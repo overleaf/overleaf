@@ -509,6 +509,33 @@ class User {
     )
   }
 
+  joinProject(projectId, callback) {
+    this.request.post(
+      {
+        url: `/project/${projectId}/join`,
+        qs: { user_id: this._id },
+        auth: {
+          user: settings.apis.web.user,
+          pass: settings.apis.web.pass,
+          sendImmediately: true
+        },
+        json: true,
+        jar: false
+      },
+      (error, res, body) => {
+        if (error) {
+          return callback(error)
+        }
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          return callback(
+            new Error(`failed to join project ${projectId} ${res.statusCode}`)
+          )
+        }
+        callback(null, body)
+      }
+    )
+  }
+
   addUserToProject(projectId, user, privileges, callback) {
     let updateOp
     if (privileges === 'readAndWrite') {

@@ -150,7 +150,13 @@ describe('ProjectEditorHandler', function() {
 
       it('should include the deletedDocs', function() {
         should.exist(this.result.deletedDocs)
-        return this.result.deletedDocs.should.equal(this.project.deletedDocs)
+        this.result.deletedDocs.should.deep.equal([
+          {
+            // omit deletedAt field
+            _id: this.project.deletedDocs[0]._id,
+            name: this.project.deletedDocs[0].name
+          }
+        ])
       })
 
       it('should gather readOnly_refs and collaberators_refs into a list of members', function() {
