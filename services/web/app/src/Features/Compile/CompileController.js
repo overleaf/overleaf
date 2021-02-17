@@ -488,7 +488,7 @@ module.exports = CompileController = {
       }
       // add any provided query string
       if (qs != null) {
-        options.qs = Object.assign(options.qs, qs)
+        options.qs = Object.assign(options.qs || {}, qs)
       }
       // if we have a build parameter, pass it through to the clsi
       if (
