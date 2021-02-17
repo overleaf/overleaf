@@ -689,33 +689,6 @@ describe('DocManager', function () {
       })
     })
 
-    describe('when the doc is already deleted', function () {
-      beforeEach(function (done) {
-        this.MongoManager.findDoc = sinon
-          .stub()
-          .yields(null, { _id: ObjectId(this.doc_id), deleted: true })
-        this.MongoManager.patchDoc = sinon.stub()
-
-        this.callback = sinon.stub().callsFake(() => done())
-        this.DocManager.patchDoc(
-          this.project_id,
-          this.doc_id,
-          'tomato.tex',
-          this.callback
-        )
-      })
-
-      it('should reject the operation', function () {
-        expect(this.callback).to.have.been.calledWith(
-          sinon.match.has('message', 'Cannot PATCH after doc deletion')
-        )
-      })
-
-      it('should not persist the change to mongo', function () {
-        expect(this.MongoManager.patchDoc).to.not.have.been.called
-      })
-    })
-
     describe('when the doc does not exist', function () {
       beforeEach(function () {
         this.MongoManager.findDoc = sinon.stub().yields(null)

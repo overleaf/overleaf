@@ -4,10 +4,7 @@ const { Errors } = require('@overleaf/object-persistor')
 
 class Md5MismatchError extends OError {}
 
-class InvalidOperation extends OError {}
-
 module.exports = {
   Md5MismatchError,
-  InvalidOperation,
   ...Errors
 }

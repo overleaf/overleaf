@@ -212,43 +212,6 @@ describe('Delete via DELETE', function () {
 describe('Delete via PATCH', function () {
   deleteTestSuite(DocstoreClient.deleteDoc)
 
-  describe('deleting a doc twice', function () {
-    beforeEach('perform 1st DELETE request', function (done) {
-      DocstoreClient.deleteDoc(this.project_id, this.doc_id, done)
-    })
-
-    beforeEach('get doc before 2nd DELETE request', function (done) {
-      db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
-        if (error) return done(error)
-        this.docBefore = docs[0]
-        if (!this.docBefore) return done(new Error('doc not found'))
-        done()
-      })
-    })
-
-    beforeEach('perform 2nd DELETE request', function (done) {
-      DocstoreClient.deleteDoc(this.project_id, this.doc_id, (error, res) => {
-        this.res1 = res
-        done(error)
-      })
-    })
-
-    it('should reject the 2nd request', function () {
-      expect(this.res1.statusCode).to.equal(400)
-    })
-
-    it('should not alter the previous doc state', function (done) {
-      db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
-        if (error) return done(error)
-        const docAfter = docs[0]
-        if (!docAfter) return done(new Error('doc not found'))
-
-        expect(docAfter).to.deep.equal(this.docBefore)
-        done()
-      })
-    })
-  })
-
   describe('when providing a custom doc name in the delete request', function () {
     beforeEach(function (done) {
       DocstoreClient.deleteDocWithName(

@@ -336,12 +336,6 @@ module.exports = DocManager = {
         )
       }
 
-      // deletion is a one-way operation
-      if (doc.deleted)
-        return callback(
-          new Errors.InvalidOperation('Cannot PATCH after doc deletion')
-        )
-
       if (meta.deleted && Settings.docstore.archiveOnSoftDelete) {
         // The user will not read this doc anytime soon. Flush it out of mongo.
         DocArchive.archiveDocById(project_id, doc_id, (err) => {
