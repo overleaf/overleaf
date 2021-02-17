@@ -5,6 +5,7 @@ import PreviewPane from '../../../features/preview/components/preview-pane'
 import { react2angular } from 'react2angular'
 import { rootContext } from '../../../shared/context/root-context'
 import 'ace/ace'
+
 const AUTO_COMPILE_MAX_WAIT = 5000
 // We add a 1 second debounce to sending user changes to server if they aren't
 // collaborating with anyone. This needs to be higher than that, and allow for
@@ -689,7 +690,31 @@ App.controller('PdfController', function(
 
     // display the combined result
     if (response != null) {
-      response.finally(annotateFiles)
+      response.finally(() => {
+        annotateFiles()
+        sendCompileMetrics()
+      })
+    }
+  }
+
+  function sendCompileMetrics() {
+    const hasCompiled =
+      $scope.pdf.view !== 'errors' && $scope.pdf.view !== 'validation-problems'
+    const sendMetricsForUser =
+      window.user.betaProgram && !window.user.alphaProgram
+
+    if (hasCompiled && sendMetricsForUser) {
+      const metadata = {
+        errors: $scope.pdf.logEntries.errors.length,
+        warnings: $scope.pdf.logEntries.warnings.length,
+        typesetting: $scope.pdf.logEntries.typesetting.length,
+        newLogsUI: window.showNewLogsUI
+      }
+      eventTracking.sendMBSampled(
+        'compile-result',
+        JSON.stringify(metadata),
+        0.05
+      )
     }
   }
 
