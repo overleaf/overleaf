@@ -26,6 +26,17 @@ module.exports = function(config) {
     webpack: webpackConfig,
     // Configure the webpack dev server used to serve test files
     webpackMiddleware: {
+      // Disable file-watching -- it is of no use in CI, we use single runs.
+      // https://webpack.js.org/configuration/watch/
+      watch: false,
+      // ^ does not work when placed in webpack.config.test.
+      // webpack-dev-middleware overrides it :/
+      // v seems to be supported, according to
+      // https://www.npmjs.com/package/webpack-dev-middleware#watchoptions
+      watchOptions: {
+        ignored: [/node_modules/, /frontend/, /test/]
+      },
+
       // Disable noisy CLI output
       stats: 'errors-only'
     },

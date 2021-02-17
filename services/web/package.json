@@ -22,7 +22,7 @@
     "test:frontend": "NODE_ENV=test TZ=GMT mocha --recursive --timeout 5000 --exit --grep=$MOCHA_GREP --require test/frontend/bootstrap.js test/frontend modules/*/test/frontend",
     "test:frontend:coverage": "c8 --all --include 'frontend/js' --include 'modules/*/frontend/js' --exclude 'frontend/js/vendor' --reporter=lcov --reporter=text-summary npm run test:frontend",
     "test:karma": "karma start",
-    "test:karma:single": "karma start --single-run",
+    "test:karma:single": "karma start --no-auto-watch --single-run",
     "start": "node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
     "webpack": "webpack-dev-server --config webpack.config.dev.js",
