@@ -20,6 +20,9 @@ module.exports = ProjectEditorHandler = {
 
   buildProjectModelView(project, members, invites) {
     let owner, ownerFeatures
+    if (!Array.isArray(project.deletedDocs)) {
+      project.deletedDocs = []
+    }
     project.deletedDocs.forEach(doc => {
       // The frontend does not use this field.
       delete doc.deletedAt
