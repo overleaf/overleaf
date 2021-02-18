@@ -28,7 +28,8 @@ describe('MongoManager', function () {
           ObjectId
         },
         '@overleaf/metrics': { timeAsyncMethod: sinon.stub() },
-        'logger-sharelatex': { log() {} }
+        'logger-sharelatex': { log() {} },
+        'settings-sharelatex': { max_deleted_docs: 42 }
       },
       globals: {
         console
@@ -172,6 +173,50 @@ describe('MongoManager', function () {
           .calledWith(null, [this.doc, this.doc3, this.doc4])
           .should.equal(true)
       })
+    })
+  })
+
+  describe('getProjectsDeletedDocs', function () {
+    beforeEach(function (done) {
+      this.filter = { name: true }
+      this.doc1 = { _id: '1', name: 'mock-doc1.tex' }
+      this.doc2 = { _id: '2', name: 'mock-doc2.tex' }
+      this.doc3 = { _id: '3', name: 'mock-doc3.tex' }
+      this.db.docs.find = sinon.stub().returns({
+        toArray: sinon.stub().yields(null, [this.doc1, this.doc2, this.doc3])
+      })
+      this.callback.callsFake(done)
+      this.MongoManager.getProjectsDeletedDocs(
+        this.project_id,
+        this.filter,
+        this.callback
+      )
+    })
+
+    it('should find the deleted docs via the project_id', function () {
+      this.db.docs.find
+        .calledWith({
+          project_id: ObjectId(this.project_id),
+          deleted: true,
+          name: { $exists: true }
+        })
+        .should.equal(true)
+    })
+
+    it('should filter, sort by deletedAt and limit', function () {
+      this.db.docs.find
+        .calledWith(sinon.match.any, {
+          projection: this.filter,
+          sort: { deletedAt: -1 },
+          limit: 42
+        })
+        .should.equal(true)
+    })
+
+    it('should call the callback with the docs', function () {
+      this.callback
+        .calledWith(null, [this.doc1, this.doc2, this.doc3])
+        .should.equal(true)
     })
   })
 

@@ -95,6 +95,24 @@ module.exports = HttpController = {
     )
   },
 
+  getAllDeletedDocs(req, res, next) {
+    const { project_id } = req.params
+    logger.log({ project_id }, 'getting all deleted docs')
+    DocManager.getAllDeletedDocs(project_id, { name: true }, function (
+      error,
+      docs
+    ) {
+      if (error) {
+        return next(error)
+      }
+      res.json(
+        docs.map((doc) => {
+          return { _id: doc._id.toString(), name: doc.name }
+        })
+      )
+    })
+  },
+
   getAllRanges(req, res, next) {
     if (next == null) {
       next = function (error) {}

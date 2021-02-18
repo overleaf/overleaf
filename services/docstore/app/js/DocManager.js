@@ -150,6 +150,10 @@ module.exports = DocManager = {
     )
   },
 
+  getAllDeletedDocs(project_id, filter, callback) {
+    MongoManager.getProjectsDeletedDocs(project_id, filter, callback)
+  },
+
   getAllNonDeletedDocs(project_id, filter, callback) {
     if (callback == null) {
       callback = function (error, docs) {}

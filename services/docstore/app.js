@@ -48,6 +48,7 @@ app.param('doc_id', function (req, res, next, docId) {
 
 Metrics.injectMetricsRoute(app)
 
+app.get('/project/:project_id/doc-deleted', HttpController.getAllDeletedDocs)
 app.get('/project/:project_id/doc', HttpController.getAllDocs)
 app.get('/project/:project_id/ranges', HttpController.getAllRanges)
 app.get('/project/:project_id/doc/:doc_id', HttpController.getDoc)

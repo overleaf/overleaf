@@ -38,6 +38,8 @@ const Settings = {
     }
   },
 
+  max_deleted_docs: parseInt(process.env.MAX_DELETED_DOCS, 10) || 2000,
+
   max_doc_length: parseInt(process.env.MAX_DOC_LENGTH) || 2 * 1024 * 1024 // 2mb
 }
 
