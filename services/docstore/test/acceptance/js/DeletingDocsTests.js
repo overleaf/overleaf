@@ -21,7 +21,7 @@ const Settings = require('settings-sharelatex')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
-describe('Deleting a doc', function () {
+function deleteTestSuite(deleteDoc) {
   beforeEach(function (done) {
     this.project_id = ObjectId()
     this.doc_id = ObjectId()
@@ -60,14 +60,10 @@ describe('Deleting a doc', function () {
 
   describe('when the doc exists', function () {
     beforeEach(function (done) {
-      return DocstoreClient.deleteDoc(
-        this.project_id,
-        this.doc_id,
-        (error, res, doc) => {
-          this.res = res
-          return done()
-        }
-      )
+      deleteDoc(this.project_id, this.doc_id, (error, res, doc) => {
+        this.res = res
+        return done()
+      })
     })
 
     afterEach(function (done) {
@@ -108,16 +104,16 @@ describe('Deleting a doc', function () {
 
   describe('when archiveOnSoftDelete is enabled', function () {
     let archiveOnSoftDelete
-    beforeEach(function overwriteSetting() {
+    beforeEach('overwrite settings', function () {
       archiveOnSoftDelete = Settings.docstore.archiveOnSoftDelete
       Settings.docstore.archiveOnSoftDelete = true
     })
-    afterEach(function restoreSetting() {
+    afterEach('restore settings', function () {
       Settings.docstore.archiveOnSoftDelete = archiveOnSoftDelete
     })
 
-    beforeEach(function deleteDoc(done) {
-      DocstoreClient.deleteDoc(this.project_id, this.doc_id, (error, res) => {
+    beforeEach('delete Doc', function (done) {
+      deleteDoc(this.project_id, this.doc_id, (error, res) => {
         this.res = res
         done()
       })
@@ -177,7 +173,7 @@ describe('Deleting a doc', function () {
     })
 
     it('should return a 404 when trying to delete', function (done) {
-      DocstoreClient.deleteDoc(otherProjectId, this.doc_id, (error, res) => {
+      deleteDoc(otherProjectId, this.doc_id, (error, res) => {
         if (error) return done(error)
         expect(res.statusCode).to.equal(404)
         done()
@@ -201,14 +197,99 @@ describe('Deleting a doc', function () {
 
     return it('should return a 404', function (done) {
       const missing_doc_id = ObjectId()
-      return DocstoreClient.deleteDoc(
+      deleteDoc(this.project_id, missing_doc_id, (error, res, doc) => {
+        res.statusCode.should.equal(404)
+        return done()
+      })
+    })
+  })
+}
+
+describe('Delete via DELETE', function () {
+  deleteTestSuite(DocstoreClient.deleteDocLegacy)
+})
+
+describe('Delete via PATCH', function () {
+  deleteTestSuite(DocstoreClient.deleteDoc)
+
+  describe('when providing a custom doc name in the delete request', function () {
+    beforeEach(function (done) {
+      DocstoreClient.deleteDocWithName(
         this.project_id,
-        missing_doc_id,
-        (error, res, doc) => {
-          res.statusCode.should.equal(404)
-          return done()
+        this.doc_id,
+        'wombat.tex',
+        done
+      )
+    })
+
+    it('should insert the doc name into the docs collection', function (done) {
+      db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
+        if (error) return done(error)
+        expect(docs[0].name).to.equal('wombat.tex')
+        done()
+      })
+    })
+  })
+
+  describe('when providing a custom deletedAt date in the delete request', function () {
+    beforeEach('record date and delay', function (done) {
+      this.deletedAt = new Date()
+      setTimeout(done, 5)
+    })
+
+    beforeEach('perform deletion with past date', function (done) {
+      DocstoreClient.deleteDocWithDate(
+        this.project_id,
+        this.doc_id,
+        this.deletedAt,
+        done
+      )
+    })
+
+    it('should insert the date into the docs collection', function (done) {
+      db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
+        if (error) return done(error)
+        expect(docs[0].deletedAt.toISOString()).to.equal(
+          this.deletedAt.toISOString()
+        )
+        done()
+      })
+    })
+  })
+
+  describe('when providing no doc name in the delete request', function () {
+    beforeEach(function (done) {
+      DocstoreClient.deleteDocWithName(
+        this.project_id,
+        this.doc_id,
+        '',
+        (error, res) => {
+          this.res = res
+          done(error)
         }
       )
+    })
+
+    it('should reject the request', function () {
+      expect(this.res.statusCode).to.equal(400)
+    })
+  })
+
+  describe('when providing no date in the delete request', function () {
+    beforeEach(function (done) {
+      DocstoreClient.deleteDocWithDate(
+        this.project_id,
+        this.doc_id,
+        '',
+        (error, res) => {
+          this.res = res
+          done(error)
+        }
+      )
+    })
+
+    it('should reject the request', function () {
+      expect(this.res.statusCode).to.equal(400)
     })
   })
 })

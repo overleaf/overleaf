@@ -320,5 +320,35 @@ module.exports = DocManager = {
 
       return MongoManager.markDocAsDeleted(project_id, doc_id, callback)
     })
+  },
+
+  patchDoc(project_id, doc_id, meta, callback) {
+    const projection = { _id: 1, deleted: true }
+    MongoManager.findDoc(project_id, doc_id, projection, (error, doc) => {
+      if (error != null) {
+        return callback(error)
+      }
+      if (!doc) {
+        return callback(
+          new Errors.NotFoundError(
+            `No such project/doc to delete: ${project_id}/${doc_id}`
+          )
+        )
+      }
+
+      if (meta.deleted && Settings.docstore.archiveOnSoftDelete) {
+        // The user will not read this doc anytime soon. Flush it out of mongo.
+        DocArchive.archiveDocById(project_id, doc_id, (err) => {
+          if (err) {
+            logger.warn(
+              { project_id, doc_id, err },
+              'archiving a single doc in the background failed'
+            )
+          }
+        })
+      }
+
+      MongoManager.patchDoc(project_id, doc_id, meta, callback)
+    })
   }
 }

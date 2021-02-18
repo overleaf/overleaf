@@ -32,7 +32,8 @@ describe('HttpController', function () {
         './DocArchiveManager': (this.DocArchiveManager = {}),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
-          error: sinon.stub()
+          error: sinon.stub(),
+          fatal: sinon.stub()
         }),
         'settings-sharelatex': settings,
         './HealthChecker': {}
@@ -453,6 +454,53 @@ describe('HttpController', function () {
 
     return it('should return a 204 (No Content)', function () {
       return this.res.sendStatus.calledWith(204).should.equal(true)
+    })
+  })
+
+  describe('patchDoc', function () {
+    beforeEach(function () {
+      this.req.params = {
+        project_id: this.project_id,
+        doc_id: this.doc_id
+      }
+      this.req.body = { name: 'foo.tex' }
+      this.DocManager.patchDoc = sinon.stub().yields(null)
+      this.HttpController.patchDoc(this.req, this.res, this.next)
+    })
+
+    it('should delete the document', function () {
+      expect(this.DocManager.patchDoc).to.have.been.calledWith(
+        this.project_id,
+        this.doc_id
+      )
+    })
+
+    it('should return a 204 (No Content)', function () {
+      expect(this.res.sendStatus).to.have.been.calledWith(204)
+    })
+
+    describe('with an invalid payload', function () {
+      beforeEach(function () {
+        this.req.body = { cannot: 'happen' }
+
+        this.DocManager.patchDoc = sinon.stub().yields(null)
+        this.HttpController.patchDoc(this.req, this.res, this.next)
+      })
+
+      it('should log a message', function () {
+        expect(this.logger.fatal).to.have.been.calledWith(
+          { field: 'cannot' },
+          'joi validation for pathDoc is broken'
+        )
+      })
+
+      it('should not pass the invalid field along', function () {
+        expect(this.DocManager.patchDoc).to.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          {}
+        )
+      })
     })
   })
 
