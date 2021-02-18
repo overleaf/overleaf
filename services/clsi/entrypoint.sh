@@ -8,9 +8,9 @@ groupadd --non-unique --gid ${DOCKER_GROUP} dockeronhost
 usermod -aG dockeronhost node
 
 # compatibility: initial volume setup
-chown node:node /app/cache
-chown node:node /app/compiles
-chown node:node /app/db
+mkdir -p /app/cache && chown node:node /app/cache
+mkdir -p /app/compiles && chown node:node /app/compiles
+mkdir -p /app/db && chown node:node /app/db
 
 # make synctex available for remount in compiles
 cp /app/bin/synctex /app/bin/synctex-mount/synctex
