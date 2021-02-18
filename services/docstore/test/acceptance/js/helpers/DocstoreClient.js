@@ -85,6 +85,22 @@ module.exports = DocstoreClient = {
     )
   },
 
+  getAllDeletedDocs(project_id, callback) {
+    request.get(
+      {
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc-deleted`,
+        json: true
+      },
+      (error, res, body) => {
+        if (error) return callback(error)
+        if (res.statusCode !== 200) {
+          return callback(new Error('unexpected statusCode'))
+        }
+        callback(null, body)
+      }
+    )
+  },
+
   getAllRanges(project_id, callback) {
     if (callback == null) {
       callback = function (error, res, body) {}

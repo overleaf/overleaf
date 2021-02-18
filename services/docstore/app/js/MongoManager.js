@@ -14,6 +14,7 @@ let MongoManager
 const { db, ObjectId } = require('./mongodb')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
+const Settings = require('settings-sharelatex')
 const { promisify } = require('util')
 
 module.exports = MongoManager = {
@@ -31,6 +32,24 @@ module.exports = MongoManager = {
       },
       callback
     )
+  },
+
+  getProjectsDeletedDocs(project_id, filter, callback) {
+    db.docs
+      .find(
+        {
+          project_id: ObjectId(project_id.toString()),
+          deleted: true,
+          // TODO(das7pad): remove name filter after back filling data
+          name: { $exists: true }
+        },
+        {
+          projection: filter,
+          sort: { deletedAt: -1 },
+          limit: Settings.max_deleted_docs
+        }
+      )
+      .toArray(callback)
   },
 
   getProjectsDocs(project_id, options, filter, callback) {
