@@ -92,7 +92,7 @@
   "file_already_exists_in_this_location": "Et emne med navnet <0>__fileName__</0> findes allerede på denne placering. Hvis du vil gennemføre flytningen, skal du først omdøbe eller flytte den fil, som er i vejen, og derefter prøve igen.",
   "blocked_filename": "Der er blokeret for det her filnavn.",
   "group_full": "Denne gruppe er allerede fuld",
-  "no_selection_select_file": "Der er ikke valgt nogen fil. Vælg venligst en fil fra filtræet.",
+  "no_selection_select_file": "Der er ikke valgt nogen fil. Du kan vælge en fil at få vist i filtræet.",
   "no_selection_create_new_file": "Dit projekt er tomt. Lav venligst en ny fil.",
   "files_selected": "filer valgt.",
   "home": "Hjem",
