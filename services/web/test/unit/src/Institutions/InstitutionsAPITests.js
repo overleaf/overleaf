@@ -199,7 +199,7 @@ describe('InstitutionsAPI', function() {
           requestOptions.method.should.equal('POST')
 
           const { body } = requestOptions
-          Object.keys(body).length.should.equal(6)
+          Object.keys(body).length.should.equal(7)
           body.email.should.equal(this.newEmail)
           body.university.should.equal(affiliationOptions.university)
           body.department.should.equal(affiliationOptions.department)

@@ -1,5 +1,3 @@
-include ../../_mixins/saml
-
 .user-notifications(ng-controller="NotificationsController")
 	include ./unsupported-browser
 
@@ -179,27 +177,19 @@ include ../../_mixins/saml
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
 
-				.alert.alert-danger(
-					ng-switch-when="notification_institution_sso_linked_by_another"
-				)
+				.alert.alert-danger(ng-switch-when="notification_institution_sso_error")
 					.notification-body
 						div
 							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
-							| !{translate("institution_account_tried_to_add_already_registered")}
+							| &nbsp;#{translate("generic_something_went_wrong")}.
+							div(ng-if="notification.error.translatedMessage" ng-bind-html="notification.error.translatedMessage")
+							div(ng-else="notification.error.message") {{ notification.error.message}}
+							div(ng-if="notification.error.tryAgain") #{translate("try_again")}.
+
 					.notification-close
 						button(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
 							span.sr-only #{translate("close")}
-
-				if institutionLinkingError
-					.alert.alert-danger(ng-switch-when="notification_institution_sso_error")
-						.notification-body
-							div
-								+samlErrorLoggedIn(institutionLinkingError)
-						.notification-close
-							button(ng-click="dismiss(notification)").close.pull-right
-								span(aria-hidden="true") &times;
-								span.sr-only #{translate("close")}
 
 	ul.list-unstyled(
 		ng-controller="EmailNotificationController",

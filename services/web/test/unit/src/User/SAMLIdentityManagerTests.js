@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb')
 const sinon = require('sinon')
 const chai = require('chai')
 const { expect } = chai
@@ -9,7 +10,7 @@ describe('SAMLIdentityManager', function() {
   const linkedEmail = 'another@example.com'
 
   beforeEach(function() {
-    this.userId = 'user-id-1'
+    this.userId = '6005c75b12cbcaf771f4a105'
     this.user = {
       _id: this.userId,
       email: 'not-linked@overleaf.com',
@@ -21,13 +22,13 @@ describe('SAMLIdentityManager', function() {
       ipAddress: '0:0:0:0'
     }
     this.userAlreadyLinked = {
-      _id: 'user-id-2',
+      _id: '6005c7a012cbcaf771f4a106',
       email: 'linked@overleaf.com',
       emails: [{ email: 'linked@overleaf.com', samlProviderId: '1' }],
       samlIdentifiers: [{ externalUserId: 'linked-id', providerId: '1' }]
     }
     this.userEmailExists = {
-      _id: 'user-id-3',
+      _id: '6005c7a012cbcaf771f4a107',
       email: 'exists@overleaf.com',
       emails: [{ email: 'exists@overleaf.com' }],
       samlIdentifiers: []
@@ -69,7 +70,7 @@ describe('SAMLIdentityManager', function() {
         '../../models/User': {
           User: (this.User = {
             findOneAndUpdate: sinon.stub().returns({
-              exec: sinon.stub().resolves()
+              exec: sinon.stub().resolves(this.user)
             }),
             findOne: sinon.stub().returns({
               exec: sinon.stub().resolves()
@@ -88,7 +89,8 @@ describe('SAMLIdentityManager', function() {
           getUser: sinon.stub(),
           promises: {
             getUser: sinon.stub().resolves(this.user),
-            getUserByAnyEmail: sinon.stub().resolves()
+            getUserByAnyEmail: sinon.stub().resolves(),
+            getUserFullEmails: sinon.stub().resolves()
           }
         }),
         '../User/UserUpdater': (this.UserUpdater = {
@@ -120,6 +122,12 @@ describe('SAMLIdentityManager', function() {
 
   describe('linkAccounts', function() {
     describe('errors', function() {
+      beforeEach(function() {
+        // first call is to get userWithProvider; should be falsy
+        this.UserGetter.promises.getUser.onFirstCall().resolves()
+        this.UserGetter.promises.getUser.onSecondCall().resolves(this.user)
+      })
+
       it('should throw an error if missing data', async function() {
         let error
         try {
@@ -148,9 +156,43 @@ describe('SAMLIdentityManager', function() {
           let error
           try {
             await this.SAMLIdentityManager.linkAccounts(
-              'user-id-1',
+              '6005c75b12cbcaf771f4a105',
               'not-linked-id',
               'exists@overleaf.com',
+              'provider-id',
+              'provider-name',
+              true,
+              {
+                intiatorId: '6005c75b12cbcaf771f4a105',
+                ip: '0:0:0:0'
+              }
+            )
+          } catch (e) {
+            error = e
+          } finally {
+            expect(error).to.be.instanceof(Errors.EmailExistsError)
+            expect(this.User.findOneAndUpdate).to.not.have.been.called
+          }
+        })
+      })
+
+      describe('when email is not affiliated', function() {
+        beforeEach(function() {
+          this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
+          this.UserGetter.promises.getUserFullEmails.resolves([
+            {
+              email: 'not-affiliated@overleaf.com'
+            }
+          ])
+        })
+
+        it('should throw SAMLEmailNotAffiliatedError', async function() {
+          let error
+          try {
+            await this.SAMLIdentityManager.linkAccounts(
+              '6005c75b12cbcaf771f4a105',
+              'not-linked-id',
+              'not-affiliated@overleaf.com',
               'provider-id',
               'provider-name',
               true,
@@ -162,7 +204,44 @@ describe('SAMLIdentityManager', function() {
           } catch (e) {
             error = e
           } finally {
-            expect(error).to.be.instanceof(Errors.EmailExistsError)
+            expect(error).to.be.instanceof(Errors.SAMLEmailNotAffiliatedError)
+            expect(this.User.findOneAndUpdate).to.not.have.been.called
+          }
+        })
+      })
+
+      describe('when email is affiliated with another institution', function() {
+        beforeEach(function() {
+          this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
+          this.UserGetter.promises.getUserFullEmails.resolves([
+            {
+              email: 'affiliated@overleaf.com',
+              affiliation: { institution: { id: '987' } }
+            }
+          ])
+        })
+
+        it('should throw SAMLEmailAffiliatedWithAnotherInstitutionError', async function() {
+          let error
+          try {
+            await this.SAMLIdentityManager.linkAccounts(
+              '6005c75b12cbcaf771f4a105',
+              'not-linked-id',
+              'affiliated@overleaf.com',
+              'provider-id',
+              'provider-name',
+              true,
+              {
+                intiatorId: 'user-id-1',
+                ip: '0:0:0:0'
+              }
+            )
+          } catch (e) {
+            error = e
+          } finally {
+            expect(error).to.be.instanceof(
+              Errors.SAMLEmailAffiliatedWithAnotherInstitutionError
+            )
             expect(this.User.findOneAndUpdate).to.not.have.been.called
           }
         })
@@ -179,14 +258,14 @@ describe('SAMLIdentityManager', function() {
           let error
           try {
             await this.SAMLIdentityManager.linkAccounts(
-              'user-id-1',
+              '6005c75b12cbcaf771f4a105',
               'already-linked-id',
               'linked@overleaf.com',
               'provider-id',
               'provider-name',
               true,
               {
-                intiatorId: 'user-id-1',
+                intiatorId: '6005c75b12cbcaf771f4a105',
                 ip: '0:0:0:0'
               }
             )
@@ -194,6 +273,42 @@ describe('SAMLIdentityManager', function() {
             error = e
           } finally {
             expect(error).to.be.instanceof(Errors.SAMLIdentityExistsError)
+            expect(this.User.findOneAndUpdate).to.not.have.been.called
+          }
+        })
+      })
+
+      describe('when institution provider is already associated with the user', function() {
+        beforeEach(function() {
+          // first call is to get userWithProvider; resolves with any user
+          this.UserGetter.promises.getUser.onFirstCall().resolves(this.user)
+        })
+
+        it('should throw an SAMLAlreadyLinkedError error', async function() {
+          let error
+          try {
+            await this.SAMLIdentityManager.linkAccounts(
+              '6005c75b12cbcaf771f4a105',
+              'already-linked-id',
+              'linked@overleaf.com',
+              123456,
+              'provider-name',
+              true,
+              {
+                intiatorId: '6005c75b12cbcaf771f4a105',
+                ip: '0:0:0:0'
+              }
+            )
+          } catch (e) {
+            error = e
+          } finally {
+            expect(
+              this.UserGetter.promises.getUser
+            ).to.have.been.calledWithMatch({
+              _id: ObjectId('6005c75b12cbcaf771f4a105'),
+              'samlIdentifiers.providerId': '123456'
+            })
+            expect(error).to.be.instanceof(Errors.SAMLAlreadyLinkedError)
             expect(this.User.findOneAndUpdate).to.not.have.been.called
           }
         })
@@ -212,7 +327,7 @@ describe('SAMLIdentityManager', function() {
             'Overleaf University',
             undefined,
             {
-              intiatorId: 'user-id-1',
+              intiatorId: '6005c75b12cbcaf771f4a105',
               ipAddress: '0:0:0:0'
             }
           )
@@ -228,9 +343,15 @@ describe('SAMLIdentityManager', function() {
     })
 
     describe('success', function() {
+      beforeEach(function() {
+        // first call is to get userWithProvider; should be falsy
+        this.UserGetter.promises.getUser.onFirstCall().resolves()
+        this.UserGetter.promises.getUser.onSecondCall().resolves(this.user)
+      })
+
       it('should update the user audit log', function() {
         const auditLog = {
-          intiatorId: 'user-id-1',
+          intiatorId: '6005c75b12cbcaf771f4a105',
           ip: '0:0:0:0'
         }
         this.SAMLIdentityManager.linkAccounts(
@@ -258,6 +379,7 @@ describe('SAMLIdentityManager', function() {
           }
         )
       })
+
       it('should send an email notification', function() {
         this.SAMLIdentityManager.linkAccounts(
           this.user._id,
@@ -267,7 +389,7 @@ describe('SAMLIdentityManager', function() {
           'Overleaf University',
           undefined,
           {
-            intiatorId: 'user-id-1',
+            intiatorId: '6005c75b12cbcaf771f4a105',
             ipAddress: '0:0:0:0'
           },
           () => {

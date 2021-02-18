@@ -1,5 +1,3 @@
-include ../../_mixins/saml
-
 mixin aboutInstitutionLink()
 	a(href="/learn/how-to/Institutional_Login") #{translate("find_out_more_about_institution_login")}.
 
@@ -267,21 +265,8 @@ form.row(
 									i.fa.fa-exclamation-triangle(aria-hidden="true")
 									| &nbsp;
 									| !{translate("in_order_to_match_institutional_metadata", {email: institutionEmailNonCanonical})}
-				if institutionLinkedToAnother
-					tr.affiliations-table-error-row(ng-if="!hideInstitutionNotifications.error")
-						td.text-center(aria-live="assertive" colspan="3")
-							button.close(
-								type="button"
-								data-dismiss="modal"
-								ng-click="closeInstitutionNotification('error')"
-								aria-label=translate("close")
-							)
-								span(aria-hidden="true") &times;
-							.small
-								i.fa.fa-exclamation-triangle(aria-hidden="true")
-								| &nbsp;
-								| !{translate("institution_account_tried_to_add_already_registered")}
-				if institutionLinkingError
+
+				if samlError
 					tr.affiliations-table-error-row(ng-if="!hideInstitutionNotifications.linkError")
 						td.text-center(aria-live="assertive" colspan="3")
 							button.close(
@@ -292,8 +277,16 @@ form.row(
 							)
 								span(aria-hidden="true") &times;
 							.small
-								+samlErrorLoggedIn(institutionLinkingError)
-		hr
+								i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
+								| &nbsp;#{translate("generic_something_went_wrong")}.
+								br
+								if samlError.translatedMessage
+									| !{samlError.translatedMessage}
+								else if samlError.message
+									| #{samlError.message}
+								if samlError.tryAgain
+									br
+									| &nbsp;#{translate("try_again")}.
 
 script(type="text/ng-template", id="affiliationFormTpl")
 	.affiliations-form-group(

@@ -380,7 +380,6 @@ const ProjectController = {
     const timer = new metrics.Timer('project-list')
     const userId = AuthenticationController.getLoggedInUserId(req)
     const currentUser = AuthenticationController.getSessionUser(req)
-    let institutionLinkingError
     async.parallel(
       {
         tags(cb) {
@@ -517,7 +516,7 @@ const ProjectController = {
             if (
               samlSession.requestedEmail &&
               samlSession.emailNonCanonical &&
-              !samlSession.linkedToAnother
+              !samlSession.error
             ) {
               notificationsInstitution.push({
                 institutionEmail: samlSession.emailNonCanonical,
@@ -533,7 +532,7 @@ const ProjectController = {
             if (
               samlSession.registerIntercept &&
               samlSession.institutionEmail &&
-              !samlSession.linkedToAnother
+              !samlSession.error
             ) {
               notificationsInstitution.push({
                 email: samlSession.institutionEmail,
@@ -541,20 +540,11 @@ const ProjectController = {
               })
             }
 
-            // Notification: Already linked to another account
-            if (samlSession.linkedToAnother) {
-              notificationsInstitution.push({
-                templateKey: 'notification_institution_sso_linked_by_another'
-              })
-            }
-
             // Notification: When there is a session error
             if (samlSession.error) {
-              institutionLinkingError = samlSession.error
               notificationsInstitution.push({
-                message: samlSession.error.message,
                 templateKey: 'notification_institution_sso_error',
-                tryAgain: samlSession.error.tryAgain
+                error: samlSession.error
               })
             }
           }
@@ -591,7 +581,6 @@ const ProjectController = {
             userAffiliations,
             userEmails,
             hasSubscription: results.hasSubscription,
-            institutionLinkingError,
             zipFileSizeLimit: Settings.maxUploadSize
           }
 

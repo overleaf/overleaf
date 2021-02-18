@@ -3,6 +3,7 @@ const path = require('path')
 const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const MODULE_PATH = path.join(
   __dirname,
@@ -605,6 +606,7 @@ describe('ProjectController', function() {
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })
+
       it('should show a notification when intent was to register via SSO but account existed', function() {
         this.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution).to.deep.include({
@@ -625,6 +627,7 @@ describe('ProjectController', function() {
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })
+
       it('should not show a register notification if the flow was abandoned', function() {
         // could initially start to register with an SSO email and then
         // abandon flow and login with an existing non-institution SSO email
@@ -642,35 +645,24 @@ describe('ProjectController', function() {
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })
-      it('should show institution account linked to another account', function() {
+
+      it('should show error notification', function() {
         this.res.render = (pageName, opts) => {
-          expect(opts.notificationsInstitution).to.deep.include({
-            templateKey: 'notification_institution_sso_linked_by_another'
-          })
-          // Also check other notifications are not shown
-          expect(opts.notificationsInstitution).to.not.deep.include({
-            email: this.institutionEmail,
-            templateKey: 'notification_institution_sso_already_registered'
-          })
-          expect(opts.notificationsInstitution).to.not.deep.include({
-            institutionEmail: this.institutionEmail,
-            requestedEmail: 'requested@overleaf.com',
-            templateKey: 'notification_institution_sso_non_canonical'
-          })
-          expect(opts.notificationsInstitution).to.not.deep.include({
-            email: this.institutionEmail,
-            institutionName: this.institutionName,
-            templateKey: 'notification_institution_sso_linked'
-          })
+          expect(opts.notificationsInstitution.length).to.equal(1)
+          expect(opts.notificationsInstitution[0].templateKey).to.equal(
+            'notification_institution_sso_error'
+          )
+          expect(opts.notificationsInstitution[0].error).to.be.instanceof(
+            Errors.SAMLAlreadyLinkedError
+          )
         }
         this.req.session.saml = {
-          emailNonCanonical: this.institutionEmail,
           institutionEmail: this.institutionEmail,
-          requestedEmail: 'requested@overleaf.com',
-          linkedToAnother: true
+          error: new Errors.SAMLAlreadyLinkedError()
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })
+
       describe('for an unconfirmed domain for an SSO institution', function() {
         beforeEach(function(done) {
           this.UserGetter.getUserFullEmails.yields(null, [

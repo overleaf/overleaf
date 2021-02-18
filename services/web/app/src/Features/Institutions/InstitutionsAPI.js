@@ -1,10 +1,14 @@
+const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
 const settings = require('settings-sharelatex')
 const request = require('request')
 const { promisifyAll } = require('../../util/promises')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const { V1ConnectionError } = require('../Errors/Errors')
+const {
+  V1ConnectionError,
+  InvalidInstitutionalEmailError
+} = require('../Errors/Errors')
 
 const InstitutionsAPI = {
   getInstitutionAffiliations(institutionId, callback) {
@@ -65,18 +69,32 @@ const InstitutionsAPI = {
       department,
       role,
       confirmedAt,
-      entitlement
+      entitlement,
+      rejectIfBlocklisted
     } = affiliationOptions
     makeAffiliationRequest(
       {
         method: 'POST',
         path: `/api/v2/users/${userId.toString()}/affiliations`,
-        body: { email, university, department, role, confirmedAt, entitlement },
+        body: {
+          email,
+          university,
+          department,
+          role,
+          confirmedAt,
+          entitlement,
+          rejectIfBlocklisted
+        },
         defaultErrorMessage: "Couldn't create affiliation"
       },
       function(error, body) {
         if (error) {
-          return callback(error, body)
+          if (error.info.statusCode === 422) {
+            return callback(
+              new InvalidInstitutionalEmailError(error.message).withCause(error)
+            )
+          }
+          return callback(error)
         }
         if (!university) {
           return callback(null, body)
@@ -214,7 +232,9 @@ var makeAffiliationRequest = function(requestOptions, callback) {
           { path: requestOptions.path, body: requestOptions.body },
           errorMessage
         )
-        return callback(new Error(errorMessage))
+        return callback(
+          new OError(errorMessage, { statusCode: response.statusCode })
+        )
       }
 
       callback(null, body)

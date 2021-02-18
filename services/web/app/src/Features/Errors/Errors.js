@@ -66,13 +66,27 @@ class NotInV2Error extends BackwardCompatibleError {}
 
 class SLInV2Error extends BackwardCompatibleError {}
 
-class SAMLIdentityExistsError extends BackwardCompatibleError {
-  constructor(arg) {
-    super(arg)
-    if (!this.message) {
-      this.message =
-        'provider and external id already linked to another account'
-    }
+class SAMLIdentityExistsError extends OError {
+  get i18nKey() {
+    return 'institution_account_tried_to_add_already_registered'
+  }
+}
+
+class SAMLAlreadyLinkedError extends OError {
+  get i18nKey() {
+    return 'institution_account_tried_to_add_already_linked'
+  }
+}
+
+class SAMLEmailNotAffiliatedError extends OError {
+  get i18nKey() {
+    return 'institution_account_tried_to_add_not_affiliated'
+  }
+}
+
+class SAMLEmailAffiliatedWithAnotherInstitutionError extends OError {
+  get i18nKey() {
+    return 'institution_account_tried_to_add_affiliated_with_another_institution'
   }
 }
 
@@ -170,6 +184,12 @@ class InvalidQueryError extends OErrorV2CompatibleError {
 
 class AffiliationError extends OError {}
 
+class InvalidInstitutionalEmailError extends OError {
+  get i18nKey() {
+    return 'invalid_institutional_email'
+  }
+}
+
 module.exports = {
   OError,
   BackwardCompatibleError,
@@ -189,6 +209,9 @@ module.exports = {
   InvalidError,
   NotInV2Error,
   SAMLIdentityExistsError,
+  SAMLAlreadyLinkedError,
+  SAMLEmailNotAffiliatedError,
+  SAMLEmailAffiliatedWithAnotherInstitutionError,
   SAMLSessionDataMissing,
   SLInV2Error,
   ThirdPartyIdentityExistsError,
@@ -199,5 +222,6 @@ module.exports = {
   UserNotCollaboratorError,
   DocHasRangesError,
   InvalidQueryError,
-  AffiliationError
+  AffiliationError,
+  InvalidInstitutionalEmailError
 }

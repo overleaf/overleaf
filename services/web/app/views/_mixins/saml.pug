@@ -1,9 +1,0 @@
-mixin samlErrorLoggedIn(error)
-	i.fa.fa-exclamation-triangle(aria-hidden="true")
-	| &nbsp;#{translate("generic_something_went_wrong")}.
-	if error.message
-		br
-		| &nbsp;#{institutionLinkingError.message}
-	if error.tryAgain
-		br
-		| &nbsp;#{translate("try_again")}.
