@@ -10,6 +10,7 @@ RUN apt-get update \
 &&  apt-get install -y parallel \
 &&  rm -rf /var/lib/apt/lists/*
 
+RUN mkdir /app/node_modules && chown node:node /app/node_modules
 
 # the deps image is used for caching npm ci
 FROM base as deps
