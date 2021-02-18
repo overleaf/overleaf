@@ -185,6 +185,20 @@ module.exports = {
             (recurlySubscription != null
               ? recurlySubscription.tax_in_cents
               : undefined) || 0
+          // Some plans allow adding more seats than the base plan provides.
+          // This is recorded as a subscription add on.
+          // Note: tax_in_cents already includes the tax for any addon.
+          let addOnPrice = 0
+          if (
+            plan.membersLimitAddOn &&
+            Array.isArray(recurlySubscription.subscription_add_ons)
+          ) {
+            recurlySubscription.subscription_add_ons.forEach(addOn => {
+              if (addOn.add_on_code === plan.membersLimitAddOn) {
+                addOnPrice += addOn.quantity * addOn.unit_amount_in_cents
+              }
+            })
+          }
           personalSubscription.recurly = {
             tax,
             taxRate: parseFloat(
@@ -203,7 +217,9 @@ module.exports = {
             price: SubscriptionFormatters.formatPrice(
               (recurlySubscription != null
                 ? recurlySubscription.unit_amount_in_cents
-                : undefined) + tax,
+                : undefined) +
+                addOnPrice +
+                tax,
               recurlySubscription != null
                 ? recurlySubscription.currency
                 : undefined

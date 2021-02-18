@@ -3,7 +3,7 @@ const chai = require('chai')
 const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionUpdater'
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const { ObjectId } = require('mongodb')
 
 chai.should()
@@ -348,6 +348,71 @@ describe('SubscriptionUpdater', function() {
           done()
         }
       )
+    })
+
+    describe('when the plan allows adding more seats', function() {
+      beforeEach(function() {
+        this.membersLimitAddOn = 'add_on1'
+        this.PlansLocator.findLocalPlanInSettings
+          .withArgs(this.recurlySubscription.plan.plan_code)
+          .returns({
+            groupPlan: true,
+            membersLimit: 5,
+            membersLimitAddOn: this.membersLimitAddOn
+          })
+      })
+
+      function expectMembersLimit(limit) {
+        it('should set the membersLimit accordingly', function(done) {
+          this.SubscriptionUpdater._updateSubscriptionFromRecurly(
+            this.recurlySubscription,
+            this.subscription,
+            {},
+            error => {
+              if (error) return done(error)
+
+              expect(this.subscription.membersLimit).to.equal(limit)
+              done()
+            }
+          )
+        })
+      }
+
+      describe('when the recurlySubscription does not have add ons', function() {
+        beforeEach(function() {
+          delete this.recurlySubscription.subscription_add_ons
+        })
+        expectMembersLimit(5)
+      })
+
+      describe('when the recurlySubscription has non-matching add ons', function() {
+        beforeEach(function() {
+          this.recurlySubscription.subscription_add_ons = [
+            { add_on_code: 'add_on_99', quantity: 3 }
+          ]
+        })
+        expectMembersLimit(5)
+      })
+
+      describe('when the recurlySubscription has a matching add on', function() {
+        beforeEach(function() {
+          this.recurlySubscription.subscription_add_ons = [
+            { add_on_code: this.membersLimitAddOn, quantity: 10 }
+          ]
+        })
+        expectMembersLimit(15)
+      })
+
+      // NOTE: This is unexpected, but we are going to support it anyways.
+      describe('when the recurlySubscription has multiple matching add ons', function() {
+        beforeEach(function() {
+          this.recurlySubscription.subscription_add_ons = [
+            { add_on_code: this.membersLimitAddOn, quantity: 10 },
+            { add_on_code: this.membersLimitAddOn, quantity: 3 }
+          ]
+        })
+        expectMembersLimit(18)
+      })
     })
   })
 

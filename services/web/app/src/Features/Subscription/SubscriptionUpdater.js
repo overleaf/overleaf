@@ -270,6 +270,19 @@ const SubscriptionUpdater = {
       }
       subscription.groupPlan = true
       subscription.membersLimit = plan.membersLimit
+
+      // Some plans allow adding more seats than the base plan provides.
+      // This is recorded as a subscription add on.
+      if (
+        plan.membersLimitAddOn &&
+        Array.isArray(recurlySubscription.subscription_add_ons)
+      ) {
+        recurlySubscription.subscription_add_ons.forEach(addOn => {
+          if (addOn.add_on_code === plan.membersLimitAddOn) {
+            subscription.membersLimit += addOn.quantity
+          }
+        })
+      }
     }
     subscription.save(function(error) {
       if (error) {
