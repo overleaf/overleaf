@@ -46,10 +46,21 @@ async function processProject(project) {
 
 async function backFillFiles(project) {
   const projectId = project._id
+  filterDuplicatesInPlace(project)
   project.deletedFiles.forEach(file => {
     file.projectId = projectId
   })
   await db.deletedFiles.insertMany(project.deletedFiles)
+}
+
+function filterDuplicatesInPlace(project) {
+  const fileIds = new Set()
+  project.deletedFiles = project.deletedFiles.filter(file => {
+    const id = file._id.toString()
+    if (fileIds.has(id)) return false
+    fileIds.add(id)
+    return true
+  })
 }
 
 async function cleanupProject(project) {
