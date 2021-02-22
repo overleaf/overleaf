@@ -225,7 +225,7 @@ module.exports = SubscriptionController = {
             err instanceof SubscriptionErrors.RecurlyTransactionError ||
             err instanceof Errors.InvalidError
           ) {
-            logger.warn(err)
+            logger.error({ err }, 'recurly transaction error, potential 422')
             return HttpErrorHandler.unprocessableEntity(
               req,
               res,
