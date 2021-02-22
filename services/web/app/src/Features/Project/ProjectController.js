@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const Path = require('path')
 const OError = require('@overleaf/o-error')
 const fs = require('fs')
@@ -476,7 +477,9 @@ const ProjectController = {
         }
 
         // Institution SSO Notifications
+        let reconfirmedViaSAML
         if (Features.hasFeature('saml')) {
+          reconfirmedViaSAML = _.get(req.session, ['saml', 'reconfirmed'])
           const samlSession = req.session.saml
           // Notification: SSO Available
           const linkedInstitutionIds = []
@@ -581,6 +584,7 @@ const ProjectController = {
             userAffiliations,
             userEmails,
             hasSubscription: results.hasSubscription,
+            reconfirmedViaSAML,
             zipFileSizeLimit: Settings.maxUploadSize
           }
 

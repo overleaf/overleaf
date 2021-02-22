@@ -1,3 +1,5 @@
+include ../../_mixins/reconfirm_affiliation
+
 .user-notifications(ng-controller="NotificationsController")
 	include ./unsupported-browser
 
@@ -214,6 +216,19 @@
 						| #{translate('resending_confirmation_email')}&hellip;
 					div(ng-if="!userEmail.confirmationInflight && userEmail.error" aria-live="polite")
 						| #{translate('generic_something_went_wrong')}
+
+	ui.list-unstyled(ng-controller="UserAffiliationsReconfirmController")
+		li.notification-entry(
+			ng-repeat="userEmail in allInReconfirmNotificationPeriods"
+		)
+			.alert.alert-info()
+				+reconfirmAffiliationNotification('/project')
+
+		li.notification-entry(
+			ng-repeat="userEmail in userEmails"
+			ng-if="userEmail.samlIdentifier && userEmail.samlIdentifier.providerId === reconfirmedViaSAML"
+		)
+			+reconfirmedAffiliationNotification()
 
 	- var hasPaidAffiliation = userAffiliations.some(affiliation => affiliation.licence && affiliation.licence !== 'free')
 	if settings.enableSubscriptions && !hasSubscription && !hasPaidAffiliation

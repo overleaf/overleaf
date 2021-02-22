@@ -10,8 +10,7 @@ mixin reconfirmAffiliationNotification(location)
 				ng-disabled="ui.isMakingRequest"
 			) #{translate("confirm_affiliation")}
 
-			| !{translate("are_you_still_at", {institutionName: '{{userEmail.affiliation.institution.name}}'}, ['strong'])}
-			| &nbsp;
+			| !{translate("are_you_still_at", {institutionName: '{{userEmail.affiliation.institution.name}}'}, ['strong'])}&nbsp;
 
 			if location == '/user/settings'
 				| !{translate('please_reconfirm_institutional_email', {}, [{ name: 'span' }])}
