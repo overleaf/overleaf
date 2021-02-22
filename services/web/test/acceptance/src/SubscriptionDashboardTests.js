@@ -134,7 +134,9 @@ describe('Subscriptions', function() {
             account_code: this.user._id,
             email: 'mock@email.com',
             hosted_login_token: 'mock-login-token'
-          }
+          },
+          additionalLicenses: 0,
+          totalLicenses: 0
         })
       })
 
