@@ -605,13 +605,24 @@
 // -------------------------
 // Easily pump out default styles, as well as :hover, :focus, :active,
 // and disabled options for all buttons
+.alert-btn(@background) {
+  background-color: darken(@background, 16%);
+  &:hover,
+  &:focus,
+  &:active,
+  &.active,
+  &.checked,
+  .open .dropdown-toggle& {
+    background-color: darken(@background, 24%);
+  }
+}
 .button-variant(@color; @background; @border) {
   color: @color;
   background-color: @background;
   border-color: @border;
 
   .alert & {
-    background-color: darken(@background, 16%);
+    .alert-btn(@background);
   }
 
   &:hover,
@@ -623,9 +634,6 @@
     color: @color;
     background-color: darken(@background, 8%);
     border-color: darken(@border, 12%);
-    .alert & {
-      background-color: darken(@background, 24%);
-    }
   }
   &:active,
   &.active,

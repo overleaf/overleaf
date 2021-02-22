@@ -33,6 +33,6 @@ mixin reconfirmAffiliationNotification(location)
 mixin reconfirmedAffiliationNotification()
 	.alert.alert-info
 		.reconfirm-notification
-			div
+			div(style="width:100%;")
 				//- extra div for flex styling
 				| !{translate("your_affiliation_is_confirmed", {institutionName: '{{userEmail.affiliation.institution.name}}'}, ['strong'])}&nbsp;#{translate('thank_you')}
