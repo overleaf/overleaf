@@ -107,6 +107,12 @@ const AdminController = {
     return res.sendStatus(200)
   },
 
+  openEditor(req, res) {
+    logger.warn('opening editor')
+    Settings.editorIsOpen = true
+    return res.sendStatus(200)
+  },
+
   closeEditor(req, res) {
     logger.warn('closing editor')
     Settings.editorIsOpen = req.body.isOpen
