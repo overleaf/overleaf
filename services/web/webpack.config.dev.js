@@ -18,12 +18,10 @@ module.exports = merge(base, {
   ],
 
   devServer: {
-    // Disable webpack dev server auto-reload
-    inline: false,
-
-    // Expose dev server as localhost with dev box
+    // Expose dev server at www.dev-overleaf.com
     host: '0.0.0.0',
     port: 3808,
+    public: 'www.dev-overleaf.com:443',
 
     // Customise output to the (node) console
     stats: {
