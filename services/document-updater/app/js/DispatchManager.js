@@ -20,13 +20,21 @@ const logger = require('logger-sharelatex')
 const Keys = require('./UpdateKeys')
 const redis = require('@overleaf/redis-wrapper')
 const Errors = require('./Errors')
+const _ = require('lodash')
 
 const UpdateManager = require('./UpdateManager')
 const Metrics = require('./Metrics')
 const RateLimitManager = require('./RateLimitManager')
 
 module.exports = DispatchManager = {
-  createDispatcher(RateLimiter) {
+  createDispatcher(RateLimiter, queueShardNumber) {
+    let pendingListKey
+    if (queueShardNumber === 0) {
+      pendingListKey = 'pending-updates-list'
+    } else {
+      pendingListKey = `pending-updates-list-${queueShardNumber}`
+    }
+
     const client = redis.createClient(Settings.redis.documentupdater)
     var worker = {
       client,
@@ -35,11 +43,8 @@ module.exports = DispatchManager = {
           callback = function (error) {}
         }
         const timer = new Metrics.Timer('worker.waiting')
-        return worker.client.blpop('pending-updates-list', 0, function (
-          error,
-          result
-        ) {
-          logger.log('getting pending-updates-list', error, result)
+        return worker.client.blpop(pendingListKey, 0, function (error, result) {
+          logger.log(`getting ${queueShardNumber}`, error, result)
           timer.done()
           if (error != null) {
             return callback(error)
@@ -102,17 +107,13 @@ module.exports = DispatchManager = {
 
   createAndStartDispatchers(number) {
     const RateLimiter = new RateLimitManager(number)
-    return (() => {
-      const result = []
-      for (
-        let i = 1, end = number, asc = end >= 1;
-        asc ? i <= end : i >= end;
-        asc ? i++ : i--
-      ) {
-        const worker = DispatchManager.createDispatcher(RateLimiter)
-        result.push(worker.run())
-      }
-      return result
-    })()
+    _.times(number, function (shardNumber) {
+      return DispatchManager.createDispatcher(RateLimiter, shardNumber).run()
+    })
+
+    // run extra dispatchers on old queue while we migrate
+    _.times(number, function () {
+      return DispatchManager.createDispatcher(RateLimiter, 0).run()
+    })
   }
 }

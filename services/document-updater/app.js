@@ -34,7 +34,7 @@ app.use(Metrics.http.monitor(logger))
 app.use(bodyParser.json({ limit: Settings.maxJsonRequestSize }))
 Metrics.injectMetricsRoute(app)
 
-DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
+DispatchManager.createAndStartDispatchers(Settings.dispatcherCount)
 
 app.param('project_id', (req, res, next, projectId) => {
   if (projectId != null && projectId.match(/^[0-9a-f]{24}$/)) {
