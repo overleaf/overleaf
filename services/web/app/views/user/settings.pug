@@ -281,7 +281,13 @@ block content
 			)
 				span(ng-hide="state.inflight") #{translate("delete")}
 				span(ng-show="state.inflight") #{translate("deleting")}…
-	
+
+	script#data(type="application/json").
+		!{StringHelper.stringifyJsonForScript({ reconfirmationRemoveEmail, reconfirmedViaSAML })}
+
+	script(type="text/javascript").
+		window.data = JSON.parse(document.querySelector("#data").text);
+
 	script(type='text/javascript').
 		window.usersEmail = !{StringHelper.stringifyJsonForScript(user.email)};
 		window.passwordStrengthOptions = !{StringHelper.stringifyJsonForScript(settings.passwordStrengthOptions || {})}

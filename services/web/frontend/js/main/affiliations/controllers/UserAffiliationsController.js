@@ -22,6 +22,8 @@ export default App.controller('UserAffiliationsController', function(
   }
   $scope.samlBetaSession = ExposedSettings.hasSamlBeta
   $scope.samlInitPath = ExposedSettings.samlInitPath
+  $scope.reconfirmationRemoveEmail = $window.data.reconfirmationRemoveEmail
+  $scope.reconfirmedViaSAML = $window.data.reconfirmedViaSAML
 
   const LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
   const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\ ".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA -Z\-0-9]+\.)+[a-zA-Z]{2,}))$/

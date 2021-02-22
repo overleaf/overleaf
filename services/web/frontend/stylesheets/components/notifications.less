@@ -1,0 +1,41 @@
+.reconfirm-notification {
+  display: flex;
+  width: 100%;
+  .fa-warning {
+    margin-right: @margin-sm;
+  }
+  .btn-reconfirm {
+    float: right;
+    margin-left: @margin-sm;
+    text-transform: capitalize;
+  }
+}
+
+// Settings page
+.affiliations-table {
+  .reconfirm-notification {
+    margin: 0px auto @margin-sm auto !important;
+    padding: @padding-md;
+  }
+
+  .reconfirm-row {
+    td {
+      border: 0;
+
+      .alert {
+        border: 0;
+        padding: 0;
+      }
+
+      :not(.alert) {
+        .reconfirm-notification {
+          background-color: @ol-blue-gray-0;
+          border-radius: @border-radius-base;
+          .fa-warning {
+            color: @brand-warning;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,3 +1,5 @@
+include ../../_mixins/reconfirm_affiliation
+
 mixin aboutInstitutionLink()
 	a(href="/learn/how-to/Institutional_Login") #{translate("find_out_more_about_institution_login")}.
 
@@ -116,7 +118,7 @@ form.row(
 						) #{translate("make_primary")}
 						| &nbsp;
 						+btnRemoveEmail()
-				tr.affiliations-table-saml-row(ng-repeat-end ng-if="userEmail.affiliation && userEmail.affiliation && userEmail.ssoAvailable")
+				tr.affiliations-table-saml-row(ng-if="userEmail.affiliation && userEmail.affiliation && userEmail.ssoAvailable")
 					td
 					td(ng-attr-colspan="{{userEmail.samlProviderId ? '2' : '1'}}" ng-class="institutionAlreadyLinked(userEmail) ? '' : 'with-border'")
 						p.small(ng-if="userEmail.samlProviderId")
@@ -137,6 +139,23 @@ form.row(
 							type="button"
 						)
 							| #{translate("link_accounts")}
+				tr(
+					class="reconfirm-row"
+					ng-if="userEmail.samlIdentifier && userEmail.samlIdentifier.providerId === reconfirmedViaSAML"
+				)
+					td(colspan="3")
+						+reconfirmedAffiliationNotification()
+				tr(
+					class="reconfirm-row"
+					ng-repeat-end
+				)
+					td(
+						colspan="3"
+						ng-if="userEmail.affiliation && userEmail.affiliation.inReconfirmNotificationPeriod"
+					)
+						div(ng-class="{'alert alert-info': reconfirmationRemoveEmail === userEmail.email}")
+							+reconfirmAffiliationNotification('/user/settings')
+
 				tr.affiliations-table-highlighted-row(
 					ng-if="!ui.showAddEmailUI && !ui.isMakingRequest"
 				)

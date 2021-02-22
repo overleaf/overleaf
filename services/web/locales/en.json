@@ -1347,5 +1347,13 @@
   "did_you_know_institution_providing_professional": "Did you know that __institutionName__ is providing <0>free __appName__ Professional features</0> to everyone at __institutionName__?",
   "add_email_to_claim_features": "Add an institutional email address to claim your features.",
   "please_change_primary_to_remove": "Please change your primary email in order to remove",
-  "dropbox_duplicate_project_names": "We detected an update from Dropbox to <0>__projectName__</0>, but you have multiple projects with that name. We are unable to process this, so have unlinked your Dropbox account. Please ensure your project names are unique across your active, archived and trashed projects, and then re-link your Dropbox account."
+  "dropbox_duplicate_project_names": "We detected an update from Dropbox to <0>__projectName__</0>, but you have multiple projects with that name. We are unable to process this, so have unlinked your Dropbox account. Please ensure your project names are unique across your active, archived and trashed projects, and then re-link your Dropbox account.",
+  "please_reconfirm_institutional_email": "Please take a moment to confirm your institutional email address or <0>remove it</0> from your account.",
+  "need_to_add_new_primary_before_remove": "You'll need to add a new primary email address before you can remove this one.",
+  "are_you_still_at": "Are you still at <0>__institutionName__</0>?",
+  "confirm_affiliation": "Confirm Affiliation",
+  "please_check_your_inbox_to_confirm": "Please check your email inbox to confirm your <0>__institutionName__</0> affiliation.",
+  "resend_confirmation_email": "Resend confirmation email",
+  "your_affiliation_is_confirmed": "Your <0>__institutionName__</0> affiliation is confirmed.",
+  "thank_you": "Thank you!"
 }

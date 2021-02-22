@@ -1,0 +1,39 @@
+mixin reconfirmAffiliationNotification(location)
+	.reconfirm-notification(ng-controller="UserAffiliationsReconfirmController")
+		div(ng-if="!reconfirm[userEmail.email].reconfirmationSent" style="width:100%;")
+			i.fa.fa-warning
+
+			button.btn-reconfirm.btn.btn-sm.btn-info(
+				data-location=location
+				ng-if="!ui.sentReconfirmation"
+				ng-click="requestReconfirmation($event, userEmail)"
+				ng-disabled="ui.isMakingRequest"
+			) #{translate("confirm_affiliation")}
+
+			| !{translate("are_you_still_at", {institutionName: '{{userEmail.affiliation.institution.name}}'}, ['strong'])}
+			| &nbsp;
+
+			if location == '/user/settings'
+				| !{translate('please_reconfirm_institutional_email', {}, [{ name: 'span' }])}
+				span(ng-if="userEmail.default") &nbsp;#{translate('need_to_add_new_primary_before_remove')}
+			else
+				| !{translate("please_reconfirm_institutional_email", {}, [{name: 'a', attrs: {href: '/user/settings?remove={{userEmail.email}}' }}])}
+
+			| &nbsp;
+			a(href="/learn/how-to/Reconfirm_an_institutional_email_address") #{translate("learn_more")}
+
+		div(ng-if="reconfirm[userEmail.email].reconfirmationSent")
+			| !{translate("please_check_your_inbox_to_confirm", {institutionName: '{{userEmail.affiliation.institution.name}}'}, ['strong'])}
+			| &nbsp;
+			a(
+				href
+				ng-click="requestReconfirmation($event, userEmail)"
+				ng-disabled="ui.isMakingRequest"
+			) #{translate('resend_confirmation_email')}
+
+mixin reconfirmedAffiliationNotification()
+	.alert.alert-info
+		.reconfirm-notification
+			div
+				//- extra div for flex styling
+				| !{translate("your_affiliation_is_confirmed", {institutionName: '{{userEmail.affiliation.institution.name}}'}, ['strong'])}&nbsp;#{translate('thank_you')}
