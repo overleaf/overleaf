@@ -318,22 +318,6 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function(req, res, next) {
-    res.locals.uiConfig = {
-      defaultResizerSizeOpen: 7,
-      defaultResizerSizeClosed: 7,
-      eastResizerCursor: 'ew-resize',
-      westResizerCursor: 'ew-resize',
-      chatResizerSizeOpen: 7,
-      chatResizerSizeClosed: 0,
-      chatMessageBorderSaturation: '85%',
-      chatMessageBorderLightness: '40%',
-      chatMessageBgSaturation: '85%',
-      chatMessageBgLightness: '40%'
-    }
-    next()
-  })
-
-  webRouter.use(function(req, res, next) {
     // TODO
     if (Settings.overleaf != null) {
       res.locals.overallThemes = [

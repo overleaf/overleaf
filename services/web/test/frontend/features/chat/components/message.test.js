@@ -3,12 +3,7 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 
 import Message from '../../../../../frontend/js/features/chat/components/message'
-import {
-  stubMathJax,
-  stubUIConfig,
-  tearDownMathJaxStubs,
-  tearDownUIConfigStubs
-} from './stubs'
+import { stubMathJax, tearDownMathJaxStubs } from './stubs'
 
 describe('<Message />', function() {
   const currentUser = {
@@ -19,13 +14,11 @@ describe('<Message />', function() {
 
   beforeEach(function() {
     window.user = currentUser
-    stubUIConfig()
     stubMathJax()
   })
 
   afterEach(function() {
     delete window.user
-    tearDownUIConfigStubs()
     tearDownMathJaxStubs()
   })
 

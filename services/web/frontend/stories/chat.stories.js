@@ -4,10 +4,7 @@ import { v4 as uuid } from 'uuid'
 
 import { ContextRoot } from '../js/shared/context/root-context'
 import ChatPane from '../js/features/chat/components/chat-pane'
-import {
-  stubUIConfig,
-  stubMathJax
-} from '../../test/frontend/features/chat/components/stubs'
+import { stubMathJax } from '../../test/frontend/features/chat/components/stubs'
 import { setupContext } from './fixtures/context'
 
 const ONE_MINUTE = 60 * 1000
@@ -43,7 +40,6 @@ function generateMessages(count) {
   return messages
 }
 
-stubUIConfig()
 stubMathJax()
 setupContext()
 

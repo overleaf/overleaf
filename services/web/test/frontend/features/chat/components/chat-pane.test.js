@@ -8,12 +8,7 @@ import {
   renderWithChatContext,
   cleanUpContext
 } from '../../../helpers/render-with-context'
-import {
-  stubMathJax,
-  stubUIConfig,
-  tearDownMathJaxStubs,
-  tearDownUIConfigStubs
-} from './stubs'
+import { stubMathJax, tearDownMathJaxStubs } from './stubs'
 
 describe('<ChatPane />', function() {
   const user = {
@@ -41,12 +36,10 @@ describe('<ChatPane />', function() {
     fetchMock.reset()
     cleanUpContext()
 
-    stubUIConfig()
     stubMathJax()
   })
 
   afterEach(function() {
-    tearDownUIConfigStubs()
     tearDownMathJaxStubs()
   })
 

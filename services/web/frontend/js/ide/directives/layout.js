@@ -35,13 +35,13 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
         if (attrs.spacingOpen != null) {
           spacingOpen = parseInt(attrs.spacingOpen, 10)
         } else {
-          spacingOpen = window.uiConfig.defaultResizerSizeOpen
+          spacingOpen = 7
         }
 
         if (attrs.spacingClosed != null) {
           spacingClosed = parseInt(attrs.spacingClosed, 10)
         } else {
-          spacingClosed = window.uiConfig.defaultResizerSizeClosed
+          spacingClosed = 7
         }
 
         const options = {
@@ -93,13 +93,8 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
           }
         }
 
-        if (window.uiConfig.eastResizerCursor != null) {
-          options.east.resizerCursor = window.uiConfig.eastResizerCursor
-        }
-
-        if (window.uiConfig.westResizerCursor != null) {
-          options.west.resizerCursor = window.uiConfig.westResizerCursor
-        }
+        options.east.resizerCursor = 'ew-resize'
+        options.west.resizerCursor = 'ew-resize'
 
         const repositionControls = function() {
           state = element.layout().readState()

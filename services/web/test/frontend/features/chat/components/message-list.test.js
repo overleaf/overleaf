@@ -4,12 +4,7 @@ import { expect } from 'chai'
 import { screen, render, fireEvent } from '@testing-library/react'
 
 import MessageList from '../../../../../frontend/js/features/chat/components/message-list'
-import {
-  stubMathJax,
-  stubUIConfig,
-  tearDownMathJaxStubs,
-  tearDownUIConfigStubs
-} from './stubs'
+import { stubMathJax, tearDownMathJaxStubs } from './stubs'
 
 describe('<MessageList />', function() {
   const currentUser = {
@@ -36,12 +31,10 @@ describe('<MessageList />', function() {
   }
 
   before(function() {
-    stubUIConfig()
     stubMathJax()
   })
 
   after(function() {
-    tearDownUIConfigStubs()
     tearDownMathJaxStubs()
   })
 

@@ -103,8 +103,8 @@ App.controller('IdeController', function(
     pdfWidth: 0,
     reviewPanelOpen: localStorage(`ui.reviewPanelOpen.${window.project_id}`),
     miniReviewPanelVisible: false,
-    chatResizerSizeOpen: window.uiConfig.chatResizerSizeOpen,
-    chatResizerSizeClosed: window.uiConfig.chatResizerSizeClosed
+    chatResizerSizeOpen: 7,
+    chatResizerSizeClosed: 7
   }
   $scope.user = window.user
 
