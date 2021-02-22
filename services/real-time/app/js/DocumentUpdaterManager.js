@@ -88,6 +88,15 @@ const DocumentUpdaterManager = {
     })
   },
 
+  _getPendingUpdateListKey() {
+    const shard = _.random(0, settings.pendingUpdateListShardCount - 1)
+    if (shard === 0) {
+      return 'pending-updates-list'
+    } else {
+      return `pending-updates-list-${shard}`
+    }
+  },
+
   queueChange(project_id, doc_id, change, callback) {
     const allowedKeys = [
       'doc',
@@ -123,9 +132,12 @@ const DocumentUpdaterManager = {
         error = new OError('error pushing update into redis').withCause(error)
         return callback(error)
       }
-      rclient.rpush('pending-updates-list', doc_key, function (error) {
+      const queueKey = DocumentUpdaterManager._getPendingUpdateListKey()
+      rclient.rpush(queueKey, doc_key, function (error) {
         if (error) {
-          error = new OError('error pushing doc_id into redis').withCause(error)
+          error = new OError('error pushing doc_id into redis')
+            .withInfo({ queueKey })
+            .withCause(error)
         }
         callback(error)
       })

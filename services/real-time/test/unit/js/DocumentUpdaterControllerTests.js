@@ -27,7 +27,7 @@ describe('DocumentUpdaterController', function () {
     this.io = { mock: 'socket.io' }
     this.rclient = []
     this.RoomEvents = { on: sinon.stub() }
-    return (this.EditorUpdatesController = SandboxedModule.require(modulePath, {
+    this.EditorUpdatesController = SandboxedModule.require(modulePath, {
       requires: {
         'logger-sharelatex': (this.logger = {
           error: sinon.stub(),
@@ -46,13 +46,17 @@ describe('DocumentUpdaterController', function () {
             pubsub: null
           }
         }),
-        '@overleaf/redis-wrapper': (this.redis = {
-          createClient: (name) => {
-            let rclientStub
-            this.rclient.push((rclientStub = { name }))
-            return rclientStub
+        './RedisClientManager': {
+          createClientList: () => {
+            this.redis = {
+              createClient: (name) => {
+                let rclientStub
+                this.rclient.push((rclientStub = { name }))
+                return rclientStub
+              }
+            }
           }
-        }),
+        },
         './SafeJsonParse': (this.SafeJsonParse = {
           parse: (data, cb) => cb(null, JSON.parse(data))
         }),
@@ -64,7 +68,7 @@ describe('DocumentUpdaterController', function () {
         }),
         './ChannelManager': (this.ChannelManager = {})
       }
-    }))
+    })
   })
 
   describe('listenForUpdatesFromDocumentUpdater', function () {
@@ -78,22 +82,20 @@ describe('DocumentUpdaterController', function () {
       this.rclient[0].on = sinon.stub()
       this.rclient[1].subscribe = sinon.stub()
       this.rclient[1].on = sinon.stub()
-      return this.EditorUpdatesController.listenForUpdatesFromDocumentUpdater()
+      this.EditorUpdatesController.listenForUpdatesFromDocumentUpdater()
     })
 
     it('should subscribe to the doc-updater stream', function () {
-      return this.rclient[0].subscribe
-        .calledWith('applied-ops')
-        .should.equal(true)
+      this.rclient[0].subscribe.calledWith('applied-ops').should.equal(true)
     })
 
     it('should register a callback to handle updates', function () {
-      return this.rclient[0].on.calledWith('message').should.equal(true)
+      this.rclient[0].on.calledWith('message').should.equal(true)
     })
 
-    return it('should subscribe to any additional doc-updater stream', function () {
+    it('should subscribe to any additional doc-updater stream', function () {
       this.rclient[1].subscribe.calledWith('applied-ops').should.equal(true)
-      return this.rclient[1].on.calledWith('message').should.equal(true)
+      this.rclient[1].on.calledWith('message').should.equal(true)
     })
   })
 
@@ -110,7 +112,7 @@ describe('DocumentUpdaterController', function () {
         )
       })
 
-      return it('should log an error', function () {
+      it('should log an error', function () {
         return this.logger.error.called.should.equal(true)
       })
     })
@@ -129,14 +131,14 @@ describe('DocumentUpdaterController', function () {
         )
       })
 
-      return it('should apply the update', function () {
+      it('should apply the update', function () {
         return this.EditorUpdatesController._applyUpdateFromDocumentUpdater
           .calledWith(this.io, this.doc_id, this.message.op)
           .should.equal(true)
       })
     })
 
-    return describe('with error', function () {
+    describe('with error', function () {
       beforeEach(function () {
         this.message = {
           doc_id: this.doc_id,

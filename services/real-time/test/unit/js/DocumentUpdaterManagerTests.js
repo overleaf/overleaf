@@ -15,6 +15,7 @@ const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const modulePath = '../../../app/js/DocumentUpdaterManager'
+const _ = require('underscore')
 
 describe('DocumentUpdaterManager', function () {
   beforeEach(function () {
@@ -34,7 +35,8 @@ describe('DocumentUpdaterManager', function () {
           }
         }
       },
-      maxUpdateSize: 7 * 1024 * 1024
+      maxUpdateSize: 7 * 1024 * 1024,
+      pendingUpdateListShardCount: 10
     }
     this.rclient = { auth() {} }
 
@@ -256,7 +258,7 @@ describe('DocumentUpdaterManager', function () {
     })
   })
 
-  return describe('queueChange', function () {
+  describe('queueChange', function () {
     beforeEach(function () {
       this.change = {
         doc: '1234567890',
@@ -269,7 +271,12 @@ describe('DocumentUpdaterManager', function () {
 
     describe('successfully', function () {
       beforeEach(function () {
-        return this.DocumentUpdaterManager.queueChange(
+        this.pendingUpdateListKey = `pending-updates-list-key-${Math.random()}`
+
+        this.DocumentUpdaterManager._getPendingUpdateListKey = sinon
+          .stub()
+          .returns(this.pendingUpdateListKey)
+        this.DocumentUpdaterManager.queueChange(
           this.project_id,
           this.doc_id,
           this.change,
@@ -278,7 +285,7 @@ describe('DocumentUpdaterManager', function () {
       })
 
       it('should push the change', function () {
-        return this.rclient.rpush
+        this.rclient.rpush
           .calledWith(
             `PendingUpdates:${this.doc_id}`,
             JSON.stringify(this.change)
@@ -286,10 +293,10 @@ describe('DocumentUpdaterManager', function () {
           .should.equal(true)
       })
 
-      return it('should notify the doc updater of the change via the pending-updates-list queue', function () {
-        return this.rclient.rpush
+      it('should notify the doc updater of the change via the pending-updates-list queue', function () {
+        this.rclient.rpush
           .calledWith(
-            'pending-updates-list',
+            this.pendingUpdateListKey,
             `${this.project_id}:${this.doc_id}`
           )
           .should.equal(true)
@@ -366,7 +373,7 @@ describe('DocumentUpdaterManager', function () {
       })
     })
 
-    return describe('with invalid keys', function () {
+    describe('with invalid keys', function () {
       beforeEach(function () {
         this.change = {
           op: [{ d: 'test', p: 345 }],
@@ -380,7 +387,7 @@ describe('DocumentUpdaterManager', function () {
         )
       })
 
-      return it('should remove the invalid keys from the change', function () {
+      it('should remove the invalid keys from the change', function () {
         return this.rclient.rpush
           .calledWith(
             `PendingUpdates:${this.doc_id}`,
@@ -388,6 +395,33 @@ describe('DocumentUpdaterManager', function () {
           )
           .should.equal(true)
       })
+    })
+  })
+
+  describe('_getPendingUpdateListKey', function () {
+    beforeEach(function () {
+      const keys = _.times(
+        10000,
+        this.DocumentUpdaterManager._getPendingUpdateListKey
+      )
+      this.keys = _.unique(keys)
+    })
+    it('should return normal pending updates key', function () {
+      _.contains(this.keys, 'pending-updates-list').should.equal(true)
+    })
+
+    it('should return pending-updates-list-n keys', function () {
+      _.contains(this.keys, 'pending-updates-list-1').should.equal(true)
+      _.contains(this.keys, 'pending-updates-list-3').should.equal(true)
+      _.contains(this.keys, 'pending-updates-list-9').should.equal(true)
+    })
+
+    it('should not include pending-updates-list-0 key', function () {
+      _.contains(this.keys, 'pending-updates-list-0').should.equal(false)
+    })
+
+    it('should not include maximum as pendingUpdateListShardCount value', function () {
+      _.contains(this.keys, 'pending-updates-list-10').should.equal(false)
     })
   })
 })
