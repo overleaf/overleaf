@@ -141,6 +141,48 @@ describe('Archiving updates', function () {
     )
   })
 
+  function testExportFeature() {
+    describe('exporting the project', function () {
+      before('fetch export', function (done) {
+        TrackChangesClient.exportProject(this.project_id, (error, updates) => {
+          if (error) {
+            return done(error)
+          }
+          this.exportedUpdates = updates
+          done()
+        })
+      })
+
+      it('should include all the imported updates, with ids, sorted by timestamp', function () {
+        // Add a safe guard for an empty array matching an empty export.
+        expect(this.updates).to.have.length(1024 + 22)
+
+        const expectedExportedUpdates = this.updates
+          .slice()
+          .reverse()
+          .map((update) => {
+            // clone object, updates are created once in before handler
+            const exportedUpdate = Object.assign({}, update)
+            exportedUpdate.meta = Object.assign({}, update.meta)
+
+            exportedUpdate.doc_id = this.doc_id
+            exportedUpdate.project_id = this.project_id
+
+            // This is for merged updates, which does not apply here.
+            exportedUpdate.meta.start_ts = exportedUpdate.meta.end_ts =
+              exportedUpdate.meta.ts
+            delete exportedUpdate.meta.ts
+            return exportedUpdate
+          })
+        expect(this.exportedUpdates).to.deep.equal(expectedExportedUpdates)
+      })
+    })
+  }
+
+  describe("before archiving a doc's updates", function () {
+    testExportFeature()
+  })
+
   describe("archiving a doc's updates", function () {
     before(function (done) {
       TrackChangesClient.pushDocHistory(
@@ -219,7 +261,7 @@ describe('Archiving updates', function () {
       )
     })
 
-    return it('should store 1024 doc changes in S3 in one pack', function (done) {
+    it('should store 1024 doc changes in S3 in one pack', function (done) {
       return db.docHistoryIndex.findOne(
         { _id: ObjectId(this.doc_id) },
         (error, index) => {
@@ -240,6 +282,8 @@ describe('Archiving updates', function () {
         }
       )
     })
+
+    testExportFeature()
   })
 
   return describe("unarchiving a doc's updates", function () {

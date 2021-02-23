@@ -165,6 +165,17 @@ module.exports = TrackChangesClient = {
     )
   },
 
+  exportProject(project_id, callback) {
+    request.get(
+      { url: `http://localhost:3015/project/${project_id}/export`, json: true },
+      (error, response, updates) => {
+        if (error) return callback(error)
+        response.statusCode.should.equal(200)
+        callback(null, updates)
+      }
+    )
+  },
+
   restoreDoc(project_id, doc_id, version, user_id, callback) {
     if (callback == null) {
       callback = function (error) {}

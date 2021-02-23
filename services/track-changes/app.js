@@ -64,6 +64,7 @@ app.get('/project/:project_id/doc/:doc_id/diff', HttpController.getDiff)
 app.get('/project/:project_id/doc/:doc_id/check', HttpController.checkDoc)
 
 app.get('/project/:project_id/updates', HttpController.getUpdates)
+app.get('/project/:project_id/export', HttpController.exportProject)
 
 app.post('/project/:project_id/flush', HttpController.flushProject)
 
