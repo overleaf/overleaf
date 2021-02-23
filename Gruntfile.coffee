@@ -12,7 +12,7 @@ settings = require("settings-sharelatex")
 _ = require("underscore")
 
 
-SERVICES = require("./config/services")
+SERVICES = require("./services")
 
 module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-bunyan'
