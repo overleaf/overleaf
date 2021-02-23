@@ -1,3 +1,6 @@
 div(ng-controller="EditorNavigationToolbarController")
 
-		editor-navigation-toolbar-root(on-show-left-menu-click="onShowLeftMenuClick")
+	editor-navigation-toolbar-root(
+		open-doc="openDoc"
+		online-users-array="onlineUsersArray"
+	)

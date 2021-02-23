@@ -4,25 +4,15 @@ import { ApplicationProvider } from './application-context'
 import { EditorProvider } from './editor-context'
 import createSharedContext from 'react2angular-shared-context'
 import { ChatProvider } from '../../features/chat/context/chat-context'
+import { LayoutProvider } from './layout-context'
 
-export function ContextRoot({
-  children,
-  editorLoading,
-  chatIsOpenAngular,
-  setChatIsOpenAngular,
-  openDoc,
-  onlineUsersArray
-}) {
+export function ContextRoot({ children, ide }) {
   return (
     <ApplicationProvider>
-      <EditorProvider
-        loading={editorLoading}
-        chatIsOpenAngular={chatIsOpenAngular}
-        setChatIsOpenAngular={setChatIsOpenAngular}
-        openDoc={openDoc}
-        onlineUsersArray={onlineUsersArray}
-      >
-        <ChatProvider>{children}</ChatProvider>
+      <EditorProvider $scope={ide.$scope}>
+        <LayoutProvider $scope={ide.$scope}>
+          <ChatProvider>{children}</ChatProvider>
+        </LayoutProvider>
       </EditorProvider>
     </ApplicationProvider>
   )
@@ -30,11 +20,7 @@ export function ContextRoot({
 
 ContextRoot.propTypes = {
   children: PropTypes.any,
-  editorLoading: PropTypes.bool,
-  chatIsOpenAngular: PropTypes.bool,
-  setChatIsOpenAngular: PropTypes.func.isRequired,
-  openDoc: PropTypes.func.isRequired,
-  onlineUsersArray: PropTypes.array.isRequired
+  ide: PropTypes.any.isRequired
 }
 
 export const rootContext = createSharedContext(ContextRoot)

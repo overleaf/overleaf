@@ -4,15 +4,18 @@ import EditorNavigationToolbarRoot from '../components/editor-navigation-toolbar
 import { rootContext } from '../../../shared/context/root-context'
 
 App.controller('EditorNavigationToolbarController', function($scope, ide) {
-  $scope.onShowLeftMenuClick = () =>
-    ide.$scope.$applyAsync(() => {
-      ide.$scope.ui.leftMenuShown = !ide.$scope.ui.leftMenuShown
-    })
+  // wrapper is required to avoid scope problems with `this` inside `EditorManager`
+  $scope.openDoc = (doc, args) => ide.editorManager.openDoc(doc, args)
 })
 
 App.component(
   'editorNavigationToolbarRoot',
   react2angular(rootContext.use(EditorNavigationToolbarRoot), [
-    'onShowLeftMenuClick'
+    'openDoc',
+
+    // `$scope.onlineUsersArray` is already populated by `OnlineUsersManager`, which also creates
+    // a new array instance every time the list of online users change (which should refresh the
+    // value passed to React as a prop, triggering a re-render)
+    'onlineUsersArray'
   ])
 )

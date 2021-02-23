@@ -3,23 +3,61 @@ import PropTypes from 'prop-types'
 import ToolbarHeader from './toolbar-header'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { useChatContext } from '../../chat/context/chat-context'
+import { useLayoutContext } from '../../../shared/context/layout-context'
 
-function EditorNavigationToolbarRoot({ onShowLeftMenuClick }) {
+const editorContextPropTypes = {
+  cobranding: PropTypes.object,
+  loading: PropTypes.bool,
+  isRestrictedTokenMember: PropTypes.bool
+}
+
+const layoutContextPropTypes = {
+  chatIsOpen: PropTypes.bool,
+  setChatIsOpen: PropTypes.func.isRequired,
+  reviewPanelOpen: PropTypes.bool,
+  setReviewPanelOpen: PropTypes.func.isRequired,
+  view: PropTypes.string,
+  setView: PropTypes.func.isRequired,
+  setLeftMenuShown: PropTypes.func.isRequired
+}
+
+function EditorNavigationToolbarRoot({ onlineUsersArray, openDoc }) {
+  const { cobranding, loading, isRestrictedTokenMember } = useEditorContext(
+    editorContextPropTypes
+  )
+
   const {
-    cobranding,
-    loading,
-    ui,
-    onlineUsersArray,
-    openDoc
-  } = useEditorContext()
+    chatIsOpen,
+    setChatIsOpen,
+    reviewPanelOpen,
+    setReviewPanelOpen,
+    view,
+    setView,
+    setLeftMenuShown
+  } = useLayoutContext(layoutContextPropTypes)
+
   const { resetUnreadMessageCount, unreadMessageCount } = useChatContext()
 
   const toggleChatOpen = useCallback(() => {
-    if (!ui.chatIsOpen) {
+    if (!chatIsOpen) {
       resetUnreadMessageCount()
     }
-    ui.toggleChatOpen()
-  }, [ui, resetUnreadMessageCount])
+    setChatIsOpen(value => !value)
+  }, [chatIsOpen, setChatIsOpen, resetUnreadMessageCount])
+
+  const toggleReviewPanelOpen = useCallback(
+    () => setReviewPanelOpen(value => !value),
+    [setReviewPanelOpen]
+  )
+
+  const toggleHistoryOpen = useCallback(() => {
+    setView(view === 'history' ? 'editor' : 'history')
+  }, [view, setView])
+
+  const onShowLeftMenuClick = useCallback(
+    () => setLeftMenuShown(value => !value),
+    [setLeftMenuShown]
+  )
 
   function goToUser(user) {
     if (user.doc && typeof user.row === 'number') {
@@ -34,16 +72,23 @@ function EditorNavigationToolbarRoot({ onShowLeftMenuClick }) {
       style={loading ? { display: 'none' } : {}}
       cobranding={cobranding}
       onShowLeftMenuClick={onShowLeftMenuClick}
-      chatIsOpen={ui.chatIsOpen}
+      chatIsOpen={chatIsOpen}
       unreadMessageCount={unreadMessageCount}
       toggleChatOpen={toggleChatOpen}
+      reviewPanelOpen={reviewPanelOpen}
+      toggleReviewPanelOpen={toggleReviewPanelOpen}
+      historyIsOpen={view === 'history'}
+      toggleHistoryOpen={toggleHistoryOpen}
       onlineUsers={onlineUsersArray}
       goToUser={goToUser}
+      isRestrictedTokenMember={isRestrictedTokenMember}
     />
   )
 }
 
 EditorNavigationToolbarRoot.propTypes = {
-  onShowLeftMenuClick: PropTypes.func.isRequired
+  onlineUsersArray: PropTypes.array.isRequired,
+  openDoc: PropTypes.func.isRequired
 }
+
 export default EditorNavigationToolbarRoot

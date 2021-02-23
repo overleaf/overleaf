@@ -10,8 +10,22 @@ import { useApplicationContext } from '../../../shared/context/application-conte
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { ChatStore } from '../store/chat-store'
 import useBrowserWindow from '../../../infrastructure/browser-window-hook'
+import { useLayoutContext } from '../../../shared/context/layout-context'
 
 export const ChatContext = createContext()
+
+ChatContext.Provider.propTypes = {
+  value: PropTypes.shape({
+    userId: PropTypes.string.isRequired,
+    atEnd: PropTypes.bool,
+    loading: PropTypes.bool,
+    messages: PropTypes.array.isRequired,
+    unreadMessageCount: PropTypes.number.isRequired,
+    resetUnreadMessageCount: PropTypes.func.isRequired,
+    loadMoreMessages: PropTypes.func.isRequired,
+    sendMessage: PropTypes.func.isRequired
+  }).isRequired
+}
 
 export function ChatProvider({ children }) {
   const {
@@ -19,11 +33,14 @@ export function ChatProvider({ children }) {
     flashTitle,
     stopFlashingTitle
   } = useBrowserWindow()
-  const { user } = useApplicationContext()
-  const {
-    projectId,
-    ui: { chatIsOpen }
-  } = useEditorContext()
+  const { user } = useApplicationContext({
+    user: PropTypes.shape({ id: PropTypes.string.isRequired }.isRequired)
+  })
+  const { projectId } = useEditorContext({
+    projectId: PropTypes.string.isRequired
+  })
+
+  const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
 
   const [unreadMessageCount, setUnreadMessageCount] = useState(0)
   function resetUnreadMessageCount() {

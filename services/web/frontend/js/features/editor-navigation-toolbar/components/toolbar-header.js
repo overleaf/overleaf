@@ -5,15 +5,22 @@ import CobrandingLogo from './cobranding-logo'
 import BackToProjectsButton from './back-to-projects-button'
 import ChatToggleButton from './chat-toggle-button'
 import OnlineUsersWidget from './online-users-widget'
+import TrackChangesToggleButton from './track-changes-toggle-button'
+import HistoryToggleButton from './history-toggle-button'
 
 function ToolbarHeader({
   cobranding,
   onShowLeftMenuClick,
   chatIsOpen,
   toggleChatOpen,
+  reviewPanelOpen,
+  toggleReviewPanelOpen,
+  historyIsOpen,
+  toggleHistoryOpen,
   unreadMessageCount,
   onlineUsers,
-  goToUser
+  goToUser,
+  isRestrictedTokenMember
 }) {
   return (
     <header className="toolbar toolbar-header toolbar-with-labels">
@@ -24,11 +31,24 @@ function ToolbarHeader({
       </div>
       <div className="toolbar-right">
         <OnlineUsersWidget onlineUsers={onlineUsers} goToUser={goToUser} />
-        <ChatToggleButton
-          chatIsOpen={chatIsOpen}
-          onClick={toggleChatOpen}
-          unreadMessageCount={unreadMessageCount}
-        />
+        {!isRestrictedTokenMember && (
+          <>
+            <TrackChangesToggleButton
+              onClick={toggleReviewPanelOpen}
+              disabled={historyIsOpen}
+              trackChangesIsOpen={reviewPanelOpen}
+            />
+            <HistoryToggleButton
+              historyIsOpen={historyIsOpen}
+              onClick={toggleHistoryOpen}
+            />
+            <ChatToggleButton
+              chatIsOpen={chatIsOpen}
+              onClick={toggleChatOpen}
+              unreadMessageCount={unreadMessageCount}
+            />
+          </>
+        )}
       </div>
     </header>
   )
@@ -39,9 +59,14 @@ ToolbarHeader.propTypes = {
   cobranding: PropTypes.object,
   chatIsOpen: PropTypes.bool,
   toggleChatOpen: PropTypes.func.isRequired,
+  reviewPanelOpen: PropTypes.bool,
+  toggleReviewPanelOpen: PropTypes.func.isRequired,
+  historyIsOpen: PropTypes.bool,
+  toggleHistoryOpen: PropTypes.func.isRequired,
   unreadMessageCount: PropTypes.number.isRequired,
   onlineUsers: PropTypes.array.isRequired,
-  goToUser: PropTypes.func.isRequired
+  goToUser: PropTypes.func.isRequired,
+  isRestrictedTokenMember: PropTypes.bool
 }
 
 export default ToolbarHeader

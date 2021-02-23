@@ -4,6 +4,7 @@ import { ApplicationProvider } from '../../../frontend/js/shared/context/applica
 import { EditorProvider } from '../../../frontend/js/shared/context/editor-context'
 import sinon from 'sinon'
 import { ChatProvider } from '../../../frontend/js/features/chat/context/chat-context'
+import { LayoutProvider } from '../../../frontend/js/shared/context/layout-context'
 
 export function renderWithEditorContext(
   children,
@@ -17,7 +18,11 @@ export function renderWithEditorContext(
         owner: {
           _id: '124abd'
         }
-      }
+      },
+      ui: {
+        chatOpen: true
+      },
+      $watch: () => {}
     },
     socket: {
       on: sinon.stub(),
@@ -27,19 +32,17 @@ export function renderWithEditorContext(
   return render(
     <ApplicationProvider>
       <EditorProvider
-        setChatIsOpen={() => {}}
-        setChatIsOpenAngular={() => {}}
         openDoc={() => {}}
         onlineUsersArray={[]}
+        $scope={window._ide.$scope}
       >
-        {children}
+        <LayoutProvider $scope={window._ide.$scope}>{children}</LayoutProvider>
       </EditorProvider>
     </ApplicationProvider>
   )
 }
 
 export function renderWithChatContext(children, { user, projectId } = {}) {
-  global.localStorage.setItem('editor.ui.chat.open', true)
   return renderWithEditorContext(<ChatProvider>{children}</ChatProvider>, {
     user,
     projectId

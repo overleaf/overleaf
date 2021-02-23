@@ -1,6 +1,6 @@
-import React, { createContext, useCallback, useContext, useEffect } from 'react'
+import React, { createContext, useContext } from 'react'
 import PropTypes from 'prop-types'
-import usePersistedState from '../../infrastructure/persisted-state-hook'
+import useScopeValue from './util/scope-value-hook'
 
 export const EditorContext = createContext()
 
@@ -13,18 +13,12 @@ EditorContext.Provider.propTypes = {
     }),
     loading: PropTypes.bool,
     projectId: PropTypes.string.isRequired,
-    isProjectOwner: PropTypes.bool
+    isProjectOwner: PropTypes.bool,
+    isRestrictedTokenMember: PropTypes.bool
   })
 }
 
-export function EditorProvider({
-  children,
-  loading,
-  chatIsOpenAngular,
-  setChatIsOpenAngular,
-  openDoc,
-  onlineUsersArray
-}) {
+export function EditorProvider({ children, $scope }) {
   const cobranding = window.brandVariation
     ? {
         logoImgUrl: window.brandVariation.logo_url,
@@ -38,39 +32,14 @@ export function EditorProvider({
       ? window._ide.$scope.project.owner._id
       : null
 
-  const [chatIsOpen, setChatIsOpen] = usePersistedState(
-    'editor.ui.chat.open',
-    false
-  )
-
-  const toggleChatOpen = useCallback(() => {
-    setChatIsOpen(!chatIsOpen)
-    setChatIsOpenAngular(!chatIsOpen)
-  }, [chatIsOpen, setChatIsOpenAngular, setChatIsOpen])
-
-  // updates React's `chatIsOpen` state when the chat is opened by Angular.
-  // In order to prevent race conditions with `toggleChatOpen` it's not a 1:1 binding:
-  // Angular forces the React state to `true`, but can only set it to `false` when
-  // the React state is explicitly `true`.
-  useEffect(() => {
-    if (chatIsOpenAngular) {
-      setChatIsOpen(true)
-    } else if (chatIsOpen) {
-      setChatIsOpen(false)
-    }
-  }, [chatIsOpenAngular, chatIsOpen, setChatIsOpen])
+  const [loading] = useScopeValue('state.loading', $scope)
 
   const editorContextValue = {
     cobranding,
     loading,
     projectId: window.project_id,
     isProjectOwner: ownerId === window.user.id,
-    openDoc,
-    onlineUsersArray,
-    ui: {
-      chatIsOpen,
-      toggleChatOpen
-    }
+    isRestrictedTokenMember: window.isRestrictedTokenMember
   }
 
   return (
@@ -82,11 +51,7 @@ export function EditorProvider({
 
 EditorProvider.propTypes = {
   children: PropTypes.any,
-  loading: PropTypes.bool,
-  chatIsOpenAngular: PropTypes.bool,
-  setChatIsOpenAngular: PropTypes.func.isRequired,
-  openDoc: PropTypes.func.isRequired,
-  onlineUsersArray: PropTypes.array.isRequired
+  $scope: PropTypes.any.isRequired
 }
 
 export function useEditorContext(propTypes) {
