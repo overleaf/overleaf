@@ -40,7 +40,8 @@ describe('PersistenceManager', function () {
         }),
         'logger-sharelatex': (this.logger = {
           log: sinon.stub(),
-          err: sinon.stub()
+          err: sinon.stub(),
+          error: sinon.stub()
         }),
         './Errors': Errors
       }
@@ -145,8 +146,14 @@ describe('PersistenceManager', function () {
         )
       })
 
-      it('should return the error', function () {
-        return this.callback.calledWith(this.error).should.equal(true)
+      it('should return a generic connection error', function () {
+        return this.callback
+          .calledWith(
+            sinon.match
+              .instanceOf(Error)
+              .and(sinon.match.has('message', 'error connecting to web API'))
+          )
+          .should.equal(true)
       })
 
       it('should time the execution', function () {
@@ -355,8 +362,14 @@ describe('PersistenceManager', function () {
         )
       })
 
-      it('should return the error', function () {
-        return this.callback.calledWith(this.error).should.equal(true)
+      it('should return a generic connection error', function () {
+        return this.callback
+          .calledWith(
+            sinon.match
+              .instanceOf(Error)
+              .and(sinon.match.has('message', 'error connecting to web API'))
+          )
+          .should.equal(true)
       })
 
       it('should time the execution', function () {

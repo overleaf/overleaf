@@ -69,10 +69,10 @@ module.exports = PersistenceManager = {
       return _callback(...Array.from(args || []))
     }
 
-    const url = `${Settings.apis.web.url}/project/${project_id}/doc/${doc_id}`
+    const urlPath = `/project/${project_id}/doc/${doc_id}`
     return request(
       {
-        url,
+        url: `${Settings.apis.web.url}${urlPath}`,
         method: 'GET',
         headers: {
           accept: 'application/json'
@@ -88,7 +88,11 @@ module.exports = PersistenceManager = {
       function (error, res, body) {
         updateMetric('getDoc', error, res)
         if (error != null) {
-          return callback(error)
+          logger.error(
+            { err: error, project_id, doc_id },
+            'web API request failed'
+          )
+          return callback(new Error('error connecting to web API'))
         }
         if (res.statusCode >= 200 && res.statusCode < 300) {
           try {
@@ -119,10 +123,12 @@ module.exports = PersistenceManager = {
             body.projectHistoryType
           )
         } else if (res.statusCode === 404) {
-          return callback(new Errors.NotFoundError(`doc not not found: ${url}`))
+          return callback(
+            new Errors.NotFoundError(`doc not not found: ${urlPath}`)
+          )
         } else {
           return callback(
-            new Error(`error accessing web API: ${url} ${res.statusCode}`)
+            new Error(`error accessing web API: ${urlPath} ${res.statusCode}`)
           )
         }
       }
@@ -148,10 +154,10 @@ module.exports = PersistenceManager = {
       return _callback(...Array.from(args || []))
     }
 
-    const url = `${Settings.apis.web.url}/project/${project_id}/doc/${doc_id}`
+    const urlPath = `/project/${project_id}/doc/${doc_id}`
     return request(
       {
-        url,
+        url: `${Settings.apis.web.url}${urlPath}`,
         method: 'POST',
         json: {
           lines,
@@ -171,15 +177,21 @@ module.exports = PersistenceManager = {
       function (error, res, body) {
         updateMetric('setDoc', error, res)
         if (error != null) {
-          return callback(error)
+          logger.error(
+            { err: error, project_id, doc_id },
+            'web API request failed'
+          )
+          return callback(new Error('error connecting to web API'))
         }
         if (res.statusCode >= 200 && res.statusCode < 300) {
           return callback(null)
         } else if (res.statusCode === 404) {
-          return callback(new Errors.NotFoundError(`doc not not found: ${url}`))
+          return callback(
+            new Errors.NotFoundError(`doc not not found: ${urlPath}`)
+          )
         } else {
           return callback(
-            new Error(`error accessing web API: ${url} ${res.statusCode}`)
+            new Error(`error accessing web API: ${urlPath} ${res.statusCode}`)
           )
         }
       }

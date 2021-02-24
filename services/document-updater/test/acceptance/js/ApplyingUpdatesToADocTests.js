@@ -703,7 +703,7 @@ describe('Applying updates to a doc', function () {
     })
   })
 
-  return describe('when the sending duplicate ops', function () {
+  describe('when the sending duplicate ops', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
@@ -790,6 +790,60 @@ describe('Applying updates to a doc', function () {
       return expect(
         JSON.parse(this.messageCallback.args[1][1]).op.dup
       ).to.equal(true)
+    })
+  })
+
+  return describe('when sending updates for a non-existing doc id', function () {
+    before(function (done) {
+      ;[this.project_id, this.doc_id] = Array.from([
+        DocUpdaterClient.randomId(),
+        DocUpdaterClient.randomId()
+      ])
+      this.non_existing = {
+        doc_id: this.doc_id,
+        v: this.version,
+        op: [{ d: 'content', p: 0 }]
+      }
+
+      DocUpdaterClient.subscribeToAppliedOps(
+        (this.messageCallback = sinon.stub())
+      )
+
+      DocUpdaterClient.sendUpdate(
+        this.project_id,
+        this.doc_id,
+        this.non_existing,
+        (error) => {
+          if (error != null) {
+            throw error
+          }
+          return setTimeout(done, 200)
+        }
+      )
+      return null
+    })
+
+    it('should not update or create a doc', function (done) {
+      DocUpdaterClient.getDoc(
+        this.project_id,
+        this.doc_id,
+        (error, res, doc) => {
+          res.statusCode.should.equal(404)
+          return done()
+        }
+      )
+      return null
+    })
+
+    return it('should send a message with an error', function () {
+      this.messageCallback.called.should.equal(true)
+      const [channel, message] = Array.from(this.messageCallback.args[0])
+      channel.should.equal('applied-ops')
+      return JSON.parse(message).should.deep.include({
+        project_id: this.project_id,
+        doc_id: this.doc_id,
+        error: `doc not not found: /project/${this.project_id}/doc/${this.doc_id}`
+      })
     })
   })
 })
