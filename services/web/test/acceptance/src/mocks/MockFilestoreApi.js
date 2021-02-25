@@ -51,6 +51,14 @@ class MockFilestoreApi extends AbstractMockApi {
       res.sendStatus(204)
     })
   }
+
+  getFile(projectId, fileId) {
+    return (
+      this.files[projectId] &&
+      this.files[projectId][fileId] &&
+      this.files[projectId][fileId].content
+    )
+  }
 }
 
 module.exports = MockFilestoreApi
