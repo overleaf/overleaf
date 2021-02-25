@@ -78,6 +78,7 @@ io.configure(function () {
   ])
 })
 
+// a 200 response on '/' is required for load balancer health checks
 app.get('/', (req, res) => res.send('real-time-sharelatex is alive'))
 
 app.get('/status', function (req, res) {
