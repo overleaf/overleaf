@@ -171,7 +171,7 @@ module.exports = TrackChangesClient = {
       (error, response, updates) => {
         if (error) return callback(error)
         response.statusCode.should.equal(200)
-        callback(null, updates)
+        callback(null, updates, JSON.parse(response.trailers['x-user-ids']))
       }
     )
   },

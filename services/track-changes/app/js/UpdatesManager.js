@@ -641,6 +641,8 @@ module.exports = UpdatesManager = {
       PackManager.makeProjectIterator(projectId, before, (err, iterator) => {
         if (err) return consumer(err)
 
+        const accumulatedUserIds = new Set()
+
         async.whilst(
           () => !iterator.done(),
 
@@ -654,13 +656,26 @@ module.exports = UpdatesManager = {
                 //  call.
                 return cb()
               }
+              updatesFromASinglePack.forEach((update) => {
+                accumulatedUserIds.add(
+                  // Super defensive access on update details.
+                  String(update && update.meta && update.meta.user_id)
+                )
+              })
               // Emit updates and wait for the consumer.
-              consumer(null, updatesFromASinglePack, cb)
+              consumer(null, { updates: updatesFromASinglePack }, cb)
             }),
 
           (err) => {
             if (err) return consumer(err)
-            consumer(null, [])
+
+            // Adding undefined can happen for broken updates.
+            accumulatedUserIds.delete('undefined')
+
+            consumer(null, {
+              updates: [],
+              userIds: Array.from(accumulatedUserIds).sort()
+            })
           }
         )
       })

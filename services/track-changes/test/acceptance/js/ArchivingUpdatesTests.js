@@ -50,6 +50,7 @@ describe('Archiving updates', function () {
     this.now = Date.now()
     this.to = this.now
     this.user_id = ObjectId().toString()
+    this.user_id_2 = ObjectId().toString()
     this.doc_id = ObjectId().toString()
     this.project_id = ObjectId().toString()
 
@@ -92,7 +93,7 @@ describe('Archiving updates', function () {
         op: [{ i: 'b', p: 0 }],
         meta: {
           ts: this.now + (i - 2048) * this.hours + 10 * this.minutes,
-          user_id: this.user_id
+          user_id: this.user_id_2
         },
         v: 2 * i + 2
       })
@@ -144,13 +145,17 @@ describe('Archiving updates', function () {
   function testExportFeature() {
     describe('exporting the project', function () {
       before('fetch export', function (done) {
-        TrackChangesClient.exportProject(this.project_id, (error, updates) => {
-          if (error) {
-            return done(error)
+        TrackChangesClient.exportProject(
+          this.project_id,
+          (error, updates, userIds) => {
+            if (error) {
+              return done(error)
+            }
+            this.exportedUpdates = updates
+            this.exportedUserIds = userIds
+            done()
           }
-          this.exportedUpdates = updates
-          done()
-        })
+        )
       })
 
       it('should include all the imported updates, with ids, sorted by timestamp', function () {
@@ -175,6 +180,10 @@ describe('Archiving updates', function () {
             return exportedUpdate
           })
         expect(this.exportedUpdates).to.deep.equal(expectedExportedUpdates)
+        expect(this.exportedUserIds).to.deep.equal([
+          this.user_id,
+          this.user_id_2
+        ])
       })
     })
   }

@@ -11,17 +11,22 @@ describe('ExportProject', function () {
 
   describe('when there are no updates', function () {
     before('fetch export', function (done) {
-      TrackChangesClient.exportProject(ObjectId(), (error, updates) => {
-        if (error) {
-          return done(error)
+      TrackChangesClient.exportProject(
+        ObjectId(),
+        (error, updates, userIds) => {
+          if (error) {
+            return done(error)
+          }
+          this.exportedUpdates = updates
+          this.exportedUserIds = userIds
+          done()
         }
-        this.exportedUpdates = updates
-        done()
-      })
+      )
     })
 
     it('should export an empty array', function () {
       expect(this.exportedUpdates).to.deep.equal([])
+      expect(this.exportedUserIds).to.deep.equal([])
     })
   })
 

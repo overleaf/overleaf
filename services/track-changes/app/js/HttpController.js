@@ -209,7 +209,7 @@ module.exports = HttpController = {
     logger.log({ project_id }, 'exporting project history')
     UpdatesManager.exportProject(project_id, function (
       err,
-      updates,
+      { updates, userIds },
       confirmWrite
     ) {
       const abortStreaming = req.aborted || res.finished || res.destroyed
@@ -236,6 +236,7 @@ module.exports = HttpController = {
         // The first write will emit the 200 status, headers and start of the
         //  response payload (open array)
         res.setHeader('Content-Type', 'application/json')
+        res.setHeader('Trailer', 'X-User-Ids')
         res.writeHead(200)
         res.write('[')
       }
@@ -255,7 +256,8 @@ module.exports = HttpController = {
 
       if (isLastWrite) {
         // The last write will have no updates and will finish the response
-        //  payload (close array).
+        //  payload (close array) and emit the userIds as trailer.
+        res.addTrailers({ 'X-User-Ids': JSON.stringify(userIds) })
         res.end(']')
       }
     })
