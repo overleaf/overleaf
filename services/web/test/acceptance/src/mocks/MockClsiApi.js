@@ -1,8 +1,6 @@
 const AbstractMockApi = require('./AbstractMockApi')
 
 class MockClsiApi extends AbstractMockApi {
-  reset() {}
-
   static compile(req, res) {
     res.status(200).send({
       compile: {

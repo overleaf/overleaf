@@ -5,8 +5,6 @@ const AbstractMockApi = require('./AbstractMockApi')
 // output when the acceptance tests try to connect.
 
 class MockNotificationsApi extends AbstractMockApi {
-  reset() {}
-
   applyRoutes() {
     this.app.get('/*', (req, res) => res.sendStatus(200))
     this.app.post('/*', (req, res) => res.sendStatus(200))

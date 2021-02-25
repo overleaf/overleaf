@@ -100,14 +100,9 @@ class AbstractMockApi {
 
   /**
    * Resets member data and restores the API to a clean state for the next test run
-   * - should be overridden in derived classes
-   * @abstract
+   * - may be overridden in derived classes
    */
-  reset() {
-    throw new OError(
-      'AbstractMockApi base class implementation should not be called'
-    )
-  }
+  reset() {}
 
   /**
    * Applies mocha hooks to start and stop the API at the beginning/end of
