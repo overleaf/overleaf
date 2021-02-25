@@ -42,7 +42,7 @@ block content
 									p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
 
 								.row-spaced
-									form(method='post',action='/admin/dissconectAllUsers')
+									form(method='post',action='/admin/disconnectAllUsers')
 										input(name="_csrf", type="hidden", value=csrfToken)
 										button.btn.btn-danger(type="submit") Disconnect all users
 									p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.

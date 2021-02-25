@@ -25,7 +25,6 @@ block content
 		.global-alerts(ng-cloak ng-hide="editor.error_state")
 			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
 				strong #{translate("disconnected")}
-				|  #{translate("please_refresh")}
 
 			.alert.alert-warning.small(ng-if="connection.reconnection_countdown")
 				strong #{translate("lost_connection")}.

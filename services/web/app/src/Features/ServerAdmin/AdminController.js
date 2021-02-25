@@ -98,11 +98,13 @@ const AdminController = {
     return res.render('admin/register')
   },
 
-  dissconectAllUsers: (req, res) => {
+  disconnectAllUsers: (req, res) => {
     logger.warn('disconecting everyone')
+    const delay = (req.query && req.query.delay) > 0 ? req.query.delay : 10
     EditorRealTimeController.emitToAll(
       'forceDisconnect',
-      'Sorry, we are performing a quick update to the editor and need to close it down. Please refresh the page to continue.'
+      'Sorry, we are performing a quick update to the editor and need to close it down. Please refresh the page to continue.',
+      delay
     )
     return res.sendStatus(200)
   },

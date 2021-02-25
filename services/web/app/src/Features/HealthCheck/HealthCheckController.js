@@ -10,8 +10,14 @@ const {
 
 module.exports = {
   check(req, res, next) {
-    // detach from express for cleaner stack traces
-    setTimeout(() => runSmokeTestsDetached(req, res).catch(next))
+    if (!settings.siteIsOpen || !settings.editorIsOpen) {
+      // always return successful health checks when site is closed
+      res.contentType('application/json')
+      res.sendStatus(200)
+    } else {
+      // detach from express for cleaner stack traces
+      setTimeout(() => runSmokeTestsDetached(req, res).catch(next))
+    }
   },
 
   checkActiveHandles(req, res, next) {
