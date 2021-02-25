@@ -4,10 +4,6 @@ const User = require('./helpers/User')
 const request = require('./helpers/request')
 const settings = require('settings-sharelatex')
 
-require('./helpers/MockChatApi')
-require('./helpers/MockDocstoreApi')
-require('./helpers/MockDocUpdaterApi')
-
 const expectErrorResponse = require('./helpers/expectErrorResponse')
 
 function tryReadAccess(user, projectId, test, callback) {

@@ -1,45 +1,27 @@
-/* eslint-disable
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let MockV1HistoryApi
+const AbstractMockApi = require('./AbstractMockApi')
 const { EventEmitter } = require('events')
-const _ = require('lodash')
-const express = require('express')
-const bodyParser = require('body-parser')
-const app = express()
 
-module.exports = MockV1HistoryApi = {
-  fakeZipCall: 0,
-  requestedZipPacks: 0,
-  sentChunks: 0,
-  resetCounter() {
-    MockV1HistoryApi.fakeZipCall = 0
-    MockV1HistoryApi.sentChunks = 0
-    MockV1HistoryApi.requestedZipPacks = 0
-  },
-  events: new EventEmitter(),
-  run() {
-    app.get(
+class MockV1HistoryApi extends AbstractMockApi {
+  reset() {
+    this.fakeZipCall = 0
+    this.requestedZipPacks = 0
+    this.sentChunks = 0
+    this.events = new EventEmitter()
+  }
+
+  applyRoutes() {
+    this.app.get(
       '/api/projects/:project_id/version/:version/zip',
       (req, res, next) => {
         res.header('content-disposition', 'attachment; name=project.zip')
         res.header('content-type', 'application/octet-stream')
-        return res.send(
+        res.send(
           `Mock zip for ${req.params.project_id} at version ${req.params.version}`
         )
       }
     )
 
-    app.get(
+    this.app.get(
       '/fake-zip-download/:project_id/version/:version',
       (req, res, next) => {
         if (!(this.fakeZipCall++ > 0)) {
@@ -52,10 +34,10 @@ module.exports = MockV1HistoryApi = {
             `Mock zip for ${req.params.project_id} at version ${req.params.version}`
           )
         }
-        function writeChunk() {
-          res.write('chunk' + MockV1HistoryApi.sentChunks++)
+        const writeChunk = () => {
+          res.write('chunk' + this.sentChunks++)
         }
-        function writeEvery(interval) {
+        const writeEvery = interval => {
           if (req.aborted) return
 
           // setInterval delays the first run
@@ -76,32 +58,29 @@ module.exports = MockV1HistoryApi = {
       }
     )
 
-    app.post(
+    this.app.post(
       '/api/projects/:project_id/version/:version/zip',
       (req, res, next) => {
-        MockV1HistoryApi.requestedZipPacks++
-        MockV1HistoryApi.events.emit('v1-history-pack-zip')
-        return res.json({
+        this.requestedZipPacks++
+        this.events.emit('v1-history-pack-zip')
+        res.json({
           zipUrl: `http://localhost:3100/fake-zip-download/${req.params.project_id}/version/${req.params.version}`
         })
       }
     )
 
-    app.delete('/api/projects/:project_id', (req, res, next) => {
+    this.app.delete('/api/projects/:project_id', (req, res, next) => {
       res.sendStatus(204)
     })
-
-    return app
-      .listen(3100, error => {
-        if (error != null) {
-          throw error
-        }
-      })
-      .on('error', error => {
-        console.error('error starting MockV1HistoryApi:', error.message)
-        return process.exit(1)
-      })
   }
 }
 
-MockV1HistoryApi.run()
+module.exports = MockV1HistoryApi
+
+// type hint for the inherited `instance` method
+/**
+ * @function instance
+ * @memberOf MockV1HistoryApi
+ * @static
+ * @returns {MockV1HistoryApi}
+ */

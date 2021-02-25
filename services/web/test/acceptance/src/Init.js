@@ -1,24 +1,41 @@
 const App = require('../../../app.js')
-const { exec } = require('child_process')
-const { waitForDb, db } = require('../../../app/src/infrastructure/mongodb')
+const MongoHelper = require('./helpers/MongoHelper')
+const { logger } = require('logger-sharelatex')
 
-require('logger-sharelatex').logger.level('error')
+const MockAnalyticsApi = require('./mocks/MockAnalyticsApi')
+const MockChatApi = require('./mocks/MockChatApi')
+const MockClsiApi = require('./mocks/MockClsiApi')
+const MockDocstoreApi = require('./mocks/MockDocstoreApi')
+const MockDocUpdaterApi = require('./mocks/MockDocUpdaterApi')
+const MockFilestoreApi = require('./mocks/MockFilestoreApi')
+const MockNotificationsApi = require('./mocks/MockNotificationsApi')
+const MockProjectHistoryApi = require('./mocks/MockProjectHistoryApi')
+const MockRecurlyApi = require('./mocks/MockRecurlyApi')
+const MockSpellingApi = require('./mocks/MockSpellingApi')
+const MockV1Api = require('./mocks/MockV1Api')
+const MockV1HistoryApi = require('./mocks/MockV1HistoryApi')
 
-before(waitForDb)
+logger.level('error')
+
+MongoHelper.initialize()
+
+const mockOpts = {
+  debug: ['1', 'true', 'TRUE'].includes(process.env.DEBUG_MOCKS)
+}
+
+MockAnalyticsApi.initialize(3050, mockOpts)
+MockChatApi.initialize(3010, mockOpts)
+MockClsiApi.initialize(3013, mockOpts)
+MockDocstoreApi.initialize(3016, mockOpts)
+MockDocUpdaterApi.initialize(3003, mockOpts)
+MockFilestoreApi.initialize(3009, mockOpts)
+MockNotificationsApi.initialize(3042, mockOpts)
+MockProjectHistoryApi.initialize(3054, mockOpts)
+MockRecurlyApi.initialize(6034, mockOpts)
+MockSpellingApi.initialize(3005, mockOpts)
+MockV1Api.initialize(5000, mockOpts)
+MockV1HistoryApi.initialize(3100, mockOpts)
 
 before(function(done) {
-  exec('bin/east migrate', (error, stdout, stderr) => {
-    console.log(stdout)
-    console.error(stderr)
-    if (error) {
-      throw error
-    }
-    App.listen(3000, 'localhost', done)
-  })
-})
-
-afterEach(async function() {
-  return Promise.all(
-    Object.values(db).map(collection => collection.deleteMany({}))
-  )
+  App.listen(3000, 'localhost', done)
 })

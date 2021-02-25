@@ -19,8 +19,15 @@ const User = require('./helpers/User')
 const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')
 const ExportsHandler = require('../../../app/src/Features/Exports/ExportsHandler.js')
 
-const MockProjectHistoryApi = require('./helpers/MockProjectHistoryApi')
-const MockV1Api = require('./helpers/MockV1Api')
+const MockProjectHistoryApiClass = require('./mocks/MockProjectHistoryApi')
+const MockV1ApiClass = require('./mocks/MockV1Api')
+
+let MockProjectHistoryApi, MockV1Api
+
+before(function() {
+  MockV1Api = MockV1ApiClass.instance()
+  MockProjectHistoryApi = MockProjectHistoryApiClass.instance()
+})
 
 describe('Exports', function() {
   beforeEach(function(done) {
@@ -50,7 +57,6 @@ describe('Exports', function() {
       MockProjectHistoryApi.setProjectVersion(this.project_id, this.version)
       this.export_id = Math.floor(Math.random() * 10000)
       MockV1Api.setExportId(this.export_id)
-      MockV1Api.clearExportParams()
       return this.owner.request(
         {
           method: 'POST',

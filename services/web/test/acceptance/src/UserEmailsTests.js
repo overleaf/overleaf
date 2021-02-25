@@ -6,8 +6,14 @@ const User = require('./helpers/User')
 const UserHelper = require('./helpers/UserHelper')
 const UserUpdater = require('../../../app/src/Features/User/UserUpdater')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
-const MockV1Api = require('./helpers/MockV1Api')
+const MockV1ApiClass = require('./mocks/MockV1Api')
 const expectErrorResponse = require('./helpers/expectErrorResponse')
+
+let MockV1Api
+
+before(function() {
+  MockV1Api = MockV1ApiClass.instance()
+})
 
 describe('UserEmails', function() {
   beforeEach(function(done) {

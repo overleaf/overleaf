@@ -26,10 +26,18 @@ const _ = require('underscore')
 
 const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')
 
-const MockDocStoreApi = require('./helpers/MockDocstoreApi')
-const MockFileStoreApi = require('./helpers/MockFileStoreApi')
 const request = require('./helpers/request')
 const User = require('./helpers/User')
+
+const MockDocstoreApiClass = require('./mocks/MockDocstoreApi')
+const MockFilestoreApiClass = require('./mocks/MockFilestoreApi')
+
+let MockDocstoreApi, MockFilestoreApi
+
+before(function() {
+  MockDocstoreApi = MockDocstoreApiClass.instance()
+  MockFilestoreApi = MockFilestoreApiClass.instance()
+})
 
 describe('ProjectDuplicateNames', function() {
   beforeEach(function(done) {
@@ -89,12 +97,12 @@ describe('ProjectDuplicateNames', function() {
     })
 
     it('should create two docs in the docstore', function() {
-      const docs = MockDocStoreApi.docs[this.example_project_id]
+      const docs = MockDocstoreApi.docs[this.example_project_id]
       return expect(Object.keys(docs).length).to.equal(2)
     })
 
     it('should create one file in the filestore', function() {
-      const files = MockFileStoreApi.files[this.example_project_id]
+      const files = MockFilestoreApi.files[this.example_project_id]
       return expect(Object.keys(files).length).to.equal(1)
     })
 

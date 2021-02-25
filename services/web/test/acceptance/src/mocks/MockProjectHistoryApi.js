@@ -1,36 +1,32 @@
-let MockProjectHistoryApi
+const AbstractMockApi = require('./AbstractMockApi')
 const _ = require('lodash')
-const express = require('express')
-const bodyParser = require('body-parser')
-const app = express()
 const { ObjectId } = require('mongodb')
 
-module.exports = MockProjectHistoryApi = {
-  docs: {},
-
-  oldFiles: {},
-
-  projectVersions: {},
-
-  labels: {},
-
-  projectSnapshots: {},
+class MockProjectHistoryApi extends AbstractMockApi {
+  reset() {
+    this.docs = {}
+    this.oldFiles = {}
+    this.projectVersions = {}
+    this.labels = {}
+    this.projectSnapshots = {}
+    this.projectHistoryId = 1
+  }
 
   addOldFile(projectId, version, pathname, content) {
     this.oldFiles[`${projectId}:${version}:${pathname}`] = content
-  },
+  }
 
   addProjectSnapshot(projectId, version, snapshot) {
     this.projectSnapshots[`${projectId}:${version}`] = snapshot
-  },
+  }
 
   setProjectVersion(projectId, version) {
     this.projectVersions[projectId] = { version }
-  },
+  }
 
   setProjectVersionInfo(projectId, versionInfo) {
     this.projectVersions[projectId] = versionInfo
-  },
+  }
 
   addLabel(projectId, label) {
     if (label.id == null) {
@@ -40,40 +36,31 @@ module.exports = MockProjectHistoryApi = {
       this.labels[projectId] = {}
     }
     this.labels[projectId][label.id] = label
-  },
+  }
 
   deleteLabel(projectId, labelId) {
     delete this.labels[projectId][labelId]
-  },
+  }
 
   getLabels(projectId) {
     if (this.labels[projectId] == null) {
       return null
     }
     return _.values(this.labels[projectId])
-  },
+  }
 
-  reset() {
-    this.oldFiles = {}
-    this.projectHistoryId = 1
-    this.projectVersions = {}
-    this.labels = {}
-  },
-
-  run() {
-    this.reset()
-
-    app.post('/project', (req, res, next) => {
+  applyRoutes() {
+    this.app.post('/project', (req, res) => {
       res.json({ project: { id: this.projectHistoryId++ } })
     })
 
-    app.delete('/project/:projectId', (req, res, next) => {
+    this.app.delete('/project/:projectId', (req, res) => {
       res.sendStatus(204)
     })
 
-    app.get(
+    this.app.get(
       '/project/:projectId/version/:version/:pathname',
-      (req, res, next) => {
+      (req, res) => {
         const { projectId, version, pathname } = req.params
         const key = `${projectId}:${version}:${pathname}`
         if (this.oldFiles[key] != null) {
@@ -84,7 +71,7 @@ module.exports = MockProjectHistoryApi = {
       }
     )
 
-    app.get('/project/:projectId/version/:version', (req, res, next) => {
+    this.app.get('/project/:projectId/version/:version', (req, res) => {
       const { projectId, version } = req.params
       const key = `${projectId}:${version}`
       if (this.projectSnapshots[key] != null) {
@@ -94,7 +81,7 @@ module.exports = MockProjectHistoryApi = {
       }
     })
 
-    app.get('/project/:projectId/version', (req, res, next) => {
+    this.app.get('/project/:projectId/version', (req, res) => {
       const { projectId } = req.params
       if (this.projectVersions[projectId] != null) {
         res.json(this.projectVersions[projectId])
@@ -103,7 +90,7 @@ module.exports = MockProjectHistoryApi = {
       }
     })
 
-    app.get('/project/:projectId/labels', (req, res, next) => {
+    this.app.get('/project/:projectId/labels', (req, res) => {
       const { projectId } = req.params
       const labels = this.getLabels(projectId)
       if (labels != null) {
@@ -113,21 +100,17 @@ module.exports = MockProjectHistoryApi = {
       }
     })
 
-    app.post(
-      '/project/:projectId/user/:user_id/labels',
-      bodyParser.json(),
-      (req, res, next) => {
-        const { projectId } = req.params
-        const { comment, version } = req.body
-        const labelId = new ObjectId().toString()
-        this.addLabel(projectId, { id: labelId, comment, version })
-        res.json({ label_id: labelId, comment, version })
-      }
-    )
+    this.app.post('/project/:projectId/user/:user_id/labels', (req, res) => {
+      const { projectId } = req.params
+      const { comment, version } = req.body
+      const labelId = new ObjectId().toString()
+      this.addLabel(projectId, { id: labelId, comment, version })
+      res.json({ label_id: labelId, comment, version })
+    })
 
-    app.delete(
+    this.app.delete(
       '/project/:projectId/user/:user_id/labels/:labelId',
-      (req, res, next) => {
+      (req, res) => {
         const { projectId, labelId } = req.params
         const label =
           this.labels[projectId] != null
@@ -142,21 +125,18 @@ module.exports = MockProjectHistoryApi = {
       }
     )
 
-    app.post('/project/:projectId/flush', (req, res, next) => {
+    this.app.post('/project/:projectId/flush', (req, res) => {
       res.sendStatus(200)
     })
-
-    app
-      .listen(3054, error => {
-        if (error != null) {
-          throw error
-        }
-      })
-      .on('error', error => {
-        console.error('error starting MockProjectHistoryApi:', error.message)
-        process.exit(1)
-      })
   }
 }
 
-MockProjectHistoryApi.run()
+module.exports = MockProjectHistoryApi
+
+// type hint for the inherited `instance` method
+/**
+ * @function instance
+ * @memberOf MockProjectHistoryApi
+ * @static
+ * @returns {MockProjectHistoryApi}
+ */

@@ -4,7 +4,6 @@ const request = require('./helpers/request')
 const User = require('./helpers/User')
 const RecurlySubscription = require('./helpers/RecurlySubscription')
 const SubscriptionUpdater = require('../../../app/src/Features/Subscription/SubscriptionUpdater')
-require('./helpers/MockV1Api')
 
 describe('Subscriptions', function() {
   describe('deletion', function() {

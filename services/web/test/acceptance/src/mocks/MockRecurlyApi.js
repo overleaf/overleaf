@@ -1,53 +1,36 @@
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let MockRecurlyApi
-const express = require('express')
-const app = express()
-const bodyParser = require('body-parser')
+const AbstractMockApi = require('./AbstractMockApi')
 const SubscriptionController = require('../../../../app/src/Features/Subscription/SubscriptionController')
 
-app.use(bodyParser.json())
-
-module.exports = MockRecurlyApi = {
-  mockSubscriptions: [],
-
-  redemptions: {},
-
-  coupons: {},
+class MockRecurlyApi extends AbstractMockApi {
+  reset() {
+    this.mockSubscriptions = []
+    this.redemptions = {}
+    this.coupons = {}
+  }
 
   addMockSubscription(recurlySubscription) {
     this.mockSubscriptions.push(recurlySubscription)
-  },
+  }
 
   getMockSubscriptionByAccountId(accountId) {
     return this.mockSubscriptions.find(
       mockSubscription => mockSubscription.account.id === accountId
     )
-  },
+  }
 
   getMockSubscriptionById(uuid) {
     return this.mockSubscriptions.find(
       mockSubscription => mockSubscription.uuid === uuid
     )
-  },
+  }
 
-  run() {
-    app.get('/subscriptions/:id', (req, res, next) => {
+  applyRoutes() {
+    this.app.get('/subscriptions/:id', (req, res) => {
       const subscription = this.getMockSubscriptionById(req.params.id)
-      if (subscription == null) {
-        return res.status(404).end()
+      if (!subscription) {
+        res.status(404).end()
       } else {
-        return res.send(`\
+        res.send(`\
 <subscription>
 	<plan_code>${subscription.plan_code}</plan_code>
 	<currency>${subscription.currency}</currency>
@@ -63,12 +46,12 @@ module.exports = MockRecurlyApi = {
       }
     })
 
-    app.get('/accounts/:id', (req, res, next) => {
+    this.app.get('/accounts/:id', (req, res) => {
       const subscription = this.getMockSubscriptionByAccountId(req.params.id)
-      if (subscription == null) {
-        return res.status(404).end()
+      if (!subscription) {
+        res.status(404).end()
       } else {
-        return res.send(`\
+        res.send(`\
 <account>
 	<account_code>${req.params.id}</account_code>
 	<hosted_login_token>${subscription.account.hosted_login_token}</hosted_login_token>
@@ -78,16 +61,16 @@ module.exports = MockRecurlyApi = {
       }
     })
 
-    app.put(
+    this.app.put(
       '/accounts/:id',
       SubscriptionController.recurlyNotificationParser, // required to parse XML requests
-      (req, res, next) => {
+      (req, res) => {
         const subscription = this.getMockSubscriptionByAccountId(req.params.id)
-        if (subscription == null) {
-          return res.status(404).end()
+        if (!subscription) {
+          res.status(404).end()
         } else {
           Object.assign(subscription.account, req.body.account)
-          return res.send(`\
+          res.send(`\
 <account>
 	<account_code>${req.params.id}</account_code>
 	<email>${subscription.account.email}</email>
@@ -97,12 +80,12 @@ module.exports = MockRecurlyApi = {
       }
     )
 
-    app.get('/coupons/:code', (req, res, next) => {
+    this.app.get('/coupons/:code', (req, res) => {
       const coupon = this.coupons[req.params.code]
-      if (coupon == null) {
-        return res.status(404).end()
+      if (!coupon) {
+        res.status(404).end()
       } else {
-        return res.send(`\
+        res.send(`\
 <coupon>
 	<coupon_code>${req.params.code}</coupon_code>
 	<name>${coupon.name || ''}</name>
@@ -112,7 +95,7 @@ module.exports = MockRecurlyApi = {
       }
     })
 
-    app.get('/accounts/:id/redemptions', (req, res, next) => {
+    this.app.get('/accounts/:id/redemptions', (req, res) => {
       const redemptions = this.redemptions[req.params.id] || []
       let redemptionsListXml = ''
       for (let redemption of Array.from(redemptions)) {
@@ -124,19 +107,21 @@ module.exports = MockRecurlyApi = {
 `
       }
 
-      return res.send(`\
+      res.send(`\
 <redemptions type="array">
 	${redemptionsListXml}
 </redemptions>\
 `)
     })
-
-    return app.listen(6034, error => {
-      if (error != null) {
-        throw error
-      }
-    })
   }
 }
 
-MockRecurlyApi.run()
+module.exports = MockRecurlyApi
+
+// type hint for the inherited `instance` method
+/**
+ * @function instance
+ * @memberOf MockRecurlyApi
+ * @static
+ * @returns {MockRecurlyApi}
+ */

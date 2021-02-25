@@ -13,7 +13,6 @@ const should = require('chai').should()
 const { assert } = require('chai')
 const async = require('async')
 const request = require('./helpers/request')
-const MockV1Api = require('./helpers/MockV1Api')
 
 const assertResponse = (path, expectedStatusCode, expectedBody, cb) =>
   request.get(path, (error, response) => {

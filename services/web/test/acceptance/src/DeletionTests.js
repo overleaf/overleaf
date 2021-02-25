@@ -6,10 +6,15 @@ const settings = require('settings-sharelatex')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 const { Subscription } = require('../../../app/src/models/Subscription')
 const SubscriptionViewModelBuilder = require('../../../app/src/Features/Subscription/SubscriptionViewModelBuilder')
-const MockDocstoreApi = require('./helpers/MockDocstoreApi')
-const MockFileStoreApi = require('./helpers/MockFileStoreApi')
-require('./helpers/MockV1Api')
-require('./helpers/MockProjectHistoryApi')
+const MockDocstoreApiClass = require('./mocks/MockDocstoreApi')
+const MockFilestoreApiClass = require('./mocks/MockFilestoreApi')
+
+let MockDocstoreApi, MockFilestoreApi
+
+before(function() {
+  MockDocstoreApi = MockDocstoreApiClass.instance()
+  MockFilestoreApi = MockFilestoreApiClass.instance()
+})
 
 describe('Deleting a user', function() {
   beforeEach(function(done) {
@@ -252,7 +257,7 @@ describe('Deleting a project', function() {
             done()
           }
         )
-        MockFileStoreApi.files[this.projectId.toString()] = {
+        MockFilestoreApi.files[this.projectId.toString()] = {
           dummyFile: 'wombat'
         }
       })
@@ -293,7 +298,7 @@ describe('Deleting a project', function() {
       })
 
       it('Should destroy the files', function(done) {
-        expect(MockFileStoreApi.files[this.projectId.toString()]).to.exist
+        expect(MockFilestoreApi.files[this.projectId.toString()]).to.exist
 
         request.post(
           `/internal/project/${this.projectId}/expire-deleted-project`,
@@ -308,7 +313,7 @@ describe('Deleting a project', function() {
             expect(error).not.to.exist
             expect(res.statusCode).to.equal(200)
 
-            expect(MockFileStoreApi.files[this.projectId.toString()]).not.to
+            expect(MockFilestoreApi.files[this.projectId.toString()]).not.to
               .exist
             done()
           }

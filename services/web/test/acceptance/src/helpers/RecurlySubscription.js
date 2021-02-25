@@ -1,7 +1,13 @@
 const { ObjectId } = require('mongodb')
 const Subscription = require('./Subscription')
-const MockRecurlyApi = require('./MockRecurlyApi')
+const MockRecurlyApiClass = require('../mocks/MockRecurlyApi')
 const RecurlyWrapper = require('../../../../app/src/Features/Subscription/RecurlyWrapper')
+
+let MockRecurlyApi
+
+before(function() {
+  MockRecurlyApi = MockRecurlyApiClass.instance()
+})
 
 class RecurlySubscription {
   constructor(options = {}) {

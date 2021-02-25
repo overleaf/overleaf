@@ -1,23 +1,24 @@
-const express = require('express')
-const app = express()
+const AbstractMockApi = require('./AbstractMockApi')
 
-const MockSpellingApi = {
-  words: {},
+class MockSpellingApi extends AbstractMockApi {
+  reset() {
+    this.words = {}
+  }
 
-  run() {
-    app.get('/user/:userId', (req, res) => {
+  applyRoutes() {
+    this.app.get('/user/:userId', (req, res) => {
       const { userId } = req.params
       const words = this.words[userId] || []
       res.json(words)
     })
 
-    app.delete('/user/:userId', (req, res) => {
+    this.app.delete('/user/:userId', (req, res) => {
       const { userId } = req.params
       this.words.delete(userId)
       res.sendStatus(200)
     })
 
-    app.post('/user/:userId/learn', (req, res) => {
+    this.app.post('/user/:userId/learn', (req, res) => {
       const word = req.body.word
       const { userId } = req.params
       if (word) {
@@ -29,7 +30,7 @@ const MockSpellingApi = {
       res.sendStatus(200)
     })
 
-    app.post('/user/:userId/unlearn', (req, res) => {
+    this.app.post('/user/:userId/unlearn', (req, res) => {
       const word = req.body.word
       const { userId } = req.params
       if (word && this.words[userId]) {
@@ -40,20 +41,15 @@ const MockSpellingApi = {
       }
       res.sendStatus(200)
     })
-
-    app
-      .listen(3005, error => {
-        if (error) {
-          throw error
-        }
-      })
-      .on('error', error => {
-        console.error('error starting MockSpellingApi:', error.message)
-        process.exit(1)
-      })
   }
 }
 
-MockSpellingApi.run()
-
 module.exports = MockSpellingApi
+
+// type hint for the inherited `instance` method
+/**
+ * @function instance
+ * @memberOf MockSpellingApi
+ * @static
+ * @returns {MockSpellingApi}
+ */

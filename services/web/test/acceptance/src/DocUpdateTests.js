@@ -3,9 +3,6 @@ const request = require('./helpers/request')
 const { expect } = require('chai')
 const settings = require('settings-sharelatex')
 const { ObjectId } = require('mongodb')
-require('./helpers/MockDocstoreApi')
-require('./helpers/MockV1Api')
-require('./helpers/MockProjectHistoryApi')
 
 describe('DocUpdate', function() {
   beforeEach(function(done) {

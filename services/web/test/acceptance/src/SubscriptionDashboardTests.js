@@ -17,9 +17,15 @@ const { Subscription } = require('../../../app/src/models/Subscription')
 const { Institution } = require('../../../app/src/models/Institution')
 const SubscriptionViewModelBuilder = require('../../../app/src/Features/Subscription/SubscriptionViewModelBuilder')
 const RecurlySubscription = require('./helpers/RecurlySubscription')
+const MockRecurlyApiClass = require('./mocks/MockRecurlyApi')
+const MockV1ApiClass = require('./mocks/MockV1Api')
 
-const MockRecurlyApi = require('./helpers/MockRecurlyApi')
-const MockV1Api = require('./helpers/MockV1Api')
+let MockV1Api, MockRecurlyApi
+
+before(function() {
+  MockV1Api = MockV1ApiClass.instance()
+  MockRecurlyApi = MockRecurlyApiClass.instance()
+})
 
 describe('Subscriptions', function() {
   describe('dashboard', function() {

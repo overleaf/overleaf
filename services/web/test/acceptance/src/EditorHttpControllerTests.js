@@ -1,8 +1,5 @@
 const User = require('./helpers/User')
 const { expect } = require('chai')
-require('./helpers/MockDocstoreApi')
-require('./helpers/MockV1Api')
-require('./helpers/MockProjectHistoryApi')
 
 describe('EditorHttpController', function() {
   beforeEach('login', function(done) {

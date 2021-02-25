@@ -22,9 +22,15 @@ const { Subscription } = require('../../../app/src/models/Subscription')
 const { User } = require('../../../app/src/models/User')
 const FeaturesUpdater = require('../../../app/src/Features/Subscription/FeaturesUpdater')
 
-const MockV1Api = require('./helpers/MockV1Api')
+const MockV1ApiClass = require('./mocks/MockV1Api')
 const logger = require('logger-sharelatex')
 logger.logger.level('error')
+
+let MockV1Api
+
+before(function() {
+  MockV1Api = MockV1ApiClass.instance()
+})
 
 const syncUserAndGetFeatures = function(user, callback) {
   if (callback == null) {

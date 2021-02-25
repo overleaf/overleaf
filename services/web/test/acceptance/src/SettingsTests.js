@@ -11,7 +11,13 @@
 const should = require('chai').should()
 const async = require('async')
 const User = require('./helpers/User')
-const MockV1Api = require('./helpers/MockV1Api')
+const MockV1ApiClass = require('./mocks/MockV1Api')
+
+let MockV1Api
+
+before(function() {
+  MockV1Api = MockV1ApiClass.instance()
+})
 
 describe('SettingsPage', function() {
   beforeEach(function(done) {
