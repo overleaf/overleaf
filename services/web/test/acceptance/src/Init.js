@@ -1,6 +1,4 @@
-const App = require('../../../app.js')
-const MongoHelper = require('./helpers/MongoHelper')
-const { logger } = require('logger-sharelatex')
+require('./helpers/InitApp')
 
 const MockAnalyticsApi = require('./mocks/MockAnalyticsApi')
 const MockChatApi = require('./mocks/MockChatApi')
@@ -14,10 +12,6 @@ const MockRecurlyApi = require('./mocks/MockRecurlyApi')
 const MockSpellingApi = require('./mocks/MockSpellingApi')
 const MockV1Api = require('./mocks/MockV1Api')
 const MockV1HistoryApi = require('./mocks/MockV1HistoryApi')
-
-logger.level('error')
-
-MongoHelper.initialize()
 
 const mockOpts = {
   debug: ['1', 'true', 'TRUE'].includes(process.env.DEBUG_MOCKS)
@@ -35,7 +29,3 @@ MockRecurlyApi.initialize(6034, mockOpts)
 MockSpellingApi.initialize(3005, mockOpts)
 MockV1Api.initialize(5000, mockOpts)
 MockV1HistoryApi.initialize(3100, mockOpts)
-
-before(function(done) {
-  App.listen(3000, 'localhost', done)
-})
