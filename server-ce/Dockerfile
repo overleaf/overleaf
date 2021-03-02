@@ -58,7 +58,7 @@ RUN cd /var/www/sharelatex \
 RUN cd /var/www/sharelatex \
 &&    bash ./bin/compile-services
 
-# Links CLSI sycntex to its default location
+# Links CLSI synctex to its default location
 # ------------------------------------------
 RUN ln -s /var/www/sharelatex/clsi/bin/synctex /opt/synctex
 

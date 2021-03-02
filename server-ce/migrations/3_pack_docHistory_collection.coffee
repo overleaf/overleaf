@@ -65,7 +65,7 @@ markDocAsUnmigrated = (doc_id, callback)->
 	markDocAsProcessed doc_id, (err)->
 		fs.appendFile unmigrated_docs_path, "#{doc_id}\n", callback
 
-checkIfDocHasBeenProccessed = (doc_id, callback)->
+checkIfDocHasBeenProcessed = (doc_id, callback)->
 	callback(null, finished_docs[doc_id])
 
 processNext = (doc_id, callback)->
@@ -73,7 +73,7 @@ processNext = (doc_id, callback)->
 		return callback()
 	if needToExit
 		return callback(new Error("graceful shutdown"))
-	checkIfDocHasBeenProccessed doc_id, (err, hasBeenProcessed)->
+	checkIfDocHasBeenProcessed doc_id, (err, hasBeenProcessed)->
 		if hasBeenProcessed
 			console.log "#{doc_id} already processed, skipping"
 			return callback()

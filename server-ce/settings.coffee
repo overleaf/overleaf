@@ -37,7 +37,7 @@ settings =
 	# Databases
 	# ---------
 
-	# ShareLaTeX's main persistant data store is MongoDB (http://www.mongodb.org/)
+	# ShareLaTeX's main persistent data store is MongoDB (http://www.mongodb.org/)
 	# Documentation about the URL connection string format can be found at:
 	#
 	#    http://docs.mongodb.org/manual/reference/connection-string/
@@ -75,7 +75,7 @@ settings =
 				# track-changes:lock
 				historyLock: ({doc_id}) -> "HistoryLock:#{doc_id}"
 				historyIndexLock: ({project_id}) -> "HistoryIndexLock:#{project_id}"
-				# track-chanegs:history
+				# track-changes:history
 				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
 				# realtime
@@ -93,8 +93,8 @@ settings =
 		project_history: redisConfig
 
 	# The compile server (the clsi) uses a SQL database to cache files and
-	# meta-data. sqllite is the default, and the load is low enough that this will
-	# be fine in production (we use sqllite at sharelatex.com).
+	# meta-data. sqlite is the default, and the load is low enough that this will
+	# be fine in production (we use sqlite at sharelatex.com).
 	#
 	# If you want to configure a different database, see the Sequelize documentation
 	# for available options:
@@ -223,7 +223,7 @@ settings =
 		templates: true
 		references: true
 
-## OPTIONAL CONFIGERABLE SETTINGS
+## OPTIONAL CONFIGURABLE SETTINGS
 
 if process.env["SHARELATEX_LEFT_FOOTER"]?
 	try
@@ -457,7 +457,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 					undefined
 			)
 			requestIdExpirationPeriodMs: (
-				if _saml_exiration = process.env["SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"]
+				if _saml_expiration = process.env["SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"]
 					try
 						parseIntOrFail(_saml_expiration)
 					catch e

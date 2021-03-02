@@ -19,7 +19,7 @@ services:
         volumes:
             - ~/sharelatex_data:/var/lib/sharelatex
             ########################################################################
-            ####  Server Pro: Un-comment the following line to mount the docker ####
+            ####  Server Pro: Uncomment the following line to mount the docker  ####
             ####             socket, required for Sibling Containers to work    ####
             ########################################################################
             # - /var/run/docker.sock:/var/run/docker.sock
