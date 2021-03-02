@@ -193,7 +193,7 @@ module.exports = (grunt) ->
 				grunt.log.errorlns """
 				!!!!!!!!!!!!!! MONGO ERROR !!!!!!!!!!!!!!
 
-				ShareLaTeX can not talk to the mongdb instance
+				ShareLaTeX can not talk to the mongodb instance
 
 				Check the mongodb instance is running and accessible on env var SHARELATEX_MONGO_URL
 				

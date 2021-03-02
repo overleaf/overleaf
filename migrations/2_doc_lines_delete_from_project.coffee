@@ -16,7 +16,7 @@ printProgress = ->
 	exec "wc #{finished_projects_path}", (error, results) ->
 		setTimeout printProgress, 1000 * 30
 
-checkIfFileHasBeenProccessed = (project_id, callback)->
+checkIfFileHasBeenProcessed = (project_id, callback)->
 	exec "grep #{project_id} #{finished_projects_path}", (error, results) ->
 		hasBeenProcessed = _.include(results, project_id)
 		callback(error, hasBeenProcessed)
@@ -125,7 +125,7 @@ getWhichDocsCanBeDeleted = (docs, callback = (err, docsToBeDeleted, unmigratedDo
 	async.series jobs, (err)->
 		callback err, docsToBeDeleted, unmigratedDocs
 
-whipeDocLines = (project_id, mongoPath, callback)->
+wipeDocLines = (project_id, mongoPath, callback)->
 	update =
 		$unset: {}
 	update.$unset["#{mongoPath}.lines"] = ""
@@ -137,15 +137,15 @@ removeDocLinesFromProject = (docs, project, callback)->
 	jobs = _.map docs, (doc)->
 		(cb)->
 			findDocInProject project, doc._id, (err, doc, mongoPath)->
-				whipeDocLines project._id, mongoPath, cb
+				wipeDocLines project._id, mongoPath, cb
 	async.parallelLimit jobs, 5, callback
 
 processNext = (project_id, callback)->
 	if !project_id? or project_id.length == 0
 		return callback()
-	checkIfFileHasBeenProccessed project_id, (err, hasBeenProcessed)->
+	checkIfFileHasBeenProcessed project_id, (err, hasBeenProcessed)->
 		if hasBeenProcessed
-			console.log "#{project_id} already procssed, skipping"
+			console.log "#{project_id} already processed, skipping"
 			return callback()
 		console.log "#{project_id} processing"
 		getAllDocs project_id, (err, docs, project)->

@@ -39,7 +39,7 @@ If you are upgrading from a previous version of Overleaf, please see the [Releas
 
 ## Other repositories
 
-This repository does not contain any code. It acts a wrapper and toolkit for managing the many different Overleaf  services. These each run as their own Node.js process and have their own Github repository. These are all downloaded and set up when you run `grunt install`
+This repository does not contain any code. It acts a wrapper and toolkit for managing the many different Overleaf  services. These each run as their own Node.js process and have their own GitHub repository. These are all downloaded and set up when you run `grunt install`
 
 | Service | Description |
 | ------- | ----------- |
