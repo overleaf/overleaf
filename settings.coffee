@@ -290,6 +290,9 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 		template:
 			customFooter: process.env["SHARELATEX_CUSTOM_EMAIL_FOOTER"]
 
+	if process.env["SHARELATEX_EMAIL_AWS_SES_REGION"]?
+		settings.email.parameters.region = process.env["SHARELATEX_EMAIL_AWS_SES_REGION"]
+
 	if process.env["SHARELATEX_EMAIL_SMTP_USER"]? or process.env["SHARELATEX_EMAIL_SMTP_PASS"]?
 		settings.email.parameters.auth =
 			user: process.env["SHARELATEX_EMAIL_SMTP_USER"]
