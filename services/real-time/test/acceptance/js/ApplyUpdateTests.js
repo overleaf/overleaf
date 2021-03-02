@@ -26,6 +26,38 @@ const rclient = redis.createClient(settings.redis.documentupdater)
 
 const redisSettings = settings.redis
 
+const PENDING_UPDATES_LIST_KEYS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
+  let key = 'pending-updates-list'
+  if (n !== 0) {
+    key += `-${n}`
+  }
+  return key
+})
+
+function getPendingUpdatesList(cb) {
+  Promise.all(
+    PENDING_UPDATES_LIST_KEYS.map((key) => rclient.lrange(key, 0, -1))
+  )
+    .then((results) => {
+      cb(
+        null,
+        results.reduce((acc, more) => {
+          if (more.length) {
+            acc.push(...more)
+          }
+          return acc
+        }, [])
+      )
+    })
+    .catch(cb)
+}
+
+function clearPendingUpdatesList(cb) {
+  Promise.all(PENDING_UPDATES_LIST_KEYS.map((key) => rclient.del(key)))
+    .then(() => cb(null))
+    .catch(cb)
+}
+
 describe('applyOtUpdate', function () {
   before(function () {
     return (this.update = {
@@ -91,7 +123,7 @@ describe('applyOtUpdate', function () {
     })
 
     it('should push the doc into the pending updates list', function (done) {
-      rclient.lrange('pending-updates-list', 0, -1, (error, ...rest) => {
+      getPendingUpdatesList((error, ...rest) => {
         const [doc_id] = Array.from(rest[0])
         doc_id.should.equal(`${this.project_id}:${this.doc_id}`)
         return done()
@@ -123,7 +155,7 @@ describe('applyOtUpdate', function () {
     return after(function (done) {
       return async.series(
         [
-          (cb) => rclient.del('pending-updates-list', cb),
+          (cb) => clearPendingUpdatesList(cb),
           (cb) =>
             rclient.del(
               'DocsWithPendingUpdates',
@@ -393,7 +425,7 @@ describe('applyOtUpdate', function () {
     })
 
     it('should push the doc into the pending updates list', function (done) {
-      rclient.lrange('pending-updates-list', 0, -1, (error, ...rest) => {
+      getPendingUpdatesList((error, ...rest) => {
         const [doc_id] = Array.from(rest[0])
         doc_id.should.equal(`${this.project_id}:${this.doc_id}`)
         return done()
@@ -425,7 +457,7 @@ describe('applyOtUpdate', function () {
     return after(function (done) {
       return async.series(
         [
-          (cb) => rclient.del('pending-updates-list', cb),
+          (cb) => clearPendingUpdatesList(cb),
           (cb) =>
             rclient.del(
               'DocsWithPendingUpdates',
