@@ -1,7 +1,18 @@
+const path = require('path')
+
+// NOTE: must be set before webpack config is imported
+process.env.SHARELATEX_CONFIG = path.resolve(
+  __dirname,
+  '../config/settings.webpack.coffee'
+)
+
 const customConfig = require('../webpack.config.dev')
 
 module.exports = {
-  stories: ['../frontend/stories/**/*.stories.js'],
+  stories: [
+    '../frontend/stories/**/*.stories.js',
+    '../modules/**/stories/**/*.stories.js'
+  ],
   addons: ['@storybook/addon-essentials', '@storybook/addon-a11y'],
   webpackFinal: storybookConfig => {
     // Combine Storybook's webpack loaders with our webpack loaders

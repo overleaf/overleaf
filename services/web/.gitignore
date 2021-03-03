@@ -58,6 +58,8 @@ Gemfile.lock
 docker-shared.yml
 
 config/*.coffee
+!config/settings.defaults.coffee
+!config/settings.webpack.coffee
 
 modules/**/Makefile
 

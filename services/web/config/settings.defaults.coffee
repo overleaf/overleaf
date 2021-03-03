@@ -680,3 +680,8 @@ module.exports = settings =
 					'th': [ 'abbr', 'headers', 'colspan', 'rowspan', 'scope', 'sorted', 'style' ]
 					'tr': [ 'class' ]
 					'video': [ 'alt', 'class', 'controls', 'height', 'width' ]
+
+	overleafModuleImports: {
+		# modules to import (an empty array for each set of modules)
+	}
+
