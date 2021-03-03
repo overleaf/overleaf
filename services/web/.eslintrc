@@ -8,9 +8,7 @@
     "standard",
     "standard-jsx",
     "standard-react",
-    "prettier",
-    "prettier/react",
-    "prettier/standard"
+    "prettier"
   ],
   "plugins": [
     "jsx-a11y",
