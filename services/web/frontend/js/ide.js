@@ -104,7 +104,7 @@ App.controller('IdeController', function(
     reviewPanelOpen: localStorage(`ui.reviewPanelOpen.${window.project_id}`),
     miniReviewPanelVisible: false,
     chatResizerSizeOpen: 7,
-    chatResizerSizeClosed: 7
+    chatResizerSizeClosed: 0
   }
   $scope.user = window.user
 
