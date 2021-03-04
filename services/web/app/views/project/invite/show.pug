@@ -7,7 +7,7 @@ block content
 				.col-md-8.col-md-offset-2
 					.card.project-invite-accept
 						.page-header.text-centered
-							h1 #{translate("user_wants_you_to_see_project", {username:owner.first_name, projectname:""})}
+							h1(ng-non-bindable) #{translate("user_wants_you_to_see_project", {username:owner.first_name, projectname:""})}
 								br
 								em(ng-non-bindable) #{project.name}
 						.row.text-center
