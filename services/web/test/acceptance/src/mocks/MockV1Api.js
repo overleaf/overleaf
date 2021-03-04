@@ -66,10 +66,12 @@ class MockV1Api extends AbstractMockApi {
     return id
   }
 
-  addInstitutionDomain(id, domain) {
+  addInstitutionDomain(institutionId, domain, options = {}) {
     if (this.allInstitutionDomains.has(domain)) return
-    if (!this.institutionDomains[id]) this.institutionDomains[id] = new Set()
-    this.institutionDomains[id].add(domain)
+    if (!this.institutionDomains[institutionId]) {
+      this.institutionDomains[institutionId] = {}
+    }
+    this.institutionDomains[institutionId][domain] = options
     this.allInstitutionDomains.add(domain)
   }
 
@@ -77,9 +79,27 @@ class MockV1Api extends AbstractMockApi {
     Object.assign(this.institutions[id], options)
   }
 
+  updateInstitutionDomain(id, domain, options = {}) {
+    if (!this.institutionDomains[id] || !this.institutionDomains[id][domain])
+      return
+    this.institutionDomains[id][domain] = Object.assign(
+      {},
+      this.institutionDomains[id][domain],
+      options
+    )
+  }
+
   addAffiliation(userId, email) {
-    let institution
+    let institution = {}
     if (!email) return
+    if (!this.affiliations[userId]) this.affiliations[userId] = []
+
+    if (
+      this.affiliations[userId].find(affiliationData => {
+        return affiliationData.email === email
+      })
+    )
+      return
 
     const domain = email.split('@').pop()
 
@@ -88,21 +108,18 @@ class MockV1Api extends AbstractMockApi {
     }
 
     if (this.allInstitutionDomains.has(domain)) {
-      for (const [id, domainSet] of Object.entries(this.institutionDomains)) {
-        if (domainSet.has(domain)) {
-          institution = this.institutions[id]
+      for (const [institutionId, domainData] of Object.entries(
+        this.institutionDomains
+      )) {
+        if (domainData[domain]) {
+          institution.id = institutionId
         }
       }
     }
 
-    if (institution) {
-      if (!this.affiliations[userId]) this.affiliations[userId] = []
+    if (institution.id) {
       this.affiliations[userId].push({ email, institution })
     }
-  }
-
-  setAffiliations(userId, affiliations) {
-    this.affiliations[userId] = affiliations
   }
 
   setDocExported(token, info) {
@@ -174,7 +191,34 @@ class MockV1Api extends AbstractMockApi {
     })
 
     this.app.get('/api/v2/users/:userId/affiliations', (req, res) => {
-      res.json(this.affiliations[req.params.userId] || [])
+      if (!this.affiliations[req.params.userId]) return res.json([])
+      const affiliations = this.affiliations[req.params.userId].map(
+        affiliation => {
+          const institutionId = affiliation.institution.id
+          const domain = affiliation.email.split('@').pop()
+          const domainData =
+            this.institutionDomains[institutionId][domain] || {}
+          const institutionData = this.institutions[institutionId] || {}
+
+          affiliation.institution = {
+            id: institutionId,
+            name: institutionData.name,
+            commonsAccount: institutionData.commonsAccount,
+            isUniversity: !institutionData.institution,
+            ssoBeta: institutionData.sso_beta || false,
+            ssoEnabled: institutionData.sso_enabled || false,
+            maxConfirmationMonths: institutionData.maxConfirmationMonths || null
+          }
+
+          affiliation.institution.confirmed = !!domainData.confirmed
+
+          if (institutionData.commonsAccount) {
+            affiliation.licence = 'pro_plus'
+          }
+          return affiliation
+        }
+      )
+      res.json(affiliations)
     })
 
     this.app.post('/api/v2/users/:userId/affiliations', (req, res) => {

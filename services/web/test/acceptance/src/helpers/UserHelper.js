@@ -340,6 +340,7 @@ class UserHelper {
       .find({
         use: 'email_confirmation',
         'data.user_id': userId.toString(),
+        'data.email': email,
         usedAt: { $exists: false }
       })
       .next()
