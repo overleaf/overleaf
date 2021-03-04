@@ -7,7 +7,14 @@ export function setupContext() {
   }
   let $scope = {}
   if (window._ide) {
-    $scope = { ...window._ide.$scope, project: {} }
+    $scope = {
+      ...window._ide.$scope,
+      project: {},
+      $watch: () => {},
+      ui: {
+        chatOpen: true
+      }
+    }
   }
   window._ide = {
     ...window._ide,

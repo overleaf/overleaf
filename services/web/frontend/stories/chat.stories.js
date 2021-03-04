@@ -87,12 +87,7 @@ export default {
     Story => (
       <>
         <style>{'html, body, .chat { height: 100%; width: 100%; }'}</style>
-        <ContextRoot
-          chatIsOpenAngular
-          setChatIsOpenAngular={() => {}}
-          openDoc={() => {}}
-          onlineUsersArray={[]}
-        >
+        <ContextRoot ide={window._ide} settings={{}}>
           <Story />
         </ContextRoot>
       </>
