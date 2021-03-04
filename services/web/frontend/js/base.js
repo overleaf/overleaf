@@ -49,6 +49,10 @@ const App = angular
         x.Config({
           messageStyle: 'none',
           imageFont: null,
+          // Fast preview, introduced in 2.5, is unhelpful due to extra codemirror refresh
+          // and disabling it avoids issues with math processing errors
+          // github.com/overleaf/write_latex/pull/1375
+          'fast-preview': { disabled: true },
           'HTML-CSS': {
             availableFonts: ['TeX'],
             // MathJax's automatic font scaling does not work well when we render math

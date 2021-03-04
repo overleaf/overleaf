@@ -213,6 +213,7 @@
     "less": "^3.11.1",
     "less-loader": "^6.0.0",
     "less-plugin-autoprefix": "^2.0.0",
+    "mathjax": "^2.7.9",
     "mini-css-extract-plugin": "^0.8.0",
     "mkdirp": "0.5.1",
     "mocha": "^6.2.2",

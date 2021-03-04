@@ -250,11 +250,25 @@ module.exports = {
       contextRegExp: /moment$/
     }),
 
-    new CopyPlugin([
+    // Copy the required files for loading MathJax from MathJax NPM package
+    new CopyPlugin(
+      [
+        { from: 'MathJax.js', to: 'js/libs/mathjax' },
+        { from: 'config/**/*', to: 'js/libs/mathjax' },
+        { from: 'extensions/**/*', to: 'js/libs/mathjax' },
+        { from: 'localization/en/**/*', to: 'js/libs/mathjax' },
+        { from: 'jax/output/HTML-CSS/fonts/TeX/**/*', to: 'js/libs/mathjax' },
+        { from: 'jax/output/HTML-CSS/**/*.js', to: 'js/libs/mathjax' },
+        { from: 'jax/element/**/*', to: 'js/libs/mathjax' },
+        { from: 'jax/input/**/*', to: 'js/libs/mathjax' },
+        { from: 'fonts/HTML-CSS/TeX/woff/*', to: 'js/libs/mathjax' }
+      ],
       {
-        from: 'frontend/js/vendor/libs/mathjax',
-        to: 'js/libs/mathjax'
-      },
+        context: 'node_modules/mathjax'
+      }
+    ),
+
+    new CopyPlugin([
       {
         from: 'frontend/js/vendor/libs/sigma-master',
         to: 'js/libs/sigma-master'
