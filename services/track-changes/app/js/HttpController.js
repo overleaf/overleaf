@@ -200,6 +200,69 @@ module.exports = HttpController = {
     )
   },
 
+  exportProject(req, res, next) {
+    // The project history can be huge:
+    //  - updates can weight MBs for insert/delete of full doc
+    //  - multiple updates form a pack
+    // Flush updates per pack onto the wire.
+    const { project_id } = req.params
+    logger.log({ project_id }, 'exporting project history')
+    UpdatesManager.exportProject(project_id, function (
+      err,
+      { updates, userIds },
+      confirmWrite
+    ) {
+      const abortStreaming = req.aborted || res.finished || res.destroyed
+      if (abortStreaming) {
+        // Tell the producer to stop emitting data
+        if (confirmWrite) confirmWrite(new Error('stop'))
+        return
+      }
+      const hasStartedStreamingResponse = res.headersSent
+      if (err) {
+        logger.error({ project_id, err }, 'export failed')
+        if (!hasStartedStreamingResponse) {
+          // Generate a nice 500
+          return next(err)
+        } else {
+          // Stop streaming
+          return res.destroy()
+        }
+      }
+      // Compose the response incrementally
+      const isFirstWrite = !hasStartedStreamingResponse
+      const isLastWrite = updates.length === 0
+      if (isFirstWrite) {
+        // The first write will emit the 200 status, headers and start of the
+        //  response payload (open array)
+        res.setHeader('Content-Type', 'application/json')
+        res.setHeader('Trailer', 'X-User-Ids')
+        res.writeHead(200)
+        res.write('[')
+      }
+      if (!isFirstWrite && !isLastWrite) {
+        // Starting from the 2nd non-empty write, emit a continuing comma.
+        // write 1: [updates1
+        // write 2: ,updates2
+        // write 3: ,updates3
+        // write N: ]
+        res.write(',')
+      }
+
+      // Every write will emit a blob onto the response stream:
+      // '[update1,update2,...]'
+      //   ^^^^^^^^^^^^^^^^^^^
+      res.write(JSON.stringify(updates).slice(1, -1), confirmWrite)
+
+      if (isLastWrite) {
+        // The last write will have no updates and will finish the response
+        //  payload (close array) and emit the userIds as trailer.
+        res.addTrailers({ 'X-User-Ids': JSON.stringify(userIds) })
+        res.end(']')
+      }
+    })
+  },
+
   restore(req, res, next) {
     if (next == null) {
       next = function (error) {}
