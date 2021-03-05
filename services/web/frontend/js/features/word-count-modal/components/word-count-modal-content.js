@@ -3,12 +3,25 @@ import { Row, Col, Modal, Grid, Alert, Button } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
+import AccessibleModal from '../../../shared/components/accessible-modal'
 
-function WordCountModalContent({ data, error, handleHide, loading }) {
+export default function WordCountModalContent({
+  animation = true,
+  show,
+  data,
+  error,
+  handleHide,
+  loading
+}) {
   const { t } = useTranslation()
 
   return (
-    <>
+    <AccessibleModal
+      animation={animation}
+      show={show}
+      onHide={handleHide}
+      id="clone-project-modal"
+    >
       <Modal.Header closeButton>
         <Modal.Title>{t('word_count')}</Modal.Title>
       </Modal.Header>
@@ -16,7 +29,7 @@ function WordCountModalContent({ data, error, handleHide, loading }) {
       <Modal.Body>
         {loading && !error && (
           <div className="loading">
-            <Loading /> &nbsp; {t('loading')}…
+            <Icon type="refresh" spin modifier="fw" /> &nbsp; {t('loading')}…
           </div>
         )}
 
@@ -70,11 +83,13 @@ function WordCountModalContent({ data, error, handleHide, loading }) {
       <Modal.Footer>
         <Button onClick={handleHide}>{t('done')}</Button>
       </Modal.Footer>
-    </>
+    </AccessibleModal>
   )
 }
 
 WordCountModalContent.propTypes = {
+  animation: PropTypes.bool,
+  show: PropTypes.bool.isRequired,
   handleHide: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
   error: PropTypes.bool,
@@ -86,9 +101,3 @@ WordCountModalContent.propTypes = {
     textWords: PropTypes.number
   })
 }
-
-function Loading() {
-  return <Icon type="refresh" spin modifier="fw" accessibilityLabel="Loading" />
-}
-
-export default WordCountModalContent

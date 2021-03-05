@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Modal } from 'react-bootstrap'
 import PropTypes from 'prop-types'
+import AbortController from 'abort-controller'
 import WordCountModalContent from './word-count-modal-content'
+import { fetchWordCount } from '../utils/api'
 
 function WordCountModal({ clsiServerId, handleHide, projectId, show }) {
   const [loading, setLoading] = useState(true)
@@ -21,24 +22,16 @@ function WordCountModal({ clsiServerId, handleHide, projectId, show }) {
     const _abortController = new AbortController()
     setAbortController(_abortController)
 
-    let query = ''
-    if (clsiServerId) {
-      query = `?clsiserverid=${clsiServerId}`
-    }
-
-    fetch(`/project/${projectId}/wordcount${query}`, {
+    fetchWordCount(projectId, clsiServerId, {
       signal: _abortController.signal
     })
-      .then(async response => {
-        if (response.ok) {
-          const { texcount } = await response.json()
-          setData(texcount)
-        } else {
+      .then(data => {
+        setData(data.texcount)
+      })
+      .catch(error => {
+        if (error.cause?.name !== 'AbortError') {
           setError(true)
         }
-      })
-      .catch(() => {
-        setError(true)
       })
       .finally(() => {
         setLoading(false)
@@ -55,14 +48,13 @@ function WordCountModal({ clsiServerId, handleHide, projectId, show }) {
   }, [abortController, handleHide])
 
   return (
-    <Modal show={show} onHide={abortAndHide}>
-      <WordCountModalContent
-        data={data}
-        error={error}
-        handleHide={abortAndHide}
-        loading={loading}
-      />
-    </Modal>
+    <WordCountModalContent
+      data={data}
+      error={error}
+      show={show}
+      handleHide={abortAndHide}
+      loading={loading}
+    />
   )
 }
 
