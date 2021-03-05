@@ -18,6 +18,10 @@ export default App.controller('LeftMenuCloneProjectModalController', function(
     })
   }
 
+  $scope.openProject = projectId => {
+    window.location.assign(`/project/${projectId}`)
+  }
+
   $scope.openCloneProjectModal = () => {
     $scope.$applyAsync(() => {
       const { project } = ide.$scope

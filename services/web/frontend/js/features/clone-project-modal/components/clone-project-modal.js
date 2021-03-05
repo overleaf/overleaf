@@ -1,54 +1,30 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Modal } from 'react-bootstrap'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
+import { cloneProject } from '../utils/api'
 import CloneProjectModalContent from './clone-project-modal-content'
 
-function CloneProjectModal({ handleHide, show, projectId, projectName }) {
+function CloneProjectModal({
+  show,
+  handleHide,
+  projectId,
+  projectName = '',
+  openProject
+}) {
   const [inFlight, setInFlight] = useState(false)
   const [error, setError] = useState()
+  const [clonedProjectName, setClonedProjectName] = useState('')
+
+  // set the cloned project name when the modal opens
+  useEffect(() => {
+    if (show) {
+      setClonedProjectName(`${projectName} (Copy)`)
+    }
+  }, [show, projectName])
 
   // reset error when the modal is opened
   useEffect(() => {
-    if (show) {
-      setError(undefined)
-    }
-  }, [show])
-
-  // clone the project when the form is submitted
-  const cloneProject = useCallback(
-    cloneName => {
-      setInFlight(true)
-
-      fetch(`/project/${projectId}/clone`, {
-        method: 'POST',
-        body: JSON.stringify({
-          _csrf: window.csrfToken,
-          projectName: cloneName
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-        .then(async response => {
-          if (response.ok) {
-            const { project_id: clonedProjectId } = await response.json()
-            window.location.assign(`/project/${clonedProjectId}`)
-          } else {
-            if (response.status === 400) {
-              setError({ message: await response.text() })
-            } else {
-              setError(true)
-            }
-            setInFlight(false)
-          }
-        })
-        .catch(() => {
-          setError(true)
-          setInFlight(false)
-        })
-    },
-    [projectId]
-  )
+    setError(undefined)
+  }, [])
 
   // close the modal if not in flight
   const cancel = useCallback(() => {
@@ -57,16 +33,49 @@ function CloneProjectModal({ handleHide, show, projectId, projectName }) {
     }
   }, [handleHide, inFlight])
 
+  // valid if the cloned project has a name
+  const valid = useMemo(() => !!clonedProjectName, [clonedProjectName])
+
+  // form submission: clone the project if the name is valid
+  const handleSubmit = event => {
+    event.preventDefault()
+
+    if (!valid) {
+      return
+    }
+
+    setError(false)
+    setInFlight(true)
+
+    // clone the project
+    cloneProject(projectId, clonedProjectName)
+      .then(data => {
+        // open the cloned project
+        openProject(data.project_id)
+      })
+      .catch(({ response, data }) => {
+        if (response.status === 400) {
+          setError(data.message)
+        } else {
+          setError(true)
+        }
+      })
+      .finally(() => {
+        setInFlight(false)
+      })
+  }
+
   return (
-    <Modal show={show} onHide={cancel}>
-      <CloneProjectModalContent
-        cloneProject={cloneProject}
-        error={error}
-        cancel={cancel}
-        inFlight={inFlight}
-        projectName={projectName}
-      />
-    </Modal>
+    <CloneProjectModalContent
+      show={show}
+      cancel={cancel}
+      inFlight={inFlight}
+      valid={valid}
+      error={error}
+      clonedProjectName={clonedProjectName}
+      setClonedProjectName={setClonedProjectName}
+      handleSubmit={handleSubmit}
+    />
   )
 }
 
@@ -74,6 +83,7 @@ CloneProjectModal.propTypes = {
   handleHide: PropTypes.func.isRequired,
   projectId: PropTypes.string.isRequired,
   projectName: PropTypes.string,
+  openProject: PropTypes.func.isRequired,
   show: PropTypes.bool.isRequired
 }
 

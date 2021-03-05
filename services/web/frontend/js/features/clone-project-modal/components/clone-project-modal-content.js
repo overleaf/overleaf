@@ -1,52 +1,49 @@
-import React, { useMemo, useState } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
+import { Trans } from 'react-i18next'
 import {
   Modal,
   Alert,
   Button,
-  FormGroup,
   ControlLabel,
-  FormControl
+  FormControl,
+  FormGroup
 } from 'react-bootstrap'
-import PropTypes from 'prop-types'
-import { useTranslation } from 'react-i18next'
+import AccessibleModal from '../../../shared/components/accessible-modal'
 
-function CloneProjectModalContent({
-  cloneProject,
-  projectName = '',
-  error,
+export default function CloneProjectModalContent({
+  animation = true,
+  show,
   cancel,
-  inFlight
+  handleSubmit,
+  clonedProjectName,
+  setClonedProjectName,
+  error,
+  inFlight,
+  valid
 }) {
-  const { t } = useTranslation()
-
-  const [clonedProjectName, setClonedProjectName] = useState(
-    `${projectName} (Copy)`
-  )
-
-  const valid = useMemo(() => !!clonedProjectName, [clonedProjectName])
-
-  function handleSubmit(event) {
-    event.preventDefault()
-    if (valid) {
-      cloneProject(clonedProjectName)
-    }
-  }
-
   return (
-    <>
+    <AccessibleModal
+      animation={animation}
+      show={show}
+      onHide={cancel}
+      id="clone-project-modal"
+    >
       <Modal.Header closeButton>
-        <Modal.Title>{t('copy_project')}</Modal.Title>
+        <Modal.Title>
+          <Trans i18nKey="copy_project" />
+        </Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         <form id="clone-project-form" onSubmit={handleSubmit}>
           <FormGroup>
-            <ControlLabel htmlFor="cloned-project-name">
-              {t('new_name')}
+            <ControlLabel htmlFor="clone-project-form-name">
+              <Trans i18nKey="new_name" />
             </ControlLabel>
 
             <FormControl
-              id="cloned-project-name"
+              id="clone-project-form-name"
               type="text"
               placeholder="New Project Name"
               required
@@ -58,14 +55,18 @@ function CloneProjectModalContent({
 
         {error && (
           <Alert bsStyle="danger">
-            {error.message || t('generic_something_went_wrong')}
+            {error.length ? (
+              error
+            ) : (
+              <Trans i18nKey="generic_something_went_wrong" />
+            )}
           </Alert>
         )}
       </Modal.Body>
 
       <Modal.Footer>
         <Button type="button" disabled={inFlight} onClick={cancel}>
-          {t('cancel')}
+          <Trans i18nKey="cancel" />
         </Button>
 
         <Button
@@ -74,24 +75,26 @@ function CloneProjectModalContent({
           bsStyle="primary"
           disabled={inFlight || !valid}
         >
-          {inFlight ? <span>{t('copying')}…</span> : <span>{t('copy')}</span>}
+          {inFlight ? (
+            <>
+              <Trans i18nKey="copying" />…
+            </>
+          ) : (
+            <Trans i18nKey="copy" />
+          )}
         </Button>
       </Modal.Footer>
-    </>
+    </AccessibleModal>
   )
 }
-
 CloneProjectModalContent.propTypes = {
-  cloneProject: PropTypes.func.isRequired,
-  error: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.shape({
-      message: PropTypes.string
-    })
-  ]),
+  animation: PropTypes.bool,
+  show: PropTypes.bool.isRequired,
   cancel: PropTypes.func.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  clonedProjectName: PropTypes.string,
+  setClonedProjectName: PropTypes.func.isRequired,
+  error: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
   inFlight: PropTypes.bool.isRequired,
-  projectName: PropTypes.string
+  valid: PropTypes.bool.isRequired
 }
-
-export default CloneProjectModalContent

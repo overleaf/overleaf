@@ -1,67 +1,67 @@
 import React from 'react'
+import fetchMock from 'fetch-mock'
+import PropTypes from 'prop-types'
 
-import CloneProjectModalContent from '../js/features/clone-project-modal/components/clone-project-modal-content'
+import CloneProjectModal from '../js/features/clone-project-modal/components/clone-project-modal'
 
-// NOTE: CloneProjectModalContent is wrapped in modal classes, without modal behaviours
+export const Interactive = ({
+  mockResponse = 200,
+  mockResponseDelay = 500,
+  ...args
+}) => {
+  fetchMock.restore().post(
+    'express:/project/:projectId/clone',
+    () => {
+      switch (mockResponse) {
+        case 400:
+          return { status: 400, body: 'The project name is not valid' }
 
-export const Form = args => (
-  <div className="modal-dialog">
-    <div className="modal-content">
-      <CloneProjectModalContent {...args} />
-    </div>
-  </div>
-)
-Form.args = {
-  inFlight: false,
-  error: false
+        default:
+          return mockResponse
+      }
+    },
+    { delay: mockResponseDelay }
+  )
+
+  return <CloneProjectModal {...args} />
 }
-
-export const Loading = args => (
-  <div className="modal-dialog">
-    <div className="modal-content">
-      <CloneProjectModalContent {...args} />
-    </div>
-  </div>
-)
-Loading.args = {
-  inFlight: true,
-  error: false
-}
-
-export const LoadingError = args => (
-  <div className="modal-dialog">
-    <div className="modal-content">
-      <CloneProjectModalContent {...args} />
-    </div>
-  </div>
-)
-LoadingError.args = {
-  inFlight: false,
-  error: true
-}
-
-export const LoadingErrorMessage = args => (
-  <div className="modal-dialog">
-    <div className="modal-content">
-      <CloneProjectModalContent {...args} />
-    </div>
-  </div>
-)
-LoadingErrorMessage.args = {
-  inFlight: false,
-  error: {
-    message: 'The chosen project name is already in use'
-  }
+Interactive.propTypes = {
+  mockResponse: PropTypes.number,
+  mockResponseDelay: PropTypes.number
 }
 
 export default {
   title: 'Clone Project Modal',
-  component: CloneProjectModalContent,
+  component: CloneProjectModal,
   args: {
-    projectName: 'Project Title'
+    projectId: 'original-project',
+    projectName: 'Project Title',
+    show: true
   },
   argTypes: {
-    cloneProject: { action: 'cloneProject' },
-    cancel: { action: 'cancel' }
+    handleHide: { action: 'close modal' },
+    openProject: { action: 'open project' },
+    mockResponse: {
+      name: 'Mock Response Status',
+      type: { name: 'number', required: false },
+      description: 'The status code that should be returned by the mock server',
+      defaultValue: 200,
+      control: {
+        type: 'radio',
+        options: [200, 500, 400]
+      }
+    },
+    mockResponseDelay: {
+      name: 'Mock Response Delay',
+      type: { name: 'number', required: false },
+      description: 'The delay before returning a response from the mock server',
+      defaultValue: 500,
+      control: {
+        type: 'range',
+        min: 0,
+        max: 2500,
+        step: 250
+      }
+    }
   }
 }
