@@ -1,21 +1,26 @@
 import React from 'react'
 
-import HotkeysModalContent from '../js/features/hotkeys-modal/components/hotkeys-modal-content'
+import HotkeysModal from '../js/features/hotkeys-modal/components/hotkeys-modal'
 
-// NOTE: HotkeysModalContent is wrapped in modal classes, without modal behaviours
-export const Basic = args => (
-  <div className="modal-lg modal-dialog">
-    <div className="modal-content">
-      <HotkeysModalContent {...args} />
-    </div>
-  </div>
-)
+export const ReviewEnabled = args => {
+  return <HotkeysModal {...args} />
+}
+
+export const ReviewDisabled = args => {
+  return <HotkeysModal {...args} trackChangesVisible={false} />
+}
+
+export const MacModifier = args => {
+  return <HotkeysModal {...args} isMac />
+}
 
 export default {
   title: 'Hotkeys Modal',
-  component: HotkeysModalContent,
+  component: HotkeysModal,
   args: {
-    isMac: true,
+    animation: false,
+    show: true,
+    isMac: false,
     trackChangesVisible: true
   },
   argTypes: {

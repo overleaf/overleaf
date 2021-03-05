@@ -1,61 +1,62 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import HotkeysModalContent from '../../../../../frontend/js/features/hotkeys-modal/components/hotkeys-modal-content'
+import HotkeysModal from '../../../../../frontend/js/features/hotkeys-modal/components/hotkeys-modal'
 import { expect } from 'chai'
+import sinon from 'sinon'
 
-const handleHide = () => {
-  // closed
+const modalProps = {
+  show: true,
+  handleHide: sinon.stub(),
+  trackChangesVisible: false
 }
 
-describe('<HotkeysModalContent />', function() {
-  it('renders the translated modal title', function() {
-    const { container } = render(
-      <HotkeysModalContent handleHide={handleHide} />
-    )
+describe('<HotkeysModal />', function() {
+  it('renders the translated modal title', async function() {
+    const { baseElement } = render(<HotkeysModal {...modalProps} />)
 
-    expect(container.querySelector('.modal-title').textContent).to.equal(
+    expect(baseElement.querySelector('.modal-title').textContent).to.equal(
       'Hotkeys'
     )
   })
 
   it('renders translated heading with embedded code', function() {
-    const { container } = render(
-      <HotkeysModalContent handleHide={handleHide} />
-    )
+    const { baseElement } = render(<HotkeysModal {...modalProps} />)
 
-    const results = container.querySelectorAll('h3 code')
+    const results = baseElement.querySelectorAll('h3 code')
     expect(results).to.have.length(1)
   })
 
   it('renders the hotkey descriptions', function() {
-    const { container } = render(
-      <HotkeysModalContent handleHide={handleHide} />
-    )
+    const { baseElement } = render(<HotkeysModal {...modalProps} />)
 
-    const hotkeys = container.querySelectorAll('[data-test-selector="hotkey"]')
+    const hotkeys = baseElement.querySelectorAll(
+      '[data-test-selector="hotkey"]'
+    )
     expect(hotkeys).to.have.length(19)
   })
 
-  it('renders extra hotkey descriptions when Track Changes is enabled', function() {
-    const { container } = render(
-      <HotkeysModalContent handleHide={handleHide} trackChangesVisible />
+  it('adds extra hotkey descriptions when Track Changes is enabled', function() {
+    const { baseElement } = render(
+      <HotkeysModal {...modalProps} trackChangesVisible />
     )
 
-    const hotkeys = container.querySelectorAll('[data-test-selector="hotkey"]')
+    const hotkeys = baseElement.querySelectorAll(
+      '[data-test-selector="hotkey"]'
+    )
     expect(hotkeys).to.have.length(22)
   })
 
   it('uses Ctrl for non-macOS', function() {
-    render(<HotkeysModalContent handleHide={handleHide} />)
+    render(<HotkeysModal {...modalProps} />)
 
-    screen.getAllByText(/Ctrl/)
+    expect(screen.getAllByText(/Ctrl/)).to.have.length(16)
     expect(screen.queryByText(/Cmd/)).to.not.exist
   })
 
   it('uses Cmd for macOS', function() {
-    render(<HotkeysModalContent handleHide={handleHide} isMac />)
+    render(<HotkeysModal {...modalProps} isMac />)
 
-    screen.getAllByText(/Cmd/)
+    expect(screen.getAllByText(/Cmd/)).to.have.length(16)
     expect(screen.queryByText(/Ctrl/)).to.not.exist
   })
 })

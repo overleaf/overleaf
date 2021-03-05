@@ -3,10 +3,11 @@ import { react2angular } from 'react2angular'
 
 import HotkeysModal from '../components/hotkeys-modal'
 
-App.component('hotkeysModal', react2angular(HotkeysModal))
+App.component('hotkeysModal', react2angular(HotkeysModal, undefined))
 
 export default App.controller('HotkeysModalController', function($scope) {
   $scope.show = false
+  $scope.isMac = /Mac/i.test(navigator.platform)
 
   $scope.handleHide = () => {
     $scope.$applyAsync(() => {
@@ -15,10 +16,10 @@ export default App.controller('HotkeysModalController', function($scope) {
   }
 
   $scope.openHotkeysModal = () => {
-    $scope.trackChangesVisible =
-      $scope.project && $scope.project.features.trackChangesVisible
-
     $scope.$applyAsync(() => {
+      $scope.trackChangesVisible =
+        $scope.project && $scope.project.features.trackChangesVisible
+
       $scope.show = true
     })
   }
