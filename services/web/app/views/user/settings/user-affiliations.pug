@@ -7,7 +7,6 @@ mixin btnMakePrimaryDisabled(tooltip)
 	div(
 		tooltip=tooltip
 		tooltip-enable="!ui.isMakingRequest"
-		ng-if="!userEmail.default && (!userEmail.confirmedAt || ui.isMakingRequest) && !institutionAlreadyLinked(userEmail)"
 	)
 		button.btn.btn-sm.btn-success.affiliations-table-inline-action(
 			disabled
@@ -106,13 +105,16 @@ form.row(
 					td.affiliations-table-inline-actions
 						// Disabled buttons don't work with tooltips, due to pointer-events: none,
 						// so create a wrapper for the tooltip
-						.affiliations-table-inline-action-disabled-wrapper(ng-if="userEmail.ssoAvailable")
-							+btnMakePrimaryDisabled("Please confirm your email by linking to your institutional account before making it the primary email.")
-						.affiliations-table-inline-action-disabled-wrapper(ng-if="!userEmail.ssoAvailable")
-							+btnMakePrimaryDisabled(translate("please_confirm_your_email_before_making_it_default"))
+						span(ng-if="!userEmail.default && (!userEmail.confirmedAt || ui.isMakingRequest) && !institutionAlreadyLinked(userEmail) && !inReconfirmNotificationPeriod(userEmail)")
+							.affiliations-table-inline-action-disabled-wrapper(ng-if="userEmail.ssoAvailable")
+								+btnMakePrimaryDisabled(translate("please_link_before_making_primary"))
+							.affiliations-table-inline-action-disabled-wrapper(ng-if="!userEmail.ssoAvailable")
+								+btnMakePrimaryDisabled(translate("please_confirm_your_email_before_making_it_default"))
+						.affiliations-table-inline-action-disabled-wrapper(ng-if="inReconfirmNotificationPeriod(userEmail)")
+							+btnMakePrimaryDisabled(translate("please_reconfirm_your_affiliation_before_making_this_primary"))
 						button.btn.btn-sm.btn-success.affiliations-table-inline-action(
 							tooltip=translate("make_email_primary_description")
-							ng-if="!userEmail.default && (userEmail.confirmedAt && !ui.isMakingRequest)"
+							ng-if="!userEmail.default && (userEmail.confirmedAt && !ui.isMakingRequest) && !inReconfirmNotificationPeriod(userEmail)"
 							ng-click="setDefaultUserEmail(userEmail)"
 							type="button"
 						) #{translate("make_primary")}

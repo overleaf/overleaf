@@ -282,6 +282,10 @@ export default App.controller('UserAffiliationsController', function(
     return promise
   }
 
+  $scope.inReconfirmNotificationPeriod = function(emailData) {
+    return _.get(emailData, ['affiliation', 'inReconfirmNotificationPeriod'])
+  }
+
   $scope.institutionAlreadyLinked = function(emailData) {
     const institutionId =
       emailData.affiliation &&
