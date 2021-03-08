@@ -14,7 +14,7 @@ block content
 							| #{translate("if_you_are_registered")},
 							a(href="/login")  #{translate("login_here")}
 					else if newTemplateData.templateName !== undefined
-						h1 #{translate("register_to_edit_template", {templateName:newTemplateData.templateName})}
+						h1(ng-non-bindable) #{translate("register_to_edit_template", {templateName:newTemplateData.templateName})}
 
 						div #{translate("already_have_sl_account")}
 							a(href="/login")  #{translate("login_here")}
@@ -25,6 +25,6 @@ block content
 						.page-header
 							h1 #{translate("register")}
 						p
-							| Please contact 
-							strong(ng-non-bindable) #{settings.adminEmail} 
+							| Please contact
+							strong(ng-non-bindable) #{settings.adminEmail}
 							| to create an account.
