@@ -127,7 +127,8 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
 
     res.locals.mathJaxPath = `/js/libs/mathjax/MathJax.js?${querystring.stringify(
       {
-        config: 'TeX-AMS_HTML,Safe'
+        config: 'TeX-AMS_HTML,Safe',
+        v: require('mathjax/package.json').version
       }
     )}`
 
