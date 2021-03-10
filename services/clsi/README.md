@@ -34,10 +34,6 @@ The CLSI can be installed and set up as part of the entire [Overleaf stack](http
 
     $ git clone git@github.com:overleaf/clsi.git
 
-Then install the require npm modules:
-
-    $ npm install
-
 Then build the Docker image:
 
     $ docker build . -t overleaf/clsi
