@@ -37,6 +37,37 @@ module.exports = (grunt) ->
 						"""
 						done()
 
+	grunt.registerTask 'user:create-user', "Create a user with the given email address and send a activation email. Usage: grunt user:create-user --email joe@example.com", () ->
+		done = @async()
+		email = grunt.option("email")
+		if !email?
+			console.error "Usage: grunt user:create-user --email=joe@example.com"
+			process.exit(1)
+
+		settings = require "settings-sharelatex"
+		mongodb = require "../web/app/src/infrastructure/mongodb"
+		UserRegistrationHandler = require "../web/app/src/Features/User/UserRegistrationHandler"
+		OneTimeTokenHandler = require "../web/app/src/Features/Security/OneTimeTokenHandler"
+		EmailHandler = require "../web/app/src/Features/Email/EmailHandler"
+		mongodb.waitForDb().then () ->
+			UserRegistrationHandler.registerNewUser {
+				email: email
+				password: require("crypto").randomBytes(32).toString("hex")
+			}, (error, user) ->
+				if error? 
+					if error?.message == "EmailAlreadyRegistered"
+						console.log("user #{email} already exists, resending welcome email")
+					else
+						throw error
+				ONE_WEEK = 7 * 24 * 60 * 60 # seconds
+				OneTimeTokenHandler.getNewToken "password", { expiresIn: ONE_WEEK, email:user.email, user_id: user._id.toString() }, (err, token)->
+					return next(err) if err?
+					setNewPasswordUrl = "#{settings.siteUrl}/user/activate?token=#{token}&user_id=#{user._id}"
+					EmailHandler.sendEmail "registered", { to: user.email, setNewPasswordUrl }, (err) ->
+						if err?
+							throw err
+						done()
+
 	grunt.registerTask 'user:delete', "deletes a user and all their data, Usage: grunt user:delete --email joe@example.com", () ->
 		done = @async()
 		email = grunt.option("email")
