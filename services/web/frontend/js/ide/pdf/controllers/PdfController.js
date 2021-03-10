@@ -1063,7 +1063,7 @@ App.factory('synctex', function(ide, $http, $q) {
           ) {
             const doc = ide.fileTreeManager.findEntityByPath(data.code[0].file)
             if (doc == null) {
-              return
+              deferred.reject()
             }
             return deferred.resolve({ doc, line: data.code[0].line })
           } else if (data.code[0].file === '') {
