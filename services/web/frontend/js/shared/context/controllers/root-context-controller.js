@@ -4,5 +4,5 @@ import { rootContext } from '../root-context'
 
 App.component(
   'sharedContextReact',
-  react2angular(rootContext.component, [], ['ide'])
+  react2angular(rootContext.component, [], ['ide', 'settings'])
 )

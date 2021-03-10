@@ -29,11 +29,18 @@ export default {
   title: 'EditorNavigationToolbar',
   component: ToolbarHeader,
   argTypes: {
-    goToUser: { action: 'goToUser' }
+    goToUser: { action: 'goToUser' },
+    renameProject: { action: 'renameProject' },
+    toggleHistoryOpen: { action: 'toggleHistoryOpen' },
+    toggleReviewPanelOpen: { action: 'toggleReviewPanelOpen' },
+    toggleChatOpen: { action: 'toggleChatOpen' },
+    togglePdfView: { action: 'togglePdfView' },
+    openShareModal: { action: 'openShareModal' },
+    onShowLeftMenuClick: { action: 'onShowLeftMenuClick' }
   },
   args: {
+    projectName: 'Overleaf Project',
     onlineUsers: [{ user_id: 'abc', name: 'overleaf' }],
-    goToUser: () => {},
-    onShowLeftMenuClick: () => {}
+    unreadMessageCount: 0
   }
 }

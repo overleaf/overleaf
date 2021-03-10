@@ -8,7 +8,10 @@ import { useLayoutContext } from '../../../shared/context/layout-context'
 const editorContextPropTypes = {
   cobranding: PropTypes.object,
   loading: PropTypes.bool,
-  isRestrictedTokenMember: PropTypes.bool
+  isRestrictedTokenMember: PropTypes.bool,
+  projectName: PropTypes.string.isRequired,
+  renameProject: PropTypes.func.isRequired,
+  isProjectOwner: PropTypes.bool
 }
 
 const layoutContextPropTypes = {
@@ -18,13 +21,28 @@ const layoutContextPropTypes = {
   setReviewPanelOpen: PropTypes.func.isRequired,
   view: PropTypes.string,
   setView: PropTypes.func.isRequired,
-  setLeftMenuShown: PropTypes.func.isRequired
+  setLeftMenuShown: PropTypes.func.isRequired,
+  pdfLayout: PropTypes.string.isRequired
 }
 
-function EditorNavigationToolbarRoot({ onlineUsersArray, openDoc }) {
-  const { cobranding, loading, isRestrictedTokenMember } = useEditorContext(
-    editorContextPropTypes
-  )
+const chatContextPropTypes = {
+  resetUnreadMessageCount: PropTypes.func.isRequired,
+  unreadMessageCount: PropTypes.number.isRequired
+}
+
+function EditorNavigationToolbarRoot({
+  onlineUsersArray,
+  openDoc,
+  openShareProjectModal
+}) {
+  const {
+    cobranding,
+    loading,
+    isRestrictedTokenMember,
+    projectName,
+    renameProject,
+    isProjectOwner
+  } = useEditorContext(editorContextPropTypes)
 
   const {
     chatIsOpen,
@@ -33,10 +51,13 @@ function EditorNavigationToolbarRoot({ onlineUsersArray, openDoc }) {
     setReviewPanelOpen,
     view,
     setView,
-    setLeftMenuShown
+    setLeftMenuShown,
+    pdfLayout
   } = useLayoutContext(layoutContextPropTypes)
 
-  const { resetUnreadMessageCount, unreadMessageCount } = useChatContext()
+  const { resetUnreadMessageCount, unreadMessageCount } = useChatContext(
+    chatContextPropTypes
+  )
 
   const toggleChatOpen = useCallback(() => {
     if (!chatIsOpen) {
@@ -53,6 +74,14 @@ function EditorNavigationToolbarRoot({ onlineUsersArray, openDoc }) {
   const toggleHistoryOpen = useCallback(() => {
     setView(view === 'history' ? 'editor' : 'history')
   }, [view, setView])
+
+  const togglePdfView = useCallback(() => {
+    setView(view === 'pdf' ? 'editor' : 'pdf')
+  }, [view, setView])
+
+  const openShareModal = useCallback(() => {
+    openShareProjectModal(isProjectOwner)
+  }, [openShareProjectModal, isProjectOwner])
 
   const onShowLeftMenuClick = useCallback(
     () => setLeftMenuShown(value => !value),
@@ -82,13 +111,20 @@ function EditorNavigationToolbarRoot({ onlineUsersArray, openDoc }) {
       onlineUsers={onlineUsersArray}
       goToUser={goToUser}
       isRestrictedTokenMember={isRestrictedTokenMember}
+      projectName={projectName}
+      renameProject={renameProject}
+      openShareModal={openShareModal}
+      pdfViewIsOpen={view === 'pdf'}
+      pdfButtonIsVisible={pdfLayout === 'flat'}
+      togglePdfView={togglePdfView}
     />
   )
 }
 
 EditorNavigationToolbarRoot.propTypes = {
   onlineUsersArray: PropTypes.array.isRequired,
-  openDoc: PropTypes.func.isRequired
+  openDoc: PropTypes.func.isRequired,
+  openShareProjectModal: PropTypes.func.isRequired
 }
 
 export default EditorNavigationToolbarRoot

@@ -4,7 +4,7 @@ let titleIsFlashing = false
 let originalTitle
 let flashIntervalHandle
 
-export function flashTitle(message) {
+function flashTitle(message) {
   if (document.hasFocus() || titleIsFlashing) {
     return
   }
@@ -23,7 +23,7 @@ export function flashTitle(message) {
   flashIntervalHandle = setInterval(swapTitle, 800)
 }
 
-export function stopFlashingTitle() {
+function stopFlashingTitle() {
   if (!titleIsFlashing) {
     return
   }
@@ -32,6 +32,14 @@ export function stopFlashingTitle() {
   window.document.title = originalTitle
   originalTitle = undefined
   titleIsFlashing = false
+}
+
+function setTitle(title) {
+  if (titleIsFlashing) {
+    originalTitle = title
+  } else {
+    window.document.title = title
+  }
 }
 
 function useBrowserWindow() {
@@ -54,7 +62,7 @@ function useBrowserWindow() {
     }
   }, [])
 
-  return { hasFocus, flashTitle, stopFlashingTitle }
+  return { hasFocus, flashTitle, stopFlashingTitle, setTitle }
 }
 
 export default useBrowserWindow

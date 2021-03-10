@@ -11,6 +11,7 @@ export function renderWithEditorContext(
   { user = { id: '123abd' }, projectId = 'project123' } = {}
 ) {
   window.user = user || window.user
+  window.ExposedSettings.appName = 'test'
   window.project_id = projectId != null ? projectId : window.project_id
   window._ide = {
     $scope: {
@@ -20,7 +21,8 @@ export function renderWithEditorContext(
         }
       },
       ui: {
-        chatOpen: true
+        chatOpen: true,
+        pdfLayout: 'flat'
       },
       $watch: () => {}
     },
@@ -31,11 +33,7 @@ export function renderWithEditorContext(
   }
   return render(
     <ApplicationProvider>
-      <EditorProvider
-        openDoc={() => {}}
-        onlineUsersArray={[]}
-        $scope={window._ide.$scope}
-      >
+      <EditorProvider ide={window._ide} settings={{}}>
         <LayoutProvider $scope={window._ide.$scope}>{children}</LayoutProvider>
       </EditorProvider>
     </ApplicationProvider>

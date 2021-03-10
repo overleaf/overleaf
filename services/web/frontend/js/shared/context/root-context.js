@@ -6,10 +6,10 @@ import createSharedContext from 'react2angular-shared-context'
 import { ChatProvider } from '../../features/chat/context/chat-context'
 import { LayoutProvider } from './layout-context'
 
-export function ContextRoot({ children, ide }) {
+export function ContextRoot({ children, ide, settings }) {
   return (
     <ApplicationProvider>
-      <EditorProvider $scope={ide.$scope}>
+      <EditorProvider ide={ide} settings={settings}>
         <LayoutProvider $scope={ide.$scope}>
           <ChatProvider>{children}</ChatProvider>
         </LayoutProvider>
@@ -20,7 +20,8 @@ export function ContextRoot({ children, ide }) {
 
 ContextRoot.propTypes = {
   children: PropTypes.any,
-  ide: PropTypes.any.isRequired
+  ide: PropTypes.any.isRequired,
+  settings: PropTypes.any.isRequired
 }
 
 export const rootContext = createSharedContext(ContextRoot)

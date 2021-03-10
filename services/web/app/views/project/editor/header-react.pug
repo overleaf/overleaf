@@ -1,6 +1,7 @@
-div(ng-controller="EditorNavigationToolbarController")
-
-	editor-navigation-toolbar-root(
-		open-doc="openDoc"
-		online-users-array="onlineUsersArray"
-	)
+div(ng-controller="ShareController")
+	div(ng-controller="EditorNavigationToolbarController")
+		editor-navigation-toolbar-root(
+			open-doc="openDoc"
+			online-users-array="onlineUsersArray"
+			open-share-project-modal="openShareProjectModal"
+		)

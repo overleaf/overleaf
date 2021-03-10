@@ -16,6 +16,11 @@ App.component(
     // `$scope.onlineUsersArray` is already populated by `OnlineUsersManager`, which also creates
     // a new array instance every time the list of online users change (which should refresh the
     // value passed to React as a prop, triggering a re-render)
-    'onlineUsersArray'
+    'onlineUsersArray',
+
+    // We're still including ShareController as part fo the React navigation toolbar. The reason is
+    // the coupling between ShareController's $scope and Angular's ShareProjectModal. Once ShareProjectModal
+    // is fully ported to React we should be able to repli
+    'openShareProjectModal'
   ])
 )

@@ -13,7 +13,8 @@ LayoutContext.Provider.propTypes = {
     reviewPanelOpen: PropTypes.bool,
     setReviewPanelOpen: PropTypes.func.isRequired,
     leftMenuShown: PropTypes.bool,
-    setLeftMenuShown: PropTypes.func.isRequired
+    setLeftMenuShown: PropTypes.func.isRequired,
+    pdfLayout: PropTypes.oneOf(['sideBySide', 'flat', 'split']).isRequired
   }).isRequired
 }
 
@@ -29,6 +30,8 @@ export function LayoutProvider({ children, $scope }) {
     $scope
   )
 
+  const [pdfLayout] = useScopeValue('ui.pdfLayout', $scope)
+
   const layoutContextValue = {
     view,
     setView,
@@ -37,7 +40,8 @@ export function LayoutProvider({ children, $scope }) {
     reviewPanelOpen,
     setReviewPanelOpen,
     leftMenuShown,
-    setLeftMenuShown
+    setLeftMenuShown,
+    pdfLayout
   }
 
   return (

@@ -113,6 +113,8 @@ ChatProvider.propTypes = {
   children: PropTypes.any
 }
 
-export function useChatContext() {
-  return useContext(ChatContext)
+export function useChatContext(propTypes) {
+  const data = useContext(ChatContext)
+  PropTypes.checkPropTypes(propTypes, data, 'data', 'ChatContext.Provider')
+  return data
 }

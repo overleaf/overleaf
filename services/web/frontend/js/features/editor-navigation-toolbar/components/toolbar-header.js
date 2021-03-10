@@ -5,8 +5,11 @@ import CobrandingLogo from './cobranding-logo'
 import BackToProjectsButton from './back-to-projects-button'
 import ChatToggleButton from './chat-toggle-button'
 import OnlineUsersWidget from './online-users-widget'
+import ProjectNameEditableLabel from './project-name-editable-label'
 import TrackChangesToggleButton from './track-changes-toggle-button'
 import HistoryToggleButton from './history-toggle-button'
+import ShareProjectButton from './share-project-button'
+import PdfToggleButton from './pdf-toggle-button'
 
 function ToolbarHeader({
   cobranding,
@@ -20,7 +23,13 @@ function ToolbarHeader({
   unreadMessageCount,
   onlineUsers,
   goToUser,
-  isRestrictedTokenMember
+  isRestrictedTokenMember,
+  projectName,
+  renameProject,
+  openShareModal,
+  pdfViewIsOpen,
+  pdfButtonIsVisible,
+  togglePdfView
 }) {
   return (
     <header className="toolbar toolbar-header toolbar-with-labels">
@@ -29,8 +38,22 @@ function ToolbarHeader({
         {cobranding ? <CobrandingLogo {...cobranding} /> : null}
         <BackToProjectsButton />
       </div>
+      {pdfButtonIsVisible && (
+        <PdfToggleButton
+          onClick={togglePdfView}
+          pdfViewIsOpen={pdfViewIsOpen}
+        />
+      )}
+      <ProjectNameEditableLabel
+        className="toolbar-center"
+        projectName={projectName}
+        userIsAdmin
+        onChange={renameProject}
+      />
+
       <div className="toolbar-right">
         <OnlineUsersWidget onlineUsers={onlineUsers} goToUser={goToUser} />
+        <ShareProjectButton onClick={openShareModal} />
         {!isRestrictedTokenMember && (
           <>
             <TrackChangesToggleButton
@@ -66,7 +89,13 @@ ToolbarHeader.propTypes = {
   unreadMessageCount: PropTypes.number.isRequired,
   onlineUsers: PropTypes.array.isRequired,
   goToUser: PropTypes.func.isRequired,
-  isRestrictedTokenMember: PropTypes.bool
+  isRestrictedTokenMember: PropTypes.bool,
+  projectName: PropTypes.string.isRequired,
+  renameProject: PropTypes.func.isRequired,
+  openShareModal: PropTypes.func.isRequired,
+  pdfViewIsOpen: PropTypes.bool,
+  pdfButtonIsVisible: PropTypes.bool,
+  togglePdfView: PropTypes.func.isRequired
 }
 
 export default ToolbarHeader
