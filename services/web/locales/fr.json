@@ -636,7 +636,7 @@
   "if_you_are_registered": "Si vous êtes déjà inscrit·e",
   "stop_compile": "Arrêter la compilation",
   "terminated": "Compilation annulée",
-  "compile_terminated_by_user": "La compilation a été annulée avec le bouton « Arrêter la compilation ». Vous pouvez consulter les fichiers journaux pour voir où la compilation s’est arrêtée.",
+  "compile_terminated_by_user": "La compilation a été annulée avec le bouton « Arrêter la compilation ». Vous pouvez télécharger les fichiers journaux pour voir où la compilation s’est arrêtée.",
   "site_description": "Un éditeur LaTeX en ligne facile à utiliser. Pas d’installation, collaboration en temps réel, gestion des versions, des centaines de modèles de documents LaTeX, et plus encore.",
   "knowledge_base": "Base de connaissances",
   "contact_message_label": "Message",
@@ -1334,5 +1334,5 @@
   "github_is_premium": "La synchronisation GitHub est une fonctionnalité premium",
   "remote_service_error": "Le service distant a renvoyé une erreur",
   "linked_file": "Fichier importé",
-  "n_items": "__count__ éléments"
+  "n_items": "__count__ élément"
 }
