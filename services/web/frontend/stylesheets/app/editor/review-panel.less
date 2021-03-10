@@ -950,9 +950,19 @@
   }
 }
 
-.review-icon when (@is-overleaf-light = true) {
-  background: url('/img/ol-icons/review-icon-light-theme.svg') top/30px
-    no-repeat;
+a when (@is-overleaf-light = true) {
+  .review-icon {
+    background: url('/img/ol-icons/review-icon-light-theme.svg') top/30px
+      no-repeat;
+  }
+
+  &.active,
+  &:active {
+    .review-icon {
+      background: url('/img/ol-icons/review-icon-dark-theme.svg') top/30px
+        no-repeat;
+    }
+  }
 }
 
 .resolved-comments-toggle {
