@@ -8,6 +8,7 @@ const logger = require('logger-sharelatex')
 const V1Api = require('../V1/V1Api')
 const crypto = require('crypto')
 const { promisifyAll } = require('../../util/promises')
+const Analytics = require('../Analytics/AnalyticsManager')
 
 const READ_AND_WRITE_TOKEN_PATTERN = '([0-9]+[a-z]{6,12})'
 const READ_ONLY_TOKEN_PATTERN = '([a-z]{12})'
@@ -164,6 +165,7 @@ const TokenAccessHandler = {
   addReadOnlyUserToProject(userId, projectId, callback) {
     userId = ObjectId(userId.toString())
     projectId = ObjectId(projectId.toString())
+    Analytics.recordEvent(userId, 'project-joined', { mode: 'read-only' })
     Project.updateOne(
       {
         _id: projectId
@@ -178,6 +180,7 @@ const TokenAccessHandler = {
   addReadAndWriteUserToProject(userId, projectId, callback) {
     userId = ObjectId(userId.toString())
     projectId = ObjectId(projectId.toString())
+    Analytics.recordEvent(userId, 'project-joined', { mode: 'read-write' })
     Project.updateOne(
       {
         _id: projectId

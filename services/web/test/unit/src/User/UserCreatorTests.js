@@ -2,7 +2,7 @@ const SandboxedModule = require('sandboxed-module')
 const chai = require('chai')
 const sinon = require('sinon')
 
-const assert = chai.assert
+const { assert } = chai
 const modulePath = '../../../../app/src/Features/User/UserCreator.js'
 
 describe('UserCreator', function() {
@@ -47,6 +47,9 @@ describe('UserCreator', function() {
               .resolves({ n: 1, nModified: 1, ok: 1 }),
             updateUser: sinon.stub().resolves()
           }
+        }),
+        '../Analytics/AnalyticsManager': (this.Analytics = {
+          recordEvent: sinon.stub()
         })
       }
     })
@@ -260,6 +263,18 @@ describe('UserCreator', function() {
         }
         const user = await this.UserCreator.promises.createNewUser(attributes)
         assert.equal(user.emails[0].samlProviderId, '1')
+      })
+
+      it('should fire an analytics event on registration', async function() {
+        const user = await this.UserCreator.promises.createNewUser({
+          email: this.email
+        })
+        assert.equal(user.email, this.email)
+        sinon.assert.calledWith(
+          this.Analytics.recordEvent,
+          user._id,
+          'user-registered'
+        )
       })
     })
   })

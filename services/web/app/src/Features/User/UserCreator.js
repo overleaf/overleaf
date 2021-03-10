@@ -6,6 +6,7 @@ const { User } = require('../../models/User')
 const UserDeleter = require('./UserDeleter')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
+const Analytics = require('../Analytics/AnalyticsManager')
 
 async function _addAffiliation(user, affiliationOptions) {
   try {
@@ -81,6 +82,8 @@ async function createNewUser(attributes, options = {}) {
       }
     }
   }
+
+  Analytics.recordEvent(user._id, 'user-registered')
 
   return user
 }
