@@ -50,13 +50,25 @@ export default SafariScrollPatcher = class SafariScrollPatcher {
 
       // If elements aren't null, remove existing listeners.
       if (this.pdfDiv != null) {
-        this.pdfDiv.removeEventListener(this.handlePdfDivMouseLeave)
-        this.pdfDiv.removeEventListener(this.handlePdfDivMouseEnter)
+        this.pdfDiv.removeEventListener(
+          'mouseleave',
+          this.handlePdfDivMouseLeave
+        )
+        this.pdfDiv.removeEventListener(
+          'mouseenter',
+          this.handlePdfDivMouseEnter
+        )
       }
 
       if (this.aceDiv != null) {
-        this.aceDiv.removeEventListener(this.handleAceDivMouseLeave)
-        this.aceDiv.removeEventListener(this.handleAceDivMouseEnter)
+        this.aceDiv.removeEventListener(
+          'mouseleave',
+          this.handleAceDivMouseLeave
+        )
+        this.aceDiv.removeEventListener(
+          'mouseenter',
+          this.handleAceDivMouseEnter
+        )
       }
 
       // Grab elements.
