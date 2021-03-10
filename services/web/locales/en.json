@@ -168,6 +168,7 @@
   "institution_account_tried_to_add_not_affiliated": "This email is <b>already associated</b> with your account but not affiliated with this institution.",
   "institution_account_tried_to_add_affiliated_with_another_institution": "This email is <b>already associated</b> with your account but affiliated with another institution.",
   "institution_acct_successfully_linked": "Your <b>__appName__</b> account was successfully linked to your <b>__institutionName__</b> institutional account.",
+  "institution_account_tried_to_confirm_saml": "This email cannot be confirmed. Please remove the email from your account and try adding it again.",
   "institution_email_new_to_app": "Your <b>__institutionName__</b> email (<b>__email__</b>) is new to __appName__.",
   "institutional": "Institutional",
   "doing_this_allow_log_in_through_institution": "Doing this will allow you to log in to <b>__appName__</b> through your institution portal.",

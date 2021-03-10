@@ -215,7 +215,8 @@ include ../../_mixins/reconfirm_affiliation
 						|
 						| #{translate('resending_confirmation_email')}&hellip;
 					div(ng-if="!userEmail.confirmationInflight && userEmail.error" aria-live="polite")
-						| #{translate('generic_something_went_wrong')}
+						span(ng-if="userEmail.errorMessage") {{ userEmail.errorMessage }}
+						span(ng-if="!userEmail.errorMessage") #{translate('generic_something_went_wrong')}
 
 	ui.list-unstyled(ng-controller="UserAffiliationsReconfirmController")
 		li.notification-entry(
