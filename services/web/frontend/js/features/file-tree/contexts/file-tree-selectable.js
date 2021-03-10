@@ -1,8 +1,10 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useReducer,
   useEffect,
+  useMemo,
   useState
 } from 'react'
 import PropTypes from 'prop-types'
@@ -163,40 +165,54 @@ export function useSelectableEntity(id) {
 
   const isSelected = selectedEntityIds.has(id)
 
-  function selectOrMultiSelectEntity(ev) {
-    const isMultiSelect = ev.ctrlKey || ev.metaKey
-    const actionType = isMultiSelect
-      ? ACTION_TYPES.MULTI_SELECT
-      : ACTION_TYPES.SELECT
+  const selectOrMultiSelectEntity = useCallback(
+    ev => {
+      const isMultiSelect = ev.ctrlKey || ev.metaKey
+      const actionType = isMultiSelect
+        ? ACTION_TYPES.MULTI_SELECT
+        : ACTION_TYPES.SELECT
 
-    dispatch({ type: actionType, id })
-  }
+      dispatch({ type: actionType, id })
+    },
+    [dispatch, id]
+  )
 
-  function handleClick(ev) {
-    selectOrMultiSelectEntity(ev)
-  }
-
-  function handleKeyPress(ev) {
-    if (ev.key === 'Enter' || ev.key === ' ') {
+  const handleClick = useCallback(
+    ev => {
       selectOrMultiSelectEntity(ev)
-    }
-  }
+    },
+    [selectOrMultiSelectEntity]
+  )
 
-  function handleContextMenu(ev) {
-    // make sure the right-clicked entity gets selected
-    if (!selectedEntityIds.has(id)) selectOrMultiSelectEntity(ev)
-  }
+  const handleKeyPress = useCallback(
+    ev => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        selectOrMultiSelectEntity(ev)
+      }
+    },
+    [selectOrMultiSelectEntity]
+  )
 
-  return {
-    isSelected,
-    props: {
+  const handleContextMenu = useCallback(
+    ev => {
+      // make sure the right-clicked entity gets selected
+      if (!selectedEntityIds.has(id)) selectOrMultiSelectEntity(ev)
+    },
+    [id, selectOrMultiSelectEntity, selectedEntityIds]
+  )
+
+  const props = useMemo(
+    () => ({
       className: classNames({ selected: isSelected }),
       'aria-selected': isSelected,
       onClick: handleClick,
       onContextMenu: handleContextMenu,
       onKeyPress: handleKeyPress
-    }
-  }
+    }),
+    [handleClick, handleContextMenu, handleKeyPress, isSelected]
+  )
+
+  return { isSelected, props }
 }
 
 export function useFileTreeSelectable() {
@@ -204,13 +220,19 @@ export function useFileTreeSelectable() {
     FileTreeSelectableContext
   )
 
-  function select(id) {
-    dispatch({ type: ACTION_TYPES.SELECT, id })
-  }
+  const select = useCallback(
+    id => {
+      dispatch({ type: ACTION_TYPES.SELECT, id })
+    },
+    [dispatch]
+  )
 
-  function unselect(id) {
-    dispatch({ type: ACTION_TYPES.UNSELECT, id })
-  }
+  const unselect = useCallback(
+    id => {
+      dispatch({ type: ACTION_TYPES.UNSELECT, id })
+    },
+    [dispatch]
+  )
 
   return {
     selectedEntityIds,

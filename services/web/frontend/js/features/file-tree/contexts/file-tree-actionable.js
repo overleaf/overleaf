@@ -1,4 +1,9 @@
-import React, { createContext, useReducer, useContext } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useReducer,
+  useContext
+} from 'react'
 import PropTypes from 'prop-types'
 
 import { mapSeries } from '../../../infrastructure/promise'
@@ -131,47 +136,50 @@ export function useFileTreeActionable() {
   const { fileTreeData, dispatchRename, dispatchMove } = useFileTreeMutable()
   const { selectedEntityIds } = useFileTreeSelectable()
 
-  function startRenaming() {
+  const startRenaming = useCallback(() => {
     dispatch({ type: ACTION_TYPES.START_RENAME })
-  }
+  }, [dispatch])
 
   // update the entity with the new name immediately in the tree, but revert to
   // the old name if the sync fails
-  function finishRenaming(newName) {
-    const selectedEntityId = Array.from(selectedEntityIds)[0]
-    const found = findInTreeOrThrow(fileTreeData, selectedEntityId)
-    const oldName = found.entity.name
-    if (newName === oldName) {
-      return dispatch({ type: ACTION_TYPES.CLEAR })
-    }
-
-    const error = validateRename(fileTreeData, found, newName)
-    if (error) return dispatch({ type: ACTION_TYPES.ERROR, error })
-
-    dispatch({ type: ACTION_TYPES.CLEAR })
-    dispatchRename(selectedEntityId, newName)
-    return syncRename(projectId, found.type, found.entity._id, newName).catch(
-      error => {
-        dispatchRename(selectedEntityId, oldName)
-        // The state from this error action isn't used anywhere right now
-        // but we need to handle the error for linting
-        dispatch({ type: ACTION_TYPES.ERROR, error })
+  const finishRenaming = useCallback(
+    newName => {
+      const selectedEntityId = Array.from(selectedEntityIds)[0]
+      const found = findInTreeOrThrow(fileTreeData, selectedEntityId)
+      const oldName = found.entity.name
+      if (newName === oldName) {
+        return dispatch({ type: ACTION_TYPES.CLEAR })
       }
-    )
-  }
+
+      const error = validateRename(fileTreeData, found, newName)
+      if (error) return dispatch({ type: ACTION_TYPES.ERROR, error })
+
+      dispatch({ type: ACTION_TYPES.CLEAR })
+      dispatchRename(selectedEntityId, newName)
+      return syncRename(projectId, found.type, found.entity._id, newName).catch(
+        error => {
+          dispatchRename(selectedEntityId, oldName)
+          // The state from this error action isn't used anywhere right now
+          // but we need to handle the error for linting
+          dispatch({ type: ACTION_TYPES.ERROR, error })
+        }
+      )
+    },
+    [dispatch, dispatchRename, fileTreeData, projectId, selectedEntityIds]
+  )
 
   // init deletion flow (this will open the delete modal).
   // A copy of the selected entities is set as `actionedEntities` so it is kept
   // unchanged as the entities are deleted and the selection is updated
-  function startDeleting() {
+  const startDeleting = useCallback(() => {
     const actionedEntities = Array.from(selectedEntityIds).map(
       entityId => findInTreeOrThrow(fileTreeData, entityId).entity
     )
     dispatch({ type: ACTION_TYPES.START_DELETE, actionedEntities })
-  }
+  }, [dispatch, fileTreeData, selectedEntityIds])
 
   // deletes entities in serie. Tree will be updated via the socket event
-  function finishDeleting() {
+  const finishDeleting = useCallback(() => {
     dispatch({ type: ACTION_TYPES.DELETING })
 
     return mapSeries(Array.from(selectedEntityIds), id => {
@@ -192,73 +200,86 @@ export function useFileTreeActionable() {
         // set an error and allow user to retry
         dispatch({ type: ACTION_TYPES.ERROR, error })
       })
-  }
+  }, [dispatch, fileTreeData, projectId, selectedEntityIds])
 
   // moves entities. Tree is updated immediately and data are sync'd after.
-  function finishMoving(toFolderId, draggedEntityIds) {
-    dispatch({ type: ACTION_TYPES.MOVING })
+  const finishMoving = useCallback(
+    (toFolderId, draggedEntityIds) => {
+      dispatch({ type: ACTION_TYPES.MOVING })
 
-    // find entities and filter out no-ops
-    const founds = Array.from(draggedEntityIds)
-      .map(draggedEntityId => findInTreeOrThrow(fileTreeData, draggedEntityId))
-      .filter(found => found.parentFolderId !== toFolderId)
+      // find entities and filter out no-ops
+      const founds = Array.from(draggedEntityIds)
+        .map(draggedEntityId =>
+          findInTreeOrThrow(fileTreeData, draggedEntityId)
+        )
+        .filter(found => found.parentFolderId !== toFolderId)
 
-    // make sure all entities can be moved, return early otherwise
-    const isMoveToRoot = toFolderId === fileTreeData._id
-    const validationError = founds
-      .map(found => validateMove(fileTreeData, toFolderId, found, isMoveToRoot))
-      .find(error => error)
-    if (validationError) {
-      return dispatch({ type: ACTION_TYPES.ERROR, error: validationError })
-    }
+      // make sure all entities can be moved, return early otherwise
+      const isMoveToRoot = toFolderId === fileTreeData._id
+      const validationError = founds
+        .map(found =>
+          validateMove(fileTreeData, toFolderId, found, isMoveToRoot)
+        )
+        .find(error => error)
+      if (validationError) {
+        return dispatch({ type: ACTION_TYPES.ERROR, error: validationError })
+      }
 
-    // dispatch moves immediately
-    founds.forEach(found => dispatchMove(found.entity._id, toFolderId))
+      // dispatch moves immediately
+      founds.forEach(found => dispatchMove(found.entity._id, toFolderId))
 
-    // sync dispatched moves after
-    return mapSeries(founds, found =>
-      syncMove(projectId, found.type, found.entity._id, toFolderId)
-    )
-      .then(() => {
-        dispatch({ type: ACTION_TYPES.CLEAR })
-      })
-      .catch(error => {
-        dispatch({ type: ACTION_TYPES.ERROR, error })
-      })
-  }
+      // sync dispatched moves after
+      return mapSeries(founds, found =>
+        syncMove(projectId, found.type, found.entity._id, toFolderId)
+      )
+        .then(() => {
+          dispatch({ type: ACTION_TYPES.CLEAR })
+        })
+        .catch(error => {
+          dispatch({ type: ACTION_TYPES.ERROR, error })
+        })
+    },
+    [dispatch, dispatchMove, fileTreeData, projectId]
+  )
 
-  function startCreatingFolder() {
+  const startCreatingFolder = useCallback(() => {
     dispatch({ type: ACTION_TYPES.START_CREATE_FOLDER })
-  }
+  }, [dispatch])
 
-  function finishCreatingEntity(entity) {
-    const parentFolderId = getSelectedParentFolderId(
-      fileTreeData,
-      selectedEntityIds
-    )
+  const finishCreatingEntity = useCallback(
+    entity => {
+      const parentFolderId = getSelectedParentFolderId(
+        fileTreeData,
+        selectedEntityIds
+      )
 
-    // check for duplicates and throw
-    if (isNameUniqueInFolder(fileTreeData, parentFolderId, entity.name)) {
-      return syncCreateEntity(projectId, parentFolderId, entity)
-    } else {
-      return Promise.reject(new DuplicateFilenameError())
-    }
-  }
+      // check for duplicates and throw
+      if (isNameUniqueInFolder(fileTreeData, parentFolderId, entity.name)) {
+        return syncCreateEntity(projectId, parentFolderId, entity)
+      } else {
+        return Promise.reject(new DuplicateFilenameError())
+      }
+    },
+    [fileTreeData, projectId, selectedEntityIds]
+  )
 
-  function finishCreatingFolder(name) {
-    dispatch({ type: ACTION_TYPES.CREATING_FOLDER })
-    return finishCreatingEntity({ endpoint: 'folder', name })
-      .then(() => {
-        dispatch({ type: ACTION_TYPES.CLEAR })
-      })
-      .catch(error => {
-        dispatch({ type: ACTION_TYPES.ERROR, error })
-      })
-  }
+  const finishCreatingFolder = useCallback(
+    name => {
+      dispatch({ type: ACTION_TYPES.CREATING_FOLDER })
+      return finishCreatingEntity({ endpoint: 'folder', name })
+        .then(() => {
+          dispatch({ type: ACTION_TYPES.CLEAR })
+        })
+        .catch(error => {
+          dispatch({ type: ACTION_TYPES.ERROR, error })
+        })
+    },
+    [dispatch, finishCreatingEntity]
+  )
 
   // bypass React file tree entirely; requesting the Angular new doc or file
   // modal instead
-  function startCreatingDocOrFile() {
+  const startCreatingDocOrFile = useCallback(() => {
     const parentFolderId = getSelectedParentFolderId(
       fileTreeData,
       selectedEntityIds
@@ -271,9 +292,9 @@ export function useFileTreeActionable() {
         }
       })
     )
-  }
+  }, [fileTreeData, selectedEntityIds])
 
-  function startUploadingDocOrFile() {
+  const startUploadingDocOrFile = useCallback(() => {
     const parentFolderId = getSelectedParentFolderId(
       fileTreeData,
       selectedEntityIds
@@ -287,47 +308,55 @@ export function useFileTreeActionable() {
         }
       })
     )
-  }
+  }, [fileTreeData, selectedEntityIds])
 
-  function finishCreatingDocOrFile(entity) {
-    return finishCreatingEntity(entity)
-      .then(() => {
-        // dispatch FileTreeReactBridge event to update the Angular modal
-        window.dispatchEvent(
-          new CustomEvent('FileTreeReactBridge.openNewFileModal', {
-            detail: {
-              done: true
-            }
-          })
-        )
-      })
-      .catch(error => {
-        // dispatch FileTreeReactBridge event to update the Angular modal with
-        // an error
-        window.dispatchEvent(
-          new CustomEvent('FileTreeReactBridge.openNewFileModal', {
-            detail: {
-              error: true,
-              data: error.message
-            }
-          })
-        )
-      })
-  }
+  const finishCreatingDocOrFile = useCallback(
+    entity =>
+      finishCreatingEntity(entity)
+        .then(() => {
+          // dispatch FileTreeReactBridge event to update the Angular modal
+          window.dispatchEvent(
+            new CustomEvent('FileTreeReactBridge.openNewFileModal', {
+              detail: {
+                done: true
+              }
+            })
+          )
+        })
+        .catch(error => {
+          // dispatch FileTreeReactBridge event to update the Angular modal with
+          // an error
+          window.dispatchEvent(
+            new CustomEvent('FileTreeReactBridge.openNewFileModal', {
+              detail: {
+                error: true,
+                data: error.message
+              }
+            })
+          )
+        }),
+    [finishCreatingEntity]
+  )
 
-  function finishCreatingDoc(entity) {
-    entity.endpoint = 'doc'
-    return finishCreatingDocOrFile(entity)
-  }
+  const finishCreatingDoc = useCallback(
+    entity => {
+      entity.endpoint = 'doc'
+      return finishCreatingDocOrFile(entity)
+    },
+    [finishCreatingDocOrFile]
+  )
 
-  function finishCreatingLinkedFile(entity) {
-    entity.endpoint = 'linked_file'
-    return finishCreatingDocOrFile(entity)
-  }
+  const finishCreatingLinkedFile = useCallback(
+    entity => {
+      entity.endpoint = 'linked_file'
+      return finishCreatingDocOrFile(entity)
+    },
+    [finishCreatingDocOrFile]
+  )
 
-  function cancel() {
+  const cancel = useCallback(() => {
     dispatch({ type: ACTION_TYPES.CANCEL })
-  }
+  }, [dispatch])
 
   return {
     canDelete: selectedEntityIds.size > 0,

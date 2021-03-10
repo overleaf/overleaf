@@ -25,17 +25,17 @@ function FileTreeContext({
       projectId={projectId}
       hasWritePermissions={hasWritePermissions}
     >
-      <FileTreeActionableProvider hasWritePermissions={hasWritePermissions}>
-        <FileTreeMutableProvider rootFolder={rootFolder}>
-          <FileTreeSelectableProvider
-            hasWritePermissions={hasWritePermissions}
-            rootDocId={rootDocId}
-            onSelect={onSelect}
-          >
+      <FileTreeMutableProvider rootFolder={rootFolder}>
+        <FileTreeSelectableProvider
+          hasWritePermissions={hasWritePermissions}
+          rootDocId={rootDocId}
+          onSelect={onSelect}
+        >
+          <FileTreeActionableProvider hasWritePermissions={hasWritePermissions}>
             <FileTreeDraggableProvider>{children}</FileTreeDraggableProvider>
-          </FileTreeSelectableProvider>
-        </FileTreeMutableProvider>
-      </FileTreeActionableProvider>
+          </FileTreeActionableProvider>
+        </FileTreeSelectableProvider>
+      </FileTreeMutableProvider>
     </FileTreeMainProvider>
   )
 }

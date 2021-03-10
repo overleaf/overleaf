@@ -1,4 +1,9 @@
-import React, { createContext, useReducer, useContext } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useReducer,
+  useContext
+} from 'react'
 import PropTypes from 'prop-types'
 
 import {
@@ -73,48 +78,66 @@ FileTreeMutableProvider.propTypes = {
 export function useFileTreeMutable() {
   const { fileTreeData, dispatch } = useContext(FileTreeMutableContext)
 
-  function dispatchCreateFolder(parentFolderId, entity) {
-    entity.type = 'folder'
-    dispatch({
-      type: ACTION_TYPES.CREATE_ENTITY,
-      parentFolderId,
-      entity
-    })
-  }
+  const dispatchCreateFolder = useCallback(
+    (parentFolderId, entity) => {
+      entity.type = 'folder'
+      dispatch({
+        type: ACTION_TYPES.CREATE_ENTITY,
+        parentFolderId,
+        entity
+      })
+    },
+    [dispatch]
+  )
 
-  function dispatchCreateDoc(parentFolderId, entity) {
-    entity.type = 'doc'
-    dispatch({
-      type: ACTION_TYPES.CREATE_ENTITY,
-      parentFolderId,
-      entity
-    })
-  }
+  const dispatchCreateDoc = useCallback(
+    (parentFolderId, entity) => {
+      entity.type = 'doc'
+      dispatch({
+        type: ACTION_TYPES.CREATE_ENTITY,
+        parentFolderId,
+        entity
+      })
+    },
+    [dispatch]
+  )
 
-  function dispatchCreateFile(parentFolderId, entity) {
-    entity.type = 'fileRef'
-    dispatch({
-      type: ACTION_TYPES.CREATE_ENTITY,
-      parentFolderId,
-      entity
-    })
-  }
+  const dispatchCreateFile = useCallback(
+    (parentFolderId, entity) => {
+      entity.type = 'fileRef'
+      dispatch({
+        type: ACTION_TYPES.CREATE_ENTITY,
+        parentFolderId,
+        entity
+      })
+    },
+    [dispatch]
+  )
 
-  function dispatchRename(id, newName) {
-    dispatch({
-      type: ACTION_TYPES.RENAME,
-      newName,
-      id
-    })
-  }
+  const dispatchRename = useCallback(
+    (id, newName) => {
+      dispatch({
+        type: ACTION_TYPES.RENAME,
+        newName,
+        id
+      })
+    },
+    [dispatch]
+  )
 
-  function dispatchDelete(id) {
-    dispatch({ type: ACTION_TYPES.DELETE, id })
-  }
+  const dispatchDelete = useCallback(
+    id => {
+      dispatch({ type: ACTION_TYPES.DELETE, id })
+    },
+    [dispatch]
+  )
 
-  function dispatchMove(entityId, toFolderId) {
-    dispatch({ type: ACTION_TYPES.MOVE, entityId, toFolderId })
-  }
+  const dispatchMove = useCallback(
+    (entityId, toFolderId) => {
+      dispatch({ type: ACTION_TYPES.MOVE, entityId, toFolderId })
+    },
+    [dispatch]
+  )
 
   return {
     fileTreeData,
