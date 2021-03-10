@@ -5,7 +5,7 @@ A web api for compiling LaTeX documents in the cloud
 
 The Common LaTeX Service Interface (CLSI) provides a RESTful interface to traditional LaTeX tools (or, more generally, any command line tool for composing marked-up documents into a display format such as PDF or HTML). The CLSI listens on the following ports by default:
 
-* TCP/3009 - the RESTful interface
+* TCP/3013 - the RESTful interface
 * TCP/3048 - reports load information
 * TCP/3049 - HTTP interface to control the CLSI service
 
@@ -33,25 +33,41 @@ Installation
 The CLSI can be installed and set up as part of the entire [Overleaf stack](https://github.com/overleaf/overleaf) (complete with front end editor and document storage), or it can be run as a standalone service. To run is as a standalone service, first checkout this repository:
 
     $ git clone git@github.com:overleaf/clsi.git
-    
+
 Then install the require npm modules:
 
     $ npm install
-    
-Then compile the coffee script source files:
 
-    $ grunt install
-    
-Finally, (after configuring your local database - see the Config section), run the CLSI service:
+Then build the Docker image:
 
-    $ grunt run
-    
-The CLSI should then be running at http://localhost:3013.
-    
+    $ docker build . -t overleaf/clsi
+
+Then pull the TeXLive image:
+
+    $ docker pull texlive/texlive
+
+Then start the Docker container:
+
+    $ docker run --rm \
+        -p 127.0.0.1:3013:3013 \
+        -e LISTEN_ADDRESS=0.0.0.0 \
+        -e DOCKER_RUNNER=true \
+        -e TEXLIVE_IMAGE=texlive/texlive \
+        -e TEXLIVE_IMAGE_USER=root \
+        -e COMPILES_HOST_DIR="$PWD/compiles" \
+        -v "$PWD/compiles:/app/compiles" \
+        -v "$PWD/cache:/app/cache" \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        overleaf/clsi
+
+Note: if you're running the CLSI in macOS you may need to use `-v /var/run/docker.sock.raw:/var/run/docker.sock` instead.
+
+The CLSI should then be running at <http://localhost:3013>
+
 Config
 ------
 
-You will need to set up a database in mysql to use with the CLSI, and then fill in the database name, username and password in the config file at `config/settings.development.coffee`.
+The CLSI will use a SQLite database by default, but you can optionally set up a MySQL database and then fill in the database name, username and password in the config file at `config/settings.development.coffee`.
 
 API
 ---
@@ -64,35 +80,38 @@ The CLSI is based on a JSON API.
 
     POST /project/<project-id>/compile
 
-```javascript
+```json5
 {
     "compile": {
         "options": {
             // Which compiler to use. Can be latex, pdflatex, xelatex or lualatex
             "compiler": "lualatex",
             // How many seconds to wait before killing the process. Default is 60.
-            "timeout": 40 
+            "timeout": 40
         },
         // The main file to run LaTeX on
-        "rootResourcePath": "main.tex", 
+        "rootResourcePath": "main.tex",
         // An array of files to include in the compilation. May have either the content
         // passed directly, or a URL where it can be downloaded.
-        "resources": [{
+        "resources": [
+          {
             "path": "main.tex",
             "content": "\\documentclass{article}\n\\begin{document}\nHello World\n\\end{document}"
-        }, {
-            "path": "image.png",
-            "url": "www.example.com/image.png",
-            "modified": 123456789 // Unix time since epoch
-        }]
+          }
+          // ,{
+          //     "path": "image.png",
+          //     "url": "www.example.com/image.png",
+          //     "modified": 123456789 // Unix time since epoch
+          // }
+        ]
     }
 }
 ```
 
-With `curl`, if you place the above json in a file called `data.json`, the request would look like this:
+With `curl`, if you place the above JSON in a file called `data.json`, the request would look like this:
 
 ``` shell
-$ curl -X POST -d @data.json localhost:3013/project/<id>/compile
+$ curl -X POST -H 'Content-Type: application/json' -d @data.json http://localhost:3013/project/<id>/compile
 ```
 
 You can specify any project-id in the URL, and the files and LaTeX environment will be persisted between requests.
@@ -100,7 +119,7 @@ URLs will be downloaded and cached until provided with a more recent modified da
 
 #### Example Response
 
-```javascript
+```json
 {
     "compile": {
         "status": "success",
@@ -120,4 +139,4 @@ License
 
 The code in this repository is released under the GNU AFFERO GENERAL PUBLIC LICENSE, version 3. A copy can be found in the `LICENSE` file.
 
-Copyright (c) Overleaf, 2014-2019.
+Copyright (c) Overleaf, 2014-2021.
