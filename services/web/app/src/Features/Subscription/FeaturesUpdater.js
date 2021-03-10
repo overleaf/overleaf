@@ -23,21 +23,25 @@ const FeaturesUpdater = {
           return callback(error)
         }
         logger.log({ userId, features }, 'updating user features')
-        UserFeaturesUpdater.updateFeatures(userId, features, err => {
-          if (err) {
-            return callback(err)
+        UserFeaturesUpdater.updateFeatures(
+          userId,
+          features,
+          (err, newFeatures, featuresChanged) => {
+            if (err) {
+              return callback(err)
+            }
+            if (oldFeatures.dropbox === true && features.dropbox === false) {
+              logger.log({ userId }, '[FeaturesUpdater] must unlink dropbox')
+              const Modules = require('../../infrastructure/Modules')
+              Modules.hooks.fire('removeDropbox', userId, err => {
+                if (err) {
+                  logger.error(err)
+                }
+              })
+            }
+            return callback(null, newFeatures, featuresChanged)
           }
-          if (oldFeatures.dropbox === true && features.dropbox === false) {
-            logger.log({ userId }, '[FeaturesUpdater] must unlink dropbox')
-            const Modules = require('../../infrastructure/Modules')
-            Modules.hooks.fire('removeDropbox', userId, err => {
-              if (err) {
-                logger.error(err)
-              }
-            })
-          }
-          return callback()
-        })
+        )
       })
     })
   },

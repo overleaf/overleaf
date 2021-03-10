@@ -1,4 +1,5 @@
 const { waitForDb } = require('../app/src/infrastructure/mongodb')
+const minimist = require('minimist')
 const InstitutionsManager = require('../app/src/Features/Institutions/InstitutionsManager')
 
 const institutionId = parseInt(process.argv[2])
@@ -13,7 +14,19 @@ waitForDb()
   })
 
 function main() {
-  InstitutionsManager.upgradeInstitutionUsers(institutionId, function(error) {
+  const argv = minimist(process.argv.slice(2))
+  if (!argv.notify) {
+    throw new Error('Missing `notify` flag. Please use `--notify true|false`')
+  }
+  if (!argv.notify[0]) {
+    throw new Error('Empty `notify` flag. Please use `--notify true|false`')
+  }
+  const notify = argv.notify[0] === 't'
+  console.log('Running with notify =', notify)
+
+  InstitutionsManager.refreshInstitutionUsers(institutionId, notify, function(
+    error
+  ) {
     if (error) {
       console.log(error)
     } else {

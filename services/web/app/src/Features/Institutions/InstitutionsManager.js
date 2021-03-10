@@ -13,7 +13,8 @@ const OError = require('@overleaf/o-error')
 
 const ASYNC_LIMIT = parseInt(process.env.ASYNC_LIMIT, 10) || 5
 module.exports = {
-  upgradeInstitutionUsers(institutionId, callback) {
+  refreshInstitutionUsers(institutionId, notify, callback) {
+    const refreshFunction = notify ? refreshFeaturesAndNotify : refreshFeatures
     async.waterfall(
       [
         cb => fetchInstitutionAndAffiliations(institutionId, cb),
@@ -23,7 +24,7 @@ module.exports = {
             affiliation.institutionId = institutionId
             return affiliation
           })
-          async.eachLimit(affiliations, ASYNC_LIMIT, refreshFeatures, err =>
+          async.eachLimit(affiliations, ASYNC_LIMIT, refreshFunction, err =>
             cb(err)
           )
         }
@@ -84,6 +85,11 @@ var fetchInstitutionAndAffiliations = (institutionId, callback) =>
   )
 
 var refreshFeatures = function(affiliation, callback) {
+  const userId = ObjectId(affiliation.user_id)
+  FeaturesUpdater.refreshFeatures(userId, callback)
+}
+
+var refreshFeaturesAndNotify = function(affiliation, callback) {
   const userId = ObjectId(affiliation.user_id)
   async.waterfall(
     [

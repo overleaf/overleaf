@@ -38,7 +38,9 @@ describe('FeaturesUpdater', function() {
         _id: this.user_id,
         features: {}
       }
-      this.UserFeaturesUpdater.updateFeatures = sinon.stub().yields()
+      this.UserFeaturesUpdater.updateFeatures = sinon
+        .stub()
+        .yields(null, { some: 'features' }, true)
       this.FeaturesUpdater._getIndividualFeatures = sinon
         .stub()
         .yields(null, { individual: 'features' })
@@ -60,6 +62,18 @@ describe('FeaturesUpdater', function() {
       this.UserGetter.getUser = sinon.stub().yields(null, this.user)
       this.callback = sinon.stub()
     })
+
+    it('should return features and featuresChanged', function() {
+      this.FeaturesUpdater.refreshFeatures(
+        this.user_id,
+        (err, features, featuresChanged) => {
+          expect(err).to.not.exist
+          expect(features).to.exist
+          expect(featuresChanged).to.exist
+        }
+      )
+    })
+
     describe('normally', function() {
       beforeEach(function() {
         this.FeaturesUpdater.refreshFeatures(this.user_id, this.callback)
