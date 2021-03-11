@@ -9,7 +9,7 @@ The Common LaTeX Service Interface (CLSI) provides a RESTful interface to tradit
 * TCP/3048 - reports load information
 * TCP/3049 - HTTP interface to control the CLSI service
 
-These defaults can be modified in `config/settings.defaults.coffee`.
+These defaults can be modified in `config/settings.defaults.js`.
 
 The provided `Dockerfile` builds a docker image which has the docker command line tools installed. The configuration in `docker-compose-config.yml` mounts the docker socket, in order that the CLSI container can talk to the docker host it is running in. This allows it to spin up `sibling containers` running an image with a TeX distribution installed to perform the actual compiles.
 
@@ -63,7 +63,7 @@ The CLSI should then be running at <http://localhost:3013>
 Config
 ------
 
-The CLSI will use a SQLite database by default, but you can optionally set up a MySQL database and then fill in the database name, username and password in the config file at `config/settings.development.coffee`.
+The CLSI will use a SQLite database by default, but you can optionally set up a MySQL database and then fill in the database name, username and password in the config file at `config/settings.development.js`.
 
 API
 ---
