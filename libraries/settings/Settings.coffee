@@ -31,6 +31,7 @@ else
 
 for file in possibleConfigFiles
 	if fs.existsSync(file)
+		console.log "Using settings from " + file
 		module.exports = merge(require(file), defaults)
 		settingsExist = true
 		break
