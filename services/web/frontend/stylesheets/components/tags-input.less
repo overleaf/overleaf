@@ -1,92 +1,106 @@
-tags-input {
+.tags-input {
   display: block;
 }
-tags-input *,
-tags-input *:before,
-tags-input *:after {
+.tags-input *,
+.tags-input *:before,
+.tags-input *:after {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
-tags-input .host {
+.tags-input label.small {
+  font-weight: normal;
+}
+.tags-input .host {
   position: relative;
   height: 100%;
 }
-tags-input .host:active {
+.tags-input .host:active {
   outline: none;
 }
 
-tags-input .tags {
+.tags-input .tags {
   .form-control;
+  border-radius: 3px; /* overriding .form-control */
   -moz-appearance: textfield;
   -webkit-appearance: textfield;
-  padding: 2px 5px;
+  padding: 3px;
   overflow: hidden;
   word-wrap: break-word;
   cursor: text;
   background-color: #fff;
   height: 100%;
+  display: flex;
+  flex-wrap: wrap;
 }
-tags-input .tags.focused {
+.tags-input .tags.focused,
+.tags-input .tags:focus-within {
   outline: none;
   -webkit-box-shadow: 0 0 3px 1px rgba(5, 139, 242, 0.6);
   -moz-box-shadow: 0 0 3px 1px rgba(5, 139, 242, 0.6);
   box-shadow: 0 0 3px 1px rgba(5, 139, 242, 0.6);
 }
-tags-input .tags .tag-list {
+.tags-input .tags .tag-list {
   margin: 0;
   padding: 0;
   list-style-type: none;
 }
-tags-input .tags .tag-item {
+.tags-input .tags .tag-item {
   margin: 2px;
-  padding: 0 7px;
-  display: inline-block;
-  float: left;
-  height: 26px;
-  line-height: 25px;
+  padding: 2px 7px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border: 1px solid @gray-light;
   background-color: @gray-lightest;
   border-radius: 3px;
 }
-tags-input .tags .tag-item.selected {
+.tags-input .tags .tag-item.selected {
   background-color: @gray-lighter;
 }
-tags-input .tags .tag-item .remove-button {
+.tags-input .tags .tag-item .fa {
+  flex-shrink: 0;
+}
+.tags-input .tags .tag-item .remove-button {
   color: @gray-light;
   text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
 }
-tags-input .tags .tag-item .remove-button:active {
+.tags-input .tags .tag-item .remove-button:active {
   color: @brand-primary;
 }
-tags-input .tags .input {
+.tags-input .tags .input {
   border: 0;
   outline: none;
   margin: 2px;
   padding: 0;
   padding-left: 5px;
-  float: left;
-  height: 26px;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-tags-input .tags .input.invalid-tag {
+.tags-input .tags .input.invalid-tag {
   color: @brand-danger;
 }
-tags-input .tags .input::-ms-clear {
+.tags-input .tags .input::-ms-clear {
   display: none;
 }
-tags-input.ng-invalid .tags {
+.tags-input.ng-invalid .tags {
   -webkit-box-shadow: 0 0 3px 1px rgba(255, 0, 0, 0.6);
   -moz-box-shadow: 0 0 3px 1px rgba(255, 0, 0, 0.6);
   box-shadow: 0 0 3px 1px rgba(255, 0, 0, 0.6);
 }
-tags-input[disabled] .host:focus {
+.tags-input[disabled] .host:focus {
   outline: none;
 }
-tags-input[disabled] .tags {
+.tags-input[disabled] .tags {
   background-color: #eee;
   cursor: default;
 }
-tags-input[disabled] .tags .tag-item {
+.tags-input[disabled] .tags .tag-item {
   opacity: 0.65;
   background: -webkit-linear-gradient(
     top,
@@ -101,18 +115,18 @@ tags-input[disabled] .tags .tag-item {
     rgba(161, 219, 255, 0.62) 100%
   );
 }
-tags-input[disabled] .tags .tag-item .remove-button {
+.tags-input[disabled] .tags .tag-item .remove-button {
   cursor: default;
 }
-tags-input[disabled] .tags .tag-item .remove-button:active {
+.tags-input[disabled] .tags .tag-item .remove-button:active {
   color: @brand-primary;
 }
-tags-input[disabled] .tags .input {
+.tags-input[disabled] .tags .input {
   background-color: #eee;
   cursor: default;
 }
 
-tags-input .autocomplete {
+.tags-input .autocomplete {
   margin-top: 5px;
   position: absolute;
   padding: 5px 0;
@@ -124,7 +138,7 @@ tags-input .autocomplete {
   -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
-tags-input .autocomplete .suggestion-list {
+.tags-input .autocomplete .suggestion-list {
   margin: 0;
   padding: 0;
   list-style-type: none;
@@ -132,21 +146,21 @@ tags-input .autocomplete .suggestion-list {
   overflow-y: auto;
   position: relative;
 }
-tags-input .autocomplete .suggestion-item {
+.tags-input .autocomplete .suggestion-item {
   padding: 5px 10px;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-tags-input .autocomplete .suggestion-item.selected {
+.tags-input .autocomplete .suggestion-item.selected {
   color: white;
   background-color: @brand-primary;
   .subdued {
     color: white;
   }
 }
-tags-input .autocomplete .suggestion-item em {
+.tags-input .autocomplete .suggestion-item em {
   font-weight: bold;
   font-style: normal;
 }

@@ -6,6 +6,18 @@
     font-size: 1rem;
   }
 
+  .project-member.form-group {
+    margin-bottom: 0;
+  }
+
+  .project-member .form-control-static.text-center {
+    padding-top: 0;
+  }
+
+  .project-member .remove-button {
+    font-size: inherit;
+  }
+
   .project-member,
   .project-invite,
   .public-access-level {
@@ -27,6 +39,9 @@
           background-color: @gray-lightest;
           border: 1px solid @gray-lighter;
           padding: 6px 12px 6px 12px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
         }
       }
     }
@@ -49,6 +64,7 @@
   .invite-controls {
     .small {
       padding: 2px;
+      margin-bottom: 0;
     }
     padding: @line-height-computed / 2;
     background-color: @gray-lightest;
@@ -67,6 +83,25 @@
         font-size: 14px;
       }
     }
+    .add-collaborators-upgrade {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  .rbt-menu > .dropdown-item {
+    display: block;
+    padding: 0.25rem 1rem;
+    color: #212529;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:hover {
+      text-decoration: none;
+      background-color: @gray-lightest;
+    }
   }
 }
 .modal-footer-share {
@@ -74,4 +109,8 @@
     max-width: 70%;
     text-align: left;
   }
+}
+
+.copy-button:focus-within {
+  outline: none;
 }

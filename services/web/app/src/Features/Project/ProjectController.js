@@ -744,6 +744,9 @@ const ProjectController = {
         )
         const wantsOldFileTreeUI =
           req.query && req.query.new_file_tree_ui === 'false'
+        const wantsNewShareModalUI =
+          req.query && req.query.new_share_modal_ui === 'true'
+
         AuthorizationManager.getPrivilegeLevelForProject(
           userId,
           projectId,
@@ -857,7 +860,8 @@ const ProjectController = {
               showNewLogsUI: userShouldSeeNewLogsUI && !wantsOldLogsUI,
               showNewNavigationUI:
                 req.query && req.query.new_navigation_ui === 'true',
-              showReactFileTree: !wantsOldFileTreeUI
+              showReactFileTree: !wantsOldFileTreeUI,
+              showReactShareModal: wantsNewShareModalUI
             })
             timer.done()
           }

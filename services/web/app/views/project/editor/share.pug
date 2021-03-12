@@ -142,6 +142,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						.small #{translate("share_with_your_collabs")}
 						.form-group
 							tags-input(
+								class="tags-input"
 								template="shareTagTemplate"
 								placeholder=settings.customisation.shareProjectPlaceholder || 'joe@example.com, sue@example.com, …'
 								ng-model="inputs.contacts"
