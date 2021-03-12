@@ -21,8 +21,7 @@ describe('HttpController', function () {
   beforeEach(function () {
     this.HttpController = SandboxedModule.require(modulePath, {
       requires: {
-        './ContactManager': (this.ContactManager = {}),
-        'logger-sharelatex': (this.logger = { log: sinon.stub() })
+        './ContactManager': (this.ContactManager = {})
       }
     })
     this.user_id = 'mock-user-id'
