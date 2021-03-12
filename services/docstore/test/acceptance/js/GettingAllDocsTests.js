@@ -12,8 +12,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-chai.should()
 const { ObjectId } = require('mongodb')
 const async = require('async')
 const DocstoreApp = require('./helpers/DocstoreApp')

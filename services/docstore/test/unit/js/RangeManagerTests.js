@@ -12,14 +12,12 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
-const { expect } = require('chai')
+const { assert, expect } = require('chai')
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/RangeManager'
 )
 const { ObjectId } = require('mongodb')
-const { assert } = require('chai')
 const _ = require('underscore')
 
 describe('RangeManager', function () {

@@ -11,7 +11,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/MongoManager'
@@ -28,11 +27,7 @@ describe('MongoManager', function () {
           ObjectId
         },
         '@overleaf/metrics': { timeAsyncMethod: sinon.stub() },
-        'logger-sharelatex': { log() {} },
         'settings-sharelatex': { max_deleted_docs: 42 }
-      },
-      globals: {
-        console
       }
     })
     this.project_id = ObjectId().toString()
