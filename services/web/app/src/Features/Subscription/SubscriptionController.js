@@ -121,21 +121,17 @@ module.exports = SubscriptionController = {
                   }
                   return res.render('subscriptions/new', {
                     title: 'subscribe',
-                    plan_code: req.query.planCode,
                     currency,
                     countryCode,
                     plan,
-                    showStudentPlan: req.query.ssp,
+                    showStudentPlan: req.query.ssp === 'true',
                     recurlyConfig: JSON.stringify({
                       currency,
                       subdomain: Settings.apis.recurly.subdomain
                     }),
-                    showCouponField: req.query.scf,
-                    showVatField: req.query.svf,
-                    couponCode: req.query.cc || '',
-                    gaOptimize: true,
-                    ITMCampaign: req.query.itm_campaign,
-                    ITMContent: req.query.itm_content
+                    showCouponField: !!req.query.scf,
+                    showVatField: !!req.query.svf,
+                    gaOptimize: true
                   })
                 }
               )

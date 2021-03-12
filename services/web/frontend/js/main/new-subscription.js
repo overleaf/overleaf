@@ -11,8 +11,14 @@ export default App.controller('NewSubscriptionController', function(
   $scope,
   MultiCurrencyPricing,
   $http,
+  $location,
   eventTracking
 ) {
+  window.couponCode = $location.search().cc || ''
+  window.plan_code = $location.search().planCode || ''
+  window.ITMCampaign = $location.search().itm_campaign || ''
+  window.ITMContent = $location.search().itm_content || ''
+
   if (typeof recurly === 'undefined' || !recurly) {
     $scope.recurlyLoadError = true
     return
