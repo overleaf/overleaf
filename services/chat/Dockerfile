@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
 
-FROM node:10.23.1 as base
+FROM node:12.21.0 as base
 
 WORKDIR /app
 
