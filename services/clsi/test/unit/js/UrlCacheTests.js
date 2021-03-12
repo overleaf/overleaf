@@ -12,7 +12,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(__dirname, '../../../app/js/UrlCache')
 const { EventEmitter } = require('events')
 
@@ -25,7 +24,6 @@ describe('UrlCache', function () {
       requires: {
         './db': {},
         './UrlFetcher': (this.UrlFetcher = {}),
-        'logger-sharelatex': (this.logger = { log: sinon.stub() }),
         'settings-sharelatex': (this.Settings = {
           path: { clsiCacheDir: '/cache/dir' }
         }),

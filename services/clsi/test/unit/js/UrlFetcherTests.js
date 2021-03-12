@@ -11,7 +11,6 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-require('chai').should()
 const modulePath = require('path').join(__dirname, '../../../app/js/UrlFetcher')
 const { EventEmitter } = require('events')
 
@@ -25,10 +24,6 @@ describe('UrlFetcher', function () {
           defaults: (this.defaults = sinon.stub().returns((this.request = {})))
         },
         fs: (this.fs = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub()
-        }),
         'settings-sharelatex': (this.settings = {})
       }
     }))

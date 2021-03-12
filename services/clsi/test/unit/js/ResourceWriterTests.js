@@ -13,7 +13,6 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const should = require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/ResourceWriter'
@@ -34,7 +33,6 @@ describe('ResourceWriter', function () {
         wrench: (this.wrench = {}),
         './UrlCache': (this.UrlCache = {}),
         './OutputFileFinder': (this.OutputFileFinder = {}),
-        'logger-sharelatex': { log: sinon.stub(), err: sinon.stub() },
         './Metrics': (this.Metrics = {
           inc: sinon.stub(),
           Timer: (Timer = (function () {
@@ -407,7 +405,7 @@ describe('ResourceWriter', function () {
       })
 
       return it('should not return an error if the resource writer errored', function () {
-        return should.not.exist(this.callback.args[0][0])
+        return expect(this.callback.args[0][0]).not.to.exist
       })
     })
 

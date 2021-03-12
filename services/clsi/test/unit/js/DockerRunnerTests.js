@@ -15,7 +15,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const { expect } = require('chai')
 const modulePath = require('path').join(
   __dirname,
@@ -32,12 +31,6 @@ describe('DockerRunner', function () {
         'settings-sharelatex': (this.Settings = {
           clsi: { docker: {} },
           path: {}
-        }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          info: sinon.stub(),
-          warn: sinon.stub()
         }),
         dockerode: (Docker = (function () {
           Docker = class Docker {
