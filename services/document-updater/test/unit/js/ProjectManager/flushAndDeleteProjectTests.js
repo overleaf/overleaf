@@ -13,8 +13,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../../app/js/ProjectManager.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -26,10 +24,6 @@ describe('ProjectManager - flushAndDeleteProject', function () {
         './RedisManager': (this.RedisManager = {}),
         './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
         './DocumentManager': (this.DocumentManager = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub()
-        }),
         './HistoryManager': (this.HistoryManager = {
           flushProjectChanges: sinon.stub().callsArg(2)
         }),

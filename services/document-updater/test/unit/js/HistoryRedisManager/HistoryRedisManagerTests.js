@@ -12,8 +12,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../../app/js/HistoryRedisManager.js'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors')
@@ -41,8 +39,7 @@ describe('HistoryRedisManager', function () {
               }
             })
           }
-        },
-        'logger-sharelatex': { log() {} }
+        }
       }
     })
     this.doc_id = 'doc-id-123'
