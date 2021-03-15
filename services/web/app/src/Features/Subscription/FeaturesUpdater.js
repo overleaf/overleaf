@@ -63,6 +63,9 @@ const FeaturesUpdater = {
       bonusFeatures(cb) {
         ReferalFeatures.getBonusFeatures(userId, cb)
       },
+      samlFeatures(cb) {
+        FeaturesUpdater._getSamlFeatures(userId, cb)
+      },
       featuresOverrides(cb) {
         FeaturesUpdater._getFeaturesOverrides(userId, cb)
       }
@@ -85,6 +88,7 @@ const FeaturesUpdater = {
         institutionFeatures,
         v1Features,
         bonusFeatures,
+        samlFeatures,
         featuresOverrides
       } = results
       logger.log(
@@ -95,6 +99,7 @@ const FeaturesUpdater = {
           institutionFeatures,
           v1Features,
           bonusFeatures,
+          samlFeatures,
           featuresOverrides
         },
         'merging user features'
@@ -104,6 +109,7 @@ const FeaturesUpdater = {
         institutionFeatures,
         v1Features,
         bonusFeatures,
+        samlFeatures,
         featuresOverrides
       ])
       const features = _.reduce(
@@ -125,6 +131,30 @@ const FeaturesUpdater = {
     SubscriptionLocator.getGroupSubscriptionsMemberOf(userId, (err, subs) =>
       callback(err, (subs || []).map(FeaturesUpdater._subscriptionToFeatures))
     )
+  },
+
+  _getSamlFeatures(userId, callback) {
+    UserGetter.getUser(userId, (err, user) => {
+      if (err) {
+        return callback(err)
+      }
+      if (
+        !user ||
+        !Array.isArray(user.samlIdentifiers) ||
+        !user.samlIdentifiers.length
+      ) {
+        return callback(null, {})
+      }
+      for (const samlIdentifier of user.samlIdentifiers) {
+        if (samlIdentifier && samlIdentifier.hasEntitlement) {
+          return callback(
+            null,
+            FeaturesUpdater._planCodeToFeatures('professional')
+          )
+        }
+      }
+      callback(null, {})
+    })
   },
 
   _getFeaturesOverrides(userId, callback) {

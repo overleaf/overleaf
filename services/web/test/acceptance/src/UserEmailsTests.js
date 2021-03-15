@@ -1025,12 +1025,11 @@ describe('UserEmails', function() {
         password: userHelper.getDefaultPassword()
       })
       const institutionId = MockV1Api.createInstitution({
-        commonsAccount: true,
         ssoEnabled: false,
         maxConfirmationMonths
       })
       const domain = 'example-affiliation.com'
-      MockV1Api.addInstitutionDomain(institutionId, domain, { confirmed: true })
+      MockV1Api.addInstitutionDomain(institutionId, domain)
 
       email1 = `leonard@${domain}`
       email2 = `mccoy@${domain}`
@@ -1054,37 +1053,24 @@ describe('UserEmails', function() {
         )
       })
 
-      describe('when all affiliations in notification period or past reconfirm date', function() {
-        it('should flag inReconfirmNotificationPeriod for all affiliations in period', async function() {
-          const response = await userHelper.request.get('/user/emails')
-          expect(response.statusCode).to.equal(200)
-          const fullEmails = JSON.parse(response.body)
-          expect(fullEmails.length).to.equal(4)
-          expect(fullEmails[0].affiliation).to.not.exist
-          expect(
-            fullEmails[1].affiliation.inReconfirmNotificationPeriod
-          ).to.equal(true)
-          expect(
-            fullEmails[2].affiliation.inReconfirmNotificationPeriod
-          ).to.equal(true)
-          expect(
-            fullEmails[3].affiliation.inReconfirmNotificationPeriod
-          ).to.equal(true)
-        })
-
-        it('should set pastReconfirmDate and emailHasInstitutionLicence:false for lapsed confirmations', async function() {
-          const response = await userHelper.request.get('/user/emails')
-          expect(response.statusCode).to.equal(200)
-          const fullEmails = JSON.parse(response.body)
-          expect(fullEmails.length).to.equal(4)
-          expect(fullEmails[0].affiliation).to.not.exist
-          expect(fullEmails[1].affiliation.pastReconfirmDate).to.equal(false)
-          expect(fullEmails[1].emailHasInstitutionLicence).to.equal(true)
-          expect(fullEmails[2].affiliation.pastReconfirmDate).to.equal(false)
-          expect(fullEmails[2].emailHasInstitutionLicence).to.equal(true)
-          expect(fullEmails[3].affiliation.pastReconfirmDate).to.equal(true)
-          expect(fullEmails[3].emailHasInstitutionLicence).to.equal(false)
-        })
+      it('should flag inReconfirmNotificationPeriod for all affiliations in period', async function() {
+        const response = await userHelper.request.get('/user/emails')
+        expect(response.statusCode).to.equal(200)
+        const fullEmails = JSON.parse(response.body)
+        expect(fullEmails.length).to.equal(4)
+        expect(fullEmails[0].affiliation).to.not.exist
+        expect(
+          fullEmails[1].affiliation.inReconfirmNotificationPeriod
+        ).to.equal(true)
+        expect(fullEmails[1].affiliation.pastReconfirmDate).to.equal(false)
+        expect(
+          fullEmails[2].affiliation.inReconfirmNotificationPeriod
+        ).to.equal(true)
+        expect(fullEmails[2].affiliation.pastReconfirmDate).to.equal(false)
+        expect(
+          fullEmails[3].affiliation.inReconfirmNotificationPeriod
+        ).to.equal(true)
+        expect(fullEmails[3].affiliation.pastReconfirmDate).to.equal(true)
       })
 
       describe('should flag emails before their confirmation expires, but within the notification period', function() {
