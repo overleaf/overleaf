@@ -27,6 +27,7 @@ module.exports =
 			# Set up our own mock recurly server
 			url: 'http://localhost:6034'
 			subdomain: 'test'
+			apiKey: 'private-nonsense'
 
 	# for registration via SL, set enableLegacyRegistration to true
 	# for registration via Overleaf v1, set enableLegacyLogin to true
