@@ -16,6 +16,10 @@ function emailHasLicence(emailData) {
   if (!affiliation.licence) {
     return false
   }
+  if (affiliation.pastReconfirmDate) {
+    return false
+  }
+
   return affiliation.licence !== 'free'
 }
 

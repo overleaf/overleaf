@@ -212,7 +212,13 @@ class MockV1Api extends AbstractMockApi {
 
           affiliation.institution.confirmed = !!domainData.confirmed
 
-          if (institutionData.commonsAccount) {
+          affiliation.licence = 'free'
+          if (
+            institutionData.commonsAccount &&
+            (!institutionData.sso_enabled ||
+              (institutionData.sso_enabled &&
+                affiliation.cached_entitlement === true))
+          ) {
             affiliation.licence = 'pro_plus'
           }
           return affiliation
