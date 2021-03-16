@@ -69,6 +69,8 @@ services:
             # SHARELATEX_EMAIL_SMTP_PASS:
             # SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
             # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: false
+            # SHARELATEX_EMAIL_SMTP_NAME: '127.0.0.1'
+            # SHARELATEX_EMAIL_SMTP_LOGGER: true
             # SHARELATEX_CUSTOM_EMAIL_FOOTER: "This system is run by department x"
 
             ################

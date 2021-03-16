@@ -285,6 +285,8 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 			port: process.env["SHARELATEX_EMAIL_SMTP_PORT"],
 			secure: parse(process.env["SHARELATEX_EMAIL_SMTP_SECURE"])
 			ignoreTLS: parse(process.env["SHARELATEX_EMAIL_SMTP_IGNORE_TLS"])
+			name: process.env["SHARELATEX_EMAIL_SMTP_NAME"]
+			logger: process.env["SHARELATEX_EMAIL_SMTP_LOGGER"] == 'true'
 
 		textEncoding:  process.env["SHARELATEX_EMAIL_TEXT_ENCODING"]
 		template:
