@@ -15,27 +15,27 @@ The provided `Dockerfile` builds a docker image which has the docker command lin
 
 The CLSI can be configured through the following environment variables:
 
-* `ALLOWED_COMPILE_GROUPS`
-* `ALLOWED_IMAGES`
-* `CATCH_ERRORS`
-* `COMPILE_GROUP_DOCKER_CONFIGS`
+* `ALLOWED_COMPILE_GROUPS` - Space separated list of allowed compile groups
+* `ALLOWED_IMAGES` - Space separated list of allowed Docker TeX Live images 
+* `CATCH_ERRORS` - Set to `true` to log uncaught exceptions
+* `COMPILE_GROUP_DOCKER_CONFIGS` - JSON string of Docker configs for compile groups
 * `COMPILES_HOST_DIR` - Working directory for LaTeX compiles
-* `COMPILE_SIZE_LIMIT`
+* `COMPILE_SIZE_LIMIT` - Sets the body-parser [limit](https://github.com/expressjs/body-parser#limit)
 * `DOCKER_RUNNER` - Set to true to use sibling containers
-* `DOCKER_RUNTIME`
+* `DOCKER_RUNTIME` - 
 * `FILESTORE_DOMAIN_OVERRIDE` - The url for the filestore service e.g.`http://$FILESTORE_HOST:3009`
-* `FILESTORE_PARALLEL_FILE_DOWNLOADS`
-* `FILESTORE_PARALLEL_SQL_QUERY_LIMIT`
+* `FILESTORE_PARALLEL_FILE_DOWNLOADS` - Number of parallel file downloads
+* `FILESTORE_PARALLEL_SQL_QUERY_LIMIT` - Number of parallel SQL queries
 * `LISTEN_ADDRESS` - The address for the RESTful service to listen on. Set to `0.0.0.0` to listen on all network interfaces
-* `PROCESS_LIFE_SPAN_LIMIT_MS`
-* `SENTRY_DSN`
+* `PROCESS_LIFE_SPAN_LIMIT_MS` - Process life span limit in milliseconds
+* `SENTRY_DSN` - Sentry [Data Source Name](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)
 * `SMOKE_TEST` - Whether to run smoke tests
 * `SQLITE_PATH` - Path to SQLite database
 * `SYNCTEX_BIN_HOST_PATH` - Path to SyncTeX binary
 * `TEXLIVE_IMAGE` - The TEXLIVE docker image to use for sibling containers, e.g. `gcr.io/overleaf-ops/texlive-full:2017.1`
 * `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the docker image e.g. `gcr.io/overleaf-ops`
 * `TEXLIVE_IMAGE_USER` - When using sibling containers, the user to run as in the TEXLIVE image. Defaults to `tex`
-* `TEXLIVE_OPENOUT_ANY`
+* `TEXLIVE_OPENOUT_ANY` - Sets the `openout_any` environment variable for Tex Live
 
 Further environment variables configure the [metrics module](https://github.com/overleaf/metrics-module)
 
