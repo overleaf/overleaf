@@ -12,7 +12,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/OutputFileFinder'
@@ -26,8 +25,7 @@ describe('OutputFileFinder', function () {
     this.OutputFileFinder = SandboxedModule.require(modulePath, {
       requires: {
         fs: (this.fs = {}),
-        child_process: { spawn: (this.spawn = sinon.stub()) },
-        'logger-sharelatex': { log: sinon.stub(), warn: sinon.stub() }
+        child_process: { spawn: (this.spawn = sinon.stub()) }
       },
       globals: {
         Math // used by lodash

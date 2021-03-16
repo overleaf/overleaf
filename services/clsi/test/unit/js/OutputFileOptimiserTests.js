@@ -12,7 +12,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/OutputFileOptimiser'
@@ -28,7 +27,6 @@ describe('OutputFileOptimiser', function () {
         fs: (this.fs = {}),
         path: (this.Path = {}),
         child_process: { spawn: (this.spawn = sinon.stub()) },
-        'logger-sharelatex': { log: sinon.stub(), warn: sinon.stub() },
         './Metrics': {}
       },
       globals: { Math } // used by lodash

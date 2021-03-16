@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
 
-FROM node:10.23.1 as base
+FROM node:12.21.0 as base
 
 WORKDIR /app
 COPY install_deps.sh /app
@@ -23,6 +23,6 @@ FROM base
 
 COPY --from=app /app /app
 RUN mkdir -p cache compiles db output \
-  &&  chown node:node cache compiles db output
+&&  chown node:node cache compiles db output
 
 CMD ["node", "--expose-gc", "app.js"]

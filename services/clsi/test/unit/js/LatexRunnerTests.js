@@ -11,7 +11,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/LatexRunner'
@@ -27,10 +26,6 @@ describe('LatexRunner', function () {
           docker: {
             socketPath: '/var/run/docker.sock'
           }
-        }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub()
         }),
         './Metrics': {
           Timer: (Timer = class Timer {

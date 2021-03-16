@@ -10,7 +10,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/DraftModeManager'
@@ -20,8 +19,7 @@ describe('DraftModeManager', function () {
   beforeEach(function () {
     return (this.DraftModeManager = SandboxedModule.require(modulePath, {
       requires: {
-        fs: (this.fs = {}),
-        'logger-sharelatex': (this.logger = { log() {} })
+        fs: (this.fs = {})
       }
     }))
   })

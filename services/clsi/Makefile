@@ -21,8 +21,10 @@ DOCKER_COMPOSE_TEST_UNIT = \
 	COMPOSE_PROJECT_NAME=test_unit_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE)
 
 clean:
-	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
-	docker rmi gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	-docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	-docker rmi gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	-$(DOCKER_COMPOSE_TEST_UNIT) down --rmi local
+	-$(DOCKER_COMPOSE_TEST_ACCEPTANCE) down --rmi local
 
 format:
 	$(DOCKER_COMPOSE) run --rm test_unit npm run --silent format

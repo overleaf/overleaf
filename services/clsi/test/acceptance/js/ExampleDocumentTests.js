@@ -17,7 +17,6 @@
  */
 const Client = require('./helpers/Client')
 const request = require('request')
-require('chai').should()
 const fs = require('fs')
 const fsExtra = require('fs-extra')
 const ChildProcess = require('child_process')
