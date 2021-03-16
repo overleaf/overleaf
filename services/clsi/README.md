@@ -11,7 +11,7 @@ The Common LaTeX Service Interface (CLSI) provides a RESTful interface to tradit
 
 These defaults can be modified in `config/settings.defaults.js`.
 
-The provided `Dockerfile` builds a docker image which has the docker command line tools installed. The configuration in `docker-compose-config.yml` mounts the docker socket, in order that the CLSI container can talk to the docker host it is running in. This allows it to spin up `sibling containers` running an image with a TeX distribution installed to perform the actual compiles.
+The provided `Dockerfile` builds a Docker image which has the Docker command line tools installed. The configuration in `docker-compose-config.yml` mounts the Docker socket, in order that the CLSI container can talk to the Docker host it is running in. This allows it to spin up `sibling containers` running an image with a TeX distribution installed to perform the actual compiles.
 
 The CLSI can be configured through the following environment variables:
 
@@ -32,10 +32,10 @@ The CLSI can be configured through the following environment variables:
 * `SMOKE_TEST` - Whether to run smoke tests
 * `SQLITE_PATH` - Path to SQLite database
 * `SYNCTEX_BIN_HOST_PATH` - Path to SyncTeX binary
-* `TEXLIVE_IMAGE` - The TEXLIVE docker image to use for sibling containers, e.g. `gcr.io/overleaf-ops/texlive-full:2017.1`
-* `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the docker image e.g. `gcr.io/overleaf-ops`
-* `TEXLIVE_IMAGE_USER` - When using sibling containers, the user to run as in the TEXLIVE image. Defaults to `tex`
-* `TEXLIVE_OPENOUT_ANY` - Sets the `openout_any` environment variable for Tex Live
+* `TEXLIVE_IMAGE` - The TeX Live Docker image to use for sibling containers, e.g. `gcr.io/overleaf-ops/texlive-full:2017.1`
+* `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the Docker image e.g. `gcr.io/overleaf-ops`
+* `TEXLIVE_IMAGE_USER` - When using sibling containers, the user to run as in the TeX Live image. Defaults to `tex`
+* `TEXLIVE_OPENOUT_ANY` - Sets the `openout_any` environment variable for TeX Live
 
 Further environment variables configure the [metrics module](https://github.com/overleaf/metrics-module)
 
@@ -50,7 +50,7 @@ Then build the Docker image:
 
     $ docker build . -t overleaf/clsi
 
-Then pull the TeXLive image:
+Then pull the TeX Live image:
 
     $ docker pull texlive/texlive
 
