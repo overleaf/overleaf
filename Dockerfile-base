@@ -30,6 +30,11 @@ RUN apt-get update \
       /etc/nginx/sites-enabled/default \
       /var/lib/apt/lists/*
 
+# Add envsubst
+# ------------
+ADD ./vendor/envsubst /usr/bin/envsubst
+RUN chmod +x /usr/bin/envsubst
+
 # Install Grunt
 # ------------
 RUN npm install -g \
