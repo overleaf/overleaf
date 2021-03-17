@@ -269,7 +269,7 @@ form.row(
 								aria-label=translate("close")
 							)
 								span(aria-hidden="true") &times;
-							.small !{translate("institution_acct_successfully_linked", {institutionName: institutionLinked.universityName})}
+							.small(ng-non-bindable) !{translate("institution_acct_successfully_linked", {institutionName: institutionLinked.universityName})}
 							if institutionLinked.hasEntitlement
 								.small !{translate("this_grants_access_to_features", {featureType: translate("professional")})}
 					if institutionEmailNonCanonical
@@ -302,9 +302,9 @@ form.row(
 								| &nbsp;#{translate("generic_something_went_wrong")}.
 								br
 								if samlError.translatedMessage
-									| !{samlError.translatedMessage}
+									span(ng-non-bindable) !{samlError.translatedMessage}
 								else if samlError.message
-									| #{samlError.message}
+									span(ng-non-bindable) #{samlError.message}
 								if samlError.tryAgain
 									br
 									| &nbsp;#{translate("try_again")}.
