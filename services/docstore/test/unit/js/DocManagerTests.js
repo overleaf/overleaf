@@ -14,11 +14,7 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const chai = require('chai')
-chai.use(require('sinon-chai'))
-const { assert } = require('chai')
-chai.should()
-const { expect } = chai
+const { assert, expect } = require('chai')
 const modulePath = require('path').join(__dirname, '../../../app/js/DocManager')
 const { ObjectId } = require('mongodb')
 const Errors = require('../../../app/js/Errors')
@@ -36,11 +32,6 @@ describe('DocManager', function () {
           shouldUpdateRanges: sinon.stub().returns(false)
         }),
         'settings-sharelatex': (this.settings = { docstore: {} }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn() {},
-          err() {}
-        }),
         './Errors': Errors
       }
     })
@@ -493,7 +484,6 @@ describe('DocManager', function () {
             this.DocArchiveManager.archiveDocById = sinon
               .stub()
               .yields(this.err)
-            this.logger.warn = sinon.stub()
             this.callback = sinon.stub().callsFake(done)
             this.DocManager.deleteDoc(
               this.project_id,
@@ -630,7 +620,6 @@ describe('DocManager', function () {
         beforeEach(function () {
           this.settings.docstore.archiveOnSoftDelete = true
           this.meta.deleted = true
-          this.logger.warn = sinon.stub()
         })
 
         describe('when the background flush succeeds', function () {

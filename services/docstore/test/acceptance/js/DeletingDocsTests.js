@@ -11,10 +11,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-chai.should()
 const { db, ObjectId } = require('../../../app/js/mongodb')
-const { expect } = chai
+const { expect } = require('chai')
 const DocstoreApp = require('./helpers/DocstoreApp')
 const Errors = require('../../../app/js/Errors')
 const Settings = require('settings-sharelatex')

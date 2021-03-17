@@ -14,9 +14,7 @@
  */
 process.env.BACKEND = 'gcs'
 const Settings = require('settings-sharelatex')
-const chai = require('chai')
-const { expect } = chai
-const should = chai.should()
+const { expect } = require('chai')
 const { db, ObjectId } = require('../../../app/js/mongodb')
 const async = require('async')
 const DocstoreApp = require('./helpers/DocstoreApp')
@@ -96,8 +94,8 @@ describe('Archiving', function () {
         ((doc) => {
           return (callback) => {
             return db.docs.findOne({ _id: doc._id }, (error, doc) => {
-              should.not.exist(doc.lines)
-              should.not.exist(doc.ranges)
+              expect(doc.lines).not.to.exist
+              expect(doc.ranges).not.to.exist
               doc.inS3.should.equal(true)
               return callback()
             })
@@ -155,7 +153,7 @@ describe('Archiving', function () {
               return db.docs.findOne({ _id: doc._id }, (error, doc) => {
                 doc.lines.should.deep.equal(this.docs[i].lines)
                 doc.ranges.should.deep.equal(this.docs[i].ranges)
-                should.not.exist(doc.inS3)
+                expect(doc.inS3).not.to.exist
                 return callback()
               })
             }
@@ -218,8 +216,8 @@ describe('Archiving', function () {
         if (error != null) {
           throw error
         }
-        should.not.exist(doc.lines)
-        should.not.exist(doc.ranges)
+        expect(doc.lines).not.to.exist
+        expect(doc.ranges).not.to.exist
         doc.inS3.should.equal(true)
         doc.deleted.should.equal(true)
         return done()
@@ -267,7 +265,7 @@ describe('Archiving', function () {
           }
           doc.lines.should.deep.equal(this.doc.lines)
           doc.ranges.should.deep.equal(this.doc.ranges)
-          should.not.exist(doc.inS3)
+          expect(doc.inS3).not.to.exist
           doc.deleted.should.equal(true)
           return done()
         })
@@ -365,8 +363,8 @@ describe('Archiving', function () {
         if (error) {
           return done(error)
         }
-        should.not.exist(doc.lines)
-        should.not.exist(doc.ranges)
+        expect(doc.lines).not.to.exist
+        expect(doc.ranges).not.to.exist
         doc.inS3.should.equal(true)
         done()
       })
@@ -433,8 +431,8 @@ describe('Archiving', function () {
         if (error != null) {
           throw error
         }
-        should.not.exist(doc.lines)
-        should.not.exist(doc.ranges)
+        expect(doc.lines).not.to.exist
+        expect(doc.ranges).not.to.exist
         doc.inS3.should.equal(true)
         return done()
       })
@@ -476,7 +474,7 @@ describe('Archiving', function () {
           }
           doc.lines.should.deep.equal(this.doc.lines)
           doc.ranges.should.deep.equal(this.doc.ranges)
-          should.not.exist(doc.inS3)
+          expect(doc.inS3).not.to.exist
           return done()
         })
       })
@@ -907,8 +905,8 @@ describe('Archiving', function () {
         if (error != null) {
           throw error
         }
-        should.not.exist(doc.lines)
-        should.not.exist(doc.ranges)
+        expect(doc.lines).not.to.exist
+        expect(doc.ranges).not.to.exist
         doc.inS3.should.equal(true)
         return done()
       })
@@ -950,7 +948,7 @@ describe('Archiving', function () {
           }
           doc.lines.should.deep.equal(this.doc.lines)
           doc.ranges.should.deep.equal(this.doc.ranges)
-          should.not.exist(doc.inS3)
+          expect(doc.inS3).not.to.exist
           return done()
         })
       })
@@ -1026,8 +1024,8 @@ describe('Archiving', function () {
         if (error != null) {
           throw error
         }
-        should.not.exist(doc.lines)
-        should.not.exist(doc.ranges)
+        expect(doc.lines).not.to.exist
+        expect(doc.ranges).not.to.exist
         doc.inS3.should.equal(true)
         return done()
       })
@@ -1070,7 +1068,7 @@ describe('Archiving', function () {
           }
           doc.lines.should.deep.equal(this.doc.lines)
           doc.ranges.should.deep.equal(this.doc.ranges)
-          should.not.exist(doc.inS3)
+          expect(doc.inS3).not.to.exist
           return done()
         })
       })
@@ -1123,8 +1121,8 @@ describe('Archiving', function () {
         if (error != null) {
           throw error
         }
-        should.not.exist(doc.lines)
-        should.not.exist(doc.ranges)
+        expect(doc.lines).not.to.exist
+        expect(doc.ranges).not.to.exist
         doc.inS3.should.equal(true)
         return done()
       })
@@ -1166,7 +1164,7 @@ describe('Archiving', function () {
           }
           doc.lines.should.deep.equal(this.doc.lines)
           doc.ranges.should.deep.equal(this.doc.ranges)
-          should.not.exist(doc.inS3)
+          expect(doc.inS3).not.to.exist
           return done()
         })
       })
@@ -1220,7 +1218,7 @@ describe('Archiving', function () {
           throw error
         }
         doc.lines.should.deep.equal(this.doc.lines)
-        should.not.exist(doc.inS3)
+        expect(doc.inS3).not.to.exist
         return done()
       })
     })

@@ -10,11 +10,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-const { assert } = require('chai')
 const sinon = require('sinon')
-const chai = require('chai')
-chai.should()
-const { expect } = chai
+const { assert, expect } = require('chai')
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/HttpController'
@@ -30,15 +27,9 @@ describe('HttpController', function () {
       requires: {
         './DocManager': (this.DocManager = {}),
         './DocArchiveManager': (this.DocArchiveManager = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          fatal: sinon.stub()
-        }),
         'settings-sharelatex': settings,
         './HealthChecker': {}
-      },
-      globals: { process }
+      }
     })
     this.res = {
       send: sinon.stub(),

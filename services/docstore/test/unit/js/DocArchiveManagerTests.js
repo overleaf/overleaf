@@ -1,13 +1,9 @@
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../app/js/DocArchiveManager.js'
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
 const Errors = require('../../../app/js/Errors')
-
-chai.use(require('chai-as-promised'))
-chai.use(require('sinon-chai'))
 
 describe('DocArchiveManager', function () {
   let DocArchiveManager,
@@ -15,7 +11,6 @@ describe('DocArchiveManager', function () {
     MongoManager,
     RangeManager,
     Settings,
-    Logger,
     Crypto,
     Streamifier,
     HashDigest,
@@ -38,10 +33,6 @@ describe('DocArchiveManager', function () {
       docstore: {
         bucket: 'wombat'
       }
-    }
-    Logger = {
-      log: sinon.stub(),
-      err: sinon.stub()
     }
     HashDigest = sinon.stub().returns(md5Sum)
     HashUpdate = sinon.stub().returns({ digest: HashDigest })
@@ -141,17 +132,12 @@ describe('DocArchiveManager', function () {
     DocArchiveManager = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': Settings,
-        'logger-sharelatex': Logger,
         crypto: Crypto,
         streamifier: Streamifier,
         './MongoManager': MongoManager,
         './RangeManager': RangeManager,
         './PersistorManager': PersistorManager,
         './Errors': Errors
-      },
-      globals: {
-        console,
-        JSON
       }
     })
   })
