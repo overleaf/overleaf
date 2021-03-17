@@ -26,9 +26,7 @@ describe('ContactManager', function () {
         './mongodb': {
           db: (this.db = { contacts: {} }),
           ObjectId
-        },
-        'logger-sharelatex': { log: sinon.stub() },
-        '@overleaf/metrics': { timeAsyncMethod: sinon.stub() }
+        }
       }
     })
     this.user_id = ObjectId().toString()
