@@ -26,7 +26,7 @@ block content
 							)
 							.alert.alert-danger(ng-show="activationForm.response.error")
 								| #{translate("activation_token_expired")}
-							
+
 							.form-group
 								label(for='email') #{translate("email")}
 								input.form-control(
@@ -35,7 +35,6 @@ block content
 									placeholder="email@example.com"
 									required,
 									ng-model="email",
-									ng-init="email = "+JSON.stringify(email),
 									ng-model-options="{ updateOn: 'blur' }",
 									disabled
 								)

@@ -22,7 +22,7 @@ block content
 									form(async-form="settings", name="settingsForm", method="POST", action="/user/settings", novalidate)
 										input(type="hidden", name="_csrf", value=csrfToken)
 										if !hasFeature('affiliations')
-											if !externalAuthenticationSystemUsed() 
+											if !externalAuthenticationSystemUsed()
 												.form-group
 													label(for='email')  #{translate("email")}
 													input.form-control(
@@ -32,7 +32,6 @@ block content
 														placeholder="email@example.com"
 														required,
 														ng-model="email",
-														ng-init="email = "+JSON.stringify(user.email),
 														ng-model-options="{ updateOn: 'blur' }"
 													)
 													span.small.text-danger(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
@@ -130,7 +129,7 @@ block content
 													required,
 													complex-password
 												)
-												span.small.text-danger(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.newPassword1.$dirty", ng-bind-html="complexPasswordErrorMessage" aria-live="polite") 
+												span.small.text-danger(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.newPassword1.$dirty", ng-bind-html="complexPasswordErrorMessage" aria-live="polite")
 											.form-group
 												label(for='newPassword2') #{translate("confirm_new_password")}
 												input.form-control(
@@ -140,11 +139,11 @@ block content
 													placeholder='*********',
 													ng-model="newPassword2",
 													equals="passwordField"
-												) 
+												)
 												span.small.text-danger(ng-show="changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$dirty" aria-live="polite")
-													| #{translate("doesnt_match")} 
+													| #{translate("doesnt_match")}
 												span.small.text-danger(ng-show="!changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty" aria-live="polite")
-													| #{translate("invalid_password")} 
+													| #{translate("invalid_password")}
 											.form-group
 												form-messages(aria-live="polite" for="changePasswordForm")
 											.actions
@@ -158,16 +157,16 @@ block content
 
 							h3
 								| #{translate("sharelatex_beta_program")}
-							
+
 							if (user.betaProgram)
 								p.small
 									| #{translate("beta_program_already_participating")}
-							
+
 							div
 								a(id="beta-program-participate-link" href="/beta/participate") #{translate("manage_beta_program_membership")}
 
 							hr
-	
+
 							h3
 								| #{translate("sessions")}
 
@@ -183,7 +182,7 @@ block content
 							if !externalAuthenticationSystemUsed() || (settings.createV1AccountOnLogin && settings.overleaf)
 
 								p.small
-									| #{translate("newsletter_info_and_unsubscribe")} 
+									| #{translate("newsletter_info_and_unsubscribe")}
 									a(
 										href,
 										ng-click="unsubscribe()",
@@ -205,7 +204,7 @@ block content
 											| Please note: If you have linked your account with Overleaf
 											| v2, then deleting your ShareLaTeX account will also delete
 											| account and all of it's associated projects and data.
-									p #{translate("need_to_leave")} 
+									p #{translate("need_to_leave")}
 										a(href, ng-click="deleteAccount()")  #{translate("delete_your_account")}
 
 

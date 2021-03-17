@@ -22,7 +22,6 @@ const UserPagesController = {
       title: 'register',
       sharedProjectData,
       newTemplateData,
-      new_email: req.query.new_email || '',
       samlBeta: req.session.samlBeta
     })
   },
@@ -37,8 +36,7 @@ const UserPagesController = {
       AuthenticationController.setRedirectInSession(req, req.query.redir)
     }
     res.render('user/login', {
-      title: 'login',
-      email: req.query.email
+      title: 'login'
     })
   },
 

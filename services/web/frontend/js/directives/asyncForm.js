@@ -3,17 +3,21 @@ import 'libs/passfield'
 App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
   controller: [
     '$scope',
-    function($scope) {
+    '$location',
+    function($scope, $location) {
       this.getEmail = () => $scope.email
+      this.getEmailFromQuery = () =>
+        $location.search().email || $location.search().new_email
       return this
     }
   ],
-  link(scope, element, attrs) {
+  link(scope, element, attrs, ctrl) {
     let response
     const formName = attrs.asyncForm
 
     scope[attrs.name].response = response = {}
     scope[attrs.name].inflight = false
+    scope.email = scope.email || ctrl.getEmailFromQuery() || attrs.newEmail
 
     const validateCaptchaIfEnabled = function(callback) {
       if (attrs.captchaActionName) {
