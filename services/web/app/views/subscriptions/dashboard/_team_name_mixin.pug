@@ -1,6 +1,6 @@
 mixin teamName(subscription)
 	- if (subscription.teamName && subscription.teamName != '')
-		strong= subscription.teamName
+		strong(ng-non-bindable)= subscription.teamName
 	- else if (subscription.admin_id._id == user._id)
 		| a group account
 	- else

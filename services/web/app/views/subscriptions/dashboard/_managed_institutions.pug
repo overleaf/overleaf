@@ -5,7 +5,7 @@ each institution in managedInstitutions
 	p
 		| You are a manager of
 		|
-		strong= institution.name
+		strong(ng-non-bindable)= institution.name
 	p
 		a.btn.btn-primary(href="/metrics/institutions/" + institution.v1Id)
 			i.fa.fa-fw.fa-line-chart
@@ -23,7 +23,7 @@ each institution in managedInstitutions
 			| Manage institution managers
 	div(ng-controller="MetricsEmailController", ng-cloak)
 		p
-			span Monthly metrics emails: 
+			span Monthly metrics emails:
 				a(href ng-bind-html="institutionEmailSubscription('"+institution.v1Id+"')" ng-show="!subscriptionChanging" ng-click="changeInstitutionalEmailSubscription('"+institution.v1Id+"')")
 				span(ng-show="subscriptionChanging")
 					i.fa.fa-spin.fa-refresh(aria-hidden="true")
