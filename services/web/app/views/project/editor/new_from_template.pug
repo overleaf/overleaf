@@ -13,7 +13,7 @@ block content
         span.loading-screen-ellip .
         span.loading-screen-ellip .
 
-  form(id='create_form' method='POST' action='/project/new/template/')
+  form(id='create_form' method='POST' action='/project/new/template/' ng-non-bindable)
     input(type="hidden", name="_csrf", value=csrfToken)
     input(type="hidden" name="templateId" value=templateId)
     input(type="hidden" name="templateVersionId" value=templateVersionId)
