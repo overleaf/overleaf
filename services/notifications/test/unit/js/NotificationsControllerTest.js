@@ -11,8 +11,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../app/js/NotificationsController.js'
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
@@ -27,7 +25,6 @@ describe('Notifications Controller', function () {
     this.notifications = {}
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
-        'logger-sharelatex': { log() {} },
         './Notifications': this.notifications,
         '@overleaf/metrics': {
           inc: sinon.stub()
