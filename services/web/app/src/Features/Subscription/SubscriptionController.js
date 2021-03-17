@@ -37,10 +37,6 @@ const OError = require('@overleaf/o-error')
 module.exports = SubscriptionController = {
   plansPage(req, res, next) {
     const plans = SubscriptionViewModelBuilder.buildPlansList()
-    let viewName = 'subscriptions/plans'
-    if (req.query.v != null) {
-      viewName = `${viewName}_${req.query.v}`
-    }
     let currentUser = null
 
     return GeoIpLookup.getCurrencyCode(
@@ -50,7 +46,7 @@ module.exports = SubscriptionController = {
           return next(err)
         }
         const render = () =>
-          res.render(viewName, {
+          res.render('subscriptions/plans', {
             title: 'plans_and_pricing',
             plans,
             gaExperiments: Settings.gaExperiments.plansPage,
