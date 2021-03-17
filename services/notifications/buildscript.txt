@@ -3,6 +3,6 @@ notifications
 --docker-repos=gcr.io/overleaf-ops
 --env-add=
 --env-pass-through=
---node-version=10.23.1
+--node-version=12.21.0
 --public-repo=True
---script-version=3.4.0
+--script-version=3.7.0
