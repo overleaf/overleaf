@@ -719,6 +719,11 @@ App.controller('PdfController', function(
   }
 
   function getRootDocOverrideId() {
+    const rootDocId = $scope.project.rootDoc_id
+    const currentDocId = ide.editorManager.getCurrentDocId()
+    if (currentDocId === rootDocId) {
+      return null // no need to override when in the root doc itself
+    }
     const doc = ide.editorManager.getCurrentDocValue()
     if (doc == null) {
       return null
