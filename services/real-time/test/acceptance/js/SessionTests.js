@@ -11,8 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 
 const RealTimeClient = require('./helpers/RealTimeClient')
 

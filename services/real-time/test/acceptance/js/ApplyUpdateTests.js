@@ -13,9 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const async = require('async')
-const chai = require('chai')
-const { expect } = chai
-chai.should()
+const { expect } = require('chai')
 
 const RealTimeClient = require('./helpers/RealTimeClient')
 const FixturesManager = require('./helpers/FixturesManager')

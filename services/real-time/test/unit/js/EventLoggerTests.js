@@ -8,7 +8,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require('chai').should()
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const modulePath = '../../../app/js/EventLogger'
@@ -21,10 +20,6 @@ describe('EventLogger', function () {
     tk.freeze(new Date(this.start))
     this.EventLogger = SandboxedModule.require(modulePath, {
       requires: {
-        'logger-sharelatex': (this.logger = {
-          error: sinon.stub(),
-          warn: sinon.stub()
-        }),
         '@overleaf/metrics': (this.metrics = { inc: sinon.stub() })
       }
     })

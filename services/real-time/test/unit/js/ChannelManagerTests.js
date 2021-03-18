@@ -9,9 +9,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../app/js/ChannelManager.js'
 const SandboxedModule = require('sandboxed-module')
@@ -26,11 +24,6 @@ describe('ChannelManager', function () {
         '@overleaf/metrics': (this.metrics = {
           inc: sinon.stub(),
           summary: sinon.stub()
-        }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub(),
-          error: sinon.stub()
         })
       }
     }))

@@ -9,8 +9,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const should = chai.should()
 const sinon = require('sinon')
 const modulePath = '../../../app/js/WebApiManager.js'
 const SandboxedModule = require('sandboxed-module')
@@ -33,10 +31,6 @@ describe('WebApiManager', function () {
               pass: 'password'
             }
           }
-        }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub()
         })
       }
     }))

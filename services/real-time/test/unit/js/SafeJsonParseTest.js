@@ -11,11 +11,9 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require('chai').should()
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const modulePath = '../../../app/js/SafeJsonParse'
-const sinon = require('sinon')
 
 describe('SafeJsonParse', function () {
   beforeEach(function () {
@@ -23,8 +21,7 @@ describe('SafeJsonParse', function () {
       requires: {
         'settings-sharelatex': (this.Settings = {
           maxUpdateSize: 16 * 1024
-        }),
-        'logger-sharelatex': (this.logger = { error: sinon.stub() })
+        })
       }
     }))
   })
