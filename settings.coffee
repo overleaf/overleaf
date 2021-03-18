@@ -1,4 +1,5 @@
 Path = require('path')
+logger = require('logger-sharelatex')
 
 # These credentials are used for authenticating api requests
 # between services that may need to go over public channels
@@ -437,6 +438,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			entryPoint: process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			callbackUrl: process.env["SHARELATEX_SAML_CALLBACK_URL"]
 			issuer: process.env["SHARELATEX_SAML_ISSUER"]
+			decryptionCert: process.env["SHARELATEX_SAML_DECRYPTION_CERT"]
 			decryptionPvk: process.env["SHARELATEX_SAML_DECRYPTION_PVK"]
 			signatureAlgorithm: process.env["SHARELATEX_SAML_SIGNATURE_ALGORITHM"]
 			identifierFormat: process.env["SHARELATEX_SAML_IDENTIFIER_FORMAT"]
