@@ -88,14 +88,46 @@ describe('<PreviewRecompileButton />', function() {
     )
   })
 
+  describe('Autocompile feedback', function() {
+    it('shows animated visual feedback via CSS class when there are uncompiled changes', function() {
+      const { container } = renderPreviewRecompileButton({
+        autoCompileHasChanges: true,
+        autoCompileHasLintingError: false
+      })
+      const recompileBtnGroupEl = container.querySelector(
+        '.btn-recompile-group'
+      )
+      expect(
+        recompileBtnGroupEl.classList.contains(
+          'btn-recompile-group-has-changes'
+        )
+      ).to.be.true
+    })
+    it('does not show animated visual feedback via CSS class when there are no uncompiled changes', function() {
+      const { container } = renderPreviewRecompileButton({
+        autoCompileHasChanges: false,
+        autoCompileHasLintingError: false
+      })
+      const recompileBtnGroupEl = container.querySelector(
+        '.btn-recompile-group'
+      )
+      expect(
+        recompileBtnGroupEl.classList.contains(
+          'btn-recompile-group-has-changes'
+        )
+      ).to.be.false
+    })
+  })
+
   function renderPreviewRecompileButton(compilerState = {}, showText) {
     if (!compilerState.logEntries) {
       compilerState.logEntries = {}
     }
     if (showText === undefined) showText = true
-    render(
+    return render(
       <PreviewRecompileButton
         compilerState={{
+          autoCompileHasChanges: false,
           isAutoCompileOn: true,
           isClearingCache: false,
           isCompiling: false,

@@ -17,6 +17,7 @@ function PreviewLogsPane({
   outputFiles = [],
   isClearingCache,
   isCompiling = false,
+  autoCompileHasLintingError = false,
   onLogEntryLocationClick,
   onClearCache
 }) {
@@ -113,11 +114,28 @@ function PreviewLogsPane({
     <div className="logs-pane">
       <div className="logs-pane-content">
         <LogsPaneBetaNotice />
+        {autoCompileHasLintingError ? <AutoCompileLintingErrorEntry /> : null}
         {errors ? errorsUI : null}
         {validationIssues ? validationIssuesUI : null}
         {allCompilerIssues.length > 0 ? logEntriesUI : null}
         {rawLog && rawLog !== '' ? rawLogUI : null}
         {actionsUI}
+      </div>
+    </div>
+  )
+}
+
+function AutoCompileLintingErrorEntry() {
+  const { t } = useTranslation()
+  return (
+    <div className="log-entry">
+      <div className="log-entry-header log-entry-header-error">
+        <div className="log-entry-header-icon-container">
+          <Icon type="exclamation-triangle" modifier="fw" />
+        </div>
+        <h3 className="log-entry-header-title">
+          {t('code_check_failed_explanation')}
+        </h3>
       </div>
     </div>
   )
@@ -173,6 +191,7 @@ PreviewLogsPane.propTypes = {
     warning: PropTypes.array,
     typesetting: PropTypes.array
   }),
+  autoCompileHasLintingError: PropTypes.bool,
   rawLog: PropTypes.string,
   outputFiles: PropTypes.array,
   isClearingCache: PropTypes.bool,

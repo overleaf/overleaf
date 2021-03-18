@@ -10,24 +10,16 @@ const MAX_ERRORS_COUNT = 99
 function PreviewLogsToggleButton({
   onToggle,
   showLogs,
+  autoCompileLintingError = false,
   compileFailed = false,
   logsState: { nErrors, nWarnings },
   showText
 }) {
   const { t } = useTranslation()
-  const toggleButtonClasses = classNames(
-    'btn',
-    'btn-xs',
-    'btn-toggle-logs',
-    'toolbar-item',
-    {
-      'btn-danger': !showLogs && nErrors,
-      'btn-warning': !showLogs && !nErrors && nWarnings,
-      'btn-default': showLogs || (!nErrors && !nWarnings)
-    }
-  )
-
   let textStyle = {}
+  let btnColorCssClass = 'btn-default'
+  let buttonContents
+
   if (!showText) {
     textStyle = {
       position: 'absolute',
@@ -40,23 +32,40 @@ function PreviewLogsToggleButton({
     onToggle()
   }
 
+  if (showLogs) {
+    buttonContents = <ViewPdf textStyle={textStyle} />
+  } else {
+    buttonContents = (
+      <CompilationResult
+        textStyle={textStyle}
+        autoCompileLintingError={autoCompileLintingError}
+        nErrors={nErrors}
+        nWarnings={nWarnings}
+      />
+    )
+    if (autoCompileLintingError || nErrors > 0) {
+      btnColorCssClass = 'btn-danger'
+    } else if (nWarnings > 0) {
+      btnColorCssClass = 'btn-warning'
+    }
+  }
+  const buttonClasses = classNames(
+    'btn',
+    'btn-xs',
+    'btn-toggle-logs',
+    'toolbar-item',
+    btnColorCssClass
+  )
+
   const buttonElement = (
     <button
       id="logs-toggle"
       type="button"
       disabled={compileFailed}
-      className={toggleButtonClasses}
+      className={buttonClasses}
       onClick={handleOnClick}
     >
-      {showLogs ? (
-        <ViewPdfButton textStyle={textStyle} />
-      ) : (
-        <CompilationResultIndicator
-          textStyle={textStyle}
-          nErrors={nErrors}
-          nWarnings={nWarnings}
-        />
-      )}
+      {buttonContents}
     </button>
   )
 
@@ -76,21 +85,40 @@ function PreviewLogsToggleButton({
   )
 }
 
-function CompilationResultIndicator({ textStyle, nErrors, nWarnings }) {
-  if (nErrors || nWarnings) {
+function CompilationResult({
+  textStyle,
+  autoCompileLintingError,
+  nErrors,
+  nWarnings
+}) {
+  if (autoCompileLintingError) {
+    return <AutoCompileLintingError textStyle={textStyle} />
+  } else if (nErrors || nWarnings) {
     return (
-      <LogsCompilationResultIndicator
+      <LogsCompilationResult
         logType={nErrors ? 'errors' : 'warnings'}
         nLogs={nErrors || nWarnings}
         textStyle={textStyle}
       />
     )
   } else {
-    return <ViewLogsButton textStyle={textStyle} />
+    return <ViewLogs textStyle={textStyle} />
   }
 }
 
-function LogsCompilationResultIndicator({ textStyle, logType, nLogs }) {
+function ViewPdf({ textStyle }) {
+  const { t } = useTranslation()
+  return (
+    <>
+      <Icon type="file-pdf-o" />
+      <span className="toolbar-text" style={textStyle}>
+        {t('view_pdf')}
+      </span>
+    </>
+  )
+}
+
+function LogsCompilationResult({ textStyle, logType, nLogs }) {
   const { t } = useTranslation()
   const label =
     logType === 'errors' ? t('your_project_has_errors') : t('view_warnings')
@@ -110,7 +138,19 @@ function LogsCompilationResultIndicator({ textStyle, logType, nLogs }) {
   )
 }
 
-function ViewLogsButton({ textStyle }) {
+function AutoCompileLintingError({ textStyle }) {
+  const { t } = useTranslation()
+  return (
+    <>
+      <Icon type="exclamation-triangle" />
+      <span className="toolbar-text" style={textStyle}>
+        {t('code_check_failed')}
+      </span>
+    </>
+  )
+}
+
+function ViewLogs({ textStyle }) {
   const { t } = useTranslation()
   return (
     <>
@@ -122,41 +162,40 @@ function ViewLogsButton({ textStyle }) {
   )
 }
 
-function ViewPdfButton({ textStyle }) {
-  const { t } = useTranslation()
-  return (
-    <>
-      <Icon type="file-pdf-o" />
-      <span className="toolbar-text" style={textStyle}>
-        {t('view_pdf')}
-      </span>
-    </>
-  )
-}
-
 PreviewLogsToggleButton.propTypes = {
   onToggle: PropTypes.func.isRequired,
   logsState: PropTypes.shape({
     nErrors: PropTypes.number.isRequired,
-    nWarnings: PropTypes.number.isRequired,
-    nLogEntries: PropTypes.number.isRequired
+    nWarnings: PropTypes.number.isRequired
   }),
   showLogs: PropTypes.bool.isRequired,
   showText: PropTypes.bool.isRequired,
-  compileFailed: PropTypes.bool
+  compileFailed: PropTypes.bool,
+  autoCompileLintingError: PropTypes.bool
 }
 
-LogsCompilationResultIndicator.propTypes = {
+CompilationResult.propTypes = {
+  textStyle: PropTypes.object.isRequired,
+  autoCompileLintingError: PropTypes.bool,
+  nErrors: PropTypes.number.isRequired,
+  nWarnings: PropTypes.number.isRequired
+}
+
+LogsCompilationResult.propTypes = {
   logType: PropTypes.string.isRequired,
   nLogs: PropTypes.number.isRequired,
   textStyle: PropTypes.object.isRequired
 }
 
-ViewLogsButton.propTypes = {
+AutoCompileLintingError.propTypes = {
   textStyle: PropTypes.object.isRequired
 }
 
-ViewPdfButton.propTypes = {
+ViewLogs.propTypes = {
+  textStyle: PropTypes.object.isRequired
+}
+
+ViewPdf.propTypes = {
   textStyle: PropTypes.object.isRequired
 }
 

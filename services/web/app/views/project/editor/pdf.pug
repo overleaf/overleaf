@@ -2,6 +2,8 @@ div.full-size.pdf(ng-controller="PdfController")
 	if showNewLogsUI
 		preview-pane(
 			compiler-state=`{
+				autoCompileHasChanges: changesToAutoCompile,
+				autoCompileHasLintingError: autoCompileLintingError,
 				isAutoCompileOn: autocompile_enabled,
 				isClearingCache: pdf.clearingCache,
 				isCompiling: pdf.compiling,

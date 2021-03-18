@@ -275,6 +275,7 @@ describe('<PreviewPane />', function() {
     ]
     return {
       compilerState: {
+        autoCompileHasChanges: false,
         isAutoCompileOn: false,
         isCompiling: isCompiling,
         isClearingCache: false,

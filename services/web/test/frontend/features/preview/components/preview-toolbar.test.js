@@ -25,6 +25,7 @@ describe('<PreviewToolbar />', function() {
     render(
       <PreviewToolbar
         compilerState={{
+          autoCompileHasChanges: true,
           isAutoCompileOn: true,
           isClearingCache: false,
           isCompiling: false,
@@ -33,7 +34,7 @@ describe('<PreviewToolbar />', function() {
           logEntries: {},
           ...compilerState
         }}
-        logsState={{ nErrors: 0, nWarnings: 0, nLogEntries: 0, ...logState }}
+        logsState={{ nErrors: 0, nWarnings: 0, ...logState }}
         onRecompile={onRecompile}
         onRecompileFromScratch={onRecompileFromScratch}
         onRunSyntaxCheckNow={onRunSyntaxCheckNow}

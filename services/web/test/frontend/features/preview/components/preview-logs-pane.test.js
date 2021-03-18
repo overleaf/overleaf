@@ -56,63 +56,63 @@ entering extended mode
     warnings,
     typesetting
   }
-
+  const noOp = () => {}
   const onLogEntryLocationClick = sinon.stub()
-  const noOp = () =>
-    describe('with logs', function() {
-      beforeEach(function() {
-        renderWithEditorContext(
-          <PreviewLogsPane
-            logEntries={logEntries}
-            rawLog={sampleRawLog}
-            onLogEntryLocationClick={onLogEntryLocationClick}
-            onClearCache={noOp}
-          />
-        )
-      })
-      it('renders all log entries with appropriate labels', function() {
-        const errorEntries = screen.getAllByLabelText(
-          `Log entry with level: error`
-        )
-        const warningEntries = screen.getAllByLabelText(
-          `Log entry with level: warning`
-        )
-        const typesettingEntries = screen.getAllByLabelText(
-          `Log entry with level: typesetting`
-        )
-        expect(errorEntries).to.have.lengthOf(errors.length)
-        expect(warningEntries).to.have.lengthOf(warnings.length)
-        expect(typesettingEntries).to.have.lengthOf(typesetting.length)
-      })
 
-      it('renders the raw log', function() {
-        screen.getByLabelText('Raw logs from the LaTeX compiler')
-      })
+  describe('with logs', function() {
+    beforeEach(function() {
+      renderWithEditorContext(
+        <PreviewLogsPane
+          logEntries={logEntries}
+          rawLog={sampleRawLog}
+          onLogEntryLocationClick={onLogEntryLocationClick}
+          onClearCache={noOp}
+        />
+      )
+    })
+    it('renders all log entries with appropriate labels', function() {
+      const errorEntries = screen.getAllByLabelText(
+        `Log entry with level: error`
+      )
+      const warningEntries = screen.getAllByLabelText(
+        `Log entry with level: warning`
+      )
+      const typesettingEntries = screen.getAllByLabelText(
+        `Log entry with level: typesetting`
+      )
+      expect(errorEntries).to.have.lengthOf(errors.length)
+      expect(warningEntries).to.have.lengthOf(warnings.length)
+      expect(typesettingEntries).to.have.lengthOf(typesetting.length)
+    })
 
-      it('renders a link to location button for every error and warning log entry', function() {
-        logEntries.all.forEach((entry, index) => {
-          const linkToSourceButton = screen.getByRole('button', {
-            name: `Navigate to log position in source code: ${entry.file}, ${entry.line}`
-          })
-          fireEvent.click(linkToSourceButton)
-          expect(onLogEntryLocationClick).to.have.callCount(index + 1)
-          const call = onLogEntryLocationClick.getCall(index)
-          expect(
-            call.calledWith({
-              file: entry.file,
-              line: entry.line,
-              column: entry.column
-            })
-          ).to.be.true
+    it('renders the raw log', function() {
+      screen.getByLabelText('Raw logs from the LaTeX compiler')
+    })
+
+    it('renders a link to location button for every error and warning log entry', function() {
+      logEntries.all.forEach((entry, index) => {
+        const linkToSourceButton = screen.getByRole('button', {
+          name: `Navigate to log position in source code: ${entry.file}, ${entry.line}`
         })
-      })
-      it(' does not render a link to location button for the raw log entry', function() {
-        const rawLogEntry = screen.getByLabelText(
-          'Raw logs from the LaTeX compiler'
-        )
-        expect(rawLogEntry.querySelector('.log-entry-header-link')).to.not.exist
+        fireEvent.click(linkToSourceButton)
+        expect(onLogEntryLocationClick).to.have.callCount(index + 1)
+        const call = onLogEntryLocationClick.getCall(index)
+        expect(
+          call.calledWith({
+            file: entry.file,
+            line: entry.line,
+            column: entry.column
+          })
+        ).to.be.true
       })
     })
+    it(' does not render a link to location button for the raw log entry', function() {
+      const rawLogEntry = screen.getByLabelText(
+        'Raw logs from the LaTeX compiler'
+      )
+      expect(rawLogEntry.querySelector('.log-entry-header-link')).to.not.exist
+    })
+  })
 
   describe('with validation issues', function() {
     const sampleValidationIssues = {
@@ -189,6 +189,25 @@ entering extended mode
         'There was an error compiling this project'
       )
       expect(errorEntries).to.have.lengthOf(0)
+    })
+  })
+
+  describe('with failing code check', function() {
+    beforeEach(function() {
+      renderWithEditorContext(
+        <PreviewLogsPane
+          logEntries={logEntries}
+          rawLog={sampleRawLog}
+          onLogEntryLocationClick={onLogEntryLocationClick}
+          onClearCache={noOp}
+          autoCompileHasLintingError
+        />
+      )
+    })
+    it('renders a code check failed entry', function() {
+      screen.getByText(
+        'Your code has errors that need to be fixed before the auto-compile can run'
+      )
     })
   })
 })

@@ -2,10 +2,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Dropdown, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
+import classNames from 'classnames'
 import Icon from '../../../shared/components/icon'
 
 function PreviewRecompileButton({
   compilerState: {
+    autoCompileHasChanges,
+    autoCompileHasLintingError,
     isAutoCompileOn,
     isCompiling,
     isDraftModeOn,
@@ -67,10 +70,19 @@ function PreviewRecompileButton({
     compilingProps = _hideText()
   }
 
+  const recompileButtonGroupClasses = classNames(
+    'btn-recompile-group',
+    'toolbar-item',
+    {
+      'btn-recompile-group-has-changes':
+        autoCompileHasChanges && !autoCompileHasLintingError
+    }
+  )
+
   const buttonElement = (
     <Dropdown
       id="pdf-recompile-dropdown"
-      className="btn-recompile-group toolbar-item"
+      className={recompileButtonGroupClasses}
     >
       <button className="btn btn-recompile" onClick={onRecompile}>
         <Icon type="refresh" spin={isCompiling} />
@@ -160,6 +172,8 @@ function PreviewRecompileButton({
 
 PreviewRecompileButton.propTypes = {
   compilerState: PropTypes.shape({
+    autoCompileHasChanges: PropTypes.bool.isRequired,
+    autoCompileHasLintingError: PropTypes.bool,
     isAutoCompileOn: PropTypes.bool.isRequired,
     isCompiling: PropTypes.bool.isRequired,
     isDraftModeOn: PropTypes.bool.isRequired,

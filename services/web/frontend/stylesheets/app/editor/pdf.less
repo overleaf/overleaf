@@ -83,19 +83,29 @@
 .btn-recompile-group {
   align-self: stretch;
   margin-right: 6px;
-  .btn-recompile {
-    height: 100%;
-    .btn-primary;
-    padding-top: 3px;
-    padding-bottom: 3px;
-    &:first-child {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-    &[disabled] {
-      background-color: mix(@btn-primary-bg, @toolbar-alt-bg-color, 65%);
-      .opacity(1);
-    }
+  border-radius: 0 @btn-border-radius-base @btn-border-radius-base 0;
+  background-color: @btn-primary-bg;
+  &.btn-recompile-group-has-changes {
+    #gradient > .striped(@color: rgba(255, 255, 255, 0.2), @angle: -45deg);
+    background-size: @stripe-width @stripe-width;
+    .animation(pdf-toolbar-stripes 2s linear infinite);
+  }
+}
+
+.btn-recompile {
+  height: 100%;
+  // .btn-primary;
+  color: #fff;
+  background-color: transparent;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  &:first-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  &[disabled] {
+    background-color: mix(@btn-primary-bg, @toolbar-alt-bg-color, 65%);
+    .opacity(1);
   }
 }
 
