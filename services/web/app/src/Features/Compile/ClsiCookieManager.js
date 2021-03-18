@@ -14,7 +14,7 @@
 let rclient_secondary
 const OError = require('@overleaf/o-error')
 const Settings = require('settings-sharelatex')
-const request = require('request')
+const request = require('request').defaults({ timeout: 30 * 1000 })
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('clsi_cookie')
 if (Settings.redis.clsi_cookie_secondary != null) {
@@ -114,10 +114,12 @@ module.exports = function(backendGroup) {
       if (callback == null) {
         callback = function(err) {}
       }
-      const multi = rclient.multi()
-      multi.set(this.buildKey(project_id), serverId)
-      multi.expire(this.buildKey(project_id), Settings.clsiCookie.ttl)
-      return multi.exec(callback)
+      rclient.setex(
+        this.buildKey(project_id),
+        Settings.clsiCookie.ttl,
+        serverId,
+        callback
+      )
     },
 
     clearServerId(project_id, callback) {

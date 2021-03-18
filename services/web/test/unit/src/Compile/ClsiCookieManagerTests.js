@@ -23,24 +23,19 @@ const realRequst = require('request')
 describe('ClsiCookieManager', function() {
   beforeEach(function() {
     const self = this
-    this.redisMulti = {
-      set: sinon.stub(),
-      get: sinon.stub(),
-      expire: sinon.stub(),
-      exec: sinon.stub()
-    }
     this.redis = {
       auth() {},
       get: sinon.stub(),
-      multi() {
-        return self.redisMulti
-      }
+      setex: sinon.stub().callsArg(3)
     }
     this.project_id = '123423431321'
     this.request = {
       get: sinon.stub(),
       cookie: realRequst.cookie,
-      jar: realRequst.jar
+      jar: realRequst.jar,
+      defaults: () => {
+        return this.request
+      }
     }
     this.settings = {
       redis: {
@@ -163,7 +158,6 @@ describe('ClsiCookieManager', function() {
       this.ClsiCookieManager._parseServerIdFromResponse = sinon
         .stub()
         .returns('clsi-8')
-      return this.redisMulti.exec.callsArgWith(0)
     })
 
     it('should set the server id with a ttl', function(done) {
@@ -171,13 +165,11 @@ describe('ClsiCookieManager', function() {
         this.project_id,
         this.response,
         err => {
-          this.redisMulti.set
-            .calledWith(`clsiserver:${this.project_id}`, 'clsi-8')
-            .should.equal(true)
-          this.redisMulti.expire
+          this.redis.setex
             .calledWith(
               `clsiserver:${this.project_id}`,
-              this.settings.clsiCookie.ttl
+              this.settings.clsiCookie.ttl,
+              'clsi-8'
             )
             .should.equal(true)
           return done()
@@ -208,7 +200,7 @@ describe('ClsiCookieManager', function() {
         this.project_id,
         this.response,
         (err, serverId) => {
-          this.redisMulti.exec.called.should.equal(false)
+          this.redis.setex.called.should.equal(false)
           return done()
         }
       )
@@ -222,19 +214,14 @@ describe('ClsiCookieManager', function() {
         this.project_id,
         this.response,
         (err, serverId) => {
-          this.redisMulti.exec.called.should.equal(false)
+          this.redis.setex.called.should.equal(false)
           return done()
         }
       )
     })
 
     it('should also set in the secondary if secondary redis is enabled', function(done) {
-      this.redisSecondaryMulti = {
-        set: sinon.stub(),
-        expire: sinon.stub(),
-        exec: sinon.stub()
-      }
-      this.redis_secondary = { multi: () => this.redisSecondaryMulti }
+      this.redis_secondary = { setex: sinon.stub().callsArg(3) }
       this.settings.redis.clsi_cookie_secondary = {}
       this.RedisWrapper.client = sinon.stub()
       this.RedisWrapper.client.withArgs('clsi_cookie').returns(this.redis)
@@ -254,13 +241,11 @@ describe('ClsiCookieManager', function() {
         this.project_id,
         this.response,
         (err, serverId) => {
-          this.redisSecondaryMulti.set
-            .calledWith(`clsiserver:${this.project_id}`, 'clsi-8')
-            .should.equal(true)
-          this.redisSecondaryMulti.expire
+          this.redis_secondary.setex
             .calledWith(
               `clsiserver:${this.project_id}`,
-              this.settings.clsiCookie.ttl
+              this.settings.clsiCookie.ttl,
+              'clsi-8'
             )
             .should.equal(true)
           return done()
