@@ -18,7 +18,7 @@
     "format:fix": "node_modules/.bin/prettier-eslint $PWD'/**/*.js' --write"
   },
   "dependencies": {
-    "@overleaf/metrics": "^3.4.1",
+    "@overleaf/metrics": "^3.5.1",
     "async": "3.2.0",
     "body-parser": "^1.19.0",
     "errorhandler": "^1.5.1",
