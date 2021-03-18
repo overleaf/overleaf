@@ -1,5 +1,4 @@
 Path = require('path')
-logger = require('logger-sharelatex')
 
 # These credentials are used for authenticating api requests
 # between services that may need to go over public channels
@@ -571,4 +570,3 @@ https = require('https')
 https.globalAgent.maxSockets = 300
 
 module.exports = settings
-
