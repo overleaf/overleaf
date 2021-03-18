@@ -5,7 +5,7 @@ export function useRefWithAutoFocus() {
 
   useEffect(() => {
     if (autoFocusedRef.current) {
-      requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
         if (autoFocusedRef.current) autoFocusedRef.current.focus()
       })
     }

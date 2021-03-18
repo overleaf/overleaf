@@ -1,6 +1,7 @@
 import React, {
   createContext,
   useCallback,
+  useMemo,
   useReducer,
   useContext
 } from 'react'
@@ -18,7 +19,7 @@ import { findInTreeOrThrow } from '../util/find-in-tree'
 import { isNameUniqueInFolder } from '../util/is-name-unique-in-folder'
 import { isBlockedFilename, isCleanFilename } from '../util/safe-path'
 
-import { FileTreeMainContext } from './file-tree-main'
+import { useFileTreeMainContext } from './file-tree-main'
 import { useFileTreeMutable } from './file-tree-mutable'
 import { useFileTreeSelectable } from './file-tree-selectable'
 
@@ -35,7 +36,9 @@ const ACTION_TYPES = {
   START_RENAME: 'START_RENAME',
   START_DELETE: 'START_DELETE',
   DELETING: 'DELETING',
+  START_CREATE_FILE: 'START_CREATE_FILE',
   START_CREATE_FOLDER: 'START_CREATE_FOLDER',
+  CREATING_FILE: 'CREATING_FILE',
   CREATING_FOLDER: 'CREATING_FOLDER',
   MOVING: 'MOVING',
   CANCEL: 'CANCEL',
@@ -46,10 +49,12 @@ const ACTION_TYPES = {
 const defaultState = {
   isDeleting: false,
   isRenaming: false,
+  isCreatingFile: false,
   isCreatingFolder: false,
   isMoving: false,
   inFlight: false,
   actionedEntities: null,
+  newFileCreateMode: null,
   error: null
 }
 
@@ -67,8 +72,21 @@ function fileTreeActionableReducer(state, action) {
         isDeleting: true,
         actionedEntities: action.actionedEntities
       }
+    case ACTION_TYPES.START_CREATE_FILE:
+      return {
+        ...defaultState,
+        isCreatingFile: true,
+        newFileCreateMode: action.newFileCreateMode
+      }
     case ACTION_TYPES.START_CREATE_FOLDER:
       return { ...defaultState, isCreatingFolder: true }
+    case ACTION_TYPES.CREATING_FILE:
+      return {
+        ...defaultState,
+        isCreatingFile: true,
+        newFileCreateMode: state.newFileCreateMode,
+        inFlight: true
+      }
     case ACTION_TYPES.CREATING_FOLDER:
       return { ...defaultState, isCreatingFolder: true, inFlight: true }
     case ACTION_TYPES.DELETING:
@@ -126,13 +144,15 @@ export function useFileTreeActionable() {
     isDeleting,
     isRenaming,
     isMoving,
+    isCreatingFile,
     isCreatingFolder,
     inFlight,
     error,
     actionedEntities,
+    newFileCreateMode,
     dispatch
   } = useContext(FileTreeActionableContext)
-  const { projectId } = useContext(FileTreeMainContext)
+  const { projectId } = useFileTreeMainContext()
   const { fileTreeData, dispatchRename, dispatchMove } = useFileTreeMutable()
   const { selectedEntityIds } = useFileTreeSelectable()
 
@@ -166,6 +186,13 @@ export function useFileTreeActionable() {
       )
     },
     [dispatch, dispatchRename, fileTreeData, projectId, selectedEntityIds]
+  )
+
+  const isDuplicate = useCallback(
+    (parentFolderId, name) => {
+      return !isNameUniqueInFolder(fileTreeData, parentFolderId, name)
+    },
+    [fileTreeData]
   )
 
   // init deletion flow (this will open the delete modal).
@@ -253,12 +280,12 @@ export function useFileTreeActionable() {
         selectedEntityIds
       )
 
-      // check for duplicates and throw
-      if (isNameUniqueInFolder(fileTreeData, parentFolderId, entity.name)) {
-        return syncCreateEntity(projectId, parentFolderId, entity)
-      } else {
-        return Promise.reject(new DuplicateFilenameError())
+      const error = validateCreate(fileTreeData, parentFolderId, entity)
+      if (error) {
+        return Promise.reject(error)
       }
+
+      return syncCreateEntity(projectId, parentFolderId, entity)
     },
     [fileTreeData, projectId, selectedEntityIds]
   )
@@ -277,65 +304,90 @@ export function useFileTreeActionable() {
     [dispatch, finishCreatingEntity]
   )
 
-  // bypass React file tree entirely; requesting the Angular new doc or file
-  // modal instead
+  const startCreatingFile = useCallback(
+    newFileCreateMode => {
+      dispatch({ type: ACTION_TYPES.START_CREATE_FILE, newFileCreateMode })
+    },
+    [dispatch]
+  )
+
   const startCreatingDocOrFile = useCallback(() => {
-    const parentFolderId = getSelectedParentFolderId(
-      fileTreeData,
-      selectedEntityIds
-    )
-    window.dispatchEvent(
-      new CustomEvent('FileTreeReactBridge.openNewDocModal', {
-        detail: {
-          mode: 'doc',
-          parentFolderId
-        }
-      })
-    )
-  }, [fileTreeData, selectedEntityIds])
+    if (window.showReactAddFilesModal) {
+      startCreatingFile('doc')
+    } else {
+      const parentFolderId = getSelectedParentFolderId(
+        fileTreeData,
+        selectedEntityIds
+      )
+
+      window.dispatchEvent(
+        new CustomEvent('FileTreeReactBridge.openNewDocModal', {
+          detail: {
+            mode: 'doc',
+            parentFolderId
+          }
+        })
+      )
+    }
+  }, [fileTreeData, selectedEntityIds, startCreatingFile])
 
   const startUploadingDocOrFile = useCallback(() => {
-    const parentFolderId = getSelectedParentFolderId(
-      fileTreeData,
-      selectedEntityIds
-    )
+    if (window.showReactAddFilesModal) {
+      startCreatingFile('upload')
+    } else {
+      const parentFolderId = getSelectedParentFolderId(
+        fileTreeData,
+        selectedEntityIds
+      )
 
-    window.dispatchEvent(
-      new CustomEvent('FileTreeReactBridge.openNewDocModal', {
-        detail: {
-          mode: 'upload',
-          parentFolderId
-        }
-      })
-    )
-  }, [fileTreeData, selectedEntityIds])
+      window.dispatchEvent(
+        new CustomEvent('FileTreeReactBridge.openNewDocModal', {
+          detail: {
+            mode: 'upload',
+            parentFolderId
+          }
+        })
+      )
+    }
+  }, [fileTreeData, selectedEntityIds, startCreatingFile])
 
   const finishCreatingDocOrFile = useCallback(
-    entity =>
-      finishCreatingEntity(entity)
+    entity => {
+      dispatch({ type: ACTION_TYPES.CREATING_FILE })
+
+      return finishCreatingEntity(entity)
         .then(() => {
-          // dispatch FileTreeReactBridge event to update the Angular modal
-          window.dispatchEvent(
-            new CustomEvent('FileTreeReactBridge.openNewFileModal', {
-              detail: {
-                done: true
-              }
-            })
-          )
+          if (window.showReactAddFilesModal) {
+            dispatch({ type: ACTION_TYPES.CLEAR })
+          } else {
+            // dispatch FileTreeReactBridge event to update the Angular modal
+            window.dispatchEvent(
+              new CustomEvent('FileTreeReactBridge.openNewFileModal', {
+                detail: {
+                  done: true
+                }
+              })
+            )
+          }
         })
         .catch(error => {
-          // dispatch FileTreeReactBridge event to update the Angular modal with
-          // an error
-          window.dispatchEvent(
-            new CustomEvent('FileTreeReactBridge.openNewFileModal', {
-              detail: {
-                error: true,
-                data: error.message
-              }
-            })
-          )
-        }),
-    [finishCreatingEntity]
+          if (window.showReactAddFilesModal) {
+            dispatch({ type: ACTION_TYPES.ERROR, error })
+          } else {
+            // dispatch FileTreeReactBridge event to update the Angular modal with
+            // an error
+            window.dispatchEvent(
+              new CustomEvent('FileTreeReactBridge.openNewFileModal', {
+                detail: {
+                  error: true,
+                  data: error.message
+                }
+              })
+            )
+          }
+        })
+    },
+    [dispatch, finishCreatingEntity]
   )
 
   const finishCreatingDoc = useCallback(
@@ -358,6 +410,11 @@ export function useFileTreeActionable() {
     dispatch({ type: ACTION_TYPES.CANCEL })
   }, [dispatch])
 
+  const parentFolderId = useMemo(
+    () => getSelectedParentFolderId(fileTreeData, selectedEntityIds),
+    [fileTreeData, selectedEntityIds]
+  )
+
   return {
     canDelete: selectedEntityIds.size > 0,
     canRename: selectedEntityIds.size === 1,
@@ -365,15 +422,20 @@ export function useFileTreeActionable() {
     isDeleting,
     isMoving,
     isRenaming,
+    isCreatingFile,
     isCreatingFolder,
     inFlight,
     actionedEntities,
     error,
+    parentFolderId,
+    isDuplicate,
+    newFileCreateMode,
     startRenaming,
     finishRenaming,
     startDeleting,
     finishDeleting,
     finishMoving,
+    startCreatingFile,
     startCreatingFolder,
     finishCreatingFolder,
     startCreatingDocOrFile,
@@ -394,6 +456,23 @@ function getSelectedParentFolderId(fileTreeData, selectedEntityIds) {
 
   const found = findInTreeOrThrow(fileTreeData, selectedEntityId)
   return found.type === 'folder' ? found.entity._id : found.parentFolderId
+}
+
+function validateCreate(fileTreeData, parentFolderId, entity) {
+  if (!isCleanFilename(entity.name)) {
+    return new InvalidFilenameError()
+  }
+
+  if (!isNameUniqueInFolder(fileTreeData, parentFolderId, entity.name)) {
+    return new DuplicateFilenameError()
+  }
+
+  // check that the name of a file is allowed, if creating in the root folder
+  const isMoveToRoot = parentFolderId === fileTreeData._id
+  const isFolder = entity.endpoint === 'folder'
+  if (isMoveToRoot && !isFolder && isBlockedFilename(entity.name)) {
+    return new BlockedFilenameError()
+  }
 }
 
 function validateRename(fileTreeData, found, newName) {

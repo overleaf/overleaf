@@ -23,6 +23,11 @@ describe('FileTree Context Menu Flow', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
@@ -52,6 +57,11 @@ describe('FileTree Context Menu Flow', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions={false}
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}

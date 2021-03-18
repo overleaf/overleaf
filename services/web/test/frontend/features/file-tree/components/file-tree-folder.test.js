@@ -33,7 +33,18 @@ describe('<FileTreeFolder/>', function() {
         folders={[]}
         docs={[]}
         files={[]}
-      />
+      />,
+      {
+        contextProps: {
+          rootFolder: [
+            {
+              docs: [{ _id: '123abc' }],
+              fileRefs: [],
+              folders: []
+            }
+          ]
+        }
+      }
     )
 
     const treeitem = screen.getByRole('treeitem', { selected: false })
@@ -58,7 +69,18 @@ describe('<FileTreeFolder/>', function() {
         folders={[]}
         docs={[]}
         files={[]}
-      />
+      />,
+      {
+        contextProps: {
+          rootFolder: [
+            {
+              docs: [{ _id: '123abc' }],
+              fileRefs: [],
+              folders: []
+            }
+          ]
+        }
+      }
     )
 
     screen.getByRole('treeitem')
@@ -76,7 +98,18 @@ describe('<FileTreeFolder/>', function() {
         folders={[]}
         docs={[]}
         files={[]}
-      />
+      />,
+      {
+        contextProps: {
+          rootFolder: [
+            {
+              docs: [{ _id: '123abc' }],
+              fileRefs: [],
+              folders: []
+            }
+          ]
+        }
+      }
     )
 
     expect(screen.queryByRole('tree')).to.not.exist

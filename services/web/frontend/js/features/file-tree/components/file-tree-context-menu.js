@@ -1,8 +1,8 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
 
 import { Dropdown } from 'react-bootstrap'
-import { FileTreeMainContext } from '../contexts/file-tree-main'
+import { useFileTreeMainContext } from '../contexts/file-tree-main'
 
 import FileTreeItemMenuItems from './file-tree-item/file-tree-item-menu-items'
 
@@ -11,7 +11,7 @@ function FileTreeContextMenu() {
     hasWritePermissions,
     contextMenuCoords,
     setContextMenuCoords
-  } = useContext(FileTreeMainContext)
+  } = useFileTreeMainContext()
 
   if (!hasWritePermissions || !contextMenuCoords) return null
 

@@ -4,6 +4,7 @@ import classNames from 'classnames'
 
 import FileTreeDoc from './file-tree-doc'
 import FileTreeFolder from './file-tree-folder'
+import { fileCollator } from '../util/file-collator'
 
 function FileTreeFolderList({
   folders,
@@ -60,19 +61,8 @@ FileTreeFolderList.propTypes = {
   children: PropTypes.node
 }
 
-// the collator used to sort files docs and folders in the tree. Use english as
-// base language for consistency. Options used:
-// numeric: true so 10 comes after 2
-// sensitivity: 'variant' so case and accent are not equal
-// caseFirst: 'upper' so upper-case letters come first
-const collator = new Intl.Collator('en', {
-  numeric: true,
-  sensitivity: 'variant',
-  caseFirst: 'upper'
-})
-
 function compareFunction(one, two) {
-  return collator.compare(one.name, two.name)
+  return fileCollator.compare(one.name, two.name)
 }
 
 export default FileTreeFolderList

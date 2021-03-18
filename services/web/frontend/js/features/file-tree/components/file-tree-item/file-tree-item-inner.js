@@ -1,18 +1,16 @@
-import React, { useContext, useEffect, createRef } from 'react'
+import React, { useEffect, createRef } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 
-import { FileTreeMainContext } from '../../contexts/file-tree-main'
+import { useFileTreeMainContext } from '../../contexts/file-tree-main'
 import { useDraggable } from '../../contexts/file-tree-draggable'
 
 import FileTreeItemName from './file-tree-item-name'
 import FileTreeItemMenu from './file-tree-item-menu'
 
 function FileTreeItemInner({ id, name, isSelected, icons }) {
-  const { hasWritePermissions, setContextMenuCoords } = useContext(
-    FileTreeMainContext
-  )
+  const { hasWritePermissions, setContextMenuCoords } = useFileTreeMainContext()
 
   const hasMenu = hasWritePermissions && isSelected
 

@@ -369,8 +369,24 @@
       vertical-align: top;
     }
   }
+  /* old modal */
   .toggle-output-files-button {
     font-size: 80%;
+  }
+  /* new modal */
+  .toggle-file-type-button {
+    font-size: 80%;
+    margin-top: -12px;
+    .btn {
+      display: inline-block;
+      padding: 0;
+      vertical-align: baseline;
+      font-size: inherit;
+    }
+    .btn:focus-within {
+      outline: none;
+      text-decoration: none;
+    }
   }
 }
 .modal-new-file--list {
@@ -378,17 +394,37 @@
   width: 220px;
   ul {
     li {
+      /* old modal (a) */
       a {
         color: @text-color;
         padding: (@line-height-computed / 4);
         display: block;
         text-decoration: none;
       }
+      /* new modal (button) */
+      .btn {
+        color: @text-color;
+        padding: (@line-height-computed / 4);
+      }
+      .btn:hover {
+        text-decoration: none;
+      }
+      .btn:focus {
+        outline: none;
+        text-decoration: none;
+        background-color: white;
+      }
     }
     li.active {
       background-color: white;
+      /* old modal (a) */
       a {
         color: @link-color;
+      }
+      /* new modal (button) */
+      .btn {
+        color: @link-color;
+        text-decoration: none;
       }
     }
     li:hover {
@@ -408,6 +444,10 @@
   margin-bottom: 0px;
 }
 
+.btn.modal-new-file-mode {
+  text-align: left;
+}
+
 .modal-new-file--body {
   padding: 20px;
   padding-top: (@line-height-computed / 4);
@@ -424,5 +464,15 @@
 
   .at-file-limit {
     text-align: left;
+  }
+}
+
+.modal-new-file--body-upload .uppy-Root {
+  font-family: inherit;
+}
+
+.modal-new-file--body-upload .uppy-size--md {
+  .uppy-Dashboard-AddFiles-title {
+    font-size: inherit;
   }
 }

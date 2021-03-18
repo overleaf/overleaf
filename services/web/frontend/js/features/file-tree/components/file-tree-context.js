@@ -17,6 +17,11 @@ function FileTreeContext({
   rootFolder,
   hasWritePermissions,
   rootDocId,
+  hasFeature,
+  refProviders,
+  reindexReferences,
+  setRefProviderEnabled,
+  setStartedFreeTrial,
   onSelect,
   children
 }) {
@@ -24,6 +29,11 @@ function FileTreeContext({
     <FileTreeMainProvider
       projectId={projectId}
       hasWritePermissions={hasWritePermissions}
+      hasFeature={hasFeature}
+      refProviders={refProviders}
+      setRefProviderEnabled={setRefProviderEnabled}
+      setStartedFreeTrial={setStartedFreeTrial}
+      reindexReferences={reindexReferences}
     >
       <FileTreeMutableProvider rootFolder={rootFolder}>
         <FileTreeSelectableProvider
@@ -44,6 +54,11 @@ FileTreeContext.propTypes = {
   projectId: PropTypes.string.isRequired,
   rootFolder: PropTypes.array.isRequired,
   hasWritePermissions: PropTypes.bool.isRequired,
+  hasFeature: PropTypes.func.isRequired,
+  reindexReferences: PropTypes.func.isRequired,
+  refProviders: PropTypes.object.isRequired,
+  setRefProviderEnabled: PropTypes.func.isRequired,
+  setStartedFreeTrial: PropTypes.func.isRequired,
   rootDocId: PropTypes.string,
   onSelect: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([

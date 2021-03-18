@@ -23,8 +23,11 @@ module.exports = {
         rule => !rule.test.toString().includes('woff')
       ),
       // Replace the less rule, adding to-string-loader
+      // Filter out the MiniCSS extraction, which conflicts with the built-in CSS loader
       ...customConfig.module.rules.filter(
-        rule => !rule.test.toString().includes('less')
+        rule =>
+          !rule.test.toString().includes('less') &&
+          !rule.test.toString().includes('css')
       ),
       {
         test: /\.less$/,

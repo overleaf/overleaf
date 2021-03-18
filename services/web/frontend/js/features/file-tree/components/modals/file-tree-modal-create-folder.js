@@ -46,7 +46,7 @@ function FileTreeModalCreateFolder() {
   }
 
   return (
-    <AccessibleModal show={isCreatingFolder} onHide={handleHide}>
+    <AccessibleModal show onHide={handleHide}>
       <Modal.Header>
         <Modal.Title>{t('new_folder')}</Modal.Title>
       </Modal.Header>

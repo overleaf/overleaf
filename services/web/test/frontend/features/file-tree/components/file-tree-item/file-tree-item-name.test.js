@@ -1,21 +1,23 @@
 import { expect } from 'chai'
 import React from 'react'
 import sinon from 'sinon'
-import { screen, fireEvent } from '@testing-library/react'
+import { screen, fireEvent, cleanup } from '@testing-library/react'
 import renderWithContext from '../../helpers/render-with-context'
 
 import FileTreeItemName from '../../../../../../frontend/js/features/file-tree/components/file-tree-item/file-tree-item-name'
 
 describe('<FileTreeItemName />', function() {
+  const sandbox = sinon.createSandbox()
   const setIsDraggable = sinon.stub()
 
   beforeEach(function() {
-    global.requestAnimationFrame = sinon.stub()
+    sandbox.spy(window, 'requestAnimationFrame')
   })
 
   afterEach(function() {
-    delete global.requestAnimationFrame
+    sandbox.restore()
     setIsDraggable.reset()
+    cleanup()
   })
 
   it('renders name as button', function() {
@@ -62,7 +64,7 @@ describe('<FileTreeItemName />', function() {
     fireEvent.doubleClick(button)
     screen.getByRole('textbox')
     expect(screen.queryByRole('button')).to.not.exist
-    expect(global.requestAnimationFrame).to.be.calledOnce
+    expect(window.requestAnimationFrame).to.be.calledOnce
     expect(setIsDraggable).to.be.calledWith(false)
   })
 

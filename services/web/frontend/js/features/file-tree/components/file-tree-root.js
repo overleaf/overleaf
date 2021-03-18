@@ -17,12 +17,18 @@ import { useDroppable } from '../contexts/file-tree-draggable'
 
 import { useFileTreeAngularListener } from '../hooks/file-tree-angular-listener'
 import { useFileTreeSocketListener } from '../hooks/file-tree-socket-listener'
+import FileTreeModalCreateFile from './modals/file-tree-modal-create-file'
 
 function FileTreeRoot({
   projectId,
   rootFolder,
   rootDocId,
   hasWritePermissions,
+  hasFeature,
+  refProviders,
+  reindexReferences,
+  setRefProviderEnabled,
+  setStartedFreeTrial,
   onSelect,
   onInit,
   isConnected
@@ -38,6 +44,11 @@ function FileTreeRoot({
     <FileTreeContext
       projectId={projectId}
       hasWritePermissions={hasWritePermissions}
+      hasFeature={hasFeature}
+      refProviders={refProviders}
+      setRefProviderEnabled={setRefProviderEnabled}
+      setStartedFreeTrial={setStartedFreeTrial}
+      reindexReferences={reindexReferences}
       rootFolder={rootFolder}
       rootDocId={rootDocId}
       onSelect={onSelect}
@@ -49,6 +60,7 @@ function FileTreeRoot({
         <FileTreeRootFolder />
       </div>
       <FileTreeModalDelete />
+      {window.showReactAddFilesModal && <FileTreeModalCreateFile />}
       <FileTreeModalCreateFolder />
       <FileTreeModalError />
     </FileTreeContext>
@@ -86,7 +98,12 @@ FileTreeRoot.propTypes = {
   hasWritePermissions: PropTypes.bool.isRequired,
   onSelect: PropTypes.func.isRequired,
   onInit: PropTypes.func.isRequired,
-  isConnected: PropTypes.bool.isRequired
+  isConnected: PropTypes.bool.isRequired,
+  setRefProviderEnabled: PropTypes.func.isRequired,
+  hasFeature: PropTypes.func.isRequired,
+  setStartedFreeTrial: PropTypes.func.isRequired,
+  reindexReferences: PropTypes.func.isRequired,
+  refProviders: PropTypes.object.isRequired
 }
 
 export default withErrorBoundary(FileTreeRoot, FileTreeError)

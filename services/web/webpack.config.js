@@ -115,6 +115,11 @@ module.exports = {
         ]
       },
       {
+        // Pass CSS files through css-loader & mini-css-extract-plugin (note: run in reverse order)
+        test: /\.css$/i,
+        use: [MiniCssExtractPlugin.loader, 'css-loader']
+      },
+      {
         // Load fonts
         test: /\.(woff|woff2)$/,
         use: [

@@ -1,14 +1,14 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 
 import Icon from '../../../shared/components/icon'
 import TooltipButton from '../../../shared/components/tooltip-button'
 
-import { FileTreeMainContext } from '../contexts/file-tree-main'
+import { useFileTreeMainContext } from '../contexts/file-tree-main'
 import { useFileTreeActionable } from '../contexts/file-tree-actionable'
 
 function FileTreeToolbar() {
-  const { hasWritePermissions } = useContext(FileTreeMainContext)
+  const { hasWritePermissions } = useFileTreeMainContext()
 
   if (!hasWritePermissions) return null
 
@@ -32,7 +32,7 @@ function FileTreeToolbarLeft() {
   if (!canCreate) return null
 
   return (
-    <>
+    <div className="toolbar-left">
       <TooltipButton
         id="new_file"
         description={t('new_file')}
@@ -58,7 +58,7 @@ function FileTreeToolbarLeft() {
       >
         <Icon type="upload" modifier="fw" accessibilityLabel={t('upload')} />
       </TooltipButton>
-    </>
+    </div>
   )
 }
 

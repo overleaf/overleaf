@@ -154,9 +154,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       }
     }
 
-    res.locals.buildCssPath = function(themeModifier = '') {
-      const cssFileName = `${themeModifier}style.css`
-
+    res.locals.buildStylesheetPath = function(cssFileName) {
       let path
       if (IS_DEV_ENV) {
         // In dev: resolve path within CSS asset directory
@@ -171,6 +169,10 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       }
 
       return Url.resolve(staticFilesBase, path)
+    }
+
+    res.locals.buildCssPath = function(themeModifier = '') {
+      return res.locals.buildStylesheetPath(`${themeModifier}style.css`)
     }
 
     res.locals.buildImgPath = function(imgFile) {
@@ -349,8 +351,11 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
       hasSamlBeta: req.session.samlBeta,
       hasSamlFeature: Features.hasFeature('saml'),
       samlInitPath: _.get(Settings, ['saml', 'ukamf', 'initPath']),
+      hasLinkUrlFeature: Features.hasFeature('link-url'),
       siteUrl: Settings.siteUrl,
       emailConfirmationDisabled: Settings.emailConfirmationDisabled,
+      maxEntitiesPerProject: Settings.maxEntitiesPerProject,
+      maxUploadSize: Settings.maxUploadSize,
       recaptchaSiteKeyV3:
         Settings.recaptcha != null ? Settings.recaptcha.siteKeyV3 : undefined,
       recaptchaDisabled:

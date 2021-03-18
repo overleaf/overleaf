@@ -1,13 +1,14 @@
 import App from '../../../base'
 import { react2angular } from 'react2angular'
+import { cloneDeep } from 'lodash'
 
 import FileTreeRoot from '../components/file-tree-root'
 
 App.controller('ReactFileTreeController', function(
   $scope,
   $timeout,
-  ide,
-  eventTracking
+  ide
+  // eventTracking
 ) {
   $scope.projectId = ide.project_id
   $scope.rootFolder = null
@@ -79,6 +80,39 @@ App.controller('ReactFileTreeController', function(
     } else {
       $scope.$emit('entity:no-selection')
     }
+  }
+
+  $scope.hasFeature = feature =>
+    ide.$scope.project.features[feature] || ide.$scope.user.features[feature]
+
+  $scope.$watch('permissions.write', hasWritePermissions => {
+    $scope.hasWritePermissions = hasWritePermissions
+  })
+
+  $scope.refProviders = ide.$scope.user.refProviders || {}
+
+  ide.$scope.$watch(
+    'user.refProviders',
+    refProviders => {
+      $scope.refProviders = cloneDeep(refProviders)
+    },
+    true
+  )
+
+  $scope.setRefProviderEnabled = provider => {
+    ide.$scope.$applyAsync(() => {
+      ide.$scope.user.refProviders[provider] = true
+    })
+  }
+
+  $scope.setStartedFreeTrial = started => {
+    $scope.$applyAsync(() => {
+      $scope.startedFreeTrial = started
+    })
+  }
+
+  $scope.reindexReferences = () => {
+    ide.$scope.$emit('references:should-reindex', {})
   }
 })
 

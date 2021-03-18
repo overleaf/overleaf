@@ -29,7 +29,7 @@ function FileTreeModalDelete() {
   }
 
   return (
-    <AccessibleModal show={isDeleting} onHide={handleHide}>
+    <AccessibleModal show onHide={handleHide}>
       <Modal.Header>
         <Modal.Title>{t('delete')}</Modal.Title>
       </Modal.Header>

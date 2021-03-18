@@ -12,7 +12,7 @@ import classNames from 'classnames'
 
 import { findInTree } from '../util/find-in-tree'
 import { useFileTreeMutable } from './file-tree-mutable'
-import { FileTreeMainContext } from './file-tree-main'
+import { useFileTreeMainContext } from './file-tree-main'
 import usePersistedState from '../../../infrastructure/persisted-state-hook'
 
 const FileTreeSelectableContext = createContext()
@@ -77,7 +77,7 @@ export function FileTreeSelectableProvider({
   onSelect,
   children
 }) {
-  const { projectId } = useContext(FileTreeMainContext)
+  const { projectId } = useFileTreeMainContext()
 
   const [initialSelectedEntityId] = usePersistedState(
     `doc.open_id.${projectId}`,

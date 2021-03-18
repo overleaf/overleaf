@@ -83,4 +83,8 @@ const withTheme = (Story, context) => {
 
 export const decorators = [withTheme]
 
-window.ExposedSettings = {}
+window.ExposedSettings = {
+  appName: 'Overleaf',
+  maxEntitiesPerProject: 10,
+  maxUploadSize: 5 * 1024 * 1024
+}

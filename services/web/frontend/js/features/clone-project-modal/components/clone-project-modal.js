@@ -23,8 +23,10 @@ function CloneProjectModal({
 
   // reset error when the modal is opened
   useEffect(() => {
-    setError(undefined)
-  }, [])
+    if (show) {
+      setError(undefined)
+    }
+  }, [show])
 
   // close the modal if not in flight
   const cancel = useCallback(() => {
@@ -54,7 +56,7 @@ function CloneProjectModal({
         openProject(data.project_id)
       })
       .catch(({ response, data }) => {
-        if (response.status === 400) {
+        if (response?.status === 400) {
           setError(data.message)
         } else {
           setError(true)

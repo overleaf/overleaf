@@ -17,7 +17,18 @@ describe('<FileTreeDoc/>', function() {
 
   it('renders selected', function() {
     renderWithContext(
-      <FileTreeDoc name="foo.tex" id="123abc" isLinkedFile={false} />
+      <FileTreeDoc name="foo.tex" id="123abc" isLinkedFile={false} />,
+      {
+        contextProps: {
+          rootFolder: [
+            {
+              docs: [{ _id: '123abc' }],
+              fileRefs: [],
+              folders: []
+            }
+          ]
+        }
+      }
     )
 
     const treeitem = screen.getByRole('treeitem', { selected: false })
@@ -41,7 +52,17 @@ describe('<FileTreeDoc/>', function() {
   })
 
   it('selects', function() {
-    renderWithContext(<FileTreeDoc name="foo.tex" id="123abc" expanded />)
+    renderWithContext(<FileTreeDoc name="foo.tex" id="123abc" expanded />, {
+      contextProps: {
+        rootFolder: [
+          {
+            docs: [{ _id: '123abc' }],
+            fileRefs: [],
+            folders: []
+          }
+        ]
+      }
+    })
 
     const treeitem = screen.getByRole('treeitem', { selected: false })
     fireEvent.click(treeitem)
@@ -50,7 +71,17 @@ describe('<FileTreeDoc/>', function() {
   })
 
   it('multi-selects', function() {
-    renderWithContext(<FileTreeDoc name="foo.tex" id="123abc" expanded />)
+    renderWithContext(<FileTreeDoc name="foo.tex" id="123abc" expanded />, {
+      contextProps: {
+        rootFolder: [
+          {
+            docs: [{ _id: '123abc' }],
+            fileRefs: [],
+            folders: []
+          }
+        ]
+      }
+    })
 
     const treeitem = screen.getByRole('treeitem')
 

@@ -40,6 +40,11 @@ describe('FileTree Create Folder Flow', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
         onSelect={onSelect}
         onInit={onInit}
         isConnected
@@ -95,6 +100,11 @@ describe('FileTree Create Folder Flow', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
         rootDocId="789ghi"
         onSelect={onSelect}
         onInit={onInit}
@@ -160,6 +170,11 @@ describe('FileTree Create Folder Flow', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
@@ -214,6 +229,11 @@ describe('FileTree Create Folder Flow', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
@@ -223,7 +243,7 @@ describe('FileTree Create Folder Flow', function() {
 
     var newFolderName = 'existingFile'
 
-    fireCreateFolder(newFolderName)
+    await fireCreateFolder(newFolderName)
 
     expect(fetchMock.called()).to.be.false
 

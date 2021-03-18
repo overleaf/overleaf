@@ -41,7 +41,18 @@ describe('<FileTreeFolderList/>', function() {
       ]
       renderWithContext(
         <FileTreeFolderList folders={[]} docs={docs} files={[]} />,
-        { contextProps: { hasWritePermissions: false } }
+        {
+          contextProps: {
+            hasWritePermissions: false,
+            rootFolder: [
+              {
+                docs: [{ _id: '1' }, { _id: '2' }],
+                fileRefs: [],
+                folders: []
+              }
+            ]
+          }
+        }
       )
 
       const treeitem1 = screen.getByRole('treeitem', { name: '1.tex' })
@@ -65,7 +76,18 @@ describe('<FileTreeFolderList/>', function() {
         { _id: '3', name: '3.tex' }
       ]
       renderWithContext(
-        <FileTreeFolderList folders={[]} docs={docs} files={[]} />
+        <FileTreeFolderList folders={[]} docs={docs} files={[]} />,
+        {
+          contextProps: {
+            rootFolder: [
+              {
+                docs: [{ _id: '1' }, { _id: '2' }, { _id: '3' }],
+                fileRefs: [],
+                folders: []
+              }
+            ]
+          }
+        }
       )
 
       const treeitem1 = screen.getByRole('treeitem', { name: '1.tex' })

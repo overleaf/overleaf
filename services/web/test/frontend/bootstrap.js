@@ -2,7 +2,14 @@
 require('@babel/register')
 
 // Load JSDOM to mock the DOM in Node
-require('jsdom-global/register')
+// Set pretendToBeVisual to enable requestAnimationFrame
+require('jsdom-global')(undefined, { pretendToBeVisual: true })
+
+const path = require('path')
+process.env.SHARELATEX_CONFIG = path.resolve(
+  __dirname,
+  '../../config/settings.webpack.coffee'
+)
 
 // Load sinon-chai assertions so expect(stubFn).to.have.been.calledWith('abc')
 // has a nicer failure messages
@@ -45,4 +52,12 @@ const fetch = require('node-fetch')
 global.fetch = (url, ...options) => fetch('http://localhost' + url, ...options)
 
 // Mock global settings
-window.ExposedSettings = {}
+window.ExposedSettings = {
+  appName: 'Overleaf',
+  maxEntitiesPerProject: 10,
+  maxUploadSize: 5 * 1024 * 1024
+}
+
+// ignore CSS files
+const { addHook } = require('pirates')
+addHook(() => '', { exts: ['.css'], ignoreNodeModules: false })

@@ -36,6 +36,11 @@ describe('<FileTreeRoot/>', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions={false}
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
@@ -67,6 +72,11 @@ describe('<FileTreeRoot/>', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
         rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
@@ -103,6 +113,11 @@ describe('<FileTreeRoot/>', function() {
         onSelect={onSelect}
         onInit={onInit}
         isConnected={false}
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
       />
     )
 
@@ -127,6 +142,11 @@ describe('<FileTreeRoot/>', function() {
         projectId="123abc"
         rootDocId="456def"
         hasWritePermissions={false}
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
         onSelect={onSelect}
         onInit={onInit}
         isConnected
@@ -175,6 +195,11 @@ describe('<FileTreeRoot/>', function() {
         projectId="123abc"
         rootDocId="456def"
         hasWritePermissions={false}
+        hasFeature={() => true}
+        refProviders={{}}
+        reindexReferences={() => null}
+        setRefProviderEnabled={() => null}
+        setStartedFreeTrial={() => null}
         onSelect={onSelect}
         onInit={onInit}
         isConnected
