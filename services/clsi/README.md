@@ -66,18 +66,45 @@ Then start the Docker container:
         -v "$PWD/compiles:/app/compiles" \
         -v "$PWD/cache:/app/cache" \
         -v /var/run/docker.sock:/var/run/docker.sock \
+        --name clsi \
         overleaf/clsi
 
 Note: if you're running the CLSI in macOS you may need to use `-v /var/run/docker.sock.raw:/var/run/docker.sock` instead.
 
-Note: if you're running the CLSI in Linux you may need to adjust the permissions of the `compiles` folder to match your local user:
+The CLSI should then be running at <http://localhost:3013>
 
-```shell
-sudo chown -R $(whoami):root compiles/
-sudo chmod g+w -R compiles/
+Important note for Linux users
+==============================
+
+The Node application runs as user `node` in the CLSI, which has uid `1000`. As a consequence of this, the `compiles` folder gets created on your host with `uid` and `gid` set to `1000`.
+```
+ls -lnd compiles
+drwxr-xr-x 2 1000 1000 4096 Mar 19 12:41 compiles
 ```
 
-The CLSI should then be running at <http://localhost:3013>
+If there is a user/group on your host which also happens to have `uid` / `gid` `1000` then that user/group will have ownership of the compiles folder on your host.
+
+LaTeX runs in the sibling containers as the user specified in the `TEXLIVE_IMAGE_USER` environment variable. In the example above this is set to `root`, which has uid `0`. This creates a problem with the above permissions, as the root user does not have permission to write to subfolders of `compiles`.
+
+A quick fix is to give the `root` group ownership and read write permissions to `compiles`, with `setgid` set so that new subfolders also inherit this ownership:
+```
+sudo chown -R 1000:root compiles
+sudo chmod -R g+w compiles
+sudo chmod g+s compiles
+```
+Another solution is to create a `sharelatex` group and add both `root` and the user with `uid` `1000` to it. If the host does not have a user with that `uid`, you will need to create one first.
+```
+sudo useradd --uid 1000 host-node-user # If required
+sudo groupadd sharelatex
+sudo usermod -a -G sharelatex root
+sudo usermod -a -G sharelatex $(id -nu 1000)
+sudo chown -R 1000:sharelatex compiles
+sudo chmod -R g+w compiles
+sudo chmod g+s compiles
+```
+
+This is a facet of the way docker works on Linux. See this [upstream issue](https://github.com/moby/moby/issues/7198)
+
 
 Config
 ------
