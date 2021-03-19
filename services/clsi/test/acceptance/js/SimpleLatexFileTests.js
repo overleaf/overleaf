@@ -10,7 +10,6 @@
  */
 const Client = require('./helpers/Client')
 const request = require('request')
-require('chai').should()
 const ClsiApp = require('./helpers/ClsiApp')
 
 describe('Simple LaTeX file', function () {

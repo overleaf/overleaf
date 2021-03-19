@@ -10,7 +10,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/TikzManager'
@@ -22,8 +21,7 @@ describe('TikzManager', function () {
       requires: {
         './ResourceWriter': (this.ResourceWriter = {}),
         './SafeReader': (this.SafeReader = {}),
-        fs: (this.fs = {}),
-        'logger-sharelatex': (this.logger = { log() {} })
+        fs: (this.fs = {})
       }
     }))
   })

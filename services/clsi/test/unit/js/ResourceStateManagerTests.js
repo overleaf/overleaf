@@ -12,7 +12,6 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const should = require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/ResourceStateManager'
@@ -26,7 +25,6 @@ describe('ResourceStateManager', function () {
       singleOnly: true,
       requires: {
         fs: (this.fs = {}),
-        'logger-sharelatex': { log: sinon.stub(), err: sinon.stub() },
         './SafeReader': (this.SafeReader = {})
       }
     })

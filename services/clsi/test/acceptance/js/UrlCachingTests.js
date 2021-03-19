@@ -11,7 +11,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const Client = require('./helpers/Client')
-require('chai').should()
 const sinon = require('sinon')
 const ClsiApp = require('./helpers/ClsiApp')
 

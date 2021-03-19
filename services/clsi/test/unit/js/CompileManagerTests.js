@@ -15,7 +15,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/CompileManager'
@@ -47,7 +46,6 @@ describe('CompileManager', function () {
           }
         }),
 
-        'logger-sharelatex': (this.logger = { log: sinon.stub(), info() {} }),
         child_process: (this.child_process = {}),
         './CommandRunner': (this.CommandRunner = {}),
         './DraftModeManager': (this.DraftModeManager = {}),

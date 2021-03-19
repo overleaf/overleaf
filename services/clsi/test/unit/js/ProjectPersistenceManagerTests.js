@@ -13,7 +13,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const assert = require('chai').assert
 const modulePath = require('path').join(
   __dirname,
@@ -28,11 +27,6 @@ describe('ProjectPersistenceManager', function () {
         './UrlCache': (this.UrlCache = {}),
         './CompileManager': (this.CompileManager = {}),
         diskusage: (this.diskusage = { check: sinon.stub() }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub(),
-          err: sinon.stub()
-        }),
         'settings-sharelatex': (this.settings = {
           project_cache_length_ms: 1000
         }),

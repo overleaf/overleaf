@@ -11,7 +11,6 @@
  */
 const Client = require('./helpers/Client')
 const request = require('request')
-require('chai').should()
 const { expect } = require('chai')
 const path = require('path')
 const fs = require('fs')

@@ -11,7 +11,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const { expect } = require('chai')
 const modulePath = require('path').join(
   __dirname,
@@ -32,13 +31,7 @@ describe('CompileController', function () {
             }
           }
         }),
-        './ProjectPersistenceManager': (this.ProjectPersistenceManager = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          err: sinon.stub(),
-          warn: sinon.stub()
-        })
+        './ProjectPersistenceManager': (this.ProjectPersistenceManager = {})
       }
     })
     this.Settings.externalUrl = 'http://www.example.com'

@@ -11,7 +11,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/LockManager'
@@ -24,11 +23,6 @@ describe('DockerLockManager', function () {
     this.LockManager = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': {},
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          err() {}
-        }),
         fs: {
           lstat: sinon.stub().callsArgWith(1),
           readdir: sinon.stub().callsArgWith(1)
