@@ -22,6 +22,7 @@ const CookieParser = require('cookie-parser')
 
 const DrainManager = require('./app/js/DrainManager')
 const HealthCheckManager = require('./app/js/HealthCheckManager')
+const DeploymentManager = require('./app/js/DeploymentManager')
 
 // NOTE: debug is invoked for every blob that is put on the wire
 const socketIoLogger = {
@@ -35,6 +36,9 @@ const socketIoLogger = {
   debug() {},
   log() {}
 }
+
+// monitor status file to take dark deployments out of the load-balancer
+DeploymentManager.initialise()
 
 // Set up socket.io server
 const app = express()
@@ -79,13 +83,20 @@ io.configure(function () {
 })
 
 // a 200 response on '/' is required for load balancer health checks
-app.get('/', (req, res) => res.send('real-time-sharelatex is alive'))
+// these operate separately from kubernetes readiness checks
+app.get('/', function (req, res) {
+  if (Settings.serviceIsClosed || Settings.shutDownInProgress) {
+    res.sendStatus(503) // Service unavailable
+  } else {
+    res.send('real-time is open')
+  }
+})
 
 app.get('/status', function (req, res) {
   if (Settings.shutDownInProgress) {
     res.sendStatus(503) // Service unavailable
   } else {
-    res.send('real-time-sharelatex is alive')
+    res.send('real-time is alive')
   }
 })
 
