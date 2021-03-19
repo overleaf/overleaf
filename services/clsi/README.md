@@ -16,13 +16,13 @@ The provided `Dockerfile` builds a Docker image which has the Docker command lin
 The CLSI can be configured through the following environment variables:
 
 * `ALLOWED_COMPILE_GROUPS` - Space separated list of allowed compile groups
-* `ALLOWED_IMAGES` - Space separated list of allowed Docker TeX Live images 
+* `ALLOWED_IMAGES` - Space separated list of allowed Docker TeX Live images
 * `CATCH_ERRORS` - Set to `true` to log uncaught exceptions
 * `COMPILE_GROUP_DOCKER_CONFIGS` - JSON string of Docker configs for compile groups
 * `COMPILES_HOST_DIR` - Working directory for LaTeX compiles
 * `COMPILE_SIZE_LIMIT` - Sets the body-parser [limit](https://github.com/expressjs/body-parser#limit)
 * `DOCKER_RUNNER` - Set to true to use sibling containers
-* `DOCKER_RUNTIME` - 
+* `DOCKER_RUNTIME` -
 * `FILESTORE_DOMAIN_OVERRIDE` - The url for the filestore service e.g.`http://$FILESTORE_HOST:3009`
 * `FILESTORE_PARALLEL_FILE_DOWNLOADS` - Number of parallel file downloads
 * `FILESTORE_PARALLEL_SQL_QUERY_LIMIT` - Number of parallel SQL queries
@@ -69,6 +69,13 @@ Then start the Docker container:
         overleaf/clsi
 
 Note: if you're running the CLSI in macOS you may need to use `-v /var/run/docker.sock.raw:/var/run/docker.sock` instead.
+
+Note: if you're running the CLSI in Linux you may need to adjust the permissions of the `compiles` folder to match your local user:
+
+```shell
+sudo chown -R $(whoami):root compiles/
+sudo chmod g+w -R compiles/
+```
 
 The CLSI should then be running at <http://localhost:3013>
 
