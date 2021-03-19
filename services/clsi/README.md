@@ -61,13 +61,14 @@ Then start the Docker container:
         -e LISTEN_ADDRESS=0.0.0.0 \
         -e DOCKER_RUNNER=true \
         -e TEXLIVE_IMAGE=texlive/texlive \
+        -e TEXLIVE_IMAGE_USER=root \
         -e COMPILES_HOST_DIR="$PWD/compiles" \
         -v "$PWD/compiles:/app/compiles" \
         -v "$PWD/cache:/app/cache" \
         -v /var/run/docker.sock:/var/run/docker.sock \
         overleaf/clsi
 
-Note: if you're running the CLSI in macOS you may need to add `-e TEXLIVE_IMAGE_USER=root` and use `-v /var/run/docker.sock.raw:/var/run/docker.sock` instead.
+Note: if you're running the CLSI in macOS you may need to use `-v /var/run/docker.sock.raw:/var/run/docker.sock` instead.
 
 The CLSI should then be running at <http://localhost:3013>
 
