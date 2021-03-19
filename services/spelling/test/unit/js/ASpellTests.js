@@ -9,20 +9,13 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const should = chai.should()
+const { expect, assert } = require('chai')
 const SandboxedModule = require('sandboxed-module')
-const { assert } = require('chai')
 
 describe('ASpell', function () {
   beforeEach(function () {
     return (this.ASpell = SandboxedModule.require('../../../app/js/ASpell', {
       requires: {
-        'logger-sharelatex': {
-          log() {},
-          info() {},
-          err() {}
-        },
         '@overleaf/metrics': {
           gauge() {},
           inc() {}
@@ -93,7 +86,7 @@ describe('ASpell', function () {
     })
 
     return it('should return an error', function () {
-      return should.exist(this.error)
+      return expect(this.error).to.exist
     })
   })
 

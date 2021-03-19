@@ -3,8 +3,7 @@
     no-undef
 */
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const EventEmitter = require('events')
 
@@ -15,11 +14,6 @@ describe('ASpellWorker', function () {
       '../../../app/js/ASpellWorker',
       {
         requires: {
-          'logger-sharelatex': {
-            log() {},
-            info() {},
-            err() {}
-          },
           '@overleaf/metrics': {
             gauge() {},
             inc() {}
