@@ -52,7 +52,7 @@ const Features = {
       case 'saml':
         return Settings.enableSaml
       case 'link-url':
-        return _.get(Settings, ['apis', 'linkedUrlProxy', 'url'])
+        return !!_.get(Settings, ['apis', 'linkedUrlProxy', 'url'])
       case 'public-registration':
         return publicRegistrationModuleAvailable
       case 'support':
