@@ -424,7 +424,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 
 
 if process.env["SHARELATEX_SAML_ENTRYPOINT"]
-	# NOTE: see https://github.com/bergie/passport-saml/blob/master/README.md for docs of `server` options
+	# NOTE: see https://github.com/node-saml/passport-saml/blob/master/README.md for docs of `server` options
 	settings.externalAuth = true
 	settings.saml =
 		updateUserDetailsOnLogin: process.env["SHARELATEX_SAML_UPDATE_USER_DETAILS_ON_LOGIN"] == 'true'
@@ -497,7 +497,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			)
 
 	# SHARELATEX_SAML_CERT cannot be empty
-	# https://github.com/bergie/passport-saml/commit/f6b1c885c0717f1083c664345556b535f217c102
+	# https://github.com/node-saml/passport-saml/commit/f6b1c885c0717f1083c664345556b535f217c102
 	if process.env["SHARELATEX_SAML_CERT"]
 		settings.saml.server.cert = process.env["SHARELATEX_SAML_CERT"]
 		settings.saml.server.privateCert = process.env["SHARELATEX_SAML_PRIVATE_CERT"]
