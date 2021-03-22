@@ -3,18 +3,23 @@ extends ../layout
 block vars
 	- var suppressNavContentLinks = true
 
-block content
-	script#data(type="application/json").
-		!{StringHelper.stringifyJsonForScript({ projects, tags, notifications, notificationsInstitution, userAffiliations, userEmails, allInReconfirmNotificationPeriods, reconfirmedViaSAML })}
-
-	script(type="text/javascript").
-		window.data = JSON.parse(document.querySelector("#data").text);
-		window.algolia = {
+block append meta
+	meta(name="ol-projects" data-type="json" content=projects)
+	meta(name="ol-tags" data-type="json" content=tags)
+	meta(name="ol-notifications" data-type="json" content=notifications)
+	meta(name="ol-notificationsInstitution" data-type="json" content=notificationsInstitution)
+	meta(name="ol-userAffiliations" data-type="json" content=userAffiliations)
+	meta(name="ol-userEmails" data-type="json" content=userEmails)
+	meta(name="ol-allInReconfirmNotificationPeriods" data-type="json" content=allInReconfirmNotificationPeriods)
+	meta(name="ol-reconfirmedViaSAML" content=reconfirmedViaSAML)
+	meta(name="ol-algolia" data-type="json" content={
 			institutions: {
-				app_id:  '#{algolia_app_id}',
-				api_key: '#{algolia_api_key}'
+				app_id:  algolia_app_id,
+				api_key: algolia_api_key
 			}
-		};
+		})
+
+block content
 
 	main.content.content-alt.project-list-page(
 		ng-controller="ProjectPageController"

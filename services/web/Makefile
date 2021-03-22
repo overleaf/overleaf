@@ -220,6 +220,10 @@ lint_misc:
 		--ignore-pattern 'modules/*/test/**/*.js' \
 		--max-warnings=0
 
+lint: lint_pug
+lint_pug:
+	bin/lint_pug_templates
+
 lint_in_docker:
 	$(RUN_LINT_FORMAT) make lint -j --output-sync
 

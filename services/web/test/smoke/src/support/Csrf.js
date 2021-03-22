@@ -1,6 +1,6 @@
 const OError = require('@overleaf/o-error')
 const { assertHasStatusCode } = require('./requestHelper')
-const CSRF_REGEX = /window.csrfToken = "(.+?)"/
+const CSRF_REGEX = /<meta name="ol-csrfToken" content="(.+?)">/
 
 function _parseCsrf(body) {
   const match = CSRF_REGEX.exec(body)

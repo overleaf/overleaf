@@ -69,44 +69,41 @@ html(
 			script(type='text/javascript').
 				window.ga = function() { console.log("would send to GA", arguments) };
 
-		script(type="text/javascript").
-			window.csrfToken = "#{csrfToken}";
+		block meta
+			meta(name="ol-csrfToken" content=csrfToken)
 			//- Configure dynamically loaded assets (via webpack) to be downloaded from CDN
 			//- See: https://webpack.js.org/guides/public-path/#on-the-fly
-			window.baseAssetPath = "#{buildBaseAssetPath()}"
+			meta(name="ol-baseAssetPath" content=buildBaseAssetPath())
+
+			meta(name="ol-usersEmail" content=getUserEmail())
+			meta(name="ol-sharelatex" data-type="json" content={
+				siteUrl: settings.siteUrl,
+				wsUrl,
+			})
+			meta(name="ol-ab" data-type="json" content={})
+			meta(name="ol-user_id" content=getLoggedInUserId())
+			//- Internationalisation settings
+			meta(name="ol-i18n" data-type="json" content={
+				currentLangCode: currentLngCode
+			})
+			//- Expose some settings globally to the frontend
+			meta(name="ol-ExposedSettings" data-type="json" content=ExposedSettings)
+
+			if (typeof(settings.algolia) != "undefined")
+				meta(name="ol-sharelatex.algolia" data-type="json" content={
+					app_id: settings.algolia.app_id,
+					api_key: settings.algolia.read_only_api_key,
+					indexes: settings.algolia.indexes
+				})
+
+			if (typeof(settings.templates) != "undefined")
+				meta(name="ol-sharelatex.templates" data-type="json" content={
+					user_id : settings.templates.user_id,
+					cdnDomain : settings.templates.cdnDomain,
+					indexName : settings.templates.indexName
+				})
 
 		block head-scripts
-
-		meta(id="ol-usersEmail" content=getUserEmail())
-		script.
-			window.sharelatex = {
-				siteUrl: '#{settings.siteUrl}',
-				wsUrl: '#{wsUrl}',
-			};
-			window.ab = {};
-			window.user_id = '#{getLoggedInUserId()}';
-			//- Internationalisation settings
-			window.i18n = {
-				currentLangCode: '#{currentLngCode}'
-			}
-			//- Expose some settings globally to the frontend
-			window.ExposedSettings = JSON.parse('!{StringHelper.stringifyJsonForScript(ExposedSettings)}');
-
-		- if (typeof(settings.algolia) != "undefined")
-			script.
-				window.sharelatex.algolia = {
-					app_id:'#{settings.algolia.app_id}',
-					api_key:'#{settings.algolia.read_only_api_key}',
-					indexes:!{StringHelper.stringifyJsonForScript(settings.algolia.indexes)}
-				}
-
-		- if (typeof(settings.templates) != "undefined")
-			script.
-				window.sharelatex.templates = {
-					user_id : '!{settings.templates.user_id}',
-					cdnDomain : '!{settings.templates.cdnDomain}',
-					indexName : '!{settings.templates.indexName}'
-				}
 
 
 	body
