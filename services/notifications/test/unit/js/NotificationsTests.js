@@ -13,9 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const expect = chai.should
-const should = chai.should()
+const { expect } = require('chai')
 const modulePath = '../../../app/js/Notifications.js'
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
@@ -43,16 +41,9 @@ describe('Notifications Tests', function () {
 
     this.notifications = SandboxedModule.require(modulePath, {
       requires: {
-        'logger-sharelatex': {
-          log() {},
-          error() {}
-        },
         'settings-sharelatex': {},
         './mongodb': { db: this.db, ObjectId },
         '@overleaf/metrics': { timeAsyncMethod: sinon.stub() }
-      },
-      globals: {
-        console
       }
     })
 
@@ -109,7 +100,7 @@ describe('Notifications Tests', function () {
         user_id,
         this.stubbedNotification,
         (err) => {
-          expect(err).not.exists
+          expect(err).not.to.exist
           sinon.assert.calledWith(
             this.updateOneStub,
             this.expectedQuery,
@@ -131,7 +122,7 @@ describe('Notifications Tests', function () {
           user_id,
           this.stubbedNotification,
           (err) => {
-            expect(err).not.exists
+            expect(err).not.to.exist
             sinon.assert.notCalled(this.updateOneStub)
             return done()
           }
@@ -144,7 +135,7 @@ describe('Notifications Tests', function () {
           user_id,
           this.stubbedNotification,
           (err) => {
-            expect(err).not.exists
+            expect(err).not.to.exist
             sinon.assert.calledWith(
               this.updateOneStub,
               this.expectedQuery,
@@ -184,7 +175,7 @@ describe('Notifications Tests', function () {
           user_id,
           this.stubbedNotification,
           (err) => {
-            expect(err).not.exists
+            expect(err).not.to.exist
             sinon.assert.calledWith(
               this.updateOneStub,
               this.expectedQuery,
