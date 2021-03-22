@@ -87,6 +87,7 @@ app.get('/project/:project_id/sync/code', CompileController.syncFromCode)
 app.get('/project/:project_id/sync/pdf', CompileController.syncFromPdf)
 app.get('/project/:project_id/wordcount', CompileController.wordcount)
 app.get('/project/:project_id/status', CompileController.status)
+app.post('/project/:project_id/status', CompileController.status)
 
 // Per-user containers
 app.post(
