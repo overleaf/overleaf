@@ -17,7 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@overleaf/metrics": "^3.4.1",
+    "@overleaf/metrics": "^3.5.1",
     "async": "^2.6.3",
     "body-parser": "^1.19.0",
     "coffee-script": "^1.12.7",
