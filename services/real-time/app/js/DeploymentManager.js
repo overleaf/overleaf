@@ -9,10 +9,13 @@ const FILE_CHECK_INTERVAL = 5000
 const statusFile = settings.deploymentFile
 const deploymentColour = settings.deploymentColour
 
+var serviceCloseTime
+
 function updateDeploymentStatus(fileContent) {
   const closed = fileContent && fileContent.indexOf(deploymentColour) === -1
   if (closed && !settings.serviceIsClosed) {
     settings.serviceIsClosed = true
+    serviceCloseTime = Date.now() + 60 * 1000 // delay closing by 1 minute
     logger.warn({ fileContent }, 'closing service')
   } else if (!closed && settings.serviceIsClosed) {
     settings.serviceIsClosed = false
@@ -49,5 +52,8 @@ module.exports = {
       checkStatusFileSync() // perform an initial synchronous check at start up
       setInterval(pollStatusFile, FILE_CHECK_INTERVAL) // continue checking periodically
     }
+  },
+  deploymentIsClosed() {
+    return settings.serviceIsClosed && Date.now() > serviceCloseTime
   }
 }

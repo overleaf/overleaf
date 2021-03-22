@@ -85,7 +85,7 @@ io.configure(function () {
 // a 200 response on '/' is required for load balancer health checks
 // these operate separately from kubernetes readiness checks
 app.get('/', function (req, res) {
-  if (Settings.serviceIsClosed || Settings.shutDownInProgress) {
+  if (Settings.shutDownInProgress || DeploymentManager.deploymentIsClosed()) {
     res.sendStatus(503) // Service unavailable
   } else {
     res.send('real-time is open')
