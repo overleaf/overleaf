@@ -23,6 +23,7 @@ block content
 								type="hidden",
 								name="passwordResetToken",
 								value=token
+								ng-non-bindable
 							)
 							.alert.alert-danger(ng-show="activationForm.response.error")
 								| #{translate("activation_token_expired")}
