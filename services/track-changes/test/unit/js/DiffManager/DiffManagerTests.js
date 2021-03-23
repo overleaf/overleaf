@@ -11,9 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/js/DiffManager.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -21,11 +19,6 @@ describe('DiffManager', function () {
   beforeEach(function () {
     this.DiffManager = SandboxedModule.require(modulePath, {
       requires: {
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          warn: sinon.stub()
-        }),
         './UpdatesManager': (this.UpdatesManager = {}),
         './DocumentUpdaterManager': (this.DocumentUpdaterManager = {}),
         './DiffGenerator': (this.DiffGenerator = {})

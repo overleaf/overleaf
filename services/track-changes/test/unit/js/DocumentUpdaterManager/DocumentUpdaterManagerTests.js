@@ -10,9 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/js/DocumentUpdaterManager.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -21,10 +19,6 @@ describe('DocumentUpdaterManager', function () {
     this.DocumentUpdaterManager = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub()
-        }),
         'settings-sharelatex': (this.settings = {
           apis: { documentupdater: { url: 'http://example.com' } }
         })

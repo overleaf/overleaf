@@ -11,10 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const { assert } = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { assert, expect } = require('chai')
 const modulePath = '../../../../app/js/PackManager.js'
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
@@ -31,7 +28,6 @@ describe('PackManager', function () {
         './mongodb': { db: (this.db = {}), ObjectId },
         './LockManager': {},
         './MongoAWS': {},
-        'logger-sharelatex': { log: sinon.stub(), error: sinon.stub() },
         '@overleaf/metrics': { inc() {} },
         './ProjectIterator': require('../../../../app/js/ProjectIterator.js'), // Cache for speed
         'settings-sharelatex': {

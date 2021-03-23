@@ -11,19 +11,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/js/DiffGenerator.js'
 const SandboxedModule = require('sandboxed-module')
 
 describe('DiffGenerator', function () {
   beforeEach(function () {
-    this.DiffGenerator = SandboxedModule.require(modulePath, {
-      requires: {
-        'logger-sharelatex': { warn: sinon.stub() }
-      }
-    })
+    this.DiffGenerator = SandboxedModule.require(modulePath, {})
     this.ts = Date.now()
     this.user_id = 'mock-user-id'
     this.user_id_2 = 'mock-user-id-2'

@@ -14,7 +14,6 @@
  */
 const app = require('../../../../app')
 const { waitForDb } = require('../../../../app/js/mongodb')
-require('logger-sharelatex')
 const logger = require('logger-sharelatex')
 const Settings = require('settings-sharelatex')
 
