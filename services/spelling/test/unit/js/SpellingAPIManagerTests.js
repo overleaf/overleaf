@@ -2,9 +2,7 @@
     handle-callback-err
 */
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
-chai.should()
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const modulePath = require('path').join(
   __dirname,

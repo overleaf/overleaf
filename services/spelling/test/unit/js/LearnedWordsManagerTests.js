@@ -1,12 +1,11 @@
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { assert, expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/LearnedWordsManager'
 )
-const { assert } = require('chai')
+
 describe('LearnedWordsManager', function () {
   beforeEach(function () {
     this.token = 'a6b3cd919ge'
@@ -22,17 +21,9 @@ describe('LearnedWordsManager', function () {
       del: sinon.stub()
     }
     this.LearnedWordsManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './mongodb': { db: this.db },
         './MongoCache': this.cache,
-        'logger-sharelatex': {
-          log() {},
-          err() {},
-          info() {}
-        },
         '@overleaf/metrics': {
           timeAsyncMethod: sinon.stub(),
           inc: sinon.stub()
