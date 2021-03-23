@@ -32,6 +32,8 @@ App.controller('PdfController', function(
   $scope.pdf.clearingCache = false
   $scope.shouldShowLogs = false
 
+  $scope.logsUISubvariant = window.logsUISubvariant
+
   // view logic to check whether the files dropdown should "drop up" or "drop down"
   $scope.shouldDropUp = false
 
@@ -708,7 +710,8 @@ App.controller('PdfController', function(
         errors: $scope.pdf.logEntries.errors.length,
         warnings: $scope.pdf.logEntries.warnings.length,
         typesetting: $scope.pdf.logEntries.typesetting.length,
-        newLogsUI: window.showNewLogsUI
+        newLogsUI: window.showNewLogsUI,
+        subvariant: window.logsUISubvariant
       }
       eventTracking.sendMBSampled(
         'compile-result',

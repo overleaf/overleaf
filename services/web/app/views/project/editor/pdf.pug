@@ -30,6 +30,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			on-set-split-layout="setPdfSplitLayout"
 			on-set-full-layout="setPdfFullLayout"
 			on-stop-compilation="stop"
+			variant-with-first-error-popup="logsUISubvariant === 'new-logs-ui-with-popup'"
 			show-logs="shouldShowLogs"
 			on-log-entry-location-click="openInEditor"
 		)
@@ -415,3 +416,4 @@ script(type='text/ng-template', id='clearCacheModalTemplate')
 
 script(type="text/javascript").
 	window.showNewLogsUI = #{showNewLogsUI || false}
+	window.logsUISubvariant = !{logsUISubvariant ? '"' + logsUISubvariant + '"' : 'null'}

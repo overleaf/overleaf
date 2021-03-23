@@ -13,6 +13,20 @@ describe('NewLogsUI helper', function() {
     return ObjectId.createFromTime(time).toString()
   }
 
+  function isExistingUI(variant) {
+    return !variant.newLogsUI && !variant.subvariant
+  }
+
+  function isNewUIWithPopup(variant) {
+    return variant.newLogsUI && variant.subvariant === 'new-logs-ui-with-popup'
+  }
+
+  function isNewUIWithoutPopup(variant) {
+    return (
+      variant.newLogsUI && variant.subvariant === 'new-logs-ui-without-popup'
+    )
+  }
+
   beforeEach(function() {
     this.user = {
       alphaProgram: false,
@@ -21,7 +35,9 @@ describe('NewLogsUI helper', function() {
     }
     this.settings = {
       logsUIPercentageBeta: 0,
-      logsUIPercentage: 0
+      logsUIPercentageWithoutPopupBeta: 0,
+      logsUIPercentage: 0,
+      logsUIPercentageWithoutPopup: 0
     }
     NewLogsUI = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -31,52 +47,117 @@ describe('NewLogsUI helper', function() {
     })
   })
 
-  it('should show the new logs ui for alpha users', function() {
+  it('should always show the new UI with popup for alpha users', function() {
     this.user.alphaProgram = true
-    expect(NewLogsUI.shouldUserSeeNewLogsUI(this.user)).to.be.true
+    for (const percentile of [0, 20, 40, 60, 80]) {
+      this.user._id = userIdFromTime(percentile)
+      const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+      expect(isNewUIWithPopup(variant)).to.be.true
+    }
   })
 
   describe('for beta users', function() {
     beforeEach(function() {
       this.user.betaProgram = true
     })
-    it('should not show the new logs ui with a beta rollout percentage of 0', function() {
-      this.settings.logsUIPercentageBeta = 0
-      expect(NewLogsUI.shouldUserSeeNewLogsUI(this.user)).to.be.false
+
+    describe('with a 0% rollout', function() {
+      it('should always show the existing UI', function() {
+        for (const percentile of [0, 20, 40, 60, 80]) {
+          this.user._id = userIdFromTime(percentile)
+          const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+          expect(isExistingUI(variant)).to.be.true
+        }
+      })
     })
-    describe('with a beta rollout percentage > 0', function() {
-      const percentileThresold = 50
+
+    describe('with a new UI rollout', function() {
+      const newUIWithPopupPercentage = 33
+      const newUIWithoutPopupPercentage = 33
+
+      const newUIWithPopupThreshold = newUIWithPopupPercentage
+      const newUIWithoutPopupThreshold =
+        newUIWithPopupPercentage + newUIWithoutPopupPercentage
+
       beforeEach(function() {
-        this.settings.logsUIPercentageBeta = percentileThresold
+        this.settings.logsUIPercentageBeta = newUIWithPopupPercentage
+        this.settings.logsUIPercentageWithoutPopupBeta = newUIWithoutPopupPercentage
       })
-      it('should not show the new logs ui when the user id is higher than the percent threshold', function() {
-        this.user._id = userIdFromTime(percentileThresold + 1)
-        expect(NewLogsUI.shouldUserSeeNewLogsUI(this.user)).to.be.false
+      it('should show the new UI with popup when the id is below the new UI with popup upper threshold (exc)', function() {
+        this.user._id = userIdFromTime(newUIWithPopupThreshold - 1)
+        const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+        expect(isNewUIWithPopup(variant)).to.be.true
       })
-      it('should show the new logs ui when the user id is lower than the percent threshold', function() {
-        this.user._id = userIdFromTime(percentileThresold - 1)
-        expect(NewLogsUI.shouldUserSeeNewLogsUI(this.user)).to.be.true
+      it('should show the new UI without popup when the id is at the new UI with popup upper threshold (exc)', function() {
+        this.user._id = userIdFromTime(newUIWithPopupThreshold)
+        const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+        expect(isNewUIWithoutPopup(variant)).to.be.true
+      })
+      it('should show the new UI without popup when the id is above the new UI with popup upper threshold (inc) and below the new UI without popup upper threshold (exc)', function() {
+        this.user._id = userIdFromTime(newUIWithoutPopupThreshold - 1)
+        const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+        expect(isNewUIWithoutPopup(variant)).to.be.true
+      })
+      it('should show the existing UI when the id is at the new UI without popup upper threshold (exc)', function() {
+        this.user._id = userIdFromTime(newUIWithoutPopupThreshold)
+        const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+        expect(isExistingUI(variant)).to.be.true
+      })
+      it('should show the existing UI when the id is above the new UI without popup upper threshold (exc)', function() {
+        this.user._id = userIdFromTime(newUIWithoutPopupThreshold + 1)
+        const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+        expect(isExistingUI(variant)).to.be.true
       })
     })
   })
 
-  describe('for normal users', function() {
-    it('should not show the new logs ui rollout percentage of 0', function() {
-      this.settings.logsUIPercentage = 0
-      expect(NewLogsUI.shouldUserSeeNewLogsUI(this.user)).to.be.false
+  describe('for regular users', function() {
+    describe('with a 0% rollout', function() {
+      it('should always show the existing UI', function() {
+        for (const percentile of [0, 20, 40, 60, 80]) {
+          this.user._id = userIdFromTime(percentile)
+          const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+          expect(isExistingUI(variant)).to.be.true
+        }
+      })
     })
-    describe('with a rollout percentage > 0', function() {
-      const percentileThresold = 50
+
+    describe('with a new UI rollout', function() {
+      const newUIWithPopupPercentage = 33
+      const newUIWithoutPopupPercentage = 33
+
+      const newUIWithPopupThreshold = newUIWithPopupPercentage
+      const newUIWithoutPopupThreshold =
+        newUIWithPopupPercentage + newUIWithoutPopupPercentage
+
       beforeEach(function() {
-        this.settings.logsUIPercentage = percentileThresold
+        this.settings.logsUIPercentage = newUIWithPopupPercentage
+        this.settings.logsUIPercentageWithoutPopup = newUIWithoutPopupPercentage
       })
-      it('should not show the new logs ui when the user id is higher than the percent threshold', function() {
-        this.user._id = userIdFromTime(percentileThresold + 1)
-        expect(NewLogsUI.shouldUserSeeNewLogsUI(this.user)).to.be.false
+      it('should show the new UI with popup when the id is below the new UI with popup upper threshold (exc)', function() {
+        this.user._id = userIdFromTime(newUIWithPopupThreshold - 1)
+        const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+        expect(isNewUIWithPopup(variant)).to.be.true
       })
-      it('should show the new logs ui when the user id is lower than the percent threshold', function() {
-        this.user._id = userIdFromTime(percentileThresold - 1)
-        expect(NewLogsUI.shouldUserSeeNewLogsUI(this.user)).to.be.true
+      it('should show the new UI without popup when the id is at the new UI with popup upper threshold (exc)', function() {
+        this.user._id = userIdFromTime(newUIWithPopupThreshold)
+        const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+        expect(isNewUIWithoutPopup(variant)).to.be.true
+      })
+      it('should show the new UI without popup when the id is above the new UI with popup upper threshold (inc) and below the new UI without popup upper threshold (exc)', function() {
+        this.user._id = userIdFromTime(newUIWithoutPopupThreshold - 1)
+        const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+        expect(isNewUIWithoutPopup(variant)).to.be.true
+      })
+      it('should show the existing UI when the id is at the new UI without popup upper threshold (exc)', function() {
+        this.user._id = userIdFromTime(newUIWithoutPopupThreshold)
+        const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+        expect(isExistingUI(variant)).to.be.true
+      })
+      it('should show the existing UI when the id is above the new UI without popup upper threshold (exc)', function() {
+        this.user._id = userIdFromTime(newUIWithoutPopupThreshold + 1)
+        const variant = NewLogsUI.getNewLogsUIVariantForUser(this.user)
+        expect(isExistingUI(variant)).to.be.true
       })
     })
   })
