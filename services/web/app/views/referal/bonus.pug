@@ -25,7 +25,7 @@ block content
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
 										a(href='https://twitter.com/share?text='+encodeURIComponent(translate("bonus_twitter_share_text"))+'&url='+encodeURIComponent(buildReferalUrl("t"))+'&counturl='+settings.social.twitter.counturl, target="_blank").twitter
-											i.fa.fa-fw.fa-2x.fa-twitter(aria-hidden)
+											i.fa.fa-fw.fa-2x.fa-twitter(aria-hidden="true")
 											|
 											| Tweet
 
@@ -33,7 +33,7 @@ block content
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
 										a(href='#', onclick='postToFeed(); return false;').facebook
-											i.fa.fa-fw.fa-2x.fa-facebook-square(aria-hidden)
+											i.fa.fa-fw.fa-2x.fa-facebook-square(aria-hidden="true")
 											|
 											| #{translate("post_on_facebook")}
 
@@ -41,7 +41,7 @@ block content
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
 										a(href='mailto:?subject='+encodeURIComponent(translate("bonus_email_share_header"))+'&body='+encodeURIComponent(translate("bonus_email_share_body")+' ')+encodeURIComponent(buildReferalUrl("e")), title='Share by Email').email
-											i.fa.fa-fw.fa-2x.fa-envelope-open-o(aria-hidden)
+											i.fa.fa-fw.fa-2x.fa-envelope-open-o(aria-hidden="true")
 											|
 											| #{translate("email_us_to_your_friends")}
 
@@ -49,7 +49,7 @@ block content
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
 										a(href='#link-modal', data-toggle="modal", ng-click="openLinkToUsModal()").link
-											i.fa.fa-fw.fa-2x.fa-globe(aria-hidden)
+											i.fa.fa-fw.fa-2x.fa-globe(aria-hidden="true")
 											|
 											| #{translate("link_to_us")}
 
