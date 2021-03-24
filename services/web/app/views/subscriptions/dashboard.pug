@@ -10,7 +10,7 @@ block content
 		.container
 			.row
 				.col-md-8.col-md-offset-2
-					-if (fromPlansPage)
+					if (fromPlansPage)
 						.alert.alert-warning
 							p You already have a subscription
 					.card
@@ -18,36 +18,36 @@ block content
 							h1 #{translate("your_subscription")}
 
 						-var hasDisplayedSubscription = false
-						-if (personalSubscription)
+						if (personalSubscription)
 							-hasDisplayedSubscription = true
 							include ./dashboard/_personal_subscription
 
-						-if (managedGroupSubscriptions && managedGroupSubscriptions.length > 0)
+						if (managedGroupSubscriptions && managedGroupSubscriptions.length > 0)
 							include ./dashboard/_managed_groups
 
-						-if (managedInstitutions && managedInstitutions.length > 0)
+						if (managedInstitutions && managedInstitutions.length > 0)
 							include ./dashboard/_managed_institutions
 
-						-if (managedPublishers && managedPublishers.length > 0)
+						if (managedPublishers && managedPublishers.length > 0)
 							include ./dashboard/_managed_publishers
 
-						-if (memberGroupSubscriptions && memberGroupSubscriptions.length > 0)
+						if (memberGroupSubscriptions && memberGroupSubscriptions.length > 0)
 							-hasDisplayedSubscription = true
 							include ./dashboard/_group_memberships
 
-						-if (confirmedMemberAffiliations && confirmedMemberAffiliations.length > 0)
+						if (confirmedMemberAffiliations && confirmedMemberAffiliations.length > 0)
 							include ./dashboard/_institution_memberships
 
-						-if (v1SubscriptionStatus)
+						if (v1SubscriptionStatus)
 							include ./dashboard/_v1_subscription_status
 
-						-if (!hasDisplayedSubscription)
-							-if (hasSubscription)
+						if (!hasDisplayedSubscription)
+							if (hasSubscription)
 								-hasDisplayedSubscription = true
 								p(ng-non-bindable) You're on an #{settings.appName} Paid plan. Contact
 									a(href="mailto:support@overleaf.com") support@overleaf.com
 									|  to find out more.
-							-else
+							else
 								p(ng-non-bindable) You're on the #{settings.appName} Free plan.
 								|
 								a(ng-controller="UpgradeSubscriptionController" href="/user/subscription/plans" ng-click="upgradeSubscription()").btn.btn-primary Upgrade now

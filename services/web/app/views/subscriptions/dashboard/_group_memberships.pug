@@ -1,12 +1,12 @@
 div(ng-controller="GroupMembershipController")
 	each groupSubscription in memberGroupSubscriptions
-		- if (user._id+'' != groupSubscription.admin_id._id+'')
-			div 
+		if (user._id+'' != groupSubscription.admin_id._id+'')
+			div
 				p
 					| You are a member of
 					|
 					+teamName(groupSubscription)
-				- if (groupSubscription.teamNotice && groupSubscription.teamNotice != '')
+				if (groupSubscription.teamNotice && groupSubscription.teamNotice != '')
 					p
 						//- Team notice is sanitized in SubscriptionViewModelBuilder
 						em(ng-non-bindable) !{groupSubscription.teamNotice}

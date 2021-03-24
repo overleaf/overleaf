@@ -134,8 +134,8 @@
 			i.fa.fa-arrow-up.fa-2x(aria-hidden="true")
 		div
 			strong #{translate("create_your_first_project")}
-			
-- if (showUserDetailsArea)
+
+if (showUserDetailsArea)
 	span(ng-controller="LeftHandMenuPromoController",  ng-cloak)
 
 		.row-spaced#userProfileInformation(ng-if="hasProjects")

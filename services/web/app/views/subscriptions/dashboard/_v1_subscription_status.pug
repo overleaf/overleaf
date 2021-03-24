@@ -1,8 +1,8 @@
-- if (v1SubscriptionStatus['team'] && v1SubscriptionStatus['team']['default_plan_name'] != 'free')
+if (v1SubscriptionStatus['team'] && v1SubscriptionStatus['team']['default_plan_name'] != 'free')
   - hasDisplayedSubscription = true
   p
     | You have a legacy group licence from Overleaf v1.
-  - if (v1SubscriptionStatus['team']['will_end_at'])
+  if (v1SubscriptionStatus['team']['will_end_at'])
     p
       | Your current group licence ends on
       |
@@ -10,16 +10,16 @@
       |
       | and will
       |
-      - if (v1SubscriptionStatus['team']['will_renew'])
+      if (v1SubscriptionStatus['team']['will_renew'])
         | be automatically renewed.
-      - else 
+      else
         | not be automatically renewed.
-  - if (v1SubscriptionStatus['can_cancel_team'])
+  if (v1SubscriptionStatus['can_cancel_team'])
     p
       form(method="POST", action="/user/subscription/v1/cancel")
         input(type="hidden", name="_csrf", value=csrfToken)
         button().btn.btn-danger Stop automatic renewal
-  - else
+  else
     p
       | Please
       |
@@ -28,9 +28,9 @@
       | to make changes to your plan
   hr
 
-- if (v1SubscriptionStatus['product'])
+if (v1SubscriptionStatus['product'])
   - hasDisplayedSubscription = true
-  p  
+  p
     | You have a legacy Overleaf v1
     |
     strong= v1SubscriptionStatus['product']['display_name']
@@ -43,16 +43,16 @@
     |
     | and will
     |
-    - if (v1SubscriptionStatus['product']['will_renew'])
+    if (v1SubscriptionStatus['product']['will_renew'])
       | be automatically renewed.
-    - else 
+    else
       | not be automatically renewed.
-  - if (v1SubscriptionStatus['can_cancel'])
+  if (v1SubscriptionStatus['can_cancel'])
     p
       form(method="POST", action="/user/subscription/v1/cancel")
         input(type="hidden", name="_csrf", value=csrfToken)
         button().btn.btn-danger Stop automatic renewal
-  - else
+  else
     p
       | Please
       |

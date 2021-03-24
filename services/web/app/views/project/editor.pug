@@ -191,7 +191,7 @@ block content
 		window.showReactFileTree = "!{showReactFileTree}" === 'true'
 		window.showReactAddFilesModal = "!{showReactAddFilesModal}" === 'true'
 
-	- if (settings.overleaf != null)
+	if (settings.overleaf != null)
 		script(type='text/javascript').
 			window.overallThemes = JSON.parse('!{StringHelper.stringifyJsonForScript(overallThemes)}');
 

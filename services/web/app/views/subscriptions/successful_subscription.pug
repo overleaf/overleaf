@@ -10,13 +10,13 @@ block content
 							h2 #{translate("thanks_for_subscribing")}
 
 						.alert.alert-success
-							- if (personalSubscription.recurly.trial_ends_at)
+							if (personalSubscription.recurly.trial_ends_at)
 								p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount: personalSubscription.recurly.price, collectionDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong', 'strong'])}
 								include ./_price_exceptions
 							p #{translate("to_modify_your_subscription_go_to")} 
 								a(href="/user/subscription")  #{translate("manage_subscription")}.
 						p
-							- if (personalSubscription.groupPlan == true)
+							if (personalSubscription.groupPlan == true)
 								a.btn.btn-success.btn-large(href=`/manage/groups/${personalSubscription._id}/members`) #{translate("add_your_first_group_member_now")}
 						p.letter-from-founders
 							p #{translate("thanks_for_subscribing_you_help_sl", {planName:personalSubscription.plan.name})}

@@ -64,16 +64,16 @@ block content
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 30px; margin-top: 20px;")
 									- for (var i = 0; i <= 10; i++) {
-										- if (refered_user_count == i)
+										if (refered_user_count == i)
 											.number(style="left: "+i+"0%").active #{i}
-										- else
+										else
 											.number(style="left: "+i+"0%") #{i}
 									- }
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner
 									.progress
-										- if (refered_user_count == 0)
+										if (refered_user_count == 0)
 											div(style="text-align: center; padding: 4px;") #{translate("spread_the_word_and_fill_bar")}
 										.progress-bar.progress-bar-info(style="width: "+refered_user_count+"0%")
 
@@ -87,11 +87,11 @@ block content
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner.bonus-status
-									- if (refered_user_count == 0)
+									if (refered_user_count == 0)
 										p.thanks !{translate("you_not_introed_anyone_to_sl")}
-									- else if (refered_user_count == 1)
+									else if (refered_user_count == 1)
 										p.thanks !{translate("you_introed_small_number", {numberOfPeople: refered_user_count}, ['strong'])}
-									- else
+									else
 										p.thanks !{translate("you_introed_high_number", {numberOfPeople: refered_user_count}, ['strong'])}
 
 						script(type="text/ng-template", id="BonusLinkToUsModal")
