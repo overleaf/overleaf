@@ -9,7 +9,7 @@ import PropTypes from 'prop-types'
 const defaultContextProps = {
   projectId: 'project-1',
   hasWritePermissions: true,
-  hasFeature: () => true,
+  userHasFeature: () => true,
   refProviders: {},
   reindexReferences: () => {
     console.log('reindex references')

@@ -36,7 +36,7 @@ describe('<FileTreeRoot/>', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions={false}
-        hasFeature={() => true}
+        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
@@ -72,7 +72,7 @@ describe('<FileTreeRoot/>', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions
-        hasFeature={() => true}
+        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
@@ -113,7 +113,7 @@ describe('<FileTreeRoot/>', function() {
         onSelect={onSelect}
         onInit={onInit}
         isConnected={false}
-        hasFeature={() => true}
+        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
@@ -142,7 +142,7 @@ describe('<FileTreeRoot/>', function() {
         projectId="123abc"
         rootDocId="456def"
         hasWritePermissions={false}
-        hasFeature={() => true}
+        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
@@ -195,7 +195,7 @@ describe('<FileTreeRoot/>', function() {
         projectId="123abc"
         rootDocId="456def"
         hasWritePermissions={false}
-        hasFeature={() => true}
+        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}

@@ -14,7 +14,7 @@ export default (children, options = {}) => {
       }
     ],
     hasWritePermissions: true,
-    hasFeature: () => true,
+    userHasFeature: () => true,
     refProviders: {},
     reindexReferences: () => {
       console.log('reindex references')

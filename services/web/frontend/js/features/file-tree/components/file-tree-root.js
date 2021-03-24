@@ -24,7 +24,7 @@ function FileTreeRoot({
   rootFolder,
   rootDocId,
   hasWritePermissions,
-  hasFeature,
+  userHasFeature,
   refProviders,
   reindexReferences,
   setRefProviderEnabled,
@@ -44,7 +44,7 @@ function FileTreeRoot({
     <FileTreeContext
       projectId={projectId}
       hasWritePermissions={hasWritePermissions}
-      hasFeature={hasFeature}
+      userHasFeature={userHasFeature}
       refProviders={refProviders}
       setRefProviderEnabled={setRefProviderEnabled}
       setStartedFreeTrial={setStartedFreeTrial}
@@ -100,7 +100,7 @@ FileTreeRoot.propTypes = {
   onInit: PropTypes.func.isRequired,
   isConnected: PropTypes.bool.isRequired,
   setRefProviderEnabled: PropTypes.func.isRequired,
-  hasFeature: PropTypes.func.isRequired,
+  userHasFeature: PropTypes.func.isRequired,
   setStartedFreeTrial: PropTypes.func.isRequired,
   reindexReferences: PropTypes.func.isRequired,
   refProviders: PropTypes.object.isRequired

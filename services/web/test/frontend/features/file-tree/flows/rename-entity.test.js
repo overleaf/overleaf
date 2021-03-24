@@ -51,7 +51,7 @@ describe('FileTree Rename Entity Flow', function() {
         rootFolder={rootFolder}
         projectId="123abc"
         hasWritePermissions
-        hasFeature={() => true}
+        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}

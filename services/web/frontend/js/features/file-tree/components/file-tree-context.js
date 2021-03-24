@@ -17,7 +17,7 @@ function FileTreeContext({
   rootFolder,
   hasWritePermissions,
   rootDocId,
-  hasFeature,
+  userHasFeature,
   refProviders,
   reindexReferences,
   setRefProviderEnabled,
@@ -29,7 +29,7 @@ function FileTreeContext({
     <FileTreeMainProvider
       projectId={projectId}
       hasWritePermissions={hasWritePermissions}
-      hasFeature={hasFeature}
+      userHasFeature={userHasFeature}
       refProviders={refProviders}
       setRefProviderEnabled={setRefProviderEnabled}
       setStartedFreeTrial={setStartedFreeTrial}
@@ -54,7 +54,7 @@ FileTreeContext.propTypes = {
   projectId: PropTypes.string.isRequired,
   rootFolder: PropTypes.array.isRequired,
   hasWritePermissions: PropTypes.bool.isRequired,
-  hasFeature: PropTypes.func.isRequired,
+  userHasFeature: PropTypes.func.isRequired,
   reindexReferences: PropTypes.func.isRequired,
   refProviders: PropTypes.object.isRequired,
   setRefProviderEnabled: PropTypes.func.isRequired,

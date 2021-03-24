@@ -3,7 +3,7 @@ import sinon from 'sinon'
 export const contextProps = {
   projectId: 'test-project',
   hasWritePermissions: true,
-  hasFeature: () => true,
+  userHasFeature: () => true,
   refProviders: {},
   reindexReferences: () => {
     console.log('reindex references')

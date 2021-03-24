@@ -82,8 +82,7 @@ App.controller('ReactFileTreeController', function(
     }
   }
 
-  $scope.hasFeature = feature =>
-    ide.$scope.project.features[feature] || ide.$scope.user.features[feature]
+  $scope.userHasFeature = feature => ide.$scope.user.features[feature]
 
   $scope.$watch('permissions.write', hasWritePermissions => {
     $scope.hasWritePermissions = hasWritePermissions

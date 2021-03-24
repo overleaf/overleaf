@@ -5,7 +5,7 @@ import FileTreeModalCreateFile from '../../../js/features/file-tree/components/m
 export const MinimalFeatures = args => <FileTreeModalCreateFile {...args} />
 MinimalFeatures.decorators = [
   createFileModalDecorator({
-    hasFeature: () => false
+    userHasFeature: () => false
   })
 ]
 
