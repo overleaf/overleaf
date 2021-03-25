@@ -9,8 +9,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-chai.should()
 const sinon = require('sinon')
 const modulePath = '../../../../app/js/MongoAWS.js'
 const SandboxedModule = require('sandboxed-module')
@@ -36,11 +34,6 @@ describe('MongoAWS', function () {
         }),
         child_process: (this.child_process = {}),
         'mongo-uri': (this.mongouri = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          err() {}
-        }),
         'aws-sdk': (this.awssdk = {}),
         fs: (this.fs = {}),
         's3-streams': (this.S3S = {}),

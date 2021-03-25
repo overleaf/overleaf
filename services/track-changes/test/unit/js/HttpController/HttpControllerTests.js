@@ -10,9 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/js/HttpController.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -21,7 +19,6 @@ describe('HttpController', function () {
     this.HttpController = SandboxedModule.require(modulePath, {
       singleOnly: true,
       requires: {
-        'logger-sharelatex': { log: sinon.stub() },
         './UpdatesManager': (this.UpdatesManager = {}),
         './DiffManager': (this.DiffManager = {}),
         './RestoreManager': (this.RestoreManager = {}),

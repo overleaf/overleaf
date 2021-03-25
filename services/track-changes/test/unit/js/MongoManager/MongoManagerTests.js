@@ -10,9 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/js/MongoManager.js'
 const packModulePath = '../../../../app/js/PackManager.js'
 const SandboxedModule = require('sandboxed-module')
@@ -26,8 +24,7 @@ describe('MongoManager', function () {
       requires: {
         './mongodb': { db: (this.db = {}), ObjectId },
         './PackManager': (this.PackManager = {}),
-        '@overleaf/metrics': { timeAsyncMethod() {} },
-        'logger-sharelatex': { log() {} }
+        '@overleaf/metrics': { timeAsyncMethod() {} }
       }
     })
     this.callback = sinon.stub()

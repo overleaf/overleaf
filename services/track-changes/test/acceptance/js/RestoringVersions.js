@@ -10,9 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const { ObjectId } = require('../../../app/js/mongodb')
 const Settings = require('settings-sharelatex')
 

@@ -14,9 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
 const modulePath = '../../../../app/js/UpdatesManager.js'
 const SandboxedModule = require('sandboxed-module')
@@ -34,7 +32,6 @@ describe('UpdatesManager', function () {
         './WebApiManager': (this.WebApiManager = {}),
         './UpdateTrimmer': (this.UpdateTrimmer = {}),
         './DocArchiveManager': (this.DocArchiveManager = {}),
-        'logger-sharelatex': { log: sinon.stub(), error: sinon.stub() },
         'settings-sharelatex': {
           redis: {
             lock: {

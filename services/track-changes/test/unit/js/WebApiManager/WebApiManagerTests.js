@@ -10,9 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/js/WebApiManager.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -21,10 +19,6 @@ describe('WebApiManager', function () {
     this.WebApiManager = SandboxedModule.require(modulePath, {
       requires: {
         requestretry: (this.request = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub()
-        }),
         'settings-sharelatex': (this.settings = {
           apis: {
             web: {
