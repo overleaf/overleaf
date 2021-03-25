@@ -159,12 +159,10 @@ block content
 			h3 {{ title }}
 		.modal-body(ng-bind-html="message")
 
-	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
-	//- and doesn't prematurely end the script tag.
 	script#data(type="application/json").
 		!{StringHelper.stringifyJsonForScript({ userSettings: userSettings, user: user, trackChangesState: trackChangesState, useV2History: useV2History, enabledLinkedFileTypes: settings.enabledLinkedFileTypes, brandVariation: brandVariation })}
 
-	script(type='text/javascript').
+	script(type="text/javascript", nonce=scriptNonce).
 		window.data = JSON.parse(document.querySelector("#data").text);
 		window.project_id = "!{project_id}";
 		window.userSettings = window.data.userSettings;
@@ -192,11 +190,11 @@ block content
 		window.showReactAddFilesModal = "!{showReactAddFilesModal}" === 'true'
 
 	if (settings.overleaf != null)
-		script(type='text/javascript').
+		script(type="text/javascript", nonce=scriptNonce).
 			window.overallThemes = JSON.parse('!{StringHelper.stringifyJsonForScript(overallThemes)}');
 
 block foot-scripts
-	script(type="text/javascript" src=(wsUrl || '/socket.io') + '/socket.io.js')
-	script(src=mathJaxPath)
-	script(src=buildJsPath('libraries.js'))
-	script(src=buildJsPath('ide.js'))
+	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
+	script(type="text/javascript", nonce=scriptNonce, src=mathJaxPath)
+	script(type="text/javascript", nonce=scriptNonce, src=buildJsPath('libraries.js'))
+	script(type="text/javascript", nonce=scriptNonce, src=buildJsPath('ide.js'))

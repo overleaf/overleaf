@@ -1,5 +1,5 @@
 block head-scripts
-	script(type='text/javascript').
+	script(type="text/javascript", nonce=scriptNonce).
 		window.oauthProviders = !{StringHelper.stringifyJsonForScript(oauthProviders)}
 		window.thirdPartyIds = !{StringHelper.stringifyJsonForScript(thirdPartyIds)}
 

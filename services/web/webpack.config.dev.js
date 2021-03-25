@@ -7,7 +7,7 @@ module.exports = merge(base, {
   mode: 'development',
 
   // Enable accurate source maps for dev
-  devtool: 'eval-source-map',
+  devtool: 'source-map',
 
   plugins: [
     // Extract CSS to a separate file (rather than inlining to a <style> tag)

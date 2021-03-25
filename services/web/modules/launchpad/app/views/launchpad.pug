@@ -2,14 +2,14 @@ extends ../../../../app/views/layout
 
 block content
 
-	script(type="text/javascript").
+	script(type="text/javascript", nonce=scriptNonce).
 		window.data = {
 			adminUserExists: !{adminUserExists == true},
 			ideJsPath: "!{buildJsPath('ide.js')}",
 			authMethod: "!{authMethod}"
 		}
 
-	script(type="text/javascript" src=(wsUrl || '/socket.io') + '/socket.io.js')
+	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
 
 	style.
 		hr { margin-bottom: 5px; }

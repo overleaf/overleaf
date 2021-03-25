@@ -25,7 +25,7 @@ block content
       input(type="hidden" name="brandVariationId" value=brandVariationId)
 
 block append foot-scripts
-  script.
+  script(type="text/javascript", nonce=scriptNonce).
     $(document).ready(function(){
       $('#create_form').submit();
     });

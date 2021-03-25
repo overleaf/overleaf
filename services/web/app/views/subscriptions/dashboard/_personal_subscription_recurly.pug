@@ -1,4 +1,4 @@
-script(type='text/javascript').
+script(type="text/javascript", nonce=scriptNonce).
 	window.recurlyApiKey = "!{settings.apis.recurly.publicKey}"
 	window.subscription = !{StringHelper.stringifyJsonForScript(personalSubscription)}
 	window.recomendedCurrency = "#{personalSubscription.recurly.currency}"

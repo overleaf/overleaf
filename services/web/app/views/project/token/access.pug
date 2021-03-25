@@ -92,7 +92,7 @@ block content
 
 
 block append foot-scripts
-	script.
+	script(type="text/javascript", nonce=scriptNonce).
 		$(document).ready(function () {
 			setTimeout(function() {
 				$('.loading-screen-brand').css('height', '20%')

@@ -284,9 +284,9 @@ block content
 	script#data(type="application/json").
 		!{StringHelper.stringifyJsonForScript({ reconfirmationRemoveEmail, reconfirmedViaSAML })}
 
-	script(type="text/javascript").
+	script(type="text/javascript", nonce=scriptNonce).
 		window.data = JSON.parse(document.querySelector("#data").text);
 
-	script(type='text/javascript').
+	script(type="text/javascript", nonce=scriptNonce).
 		window.usersEmail = !{StringHelper.stringifyJsonForScript(user.email)};
 		window.passwordStrengthOptions = !{StringHelper.stringifyJsonForScript(settings.passwordStrengthOptions || {})}

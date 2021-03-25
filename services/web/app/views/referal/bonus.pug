@@ -122,7 +122,7 @@ block content
 
 
 block append foot-scripts
-	script(type='text/javascript').
+	script(type="text/javascript", nonce=scriptNonce).
 		$(document).ready(function () {
 			$.ajax({dataType: "script", cache: true, url: "//connect.facebook.net/en_US/all.js"}).done(function () {
 				window.fbAsyncInit = function() {
@@ -148,9 +148,9 @@ block append foot-scripts
 			}
 		}
 
-	script(type='text/javascript', src='//platform.twitter.com/widgets.js')
+	script(type="text/javascript", nonce=scriptNonce, src='//platform.twitter.com/widgets.js')
 
-	script(type="text/javascript").
+	script(type="text/javascript", nonce=scriptNonce).
 		$(function() {
 			$(".twitter").click(function() {
 				ga('send', 'event', 'referal-button', 'clicked', "twitter")

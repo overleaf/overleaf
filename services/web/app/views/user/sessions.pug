@@ -2,7 +2,7 @@ extends ../layout
 
 
 block head-scripts
-	script(type='text/javascript').
+	script(type="text/javascript", nonce=scriptNonce).
 		window.otherSessions = !{StringHelper.stringifyJsonForScript(sessions)}
 
 

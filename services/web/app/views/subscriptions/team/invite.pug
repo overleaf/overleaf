@@ -1,7 +1,7 @@
 extends ../../layout
 
 block head-scripts
-	script(type='text/javascript').
+	script(type="text/javascript", nonce=scriptNonce).
 		window.teamId = '#{teamId}'
 		window.hasIndividualRecurlySubscription = #{hasIndividualRecurlySubscription}
 		window.inviteToken = '#{inviteToken}'

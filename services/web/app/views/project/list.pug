@@ -62,3 +62,6 @@ block content
 		include ./list/modals
 
 	//- include ./list/front-chat
+
+	script(type="text/javascript", nonce=scriptNonce).
+		window.userHasNoSubscription = #{!!(settings.enableSubscriptions && !hasSubscription)}

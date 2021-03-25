@@ -108,7 +108,7 @@ block content
 									a(href=paths.exportMembers) #{translate('export_csv')}
 
 
-	script(type="text/javascript").
+	script(type="text/javascript", nonce=scriptNonce).
 		window.users = !{StringHelper.stringifyJsonForScript(users)};
 		window.paths = !{StringHelper.stringifyJsonForScript(paths)};
 		window.groupSize = #{groupSize || 'null'};

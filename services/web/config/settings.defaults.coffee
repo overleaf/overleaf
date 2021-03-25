@@ -689,3 +689,10 @@ module.exports = settings =
 		createFileModes: []
 	}
 
+	csp: {
+		percentage: parseFloat(process.env.CSP_PERCENTAGE) || 0
+		enabled: process.env.CSP_ENABLED == 'true'
+		reportOnly: process.env.CSP_REPORT_ONLY == 'true'
+		reportUri: process.env.CSP_REPORT_URI
+		exclude: ['project/editor', 'project/list']
+	}

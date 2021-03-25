@@ -5,6 +5,7 @@ const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
 const expressLocals = require('./ExpressLocals')
 const Validation = require('./Validation')
+const csp = require('./CSP')
 const Router = require('../router')
 const helmet = require('helmet')
 const UserSessionsRedis = require('../Features/User/UserSessionsRedis')
@@ -220,6 +221,12 @@ webRouter.use(
     hsts: false
   })
 )
+
+// add CSP header to HTML-rendering routes, if enabled
+if (Settings.csp && Settings.csp.enabled) {
+  logger.info('adding CSP header to rendered routes', Settings.csp)
+  webRouter.use(csp(Settings.csp))
+}
 
 logger.info('creating HTTP server'.yellow)
 const server = require('http').createServer(app)
