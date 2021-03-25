@@ -12,10 +12,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const should = chai.should()
 const sinon = require('sinon')
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../app/js/WebsocketController.js'
 const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
@@ -50,11 +48,6 @@ describe('WebsocketController', function () {
         './DocumentUpdaterManager': (this.DocumentUpdaterManager = {}),
         './ConnectedUsersManager': (this.ConnectedUsersManager = {}),
         './WebsocketLoadBalancer': (this.WebsocketLoadBalancer = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          warn: sinon.stub()
-        }),
         '@overleaf/metrics': (this.metrics = {
           inc: sinon.stub(),
           set: sinon.stub()

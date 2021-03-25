@@ -11,7 +11,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/WebsocketLoadBalancer'
@@ -26,10 +25,6 @@ describe('WebsocketLoadBalancer', function () {
         './RedisClientManager': {
           createClientList: () => []
         },
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub()
-        }),
         './SafeJsonParse': (this.SafeJsonParse = {
           parse: (data, cb) => cb(null, JSON.parse(data))
         }),

@@ -12,7 +12,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/DocumentUpdaterController'
@@ -29,11 +28,6 @@ describe('DocumentUpdaterController', function () {
     this.RoomEvents = { on: sinon.stub() }
     this.EditorUpdatesController = SandboxedModule.require(modulePath, {
       requires: {
-        'logger-sharelatex': (this.logger = {
-          error: sinon.stub(),
-          log: sinon.stub(),
-          warn: sinon.stub()
-        }),
         'settings-sharelatex': (this.settings = {
           redis: {
             documentupdater: {

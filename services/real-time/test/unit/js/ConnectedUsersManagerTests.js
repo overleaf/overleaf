@@ -12,7 +12,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -58,7 +57,6 @@ describe('ConnectedUsersManager', function () {
     this.ConnectedUsersManager = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': { log() {} },
         '@overleaf/redis-wrapper': {
           createClient: () => {
             return this.rClient

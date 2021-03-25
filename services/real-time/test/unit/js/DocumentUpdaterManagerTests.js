@@ -10,7 +10,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require('chai').should()
 const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
@@ -43,11 +42,6 @@ describe('DocumentUpdaterManager', function () {
     return (this.DocumentUpdaterManager = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          warn: sinon.stub()
-        }),
         request: (this.request = {}),
         '@overleaf/redis-wrapper': { createClient: () => this.rclient },
         '@overleaf/metrics': (this.Metrics = {
@@ -56,9 +50,6 @@ describe('DocumentUpdaterManager', function () {
             done() {}
           })
         })
-      },
-      globals: {
-        JSON: (this.JSON = Object.create(JSON))
       }
     }))
   }) // avoid modifying JSON object directly
@@ -325,13 +316,19 @@ describe('DocumentUpdaterManager', function () {
 
     describe('with null byte corruption', function () {
       beforeEach(function () {
-        this.JSON.stringify = () => '["bad bytes! \u0000 <- here"]'
+        this.stringifyStub = sinon
+          .stub(JSON, 'stringify')
+          .callsFake(() => '["bad bytes! \u0000 <- here"]')
         return this.DocumentUpdaterManager.queueChange(
           this.project_id,
           this.doc_id,
           this.change,
           this.callback
         )
+      })
+
+      afterEach(function () {
+        this.stringifyStub.restore()
       })
 
       it('should return an error', function () {

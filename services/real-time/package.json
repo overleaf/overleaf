@@ -54,11 +54,11 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^4.0.1",
+    "mocha": "^8.3.2",
     "prettier": "^2.0.0",
     "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "~0.3.0",
-    "sinon": "^2.4.1",
+    "sinon": "^9.2.4",
     "timekeeper": "0.0.4",
     "uid-safe": "^2.1.5"
   }

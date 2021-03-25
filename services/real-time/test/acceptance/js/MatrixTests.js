@@ -47,8 +47,7 @@ There is additional meta-data that UserItems and SessionItems may use to skip
 /* eslint-disable
     camelcase,
 */
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const async = require('async')
 
 const RealTimeClient = require('./helpers/RealTimeClient')

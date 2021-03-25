@@ -9,7 +9,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
@@ -17,11 +16,7 @@ const modulePath = path.join(__dirname, '../../../app/js/DrainManager')
 
 describe('DrainManager', function () {
   beforeEach(function () {
-    this.DrainManager = SandboxedModule.require(modulePath, {
-      requires: {
-        'logger-sharelatex': (this.logger = { log: sinon.stub() })
-      }
-    })
+    this.DrainManager = SandboxedModule.require(modulePath, {})
     return (this.io = {
       sockets: {
         clients: sinon.stub()

@@ -10,9 +10,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const { expect } = chai
-const should = chai.should()
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../app/js/RoomManager.js'
 const SandboxedModule = require('sandboxed-module')
@@ -26,11 +24,6 @@ describe('RoomManager', function () {
     this.RoomManager = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': (this.settings = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub(),
-          error: sinon.stub()
-        }),
         '@overleaf/metrics': (this.metrics = { gauge: sinon.stub() })
       }
     })
