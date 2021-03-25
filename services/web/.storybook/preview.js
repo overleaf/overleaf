@@ -25,7 +25,10 @@ i18n.use(initReactI18next).init({
     prefix: '__',
     suffix: '__',
     unescapeSuffix: 'HTML',
-    skipOnVariables: true
+    skipOnVariables: true,
+    defaultVariables: {
+      appName: 'Overleaf'
+    }
   }
 })
 
@@ -84,7 +87,6 @@ const withTheme = (Story, context) => {
 export const decorators = [withTheme]
 
 window.ExposedSettings = {
-  appName: 'Overleaf',
   maxEntitiesPerProject: 10,
   maxUploadSize: 5 * 1024 * 1024
 }

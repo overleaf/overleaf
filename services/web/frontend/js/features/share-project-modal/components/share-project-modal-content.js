@@ -67,12 +67,7 @@ ShareProjectModalContent.propTypes = {
 function ErrorMessage({ error }) {
   switch (error) {
     case 'cannot_invite_non_user':
-      return (
-        <Trans
-          i18nKey="cannot_invite_non_user"
-          values={{ appName: window.ExposedSettings.appName }}
-        />
-      )
+      return <Trans i18nKey="cannot_invite_non_user" />
 
     case 'cannot_verify_user_not_robot':
       return <Trans i18nKey="cannot_verify_user_not_robot" />

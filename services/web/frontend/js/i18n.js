@@ -31,7 +31,11 @@ i18n.use(initReactI18next).init({
 
     // Disable nesting in interpolated values, preventing user input
     // injection via another nested value
-    skipOnVariables: true
+    skipOnVariables: true,
+
+    defaultVariables: {
+      appName: window.ExposedSettings.appName
+    }
   }
 })
 

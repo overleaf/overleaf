@@ -17,6 +17,13 @@ const chai = require('chai')
 chai.use(require('sinon-chai'))
 chai.use(require('chai-as-promised'))
 
+// Mock global settings
+window.ExposedSettings = {
+  appName: 'Overleaf',
+  maxEntitiesPerProject: 10,
+  maxUploadSize: 5 * 1024 * 1024
+}
+
 window.i18n = { currentLangCode: 'en' }
 require('../../frontend/js/i18n')
 
@@ -50,13 +57,6 @@ Object.defineProperty(global, 'localStorage', {
 // node-fetch doesn't accept relative URL's: https://github.com/node-fetch/node-fetch/blob/master/docs/v2-LIMITS.md#known-differences
 const fetch = require('node-fetch')
 global.fetch = (url, ...options) => fetch('http://localhost' + url, ...options)
-
-// Mock global settings
-window.ExposedSettings = {
-  appName: 'Overleaf',
-  maxEntitiesPerProject: 10,
-  maxUploadSize: 5 * 1024 * 1024
-}
 
 // ignore CSS files
 const { addHook } = require('pirates')
