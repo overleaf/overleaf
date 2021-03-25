@@ -31,7 +31,7 @@ export const Messages = args => {
 }
 
 export default {
-  title: 'Word Count Modal / Content',
+  title: 'Modals / Word Count / Content',
   component: WordCountModalContent,
   args: {
     animation: false,

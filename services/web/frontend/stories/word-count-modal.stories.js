@@ -41,7 +41,7 @@ Interactive.propTypes = {
 }
 
 export default {
-  title: 'Word Count Modal',
+  title: 'Modals / Word Count',
   component: WordCountModal,
   args: {
     clsiServerId: 'server-id',

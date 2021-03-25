@@ -27,7 +27,7 @@ export const SpecificError = args => {
 }
 
 export default {
-  title: 'Clone Project Modal / Content',
+  title: 'Modals / Clone Project / Content',
   component: CloneProjectModalContent,
   args: {
     animation: false,

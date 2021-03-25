@@ -31,7 +31,7 @@ Interactive.propTypes = {
 }
 
 export default {
-  title: 'Clone Project Modal',
+  title: 'Modals / Clone Project',
   component: CloneProjectModal,
   args: {
     projectId: 'original-project',
