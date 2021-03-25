@@ -118,6 +118,17 @@ export default {
   args: {
     rootFolder: rootFolderBase,
     hasWritePermissions: true,
+    setStartedFreeTrial: () => {
+      console.log('started free trial')
+    },
+    refProviders: {},
+    reindexReferences: () => {
+      console.log('reindex references')
+    },
+    userHasFeature: () => true,
+    setRefProviderEnabled: provider => {
+      console.log(`ref provider ${provider} enabled`)
+    },
     projectId: '123abc',
     rootDocId: '5e74f1a7ce17ae0041dfd056',
     isConnected: true
