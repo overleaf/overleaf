@@ -68,7 +68,7 @@ describe('AuthenticationController', function() {
           hooks: { fire: sinon.stub().yields(null, []) }
         }),
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
-          ipMatcherAffiliation: sinon.stub()
+          ipMatcherAffiliation: sinon.stub().returns({ create: sinon.stub() })
         }),
         '../../models/User': { User: this.UserModel },
         '../../../../modules/oauth2-server/app/src/Oauth2Server': (this.Oauth2Server = {
