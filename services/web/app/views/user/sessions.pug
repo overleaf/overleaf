@@ -1,9 +1,8 @@
 extends ../layout
 
 
-block head-scripts
-	script(type="text/javascript", nonce=scriptNonce).
-		window.otherSessions = !{StringHelper.stringifyJsonForScript(sessions)}
+block append meta
+	meta(name="ol-otherSessions" data-type="json" content=sessions)
 
 
 block content
