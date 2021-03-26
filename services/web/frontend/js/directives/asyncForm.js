@@ -17,7 +17,11 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
 
     scope[attrs.name].response = response = {}
     scope[attrs.name].inflight = false
-    scope.email = scope.email || ctrl.getEmailFromQuery() || attrs.newEmail
+    scope.email =
+      scope.email ||
+      scope.usersEmail ||
+      ctrl.getEmailFromQuery() ||
+      attrs.newEmail
 
     const validateCaptchaIfEnabled = function(callback) {
       if (attrs.captchaActionName) {
