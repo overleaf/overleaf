@@ -31,18 +31,20 @@ describe('PasswordUpdate', function() {
         },
         simple: false
       })
-      user = (await UserHelper.getUser({ email })).user
+      userHelper = await UserHelper.getUser({ email })
+      user = userHelper.user
     })
     it('should return 200', async function() {
       expect(response.statusCode).to.equal(200)
     })
     it('should update the audit log', function() {
-      expect(user.auditLog[0]).to.exist
-      expect(typeof user.auditLog[0].initiatorId).to.equal('object')
-      expect(user.auditLog[0].initiatorId).to.deep.equal(user._id)
-      expect(user.auditLog[0].operation).to.equal('update-password')
-      expect(user.auditLog[0].ipAddress).to.equal('127.0.0.1')
-      expect(user.auditLog[0].timestamp).to.exist
+      const auditLog = userHelper.getAuditLogWithoutNoise()
+      expect(auditLog[0]).to.exist
+      expect(typeof auditLog[0].initiatorId).to.equal('object')
+      expect(auditLog[0].initiatorId).to.deep.equal(user._id)
+      expect(auditLog[0].operation).to.equal('update-password')
+      expect(auditLog[0].ipAddress).to.equal('127.0.0.1')
+      expect(auditLog[0].timestamp).to.exist
     })
   })
   describe('errors', function() {
@@ -55,13 +57,14 @@ describe('PasswordUpdate', function() {
           },
           simple: false
         })
-        user = (await UserHelper.getUser({ email })).user
+        userHelper = await UserHelper.getUser({ email })
       })
       it('should return 500', async function() {
         expect(response.statusCode).to.equal(500)
       })
       it('should not update audit log', async function() {
-        expect(user.auditLog[0]).to.not.exist
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.deep.equal([])
       })
     })
     describe('wrong current password', function() {
@@ -74,13 +77,14 @@ describe('PasswordUpdate', function() {
           },
           simple: false
         })
-        user = (await UserHelper.getUser({ email })).user
+        userHelper = await UserHelper.getUser({ email })
       })
       it('should return 400', async function() {
         expect(response.statusCode).to.equal(400)
       })
       it('should not update audit log', async function() {
-        expect(user.auditLog[0]).to.not.exist
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.deep.equal([])
       })
     })
     describe('newPassword1 does not match newPassword2', function() {
@@ -94,7 +98,7 @@ describe('PasswordUpdate', function() {
           json: true,
           simple: false
         })
-        user = (await UserHelper.getUser({ email })).user
+        userHelper = await UserHelper.getUser({ email })
       })
       it('should return 400', async function() {
         expect(response.statusCode).to.equal(400)
@@ -103,7 +107,8 @@ describe('PasswordUpdate', function() {
         expect(response.body.message).to.equal('Passwords do not match')
       })
       it('should not update audit log', async function() {
-        expect(user.auditLog[0]).to.not.exist
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.deep.equal([])
       })
     })
     describe('new password is not valid', function() {
@@ -117,7 +122,7 @@ describe('PasswordUpdate', function() {
           json: true,
           simple: false
         })
-        user = (await UserHelper.getUser({ email })).user
+        userHelper = await UserHelper.getUser({ email })
       })
       it('should return 400', async function() {
         expect(response.statusCode).to.equal(400)
@@ -126,7 +131,8 @@ describe('PasswordUpdate', function() {
         expect(response.body.message).to.equal('password is too short')
       })
       it('should not update audit log', async function() {
-        expect(user.auditLog[0]).to.not.exist
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.deep.equal([])
       })
     })
   })

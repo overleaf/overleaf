@@ -28,6 +28,16 @@ class UserHelper {
   /* sync functions */
 
   /**
+   * Get auditLog, ignore the login
+   * @return {object[]}
+   */
+  getAuditLogWithoutNoise() {
+    return (this.user.auditLog || []).filter(entry => {
+      return entry.operation !== 'login'
+    })
+  }
+
+  /**
    * Generate default email from unique (per instantiation) user number
    * @returns {string} email
    */
@@ -290,6 +300,13 @@ class UserHelper {
     }
 
     return userHelper
+  }
+
+  async refreshMongoUser() {
+    this.user = await UserGetter.promises.getUser({
+      _id: this.user._id
+    })
+    return this.user
   }
 
   async addEmail(email) {

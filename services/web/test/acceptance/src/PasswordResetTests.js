@@ -59,13 +59,14 @@ describe('PasswordReset', function() {
         expect(user.password).to.not.exist
       })
       it('log the change with initiatorId', async function() {
-        expect(user.auditLog).to.exist
-        expect(user.auditLog[0]).to.exist
-        expect(typeof user.auditLog[0].initiatorId).to.equal('object')
-        expect(user.auditLog[0].initiatorId).to.deep.equal(user._id)
-        expect(user.auditLog[0].operation).to.equal('reset-password')
-        expect(user.auditLog[0].ipAddress).to.equal('127.0.0.1')
-        expect(user.auditLog[0].timestamp).to.exist
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.exist
+        expect(auditLog[0]).to.exist
+        expect(typeof auditLog[0].initiatorId).to.equal('object')
+        expect(auditLog[0].initiatorId).to.deep.equal(user._id)
+        expect(auditLog[0].operation).to.equal('reset-password')
+        expect(auditLog[0].ipAddress).to.equal('127.0.0.1')
+        expect(auditLog[0].timestamp).to.exist
       })
     })
     describe('when logged in as another user', function() {
@@ -99,13 +100,14 @@ describe('PasswordReset', function() {
         expect(user.password).to.not.exist
       })
       it('log the change with the logged in user as the initiatorId', async function() {
-        expect(user.auditLog).to.exist
-        expect(user.auditLog[0]).to.exist
-        expect(typeof user.auditLog[0].initiatorId).to.equal('object')
-        expect(user.auditLog[0].initiatorId).to.deep.equal(otherUser._id)
-        expect(user.auditLog[0].operation).to.equal('reset-password')
-        expect(user.auditLog[0].ipAddress).to.equal('127.0.0.1')
-        expect(user.auditLog[0].timestamp).to.exist
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.exist
+        expect(auditLog[0]).to.exist
+        expect(typeof auditLog[0].initiatorId).to.equal('object')
+        expect(auditLog[0].initiatorId).to.deep.equal(otherUser._id)
+        expect(auditLog[0].operation).to.equal('reset-password')
+        expect(auditLog[0].ipAddress).to.equal('127.0.0.1')
+        expect(auditLog[0].timestamp).to.exist
       })
     })
     describe('when not logged in', function() {
@@ -131,12 +133,13 @@ describe('PasswordReset', function() {
         expect(user.password).to.not.exist
       })
       it('log the change', async function() {
-        expect(user.auditLog).to.exist
-        expect(user.auditLog[0]).to.exist
-        expect(user.auditLog[0].initiatorId).to.equal(null)
-        expect(user.auditLog[0].operation).to.equal('reset-password')
-        expect(user.auditLog[0].ipAddress).to.equal('127.0.0.1')
-        expect(user.auditLog[0].timestamp).to.exist
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.exist
+        expect(auditLog[0]).to.exist
+        expect(auditLog[0].initiatorId).to.equal(null)
+        expect(auditLog[0].operation).to.equal('reset-password')
+        expect(auditLog[0].ipAddress).to.equal('127.0.0.1')
+        expect(auditLog[0].timestamp).to.exist
       })
     })
     describe('password checks', function() {
@@ -158,8 +161,9 @@ describe('PasswordReset', function() {
         })
         expect(response.statusCode).to.equal(400)
         userHelper = await UserHelper.getUser({ email })
-        user = userHelper.user
-        expect(user.auditLog).to.deep.equal([])
+
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.deep.equal([])
       })
 
       it('without a valid password should return 400 and not log the change', async function() {
@@ -173,8 +177,9 @@ describe('PasswordReset', function() {
         })
         expect(response.statusCode).to.equal(400)
         userHelper = await UserHelper.getUser({ email })
-        user = userHelper.user
-        expect(user.auditLog).to.deep.equal([])
+
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.deep.equal([])
       })
     })
   })

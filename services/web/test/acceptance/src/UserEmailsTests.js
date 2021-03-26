@@ -857,7 +857,8 @@ describe('UserEmails', function() {
         user = userHelper.user
       })
       it('should be updated', function() {
-        const entry = user.auditLog[user.auditLog.length - 1]
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        const entry = auditLog[auditLog.length - 1]
         expect(typeof entry.initiatorId).to.equal('object')
         expect(entry.initiatorId).to.deep.equal(user._id)
         expect(entry.ipAddress).to.equal('127.0.0.1')
@@ -994,10 +995,11 @@ describe('UserEmails', function() {
       expect(user.emails[1].email).to.equal(newEmail)
     })
     it('should add to the user audit log', async function() {
-      expect(typeof user.auditLog[0].initiatorId).to.equal('object')
-      expect(user.auditLog[0].initiatorId).to.deep.equal(user._id)
-      expect(user.auditLog[0].info.newSecondaryEmail).to.equal(newEmail)
-      expect(user.auditLog[0].ip).to.equal(this.user.request.ip)
+      const auditLog = userHelper.getAuditLogWithoutNoise()
+      expect(typeof auditLog[0].initiatorId).to.equal('object')
+      expect(auditLog[0].initiatorId).to.deep.equal(user._id)
+      expect(auditLog[0].info.newSecondaryEmail).to.equal(newEmail)
+      expect(auditLog[0].ip).to.equal(this.user.request.ip)
     })
   })
 

@@ -44,6 +44,20 @@ class User {
     db.users.findOne({ _id: ObjectId(this._id) }, callback)
   }
 
+  getAuditLogWithoutNoise(callback) {
+    this.get((error, user) => {
+      if (error) return callback(error)
+      if (!user) return callback(new Error('User not found'))
+
+      callback(
+        null,
+        (user.auditLog || []).filter(entry => {
+          return entry.operation !== 'login'
+        })
+      )
+    })
+  }
+
   mongoUpdate(updateOp, callback) {
     db.users.updateOne({ _id: ObjectId(this._id) }, updateOp, callback)
   }

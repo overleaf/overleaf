@@ -455,14 +455,14 @@ describe('Sessions', function() {
 
           // the user audit log should have been updated
           next => {
-            this.user1.get((error, user) => {
+            this.user1.getAuditLogWithoutNoise((error, auditLog) => {
               expect(error).not.to.exist
-              expect(user.auditLog).to.exist
-              expect(user.auditLog[0].operation).to.equal('clear-sessions')
-              expect(user.auditLog[0].ipAddress).to.exist
-              expect(user.auditLog[0].initiatorId).to.exist
-              expect(user.auditLog[0].timestamp).to.exist
-              expect(user.auditLog[0].info.sessions.length).to.equal(2)
+              expect(auditLog).to.exist
+              expect(auditLog[0].operation).to.equal('clear-sessions')
+              expect(auditLog[0].ipAddress).to.exist
+              expect(auditLog[0].initiatorId).to.exist
+              expect(auditLog[0].timestamp).to.exist
+              expect(auditLog[0].info.sessions.length).to.equal(2)
               next()
             })
           }
