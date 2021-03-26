@@ -10,13 +10,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../base'
+import getMeta from '../utils/meta'
 
 export default App.controller('ClearSessionsController', function(
   $scope,
   $http
 ) {
   $scope.state = {
-    otherSessions: window.otherSessions,
+    otherSessions: getMeta('ol-otherSessions'),
     error: false,
     success: false
   }
