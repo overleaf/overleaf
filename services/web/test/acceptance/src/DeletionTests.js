@@ -362,4 +362,69 @@ describe('Deleting a project', function() {
       })
     })
   })
+
+  describe('when the deleted project has deletedFiles', function() {
+    beforeEach('delete project', function(done) {
+      this.user.deleteProject(this.projectId, done)
+    })
+    let fileId1, fileId2
+    beforeEach('create files', function() {
+      // take a short cut and just allocate file ids
+      fileId1 = ObjectId()
+      fileId2 = ObjectId()
+    })
+    const otherFileDetails = {
+      name: 'universe.jpg',
+      linkedFileData: null,
+      hash: 'ed19e7d6779b47d8c63f6fa5a21954dcfb6cac00',
+      deletedAt: new Date()
+    }
+    beforeEach('insert deletedFiles', async function() {
+      const deletedFiles = [
+        { _id: fileId1, ...otherFileDetails },
+        { _id: fileId2, ...otherFileDetails },
+        // duplicate entry
+        { _id: fileId1, ...otherFileDetails }
+      ]
+      await db.deletedProjects.updateOne(
+        { 'deleterData.deletedProjectId': ObjectId(this.projectId) },
+        { $set: { 'project.deletedFiles': deletedFiles } }
+      )
+    })
+    describe('when undelete the project', function() {
+      let admin
+      beforeEach('create admin', function(done) {
+        admin = new User()
+        async.series(
+          [
+            cb => admin.ensureUserExists(cb),
+            cb => admin.ensureAdmin(cb),
+            cb => admin.login(cb)
+          ],
+          done
+        )
+      })
+      beforeEach('undelete project', function(done) {
+        admin.undeleteProject(this.projectId, done)
+      })
+
+      it('should not insert deletedFiles into the projects collection', function(done) {
+        this.user.getProject(this.projectId, (error, project) => {
+          if (error) return done(error)
+          expect(project.deletedFiles).to.deep.equal([])
+          done()
+        })
+      })
+
+      it('should insert unique entries into the deletedFiles collection', async function() {
+        const docs = await db.deletedFiles
+          .find({}, { sort: { _id: 1 } })
+          .toArray()
+        expect(docs).to.deep.equal([
+          { _id: fileId1, projectId: this.projectId, ...otherFileDetails },
+          { _id: fileId2, projectId: this.projectId, ...otherFileDetails }
+        ])
+      })
+    })
+  })
 })

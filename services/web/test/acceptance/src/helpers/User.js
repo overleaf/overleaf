@@ -356,6 +356,27 @@ class User {
     )
   }
 
+  undeleteProject(projectId, callback) {
+    this.request.post(
+      {
+        url: `/admin/project/${projectId}/undelete`
+      },
+      (error, response) => {
+        if (error) {
+          return callback(error)
+        }
+        if (response.statusCode !== 204) {
+          return callback(
+            new Error(
+              `Non-success response when undeleting project: ${response.statusCode}`
+            )
+          )
+        }
+        callback(null)
+      }
+    )
+  }
+
   deleteProjects(callback) {
     db.projects.deleteMany({ owner_ref: ObjectId(this.id) }, callback)
   }

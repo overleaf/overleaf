@@ -303,6 +303,20 @@ async function undeleteProject(projectId, options = {}) {
   )
   restored.archived = undefined
 
+  if (restored.deletedFiles && restored.deletedFiles.length > 0) {
+    filterDuplicateDeletedFilesInPlace(restored)
+    const deletedFiles = restored.deletedFiles.map(file => {
+      // break free from the model
+      file = file.toObject()
+
+      // add projectId
+      file.projectId = projectId
+      return file
+    })
+    await db.deletedFiles.insertMany(deletedFiles)
+    restored.deletedFiles = []
+  }
+
   // we can't use Mongoose to re-insert the project, as it won't
   // create a new document with an _id already specified. We need to
   // insert it directly into the collection
@@ -358,4 +372,14 @@ async function expireDeletedProject(projectId) {
     logger.warn({ projectId, error }, 'error expiring deleted project')
     throw error
   }
+}
+
+function filterDuplicateDeletedFilesInPlace(project) {
+  const fileIds = new Set()
+  project.deletedFiles = project.deletedFiles.filter(file => {
+    const id = file._id.toString()
+    if (fileIds.has(id)) return false
+    fileIds.add(id)
+    return true
+  })
 }
