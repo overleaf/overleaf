@@ -84,28 +84,23 @@ module.exports = RedisManager = {
         logger.error({ err: error, doc_id, project_id }, error.message)
         return callback(error)
       }
-      const multi = rclient.multi()
-      multi.set(keys.docLines({ doc_id }), docLines)
-      multi.set(keys.projectKey({ doc_id }), project_id)
-      multi.set(keys.docVersion({ doc_id }), version)
-      multi.set(keys.docHash({ doc_id }), docHash)
-      if (ranges != null) {
-        multi.set(keys.ranges({ doc_id }), ranges)
-      } else {
-        multi.del(keys.ranges({ doc_id }))
-      }
-      multi.set(keys.pathname({ doc_id }), pathname)
-      multi.set(keys.projectHistoryId({ doc_id }), projectHistoryId)
-      return multi.exec(function (error, result) {
-        if (error != null) {
-          return callback(error)
+      // update docsInProject set before writing doc contents
+      rclient.sadd(keys.docsInProject({ project_id }), doc_id, (error) => {
+        if (error) return callback(error)
+
+        const multi = rclient.multi()
+        multi.set(keys.docLines({ doc_id }), docLines)
+        multi.set(keys.projectKey({ doc_id }), project_id)
+        multi.set(keys.docVersion({ doc_id }), version)
+        multi.set(keys.docHash({ doc_id }), docHash)
+        if (ranges != null) {
+          multi.set(keys.ranges({ doc_id }), ranges)
+        } else {
+          multi.del(keys.ranges({ doc_id }))
         }
-        // update docsInProject set
-        return rclient.sadd(
-          keys.docsInProject({ project_id }),
-          doc_id,
-          callback
-        )
+        multi.set(keys.pathname({ doc_id }), pathname)
+        multi.set(keys.projectHistoryId({ doc_id }), projectHistoryId)
+        multi.exec(callback)
       })
     })
   },
@@ -269,48 +264,17 @@ module.exports = RedisManager = {
         projectHistoryId = parseInt(projectHistoryId)
       }
 
-      // doc is not in redis, bail out
-      if (docLines == null) {
-        return callback(
-          null,
-          docLines,
-          version,
-          ranges,
-          pathname,
-          projectHistoryId,
-          unflushedTime,
-          lastUpdatedAt,
-          lastUpdatedBy
-        )
-      }
-
-      // doc should be in project set, check if missing (workaround for missing docs from putDoc)
-      return rclient.sadd(keys.docsInProject({ project_id }), doc_id, function (
-        error,
-        result
-      ) {
-        if (error != null) {
-          return callback(error)
-        }
-        if (result !== 0) {
-          // doc should already be in set
-          logger.error(
-            { project_id, doc_id, doc_project_id },
-            'doc missing from docsInProject set'
-          )
-        }
-        return callback(
-          null,
-          docLines,
-          version,
-          ranges,
-          pathname,
-          projectHistoryId,
-          unflushedTime,
-          lastUpdatedAt,
-          lastUpdatedBy
-        )
-      })
+      callback(
+        null,
+        docLines,
+        version,
+        ranges,
+        pathname,
+        projectHistoryId,
+        unflushedTime,
+        lastUpdatedAt,
+        lastUpdatedBy
+      )
     })
   },
 

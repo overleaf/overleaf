@@ -182,12 +182,6 @@ describe('RedisManager', function () {
           .should.equal(true)
       })
 
-      it('should check if the document is in the DocsIn set', function () {
-        return this.rclient.sadd
-          .calledWith(`DocsIn:${this.project_id}`)
-          .should.equal(true)
-      })
-
       it('should return the document', function () {
         return this.callback
           .calledWithExactly(
@@ -206,78 +200,6 @@ describe('RedisManager', function () {
 
       return it('should not log any errors', function () {
         return this.logger.error.calledWith().should.equal(false)
-      })
-    })
-
-    describe('when the document is not present', function () {
-      beforeEach(function () {
-        this.rclient.mget = sinon
-          .stub()
-          .yields(null, [
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-          ])
-        this.rclient.sadd = sinon.stub().yields()
-        return this.RedisManager.getDoc(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
-      })
-
-      it('should not check if the document is in the DocsIn set', function () {
-        return this.rclient.sadd
-          .calledWith(`DocsIn:${this.project_id}`)
-          .should.equal(false)
-      })
-
-      it('should return an empty result', function () {
-        return this.callback
-          .calledWithExactly(null, null, 0, {}, null, null, null, null, null)
-          .should.equal(true)
-      })
-
-      return it('should not log any errors', function () {
-        return this.logger.error.calledWith().should.equal(false)
-      })
-    })
-
-    describe('when the document is missing from the DocsIn set', function () {
-      beforeEach(function () {
-        this.rclient.sadd = sinon.stub().yields(null, 1)
-        return this.RedisManager.getDoc(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
-      })
-
-      it('should log an error', function () {
-        return this.logger.error.calledWith().should.equal(true)
-      })
-
-      return it('should return the document', function () {
-        return this.callback
-          .calledWithExactly(
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            this.unflushed_time,
-            this.lastUpdatedAt,
-            this.lastUpdatedBy
-          )
-          .should.equal(true)
       })
     })
 
