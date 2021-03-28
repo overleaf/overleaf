@@ -88,19 +88,18 @@ module.exports = RedisManager = {
       rclient.sadd(keys.docsInProject({ project_id }), doc_id, (error) => {
         if (error) return callback(error)
 
-        const multi = rclient.multi()
-        multi.set(keys.docLines({ doc_id }), docLines)
-        multi.set(keys.projectKey({ doc_id }), project_id)
-        multi.set(keys.docVersion({ doc_id }), version)
-        multi.set(keys.docHash({ doc_id }), docHash)
-        if (ranges != null) {
-          multi.set(keys.ranges({ doc_id }), ranges)
-        } else {
-          multi.del(keys.ranges({ doc_id }))
-        }
-        multi.set(keys.pathname({ doc_id }), pathname)
-        multi.set(keys.projectHistoryId({ doc_id }), projectHistoryId)
-        multi.exec(callback)
+        rclient.mset(
+          {
+            [keys.docLines({ doc_id })]: docLines,
+            [keys.projectKey({ doc_id })]: project_id,
+            [keys.docVersion({ doc_id })]: version,
+            [keys.docHash({ doc_id })]: docHash,
+            [keys.ranges({ doc_id })]: ranges,
+            [keys.pathname({ doc_id })]: pathname,
+            [keys.projectHistoryId({ doc_id })]: projectHistoryId
+          },
+          callback
+        )
       })
     })
   },
@@ -119,17 +118,19 @@ module.exports = RedisManager = {
 
     let multi = rclient.multi()
     multi.strlen(keys.docLines({ doc_id }))
-    multi.del(keys.docLines({ doc_id }))
-    multi.del(keys.projectKey({ doc_id }))
-    multi.del(keys.docVersion({ doc_id }))
-    multi.del(keys.docHash({ doc_id }))
-    multi.del(keys.ranges({ doc_id }))
-    multi.del(keys.pathname({ doc_id }))
-    multi.del(keys.projectHistoryId({ doc_id }))
-    multi.del(keys.projectHistoryType({ doc_id }))
-    multi.del(keys.unflushedTime({ doc_id }))
-    multi.del(keys.lastUpdatedAt({ doc_id }))
-    multi.del(keys.lastUpdatedBy({ doc_id }))
+    multi.del(
+      keys.docLines({ doc_id }),
+      keys.projectKey({ doc_id }),
+      keys.docVersion({ doc_id }),
+      keys.docHash({ doc_id }),
+      keys.ranges({ doc_id }),
+      keys.pathname({ doc_id }),
+      keys.projectHistoryId({ doc_id }),
+      keys.projectHistoryType({ doc_id }),
+      keys.unflushedTime({ doc_id }),
+      keys.lastUpdatedAt({ doc_id }),
+      keys.lastUpdatedBy({ doc_id })
+    )
     return multi.exec(function (error, response) {
       if (error != null) {
         return callback(error)
@@ -483,19 +484,19 @@ module.exports = RedisManager = {
           return callback(error)
         }
         const multi = rclient.multi()
-        multi.set(keys.docLines({ doc_id }), newDocLines) // index 0
-        multi.set(keys.docVersion({ doc_id }), newVersion) // index 1
-        multi.set(keys.docHash({ doc_id }), newHash) // index 2
+        multi.mset({
+          [keys.docLines({ doc_id })]: newDocLines,
+          [keys.docVersion({ doc_id })]: newVersion,
+          [keys.docHash({ doc_id })]: newHash,
+          [keys.ranges({ doc_id })]: ranges,
+          [keys.lastUpdatedAt({ doc_id })]: Date.now(),
+          [keys.lastUpdatedBy({ doc_id })]: updateMeta && updateMeta.user_id
+        })
         multi.ltrim(
           keys.docOps({ doc_id }),
           -RedisManager.DOC_OPS_MAX_LENGTH,
           -1
         ) // index 3
-        if (ranges != null) {
-          multi.set(keys.ranges({ doc_id }), ranges) // index 4
-        } else {
-          multi.del(keys.ranges({ doc_id })) // also index 4
-        }
         // push the ops last so we can get the lengths at fixed index position 7
         if (jsonOps.length > 0) {
           multi.rpush(keys.docOps({ doc_id }), ...Array.from(jsonOps)) // index 5
@@ -519,12 +520,6 @@ module.exports = RedisManager = {
           // hasn't been modified before (the content in mongo has been
           // valid up to this point). Otherwise leave it alone ("NX" flag).
           multi.set(keys.unflushedTime({ doc_id }), Date.now(), 'NX')
-          multi.set(keys.lastUpdatedAt({ doc_id }), Date.now()) // index 8
-          if (updateMeta != null ? updateMeta.user_id : undefined) {
-            multi.set(keys.lastUpdatedBy({ doc_id }), updateMeta.user_id) // index 9
-          } else {
-            multi.del(keys.lastUpdatedBy({ doc_id })) // index 9
-          }
         }
         return multi.exec(function (error, result) {
           let docUpdateCount
@@ -536,7 +531,7 @@ module.exports = RedisManager = {
             docUpdateCount = undefined // only using project history, don't bother with track-changes
           } else {
             // project is using old track-changes history service
-            docUpdateCount = result[7] // length of uncompressedHistoryOps queue (index 7)
+            docUpdateCount = result[4]
           }
 
           if (
