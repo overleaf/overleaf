@@ -30,7 +30,7 @@ describe('ClsiCookieManager', function() {
     }
     this.project_id = '123423431321'
     this.request = {
-      get: sinon.stub(),
+      post: sinon.stub(),
       cookie: realRequst.cookie,
       jar: realRequst.jar,
       defaults: () => {
@@ -123,7 +123,7 @@ describe('ClsiCookieManager', function() {
   describe('_populateServerIdViaRequest', function() {
     beforeEach(function() {
       this.response = 'some data'
-      this.request.get.callsArgWith(1, null, this.response)
+      this.request.post.callsArgWith(1, null, this.response)
       return (this.ClsiCookieManager.setServerId = sinon
         .stub()
         .callsArgWith(2, null, 'clsi-9'))

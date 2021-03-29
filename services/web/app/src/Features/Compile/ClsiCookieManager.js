@@ -58,7 +58,7 @@ module.exports = function(backendGroup) {
         callback = function(err, serverId) {}
       }
       const url = `${Settings.apis.clsi.url}/project/${project_id}/status`
-      return request.get(url, (err, res, body) => {
+      return request.post(url, (err, res, body) => {
         if (err != null) {
           OError.tag(err, 'error getting initial server id for project', {
             project_id
