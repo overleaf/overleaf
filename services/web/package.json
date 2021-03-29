@@ -133,7 +133,7 @@
     "passport-twitter": "^1.0.4",
     "pdfjs-dist": "^2.2.228",
     "prop-types": "^15.7.2",
-    "pug": "^2.0.4",
+    "pug": "^3.0.1",
     "qrcode": "^1.4.4",
     "react": "^16.13.1",
     "react-bootstrap": "^0.33.1",
