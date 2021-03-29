@@ -14,45 +14,72 @@ const trackChangesModuleAvailable = fs.existsSync(
   `${__dirname}/../../../modules/track-changes`
 )
 
+/**
+ * @typedef {Object} Settings
+ * @property {Object | undefined}  apis
+ * @property {Object | undefined}  apis.linkedUrlProxy
+ * @property {string | undefined}  apis.linkedUrlProxy.url
+ * @property {Object | undefined}  apis.references
+ * @property {string | undefined}  apis.references.url
+ * @property {boolean | undefined} enableGithubSync
+ * @property {boolean | undefined} enableGitBridge
+ * @property {boolean | undefined} enableHomepage
+ * @property {boolean | undefined} enableSaml
+ * @property {boolean | undefined} ldap
+ * @property {boolean | undefined} oauth
+ * @property {Object | undefined} overleaf
+ * @property {Object | undefined} overleaf.oauth
+ * @property {boolean | undefined} saml
+ */
+
 const Features = {
+  /**
+   * @returns {boolean}
+   */
   externalAuthenticationSystemUsed() {
     return (
-      !!Settings.ldap ||
-      !!Settings.saml ||
-      !!_.get(Settings, ['overleaf', 'oauth'])
+      Boolean(Settings.ldap) ||
+      Boolean(Settings.saml) ||
+      Boolean(_.get(Settings, ['overleaf', 'oauth']))
     )
   },
 
+  /**
+   * Whether a feature is enabled in the appliation's configuration
+   *
+   * @param {string} feature
+   * @returns {boolean}
+   */
   hasFeature(feature) {
     switch (feature) {
       case 'homepage':
-        return Settings.enableHomepage
+        return Boolean(Settings.enableHomepage)
       case 'registration':
-        return !Features.externalAuthenticationSystemUsed() || Settings.overleaf
+        return (
+          !Features.externalAuthenticationSystemUsed() ||
+          Boolean(Settings.overleaf)
+        )
       case 'github-sync':
-        return Settings.enableGithubSync
+        return Boolean(Settings.enableGithubSync)
       case 'git-bridge':
-        return Settings.enableGitBridge
+        return Boolean(Settings.enableGitBridge)
       case 'custom-togglers':
-        return !!Settings.overleaf
+        return Boolean(Settings.overleaf)
       case 'oauth':
-        return !!Settings.oauth
+        return Boolean(Settings.oauth)
       case 'templates-server-pro':
-        return Settings.overleaf == null
+        return !Settings.overleaf
       case 'affiliations':
       case 'analytics':
-        // Checking both properties is needed for the time being to allow
-        // enabling the feature in web-api and disabling in Server Pro
-        // see https://github.com/overleaf/web-internal/pull/2127
-        return Settings.apis && Settings.apis.v1 && !!Settings.apis.v1.url
+        return Boolean(_.get(Settings, ['apis', 'v1', 'url']))
       case 'overleaf-integration':
-        return !!Settings.overleaf
+        return Boolean(Settings.overleaf)
       case 'references':
-        return !!_.get(Settings, ['apis', 'references', 'url'])
+        return Boolean(_.get(Settings, ['apis', 'references', 'url']))
       case 'saml':
-        return Settings.enableSaml
+        return Boolean(Settings.enableSaml)
       case 'link-url':
-        return !!_.get(Settings, ['apis', 'linkedUrlProxy', 'url'])
+        return Boolean(_.get(Settings, ['apis', 'linkedUrlProxy', 'url']))
       case 'public-registration':
         return publicRegistrationModuleAvailable
       case 'support':
