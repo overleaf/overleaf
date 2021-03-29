@@ -2,38 +2,10 @@ const fs = require('fs')
 const Path = require('path')
 const isUtf8 = require('utf-8-validate')
 const { promisifyAll } = require('../../util/promises')
+const Settings = require('settings-sharelatex')
 
 const FileTypeManager = {
-  TEXT_EXTENSIONS: [
-    '.tex',
-    '.latex',
-    '.sty',
-    '.cls',
-    '.bst',
-    '.bib',
-    '.bibtex',
-    '.txt',
-    '.tikz',
-    '.mtx',
-    '.rtex',
-    '.md',
-    '.asy',
-    '.latexmkrc',
-    '.lbx',
-    '.bbx',
-    '.cbx',
-    '.m',
-    '.lco',
-    '.dtx',
-    '.ins',
-    '.ist',
-    '.def',
-    '.clo',
-    '.ldf',
-    '.rmd',
-    '.lua',
-    '.gv'
-  ],
+  TEXT_EXTENSIONS: Settings.textExtensions.map(ext => `.${ext}`),
 
   IGNORE_EXTENSIONS: [
     '.dvi',

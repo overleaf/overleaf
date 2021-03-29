@@ -32,6 +32,43 @@ intFromEnv = (name, defaultValue) ->
 		throw new Error("Bad default integer value for setting: #{name}, #{defaultValue}")
 	parseInt(process.env[name], 10) || defaultValue
 
+defaultTextExtensions = [
+	'tex',
+	'latex',
+	'sty',
+	'cls',
+	'bst',
+	'bib',
+	'bibtex',
+	'txt',
+	'tikz',
+	'mtx',
+	'rtex',
+	'md',
+	'asy',
+	'latexmkrc',
+	'lbx',
+	'bbx',
+	'cbx',
+	'm',
+	'lco',
+	'dtx',
+	'ins',
+	'ist',
+	'def',
+	'clo',
+	'ldf',
+	'rmd',
+	'lua',
+	'gv'
+]
+
+parseTextExtensions = (extensions) ->
+	if extensions
+		extensions.split(',').map((ext) => ext.trim())
+	else
+		[]
+
 module.exports = settings =
 
 	allowAnonymousReadAndWriteSharing:
@@ -640,6 +677,8 @@ module.exports = settings =
 	# imageRoot: "<DOCKER REPOSITORY ROOT>" # without any trailing slash
 
 	compileBodySizeLimitMb: process.env['COMPILE_BODY_SIZE_LIMIT_MB'] or 5
+
+	textExtensions: defaultTextExtensions.concat(parseTextExtensions(process.env["ADDITIONAL_TEXT_EXTENSIONS"]))
 
 	validRootDocExtensions: ['tex', 'Rtex', 'ltx']
 

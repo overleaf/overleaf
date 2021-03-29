@@ -16,36 +16,7 @@ export default App.controller('BinaryFileController', function(
   const TAIL_OF_URL_LENGTH =
     MAX_URL_LENGTH - FRONT_OF_URL_LENGTH - FILLER.length
 
-  const textExtensions = [
-    'tex',
-    'latex',
-    'sty',
-    'cls',
-    'bst',
-    'bib',
-    'bibtex',
-    'txt',
-    'tikz',
-    'mtx',
-    'rtex',
-    'md',
-    'asy',
-    'latexmkrc',
-    'lbx',
-    'bbx',
-    'cbx',
-    'm',
-    'lco',
-    'dtx',
-    'ins',
-    'ist',
-    'def',
-    'clo',
-    'ldf',
-    'rmd',
-    'lua',
-    'gv'
-  ]
+  const textExtensions = window.ExposedSettings.textExtensions
   const imageExtensions = ['png', 'jpg', 'jpeg', 'gif']
   const previewableExtensions = []
 

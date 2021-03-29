@@ -360,6 +360,7 @@ module.exports = function(webRouter, privateApiRouter, publicApiRouter) {
         Settings.recaptcha != null ? Settings.recaptcha.siteKeyV3 : undefined,
       recaptchaDisabled:
         Settings.recaptcha != null ? Settings.recaptcha.disabled : undefined,
+      textExtensions: Settings.textExtensions,
       validRootDocExtensions: Settings.validRootDocExtensions,
       sentryAllowedOriginRegex: Settings.sentry.allowedOriginRegex,
       sentryDsn: Settings.sentry.publicDSN,
