@@ -11,6 +11,9 @@ import 'libs/passfield'
 import 'libs/ng-tags-input-3.0.0'
 import 'libs/select/select'
 
+// CSS
+import 'angular/angular-csp.css'
+
 // Polyfill fetch for IE11
 import 'isomorphic-unfetch'
 

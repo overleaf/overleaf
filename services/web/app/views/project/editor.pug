@@ -5,6 +5,9 @@ block vars
 	- var suppressFooter = true
 	- metadata.robotsNoindexNofollow = true
 
+block _headLinks
+	link(rel='stylesheet', href=buildStylesheetPath("ide.css"))
+
 block content
 	.editor(ng-controller="IdeController").full-size
 		//- required by react2angular-shared-context, must be rendered as a top level component

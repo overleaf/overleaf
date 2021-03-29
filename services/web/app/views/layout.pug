@@ -13,14 +13,13 @@ html(
 		script(type="text/javascript", nonce=scriptNonce).
 			// Stop superfish from loading
 			window.similarproducts = true
-		style [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak  {display: none !important; display: none; }
 
 		if (typeof(gaExperiments) != "undefined")
 			|!{gaExperiments}
 
 		//- Stylesheet
 		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation)), id="main-stylesheet")
-		link(rel='stylesheet', href=buildStylesheetPath("ide.css"))
+		link(rel='stylesheet', href=buildStylesheetPath("libraries.css"))
 
 		block _headLinks
 
