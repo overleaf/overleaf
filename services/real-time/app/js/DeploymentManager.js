@@ -12,7 +12,7 @@ const deploymentColour = settings.deploymentColour
 var serviceCloseTime
 
 function updateDeploymentStatus(fileContent) {
-  const closed = fileContent && fileContent.indexOf(deploymentColour) === -1
+  const closed = fileContent && !fileContent.includes(deploymentColour)
   if (closed && !settings.serviceIsClosed) {
     settings.serviceIsClosed = true
     serviceCloseTime = Date.now() + 60 * 1000 // delay closing by 1 minute
