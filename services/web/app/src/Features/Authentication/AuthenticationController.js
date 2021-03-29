@@ -17,6 +17,7 @@ const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const UrlHelper = require('../Helpers/UrlHelper')
 const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
 const _ = require('lodash')
+const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 const {
   acceptsJson
 } = require('../../infrastructure/RequestContentTypeDetection')
@@ -98,12 +99,18 @@ const AuthenticationController = {
       const redir =
         AuthenticationController._getRedirectFromSession(req) || '/project'
       _loginAsyncHandlers(req, user)
-      _afterLoginSessionSetup(req, user, function(err) {
+      const userId = user._id
+      UserAuditLogHandler.addEntry(userId, 'login', userId, req.ip, err => {
         if (err) {
           return next(err)
         }
-        AuthenticationController._clearRedirectFromSession(req)
-        AsyncFormHelper.redirect(req, res, redir)
+        _afterLoginSessionSetup(req, user, function(err) {
+          if (err) {
+            return next(err)
+          }
+          AuthenticationController._clearRedirectFromSession(req)
+          AsyncFormHelper.redirect(req, res, redir)
+        })
       })
     })
   },
@@ -508,7 +515,7 @@ function _loginAsyncHandlers(req, user) {
   LoginRateLimiter.recordSuccessfulLogin(user.email)
   AuthenticationController._recordSuccessfulLogin(user._id)
   AuthenticationController.ipMatchCheck(req, user)
-  Analytics.recordEvent(user._id, 'user-logged-in', { ip: req.ip })
+  Analytics.recordEvent(user._id, 'user-logged-in')
   Analytics.identifyUser(user._id, req.sessionID)
   logger.log(
     { email: user.email, user_id: user._id.toString() },

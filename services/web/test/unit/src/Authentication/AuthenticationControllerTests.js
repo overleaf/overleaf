@@ -23,6 +23,9 @@ describe('AuthenticationController', function() {
         console: console
       },
       requires: {
+        '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
+          addEntry: sinon.stub().yields(null)
+        }),
         '../Helpers/AsyncFormHelper': (this.AsyncFormHelper = {
           redirect: sinon.stub()
         }),
@@ -1185,6 +1188,48 @@ describe('AuthenticationController', function() {
             done()
           }
         )
+      })
+    })
+
+    describe('UserAuditLog', function() {
+      it('should add an audit log entry', function() {
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+        expect(this.UserAuditLogHandler.addEntry).to.have.been.calledWith(
+          this.user._id,
+          'login',
+          this.user._id,
+          '42.42.42.42'
+        )
+      })
+
+      it('should add an audit log entry before logging the user in', function() {
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+        expect(this.UserAuditLogHandler.addEntry).to.have.been.calledBefore(
+          this.req.login
+        )
+      })
+
+      it('should not log the user in without an audit log entry', function() {
+        const theError = new Error()
+        this.UserAuditLogHandler.addEntry.yields(theError)
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+        expect(this.next).to.have.been.calledWith(theError)
+        expect(this.req.login).to.not.have.been.called
       })
     })
 
