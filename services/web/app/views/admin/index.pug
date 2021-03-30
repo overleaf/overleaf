@@ -8,8 +8,8 @@ block content
 					.card
 						.page-header
 							h1 Admin Panel
-						tabset(ng-cloak)
-							tab(heading="System Messages")
+						tabset(bookmarkable-tabset ng-cloak)
+							tab(heading="System Messages" bookmarkable-tab="system-messages")
 								each message in systemMessages
 									.alert.alert-info.row-spaced(ng-non-bindable) #{message.content}
 								hr
@@ -25,7 +25,7 @@ block content
 									button.btn.btn-danger(type="submit") Clear all messages
 
 
-							tab(heading="Open Sockets")
+							tab(heading="Open Sockets" bookmarkable-tab="open-sockets")
 								.row-spaced
 									ul
 										each agents, url in openSockets
@@ -34,7 +34,7 @@ block content
 													each agent in agents
 														li(ng-non-bindable) #{agent}
 
-							tab(heading="Open/Close Editor")
+							tab(heading="Open/Close Editor" bookmarkable-tab="open-close-editor")
 								if hasFeature('saas')
 									| The "Open/Close Editor" feature is not available in SAAS.
 								else
@@ -56,7 +56,7 @@ block content
 											button.btn.btn-danger(type="submit") Reopen Editor
 										p.small Will reopen the editor after closing.
 
-							tab(heading="TPDS/Dropbox Management")
+							tab(heading="TPDS/Dropbox Management" bookmarkable-tab="tpds")
 								h3 Flush project to TPDS
 								.row
 									form.col-xs-6(method='post',action='/admin/flushProjectToTpds')
