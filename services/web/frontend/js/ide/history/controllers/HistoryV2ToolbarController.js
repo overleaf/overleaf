@@ -109,13 +109,13 @@ export default App.controller(
         .then(function(entity) {
           if (type === 'doc') {
             ide.editorManager.openDoc(entity)
-            this.ide.$timeout(() => {
-              this.$scope.$broadcast('history:toggle')
+            ide.$timeout(() => {
+              $scope.$broadcast('history:toggle')
             }, 0)
           } else if (type === 'file') {
             ide.binaryFilesManager.openFile(entity)
-            this.ide.$timeout(() => {
-              this.$scope.$broadcast('history:toggle')
+            ide.$timeout(() => {
+              $scope.$broadcast('history:toggle')
             }, 0)
           }
         })
