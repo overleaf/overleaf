@@ -162,6 +162,7 @@ App.controller('OutOfSyncModalController', function(
   $scope.title = title
   $scope.message = message
   $scope.editorContent = editorContent
+  $scope.editorContentRows = editorContent.split('\n').length
 
   $scope.done = () => {
     // Reload the page to avoid staying in an inconsistent state.

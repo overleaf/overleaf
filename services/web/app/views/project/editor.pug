@@ -151,7 +151,7 @@ block content
 			)
 				| {{showFileContents ? "Hide" : "Show"}} Local File Contents
 			.text-preview(ng-show="showFileContents")
-				.scroll-container
+				textarea.scroll-container(readonly="readonly" rows="{{editorContentRows}}")
 					| {{editorContent}}
 
 		.modal-footer
