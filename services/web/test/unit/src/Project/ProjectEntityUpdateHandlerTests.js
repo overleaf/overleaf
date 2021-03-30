@@ -651,6 +651,13 @@ describe('ProjectEntityUpdateHandler', function() {
           .should.equal(true)
       })
 
+      it('should mark the project as updated', function() {
+        const args = this.ProjectUpdater.markAsUpdated.args[0]
+        args[0].should.equal(projectId)
+        args[1].should.exist
+        args[2].should.equal(userId)
+      })
+
       it('sends the change in project structure to the doc updater', function() {
         const newFiles = [
           {
@@ -767,6 +774,13 @@ describe('ProjectEntityUpdateHandler', function() {
           path: this.path
         })
         .should.equal(true)
+    })
+
+    it('should mark the project as updated', function() {
+      const args = this.ProjectUpdater.markAsUpdated.args[0]
+      args[0].should.equal(projectId)
+      args[1].should.exist
+      args[2].should.equal(userId)
     })
 
     it('updates the project structure in the doc updater', function() {

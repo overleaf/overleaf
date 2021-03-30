@@ -533,6 +533,7 @@ const ProjectEntityUpdateHandler = {
               if (error != null) {
                 return callback(error)
               }
+              ProjectUpdateHandler.markAsUpdated(projectId, new Date(), userId)
               callback(null, fileRef, folderId)
             }
           )
@@ -631,6 +632,8 @@ const ProjectEntityUpdateHandler = {
               if (err != null) {
                 return callback(err)
               }
+              ProjectUpdateHandler.markAsUpdated(projectId, new Date(), userId)
+
               DocumentUpdaterHandler.updateProjectStructure(
                 projectId,
                 projectHistoryId,
