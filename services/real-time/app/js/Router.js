@@ -44,12 +44,15 @@ module.exports = Router = {
       metrics.inc('unexpected-arguments', 1, { status: method })
       const serializedError = { message: error.message }
       callback(serializedError)
+    } else if (error.message === 'no project_id found on client') {
+      logger.debug(attrs, error.message)
+      const serializedError = { message: error.message }
+      callback(serializedError)
     } else if (
       [
         'not authorized',
         'joinLeaveEpoch mismatch',
-        'doc updater could not load requested ops',
-        'no project_id found on client'
+        'doc updater could not load requested ops'
       ].includes(error.message)
     ) {
       logger.warn(attrs, error.message)
