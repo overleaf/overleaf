@@ -69,6 +69,10 @@ module.exports = Client = {
   },
 
   syncFromCode(project_id, file, line, column, callback) {
+    Client.syncFromCodeWithImage(project_id, file, line, column, '', callback)
+  },
+
+  syncFromCodeWithImage(project_id, file, line, column, imageName, callback) {
     if (callback == null) {
       callback = function (error, pdfPositions) {}
     }
@@ -76,6 +80,7 @@ module.exports = Client = {
       {
         url: `${this.host}/project/${project_id}/sync/code`,
         qs: {
+          imageName,
           file,
           line,
           column
@@ -86,12 +91,19 @@ module.exports = Client = {
         if (error != null) {
           return callback(error)
         }
+        if (response.statusCode !== 200) {
+          return callback(new Error(`statusCode=${response.statusCode}`), body)
+        }
         return callback(null, body)
       }
     )
   },
 
   syncFromPdf(project_id, page, h, v, callback) {
+    Client.syncFromPdfWithImage(project_id, page, h, v, '', callback)
+  },
+
+  syncFromPdfWithImage(project_id, page, h, v, imageName, callback) {
     if (callback == null) {
       callback = function (error, pdfPositions) {}
     }
@@ -99,6 +111,7 @@ module.exports = Client = {
       {
         url: `${this.host}/project/${project_id}/sync/pdf`,
         qs: {
+          imageName,
           page,
           h,
           v
@@ -108,6 +121,9 @@ module.exports = Client = {
       (error, response, body) => {
         if (error != null) {
           return callback(error)
+        }
+        if (response.statusCode !== 200) {
+          return callback(new Error(`statusCode=${response.statusCode}`), body)
         }
         return callback(null, body)
       }
@@ -208,7 +224,7 @@ module.exports = Client = {
           return callback(error)
         }
         if (response.statusCode !== 200) {
-          return callback(new Error(`statusCode=${response.statusCode}`))
+          return callback(new Error(`statusCode=${response.statusCode}`), body)
         }
         return callback(null, JSON.parse(body))
       }

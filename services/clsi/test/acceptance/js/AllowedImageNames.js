@@ -71,6 +71,78 @@ Hello world
     })
   })
 
+  describe('syncToCode', function () {
+    beforeEach(function (done) {
+      Client.compile(this.project_id, this.request, done)
+    })
+    it('should error out with an invalid imageName', function () {
+      Client.syncFromCodeWithImage(
+        this.project_id,
+        'main.tex',
+        3,
+        5,
+        'something/evil:1337',
+        (error, body) => {
+          expect(String(error)).to.include('statusCode=400')
+          expect(body).to.equal('invalid image')
+        }
+      )
+    })
+
+    it('should produce a mapping a valid imageName', function () {
+      Client.syncFromCodeWithImage(
+        this.project_id,
+        'main.tex',
+        3,
+        5,
+        process.env.TEXLIVE_IMAGE,
+        (error, result) => {
+          expect(error).to.not.exist
+          expect(result).to.deep.equal({
+            pdf: [
+              { page: 1, h: 133.77, v: 134.76, height: 6.92, width: 343.71 }
+            ]
+          })
+        }
+      )
+    })
+  })
+
+  describe('syncToPdf', function () {
+    beforeEach(function (done) {
+      Client.compile(this.project_id, this.request, done)
+    })
+    it('should error out with an invalid imageName', function () {
+      Client.syncFromPdfWithImage(
+        this.project_id,
+        'main.tex',
+        100,
+        200,
+        'something/evil:1337',
+        (error, body) => {
+          expect(String(error)).to.include('statusCode=400')
+          expect(body).to.equal('invalid image')
+        }
+      )
+    })
+
+    it('should produce a mapping a valid imageName', function () {
+      Client.syncFromPdfWithImage(
+        this.project_id,
+        1,
+        100,
+        200,
+        process.env.TEXLIVE_IMAGE,
+        (error, result) => {
+          expect(error).to.not.exist
+          expect(result).to.deep.equal({
+            code: [{ file: 'main.tex', line: 3, column: -1 }]
+          })
+        }
+      )
+    })
+  })
+
   describe('wordcount', function () {
     beforeEach(function (done) {
       Client.compile(this.project_id, this.request, done)
@@ -80,8 +152,9 @@ Hello world
         this.project_id,
         'main.tex',
         'something/evil:1337',
-        (error, result) => {
+        (error, body) => {
           expect(String(error)).to.include('statusCode=400')
+          expect(body).to.equal('invalid image')
         }
       )
     })

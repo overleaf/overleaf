@@ -394,13 +394,14 @@ describe('CompileManager', function () {
         this.stdout = `NODE\t${this.page}\t${this.h}\t${this.v}\t${this.width}\t${this.height}\n`
         this.CommandRunner.run = sinon
           .stub()
-          .callsArgWith(7, null, { stdout: this.stdout })
+          .yields(null, { stdout: this.stdout })
         return this.CompileManager.syncFromCode(
           this.project_id,
           this.user_id,
           this.file_name,
           this.line,
           this.column,
+          '',
           this.callback
         )
       })
@@ -428,7 +429,7 @@ describe('CompileManager', function () {
           .should.equal(true)
       })
 
-      return it('should call the callback with the parsed output', function () {
+      it('should call the callback with the parsed output', function () {
         return this.callback
           .calledWith(null, [
             {
@@ -440,6 +441,44 @@ describe('CompileManager', function () {
             }
           ])
           .should.equal(true)
+      })
+
+      describe('with a custom imageName', function () {
+        const customImageName = 'foo/bar:tag-0'
+        beforeEach(function () {
+          this.CommandRunner.run.reset()
+          this.CompileManager.syncFromCode(
+            this.project_id,
+            this.user_id,
+            this.file_name,
+            this.line,
+            this.column,
+            customImageName,
+            this.callback
+          )
+        })
+
+        it('should execute the synctex binary in a custom docker image', function () {
+          const synctex_path = `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}/output.pdf`
+          const file_path = `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}/${this.file_name}`
+          this.CommandRunner.run
+            .calledWith(
+              `${this.project_id}-${this.user_id}`,
+              [
+                '/opt/synctex',
+                'code',
+                synctex_path,
+                file_path,
+                this.line,
+                this.column
+              ],
+              `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`,
+              customImageName,
+              60000,
+              {}
+            )
+            .should.equal(true)
+        })
       })
     })
 
@@ -460,6 +499,7 @@ describe('CompileManager', function () {
           this.page,
           this.h,
           this.v,
+          '',
           this.callback
         )
       })
@@ -479,7 +519,7 @@ describe('CompileManager', function () {
           .should.equal(true)
       })
 
-      return it('should call the callback with the parsed output', function () {
+      it('should call the callback with the parsed output', function () {
         return this.callback
           .calledWith(null, [
             {
@@ -489,6 +529,36 @@ describe('CompileManager', function () {
             }
           ])
           .should.equal(true)
+      })
+
+      describe('with a custom imageName', function () {
+        const customImageName = 'foo/bar:tag-1'
+        beforeEach(function () {
+          this.CommandRunner.run.reset()
+          this.CompileManager.syncFromPdf(
+            this.project_id,
+            this.user_id,
+            this.page,
+            this.h,
+            this.v,
+            customImageName,
+            this.callback
+          )
+        })
+
+        it('should execute the synctex binary in a custom docker image', function () {
+          const synctex_path = `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}/output.pdf`
+          this.CommandRunner.run
+            .calledWith(
+              `${this.project_id}-${this.user_id}`,
+              ['/opt/synctex', 'pdf', synctex_path, this.page, this.h, this.v],
+              `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`,
+              customImageName,
+              60000,
+              {}
+            )
+            .should.equal(true)
+        })
       })
     })
   })

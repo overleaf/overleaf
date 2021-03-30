@@ -100,9 +100,7 @@ Hello world
           3,
           5,
           (error, body) => {
-            if (error != null) {
-              throw error
-            }
+            expect(String(error)).to.include('statusCode=404')
             expect(body).to.equal('Not Found')
             return done()
           }
@@ -117,9 +115,7 @@ Hello world
           100,
           200,
           (error, body) => {
-            if (error != null) {
-              throw error
-            }
+            expect(String(error)).to.include('statusCode=404')
             expect(body).to.equal('Not Found')
             return done()
           }
@@ -160,9 +156,7 @@ Hello world
           3,
           5,
           (error, body) => {
-            if (error != null) {
-              throw error
-            }
+            expect(String(error)).to.include('statusCode=404')
             expect(body).to.equal('Not Found')
             return done()
           }
@@ -177,9 +171,7 @@ Hello world
           100,
           200,
           (error, body) => {
-            if (error != null) {
-              throw error
-            }
+            expect(String(error)).to.include('statusCode=404')
             expect(body).to.equal('Not Found')
             return done()
           }

@@ -21,6 +21,12 @@ const ProjectPersistenceManager = require('./ProjectPersistenceManager')
 const logger = require('logger-sharelatex')
 const Errors = require('./Errors')
 
+function isImageNameAllowed(imageName) {
+  const ALLOWED_IMAGES =
+    Settings.clsi && Settings.clsi.docker && Settings.clsi.docker.allowedImages
+  return !ALLOWED_IMAGES || ALLOWED_IMAGES.includes(imageName)
+}
+
 module.exports = CompileController = {
   compile(req, res, next) {
     if (next == null) {
@@ -165,14 +171,21 @@ module.exports = CompileController = {
     const { file } = req.query
     const line = parseInt(req.query.line, 10)
     const column = parseInt(req.query.column, 10)
+    const { imageName } = req.query
     const { project_id } = req.params
     const { user_id } = req.params
+
+    if (imageName && !isImageNameAllowed(imageName)) {
+      return res.status(400).send('invalid image')
+    }
+
     return CompileManager.syncFromCode(
       project_id,
       user_id,
       file,
       line,
       column,
+      imageName,
       function (error, pdfPositions) {
         if (error != null) {
           return next(error)
@@ -191,14 +204,20 @@ module.exports = CompileController = {
     const page = parseInt(req.query.page, 10)
     const h = parseFloat(req.query.h)
     const v = parseFloat(req.query.v)
+    const { imageName } = req.query
     const { project_id } = req.params
     const { user_id } = req.params
+
+    if (imageName && !isImageNameAllowed(imageName)) {
+      return res.status(400).send('invalid image')
+    }
     return CompileManager.syncFromPdf(
       project_id,
       user_id,
       page,
       h,
       v,
+      imageName,
       function (error, codePositions) {
         if (error != null) {
           return next(error)
@@ -218,13 +237,7 @@ module.exports = CompileController = {
     const { project_id } = req.params
     const { user_id } = req.params
     const { image } = req.query
-    if (
-      image &&
-      Settings.clsi &&
-      Settings.clsi.docker &&
-      Settings.clsi.docker.allowedImages &&
-      !Settings.clsi.docker.allowedImages.includes(image)
-    ) {
+    if (image && !isImageNameAllowed(image)) {
       return res.status(400).send('invalid image')
     }
     logger.log({ image, file, project_id }, 'word count request')
