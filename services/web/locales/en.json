@@ -1010,6 +1010,7 @@
   "update_your_billing_details": "Update Your Billing Details",
   "subscription_canceled_and_terminate_on_x": " Your subscription has been canceled and will terminate on <0>__terminateDate__</0>. No further payments will be taken.",
   "your_subscription_has_expired": "Your subscription has expired.",
+  "account_has_past_due_invoice_change_plan_warning": "Your account currently has a past due invoice. You will not be able to change your plan until this is resolved.",
   "create_new_subscription": "Create New Subscription",
   "problem_with_subscription_contact_us": "There is a problem with your subscription. Please contact us for more information.",
   "manage_group": "Manage Group",

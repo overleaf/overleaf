@@ -5,6 +5,10 @@ script(type="text/javascript", nonce=scriptNonce).
 
 div(ng-controller="RecurlySubscriptionController")
 	div(ng-show="!showCancellation")
+		if (personalSubscription.recurly.account.has_past_due_invoice && personalSubscription.recurly.account.has_past_due_invoice._ == 'true')
+			.alert.alert-danger #{translate("account_has_past_due_invoice_change_plan_warning")} 
+				| &nbsp;
+				a(href=personalSubscription.recurly.accountManagementLink, target="_blank") #{translate("view_your_invoices")}.
 		case personalSubscription.recurly.state
 			when "active"
 				p !{translate("currently_subscribed_to_plan", {planName: personalSubscription.plan.name}, ['strong'])}

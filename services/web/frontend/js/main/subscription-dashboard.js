@@ -174,6 +174,12 @@ App.controller('GroupMembershipController', function($scope, $modal) {
 App.controller('RecurlySubscriptionController', function($scope) {
   const recurlyIsSetup = ensureRecurlyIsSetup()
   $scope.showChangePlanButton = recurlyIsSetup && !window.subscription.groupPlan
+  if (
+    window.subscription.recurly.account.has_past_due_invoice &&
+    window.subscription.recurly.account.has_past_due_invoice._ === 'true'
+  ) {
+    $scope.showChangePlanButton = false
+  }
   $scope.recurlyLoadError = !recurlyIsSetup
 
   $scope.switchToDefaultView = () => {
