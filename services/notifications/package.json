@@ -26,7 +26,6 @@
     "logger-sharelatex": "^2.2.0",
     "method-override": "^3.0.0",
     "mongodb": "^3.6.0",
-    "node-statsd": "0.1.1",
     "request": "^2.88.2",
     "settings-sharelatex": "^1.1.0",
     "underscore": "1.9.2"
