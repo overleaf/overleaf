@@ -49,7 +49,9 @@ module.exports = ProjectEditorHandler = {
     if (result.invites == null) {
       result.invites = []
     }
-
+    result.invites.forEach(invite => {
+      delete invite.token
+    })
     ;({ owner, ownerFeatures, members } = this.buildOwnerAndMembersViews(
       members
     ))

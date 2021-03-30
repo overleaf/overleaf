@@ -97,20 +97,22 @@ describe('ProjectEditorHandler', function() {
         _id: 'invite_one',
         email: 'user-one@example.com',
         privileges: 'readOnly',
-        projectId: this.project._id
+        projectId: this.project._id,
+        token: 'my-secret-token1'
       },
       {
         _id: 'invite_two',
         email: 'user-two@example.com',
         privileges: 'readOnly',
-        projectId: this.project._id
+        projectId: this.project._id,
+        token: 'my-secret-token2'
       }
     ]
     return (this.handler = SandboxedModule.require(modulePath))
   })
 
   describe('buildProjectModelView', function() {
-    describe('with owner and members included', function() {
+    describe('with owner, members and invites included', function() {
       beforeEach(function() {
         return (this.result = this.handler.buildProjectModelView(
           this.project,
@@ -157,6 +159,11 @@ describe('ProjectEditorHandler', function() {
             name: this.project.deletedDocs[0].name
           }
         ])
+      })
+
+      it('invites should not include the token', function() {
+        should.not.exist(this.result.invites[0].token)
+        should.not.exist(this.result.invites[1].token)
       })
 
       it('should gather readOnly_refs and collaberators_refs into a list of members', function() {
