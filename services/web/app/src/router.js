@@ -943,21 +943,23 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthorizationMiddleware.ensureUserIsSiteAdmin,
     UserController.register
   )
-  webRouter.post(
-    '/admin/openEditor',
-    AuthorizationMiddleware.ensureUserIsSiteAdmin,
-    AdminController.openEditor
-  )
-  webRouter.post(
-    '/admin/closeEditor',
-    AuthorizationMiddleware.ensureUserIsSiteAdmin,
-    AdminController.closeEditor
-  )
-  webRouter.post(
-    '/admin/disconnectAllUsers',
-    AuthorizationMiddleware.ensureUserIsSiteAdmin,
-    AdminController.disconnectAllUsers
-  )
+  if (!Features.hasFeature('saas')) {
+    webRouter.post(
+      '/admin/openEditor',
+      AuthorizationMiddleware.ensureUserIsSiteAdmin,
+      AdminController.openEditor
+    )
+    webRouter.post(
+      '/admin/closeEditor',
+      AuthorizationMiddleware.ensureUserIsSiteAdmin,
+      AdminController.closeEditor
+    )
+    webRouter.post(
+      '/admin/disconnectAllUsers',
+      AuthorizationMiddleware.ensureUserIsSiteAdmin,
+      AdminController.disconnectAllUsers
+    )
+  }
   webRouter.post(
     '/admin/flushProjectToTpds',
     AuthorizationMiddleware.ensureUserIsSiteAdmin,

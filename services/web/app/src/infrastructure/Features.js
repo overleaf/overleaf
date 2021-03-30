@@ -52,6 +52,8 @@ const Features = {
    */
   hasFeature(feature) {
     switch (feature) {
+      case 'saas':
+        return Boolean(Settings.overleaf)
       case 'homepage':
         return Boolean(Settings.enableHomepage)
       case 'registration':

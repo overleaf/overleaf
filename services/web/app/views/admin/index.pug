@@ -35,23 +35,26 @@ block content
 														li(ng-non-bindable) #{agent}
 
 							tab(heading="Open/Close Editor")
-								.row-spaced
-									form(method='post',action='/admin/closeEditor')
-										input(name="_csrf", type="hidden", value=csrfToken)
-										button.btn.btn-danger(type="submit") Close Editor
-									p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
+								if hasFeature('saas')
+									| The "Open/Close Editor" feature is not available in SAAS.
+								else
+									.row-spaced
+										form(method='post',action='/admin/closeEditor')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											button.btn.btn-danger(type="submit") Close Editor
+										p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
 
-								.row-spaced
-									form(method='post',action='/admin/disconnectAllUsers')
-										input(name="_csrf", type="hidden", value=csrfToken)
-										button.btn.btn-danger(type="submit") Disconnect all users
-									p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.
+									.row-spaced
+										form(method='post',action='/admin/disconnectAllUsers')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											button.btn.btn-danger(type="submit") Disconnect all users
+										p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.
 
-								.row-spaced
-									form(method='post',action='/admin/openEditor')
-										input(name="_csrf", type="hidden", value=csrfToken)
-										button.btn.btn-danger(type="submit") Reopen Editor
-									p.small Will reopen the editor after closing.
+									.row-spaced
+										form(method='post',action='/admin/openEditor')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											button.btn.btn-danger(type="submit") Reopen Editor
+										p.small Will reopen the editor after closing.
 
 							tab(heading="TPDS/Dropbox Management")
 								h3 Flush project to TPDS
