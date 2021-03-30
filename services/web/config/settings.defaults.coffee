@@ -60,7 +60,8 @@ defaultTextExtensions = [
 	'ldf',
 	'rmd',
 	'lua',
-	'gv'
+	'gv',
+	'mf'
 ]
 
 parseTextExtensions = (extensions) ->
