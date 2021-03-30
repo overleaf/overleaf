@@ -413,6 +413,73 @@ describe('CompileController', function() {
       })
     })
   })
+  describe('proxySyncCode', function() {
+    let file, line, column, imageName
+
+    beforeEach(function(done) {
+      this.req.params = { Project_id: this.project_id }
+      file = 'main.tex'
+      line = String(Date.now())
+      column = String(Date.now() + 1)
+      this.req.query = { file, line, column }
+
+      imageName = 'foo/bar:tag-0'
+      this.ProjectGetter.getProject = sinon.stub().yields(null, { imageName })
+
+      this.next.callsFake(done)
+      this.res.callback = done
+      this.CompileController.proxyToClsi = sinon.stub().callsFake(() => done())
+
+      this.CompileController.proxySyncCode(this.req, this.res, this.next)
+    })
+
+    it('should proxy the request with an imageName', function() {
+      expect(this.CompileController.proxyToClsi).to.have.been.calledWith(
+        this.project_id,
+        {
+          url: `/project/${this.project_id}/user/${this.user_id}/sync/code`,
+          qs: { file, line, column, imageName }
+        },
+        this.req,
+        this.res,
+        this.next
+      )
+    })
+  })
+
+  describe('proxySyncPdf', function() {
+    let page, h, v, imageName
+
+    beforeEach(function(done) {
+      this.req.params = { Project_id: this.project_id }
+      page = String(Date.now())
+      h = String(Math.random())
+      v = String(Math.random())
+      this.req.query = { page, h, v }
+
+      imageName = 'foo/bar:tag-1'
+      this.ProjectGetter.getProject = sinon.stub().yields(null, { imageName })
+
+      this.next.callsFake(done)
+      this.res.callback = done
+      this.CompileController.proxyToClsi = sinon.stub().callsFake(() => done())
+
+      this.CompileController.proxySyncPdf(this.req, this.res, this.next)
+    })
+
+    it('should proxy the request with an imageName', function() {
+      expect(this.CompileController.proxyToClsi).to.have.been.calledWith(
+        this.project_id,
+        {
+          url: `/project/${this.project_id}/user/${this.user_id}/sync/pdf`,
+          qs: { page, h, v, imageName }
+        },
+        this.req,
+        this.res,
+        this.next
+      )
+    })
+  })
 
   describe('proxyToClsi', function() {
     beforeEach(function() {

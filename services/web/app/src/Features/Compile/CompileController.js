@@ -33,6 +33,14 @@ const Path = require('path')
 
 const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
 
+function getImageNameForProject(projectId, callback) {
+  ProjectGetter.getProject(projectId, { imageName: 1 }, (err, project) => {
+    if (err) return callback(err)
+    if (!project) return callback(new Error('project not found'))
+    callback(null, project.imageName)
+  })
+}
+
 module.exports = CompileController = {
   compile(req, res, next) {
     res.setTimeout(COMPILE_TIMEOUT_MS)
@@ -377,15 +385,19 @@ module.exports = CompileController = {
       if (error != null) {
         return next(error)
       }
-      const url = CompileController._getUrl(project_id, user_id, 'sync/pdf')
-      const destination = { url, qs: { page, h, v } }
-      return CompileController.proxyToClsi(
-        project_id,
-        destination,
-        req,
-        res,
-        next
-      )
+      getImageNameForProject(project_id, (error, imageName) => {
+        if (error) return next(error)
+
+        const url = CompileController._getUrl(project_id, user_id, 'sync/pdf')
+        const destination = { url, qs: { page, h, v, imageName } }
+        return CompileController.proxyToClsi(
+          project_id,
+          destination,
+          req,
+          res,
+          next
+        )
+      })
     })
   },
 
@@ -417,15 +429,19 @@ module.exports = CompileController = {
       if (error != null) {
         return next(error)
       }
-      const url = CompileController._getUrl(project_id, user_id, 'sync/code')
-      const destination = { url, qs: { file, line, column } }
-      return CompileController.proxyToClsi(
-        project_id,
-        destination,
-        req,
-        res,
-        next
-      )
+      getImageNameForProject(project_id, (error, imageName) => {
+        if (error) return next(error)
+
+        const url = CompileController._getUrl(project_id, user_id, 'sync/code')
+        const destination = { url, qs: { file, line, column, imageName } }
+        return CompileController.proxyToClsi(
+          project_id,
+          destination,
+          req,
+          res,
+          next
+        )
+      })
     })
   },
 
