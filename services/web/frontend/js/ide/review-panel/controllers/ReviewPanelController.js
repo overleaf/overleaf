@@ -151,6 +151,14 @@ export default App.controller('ReviewPanelController', function(
         const result = []
         for (let member of Array.from(members)) {
           if (member.privileges === 'readAndWrite') {
+            if ($scope.reviewPanel.trackChangesState[member._id] == null) {
+              // An added member will have track changes enabled if track changes is on for everyone
+              _setUserTCState(
+                member._id,
+                $scope.reviewPanel.trackChangesOnForEveryone,
+                true
+              )
+            }
             result.push(
               ($scope.reviewPanel.formattedProjectMembers[
                 member._id
