@@ -309,7 +309,7 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 					i.fa.fa-pencil
 				.rp-entry-details
 					.rp-entry-description
-						| #{translate("aggregate_changed")}
+						| #{translate("aggregate_changed")}&nbsp;
 						del.rp-content-highlight
 							| {{ entry.metadata.replaced_content | limitTo:(isDeletionCollapsed ? contentLimit : entry.metadata.replaced_contentlength) }}
 						a.rp-collapse-toggle(
@@ -317,7 +317,7 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 							ng-if="deletionNeedsCollapsing"
 							ng-click="toggleDeletionCollapse();"
 						) {{ isDeletionCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
-						|  #{translate("aggregate_to")}
+						|  #{translate("aggregate_to")}&nbsp;
 						ins.rp-content-highlight
 							| {{ entry.content | limitTo:(isInsertionCollapsed ? contentLimit : entry.contentlength) }}
 						a.rp-collapse-toggle(
