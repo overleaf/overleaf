@@ -10,10 +10,6 @@ html(
 	head
 		include ./_metadata.pug
 
-		script(type="text/javascript", nonce=scriptNonce).
-			// Stop superfish from loading
-			window.similarproducts = true
-
 		if (typeof(gaExperiments) != "undefined")
 			|!{gaExperiments}
 
