@@ -56,7 +56,7 @@ describe('ProjectDetailsHandler', function() {
         moveEntity: sinon.stub().resolves()
       }
     }
-    this.ProjectTokenGenerator = {
+    this.TokenGenerator = {
       readAndWriteToken: sinon.stub(),
       promises: {
         generateUniqueReadOnlyToken: sinon.stub()
@@ -82,7 +82,7 @@ describe('ProjectDetailsHandler', function() {
           warn() {},
           err() {}
         },
-        './ProjectTokenGenerator': this.ProjectTokenGenerator,
+        '../TokenGenerator/TokenGenerator': this.TokenGenerator,
         'settings-sharelatex': this.settings
       }
     })
@@ -484,10 +484,10 @@ describe('ProjectDetailsHandler', function() {
         this.readOnlyToken = 'abc'
         this.readAndWriteToken = '42def'
         this.readAndWriteTokenPrefix = '42'
-        this.ProjectTokenGenerator.promises.generateUniqueReadOnlyToken.resolves(
+        this.TokenGenerator.promises.generateUniqueReadOnlyToken.resolves(
           this.readOnlyToken
         )
-        this.ProjectTokenGenerator.readAndWriteToken.returns({
+        this.TokenGenerator.readAndWriteToken.returns({
           token: this.readAndWriteToken,
           numericPrefix: this.readAndWriteTokenPrefix
         })
@@ -506,10 +506,9 @@ describe('ProjectDetailsHandler', function() {
 
       it('should update the project with new tokens', async function() {
         await this.handler.promises.ensureTokensArePresent(this.project._id)
-        expect(this.ProjectTokenGenerator.promises.generateUniqueReadOnlyToken)
-          .to.have.been.calledOnce
-        expect(this.ProjectTokenGenerator.readAndWriteToken).to.have.been
-          .calledOnce
+        expect(this.TokenGenerator.promises.generateUniqueReadOnlyToken).to.have
+          .been.calledOnce
+        expect(this.TokenGenerator.readAndWriteToken).to.have.been.calledOnce
         expect(this.ProjectModel.updateOne).to.have.been.calledOnce
         expect(this.ProjectModel.updateOne).to.have.been.calledWith(
           { _id: this.project._id },

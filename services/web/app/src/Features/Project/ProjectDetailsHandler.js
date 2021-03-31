@@ -6,7 +6,7 @@ const logger = require('logger-sharelatex')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const Errors = require('../Errors/Errors')
-const ProjectTokenGenerator = require('./ProjectTokenGenerator')
+const TokenGenerator = require('../TokenGenerator/TokenGenerator')
 const ProjectHelper = require('./ProjectHelper')
 const settings = require('settings-sharelatex')
 const { callbackify } = require('util')
@@ -236,11 +236,11 @@ async function _generateTokens(project, callback) {
   }
   const { tokens } = project
   if (tokens.readAndWrite == null) {
-    const { token, numericPrefix } = ProjectTokenGenerator.readAndWriteToken()
+    const { token, numericPrefix } = TokenGenerator.readAndWriteToken()
     tokens.readAndWrite = token
     tokens.readAndWritePrefix = numericPrefix
   }
   if (tokens.readOnly == null) {
-    tokens.readOnly = await ProjectTokenGenerator.promises.generateUniqueReadOnlyToken()
+    tokens.readOnly = await TokenGenerator.promises.generateUniqueReadOnlyToken()
   }
 }
