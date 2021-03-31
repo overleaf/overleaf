@@ -5,6 +5,9 @@ include ./dashboard/_team_name_mixin
 block head-scripts
 	script(type="text/javascript", nonce=scriptNonce, src="https://js.recurly.com/v4/recurly.js")
 
+block append meta
+	meta(name="ol-managedInstitutions", data-type="json", content=managedInstitutions)
+
 block content
 	main.content.content-alt(ng-cloak)
 		.container

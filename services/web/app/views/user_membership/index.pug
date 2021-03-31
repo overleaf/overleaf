@@ -1,5 +1,10 @@
 extends ../layout
 
+block append meta
+	meta(name="ol-users", data-type="json", content=users)
+	meta(name="ol-paths", data-type="json", content=paths)
+	meta(name="ol-groupSize", data-type="json", content=groupSize)
+
 block content
 	main.content.content-alt
 		.container
@@ -106,9 +111,3 @@ block content
 							.row
 								.col-xs-2.col-xs-offset-10(ng-if="paths.exportMembers", ng-cloak)
 									a(href=paths.exportMembers) #{translate('export_csv')}
-
-
-	script(type="text/javascript", nonce=scriptNonce).
-		window.users = !{StringHelper.stringifyJsonForScript(users)};
-		window.paths = !{StringHelper.stringifyJsonForScript(paths)};
-		window.groupSize = #{groupSize || 'null'};
