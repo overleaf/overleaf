@@ -48,7 +48,9 @@ function getClient() {
         'port',
         'secure',
         'auth',
-        'ignoreTLS'
+        'ignoreTLS',
+        'logger',
+        'name'
       )
       client = nodemailer.createTransport(smtp)
     }
