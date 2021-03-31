@@ -5,6 +5,7 @@ const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const UserSessionsManager = require('../User/UserSessionsManager')
 const OError = require('@overleaf/o-error')
+const EmailsHelper = require('../Helpers/EmailHelper')
 const { expressify } = require('../../util/promises')
 
 async function setNewUserPassword(req, res, next) {
@@ -104,7 +105,14 @@ module.exports = {
   renderSetPasswordForm(req, res) {
     if (req.query.passwordResetToken != null) {
       req.session.resetToken = req.query.passwordResetToken
-      return res.redirect('/user/password/set')
+      let emailQuery = ''
+      if (typeof req.query.email === 'string') {
+        const email = EmailsHelper.parseEmail(req.query.email)
+        if (email) {
+          emailQuery = `?email=${encodeURIComponent(email)}`
+        }
+      }
+      return res.redirect('/user/password/set' + emailQuery)
     }
     if (req.session.resetToken == null) {
       return res.redirect('/user/password/reset')

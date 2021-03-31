@@ -4,7 +4,7 @@ const UserHelper = require('./helpers/UserHelper')
 const { db } = require('../../../app/src/infrastructure/mongodb')
 
 describe('PasswordReset', function() {
-  let email, response, user, userHelper, token
+  let email, response, user, userHelper, token, emailQuery
   afterEach(async function() {
     await RateLimiter.promises.clearRateLimit(
       'password_reset_rate_limit',
@@ -14,6 +14,7 @@ describe('PasswordReset', function() {
   beforeEach(async function() {
     userHelper = new UserHelper()
     email = userHelper.getDefaultEmail()
+    emailQuery = `?email=${encodeURIComponent(email)}`
     userHelper = await UserHelper.createUser({ email })
     user = userHelper.user
 
@@ -43,7 +44,9 @@ describe('PasswordReset', function() {
           { simple: false }
         )
         expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal('/user/password/set')
+        expect(response.headers.location).to.equal(
+          `/user/password/set${emailQuery}`
+        )
         // send reset request
         response = await userHelper.request.post('/user/password/set', {
           form: {
@@ -84,7 +87,9 @@ describe('PasswordReset', function() {
           { simple: false }
         )
         expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal('/user/password/set')
+        expect(response.headers.location).to.equal(
+          `/user/password/set${emailQuery}`
+        )
         // send reset request
         response = await userHelper.request.post('/user/password/set', {
           form: {
@@ -117,7 +122,9 @@ describe('PasswordReset', function() {
           { simple: false }
         )
         expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal('/user/password/set')
+        expect(response.headers.location).to.equal(
+          `/user/password/set${emailQuery}`
+        )
         // send reset request
         response = await userHelper.request.post('/user/password/set', {
           form: {
@@ -149,7 +156,9 @@ describe('PasswordReset', function() {
           { simple: false }
         )
         expect(response.statusCode).to.equal(302)
-        expect(response.headers.location).to.equal('/user/password/set')
+        expect(response.headers.location).to.equal(
+          `/user/password/set${emailQuery}`
+        )
       })
       it('without a password should return 400 and not log the change', async function() {
         // send reset request
@@ -199,7 +208,9 @@ describe('PasswordReset', function() {
         { simple: false }
       )
       expect(response.statusCode).to.equal(302)
-      expect(response.headers.location).to.equal('/user/password/set')
+      expect(response.headers.location).to.equal(
+        `/user/password/set${emailQuery}`
+      )
       // send reset request
       response = await userHelper.request.post('/user/password/set', {
         form: {

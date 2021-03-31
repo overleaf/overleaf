@@ -353,6 +353,57 @@ describe('PasswordResetController', function() {
       })
     })
 
+    describe('with token and email in query-string', function() {
+      beforeEach(function() {
+        this.req.query.passwordResetToken = this.token
+        this.req.query.email = 'foo@bar.com'
+      })
+
+      it('should set session.resetToken and redirect with email', function(done) {
+        this.req.session.should.not.have.property('resetToken')
+        this.res.redirect = path => {
+          path.should.equal('/user/password/set?email=foo%40bar.com')
+          this.req.session.resetToken.should.equal(this.token)
+          done()
+        }
+        this.PasswordResetController.renderSetPasswordForm(this.req, this.res)
+      })
+    })
+
+    describe('with token and invalid email in query-string', function() {
+      beforeEach(function() {
+        this.req.query.passwordResetToken = this.token
+        this.req.query.email = 'not-an-email'
+      })
+
+      it('should set session.resetToken and redirect without email', function(done) {
+        this.req.session.should.not.have.property('resetToken')
+        this.res.redirect = path => {
+          path.should.equal('/user/password/set')
+          this.req.session.resetToken.should.equal(this.token)
+          done()
+        }
+        this.PasswordResetController.renderSetPasswordForm(this.req, this.res)
+      })
+    })
+
+    describe('with token and non-string email in query-string', function() {
+      beforeEach(function() {
+        this.req.query.passwordResetToken = this.token
+        this.req.query.email = { foo: 'bar' }
+      })
+
+      it('should set session.resetToken and redirect without email', function(done) {
+        this.req.session.should.not.have.property('resetToken')
+        this.res.redirect = path => {
+          path.should.equal('/user/password/set')
+          this.req.session.resetToken.should.equal(this.token)
+          done()
+        }
+        this.PasswordResetController.renderSetPasswordForm(this.req, this.res)
+      })
+    })
+
     describe('without a token in query-string', function() {
       describe('with token in session', function() {
         beforeEach(function() {
