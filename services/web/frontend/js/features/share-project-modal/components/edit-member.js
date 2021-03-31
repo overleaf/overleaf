@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 import {
@@ -24,6 +24,11 @@ export default function EditMember({ member }) {
     confirmingOwnershipTransfer,
     setConfirmingOwnershipTransfer
   ] = useState(false)
+
+  // update the local state if the member's privileges change externally
+  useEffect(() => {
+    setPrivileges(member.privileges)
+  }, [member.privileges])
 
   const { updateProject, monitorRequest } = useShareProjectContext()
   const project = useProjectContext()

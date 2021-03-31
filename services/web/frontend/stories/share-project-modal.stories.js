@@ -73,6 +73,16 @@ const setupFetchMock = () => {
     })
 }
 
+const ideWithProject = project => {
+  return {
+    $scope: {
+      $watch: () => () => {},
+      $applyAsync: () => {},
+      project
+    }
+  }
+}
+
 export const LinkSharingOff = args => {
   setupFetchMock()
 
@@ -81,7 +91,7 @@ export const LinkSharingOff = args => {
     publicAccesLevel: 'private'
   }
 
-  return <ShareProjectModal {...args} project={project} />
+  return <ShareProjectModal {...args} ide={ideWithProject(project)} />
 }
 
 export const LinkSharingOn = args => {
@@ -92,7 +102,7 @@ export const LinkSharingOn = args => {
     publicAccesLevel: 'tokenBased'
   }
 
-  return <ShareProjectModal {...args} project={project} />
+  return <ShareProjectModal {...args} ide={ideWithProject(project)} />
 }
 
 export const LinkSharingLoading = args => {
@@ -104,7 +114,7 @@ export const LinkSharingLoading = args => {
     tokens: undefined
   }
 
-  return <ShareProjectModal {...args} project={project} />
+  return <ShareProjectModal {...args} ide={ideWithProject(project)} />
 }
 
 export const NonAdminLinkSharingOff = args => {
@@ -113,7 +123,13 @@ export const NonAdminLinkSharingOff = args => {
     publicAccesLevel: 'private'
   }
 
-  return <ShareProjectModal {...args} isAdmin={false} project={project} />
+  return (
+    <ShareProjectModal
+      {...args}
+      isAdmin={false}
+      ide={ideWithProject(project)}
+    />
+  )
 }
 
 export const NonAdminLinkSharingOn = args => {
@@ -122,7 +138,13 @@ export const NonAdminLinkSharingOn = args => {
     publicAccesLevel: 'tokenBased'
   }
 
-  return <ShareProjectModal {...args} isAdmin={false} project={project} />
+  return (
+    <ShareProjectModal
+      {...args}
+      isAdmin={false}
+      ide={ideWithProject(project)}
+    />
+  )
 }
 
 export const RestrictedTokenMember = args => {
@@ -139,7 +161,7 @@ export const RestrictedTokenMember = args => {
     publicAccesLevel: 'tokenBased'
   }
 
-  return <ShareProjectModal {...args} project={project} />
+  return <ShareProjectModal {...args} ide={ideWithProject(project)} />
 }
 
 export const LegacyLinkSharingReadAndWrite = args => {
@@ -150,7 +172,7 @@ export const LegacyLinkSharingReadAndWrite = args => {
     publicAccesLevel: 'readAndWrite'
   }
 
-  return <ShareProjectModal {...args} project={project} />
+  return <ShareProjectModal {...args} ide={ideWithProject(project)} />
 }
 
 export const LegacyLinkSharingReadOnly = args => {
@@ -161,7 +183,7 @@ export const LegacyLinkSharingReadOnly = args => {
     publicAccesLevel: 'readOnly'
   }
 
-  return <ShareProjectModal {...args} project={project} />
+  return <ShareProjectModal {...args} ide={ideWithProject(project)} />
 }
 
 export const LimitedCollaborators = args => {
@@ -175,7 +197,7 @@ export const LimitedCollaborators = args => {
     }
   }
 
-  return <ShareProjectModal {...args} project={project} />
+  return <ShareProjectModal {...args} ide={ideWithProject(project)} />
 }
 
 const project = {
@@ -232,8 +254,7 @@ export default {
     animation: false,
     isAdmin: true,
     user: {},
-    project,
-    updateProject: () => null
+    project
   },
   argTypes: {
     handleHide: { action: 'hide' }

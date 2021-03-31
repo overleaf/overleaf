@@ -1,11 +1,13 @@
 import App from '../../../base'
 import { react2angular } from 'react2angular'
-import cloneDeep from 'lodash/cloneDeep'
 
 import ShareProjectModal from '../components/share-project-modal'
 import { listProjectInvites, listProjectMembers } from '../utils/api'
 
-App.component('shareProjectModal', react2angular(ShareProjectModal))
+App.component(
+  'shareProjectModal',
+  react2angular(ShareProjectModal, undefined, ['ide'])
+)
 
 export default App.controller('ReactShareProjectModalController', function(
   $scope,
@@ -15,46 +17,17 @@ export default App.controller('ReactShareProjectModalController', function(
   $scope.isAdmin = false
   $scope.show = false
 
-  let deregisterProjectWatch
-
-  // deep watch $scope.project for changes
-  function registerProjectWatch() {
-    deregisterProjectWatch = $scope.$watch(
-      'project',
-      project => {
-        $scope.clonedProject = cloneDeep(project)
-      },
-      true
-    )
-  }
-
   $scope.handleHide = () => {
     $scope.$applyAsync(() => {
       $scope.show = false
-      if (deregisterProjectWatch) {
-        deregisterProjectWatch()
-      }
     })
   }
 
   $scope.openShareProjectModal = isAdmin => {
     eventTracking.sendMBOnce('ide-open-share-modal-once')
     $scope.$applyAsync(() => {
-      registerProjectWatch()
-
       $scope.isAdmin = isAdmin
       $scope.show = true
-    })
-  }
-
-  // update $scope.project with new data
-  $scope.updateProject = data => {
-    if (!$scope.project) {
-      return
-    }
-
-    $scope.$applyAsync(() => {
-      Object.assign($scope.project, data)
     })
   }
 

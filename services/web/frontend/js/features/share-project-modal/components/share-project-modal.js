@@ -7,6 +7,7 @@ import React, {
 } from 'react'
 import PropTypes from 'prop-types'
 import ShareProjectModalContent from './share-project-modal-content'
+import useScopeValue from '../../../shared/context/util/scope-value-hook'
 
 const ShareProjectContext = createContext()
 
@@ -87,11 +88,12 @@ export default function ShareProjectModal({
   animation = true,
   isAdmin,
   eventTracking,
-  project,
-  updateProject
+  ide
 }) {
   const [inFlight, setInFlight] = useState(false)
   const [error, setError] = useState()
+
+  const [project, setProject] = useScopeValue('project', ide.$scope, true)
 
   // reset error when the modal is opened
   useEffect(() => {
@@ -129,6 +131,14 @@ export default function ShareProjectModal({
     return promise
   }, [])
 
+  // merge the new data with the old project data
+  const updateProject = useCallback(
+    data => {
+      setProject(project => Object.assign(project, data))
+    },
+    [setProject]
+  )
+
   if (!project) {
     return null
   }
@@ -162,10 +172,11 @@ ShareProjectModal.propTypes = {
   animation: PropTypes.bool,
   handleHide: PropTypes.func.isRequired,
   isAdmin: PropTypes.bool.isRequired,
-  project: projectShape,
+  ide: PropTypes.shape({
+    $scope: PropTypes.object.isRequired
+  }).isRequired,
   show: PropTypes.bool.isRequired,
   eventTracking: PropTypes.shape({
     sendMB: PropTypes.func.isRequired
-  }),
-  updateProject: PropTypes.func.isRequired
+  })
 }

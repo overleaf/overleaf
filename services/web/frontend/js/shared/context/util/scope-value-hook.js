@@ -8,6 +8,7 @@ import _ from 'lodash'
  *
  * @param {string} path - dot '.' path of a property in `sourceScope`.
  * @param {object} $scope - Angular $scope containing the value to bind.
+ * @param {boolean} deep
  * @returns {[any, function]} - Binded value and setter function tuple.
  */
 export default function useScopeValue(path, $scope, deep = false) {
@@ -17,7 +18,7 @@ export default function useScopeValue(path, $scope, deep = false) {
     return $scope.$watch(
       path,
       newValue => {
-        setValue(newValue)
+        setValue(deep ? _.cloneDeep(newValue) : newValue)
       },
       deep
     )
