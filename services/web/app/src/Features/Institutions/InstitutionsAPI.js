@@ -89,7 +89,7 @@ const InstitutionsAPI = {
       },
       function(error, body) {
         if (error) {
-          if (error.info.statusCode === 422) {
+          if (error.info && error.info.statusCode === 422) {
             return callback(
               new InvalidInstitutionalEmailError(error.message).withCause(error)
             )
