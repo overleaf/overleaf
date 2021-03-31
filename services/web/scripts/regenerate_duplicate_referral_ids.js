@@ -11,14 +11,16 @@ async function main() {
 
   await waitForDb()
 
-  const duplicates = await db.users.aggregate(
-    [
-      { $match: { referal_id: { $exists: true } } },
-      { $group: { _id: '$referal_id', count: { $sum: 1 } } },
-      { $match: { count: { $gt: 1 } } }
-    ],
-    { allowDiskUse: true }
-  )
+  const duplicates = await db.users
+    .aggregate(
+      [
+        { $match: { referal_id: { $exists: true } } },
+        { $group: { _id: '$referal_id', count: { $sum: 1 } } },
+        { $match: { count: { $gt: 1 } } }
+      ],
+      { allowDiskUse: true, readPreference: 'secondary' }
+    )
+    .maxTimeMS(600000)
 
   const duplicateReferralIds = []
   let duplicate
