@@ -10,6 +10,7 @@ block append meta
 	meta(name="ol-notificationsInstitution" data-type="json" content=notificationsInstitution)
 	meta(name="ol-userAffiliations" data-type="json" content=userAffiliations)
 	meta(name="ol-userEmails" data-type="json" content=userEmails)
+	meta(name="ol-userHasNoSubscription" data-type="boolean" content=!!(settings.enableSubscriptions && !hasSubscription))
 	meta(name="ol-allInReconfirmNotificationPeriods" data-type="json" content=allInReconfirmNotificationPeriods)
 	meta(name="ol-reconfirmedViaSAML" content=reconfirmedViaSAML)
 	meta(name="ol-algolia" data-type="json" content={
@@ -60,8 +61,3 @@ block content
 								include ./list/notifications
 
 		include ./list/modals
-
-	//- include ./list/front-chat
-
-	script(type="text/javascript", nonce=scriptNonce).
-		window.userHasNoSubscription = #{!!(settings.enableSubscriptions && !hasSubscription)}
