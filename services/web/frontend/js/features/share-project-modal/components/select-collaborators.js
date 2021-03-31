@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useCallback } from 'react'
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { Trans } from 'react-i18next'
 import { matchSorter } from 'match-sorter'
@@ -63,28 +63,6 @@ export default function SelectCollaborators({
     return true
   }, [inputValue, selectedItems])
 
-  const addNewItem = useCallback(
-    (email, focus = true) => {
-      if (
-        isValidInput &&
-        email.includes('@') &&
-        !selectedEmails.includes(email)
-      ) {
-        addSelectedItem({
-          email,
-          display: email,
-          type: 'user'
-        })
-        setInputValue('')
-        if (focus) {
-          focusInput()
-        }
-        return true
-      }
-    },
-    [addSelectedItem, selectedEmails, isValidInput, focusInput]
-  )
-
   const {
     isOpen,
     getLabelProps,
@@ -92,7 +70,8 @@ export default function SelectCollaborators({
     getInputProps,
     getComboboxProps,
     highlightedIndex,
-    getItemProps
+    getItemProps,
+    reset
   } = useCombobox({
     inputValue,
     defaultHighlightedIndex: 0,
@@ -118,8 +97,35 @@ export default function SelectCollaborators({
     }
   })
 
-  const showDropdownItems =
-    isOpen && inputValue.length > 0 && filteredOptions.length > 0
+  const addNewItem = useCallback(
+    (email, focus = true) => {
+      if (
+        isValidInput &&
+        email.includes('@') &&
+        !selectedEmails.includes(email)
+      ) {
+        addSelectedItem({
+          email,
+          display: email,
+          type: 'user'
+        })
+        setInputValue('')
+        reset()
+        if (focus) {
+          focusInput()
+        }
+        return true
+      }
+    },
+    [addSelectedItem, selectedEmails, isValidInput, focusInput, reset]
+  )
+
+  // close and reset the menu when there are no matching items
+  useEffect(() => {
+    if (isOpen && filteredOptions.length === 0) {
+      reset()
+    }
+  }, [reset, isOpen, filteredOptions.length])
 
   return (
     <div className="tags-input">
@@ -159,8 +165,8 @@ export default function SelectCollaborators({
                 ref: inputRef,
                 // preventKeyAction: showDropdown,
                 onBlur: () => {
-                  // blur: if the dropdown isn't visible, try to create a new item using inputValue
-                  if (!showDropdownItems) {
+                  // blur: if the dropdown isn't open, try to create a new item using inputValue
+                  if (!isOpen) {
                     addNewItem(inputValue, false)
                   }
                 },
@@ -173,8 +179,8 @@ export default function SelectCollaborators({
                       break
 
                     case 'Tab':
-                      // Tab: if the dropdown isn't visible, try to create a new item using inputValue and prevent blur if successful
-                      if (!showDropdownItems && addNewItem(inputValue)) {
+                      // Tab: if the dropdown isn't open, try to create a new item using inputValue and prevent blur if successful
+                      if (!isOpen && addNewItem(inputValue)) {
                         event.preventDefault()
                         event.stopPropagation()
                       }
@@ -214,9 +220,9 @@ export default function SelectCollaborators({
           />
         </div>
 
-        <div className={classnames({ autocomplete: showDropdownItems })}>
+        <div className={classnames({ autocomplete: isOpen })}>
           <ul {...getMenuProps()} className="suggestion-list">
-            {showDropdownItems &&
+            {isOpen &&
               filteredOptions.map((item, index) => (
                 <Option
                   key={item.email}

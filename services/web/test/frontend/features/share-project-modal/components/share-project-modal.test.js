@@ -774,4 +774,58 @@ describe('<ShareProjectModal/>', function() {
       'Link sharing is off, only invited users can view this project.'
     )
   })
+
+  it('avoids selecting unmatched contact', async function() {
+    render(<ShareProjectModal {...modalProps} />)
+
+    const [inputElement] = await screen.findAllByLabelText(
+      'Share with your collaborators'
+    )
+
+    // Wait for contacts to load
+    await waitFor(() => {
+      expect(fetchMock.called('express:/user/contacts')).to.be.true
+    })
+
+    // Enter a prefix that matches a contact
+    inputElement.focus()
+    fireEvent.change(inputElement, { target: { value: 'ptolemy' } })
+
+    // The matching contact should now be present and selected
+    await screen.findByRole('option', {
+      name: `Claudius Ptolemy <ptolemy@example.com>`,
+      selected: true
+    })
+
+    // Keep entering text so the contact no longer matches
+    fireEvent.change(inputElement, {
+      target: { value: 'ptolemy.new@example.com' }
+    })
+
+    // The matching contact should no longer be present
+    expect(
+      screen.queryByRole('option', {
+        name: `Claudius Ptolemy <ptolemy@example.com>`
+      })
+    ).to.be.null
+
+    // No items should be added yet
+    expect(screen.queryByRole('button', { name: 'Remove' })).to.be.null
+
+    // Pressing Tab should add the entered item
+    fireEvent.keyDown(inputElement, { key: 'Tab', code: 'Tab' })
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
+        1
+      )
+    })
+
+    // Blurring the input should not add another contact
+    fireEvent.blur(inputElement)
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
+        1
+      )
+    })
+  })
 })
