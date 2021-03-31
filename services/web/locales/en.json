@@ -1332,6 +1332,7 @@
   "continue_github_merge": "I have manually merged. Continue",
   "export_project_to_github": "Export Project to GitHub",
   "github_validation_check": "Please check that the repository name is valid, and that you have permission to create the repository.",
+  "github_git_folder_error": "This project contains a .git folder at the top level, indicating that it is already a git repository. The Overleaf Github sync service cannot sync git histories. Please remove the .git folder and try again.",
   "repository_name": "Repository Name",
   "optional": "Optional",
   "github_public_description": "Anyone can see this repository. You choose who can commit.",
