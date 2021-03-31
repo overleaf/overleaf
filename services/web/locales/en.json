@@ -108,7 +108,7 @@
   "home": "Home",
   "this_action_cannot_be_undone": "This action cannot be undone.",
   "dropbox_email_not_verified": "We have been unable to retrieve updates from your Dropbox account. Dropbox reported that your email address is unverified. Please verify your email address in your Dropbox account to resolve this.",
-  "link_email_to_join": "Link your institutional email to join __portalTitle__ on __appName__",
+  "portal_add_affiliation_to_join": "It looks like you are already logged in to __appName__! If you have a __portalTitle__ email you can add it now.",
   "token_access_success": "Access granted",
   "token_access_failure": "Cannot grant access; contact the project owner for help",
   "trashed_projects": "Trashed Projects",
