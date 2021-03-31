@@ -963,6 +963,9 @@ App.controller('PdfController', function(
 
 App.factory('synctex', function(ide, $http, $q) {
   const synctex = {
+    syncToPdfInFlight: false,
+    syncToCodeInFlight: false,
+
     syncToPdf(cursorPosition) {
       const deferred = $q.defer()
 
@@ -991,6 +994,8 @@ App.factory('synctex', function(ide, $http, $q) {
 
       const { row, column } = cursorPosition
 
+      this.syncToPdfInFlight = true
+
       $http({
         url: `/project/${ide.project_id}/sync/code`,
         method: 'GET',
@@ -1001,11 +1006,13 @@ App.factory('synctex', function(ide, $http, $q) {
           clsiserverid: ide.clsiServerId
         }
       })
-        .then(function(response) {
+        .then(response => {
+          this.syncToPdfInFlight = false
           const { data } = response
           return deferred.resolve(data.pdf || [])
         })
-        .catch(function(response) {
+        .catch(response => {
+          this.syncToPdfInFlight = false
           const error = response.data
           return deferred.reject(error)
         })
@@ -1052,6 +1059,8 @@ App.factory('synctex', function(ide, $http, $q) {
         v += 72 // use the same value as in pdfViewer highlighting visual offset
       }
 
+      this.syncToCodeInFlight = true
+
       $http({
         url: `/project/${ide.project_id}/sync/pdf`,
         method: 'GET',
@@ -1062,7 +1071,8 @@ App.factory('synctex', function(ide, $http, $q) {
           clsiserverid: ide.clsiServerId
         }
       })
-        .then(function(response) {
+        .then(response => {
+          this.syncToCodeInFlight = false
           const { data } = response
           if (
             data.code != null &&
@@ -1079,7 +1089,8 @@ App.factory('synctex', function(ide, $http, $q) {
             setTimeout(() => (ide.$scope.sync_tex_error = false), 4000)
           }
         })
-        .catch(function(response) {
+        .catch(response => {
+          this.syncToCodeInFlight = false
           const error = response.data
           return deferred.reject(error)
         })
@@ -1093,8 +1104,16 @@ App.factory('synctex', function(ide, $http, $q) {
 
 App.controller('PdfSynctexController', function($scope, synctex, ide) {
   this.cursorPosition = null
-  $scope.syncToPdfInFlight = false
-  $scope.syncToCodeInFlight = false
+
+  $scope.$watch(
+    () => synctex.syncToPdfInFlight,
+    value => ($scope.syncToPdfInFlight = value)
+  )
+  $scope.$watch(
+    () => synctex.syncToCodeInFlight,
+    value => ($scope.syncToCodeInFlight = value)
+  )
+
   ide.$scope.$on('cursor:editor:update', (event, cursorPosition) => {
     this.cursorPosition = cursorPosition
   })
@@ -1103,19 +1122,14 @@ App.controller('PdfSynctexController', function($scope, synctex, ide) {
     if (this.cursorPosition == null) {
       return
     }
-    $scope.syncToPdfInFlight = true
-    synctex
-      .syncToPdf(this.cursorPosition)
-      .then(highlights => {
-        $scope.pdf.highlights = highlights
-      })
-      .finally(() => ($scope.syncToPdfInFlight = false))
+    synctex.syncToPdf(this.cursorPosition).then(highlights => {
+      $scope.pdf.highlights = highlights
+    })
   }
 
   ide.$scope.$on('cursor:editor:syncToPdf', $scope.syncToPdf)
 
   $scope.syncToCode = function() {
-    $scope.syncToCodeInFlight = true
     synctex
       .syncToCode($scope.pdf.position, {
         includeVisualOffset: true,
@@ -1125,7 +1139,6 @@ App.controller('PdfSynctexController', function($scope, synctex, ide) {
         const { doc, line } = data
         ide.editorManager.openDoc(doc, { gotoLine: line })
       })
-      .finally(() => ($scope.syncToCodeInFlight = false))
   }
 })
 
