@@ -32,6 +32,7 @@ export default OnlineUsersManager = (function() {
       this.$scope.onlineUsers = {}
       this.$scope.onlineUserCursorHighlights = {}
       this.$scope.onlineUsersArray = []
+      this.$scope.onlineUsersCount = 0
 
       this.$scope.$on('cursor:editor:update', (event, position) => {
         return this.sendCursorPositionUpdate(position)
@@ -114,6 +115,9 @@ export default OnlineUsersManager = (function() {
 
         this.$scope.onlineUsersArray.push(user)
       }
+
+      // keep a count of the other online users
+      this.$scope.onlineUsersCount = this.$scope.onlineUsersArray.length
 
       this.$scope.onlineUserCursorHighlights = {}
       for (client_id in this.$scope.onlineUsers) {

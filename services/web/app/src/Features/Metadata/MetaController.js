@@ -42,7 +42,8 @@ module.exports = MetaController = {
   broadcastMetadataForDoc(req, res, next) {
     const { project_id } = req.params
     const { doc_id } = req.params
-    logger.log({ project_id, doc_id }, 'getting labels for doc')
+    const { broadcast } = req.body
+    logger.log({ project_id, doc_id, broadcast }, 'getting labels for doc')
     return MetaHandler.getMetaForDoc(project_id, doc_id, function(
       err,
       docMeta
@@ -54,11 +55,16 @@ module.exports = MetaController = {
         })
         return next(err)
       }
-      EditorRealTimeController.emitToRoom(project_id, 'broadcastDocMeta', {
-        docId: doc_id,
-        meta: docMeta
-      })
-      return res.sendStatus(200)
+      // default to broadcasting, unless explicitly disabled (for backwards compatibility)
+      if (broadcast !== false) {
+        EditorRealTimeController.emitToRoom(project_id, 'broadcastDocMeta', {
+          docId: doc_id,
+          meta: docMeta
+        })
+        return res.sendStatus(200)
+      } else {
+        return res.json({ docId: doc_id, meta: docMeta })
+      }
     })
   }
 }

@@ -103,53 +103,114 @@ describe('MetaController', function() {
         .callsArgWith(2, null, this.fakeLabels)
       this.EditorRealTimeController.emitToRoom = sinon.stub()
       this.docId = 'somedoc'
-      this.req = { params: { project_id: this.projectId, doc_id: this.docId } }
-      this.res = { sendStatus: sinon.stub() }
+      this.res = { sendStatus: sinon.stub(), json: sinon.stub() }
       return (this.next = sinon.stub())
     })
 
-    it('should call MetaHandler.getMetaForDoc', function() {
-      this.MetadataController.broadcastMetadataForDoc(
-        this.req,
-        this.res,
-        this.next
-      )
-      this.MetaHandler.getMetaForDoc.callCount.should.equal(1)
-      return this.MetaHandler.getMetaForDoc
-        .calledWith(this.projectId)
-        .should.equal(true)
+    describe('with broadcast:true', function() {
+      beforeEach(function() {
+        this.req = {
+          params: { project_id: this.projectId, doc_id: this.docId },
+          body: { broadcast: true }
+        }
+      })
+
+      it('should call MetaHandler.getMetaForDoc', function() {
+        this.MetadataController.broadcastMetadataForDoc(
+          this.req,
+          this.res,
+          this.next
+        )
+        this.MetaHandler.getMetaForDoc.callCount.should.equal(1)
+        return this.MetaHandler.getMetaForDoc
+          .calledWith(this.projectId)
+          .should.equal(true)
+      })
+
+      it('should call not call next with an error', function() {
+        this.MetadataController.broadcastMetadataForDoc(
+          this.req,
+          this.res,
+          this.next
+        )
+        return this.next.callCount.should.equal(0)
+      })
+
+      it('should send a success response', function() {
+        this.MetadataController.broadcastMetadataForDoc(
+          this.req,
+          this.res,
+          this.next
+        )
+        this.res.sendStatus.callCount.should.equal(1)
+        return this.res.sendStatus.calledWith(200).should.equal(true)
+      })
+
+      it('should emit a message to room', function() {
+        this.MetadataController.broadcastMetadataForDoc(
+          this.req,
+          this.res,
+          this.next
+        )
+        this.EditorRealTimeController.emitToRoom.callCount.should.equal(1)
+        const { lastCall } = this.EditorRealTimeController.emitToRoom
+        expect(lastCall.args[0]).to.equal(this.projectId)
+        expect(lastCall.args[1]).to.equal('broadcastDocMeta')
+        return expect(lastCall.args[2]).to.have.all.keys(['docId', 'meta'])
+      })
     })
 
-    it('should call not call next with an error', function() {
-      this.MetadataController.broadcastMetadataForDoc(
-        this.req,
-        this.res,
-        this.next
-      )
-      return this.next.callCount.should.equal(0)
-    })
+    describe('with broadcast:false', function() {
+      beforeEach(function() {
+        this.req = {
+          params: { project_id: this.projectId, doc_id: this.docId },
+          body: { broadcast: false }
+        }
+      })
 
-    it('should send a success response', function() {
-      this.MetadataController.broadcastMetadataForDoc(
-        this.req,
-        this.res,
-        this.next
-      )
-      this.res.sendStatus.callCount.should.equal(1)
-      return this.res.sendStatus.calledWith(200).should.equal(true)
-    })
+      it('should call MetaHandler.getMetaForDoc', function() {
+        this.MetadataController.broadcastMetadataForDoc(
+          this.req,
+          this.res,
+          this.next
+        )
+        this.MetaHandler.getMetaForDoc.callCount.should.equal(1)
+        return this.MetaHandler.getMetaForDoc
+          .calledWith(this.projectId)
+          .should.equal(true)
+      })
 
-    it('should emit a message to room', function() {
-      this.MetadataController.broadcastMetadataForDoc(
-        this.req,
-        this.res,
-        this.next
-      )
-      this.EditorRealTimeController.emitToRoom.callCount.should.equal(1)
-      const { lastCall } = this.EditorRealTimeController.emitToRoom
-      expect(lastCall.args[0]).to.equal(this.projectId)
-      expect(lastCall.args[1]).to.equal('broadcastDocMeta')
-      return expect(lastCall.args[2]).to.have.all.keys(['docId', 'meta'])
+      it('should call not call next with an error', function() {
+        this.MetadataController.broadcastMetadataForDoc(
+          this.req,
+          this.res,
+          this.next
+        )
+        return this.next.callCount.should.equal(0)
+      })
+
+      it('should send the metadata in the response', function() {
+        this.MetadataController.broadcastMetadataForDoc(
+          this.req,
+          this.res,
+          this.next
+        )
+        this.res.json.callCount.should.equal(1)
+        return this.res.json
+          .calledWith({ docId: this.docId, meta: this.fakeLabels })
+          .should.equal(true)
+      })
+
+      it('should not emit a message to room', function() {
+        this.MetadataController.broadcastMetadataForDoc(
+          this.req,
+          this.res,
+          this.next
+        )
+        return this.EditorRealTimeController.emitToRoom.callCount.should.equal(
+          0
+        )
+      })
     })
 
     describe('when MetaHandler.getMetaForDoc produces an error', function() {
@@ -160,7 +221,8 @@ describe('MetaController', function() {
         this.EditorRealTimeController.emitToRoom = sinon.stub()
         this.docId = 'somedoc'
         this.req = {
-          params: { project_id: this.projectId, doc_id: this.docId }
+          params: { project_id: this.projectId, doc_id: this.docId },
+          body: { broadcast: true }
         }
         this.res = { json: sinon.stub() }
         return (this.next = sinon.stub())

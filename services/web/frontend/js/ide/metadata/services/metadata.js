@@ -80,9 +80,19 @@ export default App.factory('metadata', function($http, ide) {
       })
 
   metadata.loadDocMetaFromServer = docId =>
-    $http.post(`/project/${window.project_id}/doc/${docId}/metadata`, {
-      _csrf: window.csrfToken
-    })
+    $http
+      .post(`/project/${window.project_id}/doc/${docId}/metadata`, {
+        // Don't broadcast metadata when there are no other users in the
+        // project.
+        broadcast: ide.$scope.onlineUsersCount > 0,
+        _csrf: window.csrfToken
+      })
+      .then(function(response) {
+        const { data } = response
+        // handle the POST response like a broadcast event when there are no
+        // other users in the project.
+        metadata.onBroadcastDocMeta(data)
+      })
 
   metadata.scheduleLoadDocMetaFromServer = function(docId) {
     if (ide.$scope.permissionsLevel === 'readOnly') {
@@ -90,7 +100,6 @@ export default App.factory('metadata', function($http, ide) {
       // The user will not be able to consume the meta data for edits anyways.
       return
     }
-
     // De-bounce loading labels with a timeout
     const existingTimeout = debouncer[docId]
 
