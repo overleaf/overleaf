@@ -24,7 +24,7 @@
     "test:karma": "karma start",
     "test:karma:single": "karma start --no-auto-watch --single-run",
     "start": "node $NODE_APP_OPTIONS app.js",
-    "nodemon": "nodemon --config nodemon.json",
+    "nodemon": "nodemon $NODE_APP_OPTIONS --config nodemon.json",
     "webpack": "webpack-dev-server --config webpack.config.dev.js",
     "webpack:production": "webpack --config webpack.config.prod.js",
     "format": "prettier --list-different $PWD/'**/*.js'",

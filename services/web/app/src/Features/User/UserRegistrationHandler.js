@@ -13,21 +13,17 @@ const settings = require('settings-sharelatex')
 const EmailHelper = require('../Helpers/EmailHelper')
 
 const UserRegistrationHandler = {
-  _registrationRequestIsValid(body, callback) {
+  _registrationRequestIsValid(body) {
     const invalidEmail = AuthenticationManager.validateEmail(body.email || '')
     const invalidPassword = AuthenticationManager.validatePassword(
       body.password || '',
       body.email
     )
-    if (invalidEmail != null || invalidPassword != null) {
-      return false
-    } else {
-      return true
-    }
+    return !(invalidEmail || invalidPassword)
   },
 
   _createNewUserIfRequired(user, userDetails, callback) {
-    if (user == null) {
+    if (!user) {
       userDetails.holdingAccount = false
       UserCreator.createNewUser(
         {
@@ -51,48 +47,48 @@ const UserRegistrationHandler = {
       return callback(new Error('request is not valid'))
     }
     userDetails.email = EmailHelper.parseEmail(userDetails.email)
-    UserGetter.getUserByAnyEmail(userDetails.email, (err, user) => {
-      if (err != null) {
-        return callback(err)
+    UserGetter.getUserByAnyEmail(userDetails.email, (error, user) => {
+      if (error) {
+        return callback(error)
       }
-      if ((user != null ? user.holdingAccount : undefined) === false) {
+      if (user && user.holdingAccount === false) {
         return callback(new Error('EmailAlreadyRegistered'), user)
       }
-      self._createNewUserIfRequired(user, userDetails, (err, user) => {
-        if (err != null) {
-          return callback(err)
+      self._createNewUserIfRequired(user, userDetails, (error, user) => {
+        if (error) {
+          return callback(error)
         }
         async.series(
           [
-            cb =>
+            callback =>
               User.updateOne(
                 { _id: user._id },
                 { $set: { holdingAccount: false } },
-                cb
+                callback
               ),
-            cb =>
+            callback =>
               AuthenticationManager.setUserPassword(
                 user,
                 userDetails.password,
-                cb
+                callback
               ),
-            cb => {
+            callback => {
               if (userDetails.subscribeToNewsletter === 'true') {
-                NewsletterManager.subscribe(user, err => {
-                  if (err != null) {
+                NewsletterManager.subscribe(user, error => {
+                  if (error) {
                     logger.warn(
-                      { err, user },
+                      { err: error, user },
                       'Failed to subscribe user to newsletter'
                     )
                   }
                 })
               }
-              cb()
+              callback()
             } // this can be slow, just fire it off
           ],
-          err => {
+          error => {
             Analytics.recordEvent(user._id, 'user-registered')
-            callback(err, user)
+            callback(error, user)
           }
         )
       })
@@ -105,17 +101,12 @@ const UserRegistrationHandler = {
         email,
         password: crypto.randomBytes(32).toString('hex')
       },
-      (err, user) => {
-        if (
-          err != null &&
-          (err != null ? err.message : undefined) !== 'EmailAlreadyRegistered'
-        ) {
-          return callback(err)
+      (error, user) => {
+        if (error && error.message !== 'EmailAlreadyRegistered') {
+          return callback(error)
         }
 
-        if (
-          (err != null ? err.message : undefined) === 'EmailAlreadyRegistered'
-        ) {
+        if (error && error.message === 'EmailAlreadyRegistered') {
           logger.log({ email }, 'user already exists, resending welcome email')
         }
 
@@ -124,9 +115,9 @@ const UserRegistrationHandler = {
           'password',
           { user_id: user._id.toString(), email: user.email },
           { expiresIn: ONE_WEEK },
-          (err, token) => {
-            if (err != null) {
-              return callback(err)
+          (error, token) => {
+            if (error) {
+              return callback(error)
             }
 
             const setNewPasswordUrl = `${settings.siteUrl}/user/activate?token=${token}&user_id=${user._id}`
@@ -137,9 +128,9 @@ const UserRegistrationHandler = {
                 to: user.email,
                 setNewPasswordUrl
               },
-              err => {
-                if (err != null) {
-                  logger.warn({ err }, 'failed to send activation email')
+              error => {
+                if (error) {
+                  logger.warn({ err: error }, 'failed to send activation email')
                 }
               }
             )

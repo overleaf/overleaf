@@ -50,6 +50,9 @@ describe('UserCreator', function() {
         }),
         '../Analytics/AnalyticsManager': (this.Analytics = {
           recordEvent: sinon.stub()
+        }),
+        './UserOnboardingEmailManager': (this.UserOnboardingEmailManager = {
+          scheduleOnboardingEmail: sinon.stub()
         })
       }
     })
@@ -274,6 +277,17 @@ describe('UserCreator', function() {
           this.Analytics.recordEvent,
           user._id,
           'user-registered'
+        )
+      })
+
+      it('should schedule an onboarding email on registration', async function() {
+        const user = await this.UserCreator.promises.createNewUser({
+          email: this.email
+        })
+        assert.equal(user.email, this.email)
+        sinon.assert.calledWith(
+          this.UserOnboardingEmailManager.scheduleOnboardingEmail,
+          user
         )
       })
     })

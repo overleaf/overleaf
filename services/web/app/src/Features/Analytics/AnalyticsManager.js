@@ -2,12 +2,15 @@ const Settings = require('settings-sharelatex')
 const Metrics = require('../../infrastructure/Metrics')
 const Queues = require('../../infrastructure/Queues')
 
+const analyticsEventsQueue = Queues.getAnalyticsEventsQueue()
+const analyticsEditingSessionsQueue = Queues.getAnalyticsEditingSessionsQueue()
+
 function identifyUser(userId, oldUserId) {
   if (isAnalyticsDisabled() || isSmokeTestUser(userId)) {
     return
   }
   Metrics.analyticsQueue.inc({ status: 'adding', event_type: 'identify' })
-  Queues.analytics.events
+  analyticsEventsQueue
     .add('identify', { userId, oldUserId })
     .then(() => {
       Metrics.analyticsQueue.inc({ status: 'added', event_type: 'identify' })
@@ -22,7 +25,7 @@ function recordEvent(userId, event, segmentation) {
     return
   }
   Metrics.analyticsQueue.inc({ status: 'adding', event_type: 'event' })
-  Queues.analytics.events
+  analyticsEventsQueue
     .add('event', { userId, event, segmentation })
     .then(() => {
       Metrics.analyticsQueue.inc({ status: 'added', event_type: 'event' })
@@ -40,7 +43,7 @@ function updateEditingSession(userId, projectId, countryCode) {
     status: 'adding',
     event_type: 'editing-session'
   })
-  Queues.analytics.editingSessions
+  analyticsEditingSessionsQueue
     .add({ userId, projectId, countryCode })
     .then(() => {
       Metrics.analyticsQueue.inc({

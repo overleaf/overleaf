@@ -7,6 +7,7 @@ const UserDeleter = require('./UserDeleter')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
 const Analytics = require('../Analytics/AnalyticsManager')
+const UserOnboardingEmailQueueManager = require('./UserOnboardingEmailManager')
 
 async function _addAffiliation(user, affiliationOptions) {
   try {
@@ -84,6 +85,14 @@ async function createNewUser(attributes, options = {}) {
   }
 
   Analytics.recordEvent(user._id, 'user-registered')
+  try {
+    await UserOnboardingEmailQueueManager.scheduleOnboardingEmail(user)
+  } catch (error) {
+    logger.error(
+      `Failed to schedule sending of onboarding email for user '${user._id}'`,
+      error
+    )
+  }
 
   return user
 }

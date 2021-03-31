@@ -23,12 +23,10 @@ if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
 }
 
 metrics.memory.monitor(logger)
+
 const Server = require('./app/src/infrastructure/Server')
 const mongodb = require('./app/src/infrastructure/mongodb')
 const mongoose = require('./app/src/infrastructure/Mongoose')
-const Queues = require('./app/src/infrastructure/Queues')
-
-Queues.initialize()
 
 if (Settings.catchErrors) {
   process.removeAllListeners('uncaughtException')

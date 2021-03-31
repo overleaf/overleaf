@@ -13,15 +13,28 @@ describe('AnalyticsManager', function() {
     this.Settings = {
       analytics: { enabled: true }
     }
-
+    this.analyticsEventsQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves()
+    }
+    this.analyticsEditingSessionQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves()
+    }
+    this.onboardingEmailsQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves()
+    }
+    const self = this
     this.Queues = {
-      analytics: {
-        events: {
-          add: sinon.stub().resolves()
-        },
-        editingSessions: {
-          add: sinon.stub().resolves()
-        }
+      getAnalyticsEventsQueue: () => {
+        return self.analyticsEventsQueue
+      },
+      getAnalyticsEditingSessionsQueue: () => {
+        return self.analyticsEditingSessionQueue
+      },
+      getOnboardingEmailsQueue: () => {
+        return self.onboardingEmailsQueue
       }
     }
     this.backgroundRequest = sinon.stub().yields()
@@ -44,13 +57,13 @@ describe('AnalyticsManager', function() {
     it('user is smoke test user', function() {
       this.Settings.smokeTest = { userId: this.fakeUserId }
       this.AnalyticsManager.identifyUser(this.fakeUserId, '')
-      sinon.assert.notCalled(this.Queues.analytics.events.add)
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
 
     it('analytics service is disabled', function() {
       this.Settings.analytics.enabled = false
       this.AnalyticsManager.identifyUser(this.fakeUserId, '')
-      sinon.assert.notCalled(this.Queues.analytics.events.add)
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
   })
 
@@ -58,20 +71,16 @@ describe('AnalyticsManager', function() {
     it('identifyUser', function() {
       const oldUserId = '456def'
       this.AnalyticsManager.identifyUser(this.fakeUserId, oldUserId)
-      sinon.assert.calledWithMatch(
-        this.Queues.analytics.events.add,
-        'identify',
-        {
-          userId: this.fakeUserId,
-          oldUserId
-        }
-      )
+      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'identify', {
+        userId: this.fakeUserId,
+        oldUserId
+      })
     })
 
     it('recordEvent', function() {
       const event = 'fake-event'
       this.AnalyticsManager.recordEvent(this.fakeUserId, event, null)
-      sinon.assert.calledWithMatch(this.Queues.analytics.events.add, 'event', {
+      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
         event,
         userId: this.fakeUserId,
         segmentation: null
@@ -86,7 +95,7 @@ describe('AnalyticsManager', function() {
         projectId,
         countryCode
       )
-      sinon.assert.calledWithMatch(this.Queues.analytics.editingSessions.add, {
+      sinon.assert.calledWithMatch(this.analyticsEditingSessionQueue.add, {
         userId: this.fakeUserId,
         projectId,
         countryCode
