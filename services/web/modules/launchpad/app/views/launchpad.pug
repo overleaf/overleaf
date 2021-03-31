@@ -1,14 +1,11 @@
 extends ../../../../app/views/layout
 
+block append meta
+	meta(name="ol-adminUserExists" data-type="boolean" content=adminUserExists)
+	meta(name="ol-ideJsPath" content=buildJsPath('ide.js'))
+	meta(name="ol-authMethod" content=authMethod)
+
 block content
-
-	script(type="text/javascript", nonce=scriptNonce).
-		window.data = {
-			adminUserExists: !{adminUserExists == true},
-			ideJsPath: "!{buildJsPath('ide.js')}",
-			authMethod: "!{authMethod}"
-		}
-
 	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
 
 	style.
