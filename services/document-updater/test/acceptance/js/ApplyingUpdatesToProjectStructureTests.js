@@ -1,4 +1,6 @@
 const sinon = require('sinon')
+const chai = require('chai')
+chai.should()
 const Settings = require('settings-sharelatex')
 const rclientProjectHistory = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history

@@ -22,11 +22,17 @@ describe('ProjectManager', function () {
     }
     this.Metrics.Timer.prototype.done = sinon.stub()
 
+    this.logger = {
+      log: sinon.stub(),
+      error: sinon.stub()
+    }
+
     this.ProjectManager = SandboxedModule.require(modulePath, {
       requires: {
         './RedisManager': this.RedisManager,
         './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
         './DocumentManager': this.DocumentManager,
+        'logger-sharelatex': this.logger,
         './HistoryManager': this.HistoryManager,
         './Metrics': this.Metrics
       }

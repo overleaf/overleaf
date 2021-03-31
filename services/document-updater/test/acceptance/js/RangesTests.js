@@ -12,7 +12,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const { expect } = require('chai')
+const chai = require('chai')
+chai.should()
+const { expect } = chai
 const async = require('async')
 
 const { db, ObjectId } = require('../../../app/js/mongodb')

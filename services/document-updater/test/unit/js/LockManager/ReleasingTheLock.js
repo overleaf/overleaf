@@ -27,6 +27,10 @@ describe('LockManager - releasing the lock', function () {
       eval: sinon.stub()
     }
     const mocks = {
+      'logger-sharelatex': {
+        log() {},
+        error() {}
+      },
       '@overleaf/redis-wrapper': {
         createClient: () => this.client
       },

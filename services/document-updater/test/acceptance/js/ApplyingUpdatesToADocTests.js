@@ -12,7 +12,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const { expect } = require('chai')
+const chai = require('chai')
+chai.should()
+const { expect } = chai
 const async = require('async')
 const Settings = require('settings-sharelatex')
 const rclient_history = require('@overleaf/redis-wrapper').createClient(

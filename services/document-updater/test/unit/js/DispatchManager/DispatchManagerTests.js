@@ -12,6 +12,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
+const chai = require('chai')
+const should = chai.should()
 const modulePath = '../../../../app/js/DispatchManager.js'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors.js')
@@ -23,6 +25,11 @@ describe('DispatchManager', function () {
     this.DispatchManager = SandboxedModule.require(modulePath, {
       requires: {
         './UpdateManager': (this.UpdateManager = {}),
+        'logger-sharelatex': (this.logger = {
+          log: sinon.stub(),
+          error: sinon.stub(),
+          warn: sinon.stub()
+        }),
         'settings-sharelatex': (this.settings = {
           redis: {
             documentupdater: {}

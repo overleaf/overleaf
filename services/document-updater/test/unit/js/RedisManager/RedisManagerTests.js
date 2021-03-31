@@ -12,6 +12,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
+const chai = require('chai')
+const should = chai.should()
 const modulePath = '../../../../app/js/RedisManager.js'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors')
@@ -26,6 +28,11 @@ describe('RedisManager', function () {
     tk.freeze(new Date())
     this.RedisManager = SandboxedModule.require(modulePath, {
       requires: {
+        'logger-sharelatex': (this.logger = {
+          error: sinon.stub(),
+          log: sinon.stub(),
+          warn: sinon.stub()
+        }),
         './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
         'settings-sharelatex': (this.settings = {
           documentupdater: { logHashErrors: { write: true, read: true } },
@@ -115,6 +122,9 @@ describe('RedisManager', function () {
           })
         }),
         './Errors': Errors
+      },
+      globals: {
+        JSON: (this.JSON = JSON)
       }
     })
 
@@ -914,9 +924,8 @@ describe('RedisManager', function () {
         this.RedisManager.getDocVersion
           .withArgs(this.doc_id)
           .yields(null, this.version - this.ops.length)
-        this.stringifyStub = sinon
-          .stub(JSON, 'stringify')
-          .callsFake(() => '["bad bytes! \u0000 <- here"]')
+        this._stringify = JSON.stringify
+        this.JSON.stringify = () => '["bad bytes! \u0000 <- here"]'
         return this.RedisManager.updateDocument(
           this.project_id,
           this.doc_id,
@@ -930,7 +939,7 @@ describe('RedisManager', function () {
       })
 
       afterEach(function () {
-        this.stringifyStub.restore()
+        return (this.JSON.stringify = this._stringify)
       })
 
       it('should log an error', function () {
@@ -1118,9 +1127,8 @@ describe('RedisManager', function () {
 
     describe('with null bytes in the serialized doc lines', function () {
       beforeEach(function () {
-        this.stringifyStub = sinon
-          .stub(JSON, 'stringify')
-          .callsFake(() => '["bad bytes! \u0000 <- here"]')
+        this._stringify = JSON.stringify
+        this.JSON.stringify = () => '["bad bytes! \u0000 <- here"]'
         return this.RedisManager.putDocInMemory(
           this.project_id,
           this.doc_id,
@@ -1134,7 +1142,7 @@ describe('RedisManager', function () {
       })
 
       afterEach(function () {
-        this.stringifyStub.restore()
+        return (this.JSON.stringify = this._stringify)
       })
 
       it('should log an error', function () {

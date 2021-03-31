@@ -1,4 +1,6 @@
 const sinon = require('sinon')
+const chai = require('chai')
+chai.should()
 const { expect } = require('chai')
 const Settings = require('settings-sharelatex')
 const docUpdaterRedis = require('@overleaf/redis-wrapper').createClient(

@@ -36,8 +36,8 @@
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "chai": "^3.5.0",
+    "chai-spies": "^0.7.1",
     "cluster-key-slot": "^1.0.5",
-    "coffee-script": "^1.12.7",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-config-standard": "^14.1.0",
@@ -53,10 +53,10 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^8.3.2",
+    "mocha": "^5.0.1",
     "prettier": "^2.0.0",
     "prettier-eslint-cli": "^5.0.0",
-    "sandboxed-module": "^2.0.4",
+    "sandboxed-module": "~0.2.0",
     "sinon": "^9.0.2",
     "timekeeper": "^2.0.0"
   }

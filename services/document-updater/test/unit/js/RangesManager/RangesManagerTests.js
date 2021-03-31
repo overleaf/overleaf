@@ -13,13 +13,23 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const { expect } = require('chai')
+const chai = require('chai')
+const should = chai.should()
+const { expect } = chai
 const modulePath = '../../../../app/js/RangesManager.js'
 const SandboxedModule = require('sandboxed-module')
 
 describe('RangesManager', function () {
   beforeEach(function () {
-    this.RangesManager = SandboxedModule.require(modulePath)
+    this.RangesManager = SandboxedModule.require(modulePath, {
+      requires: {
+        'logger-sharelatex': (this.logger = {
+          error: sinon.stub(),
+          log: sinon.stub(),
+          warn: sinon.stub()
+        })
+      }
+    })
 
     this.doc_id = 'doc-id-123'
     this.project_id = 'project-id-123'
@@ -358,6 +368,11 @@ describe('RangesManager', function () {
     beforeEach(function () {
       this.RangesManager = SandboxedModule.require(modulePath, {
         requires: {
+          'logger-sharelatex': (this.logger = {
+            error: sinon.stub(),
+            log: sinon.stub(),
+            warn: sinon.stub()
+          }),
           './RangesTracker': (this.RangesTracker = SandboxedModule.require(
             '../../../../app/js/RangesTracker.js'
           ))
