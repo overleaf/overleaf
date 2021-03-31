@@ -35,8 +35,9 @@ export default App.controller('ReactShareProjectModalController', function(
 
   ide.socket.on('project:tokens:changed', data => {
     if (data.tokens != null) {
-      ide.$scope.project.tokens = data.tokens
-      $scope.$digest()
+      $scope.$applyAsync(() => {
+        $scope.project.tokens = data.tokens
+      })
     }
   })
 
