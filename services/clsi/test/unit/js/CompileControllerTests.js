@@ -18,6 +18,48 @@ const modulePath = require('path').join(
 )
 const tk = require('timekeeper')
 
+function tryImageNameValidation(method, imageNameField) {
+  describe('when allowedImages is set', function () {
+    beforeEach(function () {
+      this.Settings.clsi = { docker: {} }
+      this.Settings.clsi.docker.allowedImages = [
+        'repo/image:tag1',
+        'repo/image:tag2'
+      ]
+      this.res.send = sinon.stub()
+      this.res.status = sinon.stub().returns({ send: this.res.send })
+
+      this.CompileManager[method].reset()
+    })
+
+    describe('with an invalid image', function () {
+      beforeEach(function () {
+        this.req.query[imageNameField] = 'something/evil:1337'
+        this.CompileController[method](this.req, this.res, this.next)
+      })
+      it('should return a 400', function () {
+        expect(this.res.status.calledWith(400)).to.equal(true)
+      })
+      it('should not run the query', function () {
+        expect(this.CompileManager[method].called).to.equal(false)
+      })
+    })
+
+    describe('with a valid image', function () {
+      beforeEach(function () {
+        this.req.query[imageNameField] = 'repo/image:tag1'
+        this.CompileController[method](this.req, this.res, this.next)
+      })
+      it('should not return a 400', function () {
+        expect(this.res.status.calledWith(400)).to.equal(false)
+      })
+      it('should run the query', function () {
+        expect(this.CompileManager[method].called).to.equal(true)
+      })
+    })
+  })
+}
+
 describe('CompileController', function () {
   beforeEach(function () {
     this.CompileController = SandboxedModule.require(modulePath, {
@@ -248,7 +290,7 @@ describe('CompileController', function () {
 
       this.CompileManager.syncFromCode = sinon
         .stub()
-        .callsArgWith(5, null, (this.pdfPositions = ['mock-positions']))
+        .yields(null, (this.pdfPositions = ['mock-positions']))
       return this.CompileController.syncFromCode(this.req, this.res, this.next)
     })
 
@@ -264,13 +306,15 @@ describe('CompileController', function () {
         .should.equal(true)
     })
 
-    return it('should return the positions', function () {
+    it('should return the positions', function () {
       return this.res.json
         .calledWith({
           pdf: this.pdfPositions
         })
         .should.equal(true)
     })
+
+    tryImageNameValidation('syncFromCode', 'imageName')
   })
 
   describe('syncFromPdf', function () {
@@ -289,7 +333,7 @@ describe('CompileController', function () {
 
       this.CompileManager.syncFromPdf = sinon
         .stub()
-        .callsArgWith(5, null, (this.codePositions = ['mock-positions']))
+        .yields(null, (this.codePositions = ['mock-positions']))
       return this.CompileController.syncFromPdf(this.req, this.res, this.next)
     })
 
@@ -299,13 +343,15 @@ describe('CompileController', function () {
         .should.equal(true)
     })
 
-    return it('should return the positions', function () {
+    it('should return the positions', function () {
       return this.res.json
         .calledWith({
           code: this.codePositions
         })
         .should.equal(true)
     })
+
+    tryImageNameValidation('syncFromPdf', 'imageName')
   })
 
   return describe('wordcount', function () {
@@ -340,42 +386,6 @@ describe('CompileController', function () {
         .should.equal(true)
     })
 
-    describe('when allowedImages is set', function () {
-      beforeEach(function () {
-        this.Settings.clsi = { docker: {} }
-        this.Settings.clsi.docker.allowedImages = [
-          'repo/image:tag1',
-          'repo/image:tag2'
-        ]
-        this.res.send = sinon.stub()
-        this.res.status = sinon.stub().returns({ send: this.res.send })
-      })
-
-      describe('with an invalid image', function () {
-        beforeEach(function () {
-          this.req.query.image = 'something/evil:1337'
-          this.CompileController.wordcount(this.req, this.res, this.next)
-        })
-        it('should return a 400', function () {
-          expect(this.res.status.calledWith(400)).to.equal(true)
-        })
-        it('should not run the query', function () {
-          expect(this.CompileManager.wordcount.called).to.equal(false)
-        })
-      })
-
-      describe('with a valid image', function () {
-        beforeEach(function () {
-          this.req.query.image = 'repo/image:tag1'
-          this.CompileController.wordcount(this.req, this.res, this.next)
-        })
-        it('should not return a 400', function () {
-          expect(this.res.status.calledWith(400)).to.equal(false)
-        })
-        it('should run the query', function () {
-          expect(this.CompileManager.wordcount.called).to.equal(true)
-        })
-      })
-    })
+    tryImageNameValidation('wordcount', 'image')
   })
 })
