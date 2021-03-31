@@ -14,6 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const text = require('../../../../app/js/sharejs/types/text')
+require('chai').should()
 const RangesTracker = require('../../../../app/js/RangesTracker')
 
 describe('ShareJS text type', function () {

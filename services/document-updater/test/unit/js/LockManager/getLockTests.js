@@ -15,6 +15,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
+const chai = require('chai')
+const should = chai.should()
 const modulePath = '../../../../app/js/LockManager.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -23,6 +25,7 @@ describe('LockManager - getting the lock', function () {
     let Profiler
     this.LockManager = SandboxedModule.require(modulePath, {
       requires: {
+        'logger-sharelatex': { log() {} },
         '@overleaf/redis-wrapper': {
           createClient: () => {
             return { auth() {} }

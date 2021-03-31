@@ -12,6 +12,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
+const chai = require('chai')
+chai.should()
 const async = require('async')
 
 const MockTrackChangesApi = require('./helpers/MockTrackChangesApi')

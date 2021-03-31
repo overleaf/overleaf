@@ -11,7 +11,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const { expect } = require('chai')
+const chai = require('chai')
+const should = chai.should()
+const { expect } = chai
 const modulePath = '../../../../app/js/ShareJsDB.js'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors')

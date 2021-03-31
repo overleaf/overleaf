@@ -10,6 +10,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
+const chai = require('chai')
+const should = chai.should()
 const modulePath = '../../../../app/js/ShareJsUpdateManager.js'
 const SandboxedModule = require('sandboxed-module')
 const crypto = require('crypto')
@@ -33,6 +35,7 @@ describe('ShareJsUpdateManager', function () {
             return (this.rclient = { auth() {} })
           }
         },
+        'logger-sharelatex': (this.logger = { log: sinon.stub() }),
         './RealTimeRedisManager': (this.RealTimeRedisManager = {}),
         './Metrics': (this.metrics = { inc: sinon.stub() })
       },
