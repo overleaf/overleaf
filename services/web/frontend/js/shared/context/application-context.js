@@ -10,18 +10,15 @@ ApplicationContext.Provider.propTypes = {
       id: PropTypes.string.isRequired
     }),
     exposedSettings: PropTypes.shape({
-      appName: PropTypes.string.isRequired,
       enableSubscriptions: PropTypes.bool
-    }),
-    gitBridgePublicBaseUrl: PropTypes.string.isRequired
+    })
   })
 }
 
 export function ApplicationProvider({ children }) {
   const applicationContextValue = {
     user: window.user,
-    exposedSettings: ExposedSettings,
-    gitBridgePublicBaseUrl: window.gitBridgePublicBaseUrl
+    exposedSettings: ExposedSettings
   }
   return (
     <ApplicationContext.Provider value={applicationContextValue}>

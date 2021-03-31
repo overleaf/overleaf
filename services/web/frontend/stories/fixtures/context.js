@@ -24,6 +24,4 @@ export function setupContext() {
       removeListener: sinon.stub()
     }
   }
-  window.ExposedSettings = window.ExposedSettings || {}
-  window.ExposedSettings.gitBridgePublicBaseUrl = 'https://git.stories.com'
 }
