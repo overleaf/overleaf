@@ -438,6 +438,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			callbackUrl: process.env["SHARELATEX_SAML_CALLBACK_URL"]
 			issuer: process.env["SHARELATEX_SAML_ISSUER"]
 			decryptionPvk: process.env["SHARELATEX_SAML_DECRYPTION_PVK"]
+			decryptionCert: process.env["SHARELATEX_SAML_DECRYPTION_CERT"]
 			signatureAlgorithm: process.env["SHARELATEX_SAML_SIGNATURE_ALGORITHM"]
 			identifierFormat: process.env["SHARELATEX_SAML_IDENTIFIER_FORMAT"]
 			attributeConsumingServiceIndex: process.env["SHARELATEX_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX"]
@@ -569,4 +570,3 @@ https = require('https')
 https.globalAgent.maxSockets = 300
 
 module.exports = settings
-
