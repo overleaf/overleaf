@@ -657,6 +657,7 @@
   "manage_beta_program_membership": "Manage Beta Program Membership",
   "beta_program_opt_out_action": "Opt-Out of Beta Program",
   "disable_beta": "Disable Beta",
+  "beta_badge_tooltip": "We made some improvements to __feature__. We hope you like it! Click here to manage your beta program membership",
   "beta_program_badge_description": "While using __appName__, you will see beta features marked with this badge:",
   "beta_program_current_beta_features_description": "We are currently testing the following new features in beta:",
   "enable_beta": "Enable Beta",
