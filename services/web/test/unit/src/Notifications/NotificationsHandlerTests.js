@@ -14,7 +14,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const { assert } = require('chai')
-require('chai').should()
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -30,18 +29,11 @@ describe('NotificationsHandler', function() {
   beforeEach(function() {
     this.request = sinon.stub().callsArgWith(1)
     return (this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': {
           apis: { notifications: { url: notificationUrl } }
         },
-        request: this.request,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
+        request: this.request
       }
     }))
   })

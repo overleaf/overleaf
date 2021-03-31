@@ -1,23 +1,16 @@
 const APP_ROOT = '../../../../app/src'
 const SandboxedModule = require('sandboxed-module')
-const chai = require('chai')
 const sinon = require('sinon')
-const sinonChai = require('sinon-chai')
-
-chai.use(sinonChai)
-const { expect } = chai
+const { expect } = require('chai')
 
 const modulePath = `${APP_ROOT}/Features/SamlLog/SamlLogHandler`
 
 describe('SamlLogHandler', function() {
-  let LoggerSharelatex, SamlLog, SamlLogHandler, SamlLogModel
+  let SamlLog, SamlLogHandler, SamlLogModel
 
   let data, providerId, samlLog, sessionId
 
   beforeEach(function() {
-    LoggerSharelatex = {
-      error: sinon.stub()
-    }
     samlLog = {
       save: sinon.stub()
     }
@@ -26,10 +19,8 @@ describe('SamlLogHandler', function() {
     }
     SamlLogModel = { SamlLog }
     SamlLogHandler = SandboxedModule.require(modulePath, {
-      globals: { console },
       requires: {
-        '../../models/SamlLog': SamlLogModel,
-        'logger-sharelatex': LoggerSharelatex
+        '../../models/SamlLog': SamlLogModel
       }
     })
 
@@ -66,7 +57,7 @@ describe('SamlLogHandler', function() {
       expect(samlLog.data).to.be.undefined
       expect(samlLog.jsonData).to.be.undefined
       samlLog.save.should.have.been.calledOnce
-      LoggerSharelatex.error.should.have.been.calledOnce.and.calledWithMatch(
+      this.logger.error.should.have.been.calledOnce.and.calledWithMatch(
         { providerId, sessionId: sessionId.substr(0, 8) },
         'SamlLog JSON.stringify Error'
       )
@@ -81,7 +72,7 @@ describe('SamlLogHandler', function() {
     })
 
     it('should log error', function() {
-      LoggerSharelatex.error.should.have.been.calledOnce.and.calledWithMatch(
+      this.logger.error.should.have.been.calledOnce.and.calledWithMatch(
         { err: 'error', providerId, sessionId: sessionId.substr(0, 8) },
         'SamlLog Error'
       )

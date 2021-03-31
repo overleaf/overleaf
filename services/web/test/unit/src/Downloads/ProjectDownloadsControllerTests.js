@@ -11,9 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Downloads/ProjectDownloadsController.js'
 const SandboxedModule = require('sandboxed-module')
@@ -30,14 +28,10 @@ describe('ProjectDownloadsController', function() {
     return (this.ProjectDownloadsController = SandboxedModule.require(
       modulePath,
       {
-        globals: {
-          console: console
-        },
         requires: {
           './ProjectZipStreamManager': (this.ProjectZipStreamManager = {}),
           '../Project/ProjectGetter': (this.ProjectGetter = {}),
           '@overleaf/metrics': (this.metrics = {}),
-          'logger-sharelatex': (this.logger = { log: sinon.stub() }),
           '../DocumentUpdater/DocumentUpdaterHandler': this
             .DocumentUpdaterHandler
         }

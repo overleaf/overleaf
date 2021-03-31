@@ -12,9 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Collaborators/CollaboratorsInviteController.js'
 const SandboxedModule = require('sandboxed-module')
@@ -44,21 +42,12 @@ describe('CollaboratorsInviteController', function() {
     }
 
     this.CollaboratorsInviteController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../Subscription/LimitationsManager': this.LimitationsManager,
         '../User/UserGetter': this.UserGetter,
         './CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         './CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
-        'logger-sharelatex': (this.logger = {
-          err: sinon.stub(),
-          error: sinon.stub(),
-          warn: sinon.stub(),
-          log: sinon.stub()
-        }),
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController = {
           emitToRoom: sinon.stub()
         }),

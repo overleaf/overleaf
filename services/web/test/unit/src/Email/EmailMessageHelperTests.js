@@ -9,11 +9,7 @@ const MODULE_PATH = path.join(
 
 describe('EmailMessageHelper', function() {
   beforeEach(function() {
-    this.EmailMessageHelper = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      }
-    })
+    this.EmailMessageHelper = SandboxedModule.require(MODULE_PATH, {})
   })
   describe('cleanHTML', function() {
     beforeEach(function() {

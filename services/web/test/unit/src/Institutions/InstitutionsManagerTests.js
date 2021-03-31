@@ -1,17 +1,15 @@
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
+const { expect } = require('chai')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Institutions/InstitutionsManager'
 )
-const { expect } = require('chai')
 
 describe('InstitutionsManager', function() {
   beforeEach(function() {
     this.institutionId = 123
-    this.logger = { log() {} }
     this.user = {}
     this.getInstitutionAffiliations = sinon.stub()
     this.refreshFeatures = sinon.stub().yields()
@@ -54,11 +52,7 @@ describe('InstitutionsManager', function() {
     this.Mongo = { ObjectId: sinon.stub().returnsArg(0) }
 
     this.InstitutionsManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': this.logger,
         './InstitutionsAPI': {
           getInstitutionAffiliations: this.getInstitutionAffiliations
         },
@@ -105,7 +99,7 @@ describe('InstitutionsManager', function() {
         this.institutionId,
         false,
         error => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           sinon.assert.calledTwice(this.refreshFeatures)
 
           // expect no notifications
@@ -125,7 +119,7 @@ describe('InstitutionsManager', function() {
         this.institutionId,
         true,
         error => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           sinon.assert.calledOnce(
             this.NotificationsBuilder.featuresUpgradedByAffiliation
           )
@@ -144,7 +138,7 @@ describe('InstitutionsManager', function() {
         this.institutionId,
         true,
         error => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           sinon.assert.calledOnce(
             this.NotificationsBuilder.redundantPersonalSubscription
           )
@@ -184,7 +178,7 @@ describe('InstitutionsManager', function() {
       this.InstitutionsManager.checkInstitutionUsers(
         this.institutionId,
         (error, usersSummary) => {
-          should.not.exist(error)
+          expect(error).not.to.exist
 
           usersSummary.confirmedEmailUsers.total.should.equal(3)
           usersSummary.confirmedEmailUsers.totalProUsers.should.equal(1)
@@ -217,7 +211,7 @@ describe('InstitutionsManager', function() {
       this.InstitutionsManager.getInstitutionUsersSubscriptions(
         this.institutionId,
         (error, subscriptions) => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           sinon.assert.calledOnce(this.subscriptionExec)
           done()
         }

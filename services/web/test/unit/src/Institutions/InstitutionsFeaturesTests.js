@@ -12,7 +12,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
-require('chai').should()
 const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = require('path').join(
@@ -26,18 +25,11 @@ describe('InstitutionsFeatures', function() {
     this.PlansLocator = { findLocalPlanInSettings: sinon.stub() }
     this.institutionPlanCode = 'institution_plan_code'
     this.InstitutionsFeatures = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../User/UserGetter': this.UserGetter,
         '../Subscription/PlansLocator': this.PlansLocator,
         'settings-sharelatex': {
           institutionPlanCode: this.institutionPlanCode
-        },
-        'logger-sharelatex': {
-          log() {},
-          err() {}
         }
       }
     })

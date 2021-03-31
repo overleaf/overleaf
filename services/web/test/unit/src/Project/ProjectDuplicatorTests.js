@@ -200,9 +200,6 @@ describe('ProjectDuplicator', function() {
     }
 
     this.ProjectDuplicator = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/Doc': { Doc: this.Doc },
         '../../models/File': { File: this.File },
@@ -218,12 +215,7 @@ describe('ProjectDuplicator', function() {
         './ProjectGetter': this.ProjectGetter,
         './ProjectLocator': this.ProjectLocator,
         './ProjectOptionsHandler': this.ProjectOptionsHandler,
-        '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        }
+        '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher
       }
     })
   })

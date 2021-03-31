@@ -9,14 +9,13 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const async = require('async')
 const request = require('./helpers/request')
 
 const assertResponse = (path, expectedStatusCode, expectedBody, cb) =>
   request.get(path, (error, response) => {
-    should.not.exist(error)
+    expect(error).not.to.exist
     response.statusCode.should.equal(expectedStatusCode)
     if (expectedBody) {
       assert.deepEqual(JSON.parse(response.body), expectedBody)

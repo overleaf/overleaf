@@ -12,7 +12,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
-require('chai').should()
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -26,9 +25,6 @@ describe('SystemMessageManager', function() {
       find: sinon.stub().yields(null, this.messages)
     }
     this.SystemMessageManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/SystemMessage': { SystemMessage: this.SystemMessage }
       }

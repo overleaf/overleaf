@@ -47,9 +47,6 @@ describe('CollaboratorsGetter', function() {
       buildOwnerAndMembersViews: sinon.stub()
     }
     this.CollaboratorsGetter = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         '../User/UserGetter': this.UserGetter,

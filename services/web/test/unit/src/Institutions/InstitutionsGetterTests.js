@@ -10,7 +10,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-require('chai').should()
 const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = require('path').join(
@@ -22,17 +21,10 @@ describe('InstitutionsGetter', function() {
   beforeEach(function() {
     this.UserGetter = { getUserFullEmails: sinon.stub() }
     this.InstitutionsGetter = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../User/UserGetter': this.UserGetter,
         '../UserMembership/UserMembershipsHandler': (this.UserMembershipsHandler = {}),
-        '../UserMembership/UserMembershipEntityConfigs': (this.UserMembershipEntityConfigs = {}),
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
+        '../UserMembership/UserMembershipEntityConfigs': (this.UserMembershipEntityConfigs = {})
       }
     })
 

@@ -16,9 +16,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Downloads/ProjectZipStreamManager.js'
 const SandboxedModule = require('sandboxed-module')
@@ -33,15 +31,8 @@ describe('ProjectZipStreamManager', function() {
       append: sinon.stub()
     }
     return (this.ProjectZipStreamManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         archiver: (this.archiver = sinon.stub().returns(this.archive)),
-        'logger-sharelatex': (this.logger = {
-          error: sinon.stub(),
-          log: sinon.stub()
-        }),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
         '../FileStore/FileStoreHandler': (this.FileStoreHandler = {}),
         '../Project/ProjectGetter': (this.ProjectGetter = {})

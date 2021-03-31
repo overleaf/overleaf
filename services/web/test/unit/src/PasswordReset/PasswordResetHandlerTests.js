@@ -15,15 +15,11 @@ const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
-const sinonChai = require('sinon-chai')
-const chai = require('chai')
+const { expect } = require('chai')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/PasswordReset/PasswordResetHandler'
 )
-const should = require('chai').should()
-chai.use(sinonChai)
-const { expect } = chai
 
 describe('PasswordResetHandler', function() {
   beforeEach(function() {
@@ -45,7 +41,6 @@ describe('PasswordResetHandler', function() {
       }
     }
     this.PasswordResetHandler = SandboxedModule.require(modulePath, {
-      globals: { console: console },
       requires: {
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           promises: {
@@ -56,11 +51,7 @@ describe('PasswordResetHandler', function() {
         '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
         '../Email/EmailHandler': this.EmailHandler,
         '../Authentication/AuthenticationManager': this.AuthenticationManager,
-        'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
+        'settings-sharelatex': this.settings
       }
     })
     this.token = '12312321i'

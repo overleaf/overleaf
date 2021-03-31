@@ -44,9 +44,6 @@ describe('HistoryManager', function() {
     }
 
     this.HistoryManager = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         'request-promise-native': this.request,
         'settings-sharelatex': this.settings,

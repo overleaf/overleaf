@@ -1,14 +1,10 @@
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/infrastructure/Features.js'
 const SandboxedModule = require('sandboxed-module')
 
 describe('Features', function() {
   beforeEach(function() {
     this.Features = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': (this.settings = {})
       }

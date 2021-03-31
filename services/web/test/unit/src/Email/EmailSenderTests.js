@@ -33,20 +33,12 @@ describe('EmailSender', function() {
     this.ses = { createTransport: () => this.sesClient }
 
     this.EmailSender = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         nodemailer: this.ses,
         'nodemailer-ses-transport': sinon.stub(),
         'nodemailer-mandrill-transport': {},
         'settings-sharelatex': this.Settings,
         '../../infrastructure/RateLimiter': this.RateLimiter,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        },
         '@overleaf/metrics': {
           inc() {}
         }

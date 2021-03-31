@@ -9,8 +9,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-chai.should()
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Docstore/DocstoreManager'
 const SandboxedModule = require('sandboxed-module')
@@ -20,9 +18,6 @@ describe('DocstoreManager', function() {
   beforeEach(function() {
     this.requestDefaults = sinon.stub().returns((this.request = sinon.stub()))
     this.DocstoreManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         request: {
           defaults: this.requestDefaults
@@ -33,12 +28,6 @@ describe('DocstoreManager', function() {
               url: 'docstore.sharelatex.com'
             }
           }
-        }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub(),
-          error: sinon.stub(),
-          err() {}
         })
       }
     })

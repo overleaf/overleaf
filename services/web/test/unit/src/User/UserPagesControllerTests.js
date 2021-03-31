@@ -10,7 +10,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -47,11 +46,6 @@ describe('UserPagesController', function() {
     this.UserGetter = { getUser: sinon.stub() }
     this.UserSessionsManager = { getAllUserSessions: sinon.stub() }
     this.dropboxStatus = {}
-    this.DropboxHandler = {
-      getUserRegistrationStatus: sinon
-        .stub()
-        .callsArgWith(1, null, this.dropboxStatus)
-    }
     this.ErrorController = { notFound: sinon.stub() }
     this.AuthenticationController = {
       getLoggedInUserId: sinon.stub().returns(this.user._id),
@@ -60,20 +54,11 @@ describe('UserPagesController', function() {
       setRedirectInSession: sinon.stub()
     }
     this.UserPagesController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        },
         './UserGetter': this.UserGetter,
         './UserSessionsManager': this.UserSessionsManager,
         '../Errors/ErrorController': this.ErrorController,
-        '../Dropbox/DropboxHandler': this.DropboxHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         request: (this.request = sinon.stub())

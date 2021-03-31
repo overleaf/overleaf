@@ -13,10 +13,7 @@
  * DS206: Consider reworking classes to avoid initClass
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const { assert } = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { assert, expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Project/ProjectEntityHandler'
 const SandboxedModule = require('sandboxed-module')
@@ -60,15 +57,7 @@ describe('ProjectEntityHandler', function() {
     this.callback = sinon.stub()
 
     return (this.ProjectEntityHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          err() {}
-        }),
         '../Docstore/DocstoreManager': (this.DocstoreManager = {}),
         '../../Features/DocumentUpdater/DocumentUpdaterHandler': this
           .DocumentUpdaterHandler,

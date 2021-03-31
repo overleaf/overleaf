@@ -87,7 +87,7 @@ class Parser {
     // check incidentals, see if we should pluck out a match
     if (incidentalCommands.length > 1) {
       const bestMatch = incidentalCommands.sort(
-        (a, b) => a[1] + a[2] < b[1] + b[2]
+        (a, b) => b[1] + b[2] - (a[1] + a[2])
       )[0]
       realCommands.push(bestMatch)
     }

@@ -61,9 +61,6 @@ describe('ProjectCreationHandler', function() {
     this.AnalyticsManager = { recordEvent: sinon.stub() }
 
     this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         '../../models/User': {
@@ -76,7 +73,6 @@ describe('ProjectCreationHandler', function() {
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
         'settings-sharelatex': this.Settings,
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
-        'logger-sharelatex': { log() {} },
         '@overleaf/metrics': {
           inc() {},
           timeAsyncMethod() {}

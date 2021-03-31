@@ -1,5 +1,5 @@
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -10,14 +10,7 @@ describe('Referal handler', function() {
   beforeEach(function() {
     this.User = { findById: sinon.stub() }
     this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         '../../models/User': {
           User: this.User
         }
@@ -37,7 +30,7 @@ describe('Referal handler', function() {
       this.handler.getReferedUsers(
         this.user_id,
         (err, passedReferedUserIds, passedReferedUserCount) => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           passedReferedUserIds.should.deep.equal(user.refered_users)
           passedReferedUserCount.should.equal(3)
           done()
@@ -52,7 +45,7 @@ describe('Referal handler', function() {
       this.handler.getReferedUsers(
         this.user_id,
         (err, passedReferedUserIds, passedReferedUserCount) => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           passedReferedUserIds.length.should.equal(0)
           done()
         }
@@ -66,7 +59,7 @@ describe('Referal handler', function() {
       this.handler.getReferedUsers(
         this.user_id,
         (err, passedReferedUserIds, passedReferedUserCount) => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           passedReferedUserCount.should.equal(0)
           done()
         }
@@ -80,7 +73,7 @@ describe('Referal handler', function() {
       this.handler.getReferedUsers(
         this.user_id,
         (err, passedReferedUserIds, passedReferedUserCount) => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           passedReferedUserCount.should.equal(3)
           done()
         }

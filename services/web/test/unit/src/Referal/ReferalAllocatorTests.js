@@ -1,5 +1,4 @@
 const SandboxedModule = require('sandboxed-module')
-require('chai').should()
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -9,19 +8,12 @@ const modulePath = require('path').join(
 describe('ReferalAllocator', function() {
   beforeEach(function() {
     this.ReferalAllocator = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/User': {
           User: (this.User = {})
         },
         '../Subscription/FeaturesUpdater': (this.FeaturesUpdater = {}),
-        'settings-sharelatex': (this.Settings = {}),
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
+        'settings-sharelatex': (this.Settings = {})
       }
     })
     this.callback = sinon.stub()

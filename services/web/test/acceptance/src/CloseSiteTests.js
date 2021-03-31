@@ -11,7 +11,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const Settings = require('settings-sharelatex')
-const chai = require('chai')
 const request = require('./helpers/request')
 
 describe('siteIsOpen', function() {

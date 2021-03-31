@@ -40,14 +40,8 @@ describe('AnalyticsManager', function() {
     this.backgroundRequest = sinon.stub().yields()
     this.request = sinon.stub().yields()
     this.AnalyticsManager = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': this.Settings,
-        'logger-sharelatex': {
-          warn() {}
-        },
         '../../infrastructure/Queues': this.Queues
       }
     })

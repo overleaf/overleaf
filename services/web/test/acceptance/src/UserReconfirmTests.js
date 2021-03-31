@@ -12,7 +12,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const { expect } = require('chai')
-const should = require('chai').should()
 const async = require('async')
 const User = require('./helpers/User')
 

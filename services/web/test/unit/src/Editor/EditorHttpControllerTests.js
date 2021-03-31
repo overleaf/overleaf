@@ -106,10 +106,6 @@ describe('EditorHttpController', function() {
     this.ProjectEditorHandler = {
       buildProjectModelView: sinon.stub().returns(this.projectView)
     }
-    this.logger = {
-      log: sinon.stub(),
-      error: sinon.stub()
-    }
     this.Metrics = { inc: sinon.stub() }
     this.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns(this.token),
@@ -128,15 +124,11 @@ describe('EditorHttpController', function() {
       unprocessableEntity: sinon.stub()
     }
     this.EditorHttpController = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Project/ProjectDeleter': this.ProjectDeleter,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Authorization/AuthorizationManager': this.AuthorizationManager,
         '../Project/ProjectEditorHandler': this.ProjectEditorHandler,
-        'logger-sharelatex': this.logger,
         './EditorController': this.EditorController,
         '@overleaf/metrics': this.Metrics,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,

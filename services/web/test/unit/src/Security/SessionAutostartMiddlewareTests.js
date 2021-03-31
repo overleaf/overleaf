@@ -1,6 +1,5 @@
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/infrastructure/SessionAutostartMiddleware.js'
 const SandboxedModule = require('sandboxed-module')
@@ -18,9 +17,6 @@ describe('SessionAutostartMiddleware', function() {
     }
 
     SessionAutostartMiddleware = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': Settings
       }

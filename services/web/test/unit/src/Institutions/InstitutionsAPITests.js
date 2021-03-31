@@ -10,8 +10,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
-let { expect } = require('chai')
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -20,23 +19,17 @@ const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Institutions/InstitutionsAPI'
 )
-;({ expect } = require('chai'))
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 describe('InstitutionsAPI', function() {
   beforeEach(function() {
-    this.logger = { warn: sinon.stub(), err: sinon.stub(), log() {} }
     this.settings = { apis: { v1: { url: 'v1.url', user: '', pass: '' } } }
     this.request = sinon.stub()
     this.ipMatcherNotification = {
       read: (this.markAsReadIpMatcher = sinon.stub().callsArgWith(1, null))
     }
     this.InstitutionsAPI = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': this.logger,
         '@overleaf/metrics': {
           timeAsyncMethod: sinon.stub()
         },
@@ -44,9 +37,6 @@ describe('InstitutionsAPI', function() {
         request: this.request,
         '../Notifications/NotificationsBuilder': {
           ipMatcherAffiliation: sinon.stub().returns(this.ipMatcherNotification)
-        },
-        '../../../../../app/src/Features/V1/V1Api': {
-          request: sinon.stub()
         }
       }
     })
@@ -67,13 +57,13 @@ describe('InstitutionsAPI', function() {
       return this.InstitutionsAPI.getInstitutionAffiliations(
         this.institutionId,
         (err, body) => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.request.calledOnce.should.equal(true)
           const requestOptions = this.request.lastCall.args[0]
           const expectedUrl = `v1.url/api/v2/institutions/${this.institutionId}/affiliations`
           requestOptions.url.should.equal(expectedUrl)
           requestOptions.method.should.equal('GET')
-          should.not.exist(requestOptions.body)
+          expect(requestOptions.body).not.to.exist
           body.should.equal(responseBody)
           return done()
         }
@@ -86,7 +76,7 @@ describe('InstitutionsAPI', function() {
       return this.InstitutionsAPI.getInstitutionAffiliations(
         this.institutionId,
         (err, body) => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           expect(body).to.be.a('Array')
           body.length.should.equal(0)
           return done()
@@ -111,7 +101,7 @@ describe('InstitutionsAPI', function() {
         endDate,
         'monthly',
         (err, body) => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.request.calledOnce.should.equal(true)
           const requestOptions = this.request.lastCall.args[0]
           const expectedUrl = `v1.url/api/v2/institutions/${this.institutionId}/institution_licences`
@@ -134,13 +124,13 @@ describe('InstitutionsAPI', function() {
       return this.InstitutionsAPI.getUserAffiliations(
         this.stubbedUser._id,
         (err, body) => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.request.calledOnce.should.equal(true)
           const requestOptions = this.request.lastCall.args[0]
           const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
           requestOptions.url.should.equal(expectedUrl)
           requestOptions.method.should.equal('GET')
-          should.not.exist(requestOptions.body)
+          expect(requestOptions.body).not.to.exist
           body.should.equal(responseBody)
           return done()
         }
@@ -164,7 +154,7 @@ describe('InstitutionsAPI', function() {
       return this.InstitutionsAPI.getUserAffiliations(
         this.stubbedUser._id,
         (err, body) => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           expect(body).to.be.a('Array')
           body.length.should.equal(0)
           return done()
@@ -191,7 +181,7 @@ describe('InstitutionsAPI', function() {
         this.newEmail,
         affiliationOptions,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.request.calledOnce.should.equal(true)
           const requestOptions = this.request.lastCall.args[0]
           const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
@@ -220,7 +210,7 @@ describe('InstitutionsAPI', function() {
         this.newEmail,
         {},
         err => {
-          should.exist(err)
+          expect(err).to.exist
           err.message.should.have.string(422)
           err.message.should.have.string(body.errors)
           return done()
@@ -239,7 +229,7 @@ describe('InstitutionsAPI', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.request.calledOnce.should.equal(true)
           const requestOptions = this.request.lastCall.args[0]
           const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations/remove`
@@ -257,7 +247,7 @@ describe('InstitutionsAPI', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           err.message.should.exist
           return done()
         }
@@ -271,7 +261,7 @@ describe('InstitutionsAPI', function() {
       return this.InstitutionsAPI.deleteAffiliations(
         this.stubbedUser._id,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.request.calledOnce.should.equal(true)
           const requestOptions = this.request.lastCall.args[0]
           const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
@@ -307,7 +297,7 @@ describe('InstitutionsAPI', function() {
         'Student',
         'Physics',
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.request.calledOnce.should.equal(true)
           const requestOptions = this.request.lastCall.args[0]
           const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations/endorse`

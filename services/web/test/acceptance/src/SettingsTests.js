@@ -8,7 +8,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
+const { expect } = require('chai')
 const async = require('async')
 const User = require('./helpers/User')
 const MockV1ApiClass = require('./mocks/MockV1Api')
@@ -56,7 +56,7 @@ describe('SettingsPage', function() {
   it('update main email address', function(done) {
     const newEmail = 'foo@bar.com'
     return this.user.updateSettings({ email: newEmail }, error => {
-      should.not.exist(error)
+      expect(error).not.to.exist
       return this.user.get((error, user) => {
         user.email.should.equal(newEmail)
         user.emails.length.should.equal(1)
@@ -77,7 +77,7 @@ describe('SettingsPage', function() {
     it('should be able to update settings', function(done) {
       const newName = 'third-party-references'
       this.user.updateSettings({ first_name: newName }, error => {
-        should.not.exist(error)
+        expect(error).not.to.exist
         this.user.get((error, user) => {
           user.first_name.should.equal(newName)
           done()

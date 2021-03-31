@@ -1,10 +1,7 @@
 const { ObjectId } = require('mongodb')
 const SandboxedModule = require('sandboxed-module')
-const chai = require('chai')
 const path = require('path')
 const sinon = require('sinon')
-
-chai.should()
 
 const modulePath = path.join(
   __dirname,
@@ -60,13 +57,9 @@ describe('TpdsUpdateSender', function() {
       promises: { getUsers }
     }
     this.updateSender = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': { log() {} },
         'request-promise-native': this.request,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../User/UserGetter.js': this.UserGetter,

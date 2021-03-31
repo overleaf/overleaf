@@ -12,7 +12,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -33,21 +32,14 @@ describe('ChatController', function() {
       getLoggedInUserId: sinon.stub().returns(this.user_id)
     }
     this.ChatController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
-          log() {}
-        },
         './ChatApiHandler': this.ChatApiHandler,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         '../User/UserInfoManager': (this.UserInfoManager = {}),
-        '../User/UserInfoController': (this.UserInfoController = {}),
-        '../Comments/CommentsController': (this.CommentsController = {})
+        '../User/UserInfoController': (this.UserInfoController = {})
       }
     })
     this.req = {

@@ -11,7 +11,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -35,13 +34,9 @@ describe('TokenAccessHandler', function() {
     this.userId = ObjectId()
     this.req = {}
     return (this.TokenAccessHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         '../../models/Project': { Project: (this.Project = {}) },
-        'logger-sharelatex': { err: sinon.stub() },
         'settings-sharelatex': (this.settings = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         '../V1/V1Api': (this.V1Api = {

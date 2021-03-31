@@ -1,6 +1,5 @@
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/User/UserController.js'
 const SandboxedModule = require('sandboxed-module')
 const OError = require('@overleaf/o-error')
@@ -91,9 +90,6 @@ describe('UserController', function() {
     this.UrlHelper.getSafeRedirectPath.returnsArg(0)
 
     this.UserController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Helpers/UrlHelper': this.UrlHelper,
         './UserGetter': this.UserGetter,
@@ -119,12 +115,6 @@ describe('UserController', function() {
         './UserSessionsManager': this.UserSessionsManager,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': (this.logger = {
-          log() {},
-          warn() {},
-          err() {},
-          error: sinon.stub()
-        }),
         '@overleaf/metrics': {
           inc() {}
         },

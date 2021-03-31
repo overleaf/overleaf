@@ -14,8 +14,6 @@
  */
 const sinon = require('sinon')
 const { expect } = require('chai')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../../app/src/Features/Uploads/ArchiveManager.js'
 const ArchiveErrors = require('../../../../app/src/Features/Uploads/ArchiveErrors')
 const SandboxedModule = require('sandboxed-module')
@@ -24,12 +22,6 @@ const events = require('events')
 describe('ArchiveManager', function() {
   beforeEach(function() {
     let Timer
-    this.logger = {
-      error: sinon.stub(),
-      warn: sinon.stub(),
-      err() {},
-      log: sinon.stub()
-    }
     this.metrics = {
       Timer: (Timer = (function() {
         Timer = class Timer {
@@ -46,15 +38,11 @@ describe('ArchiveManager', function() {
     this.zipfile.close = sinon.stub()
 
     this.ArchiveManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': {},
         yauzl: (this.yauzl = {
           open: sinon.stub().callsArgWith(2, null, this.zipfile)
         }),
-        'logger-sharelatex': this.logger,
         '@overleaf/metrics': this.metrics,
         fs: (this.fs = {}),
         'fs-extra': (this.fse = {}),

@@ -1,8 +1,7 @@
 const SandboxedModule = require('sandboxed-module')
-const chai = require('chai')
 const sinon = require('sinon')
+const { assert } = require('chai')
 
-const { assert } = chai
 const modulePath = '../../../../app/src/Features/User/UserCreator.js'
 
 describe('UserCreator', function() {
@@ -16,16 +15,10 @@ describe('UserCreator', function() {
       }
     }
     this.UserCreator = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/User': {
           User: this.UserModel
         },
-        'logger-sharelatex': (this.Logger = {
-          error: sinon.stub()
-        }),
         '@overleaf/metrics': { timeAsyncMethod() {} },
         '../../infrastructure/Features': (this.Features = {
           hasFeature: sinon.stub().returns(false)
@@ -177,7 +170,7 @@ describe('UserCreator', function() {
           })
 
           it('should log error', function() {
-            sinon.assert.calledOnce(this.Logger.error)
+            sinon.assert.calledOnce(this.logger.error)
           })
         })
 
@@ -207,7 +200,7 @@ describe('UserCreator', function() {
           })
 
           it('should log error', function() {
-            sinon.assert.calledOnce(this.Logger.error)
+            sinon.assert.calledOnce(this.logger.error)
           })
         })
       })

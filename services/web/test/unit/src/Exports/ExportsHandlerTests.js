@@ -12,9 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Exports/ExportsHandler.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -27,15 +25,7 @@ describe('ExportsHandler', function() {
       }
     }
     this.ExportsHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        },
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../Project/ProjectHistoryHandler': (this.ProjectHistoryHandler = {}),
         '../Project/ProjectLocator': (this.ProjectLocator = {}),

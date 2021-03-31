@@ -14,9 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
-const should = chai.should()
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Project/ProjectOptionsHandler.js'
 const SandboxedModule = require('sandboxed-module')
@@ -32,9 +30,6 @@ describe('ProjectOptionsHandler', function() {
     this.projectModel.updateOne = sinon.stub().yields()
 
     this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/Project': { Project: this.projectModel },
         'settings-sharelatex': {
@@ -47,10 +42,6 @@ describe('ProjectOptionsHandler', function() {
             { imageName: 'texlive-0000.0', imageDesc: 'test image 0' },
             { imageName: 'texlive-1234.5', imageDesc: 'test image 1' }
           ]
-        },
-        'logger-sharelatex': {
-          log() {},
-          err() {}
         }
       }
     })

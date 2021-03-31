@@ -10,7 +10,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -26,14 +25,10 @@ const EmailHelper = require('../../../../app/src/Features/Helpers/EmailHelper')
 describe('UserEmailsConfirmationHandler', function() {
   beforeEach(function() {
     this.UserEmailsConfirmationHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': (this.settings = {
           siteUrl: 'emails.example.com'
         }),
-        'logger-sharelatex': (this.logger = { log: sinon.stub() }),
         '../Security/OneTimeTokenHandler': (this.OneTimeTokenHandler = {}),
         './UserUpdater': (this.UserUpdater = {}),
         './UserGetter': (this.UserGetter = {

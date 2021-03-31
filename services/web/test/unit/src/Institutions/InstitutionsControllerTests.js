@@ -10,20 +10,18 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
+const { expect } = require('chai')
 const path = require('path')
 const sinon = require('sinon')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Institutions/InstitutionsController'
 )
-const { expect } = require('chai')
 
 describe('InstitutionsController', function() {
   beforeEach(function() {
-    this.logger = { err: sinon.stub(), warn: sinon.stub(), log() {} }
     this.host = 'mit.edu'
       .split('')
       .reverse()
@@ -81,11 +79,7 @@ describe('InstitutionsController', function() {
       .withArgs(this.stubbedUser2._id)
       .yields(null, this.stubbedUser2DecoratedEmails)
     this.InstitutionsController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': this.logger,
         '../User/UserGetter': {
           getUsersByHostname: this.getUsersByHostname,
           getUserFullEmails: this.getUserFullEmails

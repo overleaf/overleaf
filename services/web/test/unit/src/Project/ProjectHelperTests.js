@@ -1,5 +1,4 @@
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
 

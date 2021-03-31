@@ -1,23 +1,13 @@
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/infrastructure/SessionStoreManager.js'
 const SandboxedModule = require('sandboxed-module')
 
 describe('SessionStoreManager', function() {
   beforeEach(function() {
     this.SessionStoreManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub(),
-          error: sinon.stub(),
-          err: sinon.stub()
-        })
+        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() })
       }
     })
     this.sessionStore = {

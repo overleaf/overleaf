@@ -12,7 +12,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const { expect } = require('chai')
 const modulePath = require('path').join(
   __dirname,
@@ -25,12 +24,8 @@ describe('CooldownManager', function() {
     this.rclient = { set: sinon.stub(), get: sinon.stub() }
     this.RedisWrapper = { client: () => this.rclient }
     return (this.CooldownManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        '../../infrastructure/RedisWrapper': this.RedisWrapper,
-        'logger-sharelatex': { log: sinon.stub() }
+        '../../infrastructure/RedisWrapper': this.RedisWrapper
       }
     }))
   })

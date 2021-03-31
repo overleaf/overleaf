@@ -10,11 +10,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
 const modulePath = '../../../../app/src/infrastructure/Csrf.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -24,9 +21,6 @@ describe('Csrf', function() {
       .stub()
       .callsArgWith(2, (this.err = { code: 'EBADCSRFTOKEN' }))
     this.Csrf = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         csurf: sinon.stub().returns(this.csurf_csrf)
       }

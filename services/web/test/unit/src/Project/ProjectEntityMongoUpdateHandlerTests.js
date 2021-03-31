@@ -62,12 +62,6 @@ describe('ProjectEntityMongoUpdateHandler', function() {
       rootFolder: [this.rootFolder]
     }
 
-    this.logger = {
-      log: sinon.stub(),
-      warn: sinon.stub(),
-      error: sinon.stub(),
-      err() {}
-    }
     this.Settings = { maxEntitiesPerProject: 100 }
     this.CooldownManager = {}
     this.LockManager = {
@@ -184,12 +178,8 @@ describe('ProjectEntityMongoUpdateHandler', function() {
     }
 
     this.subject = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
-        'logger-sharelatex': this.logger,
         'settings-sharelatex': this.Settings,
         '../Cooldown/CooldownManager': this.CooldownManager,
         '../../models/Folder': { Folder: this.FolderModel },

@@ -1,5 +1,4 @@
 const { ObjectId } = require('mongodb')
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const moment = require('moment')
@@ -45,14 +44,8 @@ describe('UserGetter', function() {
     this.getUserAffiliations = sinon.stub().resolves([])
 
     this.UserGetter = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Helpers/Mongo': { normalizeQuery, normalizeMultiQuery },
-        'logger-sharelatex': {
-          log() {}
-        },
         '../../infrastructure/mongodb': this.Mongo,
         '@overleaf/metrics': {
           timeAsyncMethod: sinon.stub()
@@ -950,7 +943,7 @@ describe('UserGetter', function() {
     it('should return error if existing user is found', function(done) {
       this.UserGetter.getUserByAnyEmail.callsArgWith(1, null, this.fakeUser)
       this.UserGetter.ensureUniqueEmailAddress(this.newEmail, err => {
-        should.exist(err)
+        expect(err).to.exist
         expect(err).to.be.an.instanceof(Errors.EmailExistsError)
         done()
       })
@@ -959,7 +952,7 @@ describe('UserGetter', function() {
     it('should return null if no user is found', function(done) {
       this.UserGetter.getUserByAnyEmail.callsArgWith(1)
       this.UserGetter.ensureUniqueEmailAddress(this.newEmail, err => {
-        should.not.exist(err)
+        expect(err).not.to.exist
         done()
       })
     })

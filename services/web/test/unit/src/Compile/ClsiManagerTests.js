@@ -1,6 +1,5 @@
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Compile/ClsiManager.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -25,12 +24,6 @@ describe('ClsiManager', function() {
     this.DocumentUpdaterHandler = {
       getProjectDocsIfMatch: sinon.stub().callsArgWith(2, null, null)
     }
-    this.logger = {
-      log: sinon.stub(),
-      error: sinon.stub(),
-      err: sinon.stub(),
-      warn: sinon.stub()
-    }
     this.request = sinon.stub()
     this.Metrics = {
       Timer: class Metrics {
@@ -41,9 +34,6 @@ describe('ClsiManager', function() {
       inc: sinon.stub()
     }
     this.ClsiManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': (this.settings = {
           apis: {
@@ -68,7 +58,6 @@ describe('ClsiManager', function() {
           .DocumentUpdaterHandler,
         './ClsiCookieManager': () => this.ClsiCookieManager,
         './ClsiStateManager': this.ClsiStateManager,
-        'logger-sharelatex': this.logger,
         request: this.request,
         './ClsiFormatChecker': this.ClsiFormatChecker,
         '@overleaf/metrics': this.Metrics

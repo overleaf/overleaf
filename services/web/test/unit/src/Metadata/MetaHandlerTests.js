@@ -10,9 +10,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Metadata/MetaHandler'
 const SandboxedModule = require('sandboxed-module')
@@ -54,9 +52,6 @@ describe('MetaHandler', function() {
     }
 
     return (this.MetaHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../DocumentUpdater/DocumentUpdaterHandler': this

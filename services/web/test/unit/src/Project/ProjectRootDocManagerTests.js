@@ -11,9 +11,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Project/ProjectRootDocManager.js'
@@ -41,9 +39,6 @@ describe('ProjectRootDocManager', function() {
       stat: sinon.stub().callsArgWith(1, null, { size: 100 })
     }
     return (this.ProjectRootDocManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './ProjectEntityHandler': (this.ProjectEntityHandler = {}),
         './ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),

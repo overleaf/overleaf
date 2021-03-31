@@ -12,25 +12,15 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Compile/ClsiFormatChecker.js'
 const SandboxedModule = require('sandboxed-module')
 
 describe('ClsiFormatChecker', function() {
   beforeEach(function() {
     this.ClsiFormatChecker = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'settings-sharelatex': (this.settings = { compileBodySizeLimitMb: 5 }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          warn: sinon.stub()
-        })
+        'settings-sharelatex': (this.settings = { compileBodySizeLimitMb: 5 })
       }
     })
     return (this.project_id = 'project-id')

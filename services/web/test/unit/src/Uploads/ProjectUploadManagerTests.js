@@ -145,11 +145,7 @@ describe('ProjectUploadManager', function() {
     }
 
     this.ProjectUploadManager = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': {},
         'fs-extra': this.fs,
         './ArchiveManager': this.ArchiveManager,
         '../../models/Doc': { Doc: this.Doc },

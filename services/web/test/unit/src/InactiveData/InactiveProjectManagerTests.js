@@ -11,7 +11,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -35,23 +34,13 @@ describe('InactiveProjectManager', function() {
       markAsInactive: sinon.stub()
     }
     this.ProjectGetter = { getProject: sinon.stub() }
-    this.TrackChangesManager = { archiveProject: sinon.stub() }
     this.InactiveProjectManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        },
         '../Docstore/DocstoreManager': this.DocstoreManager,
         '../Project/ProjectUpdateHandler': this.ProjectUpdateHandler,
         '../Project/ProjectGetter': this.ProjectGetter,
-        '../TrackChanges/TrackChangesManager': this.TrackChangesManager,
         '../../models/Project': {}
       }
     })
@@ -120,7 +109,6 @@ describe('InactiveProjectManager', function() {
   describe('deactivateProject', function() {
     it('should call unarchiveProject and markAsInactive', function(done) {
       this.DocstoreManager.archiveProject.callsArgWith(1)
-      this.TrackChangesManager.archiveProject.callsArgWith(1)
 
       this.ProjectUpdateHandler.markAsInactive.callsArgWith(1)
 
@@ -130,7 +118,6 @@ describe('InactiveProjectManager', function() {
           this.DocstoreManager.archiveProject
             .calledWith(this.project_id)
             .should.equal(true)
-          // @TrackChangesManager.archiveProject.calledWith(@project_id).should.equal true
           this.ProjectUpdateHandler.markAsInactive
             .calledWith(this.project_id)
             .should.equal(true)
@@ -141,7 +128,6 @@ describe('InactiveProjectManager', function() {
 
     it('should not call markAsInactive if there was a problem archiving in docstore', function(done) {
       this.DocstoreManager.archiveProject.callsArgWith(1, 'errorrr')
-      this.TrackChangesManager.archiveProject.callsArgWith(1)
 
       this.ProjectUpdateHandler.markAsInactive.callsArgWith(1)
 

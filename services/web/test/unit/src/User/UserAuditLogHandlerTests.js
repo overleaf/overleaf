@@ -25,9 +25,6 @@ describe('UserAuditLogHandler', function() {
     }
     this.UserMock = sinon.mock(User)
     this.UserAuditLogHandler = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/User': { User }
       }

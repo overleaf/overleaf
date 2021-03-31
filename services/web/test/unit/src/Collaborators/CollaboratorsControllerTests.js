@@ -50,16 +50,8 @@ describe('CollaboratorsController', function() {
         transferOwnership: sinon.stub().resolves()
       }
     }
-    this.logger = {
-      err: sinon.stub(),
-      warn: sinon.stub(),
-      log: sinon.stub()
-    }
 
     this.CollaboratorsController = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         './CollaboratorsHandler': this.CollaboratorsHandler,
@@ -69,8 +61,7 @@ describe('CollaboratorsController', function() {
         '../../Features/Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Tags/TagsHandler': this.TagsHandler,
         '../Authentication/AuthenticationController': this
-          .AuthenticationController,
-        'logger-sharelatex': this.logger
+          .AuthenticationController
       }
     })
   })

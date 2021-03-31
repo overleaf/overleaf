@@ -21,16 +21,10 @@ describe('EmailHandler', function() {
       }
     }
     this.EmailHandler = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         './EmailBuilder': this.EmailBuilder,
         './EmailSender': this.EmailSender,
-        'settings-sharelatex': this.Settings,
-        'logger-sharelatex': {
-          log() {}
-        }
+        'settings-sharelatex': this.Settings
       }
     })
   })

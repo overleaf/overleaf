@@ -1,4 +1,3 @@
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
@@ -27,11 +26,6 @@ describe('UserUpdater', function() {
         getUser: sinon.stub()
       }
     }
-    this.logger = {
-      error: sinon.stub(),
-      log() {},
-      warn: sinon.stub()
-    }
     this.addAffiliation = sinon.stub().yields()
     this.removeAffiliation = sinon.stub().callsArgWith(2, null)
     this.refreshFeatures = sinon.stub().yields()
@@ -46,12 +40,8 @@ describe('UserUpdater', function() {
       }
     }
     this.UserUpdater = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Helpers/Mongo': { normalizeQuery },
-        'logger-sharelatex': this.logger,
         '../../infrastructure/mongodb': this.mongodb,
         '@overleaf/metrics': {
           timeAsyncMethod: sinon.stub()
@@ -134,7 +124,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         error => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           sinon.assert.calledOnce(this.UserUpdater.updateUser)
           sinon.assert.calledWithMatch(
             this.UserUpdater.updateUser,
@@ -165,7 +155,7 @@ describe('UserUpdater', function() {
         this.newEmail,
         this.auditLog,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.UserUpdater.addEmailAddress
             .calledWith(this.stubbedUser._id, this.newEmail, {}, this.auditLog)
             .should.equal(true)
@@ -192,7 +182,7 @@ describe('UserUpdater', function() {
         'foo',
         this.auditLog,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           done()
         }
       )
@@ -205,7 +195,7 @@ describe('UserUpdater', function() {
         this.newEmail,
         this.auditLog,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           done()
         }
       )
@@ -264,7 +254,7 @@ describe('UserUpdater', function() {
         affiliationOptions,
         { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.InstitutionsAPI.promises.addAffiliation.calledOnce.should.equal(
             true
           )
@@ -285,7 +275,7 @@ describe('UserUpdater', function() {
         {},
         { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
         err => {
-          should.exist(err)
+          expect(err).to.exist
           this.UserUpdater.promises.updateUser.called.should.equal(false)
           done()
         }
@@ -299,7 +289,7 @@ describe('UserUpdater', function() {
         {},
         { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
         err => {
-          should.exist(err)
+          expect(err).to.exist
           done()
         }
       )
@@ -367,7 +357,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.UserUpdater.updateUser
             .calledWith(
               { _id: this.stubbedUser._id, email: { $ne: this.newEmail } },
@@ -384,7 +374,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.removeAffiliation.calledOnce.should.equal(true)
           const { args } = this.removeAffiliation.lastCall
           args[0].should.equal(this.stubbedUser._id)
@@ -399,7 +389,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           sinon.assert.calledWith(this.refreshFeatures, this.stubbedUser._id)
           done()
         }
@@ -415,7 +405,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           done()
         }
       )
@@ -428,7 +418,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           done()
         }
       )
@@ -440,7 +430,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           this.UserUpdater.updateUser.called.should.equal(false)
           done()
         }
@@ -449,7 +439,7 @@ describe('UserUpdater', function() {
 
     it('validates email', function(done) {
       this.UserUpdater.removeEmailAddress(this.stubbedUser._id, 'baz', err => {
-        should.exist(err)
+        expect(err).to.exist
         done()
       })
     })
@@ -481,7 +471,7 @@ describe('UserUpdater', function() {
         false,
         this.auditLog,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.UserUpdater.promises.updateUser
             .calledWith(
               { _id: this.stubbedUser._id, 'emails.email': this.newEmail },
@@ -502,7 +492,7 @@ describe('UserUpdater', function() {
         false,
         this.auditLog,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.NewsletterManager.promises.changeEmail
             .calledWith(this.stubbedUser, this.newEmail)
             .should.equal(true)
@@ -523,7 +513,7 @@ describe('UserUpdater', function() {
         false,
         this.auditLog,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           done()
         }
       )
@@ -538,7 +528,7 @@ describe('UserUpdater', function() {
         false,
         this.auditLog,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           done()
         }
       )
@@ -551,7 +541,7 @@ describe('UserUpdater', function() {
         false,
         this.auditLog,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           done()
         }
       )
@@ -725,7 +715,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.stubbedUserEmail,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.UserUpdater.promises.updateUser
             .calledWith(
               {
@@ -752,7 +742,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           this.InstitutionsAPI.promises.addAffiliation.calledOnce.should.equal(
             true
           )
@@ -776,7 +766,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           done()
         }
       )
@@ -789,7 +779,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           done()
         }
       )
@@ -797,7 +787,7 @@ describe('UserUpdater', function() {
 
     it('validates email', function(done) {
       this.UserUpdater.confirmEmail(this.stubbedUser._id, '@', err => {
-        should.exist(err)
+        expect(err).to.exist
         done()
       })
     })
@@ -808,7 +798,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.exist(err)
+          expect(err).to.exist
           this.UserUpdater.promises.updateUser.called.should.equal(false)
           done()
         }
@@ -820,7 +810,7 @@ describe('UserUpdater', function() {
         this.stubbedUser._id,
         this.newEmail,
         err => {
-          should.not.exist(err)
+          expect(err).not.to.exist
           sinon.assert.calledWith(
             this.FeaturesUpdater.promises.refreshFeatures,
             this.stubbedUser._id

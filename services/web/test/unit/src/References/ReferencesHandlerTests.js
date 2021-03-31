@@ -13,10 +13,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
-const { expect } = require('chai')
+const { assert, expect } = require('chai')
 const sinon = require('sinon')
-const { assert } = require('chai')
 const modulePath = '../../../../app/src/Features/References/ReferencesHandler'
 
 describe('ReferencesHandler', function() {
@@ -48,15 +46,7 @@ describe('ReferencesHandler', function() {
     }
     this.docIds = ['aaa', 'ccc']
     this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        },
         'settings-sharelatex': (this.settings = {
           apis: {
             references: { url: 'http://some.url/references' },

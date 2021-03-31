@@ -1,6 +1,5 @@
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const sinon = require('sinon')
-const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const OError = require('@overleaf/o-error')
@@ -54,22 +53,13 @@ describe('FileStoreHandler', function() {
         }
       }
     }
-    this.logger = {
-      log: sinon.stub(),
-      warn: sinon.stub(),
-      err: sinon.stub()
-    }
     this.FileHashManager = {
       computeHash: sinon.stub().callsArgWith(1, null, this.hashValue)
     }
     this.handler = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': this.settings,
         request: this.request,
-        'logger-sharelatex': this.logger,
         './FileHashManager': this.FileHashManager,
         // FIXME: need to stub File object here
         '../../models/File': {

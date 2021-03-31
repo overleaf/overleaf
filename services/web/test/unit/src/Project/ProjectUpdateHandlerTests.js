@@ -13,7 +13,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai').should()
 const modulePath =
   '../../../../app/src/Features/Project/ProjectUpdateHandler.js'
 const SandboxedModule = require('sandboxed-module')
@@ -29,12 +28,8 @@ describe('ProjectUpdateHandler', function() {
     this.ProjectModel = Project = class Project {}
     this.ProjectModel.updateOne = sinon.stub().callsArg(3)
     return (this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        '../../models/Project': { Project: this.ProjectModel },
-        'logger-sharelatex': { log: sinon.stub() }
+        '../../models/Project': { Project: this.ProjectModel }
       }
     }))
   })

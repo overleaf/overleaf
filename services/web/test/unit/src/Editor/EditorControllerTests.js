@@ -13,7 +13,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const { expect } = require('chai')
 
 const modulePath = require('path').join(
@@ -47,9 +46,6 @@ describe('EditorController', function() {
     this.callback = sinon.stub()
 
     return (this.EditorController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
         '../Project/ProjectOptionsHandler': (this.ProjectOptionsHandler = {
@@ -70,11 +66,7 @@ describe('EditorController', function() {
         './EditorRealTimeController': (this.EditorRealTimeController = {
           emitToRoom: sinon.stub()
         }),
-        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          err: sinon.stub()
-        })
+        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() })
       }
     }))
   })

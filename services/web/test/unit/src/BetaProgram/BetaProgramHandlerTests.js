@@ -18,13 +18,10 @@ describe('BetaProgramHandler', function() {
       save: sinon.stub().callsArgWith(0, null)
     }
     this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        '@overleaf/metrics': (this.logger = {
+        '@overleaf/metrics': {
           inc: sinon.stub()
-        }),
+        },
         '../User/UserUpdater': (this.UserUpdater = {
           promises: {
             updateUser: sinon.stub().resolves()

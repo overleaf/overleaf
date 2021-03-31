@@ -30,12 +30,8 @@ describe('AuthorizationMiddleware', function() {
     }
     this.AuthorizationManager = {}
     this.AuthorizationMiddleware = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         './AuthorizationManager': this.AuthorizationManager,
-        'logger-sharelatex': { log() {} },
         mongodb: {
           ObjectId: this.ObjectId
         },

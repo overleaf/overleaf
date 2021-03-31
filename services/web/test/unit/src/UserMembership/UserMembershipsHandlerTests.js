@@ -25,9 +25,6 @@ describe('UserMembershipsHandler', function() {
     this.Subscription = { updateMany: sinon.stub().yields(null) }
     this.Publisher = { updateMany: sinon.stub().yields(null) }
     return (this.UserMembershipsHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/Institution': {
           Institution: this.Institution

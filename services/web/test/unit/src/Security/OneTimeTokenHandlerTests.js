@@ -10,7 +10,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -29,14 +28,8 @@ describe('OneTimeTokenHandler', function() {
     this.stubbedToken = 'mock-token'
     this.callback = sinon.stub()
     return (this.OneTimeTokenHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
-          log() {}
-        },
         crypto: {
           randomBytes: () => this.stubbedToken
         },

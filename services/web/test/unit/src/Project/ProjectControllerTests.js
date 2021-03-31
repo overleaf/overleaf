@@ -66,7 +66,6 @@ describe('ProjectController', function() {
     this.EditorController = { renameProject: sinon.stub() }
     this.InactiveProjectManager = { reactivateProjectIfRequired: sinon.stub() }
     this.ProjectUpdateHandler = { markAsOpened: sinon.stub() }
-    this.ReferencesSearchHandler = { indexProjectReferences: sinon.stub() }
     this.ProjectGetter = {
       findAllUsersProjects: sinon.stub(),
       getProject: sinon.stub()
@@ -127,16 +126,9 @@ describe('ProjectController', function() {
     }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         '@overleaf/metrics': this.Metrics,
         './ProjectDeleter': this.ProjectDeleter,
         './ProjectDuplicator': this.ProjectDuplicator,
@@ -152,8 +144,6 @@ describe('ProjectController', function() {
         '../Authorization/AuthorizationManager': this.AuthorizationManager,
         '../InactiveData/InactiveProjectManager': this.InactiveProjectManager,
         './ProjectUpdateHandler': this.ProjectUpdateHandler,
-        '../ReferencesSearch/ReferencesSearchHandler': this
-          .ReferencesSearchHandler,
         './ProjectGetter': this.ProjectGetter,
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../Authentication/AuthenticationController': this

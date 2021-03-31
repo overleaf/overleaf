@@ -50,18 +50,9 @@ describe('PasswordResetController', function() {
       }
     }
     this.PasswordResetController = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': this.settings,
         './PasswordResetHandler': this.PasswordResetHandler,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err: sinon.stub(),
-          error() {}
-        },
         '../../infrastructure/RateLimiter': this.RateLimiter,
         '../Authentication/AuthenticationController': (this.AuthenticationController = {
           getLoggedInUserId: sinon.stub(),

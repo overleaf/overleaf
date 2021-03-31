@@ -12,10 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { assert } = require('chai')
-const { expect } = chai
+const { assert, expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Compile/CompileController.js'
 const SandboxedModule = require('sandboxed-module')
 const MockRequest = require('../helpers/MockRequest')
@@ -61,17 +58,10 @@ describe('CompileController', function() {
       isUserLoggedIn: sinon.stub().returns(true)
     }
     this.CompileController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': this.settings,
         request: (this.request = sinon.stub()),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub()
-        }),
         '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
         './CompileManager': this.CompileManager,
         '../User/UserGetter': this.UserGetter,

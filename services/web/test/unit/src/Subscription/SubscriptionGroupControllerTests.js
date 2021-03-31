@@ -11,7 +11,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
 const sinon = require('sinon')
 const { assert } = require('chai')
 const modulePath =
@@ -57,14 +56,8 @@ describe('SubscriptionGroupController', function() {
     }
 
     return (this.Controller = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './SubscriptionGroupHandler': this.GroupHandler,
-        'logger-sharelatex': {
-          log() {}
-        },
         './SubscriptionLocator': this.SubscriptionLocator,
         '../Authentication/AuthenticationController': this
           .AuthenticationController

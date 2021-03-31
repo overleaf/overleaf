@@ -77,7 +77,6 @@ describe('TpdsUpdateHandler', function() {
     }
 
     this.TpdsUpdateHandler = SandboxedModule.require(MODULE_PATH, {
-      globals: { console },
       requires: {
         '../Cooldown/CooldownManager': this.CooldownManager,
         '../Uploads/FileTypeManager': this.FileTypeManager,
@@ -88,10 +87,7 @@ describe('TpdsUpdateHandler', function() {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Project/ProjectHelper': this.ProjectHelper,
         '../Project/ProjectRootDocManager': this.RootDocManager,
-        './UpdateMerger': this.UpdateMerger,
-        'logger-sharelatex': {
-          debug() {}
-        }
+        './UpdateMerger': this.UpdateMerger
       }
     })
   })

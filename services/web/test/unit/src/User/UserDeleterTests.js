@@ -1,4 +1,4 @@
-const chai = require('chai')
+const { expect } = require('chai')
 const sinon = require('sinon')
 const tk = require('timekeeper')
 const moment = require('moment')
@@ -7,8 +7,6 @@ const Errors = require('../../../../app/src/Features/Errors/Errors')
 const ObjectId = require('mongoose').Types.ObjectId
 const { User } = require('../helpers/models/User')
 const { DeletedUser } = require('../helpers/models/DeletedUser')
-
-const expect = chai.expect
 
 const modulePath = '../../../../app/src/Features/User/UserDeleter.js'
 
@@ -97,15 +95,7 @@ describe('UserDeleter', function() {
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
         '../UserMembership/UserMembershipsHandler': this.UserMembershipsHandler,
         '../Project/ProjectDeleter': this.ProjectDeleter,
-        '../Institutions/InstitutionsAPI': this.InstitutionsApi,
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub(),
-          err: sinon.stub()
-        })
-      },
-      globals: {
-        console: console
+        '../Institutions/InstitutionsAPI': this.InstitutionsApi
       }
     })
   })

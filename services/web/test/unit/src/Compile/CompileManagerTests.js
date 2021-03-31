@@ -13,11 +13,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { assert, expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Compile/CompileManager.js'
-const { assert } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 
 describe('CompileManager', function() {
@@ -27,9 +24,6 @@ describe('CompileManager', function() {
     const { rateLimitGetStub } = this
     this.ratelimiter = { addCount: sinon.stub() }
     this.CompileManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': (this.settings = {
           redis: { web: { host: 'localhost', port: 42 } },
@@ -56,10 +50,6 @@ describe('CompileManager', function() {
             return Timer
           })()),
           inc: sinon.stub()
-        }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub()
         })
       }
     })

@@ -15,10 +15,8 @@ const { ObjectId } = require('mongodb')
 const Path = require('path')
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
-const chai = require('chai')
+const { expect } = require('chai')
 const sinon = require('sinon')
-
-const { expect } = chai
 
 const modulePath = Path.join(
   __dirname,
@@ -34,9 +32,6 @@ describe('ProjectCollabratecDetailsHandler', function() {
     this.ProjectCollabratecDetailsHandler = SandboxedModule.require(
       modulePath,
       {
-        globals: {
-          console: console
-        },
         requires: {
           mongodb: { ObjectId },
           '../../models/Project': { Project: this.ProjectModel }

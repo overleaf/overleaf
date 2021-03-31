@@ -10,8 +10,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const should = chai.should()
 const { expect } = require('chai')
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
@@ -29,9 +27,6 @@ describe('UserMembershipViewModel', function() {
   beforeEach(function() {
     this.UserGetter = { getUser: sinon.stub() }
     this.UserMembershipViewModel = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         '../Helpers/Mongo': { isObjectIdInstance, normalizeQuery },
@@ -99,13 +94,13 @@ describe('UserMembershipViewModel', function() {
       return this.UserMembershipViewModel.buildAsync(
         ObjectId(),
         (error, viewModel) => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           assertNotCalled(this.UserMembershipViewModel.build)
           expect(viewModel._id).to.equal(this.user._id)
           expect(viewModel.email).to.equal(this.user.email)
           expect(viewModel.first_name).to.equal(this.user.first_name)
           expect(viewModel.invite).to.equal(false)
-          should.exist(viewModel.email)
+          expect(viewModel.email).to.exist
           return done()
         }
       )
@@ -117,10 +112,10 @@ describe('UserMembershipViewModel', function() {
       return this.UserMembershipViewModel.buildAsync(
         userId,
         (error, viewModel) => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           assertNotCalled(this.UserMembershipViewModel.build)
           expect(viewModel._id).to.equal(userId.toString())
-          should.not.exist(viewModel.email)
+          expect(viewModel.email).not.to.exist
           return done()
         }
       )

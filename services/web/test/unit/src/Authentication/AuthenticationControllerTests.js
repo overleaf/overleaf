@@ -1,6 +1,5 @@
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Authentication/AuthenticationController.js'
 const SandboxedModule = require('sandboxed-module')
@@ -19,9 +18,6 @@ describe('AuthenticationController', function() {
         .slice(2)
     }
     this.AuthenticationController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           addEntry: sinon.stub().yields(null)
@@ -49,12 +45,6 @@ describe('AuthenticationController', function() {
           identifyUser: sinon.stub()
         }),
         '../../infrastructure/SessionStoreManager': (this.SessionStoreManager = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub(),
-          error: sinon.stub(),
-          err: sinon.stub()
-        }),
         'settings-sharelatex': (this.Settings = {
           siteUrl: 'http://www.foo.bar',
           httpAuthUsers: this.httpAuthUsers

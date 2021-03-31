@@ -12,9 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Uploads/ProjectUploadController.js'
 const SandboxedModule = require('sandboxed-module')
@@ -44,19 +42,11 @@ describe('ProjectUploadController', function() {
     }
 
     return (this.ProjectUploadController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         multer: sinon.stub(),
         'settings-sharelatex': { path: {} },
         './ProjectUploadManager': (this.ProjectUploadManager = {}),
         './FileSystemImportManager': (this.FileSystemImportManager = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          err() {}
-        }),
         '@overleaf/metrics': this.metrics,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,

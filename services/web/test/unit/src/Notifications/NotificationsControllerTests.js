@@ -13,7 +13,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
-require('chai').should()
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -46,15 +45,8 @@ describe('NotificationsController', function() {
       getLoggedInUserId: sinon.stub().returns(this.req.session.user._id)
     }
     return (this.controller = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './NotificationsHandler': this.handler,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         '../Authentication/AuthenticationController': this
           .AuthenticationController
       }

@@ -12,7 +12,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
-require('chai').should()
 const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = require('path').join(
@@ -27,19 +26,12 @@ describe('RestoreManager', function() {
   beforeEach(function() {
     tk.freeze(Date.now()) // freeze the time for these tests
     this.RestoreManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': {},
         '../../infrastructure/FileWriter': (this.FileWriter = {}),
         '../Uploads/FileSystemImportManager': (this.FileSystemImportManager = {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
-        '../Editor/EditorController': (this.EditorController = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          err: sinon.stub()
-        })
+        '../Editor/EditorController': (this.EditorController = {})
       }
     })
     this.user_id = 'mock-user-id'

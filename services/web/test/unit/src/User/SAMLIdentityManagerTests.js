@@ -1,7 +1,6 @@
 const { ObjectId } = require('mongodb')
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const modulePath = '../../../../app/src/Features/User/SAMLIdentityManager.js'
@@ -42,19 +41,11 @@ describe('SAMLIdentityManager', function() {
         removeEntitlement: sinon.stub().resolves()
       }
     }
-    this.logger = {
-      error: sinon.stub(),
-      warn: sinon.stub()
-    }
     this.SAMLIdentityManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Email/EmailHandler': (this.EmailHandler = {
           sendEmail: sinon.stub().yields()
         }),
-        '../Errors/Errors': this.Errors,
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
           promises: {
             redundantPersonalSubscription: sinon
@@ -101,8 +92,7 @@ describe('SAMLIdentityManager', function() {
             updateUser: sinon.stub().resolves()
           }
         }),
-        '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
-        'logger-sharelatex': this.logger
+        '../Institutions/InstitutionsAPI': this.InstitutionsAPI
       }
     })
   })

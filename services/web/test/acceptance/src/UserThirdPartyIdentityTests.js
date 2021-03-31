@@ -14,9 +14,7 @@ const Errors = require('../../../app/src/Features/Errors/Errors')
 const Settings = require('settings-sharelatex')
 const User = require('./helpers/User')
 const ThirdPartyIdentityManager = require('../../../app/src/Features/User/ThirdPartyIdentityManager')
-const chai = require('chai')
-
-const { expect } = chai
+const { expect } = require('chai')
 
 describe('ThirdPartyIdentityManager', function() {
   beforeEach(function(done) {

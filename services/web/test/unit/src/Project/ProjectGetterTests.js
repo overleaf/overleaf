@@ -1,6 +1,5 @@
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Project/ProjectGetter.js'
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
@@ -43,7 +42,6 @@ describe('ProjectGetter', function() {
       lockKey: sinon.stub().returnsArg(0)
     }
     this.ProjectGetter = SandboxedModule.require(modulePath, {
-      globals: { console },
       requires: {
         '../../infrastructure/mongodb': { db: this.db, ObjectId },
         '@overleaf/metrics': {
@@ -58,11 +56,7 @@ describe('ProjectGetter', function() {
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../../infrastructure/LockManager': this.LockManager,
         './ProjectEntityMongoUpdateHandler': this
-          .ProjectEntityMongoUpdateHandler,
-        'logger-sharelatex': {
-          err() {},
-          log() {}
-        }
+          .ProjectEntityMongoUpdateHandler
       }
     })
   })

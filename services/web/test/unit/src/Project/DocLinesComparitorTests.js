@@ -12,21 +12,12 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../../app/src/Features/Project/DocLinesComparitor.js'
 const SandboxedModule = require('sandboxed-module')
 
 describe('doc lines comparitor', function() {
   beforeEach(function() {
-    return (this.comparitor = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
-      requires: {
-        'logger-sharelatex': { log() {} }
-      }
-    }))
+    return (this.comparitor = SandboxedModule.require(modulePath, {}))
   })
 
   it('should return true when the lines are the same', function() {

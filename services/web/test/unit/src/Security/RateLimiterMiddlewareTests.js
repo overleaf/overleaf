@@ -13,7 +13,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Security/RateLimiterMiddleware'
@@ -33,13 +32,9 @@ describe('RateLimiterMiddleware', function() {
       }
     }
     this.RateLimiterMiddleware = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': (this.settings = {}),
         '../../infrastructure/RateLimiter': (this.RateLimiter = {}),
-        'logger-sharelatex': (this.logger = { warn: sinon.stub() }),
         './LoginRateLimiter': {},
         '../Authentication/AuthenticationController': this
           .AuthenticationController

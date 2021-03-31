@@ -9,17 +9,10 @@ describe('FeaturesUpdater', function() {
     this.user_id = ObjectId().toString()
 
     this.FeaturesUpdater = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './UserFeaturesUpdater': (this.UserFeaturesUpdater = {}),
         './SubscriptionLocator': (this.SubscriptionLocator = {}),
         './PlansLocator': (this.PlansLocator = {}),
-        'logger-sharelatex': {
-          log() {},
-          warn() {}
-        },
         'settings-sharelatex': (this.Settings = {}),
         '../Referal/ReferalFeatures': (this.ReferalFeatures = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),

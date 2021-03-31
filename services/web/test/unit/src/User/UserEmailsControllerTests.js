@@ -1,8 +1,7 @@
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
 const assertNotCalled = sinon.assert.notCalled
-const chai = require('chai')
-const { assert, expect } = chai
+const { assert, expect } = require('chai')
 const modulePath = '../../../../app/src/Features/User/UserEmailsController.js'
 const SandboxedModule = require('sandboxed-module')
 const MockRequest = require('../helpers/MockRequest')
@@ -56,9 +55,6 @@ describe('UserEmailsController', function() {
     }
     this.HttpErrorHandler = { conflict: sinon.stub() }
     this.UserEmailsController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
@@ -78,12 +74,7 @@ describe('UserEmailsController', function() {
           }
         }),
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
-        '../Errors/HttpErrorHandler': this.HttpErrorHandler,
-        'logger-sharelatex': (this.logger = {
-          log() {},
-          warn: sinon.stub(),
-          err() {}
-        })
+        '../Errors/HttpErrorHandler': this.HttpErrorHandler
       }
     })
   })

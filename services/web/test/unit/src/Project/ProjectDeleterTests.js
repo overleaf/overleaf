@@ -1,8 +1,7 @@
 const modulePath = '../../../../app/src/Features/Project/ProjectDeleter'
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const tk = require('timekeeper')
 const moment = require('moment')
 const { Project } = require('../helpers/models/Project')
@@ -93,12 +92,6 @@ describe('ProjectDeleter', function() {
       }
     }
 
-    this.logger = {
-      err: sinon.stub(),
-      log: sinon.stub(),
-      warn: sinon.stub()
-    }
-
     this.ProjectDetailsHandler = {
       promises: {
         generateUniqueName: sinon.stub().resolves(this.project.name)
@@ -150,11 +143,7 @@ describe('ProjectDeleter', function() {
         '../Docstore/DocstoreManager': this.DocstoreManager,
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../../infrastructure/mongodb': { db: this.db, ObjectId },
-        '../History/HistoryManager': this.HistoryManager,
-        'logger-sharelatex': this.logger
-      },
-      globals: {
-        console: console
+        '../History/HistoryManager': this.HistoryManager
       }
     })
   })

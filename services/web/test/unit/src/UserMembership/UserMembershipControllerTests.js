@@ -13,10 +13,7 @@
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
 const assertNotCalled = sinon.assert.notCalled
-const chai = require('chai')
-const should = chai.should()
-const { assert } = chai
-const { expect } = require('chai')
+const { assert, expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipController.js'
 const SandboxedModule = require('sandboxed-module')
@@ -71,17 +68,10 @@ describe('UserMembershipController', function() {
     return (this.UserMembershipController = SandboxedModule.require(
       modulePath,
       {
-        globals: {
-          console: console
-        },
         requires: {
           '../Authentication/AuthenticationController': this
             .AuthenticationController,
-          './UserMembershipHandler': this.UserMembershipHandler,
-          'logger-sharelatex': {
-            log() {},
-            err() {}
-          }
+          './UserMembershipHandler': this.UserMembershipHandler
         }
       }
     ))

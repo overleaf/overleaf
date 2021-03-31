@@ -60,9 +60,6 @@ describe('OwnershipTransferHandler', function() {
       }
     }
     this.handler = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../../models/Project': {
@@ -72,12 +69,7 @@ describe('OwnershipTransferHandler', function() {
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Project/ProjectAuditLogHandler': this.ProjectAuditLogHandler,
         '../Email/EmailHandler': this.EmailHandler,
-        './CollaboratorsHandler': this.CollaboratorsHandler,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        }
+        './CollaboratorsHandler': this.CollaboratorsHandler
       }
     })
   })

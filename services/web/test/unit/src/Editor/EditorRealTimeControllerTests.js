@@ -12,7 +12,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Editor/EditorRealTimeController'
@@ -23,9 +22,6 @@ describe('EditorRealTimeController', function() {
     this.rclient = { publish: sinon.stub() }
     this.Metrics = { summary: sinon.stub() }
     this.EditorRealTimeController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../infrastructure/RedisWrapper': {
           client: () => this.rclient

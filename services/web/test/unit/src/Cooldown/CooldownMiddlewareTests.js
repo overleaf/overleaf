@@ -11,7 +11,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const { expect } = require('chai')
 const modulePath = require('path').join(
   __dirname,
@@ -22,12 +21,8 @@ describe('CooldownMiddleware', function() {
   beforeEach(function() {
     this.CooldownManager = { isProjectOnCooldown: sinon.stub() }
     return (this.CooldownMiddleware = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        './CooldownManager': this.CooldownManager,
-        'logger-sharelatex': { log: sinon.stub() }
+        './CooldownManager': this.CooldownManager
       }
     }))
   })

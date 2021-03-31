@@ -13,7 +13,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
 const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/UserFeaturesUpdater'
@@ -23,15 +22,9 @@ describe('UserFeaturesUpdater', function() {
   beforeEach(function() {
     this.User = { updateOne: sinon.stub().callsArgWith(2) }
     return (this.UserFeaturesUpdater = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/User': {
           User: this.User
-        },
-        'logger-sharelatex': {
-          log() {}
         }
       }
     }))

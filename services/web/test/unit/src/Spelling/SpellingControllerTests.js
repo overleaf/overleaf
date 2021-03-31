@@ -1,5 +1,4 @@
 const SandboxedModule = require('sandboxed-module')
-require('chai').should()
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -29,11 +28,6 @@ describe('SpellingController', function() {
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
         request: this.request,
-        'logger-sharelatex': {
-          warn() {},
-          error() {},
-          info() {}
-        },
         'settings-sharelatex': {
           languages: [
             { name: 'English', code: 'en' },

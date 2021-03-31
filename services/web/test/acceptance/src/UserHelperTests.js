@@ -1,12 +1,7 @@
 const AuthenticationManager = require('../../../app/src/Features/Authentication/AuthenticationManager')
 const UserHelper = require('./helpers/UserHelper')
-const chai = require('chai')
-const chaiAsPromised = require('chai-as-promised')
 const Features = require('../../../app/src/infrastructure/Features')
-
-const expect = chai.expect
-chai.should()
-chai.use(chaiAsPromised)
+const { expect } = require('chai')
 
 describe('UserHelper', function() {
   // Disable all tests unless the public-registration feature is enabled

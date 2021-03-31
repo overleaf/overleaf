@@ -1,5 +1,4 @@
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const sinon = require('sinon')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const SandboxedModule = require('sandboxed-module')
@@ -82,13 +81,6 @@ describe('ProjectEntityUpdateHandler', function() {
       resyncProjectHistory: sinon.stub(),
       deleteDoc: sinon.stub().yields()
     }
-    this.logger = {
-      info: sinon.stub(),
-      log: sinon.stub(),
-      warn: sinon.stub(),
-      error: sinon.stub(),
-      err() {}
-    }
     this.fs = {
       unlink: sinon.stub().yields()
     }
@@ -152,12 +144,8 @@ describe('ProjectEntityUpdateHandler', function() {
       emitToRoom: sinon.stub()
     }
     this.ProjectEntityUpdateHandler = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': { validRootDocExtensions: ['tex'] },
-        'logger-sharelatex': this.logger,
         fs: this.fs,
         '../../models/Doc': { Doc: this.DocModel },
         '../Docstore/DocstoreManager': this.DocstoreManager,

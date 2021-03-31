@@ -10,9 +10,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const { expect } = chai
-const should = chai.should()
+const { expect } = require('chai')
 
 const modulePath = '../../../../app/src/Features/Project/ProjectEditorHandler'
 const SandboxedModule = require('sandboxed-module')
@@ -122,27 +120,27 @@ describe('ProjectEditorHandler', function() {
       })
 
       it('should include the id', function() {
-        should.exist(this.result._id)
+        expect(this.result._id).to.exist
         return this.result._id.should.equal('project-id')
       })
 
       it('should include the name', function() {
-        should.exist(this.result.name)
+        expect(this.result.name).to.exist
         return this.result.name.should.equal('Project Name')
       })
 
       it('should include the root doc id', function() {
-        should.exist(this.result.rootDoc_id)
+        expect(this.result.rootDoc_id).to.exist
         return this.result.rootDoc_id.should.equal('file-id')
       })
 
       it('should include the public access level', function() {
-        should.exist(this.result.publicAccesLevel)
+        expect(this.result.publicAccesLevel).to.exist
         return this.result.publicAccesLevel.should.equal('private')
       })
 
       it('should include the owner', function() {
-        should.exist(this.result.owner)
+        expect(this.result.owner).to.exist
         this.result.owner._id.should.equal('owner-id')
         this.result.owner.email.should.equal('owner@sharelatex.com')
         this.result.owner.first_name.should.equal('Owner')
@@ -151,7 +149,7 @@ describe('ProjectEditorHandler', function() {
       })
 
       it('should include the deletedDocs', function() {
-        should.exist(this.result.deletedDocs)
+        expect(this.result.deletedDocs).to.exist
         this.result.deletedDocs.should.deep.equal([
           {
             // omit deletedAt field
@@ -162,8 +160,8 @@ describe('ProjectEditorHandler', function() {
       })
 
       it('invites should not include the token', function() {
-        should.not.exist(this.result.invites[0].token)
-        should.not.exist(this.result.invites[1].token)
+        expect(this.result.invites[0].token).not.to.exist
+        expect(this.result.invites[1].token).not.to.exist
       })
 
       it('should gather readOnly_refs and collaberators_refs into a list of members', function() {
@@ -178,7 +176,7 @@ describe('ProjectEditorHandler', function() {
 
         this.result.members.length.should.equal(2)
 
-        should.exist(findMember('read-only-id'))
+        expect(findMember('read-only-id')).to.exist
         findMember('read-only-id').privileges.should.equal('readOnly')
         findMember('read-only-id').first_name.should.equal('Read')
         findMember('read-only-id').last_name.should.equal('Only')
@@ -186,7 +184,7 @@ describe('ProjectEditorHandler', function() {
           'read-only@sharelatex.com'
         )
 
-        should.exist(findMember('read-write-id'))
+        expect(findMember('read-write-id')).to.exist
         findMember('read-write-id').privileges.should.equal('readAndWrite')
         findMember('read-write-id').first_name.should.equal('Read')
         findMember('read-write-id').last_name.should.equal('Write')
@@ -218,9 +216,8 @@ describe('ProjectEditorHandler', function() {
         this.result.rootFolder[0].folders[0].fileRefs[0].created.should.equal(
           this.created
         )
-        return should.not.exist(
-          this.result.rootFolder[0].folders[0].fileRefs[0].size
-        )
+        return expect(this.result.rootFolder[0].folders[0].fileRefs[0].size).not
+          .to.exist
       })
 
       it('should include docs in the project but not the lines', function() {
@@ -228,13 +225,12 @@ describe('ProjectEditorHandler', function() {
         this.result.rootFolder[0].folders[0].docs[0].name.should.equal(
           'main.tex'
         )
-        return should.not.exist(
-          this.result.rootFolder[0].folders[0].docs[0].lines
-        )
+        return expect(this.result.rootFolder[0].folders[0].docs[0].lines).not.to
+          .exist
       })
 
       it('should include invites', function() {
-        should.exist(this.result.invites)
+        expect(this.result.invites).to.exist
         return this.result.invites.should.deep.equal(this.invites)
       })
     })

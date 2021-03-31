@@ -12,10 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const { assert } = chai
-const should = chai.should()
-const { expect } = chai
+const { assert, expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Compile/ClsiCookieManager.js'
 const SandboxedModule = require('sandboxed-module')
 const realRequst = require('request')
@@ -56,18 +53,9 @@ describe('ClsiCookieManager', function() {
         client: () => this.redis
       }),
       'settings-sharelatex': this.settings,
-      request: this.request,
-
-      'logger-sharelatex': (this.logger = {
-        log: sinon.stub(),
-        error: sinon.stub(),
-        warn: sinon.stub()
-      })
+      request: this.request
     }
     return (this.ClsiCookieManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: this.requires
     })())
   })

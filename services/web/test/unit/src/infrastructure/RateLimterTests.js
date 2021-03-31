@@ -11,11 +11,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
 const modulePath = '../../../../app/src/infrastructure/RateLimiter.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -46,10 +43,6 @@ describe('RateLimiter', function() {
 
     this.requires = {
       'settings-sharelatex': this.settings,
-      'logger-sharelatex': (this.logger = {
-        log: sinon.stub(),
-        err: sinon.stub()
-      }),
       '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
       './RedisWrapper': this.RedisWrapper
     }
@@ -69,9 +62,6 @@ describe('RateLimiter', function() {
         return sinon.stub().callsArgWith(1, null, 0, 22)
       }
       return (this.limiter = SandboxedModule.require(modulePath, {
-        globals: {
-          console: console
-        },
         requires: this.requires
       }))
     })

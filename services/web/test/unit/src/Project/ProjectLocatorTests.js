@@ -52,19 +52,11 @@ describe('ProjectLocator', function() {
       isArchivedOrTrashed: sinon.stub()
     }
     this.locator = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/Project': { Project },
         '../../models/User': { User: this.User },
         './ProjectGetter': this.ProjectGetter,
-        './ProjectHelper': this.ProjectHelper,
-        'logger-sharelatex': {
-          log() {},
-          err() {},
-          warn() {}
-        }
+        './ProjectHelper': this.ProjectHelper
       }
     })
   })

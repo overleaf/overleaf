@@ -24,18 +24,12 @@ describe('AnalyticsController', function() {
     }
 
     this.controller = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './AnalyticsManager': this.AnalyticsManager,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
         '../../infrastructure/Features': this.Features,
-        'logger-sharelatex': {
-          log() {}
-        },
         '../../infrastructure/GeoIpLookup': (this.GeoIpLookup = {
           getDetails: sinon.stub()
         })

@@ -13,26 +13,16 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Compile/ClsiStateManager.js'
 const SandboxedModule = require('sandboxed-module')
 
 describe('ClsiStateManager', function() {
   beforeEach(function() {
     this.ClsiStateManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': (this.settings = {}),
-        '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          warn: sinon.stub()
-        })
+        '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {})
       }
     })
     this.project = 'project'

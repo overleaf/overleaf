@@ -10,10 +10,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const { assert } = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { assert, expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Project/SafePath'
 const SandboxedModule = require('sandboxed-module')

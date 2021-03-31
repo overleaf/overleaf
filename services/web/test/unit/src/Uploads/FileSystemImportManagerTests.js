@@ -23,17 +23,9 @@ describe('FileSystemImportManager', function() {
         addFolder: sinon.stub().resolves({ _id: this.newFolderId })
       }
     }
-    this.logger = {
-      log() {},
-      err() {}
-    }
     this.FileSystemImportManager = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
-        '../Editor/EditorController': this.EditorController,
-        'logger-sharelatex': this.logger
+        '../Editor/EditorController': this.EditorController
       }
     })
   })

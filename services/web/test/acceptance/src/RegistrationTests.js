@@ -2,8 +2,7 @@
     handle-callback-err
 */
 
-const { expect } = require('chai')
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const async = require('async')
 const User = require('./helpers/User')
 const redis = require('./helpers/redis')

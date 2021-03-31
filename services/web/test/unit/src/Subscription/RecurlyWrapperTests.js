@@ -12,7 +12,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
 const { expect } = require('chai')
 const sinon = require('sinon')
 const crypto = require('crypto')
@@ -145,17 +144,8 @@ describe('RecurlyWrapper', function() {
     return (this.RecurlyWrapper = RecurlyWrapper = SandboxedModule.require(
       modulePath,
       {
-        globals: {
-          console: console
-        },
         requires: {
           'settings-sharelatex': this.settings,
-          'logger-sharelatex': {
-            err: sinon.stub(),
-            error: sinon.stub(),
-            warn: sinon.stub(),
-            log: sinon.stub()
-          },
           request: sinon.stub(),
           './Errors': SubscriptionErrors
         }
@@ -292,7 +282,7 @@ describe('RecurlyWrapper', function() {
     })
 
     it('should return the updated account', function() {
-      should.exist(this.recurlyAccount)
+      expect(this.recurlyAccount).to.exist
       this.recurlyAccount.account_code.should.equal('104')
     })
   })
@@ -339,7 +329,7 @@ describe('RecurlyWrapper', function() {
     })
 
     it('should return the updated subscription', function() {
-      should.exist(this.recurlySubscription)
+      expect(this.recurlySubscription).to.exist
       return this.recurlySubscription.plan.plan_code.should.equal('gold')
     })
   })

@@ -1,7 +1,4 @@
-const chai = require('chai')
-const expect = chai.expect
-const chaiAsPromised = require('chai-as-promised')
-chai.use(chaiAsPromised)
+const { expect } = require('chai')
 
 const { User } = require('../../../app/src/models/User')
 const { Subscription } = require('../../../app/src/models/Subscription')

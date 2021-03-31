@@ -12,12 +12,9 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
-const chai = require('chai')
+const { expect } = require('chai')
 const sinon = require('sinon')
 const ProjectHelper = require('../../../../app/src/Features/Project/ProjectHelper')
-
-chai.should()
-const { expect } = chai
 
 const modulePath = '../../../../app/src/Features/Templates/TemplatesController'
 
@@ -25,9 +22,6 @@ describe('TemplatesController', function() {
   beforeEach(function() {
     this.user_id = 'user-id'
     this.TemplatesController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Project/ProjectHelper': ProjectHelper,
         '../Authentication/AuthenticationController': (this.AuthenticationController = {
@@ -35,11 +29,7 @@ describe('TemplatesController', function() {
         }),
         './TemplatesManager': (this.TemplatesManager = {
           createProjectFromV1Template: sinon.stub()
-        }),
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
+        })
       }
     })
     this.next = sinon.stub()

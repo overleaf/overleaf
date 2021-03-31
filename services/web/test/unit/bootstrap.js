@@ -1,5 +1,10 @@
+const Path = require('path')
 const chai = require('chai')
 const sinon = require('sinon')
+
+/*
+ * Chai configuration
+ */
 
 // add chai.should()
 chai.should()
@@ -17,52 +22,108 @@ chai.config.truncateThreshold = 0
 // add support for mongoose in sinon
 require('sinon-mongoose')
 
-afterEach(function() {
-  sinon.restore()
-})
+/*
+ * Global stubs
+ */
+const globalStubsSandbox = sinon.createSandbox()
+const globalStubs = {
+  logger: {
+    debug: globalStubsSandbox.stub(),
+    info: globalStubsSandbox.stub(),
+    log: globalStubsSandbox.stub(),
+    warn: globalStubsSandbox.stub(),
+    err: globalStubsSandbox.stub(),
+    error: globalStubsSandbox.stub(),
+    fatal: globalStubsSandbox.stub()
+  }
+}
+
+/*
+ * Sandboxed module configuration
+ */
 
 const SandboxedModule = require('sandboxed-module')
-const PromisesUtils = require('../../app/src/util/promises')
-const Errors = require('../../app/src/Features/Errors/Errors')
-const GLOBAL_REQUIRE_CACHE_FOR_SANDBOXED_MODULES = {
-  // cache p-limit for all expressify/promisifyAll users
-  '../../util/promises': PromisesUtils,
-  '../../../../app/src/util/promises': PromisesUtils,
-
-  // Errors are widely used and instance checks need the exact same prototypes
-  '../Errors/Errors': Errors,
-  '../../../../app/src/Features/Errors/Errors': Errors,
-  '../../../../../app/src/Features/Errors/Errors': Errors
-}
-const LIBRARIES = [
-  '@overleaf/o-error',
-  'async',
-  'lodash',
-  'moment',
-  'underscore',
-  'xml2js',
-  'json2csv',
-  'sanitize-html',
-  'marked'
-]
-LIBRARIES.forEach(lib => {
-  GLOBAL_REQUIRE_CACHE_FOR_SANDBOXED_MODULES[lib] = require(lib)
-})
-
 SandboxedModule.configure({
-  requires: GLOBAL_REQUIRE_CACHE_FOR_SANDBOXED_MODULES
+  requires: getSandboxedModuleRequires(),
+  globals: { Buffer, Promise, console, process },
+  sourceTransformers: {
+    coffee(source) {
+      if (this.filename.endsWith('.coffee')) {
+        // Coffeescript mucks with Error.prepareStackTrace, which, in turn,
+        // conflicts with OError. This is a hacky way to prevent Coffeescript
+        // from interfering.
+        //
+        // See https://github.com/jashkenas/coffeescript/blob/07f644c39223e016aceedd2cd71b5941579b5659/src/coffeescript.coffee#L368
+        const originalPrepareStackTrace = Error.prepareStackTrace
+        const compiled = require('coffeescript').compile(source)
+        Error.prepareStackTrace = originalPrepareStackTrace
+        return compiled
+      }
+      return source
+    }
+  }
 })
+
+function getSandboxedModuleRequires() {
+  const requires = {
+    'logger-sharelatex': globalStubs.logger
+  }
+
+  const internalModules = [
+    '../../app/src/util/promises',
+    '../../app/src/Features/Errors/Errors',
+    '../../app/src/Features/Helpers/Mongo'
+  ]
+  const externalLibs = [
+    'async',
+    'json2csv',
+    'lodash',
+    'marked',
+    'moment',
+    '@overleaf/o-error',
+    'sanitize-html',
+    'sshpk',
+    'underscore',
+    'xml2js'
+  ]
+  for (const modulePath of internalModules) {
+    requires[Path.resolve(__dirname, modulePath)] = require(modulePath)
+  }
+  for (const lib of externalLibs) {
+    requires[lib] = require(lib)
+  }
+  return requires
+}
+
+/*
+ * Mocha hooks
+ */
 
 // sandboxed-module somehow registers every fake module it creates in this
 // module's children array, which uses quite a big amount of memory. We'll take
 // a copy of the module children array and restore it after each test so that
 // the garbage collector has a chance to reclaim the fake modules.
 let initialModuleChildren
-before('record initial module children', function() {
-  initialModuleChildren = module.children.slice()
-})
 
-afterEach('restore module children', function() {
-  // Delete leaking sandboxed modules
-  module.children = initialModuleChildren.slice()
-})
+exports.mochaHooks = {
+  beforeAll() {
+    // Record initial module children
+    initialModuleChildren = module.children.slice()
+  },
+
+  beforeEach() {
+    // Install logger stub
+    this.logger = globalStubs.logger
+  },
+
+  afterEach() {
+    // Delete leaking sandboxed modules
+    module.children = initialModuleChildren.slice()
+
+    // Reset global stubs
+    globalStubsSandbox.reset()
+
+    // Restore other stubs
+    sinon.restore()
+  }
+}

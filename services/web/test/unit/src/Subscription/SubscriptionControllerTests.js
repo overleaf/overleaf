@@ -13,7 +13,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const should = require('chai').should()
 const { expect } = require('chai')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
@@ -96,9 +95,6 @@ describe('SubscriptionController', function() {
       getUser: sinon.stub().callsArgWith(2, null, this.user)
     }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
@@ -107,11 +103,6 @@ describe('SubscriptionController', function() {
         './SubscriptionViewModelBuilder': this.SubscriptionViewModelBuilder,
         './LimitationsManager': this.LimitationsManager,
         '../../infrastructure/GeoIpLookup': this.GeoIpLookup,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          error() {}
-        },
         'settings-sharelatex': this.settings,
         '../User/UserGetter': this.UserGetter,
         './RecurlyWrapper': (this.RecurlyWrapper = {

@@ -477,8 +477,10 @@ export default FileTreeManager = class FileTreeManager {
         return -(aDepth - bDepth) // Deeper path == folder first
       } else if (a.path < b.path) {
         return -1
-      } else {
+      } else if (a.path > b.path) {
         return 1
+      } else {
+        return 0
       }
     })
   }

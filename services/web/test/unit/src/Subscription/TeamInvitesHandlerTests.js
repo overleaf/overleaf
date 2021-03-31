@@ -83,12 +83,8 @@ describe('TeamInvitesHandler', function() {
     this.Subscription.findOne.yields(null, this.subscription)
 
     this.TeamInvitesHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
-        'logger-sharelatex': { log() {} },
         crypto: this.crypto,
         'settings-sharelatex': { siteUrl: 'http://example.com' },
         '../../models/TeamInvite': { TeamInvite: (this.TeamInvite = {}) },

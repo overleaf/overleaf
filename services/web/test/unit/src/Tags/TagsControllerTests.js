@@ -13,7 +13,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
-require('chai').should()
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -39,15 +38,8 @@ describe('TagsController', function() {
       }
     }
     this.controller = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './TagsHandler': this.handler,
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         '../Authentication/AuthenticationController': this
           .AuthenticationController
       }

@@ -9,14 +9,13 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const async = require('async')
 const request = require('./helpers/request')
 
 const assertRedirect = (method, path, expectedStatusCode, destination, cb) =>
   request[method](path, (error, response) => {
-    should.not.exist(error)
+    expect(error).not.to.exist
     response.statusCode.should.equal(expectedStatusCode)
     response.headers.location.should.equal(destination)
     return cb()
@@ -85,7 +84,7 @@ describe('RedirectUrls', function() {
     return request.get(
       { url: '/redirect/one', headers: { 'x-skip-redirects': 'true' } },
       (error, response) => {
-        should.not.exist(error)
+        expect(error).not.to.exist
         response.statusCode.should.equal(404)
         return done()
       }

@@ -19,9 +19,6 @@ describe('UserActivateController', function() {
     this.UserGetter = { getUser: sinon.stub() }
     this.ErrorController = { notFound: sinon.stub() }
     this.UserActivateController = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../../../app/src/Features/User/UserGetter': this.UserGetter,
         '../../../../app/src/Features/Errors/ErrorController': this

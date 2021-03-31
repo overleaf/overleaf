@@ -1,5 +1,4 @@
 const SandboxedModule = require('sandboxed-module')
-require('chai').should()
 const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionHandler'
@@ -75,9 +74,6 @@ describe('SubscriptionHandler', function() {
     this.AnalyticsManager = { recordEvent: sinon.stub() }
 
     this.SubscriptionHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './RecurlyWrapper': this.RecurlyWrapper,
         'settings-sharelatex': this.Settings,
@@ -85,10 +81,8 @@ describe('SubscriptionHandler', function() {
           User: this.User
         },
         './SubscriptionUpdater': this.SubscriptionUpdater,
-        'logger-sharelatex': { log() {} },
         './LimitationsManager': this.LimitationsManager,
         '../Email/EmailHandler': this.EmailHandler,
-        '../Dropbox/DropboxHandler': this.DropboxHandler,
         '../Analytics/AnalyticsManager': this.AnalyticsManager
       }
     })

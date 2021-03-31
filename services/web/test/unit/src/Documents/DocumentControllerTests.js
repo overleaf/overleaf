@@ -11,9 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Documents/DocumentController.js'
 const SandboxedModule = require('sandboxed-module')
@@ -25,15 +23,7 @@ const Errors = require('../../../../app/src/Features/Errors/Errors')
 describe('DocumentController', function() {
   beforeEach(function() {
     this.DocumentController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        },
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../Project/ProjectLocator': (this.ProjectLocator = {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),

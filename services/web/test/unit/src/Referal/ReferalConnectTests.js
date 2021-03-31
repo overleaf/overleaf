@@ -1,5 +1,4 @@
 const SandboxedModule = require('sandboxed-module')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Referal/ReferalConnect.js'
@@ -7,17 +6,7 @@ const modulePath = require('path').join(
 
 describe('Referal connect middle wear', function() {
   beforeEach(function() {
-    this.connect = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
-      requires: {
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
-      }
-    })
+    this.connect = SandboxedModule.require(modulePath, {})
   })
 
   it('should take a referal query string and put it on the session if it exists', function(done) {

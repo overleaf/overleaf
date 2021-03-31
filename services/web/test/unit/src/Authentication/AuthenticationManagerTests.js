@@ -1,11 +1,9 @@
 const sinon = require('sinon')
-const chai = require('chai')
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
 const AuthenticationErrors = require('../../../../app/src/Features/Authentication/AuthenticationErrors')
 
-chai.should()
-const { expect } = chai
 const modulePath =
   '../../../../app/src/Features/Authentication/AuthenticationManager.js'
 
@@ -13,9 +11,6 @@ describe('AuthenticationManager', function() {
   beforeEach(function() {
     this.settings = { security: { bcryptRounds: 4 } }
     this.AuthenticationManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/User': {
           User: (this.User = {})

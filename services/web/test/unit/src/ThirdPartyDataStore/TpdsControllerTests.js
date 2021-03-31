@@ -1,6 +1,5 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const modulePath = require('path').join(
   __dirname,
@@ -19,9 +18,6 @@ describe('TpdsController', function() {
       }
     }
     this.TpdsController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './TpdsUpdateHandler': this.TpdsUpdateHandler,
         './UpdateMerger': (this.UpdateMerger = {}),
@@ -31,12 +27,6 @@ describe('TpdsController', function() {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         './TpdsQueueManager': this.TpdsQueueManager,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          info() {},
-          err() {}
-        },
         '@overleaf/metrics': {
           inc() {}
         }

@@ -1,6 +1,5 @@
 const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
-require('chai').should()
 const sinon = require('sinon')
 const { Tag } = require('../helpers/models/Tag')
 const { ObjectId } = require('mongodb')

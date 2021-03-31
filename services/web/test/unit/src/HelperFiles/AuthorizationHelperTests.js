@@ -1,14 +1,10 @@
-const chai = require('chai')
 const SandboxedModule = require('sandboxed-module')
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Helpers/AuthorizationHelper'
 
 describe('AuthorizationHelper', function() {
   beforeEach(function() {
     this.AuthorizationHelper = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../models/User': {
           UserSchema: {

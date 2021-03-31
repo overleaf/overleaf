@@ -11,7 +11,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
 const sinon = require('sinon')
 const { assert } = require('chai')
 const modulePath =
@@ -23,14 +22,7 @@ describe('ReferencesController', function() {
   beforeEach(function() {
     this.projectId = '2222'
     this.controller = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        },
         'settings-sharelatex': (this.settings = {
           apis: { web: { url: 'http://some.url' } }
         }),

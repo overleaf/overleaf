@@ -12,7 +12,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
 const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionLocator'
@@ -31,9 +30,6 @@ describe('Subscription Locator Tests', function() {
       find: sinon.stub().yields()
     }
     return (this.SubscriptionLocator = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         './GroupPlansData': {},
         '../../models/Subscription': {
@@ -41,9 +37,6 @@ describe('Subscription Locator Tests', function() {
         },
         '../../models/DeletedSubscription': {
           DeletedSubscription: this.DeletedSubscription
-        },
-        'logger-sharelatex': {
-          log() {}
         }
       }
     }))

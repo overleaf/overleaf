@@ -12,9 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/User/UserSessionsManager.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -50,23 +48,13 @@ describe('UserSessionsManager', function() {
       client: () => this.rclient,
       sessionSetKey: user => `UserSessions:{${user._id}}`
     }
-    this.logger = {
-      err: sinon.stub(),
-      error: sinon.stub(),
-      warn: sinon.stub(),
-      log: sinon.stub()
-    }
     this.settings = {
       redis: {
         web: {}
       }
     }
     return (this.UserSessionsManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': this.logger,
         'settings-sharelatex': this.settings,
         './UserSessionsRedis': this.UserSessionsRedis
       }

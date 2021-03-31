@@ -1,12 +1,9 @@
 const SandboxedModule = require('sandboxed-module')
-const chai = require('chai')
 const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionUpdater'
 const { assert, expect } = require('chai')
 const { ObjectId } = require('mongodb')
-
-chai.should()
 
 describe('SubscriptionUpdater', function() {
   beforeEach(function() {
@@ -90,9 +87,6 @@ describe('SubscriptionUpdater', function() {
       findOneAndUpdate: sinon.stub().yields()
     }
     this.SubscriptionUpdater = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         '../../models/Subscription': {
@@ -102,10 +96,6 @@ describe('SubscriptionUpdater', function() {
         './SubscriptionLocator': this.SubscriptionLocator,
         '../User/UserGetter': this.UserGetter,
         './PlansLocator': this.PlansLocator,
-        'logger-sharelatex': {
-          log() {},
-          warn() {}
-        },
         'settings-sharelatex': this.Settings,
         '../../infrastructure/mongodb': { db: {}, ObjectId },
         './FeaturesUpdater': this.FeaturesUpdater,

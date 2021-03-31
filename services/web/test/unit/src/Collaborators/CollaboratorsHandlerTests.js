@@ -16,11 +16,6 @@ const sleep = promisify(setTimeout)
 
 describe('CollaboratorsHandler', function() {
   beforeEach(function() {
-    this.logger = {
-      log: sinon.stub(),
-      warn: sinon.stub(),
-      err: sinon.stub()
-    }
     this.userId = ObjectId()
     this.addingUserId = ObjectId()
     this.project = {
@@ -66,11 +61,7 @@ describe('CollaboratorsHandler', function() {
       }
     }
     this.CollaboratorsHandler = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': this.logger,
         '../User/UserGetter': this.UserGetter,
         '../Contacts/ContactManager': this.ContactManager,
         '../../models/Project': { Project },

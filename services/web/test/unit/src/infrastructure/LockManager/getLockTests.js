@@ -14,8 +14,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const path = require('path')
 const modulePath = path.join(
   __dirname,
@@ -26,13 +24,7 @@ const SandboxedModule = require('sandboxed-module')
 describe('LockManager - getting the lock', function() {
   beforeEach(function() {
     this.LockManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': {
-          log() {}
-        },
         './RedisWrapper': {
           client() {
             return { auth() {} }

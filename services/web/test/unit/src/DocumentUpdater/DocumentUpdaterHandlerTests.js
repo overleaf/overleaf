@@ -32,9 +32,6 @@ describe('DocumentUpdaterHandler', function() {
 
     this.callback = sinon.stub()
     this.handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         request: {
           defaults: () => {
@@ -42,7 +39,6 @@ describe('DocumentUpdaterHandler', function() {
           }
         },
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': { log() {}, error() {}, warn() {} },
         '../Project/ProjectEntityHandler': this.projectEntityHandler,
         '../../models/Project': {
           Project: (this.Project = {})

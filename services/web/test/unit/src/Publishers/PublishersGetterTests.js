@@ -12,7 +12,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-require('chai').should()
 const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = require('path').join(
@@ -29,9 +28,6 @@ describe('PublishersGetter', function() {
     }
 
     this.PublishersGetter = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../User/UserGetter': this.UserGetter,
         '../UserMembership/UserMembershipsHandler': (this.UserMembershipsHandler = {
@@ -47,11 +43,7 @@ describe('PublishersGetter', function() {
               primaryKey: 'slug'
             }
           }
-        }),
-        'logger-sharelatex': {
-          log() {},
-          err() {}
-        }
+        })
       }
     })
 

@@ -30,11 +30,6 @@ describe('SpellingHandler', function() {
     SpellingHandler = SandboxedModule.require(modulePath, {
       requires: {
         request: request,
-        'logger-sharelatex': {
-          warn() {},
-          error() {},
-          info() {}
-        },
         'settings-sharelatex': {
           apis: { spelling: { host: SPELLING_HOST, url: SPELLING_URL } }
         }

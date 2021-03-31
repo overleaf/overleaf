@@ -20,18 +20,12 @@ describe('EmailBuilder', function() {
       siteUrl: 'https://www.overleaf.com'
     }
     this.EmailBuilder = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         './EmailMessageHelper': EmailMessageHelper,
         './Bodies/cta-email': ctaEmailBody,
         './Bodies/NoCTAEmailBody': NoCTAEmailBody,
         './Layouts/BaseWithHeaderEmailLayout': BaseWithHeaderEmailLayout,
-        'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
-          log() {}
-        }
+        'settings-sharelatex': this.settings
       }
     })
   })

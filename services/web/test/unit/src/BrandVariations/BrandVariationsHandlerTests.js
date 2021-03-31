@@ -11,12 +11,11 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let { expect } = require('chai')
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
-;({ expect } = require('chai'))
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/BrandVariations/BrandVariationsHandler'
@@ -31,19 +30,10 @@ describe('BrandVariationsHandler', function() {
         }
       }
     }
-    this.logger = {
-      warn() {},
-      err() {},
-      log() {}
-    }
     this.V1Api = { request: sinon.stub() }
     this.BrandVariationsHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': this.logger,
         '../V1/V1Api': this.V1Api
       }
     })

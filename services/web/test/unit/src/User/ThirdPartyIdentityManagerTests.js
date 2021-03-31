@@ -1,6 +1,5 @@
 const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
+const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const modulePath =
   '../../../../app/src/Features/User/ThirdPartyIdentityManager.js'
@@ -16,18 +15,12 @@ describe('ThirdPartyIdentityManager', function() {
     this.externalData = {}
     this.auditLog = { initiatorId: this.userId, ipAddress: '0:0:0:0' }
     this.ThirdPartyIdentityManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         '../../../../app/src/Features/User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           addEntry: sinon.stub().yields()
         }),
         '../../../../app/src/Features/Email/EmailHandler': (this.EmailHandler = {
           sendEmail: sinon.stub().yields()
-        }),
-        'logger-sharelatex': (this.logger = {
-          error: sinon.stub()
         }),
         '../../../../app/src/models/User': {
           User: (this.User = {

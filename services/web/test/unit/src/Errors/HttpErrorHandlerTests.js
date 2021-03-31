@@ -1,5 +1,4 @@
 const { expect } = require('chai')
-const sinon = require('sinon')
 const MockResponse = require('../helpers/MockResponse')
 const MockRequest = require('../helpers/MockRequest')
 const SandboxedModule = require('sandboxed-module')
@@ -10,19 +9,12 @@ describe('HttpErrorHandler', function() {
     this.req = new MockRequest()
     this.res = new MockResponse()
 
-    this.logger = {
-      warn() {},
-      error() {}
-    }
-
     this.HttpErrorHandler = SandboxedModule.require(modulePath, {
-      globals: { console },
       requires: {
         'settings-sharelatex': {
           appName: 'Overleaf',
           statusPageUrl: 'https://status.overlaf.com'
-        },
-        'logger-sharelatex': this.logger
+        }
       }
     })
   })
@@ -342,7 +334,6 @@ describe('HttpErrorHandler', function() {
 
       it('should send the error to the logger', function() {
         const error = new Error('message')
-        this.logger.error = sinon.stub()
         this.HttpErrorHandler.legacyInternal(
           this.req,
           this.res,

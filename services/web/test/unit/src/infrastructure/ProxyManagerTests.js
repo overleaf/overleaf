@@ -12,9 +12,7 @@
  */
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/infrastructure/ProxyManager'
 const SandboxedModule = require('sandboxed-module')
 const MockRequest = require('../helpers/MockRequest')
@@ -28,14 +26,8 @@ describe('ProxyManager', function() {
       pipe() {}
     })
     this.proxyManager = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': this.settings,
-        'logger-sharelatex': {
-          log() {}
-        },
         request: this.request
       }
     })

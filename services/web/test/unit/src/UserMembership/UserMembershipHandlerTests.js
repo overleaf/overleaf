@@ -11,8 +11,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-const should = chai.should()
 const { expect } = require('chai')
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
@@ -68,9 +66,6 @@ describe('UserMembershipHandler', function() {
       create: sinon.stub().yields(null, this.publisher)
     }
     return (this.UserMembershipHandler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         mongodb: { ObjectId },
         './UserMembershipViewModel': this.UserMembershipViewModel,
@@ -83,10 +78,6 @@ describe('UserMembershipHandler', function() {
         },
         '../../models/Publisher': {
           Publisher: this.Publisher
-        },
-        'logger-sharelatex': {
-          log() {},
-          err() {}
         }
       }
     }))
@@ -98,7 +89,7 @@ describe('UserMembershipHandler', function() {
         this.fakeEntityId,
         EntityConfigs.publisher,
         (error, subscription) => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           const expectedQuery = { slug: this.fakeEntityId }
           assertCalledWith(this.Publisher.findOne, expectedQuery)
           expect(subscription).to.equal(this.publisher)
@@ -167,7 +158,7 @@ describe('UserMembershipHandler', function() {
         this.fakeEntityId,
         EntityConfigs.publisher,
         (error, publisher) => {
-          should.not.exist(error)
+          expect(error).not.to.exist
           assertCalledWith(this.Publisher.create, { slug: this.fakeEntityId })
           return done()
         }

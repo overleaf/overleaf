@@ -9,8 +9,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const chai = require('chai')
-chai.should()
 const sinon = require('sinon')
 
 const Errors = require('../../../../app/src/Features/Errors/Errors')
@@ -26,17 +24,9 @@ describe('HistoryController', function() {
       getLoggedInUserId: sinon.stub().returns(this.user_id)
     }
     this.HistoryController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         request: (this.request = sinon.stub()),
         'settings-sharelatex': (this.settings = {}),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub(),
-          error: sinon.stub()
-        }),
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         './HistoryManager': (this.HistoryManager = {}),

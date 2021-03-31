@@ -12,7 +12,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
-require('chai').should()
 const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = require('path').join(
@@ -31,17 +30,8 @@ describe('LaunchpadController', function() {
 
     this.User = {}
     this.LaunchpadController = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
         'settings-sharelatex': (this.Settings = {}),
-        'logger-sharelatex': (this.Logger = {
-          log() {},
-          warn() {},
-          err() {},
-          error() {}
-        }),
         '@overleaf/metrics': (this.Metrics = {}),
         '../../../../app/src/Features/User/UserRegistrationHandler': (this.UserRegistrationHandler = {}),
         '../../../../app/src/Features/Email/EmailHandler': (this.EmailHandler = {}),

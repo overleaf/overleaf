@@ -13,9 +13,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-const should = require('chai').should()
 const sinon = require('sinon')
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionGroupHandler'
 
@@ -87,13 +86,7 @@ describe('SubscriptionGroupHandler', function() {
     }
 
     return (this.Handler = SandboxedModule.require(modulePath, {
-      globals: {
-        console: console
-      },
       requires: {
-        'logger-sharelatex': {
-          log() {}
-        },
         '../User/UserCreator': this.UserCreator,
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './SubscriptionLocator': this.SubscriptionLocator,
@@ -107,12 +100,7 @@ describe('SubscriptionGroupHandler', function() {
         'settings-sharelatex': this.settings,
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
         '../UserMembership/UserMembershipViewModel': this
-          .UserMembershipViewModel,
-        'logger-sharelatex': {
-          err() {},
-          log() {},
-          warn() {}
-        }
+          .UserMembershipViewModel
       }
     }))
   })
@@ -242,7 +230,7 @@ describe('SubscriptionGroupHandler', function() {
         return this.Handler.getTotalConfirmedUsersInGroup(
           'fake-id',
           (err, count) => {
-            should.not.exist(count)
+            expect(count).not.to.exist
             return done()
           }
         )

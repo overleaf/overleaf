@@ -66,9 +66,6 @@ describe('ProjectDetailsHandler', function() {
       defaultFeatures: 'default-features'
     }
     this.handler = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console
-      },
       requires: {
         './ProjectHelper': ProjectHelper,
         './ProjectGetter': this.ProjectGetter,
@@ -77,11 +74,6 @@ describe('ProjectDetailsHandler', function() {
         },
         '../User/UserGetter': this.UserGetter,
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
-        'logger-sharelatex': {
-          log() {},
-          warn() {},
-          err() {}
-        },
         '../TokenGenerator/TokenGenerator': this.TokenGenerator,
         'settings-sharelatex': this.settings
       }
