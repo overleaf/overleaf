@@ -47,13 +47,27 @@ describe('OutlineParser', function() {
       \\section{Label after \\label{foo}}
       \\section{Label \\label{foo} between}
       \\section{TT \\texttt{Bar}}
-    `
+      \\section{plain title}
+      `
       const outline = matchOutline(content)
       expect(outline).to.deep.equal([
         { line: 2, title: ' Label before', level: 40 },
         { line: 3, title: 'Label after ', level: 40 },
         { line: 4, title: 'Label  between', level: 40 },
-        { line: 5, title: 'TT Bar', level: 40 }
+        { line: 5, title: 'TT Bar', level: 40 },
+        { line: 6, title: 'plain title', level: 40 }
+      ])
+    })
+
+    it('removes spurious commands after title definition', function() {
+      const content = `
+      \\section{Plain title} more text \\href{link}{link}
+      \\section{\\label{foo} Label before} more text \\href{link}{link}
+      `
+      const outline = matchOutline(content)
+      expect(outline).to.deep.equal([
+        { line: 2, title: 'Plain title', level: 40 },
+        { line: 3, title: ' Label before', level: 40 }
       ])
     })
 

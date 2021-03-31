@@ -50,6 +50,7 @@ function matchOutline(content) {
 }
 
 const DISPLAY_TITLE_REGEX = new RegExp('([^\\\\]*)\\\\([^{]+){([^}]+)}(.*)')
+const END_OF_TITLE_REGEX = new RegExp('^([^{}]*?({[^{}]*?}[^{}]*?)*)}')
 /*
  * Attempt to improve the display of the outline title for titles with commands.
  * Either skip the command (for labels) or display the command's content instead
@@ -61,9 +62,17 @@ const DISPLAY_TITLE_REGEX = new RegExp('([^\\\\]*)\\\\([^{]+){([^}]+)}(.*)')
  */
 function matchDisplayTitle(title) {
   const closingBracketPosition = title.indexOf('}')
+
   if (closingBracketPosition < 0) {
     // simple title (no commands)
     return title
+  }
+
+  // if there is anything outside the title def on the line, remove it
+  // before proceeding
+  const titleOnlyMatch = title.match(END_OF_TITLE_REGEX)
+  if (titleOnlyMatch) {
+    title = titleOnlyMatch[1]
   }
 
   const titleMatch = title.match(DISPLAY_TITLE_REGEX)
