@@ -162,39 +162,38 @@ block content
 			h3 {{ title }}
 		.modal-body(ng-bind-html="message")
 
-	script#data(type="application/json").
-		!{StringHelper.stringifyJsonForScript({ userSettings: userSettings, user: user, trackChangesState: trackChangesState, useV2History: useV2History, enabledLinkedFileTypes: settings.enabledLinkedFileTypes, brandVariation: brandVariation })}
+block append meta
+	meta(name="ol-useV2History" data-type="boolean" content=useV2History)
+	meta(name="ol-project_id" content=project_id)
+	meta(name="ol-userSettings" data-type="json" content=userSettings)
+	meta(name="ol-user" data-type="json" content=user)
+	meta(name="ol-anonymous" data-type="boolean" content=anonymous)
+	meta(name="ol-brandVariation" data-type="json" content=brandVariation)
+	meta(name="ol-anonymousAccessToken" content=anonymousAccessToken)
+	meta(name="ol-isTokenMember" data-type="boolean" content=isTokenMember)
+	meta(name="ol-isRestrictedTokenMember" data-type="boolean" content=isRestrictedTokenMember)
+	meta(name="ol-maxDocLength" data-type="json" content=maxDocLength)
+	meta(name="ol-trackChangesState" data-type="json" content=trackChangesState)
+	meta(name="ol-wikiEnabled" data-type="boolean" content=!!(settings.apis.wiki && settings.apis.wiki.url))
+	meta(name="ol-gitBridgePublicBaseUrl" content=gitBridgePublicBaseUrl)
+	//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
+	meta(name="ol-aceBasePath" content="/js/" + lib('ace'))
+	//- Set path for PDFjs CMaps
+	meta(name="ol-pdfCMapsPath" content="/js/cmaps/")
+	//- enable doc hash checking for all projects
+	//- used in public/js/libs/sharejs.js
+	meta(name="ol-useShareJsHash" data-type="boolean" content=true)
+	meta(name="ol-wsRetryHandshake" data-type="json" content=settings.wsRetryHandshake)
+	meta(name="ol-showReactFileTree" data-type="boolean" content=showReactFileTree)
+	meta(name="ol-showReactAddFilesModal" data-type="boolean" content=showReactAddFilesModal)
+	meta(name="ol-showNewLogsUI" data-type="boolean" content=showNewLogsUI)
+	meta(name="ol-logsUISubvariant" content=logsUISubvariant)
 
-	script(type="text/javascript", nonce=scriptNonce).
-		window.data = JSON.parse(document.querySelector("#data").text);
-		window.project_id = "!{project_id}";
-		window.userSettings = window.data.userSettings;
-		window.user = window.data.user;
-		window.enabledLinkedFiles = window.data.enabledLinkedFiles;
-		window.csrfToken = "!{csrfToken}";
-		window.anonymous = #{anonymous};
-		window.brandVariation = window.data.brandVariation;
-		window.anonymousAccessToken = "#{anonymousAccessToken}";
-		window.isTokenMember = #{!!isTokenMember};
-		window.isRestrictedTokenMember = #{!!isRestrictedTokenMember};
-		window.maxDocLength = #{maxDocLength};
-		window.trackChangesState = window.data.trackChangesState;
-		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
-		window.gitBridgePublicBaseUrl = '#{gitBridgePublicBaseUrl}'
-		//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
-		window.aceBasePath = "/js/#{lib('ace')}"
-		//- Set path for PDFjs CMaps
-		window.pdfCMapsPath = "/js/cmaps/"
-		//- enable doc hash checking for all projects
-		//- used in public/js/libs/sharejs.js
-		window.useShareJsHash = true
-		window.wsRetryHandshake = #{settings.wsRetryHandshake}
-		window.showReactFileTree = "!{showReactFileTree}" === 'true'
-		window.showReactAddFilesModal = "!{showReactAddFilesModal}" === 'true'
+	- var fileActionI18n = ['edited', 'renamed', 'created', 'deleted'].reduce((acc, i) => {acc[i] = translate('file_action_' + i); return acc}, {})
+	meta(name="ol-fileActionI18n" data-type="json" content=fileActionI18n)
 
 	if (settings.overleaf != null)
-		script(type="text/javascript", nonce=scriptNonce).
-			window.overallThemes = JSON.parse('!{StringHelper.stringifyJsonForScript(overallThemes)}');
+		meta(name="ol-overallThemes" data-type="json" content=overallThemes)
 
 block foot-scripts
 	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
