@@ -148,6 +148,12 @@ const settings = {
 
   statusCheckInterval: parseInt(process.env.STATUS_CHECK_INTERVAL || '0'),
 
+  // The deployment colour for this app (if any). Used for blue green deploys.
+  deploymentColour: process.env.DEPLOYMENT_COLOUR,
+  // Load balancer health checks will return 200 only when this file contains
+  // the deployment colour for this app.
+  deploymentFile: process.env.DEPLOYMENT_FILE,
+
   sentry: {
     dsn: process.env.SENTRY_DSN
   },
