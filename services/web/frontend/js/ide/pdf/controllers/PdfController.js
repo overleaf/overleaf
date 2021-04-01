@@ -711,7 +711,7 @@ App.controller('PdfController', function(
         warnings: $scope.pdf.logEntries.warnings.length,
         typesetting: $scope.pdf.logEntries.typesetting.length,
         newLogsUI: window.showNewLogsUI,
-        subvariant: window.logsUISubvariant || null
+        subvariant: window.logsUISubvariant
       }
       eventTracking.sendMBSampled(
         'compile-result',

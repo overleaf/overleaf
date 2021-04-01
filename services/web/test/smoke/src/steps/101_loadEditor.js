@@ -6,7 +6,7 @@ async function run({ assertHasStatusCode, request }) {
   assertHasStatusCode(response, 200)
 
   const PROJECT_ID_REGEX = new RegExp(
-    `<meta name="ol-project_id" content="${Settings.smokeTest.projectId}">`
+    `window.project_id = "${Settings.smokeTest.projectId}"`
   )
   if (!PROJECT_ID_REGEX.test(response.body)) {
     throw new Error('project page html does not have project_id')
