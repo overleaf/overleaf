@@ -131,4 +131,32 @@ describe('BackFillDeletedFiles', function() {
       expect(await getDeletedFiles(projectId5)).to.deep.equal([])
     })
   })
+
+  describe('fix partial inserts and cleanup', function() {
+    beforeEach('simulate one missing insert', async function() {
+      await setDeletedFiles(projectId1, [deletedFiles1[0]])
+    })
+    beforeEach('run script with cleanup flag', async function() {
+      await runScript(['--perform-cleanup'])
+    })
+    beforeEach('add case for one missing file', async function() {
+      await setDeletedFiles(projectId1, deletedFiles1)
+    })
+    beforeEach('add cases for no more files to insert', async function() {
+      await setDeletedFiles(projectId2, deletedFiles2)
+      await setDeletedFiles(projectId5, deletedFiles3)
+    })
+
+    beforeEach('fixing partial insert and cleanup', async function() {
+      await runScript(['--fix-partial-inserts', '--perform-cleanup'])
+    })
+
+    checkAreFilesBackFilled()
+
+    it('should cleanup the deletedFiles', async function() {
+      expect(await getDeletedFiles(projectId1)).to.deep.equal([])
+      expect(await getDeletedFiles(projectId2)).to.deep.equal([])
+      expect(await getDeletedFiles(projectId5)).to.deep.equal([])
+    })
+  })
 })

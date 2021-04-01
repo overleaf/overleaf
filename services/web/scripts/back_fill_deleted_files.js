@@ -5,7 +5,8 @@ const { promiseMapWithLimit, promisify } = require('../app/src/util/promises')
 const { db } = require('../app/src/infrastructure/mongodb')
 const sleep = promisify(setTimeout)
 
-const PERFORM_CLEANUP = process.argv.pop() === '--perform-cleanup'
+const PERFORM_CLEANUP = process.argv.includes('--perform-cleanup')
+const FIX_PARTIAL_INSERTS = process.argv.includes('--fix-partial-inserts')
 const LET_USER_DOUBLE_CHECK_INPUTS_FOR = parseInt(
   process.env.LET_USER_DOUBLE_CHECK_INPUTS_FOR || 10 * 1000,
   10
@@ -50,7 +51,12 @@ async function backFillFiles(project) {
   project.deletedFiles.forEach(file => {
     file.projectId = projectId
   })
-  await db.deletedFiles.insertMany(project.deletedFiles)
+
+  if (FIX_PARTIAL_INSERTS) {
+    await fixPartialInserts(project)
+  } else {
+    await db.deletedFiles.insertMany(project.deletedFiles)
+  }
 }
 
 function filterDuplicatesInPlace(project) {
@@ -61,6 +67,28 @@ function filterDuplicatesInPlace(project) {
     fileIds.add(id)
     return true
   })
+}
+
+async function fixPartialInserts(project) {
+  const seenFileIds = new Set(
+    (
+      await db.deletedFiles
+        .find(
+          { _id: { $in: project.deletedFiles.map(file => file._id) } },
+          { projection: { _id: 1 } }
+        )
+        .toArray()
+    ).map(file => file._id.toString())
+  )
+  project.deletedFiles = project.deletedFiles.filter(file => {
+    const id = file._id.toString()
+    if (seenFileIds.has(id)) return false
+    seenFileIds.add(id)
+    return true
+  })
+  if (project.deletedFiles.length > 0) {
+    await db.deletedFiles.insertMany(project.deletedFiles)
+  }
 }
 
 async function cleanupProject(project) {
