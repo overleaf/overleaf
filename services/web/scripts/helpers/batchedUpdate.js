@@ -13,11 +13,10 @@ async function getNextBatch(collection, query, maxId, projection) {
     query._id = { $gt: maxId }
   }
   const entries = await collection
-    .find(query)
+    .find(query, { readPreference: ReadPreference.SECONDARY })
     .project(projection)
     .sort({ _id: 1 })
     .limit(BATCH_SIZE)
-    .setReadPreference(ReadPreference.SECONDARY)
     .toArray()
   return entries
 }
