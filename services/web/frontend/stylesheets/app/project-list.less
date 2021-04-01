@@ -306,11 +306,6 @@ ul.folders-menu {
       }
     }
   }
-  > li.folders-menu-item-with-tooltip {
-    > a {
-      padding-right: 1.5 * @folders-menu-item-h-padding + @info-badge-size;
-    }
-  }
   > li > a.small {
     color: @gray;
   }
@@ -388,27 +383,6 @@ ul.folders-menu {
         display: block;
       }
     }
-  }
-}
-
-.folders-menu-tooltip-trigger {
-  display: none;
-  position: absolute;
-  top: 50%;
-  right: @folders-menu-item-h-padding;
-  width: @info-badge-size;
-  height: @info-badge-size;
-  margin-top: -(floor(@info-badge-size / 2));
-  line-height: @info-badge-size;
-  background-color: @info-badge-bg;
-  font-family: @font-family-serif;
-  color: #fff;
-  font-style: italic;
-  border-radius: ceil(@info-badge-size / 2);
-  text-align: center;
-  font-weight: 700;
-  @media (min-width: @screen-sm-min) {
-    display: block;
   }
 }
 

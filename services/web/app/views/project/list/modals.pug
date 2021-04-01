@@ -219,12 +219,20 @@ script(type='text/ng-template', id='archiveTrashLeaveOrDeleteProjectsModalTempla
 			ul
 				li(ng-repeat="project in projects | orderBy:'name'")
 					strong {{project.name}}
-			.project-action-alert.alert.alert-info(ng-if="action === 'archive'") 
-				.project-action-alert-msg #{translate("archived_projects_info_note")}
-				a(href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized" target="_blank").project-action-alert-btn.btn.btn-info.pull-right #{translate("find_out_more")}
-			.project-action-alert.alert.alert-info(ng-if="action === 'trash'") 
-				.project-action-alert-msg #{translate("trashed_projects_info_note")}
-				a(href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized" target="_blank").project-action-alert-btn.btn.btn-info.pull-right #{translate("find_out_more")}
+			div(ng-if="action === 'archive'")
+				p #{translate("archiving_projects_wont_affect_collaborators")}
+					| &nbsp;
+					a(
+						href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized"
+						target="_blank"
+					) #{translate("find_out_more_nt")}
+			div(ng-if="action === 'trash'")
+				p #{translate("trashing_projects_wont_affect_collaborators")}
+					| &nbsp;
+					a(
+						href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized"
+						target="_blank"
+					) #{translate("find_out_more_nt")}
 			.project-action-alert.alert.alert-warning(ng-if="action === 'leave' || action === 'delete'")
 				i.fa.fa-fw.fa-exclamation-triangle
 				.project-action-alert-msg #{translate("this_action_cannot_be_undone")}

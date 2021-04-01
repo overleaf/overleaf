@@ -58,24 +58,10 @@
 			a(href) #{translate("your_projects")}
 		li(ng-class="{active: (filter == 'shared')}", ng-click="filterProjects('shared')")
 			a(href) #{translate("shared_with_you")}
-		li.folders-menu-item-with-tooltip(ng-class="{active: (filter == 'archived')}", ng-click="filterProjects('archived')")
+		li(ng-class="{active: (filter == 'archived')}", ng-click="filterProjects('archived')")
 			a(href) #{settings.overleaf ? translate("archived_projects") : translate("deleted_projects")}
-			.folders-menu-tooltip-trigger(
-				href
-				tooltip=translate('archived_projects_info_note')
-				tooltip-placement="right"
-				tooltip-append-to-body="true"
-				stop-propagation="click"
-			) i
-		li.folders-menu-item-with-tooltip(ng-class="{active: (filter == 'trashed')}", ng-click="filterProjects('trashed')")
+		li(ng-class="{active: (filter == 'trashed')}", ng-click="filterProjects('trashed')")
 			a(href) #{translate("trashed_projects")}
-			.folders-menu-tooltip-trigger(
-				href
-				tooltip=translate('trashed_projects_info_note')
-				tooltip-placement="right"
-				tooltip-append-to-body="true"
-				stop-propagation="click"
-			) i
 		li.separator
 			h2 #{translate("tags_slash_folders")}
 		li.tag(ng-cloak)

@@ -119,6 +119,8 @@
   "about_to_trash_projects": "You are about to trash the following projects:",
   "archived_projects_info_note": "The Archive now works on a per-user basis. Projects that you decide to archive will only be archived for you, not your collaborators.",
   "trashed_projects_info_note": "Overleaf now has a Trash for projects you want to get rid of. Trashing a project won't affect your collaborators.",
+  "archiving_projects_wont_affect_collaborators": "Archiving projects won't affect your collaborators.",
+  "trashing_projects_wont_affect_collaborators": "Trashing projects won't affect your collaborators.",
   "register_intercept_sso": "You can link your __authProviderName__ account from the Account Settings page after logging in.",
   "continue_to": "Continue to __appName__",
   "project_ownership_transfer_confirmation_1": "Are you sure you want to make <0>__user__</0> the owner of <1>__project__</1>?",
