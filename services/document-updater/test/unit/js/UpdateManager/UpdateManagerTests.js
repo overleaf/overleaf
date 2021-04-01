@@ -12,8 +12,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../../app/js/UpdateManager.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -31,7 +29,6 @@ describe('UpdateManager', function () {
         './RealTimeRedisManager': (this.RealTimeRedisManager = {}),
         './ShareJsUpdateManager': (this.ShareJsUpdateManager = {}),
         './HistoryManager': (this.HistoryManager = {}),
-        'logger-sharelatex': (this.logger = { log: sinon.stub() }),
         './Metrics': (this.Metrics = {
           Timer: (Timer = (function () {
             Timer = class Timer {

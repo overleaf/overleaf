@@ -25,7 +25,6 @@ describe('LockManager - checking the lock', function () {
   const existsStub = sinon.stub()
 
   const mocks = {
-    'logger-sharelatex': { log() {} },
     '@overleaf/redis-wrapper': {
       createClient() {
         return {

@@ -11,7 +11,6 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-require('chai').should()
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/js/HistoryManager'
@@ -32,11 +31,6 @@ describe('HistoryManager', function () {
               url: 'http://trackchanges.example.com'
             }
           }
-        }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          error: sinon.stub(),
-          debug: sinon.stub()
         }),
         './DocumentManager': (this.DocumentManager = {}),
         './HistoryRedisManager': (this.HistoryRedisManager = {}),
