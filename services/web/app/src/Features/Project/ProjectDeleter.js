@@ -354,7 +354,8 @@ async function expireDeletedProject(projectId) {
         deletedProject.project._id,
         historyId
       ),
-      FilestoreHandler.promises.deleteProject(deletedProject.project._id)
+      FilestoreHandler.promises.deleteProject(deletedProject.project._id),
+      hardDeleteDeletedFiles(deletedProject.project._id)
     ])
 
     await DeletedProject.updateOne(
@@ -382,4 +383,23 @@ function filterDuplicateDeletedFilesInPlace(project) {
     fileIds.add(id)
     return true
   })
+}
+
+let deletedFilesProjectIdIndexExist
+async function doesDeletedFilesProjectIdIndexExist() {
+  if (typeof deletedFilesProjectIdIndexExist !== 'boolean') {
+    // Resolve this about once. No need for locking or retry handling.
+    deletedFilesProjectIdIndexExist = await db.deletedFiles.indexExists(
+      'projectId_1'
+    )
+  }
+  return deletedFilesProjectIdIndexExist
+}
+
+async function hardDeleteDeletedFiles(projectId) {
+  if (!(await doesDeletedFilesProjectIdIndexExist())) {
+    // Running the deletion command w/o index would kill mongo performance
+    return
+  }
+  return db.deletedFiles.deleteMany({ projectId })
 }
