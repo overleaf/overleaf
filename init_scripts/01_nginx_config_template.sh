@@ -28,4 +28,7 @@ if [ -f "${nginx_template_file}" ]; then
   envsubst '${NGINX_WORKER_PROCESSES} ${NGINX_WORKER_CONNECTIONS}' \
     < "${nginx_template_file}" \
     > "${nginx_config_file}"
+
+  echo "Nginx: reloading config"
+  service nginx reload
 fi
