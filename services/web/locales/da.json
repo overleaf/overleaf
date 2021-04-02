@@ -98,7 +98,6 @@
   "home": "Hjem",
   "this_action_cannot_be_undone": "Denne handling kan ikke fortrydes.",
   "dropbox_email_not_verified": "Vi har ikke kunnet hente opdateringer fra din Dropbox–konto. Dropbox rapporterer, at din emailadresse ikke er bekræftet. For at løse dette, må du bekræfte din emailadresse overfor Dropbox.",
-  "link_email_to_join": "Forbind din institutionelle email for at komme med i __protalTitle__ på __appName__",
   "token_access_success": "Adgang tildelt",
   "token_access_failure": "Kan ikke tildele adgang; kontakt projektejeren for hjælp",
   "trashed_projects": "Kassérede projekter",

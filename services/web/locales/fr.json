@@ -1,4 +1,12 @@
 {
+  "portal_add_affiliation_to_join": "Il semblerait que vous soyez déjà connecté à __appName__ ! Si vous avez une adresse courriel __portalTitle__, vous pouvez l’ajouter maintenant.",
+  "demonstrating_git_integration": "Démonstration de l’intégration Git",
+  "collaborate_online_and_offline": "Collaborez en ligne et hors ligne, avec votre propre organisation de travail",
+  "get_collaborative_benefits": "Bénéficiez des avantages de la collaboration sur __appName__, même si vous préférez travailler hors ligne",
+  "use_your_own_machine": "Utilisez votre propre machine, avec votre propre installation",
+  "store_your_work": "Stockez vos travaux sur votre propre infrastructure",
+  "beta_badge_tooltip": "Nous avons apporté quelques améliorations à __feature__. Nous espérons que vous les apprécierez ! Cliquez ici pour gérer votre participation au programme de bêta",
+  "github_git_folder_error": "Ce projet contient un répertoire .git à sa racine, ce qui indique qu’il s’agit déjà d’un dépôt Git. Le service de synchronisation GitHub d’Overleaf n’est pas en mesure de synchroniser les historiques Git. Veuillez supprimer le répertoire .git et réessayer.",
   "github_symlink_error": "Votre dépôt GitHub contient des liens symboliques qui ne sont pas encore supportés par Overleaf. Veuillez les retirer et réessayer.",
   "address_line_1": "Adresse",
   "address_line_2": "Adresse (ligne 2, optionnel)",
