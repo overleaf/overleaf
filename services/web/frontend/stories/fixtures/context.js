@@ -5,6 +5,9 @@ export function setupContext() {
   window.user = {
     id: 'fake_user'
   }
+  window.ExposedSettings = {
+    appName: 'Overleaf'
+  }
   let $scope = {}
   if (window._ide) {
     $scope = {
