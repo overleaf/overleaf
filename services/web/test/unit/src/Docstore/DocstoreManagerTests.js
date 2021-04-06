@@ -13,6 +13,7 @@ const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Docstore/DocstoreManager'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors.js')
+const tk = require('timekeeper')
 
 describe('DocstoreManager', function() {
   beforeEach(function() {
@@ -41,21 +42,31 @@ describe('DocstoreManager', function() {
 
   describe('deleteDoc', function() {
     describe('with a successful response code', function() {
+      // for assertions on the deletedAt timestamp, we need to freeze the clock.
+      before(function() {
+        tk.freeze(Date.now())
+      })
+      after(function() {
+        tk.reset()
+      })
+
       beforeEach(function() {
-        this.request.del = sinon
+        this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
         return this.DocstoreManager.deleteDoc(
           this.project_id,
           this.doc_id,
+          'wombat.tex',
           this.callback
         )
       })
 
       it('should delete the doc in the docstore api', function() {
-        return this.request.del
+        return this.request.patch
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
+            json: { deleted: true, deletedAt: new Date(), name: 'wombat.tex' },
             timeout: 30 * 1000
           })
           .should.equal(true)
@@ -68,12 +79,13 @@ describe('DocstoreManager', function() {
 
     describe('with a failed response code', function() {
       beforeEach(function() {
-        this.request.del = sinon
+        this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
         return this.DocstoreManager.deleteDoc(
           this.project_id,
           this.doc_id,
+          'main.tex',
           this.callback
         )
       })
@@ -96,12 +108,13 @@ describe('DocstoreManager', function() {
 
     describe('with a missing (404) response code', function() {
       beforeEach(function() {
-        this.request.del = sinon
+        this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 404 }, '')
         return this.DocstoreManager.deleteDoc(
           this.project_id,
           this.doc_id,
+          'main.tex',
           this.callback
         )
       })

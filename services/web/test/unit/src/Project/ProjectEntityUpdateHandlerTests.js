@@ -2180,10 +2180,9 @@ describe('ProjectEntityUpdateHandler', function() {
       })
 
       it('should delete the doc in the doc updater', function() {
-        this.DocumentUpdaterHandler.deleteDoc.calledWith(
-          projectId,
-          this.doc._id.toString()
-        )
+        this.DocumentUpdaterHandler.deleteDoc
+          .calledWith(projectId, this.doc._id.toString())
+          .should.equal(true)
       })
 
       it('should insert the doc into the deletedDocs array', function() {
@@ -2194,7 +2193,7 @@ describe('ProjectEntityUpdateHandler', function() {
 
       it('should delete the doc in the doc store', function() {
         this.DocstoreManager.deleteDoc
-          .calledWith(projectId, this.doc._id.toString())
+          .calledWith(projectId, this.doc._id.toString(), 'test.tex')
           .should.equal(true)
       })
 

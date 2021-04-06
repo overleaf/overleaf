@@ -10,12 +10,14 @@ const { Project } = require('../../../app/src/models/Project')
 const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')
 
 const User = require('./helpers/User')
+const MockDocStoreApiClass = require('./mocks/MockDocstoreApi')
 const MockDocUpdaterApiClass = require('./mocks/MockDocUpdaterApi')
 
-let MockDocUpdaterApi
+let MockDocStoreApi, MockDocUpdaterApi
 
 before(function() {
   MockDocUpdaterApi = MockDocUpdaterApiClass.instance()
+  MockDocStoreApi = MockDocStoreApiClass.instance()
 })
 
 describe('ProjectStructureChanges', function() {
@@ -1028,6 +1030,22 @@ describe('ProjectStructureChanges', function() {
           })
         })
       })
+    })
+
+    it('should pass the doc name to docstore', function(done) {
+      deleteItem(
+        owner,
+        this.exampleProjectId,
+        'doc',
+        this.exampleDocId,
+        error => {
+          if (error) return done(error)
+          expect(
+            MockDocStoreApi.getDeletedDocs(this.exampleProjectId)
+          ).to.deep.equal([{ _id: this.exampleDocId, name: 'new.tex' }])
+          done()
+        }
+      )
     })
 
     describe('when rootDoc_id matches doc being deleted', function() {
