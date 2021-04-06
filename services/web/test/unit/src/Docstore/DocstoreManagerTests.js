@@ -393,6 +393,72 @@ describe('DocstoreManager', function() {
     })
   })
 
+  describe('getAllDeletedDocs', function() {
+    describe('with a successful response code', function() {
+      beforeEach(function(done) {
+        this.callback.callsFake(done)
+        this.docs = [{ _id: 'mock-doc-id', name: 'foo.tex' }]
+        this.request.get = sinon
+          .stub()
+          .callsArgWith(1, null, { statusCode: 200 }, this.docs)
+        this.DocstoreManager.getAllDeletedDocs(this.project_id, this.callback)
+      })
+
+      it('should get all the project docs in the docstore api', function() {
+        this.request.get.should.have.been.calledWith({
+          url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc-deleted`,
+          timeout: 30 * 1000,
+          json: true
+        })
+      })
+
+      it('should call the callback with the docs', function() {
+        this.callback.should.have.been.calledWith(null, this.docs)
+      })
+    })
+
+    describe('with an error', function() {
+      beforeEach(function(done) {
+        this.callback.callsFake(() => done())
+        this.request.get = sinon
+          .stub()
+          .callsArgWith(1, new Error('connect failed'))
+        this.DocstoreManager.getAllDocs(this.project_id, this.callback)
+      })
+
+      it('should call the callback with an error', function() {
+        this.callback.should.have.been.calledWith(
+          sinon.match
+            .instanceOf(Error)
+            .and(sinon.match.has('message', 'connect failed'))
+        )
+      })
+    })
+
+    describe('with a failed response code', function() {
+      beforeEach(function(done) {
+        this.callback.callsFake(() => done())
+        this.request.get = sinon
+          .stub()
+          .callsArgWith(1, null, { statusCode: 500 })
+        this.DocstoreManager.getAllDocs(this.project_id, this.callback)
+      })
+
+      it('should call the callback with an error', function() {
+        this.callback.should.have.been.calledWith(
+          sinon.match
+            .instanceOf(Error)
+            .and(
+              sinon.match.has(
+                'message',
+                'docstore api responded with non-success code: 500'
+              )
+            )
+        )
+      })
+    })
+  })
+
   describe('getAllRanges', function() {
     describe('with a successful response code', function() {
       beforeEach(function() {

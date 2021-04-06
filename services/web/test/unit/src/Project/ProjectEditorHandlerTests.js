@@ -106,6 +106,9 @@ describe('ProjectEditorHandler', function() {
         token: 'my-secret-token2'
       }
     ]
+    this.deletedDocsFromDocstore = [
+      { _id: 'deleted-doc-id-from-docstore', name: 'docstore.tex' }
+    ]
     return (this.handler = SandboxedModule.require(modulePath))
   })
 
@@ -115,7 +118,8 @@ describe('ProjectEditorHandler', function() {
         return (this.result = this.handler.buildProjectModelView(
           this.project,
           this.members,
-          this.invites
+          this.invites,
+          this.deletedDocsFromDocstore
         ))
       })
 
@@ -155,7 +159,8 @@ describe('ProjectEditorHandler', function() {
             // omit deletedAt field
             _id: this.project.deletedDocs[0]._id,
             name: this.project.deletedDocs[0].name
-          }
+          },
+          this.deletedDocsFromDocstore[0]
         ])
       })
 
@@ -232,6 +237,26 @@ describe('ProjectEditorHandler', function() {
       it('should include invites', function() {
         expect(this.result.invites).to.exist
         return this.result.invites.should.deep.equal(this.invites)
+      })
+    })
+
+    describe('when docstore sends a deleted doc that is also present in the project', function() {
+      beforeEach(function() {
+        this.deletedDocsFromDocstore.push(this.project.deletedDocs[0])
+        this.result = this.handler.buildProjectModelView(
+          this.project,
+          this.members,
+          this.invites,
+          this.deletedDocsFromDocstore
+        )
+      })
+
+      it('should not send any duplicate', function() {
+        should.exist(this.result.deletedDocs)
+        this.result.deletedDocs.should.deep.equal([
+          this.project.deletedDocs[0],
+          this.deletedDocsFromDocstore[0]
+        ])
       })
     })
 

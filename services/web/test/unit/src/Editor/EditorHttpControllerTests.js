@@ -119,6 +119,11 @@ describe('EditorHttpController', function() {
         convertDocToFile: sinon.stub().resolves(this.file)
       }
     }
+    this.DocstoreManager = {
+      promises: {
+        getAllDeletedDocs: sinon.stub().resolves([])
+      }
+    }
     this.HttpErrorHandler = {
       notFound: sinon.stub(),
       unprocessableEntity: sinon.stub()
@@ -141,6 +146,7 @@ describe('EditorHttpController', function() {
         '../../infrastructure/FileWriter': this.FileWriter,
         '../Project/ProjectEntityUpdateHandler': this
           .ProjectEntityUpdateHandler,
+        '../Docstore/DocstoreManager': this.DocstoreManager,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler
       }
     })

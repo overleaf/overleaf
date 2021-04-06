@@ -13,6 +13,7 @@ const AuthenticationController = require('../Authentication/AuthenticationContro
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
+const DocstoreManager = require('../Docstore/DocstoreManager')
 const { expressify } = require('../../util/promises')
 
 module.exports = {
@@ -99,6 +100,9 @@ async function _buildJoinProjectView(req, projectId, userId) {
   if (project == null) {
     throw new Errors.NotFoundError('project not found')
   }
+  const deletedDocsFromDocstore = await DocstoreManager.promises.getAllDeletedDocs(
+    projectId
+  )
   const members = await CollaboratorsGetter.promises.getInvitedMembersWithPrivilegeLevels(
     projectId
   )
@@ -127,7 +131,8 @@ async function _buildJoinProjectView(req, projectId, userId) {
     project: ProjectEditorHandler.buildProjectModelView(
       project,
       members,
-      invites
+      invites,
+      deletedDocsFromDocstore
     ),
     privilegeLevel,
     isRestrictedUser

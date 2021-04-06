@@ -40,6 +40,10 @@ class MockDocstoreApi extends AbstractMockApi {
       res.json(Object.values(this.docs[req.params.projectId] || {}))
     })
 
+    this.app.get('/project/:projectId/doc-deleted', (req, res) => {
+      res.json(this.getDeletedDocs(req.params.projectId))
+    })
+
     this.app.get('/project/:projectId/doc/:docId', (req, res) => {
       const { projectId, docId } = req.params
       const doc = this.docs[projectId][docId]

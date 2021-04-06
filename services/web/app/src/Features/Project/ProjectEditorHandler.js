@@ -15,10 +15,15 @@ let ProjectEditorHandler
 const _ = require('underscore')
 const Path = require('path')
 
+function mergeDeletedDocs(a, b) {
+  const docIdsInA = new Set(a.map(doc => doc._id.toString()))
+  return a.concat(b.filter(doc => !docIdsInA.has(doc._id.toString())))
+}
+
 module.exports = ProjectEditorHandler = {
   trackChangesAvailable: false,
 
-  buildProjectModelView(project, members, invites) {
+  buildProjectModelView(project, members, invites, deletedDocsFromDocstore) {
     let owner, ownerFeatures
     if (!Array.isArray(project.deletedDocs)) {
       project.deletedDocs = []
@@ -38,7 +43,10 @@ module.exports = ProjectEditorHandler = {
       description: project.description,
       spellCheckLanguage: project.spellCheckLanguage,
       deletedByExternalDataSource: project.deletedByExternalDataSource || false,
-      deletedDocs: project.deletedDocs,
+      deletedDocs: mergeDeletedDocs(
+        project.deletedDocs,
+        deletedDocsFromDocstore
+      ),
       members: [],
       invites,
       tokens: project.tokens,

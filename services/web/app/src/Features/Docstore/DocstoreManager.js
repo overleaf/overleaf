@@ -85,6 +85,28 @@ const DocstoreManager = {
     )
   },
 
+  getAllDeletedDocs(project_id, callback) {
+    const url = `${settings.apis.docstore.url}/project/${project_id}/doc-deleted`
+    request.get({ url, timeout: TIMEOUT, json: true }, function(
+      error,
+      res,
+      docs
+    ) {
+      if (error) {
+        callback(OError.tag(error, 'could not get deleted docs from docstore'))
+      } else if (res.statusCode === 200) {
+        callback(null, docs)
+      } else {
+        callback(
+          new OError(
+            `docstore api responded with non-success code: ${res.statusCode}`,
+            { project_id }
+          )
+        )
+      }
+    })
+  },
+
   getAllRanges(project_id, callback) {
     if (callback == null) {
       callback = function(error) {}
