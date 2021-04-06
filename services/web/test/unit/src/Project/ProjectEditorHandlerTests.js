@@ -252,7 +252,7 @@ describe('ProjectEditorHandler', function() {
       })
 
       it('should not send any duplicate', function() {
-        should.exist(this.result.deletedDocs)
+        expect(this.result.deletedDocs).to.exist
         this.result.deletedDocs.should.deep.equal([
           this.project.deletedDocs[0],
           this.deletedDocsFromDocstore[0]
