@@ -1507,21 +1507,12 @@ const ProjectEntityUpdateHandler = {
       if (error != null) {
         return callback(error)
       }
-      ProjectEntityMongoUpdateHandler._insertDeletedDocReference(
-        project._id,
-        doc,
-        error => {
-          if (error != null) {
-            return callback(error)
-          }
-          DocumentUpdaterHandler.deleteDoc(projectId, docId, error => {
-            if (error != null) {
-              return callback(error)
-            }
-            DocstoreManager.deleteDoc(projectId, docId, doc.name, callback)
-          })
+      DocstoreManager.deleteDoc(projectId, docId, doc.name, error => {
+        if (error) {
+          return callback(error)
         }
-      )
+        DocumentUpdaterHandler.deleteDoc(projectId, docId, callback)
+      })
     })
   },
 

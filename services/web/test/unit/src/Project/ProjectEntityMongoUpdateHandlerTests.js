@@ -966,34 +966,6 @@ describe('ProjectEntityMongoUpdateHandler', function() {
     })
   })
 
-  describe('_insertDeletedDocReference', function() {
-    beforeEach(async function() {
-      this.ProjectMock.expects('updateOne')
-        .withArgs(
-          { _id: this.project._id },
-          {
-            $push: {
-              deletedDocs: {
-                _id: this.doc._id,
-                name: this.doc.name,
-                deletedAt: sinon.match.date
-              }
-            }
-          }
-        )
-        .chain('exec')
-        .resolves()
-      await this.subject.promises._insertDeletedDocReference(
-        this.project._id,
-        this.doc
-      )
-    })
-
-    it('should update the database', function() {
-      this.ProjectMock.verify()
-    })
-  })
-
   describe('_insertDeletedFileReference', function() {
     beforeEach(async function() {
       this.DeletedFileMock.expects('create')

@@ -70,7 +70,6 @@ module.exports = {
     'changes'
   ]),
   createNewFolderStructure: callbackify(wrapWithLock(createNewFolderStructure)),
-  _insertDeletedDocReference: callbackify(_insertDeletedDocReference),
   _insertDeletedFileReference: callbackify(_insertDeletedFileReference),
   _putElement: callbackifyMultiResult(_putElement, ['result', 'project']),
   _confirmFolder,
@@ -86,7 +85,6 @@ module.exports = {
     deleteEntity: wrapWithLock(deleteEntity),
     renameEntity: wrapWithLock(renameEntity),
     createNewFolderStructure: wrapWithLock(createNewFolderStructure),
-    _insertDeletedDocReference,
     _insertDeletedFileReference,
     _putElement
   }
@@ -443,17 +441,6 @@ async function renameEntity(
     rev: entity.rev,
     changes: { oldDocs, newDocs, oldFiles, newFiles, newProject }
   }
-}
-
-async function _insertDeletedDocReference(projectId, doc) {
-  await Project.updateOne(
-    { _id: projectId },
-    {
-      $push: {
-        deletedDocs: { _id: doc._id, name: doc.name, deletedAt: new Date() }
-      }
-    }
-  ).exec()
 }
 
 async function _insertDeletedFileReference(projectId, fileRef) {
