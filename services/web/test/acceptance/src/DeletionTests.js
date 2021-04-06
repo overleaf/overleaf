@@ -502,4 +502,77 @@ describe('Deleting a project', function() {
       })
     })
   })
+
+  describe('when the deleted project has deletedDocs', function() {
+    beforeEach('delete project', function(done) {
+      this.user.deleteProject(this.projectId, done)
+    })
+
+    let deletedDocs
+    beforeEach('set deletedDocs', function() {
+      deletedDocs = [
+        { _id: ObjectId(), name: 'foo.tex', deletedAt: new Date() },
+        { _id: ObjectId(), name: 'bar.tex', deletedAt: new Date() }
+      ]
+      deletedDocs.forEach(doc => {
+        MockDocstoreApi.createLegacyDeletedDoc(
+          this.projectId,
+          doc._id.toString()
+        )
+      })
+    })
+
+    beforeEach('insert deletedDocs', async function() {
+      await db.deletedProjects.updateOne(
+        { 'deleterData.deletedProjectId': ObjectId(this.projectId) },
+        { $set: { 'project.deletedDocs': deletedDocs } }
+      )
+    })
+
+    it('should not see any doc names before', async function() {
+      const docs = MockDocstoreApi.getDeletedDocs(this.projectId)
+      expect(docs).to.deep.equal(
+        deletedDocs.map(doc => {
+          const { _id } = doc
+          return { _id: _id.toString(), name: undefined }
+        })
+      )
+    })
+
+    describe('when undeleting the project', function() {
+      let admin
+      beforeEach('create admin', function(done) {
+        admin = new User()
+        async.series(
+          [
+            cb => admin.ensureUserExists(cb),
+            cb => admin.ensureAdmin(cb),
+            cb => admin.login(cb)
+          ],
+          done
+        )
+      })
+      beforeEach('undelete project', function(done) {
+        admin.undeleteProject(this.projectId, done)
+      })
+
+      it('should not insert deletedDocs into the projects collection', function(done) {
+        this.user.getProject(this.projectId, (error, project) => {
+          if (error) return done(error)
+          expect(project.deletedDocs).to.deep.equal([])
+          done()
+        })
+      })
+
+      it('should back fill deleted docs context', async function() {
+        const docs = MockDocstoreApi.getDeletedDocs(this.projectId)
+        expect(docs).to.deep.equal(
+          deletedDocs.map(doc => {
+            const { _id, name } = doc
+            return { _id: _id.toString(), name }
+          })
+        )
+      })
+    })
+  })
 })

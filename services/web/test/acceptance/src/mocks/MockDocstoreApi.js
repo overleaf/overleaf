@@ -5,6 +5,18 @@ class MockDocstoreApi extends AbstractMockApi {
     this.docs = {}
   }
 
+  createLegacyDeletedDoc(projectId, docId) {
+    if (!this.docs[projectId]) {
+      this.docs[projectId] = {}
+    }
+    this.docs[projectId][docId] = {
+      lines: [],
+      version: 1,
+      ranges: {},
+      deleted: true
+    }
+  }
+
   getDeletedDocs(projectId) {
     return Object.entries(this.docs[projectId] || {})
       .filter(([_, doc]) => doc.deleted)

@@ -22,12 +22,12 @@ const { promisifyAll } = require('../../util/promises')
 const TIMEOUT = 30 * 1000 // request timeout
 
 const DocstoreManager = {
-  deleteDoc(project_id, doc_id, name, callback) {
+  deleteDoc(project_id, doc_id, name, deletedAt, callback) {
     if (callback == null) {
       callback = function(error) {}
     }
     const url = `${settings.apis.docstore.url}/project/${project_id}/doc/${doc_id}`
-    const docMetaData = { deleted: true, deletedAt: new Date(), name }
+    const docMetaData = { deleted: true, deletedAt, name }
     const options = { url, json: docMetaData, timeout: TIMEOUT }
     request.patch(options, function(error, res) {
       if (error != null) {

@@ -58,6 +58,7 @@ describe('DocstoreManager', function() {
           this.project_id,
           this.doc_id,
           'wombat.tex',
+          new Date(),
           this.callback
         )
       })
@@ -86,6 +87,7 @@ describe('DocstoreManager', function() {
           this.project_id,
           this.doc_id,
           'main.tex',
+          new Date(),
           this.callback
         )
       })
@@ -115,6 +117,7 @@ describe('DocstoreManager', function() {
           this.project_id,
           this.doc_id,
           'main.tex',
+          new Date(),
           this.callback
         )
       })

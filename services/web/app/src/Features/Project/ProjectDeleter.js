@@ -303,6 +303,19 @@ async function undeleteProject(projectId, options = {}) {
   )
   restored.archived = undefined
 
+  if (restored.deletedDocs && restored.deletedDocs.length > 0) {
+    await promiseMapWithLimit(10, restored.deletedDocs, async deletedDoc => {
+      // back fill context of deleted docs
+      const { _id: docId, name, deletedAt } = deletedDoc
+      await DocstoreManager.promises.deleteDoc(
+        projectId,
+        docId,
+        name,
+        deletedAt
+      )
+    })
+    restored.deletedDocs = []
+  }
   if (restored.deletedFiles && restored.deletedFiles.length > 0) {
     filterDuplicateDeletedFilesInPlace(restored)
     const deletedFiles = restored.deletedFiles.map(file => {

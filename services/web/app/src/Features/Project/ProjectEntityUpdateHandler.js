@@ -1507,7 +1507,9 @@ const ProjectEntityUpdateHandler = {
       if (error != null) {
         return callback(error)
       }
-      DocstoreManager.deleteDoc(projectId, docId, doc.name, error => {
+      const { name } = doc
+      const deletedAt = new Date()
+      DocstoreManager.deleteDoc(projectId, docId, name, deletedAt, error => {
         if (error) {
           return callback(error)
         }
