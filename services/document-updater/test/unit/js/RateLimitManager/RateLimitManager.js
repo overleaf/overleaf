@@ -11,9 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
-const { expect } = chai
+const { expect } = require('chai')
 const modulePath = '../../../../app/js/RateLimitManager.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -22,7 +20,6 @@ describe('RateLimitManager', function () {
     let Timer
     this.RateLimitManager = SandboxedModule.require(modulePath, {
       requires: {
-        'logger-sharelatex': (this.logger = { log: sinon.stub() }),
         'settings-sharelatex': (this.settings = {}),
         './Metrics': (this.Metrics = {
           Timer: (Timer = (function () {

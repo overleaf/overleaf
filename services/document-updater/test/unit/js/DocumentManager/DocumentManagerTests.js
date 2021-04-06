@@ -13,8 +13,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../../app/js/DocumentManager.js'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors')
@@ -33,11 +31,6 @@ describe('DocumentManager', function () {
           flushDocChangesAsync: sinon.stub(),
           flushProjectChangesAsync: sinon.stub()
         }),
-        'logger-sharelatex': (this.logger = {
-          log: sinon.stub(),
-          warn: sinon.stub()
-        }),
-        './DocOpsManager': (this.DocOpsManager = {}),
         './Metrics': (this.Metrics = {
           Timer: (Timer = (function () {
             Timer = class Timer {
@@ -220,7 +213,6 @@ describe('DocumentManager', function () {
           .stub()
           .callsArgWith(2, null, null, null, null)
         this.PersistenceManager.setDoc = sinon.stub().yields()
-        this.DocOpsManager.flushDocOpsToMongo = sinon.stub().callsArgWith(2)
         return this.DocumentManager.flushDocIfLoaded(
           this.project_id,
           this.doc_id,
@@ -236,7 +228,6 @@ describe('DocumentManager', function () {
 
       it('should not write anything to the persistence layer', function () {
         this.PersistenceManager.setDoc.called.should.equal(false)
-        return this.DocOpsManager.flushDocOpsToMongo.called.should.equal(false)
       })
 
       it('should call the callback without error', function () {

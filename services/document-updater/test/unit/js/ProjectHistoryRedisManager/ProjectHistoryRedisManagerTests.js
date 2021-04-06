@@ -12,8 +12,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../../app/js/ProjectHistoryRedisManager.js'
 const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
@@ -47,13 +45,7 @@ describe('ProjectHistoryRedisManager', function () {
           '@overleaf/redis-wrapper': {
             createClient: () => this.rclient
           },
-          'logger-sharelatex': {
-            log() {}
-          },
           './Metrics': (this.metrics = { summary: sinon.stub() })
-        },
-        globals: {
-          JSON: (this.JSON = JSON)
         }
       }
     ))
@@ -136,7 +128,7 @@ describe('ProjectHistoryRedisManager', function () {
       return this.ProjectHistoryRedisManager.queueOps
         .calledWithExactly(
           this.project_id,
-          this.JSON.stringify(update),
+          JSON.stringify(update),
           this.callback
         )
         .should.equal(true)
@@ -184,7 +176,7 @@ describe('ProjectHistoryRedisManager', function () {
       return this.ProjectHistoryRedisManager.queueOps
         .calledWithExactly(
           this.project_id,
-          this.JSON.stringify(update),
+          JSON.stringify(update),
           this.callback
         )
         .should.equal(true)

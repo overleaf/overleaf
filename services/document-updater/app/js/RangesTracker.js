@@ -706,8 +706,10 @@ const load = function () {
           return result
         } else if (c1.op.i != null && c2.op.d != null) {
           return 1
-        } else {
+        } else if (c1.op.d != null && c2.op.i != null) {
           return -1
+        } else {
+          return 0
         }
       })
 
@@ -728,8 +730,10 @@ const load = function () {
           return result
         } else if (a.i != null && b.d != null) {
           return 1
-        } else {
+        } else if (a.d != null && b.i != null) {
           return -1
+        } else {
+          return 0
         }
       })
 

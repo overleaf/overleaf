@@ -12,7 +12,6 @@ describe('HttpController', function () {
           flushProjectChangesAsync: sinon.stub()
         }),
         './ProjectManager': (this.ProjectManager = {}),
-        'logger-sharelatex': (this.logger = { log: sinon.stub() }),
         './ProjectFlusher': { flushAllProjects() {} },
         './DeleteQueueManager': (this.DeleteQueueManager = {}),
         './Metrics': (this.Metrics = {}),

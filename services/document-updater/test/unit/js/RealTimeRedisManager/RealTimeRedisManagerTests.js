@@ -11,8 +11,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const chai = require('chai')
-const should = chai.should()
 const modulePath = '../../../../app/js/RealTimeRedisManager.js'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors')
@@ -45,7 +43,6 @@ describe('RealTimeRedisManager', function () {
             }
           }
         },
-        'logger-sharelatex': { log() {} },
         crypto: (this.crypto = {
           randomBytes: sinon
             .stub()
