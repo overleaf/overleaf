@@ -1,10 +1,14 @@
+## ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ##
+## ! This file was generated from a template ! ##
+## ! See /etc/nginx/templates/               ! ##
+## ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ##
 daemon off;
 user www-data;
-worker_processes 4;
+worker_processes ${NGINX_WORKER_PROCESSES};
 pid /run/nginx.pid;
 
 events {
-	worker_connections 768;
+	worker_connections ${NGINX_WORKER_CONNECTIONS};
 	# multi_accept on;
 }
 
@@ -63,7 +67,7 @@ http {
 	##
 	# Uncomment it if you installed nginx-passenger
 	##
-	
+
 	#passenger_root /usr;
 	#passenger_ruby /usr/bin/ruby;
 
