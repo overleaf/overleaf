@@ -70,7 +70,7 @@ describe('UserEmailsConfirmationHandler', function() {
           .calledWith(
             'email_confirmation',
             { user_id: this.user_id, email: this.email },
-            { expiresIn: 365 * 24 * 60 * 60 }
+            { expiresIn: 90 * 24 * 60 * 60 }
           )
           .should.equal(true)
       })

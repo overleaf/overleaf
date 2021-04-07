@@ -7,7 +7,8 @@ const UserUpdater = require('./UserUpdater')
 const UserGetter = require('./UserGetter')
 const { promisify } = require('util')
 
-const ONE_YEAR_IN_S = 365 * 24 * 60 * 60
+// Reject email confirmation tokens after 90 days
+const TOKEN_EXPIRY_IN_S = 90 * 24 * 60 * 60
 
 function sendConfirmationEmail(userId, email, emailTemplate, callback) {
   if (arguments.length === 3) {
@@ -29,7 +30,7 @@ function sendConfirmationEmail(userId, email, emailTemplate, callback) {
   OneTimeTokenHandler.getNewToken(
     'email_confirmation',
     data,
-    { expiresIn: ONE_YEAR_IN_S },
+    { expiresIn: TOKEN_EXPIRY_IN_S },
     function(err, token) {
       if (err) {
         return callback(err)
