@@ -70,7 +70,7 @@ ADD ${baseDir}/runit /etc/service
 
 # Configure nginx
 # ---------------
-ADD ${baseDir}/nginx/nginx.conf /etc/nginx/nginx.conf
+ADD ${baseDir}/nginx/nginx.conf.template /etc/nginx/templates/nginx.conf.template
 ADD ${baseDir}/nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
 
 
