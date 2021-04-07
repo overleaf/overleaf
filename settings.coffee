@@ -148,6 +148,8 @@ settings =
 		compilesDir:  Path.join(DATA_DIR, "compiles")
 		# Where to cache downloaded URLs for the CLSI
 		clsiCacheDir: Path.join(DATA_DIR, "cache")
+		# Where to write the output files to disk after running LaTeX
+		outputDir:  Path.join(DATA_DIR, "output")
 
 	# Server Config
 	# -------------
