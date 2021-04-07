@@ -20,8 +20,8 @@ RUN apt-get update \
       qpdf \
       aspell aspell-en aspell-af aspell-am aspell-ar aspell-ar-large aspell-bg aspell-bn aspell-br aspell-ca aspell-cs aspell-cy aspell-da aspell-de aspell-el aspell-eo aspell-es aspell-et aspell-eu-es aspell-fa aspell-fo aspell-fr aspell-ga aspell-gl-minimos aspell-gu aspell-he aspell-hi aspell-hr aspell-hsb aspell-hu aspell-hy aspell-id aspell-is aspell-it aspell-kk aspell-kn aspell-ku aspell-lt aspell-lv aspell-ml aspell-mr aspell-nl aspell-nr aspell-ns  aspell-pa aspell-pl aspell-pt aspell-pt-br aspell-ro aspell-ru aspell-sk aspell-sl aspell-ss aspell-st aspell-sv aspell-tl aspell-tn aspell-ts aspell-uk aspell-uz aspell-xh aspell-zu \
     \
-# install Node.JS 10
-&&  curl -sSL https://deb.nodesource.com/setup_10.x | bash - \
+# install Node.JS 12
+&&  curl -sSL https://deb.nodesource.com/setup_12.x | bash - \
 &&  apt-get install -y nodejs \
     \
 &&  rm -rf \
@@ -51,7 +51,7 @@ RUN npm install -g \
 #     -f Dockerfile-base -t sharelatex/sharelatex-base .
 ARG TEXLIVE_MIRROR=http://mirror.ctan.org/systems/texlive/tlnet
 
-ENV PATH "${PATH}:/usr/local/texlive/2020/bin/x86_64-linux"
+ENV PATH "${PATH}:/usr/local/texlive/2021/bin/x86_64-linux"
 
 RUN mkdir /install-tl-unx \
 &&  curl -sSL \
