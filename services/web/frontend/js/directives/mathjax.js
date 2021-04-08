@@ -8,15 +8,6 @@ export default App.directive('mathjax', function($compile, $parse) {
     link(scope, element, attrs) {
       if (!(MathJax && MathJax.Hub)) return
 
-      // Allowing HTML can be unsafe unless using something like
-      // `ng-bind-html` because of potential Angular XSS via {{/}}
-      if (!$parse(attrs.mathjaxAllowHtml)(scope)) {
-        const mathJaxContents = element.html()
-        const nonBindableEl = $compile('<span ng-non-bindable></span>')({})
-        element.html('').append(nonBindableEl)
-        nonBindableEl.html(mathJaxContents)
-      }
-
       if (attrs.delimiter !== 'no-single-dollar') {
         const inlineMathConfig =
           MathJax.Hub.config && MathJax.Hub.config.tex2jax.inlineMath
