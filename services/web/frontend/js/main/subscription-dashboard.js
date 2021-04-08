@@ -18,13 +18,14 @@ import _ from 'lodash'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../base'
+import getMeta from '../utils/meta'
 const SUBSCRIPTION_URL = '/user/subscription/update'
 
 const ensureRecurlyIsSetup = _.once(() => {
   if (typeof recurly === 'undefined' || !recurly) {
     return false
   }
-  recurly.configure(window.recurlyApiKey)
+  recurly.configure(getMeta('ol-recurlyApiKey'))
   return true
 })
 
@@ -106,7 +107,8 @@ App.controller('ChangePlanFormController', function(
   $scope.$watch('plan', function(plan) {
     if (!plan) return
     const planCode = plan.planCode
-    const { currency, taxRate } = window.subscription.recurly
+    const subscription = getMeta('ol-subscription')
+    const { currency, taxRate } = subscription.recurly
     $scope.price = '...' // Placeholder while we talk to recurly
     RecurlyPricing.loadDisplayPriceWithTax(planCode, currency, taxRate).then(
       price => {
@@ -173,10 +175,11 @@ App.controller('GroupMembershipController', function($scope, $modal) {
 
 App.controller('RecurlySubscriptionController', function($scope) {
   const recurlyIsSetup = ensureRecurlyIsSetup()
-  $scope.showChangePlanButton = recurlyIsSetup && !window.subscription.groupPlan
+  const subscription = getMeta('ol-subscription')
+  $scope.showChangePlanButton = recurlyIsSetup && !subscription.groupPlan
   if (
-    window.subscription.recurly.account.has_past_due_invoice &&
-    window.subscription.recurly.account.has_past_due_invoice._ === 'true'
+    subscription.recurly.account.has_past_due_invoice &&
+    subscription.recurly.account.has_past_due_invoice._ === 'true'
   ) {
     $scope.showChangePlanButton = false
   }
@@ -205,7 +208,7 @@ App.controller('RecurlyCancellationController', function(
   $http
 ) {
   if (!ensureRecurlyIsSetup()) return
-  const subscription = window.subscription
+  const subscription = getMeta('ol-subscription')
   const sevenDaysTime = new Date()
   sevenDaysTime.setDate(sevenDaysTime.getDate() + 7)
   const freeTrialEndDate = new Date(subscription.recurly.trial_ends_at)
@@ -226,7 +229,7 @@ App.controller('RecurlyCancellationController', function(
     $scope.showBasicCancel = true
   }
 
-  const { currency, taxRate } = window.subscription.recurly
+  const { currency, taxRate } = subscription.recurly
   $scope.studentPrice = '...' // Placeholder while we talk to recurly
   RecurlyPricing.loadDisplayPriceWithTax('student', currency, taxRate).then(
     price => {

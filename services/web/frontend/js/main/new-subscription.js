@@ -6,6 +6,7 @@ import _ from 'lodash'
 */
 /* global recurly */
 import App from '../base'
+import getMeta from '../utils/meta'
 
 export default App.controller('NewSubscriptionController', function(
   $scope,
@@ -67,7 +68,7 @@ export default App.controller('NewSubscriptionController', function(
     city: '',
     company: '',
     vat_number: '',
-    country: window.countryCode,
+    country: getMeta('ol-countryCode'),
     coupon: window.couponCode
   }
 
@@ -84,7 +85,7 @@ export default App.controller('NewSubscriptionController', function(
   )
 
   recurly.configure({
-    publicKey: window.recurlyApiKey,
+    publicKey: getMeta('ol-recurlyApiKey'),
     style: {
       all: {
         fontFamily: '"Open Sans", sans-serif',

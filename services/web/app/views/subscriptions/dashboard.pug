@@ -2,6 +2,12 @@ extends ../layout
 
 include ./dashboard/_team_name_mixin
 
+block append meta
+	if (personalSubscription)
+		meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
+		meta(name="ol-subscription" data-type="json" content=personalSubscription)
+		meta(name="ol-recomendedCurrency" content=personalSubscription.recurly.currency)
+
 block head-scripts
 	script(type="text/javascript", nonce=scriptNonce, src="https://js.recurly.com/v4/recurly.js")
 

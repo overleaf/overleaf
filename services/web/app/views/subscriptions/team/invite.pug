@@ -1,10 +1,8 @@
 extends ../../layout
 
-block head-scripts
-	script(type="text/javascript", nonce=scriptNonce).
-		window.teamId = '#{teamId}'
-		window.hasIndividualRecurlySubscription = #{hasIndividualRecurlySubscription}
-		window.inviteToken = '#{inviteToken}'
+block append meta
+	meta(name="ol-hasIndividualRecurlySubscription" data-type="boolean" content=hasIndividualRecurlySubscription)
+	meta(name="ol-inviteToken" content=inviteToken)
 
 block content
 	main.content.content-alt.team-invite
