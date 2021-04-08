@@ -1,3 +1,8 @@
+script(type="text/javascript", nonce=scriptNonce).
+	window.recurlyApiKey = "!{settings.apis.recurly.publicKey}"
+	window.subscription = !{StringHelper.stringifyJsonForScript(personalSubscription)}
+	window.recomendedCurrency = "#{personalSubscription.recurly.currency}"
+
 div(ng-controller="RecurlySubscriptionController")
 	div(ng-show="!showCancellation")
 		if (personalSubscription.recurly.account.has_past_due_invoice && personalSubscription.recurly.account.has_past_due_invoice._ == 'true')

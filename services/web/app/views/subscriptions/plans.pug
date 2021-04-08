@@ -6,9 +6,11 @@ include _plans_page_tables
 block vars
 	- metadata = { viewport: true }
 
-block append meta
-	meta(name="ol-recomendedCurrency" content=recomendedCurrency)
-	meta(name="ol-groupPlans" data-type="json" content=groupPlans)
+block head-scripts
+	script(type="text/javascript", nonce=scriptNonce).
+		window.recomendedCurrency = '#{recomendedCurrency}';
+		window.abCurrencyFlag = '#{abCurrencyFlag}';
+		window.groupPlans = !{StringHelper.stringifyJsonForScript(groupPlans)};
 
 block content
 	.content.content-alt

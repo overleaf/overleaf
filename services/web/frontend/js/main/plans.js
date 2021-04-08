@@ -3,9 +3,8 @@
     max-len
 */
 import App from '../base'
-import getMeta from '../utils/meta'
 App.factory('MultiCurrencyPricing', function() {
-  const currencyCode = getMeta('ol-recomendedCurrency')
+  const currencyCode = window.recomendedCurrency
 
   return {
     currencyCode,
@@ -385,12 +384,11 @@ App.controller('GroupPlansModalPurchaseController', function(
     ]
   }
 
-  $scope.prices = getMeta('ol-groupPlans')
+  $scope.prices = window.groupPlans
 
   let currency = 'USD'
-  const recomendedCurrency = getMeta('ol-recomendedCurrency')
-  if (['USD', 'GBP', 'EUR'].includes(recomendedCurrency)) {
-    currency = recomendedCurrency
+  if (['USD', 'GBP', 'EUR'].includes(window.recomendedCurrency)) {
+    currency = window.recomendedCurrency
   }
 
   // default selected

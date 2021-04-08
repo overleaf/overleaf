@@ -10,15 +10,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../base'
-import getMeta from '../../utils/meta'
 
 export default App.controller('TeamInviteController', function($scope, $http) {
   $scope.inflight = false
-  const hasIndividualRecurlySubscription = getMeta(
-    'ol-hasIndividualRecurlySubscription'
-  )
 
-  if (hasIndividualRecurlySubscription) {
+  if (window.hasIndividualRecurlySubscription) {
     $scope.view = 'hasIndividualRecurlySubscription'
   } else {
     $scope.view = 'teamInvite'
@@ -44,8 +40,7 @@ export default App.controller('TeamInviteController', function($scope, $http) {
 
   return ($scope.joinTeam = function() {
     $scope.inflight = true
-    const inviteToken = getMeta('ol-inviteToken')
-    const request = $http.put(`/subscription/invites/${inviteToken}/`, {
+    const request = $http.put(`/subscription/invites/${window.inviteToken}/`, {
       _csrf: window.csrfToken
     })
     request.then(function(response) {
