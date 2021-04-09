@@ -8,6 +8,43 @@ describe('Authentication', function() {
     user = new User()
   })
 
+  describe('CSRF regeneration on login', function() {
+    it('should prevent use of csrf token from before login', function(done) {
+      user.logout(err => {
+        if (err) {
+          return done(err)
+        }
+        user.getCsrfToken(err => {
+          if (err) {
+            return done(err)
+          }
+          const oldToken = user.csrfToken
+          user.login(err => {
+            if (err) {
+              return done(err)
+            }
+            expect(oldToken === user.csrfToken).to.equal(false)
+            user.request.post(
+              {
+                headers: {
+                  'x-csrf-token': oldToken
+                },
+                url: '/project/new',
+                json: { projectName: 'test' }
+              },
+              (err, response, body) => {
+                expect(err).to.not.exist
+                expect(response.statusCode).to.equal(403)
+                expect(body).to.equal('Forbidden')
+                done()
+              }
+            )
+          })
+        })
+      })
+    })
+  })
+
   describe('login', function() {
     beforeEach('doLogin', async function() {
       await user.login()

@@ -89,15 +89,20 @@ const tryFollowInviteLink = (user, link, callback) => {
 }
 
 const tryAcceptInvite = (user, invite, callback) => {
-  user.request.post(
-    {
-      uri: `/project/${invite.projectId}/invite/token/${invite.token}/accept`,
-      json: {
-        token: invite.token
-      }
-    },
-    callback
-  )
+  user.getCsrfToken(err => {
+    if (err) {
+      return callback(err)
+    }
+    user.request.post(
+      {
+        uri: `/project/${invite.projectId}/invite/token/${invite.token}/accept`,
+        json: {
+          token: invite.token
+        }
+      },
+      callback
+    )
+  })
 }
 
 const tryRegisterUser = (user, email, callback) => {

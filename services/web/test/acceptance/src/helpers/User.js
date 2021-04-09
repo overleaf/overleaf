@@ -113,7 +113,18 @@ class User {
             url: settings.enableLegacyLogin ? '/login/legacy' : '/login',
             json: { email, password: this.password }
           },
-          callback
+          (error, response, body) => {
+            if (error != null) {
+              return callback(error)
+            }
+            // get new csrf token, then return result of login
+            this.getCsrfToken(err => {
+              if (err) {
+                return callback(err)
+              }
+              callback(null, response, body)
+            })
+          }
         )
       })
     })

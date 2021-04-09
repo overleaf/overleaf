@@ -1236,6 +1236,16 @@ describe('AuthenticationController', function() {
         this.req.login.callCount.should.equal(1)
       })
 
+      it('should erase the CSRF secret', function() {
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+        expect(this.req.session.csrfSecret).to.not.exist
+      })
+
       it('should call req.session.save', function() {
         this.AuthenticationController.finishLogin(
           this.user,

@@ -160,22 +160,10 @@ describe('UserHelper', function() {
   })
 
   describe('getCsrfToken', function() {
-    describe('when the csrfToken is not cached', function() {
-      it('should fetch csrfToken', async function() {
-        const userHelper = new UserHelper()
-        await userHelper.getCsrfToken()
-        expect(userHelper.csrfToken).to.be.a.string
-      })
-    })
-
-    describe('when the csrfToken is cached', function() {
-      it('should return cached csrfToken', async function() {
-        let userHelper = new UserHelper()
-        await userHelper.getCsrfToken()
-        const csrfToken = userHelper._csrfToken
-        await userHelper.getCsrfToken()
-        expect(csrfToken).to.equal(userHelper._csrfToken)
-      })
+    it('should fetch csrfToken', async function() {
+      const userHelper = new UserHelper()
+      await userHelper.getCsrfToken()
+      expect(userHelper.csrfToken).to.be.a.string
     })
   })
 
