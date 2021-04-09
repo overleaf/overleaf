@@ -1074,10 +1074,7 @@ export default App.controller('ReviewPanelController', function(
     }
     const { project } = ide.$scope
     if (project.features.trackChanges) {
-      if (window.trackChangesState == null) {
-        window.trackChangesState = false
-      }
-      applyTrackChangesStateToClient(window.trackChangesState)
+      applyTrackChangesStateToClient(project.trackChangesState)
     } else {
       applyTrackChangesStateToClient(false)
     }

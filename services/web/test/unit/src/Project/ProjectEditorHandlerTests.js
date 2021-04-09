@@ -325,6 +325,60 @@ describe('ProjectEditorHandler', function() {
         )
       })
     })
+
+    describe('trackChangesState', function() {
+      describe('when the owner does not have the trackChanges feature', function() {
+        beforeEach(function() {
+          this.owner.features = {
+            trackChanges: false
+          }
+          this.result = this.handler.buildProjectModelView(
+            this.project,
+            this.members,
+            [],
+            []
+          )
+        })
+        it('should not emit trackChangesState', function() {
+          expect(this.result.trackChangesState).to.not.exist
+        })
+      })
+
+      describe('when the owner has got the trackChanges feature', function() {
+        beforeEach(function() {
+          this.owner.features = {
+            trackChanges: true
+          }
+        })
+
+        function genCase([dbEntry, expected]) {
+          describe(`when track_changes is ${JSON.stringify(
+            dbEntry
+          )}`, function() {
+            beforeEach(function() {
+              this.project.track_changes = dbEntry
+              this.result = this.handler.buildProjectModelView(
+                this.project,
+                this.members,
+                [],
+                []
+              )
+            })
+            it(`should set trackChangesState=${expected}`, function() {
+              expect(this.result.trackChangesState).to.deep.equal(expected)
+            })
+          })
+        }
+
+        const CASES = [
+          [null, false],
+          [false, false],
+          [true, true],
+          [{ someId: true }, { someId: true }]
+        ]
+        CASES.map(genCase)
+      })
+    })
   })
 
   describe('buildOwnerAndMembersViews', function() {

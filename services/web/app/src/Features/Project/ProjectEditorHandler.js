@@ -80,6 +80,10 @@ module.exports = ProjectEditorHandler = {
       trackChangesVisible: ProjectEditorHandler.trackChangesAvailable
     })
 
+    if (result.features.trackChanges) {
+      result.trackChangesState = project.track_changes || false
+    }
+
     // Originally these two feature flags were both signalled by the now-deprecated `references` flag.
     // For older users, the presence of the `references` feature flag should still turn on these features.
     result.features.referencesSearch =

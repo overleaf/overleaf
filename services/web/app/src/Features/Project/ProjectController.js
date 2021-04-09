@@ -839,7 +839,6 @@ const ProjectController = {
                 lineHeight: user.ace.lineHeight || 'normal',
                 overallTheme: user.ace.overallTheme
               },
-              trackChangesState: project.track_changes,
               privilegeLevel,
               chatUrl: Settings.apis.chat.url,
               anonymous,

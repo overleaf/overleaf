@@ -55,7 +55,3 @@ script(type="text/ng-template", id="historyFileEntityTpl")
 				ng-repeat="childEntity in $ctrl.fileEntity.children"
 				file-entity="childEntity"
 			)
-
-- var fileActionI18n = ['edited', 'renamed', 'created', 'deleted'].reduce((acc, i) => {acc[i] = translate('file_action_' + i); return acc}, {})
-script(type="text/javascript", nonce=scriptNonce).
-	window.fileActionI18n = JSON.parse('!{StringHelper.stringifyJsonForScript(fileActionI18n)}')
