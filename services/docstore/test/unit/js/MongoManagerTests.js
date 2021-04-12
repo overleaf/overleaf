@@ -250,40 +250,6 @@ describe('MongoManager', function () {
     })
   })
 
-  describe('markDocAsDeleted', function () {
-    beforeEach(function () {
-      this.db.docs.updateOne = sinon.stub().callsArgWith(2, this.stubbedErr)
-      return (this.oldRev = 77)
-    })
-
-    it('should process the update', function (done) {
-      return this.MongoManager.markDocAsDeleted(
-        this.project_id,
-        this.doc_id,
-        (err) => {
-          const args = this.db.docs.updateOne.args[0]
-          assert.deepEqual(args[0], {
-            _id: ObjectId(this.doc_id),
-            project_id: ObjectId(this.project_id)
-          })
-          assert.equal(args[1].$set.deleted, true)
-          return done()
-        }
-      )
-    })
-
-    return it('should return the error', function (done) {
-      return this.MongoManager.markDocAsDeleted(
-        this.project_id,
-        this.doc_id,
-        (err) => {
-          err.should.equal(this.stubbedErr)
-          return done()
-        }
-      )
-    })
-  })
-
   describe('destroyDoc', function () {
     beforeEach(function (done) {
       this.db.docs.deleteOne = sinon.stub().yields()

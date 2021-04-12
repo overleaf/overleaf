@@ -131,18 +131,6 @@ module.exports = DocstoreClient = {
     )
   },
 
-  deleteDocLegacy(project_id, doc_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.del(
-      {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`
-      },
-      callback
-    )
-  },
-
   deleteDoc(project_id, doc_id, callback) {
     DocstoreClient.deleteDocWithDateAndName(
       project_id,

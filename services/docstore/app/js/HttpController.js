@@ -191,21 +191,6 @@ module.exports = HttpController = {
     )
   },
 
-  deleteDoc(req, res, next) {
-    if (next == null) {
-      next = function (error) {}
-    }
-    const { project_id } = req.params
-    const { doc_id } = req.params
-    logger.log({ project_id, doc_id }, 'deleting doc')
-    return DocManager.deleteDoc(project_id, doc_id, function (error) {
-      if (error != null) {
-        return next(error)
-      }
-      return res.sendStatus(204)
-    })
-  },
-
   patchDoc(req, res, next) {
     const { project_id, doc_id } = req.params
     logger.log({ project_id, doc_id }, 'patching doc')
