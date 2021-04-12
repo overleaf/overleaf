@@ -1,11 +1,11 @@
 {
+  "logs_pane_info_message": "We are testing a new logs pane",
+  "logs_pane_info_message_popup": "We are testing a new logs pane. Click here to give feedback.",
   "github_symlink_error": "Your Github repository contains symbolic link files, which are not currently supported by Overleaf. Please remove these and try again.",
   "address_line_1": "Address",
   "address_line_2": "Address (line 2, optional)",
   "postal_code": "Postal Code",
   "reload_editor": "Reload editor",
-  "logs_pane_beta_message": "We are beta testing a new logs pane",
-  "logs_pane_beta_message_popup": "We are beta testing a new logs pane. Click here to give feedback and manage your beta program membership.",
   "compile_error_description": "This project did not compile because of an error",
   "validation_issue_description": "This project did not compile because of a validation issue",
   "compile_error_entry_description": "An error which prevented this project from compiling",

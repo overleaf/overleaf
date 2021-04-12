@@ -26,7 +26,7 @@ function PreviewFirstErrorPopUp({
     >
       <PreviewLogsPaneEntry
         headerTitle={logEntry.message}
-        headerIcon={<FirstErrorPopUpBetaBadge />}
+        headerIcon={<FirstErrorPopUpInfoBadge />}
         rawContent={logEntry.content}
         formattedContent={logEntry.humanReadableHintComponent}
         extraInfoURL={logEntry.extraInfoURL}
@@ -60,22 +60,22 @@ function PreviewFirstErrorPopUp({
   )
 }
 
-function FirstErrorPopUpBetaBadge() {
+function FirstErrorPopUpInfoBadge() {
   const { t } = useTranslation()
-  const logsPaneBetaMessage = t('logs_pane_beta_message_popup')
+  const logsPaneInfoMessage = t('logs_pane_info_message_popup')
   const tooltip = (
-    <Tooltip id="file-tree-badge-tooltip">{logsPaneBetaMessage}</Tooltip>
+    <Tooltip id="file-tree-badge-tooltip">{logsPaneInfoMessage}</Tooltip>
   )
 
   return (
     <OverlayTrigger placement="bottom" overlay={tooltip} delayHide={100}>
       <a
-        href="/beta/participate"
+        href="https://forms.gle/AUbDDRvroQ7KFwHR9"
         target="_blank"
         rel="noopener noreferrer"
-        className="beta-badge"
+        className="info-badge-fade-bg"
       >
-        <span className="sr-only">{logsPaneBetaMessage}</span>
+        <span className="sr-only">{logsPaneInfoMessage}</span>
       </a>
     </OverlayTrigger>
   )

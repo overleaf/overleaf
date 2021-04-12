@@ -213,7 +213,6 @@ App.controller('PdfController', function(
   }
 
   function onDocChanged() {
-    $scope.autoCompileLintingError = false
     _updateDocLastChangedAt()
   }
 
@@ -237,6 +236,7 @@ App.controller('PdfController', function(
   $scope.$watch('autocompile_enabled', (newValue, oldValue) => {
     if (newValue != null && oldValue !== newValue) {
       if (newValue === true) {
+        $scope.autoCompileLintingError = false
         autoCompileIfReady()
       }
       localStorage(`autocompile_enabled:${$scope.project_id}`, newValue)
@@ -534,7 +534,6 @@ App.controller('PdfController', function(
 
   function fetchLogs(fileByPath, options) {
     let blgFile, chktexFile, logFile
-    $scope.pdf.logEntries = {}
 
     if (options != null ? options.validation : undefined) {
       chktexFile = fileByPath['output.chktex']
@@ -702,21 +701,19 @@ App.controller('PdfController', function(
   function sendCompileMetrics() {
     const hasCompiled =
       $scope.pdf.view !== 'errors' && $scope.pdf.view !== 'validation-problems'
-    const sendMetricsForUser =
-      window.user.betaProgram && !window.user.alphaProgram
 
-    if (hasCompiled && sendMetricsForUser) {
+    if (hasCompiled && !window.user.alphaProgram) {
       const metadata = {
         errors: $scope.pdf.logEntries.errors.length,
         warnings: $scope.pdf.logEntries.warnings.length,
         typesetting: $scope.pdf.logEntries.typesetting.length,
         newLogsUI: window.showNewLogsUI,
-        subvariant: window.logsUISubvariant || null
+        subvariant: window.showNewLogsUI ? window.logsUISubvariant : null
       }
       eventTracking.sendMBSampled(
         'compile-result',
         JSON.stringify(metadata),
-        0.05
+        0.01
       )
     }
   }
