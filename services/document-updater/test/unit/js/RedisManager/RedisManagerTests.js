@@ -141,10 +141,9 @@ describe('RedisManager', function () {
       this.json_ranges = JSON.stringify(this.ranges)
       this.unflushed_time = 12345
       this.pathname = '/a/b/c.tex'
-      this.multi.get = sinon.stub()
-      this.multi.exec = sinon
+      this.rclient.mget = sinon
         .stub()
-        .callsArgWith(0, null, [
+        .yields(null, [
           this.jsonlines,
           this.version,
           this.hash,
@@ -166,57 +165,20 @@ describe('RedisManager', function () {
         )
       })
 
-      it('should get the lines from redis', function () {
-        return this.multi.get
-          .calledWith(`doclines:${this.doc_id}`)
-          .should.equal(true)
-      })
-
-      it('should get the version from', function () {
-        return this.multi.get
-          .calledWith(`DocVersion:${this.doc_id}`)
-          .should.equal(true)
-      })
-
-      it('should get the hash', function () {
-        return this.multi.get
-          .calledWith(`DocHash:${this.doc_id}`)
-          .should.equal(true)
-      })
-
-      it('should get the ranges', function () {
-        return this.multi.get
-          .calledWith(`Ranges:${this.doc_id}`)
-          .should.equal(true)
-      })
-
-      it('should get the unflushed time', function () {
-        return this.multi.get
-          .calledWith(`UnflushedTime:${this.doc_id}`)
-          .should.equal(true)
-      })
-
-      it('should get the pathname', function () {
-        return this.multi.get
-          .calledWith(`Pathname:${this.doc_id}`)
-          .should.equal(true)
-      })
-
-      it('should get the projectHistoryId as an integer', function () {
-        return this.multi.get
-          .calledWith(`ProjectHistoryId:${this.doc_id}`)
-          .should.equal(true)
-      })
-
-      it('should get lastUpdatedAt', function () {
-        return this.multi.get
-          .calledWith(`lastUpdatedAt:${this.doc_id}`)
-          .should.equal(true)
-      })
-
-      it('should get lastUpdatedBy', function () {
-        return this.multi.get
-          .calledWith(`lastUpdatedBy:${this.doc_id}`)
+      it('should get all the details in one call to redis', function () {
+        this.rclient.mget
+          .calledWith(
+            `doclines:${this.doc_id}`,
+            `DocVersion:${this.doc_id}`,
+            `DocHash:${this.doc_id}`,
+            `ProjectId:${this.doc_id}`,
+            `Ranges:${this.doc_id}`,
+            `Pathname:${this.doc_id}`,
+            `ProjectHistoryId:${this.doc_id}`,
+            `UnflushedTime:${this.doc_id}`,
+            `lastUpdatedAt:${this.doc_id}`,
+            `lastUpdatedBy:${this.doc_id}`
+          )
           .should.equal(true)
       })
 
@@ -249,9 +211,9 @@ describe('RedisManager', function () {
 
     describe('when the document is not present', function () {
       beforeEach(function () {
-        this.multi.exec = sinon
+        this.rclient.mget = sinon
           .stub()
-          .callsArgWith(0, null, [
+          .yields(null, [
             null,
             null,
             null,
@@ -322,9 +284,9 @@ describe('RedisManager', function () {
     describe('with a corrupted document', function () {
       beforeEach(function () {
         this.badHash = 'INVALID-HASH-VALUE'
-        this.multi.exec = sinon
+        this.rclient.mget = sinon
           .stub()
-          .callsArgWith(0, null, [
+          .yields(null, [
             this.jsonlines,
             this.version,
             this.badHash,
@@ -351,19 +313,9 @@ describe('RedisManager', function () {
 
     describe('with a slow request to redis', function () {
       beforeEach(function () {
-        this.multi.exec = sinon
-          .stub()
-          .callsArgWith(0, null, [
-            this.jsonlines,
-            this.version,
-            this.badHash,
-            this.project_id,
-            this.json_ranges,
-            this.pathname,
-            this.unflushed_time
-          ])
         this.clock = sinon.useFakeTimers()
-        this.multi.exec = (cb) => {
+        this.rclient.mget = (...args) => {
+          const cb = args.pop()
           this.clock.tick(6000)
           return cb(null, [
             this.jsonlines,
@@ -396,9 +348,9 @@ describe('RedisManager', function () {
     return describe('getDoc with an invalid project id', function () {
       beforeEach(function () {
         this.another_project_id = 'project-id-456'
-        this.multi.exec = sinon
+        this.rclient.mget = sinon
           .stub()
-          .callsArgWith(0, null, [
+          .yields(null, [
             this.jsonlines,
             this.version,
             this.hash,

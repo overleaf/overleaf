@@ -190,18 +190,19 @@ module.exports = RedisManager = {
       ) {}
     }
     const timer = new metrics.Timer('redis.get-doc')
-    const multi = rclient.multi()
-    multi.get(keys.docLines({ doc_id }))
-    multi.get(keys.docVersion({ doc_id }))
-    multi.get(keys.docHash({ doc_id }))
-    multi.get(keys.projectKey({ doc_id }))
-    multi.get(keys.ranges({ doc_id }))
-    multi.get(keys.pathname({ doc_id }))
-    multi.get(keys.projectHistoryId({ doc_id }))
-    multi.get(keys.unflushedTime({ doc_id }))
-    multi.get(keys.lastUpdatedAt({ doc_id }))
-    multi.get(keys.lastUpdatedBy({ doc_id }))
-    return multi.exec(function (error, ...rest) {
+    const collectKeys = [
+      keys.docLines({ doc_id }),
+      keys.docVersion({ doc_id }),
+      keys.docHash({ doc_id }),
+      keys.projectKey({ doc_id }),
+      keys.ranges({ doc_id }),
+      keys.pathname({ doc_id }),
+      keys.projectHistoryId({ doc_id }),
+      keys.unflushedTime({ doc_id }),
+      keys.lastUpdatedAt({ doc_id }),
+      keys.lastUpdatedBy({ doc_id })
+    ]
+    rclient.mget(...collectKeys, (error, ...rest) => {
       let [
         docLines,
         version,
