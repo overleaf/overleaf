@@ -4,8 +4,6 @@
   "address_line_2": "Adresse (2. linje, valgfri)",
   "postal_code": "Postnummer",
   "reload_editor": "Genindlæs skriveprogram",
-  "logs_pane_beta_message": "Vi betatester en ny logningsrude",
-  "logs_pane_beta_message_popup": "Vi betatester en ny logningsrude. Klik her, for at give feedback og håndtere din deltagelse i betaprogrammer.",
   "compile_error_description": "Dette projekt kompilerede ikke på grund af en fejl",
   "validation_issue_description": "Dette projekt kompilerede ikke på grund af et valideringsproblem",
   "compile_error_entry_description": "En fejl, som forhindrede dette projekt i at kompilere",

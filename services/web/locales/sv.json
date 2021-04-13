@@ -2,8 +2,6 @@
   "address_line_1": "Adress",
   "address_line_2": "Adress (rad 2, frivilligt)",
   "postal_code": "Postnummer",
-  "logs_pane_beta_message": "Vi betatestar en ny ruta för loggar",
-  "logs_pane_beta_message_popup": "Vi betatestar en ny ruta för loggar. Klicka här för att ge respons och hantera ditt medlemskap i betaprogrammet.",
   "compile_error_description": "Detta projekt kompilerade ej på grund av ett fel",
   "validation_issue_description": "Detta projekt kompilerade ej på grund av ett valideringsproblem",
   "compile_error_entry_description": "Ett fel som förhindrade kompilering av detta projekt",
