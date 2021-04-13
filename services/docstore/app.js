@@ -72,7 +72,9 @@ app.patch(
   }),
   HttpController.patchDoc
 )
-app.delete('/project/:project_id/doc/:doc_id', HttpController.deleteDoc)
+app.delete('/project/:project_id/doc/:doc_id', (req, res) => {
+  res.status(500).send('DELETE-ing a doc is DEPRECATED. PATCH the doc instead.')
+})
 
 app.post('/project/:project_id/archive', HttpController.archiveAllDocs)
 app.post('/project/:project_id/doc/:doc_id/archive', HttpController.archiveDoc)

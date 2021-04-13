@@ -74,23 +74,6 @@ module.exports = DocManager = {
     })
   },
 
-  checkDocExists(project_id, doc_id, callback) {
-    if (callback == null) {
-      callback = function (err, exists) {}
-    }
-    return DocManager._getDoc(
-      project_id,
-      doc_id,
-      { _id: 1, inS3: true },
-      function (err, doc) {
-        if (err != null) {
-          return callback(err)
-        }
-        return callback(err, doc != null)
-      }
-    )
-  },
-
   isDocDeleted(projectId, docId, callback) {
     MongoManager.findDoc(projectId, docId, { deleted: true }, function (
       err,
@@ -289,41 +272,6 @@ module.exports = DocManager = {
         })
       }
     )
-  },
-
-  deleteDoc(project_id, doc_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
-    return DocManager.checkDocExists(project_id, doc_id, function (
-      error,
-      exists
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (!exists) {
-        return callback(
-          new Errors.NotFoundError(
-            `No such project/doc to delete: ${project_id}/${doc_id}`
-          )
-        )
-      }
-
-      if (Settings.docstore.archiveOnSoftDelete) {
-        // The user will not read this doc anytime soon. Flush it out of mongo.
-        DocArchive.archiveDocById(project_id, doc_id, (err) => {
-          if (err) {
-            logger.warn(
-              { project_id, doc_id, err },
-              'archiving a single doc in the background failed'
-            )
-          }
-        })
-      }
-
-      return MongoManager.markDocAsDeleted(project_id, doc_id, callback)
-    })
   },
 
   patchDoc(project_id, doc_id, meta, callback) {

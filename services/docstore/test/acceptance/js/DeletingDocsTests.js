@@ -203,27 +203,6 @@ function deleteTestSuite(deleteDoc) {
   })
 }
 
-describe('Delete via DELETE', function () {
-  deleteTestSuite(DocstoreClient.deleteDocLegacy)
-
-  describe('when the doc gets no name on delete', function () {
-    beforeEach(function (done) {
-      DocstoreClient.deleteDocLegacy(this.project_id, this.doc_id, done)
-    })
-
-    it('should not show the doc in the deleted docs response', function (done) {
-      DocstoreClient.getAllDeletedDocs(
-        this.project_id,
-        (error, deletedDocs) => {
-          if (error) return done(error)
-          expect(deletedDocs).to.deep.equal([])
-          done()
-        }
-      )
-    })
-  })
-})
-
 describe('Delete via PATCH', function () {
   deleteTestSuite(DocstoreClient.deleteDoc)
 

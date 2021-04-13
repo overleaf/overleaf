@@ -427,27 +427,6 @@ describe('HttpController', function () {
     })
   })
 
-  describe('deleteDoc', function () {
-    beforeEach(function () {
-      this.req.params = {
-        project_id: this.project_id,
-        doc_id: this.doc_id
-      }
-      this.DocManager.deleteDoc = sinon.stub().callsArg(2)
-      return this.HttpController.deleteDoc(this.req, this.res, this.next)
-    })
-
-    it('should delete the document', function () {
-      return this.DocManager.deleteDoc
-        .calledWith(this.project_id, this.doc_id)
-        .should.equal(true)
-    })
-
-    return it('should return a 204 (No Content)', function () {
-      return this.res.sendStatus.calledWith(204).should.equal(true)
-    })
-  })
-
   describe('patchDoc', function () {
     beforeEach(function () {
       this.req.params = {
