@@ -153,7 +153,6 @@ describe('RedisManager', function () {
           this.projectHistoryId.toString(),
           this.unflushed_time
         ])
-      return (this.rclient.sadd = sinon.stub().yields(null, 0))
     })
 
     describe('successfully', function () {
@@ -182,12 +181,6 @@ describe('RedisManager', function () {
           .should.equal(true)
       })
 
-      it('should check if the document is in the DocsIn set', function () {
-        return this.rclient.sadd
-          .calledWith(`DocsIn:${this.project_id}`)
-          .should.equal(true)
-      })
-
       it('should return the document', function () {
         return this.callback
           .calledWithExactly(
@@ -206,78 +199,6 @@ describe('RedisManager', function () {
 
       return it('should not log any errors', function () {
         return this.logger.error.calledWith().should.equal(false)
-      })
-    })
-
-    describe('when the document is not present', function () {
-      beforeEach(function () {
-        this.rclient.mget = sinon
-          .stub()
-          .yields(null, [
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-          ])
-        this.rclient.sadd = sinon.stub().yields()
-        return this.RedisManager.getDoc(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
-      })
-
-      it('should not check if the document is in the DocsIn set', function () {
-        return this.rclient.sadd
-          .calledWith(`DocsIn:${this.project_id}`)
-          .should.equal(false)
-      })
-
-      it('should return an empty result', function () {
-        return this.callback
-          .calledWithExactly(null, null, 0, {}, null, null, null, null, null)
-          .should.equal(true)
-      })
-
-      return it('should not log any errors', function () {
-        return this.logger.error.calledWith().should.equal(false)
-      })
-    })
-
-    describe('when the document is missing from the DocsIn set', function () {
-      beforeEach(function () {
-        this.rclient.sadd = sinon.stub().yields(null, 1)
-        return this.RedisManager.getDoc(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
-      })
-
-      it('should log an error', function () {
-        return this.logger.error.calledWith().should.equal(true)
-      })
-
-      return it('should return the document', function () {
-        return this.callback
-          .calledWithExactly(
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            this.unflushed_time,
-            this.lastUpdatedAt,
-            this.lastUpdatedBy
-          )
-          .should.equal(true)
       })
     })
 
@@ -547,6 +468,7 @@ describe('RedisManager', function () {
       this.project_update_list_length = sinon.stub()
 
       this.RedisManager.getDocVersion = sinon.stub()
+      this.multi.mset = sinon.stub()
       this.multi.set = sinon.stub()
       this.multi.rpush = sinon.stub()
       this.multi.expire = sinon.stub()
@@ -555,9 +477,6 @@ describe('RedisManager', function () {
       this.multi.exec = sinon
         .stub()
         .callsArgWith(0, null, [
-          this.hash,
-          null,
-          null,
           null,
           null,
           null,
@@ -602,45 +521,22 @@ describe('RedisManager', function () {
             .should.equal(true)
         })
 
-        it('should set the doclines', function () {
-          return this.multi.set
-            .calledWith(`doclines:${this.doc_id}`, JSON.stringify(this.lines))
-            .should.equal(true)
-        })
-
-        it('should set the version', function () {
-          return this.multi.set
-            .calledWith(`DocVersion:${this.doc_id}`, this.version)
-            .should.equal(true)
-        })
-
-        it('should set the hash', function () {
-          return this.multi.set
-            .calledWith(`DocHash:${this.doc_id}`, this.hash)
-            .should.equal(true)
-        })
-
-        it('should set the ranges', function () {
-          return this.multi.set
-            .calledWith(`Ranges:${this.doc_id}`, JSON.stringify(this.ranges))
+        it('should set most details in a single MSET call', function () {
+          this.multi.mset
+            .calledWith({
+              [`doclines:${this.doc_id}`]: JSON.stringify(this.lines),
+              [`DocVersion:${this.doc_id}`]: this.version,
+              [`DocHash:${this.doc_id}`]: this.hash,
+              [`Ranges:${this.doc_id}`]: JSON.stringify(this.ranges),
+              [`lastUpdatedAt:${this.doc_id}`]: Date.now(),
+              [`lastUpdatedBy:${this.doc_id}`]: 'last-author-fake-id'
+            })
             .should.equal(true)
         })
 
         it('should set the unflushed time', function () {
           return this.multi.set
             .calledWith(`UnflushedTime:${this.doc_id}`, Date.now(), 'NX')
-            .should.equal(true)
-        })
-
-        it('should set the last updated time', function () {
-          return this.multi.set
-            .calledWith(`lastUpdatedAt:${this.doc_id}`, Date.now())
-            .should.equal(true)
-        })
-
-        it('should set the last updater', function () {
-          return this.multi.set
-            .calledWith(`lastUpdatedBy:${this.doc_id}`, 'last-author-fake-id')
             .should.equal(true)
         })
 
@@ -825,8 +721,15 @@ describe('RedisManager', function () {
       })
 
       return it('should still set the doclines', function () {
-        return this.multi.set
-          .calledWith(`doclines:${this.doc_id}`, JSON.stringify(this.lines))
+        this.multi.mset
+          .calledWith({
+            [`doclines:${this.doc_id}`]: JSON.stringify(this.lines),
+            [`DocVersion:${this.doc_id}`]: this.version,
+            [`DocHash:${this.doc_id}`]: this.hash,
+            [`Ranges:${this.doc_id}`]: JSON.stringify(this.ranges),
+            [`lastUpdatedAt:${this.doc_id}`]: Date.now(),
+            [`lastUpdatedBy:${this.doc_id}`]: 'last-author-fake-id'
+          })
           .should.equal(true)
       })
     })
@@ -848,15 +751,16 @@ describe('RedisManager', function () {
         )
       })
 
-      it('should not set the ranges', function () {
-        return this.multi.set
-          .calledWith(`Ranges:${this.doc_id}`, JSON.stringify(this.ranges))
-          .should.equal(false)
-      })
-
-      return it('should delete the ranges key', function () {
-        return this.multi.del
-          .calledWith(`Ranges:${this.doc_id}`)
+      it('should set empty ranges', function () {
+        this.multi.mset
+          .calledWith({
+            [`doclines:${this.doc_id}`]: JSON.stringify(this.lines),
+            [`DocVersion:${this.doc_id}`]: this.version,
+            [`DocHash:${this.doc_id}`]: this.hash,
+            [`Ranges:${this.doc_id}`]: null,
+            [`lastUpdatedAt:${this.doc_id}`]: Date.now(),
+            [`lastUpdatedBy:${this.doc_id}`]: 'last-author-fake-id'
+          })
           .should.equal(true)
       })
     })
@@ -944,15 +848,16 @@ describe('RedisManager', function () {
         )
       })
 
-      it('should set the last updater to null', function () {
-        return this.multi.del
-          .calledWith(`lastUpdatedBy:${this.doc_id}`)
-          .should.equal(true)
-      })
-
-      return it('should still set the last updated time', function () {
-        return this.multi.set
-          .calledWith(`lastUpdatedAt:${this.doc_id}`, Date.now())
+      it('should unset last updater', function () {
+        this.multi.mset
+          .calledWith({
+            [`doclines:${this.doc_id}`]: JSON.stringify(this.lines),
+            [`DocVersion:${this.doc_id}`]: this.version,
+            [`DocHash:${this.doc_id}`]: this.hash,
+            [`Ranges:${this.doc_id}`]: JSON.stringify(this.ranges),
+            [`lastUpdatedAt:${this.doc_id}`]: Date.now(),
+            [`lastUpdatedBy:${this.doc_id}`]: undefined
+          })
           .should.equal(true)
       })
     })
@@ -960,16 +865,14 @@ describe('RedisManager', function () {
 
   describe('putDocInMemory', function () {
     beforeEach(function () {
-      this.multi.set = sinon.stub()
+      this.rclient.mset = sinon.stub().yields(null)
       this.rclient.sadd = sinon.stub().yields()
-      this.multi.del = sinon.stub()
       this.lines = ['one', 'two', 'three', 'これは']
       this.version = 42
       this.hash = crypto
         .createHash('sha1')
         .update(JSON.stringify(this.lines), 'utf8')
         .digest('hex')
-      this.multi.exec = sinon.stub().callsArgWith(0, null, [this.hash])
       this.ranges = { comments: 'mock', entries: 'mock' }
       return (this.pathname = '/a/b/c.tex')
     })
@@ -988,45 +891,17 @@ describe('RedisManager', function () {
         )
       })
 
-      it('should set the lines', function () {
-        return this.multi.set
-          .calledWith(`doclines:${this.doc_id}`, JSON.stringify(this.lines))
-          .should.equal(true)
-      })
-
-      it('should set the version', function () {
-        return this.multi.set
-          .calledWith(`DocVersion:${this.doc_id}`, this.version)
-          .should.equal(true)
-      })
-
-      it('should set the hash', function () {
-        return this.multi.set
-          .calledWith(`DocHash:${this.doc_id}`, this.hash)
-          .should.equal(true)
-      })
-
-      it('should set the ranges', function () {
-        return this.multi.set
-          .calledWith(`Ranges:${this.doc_id}`, JSON.stringify(this.ranges))
-          .should.equal(true)
-      })
-
-      it('should set the project_id for the doc', function () {
-        return this.multi.set
-          .calledWith(`ProjectId:${this.doc_id}`, this.project_id)
-          .should.equal(true)
-      })
-
-      it('should set the pathname for the doc', function () {
-        return this.multi.set
-          .calledWith(`Pathname:${this.doc_id}`, this.pathname)
-          .should.equal(true)
-      })
-
-      it('should set the projectHistoryId for the doc', function () {
-        return this.multi.set
-          .calledWith(`ProjectHistoryId:${this.doc_id}`, this.projectHistoryId)
+      it('should set all the details in a single MSET call', function () {
+        this.rclient.mset
+          .calledWith({
+            [`doclines:${this.doc_id}`]: JSON.stringify(this.lines),
+            [`ProjectId:${this.doc_id}`]: this.project_id,
+            [`DocVersion:${this.doc_id}`]: this.version,
+            [`DocHash:${this.doc_id}`]: this.hash,
+            [`Ranges:${this.doc_id}`]: JSON.stringify(this.ranges),
+            [`Pathname:${this.doc_id}`]: this.pathname,
+            [`ProjectHistoryId:${this.doc_id}`]: this.projectHistoryId
+          })
           .should.equal(true)
       })
 
@@ -1055,16 +930,18 @@ describe('RedisManager', function () {
         )
       })
 
-      it('should delete the ranges key', function () {
-        return this.multi.del
-          .calledWith(`Ranges:${this.doc_id}`)
+      it('should unset ranges', function () {
+        this.rclient.mset
+          .calledWith({
+            [`doclines:${this.doc_id}`]: JSON.stringify(this.lines),
+            [`ProjectId:${this.doc_id}`]: this.project_id,
+            [`DocVersion:${this.doc_id}`]: this.version,
+            [`DocHash:${this.doc_id}`]: this.hash,
+            [`Ranges:${this.doc_id}`]: null,
+            [`Pathname:${this.doc_id}`]: this.pathname,
+            [`ProjectHistoryId:${this.doc_id}`]: this.projectHistoryId
+          })
           .should.equal(true)
-      })
-
-      return it('should not set the ranges', function () {
-        return this.multi.set
-          .calledWith(`Ranges:${this.doc_id}`, JSON.stringify(this.ranges))
-          .should.equal(false)
       })
     })
 
@@ -1148,63 +1025,27 @@ describe('RedisManager', function () {
         .should.equal(true)
     })
 
-    it('should delete the lines', function () {
+    it('should delete the details in a singe call', function () {
       return this.multi.del
-        .calledWith(`doclines:${this.doc_id}`)
-        .should.equal(true)
-    })
-
-    it('should delete the version', function () {
-      return this.multi.del
-        .calledWith(`DocVersion:${this.doc_id}`)
-        .should.equal(true)
-    })
-
-    it('should delete the hash', function () {
-      return this.multi.del
-        .calledWith(`DocHash:${this.doc_id}`)
-        .should.equal(true)
-    })
-
-    it('should delete the unflushed time', function () {
-      return this.multi.del
-        .calledWith(`UnflushedTime:${this.doc_id}`)
-        .should.equal(true)
-    })
-
-    it('should delete the project_id for the doc', function () {
-      return this.multi.del
-        .calledWith(`ProjectId:${this.doc_id}`)
+        .calledWith(
+          `doclines:${this.doc_id}`,
+          `ProjectId:${this.doc_id}`,
+          `DocVersion:${this.doc_id}`,
+          `DocHash:${this.doc_id}`,
+          `Ranges:${this.doc_id}`,
+          `Pathname:${this.doc_id}`,
+          `ProjectHistoryId:${this.doc_id}`,
+          `ProjectHistoryType:${this.doc_id}`,
+          `UnflushedTime:${this.doc_id}`,
+          `lastUpdatedAt:${this.doc_id}`,
+          `lastUpdatedBy:${this.doc_id}`
+        )
         .should.equal(true)
     })
 
     it('should remove the doc_id from the project set', function () {
       return this.multi.srem
         .calledWith(`DocsIn:${this.project_id}`, this.doc_id)
-        .should.equal(true)
-    })
-
-    it('should delete the pathname for the doc', function () {
-      return this.multi.del
-        .calledWith(`Pathname:${this.doc_id}`)
-        .should.equal(true)
-    })
-
-    it('should delete the pathname for the doc', function () {
-      return this.multi.del
-        .calledWith(`ProjectHistoryId:${this.doc_id}`)
-        .should.equal(true)
-    })
-
-    it('should delete lastUpdatedAt', function () {
-      return this.multi.del
-        .calledWith(`lastUpdatedAt:${this.doc_id}`)
-        .should.equal(true)
-    })
-
-    return it('should delete lastUpdatedBy', function () {
-      return this.multi.del
-        .calledWith(`lastUpdatedBy:${this.doc_id}`)
         .should.equal(true)
     })
   })
