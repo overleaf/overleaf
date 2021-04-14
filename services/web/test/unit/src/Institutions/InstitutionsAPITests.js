@@ -1,18 +1,5 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
 const modulePath = path.join(
@@ -46,7 +33,7 @@ describe('InstitutionsAPI', function() {
       name: 'bob',
       email: 'hello@world.com'
     }
-    return (this.newEmail = 'bob@bob.com')
+    this.newEmail = 'bob@bob.com'
   })
 
   describe('getInstitutionAffiliations', function() {
@@ -54,7 +41,7 @@ describe('InstitutionsAPI', function() {
       this.institutionId = 123
       const responseBody = ['123abc', '456def']
       this.request.yields(null, { statusCode: 200 }, responseBody)
-      return this.InstitutionsAPI.getInstitutionAffiliations(
+      this.InstitutionsAPI.getInstitutionAffiliations(
         this.institutionId,
         (err, body) => {
           expect(err).not.to.exist
@@ -65,7 +52,7 @@ describe('InstitutionsAPI', function() {
           requestOptions.method.should.equal('GET')
           expect(requestOptions.body).not.to.exist
           body.should.equal(responseBody)
-          return done()
+          done()
         }
       )
     })
@@ -73,13 +60,13 @@ describe('InstitutionsAPI', function() {
     it('handle empty response', function(done) {
       this.settings.apis.v1.url = ''
 
-      return this.InstitutionsAPI.getInstitutionAffiliations(
+      this.InstitutionsAPI.getInstitutionAffiliations(
         this.institutionId,
         (err, body) => {
           expect(err).not.to.exist
           expect(body).to.be.a('Array')
           body.length.should.equal(0)
-          return done()
+          done()
         }
       )
     })
@@ -95,7 +82,7 @@ describe('InstitutionsAPI', function() {
       this.request.yields(null, { statusCode: 200 }, responseBody)
       const startDate = '1417392000'
       const endDate = '1420848000'
-      return this.InstitutionsAPI.getInstitutionLicences(
+      this.InstitutionsAPI.getInstitutionLicences(
         this.institutionId,
         startDate,
         endDate,
@@ -111,7 +98,46 @@ describe('InstitutionsAPI', function() {
           requestOptions.body.end_date.should.equal(endDate)
           requestOptions.body.lag.should.equal('monthly')
           body.should.equal(responseBody)
-          return done()
+          done()
+        }
+      )
+    })
+  })
+
+  describe('getLicencesForAnalytics', function() {
+    const lag = 'daily'
+    const queryDate = '2017-01-07:00:00.000Z'
+    it('should send the request to v1', function(done) {
+      const v1Result = {
+        lag: 'daily',
+        date: queryDate,
+        data: {
+          user_counts: { total: [], new: [] },
+          max_confirmation_months: []
+        }
+      }
+      this.request.callsArgWith(1, null, { statusCode: 201 }, v1Result)
+      this.InstitutionsAPI.getLicencesForAnalytics(
+        lag,
+        queryDate,
+        (error, result) => {
+          expect(error).not.to.exist
+          const requestOptions = this.request.lastCall.args[0]
+          expect(requestOptions.body.query_date).to.equal(queryDate)
+          expect(requestOptions.body.lag).to.equal(lag)
+          requestOptions.method.should.equal('GET')
+          done()
+        }
+      )
+    })
+    it('should handle errors', function(done) {
+      this.request.callsArgWith(1, null, { statusCode: 500 })
+      this.InstitutionsAPI.getLicencesForAnalytics(
+        lag,
+        queryDate,
+        (error, result) => {
+          expect(error).to.be.instanceof(Errors.V1ConnectionError)
+          done()
         }
       )
     })
@@ -121,7 +147,7 @@ describe('InstitutionsAPI', function() {
     it('get affiliations', function(done) {
       const responseBody = [{ foo: 'bar' }]
       this.request.callsArgWith(1, null, { statusCode: 201 }, responseBody)
-      return this.InstitutionsAPI.getUserAffiliations(
+      this.InstitutionsAPI.getUserAffiliations(
         this.stubbedUser._id,
         (err, body) => {
           expect(err).not.to.exist
@@ -132,7 +158,7 @@ describe('InstitutionsAPI', function() {
           requestOptions.method.should.equal('GET')
           expect(requestOptions.body).not.to.exist
           body.should.equal(responseBody)
-          return done()
+          done()
         }
       )
     })
@@ -140,24 +166,21 @@ describe('InstitutionsAPI', function() {
     it('handle error', function(done) {
       const body = { errors: 'affiliation error message' }
       this.request.callsArgWith(1, null, { statusCode: 503 }, body)
-      return this.InstitutionsAPI.getUserAffiliations(
-        this.stubbedUser._id,
-        err => {
-          expect(err).to.be.instanceof(Errors.V1ConnectionError)
-          return done()
-        }
-      )
+      this.InstitutionsAPI.getUserAffiliations(this.stubbedUser._id, err => {
+        expect(err).to.be.instanceof(Errors.V1ConnectionError)
+        done()
+      })
     })
 
     it('handle empty response', function(done) {
       this.settings.apis.v1.url = ''
-      return this.InstitutionsAPI.getUserAffiliations(
+      this.InstitutionsAPI.getUserAffiliations(
         this.stubbedUser._id,
         (err, body) => {
           expect(err).not.to.exist
           expect(body).to.be.a('Array')
           body.length.should.equal(0)
-          return done()
+          done()
         }
       )
     })
@@ -165,7 +188,7 @@ describe('InstitutionsAPI', function() {
 
   describe('addAffiliation', function() {
     beforeEach(function() {
-      return this.request.callsArgWith(1, null, { statusCode: 201 })
+      this.request.callsArgWith(1, null, { statusCode: 201 })
     })
 
     it('add affiliation', function(done) {
@@ -176,7 +199,7 @@ describe('InstitutionsAPI', function() {
         confirmedAt: new Date(),
         entitlement: true
       }
-      return this.InstitutionsAPI.addAffiliation(
+      this.InstitutionsAPI.addAffiliation(
         this.stubbedUser._id,
         this.newEmail,
         affiliationOptions,
@@ -197,7 +220,7 @@ describe('InstitutionsAPI', function() {
           body.confirmedAt.should.equal(affiliationOptions.confirmedAt)
           body.entitlement.should.equal(affiliationOptions.entitlement)
           this.markAsReadIpMatcher.calledOnce.should.equal(true)
-          return done()
+          done()
         }
       )
     })
@@ -205,7 +228,7 @@ describe('InstitutionsAPI', function() {
     it('handle error', function(done) {
       const body = { errors: 'affiliation error message' }
       this.request.callsArgWith(1, null, { statusCode: 422 }, body)
-      return this.InstitutionsAPI.addAffiliation(
+      this.InstitutionsAPI.addAffiliation(
         this.stubbedUser._id,
         this.newEmail,
         {},
@@ -213,7 +236,7 @@ describe('InstitutionsAPI', function() {
           expect(err).to.exist
           err.message.should.have.string(422)
           err.message.should.have.string(body.errors)
-          return done()
+          done()
         }
       )
     })
@@ -221,11 +244,11 @@ describe('InstitutionsAPI', function() {
 
   describe('removeAffiliation', function() {
     beforeEach(function() {
-      return this.request.callsArgWith(1, null, { statusCode: 404 })
+      this.request.callsArgWith(1, null, { statusCode: 404 })
     })
 
     it('remove affiliation', function(done) {
-      return this.InstitutionsAPI.removeAffiliation(
+      this.InstitutionsAPI.removeAffiliation(
         this.stubbedUser._id,
         this.newEmail,
         err => {
@@ -236,20 +259,20 @@ describe('InstitutionsAPI', function() {
           requestOptions.url.should.equal(expectedUrl)
           requestOptions.method.should.equal('POST')
           expect(requestOptions.body).to.deep.equal({ email: this.newEmail })
-          return done()
+          done()
         }
       )
     })
 
     it('handle error', function(done) {
       this.request.callsArgWith(1, null, { statusCode: 500 })
-      return this.InstitutionsAPI.removeAffiliation(
+      this.InstitutionsAPI.removeAffiliation(
         this.stubbedUser._id,
         this.newEmail,
         err => {
           expect(err).to.exist
           err.message.should.exist
-          return done()
+          done()
         }
       )
     })
@@ -258,40 +281,34 @@ describe('InstitutionsAPI', function() {
   describe('deleteAffiliations', function() {
     it('delete affiliations', function(done) {
       this.request.callsArgWith(1, null, { statusCode: 200 })
-      return this.InstitutionsAPI.deleteAffiliations(
-        this.stubbedUser._id,
-        err => {
-          expect(err).not.to.exist
-          this.request.calledOnce.should.equal(true)
-          const requestOptions = this.request.lastCall.args[0]
-          const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
-          requestOptions.url.should.equal(expectedUrl)
-          requestOptions.method.should.equal('DELETE')
-          return done()
-        }
-      )
+      this.InstitutionsAPI.deleteAffiliations(this.stubbedUser._id, err => {
+        expect(err).not.to.exist
+        this.request.calledOnce.should.equal(true)
+        const requestOptions = this.request.lastCall.args[0]
+        const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
+        requestOptions.url.should.equal(expectedUrl)
+        requestOptions.method.should.equal('DELETE')
+        done()
+      })
     })
 
     it('handle error', function(done) {
       const body = { errors: 'affiliation error message' }
       this.request.callsArgWith(1, null, { statusCode: 518 }, body)
-      return this.InstitutionsAPI.deleteAffiliations(
-        this.stubbedUser._id,
-        err => {
-          expect(err).to.be.instanceof(Errors.V1ConnectionError)
-          return done()
-        }
-      )
+      this.InstitutionsAPI.deleteAffiliations(this.stubbedUser._id, err => {
+        expect(err).to.be.instanceof(Errors.V1ConnectionError)
+        done()
+      })
     })
   })
 
   describe('endorseAffiliation', function() {
     beforeEach(function() {
-      return this.request.callsArgWith(1, null, { statusCode: 204 })
+      this.request.callsArgWith(1, null, { statusCode: 204 })
     })
 
     it('endorse affiliation', function(done) {
-      return this.InstitutionsAPI.endorseAffiliation(
+      this.InstitutionsAPI.endorseAffiliation(
         this.stubbedUser._id,
         this.newEmail,
         'Student',
@@ -309,7 +326,7 @@ describe('InstitutionsAPI', function() {
           body.email.should.equal(this.newEmail)
           body.role.should.equal('Student')
           body.department.should.equal('Physics')
-          return done()
+          done()
         }
       )
     })

@@ -22,6 +22,18 @@ const InstitutionsAPI = {
     )
   },
 
+  getLicencesForAnalytics(lag, queryDate, callback) {
+    makeAffiliationRequest(
+      {
+        method: 'GET',
+        path: `/api/v2/institutions/institutions_licences`,
+        body: { query_date: queryDate, lag },
+        defaultErrorMessage: 'Could not get institutions licences'
+      },
+      callback
+    )
+  },
+
   getInstitutionLicences(institutionId, startDate, endDate, lag, callback) {
     makeAffiliationRequest(
       {
