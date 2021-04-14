@@ -4,8 +4,8 @@ const { expect } = require('chai')
 const settings = require('settings-sharelatex')
 const { ObjectId } = require('mongodb')
 
-describe('DocUpdate', function() {
-  beforeEach(function(done) {
+describe('DocUpdate', function () {
+  beforeEach(function (done) {
     this.user = new User()
     this.projectName = 'wombat'
     this.user.ensureUserExists(() => {
@@ -77,7 +77,7 @@ describe('DocUpdate', function() {
   }
 
   let writeOptions
-  beforeEach(function() {
+  beforeEach(function () {
     writeOptions = {
       projectId: this.projectId,
       docId: this.docId,
@@ -90,21 +90,21 @@ describe('DocUpdate', function() {
   })
 
   function shouldAcceptChanges() {
-    it('should accept writes', function(done) {
+    it('should accept writes', function (done) {
       writeContent(writeOptions, done)
     })
 
-    it('should accept updates', function(done) {
+    it('should accept updates', function (done) {
       updateContent(writeOptions, done)
     })
 
-    it('should accept same write twice', function(done) {
+    it('should accept same write twice', function (done) {
       writeContentTwice(writeOptions, done)
     })
   }
 
   function shouldBlockChanges() {
-    it('should block writes', function(done) {
+    it('should block writes', function (done) {
       writeContent(writeOptions, err => {
         expect(err).to.exist
         expect(err.message).to.equal('non-success statusCode: 404')
@@ -112,7 +112,7 @@ describe('DocUpdate', function() {
       })
     })
 
-    it('should block updates', function(done) {
+    it('should block updates', function (done) {
       updateContent(writeOptions, err => {
         expect(err).to.exist
         expect(err.message).to.equal('non-success statusCode: 404')
@@ -121,28 +121,28 @@ describe('DocUpdate', function() {
     })
   }
 
-  describe('a regular doc', function() {
+  describe('a regular doc', function () {
     shouldAcceptChanges()
   })
 
-  describe('after deleting the doc', function() {
-    beforeEach(function(done) {
+  describe('after deleting the doc', function () {
+    beforeEach(function (done) {
       this.user.deleteItemInProject(this.projectId, 'doc', this.docId, done)
     })
 
     shouldAcceptChanges()
   })
 
-  describe('unknown doc', function() {
-    beforeEach(function() {
+  describe('unknown doc', function () {
+    beforeEach(function () {
       writeOptions.docId = ObjectId()
     })
 
     shouldBlockChanges()
   })
 
-  describe('doc in another project', function() {
-    beforeEach(function(done) {
+  describe('doc in another project', function () {
+    beforeEach(function (done) {
       this.user.createProject('foo', (error, projectId) => {
         if (error) return done(error)
         writeOptions.projectId = projectId

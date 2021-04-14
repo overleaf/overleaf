@@ -8,7 +8,7 @@ function dropboxDuplicateProjectNames(userId) {
     key: `dropboxDuplicateProjectNames-${userId}`,
     create(projectName, callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       NotificationsHandler.createNotification(
         userId,
@@ -22,7 +22,7 @@ function dropboxDuplicateProjectNames(userId) {
     },
     read(callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       NotificationsHandler.markAsReadWithKey(userId, this.key, callback)
     }
@@ -34,7 +34,7 @@ function featuresUpgradedByAffiliation(affiliation, user) {
     key: `features-updated-by=${affiliation.institutionId}`,
     create(callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       const messageOpts = { institutionName: affiliation.institutionName }
       NotificationsHandler.createNotification(
@@ -49,7 +49,7 @@ function featuresUpgradedByAffiliation(affiliation, user) {
     },
     read(callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
     }
@@ -61,7 +61,7 @@ function redundantPersonalSubscription(affiliation, user) {
     key: `redundant-personal-subscription-${affiliation.institutionId}`,
     create(callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       const messageOpts = { institutionName: affiliation.institutionName }
       NotificationsHandler.createNotification(
@@ -76,7 +76,7 @@ function redundantPersonalSubscription(affiliation, user) {
     },
     read(callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
     }
@@ -88,7 +88,7 @@ function projectInvite(invite, project, sendingUser, user) {
     key: `project-invite-${invite._id}`,
     create(callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       const messageOpts = {
         userName: sendingUser.first_name,
@@ -107,7 +107,7 @@ function projectInvite(invite, project, sendingUser, user) {
     },
     read(callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
     }
@@ -118,7 +118,7 @@ function ipMatcherAffiliation(userId) {
   return {
     create(ip, callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       if (!settings.apis.v1.url) {
         // service is not configured
@@ -133,7 +133,7 @@ function ipMatcherAffiliation(userId) {
           json: true,
           timeout: 20 * 1000
         },
-        function(error, response, body) {
+        function (error, response, body) {
           if (error != null) {
             return callback(error)
           }
@@ -167,7 +167,7 @@ function ipMatcherAffiliation(userId) {
 
     read(universityId, callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       const key = `ip-matched-affiliation-${universityId}`
       NotificationsHandler.markAsReadWithKey(userId, key, callback)
@@ -180,7 +180,7 @@ function tpdsFileLimit(userId) {
     key: `tpdsFileLimit-${userId}`,
     create(projectName, callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       const messageOpts = {
         projectName: projectName
@@ -197,7 +197,7 @@ function tpdsFileLimit(userId) {
     },
     read(callback) {
       if (callback == null) {
-        callback = function() {}
+        callback = function () {}
       }
       NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
     }
@@ -215,7 +215,7 @@ const NotificationsBuilder = {
 }
 
 NotificationsBuilder.promises = {
-  redundantPersonalSubscription: function(affiliation, user) {
+  redundantPersonalSubscription: function (affiliation, user) {
     return promisifyAll(redundantPersonalSubscription(affiliation, user))
   }
 }

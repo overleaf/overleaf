@@ -11,13 +11,13 @@ const MockFilestoreApiClass = require('./mocks/MockFilestoreApi')
 
 let MockDocstoreApi, MockFilestoreApi
 
-before(function() {
+before(function () {
   MockDocstoreApi = MockDocstoreApiClass.instance()
   MockFilestoreApi = MockFilestoreApiClass.instance()
 })
 
-describe('Deleting a user', function() {
-  beforeEach(function(done) {
+describe('Deleting a user', function () {
+  beforeEach(function (done) {
     this.user = new User()
     async.series(
       [
@@ -28,7 +28,7 @@ describe('Deleting a user', function() {
     )
   })
 
-  it('Should remove the user from active users', function(done) {
+  it('Should remove the user from active users', function (done) {
     this.user.get((error, user) => {
       expect(error).not.to.exist
       expect(user).to.exist
@@ -43,7 +43,7 @@ describe('Deleting a user', function() {
     })
   })
 
-  it('Should create a soft-deleted user', function(done) {
+  it('Should create a soft-deleted user', function (done) {
     this.user.get((error, user) => {
       expect(error).not.to.exist
       this.user.deleteUser(error => {
@@ -75,7 +75,7 @@ describe('Deleting a user', function() {
     })
   })
 
-  it('Should fail if the user has a subscription', function(done) {
+  it('Should fail if the user has a subscription', function (done) {
     Subscription.create(
       {
         admin_id: this.user._id,
@@ -98,7 +98,7 @@ describe('Deleting a user', function() {
     )
   })
 
-  it("Should delete the user's projects", function(done) {
+  it("Should delete the user's projects", function (done) {
     this.user.createProject('wombat', (error, projectId) => {
       expect(error).not.to.exist
       this.user.getProject(projectId, (error, project) => {
@@ -117,8 +117,8 @@ describe('Deleting a user', function() {
     })
   })
 
-  describe('when scrubbing the user', function() {
-    beforeEach(function(done) {
+  describe('when scrubbing the user', function () {
+    beforeEach(function (done) {
       this.user.get((error, user) => {
         if (error) {
           throw error
@@ -128,7 +128,7 @@ describe('Deleting a user', function() {
       })
     })
 
-    it('Should remove the user data from mongo', function(done) {
+    it('Should remove the user data from mongo', function (done) {
       db.deletedUsers.findOne(
         { 'deleterData.deletedUserId': this.userId },
         (error, deletedUser) => {
@@ -168,8 +168,8 @@ describe('Deleting a user', function() {
   })
 })
 
-describe('Deleting a project', function() {
-  beforeEach(function(done) {
+describe('Deleting a project', function () {
+  beforeEach(function (done) {
     this.user = new User()
     this.projectName = 'wombat'
     this.user.ensureUserExists(() => {
@@ -182,7 +182,7 @@ describe('Deleting a project', function() {
     })
   })
 
-  it('Should remove the project from active projects', function(done) {
+  it('Should remove the project from active projects', function (done) {
     this.user.getProject(this.projectId, (error, project) => {
       expect(error).not.to.exist
       expect(project).to.exist
@@ -199,7 +199,7 @@ describe('Deleting a project', function() {
     })
   })
 
-  it('Should create a soft-deleted project', function(done) {
+  it('Should create a soft-deleted project', function (done) {
     this.user.getProject(this.projectId, (error, project) => {
       expect(error).not.to.exist
 
@@ -239,8 +239,8 @@ describe('Deleting a project', function() {
     })
   })
 
-  describe('when the project has deleted files', function() {
-    beforeEach('get rootFolder id', function(done) {
+  describe('when the project has deleted files', function () {
+    beforeEach('get rootFolder id', function (done) {
       this.user.getProject(this.projectId, (error, project) => {
         if (error) return done(error)
         this.rootFolder = project.rootFolder[0]._id
@@ -249,12 +249,12 @@ describe('Deleting a project', function() {
     })
 
     let allFileIds
-    beforeEach('reset allFileIds', function() {
+    beforeEach('reset allFileIds', function () {
       allFileIds = []
     })
     function createAndDeleteFile(name) {
       let fileId
-      beforeEach(`create file ${name}`, function(done) {
+      beforeEach(`create file ${name}`, function (done) {
         this.user.uploadExampleFileInProject(
           this.projectId,
           this.rootFolder,
@@ -266,7 +266,7 @@ describe('Deleting a project', function() {
           }
         )
       })
-      beforeEach(`delete file ${name}`, function(done) {
+      beforeEach(`delete file ${name}`, function (done) {
         this.user.deleteItemInProject(this.projectId, 'file', fileId, done)
       })
     }
@@ -274,7 +274,7 @@ describe('Deleting a project', function() {
       createAndDeleteFile(name)
     }
 
-    it('should have two deleteFiles entries', async function() {
+    it('should have two deleteFiles entries', async function () {
       const files = await db.deletedFiles
         .find({}, { sort: { _id: 1 } })
         .toArray()
@@ -282,11 +282,11 @@ describe('Deleting a project', function() {
       expect(files.map(file => file._id.toString())).to.deep.equal(allFileIds)
     })
 
-    describe('When the deleted project is expired', function() {
-      beforeEach('soft delete the project', function(done) {
+    describe('When the deleted project is expired', function () {
+      beforeEach('soft delete the project', function (done) {
         this.user.deleteProject(this.projectId, done)
       })
-      beforeEach('hard delete the project', function(done) {
+      beforeEach('hard delete the project', function (done) {
         request.post(
           `/internal/project/${this.projectId}/expire-deleted-project`,
           {
@@ -305,7 +305,7 @@ describe('Deleting a project', function() {
         )
       })
 
-      it('should cleanup the deleteFiles', async function() {
+      it('should cleanup the deleteFiles', async function () {
         const files = await db.deletedFiles
           .find({}, { sort: { _id: 1 } })
           .toArray()
@@ -314,8 +314,8 @@ describe('Deleting a project', function() {
     })
   })
 
-  describe('When the project has docs', function() {
-    beforeEach(function(done) {
+  describe('When the project has docs', function () {
+    beforeEach(function (done) {
       this.user.getProject(this.projectId, (error, project) => {
         if (error) {
           throw error
@@ -338,8 +338,8 @@ describe('Deleting a project', function() {
       })
     })
 
-    describe('When the deleted project is expired', function() {
-      beforeEach(function(done) {
+    describe('When the deleted project is expired', function () {
+      beforeEach(function (done) {
         this.user.deleteProject(this.projectId, error => {
           if (error) {
             throw error
@@ -348,7 +348,7 @@ describe('Deleting a project', function() {
         })
       })
 
-      it('Should destroy the docs', function(done) {
+      it('Should destroy the docs', function (done) {
         expect(
           MockDocstoreApi.docs[this.projectId.toString()][this.docId.toString()]
         ).to.exist
@@ -372,7 +372,7 @@ describe('Deleting a project', function() {
         )
       })
 
-      it('Should destroy the files', function(done) {
+      it('Should destroy the files', function (done) {
         expect(MockFilestoreApi.files[this.projectId.toString()]).to.exist
 
         request.post(
@@ -395,7 +395,7 @@ describe('Deleting a project', function() {
         )
       })
 
-      it('Should remove the project data from mongo', function(done) {
+      it('Should remove the project data from mongo', function (done) {
         db.deletedProjects.findOne(
           { 'deleterData.deletedProjectId': ObjectId(this.projectId) },
           (error, deletedProject) => {
@@ -438,12 +438,12 @@ describe('Deleting a project', function() {
     })
   })
 
-  describe('when the deleted project has deletedFiles', function() {
-    beforeEach('delete project', function(done) {
+  describe('when the deleted project has deletedFiles', function () {
+    beforeEach('delete project', function (done) {
       this.user.deleteProject(this.projectId, done)
     })
     let fileId1, fileId2
-    beforeEach('create files', function() {
+    beforeEach('create files', function () {
       // take a short cut and just allocate file ids
       fileId1 = ObjectId()
       fileId2 = ObjectId()
@@ -454,7 +454,7 @@ describe('Deleting a project', function() {
       hash: 'ed19e7d6779b47d8c63f6fa5a21954dcfb6cac00',
       deletedAt: new Date()
     }
-    beforeEach('insert deletedFiles', async function() {
+    beforeEach('insert deletedFiles', async function () {
       const deletedFiles = [
         { _id: fileId1, ...otherFileDetails },
         { _id: fileId2, ...otherFileDetails },
@@ -466,9 +466,9 @@ describe('Deleting a project', function() {
         { $set: { 'project.deletedFiles': deletedFiles } }
       )
     })
-    describe('when undelete the project', function() {
+    describe('when undelete the project', function () {
       let admin
-      beforeEach('create admin', function(done) {
+      beforeEach('create admin', function (done) {
         admin = new User()
         async.series(
           [
@@ -479,11 +479,11 @@ describe('Deleting a project', function() {
           done
         )
       })
-      beforeEach('undelete project', function(done) {
+      beforeEach('undelete project', function (done) {
         admin.undeleteProject(this.projectId, done)
       })
 
-      it('should not insert deletedFiles into the projects collection', function(done) {
+      it('should not insert deletedFiles into the projects collection', function (done) {
         this.user.getProject(this.projectId, (error, project) => {
           if (error) return done(error)
           expect(project.deletedFiles).to.deep.equal([])
@@ -491,7 +491,7 @@ describe('Deleting a project', function() {
         })
       })
 
-      it('should insert unique entries into the deletedFiles collection', async function() {
+      it('should insert unique entries into the deletedFiles collection', async function () {
         const docs = await db.deletedFiles
           .find({}, { sort: { _id: 1 } })
           .toArray()
@@ -503,13 +503,13 @@ describe('Deleting a project', function() {
     })
   })
 
-  describe('when the deleted project has deletedDocs', function() {
-    beforeEach('delete project', function(done) {
+  describe('when the deleted project has deletedDocs', function () {
+    beforeEach('delete project', function (done) {
       this.user.deleteProject(this.projectId, done)
     })
 
     let deletedDocs
-    beforeEach('set deletedDocs', function() {
+    beforeEach('set deletedDocs', function () {
       deletedDocs = [
         { _id: ObjectId(), name: 'foo.tex', deletedAt: new Date() },
         { _id: ObjectId(), name: 'bar.tex', deletedAt: new Date() }
@@ -522,14 +522,14 @@ describe('Deleting a project', function() {
       })
     })
 
-    beforeEach('insert deletedDocs', async function() {
+    beforeEach('insert deletedDocs', async function () {
       await db.deletedProjects.updateOne(
         { 'deleterData.deletedProjectId': ObjectId(this.projectId) },
         { $set: { 'project.deletedDocs': deletedDocs } }
       )
     })
 
-    it('should not see any doc names before', async function() {
+    it('should not see any doc names before', async function () {
       const docs = MockDocstoreApi.getDeletedDocs(this.projectId)
       expect(docs).to.deep.equal(
         deletedDocs.map(doc => {
@@ -539,9 +539,9 @@ describe('Deleting a project', function() {
       )
     })
 
-    describe('when undeleting the project', function() {
+    describe('when undeleting the project', function () {
       let admin
-      beforeEach('create admin', function(done) {
+      beforeEach('create admin', function (done) {
         admin = new User()
         async.series(
           [
@@ -552,11 +552,11 @@ describe('Deleting a project', function() {
           done
         )
       })
-      beforeEach('undelete project', function(done) {
+      beforeEach('undelete project', function (done) {
         admin.undeleteProject(this.projectId, done)
       })
 
-      it('should not insert deletedDocs into the projects collection', function(done) {
+      it('should not insert deletedDocs into the projects collection', function (done) {
         this.user.getProject(this.projectId, (error, project) => {
           if (error) return done(error)
           expect(project.deletedDocs).to.deep.equal([])
@@ -564,7 +564,7 @@ describe('Deleting a project', function() {
         })
       })
 
-      it('should back fill deleted docs context', async function() {
+      it('should back fill deleted docs context', async function () {
         const docs = MockDocstoreApi.getDeletedDocs(this.projectId)
         expect(docs).to.deep.equal(
           deletedDocs.map(doc => {

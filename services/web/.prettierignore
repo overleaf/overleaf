@@ -5,3 +5,4 @@ frontend/js/vendor
 modules/**/frontend/js/vendor
 public/js
 public/minjs
+frontend/stylesheets/components/nvd3.less

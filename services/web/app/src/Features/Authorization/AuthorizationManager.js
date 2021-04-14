@@ -54,20 +54,21 @@ const AuthorizationManager = {
       return callback(new Error('invalid project id'))
     }
     // Note, the Project property in the DB is `publicAccesLevel`, without the second `s`
-    ProjectGetter.getProject(projectId, { publicAccesLevel: 1 }, function(
-      error,
-      project
-    ) {
-      if (error) {
-        return callback(error)
+    ProjectGetter.getProject(
+      projectId,
+      { publicAccesLevel: 1 },
+      function (error, project) {
+        if (error) {
+          return callback(error)
+        }
+        if (!project) {
+          return callback(
+            new Errors.NotFoundError(`no project found with id ${projectId}`)
+          )
+        }
+        callback(null, project.publicAccesLevel)
       }
-      if (!project) {
-        return callback(
-          new Errors.NotFoundError(`no project found with id ${projectId}`)
-        )
-      }
-      callback(null, project.publicAccesLevel)
-    })
+    )
   },
 
   // Get the privilege level that the user has for the project
@@ -95,72 +96,78 @@ const AuthorizationManager = {
 
   // User is present, get their privilege level from database
   getPrivilegeLevelForProjectWithUser(userId, projectId, token, callback) {
-    CollaboratorsGetter.getMemberIdPrivilegeLevel(userId, projectId, function(
-      error,
-      privilegeLevel
-    ) {
-      if (error) {
-        return callback(error)
-      }
-      if (privilegeLevel && privilegeLevel !== PrivilegeLevels.NONE) {
-        // The user has direct access
-        return callback(null, privilegeLevel, false, false)
-      }
-      AuthorizationManager.isUserSiteAdmin(userId, function(error, isAdmin) {
+    CollaboratorsGetter.getMemberIdPrivilegeLevel(
+      userId,
+      projectId,
+      function (error, privilegeLevel) {
         if (error) {
           return callback(error)
         }
-        if (isAdmin) {
-          return callback(null, PrivilegeLevels.OWNER, false, true)
+        if (privilegeLevel && privilegeLevel !== PrivilegeLevels.NONE) {
+          // The user has direct access
+          return callback(null, privilegeLevel, false, false)
         }
-        // Legacy public-access system
-        // User is present (not anonymous), but does not have direct access
-        AuthorizationManager.getPublicAccessLevel(projectId, function(
-          err,
-          publicAccessLevel
-        ) {
-          if (err) {
-            return callback(err)
+        AuthorizationManager.isUserSiteAdmin(userId, function (error, isAdmin) {
+          if (error) {
+            return callback(error)
           }
-          if (publicAccessLevel === PublicAccessLevels.READ_ONLY) {
-            return callback(null, PrivilegeLevels.READ_ONLY, true, false)
+          if (isAdmin) {
+            return callback(null, PrivilegeLevels.OWNER, false, true)
           }
-          if (publicAccessLevel === PublicAccessLevels.READ_AND_WRITE) {
-            return callback(null, PrivilegeLevels.READ_AND_WRITE, true, false)
-          }
-          callback(null, PrivilegeLevels.NONE, false, false)
+          // Legacy public-access system
+          // User is present (not anonymous), but does not have direct access
+          AuthorizationManager.getPublicAccessLevel(
+            projectId,
+            function (err, publicAccessLevel) {
+              if (err) {
+                return callback(err)
+              }
+              if (publicAccessLevel === PublicAccessLevels.READ_ONLY) {
+                return callback(null, PrivilegeLevels.READ_ONLY, true, false)
+              }
+              if (publicAccessLevel === PublicAccessLevels.READ_AND_WRITE) {
+                return callback(
+                  null,
+                  PrivilegeLevels.READ_AND_WRITE,
+                  true,
+                  false
+                )
+              }
+              callback(null, PrivilegeLevels.NONE, false, false)
+            }
+          )
         })
-      })
-    })
+      }
+    )
   },
 
   // User is Anonymous, Try Token-based access
   getPrivilegeLevelForProjectWithoutUser(projectId, token, callback) {
-    AuthorizationManager.getPublicAccessLevel(projectId, function(
-      err,
-      publicAccessLevel
-    ) {
-      if (err) {
-        return callback(err)
+    AuthorizationManager.getPublicAccessLevel(
+      projectId,
+      function (err, publicAccessLevel) {
+        if (err) {
+          return callback(err)
+        }
+        if (publicAccessLevel === PublicAccessLevels.READ_ONLY) {
+          // Legacy public read-only access for anonymous user
+          return callback(null, PrivilegeLevels.READ_ONLY, true, false)
+        }
+        if (publicAccessLevel === PublicAccessLevels.READ_AND_WRITE) {
+          // Legacy public read-write access for anonymous user
+          return callback(null, PrivilegeLevels.READ_AND_WRITE, true, false)
+        }
+        if (publicAccessLevel === PublicAccessLevels.TOKEN_BASED) {
+          return AuthorizationManager.getPrivilegeLevelForProjectWithToken(
+            projectId,
+            token,
+            callback
+          )
+        }
+        // Deny anonymous user access
+        callback(null, PrivilegeLevels.NONE, false, false)
       }
-      if (publicAccessLevel === PublicAccessLevels.READ_ONLY) {
-        // Legacy public read-only access for anonymous user
-        return callback(null, PrivilegeLevels.READ_ONLY, true, false)
-      }
-      if (publicAccessLevel === PublicAccessLevels.READ_AND_WRITE) {
-        // Legacy public read-write access for anonymous user
-        return callback(null, PrivilegeLevels.READ_AND_WRITE, true, false)
-      }
-      if (publicAccessLevel === PublicAccessLevels.TOKEN_BASED) {
-        return AuthorizationManager.getPrivilegeLevelForProjectWithToken(
-          projectId,
-          token,
-          callback
-        )
-      }
-      // Deny anonymous user access
-      callback(null, PrivilegeLevels.NONE, false, false)
-    })
+    )
   },
 
   getPrivilegeLevelForProjectWithToken(projectId, token, callback) {
@@ -170,7 +177,7 @@ const AuthorizationManager = {
     TokenAccessHandler.validateTokenForAnonymousAccess(
       projectId,
       token,
-      function(err, isValidReadAndWrite, isValidReadOnly) {
+      function (err, isValidReadAndWrite, isValidReadOnly) {
         if (err) {
           return callback(err)
         }
@@ -193,7 +200,7 @@ const AuthorizationManager = {
       userId,
       projectId,
       token,
-      function(error, privilegeLevel) {
+      function (error, privilegeLevel) {
         if (error) {
           return callback(error)
         }
@@ -214,7 +221,7 @@ const AuthorizationManager = {
       userId,
       projectId,
       token,
-      function(error, privilegeLevel) {
+      function (error, privilegeLevel) {
         if (error) {
           return callback(error)
         }
@@ -233,7 +240,7 @@ const AuthorizationManager = {
       userId,
       projectId,
       token,
-      function(error, privilegeLevel, becausePublic) {
+      function (error, privilegeLevel, becausePublic) {
         if (error) {
           return callback(error)
         }
@@ -256,7 +263,7 @@ const AuthorizationManager = {
       userId,
       projectId,
       token,
-      function(error, privilegeLevel, becausePublic, becauseSiteAdmin) {
+      function (error, privilegeLevel, becausePublic, becauseSiteAdmin) {
         if (error) {
           return callback(error)
         }
@@ -273,7 +280,7 @@ const AuthorizationManager = {
     if (!userId) {
       return callback(null, false)
     }
-    User.findOne({ _id: userId }, { isAdmin: 1 }, function(error, user) {
+    User.findOne({ _id: userId }, { isAdmin: 1 }, function (error, user) {
       if (error) {
         return callback(error)
       }

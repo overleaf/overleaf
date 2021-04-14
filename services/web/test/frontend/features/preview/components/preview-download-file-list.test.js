@@ -6,7 +6,7 @@ import PreviewDownloadFileList, {
   topFileTypes
 } from '../../../../../frontend/js/features/preview/components/preview-download-file-list'
 
-describe('<PreviewDownloadFileList />', function() {
+describe('<PreviewDownloadFileList />', function () {
   const projectId = 'projectId123'
 
   function makeFile(fileName, main) {
@@ -18,7 +18,7 @@ describe('<PreviewDownloadFileList />', function() {
     }
   }
 
-  it('should list all output files and group them', function() {
+  it('should list all output files and group them', function () {
     const outputFiles = [
       makeFile('output.ind'),
       makeFile('output.log'),
@@ -55,15 +55,12 @@ describe('<PreviewDownloadFileList />', function() {
       .map(file => file.type)
     const topMenuItems = menuItems.slice(0, outputTopFileTypes.length)
     topMenuItems.forEach(item => {
-      const fileType = item.textContent
-        .split('.')
-        .pop()
-        .replace(' file', '')
+      const fileType = item.textContent.split('.').pop().replace(' file', '')
       expect(topFileTypes.includes(fileType)).to.be.true
     })
   })
 
-  it('should list all files when there are duplicate types', function() {
+  it('should list all files when there are duplicate types', function () {
     const pdfFile = makeFile('output.pdf', true)
     const bblFile = makeFile('output.bbl')
     const outputFiles = [Object.assign({}, { ...bblFile }), bblFile, pdfFile]
@@ -76,7 +73,7 @@ describe('<PreviewDownloadFileList />', function() {
     expect(bblMenuItems.length).to.equal(2)
   })
 
-  it('should list the non-main PDF in the dropdown', function() {
+  it('should list the non-main PDF in the dropdown', function () {
     const pdfFile = makeFile('output.pdf', true)
     const pdfAltFile = makeFile('alt.pdf')
     const outputFiles = [pdfFile, pdfAltFile]
@@ -84,8 +81,8 @@ describe('<PreviewDownloadFileList />', function() {
     screen.getAllByRole('menuitem', { name: 'alt.pdf' })
   })
 
-  describe('list divider and header', function() {
-    it('should display when there are top files and other files', function() {
+  describe('list divider and header', function () {
+    it('should display when there are top files and other files', function () {
       const outputFiles = [
         makeFile('output.bbl'),
         makeFile('output.ind'),
@@ -99,7 +96,7 @@ describe('<PreviewDownloadFileList />', function() {
       screen.getByRole('separator')
     })
 
-    it('should not display when there are top files and no other files', function() {
+    it('should not display when there are top files and no other files', function () {
       const outputFiles = [
         makeFile('output.bbl'),
         makeFile('output.ind'),
@@ -112,7 +109,7 @@ describe('<PreviewDownloadFileList />', function() {
       expect(screen.queryByRole('separator')).to.not.exist
     })
 
-    it('should not display when there are other files and no top files', function() {
+    it('should not display when there are other files and no top files', function () {
       const outputFiles = [makeFile('output.log')]
 
       render(<PreviewDownloadFileList fileList={outputFiles} />)

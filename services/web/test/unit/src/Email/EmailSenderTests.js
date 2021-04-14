@@ -8,8 +8,8 @@ const MODULE_PATH = path.join(
   '../../../../app/src/Features/Email/EmailSender.js'
 )
 
-describe('EmailSender', function() {
-  beforeEach(function() {
+describe('EmailSender', function () {
+  beforeEach(function () {
     this.RateLimiter = {
       promises: {
         addCount: sinon.stub()
@@ -52,8 +52,8 @@ describe('EmailSender', function() {
     }
   })
 
-  describe('sendEmail', function() {
-    it('should set the properties on the email to send', async function() {
+  describe('sendEmail', function () {
+    it('should set the properties on the email to send', async function () {
       await this.EmailSender.promises.sendEmail(this.opts)
       expect(this.sesClient.sendMail).to.have.been.calledWithMatch({
         html: this.opts.html,
@@ -62,28 +62,28 @@ describe('EmailSender', function() {
       })
     })
 
-    it('should return a non-specific error', async function() {
+    it('should return a non-specific error', async function () {
       this.sesClient.sendMail.rejects(new Error('boom'))
       await expect(this.EmailSender.promises.sendEmail({})).to.be.rejectedWith(
         'error sending message'
       )
     })
 
-    it('should use the from address from settings', async function() {
+    it('should use the from address from settings', async function () {
       await this.EmailSender.promises.sendEmail(this.opts)
       expect(this.sesClient.sendMail).to.have.been.calledWithMatch({
         from: this.Settings.email.fromAddress
       })
     })
 
-    it('should use the reply to address from settings', async function() {
+    it('should use the reply to address from settings', async function () {
       await this.EmailSender.promises.sendEmail(this.opts)
       expect(this.sesClient.sendMail).to.have.been.calledWithMatch({
         replyTo: this.Settings.email.replyToAddress
       })
     })
 
-    it('should use the reply to address in options as an override', async function() {
+    it('should use the reply to address in options as an override', async function () {
       this.opts.replyTo = 'someone@else.com'
       await this.EmailSender.promises.sendEmail(this.opts)
       expect(this.sesClient.sendMail).to.have.been.calledWithMatch({
@@ -91,7 +91,7 @@ describe('EmailSender', function() {
       })
     })
 
-    it('should not send an email when the rate limiter says no', async function() {
+    it('should not send an email when the rate limiter says no', async function () {
       this.opts.sendingUser_id = '12321312321'
       this.RateLimiter.promises.addCount.resolves(false)
       await expect(this.EmailSender.promises.sendEmail(this.opts)).to.be
@@ -99,26 +99,26 @@ describe('EmailSender', function() {
       expect(this.sesClient.sendMail).not.to.have.been.called
     })
 
-    it('should send the email when the rate limtier says continue', async function() {
+    it('should send the email when the rate limtier says continue', async function () {
       this.opts.sendingUser_id = '12321312321'
       this.RateLimiter.promises.addCount.resolves(true)
       await this.EmailSender.promises.sendEmail(this.opts)
       expect(this.sesClient.sendMail).to.have.been.called
     })
 
-    it('should not check the rate limiter when there is no sendingUser_id', async function() {
+    it('should not check the rate limiter when there is no sendingUser_id', async function () {
       this.EmailSender.sendEmail(this.opts, () => {
         expect(this.sesClient.sendMail).to.have.been.called
         expect(this.RateLimiter.promises.addCount).not.to.have.been.called
       })
     })
 
-    describe('with plain-text email content', function() {
-      beforeEach(function() {
+    describe('with plain-text email content', function () {
+      beforeEach(function () {
         this.opts.text = 'hello there'
       })
 
-      it('should set the text property on the email to send', async function() {
+      it('should set the text property on the email to send', async function () {
         await this.EmailSender.promises.sendEmail(this.opts)
         expect(this.sesClient.sendMail).to.have.been.calledWithMatch({
           html: this.opts.html,

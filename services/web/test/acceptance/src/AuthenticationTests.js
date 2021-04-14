@@ -2,14 +2,14 @@ const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
 const User = require('./helpers/User').promises
 
-describe('Authentication', function() {
+describe('Authentication', function () {
   let user
-  beforeEach('init vars', function() {
+  beforeEach('init vars', function () {
     user = new User()
   })
 
-  describe('CSRF regeneration on login', function() {
-    it('should prevent use of csrf token from before login', function(done) {
+  describe('CSRF regeneration on login', function () {
+    it('should prevent use of csrf token from before login', function (done) {
       user.logout(err => {
         if (err) {
           return done(err)
@@ -45,19 +45,19 @@ describe('Authentication', function() {
     })
   })
 
-  describe('login', function() {
-    beforeEach('doLogin', async function() {
+  describe('login', function () {
+    beforeEach('doLogin', async function () {
       await user.login()
     })
 
-    it('should log the user in', async function() {
+    it('should log the user in', async function () {
       const {
         response: { statusCode }
       } = await user.doRequest('GET', '/project')
       expect(statusCode).to.equal(200)
     })
 
-    it('should emit an user auditLog entry for the login', async function() {
+    it('should emit an user auditLog entry for the login', async function () {
       const {
         auditLog: [auditLogEntry]
       } = await user.get()

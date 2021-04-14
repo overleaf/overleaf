@@ -308,7 +308,7 @@ const ProjectEntityUpdateHandler = {
 
   addDocWithRanges: wrapWithLock({
     beforeLock(next) {
-      return function(
+      return function (
         projectId,
         folderId,
         docName,
@@ -457,7 +457,7 @@ const ProjectEntityUpdateHandler = {
 
   addFile: wrapWithLock({
     beforeLock(next) {
-      return function(
+      return function (
         projectId,
         folderId,
         fileName,
@@ -544,7 +544,7 @@ const ProjectEntityUpdateHandler = {
 
   replaceFile: wrapWithLock({
     beforeLock(next) {
-      return function(
+      return function (
         projectId,
         fileId,
         fsPath,
@@ -648,7 +648,7 @@ const ProjectEntityUpdateHandler = {
     }
   }),
 
-  upsertDoc: wrapWithLock(function(
+  upsertDoc: wrapWithLock(function (
     projectId,
     folderId,
     docName,
@@ -796,7 +796,7 @@ const ProjectEntityUpdateHandler = {
 
   upsertFile: wrapWithLock({
     beforeLock(next) {
-      return function(
+      return function (
         projectId,
         folderId,
         fileName,
@@ -974,7 +974,7 @@ const ProjectEntityUpdateHandler = {
     }
   }),
 
-  upsertDocWithPath: wrapWithLock(function(
+  upsertDocWithPath: wrapWithLock(function (
     projectId,
     elementPath,
     docLines,
@@ -1014,7 +1014,7 @@ const ProjectEntityUpdateHandler = {
 
   upsertFileWithPath: wrapWithLock({
     beforeLock(next) {
-      return function(
+      return function (
         projectId,
         elementPath,
         fsPath,
@@ -1102,7 +1102,7 @@ const ProjectEntityUpdateHandler = {
     }
   }),
 
-  deleteEntity: wrapWithLock(function(
+  deleteEntity: wrapWithLock(function (
     projectId,
     entityId,
     entityType,
@@ -1174,7 +1174,7 @@ const ProjectEntityUpdateHandler = {
     )
   ),
 
-  mkdirp: wrapWithLock(function(projectId, path, callback) {
+  mkdirp: wrapWithLock(function (projectId, path, callback) {
     for (let folder of path.split('/')) {
       if (folder.length > 0 && !SafePath.isCleanFilename(folder)) {
         return callback(new Errors.InvalidNameError('invalid element name'))
@@ -1188,7 +1188,7 @@ const ProjectEntityUpdateHandler = {
     )
   }),
 
-  mkdirpWithExactCase: wrapWithLock(function(projectId, path, callback) {
+  mkdirpWithExactCase: wrapWithLock(function (projectId, path, callback) {
     for (let folder of path.split('/')) {
       if (folder.length > 0 && !SafePath.isCleanFilename(folder)) {
         return callback(new Errors.InvalidNameError('invalid element name'))
@@ -1202,7 +1202,7 @@ const ProjectEntityUpdateHandler = {
     )
   }),
 
-  addFolder: wrapWithLock(function(
+  addFolder: wrapWithLock(function (
     projectId,
     parentFolderId,
     folderName,
@@ -1219,7 +1219,7 @@ const ProjectEntityUpdateHandler = {
     )
   }),
 
-  moveEntity: wrapWithLock(function(
+  moveEntity: wrapWithLock(function (
     projectId,
     entityId,
     destFolderId,
@@ -1272,7 +1272,7 @@ const ProjectEntityUpdateHandler = {
     )
   }),
 
-  renameEntity: wrapWithLock(function(
+  renameEntity: wrapWithLock(function (
     projectId,
     entityId,
     entityType,
@@ -1572,7 +1572,7 @@ const ProjectEntityUpdateHandler = {
 
   convertDocToFile: wrapWithLock({
     beforeLock(next) {
-      return function(projectId, docId, userId, callback) {
+      return function (projectId, docId, userId, callback) {
         DocumentUpdaterHandler.flushDocToMongo(projectId, docId, err => {
           if (err) {
             return callback(err)

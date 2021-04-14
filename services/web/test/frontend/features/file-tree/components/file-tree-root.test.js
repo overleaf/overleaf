@@ -6,15 +6,15 @@ import fetchMock from 'fetch-mock'
 
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 
-describe('<FileTreeRoot/>', function() {
+describe('<FileTreeRoot/>', function () {
   const onSelect = sinon.stub()
   const onInit = sinon.stub()
 
-  beforeEach(function() {
+  beforeEach(function () {
     global.requestAnimationFrame = sinon.stub()
   })
 
-  afterEach(function() {
+  afterEach(function () {
     delete global.requestAnimationFrame
     fetchMock.restore()
     onSelect.reset()
@@ -22,7 +22,7 @@ describe('<FileTreeRoot/>', function() {
     global.localStorage.clear()
   })
 
-  it('renders', function() {
+  it('renders', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -54,7 +54,7 @@ describe('<FileTreeRoot/>', function() {
     expect(container.querySelector('.disconnected-overlay')).to.not.exist
   })
 
-  it('renders with invalid selected doc in local storage', async function() {
+  it('renders with invalid selected doc in local storage', async function () {
     global.localStorage.setItem(
       'doc.open_id.123abc',
       JSON.stringify('not-a-valid-id')
@@ -94,7 +94,7 @@ describe('<FileTreeRoot/>', function() {
     await waitFor(() => screen.getByRole('button', { name: 'Cancel' }))
   })
 
-  it('renders disconnected overlay', function() {
+  it('renders disconnected overlay', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -124,7 +124,7 @@ describe('<FileTreeRoot/>', function() {
     expect(container.querySelector('.disconnected-overlay')).to.exist
   })
 
-  it('fire onSelect', function() {
+  it('fire onSelect', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -177,7 +177,7 @@ describe('<FileTreeRoot/>', function() {
     ])
   })
 
-  it('listen to editor.openDoc', function() {
+  it('listen to editor.openDoc', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',

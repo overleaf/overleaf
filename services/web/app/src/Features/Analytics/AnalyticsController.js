@@ -15,7 +15,7 @@ module.exports = {
     let countryCode = null
 
     if (userId) {
-      GeoIpLookup.getDetails(req.ip, function(err, geoDetails) {
+      GeoIpLookup.getDetails(req.ip, function (err, geoDetails) {
         if (err) {
           metrics.inc('analytics_geo_ip_lookup_errors')
         } else if (geoDetails && geoDetails.country_code) {
@@ -43,7 +43,7 @@ module.exports = {
       req.query.start_date,
       req.query.end_date,
       req.query.lag,
-      function(error, licences) {
+      function (error, licences) {
         if (error) {
           return next(error)
         }
@@ -58,7 +58,7 @@ module.exports = {
       req.query.start_date,
       req.query.end_date,
       req.query.lag,
-      function(error, licences) {
+      function (error, licences) {
         if (error) {
           return next(error)
         }

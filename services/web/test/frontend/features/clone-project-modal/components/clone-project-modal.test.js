@@ -5,8 +5,8 @@ import CloneProjectModal from '../../../../../frontend/js/features/clone-project
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
 
-describe('<CloneProjectModal />', function() {
-  afterEach(function() {
+describe('<CloneProjectModal />', function () {
+  afterEach(function () {
     fetchMock.reset()
   })
 
@@ -18,13 +18,13 @@ describe('<CloneProjectModal />', function() {
     show: true
   }
 
-  it('renders the translated modal title', async function() {
+  it('renders the translated modal title', async function () {
     render(<CloneProjectModal {...modalProps} />)
 
     await screen.findByText('Copy Project')
   })
 
-  it('posts the generated project name', async function() {
+  it('posts the generated project name', async function () {
     fetchMock.post(
       'express:/project/:projectId/clone',
       {
@@ -81,7 +81,7 @@ describe('<CloneProjectModal />', function() {
     })
   })
 
-  it('handles a generic error response', async function() {
+  it('handles a generic error response', async function () {
     const matcher = 'express:/project/:projectId/clone'
 
     fetchMock.postOnce(matcher, {
@@ -110,7 +110,7 @@ describe('<CloneProjectModal />', function() {
     expect(cancelButton.disabled).to.be.false
   })
 
-  it('handles a specific error response', async function() {
+  it('handles a specific error response', async function () {
     const matcher = 'express:/project/:projectId/clone'
 
     fetchMock.postOnce(matcher, {

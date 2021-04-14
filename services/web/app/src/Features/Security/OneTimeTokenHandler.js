@@ -26,7 +26,7 @@ module.exports = {
       options = {}
     }
     if (callback == null) {
-      callback = function(error, data) {}
+      callback = function (error, data) {}
     }
     if (typeof options === 'function') {
       callback = options
@@ -44,7 +44,7 @@ module.exports = {
         createdAt,
         expiresAt
       },
-      function(error) {
+      function (error) {
         if (error != null) {
           return callback(error)
         }
@@ -55,7 +55,7 @@ module.exports = {
 
   getValueFromTokenAndExpire(use, token, callback) {
     if (callback == null) {
-      callback = function(error, data) {}
+      callback = function (error, data) {}
     }
     const now = new Date()
     return db.tokens.findOneAndUpdate(
@@ -70,7 +70,7 @@ module.exports = {
           usedAt: now
         }
       },
-      function(error, result) {
+      function (error, result) {
         if (error != null) {
           return callback(error)
         }

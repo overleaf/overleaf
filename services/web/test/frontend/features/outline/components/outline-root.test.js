@@ -4,10 +4,10 @@ import { screen, render } from '@testing-library/react'
 
 import OutlineRoot from '../../../../../frontend/js/features/outline/components/outline-root'
 
-describe('<OutlineRoot />', function() {
+describe('<OutlineRoot />', function () {
   const jumpToLine = () => {}
 
-  it('renders outline', function() {
+  it('renders outline', function () {
     const outline = [
       {
         title: 'Section',
@@ -21,7 +21,7 @@ describe('<OutlineRoot />', function() {
     expect(screen.queryByRole('link')).to.be.null
   })
 
-  it('renders placeholder', function() {
+  it('renders placeholder', function () {
     const outline = []
     render(<OutlineRoot outline={outline} jumpToLine={jumpToLine} />)
 

@@ -10,7 +10,7 @@ export default {
       parsedLogEntries = rawLog
     }
 
-    const _getRule = function(logMessage) {
+    const _getRule = function (logMessage) {
       for (let rule of ruleset) {
         if (rule.regexToMatch.test(logMessage)) {
           return rule

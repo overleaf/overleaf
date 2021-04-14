@@ -19,8 +19,8 @@ const MockResponse = require('../helpers/MockResponse')
 const MockRequest = require('../helpers/MockRequest')
 const { ObjectId } = require('mongodb')
 
-describe('UserInfoController', function() {
-  beforeEach(function() {
+describe('UserInfoController', function () {
+  beforeEach(function () {
     this.UserDeleter = { deleteUser: sinon.stub().callsArgWith(1) }
     this.UserUpdater = { updatePersonalInfo: sinon.stub() }
     this.sanitizer = {
@@ -49,8 +49,8 @@ describe('UserInfoController', function() {
     return (this.next = sinon.stub())
   })
 
-  describe('getLoggedInUsersPersonalInfo', function() {
-    beforeEach(function() {
+  describe('getLoggedInUsersPersonalInfo', function () {
+    beforeEach(function () {
       this.user = { _id: ObjectId() }
       this.req.user = this.user
       this.req.session.user = this.user
@@ -66,16 +66,16 @@ describe('UserInfoController', function() {
       )
     })
 
-    it('should call sendFormattedPersonalInfo', function() {
+    it('should call sendFormattedPersonalInfo', function () {
       return this.UserInfoController.sendFormattedPersonalInfo
         .calledWith(this.user, this.res, this.next)
         .should.equal(true)
     })
   })
 
-  describe('getPersonalInfo', function() {
-    describe('when the user exists with sharelatex id', function() {
-      beforeEach(function() {
+  describe('getPersonalInfo', function () {
+    describe('when the user exists with sharelatex id', function () {
+      beforeEach(function () {
         this.user_id = ObjectId().toString()
         this.user = { _id: ObjectId(this.user_id) }
         this.req.params = { user_id: this.user_id }
@@ -88,7 +88,7 @@ describe('UserInfoController', function() {
         )
       })
 
-      it('should look up the user in the database', function() {
+      it('should look up the user in the database', function () {
         return this.UserGetter.getUser
           .calledWith(
             { _id: ObjectId(this.user_id) },
@@ -97,15 +97,15 @@ describe('UserInfoController', function() {
           .should.equal(true)
       })
 
-      it('should send the formatted details back to the client', function() {
+      it('should send the formatted details back to the client', function () {
         return this.UserInfoController.sendFormattedPersonalInfo
           .calledWith(this.user, this.res, this.next)
           .should.equal(true)
       })
     })
 
-    describe('when the user exists with overleaf id', function() {
-      beforeEach(function() {
+    describe('when the user exists with overleaf id', function () {
+      beforeEach(function () {
         this.user_id = 12345
         this.user = {
           _id: ObjectId(),
@@ -123,7 +123,7 @@ describe('UserInfoController', function() {
         )
       })
 
-      it('should look up the user in the database', function() {
+      it('should look up the user in the database', function () {
         return this.UserGetter.getUser
           .calledWith(
             { 'overleaf.id': this.user_id },
@@ -132,15 +132,15 @@ describe('UserInfoController', function() {
           .should.equal(true)
       })
 
-      it('should send the formatted details back to the client', function() {
+      it('should send the formatted details back to the client', function () {
         return this.UserInfoController.sendFormattedPersonalInfo
           .calledWith(this.user, this.res, this.next)
           .should.equal(true)
       })
     })
 
-    describe('when the user does not exist', function() {
-      beforeEach(function() {
+    describe('when the user does not exist', function () {
+      beforeEach(function () {
         this.user_id = ObjectId().toString()
         this.req.params = { user_id: this.user_id }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
@@ -151,13 +151,13 @@ describe('UserInfoController', function() {
         )
       })
 
-      it('should return 404 to the client', function() {
+      it('should return 404 to the client', function () {
         return this.res.statusCode.should.equal(404)
       })
     })
 
-    describe('when the user id is invalid', function() {
-      beforeEach(function() {
+    describe('when the user id is invalid', function () {
+      beforeEach(function () {
         this.user_id = 'invalid'
         this.req.params = { user_id: this.user_id }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
@@ -168,14 +168,14 @@ describe('UserInfoController', function() {
         )
       })
 
-      it('should return 400 to the client', function() {
+      it('should return 400 to the client', function () {
         return this.res.statusCode.should.equal(400)
       })
     })
   })
 
-  describe('sendFormattedPersonalInfo', function() {
-    beforeEach(function() {
+  describe('sendFormattedPersonalInfo', function () {
+    beforeEach(function () {
       this.user = {
         _id: ObjectId(),
         first_name: 'Douglas',
@@ -197,19 +197,19 @@ describe('UserInfoController', function() {
       )
     })
 
-    it('should format the user details for the response', function() {
+    it('should format the user details for the response', function () {
       return this.UserInfoController.formatPersonalInfo
         .calledWith(this.user)
         .should.equal(true)
     })
 
-    it('should send the formatted details back to the client', function() {
+    it('should send the formatted details back to the client', function () {
       return this.res.body.should.equal(JSON.stringify(this.formattedInfo))
     })
   })
 
-  describe('formatPersonalInfo', function() {
-    it('should return the correctly formatted data', function() {
+  describe('formatPersonalInfo', function () {
+    it('should return the correctly formatted data', function () {
       this.user = {
         _id: ObjectId(),
         first_name: 'Douglas',

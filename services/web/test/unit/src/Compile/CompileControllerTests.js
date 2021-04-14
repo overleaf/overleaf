@@ -18,8 +18,8 @@ const SandboxedModule = require('sandboxed-module')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 
-describe('CompileController', function() {
-  beforeEach(function() {
+describe('CompileController', function () {
+  beforeEach(function () {
     this.user_id = 'wat'
     this.user = {
       _id: this.user_id,
@@ -78,8 +78,8 @@ describe('CompileController', function() {
     return (this.res = new MockResponse())
   })
 
-  describe('compile', function() {
-    beforeEach(function() {
+  describe('compile', function () {
+    beforeEach(function () {
       this.req.params = { Project_id: this.project_id }
       this.req.session = {}
       return (this.CompileManager.compile = sinon
@@ -92,28 +92,28 @@ describe('CompileController', function() {
         ))
     })
 
-    describe('when not an auto compile', function() {
-      beforeEach(function() {
+    describe('when not an auto compile', function () {
+      beforeEach(function () {
         return this.CompileController.compile(this.req, this.res, this.next)
       })
 
-      it('should look up the user id', function() {
+      it('should look up the user id', function () {
         return this.AuthenticationController.getLoggedInUserId
           .calledWith(this.req)
           .should.equal(true)
       })
 
-      it('should do the compile without the auto compile flag', function() {
+      it('should do the compile without the auto compile flag', function () {
         return this.CompileManager.compile
           .calledWith(this.project_id, this.user_id, { isAutoCompile: false })
           .should.equal(true)
       })
 
-      it('should set the content-type of the response to application/json', function() {
+      it('should set the content-type of the response to application/json', function () {
         this.res.type.should.equal('application/json')
       })
 
-      it('should send a successful response reporting the status and files', function() {
+      it('should send a successful response reporting the status and files', function () {
         this.res.statusCode.should.equal(200)
         this.res.body.should.equal(
           JSON.stringify({
@@ -124,26 +124,26 @@ describe('CompileController', function() {
       })
     })
 
-    describe('when an auto compile', function() {
-      beforeEach(function() {
+    describe('when an auto compile', function () {
+      beforeEach(function () {
         this.req.query = { auto_compile: 'true' }
         return this.CompileController.compile(this.req, this.res, this.next)
       })
 
-      it('should do the compile with the auto compile flag', function() {
+      it('should do the compile with the auto compile flag', function () {
         return this.CompileManager.compile
           .calledWith(this.project_id, this.user_id, { isAutoCompile: true })
           .should.equal(true)
       })
     })
 
-    describe('with the draft attribute', function() {
-      beforeEach(function() {
+    describe('with the draft attribute', function () {
+      beforeEach(function () {
         this.req.body = { draft: true }
         return this.CompileController.compile(this.req, this.res, this.next)
       })
 
-      it('should do the compile without the draft compile flag', function() {
+      it('should do the compile without the draft compile flag', function () {
         return this.CompileManager.compile
           .calledWith(this.project_id, this.user_id, {
             isAutoCompile: false,
@@ -154,8 +154,8 @@ describe('CompileController', function() {
     })
   })
 
-  describe('compileSubmission', function() {
-    beforeEach(function() {
+  describe('compileSubmission', function () {
+    beforeEach(function () {
       this.submission_id = 'sub-1234'
       this.req.params = { submission_id: this.submission_id }
       this.req.body = {}
@@ -171,14 +171,14 @@ describe('CompileController', function() {
         ))
     })
 
-    it('should set the content-type of the response to application/json', function() {
+    it('should set the content-type of the response to application/json', function () {
       this.CompileController.compileSubmission(this.req, this.res, this.next)
       return this.res.contentType
         .calledWith('application/json')
         .should.equal(true)
     })
 
-    it('should send a successful response reporting the status and files', function() {
+    it('should send a successful response reporting the status and files', function () {
       this.CompileController.compileSubmission(this.req, this.res, this.next)
       this.res.statusCode.should.equal(200)
       return this.res.body.should.equal(
@@ -191,8 +191,8 @@ describe('CompileController', function() {
       )
     })
 
-    describe('with compileGroup and timeout', function() {
-      beforeEach(function() {
+    describe('with compileGroup and timeout', function () {
+      beforeEach(function () {
         this.req.body = {
           compileGroup: 'special',
           timeout: 600
@@ -204,7 +204,7 @@ describe('CompileController', function() {
         )
       })
 
-      it('should use the supplied values', function() {
+      it('should use the supplied values', function () {
         return this.ClsiManager.sendExternalRequest
           .calledWith(
             this.submission_id,
@@ -215,8 +215,8 @@ describe('CompileController', function() {
       })
     })
 
-    describe('with other supported options but not compileGroup and timeout', function() {
-      beforeEach(function() {
+    describe('with other supported options but not compileGroup and timeout', function () {
+      beforeEach(function () {
         this.req.body = {
           rootResourcePath: 'main.tex',
           compiler: 'lualatex',
@@ -230,7 +230,7 @@ describe('CompileController', function() {
         )
       })
 
-      it('should use the other options but default values for compileGroup and timeout', function() {
+      it('should use the other options but default values for compileGroup and timeout', function () {
         return this.ClsiManager.sendExternalRequest
           .calledWith(
             this.submission_id,
@@ -254,8 +254,8 @@ describe('CompileController', function() {
     })
   })
 
-  describe('downloadPdf', function() {
-    beforeEach(function() {
+  describe('downloadPdf', function () {
+    beforeEach(function () {
       this.req.params = { Project_id: this.project_id }
 
       this.req.query = { pdfng: true }
@@ -265,36 +265,36 @@ describe('CompileController', function() {
         .callsArgWith(2, null, this.project))
     })
 
-    describe('when downloading for embedding', function() {
-      beforeEach(function() {
+    describe('when downloading for embedding', function () {
+      beforeEach(function () {
         this.CompileController.proxyToClsi = sinon.stub()
         this.RateLimiter.addCount.callsArgWith(1, null, true)
         return this.CompileController.downloadPdf(this.req, this.res, this.next)
       })
 
-      it('should look up the project', function() {
+      it('should look up the project', function () {
         return this.ProjectGetter.getProject
           .calledWith(this.project_id, { name: 1 })
           .should.equal(true)
       })
 
-      it('should set the content-type of the response to application/pdf', function() {
+      it('should set the content-type of the response to application/pdf', function () {
         return this.res.contentType
           .calledWith('application/pdf')
           .should.equal(true)
       })
 
-      it('should set the content-disposition header with a safe version of the project name', function() {
+      it('should set the content-disposition header with a safe version of the project name', function () {
         return this.res.setContentDisposition
           .calledWith('', { filename: 'test_nam_.pdf' })
           .should.equal(true)
       })
 
-      it('should increment the pdf-downloads metric', function() {
+      it('should increment the pdf-downloads metric', function () {
         return this.Metrics.inc.calledWith('pdf-downloads').should.equal(true)
       })
 
-      it('should proxy the PDF from the CLSI', function() {
+      it('should proxy the PDF from the CLSI', function () {
         return this.CompileController.proxyToClsi
           .calledWith(
             this.project_id,
@@ -307,15 +307,15 @@ describe('CompileController', function() {
       })
     })
 
-    describe('when the a build-id is provided', function() {
-      beforeEach(function() {
+    describe('when the a build-id is provided', function () {
+      beforeEach(function () {
         this.req.params.build_id = this.buildId = '1234-5678'
         this.CompileController.proxyToClsi = sinon.stub()
         this.RateLimiter.addCount.callsArgWith(1, null, true)
         return this.CompileController.downloadPdf(this.req, this.res, this.next)
       })
 
-      it('should proxy the PDF from the CLSI, with a build-id', function() {
+      it('should proxy the PDF from the CLSI, with a build-id', function () {
         return this.CompileController.proxyToClsi
           .calledWith(
             this.project_id,
@@ -328,8 +328,8 @@ describe('CompileController', function() {
       })
     })
 
-    describe('when the pdf is not going to be used in pdfjs viewer', function() {
-      it('should check the rate limiter when pdfng is not set', function(done) {
+    describe('when the pdf is not going to be used in pdfjs viewer', function () {
+      it('should check the rate limiter when pdfng is not set', function (done) {
         this.req.query = {}
         this.RateLimiter.addCount.callsArgWith(1, null, true)
         this.CompileController.proxyToClsi = (project_id, url) => {
@@ -339,7 +339,7 @@ describe('CompileController', function() {
         return this.CompileController.downloadPdf(this.req, this.res)
       })
 
-      it('should check the rate limiter when pdfng is false', function(done) {
+      it('should check the rate limiter when pdfng is false', function (done) {
         this.req.query = { pdfng: false }
         this.RateLimiter.addCount.callsArgWith(1, null, true)
         this.CompileController.proxyToClsi = (project_id, url) => {
@@ -351,8 +351,8 @@ describe('CompileController', function() {
     })
   })
 
-  describe('getFileFromClsiWithoutUser', function() {
-    beforeEach(function() {
+  describe('getFileFromClsiWithoutUser', function () {
+    beforeEach(function () {
       this.submission_id = 'sub-1234'
       this.build_id = 123456
       this.file = 'project.pdf'
@@ -366,8 +366,8 @@ describe('CompileController', function() {
       return (this.CompileController.proxyToClsiWithLimits = sinon.stub())
     })
 
-    describe('without limits specified', function() {
-      beforeEach(function() {
+    describe('without limits specified', function () {
+      beforeEach(function () {
         return this.CompileController.getFileFromClsiWithoutUser(
           this.req,
           this.res,
@@ -375,7 +375,7 @@ describe('CompileController', function() {
         )
       })
 
-      it('should proxy to CLSI with correct URL and default limits', function() {
+      it('should proxy to CLSI with correct URL and default limits', function () {
         return this.CompileController.proxyToClsiWithLimits
           .calledWith(this.submission_id, this.expected_url, {
             compileGroup: 'standard'
@@ -384,8 +384,8 @@ describe('CompileController', function() {
       })
     })
 
-    describe('with limits specified', function() {
-      beforeEach(function() {
+    describe('with limits specified', function () {
+      beforeEach(function () {
         this.req.body = { compileTimeout: 600, compileGroup: 'special' }
         return this.CompileController.getFileFromClsiWithoutUser(
           this.req,
@@ -394,7 +394,7 @@ describe('CompileController', function() {
         )
       })
 
-      it('should proxy to CLSI with correct URL and specified limits', function() {
+      it('should proxy to CLSI with correct URL and specified limits', function () {
         return this.CompileController.proxyToClsiWithLimits
           .calledWith(this.submission_id, this.expected_url, {
             compileGroup: 'special'
@@ -403,10 +403,10 @@ describe('CompileController', function() {
       })
     })
   })
-  describe('proxySyncCode', function() {
+  describe('proxySyncCode', function () {
     let file, line, column, imageName
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       this.req.params = { Project_id: this.project_id }
       file = 'main.tex'
       line = String(Date.now())
@@ -423,7 +423,7 @@ describe('CompileController', function() {
       this.CompileController.proxySyncCode(this.req, this.res, this.next)
     })
 
-    it('should proxy the request with an imageName', function() {
+    it('should proxy the request with an imageName', function () {
       expect(this.CompileController.proxyToClsi).to.have.been.calledWith(
         this.project_id,
         {
@@ -437,10 +437,10 @@ describe('CompileController', function() {
     })
   })
 
-  describe('proxySyncPdf', function() {
+  describe('proxySyncPdf', function () {
     let page, h, v, imageName
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       this.req.params = { Project_id: this.project_id }
       page = String(Date.now())
       h = String(Math.random())
@@ -457,7 +457,7 @@ describe('CompileController', function() {
       this.CompileController.proxySyncPdf(this.req, this.res, this.next)
     })
 
-    it('should proxy the request with an imageName', function() {
+    it('should proxy the request with an imageName', function () {
       expect(this.CompileController.proxyToClsi).to.have.been.calledWith(
         this.project_id,
         {
@@ -471,8 +471,8 @@ describe('CompileController', function() {
     })
   })
 
-  describe('proxyToClsi', function() {
-    beforeEach(function() {
+  describe('proxyToClsi', function () {
+    beforeEach(function () {
       this.request.returns(
         (this.proxy = {
           pipe: sinon.stub(),
@@ -492,9 +492,9 @@ describe('CompileController', function() {
       })
     })
 
-    describe('old pdf viewer', function() {
-      describe('user with standard priority', function() {
-        beforeEach(function() {
+    describe('old pdf viewer', function () {
+      describe('user with standard priority', function () {
+        beforeEach(function () {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
             .callsArgWith(1, null, { compileGroup: 'standard' })
@@ -507,7 +507,7 @@ describe('CompileController', function() {
           )
         })
 
-        it('should open a request to the CLSI', function() {
+        it('should open a request to the CLSI', function () {
           return this.request
             .calledWith({
               jar: this.jar,
@@ -518,17 +518,17 @@ describe('CompileController', function() {
             .should.equal(true)
         })
 
-        it('should pass the request on to the client', function() {
+        it('should pass the request on to the client', function () {
           return this.proxy.pipe.calledWith(this.res).should.equal(true)
         })
 
-        it('should bind an error handle to the request proxy', function() {
+        it('should bind an error handle to the request proxy', function () {
           return this.proxy.on.calledWith('error').should.equal(true)
         })
       })
 
-      describe('user with priority compile', function() {
-        beforeEach(function() {
+      describe('user with priority compile', function () {
+        beforeEach(function () {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
             .callsArgWith(1, null, { compileGroup: 'priority' })
@@ -542,8 +542,8 @@ describe('CompileController', function() {
         })
       })
 
-      describe('user with standard priority via query string', function() {
-        beforeEach(function() {
+      describe('user with standard priority via query string', function () {
+        beforeEach(function () {
           this.req.query = { compileGroup: 'standard' }
           return this.CompileController.proxyToClsi(
             this.project_id,
@@ -554,7 +554,7 @@ describe('CompileController', function() {
           )
         })
 
-        it('should open a request to the CLSI', function() {
+        it('should open a request to the CLSI', function () {
           return this.request
             .calledWith({
               jar: this.jar,
@@ -565,17 +565,17 @@ describe('CompileController', function() {
             .should.equal(true)
         })
 
-        it('should pass the request on to the client', function() {
+        it('should pass the request on to the client', function () {
           return this.proxy.pipe.calledWith(this.res).should.equal(true)
         })
 
-        it('should bind an error handle to the request proxy', function() {
+        it('should bind an error handle to the request proxy', function () {
           return this.proxy.on.calledWith('error').should.equal(true)
         })
       })
 
-      describe('user with non-existent priority via query string', function() {
-        beforeEach(function() {
+      describe('user with non-existent priority via query string', function () {
+        beforeEach(function () {
           this.req.query = { compileGroup: 'foobar' }
           return this.CompileController.proxyToClsi(
             this.project_id,
@@ -586,7 +586,7 @@ describe('CompileController', function() {
           )
         })
 
-        it('should proxy to the standard url', function() {
+        it('should proxy to the standard url', function () {
           return this.request
             .calledWith({
               jar: this.jar,
@@ -598,8 +598,8 @@ describe('CompileController', function() {
         })
       })
 
-      describe('user with build parameter via query string', function() {
-        beforeEach(function() {
+      describe('user with build parameter via query string', function () {
+        beforeEach(function () {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
             .callsArgWith(1, null, { compileGroup: 'standard' })
@@ -613,7 +613,7 @@ describe('CompileController', function() {
           )
         })
 
-        it('should proxy to the standard url without the build parameter', function() {
+        it('should proxy to the standard url without the build parameter', function () {
           return this.request
             .calledWith({
               jar: this.jar,
@@ -626,12 +626,12 @@ describe('CompileController', function() {
       })
     })
 
-    describe('new pdf viewer', function() {
-      beforeEach(function() {
+    describe('new pdf viewer', function () {
+      beforeEach(function () {
         return (this.req.query = { pdfng: true })
       })
-      describe('user with standard priority', function() {
-        beforeEach(function() {
+      describe('user with standard priority', function () {
+        beforeEach(function () {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
             .callsArgWith(1, null, { compileGroup: 'standard' })
@@ -644,7 +644,7 @@ describe('CompileController', function() {
           )
         })
 
-        it('should open a request to the CLSI', function() {
+        it('should open a request to the CLSI', function () {
           return this.request
             .calledWith({
               jar: this.jar,
@@ -660,17 +660,17 @@ describe('CompileController', function() {
             .should.equal(true)
         })
 
-        it('should pass the request on to the client', function() {
+        it('should pass the request on to the client', function () {
           return this.proxy.pipe.calledWith(this.res).should.equal(true)
         })
 
-        it('should bind an error handle to the request proxy', function() {
+        it('should bind an error handle to the request proxy', function () {
           return this.proxy.on.calledWith('error').should.equal(true)
         })
       })
 
-      describe('user with build parameter via query string', function() {
-        beforeEach(function() {
+      describe('user with build parameter via query string', function () {
+        beforeEach(function () {
           this.CompileManager.getProjectCompileLimits = sinon
             .stub()
             .callsArgWith(1, null, { compileGroup: 'standard' })
@@ -684,7 +684,7 @@ describe('CompileController', function() {
           )
         })
 
-        it('should proxy to the standard url with the build parameter', function() {
+        it('should proxy to the standard url with the build parameter', function () {
           return this.request
             .calledWith({
               jar: this.jar,
@@ -704,8 +704,8 @@ describe('CompileController', function() {
     })
   })
 
-  describe('deleteAuxFiles', function() {
-    beforeEach(function() {
+  describe('deleteAuxFiles', function () {
+    beforeEach(function () {
       this.CompileManager.deleteAuxFiles = sinon.stub().yields()
       this.req.params = { Project_id: this.project_id }
       this.req.query = { clsiserverid: 'node-1' }
@@ -717,19 +717,19 @@ describe('CompileController', function() {
       )
     })
 
-    it('should proxy to the CLSI', function() {
+    it('should proxy to the CLSI', function () {
       return this.CompileManager.deleteAuxFiles
         .calledWith(this.project_id, this.user_id, 'node-1')
         .should.equal(true)
     })
 
-    it('should return a 200', function() {
+    it('should return a 200', function () {
       return this.res.sendStatus.calledWith(200).should.equal(true)
     })
   })
 
-  describe('compileAndDownloadPdf', function() {
-    beforeEach(function() {
+  describe('compileAndDownloadPdf', function () {
+    beforeEach(function () {
       this.req = {
         params: {
           project_id: this.project_id
@@ -740,13 +740,13 @@ describe('CompileController', function() {
       return (this.res = { send: () => {} })
     })
 
-    it('should call compile in the compile manager', function(done) {
+    it('should call compile in the compile manager', function (done) {
       this.CompileController.compileAndDownloadPdf(this.req, this.res)
       this.CompileManager.compile.calledWith(this.project_id).should.equal(true)
       return done()
     })
 
-    it('should proxy the res to the clsi with correct url', function(done) {
+    it('should proxy the res to the clsi with correct url', function (done) {
       this.CompileController.compileAndDownloadPdf(this.req, this.res)
       sinon.assert.calledWith(
         this.CompileController.proxyToClsi,
@@ -768,8 +768,8 @@ describe('CompileController', function() {
     })
   })
 
-  describe('wordCount', function() {
-    beforeEach(function() {
+  describe('wordCount', function () {
+    beforeEach(function () {
       this.CompileManager.wordCount = sinon
         .stub()
         .yields(null, { content: 'body' })
@@ -780,13 +780,13 @@ describe('CompileController', function() {
       return this.CompileController.wordCount(this.req, this.res, this.next)
     })
 
-    it('should proxy to the CLSI', function() {
+    it('should proxy to the CLSI', function () {
       return this.CompileManager.wordCount
         .calledWith(this.project_id, this.user_id, false, 'node-42')
         .should.equal(true)
     })
 
-    it('should return a 200 and body', function() {
+    it('should return a 200 and body', function () {
       return this.res.send.calledWith({ content: 'body' }).should.equal(true)
     })
   })

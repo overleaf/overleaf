@@ -30,7 +30,7 @@ export default App.directive('aggregateChangeEntry', $timeout => ({
     scope.deletionNeedsCollapsing = false
     scope.insertionNeedsCollapsing = false
 
-    element.on('click', function(e) {
+    element.on('click', function (e) {
       if (
         $(e.target).is(
           '.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i'
@@ -40,12 +40,12 @@ export default App.directive('aggregateChangeEntry', $timeout => ({
       }
     })
 
-    scope.toggleDeletionCollapse = function() {
+    scope.toggleDeletionCollapse = function () {
       scope.isDeletionCollapsed = !scope.isDeletionCollapsed
       return $timeout(() => scope.$emit('review-panel:layout'))
     }
 
-    scope.toggleInsertionCollapse = function() {
+    scope.toggleInsertionCollapse = function () {
       scope.isInsertionCollapsed = !scope.isInsertionCollapsed
       return $timeout(() => scope.$emit('review-panel:layout'))
     }

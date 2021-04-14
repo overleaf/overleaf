@@ -14,8 +14,8 @@ const modulePath = '../../../../app/src/Features/Project/ProjectApiController'
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 
-describe('Project api controller', function() {
-  beforeEach(function() {
+describe('Project api controller', function () {
+  beforeEach(function () {
     this.ProjectDetailsHandler = { getDetails: sinon.stub() }
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
@@ -36,8 +36,8 @@ describe('Project api controller', function() {
     return (this.projDetails = { name: 'something' })
   })
 
-  describe('getProjectDetails', function() {
-    it('should ask the project details handler for proj details', function(done) {
+  describe('getProjectDetails', function () {
+    it('should ask the project details handler for proj details', function (done) {
       this.ProjectDetailsHandler.getDetails.callsArgWith(
         1,
         null,
@@ -53,7 +53,7 @@ describe('Project api controller', function() {
       return this.controller.getProjectDetails(this.req, this.res)
     })
 
-    it('should send a 500 if there is an error', function() {
+    it('should send a 500 if there is an error', function () {
       this.ProjectDetailsHandler.getDetails.callsArgWith(1, 'error')
       this.controller.getProjectDetails(this.req, this.res, this.next)
       return this.next.calledWith('error').should.equal(true)

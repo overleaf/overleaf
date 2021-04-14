@@ -19,9 +19,9 @@ const settings = require('settings-sharelatex')
 module.exports = ChatApiHandler = {
   _apiRequest(opts, callback) {
     if (callback == null) {
-      callback = function(error, data) {}
+      callback = function (error, data) {}
     }
-    return request(opts, function(error, response, data) {
+    return request(opts, function (error, response, data) {
       if (error != null) {
         return callback(error)
       }
@@ -71,7 +71,7 @@ module.exports = ChatApiHandler = {
 
   sendComment(project_id, thread_id, user_id, content, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return ChatApiHandler._apiRequest(
       {
@@ -85,7 +85,7 @@ module.exports = ChatApiHandler = {
 
   getThreads(project_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return ChatApiHandler._apiRequest(
       {
@@ -99,7 +99,7 @@ module.exports = ChatApiHandler = {
 
   resolveThread(project_id, thread_id, user_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return ChatApiHandler._apiRequest(
       {
@@ -113,7 +113,7 @@ module.exports = ChatApiHandler = {
 
   reopenThread(project_id, thread_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return ChatApiHandler._apiRequest(
       {
@@ -126,7 +126,7 @@ module.exports = ChatApiHandler = {
 
   deleteThread(project_id, thread_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return ChatApiHandler._apiRequest(
       {
@@ -139,7 +139,7 @@ module.exports = ChatApiHandler = {
 
   editMessage(project_id, thread_id, message_id, content, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return ChatApiHandler._apiRequest(
       {
@@ -155,7 +155,7 @@ module.exports = ChatApiHandler = {
 
   deleteMessage(project_id, thread_id, message_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return ChatApiHandler._apiRequest(
       {

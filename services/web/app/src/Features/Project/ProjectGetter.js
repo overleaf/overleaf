@@ -72,7 +72,7 @@ const ProjectGetter = {
       return callback(err)
     }
 
-    db.projects.findOne(query, { projection }, function(err, project) {
+    db.projects.findOne(query, { projection }, function (err, project) {
       if (err) {
         OError.tag(err, 'error getting project', {
           query,
@@ -85,43 +85,49 @@ const ProjectGetter = {
   },
 
   getProjectIdByReadAndWriteToken(token, callback) {
-    Project.findOne({ 'tokens.readAndWrite': token }, { _id: 1 }, function(
-      err,
-      project
-    ) {
-      if (err) {
-        return callback(err)
+    Project.findOne(
+      { 'tokens.readAndWrite': token },
+      { _id: 1 },
+      function (err, project) {
+        if (err) {
+          return callback(err)
+        }
+        if (project == null) {
+          return callback()
+        }
+        callback(null, project._id)
       }
-      if (project == null) {
-        return callback()
-      }
-      callback(null, project._id)
-    })
+    )
   },
 
   findAllUsersProjects(userId, fields, callback) {
     const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
-    Project.find({ owner_ref: userId }, fields, function(error, ownedProjects) {
-      if (error) {
-        return callback(error)
-      }
-      CollaboratorsGetter.getProjectsUserIsMemberOf(userId, fields, function(
-        error,
-        projects
-      ) {
+    Project.find(
+      { owner_ref: userId },
+      fields,
+      function (error, ownedProjects) {
         if (error) {
           return callback(error)
         }
-        const result = {
-          owned: ownedProjects || [],
-          readAndWrite: projects.readAndWrite || [],
-          readOnly: projects.readOnly || [],
-          tokenReadAndWrite: projects.tokenReadAndWrite || [],
-          tokenReadOnly: projects.tokenReadOnly || []
-        }
-        callback(null, result)
-      })
-    })
+        CollaboratorsGetter.getProjectsUserIsMemberOf(
+          userId,
+          fields,
+          function (error, projects) {
+            if (error) {
+              return callback(error)
+            }
+            const result = {
+              owned: ownedProjects || [],
+              readAndWrite: projects.readAndWrite || [],
+              readOnly: projects.readOnly || [],
+              tokenReadAndWrite: projects.tokenReadAndWrite || [],
+              tokenReadOnly: projects.tokenReadOnly || []
+            }
+            callback(null, result)
+          }
+        )
+      }
+    )
   },
 
   /**

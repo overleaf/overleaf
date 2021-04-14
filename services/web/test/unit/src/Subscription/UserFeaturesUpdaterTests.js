@@ -18,8 +18,8 @@ const modulePath =
   '../../../../app/src/Features/Subscription/UserFeaturesUpdater'
 const { assert } = require('chai')
 
-describe('UserFeaturesUpdater', function() {
-  beforeEach(function() {
+describe('UserFeaturesUpdater', function () {
+  beforeEach(function () {
     this.User = { updateOne: sinon.stub().callsArgWith(2) }
     return (this.UserFeaturesUpdater = SandboxedModule.require(modulePath, {
       requires: {
@@ -30,8 +30,8 @@ describe('UserFeaturesUpdater', function() {
     }))
   })
 
-  describe('updateFeatures', function() {
-    it('should send the users features', function(done) {
+  describe('updateFeatures', function () {
+    it('should send the users features', function (done) {
       const user_id = '5208dd34438842e2db000005'
       this.features = { versioning: true, collaborators: 10 }
       return this.UserFeaturesUpdater.updateFeatures(

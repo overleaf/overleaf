@@ -13,8 +13,8 @@ const ctaEmailBody = require('../../../../app/src/Features/Email/Bodies/cta-emai
 const NoCTAEmailBody = require('../../../../app/src/Features/Email/Bodies/NoCTAEmailBody')
 const BaseWithHeaderEmailLayout = require('../../../../app/src/Features/Email/Layouts/BaseWithHeaderEmailLayout')
 
-describe('EmailBuilder', function() {
-  before(function() {
+describe('EmailBuilder', function () {
+  before(function () {
     this.settings = {
       appName: 'testApp',
       siteUrl: 'https://www.overleaf.com'
@@ -30,8 +30,8 @@ describe('EmailBuilder', function() {
     })
   })
 
-  describe('projectInvite', function() {
-    beforeEach(function() {
+  describe('projectInvite', function () {
+    beforeEach(function () {
       this.opts = {
         to: 'bob@bob.com',
         first_name: 'bob',
@@ -46,41 +46,41 @@ describe('EmailBuilder', function() {
       }
     })
 
-    describe('when sending a normal email', function() {
-      beforeEach(function() {
+    describe('when sending a normal email', function () {
+      beforeEach(function () {
         this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
       })
 
-      it('should have html and text properties', function() {
+      it('should have html and text properties', function () {
         expect(this.email.html != null).to.equal(true)
         expect(this.email.text != null).to.equal(true)
       })
 
-      it('should not have undefined in it', function() {
+      it('should not have undefined in it', function () {
         this.email.html.indexOf('undefined').should.equal(-1)
         this.email.subject.indexOf('undefined').should.equal(-1)
       })
     })
 
-    describe('when someone is up to no good', function() {
-      beforeEach(function() {
+    describe('when someone is up to no good', function () {
+      beforeEach(function () {
         this.opts.project.name = "<img src='http://evilsite.com/evil.php'>"
         this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
       })
 
-      it('should not contain unescaped html in the html part', function() {
+      it('should not contain unescaped html in the html part', function () {
         expect(this.email.html).to.contain('New Project')
       })
 
-      it('should not have undefined in it', function() {
+      it('should not have undefined in it', function () {
         this.email.html.indexOf('undefined').should.equal(-1)
         this.email.subject.indexOf('undefined').should.equal(-1)
       })
     })
   })
 
-  describe('SpamSafe', function() {
-    beforeEach(function() {
+  describe('SpamSafe', function () {
+    beforeEach(function () {
       this.opts = {
         to: 'bob@joe.com',
         first_name: 'bob',
@@ -96,14 +96,14 @@ describe('EmailBuilder', function() {
       this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
     })
 
-    it('should replace spammy project name', function() {
+    it('should replace spammy project name', function () {
       this.email.html.indexOf('a new project').should.not.equal(-1)
       this.email.subject.indexOf('New Project').should.not.equal(-1)
     })
   })
 
-  describe('ctaTemplate', function() {
-    describe('missing required content', function() {
+  describe('ctaTemplate', function () {
+    describe('missing required content', function () {
       const content = {
         title: () => {},
         greeting: () => {},
@@ -113,25 +113,25 @@ describe('EmailBuilder', function() {
         ctaURL: () => {},
         gmailGoToAction: () => {}
       }
-      it('should throw an error when missing title', function() {
+      it('should throw an error when missing title', function () {
         let { title, ...missing } = content
         expect(() => {
           this.EmailBuilder.ctaTemplate(missing)
         }).to.throw(Error)
       })
-      it('should throw an error when missing message', function() {
+      it('should throw an error when missing message', function () {
         let { message, ...missing } = content
         expect(() => {
           this.EmailBuilder.ctaTemplate(missing)
         }).to.throw(Error)
       })
-      it('should throw an error when missing ctaText', function() {
+      it('should throw an error when missing ctaText', function () {
         let { ctaText, ...missing } = content
         expect(() => {
           this.EmailBuilder.ctaTemplate(missing)
         }).to.throw(Error)
       })
-      it('should throw an error when missing ctaURL', function() {
+      it('should throw an error when missing ctaURL', function () {
         let { ctaURL, ...missing } = content
         expect(() => {
           this.EmailBuilder.ctaTemplate(missing)
@@ -140,10 +140,10 @@ describe('EmailBuilder', function() {
     })
   })
 
-  describe('templates', function() {
-    describe('CTA', function() {
-      describe('canceledSubscription', function() {
-        beforeEach(function() {
+  describe('templates', function () {
+    describe('CTA', function () {
+      describe('canceledSubscription', function () {
+        beforeEach(function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
             to: this.emailAddress
@@ -156,13 +156,13 @@ describe('EmailBuilder', function() {
             'https://docs.google.com/forms/d/e/1FAIpQLSfa7z_s-cucRRXm70N4jEcSbFsZeb0yuKThHGQL8ySEaQzF0Q/viewform?usp=sf_link'
         })
 
-        it('should build the email', function() {
+        it('should build the email', function () {
           expect(this.email.html).to.exist
           expect(this.email.text).to.exist
         })
 
-        describe('HTML email', function() {
-          it('should include a CTA button and a fallback CTA link', function() {
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function () {
             const dom = cheerio.load(this.email.html)
             const buttonLink = dom('a:contains("Leave Feedback")')
             expect(buttonLink.length).to.equal(1)
@@ -174,15 +174,15 @@ describe('EmailBuilder', function() {
           })
         })
 
-        describe('plain text email', function() {
-          it('should contain the CTA link', function() {
+        describe('plain text email', function () {
+          it('should contain the CTA link', function () {
             expect(this.email.text).to.contain(this.expectedUrl)
           })
         })
       })
 
-      describe('confirmEmail', function() {
-        before(function() {
+      describe('confirmEmail', function () {
+        before(function () {
           this.emailAddress = 'example@overleaf.com'
           this.userId = 'abc123'
           this.opts = {
@@ -193,13 +193,13 @@ describe('EmailBuilder', function() {
           this.email = this.EmailBuilder.buildEmail('confirmEmail', this.opts)
         })
 
-        it('should build the email', function() {
+        it('should build the email', function () {
           expect(this.email.html).to.exist
           expect(this.email.text).to.exist
         })
 
-        describe('HTML email', function() {
-          it('should include a CTA button and a fallback CTA link', function() {
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function () {
             const dom = cheerio.load(this.email.html)
             const buttonLink = dom('a:contains("Confirm Email")')
             expect(buttonLink.length).to.equal(1)
@@ -211,15 +211,15 @@ describe('EmailBuilder', function() {
           })
         })
 
-        describe('plain text email', function() {
-          it('should contain the CTA link', function() {
+        describe('plain text email', function () {
+          it('should contain the CTA link', function () {
             expect(this.email.text).to.contain(this.opts.confirmEmailUrl)
           })
         })
       })
 
-      describe('ownershipTransferConfirmationNewOwner', function() {
-        before(function() {
+      describe('ownershipTransferConfirmationNewOwner', function () {
+        before(function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
             to: this.emailAddress,
@@ -238,13 +238,13 @@ describe('EmailBuilder', function() {
           }/project/${this.opts.project._id.toString()}`
         })
 
-        it('should build the email', function() {
+        it('should build the email', function () {
           expect(this.email.html).to.exist
           expect(this.email.text).to.exist
         })
 
-        describe('HTML email', function() {
-          it('should include a CTA button and a fallback CTA link', function() {
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function () {
             const dom = cheerio.load(this.email.html)
             const buttonLink = dom('td a')
             expect(buttonLink).to.exist
@@ -256,15 +256,15 @@ describe('EmailBuilder', function() {
           })
         })
 
-        describe('plain text email', function() {
-          it('should contain the CTA link', function() {
+        describe('plain text email', function () {
+          it('should contain the CTA link', function () {
             expect(this.email.text).to.contain(this.expectedUrl)
           })
         })
       })
 
-      describe('passwordResetRequested', function() {
-        before(function() {
+      describe('passwordResetRequested', function () {
+        before(function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
             to: this.emailAddress,
@@ -280,13 +280,13 @@ describe('EmailBuilder', function() {
           )
         })
 
-        it('should build the email', function() {
+        it('should build the email', function () {
           expect(this.email.html).to.exist
           expect(this.email.text).to.exist
         })
 
-        describe('HTML email', function() {
-          it('should include a CTA button and a fallback CTA link', function() {
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function () {
             const dom = cheerio.load(this.email.html)
             const buttonLink = dom('td a')
             expect(buttonLink).to.exist
@@ -300,15 +300,15 @@ describe('EmailBuilder', function() {
           })
         })
 
-        describe('plain text email', function() {
-          it('should contain the CTA link', function() {
+        describe('plain text email', function () {
+          it('should contain the CTA link', function () {
             expect(this.email.text).to.contain(this.opts.setNewPasswordUrl)
           })
         })
       })
 
-      describe('verifyEmailToJoinTeam', function() {
-        before(function() {
+      describe('verifyEmailToJoinTeam', function () {
+        before(function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
             to: this.emailAddress,
@@ -325,13 +325,13 @@ describe('EmailBuilder', function() {
           )
         })
 
-        it('should build the email', function() {
+        it('should build the email', function () {
           expect(this.email.html).to.exist
           expect(this.email.text).to.exist
         })
 
-        describe('HTML email', function() {
-          it('should include a CTA button and a fallback CTA link', function() {
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function () {
             const dom = cheerio.load(this.email.html)
             const buttonLink = dom('a:contains("Join now")')
             expect(buttonLink.length).to.equal(1)
@@ -343,15 +343,15 @@ describe('EmailBuilder', function() {
           })
         })
 
-        describe('plain text email', function() {
-          it('should contain the CTA link', function() {
+        describe('plain text email', function () {
+          it('should contain the CTA link', function () {
             expect(this.email.text).to.contain(this.opts.acceptInviteUrl)
           })
         })
       })
 
-      describe('reactivatedSubscription', function() {
-        before(function() {
+      describe('reactivatedSubscription', function () {
+        before(function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
             to: this.emailAddress
@@ -363,13 +363,13 @@ describe('EmailBuilder', function() {
           this.expectedUrl = `${this.settings.siteUrl}/user/subscription`
         })
 
-        it('should build the email', function() {
+        it('should build the email', function () {
           expect(this.email.html).to.exist
           expect(this.email.text).to.exist
         })
 
-        describe('HTML email', function() {
-          it('should include a CTA button and a fallback CTA link', function() {
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function () {
             const dom = cheerio.load(this.email.html)
             const buttonLink = dom('a:contains("View Subscription Dashboard")')
             expect(buttonLink.length).to.equal(1)
@@ -381,15 +381,15 @@ describe('EmailBuilder', function() {
           })
         })
 
-        describe('plain text email', function() {
-          it('should contain the CTA link', function() {
+        describe('plain text email', function () {
+          it('should contain the CTA link', function () {
             expect(this.email.text).to.contain(this.expectedUrl)
           })
         })
       })
 
-      describe('testEmail', function() {
-        before(function() {
+      describe('testEmail', function () {
+        before(function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
             to: this.emailAddress
@@ -397,13 +397,13 @@ describe('EmailBuilder', function() {
           this.email = this.EmailBuilder.buildEmail('testEmail', this.opts)
         })
 
-        it('should build the email', function() {
+        it('should build the email', function () {
           expect(this.email.html).to.exist
           expect(this.email.text).to.exist
         })
 
-        describe('HTML email', function() {
-          it('should include a CTA button and a fallback CTA link', function() {
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function () {
             const dom = cheerio.load(this.email.html)
             const buttonLink = dom(
               `a:contains("Open ${this.settings.appName}")`
@@ -417,8 +417,8 @@ describe('EmailBuilder', function() {
           })
         })
 
-        describe('plain text email', function() {
-          it('should contain the CTA link', function() {
+        describe('plain text email', function () {
+          it('should contain the CTA link', function () {
             expect(this.email.text).to.contain(
               `Open ${this.settings.appName}: ${this.settings.siteUrl}`
             )
@@ -426,8 +426,8 @@ describe('EmailBuilder', function() {
         })
       })
 
-      describe('registered', function() {
-        before(function() {
+      describe('registered', function () {
+        before(function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
             to: this.emailAddress,
@@ -436,13 +436,13 @@ describe('EmailBuilder', function() {
           this.email = this.EmailBuilder.buildEmail('registered', this.opts)
         })
 
-        it('should build the email', function() {
+        it('should build the email', function () {
           expect(this.email.html).to.exist
           expect(this.email.text).to.exist
         })
 
-        describe('HTML email', function() {
-          it('should include a CTA button and a fallback CTA link', function() {
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function () {
             const dom = cheerio.load(this.email.html)
             const buttonLink = dom('a:contains("Set password")')
             expect(buttonLink.length).to.equal(1)
@@ -456,15 +456,15 @@ describe('EmailBuilder', function() {
           })
         })
 
-        describe('plain text email', function() {
-          it('should contain the CTA link', function() {
+        describe('plain text email', function () {
+          it('should contain the CTA link', function () {
             expect(this.email.text).to.contain(this.opts.setNewPasswordUrl)
           })
         })
       })
 
-      describe('projectInvite', function() {
-        before(function() {
+      describe('projectInvite', function () {
+        before(function () {
           this.emailAddress = 'example@overleaf.com'
           this.owner = {
             email: 'owner@example.com',
@@ -489,13 +489,13 @@ describe('EmailBuilder', function() {
           this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
         })
 
-        it('should build the email', function() {
+        it('should build the email', function () {
           expect(this.email.html).to.exist
           expect(this.email.text).to.exist
         })
 
-        describe('HTML email', function() {
-          it('should include a CTA button and a fallback CTA link', function() {
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function () {
             const dom = cheerio.load(this.email.html)
             const buttonLink = dom('a:contains("View project")')
             expect(buttonLink.length).to.equal(1)
@@ -507,16 +507,16 @@ describe('EmailBuilder', function() {
           })
         })
 
-        describe('plain text email', function() {
-          it('should contain the CTA link', function() {
+        describe('plain text email', function () {
+          it('should contain the CTA link', function () {
             expect(this.email.text).to.contain(this.opts.inviteUrl)
           })
         })
       })
     })
-    describe('no CTA', function() {
-      describe('securityAlert', function() {
-        before(function() {
+    describe('no CTA', function () {
+      describe('securityAlert', function () {
+        before(function () {
           this.message = 'more details about the action'
           this.messageHTML = `<br /><span style="text-align:center" class="a-class"><b><i>${this.message}</i></b></span>`
           this.messageNotAllowedHTML = `<div></div>${this.messageHTML}`
@@ -534,30 +534,30 @@ describe('EmailBuilder', function() {
           this.email = this.EmailBuilder.buildEmail('securityAlert', this.opts)
         })
 
-        it('should build the email', function() {
+        it('should build the email', function () {
           expect(this.email.html != null).to.equal(true)
           expect(this.email.text != null).to.equal(true)
         })
 
-        describe('HTML email', function() {
-          it('should clean HTML in opts.actionDescribed', function() {
+        describe('HTML email', function () {
+          it('should clean HTML in opts.actionDescribed', function () {
             expect(this.email.html).to.not.contain(
               this.actionDescribedNotAllowedHTML
             )
             expect(this.email.html).to.contain(this.actionDescribedHTML)
           })
-          it('should clean HTML in opts.message', function() {
+          it('should clean HTML in opts.message', function () {
             expect(this.email.html).to.not.contain(this.messageNotAllowedHTML)
             expect(this.email.html).to.contain(this.messageHTML)
           })
         })
 
-        describe('plain text email', function() {
-          it('should remove all HTML in opts.actionDescribed', function() {
+        describe('plain text email', function () {
+          it('should remove all HTML in opts.actionDescribed', function () {
             expect(this.email.text).to.not.contain(this.actionDescribedHTML)
             expect(this.email.text).to.contain(this.actionDescribed)
           })
-          it('should remove all HTML in opts.message', function() {
+          it('should remove all HTML in opts.message', function () {
             expect(this.email.text).to.not.contain(this.messageHTML)
             expect(this.email.text).to.contain(this.message)
           })

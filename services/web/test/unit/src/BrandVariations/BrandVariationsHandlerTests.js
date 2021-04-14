@@ -21,8 +21,8 @@ const modulePath = path.join(
   '../../../../app/src/Features/BrandVariations/BrandVariationsHandler'
 )
 
-describe('BrandVariationsHandler', function() {
-  beforeEach(function() {
+describe('BrandVariationsHandler', function () {
+  beforeEach(function () {
     this.settings = {
       apis: {
         v1: {
@@ -48,8 +48,8 @@ describe('BrandVariationsHandler', function() {
     })
   })
 
-  describe('getBrandVariationById', function() {
-    it('should call the callback with an error when the branding variation id is not provided', function(done) {
+  describe('getBrandVariationById', function () {
+    it('should call the callback with an error when the branding variation id is not provided', function (done) {
       return this.BrandVariationsHandler.getBrandVariationById(
         null,
         (err, brandVariationDetails) => {
@@ -59,7 +59,7 @@ describe('BrandVariationsHandler', function() {
       )
     })
 
-    it('should call the callback with an error when the request errors', function(done) {
+    it('should call the callback with an error when the request errors', function (done) {
       this.V1Api.request.callsArgWith(1, new Error())
       return this.BrandVariationsHandler.getBrandVariationById(
         '12',
@@ -70,7 +70,7 @@ describe('BrandVariationsHandler', function() {
       )
     })
 
-    it('should call the callback with branding details when request succeeds', function(done) {
+    it('should call the callback with branding details when request succeeds', function (done) {
       this.V1Api.request.callsArgWith(
         1,
         null,
@@ -89,7 +89,7 @@ describe('BrandVariationsHandler', function() {
       )
     })
 
-    it('should transform relative URLs in v1 absolute ones', function(done) {
+    it('should transform relative URLs in v1 absolute ones', function (done) {
       this.mockedBrandVariationDetails.logo_url = '/journal-logo.png'
       this.V1Api.request.callsArgWith(
         1,

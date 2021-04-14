@@ -18,7 +18,7 @@ if (fs.existsSync(MODULES_PATH)) {
   }, entryPoints)
 }
 
-module.exports = function() {
+module.exports = function () {
   return {
     code: entryPoints.map(entryPoint => `import '${entryPoint}'`).join('\n')
   }

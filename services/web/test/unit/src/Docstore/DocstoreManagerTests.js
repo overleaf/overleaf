@@ -15,8 +15,8 @@ const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors.js')
 const tk = require('timekeeper')
 
-describe('DocstoreManager', function() {
-  beforeEach(function() {
+describe('DocstoreManager', function () {
+  beforeEach(function () {
     this.requestDefaults = sinon.stub().returns((this.request = sinon.stub()))
     this.DocstoreManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -40,17 +40,17 @@ describe('DocstoreManager', function() {
     return (this.callback = sinon.stub())
   })
 
-  describe('deleteDoc', function() {
-    describe('with a successful response code', function() {
+  describe('deleteDoc', function () {
+    describe('with a successful response code', function () {
       // for assertions on the deletedAt timestamp, we need to freeze the clock.
-      before(function() {
+      before(function () {
         tk.freeze(Date.now())
       })
-      after(function() {
+      after(function () {
         tk.reset()
       })
 
-      beforeEach(function() {
+      beforeEach(function () {
         this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
@@ -63,7 +63,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should delete the doc in the docstore api', function() {
+      it('should delete the doc in the docstore api', function () {
         return this.request.patch
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
@@ -73,13 +73,13 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback without an error', function() {
+      it('should call the callback without an error', function () {
         return this.callback.calledWith(null).should.equal(true)
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function() {
+    describe('with a failed response code', function () {
+      beforeEach(function () {
         this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
@@ -92,7 +92,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match
@@ -108,8 +108,8 @@ describe('DocstoreManager', function() {
       })
     })
 
-    describe('with a missing (404) response code', function() {
-      beforeEach(function() {
+    describe('with a missing (404) response code', function () {
+      beforeEach(function () {
         this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 404 }, '')
@@ -122,7 +122,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         this.callback
           .calledWith(
             sinon.match
@@ -139,8 +139,8 @@ describe('DocstoreManager', function() {
     })
   })
 
-  describe('updateDoc', function() {
-    beforeEach(function() {
+  describe('updateDoc', function () {
+    beforeEach(function () {
       this.lines = ['mock', 'doc', 'lines']
       this.rev = 5
       this.version = 42
@@ -148,8 +148,8 @@ describe('DocstoreManager', function() {
       return (this.modified = true)
     })
 
-    describe('with a successful response code', function() {
-      beforeEach(function() {
+    describe('with a successful response code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(
@@ -168,7 +168,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should update the doc in the docstore api', function() {
+      it('should update the doc in the docstore api', function () {
         return this.request.post
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
@@ -182,15 +182,15 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with the modified status and revision', function() {
+      it('should call the callback with the modified status and revision', function () {
         return this.callback
           .calledWith(null, this.modified, this.rev)
           .should.equal(true)
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function() {
+    describe('with a failed response code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
@@ -204,7 +204,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match
@@ -221,8 +221,8 @@ describe('DocstoreManager', function() {
     })
   })
 
-  describe('getDoc', function() {
-    beforeEach(function() {
+  describe('getDoc', function () {
+    beforeEach(function () {
       return (this.doc = {
         lines: (this.lines = ['mock', 'doc', 'lines']),
         rev: (this.rev = 5),
@@ -231,8 +231,8 @@ describe('DocstoreManager', function() {
       })
     })
 
-    describe('with a successful response code', function() {
-      beforeEach(function() {
+    describe('with a successful response code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, this.doc)
@@ -243,7 +243,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should get the doc from the docstore api', function() {
+      it('should get the doc from the docstore api', function () {
         return this.request.get
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
@@ -253,15 +253,15 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with the lines, version and rev', function() {
+      it('should call the callback with the lines, version and rev', function () {
         return this.callback
           .calledWith(null, this.lines, this.rev, this.version, this.ranges)
           .should.equal(true)
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function() {
+    describe('with a failed response code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
@@ -272,7 +272,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match
@@ -288,8 +288,8 @@ describe('DocstoreManager', function() {
       })
     })
 
-    describe('with include_deleted=true', function() {
-      beforeEach(function() {
+    describe('with include_deleted=true', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, this.doc)
@@ -301,7 +301,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should get the doc from the docstore api (including deleted)', function() {
+      it('should get the doc from the docstore api (including deleted)', function () {
         return this.request.get
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}?include_deleted=true`,
@@ -311,15 +311,15 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with the lines, version and rev', function() {
+      it('should call the callback with the lines, version and rev', function () {
         return this.callback
           .calledWith(null, this.lines, this.rev, this.version, this.ranges)
           .should.equal(true)
       })
     })
 
-    describe('with a missing (404) response code', function() {
-      beforeEach(function() {
+    describe('with a missing (404) response code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 404 }, '')
@@ -330,7 +330,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match
@@ -342,9 +342,9 @@ describe('DocstoreManager', function() {
     })
   })
 
-  describe('getAllDocs', function() {
-    describe('with a successful response code', function() {
-      beforeEach(function() {
+  describe('getAllDocs', function () {
+    describe('with a successful response code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(
@@ -356,7 +356,7 @@ describe('DocstoreManager', function() {
         return this.DocstoreManager.getAllDocs(this.project_id, this.callback)
       })
 
-      it('should get all the project docs in the docstore api', function() {
+      it('should get all the project docs in the docstore api', function () {
         return this.request.get
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc`,
@@ -366,20 +366,20 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with the docs', function() {
+      it('should call the callback with the docs', function () {
         return this.callback.calledWith(null, this.docs).should.equal(true)
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function() {
+    describe('with a failed response code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
         return this.DocstoreManager.getAllDocs(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match
@@ -396,9 +396,9 @@ describe('DocstoreManager', function() {
     })
   })
 
-  describe('getAllDeletedDocs', function() {
-    describe('with a successful response code', function() {
-      beforeEach(function(done) {
+  describe('getAllDeletedDocs', function () {
+    describe('with a successful response code', function () {
+      beforeEach(function (done) {
         this.callback.callsFake(done)
         this.docs = [{ _id: 'mock-doc-id', name: 'foo.tex' }]
         this.request.get = sinon
@@ -407,7 +407,7 @@ describe('DocstoreManager', function() {
         this.DocstoreManager.getAllDeletedDocs(this.project_id, this.callback)
       })
 
-      it('should get all the project docs in the docstore api', function() {
+      it('should get all the project docs in the docstore api', function () {
         this.request.get.should.have.been.calledWith({
           url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc-deleted`,
           timeout: 30 * 1000,
@@ -415,13 +415,13 @@ describe('DocstoreManager', function() {
         })
       })
 
-      it('should call the callback with the docs', function() {
+      it('should call the callback with the docs', function () {
         this.callback.should.have.been.calledWith(null, this.docs)
       })
     })
 
-    describe('with an error', function() {
-      beforeEach(function(done) {
+    describe('with an error', function () {
+      beforeEach(function (done) {
         this.callback.callsFake(() => done())
         this.request.get = sinon
           .stub()
@@ -429,7 +429,7 @@ describe('DocstoreManager', function() {
         this.DocstoreManager.getAllDocs(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         this.callback.should.have.been.calledWith(
           sinon.match
             .instanceOf(Error)
@@ -438,8 +438,8 @@ describe('DocstoreManager', function() {
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function(done) {
+    describe('with a failed response code', function () {
+      beforeEach(function (done) {
         this.callback.callsFake(() => done())
         this.request.get = sinon
           .stub()
@@ -447,7 +447,7 @@ describe('DocstoreManager', function() {
         this.DocstoreManager.getAllDocs(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         this.callback.should.have.been.calledWith(
           sinon.match
             .instanceOf(Error)
@@ -462,9 +462,9 @@ describe('DocstoreManager', function() {
     })
   })
 
-  describe('getAllRanges', function() {
-    describe('with a successful response code', function() {
-      beforeEach(function() {
+  describe('getAllRanges', function () {
+    describe('with a successful response code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(
@@ -476,7 +476,7 @@ describe('DocstoreManager', function() {
         return this.DocstoreManager.getAllRanges(this.project_id, this.callback)
       })
 
-      it('should get all the project doc ranges in the docstore api', function() {
+      it('should get all the project doc ranges in the docstore api', function () {
         return this.request.get
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/ranges`,
@@ -486,20 +486,20 @@ describe('DocstoreManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with the docs', function() {
+      it('should call the callback with the docs', function () {
         return this.callback.calledWith(null, this.docs).should.equal(true)
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function() {
+    describe('with a failed response code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
         return this.DocstoreManager.getAllRanges(this.project_id, this.callback)
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match
@@ -516,9 +516,9 @@ describe('DocstoreManager', function() {
     })
   })
 
-  describe('archiveProject', function() {
-    describe('with a successful response code', function() {
-      beforeEach(function() {
+  describe('archiveProject', function () {
+    describe('with a successful response code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
@@ -528,13 +528,13 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function() {
+    describe('with a failed response code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
@@ -544,7 +544,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match
@@ -561,9 +561,9 @@ describe('DocstoreManager', function() {
     })
   })
 
-  describe('unarchiveProject', function() {
-    describe('with a successful response code', function() {
-      beforeEach(function() {
+  describe('unarchiveProject', function () {
+    describe('with a successful response code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
@@ -573,13 +573,13 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function() {
+    describe('with a failed response code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
@@ -589,7 +589,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match
@@ -606,9 +606,9 @@ describe('DocstoreManager', function() {
     })
   })
 
-  describe('destroyProject', function() {
-    describe('with a successful response code', function() {
-      beforeEach(function() {
+  describe('destroyProject', function () {
+    describe('with a successful response code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
@@ -618,13 +618,13 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function() {
+    describe('with a failed response code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
@@ -634,7 +634,7 @@ describe('DocstoreManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match

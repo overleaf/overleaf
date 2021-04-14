@@ -122,7 +122,7 @@ function fireHook(name, ...rest) {
   const callback = rest[adjustedLength - 1]
   const methods = _hooks[name] || []
   const callMethods = methods.map(method => cb => method(...args, cb))
-  async.series(callMethods, function(error, results) {
+  async.series(callMethods, function (error, results) {
     if (error) {
       return callback(error)
     }

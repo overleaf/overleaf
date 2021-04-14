@@ -17,8 +17,8 @@ const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipsHandler'
 const SandboxedModule = require('sandboxed-module')
 
-describe('UserMembershipsHandler', function() {
-  beforeEach(function() {
+describe('UserMembershipsHandler', function () {
+  beforeEach(function () {
     this.user = { _id: ObjectId() }
 
     this.Institution = { updateMany: sinon.stub().yields(null) }
@@ -39,8 +39,8 @@ describe('UserMembershipsHandler', function() {
     }))
   })
 
-  describe('remove user', function() {
-    it('remove user from all entities', function(done) {
+  describe('remove user', function () {
+    it('remove user from all entities', function (done) {
       return this.UserMembershipsHandler.removeUserFromAllEntities(
         this.user._id,
         error => {

@@ -45,7 +45,7 @@ if (!module.parent) {
   }
   Promise.all([mongodb.waitForDb(), mongoose.connectionPromise])
     .then(() => {
-      Server.server.listen(port, host, function() {
+      Server.server.listen(port, host, function () {
         logger.info(`web starting up, listening on ${host}:${port}`)
         logger.info(`${require('http').globalAgent.maxSockets} sockets enabled`)
         // wait until the process is ready before monitoring the event loop
@@ -59,7 +59,7 @@ if (!module.parent) {
 }
 
 // handle SIGTERM for graceful shutdown in kubernetes
-process.on('SIGTERM', function(signal) {
+process.on('SIGTERM', function (signal) {
   logger.warn({ signal: signal }, 'received signal, shutting down')
   Settings.shuttingDown = true
 })

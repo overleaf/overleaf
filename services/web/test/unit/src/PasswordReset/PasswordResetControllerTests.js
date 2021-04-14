@@ -9,8 +9,8 @@ const MODULE_PATH = path.join(
   '../../../../app/src/Features/PasswordReset/PasswordResetController'
 )
 
-describe('PasswordResetController', function() {
-  beforeEach(function() {
+describe('PasswordResetController', function () {
+  beforeEach(function () {
     this.email = 'bob@bob.com'
     this.user_id = 'mock-user-id'
     this.token = 'my security token that was emailed to me'
@@ -69,8 +69,8 @@ describe('PasswordResetController', function() {
     })
   })
 
-  describe('requestReset', function() {
-    it('should error if the rate limit is hit', function(done) {
+  describe('requestReset', function () {
+    it('should error if the rate limit is hit', function (done) {
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
         null,
@@ -85,7 +85,7 @@ describe('PasswordResetController', function() {
       done()
     })
 
-    it('should tell the handler to process that email', function(done) {
+    it('should tell the handler to process that email', function (done) {
       this.RateLimiter.addCount.callsArgWith(1, null, true)
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
@@ -100,7 +100,7 @@ describe('PasswordResetController', function() {
       done()
     })
 
-    it('should send a 500 if there is an error', function(done) {
+    it('should send a 500 if there is an error', function (done) {
       this.RateLimiter.addCount.callsArgWith(1, null, true)
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
@@ -112,7 +112,7 @@ describe('PasswordResetController', function() {
       })
     })
 
-    it("should send a 404 if the email doesn't exist", function(done) {
+    it("should send a 404 if the email doesn't exist", function (done) {
       this.RateLimiter.addCount.callsArgWith(1, null, true)
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
@@ -124,7 +124,7 @@ describe('PasswordResetController', function() {
       done()
     })
 
-    it('should send a 404 if the email is registered as a secondard email', function(done) {
+    it('should send a 404 if the email is registered as a secondard email', function (done) {
       this.RateLimiter.addCount.callsArgWith(1, null, true)
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
@@ -136,7 +136,7 @@ describe('PasswordResetController', function() {
       done()
     })
 
-    it('should normalize the email address', function(done) {
+    it('should normalize the email address', function (done) {
       this.email = '  UPperCaseEMAILWithSpacesAround@example.Com '
       this.req.body.email = this.email
       this.RateLimiter.addCount.callsArgWith(1, null, true)
@@ -154,12 +154,12 @@ describe('PasswordResetController', function() {
     })
   })
 
-  describe('setNewUserPassword', function() {
-    beforeEach(function() {
+  describe('setNewUserPassword', function () {
+    beforeEach(function () {
       this.req.session.resetToken = this.token
     })
 
-    it('should tell the user handler to reset the password', function(done) {
+    it('should tell the user handler to reset the password', function (done) {
       this.res.sendStatus = code => {
         code.should.equal(200)
         this.PasswordResetHandler.promises.setNewUserPassword
@@ -170,7 +170,7 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should preserve spaces in the password', function(done) {
+    it('should preserve spaces in the password', function (done) {
       this.password = this.req.body.password = ' oh! clever! spaces around!   '
       this.res.sendStatus = code => {
         code.should.equal(200)
@@ -183,7 +183,7 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should send 404 if the token was not found', function(done) {
+    it('should send 404 if the token was not found', function (done) {
       this.PasswordResetHandler.promises.setNewUserPassword.resolves({
         found: false,
         reset: false,
@@ -196,7 +196,7 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should return 500 if not reset', function(done) {
+    it('should return 500 if not reset', function (done) {
       this.PasswordResetHandler.promises.setNewUserPassword.resolves({
         found: true,
         reset: false,
@@ -209,7 +209,7 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should return 400 (Bad Request) if there is no password', function(done) {
+    it('should return 400 (Bad Request) if there is no password', function (done) {
       this.req.body.password = ''
       this.res.sendStatus = code => {
         code.should.equal(400)
@@ -221,7 +221,7 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should return 400 (Bad Request) if there is no passwordResetToken', function(done) {
+    it('should return 400 (Bad Request) if there is no passwordResetToken', function (done) {
       this.req.body.passwordResetToken = ''
       this.res.sendStatus = code => {
         code.should.equal(400)
@@ -233,7 +233,7 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should return 400 (Bad Request) if the password is invalid', function(done) {
+    it('should return 400 (Bad Request) if the password is invalid', function (done) {
       this.req.body.password = 'correct horse battery staple'
       const err = new Error('bad')
       err.name = 'InvalidPasswordError'
@@ -248,7 +248,7 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should clear the session.resetToken', function(done) {
+    it('should clear the session.resetToken', function (done) {
       this.res.sendStatus = code => {
         code.should.equal(200)
         this.req.session.should.not.have.property('resetToken')
@@ -257,7 +257,7 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should clear sessions', function(done) {
+    it('should clear sessions', function (done) {
       this.res.sendStatus = code => {
         this.UserSessionsManager.promises.revokeAllUserSessions.callCount.should.equal(
           1
@@ -267,7 +267,7 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should call removeReconfirmFlag', function(done) {
+    it('should call removeReconfirmFlag', function (done) {
       this.res.sendStatus = code => {
         this.UserUpdater.promises.removeReconfirmFlag.callCount.should.equal(1)
         done()
@@ -275,8 +275,8 @@ describe('PasswordResetController', function() {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    describe('catch errors', function() {
-      it('should return 404 for NotFoundError', function(done) {
+    describe('catch errors', function () {
+      it('should return 404 for NotFoundError', function (done) {
         const anError = new Error('oops')
         anError.name = 'NotFoundError'
         this.PasswordResetHandler.promises.setNewUserPassword.rejects(anError)
@@ -286,7 +286,7 @@ describe('PasswordResetController', function() {
         }
         this.PasswordResetController.setNewUserPassword(this.req, this.res)
       })
-      it('should return 400 for InvalidPasswordError', function(done) {
+      it('should return 400 for InvalidPasswordError', function (done) {
         const anError = new Error('oops')
         anError.name = 'InvalidPasswordError'
         this.PasswordResetHandler.promises.setNewUserPassword.rejects(anError)
@@ -296,7 +296,7 @@ describe('PasswordResetController', function() {
         }
         this.PasswordResetController.setNewUserPassword(this.req, this.res)
       })
-      it('should return 500 for other errors', function(done) {
+      it('should return 500 for other errors', function (done) {
         const anError = new Error('oops')
         this.PasswordResetHandler.promises.setNewUserPassword.rejects(anError)
         this.res.sendStatus = code => {
@@ -307,8 +307,8 @@ describe('PasswordResetController', function() {
       })
     })
 
-    describe('when doLoginAfterPasswordReset is set', function() {
-      beforeEach(function() {
+    describe('when doLoginAfterPasswordReset is set', function () {
+      beforeEach(function () {
         this.user = {
           _id: this.userId,
           email: 'joe@example.com'
@@ -317,7 +317,7 @@ describe('PasswordResetController', function() {
         this.req.session.doLoginAfterPasswordReset = 'true'
       })
 
-      it('should login user', function(done) {
+      it('should login user', function (done) {
         this.AuthenticationController.finishLogin.callsFake((...args) => {
           expect(args[0]).to.equal(this.user)
           done()
@@ -327,13 +327,13 @@ describe('PasswordResetController', function() {
     })
   })
 
-  describe('renderSetPasswordForm', function() {
-    describe('with token in query-string', function() {
-      beforeEach(function() {
+  describe('renderSetPasswordForm', function () {
+    describe('with token in query-string', function () {
+      beforeEach(function () {
         this.req.query.passwordResetToken = this.token
       })
 
-      it('should set session.resetToken and redirect', function(done) {
+      it('should set session.resetToken and redirect', function (done) {
         this.req.session.should.not.have.property('resetToken')
         this.res.redirect = path => {
           path.should.equal('/user/password/set')
@@ -344,13 +344,13 @@ describe('PasswordResetController', function() {
       })
     })
 
-    describe('with token and email in query-string', function() {
-      beforeEach(function() {
+    describe('with token and email in query-string', function () {
+      beforeEach(function () {
         this.req.query.passwordResetToken = this.token
         this.req.query.email = 'foo@bar.com'
       })
 
-      it('should set session.resetToken and redirect with email', function(done) {
+      it('should set session.resetToken and redirect with email', function (done) {
         this.req.session.should.not.have.property('resetToken')
         this.res.redirect = path => {
           path.should.equal('/user/password/set?email=foo%40bar.com')
@@ -361,13 +361,13 @@ describe('PasswordResetController', function() {
       })
     })
 
-    describe('with token and invalid email in query-string', function() {
-      beforeEach(function() {
+    describe('with token and invalid email in query-string', function () {
+      beforeEach(function () {
         this.req.query.passwordResetToken = this.token
         this.req.query.email = 'not-an-email'
       })
 
-      it('should set session.resetToken and redirect without email', function(done) {
+      it('should set session.resetToken and redirect without email', function (done) {
         this.req.session.should.not.have.property('resetToken')
         this.res.redirect = path => {
           path.should.equal('/user/password/set')
@@ -378,13 +378,13 @@ describe('PasswordResetController', function() {
       })
     })
 
-    describe('with token and non-string email in query-string', function() {
-      beforeEach(function() {
+    describe('with token and non-string email in query-string', function () {
+      beforeEach(function () {
         this.req.query.passwordResetToken = this.token
         this.req.query.email = { foo: 'bar' }
       })
 
-      it('should set session.resetToken and redirect without email', function(done) {
+      it('should set session.resetToken and redirect without email', function (done) {
         this.req.session.should.not.have.property('resetToken')
         this.res.redirect = path => {
           path.should.equal('/user/password/set')
@@ -395,13 +395,13 @@ describe('PasswordResetController', function() {
       })
     })
 
-    describe('without a token in query-string', function() {
-      describe('with token in session', function() {
-        beforeEach(function() {
+    describe('without a token in query-string', function () {
+      describe('with token in session', function () {
+        beforeEach(function () {
           this.req.session.resetToken = this.token
         })
 
-        it('should render the page, passing the reset token', function(done) {
+        it('should render the page, passing the reset token', function (done) {
           this.res.render = (templatePath, options) => {
             options.passwordResetToken.should.equal(this.req.session.resetToken)
             done()
@@ -410,8 +410,8 @@ describe('PasswordResetController', function() {
         })
       })
 
-      describe('without a token in session', function() {
-        it('should redirect to the reset request page', function(done) {
+      describe('without a token in session', function () {
+        it('should redirect to the reset request page', function (done) {
           this.res.redirect = path => {
             path.should.equal('/user/password/reset')
             this.req.session.should.not.have.property('resetToken')

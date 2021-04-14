@@ -3,30 +3,30 @@ const { expect } = require('chai')
 const { User } = require('../../../app/src/models/User')
 const { Subscription } = require('../../../app/src/models/Subscription')
 
-describe('mongoose', function() {
-  describe('User', function() {
+describe('mongoose', function () {
+  describe('User', function () {
     const email = 'wombat@potato.net'
 
-    it('allows the creation of a user', async function() {
+    it('allows the creation of a user', async function () {
       await expect(User.create({ email: email })).to.be.fulfilled
       await expect(User.findOne({ email: email })).to.eventually.exist
     })
 
-    it('does not allow the creation of multiple users with the same email', async function() {
+    it('does not allow the creation of multiple users with the same email', async function () {
       await expect(User.create({ email: email })).to.be.fulfilled
       await expect(User.create({ email: email })).to.be.rejected
       await expect(User.countDocuments({ email: email })).to.eventually.equal(1)
     })
   })
 
-  describe('Subsription', function() {
+  describe('Subsription', function () {
     let user
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       user = await User.create({ email: 'wombat@potato.net' })
     })
 
-    it('allows the creation of a subscription', async function() {
+    it('allows the creation of a subscription', async function () {
       await expect(
         Subscription.create({ admin_id: user._id, manager_ids: [user._id] })
       ).to.be.fulfilled
@@ -34,7 +34,7 @@ describe('mongoose', function() {
         .exist
     })
 
-    it('does not allow the creation of a subscription without a manager', async function() {
+    it('does not allow the creation of a subscription without a manager', async function () {
       await expect(Subscription.create({ admin_id: user._id })).to.be.rejected
     })
   })

@@ -13,9 +13,9 @@
  */
 import App from '../../../base'
 
-export default App.controller('ChatButtonController', function($scope, ide) {
+export default App.controller('ChatButtonController', function ($scope, ide) {
   let clearNewMessageNotification
-  $scope.toggleChat = function() {
+  $scope.toggleChat = function () {
     $scope.ui.chatOpen = !$scope.ui.chatOpen
     return $scope.resetUnreadMessages()
   }
@@ -49,13 +49,13 @@ export default App.controller('ChatButtonController', function($scope, ide) {
   let focussed = true
   let newMessageNotificationTimeout = null
   let originalTitle = null
-  $(window).on('focus', function() {
+  $(window).on('focus', function () {
     clearNewMessageNotification()
     return (focussed = true)
   })
   $(window).on('blur', () => (focussed = false))
 
-  var flashTitle = function() {
+  var flashTitle = function () {
     if (!focussed && newMessageNotificationTimeout == null) {
       let changeTitle
       if (!originalTitle) {
@@ -72,7 +72,7 @@ export default App.controller('ChatButtonController', function($scope, ide) {
     }
   }
 
-  return (clearNewMessageNotification = function() {
+  return (clearNewMessageNotification = function () {
     clearTimeout(newMessageNotificationTimeout)
     newMessageNotificationTimeout = null
     if (originalTitle != null) {

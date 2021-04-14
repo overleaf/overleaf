@@ -17,7 +17,7 @@ const logger = require('logger-sharelatex')
 module.exports = {
   markAsUpdated(projectId, lastUpdatedAt, lastUpdatedBy, callback) {
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     if (lastUpdatedAt == null) {
       lastUpdatedAt = new Date()
@@ -38,7 +38,7 @@ module.exports = {
   markAsOpened(project_id, callback) {
     const conditions = { _id: project_id }
     const update = { lastOpened: Date.now() }
-    return Project.updateOne(conditions, update, {}, function(err) {
+    return Project.updateOne(conditions, update, {}, function (err) {
       if (callback != null) {
         return callback()
       }
@@ -48,7 +48,7 @@ module.exports = {
   markAsInactive(project_id, callback) {
     const conditions = { _id: project_id }
     const update = { active: false }
-    return Project.updateOne(conditions, update, {}, function(err) {
+    return Project.updateOne(conditions, update, {}, function (err) {
       if (callback != null) {
         return callback()
       }
@@ -58,7 +58,7 @@ module.exports = {
   markAsActive(project_id, callback) {
     const conditions = { _id: project_id }
     const update = { active: true }
-    return Project.updateOne(conditions, update, {}, function(err) {
+    return Project.updateOne(conditions, update, {}, function (err) {
       if (callback != null) {
         return callback()
       }

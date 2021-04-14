@@ -4,7 +4,7 @@ import { rootContext } from '../../../shared/context/root-context'
 
 import ChatPane from '../components/chat-pane'
 
-App.controller('ReactChatController', function($scope, ide) {
+App.controller('ReactChatController', function ($scope, ide) {
   $scope.chatIsOpen = ide.$scope.ui.chatOpen
 
   ide.$scope.$watch('ui.chatOpen', newValue => {

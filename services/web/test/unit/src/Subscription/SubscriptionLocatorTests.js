@@ -17,8 +17,8 @@ const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionLocator'
 const { assert } = require('chai')
 
-describe('Subscription Locator Tests', function() {
-  beforeEach(function() {
+describe('Subscription Locator Tests', function () {
+  beforeEach(function () {
     this.user = { _id: '5208dd34438842e2db333333' }
     this.subscription = { hello: 'world' }
     this.Subscription = {
@@ -42,8 +42,8 @@ describe('Subscription Locator Tests', function() {
     }))
   })
 
-  describe('finding users subscription', function() {
-    it('should send the users features', function(done) {
+  describe('finding users subscription', function () {
+    it('should send the users features', function (done) {
       this.Subscription.findOne.callsArgWith(1, null, this.subscription)
       return this.SubscriptionLocator.getUsersSubscription(
         this.user,
@@ -57,7 +57,7 @@ describe('Subscription Locator Tests', function() {
       )
     })
 
-    it('should error if not found', function(done) {
+    it('should error if not found', function (done) {
       this.Subscription.findOne.callsArgWith(1, 'not found')
       return this.SubscriptionLocator.getUsersSubscription(
         this.user,
@@ -68,7 +68,7 @@ describe('Subscription Locator Tests', function() {
       )
     })
 
-    it('should take a user id rather than the user object', function(done) {
+    it('should take a user id rather than the user object', function (done) {
       this.Subscription.findOne.callsArgWith(1, null, this.subscription)
       return this.SubscriptionLocator.getUsersSubscription(
         this.user._id,

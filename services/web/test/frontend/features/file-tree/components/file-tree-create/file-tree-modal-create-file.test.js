@@ -16,13 +16,13 @@ import FileTreeContext from '../../../../../../frontend/js/features/file-tree/co
 import { useFileTreeActionable } from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-actionable'
 import { useFileTreeMutable } from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-mutable'
 
-describe('<FileTreeModalCreateFile/>', function() {
-  afterEach(function() {
+describe('<FileTreeModalCreateFile/>', function () {
+  afterEach(function () {
     fetchMock.restore()
     cleanup()
   })
 
-  it('handles invalid file names', async function() {
+  it('handles invalid file names', async function () {
     render(
       <FileTreeContext {...contextProps}>
         <OpenWithMode mode="doc" />
@@ -56,7 +56,7 @@ describe('<FileTreeModalCreateFile/>', function() {
     )
   })
 
-  it('displays an error when the file limit is reached', async function() {
+  it('displays an error when the file limit is reached', async function () {
     const rootFolder = [
       {
         docs: Array.from({ length: 10 }, (_, index) => ({
@@ -84,7 +84,7 @@ describe('<FileTreeModalCreateFile/>', function() {
     )
   })
 
-  it('displays a warning when the file limit is nearly reached', async function() {
+  it('displays a warning when the file limit is nearly reached', async function () {
     const rootFolder = [
       {
         docs: Array.from({ length: 9 }, (_, index) => ({
@@ -108,7 +108,7 @@ describe('<FileTreeModalCreateFile/>', function() {
     screen.getByText(/This project is approaching the file limit \(\d+\/\d+\)/)
   })
 
-  it('counts files in nested folders', async function() {
+  it('counts files in nested folders', async function () {
     const rootFolder = [
       {
         docs: [{ _id: 'entity-1' }],
@@ -150,7 +150,7 @@ describe('<FileTreeModalCreateFile/>', function() {
     screen.getByText(/This project is approaching the file limit \(\d+\/\d+\)/)
   })
 
-  it('creates a new file when the form is submitted', async function() {
+  it('creates a new file when the form is submitted', async function () {
     fetchMock.post('express:/project/:projectId/doc', () => 204)
 
     render(
@@ -173,7 +173,7 @@ describe('<FileTreeModalCreateFile/>', function() {
     ).to.be.true
   })
 
-  it('imports a new file from a project', async function() {
+  it('imports a new file from a project', async function () {
     fetchMock
       .get('path:/user/projects', {
         projects: [
@@ -289,7 +289,7 @@ describe('<FileTreeModalCreateFile/>', function() {
     ).to.be.true
   })
 
-  it('import from a URL when the form is submitted', async function() {
+  it('import from a URL when the form is submitted', async function () {
     fetchMock.post('express:/project/:projectId/linked_file', () => 204)
 
     render(
@@ -331,7 +331,7 @@ describe('<FileTreeModalCreateFile/>', function() {
   })
 
   // eslint-disable-next-line mocha/no-skipped-tests
-  it.skip('uploads a new file', async function() {
+  it.skip('uploads a new file', async function () {
     fetchMock.post('express:/project/:projectId/linked_file', () => 204)
 
     render(

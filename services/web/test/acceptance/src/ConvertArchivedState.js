@@ -4,14 +4,14 @@ const { ObjectId } = require('mongodb')
 
 const User = require('./helpers/User').promises
 
-describe('ConvertArchivedState', function() {
+describe('ConvertArchivedState', function () {
   let userOne, userTwo, userThree, userFour
   let projectOne, projectOneId
   let projectTwo, projectTwoId
   let projectThree, projectThreeId
   let projectFour, projectFourId
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     userOne = new User()
     userTwo = new User()
     userThree = new User()
@@ -66,7 +66,7 @@ describe('ConvertArchivedState', function() {
     await userOne.saveProject(projectFour)
   })
 
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     exec(
       'CONNECT_DELAY=1 node scripts/convert_archived_state.js FIRST,SECOND',
       (error, stdout, stderr) => {
@@ -80,8 +80,8 @@ describe('ConvertArchivedState', function() {
     )
   })
 
-  describe('main method', function() {
-    it('should change a project archived boolean to an array', async function() {
+  describe('main method', function () {
+    it('should change a project archived boolean to an array', async function () {
       projectOne = await userOne.getProject(projectOneId)
       projectTwo = await userOne.getProject(projectTwoId)
       expect(convertObjectIdsToStrings(projectOne.archived)).to.deep.equal([
@@ -97,7 +97,7 @@ describe('ConvertArchivedState', function() {
       ])
     })
 
-    it('should not change the value of a project already archived with an array', async function() {
+    it('should not change the value of a project already archived with an array', async function () {
       projectThree = await userOne.getProject(projectThreeId)
       expect(convertObjectIdsToStrings(projectThree.archived)).to.deep.equal([
         userOne._id,
@@ -106,7 +106,7 @@ describe('ConvertArchivedState', function() {
       ])
     })
 
-    it('should change a none-archived project with a boolean value to an array', async function() {
+    it('should change a none-archived project with a boolean value to an array', async function () {
       projectFour = await userOne.getProject(projectFourId)
       expect(convertObjectIdsToStrings(projectFour.archived)).to.deep.equal([])
     })

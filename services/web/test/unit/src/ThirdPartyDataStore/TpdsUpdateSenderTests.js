@@ -21,12 +21,12 @@ const siteUrl = 'http://www.localhost:3000'
 const httpAuthSiteUrl = `http://${httpUsername}:${httpPass}@www.localhost:3000`
 const filestoreUrl = 'filestore.sharelatex.com'
 
-describe('TpdsUpdateSender', function() {
-  beforeEach(function() {
+describe('TpdsUpdateSender', function () {
+  beforeEach(function () {
     this.fakeUser = {
       _id: '12390i'
     }
-    this.requestQueuer = function(queue, meth, opts, callback) {}
+    this.requestQueuer = function (queue, meth, opts, callback) {}
     const memberIds = [userId, collaberatorRef, readOnlyRef]
     this.CollaboratorsGetter = {
       promises: {
@@ -70,13 +70,13 @@ describe('TpdsUpdateSender', function() {
     })
   })
 
-  describe('enqueue', function() {
-    it('should not call request if there is no tpdsworker url', async function() {
+  describe('enqueue', function () {
+    it('should not call request if there is no tpdsworker url', async function () {
       await this.updateSender.promises.enqueue(null, null, null)
       this.request.should.not.have.been.called
     })
 
-    it('should post the message to the tpdsworker', async function() {
+    it('should post the message to the tpdsworker', async function () {
       this.settings.apis.tpdsworker = { url: 'www.tpdsworker.env' }
       const group0 = 'myproject'
       const method0 = 'somemethod0'
@@ -92,12 +92,12 @@ describe('TpdsUpdateSender', function() {
     })
   })
 
-  describe('sending updates', function() {
-    beforeEach(function() {
+  describe('sending updates', function () {
+    beforeEach(function () {
       this.settings.apis.tpdsworker = { url: 'www.tpdsworker.env' }
     })
 
-    it('queues a post the file with user and file id', async function() {
+    it('queues a post the file with user and file id', async function () {
       const fileId = '4545345'
       const path = '/some/path/here.jpg'
 
@@ -149,7 +149,7 @@ describe('TpdsUpdateSender', function() {
       )
     })
 
-    it('post doc with stream origin of docstore', async function() {
+    it('post doc with stream origin of docstore', async function () {
       const docId = '4545345'
       const path = '/some/path/here.tex'
       const lines = ['line1', 'line2', 'line3']
@@ -201,7 +201,7 @@ describe('TpdsUpdateSender', function() {
       )
     })
 
-    it('deleting entity', async function() {
+    it('deleting entity', async function () {
       const path = '/path/here/t.tex'
 
       await this.updateSender.promises.deleteEntity({
@@ -246,7 +246,7 @@ describe('TpdsUpdateSender', function() {
       )
     })
 
-    it('moving entity', async function() {
+    it('moving entity', async function () {
       const startPath = 'staring/here/file.tex'
       const endPath = 'ending/here/file.tex'
 
@@ -294,7 +294,7 @@ describe('TpdsUpdateSender', function() {
       )
     })
 
-    it('should be able to rename a project using the move entity func', async function() {
+    it('should be able to rename a project using the move entity func', async function () {
       const oldProjectName = '/oldProjectName/'
       const newProjectName = '/newProjectName/'
 
@@ -341,7 +341,7 @@ describe('TpdsUpdateSender', function() {
       )
     })
 
-    it('pollDropboxForUser', async function() {
+    it('pollDropboxForUser', async function () {
       await this.updateSender.promises.pollDropboxForUser(userId)
 
       const {

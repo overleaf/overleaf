@@ -8,11 +8,11 @@ MongoHelper.initialize()
 
 let server
 
-before('start main app', function(done) {
+before('start main app', function (done) {
   server = App.listen(3000, 'localhost', done)
 })
 
-after('stop main app', function(done) {
+after('stop main app', function (done) {
   if (!server) {
     return done()
   }

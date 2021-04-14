@@ -18,8 +18,8 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Security/RateLimiterMiddleware'
 )
 
-describe('RateLimiterMiddleware', function() {
-  beforeEach(function() {
+describe('RateLimiterMiddleware', function () {
+  beforeEach(function () {
     this.AuthenticationController = {
       getLoggedInUserId: () => {
         return __guard__(
@@ -49,8 +49,8 @@ describe('RateLimiterMiddleware', function() {
     return (this.next = sinon.stub())
   })
 
-  describe('rateLimit', function() {
-    beforeEach(function() {
+  describe('rateLimit', function () {
+    beforeEach(function () {
       this.rateLimiter = this.RateLimiterMiddleware.rateLimit({
         endpointName: 'test-endpoint',
         params: ['project_id', 'doc_id'],
@@ -63,14 +63,14 @@ describe('RateLimiterMiddleware', function() {
       })
     })
 
-    describe('when there is no session', function() {
-      beforeEach(function() {
+    describe('when there is no session', function () {
+      beforeEach(function () {
         this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
         this.req.ip = this.ip = '1.2.3.4'
         return this.rateLimiter(this.req, this.res, this.next)
       })
 
-      it('should call the rate limiter backend with the ip address', function() {
+      it('should call the rate limiter backend with the ip address', function () {
         return this.RateLimiter.addCount
           .calledWith({
             endpointName: 'test-endpoint',
@@ -81,11 +81,11 @@ describe('RateLimiterMiddleware', function() {
           .should.equal(true)
       })
 
-      it('should pass on to next()', function() {})
+      it('should pass on to next()', function () {})
     })
 
-    describe('when smoke test user', function() {
-      beforeEach(function() {
+    describe('when smoke test user', function () {
+      beforeEach(function () {
         this.req.session = {
           user: {
             _id: (this.user_id = 'smoke-test-user-id')
@@ -96,7 +96,7 @@ describe('RateLimiterMiddleware', function() {
         return this.rateLimiter(this.req, this.res, this.next)
       })
 
-      it('should not call the rate limiter backend with the user_id', function() {
+      it('should not call the rate limiter backend with the user_id', function () {
         this.RateLimiter.addCount
           .calledWith({
             endpointName: 'test-endpoint',
@@ -108,13 +108,13 @@ describe('RateLimiterMiddleware', function() {
         this.RateLimiter.addCount.callCount.should.equal(0)
       })
 
-      it('should pass on to next()', function() {
+      it('should pass on to next()', function () {
         return this.next.called.should.equal(true)
       })
     })
 
-    describe('when under the rate limit with logged in user', function() {
-      beforeEach(function() {
+    describe('when under the rate limit with logged in user', function () {
+      beforeEach(function () {
         this.req.session = {
           user: {
             _id: (this.user_id = 'user-id')
@@ -124,7 +124,7 @@ describe('RateLimiterMiddleware', function() {
         return this.rateLimiter(this.req, this.res, this.next)
       })
 
-      it('should call the rate limiter backend with the user_id', function() {
+      it('should call the rate limiter backend with the user_id', function () {
         return this.RateLimiter.addCount
           .calledWith({
             endpointName: 'test-endpoint',
@@ -135,19 +135,19 @@ describe('RateLimiterMiddleware', function() {
           .should.equal(true)
       })
 
-      it('should pass on to next()', function() {
+      it('should pass on to next()', function () {
         return this.next.called.should.equal(true)
       })
     })
 
-    describe('when under the rate limit with anonymous user', function() {
-      beforeEach(function() {
+    describe('when under the rate limit with anonymous user', function () {
+      beforeEach(function () {
         this.req.ip = this.ip = '1.2.3.4'
         this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
         return this.rateLimiter(this.req, this.res, this.next)
       })
 
-      it('should call the rate limiter backend with the ip address', function() {
+      it('should call the rate limiter backend with the ip address', function () {
         return this.RateLimiter.addCount
           .calledWith({
             endpointName: 'test-endpoint',
@@ -158,13 +158,13 @@ describe('RateLimiterMiddleware', function() {
           .should.equal(true)
       })
 
-      it('should pass on to next()', function() {
+      it('should pass on to next()', function () {
         return this.next.called.should.equal(true)
       })
     })
 
-    describe('when over the rate limit', function() {
-      beforeEach(function() {
+    describe('when over the rate limit', function () {
+      beforeEach(function () {
         this.req.session = {
           user: {
             _id: (this.user_id = 'user-id')
@@ -174,16 +174,16 @@ describe('RateLimiterMiddleware', function() {
         return this.rateLimiter(this.req, this.res, this.next)
       })
 
-      it('should return a 429', function() {
+      it('should return a 429', function () {
         this.res.status.calledWith(429).should.equal(true)
         return this.res.end.called.should.equal(true)
       })
 
-      it('should not continue', function() {
+      it('should not continue', function () {
         return this.next.called.should.equal(false)
       })
 
-      it('should log a warning', function() {
+      it('should log a warning', function () {
         return this.logger.warn
           .calledWith(
             {

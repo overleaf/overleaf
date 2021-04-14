@@ -32,7 +32,7 @@ const logger = require('logger-sharelatex')
 module.exports = ProjectOutputFileAgent = {
   _prepare(project_id, linkedFileData, user_id, callback) {
     if (callback == null) {
-      callback = function(err, linkedFileData) {}
+      callback = function (err, linkedFileData) {}
     }
     return this._checkAuth(
       project_id,
@@ -91,7 +91,7 @@ module.exports = ProjectOutputFileAgent = {
                   name,
                   parent_folder_id,
                   user_id,
-                  function(err, file) {
+                  function (err, file) {
                     if (err != null) {
                       return callback(err)
                     }
@@ -147,7 +147,7 @@ module.exports = ProjectOutputFileAgent = {
                   name,
                   parent_folder_id,
                   user_id,
-                  function(err, file) {
+                  function (err, file) {
                     if (err != null) {
                       return callback(err)
                     }
@@ -197,13 +197,13 @@ module.exports = ProjectOutputFileAgent = {
 
   _checkAuth(project_id, data, current_user_id, callback) {
     if (callback == null) {
-      callback = function(err, allowed) {}
+      callback = function (err, allowed) {}
     }
     callback = _.once(callback)
     if (!this._validate(data)) {
       return callback(new BadDataError())
     }
-    return this._getSourceProject(data, function(err, project) {
+    return this._getSourceProject(data, function (err, project) {
       if (err != null) {
         return callback(err)
       }
@@ -211,7 +211,7 @@ module.exports = ProjectOutputFileAgent = {
         current_user_id,
         project._id,
         null,
-        function(err, canRead) {
+        function (err, canRead) {
           if (err != null) {
             return callback(err)
           }
@@ -223,11 +223,11 @@ module.exports = ProjectOutputFileAgent = {
 
   _getFileStream(linkedFileData, user_id, callback) {
     if (callback == null) {
-      callback = function(err, fileStream) {}
+      callback = function (err, fileStream) {}
     }
     callback = _.once(callback)
     const { source_output_file_path, build_id } = linkedFileData
-    return this._getSourceProject(linkedFileData, function(err, project) {
+    return this._getSourceProject(linkedFileData, function (err, project) {
       if (err != null) {
         return callback(err)
       }
@@ -237,7 +237,7 @@ module.exports = ProjectOutputFileAgent = {
         user_id,
         build_id,
         source_output_file_path,
-        function(err, readStream) {
+        function (err, readStream) {
           if (err != null) {
             return callback(err)
           }
@@ -250,48 +250,49 @@ module.exports = ProjectOutputFileAgent = {
 
   _compileAndGetFileStream(linkedFileData, user_id, callback) {
     if (callback == null) {
-      callback = function(err, stream, build_id) {}
+      callback = function (err, stream, build_id) {}
     }
     callback = _.once(callback)
     const { source_output_file_path } = linkedFileData
-    return this._getSourceProject(linkedFileData, function(err, project) {
+    return this._getSourceProject(linkedFileData, function (err, project) {
       if (err != null) {
         return callback(err)
       }
       const source_project_id = project._id
-      return CompileManager.compile(source_project_id, user_id, {}, function(
-        err,
-        status,
-        outputFiles
-      ) {
-        if (err != null) {
-          return callback(err)
-        }
-        if (status !== 'success') {
-          return callback(new OutputFileFetchFailedError())
-        }
-        const outputFile = _.find(
-          outputFiles,
-          o => o.path === source_output_file_path
-        )
-        if (outputFile == null) {
-          return callback(new OutputFileFetchFailedError())
-        }
-        const build_id = outputFile.build
-        return ClsiManager.getOutputFileStream(
-          source_project_id,
-          user_id,
-          build_id,
-          source_output_file_path,
-          function(err, readStream) {
-            if (err != null) {
-              return callback(err)
-            }
-            readStream.pause()
-            return callback(null, readStream, build_id)
+      return CompileManager.compile(
+        source_project_id,
+        user_id,
+        {},
+        function (err, status, outputFiles) {
+          if (err != null) {
+            return callback(err)
           }
-        )
-      })
+          if (status !== 'success') {
+            return callback(new OutputFileFetchFailedError())
+          }
+          const outputFile = _.find(
+            outputFiles,
+            o => o.path === source_output_file_path
+          )
+          if (outputFile == null) {
+            return callback(new OutputFileFetchFailedError())
+          }
+          const build_id = outputFile.build
+          return ClsiManager.getOutputFileStream(
+            source_project_id,
+            user_id,
+            build_id,
+            source_output_file_path,
+            function (err, readStream) {
+              if (err != null) {
+                return callback(err)
+              }
+              readStream.pause()
+              return callback(null, readStream, build_id)
+            }
+          )
+        }
+      )
     })
   }
 }

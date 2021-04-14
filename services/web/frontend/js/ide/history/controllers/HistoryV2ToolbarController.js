@@ -69,7 +69,7 @@ export default App.controller(
       ide.historyManager.toggleHistoryViewMode()
     }
 
-    $scope.restoreDeletedFile = function() {
+    $scope.restoreDeletedFile = function () {
       const { pathname, deletedAtV } = $scope.history.selection.file
       if (pathname == null || deletedAtV == null) {
         return
@@ -79,7 +79,7 @@ export default App.controller(
       $scope.restoreState.inflight = true
       return ide.historyManager
         .restoreFile(deletedAtV, pathname)
-        .then(function(response) {
+        .then(function (response) {
           const { data } = response
           return openEntity(data)
         })
@@ -103,10 +103,10 @@ export default App.controller(
       })
     }
 
-    openEntity = function(data) {
+    openEntity = function (data) {
       const { id, type } = data
       return waitFor(() => ide.fileTreeManager.findEntityById(id), 3000)
-        .then(function(entity) {
+        .then(function (entity) {
           if (type === 'doc') {
             ide.editorManager.openDoc(entity)
             ide.$timeout(() => {

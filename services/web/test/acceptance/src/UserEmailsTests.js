@@ -11,19 +11,19 @@ const expectErrorResponse = require('./helpers/expectErrorResponse')
 
 let MockV1Api
 
-before(function() {
+before(function () {
   MockV1Api = MockV1ApiClass.instance()
 })
 
-describe('UserEmails', function() {
-  beforeEach(function(done) {
+describe('UserEmails', function () {
+  beforeEach(function (done) {
     this.timeout(20000)
     this.user = new User()
     this.user.login(done)
   })
 
-  describe('confirming an email', function() {
-    it('should confirm the email', function(done) {
+  describe('confirming an email', function () {
+    it('should confirm the email', function (done) {
       let token = null
       async.series(
         [
@@ -126,7 +126,7 @@ describe('UserEmails', function() {
       )
     })
 
-    it('should not allow confirmation of the email if the user has changed', function(done) {
+    it('should not allow confirmation of the email if the user has changed', function (done) {
       let token1 = null
       let token2 = null
       this.user2 = new User()
@@ -253,9 +253,9 @@ describe('UserEmails', function() {
     })
   })
 
-  describe('reconfirm an email', function() {
+  describe('reconfirm an email', function () {
     let email, userHelper, confirmedAtDate
-    beforeEach(async function() {
+    beforeEach(async function () {
       userHelper = new UserHelper()
       email = userHelper.getDefaultEmail()
       userHelper = await UserHelper.createUser({ email })
@@ -270,7 +270,7 @@ describe('UserEmails', function() {
       expect(user.emails[0].confirmedAt).to.exist
       expect(user.emails[0].reconfirmedAt).to.exist
     })
-    it('should set reconfirmedAt and not reset confirmedAt', async function() {
+    it('should set reconfirmedAt and not reset confirmedAt', async function () {
       await userHelper.confirmEmail(userHelper.user._id, email)
       const user = (await UserHelper.getUser({ email })).user
       expect(user.emails[0].confirmedAt).to.exist
@@ -284,8 +284,8 @@ describe('UserEmails', function() {
     })
   })
 
-  describe('with an expired token', function() {
-    it('should not confirm the email', function(done) {
+  describe('with an expired token', function () {
+    it('should not confirm the email', function (done) {
       let token = null
       async.series(
         [
@@ -357,8 +357,8 @@ describe('UserEmails', function() {
     })
   })
 
-  describe('resending the confirmation', function() {
-    it('should generate a new token', function(done) {
+  describe('resending the confirmation', function () {
+    it('should generate a new token', function (done) {
       async.series(
         [
           cb => {
@@ -438,7 +438,7 @@ describe('UserEmails', function() {
       )
     })
 
-    it('should create a new token if none exists', function(done) {
+    it('should create a new token if none exists', function (done) {
       // This should only be for users that have sign up with their main
       // emails before the confirmation system existed
       async.series(
@@ -490,7 +490,7 @@ describe('UserEmails', function() {
       )
     })
 
-    it("should not allow reconfirmation if the email doesn't match the user", function(done) {
+    it("should not allow reconfirmation if the email doesn't match the user", function (done) {
       async.series(
         [
           cb => {
@@ -528,8 +528,8 @@ describe('UserEmails', function() {
     })
   })
 
-  describe('setting a default email', function() {
-    it('should update confirmed emails for users not in v1', function(done) {
+  describe('setting a default email', function () {
+    it('should update confirmed emails for users not in v1', function (done) {
       async.series(
         [
           cb => {
@@ -597,7 +597,7 @@ describe('UserEmails', function() {
       )
     })
 
-    it('should not allow changing unconfirmed emails in v1', function(done) {
+    it('should not allow changing unconfirmed emails in v1', function (done) {
       async.series(
         [
           cb => {
@@ -661,7 +661,7 @@ describe('UserEmails', function() {
       )
     })
 
-    it('should not update the email in v1', function(done) {
+    it('should not update the email in v1', function (done) {
       async.series(
         [
           cb => {
@@ -732,7 +732,7 @@ describe('UserEmails', function() {
       )
     })
 
-    it('should not return an error if the email exists in v1', function(done) {
+    it('should not return an error if the email exists in v1', function (done) {
       MockV1Api.existingEmails.push('exists-in-v1@example.com')
       async.series(
         [
@@ -811,10 +811,10 @@ describe('UserEmails', function() {
       )
     })
 
-    describe('audit log', function() {
+    describe('audit log', function () {
       const originalEmail = 'original@overleaf.com'
       let otherEmail, response, userHelper, user, userId
-      beforeEach(async function() {
+      beforeEach(async function () {
         otherEmail = 'other@overleaf.com'
         userHelper = new UserHelper()
         userHelper = await UserHelper.createUser({
@@ -856,7 +856,7 @@ describe('UserEmails', function() {
         userHelper = await UserHelper.getUser(userId)
         user = userHelper.user
       })
-      it('should be updated', function() {
+      it('should be updated', function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()
         const entry = auditLog[auditLog.length - 1]
         expect(typeof entry.initiatorId).to.equal('object')
@@ -869,7 +869,7 @@ describe('UserEmails', function() {
       })
     })
 
-    describe('session cleanup', function() {
+    describe('session cleanup', function () {
       beforeEach(function setupSecondSession(done) {
         this.userSession2 = new User()
         this.userSession2.email = this.user.email
@@ -929,7 +929,7 @@ describe('UserEmails', function() {
         )
       })
 
-      it('should logout the other sessions', function(done) {
+      it('should logout the other sessions', function (done) {
         this.userSession2.request(
           { method: 'GET', url: '/project', followRedirect: false },
           (error, response) => {
@@ -945,12 +945,12 @@ describe('UserEmails', function() {
     })
   })
 
-  describe('when not logged in', function() {
-    beforeEach(function(done) {
+  describe('when not logged in', function () {
+    beforeEach(function (done) {
       this.anonymous = new User()
       this.anonymous.getCsrfToken(done)
     })
-    it('should return a plain 403 when setting the email', function(done) {
+    it('should return a plain 403 when setting the email', function (done) {
       this.anonymous.request(
         {
           method: 'POST',
@@ -970,9 +970,9 @@ describe('UserEmails', function() {
     })
   })
 
-  describe('secondary email', function() {
+  describe('secondary email', function () {
     let newEmail, userHelper, userId, user
-    beforeEach(async function() {
+    beforeEach(async function () {
       newEmail = 'a-new-email@overleaf.com'
       userHelper = new UserHelper()
       userHelper = await UserHelper.createUser()
@@ -991,10 +991,10 @@ describe('UserEmails', function() {
       userHelper = await UserHelper.getUser(userId)
       user = userHelper.user
     })
-    it('should add the email', async function() {
+    it('should add the email', async function () {
       expect(user.emails[1].email).to.equal(newEmail)
     })
-    it('should add to the user audit log', async function() {
+    it('should add to the user audit log', async function () {
       const auditLog = userHelper.getAuditLogWithoutNoise()
       expect(typeof auditLog[0].initiatorId).to.equal('object')
       expect(auditLog[0].initiatorId).to.deep.equal(user._id)
@@ -1003,7 +1003,7 @@ describe('UserEmails', function() {
     })
   })
 
-  describe('notification period', function() {
+  describe('notification period', function () {
     let defaultEmail, userHelper, email1, email2, email3
     const maxConfirmationMonths = 12
     const lastDayToReconfirm = moment()
@@ -1015,7 +1015,7 @@ describe('UserEmails', function() {
     const daysToBackdate = moment().diff(oneDayBeforeLastDayToReconfirm, 'day')
     const daysToBackdateForAfterDate = daysToBackdate + 1
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       if (!Features.hasFeature('affiliations')) {
         this.skip()
       }
@@ -1039,8 +1039,8 @@ describe('UserEmails', function() {
       email3 = `bones@${domain}`
     })
 
-    describe('non SSO affiliations', function() {
-      beforeEach(async function() {
+    describe('non SSO affiliations', function () {
+      beforeEach(async function () {
         // create a user with 3 affiliations at the institution.
         // all are within in the notification period
         const userId = userHelper.user._id
@@ -1056,8 +1056,8 @@ describe('UserEmails', function() {
         )
       })
 
-      describe('when all affiliations in notification period or past reconfirm date', function() {
-        it('should flag inReconfirmNotificationPeriod for all affiliations in period', async function() {
+      describe('when all affiliations in notification period or past reconfirm date', function () {
+        it('should flag inReconfirmNotificationPeriod for all affiliations in period', async function () {
           const response = await userHelper.request.get('/user/emails')
           expect(response.statusCode).to.equal(200)
           const fullEmails = JSON.parse(response.body)
@@ -1074,7 +1074,7 @@ describe('UserEmails', function() {
           ).to.equal(true)
         })
 
-        it('should set pastReconfirmDate and emailHasInstitutionLicence:false for lapsed confirmations', async function() {
+        it('should set pastReconfirmDate and emailHasInstitutionLicence:false for lapsed confirmations', async function () {
           const response = await userHelper.request.get('/user/emails')
           expect(response.statusCode).to.equal(200)
           const fullEmails = JSON.parse(response.body)
@@ -1089,8 +1089,8 @@ describe('UserEmails', function() {
         })
       })
 
-      describe('should flag emails before their confirmation expires, but within the notification period', function() {
-        beforeEach(async function() {
+      describe('should flag emails before their confirmation expires, but within the notification period', function () {
+        beforeEach(async function () {
           const dateInPeriodButNotExpired = moment()
             .subtract(maxConfirmationMonths, 'months')
             .add(14, 'days')
@@ -1113,7 +1113,7 @@ describe('UserEmails', function() {
           )
         })
 
-        it('should flag the emails', async function() {
+        it('should flag the emails', async function () {
           const response = await userHelper.request.get('/user/emails')
           expect(response.statusCode).to.equal(200)
           const fullEmails = JSON.parse(response.body)
@@ -1152,8 +1152,8 @@ describe('UserEmails', function() {
         })
       })
 
-      describe('missing reconfirmedAt', function() {
-        beforeEach(async function() {
+      describe('missing reconfirmedAt', function () {
+        beforeEach(async function () {
           const userId = userHelper.user._id
           const query = {
             _id: userId,
@@ -1165,7 +1165,7 @@ describe('UserEmails', function() {
           await UserUpdater.promises.updateUser(query, update)
         })
 
-        it('should fallback to confirmedAt for date check', async function() {
+        it('should fallback to confirmedAt for date check', async function () {
           const response = await userHelper.request.get('/user/emails')
           expect(response.statusCode).to.equal(200)
           const fullEmails = JSON.parse(response.body)

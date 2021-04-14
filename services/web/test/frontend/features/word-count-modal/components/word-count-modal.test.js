@@ -5,8 +5,8 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
 
-describe('<WordCountModal />', function() {
-  afterEach(function() {
+describe('<WordCountModal />', function () {
+  afterEach(function () {
     fetchMock.reset()
     cleanup()
   })
@@ -18,13 +18,13 @@ describe('<WordCountModal />', function() {
     handleHide: sinon.stub()
   }
 
-  it('renders the translated modal title', async function() {
+  it('renders the translated modal title', async function () {
     render(<WordCountModal {...modalProps} />)
 
     await screen.findByText('Word Count')
   })
 
-  it('renders a loading message when loading', async function() {
+  it('renders a loading message when loading', async function () {
     fetchMock.get('express:/project/:projectId/wordcount', () => {
       return { status: 200, body: { texcount: {} } }
     })
@@ -34,7 +34,7 @@ describe('<WordCountModal />', function() {
     await screen.findByText('Loading…')
   })
 
-  it('renders an error message and hides loading message on error', async function() {
+  it('renders an error message and hides loading message on error', async function () {
     fetchMock.get('express:/project/:projectId/wordcount', 500)
 
     render(<WordCountModal {...modalProps} />)
@@ -44,7 +44,7 @@ describe('<WordCountModal />', function() {
     expect(screen.queryByText(/Loading/)).to.not.exist
   })
 
-  it('displays messages', async function() {
+  it('displays messages', async function () {
     fetchMock.get('express:/project/:projectId/wordcount', () => {
       return {
         status: 200,
@@ -61,7 +61,7 @@ describe('<WordCountModal />', function() {
     await screen.findByText('This is a test')
   })
 
-  it('displays counts data', async function() {
+  it('displays counts data', async function () {
     fetchMock.get('express:/project/:projectId/wordcount', () => {
       return {
         status: 200,

@@ -9,8 +9,8 @@ const recurly = require('recurly')
 const modulePath = '../../../../app/src/Features/Subscription/RecurlyClient'
 const SandboxedModule = require('sandboxed-module')
 
-describe('RecurlyClient', function() {
-  beforeEach(function() {
+describe('RecurlyClient', function () {
+  beforeEach(function () {
     this.settings = {
       apis: {
         recurly: {
@@ -40,7 +40,7 @@ describe('RecurlyClient', function() {
     }
     this.recurly = {
       errors: recurly.errors,
-      Client: function() {
+      Client: function () {
         return client
       }
     }
@@ -64,8 +64,8 @@ describe('RecurlyClient', function() {
     }))
   })
 
-  describe('initalizing recurly client with undefined API key parameter', function() {
-    it('should create a client without error', function() {
+  describe('initalizing recurly client with undefined API key parameter', function () {
+    it('should create a client without error', function () {
       let testClient
       expect(() => {
         testClient = new recurly.Client(undefined)
@@ -74,8 +74,8 @@ describe('RecurlyClient', function() {
     })
   })
 
-  describe('getAccountForUserId', function() {
-    it('should return an Account if one exists', async function() {
+  describe('getAccountForUserId', function () {
+    it('should return an Account if one exists', async function () {
       this.client.getAccount = sinon.stub().resolves(this.recurlyAccount)
       await expect(
         this.RecurlyClient.promises.getAccountForUserId(this.user._id)
@@ -84,7 +84,7 @@ describe('RecurlyClient', function() {
         .that.has.property('code', this.user._id)
     })
 
-    it('should return nothing if no account found', async function() {
+    it('should return nothing if no account found', async function () {
       this.client.getAccount = sinon
         .stub()
         .throws(new recurly.errors.NotFoundError())
@@ -93,7 +93,7 @@ describe('RecurlyClient', function() {
       ).to.eventually.equal(undefined)
     })
 
-    it('should re-throw caught errors', async function() {
+    it('should re-throw caught errors', async function () {
       this.client.getAccount = sinon.stub().throws()
       await expect(
         this.RecurlyClient.promises.getAccountForUserId(this.user._id)
@@ -101,8 +101,8 @@ describe('RecurlyClient', function() {
     })
   })
 
-  describe('createAccountForUserId', function() {
-    it('should return the Account as created by recurly', async function() {
+  describe('createAccountForUserId', function () {
+    it('should return the Account as created by recurly', async function () {
       this.client.createAccount = sinon.stub().resolves(this.recurlyAccount)
       await expect(
         this.RecurlyClient.promises.createAccountForUserId(this.user._id)
@@ -111,7 +111,7 @@ describe('RecurlyClient', function() {
         .that.has.property('code', this.user._id)
     })
 
-    it('should throw any API errors', async function() {
+    it('should throw any API errors', async function () {
       this.client.createAccount = sinon.stub().throws()
       await expect(
         this.RecurlyClient.promises.createAccountForUserId(this.user._id)

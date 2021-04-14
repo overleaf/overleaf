@@ -21,25 +21,23 @@ export default App.directive('fileEntity', RecursionHelper => ({
   },
   templateUrl: 'entityListItemTemplate',
   compile(element) {
-    return RecursionHelper.compile(element, function(
-      scope,
+    return RecursionHelper.compile(
       element,
-      attrs,
-      ctrl
-    ) {
-      // Don't freak out if we're already in an apply callback
-      scope.$originalApply = scope.$apply
-      return (scope.$apply = function(fn) {
-        if (fn == null) {
-          fn = function() {}
-        }
-        const phase = this.$root.$$phase
-        if (phase === '$apply' || phase === '$digest') {
-          return fn()
-        } else {
-          return this.$originalApply(fn)
-        }
-      })
-    })
+      function (scope, element, attrs, ctrl) {
+        // Don't freak out if we're already in an apply callback
+        scope.$originalApply = scope.$apply
+        return (scope.$apply = function (fn) {
+          if (fn == null) {
+            fn = function () {}
+          }
+          const phase = this.$root.$$phase
+          if (phase === '$apply' || phase === '$digest') {
+            return fn()
+          } else {
+            return this.$originalApply(fn)
+          }
+        })
+      }
+    )
   }
 }))

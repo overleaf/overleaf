@@ -11,7 +11,7 @@
 let trackOpenSockets
 const _ = require('underscore')
 const metrics = require('@overleaf/metrics')
-;(trackOpenSockets = function() {
+;(trackOpenSockets = function () {
   metrics.gauge(
     'http.open-sockets',
     _.size(require('http').globalAgent.sockets.length),

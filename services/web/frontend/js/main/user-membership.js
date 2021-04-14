@@ -13,7 +13,7 @@ import _ from 'lodash'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../base'
-App.controller('UserMembershipController', function($scope, queuedHttp) {
+App.controller('UserMembershipController', function ($scope, queuedHttp) {
   $scope.users = window.users
   $scope.groupSize = window.groupSize
   $scope.paths = window.paths
@@ -32,7 +32,7 @@ App.controller('UserMembershipController', function($scope, queuedHttp) {
     }
   }
 
-  const parseEmails = function(emailsString) {
+  const parseEmails = function (emailsString) {
     const regexBySpaceOrComma = /[\s,]+/
     let emails = emailsString.split(regexBySpaceOrComma)
     emails = _.map(emails, email => (email = email.trim()))
@@ -40,7 +40,7 @@ App.controller('UserMembershipController', function($scope, queuedHttp) {
     return emails
   }
 
-  $scope.addMembers = function() {
+  $scope.addMembers = function () {
     $scope.inputs.addMembers.error = false
     $scope.inputs.addMembers.errorMessage = null
     $scope.inputs.addMembers.inflightCount = 0
@@ -52,7 +52,7 @@ App.controller('UserMembershipController', function($scope, queuedHttp) {
           email,
           _csrf: window.csrfToken
         })
-        .then(function(response) {
+        .then(function (response) {
           $scope.inputs.addMembers.inflightCount -= 1
           const { data } = response
           if (data.user != null) {
@@ -60,7 +60,7 @@ App.controller('UserMembershipController', function($scope, queuedHttp) {
           }
           return ($scope.inputs.addMembers.content = '')
         })
-        .catch(function(response) {
+        .catch(function (response) {
           $scope.inputs.addMembers.inflightCount -= 1
           const { data } = response
           $scope.inputs.addMembers.error = true
@@ -70,11 +70,11 @@ App.controller('UserMembershipController', function($scope, queuedHttp) {
     })
   }
 
-  $scope.removeMembers = function() {
+  $scope.removeMembers = function () {
     $scope.inputs.removeMembers.error = false
     $scope.inputs.removeMembers.errorMessage = null
     for (let user of Array.from($scope.selectedUsers)) {
-      ;(function(user) {
+      ;(function (user) {
         let url
         if (window.paths.removeInvite && user.invite && user._id == null) {
           url = `${window.paths.removeInvite}/${encodeURIComponent(user.email)}`
@@ -90,14 +90,14 @@ App.controller('UserMembershipController', function($scope, queuedHttp) {
             'X-Csrf-Token': window.csrfToken
           }
         })
-          .then(function() {
+          .then(function () {
             const index = $scope.users.indexOf(user)
             if (index === -1) {
               return
             }
             return $scope.users.splice(index, 1)
           })
-          .catch(function(response) {
+          .catch(function (response) {
             const { data } = response
             $scope.inputs.removeMembers.error = true
             return ($scope.inputs.removeMembers.errorMessage =
@@ -113,7 +113,7 @@ App.controller('UserMembershipController', function($scope, queuedHttp) {
 })
 
 export default App.controller('UserMembershipListItemController', $scope =>
-  $scope.$watch('user.selected', function(value) {
+  $scope.$watch('user.selected', function (value) {
     if (value != null) {
       return $scope.updateSelectedUsers()
     }

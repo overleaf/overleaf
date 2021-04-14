@@ -20,10 +20,10 @@ async function unsetDeletedFiles(projectId) {
   )
 }
 
-describe('BackFillDeletedFiles', function() {
+describe('BackFillDeletedFiles', function () {
   let user, projectId1, projectId2, projectId3, projectId4, projectId5
 
-  beforeEach('create projects', async function() {
+  beforeEach('create projects', async function () {
     user = new User()
     await user.login()
 
@@ -35,7 +35,7 @@ describe('BackFillDeletedFiles', function() {
   })
 
   let fileId1, fileId2, fileId3, fileId4
-  beforeEach('create files', function() {
+  beforeEach('create files', function () {
     // take a short cut and just allocate file ids
     fileId1 = ObjectId()
     fileId2 = ObjectId()
@@ -50,7 +50,7 @@ describe('BackFillDeletedFiles', function() {
     __v: 0
   }
   let deletedFiles1, deletedFiles2, deletedFiles3
-  beforeEach('set deletedFiles details', async function() {
+  beforeEach('set deletedFiles details', async function () {
     deletedFiles1 = [
       { _id: fileId1, ...otherFileDetails },
       { _id: fileId2, ...otherFileDetails }
@@ -93,7 +93,7 @@ describe('BackFillDeletedFiles', function() {
   }
 
   function checkAreFilesBackFilled() {
-    it('should back fill file and set projectId', async function() {
+    it('should back fill file and set projectId', async function () {
       const docs = await db.deletedFiles
         .find({}, { sort: { _id: 1 } })
         .toArray()
@@ -106,54 +106,54 @@ describe('BackFillDeletedFiles', function() {
     })
   }
 
-  describe('back fill only', function() {
+  describe('back fill only', function () {
     beforeEach('run script', runScript)
 
     checkAreFilesBackFilled()
 
-    it('should leave the deletedFiles as is', async function() {
+    it('should leave the deletedFiles as is', async function () {
       expect(await getDeletedFiles(projectId1)).to.deep.equal(deletedFiles1)
       expect(await getDeletedFiles(projectId2)).to.deep.equal(deletedFiles2)
       expect(await getDeletedFiles(projectId5)).to.deep.equal(deletedFiles3)
     })
   })
 
-  describe('back fill and cleanup', function() {
-    beforeEach('run script with cleanup flag', async function() {
+  describe('back fill and cleanup', function () {
+    beforeEach('run script with cleanup flag', async function () {
       await runScript(['--perform-cleanup'])
     })
 
     checkAreFilesBackFilled()
 
-    it('should cleanup the deletedFiles', async function() {
+    it('should cleanup the deletedFiles', async function () {
       expect(await getDeletedFiles(projectId1)).to.deep.equal([])
       expect(await getDeletedFiles(projectId2)).to.deep.equal([])
       expect(await getDeletedFiles(projectId5)).to.deep.equal([])
     })
   })
 
-  describe('fix partial inserts and cleanup', function() {
-    beforeEach('simulate one missing insert', async function() {
+  describe('fix partial inserts and cleanup', function () {
+    beforeEach('simulate one missing insert', async function () {
       await setDeletedFiles(projectId1, [deletedFiles1[0]])
     })
-    beforeEach('run script with cleanup flag', async function() {
+    beforeEach('run script with cleanup flag', async function () {
       await runScript(['--perform-cleanup'])
     })
-    beforeEach('add case for one missing file', async function() {
+    beforeEach('add case for one missing file', async function () {
       await setDeletedFiles(projectId1, deletedFiles1)
     })
-    beforeEach('add cases for no more files to insert', async function() {
+    beforeEach('add cases for no more files to insert', async function () {
       await setDeletedFiles(projectId2, deletedFiles2)
       await setDeletedFiles(projectId5, deletedFiles3)
     })
 
-    beforeEach('fixing partial insert and cleanup', async function() {
+    beforeEach('fixing partial insert and cleanup', async function () {
       await runScript(['--fix-partial-inserts', '--perform-cleanup'])
     })
 
     checkAreFilesBackFilled()
 
-    it('should cleanup the deletedFiles', async function() {
+    it('should cleanup the deletedFiles', async function () {
       expect(await getDeletedFiles(projectId1)).to.deep.equal([])
       expect(await getDeletedFiles(projectId2)).to.deep.equal([])
       expect(await getDeletedFiles(projectId5)).to.deep.equal([])

@@ -5,18 +5,18 @@ const MODULE_PATH =
 const MockRequest = require('../helpers/MockRequest')
 const SandboxedModule = require('sandboxed-module')
 
-describe('RequestContentTypeDetection', function() {
-  before(function() {
+describe('RequestContentTypeDetection', function () {
+  before(function () {
     this.RequestContentTypeDetection = SandboxedModule.require(MODULE_PATH)
     this.req = new MockRequest()
-    this.req.accepts = function(...args) {
+    this.req.accepts = function (...args) {
       return accepts(this).type(...args)
     }
   })
 
-  describe('isJson=true', function() {
+  describe('isJson=true', function () {
     function expectJson(type) {
-      it(type, function() {
+      it(type, function () {
         this.req.headers.accept = type
         expect(this.RequestContentTypeDetection.acceptsJson(this.req)).to.equal(
           true
@@ -29,9 +29,9 @@ describe('RequestContentTypeDetection', function() {
     expectJson('application/json, text/html, */*')
   })
 
-  describe('isJson=false', function() {
+  describe('isJson=false', function () {
     function expectNonJson(type) {
-      it(type, function() {
+      it(type, function () {
         this.req.headers.accept = type
         expect(this.RequestContentTypeDetection.acceptsJson(this.req)).to.equal(
           false

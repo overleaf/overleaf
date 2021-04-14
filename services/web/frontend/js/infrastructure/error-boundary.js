@@ -26,9 +26,9 @@ function withErrorBoundary(WrappedComponent, FallbackComponent) {
     )
   }
   ErrorBoundaryWrapper.propTypes = WrappedComponent.propTypes
-  ErrorBoundaryWrapper.displayName = `WithErrorBoundaryWrapper${WrappedComponent.displayName ||
-    WrappedComponent.name ||
-    'Component'}`
+  ErrorBoundaryWrapper.displayName = `WithErrorBoundaryWrapper${
+    WrappedComponent.displayName || WrappedComponent.name || 'Component'
+  }`
   return ErrorBoundaryWrapper
 }
 

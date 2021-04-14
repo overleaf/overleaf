@@ -5,7 +5,7 @@ module.exports = {
   initialize() {
     before(waitForDb)
 
-    before(function(done) {
+    before(function (done) {
       exec('bin/east migrate', (error, stdout, stderr) => {
         console.log(stdout)
         console.error(stderr)
@@ -16,7 +16,7 @@ module.exports = {
       })
     })
 
-    afterEach(async function() {
+    afterEach(async function () {
       return Promise.all(
         Object.values(db).map(collection => collection.deleteMany({}))
       )

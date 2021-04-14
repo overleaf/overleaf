@@ -10,7 +10,7 @@ import {
 } from '../../../helpers/render-with-context'
 import { stubMathJax, tearDownMathJaxStubs } from './stubs'
 
-describe('<ChatPane />', function() {
+describe('<ChatPane />', function () {
   const user = {
     id: 'fake_user',
     first_name: 'fake_user_first_name',
@@ -32,18 +32,18 @@ describe('<ChatPane />', function() {
     }
   ]
 
-  beforeEach(function() {
+  beforeEach(function () {
     fetchMock.reset()
     cleanUpContext()
 
     stubMathJax()
   })
 
-  afterEach(function() {
+  afterEach(function () {
     tearDownMathJaxStubs()
   })
 
-  it('renders multiple messages', async function() {
+  it('renders multiple messages', async function () {
     fetchMock.get(/messages/, testMessages)
 
     renderWithChatContext(<ChatPane />, { user })
@@ -52,7 +52,7 @@ describe('<ChatPane />', function() {
     await screen.findByText('another message')
   })
 
-  it('A loading spinner is rendered while the messages are loading, then disappears', async function() {
+  it('A loading spinner is rendered while the messages are loading, then disappears', async function () {
     fetchMock.get(/messages/, [])
 
     renderWithChatContext(<ChatPane />, { user })
@@ -60,8 +60,8 @@ describe('<ChatPane />', function() {
     await waitForElementToBeRemoved(() => screen.getByText('Loading…'))
   })
 
-  describe('"send your first message" placeholder', function() {
-    it('is rendered when there are no messages ', async function() {
+  describe('"send your first message" placeholder', function () {
+    it('is rendered when there are no messages ', async function () {
       fetchMock.get(/messages/, [])
 
       renderWithChatContext(<ChatPane />, { user })
@@ -69,7 +69,7 @@ describe('<ChatPane />', function() {
       await screen.findByText('Send your first message to your collaborators')
     })
 
-    it('is not rendered when messages are displayed', function() {
+    it('is not rendered when messages are displayed', function () {
       fetchMock.get(/messages/, testMessages)
 
       renderWithChatContext(<ChatPane />, { user })

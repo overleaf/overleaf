@@ -7,8 +7,8 @@ const ProjectHelper = require('../../../../app/src/Features/Project/ProjectHelpe
 
 const MODULE_PATH = '../../../../app/src/Features/Project/ProjectDetailsHandler'
 
-describe('ProjectDetailsHandler', function() {
-  beforeEach(function() {
+describe('ProjectDetailsHandler', function () {
+  beforeEach(function () {
     this.user = {
       _id: ObjectId(),
       email: 'user@example.com',
@@ -80,8 +80,8 @@ describe('ProjectDetailsHandler', function() {
     })
   })
 
-  describe('getDetails', function() {
-    it('should find the project and owner', async function() {
+  describe('getDetails', function () {
+    it('should find the project and owner', async function () {
       const details = await this.handler.promises.getDetails(this.project._id)
       details.name.should.equal(this.project.name)
       details.description.should.equal(this.project.description)
@@ -90,35 +90,35 @@ describe('ProjectDetailsHandler', function() {
       expect(details.something).to.be.undefined
     })
 
-    it('should find overleaf metadata if it exists', async function() {
+    it('should find overleaf metadata if it exists', async function () {
       this.project.overleaf = { id: 'id' }
       const details = await this.handler.promises.getDetails(this.project._id)
       details.overleaf.should.equal(this.project.overleaf)
       expect(details.something).to.be.undefined
     })
 
-    it('should return an error for a non-existent project', async function() {
+    it('should return an error for a non-existent project', async function () {
       this.ProjectGetter.promises.getProject.resolves(null)
       await expect(
         this.handler.promises.getDetails('0123456789012345678901234')
       ).to.be.rejectedWith(Errors.NotFoundError)
     })
 
-    it('should return the default features if no owner found', async function() {
+    it('should return the default features if no owner found', async function () {
       this.UserGetter.promises.getUser.resolves(null)
       const details = await this.handler.promises.getDetails(this.project._id)
       details.features.should.equal(this.settings.defaultFeatures)
     })
 
-    it('should rethrow any error', async function() {
+    it('should rethrow any error', async function () {
       this.ProjectGetter.promises.getProject.rejects(new Error('boom'))
       await expect(this.handler.promises.getDetails(this.project._id)).to.be
         .rejected
     })
   })
 
-  describe('getProjectDescription', function() {
-    it('should make a call to mongo just for the description', async function() {
+  describe('getProjectDescription', function () {
+    it('should make a call to mongo just for the description', async function () {
       this.ProjectGetter.promises.getProject.resolves()
       await this.handler.promises.getProjectDescription(this.project._id)
       expect(
@@ -126,7 +126,7 @@ describe('ProjectDetailsHandler', function() {
       ).to.have.been.calledWith(this.project._id, { description: true })
     })
 
-    it('should return what the mongo call returns', async function() {
+    it('should return what the mongo call returns', async function () {
       const expectedDescription = 'cool project'
       this.ProjectGetter.promises.getProject.resolves({
         description: expectedDescription
@@ -138,12 +138,12 @@ describe('ProjectDetailsHandler', function() {
     })
   })
 
-  describe('setProjectDescription', function() {
-    beforeEach(function() {
+  describe('setProjectDescription', function () {
+    beforeEach(function () {
       this.description = 'updated teh description'
     })
 
-    it('should update the project detials', async function() {
+    it('should update the project detials', async function () {
       await this.handler.promises.setProjectDescription(
         this.project._id,
         this.description
@@ -155,12 +155,12 @@ describe('ProjectDetailsHandler', function() {
     })
   })
 
-  describe('renameProject', function() {
-    beforeEach(function() {
+  describe('renameProject', function () {
+    beforeEach(function () {
       this.newName = 'new name here'
     })
 
-    it('should update the project with the new name', async function() {
+    it('should update the project with the new name', async function () {
       await this.handler.promises.renameProject(this.project._id, this.newName)
       expect(this.ProjectModel.updateOne).to.have.been.calledWith(
         { _id: this.project._id },
@@ -168,7 +168,7 @@ describe('ProjectDetailsHandler', function() {
       )
     })
 
-    it('should tell the TpdsUpdateSender', async function() {
+    it('should tell the TpdsUpdateSender', async function () {
       await this.handler.promises.renameProject(this.project._id, this.newName)
       expect(this.TpdsUpdateSender.promises.moveEntity).to.have.been.calledWith(
         {
@@ -179,7 +179,7 @@ describe('ProjectDetailsHandler', function() {
       )
     })
 
-    it('should not do anything with an invalid name', async function() {
+    it('should not do anything with an invalid name', async function () {
       await expect(this.handler.promises.renameProject(this.project._id)).to.be
         .rejected
       expect(this.TpdsUpdateSender.promises.moveEntity).not.to.have.been.called
@@ -187,40 +187,40 @@ describe('ProjectDetailsHandler', function() {
     })
   })
 
-  describe('validateProjectName', function() {
-    it('should reject undefined names', async function() {
+  describe('validateProjectName', function () {
+    it('should reject undefined names', async function () {
       await expect(this.handler.promises.validateProjectName(undefined)).to.be
         .rejected
     })
 
-    it('should reject empty names', async function() {
+    it('should reject empty names', async function () {
       await expect(this.handler.promises.validateProjectName('')).to.be.rejected
     })
 
-    it('should reject names with /s', async function() {
+    it('should reject names with /s', async function () {
       await expect(this.handler.promises.validateProjectName('foo/bar')).to.be
         .rejected
     })
 
-    it('should reject names with \\s', async function() {
+    it('should reject names with \\s', async function () {
       await expect(this.handler.promises.validateProjectName('foo\\bar')).to.be
         .rejected
     })
 
-    it('should reject long names', async function() {
+    it('should reject long names', async function () {
       await expect(this.handler.promises.validateProjectName('a'.repeat(1000)))
         .to.be.rejected
     })
 
-    it('should accept normal names', async function() {
+    it('should accept normal names', async function () {
       await expect(this.handler.promises.validateProjectName('foobar')).to.be
         .fulfilled
     })
   })
 
-  describe('generateUniqueName', function() {
+  describe('generateUniqueName', function () {
     // actually testing `ProjectHelper.promises.ensureNameIsUnique()`
-    beforeEach(function() {
+    beforeEach(function () {
       this.longName = 'x'.repeat(this.handler.MAX_PROJECT_NAME_LENGTH - 5)
       const usersProjects = {
         owned: [
@@ -281,7 +281,7 @@ describe('ProjectDetailsHandler', function() {
       this.ProjectGetter.promises.findAllUsersProjects.resolves(usersProjects)
     })
 
-    it('should leave a unique name unchanged', async function() {
+    it('should leave a unique name unchanged', async function () {
       const name = await this.handler.promises.generateUniqueName(
         this.user._id,
         'unique-name',
@@ -290,7 +290,7 @@ describe('ProjectDetailsHandler', function() {
       expect(name).to.equal('unique-name')
     })
 
-    it('should append a suffix to an existing name', async function() {
+    it('should append a suffix to an existing name', async function () {
       const name = await this.handler.promises.generateUniqueName(
         this.user._id,
         'name1',
@@ -299,7 +299,7 @@ describe('ProjectDetailsHandler', function() {
       expect(name).to.equal('name1-test-suffix')
     })
 
-    it('should fallback to a second suffix when needed', async function() {
+    it('should fallback to a second suffix when needed', async function () {
       const name = await this.handler.promises.generateUniqueName(
         this.user._id,
         'name1',
@@ -308,7 +308,7 @@ describe('ProjectDetailsHandler', function() {
       expect(name).to.equal('name1-test-suffix')
     })
 
-    it('should truncate the name when append a suffix if the result is too long', async function() {
+    it('should truncate the name when append a suffix if the result is too long', async function () {
       const name = await this.handler.promises.generateUniqueName(
         this.user._id,
         this.longName,
@@ -320,7 +320,7 @@ describe('ProjectDetailsHandler', function() {
       )
     })
 
-    it('should use a numeric index if no suffix is supplied', async function() {
+    it('should use a numeric index if no suffix is supplied', async function () {
       const name = await this.handler.promises.generateUniqueName(
         this.user._id,
         'name1',
@@ -329,7 +329,7 @@ describe('ProjectDetailsHandler', function() {
       expect(name).to.equal('name1 (1)')
     })
 
-    it('should use a numeric index if all suffixes are exhausted', async function() {
+    it('should use a numeric index if all suffixes are exhausted', async function () {
       const name = await this.handler.promises.generateUniqueName(
         this.user._id,
         'name',
@@ -338,7 +338,7 @@ describe('ProjectDetailsHandler', function() {
       expect(name).to.equal('name (1)')
     })
 
-    it('should find the next lowest available numeric index for the base name', async function() {
+    it('should find the next lowest available numeric index for the base name', async function () {
       const name = await this.handler.promises.generateUniqueName(
         this.user._id,
         'numeric',
@@ -347,7 +347,7 @@ describe('ProjectDetailsHandler', function() {
       expect(name).to.equal('numeric (21)')
     })
 
-    it('should find the next available numeric index when a numeric index is already present', async function() {
+    it('should find the next available numeric index when a numeric index is already present', async function () {
       const name = await this.handler.promises.generateUniqueName(
         this.user._id,
         'numeric (5)',
@@ -356,7 +356,7 @@ describe('ProjectDetailsHandler', function() {
       expect(name).to.equal('numeric (21)')
     })
 
-    it('should not find a numeric index lower than the one already present', async function() {
+    it('should not find a numeric index lower than the one already present', async function () {
       const name = await this.handler.promises.generateUniqueName(
         this.user._id,
         'numeric (31)',
@@ -366,36 +366,36 @@ describe('ProjectDetailsHandler', function() {
     })
   })
 
-  describe('fixProjectName', function() {
-    it('should change empty names to Untitled', function() {
+  describe('fixProjectName', function () {
+    it('should change empty names to Untitled', function () {
       expect(this.handler.fixProjectName('')).to.equal('Untitled')
     })
 
-    it('should replace / with -', function() {
+    it('should replace / with -', function () {
       expect(this.handler.fixProjectName('foo/bar')).to.equal('foo-bar')
     })
 
-    it("should replace \\ with ''", function() {
+    it("should replace \\ with ''", function () {
       expect(this.handler.fixProjectName('foo \\ bar')).to.equal('foo  bar')
     })
 
-    it('should truncate long names', function() {
+    it('should truncate long names', function () {
       expect(this.handler.fixProjectName('a'.repeat(1000))).to.equal(
         'a'.repeat(150)
       )
     })
 
-    it('should accept normal names', function() {
+    it('should accept normal names', function () {
       expect(this.handler.fixProjectName('foobar')).to.equal('foobar')
     })
   })
 
-  describe('setPublicAccessLevel', function() {
-    beforeEach(function() {
+  describe('setPublicAccessLevel', function () {
+    beforeEach(function () {
       this.accessLevel = 'readOnly'
     })
 
-    it('should update the project with the new level', async function() {
+    it('should update the project with the new level', async function () {
       await this.handler.promises.setPublicAccessLevel(
         this.project._id,
         this.accessLevel
@@ -406,7 +406,7 @@ describe('ProjectDetailsHandler', function() {
       )
     })
 
-    it('should not produce an error', async function() {
+    it('should not produce an error', async function () {
       await expect(
         this.handler.promises.setPublicAccessLevel(
           this.project._id,
@@ -415,12 +415,12 @@ describe('ProjectDetailsHandler', function() {
       ).to.be.fulfilled
     })
 
-    describe('when update produces an error', function() {
-      beforeEach(function() {
+    describe('when update produces an error', function () {
+      beforeEach(function () {
         this.ProjectModelUpdateQuery.exec.rejects(new Error('woops'))
       })
 
-      it('should produce an error', async function() {
+      it('should produce an error', async function () {
         await expect(
           this.handler.promises.setPublicAccessLevel(
             this.project._id,
@@ -431,9 +431,9 @@ describe('ProjectDetailsHandler', function() {
     })
   })
 
-  describe('ensureTokensArePresent', function() {
-    describe('when the project has tokens', function() {
-      beforeEach(function() {
+  describe('ensureTokensArePresent', function () {
+    describe('when the project has tokens', function () {
+      beforeEach(function () {
         this.project = {
           _id: this.project._id,
           tokens: {
@@ -445,7 +445,7 @@ describe('ProjectDetailsHandler', function() {
         this.ProjectGetter.promises.getProject.resolves(this.project)
       })
 
-      it('should get the project', async function() {
+      it('should get the project', async function () {
         await this.handler.promises.ensureTokensArePresent(this.project._id)
         expect(this.ProjectGetter.promises.getProject).to.have.been.calledOnce
         expect(this.ProjectGetter.promises.getProject).to.have.been.calledWith(
@@ -456,12 +456,12 @@ describe('ProjectDetailsHandler', function() {
         )
       })
 
-      it('should not update the project with new tokens', async function() {
+      it('should not update the project with new tokens', async function () {
         await this.handler.promises.ensureTokensArePresent(this.project._id)
         expect(this.ProjectModel.updateOne).not.to.have.been.called
       })
 
-      it('should produce the tokens without error', async function() {
+      it('should produce the tokens without error', async function () {
         const tokens = await this.handler.promises.ensureTokensArePresent(
           this.project._id
         )
@@ -469,8 +469,8 @@ describe('ProjectDetailsHandler', function() {
       })
     })
 
-    describe('when tokens are missing', function() {
-      beforeEach(function() {
+    describe('when tokens are missing', function () {
+      beforeEach(function () {
         this.project = { _id: this.project._id }
         this.ProjectGetter.promises.getProject.resolves(this.project)
         this.readOnlyToken = 'abc'
@@ -485,7 +485,7 @@ describe('ProjectDetailsHandler', function() {
         })
       })
 
-      it('should get the project', async function() {
+      it('should get the project', async function () {
         await this.handler.promises.ensureTokensArePresent(this.project._id)
         expect(this.ProjectGetter.promises.getProject).to.have.been.calledOnce
         expect(this.ProjectGetter.promises.getProject).to.have.been.calledWith(
@@ -496,7 +496,7 @@ describe('ProjectDetailsHandler', function() {
         )
       })
 
-      it('should update the project with new tokens', async function() {
+      it('should update the project with new tokens', async function () {
         await this.handler.promises.ensureTokensArePresent(this.project._id)
         expect(this.TokenGenerator.promises.generateUniqueReadOnlyToken).to.have
           .been.calledOnce
@@ -516,7 +516,7 @@ describe('ProjectDetailsHandler', function() {
         )
       })
 
-      it('should produce the tokens without error', async function() {
+      it('should produce the tokens without error', async function () {
         const tokens = await this.handler.promises.ensureTokensArePresent(
           this.project._id
         )
@@ -529,8 +529,8 @@ describe('ProjectDetailsHandler', function() {
     })
   })
 
-  describe('clearTokens', function() {
-    it('clears the tokens from the project', async function() {
+  describe('clearTokens', function () {
+    it('clears the tokens from the project', async function () {
       await this.handler.promises.clearTokens(this.project._id)
       expect(this.ProjectModel.updateOne).to.have.been.calledWith(
         { _id: this.project._id },

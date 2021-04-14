@@ -30,13 +30,13 @@ settings = require('settings-sharelatex')
 module.exports = ExportsHandler = self = {
   exportProject(export_params, callback) {
     if (callback == null) {
-      callback = function(error, export_data) {}
+      callback = function (error, export_data) {}
     }
-    return self._buildExport(export_params, function(err, export_data) {
+    return self._buildExport(export_params, function (err, export_data) {
       if (err != null) {
         return callback(err)
       }
-      return self._requestExport(export_data, function(err, body) {
+      return self._requestExport(export_data, function (err, body) {
         if (err != null) {
           return callback(err)
         }
@@ -50,7 +50,7 @@ module.exports = ExportsHandler = self = {
 
   _buildExport(export_params, callback) {
     if (callback == null) {
-      callback = function(err, export_data) {}
+      callback = function (err, export_data) {}
     }
     const {
       project_id,
@@ -70,17 +70,18 @@ module.exports = ExportsHandler = self = {
       rootDoc: [
         'project',
         (cb, results) =>
-          ProjectRootDocManager.ensureRootDocumentIsValid(project_id, function(
-            error
-          ) {
-            if (error != null) {
-              return callback(error)
+          ProjectRootDocManager.ensureRootDocumentIsValid(
+            project_id,
+            function (error) {
+              if (error != null) {
+                return callback(error)
+              }
+              return ProjectLocator.findRootDoc(
+                { project: results.project, project_id },
+                cb
+              )
             }
-            return ProjectLocator.findRootDoc(
-              { project: results.project, project_id },
-              cb
-            )
-          })
+          )
       ],
       user(cb) {
         return UserGetter.getUser(
@@ -92,7 +93,7 @@ module.exports = ExportsHandler = self = {
       historyVersion(cb) {
         return ProjectHistoryHandler.ensureHistoryExistsForProject(
           project_id,
-          function(error) {
+          function (error) {
             if (error != null) {
               return callback(error)
             }
@@ -102,7 +103,7 @@ module.exports = ExportsHandler = self = {
       }
     }
 
-    return async.auto(jobs, function(err, results) {
+    return async.auto(jobs, function (err, results) {
       if (err != null) {
         OError.tag(err, 'error building project export', {
           project_id,
@@ -167,7 +168,7 @@ module.exports = ExportsHandler = self = {
 
   _requestExport(export_data, callback) {
     if (callback == null) {
-      callback = function(err, export_v1_id) {}
+      callback = function (err, export_v1_id) {}
     }
     return request.post(
       {
@@ -175,7 +176,7 @@ module.exports = ExportsHandler = self = {
         auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
         json: export_data
       },
-      function(err, res, body) {
+      function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to v1 export', {
             export: export_data
@@ -197,14 +198,14 @@ module.exports = ExportsHandler = self = {
 
   _requestVersion(project_id, callback) {
     if (callback == null) {
-      callback = function(err, export_v1_id) {}
+      callback = function (err, export_v1_id) {}
     }
     return request.get(
       {
         url: `${settings.apis.project_history.url}/project/${project_id}/version`,
         json: true
       },
-      function(err, res, body) {
+      function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to project history', {
             project_id
@@ -225,14 +226,14 @@ module.exports = ExportsHandler = self = {
 
   fetchExport(export_id, callback) {
     if (callback == null) {
-      callback = function(err, export_json) {}
+      callback = function (err, export_json) {}
     }
     return request.get(
       {
         url: `${settings.apis.v1.url}/api/v1/sharelatex/exports/${export_id}`,
         auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass }
       },
-      function(err, res, body) {
+      function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to v1 export', {
             export: export_id
@@ -253,14 +254,14 @@ module.exports = ExportsHandler = self = {
 
   fetchDownload(export_id, type, callback) {
     if (callback == null) {
-      callback = function(err, file_url) {}
+      callback = function (err, file_url) {}
     }
     return request.get(
       {
         url: `${settings.apis.v1.url}/api/v1/sharelatex/exports/${export_id}/${type}_url`,
         auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass }
       },
-      function(err, res, body) {
+      function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to v1 export', {
             export: export_id

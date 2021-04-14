@@ -7,16 +7,16 @@ const Errors = require('../../../../app/src/Features/Errors/Errors')
 const MODULE_PATH =
   '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateHandler.js'
 
-describe('TpdsUpdateHandler', function() {
-  beforeEach(function() {
+describe('TpdsUpdateHandler', function () {
+  beforeEach(function () {
     this.clock = sinon.useFakeTimers()
   })
 
-  afterEach(function() {
+  afterEach(function () {
     this.clock.restore()
   })
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.projectName = 'My recipes'
     this.projects = {
       active1: { _id: new ObjectId(), name: this.projectName },
@@ -92,22 +92,22 @@ describe('TpdsUpdateHandler', function() {
     })
   })
 
-  describe('getting an update', function() {
-    describe('with no matching project', function() {
+  describe('getting an update', function () {
+    describe('with no matching project', function () {
       setupMatchingProjects([])
       receiveUpdate()
       expectProjectCreated()
       expectUpdateProcessed()
     })
 
-    describe('with one matching active project', function() {
+    describe('with one matching active project', function () {
       setupMatchingProjects(['active1'])
       receiveUpdate()
       expectProjectNotCreated()
       expectUpdateProcessed()
     })
 
-    describe('with one matching archived project', function() {
+    describe('with one matching archived project', function () {
       setupMatchingProjects(['archived1'])
       receiveUpdate()
       expectProjectNotCreated()
@@ -115,7 +115,7 @@ describe('TpdsUpdateHandler', function() {
       expectDropboxNotUnlinked()
     })
 
-    describe('with two matching active projects', function() {
+    describe('with two matching active projects', function () {
       setupMatchingProjects(['active1', 'active2'])
       receiveUpdate()
       expectProjectNotCreated()
@@ -123,7 +123,7 @@ describe('TpdsUpdateHandler', function() {
       expectDropboxUnlinked()
     })
 
-    describe('with two matching archived projects', function() {
+    describe('with two matching archived projects', function () {
       setupMatchingProjects(['archived1', 'archived2'])
       receiveUpdate()
       expectProjectNotCreated()
@@ -131,7 +131,7 @@ describe('TpdsUpdateHandler', function() {
       expectDropboxNotUnlinked()
     })
 
-    describe('with one matching active and one matching archived project', function() {
+    describe('with one matching active and one matching archived project', function () {
       setupMatchingProjects(['active1', 'archived1'])
       receiveUpdate()
       expectProjectNotCreated()
@@ -139,9 +139,9 @@ describe('TpdsUpdateHandler', function() {
       expectDropboxUnlinked()
     })
 
-    describe('update to a file that should be ignored', function(done) {
+    describe('update to a file that should be ignored', function (done) {
       setupMatchingProjects(['active1'])
-      beforeEach(function() {
+      beforeEach(function () {
         this.FileTypeManager.shouldIgnore.yields(null, true)
       })
       receiveUpdate()
@@ -150,10 +150,10 @@ describe('TpdsUpdateHandler', function() {
       expectDropboxNotUnlinked()
     })
 
-    describe('update to a project on cooldown', function(done) {
+    describe('update to a project on cooldown', function (done) {
       setupMatchingProjects(['active1'])
       setupProjectOnCooldown()
-      beforeEach(function(done) {
+      beforeEach(function (done) {
         this.TpdsUpdateHandler.newUpdate(
           this.userId,
           this.projectName,
@@ -170,29 +170,29 @@ describe('TpdsUpdateHandler', function() {
     })
   })
 
-  describe('getting a file delete', function() {
-    describe('with no matching project', function() {
+  describe('getting a file delete', function () {
+    describe('with no matching project', function () {
       setupMatchingProjects([])
       receiveFileDelete()
       expectDeleteNotProcessed()
       expectProjectNotDeleted()
     })
 
-    describe('with one matching active project', function() {
+    describe('with one matching active project', function () {
       setupMatchingProjects(['active1'])
       receiveFileDelete()
       expectDeleteProcessed()
       expectProjectNotDeleted()
     })
 
-    describe('with one matching archived project', function() {
+    describe('with one matching archived project', function () {
       setupMatchingProjects(['archived1'])
       receiveFileDelete()
       expectDeleteNotProcessed()
       expectProjectNotDeleted()
     })
 
-    describe('with two matching active projects', function() {
+    describe('with two matching active projects', function () {
       setupMatchingProjects(['active1', 'active2'])
       receiveFileDelete()
       expectDeleteNotProcessed()
@@ -200,7 +200,7 @@ describe('TpdsUpdateHandler', function() {
       expectDropboxUnlinked()
     })
 
-    describe('with two matching archived projects', function() {
+    describe('with two matching archived projects', function () {
       setupMatchingProjects(['archived1', 'archived2'])
       receiveFileDelete()
       expectDeleteNotProcessed()
@@ -208,7 +208,7 @@ describe('TpdsUpdateHandler', function() {
       expectDropboxNotUnlinked()
     })
 
-    describe('with one matching active and one matching archived project', function() {
+    describe('with one matching active and one matching archived project', function () {
       setupMatchingProjects(['active1', 'archived1'])
       receiveFileDelete()
       expectDeleteNotProcessed()
@@ -217,29 +217,29 @@ describe('TpdsUpdateHandler', function() {
     })
   })
 
-  describe('getting a project delete', function() {
-    describe('with no matching project', function() {
+  describe('getting a project delete', function () {
+    describe('with no matching project', function () {
       setupMatchingProjects([])
       receiveProjectDelete()
       expectDeleteNotProcessed()
       expectProjectNotDeleted()
     })
 
-    describe('with one matching active project', function() {
+    describe('with one matching active project', function () {
       setupMatchingProjects(['active1'])
       receiveProjectDelete()
       expectDeleteNotProcessed()
       expectProjectDeleted()
     })
 
-    describe('with one matching archived project', function() {
+    describe('with one matching archived project', function () {
       setupMatchingProjects(['archived1'])
       receiveProjectDelete()
       expectDeleteNotProcessed()
       expectProjectNotDeleted()
     })
 
-    describe('with two matching active projects', function() {
+    describe('with two matching active projects', function () {
       setupMatchingProjects(['active1', 'active2'])
       receiveProjectDelete()
       expectDeleteNotProcessed()
@@ -247,7 +247,7 @@ describe('TpdsUpdateHandler', function() {
       expectDropboxUnlinked()
     })
 
-    describe('with two matching archived projects', function() {
+    describe('with two matching archived projects', function () {
       setupMatchingProjects(['archived1', 'archived2'])
       receiveProjectDelete()
       expectDeleteNotProcessed()
@@ -255,7 +255,7 @@ describe('TpdsUpdateHandler', function() {
       expectDropboxNotUnlinked()
     })
 
-    describe('with one matching active and one matching archived project', function() {
+    describe('with one matching active and one matching archived project', function () {
       setupMatchingProjects(['active1', 'archived1'])
       receiveProjectDelete()
       expectDeleteNotProcessed()
@@ -268,7 +268,7 @@ describe('TpdsUpdateHandler', function() {
 /* Setup helpers */
 
 function setupMatchingProjects(projectKeys) {
-  beforeEach(function() {
+  beforeEach(function () {
     const projects = projectKeys.map(key => this.projects[key])
     this.ProjectGetter.findUsersProjectsByName
       .withArgs(this.userId, this.projectName)
@@ -277,7 +277,7 @@ function setupMatchingProjects(projectKeys) {
 }
 
 function setupProjectOnCooldown() {
-  beforeEach(function() {
+  beforeEach(function () {
     this.CooldownManager.isProjectOnCooldown
       .withArgs(this.projects.active1._id)
       .yields(null, true)
@@ -287,7 +287,7 @@ function setupProjectOnCooldown() {
 /* Test helpers */
 
 function receiveUpdate() {
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     this.TpdsUpdateHandler.newUpdate(
       this.userId,
       this.projectName,
@@ -300,7 +300,7 @@ function receiveUpdate() {
 }
 
 function receiveFileDelete() {
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     this.TpdsUpdateHandler.deleteUpdate(
       this.userId,
       this.projectName,
@@ -312,7 +312,7 @@ function receiveFileDelete() {
 }
 
 function receiveProjectDelete() {
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     this.TpdsUpdateHandler.deleteUpdate(
       this.userId,
       this.projectName,
@@ -326,13 +326,13 @@ function receiveProjectDelete() {
 /* Expectations */
 
 function expectProjectCreated() {
-  it('creates a project', function() {
+  it('creates a project', function () {
     expect(
       this.ProjectCreationHandler.createBlankProject
     ).to.have.been.calledWith(this.userId, this.projectName)
   })
 
-  it('sets the root doc', function() {
+  it('sets the root doc', function () {
     // Fire pending timers
     this.clock.runAll()
     expect(this.RootDocManager.setRootDocAutomatically).to.have.been.calledWith(
@@ -342,12 +342,12 @@ function expectProjectCreated() {
 }
 
 function expectProjectNotCreated() {
-  it('does not create a project', function() {
+  it('does not create a project', function () {
     expect(this.ProjectCreationHandler.createBlankProject).not.to.have.been
       .called
   })
 
-  it('does not set the root doc', function() {
+  it('does not set the root doc', function () {
     // Fire pending timers
     this.clock.runAll()
     expect(this.RootDocManager.setRootDocAutomatically).not.to.have.been.called
@@ -355,7 +355,7 @@ function expectProjectNotCreated() {
 }
 
 function expectUpdateProcessed() {
-  it('processes the update', function() {
+  it('processes the update', function () {
     expect(this.UpdateMerger.mergeUpdate).to.have.been.calledWith(
       this.userId,
       this.projects.active1._id,
@@ -367,20 +367,20 @@ function expectUpdateProcessed() {
 }
 
 function expectUpdateNotProcessed() {
-  it('does not process the update', function() {
+  it('does not process the update', function () {
     expect(this.UpdateMerger.mergeUpdate).not.to.have.been.called
   })
 }
 
 function expectDropboxUnlinked() {
-  it('unlinks Dropbox', function() {
+  it('unlinks Dropbox', function () {
     expect(this.Modules.hooks.fire).to.have.been.calledWith(
       'removeDropbox',
       this.userId
     )
   })
 
-  it('creates a notification that dropbox was unlinked', function() {
+  it('creates a notification that dropbox was unlinked', function () {
     expect(
       this.NotificationsBuilder.dropboxDuplicateProjectNames
     ).to.have.been.calledWith(this.userId)
@@ -389,18 +389,18 @@ function expectDropboxUnlinked() {
 }
 
 function expectDropboxNotUnlinked() {
-  it('does not unlink Dropbox', function() {
+  it('does not unlink Dropbox', function () {
     expect(this.Modules.hooks.fire).not.to.have.been.called
   })
 
-  it('does not create a notification that dropbox was unlinked', function() {
+  it('does not create a notification that dropbox was unlinked', function () {
     expect(this.NotificationsBuilder.dropboxDuplicateProjectNames).not.to.have
       .been.called
   })
 }
 
 function expectDeleteProcessed() {
-  it('processes the delete', function() {
+  it('processes the delete', function () {
     expect(this.UpdateMerger.deleteUpdate).to.have.been.calledWith(
       this.userId,
       this.projects.active1._id,
@@ -411,13 +411,13 @@ function expectDeleteProcessed() {
 }
 
 function expectDeleteNotProcessed() {
-  it('does not process the delete', function() {
+  it('does not process the delete', function () {
     expect(this.UpdateMerger.deleteUpdate).not.to.have.been.called
   })
 }
 
 function expectProjectDeleted() {
-  it('deletes the project', function() {
+  it('deletes the project', function () {
     expect(
       this.ProjectDeleter.markAsDeletedByExternalSource
     ).to.have.been.calledWith(this.projects.active1._id)
@@ -425,7 +425,7 @@ function expectProjectDeleted() {
 }
 
 function expectProjectNotDeleted() {
-  it('does not delete the project', function() {
+  it('does not delete the project', function () {
     expect(this.ProjectDeleter.markAsDeletedByExternalSource).not.to.have.been
       .called
   })

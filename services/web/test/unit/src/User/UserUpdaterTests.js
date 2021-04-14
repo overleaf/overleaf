@@ -9,8 +9,8 @@ const tk = require('timekeeper')
 const { expect } = require('chai')
 const { normalizeQuery } = require('../../../../app/src/Features/Helpers/Mongo')
 
-describe('UserUpdater', function() {
-  beforeEach(function() {
+describe('UserUpdater', function () {
+  beforeEach(function () {
     tk.freeze(Date.now())
     this.mongodb = {
       db: {},
@@ -95,17 +95,17 @@ describe('UserUpdater', function() {
     this.callback = sinon.stub()
   })
 
-  afterEach(function() {
+  afterEach(function () {
     return tk.reset()
   })
 
-  describe('addAffiliationForNewUser', function(done) {
-    beforeEach(function() {
+  describe('addAffiliationForNewUser', function (done) {
+    beforeEach(function () {
       this.UserUpdater.updateUser = sinon
         .stub()
         .callsArgWith(2, null, { n: 1, nModified: 1, ok: 1 })
     })
-    it('should not remove affiliationUnchecked flag if v1 returns an error', function(done) {
+    it('should not remove affiliationUnchecked flag if v1 returns an error', function (done) {
       this.addAffiliation.yields(true)
       this.UserUpdater.addAffiliationForNewUser(
         this.stubbedUser._id,
@@ -118,7 +118,7 @@ describe('UserUpdater', function() {
         }
       )
     })
-    it('should remove affiliationUnchecked flag if v1 does not return an error', function(done) {
+    it('should remove affiliationUnchecked flag if v1 does not return an error', function (done) {
       this.addAffiliation.yields()
       this.UserUpdater.addAffiliationForNewUser(
         this.stubbedUser._id,
@@ -137,8 +137,8 @@ describe('UserUpdater', function() {
     })
   })
 
-  describe('changeEmailAddress', function() {
-    beforeEach(function() {
+  describe('changeEmailAddress', function () {
+    beforeEach(function () {
       this.auditLog = {
         initiatorId: 'abc123',
         ipAddress: '0:0:0:0'
@@ -149,7 +149,7 @@ describe('UserUpdater', function() {
       this.UserUpdater.removeEmailAddress = sinon.stub().callsArgWith(2)
     })
 
-    it('change email', function(done) {
+    it('change email', function (done) {
       this.UserUpdater.changeEmailAddress(
         this.stubbedUser._id,
         this.newEmail,
@@ -176,7 +176,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('validates email', function(done) {
+    it('validates email', function (done) {
       this.UserUpdater.changeEmailAddress(
         this.stubbedUser._id,
         'foo',
@@ -188,7 +188,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('handle error', function(done) {
+    it('handle error', function (done) {
       this.UserUpdater.removeEmailAddress.callsArgWith(2, new Error('nope'))
       this.UserUpdater.changeEmailAddress(
         this.stubbedUser._id,
@@ -202,15 +202,15 @@ describe('UserUpdater', function() {
     })
   })
 
-  describe('addEmailAddress', function() {
-    beforeEach(function() {
+  describe('addEmailAddress', function () {
+    beforeEach(function () {
       this.UserGetter.promises.ensureUniqueEmailAddress = sinon
         .stub()
         .resolves()
       this.UserUpdater.promises.updateUser = sinon.stub().resolves()
     })
 
-    it('add email', function(done) {
+    it('add email', function (done) {
       this.UserUpdater.addEmailAddress(
         this.stubbedUser._id,
         this.newEmail,
@@ -242,7 +242,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('add affiliation', function(done) {
+    it('add affiliation', function (done) {
       const affiliationOptions = {
         university: { id: 1 },
         role: 'Prof',
@@ -267,7 +267,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('handle affiliation error', function(done) {
+    it('handle affiliation error', function (done) {
       this.InstitutionsAPI.promises.addAffiliation.rejects(new Error('nope'))
       this.UserUpdater.addEmailAddress(
         this.stubbedUser._id,
@@ -282,7 +282,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('validates email', function(done) {
+    it('validates email', function (done) {
       this.UserUpdater.addEmailAddress(
         this.stubbedUser._id,
         'bar',
@@ -295,7 +295,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('updates the audit log', function(done) {
+    it('updates the audit log', function (done) {
       this.ip = '127:0:0:0'
       this.UserUpdater.addEmailAddress(
         this.stubbedUser._id,
@@ -320,13 +320,13 @@ describe('UserUpdater', function() {
       )
     })
 
-    describe('errors', function() {
-      describe('via UserAuditLogHandler', function() {
+    describe('errors', function () {
+      describe('via UserAuditLogHandler', function () {
         const anError = new Error('oops')
-        beforeEach(function() {
+        beforeEach(function () {
           this.UserAuditLogHandler.promises.addEntry.throws(anError)
         })
-        it('should not add email and should return error', function(done) {
+        it('should not add email and should return error', function (done) {
           this.UserUpdater.addEmailAddress(
             this.stubbedUser._id,
             this.newEmail,
@@ -345,14 +345,14 @@ describe('UserUpdater', function() {
     })
   })
 
-  describe('removeEmailAddress', function() {
-    beforeEach(function() {
+  describe('removeEmailAddress', function () {
+    beforeEach(function () {
       this.UserUpdater.updateUser = sinon
         .stub()
         .callsArgWith(2, null, { nMatched: 1 })
     })
 
-    it('remove email', function(done) {
+    it('remove email', function (done) {
       this.UserUpdater.removeEmailAddress(
         this.stubbedUser._id,
         this.newEmail,
@@ -369,7 +369,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('remove affiliation', function(done) {
+    it('remove affiliation', function (done) {
       this.UserUpdater.removeEmailAddress(
         this.stubbedUser._id,
         this.newEmail,
@@ -384,7 +384,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('refresh features', function(done) {
+    it('refresh features', function (done) {
       this.UserUpdater.removeEmailAddress(
         this.stubbedUser._id,
         this.newEmail,
@@ -396,7 +396,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('handle error', function(done) {
+    it('handle error', function (done) {
       this.UserUpdater.updateUser = sinon
         .stub()
         .callsArgWith(2, new Error('nope'))
@@ -411,7 +411,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('handle missed update', function(done) {
+    it('handle missed update', function (done) {
       this.UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, { n: 0 })
 
       this.UserUpdater.removeEmailAddress(
@@ -424,7 +424,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('handle affiliation error', function(done) {
+    it('handle affiliation error', function (done) {
       this.removeAffiliation.callsArgWith(2, new Error('nope'))
       this.UserUpdater.removeEmailAddress(
         this.stubbedUser._id,
@@ -437,7 +437,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('validates email', function(done) {
+    it('validates email', function (done) {
       this.UserUpdater.removeEmailAddress(this.stubbedUser._id, 'baz', err => {
         expect(err).to.exist
         done()
@@ -445,8 +445,8 @@ describe('UserUpdater', function() {
     })
   })
 
-  describe('setDefaultEmailAddress', function() {
-    beforeEach(function() {
+  describe('setDefaultEmailAddress', function () {
+    beforeEach(function () {
       this.auditLog = {
         initiatorId: this.stubbedUser,
         ipAddress: '0:0:0:0'
@@ -462,7 +462,7 @@ describe('UserUpdater', function() {
       this.RecurlyWrapper.promises.updateAccountEmailAddress.resolves()
     })
 
-    it('set default', function(done) {
+    it('set default', function (done) {
       this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
 
       this.UserUpdater.setDefaultEmailAddress(
@@ -483,7 +483,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('set changed the email in newsletter', function(done) {
+    it('set changed the email in newsletter', function (done) {
       this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
 
       this.UserUpdater.setDefaultEmailAddress(
@@ -504,7 +504,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('handle error', function(done) {
+    it('handle error', function (done) {
       this.UserUpdater.promises.updateUser = sinon.stub().rejects(Error('nope'))
 
       this.UserUpdater.setDefaultEmailAddress(
@@ -519,7 +519,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('handle missed update', function(done) {
+    it('handle missed update', function (done) {
       this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 0 })
 
       this.UserUpdater.setDefaultEmailAddress(
@@ -534,7 +534,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('validates email', function(done) {
+    it('validates email', function (done) {
       this.UserUpdater.setDefaultEmailAddress(
         this.stubbedUser._id,
         '.edu',
@@ -547,7 +547,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('updates audit log', function(done) {
+    it('updates audit log', function (done) {
       this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
 
       this.UserUpdater.setDefaultEmailAddress(
@@ -574,7 +574,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('blocks email update if audit log returns an error', function(done) {
+    it('blocks email update if audit log returns an error', function (done) {
       this.UserUpdater.promises.updateUser = sinon.stub()
       this.UserAuditLogHandler.promises.addEntry.rejects(new Error('oops'))
       this.UserUpdater.setDefaultEmailAddress(
@@ -590,8 +590,8 @@ describe('UserUpdater', function() {
       )
     })
 
-    describe('when email not confirmed', function() {
-      beforeEach(function() {
+    describe('when email not confirmed', function () {
+      beforeEach(function () {
         this.stubbedUser.emails = [
           {
             email: this.newEmail,
@@ -601,7 +601,7 @@ describe('UserUpdater', function() {
         this.UserUpdater.promises.updateUser = sinon.stub()
       })
 
-      it('should callback with error', function() {
+      it('should callback with error', function () {
         this.UserUpdater.setDefaultEmailAddress(
           this.stubbedUser._id,
           this.newEmail,
@@ -619,14 +619,14 @@ describe('UserUpdater', function() {
       })
     })
 
-    describe('when email does not belong to user', function() {
-      beforeEach(function() {
+    describe('when email does not belong to user', function () {
+      beforeEach(function () {
         this.stubbedUser.emails = []
         this.UserGetter.promises.getUser.resolves(this.stubbedUser)
         this.UserUpdater.promises.updateUser = sinon.stub()
       })
 
-      it('should callback with error', function() {
+      it('should callback with error', function () {
         this.UserUpdater.setDefaultEmailAddress(
           this.stubbedUser._id,
           this.newEmail,
@@ -644,8 +644,8 @@ describe('UserUpdater', function() {
       })
     })
 
-    describe('security alert', function() {
-      it('should be sent to old and new email when sendSecurityAlert=true', function(done) {
+    describe('security alert', function () {
+      it('should be sent to old and new email when sendSecurityAlert=true', function (done) {
         // this.UserGetter.promises.getUser.resolves(this.stubbedUser)
         this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
 
@@ -670,16 +670,16 @@ describe('UserUpdater', function() {
           }
         )
       })
-      describe('errors', function() {
+      describe('errors', function () {
         const anError = new Error('oops')
-        describe('EmailHandler', function() {
-          beforeEach(function() {
+        describe('EmailHandler', function () {
+          beforeEach(function () {
             this.EmailHandler.promises.sendEmail.rejects(anError)
             this.UserUpdater.promises.updateUser = sinon
               .stub()
               .resolves({ n: 1 })
           })
-          it('should log but not pass back the error', function(done) {
+          it('should log but not pass back the error', function (done) {
             this.UserUpdater.setDefaultEmailAddress(
               this.stubbedUser._id,
               this.newEmail,
@@ -705,12 +705,12 @@ describe('UserUpdater', function() {
     })
   })
 
-  describe('confirmEmail', function() {
-    beforeEach(function() {
+  describe('confirmEmail', function () {
+    beforeEach(function () {
       this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
     })
 
-    it('should update the email record', function(done) {
+    it('should update the email record', function (done) {
       this.UserUpdater.confirmEmail(
         this.stubbedUser._id,
         this.stubbedUserEmail,
@@ -737,7 +737,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('add affiliation', function(done) {
+    it('add affiliation', function (done) {
       this.UserUpdater.confirmEmail(
         this.stubbedUser._id,
         this.newEmail,
@@ -757,7 +757,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('handle error', function(done) {
+    it('handle error', function (done) {
       this.UserUpdater.promises.updateUser = sinon
         .stub()
         .throws(new Error('nope'))
@@ -772,7 +772,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('handle missed update', function(done) {
+    it('handle missed update', function (done) {
       this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 0 })
 
       this.UserUpdater.confirmEmail(
@@ -785,14 +785,14 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('validates email', function(done) {
+    it('validates email', function (done) {
       this.UserUpdater.confirmEmail(this.stubbedUser._id, '@', err => {
         expect(err).to.exist
         done()
       })
     })
 
-    it('handle affiliation error', function(done) {
+    it('handle affiliation error', function (done) {
       this.InstitutionsAPI.promises.addAffiliation.throws(Error('nope'))
       this.UserUpdater.confirmEmail(
         this.stubbedUser._id,
@@ -805,7 +805,7 @@ describe('UserUpdater', function() {
       )
     })
 
-    it('refresh features', function(done) {
+    it('refresh features', function (done) {
       this.UserUpdater.confirmEmail(
         this.stubbedUser._id,
         this.newEmail,

@@ -28,13 +28,13 @@ module.exports = RestoreManager = {
     // It looks up the deleted doc's contents, and then creates a new doc with the same content.
     // We don't actually remove the deleted doc entry, just create a new one from its lines.
     if (callback == null) {
-      callback = function(error, doc, folder_id) {}
+      callback = function (error, doc, folder_id) {}
     }
     return ProjectEntityHandler.getDoc(
       project_id,
       doc_id,
       { include_deleted: true },
-      function(error, lines) {
+      function (error, lines) {
         if (error != null) {
           return callback(error)
         }
@@ -59,13 +59,13 @@ module.exports = RestoreManager = {
 
   restoreFileFromV2(user_id, project_id, version, pathname, callback) {
     if (callback == null) {
-      callback = function(error, entity) {}
+      callback = function (error, entity) {}
     }
     return RestoreManager._writeFileVersionToDisk(
       project_id,
       version,
       pathname,
-      function(error, fsPath) {
+      function (error, fsPath) {
         if (error != null) {
           return callback(error)
         }
@@ -75,54 +75,55 @@ module.exports = RestoreManager = {
           // no directory
           dirname = ''
         }
-        return RestoreManager._findOrCreateFolder(project_id, dirname, function(
-          error,
-          parent_folder_id
-        ) {
-          if (error != null) {
-            return callback(error)
-          }
-          const addEntityWithName = (name, callback) =>
-            FileSystemImportManager.addEntity(
-              user_id,
-              project_id,
-              parent_folder_id,
-              name,
-              fsPath,
-              false,
+        return RestoreManager._findOrCreateFolder(
+          project_id,
+          dirname,
+          function (error, parent_folder_id) {
+            if (error != null) {
+              return callback(error)
+            }
+            const addEntityWithName = (name, callback) =>
+              FileSystemImportManager.addEntity(
+                user_id,
+                project_id,
+                parent_folder_id,
+                name,
+                fsPath,
+                false,
+                callback
+              )
+            return RestoreManager._addEntityWithUniqueName(
+              addEntityWithName,
+              basename,
               callback
             )
-          return RestoreManager._addEntityWithUniqueName(
-            addEntityWithName,
-            basename,
-            callback
-          )
-        })
+          }
+        )
       }
     )
   },
 
   _findOrCreateFolder(project_id, dirname, callback) {
     if (callback == null) {
-      callback = function(error, folder_id) {}
+      callback = function (error, folder_id) {}
     }
-    return EditorController.mkdirp(project_id, dirname, function(
-      error,
-      newFolders,
-      lastFolder
-    ) {
-      if (error != null) {
-        return callback(error)
+    return EditorController.mkdirp(
+      project_id,
+      dirname,
+      function (error, newFolders, lastFolder) {
+        if (error != null) {
+          return callback(error)
+        }
+        return callback(null, lastFolder != null ? lastFolder._id : undefined)
       }
-      return callback(null, lastFolder != null ? lastFolder._id : undefined)
-    })
+    )
   },
 
   _addEntityWithUniqueName(addEntityWithName, basename, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return addEntityWithName(basename, function(error, entity) {
+    return addEntityWithName(basename, function (error, entity) {
       if (error != null) {
         if (error instanceof Errors.InvalidNameError) {
           // likely a duplicate name, so try with a prefix
@@ -146,7 +147,7 @@ module.exports = RestoreManager = {
 
   _writeFileVersionToDisk(project_id, version, pathname, callback) {
     if (callback == null) {
-      callback = function(error, fsPath) {}
+      callback = function (error, fsPath) {}
     }
     const url = `${
       Settings.apis.project_history.url

@@ -152,7 +152,7 @@ export default FileTreeManager = class FileTreeManager {
 
   multiSelectedCount() {
     let count = 0
-    this.forEachEntity(function(entity) {
+    this.forEachEntity(function (entity) {
       if (entity.multiSelected) {
         return count++
       }
@@ -162,7 +162,7 @@ export default FileTreeManager = class FileTreeManager {
 
   getMultiSelectedEntities() {
     const entities = []
-    this.forEachEntity(function(e) {
+    this.forEachEntity(function (e) {
       if (e.multiSelected) {
         return entities.push(e)
       }
@@ -172,7 +172,7 @@ export default FileTreeManager = class FileTreeManager {
 
   getFullCount() {
     const entities = []
-    this.forEachEntity(function(e) {
+    this.forEachEntity(function (e) {
       if (!e.deleted) entities.push(e)
     })
     return entities.length
@@ -242,7 +242,7 @@ export default FileTreeManager = class FileTreeManager {
 
   findSelectedEntity() {
     let selected = null
-    this.forEachEntity(function(entity) {
+    this.forEachEntity(function (entity) {
       if (entity.selected) {
         return (selected = entity)
       }
@@ -323,7 +323,7 @@ export default FileTreeManager = class FileTreeManager {
 
   forEachEntity(callback) {
     if (callback == null) {
-      callback = function(entity, parent_folder, path) {}
+      callback = function (entity, parent_folder, path) {}
     }
     this._forEachEntityInFolder(this.$scope.rootFolder, null, callback)
 
@@ -388,10 +388,7 @@ export default FileTreeManager = class FileTreeManager {
     if (path == null) {
       return
     }
-    return path
-      .split('/')
-      .slice(0, -1)
-      .join('/')
+    return path.split('/').slice(0, -1).join('/')
   }
 
   _findParentFolder(entity) {
@@ -470,7 +467,7 @@ export default FileTreeManager = class FileTreeManager {
       }
     })
     // Keep list ordered by folders, then name
-    return this.$scope.docs.sort(function(a, b) {
+    return this.$scope.docs.sort(function (a, b) {
       const aDepth = (a.path.match(/\//g) || []).length
       const bDepth = (b.path.match(/\//g) || []).length
       if (aDepth - bDepth !== 0) {
@@ -679,7 +676,7 @@ export default FileTreeManager = class FileTreeManager {
 
   renameEntity(entity, name, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     if (entity.name === name) {
       return
@@ -709,7 +706,7 @@ export default FileTreeManager = class FileTreeManager {
     // We'll wait for the socket.io notification to
     // delete from scope.
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return this.ide.queuedHttp({
       method: 'DELETE',
@@ -759,7 +756,7 @@ export default FileTreeManager = class FileTreeManager {
       return
     }
     let parent_folder = null
-    this.forEachEntity(function(possible_entity, folder) {
+    this.forEachEntity(function (possible_entity, folder) {
       if (possible_entity === entity) {
         return (parent_folder = folder)
       }

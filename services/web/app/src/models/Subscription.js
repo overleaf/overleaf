@@ -14,7 +14,7 @@ const SubscriptionSchema = new Schema({
     type: [ObjectId],
     ref: 'User',
     required: true,
-    validate: function(managers) {
+    validate: function (managers) {
       // require at least one manager
       return !!managers.length
     }
@@ -41,7 +41,7 @@ const SubscriptionSchema = new Schema({
 })
 
 // Subscriptions have no v1 data to fetch
-SubscriptionSchema.method('fetchV1Data', function(callback) {
+SubscriptionSchema.method('fetchV1Data', function (callback) {
   callback(null, this)
 })
 

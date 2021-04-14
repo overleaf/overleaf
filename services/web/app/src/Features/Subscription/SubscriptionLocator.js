@@ -21,20 +21,20 @@ require('./GroupPlansData') // make sure dynamic group plans are loaded
 const SubscriptionLocator = {
   getUsersSubscription(user_or_id, callback) {
     const user_id = SubscriptionLocator._getUserId(user_or_id)
-    return Subscription.findOne({ admin_id: user_id }, function(
-      err,
-      subscription
-    ) {
-      logger.log({ user_id }, 'got users subscription')
-      return callback(err, subscription)
-    })
+    return Subscription.findOne(
+      { admin_id: user_id },
+      function (err, subscription) {
+        logger.log({ user_id }, 'got users subscription')
+        return callback(err, subscription)
+      }
+    )
   },
 
   getUserIndividualSubscription(user_or_id, callback) {
     const user_id = SubscriptionLocator._getUserId(user_or_id)
     return Subscription.findOne(
       { admin_id: user_id, groupPlan: false },
-      function(err, subscription) {
+      function (err, subscription) {
         logger.log({ user_id }, 'got users individual subscription')
         return callback(err, subscription)
       }
@@ -43,7 +43,7 @@ const SubscriptionLocator = {
 
   getManagedGroupSubscriptions(user_or_id, callback) {
     if (callback == null) {
-      callback = function(error, managedSubscriptions) {}
+      callback = function (error, managedSubscriptions) {}
     }
     const user_id = SubscriptionLocator._getUserId(user_or_id)
     return Subscription.find({

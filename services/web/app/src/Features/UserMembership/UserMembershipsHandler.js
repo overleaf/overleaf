@@ -23,7 +23,7 @@ const UserMembershipsHandler = {
   removeUserFromAllEntities(userId, callback) {
     // get all writable entity types
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const entityConfigs = []
     for (let key in UserMembershipEntityConfigs) {
@@ -48,7 +48,7 @@ const UserMembershipsHandler = {
 
   removeUserFromEntities(entityConfig, userId, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const removeOperation = { $pull: {} }
     removeOperation.$pull[entityConfig.fields.write] = userId
@@ -61,26 +61,26 @@ const UserMembershipsHandler = {
 
   getEntitiesByUser(entityConfig, userId, callback) {
     if (callback == null) {
-      callback = function(error, entities) {}
+      callback = function (error, entities) {}
     }
     const query = Object.assign({}, entityConfig.baseQuery)
     query[entityConfig.fields.access] = userId
-    return EntityModels[entityConfig.modelName].find(query, function(
-      error,
-      entities
-    ) {
-      if (entities == null) {
-        entities = []
+    return EntityModels[entityConfig.modelName].find(
+      query,
+      function (error, entities) {
+        if (entities == null) {
+          entities = []
+        }
+        if (error != null) {
+          return callback(error)
+        }
+        return async.mapSeries(
+          entities,
+          (entity, cb) => entity.fetchV1Data(cb),
+          callback
+        )
       }
-      if (error != null) {
-        return callback(error)
-      }
-      return async.mapSeries(
-        entities,
-        (entity, cb) => entity.fetchV1Data(cb),
-        callback
-      )
-    })
+    )
   }
 }
 

@@ -13,7 +13,7 @@
  */
 import App from '../../../base'
 
-export default App.factory('pdfSpinner', function() {
+export default App.factory('pdfSpinner', function () {
   let pdfSpinner
   return (pdfSpinner = class pdfSpinner {
     constructor() {}

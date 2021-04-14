@@ -19,11 +19,12 @@ function findElement(options, _callback) {
   const elementType = sanitizeTypeOfElement(type)
 
   let count = 0
-  const endOfBranch = function() {
+  const endOfBranch = function () {
     if (--count === 0) {
       logger.warn(
-        `element ${elementId} could not be found for project ${projectId ||
-          project._id}`
+        `element ${elementId} could not be found for project ${
+          projectId || project._id
+        }`
       )
       callback(new Errors.NotFoundError('entity not found'))
     }

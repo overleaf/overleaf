@@ -5,7 +5,7 @@ const RecurlyWrapper = require('../../../../app/src/Features/Subscription/Recurl
 
 let MockRecurlyApi
 
-before(function() {
+before(function () {
   MockRecurlyApi = MockRecurlyApiClass.instance()
 })
 

@@ -13,6 +13,7 @@
   .toolbar-alt-mixin;
   padding-right: 5px;
   &.changes-to-autocompile {
+    // prettier-ignore
     #gradient > .striped(@color: rgba(255, 255, 255, 0.1), @angle: -45deg);
     background-size: @stripe-width @stripe-width;
     .animation(pdf-toolbar-stripes 2s linear infinite);
@@ -86,6 +87,7 @@
   border-radius: 0 @btn-border-radius-base @btn-border-radius-base 0;
   background-color: @btn-primary-bg;
   &.btn-recompile-group-has-changes {
+    // prettier-ignore
     #gradient > .striped(@color: rgba(255, 255, 255, 0.2), @angle: -45deg);
     background-size: @stripe-width @stripe-width;
     .animation(pdf-toolbar-stripes 2s linear infinite);

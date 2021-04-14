@@ -7,25 +7,25 @@ import MockedSocket from 'socket.io-mock'
 
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 
-describe('FileTree Delete Entity Flow', function() {
+describe('FileTree Delete Entity Flow', function () {
   const onSelect = sinon.stub()
   const onInit = sinon.stub()
 
-  beforeEach(function() {
+  beforeEach(function () {
     window._ide = {
       socket: new MockedSocket()
     }
   })
 
-  afterEach(function() {
+  afterEach(function () {
     fetchMock.restore()
     onSelect.reset()
     onInit.reset()
     delete window._ide
   })
 
-  describe('single entity', function() {
-    beforeEach(function() {
+  describe('single entity', function () {
+    beforeEach(function () {
       const rootFolder = [
         {
           _id: 'root-folder-id',
@@ -57,7 +57,7 @@ describe('FileTree Delete Entity Flow', function() {
       fireEvent.click(deleteButton)
     })
 
-    it('removes item', async function() {
+    it('removes item', async function () {
       const fetchMatcher = /\/project\/\w+\/doc\/\w+/
       fetchMock.delete(fetchMatcher, 204)
 
@@ -88,7 +88,7 @@ describe('FileTree Delete Entity Flow', function() {
       expect(lastFetchPath).to.equal('/project/123abc/doc/456def')
     })
 
-    it('continues delete on 404s', async function() {
+    it('continues delete on 404s', async function () {
       fetchMock.delete(/\/project\/\w+\/doc\/\w+/, 404)
 
       const modalDeleteButton = await getModalDeleteButton()
@@ -119,7 +119,7 @@ describe('FileTree Delete Entity Flow', function() {
       })
     })
 
-    it('aborts delete on error', async function() {
+    it('aborts delete on error', async function () {
       const fetchMatcher = /\/project\/\w+\/doc\/\w+/
       fetchMock.delete(fetchMatcher, 500)
 
@@ -131,8 +131,8 @@ describe('FileTree Delete Entity Flow', function() {
     })
   })
 
-  describe('folders', function() {
-    beforeEach(function() {
+  describe('folders', function () {
+    beforeEach(function () {
       const rootFolder = [
         {
           docs: [{ _id: '456def', name: 'main.tex' }],
@@ -174,15 +174,15 @@ describe('FileTree Delete Entity Flow', function() {
       window._ide.socket.socketClient.emit('removeEntity', '123abc')
     })
 
-    it('removes the folder', function() {
+    it('removes the folder', function () {
       expect(screen.queryByRole('treeitem', { name: 'folder' })).to.not.exist
     })
 
-    it('leaves the main file selected', function() {
+    it('leaves the main file selected', function () {
       screen.getByRole('treeitem', { name: 'main.tex', selected: true })
     })
 
-    it('unselect the child entity', async function() {
+    it('unselect the child entity', async function () {
       // as a proxy to check that the child entity has been unselect we start
       // a delete and ensure the modal is displayed (the cancel button can be
       // selected) This is needed to make sure the test fail.
@@ -192,8 +192,8 @@ describe('FileTree Delete Entity Flow', function() {
     })
   })
 
-  describe('multiple entities', function() {
-    beforeEach(function() {
+  describe('multiple entities', function () {
+    beforeEach(function () {
       const rootFolder = [
         {
           _id: 'root-folder-id',
@@ -229,7 +229,7 @@ describe('FileTree Delete Entity Flow', function() {
       fireEvent.click(deleteButton)
     })
 
-    it('removes all items', async function() {
+    it('removes all items', async function () {
       const fetchMatcher = /\/project\/\w+\/(doc|file)\/\w+/
       fetchMock.delete(fetchMatcher, 204)
 

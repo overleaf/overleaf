@@ -8,7 +8,7 @@ const ASYNC_AFFILIATIONS_LIMIT = 10
 module.exports = {
   confirmDomain(req, res, next) {
     const { hostname } = req.body
-    affiliateUsers(hostname, function(error) {
+    affiliateUsers(hostname, function (error) {
       if (error) {
         return next(error)
       }
@@ -17,13 +17,9 @@ module.exports = {
   }
 }
 
-var affiliateUsers = function(hostname, callback) {
-  const reversedHostname = hostname
-    .trim()
-    .split('')
-    .reverse()
-    .join('')
-  UserGetter.getUsersByHostname(hostname, { _id: 1 }, function(error, users) {
+var affiliateUsers = function (hostname, callback) {
+  const reversedHostname = hostname.trim().split('').reverse().join('')
+  UserGetter.getUsersByHostname(hostname, { _id: 1 }, function (error, users) {
     if (error) {
       OError.tag(error, 'problem fetching users by hostname')
       return callback(error)
@@ -44,7 +40,7 @@ var affiliateUsers = function(hostname, callback) {
   })
 }
 
-var affiliateUserByReversedHostname = function(
+var affiliateUserByReversedHostname = function (
   user,
   reversedHostname,
   callback

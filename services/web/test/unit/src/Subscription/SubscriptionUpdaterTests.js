@@ -5,8 +5,8 @@ const modulePath =
 const { assert, expect } = require('chai')
 const { ObjectId } = require('mongodb')
 
-describe('SubscriptionUpdater', function() {
-  beforeEach(function() {
+describe('SubscriptionUpdater', function () {
+  beforeEach(function () {
     this.recurlySubscription = {
       uuid: '1238uoijdasjhd',
       plan: {
@@ -106,8 +106,8 @@ describe('SubscriptionUpdater', function() {
     })
   })
 
-  describe('updateAdmin', function() {
-    it('should update the subscription admin', function(done) {
+  describe('updateAdmin', function () {
+    it('should update the subscription admin', function (done) {
       this.subscription.groupPlan = true
       this.SubscriptionUpdater.updateAdmin(
         this.subscription,
@@ -134,7 +134,7 @@ describe('SubscriptionUpdater', function() {
       )
     })
 
-    it('should remove the manager for non-group subscriptions', function(done) {
+    it('should remove the manager for non-group subscriptions', function (done) {
       this.SubscriptionUpdater.updateAdmin(
         this.subscription,
         this.otherUserId,
@@ -163,8 +163,8 @@ describe('SubscriptionUpdater', function() {
     })
   })
 
-  describe('syncSubscription', function() {
-    beforeEach(function() {
+  describe('syncSubscription', function () {
+    beforeEach(function () {
       this.SubscriptionLocator.getUsersSubscription.callsArgWith(
         1,
         null,
@@ -175,7 +175,7 @@ describe('SubscriptionUpdater', function() {
         .yields()
     })
 
-    it('should update the subscription if the user already is admin of one', function(done) {
+    it('should update the subscription if the user already is admin of one', function (done) {
       this.SubscriptionUpdater._createNewSubscription = sinon.stub()
 
       this.SubscriptionUpdater.syncSubscription(
@@ -199,7 +199,7 @@ describe('SubscriptionUpdater', function() {
       )
     })
 
-    it('should not call updateFeatures with group subscription if recurly subscription is not expired', function(done) {
+    it('should not call updateFeatures with group subscription if recurly subscription is not expired', function (done) {
       this.SubscriptionUpdater.syncSubscription(
         this.recurlySubscription,
         this.adminUser._id,
@@ -223,17 +223,17 @@ describe('SubscriptionUpdater', function() {
     })
   })
 
-  describe('_updateSubscriptionFromRecurly', function() {
-    beforeEach(function() {
+  describe('_updateSubscriptionFromRecurly', function () {
+    beforeEach(function () {
       this.FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
       this.SubscriptionUpdater.deleteSubscription = sinon.stub().yields()
     })
 
-    afterEach(function() {
+    afterEach(function () {
       this.subscription.member_ids = []
     })
 
-    it('should update the subscription with token etc when not expired', function(done) {
+    it('should update the subscription with token etc when not expired', function (done) {
       this.SubscriptionUpdater._updateSubscriptionFromRecurly(
         this.recurlySubscription,
         this.subscription,
@@ -257,7 +257,7 @@ describe('SubscriptionUpdater', function() {
       )
     })
 
-    it('should remove the subscription when expired', function(done) {
+    it('should remove the subscription when expired', function (done) {
       this.recurlySubscription.state = 'expired'
       this.SubscriptionUpdater._updateSubscriptionFromRecurly(
         this.recurlySubscription,
@@ -275,7 +275,7 @@ describe('SubscriptionUpdater', function() {
       )
     })
 
-    it('should update all the users features', function(done) {
+    it('should update all the users features', function (done) {
       this.subscription.member_ids = this.allUserIds
       this.SubscriptionUpdater._updateSubscriptionFromRecurly(
         this.recurlySubscription,
@@ -302,7 +302,7 @@ describe('SubscriptionUpdater', function() {
       )
     })
 
-    it('should set group to true and save how many members can be added to group', function(done) {
+    it('should set group to true and save how many members can be added to group', function (done) {
       this.PlansLocator.findLocalPlanInSettings
         .withArgs(this.recurlySubscription.plan.plan_code)
         .returns({ groupPlan: true, membersLimit: 5 })
@@ -324,7 +324,7 @@ describe('SubscriptionUpdater', function() {
       )
     })
 
-    it('should not set group to true or set groupPlan', function(done) {
+    it('should not set group to true or set groupPlan', function (done) {
       this.SubscriptionUpdater._updateSubscriptionFromRecurly(
         this.recurlySubscription,
         this.subscription,
@@ -340,8 +340,8 @@ describe('SubscriptionUpdater', function() {
       )
     })
 
-    describe('when the plan allows adding more seats', function() {
-      beforeEach(function() {
+    describe('when the plan allows adding more seats', function () {
+      beforeEach(function () {
         this.membersLimitAddOn = 'add_on1'
         this.PlansLocator.findLocalPlanInSettings
           .withArgs(this.recurlySubscription.plan.plan_code)
@@ -353,7 +353,7 @@ describe('SubscriptionUpdater', function() {
       })
 
       function expectMembersLimit(limit) {
-        it('should set the membersLimit accordingly', function(done) {
+        it('should set the membersLimit accordingly', function (done) {
           this.SubscriptionUpdater._updateSubscriptionFromRecurly(
             this.recurlySubscription,
             this.subscription,
@@ -368,15 +368,15 @@ describe('SubscriptionUpdater', function() {
         })
       }
 
-      describe('when the recurlySubscription does not have add ons', function() {
-        beforeEach(function() {
+      describe('when the recurlySubscription does not have add ons', function () {
+        beforeEach(function () {
           delete this.recurlySubscription.subscription_add_ons
         })
         expectMembersLimit(5)
       })
 
-      describe('when the recurlySubscription has non-matching add ons', function() {
-        beforeEach(function() {
+      describe('when the recurlySubscription has non-matching add ons', function () {
+        beforeEach(function () {
           this.recurlySubscription.subscription_add_ons = [
             { add_on_code: 'add_on_99', quantity: 3 }
           ]
@@ -384,8 +384,8 @@ describe('SubscriptionUpdater', function() {
         expectMembersLimit(5)
       })
 
-      describe('when the recurlySubscription has a matching add on', function() {
-        beforeEach(function() {
+      describe('when the recurlySubscription has a matching add on', function () {
+        beforeEach(function () {
           this.recurlySubscription.subscription_add_ons = [
             { add_on_code: this.membersLimitAddOn, quantity: 10 }
           ]
@@ -394,8 +394,8 @@ describe('SubscriptionUpdater', function() {
       })
 
       // NOTE: This is unexpected, but we are going to support it anyways.
-      describe('when the recurlySubscription has multiple matching add ons', function() {
-        beforeEach(function() {
+      describe('when the recurlySubscription has multiple matching add ons', function () {
+        beforeEach(function () {
           this.recurlySubscription.subscription_add_ons = [
             { add_on_code: this.membersLimitAddOn, quantity: 10 },
             { add_on_code: this.membersLimitAddOn, quantity: 3 }
@@ -406,8 +406,8 @@ describe('SubscriptionUpdater', function() {
     })
   })
 
-  describe('_createNewSubscription', function() {
-    it('should create a new subscription then update the subscription', function(done) {
+  describe('_createNewSubscription', function () {
+    it('should create a new subscription then update the subscription', function (done) {
       this.SubscriptionUpdater._createNewSubscription(
         this.adminUser._id,
         () => {
@@ -420,12 +420,12 @@ describe('SubscriptionUpdater', function() {
     })
   })
 
-  describe('addUserToGroup', function() {
-    beforeEach(function() {
+  describe('addUserToGroup', function () {
+    beforeEach(function () {
       this.SubscriptionUpdater.addUsersToGroup = sinon.stub().yields(null)
     })
 
-    it('delegates to addUsersToGroup', function(done) {
+    it('delegates to addUsersToGroup', function (done) {
       this.SubscriptionUpdater.addUserToGroup(
         this.subscription._id,
         this.otherUserId,
@@ -439,12 +439,12 @@ describe('SubscriptionUpdater', function() {
     })
   })
 
-  describe('addUsersToGroup', function() {
-    beforeEach(function() {
+  describe('addUsersToGroup', function () {
+    beforeEach(function () {
       this.FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
     })
 
-    it('should add the user ids to the group as a set', function(done) {
+    it('should add the user ids to the group as a set', function (done) {
       this.SubscriptionUpdater.addUsersToGroup(
         this.subscription._id,
         [this.otherUserId],
@@ -461,7 +461,7 @@ describe('SubscriptionUpdater', function() {
       )
     })
 
-    it('should update the users features', function(done) {
+    it('should update the users features', function (done) {
       this.SubscriptionUpdater.addUserToGroup(
         this.subscription._id,
         this.otherUserId,
@@ -475,8 +475,8 @@ describe('SubscriptionUpdater', function() {
     })
   })
 
-  describe('removeUserFromGroups', function() {
-    beforeEach(function() {
+  describe('removeUserFromGroups', function () {
+    beforeEach(function () {
       this.FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
       this.UserGetter.getUser.yields(null, {})
       this.fakeSubscriptions = [{ _id: 'fake-id-1' }, { _id: 'fake-id-2' }]
@@ -486,7 +486,7 @@ describe('SubscriptionUpdater', function() {
       )
     })
 
-    it('should pull the users id from the group', function(done) {
+    it('should pull the users id from the group', function (done) {
       this.SubscriptionUpdater.removeUserFromGroup(
         this.subscription._id,
         this.otherUserId,
@@ -501,7 +501,7 @@ describe('SubscriptionUpdater', function() {
       )
     })
 
-    it('should pull the users id from all groups', function(done) {
+    it('should pull the users id from all groups', function (done) {
       this.SubscriptionUpdater.removeUserFromAllGroups(this.otherUserId, () => {
         const filter = { _id: ['fake-id-1', 'fake-id-2'] }
         const removeOperation = { $pull: { member_ids: this.otherUserId } }
@@ -510,7 +510,7 @@ describe('SubscriptionUpdater', function() {
       })
     })
 
-    it('should update the users features', function(done) {
+    it('should update the users features', function (done) {
       this.SubscriptionUpdater.removeUserFromGroup(
         this.subscription._id,
         this.otherUserId,
@@ -524,8 +524,8 @@ describe('SubscriptionUpdater', function() {
     })
   })
 
-  describe('deleteSubscription', function() {
-    beforeEach(function(done) {
+  describe('deleteSubscription', function () {
+    beforeEach(function (done) {
       this.subscription = {
         _id: ObjectId().toString(),
         mock: 'subscription',
@@ -539,19 +539,19 @@ describe('SubscriptionUpdater', function() {
       this.SubscriptionUpdater.deleteSubscription(this.subscription, {}, done)
     })
 
-    it('should remove the subscription', function() {
+    it('should remove the subscription', function () {
       this.SubscriptionModel.deleteOne
         .calledWith({ _id: this.subscription._id })
         .should.equal(true)
     })
 
-    it('should downgrade the admin_id', function() {
+    it('should downgrade the admin_id', function () {
       this.FeaturesUpdater.refreshFeatures
         .calledWith(this.subscription.admin_id)
         .should.equal(true)
     })
 
-    it('should downgrade all of the members', function() {
+    it('should downgrade all of the members', function () {
       for (const userId of this.subscription.member_ids) {
         this.FeaturesUpdater.refreshFeatures
           .calledWith(userId)

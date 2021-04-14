@@ -22,7 +22,7 @@ const logger = require('logger-sharelatex')
 module.exports = V1Handler = {
   authWithV1(email, password, callback) {
     if (callback == null) {
-      callback = function(err, isValid, v1Profile) {}
+      callback = function (err, isValid, v1Profile) {}
     }
     return V1Api.request(
       {
@@ -31,7 +31,7 @@ module.exports = V1Handler = {
         json: { email, password },
         expectedStatusCodes: [403]
       },
-      function(err, response, body) {
+      function (err, response, body) {
         if (err != null) {
           OError.tag(err, '[V1Handler] error while talking to v1 login api', {
             email
@@ -65,7 +65,7 @@ module.exports = V1Handler = {
 
   doPasswordReset(v1_user_id, password, callback) {
     if (callback == null) {
-      callback = function(err, created) {}
+      callback = function (err, created) {}
     }
 
     return V1Api.request(
@@ -78,7 +78,7 @@ module.exports = V1Handler = {
         },
         expectedStatusCodes: [200]
       },
-      function(err, response, body) {
+      function (err, response, body) {
         if (err != null) {
           OError.tag(err, 'error while talking to v1 password reset api', {
             v1_user_id

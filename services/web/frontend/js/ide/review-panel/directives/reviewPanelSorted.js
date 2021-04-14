@@ -19,7 +19,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
   link(scope, element, attrs) {
     let previous_focused_entry_index = 0
 
-    const layout = function(animate) {
+    const layout = function (animate) {
       let entry,
         height,
         i,
@@ -89,7 +89,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
 
       sl_console.log('focused_entry_index', focused_entry_index)
 
-      const positionLayoutEl = function($callout_el, original_top, top) {
+      const positionLayoutEl = function ($callout_el, original_top, top) {
         if (original_top <= top) {
           $callout_el.removeClass('rp-entry-callout-inverted')
           return $callout_el.css({
@@ -177,7 +177,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
 
     scope.$applyAsync(() => layout())
 
-    scope.$on('review-panel:layout', function(e, animate) {
+    scope.$on('review-panel:layout', function (e, animate) {
       if (animate == null) {
         animate = true
       }
@@ -198,7 +198,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
     // noticeable, but keeps it perfectly in step with Ace.
     ace
       .require('ace/lib/event')
-      .addMouseWheelListener(scroller[0], function(e) {
+      .addMouseWheelListener(scroller[0], function (e) {
         const deltaY = e.wheelY
         const old_top = parseInt(list.css('top'))
         const top = old_top - deltaY * 4
@@ -211,7 +211,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
     // when it overflows.
     let ignoreNextAceEvent = false
 
-    const scrollPanel = function(scrollTop, height) {
+    const scrollPanel = function (scrollTop, height) {
       if (ignoreNextAceEvent) {
         return (ignoreNextAceEvent = false)
       } else {

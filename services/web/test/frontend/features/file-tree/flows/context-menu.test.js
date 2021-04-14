@@ -5,11 +5,11 @@ import { screen, render, fireEvent } from '@testing-library/react'
 
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 
-describe('FileTree Context Menu Flow', function() {
+describe('FileTree Context Menu Flow', function () {
   const onSelect = sinon.stub()
   const onInit = sinon.stub()
 
-  it('opens on contextMenu event', async function() {
+  it('opens on contextMenu event', async function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -43,7 +43,7 @@ describe('FileTree Context Menu Flow', function() {
     expect(screen.getAllByRole('menu').length).to.equal(2) // toolbar + menu
   })
 
-  it("doesn't open in read only mode", async function() {
+  it("doesn't open in read only mode", async function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',

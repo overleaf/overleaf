@@ -22,7 +22,7 @@ function getUser(providerId, externalUserId, callback) {
     )
   }
   const query = _getUserQuery(providerId, externalUserId)
-  User.findOne(query, function(err, user) {
+  User.findOne(query, function (err, user) {
     if (err != null) {
       return callback(err)
     }
@@ -34,25 +34,26 @@ function getUser(providerId, externalUserId, callback) {
 }
 
 function login(providerId, externalUserId, externalData, callback) {
-  ThirdPartyIdentityManager.getUser(providerId, externalUserId, function(
-    err,
-    user
-  ) {
-    if (err != null) {
-      return callback(err)
+  ThirdPartyIdentityManager.getUser(
+    providerId,
+    externalUserId,
+    function (err, user) {
+      if (err != null) {
+        return callback(err)
+      }
+      if (!externalData) {
+        return callback(null, user)
+      }
+      const query = _getUserQuery(providerId, externalUserId)
+      const update = _thirdPartyIdentifierUpdate(
+        user,
+        providerId,
+        externalUserId,
+        externalData
+      )
+      User.findOneAndUpdate(query, update, { new: true }, callback)
     }
-    if (!externalData) {
-      return callback(null, user)
-    }
-    const query = _getUserQuery(providerId, externalUserId)
-    const update = _thirdPartyIdentifierUpdate(
-      user,
-      providerId,
-      externalUserId,
-      externalData
-    )
-    User.findOneAndUpdate(query, update, { new: true }, callback)
-  })
+  )
 }
 
 function link(
@@ -115,7 +116,7 @@ function link(
             userId,
             providerId,
             auditLog,
-            function(err) {
+            function (err) {
               if (err != null) {
                 return callback(err)
               }

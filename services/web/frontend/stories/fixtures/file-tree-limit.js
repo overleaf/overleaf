@@ -4,9 +4,7 @@ const FOLDER_PER_FOLDER = 2
 const MAX_DEPTH = 7
 
 function fakeId() {
-  return Math.random()
-    .toString(16)
-    .replace(/0\./, 'random-test-id-')
+  return Math.random().toString(16).replace(/0\./, 'random-test-id-')
 }
 
 function makeFileRefs(path) {

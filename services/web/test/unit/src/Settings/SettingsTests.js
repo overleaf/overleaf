@@ -11,8 +11,8 @@ function clearSettingsCache() {
   settingsDeps.forEach(dep => delete require.cache[dep])
 }
 
-describe('settings.defaults', function() {
-  it('additional text extensions can be added via config', function() {
+describe('settings.defaults', function () {
+  it('additional text extensions can be added via config', function () {
     clearSettingsCache()
     process.env.ADDITIONAL_TEXT_EXTENSIONS = 'abc, xyz'
     const settings = require('settings-sharelatex')

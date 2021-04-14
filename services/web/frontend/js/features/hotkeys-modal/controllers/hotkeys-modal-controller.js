@@ -5,7 +5,7 @@ import HotkeysModal from '../components/hotkeys-modal'
 
 App.component('hotkeysModal', react2angular(HotkeysModal, undefined))
 
-export default App.controller('HotkeysModalController', function($scope) {
+export default App.controller('HotkeysModalController', function ($scope) {
   $scope.show = false
   $scope.isMac = /Mac/i.test(navigator.platform)
 

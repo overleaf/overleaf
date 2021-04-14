@@ -11,9 +11,9 @@
  */
 import App from '../base'
 
-export default App.factory('validateCaptcha', function() {
+export default App.factory('validateCaptcha', function () {
   let _recaptchaCallbacks = []
-  const onRecaptchaSubmit = function(token) {
+  const onRecaptchaSubmit = function (token) {
     for (let cb of _recaptchaCallbacks) {
       cb(token)
     }
@@ -23,7 +23,7 @@ export default App.factory('validateCaptcha', function() {
   let recaptchaId = null
   const validateCaptcha = (callback, captchaDisabled) => {
     if (callback == null) {
-      callback = function(response) {}
+      callback = function (response) {}
     }
     if (
       typeof grecaptcha === 'undefined' ||

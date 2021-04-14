@@ -5,9 +5,9 @@ import {
   nestOutline
 } from '../../../../frontend/js/features/outline/outline-parser'
 
-describe('OutlineParser', function() {
-  describe('matchOutline', function() {
-    it('matches all levels', function() {
+describe('OutlineParser', function () {
+  describe('matchOutline', function () {
+    it('matches all levels', function () {
       const content = `
       \\book{Book}
       \\part{Part}
@@ -41,7 +41,7 @@ describe('OutlineParser', function() {
       ])
     })
 
-    it('matches display titles', function() {
+    it('matches display titles', function () {
       const content = `
       \\section{\\label{foo} Label before}
       \\section{Label after \\label{foo}}
@@ -59,7 +59,7 @@ describe('OutlineParser', function() {
       ])
     })
 
-    it('removes spurious commands after title definition', function() {
+    it('removes spurious commands after title definition', function () {
       const content = `
       \\section{Plain title} more text \\href{link}{link}
       \\section{\\label{foo} Label before} more text \\href{link}{link}
@@ -71,24 +71,24 @@ describe('OutlineParser', function() {
       ])
     })
 
-    it('matches empty sections', function() {
+    it('matches empty sections', function () {
       const outline = matchOutline('\\section{}')
       expect(outline).to.deep.equal([{ line: 1, title: '', level: 40 }])
     })
 
-    it('matches indented sections', function() {
+    it('matches indented sections', function () {
       const outline = matchOutline('\t\\section{Indented}')
       expect(outline).to.deep.equal([{ line: 1, title: 'Indented', level: 40 }])
     })
 
-    it('matches unnumbered sections', function() {
+    it('matches unnumbered sections', function () {
       const outline = matchOutline('\\section*{Unnumbered}')
       expect(outline).to.deep.equal([
         { line: 1, title: 'Unnumbered', level: 40 }
       ])
     })
 
-    it('matches short titles', function() {
+    it('matches short titles', function () {
       const outline = matchOutline(
         '\\chapter[Short Title For TOC]{Very Long Title for Text}'
       )
@@ -97,7 +97,7 @@ describe('OutlineParser', function() {
       ])
     })
 
-    it('handles spacing', function() {
+    it('handles spacing', function () {
       const content = `
       \\section {Weird Spacing}
       \\section * {Weird Spacing Unnumbered}
@@ -111,7 +111,7 @@ describe('OutlineParser', function() {
       ])
     })
 
-    it("doesn't match commented lines", function() {
+    it("doesn't match commented lines", function () {
       const content = `
       % \\section{I should not appear in the outline}
     `
@@ -119,7 +119,7 @@ describe('OutlineParser', function() {
       expect(outline).to.deep.equal([])
     })
 
-    it("doesn't match inline sections", function() {
+    it("doesn't match inline sections", function () {
       const content = `
       I like to write \\section{inline} on one line.
     `
@@ -128,8 +128,8 @@ describe('OutlineParser', function() {
     })
   })
 
-  describe('nestOutline', function() {
-    it('matches all levels', function() {
+  describe('nestOutline', function () {
+    it('matches all levels', function () {
       const flatOutline = [
         { line: 10, title: 'Book', level: 10 },
         { line: 20, title: 'Part A', level: 20 },

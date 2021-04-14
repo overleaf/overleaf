@@ -16,7 +16,7 @@ export default App.directive('videoPlayState', $parse => ({
     const videoDOMEl = element[0]
     return scope.$watch(
       () => $parse(attrs.videoPlayState)(scope),
-      function(shouldPlay) {
+      function (shouldPlay) {
         if (shouldPlay) {
           videoDOMEl.currentTime = 0
           return videoDOMEl.play()

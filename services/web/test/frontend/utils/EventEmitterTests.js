@@ -15,12 +15,12 @@ import sinon from 'sinon'
 
 import EventEmitter from '../../../frontend/js/utils/EventEmitter'
 
-export default describe('EventEmitter', function() {
-  beforeEach(function() {
+export default describe('EventEmitter', function () {
+  beforeEach(function () {
     return (this.eventEmitter = new EventEmitter())
   })
 
-  it('calls listeners', function() {
+  it('calls listeners', function () {
     const cb1 = sinon.stub()
     const cb2 = sinon.stub()
     this.eventEmitter.on('foo', cb1)
@@ -32,7 +32,7 @@ export default describe('EventEmitter', function() {
     return expect(cb2).to.not.have.been.called
   })
 
-  it('calls multiple listeners', function() {
+  it('calls multiple listeners', function () {
     const cb1 = sinon.stub()
     const cb2 = sinon.stub()
     this.eventEmitter.on('foo', cb1)
@@ -44,7 +44,7 @@ export default describe('EventEmitter', function() {
     return expect(cb2).to.have.been.called
   })
 
-  it('calls listeners with namespace', function() {
+  it('calls listeners with namespace', function () {
     const cb1 = sinon.stub()
     const cb2 = sinon.stub()
     this.eventEmitter.on('foo', cb1)
@@ -56,7 +56,7 @@ export default describe('EventEmitter', function() {
     return expect(cb2).to.have.been.called
   })
 
-  it('removes listeners', function() {
+  it('removes listeners', function () {
     const cb = sinon.stub()
     this.eventEmitter.on('foo', cb)
     this.eventEmitter.off('foo')
@@ -66,7 +66,7 @@ export default describe('EventEmitter', function() {
     return expect(cb).to.not.have.been.called
   })
 
-  it('removes namespaced listeners', function() {
+  it('removes namespaced listeners', function () {
     const cb = sinon.stub()
     this.eventEmitter.on('foo.bar', cb)
     this.eventEmitter.off('foo.bar')
@@ -76,7 +76,7 @@ export default describe('EventEmitter', function() {
     return expect(cb).to.not.have.been.called
   })
 
-  it('does not remove unnamespaced listeners if off called with namespace', function() {
+  it('does not remove unnamespaced listeners if off called with namespace', function () {
     const cb1 = sinon.stub()
     const cb2 = sinon.stub()
     this.eventEmitter.on('foo', cb1)

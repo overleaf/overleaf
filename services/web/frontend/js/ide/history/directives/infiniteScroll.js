@@ -16,7 +16,7 @@ export default App.directive('infiniteScroll', () => ({
     const innerElement = element.find('.infinite-scroll-inner')
     element.css({ 'overflow-y': 'auto' })
 
-    const atEndOfListView = function() {
+    const atEndOfListView = function () {
       if (attrs.infiniteScrollUpwards != null) {
         return atTopOfListView()
       } else {
@@ -32,7 +32,7 @@ export default App.directive('infiniteScroll', () => ({
     const listShorterThanContainer = () =>
       element.height() > innerElement.height()
 
-    var loadUntilFull = function() {
+    var loadUntilFull = function () {
       if (
         (listShorterThanContainer() || atEndOfListView()) &&
         !scope.$eval(attrs.infiniteScrollDisabled)
@@ -44,7 +44,7 @@ export default App.directive('infiniteScroll', () => ({
 
     element.on('scroll', event => loadUntilFull())
 
-    return scope.$watch(attrs.infiniteScrollInitialize, function(value) {
+    return scope.$watch(attrs.infiniteScrollInitialize, function (value) {
       if (value) {
         return loadUntilFull()
       }

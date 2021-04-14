@@ -10,7 +10,7 @@
  * @param {string?} key Key passed to the localStorage function (if any)
  * @param {any?} value Value passed to the localStorage function (if any)
  */
-const callSafe = function(fn, key, value) {
+const callSafe = function (fn, key, value) {
   try {
     return fn(key, value)
   } catch (e) {
@@ -19,19 +19,19 @@ const callSafe = function(fn, key, value) {
   }
 }
 
-const getItem = function(key) {
+const getItem = function (key) {
   return JSON.parse(localStorage.getItem(key))
 }
 
-const setItem = function(key, value) {
+const setItem = function (key, value) {
   localStorage.setItem(key, JSON.stringify(value))
 }
 
-const clear = function() {
+const clear = function () {
   localStorage.clear()
 }
 
-const removeItem = function(key) {
+const removeItem = function (key) {
   return localStorage.removeItem(key)
 }
 

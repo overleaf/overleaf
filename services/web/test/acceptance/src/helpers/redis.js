@@ -23,7 +23,7 @@ const rclient = UserSessionsRedis.client()
 module.exports = {
   getUserSessions(user, callback) {
     if (callback == null) {
-      callback = function(err, sessionsSet) {}
+      callback = function (err, sessionsSet) {}
     }
     return rclient.smembers(
       UserSessionsRedis.sessionSetKey(user),
@@ -33,7 +33,7 @@ module.exports = {
 
   clearUserSessions(user, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
     return rclient.smembers(sessionSetKey, (err, sessionKeys) => {

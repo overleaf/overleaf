@@ -37,7 +37,7 @@ import './components/historyFileTree'
 import './components/historyFileEntity'
 let HistoryManager
 
-export default HistoryManager = (function() {
+export default HistoryManager = (function () {
   HistoryManager = class HistoryManager {
     static initClass() {
       this.prototype.MAX_RECENT_UPDATES_TO_SELECT = 5
@@ -368,13 +368,13 @@ export default HistoryManager = (function() {
           if (previouslySelectedFile != null) {
             fileToSelect = previouslySelectedFile
           } else {
-            let mainFile = _.find(files, function(file) {
+            let mainFile = _.find(files, function (file) {
               return /main\.tex$/.test(file.pathname)
             })
             if (mainFile != null) {
               fileToSelect = mainFile
             } else {
-              let anyTeXFile = _.find(files, function(file) {
+              let anyTeXFile = _.find(files, function (file) {
                 return /\.tex$/.test(file.pathname)
               })
               if (anyTeXFile != null) {
@@ -721,7 +721,7 @@ export default HistoryManager = (function() {
           this.$scope.history.selection.file.text = text
           this.$scope.history.selection.file.loading = false
         })
-        .catch(function() {})
+        .catch(function () {})
     }
 
     reloadDiff() {
@@ -767,7 +767,7 @@ export default HistoryManager = (function() {
           diff.text = text
           diff.highlights = highlights
         })
-        .catch(function() {
+        .catch(function () {
           diff.loading = false
           diff.error = true
         })

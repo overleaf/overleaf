@@ -28,9 +28,9 @@ const ensureRecurlyIsSetup = _.once(() => {
   return true
 })
 
-App.controller('MetricsEmailController', function($scope, $http) {
-  $scope.institutionEmailSubscription = function(institutionId) {
-    var inst = _.find(window.managedInstitutions, function(institution) {
+App.controller('MetricsEmailController', function ($scope, $http) {
+  $scope.institutionEmailSubscription = function (institutionId) {
+    var inst = _.find(window.managedInstitutions, function (institution) {
       return institution.v1Id === parseInt(institutionId)
     })
     if (inst.metricsEmail.optedOutUserIds.includes(window.user_id)) {
@@ -40,7 +40,7 @@ App.controller('MetricsEmailController', function($scope, $http) {
     }
   }
 
-  $scope.changeInstitutionalEmailSubscription = function(institutionId) {
+  $scope.changeInstitutionalEmailSubscription = function (institutionId) {
     $scope.subscriptionChanging = true
     return $http({
       method: 'POST',
@@ -49,30 +49,31 @@ App.controller('MetricsEmailController', function($scope, $http) {
         'X-CSRF-Token': window.csrfToken
       }
     }).then(function successCallback(response) {
-      window.managedInstitutions = _.map(window.managedInstitutions, function(
-        institution
-      ) {
-        if (institution.v1Id === parseInt(institutionId)) {
-          institution.metricsEmail.optedOutUserIds = response.data
+      window.managedInstitutions = _.map(
+        window.managedInstitutions,
+        function (institution) {
+          if (institution.v1Id === parseInt(institutionId)) {
+            institution.metricsEmail.optedOutUserIds = response.data
+          }
+          return institution
         }
-        return institution
-      })
+      )
       $scope.subscriptionChanging = false
     })
   }
 })
 
-App.factory('RecurlyPricing', function($q, MultiCurrencyPricing) {
+App.factory('RecurlyPricing', function ($q, MultiCurrencyPricing) {
   return {
-    loadDisplayPriceWithTax: function(planCode, currency, taxRate) {
+    loadDisplayPriceWithTax: function (planCode, currency, taxRate) {
       if (!ensureRecurlyIsSetup()) return
       const currencySymbol = MultiCurrencyPricing.plans[currency].symbol
       const pricing = recurly.Pricing()
-      return $q(function(resolve, reject) {
+      return $q(function (resolve, reject) {
         pricing
           .plan(planCode, { quantity: 1 })
           .currency(currency)
-          .done(function(price) {
+          .done(function (price) {
             const totalPriceExTax = parseFloat(price.next.total)
             let taxAmmount = totalPriceExTax * taxRate
             if (isNaN(taxAmmount)) {
@@ -89,79 +90,76 @@ App.factory('RecurlyPricing', function($q, MultiCurrencyPricing) {
   }
 })
 
-App.controller('ChangePlanFormController', function(
-  $scope,
-  $modal,
-  RecurlyPricing
-) {
-  if (!ensureRecurlyIsSetup()) return
+App.controller(
+  'ChangePlanFormController',
+  function ($scope, $modal, RecurlyPricing) {
+    if (!ensureRecurlyIsSetup()) return
 
-  $scope.changePlan = () =>
-    $modal.open({
-      templateUrl: 'confirmChangePlanModalTemplate',
-      controller: 'ConfirmChangePlanController',
-      scope: $scope
+    $scope.changePlan = () =>
+      $modal.open({
+        templateUrl: 'confirmChangePlanModalTemplate',
+        controller: 'ConfirmChangePlanController',
+        scope: $scope
+      })
+
+    $scope.$watch('plan', function (plan) {
+      if (!plan) return
+      const planCode = plan.planCode
+      const { currency, taxRate } = window.subscription.recurly
+      $scope.price = '...' // Placeholder while we talk to recurly
+      RecurlyPricing.loadDisplayPriceWithTax(planCode, currency, taxRate).then(
+        price => {
+          $scope.price = price
+        }
+      )
     })
-
-  $scope.$watch('plan', function(plan) {
-    if (!plan) return
-    const planCode = plan.planCode
-    const { currency, taxRate } = window.subscription.recurly
-    $scope.price = '...' // Placeholder while we talk to recurly
-    RecurlyPricing.loadDisplayPriceWithTax(planCode, currency, taxRate).then(
-      price => {
-        $scope.price = price
-      }
-    )
-  })
-})
-
-App.controller('ConfirmChangePlanController', function(
-  $scope,
-  $modalInstance,
-  $http
-) {
-  $scope.confirmChangePlan = function() {
-    const body = {
-      plan_code: $scope.plan.planCode,
-      _csrf: window.csrfToken
-    }
-
-    $scope.inflight = true
-
-    return $http
-      .post(`${SUBSCRIPTION_URL}?origin=confirmChangePlan`, body)
-      .then(() => location.reload())
-      .catch(() => console.log('something went wrong changing plan'))
   }
+)
 
-  return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
-})
-
-App.controller('LeaveGroupModalController', function(
-  $scope,
-  $modalInstance,
-  $http
-) {
-  $scope.confirmLeaveGroup = function() {
-    $scope.inflight = true
-    return $http({
-      url: '/subscription/group/user',
-      method: 'DELETE',
-      params: {
-        subscriptionId: $scope.subscriptionId,
+App.controller(
+  'ConfirmChangePlanController',
+  function ($scope, $modalInstance, $http) {
+    $scope.confirmChangePlan = function () {
+      const body = {
+        plan_code: $scope.plan.planCode,
         _csrf: window.csrfToken
       }
-    })
-      .then(() => location.reload())
-      .catch(() => console.log('something went wrong changing plan'))
+
+      $scope.inflight = true
+
+      return $http
+        .post(`${SUBSCRIPTION_URL}?origin=confirmChangePlan`, body)
+        .then(() => location.reload())
+        .catch(() => console.log('something went wrong changing plan'))
+    }
+
+    return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
   }
+)
 
-  return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
-})
+App.controller(
+  'LeaveGroupModalController',
+  function ($scope, $modalInstance, $http) {
+    $scope.confirmLeaveGroup = function () {
+      $scope.inflight = true
+      return $http({
+        url: '/subscription/group/user',
+        method: 'DELETE',
+        params: {
+          subscriptionId: $scope.subscriptionId,
+          _csrf: window.csrfToken
+        }
+      })
+        .then(() => location.reload())
+        .catch(() => console.log('something went wrong changing plan'))
+    }
 
-App.controller('GroupMembershipController', function($scope, $modal) {
-  $scope.removeSelfFromGroup = function(subscriptionId) {
+    return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
+  }
+)
+
+App.controller('GroupMembershipController', function ($scope, $modal) {
+  $scope.removeSelfFromGroup = function (subscriptionId) {
     $scope.subscriptionId = subscriptionId
     return $modal.open({
       templateUrl: 'LeaveGroupModalTemplate',
@@ -171,7 +169,7 @@ App.controller('GroupMembershipController', function($scope, $modal) {
   }
 })
 
-App.controller('RecurlySubscriptionController', function($scope) {
+App.controller('RecurlySubscriptionController', function ($scope) {
   const recurlyIsSetup = ensureRecurlyIsSetup()
   $scope.showChangePlanButton = recurlyIsSetup && !window.subscription.groupPlan
   if (
@@ -199,69 +197,68 @@ App.controller('RecurlySubscriptionController', function($scope) {
   }
 })
 
-App.controller('RecurlyCancellationController', function(
-  $scope,
-  RecurlyPricing,
-  $http
-) {
-  if (!ensureRecurlyIsSetup()) return
-  const subscription = window.subscription
-  const sevenDaysTime = new Date()
-  sevenDaysTime.setDate(sevenDaysTime.getDate() + 7)
-  const freeTrialEndDate = new Date(subscription.recurly.trial_ends_at)
-  const freeTrialInFuture = freeTrialEndDate > new Date()
-  const freeTrialExpiresUnderSevenDays = freeTrialEndDate < sevenDaysTime
+App.controller(
+  'RecurlyCancellationController',
+  function ($scope, RecurlyPricing, $http) {
+    if (!ensureRecurlyIsSetup()) return
+    const subscription = window.subscription
+    const sevenDaysTime = new Date()
+    sevenDaysTime.setDate(sevenDaysTime.getDate() + 7)
+    const freeTrialEndDate = new Date(subscription.recurly.trial_ends_at)
+    const freeTrialInFuture = freeTrialEndDate > new Date()
+    const freeTrialExpiresUnderSevenDays = freeTrialEndDate < sevenDaysTime
 
-  const isMonthlyCollab =
-    subscription.plan.planCode.indexOf('collaborator') !== -1 &&
-    subscription.plan.planCode.indexOf('ann') === -1 &&
-    !subscription.groupPlan
-  const stillInFreeTrial = freeTrialInFuture && freeTrialExpiresUnderSevenDays
+    const isMonthlyCollab =
+      subscription.plan.planCode.indexOf('collaborator') !== -1 &&
+      subscription.plan.planCode.indexOf('ann') === -1 &&
+      !subscription.groupPlan
+    const stillInFreeTrial = freeTrialInFuture && freeTrialExpiresUnderSevenDays
 
-  if (isMonthlyCollab && stillInFreeTrial) {
-    $scope.showExtendFreeTrial = true
-  } else if (isMonthlyCollab && !stillInFreeTrial) {
-    $scope.showDowngradeToStudent = true
-  } else {
-    $scope.showBasicCancel = true
-  }
-
-  const { currency, taxRate } = window.subscription.recurly
-  $scope.studentPrice = '...' // Placeholder while we talk to recurly
-  RecurlyPricing.loadDisplayPriceWithTax('student', currency, taxRate).then(
-    price => {
-      $scope.studentPrice = price
+    if (isMonthlyCollab && stillInFreeTrial) {
+      $scope.showExtendFreeTrial = true
+    } else if (isMonthlyCollab && !stillInFreeTrial) {
+      $scope.showDowngradeToStudent = true
+    } else {
+      $scope.showBasicCancel = true
     }
-  )
 
-  $scope.downgradeToStudent = function() {
-    const body = {
-      plan_code: 'student',
-      _csrf: window.csrfToken
+    const { currency, taxRate } = window.subscription.recurly
+    $scope.studentPrice = '...' // Placeholder while we talk to recurly
+    RecurlyPricing.loadDisplayPriceWithTax('student', currency, taxRate).then(
+      price => {
+        $scope.studentPrice = price
+      }
+    )
+
+    $scope.downgradeToStudent = function () {
+      const body = {
+        plan_code: 'student',
+        _csrf: window.csrfToken
+      }
+      $scope.inflight = true
+      return $http
+        .post(`${SUBSCRIPTION_URL}?origin=downgradeToStudent`, body)
+        .then(() => location.reload())
+        .catch(() => console.log('something went wrong changing plan'))
     }
-    $scope.inflight = true
-    return $http
-      .post(`${SUBSCRIPTION_URL}?origin=downgradeToStudent`, body)
-      .then(() => location.reload())
-      .catch(() => console.log('something went wrong changing plan'))
-  }
 
-  $scope.cancelSubscription = function() {
-    const body = { _csrf: window.csrfToken }
+    $scope.cancelSubscription = function () {
+      const body = { _csrf: window.csrfToken }
 
-    $scope.inflight = true
-    return $http
-      .post('/user/subscription/cancel', body)
-      .then(() => (location.href = '/user/subscription/canceled'))
-      .catch(() => console.log('something went wrong changing plan'))
-  }
+      $scope.inflight = true
+      return $http
+        .post('/user/subscription/cancel', body)
+        .then(() => (location.href = '/user/subscription/canceled'))
+        .catch(() => console.log('something went wrong changing plan'))
+    }
 
-  $scope.extendTrial = function() {
-    const body = { _csrf: window.csrfToken }
-    $scope.inflight = true
-    return $http
-      .put('/user/subscription/extend', body)
-      .then(() => location.reload())
-      .catch(() => console.log('something went wrong changing plan'))
+    $scope.extendTrial = function () {
+      const body = { _csrf: window.csrfToken }
+      $scope.inflight = true
+      return $http
+        .put('/user/subscription/extend', body)
+        .then(() => location.reload())
+        .catch(() => console.log('something went wrong changing plan'))
+    }
   }
-})
+)

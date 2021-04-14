@@ -22,8 +22,8 @@ const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const tk = require('timekeeper')
 
-describe('OneTimeTokenHandler', function() {
-  beforeEach(function() {
+describe('OneTimeTokenHandler', function () {
+  beforeEach(function () {
     tk.freeze(Date.now()) // freeze the time for these tests
     this.stubbedToken = 'mock-token'
     this.callback = sinon.stub()
@@ -40,17 +40,17 @@ describe('OneTimeTokenHandler', function() {
     }))
   })
 
-  afterEach(function() {
+  afterEach(function () {
     return tk.reset()
   })
 
-  describe('getNewToken', function() {
-    beforeEach(function() {
+  describe('getNewToken', function () {
+    beforeEach(function () {
       return (this.db.tokens.insertOne = sinon.stub().yields())
     })
 
-    describe('normally', function() {
-      beforeEach(function() {
+    describe('normally', function () {
+      beforeEach(function () {
         return this.OneTimeTokenHandler.getNewToken(
           'password',
           'mock-data-to-store',
@@ -58,7 +58,7 @@ describe('OneTimeTokenHandler', function() {
         )
       })
 
-      it('should insert a generated token with a 1 hour expiry', function() {
+      it('should insert a generated token with a 1 hour expiry', function () {
         return this.db.tokens.insertOne
           .calledWith({
             use: 'password',
@@ -70,15 +70,15 @@ describe('OneTimeTokenHandler', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with the token', function() {
+      it('should call the callback with the token', function () {
         return this.callback
           .calledWith(null, this.stubbedToken)
           .should.equal(true)
       })
     })
 
-    describe('with an optional expiresIn parameter', function() {
-      beforeEach(function() {
+    describe('with an optional expiresIn parameter', function () {
+      beforeEach(function () {
         return this.OneTimeTokenHandler.getNewToken(
           'password',
           'mock-data-to-store',
@@ -87,7 +87,7 @@ describe('OneTimeTokenHandler', function() {
         )
       })
 
-      it('should insert a generated token with a custom expiry', function() {
+      it('should insert a generated token with a custom expiry', function () {
         return this.db.tokens.insertOne
           .calledWith({
             use: 'password',
@@ -99,7 +99,7 @@ describe('OneTimeTokenHandler', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with the token', function() {
+      it('should call the callback with the token', function () {
         return this.callback
           .calledWith(null, this.stubbedToken)
           .should.equal(true)
@@ -107,9 +107,9 @@ describe('OneTimeTokenHandler', function() {
     })
   })
 
-  describe('getValueFromTokenAndExpire', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
+  describe('getValueFromTokenAndExpire', function () {
+    describe('successfully', function () {
+      beforeEach(function () {
         this.db.tokens.findOneAndUpdate = sinon
           .stub()
           .yields(null, { value: { data: 'mock-data' } })
@@ -120,7 +120,7 @@ describe('OneTimeTokenHandler', function() {
         )
       })
 
-      it('should expire the token', function() {
+      it('should expire the token', function () {
         return this.db.tokens.findOneAndUpdate
           .calledWith(
             {
@@ -136,13 +136,13 @@ describe('OneTimeTokenHandler', function() {
           .should.equal(true)
       })
 
-      it('should return the data', function() {
+      it('should return the data', function () {
         return this.callback.calledWith(null, 'mock-data').should.equal(true)
       })
     })
 
-    describe('when a valid token is not found', function() {
-      beforeEach(function() {
+    describe('when a valid token is not found', function () {
+      beforeEach(function () {
         this.db.tokens.findOneAndUpdate = sinon
           .stub()
           .yields(null, { value: null })
@@ -153,7 +153,7 @@ describe('OneTimeTokenHandler', function() {
         )
       })
 
-      it('should return a NotFoundError', function() {
+      it('should return a NotFoundError', function () {
         return this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)

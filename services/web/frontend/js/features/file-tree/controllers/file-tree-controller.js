@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash'
 
 import FileTreeRoot from '../components/file-tree-root'
 
-App.controller('ReactFileTreeController', function(
+App.controller('ReactFileTreeController', function (
   $scope,
   $timeout,
   ide

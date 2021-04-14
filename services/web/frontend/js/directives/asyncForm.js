@@ -4,7 +4,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
   controller: [
     '$scope',
     '$location',
-    function($scope, $location) {
+    function ($scope, $location) {
       this.getEmail = () => $scope.email
       this.getEmailFromQuery = () =>
         $location.search().email || $location.search().new_email
@@ -23,7 +23,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
       ctrl.getEmailFromQuery() ||
       attrs.newEmail
 
-    const validateCaptchaIfEnabled = function(callback) {
+    const validateCaptchaIfEnabled = function (callback) {
       if (attrs.captchaActionName) {
         validateCaptchaV3(attrs.captchaActionName)
       }
@@ -34,7 +34,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
       }
     }
 
-    const submitRequest = function(grecaptchaResponse) {
+    const submitRequest = function (grecaptchaResponse) {
       const formData = {}
       for (let data of Array.from(element.serializeArray())) {
         formData[data.name] = data.value
@@ -54,7 +54,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
       return httpRequestFn(element.attr('action'), formData, {
         disableAutoLoginRedirect: true
       })
-        .then(function(httpResponse) {
+        .then(function (httpResponse) {
           const { data, headers } = httpResponse
           scope[attrs.name].inflight = false
           response.success = true
@@ -86,7 +86,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
             location.href = URL.createObjectURL(blob) // Trigger file save
           }
         })
-        .catch(function(httpResponse) {
+        .catch(function (httpResponse) {
           const { data, status } = httpResponse
           scope[attrs.name].inflight = false
           response.success = false
@@ -153,7 +153,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
       return $HTTP_FNS[method.toLowerCase()]
     }
 
-    element.on('submit', function(e) {
+    element.on('submit', function (e) {
       e.preventDefault()
       submit()
     })

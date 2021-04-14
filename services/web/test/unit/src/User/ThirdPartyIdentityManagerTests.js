@@ -4,8 +4,8 @@ const SandboxedModule = require('sandboxed-module')
 const modulePath =
   '../../../../app/src/Features/User/ThirdPartyIdentityManager.js'
 
-describe('ThirdPartyIdentityManager', function() {
-  beforeEach(function() {
+describe('ThirdPartyIdentityManager', function () {
+  beforeEach(function () {
     this.userId = 'a1b2c3'
     this.user = {
       _id: this.userId,
@@ -41,8 +41,8 @@ describe('ThirdPartyIdentityManager', function() {
       }
     })
   })
-  describe('getUser', function() {
-    it('should an error when missing providerId or externalUserId', function(done) {
+  describe('getUser', function () {
+    it('should an error when missing providerId or externalUserId', function (done) {
       this.ThirdPartyIdentityManager.getUser(
         undefined,
         undefined,
@@ -57,12 +57,12 @@ describe('ThirdPartyIdentityManager', function() {
         }
       )
     })
-    describe('when user linked', function() {
-      beforeEach(function() {
+    describe('when user linked', function () {
+      beforeEach(function () {
         this.User.findOne.yields(undefined, this.user)
       })
 
-      it('should return the user', async function() {
+      it('should return the user', async function () {
         this.User.findOne.returns(undefined, this.user)
         const user = await this.ThirdPartyIdentityManager.promises.getUser(
           'google',
@@ -71,7 +71,7 @@ describe('ThirdPartyIdentityManager', function() {
         expect(user).to.deep.equal(this.user)
       })
     })
-    it('should return ThirdPartyUserNotFoundError when no user linked', function(done) {
+    it('should return ThirdPartyUserNotFoundError when no user linked', function (done) {
       this.ThirdPartyIdentityManager.getUser(
         'google',
         'an-id-not-linked',
@@ -83,8 +83,8 @@ describe('ThirdPartyIdentityManager', function() {
       )
     })
   })
-  describe('link', function() {
-    it('should send email alert', async function() {
+  describe('link', function () {
+    it('should send email alert', async function () {
       await this.ThirdPartyIdentityManager.promises.link(
         this.userId,
         'google',
@@ -99,7 +99,7 @@ describe('ThirdPartyIdentityManager', function() {
       )
     })
 
-    it('should update user audit log', async function() {
+    it('should update user audit log', async function () {
       await this.ThirdPartyIdentityManager.promises.link(
         this.userId,
         'google',
@@ -117,9 +117,9 @@ describe('ThirdPartyIdentityManager', function() {
         }
       )
     })
-    describe('errors', function() {
+    describe('errors', function () {
       const anError = new Error('oops')
-      it('should not unlink if the UserAuditLogHandler throws an error', function(done) {
+      it('should not unlink if the UserAuditLogHandler throws an error', function (done) {
         this.UserAuditLogHandler.addEntry.yields(anError)
         this.ThirdPartyIdentityManager.link(
           this.userId,
@@ -135,11 +135,11 @@ describe('ThirdPartyIdentityManager', function() {
           }
         )
       })
-      describe('EmailHandler', function() {
-        beforeEach(function() {
+      describe('EmailHandler', function () {
+        beforeEach(function () {
           this.EmailHandler.sendEmail.yields(anError)
         })
-        it('should log but not return the error', function(done) {
+        it('should log but not return the error', function (done) {
           this.ThirdPartyIdentityManager.link(
             this.userId,
             'google',
@@ -162,8 +162,8 @@ describe('ThirdPartyIdentityManager', function() {
       })
     })
   })
-  describe('unlink', function() {
-    it('should send email alert', async function() {
+  describe('unlink', function () {
+    it('should send email alert', async function () {
       await this.ThirdPartyIdentityManager.promises.unlink(
         this.userId,
         'orcid',
@@ -175,7 +175,7 @@ describe('ThirdPartyIdentityManager', function() {
         'an Orcid account was unlinked from'
       )
     })
-    it('should update user audit log', async function() {
+    it('should update user audit log', async function () {
       await this.ThirdPartyIdentityManager.promises.unlink(
         this.userId,
         'orcid',
@@ -191,9 +191,9 @@ describe('ThirdPartyIdentityManager', function() {
         }
       )
     })
-    describe('errors', function() {
+    describe('errors', function () {
       const anError = new Error('oops')
-      it('should not unlink if the UserAuditLogHandler throws an error', function(done) {
+      it('should not unlink if the UserAuditLogHandler throws an error', function (done) {
         this.UserAuditLogHandler.addEntry.yields(anError)
         this.ThirdPartyIdentityManager.unlink(
           this.userId,
@@ -208,11 +208,11 @@ describe('ThirdPartyIdentityManager', function() {
         )
         expect(this.User.findOneAndUpdate).to.not.have.been.called
       })
-      describe('EmailHandler', function() {
-        beforeEach(function() {
+      describe('EmailHandler', function () {
+        beforeEach(function () {
           this.EmailHandler.sendEmail.yields(anError)
         })
-        it('should log but not return the error', function(done) {
+        it('should log but not return the error', function (done) {
           this.ThirdPartyIdentityManager.unlink(
             this.userId,
             'google',

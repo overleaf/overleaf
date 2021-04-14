@@ -26,7 +26,7 @@ module.exports = ClsiFormatChecker = {
       }
     }
 
-    return async.series(jobs, function(err, problems) {
+    return async.series(jobs, function (err, problems) {
       if (err != null) {
         return callback(err)
       }
@@ -44,7 +44,7 @@ module.exports = ClsiFormatChecker = {
   _checkForConflictingPaths(resources, callback) {
     const paths = resources.map(resource => resource.path)
 
-    const conflicts = _.filter(paths, function(path) {
+    const conflicts = _.filter(paths, function (path) {
       const matchingPaths = _.filter(
         paths,
         checkPath => checkPath.indexOf(path + '/') !== -1
@@ -63,7 +63,7 @@ module.exports = ClsiFormatChecker = {
 
     let totalSize = 0
 
-    let sizedResources = resources.map(function(resource) {
+    let sizedResources = resources.map(function (resource) {
       const result = { path: resource.path }
       if (resource.content != null) {
         result.size = resource.content.replace(/\n/g, '').length
@@ -79,9 +79,7 @@ module.exports = ClsiFormatChecker = {
     if (!tooLarge) {
       return callback()
     } else {
-      sizedResources = _.sortBy(sizedResources, 'size')
-        .reverse()
-        .slice(0, 10)
+      sizedResources = _.sortBy(sizedResources, 'size').reverse().slice(0, 10)
       return callback(null, { resources: sizedResources, totalSize })
     }
   }

@@ -5,8 +5,8 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Referal/ReferalFeatures.js'
 )
 
-describe('ReferalFeatures', function() {
-  beforeEach(function() {
+describe('ReferalFeatures', function () {
+  beforeEach(function () {
     this.ReferalFeatures = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
@@ -22,8 +22,8 @@ describe('ReferalFeatures', function() {
     this.new_user_id = 'new-user-id-123'
   })
 
-  describe('getBonusFeatures', function() {
-    beforeEach(function() {
+  describe('getBonusFeatures', function () {
+    beforeEach(function () {
       this.refered_user_count = 3
       this.Settings.bonus_features = {
         3: {
@@ -41,19 +41,19 @@ describe('ReferalFeatures', function() {
       this.ReferalFeatures.getBonusFeatures(this.user_id, this.callback)
     })
 
-    it('should get the users number of refered user', function() {
+    it('should get the users number of refered user', function () {
       this.User.findOne.calledWith({ _id: this.user_id }).should.equal(true)
     })
 
-    it('should call the callback with the features', function() {
+    it('should call the callback with the features', function () {
       this.callback
         .calledWith(null, this.Settings.bonus_features[3])
         .should.equal(true)
     })
   })
 
-  describe('when the user is not at a bonus level', function() {
-    beforeEach(function() {
+  describe('when the user is not at a bonus level', function () {
+    beforeEach(function () {
       this.refered_user_count = 0
       this.Settings.bonus_features = {
         1: {
@@ -68,11 +68,11 @@ describe('ReferalFeatures', function() {
       this.ReferalFeatures.getBonusFeatures(this.user_id, this.callback)
     })
 
-    it('should get the users number of refered user', function() {
+    it('should get the users number of refered user', function () {
       this.User.findOne.calledWith({ _id: this.user_id }).should.equal(true)
     })
 
-    it('should call the callback with no features', function() {
+    it('should call the callback with no features', function () {
       this.callback.calledWith(null, {}).should.equal(true)
     })
   })

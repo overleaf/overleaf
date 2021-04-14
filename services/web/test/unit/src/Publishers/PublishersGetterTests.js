@@ -19,8 +19,8 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Publishers/PublishersGetter.js'
 )
 
-describe('PublishersGetter', function() {
-  beforeEach(function() {
+describe('PublishersGetter', function () {
+  beforeEach(function () {
     this.publisher = {
       _id: 'mock-publsiher-id',
       slug: 'ieee',
@@ -50,8 +50,8 @@ describe('PublishersGetter', function() {
     return (this.userId = '12345abcde')
   })
 
-  describe('getManagedPublishers', function() {
-    it('fetches v1 data before returning publisher list', function(done) {
+  describe('getManagedPublishers', function () {
+    it('fetches v1 data before returning publisher list', function (done) {
       return this.PublishersGetter.getManagedPublishers(
         this.userId,
         (error, publishers) => {

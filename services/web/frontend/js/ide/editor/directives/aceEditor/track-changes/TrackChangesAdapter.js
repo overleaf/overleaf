@@ -200,10 +200,7 @@ class TrackChangesAdapter {
   }
 
   shareJsOffsetToRowColumn(offset) {
-    const lines = this.editor
-      .getSession()
-      .getDocument()
-      .getAllLines()
+    const lines = this.editor.getSession().getDocument().getAllLines()
     return EditorShareJsCodec.shareJsOffsetToRowColumn(offset, lines)
   }
 
@@ -239,8 +236,8 @@ class TrackChangesAdapter {
     //  though. This is the code we need to trick:
     //   var range = marker.range.clipRows(config.firstRow, config.lastRow);
     //   if (range.isEmpty()) continue;
-    ace_range.clipRows = function(first_row, last_row) {
-      this.isEmpty = function() {
+    ace_range.clipRows = function (first_row, last_row) {
+      this.isEmpty = function () {
         return first_row > this.end.row || last_row < this.start.row
       }
       return this

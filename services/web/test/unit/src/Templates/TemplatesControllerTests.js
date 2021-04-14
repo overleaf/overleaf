@@ -18,8 +18,8 @@ const ProjectHelper = require('../../../../app/src/Features/Project/ProjectHelpe
 
 const modulePath = '../../../../app/src/Features/Templates/TemplatesController'
 
-describe('TemplatesController', function() {
-  beforeEach(function() {
+describe('TemplatesController', function () {
+  beforeEach(function () {
     this.user_id = 'user-id'
     this.TemplatesController = SandboxedModule.require(modulePath, {
       requires: {
@@ -52,9 +52,9 @@ describe('TemplatesController', function() {
     return (this.res = { redirect: sinon.stub() })
   })
 
-  describe('createProjectFromV1Template', function() {
-    describe('on success', function() {
-      beforeEach(function() {
+  describe('createProjectFromV1Template', function () {
+    describe('on success', function () {
+      beforeEach(function () {
         this.project = { _id: 'project-id' }
         this.TemplatesManager.createProjectFromV1Template.yields(
           null,
@@ -67,7 +67,7 @@ describe('TemplatesController', function() {
         )
       })
 
-      it('should call TemplatesManager', function() {
+      it('should call TemplatesManager', function () {
         return this.TemplatesManager.createProjectFromV1Template.should.have.been.calledWithMatch(
           'brand-variation-id',
           'compiler',
@@ -79,19 +79,19 @@ describe('TemplatesController', function() {
         )
       })
 
-      it('should redirect to project', function() {
+      it('should redirect to project', function () {
         return this.res.redirect.should.have.been.calledWith(
           '/project/project-id'
         )
       })
 
-      it('should delete session', function() {
+      it('should delete session', function () {
         return expect(this.req.session.templateData).to.be.undefined
       })
     })
 
-    describe('on error', function() {
-      beforeEach(function() {
+    describe('on error', function () {
+      beforeEach(function () {
         this.TemplatesManager.createProjectFromV1Template.yields('error')
         return this.TemplatesController.createProjectFromV1Template(
           this.req,
@@ -100,11 +100,11 @@ describe('TemplatesController', function() {
         )
       })
 
-      it('should call next with error', function() {
+      it('should call next with error', function () {
         return this.next.should.have.been.calledWith('error')
       })
 
-      it('should not redirect', function() {
+      it('should not redirect', function () {
         return this.res.redirect.called.should.equal(false)
       })
     })

@@ -40,7 +40,7 @@ module.exports = {
   enableValidationToken(sessionStore) {
     // generate an identifier from the sessionID for every new session
     const originalGenerate = sessionStore.generate
-    sessionStore.generate = function(req) {
+    sessionStore.generate = function (req) {
       originalGenerate(req)
       // add the validation token as a property that cannot be overwritten
       Object.defineProperty(req.session, 'validationToken', {

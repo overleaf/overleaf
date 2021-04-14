@@ -38,7 +38,7 @@ module.exports = {
       json: req.body,
       timeout: TEN_SECONDS
     })
-      .on('error', function(error) {
+      .on('error', function (error) {
         logger.error({ err: error }, 'Spelling API error')
         return res.status(500).end()
       })

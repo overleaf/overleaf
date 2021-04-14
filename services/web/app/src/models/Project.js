@@ -118,7 +118,7 @@ const ProjectSchema = new Schema({
   deferredTpdsFlushCounter: { type: Number }
 })
 
-ProjectSchema.statics.getProject = function(projectOrId, fields, callback) {
+ProjectSchema.statics.getProject = function (projectOrId, fields, callback) {
   if (projectOrId._id != null) {
     callback(null, projectOrId)
   } else {

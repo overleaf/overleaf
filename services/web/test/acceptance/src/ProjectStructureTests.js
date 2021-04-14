@@ -15,15 +15,15 @@ const MockDocUpdaterApiClass = require('./mocks/MockDocUpdaterApi')
 
 let MockDocStoreApi, MockDocUpdaterApi
 
-before(function() {
+before(function () {
   MockDocUpdaterApi = MockDocUpdaterApiClass.instance()
   MockDocStoreApi = MockDocStoreApiClass.instance()
 })
 
-describe('ProjectStructureChanges', function() {
+describe('ProjectStructureChanges', function () {
   let owner
 
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     owner = new User()
     owner.login(done)
   })
@@ -185,17 +185,17 @@ describe('ProjectStructureChanges', function() {
     })
   }
 
-  describe('creating a project from the example template', function() {
+  describe('creating a project from the example template', function () {
     let exampleProjectId
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       createExampleProject(owner, (err, projectId) => {
         exampleProjectId = projectId
         done(err)
       })
     })
 
-    it('should version creating a doc and a file', function() {
+    it('should version creating a doc and a file', function () {
       const { updates, version } = MockDocUpdaterApi.getProjectStructureUpdates(
         exampleProjectId
       )
@@ -217,10 +217,10 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('duplicating a project', function() {
+  describe('duplicating a project', function () {
     let dupProjectId
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       createExampleProject(owner, (err, projectId) => {
         if (err) {
           return done(err)
@@ -246,7 +246,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version the docs and files created', function() {
+    it('should version the docs and files created', function () {
       const { updates, version } = MockDocUpdaterApi.getProjectStructureUpdates(
         dupProjectId
       )
@@ -268,10 +268,10 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('adding a doc', function() {
+  describe('adding a doc', function () {
     let exampleProjectId, oldVersion
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       createExampleProject(owner, (err, projectId) => {
         if (err) {
           return done(err)
@@ -289,7 +289,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version the doc added', function(done) {
+    it('should version the doc added', function (done) {
       const {
         updates,
         version: newVersion
@@ -311,10 +311,10 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('uploading a project', function() {
+  describe('uploading a project', function () {
     let exampleProjectId
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       uploadExampleProject(owner, 'test_project.zip', (err, projectId) => {
         if (err) {
           return done(err)
@@ -324,7 +324,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version the docs and files created', function() {
+    it('should version the docs and files created', function () {
       const { updates, version } = MockDocUpdaterApi.getProjectStructureUpdates(
         exampleProjectId
       )
@@ -341,11 +341,11 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('uploading a project with a name', function() {
+  describe('uploading a project with a name', function () {
     let exampleProjectId
     const testProjectName = 'wombat'
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       uploadExampleProject(
         owner,
         'test_project_with_name.zip',
@@ -359,7 +359,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should set the project name from the zip contents', function(done) {
+    it('should set the project name from the zip contents', function (done) {
       ProjectGetter.getProject(exampleProjectId, (error, project) => {
         expect(error).not.to.exist
         expect(project.name).to.equal(testProjectName)
@@ -368,11 +368,11 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('uploading a project with an invalid name', function() {
+  describe('uploading a project with an invalid name', function () {
     let exampleProjectId
     const testProjectMatch = /^bad[^\\]+name$/
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       uploadExampleProject(
         owner,
         'test_project_with_invalid_name.zip',
@@ -386,7 +386,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should set the project name from the zip contents', function(done) {
+    it('should set the project name from the zip contents', function (done) {
       ProjectGetter.getProject(exampleProjectId, (error, project) => {
         expect(error).not.to.exist
         expect(project.name).to.match(testProjectMatch)
@@ -395,10 +395,10 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('uploading an empty zipfile', function() {
+  describe('uploading an empty zipfile', function () {
     let res
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       uploadExampleProject(
         owner,
         'test_project_empty.zip',
@@ -413,15 +413,15 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should fail with 422 error', function() {
+    it('should fail with 422 error', function () {
       expect(res.statusCode).to.equal(422)
     })
   })
 
-  describe('uploading a zipfile containing only empty directories', function() {
+  describe('uploading a zipfile containing only empty directories', function () {
     let res
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       uploadExampleProject(
         owner,
         'test_project_with_empty_folder.zip',
@@ -437,15 +437,15 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should fail with 422 error', function() {
+    it('should fail with 422 error', function () {
       expect(res.statusCode).to.equal(422)
     })
   })
 
-  describe('uploading a project with a shared top-level folder', function() {
+  describe('uploading a project with a shared top-level folder', function () {
     let exampleProjectId
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       uploadExampleProject(
         owner,
         'test_project_with_shared_top_level_folder.zip',
@@ -459,7 +459,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should not create the top-level folder', function(done) {
+    it('should not create the top-level folder', function (done) {
       ProjectGetter.getProject(exampleProjectId, (error, project) => {
         expect(error).not.to.exist
         expect(project.rootFolder[0].folders.length).to.equal(0)
@@ -469,10 +469,10 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('uploading a project with backslashes in the path names', function() {
+  describe('uploading a project with backslashes in the path names', function () {
     let exampleProjectId
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       uploadExampleProject(
         owner,
         'test_project_with_backslash_in_filename.zip',
@@ -486,7 +486,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should treat the backslash as a directory separator', function(done) {
+    it('should treat the backslash as a directory separator', function (done) {
       ProjectGetter.getProject(exampleProjectId, (error, project) => {
         expect(error).not.to.exist
         expect(project.rootFolder[0].folders[0].name).to.equal('styles')
@@ -496,9 +496,9 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('uploading a project with files in different encodings', function() {
+  describe('uploading a project with files in different encodings', function () {
     let updates
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       uploadExampleProject(owner, 'charsets/charsets.zip', (err, projectId) => {
         if (err) {
           return done(err)
@@ -510,7 +510,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should correctly parse windows-1252', function() {
+    it('should correctly parse windows-1252', function () {
       const update = _.find(
         updates,
         update => update.pathname === '/test-german-windows-1252.tex'
@@ -520,7 +520,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should correctly parse German utf8', function() {
+    it('should correctly parse German utf8', function () {
       const update = _.find(
         updates,
         update => update.pathname === '/test-german-utf8x.tex'
@@ -530,7 +530,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should correctly parse little-endian utf16', function() {
+    it('should correctly parse little-endian utf16', function () {
       const update = _.find(
         updates,
         update => update.pathname === '/test-greek-utf16-le-bom.tex'
@@ -540,7 +540,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should correctly parse Greek utf8', function() {
+    it('should correctly parse Greek utf8', function () {
       const update = _.find(
         updates,
         update => update.pathname === '/test-greek-utf8x.tex'
@@ -551,10 +551,10 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('uploading a file', function() {
+  describe('uploading a file', function () {
     let exampleProjectId, oldVersion, rootFolderId
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       createExampleProject(owner, (err, projectId, folderId) => {
         if (err) {
           return done(err)
@@ -574,7 +574,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version a newly uploaded file', function(done) {
+    it('should version a newly uploaded file', function (done) {
       const { updates, version } = MockDocUpdaterApi.getProjectStructureUpdates(
         exampleProjectId
       )
@@ -589,7 +589,7 @@ describe('ProjectStructureChanges', function() {
       verifyVersionIncremented(exampleProjectId, oldVersion, version, 1, done)
     })
 
-    it('should version a replacement file', function(done) {
+    it('should version a replacement file', function (done) {
       MockDocUpdaterApi.reset()
 
       uploadFile(
@@ -627,14 +627,14 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('moving entities', function() {
+  describe('moving entities', function () {
     let exampleProjectId,
       oldVersion,
       exampleDocId,
       exampleFileId,
       exampleFolderId
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       createExampleProject(owner, (err, projectId, rootFolderId) => {
         if (err) {
           return done(err)
@@ -670,7 +670,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version moving a doc', function(done) {
+    it('should version moving a doc', function (done) {
       moveItem(
         owner,
         exampleProjectId,
@@ -701,7 +701,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should version moving a file', function(done) {
+    it('should version moving a file', function (done) {
       moveItem(
         owner,
         exampleProjectId,
@@ -732,7 +732,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should version moving a folder', function(done) {
+    it('should version moving a folder', function (done) {
       moveItem(
         owner,
         exampleProjectId,
@@ -792,14 +792,14 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('renaming entities', function() {
+  describe('renaming entities', function () {
     let exampleProjectId,
       exampleDocId,
       exampleFileId,
       exampleFolderId,
       oldVersion
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       createExampleProject(owner, (err, projectId, rootFolderId) => {
         if (err) {
           return done(err)
@@ -841,7 +841,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version renaming a doc', function(done) {
+    it('should version renaming a doc', function (done) {
       renameItem(
         owner,
         exampleProjectId,
@@ -871,7 +871,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should version renaming a file', function(done) {
+    it('should version renaming a file', function (done) {
       renameItem(
         owner,
         exampleProjectId,
@@ -901,7 +901,7 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    it('should version renaming a folder', function(done) {
+    it('should version renaming a folder', function (done) {
       renameItem(
         owner,
         exampleProjectId,
@@ -935,10 +935,10 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('deleting entities', function() {
+  describe('deleting entities', function () {
     let exampleProjectId, oldVersion, exampleFolderId
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       createExampleProject(owner, (err, projectId) => {
         if (err) {
           return done(err)
@@ -978,7 +978,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version deleting a folder', function(done) {
+    it('should version deleting a folder', function (done) {
       deleteItem(owner, exampleProjectId, 'folder', exampleFolderId, () => {
         const {
           updates,
@@ -999,8 +999,8 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('deleting docs', function() {
-    beforeEach(function(done) {
+  describe('deleting docs', function () {
+    beforeEach(function (done) {
       createExampleProject(owner, (err, projectId) => {
         if (err) {
           return done(err)
@@ -1032,7 +1032,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should pass the doc name to docstore', function(done) {
+    it('should pass the doc name to docstore', function (done) {
       deleteItem(
         owner,
         this.exampleProjectId,
@@ -1048,8 +1048,8 @@ describe('ProjectStructureChanges', function() {
       )
     })
 
-    describe('when rootDoc_id matches doc being deleted', function() {
-      beforeEach(function(done) {
+    describe('when rootDoc_id matches doc being deleted', function () {
+      beforeEach(function (done) {
         Project.updateOne(
           { _id: this.exampleProjectId },
           { $set: { rootDoc_id: this.exampleDocId } },
@@ -1057,7 +1057,7 @@ describe('ProjectStructureChanges', function() {
         )
       })
 
-      it('should clear rootDoc_id', function(done) {
+      it('should clear rootDoc_id', function (done) {
         deleteItem(
           owner,
           this.exampleProjectId,
@@ -1079,8 +1079,8 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    describe('when rootDoc_id does not match doc being deleted', function() {
-      beforeEach(function(done) {
+    describe('when rootDoc_id does not match doc being deleted', function () {
+      beforeEach(function (done) {
         this.exampleRootDocId = new ObjectId()
         Project.updateOne(
           { _id: this.exampleProjectId },
@@ -1089,7 +1089,7 @@ describe('ProjectStructureChanges', function() {
         )
       })
 
-      it('should not clear rootDoc_id', function(done) {
+      it('should not clear rootDoc_id', function (done) {
         deleteItem(
           owner,
           this.exampleProjectId,
@@ -1114,10 +1114,10 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('tpds', function() {
+  describe('tpds', function () {
     let projectName, exampleProjectId, oldVersion, rootFolderId
 
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       projectName = `tpds-project-${new ObjectId().toString()}`
       owner.createProject(projectName, (error, projectId) => {
         if (error) {
@@ -1138,7 +1138,7 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    it('should version adding a doc', function(done) {
+    it('should version adding a doc', function (done) {
       const texFile = fs.createReadStream(
         Path.resolve(Path.join(__dirname, '..', 'files', 'test.tex'))
       )
@@ -1182,7 +1182,7 @@ describe('ProjectStructureChanges', function() {
       texFile.pipe(req)
     })
 
-    it('should version adding a new file', function(done) {
+    it('should version adding a new file', function (done) {
       const imageFile = fs.createReadStream(
         Path.resolve(Path.join(__dirname, '..', 'files', '1pixel.png'))
       )
@@ -1226,8 +1226,8 @@ describe('ProjectStructureChanges', function() {
       imageFile.pipe(req)
     })
 
-    describe('when there are files in the project', function() {
-      beforeEach(function(done) {
+    describe('when there are files in the project', function () {
+      beforeEach(function (done) {
         uploadExampleFile(owner, exampleProjectId, rootFolderId, () => {
           createExampleDoc(owner, exampleProjectId, () => {
             ProjectGetter.getProject(exampleProjectId, (error, project) => {
@@ -1242,7 +1242,7 @@ describe('ProjectStructureChanges', function() {
         })
       })
 
-      it('should version replacing a file', function(done) {
+      it('should version replacing a file', function (done) {
         const imageFile = fs.createReadStream(
           Path.resolve(Path.join(__dirname, '..', 'files', '2pixel.png'))
         )
@@ -1295,7 +1295,7 @@ describe('ProjectStructureChanges', function() {
         imageFile.pipe(req)
       })
 
-      it('should version deleting a doc', function(done) {
+      it('should version deleting a doc', function (done) {
         owner.request.delete(
           {
             uri: `/user/${owner._id}/update/${projectName}/new.tex`,
@@ -1337,9 +1337,9 @@ describe('ProjectStructureChanges', function() {
     })
   })
 
-  describe('uploading a document', function() {
+  describe('uploading a document', function () {
     let exampleProjectId, rootFolderId
-    beforeEach(function(done) {
+    beforeEach(function (done) {
       createExampleProject(owner, (err, projectId, folderId) => {
         if (err) {
           return done(err)
@@ -1351,8 +1351,8 @@ describe('ProjectStructureChanges', function() {
       })
     })
 
-    describe('with an unusual character set', function() {
-      it('should correctly handle utf16-le data', function(done) {
+    describe('with an unusual character set', function () {
+      it('should correctly handle utf16-le data', function (done) {
         uploadFile(
           owner,
           exampleProjectId,
@@ -1376,7 +1376,7 @@ describe('ProjectStructureChanges', function() {
         )
       })
 
-      it('should correctly handle windows1252/iso-8859-1/latin1 data', function(done) {
+      it('should correctly handle windows1252/iso-8859-1/latin1 data', function (done) {
         uploadFile(
           owner,
           exampleProjectId,

@@ -5,24 +5,24 @@ import { render, screen } from '@testing-library/react'
 import Message from '../../../../../frontend/js/features/chat/components/message'
 import { stubMathJax, tearDownMathJaxStubs } from './stubs'
 
-describe('<Message />', function() {
+describe('<Message />', function () {
   const currentUser = {
     id: 'fake_user',
     first_name: 'fake_user_first_name',
     email: 'fake@example.com'
   }
 
-  beforeEach(function() {
+  beforeEach(function () {
     window.user = currentUser
     stubMathJax()
   })
 
-  afterEach(function() {
+  afterEach(function () {
     delete window.user
     tearDownMathJaxStubs()
   })
 
-  it('renders a basic message', function() {
+  it('renders a basic message', function () {
     const message = {
       contents: ['a message'],
       user: currentUser
@@ -33,7 +33,7 @@ describe('<Message />', function() {
     screen.getByText('a message')
   })
 
-  it('renders a message with multiple contents', function() {
+  it('renders a message with multiple contents', function () {
     const message = {
       contents: ['a message', 'another message'],
       user: currentUser
@@ -45,7 +45,7 @@ describe('<Message />', function() {
     screen.getByText('another message')
   })
 
-  it('renders HTML links within messages', function() {
+  it('renders HTML links within messages', function () {
     const message = {
       contents: [
         'a message with a <a href="https://overleaf.com">link to Overleaf</a>'
@@ -58,13 +58,13 @@ describe('<Message />', function() {
     screen.getByRole('link', { name: 'https://overleaf.com' })
   })
 
-  describe('when the message is from the user themselves', function() {
+  describe('when the message is from the user themselves', function () {
     const message = {
       contents: ['a message'],
       user: currentUser
     }
 
-    it('does not render the user name nor the email', function() {
+    it('does not render the user name nor the email', function () {
       render(<Message userId={currentUser.id} message={message} />)
 
       expect(screen.queryByText(currentUser.first_name)).to.not.exist
@@ -72,7 +72,7 @@ describe('<Message />', function() {
     })
   })
 
-  describe('when the message is from other user', function() {
+  describe('when the message is from other user', function () {
     const otherUser = {
       id: 'other_user',
       first_name: 'other_user_first_name'
@@ -83,13 +83,13 @@ describe('<Message />', function() {
       user: otherUser
     }
 
-    it('should render the other user name', function() {
+    it('should render the other user name', function () {
       render(<Message userId={currentUser.id} message={message} />)
 
       screen.getByText(otherUser.first_name)
     })
 
-    it('should render the other user email when their name is not available', function() {
+    it('should render the other user email when their name is not available', function () {
       const msg = {
         contents: message.contents,
         user: {

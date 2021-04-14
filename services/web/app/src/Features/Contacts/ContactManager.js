@@ -23,7 +23,7 @@ module.exports = ContactManager = {
       options = { limits: 50 }
     }
     if (callback == null) {
-      callback = function(error, contacts) {}
+      callback = function (error, contacts) {}
     }
     const url = `${settings.apis.contacts.url}/user/${user_id}/contacts`
     return request.get(
@@ -33,7 +33,7 @@ module.exports = ContactManager = {
         json: true,
         jar: false
       },
-      function(error, res, data) {
+      function (error, res, data) {
         if (error != null) {
           return callback(error)
         }
@@ -55,7 +55,7 @@ module.exports = ContactManager = {
 
   addContact(user_id, contact_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const url = `${settings.apis.contacts.url}/user/${user_id}/contacts`
     return request.post(
@@ -66,7 +66,7 @@ module.exports = ContactManager = {
         },
         jar: false
       },
-      function(error, res, data) {
+      function (error, res, data) {
         if (error != null) {
           return callback(error)
         }

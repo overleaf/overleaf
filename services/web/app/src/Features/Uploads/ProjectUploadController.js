@@ -40,8 +40,8 @@ module.exports = ProjectUploadController = {
       user_id,
       name,
       path,
-      function(error, project) {
-        fs.unlink(path, function() {})
+      function (error, project) {
+        fs.unlink(path, function () {})
         timer.done()
         if (error != null) {
           logger.error(
@@ -88,8 +88,8 @@ module.exports = ProjectUploadController = {
       name,
       path,
       true,
-      function(error, entity) {
-        fs.unlink(path, function() {})
+      function (error, entity) {
+        fs.unlink(path, function () {})
         timer.done()
         if (error != null) {
           logger.error(
@@ -132,7 +132,7 @@ module.exports = ProjectUploadController = {
         .status(500)
         .json({ success: false, error: req.i18n.translate('upload_failed') })
     }
-    return upload.single('qqfile')(req, res, function(err) {
+    return upload.single('qqfile')(req, res, function (err) {
       if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
         return res
           .status(422)

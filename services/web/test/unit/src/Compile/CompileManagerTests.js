@@ -17,8 +17,8 @@ const { assert, expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Compile/CompileManager.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('CompileManager', function() {
-  beforeEach(function() {
+describe('CompileManager', function () {
+  beforeEach(function () {
     let Timer
     this.rateLimitGetStub = sinon.stub()
     const { rateLimitGetStub } = this
@@ -40,7 +40,7 @@ describe('CompileManager', function() {
         './ClsiManager': (this.ClsiManager = {}),
         '../../infrastructure/RateLimiter': this.ratelimiter,
         '@overleaf/metrics': (this.Metrics = {
-          Timer: (Timer = (function() {
+          Timer: (Timer = (function () {
             Timer = class Timer {
               static initClass() {
                 this.prototype.done = sinon.stub()
@@ -61,8 +61,8 @@ describe('CompileManager', function() {
     })
   })
 
-  describe('compile', function() {
-    beforeEach(function() {
+  describe('compile', function () {
+    beforeEach(function () {
       this.CompileManager._checkIfRecentlyCompiled = sinon
         .stub()
         .callsArgWith(2, null, false)
@@ -83,8 +83,8 @@ describe('CompileManager', function() {
         ))
     })
 
-    describe('succesfully', function() {
-      beforeEach(function() {
+    describe('succesfully', function () {
+      beforeEach(function () {
         this.CompileManager._checkIfAutoCompileLimitHasBeenHit = (
           isAutoCompile,
           compileGroup,
@@ -98,25 +98,25 @@ describe('CompileManager', function() {
         )
       })
 
-      it('should check the project has not been recently compiled', function() {
+      it('should check the project has not been recently compiled', function () {
         return this.CompileManager._checkIfRecentlyCompiled
           .calledWith(this.project_id, this.user_id)
           .should.equal(true)
       })
 
-      it('should ensure that the root document is set', function() {
+      it('should ensure that the root document is set', function () {
         return this.ProjectRootDocManager.ensureRootDocumentIsSet
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
-      it('should get the project compile limits', function() {
+      it('should get the project compile limits', function () {
         return this.CompileManager.getProjectCompileLimits
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
-      it('should run the compile with the compile limits', function() {
+      it('should run the compile with the compile limits', function () {
         return this.ClsiManager.sendRequest
           .calledWith(this.project_id, this.user_id, {
             timeout: this.limits.timeout
@@ -124,19 +124,19 @@ describe('CompileManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with the output', function() {
+      it('should call the callback with the output', function () {
         return this.callback
           .calledWith(null, this.status, this.outputFiles, this.output)
           .should.equal(true)
       })
 
-      it('should time the compile', function() {
+      it('should time the compile', function () {
         return this.Metrics.Timer.prototype.done.called.should.equal(true)
       })
     })
 
-    describe('when the project has been recently compiled', function() {
-      it('should return', function(done) {
+    describe('when the project has been recently compiled', function () {
+      it('should return', function (done) {
         this.CompileManager._checkIfAutoCompileLimitHasBeenHit = (
           isAutoCompile,
           compileGroup,
@@ -157,8 +157,8 @@ describe('CompileManager', function() {
       })
     })
 
-    describe('should check the rate limit', function() {
-      it('should return', function(done) {
+    describe('should check the rate limit', function () {
+      it('should return', function (done) {
         this.CompileManager._checkIfAutoCompileLimitHasBeenHit = sinon
           .stub()
           .callsArgWith(2, null, false)
@@ -175,8 +175,8 @@ describe('CompileManager', function() {
     })
   })
 
-  describe('getProjectCompileLimits', function() {
-    beforeEach(function() {
+  describe('getProjectCompileLimits', function () {
+    beforeEach(function () {
       this.features = {
         compileTimeout: (this.timeout = 42),
         compileGroup: (this.group = 'priority')
@@ -197,13 +197,13 @@ describe('CompileManager', function() {
       )
     })
 
-    it('should look up the owner of the project', function() {
+    it('should look up the owner of the project', function () {
       return this.ProjectGetter.getProject
         .calledWith(this.project_id, { owner_ref: 1 })
         .should.equal(true)
     })
 
-    it("should look up the owner's features", function() {
+    it("should look up the owner's features", function () {
       return this.UserGetter.getUser
         .calledWith(this.project.owner_ref, {
           alphaProgram: 1,
@@ -213,7 +213,7 @@ describe('CompileManager', function() {
         .should.equal(true)
     })
 
-    it('should return the limits', function() {
+    it('should return the limits', function () {
       return this.callback
         .calledWith(null, {
           timeout: this.timeout,
@@ -223,8 +223,8 @@ describe('CompileManager', function() {
     })
   })
 
-  describe('deleteAuxFiles', function() {
-    beforeEach(function() {
+  describe('deleteAuxFiles', function () {
+    beforeEach(function () {
       this.CompileManager.getProjectCompileLimits = sinon
         .stub()
         .callsArgWith(
@@ -240,26 +240,26 @@ describe('CompileManager', function() {
       )
     })
 
-    it('should look up the compile group to use', function() {
+    it('should look up the compile group to use', function () {
       return this.CompileManager.getProjectCompileLimits
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    it('should delete the aux files', function() {
+    it('should delete the aux files', function () {
       return this.ClsiManager.deleteAuxFiles
         .calledWith(this.project_id, this.user_id, this.limits)
         .should.equal(true)
     })
 
-    it('should call the callback', function() {
+    it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })
 
-  describe('_checkIfRecentlyCompiled', function() {
-    describe('when the key exists in redis', function() {
-      beforeEach(function() {
+  describe('_checkIfRecentlyCompiled', function () {
+    describe('when the key exists in redis', function () {
+      beforeEach(function () {
         this.rclient.set = sinon.stub().callsArgWith(5, null, null)
         return this.CompileManager._checkIfRecentlyCompiled(
           this.project_id,
@@ -268,7 +268,7 @@ describe('CompileManager', function() {
         )
       })
 
-      it('should try to set the key', function() {
+      it('should try to set the key', function () {
         return this.rclient.set
           .calledWith(
             `compile:${this.project_id}:${this.user_id}`,
@@ -280,13 +280,13 @@ describe('CompileManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with true', function() {
+      it('should call the callback with true', function () {
         return this.callback.calledWith(null, true).should.equal(true)
       })
     })
 
-    describe('when the key does not exist in redis', function() {
-      beforeEach(function() {
+    describe('when the key does not exist in redis', function () {
+      beforeEach(function () {
         this.rclient.set = sinon.stub().callsArgWith(5, null, 'OK')
         return this.CompileManager._checkIfRecentlyCompiled(
           this.project_id,
@@ -295,7 +295,7 @@ describe('CompileManager', function() {
         )
       })
 
-      it('should try to set the key', function() {
+      it('should try to set the key', function () {
         return this.rclient.set
           .calledWith(
             `compile:${this.project_id}:${this.user_id}`,
@@ -307,14 +307,14 @@ describe('CompileManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with false', function() {
+      it('should call the callback with false', function () {
         return this.callback.calledWith(null, false).should.equal(true)
       })
     })
   })
 
-  describe('_checkIfAutoCompileLimitHasBeenHit', function() {
-    it('should be able to compile if it is not an autocompile', function(done) {
+  describe('_checkIfAutoCompileLimitHasBeenHit', function () {
+    it('should be able to compile if it is not an autocompile', function (done) {
       this.ratelimiter.addCount.callsArgWith(2, null, true)
       return this.CompileManager._checkIfAutoCompileLimitHasBeenHit(
         false,
@@ -326,7 +326,7 @@ describe('CompileManager', function() {
       )
     })
 
-    it('should be able to compile if rate limit has remianing', function(done) {
+    it('should be able to compile if rate limit has remianing', function (done) {
       this.ratelimiter.addCount.callsArgWith(1, null, true)
       return this.CompileManager._checkIfAutoCompileLimitHasBeenHit(
         true,
@@ -343,7 +343,7 @@ describe('CompileManager', function() {
       )
     })
 
-    it('should be not able to compile if rate limit has no remianing', function(done) {
+    it('should be not able to compile if rate limit has no remianing', function (done) {
       this.ratelimiter.addCount.callsArgWith(1, null, false)
       return this.CompileManager._checkIfAutoCompileLimitHasBeenHit(
         true,
@@ -355,7 +355,7 @@ describe('CompileManager', function() {
       )
     })
 
-    it('should return false if there is an error in the rate limit', function(done) {
+    it('should return false if there is an error in the rate limit', function (done) {
       this.ratelimiter.addCount.callsArgWith(1, 'error')
       return this.CompileManager._checkIfAutoCompileLimitHasBeenHit(
         true,
@@ -368,8 +368,8 @@ describe('CompileManager', function() {
     })
   })
 
-  describe('wordCount', function() {
-    beforeEach(function() {
+  describe('wordCount', function () {
+    beforeEach(function () {
       this.CompileManager.getProjectCompileLimits = sinon
         .stub()
         .callsArgWith(
@@ -386,19 +386,19 @@ describe('CompileManager', function() {
       )
     })
 
-    it('should look up the compile group to use', function() {
+    it('should look up the compile group to use', function () {
       return this.CompileManager.getProjectCompileLimits
         .calledWith(this.project_id)
         .should.equal(true)
     })
 
-    it('should call wordCount for project', function() {
+    it('should call wordCount for project', function () {
       return this.ClsiManager.wordCount
         .calledWith(this.project_id, this.user_id, false, this.limits)
         .should.equal(true)
     })
 
-    it('should call the callback', function() {
+    it('should call the callback', function () {
       return this.callback.called.should.equal(true)
     })
   })

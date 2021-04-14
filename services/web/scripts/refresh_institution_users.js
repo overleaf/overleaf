@@ -24,14 +24,16 @@ function main() {
   const notify = argv.notify[0] === 't'
   console.log('Running with notify =', notify)
 
-  InstitutionsManager.refreshInstitutionUsers(institutionId, notify, function(
-    error
-  ) {
-    if (error) {
-      console.log(error)
-    } else {
-      console.log('DONE 👌')
+  InstitutionsManager.refreshInstitutionUsers(
+    institutionId,
+    notify,
+    function (error) {
+      if (error) {
+        console.log(error)
+      } else {
+        console.log('DONE 👌')
+      }
+      process.exit()
     }
-    process.exit()
-  })
+  )
 }

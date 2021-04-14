@@ -9,7 +9,7 @@ const fallbackLanguageCode = Settings.i18n.defaultLng || 'en'
 const availableLanguageCodes = []
 const availableHosts = new Map()
 const subdomainConfigs = new Map()
-Object.values(Settings.i18n.subdomainLang || {}).forEach(function(spec) {
+Object.values(Settings.i18n.subdomainLang || {}).forEach(function (spec) {
   availableLanguageCodes.push(spec.lngCode)
   // prebuild a host->lngCode mapping for the usage at runtime in the
   //  middleware

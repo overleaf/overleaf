@@ -21,7 +21,7 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Exports/ExportsController.js'
 )
 
-describe('ExportsController', function() {
+describe('ExportsController', function () {
   const project_id = '123njdskj9jlk'
   const user_id = '123nd3ijdks'
   const brand_variation_id = 22
@@ -33,7 +33,7 @@ describe('ExportsController', function() {
   const license = 'other'
   const show_source = true
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.handler = { getUserNotifications: sinon.stub().callsArgWith(1) }
     this.req = {
       params: {
@@ -71,8 +71,8 @@ describe('ExportsController', function() {
     }))
   })
 
-  describe('without gallery fields', function() {
-    it('should ask the handler to perform the export', function(done) {
+  describe('without gallery fields', function () {
+    it('should ask the handler to perform the export', function (done) {
       this.handler.exportProject = sinon
         .stub()
         .yields(null, { iAmAnExport: true, v1_id: 897 })
@@ -93,8 +93,8 @@ describe('ExportsController', function() {
     })
   })
 
-  describe('with a message from v1', function() {
-    it('should ask the handler to perform the export', function(done) {
+  describe('with a message from v1', function () {
+    it('should ask the handler to perform the export', function (done) {
       this.handler.exportProject = sinon.stub().yields(null, {
         iAmAnExport: true,
         v1_id: 897,
@@ -120,8 +120,8 @@ describe('ExportsController', function() {
     })
   })
 
-  describe('with gallery fields', function() {
-    beforeEach(function() {
+  describe('with gallery fields', function () {
+    beforeEach(function () {
       this.req.body.title = title
       this.req.body.description = description
       this.req.body.author = author
@@ -129,7 +129,7 @@ describe('ExportsController', function() {
       return (this.req.body.showSource = true)
     })
 
-    it('should ask the handler to perform the export', function(done) {
+    it('should ask the handler to perform the export', function (done) {
       this.handler.exportProject = sinon
         .stub()
         .yields(null, { iAmAnExport: true, v1_id: 897 })
@@ -155,8 +155,8 @@ describe('ExportsController', function() {
     })
   })
 
-  describe('with an error return from v1 to forward to the publish modal', function() {
-    it('should forward the response onward', function(done) {
+  describe('with an error return from v1 to forward to the publish modal', function () {
+    it('should forward the response onward', function (done) {
       this.error_json = { status: 422, message: 'nope' }
       this.handler.exportProject = sinon
         .stub()
@@ -168,7 +168,7 @@ describe('ExportsController', function() {
     })
   })
 
-  it('should ask the handler to return the status of an export', function(done) {
+  it('should ask the handler to return the status of an export', function (done) {
     this.handler.fetchExport = sinon.stub().yields(
       null,
       `{ \

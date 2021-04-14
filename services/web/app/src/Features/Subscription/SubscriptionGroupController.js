@@ -30,7 +30,7 @@ module.exports = {
     return SubscriptionGroupHandler.removeUserFromGroup(
       subscription._id,
       userToRemove_id,
-      function(err) {
+      function (err) {
         if (err != null) {
           OError.tag(err, 'error removing user from group', {
             subscriptionId: subscription._id,
@@ -46,28 +46,28 @@ module.exports = {
   removeSelfFromGroup(req, res, next) {
     const subscriptionId = req.query.subscriptionId
     const userToRemove_id = AuthenticationController.getLoggedInUserId(req)
-    return SubscriptionLocator.getSubscription(subscriptionId, function(
-      error,
-      subscription
-    ) {
-      if (error != null) {
-        return next(error)
-      }
-
-      return SubscriptionGroupHandler.removeUserFromGroup(
-        subscription._id,
-        userToRemove_id,
-        function(err) {
-          if (err != null) {
-            logger.err(
-              { err, userToRemove_id, subscriptionId },
-              'error removing self from group'
-            )
-            return res.sendStatus(500)
-          }
-          return res.sendStatus(200)
+    return SubscriptionLocator.getSubscription(
+      subscriptionId,
+      function (error, subscription) {
+        if (error != null) {
+          return next(error)
         }
-      )
-    })
+
+        return SubscriptionGroupHandler.removeUserFromGroup(
+          subscription._id,
+          userToRemove_id,
+          function (err) {
+            if (err != null) {
+              logger.err(
+                { err, userToRemove_id, subscriptionId },
+                'error removing self from group'
+              )
+              return res.sendStatus(500)
+            }
+            return res.sendStatus(200)
+          }
+        )
+      }
+    )
   }
 }

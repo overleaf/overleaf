@@ -22,7 +22,7 @@ module.exports = {
     return InactiveProjectManager.deactivateOldProjects(
       numberOfProjectsToArchive,
       ageOfProjects,
-      function(err, projectsDeactivated) {
+      function (err, projectsDeactivated) {
         if (err != null) {
           return res.sendStatus(500)
         } else {
@@ -34,7 +34,7 @@ module.exports = {
 
   deactivateProject(req, res) {
     const { project_id } = req.params
-    return InactiveProjectManager.deactivateProject(project_id, function(err) {
+    return InactiveProjectManager.deactivateProject(project_id, function (err) {
       if (err != null) {
         return res.sendStatus(500)
       } else {

@@ -15,8 +15,8 @@ const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Project/ProjectEditorHandler'
 const SandboxedModule = require('sandboxed-module')
 
-describe('ProjectEditorHandler', function() {
-  beforeEach(function() {
+describe('ProjectEditorHandler', function () {
+  beforeEach(function () {
     this.project = {
       _id: 'project-id',
       name: 'Project Name',
@@ -112,9 +112,9 @@ describe('ProjectEditorHandler', function() {
     return (this.handler = SandboxedModule.require(modulePath))
   })
 
-  describe('buildProjectModelView', function() {
-    describe('with owner, members and invites included', function() {
-      beforeEach(function() {
+  describe('buildProjectModelView', function () {
+    describe('with owner, members and invites included', function () {
+      beforeEach(function () {
         return (this.result = this.handler.buildProjectModelView(
           this.project,
           this.members,
@@ -123,27 +123,27 @@ describe('ProjectEditorHandler', function() {
         ))
       })
 
-      it('should include the id', function() {
+      it('should include the id', function () {
         expect(this.result._id).to.exist
         return this.result._id.should.equal('project-id')
       })
 
-      it('should include the name', function() {
+      it('should include the name', function () {
         expect(this.result.name).to.exist
         return this.result.name.should.equal('Project Name')
       })
 
-      it('should include the root doc id', function() {
+      it('should include the root doc id', function () {
         expect(this.result.rootDoc_id).to.exist
         return this.result.rootDoc_id.should.equal('file-id')
       })
 
-      it('should include the public access level', function() {
+      it('should include the public access level', function () {
         expect(this.result.publicAccesLevel).to.exist
         return this.result.publicAccesLevel.should.equal('private')
       })
 
-      it('should include the owner', function() {
+      it('should include the owner', function () {
         expect(this.result.owner).to.exist
         this.result.owner._id.should.equal('owner-id')
         this.result.owner.email.should.equal('owner@sharelatex.com')
@@ -152,7 +152,7 @@ describe('ProjectEditorHandler', function() {
         return this.result.owner.privileges.should.equal('owner')
       })
 
-      it('should include the deletedDocs', function() {
+      it('should include the deletedDocs', function () {
         expect(this.result.deletedDocs).to.exist
         this.result.deletedDocs.should.deep.equal([
           {
@@ -164,12 +164,12 @@ describe('ProjectEditorHandler', function() {
         ])
       })
 
-      it('invites should not include the token', function() {
+      it('invites should not include the token', function () {
         expect(this.result.invites[0].token).not.to.exist
         expect(this.result.invites[1].token).not.to.exist
       })
 
-      it('should gather readOnly_refs and collaberators_refs into a list of members', function() {
+      it('should gather readOnly_refs and collaberators_refs into a list of members', function () {
         const findMember = id => {
           for (let member of Array.from(this.result.members)) {
             if (member._id === id) {
@@ -198,7 +198,7 @@ describe('ProjectEditorHandler', function() {
         )
       })
 
-      it('should include folders in the project', function() {
+      it('should include folders in the project', function () {
         this.result.rootFolder[0]._id.should.equal('root-folder-id')
         this.result.rootFolder[0].name.should.equal('')
 
@@ -206,12 +206,12 @@ describe('ProjectEditorHandler', function() {
         return this.result.rootFolder[0].folders[0].name.should.equal('folder')
       })
 
-      it('should not duplicate folder contents', function() {
+      it('should not duplicate folder contents', function () {
         this.result.rootFolder[0].docs.length.should.equal(0)
         return this.result.rootFolder[0].fileRefs.length.should.equal(0)
       })
 
-      it('should include files in the project', function() {
+      it('should include files in the project', function () {
         this.result.rootFolder[0].folders[0].fileRefs[0]._id.should.equal(
           'file-id'
         )
@@ -225,7 +225,7 @@ describe('ProjectEditorHandler', function() {
           .to.exist
       })
 
-      it('should include docs in the project but not the lines', function() {
+      it('should include docs in the project but not the lines', function () {
         this.result.rootFolder[0].folders[0].docs[0]._id.should.equal('doc-id')
         this.result.rootFolder[0].folders[0].docs[0].name.should.equal(
           'main.tex'
@@ -234,14 +234,14 @@ describe('ProjectEditorHandler', function() {
           .exist
       })
 
-      it('should include invites', function() {
+      it('should include invites', function () {
         expect(this.result.invites).to.exist
         return this.result.invites.should.deep.equal(this.invites)
       })
     })
 
-    describe('when docstore sends a deleted doc that is also present in the project', function() {
-      beforeEach(function() {
+    describe('when docstore sends a deleted doc that is also present in the project', function () {
+      beforeEach(function () {
         this.deletedDocsFromDocstore.push(this.project.deletedDocs[0])
         this.result = this.handler.buildProjectModelView(
           this.project,
@@ -251,7 +251,7 @@ describe('ProjectEditorHandler', function() {
         )
       })
 
-      it('should not send any duplicate', function() {
+      it('should not send any duplicate', function () {
         expect(this.result.deletedDocs).to.exist
         this.result.deletedDocs.should.deep.equal([
           this.project.deletedDocs[0],
@@ -260,8 +260,8 @@ describe('ProjectEditorHandler', function() {
       })
     })
 
-    describe('deletedByExternalDataSource', function() {
-      it('should set the deletedByExternalDataSource flag to false when it is not there', function() {
+    describe('deletedByExternalDataSource', function () {
+      it('should set the deletedByExternalDataSource flag to false when it is not there', function () {
         delete this.project.deletedByExternalDataSource
         const result = this.handler.buildProjectModelView(
           this.project,
@@ -272,7 +272,7 @@ describe('ProjectEditorHandler', function() {
         return result.deletedByExternalDataSource.should.equal(false)
       })
 
-      it('should set the deletedByExternalDataSource flag to false when it is false', function() {
+      it('should set the deletedByExternalDataSource flag to false when it is false', function () {
         const result = this.handler.buildProjectModelView(
           this.project,
           this.members,
@@ -282,7 +282,7 @@ describe('ProjectEditorHandler', function() {
         return result.deletedByExternalDataSource.should.equal(false)
       })
 
-      it('should set the deletedByExternalDataSource flag to true when it is true', function() {
+      it('should set the deletedByExternalDataSource flag to true when it is true', function () {
         this.project.deletedByExternalDataSource = true
         const result = this.handler.buildProjectModelView(
           this.project,
@@ -294,8 +294,8 @@ describe('ProjectEditorHandler', function() {
       })
     })
 
-    describe('features', function() {
-      beforeEach(function() {
+    describe('features', function () {
+      beforeEach(function () {
         this.owner.features = {
           versioning: true,
           collaborators: 3,
@@ -310,7 +310,7 @@ describe('ProjectEditorHandler', function() {
         ))
       })
 
-      it('should copy the owner features to the project', function() {
+      it('should copy the owner features to the project', function () {
         this.result.features.versioning.should.equal(
           this.owner.features.versioning
         )
@@ -326,9 +326,9 @@ describe('ProjectEditorHandler', function() {
       })
     })
 
-    describe('trackChangesState', function() {
-      describe('when the owner does not have the trackChanges feature', function() {
-        beforeEach(function() {
+    describe('trackChangesState', function () {
+      describe('when the owner does not have the trackChanges feature', function () {
+        beforeEach(function () {
           this.owner.features = {
             trackChanges: false
           }
@@ -339,13 +339,13 @@ describe('ProjectEditorHandler', function() {
             []
           )
         })
-        it('should not emit trackChangesState', function() {
+        it('should not emit trackChangesState', function () {
           expect(this.result.trackChangesState).to.not.exist
         })
       })
 
-      describe('when the owner has got the trackChanges feature', function() {
-        beforeEach(function() {
+      describe('when the owner has got the trackChanges feature', function () {
+        beforeEach(function () {
           this.owner.features = {
             trackChanges: true
           }
@@ -354,8 +354,8 @@ describe('ProjectEditorHandler', function() {
         function genCase([dbEntry, expected]) {
           describe(`when track_changes is ${JSON.stringify(
             dbEntry
-          )}`, function() {
-            beforeEach(function() {
+          )}`, function () {
+            beforeEach(function () {
               this.project.track_changes = dbEntry
               this.result = this.handler.buildProjectModelView(
                 this.project,
@@ -364,7 +364,7 @@ describe('ProjectEditorHandler', function() {
                 []
               )
             })
-            it(`should set trackChangesState=${expected}`, function() {
+            it(`should set trackChangesState=${expected}`, function () {
               expect(this.result.trackChangesState).to.deep.equal(expected)
             })
           })
@@ -381,8 +381,8 @@ describe('ProjectEditorHandler', function() {
     })
   })
 
-  describe('buildOwnerAndMembersViews', function() {
-    beforeEach(function() {
+  describe('buildOwnerAndMembersViews', function () {
+    beforeEach(function () {
       this.owner.features = {
         versioning: true,
         collaborators: 3,
@@ -394,7 +394,7 @@ describe('ProjectEditorHandler', function() {
       ))
     })
 
-    it('should produce an object with the right keys', function() {
+    it('should produce an object with the right keys', function () {
       return expect(this.result).to.have.all.keys([
         'owner',
         'ownerFeatures',
@@ -402,7 +402,7 @@ describe('ProjectEditorHandler', function() {
       ])
     })
 
-    it('should separate the owner from the members', function() {
+    it('should separate the owner from the members', function () {
       this.result.members.length.should.equal(this.members.length - 1)
       expect(this.result.owner._id).to.equal(this.owner._id)
       expect(this.result.owner.email).to.equal(this.owner.email)
@@ -411,14 +411,14 @@ describe('ProjectEditorHandler', function() {
       ).to.equal(0)
     })
 
-    it('should extract the ownerFeatures from the owner object', function() {
+    it('should extract the ownerFeatures from the owner object', function () {
       return expect(this.result.ownerFeatures).to.deep.equal(
         this.owner.features
       )
     })
 
-    describe('when there is no owner', function() {
-      beforeEach(function() {
+    describe('when there is no owner', function () {
+      beforeEach(function () {
         // remove the owner from members list
         this.membersWithoutOwner = this.members.filter(
           m => m.user._id !== this.owner._id
@@ -428,7 +428,7 @@ describe('ProjectEditorHandler', function() {
         ))
       })
 
-      it('should produce an object with the right keys', function() {
+      it('should produce an object with the right keys', function () {
         return expect(this.result).to.have.all.keys([
           'owner',
           'ownerFeatures',
@@ -436,12 +436,12 @@ describe('ProjectEditorHandler', function() {
         ])
       })
 
-      it('should not separate out an owner', function() {
+      it('should not separate out an owner', function () {
         this.result.members.length.should.equal(this.membersWithoutOwner.length)
         return expect(this.result.owner).to.equal(null)
       })
 
-      it('should not extract the ownerFeatures from the owner object', function() {
+      it('should not extract the ownerFeatures from the owner object', function () {
         return expect(this.result.ownerFeatures).to.equal(null)
       })
     })

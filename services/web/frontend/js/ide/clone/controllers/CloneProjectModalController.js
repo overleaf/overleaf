@@ -11,47 +11,44 @@
  */
 import App from '../../../base'
 
-export default App.controller('CloneProjectModalController', function(
-  $scope,
-  $modalInstance,
-  $timeout,
-  $http,
-  ide
-) {
-  $scope.inputs = { projectName: ide.$scope.project.name + ' (Copy)' }
-  $scope.state = {
-    inflight: false,
-    error: false
-  }
+export default App.controller(
+  'CloneProjectModalController',
+  function ($scope, $modalInstance, $timeout, $http, ide) {
+    $scope.inputs = { projectName: ide.$scope.project.name + ' (Copy)' }
+    $scope.state = {
+      inflight: false,
+      error: false
+    }
 
-  $modalInstance.opened.then(() =>
-    $timeout(() => $scope.$broadcast('open'), 200)
-  )
+    $modalInstance.opened.then(() =>
+      $timeout(() => $scope.$broadcast('open'), 200)
+    )
 
-  const cloneProject = cloneName =>
-    $http.post(`/project/${ide.$scope.project._id}/clone`, {
-      _csrf: window.csrfToken,
-      projectName: cloneName
-    })
-
-  $scope.clone = function() {
-    $scope.state.inflight = true
-    $scope.state.error = false
-    return cloneProject($scope.inputs.projectName)
-      .then(function(response) {
-        const { data } = response
-        return (window.location = `/project/${data.project_id}`)
+    const cloneProject = cloneName =>
+      $http.post(`/project/${ide.$scope.project._id}/clone`, {
+        _csrf: window.csrfToken,
+        projectName: cloneName
       })
-      .catch(function(response) {
-        const { data, status } = response
-        $scope.state.inflight = false
-        if (status === 400) {
-          return ($scope.state.error = { message: data })
-        } else {
-          return ($scope.state.error = true)
-        }
-      })
-  }
 
-  return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
-})
+    $scope.clone = function () {
+      $scope.state.inflight = true
+      $scope.state.error = false
+      return cloneProject($scope.inputs.projectName)
+        .then(function (response) {
+          const { data } = response
+          return (window.location = `/project/${data.project_id}`)
+        })
+        .catch(function (response) {
+          const { data, status } = response
+          $scope.state.inflight = false
+          if (status === 400) {
+            return ($scope.state.error = { message: data })
+          } else {
+            return ($scope.state.error = true)
+          }
+        })
+    }
+
+    return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
+  }
+)

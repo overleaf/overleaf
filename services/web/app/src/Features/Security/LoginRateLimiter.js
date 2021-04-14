@@ -16,7 +16,7 @@ function processLoginRequest(email, callback) {
 
 function recordSuccessfulLogin(email, callback) {
   if (callback == null) {
-    callback = function() {}
+    callback = function () {}
   }
   RateLimiter.clearRateLimit('login', email, callback)
 }

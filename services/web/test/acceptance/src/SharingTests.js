@@ -1,8 +1,8 @@
 const { expect } = require('chai')
 const User = require('./helpers/User').promises
 
-describe('Sharing', function() {
-  beforeEach(async function() {
+describe('Sharing', function () {
+  beforeEach(async function () {
     this.ownerSession = new User()
     this.collaboratorSession = new User()
     this.strangerSession = new User()
@@ -15,8 +15,8 @@ describe('Sharing', function() {
     this.projectId = await this.ownerSession.createProject('Test project')
   })
 
-  describe('with read-only collaborator', function() {
-    beforeEach(async function() {
+  describe('with read-only collaborator', function () {
+    beforeEach(async function () {
       await this.ownerSession.addUserToProject(
         this.projectId,
         this.collaborator,
@@ -24,7 +24,7 @@ describe('Sharing', function() {
       )
     })
 
-    it('sets the privilege level to read-write', async function() {
+    it('sets the privilege level to read-write', async function () {
       await this.ownerSession.setCollaboratorInfo(
         this.projectId,
         this.collaborator._id,
@@ -37,7 +37,7 @@ describe('Sharing', function() {
       expect(project.readOnly_refs).to.deep.equal([])
     })
 
-    it('treats setting the privilege to read-only as a noop', async function() {
+    it('treats setting the privilege to read-only as a noop', async function () {
       await this.ownerSession.setCollaboratorInfo(
         this.projectId,
         this.collaborator._id,
@@ -48,7 +48,7 @@ describe('Sharing', function() {
       expect(project.readOnly_refs).to.be.unordered.ids([this.collaborator._id])
     })
 
-    it('prevents non-owners to set the privilege level', async function() {
+    it('prevents non-owners to set the privilege level', async function () {
       await expect(
         this.collaboratorSession.setCollaboratorInfo(
           this.projectId,
@@ -58,7 +58,7 @@ describe('Sharing', function() {
       ).to.be.rejectedWith('Unexpected status code: 403')
     })
 
-    it('validates the privilege level', async function() {
+    it('validates the privilege level', async function () {
       await expect(
         this.collaboratorSession.setCollaboratorInfo(
           this.projectId,
@@ -68,7 +68,7 @@ describe('Sharing', function() {
       ).to.be.rejectedWith('Unexpected status code: 400')
     })
 
-    it('returns 404 if the user is not already a collaborator', async function() {
+    it('returns 404 if the user is not already a collaborator', async function () {
       await expect(
         this.ownerSession.setCollaboratorInfo(
           this.projectId,
@@ -79,8 +79,8 @@ describe('Sharing', function() {
     })
   })
 
-  describe('with read-write collaborator', function() {
-    beforeEach(async function() {
+  describe('with read-write collaborator', function () {
+    beforeEach(async function () {
       await this.ownerSession.addUserToProject(
         this.projectId,
         this.collaborator,
@@ -88,7 +88,7 @@ describe('Sharing', function() {
       )
     })
 
-    it('sets the privilege level to read-only', async function() {
+    it('sets the privilege level to read-only', async function () {
       await this.ownerSession.setCollaboratorInfo(
         this.projectId,
         this.collaborator._id,

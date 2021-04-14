@@ -5,8 +5,8 @@ const { ObjectId } = require('mongodb')
 
 const MODULE_PATH = '../../../../app/src/Features/Project/ProjectDuplicator.js'
 
-describe('ProjectDuplicator', function() {
-  beforeEach(function() {
+describe('ProjectDuplicator', function () {
+  beforeEach(function () {
     this.doc0 = { _id: 'doc0_id', name: 'rootDocHere' }
     this.doc1 = { _id: 'doc1_id', name: 'level1folderDocName' }
     this.doc2 = { _id: 'doc2_id', name: 'level2folderDocName' }
@@ -220,8 +220,8 @@ describe('ProjectDuplicator', function() {
     })
   })
 
-  describe('when the copy succeeds', function() {
-    beforeEach(async function() {
+  describe('when the copy succeeds', function () {
+    beforeEach(async function () {
       this.newProjectName = 'New project name'
       this.newProject = await this.ProjectDuplicator.promises.duplicate(
         this.owner,
@@ -230,13 +230,13 @@ describe('ProjectDuplicator', function() {
       )
     })
 
-    it('should flush the original project to mongo', function() {
+    it('should flush the original project to mongo', function () {
       this.DocumentUpdaterHandler.promises.flushProjectToMongo.should.have.been.calledWith(
         this.project._id
       )
     })
 
-    it('should copy docs to docstore', function() {
+    it('should copy docs to docstore', function () {
       for (const docLines of [this.doc0Lines, this.doc1Lines, this.doc2Lines]) {
         this.DocstoreManager.promises.updateDoc.should.have.been.calledWith(
           this.newProject._id.toString(),
@@ -248,7 +248,7 @@ describe('ProjectDuplicator', function() {
       }
     })
 
-    it('should copy files to the filestore', function() {
+    it('should copy files to the filestore', function () {
       for (const file of [this.file0, this.file1, this.file2]) {
         this.FileStoreHandler.promises.copyFile.should.have.been.calledWith(
           this.project._id,
@@ -259,7 +259,7 @@ describe('ProjectDuplicator', function() {
       }
     })
 
-    it('should create a blank project', function() {
+    it('should create a blank project', function () {
       this.ProjectCreationHandler.promises.createBlankProject.should.have.been.calledWith(
         this.owner._id,
         this.newProjectName
@@ -267,26 +267,26 @@ describe('ProjectDuplicator', function() {
       this.newProject._id.should.equal(this.newBlankProject._id)
     })
 
-    it('should use the same compiler', function() {
+    it('should use the same compiler', function () {
       this.ProjectOptionsHandler.promises.setCompiler.should.have.been.calledWith(
         this.newProject._id,
         this.project.compiler
       )
     })
 
-    it('should use the same root doc', function() {
+    it('should use the same root doc', function () {
       this.ProjectEntityUpdateHandler.promises.setRootDoc.should.have.been.calledWith(
         this.newProject._id,
         this.rootFolder.docs[0]._id
       )
     })
 
-    it('should not copy the collaborators or read only refs', function() {
+    it('should not copy the collaborators or read only refs', function () {
       this.newProject.collaberator_refs.length.should.equal(0)
       this.newProject.readOnly_refs.length.should.equal(0)
     })
 
-    it('should copy all documents and files', function() {
+    it('should copy all documents and files', function () {
       this.ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure.should.have.been.calledWith(
         this.newProject._id,
         this.docEntries,
@@ -294,7 +294,7 @@ describe('ProjectDuplicator', function() {
       )
     })
 
-    it('should notify document updater of changes', function() {
+    it('should notify document updater of changes', function () {
       this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
         this.newProject._id,
         this.newProject.overleaf.history.id,
@@ -307,15 +307,15 @@ describe('ProjectDuplicator', function() {
       )
     })
 
-    it('should flush the project to TPDS', function() {
+    it('should flush the project to TPDS', function () {
       this.TpdsProjectFlusher.promises.flushProjectToTpds.should.have.been.calledWith(
         this.newProject._id
       )
     })
   })
 
-  describe('without a root doc', function() {
-    beforeEach(async function() {
+  describe('without a root doc', function () {
+    beforeEach(async function () {
       this.ProjectLocator.promises.findRootDoc.resolves({
         element: null,
         path: null
@@ -327,14 +327,14 @@ describe('ProjectDuplicator', function() {
       )
     })
 
-    it('should not set the root doc on the copy', function() {
+    it('should not set the root doc on the copy', function () {
       this.ProjectEntityUpdateHandler.promises.setRootDoc.should.not.have.been
         .called
     })
   })
 
-  describe('with an invalid root doc', function() {
-    beforeEach(async function() {
+  describe('with an invalid root doc', function () {
+    beforeEach(async function () {
       this.ProjectEntityUpdateHandler.isPathValidForRootDoc.returns(false)
       this.newProject = await this.ProjectDuplicator.promises.duplicate(
         this.owner,
@@ -343,14 +343,14 @@ describe('ProjectDuplicator', function() {
       )
     })
 
-    it('should not set the root doc on the copy', function() {
+    it('should not set the root doc on the copy', function () {
       this.ProjectEntityUpdateHandler.promises.setRootDoc.should.not.have.been
         .called
     })
   })
 
-  describe('when there is an error', function() {
-    beforeEach(async function() {
+  describe('when there is an error', function () {
+    beforeEach(async function () {
       this.ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure.rejects()
       await expect(
         this.ProjectDuplicator.promises.duplicate(
@@ -361,13 +361,13 @@ describe('ProjectDuplicator', function() {
       ).to.be.rejected
     })
 
-    it('should delete the broken cloned project', function() {
+    it('should delete the broken cloned project', function () {
       this.ProjectDeleter.promises.deleteProject.should.have.been.calledWith(
         this.newBlankProject._id
       )
     })
 
-    it('should not delete the original project', function() {
+    it('should not delete the original project', function () {
       this.ProjectDeleter.promises.deleteProject.should.not.have.been.calledWith(
         this.project._id
       )

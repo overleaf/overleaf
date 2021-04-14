@@ -5,14 +5,14 @@ import renderWithContext from '../../helpers/render-with-context'
 
 import FileTreeitemMenu from '../../../../../../frontend/js/features/file-tree/components/file-tree-item/file-tree-item-menu'
 
-describe('<FileTreeitemMenu />', function() {
+describe('<FileTreeitemMenu />', function () {
   const setContextMenuCoords = sinon.stub()
 
-  afterEach(function() {
+  afterEach(function () {
     setContextMenuCoords.reset()
   })
 
-  it('renders dropdown', function() {
+  it('renders dropdown', function () {
     renderWithContext(
       <FileTreeitemMenu
         id="123abc"
@@ -24,7 +24,7 @@ describe('<FileTreeitemMenu />', function() {
     screen.getByRole('menu')
   })
 
-  it('open / close', function() {
+  it('open / close', function () {
     renderWithContext(
       <FileTreeitemMenu
         id="123abc"

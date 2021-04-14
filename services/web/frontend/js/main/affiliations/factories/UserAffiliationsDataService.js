@@ -406,7 +406,7 @@ for (let domain of commonDomains) {
   }
 }
 
-App.factory('UserAffiliationsDataService', function($http, $q) {
+App.factory('UserAffiliationsDataService', function ($http, $q) {
   const getCountries = () => $q.resolve(countriesList)
 
   const getDefaultRoleHints = () => $q.resolve(defaultRoleHints)
@@ -426,7 +426,7 @@ App.factory('UserAffiliationsDataService', function($http, $q) {
       _.find(userEmails, userEmail => userEmail.default)
     )
 
-  const getUniversitiesFromCountry = function(country) {
+  const getUniversitiesFromCountry = function (country) {
     let universitiesFromCountry
     if (universities[country.code] != null) {
       universitiesFromCountry = universities[country.code]
@@ -440,7 +440,7 @@ App.factory('UserAffiliationsDataService', function($http, $q) {
     return $q.resolve(universitiesFromCountry)
   }
 
-  const getUniversityDomainFromPartialDomainInput = function(
+  const getUniversityDomainFromPartialDomainInput = function (
     partialDomainInput
   ) {
     if (universitiesByDomain[partialDomainInput] != null) {
@@ -450,7 +450,7 @@ App.factory('UserAffiliationsDataService', function($http, $q) {
         .get('/institutions/domains', {
           params: { hostname: partialDomainInput, limit: 1 }
         })
-        .then(function(response) {
+        .then(function (response) {
           const university = response.data[0]
           if (university != null && !isDomainBlacklisted(university.hostname)) {
             universitiesByDomain[university.hostname] = university

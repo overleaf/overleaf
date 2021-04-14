@@ -13,26 +13,26 @@ import _ from 'lodash'
  */
 import App from '../../../base'
 
-export default App.factory('metadata', function($http, ide) {
+export default App.factory('metadata', function ($http, ide) {
   const debouncer = {} // DocId => Timeout
 
   const state = { documents: {} }
 
   const metadata = { state }
 
-  metadata.onBroadcastDocMeta = function(data) {
+  metadata.onBroadcastDocMeta = function (data) {
     if (data.docId != null && data.meta != null) {
       return (state.documents[data.docId] = data.meta)
     }
   }
 
-  metadata.onEntityDeleted = function(e, entity) {
+  metadata.onEntityDeleted = function (e, entity) {
     if (entity.type === 'doc') {
       return delete state.documents[entity.id]
     }
   }
 
-  metadata.onFileUploadComplete = function(e, upload) {
+  metadata.onFileUploadComplete = function (e, upload) {
     if (upload.entity_type === 'doc') {
       return metadata.loadDocMetaFromServer(upload.entity_id)
     }
@@ -50,7 +50,7 @@ export default App.factory('metadata', function($http, ide) {
       })()
     )
 
-  metadata.getAllPackages = function() {
+  metadata.getAllPackages = function () {
     const packageCommandMapping = {}
     for (let _docId in state.documents) {
       const meta = state.documents[_docId]
@@ -65,7 +65,7 @@ export default App.factory('metadata', function($http, ide) {
   metadata.loadProjectMetaFromServer = () =>
     $http
       .get(`/project/${window.project_id}/metadata`)
-      .then(function(response) {
+      .then(function (response) {
         const { data } = response
         if (data.projectMeta) {
           return (() => {
@@ -87,14 +87,14 @@ export default App.factory('metadata', function($http, ide) {
         broadcast: ide.$scope.onlineUsersCount > 0,
         _csrf: window.csrfToken
       })
-      .then(function(response) {
+      .then(function (response) {
         const { data } = response
         // handle the POST response like a broadcast event when there are no
         // other users in the project.
         metadata.onBroadcastDocMeta(data)
       })
 
-  metadata.scheduleLoadDocMetaFromServer = function(docId) {
+  metadata.scheduleLoadDocMetaFromServer = function (docId) {
     if (ide.$scope.permissionsLevel === 'readOnly') {
       // The POST request is blocked for users without write permission.
       // The user will not be able to consume the meta data for edits anyways.

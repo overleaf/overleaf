@@ -4,16 +4,16 @@ import { screen, render, fireEvent } from '@testing-library/react'
 import PreviewRecompileButton from '../../../../../frontend/js/features/preview/components/preview-recompile-button'
 const { expect } = require('chai')
 
-describe('<PreviewRecompileButton />', function() {
+describe('<PreviewRecompileButton />', function () {
   let onRecompile, onRecompileFromScratch, onStopCompilation
 
-  beforeEach(function() {
+  beforeEach(function () {
     onRecompile = sinon.stub().resolves()
     onRecompileFromScratch = sinon.stub().resolves()
     onStopCompilation = sinon.stub().resolves()
   })
 
-  it('renders all items', function() {
+  it('renders all items', function () {
     renderPreviewRecompileButton()
 
     const menuItems = screen.getAllByRole('menuitem')
@@ -39,9 +39,9 @@ describe('<PreviewRecompileButton />', function() {
     ])
   })
 
-  describe('Recompile from scratch', function() {
-    describe('click', function() {
-      it('should call onRecompileFromScratch', async function() {
+  describe('Recompile from scratch', function () {
+    describe('click', function () {
+      it('should call onRecompileFromScratch', async function () {
         renderPreviewRecompileButton()
 
         const button = screen.getByRole('menuitem', {
@@ -51,8 +51,8 @@ describe('<PreviewRecompileButton />', function() {
         expect(onRecompileFromScratch).to.have.been.calledOnce
       })
     })
-    describe('processing', function() {
-      it('shows processing view and disable menuItem when recompiling', function() {
+    describe('processing', function () {
+      it('shows processing view and disable menuItem when recompiling', function () {
         renderPreviewRecompileButton({ isCompiling: true })
 
         screen.getByRole('button', { name: 'Compiling…' })
@@ -75,12 +75,12 @@ describe('<PreviewRecompileButton />', function() {
     })
   })
 
-  it('should show the button text when prop showText=true', function() {
+  it('should show the button text when prop showText=true', function () {
     const showText = true
     renderPreviewRecompileButton({}, showText)
     expect(screen.getByText('Recompile').getAttribute('style')).to.be.null
   })
-  it('should not show the button text when prop showText=false', function() {
+  it('should not show the button text when prop showText=false', function () {
     const showText = false
     renderPreviewRecompileButton({}, showText)
     expect(screen.getByText('Recompile').getAttribute('style')).to.equal(
@@ -88,8 +88,8 @@ describe('<PreviewRecompileButton />', function() {
     )
   })
 
-  describe('Autocompile feedback', function() {
-    it('shows animated visual feedback via CSS class when there are uncompiled changes', function() {
+  describe('Autocompile feedback', function () {
+    it('shows animated visual feedback via CSS class when there are uncompiled changes', function () {
       const { container } = renderPreviewRecompileButton({
         autoCompileHasChanges: true,
         autoCompileHasLintingError: false
@@ -103,7 +103,7 @@ describe('<PreviewRecompileButton />', function() {
         )
       ).to.be.true
     })
-    it('does not show animated visual feedback via CSS class when there are no uncompiled changes', function() {
+    it('does not show animated visual feedback via CSS class when there are no uncompiled changes', function () {
       const { container } = renderPreviewRecompileButton({
         autoCompileHasChanges: false,
         autoCompileHasLintingError: false

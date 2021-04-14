@@ -20,14 +20,14 @@ const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const ArchiveErrors = require('../../../../app/src/Features/Uploads/ArchiveErrors')
 
-describe('ProjectUploadController', function() {
-  beforeEach(function() {
+describe('ProjectUploadController', function () {
+  beforeEach(function () {
     let Timer
     this.req = new MockRequest()
     this.res = new MockResponse()
     this.user_id = 'user-id-123'
     this.metrics = {
-      Timer: (Timer = (function() {
+      Timer: (Timer = (function () {
         Timer = class Timer {
           static initClass() {
             this.prototype.done = sinon.stub()
@@ -56,8 +56,8 @@ describe('ProjectUploadController', function() {
     }))
   })
 
-  describe('uploadProject', function() {
-    beforeEach(function() {
+  describe('uploadProject', function () {
+    beforeEach(function () {
       this.path = '/path/to/file/on/disk.zip'
       this.name = 'filename.zip'
       this.req.file = {
@@ -74,65 +74,65 @@ describe('ProjectUploadController', function() {
       return (this.fs.unlink = sinon.stub())
     })
 
-    describe('successfully', function() {
-      beforeEach(function() {
+    describe('successfully', function () {
+      beforeEach(function () {
         this.ProjectUploadManager.createProjectFromZipArchive = sinon
           .stub()
           .callsArgWith(3, null, this.project)
         return this.ProjectUploadController.uploadProject(this.req, this.res)
       })
 
-      it('should create a project owned by the logged in user', function() {
+      it('should create a project owned by the logged in user', function () {
         return this.ProjectUploadManager.createProjectFromZipArchive
           .calledWith(this.user_id)
           .should.equal(true)
       })
 
-      it('should create a project with the same name as the zip archive', function() {
+      it('should create a project with the same name as the zip archive', function () {
         return this.ProjectUploadManager.createProjectFromZipArchive
           .calledWith(sinon.match.any, 'filename', sinon.match.any)
           .should.equal(true)
       })
 
-      it('should create a project from the zip archive', function() {
+      it('should create a project from the zip archive', function () {
         return this.ProjectUploadManager.createProjectFromZipArchive
           .calledWith(sinon.match.any, sinon.match.any, this.path)
           .should.equal(true)
       })
 
-      it('should return a successful response to the FileUploader client', function() {
+      it('should return a successful response to the FileUploader client', function () {
         return expect(this.res.body).to.deep.equal({
           success: true,
           project_id: this.project_id
         })
       })
 
-      it('should record the time taken to do the upload', function() {
+      it('should record the time taken to do the upload', function () {
         return this.metrics.Timer.prototype.done.called.should.equal(true)
       })
 
-      it('should remove the uploaded file', function() {
+      it('should remove the uploaded file', function () {
         return this.fs.unlink.calledWith(this.path).should.equal(true)
       })
     })
 
-    describe('when ProjectUploadManager.createProjectFromZipArchive fails', function() {
-      beforeEach(function() {
+    describe('when ProjectUploadManager.createProjectFromZipArchive fails', function () {
+      beforeEach(function () {
         this.ProjectUploadManager.createProjectFromZipArchive = sinon
           .stub()
           .callsArgWith(3, new Error('Something went wrong'), this.project)
         return this.ProjectUploadController.uploadProject(this.req, this.res)
       })
 
-      it('should return a failed response to the FileUploader client', function() {
+      it('should return a failed response to the FileUploader client', function () {
         return expect(this.res.body).to.deep.equal(
           JSON.stringify({ success: false, error: 'upload_failed' })
         )
       })
     })
 
-    describe('when ProjectUploadManager.createProjectFromZipArchive reports the file as invalid', function() {
-      beforeEach(function() {
+    describe('when ProjectUploadManager.createProjectFromZipArchive reports the file as invalid', function () {
+      beforeEach(function () {
         this.ProjectUploadManager.createProjectFromZipArchive = sinon
           .stub()
           .callsArgWith(
@@ -143,21 +143,21 @@ describe('ProjectUploadController', function() {
         return this.ProjectUploadController.uploadProject(this.req, this.res)
       })
 
-      it('should return the reported error to the FileUploader client', function() {
+      it('should return the reported error to the FileUploader client', function () {
         expect(JSON.parse(this.res.body)).to.deep.equal({
           success: false,
           error: 'zip_contents_too_large'
         })
       })
 
-      it("should return an 'unprocessable entity' status code", function() {
+      it("should return an 'unprocessable entity' status code", function () {
         return expect(this.res.statusCode).to.equal(422)
       })
     })
   })
 
-  describe('uploadFile', function() {
-    beforeEach(function() {
+  describe('uploadFile', function () {
+    beforeEach(function () {
       this.project_id = 'project-id-123'
       this.folder_id = 'folder-id-123'
       this.path = '/path/to/file/on/disk.png'
@@ -176,8 +176,8 @@ describe('ProjectUploadController', function() {
       return (this.fs.unlink = sinon.stub())
     })
 
-    describe('successfully', function() {
-      beforeEach(function() {
+    describe('successfully', function () {
+      beforeEach(function () {
         this.entity = {
           _id: '1234',
           type: 'file'
@@ -188,7 +188,7 @@ describe('ProjectUploadController', function() {
         return this.ProjectUploadController.uploadFile(this.req, this.res)
       })
 
-      it('should insert the file', function() {
+      it('should insert the file', function () {
         return this.FileSystemImportManager.addEntity
           .calledWith(
             this.user_id,
@@ -200,7 +200,7 @@ describe('ProjectUploadController', function() {
           .should.equal(true)
       })
 
-      it('should return a successful response to the FileUploader client', function() {
+      it('should return a successful response to the FileUploader client', function () {
         return expect(this.res.body).to.deep.equal({
           success: true,
           entity_id: this.entity._id,
@@ -208,39 +208,39 @@ describe('ProjectUploadController', function() {
         })
       })
 
-      it('should time the request', function() {
+      it('should time the request', function () {
         return this.metrics.Timer.prototype.done.called.should.equal(true)
       })
 
-      it('should remove the uploaded file', function() {
+      it('should remove the uploaded file', function () {
         return this.fs.unlink.calledWith(this.path).should.equal(true)
       })
     })
 
-    describe('when FileSystemImportManager.addEntity returns a generic error', function() {
-      beforeEach(function() {
+    describe('when FileSystemImportManager.addEntity returns a generic error', function () {
+      beforeEach(function () {
         this.FileSystemImportManager.addEntity = sinon
           .stub()
           .callsArgWith(6, new Error('Sorry something went wrong'))
         return this.ProjectUploadController.uploadFile(this.req, this.res)
       })
 
-      it('should return an unsuccessful response to the FileUploader client', function() {
+      it('should return an unsuccessful response to the FileUploader client', function () {
         return expect(this.res.body).to.deep.equal({
           success: false
         })
       })
     })
 
-    describe('when FileSystemImportManager.addEntity returns a too many files error', function() {
-      beforeEach(function() {
+    describe('when FileSystemImportManager.addEntity returns a too many files error', function () {
+      beforeEach(function () {
         this.FileSystemImportManager.addEntity = sinon
           .stub()
           .callsArgWith(6, new Error('project_has_too_many_files'))
         return this.ProjectUploadController.uploadFile(this.req, this.res)
       })
 
-      it('should return an unsuccessful response to the FileUploader client', function() {
+      it('should return an unsuccessful response to the FileUploader client', function () {
         return expect(this.res.body).to.deep.equal({
           success: false,
           error: 'project_has_too_many_files'
@@ -248,13 +248,13 @@ describe('ProjectUploadController', function() {
       })
     })
 
-    describe('with a bad request', function() {
-      beforeEach(function() {
+    describe('with a bad request', function () {
+      beforeEach(function () {
         this.req.file.originalname = ''
         return this.ProjectUploadController.uploadFile(this.req, this.res)
       })
 
-      it('should return a a non success response', function() {
+      it('should return a a non success response', function () {
         return expect(this.res.body).to.deep.equal({
           success: false
         })

@@ -3,7 +3,7 @@ import { react2angular } from 'react2angular'
 import EditorNavigationToolbarRoot from '../components/editor-navigation-toolbar-root'
 import { rootContext } from '../../../shared/context/root-context'
 
-App.controller('EditorNavigationToolbarController', function($scope, ide) {
+App.controller('EditorNavigationToolbarController', function ($scope, ide) {
   // wrapper is required to avoid scope problems with `this` inside `EditorManager`
   $scope.openDoc = (doc, args) => ide.editorManager.openDoc(doc, args)
 })

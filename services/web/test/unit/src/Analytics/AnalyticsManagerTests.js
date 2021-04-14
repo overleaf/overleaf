@@ -7,8 +7,8 @@ const MODULE_PATH = path.join(
   '../../../../app/src/Features/Analytics/AnalyticsManager'
 )
 
-describe('AnalyticsManager', function() {
-  beforeEach(function() {
+describe('AnalyticsManager', function () {
+  beforeEach(function () {
     this.fakeUserId = '123abc'
     this.Settings = {
       analytics: { enabled: true }
@@ -47,22 +47,22 @@ describe('AnalyticsManager', function() {
     })
   })
 
-  describe('ignores when', function() {
-    it('user is smoke test user', function() {
+  describe('ignores when', function () {
+    it('user is smoke test user', function () {
       this.Settings.smokeTest = { userId: this.fakeUserId }
       this.AnalyticsManager.identifyUser(this.fakeUserId, '')
       sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
 
-    it('analytics service is disabled', function() {
+    it('analytics service is disabled', function () {
       this.Settings.analytics.enabled = false
       this.AnalyticsManager.identifyUser(this.fakeUserId, '')
       sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
   })
 
-  describe('queues the appropriate message for', function() {
-    it('identifyUser', function() {
+  describe('queues the appropriate message for', function () {
+    it('identifyUser', function () {
       const oldUserId = '456def'
       this.AnalyticsManager.identifyUser(this.fakeUserId, oldUserId)
       sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'identify', {
@@ -71,7 +71,7 @@ describe('AnalyticsManager', function() {
       })
     })
 
-    it('recordEvent', function() {
+    it('recordEvent', function () {
       const event = 'fake-event'
       this.AnalyticsManager.recordEvent(this.fakeUserId, event, null)
       sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
@@ -81,7 +81,7 @@ describe('AnalyticsManager', function() {
       })
     })
 
-    it('updateEditingSession', function() {
+    it('updateEditingSession', function () {
       const projectId = '789ghi'
       const countryCode = 'fr'
       this.AnalyticsManager.updateEditingSession(

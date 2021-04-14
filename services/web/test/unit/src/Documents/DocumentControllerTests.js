@@ -20,8 +20,8 @@ const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
-describe('DocumentController', function() {
-  beforeEach(function() {
+describe('DocumentController', function () {
+  beforeEach(function () {
     this.DocumentController = SandboxedModule.require(modulePath, {
       requires: {
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
@@ -44,24 +44,24 @@ describe('DocumentController', function() {
     return (this.rev = 5)
   })
 
-  describe('getDocument', function() {
-    beforeEach(function() {
+  describe('getDocument', function () {
+    beforeEach(function () {
       return (this.req.params = {
         Project_id: this.project_id,
         doc_id: this.doc_id
       })
     })
 
-    describe('when the project exists without project history enabled', function() {
-      beforeEach(function() {
+    describe('when the project exists without project history enabled', function () {
+      beforeEach(function () {
         this.project = { _id: this.project_id }
         return (this.ProjectGetter.getProject = sinon
           .stub()
           .callsArgWith(2, null, this.project))
       })
 
-      describe('when the document exists', function() {
-        beforeEach(function() {
+      describe('when the document exists', function () {
+        beforeEach(function () {
           this.doc = { _id: this.doc_id }
           this.ProjectLocator.findElement = sinon
             .stub()
@@ -83,13 +83,13 @@ describe('DocumentController', function() {
           )
         })
 
-        it('should get the project', function() {
+        it('should get the project', function () {
           return this.ProjectGetter.getProject
             .calledWith(this.project_id, { rootFolder: true, overleaf: true })
             .should.equal(true)
         })
 
-        it('should get the pathname of the document', function() {
+        it('should get the pathname of the document', function () {
           return this.ProjectLocator.findElement
             .calledWith({
               project: this.project,
@@ -99,13 +99,13 @@ describe('DocumentController', function() {
             .should.equal(true)
         })
 
-        it('should get the document content', function() {
+        it('should get the document content', function () {
           return this.ProjectEntityHandler.getDoc
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
 
-        it('should return the document data to the client as JSON', function() {
+        it('should return the document data to the client as JSON', function () {
           this.res.type.should.equal('application/json')
           return this.res.body.should.equal(
             JSON.stringify({
@@ -118,8 +118,8 @@ describe('DocumentController', function() {
         })
       })
 
-      describe("when the document doesn't exist", function() {
-        beforeEach(function() {
+      describe("when the document doesn't exist", function () {
+        beforeEach(function () {
           this.ProjectLocator.findElement = sinon
             .stub()
             .callsArgWith(1, new Errors.NotFoundError('not found'))
@@ -130,7 +130,7 @@ describe('DocumentController', function() {
           )
         })
 
-        it('should call next with the NotFoundError', function() {
+        it('should call next with the NotFoundError', function () {
           return this.next
             .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
             .should.equal(true)
@@ -138,8 +138,8 @@ describe('DocumentController', function() {
       })
     })
 
-    describe('when project exists with project history enabled', function() {
-      beforeEach(function() {
+    describe('when project exists with project history enabled', function () {
+      beforeEach(function () {
         this.doc = { _id: this.doc_id }
         this.projectHistoryId = 1234
         this.projectHistoryDisplay = true
@@ -176,7 +176,7 @@ describe('DocumentController', function() {
         )
       })
 
-      it('should return the history id and display setting to the client as JSON', function() {
+      it('should return the history id and display setting to the client as JSON', function () {
         this.res.type.should.equal('application/json')
         return this.res.body.should.equal(
           JSON.stringify({
@@ -191,8 +191,8 @@ describe('DocumentController', function() {
       })
     })
 
-    describe('when the project does not exist', function() {
-      beforeEach(function() {
+    describe('when the project does not exist', function () {
+      beforeEach(function () {
         this.ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)
         return this.DocumentController.getDocument(
           this.req,
@@ -201,22 +201,22 @@ describe('DocumentController', function() {
         )
       })
 
-      it('returns a 404', function() {
+      it('returns a 404', function () {
         return this.res.statusCode.should.equal(404)
       })
     })
   })
 
-  describe('setDocument', function() {
-    beforeEach(function() {
+  describe('setDocument', function () {
+    beforeEach(function () {
       return (this.req.params = {
         Project_id: this.project_id,
         doc_id: this.doc_id
       })
     })
 
-    describe('when the document exists', function() {
-      beforeEach(function() {
+    describe('when the document exists', function () {
+      beforeEach(function () {
         this.ProjectEntityUpdateHandler.updateDocLines = sinon.stub().yields()
         this.req.body = {
           lines: this.doc_lines,
@@ -232,7 +232,7 @@ describe('DocumentController', function() {
         )
       })
 
-      it('should update the document in Mongo', function() {
+      it('should update the document in Mongo', function () {
         return sinon.assert.calledWith(
           this.ProjectEntityUpdateHandler.updateDocLines,
           this.project_id,
@@ -245,13 +245,13 @@ describe('DocumentController', function() {
         )
       })
 
-      it('should return a successful response', function() {
+      it('should return a successful response', function () {
         return this.res.success.should.equal(true)
       })
     })
 
-    describe("when the document doesn't exist", function() {
-      beforeEach(function() {
+    describe("when the document doesn't exist", function () {
+      beforeEach(function () {
         this.ProjectEntityUpdateHandler.updateDocLines = sinon
           .stub()
           .yields(new Errors.NotFoundError('document does not exist'))
@@ -263,7 +263,7 @@ describe('DocumentController', function() {
         )
       })
 
-      it('should call next with the NotFoundError', function() {
+      it('should call next with the NotFoundError', function () {
         return this.next
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)

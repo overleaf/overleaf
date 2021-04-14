@@ -5,7 +5,7 @@ const { ObjectId } = Schema
 
 const EXPIRY_IN_SECONDS = 60 * 60 * 24 * 30
 
-const ExpiryDate = function() {
+const ExpiryDate = function () {
   const timestamp = new Date()
   timestamp.setSeconds(timestamp.getSeconds() + EXPIRY_IN_SECONDS)
   return timestamp

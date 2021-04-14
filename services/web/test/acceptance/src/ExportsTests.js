@@ -24,13 +24,13 @@ const MockV1ApiClass = require('./mocks/MockV1Api')
 
 let MockProjectHistoryApi, MockV1Api
 
-before(function() {
+before(function () {
   MockV1Api = MockV1ApiClass.instance()
   MockProjectHistoryApi = MockProjectHistoryApiClass.instance()
 })
 
-describe('Exports', function() {
-  beforeEach(function(done) {
+describe('Exports', function () {
+  beforeEach(function (done) {
     this.brand_variation_id = '18'
     this.owner = new User()
     return this.owner.login(error => {
@@ -51,8 +51,8 @@ describe('Exports', function() {
     })
   })
 
-  describe('exporting a project', function() {
-    beforeEach(function(done) {
+  describe('exporting a project', function () {
+    beforeEach(function (done) {
       this.version = Math.floor(Math.random() * 10000)
       MockProjectHistoryApi.setProjectVersion(this.project_id, this.version)
       this.export_id = Math.floor(Math.random() * 10000)
@@ -81,7 +81,7 @@ describe('Exports', function() {
       )
     })
 
-    it('should have sent correct data to v1', function(done) {
+    it('should have sent correct data to v1', function (done) {
       const {
         project,
         user,
@@ -107,7 +107,7 @@ describe('Exports', function() {
       return done()
     })
 
-    it('should have returned the export ID provided by v1', function(done) {
+    it('should have returned the export ID provided by v1', function (done) {
       expect(this.exportResponseBody.export_v1_id).to.equal(this.export_id)
       return done()
     })

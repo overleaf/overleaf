@@ -19,7 +19,7 @@ module.exports = UserController = {
         email: true,
         signUpDate: true
       },
-      function(error, user) {
+      function (error, user) {
         if (error) {
           return next(error)
         }
@@ -43,7 +43,7 @@ module.exports = UserController = {
     UserGetter.getUser(
       query,
       { _id: true, first_name: true, last_name: true, email: true },
-      function(error, user) {
+      function (error, user) {
         if (error) {
           return next(error)
         }

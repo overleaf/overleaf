@@ -23,7 +23,7 @@ module.exports = ProxyManager = {
       for (var proxyUrl in settings.proxyUrls) {
         const target = settings.proxyUrls[proxyUrl]
         result.push(
-          (function(target) {
+          (function (target) {
             const method =
               (target.options != null ? target.options.method : undefined) ||
               'get'
@@ -39,7 +39,7 @@ module.exports = ProxyManager = {
   },
 
   createProxy(target) {
-    return function(req, res, next) {
+    return function (req, res, next) {
       const targetUrl = makeTargetUrl(target, req)
       logger.log({ targetUrl, reqUrl: req.url }, 'proxying url')
 
@@ -67,7 +67,7 @@ module.exports = ProxyManager = {
 
 // make a URL from a proxy target.
 // if the query is specified, set/replace the target's query with the given query
-var makeTargetUrl = function(target, req) {
+var makeTargetUrl = function (target, req) {
   const targetUrl = URL.parse(parseSettingUrl(target, req))
   if (req.query != null && Object.keys(req.query).length > 0) {
     targetUrl.query = req.query
@@ -76,7 +76,7 @@ var makeTargetUrl = function(target, req) {
   return targetUrl.format()
 }
 
-var parseSettingUrl = function(target, { params }) {
+var parseSettingUrl = function (target, { params }) {
   let path
   if (typeof target === 'string') {
     return target

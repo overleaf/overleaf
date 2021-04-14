@@ -20,7 +20,7 @@ const _ = require('underscore')
 module.exports = FileHashManager = {
   computeHash(filePath, callback) {
     if (callback == null) {
-      callback = function(error, hashValue) {}
+      callback = function (error, hashValue) {}
     }
     callback = _.once(callback) // avoid double callbacks
 
@@ -28,20 +28,20 @@ module.exports = FileHashManager = {
     const getGitBlobHeader = byteLength => `blob ${byteLength}` + '\x00'
 
     const getByteLengthOfFile = cb =>
-      fs.stat(filePath, function(err, stats) {
+      fs.stat(filePath, function (err, stats) {
         if (err != null) {
           return cb(err)
         }
         return cb(null, stats.size)
       })
 
-    return getByteLengthOfFile(function(err, byteLength) {
+    return getByteLengthOfFile(function (err, byteLength) {
       if (err != null) {
         return callback(err)
       }
 
       const input = fs.createReadStream(filePath)
-      input.on('error', function(err) {
+      input.on('error', function (err) {
         logger.warn({ filePath, err }, 'error opening file in computeHash')
         return callback(err)
       })
@@ -49,7 +49,7 @@ module.exports = FileHashManager = {
       const hash = crypto.createHash('sha1')
       hash.setEncoding('hex')
       hash.update(getGitBlobHeader(byteLength))
-      hash.on('readable', function() {
+      hash.on('readable', function () {
         const result = hash.read()
         if (result != null) {
           return callback(null, result.toString('hex'))

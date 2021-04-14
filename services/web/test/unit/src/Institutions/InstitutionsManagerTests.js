@@ -7,8 +7,8 @@ const modulePath = path.join(
   '../../../../app/src/Features/Institutions/InstitutionsManager'
 )
 
-describe('InstitutionsManager', function() {
-  beforeEach(function() {
+describe('InstitutionsManager', function () {
+  beforeEach(function () {
     this.institutionId = 123
     this.user = {}
     this.getInstitutionAffiliations = sinon.stub()
@@ -70,8 +70,8 @@ describe('InstitutionsManager', function() {
     })
   })
 
-  describe('refreshInstitutionUsers', function() {
-    beforeEach(function() {
+  describe('refreshInstitutionUsers', function () {
+    beforeEach(function () {
       this.user1Id = '123abc123abc123abc123abc'
       this.user2Id = '456def456def456def456def'
       this.affiliations = [{ user_id: this.user1Id }, { user_id: this.user2Id }]
@@ -94,7 +94,7 @@ describe('InstitutionsManager', function() {
       this.getInstitutionAffiliations.yields(null, this.affiliations)
     })
 
-    it('refresh all users Features', function(done) {
+    it('refresh all users Features', function (done) {
       this.InstitutionsManager.refreshInstitutionUsers(
         this.institutionId,
         false,
@@ -114,7 +114,7 @@ describe('InstitutionsManager', function() {
       )
     })
 
-    it('notifies users if their features have been upgraded', function(done) {
+    it('notifies users if their features have been upgraded', function (done) {
       this.InstitutionsManager.refreshInstitutionUsers(
         this.institutionId,
         true,
@@ -133,7 +133,7 @@ describe('InstitutionsManager', function() {
       )
     })
 
-    it('notifies users if they have a subscription that should be cancelled', function(done) {
+    it('notifies users if they have a subscription that should be cancelled', function (done) {
       this.InstitutionsManager.refreshInstitutionUsers(
         this.institutionId,
         true,
@@ -153,8 +153,8 @@ describe('InstitutionsManager', function() {
     })
   })
 
-  describe('checkInstitutionUsers', function() {
-    it('check all users Features', function(done) {
+  describe('checkInstitutionUsers', function () {
+    it('check all users Features', function (done) {
       const affiliations = [{ email: 'foo@bar.com' }, { email: 'baz@boo.edu' }]
       const stubbedUsers = [
         {
@@ -200,8 +200,8 @@ describe('InstitutionsManager', function() {
     })
   })
 
-  describe('getInstitutionUsersSubscriptions', function() {
-    it('returns all institution users subscriptions', function(done) {
+  describe('getInstitutionUsersSubscriptions', function () {
+    it('returns all institution users subscriptions', function (done) {
       const stubbedUsers = [
         { user_id: '123abc123abc123abc123abc' },
         { user_id: '456def456def456def456def' },

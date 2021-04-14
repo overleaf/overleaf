@@ -3,7 +3,7 @@ import _ from 'lodash'
 
 import App from '../base'
 
-export default App.directive('mathjax', function($compile, $parse) {
+export default App.directive('mathjax', function ($compile, $parse) {
   return {
     link(scope, element, attrs) {
       if (!(MathJax && MathJax.Hub)) return

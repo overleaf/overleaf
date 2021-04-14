@@ -1,8 +1,8 @@
 const { expect } = require('chai')
 const User = require('./helpers/User').promises
 
-describe('Project ownership transfer', function() {
-  beforeEach(async function() {
+describe('Project ownership transfer', function () {
+  beforeEach(async function () {
     this.ownerSession = new User()
     this.collaboratorSession = new User()
     this.strangerSession = new User()
@@ -25,39 +25,39 @@ describe('Project ownership transfer', function() {
     )
   })
 
-  describe('happy path', function() {
-    beforeEach(async function() {
+  describe('happy path', function () {
+    beforeEach(async function () {
       await this.ownerSession.transferProjectOwnership(
         this.projectId,
         this.collaborator._id
       )
     })
 
-    it('changes the project owner', async function() {
+    it('changes the project owner', async function () {
       const project = await this.collaboratorSession.getProject(this.projectId)
       expect(project.owner_ref.toString()).to.equal(
         this.collaborator._id.toString()
       )
     })
 
-    it('adds the previous owner as a read/write collaborator', async function() {
+    it('adds the previous owner as a read/write collaborator', async function () {
       const project = await this.collaboratorSession.getProject(this.projectId)
       expect(project.collaberator_refs.map(x => x.toString())).to.have.members([
         this.owner._id.toString()
       ])
     })
 
-    it('lets the new owner open the project', async function() {
+    it('lets the new owner open the project', async function () {
       await this.collaboratorSession.openProject(this.projectId)
     })
 
-    it('lets the previous owner open the project', async function() {
+    it('lets the previous owner open the project', async function () {
       await this.ownerSession.openProject(this.projectId)
     })
   })
 
-  describe('validation', function() {
-    it('lets only the project owner transfer ownership', async function() {
+  describe('validation', function () {
+    it('lets only the project owner transfer ownership', async function () {
       await expect(
         this.collaboratorSession.transferProjectOwnership(
           this.projectId,
@@ -66,7 +66,7 @@ describe('Project ownership transfer', function() {
       ).to.be.rejectedWith('Unexpected status code: 403')
     })
 
-    it('prevents transfers to a non-collaborator', async function() {
+    it('prevents transfers to a non-collaborator', async function () {
       await expect(
         this.ownerSession.transferProjectOwnership(
           this.projectId,
@@ -75,7 +75,7 @@ describe('Project ownership transfer', function() {
       ).to.be.rejectedWith('Unexpected status code: 403')
     })
 
-    it('allows an admin to transfer to any project to a non-collaborator', async function() {
+    it('allows an admin to transfer to any project to a non-collaborator', async function () {
       await expect(
         this.adminSession.transferProjectOwnership(
           this.projectId,

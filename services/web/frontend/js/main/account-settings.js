@@ -1,5 +1,5 @@
 import App from '../base'
-App.controller('AccountSettingsController', function(
+App.controller('AccountSettingsController', function (
   $scope,
   $http,
   $modal,
@@ -9,7 +9,7 @@ App.controller('AccountSettingsController', function(
 ) {
   $scope.subscribed = true
 
-  $scope.unsubscribe = function() {
+  $scope.unsubscribe = function () {
     $scope.unsubscribing = true
     return $http({
       method: 'DELETE',
@@ -18,14 +18,14 @@ App.controller('AccountSettingsController', function(
         'X-CSRF-Token': window.csrfToken
       }
     })
-      .then(function() {
+      .then(function () {
         $scope.unsubscribing = false
         $scope.subscribed = false
       })
       .catch(() => ($scope.unsubscribing = true))
   }
 
-  $scope.deleteAccount = function() {
+  $scope.deleteAccount = function () {
     $modal.open({
       templateUrl: 'deleteAccountModalTemplate',
       controller: 'DeleteAccountModalController',
@@ -48,69 +48,66 @@ App.controller('AccountSettingsController', function(
     eventTracking.send('subscription-funnel', 'settings-page', service)
 })
 
-App.controller('DeleteAccountModalController', function(
-  $scope,
-  $modalInstance,
-  $timeout,
-  $http,
-  userDefaultEmail
-) {
-  $scope.state = {
-    isValid: false,
-    deleteText: '',
-    password: '',
-    confirmSharelatexDelete: false,
-    inflight: false,
-    error: null
-  }
+App.controller(
+  'DeleteAccountModalController',
+  function ($scope, $modalInstance, $timeout, $http, userDefaultEmail) {
+    $scope.state = {
+      isValid: false,
+      deleteText: '',
+      password: '',
+      confirmSharelatexDelete: false,
+      inflight: false,
+      error: null
+    }
 
-  $scope.userDefaultEmail = userDefaultEmail
+    $scope.userDefaultEmail = userDefaultEmail
 
-  $modalInstance.opened.then(() =>
-    $timeout(() => $scope.$broadcast('open'), 700)
-  )
+    $modalInstance.opened.then(() =>
+      $timeout(() => $scope.$broadcast('open'), 700)
+    )
 
-  $scope.checkValidation = () =>
-    ($scope.state.isValid =
-      userDefaultEmail != null &&
-      $scope.state.deleteText.toLowerCase() ===
-        userDefaultEmail.toLowerCase() &&
-      $scope.state.password.length > 0 &&
-      $scope.state.confirmSharelatexDelete)
+    $scope.checkValidation = () =>
+      ($scope.state.isValid =
+        userDefaultEmail != null &&
+        $scope.state.deleteText.toLowerCase() ===
+          userDefaultEmail.toLowerCase() &&
+        $scope.state.password.length > 0 &&
+        $scope.state.confirmSharelatexDelete)
 
-  $scope.delete = function() {
-    $scope.state.inflight = true
-    $scope.state.error = null
-    return $http({
-      method: 'POST',
-      url: '/user/delete',
-      headers: {
-        'X-CSRF-Token': window.csrfToken,
-        'Content-Type': 'application/json'
-      },
-      data: {
-        password: $scope.state.password
-      },
-      disableAutoLoginRedirect: true // we want to handle errors ourselves
-    })
-      .then(function() {
-        $modalInstance.close()
-        $scope.state.inflight = false
-        $scope.state.error = null
-        setTimeout(() => (window.location = '/login'), 1000)
+    $scope.delete = function () {
+      $scope.state.inflight = true
+      $scope.state.error = null
+      return $http({
+        method: 'POST',
+        url: '/user/delete',
+        headers: {
+          'X-CSRF-Token': window.csrfToken,
+          'Content-Type': 'application/json'
+        },
+        data: {
+          password: $scope.state.password
+        },
+        disableAutoLoginRedirect: true // we want to handle errors ourselves
       })
-      .catch(function(response) {
-        const { data, status } = response
-        $scope.state.inflight = false
-        if (status === 403) {
-          $scope.state.error = { code: 'InvalidCredentialsError' }
-        } else if (data.error) {
-          $scope.state.error = { code: data.error }
-        } else {
-          $scope.state.error = { code: 'UserDeletionError' }
-        }
-      })
-  }
+        .then(function () {
+          $modalInstance.close()
+          $scope.state.inflight = false
+          $scope.state.error = null
+          setTimeout(() => (window.location = '/login'), 1000)
+        })
+        .catch(function (response) {
+          const { data, status } = response
+          $scope.state.inflight = false
+          if (status === 403) {
+            $scope.state.error = { code: 'InvalidCredentialsError' }
+          } else if (data.error) {
+            $scope.state.error = { code: data.error }
+          } else {
+            $scope.state.error = { code: 'UserDeletionError' }
+          }
+        })
+    }
 
-  $scope.cancel = () => $modalInstance.dismiss('cancel')
-})
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
+  }
+)

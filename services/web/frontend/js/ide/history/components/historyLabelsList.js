@@ -13,11 +13,11 @@ import _ from 'lodash'
 import App from '../../../base'
 import ColorManager from '../../colors/ColorManager'
 import displayNameForUser from '../util/displayNameForUser'
-const historyLabelsListController = function($scope, $element, $attrs) {
+const historyLabelsListController = function ($scope, $element, $attrs) {
   const ctrl = this
   ctrl.isDragging = false
   ctrl.versionsWithLabels = []
-  $scope.$watchCollection('$ctrl.labels', function(labels) {
+  $scope.$watchCollection('$ctrl.labels', function (labels) {
     if (labels) {
       const groupedLabelsHash = _.groupBy(labels, 'version')
       ctrl.versionsWithLabels = _.map(groupedLabelsHash, (labels, version) => {
@@ -48,7 +48,7 @@ const historyLabelsListController = function($scope, $element, $attrs) {
     }
   }
 
-  ctrl.isVersionSelected = function(version) {
+  ctrl.isVersionSelected = function (version) {
     if (ctrl.rangeSelectionEnabled) {
       return (
         version <= ctrl.selectedHistoryRange.toV &&
@@ -58,7 +58,7 @@ const historyLabelsListController = function($scope, $element, $attrs) {
       return version === ctrl.selectedHistoryVersion
     }
   }
-  ctrl.isVersionHoverSelected = function(version) {
+  ctrl.isVersionHoverSelected = function (version) {
     return (
       ctrl.rangeSelectionEnabled &&
       version <= ctrl.hoveredHistoryRange.toV &&
@@ -137,7 +137,7 @@ const historyLabelsListController = function($scope, $element, $attrs) {
     return user
   }
   ctrl.displayName = displayNameForUser
-  ctrl.getUserCSSStyle = function(user, versionWithLabel) {
+  ctrl.getUserCSSStyle = function (user, versionWithLabel) {
     const curUserId =
       (user != null ? user._id : undefined) ||
       (user != null ? user.id : undefined)

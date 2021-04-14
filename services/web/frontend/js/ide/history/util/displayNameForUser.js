@@ -12,7 +12,7 @@
  */
 let displayNameForUser
 
-export default displayNameForUser = function(user) {
+export default displayNameForUser = function (user) {
   if (user == null) {
     return 'Anonymous'
   }

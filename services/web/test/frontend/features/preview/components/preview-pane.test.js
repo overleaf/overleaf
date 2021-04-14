@@ -3,7 +3,7 @@ import { screen, render, fireEvent } from '@testing-library/react'
 import PreviewPane from '../../../../../frontend/js/features/preview/components/preview-pane'
 const { expect } = require('chai')
 
-describe('<PreviewPane />', function() {
+describe('<PreviewPane />', function () {
   const sampleError1 = {
     content: 'error 1 content',
     file: 'main.tex',
@@ -25,8 +25,8 @@ describe('<PreviewPane />', function() {
     message: "Reference `idontexist' on page 1 undefined on input line 30."
   }
 
-  describe('first error pop-up', function() {
-    it('renders a first error pop-up with the first error', function() {
+  describe('first error pop-up', function () {
+    it('renders a first error pop-up with the first error', function () {
       const propsAfterCompileWithErrors = getProps(false, {
         errors: [sampleError1, sampleError2],
         warnings: [sampleWarning]
@@ -38,7 +38,7 @@ describe('<PreviewPane />', function() {
       screen.getByText(sampleError1.message)
     })
 
-    it('does not render a first error pop-up when there are only warnings', function() {
+    it('does not render a first error pop-up when there are only warnings', function () {
       const propsAfterCompileWithWarningsOnly = getProps(false, {
         errors: [],
         warnings: [sampleWarning]
@@ -51,7 +51,7 @@ describe('<PreviewPane />', function() {
       ).to.not.exist
     })
 
-    it('does not render a first error pop-up when a compile is ongoing', function() {
+    it('does not render a first error pop-up when a compile is ongoing', function () {
       const propsWhileCompiling = getProps(true, {
         errors: [sampleError1, sampleError2],
         warnings: [sampleWarning]
@@ -64,7 +64,7 @@ describe('<PreviewPane />', function() {
       ).to.not.exist
     })
 
-    it('does not render a first error pop-up when viewing logs', function() {
+    it('does not render a first error pop-up when viewing logs', function () {
       const propsWithErrorsViewingLogs = getProps(
         false,
         {
@@ -82,7 +82,7 @@ describe('<PreviewPane />', function() {
       ).to.not.exist
     })
 
-    it('does not render a first error pop-up when going back to the PDF view after viewing logs', function() {
+    it('does not render a first error pop-up when going back to the PDF view after viewing logs', function () {
       const nowTimestamp = Date.now()
       const propsWithErrorsViewingLogs = getProps(
         false,
@@ -113,7 +113,7 @@ describe('<PreviewPane />', function() {
       ).to.not.exist
     })
 
-    it('renders a first error pop-up with updated errors after recompiling', function() {
+    it('renders a first error pop-up with updated errors after recompiling', function () {
       const nowTimestamp = Date.now()
       const laterTimestamp = Date.now() + 1000
       const propsWithErrorsAfterFirstCompile = getProps(
@@ -144,7 +144,7 @@ describe('<PreviewPane />', function() {
       screen.getByText(sampleError2.message)
     })
 
-    it('allows dismissing the first error pop-up', function() {
+    it('allows dismissing the first error pop-up', function () {
       const propsWithErrors = getProps(false, {
         errors: [sampleError1, sampleError2],
         warnings: [sampleWarning]
@@ -162,7 +162,7 @@ describe('<PreviewPane />', function() {
       ).to.not.exist
     })
 
-    it('does not render the first error pop-up with new recompiles after it being dismissed once', function() {
+    it('does not render the first error pop-up with new recompiles after it being dismissed once', function () {
       const nowTimestamp = Date.now()
       const laterTimestamp = Date.now() + 1000
       const propsWithErrorsForFirstCompile = getProps(
@@ -197,8 +197,8 @@ describe('<PreviewPane />', function() {
     })
   })
 
-  describe('accessible description of the compile result', function() {
-    it('renders an accessible description with the errors and warnings count', function() {
+  describe('accessible description of the compile result', function () {
+    it('renders an accessible description with the errors and warnings count', function () {
       const errors = [sampleError1, sampleError2]
       const warnings = [sampleWarning]
       const propsWithErrorsAndWarnings = getProps(false, {
@@ -212,7 +212,7 @@ describe('<PreviewPane />', function() {
         `${warnings.length} warning${warnings.length > 1 ? 's' : ''}`
       )
     })
-    it('renders an accessible description for failed compiles with CLSI errors', function() {
+    it('renders an accessible description for failed compiles with CLSI errors', function () {
       const sampleCLSIError = {
         clsiMaintenance: true
       }
@@ -231,7 +231,7 @@ describe('<PreviewPane />', function() {
       screen.getByText('This project did not compile because of an error')
     })
 
-    it('renders an accessible description for failed compiles with validation issues', function() {
+    it('renders an accessible description for failed compiles with validation issues', function () {
       const sampleValidationIssue = {
         clsiMaintenance: true
       }

@@ -9,19 +9,19 @@ import FileTreeCreateNameInput from '../../../../../../frontend/js/features/file
 import FileTreeContext from '../../../../../../frontend/js/features/file-tree/components/file-tree-context'
 import FileTreeCreateNameProvider from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-create-name'
 
-describe('<FileTreeCreateNameInput/>', function() {
+describe('<FileTreeCreateNameInput/>', function () {
   const sandbox = sinon.createSandbox()
 
-  beforeEach(function() {
+  beforeEach(function () {
     sandbox.spy(window, 'requestAnimationFrame')
   })
 
-  afterEach(function() {
+  afterEach(function () {
     sandbox.restore()
     cleanup()
   })
 
-  it('renders an empty input', async function() {
+  it('renders an empty input', async function () {
     render(
       <FileTreeContext {...contextProps}>
         <FileTreeCreateNameProvider>
@@ -34,7 +34,7 @@ describe('<FileTreeCreateNameInput/>', function() {
     await screen.getByPlaceholderText('File Name')
   })
 
-  it('renders a custom label and placeholder', async function() {
+  it('renders a custom label and placeholder', async function () {
     render(
       <FileTreeContext {...contextProps}>
         <FileTreeCreateNameProvider>
@@ -50,7 +50,7 @@ describe('<FileTreeCreateNameInput/>', function() {
     await screen.getByPlaceholderText('Enter a file name…')
   })
 
-  it('uses an initial name', async function() {
+  it('uses an initial name', async function () {
     render(
       <FileTreeContext {...contextProps}>
         <FileTreeCreateNameProvider initialName="test.tex">
@@ -63,7 +63,7 @@ describe('<FileTreeCreateNameInput/>', function() {
     expect(input.value).to.equal('test.tex')
   })
 
-  it('focuses the name', async function() {
+  it('focuses the name', async function () {
     render(
       <FileTreeContext {...contextProps}>
         <FileTreeCreateNameProvider initialName="test.tex">

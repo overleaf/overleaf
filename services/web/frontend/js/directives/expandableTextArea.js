@@ -10,7 +10,7 @@ import App from '../base'
 export default App.directive('expandableTextArea', () => ({
   restrict: 'A',
   link(scope, el) {
-    const resetHeight = function() {
+    const resetHeight = function () {
       const curHeight = el.outerHeight()
       const fitHeight = el.prop('scrollHeight')
       // clear height if text area is empty

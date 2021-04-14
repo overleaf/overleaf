@@ -6,21 +6,21 @@ import renderWithContext from '../../helpers/render-with-context'
 
 import FileTreeItemName from '../../../../../../frontend/js/features/file-tree/components/file-tree-item/file-tree-item-name'
 
-describe('<FileTreeItemName />', function() {
+describe('<FileTreeItemName />', function () {
   const sandbox = sinon.createSandbox()
   const setIsDraggable = sinon.stub()
 
-  beforeEach(function() {
+  beforeEach(function () {
     sandbox.spy(window, 'requestAnimationFrame')
   })
 
-  afterEach(function() {
+  afterEach(function () {
     sandbox.restore()
     setIsDraggable.reset()
     cleanup()
   })
 
-  it('renders name as button', function() {
+  it('renders name as button', function () {
     renderWithContext(
       <FileTreeItemName
         name="foo.tex"
@@ -33,7 +33,7 @@ describe('<FileTreeItemName />', function() {
     expect(screen.queryByRole('textbox')).to.not.exist
   })
 
-  it("doesn't start renaming on unselected component", function() {
+  it("doesn't start renaming on unselected component", function () {
     renderWithContext(
       <FileTreeItemName
         name="foo.tex"
@@ -49,7 +49,7 @@ describe('<FileTreeItemName />', function() {
     expect(screen.queryByRole('textbox')).to.not.exist
   })
 
-  it('start renaming on double-click', function() {
+  it('start renaming on double-click', function () {
     renderWithContext(
       <FileTreeItemName
         name="foo.tex"
@@ -68,7 +68,7 @@ describe('<FileTreeItemName />', function() {
     expect(setIsDraggable).to.be.calledWith(false)
   })
 
-  it('cannot start renaming in read-only', function() {
+  it('cannot start renaming in read-only', function () {
     renderWithContext(
       <FileTreeItemName
         name="foo.tex"
@@ -88,8 +88,8 @@ describe('<FileTreeItemName />', function() {
     expect(screen.queryByRole('textbox')).to.not.exist
   })
 
-  describe('stop renaming', function() {
-    beforeEach(function() {
+  describe('stop renaming', function () {
+    beforeEach(function () {
       renderWithContext(
         <FileTreeItemName
           name="foo.tex"
@@ -107,7 +107,7 @@ describe('<FileTreeItemName />', function() {
       fireEvent.change(input, { target: { value: 'bar.tex' } })
     })
 
-    it('on Escape', function() {
+    it('on Escape', function () {
       const input = screen.getByRole('textbox')
       fireEvent.keyDown(input, { key: 'Escape' })
 

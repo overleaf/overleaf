@@ -27,7 +27,7 @@ UserSessionsManager = {
       .multi()
       .sadd(sessionSetKey, value)
       .pexpire(sessionSetKey, `${Settings.cookieSessionLength}`) // in milliseconds
-      .exec(function(err, response) {
+      .exec(function (err, response) {
         if (err) {
           OError.tag(
             err,
@@ -39,14 +39,14 @@ UserSessionsManager = {
           )
           return callback(err)
         }
-        UserSessionsManager._checkSessions(user, function() {})
+        UserSessionsManager._checkSessions(user, function () {})
         callback()
       })
   },
 
   untrackSession(user, sessionId, callback) {
     if (!callback) {
-      callback = function() {}
+      callback = function () {}
     }
     if (!user) {
       return callback(null)
@@ -60,7 +60,7 @@ UserSessionsManager = {
       .multi()
       .srem(sessionSetKey, value)
       .pexpire(sessionSetKey, `${Settings.cookieSessionLength}`) // in milliseconds
-      .exec(function(err, response) {
+      .exec(function (err, response) {
         if (err) {
           OError.tag(
             err,
@@ -72,7 +72,7 @@ UserSessionsManager = {
           )
           return callback(err)
         }
-        UserSessionsManager._checkSessions(user, function() {})
+        UserSessionsManager._checkSessions(user, function () {})
         callback()
       })
   },
@@ -80,7 +80,7 @@ UserSessionsManager = {
   getAllUserSessions(user, exclude, callback) {
     exclude = _.map(exclude, UserSessionsManager._sessionKey)
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
-    rclient.smembers(sessionSetKey, function(err, sessionKeys) {
+    rclient.smembers(sessionSetKey, function (err, sessionKeys) {
       if (err) {
         OError.tag(err, 'error getting all session keys for user from redis', {
           user_id: user._id
@@ -96,7 +96,7 @@ UserSessionsManager = {
       Async.mapSeries(
         sessionKeys,
         (k, cb) => rclient.get(k, cb),
-        function(err, sessions) {
+        function (err, sessions) {
           if (err) {
             OError.tag(err, 'error getting all sessions for user from redis', {
               user_id: user._id
@@ -136,7 +136,7 @@ UserSessionsManager = {
       return callback(null)
     }
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
-    rclient.smembers(sessionSetKey, function(err, sessionKeys) {
+    rclient.smembers(sessionSetKey, function (err, sessionKeys) {
       if (err) {
         OError.tag(err, 'error getting contents of UserSessions set', {
           user_id: user._id,
@@ -162,7 +162,7 @@ UserSessionsManager = {
 
       const deletions = keysToDelete.map(k => cb => rclient.del(k, cb))
 
-      Async.series(deletions, function(err, _result) {
+      Async.series(deletions, function (err, _result) {
         if (err) {
           OError.tag(err, 'error revoking all sessions for user', {
             user_id: user._id,
@@ -170,7 +170,7 @@ UserSessionsManager = {
           })
           return callback(err)
         }
-        rclient.srem(sessionSetKey, keysToDelete, function(err) {
+        rclient.srem(sessionSetKey, keysToDelete, function (err) {
           if (err) {
             OError.tag(err, 'error removing session set for user', {
               user_id: user._id,
@@ -192,7 +192,7 @@ UserSessionsManager = {
     rclient.pexpire(
       sessionSetKey,
       `${Settings.cookieSessionLength}`, // in milliseconds
-      function(err, response) {
+      function (err, response) {
         if (err) {
           OError.tag(err, 'error while updating ttl on UserSessions set', {
             user_id: user._id
@@ -209,7 +209,7 @@ UserSessionsManager = {
       return callback(null)
     }
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
-    rclient.smembers(sessionSetKey, function(err, sessionKeys) {
+    rclient.smembers(sessionSetKey, function (err, sessionKeys) {
       if (err) {
         OError.tag(err, 'error getting contents of UserSessions set', {
           user_id: user._id,
@@ -219,12 +219,12 @@ UserSessionsManager = {
       }
       Async.series(
         sessionKeys.map(key => next =>
-          rclient.get(key, function(err, val) {
+          rclient.get(key, function (err, val) {
             if (err) {
               return next(err)
             }
             if (!val) {
-              rclient.srem(sessionSetKey, key, function(err, result) {
+              rclient.srem(sessionSetKey, key, function (err, result) {
                 return next(err)
               })
             } else {
@@ -232,7 +232,7 @@ UserSessionsManager = {
             }
           })
         ),
-        function(err, results) {
+        function (err, results) {
           callback(err)
         }
       )

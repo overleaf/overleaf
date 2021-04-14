@@ -3,7 +3,7 @@ import OutlinePane from '../components/outline-pane'
 import { react2angular } from 'react2angular'
 import { rootContext } from '../../../shared/context/root-context'
 
-App.controller('OutlineController', function($scope, ide, eventTracking) {
+App.controller('OutlineController', function ($scope, ide, eventTracking) {
   $scope.isTexFile = false
   $scope.outline = []
   $scope.eventTracking = eventTracking

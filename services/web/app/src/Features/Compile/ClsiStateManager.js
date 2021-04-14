@@ -34,50 +34,48 @@ const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 // unsetting it if it removes any documents from the doc updater.
 
 const buildState = s =>
-  crypto
-    .createHash('sha1')
-    .update(s, 'utf8')
-    .digest('hex')
+  crypto.createHash('sha1').update(s, 'utf8').digest('hex')
 
 module.exports = ClsiStateManager = {
   computeHash(project, options, callback) {
     if (callback == null) {
-      callback = function(err, hash) {}
+      callback = function (err, hash) {}
     }
-    return ProjectEntityHandler.getAllEntitiesFromProject(project, function(
-      err,
-      docs,
-      files
-    ) {
-      const fileList = Array.from(files || []).map(
-        f => `${f.file._id}:${f.file.rev}:${f.file.created}:${f.path}`
-      )
-      const docList = Array.from(docs || []).map(d => `${d.doc._id}:${d.path}`)
-      const sortedEntityList = [
-        ...Array.from(docList),
-        ...Array.from(fileList)
-      ].sort()
-      // ignore the isAutoCompile options as it doesn't affect the
-      // output, but include all other options e.g. draft
-      const optionsList = (() => {
-        const result = []
-        const object = options || {}
-        for (let key in object) {
-          const value = object[key]
-          if (!['isAutoCompile'].includes(key)) {
-            result.push(`option ${key}:${value}`)
+    return ProjectEntityHandler.getAllEntitiesFromProject(
+      project,
+      function (err, docs, files) {
+        const fileList = Array.from(files || []).map(
+          f => `${f.file._id}:${f.file.rev}:${f.file.created}:${f.path}`
+        )
+        const docList = Array.from(docs || []).map(
+          d => `${d.doc._id}:${d.path}`
+        )
+        const sortedEntityList = [
+          ...Array.from(docList),
+          ...Array.from(fileList)
+        ].sort()
+        // ignore the isAutoCompile options as it doesn't affect the
+        // output, but include all other options e.g. draft
+        const optionsList = (() => {
+          const result = []
+          const object = options || {}
+          for (let key in object) {
+            const value = object[key]
+            if (!['isAutoCompile'].includes(key)) {
+              result.push(`option ${key}:${value}`)
+            }
           }
-        }
-        return result
-      })()
-      const sortedOptionsList = optionsList.sort()
-      const hash = buildState(
-        [
-          ...Array.from(sortedEntityList),
-          ...Array.from(sortedOptionsList)
-        ].join('\n')
-      )
-      return callback(null, hash)
-    })
+          return result
+        })()
+        const sortedOptionsList = optionsList.sort()
+        const hash = buildState(
+          [
+            ...Array.from(sortedEntityList),
+            ...Array.from(sortedOptionsList)
+          ].join('\n')
+        )
+        return callback(null, hash)
+      }
+    )
   }
 }

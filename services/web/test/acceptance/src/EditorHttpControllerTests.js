@@ -1,12 +1,12 @@
 const User = require('./helpers/User')
 const { expect } = require('chai')
 
-describe('EditorHttpController', function() {
-  beforeEach('login', function(done) {
+describe('EditorHttpController', function () {
+  beforeEach('login', function (done) {
     this.user = new User()
     this.user.login(done)
   })
-  beforeEach('create project', function(done) {
+  beforeEach('create project', function (done) {
     this.projectName = 'wombat'
     this.user.createProject(this.projectName, (error, projectId) => {
       if (error) return done(error)
@@ -14,7 +14,7 @@ describe('EditorHttpController', function() {
       done()
     })
   })
-  beforeEach('create doc', function(done) {
+  beforeEach('create doc', function (done) {
     this.user.createDocInProject(
       this.projectId,
       null,
@@ -26,8 +26,8 @@ describe('EditorHttpController', function() {
     )
   })
 
-  describe('joinProject', function() {
-    it('should emit an empty deletedDocs array', function(done) {
+  describe('joinProject', function () {
+    it('should emit an empty deletedDocs array', function (done) {
       this.user.joinProject(this.projectId, (error, details) => {
         if (error) return done(error)
 
@@ -36,12 +36,12 @@ describe('EditorHttpController', function() {
       })
     })
 
-    describe('after deleting a doc', function() {
-      beforeEach(function(done) {
+    describe('after deleting a doc', function () {
+      beforeEach(function (done) {
         this.user.deleteItemInProject(this.projectId, 'doc', this.docId, done)
       })
 
-      it('should include the deleted doc in the deletedDocs array', function(done) {
+      it('should include the deleted doc in the deletedDocs array', function (done) {
         this.user.joinProject(this.projectId, (error, details) => {
           if (error) return done(error)
 

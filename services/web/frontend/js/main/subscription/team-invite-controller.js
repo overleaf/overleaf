@@ -11,7 +11,7 @@
  */
 import App from '../../base'
 
-export default App.controller('TeamInviteController', function($scope, $http) {
+export default App.controller('TeamInviteController', function ($scope, $http) {
   $scope.inflight = false
 
   if (window.hasIndividualRecurlySubscription) {
@@ -22,12 +22,12 @@ export default App.controller('TeamInviteController', function($scope, $http) {
 
   $scope.keepPersonalSubscription = () => ($scope.view = 'teamInvite')
 
-  $scope.cancelPersonalSubscription = function() {
+  $scope.cancelPersonalSubscription = function () {
     $scope.inflight = true
     const request = $http.post('/user/subscription/cancel', {
       _csrf: window.csrfToken
     })
-    request.then(function() {
+    request.then(function () {
       $scope.inflight = false
       return ($scope.view = 'teamInvite')
     })
@@ -38,12 +38,12 @@ export default App.controller('TeamInviteController', function($scope, $http) {
     })
   }
 
-  return ($scope.joinTeam = function() {
+  return ($scope.joinTeam = function () {
     $scope.inflight = true
     const request = $http.put(`/subscription/invites/${window.inviteToken}/`, {
       _csrf: window.csrfToken
     })
-    request.then(function(response) {
+    request.then(function (response) {
       const { status } = response
       $scope.inflight = false
       $scope.view = 'inviteAccepted'

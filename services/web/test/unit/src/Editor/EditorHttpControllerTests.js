@@ -6,8 +6,8 @@ const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const MODULE_PATH = '../../../../app/src/Features/Editor/EditorHttpController'
 
-describe('EditorHttpController', function() {
-  beforeEach(function() {
+describe('EditorHttpController', function () {
+  beforeEach(function () {
     this.ownerId = new ObjectId()
     this.project = {
       _id: new ObjectId(),
@@ -152,19 +152,19 @@ describe('EditorHttpController', function() {
     })
   })
 
-  describe('joinProject', function() {
-    beforeEach(function() {
+  describe('joinProject', function () {
+    beforeEach(function () {
       this.req.params = { Project_id: this.project._id }
       this.req.query = { user_id: this.user._id }
     })
 
-    describe('successfully', function() {
-      beforeEach(function(done) {
+    describe('successfully', function () {
+      beforeEach(function (done) {
         this.res.json.callsFake(() => done())
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
-      it('should return the project and privilege level', function() {
+      it('should return the project and privilege level', function () {
         expect(this.res.json).to.have.been.calledWith({
           project: this.projectView,
           privilegeLevel: 'owner',
@@ -172,32 +172,32 @@ describe('EditorHttpController', function() {
         })
       })
 
-      it('should not try to unmark the project as deleted', function() {
+      it('should not try to unmark the project as deleted', function () {
         expect(this.ProjectDeleter.promises.unmarkAsDeletedByExternalSource).not
           .to.have.been.called
       })
 
-      it('should send an inc metric', function() {
+      it('should send an inc metric', function () {
         expect(this.Metrics.inc).to.have.been.calledWith('editor.join-project')
       })
     })
 
-    describe('when the project is marked as deleted', function() {
-      beforeEach(function(done) {
+    describe('when the project is marked as deleted', function () {
+      beforeEach(function (done) {
         this.projectView.deletedByExternalDataSource = true
         this.res.json.callsFake(() => done())
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
-      it('should unmark the project as deleted', function() {
+      it('should unmark the project as deleted', function () {
         expect(
           this.ProjectDeleter.promises.unmarkAsDeletedByExternalSource
         ).to.have.been.calledWith(this.project._id)
       })
     })
 
-    describe('with a restricted user', function() {
-      beforeEach(function(done) {
+    describe('with a restricted user', function () {
+      beforeEach(function (done) {
         this.AuthorizationManager.isRestrictedUser.returns(true)
         this.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
           'readOnly'
@@ -206,7 +206,7 @@ describe('EditorHttpController', function() {
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
-      it('should mark the user as restricted, and hide details of owner', function() {
+      it('should mark the user as restricted, and hide details of owner', function () {
         expect(this.res.json).to.have.been.calledWith({
           project: this.reducedProjectView,
           privilegeLevel: 'readOnly',
@@ -215,8 +215,8 @@ describe('EditorHttpController', function() {
       })
     })
 
-    describe('when not authorized', function() {
-      beforeEach(function(done) {
+    describe('when not authorized', function () {
+      beforeEach(function (done) {
         this.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
           null
         )
@@ -224,13 +224,13 @@ describe('EditorHttpController', function() {
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
-      it('should send a 403 response', function() {
+      it('should send a 403 response', function () {
         expect(this.res.sendStatus).to.have.been.calledWith(403)
       })
     })
 
-    describe('with an anonymous user', function() {
-      beforeEach(function(done) {
+    describe('with an anonymous user', function () {
+      beforeEach(function (done) {
         this.req.query = { user_id: 'anonymous-user' }
         this.res.json.callsFake(() => done())
         this.AuthorizationManager.isRestrictedUser
@@ -242,7 +242,7 @@ describe('EditorHttpController', function() {
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
-      it('should mark the user as restricted', function() {
+      it('should mark the user as restricted', function () {
         expect(this.res.json).to.have.been.calledWith({
           project: this.reducedProjectView,
           privilegeLevel: 'readOnly',
@@ -251,14 +251,14 @@ describe('EditorHttpController', function() {
       })
     })
 
-    describe('when project is not found', function() {
-      beforeEach(function(done) {
+    describe('when project is not found', function () {
+      beforeEach(function (done) {
         this.ProjectGetter.promises.getProjectWithoutDocLines.resolves(null)
         this.next.callsFake(() => done())
         this.EditorHttpController.joinProject(this.req, this.res, this.next)
       })
 
-      it('should handle return not found error', function() {
+      it('should handle return not found error', function () {
         expect(this.next).to.have.been.calledWith(
           sinon.match.instanceOf(Errors.NotFoundError)
         )
@@ -266,8 +266,8 @@ describe('EditorHttpController', function() {
     })
   })
 
-  describe('addDoc', function() {
-    beforeEach(function() {
+  describe('addDoc', function () {
+    beforeEach(function () {
       this.req.params = { Project_id: this.project._id }
       this.req.body = {
         name: (this.name = 'doc-name'),
@@ -275,13 +275,13 @@ describe('EditorHttpController', function() {
       }
     })
 
-    describe('successfully', function() {
-      beforeEach(function(done) {
+    describe('successfully', function () {
+      beforeEach(function (done) {
         this.res.json.callsFake(() => done())
         this.EditorHttpController.addDoc(this.req, this.res)
       })
 
-      it('should call EditorController.addDoc', function() {
+      it('should call EditorController.addDoc', function () {
         expect(this.EditorController.promises.addDoc).to.have.been.calledWith(
           this.project._id,
           this.parentFolderId,
@@ -292,13 +292,13 @@ describe('EditorHttpController', function() {
         )
       })
 
-      it('should send the doc back as JSON', function() {
+      it('should send the doc back as JSON', function () {
         expect(this.res.json).to.have.been.calledWith(this.doc)
       })
     })
 
-    describe('unsuccesfully', function() {
-      it('handle name too short', function(done) {
+    describe('unsuccesfully', function () {
+      it('handle name too short', function (done) {
         this.req.body.name = ''
         this.res.sendStatus.callsFake(status => {
           expect(status).to.equal(400)
@@ -307,7 +307,7 @@ describe('EditorHttpController', function() {
         this.EditorHttpController.addDoc(this.req, this.res)
       })
 
-      it('handle too many files', function(done) {
+      it('handle too many files', function (done) {
         this.EditorController.promises.addDoc.rejects(
           new Error('project_has_too_many_files')
         )
@@ -322,8 +322,8 @@ describe('EditorHttpController', function() {
     })
   })
 
-  describe('addFolder', function() {
-    beforeEach(function() {
+  describe('addFolder', function () {
+    beforeEach(function () {
       this.folderName = 'folder-name'
       this.req.params = { Project_id: this.project._id }
       this.req.body = {
@@ -332,13 +332,13 @@ describe('EditorHttpController', function() {
       }
     })
 
-    describe('successfully', function() {
-      beforeEach(function(done) {
+    describe('successfully', function () {
+      beforeEach(function (done) {
         this.res.json.callsFake(() => done())
         this.EditorHttpController.addFolder(this.req, this.res)
       })
 
-      it('should call EditorController.addFolder', function() {
+      it('should call EditorController.addFolder', function () {
         expect(
           this.EditorController.promises.addFolder
         ).to.have.been.calledWith(
@@ -349,13 +349,13 @@ describe('EditorHttpController', function() {
         )
       })
 
-      it('should send the folder back as JSON', function() {
+      it('should send the folder back as JSON', function () {
         expect(this.res.json).to.have.been.calledWith(this.folder)
       })
     })
 
-    describe('unsuccesfully', function() {
-      it('handle name too short', function(done) {
+    describe('unsuccesfully', function () {
+      it('handle name too short', function (done) {
         this.req.body.name = ''
         this.res.sendStatus.callsFake(status => {
           expect(status).to.equal(400)
@@ -364,7 +364,7 @@ describe('EditorHttpController', function() {
         this.EditorHttpController.addFolder(this.req, this.res)
       })
 
-      it('handle too many files', function(done) {
+      it('handle too many files', function (done) {
         this.EditorController.promises.addFolder.rejects(
           new Error('project_has_too_many_files')
         )
@@ -377,7 +377,7 @@ describe('EditorHttpController', function() {
         this.EditorHttpController.addFolder(this.req, this.res)
       })
 
-      it('handle invalid element name', function(done) {
+      it('handle invalid element name', function (done) {
         this.EditorController.promises.addFolder.rejects(
           new Error('invalid element name')
         )
@@ -392,8 +392,8 @@ describe('EditorHttpController', function() {
     })
   })
 
-  describe('renameEntity', function() {
-    beforeEach(function() {
+  describe('renameEntity', function () {
+    beforeEach(function () {
       this.entityId = 'entity-id-123'
       this.entityType = 'entity-type'
       this.req.params = {
@@ -403,15 +403,15 @@ describe('EditorHttpController', function() {
       }
     })
 
-    describe('successfully', function() {
-      beforeEach(function(done) {
+    describe('successfully', function () {
+      beforeEach(function (done) {
         this.newName = 'new-name'
         this.req.body = { name: this.newName }
         this.res.sendStatus.callsFake(() => done())
         this.EditorHttpController.renameEntity(this.req, this.res)
       })
 
-      it('should call EditorController.renameEntity', function() {
+      it('should call EditorController.renameEntity', function () {
         expect(
           this.EditorController.promises.renameEntity
         ).to.have.been.calledWith(
@@ -423,37 +423,37 @@ describe('EditorHttpController', function() {
         )
       })
 
-      it('should send back a success response', function() {
+      it('should send back a success response', function () {
         expect(this.res.sendStatus).to.have.been.calledWith(204)
       })
     })
-    describe('with long name', function() {
-      beforeEach(function() {
+    describe('with long name', function () {
+      beforeEach(function () {
         this.newName = 'long'.repeat(100)
         this.req.body = { name: this.newName }
         this.EditorHttpController.renameEntity(this.req, this.res)
       })
 
-      it('should send back a bad request status code', function() {
+      it('should send back a bad request status code', function () {
         expect(this.res.sendStatus).to.have.been.calledWith(400)
       })
     })
 
-    describe('with 0 length name', function() {
-      beforeEach(function() {
+    describe('with 0 length name', function () {
+      beforeEach(function () {
         this.newName = ''
         this.req.body = { name: this.newName }
         this.EditorHttpController.renameEntity(this.req, this.res)
       })
 
-      it('should send back a bad request status code', function() {
+      it('should send back a bad request status code', function () {
         expect(this.res.sendStatus).to.have.been.calledWith(400)
       })
     })
   })
 
-  describe('moveEntity', function() {
-    beforeEach(function(done) {
+  describe('moveEntity', function () {
+    beforeEach(function (done) {
       this.entityId = 'entity-id-123'
       this.entityType = 'entity-type'
       this.folderId = 'folder-id-123'
@@ -467,7 +467,7 @@ describe('EditorHttpController', function() {
       this.EditorHttpController.moveEntity(this.req, this.res)
     })
 
-    it('should call EditorController.moveEntity', function() {
+    it('should call EditorController.moveEntity', function () {
       expect(this.EditorController.promises.moveEntity).to.have.been.calledWith(
         this.project._id,
         this.entityId,
@@ -477,13 +477,13 @@ describe('EditorHttpController', function() {
       )
     })
 
-    it('should send back a success response', function() {
+    it('should send back a success response', function () {
       expect(this.res.sendStatus).to.have.been.calledWith(204)
     })
   })
 
-  describe('deleteEntity', function() {
-    beforeEach(function(done) {
+  describe('deleteEntity', function () {
+    beforeEach(function (done) {
       this.entityId = 'entity-id-123'
       this.entityType = 'entity-type'
       this.req.params = {
@@ -495,7 +495,7 @@ describe('EditorHttpController', function() {
       this.EditorHttpController.deleteEntity(this.req, this.res)
     })
 
-    it('should call EditorController.deleteEntity', function() {
+    it('should call EditorController.deleteEntity', function () {
       expect(
         this.EditorController.promises.deleteEntity
       ).to.have.been.calledWith(
@@ -507,13 +507,13 @@ describe('EditorHttpController', function() {
       )
     })
 
-    it('should send back a success response', function() {
+    it('should send back a success response', function () {
       expect(this.res.sendStatus).to.have.been.calledWith(204)
     })
   })
 
-  describe('convertDocToFile', function() {
-    beforeEach(function(done) {
+  describe('convertDocToFile', function () {
+    beforeEach(function (done) {
       this.req.params = {
         Project_id: this.project._id.toString(),
         entity_id: this.doc._id.toString()
@@ -523,8 +523,8 @@ describe('EditorHttpController', function() {
       this.EditorHttpController.convertDocToFile(this.req, this.res)
     })
 
-    describe('when successful', function() {
-      it('should convert the doc to a file', function() {
+    describe('when successful', function () {
+      it('should convert the doc to a file', function () {
         expect(
           this.ProjectEntityUpdateHandler.promises.convertDocToFile
         ).to.have.been.calledWith(
@@ -534,15 +534,15 @@ describe('EditorHttpController', function() {
         )
       })
 
-      it('should return the file id in the response', function() {
+      it('should return the file id in the response', function () {
         expect(this.res.json).to.have.been.calledWith({
           fileId: this.file._id.toString()
         })
       })
     })
 
-    describe('when the doc has ranges', function() {
-      it('should return a 422 - Unprocessable Entity', function(done) {
+    describe('when the doc has ranges', function () {
+      it('should return a 422 - Unprocessable Entity', function (done) {
         this.ProjectEntityUpdateHandler.promises.convertDocToFile.rejects(
           new Errors.DocHasRangesError({})
         )
@@ -558,8 +558,8 @@ describe('EditorHttpController', function() {
       })
     })
 
-    describe("when the doc does't exist", function() {
-      it('should return a 404 - not found', function(done) {
+    describe("when the doc does't exist", function () {
+      it('should return a 404 - not found', function (done) {
         this.ProjectEntityUpdateHandler.promises.convertDocToFile.rejects(
           new Errors.NotFoundError({})
         )

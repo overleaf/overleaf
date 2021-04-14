@@ -27,7 +27,7 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
     scope.pleaseJumpTo = null
     scope.scale = null
     let initializedPosition = false
-    const initializePosition = function() {
+    const initializePosition = function () {
       let position, scale
       if (initializedPosition) {
         return
@@ -62,7 +62,7 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
     }
 
     const flashControls = () =>
-      scope.$evalAsync(function() {
+      scope.$evalAsync(function () {
         scope.flashControls = true
         return $timeout(() => (scope.flashControls = false), 1000)
       })
@@ -78,7 +78,7 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
 
     scope.$on('flash-controls', () => flashControls())
 
-    scope.$watch('pdfSrc', function(url) {
+    scope.$watch('pdfSrc', function (url) {
       if (url) {
         scope.loading = true
         scope.loaded = false
@@ -88,35 +88,35 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
       }
     })
 
-    scope.$on('loaded', function() {
+    scope.$on('loaded', function () {
       scope.loaded = true
       scope.progress = 100
-      return $timeout(function() {
+      return $timeout(function () {
         scope.loading = false
         return delete scope.progress
       }, 500)
     })
 
-    scope.fitToHeight = function() {
+    scope.fitToHeight = function () {
       const scale = angular.copy(scope.scale)
       scale.scaleMode = 'scale_mode_fit_height'
       return (scope.scale = scale)
     }
 
-    scope.fitToWidth = function() {
+    scope.fitToWidth = function () {
       const scale = angular.copy(scope.scale)
       scale.scaleMode = 'scale_mode_fit_width'
       return (scope.scale = scale)
     }
 
-    scope.zoomIn = function() {
+    scope.zoomIn = function () {
       const scale = angular.copy(scope.scale)
       scale.scaleMode = 'scale_mode_value'
       scale.scale = scale.scale * 1.2
       return (scope.scale = scale)
     }
 
-    scope.zoomOut = function() {
+    scope.zoomOut = function () {
       const scale = angular.copy(scope.scale)
       scale.scaleMode = 'scale_mode_value'
       scale.scale = scale.scale / 1.2
@@ -125,13 +125,13 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
 
     if (attrs.resizeOn != null) {
       for (let event of Array.from(attrs.resizeOn.split(','))) {
-        scope.$on(event, function(e) {})
+        scope.$on(event, function (e) {})
       }
     }
     // console.log 'got a resize event', event, e
 
     scope.$on('progress', (event, progress) =>
-      scope.$apply(function() {
+      scope.$apply(function () {
         if (scope.loaded) {
           return
         }
@@ -145,7 +145,7 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
       })
     )
 
-    return scope.$on('$destroy', function() {})
+    return scope.$on('$destroy', function () {})
   },
   // console.log 'pdfjs destroy event'
 

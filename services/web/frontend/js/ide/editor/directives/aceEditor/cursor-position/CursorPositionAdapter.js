@@ -46,10 +46,7 @@ export default CursorPositionAdapter = class CursorPositionAdapter {
   }
 
   gotoOffset(offset) {
-    const lines = this.editor
-      .getSession()
-      .getDocument()
-      .getAllLines()
+    const lines = this.editor.getSession().getDocument().getAllLines()
     const position = EditorShareJsCodec.shareJsOffsetToRowColumn(offset, lines)
     return this.gotoLine(position.row + 1, position.column)
   }

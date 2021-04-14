@@ -12,7 +12,7 @@ module.exports = {
     const userAgent = req.get('User-Agent')
     ProjectLocator.findElement(
       { project_id: projectId, element_id: fileId, type: 'file' },
-      function(err, file) {
+      function (err, file) {
         if (err) {
           logger.err(
             { err, projectId, fileId, queryString },
@@ -20,24 +20,26 @@ module.exports = {
           )
           return res.sendStatus(500)
         }
-        FileStoreHandler.getFileStream(projectId, fileId, queryString, function(
-          err,
-          stream
-        ) {
-          if (err) {
-            logger.err(
-              { err, projectId, fileId, queryString },
-              'error getting file stream for downloading file'
-            )
-            return res.sendStatus(500)
+        FileStoreHandler.getFileStream(
+          projectId,
+          fileId,
+          queryString,
+          function (err, stream) {
+            if (err) {
+              logger.err(
+                { err, projectId, fileId, queryString },
+                'error getting file stream for downloading file'
+              )
+              return res.sendStatus(500)
+            }
+            // mobile safari will try to render html files, prevent this
+            if (isMobileSafari(userAgent) && isHtml(file)) {
+              res.setHeader('Content-Type', 'text/plain')
+            }
+            res.setContentDisposition('attachment', { filename: file.name })
+            stream.pipe(res)
           }
-          // mobile safari will try to render html files, prevent this
-          if (isMobileSafari(userAgent) && isHtml(file)) {
-            res.setHeader('Content-Type', 'text/plain')
-          }
-          res.setContentDisposition('attachment', { filename: file.name })
-          stream.pipe(res)
-        })
+        )
       }
     )
   },

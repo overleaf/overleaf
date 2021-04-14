@@ -17,8 +17,8 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Institutions/InstitutionsGetter.js'
 )
 
-describe('InstitutionsGetter', function() {
-  beforeEach(function() {
+describe('InstitutionsGetter', function () {
+  beforeEach(function () {
     this.UserGetter = { getUserFullEmails: sinon.stub() }
     this.InstitutionsGetter = SandboxedModule.require(modulePath, {
       requires: {
@@ -31,8 +31,8 @@ describe('InstitutionsGetter', function() {
     return (this.userId = '12345abcde')
   })
 
-  describe('getConfirmedInstitutions', function() {
-    it('filters unconfirmed affiliations', function(done) {
+  describe('getConfirmedInstitutions', function () {
+    it('filters unconfirmed affiliations', function (done) {
       this.userEmails = [
         {
           confirmedAt: null,
@@ -61,7 +61,7 @@ describe('InstitutionsGetter', function() {
       )
     })
 
-    it('should handle empty response', function(done) {
+    it('should handle empty response', function (done) {
       this.UserGetter.getUserFullEmails.yields(null, [])
       return this.InstitutionsGetter.getConfirmedInstitutions(
         this.userId,
@@ -73,7 +73,7 @@ describe('InstitutionsGetter', function() {
       )
     })
 
-    it('should handle error', function(done) {
+    it('should handle error', function (done) {
       this.UserGetter.getUserFullEmails.yields(new Error('Nope'))
       return this.InstitutionsGetter.getConfirmedInstitutions(
         this.userId,

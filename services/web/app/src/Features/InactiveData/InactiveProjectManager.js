@@ -24,35 +24,36 @@ const { ObjectId } = require('mongodb')
 const MILISECONDS_IN_DAY = 86400000
 module.exports = InactiveProjectManager = {
   reactivateProjectIfRequired(project_id, callback) {
-    return ProjectGetter.getProject(project_id, { active: true }, function(
-      err,
-      project
-    ) {
-      if (err != null) {
-        OError.tag(err, 'error getting project', {
-          project_id
-        })
-        return callback(err)
-      }
-      logger.log(
-        { project_id, active: project.active },
-        'seeing if need to reactivate project'
-      )
-
-      if (project.active) {
-        return callback()
-      }
-
-      return DocstoreManager.unarchiveProject(project_id, function(err) {
+    return ProjectGetter.getProject(
+      project_id,
+      { active: true },
+      function (err, project) {
         if (err != null) {
-          OError.tag(err, 'error reactivating project in docstore', {
+          OError.tag(err, 'error getting project', {
             project_id
           })
           return callback(err)
         }
-        return ProjectUpdateHandler.markAsActive(project_id, callback)
-      })
-    })
+        logger.log(
+          { project_id, active: project.active },
+          'seeing if need to reactivate project'
+        )
+
+        if (project.active) {
+          return callback()
+        }
+
+        return DocstoreManager.unarchiveProject(project_id, function (err) {
+          if (err != null) {
+            OError.tag(err, 'error reactivating project in docstore', {
+              project_id
+            })
+            return callback(err)
+          }
+          return ProjectUpdateHandler.markAsActive(project_id, callback)
+        })
+      }
+    )
   },
 
   deactivateOldProjects(limit, daysOld, callback) {
@@ -73,12 +74,12 @@ module.exports = InactiveProjectManager = {
       .sort({ _id: 1 })
       .limit(limit)
       .read('secondary')
-      .exec(function(err, projects) {
+      .exec(function (err, projects) {
         if (err != null) {
           logger.err({ err }, 'could not get projects for deactivating')
         }
         const jobs = _.map(projects, project => cb =>
-          InactiveProjectManager.deactivateProject(project._id, function(err) {
+          InactiveProjectManager.deactivateProject(project._id, function (err) {
             if (err) {
               logger.err(
                 { project_id: project._id, err: err },
@@ -92,7 +93,7 @@ module.exports = InactiveProjectManager = {
           { numberOfProjects: projects && projects.length },
           'deactivating projects'
         )
-        async.series(jobs, function(err) {
+        async.series(jobs, function (err) {
           if (err != null) {
             logger.warn({ err }, 'error deactivating projects')
           }
@@ -107,7 +108,7 @@ module.exports = InactiveProjectManager = {
       cb => DocstoreManager.archiveProject(project_id, cb),
       cb => ProjectUpdateHandler.markAsInactive(project_id, cb)
     ]
-    return async.series(jobs, function(err) {
+    return async.series(jobs, function (err) {
       if (err != null) {
         logger.warn({ err, project_id }, 'error deactivating project')
       }

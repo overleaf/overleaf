@@ -13,15 +13,15 @@ waitForDb()
   })
 
 function main() {
-  InstitutionsManager.checkInstitutionUsers(institutionId, function(
-    error,
-    usersSummary
-  ) {
-    if (error) {
-      console.log(error)
-    } else {
-      console.log(usersSummary)
+  InstitutionsManager.checkInstitutionUsers(
+    institutionId,
+    function (error, usersSummary) {
+      if (error) {
+        console.log(error)
+      } else {
+        console.log(usersSummary)
+      }
+      process.exit()
     }
-    process.exit()
-  })
+  )
 }

@@ -16,8 +16,8 @@ const { assert, expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Contacts/ContactController.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('ContactController', function() {
-  beforeEach(function() {
+describe('ContactController', function () {
+  beforeEach(function () {
     this.AuthenticationController = { getLoggedInUserId: sinon.stub() }
     this.ContactController = SandboxedModule.require(modulePath, {
       requires: {
@@ -37,8 +37,8 @@ describe('ContactController', function() {
     return (this.res.send = sinon.stub())
   })
 
-  describe('getContacts', function() {
-    beforeEach(function() {
+  describe('getContacts', function () {
+    beforeEach(function () {
       this.user_id = 'mock-user-id'
       this.contact_ids = ['contact-1', 'contact-2', 'contact-3']
       this.contacts = [
@@ -79,19 +79,19 @@ describe('ContactController', function() {
       return this.ContactController.getContacts(this.req, this.res, this.next)
     })
 
-    it('should look up the logged in user id', function() {
+    it('should look up the logged in user id', function () {
       return this.AuthenticationController.getLoggedInUserId
         .calledWith(this.req)
         .should.equal(true)
     })
 
-    it('should get the users contact ids', function() {
+    it('should get the users contact ids', function () {
       return this.ContactManager.getContactIds
         .calledWith(this.user_id, { limit: 50 })
         .should.equal(true)
     })
 
-    it('should populate the users contacts ids', function() {
+    it('should populate the users contacts ids', function () {
       return this.UserGetter.getUsers
         .calledWith(this.contact_ids, {
           email: 1,
@@ -102,13 +102,13 @@ describe('ContactController', function() {
         .should.equal(true)
     })
 
-    it('should fire the getContact module hook', function() {
+    it('should fire the getContact module hook', function () {
       return this.Modules.hooks.fire
         .calledWith('getContacts', this.user_id)
         .should.equal(true)
     })
 
-    it('should return a formatted list of contacts in contact list order, without holding accounts', function() {
+    it('should return a formatted list of contacts in contact list order, without holding accounts', function () {
       return this.res.send.args[0][0].contacts.should.deep.equal([
         {
           id: 'contact-1',

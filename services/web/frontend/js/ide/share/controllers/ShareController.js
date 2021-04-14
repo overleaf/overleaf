@@ -1,5 +1,5 @@
 import App from '../../../base'
-App.controller('ShareController', function(
+App.controller('ShareController', function (
   $scope,
   $modal,
   ide,
@@ -8,7 +8,7 @@ App.controller('ShareController', function(
   // eslint-disable-next-line camelcase
   eventTracking
 ) {
-  $scope.openShareProjectModal = function(isAdmin) {
+  $scope.openShareProjectModal = function (isAdmin) {
     $scope.isAdmin = isAdmin
     eventTracking.sendMBOnce('ide-open-share-modal-once')
 

@@ -369,7 +369,7 @@ export default HighlightsManager = class HighlightsManager {
       this.editor.getSession().addMarker(
         range,
         klass,
-        function(html, range, left, top, config) {
+        function (html, range, left, top, config) {
           if (range.isMultiLine()) {
             return markerLayer.drawTextMarker(html, range, klass, config, style)
           } else {

@@ -7,8 +7,8 @@ const { ObjectId } = require('mongodb')
 const MODULE_PATH =
   '../../../../app/src/Features/Uploads/ProjectUploadManager.js'
 
-describe('ProjectUploadManager', function() {
-  beforeEach(function() {
+describe('ProjectUploadManager', function () {
+  beforeEach(function () {
     this.now = Date.now()
     timekeeper.freeze(this.now)
     this.rootFolderId = new ObjectId()
@@ -166,13 +166,13 @@ describe('ProjectUploadManager', function() {
     })
   })
 
-  afterEach(function() {
+  afterEach(function () {
     timekeeper.reset()
   })
 
-  describe('createProjectFromZipArchive', function() {
-    describe('when the title can be read from the root document', function() {
-      beforeEach(async function() {
+  describe('createProjectFromZipArchive', function () {
+    describe('when the title can be read from the root document', function () {
+      beforeEach(async function () {
         await this.ProjectUploadManager.promises.createProjectFromZipArchive(
           this.ownerId,
           this.projectName,
@@ -180,21 +180,21 @@ describe('ProjectUploadManager', function() {
         )
       })
 
-      it('should extract the archive', function() {
+      it('should extract the archive', function () {
         this.ArchiveManager.promises.extractZipArchive.should.have.been.calledWith(
           this.zipPath,
           this.extractedZipPath
         )
       })
 
-      it('should create a project', function() {
+      it('should create a project', function () {
         this.ProjectCreationHandler.promises.createBlankProject.should.have.been.calledWith(
           this.ownerId,
           this.uniqueProjectName
         )
       })
 
-      it('should initialize the file tree', function() {
+      it('should initialize the file tree', function () {
         this.ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure.should.have.been.calledWith(
           this.project._id,
           this.docEntries,
@@ -202,7 +202,7 @@ describe('ProjectUploadManager', function() {
         )
       })
 
-      it('should notify document updater', function() {
+      it('should notify document updater', function () {
         this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
           this.project._id,
           this.project.overleaf.history.id,
@@ -215,26 +215,26 @@ describe('ProjectUploadManager', function() {
         )
       })
 
-      it('should flush the project to TPDS', function() {
+      it('should flush the project to TPDS', function () {
         this.TpdsProjectFlusher.promises.flushProjectToTpds.should.have.been.calledWith(
           this.project._id
         )
       })
 
-      it('should set the root document', function() {
+      it('should set the root document', function () {
         this.ProjectRootDocManager.promises.setRootDocFromName.should.have.been.calledWith(
           this.project._id,
           'main.tex'
         )
       })
 
-      it('should remove the destination directory afterwards', function() {
+      it('should remove the destination directory afterwards', function () {
         this.fs.remove.should.have.been.calledWith(this.extractedZipPath)
       })
     })
 
-    describe("when the root document can't be determined", function() {
-      beforeEach(async function() {
+    describe("when the root document can't be determined", function () {
+      beforeEach(async function () {
         this.ProjectRootDocManager.promises.findRootDocFileFromDirectory.resolves(
           {}
         )
@@ -245,15 +245,15 @@ describe('ProjectUploadManager', function() {
         )
       })
 
-      it('should not try to set the root doc', function() {
+      it('should not try to set the root doc', function () {
         this.ProjectRootDocManager.promises.setRootDocFromName.should.not.have
           .been.called
       })
     })
   })
 
-  describe('createProjectFromZipArchiveWithName', function() {
-    beforeEach(async function() {
+  describe('createProjectFromZipArchiveWithName', function () {
+    beforeEach(async function () {
       await this.ProjectUploadManager.promises.createProjectFromZipArchiveWithName(
         this.ownerId,
         this.projectName,
@@ -261,27 +261,27 @@ describe('ProjectUploadManager', function() {
       )
     })
 
-    it('should extract the archive', function() {
+    it('should extract the archive', function () {
       this.ArchiveManager.promises.extractZipArchive.should.have.been.calledWith(
         this.zipPath,
         this.extractedZipPath
       )
     })
 
-    it('should create a project owned by the owner_id', function() {
+    it('should create a project owned by the owner_id', function () {
       this.ProjectCreationHandler.promises.createBlankProject.should.have.been.calledWith(
         this.ownerId,
         this.uniqueProjectName
       )
     })
 
-    it('should automatically set the root doc', function() {
+    it('should automatically set the root doc', function () {
       this.ProjectRootDocManager.promises.setRootDocAutomatically.should.have.been.calledWith(
         this.project._id
       )
     })
 
-    it('should initialize the file tree', function() {
+    it('should initialize the file tree', function () {
       this.ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure.should.have.been.calledWith(
         this.project._id,
         this.docEntries,
@@ -289,7 +289,7 @@ describe('ProjectUploadManager', function() {
       )
     })
 
-    it('should notify document updater', function() {
+    it('should notify document updater', function () {
       this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
         this.project._id,
         this.project.overleaf.history.id,
@@ -302,18 +302,18 @@ describe('ProjectUploadManager', function() {
       )
     })
 
-    it('should flush the project to TPDS', function() {
+    it('should flush the project to TPDS', function () {
       this.TpdsProjectFlusher.promises.flushProjectToTpds.should.have.been.calledWith(
         this.project._id
       )
     })
 
-    it('should remove the destination directory afterwards', function() {
+    it('should remove the destination directory afterwards', function () {
       this.fs.remove.should.have.been.calledWith(this.extractedZipPath)
     })
 
-    describe('when initializing the folder structure fails', function() {
-      beforeEach(async function() {
+    describe('when initializing the folder structure fails', function () {
+      beforeEach(async function () {
         this.ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure.rejects()
         await expect(
           this.ProjectUploadManager.promises.createProjectFromZipArchiveWithName(
@@ -324,15 +324,15 @@ describe('ProjectUploadManager', function() {
         ).to.be.rejected
       })
 
-      it('should cleanup the blank project created', async function() {
+      it('should cleanup the blank project created', async function () {
         this.ProjectDeleter.promises.deleteProject.should.have.been.calledWith(
           this.project._id
         )
       })
     })
 
-    describe('when setting automatically the root doc fails', function() {
-      beforeEach(async function() {
+    describe('when setting automatically the root doc fails', function () {
+      beforeEach(async function () {
         this.ProjectRootDocManager.promises.setRootDocAutomatically.rejects()
         await expect(
           this.ProjectUploadManager.promises.createProjectFromZipArchiveWithName(
@@ -343,7 +343,7 @@ describe('ProjectUploadManager', function() {
         ).to.be.rejected
       })
 
-      it('should cleanup the blank project created', function() {
+      it('should cleanup the blank project created', function () {
         this.ProjectDeleter.promises.deleteProject.should.have.been.calledWith(
           this.project._id
         )

@@ -161,11 +161,7 @@ const UserGetter = {
   },
 
   getUsersByHostname(hostname, projection, callback) {
-    const reversedHostname = hostname
-      .trim()
-      .split('')
-      .reverse()
-      .join('')
+    const reversedHostname = hostname.trim().split('').reverse().join('')
     const query = {
       emails: { $exists: true },
       'emails.reversedHostname': reversedHostname
@@ -184,7 +180,7 @@ const UserGetter = {
 
   // check for duplicate email address. This is also enforced at the DB level
   ensureUniqueEmailAddress(newEmail, callback) {
-    this.getUserByAnyEmail(newEmail, function(error, user) {
+    this.getUserByAnyEmail(newEmail, function (error, user) {
       if (user) {
         return callback(new Errors.EmailExistsError())
       }
@@ -199,7 +195,7 @@ var decorateFullEmails = (
   affiliationsData,
   samlIdentifiers
 ) => {
-  emailsData.forEach(function(emailData) {
+  emailsData.forEach(function (emailData) {
     emailData.default = emailData.email === defaultEmail
 
     const affiliation = affiliationsData.find(

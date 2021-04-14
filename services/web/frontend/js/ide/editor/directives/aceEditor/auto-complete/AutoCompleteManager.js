@@ -179,7 +179,7 @@ class AutoCompleteManager {
               score: 60
             })
             if (references.keys && references.keys.length > 0) {
-              references.keys.forEach(function(key) {
+              references.keys.forEach(function (key) {
                 if (key != null) {
                   result.push({
                     caption: `\\${commandName}{${previousArgsCaption}${key}}`,
@@ -282,7 +282,7 @@ class AutoCompleteManager {
       // Only override this once since it's global but we may create multiple
       // autocomplete handlers
       Autocomplete.prototype._insertMatch = Autocomplete.prototype.insertMatch
-      Autocomplete.prototype.insertMatch = function(data) {
+      Autocomplete.prototype.insertMatch = function (data) {
         const { editor } = this
 
         const pos = editor.getCursorPosition()
@@ -458,7 +458,7 @@ class AutoCompleteManager {
       }
     }
 
-    Util.retrievePrecedingIdentifier = function(text, pos, regex) {
+    Util.retrievePrecedingIdentifier = function (text, pos, regex) {
       let currentLineOffset = 0
       for (let i = pos - 1; i <= 0; i++) {
         if (text[i] === '\n') {

@@ -3,7 +3,7 @@
 */
 import App from '../../../base'
 
-export default App.service('ProjectListService', function() {
+export default App.service('ProjectListService', function () {
   return {
     getOwnerName(project) {
       if (project.accessLevel === 'owner') {

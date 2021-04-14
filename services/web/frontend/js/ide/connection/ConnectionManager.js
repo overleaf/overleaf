@@ -15,7 +15,7 @@ import SocketIoShim from './SocketIoShim'
 let ConnectionManager
 const ONEHOUR = 1000 * 60 * 60
 
-export default ConnectionManager = (function() {
+export default ConnectionManager = (function () {
   ConnectionManager = class ConnectionManager {
     static initClass() {
       this.prototype.disconnectAfterMs = ONEHOUR * 24

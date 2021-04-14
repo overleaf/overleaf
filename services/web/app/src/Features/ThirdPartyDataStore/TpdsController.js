@@ -119,7 +119,7 @@ module.exports = {
     }
   },
 
-  parseParams: (parseParams = function(req) {
+  parseParams: (parseParams = function (req) {
     let filePath, projectName
     let path = req.params[0]
     const userId = req.params.user_id

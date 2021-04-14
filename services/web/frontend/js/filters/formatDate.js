@@ -22,7 +22,7 @@ moment.updateLocale('en', {
 App.filter(
   'formatDate',
   () =>
-    function(date, format) {
+    function (date, format) {
       if (!date) return 'N/A'
       if (format == null) {
         format = 'Do MMM YYYY, h:mm a'
@@ -34,16 +34,12 @@ App.filter(
 App.filter(
   'utcDate',
   () =>
-    function(date, format) {
+    function (date, format) {
       if (!date) return 'N/A'
       if (format == null) {
         format = 'D MMM YYYY, HH:mm:ss'
       }
-      return (
-        moment(date)
-          .utc()
-          .format(format) + ' UTC'
-      )
+      return moment(date).utc().format(format) + ' UTC'
     }
 )
 

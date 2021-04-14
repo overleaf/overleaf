@@ -12,7 +12,7 @@
 import App from '../../../base'
 import iconTypeFromName from '../../file-tree/util/iconTypeFromName'
 import fileOperationI18nNames from '../../file-tree/util/fileOperationI18nNames'
-const historyFileEntityController = function($scope, $element, $attrs) {
+const historyFileEntityController = function ($scope, $element, $attrs) {
   const ctrl = this
   ctrl.hasOperation = false
   ctrl.getRenameTooltip = i18nRenamedStr => {
@@ -54,21 +54,21 @@ const historyFileEntityController = function($scope, $element, $attrs) {
     return [path1Parts.join('/'), path2Parts.join('/')]
   }
 
-  const _handleFolderClick = function() {
+  const _handleFolderClick = function () {
     ctrl.isOpen = !ctrl.isOpen
     ctrl.entityTypeIconClass = _getFolderIcon()
   }
 
   const _handleFileClick = () =>
     ctrl.historyFileTreeController.handleEntityClick(ctrl.fileEntity)
-  var _getFolderIcon = function() {
+  var _getFolderIcon = function () {
     if (ctrl.isOpen) {
       return 'fa-folder-open'
     } else {
       return 'fa-folder'
     }
   }
-  ctrl.$onInit = function() {
+  ctrl.$onInit = function () {
     if (ctrl.fileEntity.type === 'folder') {
       ctrl.isOpen = true
       ctrl.entityTypeIconClass = _getFolderIcon()

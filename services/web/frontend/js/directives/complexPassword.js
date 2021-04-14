@@ -56,7 +56,7 @@ App.directive('complexPassword', () => ({
     const passField = new PassField.Field('passwordField', opts)
     const [asyncFormCtrl, ngModelCtrl] = Array.from(ctrl)
 
-    ngModelCtrl.$parsers.unshift(function(modelValue) {
+    ngModelCtrl.$parsers.unshift(function (modelValue) {
       let isValid = passField.validatePass()
       const email = asyncFormCtrl.getEmail() || window.usersEmail
 
@@ -75,8 +75,9 @@ App.directive('complexPassword', () => ({
       }
       if (opts.length.max != null && modelValue.length >= opts.length.max) {
         isValid = false
-        scope.complexPasswordErrorMessage = `Maximum password length ${opts
-          .length.max - 1} exceeded`
+        scope.complexPasswordErrorMessage = `Maximum password length ${
+          opts.length.max - 1
+        } exceeded`
       }
       if (opts.length.min != null && modelValue.length < opts.length.min) {
         isValid = false

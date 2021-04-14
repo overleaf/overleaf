@@ -75,7 +75,7 @@ module.exports = LinkedFilesController = {
       name,
       parent_folder_id,
       user_id,
-      function(err, newFileId) {
+      function (err, newFileId) {
         if (err != null) {
           return LinkedFilesController.handleError(err, req, res, next)
         }
@@ -88,47 +88,46 @@ module.exports = LinkedFilesController = {
     const { project_id, file_id } = req.params
     const user_id = AuthenticationController.getLoggedInUserId(req)
 
-    return LinkedFilesHandler.getFileById(project_id, file_id, function(
-      err,
-      file,
-      path,
-      parentFolder
-    ) {
-      if (err != null) {
-        return next(err)
-      }
-      if (file == null) {
-        return res.sendStatus(404)
-      }
-      const { name } = file
-      const { linkedFileData } = file
-      if (
-        linkedFileData == null ||
-        (linkedFileData != null ? linkedFileData.provider : undefined) == null
-      ) {
-        return res.sendStatus(409)
-      }
-      const { provider } = linkedFileData
-      const parent_folder_id = parentFolder._id
-      const Agent = LinkedFilesController._getAgent(provider)
-      if (Agent == null) {
-        return res.sendStatus(400)
-      }
-
-      return Agent.refreshLinkedFile(
-        project_id,
-        linkedFileData,
-        name,
-        parent_folder_id,
-        user_id,
-        function(err, newFileId) {
-          if (err != null) {
-            return LinkedFilesController.handleError(err, req, res, next)
-          }
-          return res.json({ new_file_id: newFileId })
+    return LinkedFilesHandler.getFileById(
+      project_id,
+      file_id,
+      function (err, file, path, parentFolder) {
+        if (err != null) {
+          return next(err)
         }
-      )
-    })
+        if (file == null) {
+          return res.sendStatus(404)
+        }
+        const { name } = file
+        const { linkedFileData } = file
+        if (
+          linkedFileData == null ||
+          (linkedFileData != null ? linkedFileData.provider : undefined) == null
+        ) {
+          return res.sendStatus(409)
+        }
+        const { provider } = linkedFileData
+        const parent_folder_id = parentFolder._id
+        const Agent = LinkedFilesController._getAgent(provider)
+        if (Agent == null) {
+          return res.sendStatus(400)
+        }
+
+        return Agent.refreshLinkedFile(
+          project_id,
+          linkedFileData,
+          name,
+          parent_folder_id,
+          user_id,
+          function (err, newFileId) {
+            if (err != null) {
+              return LinkedFilesController.handleError(err, req, res, next)
+            }
+            return res.json({ new_file_id: newFileId })
+          }
+        )
+      }
+    )
   },
 
   handleError(error, req, res, next) {

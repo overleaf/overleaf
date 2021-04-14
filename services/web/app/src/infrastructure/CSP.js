@@ -1,12 +1,12 @@
 const crypto = require('crypto')
 
-module.exports = function({
+module.exports = function ({
   reportUri,
   reportOnly = false,
   exclude = [],
   percentage
 }) {
-  return function(req, res, next) {
+  return function (req, res, next) {
     const originalRender = res.render
 
     res.render = (...args) => {

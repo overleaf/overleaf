@@ -5,10 +5,10 @@ const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const modulePath = '../../../../app/src/Features/User/SAMLIdentityManager.js'
 
-describe('SAMLIdentityManager', function() {
+describe('SAMLIdentityManager', function () {
   const linkedEmail = 'another@example.com'
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.userId = '6005c75b12cbcaf771f4a105'
     this.user = {
       _id: this.userId,
@@ -97,8 +97,8 @@ describe('SAMLIdentityManager', function() {
     })
   })
 
-  describe('getUser', function() {
-    it('should throw an error if missing provider ID and/or external user ID', async function() {
+  describe('getUser', function () {
+    it('should throw an error if missing provider ID and/or external user ID', async function () {
       let error
       try {
         await this.SAMLIdentityManager.getUser(null, null)
@@ -110,15 +110,15 @@ describe('SAMLIdentityManager', function() {
     })
   })
 
-  describe('linkAccounts', function() {
-    describe('errors', function() {
-      beforeEach(function() {
+  describe('linkAccounts', function () {
+    describe('errors', function () {
+      beforeEach(function () {
         // first call is to get userWithProvider; should be falsy
         this.UserGetter.promises.getUser.onFirstCall().resolves()
         this.UserGetter.promises.getUser.onSecondCall().resolves(this.user)
       })
 
-      it('should throw an error if missing data', async function() {
+      it('should throw an error if missing data', async function () {
         let error
         try {
           await this.SAMLIdentityManager.linkAccounts(
@@ -135,14 +135,14 @@ describe('SAMLIdentityManager', function() {
         }
       })
 
-      describe('when email is already associated with another Overleaf account', function() {
-        beforeEach(function() {
+      describe('when email is already associated with another Overleaf account', function () {
+        beforeEach(function () {
           this.UserGetter.promises.getUserByAnyEmail.resolves(
             this.userEmailExists
           )
         })
 
-        it('should throw an EmailExistsError error', async function() {
+        it('should throw an EmailExistsError error', async function () {
           let error
           try {
             await this.SAMLIdentityManager.linkAccounts(
@@ -166,8 +166,8 @@ describe('SAMLIdentityManager', function() {
         })
       })
 
-      describe('when email is not affiliated', function() {
-        beforeEach(function() {
+      describe('when email is not affiliated', function () {
+        beforeEach(function () {
           this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
           this.UserGetter.promises.getUserFullEmails.resolves([
             {
@@ -176,7 +176,7 @@ describe('SAMLIdentityManager', function() {
           ])
         })
 
-        it('should throw SAMLEmailNotAffiliatedError', async function() {
+        it('should throw SAMLEmailNotAffiliatedError', async function () {
           let error
           try {
             await this.SAMLIdentityManager.linkAccounts(
@@ -200,8 +200,8 @@ describe('SAMLIdentityManager', function() {
         })
       })
 
-      describe('when email is affiliated with another institution', function() {
-        beforeEach(function() {
+      describe('when email is affiliated with another institution', function () {
+        beforeEach(function () {
           this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
           this.UserGetter.promises.getUserFullEmails.resolves([
             {
@@ -211,7 +211,7 @@ describe('SAMLIdentityManager', function() {
           ])
         })
 
-        it('should throw SAMLEmailAffiliatedWithAnotherInstitutionError', async function() {
+        it('should throw SAMLEmailAffiliatedWithAnotherInstitutionError', async function () {
           let error
           try {
             await this.SAMLIdentityManager.linkAccounts(
@@ -237,14 +237,14 @@ describe('SAMLIdentityManager', function() {
         })
       })
 
-      describe('when institution identifier is already associated with another Overleaf account', function() {
-        beforeEach(function() {
+      describe('when institution identifier is already associated with another Overleaf account', function () {
+        beforeEach(function () {
           this.UserGetter.promises.getUserByAnyEmail.resolves(
             this.userAlreadyLinked
           )
         })
 
-        it('should throw an SAMLIdentityExistsError error', async function() {
+        it('should throw an SAMLIdentityExistsError error', async function () {
           let error
           try {
             await this.SAMLIdentityManager.linkAccounts(
@@ -268,13 +268,13 @@ describe('SAMLIdentityManager', function() {
         })
       })
 
-      describe('when institution provider is already associated with the user', function() {
-        beforeEach(function() {
+      describe('when institution provider is already associated with the user', function () {
+        beforeEach(function () {
           // first call is to get userWithProvider; resolves with any user
           this.UserGetter.promises.getUser.onFirstCall().resolves(this.user)
         })
 
-        it('should throw an SAMLAlreadyLinkedError error', async function() {
+        it('should throw an SAMLAlreadyLinkedError error', async function () {
           let error
           try {
             await this.SAMLIdentityManager.linkAccounts(
@@ -304,7 +304,7 @@ describe('SAMLIdentityManager', function() {
         })
       })
 
-      it('should pass back errors via UserAuditLogHandler', async function() {
+      it('should pass back errors via UserAuditLogHandler', async function () {
         let error
         const anError = new Error('oops')
         this.UserAuditLogHandler.promises.addEntry.rejects(anError)
@@ -332,14 +332,14 @@ describe('SAMLIdentityManager', function() {
       })
     })
 
-    describe('success', function() {
-      beforeEach(function() {
+    describe('success', function () {
+      beforeEach(function () {
         // first call is to get userWithProvider; should be falsy
         this.UserGetter.promises.getUser.onFirstCall().resolves()
         this.UserGetter.promises.getUser.onSecondCall().resolves(this.user)
       })
 
-      it('should update the user audit log', function() {
+      it('should update the user audit log', function () {
         const auditLog = {
           intiatorId: '6005c75b12cbcaf771f4a105',
           ip: '0:0:0:0'
@@ -370,7 +370,7 @@ describe('SAMLIdentityManager', function() {
         )
       })
 
-      it('should send an email notification', function() {
+      it('should send an email notification', function () {
         this.SAMLIdentityManager.linkAccounts(
           this.user._id,
           'externalUserId',
@@ -397,8 +397,8 @@ describe('SAMLIdentityManager', function() {
     })
   })
 
-  describe('unlinkAccounts', function() {
-    it('should update the audit log', async function() {
+  describe('unlinkAccounts', function () {
+    it('should update the audit log', async function () {
       await this.SAMLIdentityManager.unlinkAccounts(
         this.user._id,
         linkedEmail,
@@ -421,7 +421,7 @@ describe('SAMLIdentityManager', function() {
         }
       )
     })
-    it('should remove the identifier', async function() {
+    it('should remove the identifier', async function () {
       await this.SAMLIdentityManager.unlinkAccounts(
         this.user._id,
         linkedEmail,
@@ -445,7 +445,7 @@ describe('SAMLIdentityManager', function() {
         update
       )
     })
-    it('should send an email notification', async function() {
+    it('should send an email notification', async function () {
       await this.SAMLIdentityManager.unlinkAccounts(
         this.user._id,
         linkedEmail,
@@ -464,8 +464,8 @@ describe('SAMLIdentityManager', function() {
       expect(emailArgs[1].message[0]).to.contain(linkedEmail)
     })
 
-    describe('errors', function() {
-      it('should pass back errors via UserAuditLogHandler', async function() {
+    describe('errors', function () {
+      it('should pass back errors via UserAuditLogHandler', async function () {
         let error
         const anError = new Error('oops')
         this.UserAuditLogHandler.promises.addEntry.rejects(anError)
@@ -490,43 +490,43 @@ describe('SAMLIdentityManager', function() {
     })
   })
 
-  describe('entitlementAttributeMatches', function() {
-    it('should return true when entitlement matches on string', function() {
+  describe('entitlementAttributeMatches', function () {
+    it('should return true when entitlement matches on string', function () {
       this.SAMLIdentityManager.entitlementAttributeMatches(
         'foo bar',
         'bar'
       ).should.equal(true)
     })
 
-    it('should return false when entitlement does not match on string', function() {
+    it('should return false when entitlement does not match on string', function () {
       this.SAMLIdentityManager.entitlementAttributeMatches(
         'foo bar',
         'bam'
       ).should.equal(false)
     })
 
-    it('should return false on an invalid matcher', function() {
+    it('should return false on an invalid matcher', function () {
       this.SAMLIdentityManager.entitlementAttributeMatches(
         'foo bar',
         '('
       ).should.equal(false)
     })
 
-    it('should log error on an invalid matcher', function() {
+    it('should log error on an invalid matcher', function () {
       this.SAMLIdentityManager.entitlementAttributeMatches('foo bar', '(')
       this.logger.error.firstCall.args[0].err.message.should.equal(
         'Invalid regular expression: /(/: Unterminated group'
       )
     })
 
-    it('should return true when entitlement matches on array', function() {
+    it('should return true when entitlement matches on array', function () {
       this.SAMLIdentityManager.entitlementAttributeMatches(
         ['foo', 'bar'],
         'bar'
       ).should.equal(true)
     })
 
-    it('should return false when entitlement does not match array', function() {
+    it('should return false when entitlement does not match array', function () {
       this.SAMLIdentityManager.entitlementAttributeMatches(
         ['foo', 'bar'],
         'bam'
@@ -534,19 +534,19 @@ describe('SAMLIdentityManager', function() {
     })
   })
 
-  describe('redundantSubscription', function() {
+  describe('redundantSubscription', function () {
     const userId = '1bv'
     const providerId = 123
     const providerName = 'University Name'
-    describe('with a personal subscription', function() {
-      beforeEach(function() {
+    describe('with a personal subscription', function () {
+      beforeEach(function () {
         this.SubscriptionLocator.promises.getUserIndividualSubscription.resolves(
           {
             planCode: 'professional'
           }
         )
       })
-      it('should create redundant personal subscription notification ', async function() {
+      it('should create redundant personal subscription notification ', async function () {
         try {
           await this.SAMLIdentityManager.redundantSubscription(
             userId,
@@ -560,8 +560,8 @@ describe('SAMLIdentityManager', function() {
           .to.have.been.calledOnce
       })
     })
-    describe('without a personal subscription', function() {
-      it('should create redundant personal subscription notification ', async function() {
+    describe('without a personal subscription', function () {
+      it('should create redundant personal subscription notification ', async function () {
         try {
           await this.SAMLIdentityManager.redundantSubscription(
             userId,

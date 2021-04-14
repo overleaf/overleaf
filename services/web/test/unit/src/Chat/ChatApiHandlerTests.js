@@ -20,8 +20,8 @@ const modulePath = path.join(
 )
 const { expect } = require('chai')
 
-describe('ChatApiHandler', function() {
-  beforeEach(function() {
+describe('ChatApiHandler', function () {
+  beforeEach(function () {
     this.settings = {
       apis: {
         chat: {
@@ -42,9 +42,9 @@ describe('ChatApiHandler', function() {
     return (this.callback = sinon.stub())
   })
 
-  describe('sendGlobalMessage', function() {
-    describe('successfully', function() {
-      beforeEach(function() {
+  describe('sendGlobalMessage', function () {
+    describe('successfully', function () {
+      beforeEach(function () {
         this.message = { mock: 'message' }
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.message)
         return this.ChatApiHandler.sendGlobalMessage(
@@ -55,7 +55,7 @@ describe('ChatApiHandler', function() {
         )
       })
 
-      it('should post the data to the chat api', function() {
+      it('should post the data to the chat api', function () {
         return this.request
           .calledWith({
             url: `${this.settings.apis.chat.internal_url}/project/${this.project_id}/messages`,
@@ -68,13 +68,13 @@ describe('ChatApiHandler', function() {
           .should.equal(true)
       })
 
-      it('should return the message from the post', function() {
+      it('should return the message from the post', function () {
         return this.callback.calledWith(null, this.message).should.equal(true)
       })
     })
 
-    describe('with a non-success status code', function() {
-      beforeEach(function() {
+    describe('with a non-success status code', function () {
+      beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 })
         return this.ChatApiHandler.sendGlobalMessage(
           this.project_id,
@@ -84,7 +84,7 @@ describe('ChatApiHandler', function() {
         )
       })
 
-      it('should return an error', function() {
+      it('should return an error', function () {
         expect(this.callback).to.have.been.calledWith(
           sinon.match.instanceOf(Error).and(sinon.match.has('statusCode', 500))
         )
@@ -92,15 +92,15 @@ describe('ChatApiHandler', function() {
     })
   })
 
-  describe('getGlobalMessages', function() {
-    beforeEach(function() {
+  describe('getGlobalMessages', function () {
+    beforeEach(function () {
       this.messages = [{ mock: 'message' }]
       this.limit = 30
       return (this.before = '1234')
     })
 
-    describe('successfully', function() {
-      beforeEach(function() {
+    describe('successfully', function () {
+      beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.messages)
         return this.ChatApiHandler.getGlobalMessages(
           this.project_id,
@@ -110,7 +110,7 @@ describe('ChatApiHandler', function() {
         )
       })
 
-      it('should make get request for room to chat api', function() {
+      it('should make get request for room to chat api', function () {
         return this.request
           .calledWith({
             method: 'GET',
@@ -124,13 +124,13 @@ describe('ChatApiHandler', function() {
           .should.equal(true)
       })
 
-      it('should return the messages from the request', function() {
+      it('should return the messages from the request', function () {
         return this.callback.calledWith(null, this.messages).should.equal(true)
       })
     })
 
-    describe('with failure error code', function() {
-      beforeEach(function() {
+    describe('with failure error code', function () {
+      beforeEach(function () {
         this.request.callsArgWith(1, null, { statusCode: 500 }, null)
         return this.ChatApiHandler.getGlobalMessages(
           this.project_id,
@@ -140,7 +140,7 @@ describe('ChatApiHandler', function() {
         )
       })
 
-      it('should return an error', function() {
+      it('should return an error', function () {
         expect(this.callback).to.have.been.calledWith(
           sinon.match.instanceOf(Error).and(sinon.match.has('statusCode', 500))
         )

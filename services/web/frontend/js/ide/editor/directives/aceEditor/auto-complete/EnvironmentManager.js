@@ -129,7 +129,7 @@ $3
 }
 staticSnippets.push(documentSnippet)
 
-const parseCustomEnvironments = function(text) {
+const parseCustomEnvironments = function (text) {
   let match
   const re = /^\\newenvironment{(\w+)}.*$/gm
   const result = []
@@ -144,7 +144,7 @@ const parseCustomEnvironments = function(text) {
   return result
 }
 
-const parseBeginCommands = function(text) {
+const parseBeginCommands = function (text) {
   let match
   const re = /^([\t ]*)\\begin{(\w+)}.*\n([\t ]*)/gm
   const result = []
@@ -166,12 +166,12 @@ const parseBeginCommands = function(text) {
   return result
 }
 
-const hasDocumentEnvironment = function(text) {
+const hasDocumentEnvironment = function (text) {
   const re = /^\\begin{document}/m
   return re.exec(text) !== null
 }
 
-const hasBibliographyEnvironment = function(text) {
+const hasBibliographyEnvironment = function (text) {
   const re = /^\\begin{thebibliography}/m
   return re.exec(text) !== null
 }

@@ -21,7 +21,7 @@ import ShareJsDoc from './ShareJsDoc'
 import RangesTracker from '../review-panel/RangesTracker'
 let Document
 
-export default Document = (function() {
+export default Document = (function () {
   Document = class Document extends EventEmitter {
     static initClass() {
       this.prototype.MAX_PENDING_OP_SIZE = 64
@@ -250,7 +250,7 @@ export default Document = (function() {
 
     join(callback) {
       if (callback == null) {
-        callback = function(error) {}
+        callback = function (error) {}
       }
       this.wantToBeJoined = true
       this._cancelLeave()
@@ -266,7 +266,7 @@ export default Document = (function() {
 
     leave(callback) {
       if (callback == null) {
-        callback = function(error) {}
+        callback = function (error) {}
       }
       this.flush() // force an immediate flush when leaving document
       this.wantToBeJoined = false
@@ -362,8 +362,9 @@ export default Document = (function() {
         // In any other situation, assume the document is unsaved.
         saved = false
         sl_console.log(
-          `[pollSavedStatus] assuming not saved (inflightOp?: ${inflightOp !=
-            null}, pendingOp?: ${pendingOp != null})`
+          `[pollSavedStatus] assuming not saved (inflightOp?: ${
+            inflightOp != null
+          }, pendingOp?: ${pendingOp != null})`
         )
       }
 
@@ -471,7 +472,7 @@ export default Document = (function() {
 
     _joinDoc(callback) {
       if (callback == null) {
-        callback = function(error) {}
+        callback = function (error) {}
       }
       if (this.doc != null) {
         this.ide.pushEvent('joinDoc:existing', {
@@ -562,7 +563,7 @@ export default Document = (function() {
 
     _leaveDoc(callback) {
       if (callback == null) {
-        callback = function(error) {}
+        callback = function (error) {}
       }
       this.ide.pushEvent('leaveDoc', {
         doc_id: this.doc_id

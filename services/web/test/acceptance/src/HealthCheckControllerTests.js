@@ -2,11 +2,11 @@ const { expect } = require('chai')
 const Settings = require('settings-sharelatex')
 const User = require('./helpers/User').promises
 
-describe('HealthCheckController', function() {
-  describe('SmokeTests', function() {
+describe('HealthCheckController', function () {
+  describe('SmokeTests', function () {
     let user, projectId
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       user = new User()
       await user.login()
       projectId = await user.createProject('SmokeTest')
@@ -36,8 +36,8 @@ describe('HealthCheckController', function() {
       return { response, body }
     }
 
-    describe('happy path', function() {
-      it('should respond with a 200 and stats', async function() {
+    describe('happy path', function () {
+      it('should respond with a 200 and stats', async function () {
         const { response, body } = await performSmokeTestRequest()
 
         expect(body.error).to.not.exist
@@ -45,8 +45,8 @@ describe('HealthCheckController', function() {
       })
     })
 
-    describe('when the request is aborted', function() {
-      it('should not crash', async function() {
+    describe('when the request is aborted', function () {
+      it('should not crash', async function () {
         try {
           await user.doRequest('GET', {
             timeout: 1,
@@ -61,11 +61,11 @@ describe('HealthCheckController', function() {
       })
     })
 
-    describe('when the project does not exist', function() {
-      beforeEach(function() {
+    describe('when the project does not exist', function () {
+      beforeEach(function () {
         Settings.smokeTest.projectId = '404'
       })
-      it('should respond with a 500 ', async function() {
+      it('should respond with a 500 ', async function () {
         const { response, body } = await performSmokeTestRequest()
 
         expect(body.error).to.equal('run.101_loadEditor failed')
@@ -73,11 +73,11 @@ describe('HealthCheckController', function() {
       })
     })
 
-    describe('when the password mismatches', function() {
-      beforeEach(function() {
+    describe('when the password mismatches', function () {
+      beforeEach(function () {
         Settings.smokeTest.password = 'foo-bar'
       })
-      it('should respond with a 500 with mismatching password', async function() {
+      it('should respond with a 500 with mismatching password', async function () {
         const { response, body } = await performSmokeTestRequest()
 
         expect(body.error).to.equal('run.002_login failed')

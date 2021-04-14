@@ -11,7 +11,7 @@ const RateLimiter = {
       return callback(null, true)
     }
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     const namespace = `RateLimit:${opts.endpointName}:`
     const k = `{${opts.subjectName}}`
@@ -21,7 +21,7 @@ const RateLimiter = {
       interval: opts.timeInterval * 1000,
       maxInInterval: opts.throttle
     })
-    limiter(k, function(err, timeLeft, actionsLeft) {
+    limiter(k, function (err, timeLeft, actionsLeft) {
       if (err) {
         return callback(err)
       }

@@ -6,7 +6,7 @@ import {
   MESSAGE_LIMIT
 } from '../../../../../frontend/js/features/chat/store/chat-store'
 
-describe('ChatStore', function() {
+describe('ChatStore', function () {
   let store, socket, mockSocketMessage
 
   const user = {
@@ -22,7 +22,7 @@ describe('ChatStore', function() {
     user
   }
 
-  beforeEach(function() {
+  beforeEach(function () {
     fetchMock.reset()
 
     window.csrfToken = 'csrf_tok'
@@ -34,7 +34,7 @@ describe('ChatStore', function() {
     store = new ChatStore(user, testProjectId)
   })
 
-  afterEach(function() {
+  afterEach(function () {
     fetchMock.restore()
     delete window._ide
     delete window.csrfToken
@@ -42,19 +42,19 @@ describe('ChatStore', function() {
     delete window.project_id
   })
 
-  describe('new message events', function() {
-    it('subscribes to the socket for new message events', function() {
+  describe('new message events', function () {
+    it('subscribes to the socket for new message events', function () {
       expect(socket.on).to.be.calledWith('new-chat-message')
     })
 
-    it('notifies an update event after new messages are received', function() {
+    it('notifies an update event after new messages are received', function () {
       const subscriber = sinon.stub()
       store.on('updated', subscriber)
       mockSocketMessage(testMessage)
       expect(subscriber).to.be.calledOnce
     })
 
-    it('can unsubscribe from events', function() {
+    it('can unsubscribe from events', function () {
       const subscriber = sinon.stub()
       store.on('updated', subscriber)
       store.off('updated', subscriber)
@@ -62,7 +62,7 @@ describe('ChatStore', function() {
       expect(subscriber).not.to.be.called
     })
 
-    it('when the message is from other user, it is added to the messages list', function() {
+    it('when the message is from other user, it is added to the messages list', function () {
       mockSocketMessage({ ...testMessage, id: 'other_user_msg' })
       expect(store.messages[store.messages.length - 1]).to.deep.equal({
         id: 'other_user_msg',
@@ -72,12 +72,12 @@ describe('ChatStore', function() {
       })
     })
 
-    describe('messages sent by the user', function() {
-      beforeEach(function() {
+    describe('messages sent by the user', function () {
+      beforeEach(function () {
         fetchMock.post(/messages/, 204)
       })
 
-      it('are not added to the message list', async function() {
+      it('are not added to the message list', async function () {
         await store.sendMessage(testMessage.content)
         const originalMessageList = store.messages.slice(0)
         mockSocketMessage(testMessage)
@@ -100,7 +100,7 @@ describe('ChatStore', function() {
         })
       })
 
-      it("don't notify an update event after new messages are received", async function() {
+      it("don't notify an update event after new messages are received", async function () {
         await store.sendMessage(testMessage.content)
 
         const subscriber = sinon.stub()
@@ -110,22 +110,22 @@ describe('ChatStore', function() {
         expect(subscriber).not.to.be.called
       })
 
-      it("have an 'id' property", async function() {
+      it("have an 'id' property", async function () {
         await store.sendMessage(testMessage.content)
         expect(typeof store.messages[0].id).to.equal('string')
       })
     })
   })
 
-  describe('loadMoreMessages()', function() {
-    it('aborts the request when the entire message list is loaded', async function() {
+  describe('loadMoreMessages()', function () {
+    it('aborts the request when the entire message list is loaded', async function () {
       store.atEnd = true
       await store.loadMoreMessages()
       expect(fetchMock.calls().length).to.equal(0)
       expect(store.loading).to.equal(false)
     })
 
-    it('updates the list of messages', async function() {
+    it('updates the list of messages', async function () {
       const originalMessageList = store.messages.slice(0)
       fetchMock.get(/messages/, [testMessage])
       await store.loadMoreMessages()
@@ -138,7 +138,7 @@ describe('ChatStore', function() {
       })
     })
 
-    it('notifies an update event for when the loading starts, and a second one once data is available', async function() {
+    it('notifies an update event for when the loading starts, and a second one once data is available', async function () {
       const subscriber = sinon.stub()
       store.on('updated', subscriber)
       fetchMock.get(/messages/, [testMessage])
@@ -146,14 +146,14 @@ describe('ChatStore', function() {
       expect(subscriber).to.be.calledTwice
     })
 
-    it('marks `atEnd` flag to true when there are no more messages to retrieve', async function() {
+    it('marks `atEnd` flag to true when there are no more messages to retrieve', async function () {
       expect(store.atEnd).to.equal(false)
       fetchMock.get(/messages/, [testMessage])
       await store.loadMoreMessages()
       expect(store.atEnd).to.equal(true)
     })
 
-    it('marks `atEnd` flag to false when there are still messages to retrieve', async function() {
+    it('marks `atEnd` flag to false when there are still messages to retrieve', async function () {
       const messages = []
       for (let i = 0; i < MESSAGE_LIMIT; i++) {
         messages.push({ ...testMessage, content: `message #${i}` })
@@ -164,7 +164,7 @@ describe('ChatStore', function() {
       expect(store.atEnd).to.equal(false)
     })
 
-    it('subsequent requests for new messages start at the timestamp of the latest message', async function() {
+    it('subsequent requests for new messages start at the timestamp of the latest message', async function () {
       const messages = []
       for (let i = 0; i < MESSAGE_LIMIT - 1; i++) {
         // sending enough messages so it doesn't mark `atEnd === true`
@@ -186,12 +186,12 @@ describe('ChatStore', function() {
     })
   })
 
-  describe('sendMessage()', function() {
-    beforeEach(function() {
+  describe('sendMessage()', function () {
+    beforeEach(function () {
       fetchMock.post(/messages/, 204)
     })
 
-    it('appends the message to the list', async function() {
+    it('appends the message to the list', async function () {
       const originalMessageList = store.messages.slice(0)
       await store.sendMessage('a message')
       expect(store.messages.length).to.equal(originalMessageList.length + 1)
@@ -201,14 +201,14 @@ describe('ChatStore', function() {
       expect(lastMessage.timestamp).to.be.greaterThan(0)
     })
 
-    it('notifies an update event', async function() {
+    it('notifies an update event', async function () {
       const subscriber = sinon.stub()
       store.on('updated', subscriber)
       await store.sendMessage('a message')
       expect(subscriber).to.be.calledOnce
     })
 
-    it('sends an http POST request to the server', async function() {
+    it('sends an http POST request to the server', async function () {
       await store.sendMessage('a message')
       expect(fetchMock.calls().length).to.equal(1)
       const body = fetchMock.lastCall()[1].body
@@ -218,7 +218,7 @@ describe('ChatStore', function() {
       })
     })
 
-    it('ignores empty messages', async function() {
+    it('ignores empty messages', async function () {
       const subscriber = sinon.stub()
       store.on('updated', subscriber)
       await store.sendMessage('')
@@ -227,12 +227,12 @@ describe('ChatStore', function() {
     })
   })
 
-  describe('destroy', function() {
-    beforeEach(function() {
+  describe('destroy', function () {
+    beforeEach(function () {
       fetchMock.post(/messages/, 204)
     })
 
-    it('removes event listeners', async function() {
+    it('removes event listeners', async function () {
       const subscriber = sinon.stub()
       store.on('updated', subscriber)
       store.destroy()

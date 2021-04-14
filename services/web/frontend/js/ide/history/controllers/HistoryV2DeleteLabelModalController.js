@@ -11,34 +11,32 @@
  */
 import App from '../../../base'
 
-export default App.controller('HistoryV2DeleteLabelModalController', function(
-  $scope,
-  $modalInstance,
-  ide,
-  labelDetails
-) {
-  $scope.labelDetails = labelDetails
-  $scope.state = {
-    inflight: false,
-    error: false
-  }
+export default App.controller(
+  'HistoryV2DeleteLabelModalController',
+  function ($scope, $modalInstance, ide, labelDetails) {
+    $scope.labelDetails = labelDetails
+    $scope.state = {
+      inflight: false,
+      error: false
+    }
 
-  return ($scope.deleteLabel = function() {
-    $scope.state.inflight = true
-    return ide.historyManager
-      .deleteLabel(labelDetails)
-      .then(function(response) {
-        $scope.state.inflight = false
-        return $modalInstance.close()
-      })
-      .catch(function(response) {
-        const { data, status } = response
-        $scope.state.inflight = false
-        if (status === 400) {
-          return ($scope.state.error = { message: data })
-        } else {
-          return ($scope.state.error = true)
-        }
-      })
-  })
-})
+    return ($scope.deleteLabel = function () {
+      $scope.state.inflight = true
+      return ide.historyManager
+        .deleteLabel(labelDetails)
+        .then(function (response) {
+          $scope.state.inflight = false
+          return $modalInstance.close()
+        })
+        .catch(function (response) {
+          const { data, status } = response
+          $scope.state.inflight = false
+          if (status === 400) {
+            return ($scope.state.error = { message: data })
+          } else {
+            return ($scope.state.error = true)
+          }
+        })
+    })
+  }
+)

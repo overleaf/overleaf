@@ -13,16 +13,16 @@ import { expect } from 'chai'
 
 import displayNameForUser from '../../../../../frontend/js/ide/history/util/displayNameForUser'
 
-export default describe('displayNameForUser', function() {
-  beforeEach(function() {
+export default describe('displayNameForUser', function () {
+  beforeEach(function () {
     return (window.user = { id: 42 })
   })
 
-  it("should return 'Anonymous' with no user", function() {
+  it("should return 'Anonymous' with no user", function () {
     return expect(displayNameForUser(null)).to.equal('Anonymous')
   })
 
-  it("should return 'you' when the user has the same id as the window", function() {
+  it("should return 'you' when the user has the same id as the window", function () {
     return expect(
       displayNameForUser({
         id: window.user.id,
@@ -33,7 +33,7 @@ export default describe('displayNameForUser', function() {
     ).to.equal('you')
   })
 
-  it('should return the first_name and last_name when present', function() {
+  it('should return the first_name and last_name when present', function () {
     return expect(
       displayNameForUser({
         id: window.user.id + 1,
@@ -44,7 +44,7 @@ export default describe('displayNameForUser', function() {
     ).to.equal('James Allen')
   })
 
-  it('should return only the firstAname if no last_name', function() {
+  it('should return only the firstAname if no last_name', function () {
     return expect(
       displayNameForUser({
         id: window.user.id + 1,
@@ -55,7 +55,7 @@ export default describe('displayNameForUser', function() {
     ).to.equal('James')
   })
 
-  it('should return the email username if there are no names', function() {
+  it('should return the email username if there are no names', function () {
     return expect(
       displayNameForUser({
         id: window.user.id + 1,
@@ -66,7 +66,7 @@ export default describe('displayNameForUser', function() {
     ).to.equal('james.allen')
   })
 
-  it("should return the '?' if it has nothing", function() {
+  it("should return the '?' if it has nothing", function () {
     return expect(
       displayNameForUser({
         id: window.user.id + 1,

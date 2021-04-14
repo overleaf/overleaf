@@ -5,8 +5,8 @@ const SandboxedModule = require('sandboxed-module')
 const OError = require('@overleaf/o-error')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
-describe('UserController', function() {
-  beforeEach(function() {
+describe('UserController', function () {
+  beforeEach(function () {
     this.user_id = '323123'
 
     this.user = {
@@ -137,8 +137,8 @@ describe('UserController', function() {
     this.callback = sinon.stub()
   })
 
-  describe('tryDeleteUser', function() {
-    beforeEach(function() {
+  describe('tryDeleteUser', function () {
+    beforeEach(function () {
       this.req.body.password = 'wat'
       this.req.logout = sinon.stub()
       this.req.session.destroy = sinon.stub().callsArgWith(0, null)
@@ -150,7 +150,7 @@ describe('UserController', function() {
         .callsArgWith(2, null, this.user)
     })
 
-    it('should send 200', function(done) {
+    it('should send 200', function (done) {
       this.res.sendStatus = code => {
         code.should.equal(200)
         done()
@@ -158,7 +158,7 @@ describe('UserController', function() {
       this.UserController.tryDeleteUser(this.req, this.res, this.next)
     })
 
-    it('should try to authenticate user', function(done) {
+    it('should try to authenticate user', function (done) {
       this.res.sendStatus = code => {
         this.AuthenticationManager.authenticate.callCount.should.equal(1)
         this.AuthenticationManager.authenticate
@@ -169,7 +169,7 @@ describe('UserController', function() {
       this.UserController.tryDeleteUser(this.req, this.res, this.next)
     })
 
-    it('should delete the user', function(done) {
+    it('should delete the user', function (done) {
       this.res.sendStatus = code => {
         this.UserDeleter.deleteUser.callCount.should.equal(1)
         this.UserDeleter.deleteUser.calledWith(this.user._id).should.equal(true)
@@ -178,12 +178,12 @@ describe('UserController', function() {
       this.UserController.tryDeleteUser(this.req, this.res, this.next)
     })
 
-    describe('when no password is supplied', function() {
-      beforeEach(function() {
+    describe('when no password is supplied', function () {
+      beforeEach(function () {
         this.req.body.password = ''
       })
 
-      it('should return 403', function(done) {
+      it('should return 403', function (done) {
         this.res.sendStatus = code => {
           code.should.equal(403)
           done()
@@ -192,14 +192,14 @@ describe('UserController', function() {
       })
     })
 
-    describe('when authenticate produces an error', function() {
-      beforeEach(function() {
+    describe('when authenticate produces an error', function () {
+      beforeEach(function () {
         this.AuthenticationManager.authenticate = sinon
           .stub()
           .callsArgWith(2, new Error('woops'))
       })
 
-      it('should call next with an error', function(done) {
+      it('should call next with an error', function (done) {
         this.next = err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
@@ -209,14 +209,14 @@ describe('UserController', function() {
       })
     })
 
-    describe('when authenticate does not produce a user', function() {
-      beforeEach(function() {
+    describe('when authenticate does not produce a user', function () {
+      beforeEach(function () {
         this.AuthenticationManager.authenticate = sinon
           .stub()
           .callsArgWith(2, null, null)
       })
 
-      it('should return 403', function(done) {
+      it('should return 403', function (done) {
         this.res.sendStatus = code => {
           code.should.equal(403)
           done()
@@ -225,12 +225,12 @@ describe('UserController', function() {
       })
     })
 
-    describe('when deleteUser produces an error', function() {
-      beforeEach(function() {
+    describe('when deleteUser produces an error', function () {
+      beforeEach(function () {
         this.UserDeleter.deleteUser = sinon.stub().yields(new Error('woops'))
       })
 
-      it('should call next with an error', function(done) {
+      it('should call next with an error', function (done) {
         this.next = err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
@@ -240,14 +240,14 @@ describe('UserController', function() {
       })
     })
 
-    describe('when deleteUser produces a known error', function() {
-      beforeEach(function() {
+    describe('when deleteUser produces a known error', function () {
+      beforeEach(function () {
         this.UserDeleter.deleteUser = sinon
           .stub()
           .yields(new Errors.SubscriptionAdminDeletionError())
       })
 
-      it('should return a HTTP Unprocessable Entity error', function(done) {
+      it('should return a HTTP Unprocessable Entity error', function (done) {
         this.HttpErrorHandler.unprocessableEntity = sinon.spy(
           (req, res, message, info) => {
             expect(req).to.exist
@@ -263,14 +263,14 @@ describe('UserController', function() {
       })
     })
 
-    describe('when session.destroy produces an error', function() {
-      beforeEach(function() {
+    describe('when session.destroy produces an error', function () {
+      beforeEach(function () {
         this.req.session.destroy = sinon
           .stub()
           .callsArgWith(0, new Error('woops'))
       })
 
-      it('should call next with an error', function(done) {
+      it('should call next with an error', function (done) {
         this.next = err => {
           expect(err).to.not.equal(null)
           expect(err).to.be.instanceof(Error)
@@ -281,8 +281,8 @@ describe('UserController', function() {
     })
   })
 
-  describe('unsubscribe', function() {
-    it('should send the user to unsubscribe', function(done) {
+  describe('unsubscribe', function () {
+    it('should send the user to unsubscribe', function (done) {
       this.res.sendStatus = () => {
         this.NewsLetterManager.unsubscribe
           .calledWith(this.user)
@@ -293,14 +293,14 @@ describe('UserController', function() {
     })
   })
 
-  describe('updateUserSettings', function() {
-    beforeEach(function() {
+  describe('updateUserSettings', function () {
+    beforeEach(function () {
       this.auditLog = { initiatorId: this.user_id, ipAddress: this.req.ip }
       this.newEmail = 'hello@world.com'
       this.req.externalAuthenticationSystemUsed = sinon.stub().returns(false)
     })
 
-    it('should call save', function(done) {
+    it('should call save', function (done) {
       this.req.body = {}
       this.res.sendStatus = code => {
         this.user.save.called.should.equal(true)
@@ -309,7 +309,7 @@ describe('UserController', function() {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    it('should set the first name', function(done) {
+    it('should set the first name', function (done) {
       this.req.body = { first_name: 'bobby  ' }
       this.res.sendStatus = code => {
         this.user.first_name.should.equal('bobby')
@@ -318,7 +318,7 @@ describe('UserController', function() {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    it('should set the role', function(done) {
+    it('should set the role', function (done) {
       this.req.body = { role: 'student' }
       this.res.sendStatus = code => {
         this.user.role.should.equal('student')
@@ -327,7 +327,7 @@ describe('UserController', function() {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    it('should set the institution', function(done) {
+    it('should set the institution', function (done) {
       this.req.body = { institution: 'MIT' }
       this.res.sendStatus = code => {
         this.user.institution.should.equal('MIT')
@@ -336,7 +336,7 @@ describe('UserController', function() {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    it('should set some props on ace', function(done) {
+    it('should set some props on ace', function (done) {
       this.req.body = { editorTheme: 'something' }
       this.res.sendStatus = code => {
         this.user.ace.theme.should.equal('something')
@@ -345,7 +345,7 @@ describe('UserController', function() {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    it('should set the overall theme', function(done) {
+    it('should set the overall theme', function (done) {
       this.req.body = { overallTheme: 'green-ish' }
       this.res.sendStatus = code => {
         this.user.ace.overallTheme.should.equal('green-ish')
@@ -354,25 +354,25 @@ describe('UserController', function() {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    it('should send an error if the email is 0 len', function(done) {
+    it('should send an error if the email is 0 len', function (done) {
       this.req.body.email = ''
-      this.res.sendStatus = function(code) {
+      this.res.sendStatus = function (code) {
         code.should.equal(400)
         done()
       }
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    it('should send an error if the email does not contain an @', function(done) {
+    it('should send an error if the email does not contain an @', function (done) {
       this.req.body.email = 'bob at something dot com'
-      this.res.sendStatus = function(code) {
+      this.res.sendStatus = function (code) {
         code.should.equal(400)
         done()
       }
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    it('should call the user updater with the new email and user _id', function(done) {
+    it('should call the user updater with the new email and user _id', function (done) {
       this.req.body.email = this.newEmail.toUpperCase()
       this.UserUpdater.changeEmailAddress.callsArgWith(3)
       this.res.sendStatus = code => {
@@ -385,7 +385,7 @@ describe('UserController', function() {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    it('should update the email on the session', function(done) {
+    it('should update the email on the session', function (done) {
       this.req.body.email = this.newEmail.toUpperCase()
       this.UserUpdater.changeEmailAddress.callsArgWith(3)
       let callcount = 0
@@ -409,7 +409,7 @@ describe('UserController', function() {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    it('should call populateTeamInvites', function(done) {
+    it('should call populateTeamInvites', function (done) {
       this.req.body.email = this.newEmail.toUpperCase()
       this.UserUpdater.changeEmailAddress.callsArgWith(3)
       this.res.sendStatus = code => {
@@ -422,8 +422,8 @@ describe('UserController', function() {
       this.UserController.updateUserSettings(this.req, this.res)
     })
 
-    describe('when changeEmailAddress yields an error', function() {
-      it('should pass on an error and not send a success status', function(done) {
+    describe('when changeEmailAddress yields an error', function () {
+      it('should pass on an error and not send a success status', function (done) {
         this.req.body.email = this.newEmail.toUpperCase()
         this.UserUpdater.changeEmailAddress.callsArgWith(3, new OError())
         this.HttpErrorHandler.legacyInternal = sinon.spy(
@@ -438,7 +438,7 @@ describe('UserController', function() {
         this.UserController.updateUserSettings(this.req, this.res, this.next)
       })
 
-      it('should call the HTTP conflict error handler when the email already exists', function(done) {
+      it('should call the HTTP conflict error handler when the email already exists', function (done) {
         this.HttpErrorHandler.conflict = sinon.spy((req, res, message) => {
           expect(req).to.exist
           expect(req).to.exist
@@ -454,14 +454,14 @@ describe('UserController', function() {
       })
     })
 
-    describe('when using an external auth source', function() {
-      beforeEach(function() {
+    describe('when using an external auth source', function () {
+      beforeEach(function () {
         this.UserUpdater.changeEmailAddress.callsArgWith(2)
         this.newEmail = 'someone23@example.com'
         this.req.externalAuthenticationSystemUsed = sinon.stub().returns(true)
       })
 
-      it('should not set a new email', function(done) {
+      it('should not set a new email', function (done) {
         this.req.body.email = this.newEmail
         this.res.sendStatus = code => {
           code.should.equal(200)
@@ -475,8 +475,8 @@ describe('UserController', function() {
     })
   })
 
-  describe('logout', function() {
-    it('should destroy the session', function(done) {
+  describe('logout', function () {
+    it('should destroy the session', function (done) {
       this.req.session.destroy = sinon.stub().callsArgWith(0)
       this.res.redirect = url => {
         url.should.equal('/login')
@@ -487,7 +487,7 @@ describe('UserController', function() {
       this.UserController.logout(this.req, this.res)
     })
 
-    it('should untrack session', function(done) {
+    it('should untrack session', function (done) {
       this.req.session.destroy = sinon.stub().callsArgWith(0)
       this.res.redirect = url => {
         url.should.equal('/login')
@@ -501,7 +501,7 @@ describe('UserController', function() {
       this.UserController.logout(this.req, this.res)
     })
 
-    it('should redirect after logout', function(done) {
+    it('should redirect after logout', function (done) {
       this.req.body.redirect = '/institutional-login'
       this.req.session.destroy = sinon.stub().callsArgWith(0)
       this.res.redirect = url => {
@@ -511,7 +511,7 @@ describe('UserController', function() {
       this.UserController.logout(this.req, this.res)
     })
 
-    it('should redirect after logout, but not to evil.com', function(done) {
+    it('should redirect after logout, but not to evil.com', function (done) {
       this.req.body.redirect = 'https://evil.com'
       this.req.session.destroy = sinon.stub().callsArgWith(0)
       this.res.redirect = url => {
@@ -521,7 +521,7 @@ describe('UserController', function() {
       this.UserController.logout(this.req, this.res)
     })
 
-    it('should redirect to login after logout when no redirect set', function(done) {
+    it('should redirect to login after logout when no redirect set', function (done) {
       this.req.session.destroy = sinon.stub().callsArgWith(0)
       this.res.redirect = url => {
         url.should.equal('/login')
@@ -531,8 +531,8 @@ describe('UserController', function() {
     })
   })
 
-  describe('register', function() {
-    beforeEach(function() {
+  describe('register', function () {
+    beforeEach(function () {
       this.UserRegistrationHandler.registerNewUserAndSendActivationEmail = sinon
         .stub()
         .callsArgWith(1, null, this.user, (this.url = 'mock/url'))
@@ -540,13 +540,13 @@ describe('UserController', function() {
       this.UserController.register(this.req, this.res)
     })
 
-    it('should register the user and send them an email', function() {
+    it('should register the user and send them an email', function () {
       this.UserRegistrationHandler.registerNewUserAndSendActivationEmail
         .calledWith(this.email)
         .should.equal(true)
     })
 
-    it('should return the user and activation url', function() {
+    it('should return the user and activation url', function () {
       this.res.json
         .calledWith({
           email: this.email,
@@ -556,9 +556,9 @@ describe('UserController', function() {
     })
   })
 
-  describe('clearSessions', function() {
-    describe('success', function() {
-      it('should call revokeAllUserSessions', function(done) {
+  describe('clearSessions', function () {
+    describe('success', function () {
+      it('should call revokeAllUserSessions', function (done) {
         this.res.sendStatus.callsFake(() => {
           this.UserSessionsManager.promises.revokeAllUserSessions.callCount.should.equal(
             1
@@ -568,7 +568,7 @@ describe('UserController', function() {
         this.UserController.clearSessions(this.req, this.res)
       })
 
-      it('send a 201 response', function(done) {
+      it('send a 201 response', function (done) {
         this.res.sendStatus.callsFake(status => {
           status.should.equal(201)
           done()
@@ -577,7 +577,7 @@ describe('UserController', function() {
         this.UserController.clearSessions(this.req, this.res)
       })
 
-      it('sends a security alert email', function(done) {
+      it('sends a security alert email', function (done) {
         this.res.sendStatus.callsFake(status => {
           this.EmailHandler.promises.sendEmail.callCount.should.equal(1)
           const expectedArg = {
@@ -595,9 +595,9 @@ describe('UserController', function() {
       })
     })
 
-    describe('errors', function() {
-      describe('when getAllUserSessions produces an error', function() {
-        it('should return an error', function(done) {
+    describe('errors', function () {
+      describe('when getAllUserSessions produces an error', function () {
+        it('should return an error', function (done) {
           this.UserSessionsManager.promises.getAllUserSessions.rejects(
             new Error('woops')
           )
@@ -608,8 +608,8 @@ describe('UserController', function() {
         })
       })
 
-      describe('when audit log addEntry produces an error', function() {
-        it('should call next with an error', function(done) {
+      describe('when audit log addEntry produces an error', function () {
+        it('should call next with an error', function (done) {
           this.UserAuditLogHandler.promises.addEntry.rejects(new Error('woops'))
           this.UserController.clearSessions(this.req, this.res, error => {
             expect(error).to.be.instanceof(Error)
@@ -618,8 +618,8 @@ describe('UserController', function() {
         })
       })
 
-      describe('when revokeAllUserSessions produces an error', function() {
-        it('should call next with an error', function(done) {
+      describe('when revokeAllUserSessions produces an error', function () {
+        it('should call next with an error', function (done) {
           this.UserSessionsManager.promises.revokeAllUserSessions.rejects(
             new Error('woops')
           )
@@ -630,9 +630,9 @@ describe('UserController', function() {
         })
       })
 
-      describe('when EmailHandler produces an error', function() {
+      describe('when EmailHandler produces an error', function () {
         const anError = new Error('oops')
-        it('send a 201 response but log error', function(done) {
+        it('send a 201 response but log error', function (done) {
           this.EmailHandler.promises.sendEmail.rejects(anError)
           this.res.sendStatus.callsFake(status => {
             status.should.equal(201)
@@ -653,9 +653,9 @@ describe('UserController', function() {
     })
   })
 
-  describe('changePassword', function() {
-    describe('success', function() {
-      beforeEach(function() {
+  describe('changePassword', function () {
+    describe('success', function () {
+      beforeEach(function () {
         this.AuthenticationManager.promises.authenticate.resolves(this.user)
         this.AuthenticationManager.promises.setUserPassword.resolves()
         this.req.body = {
@@ -663,7 +663,7 @@ describe('UserController', function() {
           newPassword2: 'newpass'
         }
       })
-      it('should set the new password if they do match', function(done) {
+      it('should set the new password if they do match', function (done) {
         this.res.json.callsFake(() => {
           this.AuthenticationManager.promises.setUserPassword.should.have.been.calledWith(
             this.user,
@@ -674,7 +674,7 @@ describe('UserController', function() {
         this.UserController.changePassword(this.req, this.res)
       })
 
-      it('should log the update', function(done) {
+      it('should log the update', function (done) {
         this.res.json.callsFake(() => {
           this.UserAuditLogHandler.promises.addEntry.should.have.been.calledWith(
             this.user._id,
@@ -690,7 +690,7 @@ describe('UserController', function() {
         this.UserController.changePassword(this.req, this.res)
       })
 
-      it('should send security alert email', function(done) {
+      it('should send security alert email', function (done) {
         this.res.json.callsFake(() => {
           const expectedArg = {
             to: this.user.email,
@@ -706,8 +706,8 @@ describe('UserController', function() {
       })
     })
 
-    describe('errors', function() {
-      it('should check the old password is the current one at the moment', function(done) {
+    describe('errors', function () {
+      it('should check the old password is the current one at the moment', function (done) {
         this.AuthenticationManager.promises.authenticate.resolves()
         this.req.body = { currentPassword: 'oldpasshere' }
         this.HttpErrorHandler.badRequest.callsFake(() => {
@@ -728,7 +728,7 @@ describe('UserController', function() {
         this.UserController.changePassword(this.req, this.res)
       })
 
-      it('it should not set the new password if they do not match', function(done) {
+      it('it should not set the new password if they do not match', function (done) {
         this.AuthenticationManager.promises.authenticate.resolves({})
         this.req.body = {
           newPassword1: '1',
@@ -748,7 +748,7 @@ describe('UserController', function() {
         this.UserController.changePassword(this.req, this.res)
       })
 
-      it('it should not set the new password if it is invalid', function(done) {
+      it('it should not set the new password if it is invalid', function (done) {
         // this.AuthenticationManager.validatePassword = sinon
         //   .stub()
         //   .returns({ message: 'validation-error' })
@@ -774,8 +774,8 @@ describe('UserController', function() {
         this.UserController.changePassword(this.req, this.res)
       })
 
-      describe('UserAuditLogHandler error', function() {
-        it('should return error and not update password', function(done) {
+      describe('UserAuditLogHandler error', function () {
+        it('should return error and not update password', function (done) {
           this.UserAuditLogHandler.promises.addEntry.rejects(new Error('oops'))
           this.AuthenticationManager.promises.authenticate.resolves(this.user)
           this.AuthenticationManager.promises.setUserPassword.resolves()
@@ -794,9 +794,9 @@ describe('UserController', function() {
         })
       })
 
-      describe('EmailHandler error', function() {
+      describe('EmailHandler error', function () {
         const anError = new Error('oops')
-        beforeEach(function() {
+        beforeEach(function () {
           this.AuthenticationManager.promises.authenticate.resolves(this.user)
           this.AuthenticationManager.promises.setUserPassword.resolves()
           this.req.body = {
@@ -805,7 +805,7 @@ describe('UserController', function() {
           }
           this.EmailHandler.sendEmail.yields(anError)
         })
-        it('should not return error but should log it', function(done) {
+        it('should not return error but should log it', function (done) {
           this.res.json.callsFake(result => {
             expect(result.message.type).to.equal('success')
             this.logger.error.callCount.should.equal(1)
@@ -824,27 +824,27 @@ describe('UserController', function() {
     })
   })
 
-  describe('ensureAffiliationMiddleware', function() {
-    describe('without affiliations feature', function() {
-      beforeEach(async function() {
+  describe('ensureAffiliationMiddleware', function () {
+    describe('without affiliations feature', function () {
+      beforeEach(async function () {
         await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
           this.res,
           this.next
         )
       })
-      it('should not run affiliation check', function() {
+      it('should not run affiliation check', function () {
         expect(this.UserGetter.promises.getUser).to.not.have.been.called
         expect(this.UserUpdater.promises.confirmEmail).to.not.have.been.called
         expect(this.UserUpdater.promises.addAffiliationForNewUser).to.not.have
           .been.called
       })
-      it('should not return an error', function() {
+      it('should not return an error', function () {
         expect(this.next).to.be.calledWith()
       })
     })
-    describe('without ensureAffiliation query parameter', function() {
-      beforeEach(async function() {
+    describe('without ensureAffiliation query parameter', function () {
+      beforeEach(async function () {
         this.Features.hasFeature.withArgs('affiliations').returns(true)
         await this.UserController.promises.ensureAffiliationMiddleware(
           this.req,
@@ -852,18 +852,18 @@ describe('UserController', function() {
           this.next
         )
       })
-      it('should not run middleware', function() {
+      it('should not run middleware', function () {
         expect(this.UserGetter.promises.getUser).to.not.have.been.called
         expect(this.UserUpdater.promises.confirmEmail).to.not.have.been.called
         expect(this.UserUpdater.promises.addAffiliationForNewUser).to.not.have
           .been.called
       })
-      it('should not return an error', function() {
+      it('should not return an error', function () {
         expect(this.next).to.be.calledWith()
       })
     })
-    describe('no flagged email', function() {
-      beforeEach(async function() {
+    describe('no flagged email', function () {
+      beforeEach(async function () {
         const email = 'unit-test@overleaf.com'
         this.user.email = email
         this.user.emails = [
@@ -879,22 +879,22 @@ describe('UserController', function() {
           this.next
         )
       })
-      it('should get the user', function() {
+      it('should get the user', function () {
         expect(this.UserGetter.promises.getUser).to.have.been.calledWith(
           this.user._id
         )
       })
-      it('should not try to add affiliation or update user', function() {
+      it('should not try to add affiliation or update user', function () {
         expect(this.UserUpdater.promises.addAffiliationForNewUser).to.not.have
           .been.called
       })
-      it('should not return an error', function() {
+      it('should not return an error', function () {
         expect(this.next).to.be.calledWith()
       })
     })
-    describe('flagged non-SSO email', function() {
+    describe('flagged non-SSO email', function () {
       let emailFlagged
-      beforeEach(async function() {
+      beforeEach(async function () {
         emailFlagged = 'flagged@overleaf.com'
         this.user.email = emailFlagged
         this.user.emails = [
@@ -911,7 +911,7 @@ describe('UserController', function() {
           this.next
         )
       })
-      it('should unflag the emails but not confirm', function() {
+      it('should unflag the emails but not confirm', function () {
         expect(
           this.UserUpdater.promises.addAffiliationForNewUser
         ).to.have.been.calledWith(this.user._id, emailFlagged)
@@ -919,13 +919,13 @@ describe('UserController', function() {
           this.UserUpdater.promises.confirmEmail
         ).to.not.have.been.calledWith(this.user._id, emailFlagged)
       })
-      it('should not return an error', function() {
+      it('should not return an error', function () {
         expect(this.next).to.be.calledWith()
       })
     })
-    describe('flagged SSO email', function() {
+    describe('flagged SSO email', function () {
       let emailFlagged
-      beforeEach(async function() {
+      beforeEach(async function () {
         emailFlagged = 'flagged@overleaf.com'
         this.user.email = emailFlagged
         this.user.emails = [
@@ -943,7 +943,7 @@ describe('UserController', function() {
           this.next
         )
       })
-      it('should add affiliation to v1, unflag and confirm on v2', function() {
+      it('should add affiliation to v1, unflag and confirm on v2', function () {
         expect(this.UserUpdater.promises.addAffiliationForNewUser).to.have.not
           .been.called
         expect(this.UserUpdater.promises.confirmEmail).to.have.been.calledWith(
@@ -951,13 +951,13 @@ describe('UserController', function() {
           emailFlagged
         )
       })
-      it('should not return an error', function() {
+      it('should not return an error', function () {
         expect(this.next).to.be.calledWith()
       })
     })
-    describe('when v1 returns an error', function() {
+    describe('when v1 returns an error', function () {
       let emailFlagged
-      beforeEach(async function() {
+      beforeEach(async function () {
         this.UserUpdater.promises.addAffiliationForNewUser.rejects()
         emailFlagged = 'flagged@overleaf.com'
         this.user.email = emailFlagged
@@ -975,7 +975,7 @@ describe('UserController', function() {
           this.next
         )
       })
-      it('should return the error', function() {
+      it('should return the error', function () {
         expect(this.next).to.be.calledWith(sinon.match.instanceOf(Error))
       })
     })

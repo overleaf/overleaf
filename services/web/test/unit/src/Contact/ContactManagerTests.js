@@ -13,8 +13,8 @@ const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Contacts/ContactManager'
 const SandboxedModule = require('sandboxed-module')
 
-describe('ContactManager', function() {
-  beforeEach(function() {
+describe('ContactManager', function () {
+  beforeEach(function () {
     this.ContactManager = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = sinon.stub()),
@@ -33,9 +33,9 @@ describe('ContactManager', function() {
     return (this.callback = sinon.stub())
   })
 
-  describe('getContacts', function() {
-    describe('with a successful response code', function() {
-      beforeEach(function() {
+  describe('getContacts', function () {
+    describe('with a successful response code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(
@@ -51,7 +51,7 @@ describe('ContactManager', function() {
         )
       })
 
-      it('should get the contacts from the contacts api', function() {
+      it('should get the contacts from the contacts api', function () {
         return this.request.get
           .calledWith({
             url: `${this.settings.apis.contacts.url}/user/${this.user_id}/contacts`,
@@ -62,15 +62,15 @@ describe('ContactManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback with the contatcs', function() {
+      it('should call the callback with the contatcs', function () {
         return this.callback
           .calledWith(null, this.contact_ids)
           .should.equal(true)
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function() {
+    describe('with a failed response code', function () {
+      beforeEach(function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, null)
@@ -81,7 +81,7 @@ describe('ContactManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match
@@ -98,9 +98,9 @@ describe('ContactManager', function() {
     })
   })
 
-  describe('addContact', function() {
-    describe('with a successful response code', function() {
-      beforeEach(function() {
+  describe('addContact', function () {
+    describe('with a successful response code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 200 }, null)
@@ -111,7 +111,7 @@ describe('ContactManager', function() {
         )
       })
 
-      it('should add the contacts for the user in the contacts api', function() {
+      it('should add the contacts for the user in the contacts api', function () {
         return this.request.post
           .calledWith({
             url: `${this.settings.apis.contacts.url}/user/${this.user_id}/contacts`,
@@ -123,13 +123,13 @@ describe('ContactManager', function() {
           .should.equal(true)
       })
 
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         return this.callback.called.should.equal(true)
       })
     })
 
-    describe('with a failed response code', function() {
-      beforeEach(function() {
+    describe('with a failed response code', function () {
+      beforeEach(function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, null)
@@ -140,7 +140,7 @@ describe('ContactManager', function() {
         )
       })
 
-      it('should call the callback with an error', function() {
+      it('should call the callback with an error', function () {
         return this.callback
           .calledWith(
             sinon.match

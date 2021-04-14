@@ -26,10 +26,10 @@ const { promisifyAll } = require('../../util/promises')
 const CollaboratorsInviteHandler = {
   getAllInvites(projectId, callback) {
     if (callback == null) {
-      callback = function(err, invites) {}
+      callback = function (err, invites) {}
     }
     logger.log({ projectId }, 'fetching invites for project')
-    return ProjectInvite.find({ projectId }, function(err, invites) {
+    return ProjectInvite.find({ projectId }, function (err, invites) {
       if (err != null) {
         OError.tag(err, 'error getting invites from mongo', {
           projectId
@@ -46,10 +46,10 @@ const CollaboratorsInviteHandler = {
 
   getInviteCount(projectId, callback) {
     if (callback == null) {
-      callback = function(err, count) {}
+      callback = function (err, count) {}
     }
     logger.log({ projectId }, 'counting invites for project')
-    return ProjectInvite.countDocuments({ projectId }, function(err, count) {
+    return ProjectInvite.countDocuments({ projectId }, function (err, count) {
       if (err != null) {
         OError.tag(err, 'error getting invites from mongo', {
           projectId
@@ -62,55 +62,57 @@ const CollaboratorsInviteHandler = {
 
   _trySendInviteNotification(projectId, sendingUser, invite, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     const { email } = invite
-    return UserGetter.getUserByAnyEmail(email, { _id: 1 }, function(
-      err,
-      existingUser
-    ) {
-      if (err != null) {
-        OError.tag(err, 'error checking if user exists', {
-          projectId,
-          email
-        })
-        return callback(err)
-      }
-      if (existingUser == null) {
-        logger.log({ projectId, email }, 'no existing user found, returning')
-        return callback(null)
-      }
-      return ProjectGetter.getProject(projectId, { _id: 1, name: 1 }, function(
-        err,
-        project
-      ) {
+    return UserGetter.getUserByAnyEmail(
+      email,
+      { _id: 1 },
+      function (err, existingUser) {
         if (err != null) {
-          OError.tag(err, 'error getting project', {
+          OError.tag(err, 'error checking if user exists', {
             projectId,
             email
           })
           return callback(err)
         }
-        if (project == null) {
-          logger.log(
-            { projectId },
-            'no project found while sending notification, returning'
-          )
+        if (existingUser == null) {
+          logger.log({ projectId, email }, 'no existing user found, returning')
           return callback(null)
         }
-        return NotificationsBuilder.projectInvite(
-          invite,
-          project,
-          sendingUser,
-          existingUser
-        ).create(callback)
-      })
-    })
+        return ProjectGetter.getProject(
+          projectId,
+          { _id: 1, name: 1 },
+          function (err, project) {
+            if (err != null) {
+              OError.tag(err, 'error getting project', {
+                projectId,
+                email
+              })
+              return callback(err)
+            }
+            if (project == null) {
+              logger.log(
+                { projectId },
+                'no project found while sending notification, returning'
+              )
+              return callback(null)
+            }
+            return NotificationsBuilder.projectInvite(
+              invite,
+              project,
+              sendingUser,
+              existingUser
+            ).create(callback)
+          }
+        )
+      }
+    )
   },
 
   _tryCancelInviteNotification(inviteId, callback) {
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     return NotificationsBuilder.projectInvite(
       { _id: inviteId },
@@ -122,7 +124,7 @@ const CollaboratorsInviteHandler = {
 
   _sendMessages(projectId, sendingUser, invite, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     logger.log(
       { projectId, inviteId: invite._id },
@@ -133,7 +135,7 @@ const CollaboratorsInviteHandler = {
       invite.email,
       invite,
       sendingUser,
-      function(err) {
+      function (err) {
         if (err != null) {
           return callback(err)
         }
@@ -141,7 +143,7 @@ const CollaboratorsInviteHandler = {
           projectId,
           sendingUser,
           invite,
-          function(err) {
+          function (err) {
             if (err != null) {
               return callback(err)
             }
@@ -154,13 +156,13 @@ const CollaboratorsInviteHandler = {
 
   inviteToProject(projectId, sendingUser, email, privileges, callback) {
     if (callback == null) {
-      callback = function(err, invite) {}
+      callback = function (err, invite) {}
     }
     logger.log(
       { projectId, sendingUserId: sendingUser._id, email, privileges },
       'adding invite'
     )
-    return Crypto.randomBytes(24, function(err, buffer) {
+    return Crypto.randomBytes(24, function (err, buffer) {
       if (err != null) {
         OError.tag(err, 'error generating random token', {
           projectId,
@@ -177,7 +179,7 @@ const CollaboratorsInviteHandler = {
         projectId,
         privileges
       })
-      return invite.save(function(err, invite) {
+      return invite.save(function (err, invite) {
         if (err != null) {
           OError.tag(err, 'error saving token', {
             projectId,
@@ -191,7 +193,7 @@ const CollaboratorsInviteHandler = {
           projectId,
           sendingUser,
           invite,
-          function(err) {
+          function (err) {
             if (err != null) {
               return logger.err(
                 { err, projectId, email },
@@ -207,98 +209,101 @@ const CollaboratorsInviteHandler = {
 
   revokeInvite(projectId, inviteId, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     logger.log({ projectId, inviteId }, 'removing invite')
-    return ProjectInvite.deleteOne({ projectId, _id: inviteId }, function(err) {
-      if (err != null) {
-        OError.tag(err, 'error removing invite', {
-          projectId,
-          inviteId
-        })
-        return callback(err)
+    return ProjectInvite.deleteOne(
+      { projectId, _id: inviteId },
+      function (err) {
+        if (err != null) {
+          OError.tag(err, 'error removing invite', {
+            projectId,
+            inviteId
+          })
+          return callback(err)
+        }
+        CollaboratorsInviteHandler._tryCancelInviteNotification(
+          inviteId,
+          function () {}
+        )
+        return callback(null)
       }
-      CollaboratorsInviteHandler._tryCancelInviteNotification(
-        inviteId,
-        function() {}
-      )
-      return callback(null)
-    })
+    )
   },
 
   resendInvite(projectId, sendingUser, inviteId, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     logger.log({ projectId, inviteId }, 'resending invite email')
-    return ProjectInvite.findOne({ _id: inviteId, projectId }, function(
-      err,
-      invite
-    ) {
-      if (err != null) {
-        OError.tag(err, 'error finding invite', {
-          projectId,
-          inviteId
-        })
-        return callback(err)
-      }
-      if (invite == null) {
-        logger.err(
-          { err, projectId, inviteId },
-          'no invite found, nothing to resend'
-        )
-        return callback(null)
-      }
-      return CollaboratorsInviteHandler._sendMessages(
-        projectId,
-        sendingUser,
-        invite,
-        function(err) {
-          if (err != null) {
-            OError.tag(err, 'error resending invite messages', {
-              projectId,
-              inviteId
-            })
-            return callback(err)
-          }
+    return ProjectInvite.findOne(
+      { _id: inviteId, projectId },
+      function (err, invite) {
+        if (err != null) {
+          OError.tag(err, 'error finding invite', {
+            projectId,
+            inviteId
+          })
+          return callback(err)
+        }
+        if (invite == null) {
+          logger.err(
+            { err, projectId, inviteId },
+            'no invite found, nothing to resend'
+          )
           return callback(null)
         }
-      )
-    })
+        return CollaboratorsInviteHandler._sendMessages(
+          projectId,
+          sendingUser,
+          invite,
+          function (err) {
+            if (err != null) {
+              OError.tag(err, 'error resending invite messages', {
+                projectId,
+                inviteId
+              })
+              return callback(err)
+            }
+            return callback(null)
+          }
+        )
+      }
+    )
   },
 
   getInviteByToken(projectId, tokenString, callback) {
     if (callback == null) {
-      callback = function(err, invite) {}
+      callback = function (err, invite) {}
     }
     logger.log({ projectId, tokenString }, 'fetching invite by token')
-    return ProjectInvite.findOne({ projectId, token: tokenString }, function(
-      err,
-      invite
-    ) {
-      if (err != null) {
-        OError.tag(err, 'error fetching invite', {
-          projectId
-        })
-        return callback(err)
+    return ProjectInvite.findOne(
+      { projectId, token: tokenString },
+      function (err, invite) {
+        if (err != null) {
+          OError.tag(err, 'error fetching invite', {
+            projectId
+          })
+          return callback(err)
+        }
+        if (invite == null) {
+          logger.err({ err, projectId, token: tokenString }, 'no invite found')
+          return callback(null, null)
+        }
+        return callback(null, invite)
       }
-      if (invite == null) {
-        logger.err({ err, projectId, token: tokenString }, 'no invite found')
-        return callback(null, null)
-      }
-      return callback(null, invite)
-    })
+    )
   },
 
   acceptInvite(projectId, tokenString, user, callback) {
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     logger.log({ projectId, userId: user._id, tokenString }, 'accepting invite')
     return CollaboratorsInviteHandler.getInviteByToken(
       projectId,
       tokenString,
-      function(err, invite) {
+      function (err, invite) {
         if (err != null) {
           OError.tag(err, 'error finding invite', {
             projectId,
@@ -320,7 +325,7 @@ const CollaboratorsInviteHandler = {
           invite.sendingUserId,
           user._id,
           invite.privileges,
-          function(err) {
+          function (err) {
             if (err != null) {
               OError.tag(err, 'error adding user to project', {
                 projectId,
@@ -331,7 +336,7 @@ const CollaboratorsInviteHandler = {
             }
             // Remove invite
             logger.log({ projectId, inviteId }, 'removing invite')
-            return ProjectInvite.deleteOne({ _id: inviteId }, function(err) {
+            return ProjectInvite.deleteOne({ _id: inviteId }, function (err) {
               if (err != null) {
                 OError.tag(err, 'error removing invite', {
                   projectId,
@@ -341,7 +346,7 @@ const CollaboratorsInviteHandler = {
               }
               CollaboratorsInviteHandler._tryCancelInviteNotification(
                 inviteId,
-                function() {}
+                function () {}
               )
               return callback()
             })

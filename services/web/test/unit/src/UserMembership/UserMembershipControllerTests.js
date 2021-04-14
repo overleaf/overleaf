@@ -22,8 +22,8 @@ const MockResponse = require('../helpers/MockResponse')
 const EntityConfigs = require('../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
-describe('UserMembershipController', function() {
-  beforeEach(function() {
+describe('UserMembershipController', function () {
+  beforeEach(function () {
     this.req = new MockRequest()
     this.req.params.id = 'mock-entity-id'
     this.user = { _id: 'mock-user-id' }
@@ -77,13 +77,13 @@ describe('UserMembershipController', function() {
     ))
   })
 
-  describe('index', function() {
-    beforeEach(function() {
+  describe('index', function () {
+    beforeEach(function () {
       this.req.entity = this.subscription
       return (this.req.entityConfig = EntityConfigs.group)
     })
 
-    it('get users', function(done) {
+    it('get users', function (done) {
       return this.UserMembershipController.index(this.req, {
         render: () => {
           sinon.assert.calledWithMatch(
@@ -96,7 +96,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('render group view', function(done) {
+    it('render group view', function (done) {
       return this.UserMembershipController.index(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/index')
@@ -111,7 +111,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('render group managers view', function(done) {
+    it('render group managers view', function (done) {
       this.req.entityConfig = EntityConfigs.groupManagers
       return this.UserMembershipController.index(this.req, {
         render: (viewPath, viewParams) => {
@@ -127,7 +127,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('render institution view', function(done) {
+    it('render institution view', function (done) {
       this.req.entity = this.institution
       this.req.entityConfig = EntityConfigs.institution
       return this.UserMembershipController.index(this.req, {
@@ -143,14 +143,14 @@ describe('UserMembershipController', function() {
     })
   })
 
-  describe('add', function() {
-    beforeEach(function() {
+  describe('add', function () {
+    beforeEach(function () {
       this.req.body.email = this.newUser.email
       this.req.entity = this.subscription
       return (this.req.entityConfig = EntityConfigs.groupManagers)
     })
 
-    it('add user', function(done) {
+    it('add user', function (done) {
       return this.UserMembershipController.add(this.req, {
         json: () => {
           sinon.assert.calledWithMatch(
@@ -164,7 +164,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('return user object', function(done) {
+    it('return user object', function (done) {
       return this.UserMembershipController.add(this.req, {
         json: payload => {
           payload.user.should.equal(this.newUser)
@@ -173,7 +173,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('handle readOnly entity', function(done) {
+    it('handle readOnly entity', function (done) {
       this.req.entityConfig = EntityConfigs.group
       return this.UserMembershipController.add(this.req, null, error => {
         expect(error).to.exist
@@ -182,7 +182,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('handle user already added', function(done) {
+    it('handle user already added', function (done) {
       this.UserMembershipHandler.addUser.yields({ alreadyAdded: true })
       return this.UserMembershipController.add(this.req, {
         status: () => ({
@@ -194,7 +194,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('handle user not found', function(done) {
+    it('handle user not found', function (done) {
       this.UserMembershipHandler.addUser.yields({ userNotFound: true })
       return this.UserMembershipController.add(this.req, {
         status: () => ({
@@ -206,7 +206,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('handle invalid email', function(done) {
+    it('handle invalid email', function (done) {
       this.req.body.email = 'not_valid_email'
       return this.UserMembershipController.add(this.req, {
         status: () => ({
@@ -219,14 +219,14 @@ describe('UserMembershipController', function() {
     })
   })
 
-  describe('remove', function() {
-    beforeEach(function() {
+  describe('remove', function () {
+    beforeEach(function () {
       this.req.params.userId = this.newUser._id
       this.req.entity = this.subscription
       return (this.req.entityConfig = EntityConfigs.groupManagers)
     })
 
-    it('remove user', function(done) {
+    it('remove user', function (done) {
       return this.UserMembershipController.remove(this.req, {
         sendStatus: () => {
           sinon.assert.calledWithMatch(
@@ -240,7 +240,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('handle readOnly entity', function(done) {
+    it('handle readOnly entity', function (done) {
       this.req.entityConfig = EntityConfigs.group
       return this.UserMembershipController.remove(this.req, null, error => {
         expect(error).to.exist
@@ -249,7 +249,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('prevent self removal', function(done) {
+    it('prevent self removal', function (done) {
       this.req.params.userId = this.user._id
       return this.UserMembershipController.remove(this.req, {
         status: () => ({
@@ -261,7 +261,7 @@ describe('UserMembershipController', function() {
       })
     })
 
-    it('prevent admin removal', function(done) {
+    it('prevent admin removal', function (done) {
       this.UserMembershipHandler.removeUser.yields({ isAdmin: true })
       return this.UserMembershipController.remove(this.req, {
         status: () => ({
@@ -274,8 +274,8 @@ describe('UserMembershipController', function() {
     })
   })
 
-  describe('exportCsv', function() {
-    beforeEach(function() {
+  describe('exportCsv', function () {
+    beforeEach(function () {
       this.req.entity = this.subscription
       this.req.entityConfig = EntityConfigs.groupManagers
       this.res = new MockResponse()
@@ -285,7 +285,7 @@ describe('UserMembershipController', function() {
       return this.UserMembershipController.exportCsv(this.req, this.res)
     })
 
-    it('get users', function() {
+    it('get users', function () {
       return sinon.assert.calledWithMatch(
         this.UserMembershipHandler.getUsers,
         this.subscription,
@@ -293,11 +293,11 @@ describe('UserMembershipController', function() {
       )
     })
 
-    it('should set the correct content type on the request', function() {
+    it('should set the correct content type on the request', function () {
       return assertCalledWith(this.res.contentType, 'text/csv')
     })
 
-    it('should name the exported csv file', function() {
+    it('should name the exported csv file', function () {
       return assertCalledWith(
         this.res.header,
         'Content-Disposition',
@@ -305,7 +305,7 @@ describe('UserMembershipController', function() {
       )
     })
 
-    it('should export the correct csv', function() {
+    it('should export the correct csv', function () {
       return assertCalledWith(
         this.res.send,
         '"email","last_logged_in_at"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z"\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z"'
@@ -313,13 +313,13 @@ describe('UserMembershipController', function() {
     })
   })
 
-  describe('new', function() {
-    beforeEach(function() {
+  describe('new', function () {
+    beforeEach(function () {
       this.req.params.name = 'publisher'
       return (this.req.params.id = 'abc')
     })
 
-    it('renders view', function(done) {
+    it('renders view', function (done) {
       return this.UserMembershipController.new(this.req, {
         render: (viewPath, data) => {
           expect(data.entityName).to.eq('publisher')
@@ -330,14 +330,14 @@ describe('UserMembershipController', function() {
     })
   })
 
-  describe('create', function() {
-    beforeEach(function() {
+  describe('create', function () {
+    beforeEach(function () {
       this.req.params.name = 'institution'
       this.req.entityConfig = EntityConfigs.institution
       return (this.req.params.id = 123)
     })
 
-    it('creates institution', function(done) {
+    it('creates institution', function (done) {
       return this.UserMembershipController.create(this.req, {
         redirect: path => {
           expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)

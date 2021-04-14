@@ -1,9 +1,9 @@
 const { expect } = require('chai')
 const UserHelper = require('../src/helpers/UserHelper')
 
-describe('BetaProgram', function() {
+describe('BetaProgram', function () {
   let email, userHelper
-  beforeEach(async function() {
+  beforeEach(async function () {
     userHelper = new UserHelper()
     email = userHelper.getDefaultEmail()
     userHelper = await UserHelper.createUser({ email })
@@ -12,7 +12,7 @@ describe('BetaProgram', function() {
       password: userHelper.getDefaultPassword()
     })
   })
-  it('should opt in', async function() {
+  it('should opt in', async function () {
     const response = await userHelper.request.post('/beta/opt-in', {
       simple: false
     })
@@ -26,7 +26,7 @@ describe('BetaProgram', function() {
     ).user
     expect(user.betaProgram).to.equal(true)
   })
-  it('should opt out', async function() {
+  it('should opt out', async function () {
     const response = await userHelper.request.post('/beta/opt-out', {
       simple: false
     })

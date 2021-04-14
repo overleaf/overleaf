@@ -21,7 +21,7 @@ app.config([
       '$log',
       '$delegate',
       ($log, $delegate) =>
-        function(exception, cause) {
+        function (exception, cause) {
           if (
             exception === UNHANDLED_REJECTION_ERR_MSG &&
             cause === undefined

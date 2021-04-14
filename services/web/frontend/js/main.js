@@ -54,7 +54,7 @@ import './services/validateCaptcha'
 import './services/validateCaptchaV3'
 import './filters/formatDate'
 import '../../modules/modules-main.js'
-angular.module('SharelatexApp').config(function($locationProvider) {
+angular.module('SharelatexApp').config(function ($locationProvider) {
   try {
     return $locationProvider.html5Mode({
       enabled: true,

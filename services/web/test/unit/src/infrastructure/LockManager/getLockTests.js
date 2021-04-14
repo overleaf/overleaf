@@ -21,8 +21,8 @@ const modulePath = path.join(
 )
 const SandboxedModule = require('sandboxed-module')
 
-describe('LockManager - getting the lock', function() {
-  beforeEach(function() {
+describe('LockManager - getting the lock', function () {
+  beforeEach(function () {
     this.LockManager = SandboxedModule.require(modulePath, {
       requires: {
         './RedisWrapper': {
@@ -52,8 +52,8 @@ describe('LockManager - getting the lock', function() {
     return (this.namespace = 'lockName')
   })
 
-  describe('when the lock is not set', function() {
-    beforeEach(function(done) {
+  describe('when the lock is not set', function () {
+    beforeEach(function (done) {
       this.LockManager._tryLock = sinon.stub().yields(null, true)
       return this.LockManager._getLock(this.key, this.namespace, (...args) => {
         this.callback(...Array.from(args || []))
@@ -61,29 +61,29 @@ describe('LockManager - getting the lock', function() {
       })
     })
 
-    it('should try to get the lock', function() {
+    it('should try to get the lock', function () {
       return this.LockManager._tryLock
         .calledWith(this.key, this.namespace)
         .should.equal(true)
     })
 
-    it('should only need to try once', function() {
+    it('should only need to try once', function () {
       return this.LockManager._tryLock.callCount.should.equal(1)
     })
 
-    it('should return the callback', function() {
+    it('should return the callback', function () {
       return this.callback.calledWith(null).should.equal(true)
     })
   })
 
-  describe('when the lock is initially set', function() {
-    beforeEach(function(done) {
+  describe('when the lock is initially set', function () {
+    beforeEach(function (done) {
       const startTime = Date.now()
       let tries = 0
       this.LockManager.LOCK_TEST_INTERVAL = 5
-      this.LockManager._tryLock = function(key, namespace, callback) {
+      this.LockManager._tryLock = function (key, namespace, callback) {
         if (callback == null) {
-          callback = function(error, isFree) {}
+          callback = function (error, isFree) {}
         }
         if (Date.now() - startTime < 20 || tries < 2) {
           tries = tries + 1
@@ -100,17 +100,17 @@ describe('LockManager - getting the lock', function() {
       })
     })
 
-    it('should call tryLock multiple times until free', function() {
+    it('should call tryLock multiple times until free', function () {
       return (this.LockManager._tryLock.callCount > 1).should.equal(true)
     })
 
-    it('should return the callback', function() {
+    it('should return the callback', function () {
       return this.callback.calledWith(null).should.equal(true)
     })
   })
 
-  describe('when the lock times out', function() {
-    beforeEach(function(done) {
+  describe('when the lock times out', function () {
+    beforeEach(function (done) {
       const time = Date.now()
       this.LockManager.LOCK_TEST_INTERVAL = 1
       this.LockManager.MAX_LOCK_WAIT_TIME = 5
@@ -121,21 +121,21 @@ describe('LockManager - getting the lock', function() {
       })
     })
 
-    it('should return the callback with an error', function() {
+    it('should return the callback with an error', function () {
       this.callback.should.have.been.calledWith(
         sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Timeout'))
       )
     })
   })
 
-  describe('when there are multiple requests for the same lock', function() {
-    beforeEach(function(done) {
+  describe('when there are multiple requests for the same lock', function () {
+    beforeEach(function (done) {
       let locked = false
       this.results = []
       this.LockManager.LOCK_TEST_INTERVAL = 1
-      this.LockManager._tryLock = function(key, namespace, callback) {
+      this.LockManager._tryLock = function (key, namespace, callback) {
         if (callback == null) {
-          callback = function(error, gotLock, lockValue) {}
+          callback = function (error, gotLock, lockValue) {}
         }
         if (locked) {
           return callback(null, false)
@@ -175,7 +175,7 @@ describe('LockManager - getting the lock', function() {
       )
     })
 
-    it('should process the requests in order', function() {
+    it('should process the requests in order', function () {
       return this.results.should.deep.equal([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     })
   })

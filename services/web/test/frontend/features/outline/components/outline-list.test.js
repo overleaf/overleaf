@@ -3,10 +3,10 @@ import { screen, render } from '@testing-library/react'
 
 import OutlineList from '../../../../../frontend/js/features/outline/components/outline-list'
 
-describe('<OutlineList />', function() {
+describe('<OutlineList />', function () {
   const jumpToLine = () => {}
 
-  it('renders items', function() {
+  it('renders items', function () {
     const outline = [
       {
         title: 'Section 1',
@@ -25,7 +25,7 @@ describe('<OutlineList />', function() {
     screen.getByRole('treeitem', { name: 'Section 2' })
   })
 
-  it('renders as root', function() {
+  it('renders as root', function () {
     const outline = [
       {
         title: 'Section',
@@ -38,7 +38,7 @@ describe('<OutlineList />', function() {
     screen.getByRole('tree')
   })
 
-  it('renders as non-root', function() {
+  it('renders as non-root', function () {
     const outline = [
       {
         title: 'Section',

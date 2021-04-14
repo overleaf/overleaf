@@ -17,7 +17,7 @@ module.exports = HistoryController = {
   selectHistoryApi(req, res, next) {
     const { Project_id: projectId } = req.params
     // find out which type of history service this project uses
-    ProjectDetailsHandler.getDetails(projectId, function(err, project) {
+    ProjectDetailsHandler.getDetails(projectId, function (err, project) {
       if (err) {
         return next(err)
       }
@@ -52,7 +52,7 @@ module.exports = HistoryController = {
       }
     })
     getReq.pipe(res)
-    getReq.on('error', function(err) {
+    getReq.on('error', function (err) {
       logger.warn({ url, err }, 'history API error')
       next(err)
     })
@@ -71,11 +71,11 @@ module.exports = HistoryController = {
           'X-User-Id': userId
         }
       },
-      function(err, body) {
+      function (err, body) {
         if (err) {
           return next(err)
         }
-        HistoryManager.injectUserDetails(body, function(err, data) {
+        HistoryManager.injectUserDetails(body, function (err, data) {
           if (err) {
             return next(err)
           }
@@ -97,7 +97,7 @@ module.exports = HistoryController = {
 
   resyncProjectHistory(req, res, next) {
     const projectId = req.params.Project_id
-    ProjectEntityUpdateHandler.resyncProjectHistory(projectId, function(err) {
+    ProjectEntityUpdateHandler.resyncProjectHistory(projectId, function (err) {
       if (err instanceof Errors.ProjectHistoryDisabledError) {
         return res.sendStatus(404)
       }
@@ -117,7 +117,7 @@ module.exports = HistoryController = {
       projectId,
       version,
       pathname,
-      function(err, entity) {
+      function (err, entity) {
         if (err) {
           return next(err)
         }
@@ -158,7 +158,7 @@ module.exports = HistoryController = {
         url: `${settings.apis.project_history.url}/project/${projectId}/labels`,
         json: true
       },
-      function(err, labels) {
+      function (err, labels) {
         if (err) {
           return next(err)
         }
@@ -182,7 +182,7 @@ module.exports = HistoryController = {
         url: `${settings.apis.project_history.url}/project/${projectId}/user/${userId}/labels`,
         json: { comment, version }
       },
-      function(err, label) {
+      function (err, label) {
         if (err) {
           return next(err)
         }
@@ -230,7 +230,7 @@ module.exports = HistoryController = {
     UserGetter.getUsers(
       Array.from(uniqueUsers),
       { first_name: 1, last_name: 1, email: 1 },
-      function(err, rawUsers) {
+      function (err, rawUsers) {
         if (err) {
           return callback(err)
         }
@@ -274,7 +274,7 @@ module.exports = HistoryController = {
         method: 'DELETE',
         url: `${settings.apis.project_history.url}/project/${projectId}/user/${userId}/labels/${labelId}`
       },
-      function(err) {
+      function (err) {
         if (err) {
           return next(err)
         }
@@ -284,7 +284,7 @@ module.exports = HistoryController = {
   },
 
   _makeRequest(options, callback) {
-    return request(options, function(err, response, body) {
+    return request(options, function (err, response, body) {
       if (err) {
         return callback(err)
       }
@@ -301,7 +301,7 @@ module.exports = HistoryController = {
 
   downloadZipOfVersion(req, res, next) {
     const { project_id: projectId, version } = req.params
-    ProjectDetailsHandler.getDetails(projectId, function(err, project) {
+    ProjectDetailsHandler.getDetails(projectId, function (err, project) {
       if (err) {
         return next(err)
       }
@@ -344,7 +344,7 @@ module.exports = HistoryController = {
       method: 'post',
       url
     }
-    request(options, function(err, response, body) {
+    request(options, function (err, response, body) {
       if (err) {
         OError.tag(err, 'history API error', {
           v1ProjectId,
@@ -362,7 +362,7 @@ module.exports = HistoryController = {
       async.retry(
         40,
         callback =>
-          setTimeout(function() {
+          setTimeout(function () {
             if (req.aborted) {
               // client has disconnected -- skip s3 download
               return callback() // stop async.retry loop
@@ -384,7 +384,7 @@ module.exports = HistoryController = {
               req.off('aborted', abortS3Request)
               res.off('timeout', abortS3Request)
             }
-            getReq.on('response', function(response) {
+            getReq.on('response', function (response) {
               if (response.statusCode !== 200) {
                 cleanupAbortTrigger()
                 return callback(new Error('invalid response'))
@@ -407,7 +407,7 @@ module.exports = HistoryController = {
               })
               callback()
             })
-            getReq.on('error', function(err) {
+            getReq.on('error', function (err) {
               logger.warn(
                 { err, v1ProjectId, version, retryAttempt },
                 'history s3 download error'
@@ -416,7 +416,7 @@ module.exports = HistoryController = {
               callback(err)
             })
           }, retryDelay),
-        function(err) {
+        function (err) {
           if (err) {
             OError.tag(err, 'history s3 download failed', {
               v1ProjectId,

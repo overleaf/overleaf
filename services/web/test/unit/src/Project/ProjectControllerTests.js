@@ -10,8 +10,8 @@ const MODULE_PATH = path.join(
   '../../../../app/src/Features/Project/ProjectController'
 )
 
-describe('ProjectController', function() {
-  beforeEach(function() {
+describe('ProjectController', function () {
+  beforeEach(function () {
     this.project_id = ObjectId('abcdefabcdefabcdefabcdef')
 
     this.user = {
@@ -194,8 +194,8 @@ describe('ProjectController', function() {
     }
   })
 
-  describe('updateProjectSettings', function() {
-    it('should update the name', function(done) {
+  describe('updateProjectSettings', function () {
+    it('should update the name', function (done) {
       this.EditorController.renameProject = sinon.stub().callsArg(2)
       this.req.body = { name: (this.name = 'New name') }
       this.res.sendStatus = code => {
@@ -208,7 +208,7 @@ describe('ProjectController', function() {
       this.ProjectController.updateProjectSettings(this.req, this.res)
     })
 
-    it('should update the compiler', function(done) {
+    it('should update the compiler', function (done) {
       this.EditorController.setCompiler = sinon.stub().callsArg(2)
       this.req.body = { compiler: (this.compiler = 'pdflatex') }
       this.res.sendStatus = code => {
@@ -221,7 +221,7 @@ describe('ProjectController', function() {
       this.ProjectController.updateProjectSettings(this.req, this.res)
     })
 
-    it('should update the imageName', function(done) {
+    it('should update the imageName', function (done) {
       this.EditorController.setImageName = sinon.stub().callsArg(2)
       this.req.body = { imageName: (this.imageName = 'texlive-1234.5') }
       this.res.sendStatus = code => {
@@ -234,7 +234,7 @@ describe('ProjectController', function() {
       this.ProjectController.updateProjectSettings(this.req, this.res)
     })
 
-    it('should update the spell check language', function(done) {
+    it('should update the spell check language', function (done) {
       this.EditorController.setSpellCheckLanguage = sinon.stub().callsArg(2)
       this.req.body = { spellCheckLanguage: (this.languageCode = 'fr') }
       this.res.sendStatus = code => {
@@ -247,7 +247,7 @@ describe('ProjectController', function() {
       this.ProjectController.updateProjectSettings(this.req, this.res)
     })
 
-    it('should update the root doc', function(done) {
+    it('should update the root doc', function (done) {
       this.EditorController.setRootDoc = sinon.stub().callsArg(2)
       this.req.body = { rootDocId: (this.rootDocId = 'root-doc-id') }
       this.res.sendStatus = code => {
@@ -261,8 +261,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('updateProjectAdminSettings', function() {
-    it('should update the public access level', function(done) {
+  describe('updateProjectAdminSettings', function () {
+    it('should update the public access level', function (done) {
       this.EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
       this.req.body = {
         publicAccessLevel: (this.publicAccessLevel = 'readonly')
@@ -278,8 +278,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('deleteProject', function() {
-    it('should call the project deleter', function(done) {
+  describe('deleteProject', function () {
+    it('should call the project deleter', function (done) {
       this.res.sendStatus = code => {
         this.ProjectDeleter.deleteProject
           .calledWith(this.project_id, {
@@ -294,8 +294,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('restoreProject', function() {
-    it('should tell the project deleter', function(done) {
+  describe('restoreProject', function () {
+    it('should tell the project deleter', function (done) {
       this.res.sendStatus = code => {
         this.ProjectDeleter.restoreProject
           .calledWith(this.project_id)
@@ -307,8 +307,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('cloneProject', function() {
-    it('should call the project duplicator', function(done) {
+  describe('cloneProject', function () {
+    it('should call the project duplicator', function (done) {
       this.res.send = json => {
         this.ProjectDuplicator.duplicate
           .calledWith(this.user, this.project_id, this.projectName)
@@ -320,8 +320,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('newProject', function() {
-    it('should call the projectCreationHandler with createExampleProject', function(done) {
+  describe('newProject', function () {
+    it('should call the projectCreationHandler with createExampleProject', function (done) {
       this.req.body.template = 'example'
       this.res.send = json => {
         this.ProjectCreationHandler.createExampleProject
@@ -335,7 +335,7 @@ describe('ProjectController', function() {
       this.ProjectController.newProject(this.req, this.res)
     })
 
-    it('should call the projectCreationHandler with createBasicProject', function(done) {
+    it('should call the projectCreationHandler with createBasicProject', function (done) {
       this.req.body.template = 'basic'
       this.res.send = json => {
         this.ProjectCreationHandler.createExampleProject.called.should.equal(
@@ -350,8 +350,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('projectListPage', function() {
-    beforeEach(function() {
+  describe('projectListPage', function () {
+    beforeEach(function () {
       this.tags = [
         { name: 1, project_ids: ['1', '2', '3'] },
         { name: 2, project_ids: ['a', '1'] },
@@ -404,7 +404,7 @@ describe('ProjectController', function() {
       )
     })
 
-    it('should render the project/list page', function(done) {
+    it('should render the project/list page', function (done) {
       this.res.render = (pageName, opts) => {
         pageName.should.equal('project/list')
         done()
@@ -412,7 +412,7 @@ describe('ProjectController', function() {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    it('should send the tags', function(done) {
+    it('should send the tags', function (done) {
       this.res.render = (pageName, opts) => {
         opts.tags.length.should.equal(this.tags.length)
         done()
@@ -420,7 +420,7 @@ describe('ProjectController', function() {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    it('should create trigger ip matcher notifications', function(done) {
+    it('should create trigger ip matcher notifications', function (done) {
       this.settings.overleaf = true
       this.res.render = (pageName, opts) => {
         this.NotificationBuilder.ipMatcherAffiliation.called.should.equal(true)
@@ -429,7 +429,7 @@ describe('ProjectController', function() {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    it('should send the projects', function(done) {
+    it('should send the projects', function (done) {
       this.res.render = (pageName, opts) => {
         opts.projects.length.should.equal(
           this.projects.length +
@@ -443,7 +443,7 @@ describe('ProjectController', function() {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    it('should send the user', function(done) {
+    it('should send the user', function (done) {
       this.res.render = (pageName, opts) => {
         opts.user.should.deep.equal(this.user)
         done()
@@ -451,7 +451,7 @@ describe('ProjectController', function() {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    it('should inject the users', function(done) {
+    it('should inject the users', function (done) {
       this.res.render = (pageName, opts) => {
         opts.projects[0].owner.should.equal(
           this.users[this.projects[0].owner_ref]
@@ -467,7 +467,7 @@ describe('ProjectController', function() {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    it('should send hasSubscription == false when no subscription', function(done) {
+    it('should send hasSubscription == false when no subscription', function (done) {
       this.res.render = (pageName, opts) => {
         opts.hasSubscription.should.equal(false)
         done()
@@ -475,7 +475,7 @@ describe('ProjectController', function() {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    it('should send hasSubscription == true when there is a subscription', function(done) {
+    it('should send hasSubscription == true when there is a subscription', function (done) {
       this.LimitationsManager.hasPaidSubscription = sinon
         .stub()
         .callsArgWith(1, null, true)
@@ -486,14 +486,14 @@ describe('ProjectController', function() {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    describe('front widget', function(done) {
-      beforeEach(function() {
+    describe('front widget', function (done) {
+      beforeEach(function () {
         this.settings.overleaf = {
           front_chat_widget_room_id: 'chat-room-id'
         }
       })
 
-      it('should show for paid users', function(done) {
+      it('should show for paid users', function (done) {
         this.user.features.github = true
         this.user.features.dropbox = true
         this.res.render = (pageName, opts) => {
@@ -505,7 +505,7 @@ describe('ProjectController', function() {
         this.ProjectController.projectListPage(this.req, this.res)
       })
 
-      it('should show for sample users', function(done) {
+      it('should show for sample users', function (done) {
         this.user._id = ObjectId('588f3ddae8ebc1bac07c9f00') // last two digits
         this.res.render = (pageName, opts) => {
           opts.frontChatWidgetRoomId.should.equal(
@@ -516,7 +516,7 @@ describe('ProjectController', function() {
         this.ProjectController.projectListPage(this.req, this.res)
       })
 
-      it('should not show for non sample users', function(done) {
+      it('should not show for non sample users', function (done) {
         this.user._id = ObjectId('588f3ddae8ebc1bac07c9fff') // last two digits
         this.res.render = (pageName, opts) => {
           expect(opts.frontChatWidgetRoomId).to.equal(undefined)
@@ -526,8 +526,8 @@ describe('ProjectController', function() {
       })
     })
 
-    describe('With Institution SSO feature', function() {
-      beforeEach(function(done) {
+    describe('With Institution SSO feature', function () {
+      beforeEach(function (done) {
         this.institutionEmail = 'test@overleaf.com'
         this.institutionName = 'Overleaf'
         this.Features.hasFeature.withArgs('saml').returns(true)
@@ -535,7 +535,7 @@ describe('ProjectController', function() {
         this.Features.hasFeature.withArgs('overleaf-integration').returns(true)
         done()
       })
-      it('should show institution SSO available notification for confirmed domains', function() {
+      it('should show institution SSO available notification for confirmed domains', function () {
         this.UserGetter.getUserFullEmails.yields(null, [
           {
             email: 'test@overleaf.com',
@@ -560,7 +560,7 @@ describe('ProjectController', function() {
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })
-      it('should show a linked notification', function() {
+      it('should show a linked notification', function () {
         this.req.session.saml = {
           institutionEmail: this.institutionEmail,
           linked: {
@@ -577,7 +577,7 @@ describe('ProjectController', function() {
         }
         this.ProjectController.projectListPage(this.req, this.res)
       })
-      it('should show a linked another email notification', function() {
+      it('should show a linked another email notification', function () {
         // when they request to link an email but the institution returns
         // a different email
         this.res.render = (pageName, opts) => {
@@ -599,7 +599,7 @@ describe('ProjectController', function() {
         this.ProjectController.projectListPage(this.req, this.res)
       })
 
-      it('should show a notification when intent was to register via SSO but account existed', function() {
+      it('should show a notification when intent was to register via SSO but account existed', function () {
         this.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution).to.deep.include({
             email: this.institutionEmail,
@@ -620,7 +620,7 @@ describe('ProjectController', function() {
         this.ProjectController.projectListPage(this.req, this.res)
       })
 
-      it('should not show a register notification if the flow was abandoned', function() {
+      it('should not show a register notification if the flow was abandoned', function () {
         // could initially start to register with an SSO email and then
         // abandon flow and login with an existing non-institution SSO email
         this.res.render = (pageName, opts) => {
@@ -638,7 +638,7 @@ describe('ProjectController', function() {
         this.ProjectController.projectListPage(this.req, this.res)
       })
 
-      it('should show error notification', function() {
+      it('should show error notification', function () {
         this.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution.length).to.equal(1)
           expect(opts.notificationsInstitution[0].templateKey).to.equal(
@@ -655,8 +655,8 @@ describe('ProjectController', function() {
         this.ProjectController.projectListPage(this.req, this.res)
       })
 
-      describe('for an unconfirmed domain for an SSO institution', function() {
-        beforeEach(function(done) {
+      describe('for an unconfirmed domain for an SSO institution', function () {
+        beforeEach(function (done) {
           this.UserGetter.getUserFullEmails.yields(null, [
             {
               email: 'test@overleaf-uncofirmed.com',
@@ -673,15 +673,15 @@ describe('ProjectController', function() {
           ])
           done()
         })
-        it('should not show institution SSO available notification', function() {
+        it('should not show institution SSO available notification', function () {
           this.res.render = (pageName, opts) => {
             expect(opts.notificationsInstitution.length).to.equal(0)
           }
           this.ProjectController.projectListPage(this.req, this.res)
         })
       })
-      describe('when linking/logging in initiated on institution side', function() {
-        it('should not show a linked another email notification', function() {
+      describe('when linking/logging in initiated on institution side', function () {
+        it('should not show a linked another email notification', function () {
           // this is only used when initated on Overleaf,
           // because we keep track of the requested email they tried to link
           this.res.render = (pageName, opts) => {
@@ -702,8 +702,8 @@ describe('ProjectController', function() {
           this.ProjectController.projectListPage(this.req, this.res)
         })
       })
-      describe('Institution with SSO beta testable', function() {
-        beforeEach(function(done) {
+      describe('Institution with SSO beta testable', function () {
+        beforeEach(function (done) {
           this.UserGetter.getUserFullEmails.yields(null, [
             {
               email: 'beta@beta.com',
@@ -720,7 +720,7 @@ describe('ProjectController', function() {
           ])
           done()
         })
-        it('should show institution SSO available notification when on a beta testing session', function() {
+        it('should show institution SSO available notification when on a beta testing session', function () {
           this.req.session.samlBeta = true
           this.res.render = (pageName, opts) => {
             expect(opts.notificationsInstitution).to.deep.include({
@@ -732,7 +732,7 @@ describe('ProjectController', function() {
           }
           this.ProjectController.projectListPage(this.req, this.res)
         })
-        it('should not show institution SSO available notification when not on a beta testing session', function() {
+        it('should not show institution SSO available notification when not on a beta testing session', function () {
           this.req.session.samlBeta = false
           this.res.render = (pageName, opts) => {
             expect(opts.notificationsInstitution).to.deep.not.include({
@@ -747,12 +747,12 @@ describe('ProjectController', function() {
       })
     })
 
-    describe('Without Institution SSO feature', function() {
-      beforeEach(function(done) {
+    describe('Without Institution SSO feature', function () {
+      beforeEach(function (done) {
         this.Features.hasFeature.withArgs('saml').returns(false)
         done()
       })
-      it('should not show institution sso available notification', function() {
+      it('should not show institution sso available notification', function () {
         this.res.render = (pageName, opts) => {
           expect(opts.notificationsInstitution).to.deep.not.include({
             email: 'test@overleaf.com',
@@ -766,8 +766,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('projectListPage with duplicate projects', function() {
-    beforeEach(function() {
+  describe('projectListPage with duplicate projects', function () {
+    beforeEach(function () {
       this.tags = [
         { name: 1, project_ids: ['1', '2', '3'] },
         { name: 2, project_ids: ['a', '1'] },
@@ -820,7 +820,7 @@ describe('ProjectController', function() {
       )
     })
 
-    it('should render the project/list page', function(done) {
+    it('should render the project/list page', function (done) {
       this.res.render = (pageName, opts) => {
         pageName.should.equal('project/list')
         done()
@@ -828,7 +828,7 @@ describe('ProjectController', function() {
       this.ProjectController.projectListPage(this.req, this.res)
     })
 
-    it('should omit one of the projects', function(done) {
+    it('should omit one of the projects', function (done) {
       this.res.render = (pageName, opts) => {
         opts.projects.length.should.equal(
           this.projects.length +
@@ -844,13 +844,13 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('renameProject', function() {
-    beforeEach(function() {
+  describe('renameProject', function () {
+    beforeEach(function () {
       this.newProjectName = 'my supper great new project'
       this.req.body.newProjectName = this.newProjectName
     })
 
-    it('should call the editor controller', function(done) {
+    it('should call the editor controller', function (done) {
       this.EditorController.renameProject.callsArgWith(2)
       this.res.sendStatus = code => {
         code.should.equal(200)
@@ -862,7 +862,7 @@ describe('ProjectController', function() {
       this.ProjectController.renameProject(this.req, this.res)
     })
 
-    it('should send an error to next() if there is a problem', function(done) {
+    it('should send an error to next() if there is a problem', function (done) {
       let error
       this.EditorController.renameProject.callsArgWith(
         2,
@@ -876,8 +876,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('loadEditor', function() {
-    beforeEach(function() {
+  describe('loadEditor', function () {
+    beforeEach(function () {
       this.settings.editorIsOpen = true
       this.project = {
         name: 'my proj',
@@ -911,7 +911,7 @@ describe('ProjectController', function() {
       this.ProjectUpdateHandler.markAsOpened.callsArgWith(1)
     })
 
-    it('should render the project/editor page', function(done) {
+    it('should render the project/editor page', function (done) {
       this.res.render = (pageName, opts) => {
         pageName.should.equal('project/editor')
         done()
@@ -919,7 +919,7 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should add user', function(done) {
+    it('should add user', function (done) {
       this.res.render = (pageName, opts) => {
         opts.user.email.should.equal(this.user.email)
         done()
@@ -927,7 +927,7 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should add on userSettings', function(done) {
+    it('should add on userSettings', function (done) {
       this.res.render = (pageName, opts) => {
         opts.userSettings.fontSize.should.equal(this.user.ace.fontSize)
         opts.userSettings.editorTheme.should.equal(this.user.ace.theme)
@@ -936,7 +936,7 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should add isRestrictedTokenMember', function(done) {
+    it('should add isRestrictedTokenMember', function (done) {
       this.res.render = (pageName, opts) => {
         opts.isRestrictedTokenMember.should.exist
         opts.isRestrictedTokenMember.should.equal(false)
@@ -945,7 +945,7 @@ describe('ProjectController', function() {
       return this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should set isRestrictedTokenMember when appropriate', function(done) {
+    it('should set isRestrictedTokenMember when appropriate', function (done) {
       this.AuthorizationManager.isRestrictedUser.returns(true)
       this.res.render = (pageName, opts) => {
         opts.isRestrictedTokenMember.should.exist
@@ -955,7 +955,7 @@ describe('ProjectController', function() {
       return this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should render the closed page if the editor is closed', function(done) {
+    it('should render the closed page if the editor is closed', function (done) {
       this.settings.editorIsOpen = false
       this.res.render = (pageName, opts) => {
         pageName.should.equal('general/closed')
@@ -964,7 +964,7 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should not render the page if the project can not be accessed', function(done) {
+    it('should not render the page if the project can not be accessed', function (done) {
       this.AuthorizationManager.getPrivilegeLevelForProject = sinon
         .stub()
         .callsArgWith(3, null, null)
@@ -975,7 +975,7 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should reactivateProjectIfRequired', function(done) {
+    it('should reactivateProjectIfRequired', function (done) {
       this.res.render = (pageName, opts) => {
         this.InactiveProjectManager.reactivateProjectIfRequired
           .calledWith(this.project_id)
@@ -985,7 +985,7 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should mark project as opened', function(done) {
+    it('should mark project as opened', function (done) {
       this.res.render = (pageName, opts) => {
         this.ProjectUpdateHandler.markAsOpened
           .calledWith(this.project_id)
@@ -995,7 +995,7 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should call the brand variations handler for branded projects', function(done) {
+    it('should call the brand variations handler for branded projects', function (done) {
       this.ProjectGetter.getProject.callsArgWith(2, null, this.brandedProject)
       this.res.render = (pageName, opts) => {
         this.BrandVariationsHandler.getBrandVariationById
@@ -1006,7 +1006,7 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should not call the brand variations handler for unbranded projects', function(done) {
+    it('should not call the brand variations handler for unbranded projects', function (done) {
       this.res.render = (pageName, opts) => {
         this.BrandVariationsHandler.getBrandVariationById.called.should.equal(
           false
@@ -1016,7 +1016,7 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('should expose the brand variation details as locals for branded projects', function(done) {
+    it('should expose the brand variation details as locals for branded projects', function (done) {
       this.ProjectGetter.getProject.callsArgWith(2, null, this.brandedProject)
       this.res.render = (pageName, opts) => {
         opts.brandVariation.should.deep.equal(this.brandVariationDetails)
@@ -1025,7 +1025,7 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    it('flushes the project to TPDS if a flush is pending', function(done) {
+    it('flushes the project to TPDS if a flush is pending', function (done) {
       this.res.render = () => {
         this.TpdsProjectFlusher.flushProjectToTpdsIfNeeded.should.have.been.calledWith(
           this.project_id
@@ -1035,9 +1035,9 @@ describe('ProjectController', function() {
       this.ProjectController.loadEditor(this.req, this.res)
     })
 
-    describe('wsUrl', function() {
+    describe('wsUrl', function () {
       function checkLoadEditorWsMetric(metric) {
-        it(`should inc metric ${metric}`, function(done) {
+        it(`should inc metric ${metric}`, function (done) {
           this.res.render = () => {
             this.Metrics.inc.calledWith(metric).should.equal(true)
             done()
@@ -1046,12 +1046,12 @@ describe('ProjectController', function() {
         })
       }
       function checkWsFallback(isBeta, isV2) {
-        describe('with ws=fallback', function() {
-          beforeEach(function() {
+        describe('with ws=fallback', function () {
+          beforeEach(function () {
             this.req.query = {}
             this.req.query.ws = 'fallback'
           })
-          it('should unset the wsUrl', function(done) {
+          it('should unset the wsUrl', function (done) {
             this.res.render = (pageName, opts) => {
               ;(opts.wsUrl || '/socket.io').should.equal('/socket.io')
               done()
@@ -1066,10 +1066,10 @@ describe('ProjectController', function() {
         })
       }
 
-      beforeEach(function() {
+      beforeEach(function () {
         this.settings.wsUrl = '/other.socket.io'
       })
-      it('should set the custom wsUrl', function(done) {
+      it('should set the custom wsUrl', function (done) {
         this.res.render = (pageName, opts) => {
           opts.wsUrl.should.equal('/other.socket.io')
           done()
@@ -1079,12 +1079,12 @@ describe('ProjectController', function() {
       checkLoadEditorWsMetric('load-editor-ws')
       checkWsFallback(false)
 
-      describe('beta program', function() {
-        beforeEach(function() {
+      describe('beta program', function () {
+        beforeEach(function () {
           this.settings.wsUrlBeta = '/beta.socket.io'
         })
-        describe('for a normal user', function() {
-          it('should set the normal custom wsUrl', function(done) {
+        describe('for a normal user', function () {
+          it('should set the normal custom wsUrl', function (done) {
             this.res.render = (pageName, opts) => {
               opts.wsUrl.should.equal('/other.socket.io')
               done()
@@ -1095,11 +1095,11 @@ describe('ProjectController', function() {
           checkWsFallback(false)
         })
 
-        describe('for a beta user', function() {
-          beforeEach(function() {
+        describe('for a beta user', function () {
+          beforeEach(function () {
             this.user.betaProgram = true
           })
-          it('should set the beta wsUrl', function(done) {
+          it('should set the beta wsUrl', function (done) {
             this.res.render = (pageName, opts) => {
               opts.wsUrl.should.equal('/beta.socket.io')
               done()
@@ -1111,14 +1111,14 @@ describe('ProjectController', function() {
         })
       })
 
-      describe('v2-rollout', function() {
-        beforeEach(function() {
+      describe('v2-rollout', function () {
+        beforeEach(function () {
           this.settings.wsUrlBeta = '/beta.socket.io'
           this.settings.wsUrlV2 = '/socket.io.v2'
         })
 
         function checkNonMatch() {
-          it('should set the normal custom wsUrl', function(done) {
+          it('should set the normal custom wsUrl', function (done) {
             this.res.render = (pageName, opts) => {
               opts.wsUrl.should.equal('/other.socket.io')
               done()
@@ -1129,7 +1129,7 @@ describe('ProjectController', function() {
           checkWsFallback(false)
         }
         function checkMatch() {
-          it('should set the v2 wsUrl', function(done) {
+          it('should set the v2 wsUrl', function (done) {
             this.res.render = (pageName, opts) => {
               opts.wsUrl.should.equal('/socket.io.v2')
               done()
@@ -1140,11 +1140,11 @@ describe('ProjectController', function() {
           checkWsFallback(false, true)
         }
         function checkForBetaUser() {
-          describe('for a beta user', function() {
-            beforeEach(function() {
+          describe('for a beta user', function () {
+            beforeEach(function () {
               this.user.betaProgram = true
             })
-            it('should set the beta wsUrl', function(done) {
+            it('should set the beta wsUrl', function (done) {
               this.res.render = (pageName, opts) => {
                 opts.wsUrl.should.equal('/beta.socket.io')
                 done()
@@ -1156,105 +1156,105 @@ describe('ProjectController', function() {
           })
         }
 
-        describe('when the roll out percentage is 0', function() {
-          beforeEach(function() {
+        describe('when the roll out percentage is 0', function () {
+          beforeEach(function () {
             this.settings.wsUrlV2Percentage = 0
           })
-          describe('when the projectId does not match (0)', function() {
-            beforeEach(function() {
+          describe('when the projectId does not match (0)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(0)
             })
             checkNonMatch()
           })
-          describe('when the projectId does not match (42)', function() {
-            beforeEach(function() {
+          describe('when the projectId does not match (42)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(42)
             })
             checkNonMatch()
           })
           checkForBetaUser()
         })
-        describe('when the roll out percentage is 1', function() {
-          beforeEach(function() {
+        describe('when the roll out percentage is 1', function () {
+          beforeEach(function () {
             this.settings.wsUrlV2Percentage = 1
           })
-          describe('when the projectId matches (0)', function() {
-            beforeEach(function() {
+          describe('when the projectId matches (0)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(0)
             })
             checkMatch()
             checkForBetaUser()
           })
-          describe('when the projectId does not match (1)', function() {
-            beforeEach(function() {
+          describe('when the projectId does not match (1)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(1)
             })
             checkNonMatch()
             checkForBetaUser()
           })
-          describe('when the projectId does not match (42)', function() {
-            beforeEach(function() {
+          describe('when the projectId does not match (42)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(42)
             })
             checkNonMatch()
           })
         })
-        describe('when the roll out percentage is 10', function() {
-          beforeEach(function() {
+        describe('when the roll out percentage is 10', function () {
+          beforeEach(function () {
             this.settings.wsUrlV2Percentage = 10
           })
-          describe('when the projectId matches (0)', function() {
-            beforeEach(function() {
+          describe('when the projectId matches (0)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(0)
             })
             checkMatch()
           })
-          describe('when the projectId matches (9)', function() {
-            beforeEach(function() {
+          describe('when the projectId matches (9)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(9)
             })
             checkMatch()
             checkForBetaUser()
           })
-          describe('when the projectId does not match (10)', function() {
-            beforeEach(function() {
+          describe('when the projectId does not match (10)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(10)
             })
             checkNonMatch()
           })
-          describe('when the projectId does not match (42)', function() {
-            beforeEach(function() {
+          describe('when the projectId does not match (42)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(42)
             })
             checkNonMatch()
             checkForBetaUser()
           })
         })
-        describe('when the roll out percentage is 100', function() {
-          beforeEach(function() {
+        describe('when the roll out percentage is 100', function () {
+          beforeEach(function () {
             this.settings.wsUrlV2Percentage = 100
           })
-          describe('when the projectId matches (0)', function() {
-            beforeEach(function() {
+          describe('when the projectId matches (0)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(0)
             })
             checkMatch()
             checkForBetaUser()
           })
-          describe('when the projectId matches (10)', function() {
-            beforeEach(function() {
+          describe('when the projectId matches (10)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(10)
             })
             checkMatch()
           })
-          describe('when the projectId matches (42)', function() {
-            beforeEach(function() {
+          describe('when the projectId matches (42)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(42)
             })
             checkMatch()
           })
-          describe('when the projectId matches (99)', function() {
-            beforeEach(function() {
+          describe('when the projectId matches (99)', function () {
+            beforeEach(function () {
               this.req.params.Project_id = ObjectId.createFromTime(99)
             })
             checkMatch()
@@ -1264,8 +1264,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('userProjectsJson', function() {
-    beforeEach(function(done) {
+  describe('userProjectsJson', function () {
+    beforeEach(function (done) {
       const projects = [
         {
           archived: true,
@@ -1323,7 +1323,7 @@ describe('ProjectController', function() {
       done()
     })
 
-    it('should produce a list of projects', function(done) {
+    it('should produce a list of projects', function (done) {
       this.res.json = data => {
         expect(data).to.deep.equal({
           projects: [
@@ -1337,8 +1337,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('projectEntitiesJson', function() {
-    beforeEach(function() {
+  describe('projectEntitiesJson', function () {
+    beforeEach(function () {
       this.AuthenticationController.getLoggedInUserId = sinon
         .stub()
         .returns('abc')
@@ -1357,7 +1357,7 @@ describe('ProjectController', function() {
         .callsArgWith(1, null, this.docs, this.files)
     })
 
-    it('should produce a list of entities', function(done) {
+    it('should produce a list of entities', function (done) {
       this.res.json = data => {
         expect(data).to.deep.equal({
           project_id: 'abcd',
@@ -1377,8 +1377,8 @@ describe('ProjectController', function() {
     })
   })
 
-  describe('_buildProjectViewModel', function() {
-    beforeEach(function() {
+  describe('_buildProjectViewModel', function () {
+    beforeEach(function () {
       this.ProjectHelper.isArchived.returns(false)
       this.ProjectHelper.isTrashed.returns(false)
 
@@ -1398,8 +1398,8 @@ describe('ProjectController', function() {
       }
     })
 
-    describe('project not being archived or trashed', function() {
-      it('should produce a model of the project', function() {
+    describe('project not being archived or trashed', function () {
+      it('should produce a model of the project', function () {
         const result = this.ProjectController._buildProjectViewModel(
           this.project,
           'readAndWrite',
@@ -1424,13 +1424,13 @@ describe('ProjectController', function() {
       })
     })
 
-    describe('project being simultaneously archived and trashed', function() {
-      beforeEach(function() {
+    describe('project being simultaneously archived and trashed', function () {
+      beforeEach(function () {
         this.ProjectHelper.isArchived.returns(true)
         this.ProjectHelper.isTrashed.returns(true)
       })
 
-      it('should produce a model of the project', function() {
+      it('should produce a model of the project', function () {
         const result = this.ProjectController._buildProjectViewModel(
           this.project,
           'readAndWrite',
@@ -1455,8 +1455,8 @@ describe('ProjectController', function() {
       })
     })
 
-    describe('when token-read-only access', function() {
-      it('should redact the owner and last-updated data', function() {
+    describe('when token-read-only access', function () {
+      it('should redact the owner and last-updated data', function () {
         const result = this.ProjectController._buildProjectViewModel(
           this.project,
           'readOnly',
@@ -1481,8 +1481,8 @@ describe('ProjectController', function() {
       })
     })
   })
-  describe('_isInPercentageRollout', function() {
-    before(function() {
+  describe('_isInPercentageRollout', function () {
+    before(function () {
       this.ids = [
         '5a05cd7621f9fe22be131740',
         '5a05cd7821f9fe22be131741',
@@ -1507,7 +1507,7 @@ describe('ProjectController', function() {
       ]
     })
 
-    it('should produce the expected results', function() {
+    it('should produce the expected results', function () {
       expect(
         this.ids.map(i =>
           this.ProjectController._isInPercentageRollout('abcd', i, 50)

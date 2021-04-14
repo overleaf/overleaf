@@ -4,7 +4,7 @@ import { expect } from 'chai'
 import { screen, render, fireEvent } from '@testing-library/react'
 import PreviewToolbar from '../../../../../frontend/js/features/preview/components/preview-toolbar'
 
-describe('<PreviewToolbar />', function() {
+describe('<PreviewToolbar />', function () {
   const onRecompile = sinon.stub()
   const onRecompileFromScratch = sinon.stub()
   const onRunSyntaxCheckNow = sinon.stub()
@@ -53,14 +53,14 @@ describe('<PreviewToolbar />', function() {
     )
   }
 
-  it('renders the toolbar', function() {
+  it('renders the toolbar', function () {
     renderPreviewToolbar()
     screen.getByText('Recompile')
     screen.getByText('Download PDF')
     screen.getByText('View logs')
   })
 
-  it('all toolbar items have "toolbar-item" class and text has "toolbar-text"', function() {
+  it('all toolbar items have "toolbar-item" class and text has "toolbar-text"', function () {
     renderPreviewToolbar()
     const toolbar = screen.getByTestId('toolbar-preview')
     for (const toolbarSection of toolbar.children) {
@@ -77,7 +77,7 @@ describe('<PreviewToolbar />', function() {
     }
   })
 
-  it('renders a full-screen button with a tooltip when when in split-screen mode', function() {
+  it('renders a full-screen button with a tooltip when when in split-screen mode', function () {
     renderPreviewToolbar()
     const btn = screen.getByLabelText('Full screen')
     fireEvent.click(btn)
@@ -86,7 +86,7 @@ describe('<PreviewToolbar />', function() {
     screen.getByRole('tooltip', { name: 'Full screen' })
   })
 
-  it('renders a split-screen button with a tooltip when when in full-screen mode', function() {
+  it('renders a split-screen button with a tooltip when when in full-screen mode', function () {
     renderPreviewToolbar({}, {}, false, false)
     const btn = screen.getByLabelText('Split screen')
     fireEvent.click(btn)

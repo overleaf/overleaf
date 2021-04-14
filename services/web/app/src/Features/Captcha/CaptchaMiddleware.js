@@ -17,7 +17,7 @@ const Settings = require('settings-sharelatex')
 
 module.exports = CaptchaMiddleware = {
   validateCaptcha(action) {
-    return function(req, res, next) {
+    return function (req, res, next) {
       if (
         (Settings.recaptcha != null ? Settings.recaptcha.siteKey : undefined) ==
         null
@@ -42,7 +42,7 @@ module.exports = CaptchaMiddleware = {
       return request.post(
         'https://www.google.com/recaptcha/api/siteverify',
         options,
-        function(error, response, body) {
+        function (error, response, body) {
           if (error != null) {
             return next(error)
           }

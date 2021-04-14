@@ -16,7 +16,7 @@ import 'ace/ace'
 let MetadataManager
 const { Range } = ace.require('ace/range')
 
-const getLastCommandFragment = function(lineUpToCursor) {
+const getLastCommandFragment = function (lineUpToCursor) {
   let m
   if ((m = lineUpToCursor.match(/(\\[^\\]+)$/))) {
     return m[1]

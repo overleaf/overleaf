@@ -17,8 +17,8 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Editor/EditorRealTimeController'
 )
 
-describe('EditorRealTimeController', function() {
-  beforeEach(function() {
+describe('EditorRealTimeController', function () {
+  beforeEach(function () {
     this.rclient = { publish: sinon.stub() }
     this.Metrics = { summary: sinon.stub() }
     this.EditorRealTimeController = SandboxedModule.require(modulePath, {
@@ -46,8 +46,8 @@ describe('EditorRealTimeController', function() {
     return (this.payload = ['argument one', 42])
   })
 
-  describe('emitToRoom', function() {
-    beforeEach(function() {
+  describe('emitToRoom', function () {
+    beforeEach(function () {
       this.message_id = 'web:somehost:01020304-0'
       return this.EditorRealTimeController.emitToRoom(
         this.room_id,
@@ -56,7 +56,7 @@ describe('EditorRealTimeController', function() {
       )
     })
 
-    it('should publish the message to redis', function() {
+    it('should publish the message to redis', function () {
       return this.rclient.publish
         .calledWith(
           'editor-events',
@@ -70,7 +70,7 @@ describe('EditorRealTimeController', function() {
         .should.equal(true)
     })
 
-    it('should track the payload size', function() {
+    it('should track the payload size', function () {
       this.Metrics.summary
         .calledWith(
           'redis.publish.editor-events',
@@ -85,8 +85,8 @@ describe('EditorRealTimeController', function() {
     })
   })
 
-  describe('emitToAll', function() {
-    beforeEach(function() {
+  describe('emitToAll', function () {
+    beforeEach(function () {
       this.EditorRealTimeController.emitToRoom = sinon.stub()
       return this.EditorRealTimeController.emitToAll(
         this.message,
@@ -94,7 +94,7 @@ describe('EditorRealTimeController', function() {
       )
     })
 
-    it("should emit to the room 'all'", function() {
+    it("should emit to the room 'all'", function () {
       return this.EditorRealTimeController.emitToRoom
         .calledWith('all', this.message, ...Array.from(this.payload))
         .should.equal(true)

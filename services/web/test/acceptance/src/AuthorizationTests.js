@@ -275,8 +275,8 @@ function expectNoChatAccess(user, projectId, callback) {
   )
 }
 
-describe('Authorization', function() {
-  beforeEach(function(done) {
+describe('Authorization', function () {
+  beforeEach(function (done) {
     this.timeout(90000)
     this.owner = new User()
     this.other1 = new User()
@@ -302,8 +302,8 @@ describe('Authorization', function() {
     )
   })
 
-  describe('private project', function() {
-    beforeEach(function(done) {
+  describe('private project', function () {
+    beforeEach(function (done) {
       this.owner.createProject('private-project', (error, projectId) => {
         if (error != null) {
           return done(error)
@@ -313,27 +313,27 @@ describe('Authorization', function() {
       })
     })
 
-    it('should allow the owner read access to it', function(done) {
+    it('should allow the owner read access to it', function (done) {
       expectReadAccess(this.owner, this.projectId, done)
     })
 
-    it('should allow the owner write access to its content', function(done) {
+    it('should allow the owner write access to its content', function (done) {
       expectContentWriteAccess(this.owner, this.projectId, done)
     })
 
-    it('should allow the owner write access to its settings', function(done) {
+    it('should allow the owner write access to its settings', function (done) {
       expectSettingsWriteAccess(this.owner, this.projectId, done)
     })
 
-    it('should allow the owner admin access to it', function(done) {
+    it('should allow the owner admin access to it', function (done) {
       expectAdminAccess(this.owner, this.projectId, done)
     })
 
-    it('should allow the owner user chat messages access', function(done) {
+    it('should allow the owner user chat messages access', function (done) {
       expectChatAccess(this.owner, this.projectId, done)
     })
 
-    it('should not allow another user read access to the project', function(done) {
+    it('should not allow another user read access to the project', function (done) {
       expectNoReadAccess(
         this.other1,
         this.projectId,
@@ -342,11 +342,11 @@ describe('Authorization', function() {
       )
     })
 
-    it('should not allow another user write access to its content', function(done) {
+    it('should not allow another user write access to its content', function (done) {
       expectNoContentWriteAccess(this.other1, this.projectId, done)
     })
 
-    it('should not allow another user write access to its settings', function(done) {
+    it('should not allow another user write access to its settings', function (done) {
       expectNoSettingsWriteAccess(
         this.other1,
         this.projectId,
@@ -355,15 +355,15 @@ describe('Authorization', function() {
       )
     })
 
-    it('should not allow another user admin access to it', function(done) {
+    it('should not allow another user admin access to it', function (done) {
       expectNoAdminAccess(this.other1, this.projectId, done)
     })
 
-    it('should not allow another user chat messages access', function(done) {
+    it('should not allow another user chat messages access', function (done) {
       expectNoChatAccess(this.other1, this.projectId, done)
     })
 
-    it('should not allow anonymous user read access to it', function(done) {
+    it('should not allow anonymous user read access to it', function (done) {
       expectNoReadAccess(
         this.anon,
         this.projectId,
@@ -372,11 +372,11 @@ describe('Authorization', function() {
       )
     })
 
-    it('should not allow anonymous user write access to its content', function(done) {
+    it('should not allow anonymous user write access to its content', function (done) {
       expectNoContentWriteAccess(this.anon, this.projectId, done)
     })
 
-    it('should not allow anonymous user write access to its settings', function(done) {
+    it('should not allow anonymous user write access to its settings', function (done) {
       expectNoSettingsWriteAccess(
         this.anon,
         this.projectId,
@@ -385,33 +385,33 @@ describe('Authorization', function() {
       )
     })
 
-    it('should not allow anonymous user admin access to it', function(done) {
+    it('should not allow anonymous user admin access to it', function (done) {
       expectNoAnonymousAdminAccess(this.anon, this.projectId, done)
     })
 
-    it('should not allow anonymous user chat messages access', function(done) {
+    it('should not allow anonymous user chat messages access', function (done) {
       expectNoChatAccess(this.anon, this.projectId, done)
     })
 
-    it('should allow site admin users read access to it', function(done) {
+    it('should allow site admin users read access to it', function (done) {
       expectReadAccess(this.site_admin, this.projectId, done)
     })
 
-    it('should allow site admin users write access to its content', function(done) {
+    it('should allow site admin users write access to its content', function (done) {
       expectContentWriteAccess(this.site_admin, this.projectId, done)
     })
 
-    it('should allow site admin users write access to its settings', function(done) {
+    it('should allow site admin users write access to its settings', function (done) {
       expectSettingsWriteAccess(this.site_admin, this.projectId, done)
     })
 
-    it('should allow site admin users admin access to it', function(done) {
+    it('should allow site admin users admin access to it', function (done) {
       expectAdminAccess(this.site_admin, this.projectId, done)
     })
   })
 
-  describe('shared project', function() {
-    beforeEach(function(done) {
+  describe('shared project', function () {
+    beforeEach(function (done) {
       this.rw_user = this.other1
       this.ro_user = this.other2
       this.owner.createProject('private-project', (error, projectId) => {
@@ -443,19 +443,19 @@ describe('Authorization', function() {
       })
     })
 
-    it('should allow the read-only user read access to it', function(done) {
+    it('should allow the read-only user read access to it', function (done) {
       expectReadAccess(this.ro_user, this.projectId, done)
     })
 
-    it('should allow the read-only user chat messages access', function(done) {
+    it('should allow the read-only user chat messages access', function (done) {
       expectChatAccess(this.ro_user, this.projectId, done)
     })
 
-    it('should not allow the read-only user write access to its content', function(done) {
+    it('should not allow the read-only user write access to its content', function (done) {
       expectNoContentWriteAccess(this.ro_user, this.projectId, done)
     })
 
-    it('should not allow the read-only user write access to its settings', function(done) {
+    it('should not allow the read-only user write access to its settings', function (done) {
       expectNoSettingsWriteAccess(
         this.ro_user,
         this.projectId,
@@ -464,33 +464,33 @@ describe('Authorization', function() {
       )
     })
 
-    it('should not allow the read-only user admin access to it', function(done) {
+    it('should not allow the read-only user admin access to it', function (done) {
       expectNoAdminAccess(this.ro_user, this.projectId, done)
     })
 
-    it('should allow the read-write user read access to it', function(done) {
+    it('should allow the read-write user read access to it', function (done) {
       expectReadAccess(this.rw_user, this.projectId, done)
     })
 
-    it('should allow the read-write user write access to its content', function(done) {
+    it('should allow the read-write user write access to its content', function (done) {
       expectContentWriteAccess(this.rw_user, this.projectId, done)
     })
 
-    it('should allow the read-write user write access to its settings', function(done) {
+    it('should allow the read-write user write access to its settings', function (done) {
       expectSettingsWriteAccess(this.rw_user, this.projectId, done)
     })
 
-    it('should not allow the read-write user admin access to it', function(done) {
+    it('should not allow the read-write user admin access to it', function (done) {
       expectNoAdminAccess(this.rw_user, this.projectId, done)
     })
 
-    it('should allow the read-write user chat messages access', function(done) {
+    it('should allow the read-write user chat messages access', function (done) {
       expectChatAccess(this.rw_user, this.projectId, done)
     })
   })
 
-  describe('public read-write project', function() {
-    beforeEach(function(done) {
+  describe('public read-write project', function () {
+    beforeEach(function (done) {
       this.owner.createProject('public-rw-project', (error, projectId) => {
         if (error != null) {
           return done(error)
@@ -500,19 +500,19 @@ describe('Authorization', function() {
       })
     })
 
-    it('should allow a user read access to it', function(done) {
+    it('should allow a user read access to it', function (done) {
       expectReadAccess(this.other1, this.projectId, done)
     })
 
-    it('should allow a user write access to its content', function(done) {
+    it('should allow a user write access to its content', function (done) {
       expectContentWriteAccess(this.other1, this.projectId, done)
     })
 
-    it('should allow a user chat messages access', function(done) {
+    it('should allow a user chat messages access', function (done) {
       expectChatAccess(this.other1, this.projectId, done)
     })
 
-    it('should not allow a user write access to its settings', function(done) {
+    it('should not allow a user write access to its settings', function (done) {
       expectNoSettingsWriteAccess(
         this.other1,
         this.projectId,
@@ -521,23 +521,23 @@ describe('Authorization', function() {
       )
     })
 
-    it('should not allow a user admin access to it', function(done) {
+    it('should not allow a user admin access to it', function (done) {
       expectNoAdminAccess(this.other1, this.projectId, done)
     })
 
-    it('should allow an anonymous user read access to it', function(done) {
+    it('should allow an anonymous user read access to it', function (done) {
       expectReadAccess(this.anon, this.projectId, done)
     })
 
-    it('should allow an anonymous user write access to its content', function(done) {
+    it('should allow an anonymous user write access to its content', function (done) {
       expectContentWriteAccess(this.anon, this.projectId, done)
     })
 
-    it('should allow an anonymous user chat messages access', function(done) {
+    it('should allow an anonymous user chat messages access', function (done) {
       expectChatAccess(this.anon, this.projectId, done)
     })
 
-    it('should not allow an anonymous user write access to its settings', function(done) {
+    it('should not allow an anonymous user write access to its settings', function (done) {
       expectNoSettingsWriteAccess(
         this.anon,
         this.projectId,
@@ -546,13 +546,13 @@ describe('Authorization', function() {
       )
     })
 
-    it('should not allow an anonymous user admin access to it', function(done) {
+    it('should not allow an anonymous user admin access to it', function (done) {
       expectNoAnonymousAdminAccess(this.anon, this.projectId, done)
     })
   })
 
-  describe('public read-only project', function() {
-    beforeEach(function(done) {
+  describe('public read-only project', function () {
+    beforeEach(function (done) {
       this.owner.createProject('public-ro-project', (error, projectId) => {
         if (error != null) {
           return done(error)
@@ -562,15 +562,15 @@ describe('Authorization', function() {
       })
     })
 
-    it('should allow a user read access to it', function(done) {
+    it('should allow a user read access to it', function (done) {
       expectReadAccess(this.other1, this.projectId, done)
     })
 
-    it('should not allow a user write access to its content', function(done) {
+    it('should not allow a user write access to its content', function (done) {
       expectNoContentWriteAccess(this.other1, this.projectId, done)
     })
 
-    it('should not allow a user write access to its settings', function(done) {
+    it('should not allow a user write access to its settings', function (done) {
       expectNoSettingsWriteAccess(
         this.other1,
         this.projectId,
@@ -579,24 +579,24 @@ describe('Authorization', function() {
       )
     })
 
-    it('should not allow a user admin access to it', function(done) {
+    it('should not allow a user admin access to it', function (done) {
       expectNoAdminAccess(this.other1, this.projectId, done)
     })
 
     // NOTE: legacy readOnly access does not count as 'restricted' in the new model
-    it('should allow a user chat messages access', function(done) {
+    it('should allow a user chat messages access', function (done) {
       expectChatAccess(this.other1, this.projectId, done)
     })
 
-    it('should allow an anonymous user read access to it', function(done) {
+    it('should allow an anonymous user read access to it', function (done) {
       expectReadAccess(this.anon, this.projectId, done)
     })
 
-    it('should not allow an anonymous user write access to its content', function(done) {
+    it('should not allow an anonymous user write access to its content', function (done) {
       expectNoContentWriteAccess(this.anon, this.projectId, done)
     })
 
-    it('should not allow an anonymous user write access to its settings', function(done) {
+    it('should not allow an anonymous user write access to its settings', function (done) {
       expectNoSettingsWriteAccess(
         this.anon,
         this.projectId,
@@ -605,11 +605,11 @@ describe('Authorization', function() {
       )
     })
 
-    it('should not allow an anonymous user admin access to it', function(done) {
+    it('should not allow an anonymous user admin access to it', function (done) {
       expectNoAnonymousAdminAccess(this.anon, this.projectId, done)
     })
 
-    it('should not allow an anonymous user chat messages access', function(done) {
+    it('should not allow an anonymous user chat messages access', function (done) {
       expectNoChatAccess(this.anon, this.projectId, done)
     })
   })

@@ -6,8 +6,8 @@ const OError = require('@overleaf/o-error')
 
 const MODULE_PATH = '../../../../app/src/Features/FileStore/FileStoreHandler.js'
 
-describe('FileStoreHandler', function() {
-  beforeEach(function() {
+describe('FileStoreHandler', function () {
+  beforeEach(function () {
     this.fs = {
       createReadStream: sinon.stub(),
       lstat: sinon.stub().callsArgWith(1, null, {
@@ -70,12 +70,12 @@ describe('FileStoreHandler', function() {
     })
   })
 
-  describe('uploadFileFromDisk', function() {
-    beforeEach(function() {
+  describe('uploadFileFromDisk', function () {
+    beforeEach(function () {
       this.request.returns(this.writeStream)
     })
 
-    it('should create read stream', function(done) {
+    it('should create read stream', function (done) {
       this.fs.createReadStream.returns({
         pipe() {},
         on(type, cb) {
@@ -95,7 +95,7 @@ describe('FileStoreHandler', function() {
       )
     })
 
-    it('should pipe the read stream to request', function(done) {
+    it('should pipe the read stream to request', function (done) {
       this.request.returns(this.writeStream)
       this.fs.createReadStream.returns({
         on(type, cb) {
@@ -116,7 +116,7 @@ describe('FileStoreHandler', function() {
       )
     })
 
-    it('should pass the correct options to request', function(done) {
+    it('should pass the correct options to request', function (done) {
       const fileUrl = this.getFileUrl(this.projectId, this.fileId)
       this.fs.createReadStream.returns({
         pipe() {},
@@ -138,7 +138,7 @@ describe('FileStoreHandler', function() {
       )
     })
 
-    it('should callback with the url and fileRef', function(done) {
+    it('should callback with the url and fileRef', function (done) {
       const fileUrl = this.getFileUrl(this.projectId, this.fileId)
       this.fs.createReadStream.returns({
         pipe() {},
@@ -162,8 +162,8 @@ describe('FileStoreHandler', function() {
       )
     })
 
-    describe('symlink', function() {
-      it('should not read file if it is symlink', function(done) {
+    describe('symlink', function () {
+      it('should not read file if it is symlink', function (done) {
         this.fs.lstat = sinon.stub().callsArgWith(1, null, {
           isFile() {
             return false
@@ -184,7 +184,7 @@ describe('FileStoreHandler', function() {
         )
       })
 
-      it('should not read file stat returns nothing', function(done) {
+      it('should not read file stat returns nothing', function (done) {
         this.fs.lstat = sinon.stub().callsArgWith(1, null, null)
         this.handler.uploadFileFromDisk(
           this.projectId,
@@ -198,16 +198,16 @@ describe('FileStoreHandler', function() {
       })
     })
 
-    describe('when upload fails', function() {
-      beforeEach(function() {
-        this.writeStream.on = function(type, cb) {
+    describe('when upload fails', function () {
+      beforeEach(function () {
+        this.writeStream.on = function (type, cb) {
           if (type === 'response') {
             cb({ statusCode: 500 })
           }
         }
       })
 
-      it('should callback with an error', function(done) {
+      it('should callback with an error', function (done) {
         this.fs.createReadStream.callCount = 0
         this.fs.createReadStream.returns({
           pipe() {},
@@ -234,8 +234,8 @@ describe('FileStoreHandler', function() {
     })
   })
 
-  describe('deleteFile', function() {
-    it('should send a delete request to filestore api', function(done) {
+  describe('deleteFile', function () {
+    it('should send a delete request to filestore api', function (done) {
       const fileUrl = this.getFileUrl(this.projectId, this.fileId)
       this.request.callsArgWith(1, null)
 
@@ -247,7 +247,7 @@ describe('FileStoreHandler', function() {
       })
     })
 
-    it('should return the error if there is one', function(done) {
+    it('should return the error if there is one', function (done) {
       const error = 'my error'
       this.request.callsArgWith(1, error)
       this.handler.deleteFile(this.projectId, this.fileId, err => {
@@ -257,8 +257,8 @@ describe('FileStoreHandler', function() {
     })
   })
 
-  describe('deleteProject', function() {
-    it('should send a delete request to filestore api', function(done) {
+  describe('deleteProject', function () {
+    it('should send a delete request to filestore api', function (done) {
       const projectUrl = this.getProjectUrl(this.projectId)
       this.request.callsArgWith(1, null)
 
@@ -270,7 +270,7 @@ describe('FileStoreHandler', function() {
       })
     })
 
-    it('should wrap the error if there is one', function(done) {
+    it('should wrap the error if there is one', function (done) {
       const error = new Error('my error')
       this.request.callsArgWith(1, error)
       this.handler.deleteProject(this.projectId, err => {
@@ -283,13 +283,13 @@ describe('FileStoreHandler', function() {
     })
   })
 
-  describe('getFileStream', function() {
-    beforeEach(function() {
+  describe('getFileStream', function () {
+    beforeEach(function () {
       this.query = {}
       this.request.returns(this.readStream)
     })
 
-    it('should get the stream with the correct params', function(done) {
+    it('should get the stream with the correct params', function (done) {
       const fileUrl = this.getFileUrl(this.projectId, this.fileId)
       this.handler.getFileStream(
         this.projectId,
@@ -306,7 +306,7 @@ describe('FileStoreHandler', function() {
       )
     })
 
-    it('should get stream from request', function(done) {
+    it('should get stream from request', function (done) {
       this.handler.getFileStream(
         this.projectId,
         this.fileId,
@@ -321,7 +321,7 @@ describe('FileStoreHandler', function() {
       )
     })
 
-    it('should add an error handler', function(done) {
+    it('should add an error handler', function (done) {
       this.handler.getFileStream(
         this.projectId,
         this.fileId,
@@ -336,12 +336,12 @@ describe('FileStoreHandler', function() {
       )
     })
 
-    describe('when range is specified in query', function() {
-      beforeEach(function() {
+    describe('when range is specified in query', function () {
+      beforeEach(function () {
         this.query = { range: '0-10' }
       })
 
-      it('should add a range header', function(done) {
+      it('should add a range header', function (done) {
         this.handler.getFileStream(
           this.projectId,
           this.fileId,
@@ -359,13 +359,13 @@ describe('FileStoreHandler', function() {
         )
       })
 
-      describe('when range is invalid', function() {
+      describe('when range is invalid', function () {
         ;['0-', '-100', 'one-two', 'nonsense'].forEach(r => {
-          beforeEach(function() {
+          beforeEach(function () {
             this.query = { range: `${r}` }
           })
 
-          it(`should not add a range header for '${r}'`, function(done) {
+          it(`should not add a range header for '${r}'`, function (done) {
             this.handler.getFileStream(
               this.projectId,
               this.fileId,
@@ -386,8 +386,8 @@ describe('FileStoreHandler', function() {
     })
   })
 
-  describe('getFileSize', function() {
-    it('returns the file size reported by filestore', function(done) {
+  describe('getFileSize', function () {
+    it('returns the file size reported by filestore', function (done) {
       const expectedFileSize = 32432
       const fileUrl = this.getFileUrl(this.projectId, this.fileId)
       this.request.head.yields(
@@ -409,7 +409,7 @@ describe('FileStoreHandler', function() {
       })
     })
 
-    it('throws a NotFoundError on a 404 from filestore', function(done) {
+    it('throws a NotFoundError on a 404 from filestore', function (done) {
       this.request.head.yields(null, { statusCode: 404 })
 
       this.handler.getFileSize(this.projectId, this.fileId, err => {
@@ -418,7 +418,7 @@ describe('FileStoreHandler', function() {
       })
     })
 
-    it('throws an error on a non-200 from filestore', function(done) {
+    it('throws an error on a non-200 from filestore', function (done) {
       this.request.head.yields(null, { statusCode: 500 })
 
       this.handler.getFileSize(this.projectId, this.fileId, err => {
@@ -427,7 +427,7 @@ describe('FileStoreHandler', function() {
       })
     })
 
-    it('rethrows errors from filestore', function(done) {
+    it('rethrows errors from filestore', function (done) {
       this.request.head.yields(new Error())
 
       this.handler.getFileSize(this.projectId, this.fileId, err => {
@@ -437,13 +437,13 @@ describe('FileStoreHandler', function() {
     })
   })
 
-  describe('copyFile', function() {
-    beforeEach(function() {
+  describe('copyFile', function () {
+    beforeEach(function () {
       this.newProjectId = 'new project'
       this.newFileId = 'new file id'
     })
 
-    it('should post json', function(done) {
+    it('should post json', function (done) {
       const newFileUrl = this.getFileUrl(this.newProjectId, this.newFileId)
       this.request.callsArgWith(1, null, { statusCode: 200 })
 
@@ -464,7 +464,7 @@ describe('FileStoreHandler', function() {
       )
     })
 
-    it('returns the url', function(done) {
+    it('returns the url', function (done) {
       const expectedUrl = this.getFileUrl(this.newProjectId, this.newFileId)
       this.request.callsArgWith(1, null, { statusCode: 200 })
       this.handler.copyFile(
@@ -482,7 +482,7 @@ describe('FileStoreHandler', function() {
       )
     })
 
-    it('should return the err', function(done) {
+    it('should return the err', function (done) {
       const error = new Error('error')
       this.request.callsArgWith(1, error)
       this.handler.copyFile(
@@ -497,7 +497,7 @@ describe('FileStoreHandler', function() {
       )
     })
 
-    it('should return an error for a non-success statusCode', function(done) {
+    it('should return an error for a non-success statusCode', function (done) {
       this.request.callsArgWith(1, null, { statusCode: 500 })
       this.handler.copyFile(
         this.projectId,

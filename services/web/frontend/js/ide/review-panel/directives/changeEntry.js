@@ -28,7 +28,7 @@ export default App.directive('changeEntry', $timeout => ({
     scope.isCollapsed = true
     scope.needsCollapsing = false
 
-    element.on('click', function(e) {
+    element.on('click', function (e) {
       if (
         $(e.target).is(
           '.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i'
@@ -38,7 +38,7 @@ export default App.directive('changeEntry', $timeout => ({
       }
     })
 
-    scope.toggleCollapse = function() {
+    scope.toggleCollapse = function () {
       scope.isCollapsed = !scope.isCollapsed
       return $timeout(() => scope.$emit('review-panel:layout'))
     }

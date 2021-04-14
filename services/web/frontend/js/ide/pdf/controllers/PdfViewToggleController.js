@@ -10,8 +10,8 @@
  */
 import App from '../../../base'
 
-export default App.controller('PdfViewToggleController', function($scope) {
-  $scope.togglePdfView = function() {
+export default App.controller('PdfViewToggleController', function ($scope) {
+  $scope.togglePdfView = function () {
     if ($scope.ui.view === 'pdf') {
       return ($scope.ui.view = 'editor')
     } else {
@@ -20,7 +20,7 @@ export default App.controller('PdfViewToggleController', function($scope) {
   }
 
   $scope.fileTreeClosed = false
-  return $scope.$on('layout:main:resize', function(e, state) {
+  return $scope.$on('layout:main:resize', function (e, state) {
     if (state.west.initClosed) {
       $scope.fileTreeClosed = true
     } else {

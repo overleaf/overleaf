@@ -26,14 +26,14 @@ const MockFilestoreApiClass = require('./mocks/MockFilestoreApi')
 
 let MockProjectHistoryApi, MockDocstoreApi, MockFilestoreApi
 
-before(function() {
+before(function () {
   MockProjectHistoryApi = MockProjectHistoryApiClass.instance()
   MockDocstoreApi = MockDocstoreApiClass.instance()
   MockFilestoreApi = MockFilestoreApiClass.instance()
 })
 
-describe('RestoringFiles', function() {
-  beforeEach(function(done) {
+describe('RestoringFiles', function () {
+  beforeEach(function (done) {
     this.owner = new User()
     return this.owner.login(error => {
       if (error != null) {
@@ -53,8 +53,8 @@ describe('RestoringFiles', function() {
     })
   })
 
-  describe('restoring a deleted doc', function() {
-    beforeEach(function(done) {
+  describe('restoring a deleted doc', function () {
+    beforeEach(function (done) {
       return this.owner.getProject(this.project_id, (error, project) => {
         if (error != null) {
           throw error
@@ -96,7 +96,7 @@ describe('RestoringFiles', function() {
       })
     })
 
-    it('should have restored the doc', function(done) {
+    it('should have restored the doc', function (done) {
       return this.owner.getProject(this.project_id, (error, project) => {
         if (error != null) {
           throw error
@@ -117,9 +117,9 @@ describe('RestoringFiles', function() {
     })
   })
 
-  describe('restoring from v2 history', function() {
-    describe('restoring a text file', function() {
-      beforeEach(function(done) {
+  describe('restoring from v2 history', function () {
+    describe('restoring a text file', function () {
+      beforeEach(function (done) {
         MockProjectHistoryApi.addOldFile(
           this.project_id,
           42,
@@ -145,7 +145,7 @@ describe('RestoringFiles', function() {
         )
       })
 
-      it('should have created a doc', function(done) {
+      it('should have created a doc', function (done) {
         return this.owner.getProject(this.project_id, (error, project) => {
           if (error != null) {
             throw error
@@ -161,8 +161,8 @@ describe('RestoringFiles', function() {
       })
     })
 
-    describe('restoring a binary file', function() {
-      beforeEach(function(done) {
+    describe('restoring a binary file', function () {
+      beforeEach(function (done) {
         this.pngData = fs.readFileSync(
           Path.resolve(__dirname, '../files/1pixel.png'),
           'binary'
@@ -192,7 +192,7 @@ describe('RestoringFiles', function() {
         )
       })
 
-      it('should have created a file', function(done) {
+      it('should have created a file', function (done) {
         return this.owner.getProject(this.project_id, (error, project) => {
           if (error != null) {
             throw error
@@ -208,8 +208,8 @@ describe('RestoringFiles', function() {
       })
     })
 
-    describe('restoring to a directory that exists', function() {
-      beforeEach(function(done) {
+    describe('restoring to a directory that exists', function () {
+      beforeEach(function (done) {
         MockProjectHistoryApi.addOldFile(
           this.project_id,
           42,
@@ -249,7 +249,7 @@ describe('RestoringFiles', function() {
         )
       })
 
-      it('should have created the doc in the named folder', function(done) {
+      it('should have created the doc in the named folder', function (done) {
         return this.owner.getProject(this.project_id, (error, project) => {
           if (error != null) {
             throw error
@@ -266,8 +266,8 @@ describe('RestoringFiles', function() {
       })
     })
 
-    describe('restoring to a directory that no longer exists', function() {
-      beforeEach(function(done) {
+    describe('restoring to a directory that no longer exists', function () {
+      beforeEach(function (done) {
         MockProjectHistoryApi.addOldFile(
           this.project_id,
           42,
@@ -293,7 +293,7 @@ describe('RestoringFiles', function() {
         )
       })
 
-      it('should have created the folder and restored the doc to it', function(done) {
+      it('should have created the folder and restored the doc to it', function (done) {
         return this.owner.getProject(this.project_id, (error, project) => {
           if (error != null) {
             throw error
@@ -311,8 +311,8 @@ describe('RestoringFiles', function() {
       })
     })
 
-    describe('restoring to a filename that already exists', function() {
-      beforeEach(function(done) {
+    describe('restoring to a filename that already exists', function () {
+      beforeEach(function (done) {
         MockProjectHistoryApi.addOldFile(
           this.project_id,
           42,
@@ -338,7 +338,7 @@ describe('RestoringFiles', function() {
         )
       })
 
-      it('should have created the doc in the root folder', function(done) {
+      it('should have created the doc in the root folder', function (done) {
         return this.owner.getProject(this.project_id, (error, project) => {
           if (error != null) {
             throw error

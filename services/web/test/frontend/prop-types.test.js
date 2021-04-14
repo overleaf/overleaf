@@ -9,7 +9,7 @@
  * to fail the tests when prop-types errors.
  */
 const originalConsoleError = global.console.error
-before(function() {
+before(function () {
   global.console.error = (message, ...args) => {
     // Ensure we still log the error
     originalConsoleError(message, ...args)
@@ -23,6 +23,6 @@ before(function() {
 })
 
 // Restore the original method
-after(function() {
+after(function () {
   global.console.error = originalConsoleError
 })

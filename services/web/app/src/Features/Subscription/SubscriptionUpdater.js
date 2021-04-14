@@ -45,37 +45,37 @@ const SubscriptionUpdater = {
       callback = requesterData
       requesterData = {}
     }
-    SubscriptionLocator.getUsersSubscription(adminUserId, function(
-      err,
-      subscription
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      if (subscription != null) {
-        SubscriptionUpdater._updateSubscriptionFromRecurly(
-          recurlySubscription,
-          subscription,
-          requesterData,
-          callback
-        )
-      } else {
-        SubscriptionUpdater._createNewSubscription(adminUserId, function(
-          err,
-          subscription
-        ) {
-          if (err != null) {
-            return callback(err)
-          }
+    SubscriptionLocator.getUsersSubscription(
+      adminUserId,
+      function (err, subscription) {
+        if (err != null) {
+          return callback(err)
+        }
+        if (subscription != null) {
           SubscriptionUpdater._updateSubscriptionFromRecurly(
             recurlySubscription,
             subscription,
             requesterData,
             callback
           )
-        })
+        } else {
+          SubscriptionUpdater._createNewSubscription(
+            adminUserId,
+            function (err, subscription) {
+              if (err != null) {
+                return callback(err)
+              }
+              SubscriptionUpdater._updateSubscriptionFromRecurly(
+                recurlySubscription,
+                subscription,
+                requesterData,
+                callback
+              )
+            }
+          )
+        }
       }
-    })
+    )
   },
 
   addUserToGroup(subscriptionId, userId, callback) {
@@ -86,7 +86,7 @@ const SubscriptionUpdater = {
     SubscriptionUpdater.addUsersToGroupWithoutFeaturesRefresh(
       subscriptionId,
       memberIds,
-      function(err) {
+      function (err) {
         if (err != null) {
           return callback(err)
         }
@@ -104,7 +104,7 @@ const SubscriptionUpdater = {
 
   removeUserFromGroups(filter, userId, callback) {
     const removeOperation = { $pull: { member_ids: userId } }
-    Subscription.updateMany(filter, removeOperation, function(err) {
+    Subscription.updateMany(filter, removeOperation, function (err) {
       if (err != null) {
         OError.tag(err, 'error removing user from groups', {
           filter,
@@ -112,7 +112,7 @@ const SubscriptionUpdater = {
         })
         return callback(err)
       }
-      UserGetter.getUser(userId, function(error, user) {
+      UserGetter.getUser(userId, function (error, user) {
         if (error) {
           return callback(error)
         }
@@ -130,23 +130,23 @@ const SubscriptionUpdater = {
   },
 
   removeUserFromAllGroups(userId, callback) {
-    SubscriptionLocator.getMemberSubscriptions(userId, function(
-      error,
-      subscriptions
-    ) {
-      if (error) {
-        return callback(error)
+    SubscriptionLocator.getMemberSubscriptions(
+      userId,
+      function (error, subscriptions) {
+        if (error) {
+          return callback(error)
+        }
+        if (!subscriptions) {
+          return callback()
+        }
+        const subscriptionIds = subscriptions.map(sub => sub._id)
+        SubscriptionUpdater.removeUserFromGroups(
+          { _id: subscriptionIds },
+          userId,
+          callback
+        )
       }
-      if (!subscriptions) {
-        return callback()
-      }
-      const subscriptionIds = subscriptions.map(sub => sub._id)
-      SubscriptionUpdater.removeUserFromGroups(
-        { _id: subscriptionIds },
-        userId,
-        callback
-      )
-    })
+    )
   },
 
   deleteWithV1Id(v1TeamId, callback) {
@@ -155,7 +155,7 @@ const SubscriptionUpdater = {
 
   deleteSubscription(subscription, deleterData, callback) {
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     async.series(
       [
@@ -178,38 +178,38 @@ const SubscriptionUpdater = {
   },
 
   restoreSubscription(subscriptionId, callback) {
-    SubscriptionLocator.getDeletedSubscription(subscriptionId, function(
-      err,
-      deletedSubscription
-    ) {
-      if (err) {
-        return callback(err)
+    SubscriptionLocator.getDeletedSubscription(
+      subscriptionId,
+      function (err, deletedSubscription) {
+        if (err) {
+          return callback(err)
+        }
+        let subscription = deletedSubscription.subscription
+        async.series(
+          [
+            cb =>
+              // 1. upsert subscription
+              db.subscriptions.updateOne(
+                { _id: subscription._id },
+                subscription,
+                { upsert: true },
+                cb
+              ),
+            cb =>
+              // 2. refresh users features. Do this before removing the
+              //    subscription so the restore can be retried if this fails
+              SubscriptionUpdater._refreshUsersFeatures(subscription, cb),
+            cb =>
+              // 3. remove deleted subscription
+              DeletedSubscription.deleteOne(
+                { 'subscription._id': subscription._id },
+                callback
+              )
+          ],
+          callback
+        )
       }
-      let subscription = deletedSubscription.subscription
-      async.series(
-        [
-          cb =>
-            // 1. upsert subscription
-            db.subscriptions.updateOne(
-              { _id: subscription._id },
-              subscription,
-              { upsert: true },
-              cb
-            ),
-          cb =>
-            // 2. refresh users features. Do this before removing the
-            //    subscription so the restore can be retried if this fails
-            SubscriptionUpdater._refreshUsersFeatures(subscription, cb),
-          cb =>
-            // 3. remove deleted subscription
-            DeletedSubscription.deleteOne(
-              { 'subscription._id': subscription._id },
-              callback
-            )
-        ],
-        callback
-      )
-    })
+    )
   },
 
   _refreshUsersFeatures(subscription, callback) {
@@ -284,7 +284,7 @@ const SubscriptionUpdater = {
         })
       }
     }
-    subscription.save(function(error) {
+    subscription.save(function (error) {
       if (error) {
         return callback(error)
       }

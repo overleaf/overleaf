@@ -22,7 +22,7 @@ const V1Api = require('../V1/V1Api')
 module.exports = BrandVariationsHandler = {
   getBrandVariationById(brandVariationId, callback) {
     if (callback == null) {
-      callback = function(error, brandVariationDetails) {}
+      callback = function (error, brandVariationDetails) {}
     }
     if (brandVariationId == null || brandVariationId === '') {
       return callback(new Error('Branding variation id not provided'))
@@ -32,7 +32,7 @@ module.exports = BrandVariationsHandler = {
       {
         uri: `/api/v2/brand_variations/${brandVariationId}`
       },
-      function(error, response, brandVariationDetails) {
+      function (error, response, brandVariationDetails) {
         if (error != null) {
           OError.tag(error, 'error getting brand variation details', {
             brandVariationId
@@ -46,7 +46,7 @@ module.exports = BrandVariationsHandler = {
   }
 }
 
-var _formatBrandVariationDetails = function(details) {
+var _formatBrandVariationDetails = function (details) {
   if (details.export_url != null) {
     details.export_url = _setV1AsHostIfRelativeURL(details.export_url)
   }

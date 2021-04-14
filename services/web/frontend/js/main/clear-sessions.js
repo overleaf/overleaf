@@ -12,28 +12,28 @@
 import App from '../base'
 import getMeta from '../utils/meta'
 
-export default App.controller('ClearSessionsController', function(
-  $scope,
-  $http
-) {
-  $scope.state = {
-    otherSessions: getMeta('ol-otherSessions'),
-    error: false,
-    success: false
-  }
+export default App.controller(
+  'ClearSessionsController',
+  function ($scope, $http) {
+    $scope.state = {
+      otherSessions: getMeta('ol-otherSessions'),
+      error: false,
+      success: false
+    }
 
-  return ($scope.clearSessions = function() {
-    console.log('>> clearing all sessions')
-    return $http({
-      method: 'POST',
-      url: '/user/sessions/clear',
-      headers: { 'X-CSRF-Token': window.csrfToken }
-    })
-      .then(function() {
-        $scope.state.otherSessions = []
-        $scope.state.error = false
-        return ($scope.state.success = true)
+    return ($scope.clearSessions = function () {
+      console.log('>> clearing all sessions')
+      return $http({
+        method: 'POST',
+        url: '/user/sessions/clear',
+        headers: { 'X-CSRF-Token': window.csrfToken }
       })
-      .catch(() => ($scope.state.error = true))
-  })
-})
+        .then(function () {
+          $scope.state.otherSessions = []
+          $scope.state.error = false
+          return ($scope.state.success = true)
+        })
+        .catch(() => ($scope.state.error = true))
+    })
+  }
+)

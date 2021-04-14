@@ -16,8 +16,8 @@ const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.j
 const request = require('./helpers/request')
 const User = require('./helpers/User')
 
-describe('TpdsUpdateTests', function() {
-  beforeEach(function(done) {
+describe('TpdsUpdateTests', function () {
+  beforeEach(function (done) {
     this.owner = new User()
     return this.owner.login(error => {
       if (error != null) {
@@ -37,8 +37,8 @@ describe('TpdsUpdateTests', function() {
     })
   })
 
-  describe('adding a file', function() {
-    beforeEach(function(done) {
+  describe('adding a file', function () {
+    beforeEach(function (done) {
       return request(
         {
           method: 'POST',
@@ -60,7 +60,7 @@ describe('TpdsUpdateTests', function() {
       )
     })
 
-    it('should have added the file', function(done) {
+    it('should have added the file', function (done) {
       return ProjectGetter.getProject(this.project_id, (error, project) => {
         if (error != null) {
           throw error
@@ -73,8 +73,8 @@ describe('TpdsUpdateTests', function() {
     })
   })
 
-  describe('deleting a file', function() {
-    beforeEach(function(done) {
+  describe('deleting a file', function () {
+    beforeEach(function (done) {
       return request(
         {
           method: 'DELETE',
@@ -95,7 +95,7 @@ describe('TpdsUpdateTests', function() {
       )
     })
 
-    it('should have deleted the file', function(done) {
+    it('should have deleted the file', function (done) {
       return ProjectGetter.getProject(this.project_id, (error, project) => {
         if (error != null) {
           throw error
@@ -111,8 +111,8 @@ describe('TpdsUpdateTests', function() {
     })
   })
 
-  describe('update a new file', function() {
-    beforeEach(function(done) {
+  describe('update a new file', function () {
+    beforeEach(function (done) {
       return request(
         {
           method: 'POST',
@@ -134,7 +134,7 @@ describe('TpdsUpdateTests', function() {
       )
     })
 
-    it('should have added the file', function(done) {
+    it('should have added the file', function (done) {
       return ProjectGetter.getProject(this.project_id, (error, project) => {
         if (error != null) {
           throw error
@@ -147,8 +147,8 @@ describe('TpdsUpdateTests', function() {
     })
   })
 
-  describe('update when the project is archived', function() {
-    beforeEach(function(done) {
+  describe('update when the project is archived', function () {
+    beforeEach(function (done) {
       this.owner.request(
         {
           url: `/Project/${this.project_id}/archive`,
@@ -179,7 +179,7 @@ describe('TpdsUpdateTests', function() {
       )
     })
 
-    it('should not have created a new project', function(done) {
+    it('should not have created a new project', function (done) {
       ProjectGetter.findAllUsersProjects(
         this.owner._id,
         'name',
@@ -191,7 +191,7 @@ describe('TpdsUpdateTests', function() {
       )
     })
 
-    it('should not have added the file', function(done) {
+    it('should not have added the file', function (done) {
       return ProjectGetter.getProject(this.project_id, (error, project) => {
         if (error != null) {
           throw error

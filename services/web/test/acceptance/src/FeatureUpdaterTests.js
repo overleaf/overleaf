@@ -12,11 +12,11 @@ logger.logger.level('error')
 
 let MockV1Api
 
-before(function() {
+before(function () {
   MockV1Api = MockV1ApiClass.instance()
 })
 
-const syncUserAndGetFeatures = function(user, callback) {
+const syncUserAndGetFeatures = function (user, callback) {
   FeaturesUpdater.refreshFeatures(user._id, error => {
     if (error) {
       return callback(error)
@@ -32,15 +32,15 @@ const syncUserAndGetFeatures = function(user, callback) {
   })
 }
 
-describe('FeatureUpdater.refreshFeatures', function() {
+describe('FeatureUpdater.refreshFeatures', function () {
   let userHelper, user
-  beforeEach(async function() {
+  beforeEach(async function () {
     userHelper = await UserHelper.createUser()
     user = userHelper.user
   })
 
-  describe('when user has no subscriptions', function() {
-    it('should set their features to the basic set', function(done) {
+  describe('when user has no subscriptions', function () {
+    it('should set their features to the basic set', function (done) {
       syncUserAndGetFeatures(user, (error, features) => {
         if (error) {
           throw error
@@ -51,8 +51,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  describe('when the user has an individual subscription', function() {
-    beforeEach(function() {
+  describe('when the user has an individual subscription', function () {
+    beforeEach(function () {
       Subscription.create({
         admin_id: user._id,
         manager_ids: [user._id],
@@ -61,7 +61,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       })
     }) // returns a promise
 
-    it('should set their features to the upgraded set', function(done) {
+    it('should set their features to the upgraded set', function (done) {
       syncUserAndGetFeatures(user, (error, features) => {
         if (error) {
           throw error
@@ -75,8 +75,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  describe('when the user is in a group subscription', function() {
-    beforeEach(function() {
+  describe('when the user is in a group subscription', function () {
+    beforeEach(function () {
       const groupAdminId = ObjectId()
       Subscription.create({
         admin_id: groupAdminId,
@@ -88,7 +88,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       })
     }) // returns a promise
 
-    it('should set their features to the upgraded set', function(done) {
+    it('should set their features to the upgraded set', function (done) {
       syncUserAndGetFeatures(user, (error, features) => {
         if (error) {
           throw error
@@ -102,8 +102,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  describe('when the user has bonus features', function() {
-    beforeEach(function() {
+  describe('when the user has bonus features', function () {
+    beforeEach(function () {
       return User.updateOne(
         {
           _id: user._id
@@ -114,7 +114,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     }) // returns a promise
 
-    it('should set their features to the bonus set', function(done) {
+    it('should set their features to the bonus set', function (done) {
       syncUserAndGetFeatures(user, (error, features) => {
         if (error) {
           throw error
@@ -131,9 +131,9 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  describe('when the user has affiliations', function() {
+  describe('when the user has affiliations', function () {
     let email2, institutionId, hostname
-    beforeEach(async function() {
+    beforeEach(async function () {
       institutionId = MockV1Api.createInstitution({ commonsAccount: true })
       hostname = 'institution.edu'
       MockV1Api.addInstitutionDomain(institutionId, hostname, {
@@ -149,32 +149,32 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     })
 
-    it('should not set their features if email is not confirmed', function(done) {
+    it('should not set their features if email is not confirmed', function (done) {
       syncUserAndGetFeatures(user, (error, features) => {
         expect(features).to.deep.equal(settings.defaultFeatures)
         done()
       })
     })
 
-    describe('when email is confirmed', function() {
-      beforeEach(async function() {
+    describe('when email is confirmed', function () {
+      beforeEach(async function () {
         await userHelper.confirmEmail(user._id, email2)
       })
 
-      it('should set their features', function(done) {
+      it('should set their features', function (done) {
         syncUserAndGetFeatures(user, (error, features) => {
           expect(features).to.deep.equal(this.institutionPlan.features)
           done()
         })
       })
 
-      describe('when domain is not confirmed as part of institution', function() {
-        beforeEach(function() {
+      describe('when domain is not confirmed as part of institution', function () {
+        beforeEach(function () {
           MockV1Api.updateInstitutionDomain(institutionId, hostname, {
             confirmed: false
           })
         })
-        it('should not set their features', function(done) {
+        it('should not set their features', function (done) {
           syncUserAndGetFeatures(user, (error, features) => {
             expect(features).to.deep.equal(settings.defaultFeatures)
             done()
@@ -184,8 +184,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  describe('when the user is due bonus features and has extra features that no longer apply', function() {
-    beforeEach(function() {
+  describe('when the user is due bonus features and has extra features that no longer apply', function () {
+    beforeEach(function () {
       return User.updateOne(
         {
           _id: user._id
@@ -197,7 +197,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     }) // returns a promise
 
-    it('should set their features to the bonus set and downgrade the extras', function(done) {
+    it('should set their features to the bonus set and downgrade the extras', function (done) {
       syncUserAndGetFeatures(user, (error, features) => {
         if (error) {
           throw error
@@ -214,8 +214,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  describe('when the user has a v1 plan', function() {
-    beforeEach(function() {
+  describe('when the user has a v1 plan', function () {
+    beforeEach(function () {
       MockV1Api.setUser(42, { plan_name: 'free' })
       return User.updateOne(
         {
@@ -229,7 +229,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     }) // returns a promise
 
-    it('should set their features to the v1 plan', function(done) {
+    it('should set their features to the v1 plan', function (done) {
       syncUserAndGetFeatures(user, (error, features) => {
         if (error) {
           throw error
@@ -241,8 +241,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  describe('when the user has a v1 plan and bonus features', function() {
-    beforeEach(function() {
+  describe('when the user has a v1 plan and bonus features', function () {
+    beforeEach(function () {
       MockV1Api.setUser(42, { plan_name: 'free' })
       return User.updateOne(
         {
@@ -257,7 +257,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     }) // returns a promise
 
-    it('should set their features to the best of the v1 plan and bonus features', function(done) {
+    it('should set their features to the best of the v1 plan and bonus features', function (done) {
       syncUserAndGetFeatures(user, (error, features) => {
         if (error) {
           throw error
@@ -274,8 +274,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  describe('when the user has a group and personal subscription', function() {
-    beforeEach(function(done) {
+  describe('when the user has a group and personal subscription', function () {
+    beforeEach(function (done) {
       const groupAdminId = ObjectId()
 
       Subscription.create(
@@ -304,7 +304,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     })
 
-    it('should set their features to the best set', function(done) {
+    it('should set their features to the best set', function (done) {
       syncUserAndGetFeatures(user, (error, features) => {
         if (error) {
           throw error
@@ -318,8 +318,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
     })
   })
 
-  describe('when the notifyV1Flag is passed', function() {
-    beforeEach(function() {
+  describe('when the notifyV1Flag is passed', function () {
+    beforeEach(function () {
       User.updateOne(
         {
           _id: user._id
@@ -333,8 +333,8 @@ describe('FeatureUpdater.refreshFeatures', function() {
     }) // returns a promise
   })
 
-  describe('when the user has features overrides', function() {
-    beforeEach(function() {
+  describe('when the user has features overrides', function () {
+    beforeEach(function () {
       const futureDate = new Date()
       futureDate.setDate(futureDate.getDate() + 1)
       return User.updateOne(
@@ -365,7 +365,7 @@ describe('FeatureUpdater.refreshFeatures', function() {
       )
     }) // returns a promise
 
-    it('should set their features to the overridden set', function(done) {
+    it('should set their features to the overridden set', function (done) {
       syncUserAndGetFeatures(user, (error, features) => {
         if (error) {
           throw error

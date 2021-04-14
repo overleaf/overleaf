@@ -20,7 +20,7 @@ const lockKey = `lock:web:{${5678}}`
 const lockValue = '123456'
 const SandboxedModule = require('sandboxed-module')
 
-describe('LockManager - releasing the lock', function() {
+describe('LockManager - releasing the lock', function () {
   const deleteStub = sinon.stub().callsArgWith(4)
   const mocks = {
     'settings-sharelatex': {
@@ -47,7 +47,7 @@ describe('LockManager - releasing the lock', function() {
   const LockManager = SandboxedModule.require(modulePath, { requires: mocks })
   LockManager.unlockScript = 'this is the unlock script'
 
-  it('should put a all data into memory', function(done) {
+  it('should put a all data into memory', function (done) {
     return LockManager._releaseLock(lockKey, lockValue, () => {
       deleteStub
         .calledWith(LockManager.unlockScript, 1, lockKey, lockValue)

@@ -74,7 +74,7 @@ module.exports = GeoIpLookup = {
       json: true
     }
     logger.log({ ip, opts }, 'getting geo ip details')
-    return request.get(opts, function(err, res, ipDetails) {
+    return request.get(opts, function (err, res, ipDetails) {
       if (err != null) {
         logger.warn({ err, ip }, 'error getting ip details')
       }
@@ -83,7 +83,7 @@ module.exports = GeoIpLookup = {
   },
 
   getCurrencyCode(ip, callback) {
-    return GeoIpLookup.getDetails(ip, function(err, ipDetails) {
+    return GeoIpLookup.getDetails(ip, function (err, ipDetails) {
       if (err != null || ipDetails == null) {
         logger.err(
           { err, ip },

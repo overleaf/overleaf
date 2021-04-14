@@ -31,37 +31,38 @@ module.exports = CollaboratorsInviteController = {
   getAllInvites(req, res, next) {
     const projectId = req.params.Project_id
     logger.log({ projectId }, 'getting all active invites for project')
-    return CollaboratorsInviteHandler.getAllInvites(projectId, function(
-      err,
-      invites
-    ) {
-      if (err != null) {
-        OError.tag(err, 'error getting invites for project', {
-          projectId
-        })
-        return next(err)
+    return CollaboratorsInviteHandler.getAllInvites(
+      projectId,
+      function (err, invites) {
+        if (err != null) {
+          OError.tag(err, 'error getting invites for project', {
+            projectId
+          })
+          return next(err)
+        }
+        return res.json({ invites })
       }
-      return res.json({ invites })
-    })
+    )
   },
 
   _checkShouldInviteEmail(email, callback) {
     if (callback == null) {
-      callback = function(err, shouldAllowInvite) {}
+      callback = function (err, shouldAllowInvite) {}
     }
     if (Settings.restrictInvitesToExistingAccounts === true) {
       logger.log({ email }, 'checking if user exists with this email')
-      return UserGetter.getUserByAnyEmail(email, { _id: 1 }, function(
-        err,
-        user
-      ) {
-        if (err != null) {
-          return callback(err)
+      return UserGetter.getUserByAnyEmail(
+        email,
+        { _id: 1 },
+        function (err, user) {
+          if (err != null) {
+            return callback(err)
+          }
+          const userExists =
+            user != null && (user != null ? user._id : undefined) != null
+          return callback(null, userExists)
         }
-        const userExists =
-          user != null && (user != null ? user._id : undefined) != null
-        return callback(null, userExists)
-      })
+      )
     } else {
       return callback(null, true)
     }
@@ -69,11 +70,11 @@ module.exports = CollaboratorsInviteController = {
 
   _checkRateLimit(user_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     return LimitationsManager.allowedNumberOfCollaboratorsForUser(
       user_id,
-      function(err, collabLimit) {
+      function (err, collabLimit) {
         if (collabLimit == null) {
           collabLimit = 1
         }
@@ -134,7 +135,7 @@ module.exports = CollaboratorsInviteController = {
         }
         return CollaboratorsInviteController._checkRateLimit(
           sendingUserId,
-          function(error, underRateLimit) {
+          function (error, underRateLimit) {
             if (error != null) {
               return next(error)
             }
@@ -143,7 +144,7 @@ module.exports = CollaboratorsInviteController = {
             }
             return CollaboratorsInviteController._checkShouldInviteEmail(
               email,
-              function(err, shouldAllowInvite) {
+              function (err, shouldAllowInvite) {
                 if (err != null) {
                   OError.tag(
                     err,
@@ -171,7 +172,7 @@ module.exports = CollaboratorsInviteController = {
                   sendingUser,
                   email,
                   privileges,
-                  function(err, invite) {
+                  function (err, invite) {
                     if (err != null) {
                       OError.tag(err, 'error creating project invite', {
                         projectId,
@@ -207,7 +208,7 @@ module.exports = CollaboratorsInviteController = {
     return CollaboratorsInviteHandler.revokeInvite(
       projectId,
       inviteId,
-      function(err) {
+      function (err) {
         if (err != null) {
           OError.tag(err, 'error revoking invite', {
             projectId,
@@ -232,7 +233,7 @@ module.exports = CollaboratorsInviteController = {
     const sendingUser = AuthenticationController.getSessionUser(req)
     return CollaboratorsInviteController._checkRateLimit(
       sendingUser._id,
-      function(error, underRateLimit) {
+      function (error, underRateLimit) {
         if (error != null) {
           return next(error)
         }
@@ -243,7 +244,7 @@ module.exports = CollaboratorsInviteController = {
           projectId,
           sendingUser,
           inviteId,
-          function(err) {
+          function (err) {
             if (err != null) {
               OError.tag(err, 'error resending invite', {
                 projectId,
@@ -261,7 +262,7 @@ module.exports = CollaboratorsInviteController = {
   viewInvite(req, res, next) {
     const projectId = req.params.Project_id
     const { token } = req.params
-    const _renderInvalidPage = function() {
+    const _renderInvalidPage = function () {
       logger.log(
         { projectId, token },
         'invite not valid, rendering not-valid page'
@@ -273,7 +274,7 @@ module.exports = CollaboratorsInviteController = {
     return CollaboratorsGetter.isUserInvitedMemberOfProject(
       currentUser._id,
       projectId,
-      function(err, isMember) {
+      function (err, isMember) {
         if (err != null) {
           OError.tag(err, 'error checking if user is member of project', {
             projectId
@@ -291,7 +292,7 @@ module.exports = CollaboratorsInviteController = {
         return CollaboratorsInviteHandler.getInviteByToken(
           projectId,
           token,
-          function(err, invite) {
+          function (err, invite) {
             if (err != null) {
               OError.tag(err, 'error getting invite by token', {
                 projectId,
@@ -308,7 +309,7 @@ module.exports = CollaboratorsInviteController = {
             return UserGetter.getUser(
               { _id: invite.sendingUserId },
               { email: 1, first_name: 1, last_name: 1 },
-              function(err, owner) {
+              function (err, owner) {
                 if (err != null) {
                   OError.tag(err, 'error getting project owner', {
                     projectId
@@ -320,28 +321,29 @@ module.exports = CollaboratorsInviteController = {
                   return _renderInvalidPage()
                 }
                 // fetch the project name
-                return ProjectGetter.getProject(projectId, {}, function(
-                  err,
-                  project
-                ) {
-                  if (err != null) {
-                    OError.tag(err, 'error getting project', {
-                      projectId
+                return ProjectGetter.getProject(
+                  projectId,
+                  {},
+                  function (err, project) {
+                    if (err != null) {
+                      OError.tag(err, 'error getting project', {
+                        projectId
+                      })
+                      return next(err)
+                    }
+                    if (project == null) {
+                      logger.log({ projectId }, 'no project found')
+                      return _renderInvalidPage()
+                    }
+                    // finally render the invite
+                    return res.render('project/invite/show', {
+                      invite,
+                      project,
+                      owner,
+                      title: 'Project Invite'
                     })
-                    return next(err)
                   }
-                  if (project == null) {
-                    logger.log({ projectId }, 'no project found')
-                    return _renderInvalidPage()
-                  }
-                  // finally render the invite
-                  return res.render('project/invite/show', {
-                    invite,
-                    project,
-                    owner,
-                    title: 'Project Invite'
-                  })
-                })
+                )
               }
             )
           }
@@ -362,7 +364,7 @@ module.exports = CollaboratorsInviteController = {
       projectId,
       token,
       currentUser,
-      function(err) {
+      function (err) {
         if (err != null) {
           OError.tag(err, 'error accepting invite by token', {
             projectId,

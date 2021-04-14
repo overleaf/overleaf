@@ -3,19 +3,19 @@ import sinon from 'sinon'
 
 import customLocalStorage from '../../../frontend/js/infrastructure/local-storage'
 
-describe('localStorage', function() {
+describe('localStorage', function () {
   let originalLocalStorage
-  before(function() {
+  before(function () {
     originalLocalStorage = global.localStorage
   })
 
-  after(function() {
+  after(function () {
     Object.defineProperty(global, 'localStorage', {
       value: originalLocalStorage
     })
   })
 
-  beforeEach(function() {
+  beforeEach(function () {
     Object.defineProperty(global, 'localStorage', {
       value: {
         getItem: sinon.stub().returns(null),
@@ -28,12 +28,12 @@ describe('localStorage', function() {
     global.console.error = sinon.stub()
   })
 
-  afterEach(function() {
+  afterEach(function () {
     global.console.error.reset()
     Object.defineProperty(global, 'localStorage', { value: undefined })
   })
 
-  it('getItem', function() {
+  it('getItem', function () {
     expect(customLocalStorage.getItem('foo')).to.be.null
 
     global.localStorage.getItem.returns('false')
@@ -47,7 +47,7 @@ describe('localStorage', function() {
     expect(global.console.error).to.be.calledOnce
   })
 
-  it('setItem', function() {
+  it('setItem', function () {
     customLocalStorage.setItem('foo', 'bar')
     expect(global.localStorage.setItem).to.be.calledOnceWith('foo', '"bar"')
     global.localStorage.setItem.reset()
@@ -65,7 +65,7 @@ describe('localStorage', function() {
     expect(global.console.error).to.be.calledOnce
   })
 
-  it('clear', function() {
+  it('clear', function () {
     customLocalStorage.clear()
     expect(global.localStorage.clear).to.be.calledOnce
 
@@ -74,7 +74,7 @@ describe('localStorage', function() {
     expect(global.console.error).to.be.calledOnce
   })
 
-  it('removeItem', function() {
+  it('removeItem', function () {
     customLocalStorage.removeItem('foo')
     expect(global.localStorage.removeItem).to.be.calledOnceWith('foo')
     global.localStorage.removeItem.reset()

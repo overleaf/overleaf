@@ -7,8 +7,8 @@ const MODULE_PATH = path.join(
   '../../../../app/src/Features/User/UserOnboardingEmailManager'
 )
 
-describe('UserOnboardingEmailManager', function() {
-  beforeEach(function() {
+describe('UserOnboardingEmailManager', function () {
+  beforeEach(function () {
     this.fakeUserId = '123abc'
     this.fakeUserEmail = 'frog@overleaf.com'
     this.onboardingEmailsQueue = {
@@ -55,8 +55,8 @@ describe('UserOnboardingEmailManager', function() {
     })
   })
 
-  describe('schedule email', function() {
-    it('should schedule delayed job on queue', function() {
+  describe('schedule email', function () {
+    it('should schedule delayed job on queue', function () {
       this.UserOnboardingEmailManager.scheduleOnboardingEmail({
         _id: this.fakeUserId
       })
@@ -67,7 +67,7 @@ describe('UserOnboardingEmailManager', function() {
       )
     })
 
-    it('queue process callback should send onboarding email and update user', async function() {
+    it('queue process callback should send onboarding email and update user', async function () {
       await this.queueProcessFunction({ data: { userId: this.fakeUserId } })
       sinon.assert.calledWith(
         this.UserGetter.promises.getUser,
@@ -90,7 +90,7 @@ describe('UserOnboardingEmailManager', function() {
       )
     })
 
-    it('queue process callback should stop if user is not found', async function() {
+    it('queue process callback should stop if user is not found', async function () {
       this.UserGetter.promises.getUser = sinon.stub().resolves()
       await this.queueProcessFunction({ data: { userId: 'deleted-user' } })
       sinon.assert.calledWith(

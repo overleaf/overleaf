@@ -338,7 +338,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   // PDF Download button
   webRouter.get(
     /^\/download\/project\/([^/]*)\/output\/output\.pdf$/,
-    function(req, res, next) {
+    function (req, res, next) {
       const params = { Project_id: req.params[0] }
       req.params = params
       next()
@@ -350,7 +350,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   // PDF Download button for specific build
   webRouter.get(
     /^\/download\/project\/([^/]*)\/build\/([0-9a-f-]+)\/output\/output\.pdf$/,
-    function(req, res, next) {
+    function (req, res, next) {
       const params = {
         Project_id: req.params[0],
         build_id: req.params[1]
@@ -373,7 +373,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   // Used by the pdf viewers
   webRouter.get(
     /^\/project\/([^/]*)\/output\/(.*)$/,
-    function(req, res, next) {
+    function (req, res, next) {
       const params = {
         Project_id: req.params[0],
         file: req.params[1]
@@ -388,7 +388,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   // direct url access to output files for a specific build (query string not required)
   webRouter.get(
     /^\/project\/([^/]*)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
-    function(req, res, next) {
+    function (req, res, next) {
       const params = {
         Project_id: req.params[0],
         build_id: req.params[1],
@@ -405,7 +405,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   // direct url access to output files for user but no build, to retrieve files when build fails
   webRouter.get(
     /^\/project\/([^/]*)\/user\/([0-9a-f-]+)\/output\/(.*)$/,
-    function(req, res, next) {
+    function (req, res, next) {
       const params = {
         Project_id: req.params[0],
         user_id: req.params[1],
@@ -422,7 +422,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   // direct url access to output files for a specific user and build (query string not required)
   webRouter.get(
     /^\/project\/([^/]*)\/user\/([0-9a-f]+)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
-    function(req, res, next) {
+    function (req, res, next) {
       const params = {
         Project_id: req.params[0],
         user_id: req.params[1],
@@ -761,7 +761,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   privateApiRouter.get(
     /^\/internal\/project\/([^/]*)\/output\/(.*)$/,
-    function(req, res, next) {
+    function (req, res, next) {
       const params = {
         Project_id: req.params[0],
         file: req.params[1]
@@ -883,7 +883,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   publicApiRouter.get(
     /^\/api\/clsi\/compile\/([^/]*)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
-    function(req, res, next) {
+    function (req, res, next) {
       const params = {
         submission_id: req.params[0],
         build_id: req.params[1],
@@ -906,7 +906,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     InstitutionsController.confirmDomain
   )
 
-  webRouter.get('/chrome', function(req, res, next) {
+  webRouter.get('/chrome', function (req, res, next) {
     // Match v1 behaviour - this is used for a Chrome web app
     if (AuthenticationController.isUserLoggedIn(req)) {
       res.redirect('/project')
@@ -1032,40 +1032,42 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       timeInterval: 60
     }),
     AuthorizationMiddleware.ensureUserCanReadProject,
-    function(req, res) {
+    function (req, res) {
       const projectId = req.params.Project_id
-      const sendRes = _.once(function(statusCode, message) {
+      const sendRes = _.once(function (statusCode, message) {
         res.status(statusCode)
         res.send(message)
         ClsiCookieManager.clearServerId(projectId)
       }) // force every compile to a new server
       // set a timeout
-      var handler = setTimeout(function() {
+      var handler = setTimeout(function () {
         sendRes(500, 'Compiler timed out')
         handler = null
       }, 10000)
       // use a valid user id for testing
       const testUserId = '123456789012345678901234'
       // run the compile
-      CompileManager.compile(projectId, testUserId, {}, function(
-        error,
-        status
-      ) {
-        if (handler) {
-          clearTimeout(handler)
+      CompileManager.compile(
+        projectId,
+        testUserId,
+        {},
+        function (error, status) {
+          if (handler) {
+            clearTimeout(handler)
+          }
+          if (error) {
+            sendRes(500, `Compiler returned error ${error.message}`)
+          } else if (status === 'success') {
+            sendRes(200, 'Compiler returned in less than 10 seconds')
+          } else {
+            sendRes(500, `Compiler returned failure ${status}`)
+          }
         }
-        if (error) {
-          sendRes(500, `Compiler returned error ${error.message}`)
-        } else if (status === 'success') {
-          sendRes(200, 'Compiler returned in less than 10 seconds')
-        } else {
-          sendRes(500, `Compiler returned failure ${status}`)
-        }
-      })
+      )
     }
   )
 
-  webRouter.get('/no-cache', function(req, res, next) {
+  webRouter.get('/no-cache', function (req, res, next) {
     res.header('Cache-Control', 'max-age=0')
     res.sendStatus(404)
   })
@@ -1073,21 +1075,21 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get('/oops-express', (req, res, next) =>
     next(new Error('Test error'))
   )
-  webRouter.get('/oops-internal', function(req, res, next) {
+  webRouter.get('/oops-internal', function (req, res, next) {
     throw new Error('Test error')
   })
   webRouter.get('/oops-mongo', (req, res, next) =>
-    require('./models/Project').Project.findOne({}, function() {
+    require('./models/Project').Project.findOne({}, function () {
       throw new Error('Test error')
     })
   )
 
-  privateApiRouter.get('/opps-small', function(req, res, next) {
+  privateApiRouter.get('/opps-small', function (req, res, next) {
     logger.err('test error occured')
     res.sendStatus(200)
   })
 
-  webRouter.post('/error/client', function(req, res, next) {
+  webRouter.post('/error/client', function (req, res, next) {
     logger.warn(
       { err: req.body.error, meta: req.body.meta },
       'client side error'

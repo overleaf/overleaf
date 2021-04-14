@@ -99,7 +99,7 @@ const InstitutionsAPI = {
         },
         defaultErrorMessage: "Couldn't create affiliation"
       },
-      function(error, body) {
+      function (error, body) {
         if (error) {
           if (error.info && error.info.statusCode === 422) {
             return callback(
@@ -115,7 +115,7 @@ const InstitutionsAPI = {
         // have notifications delete any ip matcher notifications for this university
         NotificationsBuilder.ipMatcherAffiliation(userId).read(
           university.id,
-          function(err) {
+          function (err) {
             if (err) {
               // log and ignore error
               logger.err(
@@ -191,7 +191,7 @@ const InstitutionsAPI = {
   }
 }
 
-var makeAffiliationRequest = function(requestOptions, callback) {
+var makeAffiliationRequest = function (requestOptions, callback) {
   if (!settings.apis.v1.url) {
     return callback(null)
   } // service is not configured
@@ -207,7 +207,7 @@ var makeAffiliationRequest = function(requestOptions, callback) {
       json: true,
       timeout: 20 * 1000
     },
-    function(error, response, body) {
+    function (error, response, body) {
       if (error) {
         return callback(
           new V1ConnectionError('error getting affiliations from v1').withCause(

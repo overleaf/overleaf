@@ -31,7 +31,7 @@ function sendConfirmationEmail(userId, email, emailTemplate, callback) {
     'email_confirmation',
     data,
     { expiresIn: TOKEN_EXPIRY_IN_S },
-    function(err, token) {
+    function (err, token) {
       if (err) {
         return callback(err)
       }
@@ -52,7 +52,7 @@ const UserEmailsConfirmationHandler = {
     OneTimeTokenHandler.getValueFromTokenAndExpire(
       'email_confirmation',
       token,
-      function(error, data) {
+      function (error, data) {
         if (error) {
           return callback(error)
         }
@@ -65,7 +65,7 @@ const UserEmailsConfirmationHandler = {
         if (!userId || email !== EmailHelper.parseEmail(email)) {
           return callback(new Errors.NotFoundError('invalid data'))
         }
-        UserGetter.getUser(userId, {}, function(error, user) {
+        UserGetter.getUser(userId, {}, function (error, user) {
           if (error) {
             return callback(error)
           }

@@ -25,7 +25,7 @@ const ProjectHistoryHandler = {
   setHistoryId(project_id, history_id, callback) {
     // reject invalid history ids
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
     if (!history_id || typeof history_id !== 'number') {
       return callback(new Error('invalid history id'))
@@ -34,7 +34,7 @@ const ProjectHistoryHandler = {
     return Project.updateOne(
       { _id: project_id, 'overleaf.history.id': { $exists: false } },
       { 'overleaf.history.id': history_id },
-      function(err, result) {
+      function (err, result) {
         if (err != null) {
           return callback(err)
         }
@@ -48,29 +48,32 @@ const ProjectHistoryHandler = {
 
   getHistoryId(project_id, callback) {
     if (callback == null) {
-      callback = function(err, result) {}
+      callback = function (err, result) {}
     }
-    return ProjectDetailsHandler.getDetails(project_id, function(err, project) {
-      if (err != null) {
-        return callback(err)
-      } // n.b. getDetails returns an error if the project doesn't exist
-      return callback(
-        null,
-        __guard__(
+    return ProjectDetailsHandler.getDetails(
+      project_id,
+      function (err, project) {
+        if (err != null) {
+          return callback(err)
+        } // n.b. getDetails returns an error if the project doesn't exist
+        return callback(
+          null,
           __guard__(
-            project != null ? project.overleaf : undefined,
-            x1 => x1.history
-          ),
-          x => x.id
+            __guard__(
+              project != null ? project.overleaf : undefined,
+              x1 => x1.history
+            ),
+            x => x.id
+          )
         )
-      )
-    })
+      }
+    )
   },
 
   upgradeHistory(project_id, callback) {
     // project must have an overleaf.history.id before allowing display of new history
     if (callback == null) {
-      callback = function(err, result) {}
+      callback = function (err, result) {}
     }
     return Project.updateOne(
       { _id: project_id, 'overleaf.history.id': { $exists: true } },
@@ -78,7 +81,7 @@ const ProjectHistoryHandler = {
         'overleaf.history.display': true,
         'overleaf.history.upgradedAt': new Date()
       },
-      function(err, result) {
+      function (err, result) {
         if (err != null) {
           return callback(err)
         }
@@ -93,7 +96,7 @@ const ProjectHistoryHandler = {
 
   downgradeHistory(project_id, callback) {
     if (callback == null) {
-      callback = function(err, result) {}
+      callback = function (err, result) {}
     }
     return Project.updateOne(
       { _id: project_id, 'overleaf.history.upgradedAt': { $exists: true } },
@@ -101,7 +104,7 @@ const ProjectHistoryHandler = {
         'overleaf.history.display': false,
         $unset: { 'overleaf.history.upgradedAt': 1 }
       },
-      function(err, result) {
+      function (err, result) {
         if (err != null) {
           return callback(err)
         }
@@ -120,45 +123,45 @@ const ProjectHistoryHandler = {
     // state. Setting a history id when one wasn't present before is ok,
     // because undefined history ids aren't cached.
     if (callback == null) {
-      callback = function(err) {}
+      callback = function (err) {}
     }
-    return ProjectHistoryHandler.getHistoryId(project_id, function(
-      err,
-      history_id
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      if (history_id != null) {
-        return callback()
-      } // history already exists, success
-      return HistoryManager.initializeProject(function(err, history) {
+    return ProjectHistoryHandler.getHistoryId(
+      project_id,
+      function (err, history_id) {
         if (err != null) {
           return callback(err)
         }
-        if (!(history != null ? history.overleaf_id : undefined)) {
-          return callback(new Error('failed to initialize history id'))
-        }
-        return ProjectHistoryHandler.setHistoryId(
-          project_id,
-          history.overleaf_id,
-          function(err) {
-            if (err != null) {
-              return callback(err)
-            }
-            return ProjectEntityUpdateHandler.resyncProjectHistory(
-              project_id,
-              function(err) {
-                if (err != null) {
-                  return callback(err)
-                }
-                return HistoryManager.flushProject(project_id, callback)
-              }
-            )
+        if (history_id != null) {
+          return callback()
+        } // history already exists, success
+        return HistoryManager.initializeProject(function (err, history) {
+          if (err != null) {
+            return callback(err)
           }
-        )
-      })
-    })
+          if (!(history != null ? history.overleaf_id : undefined)) {
+            return callback(new Error('failed to initialize history id'))
+          }
+          return ProjectHistoryHandler.setHistoryId(
+            project_id,
+            history.overleaf_id,
+            function (err) {
+              if (err != null) {
+                return callback(err)
+              }
+              return ProjectEntityUpdateHandler.resyncProjectHistory(
+                project_id,
+                function (err) {
+                  if (err != null) {
+                    return callback(err)
+                  }
+                  return HistoryManager.flushProject(project_id, callback)
+                }
+              )
+            }
+          )
+        })
+      }
+    )
   }
 }
 

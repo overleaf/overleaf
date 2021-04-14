@@ -5,14 +5,14 @@ const Institution = require('./helpers/Institution')
 const Subscription = require('./helpers/Subscription')
 const Publisher = require('./helpers/Publisher')
 
-describe('UserMembershipAuthorization', function() {
-  beforeEach(function(done) {
+describe('UserMembershipAuthorization', function () {
+  beforeEach(function (done) {
     this.user = new User()
     async.series([this.user.ensureUserExists.bind(this.user)], done)
   })
 
-  describe('group', function() {
-    beforeEach(function(done) {
+  describe('group', function () {
+    beforeEach(function (done) {
       this.subscription = new Subscription({
         groupPlan: true
       })
@@ -25,8 +25,8 @@ describe('UserMembershipAuthorization', function() {
       )
     })
 
-    describe('users management', function() {
-      it('should allow managers only', function(done) {
+    describe('users management', function () {
+      it('should allow managers only', function (done) {
         const url = `/manage/groups/${this.subscription._id}/members`
         async.series(
           [
@@ -39,8 +39,8 @@ describe('UserMembershipAuthorization', function() {
       })
     })
 
-    describe('managers management', function() {
-      it('should allow managers only', function(done) {
+    describe('managers management', function () {
+      it('should allow managers only', function (done) {
         const url = `/manage/groups/${this.subscription._id}/managers`
         async.series(
           [
@@ -54,14 +54,14 @@ describe('UserMembershipAuthorization', function() {
     })
   })
 
-  describe('institution', function() {
-    beforeEach(function(done) {
+  describe('institution', function () {
+    beforeEach(function (done) {
       this.institution = new Institution()
       async.series([this.institution.ensureExists.bind(this.institution)], done)
     })
 
-    describe('users management', function() {
-      it('should allow managers only', function(done) {
+    describe('users management', function () {
+      it('should allow managers only', function (done) {
         const url = `/manage/institutions/${this.institution.v1Id}/managers`
         async.series(
           [
@@ -75,8 +75,8 @@ describe('UserMembershipAuthorization', function() {
       })
     })
 
-    describe('creation', function() {
-      it('should allow staff only', function(done) {
+    describe('creation', function () {
+      it('should allow staff only', function (done) {
         const url = `/entities/institution/create/foo`
         async.series(
           [
@@ -92,8 +92,8 @@ describe('UserMembershipAuthorization', function() {
     })
   })
 
-  describe('publisher', function() {
-    beforeEach(function(done) {
+  describe('publisher', function () {
+    beforeEach(function (done) {
       this.publisher = new Publisher({})
       async.series(
         [
@@ -104,8 +104,8 @@ describe('UserMembershipAuthorization', function() {
       )
     })
 
-    describe('managers management', function() {
-      it('should allow managers only', function(done) {
+    describe('managers management', function () {
+      it('should allow managers only', function (done) {
         const url = `/manage/publishers/${this.publisher.slug}/managers`
         async.series(
           [
@@ -118,8 +118,8 @@ describe('UserMembershipAuthorization', function() {
       })
     })
 
-    describe('creation', function() {
-      it('should redirect staff only', function(done) {
+    describe('creation', function () {
+      it('should redirect staff only', function (done) {
         const url = `/manage/publishers/foo/managers`
         async.series(
           [
@@ -133,7 +133,7 @@ describe('UserMembershipAuthorization', function() {
         )
       })
 
-      it('should allow staff only', function(done) {
+      it('should allow staff only', function (done) {
         const url = `/entities/publisher/create/foo`
         async.series(
           [

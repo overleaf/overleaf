@@ -4,10 +4,10 @@ const request = require('./helpers/request')
 // create a string that is longer than the max allowed (as defined in Server.js)
 const wayTooLongString = 'a'.repeat(Settings.max_json_request_size + 1)
 
-describe('BodyParserErrors', function() {
-  describe('when request is too large', function() {
-    describe('json', function() {
-      it('return 413', function(done) {
+describe('BodyParserErrors', function () {
+  describe('when request is too large', function () {
+    describe('json', function () {
+      it('return 413', function (done) {
         request.post(
           {
             url: '/login',
@@ -26,8 +26,8 @@ describe('BodyParserErrors', function() {
       })
     })
 
-    describe('urlencoded', function() {
-      it('return 413', function(done) {
+    describe('urlencoded', function () {
+      it('return 413', function (done) {
         request.post(
           {
             url: '/login',
@@ -46,9 +46,9 @@ describe('BodyParserErrors', function() {
     })
   })
 
-  describe('when request is not too large', function() {
-    describe('json', function() {
-      it('return normal status code', function(done) {
+  describe('when request is not too large', function () {
+    describe('json', function () {
+      it('return normal status code', function (done) {
         request.post(
           {
             url: '/login',
@@ -66,8 +66,8 @@ describe('BodyParserErrors', function() {
       })
     })
 
-    describe('urlencoded', function() {
-      it('return normal status code', function(done) {
+    describe('urlencoded', function () {
+      it('return normal status code', function (done) {
         request.post(
           {
             url: '/login',

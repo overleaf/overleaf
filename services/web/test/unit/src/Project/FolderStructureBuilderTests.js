@@ -6,8 +6,8 @@ const MODULE_PATH =
   '../../../../app/src/Features/Project/FolderStructureBuilder'
 const MOCK_OBJECT_ID = 'MOCK_OBJECT_ID'
 
-describe('FolderStructureBuilder', function() {
-  beforeEach(function() {
+describe('FolderStructureBuilder', function () {
+  beforeEach(function () {
     this.ObjectId = sinon.stub().returns(MOCK_OBJECT_ID)
     this.FolderStructureBuilder = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -16,13 +16,13 @@ describe('FolderStructureBuilder', function() {
     })
   })
 
-  describe('buildFolderStructure', function() {
-    describe('when given no documents at all', function() {
-      beforeEach(function() {
+  describe('buildFolderStructure', function () {
+    describe('when given no documents at all', function () {
+      beforeEach(function () {
         this.result = this.FolderStructureBuilder.buildFolderStructure([], [])
       })
 
-      it('returns an empty root folder', function() {
+      it('returns an empty root folder', function () {
         expect(this.result).to.deep.equal({
           _id: MOCK_OBJECT_ID,
           name: 'rootFolder',
@@ -33,8 +33,8 @@ describe('FolderStructureBuilder', function() {
       })
     })
 
-    describe('when given documents and files', function() {
-      beforeEach(function() {
+    describe('when given documents and files', function () {
+      beforeEach(function () {
         const docUploads = [
           { path: '/main.tex', doc: { _id: 'doc-1', name: 'main.tex' } },
           { path: '/foo/other.tex', doc: { _id: 'doc-2', name: 'other.tex' } },
@@ -55,7 +55,7 @@ describe('FolderStructureBuilder', function() {
         )
       })
 
-      it('returns a full folder structure', function() {
+      it('returns a full folder structure', function () {
         expect(this.result).to.deep.equal({
           _id: MOCK_OBJECT_ID,
           name: 'rootFolder',
@@ -100,8 +100,8 @@ describe('FolderStructureBuilder', function() {
       })
     })
 
-    describe('when given duplicate files', function() {
-      it('throws an error', function() {
+    describe('when given duplicate files', function () {
+      it('throws an error', function () {
         const docUploads = [
           { path: '/foo/doc.tex', doc: { _id: 'doc-1', name: 'doc.tex' } },
           { path: '/foo/doc.tex', doc: { _id: 'doc-2', name: 'doc.tex' } }

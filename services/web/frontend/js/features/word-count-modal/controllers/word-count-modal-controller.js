@@ -5,24 +5,24 @@ import WordCountModal from '../components/word-count-modal'
 
 App.component('wordCountModal', react2angular(WordCountModal))
 
-export default App.controller('WordCountModalController', function(
-  $scope,
-  ide
-) {
-  $scope.show = false
-  $scope.projectId = ide.project_id
+export default App.controller(
+  'WordCountModalController',
+  function ($scope, ide) {
+    $scope.show = false
+    $scope.projectId = ide.project_id
 
-  $scope.handleHide = () => {
-    $scope.$applyAsync(() => {
-      $scope.show = false
-    })
-  }
+    $scope.handleHide = () => {
+      $scope.$applyAsync(() => {
+        $scope.show = false
+      })
+    }
 
-  $scope.openWordCountModal = () => {
-    $scope.$applyAsync(() => {
-      $scope.clsiServerId = ide.clsiServerId
-      $scope.projectId = ide.project_id
-      $scope.show = true
-    })
+    $scope.openWordCountModal = () => {
+      $scope.$applyAsync(() => {
+        $scope.clsiServerId = ide.clsiServerId
+        $scope.projectId = ide.project_id
+        $scope.show = true
+      })
+    }
   }
-})
+)

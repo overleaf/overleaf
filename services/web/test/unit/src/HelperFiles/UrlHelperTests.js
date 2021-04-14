@@ -5,8 +5,8 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Helpers/UrlHelper.js'
 )
 
-describe('UrlHelper', function() {
-  beforeEach(function() {
+describe('UrlHelper', function () {
+  beforeEach(function () {
     this.settings = {
       apis: { linkedUrlProxy: { url: undefined } },
       siteUrl: 'http://localhost:3000'
@@ -15,8 +15,8 @@ describe('UrlHelper', function() {
       requires: { 'settings-sharelatex': this.settings }
     })
   })
-  describe('getSafeRedirectPath', function() {
-    it('sanitize redirect path to prevent open redirects', function() {
+  describe('getSafeRedirectPath', function () {
+    it('sanitize redirect path to prevent open redirects', function () {
       expect(this.UrlHelper.getSafeRedirectPath('https://evil.com')).to.be
         .undefined
 

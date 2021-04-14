@@ -49,11 +49,11 @@ const TemplatesManager = {
       },
       timeout: 60 * 1000
     })
-    zipReq.on('error', function(err) {
+    zipReq.on('error', function (err) {
       logger.warn({ err }, 'error getting zip from template API')
       return callback(err)
     })
-    return FileWriter.ensureDumpFolderExists(function(err) {
+    return FileWriter.ensureDumpFolderExists(function (err) {
       if (err != null) {
         return callback(err)
       }
@@ -65,7 +65,7 @@ const TemplatesManager = {
         fromV1TemplateId: templateId,
         fromV1TemplateVersionId: templateVersionId
       }
-      writeStream.on('close', function() {
+      writeStream.on('close', function () {
         if (zipReq.response.statusCode !== 200) {
           logger.warn(
             { uri: zipUrl, statusCode: zipReq.response.statusCode },
@@ -78,7 +78,7 @@ const TemplatesManager = {
           projectName,
           dumpPath,
           attributes,
-          function(err, project) {
+          function (err, project) {
             if (err != null) {
               OError.tag(err, 'problem building project from zip', {
                 zipReq
@@ -97,11 +97,11 @@ const TemplatesManager = {
                     cb
                   )
               ],
-              function(err) {
+              function (err) {
                 if (err != null) {
                   return callback(err)
                 }
-                fs.unlink(dumpPath, function(err) {
+                fs.unlink(dumpPath, function (err) {
                   if (err != null) {
                     return logger.err({ err }, 'error unlinking template zip')
                   }
@@ -114,7 +114,7 @@ const TemplatesManager = {
                   { _id: project._id },
                   update,
                   {},
-                  function(err) {
+                  function (err) {
                     if (err != null) {
                       return callback(err)
                     }

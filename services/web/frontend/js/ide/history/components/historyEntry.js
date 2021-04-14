@@ -13,13 +13,13 @@ import _ from 'lodash'
 import App from '../../../base'
 import ColorManager from '../../colors/ColorManager'
 import displayNameForUser from '../util/displayNameForUser'
-const historyEntryController = function($scope, $element, $attrs) {
+const historyEntryController = function ($scope, $element, $attrs) {
   const ctrl = this
   // This method (and maybe the one below) will be removed soon. User details data will be
   // injected into the history API responses, so we won't need to fetch user data from other
   // local data structures.
   const _getUserById = id =>
-    _.find(ctrl.users, function(user) {
+    _.find(ctrl.users, function (user) {
       const curUserId =
         (user != null ? user._id : undefined) ||
         (user != null ? user.id : undefined)
@@ -27,7 +27,7 @@ const historyEntryController = function($scope, $element, $attrs) {
     })
   ctrl.displayName = displayNameForUser
   ctrl.displayNameById = id => displayNameForUser(_getUserById(id))
-  ctrl.getProjectOpDoc = function(projectOp) {
+  ctrl.getProjectOpDoc = function (projectOp) {
     if (projectOp.rename != null) {
       return `${projectOp.rename.pathname} → ${projectOp.rename.newPathname}`
     } else if (projectOp.add != null) {
@@ -36,7 +36,7 @@ const historyEntryController = function($scope, $element, $attrs) {
       return `${projectOp.remove.pathname}`
     }
   }
-  ctrl.getUserCSSStyle = function(user) {
+  ctrl.getUserCSSStyle = function (user) {
     const curUserId =
       (user != null ? user._id : undefined) ||
       (user != null ? user.id : undefined)
@@ -47,7 +47,7 @@ const historyEntryController = function($scope, $element, $attrs) {
       return { color: `hsl(${hue}, 70%, 50%)` }
     }
   }
-  ctrl.isEntrySelected = function() {
+  ctrl.isEntrySelected = function () {
     if (ctrl.rangeSelectionEnabled) {
       return (
         ctrl.entry.toV <= ctrl.selectedHistoryRange.toV &&
@@ -58,7 +58,7 @@ const historyEntryController = function($scope, $element, $attrs) {
     }
   }
 
-  ctrl.isEntryHoverSelected = function() {
+  ctrl.isEntryHoverSelected = function () {
     return (
       ctrl.rangeSelectionEnabled &&
       ctrl.entry.toV <= ctrl.hoveredHistoryRange.toV &&

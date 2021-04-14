@@ -7,8 +7,8 @@ const modulePath = path.join(
 const sinon = require('sinon')
 const { expect } = require('chai')
 
-describe('BetaProgramHandler', function() {
-  beforeEach(function() {
+describe('BetaProgramHandler', function () {
+  beforeEach(function () {
     this.user_id = 'some_id'
     this.user = {
       _id: this.user_id,
@@ -31,15 +31,15 @@ describe('BetaProgramHandler', function() {
     })
   })
 
-  describe('optIn', function() {
-    beforeEach(function() {
+  describe('optIn', function () {
+    beforeEach(function () {
       this.user.betaProgram = false
       this.call = callback => {
         this.handler.optIn(this.user_id, callback)
       }
     })
 
-    it('should call userUpdater', function(done) {
+    it('should call userUpdater', function (done) {
       this.call(err => {
         expect(err).to.not.exist
         this.UserUpdater.promises.updateUser.callCount.should.equal(1)
@@ -47,19 +47,19 @@ describe('BetaProgramHandler', function() {
       })
     })
 
-    it('should not produce an error', function(done) {
+    it('should not produce an error', function (done) {
       this.call(err => {
         expect(err).to.not.exist
         done()
       })
     })
 
-    describe('when userUpdater produces an error', function() {
-      beforeEach(function() {
+    describe('when userUpdater produces an error', function () {
+      beforeEach(function () {
         this.UserUpdater.promises.updateUser.rejects()
       })
 
-      it('should produce an error', function(done) {
+      it('should produce an error', function (done) {
         this.call(err => {
           expect(err).to.exist
           expect(err).to.be.instanceof(Error)
@@ -69,15 +69,15 @@ describe('BetaProgramHandler', function() {
     })
   })
 
-  describe('optOut', function() {
-    beforeEach(function() {
+  describe('optOut', function () {
+    beforeEach(function () {
       this.user.betaProgram = true
       this.call = callback => {
         this.handler.optOut(this.user_id, callback)
       }
     })
 
-    it('should call userUpdater', function(done) {
+    it('should call userUpdater', function (done) {
       this.call(err => {
         expect(err).to.not.exist
         this.UserUpdater.promises.updateUser.callCount.should.equal(1)
@@ -85,19 +85,19 @@ describe('BetaProgramHandler', function() {
       })
     })
 
-    it('should not produce an error', function(done) {
+    it('should not produce an error', function (done) {
       this.call(err => {
         expect(err).to.not.exist
         done()
       })
     })
 
-    describe('when userUpdater produces an error', function() {
-      beforeEach(function() {
+    describe('when userUpdater produces an error', function () {
+      beforeEach(function () {
         this.UserUpdater.promises.updateUser.rejects()
       })
 
-      it('should produce an error', function(done) {
+      it('should produce an error', function (done) {
         this.call(err => {
           expect(err).to.exist
           expect(err).to.be.instanceof(Error)

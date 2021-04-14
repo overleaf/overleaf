@@ -7,8 +7,8 @@ const AuthenticationErrors = require('../../../../app/src/Features/Authenticatio
 const modulePath =
   '../../../../app/src/Features/Authentication/AuthenticationManager.js'
 
-describe('AuthenticationManager', function() {
-  beforeEach(function() {
+describe('AuthenticationManager', function () {
+  beforeEach(function () {
     this.settings = { security: { bcryptRounds: 4 } }
     this.AuthenticationManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -28,8 +28,8 @@ describe('AuthenticationManager', function() {
     this.callback = sinon.stub()
   })
 
-  describe('with real bcrypt', function() {
-    beforeEach(function() {
+  describe('with real bcrypt', function () {
+    beforeEach(function () {
       const bcrypt = require('bcrypt')
       this.bcrypt.compare = bcrypt.compare
       this.bcrypt.getRounds = bcrypt.getRounds
@@ -40,8 +40,8 @@ describe('AuthenticationManager', function() {
         '$2a$04$DcU/3UeJf1PfsWlQL./5H.rGTQL1Z1iyz6r7bN9Do8cy6pVWxpKpK'
     })
 
-    describe('authenticate', function() {
-      beforeEach(function() {
+    describe('authenticate', function () {
+      beforeEach(function () {
         this.user = {
           _id: 'user-id',
           email: (this.email = 'USER@sharelatex.com')
@@ -49,8 +49,8 @@ describe('AuthenticationManager', function() {
         this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
       })
 
-      describe('when the hashed password matches', function() {
-        beforeEach(function(done) {
+      describe('when the hashed password matches', function () {
+        beforeEach(function (done) {
           this.unencryptedPassword = 'testpassword'
           this.user.hashedPassword = this.testPassword
           this.AuthenticationManager.authenticate(
@@ -63,17 +63,17 @@ describe('AuthenticationManager', function() {
           )
         })
 
-        it('should look up the correct user in the database', function() {
+        it('should look up the correct user in the database', function () {
           this.User.findOne.calledWith({ email: this.email }).should.equal(true)
         })
 
-        it('should return the user', function() {
+        it('should return the user', function () {
           this.callback.calledWith(null, this.user).should.equal(true)
         })
       })
 
-      describe('when the encrypted passwords do not match', function() {
-        beforeEach(function() {
+      describe('when the encrypted passwords do not match', function () {
+        beforeEach(function () {
           this.AuthenticationManager.authenticate(
             { email: this.email },
             'notthecorrectpassword',
@@ -81,14 +81,14 @@ describe('AuthenticationManager', function() {
           )
         })
 
-        it('should not return the user', function() {
+        it('should not return the user', function () {
           this.callback.calledWith(null, null).should.equal(true)
         })
       })
     })
 
-    describe('setUserPasswordInV2', function() {
-      beforeEach(function() {
+    describe('setUserPasswordInV2', function () {
+      beforeEach(function () {
         this.user = {
           _id: '5c8791477192a80b5e76ca7e',
           email: (this.email = 'USER@sharelatex.com')
@@ -100,7 +100,7 @@ describe('AuthenticationManager', function() {
           .callsArgWith(2, null, { modifiedCount: 1 })
       })
 
-      it('should not produce an error', function(done) {
+      it('should not produce an error', function (done) {
         this.AuthenticationManager.setUserPasswordInV2(
           this.user,
           'testpassword',
@@ -112,7 +112,7 @@ describe('AuthenticationManager', function() {
         )
       })
 
-      it('should set the hashed password', function(done) {
+      it('should set the hashed password', function (done) {
         this.AuthenticationManager.setUserPasswordInV2(
           this.user,
           'testpassword',
@@ -131,9 +131,9 @@ describe('AuthenticationManager', function() {
     })
   })
 
-  describe('authenticate', function() {
-    describe('when the user exists in the database', function() {
-      beforeEach(function() {
+  describe('authenticate', function () {
+    describe('when the user exists in the database', function () {
+      beforeEach(function () {
         this.user = {
           _id: 'user-id',
           email: (this.email = 'USER@sharelatex.com')
@@ -142,8 +142,8 @@ describe('AuthenticationManager', function() {
         this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
       })
 
-      describe('when the hashed password matches', function() {
-        beforeEach(function(done) {
+      describe('when the hashed password matches', function () {
+        beforeEach(function (done) {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
           this.bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
           this.bcrypt.getRounds = sinon.stub().returns(4)
@@ -157,23 +157,23 @@ describe('AuthenticationManager', function() {
           )
         })
 
-        it('should look up the correct user in the database', function() {
+        it('should look up the correct user in the database', function () {
           this.User.findOne.calledWith({ email: this.email }).should.equal(true)
         })
 
-        it('should check that the passwords match', function() {
+        it('should check that the passwords match', function () {
           this.bcrypt.compare
             .calledWith(this.unencryptedPassword, this.hashedPassword)
             .should.equal(true)
         })
 
-        it('should return the user', function() {
+        it('should return the user', function () {
           this.callback.calledWith(null, this.user).should.equal(true)
         })
       })
 
-      describe('when the encrypted passwords do not match', function() {
-        beforeEach(function() {
+      describe('when the encrypted passwords do not match', function () {
+        beforeEach(function () {
           this.AuthenticationManager.authenticate(
             { email: this.email },
             this.unencryptedPassword,
@@ -181,13 +181,13 @@ describe('AuthenticationManager', function() {
           )
         })
 
-        it('should not return the user', function() {
+        it('should not return the user', function () {
           this.callback.calledWith(null, null).should.equal(true)
         })
       })
 
-      describe('when the hashed password matches but the number of rounds is too low', function() {
-        beforeEach(function(done) {
+      describe('when the hashed password matches but the number of rounds is too low', function () {
+        beforeEach(function (done) {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
           this.bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
           this.bcrypt.getRounds = sinon.stub().returns(1)
@@ -204,33 +204,33 @@ describe('AuthenticationManager', function() {
           )
         })
 
-        it('should look up the correct user in the database', function() {
+        it('should look up the correct user in the database', function () {
           this.User.findOne.calledWith({ email: this.email }).should.equal(true)
         })
 
-        it('should check that the passwords match', function() {
+        it('should check that the passwords match', function () {
           this.bcrypt.compare
             .calledWith(this.unencryptedPassword, this.hashedPassword)
             .should.equal(true)
         })
 
-        it('should check the number of rounds', function() {
+        it('should check the number of rounds', function () {
           this.bcrypt.getRounds.called.should.equal(true)
         })
 
-        it('should set the users password (with a higher number of rounds)', function() {
+        it('should set the users password (with a higher number of rounds)', function () {
           this.AuthenticationManager.setUserPassword
             .calledWith(this.user, this.unencryptedPassword)
             .should.equal(true)
         })
 
-        it('should return the user', function() {
+        it('should return the user', function () {
           this.callback.calledWith(null, this.user).should.equal(true)
         })
       })
 
-      describe('when the hashed password matches but the number of rounds is too low, but upgrades disabled', function() {
-        beforeEach(function(done) {
+      describe('when the hashed password matches but the number of rounds is too low, but upgrades disabled', function () {
+        beforeEach(function (done) {
           this.settings.security.disableBcryptRoundsUpgrades = true
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
           this.bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
@@ -248,24 +248,24 @@ describe('AuthenticationManager', function() {
           )
         })
 
-        it('should not check the number of rounds', function() {
+        it('should not check the number of rounds', function () {
           this.bcrypt.getRounds.called.should.equal(false)
         })
 
-        it('should not set the users password (with a higher number of rounds)', function() {
+        it('should not set the users password (with a higher number of rounds)', function () {
           this.AuthenticationManager.setUserPassword
             .calledWith(this.user, this.unencryptedPassword)
             .should.equal(false)
         })
 
-        it('should return the user', function() {
+        it('should return the user', function () {
           this.callback.calledWith(null, this.user).should.equal(true)
         })
       })
     })
 
-    describe('when the user does not exist in the database', function() {
-      beforeEach(function() {
+    describe('when the user does not exist in the database', function () {
+      beforeEach(function () {
         this.User.findOne = sinon.stub().callsArgWith(1, null, null)
         this.AuthenticationManager.authenticate(
           { email: this.email },
@@ -274,15 +274,15 @@ describe('AuthenticationManager', function() {
         )
       })
 
-      it('should not return a user', function() {
+      it('should not return a user', function () {
         this.callback.calledWith(null, null).should.equal(true)
       })
     })
   })
 
-  describe('validateEmail', function() {
-    describe('valid', function() {
-      it('should return null', function() {
+  describe('validateEmail', function () {
+    describe('valid', function () {
+      it('should return null', function () {
         const result = this.AuthenticationManager.validateEmail(
           'foo@example.com'
         )
@@ -290,14 +290,14 @@ describe('AuthenticationManager', function() {
       })
     })
 
-    describe('invalid', function() {
-      it('should return validation error object for no email', function() {
+    describe('invalid', function () {
+      it('should return validation error object for no email', function () {
         const result = this.AuthenticationManager.validateEmail('')
         expect(result).to.an.instanceOf(AuthenticationErrors.InvalidEmailError)
         expect(result.message).to.equal('email not valid')
       })
 
-      it('should return validation error object for invalid', function() {
+      it('should return validation error object for invalid', function () {
         const result = this.AuthenticationManager.validateEmail('notanemail')
         expect(result).to.be.an.instanceOf(
           AuthenticationErrors.InvalidEmailError
@@ -307,15 +307,15 @@ describe('AuthenticationManager', function() {
     })
   })
 
-  describe('validatePassword', function() {
-    beforeEach(function() {
+  describe('validatePassword', function () {
+    beforeEach(function () {
       // 73 characters:
       this.longPassword =
         '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345678'
     })
 
-    describe('with a null password', function() {
-      it('should return an error', function() {
+    describe('with a null password', function () {
+      it('should return an error', function () {
         const result = this.AuthenticationManager.validatePassword()
 
         expect(result).to.be.an.instanceOf(
@@ -326,9 +326,9 @@ describe('AuthenticationManager', function() {
       })
     })
 
-    describe('password length', function() {
-      describe('with the default password length options', function() {
-        it('should reject passwords that are too short', function() {
+    describe('password length', function () {
+      describe('with the default password length options', function () {
+        it('should reject passwords that are too short', function () {
           const result1 = this.AuthenticationManager.validatePassword('')
           expect(result1).to.be.an.instanceOf(
             AuthenticationErrors.InvalidPasswordError
@@ -344,7 +344,7 @@ describe('AuthenticationManager', function() {
           expect(result2.info.code).to.equal('too_short')
         })
 
-        it('should reject passwords that are too long', function() {
+        it('should reject passwords that are too long', function () {
           const result = this.AuthenticationManager.validatePassword(
             this.longPassword
           )
@@ -356,15 +356,15 @@ describe('AuthenticationManager', function() {
           expect(result.info.code).to.equal('too_long')
         })
 
-        it('should accept passwords that are a good length', function() {
+        it('should accept passwords that are a good length', function () {
           expect(
             this.AuthenticationManager.validatePassword('l337h4x0r')
           ).to.equal(null)
         })
       })
 
-      describe('when the password length is specified in settings', function() {
-        beforeEach(function() {
+      describe('when the password length is specified in settings', function () {
+        beforeEach(function () {
           this.settings.passwordStrengthOptions = {
             length: {
               min: 10,
@@ -373,7 +373,7 @@ describe('AuthenticationManager', function() {
           }
         })
 
-        it('should reject passwords that are too short', function() {
+        it('should reject passwords that are too short', function () {
           const result = this.AuthenticationManager.validatePassword(
             '012345678'
           )
@@ -385,13 +385,13 @@ describe('AuthenticationManager', function() {
           expect(result.info.code).to.equal('too_short')
         })
 
-        it('should accept passwords of exactly minimum length', function() {
+        it('should accept passwords of exactly minimum length', function () {
           expect(
             this.AuthenticationManager.validatePassword('0123456789')
           ).to.equal(null)
         })
 
-        it('should reject passwords that are too long', function() {
+        it('should reject passwords that are too long', function () {
           const result = this.AuthenticationManager.validatePassword(
             '0123456789abc'
           )
@@ -403,15 +403,15 @@ describe('AuthenticationManager', function() {
           expect(result.info.code).to.equal('too_long')
         })
 
-        it('should accept passwords of exactly maximum length', function() {
+        it('should accept passwords of exactly maximum length', function () {
           expect(
             this.AuthenticationManager.validatePassword('0123456789ab')
           ).to.equal(null)
         })
       })
 
-      describe('when the maximum password length is set to >72 characters in settings', function() {
-        beforeEach(function() {
+      describe('when the maximum password length is set to >72 characters in settings', function () {
+        beforeEach(function () {
           this.settings.passwordStrengthOptions = {
             length: {
               max: 128
@@ -419,7 +419,7 @@ describe('AuthenticationManager', function() {
           }
         })
 
-        it('should still reject passwords > 72 characters in length', function() {
+        it('should still reject passwords > 72 characters in length', function () {
           const result = this.AuthenticationManager.validatePassword(
             this.longPassword
           )
@@ -433,9 +433,9 @@ describe('AuthenticationManager', function() {
       })
     })
 
-    describe('allowed characters', function() {
-      describe('with the default settings for allowed characters', function() {
-        it('should allow passwords with valid characters', function() {
+    describe('allowed characters', function () {
+      describe('with the default settings for allowed characters', function () {
+        it('should allow passwords with valid characters', function () {
           expect(
             this.AuthenticationManager.validatePassword(
               'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -448,7 +448,7 @@ describe('AuthenticationManager', function() {
           ).to.equal(null)
         })
 
-        it('should not allow passwords with invalid characters', function() {
+        it('should not allow passwords with invalid characters', function () {
           const result = this.AuthenticationManager.validatePassword(
             'correct horse battery staple'
           )
@@ -463,8 +463,8 @@ describe('AuthenticationManager', function() {
         })
       })
 
-      describe('when valid characters are overridden in settings', function() {
-        beforeEach(function() {
+      describe('when valid characters are overridden in settings', function () {
+        beforeEach(function () {
           this.settings.passwordStrengthOptions = {
             chars: {
               symbols: ' '
@@ -472,7 +472,7 @@ describe('AuthenticationManager', function() {
           }
         })
 
-        it('should allow passwords with valid characters', function() {
+        it('should allow passwords with valid characters', function () {
           expect(
             this.AuthenticationManager.validatePassword(
               'correct horse battery staple'
@@ -480,7 +480,7 @@ describe('AuthenticationManager', function() {
           ).to.equal(null)
         })
 
-        it('should disallow passwords with invalid characters', function() {
+        it('should disallow passwords with invalid characters', function () {
           const result = this.AuthenticationManager.validatePassword(
             '1234567890@#$%^&*()-_=+[]{};:<>/?!£€.,'
           )
@@ -495,14 +495,14 @@ describe('AuthenticationManager', function() {
         })
       })
 
-      describe('when allowAnyChars is set', function() {
-        beforeEach(function() {
+      describe('when allowAnyChars is set', function () {
+        beforeEach(function () {
           this.settings.passwordStrengthOptions = {
             allowAnyChars: true
           }
         })
 
-        it('should allow any characters', function() {
+        it('should allow any characters', function () {
           expect(
             this.AuthenticationManager.validatePassword(
               'correct horse battery staple'
@@ -518,8 +518,8 @@ describe('AuthenticationManager', function() {
     })
   })
 
-  describe('setUserPassword', function() {
-    beforeEach(function() {
+  describe('setUserPassword', function () {
+    beforeEach(function () {
       this.user_id = ObjectId()
       this.user = {
         _id: this.user_id,
@@ -534,8 +534,8 @@ describe('AuthenticationManager', function() {
       this.db.users.updateOne = sinon.stub().callsArg(2)
     })
 
-    describe('too long', function() {
-      beforeEach(function() {
+    describe('too long', function () {
+      beforeEach(function () {
         this.settings.passwordStrengthOptions = {
           length: {
             max: 10
@@ -544,7 +544,7 @@ describe('AuthenticationManager', function() {
         this.password = 'dsdsadsadsadsadsadkjsadjsadjsadljs'
       })
 
-      it('should return and error', function(done) {
+      it('should return and error', function (done) {
         this.AuthenticationManager.setUserPassword(
           this.user,
           this.password,
@@ -555,7 +555,7 @@ describe('AuthenticationManager', function() {
         )
       })
 
-      it('should not start the bcrypt process', function(done) {
+      it('should not start the bcrypt process', function (done) {
         this.AuthenticationManager.setUserPassword(
           this.user,
           this.password,
@@ -568,12 +568,12 @@ describe('AuthenticationManager', function() {
       })
     })
 
-    describe('contains full email', function() {
-      beforeEach(function() {
+    describe('contains full email', function () {
+      beforeEach(function () {
         this.password = `some${this.user.email}password`
       })
 
-      it('should reject the password', function(done) {
+      it('should reject the password', function (done) {
         this.AuthenticationManager.setUserPassword(
           this.user,
           this.password,
@@ -586,12 +586,12 @@ describe('AuthenticationManager', function() {
       })
     })
 
-    describe('contains first part of email', function() {
-      beforeEach(function() {
+    describe('contains first part of email', function () {
+      beforeEach(function () {
         this.password = `some${this.user.email.split('@')[0]}password`
       })
 
-      it('should reject the password', function(done) {
+      it('should reject the password', function (done) {
         this.AuthenticationManager.setUserPassword(
           this.user,
           this.password,
@@ -604,8 +604,8 @@ describe('AuthenticationManager', function() {
       })
     })
 
-    describe('too short', function() {
-      beforeEach(function() {
+    describe('too short', function () {
+      beforeEach(function () {
         this.settings.passwordStrengthOptions = {
           length: {
             max: 10,
@@ -615,7 +615,7 @@ describe('AuthenticationManager', function() {
         this.password = 'dsd'
       })
 
-      it('should return and error', function(done) {
+      it('should return and error', function (done) {
         this.AuthenticationManager.setUserPassword(
           this.user,
           this.password,
@@ -626,7 +626,7 @@ describe('AuthenticationManager', function() {
         )
       })
 
-      it('should not start the bcrypt process', function(done) {
+      it('should not start the bcrypt process', function (done) {
         this.AuthenticationManager.setUserPassword(
           this.user,
           this.password,
@@ -639,8 +639,8 @@ describe('AuthenticationManager', function() {
       })
     })
 
-    describe('successful password set attempt', function() {
-      beforeEach(function() {
+    describe('successful password set attempt', function () {
+      beforeEach(function () {
         this.UserGetter.getUser = sinon.stub().yields(null, { overleaf: null })
         this.AuthenticationManager.setUserPassword(
           this.user,
@@ -649,7 +649,7 @@ describe('AuthenticationManager', function() {
         )
       })
 
-      it("should update the user's password in the database", function() {
+      it("should update the user's password in the database", function () {
         const { args } = this.db.users.updateOne.lastCall
         expect(args[0]).to.deep.equal({
           _id: ObjectId(this.user_id.toString())
@@ -664,12 +664,12 @@ describe('AuthenticationManager', function() {
         })
       })
 
-      it('should hash the password', function() {
+      it('should hash the password', function () {
         this.bcrypt.genSalt.calledWith(4).should.equal(true)
         this.bcrypt.hash.calledWith(this.password, this.salt).should.equal(true)
       })
 
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         this.callback.called.should.equal(true)
       })
     })

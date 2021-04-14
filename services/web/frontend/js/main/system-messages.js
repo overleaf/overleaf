@@ -14,7 +14,7 @@ const MESSAGE_POLL_INTERVAL = 15 * 60 * 1000
 // Controller for messages (array)
 App.controller('SystemMessagesController', ($http, $scope) => {
   $scope.messages = []
-  var pollSystemMessages = function() {
+  var pollSystemMessages = function () {
     // Ignore polling if tab is hidden or browser is offline
     if (document.hidden || !navigator.onLine) {
       return
@@ -41,19 +41,19 @@ App.controller('SystemMessagesController', ($http, $scope) => {
   setInterval(pollSystemMessages, MESSAGE_POLL_INTERVAL)
 })
 
-export default App.controller('SystemMessageController', function(
-  $scope,
-  $sce
-) {
-  $scope.hidden = $.localStorage(`systemMessage.hide.${$scope.message._id}`)
-  $scope.protected = $scope.message._id === 'protected'
-  $scope.htmlContent = $scope.message.content
+export default App.controller(
+  'SystemMessageController',
+  function ($scope, $sce) {
+    $scope.hidden = $.localStorage(`systemMessage.hide.${$scope.message._id}`)
+    $scope.protected = $scope.message._id === 'protected'
+    $scope.htmlContent = $scope.message.content
 
-  return ($scope.hide = function() {
-    if (!$scope.protected) {
-      // do not allow protected messages to be hidden
-      $scope.hidden = true
-      return $.localStorage(`systemMessage.hide.${$scope.message._id}`, true)
-    }
-  })
-})
+    return ($scope.hide = function () {
+      if (!$scope.protected) {
+        // do not allow protected messages to be hidden
+        $scope.hidden = true
+        return $.localStorage(`systemMessage.hide.${$scope.message._id}`, true)
+      }
+    })
+  }
+)

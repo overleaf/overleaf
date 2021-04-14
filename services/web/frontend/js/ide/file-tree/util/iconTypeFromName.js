@@ -12,7 +12,7 @@
  */
 let iconTypeFromName
 
-export default iconTypeFromName = function(name) {
+export default iconTypeFromName = function (name) {
   const ext = __guard__(name.split('.').pop(), x => x.toLowerCase())
   if (['png', 'pdf', 'jpg', 'jpeg', 'gif'].includes(ext)) {
     return 'image'

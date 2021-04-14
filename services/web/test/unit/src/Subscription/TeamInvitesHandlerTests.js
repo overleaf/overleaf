@@ -7,8 +7,8 @@ const modulePath =
 const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
-describe('TeamInvitesHandler', function() {
-  beforeEach(function() {
+describe('TeamInvitesHandler', function () {
+  beforeEach(function () {
     this.manager = {
       _id: '666666',
       first_name: 'Daenerys',
@@ -98,8 +98,8 @@ describe('TeamInvitesHandler', function() {
     })
   })
 
-  describe('getInvite', function() {
-    it("returns the invite if there's one", function(done) {
+  describe('getInvite', function () {
+    it("returns the invite if there's one", function (done) {
       this.TeamInvitesHandler.getInvite(
         this.token,
         (err, invite, subscription) => {
@@ -111,7 +111,7 @@ describe('TeamInvitesHandler', function() {
       )
     })
 
-    it("returns teamNotFound if there's none", function(done) {
+    it("returns teamNotFound if there's none", function (done) {
       this.Subscription.findOne = sinon.stub().yields(null, null)
 
       this.TeamInvitesHandler.getInvite(
@@ -124,8 +124,8 @@ describe('TeamInvitesHandler', function() {
     })
   })
 
-  describe('createInvite', function() {
-    it('adds the team invite to the subscription', function(done) {
+  describe('createInvite', function () {
+    it('adds the team invite to the subscription', function (done) {
       this.TeamInvitesHandler.createInvite(
         this.manager._id,
         this.subscription,
@@ -144,7 +144,7 @@ describe('TeamInvitesHandler', function() {
       )
     })
 
-    it('sends an email', function(done) {
+    it('sends an email', function (done) {
       this.TeamInvitesHandler.createInvite(
         this.manager._id,
         this.subscription,
@@ -165,7 +165,7 @@ describe('TeamInvitesHandler', function() {
       )
     })
 
-    it('refreshes the existing invite if the email has already been invited', function(done) {
+    it('refreshes the existing invite if the email has already been invited', function (done) {
       const originalInvite = Object.assign({}, this.teamInvite)
 
       this.TeamInvitesHandler.createInvite(
@@ -188,7 +188,7 @@ describe('TeamInvitesHandler', function() {
       )
     })
 
-    it('removes any legacy invite from the subscription', function(done) {
+    it('removes any legacy invite from the subscription', function (done) {
       this.TeamInvitesHandler.createInvite(
         this.manager._id,
         this.subscription,
@@ -205,7 +205,7 @@ describe('TeamInvitesHandler', function() {
       )
     })
 
-    it('add user to subscription if inviting self', function(done) {
+    it('add user to subscription if inviting self', function (done) {
       this.TeamInvitesHandler.createInvite(
         this.manager._id,
         this.subscription,
@@ -228,12 +228,12 @@ describe('TeamInvitesHandler', function() {
     })
   })
 
-  describe('importInvite', function() {
-    beforeEach(function() {
+  describe('importInvite', function () {
+    beforeEach(function () {
       this.sentAt = new Date()
     })
 
-    it('can imports an invite from v1', function() {
+    it('can imports an invite from v1', function () {
       this.TeamInvitesHandler.importInvite(
         this.subscription,
         'A-Team',
@@ -255,8 +255,8 @@ describe('TeamInvitesHandler', function() {
     })
   })
 
-  describe('acceptInvite', function() {
-    beforeEach(function() {
+  describe('acceptInvite', function () {
+    beforeEach(function () {
       this.user = {
         id: '123456789',
         first_name: 'Tyrion',
@@ -275,7 +275,7 @@ describe('TeamInvitesHandler', function() {
       })
     })
 
-    it('adds the user to the team', function(done) {
+    it('adds the user to the team', function (done) {
       this.TeamInvitesHandler.acceptInvite('dddddddd', this.user.id, () => {
         this.SubscriptionUpdater.addUserToGroup
           .calledWith(this.subscription._id, this.user.id)
@@ -284,7 +284,7 @@ describe('TeamInvitesHandler', function() {
       })
     })
 
-    it('removes the invite from the subscription', function(done) {
+    it('removes the invite from the subscription', function (done) {
       this.TeamInvitesHandler.acceptInvite('dddddddd', this.user.id, () => {
         this.Subscription.updateOne
           .calledWith(
@@ -297,8 +297,8 @@ describe('TeamInvitesHandler', function() {
     })
   })
 
-  describe('revokeInvite', function() {
-    it('removes the team invite from the subscription', function(done) {
+  describe('revokeInvite', function () {
+    it('removes the team invite from the subscription', function (done) {
       this.TeamInvitesHandler.revokeInvite(
         this.manager._id,
         this.subscription,
@@ -323,8 +323,8 @@ describe('TeamInvitesHandler', function() {
     })
   })
 
-  describe('createTeamInvitesForLegacyInvitedEmail', function(done) {
-    beforeEach(function() {
+  describe('createTeamInvitesForLegacyInvitedEmail', function (done) {
+    beforeEach(function () {
       this.subscription.invited_emails = [
         'eddard@example.com',
         'robert@example.com'
@@ -335,7 +335,7 @@ describe('TeamInvitesHandler', function() {
         .yields(null, [this.subscription])
     })
 
-    it('sends an invitation email to addresses in the legacy invited_emails field', function(done) {
+    it('sends an invitation email to addresses in the legacy invited_emails field', function (done) {
       this.TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail(
         'eddard@example.com',
         (err, invite) => {
@@ -357,8 +357,8 @@ describe('TeamInvitesHandler', function() {
     })
   })
 
-  describe('validation', function() {
-    it("doesn't create an invite if the team limit has been reached", function(done) {
+  describe('validation', function () {
+    it("doesn't create an invite if the team limit has been reached", function (done) {
       this.LimitationsManager.teamHasReachedMemberLimit = sinon
         .stub()
         .returns(true)
@@ -373,7 +373,7 @@ describe('TeamInvitesHandler', function() {
       )
     })
 
-    it("doesn't create an invite if the subscription is not in a group plan", function(done) {
+    it("doesn't create an invite if the subscription is not in a group plan", function (done) {
       this.subscription.groupPlan = false
       this.TeamInvitesHandler.createInvite(
         this.manager._id,
@@ -386,7 +386,7 @@ describe('TeamInvitesHandler', function() {
       )
     })
 
-    it("doesn't create an invite if the user is already part of the team", function(done) {
+    it("doesn't create an invite if the user is already part of the team", function (done) {
       const member = {
         id: '1a2b',
         _id: '1a2b',

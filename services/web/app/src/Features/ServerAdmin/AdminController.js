@@ -27,7 +27,7 @@ const SystemMessageManager = require('../SystemMessages/SystemMessageManager')
 
 const oneMinInMs = 60 * 1000
 
-var updateOpenConnetionsMetrics = function() {
+var updateOpenConnetionsMetrics = function () {
   metrics.gauge(
     'open_connections.socketio',
     __guard__(
@@ -79,7 +79,7 @@ const AdminController = {
       })()
     }
 
-    return SystemMessageManager.getMessagesFromDB(function(
+    return SystemMessageManager.getMessagesFromDB(function (
       error,
       systemMessages
     ) {
@@ -124,7 +124,7 @@ const AdminController = {
   writeAllToMongo(req, res) {
     logger.log('writing all docs to mongo')
     Settings.mongo.writeAll = true
-    return DocumentUpdaterHandler.flushAllDocsToMongo(function() {
+    return DocumentUpdaterHandler.flushAllDocsToMongo(function () {
       logger.log('all docs have been saved to mongo')
       return res.sendStatus(200)
     })
@@ -144,18 +144,19 @@ const AdminController = {
   },
 
   createMessage(req, res, next) {
-    return SystemMessageManager.createMessage(req.body.content, function(
-      error
-    ) {
-      if (error != null) {
-        return next(error)
+    return SystemMessageManager.createMessage(
+      req.body.content,
+      function (error) {
+        if (error != null) {
+          return next(error)
+        }
+        return res.sendStatus(200)
       }
-      return res.sendStatus(200)
-    })
+    )
   },
 
   clearMessages(req, res, next) {
-    return SystemMessageManager.clearMessages(function(error) {
+    return SystemMessageManager.clearMessages(function (error) {
       if (error != null) {
         return next(error)
       }

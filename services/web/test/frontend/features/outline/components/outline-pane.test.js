@@ -6,7 +6,7 @@ import { screen, fireEvent } from '@testing-library/react'
 import OutlinePane from '../../../../../frontend/js/features/outline/components/outline-pane'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
-describe('<OutlinePane />', function() {
+describe('<OutlinePane />', function () {
   const jumpToLine = () => {}
   const onToggle = sinon.stub()
   const eventTracking = { sendMB: sinon.stub() }
@@ -16,7 +16,7 @@ describe('<OutlinePane />', function() {
   }
 
   let originalLocalStorage
-  before(function() {
+  before(function () {
     originalLocalStorage = global.localStorage
 
     Object.defineProperty(global, 'localStorage', {
@@ -27,20 +27,20 @@ describe('<OutlinePane />', function() {
     })
   })
 
-  afterEach(function() {
+  afterEach(function () {
     onToggle.reset()
     eventTracking.sendMB.reset()
     global.localStorage.getItem.resetHistory()
     global.localStorage.setItem.resetHistory()
   })
 
-  after(function() {
+  after(function () {
     Object.defineProperty(global, 'localStorage', {
       value: originalLocalStorage
     })
   })
 
-  it('renders expanded outline', function() {
+  it('renders expanded outline', function () {
     const outline = [
       {
         title: 'Section',
@@ -61,7 +61,7 @@ describe('<OutlinePane />', function() {
     screen.getByRole('tree')
   })
 
-  it('renders disabled outline', function() {
+  it('renders disabled outline', function () {
     const outline = []
     render(
       <OutlinePane
@@ -76,7 +76,7 @@ describe('<OutlinePane />', function() {
     expect(screen.queryByRole('tree')).to.be.null
   })
 
-  it('expand outline and use local storage', function() {
+  it('expand outline and use local storage', function () {
     global.localStorage.getItem.returns(false)
     const outline = [
       {

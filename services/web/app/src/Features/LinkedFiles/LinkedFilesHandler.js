@@ -28,7 +28,7 @@ const {
 module.exports = LinkedFilesHandler = {
   getFileById(project_id, file_id, callback) {
     if (callback == null) {
-      callback = function(err, file) {}
+      callback = function (err, file) {}
     }
     return ProjectLocator.findElement(
       {
@@ -36,7 +36,7 @@ module.exports = LinkedFilesHandler = {
         element_id: file_id,
         type: 'file'
       },
-      function(err, file, path, parentFolder) {
+      function (err, file, path, parentFolder) {
         if (err != null) {
           return callback(err)
         }
@@ -47,14 +47,14 @@ module.exports = LinkedFilesHandler = {
 
   getSourceProject(data, callback) {
     if (callback == null) {
-      callback = function(err, project) {}
+      callback = function (err, project) {}
     }
     const projection = { _id: 1, name: 1 }
     if (data.v1_source_doc_id != null) {
       return Project.findOne(
         { 'overleaf.id': data.v1_source_doc_id },
         projection,
-        function(err, project) {
+        function (err, project) {
           if (err != null) {
             return callback(err)
           }
@@ -68,7 +68,7 @@ module.exports = LinkedFilesHandler = {
       return ProjectGetter.getProject(
         data.source_project_id,
         projection,
-        function(err, project) {
+        function (err, project) {
           if (err != null) {
             return callback(err)
           }
@@ -93,32 +93,33 @@ module.exports = LinkedFilesHandler = {
     callback
   ) {
     if (callback == null) {
-      callback = function(err, file) {}
+      callback = function (err, file) {}
     }
     callback = _.once(callback)
-    return FileWriter.writeStreamToDisk(project_id, readStream, function(
-      err,
-      fsPath
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      return EditorController.upsertFile(
-        project_id,
-        parent_folder_id,
-        name,
-        fsPath,
-        linkedFileData,
-        'upload',
-        user_id,
-        (err, file) => {
-          if (err != null) {
-            return callback(err)
-          }
-          return callback(null, file)
+    return FileWriter.writeStreamToDisk(
+      project_id,
+      readStream,
+      function (err, fsPath) {
+        if (err != null) {
+          return callback(err)
         }
-      )
-    })
+        return EditorController.upsertFile(
+          project_id,
+          parent_folder_id,
+          name,
+          fsPath,
+          linkedFileData,
+          'upload',
+          user_id,
+          (err, file) => {
+            if (err != null) {
+              return callback(err)
+            }
+            return callback(null, file)
+          }
+        )
+      }
+    )
   },
 
   importContent(
@@ -131,31 +132,32 @@ module.exports = LinkedFilesHandler = {
     callback
   ) {
     if (callback == null) {
-      callback = function(err, file) {}
+      callback = function (err, file) {}
     }
     callback = _.once(callback)
-    return FileWriter.writeContentToDisk(project_id, content, function(
-      err,
-      fsPath
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      return EditorController.upsertFile(
-        project_id,
-        parent_folder_id,
-        name,
-        fsPath,
-        linkedFileData,
-        'upload',
-        user_id,
-        (err, file) => {
-          if (err != null) {
-            return callback(err)
-          }
-          return callback(null, file)
+    return FileWriter.writeContentToDisk(
+      project_id,
+      content,
+      function (err, fsPath) {
+        if (err != null) {
+          return callback(err)
         }
-      )
-    })
+        return EditorController.upsertFile(
+          project_id,
+          parent_folder_id,
+          name,
+          fsPath,
+          linkedFileData,
+          'upload',
+          user_id,
+          (err, file) => {
+            if (err != null) {
+              return callback(err)
+            }
+            return callback(null, file)
+          }
+        )
+      }
+    )
   }
 }

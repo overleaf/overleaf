@@ -11,14 +11,12 @@
  */
 import App from '../../../base'
 
-export default App.controller('BulkActionsModalController', function(
-  $scope,
-  $modalInstance,
-  isAccept,
-  nChanges
-) {
-  $scope.isAccept = isAccept
-  $scope.nChanges = nChanges
-  $scope.cancel = () => $modalInstance.dismiss()
-  return ($scope.confirm = () => $modalInstance.close(isAccept))
-})
+export default App.controller(
+  'BulkActionsModalController',
+  function ($scope, $modalInstance, isAccept, nChanges) {
+    $scope.isAccept = isAccept
+    $scope.nChanges = nChanges
+    $scope.cancel = () => $modalInstance.dismiss()
+    return ($scope.confirm = () => $modalInstance.close(isAccept))
+  }
+)

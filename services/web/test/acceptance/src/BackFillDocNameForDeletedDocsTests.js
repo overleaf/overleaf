@@ -13,16 +13,16 @@ async function setDeletedDocs(projectId, deletedDocs) {
   await db.projects.updateOne({ _id: projectId }, { $set: { deletedDocs } })
 }
 
-describe('BackFillDocNameForDeletedDocs', function() {
+describe('BackFillDocNameForDeletedDocs', function () {
   let user, projectId1, projectId2, docId1, docId2, docId3
-  beforeEach('create projects', async function() {
+  beforeEach('create projects', async function () {
     user = new User()
     await user.login()
 
     projectId1 = ObjectId(await user.createProject('project1'))
     projectId2 = ObjectId(await user.createProject('project2'))
   })
-  beforeEach('create docs', async function() {
+  beforeEach('create docs', async function () {
     docId1 = ObjectId(
       await user.createDocInProject(projectId1, null, 'doc1.tex')
     )
@@ -33,12 +33,12 @@ describe('BackFillDocNameForDeletedDocs', function() {
       await user.createDocInProject(projectId2, null, 'doc3.tex')
     )
   })
-  beforeEach('deleted docs', async function() {
+  beforeEach('deleted docs', async function () {
     await user.deleteItemInProject(projectId1, 'doc', docId1)
     await user.deleteItemInProject(projectId1, 'doc', docId2)
     await user.deleteItemInProject(projectId2, 'doc', docId3)
   })
-  beforeEach('insert doc stubs into docs collection', async function() {
+  beforeEach('insert doc stubs into docs collection', async function () {
     await db.docs.insertMany([
       { _id: docId1, deleted: true },
       { _id: docId2, deleted: true },
@@ -47,7 +47,7 @@ describe('BackFillDocNameForDeletedDocs', function() {
   })
   let deletedDocs1, deletedDocs2
   let deletedAt1, deletedAt2, deletedAt3
-  beforeEach('set deletedDocs details', async function() {
+  beforeEach('set deletedDocs details', async function () {
     deletedAt1 = new Date()
     deletedAt2 = new Date()
     deletedAt3 = new Date()
@@ -82,7 +82,7 @@ describe('BackFillDocNameForDeletedDocs', function() {
   }
 
   function checkDocsBackFilled() {
-    it('should back fill names and deletedAt dates into docs', async function() {
+    it('should back fill names and deletedAt dates into docs', async function () {
       const docs = await db.docs.find({}).toArray()
       expect(docs).to.deep.equal([
         { _id: docId1, deleted: true, name: 'doc1.tex', deletedAt: deletedAt1 },
@@ -92,25 +92,25 @@ describe('BackFillDocNameForDeletedDocs', function() {
     })
   }
 
-  describe('back fill only', function() {
+  describe('back fill only', function () {
     beforeEach('run script', runScript)
 
     checkDocsBackFilled()
 
-    it('should leave the deletedDocs as is', async function() {
+    it('should leave the deletedDocs as is', async function () {
       expect(await getDeletedDocs(projectId1)).to.deep.equal(deletedDocs1)
       expect(await getDeletedDocs(projectId2)).to.deep.equal(deletedDocs2)
     })
   })
 
-  describe('back fill and cleanup', function() {
-    beforeEach('run script with cleanup flag', async function() {
+  describe('back fill and cleanup', function () {
+    beforeEach('run script with cleanup flag', async function () {
       await runScript(['--perform-cleanup'])
     })
 
     checkDocsBackFilled()
 
-    it('should cleanup the deletedDocs', async function() {
+    it('should cleanup the deletedDocs', async function () {
       expect(await getDeletedDocs(projectId1)).to.deep.equal([])
       expect(await getDeletedDocs(projectId2)).to.deep.equal([])
     })

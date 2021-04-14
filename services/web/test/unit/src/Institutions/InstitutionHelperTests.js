@@ -5,9 +5,9 @@ const InstitutionsHelper = require(path.join(
   '/../../../../app/src/Features/Institutions/InstitutionsHelper'
 ))
 
-describe('InstitutionsHelper', function() {
-  describe('emailHasLicence', function() {
-    it('returns licence', function() {
+describe('InstitutionsHelper', function () {
+  describe('emailHasLicence', function () {
+    it('returns licence', function () {
       const emailHasLicence = InstitutionsHelper.emailHasLicence({
         confirmedAt: new Date(),
         affiliation: {
@@ -18,7 +18,7 @@ describe('InstitutionsHelper', function() {
       expect(emailHasLicence).to.be.true
     })
 
-    it('returns false if licence is free', function() {
+    it('returns false if licence is free', function () {
       const emailHasLicence = InstitutionsHelper.emailHasLicence({
         confirmedAt: new Date(),
         affiliation: {
@@ -29,7 +29,7 @@ describe('InstitutionsHelper', function() {
       expect(emailHasLicence).to.be.false
     })
 
-    it('returns false if licence is null', function() {
+    it('returns false if licence is null', function () {
       const emailHasLicence = InstitutionsHelper.emailHasLicence({
         confirmedAt: new Date(),
         affiliation: {
@@ -40,7 +40,7 @@ describe('InstitutionsHelper', function() {
       expect(emailHasLicence).to.be.false
     })
 
-    it('returns false if institution is not confirmed', function() {
+    it('returns false if institution is not confirmed', function () {
       const emailHasLicence = InstitutionsHelper.emailHasLicence({
         confirmedAt: new Date(),
         affiliation: {
@@ -51,7 +51,7 @@ describe('InstitutionsHelper', function() {
       expect(emailHasLicence).to.be.false
     })
 
-    it('returns false if email is not confirmed', function() {
+    it('returns false if email is not confirmed', function () {
       const emailHasLicence = InstitutionsHelper.emailHasLicence({
         confirmedAt: null,
         affiliation: {

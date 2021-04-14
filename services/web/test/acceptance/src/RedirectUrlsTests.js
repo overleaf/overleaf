@@ -21,16 +21,16 @@ const assertRedirect = (method, path, expectedStatusCode, destination, cb) =>
     return cb()
   })
 
-describe('RedirectUrls', function() {
-  beforeEach(function() {
+describe('RedirectUrls', function () {
+  beforeEach(function () {
     return this.timeout(1000)
   })
 
-  it('proxy static URLs', function(done) {
+  it('proxy static URLs', function (done) {
     return assertRedirect('get', '/redirect/one', 302, '/destination/one', done)
   })
 
-  it('proxy dynamic URLs', function(done) {
+  it('proxy dynamic URLs', function (done) {
     return assertRedirect(
       'get',
       '/redirect/params/42',
@@ -40,7 +40,7 @@ describe('RedirectUrls', function() {
     )
   })
 
-  it('proxy URLs with baseUrl', function(done) {
+  it('proxy URLs with baseUrl', function (done) {
     return assertRedirect(
       'get',
       '/redirect/base_url',
@@ -50,7 +50,7 @@ describe('RedirectUrls', function() {
     )
   })
 
-  it('proxy URLs with POST with a 307', function(done) {
+  it('proxy URLs with POST with a 307', function (done) {
     return assertRedirect(
       'post',
       '/redirect/get_and_post',
@@ -60,7 +60,7 @@ describe('RedirectUrls', function() {
     )
   })
 
-  it('proxy URLs with multiple support methods', function(done) {
+  it('proxy URLs with multiple support methods', function (done) {
     return assertRedirect(
       'get',
       '/redirect/get_and_post',
@@ -70,7 +70,7 @@ describe('RedirectUrls', function() {
     )
   })
 
-  it('redirects with query params', function(done) {
+  it('redirects with query params', function (done) {
     return assertRedirect(
       'get',
       '/redirect/qs?foo=bar&baz[]=qux1&baz[]=qux2',
@@ -80,7 +80,7 @@ describe('RedirectUrls', function() {
     )
   })
 
-  it("skips redirects if the 'skip-redirects' header is set", function(done) {
+  it("skips redirects if the 'skip-redirects' header is set", function (done) {
     return request.get(
       { url: '/redirect/one', headers: { 'x-skip-redirects': 'true' } },
       (error, response) => {

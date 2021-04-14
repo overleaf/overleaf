@@ -41,7 +41,7 @@ module.exports = LaunchpadController = {
     //   * how does all this work with ldap and saml?
     const sessionUser = AuthenticationController.getSessionUser(req)
     const authMethod = LaunchpadController._getAuthMethod()
-    return LaunchpadController._atLeastOneAdminExists(function(
+    return LaunchpadController._atLeastOneAdminExists(function (
       err,
       adminUserExists
     ) {
@@ -59,35 +59,36 @@ module.exports = LaunchpadController = {
           return res.redirect('/login')
         }
       } else {
-        return UserGetter.getUser(sessionUser._id, { isAdmin: 1 }, function(
-          err,
-          user
-        ) {
-          if (err != null) {
-            return next(err)
+        return UserGetter.getUser(
+          sessionUser._id,
+          { isAdmin: 1 },
+          function (err, user) {
+            if (err != null) {
+              return next(err)
+            }
+            if (user && user.isAdmin) {
+              return res.render(Path.resolve(__dirname, '../views/launchpad'), {
+                wsUrl: Settings.wsUrl,
+                adminUserExists,
+                authMethod
+              })
+            } else {
+              return res.redirect('/restricted')
+            }
           }
-          if (user && user.isAdmin) {
-            return res.render(Path.resolve(__dirname, '../views/launchpad'), {
-              wsUrl: Settings.wsUrl,
-              adminUserExists,
-              authMethod
-            })
-          } else {
-            return res.redirect('/restricted')
-          }
-        })
+        )
       }
     })
   },
 
   _atLeastOneAdminExists(callback) {
     if (callback == null) {
-      callback = function(err, exists) {}
+      callback = function (err, exists) {}
     }
     return UserGetter.getUser(
       { isAdmin: true },
       { _id: 1, isAdmin: 1 },
-      function(err, user) {
+      function (err, user) {
         if (err != null) {
           return callback(err)
         }
@@ -104,7 +105,7 @@ module.exports = LaunchpadController = {
     }
     logger.log({ email }, 'sending test email')
     const emailOptions = { to: email }
-    return EmailHandler.sendEmail('testEmail', emailOptions, function(err) {
+    return EmailHandler.sendEmail('testEmail', emailOptions, function (err) {
       if (err != null) {
         OError.tag(err, 'error sending test email', {
           email
@@ -117,7 +118,7 @@ module.exports = LaunchpadController = {
   },
 
   registerExternalAuthAdmin(authMethod) {
-    return function(req, res, next) {
+    return function (req, res, next) {
       if (LaunchpadController._getAuthMethod() !== authMethod) {
         logger.log(
           { authMethod },
@@ -132,7 +133,7 @@ module.exports = LaunchpadController = {
       }
 
       logger.log({ email }, 'attempted register first admin user')
-      return LaunchpadController._atLeastOneAdminExists(function(err, exists) {
+      return LaunchpadController._atLeastOneAdminExists(function (err, exists) {
         if (err != null) {
           return next(err)
         }
@@ -156,42 +157,42 @@ module.exports = LaunchpadController = {
           'creating admin account for specified external-auth user'
         )
 
-        return UserRegistrationHandler.registerNewUser(body, function(
-          err,
-          user
-        ) {
-          if (err != null) {
-            OError.tag(err, 'error with registerNewUser', {
-              email,
-              authMethod
-            })
-            return next(err)
-          }
-
-          return User.updateOne(
-            { _id: user._id },
-            {
-              $set: { isAdmin: true },
-              emails: [{ email }]
-            },
-            function(err) {
-              if (err != null) {
-                OError.tag(err, 'error setting user to admin', {
-                  user_id: user._id
-                })
-                return next(err)
-              }
-
-              AuthenticationController.setRedirectInSession(req, '/launchpad')
-              logger.log(
-                { email, user_id: user._id, authMethod },
-                'created first admin account'
-              )
-
-              return res.json({ redir: '/launchpad', email })
+        return UserRegistrationHandler.registerNewUser(
+          body,
+          function (err, user) {
+            if (err != null) {
+              OError.tag(err, 'error with registerNewUser', {
+                email,
+                authMethod
+              })
+              return next(err)
             }
-          )
-        })
+
+            return User.updateOne(
+              { _id: user._id },
+              {
+                $set: { isAdmin: true },
+                emails: [{ email }]
+              },
+              function (err) {
+                if (err != null) {
+                  OError.tag(err, 'error setting user to admin', {
+                    user_id: user._id
+                  })
+                  return next(err)
+                }
+
+                AuthenticationController.setRedirectInSession(req, '/launchpad')
+                logger.log(
+                  { email, user_id: user._id, authMethod },
+                  'created first admin account'
+                )
+
+                return res.json({ redir: '/launchpad', email })
+              }
+            )
+          }
+        )
       })
     }
   },
@@ -205,7 +206,7 @@ module.exports = LaunchpadController = {
     }
 
     logger.log({ email }, 'attempted register first admin user')
-    return LaunchpadController._atLeastOneAdminExists(function(err, exists) {
+    return LaunchpadController._atLeastOneAdminExists(function (err, exists) {
       if (err != null) {
         return next(err)
       }
@@ -219,44 +220,47 @@ module.exports = LaunchpadController = {
       }
 
       const body = { email, password }
-      return UserRegistrationHandler.registerNewUser(body, function(err, user) {
-        if (err != null) {
-          return next(err)
-        }
-
-        logger.log({ user_id: user._id }, 'making user an admin')
-        User.updateOne(
-          { _id: user._id },
-          {
-            $set: {
-              isAdmin: true,
-              emails: [{ email }]
-            }
-          },
-          function(err) {
-            if (err != null) {
-              OError.tag(err, 'error setting user to admin', {
-                user_id: user._id
-              })
-              return next(err)
-            }
-
-            AuthenticationController.setRedirectInSession(req, '/launchpad')
-            logger.log(
-              { email, user_id: user._id },
-              'created first admin account'
-            )
-            return res.json({
-              redir: '',
-              id: user._id.toString(),
-              first_name: user.first_name,
-              last_name: user.last_name,
-              email: user.email,
-              created: Date.now()
-            })
+      return UserRegistrationHandler.registerNewUser(
+        body,
+        function (err, user) {
+          if (err != null) {
+            return next(err)
           }
-        )
-      })
+
+          logger.log({ user_id: user._id }, 'making user an admin')
+          User.updateOne(
+            { _id: user._id },
+            {
+              $set: {
+                isAdmin: true,
+                emails: [{ email }]
+              }
+            },
+            function (err) {
+              if (err != null) {
+                OError.tag(err, 'error setting user to admin', {
+                  user_id: user._id
+                })
+                return next(err)
+              }
+
+              AuthenticationController.setRedirectInSession(req, '/launchpad')
+              logger.log(
+                { email, user_id: user._id },
+                'created first admin account'
+              )
+              return res.json({
+                redir: '',
+                id: user._id.toString(),
+                first_name: user.first_name,
+                last_name: user.last_name,
+                email: user.email,
+                created: Date.now()
+              })
+            }
+          )
+        }
+      )
     })
   }
 }

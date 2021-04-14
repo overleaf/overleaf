@@ -331,7 +331,7 @@ class SpellCheckManager {
 
   apiRequest(endpoint, data, callback) {
     if (callback == null) {
-      callback = function(error, result) {
+      callback = function (error, result) {
         console.error(error)
       }
     }

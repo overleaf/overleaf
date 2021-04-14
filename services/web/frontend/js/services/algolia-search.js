@@ -13,7 +13,7 @@
 import App from '../base'
 import AlgoliaSearch from 'algoliasearch'
 
-export default App.factory('algoliaSearch', function() {
+export default App.factory('algoliaSearch', function () {
   let kbIdx, wikiIdx
   if (
     (window.sharelatex != null ? window.sharelatex.algolia : undefined) !=

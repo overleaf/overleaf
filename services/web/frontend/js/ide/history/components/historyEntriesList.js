@@ -10,12 +10,12 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-const historyEntriesListController = function($scope, $element, $attrs) {
+const historyEntriesListController = function ($scope, $element, $attrs) {
   const ctrl = this
   ctrl.$entryListViewportEl = null
   ctrl.isDragging = false
 
-  const _isEntryElVisible = function($entryEl) {
+  const _isEntryElVisible = function ($entryEl) {
     const entryElTop = $entryEl.offset().top
     const entryElBottom = entryElTop + $entryEl.outerHeight()
     const entryListViewportElTop = ctrl.$entryListViewportEl.offset().top
@@ -27,11 +27,11 @@ const historyEntriesListController = function($scope, $element, $attrs) {
       entryElBottom <= entryListViewportElBottom
     )
   }
-  const _getScrollTopPosForEntry = function($entryEl) {
+  const _getScrollTopPosForEntry = function ($entryEl) {
     const halfViewportElHeight = ctrl.$entryListViewportEl.height() / 2
     return $entryEl.offset().top - halfViewportElHeight
   }
-  ctrl.onEntryLinked = function(entry, $entryEl) {
+  ctrl.onEntryLinked = function (entry, $entryEl) {
     if (
       !ctrl.rangeSelectionEnabled &&
       entry.toV === ctrl.selectedHistoryVersion

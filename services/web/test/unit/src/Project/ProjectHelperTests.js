@@ -4,8 +4,8 @@ const { ObjectId } = require('mongodb')
 
 const MODULE_PATH = '../../../../app/src/Features/Project/ProjectHelper.js'
 
-describe('ProjectHelper', function() {
-  beforeEach(function() {
+describe('ProjectHelper', function () {
+  beforeEach(function () {
     this.project = {
       _id: '123213jlkj9kdlsaj'
     }
@@ -41,9 +41,9 @@ describe('ProjectHelper', function() {
     })
   })
 
-  describe('isArchived', function() {
-    describe('project.archived being an array', function() {
-      it('returns true if user id is found', function() {
+  describe('isArchived', function () {
+    describe('project.archived being an array', function () {
+      it('returns true if user id is found', function () {
         this.project.archived = [
           ObjectId('588f3ddae8ebc1bac07c9fa4'),
           ObjectId('5c41deb2b4ca500153340809')
@@ -53,7 +53,7 @@ describe('ProjectHelper', function() {
         ).to.equal(true)
       })
 
-      it('returns false if user id is not found', function() {
+      it('returns false if user id is not found', function () {
         this.project.archived = []
         expect(
           this.ProjectHelper.isArchived(this.project, this.user._id)
@@ -61,15 +61,15 @@ describe('ProjectHelper', function() {
       })
     })
 
-    describe('project.archived being a boolean', function() {
-      it('returns true if archived is true', function() {
+    describe('project.archived being a boolean', function () {
+      it('returns true if archived is true', function () {
         this.project.archived = true
         expect(
           this.ProjectHelper.isArchived(this.project, this.user._id)
         ).to.equal(true)
       })
 
-      it('returns false if archived is false', function() {
+      it('returns false if archived is false', function () {
         this.project.archived = false
         expect(
           this.ProjectHelper.isArchived(this.project, this.user._id)
@@ -77,8 +77,8 @@ describe('ProjectHelper', function() {
       })
     })
 
-    describe('project.archived being undefined', function() {
-      it('returns false if archived is undefined', function() {
+    describe('project.archived being undefined', function () {
+      it('returns false if archived is undefined', function () {
         this.project.archived = undefined
         expect(
           this.ProjectHelper.isArchived(this.project, this.user._id)
@@ -87,8 +87,8 @@ describe('ProjectHelper', function() {
     })
   })
 
-  describe('isTrashed', function() {
-    it('returns true if user id is found', function() {
+  describe('isTrashed', function () {
+    it('returns true if user id is found', function () {
       this.project.trashed = [
         ObjectId('588f3ddae8ebc1bac07c9fa4'),
         ObjectId('5c41deb2b4ca500153340809')
@@ -98,15 +98,15 @@ describe('ProjectHelper', function() {
       ).to.equal(true)
     })
 
-    it('returns false if user id is not found', function() {
+    it('returns false if user id is not found', function () {
       this.project.trashed = []
       expect(
         this.ProjectHelper.isTrashed(this.project, this.user._id)
       ).to.equal(false)
     })
 
-    describe('project.trashed being undefined', function() {
-      it('returns false if trashed is undefined', function() {
+    describe('project.trashed being undefined', function () {
+      it('returns false if trashed is undefined', function () {
         this.project.trashed = undefined
         expect(
           this.ProjectHelper.isTrashed(this.project, this.user._id)
@@ -115,9 +115,9 @@ describe('ProjectHelper', function() {
     })
   })
 
-  describe('calculateArchivedArray', function() {
-    describe('project.archived being an array', function() {
-      it('returns an array adding the current user id when archiving', function() {
+  describe('calculateArchivedArray', function () {
+    describe('project.archived being an array', function () {
+      it('returns an array adding the current user id when archiving', function () {
         const project = { archived: [] }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
@@ -127,7 +127,7 @@ describe('ProjectHelper', function() {
         expect(result).to.deep.equal([ObjectId('5c922599cdb09e014aa7d499')])
       })
 
-      it('returns an array without the current user id when unarchiving', function() {
+      it('returns an array without the current user id when unarchiving', function () {
         const project = { archived: [ObjectId('5c922599cdb09e014aa7d499')] }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
@@ -138,8 +138,8 @@ describe('ProjectHelper', function() {
       })
     })
 
-    describe('project.archived being a boolean and being true', function() {
-      it('returns an array of all associated user ids when archiving', function() {
+    describe('project.archived being a boolean and being true', function () {
+      it('returns an array of all associated user ids when archiving', function () {
         const project = {
           archived: true,
           owner_ref: this.user._id,
@@ -166,7 +166,7 @@ describe('ProjectHelper', function() {
         ])
       })
 
-      it('returns an array of all associated users without the current user id when unarchived', function() {
+      it('returns an array of all associated users without the current user id when unarchived', function () {
         const project = {
           archived: true,
           owner_ref: this.user._id,
@@ -194,8 +194,8 @@ describe('ProjectHelper', function() {
       })
     })
 
-    describe('project.archived being a boolean and being false', function() {
-      it('returns an array adding the current user id when archiving', function() {
+    describe('project.archived being a boolean and being false', function () {
+      it('returns an array adding the current user id when archiving', function () {
         const project = { archived: false }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
@@ -205,7 +205,7 @@ describe('ProjectHelper', function() {
         expect(result).to.deep.equal([ObjectId('5c922599cdb09e014aa7d499')])
       })
 
-      it('returns an empty array when unarchiving', function() {
+      it('returns an empty array when unarchiving', function () {
         const project = { archived: false }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
@@ -216,8 +216,8 @@ describe('ProjectHelper', function() {
       })
     })
 
-    describe('project.archived not being set', function() {
-      it('returns an array adding the current user id when archiving', function() {
+    describe('project.archived not being set', function () {
+      it('returns an array adding the current user id when archiving', function () {
         const project = { archived: undefined }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
@@ -227,7 +227,7 @@ describe('ProjectHelper', function() {
         expect(result).to.deep.equal([ObjectId('5c922599cdb09e014aa7d499')])
       })
 
-      it('returns an empty array when unarchiving', function() {
+      it('returns an empty array when unarchiving', function () {
         const project = { archived: undefined }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
@@ -239,34 +239,34 @@ describe('ProjectHelper', function() {
     })
   })
 
-  describe('compilerFromV1Engine', function() {
-    it('returns the correct engine for latex_dvipdf', function() {
+  describe('compilerFromV1Engine', function () {
+    it('returns the correct engine for latex_dvipdf', function () {
       expect(this.ProjectHelper.compilerFromV1Engine('latex_dvipdf')).to.equal(
         'latex'
       )
     })
 
-    it('returns the correct engine for pdflatex', function() {
+    it('returns the correct engine for pdflatex', function () {
       expect(this.ProjectHelper.compilerFromV1Engine('pdflatex')).to.equal(
         'pdflatex'
       )
     })
 
-    it('returns the correct engine for xelatex', function() {
+    it('returns the correct engine for xelatex', function () {
       expect(this.ProjectHelper.compilerFromV1Engine('xelatex')).to.equal(
         'xelatex'
       )
     })
 
-    it('returns the correct engine for lualatex', function() {
+    it('returns the correct engine for lualatex', function () {
       expect(this.ProjectHelper.compilerFromV1Engine('lualatex')).to.equal(
         'lualatex'
       )
     })
   })
 
-  describe('getAllowedImagesForUser', function() {
-    it('filters out admin-only images when the user is anonymous', function() {
+  describe('getAllowedImagesForUser', function () {
+    it('filters out admin-only images when the user is anonymous', function () {
       const images = this.ProjectHelper.getAllowedImagesForUser(null)
       const imageNames = images.map(image => image.imageName)
       expect(imageNames).to.deep.equal([
@@ -275,7 +275,7 @@ describe('ProjectHelper', function() {
       ])
     })
 
-    it('filters out admin-only images when the user is not admin', function() {
+    it('filters out admin-only images when the user is not admin', function () {
       const images = this.ProjectHelper.getAllowedImagesForUser(this.user)
       const imageNames = images.map(image => image.imageName)
       expect(imageNames).to.deep.equal([
@@ -284,7 +284,7 @@ describe('ProjectHelper', function() {
       ])
     })
 
-    it('returns all images when the user is admin', function() {
+    it('returns all images when the user is admin', function () {
       const images = this.ProjectHelper.getAllowedImagesForUser(this.adminUser)
       const imageNames = images.map(image => image.imageName)
       expect(imageNames).to.deep.equal([

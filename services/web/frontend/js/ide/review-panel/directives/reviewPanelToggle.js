@@ -27,13 +27,13 @@ export default App.directive('reviewPanelToggle', () => ({
       scope.disabled = false
     }
     scope.onChange = (...args) => scope.onToggle({ isOn: scope.localModel })
-    scope.handleClick = function() {
+    scope.handleClick = function () {
       if (scope.disabled && scope.onDisabledClick != null) {
         return scope.onDisabledClick()
       }
     }
     scope.localModel = scope.ngModel
-    return scope.$watch('ngModel', function(value) {
+    return scope.$watch('ngModel', function (value) {
       if (scope.valWhenUndefined != null && value == null) {
         value = scope.valWhenUndefined
       }

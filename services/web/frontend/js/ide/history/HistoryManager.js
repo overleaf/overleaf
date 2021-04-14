@@ -22,7 +22,7 @@ import './controllers/HistoryDiffController'
 import './directives/infiniteScroll'
 let HistoryManager
 
-export default HistoryManager = (function() {
+export default HistoryManager = (function () {
   HistoryManager = class HistoryManager {
     static initClass() {
       this.prototype.BATCH_SIZE = 10
@@ -176,7 +176,7 @@ export default HistoryManager = (function() {
             diff.text = text
             return (diff.highlights = highlights)
           })
-          .catch(function() {
+          .catch(function () {
             diff.loading = false
             return (diff.error = true)
           })

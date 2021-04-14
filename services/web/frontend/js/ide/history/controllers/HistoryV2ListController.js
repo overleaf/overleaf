@@ -12,44 +12,43 @@
  */
 import App from '../../../base'
 
-export default App.controller('HistoryV2ListController', function(
-  $scope,
-  $modal,
-  ide
-) {
-  $scope.hoveringOverListSelectors = false
-  $scope.listConfig = { showOnlyLabelled: false }
+export default App.controller(
+  'HistoryV2ListController',
+  function ($scope, $modal, ide) {
+    $scope.hoveringOverListSelectors = false
+    $scope.listConfig = { showOnlyLabelled: false }
 
-  $scope.projectUsers = []
+    $scope.projectUsers = []
 
-  $scope.$watch('project.members', function(newVal) {
-    if (newVal != null) {
-      return ($scope.projectUsers = newVal.concat($scope.project.owner))
-    }
-  })
-
-  $scope.loadMore = () => {
-    return ide.historyManager.fetchNextBatchOfUpdates()
-  }
-
-  $scope.handleVersionSelect = version =>
-    $scope.$applyAsync(() =>
-      ide.historyManager.selectVersionForPointInTime(version)
-    )
-
-  $scope.handleRangeSelect = (selectedToV, selectedFromV) =>
-    $scope.$applyAsync(() =>
-      ide.historyManager.selectVersionsForCompare(selectedToV, selectedFromV)
-    )
-
-  return ($scope.handleLabelDelete = labelDetails =>
-    $modal.open({
-      templateUrl: 'historyV2DeleteLabelModalTemplate',
-      controller: 'HistoryV2DeleteLabelModalController',
-      resolve: {
-        labelDetails() {
-          return labelDetails
-        }
+    $scope.$watch('project.members', function (newVal) {
+      if (newVal != null) {
+        return ($scope.projectUsers = newVal.concat($scope.project.owner))
       }
-    }))
-})
+    })
+
+    $scope.loadMore = () => {
+      return ide.historyManager.fetchNextBatchOfUpdates()
+    }
+
+    $scope.handleVersionSelect = version =>
+      $scope.$applyAsync(() =>
+        ide.historyManager.selectVersionForPointInTime(version)
+      )
+
+    $scope.handleRangeSelect = (selectedToV, selectedFromV) =>
+      $scope.$applyAsync(() =>
+        ide.historyManager.selectVersionsForCompare(selectedToV, selectedFromV)
+      )
+
+    return ($scope.handleLabelDelete = labelDetails =>
+      $modal.open({
+        templateUrl: 'historyV2DeleteLabelModalTemplate',
+        controller: 'HistoryV2DeleteLabelModalController',
+        resolve: {
+          labelDetails() {
+            return labelDetails
+          }
+        }
+      }))
+  }
+)

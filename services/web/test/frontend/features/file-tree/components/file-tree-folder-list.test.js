@@ -5,15 +5,15 @@ import renderWithContext from '../helpers/render-with-context'
 
 import FileTreeFolderList from '../../../../../frontend/js/features/file-tree/components/file-tree-folder-list'
 
-describe('<FileTreeFolderList/>', function() {
-  it('renders empty', function() {
+describe('<FileTreeFolderList/>', function () {
+  it('renders empty', function () {
     renderWithContext(<FileTreeFolderList folders={[]} docs={[]} files={[]} />)
 
     screen.queryByRole('tree')
     expect(screen.queryByRole('treeitem')).to.not.exist
   })
 
-  it('renders docs, files and folders', function() {
+  it('renders docs, files and folders', function () {
     const aFolder = {
       _id: '456def',
       name: 'A Folder',
@@ -33,8 +33,8 @@ describe('<FileTreeFolderList/>', function() {
     screen.queryByRole('treeitem', { name: 'file.bib' })
   })
 
-  describe('selection and multi-selection', function() {
-    it('without write permissions', function() {
+  describe('selection and multi-selection', function () {
+    it('without write permissions', function () {
       const docs = [
         { _id: '1', name: '1.tex' },
         { _id: '2', name: '2.tex' }
@@ -69,7 +69,7 @@ describe('<FileTreeFolderList/>', function() {
       screen.getByRole('treeitem', { name: '2.tex', selected: false })
     })
 
-    it('with write permissions', function() {
+    it('with write permissions', function () {
       const docs = [
         { _id: '1', name: '1.tex' },
         { _id: '2', name: '2.tex' },

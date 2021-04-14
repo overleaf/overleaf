@@ -17,8 +17,8 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Cooldown/CooldownMiddleware'
 )
 
-describe('CooldownMiddleware', function() {
-  beforeEach(function() {
+describe('CooldownMiddleware', function () {
+  beforeEach(function () {
     this.CooldownManager = { isProjectOnCooldown: sinon.stub() }
     return (this.CooldownMiddleware = SandboxedModule.require(modulePath, {
       requires: {
@@ -27,9 +27,9 @@ describe('CooldownMiddleware', function() {
     }))
   })
 
-  describe('freezeProject', function() {
-    describe('when project is on cooldown', function() {
-      beforeEach(function() {
+  describe('freezeProject', function () {
+    describe('when project is on cooldown', function () {
+      beforeEach(function () {
         this.CooldownManager.isProjectOnCooldown = sinon
           .stub()
           .callsArgWith(1, null, true)
@@ -38,7 +38,7 @@ describe('CooldownMiddleware', function() {
         return (this.next = sinon.stub())
       })
 
-      it('should call CooldownManager.isProjectOnCooldown', function() {
+      it('should call CooldownManager.isProjectOnCooldown', function () {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         this.CooldownManager.isProjectOnCooldown.callCount.should.equal(1)
         return this.CooldownManager.isProjectOnCooldown
@@ -46,20 +46,20 @@ describe('CooldownMiddleware', function() {
           .should.equal(true)
       })
 
-      it('should not produce an error', function() {
+      it('should not produce an error', function () {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         return this.next.callCount.should.equal(0)
       })
 
-      it('should send a 429 status', function() {
+      it('should send a 429 status', function () {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         this.res.sendStatus.callCount.should.equal(1)
         return this.res.sendStatus.calledWith(429).should.equal(true)
       })
     })
 
-    describe('when project is not on cooldown', function() {
-      beforeEach(function() {
+    describe('when project is not on cooldown', function () {
+      beforeEach(function () {
         this.CooldownManager.isProjectOnCooldown = sinon
           .stub()
           .callsArgWith(1, null, false)
@@ -68,7 +68,7 @@ describe('CooldownMiddleware', function() {
         return (this.next = sinon.stub())
       })
 
-      it('should call CooldownManager.isProjectOnCooldown', function() {
+      it('should call CooldownManager.isProjectOnCooldown', function () {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         this.CooldownManager.isProjectOnCooldown.callCount.should.equal(1)
         return this.CooldownManager.isProjectOnCooldown
@@ -76,15 +76,15 @@ describe('CooldownMiddleware', function() {
           .should.equal(true)
       })
 
-      it('call next with no arguments', function() {
+      it('call next with no arguments', function () {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         this.next.callCount.should.equal(1)
         return expect(this.next.lastCall.args.length).to.equal(0)
       })
     })
 
-    describe('when isProjectOnCooldown produces an error', function() {
-      beforeEach(function() {
+    describe('when isProjectOnCooldown produces an error', function () {
+      beforeEach(function () {
         this.CooldownManager.isProjectOnCooldown = sinon
           .stub()
           .callsArgWith(1, new Error('woops'))
@@ -93,7 +93,7 @@ describe('CooldownMiddleware', function() {
         return (this.next = sinon.stub())
       })
 
-      it('should call CooldownManager.isProjectOnCooldown', function() {
+      it('should call CooldownManager.isProjectOnCooldown', function () {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         this.CooldownManager.isProjectOnCooldown.callCount.should.equal(1)
         return this.CooldownManager.isProjectOnCooldown
@@ -101,15 +101,15 @@ describe('CooldownMiddleware', function() {
           .should.equal(true)
       })
 
-      it('call next with an error', function() {
+      it('call next with an error', function () {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         this.next.callCount.should.equal(1)
         return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
     })
 
-    describe('when projectId is not part of route', function() {
-      beforeEach(function() {
+    describe('when projectId is not part of route', function () {
+      beforeEach(function () {
         this.CooldownManager.isProjectOnCooldown = sinon
           .stub()
           .callsArgWith(1, null, true)
@@ -118,13 +118,13 @@ describe('CooldownMiddleware', function() {
         return (this.next = sinon.stub())
       })
 
-      it('call next with an error', function() {
+      it('call next with an error', function () {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         this.next.callCount.should.equal(1)
         return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
-      it('should not call CooldownManager.isProjectOnCooldown', function() {
+      it('should not call CooldownManager.isProjectOnCooldown', function () {
         this.CooldownMiddleware.freezeProject(this.req, this.res, this.next)
         return this.CooldownManager.isProjectOnCooldown.callCount.should.equal(
           0

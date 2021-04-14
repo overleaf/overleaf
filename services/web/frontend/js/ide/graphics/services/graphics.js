@@ -13,11 +13,11 @@ import _ from 'lodash'
  */
 import App from '../../../base'
 
-export default App.factory('graphics', function(ide) {
+export default App.factory('graphics', function (ide) {
   const Graphics = {
     getGraphicsFiles() {
       const graphicsFiles = []
-      ide.fileTreeManager.forEachEntity(function(entity, folder, path) {
+      ide.fileTreeManager.forEachEntity(function (entity, folder, path) {
         if (
           entity.type === 'file' &&
           __guardMethod__(

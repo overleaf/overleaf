@@ -7,9 +7,9 @@ function getAllTags(userId, callback) {
 
 function createTag(userId, name, callback) {
   if (!callback) {
-    callback = function() {}
+    callback = function () {}
   }
-  Tag.create({ user_id: userId, name }, function(err, tag) {
+  Tag.create({ user_id: userId, name }, function (err, tag) {
     // on duplicate key error return existing tag
     if (err && err.code === 11000) {
       return Tag.findOne({ user_id: userId, name }, callback)
@@ -20,7 +20,7 @@ function createTag(userId, name, callback) {
 
 function renameTag(userId, tagId, name, callback) {
   if (!callback) {
-    callback = function() {}
+    callback = function () {}
   }
   Tag.updateOne(
     {
@@ -38,7 +38,7 @@ function renameTag(userId, tagId, name, callback) {
 
 function deleteTag(userId, tagId, callback) {
   if (!callback) {
-    callback = function() {}
+    callback = function () {}
   }
   Tag.deleteOne(
     {
@@ -52,7 +52,7 @@ function deleteTag(userId, tagId, callback) {
 // TODO: unused?
 function updateTagUserIds(oldUserId, newUserId, callback) {
   if (!callback) {
-    callback = function() {}
+    callback = function () {}
   }
   const searchOps = { user_id: oldUserId }
   const updateOperation = { $set: { user_id: newUserId } }
@@ -61,7 +61,7 @@ function updateTagUserIds(oldUserId, newUserId, callback) {
 
 function removeProjectFromTag(userId, tagId, projectId, callback) {
   if (!callback) {
-    callback = function() {}
+    callback = function () {}
   }
   const searchOps = {
     _id: tagId,
@@ -73,7 +73,7 @@ function removeProjectFromTag(userId, tagId, projectId, callback) {
 
 function addProjectToTag(userId, tagId, projectId, callback) {
   if (!callback) {
-    callback = function() {}
+    callback = function () {}
   }
   const searchOps = {
     _id: tagId,
@@ -85,7 +85,7 @@ function addProjectToTag(userId, tagId, projectId, callback) {
 
 function addProjectToTagName(userId, name, projectId, callback) {
   if (!callback) {
-    callback = function() {}
+    callback = function () {}
   }
   const searchOps = {
     name,

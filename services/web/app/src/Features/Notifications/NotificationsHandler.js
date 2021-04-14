@@ -17,7 +17,7 @@ const logger = require('logger-sharelatex')
 
 const oneSecond = 1000
 
-const makeRequest = function(opts, callback) {
+const makeRequest = function (opts, callback) {
   if (
     (settings.apis.notifications != null
       ? settings.apis.notifications.url
@@ -41,7 +41,7 @@ module.exports = {
       timeout: oneSecond,
       method: 'GET'
     }
-    return makeRequest(opts, function(err, res, unreadNotifications) {
+    return makeRequest(opts, function (err, res, unreadNotifications) {
       const statusCode = res != null ? res.statusCode : 500
       if (err != null || statusCode !== 200) {
         const e = new Error(

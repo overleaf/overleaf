@@ -5,18 +5,21 @@ const Settings = require('settings-sharelatex')
 
 module.exports = InstitutionsFeatures = {
   getInstitutionsFeatures(userId, callback) {
-    InstitutionsFeatures.getInstitutionsPlan(userId, function(error, planCode) {
-      if (error) {
-        return callback(error)
+    InstitutionsFeatures.getInstitutionsPlan(
+      userId,
+      function (error, planCode) {
+        if (error) {
+          return callback(error)
+        }
+        const plan = planCode && PlansLocator.findLocalPlanInSettings(planCode)
+        const features = plan && plan.features
+        callback(null, features || {})
       }
-      const plan = planCode && PlansLocator.findLocalPlanInSettings(planCode)
-      const features = plan && plan.features
-      callback(null, features || {})
-    })
+    )
   },
 
   getInstitutionsPlan(userId, callback) {
-    InstitutionsFeatures.hasLicence(userId, function(error, hasLicence) {
+    InstitutionsFeatures.hasLicence(userId, function (error, hasLicence) {
       if (error) {
         return callback(error)
       }
@@ -28,7 +31,7 @@ module.exports = InstitutionsFeatures = {
   },
 
   hasLicence(userId, callback) {
-    UserGetter.getUserFullEmails(userId, function(error, emailsData) {
+    UserGetter.getUserFullEmails(userId, function (error, emailsData) {
       if (error) {
         return callback(error)
       }

@@ -7,18 +7,18 @@ import MockedSocket from 'socket.io-mock'
 
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 
-describe('FileTree Rename Entity Flow', function() {
+describe('FileTree Rename Entity Flow', function () {
   const onSelect = sinon.stub()
   const onInit = sinon.stub()
 
-  beforeEach(function() {
+  beforeEach(function () {
     window._ide = {
       socket: new MockedSocket()
     }
     global.requestAnimationFrame = sinon.stub()
   })
 
-  afterEach(function() {
+  afterEach(function () {
     delete global.requestAnimationFrame
     fetchMock.restore()
     onSelect.reset()
@@ -26,7 +26,7 @@ describe('FileTree Rename Entity Flow', function() {
     delete window._ide
   })
 
-  beforeEach(function() {
+  beforeEach(function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -63,7 +63,7 @@ describe('FileTree Rename Entity Flow', function() {
     )
   })
 
-  it('renames doc', function() {
+  it('renames doc', function () {
     const fetchMatcher = /\/project\/\w+\/doc\/\w+\/rename/
     fetchMock.post(fetchMatcher, 204)
 
@@ -77,7 +77,7 @@ describe('FileTree Rename Entity Flow', function() {
     expect(lastFetchBody.name).to.equal('b.tex')
   })
 
-  it('renames folder', function() {
+  it('renames folder', function () {
     const fetchMatcher = /\/project\/\w+\/folder\/\w+\/rename/
     fetchMock.post(fetchMatcher, 204)
 
@@ -91,7 +91,7 @@ describe('FileTree Rename Entity Flow', function() {
     expect(lastFetchBody.name).to.equal('new folder name')
   })
 
-  it('renames file in subfolder', function() {
+  it('renames file in subfolder', function () {
     const fetchMatcher = /\/project\/\w+\/file\/\w+\/rename/
     fetchMock.post(fetchMatcher, 204)
 
@@ -109,7 +109,7 @@ describe('FileTree Rename Entity Flow', function() {
     expect(lastFetchBody.name).to.equal('d.tex')
   })
 
-  it('reverts rename on error', async function() {
+  it('reverts rename on error', async function () {
     const fetchMatcher = /\/project\/\w+\/doc\/\w+\/rename/
     fetchMock.post(fetchMatcher, 500)
 
@@ -120,7 +120,7 @@ describe('FileTree Rename Entity Flow', function() {
     screen.getByRole('treeitem', { name: 'b.tex' })
   })
 
-  it('shows error modal on invalid filename', async function() {
+  it('shows error modal on invalid filename', async function () {
     const input = initItemRename('a.tex')
     fireEvent.change(input, { target: { value: '///' } })
     fireEvent.keyDown(input, { key: 'Enter' })
@@ -131,7 +131,7 @@ describe('FileTree Rename Entity Flow', function() {
     })
   })
 
-  it('shows error modal on duplicate filename', async function() {
+  it('shows error modal on duplicate filename', async function () {
     const input = initItemRename('a.tex')
     fireEvent.change(input, { target: { value: 'folder' } })
     fireEvent.keyDown(input, { key: 'Enter' })
@@ -142,7 +142,7 @@ describe('FileTree Rename Entity Flow', function() {
     })
   })
 
-  it('shows error modal on duplicate filename in subfolder', async function() {
+  it('shows error modal on duplicate filename in subfolder', async function () {
     const expandButton = screen.queryByRole('button', { name: 'Expand' })
     if (expandButton) fireEvent.click(expandButton)
 
@@ -156,7 +156,7 @@ describe('FileTree Rename Entity Flow', function() {
     })
   })
 
-  it('shows error modal on blocked filename', async function() {
+  it('shows error modal on blocked filename', async function () {
     const input = initItemRename('a.tex')
     fireEvent.change(input, { target: { value: 'prototype' } })
     fireEvent.keyDown(input, { key: 'Enter' })
@@ -167,8 +167,8 @@ describe('FileTree Rename Entity Flow', function() {
     })
   })
 
-  describe('via socket event', function() {
-    it('renames doc', function() {
+  describe('via socket event', function () {
+    it('renames doc', function () {
       screen.getByRole('treeitem', { name: 'a.tex' })
 
       window._ide.socket.socketClient.emit(

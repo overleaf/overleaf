@@ -5,14 +5,14 @@ const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 module.exports = {
   allocate(referalId, newUserId, referalSource, referalMedium, callback) {
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     if (referalId == null) {
       return callback(null)
     }
 
     const query = { referal_id: referalId }
-    return User.findOne(query, { _id: 1 }, function(error, user) {
+    return User.findOne(query, { _id: 1 }, function (error, user) {
       if (error != null) {
         return callback(error)
       }
@@ -32,7 +32,7 @@ module.exports = {
             }
           },
           {},
-          function(err) {
+          function (err) {
             if (err != null) {
               OError.tag(err, 'something went wrong allocating referal', {
                 referalId,

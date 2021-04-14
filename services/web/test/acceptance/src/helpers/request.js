@@ -9,7 +9,7 @@ const request = require('request').defaults({
 module.exports = request
 
 module.exports.promises = {
-  request: function(options) {
+  request: function (options) {
     return new Promise((resolve, reject) => {
       request(options, (err, response) => {
         if (err) {

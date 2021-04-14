@@ -69,11 +69,7 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
   }
 
   try {
-    const reversedHostname = newEmail
-      .split('@')[1]
-      .split('')
-      .reverse()
-      .join('')
+    const reversedHostname = newEmail.split('@')[1].split('').reverse().join('')
     const update = {
       $push: {
         emails: { email: newEmail, createdAt: new Date(), reversedHostname }

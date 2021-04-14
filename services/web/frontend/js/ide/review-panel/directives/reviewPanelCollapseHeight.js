@@ -15,7 +15,7 @@ export default App.directive('reviewPanelCollapseHeight', $parse => ({
   link(scope, element, attrs) {
     return scope.$watch(
       () => $parse(attrs.reviewPanelCollapseHeight)(scope),
-      function(shouldCollapse) {
+      function (shouldCollapse) {
         const neededHeight = element.prop('scrollHeight')
         if (neededHeight > 0) {
           if (shouldCollapse) {

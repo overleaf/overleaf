@@ -38,7 +38,7 @@ const App = angular
     'ngTagsInput',
     'ui.select'
   ])
-  .config(function($qProvider, $httpProvider, uiSelectConfig) {
+  .config(function ($qProvider, $httpProvider, uiSelectConfig) {
     $qProvider.errorOnUnhandledRejections(false)
     uiSelectConfig.spinnerClass = 'fa fa-refresh ui-select-spin'
 

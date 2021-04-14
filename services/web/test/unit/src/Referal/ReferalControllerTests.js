@@ -4,8 +4,8 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Referal/ReferalController.js'
 )
 
-describe('Referal controller', function() {
-  beforeEach(function() {
+describe('Referal controller', function () {
+  beforeEach(function () {
     this.controller = SandboxedModule.require(modulePath, {})
   })
 })

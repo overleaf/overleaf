@@ -17,14 +17,14 @@ const logger = require('logger-sharelatex')
 module.exports = {
   getProjectDetails(req, res, next) {
     const { project_id } = req.params
-    return ProjectDetailsHandler.getDetails(project_id, function(
-      err,
-      projDetails
-    ) {
-      if (err != null) {
-        return next(err)
+    return ProjectDetailsHandler.getDetails(
+      project_id,
+      function (err, projDetails) {
+        if (err != null) {
+          return next(err)
+        }
+        return res.json(projDetails)
       }
-      return res.json(projDetails)
-    })
+    )
   }
 }

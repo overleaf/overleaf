@@ -96,7 +96,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
         options.east.resizerCursor = 'ew-resize'
         options.west.resizerCursor = 'ew-resize'
 
-        const repositionControls = function() {
+        const repositionControls = function () {
           state = element.layout().readState()
           if (state.east != null) {
             const controls = element.find('> .ui-layout-resizer-controls')
@@ -111,7 +111,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
           }
         }
 
-        const repositionCustomToggler = function() {
+        const repositionCustomToggler = function () {
           if (customTogglerEl == null) {
             return
           }
@@ -126,7 +126,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
           }
         }
 
-        const resetOpenStates = function() {
+        const resetOpenStates = function () {
           state = element.layout().readState()
           if (attrs.openEast != null && state.east != null) {
             const openEast = $parse(attrs.openEast)
@@ -135,7 +135,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
         }
 
         // Someone moved the resizer
-        var onInternalResize = function() {
+        var onInternalResize = function () {
           state = element.layout().readState()
           scope.$broadcast(`layout:${name}:resize`, state)
           repositionControls()
@@ -147,7 +147,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
 
         let oldWidth = element.width()
         // Something resized our parent element
-        const onExternalResize = function() {
+        const onExternalResize = function () {
           if (
             attrs.resizeProportionally != null &&
             scope.$eval(attrs.resizeProportionally)
@@ -194,7 +194,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
 
           customTogglerScope.tooltipPlacement =
             customTogglerPane === 'east' ? 'left' : 'right'
-          customTogglerScope.handleClick = function() {
+          customTogglerScope.handleClick = function () {
             element.layout().toggle(customTogglerPane)
             return repositionCustomToggler()
           }
@@ -210,7 +210,7 @@ ng-click=\"handleClick()\">\
           element.append(customTogglerEl)
         }
 
-        var onPaneOpen = function(pane) {
+        var onPaneOpen = function (pane) {
           if (!hasCustomToggler && pane !== customTogglerPane) {
             return
           }
@@ -219,7 +219,7 @@ ng-click=\"handleClick()\">\
             .$applyAsync(() => (customTogglerEl.scope().isOpen = true))
         }
 
-        var onPaneClose = function(pane) {
+        var onPaneClose = function (pane) {
           if (!hasCustomToggler && pane !== customTogglerPane) {
             return
           }
@@ -241,7 +241,7 @@ ng-click=\"handleClick()\">\
         })
 
         if (attrs.openEast != null) {
-          scope.$watch(attrs.openEast, function(value, oldValue) {
+          scope.$watch(attrs.openEast, function (value, oldValue) {
             if (value != null && value !== oldValue) {
               if (value) {
                 element.layout().open('east')
@@ -268,14 +268,14 @@ ng-click=\"handleClick()\">\
         onInternalResize()
 
         if (attrs.layoutDisabled != null) {
-          return scope.$watch(attrs.layoutDisabled, function(value) {
+          return scope.$watch(attrs.layoutDisabled, function (value) {
             if (value) {
               element.layout().hide('east')
             } else {
               element.layout().show('east')
             }
             if (hasCustomToggler) {
-              return customTogglerEl.scope().$applyAsync(function() {
+              return customTogglerEl.scope().$applyAsync(function () {
                 customTogglerEl.scope().isOpen = !value
                 return (customTogglerEl.scope().isVisible = !value)
               })

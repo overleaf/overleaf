@@ -8,8 +8,8 @@ const modulePath = path.join(
 )
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
-describe('InstitutionsAPI', function() {
-  beforeEach(function() {
+describe('InstitutionsAPI', function () {
+  beforeEach(function () {
     this.settings = { apis: { v1: { url: 'v1.url', user: '', pass: '' } } }
     this.request = sinon.stub()
     this.ipMatcherNotification = {
@@ -36,8 +36,8 @@ describe('InstitutionsAPI', function() {
     this.newEmail = 'bob@bob.com'
   })
 
-  describe('getInstitutionAffiliations', function() {
-    it('get affiliations', function(done) {
+  describe('getInstitutionAffiliations', function () {
+    it('get affiliations', function (done) {
       this.institutionId = 123
       const responseBody = ['123abc', '456def']
       this.request.yields(null, { statusCode: 200 }, responseBody)
@@ -57,7 +57,7 @@ describe('InstitutionsAPI', function() {
       )
     })
 
-    it('handle empty response', function(done) {
+    it('handle empty response', function (done) {
       this.settings.apis.v1.url = ''
 
       this.InstitutionsAPI.getInstitutionAffiliations(
@@ -72,8 +72,8 @@ describe('InstitutionsAPI', function() {
     })
   })
 
-  describe('getInstitutionLicences', function() {
-    it('get licences', function(done) {
+  describe('getInstitutionLicences', function () {
+    it('get licences', function (done) {
       this.institutionId = 123
       const responseBody = {
         lag: 'monthly',
@@ -104,10 +104,10 @@ describe('InstitutionsAPI', function() {
     })
   })
 
-  describe('getLicencesForAnalytics', function() {
+  describe('getLicencesForAnalytics', function () {
     const lag = 'daily'
     const queryDate = '2017-01-07:00:00.000Z'
-    it('should send the request to v1', function(done) {
+    it('should send the request to v1', function (done) {
       const v1Result = {
         lag: 'daily',
         date: queryDate,
@@ -130,7 +130,7 @@ describe('InstitutionsAPI', function() {
         }
       )
     })
-    it('should handle errors', function(done) {
+    it('should handle errors', function (done) {
       this.request.callsArgWith(1, null, { statusCode: 500 })
       this.InstitutionsAPI.getLicencesForAnalytics(
         lag,
@@ -143,8 +143,8 @@ describe('InstitutionsAPI', function() {
     })
   })
 
-  describe('getUserAffiliations', function() {
-    it('get affiliations', function(done) {
+  describe('getUserAffiliations', function () {
+    it('get affiliations', function (done) {
       const responseBody = [{ foo: 'bar' }]
       this.request.callsArgWith(1, null, { statusCode: 201 }, responseBody)
       this.InstitutionsAPI.getUserAffiliations(
@@ -163,7 +163,7 @@ describe('InstitutionsAPI', function() {
       )
     })
 
-    it('handle error', function(done) {
+    it('handle error', function (done) {
       const body = { errors: 'affiliation error message' }
       this.request.callsArgWith(1, null, { statusCode: 503 }, body)
       this.InstitutionsAPI.getUserAffiliations(this.stubbedUser._id, err => {
@@ -172,7 +172,7 @@ describe('InstitutionsAPI', function() {
       })
     })
 
-    it('handle empty response', function(done) {
+    it('handle empty response', function (done) {
       this.settings.apis.v1.url = ''
       this.InstitutionsAPI.getUserAffiliations(
         this.stubbedUser._id,
@@ -186,12 +186,12 @@ describe('InstitutionsAPI', function() {
     })
   })
 
-  describe('addAffiliation', function() {
-    beforeEach(function() {
+  describe('addAffiliation', function () {
+    beforeEach(function () {
       this.request.callsArgWith(1, null, { statusCode: 201 })
     })
 
-    it('add affiliation', function(done) {
+    it('add affiliation', function (done) {
       const affiliationOptions = {
         university: { id: 1 },
         role: 'Prof',
@@ -225,7 +225,7 @@ describe('InstitutionsAPI', function() {
       )
     })
 
-    it('handle error', function(done) {
+    it('handle error', function (done) {
       const body = { errors: 'affiliation error message' }
       this.request.callsArgWith(1, null, { statusCode: 422 }, body)
       this.InstitutionsAPI.addAffiliation(
@@ -242,12 +242,12 @@ describe('InstitutionsAPI', function() {
     })
   })
 
-  describe('removeAffiliation', function() {
-    beforeEach(function() {
+  describe('removeAffiliation', function () {
+    beforeEach(function () {
       this.request.callsArgWith(1, null, { statusCode: 404 })
     })
 
-    it('remove affiliation', function(done) {
+    it('remove affiliation', function (done) {
       this.InstitutionsAPI.removeAffiliation(
         this.stubbedUser._id,
         this.newEmail,
@@ -264,7 +264,7 @@ describe('InstitutionsAPI', function() {
       )
     })
 
-    it('handle error', function(done) {
+    it('handle error', function (done) {
       this.request.callsArgWith(1, null, { statusCode: 500 })
       this.InstitutionsAPI.removeAffiliation(
         this.stubbedUser._id,
@@ -278,8 +278,8 @@ describe('InstitutionsAPI', function() {
     })
   })
 
-  describe('deleteAffiliations', function() {
-    it('delete affiliations', function(done) {
+  describe('deleteAffiliations', function () {
+    it('delete affiliations', function (done) {
       this.request.callsArgWith(1, null, { statusCode: 200 })
       this.InstitutionsAPI.deleteAffiliations(this.stubbedUser._id, err => {
         expect(err).not.to.exist
@@ -292,7 +292,7 @@ describe('InstitutionsAPI', function() {
       })
     })
 
-    it('handle error', function(done) {
+    it('handle error', function (done) {
       const body = { errors: 'affiliation error message' }
       this.request.callsArgWith(1, null, { statusCode: 518 }, body)
       this.InstitutionsAPI.deleteAffiliations(this.stubbedUser._id, err => {
@@ -302,12 +302,12 @@ describe('InstitutionsAPI', function() {
     })
   })
 
-  describe('endorseAffiliation', function() {
-    beforeEach(function() {
+  describe('endorseAffiliation', function () {
+    beforeEach(function () {
       this.request.callsArgWith(1, null, { statusCode: 204 })
     })
 
-    it('endorse affiliation', function(done) {
+    it('endorse affiliation', function (done) {
       this.InstitutionsAPI.endorseAffiliation(
         this.stubbedUser._id,
         this.newEmail,

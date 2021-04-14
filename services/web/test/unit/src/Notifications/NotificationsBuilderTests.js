@@ -5,11 +5,11 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Notifications/NotificationsBuilder.js'
 )
 
-describe('NotificationsBuilder', function() {
+describe('NotificationsBuilder', function () {
   const userId = '123nd3ijdks'
 
-  describe('ipMatcherAffiliation', function() {
-    beforeEach(function() {
+  describe('ipMatcherAffiliation', function () {
+    beforeEach(function () {
       this.handler = { createNotification: sinon.stub().callsArgWith(6) }
       this.settings = { apis: { v1: { url: 'v1.url', user: '', pass: '' } } }
       this.request = sinon.stub()
@@ -22,8 +22,8 @@ describe('NotificationsBuilder', function() {
       })
     })
 
-    describe('with portal and with SSO', function() {
-      beforeEach(function() {
+    describe('with portal and with SSO', function () {
+      beforeEach(function () {
         this.body = {
           id: 1,
           name: 'stanford',
@@ -35,7 +35,7 @@ describe('NotificationsBuilder', function() {
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
       })
 
-      it('should call v1 and create affiliation notifications', function(done) {
+      it('should call v1 and create affiliation notifications', function (done) {
         const ip = '192.168.0.1'
         this.controller.ipMatcherAffiliation(userId).create(ip, callback => {
           this.request.calledOnce.should.equal(true)
@@ -58,8 +58,8 @@ describe('NotificationsBuilder', function() {
         })
       })
     })
-    describe('without portal and without SSO', function() {
-      beforeEach(function() {
+    describe('without portal and without SSO', function () {
+      beforeEach(function () {
         this.body = {
           id: 1,
           name: 'stanford',
@@ -71,7 +71,7 @@ describe('NotificationsBuilder', function() {
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
       })
 
-      it('should call v1 and create affiliation notifications', function(done) {
+      it('should call v1 and create affiliation notifications', function (done) {
         const ip = '192.168.0.1'
         this.controller.ipMatcherAffiliation(userId).create(ip, callback => {
           this.request.calledOnce.should.equal(true)

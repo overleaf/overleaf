@@ -2,8 +2,8 @@ const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/User/UserHandler.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('UserHandler', function() {
-  beforeEach(function() {
+describe('UserHandler', function () {
+  beforeEach(function () {
     this.user = {
       _id: '12390i',
       email: 'bob@bob.com',
@@ -21,12 +21,12 @@ describe('UserHandler', function() {
     })
   })
 
-  describe('populateTeamInvites', function() {
-    beforeEach(function(done) {
+  describe('populateTeamInvites', function () {
+    beforeEach(function (done) {
       this.UserHandler.populateTeamInvites(this.user, done)
     })
 
-    it('notifies the user about legacy team invites', function() {
+    it('notifies the user about legacy team invites', function () {
       this.TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail
         .calledWith(this.user.email)
         .should.eq(true)

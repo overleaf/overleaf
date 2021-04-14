@@ -67,7 +67,7 @@ const FeaturesUpdater = {
         FeaturesUpdater._getFeaturesOverrides(userId, cb)
       }
     }
-    async.series(jobs, function(err, results) {
+    async.series(jobs, function (err, results) {
       if (err) {
         OError.tag(
           err,
@@ -158,26 +158,25 @@ const FeaturesUpdater = {
   },
 
   _getV1Features(userId, callback) {
-    V1SubscriptionManager.getPlanCodeFromV1(userId, function(
-      err,
-      planCode,
-      v1Id
-    ) {
-      if (err) {
-        if ((err ? err.name : undefined) === 'NotFoundError') {
-          return callback(null, [])
+    V1SubscriptionManager.getPlanCodeFromV1(
+      userId,
+      function (err, planCode, v1Id) {
+        if (err) {
+          if ((err ? err.name : undefined) === 'NotFoundError') {
+            return callback(null, [])
+          }
+          return callback(err)
         }
-        return callback(err)
-      }
 
-      callback(
-        err,
-        FeaturesUpdater._mergeFeatures(
-          V1SubscriptionManager.getGrandfatheredFeaturesForV1User(v1Id) || {},
-          FeaturesUpdater._planCodeToFeatures(planCode)
+        callback(
+          err,
+          FeaturesUpdater._mergeFeatures(
+            V1SubscriptionManager.getGrandfatheredFeaturesForV1User(v1Id) || {},
+            FeaturesUpdater._planCodeToFeatures(planCode)
+          )
         )
-      )
-    })
+      }
+    )
   },
 
   _mergeFeatures(featuresA, featuresB) {
@@ -277,31 +276,32 @@ const FeaturesUpdater = {
 
   doSyncFromV1(v1UserId, callback) {
     logger.log({ v1UserId }, '[AccountSync] starting account sync')
-    return UserGetter.getUser({ 'overleaf.id': v1UserId }, { _id: 1 }, function(
-      err,
-      user
-    ) {
-      if (err != null) {
-        OError.tag(err, '[AccountSync] error getting user', {
-          v1UserId
-        })
-        return callback(err)
+    return UserGetter.getUser(
+      { 'overleaf.id': v1UserId },
+      { _id: 1 },
+      function (err, user) {
+        if (err != null) {
+          OError.tag(err, '[AccountSync] error getting user', {
+            v1UserId
+          })
+          return callback(err)
+        }
+        if ((user != null ? user._id : undefined) == null) {
+          logger.warn({ v1UserId }, '[AccountSync] no user found for v1 id')
+          return callback(null)
+        }
+        logger.log(
+          { v1UserId, userId: user._id },
+          '[AccountSync] updating user subscription and features'
+        )
+        return FeaturesUpdater.refreshFeatures(user._id, callback)
       }
-      if ((user != null ? user._id : undefined) == null) {
-        logger.warn({ v1UserId }, '[AccountSync] no user found for v1 id')
-        return callback(null)
-      }
-      logger.log(
-        { v1UserId, userId: user._id },
-        '[AccountSync] updating user subscription and features'
-      )
-      return FeaturesUpdater.refreshFeatures(user._id, callback)
-    })
+    )
   }
 }
 
 const refreshFeaturesPromise = userId =>
-  new Promise(function(resolve, reject) {
+  new Promise(function (resolve, reject) {
     FeaturesUpdater.refreshFeatures(
       userId,
       (error, features, featuresChanged) => {

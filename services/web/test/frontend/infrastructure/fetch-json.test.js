@@ -8,12 +8,12 @@ import {
   putJSON
 } from '../../../frontend/js/infrastructure/fetch-json'
 
-describe('fetchJSON', function() {
-  before(function() {
+describe('fetchJSON', function () {
+  before(function () {
     fetchMock.restore()
   })
 
-  afterEach(function() {
+  afterEach(function () {
     fetchMock.restore()
   })
 
@@ -22,7 +22,7 @@ describe('fetchJSON', function() {
     'Content-Type': 'application/json'
   }
 
-  it('handles GET requests', function() {
+  it('handles GET requests', function () {
     fetchMock.once(
       { method: 'GET', url: '/test', headers },
       { status: 200, body: { result: 'success' } }
@@ -33,7 +33,7 @@ describe('fetchJSON', function() {
     })
   })
 
-  it('handles 4xx responses', function() {
+  it('handles 4xx responses', function () {
     fetchMock.get('/test', {
       status: 400,
       body: { message: 'The request was invalid' }
@@ -50,7 +50,7 @@ describe('fetchJSON', function() {
       })
   })
 
-  it('handles 5xx responses', async function() {
+  it('handles 5xx responses', async function () {
     fetchMock.get('/test', { status: 500 })
 
     return expect(getJSON('/test'))
@@ -62,7 +62,7 @@ describe('fetchJSON', function() {
       })
   })
 
-  it('handles POST requests', function() {
+  it('handles POST requests', function () {
     const body = { example: true }
 
     fetchMock.once(
@@ -75,7 +75,7 @@ describe('fetchJSON', function() {
     })
   })
 
-  it('handles PUT requests', function() {
+  it('handles PUT requests', function () {
     const body = { example: true }
 
     fetchMock.once(
@@ -88,7 +88,7 @@ describe('fetchJSON', function() {
     })
   })
 
-  it('handles DELETE requests', function() {
+  it('handles DELETE requests', function () {
     fetchMock.once({ method: 'DELETE', url: '/test', headers }, { status: 204 })
 
     return expect(deleteJSON('/test')).to.eventually.deep.equal({})

@@ -11,7 +11,7 @@ const PublisherSchema = new Schema({
 })
 
 // fetch publisher's (brand on v1) data from v1 API. Errors are ignored
-PublisherSchema.method('fetchV1Data', function(callback) {
+PublisherSchema.method('fetchV1Data', function (callback) {
   request(
     {
       baseUrl: settings.apis.v1.url,

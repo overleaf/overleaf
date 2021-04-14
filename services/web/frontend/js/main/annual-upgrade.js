@@ -11,35 +11,34 @@
  */
 import App from '../base'
 
-export default App.controller('AnnualUpgradeController', function(
-  $scope,
-  $http,
-  $modal
-) {
-  const MESSAGES_URL = '/user/subscription/upgrade-annual'
+export default App.controller(
+  'AnnualUpgradeController',
+  function ($scope, $http, $modal) {
+    const MESSAGES_URL = '/user/subscription/upgrade-annual'
 
-  $scope.upgradeComplete = false
-  const savings = {
-    student: '19.2',
-    collaborator: '36'
+    $scope.upgradeComplete = false
+    const savings = {
+      student: '19.2',
+      collaborator: '36'
+    }
+    $scope.$watch($scope.planName, function () {
+      $scope.yearlySaving = savings[$scope.planName]
+      if ($scope.planName === 'annual') {
+        return ($scope.upgradeComplete = true)
+      }
+    })
+    return ($scope.completeAnnualUpgrade = function () {
+      const body = {
+        planName: $scope.planName,
+        _csrf: window.csrfToken
+      }
+
+      $scope.inflight = true
+
+      return $http
+        .post(MESSAGES_URL, body)
+        .then(() => ($scope.upgradeComplete = true))
+        .catch(() => console.log('something went wrong changing plan'))
+    })
   }
-  $scope.$watch($scope.planName, function() {
-    $scope.yearlySaving = savings[$scope.planName]
-    if ($scope.planName === 'annual') {
-      return ($scope.upgradeComplete = true)
-    }
-  })
-  return ($scope.completeAnnualUpgrade = function() {
-    const body = {
-      planName: $scope.planName,
-      _csrf: window.csrfToken
-    }
-
-    $scope.inflight = true
-
-    return $http
-      .post(MESSAGES_URL, body)
-      .then(() => ($scope.upgradeComplete = true))
-      .catch(() => console.log('something went wrong changing plan'))
-  })
-})
+)

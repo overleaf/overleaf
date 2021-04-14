@@ -69,7 +69,7 @@ class Csrf {
   static validateRequest(req, cb) {
     // run a dummy csrf check to see if it returns an error
     if (cb == null) {
-      cb = function(valid) {}
+      cb = function (valid) {}
     }
     return csrf(req, null, err => cb(err))
   }

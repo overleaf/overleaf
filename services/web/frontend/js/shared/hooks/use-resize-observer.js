@@ -4,7 +4,7 @@ function useResizeObserver(observedElement, observedData, callback) {
   const resizeObserver = useRef()
 
   const observe = useCallback(() => {
-    resizeObserver.current = new ResizeObserver(function(elementsObserved) {
+    resizeObserver.current = new ResizeObserver(function (elementsObserved) {
       callback(elementsObserved[0])
     })
   }, [callback])

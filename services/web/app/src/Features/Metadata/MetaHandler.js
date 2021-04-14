@@ -33,43 +33,49 @@ module.exports = MetaHandler = {
 
   getAllMetaForProject(projectId, callback) {
     if (callback == null) {
-      callback = function(err, projectMeta) {}
+      callback = function (err, projectMeta) {}
     }
-    return DocumentUpdaterHandler.flushProjectToMongo(projectId, function(err) {
-      if (err != null) {
-        return callback(err)
-      }
-      return ProjectEntityHandler.getAllDocs(projectId, function(err, docs) {
+    return DocumentUpdaterHandler.flushProjectToMongo(
+      projectId,
+      function (err) {
         if (err != null) {
           return callback(err)
         }
-        const projectMeta = MetaHandler.extractMetaFromProjectDocs(docs)
-        return callback(null, projectMeta)
-      })
-    })
+        return ProjectEntityHandler.getAllDocs(projectId, function (err, docs) {
+          if (err != null) {
+            return callback(err)
+          }
+          const projectMeta = MetaHandler.extractMetaFromProjectDocs(docs)
+          return callback(null, projectMeta)
+        })
+      }
+    )
   },
 
   getMetaForDoc(projectId, docId, callback) {
     if (callback == null) {
-      callback = function(err, docMeta) {}
+      callback = function (err, docMeta) {}
     }
-    return DocumentUpdaterHandler.flushDocToMongo(projectId, docId, function(
-      err
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      return ProjectEntityHandler.getDoc(projectId, docId, function(
-        err,
-        lines
-      ) {
+    return DocumentUpdaterHandler.flushDocToMongo(
+      projectId,
+      docId,
+      function (err) {
         if (err != null) {
           return callback(err)
         }
-        const docMeta = MetaHandler.extractMetaFromDoc(lines)
-        return callback(null, docMeta)
-      })
-    })
+        return ProjectEntityHandler.getDoc(
+          projectId,
+          docId,
+          function (err, lines) {
+            if (err != null) {
+              return callback(err)
+            }
+            const docMeta = MetaHandler.extractMetaFromDoc(lines)
+            return callback(null, docMeta)
+          }
+        )
+      }
+    )
   },
 
   extractMetaFromDoc(lines) {

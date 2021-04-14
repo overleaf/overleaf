@@ -61,11 +61,11 @@ const TokenGenerator = {
 
   generateUniqueReadOnlyToken(callback) {
     if (callback == null) {
-      callback = function(err, token) {}
+      callback = function (err, token) {}
     }
     return Async.retry(
       10,
-      function(cb) {
+      function (cb) {
         const token = TokenGenerator.readOnlyToken()
 
         if (!Features.hasFeature('overleaf-integration')) {
@@ -77,7 +77,7 @@ const TokenGenerator = {
             url: `/api/v1/sharelatex/docs/read_token/${token}/exists`,
             json: true
           },
-          function(err, response, body) {
+          function (err, response, body) {
             if (err != null) {
               return cb(err)
             }

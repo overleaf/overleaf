@@ -14,8 +14,8 @@ const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Metadata/MetaController'
 const SandboxedModule = require('sandboxed-module')
 
-describe('MetaController', function() {
-  beforeEach(function() {
+describe('MetaController', function () {
+  beforeEach(function () {
     this.projectId = 'somekindofid'
     this.EditorRealTimeController = {
       emitToRoom: sinon.stub()
@@ -32,8 +32,8 @@ describe('MetaController', function() {
     }))
   })
 
-  describe('getMetadata', function() {
-    beforeEach(function() {
+  describe('getMetadata', function () {
+    beforeEach(function () {
       this.fakeLabels = { somedoc: ['a_label'] }
       this.MetaHandler.getAllMetaForProject = sinon
         .stub()
@@ -43,7 +43,7 @@ describe('MetaController', function() {
       return (this.next = sinon.stub())
     })
 
-    it('should call MetaHandler.getAllMetaForProject', function() {
+    it('should call MetaHandler.getAllMetaForProject', function () {
       this.MetadataController.getMetadata(this.req, this.res, this.next)
       this.MetaHandler.getAllMetaForProject.callCount.should.equal(1)
       return this.MetaHandler.getAllMetaForProject
@@ -51,12 +51,12 @@ describe('MetaController', function() {
         .should.equal(true)
     })
 
-    it('should call not call next with an error', function() {
+    it('should call not call next with an error', function () {
       this.MetadataController.getMetadata(this.req, this.res, this.next)
       return this.next.callCount.should.equal(0)
     })
 
-    it('should send a json response', function() {
+    it('should send a json response', function () {
       this.MetadataController.getMetadata(this.req, this.res, this.next)
       this.res.json.callCount.should.equal(1)
       return expect(this.res.json.lastCall.args[0]).to.have.all.keys([
@@ -65,8 +65,8 @@ describe('MetaController', function() {
       ])
     })
 
-    describe('when MetaHandler.getAllMetaForProject produces an error', function() {
-      beforeEach(function() {
+    describe('when MetaHandler.getAllMetaForProject produces an error', function () {
+      beforeEach(function () {
         this.MetaHandler.getAllMetaForProject = sinon
           .stub()
           .callsArgWith(1, new Error('woops'))
@@ -75,7 +75,7 @@ describe('MetaController', function() {
         return (this.next = sinon.stub())
       })
 
-      it('should call MetaHandler.getAllMetaForProject', function() {
+      it('should call MetaHandler.getAllMetaForProject', function () {
         this.MetadataController.getMetadata(this.req, this.res, this.next)
         this.MetaHandler.getAllMetaForProject.callCount.should.equal(1)
         return this.MetaHandler.getAllMetaForProject
@@ -83,21 +83,21 @@ describe('MetaController', function() {
           .should.equal(true)
       })
 
-      it('should call next with an error', function() {
+      it('should call next with an error', function () {
         this.MetadataController.getMetadata(this.req, this.res, this.next)
         this.next.callCount.should.equal(1)
         return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
-      it('should not send a json response', function() {
+      it('should not send a json response', function () {
         this.MetadataController.getMetadata(this.req, this.res, this.next)
         return this.res.json.callCount.should.equal(0)
       })
     })
   })
 
-  describe('broadcastMetadataForDoc', function() {
-    beforeEach(function() {
+  describe('broadcastMetadataForDoc', function () {
+    beforeEach(function () {
       this.MetaHandler.getMetaForDoc = sinon
         .stub()
         .callsArgWith(2, null, this.fakeLabels)
@@ -107,15 +107,15 @@ describe('MetaController', function() {
       return (this.next = sinon.stub())
     })
 
-    describe('with broadcast:true', function() {
-      beforeEach(function() {
+    describe('with broadcast:true', function () {
+      beforeEach(function () {
         this.req = {
           params: { project_id: this.projectId, doc_id: this.docId },
           body: { broadcast: true }
         }
       })
 
-      it('should call MetaHandler.getMetaForDoc', function() {
+      it('should call MetaHandler.getMetaForDoc', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,
@@ -127,7 +127,7 @@ describe('MetaController', function() {
           .should.equal(true)
       })
 
-      it('should call not call next with an error', function() {
+      it('should call not call next with an error', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,
@@ -136,7 +136,7 @@ describe('MetaController', function() {
         return this.next.callCount.should.equal(0)
       })
 
-      it('should send a success response', function() {
+      it('should send a success response', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,
@@ -146,7 +146,7 @@ describe('MetaController', function() {
         return this.res.sendStatus.calledWith(200).should.equal(true)
       })
 
-      it('should emit a message to room', function() {
+      it('should emit a message to room', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,
@@ -160,15 +160,15 @@ describe('MetaController', function() {
       })
     })
 
-    describe('with broadcast:false', function() {
-      beforeEach(function() {
+    describe('with broadcast:false', function () {
+      beforeEach(function () {
         this.req = {
           params: { project_id: this.projectId, doc_id: this.docId },
           body: { broadcast: false }
         }
       })
 
-      it('should call MetaHandler.getMetaForDoc', function() {
+      it('should call MetaHandler.getMetaForDoc', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,
@@ -180,7 +180,7 @@ describe('MetaController', function() {
           .should.equal(true)
       })
 
-      it('should call not call next with an error', function() {
+      it('should call not call next with an error', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,
@@ -189,7 +189,7 @@ describe('MetaController', function() {
         return this.next.callCount.should.equal(0)
       })
 
-      it('should send the metadata in the response', function() {
+      it('should send the metadata in the response', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,
@@ -201,7 +201,7 @@ describe('MetaController', function() {
           .should.equal(true)
       })
 
-      it('should not emit a message to room', function() {
+      it('should not emit a message to room', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,
@@ -213,8 +213,8 @@ describe('MetaController', function() {
       })
     })
 
-    describe('when MetaHandler.getMetaForDoc produces an error', function() {
-      beforeEach(function() {
+    describe('when MetaHandler.getMetaForDoc produces an error', function () {
+      beforeEach(function () {
         this.MetaHandler.getMetaForDoc = sinon
           .stub()
           .callsArgWith(2, new Error('woops'))
@@ -228,7 +228,7 @@ describe('MetaController', function() {
         return (this.next = sinon.stub())
       })
 
-      it('should call MetaHandler.getMetaForDoc', function() {
+      it('should call MetaHandler.getMetaForDoc', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,
@@ -240,7 +240,7 @@ describe('MetaController', function() {
           .should.equal(true)
       })
 
-      it('should call next with an error', function() {
+      it('should call next with an error', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,
@@ -250,7 +250,7 @@ describe('MetaController', function() {
         return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
-      it('should not send a json response', function() {
+      it('should not send a json response', function () {
         this.MetadataController.broadcastMetadataForDoc(
           this.req,
           this.res,

@@ -5,8 +5,8 @@ const modulePath = require('path').join(
   '../../../../app/src/Features/Referal/ReferalAllocator.js'
 )
 
-describe('ReferalAllocator', function() {
-  beforeEach(function() {
+describe('ReferalAllocator', function () {
+  beforeEach(function () {
     this.ReferalAllocator = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
@@ -28,9 +28,9 @@ describe('ReferalAllocator', function() {
       .callsArgWith(2, null, { _id: this.user_id })
   })
 
-  describe('allocate', function() {
-    describe('when the referal was a bonus referal', function() {
-      beforeEach(function() {
+  describe('allocate', function () {
+    describe('when the referal was a bonus referal', function () {
+      beforeEach(function () {
         this.referal_source = 'bonus'
         this.ReferalAllocator.allocate(
           this.referal_id,
@@ -41,7 +41,7 @@ describe('ReferalAllocator', function() {
         )
       })
 
-      it('should update the referring user with the refered users id', function() {
+      it('should update the referring user with the refered users id', function () {
         this.User.updateOne
           .calledWith(
             {
@@ -59,25 +59,25 @@ describe('ReferalAllocator', function() {
           .should.equal(true)
       })
 
-      it('find the referring users id', function() {
+      it('find the referring users id', function () {
         this.User.findOne
           .calledWith({ referal_id: this.referal_id })
           .should.equal(true)
       })
 
-      it("should refresh the user's subscription", function() {
+      it("should refresh the user's subscription", function () {
         this.FeaturesUpdater.refreshFeatures
           .calledWith(this.user_id)
           .should.equal(true)
       })
 
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         this.callback.called.should.equal(true)
       })
     })
 
-    describe('when there is no user for the referal id', function() {
-      beforeEach(function() {
+    describe('when there is no user for the referal id', function () {
+      beforeEach(function () {
         this.referal_source = 'bonus'
         this.referal_id = 'wombat'
         this.User.findOne = sinon.stub().callsArgWith(2, null, null)
@@ -90,27 +90,27 @@ describe('ReferalAllocator', function() {
         )
       })
 
-      it('should find the referring users id', function() {
+      it('should find the referring users id', function () {
         this.User.findOne
           .calledWith({ referal_id: this.referal_id })
           .should.equal(true)
       })
 
-      it('should not update the referring user with the refered users id', function() {
+      it('should not update the referring user with the refered users id', function () {
         this.User.updateOne.called.should.equal(false)
       })
 
-      it('should not assign the user a bonus', function() {
+      it('should not assign the user a bonus', function () {
         this.FeaturesUpdater.refreshFeatures.called.should.equal(false)
       })
 
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         this.callback.called.should.equal(true)
       })
     })
 
-    describe('when the referal is not a bonus referal', function() {
-      beforeEach(function() {
+    describe('when the referal is not a bonus referal', function () {
+      beforeEach(function () {
         this.referal_source = 'public_share'
         this.ReferalAllocator.allocate(
           this.referal_id,
@@ -121,21 +121,21 @@ describe('ReferalAllocator', function() {
         )
       })
 
-      it('should not update the referring user with the refered users id', function() {
+      it('should not update the referring user with the refered users id', function () {
         this.User.updateOne.called.should.equal(false)
       })
 
-      it('find the referring users id', function() {
+      it('find the referring users id', function () {
         this.User.findOne
           .calledWith({ referal_id: this.referal_id })
           .should.equal(true)
       })
 
-      it('should not assign the user a bonus', function() {
+      it('should not assign the user a bonus', function () {
         this.FeaturesUpdater.refreshFeatures.called.should.equal(false)
       })
 
-      it('should call the callback', function() {
+      it('should call the callback', function () {
         this.callback.called.should.equal(true)
       })
     })

@@ -15,7 +15,7 @@ export function useFileTreeMainContext() {
   return context
 }
 
-export const FileTreeMainProvider = function({
+export const FileTreeMainProvider = function ({
   projectId,
   hasWritePermissions,
   userHasFeature,

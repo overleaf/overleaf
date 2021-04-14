@@ -17,8 +17,8 @@ const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionGroupController'
 const MockResponse = require('../helpers/MockResponse')
 
-describe('SubscriptionGroupController', function() {
-  beforeEach(function() {
+describe('SubscriptionGroupController', function () {
+  beforeEach(function () {
     this.user = { _id: '!@312431', email: 'user@email.com' }
     this.adminUserId = '123jlkj'
     this.subscriptionId = '123434325412'
@@ -65,8 +65,8 @@ describe('SubscriptionGroupController', function() {
     }))
   })
 
-  describe('removeUserFromGroup', function() {
-    it('should use the subscription id for the logged in user and take the user id from the params', function(done) {
+  describe('removeUserFromGroup', function () {
+    it('should use the subscription id for the logged in user and take the user id from the params', function (done) {
       const userIdToRemove = '31231'
       this.req.params = { user_id: userIdToRemove }
       this.req.entity = this.subscription
@@ -83,8 +83,8 @@ describe('SubscriptionGroupController', function() {
     })
   })
 
-  describe('removeSelfFromGroup', function() {
-    it('gets subscription and remove user', function(done) {
+  describe('removeSelfFromGroup', function () {
+    it('gets subscription and remove user', function (done) {
       const userIdToRemove = '31231'
       this.req.query = { subscriptionId: this.subscriptionId }
       const memberUserIdToremove = 123456789

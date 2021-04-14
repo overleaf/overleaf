@@ -12,7 +12,7 @@ import _ from 'lodash'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-const affiliationFormController = function(
+const affiliationFormController = function (
   $scope,
   $element,
   $attrs,
@@ -29,7 +29,7 @@ const affiliationFormController = function(
     name: universityName,
     isUserSuggested: true
   })
-  ctrl.handleFreeformInputChange = function($select, propertyToMatch) {
+  ctrl.handleFreeformInputChange = function ($select, propertyToMatch) {
     if ($select.search == null || $select.search === '') {
       return
     }
@@ -62,39 +62,39 @@ const affiliationFormController = function(
     departments => (_defaultDepartments = departments)
   )
   // Populates the universities dropdown (after selecting a country)
-  $scope.$watch('$ctrl.affiliationData.country', function(
-    newSelectedCountry,
-    prevSelectedCountry
-  ) {
-    if (
-      newSelectedCountry != null &&
-      newSelectedCountry !== prevSelectedCountry
-    ) {
-      ctrl.affiliationData.university = null
-      ctrl.affiliationData.role = null
-      ctrl.affiliationData.department = null
-      return UserAffiliationsDataService.getUniversitiesFromCountry(
-        newSelectedCountry
-      ).then(universities => (ctrl.universities = universities))
+  $scope.$watch(
+    '$ctrl.affiliationData.country',
+    function (newSelectedCountry, prevSelectedCountry) {
+      if (
+        newSelectedCountry != null &&
+        newSelectedCountry !== prevSelectedCountry
+      ) {
+        ctrl.affiliationData.university = null
+        ctrl.affiliationData.role = null
+        ctrl.affiliationData.department = null
+        return UserAffiliationsDataService.getUniversitiesFromCountry(
+          newSelectedCountry
+        ).then(universities => (ctrl.universities = universities))
+      }
     }
-  })
+  )
   // Populates the departments dropdown (after selecting a university)
-  $scope.$watch('$ctrl.affiliationData.university', function(
-    newSelectedUniversity,
-    prevSelectedUniversity
-  ) {
-    if (
-      newSelectedUniversity != null &&
-      newSelectedUniversity !== prevSelectedUniversity &&
-      (newSelectedUniversity.departments != null
-        ? newSelectedUniversity.departments.length
-        : undefined) > 0
-    ) {
-      return (ctrl.departments = _.uniq(newSelectedUniversity.departments))
-    } else {
-      return (ctrl.departments = _defaultDepartments)
+  $scope.$watch(
+    '$ctrl.affiliationData.university',
+    function (newSelectedUniversity, prevSelectedUniversity) {
+      if (
+        newSelectedUniversity != null &&
+        newSelectedUniversity !== prevSelectedUniversity &&
+        (newSelectedUniversity.departments != null
+          ? newSelectedUniversity.departments.length
+          : undefined) > 0
+      ) {
+        return (ctrl.departments = _.uniq(newSelectedUniversity.departments))
+      } else {
+        return (ctrl.departments = _defaultDepartments)
+      }
     }
-  })
+  )
 }
 
 export default App.component('affiliationForm', {

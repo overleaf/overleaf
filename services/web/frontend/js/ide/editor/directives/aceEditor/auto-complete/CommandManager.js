@@ -170,12 +170,12 @@ export default CommandManager = class CommandManager {
         const score = caption === prefix ? 99 : 50
         snippet = caption
         var i = 1
-        _.times(command[1], function() {
+        _.times(command[1], function () {
           snippet += `[\${${i}}]`
           caption += '[]'
           return i++
         })
-        _.times(command[2], function() {
+        _.times(command[2], function () {
           snippet += `{\${${i}}}`
           caption += '{}'
           return i++
@@ -204,7 +204,7 @@ export default CommandManager = class CommandManager {
       command => command[0].slice(0, commandFragment.length) === commandFragment
     )
 
-    return _.map(matchingCommands, function(command) {
+    return _.map(matchingCommands, function (command) {
       let completionAfterCursor, completionBeforeCursor
       const base = `\\${commandFragment}`
 

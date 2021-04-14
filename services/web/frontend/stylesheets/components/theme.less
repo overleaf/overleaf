@@ -30,6 +30,7 @@
 
 // Mixin for generating new styles
 .btn-styles(@btn-color: #555) {
+  // prettier-ignore
   #gradient >
     .vertical(@start-color: @btn-color; @end-color: darken(@btn-color, 12%));
   .reset-filter(
@@ -97,6 +98,7 @@
 
 .dropdown-menu > li > a:hover,
 .dropdown-menu > li > a:focus {
+  // prettier-ignore
   #gradient >
     .vertical(
       @start-color: @dropdown-link-hover-bg; @end-color:
@@ -107,6 +109,7 @@
 .dropdown-menu > .active > a,
 .dropdown-menu > .active > a:hover,
 .dropdown-menu > .active > a:focus {
+  // prettier-ignore
   #gradient >
     .vertical(
       @start-color: @dropdown-link-active-bg; @end-color:
@@ -121,6 +124,7 @@
 
 // Default navbar
 .navbar-default {
+  // prettier-ignore
   #gradient >
     .vertical(
       @start-color: lighten(@navbar-default-bg, 10%) ; @end-color:
@@ -135,6 +139,7 @@
   .box-shadow(@shadow);
 
   .navbar-nav > .active > a {
+    // prettier-ignore
     #gradient >
       .vertical(
         @start-color: darken(@navbar-default-bg, 5%) ; @end-color:
@@ -150,6 +155,7 @@
 
 // Inverted navbar
 .navbar-inverse {
+  // prettier-ignore
   #gradient >
     .vertical(
       @start-color: lighten(@navbar-inverse-bg, 10%) ; @end-color:
@@ -160,6 +166,7 @@
   ); // Remove gradient in IE<10 to fix bug where dropdowns don't get triggered
 
   .navbar-nav > .active > a {
+    // prettier-ignore
     #gradient >
       .vertical(
         @start-color: @navbar-inverse-bg; @end-color:
@@ -195,6 +202,7 @@
 
 // Mixin for generating new styles
 .alert-styles(@color) {
+  // prettier-ignore
   #gradient > .vertical(@start-color: @color; @end-color: darken(@color, 7.5%));
   border-color: darken(@color, 15%);
 }
@@ -219,12 +227,14 @@
 
 // Give the progress background some depth
 .progress {
+  // prettier-ignore
   #gradient >
     .vertical(@start-color: darken(@progress-bg, 4%) ; @end-color: @progress-bg);
 }
 
 // Mixin for generating new styles
 .progress-bar-styles(@color) {
+  // prettier-ignore
   #gradient > .vertical(@start-color: @color; @end-color: darken(@color, 10%));
 }
 
@@ -257,6 +267,7 @@
 .list-group-item.active:hover,
 .list-group-item.active:focus {
   text-shadow: 0 -1px 0 darken(@list-group-active-bg, 10%);
+  // prettier-ignore
   #gradient >
     .vertical(
       @start-color: @list-group-active-bg; @end-color:
@@ -276,6 +287,7 @@
 
 // Mixin for generating new styles
 .panel-heading-styles(@color) {
+  // prettier-ignore
   #gradient > .vertical(@start-color: @color; @end-color: darken(@color, 5%));
 }
 
@@ -304,6 +316,7 @@
 // --------------------------------------------------
 
 .well {
+  // prettier-ignore
   #gradient >
     .vertical(@start-color: darken(@well-bg, 5%) ; @end-color: @well-bg);
   border-color: darken(@well-bg, 10%);

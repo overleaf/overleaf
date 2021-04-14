@@ -16,8 +16,8 @@ const Errors = require('../../../../app/src/Features/Errors/Errors')
 const modulePath = '../../../../app/src/Features/History/HistoryController'
 const SandboxedModule = require('sandboxed-module')
 
-describe('HistoryController', function() {
-  beforeEach(function() {
+describe('HistoryController', function () {
+  beforeEach(function () {
     this.callback = sinon.stub()
     this.user_id = 'user-id-123'
     this.AuthenticationController = {
@@ -47,15 +47,15 @@ describe('HistoryController', function() {
     })
   })
 
-  describe('selectHistoryApi', function() {
-    beforeEach(function() {
+  describe('selectHistoryApi', function () {
+    beforeEach(function () {
       this.req = { url: '/mock/url', method: 'POST', params: {} }
       this.res = 'mock-res'
       return (this.next = sinon.stub())
     })
 
-    describe('for a project with project history', function() {
-      beforeEach(function() {
+    describe('for a project with project history', function () {
+      beforeEach(function () {
         this.ProjectDetailsHandler.getDetails = sinon
           .stub()
           .callsArgWith(1, null, {
@@ -68,13 +68,13 @@ describe('HistoryController', function() {
         )
       })
 
-      it('should set the flag for project history to true', function() {
+      it('should set the flag for project history to true', function () {
         return this.req.useProjectHistory.should.equal(true)
       })
     })
 
-    describe('for any other project ', function() {
-      beforeEach(function() {
+    describe('for any other project ', function () {
+      beforeEach(function () {
         this.ProjectDetailsHandler.getDetails = sinon
           .stub()
           .callsArgWith(1, null, {})
@@ -85,14 +85,14 @@ describe('HistoryController', function() {
         )
       })
 
-      it('should not set the flag for project history to false', function() {
+      it('should not set the flag for project history to false', function () {
         return this.req.useProjectHistory.should.equal(false)
       })
     })
   })
 
-  describe('proxyToHistoryApi', function() {
-    beforeEach(function() {
+  describe('proxyToHistoryApi', function () {
+    beforeEach(function () {
       this.req = { url: '/mock/url', method: 'POST' }
       this.res = 'mock-res'
       this.next = sinon.stub()
@@ -106,8 +106,8 @@ describe('HistoryController', function() {
       return this.request.returns(this.proxy)
     })
 
-    describe('for a project with the project history flag', function() {
-      beforeEach(function() {
+    describe('for a project with the project history flag', function () {
+      beforeEach(function () {
         this.req.useProjectHistory = true
         return this.HistoryController.proxyToHistoryApi(
           this.req,
@@ -116,13 +116,13 @@ describe('HistoryController', function() {
         )
       })
 
-      it('should get the user id', function() {
+      it('should get the user id', function () {
         return this.AuthenticationController.getLoggedInUserId
           .calledWith(this.req)
           .should.equal(true)
       })
 
-      it('should call the project history api', function() {
+      it('should call the project history api', function () {
         return this.request
           .calledWith({
             url: `${this.settings.apis.project_history.url}${this.req.url}`,
@@ -134,13 +134,13 @@ describe('HistoryController', function() {
           .should.equal(true)
       })
 
-      it('should pipe the response to the client', function() {
+      it('should pipe the response to the client', function () {
         return this.proxy.pipe.calledWith(this.res).should.equal(true)
       })
     })
 
-    describe('for a project without the project history flag', function() {
-      beforeEach(function() {
+    describe('for a project without the project history flag', function () {
+      beforeEach(function () {
         this.req.useProjectHistory = false
         return this.HistoryController.proxyToHistoryApi(
           this.req,
@@ -149,13 +149,13 @@ describe('HistoryController', function() {
         )
       })
 
-      it('should get the user id', function() {
+      it('should get the user id', function () {
         return this.AuthenticationController.getLoggedInUserId
           .calledWith(this.req)
           .should.equal(true)
       })
 
-      it('should call the track changes api', function() {
+      it('should call the track changes api', function () {
         return this.request
           .calledWith({
             url: `${this.settings.apis.trackchanges.url}${this.req.url}`,
@@ -167,13 +167,13 @@ describe('HistoryController', function() {
           .should.equal(true)
       })
 
-      it('should pipe the response to the client', function() {
+      it('should pipe the response to the client', function () {
         return this.proxy.pipe.calledWith(this.res).should.equal(true)
       })
     })
 
-    describe('with an error', function() {
-      beforeEach(function() {
+    describe('with an error', function () {
+      beforeEach(function () {
         this.HistoryController.proxyToHistoryApi(this.req, this.res, this.next)
         return this.proxy.events.error.call(
           this.proxy,
@@ -181,14 +181,14 @@ describe('HistoryController', function() {
         )
       })
 
-      it('should pass the error up the call chain', function() {
+      it('should pass the error up the call chain', function () {
         return this.next.calledWith(this.error).should.equal(true)
       })
     })
   })
 
-  describe('proxyToHistoryApiAndInjectUserDetails', function() {
-    beforeEach(function() {
+  describe('proxyToHistoryApiAndInjectUserDetails', function () {
+    beforeEach(function () {
       this.req = { url: '/mock/url', method: 'POST' }
       this.res = { json: sinon.stub() }
       this.next = sinon.stub()
@@ -198,8 +198,8 @@ describe('HistoryController', function() {
         .yields(null, (this.data_with_users = 'mock-injected-data')))
     })
 
-    describe('for a project with the project history flag', function() {
-      beforeEach(function() {
+    describe('for a project with the project history flag', function () {
+      beforeEach(function () {
         this.req.useProjectHistory = true
         return this.HistoryController.proxyToHistoryApiAndInjectUserDetails(
           this.req,
@@ -208,13 +208,13 @@ describe('HistoryController', function() {
         )
       })
 
-      it('should get the user id', function() {
+      it('should get the user id', function () {
         return this.AuthenticationController.getLoggedInUserId
           .calledWith(this.req)
           .should.equal(true)
       })
 
-      it('should call the project history api', function() {
+      it('should call the project history api', function () {
         return this.request
           .calledWith({
             url: `${this.settings.apis.project_history.url}${this.req.url}`,
@@ -227,19 +227,19 @@ describe('HistoryController', function() {
           .should.equal(true)
       })
 
-      it('should inject the user data', function() {
+      it('should inject the user data', function () {
         return this.HistoryManager.injectUserDetails
           .calledWith(this.data)
           .should.equal(true)
       })
 
-      it('should return the data with users to the client', function() {
+      it('should return the data with users to the client', function () {
         return this.res.json.calledWith(this.data_with_users).should.equal(true)
       })
     })
 
-    describe('for a project without the project history flag', function() {
-      beforeEach(function() {
+    describe('for a project without the project history flag', function () {
+      beforeEach(function () {
         this.req.useProjectHistory = false
         return this.HistoryController.proxyToHistoryApiAndInjectUserDetails(
           this.req,
@@ -248,13 +248,13 @@ describe('HistoryController', function() {
         )
       })
 
-      it('should get the user id', function() {
+      it('should get the user id', function () {
         return this.AuthenticationController.getLoggedInUserId
           .calledWith(this.req)
           .should.equal(true)
       })
 
-      it('should call the track changes api', function() {
+      it('should call the track changes api', function () {
         return this.request
           .calledWith({
             url: `${this.settings.apis.trackchanges.url}${this.req.url}`,
@@ -267,20 +267,20 @@ describe('HistoryController', function() {
           .should.equal(true)
       })
 
-      it('should inject the user data', function() {
+      it('should inject the user data', function () {
         return this.HistoryManager.injectUserDetails
           .calledWith(this.data)
           .should.equal(true)
       })
 
-      it('should return the data with users to the client', function() {
+      it('should return the data with users to the client', function () {
         return this.res.json.calledWith(this.data_with_users).should.equal(true)
       })
     })
   })
 
-  describe('proxyToHistoryApiAndInjectUserDetails (with the history API failing)', function() {
-    beforeEach(function() {
+  describe('proxyToHistoryApiAndInjectUserDetails (with the history API failing)', function () {
+    beforeEach(function () {
       this.req = { url: '/mock/url', method: 'POST', useProjectHistory: true }
       this.res = { json: sinon.stub() }
       this.next = sinon.stub()
@@ -295,20 +295,20 @@ describe('HistoryController', function() {
       )
     })
 
-    it('should not inject the user data', function() {
+    it('should not inject the user data', function () {
       return this.HistoryManager.injectUserDetails
         .calledWith(this.data)
         .should.equal(false)
     })
 
-    it('should not return the data with users to the client', function() {
+    it('should not return the data with users to the client', function () {
       return this.res.json.calledWith(this.data_with_users).should.equal(false)
     })
   })
 
-  describe('resyncProjectHistory', function() {
-    describe('for a project without project-history enabled', function() {
-      beforeEach(function() {
+  describe('resyncProjectHistory', function () {
+    describe('for a project without project-history enabled', function () {
+      beforeEach(function () {
         this.project_id = 'mock-project-id'
         this.req = { params: { Project_id: this.project_id } }
         this.res = { sendStatus: sinon.stub() }
@@ -326,13 +326,13 @@ describe('HistoryController', function() {
         )
       })
 
-      it('response with a 404', function() {
+      it('response with a 404', function () {
         return this.res.sendStatus.calledWith(404).should.equal(true)
       })
     })
 
-    describe('for a project with project-history enabled', function() {
-      beforeEach(function() {
+    describe('for a project with project-history enabled', function () {
+      beforeEach(function () {
         this.project_id = 'mock-project-id'
         this.req = { params: { Project_id: this.project_id } }
         this.res = { sendStatus: sinon.stub() }
@@ -349,13 +349,13 @@ describe('HistoryController', function() {
         )
       })
 
-      it('resyncs the project', function() {
+      it('resyncs the project', function () {
         return this.ProjectEntityUpdateHandler.resyncProjectHistory
           .calledWith(this.project_id)
           .should.equal(true)
       })
 
-      it('responds with a 204', function() {
+      it('responds with a 204', function () {
         return this.res.sendStatus.calledWith(204).should.equal(true)
       })
     })

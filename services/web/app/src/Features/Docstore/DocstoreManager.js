@@ -24,12 +24,12 @@ const TIMEOUT = 30 * 1000 // request timeout
 const DocstoreManager = {
   deleteDoc(project_id, doc_id, name, deletedAt, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const url = `${settings.apis.docstore.url}/project/${project_id}/doc/${doc_id}`
     const docMetaData = { deleted: true, deletedAt, name }
     const options = { url, json: docMetaData, timeout: TIMEOUT }
-    request.patch(options, function(error, res) {
+    request.patch(options, function (error, res) {
       if (error != null) {
         return callback(error)
       }
@@ -59,7 +59,7 @@ const DocstoreManager = {
 
   getAllDocs(project_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const url = `${settings.apis.docstore.url}/project/${project_id}/doc`
     return request.get(
@@ -68,7 +68,7 @@ const DocstoreManager = {
         timeout: TIMEOUT,
         json: true
       },
-      function(error, res, docs) {
+      function (error, res, docs) {
         if (error != null) {
           return callback(error)
         }
@@ -87,29 +87,30 @@ const DocstoreManager = {
 
   getAllDeletedDocs(project_id, callback) {
     const url = `${settings.apis.docstore.url}/project/${project_id}/doc-deleted`
-    request.get({ url, timeout: TIMEOUT, json: true }, function(
-      error,
-      res,
-      docs
-    ) {
-      if (error) {
-        callback(OError.tag(error, 'could not get deleted docs from docstore'))
-      } else if (res.statusCode === 200) {
-        callback(null, docs)
-      } else {
-        callback(
-          new OError(
-            `docstore api responded with non-success code: ${res.statusCode}`,
-            { project_id }
+    request.get(
+      { url, timeout: TIMEOUT, json: true },
+      function (error, res, docs) {
+        if (error) {
+          callback(
+            OError.tag(error, 'could not get deleted docs from docstore')
           )
-        )
+        } else if (res.statusCode === 200) {
+          callback(null, docs)
+        } else {
+          callback(
+            new OError(
+              `docstore api responded with non-success code: ${res.statusCode}`,
+              { project_id }
+            )
+          )
+        }
       }
-    })
+    )
   },
 
   getAllRanges(project_id, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const url = `${settings.apis.docstore.url}/project/${project_id}/ranges`
     return request.get(
@@ -118,7 +119,7 @@ const DocstoreManager = {
         timeout: TIMEOUT,
         json: true
       },
-      function(error, res, docs) {
+      function (error, res, docs) {
         if (error != null) {
           return callback(error)
         }
@@ -140,7 +141,7 @@ const DocstoreManager = {
       options = {}
     }
     if (callback == null) {
-      callback = function(error, lines, rev, version) {}
+      callback = function (error, lines, rev, version) {}
     }
     if (typeof options === 'function') {
       callback = options
@@ -156,7 +157,7 @@ const DocstoreManager = {
         timeout: TIMEOUT,
         json: true
       },
-      function(error, res, doc) {
+      function (error, res, doc) {
         if (error != null) {
           return callback(error)
         }
@@ -191,36 +192,35 @@ const DocstoreManager = {
 
   isDocDeleted(project_id, doc_id, callback) {
     const url = `${settings.apis.docstore.url}/project/${project_id}/doc/${doc_id}/deleted`
-    request.get({ url, timeout: TIMEOUT, json: true }, function(
-      err,
-      res,
-      body
-    ) {
-      if (err) {
-        callback(err)
-      } else if (res.statusCode === 200) {
-        callback(null, body.deleted)
-      } else if (res.statusCode === 404) {
-        callback(
-          new Errors.NotFoundError({
-            message: 'doc does not exist in project',
-            info: { project_id, doc_id }
-          })
-        )
-      } else {
-        callback(
-          new OError(
-            `docstore api responded with non-success code: ${res.statusCode}`,
-            { project_id, doc_id }
+    request.get(
+      { url, timeout: TIMEOUT, json: true },
+      function (err, res, body) {
+        if (err) {
+          callback(err)
+        } else if (res.statusCode === 200) {
+          callback(null, body.deleted)
+        } else if (res.statusCode === 404) {
+          callback(
+            new Errors.NotFoundError({
+              message: 'doc does not exist in project',
+              info: { project_id, doc_id }
+            })
           )
-        )
+        } else {
+          callback(
+            new OError(
+              `docstore api responded with non-success code: ${res.statusCode}`,
+              { project_id, doc_id }
+            )
+          )
+        }
       }
-    })
+    )
   },
 
   updateDoc(project_id, doc_id, lines, version, ranges, callback) {
     if (callback == null) {
-      callback = function(error, modified, rev) {}
+      callback = function (error, modified, rev) {}
     }
     const url = `${settings.apis.docstore.url}/project/${project_id}/doc/${doc_id}`
     return request.post(
@@ -233,7 +233,7 @@ const DocstoreManager = {
           ranges
         }
       },
-      function(error, res, result) {
+      function (error, res, result) {
         if (error != null) {
           return callback(error)
         }
@@ -270,7 +270,7 @@ const DocstoreManager = {
     const url = `${settings.apis.docstore.url}/project/${project_id}/${method}`
     logger.log({ project_id }, `calling ${method} for project in docstore`)
     // use default timeout for archiving/unarchiving/destroying
-    request.post(url, function(err, res, docs) {
+    request.post(url, function (err, res, docs) {
       if (err != null) {
         OError.tag(err, `error calling ${method} project in docstore`, {
           project_id

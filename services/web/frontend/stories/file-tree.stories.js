@@ -41,9 +41,7 @@ function defaultSetupMocks() {
           folders: [],
           fileRefs: [],
           docs: [],
-          _id: Math.random()
-            .toString(16)
-            .replace(/0\./, 'random-test-id-'),
+          _id: Math.random().toString(16).replace(/0\./, 'random-test-id-'),
           name: body.name
         }
         window._ide.socket.socketClient.emit(

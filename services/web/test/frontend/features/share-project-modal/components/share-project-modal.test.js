@@ -13,7 +13,7 @@ import fetchMock from 'fetch-mock'
 import ShareProjectModal from '../../../../../frontend/js/features/share-project-modal/components/share-project-modal'
 import * as locationModule from '../../../../../frontend/js/features/share-project-modal/utils/location'
 
-describe('<ShareProjectModal/>', function() {
+describe('<ShareProjectModal/>', function () {
   const project = {
     _id: 'test-project',
     name: 'Test Project',
@@ -88,30 +88,30 @@ describe('<ShareProjectModal/>', function() {
 
   const originalExposedSettings = window.ExposedSettings
 
-  before(function() {
+  before(function () {
     window.ExposedSettings = { appName: 'Overleaf' }
   })
 
-  after(function() {
+  after(function () {
     window.ExposedSettings = originalExposedSettings
   })
 
-  beforeEach(function() {
+  beforeEach(function () {
     fetchMock.get('/user/contacts', { contacts })
   })
 
-  afterEach(function() {
+  afterEach(function () {
     fetchMock.restore()
     cleanup()
   })
 
-  it('renders the modal', async function() {
+  it('renders the modal', async function () {
     render(<ShareProjectModal {...modalProps} />)
 
     await screen.findByText('Share Project')
   })
 
-  it('calls handleHide when a Close button is pressed', async function() {
+  it('calls handleHide when a Close button is pressed', async function () {
     const handleHide = sinon.stub()
 
     render(<ShareProjectModal {...modalProps} handleHide={handleHide} />)
@@ -127,7 +127,7 @@ describe('<ShareProjectModal/>', function() {
     expect(handleHide.callCount).to.equal(2)
   })
 
-  it('handles access level "private"', async function() {
+  it('handles access level "private"', async function () {
     render(
       <ShareProjectModal
         {...modalProps}
@@ -146,7 +146,7 @@ describe('<ShareProjectModal/>', function() {
       .be.null
   })
 
-  it('handles access level "tokenBased"', async function() {
+  it('handles access level "tokenBased"', async function () {
     render(
       <ShareProjectModal
         {...modalProps}
@@ -163,7 +163,7 @@ describe('<ShareProjectModal/>', function() {
       .not.to.be.null
   })
 
-  it('handles legacy access level "readAndWrite"', async function() {
+  it('handles legacy access level "readAndWrite"', async function () {
     render(
       <ShareProjectModal
         {...modalProps}
@@ -177,7 +177,7 @@ describe('<ShareProjectModal/>', function() {
     await screen.findByRole('button', { name: 'Make Private' })
   })
 
-  it('handles legacy access level "readOnly"', async function() {
+  it('handles legacy access level "readOnly"', async function () {
     render(
       <ShareProjectModal
         {...modalProps}
@@ -191,7 +191,7 @@ describe('<ShareProjectModal/>', function() {
     await screen.findByRole('button', { name: 'Make Private' })
   })
 
-  it('hides actions from non-admins', async function() {
+  it('hides actions from non-admins', async function () {
     const invites = [
       {
         _id: 'invited-author',
@@ -263,7 +263,7 @@ describe('<ShareProjectModal/>', function() {
     expect(screen.queryByRole('button', { name: 'Resend' })).to.be.null
   })
 
-  it('only shows read-only token link to restricted token members', async function() {
+  it('only shows read-only token link to restricted token members', async function () {
     window.isRestrictedTokenMember = true
 
     render(
@@ -287,7 +287,7 @@ describe('<ShareProjectModal/>', function() {
       .be.null
   })
 
-  it('displays project members and invites', async function() {
+  it('displays project members and invites', async function () {
     const members = [
       {
         _id: 'member-author',
@@ -344,7 +344,7 @@ describe('<ShareProjectModal/>', function() {
     )
   })
 
-  it('resends an invite', async function() {
+  it('resends an invite', async function () {
     fetchMock.postOnce(
       'express:/project/:projectId/invite/:inviteId/resend',
       204
@@ -382,7 +382,7 @@ describe('<ShareProjectModal/>', function() {
     expect(closeButton.disabled).to.be.false
   })
 
-  it('revokes an invite', async function() {
+  it('revokes an invite', async function () {
     fetchMock.deleteOnce('express:/project/:projectId/invite/:inviteId', 204)
 
     const invites = [
@@ -416,7 +416,7 @@ describe('<ShareProjectModal/>', function() {
     expect(closeButton.disabled).to.be.false
   })
 
-  it('changes member privileges to read + write', async function() {
+  it('changes member privileges to read + write', async function () {
     fetchMock.putOnce('express:/project/:projectId/users/:userId', 204)
 
     const members = [
@@ -459,7 +459,7 @@ describe('<ShareProjectModal/>', function() {
     expect(closeButton.disabled).to.be.false
   })
 
-  it('removes a member from the project', async function() {
+  it('removes a member from the project', async function () {
     fetchMock.deleteOnce('express:/project/:projectId/users/:userId', 204)
 
     const members = [
@@ -499,7 +499,7 @@ describe('<ShareProjectModal/>', function() {
     )
   })
 
-  it('changes member privileges to owner with confirmation', async function() {
+  it('changes member privileges to owner with confirmation', async function () {
     fetchMock.postOnce('express:/project/:projectId/transfer-ownership', 204)
 
     const members = [
@@ -552,7 +552,7 @@ describe('<ShareProjectModal/>', function() {
     reloadStub.restore()
   })
 
-  it('sends invites to input email addresses', async function() {
+  it('sends invites to input email addresses', async function () {
     render(
       <ShareProjectModal
         {...modalProps}
@@ -640,7 +640,7 @@ describe('<ShareProjectModal/>', function() {
     screen.getByText('An email address is invalid')
   })
 
-  it('displays a message when the collaborator limit is reached', async function() {
+  it('displays a message when the collaborator limit is reached', async function () {
     const originalUser = window.user
 
     window.user = { allowedFreeTrial: true }
@@ -667,7 +667,7 @@ describe('<ShareProjectModal/>', function() {
     window.user = originalUser
   })
 
-  it('handles server error responses', async function() {
+  it('handles server error responses', async function () {
     render(
       <ShareProjectModal
         {...modalProps}
@@ -689,7 +689,7 @@ describe('<ShareProjectModal/>', function() {
 
     const submitButton = screen.getByRole('button', { name: 'Share' })
 
-    const respondWithError = async function(errorReason) {
+    const respondWithError = async function (errorReason) {
       inputElement.focus()
       fireEvent.change(inputElement, {
         target: { value: 'invited-author-1@example.com' }
@@ -733,7 +733,7 @@ describe('<ShareProjectModal/>', function() {
     )
   })
 
-  it('handles switching between access levels', async function() {
+  it('handles switching between access levels', async function () {
     fetchMock.post('express:/project/:projectId/settings/admin', 204)
 
     render(
@@ -775,7 +775,7 @@ describe('<ShareProjectModal/>', function() {
     )
   })
 
-  it('avoids selecting unmatched contact', async function() {
+  it('avoids selecting unmatched contact', async function () {
     render(<ShareProjectModal {...modalProps} />)
 
     const [inputElement] = await screen.findAllByLabelText(

@@ -27,7 +27,7 @@ const clsiCookiesEnabled =
   (Settings.clsiCookie != null ? Settings.clsiCookie.key : undefined) != null &&
   Settings.clsiCookie.key.length !== 0
 
-module.exports = function(backendGroup) {
+module.exports = function (backendGroup) {
   return {
     buildKey(project_id) {
       if (backendGroup != null) {
@@ -39,7 +39,7 @@ module.exports = function(backendGroup) {
 
     _getServerId(project_id, callback) {
       if (callback == null) {
-        callback = function(err, serverId) {}
+        callback = function (err, serverId) {}
       }
       return rclient.get(this.buildKey(project_id), (err, serverId) => {
         if (err != null) {
@@ -55,7 +55,7 @@ module.exports = function(backendGroup) {
 
     _populateServerIdViaRequest(project_id, callback) {
       if (callback == null) {
-        callback = function(err, serverId) {}
+        callback = function (err, serverId) {}
       }
       const url = `${Settings.apis.clsi.url}/project/${project_id}/status`
       return request.post(url, (err, res, body) => {
@@ -65,7 +65,7 @@ module.exports = function(backendGroup) {
           })
           return callback(err)
         }
-        return this.setServerId(project_id, res, function(err, serverId) {
+        return this.setServerId(project_id, res, function (err, serverId) {
           if (err != null) {
             logger.warn(
               { err, project_id },
@@ -88,7 +88,7 @@ module.exports = function(backendGroup) {
 
     setServerId(project_id, response, callback) {
       if (callback == null) {
-        callback = function(err, serverId) {}
+        callback = function (err, serverId) {}
       }
       if (!clsiCookiesEnabled) {
         return callback()
@@ -112,7 +112,7 @@ module.exports = function(backendGroup) {
 
     _setServerIdInRedis(rclient, project_id, serverId, callback) {
       if (callback == null) {
-        callback = function(err) {}
+        callback = function (err) {}
       }
       rclient.setex(
         this.buildKey(project_id),
@@ -124,7 +124,7 @@ module.exports = function(backendGroup) {
 
     clearServerId(project_id, callback) {
       if (callback == null) {
-        callback = function(err) {}
+        callback = function (err) {}
       }
       if (!clsiCookiesEnabled) {
         return callback()
@@ -134,7 +134,7 @@ module.exports = function(backendGroup) {
 
     getCookieJar(project_id, callback) {
       if (callback == null) {
-        callback = function(err, jar) {}
+        callback = function (err, jar) {}
       }
       if (!clsiCookiesEnabled) {
         return callback(null, request.jar())

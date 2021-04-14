@@ -5,7 +5,7 @@ const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEnt
 
 module.exports = InstitutionsGetter = {
   getConfirmedAffiliations(userId, callback) {
-    UserGetter.getUserFullEmails(userId, function(error, emailsData) {
+    UserGetter.getUserFullEmails(userId, function (error, emailsData) {
       if (error) {
         return callback(error)
       }

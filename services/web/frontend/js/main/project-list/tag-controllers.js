@@ -1,7 +1,7 @@
 import App from '../../base'
 import ColorManager from '../../ide/colors/ColorManager'
-App.controller('TagListController', function($scope, $modal) {
-  $scope.filterProjects = function(filter = 'all') {
+App.controller('TagListController', function ($scope, $modal) {
+  $scope.filterProjects = function (filter = 'all') {
     $scope._clearTags()
     $scope.setFilter(filter)
   }
@@ -11,18 +11,18 @@ App.controller('TagListController', function($scope, $modal) {
       tag.selected = false
     })
 
-  $scope.selectTag = function(tag) {
+  $scope.selectTag = function (tag) {
     $scope._clearTags()
     tag.selected = true
     $scope.setFilter('tag')
   }
 
-  $scope.selectUntagged = function() {
+  $scope.selectUntagged = function () {
     $scope._clearTags()
     $scope.setFilter('untagged')
   }
 
-  $scope.countProjectsForTag = function(tag) {
+  $scope.countProjectsForTag = function (tag) {
     return tag.project_ids.reduce((acc, projectId) => {
       const project = $scope.getProjectById(projectId)
 
@@ -42,7 +42,7 @@ App.controller('TagListController', function($scope, $modal) {
 
   $scope.getHueForTagId = tagId => ColorManager.getHueForTagId(tagId)
 
-  $scope.deleteTag = function(tag) {
+  $scope.deleteTag = function (tag) {
     const modalInstance = $modal.open({
       templateUrl: 'deleteTagModalTemplate',
       controller: 'DeleteTagModalController',
@@ -52,7 +52,7 @@ App.controller('TagListController', function($scope, $modal) {
         }
       }
     })
-    modalInstance.result.then(function() {
+    modalInstance.result.then(function () {
       // Remove tag from projects
       for (let project of $scope.projects) {
         if (!project.tags) {
@@ -69,7 +69,7 @@ App.controller('TagListController', function($scope, $modal) {
     })
   }
 
-  $scope.renameTag = function(tag) {
+  $scope.renameTag = function (tag) {
     const modalInstance = $modal.open({
       templateUrl: 'renameTagModalTemplate',
       controller: 'RenameTagModalController',
@@ -83,8 +83,8 @@ App.controller('TagListController', function($scope, $modal) {
   }
 })
 
-App.controller('TagDropdownItemController', function($scope) {
-  $scope.recalculateProjectsInTag = function() {
+App.controller('TagDropdownItemController', function ($scope) {
+  $scope.recalculateProjectsInTag = function () {
     let partialSelection
     $scope.areSelectedProjectsInTag = false
     for (let projectId of $scope.getSelectedProjectIds()) {
@@ -100,7 +100,7 @@ App.controller('TagDropdownItemController', function($scope) {
     }
   }
 
-  $scope.addOrRemoveProjectsFromTag = function() {
+  $scope.addOrRemoveProjectsFromTag = function () {
     if ($scope.areSelectedProjectsInTag === true) {
       $scope.removeSelectedProjectsFromTag($scope.tag)
       $scope.areSelectedProjectsInTag = false
@@ -117,117 +117,110 @@ App.controller('TagDropdownItemController', function($scope) {
   $scope.recalculateProjectsInTag()
 })
 
-App.controller('NewTagModalController', function(
-  $scope,
-  $modalInstance,
-  $timeout,
-  $http
-) {
-  $scope.inputs = { newTagName: '' }
+App.controller(
+  'NewTagModalController',
+  function ($scope, $modalInstance, $timeout, $http) {
+    $scope.inputs = { newTagName: '' }
 
-  $scope.state = {
-    inflight: false,
-    error: false
+    $scope.state = {
+      inflight: false,
+      error: false
+    }
+
+    $modalInstance.opened.then(() =>
+      $timeout(() => $scope.$broadcast('open'), 200)
+    )
+
+    $scope.create = function () {
+      const name = $scope.inputs.newTagName
+      $scope.state.inflight = true
+      $scope.state.error = false
+      $http
+        .post('/tag', {
+          _csrf: window.csrfToken,
+          name
+        })
+        .then(function (response) {
+          const { data } = response
+          $scope.state.inflight = false
+          $modalInstance.close(data)
+        })
+        .catch(function () {
+          $scope.state.inflight = false
+          $scope.state.error = true
+        })
+    }
+
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
   }
+)
 
-  $modalInstance.opened.then(() =>
-    $timeout(() => $scope.$broadcast('open'), 200)
-  )
+App.controller(
+  'RenameTagModalController',
+  function ($scope, $modalInstance, $timeout, $http, tag) {
+    $scope.inputs = { tagName: tag.name }
 
-  $scope.create = function() {
-    const name = $scope.inputs.newTagName
-    $scope.state.inflight = true
-    $scope.state.error = false
-    $http
-      .post('/tag', {
-        _csrf: window.csrfToken,
-        name
-      })
-      .then(function(response) {
-        const { data } = response
-        $scope.state.inflight = false
-        $modalInstance.close(data)
-      })
-      .catch(function() {
-        $scope.state.inflight = false
-        $scope.state.error = true
-      })
+    $scope.state = {
+      inflight: false,
+      error: false
+    }
+
+    $modalInstance.opened.then(() =>
+      $timeout(() => $scope.$broadcast('open'), 200)
+    )
+
+    $scope.rename = function () {
+      const name = $scope.inputs.tagName
+      $scope.state.inflight = true
+      $scope.state.error = false
+      return $http
+        .post(`/tag/${tag._id}/rename`, {
+          _csrf: window.csrfToken,
+          name
+        })
+        .then(function () {
+          $scope.state.inflight = false
+          $modalInstance.close(name)
+        })
+        .catch(function () {
+          $scope.state.inflight = false
+          $scope.state.error = true
+        })
+    }
+
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
   }
+)
 
-  $scope.cancel = () => $modalInstance.dismiss('cancel')
-})
+export default App.controller(
+  'DeleteTagModalController',
+  function ($scope, $modalInstance, $http, tag) {
+    $scope.tag = tag
+    $scope.state = {
+      inflight: false,
+      error: false
+    }
 
-App.controller('RenameTagModalController', function(
-  $scope,
-  $modalInstance,
-  $timeout,
-  $http,
-  tag
-) {
-  $scope.inputs = { tagName: tag.name }
+    $scope.delete = function () {
+      $scope.state.inflight = true
+      $scope.state.error = false
+      return $http({
+        method: 'DELETE',
+        url: `/tag/${tag._id}`,
+        headers: {
+          'X-CSRF-Token': window.csrfToken
+        }
+      })
+        .then(function () {
+          $scope.state.inflight = false
+          $modalInstance.close()
+        })
+        .catch(function () {
+          $scope.state.inflight = false
+          $scope.state.error = true
+        })
+    }
 
-  $scope.state = {
-    inflight: false,
-    error: false
+    $scope.cancel = () => $modalInstance.dismiss('cancel')
   }
-
-  $modalInstance.opened.then(() =>
-    $timeout(() => $scope.$broadcast('open'), 200)
-  )
-
-  $scope.rename = function() {
-    const name = $scope.inputs.tagName
-    $scope.state.inflight = true
-    $scope.state.error = false
-    return $http
-      .post(`/tag/${tag._id}/rename`, {
-        _csrf: window.csrfToken,
-        name
-      })
-      .then(function() {
-        $scope.state.inflight = false
-        $modalInstance.close(name)
-      })
-      .catch(function() {
-        $scope.state.inflight = false
-        $scope.state.error = true
-      })
-  }
-
-  $scope.cancel = () => $modalInstance.dismiss('cancel')
-})
-
-export default App.controller('DeleteTagModalController', function(
-  $scope,
-  $modalInstance,
-  $http,
-  tag
-) {
-  $scope.tag = tag
-  $scope.state = {
-    inflight: false,
-    error: false
-  }
-
-  $scope.delete = function() {
-    $scope.state.inflight = true
-    $scope.state.error = false
-    return $http({
-      method: 'DELETE',
-      url: `/tag/${tag._id}`,
-      headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
-    })
-      .then(function() {
-        $scope.state.inflight = false
-        $modalInstance.close()
-      })
-      .catch(function() {
-        $scope.state.inflight = false
-        $scope.state.error = true
-      })
-  }
-
-  $scope.cancel = () => $modalInstance.dismiss('cancel')
-})
+)

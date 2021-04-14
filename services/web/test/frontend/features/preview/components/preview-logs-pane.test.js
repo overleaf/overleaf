@@ -6,7 +6,7 @@ import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 const { expect } = require('chai')
 
-describe('<PreviewLogsPane />', function() {
+describe('<PreviewLogsPane />', function () {
   const sampleError1 = {
     content: 'error 1 content',
     file: 'main.tex',
@@ -59,8 +59,8 @@ entering extended mode
   const noOp = () => {}
   const onLogEntryLocationClick = sinon.stub()
 
-  describe('with logs', function() {
-    beforeEach(function() {
+  describe('with logs', function () {
+    beforeEach(function () {
       renderWithEditorContext(
         <PreviewLogsPane
           logEntries={logEntries}
@@ -70,7 +70,7 @@ entering extended mode
         />
       )
     })
-    it('renders all log entries with appropriate labels', function() {
+    it('renders all log entries with appropriate labels', function () {
       const errorEntries = screen.getAllByLabelText(
         `Log entry with level: error`
       )
@@ -85,11 +85,11 @@ entering extended mode
       expect(typesettingEntries).to.have.lengthOf(typesetting.length)
     })
 
-    it('renders the raw log', function() {
+    it('renders the raw log', function () {
       screen.getByLabelText('Raw logs from the LaTeX compiler')
     })
 
-    it('renders a link to location button for every error and warning log entry', function() {
+    it('renders a link to location button for every error and warning log entry', function () {
       logEntries.all.forEach((entry, index) => {
         const linkToSourceButton = screen.getByRole('button', {
           name: `Navigate to log position in source code: ${entry.file}, ${entry.line}`
@@ -106,7 +106,7 @@ entering extended mode
         ).to.be.true
       })
     })
-    it(' does not render a link to location button for the raw log entry', function() {
+    it(' does not render a link to location button for the raw log entry', function () {
       const rawLogEntry = screen.getByLabelText(
         'Raw logs from the LaTeX compiler'
       )
@@ -114,7 +114,7 @@ entering extended mode
     })
   })
 
-  describe('with validation issues', function() {
+  describe('with validation issues', function () {
     const sampleValidationIssues = {
       sizeCheck: {
         resources: [
@@ -125,7 +125,7 @@ entering extended mode
       mainFile: true
     }
 
-    it('renders a validation entry for known issues', function() {
+    it('renders a validation entry for known issues', function () {
       renderWithEditorContext(
         <PreviewLogsPane
           validationIssues={sampleValidationIssues}
@@ -141,7 +141,7 @@ entering extended mode
       )
     })
 
-    it('ignores unknown issues', function() {
+    it('ignores unknown issues', function () {
       renderWithEditorContext(
         <PreviewLogsPane
           validationIssues={{ unknownIssue: true }}
@@ -156,14 +156,14 @@ entering extended mode
     })
   })
 
-  describe('with compilation errors', function() {
+  describe('with compilation errors', function () {
     const sampleErrors = {
       clsiMaintenance: true,
       tooRecentlyCompiled: true,
       compileTerminated: true
     }
 
-    it('renders an error entry for known errors', function() {
+    it('renders an error entry for known errors', function () {
       renderWithEditorContext(
         <PreviewLogsPane
           errors={sampleErrors}
@@ -177,7 +177,7 @@ entering extended mode
       expect(errorEntries).to.have.lengthOf(Object.keys(sampleErrors).length)
     })
 
-    it('ignores unknown errors', function() {
+    it('ignores unknown errors', function () {
       renderWithEditorContext(
         <PreviewLogsPane
           errors={{ unknownIssue: true }}
@@ -192,8 +192,8 @@ entering extended mode
     })
   })
 
-  describe('with failing code check', function() {
-    beforeEach(function() {
+  describe('with failing code check', function () {
+    beforeEach(function () {
       renderWithEditorContext(
         <PreviewLogsPane
           logEntries={logEntries}
@@ -204,7 +204,7 @@ entering extended mode
         />
       )
     })
-    it('renders a code check failed entry', function() {
+    it('renders a code check failed entry', function () {
       screen.getByText(
         'Your code has errors that need to be fixed before the auto-compile can run'
       )

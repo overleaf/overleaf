@@ -18,7 +18,7 @@
 //   frontend/js/ide/directives/SafePath.js
 //   frontend/js/features/file-tree/util/safe-path.js
 
-const load = function() {
+const load = function () {
   let SafePath
   const BADCHAR_RX = new RegExp(
     `\

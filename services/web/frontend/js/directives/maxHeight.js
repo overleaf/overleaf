@@ -11,7 +11,7 @@ import App from '../base'
 export default App.directive('maxHeight', () => ({
   restrict: 'A',
   link(scope, element, attrs) {
-    return scope.$watch(attrs.maxHeight, function(value) {
+    return scope.$watch(attrs.maxHeight, function (value) {
       if (value != null) {
         return element.css({ 'max-height': value })
       }

@@ -126,7 +126,7 @@ function _addSuffixToProjectName(name, suffix, maxLength) {
 
 function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
   const NUMERIC_SUFFIX_MATCH = / \((\d+)\)$/
-  const suffixedName = function(basename, number) {
+  const suffixedName = function (basename, number) {
     const suffix = ` (${number})`
     return basename.substr(0, maxLength - suffix.length) + suffix
   }

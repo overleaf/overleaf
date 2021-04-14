@@ -23,7 +23,7 @@ const _ = require('lodash')
 module.exports = {
   getDocument(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const project_id = req.params.Project_id
     const { doc_id } = req.params
@@ -32,7 +32,7 @@ module.exports = {
     return ProjectGetter.getProject(
       project_id,
       { rootFolder: true, overleaf: true },
-      function(error, project) {
+      function (error, project) {
         if (error != null) {
           return next(error)
         }
@@ -41,7 +41,7 @@ module.exports = {
         }
         return ProjectLocator.findElement(
           { project, element_id: doc_id, type: 'doc' },
-          function(error, doc, path) {
+          function (error, doc, path) {
             if (error != null) {
               OError.tag(error, 'error finding element for getDocument', {
                 doc_id,
@@ -49,45 +49,43 @@ module.exports = {
               })
               return next(error)
             }
-            return ProjectEntityHandler.getDoc(project_id, doc_id, function(
-              error,
-              lines,
-              rev,
-              version,
-              ranges
-            ) {
-              if (error != null) {
-                OError.tag(
-                  error,
-                  'error finding doc contents for getDocument',
-                  {
-                    doc_id,
-                    project_id
-                  }
-                )
-                return next(error)
+            return ProjectEntityHandler.getDoc(
+              project_id,
+              doc_id,
+              function (error, lines, rev, version, ranges) {
+                if (error != null) {
+                  OError.tag(
+                    error,
+                    'error finding doc contents for getDocument',
+                    {
+                      doc_id,
+                      project_id
+                    }
+                  )
+                  return next(error)
+                }
+                if (plain) {
+                  res.type('text/plain')
+                  return res.send(lines.join('\n'))
+                } else {
+                  const projectHistoryId = _.get(project, 'overleaf.history.id')
+                  const projectHistoryType = _.get(
+                    project,
+                    'overleaf.history.display'
+                  )
+                    ? 'project-history'
+                    : undefined // for backwards compatibility, don't send anything if the project is still on track-changes
+                  return res.json({
+                    lines,
+                    version,
+                    ranges,
+                    pathname: path.fileSystem,
+                    projectHistoryId,
+                    projectHistoryType
+                  })
+                }
               }
-              if (plain) {
-                res.type('text/plain')
-                return res.send(lines.join('\n'))
-              } else {
-                const projectHistoryId = _.get(project, 'overleaf.history.id')
-                const projectHistoryType = _.get(
-                  project,
-                  'overleaf.history.display'
-                )
-                  ? 'project-history'
-                  : undefined // for backwards compatibility, don't send anything if the project is still on track-changes
-                return res.json({
-                  lines,
-                  version,
-                  ranges,
-                  pathname: path.fileSystem,
-                  projectHistoryId,
-                  projectHistoryType
-                })
-              }
-            })
+            )
           }
         )
       }
@@ -96,7 +94,7 @@ module.exports = {
 
   setDocument(req, res, next) {
     if (next == null) {
-      next = function(error) {}
+      next = function (error) {}
     }
     const project_id = req.params.Project_id
     const { doc_id } = req.params
@@ -109,7 +107,7 @@ module.exports = {
       ranges,
       lastUpdatedAt,
       lastUpdatedBy,
-      function(error) {
+      function (error) {
         if (error != null) {
           OError.tag(error, 'error finding element for getDocument', {
             doc_id,

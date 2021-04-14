@@ -1,6 +1,6 @@
 const webpackConfig = require('./webpack.config.test')
 
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
     customLaunchers: {
       ChromeCustom: {
@@ -56,7 +56,7 @@ module.exports = function(config) {
  * Handle fake images
  */
 function fakeImgMiddlewareFactory() {
-  return function(req, res, next) {
+  return function (req, res, next) {
     if (req.originalUrl.startsWith('/fake/')) {
       return res.end('fake img response')
     }

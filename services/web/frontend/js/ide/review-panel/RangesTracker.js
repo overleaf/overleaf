@@ -699,7 +699,7 @@ export default RangesTracker = class RangesTracker {
     this.changes.push(change)
 
     // Keep ops in order of offset, with deletes before inserts
-    this.changes.sort(function(c1, c2) {
+    this.changes.sort(function (c1, c2) {
       const result = c1.op.p - c2.op.p
       if (result !== 0) {
         return result
@@ -723,7 +723,7 @@ export default RangesTracker = class RangesTracker {
   _applyOpModifications(content, op_modifications) {
     // Put in descending position order, with deleting first if at the same offset
     // (Inserting first would modify the content that the delete will delete)
-    op_modifications.sort(function(a, b) {
+    op_modifications.sort(function (a, b) {
       const result = b.p - a.p
       if (result !== 0) {
         return result

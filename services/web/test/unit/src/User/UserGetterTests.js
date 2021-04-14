@@ -15,8 +15,8 @@ const {
   normalizeMultiQuery
 } = require('../../../../app/src/Features/Helpers/Mongo')
 
-describe('UserGetter', function() {
-  beforeEach(function() {
+describe('UserGetter', function () {
+  beforeEach(function () {
     this.fakeUser = {
       _id: '12390i',
       email: 'email2@foo.bar',
@@ -65,8 +65,8 @@ describe('UserGetter', function() {
     })
   })
 
-  describe('getUser', function() {
-    it('should get user', function(done) {
+  describe('getUser', function () {
+    it('should get user', function (done) {
       const query = { _id: '000000000000000000000000' }
       const projection = { email: 1 }
       this.UserGetter.getUser(query, projection, (error, user) => {
@@ -78,7 +78,7 @@ describe('UserGetter', function() {
       })
     })
 
-    it('should not allow null query', function(done) {
+    it('should not allow null query', function (done) {
       this.UserGetter.getUser(null, {}, error => {
         error.should.exist
         error.message.should.equal('no query provided')
@@ -87,8 +87,8 @@ describe('UserGetter', function() {
     })
   })
 
-  describe('getUsers', function() {
-    it('should get users with array of userIds', function(done) {
+  describe('getUsers', function () {
+    it('should get users with array of userIds', function (done) {
       const query = [new ObjectId()]
       const projection = { email: 1 }
       this.UserGetter.getUsers(query, projection, (error, users) => {
@@ -102,7 +102,7 @@ describe('UserGetter', function() {
       })
     })
 
-    it('should not allow null query', function(done) {
+    it('should not allow null query', function (done) {
       this.UserGetter.getUser(null, {}, error => {
         error.should.exist
         error.message.should.equal('no query provided')
@@ -111,8 +111,8 @@ describe('UserGetter', function() {
     })
   })
 
-  describe('getUserFullEmails', function() {
-    it('should get user', function(done) {
+  describe('getUserFullEmails', function () {
+    it('should get user', function (done) {
       this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
       const projection = { email: 1, emails: 1, samlIdentifiers: 1 }
       this.UserGetter.getUserFullEmails(
@@ -128,7 +128,7 @@ describe('UserGetter', function() {
       )
     })
 
-    it('should fetch emails data', function(done) {
+    it('should fetch emails data', function (done) {
       this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
       this.UserGetter.getUserFullEmails(
         this.fakeUser._id,
@@ -154,7 +154,7 @@ describe('UserGetter', function() {
       )
     })
 
-    it('should merge affiliation data', function(done) {
+    it('should merge affiliation data', function (done) {
       this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
       const affiliationsData = [
         {
@@ -207,7 +207,7 @@ describe('UserGetter', function() {
       )
     })
 
-    it('should merge SAML identifier', function(done) {
+    it('should merge SAML identifier', function (done) {
       const fakeSamlIdentifiers = [
         { providerId: 'saml_id', exteranlUserId: 'whatever' }
       ]
@@ -242,7 +242,7 @@ describe('UserGetter', function() {
       )
     })
 
-    it('should get user when it has no emails field', function(done) {
+    it('should get user when it has no emails field', function (done) {
       this.fakeUser = {
         _id: '12390i',
         email: 'email2@foo.bar'
@@ -263,7 +263,7 @@ describe('UserGetter', function() {
       )
     })
 
-    describe('affiliation reconfirmation', function() {
+    describe('affiliation reconfirmation', function () {
       const institutionNonSSO = {
         id: 1,
         name: 'University Name',
@@ -283,7 +283,7 @@ describe('UserGetter', function() {
         ssoEnabled: true,
         maxConfirmationMonths: 12
       }
-      describe('non-SSO institutions', function() {
+      describe('non-SSO institutions', function () {
         const email1 = 'leonard@example-affiliation.com'
         const email2 = 'mccoy@example-affiliation.com'
         const affiliationsData = [
@@ -304,7 +304,7 @@ describe('UserGetter', function() {
             institution: institutionNonSSO
           }
         ]
-        it('should flag inReconfirmNotificationPeriod for all affiliations in period', function(done) {
+        it('should flag inReconfirmNotificationPeriod for all affiliations in period', function (done) {
           const user = {
             _id: '12390i',
             email: email1,
@@ -348,7 +348,7 @@ describe('UserGetter', function() {
             }
           )
         })
-        it('should not flag affiliations outside of notification period', function(done) {
+        it('should not flag affiliations outside of notification period', function (done) {
           const aboutToBeWithinPeriod = moment()
             .subtract(institutionNonSSO.maxConfirmationMonths, 'months')
             .add(15, 'days')
@@ -388,8 +388,8 @@ describe('UserGetter', function() {
         })
       })
 
-      describe('SSO institutions', function() {
-        it('should flag only linked email, if in notification period', function(done) {
+      describe('SSO institutions', function () {
+        it('should flag only linked email, if in notification period', function (done) {
           const email1 = 'email1@sso.bar'
           const email2 = 'email2@sso.bar'
           const email3 = 'email3@sso.bar'
@@ -474,8 +474,8 @@ describe('UserGetter', function() {
         })
       })
 
-      describe('multiple institution affiliations', function() {
-        it('should flag each institution', function(done) {
+      describe('multiple institution affiliations', function () {
+        it('should flag each institution', function (done) {
           const email1 = 'email1@sso.bar'
           const email2 = 'email2@sso.bar'
           const email3 = 'email3@foo.bar'
@@ -573,8 +573,8 @@ describe('UserGetter', function() {
         })
       })
 
-      describe('reconfirmedAt', function() {
-        it('only use confirmedAt when no reconfirmedAt', function(done) {
+      describe('reconfirmedAt', function () {
+        it('only use confirmedAt when no reconfirmedAt', function (done) {
           const email1 = 'email1@foo.bar'
           const email2 = 'email2@foo.bar'
           const email3 = 'email3@foo.bar'
@@ -669,9 +669,9 @@ describe('UserGetter', function() {
         })
       })
 
-      describe('before reconfirmation period expires and within reconfirmation notification period', function() {
+      describe('before reconfirmation period expires and within reconfirmation notification period', function () {
         const email = 'leonard@example-affiliation.com'
-        it('should flag the email', function(done) {
+        it('should flag the email', function (done) {
           const confirmedAt = moment()
             .subtract(institutionNonSSO.maxConfirmationMonths, 'months')
             .subtract(14, 'days')
@@ -712,8 +712,8 @@ describe('UserGetter', function() {
         })
       })
 
-      describe('when no Settings.reconfirmNotificationDays', function() {
-        it('should always return inReconfirmNotificationPeriod:false', function(done) {
+      describe('when no Settings.reconfirmNotificationDays', function () {
+        it('should always return inReconfirmNotificationPeriod:false', function (done) {
           const email1 = 'email1@sso.bar'
           const email2 = 'email2@foo.bar'
           const email3 = 'email3@foo.bar'
@@ -786,8 +786,8 @@ describe('UserGetter', function() {
     })
   })
 
-  describe('getUserbyMainEmail', function() {
-    it('query user by main email', function(done) {
+  describe('getUserbyMainEmail', function () {
+    it('query user by main email', function (done) {
       const email = 'hello@world.com'
       const projection = { emails: 1 }
       this.UserGetter.getUserByMainEmail(email, projection, (error, user) => {
@@ -798,7 +798,7 @@ describe('UserGetter', function() {
       })
     })
 
-    it('return user if found', function(done) {
+    it('return user if found', function (done) {
       const email = 'hello@world.com'
       this.UserGetter.getUserByMainEmail(email, (error, user) => {
         expect(error).to.not.exist
@@ -807,7 +807,7 @@ describe('UserGetter', function() {
       })
     })
 
-    it('trim email', function(done) {
+    it('trim email', function (done) {
       const email = 'hello@world.com'
       this.UserGetter.getUserByMainEmail(` ${email} `, (error, user) => {
         expect(error).to.not.exist
@@ -818,8 +818,8 @@ describe('UserGetter', function() {
     })
   })
 
-  describe('getUserByAnyEmail', function() {
-    it('query user for any email', function(done) {
+  describe('getUserByAnyEmail', function () {
+    it('query user for any email', function (done) {
       const email = 'hello@world.com'
       const expectedQuery = {
         emails: { $exists: true },
@@ -840,7 +840,7 @@ describe('UserGetter', function() {
       )
     })
 
-    it('query contains $exists:true so partial index is used', function(done) {
+    it('query contains $exists:true so partial index is used', function (done) {
       const expectedQuery = {
         emails: { $exists: true },
         'emails.email': ''
@@ -854,7 +854,7 @@ describe('UserGetter', function() {
       })
     })
 
-    it('checks main email as well', function(done) {
+    it('checks main email as well', function (done) {
       this.findOne.callsArgWith(2, null, null)
       const email = 'hello@world.com'
       const projection = { emails: 1 }
@@ -871,15 +871,12 @@ describe('UserGetter', function() {
     })
   })
 
-  describe('getUsersByHostname', function() {
-    it('should find user by hostname', function(done) {
+  describe('getUsersByHostname', function () {
+    it('should find user by hostname', function (done) {
       const hostname = 'bar.foo'
       const expectedQuery = {
         emails: { $exists: true },
-        'emails.reversedHostname': hostname
-          .split('')
-          .reverse()
-          .join('')
+        'emails.reversedHostname': hostname.split('').reverse().join('')
       }
       const projection = { emails: 1 }
       this.UserGetter.getUsersByHostname(
@@ -895,8 +892,8 @@ describe('UserGetter', function() {
     })
   })
 
-  describe('getUsersByAnyConfirmedEmail', function() {
-    it('should find users by confirmed email', function(done) {
+  describe('getUsersByAnyConfirmedEmail', function () {
+    it('should find users by confirmed email', function (done) {
       const emails = ['confirmed@example.com']
 
       this.UserGetter.getUsersByAnyConfirmedEmail(emails, (error, users) => {
@@ -919,8 +916,8 @@ describe('UserGetter', function() {
     })
   })
 
-  describe('getUsersByV1Id', function() {
-    it('should find users by list of v1 ids', function(done) {
+  describe('getUsersByV1Id', function () {
+    it('should find users by list of v1 ids', function (done) {
       const v1Ids = [501]
       const expectedQuery = {
         'overleaf.id': { $in: v1Ids }
@@ -935,12 +932,12 @@ describe('UserGetter', function() {
     })
   })
 
-  describe('ensureUniqueEmailAddress', function() {
-    beforeEach(function() {
+  describe('ensureUniqueEmailAddress', function () {
+    beforeEach(function () {
       this.UserGetter.getUserByAnyEmail = sinon.stub()
     })
 
-    it('should return error if existing user is found', function(done) {
+    it('should return error if existing user is found', function (done) {
       this.UserGetter.getUserByAnyEmail.callsArgWith(1, null, this.fakeUser)
       this.UserGetter.ensureUniqueEmailAddress(this.newEmail, err => {
         expect(err).to.exist
@@ -949,7 +946,7 @@ describe('UserGetter', function() {
       })
     })
 
-    it('should return null if no user is found', function(done) {
+    it('should return null if no user is found', function (done) {
       this.UserGetter.getUserByAnyEmail.callsArgWith(1)
       this.UserGetter.ensureUniqueEmailAddress(this.newEmail, err => {
         expect(err).not.to.exist

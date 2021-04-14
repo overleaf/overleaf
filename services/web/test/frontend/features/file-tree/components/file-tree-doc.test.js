@@ -5,8 +5,8 @@ import renderWithContext from '../helpers/render-with-context'
 
 import FileTreeDoc from '../../../../../frontend/js/features/file-tree/components/file-tree-doc'
 
-describe('<FileTreeDoc/>', function() {
-  it('renders unselected', function() {
+describe('<FileTreeDoc/>', function () {
+  it('renders unselected', function () {
     const { container } = renderWithContext(
       <FileTreeDoc name="foo.tex" id="123abc" isLinkedFile={false} />
     )
@@ -15,7 +15,7 @@ describe('<FileTreeDoc/>', function() {
     expect(container.querySelector('i.linked-file-highlight')).to.not.exist
   })
 
-  it('renders selected', function() {
+  it('renders selected', function () {
     renderWithContext(
       <FileTreeDoc name="foo.tex" id="123abc" isLinkedFile={false} />,
       {
@@ -42,7 +42,7 @@ describe('<FileTreeDoc/>', function() {
     screen.getByRole('menuitem', { name: 'Upload' })
   })
 
-  it('renders as linked file', function() {
+  it('renders as linked file', function () {
     const { container } = renderWithContext(
       <FileTreeDoc name="foo.tex" id="123abc" isLinkedFile />
     )
@@ -51,7 +51,7 @@ describe('<FileTreeDoc/>', function() {
     expect(container.querySelector('i.linked-file-highlight')).to.exist
   })
 
-  it('selects', function() {
+  it('selects', function () {
     renderWithContext(<FileTreeDoc name="foo.tex" id="123abc" expanded />, {
       contextProps: {
         rootFolder: [
@@ -70,7 +70,7 @@ describe('<FileTreeDoc/>', function() {
     screen.getByRole('treeitem', { selected: true })
   })
 
-  it('multi-selects', function() {
+  it('multi-selects', function () {
     renderWithContext(<FileTreeDoc name="foo.tex" id="123abc" expanded />, {
       contextProps: {
         rootFolder: [

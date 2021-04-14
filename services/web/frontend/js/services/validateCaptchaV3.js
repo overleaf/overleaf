@@ -1,6 +1,6 @@
 import App from '../base'
 
-export default App.factory('validateCaptchaV3', function() {
+export default App.factory('validateCaptchaV3', function () {
   const grecaptcha = window.grecaptcha
   const ExposedSettings = window.ExposedSettings
   return function validateCaptchaV3(actionName, callback = () => {}) {
@@ -10,7 +10,7 @@ export default App.factory('validateCaptchaV3', function() {
     if (!ExposedSettings || !ExposedSettings.recaptchaSiteKeyV3) {
       return
     }
-    grecaptcha.ready(function() {
+    grecaptcha.ready(function () {
       grecaptcha
         .execute(ExposedSettings.recaptchaSiteKeyV3, { action: actionName })
         .then(callback)

@@ -26,305 +26,297 @@ import pdfHighlights from './pdfHighlights'
 import pdfRenderer from './pdfRenderer'
 import pdfPage from './pdfPage'
 import pdfSpinner from './pdfSpinner'
-App.controller('pdfViewerController', function(
-  $scope,
-  $q,
-  $timeout,
-  PDFRenderer,
-  $element,
-  pdfHighlights,
-  pdfSpinner
-) {
-  this.load = function() {
-    // $scope.pages = []
+App.controller(
+  'pdfViewerController',
+  function (
+    $scope,
+    $q,
+    $timeout,
+    PDFRenderer,
+    $element,
+    pdfHighlights,
+    pdfSpinner
+  ) {
+    this.load = function () {
+      // $scope.pages = []
 
-    // Ensure previous document is torn down before loading the next one (to
-    // prevent race conditions)
-    const documentTearDown =
-      $scope.document != null ? $scope.document.destroy() : Promise.resolve()
+      // Ensure previous document is torn down before loading the next one (to
+      // prevent race conditions)
+      const documentTearDown =
+        $scope.document != null ? $scope.document.destroy() : Promise.resolve()
 
-    return documentTearDown.then(() => {
-      $scope.loadCount = $scope.loadCount != null ? $scope.loadCount + 1 : 1
-      // TODO need a proper url manipulation library to add to query string
-      let url = $scope.pdfSrc
-      // add 'pdfng=true' to show that we are using the angular pdfjs viewer
-      const queryStringExists = /\?/.test(url)
-      url = url + (!queryStringExists ? '?' : '&') + 'pdfng=true'
-      // for isolated compiles, load the pdf on-demand because nobody will overwrite it
-      const onDemandLoading = true
-      $scope.document = new PDFRenderer(url, {
-        scale: 1,
-        disableAutoFetch: onDemandLoading ? true : undefined,
-        navigateFn(ref) {
-          // this function captures clicks on the annotation links
-          $scope.navigateTo = ref
-          return $scope.$apply()
-        },
-        progressCallback(progress) {
-          return $scope.$emit('progress', progress)
-        },
-        loadedCallback() {
-          return $scope.$emit('loaded')
-        },
-        errorCallback(error) {
-          // MissingPDFException is "expected" as the pdf file can be on a
-          // CLSI server that has been cycled out.
-          // Currently, there is NO error handling to handle this situation,
-          // but we plan to add this in the future
-          // (https://github.com/overleaf/issues/issues/2985) and this error
-          // is causing noise in Sentry so ignore it
-          if (!error || error.name !== 'MissingPDFException') {
-            captureMessage(`pdfng error ${error}`)
+      return documentTearDown.then(() => {
+        $scope.loadCount = $scope.loadCount != null ? $scope.loadCount + 1 : 1
+        // TODO need a proper url manipulation library to add to query string
+        let url = $scope.pdfSrc
+        // add 'pdfng=true' to show that we are using the angular pdfjs viewer
+        const queryStringExists = /\?/.test(url)
+        url = url + (!queryStringExists ? '?' : '&') + 'pdfng=true'
+        // for isolated compiles, load the pdf on-demand because nobody will overwrite it
+        const onDemandLoading = true
+        $scope.document = new PDFRenderer(url, {
+          scale: 1,
+          disableAutoFetch: onDemandLoading ? true : undefined,
+          navigateFn(ref) {
+            // this function captures clicks on the annotation links
+            $scope.navigateTo = ref
+            return $scope.$apply()
+          },
+          progressCallback(progress) {
+            return $scope.$emit('progress', progress)
+          },
+          loadedCallback() {
+            return $scope.$emit('loaded')
+          },
+          errorCallback(error) {
+            // MissingPDFException is "expected" as the pdf file can be on a
+            // CLSI server that has been cycled out.
+            // Currently, there is NO error handling to handle this situation,
+            // but we plan to add this in the future
+            // (https://github.com/overleaf/issues/issues/2985) and this error
+            // is causing noise in Sentry so ignore it
+            if (!error || error.name !== 'MissingPDFException') {
+              captureMessage(`pdfng error ${error}`)
+            }
+            return $scope.$emit('pdf:error', error)
+          },
+          pageSizeChangeCallback(pageNum, deltaH) {
+            return $scope.$broadcast('pdf:page:size-change', pageNum, deltaH)
           }
-          return $scope.$emit('pdf:error', error)
-        },
-        pageSizeChangeCallback(pageNum, deltaH) {
-          return $scope.$broadcast('pdf:page:size-change', pageNum, deltaH)
-        }
-      })
+        })
 
-      // we will have all the main information needed to start display
-      // after the following promise is resolved
-      $scope.loaded = $q
-        .all({
-          numPages: $scope.document.getNumPages(),
-          // get size of first page as default @ scale 1
-          pdfViewport: $scope.document.getPdfViewport(1, 1)
+        // we will have all the main information needed to start display
+        // after the following promise is resolved
+        $scope.loaded = $q
+          .all({
+            numPages: $scope.document.getNumPages(),
+            // get size of first page as default @ scale 1
+            pdfViewport: $scope.document.getPdfViewport(1, 1)
+          })
+          .then(function (result) {
+            $scope.pdfViewport = result.pdfViewport
+            $scope.pdfPageSize = [
+              result.pdfViewport.height,
+              result.pdfViewport.width
+            ]
+            // console.log 'resolved q.all, page size is', result
+            $scope.$emit('loaded')
+            return ($scope.numPages = result.numPages)
+          })
+          .catch(function (error) {
+            $scope.$emit('pdf:error', error)
+            return $q.reject(error)
+          })
+
+        return $scope.loaded
+      })
+    }
+
+    this.setScale = (scale, containerHeight, containerWidth) =>
+      $scope.loaded
+        .then(function () {
+          let numScale
+          if (scale == null) {
+            scale = {}
+          }
+          if (containerHeight === 0 || containerWidth === 0) {
+            numScale = 1
+          } else if (scale.scaleMode === 'scale_mode_fit_width') {
+            // TODO make this dynamic
+            numScale = (containerWidth - 40) / $scope.pdfPageSize[1]
+          } else if (scale.scaleMode === 'scale_mode_fit_height') {
+            // TODO magic numbers for jquery ui layout
+            numScale = (containerHeight - 20) / $scope.pdfPageSize[0]
+          } else if (scale.scaleMode === 'scale_mode_value') {
+            numScale = scale.scale
+          } else if (scale.scaleMode === 'scale_mode_auto') {
+            // TODO
+          } else {
+            scale.scaleMode = 'scale_mode_fit_width'
+            numScale = (containerWidth - 40) / $scope.pdfPageSize[1]
+          }
+          // TODO
+          $scope.scale.scale = numScale
+          $scope.document.setScale(numScale)
+          return ($scope.defaultPageSize = [
+            numScale * $scope.pdfPageSize[0],
+            numScale * $scope.pdfPageSize[1]
+          ])
         })
-        .then(function(result) {
-          $scope.pdfViewport = result.pdfViewport
-          $scope.pdfPageSize = [
-            result.pdfViewport.height,
-            result.pdfViewport.width
-          ]
-          // console.log 'resolved q.all, page size is', result
-          $scope.$emit('loaded')
-          return ($scope.numPages = result.numPages)
-        })
-        .catch(function(error) {
+        // console.log 'in setScale result', $scope.scale.scale, $scope.defaultPageSize
+        .catch(function (error) {
           $scope.$emit('pdf:error', error)
           return $q.reject(error)
         })
 
-      return $scope.loaded
-    })
-  }
-
-  this.setScale = (scale, containerHeight, containerWidth) =>
-    $scope.loaded
-      .then(function() {
-        let numScale
-        if (scale == null) {
-          scale = {}
+    this.redraw = function (position) {
+      // console.log 'in redraw'
+      // console.log 'reseting pages array for', $scope.numPages
+      $scope.pages = __range__(0, $scope.numPages - 1, true).map(i => ({
+        pageNum: i + 1
+      }))
+      if (position != null && position.page != null) {
+        // console.log 'position is', position.page, position.offset
+        // console.log 'setting current page', position.page
+        let pagenum = position.page
+        if (pagenum > $scope.numPages - 1) {
+          pagenum = $scope.numPages - 1
         }
-        if (containerHeight === 0 || containerWidth === 0) {
-          numScale = 1
-        } else if (scale.scaleMode === 'scale_mode_fit_width') {
-          // TODO make this dynamic
-          numScale = (containerWidth - 40) / $scope.pdfPageSize[1]
-        } else if (scale.scaleMode === 'scale_mode_fit_height') {
-          // TODO magic numbers for jquery ui layout
-          numScale = (containerHeight - 20) / $scope.pdfPageSize[0]
-        } else if (scale.scaleMode === 'scale_mode_value') {
-          numScale = scale.scale
-        } else if (scale.scaleMode === 'scale_mode_auto') {
-          // TODO
-        } else {
-          scale.scaleMode = 'scale_mode_fit_width'
-          numScale = (containerWidth - 40) / $scope.pdfPageSize[1]
+        $scope.pages[pagenum].current = true
+        return ($scope.pages[pagenum].position = position)
+      }
+    }
+
+    this.zoomIn = function () {
+      // console.log 'zoom in'
+      const newScale = $scope.scale.scale * 1.2
+      return ($scope.forceScale = {
+        scaleMode: 'scale_mode_value',
+        scale: newScale
+      })
+    }
+
+    this.zoomOut = function () {
+      // console.log 'zoom out'
+      const newScale = $scope.scale.scale / 1.2
+      return ($scope.forceScale = {
+        scaleMode: 'scale_mode_value',
+        scale: newScale
+      })
+    }
+
+    this.fitWidth = () =>
+      // console.log 'fit width'
+      ($scope.forceScale = { scaleMode: 'scale_mode_fit_width' })
+
+    this.fitHeight = () =>
+      // console.log 'fit height'
+      ($scope.forceScale = { scaleMode: 'scale_mode_fit_height' })
+
+    this.checkPosition = () =>
+      // console.log 'check position'
+      ($scope.forceCheck = ($scope.forceCheck || 0) + 1)
+
+    this.showRandomHighlights = () =>
+      // console.log 'show highlights'
+      ($scope.highlights = [
+        {
+          page: 3,
+          h: 100,
+          v: 100,
+          height: 30,
+          width: 200
         }
-        // TODO
-        $scope.scale.scale = numScale
-        $scope.document.setScale(numScale)
-        return ($scope.defaultPageSize = [
-          numScale * $scope.pdfPageSize[0],
-          numScale * $scope.pdfPageSize[1]
-        ])
+      ])
+
+    // we work with (pagenumber, % of height down page from top)
+    // pdfListView works with (pagenumber, vertical position up page from
+    // bottom measured in pts)
+
+    this.getPdfPosition = function () {
+      // console.log 'in getPdfPosition'
+      let canvasOffset, pdfOffset, viewport
+      let topPageIdx = 0
+      let topPage = $scope.pages[0]
+      // find first visible page
+      const visible = $scope.pages.some(function (page, i) {
+        if (page.visible) {
+          let ref
+          return ([topPageIdx, topPage] = Array.from((ref = [i, page]))), ref
+        }
       })
-      // console.log 'in setScale result', $scope.scale.scale, $scope.defaultPageSize
-      .catch(function(error) {
-        $scope.$emit('pdf:error', error)
-        return $q.reject(error)
-      })
-
-  this.redraw = function(position) {
-    // console.log 'in redraw'
-    // console.log 'reseting pages array for', $scope.numPages
-    $scope.pages = __range__(0, $scope.numPages - 1, true).map(i => ({
-      pageNum: i + 1
-    }))
-    if (position != null && position.page != null) {
-      // console.log 'position is', position.page, position.offset
-      // console.log 'setting current page', position.page
-      let pagenum = position.page
-      if (pagenum > $scope.numPages - 1) {
-        pagenum = $scope.numPages - 1
+      if (visible && topPage.element != null) {
+        // console.log 'found it', topPageIdx
+      } else {
+        // console.log 'CANNOT FIND TOP PAGE'
+        return
       }
-      $scope.pages[pagenum].current = true
-      return ($scope.pages[pagenum].position = position)
-    }
-  }
 
-  this.zoomIn = function() {
-    // console.log 'zoom in'
-    const newScale = $scope.scale.scale * 1.2
-    return ($scope.forceScale = {
-      scaleMode: 'scale_mode_value',
-      scale: newScale
-    })
-  }
-
-  this.zoomOut = function() {
-    // console.log 'zoom out'
-    const newScale = $scope.scale.scale / 1.2
-    return ($scope.forceScale = {
-      scaleMode: 'scale_mode_value',
-      scale: newScale
-    })
-  }
-
-  this.fitWidth = () =>
-    // console.log 'fit width'
-    ($scope.forceScale = { scaleMode: 'scale_mode_fit_width' })
-
-  this.fitHeight = () =>
-    // console.log 'fit height'
-    ($scope.forceScale = { scaleMode: 'scale_mode_fit_height' })
-
-  this.checkPosition = () =>
-    // console.log 'check position'
-    ($scope.forceCheck = ($scope.forceCheck || 0) + 1)
-
-  this.showRandomHighlights = () =>
-    // console.log 'show highlights'
-    ($scope.highlights = [
-      {
-        page: 3,
-        h: 100,
-        v: 100,
-        height: 30,
-        width: 200
+      // console.log 'top page is', topPage.pageNum, topPage.elemTop, topPage.elemBottom, topPage
+      const { top } = topPage.element.offset()
+      const bottom = top + topPage.element.innerHeight()
+      const viewportTop = $element.offset().top
+      const viewportBottom = viewportTop + $element.height()
+      const topVisible = top >= viewportTop && top < viewportBottom
+      const someContentVisible = top < viewportTop && bottom > viewportTop
+      // console.log 'in PdfListView', top, topVisible, someContentVisible, viewportTop
+      if (topVisible) {
+        canvasOffset = 0
+      } else if (someContentVisible) {
+        canvasOffset = viewportTop - top
+      } else {
+        canvasOffset = null
       }
-    ])
-
-  // we work with (pagenumber, % of height down page from top)
-  // pdfListView works with (pagenumber, vertical position up page from
-  // bottom measured in pts)
-
-  this.getPdfPosition = function() {
-    // console.log 'in getPdfPosition'
-    let canvasOffset, pdfOffset, viewport
-    let topPageIdx = 0
-    let topPage = $scope.pages[0]
-    // find first visible page
-    const visible = $scope.pages.some(function(page, i) {
-      if (page.visible) {
-        let ref
-        return ([topPageIdx, topPage] = Array.from((ref = [i, page]))), ref
+      // console.log 'pdfListview position = ', canvasOffset
+      // instead of using promise, check if size is known and revert to
+      // default otherwise
+      // console.log 'looking up viewport', topPage.viewport, $scope.pdfViewport
+      if (topPage.viewport) {
+        ;({ viewport } = topPage)
+        pdfOffset = viewport.convertToPdfPoint(0, canvasOffset)
+      } else {
+        // console.log 'WARNING: had to default to global page size'
+        viewport = $scope.pdfViewport
+        const scaledOffset = canvasOffset / $scope.scale.scale
+        pdfOffset = viewport.convertToPdfPoint(0, scaledOffset)
       }
-    })
-    if (visible && topPage.element != null) {
-      // console.log 'found it', topPageIdx
-    } else {
-      // console.log 'CANNOT FIND TOP PAGE'
-      return
+      // console.log 'converted to offset = ', pdfOffset
+      const newPosition = {
+        page: topPageIdx,
+        offset: { top: pdfOffset[1], left: 0 },
+        pageSize: { height: viewport.viewBox[3], width: viewport.viewBox[2] }
+      }
+      return newPosition
     }
 
-    // console.log 'top page is', topPage.pageNum, topPage.elemTop, topPage.elemBottom, topPage
-    const { top } = topPage.element.offset()
-    const bottom = top + topPage.element.innerHeight()
-    const viewportTop = $element.offset().top
-    const viewportBottom = viewportTop + $element.height()
-    const topVisible = top >= viewportTop && top < viewportBottom
-    const someContentVisible = top < viewportTop && bottom > viewportTop
-    // console.log 'in PdfListView', top, topVisible, someContentVisible, viewportTop
-    if (topVisible) {
-      canvasOffset = 0
-    } else if (someContentVisible) {
-      canvasOffset = viewportTop - top
-    } else {
-      canvasOffset = null
-    }
-    // console.log 'pdfListview position = ', canvasOffset
-    // instead of using promise, check if size is known and revert to
-    // default otherwise
-    // console.log 'looking up viewport', topPage.viewport, $scope.pdfViewport
-    if (topPage.viewport) {
-      ;({ viewport } = topPage)
-      pdfOffset = viewport.convertToPdfPoint(0, canvasOffset)
-    } else {
-      // console.log 'WARNING: had to default to global page size'
-      viewport = $scope.pdfViewport
-      const scaledOffset = canvasOffset / $scope.scale.scale
-      pdfOffset = viewport.convertToPdfPoint(0, scaledOffset)
-    }
-    // console.log 'converted to offset = ', pdfOffset
-    const newPosition = {
-      page: topPageIdx,
-      offset: { top: pdfOffset[1], left: 0 },
-      pageSize: { height: viewport.viewBox[3], width: viewport.viewBox[2] }
-    }
-    return newPosition
-  }
-
-  this.computeOffset = function(page, position) {
-    // console.log 'computing offset for', page, position
-    const { element } = page
-    // console.log 'element =', $(element), 'parent =', $(element).parent()
-    const t1 = __guard__($(element).offset(), x => x.top)
-    const t2 = __guard__(
-      $(element)
-        .parent()
-        .offset(),
-      x1 => x1.top
-    )
-    if (!(t1 != null && t2 != null)) {
-      return $q((resolve, reject) => reject('elements destroyed'))
-    }
-    const pageTop =
-      $(element).offset().top -
-      $(element)
-        .parent()
-        .offset().top
-    // console.log('top of page scroll is', pageTop, 'vs', page.elemTop)
-    // console.log('inner height is', $(element).innerHeight())
-    const currentScroll = $(element)
-      .parent()
-      .scrollTop()
-    const { offset } = position
-    // convert offset to pixels
-    return $scope.document
-      .getPdfViewport(page.pageNum)
-      .then(function(viewport) {
-        page.viewport = viewport
-        const pageOffset = viewport.convertToViewportPoint(
-          offset.left,
-          offset.top
-        )
-        // if the passed-in position doesn't have the page height/width add them now
-        if (position.pageSize == null) {
-          position.pageSize = {
-            height: viewport.viewBox[3],
-            width: viewport.viewBox[2]
+    this.computeOffset = function (page, position) {
+      // console.log 'computing offset for', page, position
+      const { element } = page
+      // console.log 'element =', $(element), 'parent =', $(element).parent()
+      const t1 = __guard__($(element).offset(), x => x.top)
+      const t2 = __guard__($(element).parent().offset(), x1 => x1.top)
+      if (!(t1 != null && t2 != null)) {
+        return $q((resolve, reject) => reject('elements destroyed'))
+      }
+      const pageTop = $(element).offset().top - $(element).parent().offset().top
+      // console.log('top of page scroll is', pageTop, 'vs', page.elemTop)
+      // console.log('inner height is', $(element).innerHeight())
+      const currentScroll = $(element).parent().scrollTop()
+      const { offset } = position
+      // convert offset to pixels
+      return $scope.document
+        .getPdfViewport(page.pageNum)
+        .then(function (viewport) {
+          page.viewport = viewport
+          const pageOffset = viewport.convertToViewportPoint(
+            offset.left,
+            offset.top
+          )
+          // if the passed-in position doesn't have the page height/width add them now
+          if (position.pageSize == null) {
+            position.pageSize = {
+              height: viewport.viewBox[3],
+              width: viewport.viewBox[2]
+            }
           }
-        }
-        // console.log 'addition offset =', pageOffset
-        // console.log 'total', pageTop + pageOffset[1]
-        return Math.round(pageTop + pageOffset[1] + currentScroll)
-      }) // # 10 is margin
-  }
+          // console.log 'addition offset =', pageOffset
+          // console.log 'total', pageTop + pageOffset[1]
+          return Math.round(pageTop + pageOffset[1] + currentScroll)
+        }) // # 10 is margin
+    }
 
-  this.setPdfPosition = function(page, position) {
-    // console.log 'required pdf Position is', position
-    return this.computeOffset(page, position).then(function(offset) {
-      return $scope.$apply(() => {
-        $scope.pleaseScrollTo = offset
-        $scope.position = position
+    this.setPdfPosition = function (page, position) {
+      // console.log 'required pdf Position is', position
+      return this.computeOffset(page, position).then(function (offset) {
+        return $scope.$apply(() => {
+          $scope.pleaseScrollTo = offset
+          $scope.position = position
+        })
       })
-    })
+    }
+    return this
   }
-  return this
-})
+)
 
 export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
   controller: 'pdfViewerController',
@@ -345,19 +337,19 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
     const spinner = new pdfSpinner()
     let layoutReady = $q.defer()
     layoutReady.notify('waiting for layout')
-    layoutReady.promise.then(function() {})
+    layoutReady.promise.then(function () {})
     // console.log 'layoutReady was resolved'
 
-    const renderVisiblePages = function() {
+    const renderVisiblePages = function () {
       const visiblePages = getVisiblePages()
       const pages = getExtraPages(visiblePages)
       return scope.document.renderPages(pages)
     }
 
-    var getVisiblePages = function() {
+    var getVisiblePages = function () {
       const top = element[0].scrollTop
       const bottom = top + element[0].clientHeight
-      const visiblePages = _.filter(scope.pages, function(page) {
+      const visiblePages = _.filter(scope.pages, function (page) {
         if (page.element == null) {
           return false
         }
@@ -370,7 +362,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return visiblePages
     }
 
-    var getExtraPages = function(visiblePages) {
+    var getExtraPages = function (visiblePages) {
       const extra = []
       if (visiblePages.length > 0) {
         const firstVisiblePage = visiblePages[0].pageNum
@@ -395,20 +387,20 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
     }
 
     let rescaleTimer = null
-    const queueRescale = function(scale) {
+    const queueRescale = function (scale) {
       // console.log 'call to queueRescale'
       if (rescaleTimer != null || layoutTimer != null || elementTimer != null) {
         return
       }
       // console.log 'adding to rescale queue'
-      return (rescaleTimer = setTimeout(function() {
+      return (rescaleTimer = setTimeout(function () {
         doRescale(scale)
         return (rescaleTimer = null)
       }, 0))
     }
 
     let spinnerTimer = null
-    var doRescale = function(scale) {
+    var doRescale = function (scale) {
       // console.log 'doRescale', scale
       if (scale == null) {
         return
@@ -417,19 +409,19 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       // console.log 'origposition', origposition
 
       if (spinnerTimer == null) {
-        spinnerTimer = setTimeout(function() {
+        spinnerTimer = setTimeout(function () {
           spinner.add(element)
           return (spinnerTimer = null)
         }, 100)
       }
-      return layoutReady.promise.then(function(parentSize) {
+      return layoutReady.promise.then(function (parentSize) {
         const [h, w] = Array.from(parentSize)
         // console.log 'in promise', h, w
         return ctrl
           .setScale(scale, h, w)
           .then(() =>
             // console.log 'in setscale then', scale, h, w
-            scope.$evalAsync(function() {
+            scope.$evalAsync(function () {
               if (spinnerTimer) {
                 clearTimeout(spinnerTimer)
               } else {
@@ -447,21 +439,21 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
     }
 
     var elementTimer = null
-    var updateLayout = function() {
+    var updateLayout = function () {
       // if element is zero-sized keep checking until it is ready
       // console.log 'checking element ready', element.height(), element.width()
       if (element.height() === 0 || element.width() === 0) {
         if (elementTimer != null) {
           return
         }
-        return (elementTimer = setTimeout(function() {
+        return (elementTimer = setTimeout(function () {
           elementTimer = null
           return updateLayout()
         }, 1000))
       } else {
         scope.parentSize = [element.innerHeight(), element.innerWidth()]
         // console.log 'resolving layoutReady with', scope.parentSize
-        return $timeout(function() {
+        return $timeout(function () {
           layoutReady.resolve(scope.parentSize)
           return scope.$emit('flash-controls')
         })
@@ -469,14 +461,14 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
     }
 
     var layoutTimer = null
-    const queueLayout = function() {
+    const queueLayout = function () {
       // console.log 'call to queue layout'
       if (layoutTimer != null) {
         return
       }
       // console.log 'added to queue layoyt'
       layoutReady = $q.defer()
-      return (layoutTimer = setTimeout(function() {
+      return (layoutTimer = setTimeout(function () {
         // console.log 'calling update layout'
         updateLayout()
         // console.log 'setting layout timer to null'
@@ -502,7 +494,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       queueLayout()
     )
 
-    scope.$on('pdf:error', function(event, error) {
+    scope.$on('pdf:error', function (event, error) {
       if (error.name === 'RenderingCancelledException') {
         return
       }
@@ -530,7 +522,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       }
     })
 
-    scope.$on('pdf:page:size-change', function(event, pageNum, delta) {
+    scope.$on('pdf:page:size-change', function (event, pageNum, delta) {
       // console.log 'page size change event', pageNum, delta
       const origposition = angular.copy(scope.position)
       // console.log 'orig position', JSON.stringify(origposition)
@@ -546,7 +538,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       }
     })
 
-    element.on('mousedown', function(e) {
+    element.on('mousedown', function (e) {
       // We're checking that the event target isn't the directive root element
       // to make sure that the click was within a PDF page - no point in showing
       // the text layer when the click is outside.
@@ -562,7 +554,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
 
     let mouseUpHandler = null // keep track of the handler to avoid adding multiple times
 
-    var _setMouseUpHandler = function() {
+    var _setMouseUpHandler = function () {
       if (mouseUpHandler == null) {
         return (mouseUpHandler = $(document.body).one(
           'mouseup',
@@ -571,9 +563,9 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       }
     }
 
-    var _handleSelectionMouseUp = function() {
+    var _handleSelectionMouseUp = function () {
       mouseUpHandler = null // reset handler, has now fired
-      window.setTimeout(function() {
+      window.setTimeout(function () {
         const removedClass = _removeClassIfNoSelection()
         // if we still have a selection we need to keep the handler going
         if (!removedClass) {
@@ -583,7 +575,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return true
     }
 
-    var _removeClassIfNoSelection = function() {
+    var _removeClassIfNoSelection = function () {
       if (_hasSelection()) {
         return false // didn't remove the text layer
       } else {
@@ -592,7 +584,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       }
     }
 
-    var _hasSelection = function() {
+    var _hasSelection = function () {
       const selection =
         typeof window.getSelection === 'function'
           ? window.getSelection()
@@ -607,7 +599,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       )
     }
 
-    var _isSelectionWithinPDF = function(selection) {
+    var _isSelectionWithinPDF = function (selection) {
       if (selection.rangeCount === 0) {
         return false
       }
@@ -619,7 +611,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       )
     }
 
-    element.on('scroll', function() {
+    element.on('scroll', function () {
       // console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
       // scope.scrollPosition = element.scrollTop()
       if (scope.adjustingScroll) {
@@ -633,7 +625,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return (scope.scrollHandlerTimeout = setTimeout(scrollHandler, 25))
     })
 
-    var scrollHandler = function() {
+    var scrollHandler = function () {
       renderVisiblePages()
       const newPosition = ctrl.getPdfPosition()
       if (newPosition != null) {
@@ -642,7 +634,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return (scope.scrollHandlerTimeout = null)
     }
 
-    scope.$watch('pdfSrc', function(newVal, oldVal) {
+    scope.$watch('pdfSrc', function (newVal, oldVal) {
       // console.log 'loading pdf', newVal, oldVal
       if (newVal == null) {
         return
@@ -659,7 +651,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
         .catch(error => scope.$emit('pdf:error', error))
     })
 
-    scope.$watch('scale', function(newVal, oldVal) {
+    scope.$watch('scale', function (newVal, oldVal) {
       // no need to set scale when initialising, done in pdfSrc
       if (newVal === oldVal) {
         return
@@ -668,7 +660,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return queueRescale(newVal)
     })
 
-    scope.$watch('forceScale', function(newVal, oldVal) {
+    scope.$watch('forceScale', function (newVal, oldVal) {
       // console.log 'got change in numscale watcher', newVal, oldVal
       if (newVal == null) {
         return
@@ -679,7 +671,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
     //				scope.$watch 'position', (newVal, oldVal) ->
     //					console.log 'got change in position watcher', newVal, oldVal
 
-    scope.$watch('forceCheck', function(newVal, oldVal) {
+    scope.$watch('forceCheck', function (newVal, oldVal) {
       // console.log 'forceCheck', newVal, oldVal
       if (newVal == null) {
         return
@@ -690,7 +682,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
 
     scope.$watch(
       'parentSize',
-      function(newVal, oldVal) {
+      function (newVal, oldVal) {
         // console.log 'XXX in parentSize watch', newVal, oldVal
         // if newVal == oldVal
         // 	console.log 'returning because old and new are the same'
@@ -708,7 +700,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
     // scope.$watch 'elementWidth', (newVal, oldVal) ->
     // 	console.log '*** watch INTERVAL element width is', newVal, oldVal
 
-    scope.$watch('pleaseScrollTo', function(newVal, oldVal) {
+    scope.$watch('pleaseScrollTo', function (newVal, oldVal) {
       // console.log 'got request to ScrollTo', newVal, 'oldVal', oldVal
       if (newVal == null) {
         return
@@ -719,7 +711,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return (scope.pleaseScrollTo = undefined)
     })
 
-    scope.$watch('pleaseJumpTo', function(newPosition, oldPosition) {
+    scope.$watch('pleaseJumpTo', function (newPosition, oldPosition) {
       // console.log 'in pleaseJumpTo', newPosition, oldPosition
       if (newPosition == null) {
         return
@@ -727,7 +719,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return ctrl.setPdfPosition(scope.pages[newPosition.page - 1], newPosition)
     })
 
-    scope.$watch('navigateTo', function(newVal, oldVal) {
+    scope.$watch('navigateTo', function (newVal, oldVal) {
       if (newVal == null) {
         return
       }
@@ -738,12 +730,12 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return scope.document.getDestination(newVal.dest).then(r =>
         // console.log 'need to go to', r
         // console.log 'page ref is', r[0]
-        scope.document.getPageIndex(r[0]).then(function(pidx) {
+        scope.document.getPageIndex(r[0]).then(function (pidx) {
           // console.log 'page num is', pidx
           const page = scope.pages[pidx]
           return scope.document
             .getPdfViewport(page.pageNum)
-            .then(function(viewport) {
+            .then(function (viewport) {
               // console.log 'got viewport', viewport
               const coords = viewport.convertToViewportPoint(r[2], r[3])
               // console.log	'viewport position', coords
@@ -761,7 +753,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       )
     }) // XXX?
 
-    scope.$watch('highlights', function(areas) {
+    scope.$watch('highlights', function (areas) {
       // console.log 'got HIGHLIGHTS in pdfViewer', areas
       if (areas == null) {
         return
@@ -802,7 +794,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       }
 
       // use a visual offset of 72pt to match the offset in PdfController syncToCode
-      return scope.document.getPdfViewport(pageNum).then(function(viewport) {
+      return scope.document.getPdfViewport(pageNum).then(function (viewport) {
         const position = {
           page: first.page,
           offset: {
@@ -818,7 +810,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       })
     })
 
-    return scope.$on('$destroy', function() {
+    return scope.$on('$destroy', function () {
       // console.log 'handle pdfng directive destroy'
       if (elementTimer != null) {
         clearTimeout(elementTimer)

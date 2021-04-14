@@ -6,8 +6,8 @@ const modulePath = path.join(
 const SpamSafe = require(modulePath)
 const { expect } = require('chai')
 
-describe('SpamSafe', function() {
-  it('should reject spammy names', function() {
+describe('SpamSafe', function () {
+  it('should reject spammy names', function () {
     expect(SpamSafe.isSafeUserName('Charline Wałęsa')).to.equal(true)
     expect(
       SpamSafe.isSafeUserName(

@@ -7,7 +7,7 @@ const TagsController = {
     if (!userId) {
       return next(new Errors.NotFoundError())
     }
-    TagsHandler.getAllTags(userId, function(error, allTags) {
+    TagsHandler.getAllTags(userId, function (error, allTags) {
       if (error != null) {
         return next(error)
       }
@@ -28,7 +28,7 @@ const TagsController = {
   createTag(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     const { name } = req.body
-    TagsHandler.createTag(userId, name, function(error, tag) {
+    TagsHandler.createTag(userId, name, function (error, tag) {
       if (error != null) {
         return next(error)
       }
@@ -39,7 +39,7 @@ const TagsController = {
   addProjectToTag(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     const { tagId, projectId } = req.params
-    TagsHandler.addProjectToTag(userId, tagId, projectId, function(error) {
+    TagsHandler.addProjectToTag(userId, tagId, projectId, function (error) {
       if (error) {
         return next(error)
       }
@@ -50,18 +50,23 @@ const TagsController = {
   removeProjectFromTag(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     const { tagId, projectId } = req.params
-    TagsHandler.removeProjectFromTag(userId, tagId, projectId, function(error) {
-      if (error) {
-        return next(error)
+    TagsHandler.removeProjectFromTag(
+      userId,
+      tagId,
+      projectId,
+      function (error) {
+        if (error) {
+          return next(error)
+        }
+        res.status(204).end()
       }
-      res.status(204).end()
-    })
+    )
   },
 
   deleteTag(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
     const { tagId } = req.params
-    TagsHandler.deleteTag(userId, tagId, function(error) {
+    TagsHandler.deleteTag(userId, tagId, function (error) {
       if (error) {
         return next(error)
       }
@@ -76,7 +81,7 @@ const TagsController = {
     if (!name) {
       return res.status(400).end()
     }
-    TagsHandler.renameTag(userId, tagId, name, function(error) {
+    TagsHandler.renameTag(userId, tagId, name, function (error) {
       if (error) {
         return next(error)
       }

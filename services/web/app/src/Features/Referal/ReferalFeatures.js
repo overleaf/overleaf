@@ -7,10 +7,10 @@ let ReferalFeatures
 module.exports = ReferalFeatures = {
   getBonusFeatures(userId, callback) {
     if (callback == null) {
-      callback = function() {}
+      callback = function () {}
     }
     const query = { _id: userId }
-    User.findOne(query, { refered_user_count: 1 }, function(error, user) {
+    User.findOne(query, { refered_user_count: 1 }, function (error, user) {
       if (error) {
         return callback(error)
       }
@@ -37,7 +37,7 @@ module.exports = ReferalFeatures = {
 
   _getBonusLevel(user) {
     let highestBonusLevel = 0
-    _.each(_.keys(Settings.bonus_features), function(level) {
+    _.each(_.keys(Settings.bonus_features), function (level) {
       const levelIsLessThanUser = level <= user.refered_user_count
       const levelIsMoreThanCurrentHighest = level >= highestBonusLevel
       if (levelIsLessThanUser && levelIsMoreThanCurrentHighest) {

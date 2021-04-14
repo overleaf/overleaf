@@ -5,9 +5,9 @@ const User = require('./helpers/User')
 const RecurlySubscription = require('./helpers/RecurlySubscription')
 const SubscriptionUpdater = require('../../../app/src/Features/Subscription/SubscriptionUpdater')
 
-describe('Subscriptions', function() {
-  describe('deletion', function() {
-    beforeEach(function(done) {
+describe('Subscriptions', function () {
+  describe('deletion', function () {
+    beforeEach(function (done) {
       this.adminUser = new User()
       this.memberUser = new User()
       async.series(
@@ -33,7 +33,7 @@ describe('Subscriptions', function() {
       )
     })
 
-    it('deletes via Recurly callback', function(done) {
+    it('deletes via Recurly callback', function (done) {
       let url = '/user/subscription/callback'
       let body = this.recurlySubscription.buildCallbackXml()
 
@@ -46,7 +46,7 @@ describe('Subscriptions', function() {
       })
     })
 
-    it('refresh features', function(done) {
+    it('refresh features', function (done) {
       let url = '/user/subscription/callback'
       let body = this.recurlySubscription.buildCallbackXml()
 
@@ -61,7 +61,7 @@ describe('Subscriptions', function() {
       })
     })
 
-    it('allows deletion when deletedSubscription exists', function(done) {
+    it('allows deletion when deletedSubscription exists', function (done) {
       let url = '/user/subscription/callback'
       let body = this.recurlySubscription.buildCallbackXml()
 

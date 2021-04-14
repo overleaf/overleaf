@@ -21,8 +21,8 @@ const modulePath = path.join(
 )
 const { expect } = require('chai')
 
-describe('GeoIpLookup', function() {
-  beforeEach(function() {
+describe('GeoIpLookup', function () {
+  beforeEach(function () {
     this.settings = {
       apis: {
         geoIpLookup: {
@@ -54,12 +54,12 @@ describe('GeoIpLookup', function() {
     })
   })
 
-  describe('getDetails', function() {
-    beforeEach(function() {
+  describe('getDetails', function () {
+    beforeEach(function () {
       return this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
     })
 
-    it('should request the details using the ip', function(done) {
+    it('should request the details using the ip', function (done) {
       return this.GeoIpLookup.getDetails(this.ipAddress, err => {
         this.request.get
           .calledWith({
@@ -72,7 +72,7 @@ describe('GeoIpLookup', function() {
       })
     })
 
-    it('should return the ip details', function(done) {
+    it('should return the ip details', function (done) {
       return this.GeoIpLookup.getDetails(
         this.ipAddress,
         (err, returnedDetails) => {
@@ -82,7 +82,7 @@ describe('GeoIpLookup', function() {
       )
     })
 
-    it('should take the first ip in the string', function(done) {
+    it('should take the first ip in the string', function (done) {
       return this.GeoIpLookup.getDetails(
         ` ${this.ipAddress} 456.312.452.102 432.433.888.234`,
         err => {
@@ -99,8 +99,8 @@ describe('GeoIpLookup', function() {
     })
   })
 
-  describe('getCurrencyCode', function() {
-    it('should return GBP for GB country', function(done) {
+  describe('getCurrencyCode', function () {
+    it('should return GBP for GB country', function (done) {
       this.GeoIpLookup.getDetails = sinon
         .stub()
         .callsArgWith(1, null, this.stubbedResponse)
@@ -113,7 +113,7 @@ describe('GeoIpLookup', function() {
       )
     })
 
-    it('should return GBP for gb country', function(done) {
+    it('should return GBP for gb country', function (done) {
       this.stubbedResponse.country_code = 'gb'
       this.GeoIpLookup.getDetails = sinon
         .stub()
@@ -127,7 +127,7 @@ describe('GeoIpLookup', function() {
       )
     })
 
-    it('should return USD for US', function(done) {
+    it('should return USD for US', function (done) {
       this.stubbedResponse.country_code = 'US'
       this.GeoIpLookup.getDetails = sinon
         .stub()
@@ -141,7 +141,7 @@ describe('GeoIpLookup', function() {
       )
     })
 
-    it('should return EUR for DE', function(done) {
+    it('should return EUR for DE', function (done) {
       this.stubbedResponse.country_code = 'DE'
       this.GeoIpLookup.getDetails = sinon
         .stub()
@@ -155,7 +155,7 @@ describe('GeoIpLookup', function() {
       )
     })
 
-    it('should default to USD if there is an error', function(done) {
+    it('should default to USD if there is an error', function (done) {
       this.GeoIpLookup.getDetails = sinon.stub().callsArgWith(1, 'problem')
       return this.GeoIpLookup.getCurrencyCode(
         this.ipAddress,
@@ -166,7 +166,7 @@ describe('GeoIpLookup', function() {
       )
     })
 
-    it('should default to USD if there are no details', function(done) {
+    it('should default to USD if there are no details', function (done) {
       this.GeoIpLookup.getDetails = sinon.stub().callsArgWith(1)
       return this.GeoIpLookup.getCurrencyCode(
         this.ipAddress,
@@ -177,7 +177,7 @@ describe('GeoIpLookup', function() {
       )
     })
 
-    it('should default to USD if there is no match for their country', function(done) {
+    it('should default to USD if there is no match for their country', function (done) {
       this.stubbedResponse.country_code = 'Non existant'
       this.GeoIpLookup.getDetails = sinon
         .stub()

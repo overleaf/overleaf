@@ -6,20 +6,20 @@ import renderWithContext from '../../helpers/render-with-context'
 
 import FileTreeitemInner from '../../../../../../frontend/js/features/file-tree/components/file-tree-item/file-tree-item-inner'
 
-describe('<FileTreeitemInner />', function() {
+describe('<FileTreeitemInner />', function () {
   const setContextMenuCoords = sinon.stub()
 
-  beforeEach(function() {
+  beforeEach(function () {
     global.requestAnimationFrame = sinon.stub()
   })
 
-  afterEach(function() {
+  afterEach(function () {
     setContextMenuCoords.reset()
     delete global.requestAnimationFrame
   })
 
-  describe('menu', function() {
-    it('does not display if file is not selected', function() {
+  describe('menu', function () {
+    it('does not display if file is not selected', function () {
       renderWithContext(
         <FileTreeitemInner id="123abc" name="bar.tex" isSelected={false} />,
         {}
@@ -29,8 +29,8 @@ describe('<FileTreeitemInner />', function() {
     })
   })
 
-  describe('context menu', function() {
-    it('does not display without write permissions', function() {
+  describe('context menu', function () {
+    it('does not display without write permissions', function () {
       renderWithContext(
         <FileTreeitemInner id="123abc" name="bar.tex" isSelected />,
         { contextProps: { hasWritePermissions: false } }
@@ -39,7 +39,7 @@ describe('<FileTreeitemInner />', function() {
       expect(screen.queryByRole('menu', { visible: false })).to.not.exist
     })
 
-    it('open / close', function() {
+    it('open / close', function () {
       const { container } = renderWithContext(
         <FileTreeitemInner id="123abc" name="bar.tex" isSelected />
       )
@@ -56,8 +56,8 @@ describe('<FileTreeitemInner />', function() {
     })
   })
 
-  describe('name', function() {
-    it('renders name', function() {
+  describe('name', function () {
+    it('renders name', function () {
       renderWithContext(
         <FileTreeitemInner id="123abc" name="bar.tex" isSelected />
       )
@@ -66,7 +66,7 @@ describe('<FileTreeitemInner />', function() {
       expect(screen.queryByRole('textbox')).to.not.exist
     })
 
-    it('starts rename on menu item click', function() {
+    it('starts rename on menu item click', function () {
       renderWithContext(
         <FileTreeitemInner id="123abc" name="bar.tex" isSelected />,
         {

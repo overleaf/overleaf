@@ -59,9 +59,9 @@ class SizeLimitedStream extends Transform {
 const FileWriter = {
   ensureDumpFolderExists(callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
-    return fs.mkdir(Settings.path.dumpFolder, function(error) {
+    return fs.mkdir(Settings.path.dumpFolder, function (error) {
       if (error != null && error.code !== 'EEXIST') {
         // Ignore error about already existing
         return callback(error)
@@ -72,22 +72,22 @@ const FileWriter = {
 
   writeLinesToDisk(identifier, lines, callback) {
     if (callback == null) {
-      callback = function(error, fsPath) {}
+      callback = function (error, fsPath) {}
     }
     return FileWriter.writeContentToDisk(identifier, lines.join('\n'), callback)
   },
 
   writeContentToDisk(identifier, content, callback) {
     if (callback == null) {
-      callback = function(error, fsPath) {}
+      callback = function (error, fsPath) {}
     }
     callback = _.once(callback)
     const fsPath = `${Settings.path.dumpFolder}/${identifier}_${uuid.v4()}`
-    return FileWriter.ensureDumpFolderExists(function(error) {
+    return FileWriter.ensureDumpFolderExists(function (error) {
       if (error != null) {
         return callback(error)
       }
-      return fs.writeFile(fsPath, content, function(error) {
+      return fs.writeFile(fsPath, content, function (error) {
         if (error != null) {
           return callback(error)
         }
@@ -102,7 +102,7 @@ const FileWriter = {
       options = {}
     }
     if (callback == null) {
-      callback = function(error, fsPath) {}
+      callback = function (error, fsPath) {}
     }
     options = options || {}
 
@@ -110,7 +110,7 @@ const FileWriter = {
 
     stream.pause()
 
-    FileWriter.ensureDumpFolderExists(function(error) {
+    FileWriter.ensureDumpFolderExists(function (error) {
       const writeStream = fs.createWriteStream(fsPath)
 
       if (error != null) {
@@ -124,13 +124,13 @@ const FileWriter = {
 
       // if writing fails, we want to consume the bytes from the source, to avoid leaks
       for (const evt of ['error', 'close']) {
-        writeStream.on(evt, function() {
+        writeStream.on(evt, function () {
           passThrough.unpipe(writeStream)
           passThrough.resume()
         })
       }
 
-      pipeline(stream, passThrough, writeStream, function(err) {
+      pipeline(stream, passThrough, writeStream, function (err) {
         if (
           options.maxSizeBytes &&
           passThrough.bytes >= options.maxSizeBytes &&
@@ -168,20 +168,20 @@ const FileWriter = {
       options = {}
     }
     if (callback == null) {
-      callback = function(error, fsPath) {}
+      callback = function (error, fsPath) {}
     }
     options = options || {}
     callback = _.once(callback)
 
     const stream = request.get(url)
-    stream.on('error', function(err) {
+    stream.on('error', function (err) {
       logger.warn(
         { err, identifier, url },
         '[writeUrlToDisk] something went wrong with writing to disk'
       )
       callback(err)
     })
-    stream.on('response', function(response) {
+    stream.on('response', function (response) {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         FileWriter.writeStreamToDisk(identifier, stream, options, callback)
       } else {

@@ -14,7 +14,7 @@ let selectName
 App.directive('focusWhen', $timeout => ({
   restrict: 'A',
   link(scope, element, attr) {
-    return scope.$watch(attr.focusWhen, function(value) {
+    return scope.$watch(attr.focusWhen, function (value) {
       if (value) {
         return $timeout(() => element.focus())
       }
@@ -32,7 +32,7 @@ App.directive('focusOn', $timeout => ({
 App.directive('selectWhen', $timeout => ({
   restrict: 'A',
   link(scope, element, attr) {
-    return scope.$watch(attr.selectWhen, function(value) {
+    return scope.$watch(attr.selectWhen, function (value) {
       if (value) {
         return $timeout(() => element.select())
       }
@@ -50,7 +50,7 @@ App.directive('selectOn', $timeout => ({
 App.directive('selectNameWhen', $timeout => ({
   restrict: 'A',
   link(scope, element, attrs) {
-    return scope.$watch(attrs.selectNameWhen, function(value) {
+    return scope.$watch(attrs.selectNameWhen, function (value) {
       if (value) {
         return $timeout(() => selectName(element))
       }
@@ -71,7 +71,7 @@ App.directive('focus', $timeout => ({
   },
 
   link(scope, element) {
-    return scope.$watch('trigger', function(value) {
+    return scope.$watch('trigger', function (value) {
       if (value === 'true') {
         return $timeout(() => element[0].focus())
       }
@@ -79,7 +79,7 @@ App.directive('focus', $timeout => ({
   }
 }))
 
-selectName = function(element) {
+selectName = function (element) {
   // Select up to last '.'. I.e. everything except the file extension
   element.focus()
   const name = element.val()

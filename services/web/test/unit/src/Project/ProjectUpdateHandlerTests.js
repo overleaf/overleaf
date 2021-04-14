@@ -17,13 +17,13 @@ const modulePath =
   '../../../../app/src/Features/Project/ProjectUpdateHandler.js'
 const SandboxedModule = require('sandboxed-module')
 
-describe('ProjectUpdateHandler', function() {
-  beforeEach(function() {
+describe('ProjectUpdateHandler', function () {
+  beforeEach(function () {
     this.fakeTime = new Date()
     this.clock = sinon.useFakeTimers(this.fakeTime.getTime())
   })
 
-  beforeEach(function() {
+  beforeEach(function () {
     let Project
     this.ProjectModel = Project = class Project {}
     this.ProjectModel.updateOne = sinon.stub().callsArg(3)
@@ -34,14 +34,14 @@ describe('ProjectUpdateHandler', function() {
     }))
   })
 
-  describe('marking a project as recently updated', function() {
-    beforeEach(function() {
+  describe('marking a project as recently updated', function () {
+    beforeEach(function () {
       this.project_id = 'project_id'
       this.lastUpdatedAt = 987654321
       return (this.lastUpdatedBy = 'fake-last-updater-id')
     })
 
-    it('should send an update to mongo', function(done) {
+    it('should send an update to mongo', function (done) {
       return this.handler.markAsUpdated(
         this.project_id,
         this.lastUpdatedAt,
@@ -63,7 +63,7 @@ describe('ProjectUpdateHandler', function() {
       )
     })
 
-    it('should set smart fallbacks', function(done) {
+    it('should set smart fallbacks', function (done) {
       return this.handler.markAsUpdated(this.project_id, null, null, err => {
         sinon.assert.calledWithMatch(
           this.ProjectModel.updateOne,
@@ -81,8 +81,8 @@ describe('ProjectUpdateHandler', function() {
     })
   })
 
-  describe('markAsOpened', function() {
-    it('should send an update to mongo', function(done) {
+  describe('markAsOpened', function () {
+    it('should send an update to mongo', function (done) {
       const project_id = 'project_id'
       return this.handler.markAsOpened(project_id, err => {
         const args = this.ProjectModel.updateOne.args[0]
@@ -95,8 +95,8 @@ describe('ProjectUpdateHandler', function() {
     })
   })
 
-  describe('markAsInactive', function() {
-    it('should send an update to mongo', function(done) {
+  describe('markAsInactive', function () {
+    it('should send an update to mongo', function (done) {
       const project_id = 'project_id'
       return this.handler.markAsInactive(project_id, err => {
         const args = this.ProjectModel.updateOne.args[0]
@@ -107,8 +107,8 @@ describe('ProjectUpdateHandler', function() {
     })
   })
 
-  describe('markAsActive', function() {
-    it('should send an update to mongo', function(done) {
+  describe('markAsActive', function () {
+    it('should send an update to mongo', function (done) {
       const project_id = 'project_id'
       return this.handler.markAsActive(project_id, err => {
         const args = this.ProjectModel.updateOne.args[0]

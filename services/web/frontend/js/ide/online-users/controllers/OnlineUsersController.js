@@ -12,14 +12,14 @@
  */
 import App from '../../../base'
 
-export default App.controller('OnlineUsersController', function($scope, ide) {
-  $scope.gotoUser = function(user) {
+export default App.controller('OnlineUsersController', function ($scope, ide) {
+  $scope.gotoUser = function (user) {
     if (user.doc != null && user.row != null) {
       return ide.editorManager.openDoc(user.doc, { gotoLine: user.row + 1 })
     }
   }
 
-  return ($scope.userInitial = function(user) {
+  return ($scope.userInitial = function (user) {
     if (user.user_id === 'anonymous-user') {
       return '?'
     } else {

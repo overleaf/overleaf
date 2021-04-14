@@ -6,8 +6,8 @@ const Errors = require('../../../../app/src/Features/Errors/Errors')
 const MODULE_PATH =
   '../../../../app/src/Features/FileStore/FileStoreController.js'
 
-describe('FileStoreController', function() {
-  beforeEach(function() {
+describe('FileStoreController', function () {
+  beforeEach(function () {
     this.FileStoreHandler = {
       getFileStream: sinon.stub(),
       getFileSize: sinon.stub()
@@ -42,13 +42,13 @@ describe('FileStoreController', function() {
     this.file = { name: 'myfile.png' }
   })
 
-  describe('getFile', function() {
-    beforeEach(function() {
+  describe('getFile', function () {
+    beforeEach(function () {
       this.FileStoreHandler.getFileStream.callsArgWith(3, null, this.stream)
       this.ProjectLocator.findElement.callsArgWith(1, null, this.file)
     })
 
-    it('should call the file store handler with the project_id file_id and any query string', function(done) {
+    it('should call the file store handler with the project_id file_id and any query string', function (done) {
       this.stream.pipe = des => {
         this.FileStoreHandler.getFileStream
           .calledWith(
@@ -62,7 +62,7 @@ describe('FileStoreController', function() {
       this.controller.getFile(this.req, this.res)
     })
 
-    it('should pipe to res', function(done) {
+    it('should pipe to res', function (done) {
       this.stream.pipe = des => {
         des.should.equal(this.res)
         done()
@@ -70,7 +70,7 @@ describe('FileStoreController', function() {
       this.controller.getFile(this.req, this.res)
     })
 
-    it('should get the file from the db', function(done) {
+    it('should get the file from the db', function (done) {
       this.stream.pipe = des => {
         const opts = {
           project_id: this.projectId,
@@ -83,7 +83,7 @@ describe('FileStoreController', function() {
       this.controller.getFile(this.req, this.res)
     })
 
-    it('should set the Content-Disposition header', function(done) {
+    it('should set the Content-Disposition header', function (done) {
       this.stream.pipe = des => {
         this.res.setContentDisposition
           .calledWith('attachment', { filename: this.file.name })
@@ -95,8 +95,8 @@ describe('FileStoreController', function() {
 
     // Test behaviour around handling html files
     ;['.html', '.htm', '.xhtml'].forEach(extension => {
-      describe(`with a '${extension}' file extension`, function() {
-        beforeEach(function() {
+      describe(`with a '${extension}' file extension`, function () {
+        beforeEach(function () {
           this.file.name = `bad${extension}`
           this.req.get = key => {
             if (key === 'User-Agent') {
@@ -105,8 +105,8 @@ describe('FileStoreController', function() {
           }
         })
 
-        describe('from a non-ios browser', function() {
-          it('should not set Content-Type', function(done) {
+        describe('from a non-ios browser', function () {
+          it('should not set Content-Type', function (done) {
             this.stream.pipe = des => {
               this.res.setHeader
                 .calledWith('Content-Type', 'text/plain')
@@ -117,8 +117,8 @@ describe('FileStoreController', function() {
           })
         })
 
-        describe('from an iPhone', function() {
-          beforeEach(function() {
+        describe('from an iPhone', function () {
+          beforeEach(function () {
             this.req.get = key => {
               if (key === 'User-Agent') {
                 return 'An iPhone browser'
@@ -126,7 +126,7 @@ describe('FileStoreController', function() {
             }
           })
 
-          it("should set Content-Type to 'text/plain'", function(done) {
+          it("should set Content-Type to 'text/plain'", function (done) {
             this.stream.pipe = des => {
               this.res.setHeader
                 .calledWith('Content-Type', 'text/plain')
@@ -137,8 +137,8 @@ describe('FileStoreController', function() {
           })
         })
 
-        describe('from an iPad', function() {
-          beforeEach(function() {
+        describe('from an iPad', function () {
+          beforeEach(function () {
             this.req.get = key => {
               if (key === 'User-Agent') {
                 return 'An iPad browser'
@@ -146,7 +146,7 @@ describe('FileStoreController', function() {
             }
           })
 
-          it("should set Content-Type to 'text/plain'", function(done) {
+          it("should set Content-Type to 'text/plain'", function (done) {
             this.stream.pipe = des => {
               this.res.setHeader
                 .calledWith('Content-Type', 'text/plain')
@@ -165,8 +165,8 @@ describe('FileStoreController', function() {
       '.html-is-good-for-hidden-files',
       'somefile')
     ].forEach(filename => {
-      describe(`with filename as '${filename}'`, function() {
-        beforeEach(function() {
+      describe(`with filename as '${filename}'`, function () {
+        beforeEach(function () {
           this.user_agent = 'A generic browser'
           this.file.name = filename
           this.req.get = key => {
@@ -176,12 +176,12 @@ describe('FileStoreController', function() {
           }
         })
         ;[('iPhone', 'iPad', 'Firefox', 'Chrome')].forEach(browser => {
-          describe(`downloaded from ${browser}`, function() {
-            beforeEach(function() {
+          describe(`downloaded from ${browser}`, function () {
+            beforeEach(function () {
               this.user_agent = `Some ${browser} thing`
             })
 
-            it('Should not set the Content-type', function(done) {
+            it('Should not set the Content-type', function (done) {
               this.stream.pipe = des => {
                 this.res.setHeader
                   .calledWith('Content-Type', 'text/plain')
@@ -196,8 +196,8 @@ describe('FileStoreController', function() {
     })
   })
 
-  describe('getFileHead', function() {
-    it('reports the file size', function(done) {
+  describe('getFileHead', function () {
+    it('reports the file size', function (done) {
       const expectedFileSize = 99393
       this.FileStoreHandler.getFileSize.yields(
         new Error('getFileSize: unexpected arguments')
@@ -218,7 +218,7 @@ describe('FileStoreController', function() {
       this.controller.getFileHead(this.req, this.res)
     })
 
-    it('returns 404 on NotFoundError', function(done) {
+    it('returns 404 on NotFoundError', function (done) {
       this.FileStoreHandler.getFileSize.yields(new Errors.NotFoundError())
 
       this.res.end = () => {
@@ -229,7 +229,7 @@ describe('FileStoreController', function() {
       this.controller.getFileHead(this.req, this.res)
     })
 
-    it('returns 500 on error', function(done) {
+    it('returns 500 on error', function (done) {
       this.FileStoreHandler.getFileSize.yields(new Error('boom!'))
 
       this.res.end = () => {

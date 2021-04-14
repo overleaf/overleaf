@@ -61,7 +61,7 @@ module.exports = {
   },
 
   checkRedis(req, res, next) {
-    return rclient.healthCheck(function(error) {
+    return rclient.healthCheck(function (error) {
       if (error != null) {
         logger.err({ err: error }, 'failed redis health check')
         return res.sendStatus(500)
@@ -72,23 +72,23 @@ module.exports = {
   },
 
   checkMongo(req, res, next) {
-    return UserGetter.getUserEmail(settings.smokeTest.userId, function(
-      err,
-      email
-    ) {
-      if (err != null) {
-        logger.err({ err }, 'mongo health check failed, error present')
-        return res.sendStatus(500)
-      } else if (email == null) {
-        logger.err(
-          { err },
-          'mongo health check failed, no emai present in find result'
-        )
-        return res.sendStatus(500)
-      } else {
-        return res.sendStatus(200)
+    return UserGetter.getUserEmail(
+      settings.smokeTest.userId,
+      function (err, email) {
+        if (err != null) {
+          logger.err({ err }, 'mongo health check failed, error present')
+          return res.sendStatus(500)
+        } else if (email == null) {
+          logger.err(
+            { err },
+            'mongo health check failed, no emai present in find result'
+          )
+          return res.sendStatus(500)
+        } else {
+          return res.sendStatus(200)
+        }
       }
-    })
+    )
   }
 }
 

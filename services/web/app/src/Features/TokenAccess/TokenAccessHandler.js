@@ -121,7 +121,7 @@ const TokenAccessHandler = {
       {
         'tokens.readAndWritePrefix': numerics
       },
-      function(err, project) {
+      function (err, project) {
         if (err != null) {
           return callback(err)
         }
@@ -263,7 +263,7 @@ const TokenAccessHandler = {
     }
     V1Api.request(
       { url: `/api/v1/sharelatex/docs/${token}/is_published` },
-      function(err, response, body) {
+      function (err, response, body) {
         if (err != null) {
           return callback(err)
         }
@@ -279,7 +279,7 @@ const TokenAccessHandler = {
         exported: false
       })
     }
-    UserGetter.getUser(v2UserId, { overleaf: 1 }, function(err, user) {
+    UserGetter.getUser(v2UserId, { overleaf: 1 }, function (err, user) {
       if (err != null) {
         return callback(err)
       }
@@ -289,7 +289,7 @@ const TokenAccessHandler = {
       }
       V1Api.request(
         { url: `/api/v1/sharelatex/users/${v1UserId}/docs/${token}/info` },
-        function(err, response, body) {
+        function (err, response, body) {
           if (err != null) {
             return callback(err)
           }

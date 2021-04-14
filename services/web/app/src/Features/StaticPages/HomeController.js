@@ -48,14 +48,14 @@ module.exports = HomeController = {
   },
 
   externalPage(page, title) {
-    return function(req, res, next) {
+    return function (req, res, next) {
       if (next == null) {
-        next = function(error) {}
+        next = function (error) {}
       }
       const path = Path.resolve(
         __dirname + `/../../../views/external/${page}.pug`
       )
-      return fs.exists(path, function(exists) {
+      return fs.exists(path, function (exists) {
         // No error in this callback - old method in Node.js!
         if (exists) {
           return res.render(`external/${page}.pug`, { title })

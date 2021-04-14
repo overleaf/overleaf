@@ -15,12 +15,12 @@ const MockV1ApiClass = require('./mocks/MockV1Api')
 
 let MockV1Api
 
-before(function() {
+before(function () {
   MockV1Api = MockV1ApiClass.instance()
 })
 
-describe('SettingsPage', function() {
-  beforeEach(function(done) {
+describe('SettingsPage', function () {
+  beforeEach(function (done) {
     this.user = new User()
     this.v1Id = 1234
     this.v1User = {
@@ -46,14 +46,14 @@ describe('SettingsPage', function() {
     )
   })
 
-  it('load settings page', function(done) {
+  it('load settings page', function (done) {
     return this.user.getUserSettingsPage((err, statusCode) => {
       statusCode.should.equal(200)
       return done()
     })
   })
 
-  it('update main email address', function(done) {
+  it('update main email address', function (done) {
     const newEmail = 'foo@bar.com'
     return this.user.updateSettings({ email: newEmail }, error => {
       expect(error).not.to.exist
@@ -66,7 +66,7 @@ describe('SettingsPage', function() {
     })
   })
 
-  describe('with third-party-references configured', function() {
+  describe('with third-party-references configured', function () {
     beforeEach(function injectThirdPartyReferencesEntryIntoDb(done) {
       this.user.mongoUpdate(
         { $set: { refProviders: { zotero: { encrypted: '2020.9:SNIP' } } } },
@@ -74,7 +74,7 @@ describe('SettingsPage', function() {
       )
     })
 
-    it('should be able to update settings', function(done) {
+    it('should be able to update settings', function (done) {
       const newName = 'third-party-references'
       this.user.updateSettings({ first_name: newName }, error => {
         expect(error).not.to.exist

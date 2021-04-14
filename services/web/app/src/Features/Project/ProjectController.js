@@ -64,10 +64,7 @@ const ProjectController = {
       return true
     }
     const data = `${rolloutName}:${objectId.toString()}`
-    const md5hash = crypto
-      .createHash('md5')
-      .update(data)
-      .digest('hex')
+    const md5hash = crypto.createHash('md5').update(data).digest('hex')
     const counter = parseInt(md5hash.slice(26, 32), 16)
     return counter % 100 < percentage
   },
@@ -162,7 +159,7 @@ const ProjectController = {
     const projectId = req.params.Project_id
     const userId = AuthenticationController.getLoggedInUserId(req)
 
-    ProjectDeleter.archiveProject(projectId, userId, function(err) {
+    ProjectDeleter.archiveProject(projectId, userId, function (err) {
       if (err != null) {
         return next(err)
       } else {
@@ -175,7 +172,7 @@ const ProjectController = {
     const projectId = req.params.Project_id
     const userId = AuthenticationController.getLoggedInUserId(req)
 
-    ProjectDeleter.unarchiveProject(projectId, userId, function(err) {
+    ProjectDeleter.unarchiveProject(projectId, userId, function (err) {
       if (err != null) {
         return next(err)
       } else {
@@ -188,7 +185,7 @@ const ProjectController = {
     const projectId = req.params.project_id
     const userId = AuthenticationController.getLoggedInUserId(req)
 
-    ProjectDeleter.trashProject(projectId, userId, function(err) {
+    ProjectDeleter.trashProject(projectId, userId, function (err) {
       if (err != null) {
         return next(err)
       } else {
@@ -201,7 +198,7 @@ const ProjectController = {
     const projectId = req.params.project_id
     const userId = AuthenticationController.getLoggedInUserId(req)
 
-    ProjectDeleter.untrashProject(projectId, userId, function(err) {
+    ProjectDeleter.untrashProject(projectId, userId, function (err) {
       if (err != null) {
         return next(err)
       } else {

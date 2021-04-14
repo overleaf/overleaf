@@ -49,41 +49,41 @@ module.exports = {
       }
     }
 
-    return ExportsHandler.exportProject(export_params, function(
-      err,
-      export_data
-    ) {
-      if (err != null) {
-        if (err.forwardResponse != null) {
-          logger.log(
-            { responseError: err.forwardResponse },
-            'forwarding response'
-          )
-          const statusCode = err.forwardResponse.status || 500
-          return res.status(statusCode).json(err.forwardResponse)
-        } else {
-          return next(err)
+    return ExportsHandler.exportProject(
+      export_params,
+      function (err, export_data) {
+        if (err != null) {
+          if (err.forwardResponse != null) {
+            logger.log(
+              { responseError: err.forwardResponse },
+              'forwarding response'
+            )
+            const statusCode = err.forwardResponse.status || 500
+            return res.status(statusCode).json(err.forwardResponse)
+          } else {
+            return next(err)
+          }
         }
+        logger.log(
+          {
+            user_id,
+            project_id,
+            brand_variation_id,
+            export_v1_id: export_data.v1_id
+          },
+          'exported project'
+        )
+        return res.json({
+          export_v1_id: export_data.v1_id,
+          message: export_data.message
+        })
       }
-      logger.log(
-        {
-          user_id,
-          project_id,
-          brand_variation_id,
-          export_v1_id: export_data.v1_id
-        },
-        'exported project'
-      )
-      return res.json({
-        export_v1_id: export_data.v1_id,
-        message: export_data.message
-      })
-    })
+    )
   },
 
   exportStatus(req, res) {
     const { export_id } = req.params
-    return ExportsHandler.fetchExport(export_id, function(err, export_json) {
+    return ExportsHandler.fetchExport(export_id, function (err, export_json) {
       let json
       if (err != null) {
         json = {
@@ -112,15 +112,16 @@ module.exports = {
     const { type, export_id } = req.params
 
     AuthenticationController.getLoggedInUserId(req)
-    return ExportsHandler.fetchDownload(export_id, type, function(
-      err,
-      export_file_url
-    ) {
-      if (err != null) {
-        return next(err)
-      }
+    return ExportsHandler.fetchDownload(
+      export_id,
+      type,
+      function (err, export_file_url) {
+        if (err != null) {
+          return next(err)
+        }
 
-      return res.redirect(export_file_url)
-    })
+        return res.redirect(export_file_url)
+      }
+    )
   }
 }

@@ -12,7 +12,7 @@ const util = require('util')
 const BCRYPT_ROUNDS = Settings.security.bcryptRounds || 12
 const BCRYPT_MINOR_VERSION = Settings.security.bcryptMinorVersion || 'a'
 
-const _checkWriteResult = function(result, callback) {
+const _checkWriteResult = function (result, callback) {
   // for MongoDB
   if (result && result.modifiedCount === 1) {
     callback(null, true)
@@ -33,7 +33,7 @@ const AuthenticationManager = {
       if (!user || !user.hashedPassword) {
         return callback(null, null)
       }
-      bcrypt.compare(password, user.hashedPassword, function(error, match) {
+      bcrypt.compare(password, user.hashedPassword, function (error, match) {
         if (error) {
           return callback(error)
         }
@@ -44,7 +44,7 @@ const AuthenticationManager = {
           user,
           user.hashedPassword,
           password,
-          function(err) {
+          function (err) {
             if (err) {
               return callback(err)
             }
@@ -146,7 +146,7 @@ const AuthenticationManager = {
   },
 
   hashPassword(password, callback) {
-    bcrypt.genSalt(BCRYPT_ROUNDS, BCRYPT_MINOR_VERSION, function(error, salt) {
+    bcrypt.genSalt(BCRYPT_ROUNDS, BCRYPT_MINOR_VERSION, function (error, salt) {
       if (error) {
         return callback(error)
       }
@@ -162,7 +162,7 @@ const AuthenticationManager = {
     if (validationError) {
       return callback(validationError)
     }
-    this.hashPassword(password, function(error, hash) {
+    this.hashPassword(password, function (error, hash) {
       if (error) {
         return callback(error)
       }
@@ -178,7 +178,7 @@ const AuthenticationManager = {
             password: true
           }
         },
-        function(updateError, result) {
+        function (updateError, result) {
           if (updateError) {
             return callback(updateError)
           }

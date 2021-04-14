@@ -35,11 +35,11 @@ ExpandCollapseTestUI.propTypes = {
   expandCollapseArgs: PropTypes.object
 }
 
-describe('useExpandCollapse', function() {
+describe('useExpandCollapse', function () {
   // JSDom doesn't compute layout/sizing, so we need to simulate sizing for the elements
   // Here we are simulating that the content is bigger than the `collapsedSize`, so
   // the expand-collapse widget is used
-  beforeEach(function() {
+  beforeEach(function () {
     Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
       configurable: true,
       value: 500
@@ -50,7 +50,7 @@ describe('useExpandCollapse', function() {
     })
   })
 
-  afterEach(function() {
+  afterEach(function () {
     Object.defineProperty(
       HTMLElement.prototype,
       'scrollHeight',
@@ -63,8 +63,8 @@ describe('useExpandCollapse', function() {
     )
   })
 
-  describe('custom CSS classes', function() {
-    it('supports a custom CSS class', function() {
+  describe('custom CSS classes', function () {
+    it('supports a custom CSS class', function () {
       const testArgs = {
         classes: {
           container: 'my-custom-class'
@@ -76,7 +76,7 @@ describe('useExpandCollapse', function() {
       const elWithCustomCSSClass = container.querySelector('div')
       expect(elWithCustomCSSClass).to.exist
     })
-    it('supports an extra custom CSS class for the collapsed state', function() {
+    it('supports an extra custom CSS class for the collapsed state', function () {
       const testArgs = {
         classes: {
           containerCollapsed: 'my-custom-collapsed-class'
@@ -91,7 +91,7 @@ describe('useExpandCollapse', function() {
       )
       expect(elWithCustomCollapsedCSSClass).to.exist
     })
-    it('ignores the collapsed CSS class when expanded', function() {
+    it('ignores the collapsed CSS class when expanded', function () {
       const testArgs = {
         initiallyExpanded: true,
         classes: {
@@ -107,14 +107,14 @@ describe('useExpandCollapse', function() {
       expect(elWithCustomCollapsedCSSClass).to.not.exist
     })
   })
-  describe('height and width support via dimension argument', function() {
-    it('defaults to height', function() {
+  describe('height and width support via dimension argument', function () {
+    it('defaults to height', function () {
       const { container } = render(<ExpandCollapseTestUI />)
       const expandCollapseEl = container.firstChild
       expect(expandCollapseEl.style.height).to.not.be.empty
       expect(expandCollapseEl.style.width).to.be.empty
     })
-    it('supports width', function() {
+    it('supports width', function () {
       const testArgs = {
         dimension: 'width'
       }
@@ -126,13 +126,13 @@ describe('useExpandCollapse', function() {
       expect(expandCollapseEl.style.width).to.not.be.empty
     })
   })
-  describe('collapsed size support via collapsedSize argument', function() {
-    it('defaults to 0px', function() {
+  describe('collapsed size support via collapsedSize argument', function () {
+    it('defaults to 0px', function () {
       const { container } = render(<ExpandCollapseTestUI />)
       const expandCollapseEl = container.firstChild
       expect(expandCollapseEl.style.height).to.equal('0px')
     })
-    it('supports a custom collapsed size', function() {
+    it('supports a custom collapsed size', function () {
       const testArgs = {
         collapsedSize: 200
       }
@@ -142,7 +142,7 @@ describe('useExpandCollapse', function() {
       const expandCollapseEl = container.firstChild
       expect(expandCollapseEl.style.height).to.equal('200px')
     })
-    it('supports a custom collapsed size for width', function() {
+    it('supports a custom collapsed size for width', function () {
       const testArgs = {
         collapsedSize: 200,
         dimension: 'width'

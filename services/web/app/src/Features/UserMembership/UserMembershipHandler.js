@@ -29,7 +29,7 @@ const UserMembershipEntityConfigs = require('./UserMembershipEntityConfigs')
 const UserMembershipHandler = {
   getEntityWithoutAuthorizationCheck(entityId, entityConfig, callback) {
     if (callback == null) {
-      callback = function(error, entity) {}
+      callback = function (error, entity) {}
     }
     const query = buildEntityQuery(entityId, entityConfig)
     return EntityModels[entityConfig.modelName].findOne(query, callback)
@@ -37,7 +37,7 @@ const UserMembershipHandler = {
 
   createEntity(entityId, entityConfig, callback) {
     if (callback == null) {
-      callback = function(error, entity) {}
+      callback = function (error, entity) {}
     }
     const data = buildEntityQuery(entityId, entityConfig)
     return EntityModels[entityConfig.modelName].create(data, callback)
@@ -45,7 +45,7 @@ const UserMembershipHandler = {
 
   getUsers(entity, entityConfig, callback) {
     if (callback == null) {
-      callback = function(error, users) {}
+      callback = function (error, users) {}
     }
     const attributes = entityConfig.fields.read
     return getPopulatedListOfMembers(entity, attributes, callback)
@@ -53,10 +53,10 @@ const UserMembershipHandler = {
 
   addUser(entity, entityConfig, email, callback) {
     if (callback == null) {
-      callback = function(error, user) {}
+      callback = function (error, user) {}
     }
     const attribute = entityConfig.fields.write
-    return UserGetter.getUserByAnyEmail(email, function(error, user) {
+    return UserGetter.getUserByAnyEmail(email, function (error, user) {
       if (error != null) {
         return callback(error)
       }
@@ -75,7 +75,7 @@ const UserMembershipHandler = {
 
   removeUser(entity, entityConfig, userId, callback) {
     if (callback == null) {
-      callback = function(error) {}
+      callback = function (error) {}
     }
     const attribute = entityConfig.fields.write
     if (entity.admin_id != null ? entity.admin_id.equals(userId) : undefined) {
@@ -88,9 +88,9 @@ const UserMembershipHandler = {
 UserMembershipHandler.promises = promisifyAll(UserMembershipHandler)
 module.exports = UserMembershipHandler
 
-var getPopulatedListOfMembers = function(entity, attributes, callback) {
+var getPopulatedListOfMembers = function (entity, attributes, callback) {
   if (callback == null) {
-    callback = function(error, users) {}
+    callback = function (error, users) {}
   }
   const userObjects = []
 
@@ -107,25 +107,25 @@ var getPopulatedListOfMembers = function(entity, attributes, callback) {
   return async.map(userObjects, UserMembershipViewModel.buildAsync, callback)
 }
 
-var addUserToEntity = function(entity, attribute, user, callback) {
+var addUserToEntity = function (entity, attribute, user, callback) {
   if (callback == null) {
-    callback = function(error) {}
+    callback = function (error) {}
   }
   const fieldUpdate = {}
   fieldUpdate[attribute] = user._id
   return entity.updateOne({ $addToSet: fieldUpdate }, callback)
 }
 
-var removeUserFromEntity = function(entity, attribute, userId, callback) {
+var removeUserFromEntity = function (entity, attribute, userId, callback) {
   if (callback == null) {
-    callback = function(error) {}
+    callback = function (error) {}
   }
   const fieldUpdate = {}
   fieldUpdate[attribute] = userId
   return entity.updateOne({ $pull: fieldUpdate }, callback)
 }
 
-var buildEntityQuery = function(entityId, entityConfig, loggedInUser) {
+var buildEntityQuery = function (entityId, entityConfig, loggedInUser) {
   if (ObjectId.isValid(entityId.toString())) {
     entityId = ObjectId(entityId)
   }

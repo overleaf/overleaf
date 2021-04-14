@@ -33,7 +33,7 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const ProjectCreationHandler = {
   createBlankProject(owner_id, projectName, attributes, callback) {
     if (callback == null) {
-      callback = function(error, project) {}
+      callback = function (error, project) {}
     }
     metrics.inc('project-creation')
     if (arguments.length === 3) {
@@ -41,59 +41,60 @@ const ProjectCreationHandler = {
       attributes = {}
     }
 
-    return ProjectDetailsHandler.validateProjectName(projectName, function(
-      error
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (attributes.overleaf !== undefined && attributes.overleaf != null) {
-        return ProjectCreationHandler._createBlankProject(
-          owner_id,
-          projectName,
-          attributes,
-          function(error, project) {
-            if (error != null) {
-              return callback(error)
-            }
-            AnalyticsManager.recordEvent(owner_id, 'project-imported', {
-              projectId: project._id,
-              attributes
-            })
-            return callback(error, project)
-          }
-        )
-      } else {
-        return HistoryManager.initializeProject(function(error, history) {
-          if (error != null) {
-            return callback(error)
-          }
-          attributes.overleaf = {
-            history: { id: history != null ? history.overleaf_id : undefined }
-          }
+    return ProjectDetailsHandler.validateProjectName(
+      projectName,
+      function (error) {
+        if (error != null) {
+          return callback(error)
+        }
+        if (attributes.overleaf !== undefined && attributes.overleaf != null) {
           return ProjectCreationHandler._createBlankProject(
             owner_id,
             projectName,
             attributes,
-            function(error, project) {
+            function (error, project) {
               if (error != null) {
                 return callback(error)
               }
-              AnalyticsManager.recordEvent(owner_id, 'project-created', {
+              AnalyticsManager.recordEvent(owner_id, 'project-imported', {
                 projectId: project._id,
                 attributes
               })
               return callback(error, project)
             }
           )
-        })
+        } else {
+          return HistoryManager.initializeProject(function (error, history) {
+            if (error != null) {
+              return callback(error)
+            }
+            attributes.overleaf = {
+              history: { id: history != null ? history.overleaf_id : undefined }
+            }
+            return ProjectCreationHandler._createBlankProject(
+              owner_id,
+              projectName,
+              attributes,
+              function (error, project) {
+                if (error != null) {
+                  return callback(error)
+                }
+                AnalyticsManager.recordEvent(owner_id, 'project-created', {
+                  projectId: project._id,
+                  attributes
+                })
+                return callback(error, project)
+              }
+            )
+          })
+        }
       }
-    })
+    )
   },
 
   _createBlankProject(owner_id, projectName, attributes, callback) {
     if (callback == null) {
-      callback = function(error, project) {}
+      callback = function (error, project) {}
     }
     const rootFolder = new Folder({ name: 'rootFolder' })
 
@@ -113,28 +114,29 @@ const ProjectCreationHandler = {
       }
     }
     project.rootFolder[0] = rootFolder
-    return User.findById(owner_id, 'ace.spellCheckLanguage', function(
-      err,
-      user
-    ) {
-      project.spellCheckLanguage = user.ace.spellCheckLanguage
-      return project.save(function(err) {
-        if (err != null) {
-          return callback(err)
-        }
-        return callback(err, project)
-      })
-    })
+    return User.findById(
+      owner_id,
+      'ace.spellCheckLanguage',
+      function (err, user) {
+        project.spellCheckLanguage = user.ace.spellCheckLanguage
+        return project.save(function (err) {
+          if (err != null) {
+            return callback(err)
+          }
+          return callback(err, project)
+        })
+      }
+    )
   },
 
   createProjectFromSnippet(owner_id, projectName, docLines, callback) {
     if (callback == null) {
-      callback = function(error, project) {}
+      callback = function (error, project) {}
     }
     return ProjectCreationHandler.createBlankProject(
       owner_id,
       projectName,
-      function(error, project) {
+      function (error, project) {
         if (error != null) {
           return callback(error)
         }
@@ -150,12 +152,12 @@ const ProjectCreationHandler = {
 
   createBasicProject(owner_id, projectName, callback) {
     if (callback == null) {
-      callback = function(error, project) {}
+      callback = function (error, project) {}
     }
     return ProjectCreationHandler.createBlankProject(
       owner_id,
       projectName,
-      function(error, project) {
+      function (error, project) {
         if (error != null) {
           return callback(error)
         }
@@ -163,7 +165,7 @@ const ProjectCreationHandler = {
           'mainbasic.tex',
           owner_id,
           projectName,
-          function(error, docLines) {
+          function (error, docLines) {
             if (error != null) {
               return callback(error)
             }
@@ -181,12 +183,12 @@ const ProjectCreationHandler = {
 
   createExampleProject(owner_id, projectName, callback) {
     if (callback == null) {
-      callback = function(error, project) {}
+      callback = function (error, project) {}
     }
     return ProjectCreationHandler.createBlankProject(
       owner_id,
       projectName,
-      function(error, project) {
+      function (error, project) {
         if (error != null) {
           return callback(error)
         }
@@ -197,7 +199,7 @@ const ProjectCreationHandler = {
                 'main.tex',
                 owner_id,
                 projectName,
-                function(error, docLines) {
+                function (error, docLines) {
                   if (error != null) {
                     return callback(error)
                   }
@@ -214,7 +216,7 @@ const ProjectCreationHandler = {
                 'references.bib',
                 owner_id,
                 projectName,
-                function(error, docLines) {
+                function (error, docLines) {
                   if (error != null) {
                     return callback(error)
                   }
@@ -228,7 +230,7 @@ const ProjectCreationHandler = {
                   )
                 }
               ),
-            function(callback) {
+            function (callback) {
               const universePath = Path.resolve(
                 __dirname + '/../../../templates/project_files/universe.jpg'
               )
@@ -251,7 +253,7 @@ const ProjectCreationHandler = {
 
   _createRootDoc(project, owner_id, docLines, callback) {
     if (callback == null) {
-      callback = function(error, project) {}
+      callback = function (error, project) {}
     }
     return ProjectEntityUpdateHandler.addDoc(
       project._id,
@@ -259,7 +261,7 @@ const ProjectCreationHandler = {
       'main.tex',
       docLines,
       owner_id,
-      function(error, doc) {
+      function (error, doc) {
         if (error != null) {
           OError.tag(error, 'error adding root doc when creating project')
           return callback(error)
@@ -275,47 +277,48 @@ const ProjectCreationHandler = {
 
   _buildTemplate(template_name, user_id, project_name, callback) {
     if (callback == null) {
-      callback = function(error, output) {}
+      callback = function (error, output) {}
     }
-    return User.findById(user_id, 'first_name last_name', function(
-      error,
-      user
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      const monthNames = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December'
-      ]
-
-      const templatePath = Path.resolve(
-        __dirname + `/../../../templates/project_files/${template_name}`
-      )
-      return fs.readFile(templatePath, function(error, template) {
+    return User.findById(
+      user_id,
+      'first_name last_name',
+      function (error, user) {
         if (error != null) {
           return callback(error)
         }
-        const data = {
-          project_name,
-          user,
-          year: new Date().getUTCFullYear(),
-          month: monthNames[new Date().getUTCMonth()]
-        }
-        const output = _.template(template.toString(), data)
-        return callback(null, output.split('\n'))
-      })
-    })
+        const monthNames = [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December'
+        ]
+
+        const templatePath = Path.resolve(
+          __dirname + `/../../../templates/project_files/${template_name}`
+        )
+        return fs.readFile(templatePath, function (error, template) {
+          if (error != null) {
+            return callback(error)
+          }
+          const data = {
+            project_name,
+            user,
+            year: new Date().getUTCFullYear(),
+            month: monthNames[new Date().getUTCMonth()]
+          }
+          const output = _.template(template.toString(), data)
+          return callback(null, output.split('\n'))
+        })
+      }
+    )
   }
 }
 

@@ -101,7 +101,7 @@ function getDocument(projectId, docId, fromVersion, callback) {
     },
     projectId,
     'get-document',
-    function(error, doc) {
+    function (error, doc) {
       if (error) {
         return callback(error)
       }
@@ -133,7 +133,7 @@ function getProjectDocsIfMatch(projectId, projectStateHash, callback) {
   // fall back to getting them from mongo.
   const timer = new metrics.Timer('get-project-docs')
   const url = `${settings.apis.documentupdater.url}/project/${projectId}/get_and_flush_if_old?state=${projectStateHash}`
-  request.post(url, function(error, res, body) {
+  request.post(url, function (error, res, body) {
     timer.done()
     if (error) {
       OError.tag(error, 'error getting project docs from doc updater', {
@@ -300,7 +300,7 @@ function _makeRequest(options, projectId, metricsKey, callback) {
       json: options.json,
       method: options.method || 'GET'
     },
-    function(error, res, body) {
+    function (error, res, body) {
       timer.done()
       if (error) {
         logger.warn(

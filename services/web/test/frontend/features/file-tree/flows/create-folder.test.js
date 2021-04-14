@@ -7,18 +7,18 @@ import MockedSocket from 'socket.io-mock'
 
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 
-describe('FileTree Create Folder Flow', function() {
+describe('FileTree Create Folder Flow', function () {
   const onSelect = sinon.stub()
   const onInit = sinon.stub()
 
-  beforeEach(function() {
+  beforeEach(function () {
     global.requestAnimationFrame = sinon.stub()
     window._ide = {
       socket: new MockedSocket()
     }
   })
 
-  afterEach(function() {
+  afterEach(function () {
     delete global.requestAnimationFrame
     fetchMock.restore()
     onSelect.reset()
@@ -26,7 +26,7 @@ describe('FileTree Create Folder Flow', function() {
     delete window._ide
   })
 
-  it('add to root when no files are selected', async function() {
+  it('add to root when no files are selected', async function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -78,7 +78,7 @@ describe('FileTree Create Folder Flow', function() {
     await screen.findByRole('treeitem', { name: newFolderName })
   })
 
-  it('add to folder from folder', async function() {
+  it('add to folder from folder', async function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -148,7 +148,7 @@ describe('FileTree Create Folder Flow', function() {
     expect(screen.queryByRole('treeitem', { name: newFolderName })).to.not.exist
   })
 
-  it('add to folder from child', async function() {
+  it('add to folder from child', async function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -215,7 +215,7 @@ describe('FileTree Create Folder Flow', function() {
     expect(screen.queryByRole('treeitem', { name: newFolderName })).to.not.exist
   })
 
-  it('prevents adding duplicate or invalid names', async function() {
+  it('prevents adding duplicate or invalid names', async function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -278,9 +278,7 @@ describe('FileTree Create Folder Flow', function() {
   }
 
   function fakeId() {
-    return Math.random()
-      .toString(16)
-      .replace(/0\./, 'random-test-id-')
+    return Math.random().toString(16).replace(/0\./, 'random-test-id-')
   }
 
   async function getModalCreateButton() {
