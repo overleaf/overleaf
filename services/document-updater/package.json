@@ -27,7 +27,7 @@
     "diff-match-patch": "https://github.com/overleaf/diff-match-patch/archive/89805f9c671a77a263fc53461acd62aa7498f688.tar.gz",
     "express": "4.17.1",
     "lodash": "^4.17.19",
-    "logger-sharelatex": "^1.9.1",
+    "logger-sharelatex": "^2.2.0",
     "mongodb": "^3.6.0",
     "request": "^2.88.2",
     "requestretry": "^4.1.0",
