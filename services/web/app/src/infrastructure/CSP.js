@@ -24,7 +24,7 @@ module.exports = function({
         res.locals.scriptNonce = scriptNonce
 
         const directives = [
-          `script-src 'nonce-${scriptNonce}' 'unsafe-inline' 'strict-dynamic' https:`,
+          `script-src 'nonce-${scriptNonce}' 'unsafe-inline' 'strict-dynamic' https: 'report-sample'`,
           `object-src 'none'`,
           `base-uri 'none'`
         ]
