@@ -1,19 +1,33 @@
 import _ from 'lodash'
 import App from '../../../base'
+import getMeta from '../../../utils/meta'
 
 export default App.controller('UserAffiliationsReconfirmController', function(
   $scope,
   UserAffiliationsDataService,
   $window
 ) {
+  const samlInitPath = ExposedSettings.samlInitPath
   $scope.reconfirm = {}
-  // For portals:
-  $scope.userEmails = window.data.userEmails
-  // For settings page:
   $scope.ui = $scope.ui || {} // $scope.ui inherited on settings page
+  $scope.userEmails = getMeta('ol-userEmails')
+  $scope.reconfirmedViaSAML = getMeta('ol-reconfirmedViaSAML')
+
+  // For portals:
+  const portalAffiliation = getMeta('ol-portalAffiliation')
+  if (portalAffiliation) {
+    $scope.portalInReconfirmNotificationPeriod =
+      portalAffiliation && portalAffiliation.inReconfirmNotificationPeriod
+    $scope.userEmail = $scope.portalInReconfirmNotificationPeriod // mixin to show notification uses userEmail
+  }
+
+  // For settings page:
+  $scope.reconfirmationRemoveEmail = getMeta('ol-reconfirmationRemoveEmail')
+
   // For dashboard:
-  $scope.allInReconfirmNotificationPeriods =
-    window.data.allInReconfirmNotificationPeriods
+  $scope.allInReconfirmNotificationPeriods = getMeta(
+    'ol-allInReconfirmNotificationPeriods'
+  )
 
   function sendReconfirmEmail(email) {
     $scope.ui.hasError = false
@@ -27,9 +41,6 @@ export default App.controller('UserAffiliationsReconfirmController', function(
       })
       .finally(() => ($scope.ui.isMakingRequest = false))
   }
-
-  $scope.reconfirmationRemoveEmail = $window.data.reconfirmationRemoveEmail
-  $scope.reconfirmedViaSAML = $window.data.reconfirmedViaSAML
 
   $scope.requestReconfirmation = function(obj, userEmail) {
     const email = userEmail.email
@@ -48,7 +59,7 @@ export default App.controller('UserAffiliationsReconfirmController', function(
     ])
 
     if (ssoEnabled) {
-      $window.location.href = `${$scope.samlInitPath}?university_id=${institutionId}&reconfirm=${location}`
+      $window.location.href = `${samlInitPath}?university_id=${institutionId}&reconfirm=${location}`
     } else {
       sendReconfirmEmail(email)
     }

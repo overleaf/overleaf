@@ -24,8 +24,8 @@ mixin reconfirmAffiliationNotification(location)
 		div(ng-if="reconfirm[userEmail.email].reconfirmationSent")
 			| !{translate("please_check_your_inbox_to_confirm", {institutionName: '{{userEmail.affiliation.institution.name}}'}, ['strong'])}
 			| &nbsp;
-			a(
-				href
+			button(
+				class="btn-inline-link"
 				ng-click="requestReconfirmation($event, userEmail)"
 				ng-disabled="ui.isMakingRequest"
 			) #{translate('resend_confirmation_email')}
