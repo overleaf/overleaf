@@ -18,6 +18,7 @@ describe('UserEmailsController', function () {
 
     this.UserGetter = {
       getUserFullEmails: sinon.stub(),
+      getUserByAnyEmail: sinon.stub(),
       promises: {
         getUser: sinon.stub().resolves(this.user)
       }
@@ -45,13 +46,7 @@ describe('UserEmailsController', function () {
     this.EmailHelper = { parseEmail: sinon.stub() }
     this.endorseAffiliation = sinon.stub().yields()
     this.InstitutionsAPI = {
-      endorseAffiliation: this.endorseAffiliation,
-      getInstitutionViaDomain: sinon
-        .stub()
-        .withArgs('overleaf.com')
-        .resolves({ sso_enabled: true })
-        .withArgs('example.com')
-        .resolves({ sso_enabled: false })
+      endorseAffiliation: this.endorseAffiliation
     }
     this.HttpErrorHandler = { conflict: sinon.stub() }
     this.UserEmailsController = SandboxedModule.require(modulePath, {
@@ -69,6 +64,7 @@ describe('UserEmailsController', function () {
         }),
         '../Helpers/EmailHelper': this.EmailHelper,
         './UserEmailsConfirmationHandler': (this.UserEmailsConfirmationHandler = {
+          sendReconfirmationEmail: sinon.stub(),
           promises: {
             sendConfirmationEmail: sinon.stub().resolves()
           }
@@ -439,8 +435,13 @@ describe('UserEmailsController', function () {
       })
     })
   })
+
   describe('resendConfirmation', function () {
     beforeEach(function () {
+      this.EmailHelper.parseEmail.returnsArg(0)
+      this.UserGetter.getUserByAnyEmail.yields(undefined, {
+        _id: this.user._id
+      })
       this.req = {
         body: {}
       }
@@ -452,74 +453,120 @@ describe('UserEmailsController', function () {
         .stub()
         .yields()
     })
-    describe('when institution SSO is released', function () {
+
+    it('should send the email', function (done) {
+      this.req = {
+        body: {
+          email: 'test@example.com'
+        }
+      }
+      this.UserEmailsController.sendReconfirmation(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.UserEmailsConfirmationHandler.sendReconfirmationEmail).to.have
+        .been.calledOnce
+      done()
+    })
+
+    it('should return 422 if email not valid', function (done) {
+      this.req = {
+        body: {}
+      }
+      this.UserEmailsController.resendConfirmation(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.UserEmailsConfirmationHandler.sendConfirmationEmail).to.not
+        .have.been.called
+      expect(this.res.sendStatus.lastCall.args[0]).to.equal(422)
+      done()
+    })
+    describe('email on another user account', function () {
       beforeEach(function () {
-        this.Features.hasFeature.withArgs('saml').returns(true)
-      })
-      describe('for an institution SSO email', function () {
-        beforeEach(function () {
-          this.req.body.email = 'with-sso@overleaf.com'
-        })
-        it('should not send the email', function () {
-          this.UserEmailsController.resendConfirmation(
-            this.req,
-            this.res,
-            () => {
-              this.UserEmailsConfirmationHandler.sendConfirmationEmail.should
-                .not.have.been.called.once
-            }
-          )
+        this.UserGetter.getUserByAnyEmail.yields(undefined, {
+          _id: 'another-user-id'
         })
       })
-      describe('for a non-institution SSO email', function () {
-        beforeEach(function () {
-          this.req.body.email = 'without-sso@example.com'
-        })
-        it('should send the email', function () {
-          this.UserEmailsController.resendConfirmation(
-            this.req,
-            this.res,
-            () => {
-              this.UserEmailsConfirmationHandler.sendConfirmationEmail.should
-                .have.been.called.once
-            }
-          )
-        })
+      it('should return 422', function (done) {
+        this.req = {
+          body: {
+            email: 'test@example.com'
+          }
+        }
+        this.UserEmailsController.resendConfirmation(
+          this.req,
+          this.res,
+          this.next
+        )
+        expect(this.UserEmailsConfirmationHandler.sendConfirmationEmail).to.not
+          .have.been.called
+        expect(this.res.sendStatus.lastCall.args[0]).to.equal(422)
+        done()
       })
     })
-    describe('when institution SSO is not released', function () {
+  })
+
+  describe('sendReconfirmation', function () {
+    beforeEach(function () {
+      this.res.sendStatus = sinon.stub()
+      this.UserGetter.getUserByAnyEmail.yields(undefined, {
+        _id: this.user._id
+      })
+      this.EmailHelper.parseEmail.returnsArg(0)
+    })
+    it('should send the email', function (done) {
+      this.req = {
+        body: {
+          email: 'test@example.com'
+        }
+      }
+      this.UserEmailsController.sendReconfirmation(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.UserEmailsConfirmationHandler.sendReconfirmationEmail).to.have
+        .been.calledOnce
+      done()
+    })
+    it('should return 400 if email not valid', function (done) {
+      this.req = {
+        body: {}
+      }
+      this.UserEmailsController.sendReconfirmation(
+        this.req,
+        this.res,
+        this.next
+      )
+      expect(this.UserEmailsConfirmationHandler.sendReconfirmationEmail).to.not
+        .have.been.called
+      expect(this.res.sendStatus.lastCall.args[0]).to.equal(400)
+      done()
+    })
+    describe('email on another user account', function () {
       beforeEach(function () {
-        this.Features.hasFeature.withArgs('saml').returns(false)
-      })
-      describe('for an institution SSO email', function () {
-        beforeEach(function () {
-          this.req.body.email = 'with-sso@overleaf.com'
-        })
-        it('should send the email', function () {
-          this.UserEmailsController.resendConfirmation(
-            this.req,
-            this.res,
-            () => {
-              this.UserEmailsConfirmationHandler.sendConfirmationEmail.should
-                .have.been.called.once
-            }
-          )
+        this.UserGetter.getUserByAnyEmail.yields(undefined, {
+          _id: 'another-user-id'
         })
       })
-      describe('for a non-institution SSO email', function () {
-        beforeEach(function () {
-          this.req.body.email = 'without-sso@example.com'
-        })
-        it('should send the email', function () {
-          this.UserEmailsController.resendConfirmation(
-            this.req,
-            this.res,
-            () => {
-              this.UserEmailsConfirmationHandler.sendConfirmationEmail.should
-                .have.been.called.once
-            }
-          )
-        })
+      it('should return 422', function (done) {
+        this.req = {
+          body: {
+            email: 'test@example.com'
+          }
+        }
+        this.UserEmailsController.sendReconfirmation(
+          this.req,
+          this.res,
+          this.next
+        )
+        expect(this.UserEmailsConfirmationHandler.sendReconfirmationEmail).to
+          .not.have.been.called
+        expect(this.res.sendStatus.lastCall.args[0]).to.equal(422)
+        done()
       })
     })
   })

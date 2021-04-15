@@ -1,31 +1,17 @@
-/* eslint-disable
-    node/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const Settings = require('settings-sharelatex')
 const crypto = require('crypto')
-const logger = require('logger-sharelatex')
 const { db } = require('../../infrastructure/mongodb')
 const Errors = require('../Errors/Errors')
+const { promisifyAll } = require('../../util/promises')
 
 const ONE_HOUR_IN_S = 60 * 60
 
-module.exports = {
+const OneTimeTokenHandler = {
   getNewToken(use, data, options, callback) {
     // options is optional
-    if (options == null) {
+    if (!options) {
       options = {}
     }
-    if (callback == null) {
+    if (!callback) {
       callback = function (error, data) {}
     }
     if (typeof options === 'function') {
@@ -36,7 +22,7 @@ module.exports = {
     const createdAt = new Date()
     const expiresAt = new Date(createdAt.getTime() + expiresIn * 1000)
     const token = crypto.randomBytes(32).toString('hex')
-    return db.tokens.insertOne(
+    db.tokens.insertOne(
       {
         use,
         token,
@@ -45,20 +31,20 @@ module.exports = {
         expiresAt
       },
       function (error) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
-        return callback(null, token)
+        callback(null, token)
       }
     )
   },
 
   getValueFromTokenAndExpire(use, token, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function (error, data) {}
     }
     const now = new Date()
-    return db.tokens.findOneAndUpdate(
+    db.tokens.findOneAndUpdate(
       {
         use,
         token,
@@ -71,15 +57,19 @@ module.exports = {
         }
       },
       function (error, result) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         const token = result.value
-        if (token == null) {
+        if (!token) {
           return callback(new Errors.NotFoundError('no token found'))
         }
-        return callback(null, token.data)
+        callback(null, token.data)
       }
     )
   }
 }
+
+OneTimeTokenHandler.promises = promisifyAll(OneTimeTokenHandler)
+
+module.exports = OneTimeTokenHandler

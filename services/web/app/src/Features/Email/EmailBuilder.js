@@ -283,6 +283,32 @@ templates.projectInvite = ctaTemplate({
   }
 })
 
+templates.reconfirmEmail = ctaTemplate({
+  subject() {
+    return `Reconfirm Email - ${settings.appName}`
+  },
+  title() {
+    return 'Reconfirm Email'
+  },
+  message(opts) {
+    return [
+      `Please reconfirm your email address, ${opts.to}, on your ${settings.appName} account.`
+    ]
+  },
+  secondaryMessage() {
+    return [
+      'If you did not request this, you can simply ignore this message.',
+      `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${settings.adminEmail}.`
+    ]
+  },
+  ctaText() {
+    return 'Reconfirm Email'
+  },
+  ctaURL(opts) {
+    return opts.confirmEmailUrl
+  }
+})
+
 templates.verifyEmailToJoinTeam = ctaTemplate({
   subject(opts) {
     return `${_.escape(

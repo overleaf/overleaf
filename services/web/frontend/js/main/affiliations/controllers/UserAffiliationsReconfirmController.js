@@ -4,7 +4,7 @@ import getMeta from '../../../utils/meta'
 
 export default App.controller(
   'UserAffiliationsReconfirmController',
-  function ($scope, UserAffiliationsDataService, $window) {
+  function ($scope, $http, $window) {
     const samlInitPath = ExposedSettings.samlInitPath
     $scope.reconfirm = {}
     $scope.ui = $scope.ui || {} // $scope.ui inherited on settings page
@@ -30,7 +30,11 @@ export default App.controller(
     function sendReconfirmEmail(email) {
       $scope.ui.hasError = false
       $scope.ui.isMakingRequest = true
-      UserAffiliationsDataService.resendConfirmationEmail(email)
+      $http
+        .post('/user/emails/send-reconfirmation', {
+          email,
+          _csrf: window.csrfToken
+        })
         .then(() => {
           $scope.reconfirm[email].reconfirmationSent = true
         })

@@ -87,6 +87,32 @@ function resendConfirmation(req, res, next) {
   })
 }
 
+function sendReconfirmation(req, res, next) {
+  const userId = AuthenticationController.getLoggedInUserId(req)
+  const email = EmailHelper.parseEmail(req.body.email)
+  if (!email) {
+    return res.sendStatus(400)
+  }
+  UserGetter.getUserByAnyEmail(email, { _id: 1 }, function (error, user) {
+    if (error) {
+      return next(error)
+    }
+    if (!user || user._id.toString() !== userId) {
+      return res.sendStatus(422)
+    }
+    UserEmailsConfirmationHandler.sendReconfirmationEmail(
+      userId,
+      email,
+      function (error) {
+        if (error) {
+          return next(error)
+        }
+        res.sendStatus(200)
+      }
+    )
+  })
+}
+
 const UserEmailsController = {
   list(req, res, next) {
     const userId = AuthenticationController.getLoggedInUserId(req)
@@ -175,6 +201,8 @@ const UserEmailsController = {
   },
 
   resendConfirmation,
+
+  sendReconfirmation,
 
   showConfirm(req, res, next) {
     res.render('user/confirm_email', {

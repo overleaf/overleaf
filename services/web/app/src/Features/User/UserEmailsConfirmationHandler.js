@@ -5,10 +5,11 @@ const settings = require('settings-sharelatex')
 const Errors = require('../Errors/Errors')
 const UserUpdater = require('./UserUpdater')
 const UserGetter = require('./UserGetter')
-const { promisify } = require('util')
+const { callbackify, promisify } = require('util')
 
 // Reject email confirmation tokens after 90 days
 const TOKEN_EXPIRY_IN_S = 90 * 24 * 60 * 60
+const TOKEN_USE = 'email_confirmation'
 
 function sendConfirmationEmail(userId, email, emailTemplate, callback) {
   if (arguments.length === 3) {
@@ -28,7 +29,7 @@ function sendConfirmationEmail(userId, email, emailTemplate, callback) {
   }
   const data = { user_id: userId, email }
   OneTimeTokenHandler.getNewToken(
-    'email_confirmation',
+    TOKEN_USE,
     data,
     { expiresIn: TOKEN_EXPIRY_IN_S },
     function (err, token) {
@@ -45,12 +46,36 @@ function sendConfirmationEmail(userId, email, emailTemplate, callback) {
   )
 }
 
+async function sendReconfirmationEmail(userId, email) {
+  email = EmailHelper.parseEmail(email)
+  if (!email) {
+    throw new Error('invalid email')
+  }
+
+  const data = { user_id: userId, email }
+  const token = await OneTimeTokenHandler.promises.getNewToken(
+    TOKEN_USE,
+    data,
+    { expiresIn: TOKEN_EXPIRY_IN_S }
+  )
+
+  const emailOptions = {
+    to: email,
+    confirmEmailUrl: `${settings.siteUrl}/user/emails/confirm?token=${token}`,
+    sendingUser_id: userId
+  }
+
+  await EmailHandler.promises.sendEmail('reconfirmEmail', emailOptions)
+}
+
 const UserEmailsConfirmationHandler = {
   sendConfirmationEmail,
 
+  sendReconfirmationEmail: callbackify(sendReconfirmationEmail),
+
   confirmEmailFromToken(token, callback) {
     OneTimeTokenHandler.getValueFromTokenAndExpire(
-      'email_confirmation',
+      TOKEN_USE,
       token,
       function (error, data) {
         if (error) {
