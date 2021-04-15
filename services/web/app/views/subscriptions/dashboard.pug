@@ -7,6 +7,10 @@ block head-scripts
 
 block append meta
 	meta(name="ol-managedInstitutions", data-type="json", content=managedInstitutions)
+	if (personalSubscription && personalSubscription.recurly)
+		meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
+		meta(name="ol-subscription" data-type="json" content=personalSubscription)
+		meta(name="ol-recomendedCurrency" content=personalSubscription.recurly.currency)
 
 block content
 	main.content.content-alt(ng-cloak)
