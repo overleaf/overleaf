@@ -14,7 +14,11 @@
 
 .error-details {
   flex: 1 1 50%;
-  padding: @line-height-computed * 2;
+  padding: @line-height-computed;
+  max-width: 90%;
+  @media (min-width: @screen-sm-min) {
+    padding: @line-height-computed * 2;
+  }
 }
 
 .error-status {

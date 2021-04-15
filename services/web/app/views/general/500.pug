@@ -1,18 +1,16 @@
-doctype html
-html.full-height(itemscope, itemtype='http://schema.org/Product')
-	head
-		title Something went wrong
-		link(rel="icon", href="/favicon.ico")
-		if buildCssPath
-			link(rel="stylesheet", href=buildCssPath())
+extends ../layout/layout-no-js
 
+block vars
+	- metadata = { title: 'Something went wrong', viewport: true }
+
+block body
 	body.full-height
 		main.content.content-alt.full-height
 			.container.full-height
 				.error-container.full-height
 					.error-details
 						p.error-status Something went wrong, sorry.
-						p.error-description(ng-non-bindable) Our staff are probably looking into this, but if it continues, please check our status page at
+						p.error-description Our staff are probably looking into this, but if it continues, please check our status page at
 							|
 							|
 							a(href="http://" + settings.statusPageUrl) #{settings.statusPageUrl}

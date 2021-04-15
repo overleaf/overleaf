@@ -1,0 +1,18 @@
+doctype html
+html(lang="en")
+
+	- metadata = metadata || {}
+	block vars
+
+	head
+		if (metadata && metadata.title)
+			title= metadata.title
+		if metadata && metadata.viewport
+			meta(name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes")
+
+		link(rel="icon", href="/favicon.ico")
+
+		if buildCssPath
+			link(rel="stylesheet", href=buildCssPath())
+
+block body
