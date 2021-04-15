@@ -736,6 +736,21 @@ describe('<ShareProjectModal/>', function () {
   it('handles switching between access levels', async function () {
     fetchMock.post('express:/project/:projectId/settings/admin', 204)
 
+    let watchCallbacks = {}
+
+    const ideWithProject = project => {
+      return {
+        $scope: {
+          $watch: (path, callback, deep) => {
+            watchCallbacks[path] = callback
+            return () => {}
+          },
+          $applyAsync: () => {},
+          project
+        }
+      }
+    }
+
     render(
       <ShareProjectModal
         {...modalProps}
@@ -758,6 +773,10 @@ describe('<ShareProjectModal/>', function () {
       publicAccessLevel: 'tokenBased'
     })
 
+    // NOTE: updating the scoped project data manually,
+    // as the project data is usually updated via the websocket connection
+    watchCallbacks.project({ ...project, publicAccesLevel: 'tokenBased' })
+
     await screen.findByText('Link sharing is on')
     const disableButton = await screen.findByRole('button', {
       name: 'Turn off link sharing'
@@ -769,6 +788,10 @@ describe('<ShareProjectModal/>', function () {
     expect(JSON.parse(privateBody)).to.deep.equal({
       publicAccessLevel: 'private'
     })
+
+    // NOTE: updating the scoped project data manually,
+    // as the project data is usually updated via the websocket connection
+    watchCallbacks.project({ ...project, publicAccesLevel: 'private' })
 
     await screen.findByText(
       'Link sharing is off, only invited users can view this project.'

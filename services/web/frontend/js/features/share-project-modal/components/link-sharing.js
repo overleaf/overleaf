@@ -13,7 +13,7 @@ import CopyLink from '../../../shared/components/copy-link'
 export default function LinkSharing() {
   const [inflight, setInflight] = useState(false)
 
-  const { monitorRequest, updateProject } = useShareProjectContext()
+  const { monitorRequest } = useShareProjectContext()
 
   const project = useProjectContext()
 
@@ -23,15 +23,16 @@ export default function LinkSharing() {
       setInflight(true)
       monitorRequest(() => setProjectAccessLevel(project, publicAccesLevel))
         .then(() => {
-          // TODO: ideally this would use the response from the server
-          updateProject({ publicAccesLevel })
+          // NOTE: not calling `updateProject` here as it receives data via
+          // project:publicAccessLevel:changed and project:tokens:changed
+          // over the websocket connection
           // TODO: eventTracking.sendMB('project-make-token-based') when publicAccesLevel is 'tokenBased'
         })
         .finally(() => {
           setInflight(false)
         })
     },
-    [monitorRequest, project, updateProject]
+    [monitorRequest, project]
   )
 
   switch (project.publicAccesLevel) {
