@@ -1,4 +1,6 @@
 {
+  "logs_pane_info_message": "Nous testons un nouveau panneau de fichiers journaux",
+  "logs_pane_info_message_popup": "Nous testons un nouveau panneau de fichiers journaux. Cliquez ici pour donner votre avis.",
   "github_symlink_error": "Votre dépôt GitHub contient des liens symboliques qui ne sont pas encore supportés par Overleaf. Veuillez les retirer et réessayer.",
   "address_line_1": "Adresse",
   "address_line_2": "Adresse (ligne 2, optionnel)",
