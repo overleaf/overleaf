@@ -7,6 +7,11 @@ const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 const DUMMY_NAME = 'unknown.tex'
 const DUMMY_TIME = new Date('2021-04-12T00:00:00.000Z')
 const ONE_DAY_IN_S = 60 * 60 * 24
+const BATCH_SIZE = 2
+
+function getSecondsFromObjectId(id) {
+  return id.getTimestamp().getTime() / 1000
+}
 
 function getObjectIdFromDate(date) {
   const seconds = new Date(date).getTime() / 1000
@@ -14,63 +19,78 @@ function getObjectIdFromDate(date) {
 }
 
 describe('BackFillDummyDocMeta', function () {
-  let docId1, docId2, docId3, docId4, docId5, docId6
-  let projectId1, projectId2, projectId3, projectId4, projectId5, projectId6
+  let docIds
+  let projectIds
   let stopAtSeconds
   beforeEach('create docs', async function () {
-    docId1 = getObjectIdFromDate('2021-04-01T00:00:00.000Z')
-    docId2 = getObjectIdFromDate('2021-04-11T00:00:00.000Z')
-    docId3 = getObjectIdFromDate('2021-04-12T00:00:00.000Z')
-    docId4 = getObjectIdFromDate('2021-04-13T00:00:00.000Z')
-    docId5 = getObjectIdFromDate('2021-04-14T00:00:00.000Z')
-    docId6 = getObjectIdFromDate('2021-04-15T00:00:00.000Z')
+    docIds = []
+    docIds[0] = getObjectIdFromDate('2021-04-01T00:00:00.000Z')
+    docIds[1] = getObjectIdFromDate('2021-04-02T00:00:00.000Z')
+    docIds[2] = getObjectIdFromDate('2021-04-11T00:00:00.000Z')
+    docIds[3] = getObjectIdFromDate('2021-04-12T00:00:00.000Z')
+    docIds[4] = getObjectIdFromDate('2021-04-13T00:00:00.000Z')
+    docIds[5] = getObjectIdFromDate('2021-04-14T00:00:00.000Z')
+    docIds[6] = getObjectIdFromDate('2021-04-15T00:00:00.000Z')
+    docIds[7] = getObjectIdFromDate('2021-04-16T00:01:00.000Z')
+    docIds[8] = getObjectIdFromDate('2021-04-16T00:02:00.000Z')
+    docIds[9] = getObjectIdFromDate('2021-04-16T00:03:00.000Z')
 
-    projectId1 = getObjectIdFromDate('2021-04-01T00:00:00.000Z')
-    projectId2 = getObjectIdFromDate('2021-04-11T00:00:00.000Z')
-    projectId3 = getObjectIdFromDate('2021-04-12T00:00:00.000Z')
-    projectId4 = getObjectIdFromDate('2021-04-13T00:00:00.000Z')
-    projectId5 = getObjectIdFromDate('2021-04-14T00:00:00.000Z')
-    projectId6 = getObjectIdFromDate('2021-04-15T00:00:00.000Z')
+    projectIds = []
+    projectIds[0] = getObjectIdFromDate('2021-04-01T00:00:00.000Z')
+    projectIds[1] = getObjectIdFromDate('2021-04-02T00:00:00.000Z')
+    projectIds[2] = getObjectIdFromDate('2021-04-11T00:00:00.000Z')
+    projectIds[3] = getObjectIdFromDate('2021-04-12T00:00:00.000Z')
+    projectIds[4] = getObjectIdFromDate('2021-04-13T00:00:00.000Z')
+    projectIds[5] = getObjectIdFromDate('2021-04-14T00:00:00.000Z')
+    projectIds[6] = getObjectIdFromDate('2021-04-15T00:00:00.000Z')
+    projectIds[7] = getObjectIdFromDate('2021-04-16T00:01:00.000Z')
+    projectIds[8] = getObjectIdFromDate('2021-04-16T00:02:00.000Z')
+    projectIds[9] = getObjectIdFromDate('2021-04-16T00:03:00.000Z')
 
-    stopAtSeconds = new Date('2021-04-16T00:00:00.000Z').getTime() / 1000
+    stopAtSeconds = new Date('2021-04-17T00:00:00.000Z').getTime() / 1000
   })
   const now = new Date()
   beforeEach('insert doc stubs into docs collection', async function () {
     await db.docs.insertMany([
       // incomplete, without deletedDocs context
-      { _id: docId1, project_id: projectId1, deleted: true },
-      { _id: docId2, project_id: projectId2, deleted: true },
-      { _id: docId3, project_id: projectId3, deleted: true },
+      { _id: docIds[0], project_id: projectIds[0], deleted: true },
+      { _id: docIds[1], project_id: projectIds[1], deleted: true },
+      { _id: docIds[2], project_id: projectIds[2], deleted: true },
+      { _id: docIds[3], project_id: projectIds[3], deleted: true },
       // incomplete, with deletedDocs context
-      { _id: docId4, project_id: projectId4, deleted: true },
+      { _id: docIds[4], project_id: projectIds[4], deleted: true },
       // complete
       {
-        _id: docId5,
-        project_id: projectId5,
+        _id: docIds[5],
+        project_id: projectIds[5],
         deleted: true,
         name: 'foo.tex',
         deletedAt: now
       },
       // not deleted
-      { _id: docId6, project_id: projectId6 }
+      { _id: docIds[6], project_id: projectIds[6] },
+      // multiple in a single batch
+      { _id: docIds[7], project_id: projectIds[7], deleted: true },
+      { _id: docIds[8], project_id: projectIds[8], deleted: true },
+      { _id: docIds[9], project_id: projectIds[9], deleted: true }
     ])
   })
   beforeEach('insert deleted project context', async function () {
     await db.deletedProjects.insertMany([
-      // projectId1 has no entry
+      // projectIds[0] and projectIds[1] have no entry
 
       // hard-deleted
-      { deleterData: { deletedProjectId: projectId2 } },
+      { deleterData: { deletedProjectId: projectIds[2] } },
       // soft-deleted, no entry for doc
       {
-        deleterData: { deletedProjectId: projectId3 },
+        deleterData: { deletedProjectId: projectIds[3] },
         project: { deletedDocs: [] }
       },
       // soft-deleted, has entry for doc
       {
-        deleterData: { deletedProjectId: projectId4 },
+        deleterData: { deletedProjectId: projectIds[4] },
         project: {
-          deletedDocs: [{ _id: docId4, name: 'main.tex', deletedAt: now }]
+          deletedDocs: [{ _id: docIds[4], name: 'main.tex', deletedAt: now }]
         }
       }
     ])
@@ -79,8 +99,9 @@ describe('BackFillDummyDocMeta', function () {
   let options
   async function runScript(dryRun) {
     options = {
+      BATCH_SIZE,
       DRY_RUN: dryRun,
-      FIRST_PROJECT_ID: projectId1.toString(),
+      FIRST_PROJECT_ID: projectIds[0].toString(),
       INCREMENT_BY_S: ONE_DAY_IN_S,
       STOP_AT_S: stopAtSeconds,
       // start right away
@@ -106,35 +127,50 @@ describe('BackFillDummyDocMeta', function () {
       .filter(line => !line.includes('Using settings from'))
 
     expect(stdOut).to.deep.equal([
-      `Back filling dummy meta data for ["${docId1}"]`,
-      `Orphaned deleted doc ${docId1} (no deletedProjects entry)`,
-      `Back filling dummy meta data for ["${docId2}"]`,
-      `Orphaned deleted doc ${docId2} (failed hard deletion)`,
-      `Back filling dummy meta data for ["${docId3}"]`,
-      `Missing deletedDoc for ${docId3}`,
-      `Back filling dummy meta data for ["${docId4}"]`,
-      `Found deletedDoc for ${docId4}`,
+      `Back filling dummy meta data for ["${docIds[0]}"]`,
+      `Orphaned deleted doc ${docIds[0]} (no deletedProjects entry)`,
+      `Back filling dummy meta data for ["${docIds[1]}"]`,
+      `Orphaned deleted doc ${docIds[1]} (no deletedProjects entry)`,
+      `Back filling dummy meta data for ["${docIds[2]}"]`,
+      `Orphaned deleted doc ${docIds[2]} (failed hard deletion)`,
+      `Back filling dummy meta data for ["${docIds[3]}"]`,
+      `Missing deletedDoc for ${docIds[3]}`,
+      `Back filling dummy meta data for ["${docIds[4]}"]`,
+      `Found deletedDoc for ${docIds[4]}`,
+      // 7,8,9 are on the same day, but exceed the batch size of 2
+      `Back filling dummy meta data for ["${docIds[7]}","${docIds[8]}"]`,
+      `Orphaned deleted doc ${docIds[7]} (no deletedProjects entry)`,
+      `Orphaned deleted doc ${docIds[8]} (no deletedProjects entry)`,
+      `Back filling dummy meta data for ["${docIds[9]}"]`,
+      `Orphaned deleted doc ${docIds[9]} (no deletedProjects entry)`,
       ''
     ])
+    const oneDayFromProjectId8InSeconds =
+      getSecondsFromObjectId(projectIds[8]) + ONE_DAY_IN_S
+    const oneDayFromProjectId8AsObjectId = getObjectIdFromDate(
+      1000 * oneDayFromProjectId8InSeconds
+    )
     expect(stdErr).to.deep.equal([
       ...`Options: ${JSON.stringify(options, null, 2)}`.split('\n'),
       'Waiting for you to double check inputs for 1 ms',
       `Processed 1 until ${getObjectIdFromDate('2021-04-01T23:59:59.000Z')}`,
-      `Processed 1 until ${getObjectIdFromDate('2021-04-02T23:59:59.000Z')}`,
-      `Processed 1 until ${getObjectIdFromDate('2021-04-03T23:59:59.000Z')}`,
-      `Processed 1 until ${getObjectIdFromDate('2021-04-04T23:59:59.000Z')}`,
-      `Processed 1 until ${getObjectIdFromDate('2021-04-05T23:59:59.000Z')}`,
-      `Processed 1 until ${getObjectIdFromDate('2021-04-06T23:59:59.000Z')}`,
-      `Processed 1 until ${getObjectIdFromDate('2021-04-07T23:59:59.000Z')}`,
-      `Processed 1 until ${getObjectIdFromDate('2021-04-08T23:59:59.000Z')}`,
-      `Processed 1 until ${getObjectIdFromDate('2021-04-09T23:59:59.000Z')}`,
-      `Processed 1 until ${getObjectIdFromDate('2021-04-10T23:59:59.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-11T23:59:59.000Z')}`,
-      `Processed 3 until ${getObjectIdFromDate('2021-04-12T23:59:59.000Z')}`,
-      `Processed 4 until ${getObjectIdFromDate('2021-04-13T23:59:59.000Z')}`,
-      `Processed 4 until ${getObjectIdFromDate('2021-04-14T23:59:59.000Z')}`,
-      `Processed 4 until ${getObjectIdFromDate('2021-04-15T23:59:59.000Z')}`,
-      `Processed 4 until ${getObjectIdFromDate('2021-04-16T23:59:59.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-02T23:59:59.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-03T23:59:59.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-04T23:59:59.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-05T23:59:59.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-06T23:59:59.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-07T23:59:59.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-08T23:59:59.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-09T23:59:59.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-10T23:59:59.000Z')}`,
+      `Processed 3 until ${getObjectIdFromDate('2021-04-11T23:59:59.000Z')}`,
+      `Processed 4 until ${getObjectIdFromDate('2021-04-12T23:59:59.000Z')}`,
+      `Processed 5 until ${getObjectIdFromDate('2021-04-13T23:59:59.000Z')}`,
+      `Processed 5 until ${getObjectIdFromDate('2021-04-14T23:59:59.000Z')}`,
+      `Processed 5 until ${getObjectIdFromDate('2021-04-15T23:59:59.000Z')}`,
+      // 7,8,9 are on the same day, but exceed the batch size of 2
+      `Processed 7 until ${projectIds[8]}`,
+      `Processed 8 until ${oneDayFromProjectId8AsObjectId}`,
       'Done.',
       ''
     ])
@@ -148,18 +184,22 @@ describe('BackFillDummyDocMeta', function () {
     it('should leave docs as is', async function () {
       const docs = await db.docs.find({}).toArray()
       expect(docs).to.deep.equal([
-        { _id: docId1, project_id: projectId1, deleted: true },
-        { _id: docId2, project_id: projectId2, deleted: true },
-        { _id: docId3, project_id: projectId3, deleted: true },
-        { _id: docId4, project_id: projectId4, deleted: true },
+        { _id: docIds[0], project_id: projectIds[0], deleted: true },
+        { _id: docIds[1], project_id: projectIds[1], deleted: true },
+        { _id: docIds[2], project_id: projectIds[2], deleted: true },
+        { _id: docIds[3], project_id: projectIds[3], deleted: true },
+        { _id: docIds[4], project_id: projectIds[4], deleted: true },
         {
-          _id: docId5,
-          project_id: projectId5,
+          _id: docIds[5],
+          project_id: projectIds[5],
           deleted: true,
           name: 'foo.tex',
           deletedAt: now
         },
-        { _id: docId6, project_id: projectId6 }
+        { _id: docIds[6], project_id: projectIds[6] },
+        { _id: docIds[7], project_id: projectIds[7], deleted: true },
+        { _id: docIds[8], project_id: projectIds[8], deleted: true },
+        { _id: docIds[9], project_id: projectIds[9], deleted: true }
       ])
     })
   })
@@ -173,41 +213,69 @@ describe('BackFillDummyDocMeta', function () {
       const docs = await db.docs.find({}).toArray()
       expect(docs).to.deep.equal([
         {
-          _id: docId1,
-          project_id: projectId1,
+          _id: docIds[0],
+          project_id: projectIds[0],
           deleted: true,
           name: DUMMY_NAME,
           deletedAt: DUMMY_TIME
         },
         {
-          _id: docId2,
-          project_id: projectId2,
+          _id: docIds[1],
+          project_id: projectIds[1],
           deleted: true,
           name: DUMMY_NAME,
           deletedAt: DUMMY_TIME
         },
         {
-          _id: docId3,
-          project_id: projectId3,
+          _id: docIds[2],
+          project_id: projectIds[2],
           deleted: true,
           name: DUMMY_NAME,
           deletedAt: DUMMY_TIME
         },
         {
-          _id: docId4,
-          project_id: projectId4,
+          _id: docIds[3],
+          project_id: projectIds[3],
+          deleted: true,
+          name: DUMMY_NAME,
+          deletedAt: DUMMY_TIME
+        },
+        {
+          _id: docIds[4],
+          project_id: projectIds[4],
           deleted: true,
           name: 'main.tex',
           deletedAt: now
         },
         {
-          _id: docId5,
-          project_id: projectId5,
+          _id: docIds[5],
+          project_id: projectIds[5],
           deleted: true,
           name: 'foo.tex',
           deletedAt: now
         },
-        { _id: docId6, project_id: projectId6 }
+        { _id: docIds[6], project_id: projectIds[6] },
+        {
+          _id: docIds[7],
+          project_id: projectIds[7],
+          deleted: true,
+          name: DUMMY_NAME,
+          deletedAt: DUMMY_TIME
+        },
+        {
+          _id: docIds[8],
+          project_id: projectIds[8],
+          deleted: true,
+          name: DUMMY_NAME,
+          deletedAt: DUMMY_TIME
+        },
+        {
+          _id: docIds[9],
+          project_id: projectIds[9],
+          deleted: true,
+          name: DUMMY_NAME,
+          deletedAt: DUMMY_TIME
+        }
       ])
     })
   })

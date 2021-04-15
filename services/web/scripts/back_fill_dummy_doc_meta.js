@@ -4,7 +4,7 @@ const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
 const sleep = promisify(setTimeout)
 
 const NOW_IN_S = Date.now() / 1000
-const ONE_WEEK_IN_S = 1000 * 60 * 60 * 24 * 7
+const ONE_WEEK_IN_S = 60 * 60 * 24 * 7
 const TEN_SECONDS = 10 * 1000
 
 const DRY_RUN = process.env.DRY_RUN === 'true'
@@ -14,6 +14,7 @@ if (!process.env.FIRST_PROJECT_ID) {
 }
 const FIRST_PROJECT_ID = ObjectId(process.env.FIRST_PROJECT_ID)
 const INCREMENT_BY_S = parseInt(process.env.INCREMENT_BY_S, 10) || ONE_WEEK_IN_S
+const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 1000
 const STOP_AT_S = parseInt(process.env.STOP_AT_S, 10) || NOW_IN_S
 const LET_USER_DOUBLE_CHECK_INPUTS_FOR =
   parseInt(process.env.LET_USER_DOUBLE_CHECK_INPUTS_FOR, 10) || TEN_SECONDS
@@ -35,9 +36,9 @@ async function main() {
 
   let nProcessed = 0
   while (start < STOP_AT_S) {
-    const end = start + INCREMENT_BY_S
+    let end = start + INCREMENT_BY_S
     const startId = ObjectId.createFromTime(start)
-    const endId = ObjectId.createFromTime(end)
+    let endId = ObjectId.createFromTime(end)
     const query = {
       project_id: {
         // do not include edge
@@ -53,6 +54,7 @@ async function main() {
     const docs = await db.docs
       .find(query, { readPreference: ReadPreference.SECONDARY })
       .project({ _id: 1, project_id: 1 })
+      .limit(BATCH_SIZE)
       .toArray()
 
     if (docs.length) {
@@ -60,6 +62,11 @@ async function main() {
       console.log('Back filling dummy meta data for', JSON.stringify(docIds))
       await processBatch(docs)
       nProcessed += docIds.length
+
+      if (docs.length === BATCH_SIZE) {
+        endId = docs[docs.length - 1].project_id
+        end = getSecondsFromObjectId(endId)
+      }
     }
     console.error('Processed %d until %s', nProcessed, endId)
 
@@ -100,7 +107,7 @@ async function processBatch(docs) {
     } else {
       console.log('Orphaned deleted doc %s (no deletedProjects entry)', docId)
     }
-    if (DRY_RUN) return
+    if (DRY_RUN) continue
     await db.docs.updateOne({ _id: docId }, { $set: { name, deletedAt } })
   }
 }
@@ -110,6 +117,7 @@ async function letUserDoubleCheckInputs() {
     'Options:',
     JSON.stringify(
       {
+        BATCH_SIZE,
         DRY_RUN,
         FIRST_PROJECT_ID,
         INCREMENT_BY_S,
