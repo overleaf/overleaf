@@ -57,11 +57,13 @@ module.exports = MongoManager = {
     if (!options.include_deleted) {
       query.deleted = { $ne: true }
     }
-    db.docs
-      .find(query, {
-        projection: filter
-      })
-      .toArray(callback)
+    const queryOptions = {
+      projection: filter
+    }
+    if (options.limit) {
+      queryOptions.limit = options.limit
+    }
+    db.docs.find(query, queryOptions).toArray(callback)
   },
 
   getArchivedProjectDocs(project_id, callback) {
