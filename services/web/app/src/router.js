@@ -49,6 +49,9 @@ const InstitutionsController = require('./Features/Institutions/InstitutionsCont
 const UserMembershipRouter = require('./Features/UserMembership/UserMembershipRouter')
 const SystemMessageController = require('./Features/SystemMessages/SystemMessageController')
 const { Joi, validate } = require('./infrastructure/Validation')
+const {
+  unsupportedBrowserMiddleware
+} = require('./infrastructure/UnsupportedBrowserMiddleware')
 
 const logger = require('logger-sharelatex')
 const _ = require('underscore')
@@ -263,6 +266,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       maxRequests: 30,
       timeInterval: 60
     }),
+    unsupportedBrowserMiddleware,
     ProjectController.projectListPage
   )
   webRouter.post(
@@ -284,6 +288,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       maxRequests: 15,
       timeInterval: 60
     }),
+    unsupportedBrowserMiddleware,
     AuthenticationController.validateUserSession(),
     AuthorizationMiddleware.ensureUserCanReadProject,
     ProjectController.loadEditor
@@ -1137,6 +1142,10 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     }),
     TokenAccessController.grantTokenAccessReadOnly
   )
+
+  webRouter.get('/unsupported-browser', (req, res) => {
+    res.render('general/unsupported-browser')
+  })
 
   webRouter.get('*', ErrorController.notFound)
 }

@@ -69,6 +69,7 @@
     "basic-auth-connect": "^1.0.0",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
+    "bowser": "^2.11.0",
     "bufferedstream": "1.6.0",
     "bull": "^3.18.0",
     "celebrate": "^10.0.1",
