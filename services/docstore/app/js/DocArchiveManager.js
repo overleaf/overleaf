@@ -9,7 +9,8 @@ const RangeManager = require('./RangeManager')
 const PersistorManager = require('./PersistorManager')
 const pMap = require('p-map')
 
-const PARALLEL_JOBS = 5
+const PARALLEL_JOBS = settings.parallelArchiveJobs
+const DESTROY_BATCH_SIZE = settings.destroyBatchSize
 
 module.exports = {
   archiveAllDocs: callbackify(archiveAllDocs),
@@ -175,12 +176,15 @@ async function unarchiveDoc(projectId, docId) {
 }
 
 async function destroyAllDocs(projectId) {
-  const docs = await MongoManager.getProjectsDocs(
-    projectId,
-    { include_deleted: true },
-    { _id: 1 }
-  )
-  if (docs && docs.length) {
+  while (true) {
+    const docs = await MongoManager.getProjectsDocs(
+      projectId,
+      { include_deleted: true, limit: DESTROY_BATCH_SIZE },
+      { _id: 1 }
+    )
+    if (!docs || docs.length === 0) {
+      break
+    }
     await pMap(docs, (doc) => destroyDoc(projectId, doc._id), {
       concurrency: PARALLEL_JOBS
     })

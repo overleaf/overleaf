@@ -518,6 +518,11 @@ describe('DocArchiveManager', function () {
   })
 
   describe('destroyAllDocs', function () {
+    beforeEach(function () {
+      MongoManager.promises.getProjectsDocs.onCall(0).resolves(mongoDocs)
+      MongoManager.promises.getProjectsDocs.onCall(1).resolves([])
+    })
+
     it('should resolve with valid arguments', async function () {
       await expect(DocArchiveManager.promises.destroyAllDocs(projectId)).to
         .eventually.be.fulfilled

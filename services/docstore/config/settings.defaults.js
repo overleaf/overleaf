@@ -40,7 +40,10 @@ const Settings = {
 
   max_deleted_docs: parseInt(process.env.MAX_DELETED_DOCS, 10) || 2000,
 
-  max_doc_length: parseInt(process.env.MAX_DOC_LENGTH) || 2 * 1024 * 1024 // 2mb
+  max_doc_length: parseInt(process.env.MAX_DOC_LENGTH) || 2 * 1024 * 1024, // 2mb
+
+  destroyBatchSize: parseInt(process.env.DESTROY_BATCH_SIZE, 10) || 2000,
+  parallelArchiveJobs: parseInt(process.env.PARALLEL_ARCHIVE_JOBS, 10) || 5
 }
 
 if (process.env.MONGO_CONNECTION_STRING != null) {
