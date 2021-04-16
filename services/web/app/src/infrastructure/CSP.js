@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const path = require('path')
 
 module.exports = function ({
   reportUri,
@@ -10,8 +11,7 @@ module.exports = function ({
     const originalRender = res.render
 
     res.render = (...args) => {
-      // use the view path after removing any prefix up to a "views" folder
-      const view = args[0].split('/views/').pop()
+      const view = relativeViewPath(args[0])
 
       // enable the CSP header for a percentage of requests
       const belowCutoff = Math.random() * 100 <= percentage
@@ -50,4 +50,13 @@ module.exports = function ({
 
     next()
   }
+}
+
+const webRoot = path.resolve(__dirname, '..', '..', '..')
+
+// build the view path relative to the web root
+function relativeViewPath(view) {
+  return path.isAbsolute(view)
+    ? path.relative(webRoot, view)
+    : path.join('app', 'views', view)
 }

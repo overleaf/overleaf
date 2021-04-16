@@ -735,5 +735,8 @@ module.exports = settings =
 		enabled: process.env.CSP_ENABLED == 'true'
 		reportOnly: process.env.CSP_REPORT_ONLY == 'true'
 		reportUri: process.env.CSP_REPORT_URI
-		exclude: ['project/editor', 'project/list']
+		exclude: [
+			'app/views/project/editor',
+			'app/views/project/list',
+		]
 	}
