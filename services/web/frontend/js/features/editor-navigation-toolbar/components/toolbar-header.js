@@ -10,6 +10,10 @@ import TrackChangesToggleButton from './track-changes-toggle-button'
 import HistoryToggleButton from './history-toggle-button'
 import ShareProjectButton from './share-project-button'
 import PdfToggleButton from './pdf-toggle-button'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+
+const [publishModalModules] = importOverleafModules('publishModal')
+const PublishButton = publishModalModules?.import.default
 
 function ToolbarHeader({
   cobranding,
@@ -53,14 +57,18 @@ function ToolbarHeader({
 
       <div className="toolbar-right">
         <OnlineUsersWidget onlineUsers={onlineUsers} goToUser={goToUser} />
+
+        {!isRestrictedTokenMember && (
+          <TrackChangesToggleButton
+            onClick={toggleReviewPanelOpen}
+            disabled={historyIsOpen}
+            trackChangesIsOpen={reviewPanelOpen}
+          />
+        )}
         <ShareProjectButton onClick={openShareModal} />
+        {PublishButton && <PublishButton cobranding={cobranding} />}
         {!isRestrictedTokenMember && (
           <>
-            <TrackChangesToggleButton
-              onClick={toggleReviewPanelOpen}
-              disabled={historyIsOpen}
-              trackChangesIsOpen={reviewPanelOpen}
-            />
             <HistoryToggleButton
               historyIsOpen={historyIsOpen}
               onClick={toggleHistoryOpen}

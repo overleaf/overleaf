@@ -11,14 +11,22 @@ EditorContext.Provider.propTypes = {
     cobranding: PropTypes.shape({
       logoImgUrl: PropTypes.string.isRequired,
       brandVariationName: PropTypes.string.isRequired,
-      brandVariationHomeUrl: PropTypes.string.isRequired
+      brandVariationId: PropTypes.number.isRequired,
+      brandId: PropTypes.number.isRequired,
+      brandVariationHomeUrl: PropTypes.string.isRequired,
+      publishGuideHtml: PropTypes.string,
+      partner: PropTypes.string,
+      brandedMenu: PropTypes.string,
+      submitBtnHtml: PropTypes.string
     }),
     loading: PropTypes.bool,
+    projectRootDocId: PropTypes.string,
     projectId: PropTypes.string.isRequired,
     projectName: PropTypes.string.isRequired,
     renameProject: PropTypes.func.isRequired,
     isProjectOwner: PropTypes.bool,
-    isRestrictedTokenMember: PropTypes.bool
+    isRestrictedTokenMember: PropTypes.bool,
+    rootFolder: PropTypes.object
   })
 }
 
@@ -34,7 +42,13 @@ export function EditorProvider({ children, ide, settings }) {
     ? {
         logoImgUrl: window.brandVariation.logo_url,
         brandVariationName: window.brandVariation.name,
-        brandVariationHomeUrl: window.brandVariation.home_url
+        brandVariationId: window.brandVariation.id,
+        brandId: window.brandVariation.brand_id,
+        brandVariationHomeUrl: window.brandVariation.home_url,
+        publishGuideHtml: window.brandVariation.publish_guide_html,
+        partner: window.brandVariation.partner,
+        brandedMenu: window.brandVariation.branded_menu,
+        submitBtnHtml: window.brandVariation.submit_button_html
       }
     : undefined
 
@@ -45,10 +59,14 @@ export function EditorProvider({ children, ide, settings }) {
 
   const [loading] = useScopeValue('state.loading', ide.$scope)
 
+  const [projectRootDocId] = useScopeValue('project.rootDoc_id', ide.$scope)
+
   const [projectName, setProjectName] = useScopeValue(
     'project.name',
     ide.$scope
   )
+
+  const [rootFolder] = useScopeValue('rootFolder', ide.$scope)
 
   const renameProject = useCallback(
     newName => {
@@ -82,10 +100,12 @@ export function EditorProvider({ children, ide, settings }) {
     cobranding,
     loading,
     projectId: window.project_id,
+    projectRootDocId,
     projectName: projectName || '', // initially might be empty in Angular
     renameProject,
     isProjectOwner: ownerId === window.user.id,
-    isRestrictedTokenMember: window.isRestrictedTokenMember
+    isRestrictedTokenMember: window.isRestrictedTokenMember,
+    rootFolder
   }
 
   return (

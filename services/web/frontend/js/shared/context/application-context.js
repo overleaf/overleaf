@@ -7,7 +7,9 @@ export const ApplicationContext = createContext()
 ApplicationContext.Provider.propTypes = {
   value: PropTypes.shape({
     user: PropTypes.shape({
-      id: PropTypes.string.isRequired
+      id: PropTypes.string.isRequired,
+      firstName: PropTypes.string,
+      lastName: PropTypes.string
     }),
     exposedSettings: PropTypes.shape({
       appName: PropTypes.string.isRequired,

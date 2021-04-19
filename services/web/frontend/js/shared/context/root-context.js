@@ -5,14 +5,17 @@ import { EditorProvider } from './editor-context'
 import createSharedContext from 'react2angular-shared-context'
 import { ChatProvider } from '../../features/chat/context/chat-context'
 import { LayoutProvider } from './layout-context'
+import { CompileProvider } from './compile-context'
 
 export function ContextRoot({ children, ide, settings }) {
   return (
     <ApplicationProvider>
       <EditorProvider ide={ide} settings={settings}>
-        <LayoutProvider $scope={ide.$scope}>
-          <ChatProvider>{children}</ChatProvider>
-        </LayoutProvider>
+        <CompileProvider $scope={ide.$scope}>
+          <LayoutProvider $scope={ide.$scope}>
+            <ChatProvider>{children}</ChatProvider>
+          </LayoutProvider>
+        </CompileProvider>
       </EditorProvider>
     </ApplicationProvider>
   )

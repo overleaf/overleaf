@@ -28,6 +28,16 @@ describe('BrandVariationsHandler', function () {
         v1: {
           url: 'http://overleaf.example.com'
         }
+      },
+      modules: {
+        sanitize: {
+          options: {
+            allowedTags: ['br', 'strong'],
+            allowedAttributes: {
+              strong: ['style']
+            }
+          }
+        }
       }
     }
     this.V1Api = { request: sinon.stub() }
@@ -103,6 +113,26 @@ describe('BrandVariationsHandler', function () {
           expect(
             brandVariationDetails.logo_url.startsWith(this.settings.apis.v1.url)
           ).to.be.true
+          return done()
+        }
+      )
+    })
+
+    it("should sanitize 'submit_button_html'", function (done) {
+      this.mockedBrandVariationDetails.submit_button_html =
+        '<br class="break"/><strong style="color:#B39500">AGU Journal</strong><iframe>hello</iframe>'
+      this.V1Api.request.callsArgWith(
+        1,
+        null,
+        { statusCode: 200 },
+        this.mockedBrandVariationDetails
+      )
+      return this.BrandVariationsHandler.getBrandVariationById(
+        '12',
+        (err, brandVariationDetails) => {
+          expect(brandVariationDetails.submit_button_html).to.equal(
+            '<br /><strong style="color:#B39500">AGU Journal</strong>hello'
+          )
           return done()
         }
       )

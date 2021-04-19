@@ -718,6 +718,7 @@ module.exports = settings =
 					'img': [ 'alt', 'class', 'src', 'style' ]
 					'source': [ 'src', 'type' ]
 					'span': [ 'class', 'id', 'style' ]
+					'strong': [ 'style' ]
 					'table': [ 'border', 'class', 'id', 'style' ]
 					'td': [ 'colspan', 'rowspan', 'headers', 'style' ]
 					'th': [ 'abbr', 'headers', 'colspan', 'rowspan', 'scope', 'sorted', 'style' ]
@@ -728,6 +729,7 @@ module.exports = settings =
 		# modules to import (an empty array for each set of modules)
 		createFileModes: []
 		gitBridge: []
+		publishModal: []
 	}
 
 	csp: {
