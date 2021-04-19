@@ -278,6 +278,7 @@ async function deleteProject(projectId, options = {}) {
 }
 
 async function undeleteProject(projectId, options = {}) {
+  projectId = ObjectId(projectId)
   let deletedProject = await DeletedProject.findOne({
     'deleterData.deletedProjectId': projectId
   }).exec()

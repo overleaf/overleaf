@@ -496,8 +496,16 @@ describe('Deleting a project', function () {
           .find({}, { sort: { _id: 1 } })
           .toArray()
         expect(docs).to.deep.equal([
-          { _id: fileId1, projectId: this.projectId, ...otherFileDetails },
-          { _id: fileId2, projectId: this.projectId, ...otherFileDetails }
+          {
+            _id: fileId1,
+            projectId: ObjectId(this.projectId),
+            ...otherFileDetails
+          },
+          {
+            _id: fileId2,
+            projectId: ObjectId(this.projectId),
+            ...otherFileDetails
+          }
         ])
       })
     })
