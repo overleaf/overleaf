@@ -32,7 +32,7 @@ block content
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='#', onclick='postToFeed(); return false;').facebook
+										a(href='#').facebook
 											i.fa.fa-fw.fa-2x.fa-facebook-square(aria-hidden="true")
 											|
 											| #{translate("post_on_facebook")}
@@ -158,8 +158,10 @@ block append foot-scripts
 			$(".email").click(function() {
 				ga('send', 'event', 'referal-button', 'clicked', "email")
 			});
-			$(".facebook").click(function() {
+			$(".facebook").click(function(e) {
 				ga('send', 'event', 'referal-button', 'clicked', "facebook")
+				postToFeed()
+				e.preventDefault()
 			});
 			$(".link").click(function() {
 				ga('send', 'event', 'referal-button', 'clicked', "direct-link")
