@@ -6,6 +6,8 @@ function unsupportedBrowserMiddleware(req, res, next) {
 
   const userAgent = req.headers['user-agent']
 
+  if (!userAgent) return next()
+
   const parser = Bowser.getParser(userAgent)
 
   // Allow bots through by only ignoring bots or unrecognised UA strings

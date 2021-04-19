@@ -189,3 +189,6 @@ module.exports =
 	overleaf: true
 
 	reconfirmNotificationDays: 14
+
+	unsupportedBrowsers:
+		ie: '<=11'
