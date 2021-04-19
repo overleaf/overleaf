@@ -33,9 +33,9 @@ async function getBatch(batchCounter) {
   ).map(user => user._id)
 }
 
-describe('RegenerateDuplicateReferralIds', function() {
+describe('RegenerateDuplicateReferralIds', function () {
   let firstBatch, secondBatch, thirdBatch, forthBatch, duplicateAcrossBatch
-  beforeEach('insert duplicates', async function() {
+  beforeEach('insert duplicates', async function () {
     // full batch of duplicates
     await db.users.insertMany(
       Array(BATCH_SIZE)
@@ -82,7 +82,7 @@ describe('RegenerateDuplicateReferralIds', function() {
   })
 
   let result
-  beforeEach('run script', async function() {
+  beforeEach('run script', async function () {
     try {
       result = await promisify(exec)(
         [
@@ -105,7 +105,7 @@ describe('RegenerateDuplicateReferralIds', function() {
     }
   })
 
-  it('should do the correct operations', function() {
+  it('should do the correct operations', function () {
     let { stderr: stdErr, stdout: stdOut } = result
     stdErr = stdErr
       .split('\n')
@@ -143,7 +143,7 @@ describe('RegenerateDuplicateReferralIds', function() {
     ])
   })
 
-  it('should give all users a unique refereal_id', async function() {
+  it('should give all users a unique refereal_id', async function () {
     const users = await db.users
       .find({}, { projection: { referal_id: 1 } })
       .toArray()
