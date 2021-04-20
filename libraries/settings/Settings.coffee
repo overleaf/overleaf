@@ -12,8 +12,14 @@ merge = (settings, defaults) ->
 
 defaultSettingsPath = path.normalize(__dirname + "/../../config/settings.defaults")
 
-if fs.existsSync("#{defaultSettingsPath}.coffee") or fs.existsSync("#{defaultSettingsPath}.js")
-	defaults = require(defaultSettingsPath)
+if fs.existsSync("#{defaultSettingsPath}.js")
+	console.log "Using default settings from #{defaultSettingsPath}.js"
+	defaults = require("#{defaultSettingsPath}.js")
+	settingsExist = true
+else if fs.existsSync("#{defaultSettingsPath}.coffee")
+	console.warn "CoffeeScript settings file #{defaultSettingsPath}.coffee is deprecated, please convert to JavaScript"
+	console.log "Using default settings from #{defaultSettingsPath}.coffee"
+	defaults = require("#{defaultSettingsPath}.coffee")
 	settingsExist = true
 else
 	defaults = {}
@@ -31,6 +37,8 @@ else
 
 for file in possibleConfigFiles
 	if fs.existsSync(file)
+		if file.endsWith('.coffee')
+			console.warn "CoffeeScript settings file #{file}.coffee is deprecated, please convert to JavaScript"
 		console.log "Using settings from " + file
 		module.exports = merge(require(file), defaults)
 		settingsExist = true
