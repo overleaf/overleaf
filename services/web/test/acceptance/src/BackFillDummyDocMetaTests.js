@@ -7,7 +7,7 @@ const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 const DUMMY_NAME = 'unknown.tex'
 const DUMMY_TIME = new Date('2021-04-12T00:00:00.000Z')
 const ONE_DAY_IN_S = 60 * 60 * 24
-const BATCH_SIZE = 2
+const BATCH_SIZE = 3
 
 function getSecondsFromObjectId(id) {
   return id.getTimestamp().getTime() / 1000
@@ -34,6 +34,8 @@ describe('BackFillDummyDocMeta', function () {
     docIds[7] = getObjectIdFromDate('2021-04-16T00:01:00.000Z')
     docIds[8] = getObjectIdFromDate('2021-04-16T00:02:00.000Z')
     docIds[9] = getObjectIdFromDate('2021-04-16T00:03:00.000Z')
+    docIds[10] = getObjectIdFromDate('2021-04-16T00:04:00.000Z')
+    docIds[11] = getObjectIdFromDate('2021-04-16T00:05:00.000Z')
 
     projectIds = []
     projectIds[0] = getObjectIdFromDate('2021-04-01T00:00:00.000Z')
@@ -46,6 +48,9 @@ describe('BackFillDummyDocMeta', function () {
     projectIds[7] = getObjectIdFromDate('2021-04-16T00:01:00.000Z')
     projectIds[8] = getObjectIdFromDate('2021-04-16T00:02:00.000Z')
     projectIds[9] = getObjectIdFromDate('2021-04-16T00:03:00.000Z')
+    // two docs in the same project
+    projectIds[10] = projectIds[9]
+    projectIds[11] = projectIds[4]
 
     stopAtSeconds = new Date('2021-04-17T00:00:00.000Z').getTime() / 1000
   })
@@ -72,7 +77,10 @@ describe('BackFillDummyDocMeta', function () {
       // multiple in a single batch
       { _id: docIds[7], project_id: projectIds[7], deleted: true },
       { _id: docIds[8], project_id: projectIds[8], deleted: true },
-      { _id: docIds[9], project_id: projectIds[9], deleted: true }
+      { _id: docIds[9], project_id: projectIds[9], deleted: true },
+      // two docs in one project
+      { _id: docIds[10], project_id: projectIds[10], deleted: true },
+      { _id: docIds[11], project_id: projectIds[11], deleted: true }
     ])
   })
   beforeEach('insert deleted project context', async function () {
@@ -90,7 +98,10 @@ describe('BackFillDummyDocMeta', function () {
       {
         deleterData: { deletedProjectId: projectIds[4] },
         project: {
-          deletedDocs: [{ _id: docIds[4], name: 'main.tex', deletedAt: now }]
+          deletedDocs: [
+            { _id: docIds[4], name: 'main.tex', deletedAt: now },
+            { _id: docIds[11], name: 'main.tex', deletedAt: now }
+          ]
         }
       }
     ])
@@ -100,6 +111,7 @@ describe('BackFillDummyDocMeta', function () {
   async function runScript(dryRun) {
     options = {
       BATCH_SIZE,
+      CACHE_SIZE: 100,
       DRY_RUN: dryRun,
       FIRST_PROJECT_ID: projectIds[0].toString(),
       INCREMENT_BY_S: ONE_DAY_IN_S,
@@ -126,6 +138,34 @@ describe('BackFillDummyDocMeta', function () {
       .split('\n')
       .filter(line => !line.includes('Using settings from'))
 
+    const oneDayFromProjectId9InSeconds =
+      getSecondsFromObjectId(projectIds[9]) + ONE_DAY_IN_S
+    const oneDayFromProjectId9AsObjectId = getObjectIdFromDate(
+      1000 * oneDayFromProjectId9InSeconds
+    )
+    let overlappingPartStdOut
+    let overlappingPartStdErr
+    if (dryRun) {
+      // In dry-run, the previous id will get processed again as the name has not been updated.
+      overlappingPartStdOut = [
+        `Back filling dummy meta data for ["${docIds[9]}","${docIds[10]}"]`,
+        `Orphaned deleted doc ${docIds[9]} (no deletedProjects entry)`,
+        `Orphaned deleted doc ${docIds[10]} (no deletedProjects entry)`
+      ]
+      overlappingPartStdErr = [
+        `Processed 11 until ${oneDayFromProjectId9AsObjectId}`
+      ]
+    } else {
+      // Outside dry-run, the previous id will not match again as the `name` has been back-filled.
+      overlappingPartStdOut = [
+        `Back filling dummy meta data for ["${docIds[10]}"]`,
+        `Orphaned deleted doc ${docIds[10]} (no deletedProjects entry)`
+      ]
+      overlappingPartStdErr = [
+        `Processed 10 until ${oneDayFromProjectId9AsObjectId}`
+      ]
+    }
+
     expect(stdOut).to.deep.equal([
       `Back filling dummy meta data for ["${docIds[0]}"]`,
       `Orphaned deleted doc ${docIds[0]} (no deletedProjects entry)`,
@@ -135,42 +175,40 @@ describe('BackFillDummyDocMeta', function () {
       `Orphaned deleted doc ${docIds[2]} (failed hard deletion)`,
       `Back filling dummy meta data for ["${docIds[3]}"]`,
       `Missing deletedDoc for ${docIds[3]}`,
-      `Back filling dummy meta data for ["${docIds[4]}"]`,
+      // two docs in the same project
+      `Back filling dummy meta data for ["${docIds[4]}","${docIds[11]}"]`,
       `Found deletedDoc for ${docIds[4]}`,
+      `Found deletedDoc for ${docIds[11]}`,
       // 7,8,9 are on the same day, but exceed the batch size of 2
-      `Back filling dummy meta data for ["${docIds[7]}","${docIds[8]}"]`,
+      `Back filling dummy meta data for ["${docIds[7]}","${docIds[8]}","${docIds[9]}"]`,
       `Orphaned deleted doc ${docIds[7]} (no deletedProjects entry)`,
       `Orphaned deleted doc ${docIds[8]} (no deletedProjects entry)`,
-      `Back filling dummy meta data for ["${docIds[9]}"]`,
       `Orphaned deleted doc ${docIds[9]} (no deletedProjects entry)`,
+      // Potential double processing
+      ...overlappingPartStdOut,
       ''
     ])
-    const oneDayFromProjectId8InSeconds =
-      getSecondsFromObjectId(projectIds[8]) + ONE_DAY_IN_S
-    const oneDayFromProjectId8AsObjectId = getObjectIdFromDate(
-      1000 * oneDayFromProjectId8InSeconds
-    )
     expect(stdErr).to.deep.equal([
       ...`Options: ${JSON.stringify(options, null, 2)}`.split('\n'),
       'Waiting for you to double check inputs for 1 ms',
-      `Processed 1 until ${getObjectIdFromDate('2021-04-01T23:59:59.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-02T23:59:59.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-03T23:59:59.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-04T23:59:59.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-05T23:59:59.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-06T23:59:59.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-07T23:59:59.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-08T23:59:59.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-09T23:59:59.000Z')}`,
-      `Processed 2 until ${getObjectIdFromDate('2021-04-10T23:59:59.000Z')}`,
-      `Processed 3 until ${getObjectIdFromDate('2021-04-11T23:59:59.000Z')}`,
-      `Processed 4 until ${getObjectIdFromDate('2021-04-12T23:59:59.000Z')}`,
-      `Processed 5 until ${getObjectIdFromDate('2021-04-13T23:59:59.000Z')}`,
-      `Processed 5 until ${getObjectIdFromDate('2021-04-14T23:59:59.000Z')}`,
-      `Processed 5 until ${getObjectIdFromDate('2021-04-15T23:59:59.000Z')}`,
-      // 7,8,9 are on the same day, but exceed the batch size of 2
-      `Processed 7 until ${projectIds[8]}`,
-      `Processed 8 until ${oneDayFromProjectId8AsObjectId}`,
+      `Processed 1 until ${getObjectIdFromDate('2021-04-02T00:00:00.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-03T00:00:00.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-04T00:00:00.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-05T00:00:00.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-06T00:00:00.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-07T00:00:00.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-08T00:00:00.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-09T00:00:00.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-10T00:00:00.000Z')}`,
+      `Processed 2 until ${getObjectIdFromDate('2021-04-11T00:00:00.000Z')}`,
+      `Processed 3 until ${getObjectIdFromDate('2021-04-12T00:00:00.000Z')}`,
+      `Processed 4 until ${getObjectIdFromDate('2021-04-13T00:00:00.000Z')}`,
+      `Processed 6 until ${getObjectIdFromDate('2021-04-14T00:00:00.000Z')}`,
+      `Processed 6 until ${getObjectIdFromDate('2021-04-15T00:00:00.000Z')}`,
+      `Processed 6 until ${getObjectIdFromDate('2021-04-16T00:00:00.000Z')}`,
+      // 7,8,9,10 are on the same day, but exceed the batch size of 3
+      `Processed 9 until ${projectIds[9]}`,
+      ...overlappingPartStdErr,
       'Done.',
       ''
     ])
@@ -199,7 +237,9 @@ describe('BackFillDummyDocMeta', function () {
         { _id: docIds[6], project_id: projectIds[6] },
         { _id: docIds[7], project_id: projectIds[7], deleted: true },
         { _id: docIds[8], project_id: projectIds[8], deleted: true },
-        { _id: docIds[9], project_id: projectIds[9], deleted: true }
+        { _id: docIds[9], project_id: projectIds[9], deleted: true },
+        { _id: docIds[10], project_id: projectIds[10], deleted: true },
+        { _id: docIds[11], project_id: projectIds[11], deleted: true }
       ])
     })
   })
@@ -275,6 +315,20 @@ describe('BackFillDummyDocMeta', function () {
           deleted: true,
           name: DUMMY_NAME,
           deletedAt: DUMMY_TIME
+        },
+        {
+          _id: docIds[10],
+          project_id: projectIds[10],
+          deleted: true,
+          name: DUMMY_NAME,
+          deletedAt: DUMMY_TIME
+        },
+        {
+          _id: docIds[11],
+          project_id: projectIds[11],
+          deleted: true,
+          name: 'main.tex',
+          deletedAt: now
         }
       ])
     })

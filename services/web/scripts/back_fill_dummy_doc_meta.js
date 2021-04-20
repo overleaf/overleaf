@@ -7,6 +7,7 @@ const NOW_IN_S = Date.now() / 1000
 const ONE_WEEK_IN_S = 60 * 60 * 24 * 7
 const TEN_SECONDS = 10 * 1000
 
+const CACHE_SIZE = parseInt(process.env.CACHE_SIZE, 10) || 100
 const DRY_RUN = process.env.DRY_RUN === 'true'
 if (!process.env.FIRST_PROJECT_ID) {
   console.error('Set FIRST_PROJECT_ID and re-run.')
@@ -22,6 +23,11 @@ const LET_USER_DOUBLE_CHECK_INPUTS_FOR =
 const DUMMY_NAME = 'unknown.tex'
 const DUMMY_TIME = new Date('2021-04-12T00:00:00.000Z')
 
+const LRUCache = require('lru-cache')
+const deletedProjectsCache = new LRUCache({
+  max: CACHE_SIZE
+})
+
 function getSecondsFromObjectId(id) {
   return id.getTimestamp().getTime() / 1000
 }
@@ -30,21 +36,18 @@ async function main() {
   await letUserDoubleCheckInputs()
   await waitForDb()
 
-  let start = getSecondsFromObjectId(FIRST_PROJECT_ID)
-  // include the FIRST_PROJECT_ID in the first batch
-  start -= 1
+  let startId = FIRST_PROJECT_ID
 
   let nProcessed = 0
-  while (start < STOP_AT_S) {
-    let end = start + INCREMENT_BY_S
-    const startId = ObjectId.createFromTime(start)
+  while (getSecondsFromObjectId(startId) <= STOP_AT_S) {
+    const end = getSecondsFromObjectId(startId) + INCREMENT_BY_S
     let endId = ObjectId.createFromTime(end)
     const query = {
       project_id: {
-        // do not include edge
-        $gt: startId,
         // include edge
-        $lte: endId
+        $gte: startId,
+        // exclude edge
+        $lt: endId
       },
       deleted: true,
       name: {
@@ -65,27 +68,36 @@ async function main() {
 
       if (docs.length === BATCH_SIZE) {
         endId = docs[docs.length - 1].project_id
-        end = getSecondsFromObjectId(endId)
       }
     }
     console.error('Processed %d until %s', nProcessed, endId)
 
-    start = end
+    startId = endId
   }
+}
+
+async function getDeletedProject(projectId) {
+  const cacheKey = projectId.toString()
+  if (deletedProjectsCache.has(cacheKey)) {
+    return deletedProjectsCache.get(cacheKey)
+  }
+  const deletedProject = await db.deletedProjects.findOne(
+    { 'deleterData.deletedProjectId': projectId },
+    {
+      projection: {
+        _id: 1,
+        'project.deletedDocs': 1
+      }
+    }
+  )
+  deletedProjectsCache.set(cacheKey, deletedProject)
+  return deletedProject
 }
 
 async function processBatch(docs) {
   for (const doc of docs) {
     const { _id: docId, project_id: projectId } = doc
-    const deletedProject = await db.deletedProjects.findOne(
-      { 'deleterData.deletedProjectId': projectId },
-      {
-        projection: {
-          _id: 1,
-          'project.deletedDocs': 1
-        }
-      }
-    )
+    const deletedProject = await getDeletedProject(projectId)
     let name = DUMMY_NAME
     let deletedAt = DUMMY_TIME
     if (deletedProject) {
@@ -118,6 +130,7 @@ async function letUserDoubleCheckInputs() {
     JSON.stringify(
       {
         BATCH_SIZE,
+        CACHE_SIZE,
         DRY_RUN,
         FIRST_PROJECT_ID,
         INCREMENT_BY_S,
