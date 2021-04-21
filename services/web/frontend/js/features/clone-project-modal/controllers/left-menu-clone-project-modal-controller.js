@@ -30,11 +30,6 @@ export default App.controller(
           $scope.projectName = project.name
 
           $scope.show = true
-
-          // TODO: is this needed
-          window.setTimeout(() => {
-            $scope.$broadcast('open')
-          }, 200)
         }
       })
     }
