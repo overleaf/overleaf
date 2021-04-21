@@ -192,8 +192,7 @@ describe('MongoManager', function () {
       this.db.docs.find
         .calledWith({
           project_id: ObjectId(this.project_id),
-          deleted: true,
-          name: { $exists: true }
+          deleted: true
         })
         .should.equal(true)
     })

@@ -39,9 +39,7 @@ module.exports = MongoManager = {
       .find(
         {
           project_id: ObjectId(project_id.toString()),
-          deleted: true,
-          // TODO(das7pad): remove name filter after back filling data
-          name: { $exists: true }
+          deleted: true
         },
         {
           projection: filter,
