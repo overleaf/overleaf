@@ -3,6 +3,7 @@ const path = require('path')
 
 module.exports = function ({
   reportUri,
+  reportPercentage,
   reportOnly = false,
   exclude = [],
   percentage
@@ -29,7 +30,10 @@ module.exports = function ({
           `base-uri 'none'`
         ]
 
-        if (reportUri) {
+        // enable the report URI for a percentage of CSP-enabled requests
+        const belowReportCutoff = Math.random() * 100 <= reportPercentage
+
+        if (reportUri && belowReportCutoff) {
           directives.push(`report-uri ${reportUri}`)
           // NOTE: implement report-to once it's more widely supported
         }

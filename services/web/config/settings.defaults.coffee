@@ -736,6 +736,7 @@ module.exports = settings =
 		percentage: parseFloat(process.env.CSP_PERCENTAGE) || 0
 		enabled: process.env.CSP_ENABLED == 'true'
 		reportOnly: process.env.CSP_REPORT_ONLY == 'true'
+		reportPercentage: parseFloat(process.env.CSP_REPORT_PERCENTAGE) || 0
 		reportUri: process.env.CSP_REPORT_URI
 		exclude: [
 			'app/views/project/editor',
