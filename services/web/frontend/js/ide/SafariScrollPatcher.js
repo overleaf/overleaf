@@ -76,13 +76,14 @@ export default SafariScrollPatcher = class SafariScrollPatcher {
       this.aceDiv = document.querySelector('.ace_content') // Also the editor.
 
       // Set hover-related listeners.
-      this.pdfDiv.addEventListener('mouseleave', this.handlePdfDivMouseLeave)
-      this.pdfDiv.addEventListener('mouseenter', this.handlePdfDivMouseEnter)
-      this.aceDiv.addEventListener('mouseleave', this.handleAceDivMouseLeave)
-      return this.aceDiv.addEventListener(
-        'mouseenter',
-        this.handleAceDivMouseEnter
-      )
+      if (this.pdfDiv != null) {
+        this.pdfDiv.addEventListener('mouseleave', this.handlePdfDivMouseLeave)
+        this.pdfDiv.addEventListener('mouseenter', this.handlePdfDivMouseEnter)
+      }
+      if (this.aceDiv != null) {
+        this.aceDiv.addEventListener('mouseleave', this.handleAceDivMouseLeave)
+        this.aceDiv.addEventListener('mouseenter', this.handleAceDivMouseEnter)
+      }
     }
 
     // Handler for wheel events on the PDF.
