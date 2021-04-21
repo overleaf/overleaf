@@ -819,7 +819,7 @@ const ProjectController = {
                 allowedFreeTrial: allowedFreeTrial,
                 featureSwitches: user.featureSwitches,
                 features: user.features,
-                refProviders: user.refProviders,
+                refProviders: _.mapValues(user.refProviders, Boolean),
                 alphaProgram: user.alphaProgram,
                 betaProgram: user.betaProgram,
                 isAdmin: user.isAdmin

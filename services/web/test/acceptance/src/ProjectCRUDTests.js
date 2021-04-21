@@ -2,13 +2,36 @@ const { expect } = require('chai')
 const User = require('./helpers/User').promises
 const { Project } = require('../../../app/src/models/Project')
 const { ObjectId } = require('mongodb')
+const cheerio = require('cheerio')
 
 describe('Project CRUD', function () {
   beforeEach(async function () {
     this.user = new User()
     await this.user.login()
-
     this.projectId = await this.user.createProject('example-project')
+  })
+
+  describe('project page', function () {
+    it('should cast refProviders to booleans', async function () {
+      await this.user.mongoUpdate({
+        $set: {
+          refProviders: {
+            mendeley: { encrypted: 'aaa' },
+            zotero: { encrypted: 'bbb' }
+          }
+        }
+      })
+      const { response, body } = await this.user.doRequest(
+        'GET',
+        `/project/${this.projectId}`
+      )
+      expect(response.statusCode).to.equal(200)
+      const dom = cheerio.load(body)
+      const metaOlUser = dom('meta[name="ol-user"]')[0]
+      const userData = JSON.parse(metaOlUser.attribs.content)
+      expect(userData.refProviders.mendeley).to.equal(true)
+      expect(userData.refProviders.zotero).to.equal(true)
+    })
   })
 
   describe("when project doesn't exist", function () {

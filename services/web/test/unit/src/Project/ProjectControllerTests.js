@@ -896,7 +896,11 @@ describe('ProjectController', function () {
           fontSize: 'massive',
           theme: 'sexy'
         },
-        email: 'bob@bob.com'
+        email: 'bob@bob.com',
+        refProviders: {
+          mendeley: { encrypted: 'aaaa' },
+          zotero: { encrypted: 'bbbb' }
+        }
       }
       this.ProjectGetter.getProject.callsArgWith(2, null, this.project)
       this.UserModel.findById.callsArgWith(2, null, this.user)
@@ -922,6 +926,17 @@ describe('ProjectController', function () {
     it('should add user', function (done) {
       this.res.render = (pageName, opts) => {
         opts.user.email.should.equal(this.user.email)
+        done()
+      }
+      this.ProjectController.loadEditor(this.req, this.res)
+    })
+
+    it('should sanitize refProviders', function (done) {
+      this.res.render = (_pageName, opts) => {
+        expect(opts.user.refProviders).to.deep.equal({
+          mendeley: true,
+          zotero: true
+        })
         done()
       }
       this.ProjectController.loadEditor(this.req, this.res)
