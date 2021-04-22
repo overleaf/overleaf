@@ -1,28 +1,19 @@
-// Disable prop type checks for test harnesses
-/* eslint-disable react/prop-types */
-
 import React from 'react'
 import { render } from '@testing-library/react'
-import sinon from 'sinon'
 import { ApplicationProvider } from '../../../frontend/js/shared/context/application-context'
 import { EditorProvider } from '../../../frontend/js/shared/context/editor-context'
-import { LayoutProvider } from '../../../frontend/js/shared/context/layout-context'
+import sinon from 'sinon'
 import { ChatProvider } from '../../../frontend/js/features/chat/context/chat-context'
+import { LayoutProvider } from '../../../frontend/js/shared/context/layout-context'
 
-export function EditorProviders({
-  user = { id: '123abd' },
-  projectId = 'project123',
-  socket = {
-    on: sinon.stub(),
-    removeListener: sinon.stub()
-  },
-  children
-}) {
+export function renderWithEditorContext(
+  children,
+  { user = { id: '123abd' }, projectId = 'project123' } = {}
+) {
   window.user = user || window.user
   window.ExposedSettings.appName = 'test'
   window.gitBridgePublicBaseUrl = 'git.overleaf.test'
   window.project_id = projectId != null ? projectId : window.project_id
-
   window._ide = {
     $scope: {
       project: {
@@ -36,9 +27,12 @@ export function EditorProviders({
       },
       $watch: () => {}
     },
-    socket
+    socket: {
+      on: sinon.stub(),
+      removeListener: sinon.stub()
+    }
   }
-  return (
+  return render(
     <ApplicationProvider>
       <EditorProvider ide={window._ide} settings={{}}>
         <LayoutProvider $scope={window._ide.$scope}>{children}</LayoutProvider>
@@ -47,20 +41,11 @@ export function EditorProviders({
   )
 }
 
-export function renderWithEditorContext(children, props) {
-  return render(<EditorProviders {...props}>{children}</EditorProviders>)
-}
-
-export function ChatProviders({ children, ...props }) {
-  return (
-    <EditorProviders {...props}>
-      <ChatProvider>{children}</ChatProvider>
-    </EditorProviders>
-  )
-}
-
-export function renderWithChatContext(children, props) {
-  return render(<ChatProviders {...props}>{children}</ChatProviders>)
+export function renderWithChatContext(children, { user, projectId } = {}) {
+  return renderWithEditorContext(<ChatProvider>{children}</ChatProvider>, {
+    user,
+    projectId
+  })
 }
 
 export function cleanUpContext() {
