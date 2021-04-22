@@ -2,37 +2,116 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useState,
-  useEffect
+  useEffect,
+  useReducer,
+  useMemo
 } from 'react'
 import PropTypes from 'prop-types'
+import { v4 as uuid } from 'uuid'
+
 import { useApplicationContext } from '../../../shared/context/application-context'
 import { useEditorContext } from '../../../shared/context/editor-context'
-import { ChatStore } from '../store/chat-store'
+import { getJSON, postJSON } from '../../../infrastructure/fetch-json'
+import { appendMessage, prependMessages } from '../utils/message-list-appender'
 import useBrowserWindow from '../../../infrastructure/browser-window-hook'
 import { useLayoutContext } from '../../../shared/context/layout-context'
+
+const PAGE_SIZE = 50
+
+export function chatReducer(state, action) {
+  switch (action.type) {
+    case 'INITIAL_FETCH_MESSAGES':
+      return {
+        ...state,
+        status: 'pending',
+        initialMessagesLoaded: true
+      }
+
+    case 'FETCH_MESSAGES':
+      return {
+        ...state,
+        status: 'pending'
+      }
+
+    case 'FETCH_MESSAGES_SUCCESS':
+      return {
+        ...state,
+        status: 'idle',
+        messages: prependMessages(state.messages, action.messages),
+        lastTimestamp: action.messages[0] ? action.messages[0].timestamp : null,
+        atEnd: action.messages.length < PAGE_SIZE
+      }
+
+    case 'SEND_MESSAGE':
+      return {
+        ...state,
+        messages: appendMessage(state.messages, {
+          // Messages are sent optimistically, so don't have an id (used for
+          // React keys). The uuid is valid for this session, and ensures all
+          // messages have an id. It will be overwritten by the actual ids on
+          // refresh
+          id: uuid(),
+          user: action.user,
+          content: action.content,
+          timestamp: Date.now()
+        }),
+        messageWasJustSent: true
+      }
+
+    case 'RECEIVE_MESSAGE':
+      return {
+        ...state,
+        messages: appendMessage(state.messages, action.message),
+        messageWasJustSent: false,
+        unreadMessageCount: state.unreadMessageCount + 1
+      }
+
+    case 'MARK_MESSAGES_AS_READ':
+      return {
+        ...state,
+        unreadMessageCount: 0
+      }
+
+    case 'ERROR':
+      return {
+        ...state,
+        status: 'error',
+        error: action.error
+      }
+
+    default:
+      throw new Error('Unknown action')
+  }
+}
+
+const initialState = {
+  status: 'idle',
+  messages: [],
+  initialMessagesLoaded: false,
+  lastTimestamp: null,
+  atEnd: false,
+  messageWasJustSent: false,
+  unreadMessageCount: 0,
+  error: null
+}
 
 export const ChatContext = createContext()
 
 ChatContext.Provider.propTypes = {
   value: PropTypes.shape({
-    userId: PropTypes.string.isRequired,
-    atEnd: PropTypes.bool,
-    loading: PropTypes.bool,
+    status: PropTypes.string.isRequired,
     messages: PropTypes.array.isRequired,
+    initialMessagesLoaded: PropTypes.bool.isRequired,
+    atEnd: PropTypes.bool.isRequired,
     unreadMessageCount: PropTypes.number.isRequired,
-    resetUnreadMessageCount: PropTypes.func.isRequired,
+    loadInitialMessages: PropTypes.func.isRequired,
     loadMoreMessages: PropTypes.func.isRequired,
-    sendMessage: PropTypes.func.isRequired
+    sendMessage: PropTypes.func.isRequired,
+    markMessagesAsRead: PropTypes.func.isRequired
   }).isRequired
 }
 
 export function ChatProvider({ children }) {
-  const {
-    hasFocus: windowHasFocus,
-    flashTitle,
-    stopFlashingTitle
-  } = useBrowserWindow()
   const { user } = useApplicationContext({
     user: PropTypes.shape({ id: PropTypes.string.isRequired }.isRequired)
   })
@@ -42,68 +121,131 @@ export function ChatProvider({ children }) {
 
   const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
 
-  const [unreadMessageCount, setUnreadMessageCount] = useState(0)
-  function resetUnreadMessageCount() {
-    setUnreadMessageCount(0)
-  }
+  const {
+    hasFocus: windowHasFocus,
+    flashTitle,
+    stopFlashingTitle
+  } = useBrowserWindow()
 
-  const [atEnd, setAtEnd] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [messages, setMessages] = useState([])
+  const [state, dispatch] = useReducer(chatReducer, initialState)
 
-  const [store] = useState(() => new ChatStore(user, projectId))
+  const { loadInitialMessages, loadMoreMessages } = useMemo(() => {
+    function fetchMessages() {
+      if (state.atEnd) return
 
+      const query = { limit: PAGE_SIZE }
+
+      if (state.lastTimestamp) {
+        query.before = state.lastTimestamp
+      }
+
+      const queryString = new URLSearchParams(query)
+      const url = `/project/${projectId}/messages?${queryString.toString()}`
+
+      getJSON(url).then((messages = []) => {
+        dispatch({
+          type: 'FETCH_MESSAGES_SUCCESS',
+          messages: messages.reverse()
+        })
+      })
+    }
+
+    function loadInitialMessages() {
+      if (state.initialMessagesLoaded) return
+
+      dispatch({ type: 'INITIAL_FETCH_MESSAGES' })
+      fetchMessages()
+    }
+
+    function loadMoreMessages() {
+      dispatch({ type: 'FETCH_MESSAGES' })
+      fetchMessages()
+    }
+
+    return {
+      loadInitialMessages,
+      loadMoreMessages
+    }
+  }, [projectId, state.atEnd, state.initialMessagesLoaded, state.lastTimestamp])
+
+  const sendMessage = useCallback(
+    content => {
+      if (!content) return
+
+      dispatch({
+        type: 'SEND_MESSAGE',
+        user,
+        content
+      })
+
+      const url = `/project/${projectId}/messages`
+      postJSON(url, {
+        body: { content }
+      })
+    },
+    [projectId, user]
+  )
+
+  const markMessagesAsRead = useCallback(() => {
+    dispatch({ type: 'MARK_MESSAGES_AS_READ' })
+  }, [])
+
+  // Handling receiving messages over the socket
+  const socket = window._ide?.socket
+  useEffect(() => {
+    if (!socket) return
+
+    function receivedMessage(message) {
+      // If the message is from the current user and they just sent a message,
+      // then we are receiving the sent message back from the socket. Ignore it
+      // to prevent double message
+      const messageIsFromSelf = message?.user?.id === user.id
+      if (messageIsFromSelf && state.messageWasJustSent) return
+
+      dispatch({ type: 'RECEIVE_MESSAGE', message })
+    }
+
+    socket.on('new-chat-message', receivedMessage)
+    return () => {
+      if (!socket) return
+
+      socket.removeListener('new-chat-message', receivedMessage)
+    }
+    // We're adding and removing the socket listener every time we send a
+    // message (and messageWasJustSent changes). Not great, but no good way
+    // around it
+  }, [socket, state.messageWasJustSent, state.unreadMessageCount, user.id])
+
+  // Handle unread messages
   useEffect(() => {
     if (windowHasFocus) {
       stopFlashingTitle()
       if (chatIsOpen) {
-        setUnreadMessageCount(0)
+        markMessagesAsRead()
       }
     }
-    if (!windowHasFocus && unreadMessageCount > 0) {
+    if (!windowHasFocus && state.unreadMessageCount > 0) {
       flashTitle('New Message')
     }
   }, [
     windowHasFocus,
     chatIsOpen,
-    unreadMessageCount,
+    state.unreadMessageCount,
     flashTitle,
-    stopFlashingTitle
-  ])
-
-  useEffect(() => {
-    function updateState() {
-      setAtEnd(store.atEnd)
-      setLoading(store.loading)
-      setMessages(store.messages)
-    }
-
-    function handleNewMessage() {
-      setUnreadMessageCount(prevCount => prevCount + 1)
-    }
-
-    store.on('updated', updateState)
-    store.on('message-received', handleNewMessage)
-
-    updateState()
-
-    return () => store.destroy()
-  }, [store])
-
-  const loadMoreMessages = useCallback(() => store.loadMoreMessages(), [store])
-  const sendMessage = useCallback(message => store.sendMessage(message), [
-    store
+    stopFlashingTitle,
+    markMessagesAsRead
   ])
 
   const value = {
-    userId: user.id,
-    atEnd,
-    loading,
-    messages,
-    unreadMessageCount,
-    resetUnreadMessageCount,
+    status: state.status,
+    messages: state.messages,
+    initialMessagesLoaded: state.initialMessagesLoaded,
+    atEnd: state.atEnd,
+    unreadMessageCount: state.unreadMessageCount,
+    loadInitialMessages,
     loadMoreMessages,
-    sendMessage
+    sendMessage,
+    markMessagesAsRead
   }
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>

@@ -52,7 +52,7 @@ describe('<ChatPane />', function () {
     await screen.findByText('another message')
   })
 
-  it('A loading spinner is rendered while the messages are loading, then disappears', async function () {
+  it('a loading spinner is rendered while the messages are loading, then disappears', async function () {
     fetchMock.get(/messages/, [])
 
     renderWithChatContext(<ChatPane />, { user })

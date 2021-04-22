@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
+import { useTranslation } from 'react-i18next'
+
 import MessageList from './message-list'
 import MessageInput from './message-input'
 import InfiniteScroll from './infinite-scroll'
 import Icon from '../../../shared/components/icon'
-import { useTranslation } from 'react-i18next'
 import { useLayoutContext } from '../../../shared/context/layout-context'
+import { useApplicationContext } from '../../../shared/context/application-context'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { useChatContext } from '../context/chat-context'
 
@@ -13,27 +15,26 @@ function ChatPane() {
   const { t } = useTranslation()
 
   const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
+  const { user } = useApplicationContext()
 
   const {
-    userId,
-    atEnd,
-    loading,
-    loadMoreMessages,
+    status,
     messages,
+    initialMessagesLoaded,
+    atEnd,
+    loadInitialMessages,
+    loadMoreMessages,
     sendMessage,
-    resetUnreadMessageCount
+    markMessagesAsRead
   } = useChatContext()
-
-  const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
 
   useEffect(() => {
     if (chatIsOpen && !initialMessagesLoaded) {
-      loadMoreMessages()
-      setInitialMessagesLoaded(true)
+      loadInitialMessages()
     }
-  }, [initialMessagesLoaded, loadMoreMessages, chatIsOpen])
+  }, [chatIsOpen, loadInitialMessages, initialMessagesLoaded])
 
-  const shouldDisplayPlaceholder = !loading && messages.length === 0
+  const shouldDisplayPlaceholder = status !== 'pending' && messages.length === 0
 
   const messageContentCount = messages.reduce(
     (acc, { contents }) => acc + contents.length,
@@ -46,22 +47,22 @@ function ChatPane() {
         atEnd={atEnd}
         className="messages"
         fetchData={loadMoreMessages}
-        isLoading={loading}
+        isLoading={status === 'pending'}
         itemCount={messageContentCount}
       >
         <div>
           <h2 className="sr-only">{t('chat')}</h2>
-          {loading && <LoadingSpinner />}
+          {status === 'pending' && <LoadingSpinner />}
           {shouldDisplayPlaceholder && <Placeholder />}
           <MessageList
             messages={messages}
-            userId={userId}
-            resetUnreadMessages={resetUnreadMessageCount}
+            userId={user.id}
+            resetUnreadMessages={markMessagesAsRead}
           />
         </div>
       </InfiniteScroll>
       <MessageInput
-        resetUnreadMessages={resetUnreadMessageCount}
+        resetUnreadMessages={markMessagesAsRead}
         sendMessage={sendMessage}
       />
     </aside>

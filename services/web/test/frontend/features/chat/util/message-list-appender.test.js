@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import {
   appendMessage,
   prependMessages
-} from '../../../../../frontend/js/features/chat/store/message-list-appender'
+} from '../../../../../frontend/js/features/chat/utils/message-list-appender'
 
 const testUser = {
   id: '123abc'
