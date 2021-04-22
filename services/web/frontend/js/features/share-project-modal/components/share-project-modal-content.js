@@ -1,12 +1,11 @@
 import React from 'react'
 import { Button, Modal, Grid } from 'react-bootstrap'
-import { Trans, useTranslation } from 'react-i18next'
+import { Trans } from 'react-i18next'
 import ShareModalBody from './share-modal-body'
 import Icon from '../../../shared/components/icon'
 import AccessibleModal from '../../../shared/components/accessible-modal'
 import PropTypes from 'prop-types'
 import { ReadOnlyTokenLink } from './link-sharing'
-import BetaBadge from '../../../shared/components/beta-badge'
 
 export default function ShareProjectModalContent({
   show,
@@ -15,20 +14,11 @@ export default function ShareProjectModalContent({
   inFlight,
   error
 }) {
-  const { t } = useTranslation()
-
-  const tooltip = {
-    id: 'create-file-beta-tooltip',
-    text: t('beta_badge_tooltip', { feature: 'project sharing' })
-  }
-
   return (
     <AccessibleModal show={show} onHide={cancel} animation={animation}>
       <Modal.Header closeButton>
         <Modal.Title>
           <Trans i18nKey="share_project" />
-          &nbsp;&nbsp;
-          <BetaBadge tooltip={tooltip} />
         </Modal.Title>
       </Modal.Header>
 
