@@ -1373,5 +1373,12 @@
   "resend_confirmation_email": "Resend confirmation email",
   "your_affiliation_is_confirmed": "Your <0>__institutionName__</0> affiliation is confirmed.",
   "thank_you": "Thank you!",
-  "add_email": "Add Email"
+  "add_email": "Add Email",
+  "imported_from_mendeley_at_date": "Imported from Mendeley at __formattedDate__ __relativeDate__",
+  "imported_from_zotero_at_date": "Imported from Zotero  at __formattedDate__ __relativeDate__",
+  "imported_from_external_provider_at_date": "Imported from <0>__shortenedUrlHTML__</0> at __formattedDate__ __relativeDate__",
+  "imported_from_another_project_at_date": "Imported from <0>Another project</0>/__sourceEntityPathHTML__, at __formattedDate__ __relativeDate__",
+  "imported_from_the_output_of_another_project_at_date": "Imported from the output of <0>Another project</0>: __sourceOutputFilePathHTML__, at __formattedDate__ __relativeDate__",
+  "refreshing": "Refreshing",
+  "if_error_persists_try_relinking_provider": "If this error persists, try re-linking your __provider__ account here"
 }
