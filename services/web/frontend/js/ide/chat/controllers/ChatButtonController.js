@@ -14,7 +14,6 @@
 import App from '../../../base'
 
 export default App.controller('ChatButtonController', function ($scope, ide) {
-  let clearNewMessageNotification
   $scope.toggleChat = function () {
     $scope.ui.chatOpen = !$scope.ui.chatOpen
     return $scope.resetUnreadMessages()
@@ -22,8 +21,6 @@ export default App.controller('ChatButtonController', function ($scope, ide) {
 
   $scope.unreadMessages = 0
   $scope.resetUnreadMessages = () => ($scope.unreadMessages = 0)
-
-  $scope.$on('chat:resetUnreadMessages', e => $scope.resetUnreadMessages())
 
   function handleNewMessage(message) {
     if (message != null) {
@@ -36,49 +33,13 @@ export default App.controller('ChatButtonController', function ($scope, ide) {
             $scope.unreadMessages += 1
           })
         }
-        flashTitle()
       }
     }
   }
 
-  $scope.$on('chat:newMessage', (e, message) => handleNewMessage(message))
   window.addEventListener('Chat.MessageReceived', ({ detail: { message } }) =>
     handleNewMessage(message)
   )
-
-  let focussed = true
-  let newMessageNotificationTimeout = null
-  let originalTitle = null
-  $(window).on('focus', function () {
-    clearNewMessageNotification()
-    return (focussed = true)
-  })
-  $(window).on('blur', () => (focussed = false))
-
-  var flashTitle = function () {
-    if (!focussed && newMessageNotificationTimeout == null) {
-      let changeTitle
-      if (!originalTitle) {
-        originalTitle = window.document.title
-      }
-      return (changeTitle = () => {
-        if (window.document.title === originalTitle) {
-          window.document.title = 'New Message'
-        } else {
-          window.document.title = originalTitle
-        }
-        return (newMessageNotificationTimeout = setTimeout(changeTitle, 800))
-      })()
-    }
-  }
-
-  return (clearNewMessageNotification = function () {
-    clearTimeout(newMessageNotificationTimeout)
-    newMessageNotificationTimeout = null
-    if (originalTitle != null) {
-      return (window.document.title = originalTitle)
-    }
-  })
 })
 
 function __guard__(value, transform) {
