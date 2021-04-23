@@ -405,9 +405,6 @@ module.exports = settings =
 		{code: "xh", name: "Xhosa"}
 	]
 
-	overleafModuleImports:
-		tprLinkedFileInfo: []
-		tprLinkedFileRefreshError: []
 	# Password Settings
 	# -----------
 	# These restrict the passwords users can use when registering

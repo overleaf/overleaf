@@ -108,11 +108,7 @@ block content
 
 					.ui-layout-center
 						include ./editor/editor
-
-						if showNewBinaryFileUI
-							include ./editor/binary-file-react
-						else
-							include ./editor/binary-file
+						include ./editor/binary-file
 						include ./editor/history
 
 			if !isRestrictedTokenMember
