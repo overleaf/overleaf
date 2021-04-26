@@ -15,10 +15,6 @@ describe('AnalyticsController', function () {
       recordEvent: sinon.stub()
     }
 
-    this.InstitutionsAPI = {
-      getInstitutionLicences: sinon.stub().callsArgWith(4)
-    }
-
     this.Features = {
       hasFeature: sinon.stub().returns(true)
     }
@@ -28,7 +24,6 @@ describe('AnalyticsController', function () {
         './AnalyticsManager': this.AnalyticsManager,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
-        '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
         '../../infrastructure/Features': this.Features,
         '../../infrastructure/GeoIpLookup': (this.GeoIpLookup = {
           getDetails: sinon.stub()
@@ -90,34 +85,6 @@ describe('AnalyticsController', function () {
       this.controller.recordEvent(this.req, this.res)
       this.AnalyticsManager.recordEvent
         .calledWith(this.req.sessionID, this.req.params.event, this.req.body)
-        .should.equal(true)
-      done()
-    })
-  })
-
-  describe('licences', function () {
-    beforeEach(function () {
-      this.req = {
-        query: {
-          resource_id: 1,
-          start_date: '1514764800',
-          end_date: '1530662400',
-          resource_type: 'institution'
-        },
-        sessionID: 'sessionIDHere',
-        session: {}
-      }
-    })
-
-    it('should trigger institutions api to fetch licences graph data', function (done) {
-      this.controller.licences(this.req, this.res)
-      this.InstitutionsAPI.getInstitutionLicences
-        .calledWith(
-          this.req.query.resource_id,
-          this.req.query.start_date,
-          this.req.query.end_date,
-          this.req.query.lag
-        )
         .should.equal(true)
       done()
     })

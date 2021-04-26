@@ -1,7 +1,6 @@
 const metrics = require('@overleaf/metrics')
 const AnalyticsManager = require('./AnalyticsManager')
 const AuthenticationController = require('../Authentication/AuthenticationController')
-const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
 const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 const Features = require('../../infrastructure/Features')
 
@@ -35,35 +34,5 @@ module.exports = {
       AuthenticationController.getLoggedInUserId(req) || req.sessionID
     AnalyticsManager.recordEvent(userId, req.params.event, req.body)
     res.sendStatus(202)
-  },
-
-  licences(req, res, next) {
-    InstitutionsAPI.getInstitutionLicences(
-      req.query.resource_id,
-      req.query.start_date,
-      req.query.end_date,
-      req.query.lag,
-      function (error, licences) {
-        if (error) {
-          return next(error)
-        }
-        res.send(licences)
-      }
-    )
-  },
-
-  newLicences(req, res, next) {
-    InstitutionsAPI.getInstitutionNewLicences(
-      req.query.resource_id,
-      req.query.start_date,
-      req.query.end_date,
-      req.query.lag,
-      function (error, licences) {
-        if (error) {
-          return next(error)
-        }
-        res.send(licences)
-      }
-    )
   }
 }
