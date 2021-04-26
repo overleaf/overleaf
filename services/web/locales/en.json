@@ -1370,8 +1370,7 @@
   "are_you_still_at": "Are you still at <0>__institutionName__</0>?",
   "confirm_affiliation": "Confirm Affiliation",
   "please_check_your_inbox_to_confirm": "Please check your email inbox to confirm your <0>__institutionName__</0> affiliation.",
-  "resend_confirmation_email": "Resend confirmation email",
   "your_affiliation_is_confirmed": "Your <0>__institutionName__</0> affiliation is confirmed.",
-  "thank_you": "Thank you!",
+  "thank_you_exclamation": "Thank you!",
   "add_email": "Add Email"
 }
