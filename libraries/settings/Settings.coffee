@@ -38,7 +38,7 @@ else
 for file in possibleConfigFiles
 	if fs.existsSync(file)
 		if file.endsWith('.coffee')
-			console.warn "CoffeeScript settings file #{file}.coffee is deprecated, please convert to JavaScript"
+			console.warn "CoffeeScript settings file #{file} is deprecated, please convert to JavaScript"
 		console.log "Using settings from " + file
 		module.exports = merge(require(file), defaults)
 		settingsExist = true
