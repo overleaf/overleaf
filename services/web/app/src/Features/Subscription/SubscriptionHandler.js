@@ -1,5 +1,6 @@
 const async = require('async')
 const RecurlyWrapper = require('./RecurlyWrapper')
+const RecurlyClient = require('./RecurlyClient')
 const { User } = require('../../models/User')
 const { promisifyAll } = require('../../util/promises')
 const logger = require('logger-sharelatex')
@@ -7,6 +8,8 @@ const SubscriptionUpdater = require('./SubscriptionUpdater')
 const LimitationsManager = require('./LimitationsManager')
 const EmailHandler = require('../Email/EmailHandler')
 const Analytics = require('../Analytics/AnalyticsManager')
+const PlansLocator = require('./PlansLocator')
+const SubscriptionHelper = require('./SubscriptionHelper')
 
 const SubscriptionHandler = {
   validateNoSubscriptionInRecurly(userId, callback) {
@@ -98,7 +101,7 @@ const SubscriptionHandler = {
                   { includeAccount: true },
                   function (err, usersSubscription) {
                     if (err != null) {
-                      return callback(err)
+                      return cb(err)
                     }
                     RecurlyWrapper.redeemCoupon(
                       usersSubscription.account.account_code,
@@ -108,24 +111,72 @@ const SubscriptionHandler = {
                   }
                 )
               },
-              cb =>
-                RecurlyWrapper.updateSubscription(
+              function (cb) {
+                let changeAtTermEnd
+                const currentPlan = PlansLocator.findLocalPlanInSettings(
+                  subscription.planCode
+                )
+                const newPlan = PlansLocator.findLocalPlanInSettings(planCode)
+                if (currentPlan && newPlan) {
+                  changeAtTermEnd = SubscriptionHelper.shouldPlanChangeAtTermEnd(
+                    currentPlan,
+                    newPlan
+                  )
+                } else {
+                  logger.error(
+                    { currentPlan: subscription.planCode, newPlan: planCode },
+                    'unable to locate both plans in settings'
+                  )
+                  return cb(
+                    new Error('unable to locate both plans in settings')
+                  )
+                }
+                const timeframe = changeAtTermEnd ? 'term_end' : 'now'
+                RecurlyClient.changeSubscriptionByUuid(
                   subscription.recurlySubscription_id,
-                  { plan_code: planCode, timeframe: 'now' },
-                  function (error, recurlySubscription) {
+                  { planCode: planCode, timeframe: timeframe },
+                  function (error, subscriptionChange) {
                     if (error != null) {
-                      return callback(error)
+                      return cb(error)
                     }
-                    SubscriptionUpdater.syncSubscription(
-                      recurlySubscription,
+                    // v2 recurly API wants a UUID, but UUID isn't included in the subscription change response
+                    // we got the UUID from the DB using userHasV2Subscription() - it is the only property
+                    // we need to be able to build a 'recurlySubscription' object for syncSubscription()
+                    SubscriptionHandler.syncSubscription(
+                      { uuid: subscription.recurlySubscription_id },
                       user._id,
                       cb
                     )
                   }
-                ),
+                )
+              },
             ],
             callback
           )
+        }
+      }
+    )
+  },
+
+  cancelPendingSubscriptionChange(user, callback) {
+    LimitationsManager.userHasV2Subscription(
+      user,
+      function (err, hasSubscription, subscription) {
+        if (err) {
+          return callback(err)
+        }
+        if (hasSubscription) {
+          RecurlyClient.removeSubscriptionChangeByUuid(
+            subscription.recurlySubscription_id,
+            function (error) {
+              if (error != null) {
+                return callback(error)
+              }
+              callback()
+            }
+          )
+        } else {
+          callback()
         }
       }
     )

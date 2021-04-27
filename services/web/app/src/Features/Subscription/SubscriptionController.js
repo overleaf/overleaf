@@ -163,7 +163,9 @@ module.exports = SubscriptionController = {
               return next(error)
             }
             const fromPlansPage = req.query.hasSubscription
-            const plans = SubscriptionViewModelBuilder.buildPlansList()
+            const plans = SubscriptionViewModelBuilder.buildPlansList(
+              personalSubscription ? personalSubscription.plan : undefined
+            )
             const data = {
               title: 'your_subscription',
               plans,
@@ -323,6 +325,24 @@ module.exports = SubscriptionController = {
     )
   },
 
+  cancelPendingSubscriptionChange(req, res, next) {
+    const user = AuthenticationController.getSessionUser(req)
+    logger.log({ user_id: user._id }, 'canceling pending subscription change')
+    SubscriptionHandler.cancelPendingSubscriptionChange(user, function (err) {
+      if (err != null) {
+        OError.tag(
+          err,
+          'something went wrong canceling pending subscription change',
+          {
+            user_id: user._id,
+          }
+        )
+        return next(err)
+      }
+      res.redirect('/user/subscription')
+    })
+  },
+
   updateAccountEmailAddress(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
     RecurlyWrapper.updateAccountEmailAddress(
@@ -340,14 +360,14 @@ module.exports = SubscriptionController = {
   reactivateSubscription(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
     logger.log({ user_id: user._id }, 'reactivating subscription')
-    return SubscriptionHandler.reactivateSubscription(user, function (err) {
+    SubscriptionHandler.reactivateSubscription(user, function (err) {
       if (err != null) {
         OError.tag(err, 'something went wrong reactivating subscription', {
           user_id: user._id,
         })
         return next(err)
       }
-      return res.redirect('/user/subscription')
+      res.redirect('/user/subscription')
     })
   },
 

@@ -7,11 +7,16 @@ div(ng-controller="RecurlySubscriptionController")
 		case personalSubscription.recurly.state
 			when "active"
 				p !{translate("currently_subscribed_to_plan", {planName: personalSubscription.plan.name}, ['strong'])}
+					if (personalSubscription.pendingPlan)
+						|
+						| !{translate("your_plan_is_changing_at_term_end", {pendingPlanName: personalSubscription.pendingPlan.name}, ['strong'])}
 					if (personalSubscription.recurly.additionalLicenses > 0)
 						|
 						| !{translate("additional_licenses", {additionalLicenses: personalSubscription.recurly.additionalLicenses, totalLicenses: personalSubscription.recurly.totalLicenses}, ['strong', 'strong'])}
 					| &nbsp;
 					a(href, ng-click="switchToChangePlanView()", ng-if="showChangePlanButton") !{translate("change_plan")}.
+				if (personalSubscription.pendingPlan)
+					p #{translate("want_change_to_apply_before_plan_end")}
 				if (personalSubscription.recurly.trialEndsAtFormatted && personalSubscription.recurly.trial_ends_at > Date.now())
 					p You're on a free trial which ends on <strong ng-non-bindable>#{personalSubscription.recurly.trialEndsAtFormatted}</strong>
 				p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount: personalSubscription.recurly.price, collectionDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong', 'strong'])}
@@ -86,6 +91,9 @@ script(type='text/ng-template', id='confirmChangePlanModalTemplate')
 		h3 #{translate("change_plan")}
 	.modal-body
 		p !{translate("sure_you_want_to_change_plan", {planName: '{{plan.name}}'}, ['strong'])}
+		div(ng-show="planChangesAtTermEnd")
+			p #{translate("existing_plan_active_until_term_end")}
+			p #{translate("want_change_to_apply_before_plan_end")}
 	.modal-footer
 		button.btn.btn-default(
 			ng-disabled="inflight"
@@ -96,4 +104,21 @@ script(type='text/ng-template', id='confirmChangePlanModalTemplate')
 			ng-click="confirmChangePlan()"
 		)
 			span(ng-hide="inflight") #{translate("change_plan")}
+			span(ng-show="inflight") #{translate("processing")}…
+
+script(type='text/ng-template', id='cancelPendingPlanChangeModalTemplate')
+	.modal-header
+		h3 #{translate("change_plan")}
+	.modal-body
+		p !{translate("sure_you_want_to_cancel_plan_change", {planName: '{{plan.name}}'}, ['strong'])}
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="inflight"
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-success(
+			ng-disabled="state.inflight"
+			ng-click="confirmCancelPendingPlanChange()"
+		)
+			span(ng-hide="inflight") #{translate("revert_pending_plan_change")}
 			span(ng-show="inflight") #{translate("processing")}…

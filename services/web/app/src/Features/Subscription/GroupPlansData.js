@@ -40,6 +40,7 @@ for (const [usage, planData] of Object.entries(groups)) {
           planCode
         )} - Group Account (${size} licenses) - ${capitalize(usage)}`,
         hideFromUsers: true,
+        price: groups[usage][planCode].USD[size],
         annual: true,
         features: Settings.features[planCode],
         groupPlan: true,

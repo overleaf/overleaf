@@ -13,6 +13,7 @@ const metrics = require('@overleaf/metrics')
 metrics.initialize(process.env.METRICS_APP_NAME || 'web')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
+const PlansLocator = require('./app/src/Features/Subscription/PlansLocator')
 logger.initialize(process.env.METRICS_APP_NAME || 'web')
 logger.logger.serializers.user = require('./app/src/infrastructure/LoggerSerializers').user
 logger.logger.serializers.docs = require('./app/src/infrastructure/LoggerSerializers').docs
@@ -43,6 +44,9 @@ if (!module.parent) {
   if (!process.env.WEB_API_USER || !process.env.WEB_API_PASSWORD) {
     throw new Error('No API user and password provided')
   }
+
+  PlansLocator.ensurePlansAreSetupCorrectly()
+
   Promise.all([mongodb.waitForDb(), mongoose.connectionPromise])
     .then(() => {
       Server.server.listen(port, host, function () {

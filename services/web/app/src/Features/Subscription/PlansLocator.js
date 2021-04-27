@@ -1,19 +1,25 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const Settings = require('settings-sharelatex')
+const logger = require('logger-sharelatex')
+
+function ensurePlansAreSetupCorrectly() {
+  Settings.plans.forEach(plan => {
+    if (typeof plan.price !== 'number') {
+      logger.fatal({ plan }, 'missing price on plan')
+      process.exit(1)
+    }
+  })
+}
+
+function findLocalPlanInSettings(planCode) {
+  for (let plan of Settings.plans) {
+    if (plan.planCode === planCode) {
+      return plan
+    }
+  }
+  return null
+}
 
 module.exports = {
-  findLocalPlanInSettings(planCode) {
-    for (let plan of Array.from(Settings.plans)) {
-      if (plan.planCode === planCode) {
-        return plan
-      }
-    }
-    return null
-  },
+  ensurePlansAreSetupCorrectly,
+  findLocalPlanInSettings,
 }

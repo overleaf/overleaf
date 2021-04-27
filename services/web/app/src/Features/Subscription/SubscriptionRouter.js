@@ -89,6 +89,11 @@ module.exports = {
       SubscriptionController.updateSubscription
     )
     webRouter.post(
+      '/user/subscription/cancel-pending',
+      AuthenticationController.requireLogin(),
+      SubscriptionController.cancelPendingSubscriptionChange
+    )
+    webRouter.post(
       '/user/subscription/cancel',
       AuthenticationController.requireLogin(),
       SubscriptionController.cancelSubscription

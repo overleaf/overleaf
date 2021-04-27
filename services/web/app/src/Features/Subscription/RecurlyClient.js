@@ -9,18 +9,6 @@ const recurlyApiKey = recurlySettings ? recurlySettings.apiKey : undefined
 
 const client = new recurly.Client(recurlyApiKey)
 
-module.exports = {
-  errors: recurly.errors,
-
-  getAccountForUserId: callbackify(getAccountForUserId),
-  createAccountForUserId: callbackify(createAccountForUserId),
-
-  promises: {
-    getAccountForUserId,
-    createAccountForUserId,
-  },
-}
-
 async function getAccountForUserId(userId) {
   try {
     return await client.getAccount(`code-${userId}`)
@@ -50,4 +38,53 @@ async function createAccountForUserId(userId) {
   const account = await client.createAccount(accountCreate)
   logger.log({ userId, account }, 'created recurly account')
   return account
+}
+
+async function getSubscription(subscriptionId) {
+  return await client.getSubscription(subscriptionId)
+}
+
+async function changeSubscription(subscriptionId, body) {
+  const change = await client.createSubscriptionChange(subscriptionId, body)
+  logger.log(
+    { subscriptionId, changeId: change.id },
+    'created subscription change'
+  )
+  return change
+}
+
+async function changeSubscriptionByUuid(subscriptionUuid, ...args) {
+  return await changeSubscription('uuid-' + subscriptionUuid, ...args)
+}
+
+async function removeSubscriptionChange(subscriptionId) {
+  const removed = await client.removeSubscriptionChange(subscriptionId)
+  logger.log({ subscriptionId }, 'removed pending subscription change')
+  return removed
+}
+
+async function removeSubscriptionChangeByUuid(subscriptionUuid) {
+  return await removeSubscriptionChange('uuid-' + subscriptionUuid)
+}
+
+module.exports = {
+  errors: recurly.errors,
+
+  getAccountForUserId: callbackify(getAccountForUserId),
+  createAccountForUserId: callbackify(createAccountForUserId),
+  getSubscription: callbackify(getSubscription),
+  changeSubscription: callbackify(changeSubscription),
+  changeSubscriptionByUuid: callbackify(changeSubscriptionByUuid),
+  removeSubscriptionChange: callbackify(removeSubscriptionChange),
+  removeSubscriptionChangeByUuid: callbackify(removeSubscriptionChangeByUuid),
+
+  promises: {
+    getSubscription,
+    getAccountForUserId,
+    createAccountForUserId,
+    changeSubscription,
+    changeSubscriptionByUuid,
+    removeSubscriptionChange,
+    removeSubscriptionChangeByUuid,
+  },
 }

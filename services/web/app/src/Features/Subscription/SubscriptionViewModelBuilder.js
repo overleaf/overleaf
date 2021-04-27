@@ -9,6 +9,7 @@ const PublishersGetter = require('../Publishers/PublishersGetter')
 const sanitizeHtml = require('sanitize-html')
 const _ = require('underscore')
 const async = require('async')
+const SubscriptionHelper = require('./SubscriptionHelper')
 
 function buildHostedLink(recurlySubscription, type) {
   const recurlySubdomain = Settings.apis.recurly.subdomain
@@ -176,18 +177,14 @@ module.exports = {
           const totalLicenses = (plan.membersLimit || 0) + additionalLicenses
           personalSubscription.recurly = {
             tax,
-            taxRate: parseFloat(
-              recurlySubscription.tax_rate && recurlySubscription.tax_rate._
-            ),
+            taxRate: recurlySubscription.tax_rate
+              ? parseFloat(recurlySubscription.tax_rate._)
+              : 0,
             billingDetailsLink: buildHostedLink(
               recurlySubscription,
               'billingDetails'
             ),
             accountManagementLink: buildHostedLink(recurlySubscription),
-            price: SubscriptionFormatters.formatPrice(
-              recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
-              recurlySubscription.currency
-            ),
             additionalLicenses,
             totalLicenses,
             nextPaymentDueAt: SubscriptionFormatters.formatDate(
@@ -201,6 +198,33 @@ module.exports = {
             trial_ends_at: recurlySubscription.trial_ends_at,
             activeCoupons: recurlyCoupons,
             account: recurlySubscription.account,
+          }
+          if (recurlySubscription.pending_subscription) {
+            const pendingSubscriptionTax =
+              personalSubscription.recurly.taxRate *
+              recurlySubscription.pending_subscription.unit_amount_in_cents
+            personalSubscription.recurly.price = SubscriptionFormatters.formatPrice(
+              recurlySubscription.pending_subscription.unit_amount_in_cents +
+                addOnPrice +
+                pendingSubscriptionTax,
+              recurlySubscription.currency
+            )
+            const pendingPlan = PlansLocator.findLocalPlanInSettings(
+              recurlySubscription.pending_subscription.plan.plan_code
+            )
+            if (pendingPlan == null) {
+              return callback(
+                new Error(
+                  `No plan found for planCode '${personalSubscription.planCode}'`
+                )
+              )
+            }
+            personalSubscription.pendingPlan = pendingPlan
+          } else {
+            personalSubscription.recurly.price = SubscriptionFormatters.formatPrice(
+              recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
+              recurlySubscription.currency
+            )
           }
         }
 
@@ -225,13 +249,29 @@ module.exports = {
     )
   },
 
-  buildPlansList() {
+  buildPlansList(currentPlan) {
     const { plans } = Settings
 
     const allPlans = {}
-    plans.forEach(plan => (allPlans[plan.planCode] = plan))
+    plans.forEach(plan => {
+      allPlans[plan.planCode] = plan
+    })
 
     const result = { allPlans }
+
+    if (currentPlan) {
+      result.planCodesChangingAtTermEnd = _.pluck(
+        _.filter(plans, plan => {
+          if (!plan.hideFromUsers) {
+            return SubscriptionHelper.shouldPlanChangeAtTermEnd(
+              currentPlan,
+              plan
+            )
+          }
+        }),
+        'planCode'
+      )
+    }
 
     result.studentAccounts = _.filter(
       plans,

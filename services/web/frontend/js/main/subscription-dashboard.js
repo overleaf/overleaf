@@ -103,8 +103,25 @@ App.controller(
         scope: $scope,
       })
 
+    $scope.cancelPendingPlanChange = () =>
+      $modal.open({
+        templateUrl: 'cancelPendingPlanChangeModalTemplate',
+        controller: 'CancelPendingPlanChangeController',
+        scope: $scope,
+      })
+
     $scope.$watch('plan', function (plan) {
       if (!plan) return
+      const planCodesChangingAtTermEnd = getMeta(
+        'ol-planCodesChangingAtTermEnd'
+      )
+      $scope.planChangesAtTermEnd = false
+      if (
+        planCodesChangingAtTermEnd &&
+        planCodesChangingAtTermEnd.indexOf(plan.planCode) > -1
+      ) {
+        $scope.planChangesAtTermEnd = true
+      }
       const planCode = plan.planCode
       const subscription = getMeta('ol-subscription')
       const { currency, taxRate } = subscription.recurly
@@ -133,6 +150,28 @@ App.controller(
         .post(`${SUBSCRIPTION_URL}?origin=confirmChangePlan`, body)
         .then(() => location.reload())
         .catch(() => console.log('something went wrong changing plan'))
+    }
+
+    return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
+  }
+)
+
+App.controller(
+  'CancelPendingPlanChangeController',
+  function ($scope, $modalInstance, $http) {
+    $scope.confirmCancelPendingPlanChange = function () {
+      const body = {
+        _csrf: window.csrfToken,
+      }
+
+      $scope.inflight = true
+
+      return $http
+        .post('/user/subscription/cancel-pending', body)
+        .then(() => location.reload())
+        .catch(() =>
+          console.log('something went wrong reverting pending plan change')
+        )
     }
 
     return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
