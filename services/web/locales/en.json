@@ -277,6 +277,7 @@
   "history_label_project_current_state": "Current state",
   "download_project_at_this_version": "Download project at this version",
   "submit": "submit",
+  "submit_title": "Submit",
   "help_articles_matching": "Help articles matching your subject",
   "dropbox_for_link_share_projs": "This project was accessed via link-sharing and won't be synchronised to your Dropbox unless you are invited via e-mail by the project owner.",
   "clear_search": "clear search",
