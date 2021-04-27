@@ -95,7 +95,7 @@ export default function FileTreeUploadDoc() {
         })
         // handle upload errors
         .on('upload-error', (file, error, response) => {
-          switch (response.status) {
+          switch (response?.status) {
             case 429:
               setError('rate-limit-hit')
               break
