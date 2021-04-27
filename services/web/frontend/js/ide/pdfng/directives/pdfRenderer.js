@@ -18,9 +18,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-import { getDocument, renderTextLayer } from './pdfJsLoader'
+import PDFJS from './pdfJsLoader'
 import { captureMessage } from '../../../infrastructure/error-reporter'
-import OError from '@overleaf/o-error'
 
 export default App.factory(
   'PDFRenderer',
@@ -54,7 +53,7 @@ export default App.factory(
           } else {
             disableFontFace = false
           }
-          this.pdfjs = getDocument({
+          this.pdfjs = PDFJS.getDocument({
             url: this.url,
             cMapUrl: window.pdfCMapsPath,
             cMapPacked: true,
@@ -84,13 +83,9 @@ export default App.factory(
           })
           this.errorCallback = this.options.errorCallback
           this.pageSizeChangeCallback = this.options.pageSizeChangeCallback
-          this.pdfjs.promise.catch(error => {
+          this.pdfjs.promise.catch(exception => {
             // error getting document
-            this.errorCallback(
-              error
-                ? OError.tag(error)
-                : new UnknownPDFError('pdfJsLoader.getDocument()')
-            )
+            return this.errorCallback(exception)
           })
         }
 
@@ -137,14 +132,9 @@ export default App.factory(
                 return (viewport = page.getViewport({ scale: scale }))
               },
               error => {
-                this.errorCallback(
-                  error
-                    ? OError.tag(error)
-                    : new UnknownPDFError('getPdfViewport', {
-                        pageNum,
-                        scale,
-                      })
-                )
+                return typeof this.errorCallback === 'function'
+                  ? this.errorCallback(error)
+                  : undefined
               }
             )
           })
@@ -160,11 +150,9 @@ export default App.factory(
           return this.document.promise.then(
             pdfDocument => pdfDocument.getDestination(dest),
             error => {
-              this.errorCallback(
-                error
-                  ? OError.tag(error)
-                  : new UnknownPDFError('getDestination', { dest })
-              )
+              return typeof this.errorCallback === 'function'
+                ? this.errorCallback(error)
+                : undefined
             }
           )
         }
@@ -174,11 +162,9 @@ export default App.factory(
             return pdfDocument.getPageIndex(ref).then(
               idx => idx,
               error => {
-                this.errorCallback(
-                  error
-                    ? OError.tag(error)
-                    : new UnknownPDFError('getPageIndex', { ref })
-                )
+                return typeof this.errorCallback === 'function'
+                  ? this.errorCallback(error)
+                  : undefined
               }
             )
           })
@@ -356,7 +342,9 @@ export default App.factory(
             this.clearIndicator(page)
             // @jobs = @jobs - 1
             // @triggerRenderQueue(0)
-            this.errorCallback(new OError('timeout'))
+            return typeof this.errorCallback === 'function'
+              ? this.errorCallback('timeout')
+              : undefined
           }, this.PAGE_LOAD_TIMEOUT)
 
           var loadTask = this.getPage(pagenum)
@@ -459,7 +447,7 @@ export default App.factory(
           const textLayer = new pdfTextLayer({
             textLayerDiv: element.text[0],
             viewport,
-            renderer: renderTextLayer,
+            renderer: PDFJS.renderTextLayer,
           })
 
           const annotationsLayer = new pdfAnnotations({
@@ -486,20 +474,16 @@ export default App.factory(
                   return textLayer.render(textLayerTimeout)
                 },
                 error =>
-                  self.errorCallback(
-                    error
-                      ? OError.tag(error)
-                      : new UnknownPDFError('page.getTextContent')
-                  )
+                  typeof self.errorCallback === 'function'
+                    ? self.errorCallback(error)
+                    : undefined
               )
               return page.getAnnotations().then(
                 annotations => annotationsLayer.setAnnotations(annotations),
                 error =>
-                  self.errorCallback(
-                    error
-                      ? OError.tag(error)
-                      : new UnknownPDFError('page.getAnnotations')
-                  )
+                  typeof self.errorCallback === 'function'
+                    ? self.errorCallback(error)
+                    : undefined
               )
             })
             .catch(function (error) {
@@ -507,9 +491,9 @@ export default App.factory(
               if (error.name === 'RenderingCancelledException') {
                 // do nothing when cancelled
               } else {
-                self.errorCallback(
-                  error ? OError.tag(error) : new UnknownPDFError('page.render')
-                )
+                return typeof self.errorCallback === 'function'
+                  ? self.errorCallback(error)
+                  : undefined
               }
             })
 
@@ -545,11 +529,5 @@ function __guardMethod__(obj, methodName, transform) {
     return transform(obj, methodName)
   } else {
     return undefined
-  }
-}
-
-class UnknownPDFError extends OError {
-  constructor(location, info) {
-    super(`Unknown pdfRenderer error from ${location}`, info)
   }
 }
