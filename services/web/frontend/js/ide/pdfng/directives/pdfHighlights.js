@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-import PDFJS from './pdfJsLoader'
+import { Util } from './pdfJsLoader'
 
 export default App.factory('pdfHighlights', function () {
   let pdfHighlights
@@ -30,7 +30,7 @@ export default App.factory('pdfHighlights', function () {
         left + width,
         top + height,
       ])
-      rect = PDFJS.Util.normalizeRect(rect)
+      rect = Util.normalizeRect(rect)
       const element = document.createElement('div')
       element.style.left = Math.floor(rect[0]) + 'px'
       element.style.top = Math.floor(rect[1]) + 'px'
