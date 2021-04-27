@@ -7,6 +7,11 @@ import classnames from 'classnames'
 
 import Icon from '../../../shared/components/icon'
 
+// Unicode characters in these Unicode groups:
+//  "General Punctuation — Spaces"
+//  "General Punctuation — Format character" (including zero-width spaces)
+const matchAllSpaces = /[\u061C\u2000-\u200F\u202A-\u202E\u2060\u2066-\u2069\u2028\u2029\u202F]/g
+
 export default function SelectCollaborators({
   loading,
   options,
@@ -98,7 +103,9 @@ export default function SelectCollaborators({
   })
 
   const addNewItem = useCallback(
-    (email, focus = true) => {
+    (_email, focus = true) => {
+      const email = _email.replace(matchAllSpaces, '')
+
       if (
         isValidInput &&
         email.includes('@') &&
