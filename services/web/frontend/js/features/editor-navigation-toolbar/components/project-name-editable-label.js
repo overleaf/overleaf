@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import PropTypes from 'prop-types'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import Icon from '../../../shared/components/icon'
 
@@ -9,6 +11,8 @@ function ProjectNameEditableLabel({
   onChange,
   className,
 }) {
+  const { t } = useTranslation()
+
   const [isRenaming, setIsRenaming] = useState(false)
 
   const canRename = userIsAdmin && !isRenaming
@@ -63,10 +67,16 @@ function ProjectNameEditableLabel({
         />
       )}
       {canRename && (
-        // eslint-disable-next-line jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
-        <a className="rename" role="button" onClick={startRenaming}>
-          <Icon type="pencil" modifier="fw" />
-        </a>
+        <OverlayTrigger
+          placement="bottom"
+          trigger={['hover', 'focus']}
+          overlay={<Tooltip id="tooltip-online-user">{t('rename')}</Tooltip>}
+        >
+          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus */}
+          <a className="rename" role="button" onClick={startRenaming}>
+            <Icon type="pencil" modifier="fw" />
+          </a>
+        </OverlayTrigger>
       )}
     </div>
   )
