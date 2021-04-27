@@ -17,8 +17,8 @@ App.controller('NotificationsController', function ($scope, $http) {
       url: `/notifications/${notification._id}`,
       method: 'DELETE',
       headers: {
-        'X-Csrf-Token': window.csrfToken
-      }
+        'X-Csrf-Token': window.csrfToken,
+      },
     }).then(() => (notification.hide = true))
   }
 })
@@ -48,8 +48,8 @@ App.controller('ProjectInviteNotificationController', function ($scope, $http) {
       method: 'POST',
       headers: {
         'X-Csrf-Token': window.csrfToken,
-        'X-Requested-With': 'XMLHttpRequest'
-      }
+        'X-Requested-With': 'XMLHttpRequest',
+      },
     })
       .then(() => {
         $scope.notification.accepted = true

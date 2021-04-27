@@ -13,7 +13,7 @@ async function run() {
     // of the translations
     const content = await oneSky.getMultilingualFile(
       withAuth({
-        fileName: 'en-US.json'
+        fileName: 'en-US.json',
       })
     )
     const json = JSON.parse(content)
@@ -62,13 +62,13 @@ function sanitize(input) {
     // number of "replacement" tags.
     allowedTags: ['b', 'strong', 'a', 'code', ...range(10)],
     allowedAttributes: {
-      a: ['href', 'class']
+      a: ['href', 'class'],
     },
     textFilter(text) {
       return text
         .replace(/\{\{/, '&#123;&#123;')
         .replace(/\}\}/, '&#125;&#125;')
-    }
+    },
   })
 }
 

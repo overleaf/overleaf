@@ -13,5 +13,5 @@ module.exports = {
 
     webRouter.get('/user/activate', UserActivateController.activateAccountPage)
     AuthenticationController.addEndpointToLoginWhitelist('/user/activate')
-  }
+  },
 }

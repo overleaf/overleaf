@@ -20,7 +20,7 @@ const modulePath =
 const SandboxedModule = require('sandboxed-module')
 const {
   isObjectIdInstance,
-  normalizeQuery
+  normalizeQuery,
 } = require('../../../../app/src/Features/Helpers/Mongo')
 
 describe('UserMembershipViewModel', function () {
@@ -30,15 +30,15 @@ describe('UserMembershipViewModel', function () {
       requires: {
         mongodb: { ObjectId },
         '../Helpers/Mongo': { isObjectIdInstance, normalizeQuery },
-        '../User/UserGetter': this.UserGetter
-      }
+        '../User/UserGetter': this.UserGetter,
+      },
     })
     this.email = 'mock-email@bar.com'
     this.user = {
       _id: 'mock-user-id',
       email: 'mock-email@baz.com',
       first_name: 'Name',
-      lastLoggedIn: '2020-05-20T10:41:11.407Z'
+      lastLoggedIn: '2020-05-20T10:41:11.407Z',
     }
   })
 
@@ -51,7 +51,7 @@ describe('UserMembershipViewModel', function () {
         last_logged_in_at: null,
         first_name: null,
         last_name: null,
-        _id: null
+        _id: null,
       })
     })
 

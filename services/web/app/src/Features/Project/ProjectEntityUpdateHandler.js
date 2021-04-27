@@ -78,7 +78,7 @@ function getDocContext(projectId, docId, callback) {
       if (err) {
         return callback(
           OError.tag(err, 'error fetching project', {
-            projectId
+            projectId,
           })
         )
       }
@@ -125,7 +125,7 @@ function getDocContext(projectId, docId, callback) {
                   callback(null, {
                     projectName: project.name,
                     isDeletedDoc: true,
-                    path: null
+                    path: null,
                   })
                 }
               }
@@ -134,14 +134,14 @@ function getDocContext(projectId, docId, callback) {
             callback(
               OError.tag(err, 'error finding doc in rootFolder', {
                 docId,
-                projectId
+                projectId,
               })
             )
           } else {
             callback(null, {
               projectName: project.name,
               isDeletedDoc: false,
-              path: path.fileSystem
+              path: path.fileSystem,
             })
           }
         }
@@ -185,7 +185,7 @@ const ProjectEntityUpdateHandler = {
           if (err != null) {
             OError.tag(err, 'error sending doc to docstore', {
               docId,
-              projectId
+              projectId,
             })
             return callback(err)
           }
@@ -209,7 +209,7 @@ const ProjectEntityUpdateHandler = {
               path,
               doc_id: docId,
               project_name: projectName,
-              rev
+              rev,
             },
             callback
           )
@@ -271,7 +271,7 @@ const ProjectEntityUpdateHandler = {
             projectId,
             folderId,
             doc_name: doc != null ? doc.name : undefined,
-            doc_id: doc != null ? doc._id : undefined
+            doc_id: doc != null ? doc._id : undefined,
           })
           return callback(err)
         }
@@ -281,7 +281,7 @@ const ProjectEntityUpdateHandler = {
             doc_id: doc != null ? doc._id : undefined,
             path: result && result.path && result.path.fileSystem,
             project_name: project.name,
-            rev: 0
+            rev: 0,
           },
           err => {
             if (err != null) {
@@ -374,8 +374,8 @@ const ProjectEntityUpdateHandler = {
             {
               doc,
               path: docPath,
-              docLines: docLines.join('\n')
-            }
+              docLines: docLines.join('\n'),
+            },
           ]
           DocumentUpdaterHandler.updateProjectStructure(
             projectId,
@@ -391,7 +391,7 @@ const ProjectEntityUpdateHandler = {
           )
         }
       )
-    }
+    },
   }),
 
   _uploadFile(projectId, folderId, fileName, fsPath, linkedFileData, callback) {
@@ -400,7 +400,7 @@ const ProjectEntityUpdateHandler = {
     }
     const fileArgs = {
       name: fileName,
-      linkedFileData
+      linkedFileData,
     }
     FileStoreHandler.uploadFileFromDisk(
       projectId,
@@ -412,7 +412,7 @@ const ProjectEntityUpdateHandler = {
             projectId,
             folderId,
             file_name: fileName,
-            fileRef
+            fileRef,
           })
           return callback(err)
         }
@@ -432,7 +432,7 @@ const ProjectEntityUpdateHandler = {
             projectId,
             folderId,
             file_name: fileRef.name,
-            fileRef
+            fileRef,
           })
           return callback(err)
         }
@@ -442,7 +442,7 @@ const ProjectEntityUpdateHandler = {
             file_id: fileRef._id,
             path: result && result.path && result.path.fileSystem,
             project_name: project.name,
-            rev: fileRef.rev
+            rev: fileRef.rev,
           },
           err => {
             if (err != null) {
@@ -521,8 +521,8 @@ const ProjectEntityUpdateHandler = {
             {
               file: fileRef,
               path: result && result.path && result.path.fileSystem,
-              url: fileStoreUrl
-            }
+              url: fileStoreUrl,
+            },
           ]
           DocumentUpdaterHandler.updateProjectStructure(
             projectId,
@@ -539,7 +539,7 @@ const ProjectEntityUpdateHandler = {
           )
         }
       )
-    }
+    },
   }),
 
   replaceFile: wrapWithLock({
@@ -555,7 +555,7 @@ const ProjectEntityUpdateHandler = {
         // create a new file
         const fileArgs = {
           name: 'dummy-upload-filename',
-          linkedFileData
+          linkedFileData,
         }
         FileStoreHandler.uploadFileFromDisk(
           projectId,
@@ -600,15 +600,15 @@ const ProjectEntityUpdateHandler = {
           const oldFiles = [
             {
               file: oldFileRef,
-              path: path.fileSystem
-            }
+              path: path.fileSystem,
+            },
           ]
           const newFiles = [
             {
               file: newFileRef,
               path: path.fileSystem,
-              url: fileStoreUrl
-            }
+              url: fileStoreUrl,
+            },
           ]
           const projectHistoryId =
             project.overleaf &&
@@ -626,7 +626,7 @@ const ProjectEntityUpdateHandler = {
               file_id: newFileRef._id,
               path: path.fileSystem,
               rev: oldFileRef.rev + 1,
-              project_name: project.name
+              project_name: project.name,
             },
             err => {
               if (err != null) {
@@ -645,7 +645,7 @@ const ProjectEntityUpdateHandler = {
           )
         }
       )
-    }
+    },
   }),
 
   upsertDoc: wrapWithLock(function (
@@ -700,7 +700,7 @@ const ProjectEntityUpdateHandler = {
                       doc_id: doc._id,
                       path: filePath,
                       project_name: project.name,
-                      rev: existingFile.rev + 1
+                      rev: existingFile.rev + 1,
                     },
                     err => {
                       if (err) {
@@ -714,14 +714,14 @@ const ProjectEntityUpdateHandler = {
                         {
                           doc,
                           path: filePath,
-                          docLines: docLines.join('\n')
-                        }
+                          docLines: docLines.join('\n'),
+                        },
                       ]
                       const oldFiles = [
                         {
                           file: existingFile,
-                          path: filePath
-                        }
+                          path: filePath,
+                        },
                       ]
                       DocumentUpdaterHandler.updateProjectStructure(
                         projectId,
@@ -811,7 +811,7 @@ const ProjectEntityUpdateHandler = {
         // create a new file
         const fileArgs = {
           name: fileName,
-          linkedFileData
+          linkedFileData,
         }
         FileStoreHandler.uploadFileFromDisk(
           projectId,
@@ -866,7 +866,7 @@ const ProjectEntityUpdateHandler = {
               {
                 project_id: projectId,
                 element_id: existingDoc._id,
-                type: 'doc'
+                type: 'doc',
               },
               (err, doc, path) => {
                 if (err) {
@@ -890,7 +890,7 @@ const ProjectEntityUpdateHandler = {
                         file_id: newFileRef._id,
                         path: path.fileSystem,
                         rev: newFileRef.rev,
-                        project_name: project.name
+                        project_name: project.name,
                       },
                       err => {
                         if (err) {
@@ -902,17 +902,17 @@ const ProjectEntityUpdateHandler = {
                           userId,
                           {
                             oldDocs: [
-                              { doc: existingDoc, path: path.fileSystem }
+                              { doc: existingDoc, path: path.fileSystem },
                             ],
 
                             newFiles: [
                               {
                                 file: newFileRef,
                                 path: path.fileSystem,
-                                url: fileStoreUrl
-                              }
+                                url: fileStoreUrl,
+                              },
                             ],
-                            newProject: project
+                            newProject: project,
                           },
                           err => {
                             if (err) {
@@ -971,7 +971,7 @@ const ProjectEntityUpdateHandler = {
           }
         }
       )
-    }
+    },
   }),
 
   upsertDocWithPath: wrapWithLock(function (
@@ -1030,7 +1030,7 @@ const ProjectEntityUpdateHandler = {
         // create a new file
         const fileArgs = {
           name: fileName,
-          linkedFileData
+          linkedFileData,
         }
         FileStoreHandler.uploadFileFromDisk(
           projectId,
@@ -1099,7 +1099,7 @@ const ProjectEntityUpdateHandler = {
           )
         }
       )
-    }
+    },
   }),
 
   deleteEntity: wrapWithLock(function (
@@ -1138,7 +1138,7 @@ const ProjectEntityUpdateHandler = {
               {
                 project_id: projectId,
                 path: path.fileSystem,
-                project_name: projectBeforeDeletion.name
+                project_name: projectBeforeDeletion.name,
               },
               error => {
                 if (error != null) {
@@ -1256,7 +1256,7 @@ const ProjectEntityUpdateHandler = {
             project_name: project.name,
             startPath,
             endPath,
-            rev
+            rev,
           })
           .catch(err => {
             logger.error({ err }, 'error sending tpds update')
@@ -1310,7 +1310,7 @@ const ProjectEntityUpdateHandler = {
             project_name: project.name,
             startPath,
             endPath,
-            rev
+            rev,
           })
           .catch(err => {
             logger.error({ err }, 'error sending tpds update')
@@ -1358,13 +1358,13 @@ const ProjectEntityUpdateHandler = {
 
             docs = _.map(docs, doc => ({
               doc: doc.doc._id,
-              path: doc.path
+              path: doc.path,
             }))
 
             files = _.map(files, file => ({
               file: file.file._id,
               path: file.path,
-              url: FileStoreHandler._buildUrl(projectId, file.file._id)
+              url: FileStoreHandler._buildUrl(projectId, file.file._id),
             }))
 
             DocumentUpdaterHandler.resyncProjectHistory(
@@ -1464,7 +1464,7 @@ const ProjectEntityUpdateHandler = {
         for (let file of folder.fileRefs) {
           changes.oldFiles.push({
             file,
-            path: Path.join(folderPath, file.name)
+            path: Path.join(folderPath, file.name),
           })
         }
         for (const childFolder of folder.folders) {
@@ -1662,7 +1662,7 @@ const ProjectEntityUpdateHandler = {
             {
               oldDocs: [{ doc, path }],
               newFiles: [{ file: fileRef, path, url: fileStoreUrl }],
-              newProject: project
+              newProject: project,
             },
             err => {
               if (err) {
@@ -1672,7 +1672,7 @@ const ProjectEntityUpdateHandler = {
                 {
                   project_id: projectId,
                   element_id: fileRef._id,
-                  type: 'file'
+                  type: 'file',
                 },
                 (err, element, path, folder) => {
                   if (err) {
@@ -1700,8 +1700,8 @@ const ProjectEntityUpdateHandler = {
           )
         }
       )
-    }
-  })
+    },
+  }),
 }
 
 module.exports = ProjectEntityUpdateHandler
@@ -1720,6 +1720,6 @@ module.exports.promises = promisifyAll(ProjectEntityUpdateHandler, {
     upsertFileWithPath: ['fileRef', 'isNew', 'oldFile', 'newFolders', 'folder'],
     mkdirp: ['newFolders', 'folder'],
     mkdirpWithExactCase: ['newFolders', 'folder'],
-    addFolder: ['folder', 'parentFolderId']
-  }
+    addFolder: ['folder', 'parentFolderId'],
+  },
 })

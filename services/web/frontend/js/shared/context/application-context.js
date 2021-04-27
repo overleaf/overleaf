@@ -9,21 +9,21 @@ ApplicationContext.Provider.propTypes = {
     user: PropTypes.shape({
       id: PropTypes.string.isRequired,
       firstName: PropTypes.string,
-      lastName: PropTypes.string
+      lastName: PropTypes.string,
     }),
     exposedSettings: PropTypes.shape({
       appName: PropTypes.string.isRequired,
-      enableSubscriptions: PropTypes.bool
+      enableSubscriptions: PropTypes.bool,
     }),
-    gitBridgePublicBaseUrl: PropTypes.string.isRequired
-  })
+    gitBridgePublicBaseUrl: PropTypes.string.isRequired,
+  }),
 }
 
 export function ApplicationProvider({ children }) {
   const applicationContextValue = {
     user: window.user,
     exposedSettings: ExposedSettings,
-    gitBridgePublicBaseUrl: window.gitBridgePublicBaseUrl
+    gitBridgePublicBaseUrl: window.gitBridgePublicBaseUrl,
   }
   return (
     <ApplicationContext.Provider value={applicationContextValue}>
@@ -33,7 +33,7 @@ export function ApplicationProvider({ children }) {
 }
 
 ApplicationProvider.propTypes = {
-  children: PropTypes.any
+  children: PropTypes.any,
 }
 
 export function useApplicationContext(propTypes) {

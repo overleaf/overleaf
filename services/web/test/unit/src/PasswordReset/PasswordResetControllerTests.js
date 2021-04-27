@@ -19,13 +19,13 @@ describe('PasswordResetController', function () {
       body: {
         email: this.email,
         passwordResetToken: this.token,
-        password: this.password
+        password: this.password,
       },
       i18n: {
-        translate() {}
+        translate() {},
       },
       session: {},
-      query: {}
+      query: {},
     }
     this.res = new MockResponse()
 
@@ -35,19 +35,19 @@ describe('PasswordResetController', function () {
       promises: {
         setNewUserPassword: sinon
           .stub()
-          .resolves({ found: true, reset: true, userID: this.user_id })
-      }
+          .resolves({ found: true, reset: true, userID: this.user_id }),
+      },
     }
     this.RateLimiter = { addCount: sinon.stub() }
     this.UserSessionsManager = {
       promises: {
-        revokeAllUserSessions: sinon.stub().resolves()
-      }
+        revokeAllUserSessions: sinon.stub().resolves(),
+      },
     }
     this.UserUpdater = {
       promises: {
-        removeReconfirmFlag: sinon.stub().resolves()
-      }
+        removeReconfirmFlag: sinon.stub().resolves(),
+      },
     }
     this.PasswordResetController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -56,16 +56,16 @@ describe('PasswordResetController', function () {
         '../../infrastructure/RateLimiter': this.RateLimiter,
         '../Authentication/AuthenticationController': (this.AuthenticationController = {
           getLoggedInUserId: sinon.stub(),
-          finishLogin: sinon.stub()
+          finishLogin: sinon.stub(),
         }),
         '../User/UserGetter': (this.UserGetter = {
           promises: {
-            getUser: sinon.stub()
-          }
+            getUser: sinon.stub(),
+          },
         }),
         '../User/UserSessionsManager': this.UserSessionsManager,
-        '../User/UserUpdater': this.UserUpdater
-      }
+        '../User/UserUpdater': this.UserUpdater,
+      },
     })
   })
 
@@ -187,7 +187,7 @@ describe('PasswordResetController', function () {
       this.PasswordResetHandler.promises.setNewUserPassword.resolves({
         found: false,
         reset: false,
-        userId: this.user_id
+        userId: this.user_id,
       })
       this.res.sendStatus = code => {
         code.should.equal(404)
@@ -200,7 +200,7 @@ describe('PasswordResetController', function () {
       this.PasswordResetHandler.promises.setNewUserPassword.resolves({
         found: true,
         reset: false,
-        userId: this.user_id
+        userId: this.user_id,
       })
       this.res.sendStatus = code => {
         code.should.equal(500)
@@ -311,7 +311,7 @@ describe('PasswordResetController', function () {
       beforeEach(function () {
         this.user = {
           _id: this.userId,
-          email: 'joe@example.com'
+          email: 'joe@example.com',
         }
         this.UserGetter.promises.getUser.resolves(this.user)
         this.req.session.doLoginAfterPasswordReset = 'true'

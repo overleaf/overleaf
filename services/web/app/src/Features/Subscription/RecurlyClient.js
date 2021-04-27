@@ -17,8 +17,8 @@ module.exports = {
 
   promises: {
     getAccountForUserId,
-    createAccountForUserId
-  }
+    createAccountForUserId,
+  },
 }
 
 async function getAccountForUserId(userId) {
@@ -39,13 +39,13 @@ async function createAccountForUserId(userId) {
     _id: 1,
     first_name: 1,
     last_name: 1,
-    email: 1
+    email: 1,
   })
   const accountCreate = {
     code: user._id.toString(),
     email: user.email,
     firstName: user.first_name,
-    lastName: user.last_name
+    lastName: user.last_name,
   }
   const account = await client.createAccount(accountCreate)
   logger.log({ userId, account }, 'created recurly account')

@@ -4,7 +4,7 @@ export default App.directive('historyDroppableArea', () => ({
   scope: {
     historyDroppableAreaOnDrop: '&',
     historyDroppableAreaOnOver: '&',
-    historyDroppableAreaOnOut: '&'
+    historyDroppableAreaOnOut: '&',
   },
   restrict: 'A',
   link(scope, element, attrs) {
@@ -18,7 +18,7 @@ export default App.directive('historyDroppableArea', () => ({
       over: (e, ui) => {
         const draggedBoundary = ui.draggable.data('selectionBoundary').boundary
         scope.historyDroppableAreaOnOver({ boundary: draggedBoundary })
-      }
+      },
     })
-  }
+  },
 }))

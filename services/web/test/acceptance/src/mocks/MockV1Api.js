@@ -207,7 +207,8 @@ class MockV1Api extends AbstractMockApi {
             isUniversity: !institutionData.institution,
             ssoBeta: institutionData.sso_beta || false,
             ssoEnabled: institutionData.sso_enabled || false,
-            maxConfirmationMonths: institutionData.maxConfirmationMonths || null
+            maxConfirmationMonths:
+              institutionData.maxConfirmationMonths || null,
           }
 
           affiliation.institution.confirmed = !!domainData.confirmed
@@ -254,7 +255,7 @@ class MockV1Api extends AbstractMockApi {
     this.app.get('/universities/list/:id', (req, res) =>
       res.json({
         id: parseInt(req.params.id),
-        name: `Institution ${req.params.id}`
+        name: `Institution ${req.params.id}`,
       })
     )
 
@@ -281,13 +282,13 @@ class MockV1Api extends AbstractMockApi {
           return res.json({
             email: user.email,
             valid: true,
-            user_profile: user.profile
+            user_profile: user.profile,
           })
         }
       }
       res.status(403).json({
         email: req.body.email,
-        valid: false
+        valid: false,
       })
     })
 
@@ -299,7 +300,7 @@ class MockV1Api extends AbstractMockApi {
       if (conversion) {
         res.status(200).json({
           input_file_uri: conversion,
-          brand_variation_id: partner.brand_variation_id
+          brand_variation_id: partner.brand_variation_id,
         })
       } else {
         res.status(404).json({})
@@ -324,7 +325,7 @@ class MockV1Api extends AbstractMockApi {
       (req, res) => {
         const info = this.getDocInfo(req.params.token) || {
           exists: false,
-          exported: false
+          exported: false,
         }
         res.json(info)
       }

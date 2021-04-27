@@ -43,7 +43,7 @@ describe('Project ownership transfer', function () {
     it('adds the previous owner as a read/write collaborator', async function () {
       const project = await this.collaboratorSession.getProject(this.projectId)
       expect(project.collaberator_refs.map(x => x.toString())).to.have.members([
-        this.owner._id.toString()
+        this.owner._id.toString(),
       ])
     })
 

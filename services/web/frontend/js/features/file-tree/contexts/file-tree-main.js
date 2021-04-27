@@ -23,7 +23,7 @@ export const FileTreeMainProvider = function ({
   reindexReferences,
   setRefProviderEnabled,
   setStartedFreeTrial,
-  children
+  children,
 }) {
   const [contextMenuCoords, setContextMenuCoords] = useState()
 
@@ -38,7 +38,7 @@ export const FileTreeMainProvider = function ({
         setRefProviderEnabled,
         setStartedFreeTrial,
         contextMenuCoords,
-        setContextMenuCoords
+        setContextMenuCoords,
       }}
     >
       {children}
@@ -56,6 +56,6 @@ FileTreeMainProvider.propTypes = {
   setStartedFreeTrial: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ]).isRequired
+    PropTypes.node,
+  ]).isRequired,
 }

@@ -19,8 +19,8 @@ const Settings = require('settings-sharelatex')
 const auth = new Buffer('sharelatex:password').toString('base64')
 const authed_request = request.defaults({
   headers: {
-    Authorization: `Basic ${auth}`
-  }
+    Authorization: `Basic ${auth}`,
+  },
 })
 
 describe('ApiClsiTests', function () {
@@ -30,22 +30,22 @@ describe('ApiClsiTests', function () {
         compile: {
           options: {
             compiler: 'pdflatex',
-            timeout: 60
+            timeout: 60,
           },
           rootResourcePath: 'main.tex',
           resources: [
             {
               path: 'main/tex',
               content:
-                '\\documentclass{article}\n\\begin{document}\nHello World\n\\end{document}'
+                '\\documentclass{article}\n\\begin{document}\nHello World\n\\end{document}',
             },
             {
               path: 'image.png',
               url: 'www.example.com/image.png',
-              modified: 123456789
-            }
-          ]
-        }
+              modified: 123456789,
+            },
+          ],
+        },
       }
       return done()
     })
@@ -55,7 +55,7 @@ describe('ApiClsiTests', function () {
         return authed_request.post(
           {
             uri: '/api/clsi/compile/abcd',
-            json: this.compileSpec
+            json: this.compileSpec,
           },
           (error, response, body) => {
             if (error != null) {
@@ -69,15 +69,15 @@ describe('ApiClsiTests', function () {
                   path: 'project.pdf',
                   url: '/project/abcd/build/1234/output/project.pdf',
                   type: 'pdf',
-                  build: 1234
+                  build: 1234,
                 },
                 {
                   path: 'project.log',
                   url: '/project/abcd/build/1234/output/project.log',
                   type: 'log',
-                  build: 1234
-                }
-              ]
+                  build: 1234,
+                },
+              ],
             })
             return done()
           }
@@ -90,7 +90,7 @@ describe('ApiClsiTests', function () {
         return request.post(
           {
             uri: '/api/clsi/compile/abcd',
-            json: this.compileSpec
+            json: this.compileSpec,
           },
           (error, response, body) => {
             if (error != null) {

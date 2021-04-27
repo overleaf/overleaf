@@ -3,7 +3,7 @@ import React, {
   useCallback,
   useMemo,
   useReducer,
-  useContext
+  useContext,
 } from 'react'
 import PropTypes from 'prop-types'
 
@@ -13,7 +13,7 @@ import {
   syncRename,
   syncDelete,
   syncMove,
-  syncCreateEntity
+  syncCreateEntity,
 } from '../util/sync-mutation'
 import { findInTreeOrThrow } from '../util/find-in-tree'
 import { isNameUniqueInFolder } from '../util/is-name-unique-in-folder'
@@ -27,7 +27,7 @@ import {
   InvalidFilenameError,
   BlockedFilenameError,
   DuplicateFilenameError,
-  DuplicateFilenameMoveError
+  DuplicateFilenameMoveError,
 } from '../errors'
 
 const FileTreeActionableContext = createContext()
@@ -43,7 +43,7 @@ const ACTION_TYPES = {
   MOVING: 'MOVING',
   CANCEL: 'CANCEL',
   CLEAR: 'CLEAR',
-  ERROR: 'ERROR'
+  ERROR: 'ERROR',
 }
 
 const defaultState = {
@@ -55,7 +55,7 @@ const defaultState = {
   inFlight: false,
   actionedEntities: null,
   newFileCreateMode: null,
-  error: null
+  error: null,
 }
 
 function fileTreeActionableReadOnlyReducer(state) {
@@ -70,13 +70,13 @@ function fileTreeActionableReducer(state, action) {
       return {
         ...defaultState,
         isDeleting: true,
-        actionedEntities: action.actionedEntities
+        actionedEntities: action.actionedEntities,
       }
     case ACTION_TYPES.START_CREATE_FILE:
       return {
         ...defaultState,
         isCreatingFile: true,
-        newFileCreateMode: action.newFileCreateMode
+        newFileCreateMode: action.newFileCreateMode,
       }
     case ACTION_TYPES.START_CREATE_FOLDER:
       return { ...defaultState, isCreatingFolder: true }
@@ -85,7 +85,7 @@ function fileTreeActionableReducer(state, action) {
         ...defaultState,
         isCreatingFile: true,
         newFileCreateMode: state.newFileCreateMode,
-        inFlight: true
+        inFlight: true,
       }
     case ACTION_TYPES.CREATING_FOLDER:
       return { ...defaultState, isCreatingFolder: true, inFlight: true }
@@ -96,13 +96,13 @@ function fileTreeActionableReducer(state, action) {
         ...defaultState,
         isDeleting: true,
         inFlight: true,
-        actionedEntities: state.actionedEntities
+        actionedEntities: state.actionedEntities,
       }
     case ACTION_TYPES.MOVING:
       return {
         ...defaultState,
         isMoving: true,
-        inFlight: true
+        inFlight: true,
       }
     case ACTION_TYPES.CLEAR:
       return { ...defaultState }
@@ -135,8 +135,8 @@ FileTreeActionableProvider.propTypes = {
   hasWritePermissions: PropTypes.bool.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ]).isRequired
+    PropTypes.node,
+  ]).isRequired,
 }
 
 export function useFileTreeActionable() {
@@ -150,7 +150,7 @@ export function useFileTreeActionable() {
     error,
     actionedEntities,
     newFileCreateMode,
-    dispatch
+    dispatch,
   } = useContext(FileTreeActionableContext)
   const { projectId } = useFileTreeMainContext()
   const { fileTreeData, dispatchRename, dispatchMove } = useFileTreeMutable()
@@ -324,8 +324,8 @@ export function useFileTreeActionable() {
         new CustomEvent('FileTreeReactBridge.openNewDocModal', {
           detail: {
             mode: 'doc',
-            parentFolderId
-          }
+            parentFolderId,
+          },
         })
       )
     }
@@ -344,8 +344,8 @@ export function useFileTreeActionable() {
         new CustomEvent('FileTreeReactBridge.openNewDocModal', {
           detail: {
             mode: 'upload',
-            parentFolderId
-          }
+            parentFolderId,
+          },
         })
       )
     }
@@ -364,8 +364,8 @@ export function useFileTreeActionable() {
             window.dispatchEvent(
               new CustomEvent('FileTreeReactBridge.openNewFileModal', {
                 detail: {
-                  done: true
-                }
+                  done: true,
+                },
               })
             )
           }
@@ -380,8 +380,8 @@ export function useFileTreeActionable() {
               new CustomEvent('FileTreeReactBridge.openNewFileModal', {
                 detail: {
                   error: true,
-                  data: error.message
-                }
+                  data: error.message,
+                },
               })
             )
           }
@@ -442,7 +442,7 @@ export function useFileTreeActionable() {
     startUploadingDocOrFile,
     finishCreatingDoc,
     finishCreatingLinkedFile,
-    cancel
+    cancel,
   }
 }
 

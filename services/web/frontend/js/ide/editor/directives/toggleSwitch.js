@@ -16,7 +16,7 @@ export default App.directive('toggleSwitch', () => ({
     description: '@',
     labelFalse: '@',
     labelTrue: '@',
-    ngModel: '='
+    ngModel: '=',
   },
   template: `\
 <fieldset class="toggle-switch">
@@ -44,5 +44,5 @@ export default App.directive('toggleSwitch', () => ({
 
   <span class="toggle-switch-selection" aria-hidden="true"></span>
 </fieldset>\
-`
+`,
 }))

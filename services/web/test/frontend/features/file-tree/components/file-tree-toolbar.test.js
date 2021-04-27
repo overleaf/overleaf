@@ -22,7 +22,7 @@ describe('<FileTreeToolbar/>', function () {
 
   it('read-only', function () {
     renderWithContext(<FileTreeToolbar />, {
-      contextProps: { hasWritePermissions: false }
+      contextProps: { hasWritePermissions: false },
     })
 
     expect(screen.queryByRole('button')).to.not.exist
@@ -37,10 +37,10 @@ describe('<FileTreeToolbar/>', function () {
             _id: 'root-folder-id',
             docs: [{ _id: '456def', name: 'main.tex' }],
             folders: [],
-            fileRefs: []
-          }
-        ]
-      }
+            fileRefs: [],
+          },
+        ],
+      },
     })
 
     screen.getByRole('button', { name: 'New File' })

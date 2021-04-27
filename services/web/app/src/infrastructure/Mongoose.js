@@ -20,7 +20,7 @@ const connectionPromise = mongoose.connect(
       // mongoose defaults to false, native driver defaults to true
       useNewUrlParser: true,
       // use the equivalent `findOneAndUpdate` methods of the native driver
-      useFindAndModify: false
+      useFindAndModify: false,
     },
     Settings.mongo.options
   )

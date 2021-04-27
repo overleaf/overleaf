@@ -14,8 +14,8 @@ LayoutContext.Provider.propTypes = {
     setReviewPanelOpen: PropTypes.func.isRequired,
     leftMenuShown: PropTypes.bool,
     setLeftMenuShown: PropTypes.func.isRequired,
-    pdfLayout: PropTypes.oneOf(['sideBySide', 'flat', 'split']).isRequired
-  }).isRequired
+    pdfLayout: PropTypes.oneOf(['sideBySide', 'flat', 'split']).isRequired,
+  }).isRequired,
 }
 
 export function LayoutProvider({ children, $scope }) {
@@ -41,7 +41,7 @@ export function LayoutProvider({ children, $scope }) {
     setReviewPanelOpen,
     leftMenuShown,
     setLeftMenuShown,
-    pdfLayout
+    pdfLayout,
   }
 
   return (
@@ -53,7 +53,7 @@ export function LayoutProvider({ children, $scope }) {
 
 LayoutProvider.propTypes = {
   children: PropTypes.any,
-  $scope: PropTypes.any.isRequired
+  $scope: PropTypes.any.isRequired,
 }
 
 export function useLayoutContext(propTypes) {

@@ -390,7 +390,7 @@ export default Document = (function () {
         remote_doc_id: update != null ? update.doc : undefined,
         wantToBeJoined: this.wantToBeJoined,
         update,
-        hasDoc: this.doc != null
+        hasDoc: this.doc != null,
       })
 
       if (
@@ -416,7 +416,7 @@ export default Document = (function () {
         this.doc != null
       ) {
         this.ide.pushEvent('received-update:processing', {
-          update
+          update,
         })
         // FIXME: change this back to processUpdateFromServer when redis fixed
         this.doc.processUpdateFromServerInOrder(update)
@@ -477,7 +477,7 @@ export default Document = (function () {
       if (this.doc != null) {
         this.ide.pushEvent('joinDoc:existing', {
           doc_id: this.doc_id,
-          version: this.doc.getVersion()
+          version: this.doc.getVersion(),
         })
         return this.ide.socket.emit(
           'joinDoc',
@@ -500,7 +500,7 @@ export default Document = (function () {
         )
       } else {
         this.ide.pushEvent('joinDoc:new', {
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         })
         return this.ide.socket.emit(
           'joinDoc',
@@ -513,7 +513,7 @@ export default Document = (function () {
             this.joined = true
             this.ide.pushEvent('joinDoc:inited', {
               doc_id: this.doc_id,
-              version
+              version,
             })
             this.doc = new ShareJsDoc(
               this.doc_id,
@@ -566,7 +566,7 @@ export default Document = (function () {
         callback = function (error) {}
       }
       this.ide.pushEvent('leaveDoc', {
-        doc_id: this.doc_id
+        doc_id: this.doc_id,
       })
       sl_console.log('[_leaveDoc] Sending leaveDoc request')
       return this.ide.socket.emit('leaveDoc', this.doc_id, error => {
@@ -620,25 +620,25 @@ export default Document = (function () {
       this.doc.on('op:sent', op => {
         this.ide.pushEvent('op:sent', {
           doc_id: this.doc_id,
-          op
+          op,
         })
         return this.trigger('op:sent')
       })
       this.doc.on('op:acknowledged', op => {
         this.ide.pushEvent('op:acknowledged', {
           doc_id: this.doc_id,
-          op
+          op,
         })
         this.ide.$scope.$emit('ide:opAcknowledged', {
           doc_id: this.doc_id,
-          op
+          op,
         })
         return this.trigger('op:acknowledged')
       })
       this.doc.on('op:timeout', op => {
         this.ide.pushEvent('op:timeout', {
           doc_id: this.doc_id,
-          op
+          op,
         })
         this.trigger('op:timeout')
         return this._onError(new Error('op timed out'), { op })
@@ -648,7 +648,7 @@ export default Document = (function () {
           doc_id: this.doc_id,
           inflightOp,
           pendingOp,
-          v: version
+          v: version,
         })
       })
       this.doc.on('change', (ops, oldSnapshot, msg) => {

@@ -17,7 +17,7 @@ export default App.controller(
     $scope.inputs = { projectName: ide.$scope.project.name + ' (Copy)' }
     $scope.state = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $modalInstance.opened.then(() =>
@@ -27,7 +27,7 @@ export default App.controller(
     const cloneProject = cloneName =>
       $http.post(`/project/${ide.$scope.project._id}/clone`, {
         _csrf: window.csrfToken,
-        projectName: cloneName
+        projectName: cloneName,
       })
 
     $scope.clone = function () {

@@ -15,50 +15,50 @@ describe('UserOnboardingEmailManager', function () {
       add: sinon.stub().resolves(),
       process: callback => {
         this.queueProcessFunction = callback
-      }
+      },
     }
     const self = this
     this.Queues = {
       getOnboardingEmailsQueue: () => {
         return self.onboardingEmailsQueue
-      }
+      },
     }
     this.UserGetter = {
       promises: {
         getUser: sinon.stub().resolves({
           _id: this.fakeUserId,
-          email: this.fakeUserEmail
-        })
-      }
+          email: this.fakeUserEmail,
+        }),
+      },
     }
     this.EmailHandler = {
       promises: {
-        sendEmail: sinon.stub().resolves()
-      }
+        sendEmail: sinon.stub().resolves(),
+      },
     }
     this.UserUpdater = {
       promises: {
-        updateUser: sinon.stub().resolves()
-      }
+        updateUser: sinon.stub().resolves(),
+      },
     }
     this.request = sinon.stub().yields()
     this.UserOnboardingEmailManager = SandboxedModule.require(MODULE_PATH, {
       globals: {
-        console: console
+        console: console,
       },
       requires: {
         '../../infrastructure/Queues': this.Queues,
         '../Email/EmailHandler': this.EmailHandler,
         './UserGetter': this.UserGetter,
-        './UserUpdater': this.UserUpdater
-      }
+        './UserUpdater': this.UserUpdater,
+      },
     })
   })
 
   describe('schedule email', function () {
     it('should schedule delayed job on queue', function () {
       this.UserOnboardingEmailManager.scheduleOnboardingEmail({
-        _id: this.fakeUserId
+        _id: this.fakeUserId,
       })
       sinon.assert.calledWith(
         this.onboardingEmailsQueue.add,
@@ -78,14 +78,14 @@ describe('UserOnboardingEmailManager', function () {
         this.EmailHandler.promises.sendEmail,
         'userOnboardingEmail',
         {
-          to: this.fakeUserEmail
+          to: this.fakeUserEmail,
         }
       )
       sinon.assert.calledWith(
         this.UserUpdater.promises.updateUser,
         this.fakeUserId,
         {
-          $set: { onboardingEmailSentAt: sinon.match.date }
+          $set: { onboardingEmailSentAt: sinon.match.date },
         }
       )
     })

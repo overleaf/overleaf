@@ -28,7 +28,7 @@ export default describe('displayNameForUser', function () {
         id: window.user.id,
         email: 'james.allen@overleaf.com',
         first_name: 'James',
-        last_name: 'Allen'
+        last_name: 'Allen',
       })
     ).to.equal('you')
   })
@@ -39,7 +39,7 @@ export default describe('displayNameForUser', function () {
         id: window.user.id + 1,
         email: 'james.allen@overleaf.com',
         first_name: 'James',
-        last_name: 'Allen'
+        last_name: 'Allen',
       })
     ).to.equal('James Allen')
   })
@@ -50,7 +50,7 @@ export default describe('displayNameForUser', function () {
         id: window.user.id + 1,
         email: 'james.allen@overleaf.com',
         first_name: 'James',
-        last_name: ''
+        last_name: '',
       })
     ).to.equal('James')
   })
@@ -61,7 +61,7 @@ export default describe('displayNameForUser', function () {
         id: window.user.id + 1,
         email: 'james.allen@overleaf.com',
         first_name: '',
-        last_name: ''
+        last_name: '',
       })
     ).to.equal('james.allen')
   })
@@ -72,7 +72,7 @@ export default describe('displayNameForUser', function () {
         id: window.user.id + 1,
         email: '',
         first_name: '',
-        last_name: ''
+        last_name: '',
       })
     ).to.equal('?')
   })

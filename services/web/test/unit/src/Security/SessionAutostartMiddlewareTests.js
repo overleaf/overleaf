@@ -13,13 +13,13 @@ describe('SessionAutostartMiddleware', function () {
 
   beforeEach(function () {
     Settings = {
-      cookieName: cookieName
+      cookieName: cookieName,
     }
 
     SessionAutostartMiddleware = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': Settings
-      }
+        'settings-sharelatex': Settings,
+      },
     })
 
     middleware = new SessionAutostartMiddleware()
@@ -38,7 +38,7 @@ describe('SessionAutostartMiddleware', function () {
         path: excludedRoute,
         method: excludedMethod,
         signedCookies: {},
-        headers: {}
+        headers: {},
       }
       next = sinon.stub()
     })
@@ -72,7 +72,7 @@ describe('SessionAutostartMiddleware', function () {
     beforeEach(function () {
       req = {
         signedCookies: {},
-        headers: {}
+        headers: {},
       }
       next = sinon.stub()
     })

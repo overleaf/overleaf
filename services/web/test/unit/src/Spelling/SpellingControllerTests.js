@@ -19,11 +19,11 @@ describe('SpellingController', function () {
       .stub()
       .returns({ pipe: this.requestStreamPipe })
     this.request = sinon.stub().returns({
-      on: this.requestStreamOn
+      on: this.requestStreamOn,
     })
 
     this.AuthenticationController = {
-      getLoggedInUserId: req => req.session.user._id
+      getLoggedInUserId: req => req.session.user._id,
     }
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
@@ -31,13 +31,13 @@ describe('SpellingController', function () {
         'settings-sharelatex': {
           languages: [
             { name: 'English', code: 'en' },
-            { name: 'French', code: 'fr' }
+            { name: 'French', code: 'fr' },
           ],
-          apis: { spelling: { host: SPELLING_HOST, url: SPELLING_URL } }
+          apis: { spelling: { host: SPELLING_HOST, url: SPELLING_URL } },
         },
         '../Authentication/AuthenticationController': this
-          .AuthenticationController
-      }
+          .AuthenticationController,
+      },
     })
     this.req = {
       url: '/spelling/check',
@@ -45,10 +45,10 @@ describe('SpellingController', function () {
       params: {},
       session: {
         user: {
-          _id: userId
-        }
+          _id: userId,
+        },
       },
-      headers: { Host: SPELLING_HOST }
+      headers: { Host: SPELLING_HOST },
     }
 
     this.res = {}
@@ -73,7 +73,7 @@ describe('SpellingController', function () {
             method: this.req.method,
             headers: this.req.headers,
             json: this.req.body,
-            timeout: TEN_SECONDS
+            timeout: TEN_SECONDS,
           })
           .should.equal(true)
       })

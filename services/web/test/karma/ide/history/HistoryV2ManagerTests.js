@@ -28,20 +28,20 @@ export default describe('HistoryV2Manager', function () {
         pathname: null,
         range: {
           fromV: null,
-          toV: null
+          toV: null,
         },
         hoveredRange: {
           fromV: null,
-          toV: null
+          toV: null,
         },
         diff: null,
         files: [],
-        file: null
+        file: null,
       },
       error: null,
       showOnlyLabels: false,
       labels: null,
-      loadingFileTree: true
+      loadingFileTree: true,
     }
 
     this.sampleUpdates = [
@@ -55,11 +55,11 @@ export default describe('HistoryV2Manager', function () {
               last_name: '',
               email: 'john.doe@domain.tld',
               id: '5b57299087712202fb599ab4',
-              hue: 200
-            }
+              hue: 200,
+            },
           ],
           start_ts: 1544021278346,
-          end_ts: 1544021278346
+          end_ts: 1544021278346,
         },
         labels: [
           {
@@ -67,18 +67,18 @@ export default describe('HistoryV2Manager', function () {
             comment: 'My first label',
             version: 5,
             user_id: '5b57299087712202fb599ab4',
-            created_at: '2018-12-05T15:00:50.688Z'
-          }
+            created_at: '2018-12-05T15:00:50.688Z',
+          },
         ],
         pathnames: [],
         project_ops: [
           {
             add: {
-              pathname: 'chapters/chapter1.tex'
+              pathname: 'chapters/chapter1.tex',
             },
-            atV: 4
-          }
-        ]
+            atV: 4,
+          },
+        ],
       },
       {
         fromV: 3,
@@ -90,15 +90,15 @@ export default describe('HistoryV2Manager', function () {
               last_name: '',
               email: 'john.doe@domain.tld',
               id: '5b57299087712202fb599ab4',
-              hue: 200
-            }
+              hue: 200,
+            },
           ],
           start_ts: 1544021262622,
-          end_ts: 1544021262622
+          end_ts: 1544021262622,
         },
         labels: [],
         pathnames: ['main.tex'],
-        project_ops: []
+        project_ops: [],
       },
       {
         fromV: 0,
@@ -110,52 +110,52 @@ export default describe('HistoryV2Manager', function () {
               last_name: '',
               email: 'john.doe@domain.tld',
               id: '5b57299087712202fb599ab4',
-              hue: 200
-            }
+              hue: 200,
+            },
           ],
           start_ts: 1544021213540,
-          end_ts: 1544021213618
+          end_ts: 1544021213618,
         },
         labels: [],
         pathnames: [],
         project_ops: [
           {
             add: {
-              pathname: 'universe.jpg'
+              pathname: 'universe.jpg',
             },
-            atV: 2
+            atV: 2,
           },
           {
             add: {
-              pathname: 'references.bib'
+              pathname: 'references.bib',
             },
-            atV: 1
+            atV: 1,
           },
           {
             add: {
-              pathname: 'main.tex'
+              pathname: 'main.tex',
             },
-            atV: 0
-          }
-        ]
-      }
+            atV: 0,
+          },
+        ],
+      },
     ]
 
     inject(($q, $http, $filter, $rootScope) => {
       this.$scope = $rootScope.$new()
       this.$scope.project = {
         features: {
-          versioning: true
-        }
+          versioning: true,
+        },
       }
       this.$scope.user = {
-        isAdmin: false
+        isAdmin: false,
       }
       this.ide = {
         globalEditorWatchdogManager: { attachToEditor() {} },
         $q: $q,
         $http: $http,
-        $filter: $filter
+        $filter: $filter,
       }
       this.localStorage = sinon.stub().returns(null)
       this.historyManager = new HistoryV2Manager(
@@ -173,7 +173,7 @@ export default describe('HistoryV2Manager', function () {
 
   it('should keep history updates after performing a soft reset', function () {
     let historyScopeWithUpdates = Object.assign({}, this.defaultHistoryScope, {
-      updates: this.sampleUpdates
+      updates: this.sampleUpdates,
     })
     this.$scope.history.updates = this.sampleUpdates
     this.historyManager.softReset()
@@ -219,35 +219,35 @@ export default describe('HistoryV2Manager', function () {
       beforeEach(function () {
         this.mockedFilesList = [
           {
-            pathname: 'main.tex'
+            pathname: 'main.tex',
           },
           {
-            pathname: 'references.bib'
+            pathname: 'references.bib',
           },
           {
-            pathname: 'universe.jpg'
+            pathname: 'universe.jpg',
           },
           {
-            pathname: 'chapters/chapter2.tex'
+            pathname: 'chapters/chapter2.tex',
           },
           {
             pathname: 'chapters/draft.tex',
             operation: 'removed',
-            deletedAtV: 47
+            deletedAtV: 47,
           },
           {
             pathname: 'chapters/chapter3.tex',
-            operation: 'added'
+            operation: 'added',
           },
           {
             pathname: 'chapters/chapter1.tex',
-            operation: 'edited'
+            operation: 'edited',
           },
           {
             pathname: 'chapters/foo.tex',
             oldPathname: 'chapters/bar.tex',
-            operation: 'renamed'
-          }
+            operation: 'renamed',
+          },
         ]
         this.mockedMainTex = this.mockedFilesList[0]
         this.mockedReferencesFile = this.mockedFilesList[1]
@@ -342,17 +342,17 @@ export default describe('HistoryV2Manager', function () {
         beforeEach(function () {
           this.mockedFilesListWithNoOps = [
             {
-              pathname: 'main.tex'
+              pathname: 'main.tex',
             },
             {
-              pathname: 'references.bib'
+              pathname: 'references.bib',
             },
             {
-              pathname: 'other.tex'
+              pathname: 'other.tex',
             },
             {
-              pathname: 'universe.jpg'
-            }
+              pathname: 'universe.jpg',
+            },
           ]
           this.mockedMainTex = this.mockedFilesListWithNoOps[0]
           this.mockedReferencesFile = this.mockedFilesListWithNoOps[1]
@@ -409,27 +409,27 @@ export default describe('HistoryV2Manager', function () {
                 last_name: '',
                 email: 'john.doe@domain.tld',
                 id: '5b57299087712202fb599ab4',
-                hue: 200
-              }
+                hue: 200,
+              },
             ],
             start_ts: 1544021278346,
-            end_ts: 1544021278346
+            end_ts: 1544021278346,
           },
           pathnames: ['main.tex'],
           project_ops: [
             {
               add: {
-                pathname: 'chapters/chapter1.tex'
+                pathname: 'chapters/chapter1.tex',
               },
-              atV: 4
+              atV: 4,
             },
             {
               rename: {
                 pathname: 'foo.tex',
-                newPathname: 'bar.tex'
-              }
-            }
-          ]
+                newPathname: 'bar.tex',
+              },
+            },
+          ],
         }
         this.sampleUpdateEditedFile = this.sampleUpdates[0].pathnames[0]
         this.sampleUpdateAddedFile = this.sampleUpdates[0].project_ops[0].add.pathname
@@ -437,33 +437,33 @@ export default describe('HistoryV2Manager', function () {
         this.$scope.history.updates = this.sampleUpdates
         this.$scope.history.selection.range = {
           fromV: this.sampleUpdates[0].toV,
-          toV: this.sampleUpdates[0].toV
+          toV: this.sampleUpdates[0].toV,
         }
         this.mockedFilesList = [
           {
-            pathname: 'main.tex'
+            pathname: 'main.tex',
           },
           {
-            pathname: 'references.bib'
+            pathname: 'references.bib',
           },
           {
-            pathname: 'universe.jpg'
+            pathname: 'universe.jpg',
           },
           {
-            pathname: 'chapters/chapter2.tex'
+            pathname: 'chapters/chapter2.tex',
           },
           {
-            pathname: 'chapters/draft.tex'
+            pathname: 'chapters/draft.tex',
           },
           {
-            pathname: 'chapters/chapter3.tex'
+            pathname: 'chapters/chapter3.tex',
           },
           {
-            pathname: 'chapters/chapter1.tex'
+            pathname: 'chapters/chapter1.tex',
           },
           {
-            pathname: 'bar.tex'
-          }
+            pathname: 'bar.tex',
+          },
         ]
         this.$scope.history.selection.files = this.mockedFilesList
       })
@@ -554,20 +554,20 @@ export default describe('HistoryV2Manager', function () {
             id: '1',
             version: 1,
             comment: 'foo',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           },
           {
             id: '2',
             version: 2,
             comment: 'bar',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           },
           {
             id: '3',
             version: 3,
             comment: 'baz',
-            created_at: new Date().toISOString()
-          }
+            created_at: new Date().toISOString(),
+          },
         ]
         const lastUpdate = 3
 
@@ -582,20 +582,20 @@ export default describe('HistoryV2Manager', function () {
             id: '1',
             version: 1,
             comment: 'foo',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           },
           {
             id: '2',
             version: 2,
             comment: 'bar',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           },
           {
             id: '3',
             version: 3,
             comment: 'baz',
-            created_at: new Date().toISOString()
-          }
+            created_at: new Date().toISOString(),
+          },
         ]
         const lastUpdate = 5
 
@@ -612,8 +612,8 @@ export default describe('HistoryV2Manager', function () {
             id: '1',
             version: 1,
             comment: 'foo',
-            created_at: new Date().toISOString()
-          }
+            created_at: new Date().toISOString(),
+          },
         ]
         const lastUpdate = 5
 

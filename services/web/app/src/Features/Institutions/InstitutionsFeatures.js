@@ -42,5 +42,5 @@ module.exports = InstitutionsFeatures = {
 
       callback(null, hasLicence)
     })
-  }
+  },
 }

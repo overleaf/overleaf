@@ -21,6 +21,6 @@ App.component(
     // We're still including ShareController as part fo the React navigation toolbar. The reason is
     // the coupling between ShareController's $scope and Angular's ShareProjectModal. Once ShareProjectModal
     // is fully ported to React we should be able to repli
-    'openShareProjectModal'
+    'openShareProjectModal',
   ])
 )

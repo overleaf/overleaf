@@ -37,29 +37,29 @@ describe('ProjectEditorHandler', function () {
                 {
                   _id: 'doc-id',
                   name: 'main.tex',
-                  lines: (this.lines = ['line 1', 'line 2', 'line 3'])
-                }
+                  lines: (this.lines = ['line 1', 'line 2', 'line 3']),
+                },
               ],
               fileRefs: [
                 {
                   _id: 'file-id',
                   name: 'image.png',
                   created: (this.created = new Date()),
-                  size: 1234
-                }
+                  size: 1234,
+                },
               ],
-              folders: []
-            }
-          ]
-        }
+              folders: [],
+            },
+          ],
+        },
       ],
       deletedDocs: [
         {
           _id: 'deleted-doc-id',
           name: 'main.tex',
-          deletedAt: (this.deletedAt = new Date('2017-01-01'))
-        }
-      ]
+          deletedAt: (this.deletedAt = new Date('2017-01-01')),
+        },
+      ],
     }
     this.members = [
       {
@@ -67,28 +67,28 @@ describe('ProjectEditorHandler', function () {
           _id: 'owner-id',
           first_name: 'Owner',
           last_name: 'ShareLaTeX',
-          email: 'owner@sharelatex.com'
+          email: 'owner@sharelatex.com',
         }),
-        privilegeLevel: 'owner'
+        privilegeLevel: 'owner',
       },
       {
         user: {
           _id: 'read-only-id',
           first_name: 'Read',
           last_name: 'Only',
-          email: 'read-only@sharelatex.com'
+          email: 'read-only@sharelatex.com',
         },
-        privilegeLevel: 'readOnly'
+        privilegeLevel: 'readOnly',
       },
       {
         user: {
           _id: 'read-write-id',
           first_name: 'Read',
           last_name: 'Write',
-          email: 'read-write@sharelatex.com'
+          email: 'read-write@sharelatex.com',
         },
-        privilegeLevel: 'readAndWrite'
-      }
+        privilegeLevel: 'readAndWrite',
+      },
     ]
     this.invites = [
       {
@@ -96,18 +96,18 @@ describe('ProjectEditorHandler', function () {
         email: 'user-one@example.com',
         privileges: 'readOnly',
         projectId: this.project._id,
-        token: 'my-secret-token1'
+        token: 'my-secret-token1',
       },
       {
         _id: 'invite_two',
         email: 'user-two@example.com',
         privileges: 'readOnly',
         projectId: this.project._id,
-        token: 'my-secret-token2'
-      }
+        token: 'my-secret-token2',
+      },
     ]
     this.deletedDocsFromDocstore = [
-      { _id: 'deleted-doc-id-from-docstore', name: 'docstore.tex' }
+      { _id: 'deleted-doc-id-from-docstore', name: 'docstore.tex' },
     ]
     return (this.handler = SandboxedModule.require(modulePath))
   })
@@ -158,9 +158,9 @@ describe('ProjectEditorHandler', function () {
           {
             // omit deletedAt field
             _id: this.project.deletedDocs[0]._id,
-            name: this.project.deletedDocs[0].name
+            name: this.project.deletedDocs[0].name,
           },
-          this.deletedDocsFromDocstore[0]
+          this.deletedDocsFromDocstore[0],
         ])
       })
 
@@ -255,7 +255,7 @@ describe('ProjectEditorHandler', function () {
         expect(this.result.deletedDocs).to.exist
         this.result.deletedDocs.should.deep.equal([
           this.project.deletedDocs[0],
-          this.deletedDocsFromDocstore[0]
+          this.deletedDocsFromDocstore[0],
         ])
       })
     })
@@ -300,7 +300,7 @@ describe('ProjectEditorHandler', function () {
           versioning: true,
           collaborators: 3,
           compileGroup: 'priority',
-          compileTimeout: 96
+          compileTimeout: 96,
         }
         return (this.result = this.handler.buildProjectModelView(
           this.project,
@@ -330,7 +330,7 @@ describe('ProjectEditorHandler', function () {
       describe('when the owner does not have the trackChanges feature', function () {
         beforeEach(function () {
           this.owner.features = {
-            trackChanges: false
+            trackChanges: false,
           }
           this.result = this.handler.buildProjectModelView(
             this.project,
@@ -347,7 +347,7 @@ describe('ProjectEditorHandler', function () {
       describe('when the owner has got the trackChanges feature', function () {
         beforeEach(function () {
           this.owner.features = {
-            trackChanges: true
+            trackChanges: true,
           }
         })
 
@@ -374,7 +374,7 @@ describe('ProjectEditorHandler', function () {
           [null, false],
           [false, false],
           [true, true],
-          [{ someId: true }, { someId: true }]
+          [{ someId: true }, { someId: true }],
         ]
         CASES.map(genCase)
       })
@@ -387,7 +387,7 @@ describe('ProjectEditorHandler', function () {
         versioning: true,
         collaborators: 3,
         compileGroup: 'priority',
-        compileTimeout: 22
+        compileTimeout: 22,
       }
       return (this.result = this.handler.buildOwnerAndMembersViews(
         this.members
@@ -398,7 +398,7 @@ describe('ProjectEditorHandler', function () {
       return expect(this.result).to.have.all.keys([
         'owner',
         'ownerFeatures',
-        'members'
+        'members',
       ])
     })
 
@@ -432,7 +432,7 @@ describe('ProjectEditorHandler', function () {
         return expect(this.result).to.have.all.keys([
           'owner',
           'ownerFeatures',
-          'members'
+          'members',
         ])
       })
 

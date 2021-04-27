@@ -34,8 +34,8 @@ describe('ProjectCollabratecDetailsHandler', function () {
       {
         requires: {
           mongodb: { ObjectId },
-          '../../models/Project': { Project: this.ProjectModel }
-        }
+          '../../models/Project': { Project: this.ProjectModel },
+        },
       }
     )
     return (this.callback = sinon.stub())
@@ -61,10 +61,10 @@ describe('ProjectCollabratecDetailsHandler', function () {
               {
                 user_id: this.userId,
                 collabratec_document_id: 'collabratec-document-id',
-                collabratec_privategroup_id: 'collabratec-private-group-id'
-              }
-            ]
-          }
+                collabratec_privategroup_id: 'collabratec-private-group-id',
+              },
+            ],
+          },
         }
         return expect(this.ProjectModel.updateOne).to.have.been.calledWith(
           { _id: this.projectId },
@@ -135,9 +135,9 @@ describe('ProjectCollabratecDetailsHandler', function () {
               _id: ObjectId(this.projectId),
               collabratecUsers: {
                 $elemMatch: {
-                  user_id: ObjectId(this.userId)
-                }
-              }
+                  user_id: ObjectId(this.userId),
+                },
+              },
             }
           )
         })
@@ -217,18 +217,18 @@ describe('ProjectCollabratecDetailsHandler', function () {
             $not: {
               $elemMatch: {
                 collabratec_document_id: 'collabratec-document-id',
-                user_id: this.userId
-              }
-            }
-          }
+                user_id: this.userId,
+              },
+            },
+          },
         }
         const update = {
           $push: {
             collabratecUsers: {
               collabratec_document_id: 'collabratec-document-id',
-              user_id: this.userId
-            }
-          }
+              user_id: this.userId,
+            },
+          },
         }
         return expect(this.ProjectModel.updateOne).to.have.been.calledWith(
           query,
@@ -281,13 +281,13 @@ describe('ProjectCollabratecDetailsHandler', function () {
         {
           user_id: this.userId,
           collabratec_document_id: 'collabratec-document-id-1',
-          collabratec_privategroup_id: 'collabratec-private-group-id-1'
+          collabratec_privategroup_id: 'collabratec-private-group-id-1',
         },
         {
           user_id: this.userId2,
           collabratec_document_id: 'collabratec-document-id-2',
-          collabratec_privategroup_id: 'collabratec-private-group-id-2'
-        }
+          collabratec_privategroup_id: 'collabratec-private-group-id-2',
+        },
       ])
     })
 
@@ -304,8 +304,8 @@ describe('ProjectCollabratecDetailsHandler', function () {
       it('should update project model', function () {
         const update = {
           $set: {
-            collabratecUsers: this.collabratecUsers
-          }
+            collabratecUsers: this.collabratecUsers,
+          },
         }
         return expect(this.ProjectModel.updateOne).to.have.been.calledWith(
           { _id: this.projectId },
@@ -386,9 +386,9 @@ describe('ProjectCollabratecDetailsHandler', function () {
         const update = {
           $pull: {
             collabratecUsers: {
-              user_id: this.userId
-            }
-          }
+              user_id: this.userId,
+            },
+          },
         }
         return expect(this.ProjectModel.updateOne).to.have.been.calledWith(
           query,

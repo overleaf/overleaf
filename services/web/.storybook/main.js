@@ -11,7 +11,7 @@ const customConfig = require('../webpack.config.dev')
 module.exports = {
   stories: [
     '../frontend/stories/**/*.stories.js',
-    '../modules/**/stories/**/*.stories.js'
+    '../modules/**/stories/**/*.stories.js',
   ],
   addons: ['@storybook/addon-essentials', '@storybook/addon-a11y'],
   webpackFinal: storybookConfig => {
@@ -31,8 +31,8 @@ module.exports = {
       ),
       {
         test: /\.less$/,
-        use: ['to-string-loader', 'css-loader', 'less-loader']
-      }
+        use: ['to-string-loader', 'css-loader', 'less-loader'],
+      },
     ]
 
     // Combine Storybook's webpack plugins with our webpack plugins
@@ -42,9 +42,9 @@ module.exports = {
       ...storybookConfig,
       module: {
         ...storybookConfig.module,
-        rules
+        rules,
       },
-      plugins
+      plugins,
     }
-  }
+  },
 }

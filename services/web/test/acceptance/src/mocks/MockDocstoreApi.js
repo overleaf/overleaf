@@ -13,7 +13,7 @@ class MockDocstoreApi extends AbstractMockApi {
       lines: [],
       version: 1,
       ranges: {},
-      deleted: true
+      deleted: true,
     }
   }
 
@@ -44,7 +44,7 @@ class MockDocstoreApi extends AbstractMockApi {
       this.docs[projectId][docId]._id = docId
       res.json({
         modified: oldVersion !== version,
-        rev: this.docs[projectId][docId].rev
+        rev: this.docs[projectId][docId].rev,
       })
     })
 

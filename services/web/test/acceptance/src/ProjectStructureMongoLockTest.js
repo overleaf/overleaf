@@ -46,7 +46,7 @@ describe('ProjectStructureMongoLock', function () {
       this.lockValue = 'lock-value'
       const userDetails = {
         holdingAccount: false,
-        email: 'test@example.com'
+        email: 'test@example.com',
       }
       UserCreator.createNewUser(userDetails, {}, (err, user) => {
         this.user = user
@@ -87,7 +87,7 @@ describe('ProjectStructureMongoLock', function () {
         'mkdirp',
         'moveEntity',
         'renameEntity',
-        'addFolder'
+        'addFolder',
       ]
       for (var methodName of Array.from(LOCKING_UPDATE_METHODS)) {
         it(`cannot call ProjectEntityMongoUpdateHandler.${methodName}`, function (done) {

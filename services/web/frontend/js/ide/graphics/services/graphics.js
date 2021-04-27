@@ -32,7 +32,7 @@ export default App.factory('graphics', function (ide) {
         }
       })
       return graphicsFiles
-    }
+    },
   }
 
   return Graphics

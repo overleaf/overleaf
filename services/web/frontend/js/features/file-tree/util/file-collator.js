@@ -7,5 +7,5 @@
 export const fileCollator = new Intl.Collator('en', {
   numeric: true,
   sensitivity: 'variant',
-  caseFirst: 'upper'
+  caseFirst: 'upper',
 })

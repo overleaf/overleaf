@@ -128,7 +128,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     res.locals.mathJaxPath = `/js/libs/mathjax/MathJax.js?${querystring.stringify(
       {
         config: 'TeX-AMS_HTML,Safe',
-        v: require('mathjax/package.json').version
+        v: require('mathjax/package.json').version,
       }
     )}`
 
@@ -287,7 +287,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       res.locals.user = {
         email: currentUser.email,
         first_name: currentUser.first_name,
-        last_name: currentUser.last_name
+        last_name: currentUser.last_name,
       }
     }
     next()
@@ -327,13 +327,13 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
         {
           name: 'Default',
           val: '',
-          path: res.locals.buildCssPath()
+          path: res.locals.buildCssPath(),
         },
         {
           name: 'Light',
           val: 'light-',
-          path: res.locals.buildCssPath('light-')
-        }
+          path: res.locals.buildCssPath('light-'),
+        },
       ]
     }
     next()
@@ -366,7 +366,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       sentryDsn: Settings.sentry.publicDSN,
       sentryEnvironment: Settings.sentry.environment,
       sentryRelease: Settings.sentry.release,
-      enableSubscriptions: Settings.enableSubscriptions
+      enableSubscriptions: Settings.enableSubscriptions,
     }
     next()
   })

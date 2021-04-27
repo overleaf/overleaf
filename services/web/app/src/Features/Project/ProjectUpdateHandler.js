@@ -25,12 +25,12 @@ module.exports = {
 
     const conditions = {
       _id: projectId,
-      lastUpdated: { $lt: lastUpdatedAt }
+      lastUpdated: { $lt: lastUpdatedAt },
     }
 
     const update = {
       lastUpdated: lastUpdatedAt || new Date().getTime(),
-      lastUpdatedBy
+      lastUpdatedBy,
     }
     return Project.updateOne(conditions, update, {}, callback)
   },
@@ -63,5 +63,5 @@ module.exports = {
         return callback()
       }
     })
-  }
+  },
 }

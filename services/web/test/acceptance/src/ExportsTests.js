@@ -67,8 +67,8 @@ describe('Exports', function () {
             description: 'description',
             author: 'author',
             license: 'other',
-            showSource: true
-          }
+            showSource: true,
+          },
         },
         (error, response, body) => {
           if (error != null) {
@@ -86,7 +86,7 @@ describe('Exports', function () {
         project,
         user,
         destination,
-        options
+        options,
       } = MockV1Api.getLastExportParams()
       // project details should match
       expect(project.id).to.equal(this.project_id)

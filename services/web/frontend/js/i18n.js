@@ -19,7 +19,7 @@ i18n.use(initReactI18next).init({
     // Trigger a re-render when a language is added. Since we load the
     // translation strings asynchronously, we need to trigger a re-render once
     // they've loaded
-    bindI18nStore: 'added'
+    bindI18nStore: 'added',
   },
 
   interpolation: {
@@ -34,9 +34,9 @@ i18n.use(initReactI18next).init({
     skipOnVariables: true,
 
     defaultVariables: {
-      appName: window.ExposedSettings.appName
-    }
-  }
+      appName: window.ExposedSettings.appName,
+    },
+  },
 })
 
 // The webpackChunkName here will name this chunk (and thus the requested

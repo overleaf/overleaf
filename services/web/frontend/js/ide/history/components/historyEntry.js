@@ -115,11 +115,11 @@ export default App.component('historyEntry', {
     selectedHistoryRange: '<?',
     hoveredHistoryRange: '<?',
     onSelect: '&',
-    onLabelDelete: '&'
+    onLabelDelete: '&',
   },
   require: {
-    historyEntriesList: '^historyEntriesList'
+    historyEntriesList: '^historyEntriesList',
   },
   controller: historyEntryController,
-  templateUrl: 'historyEntryTpl'
+  templateUrl: 'historyEntryTpl',
 })

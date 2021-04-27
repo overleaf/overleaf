@@ -24,13 +24,13 @@ describe('TpdsUpdateHandler', function () {
       archived1: {
         _id: new ObjectId(),
         name: this.projectName,
-        archived: [this.userId]
+        archived: [this.userId],
       },
       archived2: {
         _id: new ObjectId(),
         name: this.projectName,
-        archived: [this.userId]
-      }
+        archived: [this.userId],
+      },
     }
     this.userId = new ObjectId()
     this.source = 'dropbox'
@@ -38,31 +38,31 @@ describe('TpdsUpdateHandler', function () {
     this.update = {}
 
     this.CooldownManager = {
-      isProjectOnCooldown: sinon.stub().yields(null, false)
+      isProjectOnCooldown: sinon.stub().yields(null, false),
     }
     this.FileTypeManager = {
-      shouldIgnore: sinon.stub().yields(null, false)
+      shouldIgnore: sinon.stub().yields(null, false),
     }
     this.Modules = {
-      hooks: { fire: sinon.stub().yields() }
+      hooks: { fire: sinon.stub().yields() },
     }
     this.notification = {
-      create: sinon.stub().yields()
+      create: sinon.stub().yields(),
     }
     this.NotificationsBuilder = {
-      dropboxDuplicateProjectNames: sinon.stub().returns(this.notification)
+      dropboxDuplicateProjectNames: sinon.stub().returns(this.notification),
     }
     this.ProjectCreationHandler = {
-      createBlankProject: sinon.stub().yields(null, this.projects.active1)
+      createBlankProject: sinon.stub().yields(null, this.projects.active1),
     }
     this.ProjectDeleter = {
-      markAsDeletedByExternalSource: sinon.stub().yields()
+      markAsDeletedByExternalSource: sinon.stub().yields(),
     }
     this.ProjectGetter = {
-      findUsersProjectsByName: sinon.stub()
+      findUsersProjectsByName: sinon.stub(),
     }
     this.ProjectHelper = {
-      isArchivedOrTrashed: sinon.stub().returns(false)
+      isArchivedOrTrashed: sinon.stub().returns(false),
     }
     this.ProjectHelper.isArchivedOrTrashed
       .withArgs(this.projects.archived1, this.userId)
@@ -73,7 +73,7 @@ describe('TpdsUpdateHandler', function () {
     this.RootDocManager = { setRootDocAutomatically: sinon.stub() }
     this.UpdateMerger = {
       deleteUpdate: sinon.stub().yields(),
-      mergeUpdate: sinon.stub().yields()
+      mergeUpdate: sinon.stub().yields(),
     }
 
     this.TpdsUpdateHandler = SandboxedModule.require(MODULE_PATH, {
@@ -87,8 +87,8 @@ describe('TpdsUpdateHandler', function () {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Project/ProjectHelper': this.ProjectHelper,
         '../Project/ProjectRootDocManager': this.RootDocManager,
-        './UpdateMerger': this.UpdateMerger
-      }
+        './UpdateMerger': this.UpdateMerger,
+      },
     })
   })
 

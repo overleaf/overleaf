@@ -23,15 +23,15 @@ describe('RateLimiter', function () {
         web: {
           port: '1234',
           host: 'somewhere',
-          password: 'password'
-        }
-      }
+          password: 'password',
+        },
+      },
     }
     this.rclient = {
       incr: sinon.stub(),
       get: sinon.stub(),
       expire: sinon.stub(),
-      exec: sinon.stub()
+      exec: sinon.stub(),
     }
     this.rclient.multi = sinon.stub().returns(this.rclient)
     this.RedisWrapper = { client: sinon.stub().returns(this.rclient) }
@@ -44,14 +44,14 @@ describe('RateLimiter', function () {
     this.requires = {
       'settings-sharelatex': this.settings,
       '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
-      './RedisWrapper': this.RedisWrapper
+      './RedisWrapper': this.RedisWrapper,
     }
 
     this.details = {
       endpointName: this.endpointName,
       subjectName: this.subject,
       throttle: this.throttleLimit,
-      timeInterval: this.timeInterval
+      timeInterval: this.timeInterval,
     }
     return (this.key = `RateLimiter:${this.endpointName}:{${this.subject}}`)
   })
@@ -62,7 +62,7 @@ describe('RateLimiter', function () {
         return sinon.stub().callsArgWith(1, null, 0, 22)
       }
       return (this.limiter = SandboxedModule.require(modulePath, {
-        requires: this.requires
+        requires: this.requires,
       }))
     })
 
@@ -98,9 +98,9 @@ describe('RateLimiter', function () {
       }
       return (this.limiter = SandboxedModule.require(modulePath, {
         globals: {
-          console: console
+          console: console,
         },
-        requires: this.requires
+        requires: this.requires,
       }))
     })
 
@@ -123,7 +123,7 @@ describe('RateLimiter', function () {
         { endpointName: this.endpointName },
         (err, should) => {
           sinon.assert.calledWith(this.Metrics.inc, `rate-limit-hit`, 1, {
-            path: this.endpointName
+            path: this.endpointName,
           })
           return done()
         }
@@ -138,9 +138,9 @@ describe('RateLimiter', function () {
       }
       return (this.limiter = SandboxedModule.require(modulePath, {
         globals: {
-          console: console
+          console: console,
         },
-        requires: this.requires
+        requires: this.requires,
       }))
     })
 

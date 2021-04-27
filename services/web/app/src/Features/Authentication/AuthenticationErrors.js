@@ -5,5 +5,5 @@ class InvalidPasswordError extends Errors.BackwardCompatibleError {}
 
 module.exports = {
   InvalidEmailError,
-  InvalidPasswordError
+  InvalidPasswordError,
 }

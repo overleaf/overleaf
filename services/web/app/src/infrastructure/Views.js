@@ -10,13 +10,13 @@ const viewList = globby
   .sync('app/views/**/*.pug', {
     onlyFiles: true,
     concurrency: 1,
-    ignore: '**/_*.pug'
+    ignore: '**/_*.pug',
   })
   .concat(
     globby.sync('modules/*/app/views/**/*.pug', {
       onlyFiles: true,
       concurrency: 1,
-      ignore: '**/_*.pug'
+      ignore: '**/_*.pug',
     })
   )
   .map(x => {
@@ -36,7 +36,7 @@ module.exports = {
       try {
         pug.compileFile(filename, {
           cache: true,
-          compileDebug: Settings.debugPugTemplates
+          compileDebug: Settings.debugPugTemplates,
         })
         logger.log({ filename }, 'compiled')
         success++
@@ -49,5 +49,5 @@ module.exports = {
       { timeTaken: Date.now() - startTime, failures, success },
       'compiled templates'
     )
-  }
+  },
 }

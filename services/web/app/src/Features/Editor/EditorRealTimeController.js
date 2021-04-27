@@ -37,15 +37,15 @@ module.exports = EditorRealTimeController = {
       room_id,
       message,
       payload,
-      _id: message_id
+      _id: message_id,
     })
     Metrics.summary('redis.publish.editor-events', blob.length, {
-      status: message
+      status: message,
     })
     return rclient.publish(channel, blob)
   },
 
   emitToAll(message, ...payload) {
     return this.emitToRoom('all', message, ...Array.from(payload))
-  }
+  },
 }

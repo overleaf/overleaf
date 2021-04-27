@@ -2,7 +2,7 @@ import {
   deleteJSON,
   getJSON,
   postJSON,
-  putJSON
+  putJSON,
 } from '../../../infrastructure/fetch-json'
 import { executeV2Captcha } from './captcha'
 
@@ -14,8 +14,8 @@ export function sendInvite(project, email, privileges) {
       body: {
         email, // TODO: normalisedEmail?
         privileges,
-        'g-recaptcha-response': grecaptchaResponse
-      }
+        'g-recaptcha-response': grecaptchaResponse,
+      },
     })
   })
 }
@@ -30,7 +30,7 @@ export function revokeInvite(project, invite) {
 
 export function updateMember(project, member, data) {
   return putJSON(`/project/${project._id}/users/${member._id}`, {
-    body: data
+    body: data,
   })
 }
 
@@ -41,14 +41,14 @@ export function removeMemberFromProject(project, member) {
 export function transferProjectOwnership(project, member) {
   return postJSON(`/project/${project._id}/transfer-ownership`, {
     body: {
-      user_id: member._id
-    }
+      user_id: member._id,
+    },
   })
 }
 
 export function setProjectAccessLevel(project, publicAccessLevel) {
   return postJSON(`/project/${project._id}/settings/admin`, {
-    body: { publicAccessLevel }
+    body: { publicAccessLevel },
   })
 }
 

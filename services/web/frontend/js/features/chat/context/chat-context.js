@@ -4,7 +4,7 @@ import React, {
   useContext,
   useEffect,
   useReducer,
-  useMemo
+  useMemo,
 } from 'react'
 import PropTypes from 'prop-types'
 import { v4 as uuid } from 'uuid'
@@ -24,13 +24,13 @@ export function chatReducer(state, action) {
       return {
         ...state,
         status: 'pending',
-        initialMessagesLoaded: true
+        initialMessagesLoaded: true,
       }
 
     case 'FETCH_MESSAGES':
       return {
         ...state,
-        status: 'pending'
+        status: 'pending',
       }
 
     case 'FETCH_MESSAGES_SUCCESS':
@@ -39,7 +39,7 @@ export function chatReducer(state, action) {
         status: 'idle',
         messages: prependMessages(state.messages, action.messages),
         lastTimestamp: action.messages[0] ? action.messages[0].timestamp : null,
-        atEnd: action.messages.length < PAGE_SIZE
+        atEnd: action.messages.length < PAGE_SIZE,
       }
 
     case 'SEND_MESSAGE':
@@ -53,9 +53,9 @@ export function chatReducer(state, action) {
           id: uuid(),
           user: action.user,
           content: action.content,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         }),
-        messageWasJustSent: true
+        messageWasJustSent: true,
       }
 
     case 'RECEIVE_MESSAGE':
@@ -63,20 +63,20 @@ export function chatReducer(state, action) {
         ...state,
         messages: appendMessage(state.messages, action.message),
         messageWasJustSent: false,
-        unreadMessageCount: state.unreadMessageCount + 1
+        unreadMessageCount: state.unreadMessageCount + 1,
       }
 
     case 'MARK_MESSAGES_AS_READ':
       return {
         ...state,
-        unreadMessageCount: 0
+        unreadMessageCount: 0,
       }
 
     case 'ERROR':
       return {
         ...state,
         status: 'error',
-        error: action.error
+        error: action.error,
       }
 
     default:
@@ -92,7 +92,7 @@ const initialState = {
   atEnd: false,
   messageWasJustSent: false,
   unreadMessageCount: 0,
-  error: null
+  error: null,
 }
 
 export const ChatContext = createContext()
@@ -107,16 +107,16 @@ ChatContext.Provider.propTypes = {
     loadInitialMessages: PropTypes.func.isRequired,
     loadMoreMessages: PropTypes.func.isRequired,
     sendMessage: PropTypes.func.isRequired,
-    markMessagesAsRead: PropTypes.func.isRequired
-  }).isRequired
+    markMessagesAsRead: PropTypes.func.isRequired,
+  }).isRequired,
 }
 
 export function ChatProvider({ children }) {
   const { user } = useApplicationContext({
-    user: PropTypes.shape({ id: PropTypes.string.isRequired }.isRequired)
+    user: PropTypes.shape({ id: PropTypes.string.isRequired }.isRequired),
   })
   const { projectId } = useEditorContext({
-    projectId: PropTypes.string.isRequired
+    projectId: PropTypes.string.isRequired,
   })
 
   const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
@@ -124,7 +124,7 @@ export function ChatProvider({ children }) {
   const {
     hasFocus: windowHasFocus,
     flashTitle,
-    stopFlashingTitle
+    stopFlashingTitle,
   } = useBrowserWindow()
 
   const [state, dispatch] = useReducer(chatReducer, initialState)
@@ -145,7 +145,7 @@ export function ChatProvider({ children }) {
       getJSON(url).then((messages = []) => {
         dispatch({
           type: 'FETCH_MESSAGES_SUCCESS',
-          messages: messages.reverse()
+          messages: messages.reverse(),
         })
       })
     }
@@ -164,7 +164,7 @@ export function ChatProvider({ children }) {
 
     return {
       loadInitialMessages,
-      loadMoreMessages
+      loadMoreMessages,
     }
   }, [projectId, state.atEnd, state.initialMessagesLoaded, state.lastTimestamp])
 
@@ -175,12 +175,12 @@ export function ChatProvider({ children }) {
       dispatch({
         type: 'SEND_MESSAGE',
         user,
-        content
+        content,
       })
 
       const url = `/project/${projectId}/messages`
       postJSON(url, {
-        body: { content }
+        body: { content },
       })
     },
     [projectId, user]
@@ -238,7 +238,7 @@ export function ChatProvider({ children }) {
     state.unreadMessageCount,
     flashTitle,
     stopFlashingTitle,
-    markMessagesAsRead
+    markMessagesAsRead,
   ])
 
   const value = {
@@ -250,14 +250,14 @@ export function ChatProvider({ children }) {
     loadInitialMessages,
     loadMoreMessages,
     sendMessage,
-    markMessagesAsRead
+    markMessagesAsRead,
   }
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>
 }
 
 ChatProvider.propTypes = {
-  children: PropTypes.any
+  children: PropTypes.any,
 }
 
 export function useChatContext(propTypes) {

@@ -103,7 +103,7 @@ const fixtures = {
     '  <accept_language nil="nil"></accept_language>' +
     '  <hosted_login_token>a92468579e9c4231a6c0031c4716c01d</hosted_login_token>' +
     '  <created_at type="datetime">2011-10-25T12:00:00</created_at>' +
-    '</account>'
+    '</account>',
 }
 
 const mockApiRequest = function (options, callback) {
@@ -124,20 +124,20 @@ describe('RecurlyWrapper', function () {
           name: 'Collaborator',
           features: {
             collaborators: -1,
-            versioning: true
-          }
-        }
+            versioning: true,
+          },
+        },
       ],
       defaultPlanCode: {
         collaborators: 0,
-        versioning: false
+        versioning: false,
       },
       apis: {
         recurly: {
           apiKey: 'nonsense',
-          privateKey: 'private_nonsense'
-        }
-      }
+          privateKey: 'private_nonsense',
+        },
+      },
     }
 
     tk.freeze(Date.now()) // freeze the time for these tests
@@ -147,8 +147,8 @@ describe('RecurlyWrapper', function () {
         requires: {
           'settings-sharelatex': this.settings,
           request: sinon.stub(),
-          './Errors': SubscriptionErrors
-        }
+          './Errors': SubscriptionErrors,
+        },
       }
     ))
   })
@@ -498,7 +498,7 @@ describe('RecurlyWrapper', function () {
     beforeEach(function () {
       this.user = {
         _id: 'some_id',
-        email: 'user@example.com'
+        email: 'user@example.com',
       }
       this.subscriptionDetails = {
         currencyCode: 'EUR',
@@ -510,13 +510,13 @@ describe('RecurlyWrapper', function () {
           address2: 'addr_two',
           country: 'some_country',
           state: 'some_state',
-          zip: 'some_zip'
-        }
+          zip: 'some_zip',
+        },
       }
       this.subscription = {}
       this.recurlyTokenIds = {
         billing: 'a-token-id',
-        threeDSecureActionResult: 'a-3d-token-id'
+        threeDSecureActionResult: 'a-3d-token-id',
       }
       return (this.call = callback => {
         return this.RecurlyWrapper.createSubscription(
@@ -649,7 +649,7 @@ describe('RecurlyWrapper', function () {
         _id: 'some_id',
         email: 'user@example.com',
         first_name: 'Foo',
-        last_name: 'Johnson'
+        last_name: 'Johnson',
       }
       this.subscriptionDetails = {
         currencyCode: 'EUR',
@@ -662,15 +662,15 @@ describe('RecurlyWrapper', function () {
           address2: 'addr_two',
           country: 'some_country',
           state: 'some_state',
-          zip: 'some_zip'
+          zip: 'some_zip',
         },
         ITMCampaign: 'itm-campaign-value',
-        ITMContent: 'itm-content-value'
+        ITMContent: 'itm-content-value',
       }
       this.subscription = {}
       this.recurlyTokenIds = {
         billing: 'a-token-id',
-        threeDSecureActionResult: 'a-3d-token-id'
+        threeDSecureActionResult: 'a-3d-token-id',
       }
       this.apiRequest = sinon.stub(this.RecurlyWrapper, 'apiRequest')
       this.response = { statusCode: 200 }
@@ -859,7 +859,7 @@ describe('RecurlyWrapper', function () {
       )
       this.user = {
         _id: 'some_id',
-        email: 'user@example.com'
+        email: 'user@example.com',
       }
       this.subscriptionDetails = {
         currencyCode: 'EUR',
@@ -871,13 +871,13 @@ describe('RecurlyWrapper', function () {
           address2: 'addr_two',
           country: 'some_country',
           state: 'some_state',
-          zip: 'some_zip'
-        }
+          zip: 'some_zip',
+        },
       }
       this.subscription = {}
       this.recurlyTokenIds = {
         billing: 'a-token-id',
-        threeDSecureActionResult: 'a-3d-token-id'
+        threeDSecureActionResult: 'a-3d-token-id',
       }
 
       // set up data callbacks
@@ -890,14 +890,14 @@ describe('RecurlyWrapper', function () {
         subscriptionDetails,
         recurlyTokenIds,
         userExists: false,
-        account: { accountCode: 'xx' }
+        account: { accountCode: 'xx' },
       })
       this.createAccount.callsArgWith(1, null, {
         user,
         subscriptionDetails,
         recurlyTokenIds,
         userExists: false,
-        account: { accountCode: 'xx' }
+        account: { accountCode: 'xx' },
       })
       this.createBillingInfo.callsArgWith(1, null, {
         user,
@@ -905,7 +905,7 @@ describe('RecurlyWrapper', function () {
         recurlyTokenIds,
         userExists: false,
         account: { accountCode: 'xx' },
-        billingInfo: { token_id: 'abc' }
+        billingInfo: { token_id: 'abc' },
       })
       this.setAddressAndCompanyBillingInfo.callsArgWith(1, null, {
         user,
@@ -913,7 +913,7 @@ describe('RecurlyWrapper', function () {
         recurlyTokenIds,
         userExists: false,
         account: { accountCode: 'xx' },
-        billingInfo: { token_id: 'abc' }
+        billingInfo: { token_id: 'abc' },
       })
       this.createSubscription.callsArgWith(1, null, {
         user,
@@ -922,7 +922,7 @@ describe('RecurlyWrapper', function () {
         userExists: false,
         account: { accountCode: 'xx' },
         billingInfo: { token_id: 'abc' },
-        subscription: this.subscription
+        subscription: this.subscription,
       })
 
       return (this.call = callback => {
@@ -1011,11 +1011,11 @@ describe('RecurlyWrapper', function () {
           _id: 'some_id',
           email: 'foo@bar.com',
           first_name: 'Foo',
-          last_name: 'Bar'
+          last_name: 'Bar',
         }),
         recurlyTokenIds: (this.recurlyTokenIds = {
           billing: 'a-token-id',
-          threeDSecureActionResult: 'a-3d-token-id'
+          threeDSecureActionResult: 'a-3d-token-id',
         }),
         subscriptionDetails: (this.subscriptionDetails = {
           currencyCode: 'EUR',
@@ -1028,11 +1028,11 @@ describe('RecurlyWrapper', function () {
             city: 'some_city',
             country: 'some_country',
             state: 'some_state',
-            zip: 'some_zip'
+            zip: 'some_zip',
           },
           ITMCampaign: 'itm-campaign-value',
-          ITMContent: 'itm-content-value'
-        })
+          ITMContent: 'itm-content-value',
+        }),
       })
     })
 
@@ -1091,7 +1091,7 @@ describe('RecurlyWrapper', function () {
             expect(result.account).to.not.equal(null)
             expect(result.account).to.not.equal(undefined)
             expect(result.account).to.deep.equal({
-              account_code: 'abc'
+              account_code: 'abc',
             })
             return done()
           })
@@ -1150,7 +1150,7 @@ describe('RecurlyWrapper', function () {
       describe('when apiRequest produces an error', function () {
         beforeEach(function () {
           return this.apiRequest.callsArgWith(1, new Error('woops'), {
-            statusCode: 500
+            statusCode: 500,
           })
         })
 
@@ -1213,7 +1213,7 @@ describe('RecurlyWrapper', function () {
           return this.call((err, result) => {
             expect(result).to.deep.equal(this.cache)
             expect(result.account).to.deep.equal({
-              account_code: 'abc'
+              account_code: 'abc',
             })
             return done()
           })
@@ -1295,7 +1295,7 @@ describe('RecurlyWrapper', function () {
         describe('when apiRequest produces an error', function () {
           beforeEach(function () {
             return this.apiRequest.callsArgWith(1, new Error('woops'), {
-              statusCode: 500
+              statusCode: 500,
             })
           })
 
@@ -1381,7 +1381,7 @@ describe('RecurlyWrapper', function () {
         it('should set billingInfo on cache', function (done) {
           return this.call((err, result) => {
             expect(result.billingInfo).to.deep.equal({
-              a: '1'
+              a: '1',
             })
             return done()
           })
@@ -1391,7 +1391,7 @@ describe('RecurlyWrapper', function () {
       describe('when apiRequest produces an error', function () {
         beforeEach(function () {
           return this.apiRequest.callsArgWith(1, new Error('woops'), {
-            statusCode: 500
+            statusCode: 500,
           })
         })
 
@@ -1495,7 +1495,7 @@ describe('RecurlyWrapper', function () {
         it('should set billingInfo on cache', function (done) {
           return this.call((err, result) => {
             expect(result.billingInfo).to.deep.equal({
-              city: 'London'
+              city: 'London',
             })
             return done()
           })
@@ -1505,7 +1505,7 @@ describe('RecurlyWrapper', function () {
       describe('when apiRequest produces an error', function () {
         beforeEach(function () {
           return this.apiRequest.callsArgWith(1, new Error('woops'), {
-            statusCode: 500
+            statusCode: 500,
           })
         })
 
@@ -1593,7 +1593,7 @@ describe('RecurlyWrapper', function () {
         it('should set subscription on cache', function (done) {
           return this.call((err, result) => {
             expect(result.subscription).to.deep.equal({
-              a: '1'
+              a: '1',
             })
             return done()
           })
@@ -1603,7 +1603,7 @@ describe('RecurlyWrapper', function () {
       describe('when apiRequest produces an error', function () {
         beforeEach(function () {
           return this.apiRequest.callsArgWith(1, new Error('woops'), {
-            statusCode: 500
+            statusCode: 500,
           })
         })
 
@@ -1646,9 +1646,9 @@ describe('RecurlyWrapper', function () {
           .calledWith({
             url: `accounts/${this.user_id}/subscriptions`,
             qs: {
-              state: 'active'
+              state: 'active',
             },
-            expect404: true
+            expect404: true,
           })
           .should.equal(true)
       })

@@ -7,7 +7,7 @@ export const EntryWithCompilerOutput = args => (
 )
 EntryWithCompilerOutput.args = {
   title: 'PreviewLogsPaneEntry/bar/baz',
-  level: 'error'
+  level: 'error',
 }
 
 export const EntryWithCompilerOutputAndHumanReadableHint = args => (
@@ -17,7 +17,7 @@ EntryWithCompilerOutputAndHumanReadableHint.args = {
   level: 'error',
   formattedContent: <SampleHumanReadableHintComponent />,
   extraInfoURL:
-    'https://www.overleaf.com/learn/latex/Errors/Extra_alignment_tab_has_been_changed_to_%5Ccr'
+    'https://www.overleaf.com/learn/latex/Errors/Extra_alignment_tab_has_been_changed_to_%5Ccr',
 }
 
 export const EntryWithoutCompilerOutput = args => (
@@ -25,7 +25,7 @@ export const EntryWithoutCompilerOutput = args => (
 )
 EntryWithoutCompilerOutput.args = {
   level: 'error',
-  rawContent: null
+  rawContent: null,
 }
 
 export const EntryWithoutSourceLocationLink = args => (
@@ -33,53 +33,53 @@ export const EntryWithoutSourceLocationLink = args => (
 )
 EntryWithoutSourceLocationLink.args = {
   level: 'error',
-  showSourceLocationLink: false
+  showSourceLocationLink: false,
 }
 
 export const EntryWithLevelError = args => <PreviewLogsPaneEntry {...args} />
 EntryWithLevelError.args = {
-  level: 'error'
+  level: 'error',
 }
 
 export const EntryWithLevelWarning = args => <PreviewLogsPaneEntry {...args} />
 EntryWithLevelWarning.args = {
-  level: 'warning'
+  level: 'warning',
 }
 
 export const EntryWithLevelTypesetting = args => (
   <PreviewLogsPaneEntry {...args} />
 )
 EntryWithLevelTypesetting.args = {
-  level: 'typesetting'
+  level: 'typesetting',
 }
 
 export const EntryWithLevelRaw = args => <PreviewLogsPaneEntry {...args} />
 EntryWithLevelRaw.args = {
-  level: 'raw'
+  level: 'raw',
 }
 
 export const EntryWithLevelSuccess = args => <PreviewLogsPaneEntry {...args} />
 EntryWithLevelSuccess.args = {
-  level: 'success'
+  level: 'success',
 }
 
 export const EntryWithButtonToClose = args => <PreviewLogsPaneEntry {...args} />
 EntryWithButtonToClose.args = {
   level: 'error',
   showCloseButton: true,
-  onClose: () => window.alert('You clicked "×"')
+  onClose: () => window.alert('You clicked "×"'),
 }
 
 export const EntryWithIcon = args => <PreviewLogsPaneEntry {...args} />
 EntryWithIcon.args = {
   level: 'error',
-  headerIcon: <Icon type="taxi" />
+  headerIcon: <Icon type="taxi" />,
 }
 
 export const EntryWithBetaIcon = args => <PreviewLogsPaneEntry {...args} />
 EntryWithBetaIcon.args = {
   level: 'typesetting',
-  headerIcon: <span className="beta-badge" />
+  headerIcon: <span className="beta-badge" />,
 }
 
 function SampleHumanReadableHintComponent() {
@@ -106,7 +106,7 @@ export default {
     sourceLocation: {
       file: 'foo/bar.tex',
       line: 10,
-      column: 20
+      column: 20,
     },
     headerTitle: 'Entry title',
     rawContent: `
@@ -130,6 +130,6 @@ LaTeX Font Info:    External font \`cmex10' loaded for size
 
  main.tex, line 23
      
-`
-  }
+`,
+  },
 }

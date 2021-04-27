@@ -89,7 +89,7 @@ attemptInvoicesCollection(error => {
     {
       INVOICES_COLLECTED,
       INVOICES_COLLECTED_SUCCESS,
-      USERS_COLLECTED
+      USERS_COLLECTED,
     },
     { maxArrayLength: null }
   )

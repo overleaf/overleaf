@@ -22,7 +22,7 @@ describe('ExportsHandler', function () {
     this.request = {
       defaults: () => {
         return this.stubRequest
-      }
+      },
     }
     this.ExportsHandler = SandboxedModule.require(modulePath, {
       requires: {
@@ -32,8 +32,8 @@ describe('ExportsHandler', function () {
         '../Project/ProjectRootDocManager': (this.ProjectRootDocManager = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         'settings-sharelatex': (this.settings = {}),
-        request: this.request
-      }
+        request: this.request,
+      },
     })
     this.project_id = 'project-id-123'
     this.project_history_id = 987
@@ -52,7 +52,7 @@ describe('ExportsHandler', function () {
       description: this.description,
       author: this.author,
       license: this.license,
-      show_source: this.show_source
+      show_source: this.show_source,
     }
     return (this.callback = sinon.stub())
   })
@@ -136,7 +136,7 @@ describe('ExportsHandler', function () {
       it('should return success and the response to forward', function () {
         ;(this.callback.args[0][0] instanceof Error).should.equal(false)
         return this.callback.calledWith(null, {
-          forwardResponse: this.error_json
+          forwardResponse: this.error_json,
         })
       })
     })
@@ -152,9 +152,9 @@ describe('ExportsHandler', function () {
         overleaf: {
           id: this.project_history_id, // for projects imported from v1
           history: {
-            id: this.project_history_id
-          }
-        }
+            id: this.project_history_id,
+          },
+        },
       }
       this.user = {
         id: this.user_id,
@@ -162,8 +162,8 @@ describe('ExportsHandler', function () {
         last_name: 'Author',
         email: 'arthur.author@arthurauthoring.org',
         overleaf: {
-          id: 876
-        }
+          id: 876,
+        },
       }
       this.rootDocPath = 'main.tex'
       this.historyVersion = 777
@@ -220,8 +220,8 @@ describe('ExportsHandler', function () {
               description: this.description,
               author: this.author,
               license: this.license,
-              showSource: this.show_source
-            }
+              showSource: this.show_source,
+            },
           },
           user: {
             id: this.user_id,
@@ -229,14 +229,14 @@ describe('ExportsHandler', function () {
             lastName: this.user.last_name,
             email: this.user.email,
             orcidId: null,
-            v1UserId: 876
+            v1UserId: 876,
           },
           destination: {
-            brandVariationId: this.brand_variation_id
+            brandVariationId: this.brand_variation_id,
           },
           options: {
-            callbackUrl: null
-          }
+            callbackUrl: null,
+          },
         }
         return this.callback
           .calledWith(null, expected_export_data)
@@ -274,8 +274,8 @@ describe('ExportsHandler', function () {
               description: this.description,
               author: this.author,
               license: this.license,
-              showSource: this.show_source
-            }
+              showSource: this.show_source,
+            },
           },
           user: {
             id: this.user_id,
@@ -283,14 +283,14 @@ describe('ExportsHandler', function () {
             lastName: this.custom_last_name,
             email: this.user.email,
             orcidId: null,
-            v1UserId: 876
+            v1UserId: 876,
           },
           destination: {
-            brandVariationId: this.brand_variation_id
+            brandVariationId: this.brand_variation_id,
           },
           options: {
-            callbackUrl: null
-          }
+            callbackUrl: null,
+          },
         }
         return this.callback
           .calledWith(null, expected_export_data)
@@ -354,8 +354,8 @@ describe('ExportsHandler', function () {
                 description: this.description,
                 author: this.author,
                 license: this.license,
-                showSource: this.show_source
-              }
+                showSource: this.show_source,
+              },
             },
             user: {
               id: this.user_id,
@@ -363,14 +363,14 @@ describe('ExportsHandler', function () {
               lastName: this.user.last_name,
               email: this.user.email,
               orcidId: null,
-              v1UserId: 876
+              v1UserId: 876,
             },
             destination: {
-              brandVariationId: this.brand_variation_id
+              brandVariationId: this.brand_variation_id,
             },
             options: {
-              callbackUrl: null
-            }
+              callbackUrl: null,
+            },
           }
           return this.callback
             .calledWith(null, expected_export_data)
@@ -417,8 +417,8 @@ describe('ExportsHandler', function () {
                 description: this.description,
                 author: this.author,
                 license: this.license,
-                showSource: this.show_source
-              }
+                showSource: this.show_source,
+              },
             },
             user: {
               id: this.user_id,
@@ -426,14 +426,14 @@ describe('ExportsHandler', function () {
               lastName: this.user.last_name,
               email: this.user.email,
               orcidId: null,
-              v1UserId: 876
+              v1UserId: 876,
             },
             destination: {
-              brandVariationId: this.brand_variation_id
+              brandVariationId: this.brand_variation_id,
             },
             options: {
-              callbackUrl: null
-            }
+              callbackUrl: null,
+            },
           }
           return this.callback
             .calledWith(null, expected_export_data)
@@ -506,8 +506,8 @@ describe('ExportsHandler', function () {
         v1: {
           url: 'http://localhost:5000',
           user: 'overleaf',
-          pass: 'pass'
-        }
+          pass: 'pass',
+        },
       }
       this.export_data = { iAmAnExport: true }
       this.export_id = 4096
@@ -534,9 +534,9 @@ describe('ExportsHandler', function () {
           url: this.settings.apis.v1.url + '/api/v1/sharelatex/exports',
           auth: {
             user: this.settings.apis.v1.user,
-            pass: this.settings.apis.v1.pass
+            pass: this.settings.apis.v1.pass,
           },
-          json: this.export_data
+          json: this.export_data,
         })
       })
 
@@ -585,7 +585,7 @@ describe('ExportsHandler', function () {
       it('should return success and the response to forward', function () {
         ;(this.callback.args[0][0] instanceof Error).should.equal(false)
         return this.callback.calledWith(null, {
-          forwardResponse: this.error_json
+          forwardResponse: this.error_json,
         })
       })
     })
@@ -597,8 +597,8 @@ describe('ExportsHandler', function () {
         v1: {
           url: 'http://localhost:5000',
           user: 'overleaf',
-          pass: 'pass'
-        }
+          pass: 'pass',
+        },
       }
       this.export_id = 897
       this.body = '{"id":897, "status_summary":"completed"}'
@@ -628,8 +628,8 @@ describe('ExportsHandler', function () {
             this.export_id,
           auth: {
             user: this.settings.apis.v1.user,
-            pass: this.settings.apis.v1.pass
-          }
+            pass: this.settings.apis.v1.pass,
+          },
         })
       })
 
@@ -647,8 +647,8 @@ describe('ExportsHandler', function () {
         v1: {
           url: 'http://localhost:5000',
           user: 'overleaf',
-          pass: 'pass'
-        }
+          pass: 'pass',
+        },
       }
       this.export_id = 897
       this.body =
@@ -681,8 +681,8 @@ describe('ExportsHandler', function () {
             '/zip_url',
           auth: {
             user: this.settings.apis.v1.user,
-            pass: this.settings.apis.v1.pass
-          }
+            pass: this.settings.apis.v1.pass,
+          },
         })
       })
 

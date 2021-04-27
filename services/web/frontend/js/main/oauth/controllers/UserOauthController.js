@@ -6,7 +6,7 @@ export default App.controller(
     const _reset = function () {
       $scope.ui = {
         hasError: false,
-        errorMessage: ''
+        errorMessage: '',
       }
       $scope.providers = window.oauthProviders
       $scope.thirdPartyIds = window.thirdPartyIds
@@ -22,13 +22,13 @@ export default App.controller(
         // UI
         $scope.providers[providerId].ui = {
           hasError: false,
-          isProcessing: true
+          isProcessing: true,
         }
         // Data for update
         const data = {
           _csrf: window.csrfToken,
           link: false,
-          providerId
+          providerId,
         }
         $http
           .post('/user/oauth-unlink', data)

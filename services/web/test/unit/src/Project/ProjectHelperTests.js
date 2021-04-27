@@ -7,18 +7,18 @@ const MODULE_PATH = '../../../../app/src/Features/Project/ProjectHelper.js'
 describe('ProjectHelper', function () {
   beforeEach(function () {
     this.project = {
-      _id: '123213jlkj9kdlsaj'
+      _id: '123213jlkj9kdlsaj',
     }
 
     this.user = {
       _id: '588f3ddae8ebc1bac07c9fa4',
       first_name: 'bjkdsjfk',
-      features: {}
+      features: {},
     }
 
     this.adminUser = {
       _id: 'admin-user-id',
-      isAdmin: true
+      isAdmin: true,
     }
 
     this.Settings = {
@@ -28,16 +28,16 @@ describe('ProjectHelper', function () {
         {
           imageName: 'texlive-full:2020.1',
           imageDesc: 'TeX Live 2020',
-          adminOnly: true
-        }
-      ]
+          adminOnly: true,
+        },
+      ],
     }
 
     this.ProjectHelper = SandboxedModule.require(MODULE_PATH, {
       requires: {
         mongodb: { ObjectId },
-        'settings-sharelatex': this.Settings
-      }
+        'settings-sharelatex': this.Settings,
+      },
     })
   })
 
@@ -46,7 +46,7 @@ describe('ProjectHelper', function () {
       it('returns true if user id is found', function () {
         this.project.archived = [
           ObjectId('588f3ddae8ebc1bac07c9fa4'),
-          ObjectId('5c41deb2b4ca500153340809')
+          ObjectId('5c41deb2b4ca500153340809'),
         ]
         expect(
           this.ProjectHelper.isArchived(this.project, this.user._id)
@@ -91,7 +91,7 @@ describe('ProjectHelper', function () {
     it('returns true if user id is found', function () {
       this.project.trashed = [
         ObjectId('588f3ddae8ebc1bac07c9fa4'),
-        ObjectId('5c41deb2b4ca500153340809')
+        ObjectId('5c41deb2b4ca500153340809'),
       ]
       expect(
         this.ProjectHelper.isTrashed(this.project, this.user._id)
@@ -145,11 +145,11 @@ describe('ProjectHelper', function () {
           owner_ref: this.user._id,
           collaberator_refs: [
             ObjectId('4f2cfb341eb5855a5b000f8b'),
-            ObjectId('5c45f3bd425ead01488675aa')
+            ObjectId('5c45f3bd425ead01488675aa'),
           ],
           readOnly_refs: [ObjectId('5c92243fcdb09e014aa7d487')],
           tokenAccessReadAndWrite_refs: [ObjectId('5c922599cdb09e014aa7d499')],
-          tokenAccessReadOnly_refs: []
+          tokenAccessReadOnly_refs: [],
         }
 
         const result = this.ProjectHelper.calculateArchivedArray(
@@ -162,7 +162,7 @@ describe('ProjectHelper', function () {
           ObjectId('4f2cfb341eb5855a5b000f8b'),
           ObjectId('5c45f3bd425ead01488675aa'),
           ObjectId('5c92243fcdb09e014aa7d487'),
-          ObjectId('5c922599cdb09e014aa7d499')
+          ObjectId('5c922599cdb09e014aa7d499'),
         ])
       })
 
@@ -173,11 +173,11 @@ describe('ProjectHelper', function () {
           collaberator_refs: [
             ObjectId('4f2cfb341eb5855a5b000f8b'),
             ObjectId('5c45f3bd425ead01488675aa'),
-            ObjectId('5c922599cdb09e014aa7d499')
+            ObjectId('5c922599cdb09e014aa7d499'),
           ],
           readOnly_refs: [ObjectId('5c92243fcdb09e014aa7d487')],
           tokenAccessReadAndWrite_refs: [ObjectId('5c922599cdb09e014aa7d499')],
-          tokenAccessReadOnly_refs: []
+          tokenAccessReadOnly_refs: [],
         }
 
         const result = this.ProjectHelper.calculateArchivedArray(
@@ -189,7 +189,7 @@ describe('ProjectHelper', function () {
           ObjectId('4f2cfb341eb5855a5b000f8b'),
           ObjectId('5c45f3bd425ead01488675aa'),
           ObjectId('5c922599cdb09e014aa7d499'),
-          ObjectId('5c92243fcdb09e014aa7d487')
+          ObjectId('5c92243fcdb09e014aa7d487'),
         ])
       })
     })
@@ -271,7 +271,7 @@ describe('ProjectHelper', function () {
       const imageNames = images.map(image => image.imageName)
       expect(imageNames).to.deep.equal([
         'texlive-full:2018.1',
-        'texlive-full:2019.1'
+        'texlive-full:2019.1',
       ])
     })
 
@@ -280,7 +280,7 @@ describe('ProjectHelper', function () {
       const imageNames = images.map(image => image.imageName)
       expect(imageNames).to.deep.equal([
         'texlive-full:2018.1',
-        'texlive-full:2019.1'
+        'texlive-full:2019.1',
       ])
     })
 
@@ -290,7 +290,7 @@ describe('ProjectHelper', function () {
       expect(imageNames).to.deep.equal([
         'texlive-full:2018.1',
         'texlive-full:2019.1',
-        'texlive-full:2020.1'
+        'texlive-full:2020.1',
       ])
     })
   })

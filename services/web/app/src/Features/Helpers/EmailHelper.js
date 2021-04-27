@@ -25,5 +25,5 @@ function parseEmail(email) {
 
 module.exports = {
   getDomain,
-  parseEmail
+  parseEmail,
 }

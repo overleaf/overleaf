@@ -49,9 +49,9 @@ module.exports = ProjectCollabratecDetailsHandler = {
       _id: project_id,
       collabratecUsers: {
         $elemMatch: {
-          user_id
-        }
-      }
+          user_id,
+        },
+      },
     }
     return Project.findOne(query, { _id: 1 }, function (err, project) {
       if (err != null) {
@@ -83,18 +83,18 @@ module.exports = ProjectCollabratecDetailsHandler = {
         $not: {
           $elemMatch: {
             collabratec_document_id,
-            user_id
-          }
-        }
-      }
+            user_id,
+          },
+        },
+      },
     }
     const update = {
       $push: {
         collabratecUsers: {
           collabratec_document_id,
-          user_id
-        }
-      }
+          user_id,
+        },
+      },
     }
     return Project.updateOne(query, update, callback)
   },
@@ -140,9 +140,9 @@ module.exports = ProjectCollabratecDetailsHandler = {
     const update = {
       $pull: {
         collabratecUsers: {
-          user_id
-        }
-      }
+          user_id,
+        },
+      },
     }
     return Project.updateOne(query, update, callback)
   },
@@ -161,5 +161,5 @@ module.exports = ProjectCollabratecDetailsHandler = {
     const query = { 'collabratecUsers.user_id': old_user_id }
     const update = { $set: { 'collabratecUsers.$.user_id': new_user_id } }
     return Project.updateMany(query, update, callback)
-  }
+  },
 }

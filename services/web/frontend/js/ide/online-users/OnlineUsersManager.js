@@ -59,7 +59,7 @@ export default OnlineUsersManager = (function () {
                   user.cursorData != null ? user.cursorData.doc_id : undefined,
                 row: user.cursorData != null ? user.cursorData.row : undefined,
                 column:
-                  user.cursorData != null ? user.cursorData.column : undefined
+                  user.cursorData != null ? user.cursorData.column : undefined,
               }
             }
             return this.refreshOnlineUsers()
@@ -133,9 +133,9 @@ export default OnlineUsersManager = (function () {
           label: client.name,
           cursor: {
             row: client.row,
-            column: client.column
+            column: client.column,
           },
-          hue: ColorManager.getHueForUserId(client.user_id)
+          hue: ColorManager.getHueForUserId(client.user_id),
         })
       }
 
@@ -165,7 +165,7 @@ export default OnlineUsersManager = (function () {
               this.$scope.currentPosition != null
                 ? this.$scope.currentPosition.column
                 : undefined,
-            doc_id
+            doc_id,
           })
 
           return delete this.cursorUpdateTimeout

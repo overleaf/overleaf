@@ -7,7 +7,7 @@ const readline = require('readline')
 const {
   db,
   ObjectId,
-  waitForDb
+  waitForDb,
 } = require('../../app/src/infrastructure/mongodb')
 const DocstoreManager = require('../../app/src/Features/Docstore/DocstoreManager')
   .promises
@@ -25,7 +25,7 @@ const input = fs.createReadStream(argv._[0])
 
 const rl = readline.createInterface({
   crlfDelay: Infinity,
-  input
+  input,
 })
 
 const orphanedDocs = {}
@@ -106,7 +106,7 @@ async function projectIdExists(projectId) {
   // check both projects and deletedProjects to see if project id exists
   const [project, deletedProject] = await Promise.all([
     findProject(projectId),
-    findDeletedProject(projectId)
+    findDeletedProject(projectId),
   ])
 
   return project !== null || deletedProject !== null

@@ -10,7 +10,7 @@ function FileTreeContextMenu() {
   const {
     hasWritePermissions,
     contextMenuCoords,
-    setContextMenuCoords
+    setContextMenuCoords,
   } = useFileTreeMainContext()
 
   if (!hasWritePermissions || !contextMenuCoords) return null

@@ -15,13 +15,13 @@ const DeleterDataSchema = new Schema({
   deletedUserReferralId: { type: String },
   deletedUserReferredUsers: [{ type: ObjectId, ref: 'User' }],
   deletedUserReferredUserCount: { type: Number },
-  deletedUserOverleafId: { type: Number }
+  deletedUserOverleafId: { type: Number },
 })
 
 const DeletedUserSchema = new Schema(
   {
     deleterData: DeleterDataSchema,
-    user: UserSchema
+    user: UserSchema,
   },
   { collection: 'deletedUsers' }
 )

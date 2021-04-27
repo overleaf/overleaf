@@ -9,11 +9,11 @@ describe('HistoryManager', function () {
   beforeEach(function () {
     this.user_id = 'user-id-123'
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns(this.user_id)
+      getLoggedInUserId: sinon.stub().returns(this.user_id),
     }
     this.request = {
       post: sinon.stub(),
-      delete: sinon.stub().resolves()
+      delete: sinon.stub().resolves(),
     }
     this.projectHistoryUrl = 'http://project_history.example.com'
     this.v1HistoryUrl = 'http://v1_history.example.com'
@@ -23,32 +23,32 @@ describe('HistoryManager', function () {
       apis: {
         trackchanges: {
           enabled: false,
-          url: 'http://trackchanges.example.com'
+          url: 'http://trackchanges.example.com',
         },
         project_history: {
-          url: this.projectHistoryUrl
+          url: this.projectHistoryUrl,
         },
         v1_history: {
           url: this.v1HistoryUrl,
           user: this.v1HistoryUser,
-          pass: this.v1HistoryPassword
-        }
-      }
+          pass: this.v1HistoryPassword,
+        },
+      },
     }
 
     this.UserGetter = {
       promises: {
         getUsersByV1Ids: sinon.stub(),
-        getUsers: sinon.stub()
-      }
+        getUsers: sinon.stub(),
+      },
     }
 
     this.HistoryManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         'request-promise-native': this.request,
         'settings-sharelatex': this.settings,
-        '../User/UserGetter': this.UserGetter
-      }
+        '../User/UserGetter': this.UserGetter,
+      },
     })
   })
 
@@ -70,7 +70,7 @@ describe('HistoryManager', function () {
         it('should call the project history api', function () {
           this.request.post
             .calledWith({
-              url: `${this.settings.apis.project_history.url}/project`
+              url: `${this.settings.apis.project_history.url}/project`,
             })
             .should.equal(true)
         })
@@ -113,25 +113,25 @@ describe('HistoryManager', function () {
         first_name: 'Jane',
         last_name: 'Doe',
         email: 'jane@example.com',
-        overleaf: { id: 5011 }
+        overleaf: { id: 5011 },
       }
       this.user1_view = {
         id: this.user_id1,
         first_name: 'Jane',
         last_name: 'Doe',
-        email: 'jane@example.com'
+        email: 'jane@example.com',
       }
       this.user2 = {
         _id: (this.user_id2 = 'abcdef'),
         first_name: 'John',
         last_name: 'Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       }
       this.user2_view = {
         id: this.user_id2,
         first_name: 'John',
         last_name: 'Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       }
       this.UserGetter.promises.getUsersByV1Ids.resolves([this.user1])
       this.UserGetter.promises.getUsers.resolves([this.user1, this.user2])
@@ -144,16 +144,16 @@ describe('HistoryManager', function () {
             {
               i: 'foo',
               meta: {
-                users: [this.user_id1]
-              }
+                users: [this.user_id1],
+              },
             },
             {
               i: 'bar',
               meta: {
-                users: [this.user_id2]
-              }
-            }
-          ]
+                users: [this.user_id2],
+              },
+            },
+          ],
         })
         expect(diff.diff[0].meta.users).to.deep.equal([this.user1_view])
         expect(diff.diff[1].meta.users).to.deep.equal([this.user2_view])
@@ -165,16 +165,16 @@ describe('HistoryManager', function () {
             {
               i: 'foo',
               meta: {
-                users: [5011]
-              }
+                users: [5011],
+              },
             },
             {
               i: 'bar',
               meta: {
-                users: [this.user_id2]
-              }
-            }
-          ]
+                users: [this.user_id2],
+              },
+            },
+          ],
         })
         expect(diff.diff[0].meta.users).to.deep.equal([this.user1_view])
         expect(diff.diff[1].meta.users).to.deep.equal([this.user2_view])
@@ -186,16 +186,16 @@ describe('HistoryManager', function () {
             {
               i: 'foo',
               meta: {
-                users: [this.user1_view]
-              }
+                users: [this.user1_view],
+              },
             },
             {
               i: 'bar',
               meta: {
-                users: [this.user_id2]
-              }
-            }
-          ]
+                users: [this.user_id2],
+              },
+            },
+          ],
         })
         expect(diff.diff[0].meta.users).to.deep.equal([this.user1_view])
         expect(diff.diff[1].meta.users).to.deep.equal([this.user2_view])
@@ -203,7 +203,7 @@ describe('HistoryManager', function () {
 
       it('should handle a binary diff marker', async function () {
         const diff = await this.HistoryManager.promises.injectUserDetails({
-          diff: { binary: true }
+          diff: { binary: true },
         })
         expect(diff.diff.binary).to.be.true
       })
@@ -217,17 +217,17 @@ describe('HistoryManager', function () {
               fromV: 5,
               toV: 8,
               meta: {
-                users: [this.user_id1]
-              }
+                users: [this.user_id1],
+              },
             },
             {
               fromV: 4,
               toV: 5,
               meta: {
-                users: [this.user_id2]
-              }
-            }
-          ]
+                users: [this.user_id2],
+              },
+            },
+          ],
         })
         expect(updates.updates[0].meta.users).to.deep.equal([this.user1_view])
         expect(updates.updates[1].meta.users).to.deep.equal([this.user2_view])
@@ -240,17 +240,17 @@ describe('HistoryManager', function () {
               fromV: 5,
               toV: 8,
               meta: {
-                users: [this.user1_view]
-              }
+                users: [this.user1_view],
+              },
             },
             {
               fromV: 4,
               toV: 5,
               meta: {
-                users: [this.user_id2]
-              }
-            }
-          ]
+                users: [this.user_id2],
+              },
+            },
+          ],
         })
         expect(updates.updates[0].meta.users).to.deep.equal([this.user1_view])
         expect(updates.updates[1].meta.users).to.deep.equal([this.user2_view])
@@ -277,8 +277,8 @@ describe('HistoryManager', function () {
         url: `${this.v1HistoryUrl}/projects/${historyId}`,
         auth: {
           user: this.v1HistoryUser,
-          pass: this.v1HistoryPassword
-        }
+          pass: this.v1HistoryPassword,
+        },
       })
     })
   })

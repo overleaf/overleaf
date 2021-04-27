@@ -38,8 +38,8 @@ export default App.controller(
               resolve: {
                 fileName() {
                   return dropped_entity.name
-                }
-              }
+                },
+              },
             })
           }
         }

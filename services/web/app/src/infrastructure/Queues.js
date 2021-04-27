@@ -35,9 +35,9 @@ function getOrCreateQueue(queueName, defaultJobOptions) {
         attempts: 11,
         backoff: {
           type: 'exponential',
-          delay: 3000
-        }
-      }
+          delay: 3000,
+        },
+      },
     })
   }
   return queues[queueName]
@@ -46,5 +46,5 @@ function getOrCreateQueue(queueName, defaultJobOptions) {
 module.exports = {
   getAnalyticsEventsQueue,
   getAnalyticsEditingSessionsQueue,
-  getOnboardingEmailsQueue
+  getOnboardingEmailsQueue,
 }

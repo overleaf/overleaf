@@ -8,7 +8,7 @@ setupContext()
 
 export const Basic = args => <OutlinePane {...args} />
 Basic.args = {
-  outline: [{ line: 1, title: 'Hello', level: 1 }]
+  outline: [{ line: 1, title: 'Hello', level: 1 }],
 }
 
 export const Nested = args => <OutlinePane {...args} />
@@ -27,13 +27,13 @@ Nested.args = {
             {
               line: 3,
               title: 'Subsubsection',
-              level: 3
-            }
-          ]
-        }
-      ]
-    }
-  ]
+              level: 3,
+            },
+          ],
+        },
+      ],
+    },
+  ],
 }
 
 export const NoSections = args => <OutlinePane {...args} />
@@ -41,27 +41,27 @@ NoSections.args = {}
 
 export const NonTexFile = args => <OutlinePane {...args} />
 NonTexFile.args = {
-  isTexFile: false
+  isTexFile: false,
 }
 
 export default {
   title: 'Outline',
   component: OutlinePane,
   argTypes: {
-    jumpToLine: { action: 'jumpToLine' }
+    jumpToLine: { action: 'jumpToLine' },
   },
   args: {
     eventTracking: { sendMB: () => {} },
     isTexFile: true,
     outline: [],
     jumpToLine: () => {},
-    onToggle: () => {}
+    onToggle: () => {},
   },
   decorators: [
     Story => (
       <ContextRoot>
         <Story />
       </ContextRoot>
-    )
-  ]
+    ),
+  ],
 }

@@ -33,8 +33,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails',
                 json: {
-                  email: 'newly-added-email@example.com'
-                }
+                  email: 'newly-added-email@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -62,7 +62,7 @@ describe('UserEmails', function () {
               .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
-                usedAt: { $exists: false }
+                usedAt: { $exists: false },
               })
               .toArray((error, tokens) => {
                 expect(error).to.not.exist
@@ -82,8 +82,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/confirm',
                 json: {
-                  token
-                }
+                  token,
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -112,7 +112,7 @@ describe('UserEmails', function () {
               .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
-                usedAt: { $exists: false }
+                usedAt: { $exists: false },
               })
               .toArray((error, tokens) => {
                 expect(error).to.not.exist
@@ -120,7 +120,7 @@ describe('UserEmails', function () {
                 expect(tokens.length).to.equal(0)
                 cb()
               })
-          }
+          },
         ],
         done
       )
@@ -140,7 +140,7 @@ describe('UserEmails', function () {
               {
                 method: 'POST',
                 url: '/user/emails',
-                json: { email: this.email }
+                json: { email: this.email },
               },
               cb
             )
@@ -150,7 +150,7 @@ describe('UserEmails', function () {
               .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
-                usedAt: { $exists: false }
+                usedAt: { $exists: false },
               })
               .toArray((error, tokens) => {
                 expect(error).to.not.exist
@@ -168,7 +168,7 @@ describe('UserEmails', function () {
               {
                 method: 'POST',
                 url: '/user/emails/delete',
-                json: { email: this.email }
+                json: { email: this.email },
               },
               cb
             )
@@ -179,7 +179,7 @@ describe('UserEmails', function () {
               {
                 method: 'POST',
                 url: '/user/emails',
-                json: { email: this.email }
+                json: { email: this.email },
               },
               cb
             )
@@ -191,8 +191,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/confirm',
                 json: {
-                  token: token1
-                }
+                  token: token1,
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -206,7 +206,7 @@ describe('UserEmails', function () {
               .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user2._id,
-                usedAt: { $exists: false }
+                usedAt: { $exists: false },
               })
               .toArray((error, tokens) => {
                 expect(error).to.not.exist
@@ -225,8 +225,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/confirm',
                 json: {
-                  token: token2
-                }
+                  token: token2,
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -246,7 +246,7 @@ describe('UserEmails', function () {
                 cb()
               }
             )
-          }
+          },
         ],
         done
       )
@@ -261,7 +261,7 @@ describe('UserEmails', function () {
       userHelper = await UserHelper.createUser({ email })
       userHelper = await UserHelper.loginUser({
         email,
-        password: userHelper.getDefaultPassword()
+        password: userHelper.getDefaultPassword(),
       })
       // original confirmation
       await userHelper.confirmEmail(userHelper.user._id, email)
@@ -295,8 +295,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails',
                 json: {
-                  email: (this.email = 'expired-token-email@example.com')
-                }
+                  email: (this.email = 'expired-token-email@example.com'),
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -310,7 +310,7 @@ describe('UserEmails', function () {
               .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
-                usedAt: { $exists: false }
+                usedAt: { $exists: false },
               })
               .toArray((error, tokens) => {
                 expect(error).to.not.exist
@@ -325,12 +325,12 @@ describe('UserEmails', function () {
           cb => {
             db.tokens.update(
               {
-                token
+                token,
               },
               {
                 $set: {
-                  expiresAt: new Date(Date.now() - 1000000)
-                }
+                  expiresAt: new Date(Date.now() - 1000000),
+                },
               },
               cb
             )
@@ -341,8 +341,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/confirm',
                 json: {
-                  token
-                }
+                  token,
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -350,7 +350,7 @@ describe('UserEmails', function () {
                 cb()
               }
             )
-          }
+          },
         ],
         done
       )
@@ -367,8 +367,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails',
                 json: {
-                  email: 'reconfirmation-email@example.com'
-                }
+                  email: 'reconfirmation-email@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -382,7 +382,7 @@ describe('UserEmails', function () {
               .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
-                usedAt: { $exists: false }
+                usedAt: { $exists: false },
               })
               .toArray((error, tokens) => {
                 expect(error).to.not.exist
@@ -401,8 +401,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/resend_confirmation',
                 json: {
-                  email: 'reconfirmation-email@example.com'
-                }
+                  email: 'reconfirmation-email@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -416,7 +416,7 @@ describe('UserEmails', function () {
               .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
-                usedAt: { $exists: false }
+                usedAt: { $exists: false },
               })
               .toArray((error, tokens) => {
                 expect(error).to.not.exist
@@ -432,7 +432,7 @@ describe('UserEmails', function () {
                 expect(tokens[1].data.user_id).to.equal(this.user._id)
                 cb()
               })
-          }
+          },
         ],
         done
       )
@@ -448,7 +448,7 @@ describe('UserEmails', function () {
               {
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
-                usedAt: { $exists: false }
+                usedAt: { $exists: false },
               },
               cb
             )
@@ -459,8 +459,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/resend_confirmation',
                 json: {
-                  email: this.user.email
-                }
+                  email: this.user.email,
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -474,7 +474,7 @@ describe('UserEmails', function () {
               .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
-                usedAt: { $exists: false }
+                usedAt: { $exists: false },
               })
               .toArray((error, tokens) => {
                 expect(error).to.not.exist
@@ -484,7 +484,7 @@ describe('UserEmails', function () {
                 expect(tokens[0].data.user_id).to.equal(this.user._id)
                 cb()
               })
-          }
+          },
         ],
         done
       )
@@ -499,8 +499,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/resend_confirmation',
                 json: {
-                  email: 'non-matching-email@example.com'
-                }
+                  email: 'non-matching-email@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -514,14 +514,14 @@ describe('UserEmails', function () {
               .find({
                 use: 'email_confirmation',
                 'data.user_id': this.user._id,
-                usedAt: { $exists: false }
+                usedAt: { $exists: false },
               })
               .toArray((error, tokens) => {
                 expect(error).to.not.exist
                 expect(tokens.length).to.equal(0)
                 cb()
               })
-          }
+          },
         ],
         done
       )
@@ -538,8 +538,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails',
                 json: {
-                  email: 'new-confirmed-default@example.com'
-                }
+                  email: 'new-confirmed-default@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -552,12 +552,12 @@ describe('UserEmails', function () {
             // Mark the email as confirmed
             db.users.updateOne(
               {
-                'emails.email': 'new-confirmed-default@example.com'
+                'emails.email': 'new-confirmed-default@example.com',
               },
               {
                 $set: {
-                  'emails.$.confirmedAt': new Date()
-                }
+                  'emails.$.confirmedAt': new Date(),
+                },
               },
               cb
             )
@@ -568,8 +568,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/default',
                 json: {
-                  email: 'new-confirmed-default@example.com'
-                }
+                  email: 'new-confirmed-default@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -591,7 +591,7 @@ describe('UserEmails', function () {
                 cb()
               }
             )
-          }
+          },
         ],
         done
       )
@@ -603,12 +603,12 @@ describe('UserEmails', function () {
           cb => {
             db.users.updateOne(
               {
-                _id: ObjectId(this.user._id)
+                _id: ObjectId(this.user._id),
               },
               {
                 $set: {
-                  'overleaf.id': 42
-                }
+                  'overleaf.id': 42,
+                },
               },
               cb
             )
@@ -619,8 +619,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails',
                 json: {
-                  email: 'new-unconfirmed-default@example.com'
-                }
+                  email: 'new-unconfirmed-default@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -635,8 +635,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/default',
                 json: {
-                  email: 'new-unconfirmed-default@example.com'
-                }
+                  email: 'new-unconfirmed-default@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -655,7 +655,7 @@ describe('UserEmails', function () {
                 cb()
               }
             )
-          }
+          },
         ],
         done
       )
@@ -667,12 +667,12 @@ describe('UserEmails', function () {
           cb => {
             db.users.updateOne(
               {
-                _id: ObjectId(this.user._id)
+                _id: ObjectId(this.user._id),
               },
               {
                 $set: {
-                  'overleaf.id': 42
-                }
+                  'overleaf.id': 42,
+                },
               },
               cb
             )
@@ -683,8 +683,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails',
                 json: {
-                  email: 'new-confirmed-default-in-v1@example.com'
-                }
+                  email: 'new-confirmed-default-in-v1@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -697,12 +697,12 @@ describe('UserEmails', function () {
             // Mark the email as confirmed
             db.users.updateOne(
               {
-                'emails.email': 'new-confirmed-default-in-v1@example.com'
+                'emails.email': 'new-confirmed-default-in-v1@example.com',
               },
               {
                 $set: {
-                  'emails.$.confirmedAt': new Date()
-                }
+                  'emails.$.confirmedAt': new Date(),
+                },
               },
               cb
             )
@@ -713,8 +713,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/default',
                 json: {
-                  email: 'new-confirmed-default-in-v1@example.com'
-                }
+                  email: 'new-confirmed-default-in-v1@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -722,7 +722,7 @@ describe('UserEmails', function () {
                 cb()
               }
             )
-          }
+          },
         ],
         error => {
           expect(error).to.not.exist
@@ -739,12 +739,12 @@ describe('UserEmails', function () {
           cb => {
             db.users.updateOne(
               {
-                _id: ObjectId(this.user._id)
+                _id: ObjectId(this.user._id),
               },
               {
                 $set: {
-                  'overleaf.id': 42
-                }
+                  'overleaf.id': 42,
+                },
               },
               cb
             )
@@ -755,8 +755,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails',
                 json: {
-                  email: 'exists-in-v1@example.com'
-                }
+                  email: 'exists-in-v1@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -769,12 +769,12 @@ describe('UserEmails', function () {
             // Mark the email as confirmed
             db.users.updateOne(
               {
-                'emails.email': 'exists-in-v1@example.com'
+                'emails.email': 'exists-in-v1@example.com',
               },
               {
                 $set: {
-                  'emails.$.confirmedAt': new Date()
-                }
+                  'emails.$.confirmedAt': new Date(),
+                },
               },
               cb
             )
@@ -785,8 +785,8 @@ describe('UserEmails', function () {
                 method: 'POST',
                 url: '/user/emails/default',
                 json: {
-                  email: 'exists-in-v1@example.com'
-                }
+                  email: 'exists-in-v1@example.com',
+                },
               },
               (error, response, body) => {
                 expect(error).to.not.exist
@@ -805,7 +805,7 @@ describe('UserEmails', function () {
                 cb()
               }
             )
-          }
+          },
         ],
         done
       )
@@ -818,39 +818,39 @@ describe('UserEmails', function () {
         otherEmail = 'other@overleaf.com'
         userHelper = new UserHelper()
         userHelper = await UserHelper.createUser({
-          email: originalEmail
+          email: originalEmail,
         })
         userHelper = await UserHelper.loginUser({
           email: originalEmail,
-          password: userHelper.getDefaultPassword()
+          password: userHelper.getDefaultPassword(),
         })
         userId = userHelper.user._id
         response = await userHelper.request.post({
           form: {
-            email: otherEmail
+            email: otherEmail,
           },
           simple: false,
-          uri: '/user/emails'
+          uri: '/user/emails',
         })
         expect(response.statusCode).to.equal(204)
         const token = (
           await db.tokens.findOne({
             'data.user_id': userId.toString(),
-            'data.email': otherEmail
+            'data.email': otherEmail,
           })
         ).token
         response = await userHelper.request.post(`/user/emails/confirm`, {
           form: {
-            token
+            token,
           },
-          simple: false
+          simple: false,
         })
         expect(response.statusCode).to.equal(200)
         response = await userHelper.request.post('/user/emails/default', {
           form: {
-            email: otherEmail
+            email: otherEmail,
           },
-          simple: false
+          simple: false,
         })
         expect(response.statusCode).to.equal(200)
         userHelper = await UserHelper.getUser(userId)
@@ -864,7 +864,7 @@ describe('UserEmails', function () {
         expect(entry.ipAddress).to.equal('127.0.0.1')
         expect(entry.info).to.deep.equal({
           newPrimaryEmail: otherEmail,
-          oldPrimaryEmail: originalEmail
+          oldPrimaryEmail: originalEmail,
         })
       })
     })
@@ -896,7 +896,7 @@ describe('UserEmails', function () {
           {
             method: 'POST',
             url: '/user/emails',
-            json: { email: 'new-confirmed-default@example.com' }
+            json: { email: 'new-confirmed-default@example.com' },
           },
           (error, response) => {
             expect(error).to.not.exist
@@ -919,7 +919,7 @@ describe('UserEmails', function () {
           {
             method: 'POST',
             url: '/user/emails/default',
-            json: { email: 'new-confirmed-default@example.com' }
+            json: { email: 'new-confirmed-default@example.com' },
           },
           (error, response) => {
             expect(error).to.not.exist
@@ -956,8 +956,8 @@ describe('UserEmails', function () {
           method: 'POST',
           url: '/user/emails',
           json: {
-            email: 'newly-added-email@example.com'
-          }
+            email: 'newly-added-email@example.com',
+          },
         },
         (error, response, body) => {
           if (error) {
@@ -978,15 +978,15 @@ describe('UserEmails', function () {
       userHelper = await UserHelper.createUser()
       userHelper = await UserHelper.loginUser({
         email: userHelper.getDefaultEmail(),
-        password: userHelper.getDefaultPassword()
+        password: userHelper.getDefaultPassword(),
       })
       userId = userHelper.user._id
       await userHelper.request.post({
         form: {
-          email: newEmail
+          email: newEmail,
         },
         simple: false,
-        uri: '/user/emails'
+        uri: '/user/emails',
       })
       userHelper = await UserHelper.getUser(userId)
       user = userHelper.user
@@ -1024,12 +1024,12 @@ describe('UserEmails', function () {
       userHelper = await UserHelper.createUser({ email: defaultEmail })
       userHelper = await UserHelper.loginUser({
         email: defaultEmail,
-        password: userHelper.getDefaultPassword()
+        password: userHelper.getDefaultPassword(),
       })
       const institutionId = MockV1Api.createInstitution({
         commonsAccount: true,
         ssoEnabled: false,
-        maxConfirmationMonths
+        maxConfirmationMonths,
       })
       const domain = 'example-affiliation.com'
       MockV1Api.addInstitutionDomain(institutionId, domain, { confirmed: true })
@@ -1157,10 +1157,10 @@ describe('UserEmails', function () {
           const userId = userHelper.user._id
           const query = {
             _id: userId,
-            'emails.email': email2
+            'emails.email': email2,
           }
           const update = {
-            $unset: { 'emails.$.reconfirmedAt': true }
+            $unset: { 'emails.$.reconfirmedAt': true },
           }
           await UserUpdater.promises.updateUser(query, update)
         })

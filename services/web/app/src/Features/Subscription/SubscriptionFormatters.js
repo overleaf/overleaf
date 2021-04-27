@@ -23,7 +23,7 @@ const currenySymbols = {
   AUD: '$',
   NZD: '$',
   CHF: 'Fr',
-  SGD: '$'
+  SGD: '$',
 }
 
 module.exports = {
@@ -52,5 +52,5 @@ module.exports = {
       return null
     }
     return dateformat(date, 'dS mmmm yyyy')
-  }
+  },
 }

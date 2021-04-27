@@ -27,61 +27,61 @@ describe('UserDeleter', function () {
         signUpDate: Date.now() + 2000,
         loginCount: 10,
         overleaf: {
-          id: 1234
+          id: 1234,
         },
         refered_users: ['wombat', 'potato'],
         refered_user_count: 2,
-        referal_id: ['giraffe']
+        referal_id: ['giraffe'],
       })
     )
     this.user = this.mockedUser.object
 
     this.NewsletterManager = {
       promises: {
-        unsubscribe: sinon.stub().resolves()
-      }
+        unsubscribe: sinon.stub().resolves(),
+      },
     }
 
     this.ProjectDeleter = {
       promises: {
-        deleteUsersProjects: sinon.stub().resolves()
-      }
+        deleteUsersProjects: sinon.stub().resolves(),
+      },
     }
 
     this.SubscriptionHandler = {
       promises: {
-        cancelSubscription: sinon.stub().resolves()
-      }
+        cancelSubscription: sinon.stub().resolves(),
+      },
     }
 
     this.SubscriptionUpdater = {
       promises: {
-        removeUserFromAllGroups: sinon.stub().resolves()
-      }
+        removeUserFromAllGroups: sinon.stub().resolves(),
+      },
     }
 
     this.SubscriptionLocator = {
       promises: {
-        getUsersSubscription: sinon.stub().resolves()
-      }
+        getUsersSubscription: sinon.stub().resolves(),
+      },
     }
 
     this.UserMembershipsHandler = {
       promises: {
-        removeUserFromAllEntities: sinon.stub().resolves()
-      }
+        removeUserFromAllEntities: sinon.stub().resolves(),
+      },
     }
 
     this.UserSessionsManager = {
       promises: {
-        revokeAllUserSessions: sinon.stub().resolves()
-      }
+        revokeAllUserSessions: sinon.stub().resolves(),
+      },
     }
 
     this.InstitutionsApi = {
       promises: {
-        deleteAffiliations: sinon.stub().resolves()
-      }
+        deleteAffiliations: sinon.stub().resolves(),
+      },
     }
 
     this.UserDeleter = SandboxedModule.require(modulePath, {
@@ -95,8 +95,8 @@ describe('UserDeleter', function () {
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
         '../UserMembership/UserMembershipsHandler': this.UserMembershipsHandler,
         '../Project/ProjectDeleter': this.ProjectDeleter,
-        '../Institutions/InstitutionsAPI': this.InstitutionsApi
-      }
+        '../Institutions/InstitutionsAPI': this.InstitutionsApi,
+      },
     })
   })
 
@@ -129,8 +129,8 @@ describe('UserDeleter', function () {
             deletedUserReferralId: this.user.referal_id,
             deletedUserReferredUsers: this.user.refered_users,
             deletedUserReferredUserCount: this.user.refered_user_count,
-            deletedUserOverleafId: this.user.overleaf.id
-          }
+            deletedUserOverleafId: this.user.overleaf.id,
+          },
         }
       })
 
@@ -210,7 +210,7 @@ describe('UserDeleter', function () {
 
           it('rejects if the user is a subscription admin', async function () {
             this.SubscriptionLocator.promises.getUsersSubscription.rejects({
-              _id: 'some-subscription'
+              _id: 'some-subscription',
             })
             await expect(this.UserDeleter.promises.deleteUser(this.userId)).to
               .be.rejected
@@ -280,7 +280,7 @@ describe('UserDeleter', function () {
         it('should add the deleted user id and ip address to the deletedUser', async function () {
           await this.UserDeleter.promises.deleteUser(this.userId, {
             deleterUser: { _id: this.deleterId },
-            ipAddress: this.ipAddress
+            ipAddress: this.ipAddress,
           })
           this.DeletedUserMock.verify()
         })
@@ -291,7 +291,7 @@ describe('UserDeleter', function () {
               this.userId,
               {
                 deleterUser: { _id: this.deleterId },
-                ipAddress: this.ipAddress
+                ipAddress: this.ipAddress,
               },
               err => {
                 expect(err).not.to.exist
@@ -308,7 +308,7 @@ describe('UserDeleter', function () {
     describe('when the user cannot be deleted because they are a subscription admin', function () {
       beforeEach(function () {
         this.SubscriptionLocator.promises.getUsersSubscription.resolves({
-          _id: 'some-subscription'
+          _id: 'some-subscription',
         })
       })
 
@@ -347,7 +347,7 @@ describe('UserDeleter', function () {
 
     it('should return custom error when user is group admin', async function () {
       this.SubscriptionLocator.promises.getUsersSubscription.resolves({
-        _id: '123abc'
+        _id: '123abc',
       })
       let error
       try {
@@ -383,30 +383,30 @@ describe('UserDeleter', function () {
         {
           user: { _id: userId1 },
           deleterData: { deletedUserId: userId1 },
-          save: sinon.stub().resolves()
+          save: sinon.stub().resolves(),
         },
         {
           user: { _id: userId2 },
           deleterData: { deletedUserId: userId2 },
-          save: sinon.stub().resolves()
-        }
+          save: sinon.stub().resolves(),
+        },
       ]
 
       this.DeletedUserMock.expects('find')
         .withArgs({
           'deleterData.deletedAt': {
-            $lt: new Date(moment().subtract(90, 'days'))
+            $lt: new Date(moment().subtract(90, 'days')),
           },
           user: {
-            $ne: null
-          }
+            $ne: null,
+          },
         })
         .chain('exec')
         .resolves(this.deletedUsers)
       for (const deletedUser of this.deletedUsers) {
         this.DeletedUserMock.expects('findOne')
           .withArgs({
-            'deleterData.deletedUserId': deletedUser.deleterData.deletedUserId
+            'deleterData.deletedUserId': deletedUser.deleterData.deletedUserId,
           })
           .chain('exec')
           .resolves(deletedUser)
@@ -429,8 +429,8 @@ describe('UserDeleter', function () {
           user: this.user,
           deleterData: {
             deleterIpAddress: '1.1.1.1',
-            deletedUserId: this.userId
-          }
+            deletedUserId: this.userId,
+          },
         })
       )
       this.deletedUser = this.mockedDeletedUser.object

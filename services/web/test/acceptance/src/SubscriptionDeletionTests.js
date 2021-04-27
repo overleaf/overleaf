@@ -22,12 +22,12 @@ describe('Subscriptions', function () {
               teamInvites: [{ email: 'foo@baz.com' }],
               groupPlan: true,
               state: 'expired',
-              planCode: 'professional'
+              planCode: 'professional',
             })
             this.subscription = this.recurlySubscription.subscription
             this.recurlySubscription.ensureExists(cb)
           },
-          cb => this.subscription.refreshUsersFeatures(cb)
+          cb => this.subscription.refreshUsersFeatures(cb),
         ],
         done
       )

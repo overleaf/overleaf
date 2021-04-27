@@ -31,7 +31,7 @@ module.exports = ContactManager = {
         url,
         qs: options,
         json: true,
-        jar: false
+        jar: false,
       },
       function (error, res, data) {
         if (error != null) {
@@ -62,9 +62,9 @@ module.exports = ContactManager = {
       {
         url,
         json: {
-          contact_id
+          contact_id,
         },
-        jar: false
+        jar: false,
       },
       function (error, res, data) {
         if (error != null) {
@@ -80,12 +80,12 @@ module.exports = ContactManager = {
             `contacts api responded with non-success code: ${res.statusCode}`,
             {
               user_id,
-              contact_id
+              contact_id,
             }
           )
           return callback(error)
         }
       }
     )
-  }
+  },
 }

@@ -89,7 +89,7 @@ module.exports = UrlAgent = {
   _sanitizeData(data) {
     return {
       provider: data.provider,
-      url: UrlHelper.prependHttpIfNeeded(data.url)
+      url: UrlHelper.prependHttpIfNeeded(data.url),
     }
   },
 
@@ -106,5 +106,5 @@ module.exports = UrlAgent = {
     const readStream = request.get(url)
     readStream.pause()
     return callback(null, readStream)
-  }
+  },
 }

@@ -11,16 +11,16 @@ class MockClsiApi extends AbstractMockApi {
             url: `/project/${req.params.project_id}/build/1234/output/project.pdf`,
             path: 'project.pdf',
             type: 'pdf',
-            build: 1234
+            build: 1234,
           },
           {
             url: `/project/${req.params.project_id}/build/1234/output/project.log`,
             path: 'project.log',
             type: 'log',
-            build: 1234
-          }
-        ]
-      }
+            build: 1234,
+          },
+        ],
+      },
     })
   }
 

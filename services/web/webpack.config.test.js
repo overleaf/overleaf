@@ -10,5 +10,5 @@ module.exports = merge(base, {
 
   // Karma configures entry & output for us, so disable these
   entry: null,
-  output: null
+  output: null,
 })

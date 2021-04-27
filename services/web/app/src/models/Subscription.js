@@ -8,7 +8,7 @@ const SubscriptionSchema = new Schema({
   admin_id: {
     type: ObjectId,
     ref: 'User',
-    index: { unique: true, dropDups: true }
+    index: { unique: true, dropDups: true },
   },
   manager_ids: {
     type: [ObjectId],
@@ -17,7 +17,7 @@ const SubscriptionSchema = new Schema({
     validate: function (managers) {
       // require at least one manager
       return !!managers.length
-    }
+    },
   },
   member_ids: [{ type: ObjectId, ref: 'User' }],
   invited_emails: [String],
@@ -34,10 +34,10 @@ const SubscriptionSchema = new Schema({
       type: Number,
       index: {
         unique: true,
-        partialFilterExpression: { 'overleaf.id': { $exists: true } }
-      }
-    }
-  }
+        partialFilterExpression: { 'overleaf.id': { $exists: true } },
+      },
+    },
+  },
 })
 
 // Subscriptions have no v1 data to fetch

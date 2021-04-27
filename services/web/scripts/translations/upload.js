@@ -13,7 +13,7 @@ async function uploadLocales() {
       language: 'en-GB',
       format: 'HIERARCHICAL_JSON',
       content: await fs.readFile(`${__dirname}/../../locales/en.json`),
-      keepStrings: false // deprecate locales that no longer exist in en.json
+      keepStrings: false, // deprecate locales that no longer exist in en.json
     })
   )
   return JSON.parse(blob).data.import.id

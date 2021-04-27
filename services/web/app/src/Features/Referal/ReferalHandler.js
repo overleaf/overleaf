@@ -11,5 +11,5 @@ module.exports = {
       const referedUserCount = user.refered_user_count || referedUsers.length
       callback(null, referedUsers, referedUserCount)
     })
-  }
+  },
 }

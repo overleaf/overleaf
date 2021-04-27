@@ -24,7 +24,7 @@ export default App.directive('fineUpload', $timeout => ({
     onCancelCallback: '=',
     autoUpload: '=',
     params: '=',
-    control: '='
+    control: '=',
   },
   link(scope, element, attrs) {
     let autoUpload, validation
@@ -65,7 +65,7 @@ export default App.directive('fineUpload', $timeout => ({
         endpoint,
         forceMultipart: true,
         params,
-        paramsInBody: false
+        paramsInBody: false,
       },
       callbacks: {
         onComplete,
@@ -73,18 +73,18 @@ export default App.directive('fineUpload', $timeout => ({
         onValidateBatch,
         onError,
         onSubmit,
-        onCancel
+        onCancel,
       },
       template: templateId,
       failedUploadTextDisplay: {
         mode: 'custom',
-        responseProperty: 'error'
-      }
+        responseProperty: 'error',
+      },
     })
     window.q = q
     if (scope.control != null) {
       scope.control.q = q
     }
     return q
-  }
+  },
 }))

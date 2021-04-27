@@ -7,7 +7,7 @@ import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend'
 
 import {
   findAllInTreeOrThrow,
-  findAllFolderIdsInFolders
+  findAllFolderIdsInFolders,
 } from '../util/find-in-tree'
 
 import { useFileTreeActionable } from './file-tree-actionable'
@@ -38,7 +38,7 @@ const ModifiedBackend = (...args) => {
     'handleTopDragOver',
     'handleTopDragOverCapture',
     'handleTopDrop',
-    'handleTopDropCapture'
+    'handleTopDropCapture',
   ]
 
   dragDropListeners.forEach(dragDropListener => {
@@ -68,8 +68,8 @@ export function FileTreeDraggableProvider({ children }) {
 FileTreeDraggableProvider.propTypes = {
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ]).isRequired
+    PropTypes.node,
+  ]).isRequired,
 }
 
 export function useDraggable(draggedEntityId) {
@@ -94,8 +94,8 @@ export function useDraggable(draggedEntityId) {
       return { ...item, title, forbiddenFolderIds, draggedEntityIds }
     },
     collect: monitor => ({
-      isDragging: !!monitor.isDragging()
-    })
+      isDragging: !!monitor.isDragging(),
+    }),
   })
 
   // remove the automatic preview as we're using a custom preview via
@@ -108,7 +108,7 @@ export function useDraggable(draggedEntityId) {
     dragRef,
     isDragging,
     isDraggable,
-    setIsDraggable
+    setIsDraggable,
   }
 }
 
@@ -129,13 +129,13 @@ export function useDroppable(droppedEntityId) {
       finishMoving(droppedEntityId, item.draggedEntityIds)
     },
     collect: monitor => ({
-      isOver: monitor.canDrop()
-    })
+      isOver: monitor.canDrop(),
+    }),
   })
 
   return {
     dropRef,
-    isOver
+    isOver,
   }
 }
 

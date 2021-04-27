@@ -20,7 +20,7 @@ export default App.factory('settings', (ide, eventTracking) => ({
       const changedSettingVal = data[key]
       eventTracking.sendMB('setting-changed', {
         changedSetting,
-        changedSettingVal
+        changedSettingVal,
       })
     }
     // End of tracking code.
@@ -37,5 +37,5 @@ export default App.factory('settings', (ide, eventTracking) => ({
   saveProjectAdminSettings(data) {
     data._csrf = window.csrfToken
     return ide.$http.post(`/project/${ide.project_id}/settings/admin`, data)
-  }
+  },
 }))

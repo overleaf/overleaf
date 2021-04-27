@@ -10,11 +10,11 @@ describe('ReferalAllocator', function () {
     this.ReferalAllocator = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
-          User: (this.User = {})
+          User: (this.User = {}),
         },
         '../Subscription/FeaturesUpdater': (this.FeaturesUpdater = {}),
-        'settings-sharelatex': (this.Settings = {})
-      }
+        'settings-sharelatex': (this.Settings = {}),
+      },
     })
     this.callback = sinon.stub()
     this.referal_id = 'referal-id-123'
@@ -45,15 +45,15 @@ describe('ReferalAllocator', function () {
         this.User.updateOne
           .calledWith(
             {
-              referal_id: this.referal_id
+              referal_id: this.referal_id,
             },
             {
               $push: {
-                refered_users: this.new_user_id
+                refered_users: this.new_user_id,
               },
               $inc: {
-                refered_user_count: 1
-              }
+                refered_user_count: 1,
+              },
             }
           )
           .should.equal(true)

@@ -4,12 +4,12 @@ export default App.directive('historyDraggableBoundary', () => ({
   scope: {
     historyDraggableBoundary: '@',
     historyDraggableBoundaryOnDragStart: '&',
-    historyDraggableBoundaryOnDragStop: '&'
+    historyDraggableBoundaryOnDragStop: '&',
   },
   restrict: 'A',
   link(scope, element, attrs) {
     element.data('selectionBoundary', {
-      boundary: scope.historyDraggableBoundary
+      boundary: scope.historyDraggableBoundary,
     })
     element.draggable({
       axis: 'y',
@@ -25,9 +25,9 @@ export default App.directive('historyDraggableBoundary', () => ({
       stop(e, ui) {
         scope.historyDraggableBoundaryOnDragStop({
           isValidDrop: ui.helper.data('wasProperlyDropped'),
-          boundary: scope.historyDraggableBoundary
+          boundary: scope.historyDraggableBoundary,
         })
-      }
+      },
     })
-  }
+  },
 }))

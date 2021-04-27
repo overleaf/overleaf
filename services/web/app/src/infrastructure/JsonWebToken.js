@@ -17,6 +17,6 @@ async function sign(payload, options = {}) {
 module.exports = {
   sign: callbackify(sign),
   promises: {
-    sign
-  }
+    sign,
+  },
 }

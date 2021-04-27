@@ -19,7 +19,7 @@ export default App.controller(
     $scope.upgradeComplete = false
     const savings = {
       student: '19.2',
-      collaborator: '36'
+      collaborator: '36',
     }
     $scope.$watch($scope.planName, function () {
       $scope.yearlySaving = savings[$scope.planName]
@@ -30,7 +30,7 @@ export default App.controller(
     return ($scope.completeAnnualUpgrade = function () {
       const body = {
         planName: $scope.planName,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       }
 
       $scope.inflight = true

@@ -55,8 +55,8 @@ export default App.controller(
               resolve: {
                 fileName() {
                   return dropped_entity.name
-                }
-              }
+                },
+              },
             })
           }
         }
@@ -95,8 +95,8 @@ export default App.controller(
           },
           userFeatures() {
             return ide.$scope.user.features
-          }
-        }
+          },
+        },
       })
 
     $scope.openNewFolderModal = () =>
@@ -106,8 +106,8 @@ export default App.controller(
         resolve: {
           parent_folder() {
             return $scope.entity
-          }
-        }
+          },
+        },
       })
 
     return ($scope.openUploadFileModal = () =>
@@ -127,8 +127,8 @@ export default App.controller(
           },
           userFeatures() {
             return ide.$scope.user.features
-          }
-        }
+          },
+        },
       }))
   }
 )

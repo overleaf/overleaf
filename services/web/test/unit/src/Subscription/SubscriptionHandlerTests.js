@@ -8,15 +8,15 @@ const mockRecurlySubscriptions = {
     uuid: 'subscription-123-active',
     plan: {
       name: 'Gold',
-      plan_code: 'gold'
+      plan_code: 'gold',
     },
     current_period_ends_at: new Date(),
     state: 'active',
     unit_amount_in_cents: 999,
     account: {
-      account_code: 'user-123'
-    }
-  }
+      account_code: 'user-123',
+    },
+  },
 }
 
 describe('SubscriptionHandler', function () {
@@ -28,21 +28,21 @@ describe('SubscriptionHandler', function () {
           name: 'Collaborator',
           features: {
             collaborators: -1,
-            versioning: true
-          }
-        }
+            versioning: true,
+          },
+        },
       ],
       defaultPlanCode: {
         collaborators: 0,
-        versioning: false
-      }
+        versioning: false,
+      },
     }
     this.activeRecurlySubscription =
       mockRecurlySubscriptions['subscription-123-active']
     this.User = {}
     this.user = { _id: (this.user_id = 'user_id_here_') }
     this.subscription = {
-      recurlySubscription_id: this.activeRecurlySubscription.uuid
+      recurlySubscription_id: this.activeRecurlySubscription.uuid,
     }
     this.RecurlyWrapper = {
       getSubscription: sinon
@@ -59,12 +59,12 @@ describe('SubscriptionHandler', function () {
         .callsArgWith(3, null, this.activeRecurlySubscription),
       getBillingInfo: sinon.stub().yields(),
       getAccountPastDueInvoices: sinon.stub().yields(),
-      attemptInvoiceCollection: sinon.stub().yields()
+      attemptInvoiceCollection: sinon.stub().yields(),
     }
 
     this.SubscriptionUpdater = {
       syncSubscription: sinon.stub().yields(),
-      startFreeTrial: sinon.stub().callsArgWith(1)
+      startFreeTrial: sinon.stub().callsArgWith(1),
     }
 
     this.LimitationsManager = { userHasV2Subscription: sinon.stub() }
@@ -78,13 +78,13 @@ describe('SubscriptionHandler', function () {
         './RecurlyWrapper': this.RecurlyWrapper,
         'settings-sharelatex': this.Settings,
         '../../models/User': {
-          User: this.User
+          User: this.User,
         },
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './LimitationsManager': this.LimitationsManager,
         '../Email/EmailHandler': this.EmailHandler,
-        '../Analytics/AnalyticsManager': this.AnalyticsManager
-      }
+        '../Analytics/AnalyticsManager': this.AnalyticsManager,
+      },
     })
 
     this.SubscriptionHandler.syncSubscriptionToUser = sinon
@@ -97,7 +97,7 @@ describe('SubscriptionHandler', function () {
       this.callback = sinon.stub()
       this.subscriptionDetails = {
         cvv: '123',
-        number: '12345'
+        number: '12345',
       }
       this.recurlyTokenIds = { billing: '45555666' }
       this.SubscriptionHandler.validateNoSubscriptionInRecurly = sinon
@@ -396,7 +396,7 @@ describe('SubscriptionHandler', function () {
     describe('for credit card users', function () {
       beforeEach(function (done) {
         this.RecurlyWrapper.getBillingInfo.yields(null, {
-          paypal_billing_agreement_id: null
+          paypal_billing_agreement_id: null,
         })
         this.SubscriptionHandler.attemptPaypalInvoiceCollection(
           this.activeRecurlySubscription.account.account_code,
@@ -419,10 +419,10 @@ describe('SubscriptionHandler', function () {
     describe('for paypal users', function () {
       beforeEach(function (done) {
         this.RecurlyWrapper.getBillingInfo.yields(null, {
-          paypal_billing_agreement_id: 'mock-billing-agreement'
+          paypal_billing_agreement_id: 'mock-billing-agreement',
         })
         this.RecurlyWrapper.getAccountPastDueInvoices.yields(null, [
-          { invoice_number: 'mock-invoice-number' }
+          { invoice_number: 'mock-invoice-number' },
         ])
         this.SubscriptionHandler.attemptPaypalInvoiceCollection(
           this.activeRecurlySubscription.account.account_code,

@@ -14,12 +14,12 @@ describe('UserMembershipAuthorization', function () {
   describe('group', function () {
     beforeEach(function (done) {
       this.subscription = new Subscription({
-        groupPlan: true
+        groupPlan: true,
       })
       async.series(
         [
           this.subscription.ensureExists.bind(this.subscription),
-          cb => this.user.login(cb)
+          cb => this.user.login(cb),
         ],
         done
       )
@@ -32,7 +32,7 @@ describe('UserMembershipAuthorization', function () {
           [
             expectAccess(this.user, url, 403),
             cb => this.subscription.setManagerIds([this.user._id], cb),
-            expectAccess(this.user, url, 200)
+            expectAccess(this.user, url, 200),
           ],
           done
         )
@@ -46,7 +46,7 @@ describe('UserMembershipAuthorization', function () {
           [
             expectAccess(this.user, url, 403),
             cb => this.subscription.setManagerIds([this.user._id], cb),
-            expectAccess(this.user, url, 200)
+            expectAccess(this.user, url, 200),
           ],
           done
         )
@@ -68,7 +68,7 @@ describe('UserMembershipAuthorization', function () {
             this.user.login.bind(this.user),
             expectAccess(this.user, url, 403),
             cb => this.institution.setManagerIds([this.user._id], cb),
-            expectAccess(this.user, url, 200)
+            expectAccess(this.user, url, 200),
           ],
           done
         )
@@ -84,7 +84,7 @@ describe('UserMembershipAuthorization', function () {
             expectAccess(this.user, url, 403),
             cb => this.user.ensureStaffAccess('institutionManagement', cb),
             this.user.login.bind(this.user),
-            expectAccess(this.user, url, 200)
+            expectAccess(this.user, url, 200),
           ],
           done
         )
@@ -98,7 +98,7 @@ describe('UserMembershipAuthorization', function () {
       async.series(
         [
           this.publisher.ensureExists.bind(this.publisher),
-          cb => this.user.login(cb)
+          cb => this.user.login(cb),
         ],
         done
       )
@@ -111,7 +111,7 @@ describe('UserMembershipAuthorization', function () {
           [
             expectAccess(this.user, url, 403),
             cb => this.publisher.setManagerIds([this.user._id], cb),
-            expectAccess(this.user, url, 200)
+            expectAccess(this.user, url, 200),
           ],
           done
         )
@@ -127,7 +127,7 @@ describe('UserMembershipAuthorization', function () {
             expectAccess(this.user, url, 404),
             cb => this.user.ensureStaffAccess('publisherManagement', cb),
             this.user.login.bind(this.user),
-            expectAccess(this.user, url, 302, /\/create/)
+            expectAccess(this.user, url, 302, /\/create/),
           ],
           done
         )
@@ -140,7 +140,7 @@ describe('UserMembershipAuthorization', function () {
             expectAccess(this.user, url, 403),
             cb => this.user.ensureStaffAccess('publisherManagement', cb),
             this.user.login.bind(this.user),
-            expectAccess(this.user, url, 200)
+            expectAccess(this.user, url, 200),
           ],
           done
         )

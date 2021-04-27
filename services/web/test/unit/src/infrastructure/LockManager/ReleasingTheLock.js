@@ -30,18 +30,18 @@ describe('LockManager - releasing the lock', function () {
         maxTestInterval: 1000,
         maxLockWaitTime: 10000,
         redisLockExpiry: 30,
-        slowExecutionThreshold: 5000
-      }
+        slowExecutionThreshold: 5000,
+      },
     },
     '@overleaf/metrics': {},
     './RedisWrapper': {
       client() {
         return {
           auth() {},
-          eval: deleteStub
+          eval: deleteStub,
         }
-      }
-    }
+      },
+    },
   }
 
   const LockManager = SandboxedModule.require(modulePath, { requires: mocks })

@@ -26,7 +26,7 @@ export default App.directive('resolvedCommentsDropdown', () => ({
     onOpen: '&',
     onUnresolve: '&',
     onDelete: '&',
-    isLoading: '='
+    isLoading: '=',
   },
 
   link(scope, element, attrs) {
@@ -105,5 +105,5 @@ export default App.directive('resolvedCommentsDropdown', () => ({
         return result
       })()
     })
-  }
+  },
 }))

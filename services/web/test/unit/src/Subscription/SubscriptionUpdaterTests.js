@@ -10,8 +10,8 @@ describe('SubscriptionUpdater', function () {
     this.recurlySubscription = {
       uuid: '1238uoijdasjhd',
       plan: {
-        plan_code: 'kjhsakjds'
-      }
+        plan_code: 'kjhsakjds',
+      },
     }
     this.adminUser = { _id: (this.adminuser_id = '5208dd34438843e2db000007') }
     this.otherUserId = '5208dd34438842e2db000005'
@@ -22,7 +22,7 @@ describe('SubscriptionUpdater', function () {
       manager_ids: [this.adminUser._id],
       member_ids: [],
       save: sinon.stub().callsArgWith(0),
-      planCode: 'student_or_something'
+      planCode: 'student_or_something',
     }
     this.user_id = this.adminuser_id
 
@@ -32,7 +32,7 @@ describe('SubscriptionUpdater', function () {
       manager_ids: [this.adminUser._id],
       member_ids: this.allUserIds,
       save: sinon.stub().callsArgWith(0),
-      planCode: 'group_subscription'
+      planCode: 'group_subscription',
     }
 
     this.updateStub = sinon.stub().callsArgWith(2, null)
@@ -58,12 +58,12 @@ describe('SubscriptionUpdater', function () {
     this.SubscriptionLocator = {
       getUsersSubscription: sinon.stub(),
       getGroupSubscriptionMemberOf: sinon.stub(),
-      getMemberSubscriptions: sinon.stub().yields(null, [])
+      getMemberSubscriptions: sinon.stub().yields(null, []),
     }
 
     this.Settings = {
       defaultPlanCode: 'personal',
-      defaultFeatures: { default: 'features' }
+      defaultFeatures: { default: 'features' },
     }
 
     this.UserFeaturesUpdater = { updateFeatures: sinon.stub().yields() }
@@ -75,22 +75,22 @@ describe('SubscriptionUpdater', function () {
         const users = memberIds.map(id => ({ _id: id }))
         callback(null, users)
       },
-      getUser: sinon.stub()
+      getUser: sinon.stub(),
     }
 
     this.ReferalFeatures = { getBonusFeatures: sinon.stub().callsArgWith(1) }
     this.Modules = { hooks: { fire: sinon.stub().callsArgWith(2, null, null) } }
     this.FeaturesUpdater = {
-      refreshFeatures: sinon.stub().yields()
+      refreshFeatures: sinon.stub().yields(),
     }
     this.DeletedSubscription = {
-      findOneAndUpdate: sinon.stub().yields()
+      findOneAndUpdate: sinon.stub().yields(),
     }
     this.SubscriptionUpdater = SandboxedModule.require(modulePath, {
       requires: {
         mongodb: { ObjectId },
         '../../models/Subscription': {
-          Subscription: this.SubscriptionModel
+          Subscription: this.SubscriptionModel,
         },
         './UserFeaturesUpdater': this.UserFeaturesUpdater,
         './SubscriptionLocator': this.SubscriptionLocator,
@@ -100,9 +100,9 @@ describe('SubscriptionUpdater', function () {
         '../../infrastructure/mongodb': { db: {}, ObjectId },
         './FeaturesUpdater': this.FeaturesUpdater,
         '../../models/DeletedSubscription': {
-          DeletedSubscription: this.DeletedSubscription
-        }
-      }
+          DeletedSubscription: this.DeletedSubscription,
+        },
+      },
     })
   })
 
@@ -118,11 +118,11 @@ describe('SubscriptionUpdater', function () {
           }
           const query = {
             _id: ObjectId(this.subscription._id),
-            customAccount: true
+            customAccount: true,
           }
           const update = {
             $set: { admin_id: ObjectId(this.otherUserId) },
-            $addToSet: { manager_ids: ObjectId(this.otherUserId) }
+            $addToSet: { manager_ids: ObjectId(this.otherUserId) },
           }
           this.SubscriptionModel.updateOne.should.have.been.calledOnce
           this.SubscriptionModel.updateOne.should.have.been.calledWith(
@@ -144,13 +144,13 @@ describe('SubscriptionUpdater', function () {
           }
           const query = {
             _id: ObjectId(this.subscription._id),
-            customAccount: true
+            customAccount: true,
           }
           const update = {
             $set: {
               admin_id: ObjectId(this.otherUserId),
-              manager_ids: [ObjectId(this.otherUserId)]
-            }
+              manager_ids: [ObjectId(this.otherUserId)],
+            },
           }
           this.SubscriptionModel.updateOne.should.have.been.calledOnce
           this.SubscriptionModel.updateOne.should.have.been.calledWith(
@@ -317,7 +317,7 @@ describe('SubscriptionUpdater', function () {
           this.subscription.membersLimit.should.equal(5)
           this.subscription.groupPlan.should.equal(true)
           this.subscription.member_ids.should.deep.equal([
-            this.subscription.admin_id
+            this.subscription.admin_id,
           ])
           done()
         }
@@ -348,7 +348,7 @@ describe('SubscriptionUpdater', function () {
           .returns({
             groupPlan: true,
             membersLimit: 5,
-            membersLimitAddOn: this.membersLimitAddOn
+            membersLimitAddOn: this.membersLimitAddOn,
           })
       })
 
@@ -378,7 +378,7 @@ describe('SubscriptionUpdater', function () {
       describe('when the recurlySubscription has non-matching add ons', function () {
         beforeEach(function () {
           this.recurlySubscription.subscription_add_ons = [
-            { add_on_code: 'add_on_99', quantity: 3 }
+            { add_on_code: 'add_on_99', quantity: 3 },
           ]
         })
         expectMembersLimit(5)
@@ -387,7 +387,7 @@ describe('SubscriptionUpdater', function () {
       describe('when the recurlySubscription has a matching add on', function () {
         beforeEach(function () {
           this.recurlySubscription.subscription_add_ons = [
-            { add_on_code: this.membersLimitAddOn, quantity: 10 }
+            { add_on_code: this.membersLimitAddOn, quantity: 10 },
           ]
         })
         expectMembersLimit(15)
@@ -398,7 +398,7 @@ describe('SubscriptionUpdater', function () {
         beforeEach(function () {
           this.recurlySubscription.subscription_add_ons = [
             { add_on_code: this.membersLimitAddOn, quantity: 10 },
-            { add_on_code: this.membersLimitAddOn, quantity: 3 }
+            { add_on_code: this.membersLimitAddOn, quantity: 3 },
           ]
         })
         expectMembersLimit(18)
@@ -451,7 +451,7 @@ describe('SubscriptionUpdater', function () {
         () => {
           const searchOps = { _id: this.subscription._id }
           const insertOperation = {
-            $addToSet: { member_ids: { $each: [this.otherUserId] } }
+            $addToSet: { member_ids: { $each: [this.otherUserId] } },
           }
           this.updateStub
             .calledWith(searchOps, insertOperation)
@@ -530,7 +530,7 @@ describe('SubscriptionUpdater', function () {
         _id: ObjectId().toString(),
         mock: 'subscription',
         admin_id: ObjectId(),
-        member_ids: [ObjectId(), ObjectId(), ObjectId()]
+        member_ids: [ObjectId(), ObjectId(), ObjectId()],
       }
       this.SubscriptionLocator.getSubscription = sinon
         .stub()

@@ -37,6 +37,6 @@ function buildContact(contact) {
   return {
     ...contact,
     name,
-    display: name ? `${name} <${contact.email}>` : contact.email
+    display: name ? `${name} <${contact.email}>` : contact.email,
   }
 }

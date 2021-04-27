@@ -12,7 +12,7 @@ const JSON_ESCAPE = {
   '>': '\\u003e',
   '<': '\\u003c',
   '\u2028': '\\u2028',
-  '\u2029': '\\u2029'
+  '\u2029': '\\u2029',
 }
 
 module.exports = StringHelper = {
@@ -26,5 +26,5 @@ module.exports = StringHelper = {
       JSON_ESCAPE_REGEXP,
       match => JSON_ESCAPE[match]
     )
-  }
+  },
 }

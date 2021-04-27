@@ -30,7 +30,7 @@ function AccessibleModal({ show, ...otherProps }) {
 }
 
 AccessibleModal.propTypes = {
-  show: PropTypes.bool
+  show: PropTypes.bool,
 }
 
 export default AccessibleModal

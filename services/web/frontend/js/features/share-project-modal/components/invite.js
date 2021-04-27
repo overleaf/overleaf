@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 import PropTypes from 'prop-types'
 import {
   useProjectContext,
-  useShareProjectContext
+  useShareProjectContext,
 } from './share-project-modal'
 import Icon from '../../../shared/components/icon'
 import { Button, Col, Row, OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -38,7 +38,7 @@ export default function Invite({ invite, isAdmin }) {
 
 Invite.propTypes = {
   invite: PropTypes.object.isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  isAdmin: PropTypes.bool.isRequired,
 }
 
 function ResendInvite({ invite }) {
@@ -71,7 +71,7 @@ function ResendInvite({ invite }) {
   )
 }
 ResendInvite.propTypes = {
-  invite: PropTypes.object.isRequired
+  invite: PropTypes.object.isRequired,
 }
 
 function RevokeInvite({ invite }) {
@@ -83,7 +83,7 @@ function RevokeInvite({ invite }) {
 
     monitorRequest(() => revokeInvite(project, invite)).then(() => {
       updateProject({
-        invites: project.invites.filter(existing => existing !== invite)
+        invites: project.invites.filter(existing => existing !== invite),
       })
     })
   }
@@ -110,5 +110,5 @@ function RevokeInvite({ invite }) {
   )
 }
 RevokeInvite.propTypes = {
-  invite: PropTypes.object.isRequired
+  invite: PropTypes.object.isRequired,
 }

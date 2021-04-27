@@ -6,7 +6,7 @@ export default App.factory('projectInvites', (ide, $http) => ({
       email,
       privileges,
       _csrf: window.csrfToken,
-      'g-recaptcha-response': grecaptchaResponse
+      'g-recaptcha-response': grecaptchaResponse,
     })
   },
 
@@ -15,14 +15,14 @@ export default App.factory('projectInvites', (ide, $http) => ({
       url: `/project/${ide.project_id}/invite/${inviteId}`,
       method: 'DELETE',
       headers: {
-        'X-Csrf-Token': window.csrfToken
-      }
+        'X-Csrf-Token': window.csrfToken,
+      },
     })
   },
 
   resendInvite(inviteId, privileges) {
     return $http.post(`/project/${ide.project_id}/invite/${inviteId}/resend`, {
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
   },
 
@@ -30,8 +30,8 @@ export default App.factory('projectInvites', (ide, $http) => ({
     return $http.get(`/project/${ide.project_id}/invites`, {
       json: true,
       headers: {
-        'X-Csrf-Token': window.csrfToken
-      }
+        'X-Csrf-Token': window.csrfToken,
+      },
     })
-  }
+  },
 }))

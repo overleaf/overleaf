@@ -51,7 +51,9 @@ module.exports = ProjectEditorHandler = {
       invites,
       tokens: project.tokens,
       imageName:
-        project.imageName != null ? Path.basename(project.imageName) : undefined
+        project.imageName != null
+          ? Path.basename(project.imageName)
+          : undefined,
     }
 
     if (result.invites == null) {
@@ -77,7 +79,7 @@ module.exports = ProjectEditorHandler = {
       referencesSearch: false,
       mendeley: false,
       trackChanges: false,
-      trackChangesVisible: ProjectEditorHandler.trackChangesAvailable
+      trackChangesVisible: ProjectEditorHandler.trackChangesAvailable,
     })
 
     if (result.features.trackChanges) {
@@ -111,7 +113,7 @@ module.exports = ProjectEditorHandler = {
     return {
       owner,
       ownerFeatures,
-      members: filteredMembers
+      members: filteredMembers,
     }
   },
 
@@ -122,7 +124,7 @@ module.exports = ProjectEditorHandler = {
       last_name: user.last_name,
       email: user.email,
       privileges,
-      signUpDate: user.signUpDate
+      signUpDate: user.signUpDate,
     }
   },
 
@@ -144,7 +146,7 @@ module.exports = ProjectEditorHandler = {
       })(),
       docs: Array.from(folder.docs || []).map(doc =>
         this.buildDocModelView(doc)
-      )
+      ),
     }
   },
 
@@ -153,14 +155,14 @@ module.exports = ProjectEditorHandler = {
       _id: file._id,
       name: file.name,
       linkedFileData: file.linkedFileData,
-      created: file.created
+      created: file.created,
     }
   },
 
   buildDocModelView(doc) {
     return {
       _id: doc._id,
-      name: doc.name
+      name: doc.name,
     }
-  }
+  },
 }

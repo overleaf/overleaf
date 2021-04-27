@@ -41,7 +41,7 @@ class SpellCheckAdapter {
     e.domEvent.stopPropagation()
     return {
       x: e.domEvent.clientX,
-      y: e.domEvent.clientY
+      y: e.domEvent.clientY,
     }
   }
 
@@ -56,7 +56,7 @@ class SpellCheckAdapter {
     )
     return this.highlightedWordManager.findHighlightWithinRange({
       start: position,
-      end: position
+      end: position,
     })
   }
 

@@ -15,8 +15,8 @@ const createInvite = (sendingUser, projectId, email, callback) => {
         uri: `/project/${projectId}/invite`,
         json: {
           email,
-          privileges: 'readAndWrite'
-        }
+          privileges: 'readAndWrite',
+        },
       },
       (err, response, body) => {
         if (err) {
@@ -37,7 +37,7 @@ const createProject = (owner, projectName, callback) => {
     const fakeProject = {
       _id: projectId,
       name: projectName,
-      owner_ref: owner
+      owner_ref: owner,
     }
     callback(err, projectId, fakeProject)
   })
@@ -65,7 +65,7 @@ const revokeInvite = (sendingUser, projectId, inviteId, callback) => {
     }
     sendingUser.request.delete(
       {
-        uri: `/project/${projectId}/invite/${inviteId}`
+        uri: `/project/${projectId}/invite/${inviteId}`,
       },
       err => {
         if (err) {
@@ -82,7 +82,7 @@ const tryFollowInviteLink = (user, link, callback) => {
   user.request.get(
     {
       uri: link,
-      baseUrl: null
+      baseUrl: null,
     },
     callback
   )
@@ -97,8 +97,8 @@ const tryAcceptInvite = (user, invite, callback) => {
       {
         uri: `/project/${invite.projectId}/invite/token/${invite.token}/accept`,
         json: {
-          token: invite.token
-        }
+          token: invite.token,
+        },
       },
       callback
     )
@@ -115,8 +115,8 @@ const tryRegisterUser = (user, email, callback) => {
         url: '/register',
         json: {
           email,
-          password: 'some_weird_password'
-        }
+          password: 'some_weird_password',
+        },
       },
       callback
     )
@@ -142,8 +142,8 @@ const tryLoginUser = (user, callback) => {
         url: '/login',
         json: {
           email: user.email,
-          password: user.password
-        }
+          password: user.password,
+        },
       },
       callback
     )
@@ -158,7 +158,7 @@ const tryGetInviteList = (user, projectId, callback) => {
     user.request.get(
       {
         url: `/project/${projectId}/invites`,
-        json: true
+        json: true,
       },
       callback
     )
@@ -177,10 +177,10 @@ const tryJoinProject = (user, projectId, callback) => {
         auth: {
           user: settings.apis.web.user,
           pass: settings.apis.web.pass,
-          sendImmediately: true
+          sendImmediately: true,
         },
         json: true,
-        jar: false
+        jar: false,
       },
       callback
     )
@@ -310,7 +310,7 @@ describe('ProjectInviteTests', function () {
       [
         cb => this.user.ensureUserExists(cb),
         cb => this.sendingUser.login(cb),
-        cb => this.sendingUser.setFeatures({ collaborators: 10 }, cb)
+        cb => this.sendingUser.setFeatures({ collaborators: 10 }, cb),
       ],
       done
     )
@@ -408,7 +408,7 @@ describe('ProjectInviteTests', function () {
                 this.projectId,
                 0,
                 cb
-              )
+              ),
           ],
           done
         )
@@ -480,7 +480,8 @@ describe('ProjectInviteTests', function () {
                 this.inviteTwo._id,
                 cb
               ),
-            cb => expectInviteListCount(this.sendingUser, this.projectId, 0, cb)
+            cb =>
+              expectInviteListCount(this.sendingUser, this.projectId, 0, cb),
           ],
           done
         )
@@ -516,7 +517,7 @@ describe('ProjectInviteTests', function () {
             [
               cb => expectInvitePage(this.user, this.link, cb),
               cb => expectAcceptInviteAndRedirect(this.user, this.invite, cb),
-              cb => expectProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -534,7 +535,7 @@ describe('ProjectInviteTests', function () {
                     this.invite,
                     cb
                   ),
-                cb => expectProjectAccess(this.user, this.invite.projectId, cb)
+                cb => expectProjectAccess(this.user, this.invite.projectId, cb),
               ],
               done
             )
@@ -577,7 +578,7 @@ describe('ProjectInviteTests', function () {
                       this.projectId,
                       this.secondInvite._id,
                       cb
-                    )
+                    ),
                 ],
                 done
               )
@@ -591,7 +592,7 @@ describe('ProjectInviteTests', function () {
           Async.series(
             [
               cb => expectInvitePage(this.user, this.link, cb),
-              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -608,7 +609,7 @@ describe('ProjectInviteTests', function () {
                 expectInvalidInvitePage(this.user, link, cb)
               },
               cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
-              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -619,7 +620,7 @@ describe('ProjectInviteTests', function () {
             [
               cb => expectInvitePage(this.user, this.link, cb),
               cb => expectAcceptInviteAndRedirect(this.user, this.invite, cb),
-              cb => expectProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -652,7 +653,7 @@ describe('ProjectInviteTests', function () {
                 ),
               cb => expectInvitePage(this.user, this.link, cb),
               cb => expectAcceptInviteAndRedirect(this.user, this.invite, cb),
-              cb => expectProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -670,7 +671,7 @@ describe('ProjectInviteTests', function () {
           Async.series(
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
-              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -692,7 +693,7 @@ describe('ProjectInviteTests', function () {
                   cb
                 ),
               cb => expectInvalidInvitePage(this.user, badLink, cb),
-              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -704,7 +705,7 @@ describe('ProjectInviteTests', function () {
           Async.series(
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
-              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -717,7 +718,7 @@ describe('ProjectInviteTests', function () {
               cb => expectLoginPage(this.user, cb),
               cb => expectLoginRedirectToInvite(this.user, this.link, cb),
               cb => expectInvitePage(this.user, this.link, cb),
-              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -731,7 +732,7 @@ describe('ProjectInviteTests', function () {
               cb => expectLoginRedirectToInvite(this.user, this.link, cb),
               cb => expectInvitePage(this.user, this.link, cb),
               cb => expectAcceptInviteAndRedirect(this.user, this.invite, cb),
-              cb => expectProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -743,7 +744,7 @@ describe('ProjectInviteTests', function () {
           Async.series(
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
-              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )
@@ -764,7 +765,7 @@ describe('ProjectInviteTests', function () {
               },
               cb => expectLoginRedirectToInvite(this.user, badLink, cb),
               cb => expectInvalidInvitePage(this.user, badLink, cb),
-              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb)
+              cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
             ],
             done
           )

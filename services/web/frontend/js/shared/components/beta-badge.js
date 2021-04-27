@@ -24,6 +24,6 @@ export default function BetaBadge({ tooltip }) {
 BetaBadge.propTypes = {
   tooltip: PropTypes.exact({
     id: PropTypes.string.isRequired,
-    text: PropTypes.string.isRequired
-  })
+    text: PropTypes.string.isRequired,
+  }),
 }

@@ -28,7 +28,7 @@ const OneTimeTokenHandler = {
         token,
         data,
         createdAt,
-        expiresAt
+        expiresAt,
       },
       function (error) {
         if (error) {
@@ -49,12 +49,12 @@ const OneTimeTokenHandler = {
         use,
         token,
         expiresAt: { $gt: now },
-        usedAt: { $exists: false }
+        usedAt: { $exists: false },
       },
       {
         $set: {
-          usedAt: now
-        }
+          usedAt: now,
+        },
       },
       function (error, result) {
         if (error) {
@@ -67,7 +67,7 @@ const OneTimeTokenHandler = {
         callback(null, token.data)
       }
     )
-  }
+  },
 }
 
 OneTimeTokenHandler.promises = promisifyAll(OneTimeTokenHandler)

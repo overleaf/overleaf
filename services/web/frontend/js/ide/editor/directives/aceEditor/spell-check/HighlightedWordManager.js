@@ -48,11 +48,11 @@ export default HighlightedWordManager = class HighlightedWordManager {
     const range = new Range()
     range.start = doc.createAnchor({
       row: options.row,
-      column: options.column
+      column: options.column,
     })
     range.end = doc.createAnchor({
       row: options.row,
-      column: options.column + options.word.length
+      column: options.column + options.word.length,
     })
     // Prevent range from adding newly typed characters to the end of the word.
     // This makes it appear as if the spelling error continues to the next word

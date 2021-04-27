@@ -80,5 +80,5 @@ export default {
     }
 
     return parsedLogEntries
-  }
+  },
 }

@@ -25,7 +25,7 @@ function dropboxDuplicateProjectNames(userId) {
         callback = function () {}
       }
       NotificationsHandler.markAsReadWithKey(userId, this.key, callback)
-    }
+    },
   }
 }
 
@@ -52,7 +52,7 @@ function featuresUpgradedByAffiliation(affiliation, user) {
         callback = function () {}
       }
       NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
-    }
+    },
   }
 }
 
@@ -79,7 +79,7 @@ function redundantPersonalSubscription(affiliation, user) {
         callback = function () {}
       }
       NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
-    }
+    },
   }
 }
 
@@ -94,7 +94,7 @@ function projectInvite(invite, project, sendingUser, user) {
         userName: sendingUser.first_name,
         projectName: project.name,
         projectId: project._id.toString(),
-        token: invite.token
+        token: invite.token,
       }
       NotificationsHandler.createNotification(
         user._id,
@@ -110,7 +110,7 @@ function projectInvite(invite, project, sendingUser, user) {
         callback = function () {}
       }
       NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
-    }
+    },
   }
 }
 
@@ -131,7 +131,7 @@ function ipMatcherAffiliation(userId) {
           auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
           body: { ip },
           json: true,
-          timeout: 20 * 1000
+          timeout: 20 * 1000,
         },
         function (error, response, body) {
           if (error != null) {
@@ -150,7 +150,7 @@ function ipMatcherAffiliation(userId) {
             institutionId: body.id,
             content: body.enrolment_ad_html,
             portalPath,
-            ssoEnabled: body.sso_enabled
+            ssoEnabled: body.sso_enabled,
           }
           NotificationsHandler.createNotification(
             userId,
@@ -171,7 +171,7 @@ function ipMatcherAffiliation(userId) {
       }
       const key = `ip-matched-affiliation-${universityId}`
       NotificationsHandler.markAsReadWithKey(userId, key, callback)
-    }
+    },
   }
 }
 
@@ -183,7 +183,7 @@ function tpdsFileLimit(userId) {
         callback = function () {}
       }
       const messageOpts = {
-        projectName: projectName
+        projectName: projectName,
       }
       NotificationsHandler.createNotification(
         userId,
@@ -200,7 +200,7 @@ function tpdsFileLimit(userId) {
         callback = function () {}
       }
       NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
-    }
+    },
   }
 }
 
@@ -211,13 +211,13 @@ const NotificationsBuilder = {
   redundantPersonalSubscription,
   projectInvite,
   ipMatcherAffiliation,
-  tpdsFileLimit
+  tpdsFileLimit,
 }
 
 NotificationsBuilder.promises = {
   redundantPersonalSubscription: function (affiliation, user) {
     return promisifyAll(redundantPersonalSubscription(affiliation, user))
-  }
+  },
 }
 
 module.exports = NotificationsBuilder

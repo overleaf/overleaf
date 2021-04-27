@@ -48,5 +48,5 @@ module.exports = InstitutionsGetter = {
       userId,
       callback
     )
-  }
+  },
 }

@@ -24,8 +24,8 @@ describe('InstitutionsGetter', function () {
       requires: {
         '../User/UserGetter': this.UserGetter,
         '../UserMembership/UserMembershipsHandler': (this.UserMembershipsHandler = {}),
-        '../UserMembership/UserMembershipEntityConfigs': (this.UserMembershipEntityConfigs = {})
-      }
+        '../UserMembership/UserMembershipEntityConfigs': (this.UserMembershipEntityConfigs = {}),
+      },
     })
 
     return (this.userId = '12345abcde')
@@ -36,18 +36,18 @@ describe('InstitutionsGetter', function () {
       this.userEmails = [
         {
           confirmedAt: null,
-          affiliation: { institution: { id: 123, confirmed: true } }
+          affiliation: { institution: { id: 123, confirmed: true } },
         },
         {
           confirmedAt: new Date(),
-          affiliation: { institution: { id: 456, confirmed: true } }
+          affiliation: { institution: { id: 456, confirmed: true } },
         },
         { confirmedAt: new Date(), affiliation: null },
         { confirmedAt: new Date(), affiliation: { institution: null } },
         {
           confirmedAt: new Date(),
-          affiliation: { institution: { id: 789, confirmed: false } }
-        }
+          affiliation: { institution: { id: 789, confirmed: false } },
+        },
       ]
       this.UserGetter.getUserFullEmails.yields(null, this.userEmails)
       return this.InstitutionsGetter.getConfirmedInstitutions(

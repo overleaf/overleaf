@@ -23,5 +23,5 @@ module.exports = UniversityController = {
 
   getIndexPage(req, res) {
     return res.redirect('/i/university')
-  }
+  },
 }

@@ -37,7 +37,7 @@ App.directive('bookmarkableTabset', $location => ({
         )
       }
     })
-  }
+  },
 }))
 
 App.directive('bookmarkableTab', $location => ({
@@ -54,5 +54,5 @@ App.directive('bookmarkableTab', $location => ({
         }
       })
     }
-  }
+  },
 }))

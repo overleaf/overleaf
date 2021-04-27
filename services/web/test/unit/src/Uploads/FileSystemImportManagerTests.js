@@ -20,13 +20,13 @@ describe('FileSystemImportManager', function () {
         addFile: sinon.stub().resolves(),
         upsertDoc: sinon.stub().resolves(),
         upsertFile: sinon.stub().resolves(),
-        addFolder: sinon.stub().resolves({ _id: this.newFolderId })
-      }
+        addFolder: sinon.stub().resolves({ _id: this.newFolderId }),
+      },
     }
     this.FileSystemImportManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        '../Editor/EditorController': this.EditorController
-      }
+        '../Editor/EditorController': this.EditorController,
+      },
     })
   })
 
@@ -38,20 +38,20 @@ describe('FileSystemImportManager', function () {
           'link-to-main.tex': mockFs.symlink({ path: 'import-test/main.tex' }),
           '.DS_Store': 'Should be ignored',
           images: {
-            'cat.jpg': Buffer.from([1, 2, 3, 4])
+            'cat.jpg': Buffer.from([1, 2, 3, 4]),
           },
           'line-endings': {
             'unix.txt': 'one\ntwo\nthree',
             'mac.txt': 'uno\rdos\rtres',
             'windows.txt': 'ein\r\nzwei\r\ndrei',
-            'mixed.txt': 'uno\rdue\r\ntre\nquattro'
+            'mixed.txt': 'uno\rdue\r\ntre\nquattro',
           },
           encodings: {
             'utf16le.txt': Buffer.from('\ufeffétonnant!', 'utf16le'),
-            'latin1.txt': Buffer.from('tétanisant!', 'latin1')
-          }
+            'latin1.txt': Buffer.from('tétanisant!', 'latin1'),
+          },
         },
-        symlink: mockFs.symlink({ path: 'import-test' })
+        symlink: mockFs.symlink({ path: 'import-test' }),
       })
       this.entries = await this.FileSystemImportManager.promises.importDir(
         'import-test'
@@ -67,7 +67,7 @@ describe('FileSystemImportManager', function () {
       expect(this.entries).to.deep.include({
         type: 'doc',
         projectPath: '/main.tex',
-        lines: ['My thesis']
+        lines: ['My thesis'],
       })
     })
 
@@ -83,7 +83,7 @@ describe('FileSystemImportManager', function () {
       expect(this.entries).to.deep.include({
         type: 'file',
         projectPath: '/images/cat.jpg',
-        fsPath: 'import-test/images/cat.jpg'
+        fsPath: 'import-test/images/cat.jpg',
       })
     })
 
@@ -91,22 +91,22 @@ describe('FileSystemImportManager', function () {
       expect(this.entries).to.deep.include({
         type: 'doc',
         projectPath: '/line-endings/unix.txt',
-        lines: ['one', 'two', 'three']
+        lines: ['one', 'two', 'three'],
       })
       expect(this.entries).to.deep.include({
         type: 'doc',
         projectPath: '/line-endings/mac.txt',
-        lines: ['uno', 'dos', 'tres']
+        lines: ['uno', 'dos', 'tres'],
       })
       expect(this.entries).to.deep.include({
         type: 'doc',
         projectPath: '/line-endings/windows.txt',
-        lines: ['ein', 'zwei', 'drei']
+        lines: ['ein', 'zwei', 'drei'],
       })
       expect(this.entries).to.deep.include({
         type: 'doc',
         projectPath: '/line-endings/mixed.txt',
-        lines: ['uno', 'due', 'tre', 'quattro']
+        lines: ['uno', 'due', 'tre', 'quattro'],
       })
     })
 
@@ -114,7 +114,7 @@ describe('FileSystemImportManager', function () {
       expect(this.entries).to.deep.include({
         type: 'doc',
         projectPath: '/encodings/latin1.txt',
-        lines: ['tétanisant!']
+        lines: ['tétanisant!'],
       })
     })
 
@@ -122,7 +122,7 @@ describe('FileSystemImportManager', function () {
       expect(this.entries).to.deep.include({
         type: 'doc',
         projectPath: '/encodings/utf16le.txt',
-        lines: ['\ufeffétonnant!']
+        lines: ['\ufeffétonnant!'],
       })
     })
 
@@ -140,10 +140,10 @@ describe('FileSystemImportManager', function () {
             to: {
               folder: {
                 'doc.tex': 'one\ntwo\nthree',
-                'image.jpg': Buffer.from([1, 2, 3, 4])
-              }
-            }
-          }
+                'image.jpg': Buffer.from([1, 2, 3, 4]),
+              },
+            },
+          },
         })
 
         await this.FileSystemImportManager.promises.addEntity(
@@ -253,14 +253,14 @@ describe('FileSystemImportManager', function () {
     for (const [lineEndingDescription, lineEnding] of [
       ['Unix', '\n'],
       ['Mac', '\r'],
-      ['Windows', '\r\n']
+      ['Windows', '\r\n'],
     ]) {
       describe(`with text file (${lineEndingDescription} line endings)`, function () {
         beforeEach(function () {
           mockFs({
             path: {
-              to: { 'uploaded-file': `one${lineEnding}two${lineEnding}three` }
-            }
+              to: { 'uploaded-file': `one${lineEnding}two${lineEnding}three` },
+            },
           })
         })
 
@@ -321,7 +321,7 @@ describe('FileSystemImportManager', function () {
     describe('with symlink', function () {
       beforeEach(function () {
         mockFs({
-          path: { to: { symlink: mockFs.symlink({ path: '/etc/passwd' }) } }
+          path: { to: { symlink: mockFs.symlink({ path: '/etc/passwd' }) } },
         })
       })
 

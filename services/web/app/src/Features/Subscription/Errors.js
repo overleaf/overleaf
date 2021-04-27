@@ -4,11 +4,11 @@ class RecurlyTransactionError extends Errors.BackwardCompatibleError {
   constructor(options) {
     super({
       message: 'Unknown transaction error',
-      ...options
+      ...options,
     })
   }
 }
 
 module.exports = {
-  RecurlyTransactionError
+  RecurlyTransactionError,
 }

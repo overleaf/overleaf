@@ -27,12 +27,12 @@ describe('CompileManager', function () {
       requires: {
         'settings-sharelatex': (this.settings = {
           redis: { web: { host: 'localhost', port: 42 } },
-          rateLimit: { autoCompile: {} }
+          rateLimit: { autoCompile: {} },
         }),
         '../../infrastructure/RedisWrapper': {
           client: () => {
             return (this.rclient = { auth() {} })
-          }
+          },
         },
         '../Project/ProjectRootDocManager': (this.ProjectRootDocManager = {}),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
@@ -49,15 +49,15 @@ describe('CompileManager', function () {
             Timer.initClass()
             return Timer
           })()),
-          inc: sinon.stub()
-        })
-      }
+          inc: sinon.stub(),
+        }),
+      },
     })
     this.project_id = 'mock-project-id-123'
     this.user_id = 'mock-user-id-123'
     this.callback = sinon.stub()
     return (this.limits = {
-      timeout: 42
+      timeout: 42,
     })
   })
 
@@ -119,7 +119,7 @@ describe('CompileManager', function () {
       it('should run the compile with the compile limits', function () {
         return this.ClsiManager.sendRequest
           .calledWith(this.project_id, this.user_id, {
-            timeout: this.limits.timeout
+            timeout: this.limits.timeout,
           })
           .should.equal(true)
       })
@@ -179,7 +179,7 @@ describe('CompileManager', function () {
     beforeEach(function () {
       this.features = {
         compileTimeout: (this.timeout = 42),
-        compileGroup: (this.group = 'priority')
+        compileGroup: (this.group = 'priority'),
       }
       this.ProjectGetter.getProject = sinon
         .stub()
@@ -208,7 +208,7 @@ describe('CompileManager', function () {
         .calledWith(this.project.owner_ref, {
           alphaProgram: 1,
           betaProgram: 1,
-          features: 1
+          features: 1,
         })
         .should.equal(true)
     })
@@ -217,7 +217,7 @@ describe('CompileManager', function () {
       return this.callback
         .calledWith(null, {
           timeout: this.timeout,
-          compileGroup: this.group
+          compileGroup: this.group,
         })
         .should.equal(true)
     })

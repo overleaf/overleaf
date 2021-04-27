@@ -28,8 +28,8 @@ describe('<FileTreeRoot/>', function () {
         _id: 'root-folder-id',
         docs: [{ _id: '456def', name: 'main.tex' }],
         folders: [],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     const { container } = render(
       <FileTreeRoot
@@ -64,8 +64,8 @@ describe('<FileTreeRoot/>', function () {
         _id: 'root-folder-id',
         docs: [{ _id: '456def', name: 'main.tex' }],
         folders: [],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     render(
       <FileTreeRoot
@@ -100,8 +100,8 @@ describe('<FileTreeRoot/>', function () {
         _id: 'root-folder-id',
         docs: [{ _id: '456def', name: 'main.tex' }],
         folders: [],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
 
     const { container } = render(
@@ -130,11 +130,11 @@ describe('<FileTreeRoot/>', function () {
         _id: 'root-folder-id',
         docs: [
           { _id: '456def', name: 'main.tex' },
-          { _id: '789ghi', name: 'other.tex' }
+          { _id: '789ghi', name: 'other.tex' },
         ],
         folders: [],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     render(
       <FileTreeRoot
@@ -157,9 +157,9 @@ describe('<FileTreeRoot/>', function () {
       sinon.match({
         entity: {
           _id: '456def',
-          name: 'main.tex'
-        }
-      })
+          name: 'main.tex',
+        },
+      }),
     ])
     onSelect.reset()
 
@@ -171,9 +171,9 @@ describe('<FileTreeRoot/>', function () {
       sinon.match({
         entity: {
           _id: '789ghi',
-          name: 'other.tex'
-        }
-      })
+          name: 'other.tex',
+        },
+      }),
     ])
   })
 
@@ -183,11 +183,11 @@ describe('<FileTreeRoot/>', function () {
         _id: 'root-folder-id',
         docs: [
           { _id: '456def', name: 'main.tex' },
-          { _id: '789ghi', name: 'other.tex' }
+          { _id: '789ghi', name: 'other.tex' },
         ],
         folders: [],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     render(
       <FileTreeRoot

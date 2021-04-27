@@ -24,7 +24,7 @@ describe('ProjectRootDocManager', function () {
       'doc-id-1': '/chapter1.tex',
       'doc-id-2': '/main.tex',
       'doc-id-3': '/nested/chapter1a.tex',
-      'doc-id-4': '/nested/chapter1b.tex'
+      'doc-id-4': '/nested/chapter1b.tex',
     }
     this.sl_req_id = 'sl-req-id-123'
     this.callback = sinon.stub()
@@ -36,7 +36,7 @@ describe('ProjectRootDocManager', function () {
     )
     this.fs = {
       readFile: sinon.stub().callsArgWith(2, new Error('file not found')),
-      stat: sinon.stub().callsArgWith(1, null, { size: 100 })
+      stat: sinon.stub().callsArgWith(1, null, { size: 100 }),
     }
     return (this.ProjectRootDocManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -44,8 +44,8 @@ describe('ProjectRootDocManager', function () {
         './ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
         './ProjectGetter': (this.ProjectGetter = {}),
         globby: this.globby,
-        fs: this.fs
-      }
+        fs: this.fs,
+      },
     }))
   })
 
@@ -65,25 +65,25 @@ describe('ProjectRootDocManager', function () {
               'something else',
               '\\begin{document}',
               'Hello world',
-              '\\end{document}'
-            ]
+              '\\end{document}',
+            ],
           },
           '/main.tex': {
             _id: 'doc-id-2',
             lines: [
               'different line',
               '\\documentclass{article}',
-              '\\input{chapter1}'
-            ]
+              '\\input{chapter1}',
+            ],
           },
           '/nested/chapter1a.tex': {
             _id: 'doc-id-3',
-            lines: ['Hello world']
+            lines: ['Hello world'],
           },
           '/nested/chapter1b.tex': {
             _id: 'doc-id-4',
-            lines: ['Hello world']
-          }
+            lines: ['Hello world'],
+          },
         }
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
@@ -112,12 +112,12 @@ describe('ProjectRootDocManager', function () {
         this.docs = {
           '/chapter1.tex': {
             _id: 'doc-id-1',
-            lines: ['\\begin{document}', 'Hello world', '\\end{document}']
+            lines: ['\\begin{document}', 'Hello world', '\\end{document}'],
           },
           '/main.Rtex': {
             _id: 'doc-id-2',
-            lines: ['\\documentclass{article}', '\\input{chapter1}']
-          }
+            lines: ['\\documentclass{article}', '\\input{chapter1}'],
+          },
         }
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
@@ -140,12 +140,12 @@ describe('ProjectRootDocManager', function () {
         this.docs = {
           '/chapter1.tex': {
             _id: 'doc-id-1',
-            lines: ['\\begin{document}', 'Hello world', '\\end{document}']
+            lines: ['\\begin{document}', 'Hello world', '\\end{document}'],
           },
           '/style.bst': {
             _id: 'doc-id-2',
-            lines: ['%Example: \\documentclass{article}']
-          }
+            lines: ['%Example: \\documentclass{article}'],
+          },
         }
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
@@ -350,7 +350,7 @@ describe('ProjectRootDocManager', function () {
           'doc-id-1': '/chapter1.tex',
           'doc-id-2': '/main.tex',
           'doc-id-3': '/nested/chapter1a.tex',
-          'doc-id-4': '/nested/chapter1b.tex'
+          'doc-id-4': '/nested/chapter1b.tex',
         }
         this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
           .stub()

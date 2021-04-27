@@ -34,8 +34,8 @@ module.exports = {
     generateUniqueName,
     setPublicAccessLevel,
     ensureTokensArePresent,
-    clearTokens
-  }
+    clearTokens,
+  },
 }
 
 async function getDetails(projectId) {
@@ -47,7 +47,7 @@ async function getDetails(projectId) {
       compiler: true,
       features: true,
       owner_ref: true,
-      overleaf: true
+      overleaf: true,
     })
   } catch (err) {
     logger.warn({ err, projectId }, 'error getting project')
@@ -64,7 +64,7 @@ async function getDetails(projectId) {
     features:
       user != null && user.features != null
         ? user.features
-        : settings.defaultFeatures
+        : settings.defaultFeatures,
   }
   if (project.overleaf != null) {
     details.overleaf = project.overleaf
@@ -74,7 +74,7 @@ async function getDetails(projectId) {
 
 async function getProjectDescription(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
-    description: true
+    description: true,
   })
   if (project == null) {
     return undefined
@@ -115,7 +115,7 @@ async function renameProject(projectId, newName) {
   await TpdsUpdateSender.promises.moveEntity({
     project_id: projectId,
     project_name: oldProjectName,
-    newProjectName: newName
+    newProjectName: newName,
   })
 }
 
@@ -192,7 +192,7 @@ async function setPublicAccessLevel(projectId, newAccessLevel) {
         PublicAccessLevels.READ_ONLY,
         PublicAccessLevels.READ_AND_WRITE,
         PublicAccessLevels.PRIVATE,
-        PublicAccessLevels.TOKEN_BASED
+        PublicAccessLevels.TOKEN_BASED,
       ],
       newAccessLevel
     )
@@ -206,7 +206,7 @@ async function setPublicAccessLevel(projectId, newAccessLevel) {
 
 async function ensureTokensArePresent(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
-    tokens: 1
+    tokens: 1,
   })
   if (
     project.tokens != null &&

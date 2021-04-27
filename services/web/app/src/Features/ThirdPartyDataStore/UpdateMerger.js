@@ -174,7 +174,7 @@ module.exports = UpdateMerger = {
               } else {
                 return cb(new Error('unrecognized file'))
               }
-            }
+            },
           ],
           callback
         )
@@ -207,7 +207,7 @@ module.exports = UpdateMerger = {
               err,
               'error reading file into text array for process doc update',
               {
-                project_id
+                project_id,
               }
             )
             return callback(err)
@@ -248,13 +248,13 @@ module.exports = UpdateMerger = {
         }
         if (error != null) {
           OError.tag(error, 'error reading file into text array', {
-            path
+            path,
           })
           return callback(error)
         }
         const lines = content.split(/\r\n|\n|\r/)
         return callback(error, lines)
       })
-    }
-  }
+    },
+  },
 }

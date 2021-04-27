@@ -41,5 +41,5 @@ module.exports = {
     NotificationsHandler.markAsRead(user_id, notification_id, () =>
       res.sendStatus(200)
     )
-  }
+  },
 }

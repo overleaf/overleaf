@@ -72,7 +72,7 @@ export default function FileTreeImportFromProject() {
     validName,
     isOutputFilesMode,
     selectedProjectEntity,
-    selectedProjectOutputFile
+    selectedProjectOutputFile,
   ])
 
   // form submission: create a linked file with this name, from this entity or output file
@@ -86,8 +86,8 @@ export default function FileTreeImportFromProject() {
         data: {
           source_project_id: selectedProject._id,
           source_output_file_path: selectedProjectOutputFile.path,
-          build_id: selectedProjectOutputFile.build
-        }
+          build_id: selectedProjectOutputFile.build,
+        },
       })
     } else {
       finishCreatingLinkedFile({
@@ -95,8 +95,8 @@ export default function FileTreeImportFromProject() {
         provider: 'project_file',
         data: {
           source_project_id: selectedProject._id,
-          source_entity_path: selectedProjectEntity.path
-        }
+          source_entity_path: selectedProjectEntity.path,
+        },
       })
     }
   }
@@ -141,7 +141,7 @@ export default function FileTreeImportFromProject() {
       <FileTreeCreateNameInput
         label={t('file_name_in_this_project')}
         classes={{
-          formGroup: 'form-controls row-spaced-small'
+          formGroup: 'form-controls row-spaced-small',
         }}
         placeholder="example.tex"
         error={error}
@@ -208,13 +208,13 @@ function SelectProject({ projectId, selectedProject, setSelectedProject }) {
 SelectProject.propTypes = {
   projectId: PropTypes.string.isRequired,
   selectedProject: PropTypes.object,
-  setSelectedProject: PropTypes.func.isRequired
+  setSelectedProject: PropTypes.func.isRequired,
 }
 
 function SelectProjectOutputFile({
   selectedProjectId,
   selectedProjectOutputFile,
-  setSelectedProjectOutputFile
+  setSelectedProjectOutputFile,
 }) {
   // NOTE: unhandled error
   const { data, loading } = useProjectOutputFiles(selectedProjectId)
@@ -260,13 +260,13 @@ function SelectProjectOutputFile({
 SelectProjectOutputFile.propTypes = {
   selectedProjectId: PropTypes.string,
   selectedProjectOutputFile: PropTypes.object,
-  setSelectedProjectOutputFile: PropTypes.func.isRequired
+  setSelectedProjectOutputFile: PropTypes.func.isRequired,
 }
 
 function SelectProjectEntity({
   selectedProjectId,
   selectedProjectEntity,
-  setSelectedProjectEntity
+  setSelectedProjectEntity,
 }) {
   // NOTE: unhandled error
   const { data, loading } = useProjectEntities(selectedProjectId)
@@ -312,5 +312,5 @@ function SelectProjectEntity({
 SelectProjectEntity.propTypes = {
   selectedProjectId: PropTypes.string,
   selectedProjectEntity: PropTypes.object,
-  setSelectedProjectEntity: PropTypes.func.isRequired
+  setSelectedProjectEntity: PropTypes.func.isRequired,
 }

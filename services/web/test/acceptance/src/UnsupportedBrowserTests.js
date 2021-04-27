@@ -14,8 +14,8 @@ describe('UnsupportedBrowsers', function () {
         headers: {
           // Googlebot user agent
           'user-agent':
-            'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
-        }
+            'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        },
       },
       (error, response) => {
         expect(error).to.not.exist
@@ -32,8 +32,8 @@ describe('UnsupportedBrowsers', function () {
         headers: {
           // Chrome 90 user agent
           'user-agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.72 Safari/537.36'
-        }
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.72 Safari/537.36',
+        },
       },
       (error, response) => {
         expect(error).to.not.exist
@@ -50,8 +50,8 @@ describe('UnsupportedBrowsers', function () {
         headers: {
           // IE11 user agent
           'user-agent':
-            'Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko'
-        }
+            'Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko',
+        },
       },
       (error, response) => {
         expect(error).to.not.exist

@@ -17,14 +17,14 @@ describe('ProjectDeleter', function () {
     this.user = {
       _id: '588f3ddae8ebc1bac07c9fa4',
       first_name: 'bjkdsjfk',
-      features: {}
+      features: {},
     }
 
     this.doc = {
       _id: '5bd975f54f62e803cb8a8fec',
       lines: ['a bunch of lines', 'for a sunny day', 'in London town'],
       ranges: {},
-      project_id: '5cf9270b4eff6e186cf8b05e'
+      project_id: '5cf9270b4eff6e186cf8b05e',
     }
 
     this.deletedProjects = [
@@ -35,16 +35,16 @@ describe('ProjectDeleter', function () {
           deletedAt: moment().subtract(95, 'days').toDate(),
           deleterId: '588f3ddae8ebc1bac07c9fa4',
           deleterIpAddress: '172.19.0.1',
-          deletedProjectId: '5cf9270b4eff6e186cf8b05e'
+          deletedProjectId: '5cf9270b4eff6e186cf8b05e',
         },
         project: {
           _id: '5cf9270b4eff6e186cf8b05e',
           overleaf: {
             history: {
-              id: new ObjectId()
-            }
-          }
-        }
+              id: new ObjectId(),
+            },
+          },
+        },
       },
       {
         _id: '5cf8eb11c1401f0ca0eb1ad7',
@@ -53,79 +53,79 @@ describe('ProjectDeleter', function () {
           deletedAt: moment().subtract(95, 'days').toDate(),
           deleterId: '588f3ddae8ebc1bac07c9fa4',
           deleterIpAddress: '172.20.0.1',
-          deletedProjectId: '5cf8f95a0c87371362c23919'
+          deletedProjectId: '5cf8f95a0c87371362c23919',
         },
         project: {
-          _id: '5cf8f95a0c87371362c23919'
-        }
-      }
+          _id: '5cf8f95a0c87371362c23919',
+        },
+      },
     ]
 
     this.DocumentUpdaterHandler = {
       promises: {
-        flushProjectToMongoAndDelete: sinon.stub().resolves()
-      }
+        flushProjectToMongoAndDelete: sinon.stub().resolves(),
+      },
     }
     this.EditorRealTimeController = {
-      emitToRoom: sinon.stub()
+      emitToRoom: sinon.stub(),
     }
     this.TagsHandler = {
       promises: {
-        removeProjectFromAllTags: sinon.stub().resolves()
-      }
+        removeProjectFromAllTags: sinon.stub().resolves(),
+      },
     }
     this.CollaboratorsHandler = {
       promises: {
-        removeUserFromAllProjects: sinon.stub().resolves()
-      }
+        removeUserFromAllProjects: sinon.stub().resolves(),
+      },
     }
     this.CollaboratorsGetter = {
       promises: {
         getMemberIds: sinon
           .stub()
           .withArgs(this.project._id)
-          .resolves(['member-id-1', 'member-id-2'])
-      }
+          .resolves(['member-id-1', 'member-id-2']),
+      },
     }
 
     this.ProjectDetailsHandler = {
       promises: {
-        generateUniqueName: sinon.stub().resolves(this.project.name)
-      }
+        generateUniqueName: sinon.stub().resolves(this.project.name),
+      },
     }
 
     this.ProjectHelper = {
-      calculateArchivedArray: sinon.stub()
+      calculateArchivedArray: sinon.stub(),
     }
 
     this.db = {
       deletedFiles: {
         indexExists: sinon.stub().resolves(false),
-        deleteMany: sinon.stub()
+        deleteMany: sinon.stub(),
       },
       projects: {
-        insertOne: sinon.stub().resolves()
-      }
+        insertOne: sinon.stub().resolves(),
+      },
     }
 
     this.DocstoreManager = {
       promises: {
         archiveProject: sinon.stub().resolves(),
-        destroyProject: sinon.stub().resolves()
-      }
+        destroyProject: sinon.stub().resolves(),
+      },
     }
     this.HistoryManager = {
       promises: {
-        deleteProject: sinon.stub().resolves()
-      }
+        deleteProject: sinon.stub().resolves(),
+      },
     }
 
     this.ProjectMock = sinon.mock(Project)
     this.DeletedProjectMock = sinon.mock(DeletedProject)
     this.FileStoreHandler = {
       promises: {
-        deleteProject: sinon.stub().resolves()
-      }
+        deleteProject: sinon.stub().resolves(),
+      },
     }
 
     this.ProjectDeleter = SandboxedModule.require(modulePath, {
@@ -143,8 +143,8 @@ describe('ProjectDeleter', function () {
         '../Docstore/DocstoreManager': this.DocstoreManager,
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../../infrastructure/mongodb': { db: this.db, ObjectId },
-        '../History/HistoryManager': this.HistoryManager
-      }
+        '../History/HistoryManager': this.HistoryManager,
+      },
     })
   })
 
@@ -223,7 +223,7 @@ describe('ProjectDeleter', function () {
             { 'deleterData.deletedProjectId': project._id },
             {
               project,
-              deleterData: sinon.match.object
+              deleterData: sinon.match.object,
             },
             { upsert: true }
           )
@@ -265,7 +265,7 @@ describe('ProjectDeleter', function () {
         deletedProjectReadOnlyToken: this.project.tokens.readOnly,
         deletedProjectOverleafId: this.project.overleaf.id,
         deletedProjectOverleafHistoryId: this.project.overleaf.history.id,
-        deletedProjectLastUpdatedAt: this.project.lastUpdated
+        deletedProjectLastUpdatedAt: this.project.lastUpdated,
       }
 
       this.ProjectMock.expects('findOne')
@@ -284,7 +284,7 @@ describe('ProjectDeleter', function () {
           { 'deleterData.deletedProjectId': this.project._id },
           {
             project: this.project,
-            deleterData: this.deleterData
+            deleterData: this.deleterData,
           },
           { upsert: true }
         )
@@ -292,7 +292,7 @@ describe('ProjectDeleter', function () {
 
       await this.ProjectDeleter.promises.deleteProject(this.project._id, {
         deleterUser: this.user,
-        ipAddress: this.ip
+        ipAddress: this.ip,
       })
       this.DeletedProjectMock.verify()
     })
@@ -303,7 +303,7 @@ describe('ProjectDeleter', function () {
 
       await this.ProjectDeleter.promises.deleteProject(this.project._id, {
         deleterUser: this.user,
-        ipAddress: this.ip
+        ipAddress: this.ip,
       })
       this.DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete
         .calledWith(this.project._id)
@@ -315,7 +315,7 @@ describe('ProjectDeleter', function () {
       this.DeletedProjectMock.expects('updateOne').resolves()
       await this.ProjectDeleter.promises.deleteProject(this.project._id, {
         deleterUser: this.user,
-        ipAddress: this.ip
+        ipAddress: this.ip,
       })
       expect(
         this.DocstoreManager.promises.archiveProject
@@ -328,7 +328,7 @@ describe('ProjectDeleter', function () {
       this.DocstoreManager.promises.archiveProject.rejects(new Error('foo'))
       await this.ProjectDeleter.promises.deleteProject(this.project._id, {
         deleterUser: this.user,
-        ipAddress: this.ip
+        ipAddress: this.ip,
       })
     })
 
@@ -366,11 +366,11 @@ describe('ProjectDeleter', function () {
       this.DeletedProjectMock.expects('find')
         .withArgs({
           'deleterData.deletedAt': {
-            $lt: new Date(moment().subtract(90, 'days'))
+            $lt: new Date(moment().subtract(90, 'days')),
           },
           project: {
-            $ne: null
-          }
+            $ne: null,
+          },
         })
         .chain('exec')
         .resolves(this.deletedProjects)
@@ -378,20 +378,20 @@ describe('ProjectDeleter', function () {
       for (const deletedProject of this.deletedProjects) {
         this.DeletedProjectMock.expects('findOne')
           .withArgs({
-            'deleterData.deletedProjectId': deletedProject.project._id
+            'deleterData.deletedProjectId': deletedProject.project._id,
           })
           .chain('exec')
           .resolves(deletedProject)
         this.DeletedProjectMock.expects('updateOne')
           .withArgs(
             {
-              _id: deletedProject._id
+              _id: deletedProject._id,
             },
             {
               $set: {
                 'deleterData.deleterIpAddress': null,
-                project: null
-              }
+                project: null,
+              },
             }
           )
           .chain('exec')
@@ -411,13 +411,13 @@ describe('ProjectDeleter', function () {
       this.DeletedProjectMock.expects('updateOne')
         .withArgs(
           {
-            _id: this.deletedProjects[0]._id
+            _id: this.deletedProjects[0]._id,
           },
           {
             $set: {
               'deleterData.deleterIpAddress': null,
-              project: null
-            }
+              project: null,
+            },
           }
         )
         .chain('exec')
@@ -425,7 +425,7 @@ describe('ProjectDeleter', function () {
 
       this.DeletedProjectMock.expects('findOne')
         .withArgs({
-          'deleterData.deletedProjectId': this.deletedProjects[0].project._id
+          'deleterData.deletedProjectId': this.deletedProjects[0].project._id,
         })
         .chain('exec')
         .resolves(this.deletedProjects[0])
@@ -476,7 +476,7 @@ describe('ProjectDeleter', function () {
           { _id: this.project._id },
           {
             $set: { archived: archived },
-            $pull: { trashed: ObjectId(this.user._id) }
+            $pull: { trashed: ObjectId(this.user._id) },
           }
         )
         .resolves()
@@ -554,7 +554,7 @@ describe('ProjectDeleter', function () {
           { _id: this.project._id },
           {
             $addToSet: { trashed: ObjectId(this.user._id) },
-            $set: { archived: archived }
+            $set: { archived: archived },
           }
         )
         .resolves()
@@ -610,10 +610,10 @@ describe('ProjectDeleter', function () {
       this.ProjectMock.expects('updateOne')
         .withArgs(
           {
-            _id: this.project._id
+            _id: this.project._id,
           },
           {
-            $unset: { archived: true }
+            $unset: { archived: true },
           }
         )
         .chain('exec')
@@ -635,15 +635,15 @@ describe('ProjectDeleter', function () {
         project: this.project,
         deleterData: {
           deletedProjectId: this.project._id,
-          deletedProjectOwnerId: this.project.owner_ref
-        }
+          deletedProjectOwnerId: this.project.owner_ref,
+        },
       }
       this.purgedProject = {
         _id: 'purged',
         deleterData: {
           deletedProjectId: this.purgedProjectId,
-          deletedProjectOwnerId: 'potato'
-        }
+          deletedProjectOwnerId: 'potato',
+        },
       }
 
       this.DeletedProjectMock.expects('findOne')
@@ -683,7 +683,7 @@ describe('ProjectDeleter', function () {
         this.db.projects.insertOne,
         sinon.match({
           _id: this.project._id,
-          name: this.project.name
+          name: this.project.name,
         })
       )
     })
@@ -745,14 +745,14 @@ function dummyProject() {
     owner_ref: new ObjectId(),
     tokens: {
       readOnly: 'wombat',
-      readAndWrite: 'potato'
+      readAndWrite: 'potato',
     },
     overleaf: {
       id: 1234,
       history: {
-        id: 5678
-      }
+        id: 5678,
+      },
     },
-    name: 'a very scientific analysis of spooky ghosts'
+    name: 'a very scientific analysis of spooky ghosts',
   }
 }

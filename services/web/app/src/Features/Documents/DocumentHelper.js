@@ -74,5 +74,5 @@ module.exports = DocumentHelper = {
     } else {
       return content
     }
-  }
+  },
 }

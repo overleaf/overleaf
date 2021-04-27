@@ -4,7 +4,7 @@ class InvalidZipFileError extends Errors.BackwardCompatibleError {
   constructor(options) {
     super({
       message: 'invalid_zip_file',
-      ...options
+      ...options,
     })
   }
 }
@@ -13,7 +13,7 @@ class EmptyZipFileError extends InvalidZipFileError {
   constructor(options) {
     super({
       message: 'empty_zip_file',
-      ...options
+      ...options,
     })
   }
 }
@@ -22,7 +22,7 @@ class ZipContentsTooLargeError extends InvalidZipFileError {
   constructor(options) {
     super({
       message: 'zip_contents_too_large',
-      ...options
+      ...options,
     })
   }
 }
@@ -30,5 +30,5 @@ class ZipContentsTooLargeError extends InvalidZipFileError {
 module.exports = {
   InvalidZipFileError,
   EmptyZipFileError,
-  ZipContentsTooLargeError
+  ZipContentsTooLargeError,
 }

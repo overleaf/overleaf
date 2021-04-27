@@ -58,8 +58,8 @@ describe('ProjectStructureChanges', function () {
           uri: `project/${projectId}/doc`,
           json: {
             name: 'new.tex',
-            parent_folder_id: project.rootFolder[0]._id
-          }
+            parent_folder_id: project.rootFolder[0]._id,
+          },
         },
         (error, res, body) => {
           if (error) {
@@ -79,8 +79,8 @@ describe('ProjectStructureChanges', function () {
       {
         uri: `project/${projectId}/folder`,
         json: {
-          name: 'foo'
-        }
+          name: 'foo',
+        },
       },
       (error, res, body) => {
         if (error) {
@@ -136,8 +136,8 @@ describe('ProjectStructureChanges', function () {
       {
         uri: 'project/new/upload',
         formData: {
-          qqfile: zipFile
-        }
+          qqfile: zipFile,
+        },
       },
       (error, res, body) => {
         if (error) {
@@ -229,8 +229,8 @@ describe('ProjectStructureChanges', function () {
           {
             uri: `/Project/${projectId}/clone`,
             json: {
-              projectName: 'new.tex'
-            }
+              projectName: 'new.tex',
+            },
           },
           (error, res, body) => {
             if (error) {
@@ -292,7 +292,7 @@ describe('ProjectStructureChanges', function () {
     it('should version the doc added', function (done) {
       const {
         updates,
-        version: newVersion
+        version: newVersion,
       } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
       expect(updates.length).to.equal(1)
       const update = updates[0]
@@ -602,7 +602,7 @@ describe('ProjectStructureChanges', function () {
         () => {
           const {
             updates,
-            version
+            version,
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(2)
           expect(updates[0].type).to.equal('rename-file')
@@ -680,7 +680,7 @@ describe('ProjectStructureChanges', function () {
         () => {
           const {
             updates,
-            version
+            version,
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(1)
           const update = updates[0]
@@ -711,7 +711,7 @@ describe('ProjectStructureChanges', function () {
         () => {
           const {
             updates,
-            version
+            version,
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(1)
           const update = updates[0]
@@ -746,8 +746,8 @@ describe('ProjectStructureChanges', function () {
             {
               uri: `project/${exampleProjectId}/folder`,
               json: {
-                name: 'bar'
-              }
+                name: 'bar',
+              },
             },
             (error, res, body) => {
               if (error) {
@@ -764,7 +764,7 @@ describe('ProjectStructureChanges', function () {
                 () => {
                   const {
                     updates,
-                    version
+                    version,
                   } = MockDocUpdaterApi.getProjectStructureUpdates(
                     exampleProjectId
                   )
@@ -851,7 +851,7 @@ describe('ProjectStructureChanges', function () {
         () => {
           const {
             updates,
-            version
+            version,
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(1)
           const update = updates[0]
@@ -881,7 +881,7 @@ describe('ProjectStructureChanges', function () {
         () => {
           const {
             updates,
-            version
+            version,
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(1)
           const update = updates[0]
@@ -911,7 +911,7 @@ describe('ProjectStructureChanges', function () {
         () => {
           const {
             updates,
-            version
+            version,
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(2)
           expect(updates[0].type).to.equal('rename-doc')
@@ -982,7 +982,7 @@ describe('ProjectStructureChanges', function () {
       deleteItem(owner, exampleProjectId, 'folder', exampleFolderId, () => {
         const {
           updates,
-          version
+          version,
         } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
         expect(updates.length).to.equal(2)
         expect(updates[0].type).to.equal('rename-doc')
@@ -1148,8 +1148,8 @@ describe('ProjectStructureChanges', function () {
         auth: {
           user: _.keys(Settings.httpAuthUsers)[0],
           pass: _.values(Settings.httpAuthUsers)[0],
-          sendImmediately: true
-        }
+          sendImmediately: true,
+        },
       })
 
       texFile.on('error', err => {
@@ -1167,7 +1167,7 @@ describe('ProjectStructureChanges', function () {
 
         const {
           updates,
-          version
+          version,
         } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
         expect(updates.length).to.equal(1)
         const update = updates[0]
@@ -1192,8 +1192,8 @@ describe('ProjectStructureChanges', function () {
         auth: {
           user: _.keys(Settings.httpAuthUsers)[0],
           pass: _.values(Settings.httpAuthUsers)[0],
-          sendImmediately: true
-        }
+          sendImmediately: true,
+        },
       })
 
       imageFile.on('error', err => {
@@ -1211,7 +1211,7 @@ describe('ProjectStructureChanges', function () {
 
         const {
           updates,
-          version
+          version,
         } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
         expect(updates.length).to.equal(1)
         const update = updates[0]
@@ -1252,8 +1252,8 @@ describe('ProjectStructureChanges', function () {
           auth: {
             user: _.keys(Settings.httpAuthUsers)[0],
             pass: _.values(Settings.httpAuthUsers)[0],
-            sendImmediately: true
-          }
+            sendImmediately: true,
+          },
         })
 
         imageFile.on('error', err => {
@@ -1271,7 +1271,7 @@ describe('ProjectStructureChanges', function () {
 
           const {
             updates,
-            version
+            version,
           } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
           expect(updates.length).to.equal(2)
           expect(updates[0].type).to.equal('rename-file')
@@ -1302,8 +1302,8 @@ describe('ProjectStructureChanges', function () {
             auth: {
               user: _.keys(Settings.httpAuthUsers)[0],
               pass: _.values(Settings.httpAuthUsers)[0],
-              sendImmediately: true
-            }
+              sendImmediately: true,
+            },
           },
           (error, res) => {
             if (error) {
@@ -1315,7 +1315,7 @@ describe('ProjectStructureChanges', function () {
 
             const {
               updates,
-              version
+              version,
             } = MockDocUpdaterApi.getProjectStructureUpdates(exampleProjectId)
             expect(updates.length).to.equal(1)
             const update = updates[0]

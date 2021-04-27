@@ -17,7 +17,7 @@ export default App.controller(
     $scope.labelDetails = labelDetails
     $scope.state = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     return ($scope.deleteLabel = function () {

@@ -71,7 +71,7 @@ module.exports = TeamInvitesHandler = {
           email,
           inviterName,
           token,
-          sentAt
+          sentAt,
         })
 
         subscription.save(callback)
@@ -126,7 +126,7 @@ module.exports = TeamInvitesHandler = {
         callback
       )
     })
-  }
+  },
 }
 
 var createInvite = function (subscription, email, inviter, callback) {
@@ -160,7 +160,7 @@ var createInvite = function (subscription, email, inviter, callback) {
                 email: inviter.email,
                 first_name: inviter.first_name,
                 last_name: inviter.last_name,
-                invite: false
+                invite: false,
               }
               callback(error, inviteUserData)
             })
@@ -180,7 +180,7 @@ var createInvite = function (subscription, email, inviter, callback) {
           email,
           inviterName,
           token: crypto.randomBytes(32).toString('hex'),
-          sentAt: new Date()
+          sentAt: new Date(),
         }
         subscription.teamInvites.push(invite)
       }
@@ -194,7 +194,7 @@ var createInvite = function (subscription, email, inviter, callback) {
           to: email,
           inviter,
           acceptInviteUrl: `${settings.siteUrl}/subscription/invites/${invite.token}/`,
-          appName: settings.appName
+          appName: settings.appName,
         }
         EmailHandler.sendEmail('verifyEmailToJoinTeam', opts, error => {
           Object.assign(invite, { invite: true })
@@ -212,7 +212,7 @@ var removeInviteFromTeam = function (subscriptionId, email, callback) {
   async.series(
     [
       cb => Subscription.updateOne(searchConditions, removeInvite, cb),
-      cb => removeLegacyInvite(subscriptionId, email, cb)
+      cb => removeLegacyInvite(subscriptionId, email, cb),
     ],
     callback
   )
@@ -221,12 +221,12 @@ var removeInviteFromTeam = function (subscriptionId, email, callback) {
 var removeLegacyInvite = (subscriptionId, email, callback) =>
   Subscription.updateOne(
     {
-      _id: new ObjectId(subscriptionId.toString())
+      _id: new ObjectId(subscriptionId.toString()),
     },
     {
       $pull: {
-        invited_emails: email
-      }
+        invited_emails: email,
+      },
     },
     callback
   )

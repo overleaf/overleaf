@@ -5,8 +5,8 @@ export function syncRename(projectId, entityType, entityId, newName) {
     `/project/${projectId}/${getEntityPathName(entityType)}/${entityId}/rename`,
     {
       body: {
-        name: newName
-      }
+        name: newName,
+      },
     }
   )
 }
@@ -22,8 +22,8 @@ export function syncMove(projectId, entityType, entityId, toFolderId) {
     `/project/${projectId}/${getEntityPathName(entityType)}/${entityId}/move`,
     {
       body: {
-        folder_id: toFolderId
-      }
+        folder_id: toFolderId,
+      },
     }
   )
 }
@@ -33,8 +33,8 @@ export function syncCreateEntity(projectId, parentFolderId, newEntityData) {
   return postJSON(`/project/${projectId}/${endpoint}`, {
     body: {
       parent_folder_id: parentFolderId,
-      ...newEntity
-    }
+      ...newEntity,
+    },
   })
 }
 

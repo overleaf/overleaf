@@ -16,57 +16,57 @@ describe('UserUpdater', function () {
       db: {},
       ObjectId(id) {
         return id
-      }
+      },
     }
     this.UserGetter = {
       getUserEmail: sinon.stub(),
       getUserByAnyEmail: sinon.stub(),
       promises: {
         ensureUniqueEmailAddress: sinon.stub(),
-        getUser: sinon.stub()
-      }
+        getUser: sinon.stub(),
+      },
     }
     this.addAffiliation = sinon.stub().yields()
     this.removeAffiliation = sinon.stub().callsArgWith(2, null)
     this.refreshFeatures = sinon.stub().yields()
     this.NewsletterManager = {
       promises: {
-        changeEmail: sinon.stub()
-      }
+        changeEmail: sinon.stub(),
+      },
     }
     this.RecurlyWrapper = {
       promises: {
-        updateAccountEmailAddress: sinon.stub()
-      }
+        updateAccountEmailAddress: sinon.stub(),
+      },
     }
     this.UserUpdater = SandboxedModule.require(modulePath, {
       requires: {
         '../Helpers/Mongo': { normalizeQuery },
         '../../infrastructure/mongodb': this.mongodb,
         '@overleaf/metrics': {
-          timeAsyncMethod: sinon.stub()
+          timeAsyncMethod: sinon.stub(),
         },
         './UserGetter': this.UserGetter,
         '../Institutions/InstitutionsAPI': (this.InstitutionsAPI = {
           addAffiliation: this.addAffiliation,
           removeAffiliation: this.removeAffiliation,
           promises: {
-            addAffiliation: sinon.stub()
-          }
+            addAffiliation: sinon.stub(),
+          },
         }),
         '../Email/EmailHandler': (this.EmailHandler = {
           promises: {
-            sendEmail: sinon.stub()
-          }
+            sendEmail: sinon.stub(),
+          },
         }),
         '../../infrastructure/Features': (this.Features = {
-          hasFeature: sinon.stub().returns(false)
+          hasFeature: sinon.stub().returns(false),
         }),
         '../Subscription/FeaturesUpdater': (this.FeaturesUpdater = {
           refreshFeatures: this.refreshFeatures,
           promises: {
-            refreshFeatures: sinon.stub().resolves()
-          }
+            refreshFeatures: sinon.stub().resolves(),
+          },
         }),
         'settings-sharelatex': (this.settings = {}),
         request: (this.request = {}),
@@ -74,10 +74,10 @@ describe('UserUpdater', function () {
         '../Subscription/RecurlyWrapper': this.RecurlyWrapper,
         './UserAuditLogHandler': (this.UserAuditLogHandler = {
           promises: {
-            addEntry: sinon.stub().resolves()
-          }
-        })
-      }
+            addEntry: sinon.stub().resolves(),
+          },
+        }),
+      },
     })
 
     this.stubbedUserEmail = 'hello@world.com'
@@ -87,9 +87,9 @@ describe('UserUpdater', function () {
       email: this.stubbedUserEmail,
       emails: [
         {
-          email: this.stubbedUserEmail
-        }
-      ]
+          email: this.stubbedUserEmail,
+        },
+      ],
     }
     this.newEmail = 'bob@bob.com'
     this.callback = sinon.stub()
@@ -141,7 +141,7 @@ describe('UserUpdater', function () {
     beforeEach(function () {
       this.auditLog = {
         initiatorId: 'abc123',
-        ipAddress: '0:0:0:0'
+        ipAddress: '0:0:0:0',
       }
       this.UserGetter.getUserEmail.callsArgWith(1, null, this.stubbedUser.email)
       this.UserUpdater.addEmailAddress = sinon.stub().callsArgWith(4)
@@ -232,9 +232,9 @@ describe('UserUpdater', function () {
                 emails: {
                   email: this.newEmail,
                   createdAt: sinon.match.date,
-                  reversedHostname
-                }
-              }
+                  reversedHostname,
+                },
+              },
             })
             .should.equal(true)
           done()
@@ -246,7 +246,7 @@ describe('UserUpdater', function () {
       const affiliationOptions = {
         university: { id: 1 },
         role: 'Prof',
-        department: 'Math'
+        department: 'Math',
       }
       this.UserUpdater.addEmailAddress(
         this.stubbedUser._id,
@@ -313,7 +313,7 @@ describe('UserUpdater', function () {
           expect(args[2]).to.equal(this.stubbedUser._id)
           expect(args[3]).to.equal(this.ip)
           expect(args[4]).to.deep.equal({
-            newSecondaryEmail: this.newEmail
+            newSecondaryEmail: this.newEmail,
           })
           done()
         }
@@ -449,13 +449,13 @@ describe('UserUpdater', function () {
     beforeEach(function () {
       this.auditLog = {
         initiatorId: this.stubbedUser,
-        ipAddress: '0:0:0:0'
+        ipAddress: '0:0:0:0',
       }
       this.stubbedUser.emails = [
         {
           email: this.newEmail,
-          confirmedAt: new Date()
-        }
+          confirmedAt: new Date(),
+        },
       ]
       this.UserGetter.promises.getUser.resolves(this.stubbedUser)
       this.NewsletterManager.promises.changeEmail.callsArgWith(2, null)
@@ -566,7 +566,7 @@ describe('UserUpdater', function () {
             this.auditLog.ipAddress,
             {
               newPrimaryEmail: this.newEmail,
-              oldPrimaryEmail: this.stubbedUser.email
+              oldPrimaryEmail: this.stubbedUser.email,
             }
           )
           done()
@@ -595,8 +595,8 @@ describe('UserUpdater', function () {
         this.stubbedUser.emails = [
           {
             email: this.newEmail,
-            confirmedAt: null
-          }
+            confirmedAt: null,
+          },
         ]
         this.UserUpdater.promises.updateUser = sinon.stub()
       })
@@ -691,7 +691,7 @@ describe('UserUpdater', function () {
                 const loggerCall = this.logger.error.firstCall
                 expect(loggerCall.args[0]).to.deep.equal({
                   error: anError,
-                  userId: this.stubbedUser._id
+                  userId: this.stubbedUser._id,
                 })
                 expect(loggerCall.args[1]).to.contain(
                   'could not send security alert email when primary email changed'
@@ -720,15 +720,15 @@ describe('UserUpdater', function () {
             .calledWith(
               {
                 _id: this.stubbedUser._id,
-                'emails.email': this.stubbedUserEmail
+                'emails.email': this.stubbedUserEmail,
               },
               {
                 $set: {
-                  'emails.$.reconfirmedAt': new Date()
+                  'emails.$.reconfirmedAt': new Date(),
                 },
                 $min: {
-                  'emails.$.confirmedAt': new Date()
-                }
+                  'emails.$.confirmedAt': new Date(),
+                },
               }
             )
             .should.equal(true)

@@ -21,14 +21,14 @@ function HorizontalTestUI(props) {
 
 VerticalTestUI.propTypes = {
   expandableProps: PropTypes.object,
-  toggleProps: PropTypes.object
+  toggleProps: PropTypes.object,
 }
 
 HorizontalTestUI.propTypes = VerticalTestUI.propTypes
 
 TestUI.propTypes = {
   ...VerticalTestUI.propTypes,
-  children: PropTypes.node
+  children: PropTypes.node,
 }
 
 export const Vertical = args => {
@@ -51,7 +51,7 @@ export const VerticalInitiallyExpanded = args => {
   )
 }
 VerticalInitiallyExpanded.args = {
-  initiallyExpanded: true
+  initiallyExpanded: true,
 }
 
 export const VerticalWithMinSize = args => {
@@ -64,7 +64,7 @@ export const VerticalWithMinSize = args => {
   )
 }
 VerticalWithMinSize.args = {
-  collapsedSize: 200
+  collapsedSize: 200,
 }
 
 export const Horizontal = args => {
@@ -77,7 +77,7 @@ export const Horizontal = args => {
   )
 }
 Horizontal.args = {
-  dimension: 'width'
+  dimension: 'width',
 }
 
 export const HorizontalInitiallyExpanded = args => {
@@ -90,7 +90,7 @@ export const HorizontalInitiallyExpanded = args => {
   )
 }
 HorizontalInitiallyExpanded.args = {
-  initiallyExpanded: true
+  initiallyExpanded: true,
 }
 
 export const HorizontalWithMinSize = args => {
@@ -104,7 +104,7 @@ export const HorizontalWithMinSize = args => {
 }
 HorizontalWithMinSize.args = {
   dimension: 'width',
-  collapsedSize: 200
+  collapsedSize: 200,
 }
 
 const defaultContentStyles = {
@@ -115,7 +115,7 @@ const defaultContentStyles = {
   backgroundImage: 'linear-gradient(to bottom, red, blue)',
   width: '500px',
   height: '500px',
-  color: '#FFF'
+  color: '#FFF',
 }
 
 const verticalContents = <div style={defaultContentStyles}>Vertical</div>
@@ -124,7 +124,7 @@ const horizontalContents = (
   <div
     style={{
       ...defaultContentStyles,
-      backgroundImage: 'linear-gradient(to right, red, blue)'
+      backgroundImage: 'linear-gradient(to right, red, blue)',
     }}
   >
     Horizontal
@@ -132,5 +132,5 @@ const horizontalContents = (
 )
 
 export default {
-  title: 'useExpandCollapse'
+  title: 'useExpandCollapse',
 }

@@ -31,5 +31,5 @@ export default function FileTreeModalCreateFileMode({ mode, icon, label }) {
 FileTreeModalCreateFileMode.propTypes = {
   mode: PropTypes.string.isRequired,
   icon: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired
+  label: PropTypes.string.isRequired,
 }

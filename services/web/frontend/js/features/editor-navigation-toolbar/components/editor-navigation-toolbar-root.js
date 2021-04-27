@@ -11,7 +11,7 @@ const editorContextPropTypes = {
   isRestrictedTokenMember: PropTypes.bool,
   projectName: PropTypes.string.isRequired,
   renameProject: PropTypes.func.isRequired,
-  isProjectOwner: PropTypes.bool
+  isProjectOwner: PropTypes.bool,
 }
 
 const layoutContextPropTypes = {
@@ -22,18 +22,18 @@ const layoutContextPropTypes = {
   view: PropTypes.string,
   setView: PropTypes.func.isRequired,
   setLeftMenuShown: PropTypes.func.isRequired,
-  pdfLayout: PropTypes.string.isRequired
+  pdfLayout: PropTypes.string.isRequired,
 }
 
 const chatContextPropTypes = {
   resetUnreadMessageCount: PropTypes.func.isRequired,
-  unreadMessageCount: PropTypes.number.isRequired
+  unreadMessageCount: PropTypes.number.isRequired,
 }
 
 function EditorNavigationToolbarRoot({
   onlineUsersArray,
   openDoc,
-  openShareProjectModal
+  openShareProjectModal,
 }) {
   const {
     cobranding,
@@ -41,7 +41,7 @@ function EditorNavigationToolbarRoot({
     isRestrictedTokenMember,
     projectName,
     renameProject,
-    isProjectOwner
+    isProjectOwner,
   } = useEditorContext(editorContextPropTypes)
 
   const {
@@ -52,7 +52,7 @@ function EditorNavigationToolbarRoot({
     view,
     setView,
     setLeftMenuShown,
-    pdfLayout
+    pdfLayout,
   } = useLayoutContext(layoutContextPropTypes)
 
   const { resetUnreadMessageCount, unreadMessageCount } = useChatContext(
@@ -124,7 +124,7 @@ function EditorNavigationToolbarRoot({
 EditorNavigationToolbarRoot.propTypes = {
   onlineUsersArray: PropTypes.array.isRequired,
   openDoc: PropTypes.func.isRequired,
-  openShareProjectModal: PropTypes.func.isRequired
+  openShareProjectModal: PropTypes.func.isRequired,
 }
 
 export default EditorNavigationToolbarRoot

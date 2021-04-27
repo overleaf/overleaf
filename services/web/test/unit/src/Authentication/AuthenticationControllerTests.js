@@ -13,66 +13,66 @@ describe('AuthenticationController', function () {
     tk.freeze(Date.now())
     this.UserModel = { findOne: sinon.stub() }
     this.httpAuthUsers = {
-      'valid-test-user': Math.random().toString(16).slice(2)
+      'valid-test-user': Math.random().toString(16).slice(2),
     }
     this.AuthenticationController = SandboxedModule.require(modulePath, {
       requires: {
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
-          addEntry: sinon.stub().yields(null)
+          addEntry: sinon.stub().yields(null),
         }),
         '../Helpers/AsyncFormHelper': (this.AsyncFormHelper = {
-          redirect: sinon.stub()
+          redirect: sinon.stub(),
         }),
         '../../infrastructure/RequestContentTypeDetection': {
-          acceptsJson: (this.acceptsJson = sinon.stub().returns(false))
+          acceptsJson: (this.acceptsJson = sinon.stub().returns(false)),
         },
         './AuthenticationManager': (this.AuthenticationManager = {}),
         '../User/UserUpdater': (this.UserUpdater = {
-          updateUser: sinon.stub()
+          updateUser: sinon.stub(),
         }),
         '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
         '../Security/LoginRateLimiter': (this.LoginRateLimiter = {
           processLoginRequest: sinon.stub(),
-          recordSuccessfulLogin: sinon.stub()
+          recordSuccessfulLogin: sinon.stub(),
         }),
         '../User/UserHandler': (this.UserHandler = {
-          setupLoginData: sinon.stub()
+          setupLoginData: sinon.stub(),
         }),
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
           recordEvent: sinon.stub(),
-          identifyUser: sinon.stub()
+          identifyUser: sinon.stub(),
         }),
         '../../infrastructure/SessionStoreManager': (this.SessionStoreManager = {}),
         'settings-sharelatex': (this.Settings = {
           siteUrl: 'http://www.foo.bar',
-          httpAuthUsers: this.httpAuthUsers
+          httpAuthUsers: this.httpAuthUsers,
         }),
         passport: (this.passport = {
-          authenticate: sinon.stub().returns(sinon.stub())
+          authenticate: sinon.stub().returns(sinon.stub()),
         }),
         '../User/UserSessionsManager': (this.UserSessionsManager = {
           trackSession: sinon.stub(),
           untrackSession: sinon.stub(),
-          revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
+          revokeAllUserSessions: sinon.stub().callsArgWith(1, null),
         }),
         '../../infrastructure/Modules': (this.Modules = {
-          hooks: { fire: sinon.stub().yields(null, []) }
+          hooks: { fire: sinon.stub().yields(null, []) },
         }),
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
-          ipMatcherAffiliation: sinon.stub().returns({ create: sinon.stub() })
+          ipMatcherAffiliation: sinon.stub().returns({ create: sinon.stub() }),
         }),
         '../../models/User': { User: this.UserModel },
         '../../../../modules/oauth2-server/app/src/Oauth2Server': (this.Oauth2Server = {
           Request: sinon.stub(),
           Response: sinon.stub(),
           server: {
-            authenticate: sinon.stub()
-          }
+            authenticate: sinon.stub(),
+          },
         }),
         '../Helpers/UrlHelper': (this.UrlHelper = {
-          getSafeRedirectPath: sinon.stub()
-        })
-      }
+          getSafeRedirectPath: sinon.stub(),
+        }),
+      },
     })
     this.UrlHelper.getSafeRedirectPath
       .withArgs('https://evil.com')
@@ -84,7 +84,7 @@ describe('AuthenticationController', function () {
       first_name: 'bob',
       last_name: 'brown',
       referal_id: 1234,
-      isAdmin: false
+      isAdmin: false,
     }
     this.password = 'banana'
     this.req = new MockRequest()
@@ -102,15 +102,15 @@ describe('AuthenticationController', function () {
       this.Settings.adminDomains = ['good.example.com']
       this.goodAdmin = {
         email: 'alice@good.example.com',
-        isAdmin: true
+        isAdmin: true,
       }
       this.badAdmin = {
         email: 'beatrice@bad.example.com',
-        isAdmin: true
+        isAdmin: true,
       }
       this.normalUser = {
         email: 'claire@whatever.example.com',
-        isAdmin: false
+        isAdmin: false,
       }
     })
 
@@ -206,7 +206,7 @@ describe('AuthenticationController', function () {
         _id: 'id',
         first_name: 'a',
         last_name: 'b',
-        email: 'c'
+        email: 'c',
       }
       this.AuthenticationController.getSessionUser = sinon
         .stub()
@@ -216,13 +216,13 @@ describe('AuthenticationController', function () {
     it('should update the right properties', function () {
       this.AuthenticationController.setInSessionUser(this.req, {
         first_name: 'new_first_name',
-        email: 'new_email'
+        email: 'new_email',
       })
       const expectedUser = {
         _id: 'id',
         first_name: 'new_first_name',
         last_name: 'b',
-        email: 'new_email'
+        email: 'new_email',
       }
       expect(this.user).to.deep.equal(expectedUser)
       expect(this.user).to.deep.equal(expectedUser)
@@ -236,7 +236,7 @@ describe('AuthenticationController', function () {
       this.res.json = sinon.stub()
       this.req.session = {
         passport: { user: this.user },
-        postLoginRedirect: '/path/to/redir/to'
+        postLoginRedirect: '/path/to/redir/to',
       }
       this.req.session.destroy = sinon.stub().callsArgWith(0, null)
       this.req.session.save = sinon.stub().callsArgWith(0, null)
@@ -327,8 +327,8 @@ describe('AuthenticationController', function () {
         email: this.email,
         password: this.password,
         session: {
-          postLoginRedirect: '/path/to/redir/to'
-        }
+          postLoginRedirect: '/path/to/redir/to',
+        },
       }
       this.cb = sinon.stub()
     })
@@ -461,9 +461,9 @@ describe('AuthenticationController', function () {
       this.req.session = {
         passport: {
           user: {
-            _id: this.user_id
-          }
-        }
+            _id: this.user_id,
+          },
+        },
       }
       const result = this.AuthenticationController.getLoggedInUserId(this.req)
       expect(result).to.equal(this.user_id)
@@ -491,7 +491,7 @@ describe('AuthenticationController', function () {
     beforeEach(function () {
       this.user = {
         _id: 'user-id-123',
-        email: 'user@sharelatex.com'
+        email: 'user@sharelatex.com',
       }
       this.middleware = this.AuthenticationController.requireLogin()
     })
@@ -501,8 +501,8 @@ describe('AuthenticationController', function () {
         this.req.session = {
           user: (this.user = {
             _id: 'user-id-123',
-            email: 'user@sharelatex.com'
-          })
+            email: 'user@sharelatex.com',
+          }),
         }
         this.middleware(this.req, this.res, this.next)
       })
@@ -532,7 +532,7 @@ describe('AuthenticationController', function () {
     beforeEach(function () {
       this.user = {
         _id: 'user-id-123',
-        email: 'user@sharelatex.com'
+        email: 'user@sharelatex.com',
       }
       this.middleware = this.AuthenticationController.validateUserSession()
     })
@@ -553,7 +553,7 @@ describe('AuthenticationController', function () {
       beforeEach(function () {
         this.req.session = {
           user: this.user,
-          regenerate: sinon.stub().yields()
+          regenerate: sinon.stub().yields(),
         }
         this.req.user = this.user
         this.AuthenticationController._redirectToLoginOrRegisterPage = sinon.stub()
@@ -588,7 +588,7 @@ describe('AuthenticationController', function () {
       beforeEach(function () {
         this.token = {
           accessToken: 'token',
-          user: 'user'
+          user: 'user',
         }
         this.Oauth2Server.server.authenticate.yields(null, this.token)
         this.middleware(this.req, this.res, this.next)
@@ -730,7 +730,7 @@ describe('AuthenticationController', function () {
     describe('with http auth', function () {
       it('should error with incorrect user', function (done) {
         this.req.headers = {
-          authorization: `Basic ${Buffer.from('user:nope').toString('base64')}`
+          authorization: `Basic ${Buffer.from('user:nope').toString('base64')}`,
         }
         this.req.end = status => {
           expect(status).to.equal('Unauthorized')
@@ -743,7 +743,7 @@ describe('AuthenticationController', function () {
         this.req.headers = {
           authorization: `Basic ${Buffer.from('valid-test-user:nope').toString(
             'base64'
-          )}`
+          )}`,
         }
         this.req.end = status => {
           expect(status).to.equal('Unauthorized')
@@ -756,7 +756,7 @@ describe('AuthenticationController', function () {
         this.req.headers = {
           authorization: `Basic ${Buffer.from(`invalid-test-user:`).toString(
             'base64'
-          )}`
+          )}`,
         }
         this.req.end = status => {
           expect(status).to.equal('Unauthorized')
@@ -769,7 +769,7 @@ describe('AuthenticationController', function () {
         this.req.headers = {
           authorization: `Basic ${Buffer.from(
             `valid-test-user:${this.httpAuthUsers['valid-test-user']}`
-          ).toString('base64')}`
+          ).toString('base64')}`,
         }
         this.AuthenticationController.httpAuth(this.req, this.res, done)
       })
@@ -1016,7 +1016,7 @@ describe('AuthenticationController', function () {
 
       this.req.sessionID = 'thisisacryptographicallysecurerandomid'
       this.req.session = {
-        passport: { user: { _id: 'one' } }
+        passport: { user: { _id: 'one' } },
       }
       this.req.session.destroy = sinon.stub().callsArgWith(0, null)
       this.req.session.save = sinon.stub().callsArgWith(0, null)

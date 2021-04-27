@@ -6,7 +6,7 @@ const { getCsrfTokenForFactory } = require('./support/Csrf')
 const { SmokeTestFailure } = require('./support/Errors')
 const {
   requestFactory,
-  assertHasStatusCode
+  assertHasStatusCode,
 } = require('./support/requestHelper')
 const { processWithTimeout } = require('./support/timeoutHelper')
 
@@ -38,7 +38,7 @@ async function runSmokeTests({ isAborted, stats }) {
     processWithTimeout,
     request,
     stats,
-    timeout: STEP_TIMEOUT
+    timeout: STEP_TIMEOUT,
   }
   const cleanupSteps = []
 
@@ -87,7 +87,7 @@ async function runSmokeTests({ isAborted, stats }) {
     if (cleanupErrors.length === 1) throw cleanupErrors[0]
     throw new SmokeTestFailure('multiple cleanup steps failed', {
       stats,
-      cleanupErrors
+      cleanupErrors,
     })
   }
 }

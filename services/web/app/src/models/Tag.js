@@ -7,7 +7,7 @@ const { Schema } = mongoose
 const TagSchema = new Schema({
   user_id: { type: String, required: true },
   name: { type: String, required: true },
-  project_ids: [String]
+  project_ids: [String],
 })
 
 exports.Tag = mongoose.model('Tag', TagSchema)

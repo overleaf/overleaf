@@ -1,7 +1,7 @@
 const { UserSchema } = require('../../models/User')
 
 module.exports = {
-  hasAnyStaffAccess
+  hasAnyStaffAccess,
 }
 
 function hasAnyStaffAccess(user) {

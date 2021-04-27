@@ -15,49 +15,49 @@ describe('InstitutionsManager', function () {
     this.refreshFeatures = sinon.stub().yields()
     this.UserGetter = {
       getUsersByAnyConfirmedEmail: sinon.stub().yields(),
-      getUser: sinon.stub().callsArgWith(1, null, this.user)
+      getUser: sinon.stub().callsArgWith(1, null, this.user),
     }
     this.creator = { create: sinon.stub().callsArg(0) }
     this.NotificationsBuilder = {
       featuresUpgradedByAffiliation: sinon.stub().returns(this.creator),
-      redundantPersonalSubscription: sinon.stub().returns(this.creator)
+      redundantPersonalSubscription: sinon.stub().returns(this.creator),
     }
     this.SubscriptionLocator = {
-      getUsersSubscription: sinon.stub().callsArg(1)
+      getUsersSubscription: sinon.stub().callsArg(1),
     }
     this.institutionWithV1Data = { name: 'Wombat University' }
     this.institution = {
       fetchV1Data: sinon
         .stub()
-        .callsArgWith(0, null, this.institutionWithV1Data)
+        .callsArgWith(0, null, this.institutionWithV1Data),
     }
     this.InstitutionModel = {
       Institution: {
-        findOne: sinon.stub().callsArgWith(1, null, this.institution)
-      }
+        findOne: sinon.stub().callsArgWith(1, null, this.institution),
+      },
     }
     this.subscriptionExec = sinon.stub().yields()
     this.SAMLIdentityManager = {
-      userHasEntitlement: sinon.stub().returns(false)
+      userHasEntitlement: sinon.stub().returns(false),
     }
     const SubscriptionModel = {
       Subscription: {
         find: () => ({
           populate: () => ({
-            exec: this.subscriptionExec
-          })
-        })
-      }
+            exec: this.subscriptionExec,
+          }),
+        }),
+      },
     }
     this.Mongo = { ObjectId: sinon.stub().returnsArg(0) }
 
     this.InstitutionsManager = SandboxedModule.require(modulePath, {
       requires: {
         './InstitutionsAPI': {
-          getInstitutionAffiliations: this.getInstitutionAffiliations
+          getInstitutionAffiliations: this.getInstitutionAffiliations,
         },
         '../Subscription/FeaturesUpdater': {
-          refreshFeatures: this.refreshFeatures
+          refreshFeatures: this.refreshFeatures,
         },
         '../User/UserGetter': this.UserGetter,
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
@@ -65,8 +65,8 @@ describe('InstitutionsManager', function () {
         '../../models/Institution': this.InstitutionModel,
         '../../models/Subscription': SubscriptionModel,
         mongodb: this.Mongo,
-        '../User/SAMLIdentityManager': this.SAMLIdentityManager
-      }
+        '../User/SAMLIdentityManager': this.SAMLIdentityManager,
+      },
     })
   })
 
@@ -79,7 +79,7 @@ describe('InstitutionsManager', function () {
       this.user2 = { _id: this.user2Id }
       this.subscription = {
         planCode: 'pro',
-        groupPlan: false
+        groupPlan: false,
       }
       this.UserGetter.getUser
         .withArgs(this.user1Id)
@@ -159,16 +159,16 @@ describe('InstitutionsManager', function () {
       const stubbedUsers = [
         {
           _id: '123abc123abc123abc123abc',
-          features: { collaborators: -1, trackChanges: true }
+          features: { collaborators: -1, trackChanges: true },
         },
         {
           _id: '456def456def456def456def',
-          features: { collaborators: 10, trackChanges: false }
+          features: { collaborators: 10, trackChanges: false },
         },
         {
           _id: '789def789def789def789def',
-          features: { collaborators: -1, trackChanges: false }
-        }
+          features: { collaborators: -1, trackChanges: false },
+        },
       ]
       this.getInstitutionAffiliations.yields(null, affiliations)
       this.UserGetter.getUsersByAnyConfirmedEmail.yields(null, stubbedUsers)
@@ -185,14 +185,14 @@ describe('InstitutionsManager', function () {
           usersSummary.confirmedEmailUsers.totalNonProUsers.should.equal(2)
           expect(usersSummary.confirmedEmailUsers.nonProUsers).to.deep.equal([
             '456def456def456def456def',
-            '789def789def789def789def'
+            '789def789def789def789def',
           ])
 
           usersSummary.entitledSSOUsers.total.should.equal(2)
           usersSummary.entitledSSOUsers.totalProUsers.should.equal(1)
           usersSummary.entitledSSOUsers.totalNonProUsers.should.equal(1)
           expect(usersSummary.entitledSSOUsers.nonProUsers).to.deep.equal([
-            '456def456def456def456def'
+            '456def456def456def456def',
           ])
           done()
         }
@@ -205,7 +205,7 @@ describe('InstitutionsManager', function () {
       const stubbedUsers = [
         { user_id: '123abc123abc123abc123abc' },
         { user_id: '456def456def456def456def' },
-        { user_id: '789def789def789def789def' }
+        { user_id: '789def789def789def789def' },
       ]
       this.getInstitutionAffiliations.yields(null, stubbedUsers)
       this.InstitutionsManager.getInstitutionUsersSubscriptions(

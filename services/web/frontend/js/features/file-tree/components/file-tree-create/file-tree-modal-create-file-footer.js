@@ -27,7 +27,7 @@ export function FileTreeModalCreateFileFooterContent({
   fileCount,
   inFlight,
   newFileCreateMode,
-  cancel
+  cancel,
 }) {
   const { t } = useTranslation()
 
@@ -74,9 +74,9 @@ FileTreeModalCreateFileFooterContent.propTypes = {
   fileCount: PropTypes.shape({
     limit: PropTypes.number.isRequired,
     status: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired
+    value: PropTypes.number.isRequired,
   }).isRequired,
   inFlight: PropTypes.bool.isRequired,
   newFileCreateMode: PropTypes.string,
-  valid: PropTypes.bool.isRequired
+  valid: PropTypes.bool.isRequired,
 }

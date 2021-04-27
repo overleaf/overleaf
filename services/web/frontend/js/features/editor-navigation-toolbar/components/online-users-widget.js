@@ -57,10 +57,10 @@ OnlineUsersWidget.propTypes = {
   onlineUsers: PropTypes.arrayOf(
     PropTypes.shape({
       user_id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired
+      name: PropTypes.string.isRequired,
     })
   ).isRequired,
-  goToUser: PropTypes.func.isRequired
+  goToUser: PropTypes.func.isRequired,
 }
 
 function UserIcon({ user, showName, onClick }) {
@@ -86,10 +86,10 @@ function UserIcon({ user, showName, onClick }) {
 UserIcon.propTypes = {
   user: PropTypes.shape({
     user_id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired
+    name: PropTypes.string.isRequired,
   }),
   showName: PropTypes.bool,
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
 }
 
 const DropDownToggleButton = React.forwardRef((props, ref) => {
@@ -114,7 +114,7 @@ const DropDownToggleButton = React.forwardRef((props, ref) => {
 
 DropDownToggleButton.propTypes = {
   onlineUserCount: PropTypes.number.isRequired,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
 }
 
 export default OnlineUsersWidget

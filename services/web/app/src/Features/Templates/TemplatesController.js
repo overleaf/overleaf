@@ -65,5 +65,5 @@ module.exports = TemplatesController = {
         return res.redirect(`/project/${project._id}`)
       }
     )
-  }
+  },
 }

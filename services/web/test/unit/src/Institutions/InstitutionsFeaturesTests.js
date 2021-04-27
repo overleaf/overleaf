@@ -29,9 +29,9 @@ describe('InstitutionsFeatures', function () {
         '../User/UserGetter': this.UserGetter,
         '../Subscription/PlansLocator': this.PlansLocator,
         'settings-sharelatex': {
-          institutionPlanCode: this.institutionPlanCode
-        }
-      }
+          institutionPlanCode: this.institutionPlanCode,
+        },
+      },
     })
 
     return (this.userId = '12345abcde')
@@ -65,7 +65,7 @@ describe('InstitutionsFeatures', function () {
     it('should return true if user has confirmed paid affiliation', function (done) {
       const emailData = [
         { emailHasInstitutionLicence: true },
-        { emailHasInstitutionLicence: false }
+        { emailHasInstitutionLicence: false },
       ]
       this.UserGetter.getUserFullEmails.yields(null, emailData)
       return this.InstitutionsFeatures.hasLicence(

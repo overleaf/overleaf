@@ -5,7 +5,7 @@ export function renameInTree(tree, id, { newName }) {
     const newParent = Object.assign([], parent)
     const newEntity = {
       ...entity,
-      name: newName
+      name: newName,
     }
     newParent[index] = newEntity
     return newParent
@@ -27,7 +27,7 @@ export function moveInTree(tree, entityId, toFolderId) {
   const newFileTreeData = deleteInTree(tree, entityId)
   return createEntityInTree(newFileTreeData, toFolderId, {
     ...found.entity,
-    type: found.type
+    type: found.type,
   })
 }
 
@@ -39,7 +39,7 @@ export function createEntityInTree(tree, parentFolderId, newEntityData) {
   return mutateInTree(tree, parentFolderId, (parent, folder, index) => {
     parent[index] = {
       ...folder,
-      [entityType]: [...folder[entityType], newEntity]
+      [entityType]: [...folder[entityType], newEntity],
     }
     return parent
   })
@@ -60,7 +60,7 @@ function mutateInTree(tree, id, mutationFunction) {
       if (entity._id === id) {
         return {
           ...tree,
-          [entityType]: mutationFunction(tree[entityType], entity, index)
+          [entityType]: mutationFunction(tree[entityType], entity, index),
         }
       }
     }

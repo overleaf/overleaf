@@ -20,10 +20,10 @@ const DEFAULT_V1_PARAMS = {
   baseUrl: settings.apis.v1.url,
   auth: {
     user: settings.apis.v1.user,
-    pass: settings.apis.v1.pass
+    pass: settings.apis.v1.pass,
   },
   json: true,
-  timeout: 30 * 1000
+  timeout: 30 * 1000,
 }
 
 const v1Request = request.defaults(DEFAULT_V1_PARAMS)
@@ -31,7 +31,7 @@ const v1Request = request.defaults(DEFAULT_V1_PARAMS)
 const DEFAULT_V1_OAUTH_PARAMS = {
   baseUrl: settings.apis.v1.url,
   json: true,
-  timeout: 30 * 1000
+  timeout: 30 * 1000,
 }
 
 const v1OauthRequest = request.defaults(DEFAULT_V1_OAUTH_PARAMS)
@@ -69,7 +69,7 @@ const V1Api = {
       return callback(
         new Errors.V1ConnectionError({
           message: 'error from V1 API',
-          info: { status: response.statusCode, body: body }
+          info: { status: response.statusCode, body: body },
         })
       )
     }
@@ -97,13 +97,13 @@ const V1Api = {
       error.statusCode = response.statusCode
       return callback(error)
     }
-  }
+  },
 }
 
 V1Api.promises = promisifyAll(V1Api, {
   multiResult: {
     request: ['response', 'body'],
-    oauthRequest: ['response', 'body']
-  }
+    oauthRequest: ['response', 'body'],
+  },
 })
 module.exports = V1Api

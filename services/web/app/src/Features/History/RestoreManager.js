@@ -153,5 +153,5 @@ module.exports = RestoreManager = {
       Settings.apis.project_history.url
     }/project/${project_id}/version/${version}/${encodeURIComponent(pathname)}`
     return FileWriter.writeUrlToDisk(project_id, url, callback)
-  }
+  },
 }

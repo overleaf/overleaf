@@ -14,11 +14,11 @@ i18n.use(initReactI18next).init({
   lng: 'en',
 
   resources: {
-    en: { translation: en }
+    en: { translation: en },
   },
 
   react: {
-    useSuspense: false
+    useSuspense: false,
   },
 
   interpolation: {
@@ -27,9 +27,9 @@ i18n.use(initReactI18next).init({
     unescapeSuffix: 'HTML',
     skipOnVariables: true,
     defaultVariables: {
-      appName: 'Overleaf'
-    }
-  }
+      appName: 'Overleaf',
+    },
+  },
 })
 
 export const parameters = {
@@ -39,8 +39,8 @@ export const parameters = {
   actions: { argTypesRegex: '^on.*' },
   docs: {
     // render stories in iframes, to isolate modals
-    inlineStories: false
-  }
+    inlineStories: false,
+  },
 }
 
 export const globalTypes = {
@@ -53,10 +53,10 @@ export const globalTypes = {
       items: [
         { value: 'default-', title: 'Default' },
         { value: 'light-', title: 'Light' },
-        { value: 'ieee-', title: 'IEEE' }
-      ]
-    }
-  }
+        { value: 'ieee-', title: 'IEEE' },
+      ],
+    },
+  },
 }
 
 export const loaders = [
@@ -68,9 +68,9 @@ export const loaders = [
       // so that webpack only bundles files ending with "style.less"
       activeStyle: await import(
         `../frontend/stylesheets/${theme === 'default-' ? '' : theme}style.less`
-      )
+      ),
     }
-  }
+  },
 ]
 
 const withTheme = (Story, context) => {
@@ -88,5 +88,5 @@ export const decorators = [withTheme]
 
 window.ExposedSettings = {
   maxEntitiesPerProject: 10,
-  maxUploadSize: 5 * 1024 * 1024
+  maxUploadSize: 5 * 1024 * 1024,
 }

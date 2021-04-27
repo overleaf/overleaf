@@ -19,14 +19,14 @@ App.directive('focusWhen', $timeout => ({
         return $timeout(() => element.focus())
       }
     })
-  }
+  },
 }))
 
 App.directive('focusOn', $timeout => ({
   restrict: 'A',
   link(scope, element, attrs) {
     return scope.$on(attrs.focusOn, () => element.focus())
-  }
+  },
 }))
 
 App.directive('selectWhen', $timeout => ({
@@ -37,14 +37,14 @@ App.directive('selectWhen', $timeout => ({
         return $timeout(() => element.select())
       }
     })
-  }
+  },
 }))
 
 App.directive('selectOn', $timeout => ({
   restrict: 'A',
   link(scope, element, attrs) {
     return scope.$on(attrs.selectOn, () => element.select())
-  }
+  },
 }))
 
 App.directive('selectNameWhen', $timeout => ({
@@ -55,19 +55,19 @@ App.directive('selectNameWhen', $timeout => ({
         return $timeout(() => selectName(element))
       }
     })
-  }
+  },
 }))
 
 App.directive('selectNameOn', () => ({
   restrict: 'A',
   link(scope, element, attrs) {
     return scope.$on(attrs.selectNameOn, () => selectName(element))
-  }
+  },
 }))
 
 App.directive('focus', $timeout => ({
   scope: {
-    trigger: '@focus'
+    trigger: '@focus',
   },
 
   link(scope, element) {
@@ -76,7 +76,7 @@ App.directive('focus', $timeout => ({
         return $timeout(() => element[0].focus())
       }
     })
-  }
+  },
 }))
 
 selectName = function (element) {

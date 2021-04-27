@@ -28,7 +28,7 @@ async function _addAuditLogEntry(
     {
       institutionEmail,
       providerId,
-      providerName
+      providerName,
     }
   )
 }
@@ -114,23 +114,23 @@ async function _addIdentifier(
   const query = {
     _id: userId,
     'samlIdentifiers.providerId': {
-      $ne: providerId
-    }
+      $ne: providerId,
+    },
   }
   const update = {
     $push: {
       samlIdentifiers: {
         hasEntitlement,
         externalUserId,
-        providerId
-      }
-    }
+        providerId,
+      },
+    },
   }
 
   try {
     // update v2 user record
     const updatedUser = await User.findOneAndUpdate(query, update, {
-      new: true
+      new: true,
     }).exec()
     if (!updatedUser) {
       throw new OError('No update while linking user')
@@ -149,12 +149,12 @@ async function _addInstitutionEmail(userId, email, providerId, auditLog) {
   const user = await UserGetter.promises.getUser(userId)
   const query = {
     _id: userId,
-    'emails.email': email
+    'emails.email': email,
   }
   const update = {
     $set: {
-      'emails.$.samlProviderId': providerId.toString()
-    }
+      'emails.$.samlProviderId': providerId.toString(),
+    },
   }
   if (user == null) {
     throw new Errors.NotFoundError('user not found')
@@ -182,8 +182,8 @@ async function _sendLinkedEmail(userId, providerName, institutionEmail) {
     actionDescribed: `an Institutional SSO account at ${providerName} was linked to your account ${user.email}`,
     action: 'institutional SSO account linked',
     message: [
-      `<span style="display:inline-block;padding: 0 20px;width:100%;">Linked: <br/><b>${institutionEmail}</b></span>`
-    ]
+      `<span style="display:inline-block;padding: 0 20px;width:100%;">Linked: <br/><b>${institutionEmail}</b></span>`,
+    ],
   }
   EmailHandler.sendEmail('securityAlert', emailOptions, error => {
     if (error) {
@@ -198,8 +198,8 @@ function _sendUnlinkedEmail(primaryEmail, providerName, institutionEmail) {
     actionDescribed: `an Institutional SSO account at ${providerName} was unlinked from your account ${primaryEmail}`,
     action: 'institutional SSO account no longer linked',
     message: [
-      `<span style="display:inline-block;padding: 0 20px;width:100%;">No longer linked: <br/><b>${institutionEmail}</b></span>`
-    ]
+      `<span style="display:inline-block;padding: 0 20px;width:100%;">No longer linked: <br/><b>${institutionEmail}</b></span>`,
+    ],
   }
   EmailHandler.sendEmail('securityAlert', emailOptions, error => {
     if (error) {
@@ -216,7 +216,7 @@ async function getUser(providerId, externalUserId) {
   }
   const user = await User.findOne({
     'samlIdentifiers.externalUserId': externalUserId.toString(),
-    'samlIdentifiers.providerId': providerId.toString()
+    'samlIdentifiers.providerId': providerId.toString(),
   }).exec()
 
   return user
@@ -232,7 +232,7 @@ async function redundantSubscription(userId, providerId, providerName) {
       .redundantPersonalSubscription(
         {
           institutionId: providerId,
-          institutionName: providerName
+          institutionName: providerName,
         },
         { _id: userId }
       )
@@ -309,14 +309,14 @@ async function _removeIdentifier(userId, providerId) {
   providerId = providerId.toString()
 
   const query = {
-    _id: userId
+    _id: userId,
   }
   const update = {
     $pull: {
       samlIdentifiers: {
-        providerId
-      }
-    }
+        providerId,
+      },
+    },
   }
   await User.updateOne(query, update).exec()
 }
@@ -331,12 +331,12 @@ async function updateEntitlement(
   hasEntitlement = !!hasEntitlement
   const query = {
     _id: userId,
-    'samlIdentifiers.providerId': providerId.toString()
+    'samlIdentifiers.providerId': providerId.toString(),
   }
   const update = {
     $set: {
-      'samlIdentifiers.$.hasEntitlement': hasEntitlement
-    }
+      'samlIdentifiers.$.hasEntitlement': hasEntitlement,
+    },
   }
   // update v2 user
   await User.updateOne(query, update).exec()
@@ -393,7 +393,7 @@ const SAMLIdentityManager = {
   redundantSubscription,
   unlinkAccounts,
   updateEntitlement,
-  userHasEntitlement
+  userHasEntitlement,
 }
 
 module.exports = SAMLIdentityManager

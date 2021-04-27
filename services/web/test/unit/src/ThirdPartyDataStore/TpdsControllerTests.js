@@ -10,27 +10,27 @@ describe('TpdsController', function () {
   beforeEach(function () {
     this.TpdsUpdateHandler = {}
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns('user-id')
+      getLoggedInUserId: sinon.stub().returns('user-id'),
     }
     this.TpdsQueueManager = {
       promises: {
-        getQueues: sinon.stub().returns('queues')
-      }
+        getQueues: sinon.stub().returns('queues'),
+      },
     }
     this.TpdsController = SandboxedModule.require(modulePath, {
       requires: {
         './TpdsUpdateHandler': this.TpdsUpdateHandler,
         './UpdateMerger': (this.UpdateMerger = {}),
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
-          tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() })
+          tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() }),
         }),
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         './TpdsQueueManager': this.TpdsQueueManager,
         '@overleaf/metrics': {
-          inc() {}
-        }
-      }
+          inc() {},
+        },
+      },
     })
 
     this.user_id = 'dsad29jlkjas'
@@ -43,11 +43,11 @@ describe('TpdsController', function () {
         pause() {},
         params: { 0: path, user_id: this.user_id },
         session: {
-          destroy() {}
+          destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
       }
       this.TpdsUpdateHandler.newUpdate = sinon.stub().callsArg(5)
       const res = {
@@ -62,7 +62,7 @@ describe('TpdsController', function () {
             )
             .should.equal(true)
           done()
-        }
+        },
       }
       this.TpdsController.mergeUpdate(req, res)
     })
@@ -73,17 +73,17 @@ describe('TpdsController', function () {
         pause() {},
         params: { 0: path, user_id: this.user_id },
         session: {
-          destroy() {}
+          destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
       }
       this.TpdsUpdateHandler.newUpdate = sinon
         .stub()
         .callsArgWith(5, 'update-receiver-error')
       const res = {
-        sendStatus: sinon.stub()
+        sendStatus: sinon.stub(),
       }
       this.TpdsController.mergeUpdate(req, res)
       res.sendStatus.calledWith(500).should.equal(true)
@@ -95,17 +95,17 @@ describe('TpdsController', function () {
         pause() {},
         params: { 0: path, user_id: this.user_id, projectName: 'projectName' },
         session: {
-          destroy() {}
+          destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
       }
       this.TpdsUpdateHandler.newUpdate = sinon
         .stub()
         .callsArgWith(5, { message: 'project_has_too_many_files' })
       const res = {
-        sendStatus: sinon.stub()
+        sendStatus: sinon.stub(),
       }
       this.TpdsController.mergeUpdate(req, res)
       res.sendStatus.calledWith(400).should.equal(true)
@@ -120,17 +120,17 @@ describe('TpdsController', function () {
         pause() {},
         params: { 0: path, user_id: this.user_id },
         session: {
-          destroy() {}
+          destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
       }
       this.TpdsUpdateHandler.newUpdate = sinon
         .stub()
         .callsArgWith(5, new Errors.TooManyRequestsError('project on cooldown'))
       const res = {
-        sendStatus: sinon.stub()
+        sendStatus: sinon.stub(),
       }
       this.TpdsController.mergeUpdate(req, res)
       res.sendStatus.calledWith(429).should.equal(true)
@@ -143,11 +143,11 @@ describe('TpdsController', function () {
       const req = {
         params: { 0: path, user_id: this.user_id },
         session: {
-          destroy() {}
+          destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox')
-        }
+          'x-sl-update-source': (this.source = 'dropbox'),
+        },
       }
       this.TpdsUpdateHandler.deleteUpdate = sinon.stub().callsArg(4)
       const res = {
@@ -156,7 +156,7 @@ describe('TpdsController', function () {
             .calledWith(this.user_id, 'projectName', '/here.txt', this.source)
             .should.equal(true)
           done()
-        }
+        },
       }
       this.TpdsController.deleteUpdate(req, res)
     })
@@ -196,14 +196,14 @@ describe('TpdsController', function () {
       this.req = {
         params: {
           0: (this.path = 'chapters/main.tex'),
-          project_id: (this.project_id = 'project-id-123')
+          project_id: (this.project_id = 'project-id-123'),
         },
         session: {
-          destroy: sinon.stub()
+          destroy: sinon.stub(),
         },
         headers: {
-          'x-sl-update-source': (this.source = 'github')
-        }
+          'x-sl-update-source': (this.source = 'github'),
+        },
       }
       this.res = { sendStatus: sinon.stub() }
 
@@ -233,14 +233,14 @@ describe('TpdsController', function () {
       this.req = {
         params: {
           0: (this.path = 'chapters/main.tex'),
-          project_id: (this.project_id = 'project-id-123')
+          project_id: (this.project_id = 'project-id-123'),
         },
         session: {
-          destroy: sinon.stub()
+          destroy: sinon.stub(),
         },
         headers: {
-          'x-sl-update-source': (this.source = 'github')
-        }
+          'x-sl-update-source': (this.source = 'github'),
+        },
       }
       this.res = { sendStatus: sinon.stub() }
 

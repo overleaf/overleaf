@@ -13,8 +13,8 @@ module.exports = merge(base, {
     // Extract CSS to a separate file (rather than inlining to a <style> tag)
     new MiniCssExtractPlugin({
       // Output to public/stylesheets directory
-      filename: 'stylesheets/[name].css'
-    })
+      filename: 'stylesheets/[name].css',
+    }),
   ],
 
   devServer: {
@@ -33,7 +33,7 @@ module.exports = merge(base, {
       chunks: false,
       modules: false,
       // Hide copied assets from output
-      excludeAssets: [/^js\/ace/, /^js\/libs/, /^js\/cmaps/]
-    }
-  }
+      excludeAssets: [/^js\/ace/, /^js\/libs/, /^js\/cmaps/],
+    },
+  },
 })

@@ -5,7 +5,7 @@ import React, {
   useReducer,
   useEffect,
   useMemo,
-  useState
+  useState,
 } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
@@ -20,7 +20,7 @@ const FileTreeSelectableContext = createContext()
 const ACTION_TYPES = {
   SELECT: 'SELECT',
   MULTI_SELECT: 'MULTI_SELECT',
-  UNSELECT: 'UNSELECT'
+  UNSELECT: 'UNSELECT',
 }
 
 function fileTreeSelectableReadWriteReducer(selectedEntityIds, action) {
@@ -75,7 +75,7 @@ export function FileTreeSelectableProvider({
   hasWritePermissions,
   rootDocId,
   onSelect,
-  children
+  children,
 }) {
   const { projectId } = useFileTreeMainContext()
 
@@ -156,8 +156,8 @@ FileTreeSelectableProvider.propTypes = {
   onSelect: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ]).isRequired
+    PropTypes.node,
+  ]).isRequired,
 }
 
 export function useSelectableEntity(id) {
@@ -207,7 +207,7 @@ export function useSelectableEntity(id) {
       'aria-selected': isSelected,
       onClick: handleClick,
       onContextMenu: handleContextMenu,
-      onKeyPress: handleKeyPress
+      onKeyPress: handleKeyPress,
     }),
     [handleClick, handleContextMenu, handleKeyPress, isSelected]
   )
@@ -238,6 +238,6 @@ export function useFileTreeSelectable() {
     selectedEntityIds,
     selectedEntityParentIds,
     select,
-    unselect
+    unselect,
   }
 }

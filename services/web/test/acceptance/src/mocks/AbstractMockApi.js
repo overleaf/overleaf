@@ -37,7 +37,7 @@ class AbstractMockApi {
     if (this.constructor._obj) {
       throw new OError('mock already initialized', {
         className: this.constructor._obj.constructor.name,
-        port: this.port
+        port: this.port,
       })
     }
     if (this.constructor === AbstractMockApi) {
@@ -66,7 +66,7 @@ class AbstractMockApi {
         path,
         query,
         params,
-        body
+        body,
       })
       const oldEnd = res.end
       const oldJson = res.json

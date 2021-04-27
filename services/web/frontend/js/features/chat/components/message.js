@@ -11,13 +11,13 @@ function Message({ message, userId }) {
   function getMessageStyle(user) {
     return {
       borderColor: `hsl(${hue(user)}, 85%, 40%)`,
-      backgroundColor: `hsl(${hue(user)}, 85%, 40%`
+      backgroundColor: `hsl(${hue(user)}, 85%, 40%`,
     }
   }
 
   function getArrowStyle(user) {
     return {
-      borderColor: `hsl(${hue(user)}, 85%, 40%)`
+      borderColor: `hsl(${hue(user)}, 85%, 40%)`,
     }
   }
 
@@ -50,10 +50,10 @@ Message.propTypes = {
     user: PropTypes.shape({
       id: PropTypes.string,
       email: PropTypes.string,
-      first_name: PropTypes.string
-    })
+      first_name: PropTypes.string,
+    }),
   }),
-  userId: PropTypes.string.isRequired
+  userId: PropTypes.string.isRequired,
 }
 
 export default Message

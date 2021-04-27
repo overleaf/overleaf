@@ -14,7 +14,7 @@ const transparentMethods = [
   'disconnect',
   'emit',
   'on',
-  'removeListener'
+  'removeListener',
 ]
 for (let method of transparentMethods) {
   SocketShimBase.prototype[method] = function () {
@@ -41,7 +41,7 @@ class SocketShimNoop extends SocketShimBase {
       },
 
       connect() {},
-      disconnect(reason) {}
+      disconnect(reason) {},
     }
   }
 
@@ -78,11 +78,11 @@ class SocketShimV2 extends SocketShimBase {
     const connectionFailureEvents = [
       'connect_error',
       'connect_timeout',
-      'error'
+      'error',
     ]
     return new Map([
       ['connect_failed', connectionFailureEvents],
-      ['error', connectionFailureEvents]
+      ['error', connectionFailureEvents],
     ])
   }
 
@@ -198,7 +198,7 @@ class SocketShimV2 extends SocketShimBase {
       },
       disconnect(reason) {
         return self._socket.disconnect(reason)
-      }
+      },
     }
   }
 }
@@ -222,5 +222,5 @@ export default {
   SocketShimV2,
   current,
   connect: current.connect,
-  stub: () => new SocketShimNoop()
+  stub: () => new SocketShimNoop(),
 }

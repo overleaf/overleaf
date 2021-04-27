@@ -71,7 +71,7 @@ const EditorController = {
         if (err != null) {
           OError.tag(err, 'error adding doc without lock', {
             project_id,
-            docName
+            docName,
           })
           return callback(err)
         }
@@ -115,7 +115,7 @@ const EditorController = {
           OError.tag(err, 'error adding file without lock', {
             project_id,
             folder_id,
-            fileName
+            fileName,
           })
           return callback(err)
         }
@@ -333,7 +333,7 @@ const EditorController = {
             project_id,
             folder_id,
             folderName,
-            source
+            source,
           })
           return callback(err)
         }
@@ -365,7 +365,7 @@ const EditorController = {
         if (err != null) {
           OError.tag(err, 'could not mkdirp', {
             project_id,
-            path
+            path,
           })
           return callback(err)
         }
@@ -399,7 +399,7 @@ const EditorController = {
           OError.tag(err, 'could not delete entity', {
             project_id,
             entity_id,
-            entityType
+            entityType,
           })
           return callback(err)
         }
@@ -453,7 +453,7 @@ const EditorController = {
             'something went wrong setting the project description',
             {
               project_id,
-              description
+              description,
             }
           )
           return callback(err)
@@ -491,7 +491,7 @@ const EditorController = {
             project_id,
             entity_id,
             entityType,
-            newName
+            newName,
           })
           return callback(err)
         }
@@ -524,7 +524,7 @@ const EditorController = {
           OError.tag(err, 'error moving entity', {
             project_id,
             entity_id,
-            folder_id
+            folder_id,
           })
           return callback(err)
         }
@@ -550,7 +550,7 @@ const EditorController = {
         if (err != null) {
           OError.tag(err, 'error renaming project', {
             project_id,
-            newName
+            newName,
           })
           return callback(err)
         }
@@ -722,7 +722,7 @@ const EditorController = {
       userId
     )
     return callback()
-  }
+  },
 }
 
 EditorController.promises = promisifyAll(EditorController)

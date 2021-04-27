@@ -9,13 +9,13 @@ import { startFreeTrial } from '../../../main/account-upgrade'
 
 function PreviewError({ name }) {
   const { isProjectOwner } = useEditorContext({
-    isProjectOwner: PropTypes.bool
+    isProjectOwner: PropTypes.bool,
   })
   const {
-    exposedSettings: { enableSubscriptions }
+    exposedSettings: { enableSubscriptions },
   } = useApplicationContext({
     exposedSettings: PropTypes.shape({ enableSubscriptions: PropTypes.bool })
-      .isRequired
+      .isRequired,
   })
 
   const { t } = useTranslation()
@@ -157,11 +157,11 @@ function TimeoutUpgradePrompt({ isProjectOwner }) {
 }
 
 PreviewError.propTypes = {
-  name: PropTypes.string.isRequired
+  name: PropTypes.string.isRequired,
 }
 
 TimeoutUpgradePrompt.propTypes = {
-  isProjectOwner: PropTypes.bool.isRequired
+  isProjectOwner: PropTypes.bool.isRequired,
 }
 
 export default PreviewError

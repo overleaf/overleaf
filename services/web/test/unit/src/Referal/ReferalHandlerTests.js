@@ -12,9 +12,9 @@ describe('Referal handler', function () {
     this.handler = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
-          User: this.User
-        }
-      }
+          User: this.User,
+        },
+      },
     })
     this.user_id = '12313'
   })
@@ -23,7 +23,7 @@ describe('Referal handler', function () {
     it('should get the user from mongo and return the refered users array', function (done) {
       const user = {
         refered_users: ['1234', '312312', '3213129'],
-        refered_user_count: 3
+        refered_user_count: 3,
       }
       this.User.findById.callsArgWith(2, null, user)
 

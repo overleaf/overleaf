@@ -14,7 +14,7 @@ describe('AdminEmails', function () {
       async.series(
         [
           cb => this.badUser.ensureUserExists(cb),
-          cb => this.badUser.ensureAdmin(cb)
+          cb => this.badUser.ensureAdmin(cb),
         ],
         done
       )
@@ -37,7 +37,7 @@ describe('AdminEmails', function () {
       async.series(
         [
           cb => this.goodUser.ensureUserExists(cb),
-          cb => this.goodUser.ensureAdmin(cb)
+          cb => this.goodUser.ensureAdmin(cb),
         ],
         done
       )

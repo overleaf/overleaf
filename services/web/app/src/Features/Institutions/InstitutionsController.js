@@ -14,7 +14,7 @@ module.exports = {
       }
       res.sendStatus(200)
     })
-  }
+  },
 }
 
 var affiliateUsers = function (hostname, callback) {
@@ -57,7 +57,7 @@ var affiliateUserByReversedHostname = function (
         {
           confirmedAt: email.confirmedAt,
           entitlement:
-            email.samlIdentifier && email.samlIdentifier.hasEntitlement
+            email.samlIdentifier && email.samlIdentifier.hasEntitlement,
         },
         error => {
           if (error) {

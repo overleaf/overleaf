@@ -70,7 +70,7 @@ App.controller(
       const result = {
         name: pageName,
         url: `/learn/${pagePath}${pageSlug}${section_underscored}`,
-        content
+        content,
       }
       return result
     }
@@ -93,7 +93,7 @@ App.controller(
       return algoliaSearch.searchWiki(
         query,
         {
-          hitsPerPage: $scope.config_hits_per_page
+          hitsPerPage: $scope.config_hits_per_page,
         },
         function (err, response) {
           $scope.processingSearch = false

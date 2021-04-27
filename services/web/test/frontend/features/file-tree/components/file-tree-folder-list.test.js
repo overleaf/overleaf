@@ -19,7 +19,7 @@ describe('<FileTreeFolderList/>', function () {
       name: 'A Folder',
       folders: [],
       docs: [],
-      fileRefs: []
+      fileRefs: [],
     }
     const aDoc = { _id: '789ghi', name: 'doc.tex', linkedFileData: {} }
     const aFile = { _id: '987jkl', name: 'file.bib', linkedFileData: {} }
@@ -37,7 +37,7 @@ describe('<FileTreeFolderList/>', function () {
     it('without write permissions', function () {
       const docs = [
         { _id: '1', name: '1.tex' },
-        { _id: '2', name: '2.tex' }
+        { _id: '2', name: '2.tex' },
       ]
       renderWithContext(
         <FileTreeFolderList folders={[]} docs={docs} files={[]} />,
@@ -48,10 +48,10 @@ describe('<FileTreeFolderList/>', function () {
               {
                 docs: [{ _id: '1' }, { _id: '2' }],
                 fileRefs: [],
-                folders: []
-              }
-            ]
-          }
+                folders: [],
+              },
+            ],
+          },
         }
       )
 
@@ -73,7 +73,7 @@ describe('<FileTreeFolderList/>', function () {
       const docs = [
         { _id: '1', name: '1.tex' },
         { _id: '2', name: '2.tex' },
-        { _id: '3', name: '3.tex' }
+        { _id: '3', name: '3.tex' },
       ]
       renderWithContext(
         <FileTreeFolderList folders={[]} docs={docs} files={[]} />,
@@ -83,10 +83,10 @@ describe('<FileTreeFolderList/>', function () {
               {
                 docs: [{ _id: '1' }, { _id: '2' }, { _id: '3' }],
                 fileRefs: [],
-                folders: []
-              }
-            ]
-          }
+                folders: [],
+              },
+            ],
+          },
         }
       )
 

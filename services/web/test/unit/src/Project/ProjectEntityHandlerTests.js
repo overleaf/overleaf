@@ -30,7 +30,7 @@ describe('ProjectEntityHandler', function () {
     let Project
     this.TpdsUpdateSender = {
       addDoc: sinon.stub().callsArg(1),
-      addFile: sinon.stub().callsArg(1)
+      addFile: sinon.stub().callsArg(1),
     }
     this.ProjectModel = Project = (function () {
       Project = class Project {
@@ -52,7 +52,7 @@ describe('ProjectEntityHandler', function () {
 
     this.ProjectLocator = { findElement: sinon.stub() }
     this.DocumentUpdaterHandler = {
-      updateProjectStructure: sinon.stub().yields()
+      updateProjectStructure: sinon.stub().yields(),
     }
     this.callback = sinon.stub()
 
@@ -62,12 +62,12 @@ describe('ProjectEntityHandler', function () {
         '../../Features/DocumentUpdater/DocumentUpdaterHandler': this
           .DocumentUpdaterHandler,
         '../../models/Project': {
-          Project: this.ProjectModel
+          Project: this.ProjectModel,
         },
         './ProjectLocator': this.ProjectLocator,
         './ProjectGetter': (this.ProjectGetter = {}),
-        '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender
-      }
+        '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
+      },
     }))
   })
 
@@ -78,15 +78,15 @@ describe('ProjectEntityHandler', function () {
           docs: [
             (this.doc1 = {
               name: 'doc1',
-              _id: 'doc1_id'
-            })
+              _id: 'doc1_id',
+            }),
           ],
           fileRefs: [
             (this.file1 = {
               rev: 1,
               _id: 'file1_id',
-              name: 'file1'
-            })
+              name: 'file1',
+            }),
           ],
           folders: [
             (this.folder1 = {
@@ -94,20 +94,20 @@ describe('ProjectEntityHandler', function () {
               docs: [
                 (this.doc2 = {
                   name: 'doc2',
-                  _id: 'doc2_id'
-                })
+                  _id: 'doc2_id',
+                }),
               ],
               fileRefs: [
                 (this.file2 = {
                   rev: 2,
                   name: 'file2',
-                  _id: 'file2_id'
-                })
+                  _id: 'file2_id',
+                }),
               ],
-              folders: []
-            })
-          ]
-        }
+              folders: [],
+            }),
+          ],
+        },
       ]
       this.ProjectGetter.getProjectWithoutDocLines = sinon
         .stub()
@@ -120,13 +120,13 @@ describe('ProjectEntityHandler', function () {
           {
             _id: this.doc1._id,
             lines: (this.lines1 = ['one']),
-            rev: (this.rev1 = 1)
+            rev: (this.rev1 = 1),
           },
           {
             _id: this.doc2._id,
             lines: (this.lines2 = ['two']),
-            rev: (this.rev2 = 2)
-          }
+            rev: (this.rev2 = 2),
+          },
         ]
         this.DocstoreManager.getAllDocs = sinon
           .stub()
@@ -147,14 +147,14 @@ describe('ProjectEntityHandler', function () {
               _id: this.doc1._id,
               lines: this.lines1,
               name: this.doc1.name,
-              rev: this.rev1
+              rev: this.rev1,
             },
             '/folder1/doc2': {
               _id: this.doc2._id,
               lines: this.lines2,
               name: this.doc2.name,
-              rev: this.rev2
-            }
+              rev: this.rev2,
+            },
           })
           .should.equal(true)
       })
@@ -170,7 +170,7 @@ describe('ProjectEntityHandler', function () {
         this.callback
           .calledWith(null, {
             '/file1': this.file1,
-            '/folder1/file2': this.file2
+            '/folder1/file2': this.file2,
           })
           .should.equal(true)
       })
@@ -182,13 +182,13 @@ describe('ProjectEntityHandler', function () {
           {
             _id: this.doc1._id,
             lines: (this.lines1 = ['one']),
-            rev: (this.rev1 = 1)
+            rev: (this.rev1 = 1),
           },
           {
             _id: this.doc2._id,
             lines: (this.lines2 = ['two']),
-            rev: (this.rev2 = 2)
-          }
+            rev: (this.rev2 = 2),
+          },
         ]
         this.callback = sinon.stub()
         this.ProjectEntityHandler.getAllDocPathsFromProject(
@@ -268,7 +268,7 @@ describe('ProjectEntityHandler', function () {
         this.callback
           .calledWith(null, {
             '/': this.project.rootFolder[0],
-            '/folder1': this.folder1
+            '/folder1': this.folder1,
           })
           .should.equal(true)
       })
@@ -287,7 +287,7 @@ describe('ProjectEntityHandler', function () {
         this.callback
           .calledWith(null, {
             '/': this.project.rootFolder[0],
-            '/folder1': this.folder1
+            '/folder1': this.folder1,
           })
           .should.equal(true)
       })

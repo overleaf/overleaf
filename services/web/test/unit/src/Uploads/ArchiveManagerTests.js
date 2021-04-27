@@ -31,7 +31,7 @@ describe('ArchiveManager', function () {
         }
         Timer.initClass()
         return Timer
-      })())
+      })()),
     }
     this.zipfile = new events.EventEmitter()
     this.zipfile.readEntry = sinon.stub()
@@ -41,13 +41,13 @@ describe('ArchiveManager', function () {
       requires: {
         'settings-sharelatex': {},
         yauzl: (this.yauzl = {
-          open: sinon.stub().callsArgWith(2, null, this.zipfile)
+          open: sinon.stub().callsArgWith(2, null, this.zipfile),
         }),
         '@overleaf/metrics': this.metrics,
         fs: (this.fs = {}),
         'fs-extra': (this.fse = {}),
-        './ArchiveErrors': ArchiveErrors
-      }
+        './ArchiveErrors': ArchiveErrors,
+      },
     })
     return (this.callback = sinon.stub())
   })
@@ -283,10 +283,10 @@ describe('ArchiveManager', function () {
 
       it('should read the file entry with its original path', function () {
         this.zipfile.openReadStream.should.be.calledWith({
-          fileName: 'wombat\\foo.tex'
+          fileName: 'wombat\\foo.tex',
         })
         return this.zipfile.openReadStream.should.be.calledWith({
-          fileName: 'potato\\bar.tex'
+          fileName: 'potato\\bar.tex',
         })
       })
 
@@ -518,7 +518,7 @@ describe('ArchiveManager', function () {
         this.fs.stat.callsArgWith(1, null, {
           isDirectory() {
             return false
-          }
+          },
         })
         return this.ArchiveManager.findTopLevelDirectory(
           this.directory,
@@ -543,7 +543,7 @@ describe('ArchiveManager', function () {
         this.fs.stat.callsArgWith(1, null, {
           isDirectory() {
             return true
-          }
+          },
         })
         return this.ArchiveManager.findTopLevelDirectory(
           this.directory,

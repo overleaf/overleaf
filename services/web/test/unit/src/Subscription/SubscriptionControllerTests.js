@@ -26,15 +26,15 @@ const mockSubscriptions = {
     uuid: 'subscription-123-active',
     plan: {
       name: 'Gold',
-      plan_code: 'gold'
+      plan_code: 'gold',
     },
     current_period_ends_at: new Date(),
     state: 'active',
     unit_amount_in_cents: 999,
     account: {
-      account_code: 'user-123'
-    }
-  }
+      account_code: 'user-123',
+    },
+  },
 }
 
 describe('SubscriptionController', function () {
@@ -42,7 +42,7 @@ describe('SubscriptionController', function () {
     this.user = {
       email: 'tom@yahoo.com',
       _id: 'one',
-      signUpDate: new Date('2000-10-01')
+      signUpDate: new Date('2000-10-01'),
     }
     this.activeRecurlySubscription =
       mockSubscriptions['subscription-123-active']
@@ -51,7 +51,7 @@ describe('SubscriptionController', function () {
       getLoggedInUser: sinon.stub().callsArgWith(1, null, this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       getSessionUser: sinon.stub().returns(this.user),
-      isUserLoggedIn: sinon.stub().returns(true)
+      isUserLoggedIn: sinon.stub().returns(true),
     }
     this.SubscriptionHandler = {
       createSubscription: sinon.stub().callsArgWith(3),
@@ -60,7 +60,7 @@ describe('SubscriptionController', function () {
       cancelSubscription: sinon.stub().callsArgWith(1),
       syncSubscription: sinon.stub().yields(),
       attemptPaypalInvoiceCollection: sinon.stub().yields(),
-      startFreeTrial: sinon.stub()
+      startFreeTrial: sinon.stub(),
     }
 
     this.PlansLocator = { findLocalPlanInSettings: sinon.stub() }
@@ -68,31 +68,31 @@ describe('SubscriptionController', function () {
     this.LimitationsManager = {
       hasPaidSubscription: sinon.stub(),
       userHasV1OrV2Subscription: sinon.stub(),
-      userHasV2Subscription: sinon.stub()
+      userHasV2Subscription: sinon.stub(),
     }
 
     this.SubscriptionViewModelBuilder = {
       buildUsersSubscriptionViewModel: sinon.stub().callsArgWith(1, null, {}),
-      buildPlansList: sinon.stub()
+      buildPlansList: sinon.stub(),
     }
     this.settings = {
       coupon_codes: {
         upgradeToAnnualPromo: {
           student: 'STUDENTCODEHERE',
-          collaborator: 'COLLABORATORCODEHERE'
-        }
+          collaborator: 'COLLABORATORCODEHERE',
+        },
       },
       apis: {
         recurly: {
-          subdomain: 'sl'
-        }
+          subdomain: 'sl',
+        },
       },
       siteUrl: 'http://de.sharelatex.dev:3000',
-      gaExperiments: {}
+      gaExperiments: {},
     }
     this.GeoIpLookup = { getCurrencyCode: sinon.stub() }
     this.UserGetter = {
-      getUser: sinon.stub().callsArgWith(2, null, this.user)
+      getUser: sinon.stub().callsArgWith(2, null, this.user),
     }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
       requires: {
@@ -106,16 +106,16 @@ describe('SubscriptionController', function () {
         'settings-sharelatex': this.settings,
         '../User/UserGetter': this.UserGetter,
         './RecurlyWrapper': (this.RecurlyWrapper = {
-          updateAccountEmailAddress: sinon.stub().yields()
+          updateAccountEmailAddress: sinon.stub().yields(),
         }),
         './FeaturesUpdater': (this.FeaturesUpdater = {}),
         './GroupPlansData': (this.GroupPlansData = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
         '../Errors/HttpErrorHandler': (this.HttpErrorHandler = {
-          unprocessableEntity: sinon.stub()
+          unprocessableEntity: sinon.stub(),
         }),
-        './Errors': SubscriptionErrors
-      }
+        './Errors': SubscriptionErrors,
+      },
     })
 
     this.res = new MockResponse()
@@ -335,11 +335,11 @@ describe('SubscriptionController', function () {
         null,
         {
           personalSubscription: (this.personalSubscription = {
-            'personal-subscription': 'mock'
+            'personal-subscription': 'mock',
           }),
           memberGroupSubscriptions: (this.memberGroupSubscriptions = {
-            'group-subscriptions': 'mock'
-          })
+            'group-subscriptions': 'mock',
+          }),
         }
       )
       this.SubscriptionViewModelBuilder.buildPlansList.returns(
@@ -384,16 +384,16 @@ describe('SubscriptionController', function () {
       this.res = {
         sendStatus() {
           return done()
-        }
+        },
       }
       sinon.spy(this.res, 'sendStatus')
       this.subscriptionDetails = {
         card: '1234',
-        cvv: '123'
+        cvv: '123',
       }
       this.recurlyTokenIds = {
         billing: '1234',
-        threeDSecureActionResult: '5678'
+        threeDSecureActionResult: '5678',
       }
       this.req.body.recurly_token_id = this.recurlyTokenIds.billing
       this.req.body.recurly_three_d_secure_action_result_token_id = this.recurlyTokenIds.threeDSecureActionResult
@@ -428,7 +428,7 @@ describe('SubscriptionController', function () {
           this.SubscriptionHandler.createSubscription.called.should.equal(false)
 
           done()
-        }
+        },
       })
     })
 
@@ -505,7 +505,7 @@ describe('SubscriptionController', function () {
       this.res = {
         redirect() {
           return done()
-        }
+        },
       }
       sinon.spy(this.res, 'redirect')
       this.plan_code = '1234'
@@ -560,7 +560,7 @@ describe('SubscriptionController', function () {
       this.res = {
         redirect() {
           return done()
-        }
+        },
       }
       sinon.spy(this.res, 'redirect')
       return this.SubscriptionController.reactivateSubscription(
@@ -587,7 +587,7 @@ describe('SubscriptionController', function () {
       this.res = {
         redirect() {
           return done()
-        }
+        },
       }
       sinon.spy(this.res, 'redirect')
       return this.SubscriptionController.cancelSubscription(this.req, this.res)
@@ -615,15 +615,15 @@ describe('SubscriptionController', function () {
           body: {
             expired_subscription_notification: {
               subscription: {
-                uuid: this.activeRecurlySubscription.uuid
-              }
-            }
-          }
+                uuid: this.activeRecurlySubscription.uuid,
+              },
+            },
+          },
         }
         this.res = {
           sendStatus() {
             return done()
-          }
+          },
         }
         sinon.spy(this.res, 'sendStatus')
         return this.SubscriptionController.recurlyCallback(this.req, this.res)
@@ -646,15 +646,15 @@ describe('SubscriptionController', function () {
           body: {
             billing_info_updated_notification: {
               account: {
-                account_code: 'mock-account-code'
-              }
-            }
-          }
+                account_code: 'mock-account-code',
+              },
+            },
+          },
         }
         this.res = {
           sendStatus() {
             done()
-          }
+          },
         }
         sinon.spy(this.res, 'sendStatus')
         this.SubscriptionController.recurlyCallback(this.req, this.res)
@@ -680,15 +680,15 @@ describe('SubscriptionController', function () {
           body: {
             renewed_subscription_notification: {
               subscription: {
-                uuid: this.activeRecurlySubscription.uuid
-              }
-            }
-          }
+                uuid: this.activeRecurlySubscription.uuid,
+              },
+            },
+          },
         }
         this.res = {
           sendStatus() {
             return done()
-          }
+          },
         }
         sinon.spy(this.res, 'sendStatus')
         return this.SubscriptionController.recurlyCallback(this.req, this.res)

@@ -82,10 +82,10 @@ export default HistoryManager = (function () {
             fromV: null,
             toV: null,
             start_ts: null,
-            end_ts: null
-          }
+            end_ts: null,
+          },
         },
-        diff: null
+        diff: null,
       })
     }
 
@@ -134,7 +134,7 @@ export default HistoryManager = (function () {
         fromV,
         toV,
         start_ts,
-        end_ts
+        end_ts,
       } = this._calculateRangeFromSelection()
 
       if (doc == null) {
@@ -157,7 +157,7 @@ export default HistoryManager = (function () {
         end_ts,
         doc,
         error: false,
-        pathname: doc.name
+        pathname: doc.name,
       }
 
       if (!doc.deleted) {
@@ -192,7 +192,7 @@ export default HistoryManager = (function () {
       const url = `/project/${this.$scope.project_id}/doc/${doc.id}/restore`
       return this.ide.$http.post(url, {
         name: doc.name,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       })
     }
 
@@ -231,12 +231,12 @@ export default HistoryManager = (function () {
         const range = {
           start: {
             row: startRow,
-            column: startColumn
+            column: startColumn,
           },
           end: {
             row: endRow,
-            column: endColumn
-          }
+            column: endColumn,
+          },
         }
 
         if (entry.i != null || entry.d != null) {
@@ -248,7 +248,7 @@ export default HistoryManager = (function () {
               highlight: range,
               hue: ColorManager.getHueForUserId(
                 entry.meta.user != null ? entry.meta.user.id : undefined
-              )
+              ),
             })
           } else if (entry.d != null) {
             highlights.push({
@@ -256,7 +256,7 @@ export default HistoryManager = (function () {
               strikeThrough: range,
               hue: ColorManager.getHueForUserId(
                 entry.meta.user != null ? entry.meta.user.id : undefined
-              )
+              ),
             })
           }
         }
@@ -279,7 +279,7 @@ export default HistoryManager = (function () {
         for (let doc_id in object) {
           const doc = object[doc_id]
           doc.entity = this.ide.fileTreeManager.findEntityById(doc_id, {
-            includeDeleted: true
+            includeDeleted: true,
           })
           update.pathnames.push(doc.entity.name)
         }

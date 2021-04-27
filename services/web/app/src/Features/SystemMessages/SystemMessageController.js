@@ -18,14 +18,14 @@ const ProjectController = {
             {
               content:
                 'SITE IS CLOSED TO PUBLIC. OPEN ONLY FOR SITE ADMINS. DO NOT EDIT PROJECTS.',
-              _id: 'protected' // prevents hiding message in frontend
-            }
+              _id: 'protected', // prevents hiding message in frontend
+            },
           ]
         }
         res.json(messages || [])
       }
     })
-  }
+  },
 }
 
 module.exports = ProjectController

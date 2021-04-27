@@ -9,7 +9,7 @@ export default function HotkeysModal({
   handleHide,
   show,
   isMac = false,
-  trackChangesVisible = false
+  trackChangesVisible = false,
 }) {
   const { t } = useTranslation()
 
@@ -168,7 +168,7 @@ HotkeysModal.propTypes = {
   isMac: PropTypes.bool,
   show: PropTypes.bool.isRequired,
   handleHide: PropTypes.func.isRequired,
-  trackChangesVisible: PropTypes.bool
+  trackChangesVisible: PropTypes.bool,
 }
 
 function Hotkey({ combination, description }) {
@@ -181,5 +181,5 @@ function Hotkey({ combination, description }) {
 }
 Hotkey.propTypes = {
   combination: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired
+  description: PropTypes.string.isRequired,
 }

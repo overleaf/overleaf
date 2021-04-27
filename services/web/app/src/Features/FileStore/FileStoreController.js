@@ -60,7 +60,7 @@ module.exports = {
       res.set('Content-Length', fileSize)
       res.status(200).end()
     })
-  }
+  },
 }
 
 function isHtml(file) {

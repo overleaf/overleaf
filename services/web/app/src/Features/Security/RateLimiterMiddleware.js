@@ -39,7 +39,7 @@ function rateLimit(opts) {
       endpointName: opts.endpointName,
       timeInterval: opts.timeInterval || 60,
       subjectName,
-      throttle: opts.maxRequests || 6
+      throttle: opts.maxRequests || 6,
     }
     return RateLimiter.addCount(options, function (error, canContinue) {
       if (error != null) {
@@ -79,7 +79,7 @@ function loginRateLimit(req, res, next) {
 
 const RateLimiterMiddleware = {
   rateLimit,
-  loginRateLimit
+  loginRateLimit,
 }
 
 module.exports = RateLimiterMiddleware

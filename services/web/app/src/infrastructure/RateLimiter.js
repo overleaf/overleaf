@@ -19,7 +19,7 @@ const RateLimiter = {
       redis: rclient,
       namespace,
       interval: opts.timeInterval * 1000,
-      maxInInterval: opts.throttle
+      maxInInterval: opts.throttle,
     })
     limiter(k, function (err, timeLeft, actionsLeft) {
       if (err) {
@@ -28,7 +28,7 @@ const RateLimiter = {
       const allowed = timeLeft === 0
       if (!allowed) {
         Metrics.inc('rate-limit-hit', 1, {
-          path: opts.endpointName
+          path: opts.endpointName,
         })
       }
       return callback(null, allowed)
@@ -39,7 +39,7 @@ const RateLimiter = {
     // same as the key which will be built by RollingRateLimiter (namespace+k)
     const keyName = `RateLimit:${endpointName}:{${subject}}`
     rclient.del(keyName, callback)
-  }
+  },
 }
 
 RateLimiter.promises = promisifyAll(RateLimiter)

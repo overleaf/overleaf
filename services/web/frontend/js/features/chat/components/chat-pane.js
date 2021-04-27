@@ -25,7 +25,7 @@ function ChatPane() {
     loadInitialMessages,
     loadMoreMessages,
     sendMessage,
-    markMessagesAsRead
+    markMessagesAsRead,
   } = useChatContext()
 
   useEffect(() => {

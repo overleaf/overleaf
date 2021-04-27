@@ -8,7 +8,7 @@ fileActionI18n = {
   edited: 'edited',
   renamed: 'renamed',
   created: 'created',
-  deleted: 'deleted'
+  deleted: 'deleted',
 }
 
 export default fileActionI18n

@@ -30,38 +30,38 @@ describe('SubscriptionGroupHandler', function () {
     this.subscription = {
       admin_id: this.adminUser_id,
       manager_ids: [this.adminUser_id],
-      _id: this.subscription_id
+      _id: this.subscription_id,
     }
 
     this.SubscriptionLocator = {
       getUsersSubscription: sinon.stub(),
       getSubscriptionByMemberIdAndId: sinon.stub(),
-      getSubscription: sinon.stub().callsArgWith(1, null, this.subscription)
+      getSubscription: sinon.stub().callsArgWith(1, null, this.subscription),
     }
 
     this.UserCreator = {
       getUserOrCreateHoldingAccount: sinon
         .stub()
-        .callsArgWith(1, null, this.user)
+        .callsArgWith(1, null, this.user),
     }
 
     this.SubscriptionUpdater = {
       removeUserFromGroup: sinon.stub().callsArgWith(2),
-      getSubscription: sinon.stub().callsArgWith(2)
+      getSubscription: sinon.stub().callsArgWith(2),
     }
 
     this.TeamInvitesHandler = { createInvite: sinon.stub().callsArgWith(2) }
 
     this.UserGetter = {
       getUser: sinon.stub(),
-      getUserByAnyEmail: sinon.stub()
+      getUserByAnyEmail: sinon.stub(),
     }
 
     this.LimitationsManager = { hasGroupMembersLimitReached: sinon.stub() }
 
     this.OneTimeTokenHandler = {
       getValueFromTokenAndExpire: sinon.stub(),
-      getNewToken: sinon.stub()
+      getNewToken: sinon.stub(),
     }
 
     this.EmailHandler = { sendEmail: sinon.stub() }
@@ -69,20 +69,20 @@ describe('SubscriptionGroupHandler', function () {
     this.Subscription = {
       updateOne: sinon.stub().yields(),
       updateMany: sinon.stub().yields(),
-      findOne: sinon.stub().yields()
+      findOne: sinon.stub().yields(),
     }
 
     this.settings = { siteUrl: 'http://www.sharelatex.com' }
 
     this.readStub = sinon.stub()
     this.NotificationsBuilder = {
-      groupPlan: sinon.stub().returns({ read: this.readStub })
+      groupPlan: sinon.stub().returns({ read: this.readStub }),
     }
 
     this.UserMembershipViewModel = {
       build(email) {
         return { email }
-      }
+      },
     }
 
     return (this.Handler = SandboxedModule.require(modulePath, {
@@ -91,7 +91,7 @@ describe('SubscriptionGroupHandler', function () {
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './SubscriptionLocator': this.SubscriptionLocator,
         '../../models/Subscription': {
-          Subscription: this.Subscription
+          Subscription: this.Subscription,
         },
         '../User/UserGetter': this.UserGetter,
         './LimitationsManager': this.LimitationsManager,
@@ -100,8 +100,8 @@ describe('SubscriptionGroupHandler', function () {
         'settings-sharelatex': this.settings,
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
         '../UserMembership/UserMembershipViewModel': this
-          .UserMembershipViewModel
-      }
+          .UserMembershipViewModel,
+      },
     }))
   })
 

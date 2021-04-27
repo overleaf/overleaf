@@ -22,17 +22,17 @@ describe('ProjectUploadManager', function () {
     this.project = {
       _id: new ObjectId(),
       rootFolder: [{ _id: this.rootFolderId }],
-      overleaf: { history: { id: 12345 } }
+      overleaf: { history: { id: 12345 } },
     }
     this.doc = {
       _id: new ObjectId(),
-      name: 'main.tex'
+      name: 'main.tex',
     }
     this.docFsPath = '/path/to/doc'
     this.docLines = ['My thesis', 'by A. U. Thor']
     this.file = {
       _id: new ObjectId(),
-      name: 'image.png'
+      name: 'image.png',
     }
     this.fileFsPath = '/path/to/file'
 
@@ -42,27 +42,27 @@ describe('ProjectUploadManager', function () {
       {
         type: 'doc',
         projectPath: '/main.tex',
-        lines: this.docLines
+        lines: this.docLines,
       },
       {
         type: 'file',
         projectPath: `/${this.file.name}`,
-        fsPath: this.fileFsPath
-      }
+        fsPath: this.fileFsPath,
+      },
     ]
     this.docEntries = [
       {
         doc: this.doc,
         path: `/${this.doc.name}`,
-        docLines: this.docLines.join('\n')
-      }
+        docLines: this.docLines.join('\n'),
+      },
     ]
     this.fileEntries = [
-      { file: this.file, path: `/${this.file.name}`, url: this.fileStoreUrl }
+      { file: this.file, path: `/${this.file.name}`, url: this.fileStoreUrl },
     ]
 
     this.fs = {
-      remove: sinon.stub().resolves()
+      remove: sinon.stub().resolves(),
     }
     this.ArchiveManager = {
       promises: {
@@ -70,50 +70,50 @@ describe('ProjectUploadManager', function () {
         findTopLevelDirectory: sinon
           .stub()
           .withArgs(this.extractedZipPath)
-          .resolves(this.topLevelDestination)
-      }
+          .resolves(this.topLevelDestination),
+      },
     }
     this.Doc = sinon.stub().returns(this.doc)
     this.DocstoreManager = {
       promises: {
-        updateDoc: sinon.stub().resolves()
-      }
+        updateDoc: sinon.stub().resolves(),
+      },
     }
     this.DocumentHelper = {
       getTitleFromTexContent: sinon
         .stub()
         .withArgs(this.mainContent)
-        .returns(this.projectName)
+        .returns(this.projectName),
     }
     this.DocumentUpdaterHandler = {
       promises: {
-        updateProjectStructure: sinon.stub().resolves()
-      }
+        updateProjectStructure: sinon.stub().resolves(),
+      },
     }
     this.FileStoreHandler = {
       promises: {
         uploadFileFromDisk: sinon
           .stub()
-          .resolves({ fileRef: this.file, url: this.fileStoreUrl })
-      }
+          .resolves({ fileRef: this.file, url: this.fileStoreUrl }),
+      },
     }
     this.FileSystemImportManager = {
       promises: {
         importDir: sinon
           .stub()
           .withArgs(this.topLevelDestination)
-          .resolves(this.importEntries)
-      }
+          .resolves(this.importEntries),
+      },
     }
     this.ProjectCreationHandler = {
       promises: {
-        createBlankProject: sinon.stub().resolves(this.project)
-      }
+        createBlankProject: sinon.stub().resolves(this.project),
+      },
     }
     this.ProjectEntityMongoUpdateHandler = {
       promises: {
-        createNewFolderStructure: sinon.stub().resolves(this.newProjectVersion)
-      }
+        createNewFolderStructure: sinon.stub().resolves(this.newProjectVersion),
+      },
     }
     this.ProjectRootDocManager = {
       promises: {
@@ -121,8 +121,8 @@ describe('ProjectUploadManager', function () {
         findRootDocFileFromDirectory: sinon
           .stub()
           .resolves({ path: 'main.tex', content: this.mainContent }),
-        setRootDocFromName: sinon.stub().resolves()
-      }
+        setRootDocFromName: sinon.stub().resolves(),
+      },
     }
     this.ProjectDetailsHandler = {
       fixProjectName: sinon
@@ -130,18 +130,18 @@ describe('ProjectUploadManager', function () {
         .withArgs(this.projectName)
         .returns(this.fixedProjectName),
       promises: {
-        generateUniqueName: sinon.stub().resolves(this.uniqueProjectName)
-      }
+        generateUniqueName: sinon.stub().resolves(this.uniqueProjectName),
+      },
     }
     this.ProjectDeleter = {
       promises: {
-        deleteProject: sinon.stub().resolves()
-      }
+        deleteProject: sinon.stub().resolves(),
+      },
     }
     this.TpdsProjectFlusher = {
       promises: {
-        flushProjectToTpds: sinon.stub().resolves()
-      }
+        flushProjectToTpds: sinon.stub().resolves(),
+      },
     }
 
     this.ProjectUploadManager = SandboxedModule.require(MODULE_PATH, {
@@ -161,8 +161,8 @@ describe('ProjectUploadManager', function () {
         '../Project/ProjectRootDocManager': this.ProjectRootDocManager,
         '../Project/ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../Project/ProjectDeleter': this.ProjectDeleter,
-        '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher
-      }
+        '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
+      },
     })
   })
 
@@ -210,7 +210,7 @@ describe('ProjectUploadManager', function () {
           {
             newDocs: this.docEntries,
             newFiles: this.fileEntries,
-            newProject: { version: this.newProjectVersion }
+            newProject: { version: this.newProjectVersion },
           }
         )
       })
@@ -297,7 +297,7 @@ describe('ProjectUploadManager', function () {
         {
           newDocs: this.docEntries,
           newFiles: this.fileEntries,
-          newProject: { version: this.newProjectVersion }
+          newProject: { version: this.newProjectVersion },
         }
       )
     })

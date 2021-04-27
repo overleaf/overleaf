@@ -138,20 +138,20 @@ export default HistoryManager = (function () {
           pathname: null,
           range: {
             fromV: null,
-            toV: null
+            toV: null,
           },
           hoveredRange: {
             fromV: null,
-            toV: null
+            toV: null,
           },
           diff: null,
           files: [],
-          file: null
+          file: null,
         },
         error: null,
         showOnlyLabels: this._getShowOnlyLabelsUserPref(),
         labels: null,
-        loadingFileTree: true
+        loadingFileTree: true,
       }
       let _deregisterFeatureWatcher = this.$scope.$watch(
         'project.features.versioning',
@@ -174,15 +174,15 @@ export default HistoryManager = (function () {
         pathname: null,
         range: {
           fromV: null,
-          toV: null
+          toV: null,
         },
         hoveredRange: {
           fromV: null,
-          toV: null
+          toV: null,
         },
         diff: null, // When history.viewMode == HistoryViewModes.COMPARE
         files: [], // When history.viewMode == HistoryViewModes.COMPARE
-        file: null
+        file: null,
       }
       this.$scope.history.error = null
       this.$scope.history.showOnlyLabels = this._getShowOnlyLabelsUserPref()
@@ -264,7 +264,7 @@ export default HistoryManager = (function () {
       return this.ide.$http.post(url, {
         version,
         pathname,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       })
     }
 
@@ -344,10 +344,10 @@ export default HistoryManager = (function () {
 
       if (this._previouslySelectedPathname != null) {
         previouslySelectedFile = _.find(files, {
-          pathname: this._previouslySelectedPathname
+          pathname: this._previouslySelectedPathname,
         })
         previouslySelectedFileHasOp = _.some(filesWithOps, {
-          pathname: this._previouslySelectedPathname
+          pathname: this._previouslySelectedPathname,
         })
       }
       if (previouslySelectedFile != null && previouslySelectedFileHasOp) {
@@ -355,11 +355,11 @@ export default HistoryManager = (function () {
       } else {
         for (let opType of orderedOpTypes) {
           let fileWithMatchingOpType = _.find(filesWithOps, {
-            operation: opType
+            operation: opType,
           })
           if (fileWithMatchingOpType != null) {
             fileToSelect = _.find(files, {
-              pathname: fileWithMatchingOpType.pathname
+              pathname: fileWithMatchingOpType.pathname,
             })
             break
           }
@@ -401,7 +401,7 @@ export default HistoryManager = (function () {
           for (let pathname of currentUpdate.pathnames) {
             filesWithOps.push({
               pathname: pathname,
-              operation: 'edited'
+              operation: 'edited',
             })
           }
           for (let op of currentUpdate.project_ops) {
@@ -409,17 +409,17 @@ export default HistoryManager = (function () {
             if (op.add != null) {
               fileWithOp = {
                 pathname: op.add.pathname,
-                operation: 'added'
+                operation: 'added',
               }
             } else if (op.remove != null) {
               fileWithOp = {
                 pathname: op.remove.pathname,
-                operation: 'removed'
+                operation: 'removed',
               }
             } else if (op.rename != null) {
               fileWithOp = {
                 pathname: op.rename.newPathname,
-                operation: 'renamed'
+                operation: 'renamed',
               }
             }
             if (fileWithOp != null) {
@@ -434,7 +434,7 @@ export default HistoryManager = (function () {
             if (file.operation) {
               curFilesWithOps.push({
                 pathname: file.pathname,
-                operation: file.operation
+                operation: file.operation,
               })
             }
             return curFilesWithOps
@@ -684,7 +684,7 @@ export default HistoryManager = (function () {
           id: '1',
           isPseudoCurrentStateLabel: true,
           version: mostRecentVersion,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
         }
         labels.unshift(pseudoCurrentStateLabel)
       }
@@ -695,7 +695,7 @@ export default HistoryManager = (function () {
       return this.ide.$filter('orderBy')(labels, [
         'isPseudoCurrentStateLabel',
         '-version',
-        '-created_at'
+        '-created_at',
       ])
     }
 
@@ -709,7 +709,7 @@ export default HistoryManager = (function () {
       const query = [
         `pathname=${encodeURIComponent(pathname)}`,
         `from=${toV}`,
-        `to=${toV}`
+        `to=${toV}`,
       ]
       url += `?${query.join('&')}`
       this.$scope.history.selection.file.loading = true
@@ -747,7 +747,7 @@ export default HistoryManager = (function () {
         fromV,
         toV,
         pathname,
-        error: false
+        error: false,
       }
 
       diff.loading = true
@@ -788,8 +788,8 @@ export default HistoryManager = (function () {
           url,
           method: 'DELETE',
           headers: {
-            'X-CSRF-Token': window.csrfToken
-          }
+            'X-CSRF-Token': window.csrfToken,
+          },
         })
         .then(response => {
           return this._deleteLabelLocally(label)
@@ -861,12 +861,12 @@ export default HistoryManager = (function () {
         const range = {
           start: {
             row: startRow,
-            column: startColumn
+            column: startColumn,
           },
           end: {
             row: endRow,
-            column: endColumn
-          }
+            column: endColumn,
+          },
         }
 
         if (entry.i != null || entry.d != null) {
@@ -880,7 +880,7 @@ export default HistoryManager = (function () {
               highlight: range,
               hue: ColorManager.getHueForUserId(
                 user != null ? user.id : undefined
-              )
+              ),
             })
           } else if (entry.d != null) {
             highlights.push({
@@ -888,7 +888,7 @@ export default HistoryManager = (function () {
               strikeThrough: range,
               hue: ColorManager.getHueForUserId(
                 user != null ? user.id : undefined
-              )
+              ),
             })
           }
         }
@@ -963,7 +963,7 @@ export default HistoryManager = (function () {
         .post(url, {
           comment,
           version,
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         })
         .then(response => {
           return this._addLabelLocally(response.data)

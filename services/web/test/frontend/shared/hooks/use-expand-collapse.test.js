@@ -32,7 +32,7 @@ function ExpandCollapseTestUI({ expandCollapseArgs }) {
   )
 }
 ExpandCollapseTestUI.propTypes = {
-  expandCollapseArgs: PropTypes.object
+  expandCollapseArgs: PropTypes.object,
 }
 
 describe('useExpandCollapse', function () {
@@ -42,11 +42,11 @@ describe('useExpandCollapse', function () {
   beforeEach(function () {
     Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
       configurable: true,
-      value: 500
+      value: 500,
     })
     Object.defineProperty(HTMLElement.prototype, 'scrollWidth', {
       configurable: true,
-      value: 500
+      value: 500,
     })
   })
 
@@ -67,8 +67,8 @@ describe('useExpandCollapse', function () {
     it('supports a custom CSS class', function () {
       const testArgs = {
         classes: {
-          container: 'my-custom-class'
-        }
+          container: 'my-custom-class',
+        },
       }
       const { container } = render(
         <ExpandCollapseTestUI expandCollapseArgs={testArgs} />
@@ -79,8 +79,8 @@ describe('useExpandCollapse', function () {
     it('supports an extra custom CSS class for the collapsed state', function () {
       const testArgs = {
         classes: {
-          containerCollapsed: 'my-custom-collapsed-class'
-        }
+          containerCollapsed: 'my-custom-collapsed-class',
+        },
       }
 
       const { container } = render(
@@ -95,8 +95,8 @@ describe('useExpandCollapse', function () {
       const testArgs = {
         initiallyExpanded: true,
         classes: {
-          containerCollapsed: 'my-custom-collapsed-class'
-        }
+          containerCollapsed: 'my-custom-collapsed-class',
+        },
       }
       const { container } = render(
         <ExpandCollapseTestUI expandCollapseArgs={testArgs} />
@@ -116,7 +116,7 @@ describe('useExpandCollapse', function () {
     })
     it('supports width', function () {
       const testArgs = {
-        dimension: 'width'
+        dimension: 'width',
       }
       const { container } = render(
         <ExpandCollapseTestUI expandCollapseArgs={testArgs} />
@@ -134,7 +134,7 @@ describe('useExpandCollapse', function () {
     })
     it('supports a custom collapsed size', function () {
       const testArgs = {
-        collapsedSize: 200
+        collapsedSize: 200,
       }
       const { container } = render(
         <ExpandCollapseTestUI expandCollapseArgs={testArgs} />
@@ -145,7 +145,7 @@ describe('useExpandCollapse', function () {
     it('supports a custom collapsed size for width', function () {
       const testArgs = {
         collapsedSize: 200,
-        dimension: 'width'
+        dimension: 'width',
       }
       const { container } = render(
         <ExpandCollapseTestUI expandCollapseArgs={testArgs} />

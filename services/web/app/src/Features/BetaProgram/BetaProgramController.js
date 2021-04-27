@@ -40,17 +40,17 @@ const BetaProgramController = {
     UserGetter.getUser(userId, function (err, user) {
       if (err) {
         OError.tag(err, 'error fetching user', {
-          userId
+          userId,
         })
         return next(err)
       }
       res.render('beta_program/opt_in', {
         title: 'sharelatex_beta_program',
         user,
-        languages: Settings.languages
+        languages: Settings.languages,
       })
     })
-  }
+  },
 }
 
 module.exports = BetaProgramController

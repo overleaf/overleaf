@@ -30,7 +30,7 @@ describe('LimitationsManager', function () {
         } else {
           return callback(null, null)
         }
-      }
+      },
     }
     this.UserGetter = {
       getUser: (user_id, filter, callback) => {
@@ -39,12 +39,12 @@ describe('LimitationsManager', function () {
         } else {
           return callback(null, null)
         }
-      }
+      },
     }
 
     this.SubscriptionLocator = {
       getUsersSubscription: sinon.stub(),
-      getSubscription: sinon.stub()
+      getSubscription: sinon.stub(),
     }
 
     return (this.LimitationsManager = SandboxedModule.require(modulePath, {
@@ -55,8 +55,8 @@ describe('LimitationsManager', function () {
         'settings-sharelatex': (this.Settings = {}),
         '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         '../Collaborators/CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
-        './V1SubscriptionManager': (this.V1SubscriptionManager = {})
-      }
+        './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
+      },
     }))
   })
 
@@ -383,7 +383,7 @@ describe('LimitationsManager', function () {
 
     it('should return true if the recurly token is set', function (done) {
       this.SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {
-        recurlySubscription_id: '1234'
+        recurlySubscription_id: '1234',
       })
       return this.LimitationsManager.userHasV2Subscription(
         this.user,
@@ -626,8 +626,8 @@ describe('LimitationsManager', function () {
         membersLimit: 3,
         member_ids: ['', ''],
         teamInvites: [
-          { email: 'bob@example.com', sentAt: new Date(), token: 'hey' }
-        ]
+          { email: 'bob@example.com', sentAt: new Date(), token: 'hey' },
+        ],
       })
     })
 

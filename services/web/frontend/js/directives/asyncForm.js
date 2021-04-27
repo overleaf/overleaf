@@ -9,7 +9,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
       this.getEmailFromQuery = () =>
         $location.search().email || $location.search().new_email
       return this
-    }
+    },
   ],
   link(scope, element, attrs, ctrl) {
     let response
@@ -52,7 +52,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
       // authentication fails, we will handle it ourselves
       const httpRequestFn = _httpRequestFn(element.attr('method'))
       return httpRequestFn(element.attr('action'), formData, {
-        disableAutoLoginRedirect: true
+        disableAutoLoginRedirect: true,
       })
         .then(function (httpResponse) {
           const { data, headers } = httpResponse
@@ -81,7 +81,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
             }
           } else if (scope.$eval(attrs.asyncFormDownloadResponse)) {
             const blob = new Blob([data], {
-              type: headers('Content-Type')
+              type: headers('Content-Type'),
             })
             location.href = URL.createObjectURL(blob) // Trigger file save
           }
@@ -113,7 +113,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
               text:
                 responseMessage ||
                 'Invalid Request. Please correct the data and try again.',
-              type: 'error'
+              type: 'error',
             }
           } else if (status === 403) {
             // Forbidden
@@ -121,21 +121,21 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
               text:
                 responseMessage ||
                 'Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies.',
-              type: 'error'
+              type: 'error',
             }
           } else if (status === 429) {
             response.message = {
               text:
                 responseMessage ||
                 'Too many attempts. Please wait for a while and try again.',
-              type: 'error'
+              type: 'error',
             }
           } else {
             response.message = {
               text:
                 responseMessage ||
                 'Something went wrong talking to the server :(. Please try again.',
-              type: 'error'
+              type: 'error',
             }
           }
           ga('send', 'event', formName, 'failure', data.message)
@@ -148,7 +148,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
     const _httpRequestFn = (method = 'post') => {
       const $HTTP_FNS = {
         post: $http.post,
-        get: $http.get
+        get: $http.get,
       }
       return $HTTP_FNS[method.toLowerCase()]
     }
@@ -161,7 +161,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
     if (attrs.autoSubmit) {
       submit()
     }
-  }
+  },
 }))
 
 App.directive('formMessages', () => ({
@@ -176,6 +176,6 @@ App.directive('formMessages', () => ({
 `,
   transclude: true,
   scope: {
-    form: '=for'
-  }
+    form: '=for',
+  },
 }))

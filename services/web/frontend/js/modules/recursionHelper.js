@@ -70,9 +70,9 @@ angular.module('RecursionHelper', []).factory('RecursionHelper', [
             if (link && link.post) {
               link.post.apply(null, arguments)
             }
-          }
+          },
         }
-      }
+      },
     }
-  }
+  },
 ])

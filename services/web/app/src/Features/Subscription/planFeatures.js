@@ -8,9 +8,9 @@ module.exports = [
       free: '1',
       personal: '1',
       coll: '10',
-      prof: 'unlimited'
+      prof: 'unlimited',
     },
-    student: '6'
+    student: '6',
   },
   {
     feature: 'unlimited_private',
@@ -20,9 +20,9 @@ module.exports = [
       free: true,
       personal: true,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
+    student: true,
   },
   {
     feature: 'realtime_collab',
@@ -32,9 +32,9 @@ module.exports = [
       free: true,
       personal: true,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
+    student: true,
   },
   {
     feature: 'thousands_templates',
@@ -44,9 +44,9 @@ module.exports = [
       free: true,
       personal: true,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
+    student: true,
   },
   {
     feature: 'powerful_latex_editor',
@@ -56,9 +56,9 @@ module.exports = [
       free: true,
       personal: true,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
+    student: true,
   },
   {
     feature: 'compile_timeout',
@@ -67,9 +67,9 @@ module.exports = [
       free: '1 min',
       personal: '4 mins',
       coll: '4 mins',
-      prof: '4 mins'
+      prof: '4 mins',
     },
-    student: '4 mins'
+    student: '4 mins',
   },
   {
     feature: 'realtime_track_changes',
@@ -79,9 +79,9 @@ module.exports = [
       free: false,
       personal: false,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
+    student: true,
   },
   {
     feature: 'full_doc_history',
@@ -91,9 +91,9 @@ module.exports = [
       free: false,
       personal: true,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
+    student: true,
   },
   {
     feature: 'reference_search',
@@ -103,9 +103,9 @@ module.exports = [
       free: false,
       personal: true,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
+    student: true,
   },
   {
     feature: 'reference_sync',
@@ -115,9 +115,9 @@ module.exports = [
       free: false,
       personal: true,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
+    student: true,
   },
   {
     feature: 'dropbox_integration_lowercase',
@@ -127,9 +127,9 @@ module.exports = [
       free: false,
       personal: true,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
+    student: true,
   },
   {
     feature: 'github_integration_lowercase',
@@ -139,9 +139,9 @@ module.exports = [
       free: false,
       personal: true,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
+    student: true,
   },
   {
     feature: 'priority_support',
@@ -150,8 +150,8 @@ module.exports = [
       free: false,
       personal: true,
       coll: true,
-      prof: true
+      prof: true,
     },
-    student: true
-  }
+    student: true,
+  },
 ]

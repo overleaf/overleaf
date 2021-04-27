@@ -35,12 +35,12 @@ export default HighlightsManager = class HighlightsManager {
       top: 'auto',
       bottom: 'auto',
       backgroundColor: 'black',
-      text: ''
+      text: '',
     }
 
     this.$scope.updateLabels = {
       updatesAbove: 0,
-      updatesBelow: 0
+      updatesBelow: 0,
     }
 
     this.$scope.$watch('highlights', value => {
@@ -125,7 +125,7 @@ export default HighlightsManager = class HighlightsManager {
               annotation.cursor.column + 1
             ),
             colorScheme,
-            snapToStartOfRange: true
+            snapToStartOfRange: true,
           })
           return this._drawCursor(annotation, colorScheme)
         } else if (annotation.highlight != null) {
@@ -137,7 +137,7 @@ export default HighlightsManager = class HighlightsManager {
               annotation.highlight.end.row,
               annotation.highlight.end.column
             ),
-            colorScheme
+            colorScheme,
           })
           return this._drawHighlight(annotation, colorScheme)
         } else if (annotation.strikeThrough != null) {
@@ -149,7 +149,7 @@ export default HighlightsManager = class HighlightsManager {
               annotation.strikeThrough.end.row,
               annotation.strikeThrough.end.column
             ),
-            colorScheme
+            colorScheme,
           })
           return this._drawStrikeThrough(annotation, colorScheme)
         }
@@ -235,7 +235,7 @@ export default HighlightsManager = class HighlightsManager {
           bottom,
           top,
           backgroundColor: labelToShow.colorScheme.labelBackgroundColor,
-          text: labelToShow.text
+          text: labelToShow.text,
         })
       })
     }
@@ -272,7 +272,7 @@ export default HighlightsManager = class HighlightsManager {
       return this.$scope.$apply(() => {
         return (this.$scope.updateLabels = {
           highlightsBefore,
-          highlightsAfter
+          highlightsAfter,
         })
       })
     }, 100)

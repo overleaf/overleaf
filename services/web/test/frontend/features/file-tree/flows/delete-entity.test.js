@@ -13,7 +13,7 @@ describe('FileTree Delete Entity Flow', function () {
 
   beforeEach(function () {
     window._ide = {
-      socket: new MockedSocket()
+      socket: new MockedSocket(),
     }
   })
 
@@ -31,8 +31,8 @@ describe('FileTree Delete Entity Flow', function () {
           _id: 'root-folder-id',
           docs: [{ _id: '456def', name: 'main.tex' }],
           folders: [],
-          fileRefs: []
-        }
+          fileRefs: [],
+        },
       ]
       render(
         <FileTreeRoot
@@ -70,13 +70,13 @@ describe('FileTree Delete Entity Flow', function () {
         expect(
           screen.queryByRole('treeitem', {
             name: 'main.tex',
-            hidden: true // treeitem might be hidden behind the modal
+            hidden: true, // treeitem might be hidden behind the modal
           })
         ).to.not.exist
 
         expect(
           screen.queryByRole('treeitem', {
-            name: 'main.tex'
+            name: 'main.tex',
           })
         ).to.not.exist
 
@@ -103,13 +103,13 @@ describe('FileTree Delete Entity Flow', function () {
         expect(
           screen.queryByRole('treeitem', {
             name: 'main.tex',
-            hidden: true // treeitem might be hidden behind the modal
+            hidden: true, // treeitem might be hidden behind the modal
           })
         ).to.not.exist
 
         expect(
           screen.queryByRole('treeitem', {
-            name: 'main.tex'
+            name: 'main.tex',
           })
         ).to.not.exist
 
@@ -142,11 +142,11 @@ describe('FileTree Delete Entity Flow', function () {
               name: 'folder',
               docs: [],
               folders: [],
-              fileRefs: [{ _id: '789ghi', name: 'my.bib' }]
-            }
+              fileRefs: [{ _id: '789ghi', name: 'my.bib' }],
+            },
           ],
-          fileRefs: []
-        }
+          fileRefs: [],
+        },
       ]
       render(
         <FileTreeRoot
@@ -199,8 +199,8 @@ describe('FileTree Delete Entity Flow', function () {
           _id: 'root-folder-id',
           docs: [{ _id: '456def', name: 'main.tex' }],
           folders: [],
-          fileRefs: [{ _id: '789ghi', name: 'my.bib' }]
-        }
+          fileRefs: [{ _id: '789ghi', name: 'my.bib' }],
+        },
       ]
       render(
         <FileTreeRoot
@@ -224,7 +224,7 @@ describe('FileTree Delete Entity Flow', function () {
       fireEvent.click(treeitemFile, { ctrlKey: true })
 
       const deleteButton = screen.getAllByRole('menuitem', {
-        name: 'Delete'
+        name: 'Delete',
       })[0]
       fireEvent.click(deleteButton)
     })
@@ -244,13 +244,13 @@ describe('FileTree Delete Entity Flow', function () {
           expect(
             screen.queryByRole('treeitem', {
               name,
-              hidden: true // treeitem might be hidden behind the modal
+              hidden: true, // treeitem might be hidden behind the modal
             })
           ).to.not.exist
 
           expect(
             screen.queryByRole('treeitem', {
-              name
+              name,
             })
           ).to.not.exist
 

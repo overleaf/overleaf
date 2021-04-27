@@ -28,7 +28,7 @@ export default App.factory('pdfHighlights', function () {
         left,
         top,
         left + width,
-        top + height
+        top + height,
       ])
       rect = PDFJS.Util.normalizeRect(rect)
       const element = document.createElement('div')

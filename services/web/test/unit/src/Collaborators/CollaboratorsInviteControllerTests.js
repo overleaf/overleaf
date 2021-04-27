@@ -30,7 +30,7 @@ describe('CollaboratorsInviteController', function () {
       getSessionUser: req => {
         this.sendingUser = req.session.user
         return this.sendingUser
-      }
+      },
     }
 
     this.RateLimiter = { addCount: sinon.stub }
@@ -38,7 +38,7 @@ describe('CollaboratorsInviteController', function () {
     this.LimitationsManager = {}
     this.UserGetter = {
       getUserByAnyEmail: sinon.stub(),
-      getUser: sinon.stub()
+      getUser: sinon.stub(),
     }
 
     this.CollaboratorsInviteController = SandboxedModule.require(modulePath, {
@@ -49,14 +49,14 @@ describe('CollaboratorsInviteController', function () {
         './CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         './CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController = {
-          emitToRoom: sinon.stub()
+          emitToRoom: sinon.stub(),
         }),
         '../Analytics/AnalyticsManager': this.AnalyticsManger,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         'settings-sharelatex': (this.settings = {}),
-        '../../infrastructure/RateLimiter': this.RateLimiter
-      }
+        '../../infrastructure/RateLimiter': this.RateLimiter,
+      },
     })
     this.res = new MockResponse()
     this.req = new MockRequest()
@@ -69,7 +69,7 @@ describe('CollaboratorsInviteController', function () {
     beforeEach(function () {
       this.fakeInvites = [
         { _id: ObjectId(), one: 1 },
-        { _id: ObjectId(), two: 2 }
+        { _id: ObjectId(), two: 2 },
       ]
       this.req.params = { Project_id: this.project_id }
       this.res.json = sinon.stub()
@@ -134,7 +134,7 @@ describe('CollaboratorsInviteController', function () {
       this.req.session = { user: this.current_user }
       this.req.body = {
         email: this.targetEmail,
-        privileges: (this.privileges = 'readAndWrite')
+        privileges: (this.privileges = 'readAndWrite'),
       }
       this.res.json = sinon.stub()
       this.res.sendStatus = sinon.stub()
@@ -144,7 +144,7 @@ describe('CollaboratorsInviteController', function () {
         sendingUserId: this.current_user_id,
         projectId: this.targetEmail,
         targetEmail: 'user@example.com',
-        createdAt: new Date()
+        createdAt: new Date(),
       }
       this.LimitationsManager.canAddXCollaborators = sinon
         .stub()
@@ -377,7 +377,7 @@ describe('CollaboratorsInviteController', function () {
         this.res.json.callCount.should.equal(1)
         return {
           invite: null,
-          error: 'cannot_invite_non_user'
+          error: 'cannot_invite_non_user',
         }.should.deep.equal(this.res.json.firstCall.args[0])
       })
 
@@ -531,10 +531,10 @@ describe('CollaboratorsInviteController', function () {
       this.token = 'some-opaque-token'
       this.req.params = {
         Project_id: this.project_id,
-        token: this.token
+        token: this.token,
       }
       this.req.session = {
-        user: { _id: (this.current_user_id = 'current-user-id') }
+        user: { _id: (this.current_user_id = 'current-user-id') },
       }
       this.res.render = sinon.stub()
       this.res.redirect = sinon.stub()
@@ -545,20 +545,20 @@ describe('CollaboratorsInviteController', function () {
         sendingUserId: ObjectId(),
         projectId: this.project_id,
         targetEmail: 'user@example.com',
-        createdAt: new Date()
+        createdAt: new Date(),
       }
       this.fakeProject = {
         _id: this.project_id,
         name: 'some project',
         owner_ref: this.invite.sendingUserId,
         collaberator_refs: [],
-        readOnly_refs: []
+        readOnly_refs: [],
       }
       this.owner = {
         _id: this.fakeProject.owner_ref,
         first_name: 'John',
         last_name: 'Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       }
 
       this.CollaboratorsGetter.isUserInvitedMemberOfProject = sinon
@@ -1001,10 +1001,10 @@ describe('CollaboratorsInviteController', function () {
     beforeEach(function () {
       this.req.params = {
         Project_id: this.project_id,
-        invite_id: (this.invite_id = 'thuseoautoh')
+        invite_id: (this.invite_id = 'thuseoautoh'),
       }
       this.req.session = {
-        user: { _id: (this.current_user_id = 'current-user-id') }
+        user: { _id: (this.current_user_id = 'current-user-id') },
       }
       this.res.render = sinon.stub()
       this.res.sendStatus = sinon.stub()
@@ -1080,7 +1080,7 @@ describe('CollaboratorsInviteController', function () {
     beforeEach(function () {
       this.req.params = {
         Project_id: this.project_id,
-        invite_id: (this.invite_id = 'thuseoautoh')
+        invite_id: (this.invite_id = 'thuseoautoh'),
       }
       this.current_user = { _id: (this.current_user_id = 'current-user-id') }
       this.req.session = { user: this.current_user }
@@ -1156,10 +1156,10 @@ describe('CollaboratorsInviteController', function () {
     beforeEach(function () {
       this.req.params = {
         Project_id: this.project_id,
-        token: (this.token = 'mock-token')
+        token: (this.token = 'mock-token'),
       }
       this.req.session = {
-        user: { _id: (this.current_user_id = 'current-user-id') }
+        user: { _id: (this.current_user_id = 'current-user-id') },
       }
       this.res.render = sinon.stub()
       this.res.redirect = sinon.stub()

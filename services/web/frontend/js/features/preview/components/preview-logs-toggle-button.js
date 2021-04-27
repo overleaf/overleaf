@@ -13,7 +13,7 @@ function PreviewLogsToggleButton({
   autoCompileLintingError = false,
   compileFailed = false,
   logsState: { nErrors, nWarnings },
-  showText
+  showText,
 }) {
   const { t } = useTranslation()
   let textStyle = {}
@@ -23,7 +23,7 @@ function PreviewLogsToggleButton({
   if (!showText) {
     textStyle = {
       position: 'absolute',
-      right: '-100vw'
+      right: '-100vw',
     }
   }
 
@@ -89,7 +89,7 @@ function CompilationResult({
   textStyle,
   autoCompileLintingError,
   nErrors,
-  nWarnings
+  nWarnings,
 }) {
   if (autoCompileLintingError) {
     return <AutoCompileLintingError textStyle={textStyle} />
@@ -166,37 +166,37 @@ PreviewLogsToggleButton.propTypes = {
   onToggle: PropTypes.func.isRequired,
   logsState: PropTypes.shape({
     nErrors: PropTypes.number.isRequired,
-    nWarnings: PropTypes.number.isRequired
+    nWarnings: PropTypes.number.isRequired,
   }),
   showLogs: PropTypes.bool.isRequired,
   showText: PropTypes.bool.isRequired,
   compileFailed: PropTypes.bool,
-  autoCompileLintingError: PropTypes.bool
+  autoCompileLintingError: PropTypes.bool,
 }
 
 CompilationResult.propTypes = {
   textStyle: PropTypes.object.isRequired,
   autoCompileLintingError: PropTypes.bool,
   nErrors: PropTypes.number.isRequired,
-  nWarnings: PropTypes.number.isRequired
+  nWarnings: PropTypes.number.isRequired,
 }
 
 LogsCompilationResult.propTypes = {
   logType: PropTypes.string.isRequired,
   nLogs: PropTypes.number.isRequired,
-  textStyle: PropTypes.object.isRequired
+  textStyle: PropTypes.object.isRequired,
 }
 
 AutoCompileLintingError.propTypes = {
-  textStyle: PropTypes.object.isRequired
+  textStyle: PropTypes.object.isRequired,
 }
 
 ViewLogs.propTypes = {
-  textStyle: PropTypes.object.isRequired
+  textStyle: PropTypes.object.isRequired,
 }
 
 ViewPdf.propTypes = {
-  textStyle: PropTypes.object.isRequired
+  textStyle: PropTypes.object.isRequired,
 }
 
 export default PreviewLogsToggleButton

@@ -32,7 +32,7 @@ const CollaboratorsInviteHandler = {
     return ProjectInvite.find({ projectId }, function (err, invites) {
       if (err != null) {
         OError.tag(err, 'error getting invites from mongo', {
-          projectId
+          projectId,
         })
         return callback(err)
       }
@@ -52,7 +52,7 @@ const CollaboratorsInviteHandler = {
     return ProjectInvite.countDocuments({ projectId }, function (err, count) {
       if (err != null) {
         OError.tag(err, 'error getting invites from mongo', {
-          projectId
+          projectId,
         })
         return callback(err)
       }
@@ -72,7 +72,7 @@ const CollaboratorsInviteHandler = {
         if (err != null) {
           OError.tag(err, 'error checking if user exists', {
             projectId,
-            email
+            email,
           })
           return callback(err)
         }
@@ -87,7 +87,7 @@ const CollaboratorsInviteHandler = {
             if (err != null) {
               OError.tag(err, 'error getting project', {
                 projectId,
-                email
+                email,
               })
               return callback(err)
             }
@@ -167,7 +167,7 @@ const CollaboratorsInviteHandler = {
         OError.tag(err, 'error generating random token', {
           projectId,
           sendingUserId: sendingUser._id,
-          email
+          email,
         })
         return callback(err)
       }
@@ -177,14 +177,14 @@ const CollaboratorsInviteHandler = {
         token,
         sendingUserId: sendingUser._id,
         projectId,
-        privileges
+        privileges,
       })
       return invite.save(function (err, invite) {
         if (err != null) {
           OError.tag(err, 'error saving token', {
             projectId,
             sendingUserId: sendingUser._id,
-            email
+            email,
           })
           return callback(err)
         }
@@ -218,7 +218,7 @@ const CollaboratorsInviteHandler = {
         if (err != null) {
           OError.tag(err, 'error removing invite', {
             projectId,
-            inviteId
+            inviteId,
           })
           return callback(err)
         }
@@ -242,7 +242,7 @@ const CollaboratorsInviteHandler = {
         if (err != null) {
           OError.tag(err, 'error finding invite', {
             projectId,
-            inviteId
+            inviteId,
           })
           return callback(err)
         }
@@ -261,7 +261,7 @@ const CollaboratorsInviteHandler = {
             if (err != null) {
               OError.tag(err, 'error resending invite messages', {
                 projectId,
-                inviteId
+                inviteId,
               })
               return callback(err)
             }
@@ -282,7 +282,7 @@ const CollaboratorsInviteHandler = {
       function (err, invite) {
         if (err != null) {
           OError.tag(err, 'error fetching invite', {
-            projectId
+            projectId,
           })
           return callback(err)
         }
@@ -307,7 +307,7 @@ const CollaboratorsInviteHandler = {
         if (err != null) {
           OError.tag(err, 'error finding invite', {
             projectId,
-            tokenString
+            tokenString,
           })
           return callback(err)
         }
@@ -330,7 +330,7 @@ const CollaboratorsInviteHandler = {
               OError.tag(err, 'error adding user to project', {
                 projectId,
                 inviteId,
-                userId: user._id
+                userId: user._id,
               })
               return callback(err)
             }
@@ -340,7 +340,7 @@ const CollaboratorsInviteHandler = {
               if (err != null) {
                 OError.tag(err, 'error removing invite', {
                   projectId,
-                  inviteId
+                  inviteId,
                 })
                 return callback(err)
               }
@@ -354,7 +354,7 @@ const CollaboratorsInviteHandler = {
         )
       }
     )
-  }
+  },
 }
 
 module.exports = CollaboratorsInviteHandler

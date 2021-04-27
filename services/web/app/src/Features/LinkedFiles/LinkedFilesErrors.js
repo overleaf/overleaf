@@ -39,5 +39,5 @@ module.exports = {
   NotOriginalImporterError,
   FeatureNotAvailableError,
   RemoteServiceError,
-  FileCannotRefreshError
+  FileCannotRefreshError,
 }

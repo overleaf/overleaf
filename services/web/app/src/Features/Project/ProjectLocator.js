@@ -14,7 +14,7 @@ function findElement(options, _callback) {
     project,
     project_id: projectId,
     element_id: elementId,
-    type
+    type,
   } = options
   const elementType = sanitizeTypeOfElement(type)
 
@@ -289,16 +289,16 @@ module.exports = {
     findElement: promisifyMultiResult(findElement, [
       'element',
       'path',
-      'folder'
+      'folder',
     ]),
     findElementByPath: promisifyMultiResult(findElementByPath, [
       'element',
-      'type'
+      'type',
     ]),
     findRootDoc: promisifyMultiResult(findRootDoc, [
       'element',
       'path',
-      'folder'
-    ])
-  }
+      'folder',
+    ]),
+  },
 }

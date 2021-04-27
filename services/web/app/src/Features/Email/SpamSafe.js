@@ -50,7 +50,7 @@ const SpamSafe = {
       return email
     }
     return alternative
-  }
+  },
 }
 
 module.exports = SpamSafe

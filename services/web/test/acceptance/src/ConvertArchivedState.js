@@ -22,7 +22,7 @@ describe('ConvertArchivedState', function () {
     await userFour.login()
 
     projectOneId = await userOne.createProject('old-archived-1', {
-      template: 'blank'
+      template: 'blank',
     })
 
     projectOne = await userOne.getProject(projectOneId)
@@ -33,7 +33,7 @@ describe('ConvertArchivedState', function () {
     await userOne.saveProject(projectOne)
 
     projectTwoId = await userOne.createProject('old-archived-2', {
-      template: 'blank'
+      template: 'blank',
     })
 
     projectTwo = await userOne.getProject(projectTwoId)
@@ -44,13 +44,13 @@ describe('ConvertArchivedState', function () {
     await userOne.saveProject(projectTwo)
 
     projectThreeId = await userOne.createProject('already-new-archived', {
-      template: 'blank'
+      template: 'blank',
     })
     projectThree = await userOne.getProject(projectThreeId)
     projectThree.archived = [
       ObjectId(userOne._id),
       ObjectId(userTwo._id),
-      ObjectId(userFour._id)
+      ObjectId(userFour._id),
     ]
     projectThree.collaberator_refs.push(userTwo._id)
     projectThree.tokenAccessReadOnly_refs.push(userFour._id)
@@ -58,7 +58,7 @@ describe('ConvertArchivedState', function () {
     await userOne.saveProject(projectThree)
 
     projectFourId = await userOne.createProject('not-archived', {
-      template: 'blank'
+      template: 'blank',
     })
     projectFour = await userOne.getProject(projectFourId)
     projectFour.archived = false
@@ -87,13 +87,13 @@ describe('ConvertArchivedState', function () {
       expect(convertObjectIdsToStrings(projectOne.archived)).to.deep.equal([
         userOne._id,
         userTwo._id,
-        userThree._id
+        userThree._id,
       ])
 
       expect(convertObjectIdsToStrings(projectTwo.archived)).to.deep.equal([
         userOne._id,
         userThree._id,
-        userFour._id
+        userFour._id,
       ])
     })
 
@@ -102,7 +102,7 @@ describe('ConvertArchivedState', function () {
       expect(convertObjectIdsToStrings(projectThree.archived)).to.deep.equal([
         userOne._id,
         userTwo._id,
-        userFour._id
+        userFour._id,
       ])
     })
 

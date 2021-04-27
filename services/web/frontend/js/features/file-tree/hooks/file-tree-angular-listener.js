@@ -7,7 +7,7 @@ import { useFileTreeActionable } from '../contexts/file-tree-actionable'
 export function useFileTreeAngularListener() {
   const {
     finishCreatingDoc,
-    finishCreatingLinkedFile
+    finishCreatingLinkedFile,
   } = useFileTreeActionable()
 
   useEffect(() => {

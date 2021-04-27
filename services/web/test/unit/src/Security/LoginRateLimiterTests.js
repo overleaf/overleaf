@@ -23,13 +23,13 @@ describe('LoginRateLimiter', function () {
     this.email = 'bob@bob.com'
     this.RateLimiter = {
       clearRateLimit: sinon.stub(),
-      addCount: sinon.stub()
+      addCount: sinon.stub(),
     }
 
     return (this.LoginRateLimiter = SandboxedModule.require(modulePath, {
       requires: {
-        '../../infrastructure/RateLimiter': this.RateLimiter
-      }
+        '../../infrastructure/RateLimiter': this.RateLimiter,
+      },
     }))
   })
 

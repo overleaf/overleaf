@@ -16,61 +16,61 @@ describe('OwnershipTransferHandler', function () {
       _id: ObjectId(),
       name: 'project',
       owner_ref: this.user._id,
-      collaberator_refs: [this.collaborator._id]
+      collaberator_refs: [this.collaborator._id],
     }
     this.ProjectGetter = {
       promises: {
-        getProject: sinon.stub().resolves(this.project)
-      }
+        getProject: sinon.stub().resolves(this.project),
+      },
     }
     this.ProjectModel = {
       updateOne: sinon.stub().returns({
-        exec: sinon.stub().resolves()
-      })
+        exec: sinon.stub().resolves(),
+      }),
     }
     this.UserGetter = {
       promises: {
-        getUser: sinon.stub().resolves(this.user)
-      }
+        getUser: sinon.stub().resolves(this.user),
+      },
     }
     this.TpdsUpdateSender = {
       promises: {
-        moveEntity: sinon.stub().resolves()
-      }
+        moveEntity: sinon.stub().resolves(),
+      },
     }
     this.TpdsProjectFlusher = {
       promises: {
-        flushProjectToTpds: sinon.stub().resolves()
-      }
+        flushProjectToTpds: sinon.stub().resolves(),
+      },
     }
     this.CollaboratorsHandler = {
       promises: {
         removeUserFromProject: sinon.stub().resolves(),
-        addUserIdToProject: sinon.stub().resolves()
-      }
+        addUserIdToProject: sinon.stub().resolves(),
+      },
     }
     this.EmailHandler = {
       promises: {
-        sendEmail: sinon.stub().resolves()
-      }
+        sendEmail: sinon.stub().resolves(),
+      },
     }
     this.ProjectAuditLogHandler = {
       promises: {
-        addEntry: sinon.stub().resolves()
-      }
+        addEntry: sinon.stub().resolves(),
+      },
     }
     this.handler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../../models/Project': {
-          Project: this.ProjectModel
+          Project: this.ProjectModel,
         },
         '../User/UserGetter': this.UserGetter,
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Project/ProjectAuditLogHandler': this.ProjectAuditLogHandler,
         '../Email/EmailHandler': this.EmailHandler,
-        './CollaboratorsHandler': this.CollaboratorsHandler
-      }
+        './CollaboratorsHandler': this.CollaboratorsHandler,
+      },
     })
   })
 
@@ -179,7 +179,7 @@ describe('OwnershipTransferHandler', function () {
         {
           to: this.user.email,
           project: this.project,
-          newOwner: this.collaborator
+          newOwner: this.collaborator,
         }
       )
       expect(this.EmailHandler.promises.sendEmail).to.have.been.calledWith(
@@ -187,7 +187,7 @@ describe('OwnershipTransferHandler', function () {
         {
           to: this.collaborator.email,
           project: this.project,
-          previousOwner: this.user
+          previousOwner: this.user,
         }
       )
     })
@@ -207,7 +207,7 @@ describe('OwnershipTransferHandler', function () {
         sessionUserId,
         {
           previousOwnerId: this.user._id,
-          newOwnerId: this.collaborator._id
+          newOwnerId: this.collaborator._id,
         }
       )
     })

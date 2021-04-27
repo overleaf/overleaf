@@ -11,10 +11,10 @@ function linkOrUnlink(accountLinked, providerName, email) {
   return {
     to: email,
     action: `${providerName} account ${action}`,
-    actionDescribed: `${indefiniteArticle} ${providerName} account ${actionDescribed} your account ${email}`
+    actionDescribed: `${indefiniteArticle} ${providerName} account ${actionDescribed} your account ${email}`,
   }
 }
 
 module.exports = {
-  linkOrUnlink
+  linkOrUnlink,
 }

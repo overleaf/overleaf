@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 function CobrandingLogo({
   brandVariationHomeUrl,
   brandVariationName,
-  logoImgUrl
+  logoImgUrl,
 }) {
   return (
     <a
@@ -25,7 +25,7 @@ function CobrandingLogo({
 CobrandingLogo.propTypes = {
   brandVariationHomeUrl: PropTypes.string.isRequired,
   brandVariationName: PropTypes.string.isRequired,
-  logoImgUrl: PropTypes.string.isRequired
+  logoImgUrl: PropTypes.string.isRequired,
 }
 
 export default CobrandingLogo

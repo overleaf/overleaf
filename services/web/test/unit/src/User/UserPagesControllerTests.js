@@ -27,9 +27,9 @@ describe('UserPagesController', function () {
         v1: {
           url: 'some.host',
           user: 'one',
-          pass: 'two'
-        }
-      }
+          pass: 'two',
+        },
+      },
     }
     this.user = {
       _id: (this.user_id = 'kwjewkl'),
@@ -38,9 +38,9 @@ describe('UserPagesController', function () {
       thirdPartyIdentifiers: [
         {
           providerId: 'google',
-          externalUserId: 'testId'
-        }
-      ]
+          externalUserId: 'testId',
+        },
+      ],
     }
 
     this.UserGetter = { getUser: sinon.stub() }
@@ -51,7 +51,7 @@ describe('UserPagesController', function () {
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       getSessionUser: sinon.stub().returns(this.user),
       _getRedirectFromSession: sinon.stub(),
-      setRedirectInSession: sinon.stub()
+      setRedirectInSession: sinon.stub(),
     }
     this.UserPagesController = SandboxedModule.require(modulePath, {
       requires: {
@@ -61,14 +61,14 @@ describe('UserPagesController', function () {
         '../Errors/ErrorController': this.ErrorController,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
-        request: (this.request = sinon.stub())
-      }
+        request: (this.request = sinon.stub()),
+      },
     })
     this.req = {
       query: {},
       session: {
-        user: this.user
-      }
+        user: this.user,
+      },
     }
     return (this.res = {})
   })
@@ -232,7 +232,7 @@ describe('UserPagesController', function () {
 
     it('should restructure thirdPartyIdentifiers data for template use', function (done) {
       const expectedResult = {
-        google: 'testId'
+        google: 'testId',
       }
       this.res.render = (page, opts) => {
         expect(opts.thirdPartyIds).to.include(expectedResult)

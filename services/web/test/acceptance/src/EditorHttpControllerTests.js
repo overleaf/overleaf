@@ -46,7 +46,7 @@ describe('EditorHttpController', function () {
           if (error) return done(error)
 
           expect(details.project.deletedDocs).to.deep.equal([
-            { _id: this.docId, name: 'potato.tex' }
+            { _id: this.docId, name: 'potato.tex' },
           ])
           done()
         })

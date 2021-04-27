@@ -7,7 +7,7 @@ import sinon from 'sinon'
 const modalProps = {
   show: true,
   handleHide: sinon.stub(),
-  trackChangesVisible: false
+  trackChangesVisible: false,
 }
 
 describe('<HotkeysModal />', function () {

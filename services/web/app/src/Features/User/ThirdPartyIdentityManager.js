@@ -17,7 +17,7 @@ function getUser(providerId, externalUserId, callback) {
     return callback(
       new OError('invalid SSO arguments', {
         externalUserId,
-        providerId
+        providerId,
       })
     )
   }
@@ -76,7 +76,7 @@ function link(
     auditLog.initiatorId,
     auditLog.ipAddress,
     {
-      providerId
+      providerId,
     },
     error => {
       if (error) {
@@ -85,17 +85,17 @@ function link(
       const query = {
         _id: userId,
         'thirdPartyIdentifiers.providerId': {
-          $ne: providerId
-        }
+          $ne: providerId,
+        },
       }
       const update = {
         $push: {
           thirdPartyIdentifiers: {
             externalUserId,
             externalData,
-            providerId
-          }
-        }
+            providerId,
+          },
+        },
       }
       // add new tpi only if an entry for the provider does not exist
       // projection includes thirdPartyIdentifiers for tests
@@ -148,21 +148,21 @@ function unlink(userId, providerId, auditLog, callback) {
     auditLog.initiatorId,
     auditLog.ipAddress,
     {
-      providerId
+      providerId,
     },
     error => {
       if (error) {
         return callback(error)
       }
       const query = {
-        _id: userId
+        _id: userId,
       }
       const update = {
         $pull: {
           thirdPartyIdentifiers: {
-            providerId
-          }
-        }
+            providerId,
+          },
+        },
       }
       // projection includes thirdPartyIdentifiers for tests
       User.findOneAndUpdate(query, update, { new: 1 }, (err, res) => {
@@ -185,7 +185,7 @@ function _getUserQuery(providerId, externalUserId) {
   providerId = providerId.toString()
   const query = {
     'thirdPartyIdentifiers.externalUserId': externalUserId,
-    'thirdPartyIdentifiers.providerId': providerId
+    'thirdPartyIdentifiers.providerId': providerId,
   }
   return query
 }
@@ -229,7 +229,7 @@ const ThirdPartyIdentityManager = {
   getUser,
   login,
   link,
-  unlink
+  unlink,
 }
 
 ThirdPartyIdentityManager.promises = promisifyAll(ThirdPartyIdentityManager)

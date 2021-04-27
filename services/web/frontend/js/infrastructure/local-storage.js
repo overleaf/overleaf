@@ -39,7 +39,7 @@ const customLocalStorage = {
   getItem: key => callSafe(getItem, key),
   setItem: (key, value) => callSafe(setItem, key, value),
   clear: () => callSafe(clear),
-  removeItem: key => callSafe(removeItem, key)
+  removeItem: key => callSafe(removeItem, key),
 }
 
 export default customLocalStorage

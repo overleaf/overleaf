@@ -15,7 +15,7 @@ App.directive('complexPassword', () => ({
       pattern: '',
       length: {
         min: 6,
-        max: 72
+        max: 72,
       },
       allowEmpty: false,
       allowAnyChars: false,
@@ -29,8 +29,8 @@ App.directive('complexPassword', () => ({
         digits: '1234567890',
         letters: 'abcdefghijklmnopqrstuvwxyz',
         letters_up: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-        symbols: '@#$%^&*()-_=+[]{};:<>/?!£€.,'
-      }
+        symbols: '@#$%^&*()-_=+[]{};:<>/?!£€.,',
+      },
     }
 
     const opts = _.defaults(
@@ -86,5 +86,5 @@ App.directive('complexPassword', () => ({
       ngModelCtrl.$setValidity('complexPassword', isValid)
       return modelValue
     })
-  }
+  },
 }))

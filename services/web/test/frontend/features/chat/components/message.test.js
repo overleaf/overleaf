@@ -9,7 +9,7 @@ describe('<Message />', function () {
   const currentUser = {
     id: 'fake_user',
     first_name: 'fake_user_first_name',
-    email: 'fake@example.com'
+    email: 'fake@example.com',
   }
 
   beforeEach(function () {
@@ -25,7 +25,7 @@ describe('<Message />', function () {
   it('renders a basic message', function () {
     const message = {
       contents: ['a message'],
-      user: currentUser
+      user: currentUser,
     }
 
     render(<Message userId={currentUser.id} message={message} />)
@@ -36,7 +36,7 @@ describe('<Message />', function () {
   it('renders a message with multiple contents', function () {
     const message = {
       contents: ['a message', 'another message'],
-      user: currentUser
+      user: currentUser,
     }
 
     render(<Message userId={currentUser.id} message={message} />)
@@ -48,9 +48,9 @@ describe('<Message />', function () {
   it('renders HTML links within messages', function () {
     const message = {
       contents: [
-        'a message with a <a href="https://overleaf.com">link to Overleaf</a>'
+        'a message with a <a href="https://overleaf.com">link to Overleaf</a>',
       ],
-      user: currentUser
+      user: currentUser,
     }
 
     render(<Message userId={currentUser.id} message={message} />)
@@ -61,7 +61,7 @@ describe('<Message />', function () {
   describe('when the message is from the user themselves', function () {
     const message = {
       contents: ['a message'],
-      user: currentUser
+      user: currentUser,
     }
 
     it('does not render the user name nor the email', function () {
@@ -75,12 +75,12 @@ describe('<Message />', function () {
   describe('when the message is from other user', function () {
     const otherUser = {
       id: 'other_user',
-      first_name: 'other_user_first_name'
+      first_name: 'other_user_first_name',
     }
 
     const message = {
       contents: ['a message'],
-      user: otherUser
+      user: otherUser,
     }
 
     it('should render the other user name', function () {
@@ -94,8 +94,8 @@ describe('<Message />', function () {
         contents: message.contents,
         user: {
           id: otherUser.id,
-          email: 'other@example.com'
-        }
+          email: 'other@example.com',
+        },
       }
 
       render(<Message userId={currentUser.id} message={msg} />)

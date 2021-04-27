@@ -66,7 +66,7 @@ describe('RestoringFiles', function () {
         return this.owner.request(
           {
             method: 'DELETE',
-            url: `/project/${this.project_id}/doc/${this.doc._id}`
+            url: `/project/${this.project_id}/doc/${this.doc._id}`,
           },
           (error, response, body) => {
             if (error != null) {
@@ -78,8 +78,8 @@ describe('RestoringFiles', function () {
                 method: 'POST',
                 url: `/project/${this.project_id}/doc/${this.doc._id}/restore`,
                 json: {
-                  name: 'main.tex'
-                }
+                  name: 'main.tex',
+                },
               },
               (error, response, body) => {
                 if (error != null) {
@@ -132,8 +132,8 @@ describe('RestoringFiles', function () {
             url: `/project/${this.project_id}/restore_file`,
             json: {
               pathname: 'foo.tex',
-              version: 42
-            }
+              version: 42,
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -179,8 +179,8 @@ describe('RestoringFiles', function () {
             url: `/project/${this.project_id}/restore_file`,
             json: {
               pathname: 'image.png',
-              version: 42
-            }
+              version: 42,
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -220,8 +220,8 @@ describe('RestoringFiles', function () {
           {
             uri: `project/${this.project_id}/folder`,
             json: {
-              name: 'foldername'
-            }
+              name: 'foldername',
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -234,8 +234,8 @@ describe('RestoringFiles', function () {
                 url: `/project/${this.project_id}/restore_file`,
                 json: {
                   pathname: 'foldername/foo2.tex',
-                  version: 42
-                }
+                  version: 42,
+                },
               },
               (error, response, body) => {
                 if (error != null) {
@@ -280,8 +280,8 @@ describe('RestoringFiles', function () {
             url: `/project/${this.project_id}/restore_file`,
             json: {
               pathname: 'nothere/foo3.tex',
-              version: 42
-            }
+              version: 42,
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -325,8 +325,8 @@ describe('RestoringFiles', function () {
             url: `/project/${this.project_id}/restore_file`,
             json: {
               pathname: 'main.tex',
-              version: 42
-            }
+              version: 42,
+            },
           },
           (error, response, body) => {
             if (error != null) {

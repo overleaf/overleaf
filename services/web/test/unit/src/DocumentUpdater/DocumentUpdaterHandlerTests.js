@@ -22,12 +22,12 @@ describe('DocumentUpdaterHandler', function () {
     this.settings = {
       apis: {
         documentupdater: {
-          url: 'http://document_updater.example.com'
+          url: 'http://document_updater.example.com',
         },
         project_history: {
-          url: 'http://project_history.example.com'
-        }
-      }
+          url: 'http://project_history.example.com',
+        },
+      },
     }
 
     this.callback = sinon.stub()
@@ -36,20 +36,20 @@ describe('DocumentUpdaterHandler', function () {
         request: {
           defaults: () => {
             return this.request
-          }
+          },
         },
         'settings-sharelatex': this.settings,
         '../Project/ProjectEntityHandler': this.projectEntityHandler,
         '../../models/Project': {
-          Project: (this.Project = {})
+          Project: (this.Project = {}),
         },
         '../../Features/Project/ProjectLocator': {},
         '@overleaf/metrics': {
           Timer: class {
             done() {}
-          }
-        }
-      }
+          },
+        },
+      },
     })
   })
 
@@ -64,7 +64,7 @@ describe('DocumentUpdaterHandler', function () {
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/flush`,
-            method: 'POST'
+            method: 'POST',
           })
           .should.equal(true)
       })
@@ -129,7 +129,7 @@ describe('DocumentUpdaterHandler', function () {
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}`,
-            method: 'DELETE'
+            method: 'DELETE',
           })
           .should.equal(true)
       })
@@ -201,7 +201,7 @@ describe('DocumentUpdaterHandler', function () {
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/flush`,
-            method: 'POST'
+            method: 'POST',
           })
           .should.equal(true)
       })
@@ -271,7 +271,7 @@ describe('DocumentUpdaterHandler', function () {
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}`,
-            method: 'DELETE'
+            method: 'DELETE',
           })
           .should.equal(true)
       })
@@ -347,9 +347,9 @@ describe('DocumentUpdaterHandler', function () {
             json: {
               lines: this.lines,
               source: this.source,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            method: 'POST'
+            method: 'POST',
           })
           .should.equal(true)
       })
@@ -421,7 +421,7 @@ describe('DocumentUpdaterHandler', function () {
           lines: this.lines,
           version: this.version,
           ops: (this.ops = ['mock-op-1', 'mock-op-2']),
-          ranges: (this.ranges = { mock: 'ranges' })
+          ranges: (this.ranges = { mock: 'ranges' }),
         }
         this.fromVersion = 2
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
@@ -438,7 +438,7 @@ describe('DocumentUpdaterHandler', function () {
           .calledWith({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}?fromVersion=${this.fromVersion}`,
             method: 'GET',
-            json: true
+            json: true,
           })
           .should.equal(true)
       })
@@ -511,7 +511,7 @@ describe('DocumentUpdaterHandler', function () {
         this.doc0 = {
           _id: this.doc_id,
           lines: this.lines,
-          v: this.version
+          v: this.version,
         }
         this.docs = [this.doc0, this.doc0, this.doc0]
         this.body = JSON.stringify(this.docs)
@@ -583,7 +583,7 @@ describe('DocumentUpdaterHandler', function () {
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/clearState`,
-            method: 'POST'
+            method: 'POST',
           })
           .should.equal(true)
       })
@@ -655,9 +655,9 @@ describe('DocumentUpdaterHandler', function () {
           .calledWith({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/change/accept`,
             json: {
-              change_ids: [this.change_id]
+              change_ids: [this.change_id],
             },
-            method: 'POST'
+            method: 'POST',
           })
           .should.equal(true)
       })
@@ -738,7 +738,7 @@ describe('DocumentUpdaterHandler', function () {
         this.request
           .calledWithMatch({
             url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}`,
-            method: 'DELETE'
+            method: 'DELETE',
           })
           .should.equal(true)
       })
@@ -840,20 +840,20 @@ describe('DocumentUpdaterHandler', function () {
           this.changes = {
             oldDocs: [
               { path: '/old_a', doc: { _id: this.docIdA } },
-              { path: '/old_b', doc: { _id: this.docIdB } }
+              { path: '/old_b', doc: { _id: this.docIdB } },
             ],
             // create new instances of the same ObjectIds so that == doesn't pass
             newDocs: [
               {
                 path: '/old_a',
-                doc: { _id: new ObjectId(this.docIdA.toString()) }
+                doc: { _id: new ObjectId(this.docIdA.toString()) },
               },
               {
                 path: '/new_b',
-                doc: { _id: new ObjectId(this.docIdB.toString()) }
-              }
+                doc: { _id: new ObjectId(this.docIdB.toString()) },
+              },
             ],
-            newProject: { version: this.version }
+            newProject: { version: this.version },
           }
 
           const updates = [
@@ -861,8 +861,8 @@ describe('DocumentUpdaterHandler', function () {
               type: 'rename-doc',
               id: this.docIdB.toString(),
               pathname: '/old_b',
-              newPathname: '/new_b'
-            }
+              newPathname: '/new_b',
+            },
           ]
 
           this.handler.updateProjectStructure(
@@ -879,8 +879,8 @@ describe('DocumentUpdaterHandler', function () {
                     updates,
                     userId: this.user_id,
                     version: this.version,
-                    projectHistoryId: this.projectHistoryId
-                  }
+                    projectHistoryId: this.projectHistoryId,
+                  },
                 })
                 .should.equal(true)
               done()
@@ -894,9 +894,9 @@ describe('DocumentUpdaterHandler', function () {
           this.docId = new ObjectId()
           this.changes = {
             newDocs: [
-              { path: '/foo', docLines: 'a\nb', doc: { _id: this.docId } }
+              { path: '/foo', docLines: 'a\nb', doc: { _id: this.docId } },
             ],
-            newProject: { version: this.version }
+            newProject: { version: this.version },
           }
 
           const updates = [
@@ -906,8 +906,8 @@ describe('DocumentUpdaterHandler', function () {
               pathname: '/foo',
               docLines: 'a\nb',
               url: undefined,
-              hash: undefined
-            }
+              hash: undefined,
+            },
           ]
 
           this.handler.updateProjectStructure(
@@ -924,8 +924,8 @@ describe('DocumentUpdaterHandler', function () {
                     updates,
                     userId: this.user_id,
                     version: this.version,
-                    projectHistoryId: this.projectHistoryId
-                  }
+                    projectHistoryId: this.projectHistoryId,
+                  },
                 })
                 .should.equal(true)
               done()
@@ -942,10 +942,10 @@ describe('DocumentUpdaterHandler', function () {
               {
                 path: '/bar',
                 url: 'filestore.example.com/file',
-                file: { _id: this.fileId, hash: '12345' }
-              }
+                file: { _id: this.fileId, hash: '12345' },
+              },
             ],
-            newProject: { version: this.version }
+            newProject: { version: this.version },
           }
 
           const updates = [
@@ -955,8 +955,8 @@ describe('DocumentUpdaterHandler', function () {
               pathname: '/bar',
               url: 'filestore.example.com/file',
               docLines: undefined,
-              hash: '12345'
-            }
+              hash: '12345',
+            },
           ]
 
           this.handler.updateProjectStructure(
@@ -973,8 +973,8 @@ describe('DocumentUpdaterHandler', function () {
                     updates,
                     userId: this.user_id,
                     version: this.version,
-                    projectHistoryId: this.projectHistoryId
-                  }
+                    projectHistoryId: this.projectHistoryId,
+                  },
                 })
                 .should.equal(true)
               done()
@@ -988,9 +988,9 @@ describe('DocumentUpdaterHandler', function () {
           this.docId = new ObjectId()
           this.changes = {
             oldDocs: [
-              { path: '/foo', docLines: 'a\nb', doc: { _id: this.docId } }
+              { path: '/foo', docLines: 'a\nb', doc: { _id: this.docId } },
             ],
-            newProject: { version: this.version }
+            newProject: { version: this.version },
           }
 
           const updates = [
@@ -998,8 +998,8 @@ describe('DocumentUpdaterHandler', function () {
               type: 'rename-doc',
               id: this.docId.toString(),
               pathname: '/foo',
-              newPathname: ''
-            }
+              newPathname: '',
+            },
           ]
 
           this.handler.updateProjectStructure(
@@ -1016,8 +1016,8 @@ describe('DocumentUpdaterHandler', function () {
                     updates,
                     userId: this.user_id,
                     version: this.version,
-                    projectHistoryId: this.projectHistoryId
-                  }
+                    projectHistoryId: this.projectHistoryId,
+                  },
                 })
                 .should.equal(true)
               done()
@@ -1035,17 +1035,17 @@ describe('DocumentUpdaterHandler', function () {
               {
                 path: '/foo.doc',
                 url: 'filestore.example.com/file',
-                file: { _id: this.fileId }
-              }
+                file: { _id: this.fileId },
+              },
             ],
             newDocs: [
               {
                 path: '/foo.doc',
                 docLines: 'hello there',
-                doc: { _id: this.docId }
-              }
+                doc: { _id: this.docId },
+              },
             ],
-            newProject: { version: this.version }
+            newProject: { version: this.version },
           }
 
           const updates = [
@@ -1053,7 +1053,7 @@ describe('DocumentUpdaterHandler', function () {
               type: 'rename-file',
               id: this.fileId.toString(),
               pathname: '/foo.doc',
-              newPathname: ''
+              newPathname: '',
             },
             {
               type: 'add-doc',
@@ -1061,8 +1061,8 @@ describe('DocumentUpdaterHandler', function () {
               pathname: '/foo.doc',
               docLines: 'hello there',
               url: undefined,
-              hash: undefined
-            }
+              hash: undefined,
+            },
           ]
 
           this.handler.updateProjectStructure(
@@ -1078,8 +1078,8 @@ describe('DocumentUpdaterHandler', function () {
                   updates,
                   userId: this.user_id,
                   version: this.version,
-                  projectHistoryId: this.projectHistoryId
-                }
+                  projectHistoryId: this.projectHistoryId,
+                },
               })
               done()
             }
@@ -1092,8 +1092,8 @@ describe('DocumentUpdaterHandler', function () {
           this.docId = new ObjectId()
           this.changes = {
             oldDocs: [
-              { path: '/foo', docLines: 'a\nb', doc: { _id: this.docId } }
-            ]
+              { path: '/foo', docLines: 'a\nb', doc: { _id: this.docId } },
+            ],
           }
 
           this.handler.updateProjectStructure(

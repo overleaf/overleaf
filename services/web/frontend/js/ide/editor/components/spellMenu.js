@@ -18,7 +18,7 @@ export default App.component('spellMenu', {
     layoutFromBottom: '<',
     highlight: '<',
     replaceWord: '&',
-    learnWord: '&'
+    learnWord: '&',
   },
   template: `\
 <div
@@ -42,5 +42,5 @@ ng-class="{open: $ctrl.open, 'spell-check-menu-from-bottom': $ctrl.layoutFromBot
   </li>
 </ul>
 </div>\
-`
+`,
 })

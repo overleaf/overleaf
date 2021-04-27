@@ -4,8 +4,8 @@ export function stubMathJax() {
   window.MathJax = {
     Hub: {
       Queue: sinon.stub(),
-      config: { tex2jax: { inlineMath: [['$', '$']] } }
-    }
+      config: { tex2jax: { inlineMath: [['$', '$']] } },
+    },
   }
 }
 

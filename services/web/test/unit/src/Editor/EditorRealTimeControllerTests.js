@@ -24,10 +24,10 @@ describe('EditorRealTimeController', function () {
     this.EditorRealTimeController = SandboxedModule.require(modulePath, {
       requires: {
         '../../infrastructure/RedisWrapper': {
-          client: () => this.rclient
+          client: () => this.rclient,
         },
         '../../infrastructure/Server': {
-          io: (this.io = {})
+          io: (this.io = {}),
         },
         'settings-sharelatex': { redis: {} },
         '@overleaf/metrics': this.Metrics,
@@ -35,10 +35,10 @@ describe('EditorRealTimeController', function () {
           randomBytes: sinon
             .stub()
             .withArgs(4)
-            .returns(Buffer.from([0x1, 0x2, 0x3, 0x4]))
+            .returns(Buffer.from([0x1, 0x2, 0x3, 0x4])),
         }),
-        os: (this.os = { hostname: sinon.stub().returns('somehost') })
-      }
+        os: (this.os = { hostname: sinon.stub().returns('somehost') }),
+      },
     })
 
     this.room_id = 'room-id'
@@ -64,7 +64,7 @@ describe('EditorRealTimeController', function () {
             room_id: this.room_id,
             message: this.message,
             payload: this.payload,
-            _id: this.message_id
+            _id: this.message_id,
           })
         )
         .should.equal(true)
@@ -78,7 +78,7 @@ describe('EditorRealTimeController', function () {
             room_id: this.room_id,
             message: this.message,
             payload: this.payload,
-            _id: this.message_id
+            _id: this.message_id,
           }).length
         )
         .should.equal(true)

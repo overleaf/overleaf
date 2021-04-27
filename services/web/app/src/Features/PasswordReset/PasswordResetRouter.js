@@ -12,8 +12,8 @@ module.exports = {
       '/user/password/reset',
       validate({
         body: Joi.object({
-          email: Joi.string().required()
-        })
+          email: Joi.string().required(),
+        }),
       }),
       PasswordResetController.requestReset
     )
@@ -28,8 +28,8 @@ module.exports = {
       validate({
         body: Joi.object({
           password: Joi.string().required(),
-          passwordResetToken: Joi.string().required()
-        })
+          passwordResetToken: Joi.string().required(),
+        }),
       }),
       PasswordResetController.setNewUserPassword
     )
@@ -39,10 +39,10 @@ module.exports = {
       '/user/reconfirm',
       validate({
         body: Joi.object({
-          email: Joi.string().required()
-        })
+          email: Joi.string().required(),
+        }),
       }),
       PasswordResetController.requestReset
     )
-  }
+  },
 }

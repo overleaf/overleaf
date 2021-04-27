@@ -12,26 +12,26 @@ describe('<PreviewLogsPane />', function () {
     file: 'main.tex',
     level: 'error',
     line: 17,
-    message: 'Misplaced alignment tab character &.'
+    message: 'Misplaced alignment tab character &.',
   }
   const sampleError2 = {
     content: 'error 1 content',
     file: 'main.tex',
     level: 'error',
     line: 22,
-    message: 'Extra alignment tab has been changed to cr.'
+    message: 'Extra alignment tab has been changed to cr.',
   }
   const sampleWarning = {
     file: 'main.tex',
     level: 'warning',
     line: 30,
-    message: "Reference `idontexist' on page 1 undefined on input line 30."
+    message: "Reference `idontexist' on page 1 undefined on input line 30.",
   }
   const sampleTypesettingIssue = {
     file: 'main.tex',
     level: 'typesetting',
     line: 12,
-    message: "Reference `idontexist' on page 1 undefined on input line 30."
+    message: "Reference `idontexist' on page 1 undefined on input line 30.",
   }
   const sampleRawLog = `
   This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.9.10)  6 NOV 2020 15:23
@@ -54,7 +54,7 @@ entering extended mode
     all: [...errors, ...warnings, ...typesetting],
     errors,
     warnings,
-    typesetting
+    typesetting,
   }
   const noOp = () => {}
   const onLogEntryLocationClick = sinon.stub()
@@ -92,7 +92,7 @@ entering extended mode
     it('renders a link to location button for every error and warning log entry', function () {
       logEntries.all.forEach((entry, index) => {
         const linkToSourceButton = screen.getByRole('button', {
-          name: `Navigate to log position in source code: ${entry.file}, ${entry.line}`
+          name: `Navigate to log position in source code: ${entry.file}, ${entry.line}`,
         })
         fireEvent.click(linkToSourceButton)
         expect(onLogEntryLocationClick).to.have.callCount(index + 1)
@@ -101,7 +101,7 @@ entering extended mode
           call.calledWith({
             file: entry.file,
             line: entry.line,
-            column: entry.column
+            column: entry.column,
           })
         ).to.be.true
       })
@@ -119,10 +119,10 @@ entering extended mode
       sizeCheck: {
         resources: [
           { path: 'foo/bar', kbSize: 76221 },
-          { path: 'bar/baz', kbSize: 2342 }
-        ]
+          { path: 'bar/baz', kbSize: 2342 },
+        ],
       },
-      mainFile: true
+      mainFile: true,
     }
 
     it('renders a validation entry for known issues', function () {
@@ -160,7 +160,7 @@ entering extended mode
     const sampleErrors = {
       clsiMaintenance: true,
       tooRecentlyCompiled: true,
-      compileTerminated: true
+      compileTerminated: true,
     }
 
     it('renders an error entry for known errors', function () {

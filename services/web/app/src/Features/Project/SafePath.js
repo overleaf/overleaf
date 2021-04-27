@@ -125,7 +125,7 @@ prototype\
 
     isAllowedLength(pathname) {
       return pathname.length > 0 && pathname.length <= MAX_PATH
-    }
+    },
   })
 }
 

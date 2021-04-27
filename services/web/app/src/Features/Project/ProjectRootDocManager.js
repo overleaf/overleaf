@@ -76,7 +76,7 @@ module.exports = ProjectRootDocManager = {
       cwd: directoryPath,
       followSymlinkedDirectories: false,
       onlyFiles: true,
-      case: false
+      case: false,
     })
 
     // the search order is such that we prefer files closer to the project root, then
@@ -272,7 +272,7 @@ module.exports = ProjectRootDocManager = {
             size: stat.size,
             path: filePath,
             elements: filePath.split(Path.sep).length,
-            name: Path.basename(filePath)
+            name: Path.basename(filePath),
           })
         }),
       function (err, files) {
@@ -309,7 +309,7 @@ module.exports = ProjectRootDocManager = {
     }
     // otherwise, use the full path name
     return a.path.localeCompare(b.path)
-  }
+  },
 }
 
 const promises = {
@@ -330,7 +330,7 @@ const promises = {
         }
       )
     }),
-  setRootDocFromName: promisify(ProjectRootDocManager.setRootDocFromName)
+  setRootDocFromName: promisify(ProjectRootDocManager.setRootDocFromName),
 }
 
 ProjectRootDocManager.promises = promises

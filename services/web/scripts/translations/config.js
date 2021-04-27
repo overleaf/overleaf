@@ -18,12 +18,12 @@ function withAuth(options) {
     {
       apiKey: process.env.ONE_SKY_PUBLIC_KEY,
       secret: process.env.ONE_SKY_PRIVATE_KEY,
-      projectId: '25049'
+      projectId: '25049',
     },
     userOptions
   )
 }
 
 module.exports = {
-  withAuth
+  withAuth,
 }

@@ -22,8 +22,8 @@ module.exports = {
     removeUserFromAllProjects,
     addUserIdToProject,
     transferProjects,
-    setCollaboratorPrivilegeLevel
-  }
+    setCollaboratorPrivilegeLevel,
+  },
 }
 
 async function removeUserFromProject(projectId, userId) {
@@ -50,8 +50,8 @@ async function removeUserFromProject(projectId, userId) {
             readOnly_refs: userId,
             tokenAccessReadOnly_refs: userId,
             tokenAccessReadAndWrite_refs: userId,
-            trashed: userId
-          }
+            trashed: userId,
+          },
         }
       )
     } else {
@@ -64,15 +64,15 @@ async function removeUserFromProject(projectId, userId) {
             tokenAccessReadOnly_refs: userId,
             tokenAccessReadAndWrite_refs: userId,
             archived: userId,
-            trashed: userId
-          }
+            trashed: userId,
+          },
         }
       )
     }
   } catch (err) {
     throw OError.tag(err, 'problem removing user from project collaborators', {
       projectId,
-      userId
+      userId,
     })
   }
 }
@@ -82,9 +82,9 @@ async function removeUserFromAllProjects(userId) {
     readAndWrite,
     readOnly,
     tokenReadAndWrite,
-    tokenReadOnly
+    tokenReadOnly,
   } = await CollaboratorsGetter.promises.getProjectsUserIsMemberOf(userId, {
-    _id: 1
+    _id: 1,
   })
   const allProjects = readAndWrite
     .concat(readOnly)
@@ -103,7 +103,7 @@ async function addUserIdToProject(
 ) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     collaberator_refs: 1,
-    readOnly_refs: 1
+    readOnly_refs: 1,
   })
   let level
   let existingUsers = project.collaberator_refs || []
@@ -144,8 +144,8 @@ async function transferProjects(fromUserId, toUserId) {
       $or: [
         { owner_ref: fromUserId },
         { collaberator_refs: fromUserId },
-        { readOnly_refs: fromUserId }
-      ]
+        { readOnly_refs: fromUserId },
+      ],
     },
     { _id: 1 }
   ).exec()
@@ -160,26 +160,26 @@ async function transferProjects(fromUserId, toUserId) {
   await Project.updateMany(
     { collaberator_refs: fromUserId },
     {
-      $addToSet: { collaberator_refs: toUserId }
+      $addToSet: { collaberator_refs: toUserId },
     }
   ).exec()
   await Project.updateMany(
     { collaberator_refs: fromUserId },
     {
-      $pull: { collaberator_refs: fromUserId }
+      $pull: { collaberator_refs: fromUserId },
     }
   ).exec()
 
   await Project.updateMany(
     { readOnly_refs: fromUserId },
     {
-      $addToSet: { readOnly_refs: toUserId }
+      $addToSet: { readOnly_refs: toUserId },
     }
   ).exec()
   await Project.updateMany(
     { readOnly_refs: fromUserId },
     {
-      $pull: { readOnly_refs: fromUserId }
+      $pull: { readOnly_refs: fromUserId },
     }
   ).exec()
 
@@ -201,21 +201,21 @@ async function setCollaboratorPrivilegeLevel(
   // collaborator
   const query = {
     _id: projectId,
-    $or: [{ collaberator_refs: userId }, { readOnly_refs: userId }]
+    $or: [{ collaberator_refs: userId }, { readOnly_refs: userId }],
   }
   let update
   switch (privilegeLevel) {
     case PrivilegeLevels.READ_AND_WRITE: {
       update = {
         $pull: { readOnly_refs: userId },
-        $addToSet: { collaberator_refs: userId }
+        $addToSet: { collaberator_refs: userId },
       }
       break
     }
     case PrivilegeLevels.READ_ONLY: {
       update = {
         $pull: { collaberator_refs: userId },
-        $addToSet: { readOnly_refs: userId }
+        $addToSet: { readOnly_refs: userId },
       }
       break
     }
@@ -239,18 +239,18 @@ async function userIsTokenMember(userId, projectId) {
         _id: projectId,
         $or: [
           { tokenAccessReadOnly_refs: userId },
-          { tokenAccessReadAndWrite_refs: userId }
-        ]
+          { tokenAccessReadAndWrite_refs: userId },
+        ],
       },
       {
-        _id: 1
+        _id: 1,
       }
     )
     return project != null
   } catch (err) {
     throw OError.tag(err, 'problem while checking if user is token member', {
       userId,
-      projectId
+      projectId,
     })
   }
 }

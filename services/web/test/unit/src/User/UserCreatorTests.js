@@ -17,37 +17,37 @@ describe('UserCreator', function () {
     this.UserCreator = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
-          User: this.UserModel
+          User: this.UserModel,
         },
         '@overleaf/metrics': { timeAsyncMethod() {} },
         '../../infrastructure/Features': (this.Features = {
-          hasFeature: sinon.stub().returns(false)
+          hasFeature: sinon.stub().returns(false),
         }),
         './UserDeleter': (this.UserDeleter = {
           promises: {
-            deleteNewUser: sinon.stub().resolves()
-          }
+            deleteNewUser: sinon.stub().resolves(),
+          },
         }),
         './UserGetter': (this.UserGetter = {
           promises: {
-            getUser: sinon.stub().resolves(this.user)
-          }
+            getUser: sinon.stub().resolves(this.user),
+          },
         }),
         './UserUpdater': (this.UserUpdater = {
           promises: {
             addAffiliationForNewUser: sinon
               .stub()
               .resolves({ n: 1, nModified: 1, ok: 1 }),
-            updateUser: sinon.stub().resolves()
-          }
+            updateUser: sinon.stub().resolves(),
+          },
         }),
         '../Analytics/AnalyticsManager': (this.Analytics = {
-          recordEvent: sinon.stub()
+          recordEvent: sinon.stub(),
         }),
         './UserOnboardingEmailManager': (this.UserOnboardingEmailManager = {
-          scheduleOnboardingEmail: sinon.stub()
-        })
-      }
+          scheduleOnboardingEmail: sinon.stub(),
+        }),
+      },
     })
 
     this.email = 'bob.oswald@gmail.com'
@@ -58,7 +58,7 @@ describe('UserCreator', function () {
       it('should take the opts and put them in the model', async function () {
         const user = await this.UserCreator.promises.createNewUser({
           email: this.email,
-          holdingAccount: true
+          holdingAccount: true,
         })
         assert.equal(user.email, this.email)
         assert.equal(user.holdingAccount, true)
@@ -69,7 +69,7 @@ describe('UserCreator', function () {
         const user = await this.UserCreator.promises.createNewUser({
           email: this.email,
           holdingAccount: true,
-          first_name: ''
+          first_name: '',
         })
         assert.equal(user.email, this.email)
         assert.equal(user.holdingAccount, true)
@@ -80,7 +80,7 @@ describe('UserCreator', function () {
         const user = await this.UserCreator.promises.createNewUser({
           email: this.email,
           holdingAccount: true,
-          first_name: 'fiiirstname'
+          first_name: 'fiiirstname',
         })
         assert.equal(user.email, this.email)
         assert.equal(user.holdingAccount, true)
@@ -91,7 +91,7 @@ describe('UserCreator', function () {
         const user = await this.UserCreator.promises.createNewUser({
           email: this.email,
           holdingAccount: true,
-          last_name: 'lastNammmmeee'
+          last_name: 'lastNammmmeee',
         })
         assert.equal(user.email, this.email)
         assert.equal(user.holdingAccount, true)
@@ -100,7 +100,7 @@ describe('UserCreator', function () {
 
       it('should set emails attribute', async function () {
         const user = await this.UserCreator.promises.createNewUser({
-          email: this.email
+          email: this.email,
         })
         user.email.should.equal(this.email)
         user.emails.length.should.equal(1)
@@ -218,7 +218,7 @@ describe('UserCreator', function () {
       it('should take the opts and put them in the model', async function () {
         const opts = {
           email: this.email,
-          holdingAccount: true
+          holdingAccount: true,
         }
         const user = await this.UserCreator.promises.createNewUser(opts)
         assert.equal(user.email, this.email)
@@ -255,7 +255,7 @@ describe('UserCreator', function () {
       it('should include SAML provider ID with email', async function () {
         const attributes = {
           email: this.email,
-          samlIdentifiers: [{ email: this.email, providerId: '1' }]
+          samlIdentifiers: [{ email: this.email, providerId: '1' }],
         }
         const user = await this.UserCreator.promises.createNewUser(attributes)
         assert.equal(user.emails[0].samlProviderId, '1')
@@ -263,7 +263,7 @@ describe('UserCreator', function () {
 
       it('should fire an analytics event on registration', async function () {
         const user = await this.UserCreator.promises.createNewUser({
-          email: this.email
+          email: this.email,
         })
         assert.equal(user.email, this.email)
         sinon.assert.calledWith(
@@ -275,7 +275,7 @@ describe('UserCreator', function () {
 
       it('should schedule an onboarding email on registration', async function () {
         const user = await this.UserCreator.promises.createNewUser({
-          email: this.email
+          email: this.email,
         })
         assert.equal(user.email, this.email)
         sinon.assert.calledWith(

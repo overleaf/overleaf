@@ -63,12 +63,12 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
           ),
           east: {
             size: scope.$eval(attrs.initialSizeEast),
-            initClosed: scope.$eval(attrs.initClosedEast)
+            initClosed: scope.$eval(attrs.initClosedEast),
           },
           west: {
             size: scope.$eval(attrs.initialSizeEast),
-            initClosed: scope.$eval(attrs.initClosedWest)
-          }
+            initClosed: scope.$eval(attrs.initClosedWest),
+          },
         }
 
         // Restore previously recorded state
@@ -105,7 +105,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
             } else {
               controls.show()
               return controls.css({
-                right: state.east.size
+                right: state.east.size,
               })
             }
           }
@@ -288,7 +288,7 @@ ng-click=\"handleClick()\">\
         const name = attrs.layout
         const state = element.layout().readState()
         return scope.$broadcast(`layout:${name}:linked`, state)
-      }
+      },
     }
-  }
+  },
 }))

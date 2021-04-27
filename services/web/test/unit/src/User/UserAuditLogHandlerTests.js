@@ -17,17 +17,17 @@ describe('UserAuditLogHandler', function () {
         sessions: [
           {
             ip_address: '0:0:0:0',
-            session_created: '2020-07-15T16:07:57.652Z'
-          }
-        ]
+            session_created: '2020-07-15T16:07:57.652Z',
+          },
+        ],
       },
-      ip: '0:0:0:0'
+      ip: '0:0:0:0',
     }
     this.UserMock = sinon.mock(User)
     this.UserAuditLogHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        '../../models/User': { User }
-      }
+        '../../models/User': { User },
+      },
     })
   })
 

@@ -25,18 +25,18 @@ module.exports = {
           query,
           {
             $push: {
-              refered_users: newUserId
+              refered_users: newUserId,
             },
             $inc: {
-              refered_user_count: 1
-            }
+              refered_user_count: 1,
+            },
           },
           {},
           function (err) {
             if (err != null) {
               OError.tag(err, 'something went wrong allocating referal', {
                 referalId,
-                newUserId
+                newUserId,
               })
               return callback(err)
             }
@@ -47,5 +47,5 @@ module.exports = {
         callback()
       }
     })
-  }
+  },
 }

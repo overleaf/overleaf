@@ -184,7 +184,7 @@ export default CommandManager = class CommandManager {
           caption,
           snippet,
           meta: 'cmd',
-          score
+          score,
         })
       }
     }
@@ -228,7 +228,7 @@ export default CommandManager = class CommandManager {
         base,
         completion: completionBase + args,
         completionBeforeCursor,
-        completionAfterCursor
+        completionAfterCursor,
       }
     })
   }

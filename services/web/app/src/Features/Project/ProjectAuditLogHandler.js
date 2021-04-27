@@ -5,8 +5,8 @@ const MAX_AUDIT_LOG_ENTRIES = 200
 
 module.exports = {
   promises: {
-    addEntry
-  }
+    addEntry,
+  },
 }
 
 /**
@@ -24,14 +24,14 @@ async function addEntry(projectId, operation, initiatorId, info = {}) {
     operation,
     initiatorId,
     timestamp,
-    info
+    info,
   }
   const result = await Project.updateOne(
     { _id: projectId },
     {
       $push: {
-        auditLog: { $each: [entry], $slice: -MAX_AUDIT_LOG_ENTRIES }
-      }
+        auditLog: { $each: [entry], $slice: -MAX_AUDIT_LOG_ENTRIES },
+      },
     }
   ).exec()
   if (result.nModified === 0) {

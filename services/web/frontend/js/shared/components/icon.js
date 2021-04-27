@@ -8,14 +8,14 @@ function Icon({
   modifier,
   classes = {},
   accessibilityLabel,
-  children
+  children,
 }) {
   const iconClassName = classNames(
     'fa',
     `fa-${type}`,
     {
       'fa-spin': spin,
-      [`fa-${modifier}`]: modifier
+      [`fa-${modifier}`]: modifier,
     },
     classes.icon
   )
@@ -37,13 +37,13 @@ Icon.propTypes = {
   spin: PropTypes.bool,
   modifier: PropTypes.string,
   classes: PropTypes.exact({
-    icon: PropTypes.string
+    icon: PropTypes.string,
   }),
   accessibilityLabel: PropTypes.string,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ])
+    PropTypes.node,
+  ]),
 }
 
 export default Icon

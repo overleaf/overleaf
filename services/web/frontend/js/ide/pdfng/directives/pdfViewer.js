@@ -82,7 +82,7 @@ App.controller(
           },
           pageSizeChangeCallback(pageNum, deltaH) {
             return $scope.$broadcast('pdf:page:size-change', pageNum, deltaH)
-          }
+          },
         })
 
         // we will have all the main information needed to start display
@@ -91,13 +91,13 @@ App.controller(
           .all({
             numPages: $scope.document.getNumPages(),
             // get size of first page as default @ scale 1
-            pdfViewport: $scope.document.getPdfViewport(1, 1)
+            pdfViewport: $scope.document.getPdfViewport(1, 1),
           })
           .then(function (result) {
             $scope.pdfViewport = result.pdfViewport
             $scope.pdfPageSize = [
               result.pdfViewport.height,
-              result.pdfViewport.width
+              result.pdfViewport.width,
             ]
             // console.log 'resolved q.all, page size is', result
             $scope.$emit('loaded')
@@ -140,7 +140,7 @@ App.controller(
           $scope.document.setScale(numScale)
           return ($scope.defaultPageSize = [
             numScale * $scope.pdfPageSize[0],
-            numScale * $scope.pdfPageSize[1]
+            numScale * $scope.pdfPageSize[1],
           ])
         })
         // console.log 'in setScale result', $scope.scale.scale, $scope.defaultPageSize
@@ -153,7 +153,7 @@ App.controller(
       // console.log 'in redraw'
       // console.log 'reseting pages array for', $scope.numPages
       $scope.pages = __range__(0, $scope.numPages - 1, true).map(i => ({
-        pageNum: i + 1
+        pageNum: i + 1,
       }))
       if (position != null && position.page != null) {
         // console.log 'position is', position.page, position.offset
@@ -172,7 +172,7 @@ App.controller(
       const newScale = $scope.scale.scale * 1.2
       return ($scope.forceScale = {
         scaleMode: 'scale_mode_value',
-        scale: newScale
+        scale: newScale,
       })
     }
 
@@ -181,7 +181,7 @@ App.controller(
       const newScale = $scope.scale.scale / 1.2
       return ($scope.forceScale = {
         scaleMode: 'scale_mode_value',
-        scale: newScale
+        scale: newScale,
       })
     }
 
@@ -205,8 +205,8 @@ App.controller(
           h: 100,
           v: 100,
           height: 30,
-          width: 200
-        }
+          width: 200,
+        },
       ])
 
     // we work with (pagenumber, % of height down page from top)
@@ -264,7 +264,7 @@ App.controller(
       const newPosition = {
         page: topPageIdx,
         offset: { top: pdfOffset[1], left: 0 },
-        pageSize: { height: viewport.viewBox[3], width: viewport.viewBox[2] }
+        pageSize: { height: viewport.viewBox[3], width: viewport.viewBox[2] },
       }
       return newPosition
     }
@@ -296,7 +296,7 @@ App.controller(
           if (position.pageSize == null) {
             position.pageSize = {
               height: viewport.viewBox[3],
-              width: viewport.viewBox[2]
+              width: viewport.viewBox[2],
             }
           }
           // console.log 'addition offset =', pageOffset
@@ -326,7 +326,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
     highlights: '=',
     position: '=',
     scale: '=',
-    pleaseJumpTo: '='
+    pleaseJumpTo: '=',
   },
   template: `\
 <div data-pdf-page class='pdf-page-container page-container' ng-repeat='page in pages'></div>\
@@ -744,7 +744,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
                 // console.log 'XYZ:', r[2], r[3]
                 const newPosition = {
                   page: pidx,
-                  offset: { top: r[3], left: r[2] }
+                  offset: { top: r[3], left: r[2] },
                 }
                 return ctrl.setPdfPosition(scope.pages[pidx], newPosition)
               }
@@ -765,8 +765,8 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
           left: area.h,
           top: area.v,
           height: area.height,
-          width: area.width
-        }
+          width: area.width,
+        },
       }))
       // console.log 'highlights', highlights
 
@@ -803,8 +803,8 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
               viewport.viewBox[3] -
               first.highlight.top +
               first.highlight.height +
-              72
-          }
+              72,
+          },
         }
         return ctrl.setPdfPosition(scope.pages[first.page], position)
       })
@@ -825,7 +825,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
         return clearTimeout(spinnerTimer)
       }
     })
-  }
+  },
 }))
 
 function __range__(left, right, inclusive) {

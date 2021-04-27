@@ -13,7 +13,7 @@ const envs = [
   'split',
   'verbatim',
   'quote',
-  'center'
+  'center',
 ]
 
 const envsWithSnippets = [
@@ -25,10 +25,10 @@ const envsWithSnippets = [
   'enumerate',
   'itemize',
   'frame',
-  'thebibliography'
+  'thebibliography',
 ]
 
 export default {
   all: envs.concat(envsWithSnippets),
-  withoutSnippets: envs
+  withoutSnippets: envs,
 }

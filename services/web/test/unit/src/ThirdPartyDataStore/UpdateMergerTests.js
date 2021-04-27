@@ -15,8 +15,8 @@ describe('UpdateMerger :', function () {
         '../Uploads/FileTypeManager': (this.FileTypeManager = {}),
         '../../infrastructure/FileWriter': (this.FileWriter = {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
-        'settings-sharelatex': { path: { dumpPath: 'dump_here' } }
-      }
+        'settings-sharelatex': { path: { dumpPath: 'dump_here' } },
+      },
     })
     this.project_id = 'project_id_here'
     this.user_id = 'mock-user-id'

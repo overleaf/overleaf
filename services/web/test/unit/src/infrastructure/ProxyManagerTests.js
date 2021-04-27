@@ -23,13 +23,13 @@ describe('ProxyManager', function () {
     this.settings = { proxyUrls: {} }
     this.request = sinon.stub().returns({
       on() {},
-      pipe() {}
+      pipe() {},
     })
     this.proxyManager = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': this.settings,
-        request: this.request
-      }
+        request: this.request,
+      },
     })
     this.proxyPath = '/foo/bar'
     this.req = new MockRequest()
@@ -42,7 +42,7 @@ describe('ProxyManager', function () {
       this.router = { get: sinon.stub() }
       this.settings.proxyUrls = {
         '/foo/bar': '',
-        '/foo/:id': ''
+        '/foo/:id': '',
       }
       this.proxyManager.apply(this.router)
       sinon.assert.calledTwice(this.router.get)
@@ -53,11 +53,11 @@ describe('ProxyManager', function () {
     it('applies methods other than get', function () {
       this.router = {
         post: sinon.stub(),
-        put: sinon.stub()
+        put: sinon.stub(),
       }
       this.settings.proxyUrls = {
         '/foo/bar': { options: { method: 'post' } },
-        '/foo/:id': { options: { method: 'put' } }
+        '/foo/:id': { options: { method: 'put' } },
       }
       this.proxyManager.apply(this.router)
       sinon.assert.calledOnce(this.router.post)
@@ -125,7 +125,7 @@ describe('ProxyManager', function () {
         baseUrl: 'api.v1',
         path(params) {
           return `/resource/${params.id}`
-        }
+        },
       }
       this.settings.proxyUrls['/res/:id'] = target
       this.req.url = '/res/123'
@@ -139,14 +139,14 @@ describe('ProxyManager', function () {
       const target = {
         baseUrl: 'api.v1',
         path: '/foo',
-        options: { foo: 'bar' }
+        options: { foo: 'bar' },
       }
       this.req.url = '/foo'
       this.req.route.path = '/foo'
       this.proxyManager.createProxy(target)(this.req, this.res, this.next)
       return assertCalledWith(this.request, {
         foo: 'bar',
-        url: 'api.v1/foo'
+        url: 'api.v1/foo',
       })
     })
 
@@ -158,9 +158,9 @@ describe('ProxyManager', function () {
       this.proxyManager.createProxy(target)(this.req, this.res, this.next)
       return assertCalledWith(this.request, {
         headers: {
-          Cookie: 'cookie'
+          Cookie: 'cookie',
         },
-        url: 'api.v1/foo'
+        url: 'api.v1/foo',
       })
     })
 
@@ -168,7 +168,7 @@ describe('ProxyManager', function () {
       const target = {
         baseUrl: 'api.v1',
         path: '/foo',
-        options: { method: 'post' }
+        options: { method: 'post' },
       }
       this.req.url = '/foo'
       this.req.route.path = '/foo'
@@ -176,10 +176,10 @@ describe('ProxyManager', function () {
       this.proxyManager.createProxy(target)(this.req, this.res, this.next)
       return assertCalledWith(this.request, {
         form: {
-          foo: 'bar'
+          foo: 'bar',
         },
         method: 'post',
-        url: 'api.v1/foo'
+        url: 'api.v1/foo',
       })
     })
 
@@ -187,7 +187,7 @@ describe('ProxyManager', function () {
       const target = {
         baseUrl: 'api.v1',
         path: '/foo',
-        options: { method: 'put' }
+        options: { method: 'put' },
       }
       this.req.url = '/foo'
       this.req.route.path = '/foo'
@@ -195,10 +195,10 @@ describe('ProxyManager', function () {
       this.proxyManager.createProxy(target)(this.req, this.res, this.next)
       return assertCalledWith(this.request, {
         form: {
-          foo: 'bar'
+          foo: 'bar',
         },
         method: 'put',
-        url: 'api.v1/foo'
+        url: 'api.v1/foo',
       })
     })
   })

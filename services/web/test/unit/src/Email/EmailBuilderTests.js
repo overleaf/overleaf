@@ -17,7 +17,7 @@ describe('EmailBuilder', function () {
   before(function () {
     this.settings = {
       appName: 'testApp',
-      siteUrl: 'https://www.overleaf.com'
+      siteUrl: 'https://www.overleaf.com',
     }
     this.EmailBuilder = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -25,8 +25,8 @@ describe('EmailBuilder', function () {
         './Bodies/cta-email': ctaEmailBody,
         './Bodies/NoCTAEmailBody': NoCTAEmailBody,
         './Layouts/BaseWithHeaderEmailLayout': BaseWithHeaderEmailLayout,
-        'settings-sharelatex': this.settings
-      }
+        'settings-sharelatex': this.settings,
+      },
     })
   })
 
@@ -36,13 +36,13 @@ describe('EmailBuilder', function () {
         to: 'bob@bob.com',
         first_name: 'bob',
         owner: {
-          email: 'sally@hally.com'
+          email: 'sally@hally.com',
         },
         inviteUrl: 'http://example.com/invite',
         project: {
           url: 'http://www.project.com',
-          name: 'standard project'
-        }
+          name: 'standard project',
+        },
       }
     })
 
@@ -85,13 +85,13 @@ describe('EmailBuilder', function () {
         to: 'bob@joe.com',
         first_name: 'bob',
         owner: {
-          email: 'sally@hally.com'
+          email: 'sally@hally.com',
         },
         inviteUrl: 'http://example.com/invite',
         project: {
           url: 'http://www.project.com',
-          name: 'come buy my product at http://notascam.com'
-        }
+          name: 'come buy my product at http://notascam.com',
+        },
       }
       this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
     })
@@ -111,7 +111,7 @@ describe('EmailBuilder', function () {
         secondaryMessage: () => {},
         ctaText: () => {},
         ctaURL: () => {},
-        gmailGoToAction: () => {}
+        gmailGoToAction: () => {},
       }
       it('should throw an error when missing title', function () {
         let { title, ...missing } = content
@@ -146,7 +146,7 @@ describe('EmailBuilder', function () {
         beforeEach(function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
-            to: this.emailAddress
+            to: this.emailAddress,
           }
           this.email = this.EmailBuilder.buildEmail(
             'canceledSubscription',
@@ -188,7 +188,7 @@ describe('EmailBuilder', function () {
           this.opts = {
             to: this.emailAddress,
             confirmEmailUrl: `${this.settings.siteUrl}/user/emails/confirm?token=aToken123`,
-            sendingUser_id: this.userId
+            sendingUser_id: this.userId,
           }
           this.email = this.EmailBuilder.buildEmail('confirmEmail', this.opts)
         })
@@ -226,8 +226,8 @@ describe('EmailBuilder', function () {
             previousOwner: {},
             project: {
               _id: 'abc123',
-              name: 'example project'
-            }
+              name: 'example project',
+            },
           }
           this.email = this.EmailBuilder.buildEmail(
             'ownershipTransferConfirmationNewOwner',
@@ -272,7 +272,7 @@ describe('EmailBuilder', function () {
               this.settings.siteUrl
             }/user/password/set?passwordResetToken=aToken&email=${encodeURIComponent(
               this.emailAddress
-            )}`
+            )}`,
           }
           this.email = this.EmailBuilder.buildEmail(
             'passwordResetRequested',
@@ -314,7 +314,7 @@ describe('EmailBuilder', function () {
           this.opts = {
             to: this.emailAddress,
             confirmEmailUrl: `${this.settings.siteUrl}/user/emails/confirm?token=aToken123`,
-            sendingUser_id: this.userId
+            sendingUser_id: this.userId,
           }
           this.email = this.EmailBuilder.buildEmail('reconfirmEmail', this.opts)
         })
@@ -353,8 +353,8 @@ describe('EmailBuilder', function () {
             inviter: {
               email: 'deanna@overleaf.com',
               first_name: 'Deanna',
-              last_name: 'Troi'
-            }
+              last_name: 'Troi',
+            },
           }
           this.email = this.EmailBuilder.buildEmail(
             'verifyEmailToJoinTeam',
@@ -391,7 +391,7 @@ describe('EmailBuilder', function () {
         before(function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
-            to: this.emailAddress
+            to: this.emailAddress,
           }
           this.email = this.EmailBuilder.buildEmail(
             'reactivatedSubscription',
@@ -429,7 +429,7 @@ describe('EmailBuilder', function () {
         before(function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
-            to: this.emailAddress
+            to: this.emailAddress,
           }
           this.email = this.EmailBuilder.buildEmail('testEmail', this.opts)
         })
@@ -468,7 +468,7 @@ describe('EmailBuilder', function () {
           this.emailAddress = 'example@overleaf.com'
           this.opts = {
             to: this.emailAddress,
-            setNewPasswordUrl: `${this.settings.siteUrl}/user/activate?token=aToken123&user_id=aUserId123`
+            setNewPasswordUrl: `${this.settings.siteUrl}/user/activate?token=aToken123&user_id=aUserId123`,
           }
           this.email = this.EmailBuilder.buildEmail('registered', this.opts)
         })
@@ -505,7 +505,7 @@ describe('EmailBuilder', function () {
           this.emailAddress = 'example@overleaf.com'
           this.owner = {
             email: 'owner@example.com',
-            name: 'Bailey'
+            name: 'Bailey',
           }
           this.projectName = 'Top Secret'
           this.opts = {
@@ -513,15 +513,15 @@ describe('EmailBuilder', function () {
               `${this.settings.siteUrl}/project/projectId123/invite/token/aToken123?` +
               [
                 `project_name=${encodeURIComponent(this.projectName)}`,
-                `user_first_name=${encodeURIComponent(this.owner.name)}`
+                `user_first_name=${encodeURIComponent(this.owner.name)}`,
               ].join('&'),
             owner: {
-              email: this.owner.email
+              email: this.owner.email,
             },
             project: {
-              name: this.projectName
+              name: this.projectName,
             },
-            to: this.emailAddress
+            to: this.emailAddress,
           }
           this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
         })
@@ -566,7 +566,7 @@ describe('EmailBuilder', function () {
             to: this.email,
             actionDescribed: this.actionDescribedNotAllowedHTML,
             action: 'an action',
-            message: [this.messageNotAllowedHTML]
+            message: [this.messageNotAllowedHTML],
           }
           this.email = this.EmailBuilder.buildEmail('securityAlert', this.opts)
         })

@@ -5,7 +5,7 @@ import OutlineItem from './outline-item'
 
 function OutlineList({ outline, jumpToLine, isRoot, highlightedLine }) {
   const listClasses = classNames('outline-item-list', {
-    'outline-item-list-root': isRoot
+    'outline-item-list-root': isRoot,
   })
   return (
     <ul className={listClasses} role={isRoot ? 'tree' : 'group'}>
@@ -27,7 +27,7 @@ OutlineList.propTypes = {
   outline: PropTypes.array.isRequired,
   jumpToLine: PropTypes.func.isRequired,
   isRoot: PropTypes.bool,
-  highlightedLine: PropTypes.number
+  highlightedLine: PropTypes.number,
 }
 
 export default OutlineList

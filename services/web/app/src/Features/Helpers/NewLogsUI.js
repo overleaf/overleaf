@@ -4,11 +4,11 @@ const Settings = require('settings-sharelatex')
 const EXISTING_UI = { newLogsUI: false, subvariant: null }
 const NEW_UI_WITH_POPUP = {
   newLogsUI: true,
-  subvariant: 'new-logs-ui-with-popup'
+  subvariant: 'new-logs-ui-with-popup',
 }
 const NEW_UI_WITHOUT_POPUP = {
   newLogsUI: true,
-  subvariant: 'new-logs-ui-without-popup'
+  subvariant: 'new-logs-ui-without-popup',
 }
 
 function _getVariantForPercentile(
@@ -41,7 +41,7 @@ function getNewLogsUIVariantForUser(user) {
   const {
     _id: userId,
     alphaProgram: isAlphaUser,
-    betaProgram: isBetaUser
+    betaProgram: isBetaUser,
   } = user
   if (!userId) {
     return EXISTING_UI
@@ -67,5 +67,5 @@ function getNewLogsUIVariantForUser(user) {
 }
 
 module.exports = {
-  getNewLogsUIVariantForUser
+  getNewLogsUIVariantForUser,
 }

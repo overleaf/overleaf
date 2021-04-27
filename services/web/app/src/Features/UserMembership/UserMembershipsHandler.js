@@ -15,7 +15,7 @@ const { promisifyAll } = require('../../util/promises')
 const EntityModels = {
   Institution: require('../../models/Institution').Institution,
   Subscription: require('../../models/Subscription').Subscription,
-  Publisher: require('../../models/Publisher').Publisher
+  Publisher: require('../../models/Publisher').Publisher,
 }
 const UserMembershipEntityConfigs = require('./UserMembershipEntityConfigs')
 
@@ -81,7 +81,7 @@ const UserMembershipsHandler = {
         )
       }
     )
-  }
+  },
 }
 
 UserMembershipsHandler.promises = promisifyAll(UserMembershipsHandler)

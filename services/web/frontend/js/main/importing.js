@@ -12,7 +12,7 @@ App.controller(
       $window.location.reload()
     }, 5000)
     $scope.state = {
-      load_progress: 20
+      load_progress: 20,
     }
   }
 )

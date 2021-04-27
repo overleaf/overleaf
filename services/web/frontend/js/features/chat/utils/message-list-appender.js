@@ -18,14 +18,14 @@ export function appendMessage(messageList, message) {
       // message is appended or prepended
       id: message.id,
       timestamp: message.timestamp,
-      contents: lastMessage.contents.concat(message.content)
+      contents: lastMessage.contents.concat(message.content),
     })
   } else {
     return messageList.slice(0).concat({
       id: message.id,
       user: message.user,
       timestamp: message.timestamp,
-      contents: [message.content]
+      contents: [message.content],
     })
   }
 }
@@ -53,7 +53,7 @@ export function prependMessages(messageList, messages) {
           id: message.id,
           user: message.user,
           timestamp: message.timestamp,
-          contents: [message.content]
+          contents: [message.content],
         })
       }
     })

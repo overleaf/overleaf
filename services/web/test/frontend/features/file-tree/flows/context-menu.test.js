@@ -15,8 +15,8 @@ describe('FileTree Context Menu Flow', function () {
         _id: 'root-folder-id',
         docs: [{ _id: '456def', name: 'main.tex' }],
         folders: [],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     render(
       <FileTreeRoot
@@ -49,8 +49,8 @@ describe('FileTree Context Menu Flow', function () {
         _id: 'root-folder-id',
         docs: [{ _id: '456def', name: 'main.tex' }],
         folders: [],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     render(
       <FileTreeRoot

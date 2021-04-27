@@ -18,7 +18,7 @@ describe('SafeHTMLSubstitution', function () {
       '<0></0>': ['', '0', '', ''],
       '<0>INNER</0><0>INNER2</0>': ['', '0', 'INNER', '', '0', 'INNER2', ''],
       '<0><1>INNER</1></0>': ['', '0', '<1>INNER</1>', ''],
-      'PLAIN TEXT': ['PLAIN TEXT']
+      'PLAIN TEXT': ['PLAIN TEXT'],
     }
     Object.entries(CASES).forEach(([input, output]) => {
       it(`should parse "${input}" as expected`, function () {
@@ -53,7 +53,7 @@ describe('SafeHTMLSubstitution', function () {
         expect(
           SafeHTMLSubstitution.render('<0>one</0><1>two</1>', [
             { name: 'b' },
-            { name: 'i' }
+            { name: 'i' },
           ])
         ).to.equal('<b>one</b><i>two</i>')
       })
@@ -64,9 +64,9 @@ describe('SafeHTMLSubstitution', function () {
             {
               name: 'b',
               attrs: {
-                class: 'magic'
-              }
-            }
+                class: 'magic',
+              },
+            },
           ])
         ).to.equal('<b class="magic">text</b>')
       })
@@ -75,7 +75,7 @@ describe('SafeHTMLSubstitution', function () {
         expect(
           SafeHTMLSubstitution.render('<0><1>nested</1></0>', [
             { name: 'b' },
-            { name: 'i' }
+            { name: 'i' },
           ])
         ).to.equal('<b><i>nested</i></b>')
       })
@@ -83,7 +83,7 @@ describe('SafeHTMLSubstitution', function () {
       it('should handle links', function () {
         expect(
           SafeHTMLSubstitution.render('<0>Go to Login</0>', [
-            { name: 'a', attrs: { href: 'https://www.overleaf.com/login' } }
+            { name: 'a', attrs: { href: 'https://www.overleaf.com/login' } },
           ])
         ).to.equal('<a href="https://www.overleaf.com/login">Go to Login</a>')
       })
@@ -93,7 +93,7 @@ describe('SafeHTMLSubstitution', function () {
           SafeHTMLSubstitution.render('<0>good</0>', [
             { name: 'b' },
             { name: 'i' },
-            { name: 'u' }
+            { name: 'u' },
           ])
         ).to.equal('<b>good</b>')
       })
@@ -147,7 +147,7 @@ describe('SafeHTMLSubstitution', function () {
       it('should escape text after of a component', function () {
         expect(
           SafeHTMLSubstitution.render('<0>inner</0><i>POST</i>', [
-            { name: 'b' }
+            { name: 'b' },
           ])
         ).to.equal('<b>inner</b>&lt;i&gt;POST&lt;/i&gt;')
       })

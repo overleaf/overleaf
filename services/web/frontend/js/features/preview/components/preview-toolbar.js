@@ -29,7 +29,7 @@ function PreviewToolbar({
   outputFiles,
   pdfDownloadUrl,
   showLogs,
-  splitLayout
+  splitLayout,
 }) {
   const showTextRef = useRef(true)
   const showToggleTextRef = useRef(true)
@@ -266,11 +266,11 @@ PreviewToolbar.propTypes = {
     isDraftModeOn: PropTypes.bool.isRequired,
     isSyntaxCheckOn: PropTypes.bool.isRequired,
     compileFailed: PropTypes.bool,
-    logEntries: PropTypes.object.isRequired
+    logEntries: PropTypes.object.isRequired,
   }),
   logsState: PropTypes.shape({
     nErrors: PropTypes.number.isRequired,
-    nWarnings: PropTypes.number.isRequired
+    nWarnings: PropTypes.number.isRequired,
   }),
   showLogs: PropTypes.bool.isRequired,
   splitLayout: PropTypes.bool.isRequired,
@@ -285,7 +285,7 @@ PreviewToolbar.propTypes = {
   onSetFullLayout: PropTypes.func.isRequired,
   onStopCompilation: PropTypes.func.isRequired,
   pdfDownloadUrl: PropTypes.string,
-  outputFiles: PropTypes.array
+  outputFiles: PropTypes.array,
 }
 
 export default PreviewToolbar

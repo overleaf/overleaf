@@ -8,7 +8,7 @@ import PropTypes from 'prop-types'
 import {
   BlockedFilenameError,
   DuplicateFilenameError,
-  InvalidFilenameError
+  InvalidFilenameError,
 } from '../../errors'
 
 /**
@@ -20,7 +20,7 @@ export default function FileTreeCreateNameInput({
   focusName = false,
   classes = {},
   placeholder = 'File Name',
-  error
+  error,
 }) {
   // the value is stored in a context provider, so it's available elsewhere in the form
   const { name, setName, touchedName, validName } = useFileTreeCreateName()
@@ -68,10 +68,10 @@ FileTreeCreateNameInput.propTypes = {
   focusName: PropTypes.bool,
   label: PropTypes.string,
   classes: PropTypes.shape({
-    formGroup: PropTypes.string
+    formGroup: PropTypes.string,
   }),
   placeholder: PropTypes.string,
-  error: PropTypes.oneOfType([PropTypes.object, PropTypes.string])
+  error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 }
 
 function ErrorMessage({ error }) {
@@ -107,5 +107,5 @@ function ErrorMessage({ error }) {
   }
 }
 ErrorMessage.propTypes = {
-  error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired
+  error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
 }

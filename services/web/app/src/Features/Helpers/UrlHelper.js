@@ -26,7 +26,7 @@ const UrlHelper = {
       url = `http://${url}`
     }
     return url
-  }
+  },
 }
 
 module.exports = UrlHelper

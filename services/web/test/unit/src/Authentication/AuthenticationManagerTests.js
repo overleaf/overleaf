@@ -13,17 +13,17 @@ describe('AuthenticationManager', function () {
     this.AuthenticationManager = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
-          User: (this.User = {})
+          User: (this.User = {}),
         },
         '../../infrastructure/mongodb': {
           db: (this.db = { users: {} }),
-          ObjectId
+          ObjectId,
         },
         bcrypt: (this.bcrypt = {}),
         'settings-sharelatex': this.settings,
         '../User/UserGetter': (this.UserGetter = {}),
-        './AuthenticationErrors': AuthenticationErrors
-      }
+        './AuthenticationErrors': AuthenticationErrors,
+      },
     })
     this.callback = sinon.stub()
   })
@@ -44,7 +44,7 @@ describe('AuthenticationManager', function () {
       beforeEach(function () {
         this.user = {
           _id: 'user-id',
-          email: (this.email = 'USER@sharelatex.com')
+          email: (this.email = 'USER@sharelatex.com'),
         }
         this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
       })
@@ -91,7 +91,7 @@ describe('AuthenticationManager', function () {
       beforeEach(function () {
         this.user = {
           _id: '5c8791477192a80b5e76ca7e',
-          email: (this.email = 'USER@sharelatex.com')
+          email: (this.email = 'USER@sharelatex.com'),
         }
         this.db.users.updateOne = sinon
         this.User.findOne = sinon.stub().callsArgWith(2, null, this.user)
@@ -119,7 +119,7 @@ describe('AuthenticationManager', function () {
           err => {
             expect(err).to.not.exist
             const {
-              hashedPassword
+              hashedPassword,
             } = this.db.users.updateOne.lastCall.args[1].$set
             expect(hashedPassword).to.exist
             expect(hashedPassword.length).to.equal(60)
@@ -136,7 +136,7 @@ describe('AuthenticationManager', function () {
       beforeEach(function () {
         this.user = {
           _id: 'user-id',
-          email: (this.email = 'USER@sharelatex.com')
+          email: (this.email = 'USER@sharelatex.com'),
         }
         this.unencryptedPassword = 'banana'
         this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
@@ -368,8 +368,8 @@ describe('AuthenticationManager', function () {
           this.settings.passwordStrengthOptions = {
             length: {
               min: 10,
-              max: 12
-            }
+              max: 12,
+            },
           }
         })
 
@@ -414,8 +414,8 @@ describe('AuthenticationManager', function () {
         beforeEach(function () {
           this.settings.passwordStrengthOptions = {
             length: {
-              max: 128
-            }
+              max: 128,
+            },
           }
         })
 
@@ -467,8 +467,8 @@ describe('AuthenticationManager', function () {
         beforeEach(function () {
           this.settings.passwordStrengthOptions = {
             chars: {
-              symbols: ' '
-            }
+              symbols: ' ',
+            },
           }
         })
 
@@ -498,7 +498,7 @@ describe('AuthenticationManager', function () {
       describe('when allowAnyChars is set', function () {
         beforeEach(function () {
           this.settings.passwordStrengthOptions = {
-            allowAnyChars: true
+            allowAnyChars: true,
           }
         })
 
@@ -523,7 +523,7 @@ describe('AuthenticationManager', function () {
       this.user_id = ObjectId()
       this.user = {
         _id: this.user_id,
-        email: 'user@example.com'
+        email: 'user@example.com',
       }
       this.password = 'banana'
       this.hashedPassword = 'asdkjfa;osiuvandf'
@@ -538,8 +538,8 @@ describe('AuthenticationManager', function () {
       beforeEach(function () {
         this.settings.passwordStrengthOptions = {
           length: {
-            max: 10
-          }
+            max: 10,
+          },
         }
         this.password = 'dsdsadsadsadsadsadkjsadjsadjsadljs'
       })
@@ -609,8 +609,8 @@ describe('AuthenticationManager', function () {
         this.settings.passwordStrengthOptions = {
           length: {
             max: 10,
-            min: 6
-          }
+            min: 6,
+          },
         }
         this.password = 'dsd'
       })
@@ -652,15 +652,15 @@ describe('AuthenticationManager', function () {
       it("should update the user's password in the database", function () {
         const { args } = this.db.users.updateOne.lastCall
         expect(args[0]).to.deep.equal({
-          _id: ObjectId(this.user_id.toString())
+          _id: ObjectId(this.user_id.toString()),
         })
         expect(args[1]).to.deep.equal({
           $set: {
-            hashedPassword: this.hashedPassword
+            hashedPassword: this.hashedPassword,
           },
           $unset: {
-            password: true
-          }
+            password: true,
+          },
         })
       })
 

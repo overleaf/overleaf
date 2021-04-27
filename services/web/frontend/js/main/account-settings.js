@@ -15,8 +15,8 @@ App.controller('AccountSettingsController', function (
       method: 'DELETE',
       url: '/user/newsletter/unsubscribe',
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
       .then(function () {
         $scope.unsubscribing = false
@@ -39,8 +39,8 @@ App.controller('AccountSettingsController', function (
                   : undefined) || null
             )
             .catch(() => null)
-        }
-      }
+        },
+      },
     })
   }
 
@@ -57,7 +57,7 @@ App.controller(
       password: '',
       confirmSharelatexDelete: false,
       inflight: false,
-      error: null
+      error: null,
     }
 
     $scope.userDefaultEmail = userDefaultEmail
@@ -82,12 +82,12 @@ App.controller(
         url: '/user/delete',
         headers: {
           'X-CSRF-Token': window.csrfToken,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         data: {
-          password: $scope.state.password
+          password: $scope.state.password,
         },
-        disableAutoLoginRedirect: true // we want to handle errors ourselves
+        disableAutoLoginRedirect: true, // we want to handle errors ourselves
       })
         .then(function () {
           $modalInstance.close()

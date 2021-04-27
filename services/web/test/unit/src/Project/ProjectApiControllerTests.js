@@ -19,17 +19,17 @@ describe('Project api controller', function () {
     this.ProjectDetailsHandler = { getDetails: sinon.stub() }
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
-        './ProjectDetailsHandler': this.ProjectDetailsHandler
-      }
+        './ProjectDetailsHandler': this.ProjectDetailsHandler,
+      },
     })
     this.project_id = '321l3j1kjkjl'
     this.req = {
       params: {
-        project_id: this.project_id
+        project_id: this.project_id,
       },
       session: {
-        destroy: sinon.stub()
-      }
+        destroy: sinon.stub(),
+      },
     }
     this.res = {}
     this.next = sinon.stub()

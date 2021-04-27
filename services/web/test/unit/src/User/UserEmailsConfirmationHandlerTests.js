@@ -27,21 +27,21 @@ describe('UserEmailsConfirmationHandler', function () {
     this.UserEmailsConfirmationHandler = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': (this.settings = {
-          siteUrl: 'emails.example.com'
+          siteUrl: 'emails.example.com',
         }),
         '../Security/OneTimeTokenHandler': (this.OneTimeTokenHandler = {}),
         './UserUpdater': (this.UserUpdater = {}),
         './UserGetter': (this.UserGetter = {
-          getUser: sinon.stub().yields(null, this.mockUser)
+          getUser: sinon.stub().yields(null, this.mockUser),
         }),
         '../Email/EmailHandler': (this.EmailHandler = {}),
-        '../Helpers/EmailHelper': EmailHelper
-      }
+        '../Helpers/EmailHelper': EmailHelper,
+      },
     })
     this.mockUser = {
       _id: 'mock-user-id',
       email: 'mock@example.com',
-      emails: [{ email: 'mock@example.com' }]
+      emails: [{ email: 'mock@example.com' }],
     }
     this.user_id = this.mockUser._id
     this.email = this.mockUser.email
@@ -81,7 +81,7 @@ describe('UserEmailsConfirmationHandler', function () {
             to: this.email,
             confirmEmailUrl:
               'emails.example.com/user/emails/confirm?token=new-token',
-            sendingUser_id: this.user_id
+            sendingUser_id: this.user_id,
           })
           .should.equal(true)
       })

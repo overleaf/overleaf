@@ -87,18 +87,18 @@ export default ShareJsDoc = (function () {
           )
         },
         state: 'ok',
-        id: this.socket.publicId
+        id: this.socket.publicId,
       }
 
       this._doc = new ShareJs.Doc(this.connection, this.doc_id, {
-        type: this.type
+        type: this.type,
       })
       this._doc.setFlushDelay(SINGLE_USER_FLUSH_DELAY)
       this._doc.on('change', (...args) => {
         return this.trigger('change', ...Array.from(args))
       })
       this.EditorWatchdogManager = new EditorWatchdogManager({
-        parent: globalEditorWatchdogManager
+        parent: globalEditorWatchdogManager,
       })
       this._doc.on('acknowledge', () => {
         this.lastAcked = new Date() // note time of last ack from server for an op we sent
@@ -126,7 +126,7 @@ export default ShareJsDoc = (function () {
       this.processUpdateFromServer({
         open: true,
         v: version,
-        snapshot
+        snapshot,
       })
       this._removeCarriageReturnCharFromShareJsDoc()
     }
@@ -137,7 +137,7 @@ export default ShareJsDoc = (function () {
         return
       }
       window._ide.pushEvent('remove-carriage-return-char', {
-        doc_id: this.doc_id
+        doc_id: this.doc_id,
       })
       let nextPos
       while ((nextPos = doc.snapshot.indexOf('\r')) !== -1) {
@@ -397,7 +397,7 @@ export default ShareJsDoc = (function () {
           // one or more disconnects, or if it was submitted during the current session.
           update.dupIfSource = [
             this.connection.id,
-            ...Array.from(this._doc.inflightSubmittedIds)
+            ...Array.from(this._doc.inflightSubmittedIds),
           ]
 
           // We must be joined to a project for applyOtUpdate to work on the real-time

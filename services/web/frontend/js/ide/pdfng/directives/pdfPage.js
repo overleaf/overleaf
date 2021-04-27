@@ -52,7 +52,7 @@ export default App.directive(
         text: textElement,
         annotations: annotationsElement,
         highlights: highlightsElement,
-        container: element
+        container: element,
       }
 
       if (!scope.page.sized) {
@@ -93,14 +93,14 @@ export default App.directive(
             const event = {
               page: scope.page.pageNum,
               x: pdfPoint[0],
-              y: viewport.viewBox[3] - pdfPoint[1]
+              y: viewport.viewBox[3] - pdfPoint[1],
             }
             return scope.$emit('pdfDoubleClick', event)
           })
       })
 
       const highlightsLayer = new pdfHighlights({
-        highlights: highlightsElement
+        highlights: highlightsElement,
       })
 
       scope.$on('pdf:highlights', function (event, highlights) {
@@ -161,6 +161,6 @@ export default App.directive(
           return highlightsLayer.clearHighlights()
         }
       })
-    }
+    },
   })
 )

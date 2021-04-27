@@ -47,8 +47,8 @@ App.controller('MetricsEmailController', function ($scope, $http) {
       method: 'POST',
       url: `/institutions/${institutionId}/emailSubscription`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     }).then(function successCallback(response) {
       window.managedInstitutions = _.map(
         window.managedInstitutions,
@@ -87,7 +87,7 @@ App.factory('RecurlyPricing', function ($q, MultiCurrencyPricing) {
             resolve(`${currencySymbol}${total}`)
           })
       })
-    }
+    },
   }
 })
 
@@ -100,7 +100,7 @@ App.controller(
       $modal.open({
         templateUrl: 'confirmChangePlanModalTemplate',
         controller: 'ConfirmChangePlanController',
-        scope: $scope
+        scope: $scope,
       })
 
     $scope.$watch('plan', function (plan) {
@@ -124,7 +124,7 @@ App.controller(
     $scope.confirmChangePlan = function () {
       const body = {
         plan_code: $scope.plan.planCode,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       }
 
       $scope.inflight = true
@@ -149,8 +149,8 @@ App.controller(
         method: 'DELETE',
         params: {
           subscriptionId: $scope.subscriptionId,
-          _csrf: window.csrfToken
-        }
+          _csrf: window.csrfToken,
+        },
       })
         .then(() => location.reload())
         .catch(() => console.log('something went wrong changing plan'))
@@ -166,7 +166,7 @@ App.controller('GroupMembershipController', function ($scope, $modal) {
     return $modal.open({
       templateUrl: 'LeaveGroupModalTemplate',
       controller: 'LeaveGroupModalController',
-      scope: $scope
+      scope: $scope,
     })
   }
 })
@@ -236,7 +236,7 @@ App.controller(
     $scope.downgradeToStudent = function () {
       const body = {
         plan_code: 'student',
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       }
       $scope.inflight = true
       return $http

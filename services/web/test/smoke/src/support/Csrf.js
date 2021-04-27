@@ -23,5 +23,5 @@ function getCsrfTokenForFactory({ request }) {
 }
 
 module.exports = {
-  getCsrfTokenForFactory
+  getCsrfTokenForFactory,
 }

@@ -9,7 +9,7 @@ const COMMAND_LEVELS = {
   subsection: 50,
   subsubsection: 60,
   paragraph: 70,
-  subparagraph: 80
+  subparagraph: 80,
 }
 
 /*
@@ -43,7 +43,7 @@ function matchOutline(content) {
     flatOutline.push({
       line: lineId + 1,
       title: matchDisplayTitle(shortTitle || title),
-      level: COMMAND_LEVELS[command]
+      level: COMMAND_LEVELS[command],
     })
   })
   return flatOutline

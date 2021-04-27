@@ -15,9 +15,9 @@ describe('RecurlyClient', function () {
       apis: {
         recurly: {
           apiKey: 'nonsense',
-          privateKey: 'private_nonsense'
-        }
-      }
+          privateKey: 'private_nonsense',
+        },
+      },
     }
 
     this.user = { _id: '123456', email: 'joe@example.com', first_name: 'Joe' }
@@ -30,24 +30,24 @@ describe('RecurlyClient', function () {
           if (userId === this.user._id) {
             return this.user
           }
-        })
-      }
+        }),
+      },
     }
 
     let client
     this.client = client = {
-      getAccount: sinon.stub()
+      getAccount: sinon.stub(),
     }
     this.recurly = {
       errors: recurly.errors,
       Client: function () {
         return client
-      }
+      },
     }
 
     return (this.RecurlyClient = SandboxedModule.require(modulePath, {
       globals: {
-        console: console
+        console: console,
       },
       requires: {
         'settings-sharelatex': this.settings,
@@ -57,10 +57,10 @@ describe('RecurlyClient', function () {
           error: sinon.stub(),
           warn: sinon.stub(),
           log: sinon.stub(),
-          debug: sinon.stub()
+          debug: sinon.stub(),
         },
-        '../User/UserGetter': this.UserGetter
-      }
+        '../User/UserGetter': this.UserGetter,
+      },
     }))
   })
 

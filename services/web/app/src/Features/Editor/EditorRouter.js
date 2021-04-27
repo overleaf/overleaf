@@ -13,7 +13,7 @@ module.exports = {
         endpointName: 'add-doc-to-project',
         params: ['Project_id'],
         maxRequests: 30,
-        timeInterval: 60
+        timeInterval: 60,
       }),
       EditorHttpController.addDoc
     )
@@ -24,7 +24,7 @@ module.exports = {
         endpointName: 'add-folder-to-project',
         params: ['Project_id'],
         maxRequests: 60,
-        timeInterval: 60
+        timeInterval: 60,
       }),
       EditorHttpController.addFolder
     )
@@ -60,8 +60,8 @@ module.exports = {
       AuthenticationController.httpAuth,
       validate({
         body: Joi.object({
-          userId: Joi.objectId().required()
-        })
+          userId: Joi.objectId().required(),
+        }),
       }),
       EditorHttpController.convertDocToFile
     )
@@ -76,9 +76,9 @@ module.exports = {
         endpointName: 'join-project',
         params: ['Project_id'],
         maxRequests: 45,
-        timeInterval: 60
+        timeInterval: 60,
       }),
       EditorHttpController.joinProject
     )
-  }
+  },
 }

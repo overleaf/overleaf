@@ -30,7 +30,7 @@ module.exports = InactiveProjectManager = {
       function (err, project) {
         if (err != null) {
           OError.tag(err, 'error getting project', {
-            project_id
+            project_id,
           })
           return callback(err)
         }
@@ -46,7 +46,7 @@ module.exports = InactiveProjectManager = {
         return DocstoreManager.unarchiveProject(project_id, function (err) {
           if (err != null) {
             OError.tag(err, 'error reactivating project in docstore', {
-              project_id
+              project_id,
             })
             return callback(err)
           }
@@ -106,7 +106,7 @@ module.exports = InactiveProjectManager = {
     logger.log({ project_id }, 'deactivating inactive project')
     const jobs = [
       cb => DocstoreManager.archiveProject(project_id, cb),
-      cb => ProjectUpdateHandler.markAsInactive(project_id, cb)
+      cb => ProjectUpdateHandler.markAsInactive(project_id, cb),
     ]
     return async.series(jobs, function (err) {
       if (err != null) {
@@ -114,5 +114,5 @@ module.exports = InactiveProjectManager = {
       }
       return callback(err)
     })
-  }
+  },
 }

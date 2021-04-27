@@ -17,14 +17,14 @@ const secondSubFolder = {
   _id: 'dsa3e23',
   docs: [subSubDoc],
   fileRefs: [subSubFile],
-  folders: []
+  folders: [],
 }
 const subFolder = {
   name: 'subFolder',
   _id: 'dsadsa93',
   folders: [secondSubFolder, null],
   docs: [],
-  fileRefs: []
+  fileRefs: [],
 }
 const subFolder1 = { name: 'subFolder1', _id: '123asdjoij' }
 
@@ -32,7 +32,7 @@ const rootFolder = {
   _id: '123sdskd',
   docs: [doc1, doc2, null, rootDoc],
   fileRefs: [file1],
-  folders: [subFolder1, subFolder]
+  folders: [subFolder1, subFolder],
 }
 
 project.rootFolder[0] = rootFolder
@@ -44,20 +44,20 @@ describe('ProjectLocator', function () {
       callback(null, project)
     }
     this.ProjectGetter = {
-      getProject: sinon.stub().callsArgWith(2, null, project)
+      getProject: sinon.stub().callsArgWith(2, null, project),
     }
     this.ProjectHelper = {
       isArchived: sinon.stub(),
       isTrashed: sinon.stub(),
-      isArchivedOrTrashed: sinon.stub()
+      isArchivedOrTrashed: sinon.stub(),
     }
     this.locator = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/Project': { Project },
         '../../models/User': { User: this.User },
         './ProjectGetter': this.ProjectGetter,
-        './ProjectHelper': this.ProjectHelper
-      }
+        './ProjectHelper': this.ProjectHelper,
+      },
     })
   })
 
@@ -143,7 +143,7 @@ describe('ProjectLocator', function () {
         {
           project_id: project._id,
           element_id: secondSubFolder._id,
-          type: 'folder'
+          type: 'folder',
         },
         (err, foundElement, path, parentFolder) => {
           if (err != null) {
@@ -183,7 +183,7 @@ describe('ProjectLocator', function () {
         {
           project_id: project._id,
           element_id: subSubFile._id,
-          type: 'fileRefs'
+          type: 'fileRefs',
         },
         (err, foundElement, path, parentFolder) => {
           if (err != null) {
@@ -232,15 +232,15 @@ describe('ProjectLocator', function () {
   describe('should be able to take actual project as well as id', function () {
     const doc3 = {
       _id: '123dsdj3',
-      name: 'doc3'
+      name: 'doc3',
     }
     const rootFolder2 = {
       _id: '123sddedskd',
-      docs: [doc3]
+      docs: [doc3],
     }
     const project2 = {
       _id: '1234566',
-      rootFolder: [rootFolder2]
+      rootFolder: [rootFolder2],
     }
     it('should find doc in project', function (done) {
       this.locator.findElement(
@@ -460,20 +460,20 @@ describe('ProjectLocator', function () {
               name: '1',
               docs: [{ name: 'main.tex', _id: '456' }],
               folders: [],
-              fileRefs: []
-            }
+              fileRefs: [],
+            },
           ],
           docs: [(this.doc = { name: 'main.tex', _id: '456' })],
-          fileRefs: []
+          fileRefs: [],
         }
         this.project = {
           rootFolder: [
             {
               folders: [this.duplicateFolder, this.duplicateFolder],
               fileRefs: [],
-              docs: []
-            }
-          ]
+              docs: [],
+            },
+          ],
         }
       })
 
@@ -499,9 +499,9 @@ describe('ProjectLocator', function () {
             {
               folders: [],
               fileRefs: [],
-              docs: [{ name: 'main.tex' }, null, { name: 'other.tex' }]
-            }
-          ]
+              docs: [{ name: 'main.tex' }, null, { name: 'other.tex' }],
+            },
+          ],
         }
       })
 

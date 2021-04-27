@@ -24,17 +24,17 @@ const defaultContextProps = {
     {
       docs: [
         {
-          _id: 'entity-1'
-        }
+          _id: 'entity-1',
+        },
       ],
       fileRefs: [],
-      folders: []
-    }
+      folders: [],
+    },
   ],
   initialSelectedEntityId: 'entity-1',
   onSelect: () => {
     console.log('selected')
-  }
+  },
 }
 
 export const createFileModalDecorator = (
@@ -47,48 +47,48 @@ export const createFileModalDecorator = (
       projects: [
         {
           _id: 'project-1',
-          name: 'Project One'
+          name: 'Project One',
         },
         {
           _id: 'project-2',
-          name: 'Project Two'
-        }
-      ]
+          name: 'Project Two',
+        },
+      ],
     })
     .get('path:/mendeley/groups', {
       groups: [
         {
           id: 'group-1',
-          name: 'Group One'
+          name: 'Group One',
         },
         {
           id: 'group-2',
-          name: 'Group Two'
-        }
-      ]
+          name: 'Group Two',
+        },
+      ],
     })
     .get('express:/project/:projectId/entities', {
       entities: [
         {
-          path: '/foo.tex'
+          path: '/foo.tex',
         },
         {
-          path: '/bar.tex'
-        }
-      ]
+          path: '/bar.tex',
+        },
+      ],
     })
     .post('express:/project/:projectId/compile', {
       status: 'success',
       outputFiles: [
         {
           build: 'foo',
-          path: 'baz.jpg'
+          path: 'baz.jpg',
         },
         {
           build: 'foo',
-          path: 'ball.jpg'
-        }
-      ]
+          path: 'ball.jpg',
+        },
+      ],
     })
     .post('express:/project/:projectId/doc', (path, req) => {
       console.log({ path, req })
@@ -130,6 +130,6 @@ OpenCreateFileModal.propTypes = {
   finishCreating: PropTypes.bool,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ]).isRequired
+    PropTypes.node,
+  ]).isRequired,
 }

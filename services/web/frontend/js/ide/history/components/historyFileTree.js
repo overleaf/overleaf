@@ -40,7 +40,7 @@ const historyFileTreeController = function ($scope, $element, $attrs) {
           fileTreeEntity = {
             name: pathPart,
             type: 'folder',
-            children: []
+            children: [],
           }
           currentFileTreeLocation.push(fileTreeEntity)
         }
@@ -56,8 +56,8 @@ export default App.component('historyFileTree', {
     files: '<',
     selectedPathname: '<',
     onSelectedFileChange: '&',
-    isLoading: '<'
+    isLoading: '<',
   },
   controller: historyFileTreeController,
-  templateUrl: 'historyFileTreeTpl'
+  templateUrl: 'historyFileTreeTpl',
 })

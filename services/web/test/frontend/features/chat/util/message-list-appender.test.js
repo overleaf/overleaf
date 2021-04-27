@@ -1,15 +1,15 @@
 import { expect } from 'chai'
 import {
   appendMessage,
-  prependMessages
+  prependMessages,
 } from '../../../../../frontend/js/features/chat/utils/message-list-appender'
 
 const testUser = {
-  id: '123abc'
+  id: '123abc',
 }
 
 const otherUser = {
-  id: '234other'
+  id: '234other',
 }
 
 function createTestMessageList() {
@@ -18,14 +18,14 @@ function createTestMessageList() {
       id: 'msg_1',
       contents: ['hello', 'world'],
       timestamp: new Date().getTime(),
-      user: otherUser
+      user: otherUser,
     },
     {
       id: 'msg_2',
       contents: ['foo'],
       timestamp: new Date().getTime(),
-      user: testUser
-    }
+      user: testUser,
+    },
   ]
 }
 
@@ -35,7 +35,7 @@ describe('prependMessages()', function () {
       id: 'prepended_message',
       content: 'hello',
       timestamp: new Date().getTime(),
-      user: testUser
+      user: testUser,
     }
     const message2 = { ...message1, id: 'prepended_message_2' }
     return [message1, message2]
@@ -48,8 +48,8 @@ describe('prependMessages()', function () {
         id: messages[0].id,
         timestamp: messages[0].timestamp,
         user: messages[0].user,
-        contents: [messages[0].content, messages[1].content]
-      }
+        contents: [messages[0].content, messages[1].content],
+      },
     ])
   })
 
@@ -69,7 +69,7 @@ describe('prependMessages()', function () {
         id: messages[0].id,
         timestamp: messages[0].timestamp,
         user: messages[0].user,
-        contents: [messages[0].content, messages[1].content]
+        contents: [messages[0].content, messages[1].content],
       })
     })
 
@@ -81,13 +81,13 @@ describe('prependMessages()', function () {
         id: messages[0].id,
         timestamp: messages[0].timestamp,
         user: messages[0].user,
-        contents: [messages[0].content]
+        contents: [messages[0].content],
       })
       expect(result[1]).to.deep.equal({
         id: messages[1].id,
         timestamp: messages[1].timestamp,
         user: messages[1].user,
-        contents: [messages[1].content]
+        contents: [messages[1].content],
       })
     })
   })
@@ -108,13 +108,13 @@ describe('prependMessages()', function () {
         id: messages[0].id,
         timestamp: messages[0].timestamp,
         user: messages[0].user,
-        contents: [messages[0].content]
+        contents: [messages[0].content],
       })
       expect(result[1]).to.deep.equal({
         id: messages[1].id,
         timestamp: messages[1].timestamp,
         user: messages[1].user,
-        contents: [messages[1].content]
+        contents: [messages[1].content],
       })
     })
   })
@@ -130,7 +130,7 @@ describe('prependMessages()', function () {
       id: messages[0].id,
       timestamp: messages[0].timestamp,
       user: messages[0].user,
-      contents: [messages[0].content, messages[1].content, ...list[0].contents]
+      contents: [messages[0].content, messages[1].content, ...list[0].contents],
     })
   })
 })
@@ -141,7 +141,7 @@ describe('appendMessage()', function () {
       id: 'appended_message',
       content: 'hi!',
       timestamp: new Date().getTime(),
-      user: testUser
+      user: testUser,
     }
   }
 
@@ -152,8 +152,8 @@ describe('appendMessage()', function () {
         id: 'appended_message',
         timestamp: testMessage.timestamp,
         user: testMessage.user,
-        contents: [testMessage.content]
-      }
+        contents: [testMessage.content],
+      },
     ])
   })
 
@@ -193,7 +193,7 @@ describe('appendMessage()', function () {
           id: 'appended_message',
           timestamp: message.timestamp,
           user: message.user,
-          contents: [message.content]
+          contents: [message.content],
         })
       })
     })
@@ -215,7 +215,7 @@ describe('appendMessage()', function () {
         id: 'appended_message',
         timestamp: message.timestamp,
         user: message.user,
-        contents: [message.content]
+        contents: [message.content],
       })
     })
 
@@ -228,7 +228,7 @@ describe('appendMessage()', function () {
         id: 'appended_message',
         timestamp: message.timestamp,
         user: message.user,
-        contents: [message.content]
+        contents: [message.content],
       })
     })
   })

@@ -93,7 +93,7 @@ App.controller(
         }
         invalidModalShowing = true
         const modal = $modal.open({
-          templateUrl: 'invalidFileNameModalTemplate'
+          templateUrl: 'invalidFileNameModalTemplate',
         })
         modal.result.then(() => (invalidModalShowing = false))
         return
@@ -126,8 +126,8 @@ App.controller(
         resolve: {
           entities() {
             return entities
-          }
-        }
+          },
+        },
       })
     }
 

@@ -44,7 +44,7 @@ async function checkCert(ukamfDB, providerId) {
     const { body } = await V1Api.request({
       json: true,
       qs: { university_id: providerId },
-      uri: '/api/v1/sharelatex/university_saml'
+      uri: '/api/v1/sharelatex/university_saml',
     })
     // show notice if sso not currently enabled
     if (body.sso_enabled === true) {
@@ -93,6 +93,6 @@ async function checkCert(ukamfDB, providerId) {
 
 async function getActiveProviderIds() {
   return db.users.distinct('samlIdentifiers.providerId', {
-    'samlIdentifiers.externalUserId': { $exists: true }
+    'samlIdentifiers.externalUserId': { $exists: true },
   })
 }

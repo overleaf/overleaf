@@ -16,9 +16,9 @@ export default App.directive('droppable', () => ({
           hoverClass: 'droppable-hover',
           tolerance: 'pointer',
           accept: attrs.accept,
-          drop: scope.$eval(attrs.onDropCallback)
+          drop: scope.$eval(attrs.onDropCallback),
         })
       }
     })
-  }
+  },
 }))

@@ -39,6 +39,6 @@ App.component(
     'highlightedLine',
     'eventTracking',
     'onToggle',
-    'isTexFile'
+    'isTexFile',
   ])
 )

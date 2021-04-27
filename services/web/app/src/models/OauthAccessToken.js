@@ -11,10 +11,10 @@ const OauthAccessTokenSchema = new Schema(
     refreshToken: String,
     refreshTokenExpiresAt: Date,
     scope: String,
-    user_id: { type: ObjectId, ref: 'User' }
+    user_id: { type: ObjectId, ref: 'User' },
   },
   {
-    collection: 'oauthAccessTokens'
+    collection: 'oauthAccessTokens',
   }
 )
 

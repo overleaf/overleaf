@@ -24,6 +24,6 @@ let UserMembershipAuthorization = {
         accessUserId.equals(req.user._id)
       )
     }
-  }
+  },
 }
 module.exports = UserMembershipAuthorization

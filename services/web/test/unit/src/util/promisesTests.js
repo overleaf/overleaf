@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const {
   promisifyAll,
-  callbackifyMultiResult
+  callbackifyMultiResult,
 } = require('../../../../app/src/util/promises')
 
 describe('promisifyAll', function () {
@@ -14,7 +14,7 @@ describe('promisifyAll', function () {
         },
         asyncDouble(x, callback) {
           this.asyncAdd(x, x, callback)
-        }
+        },
       }
       this.promisified = promisifyAll(this.module)
     })
@@ -46,7 +46,7 @@ describe('promisifyAll', function () {
         },
         syncAdd(a, b) {
           return a + b
-        }
+        },
       }
       this.promisified = promisifyAll(this.module, { without: 'syncAdd' })
     })
@@ -69,10 +69,10 @@ describe('promisifyAll', function () {
         },
         asyncArithmetic(a, b, callback) {
           callback(null, a + b, a * b)
-        }
+        },
       }
       this.promisified = promisifyAll(this.module, {
-        multiResult: { asyncArithmetic: ['sum', 'product'] }
+        multiResult: { asyncArithmetic: ['sum', 'product'] },
       })
     })
 
@@ -95,7 +95,7 @@ describe('callbackifyMultiResult', function () {
     }
     const callbackified = callbackifyMultiResult(asyncArithmetic, [
       'sum',
-      'product'
+      'product',
     ])
     callbackified(3, 11, (err, sum, product) => {
       if (err != null) {
@@ -113,7 +113,7 @@ describe('callbackifyMultiResult', function () {
     }
     const callbackified = callbackifyMultiResult(asyncBomb, [
       'explosives',
-      'dynamite'
+      'dynamite',
     ])
     callbackified(err => {
       expect(err).to.exist

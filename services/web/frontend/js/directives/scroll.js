@@ -52,5 +52,5 @@ export default App.directive('updateScrollBottomOn', $timeout => ({
         0
       )
     )
-  }
+  },
 }))

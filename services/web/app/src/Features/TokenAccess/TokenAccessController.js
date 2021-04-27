@@ -12,7 +12,7 @@ const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
   PrivilegeLevels.READ_ONLY,
   PrivilegeLevels.READ_AND_WRITE,
-  PrivilegeLevels.OWNER
+  PrivilegeLevels.OWNER,
 ]
 
 async function _userAlreadyHasHigherPrivilege(
@@ -68,8 +68,8 @@ async function _handleV1Project(token, userId) {
         projectId: token,
         hasOwner: docInfo.has_owner,
         name: docInfo.name || 'Untitled',
-        brandInfo: docInfo.brand_info
-      }
+        brandInfo: docInfo.brand_info,
+      },
     }
   }
 }
@@ -89,7 +89,7 @@ async function tokenAccessPage(req, res, next) {
       }
     }
     res.render('project/token/access', {
-      postUrl: makePostUrl(token)
+      postUrl: makePostUrl(token),
     })
   } catch (err) {
     return next(
@@ -123,7 +123,7 @@ async function checkAndGetProjectOrResponseAction(
           } else {
             res.sendStatus(404)
           }
-        }
+        },
       ]
     } else {
       return [null, null]
@@ -145,9 +145,9 @@ async function checkAndGetProjectOrResponseAction(
           () => {
             res.json({
               redirect: `/project/${projectId}`,
-              grantAnonymousAccess: tokenType
+              grantAnonymousAccess: tokenType,
             })
-          }
+          },
         ]
       } else {
         logger.warn(
@@ -163,9 +163,9 @@ async function checkAndGetProjectOrResponseAction(
           () => {
             res.json({
               redirect: '/restricted',
-              anonWriteAccessDenied: true
+              anonWriteAccessDenied: true,
             })
-          }
+          },
         ]
       }
     } else if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_ONLY) {
@@ -176,9 +176,9 @@ async function checkAndGetProjectOrResponseAction(
         () => {
           res.json({
             redirect: `/project/${projectId}`,
-            grantAnonymousAccess: tokenType
+            grantAnonymousAccess: tokenType,
           })
-        }
+        },
       ]
     } else {
       throw new Error('unreachable')
@@ -195,7 +195,7 @@ async function checkAndGetProjectOrResponseAction(
       null,
       () => {
         res.json({ redirect: `/project/${project._id}`, higherAccess: true })
-      }
+      },
     ]
   }
   if (!tokenAccessEnabled) {
@@ -203,7 +203,7 @@ async function checkAndGetProjectOrResponseAction(
       null,
       () => {
         next(new Errors.NotFoundError())
-      }
+      },
     ]
   }
   return [project, null]
@@ -237,7 +237,7 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
     )
     return res.json({
       redirect: `/project/${project._id}`,
-      tokenAccessGranted: tokenType
+      tokenAccessGranted: tokenType,
     })
   } catch (err) {
     return next(
@@ -284,12 +284,12 @@ async function grantTokenAccessReadOnly(req, res, next) {
     )
     return res.json({
       redirect: `/project/${project._id}`,
-      tokenAccessGranted: tokenType
+      tokenAccessGranted: tokenType,
     })
   } catch (err) {
     return next(
       OError.tag(err, 'error while trying to grant read-only token access', {
-        token
+        token,
       })
     )
   }
@@ -301,5 +301,5 @@ module.exports = {
 
   tokenAccessPage: expressify(tokenAccessPage),
   grantTokenAccessReadOnly: expressify(grantTokenAccessReadOnly),
-  grantTokenAccessReadAndWrite: expressify(grantTokenAccessReadAndWrite)
+  grantTokenAccessReadAndWrite: expressify(grantTokenAccessReadAndWrite),
 }

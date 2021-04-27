@@ -15,7 +15,7 @@ App.controller(
     ($scope.openLinkToUsModal = () =>
       $modal.open({
         templateUrl: 'BonusLinkToUsModal',
-        controller: 'BonusModalController'
+        controller: 'BonusModalController',
       }))
 )
 

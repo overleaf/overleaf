@@ -15,7 +15,7 @@ function getUserWithReferralId(referralId) {
     referal_id: referralId,
     // Make the unique indexes happy.
     email,
-    emails: [{ email }]
+    emails: [{ email }],
   }
 }
 async function getBatch(batchCounter) {
@@ -26,7 +26,7 @@ async function getBatch(batchCounter) {
         {
           projection: { _id: 1 },
           skip: BATCH_SIZE * --batchCounter,
-          limit: BATCH_SIZE
+          limit: BATCH_SIZE,
         }
       )
       .toArray()
@@ -95,7 +95,7 @@ describe('RegenerateDuplicateReferralIds', function () {
 
           // actual command
           'node',
-          'scripts/regenerate_duplicate_referral_ids'
+          'scripts/regenerate_duplicate_referral_ids',
         ].join(' ')
       )
     } catch (err) {
@@ -119,7 +119,7 @@ describe('RegenerateDuplicateReferralIds', function () {
       `Completed batch ending ${thirdBatch[BATCH_SIZE - 1]}`,
       `Completed batch ending ${forthBatch[BATCH_SIZE - 1]}`,
       'Done.',
-      ''
+      '',
     ])
     expect(stdOut).to.deep.equal([
       // only duplicates
@@ -139,7 +139,7 @@ describe('RegenerateDuplicateReferralIds', function () {
 
       // no new duplicates
       `Running update on batch with ids ${JSON.stringify(forthBatch)}`,
-      ''
+      '',
     ])
   })
 

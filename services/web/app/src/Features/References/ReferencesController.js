@@ -73,5 +73,5 @@ module.exports = ReferencesController = {
       )
     }
     return res.json(data)
-  }
+  },
 }

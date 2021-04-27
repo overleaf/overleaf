@@ -5,7 +5,7 @@ const logger = require('logger-sharelatex')
 const UserGetter = require('../User/UserGetter')
 const {
   SmokeTestFailure,
-  runSmokeTests
+  runSmokeTests,
 } = require('./../../../../test/smoke/src/SmokeTests')
 
 module.exports = {
@@ -89,7 +89,7 @@ module.exports = {
         }
       }
     )
-  }
+  },
 }
 
 function prettyJSON(blob) {

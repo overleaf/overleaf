@@ -19,7 +19,7 @@ const Errors = require('../Errors/Errors')
 const EntityModels = {
   Institution: require('../../models/Institution').Institution,
   Subscription: require('../../models/Subscription').Subscription,
-  Publisher: require('../../models/Publisher').Publisher
+  Publisher: require('../../models/Publisher').Publisher,
 }
 const UserMembershipViewModel = require('./UserMembershipViewModel')
 const UserGetter = require('../User/UserGetter')
@@ -82,7 +82,7 @@ const UserMembershipHandler = {
       return callback({ isAdmin: true })
     }
     return removeUserFromEntity(entity, attribute, userId, callback)
-  }
+  },
 }
 
 UserMembershipHandler.promises = promisifyAll(UserMembershipHandler)

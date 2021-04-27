@@ -22,7 +22,7 @@ App.controller(
       reset() {
         this.privileges = $scope.member.privileges
         $scope.clearError()
-      }
+      },
     }
 
     function setPrivilegeLevel(userId, privilegeLevel) {
@@ -39,7 +39,7 @@ App.controller(
       $modal.open({
         templateUrl: 'ownershipTransferConfirmTemplate',
         controller: 'OwnershipTransferConfirmModalController',
-        scope: $scope
+        scope: $scope,
       })
     }
   }

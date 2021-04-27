@@ -64,7 +64,7 @@ const isInViewport = function (element) {
 export default App.directive('eventTracking', eventTracking => ({
   scope: {
     eventTracking: '@',
-    eventSegmentation: '=?'
+    eventSegmentation: '=?',
   },
   link(scope, element, attrs) {
     const sendGA = attrs.eventTrackingGa || false
@@ -121,5 +121,5 @@ export default App.directive('eventTracking', eventTracking => ({
         }, 500)
       )
     }
-  }
+  },
 }))

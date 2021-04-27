@@ -29,7 +29,7 @@ module.exports = MetaController = {
             err,
             '[MetaController] error getting all labels from project',
             {
-              project_id
+              project_id,
             }
           )
           return next(err)
@@ -51,7 +51,7 @@ module.exports = MetaController = {
         if (err != null) {
           OError.tag(err, '[MetaController] error getting labels from doc', {
             project_id,
-            doc_id
+            doc_id,
           })
           return next(err)
         }
@@ -59,7 +59,7 @@ module.exports = MetaController = {
         if (broadcast !== false) {
           EditorRealTimeController.emitToRoom(project_id, 'broadcastDocMeta', {
             docId: doc_id,
-            meta: docMeta
+            meta: docMeta,
           })
           return res.sendStatus(200)
         } else {
@@ -67,5 +67,5 @@ module.exports = MetaController = {
         }
       }
     )
-  }
+  },
 }

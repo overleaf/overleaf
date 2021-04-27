@@ -15,7 +15,7 @@ function FileTreeModalDelete() {
     finishDeleting,
     actionedEntities,
     cancel,
-    error
+    error,
   } = useFileTreeActionable()
 
   if (!isDeleting) return null // the modal will not be rendered; return early

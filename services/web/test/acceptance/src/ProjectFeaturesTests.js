@@ -25,10 +25,10 @@ const joinProject = (user_id, project_id, callback) =>
       auth: {
         user: settings.apis.web.user,
         pass: settings.apis.web.pass,
-        sendImmediately: true
+        sendImmediately: true,
       },
       json: true,
-      jar: false
+      jar: false,
     },
     callback
   )

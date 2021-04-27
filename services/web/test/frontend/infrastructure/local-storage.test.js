@@ -11,7 +11,7 @@ describe('localStorage', function () {
 
   after(function () {
     Object.defineProperty(global, 'localStorage', {
-      value: originalLocalStorage
+      value: originalLocalStorage,
     })
   })
 
@@ -21,8 +21,8 @@ describe('localStorage', function () {
         getItem: sinon.stub().returns(null),
         setItem: sinon.stub(),
         clear: sinon.stub(),
-        removeItem: sinon.stub()
-      }
+        removeItem: sinon.stub(),
+      },
     })
 
     global.console.error = sinon.stub()

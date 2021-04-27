@@ -60,7 +60,7 @@ module.exports = ExportsHandler = self = {
       description,
       author,
       license,
-      show_source
+      show_source,
     } = export_params
     const jobs = {
       project(cb) {
@@ -81,7 +81,7 @@ module.exports = ExportsHandler = self = {
                 cb
               )
             }
-          )
+          ),
       ],
       user(cb) {
         return UserGetter.getUser(
@@ -100,7 +100,7 @@ module.exports = ExportsHandler = self = {
             return self._requestVersion(project_id, cb)
           }
         )
-      }
+      },
     }
 
     return async.auto(jobs, function (err, results) {
@@ -108,7 +108,7 @@ module.exports = ExportsHandler = self = {
         OError.tag(err, 'error building project export', {
           project_id,
           user_id,
-          brand_variation_id
+          brand_variation_id,
         })
         return callback(err)
       }
@@ -116,7 +116,7 @@ module.exports = ExportsHandler = self = {
       const { project, rootDoc, user, historyVersion } = results
       if (!rootDoc || rootDoc[1] == null) {
         err = new OError('cannot export project without root doc', {
-          project_id
+          project_id,
         })
         return callback(err)
       }
@@ -144,8 +144,8 @@ module.exports = ExportsHandler = self = {
             description,
             author,
             license,
-            showSource: show_source
-          }
+            showSource: show_source,
+          },
         },
         user: {
           id: user_id,
@@ -153,14 +153,14 @@ module.exports = ExportsHandler = self = {
           lastName: user.last_name,
           email: user.email,
           orcidId: null, // until v2 gets ORCID
-          v1UserId: user.overleaf != null ? user.overleaf.id : undefined
+          v1UserId: user.overleaf != null ? user.overleaf.id : undefined,
         },
         destination: {
-          brandVariationId: brand_variation_id
+          brandVariationId: brand_variation_id,
         },
         options: {
-          callbackUrl: null
-        } // for now, until we want v1 to call us back
+          callbackUrl: null,
+        }, // for now, until we want v1 to call us back
       }
       return callback(null, export_data)
     })
@@ -174,12 +174,12 @@ module.exports = ExportsHandler = self = {
       {
         url: `${settings.apis.v1.url}/api/v1/sharelatex/exports`,
         auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
-        json: export_data
+        json: export_data,
       },
       function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to v1 export', {
-            export: export_data
+            export: export_data,
           })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -203,12 +203,12 @@ module.exports = ExportsHandler = self = {
     return request.get(
       {
         url: `${settings.apis.project_history.url}/project/${project_id}/version`,
-        json: true
+        json: true,
       },
       function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to project history', {
-            project_id
+            project_id,
           })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -231,12 +231,12 @@ module.exports = ExportsHandler = self = {
     return request.get(
       {
         url: `${settings.apis.v1.url}/api/v1/sharelatex/exports/${export_id}`,
-        auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass }
+        auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
       },
       function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to v1 export', {
-            export: export_id
+            export: export_id,
           })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -259,12 +259,12 @@ module.exports = ExportsHandler = self = {
     return request.get(
       {
         url: `${settings.apis.v1.url}/api/v1/sharelatex/exports/${export_id}/${type}_url`,
-        auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass }
+        auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
       },
       function (err, res, body) {
         if (err != null) {
           OError.tag(err, 'error making request to v1 export', {
-            export: export_id
+            export: export_id,
           })
           return callback(err)
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -278,7 +278,7 @@ module.exports = ExportsHandler = self = {
         }
       }
     )
-  }
+  },
 }
 
 function __guard__(value, transform) {

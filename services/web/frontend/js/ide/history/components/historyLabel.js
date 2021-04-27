@@ -30,8 +30,8 @@ export default App.component('historyLabel', {
     isOwnedByCurrentUser: '<',
     isPseudoCurrentStateLabel: '<',
     onLabelDelete: '&',
-    showTooltip: '<?'
+    showTooltip: '<?',
   },
   controller: historyLabelController,
-  templateUrl: 'historyLabelTpl'
+  templateUrl: 'historyLabelTpl',
 })

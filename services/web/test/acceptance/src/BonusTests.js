@@ -10,13 +10,13 @@ describe('Bonus', function () {
     userHelper = await UserHelper.createUser({ email })
     userHelper = await UserHelper.loginUser({
       email,
-      password: userHelper.getDefaultPassword()
+      password: userHelper.getDefaultPassword(),
     })
   })
 
   it('should use the count rather than refered_users', async function () {
     await UserHelper.updateUser(userHelper.user._id, {
-      $set: { refered_user_count: 1, refered_users: [] }
+      $set: { refered_user_count: 1, refered_users: [] },
     })
 
     const response = await userHelper.request.get('/user/bonus')

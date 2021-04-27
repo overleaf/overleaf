@@ -20,7 +20,7 @@ export default PermissionsManager = class PermissionsManager {
       read: false,
       write: false,
       admin: false,
-      comment: false
+      comment: false,
     }
     this.$scope.$watch('permissionsLevel', permissionsLevel => {
       if (permissionsLevel != null) {

@@ -22,7 +22,7 @@ describe('Deleting a user', function () {
     async.series(
       [
         this.user.ensureUserExists.bind(this.user),
-        this.user.login.bind(this.user)
+        this.user.login.bind(this.user),
       ],
       done
     )
@@ -80,7 +80,7 @@ describe('Deleting a user', function () {
       {
         admin_id: this.user._id,
         manager_ids: [this.user._id],
-        planCode: 'collaborator'
+        planCode: 'collaborator',
       },
       error => {
         expect(error).not.to.exist
@@ -143,8 +143,8 @@ describe('Deleting a user', function () {
               auth: {
                 user: settings.apis.web.user,
                 pass: settings.apis.web.pass,
-                sendImmediately: true
-              }
+                sendImmediately: true,
+              },
             },
             (error, res) => {
               expect(error).not.to.exist
@@ -293,8 +293,8 @@ describe('Deleting a project', function () {
             auth: {
               user: settings.apis.web.user,
               pass: settings.apis.web.pass,
-              sendImmediately: true
-            }
+              sendImmediately: true,
+            },
           },
           (error, res) => {
             expect(error).not.to.exist
@@ -333,7 +333,7 @@ describe('Deleting a project', function () {
           }
         )
         MockFilestoreApi.files[this.projectId.toString()] = {
-          dummyFile: 'wombat'
+          dummyFile: 'wombat',
         }
       })
     })
@@ -359,8 +359,8 @@ describe('Deleting a project', function () {
             auth: {
               user: settings.apis.web.user,
               pass: settings.apis.web.pass,
-              sendImmediately: true
-            }
+              sendImmediately: true,
+            },
           },
           (error, res) => {
             expect(error).not.to.exist
@@ -381,8 +381,8 @@ describe('Deleting a project', function () {
             auth: {
               user: settings.apis.web.user,
               pass: settings.apis.web.pass,
-              sendImmediately: true
-            }
+              sendImmediately: true,
+            },
           },
           (error, res) => {
             expect(error).not.to.exist
@@ -411,8 +411,8 @@ describe('Deleting a project', function () {
                 auth: {
                   user: settings.apis.web.user,
                   pass: settings.apis.web.pass,
-                  sendImmediately: true
-                }
+                  sendImmediately: true,
+                },
               },
               (error, res) => {
                 expect(error).not.to.exist
@@ -452,14 +452,14 @@ describe('Deleting a project', function () {
       name: 'universe.jpg',
       linkedFileData: null,
       hash: 'ed19e7d6779b47d8c63f6fa5a21954dcfb6cac00',
-      deletedAt: new Date()
+      deletedAt: new Date(),
     }
     beforeEach('insert deletedFiles', async function () {
       const deletedFiles = [
         { _id: fileId1, ...otherFileDetails },
         { _id: fileId2, ...otherFileDetails },
         // duplicate entry
-        { _id: fileId1, ...otherFileDetails }
+        { _id: fileId1, ...otherFileDetails },
       ]
       await db.deletedProjects.updateOne(
         { 'deleterData.deletedProjectId': ObjectId(this.projectId) },
@@ -474,7 +474,7 @@ describe('Deleting a project', function () {
           [
             cb => admin.ensureUserExists(cb),
             cb => admin.ensureAdmin(cb),
-            cb => admin.login(cb)
+            cb => admin.login(cb),
           ],
           done
         )
@@ -499,13 +499,13 @@ describe('Deleting a project', function () {
           {
             _id: fileId1,
             projectId: ObjectId(this.projectId),
-            ...otherFileDetails
+            ...otherFileDetails,
           },
           {
             _id: fileId2,
             projectId: ObjectId(this.projectId),
-            ...otherFileDetails
-          }
+            ...otherFileDetails,
+          },
         ])
       })
     })
@@ -520,7 +520,7 @@ describe('Deleting a project', function () {
     beforeEach('set deletedDocs', function () {
       deletedDocs = [
         { _id: ObjectId(), name: 'foo.tex', deletedAt: new Date() },
-        { _id: ObjectId(), name: 'bar.tex', deletedAt: new Date() }
+        { _id: ObjectId(), name: 'bar.tex', deletedAt: new Date() },
       ]
       deletedDocs.forEach(doc => {
         MockDocstoreApi.createLegacyDeletedDoc(
@@ -555,7 +555,7 @@ describe('Deleting a project', function () {
           [
             cb => admin.ensureUserExists(cb),
             cb => admin.ensureAdmin(cb),
-            cb => admin.login(cb)
+            cb => admin.login(cb),
           ],
           done
         )

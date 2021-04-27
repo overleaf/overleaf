@@ -34,7 +34,7 @@ const MAPPING = {
   project_ownership_transfer_confirmation_1: ['user', 'project'],
   you_introed_high_number: ['numberOfPeople'],
   you_introed_small_number: ['numberOfPeople'],
-  click_here_to_view_sl_in_lng: ['lngName']
+  click_here_to_view_sl_in_lng: ['lngName'],
 }
 
 const { transformLocales } = require('./transformLocales')

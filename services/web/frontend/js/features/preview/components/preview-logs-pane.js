@@ -20,14 +20,14 @@ function PreviewLogsPane({
   autoCompileHasLintingError = false,
   variantWithFirstErrorPopup,
   onLogEntryLocationClick,
-  onClearCache
+  onClearCache,
 }) {
   const { t } = useTranslation()
   const {
     all: allCompilerIssues = [],
     errors: compilerErrors = [],
     warnings: compilerWarnings = [],
-    typesetting: compilerTypesettingIssues = []
+    typesetting: compilerTypesettingIssues = [],
   } = logEntries
 
   const errorsUI = Object.keys(errors).map((name, index) => (
@@ -47,7 +47,7 @@ function PreviewLogsPane({
   const logEntriesUI = [
     ...compilerErrors,
     ...compilerWarnings,
-    ...compilerTypesettingIssues
+    ...compilerTypesettingIssues,
   ].map((logEntry, idx) => (
     <PreviewLogsPaneEntry
       key={idx}
@@ -58,12 +58,12 @@ function PreviewLogsPane({
       extraInfoURL={logEntry.extraInfoURL}
       level={logEntry.level}
       entryAriaLabel={t('log_entry_description', {
-        level: logEntry.level
+        level: logEntry.level,
       })}
       sourceLocation={{
         file: logEntry.file,
         line: logEntry.line,
-        column: logEntry.column
+        column: logEntry.column,
       }}
       onSourceLocationClick={onLogEntryLocationClick}
     />
@@ -191,7 +191,7 @@ function LogsPaneInfoNotice({ variantWithFirstErrorPopup }) {
 }
 
 LogsPaneInfoNotice.propTypes = {
-  variantWithFirstErrorPopup: PropTypes.bool
+  variantWithFirstErrorPopup: PropTypes.bool,
 }
 
 PreviewLogsPane.propTypes = {
@@ -199,7 +199,7 @@ PreviewLogsPane.propTypes = {
     all: PropTypes.array,
     errors: PropTypes.array,
     warning: PropTypes.array,
-    typesetting: PropTypes.array
+    typesetting: PropTypes.array,
   }),
   autoCompileHasLintingError: PropTypes.bool,
   rawLog: PropTypes.string,
@@ -210,7 +210,7 @@ PreviewLogsPane.propTypes = {
   onLogEntryLocationClick: PropTypes.func.isRequired,
   onClearCache: PropTypes.func.isRequired,
   validationIssues: PropTypes.object,
-  errors: PropTypes.object
+  errors: PropTypes.object,
 }
 
 export default PreviewLogsPane

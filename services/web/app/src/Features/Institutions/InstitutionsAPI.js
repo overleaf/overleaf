@@ -7,7 +7,7 @@ const { promisifyAll } = require('../../util/promises')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const {
   V1ConnectionError,
-  InvalidInstitutionalEmailError
+  InvalidInstitutionalEmailError,
 } = require('../Errors/Errors')
 
 const InstitutionsAPI = {
@@ -16,7 +16,7 @@ const InstitutionsAPI = {
       {
         method: 'GET',
         path: `/api/v2/institutions/${institutionId.toString()}/affiliations`,
-        defaultErrorMessage: "Couldn't get institution affiliations"
+        defaultErrorMessage: "Couldn't get institution affiliations",
       },
       (error, body) => callback(error, body || [])
     )
@@ -28,7 +28,7 @@ const InstitutionsAPI = {
         method: 'GET',
         path: `/api/v2/institutions/institutions_licences`,
         body: { query_date: queryDate, lag },
-        defaultErrorMessage: 'Could not get institutions licences'
+        defaultErrorMessage: 'Could not get institutions licences',
       },
       callback
     )
@@ -40,7 +40,7 @@ const InstitutionsAPI = {
         method: 'GET',
         path: `/api/v2/institutions/${institutionId.toString()}/institution_licences`,
         body: { start_date: startDate, end_date: endDate, lag },
-        defaultErrorMessage: "Couldn't get institution licences"
+        defaultErrorMessage: "Couldn't get institution licences",
       },
       callback
     )
@@ -52,7 +52,7 @@ const InstitutionsAPI = {
         method: 'GET',
         path: `/api/v2/institutions/${institutionId.toString()}/new_institution_licences`,
         body: { start_date: startDate, end_date: endDate, lag },
-        defaultErrorMessage: "Couldn't get institution new licences"
+        defaultErrorMessage: "Couldn't get institution new licences",
       },
       callback
     )
@@ -63,7 +63,7 @@ const InstitutionsAPI = {
       {
         method: 'GET',
         path: `/api/v2/users/${userId.toString()}/affiliations`,
-        defaultErrorMessage: "Couldn't get user affiliations"
+        defaultErrorMessage: "Couldn't get user affiliations",
       },
       (error, body) => callback(error, body || [])
     )
@@ -82,7 +82,7 @@ const InstitutionsAPI = {
       role,
       confirmedAt,
       entitlement,
-      rejectIfBlocklisted
+      rejectIfBlocklisted,
     } = affiliationOptions
     makeAffiliationRequest(
       {
@@ -95,9 +95,9 @@ const InstitutionsAPI = {
           role,
           confirmedAt,
           entitlement,
-          rejectIfBlocklisted
+          rejectIfBlocklisted,
         },
-        defaultErrorMessage: "Couldn't create affiliation"
+        defaultErrorMessage: "Couldn't create affiliation",
       },
       function (error, body) {
         if (error) {
@@ -137,7 +137,7 @@ const InstitutionsAPI = {
         path: `/api/v2/users/${userId.toString()}/affiliations/remove`,
         body: { email },
         extraSuccessStatusCodes: [404], // `Not Found` responses are considered successful
-        defaultErrorMessage: "Couldn't remove affiliation"
+        defaultErrorMessage: "Couldn't remove affiliation",
       },
       callback
     )
@@ -149,7 +149,7 @@ const InstitutionsAPI = {
         method: 'POST',
         path: `/api/v2/users/${userId.toString()}/affiliations/endorse`,
         body: { email, role, department },
-        defaultErrorMessage: "Couldn't endorse affiliation"
+        defaultErrorMessage: "Couldn't endorse affiliation",
       },
       callback
     )
@@ -160,7 +160,7 @@ const InstitutionsAPI = {
       {
         method: 'DELETE',
         path: `/api/v2/users/${userId.toString()}/affiliations`,
-        defaultErrorMessage: "Couldn't delete affiliations"
+        defaultErrorMessage: "Couldn't delete affiliations",
       },
       callback
     )
@@ -172,7 +172,7 @@ const InstitutionsAPI = {
         method: 'POST',
         path: `/api/v2/users/${userId}/affiliations/add_entitlement`,
         body: { email },
-        defaultErrorMessage: "Couldn't add entitlement"
+        defaultErrorMessage: "Couldn't add entitlement",
       },
       callback
     )
@@ -184,11 +184,11 @@ const InstitutionsAPI = {
         method: 'POST',
         path: `/api/v2/users/${userId}/affiliations/remove_entitlement`,
         body: { email },
-        defaultErrorMessage: "Couldn't remove entitlement"
+        defaultErrorMessage: "Couldn't remove entitlement",
       },
       callback
     )
-  }
+  },
 }
 
 var makeAffiliationRequest = function (requestOptions, callback) {
@@ -205,7 +205,7 @@ var makeAffiliationRequest = function (requestOptions, callback) {
       body: requestOptions.body,
       auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
       json: true,
-      timeout: 20 * 1000
+      timeout: 20 * 1000,
     },
     function (error, response, body) {
       if (error) {
@@ -221,8 +221,8 @@ var makeAffiliationRequest = function (requestOptions, callback) {
             message: 'error getting affiliations from v1',
             info: {
               status: response.statusCode,
-              body: body
-            }
+              body: body,
+            },
           })
         )
       }
@@ -257,7 +257,7 @@ var makeAffiliationRequest = function (requestOptions, callback) {
   'getInstitutionAffiliations',
   'getUserAffiliations',
   'addAffiliation',
-  'removeAffiliation'
+  'removeAffiliation',
 ].map(method =>
   metrics.timeAsyncMethod(
     InstitutionsAPI,

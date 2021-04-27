@@ -186,7 +186,7 @@ module.exports = CompileManager = {
                 Settings.defaultFeatures.compileTimeout,
               compileGroup:
                 ownerFeatures.compileGroup ||
-                Settings.defaultFeatures.compileGroup
+                Settings.defaultFeatures.compileGroup,
             })
           }
         )
@@ -251,7 +251,7 @@ module.exports = CompileManager = {
       endpointName: 'auto_compile',
       timeInterval: 20,
       subjectName: compileGroup,
-      throttle: Settings.rateLimit.autoCompile[compileGroup] || 25
+      throttle: Settings.rateLimit.autoCompile[compileGroup] || 25,
     }
     return rateLimiter.addCount(opts, function (err, canCompile) {
       if (err != null) {
@@ -284,5 +284,5 @@ module.exports = CompileManager = {
         )
       }
     )
-  }
+  },
 }

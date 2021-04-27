@@ -16,8 +16,8 @@ describe('FileStoreHandler', function () {
         },
         isDirectory() {
           return false
-        }
-      })
+        },
+      }),
     }
     this.writeStream = {
       my: 'writeStream',
@@ -25,14 +25,14 @@ describe('FileStoreHandler', function () {
         if (type === 'response') {
           cb({ statusCode: 200 })
         }
-      }
+      },
     }
     this.readStream = { my: 'readStream', on: sinon.stub() }
     this.request = sinon.stub()
     this.request.head = sinon.stub()
     this.filestoreUrl = 'http://filestore.sharelatex.test'
     this.settings = {
-      apis: { filestore: { url: this.filestoreUrl } }
+      apis: { filestore: { url: this.filestoreUrl } },
     }
     this.hashValue = '0123456789'
     this.fileArgs = { name: 'upload-filename' }
@@ -54,7 +54,7 @@ describe('FileStoreHandler', function () {
       }
     }
     this.FileHashManager = {
-      computeHash: sinon.stub().callsArgWith(1, null, this.hashValue)
+      computeHash: sinon.stub().callsArgWith(1, null, this.hashValue),
     }
     this.handler = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -63,10 +63,10 @@ describe('FileStoreHandler', function () {
         './FileHashManager': this.FileHashManager,
         // FIXME: need to stub File object here
         '../../models/File': {
-          File: this.FileModel
+          File: this.FileModel,
         },
-        fs: this.fs
-      }
+        fs: this.fs,
+      },
     })
   })
 
@@ -82,7 +82,7 @@ describe('FileStoreHandler', function () {
           if (type === 'open') {
             cb()
           }
-        }
+        },
       })
       this.handler.uploadFileFromDisk(
         this.projectId,
@@ -106,7 +106,7 @@ describe('FileStoreHandler', function () {
         pipe: o => {
           this.writeStream.should.equal(o)
           done()
-        }
+        },
       })
       this.handler.uploadFileFromDisk(
         this.projectId,
@@ -124,7 +124,7 @@ describe('FileStoreHandler', function () {
           if (type === 'open') {
             cb()
           }
-        }
+        },
       })
       this.handler.uploadFileFromDisk(
         this.projectId,
@@ -146,7 +146,7 @@ describe('FileStoreHandler', function () {
           if (type === 'open') {
             cb()
           }
-        }
+        },
       })
       this.handler.uploadFileFromDisk(
         this.projectId,
@@ -170,7 +170,7 @@ describe('FileStoreHandler', function () {
           },
           isDirectory() {
             return false
-          }
+          },
         })
 
         this.handler.uploadFileFromDisk(
@@ -215,7 +215,7 @@ describe('FileStoreHandler', function () {
             if (type === 'open') {
               cb()
             }
-          }
+          },
         })
         this.handler.uploadFileFromDisk(
           this.projectId,
@@ -396,8 +396,8 @@ describe('FileStoreHandler', function () {
       this.request.head.withArgs(fileUrl).yields(null, {
         statusCode: 200,
         headers: {
-          'content-length': expectedFileSize
-        }
+          'content-length': expectedFileSize,
+        },
       })
 
       this.handler.getFileSize(this.projectId, this.fileId, (err, fileSize) => {

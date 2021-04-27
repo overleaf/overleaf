@@ -25,7 +25,7 @@ const DUMMY_TIME = new Date('2021-04-12T00:00:00.000Z')
 
 const LRUCache = require('lru-cache')
 const deletedProjectsCache = new LRUCache({
-  max: CACHE_SIZE
+  max: CACHE_SIZE,
 })
 
 function getSecondsFromObjectId(id) {
@@ -47,12 +47,12 @@ async function main() {
         // include edge
         $gte: startId,
         // exclude edge
-        $lt: endId
+        $lt: endId,
       },
       deleted: true,
       name: {
-        $exists: false
-      }
+        $exists: false,
+      },
     }
     const docs = await db.docs
       .find(query, { readPreference: ReadPreference.SECONDARY })
@@ -86,8 +86,8 @@ async function getDeletedProject(projectId) {
     {
       projection: {
         _id: 1,
-        'project.deletedDocs': 1
-      }
+        'project.deletedDocs': 1,
+      },
     }
   )
   deletedProjectsCache.set(cacheKey, deletedProject)
@@ -135,7 +135,7 @@ async function letUserDoubleCheckInputs() {
         FIRST_PROJECT_ID,
         INCREMENT_BY_S,
         STOP_AT_S,
-        LET_USER_DOUBLE_CHECK_INPUTS_FOR
+        LET_USER_DOUBLE_CHECK_INPUTS_FOR,
       },
       null,
       2

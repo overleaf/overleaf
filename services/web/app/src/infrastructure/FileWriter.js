@@ -47,7 +47,7 @@ class SizeLimitedStream extends Transform {
       return done(
         new FileTooLargeError({
           message: 'stream size limit reached',
-          info: { size: this.bytes }
+          info: { size: this.bytes },
         })
       )
     }
@@ -119,7 +119,7 @@ const FileWriter = {
       stream.resume()
 
       const passThrough = new SizeLimitedStream({
-        maxSizeBytes: options.maxSizeBytes
+        maxSizeBytes: options.maxSizeBytes,
       })
 
       // if writing fails, we want to consume the bytes from the source, to avoid leaks
@@ -138,7 +138,7 @@ const FileWriter = {
         ) {
           err = new FileTooLargeError({
             message: 'stream size limit reached',
-            info: { size: passThrough.bytes }
+            info: { size: passThrough.bytes },
           }).withCause(err || {})
         }
         if (err) {
@@ -147,7 +147,7 @@ const FileWriter = {
             '[writeStreamToDisk] something went wrong writing the stream to disk',
             {
               identifier,
-              fsPath
+              fsPath,
             }
           )
           return callback(err)
@@ -190,7 +190,7 @@ const FileWriter = {
         return callback(err)
       }
     })
-  }
+  },
 }
 
 module.exports = FileWriter

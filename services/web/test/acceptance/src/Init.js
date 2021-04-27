@@ -14,7 +14,7 @@ const MockV1Api = require('./mocks/MockV1Api')
 const MockV1HistoryApi = require('./mocks/MockV1HistoryApi')
 
 const mockOpts = {
-  debug: ['1', 'true', 'TRUE'].includes(process.env.DEBUG_MOCKS)
+  debug: ['1', 'true', 'TRUE'].includes(process.env.DEBUG_MOCKS),
 }
 
 MockAnalyticsApi.initialize(3050, mockOpts)

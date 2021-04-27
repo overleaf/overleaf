@@ -34,7 +34,7 @@ function ChatToggleButton({ chatIsOpen, unreadMessageCount, onClick }) {
 ChatToggleButton.propTypes = {
   chatIsOpen: PropTypes.bool,
   unreadMessageCount: PropTypes.number.isRequired,
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
 }
 
 export default ChatToggleButton

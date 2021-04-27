@@ -132,5 +132,5 @@ module.exports = ChatController = {
       }
       return callback(null, threads)
     })
-  }
+  },
 }

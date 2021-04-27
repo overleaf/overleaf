@@ -11,7 +11,7 @@ function FileTreeItemName({ name, isSelected, setIsDraggable }) {
     startRenaming,
     finishRenaming,
     error,
-    cancel
+    cancel,
   } = useFileTreeActionable()
 
   const isRenamingEntity = isRenaming && isSelected && !error
@@ -41,7 +41,7 @@ function FileTreeItemName({ name, isSelected, setIsDraggable }) {
 FileTreeItemName.propTypes = {
   name: PropTypes.string.isRequired,
   isSelected: PropTypes.bool.isRequired,
-  setIsDraggable: PropTypes.func.isRequired
+  setIsDraggable: PropTypes.func.isRequired,
 }
 
 function DisplayName({ name, isSelected, startRenaming }) {
@@ -75,7 +75,7 @@ function DisplayName({ name, isSelected, startRenaming }) {
 DisplayName.propTypes = {
   name: PropTypes.string.isRequired,
   startRenaming: PropTypes.func.isRequired,
-  isSelected: PropTypes.bool.isRequired
+  isSelected: PropTypes.bool.isRequired,
 }
 
 function InputName({ initialValue, finishRenaming, cancel }) {
@@ -129,7 +129,7 @@ function InputName({ initialValue, finishRenaming, cancel }) {
 InputName.propTypes = {
   initialValue: PropTypes.string.isRequired,
   finishRenaming: PropTypes.func.isRequired,
-  cancel: PropTypes.func.isRequired
+  cancel: PropTypes.func.isRequired,
 }
 
 export default FileTreeItemName

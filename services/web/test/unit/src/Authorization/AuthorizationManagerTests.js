@@ -28,15 +28,15 @@ describe('AuthorizationManager', function () {
         '../Collaborators/CollaboratorsHandler': (this.CollaboratorsHandler = {}),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../../models/User': {
-          User: (this.User = {})
+          User: (this.User = {}),
         },
         '../TokenAccess/TokenAccessHandler': (this.TokenAccessHandler = {
           validateTokenForAnonymousAccess: sinon
             .stub()
-            .callsArgWith(2, null, false, false)
+            .callsArgWith(2, null, false, false),
         }),
-        'settings-sharelatex': { passwordStrengthOptions: {} }
-      }
+        'settings-sharelatex': { passwordStrengthOptions: {} },
+      },
     })
     this.user_id = 'user-id-1'
     this.project_id = 'project-id-1'
@@ -49,7 +49,7 @@ describe('AuthorizationManager', function () {
       const notRestrictedScenarios = [
         [null, 'readAndWrite', false],
         ['id', 'readAndWrite', true],
-        ['id', 'readOnly', false]
+        ['id', 'readOnly', false],
       ]
       const restrictedScenarios = [
         [null, 'readOnly', false],
@@ -57,7 +57,7 @@ describe('AuthorizationManager', function () {
         [null, false, true],
         [null, false, false],
         ['id', false, true],
-        ['id', false, false]
+        ['id', false, false],
       ]
       for (var notRestrictedArgs of notRestrictedScenarios) {
         expect(

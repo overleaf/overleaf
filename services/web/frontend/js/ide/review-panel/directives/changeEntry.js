@@ -21,7 +21,7 @@ export default App.directive('changeEntry', $timeout => ({
     onAccept: '&',
     onReject: '&',
     onIndicatorClick: '&',
-    onBodyClick: '&'
+    onBodyClick: '&',
   },
   link(scope, element, attrs) {
     scope.contentLimit = 40
@@ -48,5 +48,5 @@ export default App.directive('changeEntry', $timeout => ({
       contentLength =>
         (scope.needsCollapsing = contentLength > scope.contentLimit)
     )
-  }
+  },
 }))

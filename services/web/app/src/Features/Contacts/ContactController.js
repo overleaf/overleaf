@@ -35,7 +35,7 @@ module.exports = ContactsController = {
             email: 1,
             first_name: 1,
             last_name: 1,
-            holdingAccount: 1
+            holdingAccount: 1,
           },
           function (error, contacts) {
             if (error != null) {
@@ -71,7 +71,7 @@ module.exports = ContactsController = {
                   ...Array.from(additional_contacts || [])
                 )
                 return res.send({
-                  contacts
+                  contacts,
                 })
               }
             )
@@ -87,7 +87,7 @@ module.exports = ContactsController = {
       email: contact.email || '',
       first_name: contact.first_name || '',
       last_name: contact.last_name || '',
-      type: 'user'
+      type: 'user',
     }
-  }
+  },
 }

@@ -57,5 +57,5 @@ module.exports = FileHashManager = {
       })
       return input.pipe(hash)
     })
-  }
+  },
 }

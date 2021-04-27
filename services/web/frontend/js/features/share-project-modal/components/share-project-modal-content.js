@@ -12,7 +12,7 @@ export default function ShareProjectModalContent({
   cancel,
   animation,
   inFlight,
-  error
+  error,
 }) {
   return (
     <AccessibleModal show={show} onHide={cancel} animation={animation}>
@@ -61,7 +61,7 @@ ShareProjectModalContent.propTypes = {
   show: PropTypes.bool,
   animation: PropTypes.bool,
   inFlight: PropTypes.bool,
-  error: PropTypes.string
+  error: PropTypes.string,
 }
 
 function ErrorMessage({ error }) {
@@ -86,5 +86,5 @@ function ErrorMessage({ error }) {
   }
 }
 ErrorMessage.propTypes = {
-  error: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]).isRequired
+  error: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]).isRequired,
 }

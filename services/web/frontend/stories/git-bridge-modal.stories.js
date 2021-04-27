@@ -5,36 +5,36 @@ import importOverleafModules from '../macros/import-overleaf-module.macro'
 
 const [
   {
-    import: { default: GitBridgeModal }
-  }
+    import: { default: GitBridgeModal },
+  },
 ] = importOverleafModules('gitBridge')
 
 setupContext()
 
 export const GitBridgeUrlModal = args => <GitBridgeModal {...args} />
 GitBridgeUrlModal.args = {
-  type: 'show_url'
+  type: 'show_url',
 }
 
 export const CollaboratorModal = args => <GitBridgeModal {...args} />
 CollaboratorModal.args = {
-  type: 'collaborator'
+  type: 'collaborator',
 }
 
 export const TeaserModal = args => <GitBridgeModal {...args} />
 TeaserModal.args = {
-  type: 'teaser'
+  type: 'teaser',
 }
 
 export default {
   title: 'Modals / Git Bridge Modal',
   component: GitBridgeModal,
   args: {
-    show: true
+    show: true,
   },
   argTypes: {
     handleHide: { action: 'handleHide' },
-    startFreeTrial: { action: 'startFreeTrial' }
+    startFreeTrial: { action: 'startFreeTrial' },
   },
   decorators: [
     Story => (
@@ -43,6 +43,6 @@ export default {
           <Story />
         </ContextRoot>
       </>
-    )
-  ]
+    ),
+  ],
 }

@@ -20,7 +20,7 @@ const defaultArgs = {
   pullRight: false,
   noCaret: false,
   className: '',
-  defaultOpen: true
+  defaultOpen: true,
 }
 
 export const Default = args => {
@@ -66,7 +66,7 @@ SingleIconTransparent.args = {
   pullRight: true,
   title: <Icon type="ellipsis-v" />,
   noCaret: true,
-  className: 'dropdown-toggle-no-background'
+  className: 'dropdown-toggle-no-background',
 }
 
 export const Customized = args => {
@@ -88,10 +88,10 @@ export const Customized = args => {
 Customized.args = {
   ...defaultArgs,
   component: Dropdown,
-  title: 'Toggle & Menu used separately'
+  title: 'Toggle & Menu used separately',
 }
 
 export default {
   title: 'Dropdown',
-  component: DropdownButton
+  component: DropdownButton,
 }

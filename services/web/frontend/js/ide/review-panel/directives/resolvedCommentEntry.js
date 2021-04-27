@@ -18,7 +18,7 @@ export default App.directive('resolvedCommentEntry', () => ({
     thread: '=',
     permissions: '=',
     onUnresolve: '&',
-    onDelete: '&'
+    onDelete: '&',
   },
   link(scope, element, attrs) {
     scope.contentLimit = 40
@@ -32,5 +32,5 @@ export default App.directive('resolvedCommentEntry', () => ({
       contentLength =>
         (scope.needsCollapsing = contentLength > scope.contentLimit)
     )
-  }
+  },
 }))

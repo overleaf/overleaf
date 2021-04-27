@@ -21,9 +21,9 @@ export default {
     animation: false,
     show: true,
     isMac: false,
-    trackChangesVisible: true
+    trackChangesVisible: true,
   },
   argTypes: {
-    handleHide: { action: 'handleHide' }
-  }
+    handleHide: { action: 'handleHide' },
+  },
 }

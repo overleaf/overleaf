@@ -83,7 +83,7 @@ export default ConnectionManager = (function () {
         // If we need to force everyone to reload the editor
         forced_disconnect: false,
         inactive_disconnect: false,
-        jobId: 0
+        jobId: 0,
       }
 
       this.$scope.tryReconnectNow = () => {
@@ -127,14 +127,14 @@ export default ConnectionManager = (function () {
         }
         parsedURL = {
           origin: null,
-          pathname: this.wsUrl || '/socket.io'
+          pathname: this.wsUrl || '/socket.io',
         }
       }
       this.ide.socket = SocketIoShim.connect(parsedURL.origin, {
         resource: parsedURL.pathname.slice(1),
         reconnect: false,
         'connect timeout': 30 * 1000,
-        'force new connection': true
+        'force new connection': true,
       })
 
       // handle network-level websocket errors (e.g. failed dns lookups)
@@ -387,7 +387,7 @@ Something went wrong connecting to your project. Please refresh if this continue
         return
       }
       const data = {
-        project_id: this.ide.project_id
+        project_id: this.ide.project_id,
       }
       if (window.anonymousAccessToken) {
         data.anonymousAccessToken = window.anonymousAccessToken

@@ -67,7 +67,7 @@ App.controller('ReactFileTreeController', function (
       $scope.$emit('entity:selected', {
         ...selectedEntity.entity,
         id: selectedEntity.entity._id,
-        type
+        type,
       })
 
       // in the react implementation there is no such concept as "1
@@ -75,7 +75,7 @@ App.controller('ReactFileTreeController', function (
       $scope.$emit('entities:multiSelected', { count: 0 })
     } else if (selectedEntities.length > 1) {
       $scope.$emit('entities:multiSelected', {
-        count: selectedEntities.length
+        count: selectedEntities.length,
       })
     } else {
       $scope.$emit('entity:no-selection')

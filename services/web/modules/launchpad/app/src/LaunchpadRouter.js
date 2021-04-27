@@ -54,5 +54,5 @@ module.exports = {
         '/launchpad/register_saml_admin'
       )
     }
-  }
+  },
 }

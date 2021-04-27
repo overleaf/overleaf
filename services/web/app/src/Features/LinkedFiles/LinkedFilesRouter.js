@@ -23,7 +23,7 @@ module.exports = {
         endpointName: 'create-linked-file',
         params: ['project_id'],
         maxRequests: 100,
-        timeInterval: 60
+        timeInterval: 60,
       }),
       LinkedFilesController.createLinkedFile
     )
@@ -36,9 +36,9 @@ module.exports = {
         endpointName: 'refresh-linked-file',
         params: ['project_id'],
         maxRequests: 100,
-        timeInterval: 60
+        timeInterval: 60,
       }),
       LinkedFilesController.refreshLinkedFile
     )
-  }
+  },
 }

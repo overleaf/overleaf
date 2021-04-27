@@ -29,12 +29,12 @@ module.exports = V1Handler = {
         method: 'POST',
         url: '/api/v1/sharelatex/login',
         json: { email, password },
-        expectedStatusCodes: [403]
+        expectedStatusCodes: [403],
       },
       function (err, response, body) {
         if (err != null) {
           OError.tag(err, '[V1Handler] error while talking to v1 login api', {
-            email
+            email,
           })
           return callback(err)
         }
@@ -48,7 +48,7 @@ module.exports = V1Handler = {
               v1UserId: __guard__(
                 body != null ? body.user_profile : undefined,
                 x => x.id
-              )
+              ),
             },
             '[V1Handler] got response from v1 login api'
           )
@@ -74,14 +74,14 @@ module.exports = V1Handler = {
         url: '/api/v1/sharelatex/reset_password',
         json: {
           user_id: v1_user_id,
-          password
+          password,
         },
-        expectedStatusCodes: [200]
+        expectedStatusCodes: [200],
       },
       function (err, response, body) {
         if (err != null) {
           OError.tag(err, 'error while talking to v1 password reset api', {
-            v1_user_id
+            v1_user_id,
           })
           return callback(err, false)
         }
@@ -99,7 +99,7 @@ module.exports = V1Handler = {
         }
       }
     )
-  }
+  },
 }
 
 function __guard__(value, transform) {

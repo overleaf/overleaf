@@ -7,7 +7,7 @@ module.exports = {
   promisifyMultiResult,
   callbackifyMultiResult,
   expressify,
-  promiseMapWithLimit
+  promiseMapWithLimit,
 }
 
 /**

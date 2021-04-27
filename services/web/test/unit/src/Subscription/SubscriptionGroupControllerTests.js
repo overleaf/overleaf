@@ -27,23 +27,23 @@ describe('SubscriptionGroupController', function () {
       session: {
         user: {
           _id: this.adminUserId,
-          email: this.user_email
-        }
+          email: this.user_email,
+        },
       },
       params: {
-        subscriptionId: this.subscriptionId
+        subscriptionId: this.subscriptionId,
       },
-      query: {}
+      query: {},
     }
 
     this.subscription = {
-      _id: this.subscriptionId
+      _id: this.subscriptionId,
     }
 
     this.GroupHandler = { removeUserFromGroup: sinon.stub().callsArgWith(2) }
 
     this.SubscriptionLocator = {
-      getSubscription: sinon.stub().callsArgWith(1, null, this.subscription)
+      getSubscription: sinon.stub().callsArgWith(1, null, this.subscription),
     }
 
     this.AuthenticationController = {
@@ -52,7 +52,7 @@ describe('SubscriptionGroupController', function () {
       },
       getSessionUser(req) {
         return req.session.user
-      }
+      },
     }
 
     return (this.Controller = SandboxedModule.require(modulePath, {
@@ -60,8 +60,8 @@ describe('SubscriptionGroupController', function () {
         './SubscriptionGroupHandler': this.GroupHandler,
         './SubscriptionLocator': this.SubscriptionLocator,
         '../Authentication/AuthenticationController': this
-          .AuthenticationController
-      }
+          .AuthenticationController,
+      },
     }))
   })
 
@@ -77,7 +77,7 @@ describe('SubscriptionGroupController', function () {
             .calledWith(this.subscriptionId, userIdToRemove)
             .should.equal(true)
           return done()
-        }
+        },
       }
       return this.Controller.removeUserFromGroup(this.req, res)
     })
@@ -102,7 +102,7 @@ describe('SubscriptionGroupController', function () {
             memberUserIdToremove
           )
           return done()
-        }
+        },
       }
       return this.Controller.removeSelfFromGroup(this.req, res)
     })

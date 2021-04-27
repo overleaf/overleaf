@@ -89,5 +89,5 @@ module.exports = {
   ObjectId,
   addCollection,
   getCollectionNames,
-  waitForDb
+  waitForDb,
 }

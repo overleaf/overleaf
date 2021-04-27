@@ -3,10 +3,10 @@ import sinon from 'sinon'
 export function setupContext() {
   window.project_id = '1234'
   window.user = {
-    id: 'fake_user'
+    id: 'fake_user',
   }
   window.ExposedSettings = {
-    appName: 'Overleaf'
+    appName: 'Overleaf',
   }
   let $scope = {}
   if (window._ide) {
@@ -15,8 +15,8 @@ export function setupContext() {
       project: {},
       $watch: () => {},
       ui: {
-        chatOpen: true
-      }
+        chatOpen: true,
+      },
     }
   }
   window._ide = {
@@ -24,8 +24,8 @@ export function setupContext() {
     $scope,
     socket: {
       on: sinon.stub(),
-      removeListener: sinon.stub()
-    }
+      removeListener: sinon.stub(),
+    },
   }
   window.ExposedSettings = window.ExposedSettings || {}
   window.ExposedSettings.gitBridgePublicBaseUrl = 'https://git.stories.com'

@@ -13,7 +13,7 @@ const ProjectHistoryFailureSchema = new Schema(
     history: Schema.Types.Mixed,
     resyncStartedAt: Date,
     resyncAttempts: Number,
-    requestCount: Number
+    requestCount: Number,
   },
   { collection: 'projectHistoryFailures' }
 )

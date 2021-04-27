@@ -17,5 +17,5 @@ export default App.directive('validFile', () => ({
   link(scope, element, attrs, ngModelCtrl) {
     return (ngModelCtrl.$validators.validFile = filename =>
       SafePath.isCleanFilename(filename))
-  }
+  },
 }))

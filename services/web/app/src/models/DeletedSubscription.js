@@ -12,8 +12,8 @@ const DeleterDataSchema = new Schema(
       type: Date,
       default() {
         return new Date()
-      }
-    }
+      },
+    },
   },
   { _id: false }
 )
@@ -21,7 +21,7 @@ const DeleterDataSchema = new Schema(
 const DeletedSubscriptionSchema = new Schema(
   {
     deleterData: DeleterDataSchema,
-    subscription: SubscriptionSchema
+    subscription: SubscriptionSchema,
   },
   { collection: 'deletedSubscriptions' }
 )

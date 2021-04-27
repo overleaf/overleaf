@@ -74,5 +74,5 @@ function batchedUpdateWithResultHandling(collection, query, update) {
 module.exports = {
   getNextBatch,
   batchedUpdate,
-  batchedUpdateWithResultHandling
+  batchedUpdateWithResultHandling,
 }

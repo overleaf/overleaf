@@ -7,7 +7,7 @@ function ProjectNameEditableLabel({
   projectName,
   userIsAdmin,
   onChange,
-  className
+  className,
 }) {
   const [isRenaming, setIsRenaming] = useState(false)
 
@@ -76,7 +76,7 @@ ProjectNameEditableLabel.propTypes = {
   projectName: PropTypes.string.isRequired,
   userIsAdmin: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
-  className: PropTypes.string
+  className: PropTypes.string,
 }
 
 export default ProjectNameEditableLabel

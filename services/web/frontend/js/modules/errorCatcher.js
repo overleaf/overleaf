@@ -35,8 +35,8 @@ app.config([
           })
 
           return $delegate(exception, cause)
-        }
-    ])
+        },
+    ]),
 ])
 
 // Interceptor to check auth failures in all $http requests
@@ -64,11 +64,11 @@ app.factory('unAuthHttpResponseInterceptor', ($q, $location) => ({
     }
     // pass the response back to the original requester
     return $q.reject(response)
-  }
+  },
 }))
 
 app.config([
   '$httpProvider',
   $httpProvider =>
-    $httpProvider.interceptors.push('unAuthHttpResponseInterceptor')
+    $httpProvider.interceptors.push('unAuthHttpResponseInterceptor'),
 ])

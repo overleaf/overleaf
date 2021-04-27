@@ -40,8 +40,8 @@ const DocstoreManager = {
           message: 'tried to delete doc not in docstore',
           info: {
             project_id,
-            doc_id
-          }
+            doc_id,
+          },
         })
         return callback(error) // maybe suppress the error when delete doc which is not present?
       } else {
@@ -49,7 +49,7 @@ const DocstoreManager = {
           `docstore api responded with non-success code: ${res.statusCode}`,
           {
             project_id,
-            doc_id
+            doc_id,
           }
         )
         return callback(error)
@@ -66,7 +66,7 @@ const DocstoreManager = {
       {
         url,
         timeout: TIMEOUT,
-        json: true
+        json: true,
       },
       function (error, res, docs) {
         if (error != null) {
@@ -117,7 +117,7 @@ const DocstoreManager = {
       {
         url,
         timeout: TIMEOUT,
-        json: true
+        json: true,
       },
       function (error, res, docs) {
         if (error != null) {
@@ -155,7 +155,7 @@ const DocstoreManager = {
       {
         url,
         timeout: TIMEOUT,
-        json: true
+        json: true,
       },
       function (error, res, doc) {
         if (error != null) {
@@ -172,8 +172,8 @@ const DocstoreManager = {
             message: 'doc not found in docstore',
             info: {
               project_id,
-              doc_id
-            }
+              doc_id,
+            },
           })
           return callback(error)
         } else {
@@ -181,7 +181,7 @@ const DocstoreManager = {
             `docstore api responded with non-success code: ${res.statusCode}`,
             {
               project_id,
-              doc_id
+              doc_id,
             }
           )
           return callback(error)
@@ -203,7 +203,7 @@ const DocstoreManager = {
           callback(
             new Errors.NotFoundError({
               message: 'doc does not exist in project',
-              info: { project_id, doc_id }
+              info: { project_id, doc_id },
             })
           )
         } else {
@@ -230,8 +230,8 @@ const DocstoreManager = {
         json: {
           lines,
           version,
-          ranges
-        }
+          ranges,
+        },
       },
       function (error, res, result) {
         if (error != null) {
@@ -273,7 +273,7 @@ const DocstoreManager = {
     request.post(url, function (err, res, docs) {
       if (err != null) {
         OError.tag(err, `error calling ${method} project in docstore`, {
-          project_id
+          project_id,
         })
         return callback(err)
       }
@@ -291,13 +291,13 @@ const DocstoreManager = {
         callback(error)
       }
     })
-  }
+  },
 }
 
 module.exports = DocstoreManager
 module.exports.promises = promisifyAll(DocstoreManager, {
   multiResult: {
     getDoc: ['lines', 'rev', 'version', 'ranges'],
-    updateDoc: ['modified', 'rev']
-  }
+    updateDoc: ['modified', 'rev'],
+  },
 })

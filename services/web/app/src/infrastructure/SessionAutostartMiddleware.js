@@ -7,7 +7,7 @@ const botUserAgents = [
   'GoogleHC',
   'Googlebot',
   'bingbot',
-  'facebookexternal'
+  'facebookexternal',
 ].map(agent => {
   return agent.toLowerCase()
 })
@@ -81,13 +81,13 @@ class SessionAutostartMiddleware {
       const callback = this.autostartCallbackForRequest(req)
       if (callback) {
         req.session = {
-          noSessionCallback: callback
+          noSessionCallback: callback,
         }
       } else if (this.reqIsBot(req)) {
         req.session = {
           noSessionCallback: (_req, _res, next) => {
             next()
-          }
+          },
         }
       }
     }
@@ -106,7 +106,7 @@ class SessionAutostartMiddleware {
       return next(
         new OError('post gateway invoked for non-POST request', {
           path: req.path,
-          method: req.method
+          method: req.method,
         })
       )
     }

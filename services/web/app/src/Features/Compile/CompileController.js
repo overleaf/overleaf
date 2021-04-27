@@ -48,7 +48,7 @@ module.exports = CompileController = {
     const isAutoCompile = !!req.query.auto_compile
     const user_id = AuthenticationController.getLoggedInUserId(req)
     const options = {
-      isAutoCompile
+      isAutoCompile,
     }
 
     if (req.body.rootDoc_id) {
@@ -96,7 +96,7 @@ module.exports = CompileController = {
           compileGroup: limits != null ? limits.compileGroup : undefined,
           clsiServerId,
           validationProblems,
-          pdfDownloadDomain: Settings.pdfDownloadDomain
+          pdfDownloadDomain: Settings.pdfDownloadDomain,
         })
       }
     )
@@ -160,7 +160,7 @@ module.exports = CompileController = {
             status,
             outputFiles,
             clsiServerId,
-            validationProblems
+            validationProblems,
           })
         )
       }
@@ -203,7 +203,7 @@ module.exports = CompileController = {
           endpointName: 'full-pdf-download',
           throttle: 1000,
           subjectName: req.ip,
-          timeInterval: 60 * 60
+          timeInterval: 60 * 60,
         }
         return RateLimiter.addCount(rateLimitOpts, callback)
       }
@@ -333,7 +333,7 @@ module.exports = CompileController = {
     const limits = {
       compileGroup:
         (req.body != null ? req.body.compileGroup : undefined) ||
-        Settings.defaultFeatures.compileGroup
+        Settings.defaultFeatures.compileGroup,
     }
     return CompileController.proxyToClsiWithLimits(
       submission_id,
@@ -504,7 +504,7 @@ module.exports = CompileController = {
         url,
         method: req.method,
         timeout: oneMinute,
-        ...persistenceOptions
+        ...persistenceOptions,
       }
       // add any provided query string
       if (qs != null) {
@@ -563,7 +563,7 @@ module.exports = CompileController = {
         }
       )
     })
-  }
+  },
 }
 
 function _getPersistenceOptions(req, projectId, callback) {

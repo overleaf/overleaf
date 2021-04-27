@@ -46,7 +46,7 @@ App.factory('pdfTextLayer', function () {
         viewport: this.viewport,
         textDivs: this.textDivs,
         timeout,
-        enhanceTextSelection: this.enhanceTextSelection
+        enhanceTextSelection: this.enhanceTextSelection,
       })
 
       const textLayerSuccess = () => {

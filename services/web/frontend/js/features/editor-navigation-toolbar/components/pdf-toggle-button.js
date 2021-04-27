@@ -10,7 +10,7 @@ function PdfToggleButton({ onClick, pdfViewIsOpen }) {
     'btn-full-height',
     'btn-full-height-no-border',
     {
-      active: pdfViewIsOpen
+      active: pdfViewIsOpen,
     }
   )
 
@@ -30,7 +30,7 @@ function PdfToggleButton({ onClick, pdfViewIsOpen }) {
 
 PdfToggleButton.propTypes = {
   onClick: PropTypes.func.isRequired,
-  pdfViewIsOpen: PropTypes.bool
+  pdfViewIsOpen: PropTypes.bool,
 }
 
 export default PdfToggleButton

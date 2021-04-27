@@ -21,7 +21,7 @@ function PreviewLogsPaneEntry({
   entryAriaLabel = null,
   customClass,
   onSourceLocationClick,
-  onClose
+  onClose,
 }) {
   const logEntryClasses = classNames('log-entry', customClass)
 
@@ -63,7 +63,7 @@ function PreviewLogEntryHeader({
   showSourceLocationLink = true,
   showCloseButton = false,
   onSourceLocationClick,
-  onClose
+  onClose,
 }) {
   const { t } = useTranslation()
   const logLocationSpanRef = useRef()
@@ -82,17 +82,17 @@ function PreviewLogEntryHeader({
     'log-entry-header-warning': level === 'warning',
     'log-entry-header-typesetting': level === 'typesetting',
     'log-entry-header-raw': level === 'raw',
-    'log-entry-header-success': level === 'success'
+    'log-entry-header-success': level === 'success',
   })
   const logEntryLocationBtnClasses = classNames('log-entry-header-link', {
     'log-entry-header-link-error': level === 'error',
     'log-entry-header-link-warning': level === 'warning',
     'log-entry-header-link-typesetting': level === 'typesetting',
     'log-entry-header-link-raw': level === 'raw',
-    'log-entry-header-link-success': level === 'success'
+    'log-entry-header-link-success': level === 'success',
   })
   const headerLogLocationTitle = t('navigate_log_source', {
-    location: file + (line ? `, ${line}` : '')
+    location: file + (line ? `, ${line}` : ''),
   })
 
   function setTooltipForLogLocationLinkIfNeeded(observedElement) {
@@ -170,21 +170,21 @@ function PreviewLogEntryHeader({
 function PreviewLogEntryContent({
   rawContent,
   formattedContent,
-  extraInfoURL
+  extraInfoURL,
 }) {
   const {
     isExpanded,
     needsExpandCollapse,
     expandableProps,
-    toggleProps
+    toggleProps,
   } = useExpandCollapse({
-    collapsedSize: 150
+    collapsedSize: 150,
   })
 
   const buttonContainerClasses = classNames(
     'log-entry-content-button-container',
     {
-      'log-entry-content-button-container-collapsed': !isExpanded
+      'log-entry-content-button-container-collapsed': !isExpanded,
     }
   )
 
@@ -239,7 +239,7 @@ PreviewLogEntryHeader.propTypes = {
     // an empty string (from BibTeX errors), which is why we're using `any` here. We should revert
     // to PropTypes.number (not required) once we fix that.
     line: PropTypes.any,
-    column: PropTypes.any
+    column: PropTypes.any,
   }),
   level: PropTypes.string.isRequired,
   headerTitle: PropTypes.string,
@@ -248,13 +248,13 @@ PreviewLogEntryHeader.propTypes = {
   showSourceLocationLink: PropTypes.bool,
   showCloseButton: PropTypes.bool,
   onSourceLocationClick: PropTypes.func,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
 }
 
 PreviewLogEntryContent.propTypes = {
   rawContent: PropTypes.string,
   formattedContent: PropTypes.node,
-  extraInfoURL: PropTypes.string
+  extraInfoURL: PropTypes.string,
 }
 
 PreviewLogsPaneEntry.propTypes = {
@@ -272,7 +272,7 @@ PreviewLogsPaneEntry.propTypes = {
   showCloseButton: PropTypes.bool,
   entryAriaLabel: PropTypes.string,
   onSourceLocationClick: PropTypes.func,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
 }
 
 export default PreviewLogsPaneEntry

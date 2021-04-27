@@ -22,8 +22,8 @@ describe('ClsiStateManager', function () {
     this.ClsiStateManager = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': (this.settings = {}),
-        '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {})
-      }
+        '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
+      },
     })
     this.project = 'project'
     this.options = { draft: true, isAutoCompile: false }
@@ -34,17 +34,17 @@ describe('ClsiStateManager', function () {
     beforeEach(function (done) {
       this.docs = [
         { path: '/main.tex', doc: { _id: 'doc-id-1' } },
-        { path: '/folder/sub.tex', doc: { _id: 'doc-id-2' } }
+        { path: '/folder/sub.tex', doc: { _id: 'doc-id-2' } },
       ]
       this.files = [
         {
           path: '/figure.pdf',
-          file: { _id: 'file-id-1', rev: 123, created: 'aaaaaa' }
+          file: { _id: 'file-id-1', rev: 123, created: 'aaaaaa' },
         },
         {
           path: '/folder/fig2.pdf',
-          file: { _id: 'file-id-2', rev: 456, created: 'bbbbbb' }
-        }
+          file: { _id: 'file-id-2', rev: 456, created: 'bbbbbb' },
+        },
       ]
       this.ProjectEntityHandler.getAllEntitiesFromProject = sinon
         .stub()
@@ -80,7 +80,7 @@ describe('ClsiStateManager', function () {
         ;[this.docs[0], this.docs[1]] = Array.from([this.docs[1], this.docs[0]])
         ;[this.files[0], this.files[1]] = Array.from([
           this.files[1],
-          this.files[0]
+          this.files[0],
         ])
         return this.ClsiStateManager.computeHash(
           this.project,
@@ -158,7 +158,7 @@ describe('ClsiStateManager', function () {
       beforeEach(function (done) {
         this.files.push({
           path: '/newfile.tex',
-          file: { _id: 'newfile-id', rev: 123 }
+          file: { _id: 'newfile-id', rev: 123 },
         })
         return this.ClsiStateManager.computeHash(
           this.project,

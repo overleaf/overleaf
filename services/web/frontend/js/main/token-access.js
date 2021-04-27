@@ -38,8 +38,8 @@ App.controller(
         method: 'POST',
         url: postUrl,
         data: {
-          _csrf: csrfToken
-        }
+          _csrf: csrfToken,
+        },
       }).then(
         function successCallback(response) {
           $scope.accessInFlight = false

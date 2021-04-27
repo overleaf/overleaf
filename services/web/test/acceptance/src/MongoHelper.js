@@ -7,7 +7,7 @@ const { User: UserModel } = require('../../../app/src/models/User')
 const { db } = require('../../../app/src/infrastructure/mongodb')
 const {
   normalizeQuery,
-  normalizeMultiQuery
+  normalizeMultiQuery,
 } = require('../../../app/src/Features/Helpers/Mongo')
 
 const User = require('./helpers/User').promises

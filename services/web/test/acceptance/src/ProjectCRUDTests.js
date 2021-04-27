@@ -17,9 +17,9 @@ describe('Project CRUD', function () {
         $set: {
           refProviders: {
             mendeley: { encrypted: 'aaa' },
-            zotero: { encrypted: 'bbb' }
-          }
-        }
+            zotero: { encrypted: 'bbb' },
+          },
+        },
       })
       const { response, body } = await this.user.doRequest(
         'GET',

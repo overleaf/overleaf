@@ -94,7 +94,7 @@ App.controller(
     $scope.state = {
       loading: true,
       load_progress: 40,
-      error: null
+      error: null,
     }
     $scope.ui = {
       leftMenuShown: false,
@@ -106,7 +106,7 @@ App.controller(
       reviewPanelOpen: localStorage(`ui.reviewPanelOpen.${window.project_id}`),
       miniReviewPanelVisible: false,
       chatResizerSizeOpen: 7,
-      chatResizerSizeClosed: 0
+      chatResizerSizeClosed: 0,
     }
     $scope.user = window.user
 
@@ -120,7 +120,7 @@ App.controller(
       logoImgUrl: CobrandingDataService.getLogoImgUrl(),
       submitBtnHtml: CobrandingDataService.getSubmitBtnHtml(),
       brandVariationName: CobrandingDataService.getBrandVariationName(),
-      brandVariationHomeUrl: CobrandingDataService.getBrandVariationHomeUrl()
+      brandVariationHomeUrl: CobrandingDataService.getBrandVariationHomeUrl(),
     }
 
     $scope.chat = {}
@@ -131,7 +131,7 @@ App.controller(
       }
       $scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
       return eventTracking.sendMB('rp-toggle-panel', {
-        value: $scope.ui.reviewPanelOpen
+        value: $scope.ui.reviewPanelOpen,
       })
     }
 
@@ -264,7 +264,7 @@ If the project has been renamed please look in your project list for a new proje
       'tomorrow_night_bright',
       'tomorrow_night_eighties',
       'twilight',
-      'vibrant_ink'
+      'vibrant_ink',
     ]
     $scope.darkTheme = false
     $scope.$watch('settings.editorTheme', function (theme) {

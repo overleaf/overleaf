@@ -30,29 +30,29 @@ describe('TagsController', function () {
       removeProjectFromTag: sinon.stub().callsArgWith(3),
       deleteTag: sinon.stub().callsArg(2),
       renameTag: sinon.stub().callsArg(3),
-      createTag: sinon.stub()
+      createTag: sinon.stub(),
     }
     this.AuthenticationController = {
       getLoggedInUserId: req => {
         return req.session.user._id
-      }
+      },
     }
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
         './TagsHandler': this.handler,
         '../Authentication/AuthenticationController': this
-          .AuthenticationController
-      }
+          .AuthenticationController,
+      },
     })
     this.req = {
       params: {
-        projectId
+        projectId,
       },
       session: {
         user: {
-          _id: userId
-        }
-      }
+          _id: userId,
+        },
+      },
     }
 
     this.res = {}
@@ -70,7 +70,7 @@ describe('TagsController', function () {
           body.should.equal(allTags)
           this.handler.getAllTags.calledWith(userId).should.equal(true)
           return done()
-        }
+        },
       })
     })
   })

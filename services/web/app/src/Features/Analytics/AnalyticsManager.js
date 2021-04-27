@@ -41,20 +41,20 @@ function updateEditingSession(userId, projectId, countryCode) {
   }
   Metrics.analyticsQueue.inc({
     status: 'adding',
-    event_type: 'editing-session'
+    event_type: 'editing-session',
   })
   analyticsEditingSessionsQueue
     .add({ userId, projectId, countryCode })
     .then(() => {
       Metrics.analyticsQueue.inc({
         status: 'added',
-        event_type: 'editing-session'
+        event_type: 'editing-session',
       })
     })
     .catch(() => {
       Metrics.analyticsQueue.inc({
         status: 'error',
-        event_type: 'editing-session'
+        event_type: 'editing-session',
       })
     })
 }
@@ -71,5 +71,5 @@ function isAnalyticsDisabled() {
 module.exports = {
   identifyUser,
   recordEvent,
-  updateEditingSession
+  updateEditingSession,
 }

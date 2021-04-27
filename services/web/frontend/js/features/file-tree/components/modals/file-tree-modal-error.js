@@ -9,7 +9,7 @@ import {
   InvalidFilenameError,
   BlockedFilenameError,
   DuplicateFilenameError,
-  DuplicateFilenameMoveError
+  DuplicateFilenameMoveError,
 } from '../../errors'
 
 function FileTreeModalError() {

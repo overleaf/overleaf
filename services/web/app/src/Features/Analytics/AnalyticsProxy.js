@@ -22,7 +22,7 @@ module.exports = {
       proxyReqOptDecorator(proxyReqOpts, srcReq) {
         proxyReqOpts.headers = {} // unset all headers
         return proxyReqOpts
-      }
+      },
     })
-  }
+  },
 }

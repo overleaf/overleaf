@@ -24,12 +24,12 @@ App.controller('UserMembershipController', function ($scope, queuedHttp) {
       content: '',
       error: false,
       errorMessage: null,
-      inflightCount: 0
+      inflightCount: 0,
     },
     removeMembers: {
       error: false,
-      errorMessage: null
-    }
+      errorMessage: null,
+    },
   }
 
   const parseEmails = function (emailsString) {
@@ -50,7 +50,7 @@ App.controller('UserMembershipController', function ($scope, queuedHttp) {
       return queuedHttp
         .post(window.paths.addMember, {
           email,
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         })
         .then(function (response) {
           $scope.inputs.addMembers.inflightCount -= 1
@@ -87,8 +87,8 @@ App.controller('UserMembershipController', function ($scope, queuedHttp) {
           method: 'DELETE',
           url,
           headers: {
-            'X-Csrf-Token': window.csrfToken
-          }
+            'X-Csrf-Token': window.csrfToken,
+          },
         })
           .then(function () {
             const index = $scope.users.indexOf(user)

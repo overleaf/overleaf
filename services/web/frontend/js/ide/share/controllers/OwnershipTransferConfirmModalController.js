@@ -4,7 +4,7 @@ App.controller(
   function ($scope, $window, $modalInstance, projectMembers) {
     $scope.state = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $scope.confirm = function () {

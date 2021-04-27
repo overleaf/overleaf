@@ -24,14 +24,14 @@ const filestoreUrl = 'filestore.sharelatex.com'
 describe('TpdsUpdateSender', function () {
   beforeEach(function () {
     this.fakeUser = {
-      _id: '12390i'
+      _id: '12390i',
     }
     this.requestQueuer = function (queue, meth, opts, callback) {}
     const memberIds = [userId, collaberatorRef, readOnlyRef]
     this.CollaboratorsGetter = {
       promises: {
-        getInvitedMemberIds: sinon.stub().resolves(memberIds)
-      }
+        getInvitedMemberIds: sinon.stub().resolves(memberIds),
+      },
     }
     this.docstoreUrl = 'docstore.sharelatex.env'
     this.request = sinon.stub().resolves()
@@ -41,12 +41,12 @@ describe('TpdsUpdateSender', function () {
       apis: {
         thirdPartyDataStore: { url: thirdPartyDataStoreApiUrl },
         filestore: {
-          url: filestoreUrl
+          url: filestoreUrl,
         },
         docstore: {
-          pubUrl: this.docstoreUrl
-        }
-      }
+          pubUrl: this.docstoreUrl,
+        },
+      },
     }
     const getUsers = sinon.stub().resolves(
       memberIds.slice(1).map(userId => {
@@ -54,7 +54,7 @@ describe('TpdsUpdateSender', function () {
       })
     )
     this.UserGetter = {
-      promises: { getUsers }
+      promises: { getUsers },
     }
     this.updateSender = SandboxedModule.require(modulePath, {
       requires: {
@@ -64,9 +64,9 @@ describe('TpdsUpdateSender', function () {
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../User/UserGetter.js': this.UserGetter,
         '@overleaf/metrics': {
-          inc() {}
-        }
-      }
+          inc() {},
+        },
+      },
     })
   })
 
@@ -105,13 +105,13 @@ describe('TpdsUpdateSender', function () {
         project_id: projectId,
         file_id: fileId,
         path,
-        project_name: projectName
+        project_name: projectName,
       })
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
       group0.should.equal(userId)
       method0.should.equal('pipeStreamFrom')
@@ -141,9 +141,9 @@ describe('TpdsUpdateSender', function () {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [collaberatorRef, readOnlyRef]
+            $in: [collaberatorRef, readOnlyRef],
           },
-          'dropbox.access_token.uid': { $ne: null }
+          'dropbox.access_token.uid': { $ne: null },
         },
         { _id: 1 }
       )
@@ -159,13 +159,13 @@ describe('TpdsUpdateSender', function () {
         doc_id: docId,
         path,
         docLines: lines,
-        project_name: projectName
+        project_name: projectName,
       })
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
 
       group0.should.equal(userId)
@@ -193,9 +193,9 @@ describe('TpdsUpdateSender', function () {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [collaberatorRef, readOnlyRef]
+            $in: [collaberatorRef, readOnlyRef],
           },
-          'dropbox.access_token.uid': { $ne: null }
+          'dropbox.access_token.uid': { $ne: null },
         },
         { _id: 1 }
       )
@@ -207,13 +207,13 @@ describe('TpdsUpdateSender', function () {
       await this.updateSender.promises.deleteEntity({
         project_id: projectId,
         path,
-        project_name: projectName
+        project_name: projectName,
       })
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
 
       group0.should.equal(userId)
@@ -238,9 +238,9 @@ describe('TpdsUpdateSender', function () {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [collaberatorRef, readOnlyRef]
+            $in: [collaberatorRef, readOnlyRef],
           },
-          'dropbox.access_token.uid': { $ne: null }
+          'dropbox.access_token.uid': { $ne: null },
         },
         { _id: 1 }
       )
@@ -254,13 +254,13 @@ describe('TpdsUpdateSender', function () {
         project_id: projectId,
         startPath,
         endPath,
-        project_name: projectName
+        project_name: projectName,
       })
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
 
       group0.should.equal(userId)
@@ -286,9 +286,9 @@ describe('TpdsUpdateSender', function () {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [collaberatorRef, readOnlyRef]
+            $in: [collaberatorRef, readOnlyRef],
           },
-          'dropbox.access_token.uid': { $ne: null }
+          'dropbox.access_token.uid': { $ne: null },
         },
         { _id: 1 }
       )
@@ -301,13 +301,13 @@ describe('TpdsUpdateSender', function () {
       await this.updateSender.promises.moveEntity({
         project_id: projectId,
         project_name: oldProjectName,
-        newProjectName
+        newProjectName,
       })
 
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
 
       group0.should.equal(userId)
@@ -333,9 +333,9 @@ describe('TpdsUpdateSender', function () {
       this.UserGetter.promises.getUsers.should.have.been.calledOnce.and.calledWith(
         {
           _id: {
-            $in: [collaberatorRef, readOnlyRef]
+            $in: [collaberatorRef, readOnlyRef],
           },
-          'dropbox.access_token.uid': { $ne: null }
+          'dropbox.access_token.uid': { $ne: null },
         },
         { _id: 1 }
       )
@@ -347,7 +347,7 @@ describe('TpdsUpdateSender', function () {
       const {
         group: group0,
         job: job0,
-        method: method0
+        method: method0,
       } = this.request.firstCall.args[0].json
 
       group0.should.equal(`poll-dropbox:${userId}`)

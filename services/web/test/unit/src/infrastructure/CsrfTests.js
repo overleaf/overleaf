@@ -22,15 +22,15 @@ describe('Csrf', function () {
       .callsArgWith(2, (this.err = { code: 'EBADCSRFTOKEN' }))
     this.Csrf = SandboxedModule.require(modulePath, {
       requires: {
-        csurf: sinon.stub().returns(this.csurf_csrf)
-      }
+        csurf: sinon.stub().returns(this.csurf_csrf),
+      },
     })
     this.csrf = new this.Csrf()
     this.next = sinon.stub()
     this.path = '/foo/bar'
     this.req = {
       path: this.path,
-      method: 'POST'
+      method: 'POST',
     }
     return (this.res = {})
   })
@@ -97,7 +97,7 @@ describe('Csrf', function () {
         let err
         this.Csrf = SandboxedModule.require(modulePath, {
           globals: {
-            console: console
+            console: console,
           },
           requires: {
             csurf: (this.csurf = sinon
@@ -106,8 +106,8 @@ describe('Csrf', function () {
                 (this.csurf_csrf = sinon
                   .stub()
                   .callsArgWith(2, (err = { code: 'EOTHER' })))
-              ))
-          }
+              )),
+          },
         })
         this.csrf = new this.Csrf()
         this.csrf.disableDefaultCsrfProtection(this.path, 'POST')
@@ -131,13 +131,13 @@ describe('Csrf', function () {
       it('calls the callback without an error', function () {
         this.Csrf = SandboxedModule.require(modulePath, {
           globals: {
-            console: console
+            console: console,
           },
           requires: {
             csurf: (this.csurf = sinon
               .stub()
-              .returns((this.csurf_csrf = sinon.stub().callsArg(2))))
-          }
+              .returns((this.csurf_csrf = sinon.stub().callsArg(2)))),
+          },
         })
         this.cb = sinon.stub()
         this.Csrf.validateRequest(this.req, this.cb)
@@ -159,13 +159,13 @@ describe('Csrf', function () {
       it('calls the callback with `true`', function () {
         this.Csrf = SandboxedModule.require(modulePath, {
           globals: {
-            console: console
+            console: console,
           },
           requires: {
             csurf: (this.csurf = sinon
               .stub()
-              .returns((this.csurf_csrf = sinon.stub().callsArg(2))))
-          }
+              .returns((this.csurf_csrf = sinon.stub().callsArg(2)))),
+          },
         })
         this.cb = sinon.stub()
         this.Csrf.validateToken('goodtoken', {}, this.cb)
@@ -177,13 +177,13 @@ describe('Csrf', function () {
       it('calls the callback with an error', function () {
         this.Csrf = SandboxedModule.require(modulePath, {
           globals: {
-            console: console
+            console: console,
           },
           requires: {
             csurf: (this.csurf = sinon
               .stub()
-              .returns((this.csurf_csrf = sinon.stub().callsArg(2))))
-          }
+              .returns((this.csurf_csrf = sinon.stub().callsArg(2)))),
+          },
         })
         this.cb = sinon.stub()
         this.Csrf.validateToken(null, {}, error => {

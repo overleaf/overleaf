@@ -10,7 +10,7 @@ import FileTreeError from '../js/features/file-tree/components/file-tree-error'
 const MOCK_DELAY = 2000
 
 window._ide = {
-  socket: new MockedSocket()
+  socket: new MockedSocket(),
 }
 
 function defaultSetupMocks() {
@@ -30,7 +30,7 @@ function defaultSetupMocks() {
       },
 
       {
-        delay: MOCK_DELAY
+        delay: MOCK_DELAY,
       }
     )
     .post(
@@ -42,7 +42,7 @@ function defaultSetupMocks() {
           fileRefs: [],
           docs: [],
           _id: Math.random().toString(16).replace(/0\./, 'random-test-id-'),
-          name: body.name
+          name: body.name,
         }
         window._ide.socket.socketClient.emit(
           'reciveNewFolder',
@@ -52,7 +52,7 @@ function defaultSetupMocks() {
         return newFolder
       },
       {
-        delay: MOCK_DELAY
+        delay: MOCK_DELAY,
       }
     )
     .delete(
@@ -63,7 +63,7 @@ function defaultSetupMocks() {
         return 204
       },
       {
-        delay: MOCK_DELAY
+        delay: MOCK_DELAY,
       }
     )
     .post(/\/project\/\w+\/(file|doc|folder)\/\w+\/move/, (path, req) => {
@@ -93,15 +93,15 @@ NetworkErrors.parameters = {
     fetchMock
       .restore()
       .post(/\/project\/\w+\/folder/, 500, {
-        delay: MOCK_DELAY
+        delay: MOCK_DELAY,
       })
       .post(/\/project\/\w+\/(file|doc|folder)\/\w+\/rename/, 500, {
-        delay: MOCK_DELAY
+        delay: MOCK_DELAY,
       })
       .delete(/\/project\/\w+\/(file|doc|folder)\/\w+/, 500, {
-        delay: MOCK_DELAY
+        delay: MOCK_DELAY,
       })
-  }
+  },
 }
 
 export const FallbackError = args => <FileTreeError {...args} />
@@ -129,11 +129,11 @@ export default {
     },
     projectId: '123abc',
     rootDocId: '5e74f1a7ce17ae0041dfd056',
-    isConnected: true
+    isConnected: true,
   },
   argTypes: {
     onInit: { action: 'onInit' },
-    onSelect: { action: 'onSelect' }
+    onSelect: { action: 'onSelect' },
   },
   decorators: [
     (Story, { parameters: { setupMocks } }) => {
@@ -149,6 +149,6 @@ export default {
           </div>
         </div>
       </>
-    )
-  ]
+    ),
+  ],
 }

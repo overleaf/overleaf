@@ -46,9 +46,9 @@ describe('TpdsUpdateTests', function () {
           auth: {
             username: 'sharelatex',
             password: 'password',
-            sendImmediately: true
+            sendImmediately: true,
           },
-          body: 'test one two'
+          body: 'test one two',
         },
         (error, response, body) => {
           if (error != null) {
@@ -82,8 +82,8 @@ describe('TpdsUpdateTests', function () {
           auth: {
             username: 'sharelatex',
             password: 'password',
-            sendImmediately: true
-          }
+            sendImmediately: true,
+          },
         },
         (error, response, body) => {
           if (error != null) {
@@ -120,9 +120,9 @@ describe('TpdsUpdateTests', function () {
           auth: {
             username: 'sharelatex',
             password: 'password',
-            sendImmediately: true
+            sendImmediately: true,
           },
-          body: 'test one two'
+          body: 'test one two',
         },
         (error, response, body) => {
           if (error != null) {
@@ -152,7 +152,7 @@ describe('TpdsUpdateTests', function () {
       this.owner.request(
         {
           url: `/Project/${this.project_id}/archive`,
-          method: 'post'
+          method: 'post',
         },
         (err, response, body) => {
           expect(err).to.not.exist
@@ -163,9 +163,9 @@ describe('TpdsUpdateTests', function () {
               auth: {
                 username: 'sharelatex',
                 password: 'password',
-                sendImmediately: true
+                sendImmediately: true,
               },
-              body: 'test one two'
+              body: 'test one two',
             },
             (error, response, body) => {
               if (error != null) {

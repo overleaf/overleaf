@@ -82,18 +82,18 @@ class Csrf {
     // use this to simulate a csrf check regardless of req method, headers &c.
     const req = {
       body: {
-        _csrf: token
+        _csrf: token,
       },
       headers: {},
       method: 'POST',
-      session
+      session,
     }
     return Csrf.validateRequest(req, cb)
   }
 }
 
 Csrf.promises = {
-  validateRequest: promisify(Csrf.validateRequest)
+  validateRequest: promisify(Csrf.validateRequest),
 }
 
 module.exports = Csrf

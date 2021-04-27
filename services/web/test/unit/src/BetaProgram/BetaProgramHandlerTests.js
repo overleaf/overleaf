@@ -15,19 +15,19 @@ describe('BetaProgramHandler', function () {
       email: 'user@example.com',
       features: {},
       betaProgram: false,
-      save: sinon.stub().callsArgWith(0, null)
+      save: sinon.stub().callsArgWith(0, null),
     }
     this.handler = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/metrics': {
-          inc: sinon.stub()
+          inc: sinon.stub(),
         },
         '../User/UserUpdater': (this.UserUpdater = {
           promises: {
-            updateUser: sinon.stub().resolves()
-          }
-        })
-      }
+            updateUser: sinon.stub().resolves(),
+          },
+        }),
+      },
     })
   })
 

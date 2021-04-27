@@ -22,7 +22,7 @@ const _ = require('underscore')
 const {
   ProjectNotFoundError,
   V1ProjectNotFoundError,
-  BadDataError
+  BadDataError,
 } = require('./LinkedFilesErrors')
 
 module.exports = LinkedFilesHandler = {
@@ -34,7 +34,7 @@ module.exports = LinkedFilesHandler = {
       {
         project_id,
         element_id: file_id,
-        type: 'file'
+        type: 'file',
       },
       function (err, file, path, parentFolder) {
         if (err != null) {
@@ -159,5 +159,5 @@ module.exports = LinkedFilesHandler = {
         )
       }
     )
-  }
+  },
 }

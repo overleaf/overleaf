@@ -34,7 +34,7 @@ export default EventEmitter = class EventEmitter {
     }
     return this.events[event].push({
       callback,
-      namespace
+      namespace,
     })
   }
 

@@ -12,7 +12,7 @@ describe('Referal connect middle wear', function () {
   it('should take a referal query string and put it on the session if it exists', function (done) {
     const req = {
       query: { referal: '12345' },
-      session: {}
+      session: {},
     }
     this.connect.use(req, {}, () => {
       req.session.referal_id.should.equal(req.query.referal)
@@ -23,7 +23,7 @@ describe('Referal connect middle wear', function () {
   it('should not change the referal_id on the session if not in query', function (done) {
     const req = {
       query: {},
-      session: { referal_id: 'same' }
+      session: { referal_id: 'same' },
     }
     this.connect.use(req, {}, () => {
       req.session.referal_id.should.equal('same')
@@ -34,7 +34,7 @@ describe('Referal connect middle wear', function () {
   it('should take a facebook referal query string and put it on the session if it exists', function (done) {
     const req = {
       query: { fb_ref: '12345' },
-      session: {}
+      session: {},
     }
     this.connect.use(req, {}, () => {
       req.session.referal_id.should.equal(req.query.fb_ref)
@@ -45,7 +45,7 @@ describe('Referal connect middle wear', function () {
   it('should map the facebook medium into the session', function (done) {
     const req = {
       query: { rm: 'fb' },
-      session: {}
+      session: {},
     }
     this.connect.use(req, {}, () => {
       req.session.referal_medium.should.equal('facebook')
@@ -56,7 +56,7 @@ describe('Referal connect middle wear', function () {
   it('should map the twitter medium into the session', function (done) {
     const req = {
       query: { rm: 't' },
-      session: {}
+      session: {},
     }
     this.connect.use(req, {}, () => {
       req.session.referal_medium.should.equal('twitter')
@@ -67,7 +67,7 @@ describe('Referal connect middle wear', function () {
   it('should map the google plus medium into the session', function (done) {
     const req = {
       query: { rm: 'gp' },
-      session: {}
+      session: {},
     }
     this.connect.use(req, {}, () => {
       req.session.referal_medium.should.equal('google_plus')
@@ -78,7 +78,7 @@ describe('Referal connect middle wear', function () {
   it('should map the email medium into the session', function (done) {
     const req = {
       query: { rm: 'e' },
-      session: {}
+      session: {},
     }
     this.connect.use(req, {}, () => {
       req.session.referal_medium.should.equal('email')
@@ -89,7 +89,7 @@ describe('Referal connect middle wear', function () {
   it('should map the direct medium into the session', function (done) {
     const req = {
       query: { rm: 'd' },
-      session: {}
+      session: {},
     }
     this.connect.use(req, {}, () => {
       req.session.referal_medium.should.equal('direct')
@@ -100,7 +100,7 @@ describe('Referal connect middle wear', function () {
   it('should map the bonus source into the session', function (done) {
     const req = {
       query: { rs: 'b' },
-      session: {}
+      session: {},
     }
     this.connect.use(req, {}, () => {
       req.session.referal_source.should.equal('bonus')
@@ -111,7 +111,7 @@ describe('Referal connect middle wear', function () {
   it('should map the public share source into the session', function (done) {
     const req = {
       query: { rs: 'ps' },
-      session: {}
+      session: {},
     }
     this.connect.use(req, {}, () => {
       req.session.referal_source.should.equal('public_share')
@@ -122,7 +122,7 @@ describe('Referal connect middle wear', function () {
   it('should map the collaborator invite into the session', function (done) {
     const req = {
       query: { rs: 'ci' },
-      session: {}
+      session: {},
     }
     this.connect.use(req, {}, () => {
       req.session.referal_source.should.equal('collaborator_invite')

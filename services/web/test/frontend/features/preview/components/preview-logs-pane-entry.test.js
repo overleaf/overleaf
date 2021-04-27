@@ -31,14 +31,14 @@ describe('<PreviewLogsPaneEntry />', function () {
         <PreviewLogsPaneEntry sourceLocation={{ file, line }} level={level} />
       )
       screen.getByRole('button', {
-        name: `Navigate to log position in source code: ${file}, ${line}`
+        name: `Navigate to log position in source code: ${file}, ${line}`,
       })
     })
 
     it('renders only file when line information is not available', function () {
       render(<PreviewLogsPaneEntry sourceLocation={{ file }} level={level} />)
       screen.getByRole('button', {
-        name: `Navigate to log position in source code: ${file}`
+        name: `Navigate to log position in source code: ${file}`,
       })
     })
 
@@ -46,7 +46,7 @@ describe('<PreviewLogsPaneEntry />', function () {
       render(<PreviewLogsPaneEntry level={level} />)
       expect(
         screen.queryByRole('button', {
-          name: `Navigate to log position in source code: `
+          name: `Navigate to log position in source code: `,
         })
       ).to.not.exist
     })
@@ -60,7 +60,7 @@ describe('<PreviewLogsPaneEntry />', function () {
         />
       )
       const linkToSourceButton = screen.getByRole('button', {
-        name: `Navigate to log position in source code: ${file}, ${line}`
+        name: `Navigate to log position in source code: ${file}, ${line}`,
       })
 
       fireEvent.click(linkToSourceButton)
@@ -68,7 +68,7 @@ describe('<PreviewLogsPaneEntry />', function () {
       expect(onSourceLocationClick).to.be.calledWith({
         file,
         line,
-        column
+        column,
       })
     })
   })
@@ -91,11 +91,11 @@ describe('<PreviewLogsPaneEntry />', function () {
     beforeEach(function () {
       Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
         configurable: true,
-        value: 500
+        value: 500,
       })
       Object.defineProperty(HTMLElement.prototype, 'scrollWidth', {
         configurable: true,
-        value: 500
+        value: 500,
       })
     })
 
@@ -116,7 +116,7 @@ describe('<PreviewLogsPaneEntry />', function () {
       render(<PreviewLogsPaneEntry rawContent={rawContent} level={level} />)
       screen.getByText(rawContent)
       screen.getByRole('button', {
-        name: 'Expand'
+        name: 'Expand',
       })
     })
 
@@ -124,11 +124,11 @@ describe('<PreviewLogsPaneEntry />', function () {
       render(<PreviewLogsPaneEntry rawContent={rawContent} level={level} />)
       screen.getByText(rawContent)
       const expandCollapseBtn = screen.getByRole('button', {
-        name: 'Expand'
+        name: 'Expand',
       })
       fireEvent.click(expandCollapseBtn)
       screen.getByRole('button', {
-        name: 'Collapse'
+        name: 'Collapse',
       })
     })
 

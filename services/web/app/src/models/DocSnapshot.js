@@ -10,7 +10,7 @@ const DocSnapshotSchema = new Schema(
     lines: [String],
     pathname: String,
     ranges: Schema.Types.Mixed,
-    ts: Date
+    ts: Date,
   },
   { collection: 'docSnapshots' }
 )

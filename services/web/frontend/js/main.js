@@ -59,7 +59,7 @@ angular.module('SharelatexApp').config(function ($locationProvider) {
     return $locationProvider.html5Mode({
       enabled: true,
       requireBase: false,
-      rewriteLinks: false
+      rewriteLinks: false,
     })
   } catch (e) {
     return console.error("Error while trying to fix '#' links: ", e)

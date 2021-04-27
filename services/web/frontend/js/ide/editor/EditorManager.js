@@ -39,7 +39,7 @@ export default EditorManager = (function () {
         opening: true,
         trackChanges: false,
         wantTrackChanges: false,
-        showRichText: this.showRichText()
+        showRichText: this.showRichText(),
       }
 
       this.$scope.$on('entity:selected', (event, entity) => {

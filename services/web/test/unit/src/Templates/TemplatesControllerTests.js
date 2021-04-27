@@ -25,12 +25,12 @@ describe('TemplatesController', function () {
       requires: {
         '../Project/ProjectHelper': ProjectHelper,
         '../Authentication/AuthenticationController': (this.AuthenticationController = {
-          getLoggedInUserId: sinon.stub().returns(this.user_id)
+          getLoggedInUserId: sinon.stub().returns(this.user_id),
         }),
         './TemplatesManager': (this.TemplatesManager = {
-          createProjectFromV1Template: sinon.stub()
-        })
-      }
+          createProjectFromV1Template: sinon.stub(),
+        }),
+      },
     })
     this.next = sinon.stub()
     this.req = {
@@ -40,14 +40,14 @@ describe('TemplatesController', function () {
         mainFile: 'main-file',
         templateId: 'template-id',
         templateName: 'template-name',
-        templateVersionId: 'template-version-id'
+        templateVersionId: 'template-version-id',
       },
       session: {
         templateData: 'template-data',
         user: {
-          _id: this.user_id
-        }
-      }
+          _id: this.user_id,
+        },
+      },
     }
     return (this.res = { redirect: sinon.stub() })
   })

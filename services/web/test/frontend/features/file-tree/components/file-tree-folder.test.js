@@ -40,10 +40,10 @@ describe('<FileTreeFolder/>', function () {
             {
               docs: [{ _id: '123abc' }],
               fileRefs: [],
-              folders: []
-            }
-          ]
-        }
+              folders: [],
+            },
+          ],
+        },
       }
     )
 
@@ -76,10 +76,10 @@ describe('<FileTreeFolder/>', function () {
             {
               docs: [{ _id: '123abc' }],
               fileRefs: [],
-              folders: []
-            }
-          ]
-        }
+              folders: [],
+            },
+          ],
+        },
       }
     )
 
@@ -105,10 +105,10 @@ describe('<FileTreeFolder/>', function () {
             {
               docs: [{ _id: '123abc' }],
               fileRefs: [],
-              folders: []
-            }
-          ]
-        }
+              folders: [],
+            },
+          ],
+        },
       }
     )
 

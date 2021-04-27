@@ -12,7 +12,7 @@ function PreviewRecompileButton({
     isAutoCompileOn,
     isCompiling,
     isDraftModeOn,
-    isSyntaxCheckOn
+    isSyntaxCheckOn,
   },
   onRecompile,
   onRecompileFromScratch,
@@ -21,7 +21,7 @@ function PreviewRecompileButton({
   onSetAutoCompile,
   onSetDraftMode,
   onSetSyntaxCheck,
-  showText
+  showText,
 }) {
   const { t } = useTranslation()
 
@@ -56,8 +56,8 @@ function PreviewRecompileButton({
       'aria-hidden': !keepAria,
       style: {
         position: 'absolute',
-        right: '-100vw'
-      }
+        right: '-100vw',
+      },
     }
   }
 
@@ -75,7 +75,7 @@ function PreviewRecompileButton({
     'toolbar-item',
     {
       'btn-recompile-group-has-changes':
-        autoCompileHasChanges && !autoCompileHasLintingError
+        autoCompileHasChanges && !autoCompileHasLintingError,
     }
   )
 
@@ -178,7 +178,7 @@ PreviewRecompileButton.propTypes = {
     isCompiling: PropTypes.bool.isRequired,
     isDraftModeOn: PropTypes.bool.isRequired,
     isSyntaxCheckOn: PropTypes.bool.isRequired,
-    logEntries: PropTypes.object.isRequired
+    logEntries: PropTypes.object.isRequired,
   }),
   onRecompile: PropTypes.func.isRequired,
   onRecompileFromScratch: PropTypes.func.isRequired,
@@ -187,7 +187,7 @@ PreviewRecompileButton.propTypes = {
   onSetDraftMode: PropTypes.func.isRequired,
   onSetSyntaxCheck: PropTypes.func.isRequired,
   onStopCompilation: PropTypes.func.isRequired,
-  showText: PropTypes.bool.isRequired
+  showText: PropTypes.bool.isRequired,
 }
 
 export default PreviewRecompileButton

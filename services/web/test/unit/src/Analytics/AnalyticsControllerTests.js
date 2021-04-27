@@ -12,11 +12,11 @@ describe('AnalyticsController', function () {
 
     this.AnalyticsManager = {
       updateEditingSession: sinon.stub(),
-      recordEvent: sinon.stub()
+      recordEvent: sinon.stub(),
     }
 
     this.Features = {
-      hasFeature: sinon.stub().returns(true)
+      hasFeature: sinon.stub().returns(true),
     }
 
     this.controller = SandboxedModule.require(modulePath, {
@@ -26,14 +26,14 @@ describe('AnalyticsController', function () {
           .AuthenticationController,
         '../../infrastructure/Features': this.Features,
         '../../infrastructure/GeoIpLookup': (this.GeoIpLookup = {
-          getDetails: sinon.stub()
-        })
-      }
+          getDetails: sinon.stub(),
+        }),
+      },
     })
 
     this.res = {
       send() {},
-      sendStatus() {}
+      sendStatus() {},
     }
   })
 
@@ -41,8 +41,8 @@ describe('AnalyticsController', function () {
     beforeEach(function () {
       this.req = {
         params: {
-          projectId: 'a project id'
-        }
+          projectId: 'a project id',
+        },
       }
       this.GeoIpLookup.getDetails = sinon
         .stub()
@@ -64,11 +64,11 @@ describe('AnalyticsController', function () {
     beforeEach(function () {
       this.req = {
         params: {
-          event: 'i_did_something'
+          event: 'i_did_something',
         },
         body: 'stuff',
         sessionID: 'sessionIDHere',
-        session: {}
+        session: {},
       }
     })
 

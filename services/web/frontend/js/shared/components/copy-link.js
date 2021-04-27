@@ -45,5 +45,5 @@ export default function CopyLink({ link, tooltipId }) {
 }
 CopyLink.propTypes = {
   link: PropTypes.string.isRequired,
-  tooltipId: PropTypes.string.isRequired
+  tooltipId: PropTypes.string.isRequired,
 }

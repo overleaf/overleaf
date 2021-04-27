@@ -12,7 +12,7 @@ function FileTreeDraggablePreviewLayer({ isOver }) {
   const { isDragging, item, clientOffset } = useDragLayer(monitor => ({
     isDragging: monitor.isDragging(),
     item: monitor.getItem(),
-    clientOffset: monitor.getClientOffset()
+    clientOffset: monitor.getClientOffset(),
   }))
   const ref = useRef()
 
@@ -28,7 +28,7 @@ function FileTreeDraggablePreviewLayer({ isOver }) {
     <div
       ref={ref}
       className={classNames('dnd-draggable-preview-layer', {
-        'dnd-droppable-hover': isOver
+        'dnd-droppable-hover': isOver,
       })}
     >
       <div style={getItemStyle(clientOffset, containerOffset)}>
@@ -39,7 +39,7 @@ function FileTreeDraggablePreviewLayer({ isOver }) {
 }
 
 FileTreeDraggablePreviewLayer.propTypes = {
-  isOver: PropTypes.bool.isRequired
+  isOver: PropTypes.bool.isRequired,
 }
 
 function DraggablePreviewItem({ title }) {
@@ -47,7 +47,7 @@ function DraggablePreviewItem({ title }) {
 }
 
 DraggablePreviewItem.propTypes = {
-  title: PropTypes.string.isRequired
+  title: PropTypes.string.isRequired,
 }
 
 // makes the preview item follow the cursor.
@@ -55,7 +55,7 @@ DraggablePreviewItem.propTypes = {
 function getItemStyle(clientOffset, containerOffset) {
   if (!containerOffset || !clientOffset) {
     return {
-      display: 'none'
+      display: 'none',
     }
   }
   const { x: containerX, y: containerY } = containerOffset
@@ -65,7 +65,7 @@ function getItemStyle(clientOffset, containerOffset) {
   const transform = `translate(${posX}px, ${posY}px)`
   return {
     transform,
-    WebkitTransform: transform
+    WebkitTransform: transform,
   }
 }
 

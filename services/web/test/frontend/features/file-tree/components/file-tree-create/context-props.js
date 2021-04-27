@@ -18,9 +18,9 @@ export const contextProps = {
     {
       docs: [{ _id: 'entity-1' }],
       fileRefs: [],
-      folders: []
-    }
+      folders: [],
+    },
   ],
   initialSelectedEntityId: 'entity-1',
-  onSelect: sinon.stub()
+  onSelect: sinon.stub(),
 }

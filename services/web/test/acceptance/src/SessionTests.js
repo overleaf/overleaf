@@ -56,7 +56,7 @@ describe('Sessions', function () {
               expect(sessions.length).to.equal(0)
               next()
             })
-          }
+          },
         ],
         (err, result) => {
           if (err) {
@@ -180,7 +180,7 @@ describe('Sessions', function () {
               expect(statusCode).to.equal(302)
               next()
             })
-          }
+          },
         ],
         (err, result) => {
           if (err) {
@@ -304,7 +304,7 @@ describe('Sessions', function () {
               expect(sessions.length).to.equal(0)
               next()
             })
-          }
+          },
         ],
         (err, result) => {
           if (err) {
@@ -383,7 +383,7 @@ describe('Sessions', function () {
           next => {
             this.user2.request.get(
               {
-                uri: '/user/sessions'
+                uri: '/user/sessions',
               },
               (err, response, body) => {
                 expect(err).to.be.oneOf([null, undefined])
@@ -399,7 +399,7 @@ describe('Sessions', function () {
               expect(err).to.be.oneOf([null, undefined])
               this.user2.request.post(
                 {
-                  uri: '/user/sessions/clear'
+                  uri: '/user/sessions/clear',
                 },
                 err => next(err)
               )
@@ -465,7 +465,7 @@ describe('Sessions', function () {
               expect(auditLog[0].info.sessions.length).to.equal(2)
               next()
             })
-          }
+          },
         ],
         (err, result) => {
           if (err) {

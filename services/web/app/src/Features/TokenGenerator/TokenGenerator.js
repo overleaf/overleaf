@@ -75,7 +75,7 @@ const TokenGenerator = {
         return V1Api.request(
           {
             url: `/api/v1/sharelatex/docs/read_token/${token}/exists`,
-            json: true
+            json: true,
           },
           function (err, response, body) {
             if (err != null) {
@@ -98,12 +98,12 @@ const TokenGenerator = {
       },
       callback
     )
-  }
+  },
 }
 
 TokenGenerator.promises = {
   generateUniqueReadOnlyToken: promisify(
     TokenGenerator.generateUniqueReadOnlyToken
-  )
+  ),
 }
 module.exports = TokenGenerator

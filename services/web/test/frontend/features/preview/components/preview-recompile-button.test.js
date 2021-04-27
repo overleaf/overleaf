@@ -27,7 +27,7 @@ describe('<PreviewRecompileButton />', function () {
       "Don't check syntax",
       'Run syntax check now',
       'Stop compilation',
-      'Recompile from scratch'
+      'Recompile from scratch',
     ])
 
     const menuHeadingItems = screen.getAllByRole('heading')
@@ -35,7 +35,7 @@ describe('<PreviewRecompileButton />', function () {
     expect(menuHeadingItems.map(item => item.textContent)).to.deep.equal([
       'Auto Compile',
       'Compile Mode',
-      'Syntax Checks'
+      'Syntax Checks',
     ])
   })
 
@@ -45,7 +45,7 @@ describe('<PreviewRecompileButton />', function () {
         renderPreviewRecompileButton()
 
         const button = screen.getByRole('menuitem', {
-          name: 'Recompile from scratch'
+          name: 'Recompile from scratch',
         })
         await fireEvent.click(button)
         expect(onRecompileFromScratch).to.have.been.calledOnce
@@ -59,14 +59,14 @@ describe('<PreviewRecompileButton />', function () {
         expect(
           screen
             .getByRole('menuitem', {
-              name: 'Recompile from scratch'
+              name: 'Recompile from scratch',
             })
             .getAttribute('aria-disabled')
         ).to.equal('true')
         expect(
           screen
             .getByRole('menuitem', {
-              name: 'Recompile from scratch'
+              name: 'Recompile from scratch',
             })
             .closest('li')
             .getAttribute('class')
@@ -92,7 +92,7 @@ describe('<PreviewRecompileButton />', function () {
     it('shows animated visual feedback via CSS class when there are uncompiled changes', function () {
       const { container } = renderPreviewRecompileButton({
         autoCompileHasChanges: true,
-        autoCompileHasLintingError: false
+        autoCompileHasLintingError: false,
       })
       const recompileBtnGroupEl = container.querySelector(
         '.btn-recompile-group'
@@ -106,7 +106,7 @@ describe('<PreviewRecompileButton />', function () {
     it('does not show animated visual feedback via CSS class when there are no uncompiled changes', function () {
       const { container } = renderPreviewRecompileButton({
         autoCompileHasChanges: false,
-        autoCompileHasLintingError: false
+        autoCompileHasLintingError: false,
       })
       const recompileBtnGroupEl = container.querySelector(
         '.btn-recompile-group'
@@ -133,7 +133,7 @@ describe('<PreviewRecompileButton />', function () {
           isCompiling: false,
           isDraftModeOn: false,
           isSyntaxCheckOn: false,
-          ...compilerState
+          ...compilerState,
         }}
         onRecompile={onRecompile}
         onRunSyntaxCheckNow={() => {}}

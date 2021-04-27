@@ -47,8 +47,8 @@ App.controller('HistoryListController', function ($scope, $modal, ide) {
       resolve: {
         labelDetails() {
           return labelDetails
-        }
-      }
+        },
+      },
     })
 
   $scope.loadMore = () => {

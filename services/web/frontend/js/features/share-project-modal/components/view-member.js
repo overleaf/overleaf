@@ -18,6 +18,6 @@ ViewMember.propTypes = {
   member: PropTypes.shape({
     _id: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired,
-    privileges: PropTypes.string.isRequired
-  }).isRequired
+    privileges: PropTypes.string.isRequired,
+  }).isRequired,
 }

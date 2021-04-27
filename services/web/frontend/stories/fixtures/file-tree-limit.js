@@ -35,7 +35,7 @@ function makeFolders(path, depth = 0) {
       name: folderPath,
       folders: depth < MAX_DEPTH ? makeFolders(folderPath, depth + 1) : [],
       fileRefs: makeFileRefs(folderPath),
-      docs: makeDocs(folderPath)
+      docs: makeDocs(folderPath),
     })
   }
   return folders
@@ -47,6 +47,6 @@ export const rootFolderLimit = [
     name: 'rootFolder',
     folders: makeFolders('root'),
     fileRefs: makeFileRefs('root'),
-    docs: makeDocs('root')
-  }
+    docs: makeDocs('root'),
+  },
 ]

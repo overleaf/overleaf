@@ -15,7 +15,7 @@ class MockChatApi extends AbstractMockApi {
       id: Math.random().toString(),
       content: req.body.content,
       timestamp: Date.now(),
-      user_id: req.body.user_id
+      user_id: req.body.user_id,
     }
     this.projects[projectId] = this.projects[projectId] || []
     this.projects[projectId].push(message)

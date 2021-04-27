@@ -16,7 +16,7 @@ module.exports = {
   removeSelfFromProject: expressify(removeSelfFromProject),
   getAllMembers: expressify(getAllMembers),
   setCollaboratorInfo: expressify(setCollaboratorInfo),
-  transferOwnership: expressify(transferOwnership)
+  transferOwnership: expressify(transferOwnership),
 }
 
 async function removeUserFromProject(req, res, next) {
@@ -24,7 +24,7 @@ async function removeUserFromProject(req, res, next) {
   const userId = req.params.user_id
   await _removeUserIdFromProject(projectId, userId)
   EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {
-    members: true
+    members: true,
   })
   res.sendStatus(204)
 }
@@ -83,7 +83,7 @@ async function transferOwnership(req, res, next) {
       toUserId,
       {
         allowTransferToNonCollaborators: sessionUser.isAdmin,
-        sessionUserId: ObjectId(sessionUser._id)
+        sessionUserId: ObjectId(sessionUser._id),
       }
     )
     res.sendStatus(204)

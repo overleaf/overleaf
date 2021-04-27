@@ -21,5 +21,5 @@ module.exports = {
         Object.values(db).map(collection => collection.deleteMany({}))
       )
     })
-  }
+  },
 }

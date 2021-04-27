@@ -10,19 +10,19 @@ describe('ClsiManager', function () {
       clearServerId: sinon.stub().yields(),
       getCookieJar: sinon.stub().callsArgWith(1, null, this.jar),
       setServerId: sinon.stub().callsArgWith(2),
-      _getServerId: sinon.stub()
+      _getServerId: sinon.stub(),
     }
     this.ClsiStateManager = {
-      computeHash: sinon.stub().callsArgWith(2, null, '01234567890abcdef')
+      computeHash: sinon.stub().callsArgWith(2, null, '01234567890abcdef'),
     }
     this.ClsiFormatChecker = {
-      checkRecoursesForProblems: sinon.stub().callsArgWith(1)
+      checkRecoursesForProblems: sinon.stub().callsArgWith(1),
     }
     this.Project = {}
     this.ProjectEntityHandler = {}
     this.ProjectGetter = {}
     this.DocumentUpdaterHandler = {
-      getProjectDocsIfMatch: sinon.stub().callsArgWith(2, null, null)
+      getProjectDocsIfMatch: sinon.stub().callsArgWith(2, null, null),
     }
     this.request = sinon.stub()
     this.Metrics = {
@@ -31,7 +31,7 @@ describe('ClsiManager', function () {
           this.done = sinon.stub()
         }
       },
-      inc: sinon.stub()
+      inc: sinon.stub(),
     }
     this.ClsiManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -39,18 +39,18 @@ describe('ClsiManager', function () {
           apis: {
             filestore: {
               url: 'filestore.example.com',
-              secret: 'secret'
+              secret: 'secret',
             },
             clsi: {
-              url: 'http://clsi.example.com'
+              url: 'http://clsi.example.com',
             },
             clsi_priority: {
-              url: 'https://clsipremium.example.com'
-            }
-          }
+              url: 'https://clsipremium.example.com',
+            },
+          },
         }),
         '../../models/Project': {
-          Project: this.Project
+          Project: this.Project,
         },
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../Project/ProjectGetter': this.ProjectGetter,
@@ -60,8 +60,8 @@ describe('ClsiManager', function () {
         './ClsiStateManager': this.ClsiStateManager,
         request: this.request,
         './ClsiFormatChecker': this.ClsiFormatChecker,
-        '@overleaf/metrics': this.Metrics
-      }
+        '@overleaf/metrics': this.Metrics,
+      },
     })
     this.project_id = 'project-id'
     this.user_id = 'user-id'
@@ -86,16 +86,16 @@ describe('ClsiManager', function () {
                 url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.pdf`,
                 path: 'output.pdf',
                 type: 'pdf',
-                build: 1234
+                build: 1234,
               },
               {
                 url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.log`,
                 path: 'output.log',
                 type: 'log',
-                build: 1234
-              }
-            ]
-          }
+                build: 1234,
+              },
+            ],
+          },
         })
         this.ClsiManager.sendRequest(
           this.project_id,
@@ -123,14 +123,14 @@ describe('ClsiManager', function () {
             url: `/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.pdf`,
             path: 'output.pdf',
             type: 'pdf',
-            build: 1234
+            build: 1234,
           },
           {
             url: `/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.log`,
             path: 'output.log',
             type: 'log',
-            build: 1234
-          }
+            build: 1234,
+          },
         ]
         this.callback
           .calledWith(null, this.status, outputFiles)
@@ -142,8 +142,8 @@ describe('ClsiManager', function () {
       beforeEach(function () {
         this.ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
           compile: {
-            status: (this.status = 'failure')
-          }
+            status: (this.status = 'failure'),
+          },
         })
         this.ClsiManager.sendRequest(
           this.project_id,
@@ -202,7 +202,7 @@ describe('ClsiManager', function () {
         this.ClsiManager.sendRequestOnce
           .withArgs(this.project_id, this.user_id, {
             syncType: 'full',
-            forceNewClsiServer: true
+            forceNewClsiServer: true,
           })
           .callsArgWith(3, null, (this.status = 'success'))
         this.ClsiManager.sendRequestOnce
@@ -224,7 +224,7 @@ describe('ClsiManager', function () {
         this.ClsiManager.sendRequestOnce
           .calledWith(this.project_id, this.user_id, {
             forceNewClsiServer: true,
-            syncType: 'full'
+            syncType: 'full',
           })
           .should.equal(true)
       })
@@ -247,8 +247,8 @@ describe('ClsiManager', function () {
           .callsArgWith(1, new Error('failed'))
         this.ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
           compile: {
-            status: (this.status = 'failure')
-          }
+            status: (this.status = 'failure'),
+          },
         })
         this.ClsiManager.sendRequest(
           this.project_id,
@@ -285,16 +285,16 @@ describe('ClsiManager', function () {
                 url: `${this.settings.apis.clsi.url}/project/${this.submission_id}/build/1234/output/output.pdf`,
                 path: 'output.pdf',
                 type: 'pdf',
-                build: 1234
+                build: 1234,
               },
               {
                 url: `${this.settings.apis.clsi.url}/project/${this.submission_id}/build/1234/output/output.log`,
                 path: 'output.log',
                 type: 'log',
-                build: 1234
-              }
-            ]
-          }
+                build: 1234,
+              },
+            ],
+          },
         })
         this.ClsiManager.sendExternalRequest(
           this.submission_id,
@@ -316,14 +316,14 @@ describe('ClsiManager', function () {
             url: `/project/${this.submission_id}/build/1234/output/output.pdf`,
             path: 'output.pdf',
             type: 'pdf',
-            build: 1234
+            build: 1234,
           },
           {
             url: `/project/${this.submission_id}/build/1234/output/output.log`,
             path: 'output.log',
             type: 'log',
-            build: 1234
-          }
+            build: 1234,
+          },
         ]
         this.callback
           .calledWith(null, this.status, outputFiles)
@@ -335,8 +335,8 @@ describe('ClsiManager', function () {
       beforeEach(function () {
         this.ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
           compile: {
-            status: (this.status = 'failure')
-          }
+            status: (this.status = 'failure'),
+          },
         })
         this.ClsiManager.sendExternalRequest(
           this.submission_id,
@@ -358,8 +358,8 @@ describe('ClsiManager', function () {
           .callsArgWith(1, new Error('failed'))
         this.ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
           compile: {
-            status: (this.status = 'failure')
-          }
+            status: (this.status = 'failure'),
+          },
         })
         this.ClsiManager.sendExternalRequest(
           this.submission_id,
@@ -402,7 +402,7 @@ describe('ClsiManager', function () {
             this.project_id,
             {
               method: 'DELETE',
-              url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}`
+              url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}`,
             },
             'node-1'
           )
@@ -433,28 +433,28 @@ describe('ClsiManager', function () {
         _id: this.project_id,
         compiler: (this.compiler = 'latex'),
         rootDoc_id: 'mock-doc-id-1',
-        imageName: (this.image = 'mock-image-name')
+        imageName: (this.image = 'mock-image-name'),
       }
 
       this.docs = {
         '/main.tex': (this.doc_1 = {
           name: 'main.tex',
           _id: 'mock-doc-id-1',
-          lines: ['Hello', 'world']
+          lines: ['Hello', 'world'],
         }),
         '/chapters/chapter1.tex': (this.doc_2 = {
           name: 'chapter1.tex',
           _id: 'mock-doc-id-2',
-          lines: ['Chapter 1']
-        })
+          lines: ['Chapter 1'],
+        }),
       }
 
       this.files = {
         '/images/image.png': (this.file_1 = {
           name: 'image.png',
           _id: 'mock-file-id-1',
-          created: new Date()
-        })
+          created: new Date(),
+        }),
       }
 
       this.Project.findById = sinon.stub().callsArgWith(2, null, this.project)
@@ -493,7 +493,7 @@ describe('ClsiManager', function () {
             compiler: 1,
             rootDoc_id: 1,
             imageName: 1,
-            rootFolder: 1
+            rootFolder: 1,
           })
           .should.equal(true)
       })
@@ -527,25 +527,25 @@ describe('ClsiManager', function () {
               check: undefined,
               syncType: undefined, // "full"
               syncState: undefined,
-              compileGroup: 'standard'
+              compileGroup: 'standard',
             }, // "01234567890abcdef"
             rootResourcePath: 'main.tex',
             resources: [
               {
                 path: 'main.tex',
-                content: this.doc_1.lines.join('\n')
+                content: this.doc_1.lines.join('\n'),
               },
               {
                 path: 'chapters/chapter1.tex',
-                content: this.doc_2.lines.join('\n')
+                content: this.doc_2.lines.join('\n'),
               },
               {
                 path: 'images/image.png',
                 url: `${this.settings.apis.filestore.url}/project/${this.project_id}/file/${this.file_1._id}`,
-                modified: this.file_1.created.getTime()
-              }
-            ]
-          }
+                modified: this.file_1.created.getTime(),
+              },
+            ],
+          },
         })
       })
     })
@@ -562,7 +562,7 @@ describe('ClsiManager', function () {
         this.DocumentUpdaterHandler.getProjectDocsIfMatch = sinon
           .stub()
           .callsArgWith(2, null, [
-            { _id: this.doc_1._id, lines: this.doc_1.lines, v: 123 }
+            { _id: this.doc_1._id, lines: this.doc_1.lines, v: 123 },
           ])
         this.ProjectEntityHandler.getAllDocPathsFromProject = sinon
           .stub()
@@ -572,7 +572,7 @@ describe('ClsiManager', function () {
           {
             timeout: 100,
             incrementalCompilesEnabled: true,
-            compileGroup: 'priority'
+            compileGroup: 'priority',
           },
           (err, request) => {
             if (err != null) {
@@ -590,7 +590,7 @@ describe('ClsiManager', function () {
             compiler: 1,
             rootDoc_id: 1,
             imageName: 1,
-            rootFolder: 1
+            rootFolder: 1,
           })
           .should.equal(true)
       })
@@ -622,16 +622,16 @@ describe('ClsiManager', function () {
               check: undefined,
               syncType: 'incremental',
               syncState: '01234567890abcdef',
-              compileGroup: 'priority'
+              compileGroup: 'priority',
             },
             rootResourcePath: 'main.tex',
             resources: [
               {
                 path: 'main.tex',
-                content: this.doc_1.lines.join('\n')
-              }
-            ]
-          }
+                content: this.doc_1.lines.join('\n'),
+              },
+            ],
+          },
         })
       })
 
@@ -647,20 +647,20 @@ describe('ClsiManager', function () {
           this.DocumentUpdaterHandler.getProjectDocsIfMatch = sinon
             .stub()
             .callsArgWith(2, null, [
-              { _id: this.doc_1._id, lines: this.doc_1.lines, v: 123 }
+              { _id: this.doc_1._id, lines: this.doc_1.lines, v: 123 },
             ])
           this.ProjectEntityHandler.getAllDocPathsFromProject = sinon
             .stub()
             .callsArgWith(1, null, {
               'mock-doc-id-1': 'main.tex',
-              'mock-doc-id-2': '/chapters/chapter1.tex'
+              'mock-doc-id-2': '/chapters/chapter1.tex',
             })
           this.ClsiManager._buildRequest(
             this.project_id,
             {
               timeout: 100,
               incrementalCompilesEnabled: true,
-              rootDoc_id: 'mock-doc-id-2'
+              rootDoc_id: 'mock-doc-id-2',
             },
             (err, request) => {
               if (err != null) {
@@ -761,13 +761,13 @@ describe('ClsiManager', function () {
           '/other.tex': (this.doc_1 = {
             name: 'other.tex',
             _id: 'mock-doc-id-1',
-            lines: ['Hello', 'world']
+            lines: ['Hello', 'world'],
           }),
           '/chapters/chapter1.tex': (this.doc_2 = {
             name: 'chapter1.tex',
             _id: 'mock-doc-id-2',
-            lines: ['Chapter 1']
-          })
+            lines: ['Chapter 1'],
+          }),
         }
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
@@ -787,8 +787,8 @@ describe('ClsiManager', function () {
           '/other.tex': (this.doc_1 = {
             name: 'other.tex',
             _id: 'mock-doc-id-1',
-            lines: ['Hello', 'world']
-          })
+            lines: ['Hello', 'world'],
+          }),
         }
         this.ProjectEntityHandler.getAllDocs = sinon
           .stub()
@@ -852,7 +852,7 @@ describe('ClsiManager', function () {
           .calledWith(this.project_id, {
             method: 'POST',
             url,
-            json: this.req
+            json: this.req,
           })
           .should.equal(true)
       })
@@ -896,7 +896,7 @@ describe('ClsiManager', function () {
         2,
         null,
         (this.req = {
-          compile: { rootResourcePath: 'rootfile.text', options: {} }
+          compile: { rootResourcePath: 'rootfile.text', options: {} },
         })
       )
     })
@@ -922,8 +922,8 @@ describe('ClsiManager', function () {
               url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
               qs: {
                 file: 'rootfile.text',
-                image: undefined
-              }
+                image: undefined,
+              },
             },
             'node-1'
           )
@@ -954,7 +954,7 @@ describe('ClsiManager', function () {
             {
               method: 'GET',
               url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
-              qs: { file: 'main.tex', image: undefined }
+              qs: { file: 'main.tex', image: undefined },
             },
             'node-2'
           )
@@ -983,7 +983,7 @@ describe('ClsiManager', function () {
             {
               method: 'GET',
               url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
-              qs: { file: 'main.tex', image: this.image }
+              qs: { file: 'main.tex', image: this.image },
             },
             'node-3'
           )
@@ -998,7 +998,7 @@ describe('ClsiManager', function () {
       this.request.callsArgWith(1, null, this.response)
       this.opts = {
         method: 'SOMETHIGN',
-        url: 'http://a place on the web'
+        url: 'http://a place on the web',
       }
     })
 
@@ -1028,7 +1028,7 @@ describe('ClsiManager', function () {
       this.request.yields(null, this.response)
       this.opts = {
         method: 'GET',
-        url: 'http://clsi'
+        url: 'http://clsi',
       }
     })
 
@@ -1105,7 +1105,7 @@ describe('ClsiManager', function () {
       this.response = { there: 'something' }
       this.request.callsArgWith(1, null, this.response)
       this.opts = {
-        url: this.ClsiManager._getCompilerUrl(null, this.project_id)
+        url: this.ClsiManager._getCompilerUrl(null, this.project_id),
       }
     })
 

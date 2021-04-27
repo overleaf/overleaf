@@ -7,7 +7,7 @@ export const Basic = args => {
     headers: 4,
     mathDisplay: 40,
     mathInline: 400,
-    textWords: 4000
+    textWords: 4000,
   }
 
   return <WordCountModalContent {...args} data={data} />
@@ -24,7 +24,7 @@ export const LoadingError = args => {
 export const Messages = args => {
   const messages = [
     'Lorem ipsum dolor sit amet.',
-    'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+    'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
   ].join('\n')
 
   return <WordCountModalContent {...args} data={{ messages }} />
@@ -37,9 +37,9 @@ export default {
     animation: false,
     show: true,
     error: false,
-    loading: false
+    loading: false,
   },
   argTypes: {
-    handleHide: { action: 'hide' }
-  }
+    handleHide: { action: 'hide' },
+  },
 }

@@ -62,7 +62,7 @@ const printAccountCSV = (account, callback) => {
         }-${endAt.getDate()}`,
         current_period_ends_at_segment: parseInt(
           ((endAt - NOW) / 1000 / 3600 / 24 / 365) * 7
-        )
+        ),
       }
       callback(null, csvData)
     })
@@ -93,7 +93,7 @@ const csvFields = [
   'billing_info_url',
   'account_management_url',
   'current_period_ends_at',
-  'current_period_ends_at_segment'
+  'current_period_ends_at_segment',
 ]
 const csvParser = new CSVParser({ csvFields })
 

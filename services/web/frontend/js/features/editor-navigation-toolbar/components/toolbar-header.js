@@ -33,7 +33,7 @@ function ToolbarHeader({
   openShareModal,
   pdfViewIsOpen,
   pdfButtonIsVisible,
-  togglePdfView
+  togglePdfView,
 }) {
   return (
     <header className="toolbar toolbar-header toolbar-with-labels">
@@ -103,7 +103,7 @@ ToolbarHeader.propTypes = {
   openShareModal: PropTypes.func.isRequired,
   pdfViewIsOpen: PropTypes.bool,
   pdfButtonIsVisible: PropTypes.bool,
-  togglePdfView: PropTypes.func.isRequired
+  togglePdfView: PropTypes.func.isRequired,
 }
 
 export default ToolbarHeader

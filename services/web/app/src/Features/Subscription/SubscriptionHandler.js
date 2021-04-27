@@ -122,7 +122,7 @@ const SubscriptionHandler = {
                       cb
                     )
                   }
-                )
+                ),
             ],
             callback
           )
@@ -150,7 +150,7 @@ const SubscriptionHandler = {
               }
               const emailOpts = {
                 to: user.email,
-                first_name: user.first_name
+                first_name: user.first_name,
               }
               const ONE_HOUR_IN_MS = 1000 * 60 * 60
               setTimeout(
@@ -288,7 +288,7 @@ const SubscriptionHandler = {
       daysToExend,
       callback
     )
-  }
+  },
 }
 
 SubscriptionHandler.promises = promisifyAll(SubscriptionHandler)

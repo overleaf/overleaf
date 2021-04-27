@@ -6,8 +6,8 @@ describe('Features', function () {
   beforeEach(function () {
     this.Features = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {})
-      }
+        'settings-sharelatex': (this.settings = {}),
+      },
     })
   })
   describe('externalAuthenticationSystemUsed', function () {
@@ -89,14 +89,14 @@ describe('Features', function () {
           beforeEach(function () {
             this.settings.apis = {
               linkedUrlProxy: {
-                url: 'https://www.overleaf.com'
+                url: 'https://www.overleaf.com',
               },
               references: {
-                url: 'https://www.overleaf.com'
+                url: 'https://www.overleaf.com',
               },
               v1: {
-                url: 'https://www.overleaf.com'
-              }
+                url: 'https://www.overleaf.com',
+              },
             }
           })
           it('should return true', function () {

@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { screen, render } from '@testing-library/react'
 
 import PreviewDownloadFileList, {
-  topFileTypes
+  topFileTypes,
 } from '../../../../../frontend/js/features/preview/components/preview-download-file-list'
 
 describe('<PreviewDownloadFileList />', function () {
@@ -14,7 +14,7 @@ describe('<PreviewDownloadFileList />', function () {
       fileName,
       url: `/project/${projectId}/output/${fileName}`,
       type: fileName.split('.').pop(),
-      main: main || false
+      main: main || false,
     }
   }
 
@@ -28,7 +28,7 @@ describe('<PreviewDownloadFileList />', function () {
       makeFile('output.stdout'),
       makeFile('output.aux'),
       makeFile('output.bbl'),
-      makeFile('output.blg')
+      makeFile('output.blg'),
     ]
 
     render(<PreviewDownloadFileList fileList={outputFiles} />)
@@ -87,7 +87,7 @@ describe('<PreviewDownloadFileList />', function () {
         makeFile('output.bbl'),
         makeFile('output.ind'),
         makeFile('output.gls'),
-        makeFile('output.log')
+        makeFile('output.log'),
       ]
 
       render(<PreviewDownloadFileList fileList={outputFiles} />)
@@ -100,7 +100,7 @@ describe('<PreviewDownloadFileList />', function () {
       const outputFiles = [
         makeFile('output.bbl'),
         makeFile('output.ind'),
-        makeFile('output.gls')
+        makeFile('output.gls'),
       ]
 
       render(<PreviewDownloadFileList fileList={outputFiles} />)

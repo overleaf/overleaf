@@ -50,7 +50,7 @@ const ScriptLogger = {
       'Recent Logged In (Last 30 Days):',
       _.filter(ScriptLogger.allDaysSinceLastLoggedIn, a => a < 30).length
     )
-  }
+  },
 }
 
 const checkAndUpdateUser = (user, callback) =>

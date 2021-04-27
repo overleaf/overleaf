@@ -70,7 +70,7 @@ describe('BackFillDummyDocMeta', function () {
         project_id: projectIds[5],
         deleted: true,
         name: 'foo.tex',
-        deletedAt: now
+        deletedAt: now,
       },
       // not deleted
       { _id: docIds[6], project_id: projectIds[6] },
@@ -80,7 +80,7 @@ describe('BackFillDummyDocMeta', function () {
       { _id: docIds[9], project_id: projectIds[9], deleted: true },
       // two docs in one project
       { _id: docIds[10], project_id: projectIds[10], deleted: true },
-      { _id: docIds[11], project_id: projectIds[11], deleted: true }
+      { _id: docIds[11], project_id: projectIds[11], deleted: true },
     ])
   })
   beforeEach('insert deleted project context', async function () {
@@ -92,7 +92,7 @@ describe('BackFillDummyDocMeta', function () {
       // soft-deleted, no entry for doc
       {
         deleterData: { deletedProjectId: projectIds[3] },
-        project: { deletedDocs: [] }
+        project: { deletedDocs: [] },
       },
       // soft-deleted, has entry for doc
       {
@@ -100,10 +100,10 @@ describe('BackFillDummyDocMeta', function () {
         project: {
           deletedDocs: [
             { _id: docIds[4], name: 'main.tex', deletedAt: now },
-            { _id: docIds[11], name: 'main.tex', deletedAt: now }
-          ]
-        }
-      }
+            { _id: docIds[11], name: 'main.tex', deletedAt: now },
+          ],
+        },
+      },
     ])
   })
 
@@ -117,7 +117,7 @@ describe('BackFillDummyDocMeta', function () {
       INCREMENT_BY_S: ONE_DAY_IN_S,
       STOP_AT_S: stopAtSeconds,
       // start right away
-      LET_USER_DOUBLE_CHECK_INPUTS_FOR: 1
+      LET_USER_DOUBLE_CHECK_INPUTS_FOR: 1,
     }
     let result
     try {
@@ -150,19 +150,19 @@ describe('BackFillDummyDocMeta', function () {
       overlappingPartStdOut = [
         `Back filling dummy meta data for ["${docIds[9]}","${docIds[10]}"]`,
         `Orphaned deleted doc ${docIds[9]} (no deletedProjects entry)`,
-        `Orphaned deleted doc ${docIds[10]} (no deletedProjects entry)`
+        `Orphaned deleted doc ${docIds[10]} (no deletedProjects entry)`,
       ]
       overlappingPartStdErr = [
-        `Processed 11 until ${oneDayFromProjectId9AsObjectId}`
+        `Processed 11 until ${oneDayFromProjectId9AsObjectId}`,
       ]
     } else {
       // Outside dry-run, the previous id will not match again as the `name` has been back-filled.
       overlappingPartStdOut = [
         `Back filling dummy meta data for ["${docIds[10]}"]`,
-        `Orphaned deleted doc ${docIds[10]} (no deletedProjects entry)`
+        `Orphaned deleted doc ${docIds[10]} (no deletedProjects entry)`,
       ]
       overlappingPartStdErr = [
-        `Processed 10 until ${oneDayFromProjectId9AsObjectId}`
+        `Processed 10 until ${oneDayFromProjectId9AsObjectId}`,
       ]
     }
 
@@ -186,7 +186,7 @@ describe('BackFillDummyDocMeta', function () {
       `Orphaned deleted doc ${docIds[9]} (no deletedProjects entry)`,
       // Potential double processing
       ...overlappingPartStdOut,
-      ''
+      '',
     ])
     expect(stdErr).to.deep.equal([
       ...`Options: ${JSON.stringify(options, null, 2)}`.split('\n'),
@@ -210,7 +210,7 @@ describe('BackFillDummyDocMeta', function () {
       `Processed 9 until ${projectIds[9]}`,
       ...overlappingPartStdErr,
       'Done.',
-      ''
+      '',
     ])
   }
 
@@ -232,14 +232,14 @@ describe('BackFillDummyDocMeta', function () {
           project_id: projectIds[5],
           deleted: true,
           name: 'foo.tex',
-          deletedAt: now
+          deletedAt: now,
         },
         { _id: docIds[6], project_id: projectIds[6] },
         { _id: docIds[7], project_id: projectIds[7], deleted: true },
         { _id: docIds[8], project_id: projectIds[8], deleted: true },
         { _id: docIds[9], project_id: projectIds[9], deleted: true },
         { _id: docIds[10], project_id: projectIds[10], deleted: true },
-        { _id: docIds[11], project_id: projectIds[11], deleted: true }
+        { _id: docIds[11], project_id: projectIds[11], deleted: true },
       ])
     })
   })
@@ -257,42 +257,42 @@ describe('BackFillDummyDocMeta', function () {
           project_id: projectIds[0],
           deleted: true,
           name: DUMMY_NAME,
-          deletedAt: DUMMY_TIME
+          deletedAt: DUMMY_TIME,
         },
         {
           _id: docIds[1],
           project_id: projectIds[1],
           deleted: true,
           name: DUMMY_NAME,
-          deletedAt: DUMMY_TIME
+          deletedAt: DUMMY_TIME,
         },
         {
           _id: docIds[2],
           project_id: projectIds[2],
           deleted: true,
           name: DUMMY_NAME,
-          deletedAt: DUMMY_TIME
+          deletedAt: DUMMY_TIME,
         },
         {
           _id: docIds[3],
           project_id: projectIds[3],
           deleted: true,
           name: DUMMY_NAME,
-          deletedAt: DUMMY_TIME
+          deletedAt: DUMMY_TIME,
         },
         {
           _id: docIds[4],
           project_id: projectIds[4],
           deleted: true,
           name: 'main.tex',
-          deletedAt: now
+          deletedAt: now,
         },
         {
           _id: docIds[5],
           project_id: projectIds[5],
           deleted: true,
           name: 'foo.tex',
-          deletedAt: now
+          deletedAt: now,
         },
         { _id: docIds[6], project_id: projectIds[6] },
         {
@@ -300,36 +300,36 @@ describe('BackFillDummyDocMeta', function () {
           project_id: projectIds[7],
           deleted: true,
           name: DUMMY_NAME,
-          deletedAt: DUMMY_TIME
+          deletedAt: DUMMY_TIME,
         },
         {
           _id: docIds[8],
           project_id: projectIds[8],
           deleted: true,
           name: DUMMY_NAME,
-          deletedAt: DUMMY_TIME
+          deletedAt: DUMMY_TIME,
         },
         {
           _id: docIds[9],
           project_id: projectIds[9],
           deleted: true,
           name: DUMMY_NAME,
-          deletedAt: DUMMY_TIME
+          deletedAt: DUMMY_TIME,
         },
         {
           _id: docIds[10],
           project_id: projectIds[10],
           deleted: true,
           name: DUMMY_NAME,
-          deletedAt: DUMMY_TIME
+          deletedAt: DUMMY_TIME,
         },
         {
           _id: docIds[11],
           project_id: projectIds[11],
           deleted: true,
           name: 'main.tex',
-          deletedAt: now
-        }
+          deletedAt: now,
+        },
       ])
     })
   })

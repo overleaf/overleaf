@@ -57,7 +57,7 @@ class UserHelper {
     return {
       email: this.getDefaultEmail(),
       password: this.getDefaultPassword(),
-      ...userData
+      ...userData,
     }
   }
 
@@ -86,7 +86,7 @@ class UserHelper {
       baseUrl: UserHelper.baseUrl(),
       followRedirect: false,
       jar: this.jar,
-      resolveWithFullResponse: true
+      resolveWithFullResponse: true,
     })
   }
 
@@ -128,7 +128,7 @@ class UserHelper {
     this._csrfToken = response.body
     // use csrf token for requests
     this.setRequestDefaults({
-      headers: { 'x-csrf-token': this._csrfToken }
+      headers: { 'x-csrf-token': this._csrfToken },
     })
   }
 
@@ -239,7 +239,7 @@ class UserHelper {
     const loginPath = Settings.enableLegacyLogin ? '/login/legacy' : '/login'
     await userHelper.getCsrfToken()
     const response = await userHelper.request.post(loginPath, {
-      json: userData
+      json: userData,
     })
     if (response.statusCode !== 200 || response.body.redir !== '/project') {
       const error = new Error('login failed')
@@ -247,7 +247,7 @@ class UserHelper {
       throw error
     }
     userHelper.user = await UserGetter.promises.getUser({
-      email: userData.email
+      email: userData.email,
     })
     if (!userHelper.user) {
       throw new Error(`user not found for email: ${userData.email}`)
@@ -263,7 +263,7 @@ class UserHelper {
    */
   async isLoggedIn() {
     const response = await this.request.get('/user/sessions', {
-      followRedirect: true
+      followRedirect: true,
     })
     return response.request.path === '/user/sessions'
   }
@@ -291,7 +291,7 @@ class UserHelper {
       )
     }
     userHelper.user = await UserGetter.promises.getUser({
-      email: userData.email
+      email: userData.email,
     })
     if (!userHelper.user) {
       throw new Error(`user not found for email: ${userData.email}`)
@@ -303,7 +303,7 @@ class UserHelper {
 
   async refreshMongoUser() {
     this.user = await UserGetter.promises.getUser({
-      _id: this.user._id
+      _id: this.user._id,
     })
     return this.user
   }
@@ -311,10 +311,10 @@ class UserHelper {
   async addEmail(email) {
     let response = await this.request.post({
       form: {
-        email
+        email,
       },
       simple: false,
-      uri: '/user/emails'
+      uri: '/user/emails',
     })
     expect(response.statusCode).to.equal(204)
   }
@@ -328,13 +328,13 @@ class UserHelper {
     const confirmedDate = moment().subtract(days, 'days').toDate()
     const query = {
       _id: userId,
-      'emails.email': email
+      'emails.email': email,
     }
     const update = {
       $set: {
         'emails.$.confirmedAt': confirmedDate,
-        'emails.$.reconfirmedAt': confirmedDate
-      }
+        'emails.$.reconfirmedAt': confirmedDate,
+      },
     }
     await UserUpdater.promises.updateUser(query, update)
   }
@@ -344,10 +344,10 @@ class UserHelper {
     // UserHelper.createUser does not create a confirmation token
     response = await this.request.post({
       form: {
-        email
+        email,
       },
       simple: false,
-      uri: '/user/emails/resend_confirmation'
+      uri: '/user/emails/resend_confirmation',
     })
     expect(response.statusCode).to.equal(200)
     const tokenData = await db.tokens
@@ -355,15 +355,15 @@ class UserHelper {
         use: 'email_confirmation',
         'data.user_id': userId.toString(),
         'data.email': email,
-        usedAt: { $exists: false }
+        usedAt: { $exists: false },
       })
       .next()
     response = await this.request.post({
       form: {
-        token: tokenData.token
+        token: tokenData.token,
       },
       simple: false,
-      uri: '/user/emails/confirm'
+      uri: '/user/emails/confirm',
     })
     expect(response.statusCode).to.equal(200)
   }

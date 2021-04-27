@@ -72,8 +72,8 @@ function functionBodyProcessor(j, path) {
       j(path)
         .find(j.CallExpression, {
           callee: {
-            object: { name: 'logger' }
-          }
+            object: { name: 'logger' },
+          },
         })
         .filter(path => expressionIsLoggingError(path))
         .replaceWith(path => {

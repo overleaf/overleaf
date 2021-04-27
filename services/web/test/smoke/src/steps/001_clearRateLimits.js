@@ -35,10 +35,10 @@ async function run({ processWithTimeout, timeout }) {
     work: Promise.all([
       clearLoginRateLimit(),
       clearOverleafLoginRateLimit(),
-      clearOpenProjectRateLimit()
+      clearOpenProjectRateLimit(),
     ]),
     timeout,
-    message: 'cleanupRateLimits timed out'
+    message: 'cleanupRateLimits timed out',
   })
 }
 

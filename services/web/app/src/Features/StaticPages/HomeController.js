@@ -64,5 +64,5 @@ module.exports = HomeController = {
         }
       })
     }
-  }
+  },
 }

@@ -28,15 +28,15 @@ describe('ProjectZipStreamManager', function () {
     this.callback = sinon.stub()
     this.archive = {
       on() {},
-      append: sinon.stub()
+      append: sinon.stub(),
     }
     return (this.ProjectZipStreamManager = SandboxedModule.require(modulePath, {
       requires: {
         archiver: (this.archiver = sinon.stub().returns(this.archive)),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
         '../FileStore/FileStoreHandler': (this.FileStoreHandler = {}),
-        '../Project/ProjectGetter': (this.ProjectGetter = {})
-      }
+        '../Project/ProjectGetter': (this.ProjectGetter = {}),
+      },
     }))
   })
 
@@ -46,12 +46,12 @@ describe('ProjectZipStreamManager', function () {
         this.project_ids = ['project-1', 'project-2']
         this.zip_streams = {
           'project-1': new EventEmitter(),
-          'project-2': new EventEmitter()
+          'project-2': new EventEmitter(),
         }
 
         this.project_names = {
           'project-1': 'Project One Name',
-          'project-2': 'Project Two Name'
+          'project-2': 'Project Two Name',
         }
 
         this.ProjectZipStreamManager.createZipStreamForProject = (
@@ -114,7 +114,7 @@ describe('ProjectZipStreamManager', function () {
         return Array.from(this.project_ids).map(project_id =>
           this.archive.append
             .calledWith(this.zip_streams[project_id], {
-              name: this.project_names[project_id] + '.zip'
+              name: this.project_names[project_id] + '.zip',
             })
             .should.equal(true)
         )
@@ -244,12 +244,12 @@ describe('ProjectZipStreamManager', function () {
             '\\documentclass{article}',
             '\\begin{document}',
             'Hello world',
-            '\\end{document}'
-          ]
+            '\\end{document}',
+          ],
         },
         '/chapters/chapter1.tex': {
-          lines: ['chapter1', 'content']
-        }
+          lines: ['chapter1', 'content'],
+        },
       }
       this.ProjectEntityHandler.getAllDocs = sinon
         .stub()
@@ -291,15 +291,15 @@ describe('ProjectZipStreamManager', function () {
     beforeEach(function () {
       this.files = {
         '/image.png': {
-          _id: 'file-id-1'
+          _id: 'file-id-1',
         },
         '/folder/picture.png': {
-          _id: 'file-id-2'
-        }
+          _id: 'file-id-2',
+        },
       }
       this.streams = {
         'file-id-1': new EventEmitter(),
-        'file-id-2': new EventEmitter()
+        'file-id-2': new EventEmitter(),
       }
       this.ProjectEntityHandler.getAllFiles = sinon
         .stub()

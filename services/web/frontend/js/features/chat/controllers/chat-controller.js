@@ -21,6 +21,6 @@ App.component(
   'chat',
   react2angular(rootContext.use(ChatPane), [
     'resetUnreadMessages',
-    'chatIsOpen'
+    'chatIsOpen',
   ])
 )

@@ -82,10 +82,10 @@ function fetchJSON(
       ...headers,
       'Content-Type': 'application/json',
       'X-Csrf-Token': window.csrfToken,
-      Accept: 'application/json'
+      Accept: 'application/json',
     },
     credentials,
-    method
+    method,
   }
 
   if (method !== 'GET' && method !== 'HEAD') {

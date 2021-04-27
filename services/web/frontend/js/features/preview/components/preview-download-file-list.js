@@ -60,11 +60,11 @@ function SubFileList({ subFileList, listType }) {
 
 SubFileList.propTypes = {
   subFileList: PropTypes.array.isRequired,
-  listType: PropTypes.string.isRequired
+  listType: PropTypes.string.isRequired,
 }
 
 PreviewDownloadFileList.propTypes = {
-  fileList: PropTypes.array
+  fileList: PropTypes.array,
 }
 
 export default PreviewDownloadFileList

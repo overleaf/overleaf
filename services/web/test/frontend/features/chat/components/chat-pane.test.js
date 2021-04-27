@@ -6,7 +6,7 @@ import fetchMock from 'fetch-mock'
 import ChatPane from '../../../../../frontend/js/features/chat/components/chat-pane'
 import {
   renderWithChatContext,
-  cleanUpContext
+  cleanUpContext,
 } from '../../../helpers/render-with-context'
 import { stubMathJax, tearDownMathJaxStubs } from './stubs'
 
@@ -14,7 +14,7 @@ describe('<ChatPane />', function () {
   const user = {
     id: 'fake_user',
     first_name: 'fake_user_first_name',
-    email: 'fake@example.com'
+    email: 'fake@example.com',
   }
 
   const testMessages = [
@@ -22,14 +22,14 @@ describe('<ChatPane />', function () {
       id: 'msg_1',
       content: 'a message',
       user,
-      timestamp: new Date().getTime()
+      timestamp: new Date().getTime(),
     },
     {
       id: 'msg_2',
       content: 'another message',
       user,
-      timestamp: new Date().getTime()
-    }
+      timestamp: new Date().getTime(),
+    },
   ]
 
   beforeEach(function () {

@@ -51,23 +51,23 @@ describe('EditorController', function () {
         '../Project/ProjectOptionsHandler': (this.ProjectOptionsHandler = {
           setCompiler: sinon.stub().yields(),
           setImageName: sinon.stub().yields(),
-          setSpellCheckLanguage: sinon.stub().yields()
+          setSpellCheckLanguage: sinon.stub().yields(),
         }),
         '../Project/ProjectDetailsHandler': (this.ProjectDetailsHandler = {
           setProjectDescription: sinon.stub().yields(),
           renameProject: sinon.stub().yields(),
-          setPublicAccessLevel: sinon.stub().yields()
+          setPublicAccessLevel: sinon.stub().yields(),
         }),
         '../Project/ProjectDeleter': (this.ProjectDeleter = {}),
         '../DocumentUpdater/DocumentUpdaterHandler': (this.DocumentUpdaterHandler = {
           flushDocToMongo: sinon.stub().yields(),
-          setDocument: sinon.stub().yields()
+          setDocument: sinon.stub().yields(),
         }),
         './EditorRealTimeController': (this.EditorRealTimeController = {
-          emitToRoom: sinon.stub()
+          emitToRoom: sinon.stub(),
         }),
-        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() })
-      }
+        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
+      },
     }))
   })
 
@@ -352,7 +352,7 @@ describe('EditorController', function () {
       beforeEach(function () {
         const folders = [
           (this.folderA = { _id: 2, parentFolder_id: 1 }),
-          (this.folderB = { _id: 3, parentFolder_id: 2 })
+          (this.folderB = { _id: 3, parentFolder_id: 2 }),
         ]
         this.ProjectEntityUpdateHandler.upsertDocWithPath = sinon
           .stub()
@@ -452,7 +452,7 @@ describe('EditorController', function () {
       beforeEach(function () {
         const folders = [
           (this.folderA = { _id: 2, parentFolder_id: 1 }),
-          (this.folderB = { _id: 3, parentFolder_id: 2 })
+          (this.folderB = { _id: 3, parentFolder_id: 2 }),
         ]
         this.ProjectEntityUpdateHandler.upsertFileWithPath = sinon
           .stub()
@@ -529,7 +529,7 @@ describe('EditorController', function () {
       this.path = 'folder1/folder2'
       this.folders = [
         (this.folderA = { _id: 2, parentFolder_id: 1 }),
-        (this.folderB = { _id: 3, parentFolder_id: 2 })
+        (this.folderB = { _id: 3, parentFolder_id: 2 }),
       ]
       this.EditorController._notifyProjectUsersOfNewFolders = sinon
         .stub()
@@ -884,7 +884,7 @@ describe('EditorController', function () {
       it('should not broadcast a token change', function () {
         return this.EditorRealTimeController.emitToRoom
           .calledWith(this.project_id, 'project:tokens:changed', {
-            tokens: this.tokens
+            tokens: this.tokens,
           })
           .should.equal(false)
       })
@@ -925,7 +925,7 @@ describe('EditorController', function () {
       it('should broadcast the token change too', function () {
         return this.EditorRealTimeController.emitToRoom
           .calledWith(this.project_id, 'project:tokens:changed', {
-            tokens: this.tokens
+            tokens: this.tokens,
           })
           .should.equal(true)
       })

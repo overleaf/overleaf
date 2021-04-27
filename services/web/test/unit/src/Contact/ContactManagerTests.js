@@ -21,11 +21,11 @@ describe('ContactManager', function () {
         'settings-sharelatex': (this.settings = {
           apis: {
             contacts: {
-              url: 'contacts.sharelatex.com'
-            }
-          }
-        })
-      }
+              url: 'contacts.sharelatex.com',
+            },
+          },
+        }),
+      },
     })
 
     this.user_id = 'user-id-123'
@@ -57,7 +57,7 @@ describe('ContactManager', function () {
             url: `${this.settings.apis.contacts.url}/user/${this.user_id}/contacts`,
             qs: { limit: 42 },
             json: true,
-            jar: false
+            jar: false,
           })
           .should.equal(true)
       })
@@ -116,9 +116,9 @@ describe('ContactManager', function () {
           .calledWith({
             url: `${this.settings.apis.contacts.url}/user/${this.user_id}/contacts`,
             json: {
-              contact_id: this.contact_id
+              contact_id: this.contact_id,
             },
-            jar: false
+            jar: false,
           })
           .should.equal(true)
       })

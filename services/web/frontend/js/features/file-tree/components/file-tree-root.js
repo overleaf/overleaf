@@ -31,7 +31,7 @@ function FileTreeRoot({
   setStartedFreeTrial,
   onSelect,
   onInit,
-  isConnected
+  isConnected,
 }) {
   const isReady = projectId && rootFolder
 
@@ -103,7 +103,7 @@ FileTreeRoot.propTypes = {
   userHasFeature: PropTypes.func.isRequired,
   setStartedFreeTrial: PropTypes.func.isRequired,
   reindexReferences: PropTypes.func.isRequired,
-  refProviders: PropTypes.object.isRequired
+  refProviders: PropTypes.object.isRequired,
 }
 
 export default withErrorBoundary(FileTreeRoot, FileTreeError)

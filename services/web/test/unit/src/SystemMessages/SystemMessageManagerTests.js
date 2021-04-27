@@ -22,12 +22,12 @@ describe('SystemMessageManager', function () {
   beforeEach(function () {
     this.messages = ['messages-stub']
     this.SystemMessage = {
-      find: sinon.stub().yields(null, this.messages)
+      find: sinon.stub().yields(null, this.messages),
     }
     this.SystemMessageManager = SandboxedModule.require(modulePath, {
       requires: {
-        '../../models/SystemMessage': { SystemMessage: this.SystemMessage }
-      }
+        '../../models/SystemMessage': { SystemMessage: this.SystemMessage },
+      },
     })
     return (this.callback = sinon.stub())
   })

@@ -21,34 +21,34 @@ describe('CollaboratorsController', function () {
     this.CollaboratorsHandler = {
       promises: {
         removeUserFromProject: sinon.stub().resolves(),
-        setCollaboratorPrivilegeLevel: sinon.stub().resolves()
-      }
+        setCollaboratorPrivilegeLevel: sinon.stub().resolves(),
+      },
     }
     this.CollaboratorsGetter = {
       promises: {
-        getAllInvitedMembers: sinon.stub()
-      }
+        getAllInvitedMembers: sinon.stub(),
+      },
     }
     this.EditorRealTimeController = {
-      emitToRoom: sinon.stub()
+      emitToRoom: sinon.stub(),
     }
     this.HttpErrorHandler = {
       forbidden: sinon.stub(),
-      notFound: sinon.stub()
+      notFound: sinon.stub(),
     }
     this.TagsHandler = {
       promises: {
-        removeProjectFromAllTags: sinon.stub().resolves()
-      }
+        removeProjectFromAllTags: sinon.stub().resolves(),
+      },
     }
     this.AuthenticationController = {
       getSessionUser: sinon.stub().returns(this.user),
-      getLoggedInUserId: sinon.stub().returns(this.user._id)
+      getLoggedInUserId: sinon.stub().returns(this.user._id),
     }
     this.OwnershipTransferHandler = {
       promises: {
-        transferOwnership: sinon.stub().resolves()
-      }
+        transferOwnership: sinon.stub().resolves(),
+      },
     }
 
     this.CollaboratorsController = SandboxedModule.require(MODULE_PATH, {
@@ -61,8 +61,8 @@ describe('CollaboratorsController', function () {
         '../../Features/Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Tags/TagsHandler': this.TagsHandler,
         '../Authentication/AuthenticationController': this
-          .AuthenticationController
-      }
+          .AuthenticationController,
+      },
     })
   })
 
@@ -70,7 +70,7 @@ describe('CollaboratorsController', function () {
     beforeEach(function (done) {
       this.req.params = {
         Project_id: this.projectId,
-        user_id: this.user._id
+        user_id: this.user._id,
       }
       this.res.sendStatus = sinon.spy(() => {
         done()
@@ -199,7 +199,7 @@ describe('CollaboratorsController', function () {
     beforeEach(function () {
       this.req.params = {
         Project_id: this.projectId,
-        user_id: this.user._id
+        user_id: this.user._id,
       }
       this.req.body = { privilegeLevel: 'readOnly' }
     })

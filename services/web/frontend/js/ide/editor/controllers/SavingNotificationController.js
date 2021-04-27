@@ -51,7 +51,7 @@ export default App.controller(
           } else {
             newStatus[doc_id] = {
               unsavedSeconds: 0,
-              doc: ide.fileTreeManager.findEntityById(doc_id)
+              doc: ide.fileTreeManager.findEntityById(doc_id),
             }
           }
         }

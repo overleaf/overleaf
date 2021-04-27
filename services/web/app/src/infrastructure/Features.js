@@ -91,7 +91,7 @@ const Features = {
       default:
         throw new Error(`unknown feature: ${feature}`)
     }
-  }
+  },
 }
 
 module.exports = Features

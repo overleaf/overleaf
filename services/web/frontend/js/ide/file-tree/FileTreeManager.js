@@ -68,7 +68,7 @@ export default FileTreeManager = class FileTreeManager {
         parent_folder.children.push({
           name: doc.name,
           id: doc._id,
-          type: 'doc'
+          type: 'doc',
         })
         return this.recalculateDocList()
       })
@@ -85,7 +85,7 @@ export default FileTreeManager = class FileTreeManager {
             id: file._id,
             type: 'file',
             linkedFileData,
-            created: file.created
+            created: file.created,
           })
           return this.recalculateDocList()
         })
@@ -100,7 +100,7 @@ export default FileTreeManager = class FileTreeManager {
           name: folder.name,
           id: folder._id,
           type: 'folder',
-          children: []
+          children: [],
         })
         return this.recalculateDocList()
       })
@@ -414,7 +414,7 @@ export default FileTreeManager = class FileTreeManager {
       id: rawFolder._id,
       type: 'folder',
       children: [],
-      selected: rawFolder._id === this.selected_entity_id
+      selected: rawFolder._id === this.selected_entity_id,
     }
 
     for (let doc of Array.from(rawFolder.docs || [])) {
@@ -422,7 +422,7 @@ export default FileTreeManager = class FileTreeManager {
         name: doc.name,
         id: doc._id,
         type: 'doc',
-        selected: doc._id === this.selected_entity_id
+        selected: doc._id === this.selected_entity_id,
       })
     }
 
@@ -433,7 +433,7 @@ export default FileTreeManager = class FileTreeManager {
         type: 'file',
         selected: file._id === this.selected_entity_id,
         linkedFileData: file.linkedFileData,
-        created: file.created
+        created: file.created,
       })
     }
 
@@ -451,7 +451,7 @@ export default FileTreeManager = class FileTreeManager {
         name: doc.name,
         id: doc._id,
         type: 'doc',
-        deleted: true
+        deleted: true,
       })
     )
   }
@@ -462,7 +462,7 @@ export default FileTreeManager = class FileTreeManager {
       if (entity.type === 'doc' && !entity.deleted) {
         return this.$scope.docs.push({
           doc: entity,
-          path
+          path,
         })
       }
     })
@@ -567,14 +567,14 @@ export default FileTreeManager = class FileTreeManager {
       const promise = new Promise((resolve, reject) => {
         this.$scope.FileTreeReactBridgePromise = {
           resolve,
-          reject
+          reject,
         }
       })
       window.dispatchEvent(
         new CustomEvent('FileTreeReactBridge.createDoc', {
           detail: {
-            name
-          }
+            name,
+          },
         })
       )
       return promise
@@ -591,7 +591,7 @@ export default FileTreeManager = class FileTreeManager {
     return this.ide.$http.post(`/project/${this.ide.project_id}/doc`, {
       name,
       parent_folder_id: parent_folder != null ? parent_folder.id : undefined,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
   }
 
@@ -608,7 +608,7 @@ export default FileTreeManager = class FileTreeManager {
     return this.ide.$http.post(`/project/${this.ide.project_id}/folder`, {
       name,
       parent_folder_id: parent_folder != null ? parent_folder.id : undefined,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
   }
 
@@ -617,7 +617,7 @@ export default FileTreeManager = class FileTreeManager {
       const promise = new Promise((resolve, reject) => {
         this.$scope.FileTreeReactBridgePromise = {
           resolve,
-          reject
+          reject,
         }
       })
       window.dispatchEvent(
@@ -625,8 +625,8 @@ export default FileTreeManager = class FileTreeManager {
           detail: {
             name,
             provider,
-            data
-          }
+            data,
+          },
         })
       )
       return promise
@@ -647,10 +647,10 @@ export default FileTreeManager = class FileTreeManager {
         parent_folder_id: parent_folder != null ? parent_folder.id : undefined,
         provider,
         data,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       },
       {
-        disableAutoLoginRedirect: true
+        disableAutoLoginRedirect: true,
       }
     )
   }
@@ -666,10 +666,10 @@ export default FileTreeManager = class FileTreeManager {
     return this.ide.$http.post(
       `/project/${this.ide.project_id}/linked_file/${file.id}/refresh`,
       {
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       },
       {
-        disableAutoLoginRedirect: true
+        disableAutoLoginRedirect: true,
       }
     )
   }
@@ -695,7 +695,7 @@ export default FileTreeManager = class FileTreeManager {
         `/project/${this.ide.project_id}/${entity.type}/${entity.id}/rename`,
         {
           name,
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         }
       )
       .then(() => (entity.name = name))
@@ -712,8 +712,8 @@ export default FileTreeManager = class FileTreeManager {
       method: 'DELETE',
       url: `/project/${this.ide.project_id}/${entity.type}/${entity.id}`,
       headers: {
-        'X-Csrf-Token': window.csrfToken
-      }
+        'X-Csrf-Token': window.csrfToken,
+      },
     })
   }
 
@@ -733,7 +733,7 @@ export default FileTreeManager = class FileTreeManager {
         `/project/${this.ide.project_id}/${entity.type}/${entity.id}/move`,
         {
           folder_id: parent_folder.id,
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         }
       )
       .then(() => {

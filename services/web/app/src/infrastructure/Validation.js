@@ -4,7 +4,7 @@ const { ObjectId } = require('mongodb')
 const objectIdValidator = {
   name: 'objectId',
   language: {
-    invalid: 'needs to be a valid ObjectId'
+    invalid: 'needs to be a valid ObjectId',
   },
   pre(value, state, options) {
     if (!ObjectId.isValid(value)) {
@@ -16,7 +16,7 @@ const objectIdValidator = {
     }
 
     return value
-  }
+  },
 }
 
 const Joi = CelebrateJoi.extend(objectIdValidator)

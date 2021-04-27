@@ -15,5 +15,5 @@ export default App.directive('rightClick', () => ({
       e.stopPropagation()
       return scope.$eval(attrs.rightClick)
     })
-  }
+  },
 }))

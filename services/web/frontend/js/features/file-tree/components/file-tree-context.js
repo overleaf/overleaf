@@ -23,7 +23,7 @@ function FileTreeContext({
   setRefProviderEnabled,
   setStartedFreeTrial,
   onSelect,
-  children
+  children,
 }) {
   return (
     <FileTreeMainProvider
@@ -63,8 +63,8 @@ FileTreeContext.propTypes = {
   onSelect: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ]).isRequired
+    PropTypes.node,
+  ]).isRequired,
 }
 
 export default FileTreeContext

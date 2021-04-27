@@ -27,8 +27,8 @@ describe('DocumentController', function () {
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../Project/ProjectLocator': (this.ProjectLocator = {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
-        '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {})
-      }
+        '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
+      },
     })
     this.res = new MockResponse()
     this.req = new MockRequest()
@@ -48,7 +48,7 @@ describe('DocumentController', function () {
     beforeEach(function () {
       return (this.req.params = {
         Project_id: this.project_id,
-        doc_id: this.doc_id
+        doc_id: this.doc_id,
       })
     })
 
@@ -94,7 +94,7 @@ describe('DocumentController', function () {
             .calledWith({
               project: this.project,
               element_id: this.doc_id,
-              type: 'doc'
+              type: 'doc',
             })
             .should.equal(true)
         })
@@ -112,7 +112,7 @@ describe('DocumentController', function () {
               lines: this.doc_lines,
               version: this.version,
               ranges: this.ranges,
-              pathname: this.pathname
+              pathname: this.pathname,
             })
           )
         })
@@ -149,9 +149,9 @@ describe('DocumentController', function () {
           overleaf: {
             history: {
               id: this.projectHistoryId,
-              display: this.projectHistoryDisplay
-            }
-          }
+              display: this.projectHistoryDisplay,
+            },
+          },
         }
         this.ProjectGetter.getProject = sinon
           .stub()
@@ -185,7 +185,7 @@ describe('DocumentController', function () {
             ranges: this.ranges,
             pathname: this.pathname,
             projectHistoryId: this.projectHistoryId,
-            projectHistoryType: this.projectHistoryType
+            projectHistoryType: this.projectHistoryType,
           })
         )
       })
@@ -211,7 +211,7 @@ describe('DocumentController', function () {
     beforeEach(function () {
       return (this.req.params = {
         Project_id: this.project_id,
-        doc_id: this.doc_id
+        doc_id: this.doc_id,
       })
     })
 
@@ -223,7 +223,7 @@ describe('DocumentController', function () {
           version: this.version,
           ranges: this.ranges,
           lastUpdatedAt: this.lastUpdatedAt,
-          lastUpdatedBy: this.lastUpdatedBy
+          lastUpdatedBy: this.lastUpdatedBy,
         }
         return this.DocumentController.setDocument(
           this.req,

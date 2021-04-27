@@ -99,7 +99,7 @@ class OutlineManager {
     this.scope.$broadcast('outline-manager:outline-changed', {
       isTexFile: this.isTexFile,
       outline: this.outline,
-      highlightedLine: this.highlightedLine
+      highlightedLine: this.highlightedLine,
     })
   }
 }

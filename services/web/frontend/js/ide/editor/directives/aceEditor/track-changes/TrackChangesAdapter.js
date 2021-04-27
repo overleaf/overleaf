@@ -49,7 +49,7 @@ class TrackChangesAdapter {
 
     this.changeIdToMarkerIdMap[change.id] = {
       background_marker_id,
-      callout_marker_id
+      callout_marker_id,
     }
   }
 
@@ -81,7 +81,7 @@ class TrackChangesAdapter {
 
     this.changeIdToMarkerIdMap[change.id] = {
       background_marker_id,
-      callout_marker_id
+      callout_marker_id,
     }
   }
 
@@ -91,7 +91,7 @@ class TrackChangesAdapter {
     }
     const {
       background_marker_id,
-      callout_marker_id
+      callout_marker_id,
     } = this.changeIdToMarkerIdMap[change.id]
     delete this.changeIdToMarkerIdMap[change.id]
     const session = this.editor.getSession()
@@ -105,7 +105,7 @@ class TrackChangesAdapter {
     }
     const {
       background_marker_id,
-      callout_marker_id
+      callout_marker_id,
     } = this.changeIdToMarkerIdMap[change.id]
     delete this.changeIdToMarkerIdMap[change.id]
 
@@ -150,7 +150,7 @@ class TrackChangesAdapter {
       )
       this.changeIdToMarkerIdMap[comment.id] = {
         background_marker_id,
-        callout_marker_id
+        callout_marker_id,
       }
     }
   }
@@ -168,7 +168,7 @@ class TrackChangesAdapter {
       // Resolved comments may not have marker ids
       const {
         background_marker_id,
-        callout_marker_id
+        callout_marker_id,
       } = this.changeIdToMarkerIdMap[comment.id]
       delete this.changeIdToMarkerIdMap[comment.id]
       const session = this.editor.getSession()
@@ -185,7 +185,7 @@ class TrackChangesAdapter {
     const markers = session.getMarkers()
     const {
       background_marker_id,
-      callout_marker_id
+      callout_marker_id,
     } = this.changeIdToMarkerIdMap[change_id]
     if (background_marker_id != null && markers[background_marker_id] != null) {
       const background_marker = markers[background_marker_id]

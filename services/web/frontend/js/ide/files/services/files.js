@@ -16,7 +16,7 @@ export default App.factory('files', function (ide) {
         }
       })
       return texFiles
-    }
+    },
   }
   return Files
 })

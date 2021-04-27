@@ -16,7 +16,7 @@ function sentryReporter() {
           // Ignore errors unless they come from our origins
           // Adapted from: https://docs.sentry.io/platforms/javascript/#decluttering-sentry
           whitelistUrls: [
-            new RegExp(window.ExposedSettings.sentryAllowedOriginRegex)
+            new RegExp(window.ExposedSettings.sentryAllowedOriginRegex),
           ],
 
           ignoreErrors: [
@@ -28,7 +28,7 @@ function sentryReporter() {
             /^AbortError/,
             // Ignore spurious error from Ace internals - see https://github.com/overleaf/issues/issues/3321
             'ResizeObserver loop limit exceeded',
-            'ResizeObserver loop completed with undelivered notifications.'
+            'ResizeObserver loop completed with undelivered notifications.',
           ],
 
           beforeSend(event) {
@@ -41,7 +41,7 @@ function sentryReporter() {
             } else {
               return event
             }
-          }
+          },
         })
 
         Sentry.setUser({ id: window.user_id })
@@ -60,7 +60,7 @@ function nullReporter() {
     },
     captureMessage: error => {
       console.error(error)
-    }
+    },
   })
 }
 

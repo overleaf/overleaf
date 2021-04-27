@@ -5,7 +5,7 @@ import {
   FetchError,
   getJSON,
   postJSON,
-  putJSON
+  putJSON,
 } from '../../../frontend/js/infrastructure/fetch-json'
 
 describe('fetchJSON', function () {
@@ -19,7 +19,7 @@ describe('fetchJSON', function () {
 
   const headers = {
     Accept: 'application/json',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   }
 
   it('handles GET requests', function () {
@@ -29,14 +29,14 @@ describe('fetchJSON', function () {
     )
 
     return expect(getJSON('/test')).to.eventually.deep.equal({
-      result: 'success'
+      result: 'success',
     })
   })
 
   it('handles 4xx responses', function () {
     fetchMock.get('/test', {
       status: 400,
-      body: { message: 'The request was invalid' }
+      body: { message: 'The request was invalid' },
     })
 
     return expect(getJSON('/test'))
@@ -46,7 +46,7 @@ describe('fetchJSON', function () {
         message: 'Bad Request',
         'data.message': 'The request was invalid',
         'response.status': 400,
-        'info.statusCode': 400
+        'info.statusCode': 400,
       })
   })
 
@@ -58,7 +58,7 @@ describe('fetchJSON', function () {
       .and.be.an.instanceOf(FetchError)
       .to.nested.include({
         'response.status': 500,
-        'info.statusCode': 500
+        'info.statusCode': 500,
       })
   })
 
@@ -71,7 +71,7 @@ describe('fetchJSON', function () {
     )
 
     return expect(postJSON('/test', { body })).to.eventually.deep.equal({
-      result: 'success'
+      result: 'success',
     })
   })
 
@@ -84,7 +84,7 @@ describe('fetchJSON', function () {
     )
 
     return expect(putJSON('/test', { body })).to.eventually.deep.equal({
-      result: 'success'
+      result: 'success',
     })
   })
 

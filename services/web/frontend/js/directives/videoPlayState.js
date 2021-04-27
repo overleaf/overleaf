@@ -25,5 +25,5 @@ export default App.directive('videoPlayState', $parse => ({
         }
       }
     )
-  }
+  },
 }))

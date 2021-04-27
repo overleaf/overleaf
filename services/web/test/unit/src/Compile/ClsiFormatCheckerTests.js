@@ -20,8 +20,8 @@ describe('ClsiFormatChecker', function () {
   beforeEach(function () {
     this.ClsiFormatChecker = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = { compileBodySizeLimitMb: 5 })
-      }
+        'settings-sharelatex': (this.settings = { compileBodySizeLimitMb: 5 }),
+      },
     })
     return (this.project_id = 'project-id')
   })
@@ -31,17 +31,17 @@ describe('ClsiFormatChecker', function () {
       return (this.resources = [
         {
           path: 'main.tex',
-          content: 'stuff'
+          content: 'stuff',
         },
         {
           path: 'chapters/chapter1',
-          content: 'other stuff'
+          content: 'other stuff',
         },
         {
           path: 'stuff/image/image.png',
           url: `http:somewhere.com/project/${this.project_id}/file/1234124321312`,
-          modified: 'more stuff'
-        }
+          modified: 'more stuff',
+        },
       ])
     })
 
@@ -108,7 +108,7 @@ describe('ClsiFormatChecker', function () {
         .stub()
         .callsArgWith(1, null, {
           resources: [{ 'a.tex': 'a.tex' }, { 'b.tex': 'b.tex' }],
-          totalSize: 1000000
+          totalSize: 1000000,
         })
       return this.ClsiFormatChecker.checkRecoursesForProblems(
         this.resources,
@@ -125,19 +125,19 @@ describe('ClsiFormatChecker', function () {
       beforeEach(function () {
         this.resources.push({
           path: 'chapters/chapter1.tex',
-          content: 'other stuff'
+          content: 'other stuff',
         })
 
         return this.resources.push({
           path: 'chapters.tex',
-          content: 'other stuff'
+          content: 'other stuff',
         })
       })
 
       it('should flag up when a nested file has folder with same subpath as file elsewhere', function (done) {
         this.resources.push({
           path: 'stuff/image',
-          url: 'http://somwhere.com'
+          url: 'http://somwhere.com',
         })
 
         return this.ClsiFormatChecker._checkForConflictingPaths(
@@ -153,7 +153,7 @@ describe('ClsiFormatChecker', function () {
       it('should flag up when a root level file has folder with same subpath as file elsewhere', function (done) {
         this.resources.push({
           path: 'stuff',
-          content: 'other stuff'
+          content: 'other stuff',
         })
 
         return this.ClsiFormatChecker._checkForConflictingPaths(
@@ -169,7 +169,7 @@ describe('ClsiFormatChecker', function () {
       it('should not flag up when the file is a substring of a path', function (done) {
         this.resources.push({
           path: 'stuf',
-          content: 'other stuff'
+          content: 'other stuff',
         })
 
         return this.ClsiFormatChecker._checkForConflictingPaths(
@@ -186,13 +186,13 @@ describe('ClsiFormatChecker', function () {
       it('should error when there is more than 5mb of data', function (done) {
         this.resources.push({
           path: 'massive.tex',
-          content: 'hello world'.repeat(833333) // over 5mb limit
+          content: 'hello world'.repeat(833333), // over 5mb limit
         })
 
         while (this.resources.length < 20) {
           this.resources.push({
             path: 'chapters/chapter1.tex',
-            url: 'http://somwhere.com'
+            url: 'http://somwhere.com',
           })
         }
 
@@ -211,13 +211,13 @@ describe('ClsiFormatChecker', function () {
       it('should return nothing when project is correct size', function (done) {
         this.resources.push({
           path: 'massive.tex',
-          content: 'x'.repeat(2 * 1000 * 1000)
+          content: 'x'.repeat(2 * 1000 * 1000),
         })
 
         while (this.resources.length < 20) {
           this.resources.push({
             path: 'chapters/chapter1.tex',
-            url: 'http://somwhere.com'
+            url: 'http://somwhere.com',
           })
         }
 

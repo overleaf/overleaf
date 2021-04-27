@@ -14,12 +14,12 @@ describe('Subscriptions', function () {
             this.recurlySubscription = new RecurlySubscription({
               adminId: this.recurlyUser._id,
               account: {
-                email: 'stale-recurly@email.com'
-              }
+                email: 'stale-recurly@email.com',
+              },
             })
             this.recurlySubscription.ensureExists(cb)
           },
-          cb => this.recurlyUser.login(cb)
+          cb => this.recurlyUser.login(cb),
         ],
         done
       )

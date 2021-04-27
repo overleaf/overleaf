@@ -37,5 +37,5 @@ module.exports = {
 
     webRouter.get('/university', UniversityController.getIndexPage)
     return webRouter.get('/university/*', UniversityController.getPage)
-  }
+  },
 }

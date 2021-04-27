@@ -29,7 +29,7 @@ describe('TokenAccessHandler', function () {
     this.project = {
       _id: this.projectId,
       publicAccesLevel: 'tokenBased',
-      owner_ref: ObjectId()
+      owner_ref: ObjectId(),
     }
     this.userId = ObjectId()
     this.req = {}
@@ -40,13 +40,13 @@ describe('TokenAccessHandler', function () {
         'settings-sharelatex': (this.settings = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         '../V1/V1Api': (this.V1Api = {
-          request: sinon.stub()
+          request: sinon.stub(),
         }),
         crypto: (this.Crypto = require('crypto')),
         '../Analytics/AnalyticsManager': (this.Analytics = {
-          recordEvent: sinon.stub()
-        })
-      }
+          recordEvent: sinon.stub(),
+        }),
+      },
     }))
   })
 
@@ -58,7 +58,7 @@ describe('TokenAccessHandler', function () {
         '54325aaaaaa': 'readAndWrite',
         '54325aaaaaabbbbbb': 'readAndWrite',
         '': null,
-        abc123def: null
+        abc123def: null,
       }
       for (var token of Object.keys(specs)) {
         expect(this.TokenAccessHandler.getTokenType(token)).to.equal(
@@ -93,7 +93,7 @@ describe('TokenAccessHandler', function () {
       this.token = '1234abcdefabcdef'
       this.project.tokens = {
         readAndWrite: this.token,
-        readAndWritePrefix: '1234'
+        readAndWritePrefix: '1234',
       }
       this.Project.findOne = sinon.stub().callsArgWith(2, null, this.project)
     })
@@ -132,7 +132,7 @@ describe('TokenAccessHandler', function () {
           expect(this.Project.updateOne.callCount).to.equal(1)
           expect(
             this.Project.updateOne.calledWith({
-              _id: this.projectId
+              _id: this.projectId,
             })
           ).to.equal(true)
           expect(
@@ -193,7 +193,7 @@ describe('TokenAccessHandler', function () {
           expect(this.Project.updateOne.callCount).to.equal(1)
           expect(
             this.Project.updateOne.calledWith({
-              _id: this.projectId
+              _id: this.projectId,
             })
           ).to.equal(true)
           expect(
@@ -521,8 +521,8 @@ describe('TokenAccessHandler', function () {
         tokens: {
           readAndWrite: 'rw',
           readOnly: 'ro',
-          readAndWritePrefix: 'pre'
-        }
+          readAndWritePrefix: 'pre',
+        },
       })
     })
 
@@ -564,7 +564,7 @@ describe('TokenAccessHandler', function () {
         expect(this.V1Api.request.called).to.equal(false)
         return expect(
           this.callback.calledWith(null, {
-            allow: true
+            allow: true,
           })
         ).to.equal(true)
       })
@@ -589,7 +589,7 @@ describe('TokenAccessHandler', function () {
         it('should return response body', function () {
           expect(
             this.V1Api.request.calledWith({
-              url: `/api/v1/sharelatex/docs/${this.token}/is_published`
+              url: `/api/v1/sharelatex/docs/${this.token}/is_published`,
             })
           ).to.equal(true)
           return expect(this.callback.calledWith(null, 'mock-data')).to.equal(
@@ -634,7 +634,7 @@ describe('TokenAccessHandler', function () {
         return expect(
           this.callback.calledWith(null, {
             exists: true,
-            exported: false
+            exported: false,
           })
         ).to.equal(true)
       })
@@ -648,7 +648,7 @@ describe('TokenAccessHandler', function () {
       describe('on UserGetter.getUser success', function () {
         beforeEach(function () {
           this.UserGetter.getUser = sinon.stub().yields(null, {
-            overleaf: { id: 1 }
+            overleaf: { id: 1 },
           })
           return this.TokenAccessHandler.getV1DocInfo(
             this.token,
@@ -684,7 +684,7 @@ describe('TokenAccessHandler', function () {
         beforeEach(function () {
           this.v1UserId = 1
           this.UserGetter.getUser = sinon.stub().yields(null, {
-            overleaf: { id: this.v1UserId }
+            overleaf: { id: this.v1UserId },
           })
           this.V1Api.request = sinon
             .stub()
@@ -699,7 +699,7 @@ describe('TokenAccessHandler', function () {
         it('should return response body', function () {
           expect(
             this.V1Api.request.calledWith({
-              url: `/api/v1/sharelatex/users/${this.v1UserId}/docs/${this.token}/info`
+              url: `/api/v1/sharelatex/users/${this.v1UserId}/docs/${this.token}/info`,
             })
           ).to.equal(true)
           return expect(this.callback.calledWith(null, 'mock-data')).to.equal(
@@ -711,7 +711,7 @@ describe('TokenAccessHandler', function () {
       describe('on V1Api.request error', function () {
         beforeEach(function () {
           this.UserGetter.getUser = sinon.stub().yields(null, {
-            overleaf: { id: 1 }
+            overleaf: { id: 1 },
           })
           this.V1Api.request = sinon.stub().callsArgWith(1, 'error')
           return this.TokenAccessHandler.getV1DocInfo(

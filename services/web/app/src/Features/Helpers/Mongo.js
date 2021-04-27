@@ -47,5 +47,5 @@ function isObjectIdInstance(id) {
 module.exports = {
   isObjectIdInstance,
   normalizeQuery,
-  normalizeMultiQuery
+  normalizeMultiQuery,
 }

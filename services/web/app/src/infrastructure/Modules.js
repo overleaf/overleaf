@@ -67,7 +67,7 @@ function loadViewIncludes(app) {
       _viewIncludes[view].push(
         pug.compileFile(filePath, {
           doctype: 'html',
-          compileDebug: Settings.debugPugTemplates
+          compileDebug: Settings.debugPugTemplates,
         })
       )
     }
@@ -139,13 +139,13 @@ module.exports = {
   moduleIncludesAvailable,
   hooks: {
     attach: attachHook,
-    fire: fireHook
+    fire: fireHook,
   },
   promises: {
     hooks: {
-      fire: promisify(fireHook)
-    }
-  }
+      fire: promisify(fireHook),
+    },
+  },
 }
 
 loadModules()

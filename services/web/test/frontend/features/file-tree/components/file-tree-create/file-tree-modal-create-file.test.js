@@ -5,7 +5,7 @@ import {
   render,
   fireEvent,
   cleanup,
-  waitFor
+  waitFor,
 } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import PropTypes from 'prop-types'
@@ -60,11 +60,11 @@ describe('<FileTreeModalCreateFile/>', function () {
     const rootFolder = [
       {
         docs: Array.from({ length: 10 }, (_, index) => ({
-          _id: `entity-${index}`
+          _id: `entity-${index}`,
         })),
         fileRefs: [],
-        folders: []
-      }
+        folders: [],
+      },
     ]
 
     render(
@@ -88,11 +88,11 @@ describe('<FileTreeModalCreateFile/>', function () {
     const rootFolder = [
       {
         docs: Array.from({ length: 9 }, (_, index) => ({
-          _id: `entity-${index}`
+          _id: `entity-${index}`,
         })),
         fileRefs: [],
-        folders: []
-      }
+        folders: [],
+      },
     ]
 
     render(
@@ -126,15 +126,15 @@ describe('<FileTreeModalCreateFile/>', function () {
                   { _id: 'entity-6' },
                   { _id: 'entity-7' },
                   { _id: 'entity-8' },
-                  { _id: 'entity-9' }
+                  { _id: 'entity-9' },
                 ],
                 fileRefs: [],
-                folders: []
-              }
-            ]
-          }
-        ]
-      }
+                folders: [],
+              },
+            ],
+          },
+        ],
+      },
     ]
 
     render(
@@ -168,7 +168,7 @@ describe('<FileTreeModalCreateFile/>', function () {
 
     expect(
       fetchMock.called('express:/project/:projectId/doc', {
-        body: { name: 'test.tex' }
+        body: { name: 'test.tex' },
       })
     ).to.be.true
   })
@@ -179,40 +179,40 @@ describe('<FileTreeModalCreateFile/>', function () {
         projects: [
           {
             _id: 'test-project',
-            name: 'This Project'
+            name: 'This Project',
           },
           {
             _id: 'project-1',
-            name: 'Project One'
+            name: 'Project One',
           },
           {
             _id: 'project-2',
-            name: 'Project Two'
-          }
-        ]
+            name: 'Project Two',
+          },
+        ],
       })
       .get('express:/project/:projectId/entities', {
         entities: [
           {
-            path: '/foo.tex'
+            path: '/foo.tex',
           },
           {
-            path: '/bar.tex'
-          }
-        ]
+            path: '/bar.tex',
+          },
+        ],
       })
       .post('express:/project/:projectId/compile', {
         status: 'success',
         outputFiles: [
           {
             build: 'test',
-            path: 'baz.jpg'
+            path: 'baz.jpg',
           },
           {
             build: 'test',
-            path: 'ball.jpg'
-          }
-        ]
+            path: 'ball.jpg',
+          },
+        ],
       })
       .post('express:/project/:projectId/linked_file', () => 204)
 
@@ -253,7 +253,7 @@ describe('<FileTreeModalCreateFile/>', function () {
 
     // click on the button to toggle between source and output files
     const sourceTypeButton = screen.getByRole('button', {
-      name: 'select from output files'
+      name: 'select from output files',
     })
     await fireEvent.click(sourceTypeButton)
 
@@ -282,9 +282,9 @@ describe('<FileTreeModalCreateFile/>', function () {
           data: {
             source_project_id: 'project-2',
             source_output_file_path: 'ball.jpg',
-            build_id: 'test'
-          }
-        }
+            build_id: 'test',
+          },
+        },
       })
     ).to.be.true
   })
@@ -302,14 +302,14 @@ describe('<FileTreeModalCreateFile/>', function () {
     const nameInput = screen.getByLabelText('File Name In This Project')
 
     await fireEvent.change(urlInput, {
-      target: { value: 'https://example.com/example.tex' }
+      target: { value: 'https://example.com/example.tex' },
     })
 
     // check that the name has updated automatically
     expect(nameInput.value).to.equal('example.tex')
 
     await fireEvent.change(nameInput, {
-      target: { value: 'test.tex' }
+      target: { value: 'test.tex' },
     })
 
     // check that the name can still be edited manually
@@ -324,8 +324,8 @@ describe('<FileTreeModalCreateFile/>', function () {
         body: {
           name: 'test.tex',
           provider: 'url',
-          data: { url: 'https://example.com/example.tex' }
-        }
+          data: { url: 'https://example.com/example.tex' },
+        },
       })
     ).to.be.true
   })
@@ -350,8 +350,8 @@ describe('<FileTreeModalCreateFile/>', function () {
     // https://github.com/jsdom/jsdom/issues/1568 - no paste
     fireEvent.drop(dropzone, {
       dataTransfer: {
-        files: [new File(['test'], 'test.tex', { type: 'text/plain' })]
-      }
+        files: [new File(['test'], 'test.tex', { type: 'text/plain' })],
+      },
     })
 
     expect(fetchMock.called('express:/project/:projectId/upload')).to.be.true
@@ -373,5 +373,5 @@ function OpenWithMode({ mode }) {
   return <FileTreeModalCreateFile />
 }
 OpenWithMode.propTypes = {
-  mode: PropTypes.string.isRequired
+  mode: PropTypes.string.isRequired,
 }

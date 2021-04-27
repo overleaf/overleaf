@@ -19,5 +19,5 @@ module.exports = {
       AuthenticationController.httpAuth,
       AnalyticsProxy.call('/uniExternalCollaboration')
     )
-  }
+  },
 }

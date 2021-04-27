@@ -33,31 +33,31 @@ describe('TemplatesManager', function () {
       pipe() {},
       on() {},
       response: {
-        statusCode: 200
-      }
+        statusCode: 200,
+      },
     })
     this.fs = {
       unlink: sinon.stub(),
-      createWriteStream: sinon.stub().returns({ on: sinon.stub().yields() })
+      createWriteStream: sinon.stub().returns({ on: sinon.stub().yields() }),
     }
     this.ProjectUploadManager = {
       createProjectFromZipArchiveWithName: sinon
         .stub()
-        .callsArgWith(4, null, { _id: this.project_id })
+        .callsArgWith(4, null, { _id: this.project_id }),
     }
     this.dumpFolder = 'dump/path'
     this.ProjectOptionsHandler = {
       setCompiler: sinon.stub().callsArgWith(2),
       setImageName: sinon.stub().callsArgWith(2),
-      setBrandVariationId: sinon.stub().callsArgWith(2)
+      setBrandVariationId: sinon.stub().callsArgWith(2),
     }
     this.uuid = '1234'
     this.ProjectRootDocManager = {
-      setRootDocFromName: sinon.stub().callsArgWith(2)
+      setRootDocFromName: sinon.stub().callsArgWith(2),
     }
     this.ProjectDetailsHandler = {
       getProjectDescription: sinon.stub(),
-      fixProjectName: sinon.stub().returns(this.templateName)
+      fixProjectName: sinon.stub().returns(this.templateName),
     }
     this.Project = { updateOne: sinon.stub().callsArgWith(3, null) }
     this.FileWriter = { ensureDumpFolderExists: sinon.stub().callsArg(0) }
@@ -69,32 +69,32 @@ describe('TemplatesManager', function () {
         '../Project/ProjectRootDocManager': this.ProjectRootDocManager,
         '../Project/ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../Authentication/AuthenticationController': (this.AuthenticationController = {
-          getLoggedInUserId: sinon.stub()
+          getLoggedInUserId: sinon.stub(),
         }),
         '../../infrastructure/FileWriter': this.FileWriter,
         'settings-sharelatex': {
           path: {
-            dumpFolder: this.dumpFolder
+            dumpFolder: this.dumpFolder,
           },
           siteUrl: (this.siteUrl = 'http://localhost:3000'),
           apis: {
             v1: {
               url: (this.v1Url = 'http://overleaf.com'),
               user: 'sharelatex',
-              pass: 'password'
-            }
+              pass: 'password',
+            },
           },
           overleaf: {
-            host: this.v1Url
-          }
+            host: this.v1Url,
+          },
         },
         uuid: {
-          v4: () => this.uuid
+          v4: () => this.uuid,
         },
         request: this.request,
         fs: this.fs,
-        '../../models/Project': { Project: this.Project }
-      }
+        '../../models/Project': { Project: this.Project },
+      },
     })
     return (this.zipUrl =
       '%2Ftemplates%2F52fb86a81ae1e566597a25f6%2Fv%2F4%2Fzip&templateName=Moderncv%20Banking&compiler=pdflatex')
@@ -135,7 +135,7 @@ describe('TemplatesManager', function () {
           this.dumpPath,
           {
             fromV1TemplateId: this.templateId,
-            fromV1TemplateVersionId: this.templateVersionId
+            fromV1TemplateVersionId: this.templateVersionId,
           }
         )
       })
@@ -168,7 +168,7 @@ describe('TemplatesManager', function () {
           { _id: this.project_id },
           {
             fromV1TemplateId: this.templateId,
-            fromV1TemplateVersionId: this.templateVersionId
+            fromV1TemplateVersionId: this.templateVersionId,
           }
         )
       })

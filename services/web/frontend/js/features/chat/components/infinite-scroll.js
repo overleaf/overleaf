@@ -10,7 +10,7 @@ function InfiniteScroll({
   className = '',
   fetchData,
   itemCount,
-  isLoading
+  isLoading,
 }) {
   const root = useRef(null)
 
@@ -82,7 +82,7 @@ InfiniteScroll.propTypes = {
   className: PropTypes.string,
   fetchData: PropTypes.func.isRequired,
   itemCount: PropTypes.number.isRequired,
-  isLoading: PropTypes.bool
+  isLoading: PropTypes.bool,
 }
 
 export default InfiniteScroll

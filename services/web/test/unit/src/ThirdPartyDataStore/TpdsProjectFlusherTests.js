@@ -12,21 +12,21 @@ describe('TpdsProjectFlusher', function () {
     this.project = { _id: ObjectId() }
     this.docs = {
       '/doc/one': { _id: 'mock-doc-1', lines: ['one'], rev: 5 },
-      '/doc/two': { _id: 'mock-doc-2', lines: ['two'], rev: 6 }
+      '/doc/two': { _id: 'mock-doc-2', lines: ['two'], rev: 6 },
     }
     this.files = {
       '/file/one': { _id: 'mock-file-1', rev: 7 },
-      '/file/two': { _id: 'mock-file-2', rev: 8 }
+      '/file/two': { _id: 'mock-file-2', rev: 8 },
     }
     this.DocumentUpdaterHandler = {
       promises: {
-        flushProjectToMongo: sinon.stub().resolves()
-      }
+        flushProjectToMongo: sinon.stub().resolves(),
+      },
     }
     this.ProjectGetter = {
       promises: {
-        getProject: sinon.stub().resolves(this.project)
-      }
+        getProject: sinon.stub().resolves(this.project),
+      },
     }
     this.ProjectEntityHandler = {
       promises: {
@@ -34,14 +34,14 @@ describe('TpdsProjectFlusher', function () {
         getAllFiles: sinon
           .stub()
           .withArgs(this.project._id)
-          .resolves(this.files)
-      }
+          .resolves(this.files),
+      },
     }
     this.TpdsUpdateSender = {
       promises: {
         addDoc: sinon.stub().resolves(),
-        addFile: sinon.stub().resolves()
-      }
+        addFile: sinon.stub().resolves(),
+      },
     }
     this.ProjectMock = sinon.mock(Project)
 
@@ -52,8 +52,8 @@ describe('TpdsProjectFlusher', function () {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../../models/Project': { Project },
-        './TpdsUpdateSender': this.TpdsUpdateSender
-      }
+        './TpdsUpdateSender': this.TpdsUpdateSender,
+      },
     })
   })
 
@@ -83,7 +83,7 @@ describe('TpdsProjectFlusher', function () {
               doc_id: doc._id,
               project_name: this.project.name,
               rev: doc.rev,
-              path
+              path,
             }
           )
         }
@@ -98,7 +98,7 @@ describe('TpdsProjectFlusher', function () {
             file_id: file._id,
             project_name: this.project.name,
             rev: file.rev,
-            path
+            path,
           })
         }
       })
@@ -111,7 +111,7 @@ describe('TpdsProjectFlusher', function () {
           .withArgs(
             {
               _id: this.project._id,
-              deferredTpdsFlushCounter: { $lte: 2 }
+              deferredTpdsFlushCounter: { $lte: 2 },
             },
             { $set: { deferredTpdsFlushCounter: 0 } }
           )
@@ -133,7 +133,7 @@ describe('TpdsProjectFlusher', function () {
       this.ProjectMock.expects('updateOne')
         .withArgs(
           {
-            _id: this.project._id
+            _id: this.project._id,
           },
           { $inc: { deferredTpdsFlushCounter: 1 } }
         )
@@ -184,7 +184,7 @@ describe('TpdsProjectFlusher', function () {
             .withArgs(
               {
                 _id: this.project._id,
-                deferredTpdsFlushCounter: { $lte: counterValue }
+                deferredTpdsFlushCounter: { $lte: counterValue },
               },
               { $set: { deferredTpdsFlushCounter: 0 } }
             )
@@ -210,7 +210,7 @@ describe('TpdsProjectFlusher', function () {
               doc_id: doc._id,
               project_name: this.project.name,
               rev: doc.rev,
-              path
+              path,
             })
           }
         })
@@ -224,7 +224,7 @@ describe('TpdsProjectFlusher', function () {
               file_id: file._id,
               project_name: this.project.name,
               rev: file.rev,
-              path
+              path,
             })
           }
         })

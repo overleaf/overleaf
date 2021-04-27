@@ -69,7 +69,7 @@ export default App.factory(
             // requests
             rangeChunkSize: 128 * 1024,
             disableAutoFetch: !!this.options.disableAutoFetch,
-            disableStream: !!this.options.disableAutoFetch
+            disableStream: !!this.options.disableAutoFetch,
           })
           this.pdfjs.onProgress = this.options.progressCallback
           this.document = this.pdfjs
@@ -203,7 +203,7 @@ export default App.factory(
           }
           this.renderQueue = Array.from(pages).map(page => ({
             element: page.elementChildren,
-            pagenum: page.pageNum
+            pagenum: page.pageNum,
           }))
           return this.triggerRenderQueue()
         }
@@ -214,7 +214,7 @@ export default App.factory(
           }
           const current = {
             element: page.elementChildren,
-            pagenum: page.pageNum
+            pagenum: page.pageNum,
           }
           this.renderQueue.push(current)
           return this.processRenderQueue()
@@ -447,19 +447,19 @@ export default App.factory(
           const textLayer = new pdfTextLayer({
             textLayerDiv: element.text[0],
             viewport,
-            renderer: PDFJS.renderTextLayer
+            renderer: PDFJS.renderTextLayer,
           })
 
           const annotationsLayer = new pdfAnnotations({
             annotations: element.annotations[0],
             viewport,
-            navigateFn: this.navigateFn
+            navigateFn: this.navigateFn,
           })
 
           const result = page.render({
             canvasContext: ctx,
             viewport,
-            transform: [pixelRatio, 0, 0, pixelRatio, 0, 0]
+            transform: [pixelRatio, 0, 0, pixelRatio, 0, 0],
           })
 
           const textLayerTimeout = this.TEXTLAYER_TIMEOUT

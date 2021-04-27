@@ -18,17 +18,17 @@ describe('MetaController', function () {
   beforeEach(function () {
     this.projectId = 'somekindofid'
     this.EditorRealTimeController = {
-      emitToRoom: sinon.stub()
+      emitToRoom: sinon.stub(),
     }
     this.MetaHandler = {
       getAllMetaForProject: sinon.stub(),
-      getMetaForDoc: sinon.stub()
+      getMetaForDoc: sinon.stub(),
     }
     return (this.MetadataController = SandboxedModule.require(modulePath, {
       requires: {
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
-        './MetaHandler': this.MetaHandler
-      }
+        './MetaHandler': this.MetaHandler,
+      },
     }))
   })
 
@@ -61,7 +61,7 @@ describe('MetaController', function () {
       this.res.json.callCount.should.equal(1)
       return expect(this.res.json.lastCall.args[0]).to.have.all.keys([
         'projectId',
-        'projectMeta'
+        'projectMeta',
       ])
     })
 
@@ -111,7 +111,7 @@ describe('MetaController', function () {
       beforeEach(function () {
         this.req = {
           params: { project_id: this.projectId, doc_id: this.docId },
-          body: { broadcast: true }
+          body: { broadcast: true },
         }
       })
 
@@ -164,7 +164,7 @@ describe('MetaController', function () {
       beforeEach(function () {
         this.req = {
           params: { project_id: this.projectId, doc_id: this.docId },
-          body: { broadcast: false }
+          body: { broadcast: false },
         }
       })
 
@@ -222,7 +222,7 @@ describe('MetaController', function () {
         this.docId = 'somedoc'
         this.req = {
           params: { project_id: this.projectId, doc_id: this.docId },
-          body: { broadcast: true }
+          body: { broadcast: true },
         }
         this.res = { json: sinon.stub() }
         return (this.next = sinon.stub())

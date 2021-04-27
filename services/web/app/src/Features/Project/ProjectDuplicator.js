@@ -20,8 +20,8 @@ const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 module.exports = {
   duplicate: callbackify(duplicate),
   promises: {
-    duplicate
-  }
+    duplicate,
+  },
 }
 
 async function duplicate(owner, originalProjectId, newProjectName) {
@@ -31,11 +31,11 @@ async function duplicate(owner, originalProjectId, newProjectName) {
     {
       compiler: true,
       rootFolder: true,
-      rootDoc_id: true
+      rootDoc_id: true,
     }
   )
   const { path: rootDocPath } = await ProjectLocator.promises.findRootDoc({
-    project_id: originalProjectId
+    project_id: originalProjectId,
   })
 
   const originalEntries = _getFolderEntries(originalProject.rootFolder[0])
@@ -53,7 +53,7 @@ async function duplicate(owner, originalProjectId, newProjectName) {
     )
     const [docEntries, fileEntries] = await Promise.all([
       _copyDocs(originalEntries.docEntries, originalProject, newProject),
-      _copyFiles(originalEntries.fileEntries, originalProject, newProject)
+      _copyFiles(originalEntries.fileEntries, originalProject, newProject),
     ])
     const projectVersion = await ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure(
       newProject._id,
@@ -70,7 +70,7 @@ async function duplicate(owner, originalProjectId, newProjectName) {
     await _notifyDocumentUpdater(newProject, owner._id, {
       newFiles: fileEntries,
       newDocs: docEntries,
-      newProject: { version: projectVersion }
+      newProject: { version: projectVersion },
     })
     await TpdsProjectFlusher.promises.flushProjectToTpds(newProject._id)
   } catch (err) {
@@ -80,7 +80,7 @@ async function duplicate(owner, originalProjectId, newProjectName) {
     throw OError.tag(err, 'error cloning project, broken clone deleted', {
       originalProjectId,
       newProjectName,
-      newProjectId: newProject._id
+      newProjectId: newProject._id,
     })
   }
   return newProject
@@ -181,7 +181,7 @@ async function _setRootDoc(projectId, path) {
   const { element: rootDoc } = await ProjectLocator.promises.findElementByPath({
     project_id: projectId,
     path,
-    exactCaseMatch: true
+    exactCaseMatch: true,
   })
   await ProjectEntityUpdateHandler.promises.setRootDoc(projectId, rootDoc._id)
 }

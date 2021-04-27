@@ -28,12 +28,12 @@ describe('UserRegistrationHandler', function () {
     this.User = { updateOne: sinon.stub().callsArgWith(2) }
     this.UserGetter = { getUserByAnyEmail: sinon.stub() }
     this.UserCreator = {
-      createNewUser: sinon.stub().callsArgWith(2, null, this.user)
+      createNewUser: sinon.stub().callsArgWith(2, null, this.user),
     }
     this.AuthenticationManager = {
       validateEmail: sinon.stub().returns(null),
       validatePassword: sinon.stub().returns(null),
-      setUserPassword: sinon.stub().callsArgWith(2)
+      setUserPassword: sinon.stub().callsArgWith(2),
     }
     this.NewsLetterManager = { subscribe: sinon.stub().callsArgWith(1) }
     this.EmailHandler = { sendEmail: sinon.stub().callsArgWith(2) }
@@ -49,18 +49,18 @@ describe('UserRegistrationHandler', function () {
         '../Email/EmailHandler': this.EmailHandler,
         '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
-          recordEvent: sinon.stub()
+          recordEvent: sinon.stub(),
         }),
         'settings-sharelatex': (this.settings = {
-          siteUrl: 'http://sl.example.com'
+          siteUrl: 'http://sl.example.com',
         }),
-        '../Helpers/EmailHelper': EmailHelper
-      }
+        '../Helpers/EmailHelper': EmailHelper,
+      },
     })
 
     return (this.passingRequest = {
       email: 'something@email.com',
-      password: '123'
+      password: '123',
     })
   })
 
@@ -75,7 +75,7 @@ describe('UserRegistrationHandler', function () {
     describe('failing email validation', function () {
       beforeEach(function () {
         return this.AuthenticationManager.validateEmail.returns({
-          message: 'email not set'
+          message: 'email not set',
         })
       })
 
@@ -90,7 +90,7 @@ describe('UserRegistrationHandler', function () {
     describe('failing password validation', function () {
       beforeEach(function () {
         return this.AuthenticationManager.validatePassword.returns({
-          message: 'password is too short'
+          message: 'password is too short',
         })
       })
 
@@ -173,7 +173,7 @@ describe('UserRegistrationHandler', function () {
               email: this.passingRequest.email,
               holdingAccount: false,
               first_name: this.passingRequest.first_name,
-              last_name: this.passingRequest.last_name
+              last_name: this.passingRequest.last_name,
             })
             .should.equal(true)
           return done()
@@ -249,7 +249,7 @@ describe('UserRegistrationHandler', function () {
       this.crypto.randomBytes = sinon.stub().returns({
         toString: () => {
           return (this.password = 'mock-password')
-        }
+        },
       })
       this.OneTimeTokenHandler.getNewToken.yields(
         null,
@@ -273,7 +273,7 @@ describe('UserRegistrationHandler', function () {
         return this.handler.registerNewUser
           .calledWith({
             email: this.email,
-            password: this.password
+            password: this.password,
           })
           .should.equal(true)
       })
@@ -281,7 +281,7 @@ describe('UserRegistrationHandler', function () {
       it('should generate a new password reset token', function () {
         const data = {
           user_id: this.user._id.toString(),
-          email: this.user.email
+          email: this.user.email,
         }
         return this.OneTimeTokenHandler.getNewToken
           .calledWith('password', data, { expiresIn: 7 * 24 * 60 * 60 })
@@ -292,7 +292,7 @@ describe('UserRegistrationHandler', function () {
         return this.EmailHandler.sendEmail
           .calledWith('registered', {
             to: this.user.email,
-            setNewPasswordUrl: `${this.settings.siteUrl}/user/activate?token=${this.token}&user_id=${this.user_id}`
+            setNewPasswordUrl: `${this.settings.siteUrl}/user/activate?token=${this.token}&user_id=${this.user_id}`,
           })
           .should.equal(true)
       })

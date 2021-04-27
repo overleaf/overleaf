@@ -46,5 +46,5 @@ export default EditorShareJsCodec = {
       offset -= lines[row].length + 1
     } // + 1 for newline char
     return { row, column: offset }
-  }
+  },
 }

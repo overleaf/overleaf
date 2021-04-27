@@ -30,33 +30,33 @@ describe('InstitutionsController', function () {
       emails: [
         { email: 'stubb1@mit.edu', reversedHostname: this.host },
         { email: 'test@test.com', reversedHostname: 'test.com' },
-        { email: 'another@mit.edu', reversedHostname: this.host }
-      ]
+        { email: 'another@mit.edu', reversedHostname: this.host },
+      ],
     }
     this.stubbedUser1DecoratedEmails = [
       {
         email: 'stubb1@mit.edu',
         reversedHostname: this.host,
-        samlIdentifier: { hasEntitlement: false }
+        samlIdentifier: { hasEntitlement: false },
       },
       { email: 'test@test.com', reversedHostname: 'test.com' },
       {
         email: 'another@mit.edu',
         reversedHostname: this.host,
-        samlIdentifier: { hasEntitlement: true }
-      }
+        samlIdentifier: { hasEntitlement: true },
+      },
     ]
     this.stubbedUser2 = {
       _id: '3131232',
       name: 'test',
       email: 'hello2@world.com',
-      emails: [{ email: 'subb2@mit.edu', reversedHostname: this.host }]
+      emails: [{ email: 'subb2@mit.edu', reversedHostname: this.host }],
     }
     this.stubbedUser2DecoratedEmails = [
       {
         email: 'subb2@mit.edu',
-        reversedHostname: this.host
-      }
+        reversedHostname: this.host,
+      },
     ]
 
     this.getUsersByHostname = sinon.stub().callsArgWith(
@@ -79,22 +79,22 @@ describe('InstitutionsController', function () {
       requires: {
         '../User/UserGetter': {
           getUsersByHostname: this.getUsersByHostname,
-          getUserFullEmails: this.getUserFullEmails
+          getUserFullEmails: this.getUserFullEmails,
         },
         '../Institutions/InstitutionsAPI': {
-          addAffiliation: this.addAffiliation
+          addAffiliation: this.addAffiliation,
         },
         '../Subscription/FeaturesUpdater': {
-          refreshFeatures: this.refreshFeatures
-        }
-      }
+          refreshFeatures: this.refreshFeatures,
+        },
+      },
     })
 
     this.req = { body: { hostname: 'mit.edu' } }
 
     this.res = {
       send: sinon.stub(),
-      json: sinon.stub()
+      json: sinon.stub(),
     }
     return (this.next = sinon.stub())
   })

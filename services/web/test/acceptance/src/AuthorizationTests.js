@@ -27,7 +27,7 @@ function tryReadAccess(user, projectId, test, callback) {
             test(response, body)
             cb()
           }
-        )
+        ),
     ],
     callback
   )
@@ -41,8 +41,8 @@ function trySettingsWriteAccess(user, projectId, test, callback) {
           {
             uri: `/project/${projectId}/settings`,
             json: {
-              compiler: 'latex'
-            }
+              compiler: 'latex',
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -51,7 +51,7 @@ function trySettingsWriteAccess(user, projectId, test, callback) {
             test(response, body)
             cb()
           }
-        )
+        ),
     ],
     callback
   )
@@ -65,8 +65,8 @@ function tryAdminAccess(user, projectId, test, callback) {
           {
             uri: `/project/${projectId}/rename`,
             json: {
-              newProjectName: 'new-name'
-            }
+              newProjectName: 'new-name',
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -81,8 +81,8 @@ function tryAdminAccess(user, projectId, test, callback) {
           {
             uri: `/project/${projectId}/settings/admin`,
             json: {
-              publicAccessLevel: 'private'
-            }
+              publicAccessLevel: 'private',
+            },
           },
           (error, response, body) => {
             if (error != null) {
@@ -91,7 +91,7 @@ function tryAdminAccess(user, projectId, test, callback) {
             test(response, body)
             cb()
           }
-        )
+        ),
     ],
     callback
   )
@@ -113,10 +113,10 @@ function tryContentAccess(user, projectId, test, callback) {
       auth: {
         user: settings.apis.web.user,
         pass: settings.apis.web.pass,
-        sendImmediately: true
+        sendImmediately: true,
       },
       json: true,
-      jar: false
+      jar: false,
     },
     (error, response, body) => {
       if (error != null) {
@@ -147,10 +147,10 @@ function expectReadAccess(user, projectId, callback) {
             expect(body.privilegeLevel).to.be.oneOf([
               'owner',
               'readAndWrite',
-              'readOnly'
+              'readOnly',
             ]),
           cb
-        )
+        ),
     ],
     callback
   )
@@ -198,7 +198,7 @@ function expectNoReadAccess(user, projectId, options, callback) {
             expect(body).to.equal('Forbidden')
           },
           cb
-        )
+        ),
     ],
     callback
   )
@@ -247,7 +247,7 @@ function expectChatAccess(user, projectId, callback) {
   user.request.get(
     {
       url: `/project/${projectId}/messages`,
-      json: true
+      json: true,
     },
     (error, response) => {
       if (error != null) {
@@ -263,7 +263,7 @@ function expectNoChatAccess(user, projectId, callback) {
   user.request.get(
     {
       url: `/project/${projectId}/messages`,
-      json: true
+      json: true,
     },
     (error, response) => {
       if (error != null) {
@@ -296,7 +296,7 @@ describe('Authorization', function () {
             }
             return this.site_admin.ensureAdmin(cb)
           })
-        }
+        },
       ],
       done
     )

@@ -26,33 +26,33 @@ describe('PasswordResetHandler', function () {
     this.settings = { siteUrl: 'www.sharelatex.com' }
     this.OneTimeTokenHandler = {
       getNewToken: sinon.stub(),
-      getValueFromTokenAndExpire: sinon.stub()
+      getValueFromTokenAndExpire: sinon.stub(),
     }
     this.UserGetter = {
       getUserByMainEmail: sinon.stub(),
       getUser: sinon.stub(),
-      getUserByAnyEmail: sinon.stub()
+      getUserByAnyEmail: sinon.stub(),
     }
     this.EmailHandler = { sendEmail: sinon.stub() }
     this.AuthenticationManager = {
       setUserPasswordInV2: sinon.stub(),
       promises: {
-        setUserPassword: sinon.stub().resolves()
-      }
+        setUserPassword: sinon.stub().resolves(),
+      },
     }
     this.PasswordResetHandler = SandboxedModule.require(modulePath, {
       requires: {
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           promises: {
-            addEntry: sinon.stub().resolves()
-          }
+            addEntry: sinon.stub().resolves(),
+          },
         }),
         '../User/UserGetter': this.UserGetter,
         '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
         '../Email/EmailHandler': this.EmailHandler,
         '../Authentication/AuthenticationManager': this.AuthenticationManager,
-        'settings-sharelatex': this.settings
-      }
+        'settings-sharelatex': this.settings,
+      },
     })
     this.token = '12312321i'
     this.user_id = 'user_id_here'
@@ -116,7 +116,7 @@ describe('PasswordResetHandler', function () {
           'password',
           {
             email: this.email,
-            user_id: this.user._id
+            user_id: this.user._id,
           }
         )
       })
@@ -201,7 +201,7 @@ describe('PasswordResetHandler', function () {
             expect(result).to.deep.equal({
               found: false,
               reset: false,
-              userId: null
+              userId: null,
             })
           }
         )
@@ -214,7 +214,7 @@ describe('PasswordResetHandler', function () {
           .withArgs('password', this.token)
           .yields(null, {
             user_id: this.user._id,
-            email: this.email
+            email: this.email,
           })
         this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user, this.password)
@@ -373,7 +373,7 @@ describe('PasswordResetHandler', function () {
           .withArgs('password', this.token)
           .yields(null, {
             v1_user_id: this.user.overleaf.id,
-            email: this.email
+            email: this.email,
           })
         this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user, this.password)
@@ -407,7 +407,7 @@ describe('PasswordResetHandler', function () {
           this.UserGetter.getUserByMainEmail.withArgs(this.email).yields(null, {
             _id: this.user._id,
             email: this.email,
-            overleaf: { id: 'not-the-same' }
+            overleaf: { id: 'not-the-same' },
           })
         })
 

@@ -52,7 +52,7 @@ module.exports = ClsiStateManager = {
         )
         const sortedEntityList = [
           ...Array.from(docList),
-          ...Array.from(fileList)
+          ...Array.from(fileList),
         ].sort()
         // ignore the isAutoCompile options as it doesn't affect the
         // output, but include all other options e.g. draft
@@ -71,11 +71,11 @@ module.exports = ClsiStateManager = {
         const hash = buildState(
           [
             ...Array.from(sortedEntityList),
-            ...Array.from(sortedOptionsList)
+            ...Array.from(sortedOptionsList),
           ].join('\n')
         )
         return callback(null, hash)
       }
     )
-  }
+  },
 }

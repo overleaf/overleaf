@@ -22,11 +22,11 @@ const ProjectInviteSchema = new Schema(
     expires: {
       type: Date,
       default: ExpiryDate,
-      index: { expireAfterSeconds: 10 }
-    }
+      index: { expireAfterSeconds: 10 },
+    },
   },
   {
-    collection: 'projectInvites'
+    collection: 'projectInvites',
   }
 )
 

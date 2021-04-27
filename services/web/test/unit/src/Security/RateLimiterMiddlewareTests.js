@@ -29,7 +29,7 @@ describe('RateLimiterMiddleware', function () {
           ),
           x => x._id
         )
-      }
+      },
     }
     this.RateLimiterMiddleware = SandboxedModule.require(modulePath, {
       requires: {
@@ -37,14 +37,14 @@ describe('RateLimiterMiddleware', function () {
         '../../infrastructure/RateLimiter': (this.RateLimiter = {}),
         './LoginRateLimiter': {},
         '../Authentication/AuthenticationController': this
-          .AuthenticationController
-      }
+          .AuthenticationController,
+      },
     })
     this.req = { params: {} }
     this.res = {
       status: sinon.stub(),
       write: sinon.stub(),
-      end: sinon.stub()
+      end: sinon.stub(),
     }
     return (this.next = sinon.stub())
   })
@@ -55,11 +55,11 @@ describe('RateLimiterMiddleware', function () {
         endpointName: 'test-endpoint',
         params: ['project_id', 'doc_id'],
         timeInterval: 42,
-        maxRequests: 12
+        maxRequests: 12,
       })
       return (this.req.params = {
         project_id: (this.project_id = 'project-id'),
-        doc_id: (this.doc_id = 'doc-id')
+        doc_id: (this.doc_id = 'doc-id'),
       })
     })
 
@@ -76,7 +76,7 @@ describe('RateLimiterMiddleware', function () {
             endpointName: 'test-endpoint',
             timeInterval: 42,
             throttle: 12,
-            subjectName: `${this.project_id}:${this.doc_id}:${this.ip}`
+            subjectName: `${this.project_id}:${this.doc_id}:${this.ip}`,
           })
           .should.equal(true)
       })
@@ -88,8 +88,8 @@ describe('RateLimiterMiddleware', function () {
       beforeEach(function () {
         this.req.session = {
           user: {
-            _id: (this.user_id = 'smoke-test-user-id')
-          }
+            _id: (this.user_id = 'smoke-test-user-id'),
+          },
         }
         this.settings.smokeTest = { userId: this.user_id }
         this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
@@ -102,7 +102,7 @@ describe('RateLimiterMiddleware', function () {
             endpointName: 'test-endpoint',
             timeInterval: 42,
             throttle: 12,
-            subjectName: `${this.project_id}:${this.doc_id}:${this.user_id}`
+            subjectName: `${this.project_id}:${this.doc_id}:${this.user_id}`,
           })
           .should.equal(false)
         this.RateLimiter.addCount.callCount.should.equal(0)
@@ -117,8 +117,8 @@ describe('RateLimiterMiddleware', function () {
       beforeEach(function () {
         this.req.session = {
           user: {
-            _id: (this.user_id = 'user-id')
-          }
+            _id: (this.user_id = 'user-id'),
+          },
         }
         this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
         return this.rateLimiter(this.req, this.res, this.next)
@@ -130,7 +130,7 @@ describe('RateLimiterMiddleware', function () {
             endpointName: 'test-endpoint',
             timeInterval: 42,
             throttle: 12,
-            subjectName: `${this.project_id}:${this.doc_id}:${this.user_id}`
+            subjectName: `${this.project_id}:${this.doc_id}:${this.user_id}`,
           })
           .should.equal(true)
       })
@@ -153,7 +153,7 @@ describe('RateLimiterMiddleware', function () {
             endpointName: 'test-endpoint',
             timeInterval: 42,
             throttle: 12,
-            subjectName: `${this.project_id}:${this.doc_id}:${this.ip}`
+            subjectName: `${this.project_id}:${this.doc_id}:${this.ip}`,
           })
           .should.equal(true)
       })
@@ -167,8 +167,8 @@ describe('RateLimiterMiddleware', function () {
       beforeEach(function () {
         this.req.session = {
           user: {
-            _id: (this.user_id = 'user-id')
-          }
+            _id: (this.user_id = 'user-id'),
+          },
         }
         this.RateLimiter.addCount = sinon.stub().callsArgWith(1, null, false)
         return this.rateLimiter(this.req, this.res, this.next)
@@ -190,7 +190,7 @@ describe('RateLimiterMiddleware', function () {
               endpointName: 'test-endpoint',
               timeInterval: 42,
               throttle: 12,
-              subjectName: `${this.project_id}:${this.doc_id}:${this.user_id}`
+              subjectName: `${this.project_id}:${this.doc_id}:${this.user_id}`,
             },
             'rate limit exceeded'
           )

@@ -28,13 +28,13 @@ module.exports = ErrorController = {
       SamlLogHandler.log(req.session.saml.universityId, req.sessionID, {
         error: {
           message: error && error.message,
-          stack: error && error.stack
+          stack: error && error.stack,
         },
         body: req.body,
         path: req.path,
         query: req.query,
         saml: req.session.saml,
-        user_id: user && user._id
+        user_id: user && user._id,
       })
     }
     if (error.code === 'EBADCSRFTOKEN') {
@@ -99,5 +99,5 @@ module.exports = ErrorController = {
       )
       res.sendStatus(500)
     }
-  }
+  },
 }

@@ -24,22 +24,22 @@ describe('ReferencesController', function () {
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': (this.settings = {
-          apis: { web: { url: 'http://some.url' } }
+          apis: { web: { url: 'http://some.url' } },
         }),
         './ReferencesHandler': (this.ReferencesHandler = {
           index: sinon.stub(),
-          indexAll: sinon.stub()
+          indexAll: sinon.stub(),
         }),
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController = {
-          emitToRoom: sinon.stub()
-        })
-      }
+          emitToRoom: sinon.stub(),
+        }),
+      },
     })
     this.req = new MockRequest()
     this.req.params.Project_id = this.projectId
     this.req.body = {
       docIds: (this.docIds = ['aaa', 'bbb']),
-      shouldBroadcast: false
+      shouldBroadcast: false,
     }
     this.res = new MockResponse()
     this.res.json = sinon.stub()
@@ -47,7 +47,7 @@ describe('ReferencesController', function () {
     this.res.sendStatus = sinon.stub()
     return (this.fakeResponseData = {
       projectId: this.projectId,
-      keys: ['one', 'two', 'three']
+      keys: ['one', 'two', 'three'],
     })
   })
 

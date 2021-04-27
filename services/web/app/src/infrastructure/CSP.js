@@ -6,7 +6,7 @@ module.exports = function ({
   reportPercentage,
   reportOnly = false,
   exclude = [],
-  percentage
+  percentage,
 }) {
   return function (req, res, next) {
     const originalRender = res.render
@@ -27,7 +27,7 @@ module.exports = function ({
         const directives = [
           `script-src 'nonce-${scriptNonce}' 'unsafe-inline' 'strict-dynamic' https: 'report-sample'`,
           `object-src 'none'`,
-          `base-uri 'none'`
+          `base-uri 'none'`,
         ]
 
         // enable the report URI for a percentage of CSP-enabled requests

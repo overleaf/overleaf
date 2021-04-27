@@ -12,13 +12,13 @@ export function useFileTreeSocketListener() {
     dispatchCreateFolder,
     dispatchCreateDoc,
     dispatchCreateFile,
-    fileTreeData
+    fileTreeData,
   } = useFileTreeMutable()
   const {
     selectedEntityIds,
     selectedEntityParentIds,
     select,
-    unselect
+    unselect,
   } = useFileTreeSelectable()
   const socket = window._ide && window._ide.socket
 
@@ -74,7 +74,7 @@ export function useFileTreeSocketListener() {
     dispatchDelete,
     fileTreeData,
     selectedEntityIds,
-    selectedEntityParentIds
+    selectedEntityParentIds,
   ])
 
   useEffect(() => {

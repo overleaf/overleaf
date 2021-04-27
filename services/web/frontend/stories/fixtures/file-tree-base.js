@@ -12,21 +12,23 @@ export const rootFolderBase = [
             name: 'sub folder',
             folders: [],
             fileRefs: [],
-            docs: []
-          }
+            docs: [],
+          },
         ],
         fileRefs: [
-          { _id: '5cffb9d93da45d3995d05362', name: 'file-in-a-folder.pdf' }
+          { _id: '5cffb9d93da45d3995d05362', name: 'file-in-a-folder.pdf' },
         ],
-        docs: [{ _id: '5f46786322d556004e72a555', name: 'doc-in-a-folder.tex' }]
+        docs: [
+          { _id: '5f46786322d556004e72a555', name: 'doc-in-a-folder.tex' },
+        ],
       },
       {
         _id: '5f638e68b652df0026c5c8f6',
         name: 'another folder',
         folders: [],
         fileRefs: [],
-        docs: []
-      }
+        docs: [],
+      },
     ],
     fileRefs: [{ _id: '5f11c78e0924770027412a67', name: 'univers.jpg' }],
     docs: [
@@ -35,8 +37,8 @@ export const rootFolderBase = [
       {
         _id: '5da532e29019e800015321c6',
         name: 'zotero.bib',
-        linkedFileData: { provider: 'zotero' }
-      }
-    ]
-  }
+        linkedFileData: { provider: 'zotero' },
+      },
+    ],
+  },
 ]

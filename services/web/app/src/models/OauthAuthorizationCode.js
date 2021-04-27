@@ -10,10 +10,10 @@ const OauthAuthorizationCodeSchema = new Schema(
     oauthApplication_id: { type: ObjectId, ref: 'OauthApplication' },
     redirectUri: String,
     scope: String,
-    user_id: { type: ObjectId, ref: 'User' }
+    user_id: { type: ObjectId, ref: 'User' },
   },
   {
-    collection: 'oauthAuthorizationCodes'
+    collection: 'oauthAuthorizationCodes',
   }
 )
 

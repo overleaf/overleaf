@@ -23,8 +23,8 @@ describe('TagsHandler', function () {
     this.TagsHandler = SandboxedModule.require(modulePath, {
       requires: {
         '../../infrastructure/mongodb': this.mongodb,
-        '../../models/Tag': { Tag: Tag }
-      }
+        '../../models/Tag': { Tag: Tag },
+      },
     })
   })
 
@@ -170,10 +170,10 @@ describe('TagsHandler', function () {
           .withArgs(
             {
               _id: this.tagId,
-              user_id: this.userId
+              user_id: this.userId,
             },
             {
-              $pull: { project_ids: this.projectId }
+              $pull: { project_ids: this.projectId },
             }
           )
           .yields()
@@ -197,10 +197,10 @@ describe('TagsHandler', function () {
         .once()
         .withArgs(
           {
-            user_id: this.userId
+            user_id: this.userId,
           },
           {
-            $pull: { project_ids: this.projectId }
+            $pull: { project_ids: this.projectId },
           }
         )
         .yields()

@@ -21,7 +21,7 @@ describe('HistoryController', function () {
     this.callback = sinon.stub()
     this.user_id = 'user-id-123'
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns(this.user_id)
+      getLoggedInUserId: sinon.stub().returns(this.user_id),
     }
     this.HistoryController = SandboxedModule.require(modulePath, {
       requires: {
@@ -33,17 +33,17 @@ describe('HistoryController', function () {
         '../Project/ProjectDetailsHandler': (this.ProjectDetailsHandler = {}),
         '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
         '../User/UserGetter': (this.UserGetter = {}),
-        './RestoreManager': (this.RestoreManager = {})
-      }
+        './RestoreManager': (this.RestoreManager = {}),
+      },
     })
     return (this.settings.apis = {
       trackchanges: {
         enabled: false,
-        url: 'http://trackchanges.example.com'
+        url: 'http://trackchanges.example.com',
       },
       project_history: {
-        url: 'http://project_history.example.com'
-      }
+        url: 'http://project_history.example.com',
+      },
     })
   })
 
@@ -59,7 +59,7 @@ describe('HistoryController', function () {
         this.ProjectDetailsHandler.getDetails = sinon
           .stub()
           .callsArgWith(1, null, {
-            overleaf: { history: { id: 42, display: true } }
+            overleaf: { history: { id: 42, display: true } },
           })
         return this.HistoryController.selectHistoryApi(
           this.req,
@@ -101,7 +101,7 @@ describe('HistoryController', function () {
         pipe: sinon.stub(),
         on(event, handler) {
           return (this.events[event] = handler)
-        }
+        },
       }
       return this.request.returns(this.proxy)
     })
@@ -128,8 +128,8 @@ describe('HistoryController', function () {
             url: `${this.settings.apis.project_history.url}${this.req.url}`,
             method: this.req.method,
             headers: {
-              'X-User-Id': this.user_id
-            }
+              'X-User-Id': this.user_id,
+            },
           })
           .should.equal(true)
       })
@@ -161,8 +161,8 @@ describe('HistoryController', function () {
             url: `${this.settings.apis.trackchanges.url}${this.req.url}`,
             method: this.req.method,
             headers: {
-              'X-User-Id': this.user_id
-            }
+              'X-User-Id': this.user_id,
+            },
           })
           .should.equal(true)
       })
@@ -221,8 +221,8 @@ describe('HistoryController', function () {
             method: this.req.method,
             json: true,
             headers: {
-              'X-User-Id': this.user_id
-            }
+              'X-User-Id': this.user_id,
+            },
           })
           .should.equal(true)
       })
@@ -261,8 +261,8 @@ describe('HistoryController', function () {
             method: this.req.method,
             json: true,
             headers: {
-              'X-User-Id': this.user_id
-            }
+              'X-User-Id': this.user_id,
+            },
           })
           .should.equal(true)
       })

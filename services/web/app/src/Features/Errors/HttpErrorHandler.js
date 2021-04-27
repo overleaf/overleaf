@@ -33,7 +33,7 @@ function handleGeneric400Error(req, res, statusCode, message, info = {}) {
     case 'html':
       return res.render('general/400', {
         title: 'Client Error',
-        message: message
+        message: message,
       })
     case 'json':
       return renderJSONError(res, message, info)
@@ -85,7 +85,7 @@ module.exports = HttpErrorHandler = {
       case 'html':
         return res.render('general/400', {
           title: 'Client Error',
-          message: message
+          message: message,
         })
       case 'json':
         return renderJSONError(res, message, info)
@@ -124,7 +124,7 @@ module.exports = HttpErrorHandler = {
       case 'html':
         return res.render('general/400', {
           title: 'Client Error',
-          message: message
+          message: message,
         })
       case 'json':
         return renderJSONError(res, message, info)
@@ -157,5 +157,5 @@ module.exports = HttpErrorHandler = {
       default:
         return res.send(message)
     }
-  }
+  },
 }

@@ -21,16 +21,16 @@ describe('DocstoreManager', function () {
     this.DocstoreManager = SandboxedModule.require(modulePath, {
       requires: {
         request: {
-          defaults: this.requestDefaults
+          defaults: this.requestDefaults,
         },
         'settings-sharelatex': (this.settings = {
           apis: {
             docstore: {
-              url: 'docstore.sharelatex.com'
-            }
-          }
-        })
-      }
+              url: 'docstore.sharelatex.com',
+            },
+          },
+        }),
+      },
     })
 
     this.requestDefaults.calledWith({ jar: false }).should.equal(true)
@@ -68,7 +68,7 @@ describe('DocstoreManager', function () {
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
             json: { deleted: true, deletedAt: new Date(), name: 'wombat.tex' },
-            timeout: 30 * 1000
+            timeout: 30 * 1000,
           })
           .should.equal(true)
       })
@@ -176,8 +176,8 @@ describe('DocstoreManager', function () {
             json: {
               lines: this.lines,
               version: this.version,
-              ranges: this.ranges
-            }
+              ranges: this.ranges,
+            },
           })
           .should.equal(true)
       })
@@ -227,7 +227,7 @@ describe('DocstoreManager', function () {
         lines: (this.lines = ['mock', 'doc', 'lines']),
         rev: (this.rev = 5),
         version: (this.version = 42),
-        ranges: (this.ranges = { mock: 'ranges' })
+        ranges: (this.ranges = { mock: 'ranges' }),
       })
     })
 
@@ -248,7 +248,7 @@ describe('DocstoreManager', function () {
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
             timeout: 30 * 1000,
-            json: true
+            json: true,
           })
           .should.equal(true)
       })
@@ -306,7 +306,7 @@ describe('DocstoreManager', function () {
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}?include_deleted=true`,
             timeout: 30 * 1000,
-            json: true
+            json: true,
           })
           .should.equal(true)
       })
@@ -361,7 +361,7 @@ describe('DocstoreManager', function () {
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc`,
             timeout: 30 * 1000,
-            json: true
+            json: true,
           })
           .should.equal(true)
       })
@@ -411,7 +411,7 @@ describe('DocstoreManager', function () {
         this.request.get.should.have.been.calledWith({
           url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc-deleted`,
           timeout: 30 * 1000,
-          json: true
+          json: true,
         })
       })
 
@@ -481,7 +481,7 @@ describe('DocstoreManager', function () {
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/ranges`,
             timeout: 30 * 1000,
-            json: true
+            json: true,
           })
           .should.equal(true)
       })

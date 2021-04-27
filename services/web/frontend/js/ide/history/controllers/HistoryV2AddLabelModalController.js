@@ -18,7 +18,7 @@ export default App.controller(
     $scope.inputs = { labelName: null }
     $scope.state = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $modalInstance.opened.then(() =>

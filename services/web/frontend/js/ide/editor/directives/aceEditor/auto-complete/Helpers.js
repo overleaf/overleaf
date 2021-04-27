@@ -59,9 +59,9 @@ var Helpers = {
       lineUpToCursor,
       commandFragment,
       commandName,
-      lineBeyondCursor
+      lineBeyondCursor,
     }
-  }
+  },
 }
 
 export default Helpers

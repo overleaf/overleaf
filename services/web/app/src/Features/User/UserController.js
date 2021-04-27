@@ -24,7 +24,7 @@ async function _sendSecurityAlertClearedSessions(user) {
   const emailOptions = {
     to: user.email,
     actionDescribed: `active sessions were cleared on your account ${user.email}`,
-    action: 'active sessions cleared'
+    action: 'active sessions cleared',
   }
   try {
     await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
@@ -41,7 +41,7 @@ function _sendSecurityAlertPasswordChanged(user) {
   const emailOptions = {
     to: user.email,
     actionDescribed: `your password has been changed on your account ${user.email}`,
-    action: 'password changed'
+    action: 'password changed',
   }
   EmailHandler.sendEmail('securityAlert', emailOptions, error => {
     if (error) {
@@ -105,15 +105,15 @@ async function changePassword(req, res, next) {
   _sendSecurityAlertPasswordChanged(user)
 
   await UserSessionsManager.promises.revokeAllUserSessions(user, [
-    req.sessionID
+    req.sessionID,
   ])
 
   return res.json({
     message: {
       type: 'success',
       email: user.email,
-      text: req.i18n.translate('password_change_successful')
-    }
+      text: req.i18n.translate('password_change_successful'),
+    },
   })
 }
 
@@ -122,7 +122,7 @@ async function clearSessions(req, res, next) {
   const userId = AuthenticationController.getLoggedInUserId(req)
   const user = await UserGetter.promises.getUser(userId, { email: 1 })
   const sessions = await UserSessionsManager.promises.getAllUserSessions(user, [
-    req.sessionID
+    req.sessionID,
   ])
   await UserAuditLogHandler.promises.addEntry(
     user._id,
@@ -132,7 +132,7 @@ async function clearSessions(req, res, next) {
     { sessions }
   )
   await UserSessionsManager.promises.revokeAllUserSessions(user, [
-    req.sessionID
+    req.sessionID,
   ])
 
   await _sendSecurityAlertClearedSessions(user)
@@ -202,7 +202,7 @@ const UserController = {
             err,
             'error authenticating during attempt to delete account',
             {
-              userId
+              userId,
             }
           )
           return next(err)
@@ -218,13 +218,13 @@ const UserController = {
             if (err) {
               let errorData = {
                 message: 'error while deleting user account',
-                info: { userId }
+                info: { userId },
               }
               if (err instanceof Errors.SubscriptionAdminDeletionError) {
                 // set info.public.error for JSON response so frontend can display
                 // a specific message
                 errorData.info.public = {
-                  error: 'SubscriptionAdminDeletionError'
+                  error: 'SubscriptionAdminDeletionError',
                 }
                 logger.warn(OError.tag(err, errorData.message, errorData.info))
                 return HttpErrorHandler.unprocessableEntity(
@@ -343,7 +343,7 @@ const UserController = {
           // end here, don't update email
           AuthenticationController.setInSessionUser(req, {
             first_name: user.first_name,
-            last_name: user.last_name
+            last_name: user.last_name,
           })
           res.sendStatus(200)
         } else if (newEmail.indexOf('@') === -1) {
@@ -353,7 +353,7 @@ const UserController = {
           // update the user email
           const auditLog = {
             initiatorId: userId,
-            ipAddress: req.ip
+            ipAddress: req.ip,
           }
           UserUpdater.changeEmailAddress(userId, newEmail, auditLog, err => {
             if (err) {
@@ -369,7 +369,7 @@ const UserController = {
                   req.i18n.translate('problem_changing_email_address'),
                   OError.tag(err, 'problem_changing_email_address', {
                     userId,
-                    newEmail
+                    newEmail,
                   })
                 )
               }
@@ -385,7 +385,7 @@ const UserController = {
               AuthenticationController.setInSessionUser(req, {
                 email: user.email,
                 first_name: user.first_name,
-                last_name: user.last_name
+                last_name: user.last_name,
               })
               UserHandler.populateTeamInvites(user, err => {
                 // need to refresh this in the background
@@ -469,19 +469,19 @@ const UserController = {
         }
         res.json({
           email: user.email,
-          setNewPasswordUrl
+          setNewPasswordUrl,
         })
       }
     )
   },
 
-  changePassword: expressify(changePassword)
+  changePassword: expressify(changePassword),
 }
 
 UserController.promises = {
   doLogout: promisify(UserController.doLogout),
   ensureAffiliation,
-  ensureAffiliationMiddleware
+  ensureAffiliationMiddleware,
 }
 
 module.exports = UserController

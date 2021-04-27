@@ -19,5 +19,5 @@ export default App.constant('Keys', {
   RIGHT: 39,
   PERIOD: 190,
   COMMA: 188,
-  END: 35
+  END: 35,
 })

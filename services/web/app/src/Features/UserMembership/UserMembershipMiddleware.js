@@ -18,8 +18,8 @@ let UserMembershipMiddleware = {
     requireEntity(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('groupMetrics')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('groupMetrics'),
+    ]),
   ],
 
   requireGroupManagementAccess: [
@@ -29,8 +29,8 @@ let UserMembershipMiddleware = {
     requireEntity(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('groupManagement')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('groupManagement'),
+    ]),
   ],
 
   requireGroupMetricsAccess: [
@@ -40,8 +40,8 @@ let UserMembershipMiddleware = {
     requireEntity(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('groupMetrics')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('groupMetrics'),
+    ]),
   ],
 
   requireGroupManagersManagementAccess: [
@@ -51,8 +51,8 @@ let UserMembershipMiddleware = {
     requireEntity(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('groupManagement')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('groupManagement'),
+    ]),
   ],
 
   requireInstitutionMetricsAccess: [
@@ -62,8 +62,8 @@ let UserMembershipMiddleware = {
     requireEntityOrCreate('institutionManagement'),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('institutionMetrics')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('institutionMetrics'),
+    ]),
   ],
 
   requireInstitutionManagementAccess: [
@@ -73,18 +73,18 @@ let UserMembershipMiddleware = {
     requireEntityOrCreate('institutionManagement'),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('institutionManagement')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('institutionManagement'),
+    ]),
   ],
 
   requireInstitutionManagementStaffAccess: [
     AuthenticationController.requireLogin(),
     allowAccessIfAny([
-      UserMembershipAuthorization.hasStaffAccess('institutionManagement')
+      UserMembershipAuthorization.hasStaffAccess('institutionManagement'),
     ]),
     fetchEntityConfig('institution'),
     fetchEntity(),
-    requireEntityOrCreate('institutionManagement')
+    requireEntityOrCreate('institutionManagement'),
   ],
 
   requirePublisherMetricsAccess: [
@@ -94,8 +94,8 @@ let UserMembershipMiddleware = {
     requireEntityOrCreate('publisherManagement'),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('publisherMetrics')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('publisherMetrics'),
+    ]),
   ],
 
   requirePublisherManagementAccess: [
@@ -105,8 +105,8 @@ let UserMembershipMiddleware = {
     requireEntityOrCreate('publisherManagement'),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('publisherManagement')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('publisherManagement'),
+    ]),
   ],
 
   requireConversionMetricsAccess: [
@@ -116,15 +116,15 @@ let UserMembershipMiddleware = {
     requireEntityOrCreate('publisherManagement'),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('publisherMetrics')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('publisherMetrics'),
+    ]),
   ],
 
   requireAdminMetricsAccess: [
     AuthenticationController.requireLogin(),
     allowAccessIfAny([
-      UserMembershipAuthorization.hasStaffAccess('adminMetrics')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('adminMetrics'),
+    ]),
   ],
 
   requireTemplateMetricsAccess: [
@@ -135,24 +135,24 @@ let UserMembershipMiddleware = {
     fetchPublisherFromTemplate(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('publisherMetrics')
-    ])
+      UserMembershipAuthorization.hasStaffAccess('publisherMetrics'),
+    ]),
   ],
 
   requirePublisherCreationAccess: [
     AuthenticationController.requireLogin(),
     allowAccessIfAny([
-      UserMembershipAuthorization.hasStaffAccess('publisherManagement')
+      UserMembershipAuthorization.hasStaffAccess('publisherManagement'),
     ]),
-    fetchEntityConfig('publisher')
+    fetchEntityConfig('publisher'),
   ],
 
   requireInstitutionCreationAccess: [
     AuthenticationController.requireLogin(),
     allowAccessIfAny([
-      UserMembershipAuthorization.hasStaffAccess('institutionManagement')
+      UserMembershipAuthorization.hasStaffAccess('institutionManagement'),
     ]),
-    fetchEntityConfig('institution')
+    fetchEntityConfig('institution'),
   ],
 
   // graphs access is an edge-case:
@@ -180,7 +180,7 @@ let UserMembershipMiddleware = {
     // run the list of middleware functions in series. This is essencially
     // a poor man's middleware runner
     async.eachSeries(middleware, (fn, callback) => fn(req, res, callback), next)
-  }
+  },
 }
 
 module.exports = UserMembershipMiddleware
@@ -260,7 +260,7 @@ function fetchV1Template() {
     req.template = {
       id: body.id,
       title: body.title,
-      brand: body.brand
+      brand: body.brand,
     }
     next()
   })

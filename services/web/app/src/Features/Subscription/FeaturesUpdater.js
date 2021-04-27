@@ -65,7 +65,7 @@ const FeaturesUpdater = {
       },
       featuresOverrides(cb) {
         FeaturesUpdater._getFeaturesOverrides(userId, cb)
-      }
+      },
     }
     async.series(jobs, function (err, results) {
       if (err) {
@@ -73,7 +73,7 @@ const FeaturesUpdater = {
           err,
           'error getting subscription or group for refreshFeatures',
           {
-            userId
+            userId,
           }
         )
         return callback(err)
@@ -85,7 +85,7 @@ const FeaturesUpdater = {
         institutionFeatures,
         v1Features,
         bonusFeatures,
-        featuresOverrides
+        featuresOverrides,
       } = results
       logger.log(
         {
@@ -95,7 +95,7 @@ const FeaturesUpdater = {
           institutionFeatures,
           v1Features,
           bonusFeatures,
-          featuresOverrides
+          featuresOverrides,
         },
         'merging user features'
       )
@@ -104,7 +104,7 @@ const FeaturesUpdater = {
         institutionFeatures,
         v1Features,
         bonusFeatures,
-        featuresOverrides
+        featuresOverrides,
       ])
       const features = _.reduce(
         featureSets,
@@ -243,8 +243,8 @@ const FeaturesUpdater = {
     const featureKeys = [
       ...new Set([
         ...Object.keys(currentFeatures),
-        ...Object.keys(expectedFeatures)
-      ])
+        ...Object.keys(expectedFeatures),
+      ]),
     ]
     featureKeys.sort().forEach(key => {
       if (expectedFeatures[key] !== currentFeatures[key]) {
@@ -282,7 +282,7 @@ const FeaturesUpdater = {
       function (err, user) {
         if (err != null) {
           OError.tag(err, '[AccountSync] error getting user', {
-            v1UserId
+            v1UserId,
           })
           return callback(err)
         }
@@ -297,7 +297,7 @@ const FeaturesUpdater = {
         return FeaturesUpdater.refreshFeatures(user._id, callback)
       }
     )
-  }
+  },
 }
 
 const refreshFeaturesPromise = userId =>
@@ -315,7 +315,7 @@ const refreshFeaturesPromise = userId =>
   })
 
 FeaturesUpdater.promises = {
-  refreshFeatures: refreshFeaturesPromise
+  refreshFeatures: refreshFeaturesPromise,
 }
 
 module.exports = FeaturesUpdater

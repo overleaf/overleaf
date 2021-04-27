@@ -42,5 +42,5 @@ function render(locale, components) {
 
 module.exports = {
   SPLIT_REGEX,
-  render
+  render,
 }

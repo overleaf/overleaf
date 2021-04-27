@@ -13,10 +13,10 @@ module.exports = {
           res.render('referal/bonus', {
             title: 'bonus_please_recommend_us',
             refered_users: referedUsers,
-            refered_user_count: referedUserCount
+            refered_user_count: referedUserCount,
           })
         }
       }
     )
-  }
+  },
 }

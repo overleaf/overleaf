@@ -9,7 +9,7 @@ const UserGetter = require('./UserGetter')
 const {
   addAffiliation,
   removeAffiliation,
-  promises: InstitutionsAPIPromises
+  promises: InstitutionsAPIPromises,
 } = require('../Institutions/InstitutionsAPI')
 const Features = require('../../infrastructure/Features')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
@@ -24,7 +24,7 @@ async function _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email) {
   // send email to both old and new primary email
   const emailOptions = {
     actionDescribed: `the primary email address on your account was changed to ${email}`,
-    action: 'change of primary email address'
+    action: 'change of primary email address',
   }
   const toOld = Object.assign({}, emailOptions, { to: oldEmail })
   const toNew = Object.assign({}, emailOptions, { to: email })
@@ -54,7 +54,7 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
     auditLog.initiatorId,
     auditLog.ipAddress,
     {
-      newSecondaryEmail: newEmail
+      newSecondaryEmail: newEmail,
     }
   )
 
@@ -72,8 +72,8 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
     const reversedHostname = newEmail.split('@')[1].split('').reverse().join('')
     const update = {
       $push: {
-        emails: { email: newEmail, createdAt: new Date(), reversedHostname }
-      }
+        emails: { email: newEmail, createdAt: new Date(), reversedHostname },
+      },
     }
     await UserUpdater.promises.updateUser(userId, update)
   } catch (error) {
@@ -95,7 +95,7 @@ async function setDefaultEmailAddress(
 
   const user = await UserGetter.promises.getUser(userId, {
     email: 1,
-    emails: 1
+    emails: 1,
   })
   if (!user) {
     throw new Error('invalid userId')
@@ -117,7 +117,7 @@ async function setDefaultEmailAddress(
     auditLog.ipAddress,
     {
       newPrimaryEmail: email,
-      oldPrimaryEmail: oldEmail
+      oldPrimaryEmail: oldEmail,
     }
   )
 
@@ -169,22 +169,22 @@ async function confirmEmail(userId, email) {
 
   const query = {
     _id: userId,
-    'emails.email': email
+    'emails.email': email,
   }
 
   // only update confirmedAt if it was not previously set
   const update = {
     $set: {
-      'emails.$.reconfirmedAt': confirmedAt
+      'emails.$.reconfirmedAt': confirmedAt,
     },
     $min: {
-      'emails.$.confirmedAt': confirmedAt
-    }
+      'emails.$.confirmedAt': confirmedAt,
+    },
   }
 
   if (Features.hasFeature('affiliations')) {
     update.$unset = {
-      'emails.$.affiliationUnchecked': 1
+      'emails.$.affiliationUnchecked': 1,
     }
   }
 
@@ -218,7 +218,7 @@ const UserUpdater = {
                 'could not remove affiliationUnchecked flag for user on create',
                 {
                   userId,
-                  email
+                  email,
                 }
               )
             )
@@ -275,7 +275,7 @@ const UserUpdater = {
             true,
             cb
           ),
-        cb => UserUpdater.removeEmailAddress(userId, oldEmail, cb)
+        cb => UserUpdater.removeEmailAddress(userId, oldEmail, cb),
       ],
       callback
     )
@@ -323,11 +323,11 @@ const UserUpdater = {
     UserUpdater.updateUser(
       userId.toString(),
       {
-        $set: { must_reconfirm: false }
+        $set: { must_reconfirm: false },
       },
       error => callback(error)
     )
-  }
+  },
 }
 ;[
   'updateUser',
@@ -335,7 +335,7 @@ const UserUpdater = {
   'setDefaultEmailAddress',
   'addEmailAddress',
   'removeEmailAddress',
-  'removeReconfirmFlag'
+  'removeReconfirmFlag',
 ].map(method =>
   metrics.timeAsyncMethod(UserUpdater, method, 'mongo.UserUpdater', logger)
 )
@@ -346,7 +346,7 @@ const promises = {
   confirmEmail,
   setDefaultEmailAddress,
   updateUser: promisify(UserUpdater.updateUser),
-  removeReconfirmFlag: promisify(UserUpdater.removeReconfirmFlag)
+  removeReconfirmFlag: promisify(UserUpdater.removeReconfirmFlag),
 }
 
 UserUpdater.promises = promises

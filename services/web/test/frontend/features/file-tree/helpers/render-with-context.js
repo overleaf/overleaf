@@ -10,8 +10,8 @@ export default (children, options = {}) => {
       {
         docs: [],
         fileRefs: [],
-        folders: []
-      }
+        folders: [],
+      },
     ],
     hasWritePermissions: true,
     userHasFeature: () => true,
@@ -26,7 +26,7 @@ export default (children, options = {}) => {
       console.log('started free trial')
     },
     onSelect: () => {},
-    ...contextProps
+    ...contextProps,
   }
   return render(
     <FileTreeContext {...contextProps}>{children}</FileTreeContext>,

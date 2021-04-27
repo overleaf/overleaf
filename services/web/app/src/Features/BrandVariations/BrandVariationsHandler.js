@@ -6,7 +6,7 @@ const V1Api = require('../V1/V1Api')
 const sanitizeHtml = require('sanitize-html')
 
 module.exports = {
-  getBrandVariationById
+  getBrandVariationById,
 }
 
 function getBrandVariationById(brandVariationId, callback) {
@@ -16,12 +16,12 @@ function getBrandVariationById(brandVariationId, callback) {
   logger.log({ brandVariationId }, 'fetching brand variation details from v1')
   V1Api.request(
     {
-      uri: `/api/v2/brand_variations/${brandVariationId}`
+      uri: `/api/v2/brand_variations/${brandVariationId}`,
     },
     function (error, response, brandVariationDetails) {
       if (error != null) {
         OError.tag(error, 'error getting brand variation details', {
-          brandVariationId
+          brandVariationId,
         })
         return callback(error)
       }

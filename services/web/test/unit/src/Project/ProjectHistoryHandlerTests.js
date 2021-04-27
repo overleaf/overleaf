@@ -46,12 +46,12 @@ describe('ProjectHistoryHandler', function () {
       requires: {
         'settings-sharelatex': (this.Settings = {}),
         '../../models/Project': {
-          Project: this.ProjectModel
+          Project: this.ProjectModel,
         },
         './ProjectDetailsHandler': (this.ProjectDetailsHandler = {}),
         '../History/HistoryManager': (this.HistoryManager = {}),
-        './ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {})
-      }
+        './ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
+      },
     }))
   })
 

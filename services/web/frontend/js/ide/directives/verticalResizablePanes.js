@@ -4,7 +4,7 @@ const layoutOptions = {
   center: {
     paneSelector: '[vertical-resizable-top]',
     paneClass: 'vertical-resizable-top',
-    size: 'auto'
+    size: 'auto',
   },
   south: {
     paneSelector: '[vertical-resizable-bottom]',
@@ -17,8 +17,8 @@ const layoutOptions = {
     slidable: false,
     spacing_open: 6,
     spacing_closed: 6,
-    maxSize: '75%'
-  }
+    maxSize: '75%',
+  },
 }
 
 export default App.directive('verticalResizablePanes', localStorage => ({
@@ -106,5 +106,5 @@ export default App.directive('verticalResizablePanes', localStorage => ({
     layoutOptions.south.onresize = handleResize
 
     const layoutHandle = element.layout(layoutOptions)
-  }
+  },
 }))

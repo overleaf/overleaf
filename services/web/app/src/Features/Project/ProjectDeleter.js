@@ -48,8 +48,8 @@ module.exports = {
     unmarkAsDeletedByExternalSource,
     deleteUsersProjects,
     expireDeletedProjectsAfterDuration,
-    restoreProject
-  }
+    restoreProject,
+  },
 }
 
 async function markAsDeletedByExternalSource(projectId) {
@@ -84,9 +84,9 @@ async function expireDeletedProjectsAfterDuration() {
   const deletedProjects = await DeletedProject.find(
     {
       'deleterData.deletedAt': {
-        $lt: new Date(moment().subtract(EXPIRE_PROJECTS_AFTER_DAYS, 'days'))
+        $lt: new Date(moment().subtract(EXPIRE_PROJECTS_AFTER_DAYS, 'days')),
       },
-      project: { $ne: null }
+      project: { $ne: null },
     },
     { 'deleterData.deletedProjectId': 1 }
   )
@@ -171,7 +171,7 @@ async function trashProject(projectId, userId) {
       { _id: projectId },
       {
         $addToSet: { trashed: ObjectId(userId) },
-        $set: { archived: archived }
+        $set: { archived: archived },
       }
     )
   } catch (err) {
@@ -225,7 +225,7 @@ async function deleteProject(projectId, options = {}) {
       deletedProjectReadOnlyTokenAccessIds: project.tokenAccessReadOnly_refs,
       deletedProjectReadWriteToken: project.tokens.readAndWrite,
       deletedProjectReadOnlyToken: project.tokens.readOnly,
-      deletedProjectLastUpdatedAt: project.lastUpdated
+      deletedProjectLastUpdatedAt: project.lastUpdated,
     }
 
     Object.keys(deleterData).forEach(key =>
@@ -280,7 +280,7 @@ async function deleteProject(projectId, options = {}) {
 async function undeleteProject(projectId, options = {}) {
   projectId = ObjectId(projectId)
   let deletedProject = await DeletedProject.findOne({
-    'deleterData.deletedProjectId': projectId
+    'deleterData.deletedProjectId': projectId,
   }).exec()
 
   if (!deletedProject) {
@@ -342,7 +342,7 @@ async function undeleteProject(projectId, options = {}) {
 async function expireDeletedProject(projectId) {
   try {
     const deletedProject = await DeletedProject.findOne({
-      'deleterData.deletedProjectId': projectId
+      'deleterData.deletedProjectId': projectId,
     }).exec()
     if (!deletedProject) {
       throw new Errors.NotFoundError(
@@ -369,18 +369,18 @@ async function expireDeletedProject(projectId) {
         historyId
       ),
       FilestoreHandler.promises.deleteProject(deletedProject.project._id),
-      hardDeleteDeletedFiles(deletedProject.project._id)
+      hardDeleteDeletedFiles(deletedProject.project._id),
     ])
 
     await DeletedProject.updateOne(
       {
-        _id: deletedProject._id
+        _id: deletedProject._id,
       },
       {
         $set: {
           'deleterData.deleterIpAddress': null,
-          project: null
-        }
+          project: null,
+        },
       }
     ).exec()
   } catch (error) {

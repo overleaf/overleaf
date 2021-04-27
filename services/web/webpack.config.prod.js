@@ -17,7 +17,7 @@ module.exports = merge.smart(
 
     output: {
       // Override filename to include hash for immutable caching
-      filename: 'js/[name]-[chunkhash].js'
+      filename: 'js/[name]-[chunkhash].js',
     },
 
     module: {
@@ -32,12 +32,12 @@ module.exports = merge.smart(
               options: {
                 outputPath: 'fonts',
                 publicPath: '/fonts/',
-                name: '[name]-[hash].[ext]'
-              }
-            }
-          ]
-        }
-      ]
+                name: '[name]-[hash].[ext]',
+              },
+            },
+          ],
+        },
+      ],
     },
 
     optimization: {
@@ -46,11 +46,11 @@ module.exports = merge.smart(
         new TerserPlugin({
           terserOptions: {
             keep_classnames: /Error$/,
-            keep_fnames: /Error$/
-          }
+            keep_fnames: /Error$/,
+          },
         }),
-        new OptimizeCssAssetsPlugin()
-      ]
+        new OptimizeCssAssetsPlugin(),
+      ],
     },
 
     plugins: [
@@ -58,9 +58,9 @@ module.exports = merge.smart(
       new MiniCssExtractPlugin({
         // Output to public/stylesheets directory and append hash for immutable
         // caching
-        filename: 'stylesheets/[name]-[chunkhash].css'
-      })
-    ]
+        filename: 'stylesheets/[name]-[chunkhash].css',
+      }),
+    ],
   },
   {}
 )

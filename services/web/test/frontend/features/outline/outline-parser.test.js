@@ -2,7 +2,7 @@ import { expect } from 'chai'
 
 import {
   matchOutline,
-  nestOutline
+  nestOutline,
 } from '../../../../frontend/js/features/outline/outline-parser'
 
 describe('OutlineParser', function () {
@@ -37,7 +37,7 @@ describe('OutlineParser', function () {
         { line: 11, title: 'Section 2', level: 40 },
         { line: 12, title: 'Subsubsection without subsection', level: 60 },
         { line: 13, title: 'a paragraph', level: 70 },
-        { line: 14, title: 'a subparagraph', level: 80 }
+        { line: 14, title: 'a subparagraph', level: 80 },
       ])
     })
 
@@ -55,7 +55,7 @@ describe('OutlineParser', function () {
         { line: 3, title: 'Label after ', level: 40 },
         { line: 4, title: 'Label  between', level: 40 },
         { line: 5, title: 'TT Bar', level: 40 },
-        { line: 6, title: 'plain title', level: 40 }
+        { line: 6, title: 'plain title', level: 40 },
       ])
     })
 
@@ -67,7 +67,7 @@ describe('OutlineParser', function () {
       const outline = matchOutline(content)
       expect(outline).to.deep.equal([
         { line: 2, title: 'Plain title', level: 40 },
-        { line: 3, title: ' Label before', level: 40 }
+        { line: 3, title: ' Label before', level: 40 },
       ])
     })
 
@@ -84,7 +84,7 @@ describe('OutlineParser', function () {
     it('matches unnumbered sections', function () {
       const outline = matchOutline('\\section*{Unnumbered}')
       expect(outline).to.deep.equal([
-        { line: 1, title: 'Unnumbered', level: 40 }
+        { line: 1, title: 'Unnumbered', level: 40 },
       ])
     })
 
@@ -93,7 +93,7 @@ describe('OutlineParser', function () {
         '\\chapter[Short Title For TOC]{Very Long Title for Text}'
       )
       expect(outline).to.deep.equal([
-        { line: 1, title: 'Short Title For TOC', level: 30 }
+        { line: 1, title: 'Short Title For TOC', level: 30 },
       ])
     })
 
@@ -107,7 +107,7 @@ describe('OutlineParser', function () {
       expect(outline).to.deep.equal([
         { line: 2, title: 'Weird Spacing', level: 40 },
         { line: 3, title: 'Weird Spacing Unnumbered', level: 40 },
-        { line: 4, title: 'Weird Spacing for TOC', level: 40 }
+        { line: 4, title: 'Weird Spacing for TOC', level: 40 },
       ])
     })
 
@@ -142,7 +142,7 @@ describe('OutlineParser', function () {
         { line: 90, title: 'Chapter', level: 30 },
         { line: 100, title: 'Part B', level: 20 },
         { line: 110, title: 'Section 2', level: 40 },
-        { line: 120, title: 'Subsubsection without subsection', level: 60 }
+        { line: 120, title: 'Subsubsection without subsection', level: 60 },
       ]
       const nestedOutline = nestOutline(flatOutline)
       expect(nestedOutline).to.deep.equal([
@@ -162,18 +162,20 @@ describe('OutlineParser', function () {
                   level: 40,
                   children: [
                     { line: 40, title: 'Subsection A 1 1', level: 50 },
-                    { line: 50, title: 'Subsection A 1 2', level: 50 }
-                  ]
+                    { line: 50, title: 'Subsection A 1 2', level: 50 },
+                  ],
                 },
                 { line: 60, title: 'Section A 2', level: 40 },
                 {
                   line: 70,
                   title: 'Section A 3',
                   level: 40,
-                  children: [{ line: 80, title: 'Subsection A 3 1', level: 50 }]
+                  children: [
+                    { line: 80, title: 'Subsection A 3 1', level: 50 },
+                  ],
                 },
-                { line: 90, title: 'Chapter', level: 30 }
-              ]
+                { line: 90, title: 'Chapter', level: 30 },
+              ],
             },
             {
               line: 100,
@@ -188,14 +190,14 @@ describe('OutlineParser', function () {
                     {
                       line: 120,
                       title: 'Subsubsection without subsection',
-                      level: 60
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
+                      level: 60,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       ])
     })
   })

@@ -58,11 +58,11 @@ MessageList.propTypes = {
   messages: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
-      timestamp: PropTypes.number
+      timestamp: PropTypes.number,
     })
   ).isRequired,
   resetUnreadMessages: PropTypes.func.isRequired,
-  userId: PropTypes.string.isRequired
+  userId: PropTypes.string.isRequired,
 }
 
 export default MessageList

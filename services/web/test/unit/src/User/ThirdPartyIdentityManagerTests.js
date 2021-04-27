@@ -9,7 +9,7 @@ describe('ThirdPartyIdentityManager', function () {
     this.userId = 'a1b2c3'
     this.user = {
       _id: this.userId,
-      email: 'example@overleaf.com'
+      email: 'example@overleaf.com',
     }
     this.externalUserId = 'id789'
     this.externalData = {}
@@ -17,28 +17,28 @@ describe('ThirdPartyIdentityManager', function () {
     this.ThirdPartyIdentityManager = SandboxedModule.require(modulePath, {
       requires: {
         '../../../../app/src/Features/User/UserAuditLogHandler': (this.UserAuditLogHandler = {
-          addEntry: sinon.stub().yields()
+          addEntry: sinon.stub().yields(),
         }),
         '../../../../app/src/Features/Email/EmailHandler': (this.EmailHandler = {
-          sendEmail: sinon.stub().yields()
+          sendEmail: sinon.stub().yields(),
         }),
         '../../../../app/src/models/User': {
           User: (this.User = {
             findOneAndUpdate: sinon.stub().yields(undefined, this.user),
-            findOne: sinon.stub().yields(undefined, undefined)
-          })
+            findOne: sinon.stub().yields(undefined, undefined),
+          }),
         },
         'settings-sharelatex': {
           oauthProviders: {
             google: {
-              name: 'Google'
+              name: 'Google',
             },
             orcid: {
-              name: 'Orcid'
-            }
-          }
-        }
-      }
+              name: 'Orcid',
+            },
+          },
+        },
+      },
     })
   })
   describe('getUser', function () {
@@ -51,7 +51,7 @@ describe('ThirdPartyIdentityManager', function () {
           expect(error.message).to.equal('invalid SSO arguments')
           expect(error.info).to.deep.equal({
             externalUserId: undefined,
-            providerId: undefined
+            providerId: undefined,
           })
           done()
         }
@@ -113,7 +113,7 @@ describe('ThirdPartyIdentityManager', function () {
         this.auditLog.initiatorId,
         this.auditLog.ipAddress,
         {
-          providerId: 'google'
+          providerId: 'google',
         }
       )
     })
@@ -151,7 +151,7 @@ describe('ThirdPartyIdentityManager', function () {
               expect(this.logger.error.lastCall).to.be.calledWithExactly(
                 {
                   err: anError,
-                  userId: this.userId
+                  userId: this.userId,
                 },
                 'could not send security alert email when Google account linked'
               )
@@ -187,7 +187,7 @@ describe('ThirdPartyIdentityManager', function () {
         this.auditLog.initiatorId,
         this.auditLog.ipAddress,
         {
-          providerId: 'orcid'
+          providerId: 'orcid',
         }
       )
     })
@@ -222,7 +222,7 @@ describe('ThirdPartyIdentityManager', function () {
               expect(this.logger.error.lastCall).to.be.calledWithExactly(
                 {
                   err: anError,
-                  userId: this.userId
+                  userId: this.userId,
                 },
                 'could not send security alert email when Google account no longer linked'
               )

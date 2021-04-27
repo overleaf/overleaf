@@ -15,7 +15,7 @@
  */
 const MAPPING = {
   also_provides_free_plan: ['registerLinkOpen', 'registerLinkClose'],
-  faq_pay_by_invoice_answer: ['payByInvoiceLinkOpen', 'payByInvoiceLinkClose']
+  faq_pay_by_invoice_answer: ['payByInvoiceLinkOpen', 'payByInvoiceLinkClose'],
 }
 
 const { transformLocales } = require('./transformLocales')

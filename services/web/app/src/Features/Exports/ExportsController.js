@@ -21,7 +21,7 @@ module.exports = {
     const export_params = {
       project_id,
       brand_variation_id,
-      user_id
+      user_id,
     }
 
     if (req.body) {
@@ -69,13 +69,13 @@ module.exports = {
             user_id,
             project_id,
             brand_variation_id,
-            export_v1_id: export_data.v1_id
+            export_v1_id: export_data.v1_id,
           },
           'exported project'
         )
         return res.json({
           export_v1_id: export_data.v1_id,
-          message: export_data.message
+          message: export_data.message,
         })
       }
     )
@@ -88,7 +88,7 @@ module.exports = {
       if (err != null) {
         json = {
           status_summary: 'failed',
-          status_detail: err.toString
+          status_detail: err.toString,
         }
         res.json({ export_json: json })
         return err
@@ -102,7 +102,7 @@ module.exports = {
         v2_user_first_name: parsed_export.v2_user_first_name,
         v2_user_last_name: parsed_export.v2_user_last_name,
         title: parsed_export.title,
-        token: parsed_export.token
+        token: parsed_export.token,
       }
       return res.json({ export_json: json })
     })
@@ -123,5 +123,5 @@ module.exports = {
         return res.redirect(export_file_url)
       }
     )
-  }
+  },
 }

@@ -13,35 +13,35 @@ describe('BetaProgramController', function () {
       _id: (this.user_id = 'a_simple_id'),
       email: 'user@example.com',
       features: {},
-      betaProgram: false
+      betaProgram: false,
     }
     this.req = {
       query: {},
       session: {
-        user: this.user
-      }
+        user: this.user,
+      },
     }
     this.BetaProgramController = SandboxedModule.require(modulePath, {
       requires: {
         './BetaProgramHandler': (this.BetaProgramHandler = {
           optIn: sinon.stub(),
-          optOut: sinon.stub()
+          optOut: sinon.stub(),
         }),
         '../User/UserGetter': (this.UserGetter = {
-          getUser: sinon.stub()
+          getUser: sinon.stub(),
         }),
         'settings-sharelatex': (this.settings = {
-          languages: {}
+          languages: {},
         }),
         '../Authentication/AuthenticationController': (this.AuthenticationController = {
-          getLoggedInUserId: sinon.stub().returns(this.user._id)
-        })
-      }
+          getLoggedInUserId: sinon.stub().returns(this.user._id),
+        }),
+      },
     })
     this.res = {
       send: sinon.stub(),
       redirect: sinon.stub(),
-      render: sinon.stub()
+      render: sinon.stub(),
     }
     this.next = sinon.stub()
   })

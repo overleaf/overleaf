@@ -15,7 +15,7 @@ export function executeV2Captcha(disabled = false) {
               _recaptchaResolve = undefined
             }
             window.grecaptcha.reset()
-          }
+          },
         })
       }
       _recaptchaResolve = resolve

@@ -31,5 +31,5 @@ const wrapBodyParser = method => opts => {
 
 module.exports = {
   urlencoded: wrapBodyParser('urlencoded'),
-  json: wrapBodyParser('json')
+  json: wrapBodyParser('json'),
 }

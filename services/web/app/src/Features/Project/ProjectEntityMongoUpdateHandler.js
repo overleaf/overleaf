@@ -26,7 +26,7 @@ const ENTITY_TYPE_TO_MONGO_PATH_SEGMENT = {
   files: 'fileRefs',
   fileRefs: 'fileRefs',
   folder: 'folders',
-  folders: 'folders'
+  folders: 'folders',
 }
 
 module.exports = {
@@ -35,39 +35,39 @@ module.exports = {
   addFile: callbackifyMultiResult(wrapWithLock(addFile), ['result', 'project']),
   addFolder: callbackifyMultiResult(wrapWithLock(addFolder), [
     'folder',
-    'parentFolderId'
+    'parentFolderId',
   ]),
   replaceFileWithNew: callbackifyMultiResult(wrapWithLock(replaceFileWithNew), [
     'oldFileRef',
     'project',
     'path',
-    'newProject'
+    'newProject',
   ]),
   replaceDocWithFile: callbackify(replaceDocWithFile),
   replaceFileWithDoc: callbackify(replaceFileWithDoc),
   mkdirp: callbackifyMultiResult(wrapWithLock(mkdirp), [
     'newFolders',
-    'folder'
+    'folder',
   ]),
   moveEntity: callbackifyMultiResult(wrapWithLock(moveEntity), [
     'project',
     'startPath',
     'endPath',
     'rev',
-    'changes'
+    'changes',
   ]),
   deleteEntity: callbackifyMultiResult(wrapWithLock(deleteEntity), [
     'entity',
     'path',
     'projectBeforeDeletion',
-    'newProject'
+    'newProject',
   ]),
   renameEntity: callbackifyMultiResult(wrapWithLock(renameEntity), [
     'project',
     'startPath',
     'endPath',
     'rev',
-    'changes'
+    'changes',
   ]),
   createNewFolderStructure: callbackify(wrapWithLock(createNewFolderStructure)),
   _insertDeletedFileReference: callbackify(_insertDeletedFileReference),
@@ -86,8 +86,8 @@ module.exports = {
     renameEntity: wrapWithLock(renameEntity),
     createNewFolderStructure: wrapWithLock(createNewFolderStructure),
     _insertDeletedFileReference,
-    _putElement
-  }
+    _putElement,
+  },
 }
 
 function wrapWithLock(methodWithoutLock) {
@@ -109,7 +109,7 @@ async function addDoc(projectId, folderId, doc) {
     {
       rootFolder: true,
       name: true,
-      overleaf: true
+      overleaf: true,
     }
   )
   folderId = _confirmFolder(project, folderId)
@@ -156,7 +156,7 @@ async function replaceFileWithNew(projectId, fileId, newFileRef) {
   const { element: fileRef, path } = await ProjectLocator.promises.findElement({
     project,
     element_id: fileId,
-    type: 'file'
+    type: 'file',
   })
   await _insertDeletedFileReference(projectId, fileRef)
   const newProject = await Project.findOneAndUpdate(
@@ -166,12 +166,12 @@ async function replaceFileWithNew(projectId, fileId, newFileRef) {
         [`${path.mongo}._id`]: newFileRef._id,
         [`${path.mongo}.created`]: new Date(),
         [`${path.mongo}.linkedFileData`]: newFileRef.linkedFileData,
-        [`${path.mongo}.hash`]: newFileRef.hash
+        [`${path.mongo}.hash`]: newFileRef.hash,
       },
       $inc: {
         version: 1,
-        [`${path.mongo}.rev`]: 1
-      }
+        [`${path.mongo}.rev`]: 1,
+      },
     },
     { new: true }
   ).exec()
@@ -192,19 +192,19 @@ async function replaceDocWithFile(projectId, docId, fileRef) {
   const { path } = await ProjectLocator.promises.findElement({
     project,
     element_id: docId,
-    type: 'doc'
+    type: 'doc',
   })
   const folderMongoPath = _getParentMongoPath(path.mongo)
   const newProject = await Project.findOneAndUpdate(
     { _id: project._id },
     {
       $pull: {
-        [`${folderMongoPath}.docs`]: { _id: docId }
+        [`${folderMongoPath}.docs`]: { _id: docId },
       },
       $push: {
-        [`${folderMongoPath}.fileRefs`]: fileRef
+        [`${folderMongoPath}.fileRefs`]: fileRef,
       },
-      $inc: { version: 1 }
+      $inc: { version: 1 },
     },
     { new: true }
   ).exec()
@@ -219,19 +219,19 @@ async function replaceFileWithDoc(projectId, fileId, newDoc) {
   const { path } = await ProjectLocator.promises.findElement({
     project,
     element_id: fileId,
-    type: 'file'
+    type: 'file',
   })
   const folderMongoPath = _getParentMongoPath(path.mongo)
   const newProject = await Project.findOneAndUpdate(
     { _id: project._id },
     {
       $pull: {
-        [`${folderMongoPath}.fileRefs`]: { _id: fileId }
+        [`${folderMongoPath}.fileRefs`]: { _id: fileId },
       },
       $push: {
-        [`${folderMongoPath}.docs`]: newDoc
+        [`${folderMongoPath}.docs`]: newDoc,
       },
-      $inc: { version: 1 }
+      $inc: { version: 1 },
     },
     { new: true }
   ).exec()
@@ -258,11 +258,11 @@ async function mkdirp(projectId, path, options = {}) {
     builtUpPath += `/${folderName}`
     try {
       const {
-        element: foundFolder
+        element: foundFolder,
       } = await ProjectLocator.promises.findElementByPath({
         project,
         path: builtUpPath,
-        exactCaseMatch: options.exactCaseMatch
+        exactCaseMatch: options.exactCaseMatch,
       })
       lastFolder = foundFolder
     } catch (err) {
@@ -270,7 +270,7 @@ async function mkdirp(projectId, path, options = {}) {
       const parentFolderId = lastFolder && lastFolder._id
       const {
         folder: newFolder,
-        parentFolderId: newParentFolderId
+        parentFolderId: newParentFolderId,
       } = await addFolder(projectId, parentFolderId, folderName)
       newFolder.parentFolder_id = newParentFolderId
       lastFolder = newFolder
@@ -287,11 +287,11 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
   )
   const {
     element: entity,
-    path: entityPath
+    path: entityPath,
   } = await ProjectLocator.promises.findElement({
     project,
     element_id: entityId,
-    type: entityType
+    type: entityType,
   })
   // Prevent top-level docs/files with reserved names (to match v1 behaviour)
   if (_blockedFilename(entityPath, entityType)) {
@@ -300,7 +300,7 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
   await _checkValidMove(project, entityType, entity, entityPath, destFolderId)
   const {
     docs: oldDocs,
-    files: oldFiles
+    files: oldFiles,
   } = await ProjectEntityHandler.promises.getAllEntitiesFromProject(project)
   // For safety, insert the entity in the destination
   // location first, and then remove the original.  If
@@ -330,7 +330,7 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
   )
   const {
     docs: newDocs,
-    files: newFiles
+    files: newFiles,
   } = await ProjectEntityHandler.promises.getAllEntitiesFromProject(newProject)
   const startPath = entityPath.fileSystem
   const endPath = result.path.fileSystem
@@ -339,7 +339,7 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
     newDocs,
     oldFiles,
     newFiles,
-    newProject
+    newProject,
   }
   // check that no files have been lost (or duplicated)
   if (
@@ -354,7 +354,7 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
         oldFiles: oldFiles.length,
         newFiles: newFiles.length,
         origProject: project,
-        newProject
+        newProject,
       },
       "project corrupted moving files - shouldn't happen"
     )
@@ -375,7 +375,7 @@ async function deleteEntity(projectId, entityId, entityType, callback) {
   const { element: entity, path } = await ProjectLocator.promises.findElement({
     project,
     element_id: entityId,
-    type: entityType
+    type: entityType,
   })
   const newProject = await _removeElementFromMongoArray(
     Project,
@@ -401,11 +401,11 @@ async function renameEntity(
   const {
     element: entity,
     path: entPath,
-    folder: parentFolder
+    folder: parentFolder,
   } = await ProjectLocator.promises.findElement({
     project,
     element_id: entityId,
-    type: entityType
+    type: entityType,
   })
   const startPath = entPath.fileSystem
   const endPath = path.join(path.dirname(entPath.fileSystem), newName)
@@ -420,7 +420,7 @@ async function renameEntity(
 
   const {
     docs: oldDocs,
-    files: oldFiles
+    files: oldFiles,
   } = await ProjectEntityHandler.promises.getAllEntitiesFromProject(project)
 
   // we need to increment the project version number for any structure change
@@ -432,14 +432,14 @@ async function renameEntity(
 
   const {
     docs: newDocs,
-    files: newFiles
+    files: newFiles,
   } = await ProjectEntityHandler.promises.getAllEntitiesFromProject(newProject)
   return {
     project,
     startPath,
     endPath,
     rev: entity.rev,
-    changes: { oldDocs, newDocs, oldFiles, newFiles, newProject }
+    changes: { oldDocs, newDocs, oldFiles, newFiles, newProject },
   }
 }
 
@@ -450,7 +450,7 @@ async function _insertDeletedFileReference(projectId, fileRef) {
     name: fileRef.name,
     linkedFileData: fileRef.linkedFileData,
     hash: fileRef.hash,
-    deletedAt: new Date()
+    deletedAt: new Date(),
   })
 }
 
@@ -466,7 +466,7 @@ async function _removeElementFromMongoArray(
   const query = { _id: modelId }
   const update = {
     $pull: { [nonArrayPath]: { _id: elementId } },
-    $inc: { version: 1 }
+    $inc: { version: 1 },
   }
   if (deleteRootDoc) {
     update.$unset = { rootDoc_id: 1 }
@@ -536,11 +536,11 @@ async function _putElement(project, folderId, element, type) {
   const { element: folder, path } = await ProjectLocator.promises.findElement({
     project,
     element_id: folderId,
-    type: 'folder'
+    type: 'folder',
   })
   const newPath = {
     fileSystem: `${path.fileSystem}/${element.name}`,
-    mongo: path.mongo
+    mongo: path.mongo,
   }
   // check if the path would be too long
   if (!SafePath.isAllowedLength(newPath.fileSystem)) {
@@ -620,11 +620,11 @@ async function _checkValidMove(
 ) {
   const {
     element: destEntity,
-    path: destFolderPath
+    path: destFolderPath,
   } = await ProjectLocator.promises.findElement({
     project,
     element_id: destFolderId,
-    type: 'folder'
+    type: 'folder',
   })
   // check if there is already a doc/file/folder with the same name
   // in the destination folder
@@ -663,21 +663,21 @@ async function createNewFolderStructure(projectId, docEntries, fileEntries) {
         _id: projectId,
         'rootFolder.0.folders.0': { $exists: false },
         'rootFolder.0.docs.0': { $exists: false },
-        'rootFolder.0.files.0': { $exists: false }
+        'rootFolder.0.files.0': { $exists: false },
       },
       {
         $set: { rootFolder: [rootFolder] },
-        $inc: { version: 1 }
+        $inc: { version: 1 },
       },
       {
         new: true,
         lean: true,
-        fields: { version: 1 }
+        fields: { version: 1 },
       }
     ).exec()
     if (project == null) {
       throw new OError('project not found or folder structure already exists', {
-        projectId
+        projectId,
       })
     }
     return project.version

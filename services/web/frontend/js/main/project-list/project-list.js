@@ -282,7 +282,7 @@ App.controller('ProjectPageController', function (
       'project_list',
       JSON.stringify({
         filter: $scope.filter,
-        selectedTagId: selectedTag != null ? selectedTag._id : undefined
+        selectedTagId: selectedTag != null ? selectedTag._id : undefined,
       })
     )
     $scope.updateSelectedProjects()
@@ -346,8 +346,8 @@ App.controller('ProjectPageController', function (
         method: 'DELETE',
         url: `/tag/${tag._id}/project/${projectId}`,
         headers: {
-          'X-CSRF-Token': window.csrfToken
-        }
+          'X-CSRF-Token': window.csrfToken,
+        },
       })
     }
 
@@ -371,8 +371,8 @@ App.controller('ProjectPageController', function (
         method: 'DELETE',
         url: `/tag/${tag._id}/project/${project.id}`,
         headers: {
-          'X-CSRF-Token': window.csrfToken
-        }
+          'X-CSRF-Token': window.csrfToken,
+        },
       })
       $scope.updateVisibleProjects()
     }
@@ -407,7 +407,7 @@ App.controller('ProjectPageController', function (
 
     for (let projectId of addedProjectIds) {
       queuedHttp.post(`/tag/${tag._id}/project/${projectId}`, {
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       })
     }
   }
@@ -415,7 +415,7 @@ App.controller('ProjectPageController', function (
   $scope.openNewTagModal = function (e) {
     const modalInstance = $modal.open({
       templateUrl: 'newTagModalTemplate',
-      controller: 'NewTagModalController'
+      controller: 'NewTagModalController',
     })
 
     modalInstance.result.then(function (tag) {
@@ -438,7 +438,7 @@ App.controller('ProjectPageController', function (
       .post('/project/new', {
         _csrf: window.csrfToken,
         projectName: name,
-        template
+        template,
       })
       .then(function (response) {
         const { data } = response
@@ -446,7 +446,7 @@ App.controller('ProjectPageController', function (
           name,
           _id: data.project_id,
           accessLevel: 'owner',
-          owner: data.owner
+          owner: data.owner,
           // TODO: Check access level if correct after adding it in
           // to the rest of the app
         })
@@ -465,9 +465,9 @@ App.controller('ProjectPageController', function (
       resolve: {
         template() {
           return template
-        }
+        },
       },
-      scope: $scope
+      scope: $scope,
     })
 
     modalInstance.result.then(
@@ -479,7 +479,7 @@ App.controller('ProjectPageController', function (
     queuedHttp
       .post(`/project/${project.id}/rename`, {
         newProjectName: newName,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       })
       .then(() => (project.name = newName))
 
@@ -499,9 +499,9 @@ App.controller('ProjectPageController', function (
       resolve: {
         project() {
           return project
-        }
+        },
       },
-      scope: $scope
+      scope: $scope,
     })
   }
 
@@ -514,7 +514,7 @@ App.controller('ProjectPageController', function (
     return queuedHttp
       .post(`/project/${project.id}/clone`, {
         _csrf: window.csrfToken,
-        projectName: cloneName
+        projectName: cloneName,
       })
       .then(function (response) {
         const { data } = response
@@ -522,7 +522,7 @@ App.controller('ProjectPageController', function (
           name: data.name,
           id: data.project_id,
           accessLevel: 'owner',
-          owner: data.owner
+          owner: data.owner,
           // TODO: Check access level if correct after adding it in
           // to the rest of the app
         })
@@ -541,9 +541,9 @@ App.controller('ProjectPageController', function (
       resolve: {
         project() {
           return project
-        }
+        },
       },
-      scope: $scope
+      scope: $scope,
     })
   }
 
@@ -566,8 +566,8 @@ App.controller('ProjectPageController', function (
         },
         action() {
           return action
-        }
-      }
+        },
+      },
     })
   }
 
@@ -722,8 +722,8 @@ App.controller('ProjectPageController', function (
       method: 'POST',
       url: `/project/${project.id}/archive`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
@@ -732,8 +732,8 @@ App.controller('ProjectPageController', function (
       method: 'DELETE',
       url: `/project/${project.id}/archive`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
@@ -742,8 +742,8 @@ App.controller('ProjectPageController', function (
       method: 'POST',
       url: `/project/${project.id}/trash`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
@@ -752,8 +752,8 @@ App.controller('ProjectPageController', function (
       method: 'DELETE',
       url: `/project/${project.id}/trash`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
@@ -762,8 +762,8 @@ App.controller('ProjectPageController', function (
       method: 'POST',
       url: `/project/${project.id}/leave`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
@@ -772,8 +772,8 @@ App.controller('ProjectPageController', function (
       method: 'DELETE',
       url: `/project/${project.id}`,
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
   }
 
@@ -798,7 +798,7 @@ App.controller('ProjectPageController', function (
   $scope.openUploadProjectModal = function () {
     $modal.open({
       templateUrl: 'uploadProjectModalTemplate',
-      controller: 'UploadProjectModalController'
+      controller: 'UploadProjectModalController',
     })
   }
 

@@ -25,24 +25,24 @@ describe('ReferencesHandler', function () {
       owner_ref: (this.fakeOwner = {
         _id: 'some_owner',
         features: {
-          references: false
-        }
+          references: false,
+        },
       }),
       rootFolder: [
         {
           docs: [
             { name: 'one.bib', _id: 'aaa' },
-            { name: 'two.txt', _id: 'bbb' }
+            { name: 'two.txt', _id: 'bbb' },
           ],
           folders: [
             {
               docs: [{ name: 'three.bib', _id: 'ccc' }],
               fileRefs: [{ name: 'four.bib', _id: 'ghg' }],
-              folders: []
-            }
-          ]
-        }
-      ]
+              folders: [],
+            },
+          ],
+        },
+      ],
     }
     this.docIds = ['aaa', 'ccc']
     this.handler = SandboxedModule.require(modulePath, {
@@ -51,30 +51,30 @@ describe('ReferencesHandler', function () {
           apis: {
             references: { url: 'http://some.url/references' },
             docstore: { url: 'http://some.url/docstore' },
-            filestore: { url: 'http://some.url/filestore' }
-          }
+            filestore: { url: 'http://some.url/filestore' },
+          },
         }),
         request: (this.request = {
           get: sinon.stub(),
-          post: sinon.stub()
+          post: sinon.stub(),
         }),
         '../Project/ProjectGetter': (this.ProjectGetter = {
-          getProject: sinon.stub().callsArgWith(2, null, this.fakeProject)
+          getProject: sinon.stub().callsArgWith(2, null, this.fakeProject),
         }),
         '../User/UserGetter': (this.UserGetter = {
-          getUser: sinon.stub()
+          getUser: sinon.stub(),
         }),
         '../DocumentUpdater/DocumentUpdaterHandler': (this.DocumentUpdaterHandler = {
-          flushDocToMongo: sinon.stub().callsArgWith(2, null)
+          flushDocToMongo: sinon.stub().callsArgWith(2, null),
         }),
         '../../infrastructure/Features': (this.Features = {
-          hasFeature: sinon.stub().returns(true)
-        })
-      }
+          hasFeature: sinon.stub().returns(true),
+        }),
+      },
     })
     return (this.fakeResponseData = {
       projectId: this.projectId,
-      keys: ['k1', 'k2']
+      keys: ['k1', 'k2'],
     })
   })
 
@@ -446,13 +446,13 @@ describe('ReferencesHandler', function () {
           {
             docs: [
               { name: 'one.bib', _id: 'aaa' },
-              { name: 'two.txt', _id: 'bbb' }
+              { name: 'two.txt', _id: 'bbb' },
             ],
             folders: [
-              { docs: [{ name: 'three.bib', _id: 'ccc' }], folders: [] }
-            ]
-          }
-        ]
+              { docs: [{ name: 'three.bib', _id: 'ccc' }], folders: [] },
+            ],
+          },
+        ],
       }
       return (this.expectedIds = ['aaa', 'ccc'])
     })
@@ -476,18 +476,18 @@ describe('ReferencesHandler', function () {
           {
             docs: [
               { name: 'one.bib', _id: 'aaa' },
-              { name: 'two.txt', _id: 'bbb' }
+              { name: 'two.txt', _id: 'bbb' },
             ],
             fileRefs: [{ name: 'other.bib', _id: 'ddd' }],
             folders: [
               {
                 docs: [{ name: 'three.bib', _id: 'ccc' }],
                 fileRefs: [{ name: 'four.bib', _id: 'ghg' }],
-                folders: []
-              }
-            ]
-          }
-        ]
+                folders: [],
+              },
+            ],
+          },
+        ],
       }
       return (this.expectedIds = ['ddd', 'ghg'])
     })
@@ -503,8 +503,8 @@ describe('ReferencesHandler', function () {
       this.fakeProject = { owner_ref: (this.owner_ref = 'owner-ref-123') }
       this.owner = {
         features: {
-          references: false
-        }
+          references: false,
+        },
       }
       this.UserGetter.getUser = sinon.stub()
       this.UserGetter.getUser
@@ -545,7 +545,7 @@ describe('ReferencesHandler', function () {
       beforeEach(function () {
         return (this.owner.features = {
           referencesSearch: true,
-          references: false
+          references: false,
         })
       })
 

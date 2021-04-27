@@ -36,7 +36,7 @@ const App = angular
     'localStorage',
     'sessionStorage',
     'ngTagsInput',
-    'ui.select'
+    'ui.select',
   ])
   .config(function ($qProvider, $httpProvider, uiSelectConfig) {
     $qProvider.errorOnUnhandledRejections(false)
@@ -60,11 +60,11 @@ const App = angular
             // that isn't yet on the page, so we disable it and set a global font
             // scale factor
             scale: 110,
-            matchFontHeight: false
+            matchFontHeight: false,
           },
           TeX: {
             equationNumbers: { autoNumber: 'AMS' },
-            useLabelIDs: false
+            useLabelIDs: false,
           },
           skipStartupTypeset: true,
           tex2jax: {
@@ -73,9 +73,9 @@ const App = angular
             inlineMath: [['\\(', '\\)']],
             displayMath: [
               ['$$', '$$'],
-              ['\\[', '\\]']
-            ]
-          }
+              ['\\[', '\\]'],
+            ],
+          },
         })
     )
   })

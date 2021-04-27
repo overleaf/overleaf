@@ -36,11 +36,11 @@ export default {
     show: true,
     error: false,
     inFlight: false,
-    valid: true
+    valid: true,
   },
   argTypes: {
     cancel: { action: 'cancel' },
     handleSubmit: { action: 'submit' },
-    setClonedProjectName: { action: 'set project name' }
-  }
+    setClonedProjectName: { action: 'set project name' },
+  },
 }

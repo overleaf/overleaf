@@ -16,5 +16,5 @@ export default App.directive('maxHeight', () => ({
         return element.css({ 'max-height': value })
       }
     })
-  }
+  },
 }))

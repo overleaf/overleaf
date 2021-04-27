@@ -13,51 +13,51 @@ describe('ProjectGetter', function () {
     this.userId = new ObjectId()
 
     this.DeletedProject = {
-      find: sinon.stub().yields(null, [this.deletedProject])
+      find: sinon.stub().yields(null, [this.deletedProject]),
     }
     this.Project = {
       find: sinon.stub(),
-      findOne: sinon.stub().yields(null, this.project)
+      findOne: sinon.stub().yields(null, this.project),
     }
     this.CollaboratorsGetter = {
       getProjectsUserIsMemberOf: sinon.stub().yields(null, {
         readAndWrite: [],
         readOnly: [],
         tokenReadAndWrite: [],
-        tokenReadOnly: []
-      })
+        tokenReadOnly: [],
+      }),
     }
     this.LockManager = {
       runWithLock: sinon
         .stub()
-        .callsFake((namespace, id, runner, callback) => runner(callback))
+        .callsFake((namespace, id, runner, callback) => runner(callback)),
     }
     this.db = {
       projects: {
-        findOne: sinon.stub().yields(null, this.project)
+        findOne: sinon.stub().yields(null, this.project),
       },
-      users: {}
+      users: {},
     }
     this.ProjectEntityMongoUpdateHandler = {
-      lockKey: sinon.stub().returnsArg(0)
+      lockKey: sinon.stub().returnsArg(0),
     }
     this.ProjectGetter = SandboxedModule.require(modulePath, {
       requires: {
         '../../infrastructure/mongodb': { db: this.db, ObjectId },
         '@overleaf/metrics': {
-          timeAsyncMethod: sinon.stub()
+          timeAsyncMethod: sinon.stub(),
         },
         '../../models/Project': {
-          Project: this.Project
+          Project: this.Project,
         },
         '../../models/DeletedProject': {
-          DeletedProject: this.DeletedProject
+          DeletedProject: this.DeletedProject,
         },
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../../infrastructure/LockManager': this.LockManager,
         './ProjectEntityMongoUpdateHandler': this
-          .ProjectEntityMongoUpdateHandler
-      }
+          .ProjectEntityMongoUpdateHandler,
+      },
     })
   })
 
@@ -89,7 +89,7 @@ describe('ProjectGetter', function () {
           'rootFolder.folders.folders.folders.folders.docs.lines': 0,
           'rootFolder.folders.folders.folders.folders.folders.docs.lines': 0,
           'rootFolder.folders.folders.folders.folders.folders.folders.docs.lines': 0,
-          'rootFolder.folders.folders.folders.folders.folders.folders.folders.docs.lines': 0
+          'rootFolder.folders.folders.folders.folders.folders.folders.folders.docs.lines': 0,
         }
 
         this.ProjectGetter.getProject
@@ -139,7 +139,7 @@ describe('ProjectGetter', function () {
           'rootFolder.folders.folders.folders.folders.folders.folders.docs': 0,
           'rootFolder.folders.folders.folders.folders.folders.folders.fileRefs': 0,
           'rootFolder.folders.folders.folders.folders.folders.folders.folders.docs': 0,
-          'rootFolder.folders.folders.folders.folders.folders.folders.folders.fileRefs': 0
+          'rootFolder.folders.folders.folders.folders.folders.folders.folders.fileRefs': 0,
         }
         this.ProjectGetter.getProject
           .calledWith(this.project._id, excludes)
@@ -199,7 +199,7 @@ describe('ProjectGetter', function () {
             this.db.projects.findOne.lastCall.args[0]._id.toString()
           ).to.equal(this.projectIdStr)
           expect(this.db.projects.findOne.lastCall.args[1]).to.deep.equal({
-            projection: this.projection
+            projection: this.projection,
           })
         })
       })
@@ -267,7 +267,7 @@ describe('ProjectGetter', function () {
             this.db.projects.findOne.lastCall.args[0]._id.toString()
           ).to.equal(this.projectIdStr)
           expect(this.db.projects.findOne.lastCall.args[1]).to.deep.equal({
-            projection: this.projection
+            projection: this.projection,
           })
         })
       })
@@ -295,7 +295,7 @@ describe('ProjectGetter', function () {
         readAndWrite: ['mock-rw-projects'],
         readOnly: ['mock-ro-projects'],
         tokenReadAndWrite: ['mock-token-rw-projects'],
-        tokenReadOnly: ['mock-token-ro-projects']
+        tokenReadOnly: ['mock-token-ro-projects'],
       })
       this.ProjectGetter.findAllUsersProjects(
         this.userId,
@@ -311,7 +311,7 @@ describe('ProjectGetter', function () {
           readAndWrite: ['mock-rw-projects'],
           readOnly: ['mock-ro-projects'],
           tokenReadAndWrite: ['mock-token-rw-projects'],
-          tokenReadOnly: ['mock-token-ro-projects']
+          tokenReadOnly: ['mock-token-ro-projects'],
         })
         .should.equal(true)
     })
@@ -374,7 +374,7 @@ describe('ProjectGetter', function () {
           { name: 'find me!' },
           { name: 'not me!' },
           { name: 'FIND ME!' },
-          { name: 'Find Me!' }
+          { name: 'Find Me!' },
         ])
       this.ProjectGetter.findUsersProjectsByName(
         this.userId,
@@ -399,7 +399,7 @@ describe('ProjectGetter', function () {
         readAndWrite: [{ name: 'FIND ME!' }],
         readOnly: [{ name: 'Find Me!' }],
         tokenReadAndWrite: [{ name: 'find ME!' }],
-        tokenReadOnly: [{ name: 'FIND me!' }]
+        tokenReadOnly: [{ name: 'FIND me!' }],
       })
       this.ProjectGetter.findUsersProjectsByName(
         this.userId,
@@ -410,7 +410,7 @@ describe('ProjectGetter', function () {
           }
           expect(projects.map(project => project.name)).to.have.members([
             'find me!',
-            'FIND ME!'
+            'FIND ME!',
           ])
           done()
         }
@@ -425,7 +425,7 @@ describe('ProjectGetter', function () {
           return done(err)
         }
         sinon.assert.calledWith(this.DeletedProject.find, {
-          'deleterData.deletedProjectOwnerId': 'giraffe'
+          'deleterData.deletedProjectOwnerId': 'giraffe',
         })
         done()
       })

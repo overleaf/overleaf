@@ -17,7 +17,7 @@ describe('PasswordUpdate', function () {
     userHelper = await UserHelper.createUser({ email, password })
     userHelper = await UserHelper.loginUser({
       email,
-      password
+      password,
     })
     await userHelper.getCsrfToken()
   })
@@ -27,9 +27,9 @@ describe('PasswordUpdate', function () {
         form: {
           currentPassword: password,
           newPassword1: 'new-password',
-          newPassword2: 'new-password'
+          newPassword2: 'new-password',
         },
-        simple: false
+        simple: false,
       })
       userHelper = await UserHelper.getUser({ email })
       user = userHelper.user
@@ -53,9 +53,9 @@ describe('PasswordUpdate', function () {
         response = await userHelper.request.post('/user/password/update', {
           form: {
             newPassword1: 'new-password',
-            newPassword2: 'new-password'
+            newPassword2: 'new-password',
           },
-          simple: false
+          simple: false,
         })
         userHelper = await UserHelper.getUser({ email })
       })
@@ -73,9 +73,9 @@ describe('PasswordUpdate', function () {
           form: {
             currentPassword: 'wrong-password',
             newPassword1: 'new-password',
-            newPassword2: 'new-password'
+            newPassword2: 'new-password',
           },
-          simple: false
+          simple: false,
         })
         userHelper = await UserHelper.getUser({ email })
       })
@@ -93,10 +93,10 @@ describe('PasswordUpdate', function () {
           form: {
             currentPassword: password,
             newPassword1: 'new-password',
-            newPassword2: 'oops-password'
+            newPassword2: 'oops-password',
           },
           json: true,
-          simple: false
+          simple: false,
         })
         userHelper = await UserHelper.getUser({ email })
       })
@@ -117,10 +117,10 @@ describe('PasswordUpdate', function () {
           form: {
             currentPassword: password,
             newPassword1: 'short',
-            newPassword2: 'short'
+            newPassword2: 'short',
           },
           json: true,
-          simple: false
+          simple: false,
         })
         userHelper = await UserHelper.getUser({ email })
       })

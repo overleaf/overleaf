@@ -27,15 +27,15 @@ describe('UserMembershipsHandler', function () {
     return (this.UserMembershipsHandler = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/Institution': {
-          Institution: this.Institution
+          Institution: this.Institution,
         },
         '../../models/Subscription': {
-          Subscription: this.Subscription
+          Subscription: this.Subscription,
         },
         '../../models/Publisher': {
-          Publisher: this.Publisher
-        }
-      }
+          Publisher: this.Publisher,
+        },
+      },
     }))
   })
 

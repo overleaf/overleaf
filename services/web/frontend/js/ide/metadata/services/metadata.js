@@ -85,7 +85,7 @@ export default App.factory('metadata', function ($http, ide) {
         // Don't broadcast metadata when there are no other users in the
         // project.
         broadcast: ide.$scope.onlineUsersCount > 0,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       })
       .then(function (response) {
         const { data } = response

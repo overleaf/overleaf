@@ -25,7 +25,7 @@ function generateAndEmailResetToken(email, callback) {
           settings.siteUrl
         }/user/password/set?passwordResetToken=${token}&email=${encodeURIComponent(
           email
-        )}`
+        )}`,
       }
       EmailHandler.sendEmail('passwordResetRequested', emailOptions, err => {
         if (err) {
@@ -89,7 +89,7 @@ async function setNewUserPassword(token, password, auditLog) {
     return {
       found: false,
       reset: false,
-      userId: null
+      userId: null,
     }
   }
 
@@ -113,14 +113,14 @@ const PasswordResetHandler = {
 
   setNewUserPassword: callbackify(setNewUserPassword),
 
-  getUserForPasswordResetToken
+  getUserForPasswordResetToken,
 }
 
 PasswordResetHandler.promises = {
   getUserForPasswordResetToken: promisify(
     PasswordResetHandler.getUserForPasswordResetToken
   ),
-  setNewUserPassword
+  setNewUserPassword,
 }
 
 module.exports = PasswordResetHandler

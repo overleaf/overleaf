@@ -28,9 +28,9 @@ module.exports = {
       RateLimiterMiddleware.rateLimit({
         endpointName: 'create-project-from-template',
         maxRequests: 20,
-        timeInterval: 60
+        timeInterval: 60,
       }),
       TemplatesController.createProjectFromV1Template
     )
-  }
+  },
 }

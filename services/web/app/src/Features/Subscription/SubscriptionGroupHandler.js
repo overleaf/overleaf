@@ -103,7 +103,7 @@ const SubscriptionGroupHandler = {
           )
         )
     )
-  }
+  },
 }
 
 var replaceInArray = function (model, property, oldValue, newValue, callback) {
@@ -136,7 +136,7 @@ SubscriptionGroupHandler.promises = {
   getTotalConfirmedUsersInGroup: promisify(
     SubscriptionGroupHandler.getTotalConfirmedUsersInGroup
   ),
-  isUserPartOfGroup: promisify(SubscriptionGroupHandler.isUserPartOfGroup)
+  isUserPartOfGroup: promisify(SubscriptionGroupHandler.isUserPartOfGroup),
 }
 
 module.exports = SubscriptionGroupHandler

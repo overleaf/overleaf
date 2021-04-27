@@ -25,16 +25,16 @@ describe('ChatApiHandler', function () {
     this.settings = {
       apis: {
         chat: {
-          internal_url: 'chat.sharelatex.env'
-        }
-      }
+          internal_url: 'chat.sharelatex.env',
+        },
+      },
     }
     this.request = sinon.stub()
     this.ChatApiHandler = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': this.settings,
-        request: this.request
-      }
+        request: this.request,
+      },
     })
     this.project_id = '3213213kl12j'
     this.user_id = '2k3jlkjs9'
@@ -62,8 +62,8 @@ describe('ChatApiHandler', function () {
             method: 'POST',
             json: {
               content: this.content,
-              user_id: this.user_id
-            }
+              user_id: this.user_id,
+            },
           })
           .should.equal(true)
       })
@@ -117,9 +117,9 @@ describe('ChatApiHandler', function () {
             url: `${this.settings.apis.chat.internal_url}/project/${this.project_id}/messages`,
             qs: {
               limit: this.limit,
-              before: this.before
+              before: this.before,
             },
-            json: true
+            json: true,
           })
           .should.equal(true)
       })

@@ -16,9 +16,9 @@ async function _sendSecurityAlertEmail(user, email) {
     to: user.email,
     actionDescribed: `a secondary email address has been added to your account ${user.email}`,
     message: [
-      `<span style="display:inline-block;padding: 0 20px;width:100%;">Added: <br/><b>${email}</b></span>`
+      `<span style="display:inline-block;padding: 0 20px;width:100%;">Added: <br/><b>${email}</b></span>`,
     ],
-    action: 'secondary email address added'
+    action: 'secondary email address added',
   }
   await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
 }
@@ -34,7 +34,7 @@ async function add(req, res, next) {
   const affiliationOptions = {
     university: req.body.university,
     role: req.body.role,
-    department: req.body.department
+    department: req.body.department,
   }
 
   try {
@@ -44,7 +44,7 @@ async function add(req, res, next) {
       affiliationOptions,
       {
         initiatorId: user._id,
-        ipAddress: req.ip
+        ipAddress: req.ip,
       }
     )
   } catch (error) {
@@ -149,7 +149,7 @@ const UserEmailsController = {
     }
     const auditLog = {
       initiatorId: userId,
-      ipAddress: req.ip
+      ipAddress: req.ip,
     }
     UserUpdater.setDefaultEmailAddress(
       userId,
@@ -207,7 +207,7 @@ const UserEmailsController = {
   showConfirm(req, res, next) {
     res.render('user/confirm_email', {
       token: req.query.token,
-      title: 'confirm_email'
+      title: 'confirm_email',
     })
   },
 
@@ -215,7 +215,7 @@ const UserEmailsController = {
     const { token } = req.body
     if (!token) {
       return res.status(422).json({
-        message: req.i18n.translate('confirmation_link_broken')
+        message: req.i18n.translate('confirmation_link_broken'),
       })
     }
     UserEmailsConfirmationHandler.confirmEmailFromToken(
@@ -224,7 +224,7 @@ const UserEmailsController = {
         if (error) {
           if (error instanceof Errors.NotFoundError) {
             res.status(404).json({
-              message: req.i18n.translate('confirmation_token_invalid')
+              message: req.i18n.translate('confirmation_token_invalid'),
             })
           } else {
             next(error)
@@ -247,7 +247,7 @@ const UserEmailsController = {
       return HttpErrorHandler.conflict(req, res, message)
     }
     next(error)
-  }
+  },
 }
 
 module.exports = UserEmailsController

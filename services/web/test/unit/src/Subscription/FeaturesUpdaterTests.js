@@ -19,9 +19,9 @@ describe('FeaturesUpdater', function () {
         '../Institutions/InstitutionsFeatures': (this.InstitutionsFeatures = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         '../../infrastructure/Modules': (this.Modules = {
-          hooks: { fire: sinon.stub() }
-        })
-      }
+          hooks: { fire: sinon.stub() },
+        }),
+      },
     })
   })
 
@@ -29,7 +29,7 @@ describe('FeaturesUpdater', function () {
     beforeEach(function () {
       this.user = {
         _id: this.user_id,
-        features: {}
+        features: {},
       }
       this.UserFeaturesUpdater.updateFeatures = sinon
         .stub()
@@ -151,7 +151,7 @@ describe('FeaturesUpdater', function () {
       beforeEach(function () {
         this.user = {
           _id: this.user_id,
-          features: { dropbox: true }
+          features: { dropbox: true },
         }
         this.UserGetter.getUser = sinon.stub().yields(null, this.user)
         this.FeaturesUpdater._mergeFeatures = sinon
@@ -172,50 +172,50 @@ describe('FeaturesUpdater', function () {
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileGroup: 'priority'
+            compileGroup: 'priority',
           },
           {
-            compileGroup: 'standard'
+            compileGroup: 'standard',
           }
         )
       ).to.deep.equal({
-        compileGroup: 'priority'
+        compileGroup: 'priority',
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileGroup: 'standard'
+            compileGroup: 'standard',
           },
           {
-            compileGroup: 'priority'
+            compileGroup: 'priority',
           }
         )
       ).to.deep.equal({
-        compileGroup: 'priority'
+        compileGroup: 'priority',
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileGroup: 'priority'
+            compileGroup: 'priority',
           },
           {
-            compileGroup: 'priority'
+            compileGroup: 'priority',
           }
         )
       ).to.deep.equal({
-        compileGroup: 'priority'
+        compileGroup: 'priority',
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileGroup: 'standard'
+            compileGroup: 'standard',
           },
           {
-            compileGroup: 'standard'
+            compileGroup: 'standard',
           }
         )
       ).to.deep.equal({
-        compileGroup: 'standard'
+        compileGroup: 'standard',
       })
     })
 
@@ -223,38 +223,38 @@ describe('FeaturesUpdater', function () {
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            collaborators: -1
+            collaborators: -1,
           },
           {
-            collaborators: 10
+            collaborators: 10,
           }
         )
       ).to.deep.equal({
-        collaborators: -1
+        collaborators: -1,
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            collaborators: 10
+            collaborators: 10,
           },
           {
-            collaborators: -1
+            collaborators: -1,
           }
         )
       ).to.deep.equal({
-        collaborators: -1
+        collaborators: -1,
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            collaborators: 4
+            collaborators: 4,
           },
           {
-            collaborators: 10
+            collaborators: 10,
           }
         )
       ).to.deep.equal({
-        collaborators: 10
+        collaborators: 10,
       })
     })
 
@@ -262,26 +262,26 @@ describe('FeaturesUpdater', function () {
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileTimeout: 20
+            compileTimeout: 20,
           },
           {
-            compileTimeout: 10
+            compileTimeout: 10,
           }
         )
       ).to.deep.equal({
-        compileTimeout: 20
+        compileTimeout: 20,
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            compileTimeout: 10
+            compileTimeout: 10,
           },
           {
-            compileTimeout: 20
+            compileTimeout: 20,
           }
         )
       ).to.deep.equal({
-        compileTimeout: 20
+        compileTimeout: 20,
       })
     })
 
@@ -289,50 +289,50 @@ describe('FeaturesUpdater', function () {
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            github: true
+            github: true,
           },
           {
-            github: false
+            github: false,
           }
         )
       ).to.deep.equal({
-        github: true
+        github: true,
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            github: false
+            github: false,
           },
           {
-            github: true
+            github: true,
           }
         )
       ).to.deep.equal({
-        github: true
+        github: true,
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            github: true
+            github: true,
           },
           {
-            github: true
+            github: true,
           }
         )
       ).to.deep.equal({
-        github: true
+        github: true,
       })
       expect(
         this.FeaturesUpdater._mergeFeatures(
           {
-            github: false
+            github: false,
           },
           {
-            github: false
+            github: false,
           }
         )
       ).to.deep.equal({
-        github: false
+        github: false,
       })
     })
   })
@@ -344,8 +344,8 @@ describe('FeaturesUpdater', function () {
         _id: this.user_id,
         email: 'user@example.com',
         overleaf: {
-          id: this.v1UserId
-        }
+          id: this.v1UserId,
+        },
       }
 
       this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)

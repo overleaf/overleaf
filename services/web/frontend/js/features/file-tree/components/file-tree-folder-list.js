@@ -12,7 +12,7 @@ function FileTreeFolderList({
   files,
   classes = {},
   dropRef = null,
-  children
+  children,
 }) {
   const docsAndFiles = [...docs, ...files]
 
@@ -55,10 +55,10 @@ FileTreeFolderList.propTypes = {
   docs: PropTypes.array.isRequired,
   files: PropTypes.array.isRequired,
   classes: PropTypes.exact({
-    root: PropTypes.string
+    root: PropTypes.string,
   }),
   dropRef: PropTypes.func,
-  children: PropTypes.node
+  children: PropTypes.node,
 }
 
 function compareFunction(one, two) {

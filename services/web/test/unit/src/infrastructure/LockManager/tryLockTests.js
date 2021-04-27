@@ -26,9 +26,9 @@ describe('LockManager - trying the lock', function () {
           client: () => {
             return {
               auth() {},
-              set: (this.set = sinon.stub())
+              set: (this.set = sinon.stub()),
             }
-          }
+          },
         },
         'settings-sharelatex': {
           redis: {},
@@ -37,13 +37,13 @@ describe('LockManager - trying the lock', function () {
             maxTestInterval: 1000,
             maxLockWaitTime: 10000,
             redisLockExpiry: 30,
-            slowExecutionThreshold: 5000
-          }
+            slowExecutionThreshold: 5000,
+          },
         },
         '@overleaf/metrics': {
-          inc() {}
-        }
-      }
+          inc() {},
+        },
+      },
     })
     this.callback = sinon.stub()
     this.key = 'lock:web:lockName:project-id}'

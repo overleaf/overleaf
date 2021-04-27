@@ -45,9 +45,9 @@ const TemplatesManager = {
     const zipReq = request(zipUrl, {
       auth: {
         user: settings.apis.v1.user,
-        pass: settings.apis.v1.pass
+        pass: settings.apis.v1.pass,
       },
-      timeout: 60 * 1000
+      timeout: 60 * 1000,
     })
     zipReq.on('error', function (err) {
       logger.warn({ err }, 'error getting zip from template API')
@@ -63,7 +63,7 @@ const TemplatesManager = {
       const writeStream = fs.createWriteStream(dumpPath)
       const attributes = {
         fromV1TemplateId: templateId,
-        fromV1TemplateVersionId: templateVersionId
+        fromV1TemplateVersionId: templateVersionId,
       }
       writeStream.on('close', function () {
         if (zipReq.response.statusCode !== 200) {
@@ -81,7 +81,7 @@ const TemplatesManager = {
           function (err, project) {
             if (err != null) {
               OError.tag(err, 'problem building project from zip', {
-                zipReq
+                zipReq,
               })
               return callback(err)
             }
@@ -95,7 +95,7 @@ const TemplatesManager = {
                     project._id,
                     brandVariationId,
                     cb
-                  )
+                  ),
               ],
               function (err) {
                 if (err != null) {
@@ -108,7 +108,7 @@ const TemplatesManager = {
                 })
                 const update = {
                   fromV1TemplateId: templateId,
-                  fromV1TemplateVersionId: templateVersionId
+                  fromV1TemplateVersionId: templateVersionId,
                 }
                 return Project.updateOne(
                   { _id: project._id },
@@ -175,12 +175,12 @@ const TemplatesManager = {
         auth: {
           user: settings.apis.v1.user,
           pass: settings.apis.v1.pass,
-          sendImmediately: true
+          sendImmediately: true,
         },
         resolveWithFullResponse: true,
         simple: false,
         json: true,
-        timeout: 60 * 1000
+        timeout: 60 * 1000,
       })
 
       if (statusCode === 404) {
@@ -196,8 +196,8 @@ const TemplatesManager = {
       }
 
       return body
-    }
-  }
+    },
+  },
 }
 
 TemplatesManager.fetchFromV1 = util.callbackify(

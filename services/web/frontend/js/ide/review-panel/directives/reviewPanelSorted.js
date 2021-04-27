@@ -53,7 +53,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
           $indicator_el: $(el).find('.rp-entry-indicator'),
           $box_el: $(el).find('.rp-entry'),
           $callout_el: $(el).find('.rp-entry-callout'),
-          scope: angular.element(el).scope()
+          scope: angular.element(el).scope(),
         }
         if (scope.ui.reviewPanelOpen) {
           entry.$layout_el = entry.$box_el
@@ -94,13 +94,13 @@ export default App.directive('reviewPanelSorted', $timeout => ({
           $callout_el.removeClass('rp-entry-callout-inverted')
           return $callout_el.css({
             top: original_top + line_height - 1,
-            height: top - original_top
+            height: top - original_top,
           })
         } else {
           $callout_el.addClass('rp-entry-callout-inverted')
           return $callout_el.css({
             top: top + line_height,
-            height: original_top - top
+            height: original_top - top,
           })
         }
       }
@@ -114,7 +114,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
         top: focused_entry_top,
         // The entry element is invisible by default, to avoid flickering when positioning for
         // the first time. Here we make sure it becomes visible after having a "top" value.
-        visibility: 'visible'
+        visibility: 'visible',
       })
       focused_entry.$indicator_el.css({ top: focused_entry_top })
       positionLayoutEl(
@@ -133,7 +133,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
           top,
           // The entry element is invisible by default, to avoid flickering when positioning for
           // the first time. Here we make sure it becomes visible after having a "top" value.
-          visibility: 'visible'
+          visibility: 'visible',
         })
         entry.$indicator_el.css({ top })
         positionLayoutEl(entry.$callout_el, original_top, top)
@@ -156,7 +156,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
           top,
           // The entry element is invisible by default, to avoid flickering when positioning for
           // the first time. Here we make sure it becomes visible after having a "top" value.
-          visibility: 'visible'
+          visibility: 'visible',
         })
         entry.$indicator_el.css({ top })
         positionLayoutEl(entry.$callout_el, original_top, top)
@@ -171,7 +171,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       }
       return scope.$emit('review-panel:sizes', {
         overflowTop,
-        height: previousBottom + OVERVIEW_TOGGLE_HEIGHT
+        height: previousBottom + OVERVIEW_TOGGLE_HEIGHT,
       })
     }
 
@@ -229,5 +229,5 @@ export default App.directive('reviewPanelSorted', $timeout => ({
     scope.$on('$destroy', () => scope.reviewPanelEventsBridge.off('aceScroll'))
 
     return scope.reviewPanelEventsBridge.emit('refreshScrollPosition')
-  }
+  },
 }))

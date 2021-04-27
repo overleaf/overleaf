@@ -29,7 +29,7 @@ describe('ChatController', function () {
     this.ChatApiHandler = {}
     this.EditorRealTimeController = { emitToRoom: sinon.stub() }
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns(this.user_id)
+      getLoggedInUserId: sinon.stub().returns(this.user_id),
     }
     this.ChatController = SandboxedModule.require(modulePath, {
       requires: {
@@ -39,18 +39,18 @@ describe('ChatController', function () {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         '../User/UserInfoManager': (this.UserInfoManager = {}),
-        '../User/UserInfoController': (this.UserInfoController = {})
-      }
+        '../User/UserInfoController': (this.UserInfoController = {}),
+      },
     })
     this.req = {
       params: {
-        project_id: this.project_id
-      }
+        project_id: this.project_id,
+      },
     }
     this.res = {
       json: sinon.stub(),
       send: sinon.stub(),
-      sendStatus: sinon.stub()
+      sendStatus: sinon.stub(),
     }
   })
 
@@ -106,7 +106,7 @@ describe('ChatController', function () {
     beforeEach(function () {
       this.req.query = {
         limit: (this.limit = '30'),
-        before: (this.before = '12345')
+        before: (this.before = '12345'),
       }
       this.ChatController._injectUserInfoIntoThreads = sinon.stub().yields()
       this.ChatApiHandler.getGlobalMessages = sinon
@@ -130,18 +130,18 @@ describe('ChatController', function () {
     beforeEach(function () {
       this.users = {
         user_id_1: {
-          mock: 'user_1'
+          mock: 'user_1',
         },
         user_id_2: {
-          mock: 'user_2'
-        }
+          mock: 'user_2',
+        },
       }
       this.UserInfoManager.getPersonalInfo = (user_id, callback) => {
         return callback(null, this.users[user_id])
       }
       sinon.spy(this.UserInfoManager, 'getPersonalInfo')
       return (this.UserInfoController.formatPersonalInfo = user => ({
-        formatted: user.mock
+        formatted: user.mock,
       }))
     })
 
@@ -154,22 +154,22 @@ describe('ChatController', function () {
             messages: [
               {
                 user_id: 'user_id_1',
-                content: 'foo'
+                content: 'foo',
               },
               {
                 user_id: 'user_id_2',
-                content: 'bar'
-              }
-            ]
+                content: 'bar',
+              },
+            ],
           },
           thread2: {
             messages: [
               {
                 user_id: 'user_id_1',
-                content: 'baz'
-              }
-            ]
-          }
+                content: 'baz',
+              },
+            ],
+          },
         },
         (error, threads) => {
           expect(threads).to.deep.equal({
@@ -181,24 +181,24 @@ describe('ChatController', function () {
                 {
                   user_id: 'user_id_1',
                   user: { formatted: 'user_1' },
-                  content: 'foo'
+                  content: 'foo',
                 },
                 {
                   user_id: 'user_id_2',
                   user: { formatted: 'user_2' },
-                  content: 'bar'
-                }
-              ]
+                  content: 'bar',
+                },
+              ],
             },
             thread2: {
               messages: [
                 {
                   user_id: 'user_id_1',
                   user: { formatted: 'user_1' },
-                  content: 'baz'
-                }
-              ]
-            }
+                  content: 'baz',
+                },
+              ],
+            },
           })
           return done()
         }
@@ -212,14 +212,14 @@ describe('ChatController', function () {
             messages: [
               {
                 user_id: 'user_id_1',
-                content: 'foo'
+                content: 'foo',
               },
               {
                 user_id: 'user_id_1',
-                content: 'bar'
-              }
-            ]
-          }
+                content: 'bar',
+              },
+            ],
+          },
         ],
         (error, threads) => {
           this.UserInfoManager.getPersonalInfo.calledOnce.should.equal(true)

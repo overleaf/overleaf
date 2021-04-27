@@ -135,8 +135,8 @@ describe('Tags', function () {
     const auth = Buffer.from('sharelatex:password').toString('base64')
     const authedRequest = request.defaults({
       headers: {
-        Authorization: `Basic ${auth}`
-      }
+        Authorization: `Basic ${auth}`,
+      },
     })
 
     it('should disallow without appropriate auth headers', function (done) {

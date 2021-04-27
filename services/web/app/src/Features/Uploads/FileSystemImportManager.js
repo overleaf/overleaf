@@ -12,8 +12,8 @@ module.exports = {
   importDir: callbackify(importDir),
   promises: {
     addEntity,
-    importDir
-  }
+    importDir,
+  },
 }
 
 async function addDoc(userId, projectId, folderId, name, lines, replace) {

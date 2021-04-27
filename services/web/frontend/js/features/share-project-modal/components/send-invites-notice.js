@@ -29,5 +29,5 @@ function AccessLevel({ level }) {
   }
 }
 AccessLevel.propTypes = {
-  level: PropTypes.string
+  level: PropTypes.string,
 }

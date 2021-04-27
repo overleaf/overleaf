@@ -19,8 +19,8 @@ waitForDb().then(async () => {
           _id: 1,
           owner_ref: 1,
           tokenAccessReadOnly_refs: 1,
-          tokenAccessReadAndWrite_refs: 1
-        }
+          tokenAccessReadAndWrite_refs: 1,
+        },
       }
     )
     .toArray()
@@ -39,8 +39,8 @@ waitForDb().then(async () => {
           $set: {
             publicAccesLevel: 'private', // note the spelling in the db is publicAccesLevel (with one 's')
             tokenAccessReadOnly_refs: [],
-            tokenAccessReadAndWrite_refs: []
-          }
+            tokenAccessReadAndWrite_refs: [],
+          },
         }
       )
       console.log('result', JSON.stringify(result))

@@ -49,7 +49,7 @@ class AutoCompleteManager {
     this.editor.setOptions({
       enableBasicAutocompletion: true,
       enableSnippets: true,
-      enableLiveAutocompletion: false
+      enableLiveAutocompletion: false,
     })
 
     const CommandCompleter = new CommandManager(this.metadataManager)
@@ -84,13 +84,13 @@ class AutoCompleteManager {
                 caption: `\\${commandName}{${path}}`,
                 value: `\\${commandName}{${path}}`,
                 meta: 'graphic',
-                score: 50
+                score: 50,
               })
             }
             callback(null, result)
           }
         }
-      }
+      },
     }
 
     const { metadataManager } = this
@@ -111,14 +111,14 @@ class AutoCompleteManager {
                   caption: `\\${commandName}{${path}}`,
                   value: `\\${commandName}{${cleanPath}}`,
                   meta: 'file',
-                  score: 50
+                  score: 50,
                 })
               }
             }
             callback(null, result)
           }
         }
-      }
+      },
     }
 
     const LabelsCompleter = {
@@ -138,7 +138,7 @@ class AutoCompleteManager {
                 caption: `\\${commandName}{}`,
                 snippet: `\\${commandName}{}`,
                 meta: 'cross-reference',
-                score: 60
+                score: 60,
               })
             }
             for (let label of metadataManager.getAllLabels()) {
@@ -146,13 +146,13 @@ class AutoCompleteManager {
                 caption: `\\${commandName}{${label}}`,
                 value: `\\${commandName}{${label}}`,
                 meta: 'cross-reference',
-                score: 50
+                score: 50,
               })
             }
             callback(null, result)
           }
         }
-      }
+      },
     }
 
     const references = this.$scope.$root._references
@@ -176,7 +176,7 @@ class AutoCompleteManager {
               caption: `\\${commandName}{}`,
               snippet: `\\${commandName}{}`,
               meta: 'reference',
-              score: 60
+              score: 60,
             })
             if (references.keys && references.keys.length > 0) {
               references.keys.forEach(function (key) {
@@ -185,7 +185,7 @@ class AutoCompleteManager {
                     caption: `\\${commandName}{${previousArgsCaption}${key}}`,
                     value: `\\${commandName}{${previousArgs}${key}}`,
                     meta: 'reference',
-                    score: 50
+                    score: 50,
                   })
                 }
               })
@@ -195,7 +195,7 @@ class AutoCompleteManager {
             }
           }
         }
-      }
+      },
     }
 
     this.editor.completers = [
@@ -205,14 +205,14 @@ class AutoCompleteManager {
       ReferencesCompleter,
       LabelsCompleter,
       GraphicsCompleter,
-      FilesCompleter
+      FilesCompleter,
     ]
   }
 
   disable() {
     return this.editor.setOptions({
       enableBasicAutocompletion: false,
-      enableSnippets: false
+      enableSnippets: false,
     })
   }
 
@@ -403,7 +403,7 @@ class AutoCompleteManager {
               } else {
                 editor.execCommand('insertstring', matchData.value || matchData)
               }
-            }
+            },
           }
         }
 
@@ -454,7 +454,7 @@ class AutoCompleteManager {
             editor.completer.detach()
           }
         },
-        bindKey: 'Ctrl-Space|Ctrl-Shift-Space|Alt-Space'
+        bindKey: 'Ctrl-Space|Ctrl-Shift-Space|Alt-Space',
       }
     }
 

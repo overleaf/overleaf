@@ -12,7 +12,7 @@ module.exports = {
       RateLimiterMiddleware.rateLimit({
         endpointName: 'project-upload',
         maxRequests: 20,
-        timeInterval: 60
+        timeInterval: 60,
       }),
       ProjectUploadController.multerMiddleware,
       ProjectUploadController.uploadProject
@@ -23,7 +23,7 @@ module.exports = {
       endpointName: 'file-upload',
       params: ['Project_id'],
       maxRequests: 200,
-      timeInterval: 60 * 15
+      timeInterval: 60 * 15,
     })
     if (Settings.allowAnonymousReadAndWriteSharing) {
       webRouter.post(
@@ -43,5 +43,5 @@ module.exports = {
         ProjectUploadController.uploadFile
       )
     }
-  }
+  },
 }

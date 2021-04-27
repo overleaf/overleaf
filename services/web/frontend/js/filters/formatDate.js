@@ -15,8 +15,8 @@ moment.updateLocale('en', {
     nextDay: '[Tomorrow]',
     lastWeek: 'ddd, Do MMM YY',
     nextWeek: 'ddd, Do MMM YY',
-    sameElse: 'ddd, Do MMM YY'
-  }
+    sameElse: 'ddd, Do MMM YY',
+  },
 })
 
 App.filter(

@@ -39,8 +39,8 @@ App.controller(
           },
           userFeatures() {
             return ide.$scope.user.features
-          }
-        }
+          },
+        },
       })
 
     $scope.openNewFolderModal = () =>
@@ -50,8 +50,8 @@ App.controller(
         resolve: {
           parent_folder() {
             return ide.fileTreeManager.getCurrentFolder()
-          }
-        }
+          },
+        },
       })
 
     $scope.openUploadFileModal = reactBridgeParentFolderId =>
@@ -74,8 +74,8 @@ App.controller(
           },
           userFeatures() {
             return ide.$scope.user.features
-          }
-        }
+          },
+        },
       })
 
     if (
@@ -167,7 +167,7 @@ App.controller(
     $scope.parent_folder = parent_folder
     $scope.state = {
       inflight: false,
-      valid: true
+      valid: true,
     }
     $scope.cancel = () => $modalInstance.dismiss('cancel')
     $scope.create = () => $scope.$broadcast('create')
@@ -367,12 +367,12 @@ App.controller(
       selectedProjectEntity: null,
       selectedProjectOutputFile: null,
       buildId: null,
-      name: null
+      name: null,
     }
     $scope.state.inFlight = {
       projects: false,
       entities: false,
-      compile: false
+      compile: false,
     }
     $scope.state.isOutputFilesMode = false
     $scope.state.error = false
@@ -512,7 +512,7 @@ App.controller(
       _setInFlight('projects')
       return ide.$http
         .get('/user/projects', {
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         })
         .then(function (resp) {
           $scope.data.projectEntities = null
@@ -528,7 +528,7 @@ App.controller(
       _setInFlight('entities')
       return ide.$http
         .get(`/project/${project_id}/entities`, {
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         })
         .then(function (resp) {
           if ($scope.data.selectedProjectId === resp.data.project_id) {
@@ -546,7 +546,7 @@ App.controller(
           check: 'silent',
           draft: false,
           incrementalCompilesEnabled: false,
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         })
         .then(function (resp) {
           if (resp.data.status === 'success') {
@@ -583,13 +583,13 @@ App.controller(
         payload = {
           source_project_id: projectId,
           source_output_file_path: $scope.data.selectedProjectOutputFile,
-          build_id: $scope.data.buildId
+          build_id: $scope.data.buildId,
         }
       } else {
         provider = 'project_file'
         payload = {
           source_project_id: projectId,
-          source_entity_path: $scope.data.selectedProjectEntity
+          source_entity_path: $scope.data.selectedProjectEntity,
         }
       }
       _setInFlight('create')
@@ -617,7 +617,7 @@ export default App.controller(
   function ($scope, ide, $timeout) {
     $scope.inputs = {
       name: '',
-      url: ''
+      url: '',
     }
     $scope.nameChangedByUser = false
 

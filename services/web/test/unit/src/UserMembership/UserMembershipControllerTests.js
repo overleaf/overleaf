@@ -30,7 +30,7 @@ describe('UserMembershipController', function () {
     this.newUser = { _id: 'mock-new-user-id', email: 'new-user-email@foo.bar' }
     this.subscription = {
       _id: 'mock-subscription-id',
-      fetchV1Data: callback => callback(null, this.subscription)
+      fetchV1Data: callback => callback(null, this.subscription),
     }
     this.institution = {
       _id: 'mock-institution-id',
@@ -39,31 +39,31 @@ describe('UserMembershipController', function () {
         const institution = Object.assign({}, this.institution)
         institution.name = 'Test Institution Name'
         return callback(null, institution)
-      }
+      },
     }
     this.users = [
       {
         _id: 'mock-member-id-1',
         email: 'mock-email-1@foo.com',
-        last_logged_in_at: '2020-08-09T12:43:11.467Z'
+        last_logged_in_at: '2020-08-09T12:43:11.467Z',
       },
       {
         _id: 'mock-member-id-2',
         email: 'mock-email-2@foo.com',
-        last_logged_in_at: '2020-05-20T10:41:11.407Z'
-      }
+        last_logged_in_at: '2020-05-20T10:41:11.407Z',
+      },
     ]
 
     this.AuthenticationController = {
       getSessionUser: sinon.stub().returns(this.user),
-      getLoggedInUserId: sinon.stub().returns(this.user._id)
+      getLoggedInUserId: sinon.stub().returns(this.user._id),
     }
     this.UserMembershipHandler = {
       getEntity: sinon.stub().yields(null, this.subscription),
       createEntity: sinon.stub().yields(null, this.institution),
       getUsers: sinon.stub().yields(null, this.users),
       addUser: sinon.stub().yields(null, this.newUser),
-      removeUser: sinon.stub().yields(null)
+      removeUser: sinon.stub().yields(null),
     }
     return (this.UserMembershipController = SandboxedModule.require(
       modulePath,
@@ -71,8 +71,8 @@ describe('UserMembershipController', function () {
         requires: {
           '../Authentication/AuthenticationController': this
             .AuthenticationController,
-          './UserMembershipHandler': this.UserMembershipHandler
-        }
+          './UserMembershipHandler': this.UserMembershipHandler,
+        },
       }
     ))
   })
@@ -92,7 +92,7 @@ describe('UserMembershipController', function () {
             { modelName: 'Subscription' }
           )
           return done()
-        }
+        },
       })
     })
 
@@ -107,7 +107,7 @@ describe('UserMembershipController', function () {
             `/manage/groups/${this.subscription._id}/invites`
           )
           return done()
-        }
+        },
       })
     })
 
@@ -123,7 +123,7 @@ describe('UserMembershipController', function () {
           )
           expect(viewParams.paths.exportMembers).to.be.undefined
           return done()
-        }
+        },
       })
     })
 
@@ -138,7 +138,7 @@ describe('UserMembershipController', function () {
           expect(viewParams.translations.title).to.equal('institution_account')
           expect(viewParams.paths.exportMembers).to.be.undefined
           return done()
-        }
+        },
       })
     })
   })
@@ -160,7 +160,7 @@ describe('UserMembershipController', function () {
             this.newUser.email
           )
           return done()
-        }
+        },
       })
     })
 
@@ -169,7 +169,7 @@ describe('UserMembershipController', function () {
         json: payload => {
           payload.user.should.equal(this.newUser)
           return done()
-        }
+        },
       })
     })
 
@@ -189,8 +189,8 @@ describe('UserMembershipController', function () {
           json: payload => {
             expect(payload.error.code).to.equal('user_already_added')
             return done()
-          }
-        })
+          },
+        }),
       })
     })
 
@@ -201,8 +201,8 @@ describe('UserMembershipController', function () {
           json: payload => {
             expect(payload.error.code).to.equal('user_not_found')
             return done()
-          }
-        })
+          },
+        }),
       })
     })
 
@@ -213,8 +213,8 @@ describe('UserMembershipController', function () {
           json: payload => {
             expect(payload.error.code).to.equal('invalid_email')
             return done()
-          }
-        })
+          },
+        }),
       })
     })
   })
@@ -236,7 +236,7 @@ describe('UserMembershipController', function () {
             this.newUser._id
           )
           return done()
-        }
+        },
       })
     })
 
@@ -256,8 +256,8 @@ describe('UserMembershipController', function () {
           json: payload => {
             expect(payload.error.code).to.equal('managers_cannot_remove_self')
             return done()
-          }
-        })
+          },
+        }),
       })
     })
 
@@ -268,8 +268,8 @@ describe('UserMembershipController', function () {
           json: payload => {
             expect(payload.error.code).to.equal('managers_cannot_remove_admin')
             return done()
-          }
-        })
+          },
+        }),
       })
     })
   })
@@ -325,7 +325,7 @@ describe('UserMembershipController', function () {
           expect(data.entityName).to.eq('publisher')
           expect(data.entityId).to.eq('abc')
           return done()
-        }
+        },
       })
     })
   })
@@ -347,7 +347,7 @@ describe('UserMembershipController', function () {
             { modelName: 'Institution' }
           )
           return done()
-        }
+        },
       })
     })
   })

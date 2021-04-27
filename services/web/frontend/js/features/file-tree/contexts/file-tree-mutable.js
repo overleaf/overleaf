@@ -2,7 +2,7 @@ import React, {
   createContext,
   useCallback,
   useReducer,
-  useContext
+  useContext,
 } from 'react'
 import PropTypes from 'prop-types'
 
@@ -10,7 +10,7 @@ import {
   renameInTree,
   deleteInTree,
   moveInTree,
-  createEntityInTree
+  createEntityInTree,
 } from '../util/mutate-in-tree'
 
 const FileTreeMutableContext = createContext()
@@ -19,19 +19,19 @@ const ACTION_TYPES = {
   RENAME: 'RENAME',
   DELETE: 'DELETE',
   MOVE: 'MOVE',
-  CREATE_ENTITY: 'CREATE_ENTITY'
+  CREATE_ENTITY: 'CREATE_ENTITY',
 }
 
 function fileTreeMutableReducer({ fileTreeData }, action) {
   switch (action.type) {
     case ACTION_TYPES.RENAME: {
       const newFileTreeData = renameInTree(fileTreeData, action.id, {
-        newName: action.newName
+        newName: action.newName,
       })
 
       return {
         fileTreeData: newFileTreeData,
-        fileCount: countFiles(newFileTreeData)
+        fileCount: countFiles(newFileTreeData),
       }
     }
 
@@ -40,7 +40,7 @@ function fileTreeMutableReducer({ fileTreeData }, action) {
 
       return {
         fileTreeData: newFileTreeData,
-        fileCount: countFiles(newFileTreeData)
+        fileCount: countFiles(newFileTreeData),
       }
     }
 
@@ -53,7 +53,7 @@ function fileTreeMutableReducer({ fileTreeData }, action) {
 
       return {
         fileTreeData: newFileTreeData,
-        fileCount: countFiles(newFileTreeData)
+        fileCount: countFiles(newFileTreeData),
       }
     }
 
@@ -66,7 +66,7 @@ function fileTreeMutableReducer({ fileTreeData }, action) {
 
       return {
         fileTreeData: newFileTreeData,
-        fileCount: countFiles(newFileTreeData)
+        fileCount: countFiles(newFileTreeData),
       }
     }
 
@@ -81,7 +81,7 @@ export const FileTreeMutableProvider = function ({ rootFolder, children }) {
     fileTreeMutableReducer,
     {
       fileTreeData: rootFolder[0],
-      fileCount: countFiles(rootFolder[0])
+      fileCount: countFiles(rootFolder[0]),
     }
   )
 
@@ -98,8 +98,8 @@ FileTreeMutableProvider.propTypes = {
   rootFolder: PropTypes.array.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ]).isRequired
+    PropTypes.node,
+  ]).isRequired,
 }
 
 export function useFileTreeMutable() {
@@ -113,7 +113,7 @@ export function useFileTreeMutable() {
       dispatch({
         type: ACTION_TYPES.CREATE_ENTITY,
         parentFolderId,
-        entity
+        entity,
       })
     },
     [dispatch]
@@ -125,7 +125,7 @@ export function useFileTreeMutable() {
       dispatch({
         type: ACTION_TYPES.CREATE_ENTITY,
         parentFolderId,
-        entity
+        entity,
       })
     },
     [dispatch]
@@ -137,7 +137,7 @@ export function useFileTreeMutable() {
       dispatch({
         type: ACTION_TYPES.CREATE_ENTITY,
         parentFolderId,
-        entity
+        entity,
       })
     },
     [dispatch]
@@ -148,7 +148,7 @@ export function useFileTreeMutable() {
       dispatch({
         type: ACTION_TYPES.RENAME,
         newName,
-        id
+        id,
       })
     },
     [dispatch]
@@ -176,7 +176,7 @@ export function useFileTreeMutable() {
     dispatchMove,
     dispatchCreateFolder,
     dispatchCreateDoc,
-    dispatchCreateFile
+    dispatchCreateFile,
   }
 }
 

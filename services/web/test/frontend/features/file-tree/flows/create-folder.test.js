@@ -14,7 +14,7 @@ describe('FileTree Create Folder Flow', function () {
   beforeEach(function () {
     global.requestAnimationFrame = sinon.stub()
     window._ide = {
-      socket: new MockedSocket()
+      socket: new MockedSocket(),
     }
   })
 
@@ -32,8 +32,8 @@ describe('FileTree Create Folder Flow', function () {
         _id: 'root-folder-id',
         docs: [{ _id: '456def', name: 'main.tex' }],
         folders: [],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     render(
       <FileTreeRoot
@@ -58,7 +58,7 @@ describe('FileTree Create Folder Flow', function () {
       fileRefs: [],
       docs: [],
       _id: fakeId(),
-      name: newFolderName
+      name: newFolderName,
     }
     fetchMock.post(matcher, response)
 
@@ -73,7 +73,7 @@ describe('FileTree Create Folder Flow', function () {
       name: newFolderName,
       docs: [],
       fileRefs: [],
-      folders: []
+      folders: [],
     })
     await screen.findByRole('treeitem', { name: newFolderName })
   })
@@ -89,11 +89,11 @@ describe('FileTree Create Folder Flow', function () {
             name: 'thefolder',
             docs: [],
             fileRefs: [],
-            folders: []
-          }
+            folders: [],
+          },
         ],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     render(
       <FileTreeRoot
@@ -122,7 +122,7 @@ describe('FileTree Create Folder Flow', function () {
       fileRefs: [],
       docs: [],
       _id: fakeId(),
-      name: newFolderName
+      name: newFolderName,
     }
     fetchMock.post(matcher, response)
 
@@ -137,7 +137,7 @@ describe('FileTree Create Folder Flow', function () {
       name: newFolderName,
       docs: [],
       fileRefs: [],
-      folders: []
+      folders: [],
     })
 
     // find the created folder
@@ -159,11 +159,11 @@ describe('FileTree Create Folder Flow', function () {
             name: 'thefolder',
             docs: [],
             fileRefs: [{ _id: '456def', name: 'sub.tex' }],
-            folders: []
-          }
+            folders: [],
+          },
         ],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     render(
       <FileTreeRoot
@@ -189,7 +189,7 @@ describe('FileTree Create Folder Flow', function () {
       fileRefs: [],
       docs: [],
       _id: fakeId(),
-      name: newFolderName
+      name: newFolderName,
     }
     fetchMock.post(matcher, response)
 
@@ -204,7 +204,7 @@ describe('FileTree Create Folder Flow', function () {
       name: newFolderName,
       docs: [],
       fileRefs: [],
-      folders: []
+      folders: [],
     })
 
     // find the created folder
@@ -221,8 +221,8 @@ describe('FileTree Create Folder Flow', function () {
         _id: 'root-folder-id',
         docs: [{ _id: '456def', name: 'existingFile' }],
         folders: [],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     render(
       <FileTreeRoot
@@ -249,20 +249,20 @@ describe('FileTree Create Folder Flow', function () {
 
     await screen.findByRole('alert', {
       name: 'A file or folder with this name already exists',
-      hidden: true
+      hidden: true,
     })
 
     newFolderName = 'in/valid '
     setFolderName(newFolderName)
     await screen.findByRole('alert', {
       name: 'File name is empty or contains invalid characters',
-      hidden: true
+      hidden: true,
     })
   })
 
   async function fireCreateFolder(name) {
     const createFolderButton = screen.getByRole('button', {
-      name: 'New Folder'
+      name: 'New Folder',
     })
     fireEvent.click(createFolderButton)
 

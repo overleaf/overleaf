@@ -145,7 +145,7 @@ describe('DocumentHelper', function () {
         '% line',
         '% line',
         '% line',
-        '    asdf \\documentclass'
+        '    asdf \\documentclass',
       ]
       return expect(
         this.DocumentHelper.contentHasDocumentclass(document)

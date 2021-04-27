@@ -22,13 +22,13 @@ describe('PasswordReset', function () {
     await userHelper.getCsrfToken()
     response = await userHelper.request.post('/user/password/reset', {
       form: {
-        email
-      }
+        email,
+      },
     })
 
     token = (
       await db.tokens.findOne({
-        'data.user_id': user._id.toString()
+        'data.user_id': user._id.toString(),
       })
     ).token
   })
@@ -37,7 +37,7 @@ describe('PasswordReset', function () {
       beforeEach(async function () {
         userHelper = await UserHelper.loginUser({
           email,
-          password: userHelper.getDefaultPassword()
+          password: userHelper.getDefaultPassword(),
         })
         response = await userHelper.request.get(
           `/user/password/set?passwordResetToken=${token}&email=${email}`,
@@ -51,8 +51,8 @@ describe('PasswordReset', function () {
         response = await userHelper.request.post('/user/password/set', {
           form: {
             passwordResetToken: token,
-            password: 'a-password'
-          }
+            password: 'a-password',
+          },
         })
         userHelper = await UserHelper.getUser({ email })
         user = userHelper.user
@@ -80,7 +80,7 @@ describe('PasswordReset', function () {
         otherUser = userHelper.user
         userHelper = await UserHelper.loginUser({
           email: otherUserEmail,
-          password: userHelper.getDefaultPassword()
+          password: userHelper.getDefaultPassword(),
         })
         response = await userHelper.request.get(
           `/user/password/set?passwordResetToken=${token}&email=${email}`,
@@ -94,8 +94,8 @@ describe('PasswordReset', function () {
         response = await userHelper.request.post('/user/password/set', {
           form: {
             passwordResetToken: token,
-            password: 'a-password'
-          }
+            password: 'a-password',
+          },
         })
         userHelper = await UserHelper.getUser({ email })
         user = userHelper.user
@@ -129,8 +129,8 @@ describe('PasswordReset', function () {
         response = await userHelper.request.post('/user/password/set', {
           form: {
             passwordResetToken: token,
-            password: 'a-password'
-          }
+            password: 'a-password',
+          },
         })
         userHelper = await UserHelper.getUser({ email })
         user = userHelper.user
@@ -164,9 +164,9 @@ describe('PasswordReset', function () {
         // send reset request
         response = await userHelper.request.post('/user/password/set', {
           form: {
-            passwordResetToken: token
+            passwordResetToken: token,
           },
-          simple: false
+          simple: false,
         })
         expect(response.statusCode).to.equal(400)
         userHelper = await UserHelper.getUser({ email })
@@ -180,9 +180,9 @@ describe('PasswordReset', function () {
         response = await userHelper.request.post('/user/password/set', {
           form: {
             passwordResetToken: token,
-            password: 'short'
+            password: 'short',
           },
-          simple: false
+          simple: false,
         })
         expect(response.statusCode).to.equal(400)
         userHelper = await UserHelper.getUser({ email })
@@ -215,9 +215,9 @@ describe('PasswordReset', function () {
       response = await userHelper.request.post('/user/password/set', {
         form: {
           passwordResetToken: invalidToken,
-          password: 'a-password'
+          password: 'a-password',
         },
-        simple: false
+        simple: false,
       })
       expect(response.statusCode).to.equal(404)
     })
@@ -226,8 +226,8 @@ describe('PasswordReset', function () {
     it('should return 200 if email field is valid', async function () {
       response = await userHelper.request.post(`/user/password/reset`, {
         form: {
-          email
-        }
+          email,
+        },
       })
       expect(response.statusCode).to.equal(200)
     })
@@ -235,9 +235,9 @@ describe('PasswordReset', function () {
     it('should return 400 if email field is missing', async function () {
       response = await userHelper.request.post(`/user/password/reset`, {
         form: {
-          mail: email
+          mail: email,
         },
-        simple: false
+        simple: false,
       })
       expect(response.statusCode).to.equal(400)
     })
@@ -247,8 +247,8 @@ describe('PasswordReset', function () {
       response = await userHelper.request.post(`/user/password/set`, {
         form: {
           password: 'new-password',
-          passwordResetToken: token
-        }
+          passwordResetToken: token,
+        },
       })
       expect(response.statusCode).to.equal(200)
     })
@@ -256,9 +256,9 @@ describe('PasswordReset', function () {
     it('should return 400 if password field is missing', async function () {
       response = await userHelper.request.post(`/user/password/set`, {
         form: {
-          passwordResetToken: token
+          passwordResetToken: token,
         },
-        simple: false
+        simple: false,
       })
       expect(response.statusCode).to.equal(400)
     })
@@ -266,9 +266,9 @@ describe('PasswordReset', function () {
     it('should return 400 if passwordResetToken field is missing', async function () {
       response = await userHelper.request.post(`/user/password/set`, {
         form: {
-          password: 'new-password'
+          password: 'new-password',
         },
-        simple: false
+        simple: false,
       })
       expect(response.statusCode).to.equal(400)
     })

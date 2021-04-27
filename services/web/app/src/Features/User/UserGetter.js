@@ -6,7 +6,7 @@ const moment = require('moment')
 const settings = require('settings-sharelatex')
 const { promisifyAll } = require('../../util/promises')
 const {
-  promises: InstitutionsAPIPromises
+  promises: InstitutionsAPIPromises,
 } = require('../Institutions/InstitutionsAPI')
 const InstitutionsHelper = require('../Institutions/InstitutionsHelper')
 const Errors = require('../Errors/Errors')
@@ -58,7 +58,7 @@ async function getUserFullEmails(userId) {
   const user = await UserGetter.promises.getUser(userId, {
     email: 1,
     emails: 1,
-    samlIdentifiers: 1
+    samlIdentifiers: 1,
   })
 
   if (!user) {
@@ -143,9 +143,9 @@ const UserGetter = {
         $exists: true,
         $elemMatch: {
           email: { $in: emails },
-          confirmedAt: { $exists: true }
-        }
-      }
+          confirmedAt: { $exists: true },
+        },
+      },
     }
 
     db.users.find(query, { projection }).toArray(callback)
@@ -164,7 +164,7 @@ const UserGetter = {
     const reversedHostname = hostname.trim().split('').reverse().join('')
     const query = {
       emails: { $exists: true },
-      'emails.reversedHostname': reversedHostname
+      'emails.reversedHostname': reversedHostname,
     }
     db.users.find(query, { projection }).toArray(callback)
   },
@@ -186,7 +186,7 @@ const UserGetter = {
       }
       callback(error)
     })
-  }
+  },
 }
 
 var decorateFullEmails = (
@@ -208,7 +208,7 @@ var decorateFullEmails = (
         role,
         department,
         licence,
-        portal
+        portal,
       } = affiliation
       const lastDayToReconfirm = _lastDayToReconfirm(emailData, institution)
       const pastReconfirmDate = _pastReconfirmDate(lastDayToReconfirm)
@@ -224,7 +224,7 @@ var decorateFullEmails = (
         role,
         department,
         licence,
-        portal
+        portal,
       }
     }
 
@@ -247,13 +247,13 @@ var decorateFullEmails = (
   'getUserByMainEmail',
   'getUserByAnyEmail',
   'getUsers',
-  'ensureUniqueEmailAddress'
+  'ensureUniqueEmailAddress',
 ].map(method =>
   metrics.timeAsyncMethod(UserGetter, method, 'mongo.UserGetter', logger)
 )
 
 UserGetter.promises = promisifyAll(UserGetter, {
-  without: ['getUserFullEmails']
+  without: ['getUserFullEmails'],
 })
 UserGetter.promises.getUserFullEmails = getUserFullEmails
 

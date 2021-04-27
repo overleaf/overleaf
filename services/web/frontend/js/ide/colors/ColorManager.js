@@ -24,7 +24,7 @@ export default ColorManager = {
         labelBackgroundColor: `hsl(${hue}, 70%, 50%)`,
         highlightBackgroundColor: `hsl(${hue}, 100%, 28%);`,
         strikeThroughBackgroundColor: `hsl(${hue}, 100%, 20%);`,
-        strikeThroughForegroundColor: `hsl(${hue}, 100%, 60%);`
+        strikeThroughForegroundColor: `hsl(${hue}, 100%, 60%);`,
       }
     } else {
       return {
@@ -32,7 +32,7 @@ export default ColorManager = {
         labelBackgroundColor: `hsl(${hue}, 70%, 50%)`,
         highlightBackgroundColor: `hsl(${hue}, 70%, 85%);`,
         strikeThroughBackgroundColor: `hsl(${hue}, 70%, 95%);`,
-        strikeThroughForegroundColor: `hsl(${hue}, 70%, 40%);`
+        strikeThroughForegroundColor: `hsl(${hue}, 70%, 40%);`,
       }
     }
   },
@@ -86,5 +86,5 @@ export default ColorManager = {
       parseInt(hash.toString().slice(0, 8), 16) %
       (this.TOTAL_HUES - this.OWN_HUE_BLOCKED_SIZE * 2)
     return hue
-  }
+  },
 }

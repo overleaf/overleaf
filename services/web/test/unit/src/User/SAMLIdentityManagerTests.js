@@ -14,86 +14,86 @@ describe('SAMLIdentityManager', function () {
       _id: this.userId,
       email: 'not-linked@overleaf.com',
       emails: [{ email: 'not-linked@overleaf.com' }],
-      samlIdentifiers: []
+      samlIdentifiers: [],
     }
     this.auditLog = {
       initiatorId: this.userId,
-      ipAddress: '0:0:0:0'
+      ipAddress: '0:0:0:0',
     }
     this.userAlreadyLinked = {
       _id: '6005c7a012cbcaf771f4a106',
       email: 'linked@overleaf.com',
       emails: [{ email: 'linked@overleaf.com', samlProviderId: '1' }],
-      samlIdentifiers: [{ externalUserId: 'linked-id', providerId: '1' }]
+      samlIdentifiers: [{ externalUserId: 'linked-id', providerId: '1' }],
     }
     this.userEmailExists = {
       _id: '6005c7a012cbcaf771f4a107',
       email: 'exists@overleaf.com',
       emails: [{ email: 'exists@overleaf.com' }],
-      samlIdentifiers: []
+      samlIdentifiers: [],
     }
     this.institution = {
-      name: 'Overleaf University'
+      name: 'Overleaf University',
     }
     this.InstitutionsAPI = {
       promises: {
         addEntitlement: sinon.stub().resolves(),
-        removeEntitlement: sinon.stub().resolves()
-      }
+        removeEntitlement: sinon.stub().resolves(),
+      },
     }
     this.SAMLIdentityManager = SandboxedModule.require(modulePath, {
       requires: {
         '../Email/EmailHandler': (this.EmailHandler = {
-          sendEmail: sinon.stub().yields()
+          sendEmail: sinon.stub().yields(),
         }),
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
           promises: {
             redundantPersonalSubscription: sinon
               .stub()
-              .returns({ create: sinon.stub().resolves() })
-          }
+              .returns({ create: sinon.stub().resolves() }),
+          },
         }),
         '../Subscription/SubscriptionLocator': (this.SubscriptionLocator = {
           promises: {
-            getUserIndividualSubscription: sinon.stub().resolves()
-          }
+            getUserIndividualSubscription: sinon.stub().resolves(),
+          },
         }),
         '../../models/User': {
           User: (this.User = {
             findOneAndUpdate: sinon.stub().returns({
-              exec: sinon.stub().resolves(this.user)
+              exec: sinon.stub().resolves(this.user),
             }),
             findOne: sinon.stub().returns({
-              exec: sinon.stub().resolves()
+              exec: sinon.stub().resolves(),
             }),
             updateOne: sinon.stub().returns({
-              exec: sinon.stub().resolves()
-            })
-          })
+              exec: sinon.stub().resolves(),
+            }),
+          }),
         },
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           promises: {
-            addEntry: sinon.stub().resolves()
-          }
+            addEntry: sinon.stub().resolves(),
+          },
         }),
         '../User/UserGetter': (this.UserGetter = {
           getUser: sinon.stub(),
           promises: {
             getUser: sinon.stub().resolves(this.user),
             getUserByAnyEmail: sinon.stub().resolves(),
-            getUserFullEmails: sinon.stub().resolves()
-          }
+            getUserFullEmails: sinon.stub().resolves(),
+          },
         }),
         '../User/UserUpdater': (this.UserUpdater = {
           addEmailAddress: sinon.stub(),
           promises: {
             addEmailAddress: sinon.stub().resolves(),
             confirmEmail: sinon.stub().resolves(),
-            updateUser: sinon.stub().resolves()
-          }
+            updateUser: sinon.stub().resolves(),
+          },
         }),
-        '../Institutions/InstitutionsAPI': this.InstitutionsAPI
-      }
+        '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
+      },
     })
   })
 
@@ -154,7 +154,7 @@ describe('SAMLIdentityManager', function () {
               true,
               {
                 intiatorId: '6005c75b12cbcaf771f4a105',
-                ip: '0:0:0:0'
+                ip: '0:0:0:0',
               }
             )
           } catch (e) {
@@ -171,8 +171,8 @@ describe('SAMLIdentityManager', function () {
           this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
           this.UserGetter.promises.getUserFullEmails.resolves([
             {
-              email: 'not-affiliated@overleaf.com'
-            }
+              email: 'not-affiliated@overleaf.com',
+            },
           ])
         })
 
@@ -188,7 +188,7 @@ describe('SAMLIdentityManager', function () {
               true,
               {
                 intiatorId: 'user-id-1',
-                ip: '0:0:0:0'
+                ip: '0:0:0:0',
               }
             )
           } catch (e) {
@@ -206,8 +206,8 @@ describe('SAMLIdentityManager', function () {
           this.UserGetter.promises.getUserFullEmails.resolves([
             {
               email: 'affiliated@overleaf.com',
-              affiliation: { institution: { id: '987' } }
-            }
+              affiliation: { institution: { id: '987' } },
+            },
           ])
         })
 
@@ -223,7 +223,7 @@ describe('SAMLIdentityManager', function () {
               true,
               {
                 intiatorId: 'user-id-1',
-                ip: '0:0:0:0'
+                ip: '0:0:0:0',
               }
             )
           } catch (e) {
@@ -256,7 +256,7 @@ describe('SAMLIdentityManager', function () {
               true,
               {
                 intiatorId: '6005c75b12cbcaf771f4a105',
-                ip: '0:0:0:0'
+                ip: '0:0:0:0',
               }
             )
           } catch (e) {
@@ -286,7 +286,7 @@ describe('SAMLIdentityManager', function () {
               true,
               {
                 intiatorId: '6005c75b12cbcaf771f4a105',
-                ip: '0:0:0:0'
+                ip: '0:0:0:0',
               }
             )
           } catch (e) {
@@ -296,7 +296,7 @@ describe('SAMLIdentityManager', function () {
               this.UserGetter.promises.getUser
             ).to.have.been.calledWithMatch({
               _id: ObjectId('6005c75b12cbcaf771f4a105'),
-              'samlIdentifiers.providerId': '123456'
+              'samlIdentifiers.providerId': '123456',
             })
             expect(error).to.be.instanceof(Errors.SAMLAlreadyLinkedError)
             expect(this.User.findOneAndUpdate).to.not.have.been.called
@@ -318,7 +318,7 @@ describe('SAMLIdentityManager', function () {
             undefined,
             {
               intiatorId: '6005c75b12cbcaf771f4a105',
-              ipAddress: '0:0:0:0'
+              ipAddress: '0:0:0:0',
             }
           )
         } catch (e) {
@@ -342,7 +342,7 @@ describe('SAMLIdentityManager', function () {
       it('should update the user audit log', function () {
         const auditLog = {
           intiatorId: '6005c75b12cbcaf771f4a105',
-          ip: '0:0:0:0'
+          ip: '0:0:0:0',
         }
         this.SAMLIdentityManager.linkAccounts(
           this.user._id,
@@ -363,7 +363,7 @@ describe('SAMLIdentityManager', function () {
               {
                 institutionEmail: this.user.email,
                 providerId: '1',
-                providerName: 'Overleaf University'
+                providerName: 'Overleaf University',
               }
             )
           }
@@ -380,7 +380,7 @@ describe('SAMLIdentityManager', function () {
           undefined,
           {
             intiatorId: '6005c75b12cbcaf771f4a105',
-            ipAddress: '0:0:0:0'
+            ipAddress: '0:0:0:0',
           },
           () => {
             expect(this.User.updateOne).to.have.been.called
@@ -417,7 +417,7 @@ describe('SAMLIdentityManager', function () {
         {
           institutionEmail: linkedEmail,
           providerId: '1',
-          providerName: 'Overleaf University'
+          providerName: 'Overleaf University',
         }
       )
     })
@@ -431,14 +431,14 @@ describe('SAMLIdentityManager', function () {
         this.auditLog
       )
       const query = {
-        _id: this.user._id
+        _id: this.user._id,
       }
       const update = {
         $pull: {
           samlIdentifiers: {
-            providerId: '1'
-          }
-        }
+            providerId: '1',
+          },
+        },
       }
       expect(this.User.updateOne).to.have.been.calledOnce.and.calledWithMatch(
         query,
@@ -542,7 +542,7 @@ describe('SAMLIdentityManager', function () {
       beforeEach(function () {
         this.SubscriptionLocator.promises.getUserIndividualSubscription.resolves(
           {
-            planCode: 'professional'
+            planCode: 'professional',
           }
         )
       })

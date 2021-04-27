@@ -226,7 +226,7 @@ module.exports = LimitationsManager = {
       function (err, subscription) {
         if (err != null) {
           OError.tag(err, 'error getting subscription', {
-            subscriptionId
+            subscriptionId,
           })
           return callback(err)
         }
@@ -241,5 +241,5 @@ module.exports = LimitationsManager = {
         return callback(err, limitReached, subscription)
       }
     )
-  }
+  },
 }

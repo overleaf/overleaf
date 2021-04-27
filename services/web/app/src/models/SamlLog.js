@@ -7,10 +7,10 @@ const SamlLogSchema = new Schema(
     data: { type: Object },
     jsonData: { type: String },
     providerId: { type: String, default: '' },
-    sessionId: { type: String, default: '' }
+    sessionId: { type: String, default: '' },
   },
   {
-    collection: 'samlLogs'
+    collection: 'samlLogs',
   }
 )
 

@@ -5,7 +5,7 @@ import { Trans } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 import {
   useProjectContext,
-  useShareProjectContext
+  useShareProjectContext,
 } from './share-project-modal'
 import { setProjectAccessLevel } from '../utils/api'
 import CopyLink from '../../../shared/components/copy-link'
@@ -90,7 +90,7 @@ function PrivateSharing({ setAccessLevel, inflight }) {
 }
 PrivateSharing.propTypes = {
   setAccessLevel: PropTypes.func.isRequired,
-  inflight: PropTypes.bool
+  inflight: PropTypes.bool,
 }
 
 function TokenBasedSharing({ setAccessLevel, inflight }) {
@@ -141,7 +141,7 @@ function TokenBasedSharing({ setAccessLevel, inflight }) {
 }
 TokenBasedSharing.propTypes = {
   setAccessLevel: PropTypes.func.isRequired,
-  inflight: PropTypes.bool
+  inflight: PropTypes.bool,
 }
 
 function LegacySharing({ accessLevel, setAccessLevel, inflight }) {
@@ -175,7 +175,7 @@ function LegacySharing({ accessLevel, setAccessLevel, inflight }) {
 LegacySharing.propTypes = {
   accessLevel: PropTypes.string.isRequired,
   setAccessLevel: PropTypes.func.isRequired,
-  inflight: PropTypes.bool
+  inflight: PropTypes.bool,
 }
 
 export function ReadOnlyTokenLink() {
@@ -222,7 +222,7 @@ function AccessToken({ token, path, tooltipId }) {
 AccessToken.propTypes = {
   token: PropTypes.string,
   tooltipId: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired
+  path: PropTypes.string.isRequired,
 }
 
 function LinkSharingInfo() {

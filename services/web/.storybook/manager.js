@@ -9,7 +9,7 @@ const theme = create({
   base: 'light',
   brandTitle: 'Overleaf',
   brandUrl: 'https://www.overleaf.com',
-  brandImage
+  brandImage,
 })
 
 addons.setConfig({ theme })

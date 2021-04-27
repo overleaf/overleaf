@@ -25,12 +25,12 @@ function renameTag(userId, tagId, name, callback) {
   Tag.updateOne(
     {
       _id: tagId,
-      user_id: userId
+      user_id: userId,
     },
     {
       $set: {
-        name
-      }
+        name,
+      },
     },
     callback
   )
@@ -43,7 +43,7 @@ function deleteTag(userId, tagId, callback) {
   Tag.deleteOne(
     {
       _id: tagId,
-      user_id: userId
+      user_id: userId,
     },
     callback
   )
@@ -65,7 +65,7 @@ function removeProjectFromTag(userId, tagId, projectId, callback) {
   }
   const searchOps = {
     _id: tagId,
-    user_id: userId
+    user_id: userId,
   }
   const deleteOperation = { $pull: { project_ids: projectId } }
   Tag.updateOne(searchOps, deleteOperation, callback)
@@ -77,7 +77,7 @@ function addProjectToTag(userId, tagId, projectId, callback) {
   }
   const searchOps = {
     _id: tagId,
-    user_id: userId
+    user_id: userId,
   }
   const insertOperation = { $addToSet: { project_ids: projectId } }
   Tag.findOneAndUpdate(searchOps, insertOperation, callback)
@@ -89,7 +89,7 @@ function addProjectToTagName(userId, name, projectId, callback) {
   }
   const searchOps = {
     name,
-    user_id: userId
+    user_id: userId,
   }
   const insertOperation = { $addToSet: { project_ids: projectId } }
   Tag.updateOne(searchOps, insertOperation, { upsert: true }, callback)
@@ -110,7 +110,7 @@ const TagsHandler = {
   removeProjectFromTag,
   addProjectToTag,
   addProjectToTagName,
-  removeProjectFromAllTags
+  removeProjectFromAllTags,
 }
 TagsHandler.promises = promisifyAll(TagsHandler)
 module.exports = TagsHandler

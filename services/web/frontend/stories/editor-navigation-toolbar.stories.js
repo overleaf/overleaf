@@ -11,8 +11,8 @@ export const UpToThreeConnectedUsers = args => {
 UpToThreeConnectedUsers.args = {
   onlineUsers: ['a', 'c', 'd'].map(c => ({
     user_id: c,
-    name: `${c}_user name`
-  }))
+    name: `${c}_user name`,
+  })),
 }
 
 export const ManyConnectedUsers = args => {
@@ -21,8 +21,8 @@ export const ManyConnectedUsers = args => {
 ManyConnectedUsers.args = {
   onlineUsers: ['a', 'c', 'd', 'e', 'f'].map(c => ({
     user_id: c,
-    name: `${c}_user name`
-  }))
+    name: `${c}_user name`,
+  })),
 }
 
 export default {
@@ -36,11 +36,11 @@ export default {
     toggleChatOpen: { action: 'toggleChatOpen' },
     togglePdfView: { action: 'togglePdfView' },
     openShareModal: { action: 'openShareModal' },
-    onShowLeftMenuClick: { action: 'onShowLeftMenuClick' }
+    onShowLeftMenuClick: { action: 'onShowLeftMenuClick' },
   },
   args: {
     projectName: 'Overleaf Project',
     onlineUsers: [{ user_id: 'abc', name: 'overleaf' }],
-    unreadMessageCount: 0
-  }
+    unreadMessageCount: 0,
+  },
 }

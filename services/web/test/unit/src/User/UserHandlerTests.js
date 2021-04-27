@@ -7,17 +7,17 @@ describe('UserHandler', function () {
     this.user = {
       _id: '12390i',
       email: 'bob@bob.com',
-      remove: sinon.stub().callsArgWith(0)
+      remove: sinon.stub().callsArgWith(0),
     }
 
     this.TeamInvitesHandler = {
-      createTeamInvitesForLegacyInvitedEmail: sinon.stub().yields()
+      createTeamInvitesForLegacyInvitedEmail: sinon.stub().yields(),
     }
 
     this.UserHandler = SandboxedModule.require(modulePath, {
       requires: {
-        '../Subscription/TeamInvitesHandler': this.TeamInvitesHandler
-      }
+        '../Subscription/TeamInvitesHandler': this.TeamInvitesHandler,
+      },
     })
   })
 

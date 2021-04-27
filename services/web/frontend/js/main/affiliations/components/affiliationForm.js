@@ -27,7 +27,7 @@ const affiliationFormController = function (
 
   ctrl.addUniversityToSelection = universityName => ({
     name: universityName,
-    isUserSuggested: true
+    isUserSuggested: true,
   })
   ctrl.handleFreeformInputChange = function ($select, propertyToMatch) {
     if ($select.search == null || $select.search === '') {
@@ -101,8 +101,8 @@ export default App.component('affiliationForm', {
   bindings: {
     affiliationData: '=',
     showUniversityAndCountry: '<',
-    showRoleAndDepartment: '<'
+    showRoleAndDepartment: '<',
   },
   controller: affiliationFormController,
-  templateUrl: 'affiliationFormTpl'
+  templateUrl: 'affiliationFormTpl',
 })

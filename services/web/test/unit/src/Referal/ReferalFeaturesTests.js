@@ -10,10 +10,10 @@ describe('ReferalFeatures', function () {
     this.ReferalFeatures = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
-          User: (this.User = {})
+          User: (this.User = {}),
         },
-        'settings-sharelatex': (this.Settings = {})
-      }
+        'settings-sharelatex': (this.Settings = {}),
+      },
     })
     this.callback = sinon.stub()
     this.referal_id = 'referal-id-123'
@@ -29,12 +29,12 @@ describe('ReferalFeatures', function () {
         3: {
           collaborators: 3,
           dropbox: false,
-          versioning: false
-        }
+          versioning: false,
+        },
       }
       const stubbedUser = {
         refered_user_count: this.refered_user_count,
-        features: { collaborators: 1, dropbox: false, versioning: false }
+        features: { collaborators: 1, dropbox: false, versioning: false },
       }
 
       this.User.findOne = sinon.stub().callsArgWith(2, null, stubbedUser)
@@ -59,8 +59,8 @@ describe('ReferalFeatures', function () {
         1: {
           collaborators: 3,
           dropbox: false,
-          versioning: false
-        }
+          versioning: false,
+        },
       }
       this.User.findOne = sinon
         .stub()

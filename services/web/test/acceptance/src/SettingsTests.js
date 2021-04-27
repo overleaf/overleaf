@@ -29,8 +29,8 @@ describe('SettingsPage', function () {
       password: this.user.password,
       profile: {
         id: this.v1Id,
-        email: this.user.email
-      }
+        email: this.user.email,
+      },
     }
     return async.series(
       [
@@ -40,7 +40,7 @@ describe('SettingsPage', function () {
         cb => {
           MockV1Api.setUser(this.v1Id, this.v1User)
           return cb()
-        }
+        },
       ],
       done
     )

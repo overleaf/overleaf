@@ -17,14 +17,14 @@ App.controller('ShareProjectModalController', function (
 ) {
   $scope.inputs = {
     privileges: 'readAndWrite',
-    contacts: []
+    contacts: [],
   }
   $scope.state = {
     error: null,
     errorReason: null,
     inflight: false,
     startedFreeTrial: false,
-    invites: []
+    invites: [],
   }
 
   $modalInstance.opened.then(() =>

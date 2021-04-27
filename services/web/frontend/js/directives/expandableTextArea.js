@@ -25,5 +25,5 @@ export default App.directive('expandableTextArea', () => ({
     }
 
     return scope.$watch(() => el.val(), resetHeight)
-  }
+  },
 }))

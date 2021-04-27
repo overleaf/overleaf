@@ -209,7 +209,7 @@ const AuthorizationManager = {
           [
             PrivilegeLevels.OWNER,
             PrivilegeLevels.READ_AND_WRITE,
-            PrivilegeLevels.READ_ONLY
+            PrivilegeLevels.READ_ONLY,
           ].includes(privilegeLevel)
         )
       }
@@ -286,10 +286,10 @@ const AuthorizationManager = {
       }
       callback(null, (user && user.isAdmin) === true)
     })
-  }
+  },
 }
 
 module.exports = AuthorizationManager
 module.exports.promises = promisifyAll(AuthorizationManager, {
-  without: 'isRestrictedUser'
+  without: 'isRestrictedUser',
 })

@@ -41,5 +41,5 @@ module.exports = {
         return res.sendStatus(200)
       }
     })
-  }
+  },
 }

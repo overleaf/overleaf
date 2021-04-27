@@ -12,7 +12,7 @@ const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const {
   normalizeQuery,
-  normalizeMultiQuery
+  normalizeMultiQuery,
 } = require('../../../../app/src/Features/Helpers/Mongo')
 
 describe('UserGetter', function () {
@@ -24,10 +24,10 @@ describe('UserGetter', function () {
         {
           email: 'email1@foo.bar',
           reversedHostname: 'rab.oof',
-          confirmedAt: new Date()
+          confirmedAt: new Date(),
         },
-        { email: 'email2@foo.bar', reversedHostname: 'rab.oof' }
-      ]
+        { email: 'email2@foo.bar', reversedHostname: 'rab.oof' },
+      ],
     }
     this.findOne = sinon.stub().callsArgWith(2, null, this.fakeUser)
     this.findToArrayStub = sinon.stub().yields(null, [this.fakeUser])
@@ -36,10 +36,10 @@ describe('UserGetter', function () {
       db: {
         users: {
           findOne: this.findOne,
-          find: this.find
-        }
+          find: this.find,
+        },
       },
-      ObjectId
+      ObjectId,
     }
     this.getUserAffiliations = sinon.stub().resolves([])
 
@@ -48,20 +48,20 @@ describe('UserGetter', function () {
         '../Helpers/Mongo': { normalizeQuery, normalizeMultiQuery },
         '../../infrastructure/mongodb': this.Mongo,
         '@overleaf/metrics': {
-          timeAsyncMethod: sinon.stub()
+          timeAsyncMethod: sinon.stub(),
         },
         'settings-sharelatex': (this.settings = {
-          reconfirmNotificationDays: 14
+          reconfirmNotificationDays: 14,
         }),
         '../Institutions/InstitutionsAPI': {
           promises: {
-            getUserAffiliations: this.getUserAffiliations
-          }
+            getUserAffiliations: this.getUserAffiliations,
+          },
         },
         '../../infrastructure/Features': {
-          hasFeature: sinon.stub().returns(true)
-        }
-      }
+          hasFeature: sinon.stub().returns(true),
+        },
+      },
     })
   })
 
@@ -140,14 +140,14 @@ describe('UserGetter', function () {
               reversedHostname: 'rab.oof',
               confirmedAt: this.fakeUser.emails[0].confirmedAt,
               emailHasInstitutionLicence: false,
-              default: false
+              default: false,
             },
             {
               email: 'email2@foo.bar',
               reversedHostname: 'rab.oof',
               emailHasInstitutionLicence: false,
-              default: true
-            }
+              default: true,
+            },
           ])
           done()
         }
@@ -166,10 +166,10 @@ describe('UserGetter', function () {
           institution: {
             name: 'University Name',
             isUniversity: true,
-            confirmed: true
+            confirmed: true,
           },
-          portal: undefined
-        }
+          portal: undefined,
+        },
       ]
       this.getUserAffiliations.resolves(affiliationsData)
       this.UserGetter.getUserFullEmails(
@@ -192,15 +192,15 @@ describe('UserGetter', function () {
                 licence: affiliationsData[0].licence,
                 inReconfirmNotificationPeriod: false,
                 pastReconfirmDate: false,
-                portal: undefined
-              }
+                portal: undefined,
+              },
             },
             {
               email: 'email2@foo.bar',
               reversedHostname: 'rab.oof',
               emailHasInstitutionLicence: false,
-              default: true
-            }
+              default: true,
+            },
           ])
           done()
         }
@@ -209,7 +209,7 @@ describe('UserGetter', function () {
 
     it('should merge SAML identifier', function (done) {
       const fakeSamlIdentifiers = [
-        { providerId: 'saml_id', exteranlUserId: 'whatever' }
+        { providerId: 'saml_id', exteranlUserId: 'whatever' },
       ]
       const fakeUserWithSaml = this.fakeUser
       fakeUserWithSaml.emails[0].samlProviderId = 'saml_id'
@@ -228,14 +228,14 @@ describe('UserGetter', function () {
               default: false,
               emailHasInstitutionLicence: false,
               samlProviderId: 'saml_id',
-              samlIdentifier: fakeSamlIdentifiers[0]
+              samlIdentifier: fakeSamlIdentifiers[0],
             },
             {
               email: 'email2@foo.bar',
               reversedHostname: 'rab.oof',
               emailHasInstitutionLicence: false,
-              default: true
-            }
+              default: true,
+            },
           ])
           done()
         }
@@ -245,7 +245,7 @@ describe('UserGetter', function () {
     it('should get user when it has no emails field', function (done) {
       this.fakeUser = {
         _id: '12390i',
-        email: 'email2@foo.bar'
+        email: 'email2@foo.bar',
       }
       this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
       const projection = { email: 1, emails: 1, samlIdentifiers: 1 }
@@ -272,7 +272,7 @@ describe('UserGetter', function () {
         confirmed: true,
         ssoBeta: false,
         ssoEnabled: false,
-        maxConfirmationMonths: 12
+        maxConfirmationMonths: 12,
       }
       const institutionSSO = {
         id: 2,
@@ -281,7 +281,7 @@ describe('UserGetter', function () {
         confirmed: true,
         ssoBeta: false,
         ssoEnabled: true,
-        maxConfirmationMonths: 12
+        maxConfirmationMonths: 12,
       }
       describe('non-SSO institutions', function () {
         const email1 = 'leonard@example-affiliation.com'
@@ -293,7 +293,7 @@ describe('UserGetter', function () {
             department: 'Medicine',
             inferred: false,
             licence: 'pro_plus',
-            institution: institutionNonSSO
+            institution: institutionNonSSO,
           },
           {
             email: email2,
@@ -301,8 +301,8 @@ describe('UserGetter', function () {
             department: 'Medicine',
             inferred: false,
             licence: 'pro_plus',
-            institution: institutionNonSSO
-          }
+            institution: institutionNonSSO,
+          },
         ]
         it('should flag inReconfirmNotificationPeriod for all affiliations in period', function (done) {
           const user = {
@@ -318,7 +318,7 @@ describe('UserGetter', function () {
                     'months'
                   )
                   .toDate(),
-                default: true
+                default: true,
               },
               {
                 email: email2,
@@ -328,9 +328,9 @@ describe('UserGetter', function () {
                     institutionNonSSO.maxConfirmationMonths + 1,
                     'months'
                   )
-                  .toDate()
-              }
-            ]
+                  .toDate(),
+              },
+            ],
           }
           this.getUserAffiliations.resolves(affiliationsData)
           this.UserGetter.promises.getUser = sinon.stub().resolves(user)
@@ -361,14 +361,14 @@ describe('UserGetter', function () {
                 email: email1,
                 reversedHostname: 'moc.noitailiffa-elpmaxe',
                 confirmedAt: new Date(),
-                default: true
+                default: true,
               },
               {
                 email: email2,
                 reversedHostname: 'moc.noitailiffa-elpmaxe',
-                confirmedAt: aboutToBeWithinPeriod
-              }
-            ]
+                confirmedAt: aboutToBeWithinPeriod,
+              },
+            ],
           }
           this.getUserAffiliations.resolves(affiliationsData)
           this.UserGetter.promises.getUser = sinon.stub().resolves(user)
@@ -401,7 +401,7 @@ describe('UserGetter', function () {
               department: 'Maths',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionSSO
+              institution: institutionSSO,
             },
             {
               email: email2,
@@ -409,7 +409,7 @@ describe('UserGetter', function () {
               department: 'Maths',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionSSO
+              institution: institutionSSO,
             },
             {
               email: email3,
@@ -417,8 +417,8 @@ describe('UserGetter', function () {
               department: 'Maths',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionSSO
-            }
+              institution: institutionSSO,
+            },
           ]
 
           const user = {
@@ -430,28 +430,28 @@ describe('UserGetter', function () {
                 reversedHostname: 'rab.oss',
                 confirmedAt: new Date('2019-09-24'),
                 reconfirmedAt: new Date('2019-09-24'),
-                default: true
+                default: true,
               },
               {
                 email: email2,
                 reversedHostname: 'rab.oss',
                 confirmedAt: new Date('2019-09-24'),
                 reconfirmedAt: new Date('2019-09-24'),
-                samlProviderId: institutionSSO.id
+                samlProviderId: institutionSSO.id,
               },
               {
                 email: email3,
                 reversedHostname: 'rab.oss',
                 confirmedAt: new Date('2019-09-24'),
-                reconfirmedAt: new Date('2019-09-24')
-              }
+                reconfirmedAt: new Date('2019-09-24'),
+              },
             ],
             samlIdentifiers: [
               {
                 providerId: institutionSSO.id,
-                externalUserId: 'abc123'
-              }
-            ]
+                externalUserId: 'abc123',
+              },
+            ],
           }
           this.getUserAffiliations.resolves(affiliationsData)
           this.UserGetter.promises.getUser = sinon.stub().resolves(user)
@@ -488,7 +488,7 @@ describe('UserGetter', function () {
               department: 'Maths',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionSSO
+              institution: institutionSSO,
             },
             {
               email: email2,
@@ -496,7 +496,7 @@ describe('UserGetter', function () {
               department: 'Maths',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionSSO
+              institution: institutionSSO,
             },
             {
               email: email3,
@@ -504,7 +504,7 @@ describe('UserGetter', function () {
               department: 'Maths',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionNonSSO
+              institution: institutionNonSSO,
             },
             {
               email: email4,
@@ -512,8 +512,8 @@ describe('UserGetter', function () {
               department: 'Maths',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionNonSSO
-            }
+              institution: institutionNonSSO,
+            },
           ]
           const user = {
             _id: '12390i',
@@ -523,31 +523,31 @@ describe('UserGetter', function () {
                 email: email1,
                 reversedHostname: 'rab.oss',
                 confirmedAt: '2019-09-24T20:25:08.503Z',
-                default: true
+                default: true,
               },
               {
                 email: email2,
                 reversedHostname: 'rab.oss',
                 confirmedAt: new Date('2019-09-24T20:25:08.503Z'),
-                samlProviderId: institutionSSO.id
+                samlProviderId: institutionSSO.id,
               },
               {
                 email: email3,
                 reversedHostname: 'rab.oof',
-                confirmedAt: new Date('2019-10-24T20:25:08.503Z')
+                confirmedAt: new Date('2019-10-24T20:25:08.503Z'),
               },
               {
                 email: email4,
                 reversedHostname: 'rab.oof',
-                confirmedAt: new Date('2019-09-24T20:25:08.503Z')
-              }
+                confirmedAt: new Date('2019-09-24T20:25:08.503Z'),
+              },
             ],
             samlIdentifiers: [
               {
                 providerId: institutionSSO.id,
-                externalUserId: 'abc123'
-              }
-            ]
+                externalUserId: 'abc123',
+              },
+            ],
           }
           this.getUserAffiliations.resolves(affiliationsData)
           this.UserGetter.promises.getUser = sinon.stub().resolves(user)
@@ -586,7 +586,7 @@ describe('UserGetter', function () {
               department: 'Maths',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionNonSSO
+              institution: institutionNonSSO,
             },
             {
               email: email2,
@@ -594,7 +594,7 @@ describe('UserGetter', function () {
               department: 'Maths',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionNonSSO
+              institution: institutionNonSSO,
             },
             {
               email: email3,
@@ -602,8 +602,8 @@ describe('UserGetter', function () {
               department: 'Maths',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionNonSSO
-            }
+              institution: institutionNonSSO,
+            },
           ]
           const user = {
             _id: '12390i',
@@ -620,7 +620,7 @@ describe('UserGetter', function () {
                   institutionSSO.maxConfirmationMonths * 3,
                   'months'
                 ),
-                default: true
+                default: true,
               },
               {
                 email: email2,
@@ -632,7 +632,7 @@ describe('UserGetter', function () {
                 reconfirmedAt: moment().subtract(
                   institutionSSO.maxConfirmationMonths * 2,
                   'months'
-                )
+                ),
               },
               {
                 email: email3,
@@ -644,9 +644,9 @@ describe('UserGetter', function () {
                 reconfirmedAt: moment().subtract(
                   institutionSSO.maxConfirmationMonths * 4,
                   'months'
-                )
-              }
-            ]
+                ),
+              },
+            ],
           }
           this.getUserAffiliations.resolves(affiliationsData)
           this.UserGetter.promises.getUser = sinon.stub().resolves(user)
@@ -683,8 +683,8 @@ describe('UserGetter', function () {
               department: 'Medicine',
               inferred: false,
               licence: 'pro_plus',
-              institution: institutionNonSSO
-            }
+              institution: institutionNonSSO,
+            },
           ]
           const user = {
             _id: '12390i',
@@ -693,9 +693,9 @@ describe('UserGetter', function () {
               {
                 email,
                 confirmedAt,
-                default: true
-              }
-            ]
+                default: true,
+              },
+            ],
           }
           this.getUserAffiliations.resolves(affiliationsData)
           this.UserGetter.promises.getUser = sinon.stub().resolves(user)
@@ -725,16 +725,16 @@ describe('UserGetter', function () {
           const affiliationsData = [
             {
               email: email1,
-              institution: institutionSSO
+              institution: institutionSSO,
             },
             {
               email: email2,
-              institution: institutionNonSSO
+              institution: institutionNonSSO,
             },
             {
               email: email3,
-              institution: institutionNonSSO
-            }
+              institution: institutionNonSSO,
+            },
           ]
           const user = {
             _id: '12390i',
@@ -744,23 +744,23 @@ describe('UserGetter', function () {
                 email: email1,
                 confirmedAt: confirmedAtAboutToExpire,
                 default: true,
-                samlProviderId: institutionSSO.id
+                samlProviderId: institutionSSO.id,
               },
               {
                 email: email2,
-                confirmedAt: new Date('2019-09-24T20:25:08.503Z')
+                confirmedAt: new Date('2019-09-24T20:25:08.503Z'),
               },
               {
                 email: email3,
-                confirmedAt: new Date('2019-10-24T20:25:08.503Z')
-              }
+                confirmedAt: new Date('2019-10-24T20:25:08.503Z'),
+              },
             ],
             samlIdentifiers: [
               {
                 providerId: institutionSSO.id,
-                externalUserId: 'abc123'
-              }
-            ]
+                externalUserId: 'abc123',
+              },
+            ],
           }
           this.settings.reconfirmNotificationDays = undefined
           this.getUserAffiliations.resolves(affiliationsData)
@@ -823,7 +823,7 @@ describe('UserGetter', function () {
       const email = 'hello@world.com'
       const expectedQuery = {
         emails: { $exists: true },
-        'emails.email': email
+        'emails.email': email,
       }
       const projection = { emails: 1 }
       this.UserGetter.getUserByAnyEmail(
@@ -843,7 +843,7 @@ describe('UserGetter', function () {
     it('query contains $exists:true so partial index is used', function (done) {
       const expectedQuery = {
         emails: { $exists: true },
-        'emails.email': ''
+        'emails.email': '',
       }
       this.UserGetter.getUserByAnyEmail('', {}, (error, user) => {
         expect(error).to.not.exist
@@ -876,7 +876,7 @@ describe('UserGetter', function () {
       const hostname = 'bar.foo'
       const expectedQuery = {
         emails: { $exists: true },
-        'emails.reversedHostname': hostname.split('').reverse().join('')
+        'emails.reversedHostname': hostname.split('').reverse().join(''),
       }
       const projection = { emails: 1 }
       this.UserGetter.getUsersByHostname(
@@ -905,9 +905,9 @@ describe('UserGetter', function () {
               $exists: true,
               $elemMatch: {
                 email: { $in: emails },
-                confirmedAt: { $exists: true }
-              }
-            }
+                confirmedAt: { $exists: true },
+              },
+            },
           },
           { projection: {} }
         )
@@ -920,7 +920,7 @@ describe('UserGetter', function () {
     it('should find users by list of v1 ids', function (done) {
       const v1Ids = [501]
       const expectedQuery = {
-        'overleaf.id': { $in: v1Ids }
+        'overleaf.id': { $in: v1Ids },
       }
       const projection = { emails: 1 }
       this.UserGetter.getUsersByV1Ids(v1Ids, projection, (error, users) => {

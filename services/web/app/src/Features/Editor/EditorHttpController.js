@@ -28,7 +28,7 @@ module.exports = {
   deleteFolder: expressify(deleteFolder),
   deleteEntity: expressify(deleteEntity),
   convertDocToFile: expressify(convertDocToFile),
-  _nameIsAcceptableLength
+  _nameIsAcceptableLength,
 }
 
 const unsupportedSpellcheckLanguages = [
@@ -50,7 +50,7 @@ const unsupportedSpellcheckLanguages = [
   'uk',
   'uz',
   'zu',
-  'fi'
+  'fi',
 ]
 
 async function joinProject(req, res, next) {
@@ -63,7 +63,7 @@ async function joinProject(req, res, next) {
   const {
     project,
     privilegeLevel,
-    isRestrictedUser
+    isRestrictedUser,
   } = await _buildJoinProjectView(req, projectId, userId)
   if (!project) {
     return res.sendStatus(403)
@@ -90,7 +90,7 @@ async function joinProject(req, res, next) {
   res.json({
     project,
     privilegeLevel,
-    isRestrictedUser
+    isRestrictedUser,
   })
 }
 
@@ -148,7 +148,7 @@ async function _buildJoinProjectView(req, projectId, userId) {
       deletedDocsFromDocstore
     ),
     privilegeLevel,
-    isRestrictedUser
+    isRestrictedUser,
   }
 }
 

@@ -29,8 +29,8 @@ describe('ProjectUpdateHandler', function () {
     this.ProjectModel.updateOne = sinon.stub().callsArg(3)
     return (this.handler = SandboxedModule.require(modulePath, {
       requires: {
-        '../../models/Project': { Project: this.ProjectModel }
-      }
+        '../../models/Project': { Project: this.ProjectModel },
+      },
     }))
   })
 
@@ -51,11 +51,11 @@ describe('ProjectUpdateHandler', function () {
             this.ProjectModel.updateOne,
             {
               _id: this.project_id,
-              lastUpdated: { $lt: this.lastUpdatedAt }
+              lastUpdated: { $lt: this.lastUpdatedAt },
             },
             {
               lastUpdated: this.lastUpdatedAt,
-              lastUpdatedBy: this.lastUpdatedBy
+              lastUpdatedBy: this.lastUpdatedBy,
             }
           )
           return done()
@@ -69,11 +69,11 @@ describe('ProjectUpdateHandler', function () {
           this.ProjectModel.updateOne,
           {
             _id: this.project_id,
-            lastUpdated: { $lt: this.fakeTime }
+            lastUpdated: { $lt: this.fakeTime },
           },
           {
             lastUpdated: this.fakeTime,
-            lastUpdatedBy: null
+            lastUpdatedBy: null,
           }
         )
         return done()

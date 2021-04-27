@@ -31,8 +31,8 @@ describe('RestoreManager', function () {
         '../../infrastructure/FileWriter': (this.FileWriter = {}),
         '../Uploads/FileSystemImportManager': (this.FileSystemImportManager = {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
-        '../Editor/EditorController': (this.EditorController = {})
-      }
+        '../Editor/EditorController': (this.EditorController = {}),
+      },
     })
     this.user_id = 'mock-user-id'
     this.project_id = 'mock-project-id'

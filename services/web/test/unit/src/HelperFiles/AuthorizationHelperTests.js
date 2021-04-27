@@ -16,12 +16,12 @@ describe('AuthorizationHelper', function () {
                 institutionManagement: {},
                 groupMetrics: {},
                 groupManagement: {},
-                adminMetrics: {}
-              }
-            }
-          }
-        }
-      }
+                adminMetrics: {},
+              },
+            },
+          },
+        },
+      },
     })
   })
 

@@ -23,15 +23,15 @@ module.exports = {
   ),
   promises: {
     createProjectFromZipArchive,
-    createProjectFromZipArchiveWithName
-  }
+    createProjectFromZipArchiveWithName,
+  },
 }
 
 async function createProjectFromZipArchive(ownerId, defaultName, zipPath) {
   const contentsPath = await _extractZip(zipPath)
   const {
     path,
-    content
+    content,
   } = await ProjectRootDocManager.promises.findRootDocFileFromDirectory(
     contentsPath
   )
@@ -139,7 +139,7 @@ async function _initializeProjectWithZipContents(
   await _notifyDocumentUpdater(project, ownerId, {
     newFiles: fileEntries,
     newDocs: docEntries,
-    newProject: { version: projectVersion }
+    newProject: { version: projectVersion },
   })
   await TpdsProjectFlusher.promises.flushProjectToTpds(project._id)
 }

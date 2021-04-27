@@ -19,5 +19,5 @@ module.exports = {
     User.updateOne(conditions, update, (err, result) =>
       callback(err, (result ? result.nModified : 0) === 1)
     )
-  }
+  },
 }

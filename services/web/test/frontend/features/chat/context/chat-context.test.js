@@ -10,7 +10,7 @@ import EventEmitter from 'events'
 import { useChatContext } from '../../../../../frontend/js/features/chat/context/chat-context'
 import {
   ChatProviders,
-  cleanUpContext
+  cleanUpContext,
 } from '../../../helpers/render-with-context'
 import { stubMathJax, tearDownMathJaxStubs } from '../components/stubs'
 
@@ -18,7 +18,7 @@ describe('ChatContext', function () {
   const user = {
     id: 'fake_user',
     first_name: 'fake_user_first_name',
-    email: 'fake@example.com'
+    email: 'fake@example.com',
   }
 
   beforeEach(function () {
@@ -64,7 +64,7 @@ describe('ChatContext', function () {
       const socket = new EventEmitter()
       const { result, waitForNextUpdate } = renderChatContextHook({
         user,
-        socket
+        socket,
       })
 
       // Wait until initial messages have loaded
@@ -82,8 +82,8 @@ describe('ChatContext', function () {
         user: {
           id: 'another_fake_user',
           first_name: 'another_fake_user_first_name',
-          email: 'another_fake@example.com'
-        }
+          email: 'another_fake@example.com',
+        },
       })
 
       const message = result.current.messages[0]
@@ -95,7 +95,7 @@ describe('ChatContext', function () {
       const socket = new EventEmitter()
       const { result, waitForNextUpdate } = renderChatContextHook({
         user,
-        socket
+        socket,
       })
 
       // Wait until initial messages have loaded
@@ -110,7 +110,7 @@ describe('ChatContext', function () {
         id: 'msg_1',
         content: 'received message',
         timestamp: Date.now(),
-        user
+        user,
       })
 
       // Expect that the sent message is shown, but the new message is not
@@ -125,7 +125,7 @@ describe('ChatContext', function () {
       const socket = new EventEmitter()
       const { result, waitForNextUpdate } = renderChatContextHook({
         user,
-        socket
+        socket,
       })
 
       // Wait until initial messages have loaded
@@ -137,7 +137,7 @@ describe('ChatContext', function () {
 
       const [sentMessageFromCurrentUser] = result.current.messages
       expect(sentMessageFromCurrentUser.contents).to.deep.equal([
-        'sent message from current user'
+        'sent message from current user',
       ])
 
       act(() => {
@@ -149,14 +149,14 @@ describe('ChatContext', function () {
           user: {
             id: 'another_fake_user',
             first_name: 'another_fake_user_first_name',
-            email: 'another_fake@example.com'
-          }
+            email: 'another_fake@example.com',
+          },
         })
       })
 
       const [, messageFromOtherUser] = result.current.messages
       expect(messageFromOtherUser.contents).to.deep.equal([
-        'new message from other user'
+        'new message from other user',
       ])
 
       // Receive a message from the current user
@@ -164,13 +164,13 @@ describe('ChatContext', function () {
         id: 'msg_2',
         content: 'received message from current user',
         timestamp: Date.now(),
-        user
+        user,
       })
 
       // Since the current user didn't just send a message, it is now shown
       const [, , receivedMessageFromCurrentUser] = result.current.messages
       expect(receivedMessageFromCurrentUser.contents).to.deep.equal([
-        'received message from current user'
+        'received message from current user',
       ])
     })
   })
@@ -182,8 +182,8 @@ describe('ChatContext', function () {
           id: 'msg_1',
           content: 'a message',
           user,
-          timestamp: Date.now()
-        }
+          timestamp: Date.now(),
+        },
       ])
     })
 
@@ -218,8 +218,8 @@ describe('ChatContext', function () {
           id: 'msg_1',
           content: 'first message',
           user,
-          timestamp: new Date('2021-03-04T10:00:00').getTime()
-        }
+          timestamp: new Date('2021-03-04T10:00:00').getTime(),
+        },
       ])
 
       const { result, waitForNextUpdate } = renderChatContextHook({ user })
@@ -228,7 +228,7 @@ describe('ChatContext', function () {
       await waitForNextUpdate()
 
       expect(result.current.messages[0].contents).to.deep.equal([
-        'first message'
+        'first message',
       ])
 
       // The before query param is not set
@@ -250,8 +250,8 @@ describe('ChatContext', function () {
               id: 'msg_51',
               content: 'message from second page',
               user,
-              timestamp: new Date('2021-03-04T11:00:00').getTime()
-            }
+              timestamp: new Date('2021-03-04T11:00:00').getTime(),
+            },
           ],
           { overwriteRoutes: false }
         )
@@ -312,7 +312,7 @@ describe('ChatContext', function () {
       const socket = new EventEmitter()
       const { result, waitForNextUpdate } = renderChatContextHook({
         user,
-        socket
+        socket,
       })
 
       // Start loading messages
@@ -327,8 +327,8 @@ describe('ChatContext', function () {
         user: {
           id: 'another_fake_user',
           first_name: 'another_fake_user_first_name',
-          email: 'another_fake@example.com'
-        }
+          email: 'another_fake@example.com',
+        },
       })
 
       // Resolve messages being loaded
@@ -337,8 +337,8 @@ describe('ChatContext', function () {
           id: 'fetched_msg',
           content: 'loaded message',
           user,
-          timestamp: Date.now()
-        }
+          timestamp: Date.now(),
+        },
       ])
       await waitForNextUpdate()
 
@@ -349,7 +349,7 @@ describe('ChatContext', function () {
       )
       expect(messageContents).to.deep.equal([
         'loaded message',
-        'socket message'
+        'socket message',
       ])
     })
   })
@@ -369,7 +369,7 @@ describe('ChatContext', function () {
       result.current.sendMessage('sent message')
 
       expect(result.current.messages[0].contents).to.deep.equal([
-        'sent message'
+        'sent message',
       ])
     })
 
@@ -393,7 +393,7 @@ describe('ChatContext', function () {
       expect(result.current.messages).to.be.empty
       expect(
         fetchMock.called('express:/project/:projectId/messages', {
-          method: 'post'
+          method: 'post',
         })
       ).to.be.false
     })
@@ -414,7 +414,7 @@ describe('ChatContext', function () {
         id: 'msg_1',
         content: 'new message',
         timestamp: Date.now(),
-        user
+        user,
       })
 
       expect(result.current.unreadMessageCount).to.equal(1)
@@ -430,7 +430,7 @@ describe('ChatContext', function () {
         id: 'msg_1',
         content: 'new message',
         timestamp: Date.now(),
-        user
+        user,
       })
 
       result.current.markMessagesAsRead()
@@ -445,7 +445,7 @@ function renderChatContextHook(props) {
     // Wrap with ChatContext.Provider (and the other editor context providers)
     wrapper: ({ children }) => (
       <ChatProviders {...props}>{children}</ChatProviders>
-    )
+    ),
   })
 }
 
@@ -454,7 +454,7 @@ function createMessages(number, user, timestamp = Date.now()) {
     id: `msg_${idx + 1}`,
     content: `message ${idx + 1}`,
     user,
-    timestamp
+    timestamp,
   }))
 }
 

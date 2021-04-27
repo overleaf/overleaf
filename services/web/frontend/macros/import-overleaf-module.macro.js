@@ -28,7 +28,7 @@ function importOverleafModuleMacro({ references, state, babel }) {
         all.importedVariables.push(
           t.objectExpression([
             t.objectProperty(t.identifier('import'), id),
-            t.objectProperty(t.identifier('path'), t.stringLiteral(path))
+            t.objectProperty(t.identifier('path'), t.stringLiteral(path)),
           ])
         )
 

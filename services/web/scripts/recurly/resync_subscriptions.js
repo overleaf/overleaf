@@ -35,7 +35,7 @@ const ScriptLogger = {
       )
     } else {
       ScriptLogger.allMismatchReasons[mismatchReasonsString] = [
-        subscription._id
+        subscription._id,
       ]
     }
   },
@@ -52,7 +52,7 @@ const ScriptLogger = {
       'Mismatch Subscriptions Count',
       ScriptLogger.mismatchSubscriptionsCount
     )
-  }
+  },
 }
 
 const slowCallback = callback => setTimeout(callback, 80)
@@ -105,7 +105,7 @@ const syncSubscriptions = (subscriptions, callback) => {
 
 const loopForSubscriptions = (skip, callback) => {
   Subscription.find({
-    recurlySubscription_id: { $exists: true, $ne: '' }
+    recurlySubscription_id: { $exists: true, $ne: '' },
   })
     .sort('_id')
     .skip(skip)

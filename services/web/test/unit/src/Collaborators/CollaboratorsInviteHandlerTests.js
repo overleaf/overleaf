@@ -58,26 +58,26 @@ describe('CollaboratorsInviteHandler', function () {
         '../../models/ProjectInvite': { ProjectInvite: this.ProjectInvite },
         './CollaboratorsEmailHandler': (this.CollaboratorsEmailHandler = {}),
         './CollaboratorsHandler': (this.CollaboratorsHandler = {
-          addUserIdToProject: sinon.stub()
+          addUserIdToProject: sinon.stub(),
         }),
         '../User/UserGetter': (this.UserGetter = { getUser: sinon.stub() }),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {}),
-        crypto: this.Crypto
-      }
+        crypto: this.Crypto,
+      },
     })
 
     this.projectId = ObjectId()
     this.sendingUserId = ObjectId()
     this.sendingUser = {
       _id: this.sendingUserId,
-      name: 'Bob'
+      name: 'Bob',
     }
     this.email = 'user@example.com'
     this.userId = ObjectId()
     this.user = {
       _id: this.userId,
-      email: 'someone@example.com'
+      email: 'someone@example.com',
     }
     this.inviteId = ObjectId()
     this.token = 'hnhteaosuhtaeosuahs'
@@ -89,7 +89,7 @@ describe('CollaboratorsInviteHandler', function () {
       sendingUserId: this.sendingUserId,
       projectId: this.projectId,
       privileges: this.privileges,
-      createdAt: new Date()
+      createdAt: new Date(),
     })
   })
 
@@ -140,7 +140,7 @@ describe('CollaboratorsInviteHandler', function () {
     beforeEach(function () {
       this.fakeInvites = [
         { _id: ObjectId(), one: 1 },
-        { _id: ObjectId(), two: 2 }
+        { _id: ObjectId(), two: 2 },
       ]
       this.ProjectInvite.find.callsArgWith(1, null, this.fakeInvites)
       return (this.call = callback => {
@@ -241,7 +241,7 @@ describe('CollaboratorsInviteHandler', function () {
             'token',
             'sendingUserId',
             'projectId',
-            'privileges'
+            'privileges',
           ])
           return done()
         })
@@ -623,7 +623,7 @@ describe('CollaboratorsInviteHandler', function () {
       this.fakeProject = {
         _id: this.projectId,
         collaberator_refs: [],
-        readOnly_refs: []
+        readOnly_refs: [],
       }
       this.CollaboratorsHandler.addUserIdToProject.callsArgWith(4, null)
       this._getInviteByToken = sinon.stub(
@@ -928,7 +928,7 @@ describe('CollaboratorsInviteHandler', function () {
     describe('when notification.read produces an error', function () {
       beforeEach(function () {
         this.notification = {
-          read: sinon.stub().callsArgWith(0, new Error('woops'))
+          read: sinon.stub().callsArgWith(0, new Error('woops')),
         }
         return (this.NotificationsBuilder.projectInvite = sinon
           .stub()
@@ -952,11 +952,11 @@ describe('CollaboratorsInviteHandler', function () {
         sendingUserId: ObjectId(),
         projectId: this.project_id,
         targetEmail: 'user@example.com',
-        createdAt: new Date()
+        createdAt: new Date(),
       }
       this.sendingUser = {
         _id: ObjectId(),
-        first_name: 'jim'
+        first_name: 'jim',
       }
       this.existingUser = { _id: ObjectId() }
       this.UserGetter.getUserByAnyEmail = sinon
@@ -964,7 +964,7 @@ describe('CollaboratorsInviteHandler', function () {
         .callsArgWith(2, null, this.existingUser)
       this.fakeProject = {
         _id: this.project_id,
-        name: 'some project'
+        name: 'some project',
       }
       this.ProjectGetter.getProject = sinon
         .stub()

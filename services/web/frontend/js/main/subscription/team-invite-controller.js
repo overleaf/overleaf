@@ -29,7 +29,7 @@ export default App.controller('TeamInviteController', function ($scope, $http) {
   $scope.cancelPersonalSubscription = function () {
     $scope.inflight = true
     const request = $http.post('/user/subscription/cancel', {
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
     request.then(function () {
       $scope.inflight = false
@@ -46,7 +46,7 @@ export default App.controller('TeamInviteController', function ($scope, $http) {
     $scope.inflight = true
     const inviteToken = getMeta('ol-inviteToken')
     const request = $http.put(`/subscription/invites/${inviteToken}/`, {
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     })
     request.then(function (response) {
       const { status } = response

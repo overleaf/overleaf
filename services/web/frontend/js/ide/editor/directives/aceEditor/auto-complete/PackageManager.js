@@ -109,7 +109,7 @@ const packages = [
   'framed',
   'aliascnt',
   'layaureo',
-  'authblk'
+  'authblk',
 ]
 
 class PackageManager {
@@ -125,7 +125,7 @@ class PackageManager {
         packageSnippets.push({
           caption: `\\usepackage{${pkg}}`,
           snippet: `\\usepackage{${pkg}}`,
-          meta: 'pkg'
+          meta: 'pkg',
         })
       }
     }
@@ -134,7 +134,7 @@ class PackageManager {
       caption: '\\usepackage{}',
       snippet: '\\usepackage{$1}',
       meta: 'pkg',
-      score: 70
+      score: 70,
     })
     return callback(null, packageSnippets)
   }

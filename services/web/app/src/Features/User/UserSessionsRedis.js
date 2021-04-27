@@ -8,6 +8,6 @@ const UserSessionsRedis = {
 
   sessionSetKey(user) {
     return `UserSessions:{${user._id}}`
-  }
+  },
 }
 module.exports = UserSessionsRedis

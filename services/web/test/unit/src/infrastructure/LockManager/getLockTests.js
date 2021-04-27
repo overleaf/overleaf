@@ -28,7 +28,7 @@ describe('LockManager - getting the lock', function () {
         './RedisWrapper': {
           client() {
             return { auth() {} }
-          }
+          },
         },
         'settings-sharelatex': {
           redis: {},
@@ -37,14 +37,14 @@ describe('LockManager - getting the lock', function () {
             maxTestInterval: 1000,
             maxLockWaitTime: 10000,
             redisLockExpiry: 30,
-            slowExecutionThreshold: 5000
-          }
+            slowExecutionThreshold: 5000,
+          },
         },
         '@overleaf/metrics': {
           inc() {},
-          gauge() {}
-        }
-      }
+          gauge() {},
+        },
+      },
     })
 
     this.callback = sinon.stub()

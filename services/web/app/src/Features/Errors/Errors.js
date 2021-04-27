@@ -103,7 +103,7 @@ class SAMLSessionDataMissing extends BackwardCompatibleError {
       universityId,
       universityName,
       externalUserId,
-      institutionEmail
+      institutionEmail,
     } = samlSession
 
     if (
@@ -223,5 +223,5 @@ module.exports = {
   DocHasRangesError,
   InvalidQueryError,
   AffiliationError,
-  InvalidInstitutionalEmailError
+  InvalidInstitutionalEmailError,
 }

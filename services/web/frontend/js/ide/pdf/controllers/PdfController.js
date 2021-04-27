@@ -243,7 +243,7 @@ App.controller(
         }
         localStorage(`autocompile_enabled:${$scope.project_id}`, newValue)
         eventTracking.sendMB('autocompile-setting-changed', {
-          value: newValue
+          value: newValue,
         })
       }
     })
@@ -315,7 +315,7 @@ App.controller(
           // use incremental compile for all users but revert to a full
           // compile if there is a server error
           incrementalCompilesEnabled: !$scope.pdf.error,
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         },
         { params }
       )
@@ -440,7 +440,7 @@ App.controller(
           $scope.pdf.autoCompileDisabled = true
           $scope.autocompile_enabled = false // disable any further autocompiles
           eventTracking.sendMB('autocompile-rate-limited', {
-            hasPremiumCompile: $scope.hasPremiumCompile
+            hasPremiumCompile: $scope.hasPremiumCompile,
           })
         }
       } else if (response.status === 'project-too-large') {
@@ -523,7 +523,7 @@ App.controller(
             url: file.url + createQueryString(qs),
             main: !!isOutputFile,
             fileName: file.path,
-            type: file.type
+            type: file.type,
           })
         }
       }
@@ -550,8 +550,8 @@ App.controller(
           url: buildPdfDownloadUrl(options.pdfDownloadDomain, file.url),
           params: {
             compileGroup: ide.compileGroup,
-            clsiserverid: ide.clsiServerId
-          }
+            clsiserverid: ide.clsiServerId,
+          },
         }
         return $http(opts)
       }
@@ -561,7 +561,7 @@ App.controller(
         all: [],
         errors: [],
         warnings: [],
-        typesetting: []
+        typesetting: [],
       }
 
       function accumulateResults(newEntries) {
@@ -581,7 +581,7 @@ App.controller(
       function processLog(log) {
         $scope.pdf.rawLog = log
         const { errors, warnings, typesetting } = HumanReadableLogs.parse(log, {
-          ignoreDuplicates: true
+          ignoreDuplicates: true,
         })
         const all = [].concat(errors, warnings, typesetting)
         accumulateResults({ all, errors, warnings, typesetting })
@@ -598,7 +598,7 @@ App.controller(
               line: m[2],
               column: m[3],
               level: m[4].toLowerCase(),
-              message: `${m[4]}: ${m[5]}`
+              message: `${m[4]}: ${m[5]}`,
             }
             if (result.level === 'error') {
               errors.push(result)
@@ -612,11 +612,11 @@ App.controller(
           type: 'Syntax',
           all,
           errors,
-          warnings
+          warnings,
         })
         eventTracking.sendMB('syntax-check-return-count', {
           errors: errors.length,
-          warnings: warnings.length
+          warnings: warnings.length,
         })
         accumulateResults(logHints)
       }
@@ -647,7 +647,7 @@ App.controller(
               $scope.pdf.logEntryAnnotations[entity.id].push({
                 row: entry.line - 1,
                 type: entry.level === 'error' ? 'error' : 'warning',
-                text: entry.message
+                text: entry.message,
               })
             }
           }
@@ -711,7 +711,7 @@ App.controller(
           warnings: $scope.pdf.logEntries.warnings.length,
           typesetting: $scope.pdf.logEntries.typesetting.length,
           newLogsUI: window.showNewLogsUI,
-          subvariant: window.showNewLogsUI ? window.logsUISubvariant : null
+          subvariant: window.showNewLogsUI ? window.logsUISubvariant : null,
         }
         eventTracking.sendMBSampled(
           'compile-result',
@@ -828,11 +828,11 @@ App.controller(
         url: `/project/${$scope.project_id}/compile/stop`,
         method: 'POST',
         params: {
-          clsiserverid: ide.clsiServerId
+          clsiserverid: ide.clsiServerId,
         },
         headers: {
-          'X-Csrf-Token': window.csrfToken
-        }
+          'X-Csrf-Token': window.csrfToken,
+        },
       })
     }
 
@@ -849,11 +849,11 @@ App.controller(
         url: `/project/${$scope.project_id}/output`,
         method: 'DELETE',
         params: {
-          clsiserverid: ide.clsiServerId
+          clsiserverid: ide.clsiServerId,
         },
         headers: {
-          'X-Csrf-Token': window.csrfToken
-        }
+          'X-Csrf-Token': window.csrfToken,
+        },
       })
         .then(function (response) {
           $scope.pdf.clearingCache = false
@@ -909,7 +909,7 @@ App.controller(
       $modal.open({
         templateUrl: 'clearCacheModalTemplate',
         controller: 'ClearCacheModalController',
-        scope: $scope
+        scope: $scope,
       })
     }
 
@@ -956,7 +956,7 @@ App.controller(
       }
       ide.editorManager.openDoc(entity, {
         gotoLine: line,
-        gotoColumn: column
+        gotoColumn: column,
       })
     }
   }
@@ -1004,8 +1004,8 @@ App.factory('synctex', function (ide, $http, $q) {
           file: path,
           line: row + 1,
           column,
-          clsiserverid: ide.clsiServerId
-        }
+          clsiserverid: ide.clsiServerId,
+        },
       })
         .then(response => {
           this.syncToPdfInFlight = false
@@ -1069,8 +1069,8 @@ App.factory('synctex', function (ide, $http, $q) {
           page: position.page + 1,
           h: h.toFixed(2),
           v: v.toFixed(2),
-          clsiserverid: ide.clsiServerId
-        }
+          clsiserverid: ide.clsiServerId,
+        },
       })
         .then(response => {
           this.syncToCodeInFlight = false
@@ -1097,7 +1097,7 @@ App.factory('synctex', function (ide, $http, $q) {
         })
 
       return deferred.promise
-    }
+    },
   }
 
   return synctex
@@ -1134,7 +1134,7 @@ App.controller('PdfSynctexController', function ($scope, synctex, ide) {
     synctex
       .syncToCode($scope.pdf.position, {
         includeVisualOffset: true,
-        fromPdfPosition: true
+        fromPdfPosition: true,
       })
       .then(function (data) {
         const { doc, line } = data

@@ -155,5 +155,5 @@ function handleDuplicateProjects(userId, projectName, callback) {
 
 module.exports = {
   newUpdate,
-  deleteUpdate
+  deleteUpdate,
 }

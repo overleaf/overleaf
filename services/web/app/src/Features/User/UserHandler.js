@@ -10,6 +10,6 @@ const UserHandler = {
 
   setupLoginData(user, callback) {
     this.populateTeamInvites(user, callback)
-  }
+  },
 }
 module.exports = UserHandler

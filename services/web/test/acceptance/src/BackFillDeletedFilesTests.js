@@ -47,13 +47,13 @@ describe('BackFillDeletedFiles', function () {
     linkedFileData: null,
     hash: 'ed19e7d6779b47d8c63f6fa5a21954dcfb6cac00',
     deletedAt: new Date(),
-    __v: 0
+    __v: 0,
   }
   let deletedFiles1, deletedFiles2, deletedFiles3
   beforeEach('set deletedFiles details', async function () {
     deletedFiles1 = [
       { _id: fileId1, ...otherFileDetails },
-      { _id: fileId2, ...otherFileDetails }
+      { _id: fileId2, ...otherFileDetails },
     ]
     deletedFiles2 = [{ _id: fileId3, ...otherFileDetails }]
     await setDeletedFiles(projectId1, deletedFiles1)
@@ -66,7 +66,7 @@ describe('BackFillDeletedFiles', function () {
     // duplicate entry
     deletedFiles3 = [
       { _id: fileId4, ...otherFileDetails },
-      { _id: fileId4, ...otherFileDetails }
+      { _id: fileId4, ...otherFileDetails },
     ]
     await setDeletedFiles(projectId5, deletedFiles3)
   })
@@ -101,7 +101,7 @@ describe('BackFillDeletedFiles', function () {
         { _id: fileId1, projectId: projectId1, ...otherFileDetails },
         { _id: fileId2, projectId: projectId1, ...otherFileDetails },
         { _id: fileId3, projectId: projectId2, ...otherFileDetails },
-        { _id: fileId4, projectId: projectId5, ...otherFileDetails }
+        { _id: fileId4, projectId: projectId5, ...otherFileDetails },
       ])
     })
   }

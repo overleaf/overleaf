@@ -33,7 +33,7 @@ export default App.controller(
       $http
         .post('/user/emails/send-reconfirmation', {
           email,
-          _csrf: window.csrfToken
+          _csrf: window.csrfToken,
         })
         .then(() => {
           $scope.reconfirm[email].reconfirmationSent = true
@@ -56,12 +56,12 @@ export default App.controller(
       const institutionId = _.get(userEmail, [
         'affiliation',
         'institution',
-        'id'
+        'id',
       ])
       const ssoEnabled = _.get(userEmail, [
         'affiliation',
         'institution',
-        'ssoEnabled'
+        'ssoEnabled',
       ])
 
       if (ssoEnabled) {

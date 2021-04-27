@@ -89,7 +89,7 @@ const AdminController = {
       return res.render('admin/index', {
         title: 'System Admin',
         openSockets,
-        systemMessages
+        systemMessages,
       })
     })
   },
@@ -162,7 +162,7 @@ const AdminController = {
       }
       return res.sendStatus(200)
     })
-  }
+  },
 }
 
 function __guard__(value, transform) {

@@ -44,7 +44,7 @@ module.exports = {
               ? entity.membersLimit
               : undefined,
             translations: entityConfig.translations,
-            paths: entityConfig.pathsFor(entityPrimaryKey)
+            paths: entityConfig.pathsFor(entityPrimaryKey),
           })
         }
       )
@@ -58,8 +58,8 @@ module.exports = {
       return res.status(400).json({
         error: {
           code: 'invalid_email',
-          message: req.i18n.translate('invalid_email')
-        }
+          message: req.i18n.translate('invalid_email'),
+        },
       })
     }
 
@@ -76,16 +76,16 @@ module.exports = {
           return res.status(400).json({
             error: {
               code: 'user_already_added',
-              message: req.i18n.translate('user_already_added')
-            }
+              message: req.i18n.translate('user_already_added'),
+            },
           })
         }
         if (error != null ? error.userNotFound : undefined) {
           return res.status(404).json({
             error: {
               code: 'user_not_found',
-              message: req.i18n.translate('user_not_found')
-            }
+              message: req.i18n.translate('user_not_found'),
+            },
           })
         }
         if (error != null) {
@@ -109,8 +109,8 @@ module.exports = {
       return res.status(400).json({
         error: {
           code: 'managers_cannot_remove_self',
-          message: req.i18n.translate('managers_cannot_remove_self')
-        }
+          message: req.i18n.translate('managers_cannot_remove_self'),
+        },
       })
     }
 
@@ -123,8 +123,8 @@ module.exports = {
           return res.status(400).json({
             error: {
               code: 'managers_cannot_remove_admin',
-              message: req.i18n.translate('managers_cannot_remove_admin')
-            }
+              message: req.i18n.translate('managers_cannot_remove_admin'),
+            },
           })
         }
         if (error != null) {
@@ -157,7 +157,7 @@ module.exports = {
   new(req, res, next) {
     return res.render('user_membership/new', {
       entityName: req.params.name,
-      entityId: req.params.id
+      entityId: req.params.id,
     })
   },
 
@@ -175,5 +175,5 @@ module.exports = {
         return res.redirect(entityConfig.pathsFor(entityId).index)
       }
     )
-  }
+  },
 }

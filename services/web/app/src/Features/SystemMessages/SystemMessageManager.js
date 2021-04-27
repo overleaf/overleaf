@@ -48,7 +48,7 @@ module.exports = SystemMessageManager = {
         this._cachedMessages = messages
       }
     })
-  }
+  },
 }
 
 const CACHE_TIMEOUT = 10 * 1000 * (Math.random() + 2) // 20-30 seconds

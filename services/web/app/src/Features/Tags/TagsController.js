@@ -87,7 +87,7 @@ const TagsController = {
       }
       res.status(204).end()
     })
-  }
+  },
 }
 
 module.exports = TagsController

@@ -13,7 +13,7 @@ describe('UserActivateController', function () {
     this.user = {
       _id: (this.user_id = 'kwjewkl'),
       features: {},
-      email: 'joe@example.com'
+      email: 'joe@example.com',
     }
 
     this.UserGetter = { getUser: sinon.stub() }
@@ -22,14 +22,14 @@ describe('UserActivateController', function () {
       requires: {
         '../../../../app/src/Features/User/UserGetter': this.UserGetter,
         '../../../../app/src/Features/Errors/ErrorController': this
-          .ErrorController
-      }
+          .ErrorController,
+      },
     })
     this.req = {
       query: {},
       session: {
-        user: this.user
-      }
+        user: this.user,
+      },
     }
     this.res = {}
   })

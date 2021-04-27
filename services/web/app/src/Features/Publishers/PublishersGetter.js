@@ -28,5 +28,5 @@ module.exports = PublishersGetter = {
       user_id,
       (error, managedPublishers) => callback(error, managedPublishers)
     )
-  }
+  },
 }

@@ -24,9 +24,9 @@ describe('UserFeaturesUpdater', function () {
     return (this.UserFeaturesUpdater = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
-          User: this.User
-        }
-      }
+          User: this.User,
+        },
+      },
     }))
   })
 
@@ -40,7 +40,7 @@ describe('UserFeaturesUpdater', function () {
         (err, features) => {
           const update = {
             'features.versioning': true,
-            'features.collaborators': 10
+            'features.collaborators': 10,
           }
           this.User.updateOne
             .calledWith({ _id: user_id }, update)

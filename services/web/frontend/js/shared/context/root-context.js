@@ -24,7 +24,7 @@ export function ContextRoot({ children, ide, settings }) {
 ContextRoot.propTypes = {
   children: PropTypes.any,
   ide: PropTypes.any.isRequired,
-  settings: PropTypes.any.isRequired
+  settings: PropTypes.any.isRequired,
 }
 
 export const rootContext = createSharedContext(ContextRoot)

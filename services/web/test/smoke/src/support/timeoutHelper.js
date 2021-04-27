@@ -9,10 +9,10 @@ async function processWithTimeout({ work, timeout, message }) {
         reject(new Error(message))
       }, timeout)
     }),
-    work.finally(checkInResults)
+    work.finally(checkInResults),
   ])
 }
 
 module.exports = {
-  processWithTimeout
+  processWithTimeout,
 }

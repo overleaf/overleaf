@@ -17,8 +17,8 @@ describe('NotificationsBuilder', function () {
         requires: {
           './NotificationsHandler': this.handler,
           'settings-sharelatex': this.settings,
-          request: this.request
-        }
+          request: this.request,
+        },
       })
     })
 
@@ -30,7 +30,7 @@ describe('NotificationsBuilder', function () {
           enrolment_ad_html: 'v1 ad content',
           is_university: true,
           portal_slug: null,
-          sso_enabled: false
+          sso_enabled: false,
         }
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
       })
@@ -44,7 +44,7 @@ describe('NotificationsBuilder', function () {
             university_name: this.body.name,
             content: this.body.enrolment_ad_html,
             ssoEnabled: false,
-            portalPath: undefined
+            portalPath: undefined,
           }
           this.handler.createNotification
             .calledWith(
@@ -66,7 +66,7 @@ describe('NotificationsBuilder', function () {
           enrolment_ad_html: 'v1 ad content',
           is_university: true,
           portal_slug: 'stanford',
-          sso_enabled: true
+          sso_enabled: true,
         }
         this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
       })
@@ -80,7 +80,7 @@ describe('NotificationsBuilder', function () {
             university_name: this.body.name,
             content: this.body.enrolment_ad_html,
             ssoEnabled: true,
-            portalPath: '/edu/stanford'
+            portalPath: '/edu/stanford',
           }
           this.handler.createNotification
             .calledWith(

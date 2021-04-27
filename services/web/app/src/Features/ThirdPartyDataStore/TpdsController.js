@@ -135,5 +135,5 @@ module.exports = {
     }
 
     return { filePath, userId, projectName }
-  })
+  }),
 }

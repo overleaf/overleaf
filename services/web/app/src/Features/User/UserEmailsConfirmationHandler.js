@@ -39,7 +39,7 @@ function sendConfirmationEmail(userId, email, emailTemplate, callback) {
       const emailOptions = {
         to: email,
         confirmEmailUrl: `${settings.siteUrl}/user/emails/confirm?token=${token}`,
-        sendingUser_id: userId
+        sendingUser_id: userId,
       }
       EmailHandler.sendEmail(emailTemplate, emailOptions, callback)
     }
@@ -62,7 +62,7 @@ async function sendReconfirmationEmail(userId, email) {
   const emailOptions = {
     to: email,
     confirmEmailUrl: `${settings.siteUrl}/user/emails/confirm?token=${token}`,
-    sendingUser_id: userId
+    sendingUser_id: userId,
   }
 
   await EmailHandler.promises.sendEmail('reconfirmEmail', emailOptions)
@@ -107,11 +107,11 @@ const UserEmailsConfirmationHandler = {
         })
       }
     )
-  }
+  },
 }
 
 UserEmailsConfirmationHandler.promises = {
-  sendConfirmationEmail: promisify(sendConfirmationEmail)
+  sendConfirmationEmail: promisify(sendConfirmationEmail),
 }
 
 module.exports = UserEmailsConfirmationHandler

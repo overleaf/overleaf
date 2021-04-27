@@ -4,10 +4,10 @@ const { Schema } = mongoose
 const SamlCacheSchema = new Schema(
   {
     createdAt: { type: Date },
-    requestId: { type: String }
+    requestId: { type: String },
   },
   {
-    collection: 'samlCache'
+    collection: 'samlCache',
   }
 )
 

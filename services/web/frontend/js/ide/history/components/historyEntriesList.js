@@ -49,7 +49,7 @@ const historyEntriesListController = function ($scope, $element, $attrs) {
     if (ctrl.rangeSelectionEnabled) {
       ctrl.onRangeSelect({
         selectedToV: entry.toV,
-        selectedFromV: entry.fromV
+        selectedFromV: entry.fromV,
       })
     } else {
       ctrl.onVersionSelect({ version: entry.toV })
@@ -59,7 +59,7 @@ const historyEntriesListController = function ($scope, $element, $attrs) {
     if (toV > ctrl.selectedHistoryRange.fromV) {
       ctrl.onRangeSelect({
         selectedToV: toV,
-        selectedFromV: ctrl.selectedHistoryRange.fromV
+        selectedFromV: ctrl.selectedHistoryRange.fromV,
       })
     }
   }
@@ -67,14 +67,14 @@ const historyEntriesListController = function ($scope, $element, $attrs) {
     if (fromV < ctrl.selectedHistoryRange.toV) {
       ctrl.onRangeSelect({
         selectedToV: ctrl.selectedHistoryRange.toV,
-        selectedFromV: fromV
+        selectedFromV: fromV,
       })
     }
   }
   ctrl.initHoveredRange = () => {
     ctrl.hoveredHistoryRange = {
       toV: ctrl.selectedHistoryRange.toV,
-      fromV: ctrl.selectedHistoryRange.fromV
+      fromV: ctrl.selectedHistoryRange.fromV,
     }
   }
   ctrl.resetHoveredRange = () => {
@@ -131,8 +131,8 @@ export default App.component('historyEntriesList', {
     selectedHistoryRange: '<?',
     onVersionSelect: '&',
     onRangeSelect: '&',
-    onLabelDelete: '&'
+    onLabelDelete: '&',
   },
   controller: historyEntriesListController,
-  templateUrl: 'historyEntriesListTpl'
+  templateUrl: 'historyEntriesListTpl',
 })

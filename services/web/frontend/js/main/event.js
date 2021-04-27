@@ -52,8 +52,8 @@ App.factory('eventTracking', function ($http, localStorage) {
       url: `/editingSession/${window.project_id}`,
       method: 'PUT',
       headers: {
-        'X-CSRF-Token': window.csrfToken
-      }
+        'X-CSRF-Token': window.csrfToken,
+      },
     })
 
   return {
@@ -98,8 +98,8 @@ App.factory('eventTracking', function ($http, localStorage) {
         method: 'POST',
         data: segmentation,
         headers: {
-          'X-CSRF-Token': window.csrfToken
-        }
+          'X-CSRF-Token': window.csrfToken,
+        },
       })
     },
 
@@ -118,7 +118,7 @@ App.factory('eventTracking', function ($http, localStorage) {
 
     eventInCache(key) {
       return _eventInCache(key)
-    }
+    },
   }
 })
 

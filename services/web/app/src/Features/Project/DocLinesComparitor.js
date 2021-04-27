@@ -9,5 +9,5 @@ module.exports = {
     }
 
     return _.isEqual(lines1, lines2)
-  }
+  },
 }

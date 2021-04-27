@@ -17,5 +17,5 @@ export default App.directive('equals', () => ({
         return ctrl.$setValidity('areEqual', equal)
       })
     )
-  }
+  },
 }))

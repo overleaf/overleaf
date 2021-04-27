@@ -29,22 +29,22 @@ describe('CollaboratorsGetter', function () {
       collaberator_refs: [this.readWriteRef1, this.readWriteRef2],
       tokenAccessReadAndWrite_refs: [this.readWriteTokenRef],
       tokenAccessReadOnly_refs: [this.readOnlyTokenRef],
-      publicAccesLevel: 'tokenBased'
+      publicAccesLevel: 'tokenBased',
     }
 
     this.UserGetter = {
       promises: {
-        getUser: sinon.stub().resolves(null)
-      }
+        getUser: sinon.stub().resolves(null),
+      },
     }
     this.ProjectMock = sinon.mock(Project)
     this.ProjectGetter = {
       promises: {
-        getProject: sinon.stub().resolves(this.project)
-      }
+        getProject: sinon.stub().resolves(this.project),
+      },
     }
     this.ProjectEditorHandler = {
-      buildOwnerAndMembersViews: sinon.stub()
+      buildOwnerAndMembersViews: sinon.stub(),
     }
     this.CollaboratorsGetter = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -52,8 +52,8 @@ describe('CollaboratorsGetter', function () {
         '../User/UserGetter': this.UserGetter,
         '../../models/Project': { Project },
         '../Project/ProjectGetter': this.ProjectGetter,
-        '../Project/ProjectEditorHandler': this.ProjectEditorHandler
-      }
+        '../Project/ProjectEditorHandler': this.ProjectEditorHandler,
+      },
     })
   })
 
@@ -71,38 +71,38 @@ describe('CollaboratorsGetter', function () {
           {
             id: this.ownerRef.toString(),
             privilegeLevel: 'owner',
-            source: 'owner'
+            source: 'owner',
           },
           {
             id: this.readWriteRef1.toString(),
             privilegeLevel: 'readAndWrite',
-            source: 'invite'
+            source: 'invite',
           },
           {
             id: this.readWriteRef2.toString(),
             privilegeLevel: 'readAndWrite',
-            source: 'invite'
+            source: 'invite',
           },
           {
             id: this.readOnlyRef1.toString(),
             privilegeLevel: 'readOnly',
-            source: 'invite'
+            source: 'invite',
           },
           {
             id: this.readOnlyRef2.toString(),
             privilegeLevel: 'readOnly',
-            source: 'invite'
+            source: 'invite',
           },
           {
             id: this.readOnlyTokenRef.toString(),
             privilegeLevel: 'readOnly',
-            source: 'token'
+            source: 'token',
           },
           {
             id: this.readWriteTokenRef.toString(),
             privilegeLevel: 'readAndWrite',
-            source: 'token'
-          }
+            source: 'token',
+          },
         ])
       })
     })
@@ -134,7 +134,7 @@ describe('CollaboratorsGetter', function () {
         this.readWriteRef1.toString(),
         this.readWriteRef2.toString(),
         this.readWriteTokenRef.toString(),
-        this.readOnlyTokenRef.toString()
+        this.readOnlyTokenRef.toString(),
       ])
     })
   })
@@ -149,7 +149,7 @@ describe('CollaboratorsGetter', function () {
         this.readOnlyRef1.toString(),
         this.readOnlyRef2.toString(),
         this.readWriteRef1.toString(),
-        this.readWriteRef2.toString()
+        this.readWriteRef2.toString(),
       ])
     })
   })
@@ -176,7 +176,7 @@ describe('CollaboratorsGetter', function () {
       )
       expect(result).to.have.deep.members([
         { user: { _id: this.readOnlyRef1 }, privilegeLevel: 'readOnly' },
-        { user: { _id: this.readWriteRef2 }, privilegeLevel: 'readAndWrite' }
+        { user: { _id: this.readWriteRef2 }, privilegeLevel: 'readAndWrite' },
       ])
     })
   })
@@ -235,27 +235,27 @@ describe('CollaboratorsGetter', function () {
         .withArgs(
           {
             tokenAccessReadAndWrite_refs: this.userId,
-            publicAccesLevel: 'tokenBased'
+            publicAccesLevel: 'tokenBased',
           },
           this.fields
         )
         .chain('exec')
         .resolves([
           'mock-token-read-write-project-1',
-          'mock-token-read-write-project-2'
+          'mock-token-read-write-project-2',
         ])
       this.ProjectMock.expects('find')
         .withArgs(
           {
             tokenAccessReadOnly_refs: this.userId,
-            publicAccesLevel: 'tokenBased'
+            publicAccesLevel: 'tokenBased',
           },
           this.fields
         )
         .chain('exec')
         .resolves([
           'mock-token-read-only-project-1',
-          'mock-token-read-only-project-2'
+          'mock-token-read-only-project-2',
         ])
     })
 
@@ -267,17 +267,17 @@ describe('CollaboratorsGetter', function () {
       expect(projects).to.deep.equal({
         readAndWrite: [
           'mock-read-write-project-1',
-          'mock-read-write-project-2'
+          'mock-read-write-project-2',
         ],
         readOnly: ['mock-read-only-project-1', 'mock-read-only-project-2'],
         tokenReadAndWrite: [
           'mock-token-read-write-project-1',
-          'mock-token-read-write-project-2'
+          'mock-token-read-write-project-2',
         ],
         tokenReadOnly: [
           'mock-token-read-only-project-1',
-          'mock-token-read-only-project-2'
-        ]
+          'mock-token-read-only-project-2',
+        ],
       })
     })
   })
@@ -287,22 +287,22 @@ describe('CollaboratorsGetter', function () {
       this.owningUser = {
         _id: this.ownerRef,
         email: 'owner@example.com',
-        features: { a: 1 }
+        features: { a: 1 },
       }
       this.readWriteUser = {
         _id: this.readWriteRef1,
-        email: 'readwrite@example.com'
+        email: 'readwrite@example.com',
       }
       this.members = [
         { user: this.owningUser, privilegeLevel: 'owner' },
-        { user: this.readWriteUser, privilegeLevel: 'readAndWrite' }
+        { user: this.readWriteUser, privilegeLevel: 'readAndWrite' },
       ]
       this.views = {
         owner: this.owningUser,
         ownerFeatures: this.owningUser.features,
         members: [
-          { _id: this.readWriteUser._id, email: this.readWriteUser.email }
-        ]
+          { _id: this.readWriteUser._id, email: this.readWriteUser.email },
+        ],
       }
       this.UserGetter.promises.getUser
         .withArgs(this.owningUser._id.toString())

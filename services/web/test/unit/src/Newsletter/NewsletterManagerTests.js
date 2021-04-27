@@ -9,34 +9,34 @@ describe('NewsletterManager', function () {
     this.Settings = {
       mailchimp: {
         api_key: 'api_key',
-        list_id: 'list_id'
-      }
+        list_id: 'list_id',
+      },
     }
     this.mailchimp = {
       put: sinon.stub(),
       patch: sinon.stub(),
-      delete: sinon.stub()
+      delete: sinon.stub(),
     }
     this.Mailchimp = sinon.stub().returns(this.mailchimp)
 
     this.mergeFields = {
       FNAME: 'Overleaf',
       LNAME: 'Duck',
-      MONGO_ID: 'user_id'
+      MONGO_ID: 'user_id',
     }
 
     this.NewsletterManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         'mailchimp-api-v3': this.Mailchimp,
-        'settings-sharelatex': this.Settings
-      }
+        'settings-sharelatex': this.Settings,
+      },
     }).promises
 
     this.user = {
       _id: 'user_id',
       email: 'overleaf.duck@example.com',
       first_name: 'Overleaf',
-      last_name: 'Duck'
+      last_name: 'Duck',
     }
     // MD5 sum of the user email
     this.emailHash = 'c02f60ed0ef51818186274e406c9a48f'
@@ -51,7 +51,7 @@ describe('NewsletterManager', function () {
           email_address: this.user.email,
           status: 'subscribed',
           status_if_new: 'subscribed',
-          merge_fields: this.mergeFields
+          merge_fields: this.mergeFields,
         }
       )
     })
@@ -65,7 +65,7 @@ describe('NewsletterManager', function () {
           `/lists/list_id/members/${this.emailHash}`,
           {
             status: 'unsubscribed',
-            merge_fields: this.mergeFields
+            merge_fields: this.mergeFields,
           }
         )
       })
@@ -129,7 +129,7 @@ describe('NewsletterManager', function () {
         `/lists/list_id/members/${this.emailHash}`,
         {
           email_address: 'overleaf.squirrel@example.com',
-          merge_fields: this.mergeFields
+          merge_fields: this.mergeFields,
         }
       )
     })
@@ -138,7 +138,7 @@ describe('NewsletterManager', function () {
       this.mailchimp.patch
         .withArgs(`/lists/list_id/members/${this.emailHash}`, {
           email_address: 'overleaf.squirrel@example.com',
-          merge_fields: this.mergeFields
+          merge_fields: this.mergeFields,
         })
         .rejects(new Error('that did not work'))
 

@@ -35,7 +35,7 @@ export default App.controller(
         queuedHttp
           .post('/admin/register', {
             email,
-            _csrf: window.csrfToken
+            _csrf: window.csrfToken,
           })
           .then(function (response) {
             const { data } = response

@@ -10,7 +10,7 @@ describe('<MessageList />', function () {
   const currentUser = {
     id: 'fake_user',
     first_name: 'fake_user_first_name',
-    email: 'fake@example.com'
+    email: 'fake@example.com',
   }
 
   function createMessages() {
@@ -19,14 +19,14 @@ describe('<MessageList />', function () {
         id: '1',
         contents: ['a message'],
         user: currentUser,
-        timestamp: new Date().getTime()
+        timestamp: new Date().getTime(),
       },
       {
         id: '2',
         contents: ['another message'],
         user: currentUser,
-        timestamp: new Date().getTime()
-      }
+        timestamp: new Date().getTime(),
+      },
     ]
   }
 

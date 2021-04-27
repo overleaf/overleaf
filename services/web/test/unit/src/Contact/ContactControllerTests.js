@@ -26,8 +26,8 @@ describe('ContactController', function () {
         '../Authentication/AuthenticationController': (this.AuthenticationController = {}),
         '../../infrastructure/Modules': (this.Modules = { hooks: {} }),
         '../Authentication/AuthenticationController': this
-          .AuthenticationController
-      }
+          .AuthenticationController,
+      },
     })
 
     this.next = sinon.stub()
@@ -47,7 +47,7 @@ describe('ContactController', function () {
           email: 'joe@example.com',
           first_name: 'Joe',
           last_name: 'Example',
-          unsued: 'foo'
+          unsued: 'foo',
         },
         {
           _id: 'contact-2',
@@ -55,15 +55,15 @@ describe('ContactController', function () {
           first_name: 'Jane',
           last_name: 'Example',
           unsued: 'foo',
-          holdingAccount: true
+          holdingAccount: true,
         },
         {
           _id: 'contact-3',
           email: 'jim@example.com',
           first_name: 'Jim',
           last_name: 'Example',
-          unsued: 'foo'
-        }
+          unsued: 'foo',
+        },
       ]
       this.AuthenticationController.getLoggedInUserId = sinon
         .stub()
@@ -97,7 +97,7 @@ describe('ContactController', function () {
           email: 1,
           first_name: 1,
           last_name: 1,
-          holdingAccount: 1
+          holdingAccount: 1,
         })
         .should.equal(true)
     })
@@ -115,15 +115,15 @@ describe('ContactController', function () {
           email: 'joe@example.com',
           first_name: 'Joe',
           last_name: 'Example',
-          type: 'user'
+          type: 'user',
         },
         {
           id: 'contact-3',
           email: 'jim@example.com',
           first_name: 'Jim',
           last_name: 'Example',
-          type: 'user'
-        }
+          type: 'user',
+        },
       ])
     })
   })

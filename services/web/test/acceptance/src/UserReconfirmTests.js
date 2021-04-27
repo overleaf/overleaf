@@ -21,7 +21,7 @@ describe('User Must Reconfirm', function () {
     return async.series(
       [
         this.user.ensureUserExists.bind(this.user),
-        cb => this.user.mongoUpdate({ $set: { must_reconfirm: true } }, cb)
+        cb => this.user.mongoUpdate({ $set: { must_reconfirm: true } }, cb),
       ],
       done
     )

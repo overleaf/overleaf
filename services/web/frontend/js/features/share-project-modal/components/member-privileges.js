@@ -15,5 +15,5 @@ export default function MemberPrivileges({ privileges }) {
   }
 }
 MemberPrivileges.propTypes = {
-  privileges: PropTypes.string.isRequired
+  privileges: PropTypes.string.isRequired,
 }

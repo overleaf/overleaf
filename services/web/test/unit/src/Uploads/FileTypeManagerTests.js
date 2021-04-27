@@ -10,12 +10,12 @@ describe('FileTypeManager', function () {
     this.isUtf8 = sinon.spy(isUtf8)
     this.stats = {
       isDirectory: sinon.stub().returns(false),
-      size: 100
+      size: 100,
     }
     const fileContents = 'Ich bin eine kleine Teekanne, kurz und kräftig.'
     this.fs = {
       stat: sinon.stub().yields(null, this.stats),
-      readFile: sinon.stub()
+      readFile: sinon.stub(),
     }
     this.fs.readFile
       .withArgs('utf8.tex')
@@ -44,8 +44,8 @@ describe('FileTypeManager', function () {
       requires: {
         fs: this.fs,
         'utf-8-validate': this.isUtf8,
-        'settings-sharelatex': Settings
-      }
+        'settings-sharelatex': Settings,
+      },
     })
   })
 
@@ -87,7 +87,7 @@ describe('FileTypeManager', function () {
         'file.bbx',
         'file.cbx',
         'file.m',
-        'file.TEX'
+        'file.TEX',
       ]
       TEXT_FILENAMES.forEach(filename => {
         it(`should classify ${filename} as text`, function (done) {

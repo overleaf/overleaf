@@ -31,10 +31,10 @@ describe('NotificationsHandler', function () {
     return (this.handler = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': {
-          apis: { notifications: { url: notificationUrl } }
+          apis: { notifications: { url: notificationUrl } },
         },
-        request: this.request
-      }
+        request: this.request,
+      },
     }))
   })
 
@@ -55,7 +55,7 @@ describe('NotificationsHandler', function () {
             uri: `${notificationUrl}/user/${user_id}`,
             json: true,
             timeout: 1000,
-            method: 'GET'
+            method: 'GET',
           }
           this.request.calledWith(getOpts).should.equal(true)
           return done()
@@ -84,10 +84,10 @@ describe('NotificationsHandler', function () {
         const opts = {
           uri: `${notificationUrl}/user/${user_id}`,
           json: {
-            key: this.key
+            key: this.key,
           },
           timeout: 1000,
-          method: 'DELETE'
+          method: 'DELETE',
         }
         this.request.calledWith(opts).should.equal(true)
         return done()
@@ -118,7 +118,7 @@ describe('NotificationsHandler', function () {
             key: this.key,
             templateKey: this.templateKey,
             messageOpts: this.messageOpts,
-            forceCreate: true
+            forceCreate: true,
           }
           assert.deepEqual(args.json, expectedJson)
           return done()
@@ -150,7 +150,7 @@ describe('NotificationsHandler', function () {
               templateKey: this.templateKey,
               messageOpts: this.messageOpts,
               expires: this.expiry,
-              forceCreate: true
+              forceCreate: true,
             }
             assert.deepEqual(args.json, expectedJson)
             return done()
@@ -170,7 +170,7 @@ describe('NotificationsHandler', function () {
         const opts = {
           uri: `${notificationUrl}/key/${this.key}`,
           timeout: 1000,
-          method: 'DELETE'
+          method: 'DELETE',
         }
         this.request.calledWith(opts).should.equal(true)
         return done()

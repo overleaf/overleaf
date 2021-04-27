@@ -18,7 +18,7 @@ module.exports = {
       id: user._id,
       email: user.email,
       first_name: user.name,
-      last_name: user.name
+      last_name: user.name,
     }
   },
 
@@ -31,7 +31,7 @@ module.exports = {
     }
     return {
       id: project._id,
-      name: project.name
+      name: project.name,
     }
   },
 
@@ -41,7 +41,7 @@ module.exports = {
     }
     return docs.map(doc => ({
       path: doc.path,
-      id: doc.doc
+      id: doc.doc,
     }))
   },
 
@@ -51,7 +51,7 @@ module.exports = {
     }
     return files.map(file => ({
       path: file.path,
-      id: file.file
+      id: file.file,
     }))
-  }
+  },
 }

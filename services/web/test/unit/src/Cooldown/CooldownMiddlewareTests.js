@@ -22,8 +22,8 @@ describe('CooldownMiddleware', function () {
     this.CooldownManager = { isProjectOnCooldown: sinon.stub() }
     return (this.CooldownMiddleware = SandboxedModule.require(modulePath, {
       requires: {
-        './CooldownManager': this.CooldownManager
-      }
+        './CooldownManager': this.CooldownManager,
+      },
     }))
   })
 

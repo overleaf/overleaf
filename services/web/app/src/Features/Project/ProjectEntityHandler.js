@@ -36,7 +36,7 @@ const ProjectEntityHandler = {
                 _id: doc._id,
                 name: doc.name,
                 lines: content.lines,
-                rev: content.rev
+                rev: content.rev,
               }
             }
           }
@@ -217,7 +217,7 @@ const ProjectEntityHandler = {
 
     processFolder('/', project.rootFolder[0])
     callback(null, folders)
-  }
+  },
 }
 
 module.exports = ProjectEntityHandler
@@ -225,6 +225,6 @@ module.exports.promises = promisifyAll(ProjectEntityHandler, {
   multiResult: {
     getAllEntities: ['docs', 'files'],
     getAllEntitiesFromProject: ['docs', 'files'],
-    getDoc: ['lines', 'rev', 'version', 'ranges']
-  }
+    getDoc: ['lines', 'rev', 'version', 'ranges'],
+  },
 })

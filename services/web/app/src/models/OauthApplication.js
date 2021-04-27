@@ -9,10 +9,10 @@ const OauthApplicationSchema = new Schema(
     grants: [String],
     name: String,
     redirectUris: [String],
-    scopes: [String]
+    scopes: [String],
   },
   {
-    collection: 'oauthApplications'
+    collection: 'oauthApplications',
   }
 )
 

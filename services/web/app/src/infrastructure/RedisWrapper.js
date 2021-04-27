@@ -20,5 +20,5 @@ module.exports = {
   client(feature) {
     const redisFeatureSettings = Settings.redis[feature] || Settings.redis.web
     return redis.createClient(redisFeatureSettings)
-  }
+  },
 }

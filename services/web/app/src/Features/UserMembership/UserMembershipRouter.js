@@ -25,7 +25,7 @@ module.exports = {
       RateLimiterMiddleware.rateLimit({
         endpointName: 'create-team-invite',
         maxRequests: 200,
-        timeInterval: 60
+        timeInterval: 60,
       }),
       TeamInvitesController.createInvite
     )
@@ -45,7 +45,7 @@ module.exports = {
       RateLimiterMiddleware.rateLimit({
         endpointName: 'export-team-csv',
         maxRequests: 30,
-        timeInterval: 60
+        timeInterval: 60,
       }),
       UserMembershipController.exportCsv
     )
@@ -124,5 +124,5 @@ module.exports = {
       UserMembershipMiddleware.requireInstitutionCreationAccess,
       UserMembershipController.create
     )
-  }
+  },
 }

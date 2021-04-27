@@ -11,7 +11,7 @@ module.exports = {
   subscribe: callbackify(provider.subscribe),
   unsubscribe: callbackify(provider.unsubscribe),
   changeEmail: callbackify(provider.changeEmail),
-  promises: provider
+  promises: provider,
 }
 
 class NonFatalEmailUpdateError extends OError {
@@ -41,7 +41,7 @@ function makeMailchimpProvider() {
   return {
     subscribe,
     unsubscribe,
-    changeEmail
+    changeEmail,
   }
 
   async function subscribe(user) {
@@ -51,12 +51,12 @@ function makeMailchimpProvider() {
         email_address: user.email,
         status: 'subscribed',
         status_if_new: 'subscribed',
-        merge_fields: getMergeFields(user)
+        merge_fields: getMergeFields(user),
       })
       logger.info({ user }, 'finished subscribing user to newsletter')
     } catch (err) {
       throw OError.tag(err, 'error subscribing user to newsletter', {
-        userId: user._id
+        userId: user._id,
       })
     }
   }
@@ -69,7 +69,7 @@ function makeMailchimpProvider() {
       } else {
         await mailchimp.patch(path, {
           status: 'unsubscribed',
-          merge_fields: getMergeFields(user)
+          merge_fields: getMergeFields(user),
         })
       }
       logger.info(
@@ -91,7 +91,7 @@ function makeMailchimpProvider() {
       }
 
       throw OError.tag(err, 'error unsubscribing user from newsletter', {
-        userId: user._id
+        userId: user._id,
       })
     }
   }
@@ -135,14 +135,14 @@ function makeMailchimpProvider() {
       'could not be validated':
         'user has previously unsubscribed or new email already exist on list',
       'is already a list member': 'new email is already on mailing list',
-      'looks fake or invalid': 'mail looks fake to mailchimp'
+      'looks fake or invalid': 'mail looks fake to mailchimp',
     }
 
     try {
       const path = getSubscriberPath(oldEmail)
       await mailchimp.patch(path, {
         email_address: newEmail,
-        merge_fields: getMergeFields(user)
+        merge_fields: getMergeFields(user),
       })
       logger.info('finished changing email in the newsletter')
     } catch (err) {
@@ -169,7 +169,7 @@ function makeMailchimpProvider() {
       // if we didn't find an expected error, generate something to throw
       throw OError.tag(err, 'error changing email in newsletter', {
         oldEmail,
-        newEmail
+        newEmail,
       })
     }
   }
@@ -187,7 +187,7 @@ function makeMailchimpProvider() {
     return {
       FNAME: user.first_name,
       LNAME: user.last_name,
-      MONGO_ID: user._id.toString()
+      MONGO_ID: user._id.toString(),
     }
   }
 }
@@ -196,7 +196,7 @@ function makeNullProvider() {
   return {
     subscribe,
     unsubscribe,
-    changeEmail
+    changeEmail,
   }
 
   async function subscribe(user) {

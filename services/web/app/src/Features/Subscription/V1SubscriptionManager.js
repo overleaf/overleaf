@@ -34,7 +34,7 @@ module.exports = V1SubscriptionManager = {
         method: 'GET',
         url(v1Id) {
           return `/api/v1/sharelatex/users/${v1Id}/plan_code`
-        }
+        },
       },
       function (error, body, v1Id) {
         if (error != null) {
@@ -62,7 +62,7 @@ module.exports = V1SubscriptionManager = {
         method: 'GET',
         url(v1Id) {
           return `/api/v1/sharelatex/users/${v1Id}/subscriptions`
-        }
+        },
       },
       callback
     )
@@ -78,7 +78,7 @@ module.exports = V1SubscriptionManager = {
         method: 'GET',
         url(v1Id) {
           return `/api/v1/sharelatex/users/${v1Id}/subscription_status`
-        }
+        },
       },
       callback
     )
@@ -94,7 +94,7 @@ module.exports = V1SubscriptionManager = {
         method: 'DELETE',
         url(v1Id) {
           return `/api/v1/sharelatex/users/${v1Id}/subscription`
-        }
+        },
       },
       callback
     )
@@ -163,17 +163,17 @@ module.exports = V1SubscriptionManager = {
           auth: {
             user: settings.apis.v1.user,
             pass: settings.apis.v1.pass,
-            sendImmediately: true
+            sendImmediately: true,
           },
           json: true,
-          timeout: 15 * 1000
+          timeout: 15 * 1000,
         },
         function (error, response, body) {
           if (error != null) {
             return callback(
               new V1ConnectionError({
                 message: 'no v1 connection',
-                info: { url }
+                info: { url },
               }).withCause(error)
             )
           }
@@ -183,8 +183,8 @@ module.exports = V1SubscriptionManager = {
                 message: 'error from v1',
                 info: {
                   status: response.statusCode,
-                  body: body
-                }
+                  body: body,
+                },
               })
             )
           }
@@ -206,7 +206,7 @@ module.exports = V1SubscriptionManager = {
         }
       )
     })
-  }
+  },
 }
 
 function __guard__(value, transform) {

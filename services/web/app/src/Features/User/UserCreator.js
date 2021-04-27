@@ -50,7 +50,7 @@ async function createNewUser(attributes, options = {}) {
   const emailData = {
     email: user.email,
     createdAt: new Date(),
-    reversedHostname
+    reversedHostname,
   }
   if (Features.hasFeature('affiliations')) {
     emailData.affiliationUnchecked = true
@@ -96,8 +96,8 @@ async function createNewUser(attributes, options = {}) {
 const UserCreator = {
   createNewUser: util.callbackify(createNewUser),
   promises: {
-    createNewUser: createNewUser
-  }
+    createNewUser: createNewUser,
+  },
 }
 
 module.exports = UserCreator

@@ -34,7 +34,7 @@ module.exports = {
         if (err != null) {
           OError.tag(err, 'error removing user from group', {
             subscriptionId: subscription._id,
-            userToRemove_id
+            userToRemove_id,
           })
           return next(err)
         }
@@ -69,5 +69,5 @@ module.exports = {
         )
       }
     )
-  }
+  },
 }

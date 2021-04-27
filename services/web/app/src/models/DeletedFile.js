@@ -6,13 +6,13 @@ const DeletedFileSchema = new Schema(
     name: String,
     projectId: Schema.ObjectId,
     created: {
-      type: Date
+      type: Date,
     },
     linkedFileData: { type: Schema.Types.Mixed },
     hash: {
-      type: String
+      type: String,
     },
-    deletedAt: { type: Date }
+    deletedAt: { type: Date },
   },
   { collection: 'deletedFiles' }
 )

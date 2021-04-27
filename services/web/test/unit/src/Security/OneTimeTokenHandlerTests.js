@@ -31,12 +31,12 @@ describe('OneTimeTokenHandler', function () {
       requires: {
         'settings-sharelatex': this.settings,
         crypto: {
-          randomBytes: () => this.stubbedToken
+          randomBytes: () => this.stubbedToken,
         },
         '../../infrastructure/mongodb': {
-          db: (this.db = { tokens: {} })
-        }
-      }
+          db: (this.db = { tokens: {} }),
+        },
+      },
     }))
   })
 
@@ -65,7 +65,7 @@ describe('OneTimeTokenHandler', function () {
             token: this.stubbedToken,
             createdAt: new Date(),
             expiresAt: new Date(Date.now() + 60 * 60 * 1000),
-            data: 'mock-data-to-store'
+            data: 'mock-data-to-store',
           })
           .should.equal(true)
       })
@@ -94,7 +94,7 @@ describe('OneTimeTokenHandler', function () {
             token: this.stubbedToken,
             createdAt: new Date(),
             expiresAt: new Date(Date.now() + 42 * 1000),
-            data: 'mock-data-to-store'
+            data: 'mock-data-to-store',
           })
           .should.equal(true)
       })
@@ -127,10 +127,10 @@ describe('OneTimeTokenHandler', function () {
               use: 'password',
               token: 'mock-token',
               expiresAt: { $gt: new Date() },
-              usedAt: { $exists: false }
+              usedAt: { $exists: false },
             },
             {
-              $set: { usedAt: new Date() }
+              $set: { usedAt: new Date() },
             }
           )
           .should.equal(true)

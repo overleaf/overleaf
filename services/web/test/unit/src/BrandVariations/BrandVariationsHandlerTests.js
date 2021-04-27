@@ -26,26 +26,26 @@ describe('BrandVariationsHandler', function () {
     this.settings = {
       apis: {
         v1: {
-          url: 'http://overleaf.example.com'
-        }
+          url: 'http://overleaf.example.com',
+        },
       },
       modules: {
         sanitize: {
           options: {
             allowedTags: ['br', 'strong'],
             allowedAttributes: {
-              strong: ['style']
-            }
-          }
-        }
-      }
+              strong: ['style'],
+            },
+          },
+        },
+      },
     }
     this.V1Api = { request: sinon.stub() }
     this.BrandVariationsHandler = SandboxedModule.require(modulePath, {
       requires: {
         'settings-sharelatex': this.settings,
-        '../V1/V1Api': this.V1Api
-      }
+        '../V1/V1Api': this.V1Api,
+      },
     })
     return (this.mockedBrandVariationDetails = {
       id: '12',
@@ -54,7 +54,7 @@ describe('BrandVariationsHandler', function () {
       logo_url: 'http://my.cdn.tld/journal-logo.png',
       journal_cover_url: 'http://my.cdn.tld/journal-cover.jpg',
       home_url: 'http://www.thejournal.com/',
-      publish_menu_link_html: 'Submit your paper to the <em>The Journal</em>'
+      publish_menu_link_html: 'Submit your paper to the <em>The Journal</em>',
     })
   })
 

@@ -43,7 +43,7 @@ module.exports = ChatApiHandler = {
       {
         url: `${settings.apis.chat.internal_url}/project/${project_id}/messages`,
         method: 'POST',
-        json: { user_id, content }
+        json: { user_id, content },
       },
       callback
     )
@@ -63,7 +63,7 @@ module.exports = ChatApiHandler = {
         url: `${settings.apis.chat.internal_url}/project/${project_id}/messages`,
         method: 'GET',
         qs,
-        json: true
+        json: true,
       },
       callback
     )
@@ -77,7 +77,7 @@ module.exports = ChatApiHandler = {
       {
         url: `${settings.apis.chat.internal_url}/project/${project_id}/thread/${thread_id}/messages`,
         method: 'POST',
-        json: { user_id, content }
+        json: { user_id, content },
       },
       callback
     )
@@ -91,7 +91,7 @@ module.exports = ChatApiHandler = {
       {
         url: `${settings.apis.chat.internal_url}/project/${project_id}/threads`,
         method: 'GET',
-        json: true
+        json: true,
       },
       callback
     )
@@ -105,7 +105,7 @@ module.exports = ChatApiHandler = {
       {
         url: `${settings.apis.chat.internal_url}/project/${project_id}/thread/${thread_id}/resolve`,
         method: 'POST',
-        json: { user_id }
+        json: { user_id },
       },
       callback
     )
@@ -118,7 +118,7 @@ module.exports = ChatApiHandler = {
     return ChatApiHandler._apiRequest(
       {
         url: `${settings.apis.chat.internal_url}/project/${project_id}/thread/${thread_id}/reopen`,
-        method: 'POST'
+        method: 'POST',
       },
       callback
     )
@@ -131,7 +131,7 @@ module.exports = ChatApiHandler = {
     return ChatApiHandler._apiRequest(
       {
         url: `${settings.apis.chat.internal_url}/project/${project_id}/thread/${thread_id}`,
-        method: 'DELETE'
+        method: 'DELETE',
       },
       callback
     )
@@ -146,8 +146,8 @@ module.exports = ChatApiHandler = {
         url: `${settings.apis.chat.internal_url}/project/${project_id}/thread/${thread_id}/messages/${message_id}/edit`,
         method: 'POST',
         json: {
-          content
-        }
+          content,
+        },
       },
       callback
     )
@@ -160,9 +160,9 @@ module.exports = ChatApiHandler = {
     return ChatApiHandler._apiRequest(
       {
         url: `${settings.apis.chat.internal_url}/project/${project_id}/thread/${thread_id}/messages/${message_id}`,
-        method: 'DELETE'
+        method: 'DELETE',
       },
       callback
     )
-  }
+  },
 }

@@ -29,7 +29,7 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
       setTimeout(() => {
         if (item) {
           scrollIntoViewIfNeeded(item, {
-            scrollMode: 'if-needed'
+            scrollMode: 'if-needed',
           })
         }
       }, 100)
@@ -40,14 +40,14 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
     ev.preventDefault()
     setContextMenuCoords({
       top: ev.pageY,
-      left: ev.pageX
+      left: ev.pageX,
     })
   }
 
   return (
     <div
       className={classNames('entity', {
-        'dnd-draggable-dragging': isDragging
+        'dnd-draggable-dragging': isDragging,
       })}
       role="presentation"
       ref={dragRef}
@@ -75,7 +75,7 @@ FileTreeItemInner.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   isSelected: PropTypes.bool.isRequired,
-  icons: PropTypes.node
+  icons: PropTypes.node,
 }
 
 export default FileTreeItemInner

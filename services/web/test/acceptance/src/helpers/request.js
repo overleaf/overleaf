@@ -3,7 +3,7 @@
 const BASE_URL = `http://${process.env.HTTP_TEST_HOST || 'localhost'}:3000`
 const request = require('request').defaults({
   baseUrl: BASE_URL,
-  followRedirect: false
+  followRedirect: false,
 })
 
 module.exports = request
@@ -19,5 +19,5 @@ module.exports.promises = {
         }
       })
     })
-  }
+  },
 }

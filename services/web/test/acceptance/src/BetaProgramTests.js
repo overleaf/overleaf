@@ -9,33 +9,33 @@ describe('BetaProgram', function () {
     userHelper = await UserHelper.createUser({ email })
     userHelper = await UserHelper.loginUser({
       email,
-      password: userHelper.getDefaultPassword()
+      password: userHelper.getDefaultPassword(),
     })
   })
   it('should opt in', async function () {
     const response = await userHelper.request.post('/beta/opt-in', {
-      simple: false
+      simple: false,
     })
     expect(response.statusCode).to.equal(302)
     response.statusCode.should.equal(302)
     expect(response.headers.location).to.equal('/beta/participate')
     const user = (
       await UserHelper.getUser({
-        email
+        email,
       })
     ).user
     expect(user.betaProgram).to.equal(true)
   })
   it('should opt out', async function () {
     const response = await userHelper.request.post('/beta/opt-out', {
-      simple: false
+      simple: false,
     })
     expect(response.statusCode).to.equal(302)
     response.statusCode.should.equal(302)
     expect(response.headers.location).to.equal('/beta/participate')
     const user = (
       await UserHelper.getUser({
-        email
+        email,
       })
     ).user
     expect(user.betaProgram).to.equal(false)

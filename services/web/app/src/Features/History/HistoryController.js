@@ -48,8 +48,8 @@ module.exports = HistoryController = {
       url,
       method: req.method,
       headers: {
-        'X-User-Id': userId
-      }
+        'X-User-Id': userId,
+      },
     })
     getReq.pipe(res)
     getReq.on('error', function (err) {
@@ -68,8 +68,8 @@ module.exports = HistoryController = {
         method: req.method,
         json: true,
         headers: {
-          'X-User-Id': userId
-        }
+          'X-User-Id': userId,
+        },
       },
       function (err, body) {
         if (err) {
@@ -123,7 +123,7 @@ module.exports = HistoryController = {
         }
         res.json({
           type: entity.type,
-          id: entity._id
+          id: entity._id,
         })
       }
     )
@@ -144,7 +144,7 @@ module.exports = HistoryController = {
       (err, doc) => {
         if (err) return next(err)
         res.json({
-          doc_id: doc._id
+          doc_id: doc._id,
         })
       }
     )
@@ -156,7 +156,7 @@ module.exports = HistoryController = {
       {
         method: 'GET',
         url: `${settings.apis.project_history.url}/project/${projectId}/labels`,
-        json: true
+        json: true,
       },
       function (err, labels) {
         if (err) {
@@ -180,7 +180,7 @@ module.exports = HistoryController = {
       {
         method: 'POST',
         url: `${settings.apis.project_history.url}/project/${projectId}/user/${userId}/labels`,
-        json: { comment, version }
+        json: { comment, version },
       },
       function (err, label) {
         if (err) {
@@ -272,7 +272,7 @@ module.exports = HistoryController = {
     HistoryController._makeRequest(
       {
         method: 'DELETE',
-        url: `${settings.apis.project_history.url}/project/${projectId}/user/${userId}/labels/${labelId}`
+        url: `${settings.apis.project_history.url}/project/${projectId}/user/${userId}/labels/${labelId}`,
       },
       function (err) {
         if (err) {
@@ -338,17 +338,17 @@ module.exports = HistoryController = {
     const options = {
       auth: {
         user: settings.apis.v1_history.user,
-        pass: settings.apis.v1_history.pass
+        pass: settings.apis.v1_history.pass,
       },
       json: true,
       method: 'post',
-      url
+      url,
     }
     request(options, function (err, response, body) {
       if (err) {
         OError.tag(err, 'history API error', {
           v1ProjectId,
-          version
+          version,
         })
         return next(err)
       }
@@ -375,7 +375,7 @@ module.exports = HistoryController = {
             retryAttempt++
             const getReq = request({
               url: body.zipUrl,
-              sendImmediately: true
+              sendImmediately: true,
             })
             const abortS3Request = () => getReq.abort()
             req.on('aborted', abortS3Request)
@@ -394,7 +394,7 @@ module.exports = HistoryController = {
               delete response.headers['content-type']
               res.status(response.statusCode)
               res.setContentDisposition('attachment', {
-                filename: `${name}.zip`
+                filename: `${name}.zip`,
               })
               res.contentType('application/zip')
               pipeline(response, res, err => {
@@ -421,12 +421,12 @@ module.exports = HistoryController = {
             OError.tag(err, 'history s3 download failed', {
               v1ProjectId,
               version,
-              retryAttempt
+              retryAttempt,
             })
             next(err)
           }
         }
       )
     })
-  }
+  },
 }

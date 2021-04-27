@@ -43,9 +43,9 @@ describe('DocUpdate', function () {
         auth: {
           user: settings.apis.web.user,
           pass: settings.apis.web.pass,
-          sendImmediately: true
+          sendImmediately: true,
         },
-        json: { lines, version, ranges, lastUpdatedAt, lastUpdatedBy }
+        json: { lines, version, ranges, lastUpdatedAt, lastUpdatedBy },
       },
       (error, res) => {
         if (error) return callback(error)
@@ -85,7 +85,7 @@ describe('DocUpdate', function () {
       version: 1,
       ranges: {},
       lastUpdatedAt: new Date(),
-      lastUpdatedBy: this.user.id
+      lastUpdatedBy: this.user.id,
     }
   })
 

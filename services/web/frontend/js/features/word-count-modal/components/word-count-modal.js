@@ -46,7 +46,7 @@ WordCountModal.propTypes = {
   clsiServerId: PropTypes.string,
   handleHide: PropTypes.func.isRequired,
   projectId: PropTypes.string.isRequired,
-  show: PropTypes.bool.isRequired
+  show: PropTypes.bool.isRequired,
 }
 
 export default WordCountModal

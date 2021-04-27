@@ -35,10 +35,10 @@ function requestFactory({ timeout }) {
       headers: {
         // emulate the header of a https proxy
         // express wont emit a 'Secure;' cookie on a plain-text connection.
-        'X-Forwarded-Proto': 'https'
+        'X-Forwarded-Proto': 'https',
       },
       jar: new InsecureCookieJar(),
-      timeout
+      timeout,
     })
   )
 }
@@ -49,12 +49,12 @@ function assertHasStatusCode(response, expected) {
     throw new OError('unexpected response code', {
       url: response.request.uri.href,
       actual,
-      expected
+      expected,
     })
   }
 }
 
 module.exports = {
   assertHasStatusCode,
-  requestFactory
+  requestFactory,
 }

@@ -23,7 +23,7 @@ const historyLabelsListController = function ($scope, $element, $attrs) {
       ctrl.versionsWithLabels = _.map(groupedLabelsHash, (labels, version) => {
         return {
           version: parseInt(version, 10),
-          labels
+          labels,
         }
       })
     }
@@ -31,7 +31,7 @@ const historyLabelsListController = function ($scope, $element, $attrs) {
   ctrl.initHoveredRange = () => {
     ctrl.hoveredHistoryRange = {
       toV: ctrl.selectedHistoryRange.toV,
-      fromV: ctrl.selectedHistoryRange.fromV
+      fromV: ctrl.selectedHistoryRange.fromV,
     }
   }
   ctrl.resetHoveredRange = () => {
@@ -107,7 +107,7 @@ const historyLabelsListController = function ($scope, $element, $attrs) {
       // TODO
       ctrl.onRangeSelect({
         selectedToV: versionWithLabel.version,
-        selectedFromV: versionWithLabel.version
+        selectedFromV: versionWithLabel.version,
       })
     } else {
       ctrl.onVersionSelect({ version: versionWithLabel.version })
@@ -117,7 +117,7 @@ const historyLabelsListController = function ($scope, $element, $attrs) {
     if (version >= ctrl.selectedHistoryRange.fromV) {
       ctrl.onRangeSelect({
         selectedToV: version,
-        selectedFromV: ctrl.selectedHistoryRange.fromV
+        selectedFromV: ctrl.selectedHistoryRange.fromV,
       })
     }
   }
@@ -125,14 +125,14 @@ const historyLabelsListController = function ($scope, $element, $attrs) {
     if (version <= ctrl.selectedHistoryRange.toV) {
       ctrl.onRangeSelect({
         selectedToV: ctrl.selectedHistoryRange.toV,
-        selectedFromV: version
+        selectedFromV: version,
       })
     }
   }
   ctrl.buildUserView = label => {
     const user = {
       _id: label.user_id,
-      displayName: label.user_display_name
+      displayName: label.user_display_name,
     }
     return user
   }
@@ -168,8 +168,8 @@ export default App.component('historyLabelsList', {
     selectedHistoryRange: '<?',
     onVersionSelect: '&',
     onRangeSelect: '&',
-    onLabelDelete: '&'
+    onLabelDelete: '&',
   },
   controller: historyLabelsListController,
-  templateUrl: 'historyLabelsListTpl'
+  templateUrl: 'historyLabelsListTpl',
 })

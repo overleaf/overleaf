@@ -22,8 +22,8 @@ export const Interactive = ({
               headers: 4,
               mathDisplay: 40,
               mathInline: 400,
-              textWords: 4000
-            }
+              textWords: 4000,
+            },
           }
 
         default:
@@ -37,7 +37,7 @@ export const Interactive = ({
 }
 Interactive.propTypes = {
   mockResponse: PropTypes.number,
-  mockResponseDelay: PropTypes.number
+  mockResponseDelay: PropTypes.number,
 }
 
 export default {
@@ -46,7 +46,7 @@ export default {
   args: {
     clsiServerId: 'server-id',
     projectId: 'project-id',
-    show: true
+    show: true,
   },
   argTypes: {
     handleHide: { action: 'handleHide' },
@@ -57,8 +57,8 @@ export default {
       defaultValue: 200,
       control: {
         type: 'radio',
-        options: [200, 500, 400]
-      }
+        options: [200, 500, 400],
+      },
     },
     mockResponseDelay: {
       name: 'Mock Response Delay',
@@ -69,8 +69,8 @@ export default {
         type: 'range',
         min: 0,
         max: 2500,
-        step: 250
-      }
-    }
-  }
+        step: 250,
+      },
+    },
+  },
 }

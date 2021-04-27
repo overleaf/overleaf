@@ -15,7 +15,7 @@ describe('<CloneProjectModal />', function () {
     projectId: 'project-1',
     projectName: 'Test Project',
     openProject: sinon.stub(),
-    show: true
+    show: true,
   }
 
   it('renders the translated modal title', async function () {
@@ -29,7 +29,7 @@ describe('<CloneProjectModal />', function () {
       'express:/project/:projectId/clone',
       {
         status: 200,
-        body: { project_id: modalProps.projectId }
+        body: { project_id: modalProps.projectId },
       },
       { delay: 10 }
     )
@@ -47,12 +47,12 @@ describe('<CloneProjectModal />', function () {
     const input = await screen.getByLabelText('New Name')
 
     fireEvent.change(input, {
-      target: { value: '' }
+      target: { value: '' },
     })
     expect(submitButton.disabled).to.be.true
 
     fireEvent.change(input, {
-      target: { value: 'A Cloned Project' }
+      target: { value: 'A Cloned Project' },
     })
     expect(submitButton.disabled).to.be.false
 
@@ -67,7 +67,7 @@ describe('<CloneProjectModal />', function () {
     expect(url).to.equal('/project/project-1/clone')
 
     expect(JSON.parse(options.body)).to.deep.equal({
-      projectName: 'A Cloned Project'
+      projectName: 'A Cloned Project',
     })
 
     expect(openProject).to.be.calledOnce
@@ -86,7 +86,7 @@ describe('<CloneProjectModal />', function () {
 
     fetchMock.postOnce(matcher, {
       status: 500,
-      body: 'There was an error!'
+      body: 'There was an error!',
     })
 
     const openProject = sinon.stub()
@@ -115,7 +115,7 @@ describe('<CloneProjectModal />', function () {
 
     fetchMock.postOnce(matcher, {
       status: 400,
-      body: 'There was an error!'
+      body: 'There was an error!',
     })
 
     const openProject = sinon.stub()

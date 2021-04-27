@@ -17,7 +17,7 @@ EditorContext.Provider.propTypes = {
       publishGuideHtml: PropTypes.string,
       partner: PropTypes.string,
       brandedMenu: PropTypes.string,
-      submitBtnHtml: PropTypes.string
+      submitBtnHtml: PropTypes.string,
     }),
     loading: PropTypes.bool,
     projectRootDocId: PropTypes.string,
@@ -26,16 +26,16 @@ EditorContext.Provider.propTypes = {
     renameProject: PropTypes.func.isRequired,
     isProjectOwner: PropTypes.bool,
     isRestrictedTokenMember: PropTypes.bool,
-    rootFolder: PropTypes.object
-  })
+    rootFolder: PropTypes.object,
+  }),
 }
 
 export function EditorProvider({ children, ide, settings }) {
   const {
-    exposedSettings: { appName }
+    exposedSettings: { appName },
   } = useApplicationContext({
     exposedSettings: PropTypes.shape({ appName: PropTypes.string.isRequired })
-      .isRequired
+      .isRequired,
   })
 
   const cobranding = window.brandVariation
@@ -48,7 +48,7 @@ export function EditorProvider({ children, ide, settings }) {
         publishGuideHtml: window.brandVariation.publish_guide_html,
         partner: window.brandVariation.partner,
         brandedMenu: window.brandVariation.branded_menu,
-        submitBtnHtml: window.brandVariation.submit_button_html
+        submitBtnHtml: window.brandVariation.submit_button_html,
       }
     : undefined
 
@@ -105,7 +105,7 @@ export function EditorProvider({ children, ide, settings }) {
     renameProject,
     isProjectOwner: ownerId === window.user.id,
     isRestrictedTokenMember: window.isRestrictedTokenMember,
-    rootFolder
+    rootFolder,
   }
 
   return (
@@ -120,7 +120,7 @@ export function EditorProvider({ children, ide, settings }) {
 EditorProvider.propTypes = {
   children: PropTypes.any,
   ide: PropTypes.any.isRequired,
-  settings: PropTypes.any.isRequired
+  settings: PropTypes.any.isRequired,
 }
 
 export function useEditorContext(propTypes) {

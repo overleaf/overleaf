@@ -15,7 +15,7 @@ App.controller('ShareController', function (
     $modal.open({
       templateUrl: 'shareProjectModalTemplate',
       controller: 'ShareProjectModalController',
-      scope: $scope
+      scope: $scope,
     })
   }
 

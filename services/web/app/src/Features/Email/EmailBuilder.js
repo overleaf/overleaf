@@ -79,9 +79,9 @@ function ctaTemplate(content) {
         ctaText: content.ctaText(opts),
         ctaURL: content.ctaURL(opts),
         gmailGoToAction: content.gmailGoToAction(opts),
-        StringHelper
+        StringHelper,
       })
-    }
+    },
   }
 }
 
@@ -113,9 +113,9 @@ The ${settings.appName} Team - ${settings.siteUrl}\
           typeof content.title === 'function' ? content.title(opts) : undefined,
         greeting: content.greeting(opts),
         message: content.message(opts),
-        StringHelper
+        StringHelper,
       })
-    }
+    },
   }
 }
 
@@ -126,7 +126,7 @@ function buildEmail(templateName, opts) {
   return {
     subject: template.subject(opts),
     html: template.layout(opts),
-    text: template.plainTextTemplate && template.plainTextTemplate(opts)
+    text: template.plainTextTemplate && template.plainTextTemplate(opts),
   }
 }
 
@@ -141,12 +141,12 @@ templates.registered = ctaTemplate({
       `Congratulations, you've just had an account created for you on ${
         settings.appName
       } with the email address '${_.escape(opts.to)}'.`,
-      'Click here to set your password and log in:'
+      'Click here to set your password and log in:',
     ]
   },
   secondaryMessage() {
     return [
-      `If you have any questions or problems, please contact ${settings.adminEmail}`
+      `If you have any questions or problems, please contact ${settings.adminEmail}`,
     ]
   },
   ctaText() {
@@ -154,7 +154,7 @@ templates.registered = ctaTemplate({
   },
   ctaURL(opts) {
     return opts.setNewPasswordUrl
-  }
+  },
 })
 
 templates.canceledSubscription = ctaTemplate({
@@ -163,7 +163,7 @@ templates.canceledSubscription = ctaTemplate({
   },
   message() {
     return [
-      `We are sorry to see you cancelled your ${settings.appName} premium subscription. Would you mind giving us some feedback on what the site is lacking at the moment via this quick survey?`
+      `We are sorry to see you cancelled your ${settings.appName} premium subscription. Would you mind giving us some feedback on what the site is lacking at the moment via this quick survey?`,
     ]
   },
   secondaryMessage() {
@@ -174,7 +174,7 @@ templates.canceledSubscription = ctaTemplate({
   },
   ctaURL(opts) {
     return 'https://docs.google.com/forms/d/e/1FAIpQLSfa7z_s-cucRRXm70N4jEcSbFsZeb0yuKThHGQL8ySEaQzF0Q/viewform?usp=sf_link'
-  }
+  },
 })
 
 templates.reactivatedSubscription = ctaTemplate({
@@ -189,7 +189,7 @@ templates.reactivatedSubscription = ctaTemplate({
   },
   ctaURL(opts) {
     return `${settings.siteUrl}/user/subscription`
-  }
+  },
 })
 
 templates.passwordResetRequested = ctaTemplate({
@@ -205,7 +205,7 @@ templates.passwordResetRequested = ctaTemplate({
   secondaryMessage() {
     return [
       "If you ignore this message, your password won't be changed.",
-      "If you didn't request a password reset, let us know."
+      "If you didn't request a password reset, let us know.",
     ]
   },
   ctaText() {
@@ -213,7 +213,7 @@ templates.passwordResetRequested = ctaTemplate({
   },
   ctaURL(opts) {
     return opts.setNewPasswordUrl
-  }
+  },
 })
 
 templates.confirmEmail = ctaTemplate({
@@ -225,13 +225,13 @@ templates.confirmEmail = ctaTemplate({
   },
   message(opts) {
     return [
-      `Please confirm that you have added a new email, ${opts.to}, to your ${settings.appName} account.`
+      `Please confirm that you have added a new email, ${opts.to}, to your ${settings.appName} account.`,
     ]
   },
   secondaryMessage() {
     return [
       'If you did not request this, you can simply ignore this message.',
-      `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${settings.adminEmail}.`
+      `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${settings.adminEmail}.`,
     ]
   },
   ctaText() {
@@ -239,7 +239,7 @@ templates.confirmEmail = ctaTemplate({
   },
   ctaURL(opts) {
     return opts.confirmEmailUrl
-  }
+  },
 })
 
 templates.projectInvite = ctaTemplate({
@@ -263,7 +263,7 @@ templates.projectInvite = ctaTemplate({
         SpamSafe.safeEmail(opts.owner.email, 'a collaborator')
       )} wants to share ${_.escape(
         SpamSafe.safeProjectName(opts.project.name, 'a new project')
-      )} with you.`
+      )} with you.`,
     ]
   },
   ctaText() {
@@ -278,9 +278,9 @@ templates.projectInvite = ctaTemplate({
       name: 'View project',
       description: `Join ${_.escape(
         SpamSafe.safeProjectName(opts.project.name, 'project')
-      )} at ${settings.appName}`
+      )} at ${settings.appName}`,
     }
-  }
+  },
 })
 
 templates.reconfirmEmail = ctaTemplate({
@@ -292,13 +292,13 @@ templates.reconfirmEmail = ctaTemplate({
   },
   message(opts) {
     return [
-      `Please reconfirm your email address, ${opts.to}, on your ${settings.appName} account.`
+      `Please reconfirm your email address, ${opts.to}, on your ${settings.appName} account.`,
     ]
   },
   secondaryMessage() {
     return [
       'If you did not request this, you can simply ignore this message.',
-      `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${settings.adminEmail}.`
+      `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${settings.adminEmail}.`,
     ]
   },
   ctaText() {
@@ -306,7 +306,7 @@ templates.reconfirmEmail = ctaTemplate({
   },
   ctaURL(opts) {
     return opts.confirmEmailUrl
-  }
+  },
 })
 
 templates.verifyEmailToJoinTeam = ctaTemplate({
@@ -322,7 +322,7 @@ templates.verifyEmailToJoinTeam = ctaTemplate({
   },
   message(opts) {
     return [
-      `Please click the button below to join the team and enjoy the benefits of an upgraded ${settings.appName} account.`
+      `Please click the button below to join the team and enjoy the benefits of an upgraded ${settings.appName} account.`,
     ]
   },
   ctaText(opts) {
@@ -330,7 +330,7 @@ templates.verifyEmailToJoinTeam = ctaTemplate({
   },
   ctaURL(opts) {
     return opts.acceptInviteUrl
-  }
+  },
 })
 
 templates.testEmail = ctaTemplate({
@@ -351,7 +351,7 @@ templates.testEmail = ctaTemplate({
   },
   ctaURL() {
     return settings.siteUrl
-  }
+  },
 })
 
 templates.ownershipTransferConfirmationPreviousOwner = NoCTAEmailTemplate({
@@ -376,9 +376,9 @@ templates.ownershipTransferConfirmationPreviousOwner = NoCTAEmailTemplate({
       : `<b>${projectName}</b>`
     return [
       `As per your request, we have made ${nameAndEmail} the owner of ${projectNameDisplay}.`,
-      `If you haven't asked to change the owner of ${projectNameDisplay}, please get in touch with us via ${settings.adminEmail}.`
+      `If you haven't asked to change the owner of ${projectNameDisplay}, please get in touch with us via ${settings.adminEmail}.`,
     ]
-  }
+  },
 })
 
 templates.ownershipTransferConfirmationNewOwner = ctaTemplate({
@@ -402,7 +402,7 @@ templates.ownershipTransferConfirmationNewOwner = ctaTemplate({
       ? projectName
       : `<b>${projectName}</b>`
     return [
-      `${nameAndEmail} has made you the owner of ${projectNameEmphasized}. You can now manage ${projectName} sharing settings.`
+      `${nameAndEmail} has made you the owner of ${projectNameEmphasized}. You can now manage ${projectName} sharing settings.`,
     ]
   },
   ctaText(opts) {
@@ -413,7 +413,7 @@ templates.ownershipTransferConfirmationNewOwner = ctaTemplate({
       settings.siteUrl
     }/project/${opts.project._id.toString()}`
     return projectUrl
-  }
+  },
 })
 
 templates.userOnboardingEmail = NoCTAEmailTemplate({
@@ -466,9 +466,9 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
       'Thanks again for using Overleaf :)',
       `John`,
       `Dr John Hammersley <br />Co-founder & CEO <br />${siteLink}<hr>`,
-      `Don't want onboarding emails like this from us? Don't worry, this is the only one. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`
+      `Don't want onboarding emails like this from us? Don't worry, this is the only one. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`,
     ]
-  }
+  },
 })
 
 templates.securityAlert = NoCTAEmailTemplate({
@@ -504,9 +504,9 @@ templates.securityAlert = NoCTAEmailTemplate({
       ...message,
       `If this was you, you can ignore this email.`,
       `If this was not you, we recommend getting in touch with our support team at ${settings.adminEmail} to report this as potentially suspicious activity on your account.`,
-      `We also encourage you to read our ${helpLink} to keeping your ${settings.appName} account safe.`
+      `We also encourage you to read our ${helpLink} to keeping your ${settings.appName} account safe.`,
     ]
-  }
+  },
 })
 
 function _formatUserNameAndEmail(user, placeholder) {
@@ -527,5 +527,5 @@ module.exports = {
   templates,
   ctaTemplate,
   NoCTAEmailTemplate,
-  buildEmail
+  buildEmail,
 }

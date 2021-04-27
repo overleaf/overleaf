@@ -10,15 +10,15 @@ describe('FileStoreController', function () {
   beforeEach(function () {
     this.FileStoreHandler = {
       getFileStream: sinon.stub(),
-      getFileSize: sinon.stub()
+      getFileSize: sinon.stub(),
     }
     this.ProjectLocator = { findElement: sinon.stub() }
     this.controller = SandboxedModule.require(MODULE_PATH, {
       requires: {
         'settings-sharelatex': this.settings,
         '../Project/ProjectLocator': this.ProjectLocator,
-        './FileStoreHandler': this.FileStoreHandler
-      }
+        './FileStoreHandler': this.FileStoreHandler,
+      },
     })
     this.stream = {}
     this.projectId = '2k3j1lk3j21lk3j'
@@ -26,18 +26,18 @@ describe('FileStoreController', function () {
     this.req = {
       params: {
         Project_id: this.projectId,
-        File_id: this.fileId
+        File_id: this.fileId,
       },
       query: 'query string here',
       get(key) {
         return undefined
-      }
+      },
     }
     this.res = {
       set: sinon.stub().returnsThis(),
       setHeader: sinon.stub(),
       setContentDisposition: sinon.stub(),
-      status: sinon.stub().returnsThis()
+      status: sinon.stub().returnsThis(),
     }
     this.file = { name: 'myfile.png' }
   })
@@ -75,7 +75,7 @@ describe('FileStoreController', function () {
         const opts = {
           project_id: this.projectId,
           element_id: this.fileId,
-          type: 'file'
+          type: 'file',
         }
         this.ProjectLocator.findElement.calledWith(opts).should.equal(true)
         done()
@@ -163,7 +163,7 @@ describe('FileStoreController', function () {
       ('x.html-is-rad',
       'html.pdf',
       '.html-is-good-for-hidden-files',
-      'somefile')
+      'somefile'),
     ].forEach(filename => {
       describe(`with filename as '${filename}'`, function () {
         beforeEach(function () {
@@ -210,7 +210,7 @@ describe('FileStoreController', function () {
         expect(this.res.status.lastCall.args).to.deep.equal([200])
         expect(this.res.set.lastCall.args).to.deep.equal([
           'Content-Length',
-          expectedFileSize
+          expectedFileSize,
         ])
         done()
       }

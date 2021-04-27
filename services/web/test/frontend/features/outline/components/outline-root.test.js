@@ -12,8 +12,8 @@ describe('<OutlineRoot />', function () {
       {
         title: 'Section',
         line: 1,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(<OutlineRoot outline={outline} jumpToLine={jumpToLine} />)
 

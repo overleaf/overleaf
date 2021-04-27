@@ -26,8 +26,8 @@ describe('CompileController', function () {
       email: 'user@example.com',
       features: {
         compileGroup: 'premium',
-        compileTimeout: 100
-      }
+        compileTimeout: 100,
+      },
     }
     this.CompileManager = { compile: sinon.stub() }
     this.ClsiManager = {}
@@ -36,26 +36,26 @@ describe('CompileController', function () {
     this.settings = {
       apis: {
         clsi: {
-          url: 'clsi.example.com'
+          url: 'clsi.example.com',
         },
         clsi_priority: {
-          url: 'clsi-priority.example.com'
-        }
+          url: 'clsi-priority.example.com',
+        },
       },
       defaultFeatures: {
         compileGroup: 'standard',
-        compileTimeout: 60
-      }
+        compileTimeout: 60,
+      },
     }
     this.jar = { cookie: 'stuff' }
     this.ClsiCookieManager = {
-      getCookieJar: sinon.stub().callsArgWith(1, null, this.jar)
+      getCookieJar: sinon.stub().callsArgWith(1, null, this.jar),
     }
     this.AuthenticationController = {
       getLoggedInUser: sinon.stub().callsArgWith(1, null, this.user),
       getLoggedInUserId: sinon.stub().returns(this.user_id),
       getSessionUser: sinon.stub().returns(this.user),
-      isUserLoggedIn: sinon.stub().returns(true)
+      isUserLoggedIn: sinon.stub().returns(true),
     }
     this.CompileController = SandboxedModule.require(modulePath, {
       requires: {
@@ -69,8 +69,8 @@ describe('CompileController', function () {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         '../../infrastructure/RateLimiter': this.RateLimiter,
-        './ClsiCookieManager': () => this.ClsiCookieManager
-      }
+        './ClsiCookieManager': () => this.ClsiCookieManager,
+      },
     })
     this.project_id = 'project-id'
     this.next = sinon.stub()
@@ -118,7 +118,7 @@ describe('CompileController', function () {
         this.res.body.should.equal(
           JSON.stringify({
             status: this.status,
-            outputFiles: this.outputFiles
+            outputFiles: this.outputFiles,
           })
         )
       })
@@ -147,7 +147,7 @@ describe('CompileController', function () {
         return this.CompileManager.compile
           .calledWith(this.project_id, this.user_id, {
             isAutoCompile: false,
-            draft: true
+            draft: true,
           })
           .should.equal(true)
       })
@@ -186,7 +186,7 @@ describe('CompileController', function () {
           status: this.status,
           outputFiles: this.outputFiles,
           clsiServerId: 'mock-server-id',
-          validationProblems: null
+          validationProblems: null,
         })
       )
     })
@@ -195,7 +195,7 @@ describe('CompileController', function () {
       beforeEach(function () {
         this.req.body = {
           compileGroup: 'special',
-          timeout: 600
+          timeout: 600,
         }
         return this.CompileController.compileSubmission(
           this.req,
@@ -221,7 +221,7 @@ describe('CompileController', function () {
           rootResourcePath: 'main.tex',
           compiler: 'lualatex',
           draft: true,
-          check: 'validate'
+          check: 'validate',
         }
         return this.CompileController.compileSubmission(
           this.req,
@@ -238,7 +238,7 @@ describe('CompileController', function () {
               rootResourcePath: 'main.tex',
               compiler: 'lualatex',
               draft: true,
-              check: 'validate'
+              check: 'validate',
             },
             {
               rootResourcePath: 'main.tex',
@@ -246,7 +246,7 @@ describe('CompileController', function () {
               draft: true,
               check: 'validate',
               compileGroup: 'standard',
-              timeout: 60
+              timeout: 60,
             }
           )
           .should.equal(true)
@@ -359,7 +359,7 @@ describe('CompileController', function () {
       this.req.params = {
         submission_id: this.submission_id,
         build_id: this.build_id,
-        file: this.file
+        file: this.file,
       }
       this.req.body = {}
       this.expected_url = `/project/${this.submission_id}/build/${this.build_id}/output/${this.file}`
@@ -378,7 +378,7 @@ describe('CompileController', function () {
       it('should proxy to CLSI with correct URL and default limits', function () {
         return this.CompileController.proxyToClsiWithLimits
           .calledWith(this.submission_id, this.expected_url, {
-            compileGroup: 'standard'
+            compileGroup: 'standard',
           })
           .should.equal(true)
       })
@@ -397,7 +397,7 @@ describe('CompileController', function () {
       it('should proxy to CLSI with correct URL and specified limits', function () {
         return this.CompileController.proxyToClsiWithLimits
           .calledWith(this.submission_id, this.expected_url, {
-            compileGroup: 'special'
+            compileGroup: 'special',
           })
           .should.equal(true)
       })
@@ -428,7 +428,7 @@ describe('CompileController', function () {
         this.project_id,
         {
           url: `/project/${this.project_id}/user/${this.user_id}/sync/code`,
-          qs: { file, line, column, imageName }
+          qs: { file, line, column, imageName },
         },
         this.req,
         this.res,
@@ -462,7 +462,7 @@ describe('CompileController', function () {
         this.project_id,
         {
           url: `/project/${this.project_id}/user/${this.user_id}/sync/pdf`,
-          qs: { page, h, v, imageName }
+          qs: { page, h, v, imageName },
         },
         this.req,
         this.res,
@@ -476,19 +476,19 @@ describe('CompileController', function () {
       this.request.returns(
         (this.proxy = {
           pipe: sinon.stub(),
-          on: sinon.stub()
+          on: sinon.stub(),
         })
       )
       this.upstream = {
         statusCode: 204,
-        headers: { mock: 'header' }
+        headers: { mock: 'header' },
       }
       this.req.method = 'mock-method'
       return (this.req.headers = {
         Mock: 'Headers',
         Range: '123-456',
         'If-Range': 'abcdef',
-        'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT'
+        'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT',
       })
     })
 
@@ -513,7 +513,7 @@ describe('CompileController', function () {
               jar: this.jar,
               method: this.req.method,
               url: `${this.settings.apis.clsi.url}${this.url}`,
-              timeout: 60 * 1000
+              timeout: 60 * 1000,
             })
             .should.equal(true)
         })
@@ -560,7 +560,7 @@ describe('CompileController', function () {
               jar: this.jar,
               method: this.req.method,
               url: `${this.settings.apis.clsi.url}${this.url}`,
-              timeout: 60 * 1000
+              timeout: 60 * 1000,
             })
             .should.equal(true)
         })
@@ -592,7 +592,7 @@ describe('CompileController', function () {
               jar: this.jar,
               method: this.req.method,
               url: `${this.settings.apis.clsi.url}${this.url}`,
-              timeout: 60 * 1000
+              timeout: 60 * 1000,
             })
             .should.equal(true)
         })
@@ -619,7 +619,7 @@ describe('CompileController', function () {
               jar: this.jar,
               method: this.req.method,
               url: `${this.settings.apis.clsi.url}${this.url}`,
-              timeout: 60 * 1000
+              timeout: 60 * 1000,
             })
             .should.equal(true)
         })
@@ -654,8 +654,8 @@ describe('CompileController', function () {
               headers: {
                 Range: '123-456',
                 'If-Range': 'abcdef',
-                'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT'
-              }
+                'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT',
+              },
             })
             .should.equal(true)
         })
@@ -695,8 +695,8 @@ describe('CompileController', function () {
               headers: {
                 Range: '123-456',
                 'If-Range': 'abcdef',
-                'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT'
-              }
+                'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT',
+              },
             })
             .should.equal(true)
         })
@@ -732,8 +732,8 @@ describe('CompileController', function () {
     beforeEach(function () {
       this.req = {
         params: {
-          project_id: this.project_id
-        }
+          project_id: this.project_id,
+        },
       }
       this.CompileManager.compile.callsArgWith(3)
       this.CompileController.proxyToClsi = sinon.stub()

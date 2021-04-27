@@ -24,7 +24,7 @@ const {
   BadDataError,
   AccessDeniedError,
   BadEntityTypeError,
-  OutputFileFetchFailedError
+  OutputFileFetchFailedError,
 } = require('./LinkedFilesErrors')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
 const logger = require('logger-sharelatex')
@@ -173,7 +173,7 @@ module.exports = ProjectOutputFileAgent = {
       provider: data.provider,
       source_project_id: data.source_project_id,
       source_output_file_path: data.source_output_file_path,
-      build_id: data.build_id
+      build_id: data.build_id,
     }
   },
 
@@ -294,5 +294,5 @@ module.exports = ProjectOutputFileAgent = {
         }
       )
     })
-  }
+  },
 }

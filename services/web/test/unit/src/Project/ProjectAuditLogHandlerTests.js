@@ -14,8 +14,8 @@ describe('ProjectAuditLogHandler', function () {
     this.ProjectMock = sinon.mock(Project)
     this.ProjectAuditLogHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        '../../models/Project': { Project }
-      }
+        '../../models/Project': { Project },
+      },
     })
   })
 
@@ -36,12 +36,12 @@ describe('ProjectAuditLogHandler', function () {
                     operation: 'translate',
                     initiatorId: this.userId,
                     info: { destinationLanguage: 'tagalog' },
-                    timestamp: sinon.match.typeOf('date')
-                  }
+                    timestamp: sinon.match.typeOf('date'),
+                  },
                 ],
-                $slice: -200
-              }
-            }
+                $slice: -200,
+              },
+            },
           }
         )
         this.dbUpdate.chain('exec').resolves({ nModified: 1 })

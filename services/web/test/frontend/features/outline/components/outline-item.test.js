@@ -15,7 +15,7 @@ describe('<OutlineItem />', function () {
   it('renders basic item', function () {
     const outlineItem = {
       title: 'Test Title',
-      line: 1
+      line: 1,
     }
     render(<OutlineItem outlineItem={outlineItem} jumpToLine={jumpToLine} />)
 
@@ -28,7 +28,7 @@ describe('<OutlineItem />', function () {
     const outlineItem = {
       title: 'Parent',
       line: 1,
-      children: [{ title: 'Child', line: 2 }]
+      children: [{ title: 'Child', line: 2 }],
     }
     render(<OutlineItem outlineItem={outlineItem} jumpToLine={jumpToLine} />)
 
@@ -47,7 +47,7 @@ describe('<OutlineItem />', function () {
   it('highlights', function () {
     const outlineItem = {
       title: 'Parent',
-      line: 1
+      line: 1,
     }
 
     render(
@@ -65,7 +65,7 @@ describe('<OutlineItem />', function () {
     const outlineItem = {
       title: 'Parent',
       line: 1,
-      children: [{ title: 'Child', line: 2 }]
+      children: [{ title: 'Child', line: 2 }],
     }
     render(
       <OutlineItem
@@ -86,7 +86,7 @@ describe('<OutlineItem />', function () {
   it('click and double-click jump to location', function () {
     const outlineItem = {
       title: 'Parent',
-      line: 1
+      line: 1,
     }
     render(<OutlineItem outlineItem={outlineItem} jumpToLine={jumpToLine} />)
 

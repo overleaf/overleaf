@@ -89,7 +89,7 @@ export default ReferencesManager = class ReferencesManager {
     const opts = {
       docIds,
       shouldBroadcast,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     }
     return this.ide.$http
       .post(`/project/${this.$scope.project_id}/references/index`, opts)
@@ -101,7 +101,7 @@ export default ReferencesManager = class ReferencesManager {
   indexAllReferences(shouldBroadcast) {
     const opts = {
       shouldBroadcast,
-      _csrf: window.csrfToken
+      _csrf: window.csrfToken,
     }
     return this.ide.$http
       .post(`/project/${this.$scope.project_id}/references/indexAll`, opts)

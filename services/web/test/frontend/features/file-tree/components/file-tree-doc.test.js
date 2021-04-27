@@ -24,10 +24,10 @@ describe('<FileTreeDoc/>', function () {
             {
               docs: [{ _id: '123abc' }],
               fileRefs: [],
-              folders: []
-            }
-          ]
-        }
+              folders: [],
+            },
+          ],
+        },
       }
     )
 
@@ -58,10 +58,10 @@ describe('<FileTreeDoc/>', function () {
           {
             docs: [{ _id: '123abc' }],
             fileRefs: [],
-            folders: []
-          }
-        ]
-      }
+            folders: [],
+          },
+        ],
+      },
     })
 
     const treeitem = screen.getByRole('treeitem', { selected: false })
@@ -77,10 +77,10 @@ describe('<FileTreeDoc/>', function () {
           {
             docs: [{ _id: '123abc' }],
             fileRefs: [],
-            folders: []
-          }
-        ]
-      }
+            folders: [],
+          },
+        ],
+      },
     })
 
     const treeitem = screen.getByRole('treeitem')

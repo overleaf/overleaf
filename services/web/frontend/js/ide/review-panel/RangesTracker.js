@@ -274,9 +274,9 @@ export default RangesTracker = class RangesTracker {
             // Copy because we'll modify in place
             c: op.c,
             p: op.p,
-            t: op.t
+            t: op.t,
           },
-          metadata
+          metadata,
         })
       )
       this._markAsDirty(comment, 'comment', 'added')
@@ -488,9 +488,9 @@ export default RangesTracker = class RangesTracker {
           const after_change = {
             op: {
               i: after_content,
-              p: change_start + offset + op_length
+              p: change_start + offset + op_length,
             },
-            metadata: {}
+            metadata: {},
           }
           for (let key in change.metadata) {
             const value = change.metadata[key]
@@ -605,7 +605,7 @@ export default RangesTracker = class RangesTracker {
               delete_removed_start,
               delete_removed_start + delete_removed_length
             ),
-            p: delete_removed_start
+            p: delete_removed_start,
           }
           if (modification.d.length > 0) {
             op_modifications.push(modification)
@@ -642,7 +642,7 @@ export default RangesTracker = class RangesTracker {
     // Copy rather than modify because we still need to apply it to comments
     op = {
       p: op.p,
-      d: this._applyOpModifications(op.d, op_modifications)
+      d: this._applyOpModifications(op.d, op_modifications),
     }
 
     for (change of Array.from(remove_changes)) {
@@ -694,7 +694,7 @@ export default RangesTracker = class RangesTracker {
     const change = {
       id: this.newId(),
       op: this._clone(op), // Don't take a reference to the existing op since we'll modify this in place with future changes
-      metadata: this._clone(metadata)
+      metadata: this._clone(metadata),
     }
     this.changes.push(change)
 
@@ -810,13 +810,13 @@ export default RangesTracker = class RangesTracker {
       comment: {
         moved: {},
         removed: {},
-        added: {}
+        added: {},
       },
       change: {
         moved: {},
         removed: {},
-        added: {}
-      }
+        added: {},
+      },
     })
   }
 

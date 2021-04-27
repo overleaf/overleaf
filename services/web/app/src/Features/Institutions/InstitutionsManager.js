@@ -27,7 +27,7 @@ module.exports = {
           async.eachLimit(affiliations, ASYNC_LIMIT, refreshFunction, err =>
             cb(err)
           )
-        }
+        },
       ],
       callback
     )
@@ -59,12 +59,12 @@ module.exports = {
       )
       Subscription.find({
         admin_id: userIds,
-        planCode: { $not: /trial/ }
+        planCode: { $not: /trial/ },
       })
         .populate('admin_id', 'email')
         .exec(callback)
     })
-  }
+  },
 }
 
 var fetchInstitutionAndAffiliations = (institutionId, callback) =>
@@ -79,7 +79,7 @@ var fetchInstitutionAndAffiliations = (institutionId, callback) =>
       (institution, cb) =>
         getInstitutionAffiliations(institutionId, (err, affiliations) =>
           cb(err, institution, affiliations)
-        )
+        ),
     ],
     callback
   )
@@ -103,7 +103,7 @@ var refreshFeaturesAndNotify = function (affiliation, callback) {
           cb(error, user, subscription, featuresChanged)
         ),
       (user, subscription, featuresChanged, cb) =>
-        notifyUser(user, affiliation, subscription, featuresChanged, cb)
+        notifyUser(user, affiliation, subscription, featuresChanged, cb),
     ],
     callback
   )
@@ -116,7 +116,7 @@ var getUserInfo = (userId, callback) =>
       (user, cb) =>
         SubscriptionLocator.getUsersSubscription(user, (err, subscription) =>
           cb(err, user, subscription)
-        )
+        ),
     ],
     callback
   )
@@ -147,7 +147,7 @@ var notifyUser = (user, affiliation, subscription, featuresChanged, callback) =>
         } else {
           cb()
         }
-      }
+      },
     ],
     callback
   )
@@ -158,14 +158,14 @@ var checkFeatures = function (institutionId, users) {
       total: users.length, // all users are confirmed email users
       totalProUsers: 0,
       totalNonProUsers: 0,
-      nonProUsers: []
+      nonProUsers: [],
     },
     entitledSSOUsers: {
       total: 0,
       totalProUsers: 0,
       totalNonProUsers: 0,
-      nonProUsers: []
-    }
+      nonProUsers: [],
+    },
   }
   users.forEach(function (user) {
     let isSSOEntitled = SAMLIdentityManager.userHasEntitlement(

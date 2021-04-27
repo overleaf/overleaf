@@ -9,19 +9,19 @@ const { ObjectId } = Schema
 
 const DeletedDocSchema = new Schema({
   name: String,
-  deletedAt: { type: Date }
+  deletedAt: { type: Date },
 })
 
 const DeletedFileSchema = new Schema({
   name: String,
   created: {
-    type: Date
+    type: Date,
   },
   linkedFileData: { type: Schema.Types.Mixed },
   hash: {
-    type: String
+    type: String,
   },
-  deletedAt: { type: Date }
+  deletedAt: { type: Date },
 })
 
 const AuditLogEntrySchema = new Schema({
@@ -29,7 +29,7 @@ const AuditLogEntrySchema = new Schema({
   operation: { type: String },
   initiatorId: { type: Schema.Types.ObjectId },
   timestamp: { type: Date },
-  info: { type: Object }
+  info: { type: Object },
 })
 
 const ProjectSchema = new Schema({
@@ -38,7 +38,7 @@ const ProjectSchema = new Schema({
     type: Date,
     default() {
       return new Date()
-    }
+    },
   },
   lastUpdatedBy: { type: ObjectId, ref: 'User' },
   lastOpened: { type: Date },
@@ -66,25 +66,25 @@ const ProjectSchema = new Schema({
       type: String,
       index: {
         unique: true,
-        partialFilterExpression: { 'tokens.readOnly': { $exists: true } }
-      }
+        partialFilterExpression: { 'tokens.readOnly': { $exists: true } },
+      },
     },
     readAndWrite: {
       type: String,
       index: {
         unique: true,
-        partialFilterExpression: { 'tokens.readAndWrite': { $exists: true } }
-      }
+        partialFilterExpression: { 'tokens.readAndWrite': { $exists: true } },
+      },
     },
     readAndWritePrefix: {
       type: String,
       index: {
         unique: true,
         partialFilterExpression: {
-          'tokens.readAndWritePrefix': { $exists: true }
-        }
-      }
-    }
+          'tokens.readAndWritePrefix': { $exists: true },
+        },
+      },
+    },
   },
   tokenAccessReadOnly_refs: [{ type: ObjectId, ref: 'User' }],
   tokenAccessReadAndWrite_refs: [{ type: ObjectId, ref: 'User' }],
@@ -98,8 +98,8 @@ const ProjectSchema = new Schema({
     history: {
       id: { type: Number },
       display: { type: Boolean },
-      upgradedAt: { type: Date }
-    }
+      upgradedAt: { type: Date },
+    },
   },
   collabratecUsers: [
     {
@@ -110,12 +110,12 @@ const ProjectSchema = new Schema({
         type: Date,
         default() {
           return new Date()
-        }
-      }
-    }
+        },
+      },
+    },
   ],
   auditLog: [AuditLogEntrySchema],
-  deferredTpdsFlushCounter: { type: Number }
+  deferredTpdsFlushCounter: { type: Number },
 })
 
 ProjectSchema.statics.getProject = function (projectOrId, fields, callback) {

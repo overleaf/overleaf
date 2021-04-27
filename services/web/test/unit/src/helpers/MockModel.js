@@ -20,7 +20,7 @@ module.exports = (modelName, requires = {}) => {
   requires['../infrastructure/Mongoose'] = {
     createConnection: () => {
       return {
-        model: () => {}
+        model: () => {},
       }
     },
     model: (modelName, schema) => {
@@ -28,11 +28,11 @@ module.exports = (modelName, requires = {}) => {
       model[modelName] = mongoose.model(modelName, schema)
     },
     Schema: mongoose.Schema,
-    Types: mongoose.Types
+    Types: mongoose.Types,
   }
 
   SandboxedModule.require('../../../../app/src/models/' + modelName, {
-    requires: requires
+    requires: requires,
   })
 
   return model

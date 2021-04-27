@@ -1,7 +1,7 @@
 import React from 'react'
 import {
   useProjectContext,
-  useShareProjectContext
+  useShareProjectContext,
 } from './share-project-modal'
 import EditMember from './edit-member'
 import LinkSharing from './link-sharing'

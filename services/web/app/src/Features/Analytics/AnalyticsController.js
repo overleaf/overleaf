@@ -34,5 +34,5 @@ module.exports = {
       AuthenticationController.getLoggedInUserId(req) || req.sessionID
     AnalyticsManager.recordEvent(userId, req.params.event, req.body)
     res.sendStatus(202)
-  }
+  },
 }

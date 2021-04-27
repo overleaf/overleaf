@@ -13,19 +13,19 @@ describe('EmailHandler', function () {
     this.html = '<html>hello</html>'
     this.Settings = { email: {} }
     this.EmailBuilder = {
-      buildEmail: sinon.stub().returns({ html: this.html })
+      buildEmail: sinon.stub().returns({ html: this.html }),
     }
     this.EmailSender = {
       promises: {
-        sendEmail: sinon.stub().resolves()
-      }
+        sendEmail: sinon.stub().resolves(),
+      },
     }
     this.EmailHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './EmailBuilder': this.EmailBuilder,
         './EmailSender': this.EmailSender,
-        'settings-sharelatex': this.Settings
-      }
+        'settings-sharelatex': this.Settings,
+      },
     })
   })
 
@@ -34,7 +34,7 @@ describe('EmailHandler', function () {
       const opts = { to: 'bob@bob.com' }
       await this.EmailHandler.promises.sendEmail('welcome', opts)
       expect(this.EmailSender.promises.sendEmail).to.have.been.calledWithMatch({
-        html: this.html
+        html: this.html,
       })
     })
 
@@ -42,7 +42,7 @@ describe('EmailHandler', function () {
       this.EmailSender.promises.sendEmail.rejects(new Error('boom'))
       const opts = {
         to: 'bob@bob.com',
-        subject: 'hello bob'
+        subject: 'hello bob',
       }
       await expect(this.EmailHandler.promises.sendEmail('welcome', opts)).to.be
         .rejected
@@ -79,7 +79,7 @@ describe('EmailHandler', function () {
       it('should pass along the text field', async function () {
         this.EmailBuilder.buildEmail.returns({
           html: this.html,
-          text: this.text
+          text: this.text,
         })
         const opts = { to: 'bob@bob.com' }
         await this.EmailHandler.promises.sendEmail('welcome', opts)
@@ -87,7 +87,7 @@ describe('EmailHandler', function () {
           this.EmailSender.promises.sendEmail
         ).to.have.been.calledWithMatch({
           html: this.html,
-          text: this.text
+          text: this.text,
         })
       })
     })

@@ -14,7 +14,7 @@ async function main() {
       'projects',
       { archived: false },
       {
-        $set: { archived: [] }
+        $set: { archived: [] },
       }
     )
 
@@ -28,7 +28,7 @@ async function main() {
       collaberator_refs: 1,
       readOnly_refs: 1,
       tokenAccessReadAndWrite_refs: 1,
-      tokenAccessReadOnly_refs: 1
+      tokenAccessReadOnly_refs: 1,
     })
 
     console.error('Done, with second part')
@@ -56,7 +56,7 @@ async function setArchived(collection, project) {
   return collection.updateOne(
     { _id: project._id },
     {
-      $set: { archived: archived }
+      $set: { archived: archived },
     }
   )
 }

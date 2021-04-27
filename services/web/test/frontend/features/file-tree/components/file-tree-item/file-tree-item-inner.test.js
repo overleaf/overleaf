@@ -77,10 +77,10 @@ describe('<FileTreeitemInner />', function () {
                 _id: 'root-folder-id',
                 docs: [{ _id: '123abc', name: 'bar.tex' }],
                 folders: [],
-                fileRefs: []
-              }
-            ]
-          }
+                fileRefs: [],
+              },
+            ],
+          },
         }
       )
 

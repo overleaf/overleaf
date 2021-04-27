@@ -3,7 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useState
+  useState,
 } from 'react'
 import PropTypes from 'prop-types'
 import ShareProjectModalContent from './share-project-modal-content'
@@ -17,13 +17,13 @@ ShareProjectContext.Provider.propTypes = {
     updateProject: PropTypes.func.isRequired,
     monitorRequest: PropTypes.func.isRequired,
     eventTracking: PropTypes.shape({
-      sendMB: PropTypes.func.isRequired
+      sendMB: PropTypes.func.isRequired,
     }),
     inFlight: PropTypes.bool,
     setInFlight: PropTypes.func,
     error: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
-    setError: PropTypes.func
-  })
+    setError: PropTypes.func,
+  }),
 }
 
 export function useShareProjectContext() {
@@ -42,32 +42,32 @@ const projectShape = PropTypes.shape({
   _id: PropTypes.string.isRequired,
   members: PropTypes.arrayOf(
     PropTypes.shape({
-      _id: PropTypes.string.isRequired
+      _id: PropTypes.string.isRequired,
     })
   ),
   invites: PropTypes.arrayOf(
     PropTypes.shape({
-      _id: PropTypes.string.isRequired
+      _id: PropTypes.string.isRequired,
     })
   ),
   name: PropTypes.string,
   features: PropTypes.shape({
-    collaborators: PropTypes.number
+    collaborators: PropTypes.number,
   }),
   publicAccesLevel: PropTypes.string,
   tokens: PropTypes.shape({
     readOnly: PropTypes.string,
-    readAndWrite: PropTypes.string
+    readAndWrite: PropTypes.string,
   }),
   owner: PropTypes.shape({
-    email: PropTypes.string
-  })
+    email: PropTypes.string,
+  }),
 })
 
 const ProjectContext = createContext()
 
 ProjectContext.Provider.propTypes = {
-  value: projectShape
+  value: projectShape,
 }
 
 export function useProjectContext() {
@@ -88,7 +88,7 @@ export default function ShareProjectModal({
   animation = true,
   isAdmin,
   eventTracking,
-  ide
+  ide,
 }) {
   const [inFlight, setInFlight] = useState(false)
   const [error, setError] = useState()
@@ -153,7 +153,7 @@ export default function ShareProjectModal({
         inFlight,
         setInFlight,
         error,
-        setError
+        setError,
       }}
     >
       <ProjectContext.Provider value={project}>
@@ -173,10 +173,10 @@ ShareProjectModal.propTypes = {
   handleHide: PropTypes.func.isRequired,
   isAdmin: PropTypes.bool.isRequired,
   ide: PropTypes.shape({
-    $scope: PropTypes.object.isRequired
+    $scope: PropTypes.object.isRequired,
   }).isRequired,
   show: PropTypes.bool.isRequired,
   eventTracking: PropTypes.shape({
-    sendMB: PropTypes.func.isRequired
-  })
+    sendMB: PropTypes.func.isRequired,
+  }),
 }

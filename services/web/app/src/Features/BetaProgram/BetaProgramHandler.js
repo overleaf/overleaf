@@ -9,7 +9,7 @@ async function optIn(userId) {
 
 async function optOut(userId) {
   await UserUpdater.promises.updateUser(userId, {
-    $set: { betaProgram: false }
+    $set: { betaProgram: false },
   })
   metrics.inc('beta-program.opt-out')
 }
@@ -17,12 +17,12 @@ async function optOut(userId) {
 const BetaProgramHandler = {
   optIn: callbackify(optIn),
 
-  optOut: callbackify(optOut)
+  optOut: callbackify(optOut),
 }
 
 BetaProgramHandler.promises = {
   optIn,
-  optOut
+  optOut,
 }
 
 module.exports = BetaProgramHandler

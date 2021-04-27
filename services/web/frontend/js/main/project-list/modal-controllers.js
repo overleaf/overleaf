@@ -19,7 +19,7 @@ App.controller(
 
     $scope.state = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $modalInstance.opened.then(() =>
@@ -57,7 +57,7 @@ App.controller(
     $scope.inputs = { projectName: project.name + ' (Copy)' }
     $scope.state = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $modalInstance.opened.then(() =>
@@ -94,7 +94,7 @@ App.controller(
     $scope.inputs = { projectName: '' }
     $scope.state = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $modalInstance.opened.then(() =>

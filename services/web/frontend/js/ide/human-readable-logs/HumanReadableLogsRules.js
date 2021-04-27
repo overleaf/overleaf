@@ -14,7 +14,7 @@ function WikiLink({ url, children }) {
 
 WikiLink.propTypes = {
   url: PropTypes.string,
-  children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired,
 }
 
 const rules = [
@@ -35,7 +35,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have placed an alignment tab character &#x27;&amp;&#x27; in the wrong place. If you want to align something, you must write it inside an align environment such as \\begin{align} … \\end{align}, \\begin{tabular} … \\end{tabular}, etc. If you want to write an ampersand &#x27;&amp;&#x27; in text, you must write \\&amp; instead.'
+      'You have placed an alignment tab character &#x27;&amp;&#x27; in the wrong place. If you want to align something, you must write it inside an align environment such as \\begin{align} … \\end{align}, \\begin{tabular} … \\end{tabular}, etc. If you want to write an ampersand &#x27;&amp;&#x27; in text, you must write \\&amp; instead.',
   },
   {
     regexToMatch: /Extra alignment tab has been changed to \\cr/,
@@ -50,7 +50,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have written too many alignment tabs in a table, causing one of them to be turned into a line break. Make sure you have specified the correct number of columns in your <a href="https://www.overleaf.com/learn/Tables" target="_blank">table</a>.'
+      'You have written too many alignment tabs in a table, causing one of them to be turned into a line break. Make sure you have specified the correct number of columns in your <a href="https://www.overleaf.com/learn/Tables" target="_blank">table</a>.',
   },
   {
     regexToMatch: /Display math should end with \$\$/,
@@ -64,7 +64,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have forgotten a $ sign at the end of &#x27;display math&#x27; mode. When writing in display math mode, you must always math write inside $$ … $$. Check that the number of $s match around each math expression.'
+      'You have forgotten a $ sign at the end of &#x27;display math&#x27; mode. When writing in display math mode, you must always math write inside $$ … $$. Check that the number of $s match around each math expression.',
   },
   {
     regexToMatch: /Missing [{$] inserted./,
@@ -87,7 +87,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'Check that your $&#x27;s match around math expressions. If they do, then you&#x27;ve probably used a symbol in normal text that needs to be in math mode. Symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ), and modifiers (\\vec{x}, \\tilde{x} ) must be written in math mode. See the full list <a href="https://www.overleaf.com/learn/Errors/Missing_$_inserted" target="_blank">here</a>. If you intended to use mathematics mode, then use $ … $ for &#x27;inline math mode&#x27;, $$ … $$ for &#x27;display math mode&#x27; or alternatively \\begin{math} … \\end{math}.'
+      'Check that your $&#x27;s match around math expressions. If they do, then you&#x27;ve probably used a symbol in normal text that needs to be in math mode. Symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ), and modifiers (\\vec{x}, \\tilde{x} ) must be written in math mode. See the full list <a href="https://www.overleaf.com/learn/Errors/Missing_$_inserted" target="_blank">here</a>. If you intended to use mathematics mode, then use $ … $ for &#x27;inline math mode&#x27;, $$ … $$ for &#x27;display math mode&#x27; or alternatively \\begin{math} … \\end{math}.',
   },
   {
     regexToMatch: /(undefined )?[rR]eference(s)?.+(undefined)?/,
@@ -102,7 +102,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have referenced something which has not yet been labelled. If you have labelled it already, make sure that what is written inside \\ref{...} is the same as what is written inside \\label{...}.'
+      'You have referenced something which has not yet been labelled. If you have labelled it already, make sure that what is written inside \\ref{...} is the same as what is written inside \\label{...}.',
   },
   {
     regexToMatch: /Citation .+ on page .+ undefined on input line .+/,
@@ -117,7 +117,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have cited something which is not included in your bibliography. Make sure that the citation (\\cite{...}) has a corresponding key in your bibliography, and that both are spelled the same way.'
+      'You have cited something which is not included in your bibliography. Make sure that the citation (\\cite{...}) has a corresponding key in your bibliography, and that both are spelled the same way.',
   },
   {
     regexToMatch: /(Label .+)? multiply[ -]defined( labels)?/,
@@ -130,7 +130,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used the same label more than once. Check that each \\label{...} labels only one item.'
+      'You have used the same label more than once. Check that each \\label{...} labels only one item.',
   },
   {
     regexToMatch: /`!?h' float specifier changed to `!?ht'/,
@@ -149,7 +149,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'The float specifier &#x27;h&#x27; is too strict of a demand for LaTeX to place your float in a nice way here. Try relaxing it by using &#x27;ht&#x27;, or even &#x27;htbp&#x27; if necessary. If you want to try keep the float here anyway, check out the <a href="https://www.overleaf.com/learn/Positioning_of_Figures" target="_blank">float package</a>.'
+      'The float specifier &#x27;h&#x27; is too strict of a demand for LaTeX to place your float in a nice way here. Try relaxing it by using &#x27;ht&#x27;, or even &#x27;htbp&#x27; if necessary. If you want to try keep the float here anyway, check out the <a href="https://www.overleaf.com/learn/Positioning_of_Figures" target="_blank">float package</a>.',
   },
   {
     regexToMatch: /No positions in optional float specifier/,
@@ -171,7 +171,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have forgotten to include a float specifier, which tells LaTeX where to position your figure. To fix this, either insert a float specifier inside the square brackets (e.g. \\begin{figure}[h]), or remove the square brackets (e.g. \\begin{figure}). Find out more about float specifiers <a href="https://www.overleaf.com/learn/Positioning_of_Figures" target="_blank">here</a>.'
+      'You have forgotten to include a float specifier, which tells LaTeX where to position your figure. To fix this, either insert a float specifier inside the square brackets (e.g. \\begin{figure}[h]), or remove the square brackets (e.g. \\begin{figure}). Find out more about float specifiers <a href="https://www.overleaf.com/learn/Positioning_of_Figures" target="_blank">here</a>.',
   },
   {
     regexToMatch: /Undefined control sequence/,
@@ -187,7 +187,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'The compiler is having trouble understanding a command you have used. Check that the command is spelled correctly. If the command is part of a package, make sure you have included the package in your preamble using \\usepackage{...}.'
+      'The compiler is having trouble understanding a command you have used. Check that the command is spelled correctly. If the command is part of a package, make sure you have included the package in your preamble using \\usepackage{...}.',
   },
   {
     regexToMatch: /File .+ not found/,
@@ -208,7 +208,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'The compiler cannot find the file you want to include. Make sure that you have <a href="https://www.overleaf.com/learn/Including_images_in_ShareLaTeX" target="_blank">uploaded the file</a> and <a href="https://www.overleaf.com/learn/Errors/File_XXX_not_found_on_input_line_XXX." target="_blank">specified the file location correctly</a>.'
+      'The compiler cannot find the file you want to include. Make sure that you have <a href="https://www.overleaf.com/learn/Including_images_in_ShareLaTeX" target="_blank">uploaded the file</a> and <a href="https://www.overleaf.com/learn/Errors/File_XXX_not_found_on_input_line_XXX." target="_blank">specified the file location correctly</a>.',
   },
   {
     regexToMatch: /LaTeX Error: Unknown graphics extension: \..+/,
@@ -226,7 +226,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'The compiler does not recognise the file type of one of your images. Make sure you are using a <a href="https://www.overleaf.com/learn/Errors/LaTeX_Error:_Unknown_graphics_extension:_.gif." target="_blank">supported image format</a> for your choice of compiler, and check that there are no periods (.) in the name of your image.'
+      'The compiler does not recognise the file type of one of your images. Make sure you are using a <a href="https://www.overleaf.com/learn/Errors/LaTeX_Error:_Unknown_graphics_extension:_.gif." target="_blank">supported image format</a> for your choice of compiler, and check that there are no periods (.) in the name of your image.',
   },
   {
     regexToMatch: /LaTeX Error: Unknown float option `H'/,
@@ -239,7 +239,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'The compiler isn&#x27;t recognizing the float option &#x27;H&#x27;. Include \\usepackage{float} in your preamble to fix this.'
+      'The compiler isn&#x27;t recognizing the float option &#x27;H&#x27;. Include \\usepackage{float} in your preamble to fix this.',
   },
   {
     regexToMatch: /LaTeX Error: Unknown float option `q'/,
@@ -257,7 +257,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used a float specifier which the compiler does not understand. You can learn more about the different float options available for placing figures <a href="https://www.overleaf.com/learn/Positioning_of_Figures" target="_blank">here</a> .'
+      'You have used a float specifier which the compiler does not understand. You can learn more about the different float options available for placing figures <a href="https://www.overleaf.com/learn/Positioning_of_Figures" target="_blank">here</a> .',
   },
   {
     regexToMatch: /LaTeX Error: \\math.+ allowed only in math mode/,
@@ -274,7 +274,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used a font command which is only available in math mode. To use this command, you must be in maths mode (E.g. $ … $ or \\begin{math} … \\end{math}). If you want to use it outside of math mode, use the text version instead: \\textrm, \\textit, etc.'
+      'You have used a font command which is only available in math mode. To use this command, you must be in maths mode (E.g. $ … $ or \\begin{math} … \\end{math}). If you want to use it outside of math mode, use the text version instead: \\textrm, \\textit, etc.',
   },
   {
     ruleId: 'hint_mismatched_environment',
@@ -289,7 +289,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used \\begin{...} without a corresponding \\end{...}.'
+      'You have used \\begin{...} without a corresponding \\end{...}.',
   },
   {
     ruleId: 'hint_mismatched_brackets',
@@ -300,7 +300,7 @@ const rules = [
       <>You have used an open bracket without a corresponding close bracket.</>
     ),
     humanReadableHint:
-      'You have used an open bracket without a corresponding close bracket.'
+      'You have used an open bracket without a corresponding close bracket.',
   },
   {
     regexToMatch: /LaTeX Error: Can be used only in preamble/,
@@ -316,7 +316,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used a command in the main body of your document which should be used in the preamble. Make sure that \\documentclass[…]{…} and all \\usepackage{…} commands are written before \\begin{document}.'
+      'You have used a command in the main body of your document which should be used in the preamble. Make sure that \\documentclass[…]{…} and all \\usepackage{…} commands are written before \\begin{document}.',
   },
   {
     regexToMatch: /Missing \\right inserted/,
@@ -335,7 +335,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have started an expression with a \\left command, but have not included a corresponding \\right command. Make sure that your \\left and \\right commands balance everywhere, or else try using \\Biggl and \\Biggr commands instead as shown <a href="https://www.overleaf.com/learn/Errors/Missing_%5Cright_inserted" target="_blank">here</a>.'
+      'You have started an expression with a \\left command, but have not included a corresponding \\right command. Make sure that your \\left and \\right commands balance everywhere, or else try using \\Biggl and \\Biggr commands instead as shown <a href="https://www.overleaf.com/learn/Errors/Missing_%5Cright_inserted" target="_blank">here</a>.',
   },
   {
     regexToMatch: /Double superscript/,
@@ -349,7 +349,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have written a double superscript incorrectly as a^b^c, or else you have written a prime with a superscript. Remember to include {and} when using multiple superscripts. Try a^{b ^ c} instead.'
+      'You have written a double superscript incorrectly as a^b^c, or else you have written a prime with a superscript. Remember to include {and} when using multiple superscripts. Try a^{b ^ c} instead.',
   },
   {
     regexToMatch: /Double subscript/,
@@ -362,7 +362,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have written a double subscript incorrectly as a_b_c. Remember to include {and} when using multiple subscripts. Try a_{b_c} instead.'
+      'You have written a double subscript incorrectly as a_b_c. Remember to include {and} when using multiple subscripts. Try a_{b_c} instead.',
   },
   {
     regexToMatch: /No \\author given/,
@@ -376,7 +376,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used the \\maketitle command, but have not specified any \\author. To fix this, include an author in your preamble using the \\author{…} command.'
+      'You have used the \\maketitle command, but have not specified any \\author. To fix this, include an author in your preamble using the \\author{…} command.',
   },
   {
     regexToMatch: /LaTeX Error: Environment .+ undefined/,
@@ -392,7 +392,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have created an environment (using \\begin{…} and \\end{…} commands) which is not recognized. Make sure you have included the required package for that environment in your preamble, and that the environment is spelled correctly.'
+      'You have created an environment (using \\begin{…} and \\end{…} commands) which is not recognized. Make sure you have included the required package for that environment in your preamble, and that the environment is spelled correctly.',
   },
   {
     regexToMatch: /LaTeX Error: Something's wrong--perhaps a missing \\item/,
@@ -406,7 +406,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'There are no entries found in a list you have created. Make sure you label list entries using the \\item command, and that you have not used a list inside a table.'
+      'There are no entries found in a list you have created. Make sure you label list entries using the \\item command, and that you have not used a list inside a table.',
   },
   {
     regexToMatch: /Misplaced \\noalign/,
@@ -419,7 +419,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used a \\hline command in the wrong place, probably outside a table. If the \\hline command is written inside a table, try including \\\\ before it.'
+      'You have used a \\hline command in the wrong place, probably outside a table. If the \\hline command is written inside a table, try including \\\\ before it.',
   },
   {
     regexToMatch: /LaTeX Error: There's no line here to end/,
@@ -433,7 +433,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used a \\\\ or \\newline command where LaTeX was not expecting one. Make sure that you only use line breaks after blocks of text, and be careful using linebreaks inside lists and other environments.\\'
+      'You have used a \\\\ or \\newline command where LaTeX was not expecting one. Make sure that you only use line breaks after blocks of text, and be careful using linebreaks inside lists and other environments.\\',
   },
   {
     regexToMatch: /LaTeX Error: \\verb ended by end of line/,
@@ -450,7 +450,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used a \\verb command incorrectly. Try replacling the \\verb command with \\begin{verbatim}…\\end{verbatim}.\\'
+      'You have used a \\verb command incorrectly. Try replacling the \\verb command with \\begin{verbatim}…\\end{verbatim}.\\',
   },
   {
     regexToMatch: /Illegal unit of measure (pt inserted)/,
@@ -464,7 +464,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have written a length, but have not specified the appropriate units (pt, mm, cm etc.). If you have not written a length, check that you have not witten a linebreak \\\\ followed by square brackets […] anywhere.'
+      'You have written a length, but have not specified the appropriate units (pt, mm, cm etc.). If you have not written a length, check that you have not witten a linebreak \\\\ followed by square brackets […] anywhere.',
   },
   {
     regexToMatch: /Extra \\right/,
@@ -476,7 +476,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have written a \\right command without a corresponding \\left command. Check that all \\left and \\right commands balance everywhere.'
+      'You have written a \\right command without a corresponding \\left command. Check that all \\left and \\right commands balance everywhere.',
   },
   {
     regexToMatch: /Missing \\begin{document}/,
@@ -491,7 +491,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'No \\begin{document} command was found. Make sure you have included \\begin{document} in your preamble, and that your main document is set correctly.'
+      'No \\begin{document} command was found. Make sure you have included \\begin{document} in your preamble, and that your main document is set correctly.',
   },
   {
     ruleId: 'hint_mismatched_environment2',
@@ -507,7 +507,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used \\begin{} without a corresponding \\end{}.'
+      'You have used \\begin{} without a corresponding \\end{}.',
   },
   {
     ruleId: 'hint_mismatched_environment3',
@@ -523,7 +523,7 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used \\begin{} without a corresponding \\end{}.'
+      'You have used \\begin{} without a corresponding \\end{}.',
   },
   {
     ruleId: 'hint_mismatched_environment4',
@@ -539,8 +539,8 @@ const rules = [
       </>
     ),
     humanReadableHint:
-      'You have used \\begin{} without a corresponding \\end{}.'
-  }
+      'You have used \\begin{} without a corresponding \\end{}.',
+  },
 ]
 
 if (!window.wikiEnabled) {

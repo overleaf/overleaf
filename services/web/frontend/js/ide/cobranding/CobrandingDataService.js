@@ -54,6 +54,6 @@ export default App.factory('CobrandingDataService', function () {
     getPartner,
     hasBrandedMenu,
     getBrandId,
-    getBrandVariationId
+    getBrandVariationId,
   }
 })

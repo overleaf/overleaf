@@ -24,5 +24,5 @@ function emailHasLicence(emailData) {
 }
 
 module.exports = {
-  emailHasLicence
+  emailHasLicence,
 }

@@ -32,7 +32,7 @@ describe('<PreviewToolbar />', function () {
           isDraftModeOn: false,
           isSyntaxCheckOn: false,
           logEntries: {},
-          ...compilerState
+          ...compilerState,
         }}
         logsState={{ nErrors: 0, nWarnings: 0, ...logState }}
         onRecompile={onRecompile}

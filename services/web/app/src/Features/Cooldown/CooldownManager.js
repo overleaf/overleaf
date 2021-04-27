@@ -52,5 +52,5 @@ module.exports = CooldownManager = {
         return callback(null, result === '1')
       }
     )
-  }
+  },
 }

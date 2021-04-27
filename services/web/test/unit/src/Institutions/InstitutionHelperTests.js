@@ -12,8 +12,8 @@ describe('InstitutionsHelper', function () {
         confirmedAt: new Date(),
         affiliation: {
           institution: { confirmed: true },
-          licence: 'pro_plus'
-        }
+          licence: 'pro_plus',
+        },
       })
       expect(emailHasLicence).to.be.true
     })
@@ -23,8 +23,8 @@ describe('InstitutionsHelper', function () {
         confirmedAt: new Date(),
         affiliation: {
           institution: { confirmed: true },
-          licence: 'free'
-        }
+          licence: 'free',
+        },
       })
       expect(emailHasLicence).to.be.false
     })
@@ -34,8 +34,8 @@ describe('InstitutionsHelper', function () {
         confirmedAt: new Date(),
         affiliation: {
           institution: { confirmed: true },
-          licence: null
-        }
+          licence: null,
+        },
       })
       expect(emailHasLicence).to.be.false
     })
@@ -45,8 +45,8 @@ describe('InstitutionsHelper', function () {
         confirmedAt: new Date(),
         affiliation: {
           institution: { confirmed: false },
-          licence: 'pro_plus'
-        }
+          licence: 'pro_plus',
+        },
       })
       expect(emailHasLicence).to.be.false
     })
@@ -56,8 +56,8 @@ describe('InstitutionsHelper', function () {
         confirmedAt: null,
         affiliation: {
           institution: { confirmed: true },
-          licence: 'pro_plus'
-        }
+          licence: 'pro_plus',
+        },
       })
       expect(emailHasLicence).to.be.false
     })

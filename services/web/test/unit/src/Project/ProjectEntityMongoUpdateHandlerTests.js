@@ -16,58 +16,58 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       _id: ObjectId(),
       name: 'test-doc.txt',
       lines: ['hello', 'world'],
-      rev: 1234
+      rev: 1234,
     }
     this.docPath = {
       mongo: 'rootFolder.0.docs.0',
-      fileSystem: '/test-doc.txt'
+      fileSystem: '/test-doc.txt',
     }
     this.file = {
       _id: ObjectId(),
       name: 'something.jpg',
       linkedFileData: { provider: 'url' },
-      hash: 'some-hash'
+      hash: 'some-hash',
     }
     this.filePath = {
       fileSystem: '/something.png',
-      mongo: 'rootFolder.0.fileRefs.0'
+      mongo: 'rootFolder.0.fileRefs.0',
     }
     this.subfolder = { _id: ObjectId(), name: 'test-subfolder' }
     this.subfolderPath = {
       fileSystem: '/test-folder/test-subfolder',
-      mongo: 'rootFolder.0.folders.0.folders.0'
+      mongo: 'rootFolder.0.folders.0.folders.0',
     }
     this.folder = {
       _id: ObjectId(),
       name: 'test-folder',
-      folders: [this.subfolder]
+      folders: [this.subfolder],
     }
     this.folderPath = {
       fileSystem: '/test-folder',
-      mongo: 'rootFolder.0.folders.0'
+      mongo: 'rootFolder.0.folders.0',
     }
     this.rootFolder = {
       _id: ObjectId(),
       folders: [this.folder],
       docs: [this.doc],
-      fileRefs: [this.file]
+      fileRefs: [this.file],
     }
     this.rootFolderPath = {
       fileSystem: '/',
-      mongo: 'rootFolder.0'
+      mongo: 'rootFolder.0',
     }
     this.project = {
       _id: ObjectId(),
       name: 'project name',
-      rootFolder: [this.rootFolder]
+      rootFolder: [this.rootFolder],
     }
 
     this.Settings = { maxEntitiesPerProject: 100 }
     this.CooldownManager = {}
     this.LockManager = {
       promises: {
-        runWithLock: sinon.spy((namespace, id, runner) => runner())
-      }
+        runWithLock: sinon.spy((namespace, id, runner) => runner()),
+      },
     }
 
     this.FolderModel = sinon.stub()
@@ -75,74 +75,74 @@ describe('ProjectEntityMongoUpdateHandler', function () {
     this.ProjectMock = sinon.mock(Project)
     this.ProjectEntityHandler = {
       promises: {
-        getAllEntitiesFromProject: sinon.stub()
-      }
+        getAllEntitiesFromProject: sinon.stub(),
+      },
     }
     this.ProjectLocator = {
       promises: {
         findElement: sinon.stub().rejects(new Error('not found')),
-        findElementByPath: sinon.stub().rejects(new Error('not found'))
-      }
+        findElementByPath: sinon.stub().rejects(new Error('not found')),
+      },
     }
     this.ProjectLocator.promises.findElement
       .withArgs({
         project: this.project,
         element_id: this.rootFolder._id,
-        type: 'folder'
+        type: 'folder',
       })
       .resolves({
         element: this.rootFolder,
-        path: this.rootFolderPath
+        path: this.rootFolderPath,
       })
     this.ProjectLocator.promises.findElement
       .withArgs({
         project: this.project,
         element_id: this.folder._id,
-        type: 'folder'
+        type: 'folder',
       })
       .resolves({
         element: this.folder,
         path: this.folderPath,
-        folder: this.rootFolder
+        folder: this.rootFolder,
       })
     this.ProjectLocator.promises.findElement
       .withArgs({
         project: this.project,
         element_id: this.subfolder._id,
-        type: 'folder'
+        type: 'folder',
       })
       .resolves({
         element: this.subfolder,
         path: this.subfolderPath,
-        folder: this.folder
+        folder: this.folder,
       })
     this.ProjectLocator.promises.findElement
       .withArgs({
         project: this.project,
         element_id: this.file._id,
-        type: 'file'
+        type: 'file',
       })
       .resolves({
         element: this.file,
         path: this.filePath,
-        folder: this.rootFolder
+        folder: this.rootFolder,
       })
     this.ProjectLocator.promises.findElement
       .withArgs({
         project: this.project,
         element_id: this.doc._id,
-        type: 'doc'
+        type: 'doc',
       })
       .resolves({
         element: this.doc,
         path: this.docPath,
-        folder: this.rootFolder
+        folder: this.rootFolder,
       })
     this.ProjectLocator.promises.findElementByPath
       .withArgs(
         sinon.match({
           project: this.project,
-          path: '/'
+          path: '/',
         })
       )
       .resolves({ element: this.rootFolder, type: 'folder' })
@@ -150,7 +150,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       .withArgs(
         sinon.match({
           project: this.project,
-          path: '/test-folder'
+          path: '/test-folder',
         })
       )
       .resolves({ element: this.folder, type: 'folder' })
@@ -158,7 +158,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       .withArgs(
         sinon.match({
           project: this.project,
-          path: '/test-folder/test-subfolder'
+          path: '/test-folder/test-subfolder',
         })
       )
       .resolves({ element: this.subfolder, type: 'folder' })
@@ -169,12 +169,12 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           .stub()
           .withArgs(this.project._id)
           .resolves(this.project),
-        getProjectWithOnlyFolders: sinon.stub().resolves(this.project)
-      }
+        getProjectWithOnlyFolders: sinon.stub().resolves(this.project),
+      },
     }
 
     this.FolderStructureBuilder = {
-      buildFolderStructure: sinon.stub()
+      buildFolderStructure: sinon.stub(),
     }
 
     this.subject = SandboxedModule.require(MODULE_PATH, {
@@ -189,8 +189,8 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         './ProjectEntityHandler': this.ProjectEntityHandler,
         './ProjectLocator': this.ProjectLocator,
         './ProjectGetter': this.ProjectGetter,
-        './FolderStructureBuilder': this.FolderStructureBuilder
-      }
+        './FolderStructureBuilder': this.FolderStructureBuilder,
+      },
     })
   })
 
@@ -215,7 +215,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           { _id: this.project._id },
           {
             $push: { 'rootFolder.0.folders.0.docs': doc },
-            $inc: { version: 1 }
+            $inc: { version: 1 },
           }
         )
         .chain('exec')
@@ -236,10 +236,10 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         result: {
           path: {
             mongo: 'rootFolder.0.folders.0',
-            fileSystem: '/test-folder/other.txt'
-          }
+            fileSystem: '/test-folder/other.txt',
+          },
         },
-        project: this.project
+        project: this.project,
       })
     })
   })
@@ -252,7 +252,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           { _id: this.project._id },
           {
             $push: { 'rootFolder.0.folders.0.fileRefs': this.newFile },
-            $inc: { version: 1 }
+            $inc: { version: 1 },
           }
         )
         .chain('exec')
@@ -277,10 +277,10 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           result: {
             path: {
               mongo: 'rootFolder.0.folders.0',
-              fileSystem: '/test-folder/picture.jpg'
-            }
+              fileSystem: '/test-folder/picture.jpg',
+            },
           },
-          project: this.project
+          project: this.project,
         })
       })
     })
@@ -312,7 +312,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       const folderName = 'New folder'
       this.FolderModel.withArgs({ name: folderName }).returns({
         _id: ObjectId(),
-        name: folderName
+        name: folderName,
       })
       this.ProjectMock.expects('findOneAndUpdate')
         .withArgs(
@@ -320,10 +320,10 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           {
             $push: {
               'rootFolder.0.folders.0.folders': sinon.match({
-                name: folderName
-              })
+                name: folderName,
+              }),
             },
-            $inc: { version: 1 }
+            $inc: { version: 1 },
           }
         )
         .chain('exec')
@@ -346,7 +346,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         _id: ObjectId(),
         name: 'some-other-file.png',
         linkedFileData: { some: 'data' },
-        hash: 'some-hash'
+        hash: 'some-hash',
       }
       // Add a deleted file record
       this.DeletedFileMock.expects('create')
@@ -356,7 +356,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           name: this.file.name,
           linkedFileData: this.file.linkedFileData,
           hash: this.file.hash,
-          deletedAt: sinon.match.date
+          deletedAt: sinon.match.date,
         })
         .resolves()
       // Update the file in place
@@ -368,12 +368,12 @@ describe('ProjectEntityMongoUpdateHandler', function () {
               'rootFolder.0.fileRefs.0._id': newFile._id,
               'rootFolder.0.fileRefs.0.created': sinon.match.date,
               'rootFolder.0.fileRefs.0.linkedFileData': newFile.linkedFileData,
-              'rootFolder.0.fileRefs.0.hash': newFile.hash
+              'rootFolder.0.fileRefs.0.hash': newFile.hash,
             },
             $inc: {
               version: 1,
-              'rootFolder.0.fileRefs.0.rev': 1
-            }
+              'rootFolder.0.fileRefs.0.rev': 1,
+            },
           }
         )
         .chain('exec')
@@ -443,7 +443,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             { _id: this.project._id },
             {
               $push: { 'rootFolder.0.folders': this.newFolder },
-              $inc: { version: 1 }
+              $inc: { version: 1 },
             }
           )
           .chain('exec')
@@ -487,10 +487,10 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             {
               $push: {
                 'rootFolder.0.folders.0.folders': sinon.match({
-                  name: 'new-folder'
-                })
+                  name: 'new-folder',
+                }),
               },
-              $inc: { version: 1 }
+              $inc: { version: 1 },
             }
           )
           .chain('exec')
@@ -523,12 +523,12 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         this.folder1 = { _id: ObjectId(), name: 'folder1' }
         this.folder1Path = {
           fileSystem: '/test-folder/folder1',
-          mongo: 'rootFolder.0.folders.0.folders.0'
+          mongo: 'rootFolder.0.folders.0.folders.0',
         }
         this.folder2 = { _id: ObjectId(), name: 'folder2' }
         this.folder2Path = {
           fileSystem: '/test-folder/folder1/folder2',
-          mongo: 'rootFolder.0.folders.0.folders.0.folders.0'
+          mongo: 'rootFolder.0.folders.0.folders.0.folders.0',
         }
         this.FolderModel.onFirstCall().returns(this.folder1)
         this.FolderModel.onSecondCall().returns(this.folder2)
@@ -536,21 +536,21 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           .withArgs({
             project: this.project,
             element_id: this.folder1._id,
-            type: 'folder'
+            type: 'folder',
           })
           .resolves({
             element: this.folder1,
-            path: this.folder1Path
+            path: this.folder1Path,
           })
         this.ProjectLocator.promises.findElement
           .withArgs({
             project: this.project,
             element_id: this.folder2._id,
-            type: 'folder'
+            type: 'folder',
           })
           .resolves({
             element: this.folder2,
-            path: this.folder2Path
+            path: this.folder2Path,
           })
         this.ProjectMock.expects('findOneAndUpdate')
           .withArgs(
@@ -558,10 +558,10 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             {
               $push: {
                 'rootFolder.0.folders.0.folders': sinon.match({
-                  name: 'folder1'
-                })
+                  name: 'folder1',
+                }),
               },
-              $inc: { version: 1 }
+              $inc: { version: 1 },
             }
           )
           .chain('exec')
@@ -572,10 +572,10 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             {
               $push: {
                 'rootFolder.0.folders.0.folders.0.folders': sinon.match({
-                  name: 'folder2'
-                })
+                  name: 'folder2',
+                }),
               },
-              $inc: { version: 1 }
+              $inc: { version: 1 },
             }
           )
           .chain('exec')
@@ -584,12 +584,12 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       ;[
         {
           description: 'without a trailing slash',
-          path: '/test-folder/folder1/folder2'
+          path: '/test-folder/folder1/folder2',
         },
         {
           description: 'with a trailing slash',
-          path: '/test-folder/folder1/folder2/'
-        }
+          path: '/test-folder/folder1/folder2/',
+        },
       ].forEach(({ description, path }) => {
         describe(description, function () {
           beforeEach(async function () {
@@ -628,7 +628,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
     describe('moving a doc into a different folder', function () {
       beforeEach(async function () {
         this.pathAfterMove = {
-          fileSystem: '/somewhere/else.txt'
+          fileSystem: '/somewhere/else.txt',
         }
         this.oldDocs = ['old-doc']
         this.oldFiles = ['old-file']
@@ -647,7 +647,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             { _id: this.project._id },
             {
               $push: { 'rootFolder.0.folders.0.docs': this.doc },
-              $inc: { version: 1 }
+              $inc: { version: 1 },
             }
           )
           .chain('exec')
@@ -657,7 +657,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             { _id: this.project._id },
             {
               $pull: { 'rootFolder.0.docs': { _id: this.doc._id } },
-              $inc: { version: 1 }
+              $inc: { version: 1 },
             }
           )
           .chain('exec')
@@ -685,8 +685,8 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             newDocs: this.newDocs,
             oldFiles: this.oldFiles,
             newFiles: this.newFiles,
-            newProject: this.project
-          }
+            newProject: this.project,
+          },
         })
       })
     })
@@ -725,7 +725,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           { _id: this.project._id },
           {
             $pull: { 'rootFolder.0.docs': { _id: this.doc._id } },
-            $inc: { version: 1 }
+            $inc: { version: 1 },
           }
         )
         .chain('exec')
@@ -763,7 +763,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             { _id: this.project._id },
             {
               $set: { 'rootFolder.0.docs.0.name': this.newName },
-              $inc: { version: 1 }
+              $inc: { version: 1 },
             }
           )
           .chain('exec')
@@ -791,8 +791,8 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             newDocs: this.newDocs,
             oldFiles: this.oldFiles,
             newFiles: this.newFiles,
-            newProject: this.project
-          }
+            newProject: this.project,
+          },
         })
       })
     })
@@ -821,7 +821,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
               { _id: this.project._id },
               {
                 $push: { 'rootFolder.0.folders.0.fileRefs': this.newFile },
-                $inc: { version: 1 }
+                $inc: { version: 1 },
               }
             )
             .chain('exec')
@@ -888,7 +888,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         it('should error if element name is too long', async function () {
           const file = {
             _id: ObjectId(),
-            name: 'long-'.repeat(1000) + 'something'
+            name: 'long-'.repeat(1000) + 'something',
           }
           await expect(
             this.subject.promises._putElement(
@@ -903,17 +903,17 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         it('should error if the folder name is too long', async function () {
           const file = {
             _id: ObjectId(),
-            name: 'something'
+            name: 'something',
           }
           this.ProjectLocator.promises.findElement
             .withArgs({
               project: this.project,
               element_id: this.folder._id,
-              type: 'folder'
+              type: 'folder',
             })
             .resolves({
               element: this.folder,
-              path: { fileSystem: 'subdir/'.repeat(1000) + 'foo' }
+              path: { fileSystem: 'subdir/'.repeat(1000) + 'foo' },
             })
           await expect(
             this.subject.promises._putElement(
@@ -928,7 +928,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           it(`should error if a ${entityType} already exists with the same name`, async function () {
             const file = {
               _id: ObjectId(),
-              name: this[entityType].name
+              name: this[entityType].name,
             }
             await expect(
               this.subject.promises._putElement(
@@ -951,7 +951,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             { _id: this.project._id },
             {
               $push: { 'rootFolder.0.fileRefs': this.newFile },
-              $inc: { version: 1 }
+              $inc: { version: 1 },
             }
           )
           .chain('exec')
@@ -975,7 +975,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           name: this.file.name,
           linkedFileData: this.file.linkedFileData,
           hash: this.file.hash,
-          deletedAt: sinon.match.date
+          deletedAt: sinon.match.date,
         })
         .resolves()
       await this.subject.promises._insertDeletedFileReference(
@@ -1003,7 +1003,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             _id: this.project._id,
             'rootFolder.0.folders.0': { $exists: false },
             'rootFolder.0.docs.0': { $exists: false },
-            'rootFolder.0.files.0': { $exists: false }
+            'rootFolder.0.files.0': { $exists: false },
           },
           { $set: { rootFolder: [this.mockRootFolder] }, $inc: { version: 1 } },
           { new: true, lean: true, fields: { version: 1 } }
@@ -1051,7 +1051,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           {
             $pull: { 'rootFolder.0.docs': { _id: this.doc._id } },
             $push: { 'rootFolder.0.fileRefs': this.file },
-            $inc: { version: 1 }
+            $inc: { version: 1 },
           },
           { new: true }
         )
@@ -1074,7 +1074,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           {
             $pull: { 'rootFolder.0.fileRefs': { _id: this.file._id } },
             $push: { 'rootFolder.0.docs': this.doc },
-            $inc: { version: 1 }
+            $inc: { version: 1 },
           },
           { new: true }
         )

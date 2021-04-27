@@ -26,7 +26,7 @@ describe('UserInfoController', function () {
     this.sanitizer = {
       escape(v) {
         return v
-      }
+      },
     }
     sinon.spy(this.sanitizer, 'escape')
     this.UserGetter = {}
@@ -39,9 +39,9 @@ describe('UserInfoController', function () {
         './UserDeleter': this.UserDeleter,
         sanitizer: this.sanitizer,
         '../Authentication/AuthenticationController': (this.AuthenticationController = {
-          getLoggedInUserId: sinon.stub()
-        })
-      }
+          getLoggedInUserId: sinon.stub(),
+        }),
+      },
     })
 
     this.req = new MockRequest()
@@ -110,8 +110,8 @@ describe('UserInfoController', function () {
         this.user = {
           _id: ObjectId(),
           overleaf: {
-            id: this.user_id
-          }
+            id: this.user_id,
+          },
         }
         this.req.params = { user_id: this.user_id.toString() }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)
@@ -180,13 +180,13 @@ describe('UserInfoController', function () {
         _id: ObjectId(),
         first_name: 'Douglas',
         last_name: 'Adams',
-        email: 'doug@sharelatex.com'
+        email: 'doug@sharelatex.com',
       }
       this.formattedInfo = {
         id: this.user._id.toString(),
         first_name: this.user.first_name,
         last_name: this.user.last_name,
-        email: this.user.email
+        email: this.user.email,
       }
       this.UserInfoController.formatPersonalInfo = sinon
         .stub()
@@ -218,7 +218,7 @@ describe('UserInfoController', function () {
         password: 'should-not-get-included',
         signUpDate: new Date(),
         role: 'student',
-        institution: 'sheffield'
+        institution: 'sheffield',
       }
       return expect(
         this.UserInfoController.formatPersonalInfo(this.user)
@@ -229,7 +229,7 @@ describe('UserInfoController', function () {
         email: this.user.email,
         signUpDate: this.user.signUpDate,
         role: this.user.role,
-        institution: this.user.institution
+        institution: this.user.institution,
       })
     })
   })

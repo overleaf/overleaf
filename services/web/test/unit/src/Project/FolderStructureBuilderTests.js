@@ -11,8 +11,8 @@ describe('FolderStructureBuilder', function () {
     this.ObjectId = sinon.stub().returns(MOCK_OBJECT_ID)
     this.FolderStructureBuilder = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        mongodb: { ObjectId: this.ObjectId }
-      }
+        mongodb: { ObjectId: this.ObjectId },
+      },
     })
   })
 
@@ -28,7 +28,7 @@ describe('FolderStructureBuilder', function () {
           name: 'rootFolder',
           folders: [],
           docs: [],
-          fileRefs: []
+          fileRefs: [],
         })
       })
     })
@@ -41,13 +41,13 @@ describe('FolderStructureBuilder', function () {
           { path: '/foo/other.bib', doc: { _id: 'doc-3', name: 'other.bib' } },
           {
             path: '/foo/foo1/foo2/another.tex',
-            doc: { _id: 'doc-4', name: 'another.tex' }
-          }
+            doc: { _id: 'doc-4', name: 'another.tex' },
+          },
         ]
         const fileUploads = [
           { path: '/aaa.jpg', file: { _id: 'file-1', name: 'aaa.jpg' } },
           { path: '/foo/bbb.jpg', file: { _id: 'file-2', name: 'bbb.jpg' } },
-          { path: '/bar/ccc.jpg', file: { _id: 'file-3', name: 'ccc.jpg' } }
+          { path: '/bar/ccc.jpg', file: { _id: 'file-3', name: 'ccc.jpg' } },
         ]
         this.result = this.FolderStructureBuilder.buildFolderStructure(
           docUploads,
@@ -67,7 +67,7 @@ describe('FolderStructureBuilder', function () {
               name: 'foo',
               docs: [
                 { _id: 'doc-2', name: 'other.tex' },
-                { _id: 'doc-3', name: 'other.bib' }
+                { _id: 'doc-3', name: 'other.bib' },
               ],
               fileRefs: [{ _id: 'file-2', name: 'bbb.jpg' }],
               folders: [
@@ -82,20 +82,20 @@ describe('FolderStructureBuilder', function () {
                       name: 'foo2',
                       docs: [{ _id: 'doc-4', name: 'another.tex' }],
                       fileRefs: [],
-                      folders: []
-                    }
-                  ]
-                }
-              ]
+                      folders: [],
+                    },
+                  ],
+                },
+              ],
             },
             {
               _id: MOCK_OBJECT_ID,
               name: 'bar',
               docs: [],
               fileRefs: [{ _id: 'file-3', name: 'ccc.jpg' }],
-              folders: []
-            }
-          ]
+              folders: [],
+            },
+          ],
         })
       })
     })
@@ -104,7 +104,7 @@ describe('FolderStructureBuilder', function () {
       it('throws an error', function () {
         const docUploads = [
           { path: '/foo/doc.tex', doc: { _id: 'doc-1', name: 'doc.tex' } },
-          { path: '/foo/doc.tex', doc: { _id: 'doc-2', name: 'doc.tex' } }
+          { path: '/foo/doc.tex', doc: { _id: 'doc-2', name: 'doc.tex' } },
         ]
         expect(() =>
           this.FolderStructureBuilder.buildFolderStructure(docUploads, [])

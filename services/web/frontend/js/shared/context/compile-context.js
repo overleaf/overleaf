@@ -9,8 +9,8 @@ CompileContext.Provider.propTypes = {
     pdfUrl: PropTypes.string,
     pdfDownloadUrl: PropTypes.string,
     logEntries: PropTypes.object,
-    uncompiled: PropTypes.bool
-  })
+    uncompiled: PropTypes.bool,
+  }),
 }
 
 export function CompileProvider({ children, $scope }) {
@@ -23,7 +23,7 @@ export function CompileProvider({ children, $scope }) {
     pdfUrl,
     pdfDownloadUrl,
     logEntries,
-    uncompiled
+    uncompiled,
   }
 
   return (
@@ -37,7 +37,7 @@ export function CompileProvider({ children, $scope }) {
 
 CompileProvider.propTypes = {
   children: PropTypes.any,
-  $scope: PropTypes.any.isRequired
+  $scope: PropTypes.any.isRequired,
 }
 
 export function useCompileContext(propTypes) {

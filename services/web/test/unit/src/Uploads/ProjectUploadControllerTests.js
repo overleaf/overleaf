@@ -35,10 +35,10 @@ describe('ProjectUploadController', function () {
         }
         Timer.initClass()
         return Timer
-      })())
+      })()),
     }
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns(this.user_id)
+      getLoggedInUserId: sinon.stub().returns(this.user_id),
     }
 
     return (this.ProjectUploadController = SandboxedModule.require(modulePath, {
@@ -51,8 +51,8 @@ describe('ProjectUploadController', function () {
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         './ArchiveErrors': ArchiveErrors,
-        fs: (this.fs = {})
-      }
+        fs: (this.fs = {}),
+      },
     }))
   })
 
@@ -62,12 +62,12 @@ describe('ProjectUploadController', function () {
       this.name = 'filename.zip'
       this.req.file = {
         path: this.path,
-        originalname: this.name
+        originalname: this.name,
       }
       this.req.session = {
         user: {
-          _id: this.user_id
-        }
+          _id: this.user_id,
+        },
       }
       this.project = { _id: (this.project_id = 'project-id-123') }
 
@@ -103,7 +103,7 @@ describe('ProjectUploadController', function () {
       it('should return a successful response to the FileUploader client', function () {
         return expect(this.res.body).to.deep.equal({
           success: true,
-          project_id: this.project_id
+          project_id: this.project_id,
         })
       })
 
@@ -146,7 +146,7 @@ describe('ProjectUploadController', function () {
       it('should return the reported error to the FileUploader client', function () {
         expect(JSON.parse(this.res.body)).to.deep.equal({
           success: false,
-          error: 'zip_contents_too_large'
+          error: 'zip_contents_too_large',
         })
       })
 
@@ -164,12 +164,12 @@ describe('ProjectUploadController', function () {
       this.name = 'filename.png'
       this.req.file = {
         path: this.path,
-        originalname: this.name
+        originalname: this.name,
       }
       this.req.session = {
         user: {
-          _id: this.user_id
-        }
+          _id: this.user_id,
+        },
       }
       this.req.params = { Project_id: this.project_id }
       this.req.query = { folder_id: this.folder_id }
@@ -180,7 +180,7 @@ describe('ProjectUploadController', function () {
       beforeEach(function () {
         this.entity = {
           _id: '1234',
-          type: 'file'
+          type: 'file',
         }
         this.FileSystemImportManager.addEntity = sinon
           .stub()
@@ -204,7 +204,7 @@ describe('ProjectUploadController', function () {
         return expect(this.res.body).to.deep.equal({
           success: true,
           entity_id: this.entity._id,
-          entity_type: 'file'
+          entity_type: 'file',
         })
       })
 
@@ -227,7 +227,7 @@ describe('ProjectUploadController', function () {
 
       it('should return an unsuccessful response to the FileUploader client', function () {
         return expect(this.res.body).to.deep.equal({
-          success: false
+          success: false,
         })
       })
     })
@@ -243,7 +243,7 @@ describe('ProjectUploadController', function () {
       it('should return an unsuccessful response to the FileUploader client', function () {
         return expect(this.res.body).to.deep.equal({
           success: false,
-          error: 'project_has_too_many_files'
+          error: 'project_has_too_many_files',
         })
       })
     })
@@ -256,7 +256,7 @@ describe('ProjectUploadController', function () {
 
       it('should return a a non success response', function () {
         return expect(this.res.body).to.deep.equal({
-          success: false
+          success: false,
         })
       })
     })

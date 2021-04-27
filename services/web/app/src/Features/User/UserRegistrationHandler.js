@@ -30,7 +30,7 @@ const UserRegistrationHandler = {
           holdingAccount: false,
           email: userDetails.email,
           first_name: userDetails.first_name,
-          last_name: userDetails.last_name
+          last_name: userDetails.last_name,
         },
         {},
         callback
@@ -84,7 +84,7 @@ const UserRegistrationHandler = {
                 })
               }
               callback()
-            } // this can be slow, just fire it off
+            }, // this can be slow, just fire it off
           ],
           error => {
             Analytics.recordEvent(user._id, 'user-registered')
@@ -99,7 +99,7 @@ const UserRegistrationHandler = {
     UserRegistrationHandler.registerNewUser(
       {
         email,
-        password: crypto.randomBytes(32).toString('hex')
+        password: crypto.randomBytes(32).toString('hex'),
       },
       (error, user) => {
         if (error && error.message !== 'EmailAlreadyRegistered') {
@@ -126,7 +126,7 @@ const UserRegistrationHandler = {
               'registered',
               {
                 to: user.email,
-                setNewPasswordUrl
+                setNewPasswordUrl,
               },
               error => {
                 if (error) {
@@ -140,7 +140,7 @@ const UserRegistrationHandler = {
         )
       }
     )
-  }
+  },
 }
 
 module.exports = UserRegistrationHandler

@@ -6,7 +6,7 @@ import classNames from 'classnames'
 import Icon from '../../../shared/components/icon'
 import {
   useFileTreeSelectable,
-  useSelectableEntity
+  useSelectableEntity,
 } from '../contexts/file-tree-selectable'
 import { useDroppable } from '../contexts/file-tree-draggable'
 
@@ -61,7 +61,7 @@ function FileTreeFolder({ name, id, folders, docs, files }) {
         tabIndex="0"
         ref={dropRefRoot}
         className={classNames(selectableEntityProps.className, {
-          'dnd-droppable-hover': isOverRoot || isOverList
+          'dnd-droppable-hover': isOverRoot || isOverList,
         })}
       >
         <FileTreeItemInner
@@ -88,7 +88,7 @@ FileTreeFolder.propTypes = {
   id: PropTypes.string.isRequired,
   folders: PropTypes.array.isRequired,
   docs: PropTypes.array.isRequired,
-  files: PropTypes.array.isRequired
+  files: PropTypes.array.isRequired,
 }
 
 export default FileTreeFolder

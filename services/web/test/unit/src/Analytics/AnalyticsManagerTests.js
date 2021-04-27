@@ -11,19 +11,19 @@ describe('AnalyticsManager', function () {
   beforeEach(function () {
     this.fakeUserId = '123abc'
     this.Settings = {
-      analytics: { enabled: true }
+      analytics: { enabled: true },
     }
     this.analyticsEventsQueue = {
       add: sinon.stub().resolves(),
-      process: sinon.stub().resolves()
+      process: sinon.stub().resolves(),
     }
     this.analyticsEditingSessionQueue = {
       add: sinon.stub().resolves(),
-      process: sinon.stub().resolves()
+      process: sinon.stub().resolves(),
     }
     this.onboardingEmailsQueue = {
       add: sinon.stub().resolves(),
-      process: sinon.stub().resolves()
+      process: sinon.stub().resolves(),
     }
     const self = this
     this.Queues = {
@@ -35,15 +35,15 @@ describe('AnalyticsManager', function () {
       },
       getOnboardingEmailsQueue: () => {
         return self.onboardingEmailsQueue
-      }
+      },
     }
     this.backgroundRequest = sinon.stub().yields()
     this.request = sinon.stub().yields()
     this.AnalyticsManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         'settings-sharelatex': this.Settings,
-        '../../infrastructure/Queues': this.Queues
-      }
+        '../../infrastructure/Queues': this.Queues,
+      },
     })
   })
 
@@ -67,7 +67,7 @@ describe('AnalyticsManager', function () {
       this.AnalyticsManager.identifyUser(this.fakeUserId, oldUserId)
       sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'identify', {
         userId: this.fakeUserId,
-        oldUserId
+        oldUserId,
       })
     })
 
@@ -77,7 +77,7 @@ describe('AnalyticsManager', function () {
       sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
         event,
         userId: this.fakeUserId,
-        segmentation: null
+        segmentation: null,
       })
     })
 
@@ -92,7 +92,7 @@ describe('AnalyticsManager', function () {
       sinon.assert.calledWithMatch(this.analyticsEditingSessionQueue.add, {
         userId: this.fakeUserId,
         projectId,
-        countryCode
+        countryCode,
       })
     })
   })

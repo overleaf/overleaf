@@ -7,7 +7,7 @@ const UserInfoManager = {
       { _id: true, first_name: true, last_name: true, email: true },
       callback
     )
-  }
+  },
 }
 
 module.exports = UserInfoManager

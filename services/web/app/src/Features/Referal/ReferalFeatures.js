@@ -45,5 +45,5 @@ module.exports = ReferalFeatures = {
       }
     })
     return highestBonusLevel
-  }
+  },
 }

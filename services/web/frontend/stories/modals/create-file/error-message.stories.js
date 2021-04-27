@@ -5,7 +5,7 @@ import { FetchError } from '../../../js/infrastructure/fetch-json'
 import {
   BlockedFilenameError,
   DuplicateFilenameError,
-  InvalidFilenameError
+  InvalidFilenameError,
 } from '../../../js/features/file-tree/errors'
 
 export const KeyedErrors = () => {
@@ -75,7 +75,7 @@ export const FetchDataErrors = () => {
       <ErrorMessage
         error={
           new FetchError('Error', '/story', {}, new Response(), {
-            message: 'There was an error!'
+            message: 'There was an error!',
           })
         }
       />
@@ -83,8 +83,8 @@ export const FetchDataErrors = () => {
         error={
           new FetchError('Error', '/story', {}, new Response(), {
             message: {
-              text: 'There was an error with some text!'
-            }
+              text: 'There was an error with some text!',
+            },
           })
         }
       />
@@ -105,5 +105,5 @@ export const SpecificClassErrors = () => {
 
 export default {
   title: 'Modals / Create File / Error Message',
-  component: ErrorMessage
+  component: ErrorMessage,
 }

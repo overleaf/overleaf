@@ -7,14 +7,14 @@ describe('SessionStoreManager', function () {
   beforeEach(function () {
     this.SessionStoreManager = SandboxedModule.require(modulePath, {
       requires: {
-        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() })
-      }
+        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
+      },
     })
     this.sessionStore = {
       generate: sinon.spy(req => {
         req.session = {}
         req.session.destroy = sinon.stub().yields()
-      })
+      }),
     }
   })
   describe('enableValidationToken', function () {

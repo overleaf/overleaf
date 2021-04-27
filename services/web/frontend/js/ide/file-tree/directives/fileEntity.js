@@ -17,7 +17,7 @@ export default App.directive('fileEntity', RecursionHelper => ({
   scope: {
     entity: '=',
     permissions: '=',
-    depth: '=?'
+    depth: '=?',
   },
   templateUrl: 'entityListItemTemplate',
   compile(element) {
@@ -39,5 +39,5 @@ export default App.directive('fileEntity', RecursionHelper => ({
         })
       }
     )
-  }
+  },
 }))

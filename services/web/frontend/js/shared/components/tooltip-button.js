@@ -18,8 +18,8 @@ TooltipButton.propTypes = {
   onClick: PropTypes.func,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ])
+    PropTypes.node,
+  ]),
 }
 
 export default TooltipButton

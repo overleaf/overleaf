@@ -10,7 +10,7 @@ const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 
 module.exports = {
-  promises: { transferOwnership }
+  promises: { transferOwnership },
 }
 
 async function transferOwnership(projectId, newOwnerId, options = {}) {
@@ -19,7 +19,7 @@ async function transferOwnership(projectId, newOwnerId, options = {}) {
   // Fetch project and user
   const [project, newOwner] = await Promise.all([
     _getProject(projectId),
-    _getUser(newOwnerId)
+    _getUser(newOwnerId),
   ])
 
   // Exit early if the transferee is already the project owner
@@ -57,7 +57,7 @@ async function _getProject(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     owner_ref: 1,
     collaberator_refs: 1,
-    name: 1
+    name: 1,
   })
   if (project == null) {
     throw new Errors.ProjectNotFoundError({ info: { projectId } })
@@ -111,14 +111,14 @@ async function _sendEmails(project, previousOwner, newOwner) {
         {
           to: previousOwner.email,
           project,
-          newOwner
+          newOwner,
         }
       ),
       EmailHandler.promises.sendEmail('ownershipTransferConfirmationNewOwner', {
         to: newOwner.email,
         project,
-        previousOwner
-      })
+        previousOwner,
+      }),
     ])
   }
 }

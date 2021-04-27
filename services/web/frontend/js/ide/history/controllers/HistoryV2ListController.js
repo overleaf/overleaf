@@ -47,8 +47,8 @@ export default App.controller(
         resolve: {
           labelDetails() {
             return labelDetails
-          }
-        }
+          },
+        },
       }))
   }
 )

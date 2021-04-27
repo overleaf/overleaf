@@ -22,7 +22,7 @@ describe('HealthCheckController', function () {
       const start = Date.now()
       const { response, body } = await user.doRequest('GET', {
         url: '/health_check/full',
-        json: true
+        json: true,
       })
       const end = Date.now()
 
@@ -51,7 +51,7 @@ describe('HealthCheckController', function () {
           await user.doRequest('GET', {
             timeout: 1,
             url: '/health_check/full',
-            json: true
+            json: true,
           })
         } catch (err) {
           expect(err.code).to.be.oneOf(['ETIMEDOUT', 'ESOCKETTIMEDOUT'])

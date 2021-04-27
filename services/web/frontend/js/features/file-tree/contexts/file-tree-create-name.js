@@ -18,16 +18,16 @@ export const useFileTreeCreateName = () => {
 
 export default function FileTreeCreateNameProvider({
   children,
-  initialName = ''
+  initialName = '',
 }) {
   const [state, setName] = useReducer(
     (state, name) => ({
       name, // the file name
-      touchedName: true // whether the name has been edited
+      touchedName: true, // whether the name has been edited
     }),
     {
       name: initialName,
-      touchedName: false
+      touchedName: false,
     }
   )
 
@@ -46,7 +46,7 @@ export default function FileTreeCreateNameProvider({
 FileTreeCreateNameProvider.propTypes = {
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
+    PropTypes.node,
   ]).isRequired,
-  initialName: PropTypes.string
+  initialName: PropTypes.string,
 }

@@ -23,7 +23,7 @@ describe('ClsiCookieManager', function () {
     this.redis = {
       auth() {},
       get: sinon.stub(),
-      setex: sinon.stub().callsArg(3)
+      setex: sinon.stub().callsArg(3),
     }
     this.project_id = '123423431321'
     this.request = {
@@ -32,31 +32,31 @@ describe('ClsiCookieManager', function () {
       jar: realRequst.jar,
       defaults: () => {
         return this.request
-      }
+      },
     }
     this.settings = {
       redis: {
-        web: 'redis.something'
+        web: 'redis.something',
       },
       apis: {
         clsi: {
-          url: 'http://clsi.example.com'
-        }
+          url: 'http://clsi.example.com',
+        },
       },
       clsiCookie: {
         ttl: Math.random(),
-        key: 'coooookie'
-      }
+        key: 'coooookie',
+      },
     }
     this.requires = {
       '../../infrastructure/RedisWrapper': (this.RedisWrapper = {
-        client: () => this.redis
+        client: () => this.redis,
       }),
       'settings-sharelatex': this.settings,
-      request: this.request
+      request: this.request,
     }
     return (this.ClsiCookieManager = SandboxedModule.require(modulePath, {
-      requires: this.requires
+      requires: this.requires,
     })())
   })
 
@@ -180,9 +180,9 @@ describe('ClsiCookieManager', function () {
       delete this.settings.clsiCookie.key
       this.ClsiCookieManager = SandboxedModule.require(modulePath, {
         globals: {
-          console: console
+          console: console,
         },
-        requires: this.requires
+        requires: this.requires,
       })()
       return this.ClsiCookieManager.setServerId(
         this.project_id,
@@ -218,9 +218,9 @@ describe('ClsiCookieManager', function () {
         .returns(this.redis_secondary)
       this.ClsiCookieManager = SandboxedModule.require(modulePath, {
         globals: {
-          console: console
+          console: console,
         },
-        requires: this.requires
+        requires: this.requires,
       })()
       this.ClsiCookieManager._parseServerIdFromResponse = sinon
         .stub()
@@ -268,9 +268,9 @@ describe('ClsiCookieManager', function () {
       delete this.settings.clsiCookie.key
       this.ClsiCookieManager = SandboxedModule.require(modulePath, {
         globals: {
-          console: console
+          console: console,
         },
-        requires: this.requires
+        requires: this.requires,
       })()
       return this.ClsiCookieManager.getCookieJar(
         this.project_id,

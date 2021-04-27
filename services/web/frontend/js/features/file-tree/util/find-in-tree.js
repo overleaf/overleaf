@@ -48,7 +48,7 @@ export function findInTree(tree, id, path) {
         parent: tree.docs,
         parentFolderId: tree._id,
         path,
-        index
+        index,
       }
     }
   }
@@ -62,7 +62,7 @@ export function findInTree(tree, id, path) {
         parent: tree.fileRefs,
         parentFolderId: tree._id,
         path,
-        index
+        index,
       }
     }
   }
@@ -76,7 +76,7 @@ export function findInTree(tree, id, path) {
         parent: tree.folders,
         parentFolderId: tree._id,
         path,
-        index
+        index,
       }
     }
     const found = findInTree(folder, id, path.concat(folder._id))

@@ -24,16 +24,16 @@ describe('SpellingHandler', function () {
         .stub()
         .yields(null, { statusCode: 200, body: dictionaryString }),
       post: sinon.stub().yields(null, { statusCode: 204 }),
-      delete: sinon.stub().yields(null, { statusCode: 204 })
+      delete: sinon.stub().yields(null, { statusCode: 204 }),
     }
 
     SpellingHandler = SandboxedModule.require(modulePath, {
       requires: {
         request: request,
         'settings-sharelatex': {
-          apis: { spelling: { host: SPELLING_HOST, url: SPELLING_URL } }
-        }
-      }
+          apis: { spelling: { host: SPELLING_HOST, url: SPELLING_URL } },
+        },
+      },
     })
   })
 
@@ -42,7 +42,7 @@ describe('SpellingHandler', function () {
       SpellingHandler.getUserDictionary(userId, () => {
         expect(request.get).to.have.been.calledWith({
           url: 'http://spelling.service.test/user/wombat',
-          timeout: TIMEOUT
+          timeout: TIMEOUT,
         })
         done()
       })
@@ -71,9 +71,9 @@ describe('SpellingHandler', function () {
         expect(request.post).to.have.been.calledWith({
           url: 'http://spelling.service.test/user/wombat/unlearn',
           json: {
-            word: word
+            word: word,
           },
-          timeout: TIMEOUT
+          timeout: TIMEOUT,
         })
         done()
       })
@@ -100,7 +100,7 @@ describe('SpellingHandler', function () {
       SpellingHandler.deleteUserDictionary(userId, () => {
         expect(request.delete).to.have.been.calledWith({
           url: 'http://spelling.service.test/user/wombat',
-          timeout: TIMEOUT
+          timeout: TIMEOUT,
         })
         done()
       })

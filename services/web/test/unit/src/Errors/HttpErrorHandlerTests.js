@@ -13,9 +13,9 @@ describe('HttpErrorHandler', function () {
       requires: {
         'settings-sharelatex': {
           appName: 'Overleaf',
-          statusPageUrl: 'https://status.overlaf.com'
-        }
-      }
+          statusPageUrl: 'https://status.overlaf.com',
+        },
+      },
     })
   })
 
@@ -155,7 +155,7 @@ describe('HttpErrorHandler', function () {
       expect(this.res.renderedTemplate).to.equal('general/400')
       expect(this.res.renderedVariables).to.deep.equal({
         title: 'Client Error',
-        message: 'an error'
+        message: 'an error',
       })
     })
 
@@ -165,18 +165,18 @@ describe('HttpErrorHandler', function () {
       expect(this.res.renderedTemplate).to.equal('general/400')
       expect(this.res.renderedVariables).to.deep.equal({
         title: 'Client Error',
-        message: undefined
+        message: undefined,
       })
     })
 
     it("should return a json object when content-type is 'json'", function () {
       this.req.accepts = () => 'json'
       this.HttpErrorHandler.badRequest(this.req, this.res, 'an error', {
-        foo: 'bar'
+        foo: 'bar',
       })
       expect(JSON.parse(this.res.body)).to.deep.equal({
         message: 'an error',
-        foo: 'bar'
+        foo: 'bar',
       })
     })
 
@@ -204,7 +204,7 @@ describe('HttpErrorHandler', function () {
       expect(this.res.renderedTemplate).to.equal('general/400')
       expect(this.res.renderedVariables).to.deep.equal({
         title: 'Client Error',
-        message: 'an error'
+        message: 'an error',
       })
     })
 
@@ -215,12 +215,12 @@ describe('HttpErrorHandler', function () {
         this.res,
         'an error',
         {
-          foo: 'bar'
+          foo: 'bar',
         }
       )
       expect(JSON.parse(this.res.body)).to.deep.equal({
         message: 'an error',
-        foo: 'bar'
+        foo: 'bar',
       })
     })
   })
@@ -241,18 +241,18 @@ describe('HttpErrorHandler', function () {
       this.HttpErrorHandler.forbidden(this.req, this.res)
       expect(this.res.renderedTemplate).to.equal('user/restricted')
       expect(this.res.renderedVariables).to.deep.equal({
-        title: 'restricted'
+        title: 'restricted',
       })
     })
 
     it("should return a json object when content-type is 'json'", function () {
       this.req.accepts = () => 'json'
       this.HttpErrorHandler.forbidden(this.req, this.res, 'an error', {
-        foo: 'bar'
+        foo: 'bar',
       })
       expect(JSON.parse(this.res.body)).to.deep.equal({
         message: 'an error',
-        foo: 'bar'
+        foo: 'bar',
       })
     })
   })
@@ -273,18 +273,18 @@ describe('HttpErrorHandler', function () {
       this.HttpErrorHandler.notFound(this.req, this.res)
       expect(this.res.renderedTemplate).to.equal('general/404')
       expect(this.res.renderedVariables).to.deep.equal({
-        title: 'page_not_found'
+        title: 'page_not_found',
       })
     })
 
     it("should return a json object when content-type is 'json'", function () {
       this.req.accepts = () => 'json'
       this.HttpErrorHandler.notFound(this.req, this.res, 'an error', {
-        foo: 'bar'
+        foo: 'bar',
       })
       expect(JSON.parse(this.res.body)).to.deep.equal({
         message: 'an error',
-        foo: 'bar'
+        foo: 'bar',
       })
     })
   })
@@ -306,7 +306,7 @@ describe('HttpErrorHandler', function () {
       expect(this.res.renderedTemplate).to.equal('general/400')
       expect(this.res.renderedVariables).to.deep.equal({
         title: 'Client Error',
-        message: 'an error'
+        message: 'an error',
       })
     })
 
@@ -317,12 +317,12 @@ describe('HttpErrorHandler', function () {
         this.res,
         'an error',
         {
-          foo: 'bar'
+          foo: 'bar',
         }
       )
       expect(JSON.parse(this.res.body)).to.deep.equal({
         message: 'an error',
-        foo: 'bar'
+        foo: 'bar',
       })
     })
 
@@ -353,7 +353,7 @@ describe('HttpErrorHandler', function () {
         this.HttpErrorHandler.legacyInternal(this.req, this.res, new Error())
         expect(this.res.renderedTemplate).to.equal('general/500')
         expect(this.res.renderedVariables).to.deep.equal({
-          title: 'Server Error'
+          title: 'Server Error',
         })
       })
 
@@ -366,7 +366,7 @@ describe('HttpErrorHandler', function () {
           new Error()
         )
         expect(JSON.parse(this.res.body)).to.deep.equal({
-          message: 'a message'
+          message: 'a message',
         })
       })
     })

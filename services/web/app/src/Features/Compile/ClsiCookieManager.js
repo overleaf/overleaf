@@ -61,7 +61,7 @@ module.exports = function (backendGroup) {
       return request.post(url, (err, res, body) => {
         if (err != null) {
           OError.tag(err, 'error getting initial server id for project', {
-            project_id
+            project_id,
           })
           return callback(err)
         }
@@ -142,7 +142,7 @@ module.exports = function (backendGroup) {
       return this._getServerId(project_id, (err, serverId) => {
         if (err != null) {
           OError.tag(err, 'error getting server id', {
-            project_id
+            project_id,
           })
           return callback(err)
         }
@@ -153,6 +153,6 @@ module.exports = function (backendGroup) {
         jar.setCookie(serverCookie, Settings.apis.clsi.url)
         return callback(null, jar)
       })
-    }
+    },
   }
 }

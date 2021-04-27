@@ -22,7 +22,7 @@ class UKAMFEntity {
       'ds:X509Data',
       0,
       'ds:X509Certificate',
-      0
+      0,
     ])
     if (!cert) {
       throw new Error('no cert')
@@ -42,7 +42,7 @@ class UKAMFEntity {
     return {
       cert,
       entityId,
-      entryPoint
+      entryPoint,
     }
   }
 }

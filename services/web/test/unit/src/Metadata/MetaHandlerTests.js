@@ -21,10 +21,10 @@ describe('MetaHandler', function () {
     this.docId = 'somedocid'
     this.ProjectEntityHandler = {
       getAllDocs: sinon.stub(),
-      getDoc: sinon.stub()
+      getDoc: sinon.stub(),
     }
     this.DocumentUpdaterHandler = {
-      flushDocToMongo: sinon.stub()
+      flushDocToMongo: sinon.stub(),
     }
     this.packageMapping = {
       foo: [
@@ -32,23 +32,23 @@ describe('MetaHandler', function () {
           caption: '\\bar',
           snippet: '\\bar',
           meta: 'foo-cmd',
-          score: 12
+          score: 12,
         },
         {
           caption: '\\bat[]{}',
           snippet: '\\bar[$1]{$2}',
           meta: 'foo-cmd',
-          score: 10
-        }
+          score: 10,
+        },
       ],
       baz: [
         {
           caption: '\\longercommandtest{}',
           snippet: '\\longercommandtest{$1}',
           meta: 'baz-cmd',
-          score: 50
-        }
-      ]
+          score: 50,
+        },
+      ],
     }
 
     return (this.MetaHandler = SandboxedModule.require(modulePath, {
@@ -56,8 +56,8 @@ describe('MetaHandler', function () {
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../DocumentUpdater/DocumentUpdaterHandler': this
           .DocumentUpdaterHandler,
-        './packageMapping': this.packageMapping
-      }
+        './packageMapping': this.packageMapping,
+      },
     }))
   })
 
@@ -71,7 +71,7 @@ describe('MetaHandler', function () {
         'three \\label{aaa}',
         'four five',
         '\\label{bbb}',
-        'six seven'
+        'six seven',
       ])
     })
 
@@ -85,16 +85,16 @@ describe('MetaHandler', function () {
               caption: '\\bar',
               snippet: '\\bar',
               meta: 'foo-cmd',
-              score: 12
+              score: 12,
             },
             {
               caption: '\\bat[]{}',
               snippet: '\\bar[$1]{$2}',
               meta: 'foo-cmd',
-              score: 10
-            }
-          ]
-        }
+              score: 10,
+            },
+          ],
+        },
       })
     })
   })
@@ -104,22 +104,22 @@ describe('MetaHandler', function () {
       return (this.docs = {
         doc_one: {
           _id: 'id_one',
-          lines: ['one', '\\label{aaa} two', 'three']
+          lines: ['one', '\\label{aaa} two', 'three'],
         },
         doc_two: {
           _id: 'id_two',
-          lines: ['four']
+          lines: ['four'],
         },
         doc_three: {
           _id: 'id_three',
-          lines: ['\\label{bbb}', 'five six', 'seven eight \\label{ccc} nine']
+          lines: ['\\label{bbb}', 'five six', 'seven eight \\label{ccc} nine'],
         },
         doc_four: {
           _id: 'id_four',
           lines: [
             '\\usepackage[width=\\textwidth]{baz}',
-            '\\usepackage{amsmath}'
-          ]
+            '\\usepackage{amsmath}',
+          ],
         },
         doc_five: {
           _id: 'id_five',
@@ -129,9 +129,9 @@ describe('MetaHandler', function () {
             'some text',
             '\\section{this}\\label{sec:intro}',
             'In Section \\ref{sec:intro} we saw',
-            'nothing'
-          ]
-        }
+            'nothing',
+          ],
+        },
       })
     })
 
@@ -149,10 +149,10 @@ describe('MetaHandler', function () {
                 caption: '\\longercommandtest{}',
                 snippet: '\\longercommandtest{$1}',
                 meta: 'baz-cmd',
-                score: 50
-              }
-            ]
-          }
+                score: 50,
+              },
+            ],
+          },
         },
         id_five: {
           labels: ['sec:intro'],
@@ -162,25 +162,25 @@ describe('MetaHandler', function () {
                 caption: '\\bar',
                 snippet: '\\bar',
                 meta: 'foo-cmd',
-                score: 12
+                score: 12,
               },
               {
                 caption: '\\bat[]{}',
                 snippet: '\\bar[$1]{$2}',
                 meta: 'foo-cmd',
-                score: 10
-              }
+                score: 10,
+              },
             ],
             baz: [
               {
                 caption: '\\longercommandtest{}',
                 snippet: '\\longercommandtest{$1}',
                 meta: 'baz-cmd',
-                score: 50
-              }
-            ]
-          }
-        }
+                score: 50,
+              },
+            ],
+          },
+        },
       })
     })
   })
@@ -254,8 +254,8 @@ describe('MetaHandler', function () {
     beforeEach(function () {
       this.fakeDocs = {
         doc_one: {
-          lines: ['\\usepackage[some-options,more=foo]{foo}', '\\label{aaa}']
-        }
+          lines: ['\\usepackage[some-options,more=foo]{foo}', '\\label{aaa}'],
+        },
       }
 
       this.fakeMeta = {
@@ -266,16 +266,16 @@ describe('MetaHandler', function () {
               caption: '\\bar',
               snippet: '\\bar',
               meta: 'foo-cmd',
-              score: 12
+              score: 12,
             },
             {
               caption: '\\bat[]{}',
               snippet: '\\bar[$1]{$2}',
               meta: 'foo-cmd',
-              score: 10
-            }
-          ]
-        }
+              score: 10,
+            },
+          ],
+        },
       }
       this.DocumentUpdaterHandler.flushProjectToMongo = sinon
         .stub()

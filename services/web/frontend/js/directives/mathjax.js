@@ -19,8 +19,8 @@ export default App.directive('mathjax', function ($compile, $parse) {
         if (!alreadyConfigured) {
           MathJax.Hub.Config({
             tex2jax: {
-              inlineMath: inlineMathConfig.concat([['$', '$']])
-            }
+              inlineMath: inlineMathConfig.concat([['$', '$']]),
+            },
           })
         }
       }
@@ -28,6 +28,6 @@ export default App.directive('mathjax', function ($compile, $parse) {
       setTimeout(() => {
         MathJax.Hub.Queue(['Typeset', MathJax.Hub, element.get(0)])
       }, 0)
-    }
+    },
   }
 })

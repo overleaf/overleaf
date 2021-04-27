@@ -11,25 +11,25 @@ describe('EditorHttpController', function () {
     this.ownerId = new ObjectId()
     this.project = {
       _id: new ObjectId(),
-      owner_ref: this.ownerId
+      owner_ref: this.ownerId,
     }
     this.user = {
       _id: new ObjectId(),
-      projects: {}
+      projects: {},
     }
     this.projectView = {
       _id: this.project._id,
       owner: {
         _id: 'owner',
         email: 'owner@example.com',
-        other_property: true
+        other_property: true,
       },
-      members: [{ one: 1 }, { two: 2 }]
+      members: [{ one: 1 }, { two: 2 }],
     }
     this.reducedProjectView = {
       _id: this.projectView._id,
       owner: { _id: this.projectView.owner._id },
-      members: []
+      members: [],
     }
     this.doc = { _id: new ObjectId(), name: 'excellent-original-idea.tex' }
     this.file = { _id: new ObjectId() }
@@ -41,7 +41,7 @@ describe('EditorHttpController', function () {
       send: sinon.stub().returns(this.res),
       status: sinon.stub().returns(this.res),
       sendStatus: sinon.stub().returns(this.res),
-      json: sinon.stub().returns(this.res)
+      json: sinon.stub().returns(this.res),
     }
     this.next = sinon.stub()
     this.token = null
@@ -50,20 +50,20 @@ describe('EditorHttpController', function () {
     this.AuthorizationManager = {
       isRestrictedUser: sinon.stub().returns(false),
       promises: {
-        getPrivilegeLevelForProject: sinon.stub().resolves('owner')
-      }
+        getPrivilegeLevelForProject: sinon.stub().resolves('owner'),
+      },
     }
     this.CollaboratorsGetter = {
       promises: {
         getInvitedMembersWithPrivilegeLevels: sinon
           .stub()
-          .resolves(['members', 'mock'])
-      }
+          .resolves(['members', 'mock']),
+      },
     }
     this.CollaboratorsHandler = {
       promises: {
-        userIsTokenMember: sinon.stub().resolves(false)
-      }
+        userIsTokenMember: sinon.stub().resolves(false),
+      },
     }
     this.CollaboratorsInviteHandler = {
       promises: {
@@ -72,16 +72,16 @@ describe('EditorHttpController', function () {
             _id: 'invite_one',
             email: 'user-one@example.com',
             privileges: 'readOnly',
-            projectId: this.project._id
+            projectId: this.project._id,
           },
           {
             _id: 'invite_two',
             email: 'user-two@example.com',
             privileges: 'readOnly',
-            projectId: this.project._id
-          }
-        ])
-      }
+            projectId: this.project._id,
+          },
+        ]),
+      },
     }
     this.EditorController = {
       promises: {
@@ -90,43 +90,43 @@ describe('EditorHttpController', function () {
         addFolder: sinon.stub().resolves(this.folder),
         renameEntity: sinon.stub().resolves(),
         moveEntity: sinon.stub().resolves(),
-        deleteEntity: sinon.stub().resolves()
-      }
+        deleteEntity: sinon.stub().resolves(),
+      },
     }
     this.ProjectDeleter = {
       promises: {
-        unmarkAsDeletedByExternalSource: sinon.stub().resolves()
-      }
+        unmarkAsDeletedByExternalSource: sinon.stub().resolves(),
+      },
     }
     this.ProjectGetter = {
       promises: {
-        getProjectWithoutDocLines: sinon.stub().resolves(this.project)
-      }
+        getProjectWithoutDocLines: sinon.stub().resolves(this.project),
+      },
     }
     this.ProjectEditorHandler = {
-      buildProjectModelView: sinon.stub().returns(this.projectView)
+      buildProjectModelView: sinon.stub().returns(this.projectView),
     }
     this.Metrics = { inc: sinon.stub() }
     this.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns(this.token),
-      protectTokens: sinon.stub()
+      protectTokens: sinon.stub(),
     }
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns(this.user._id)
+      getLoggedInUserId: sinon.stub().returns(this.user._id),
     }
     this.ProjectEntityUpdateHandler = {
       promises: {
-        convertDocToFile: sinon.stub().resolves(this.file)
-      }
+        convertDocToFile: sinon.stub().resolves(this.file),
+      },
     }
     this.DocstoreManager = {
       promises: {
-        getAllDeletedDocs: sinon.stub().resolves([])
-      }
+        getAllDeletedDocs: sinon.stub().resolves([]),
+      },
     }
     this.HttpErrorHandler = {
       notFound: sinon.stub(),
-      unprocessableEntity: sinon.stub()
+      unprocessableEntity: sinon.stub(),
     }
     this.EditorHttpController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -147,8 +147,8 @@ describe('EditorHttpController', function () {
         '../Project/ProjectEntityUpdateHandler': this
           .ProjectEntityUpdateHandler,
         '../Docstore/DocstoreManager': this.DocstoreManager,
-        '../Errors/HttpErrorHandler': this.HttpErrorHandler
-      }
+        '../Errors/HttpErrorHandler': this.HttpErrorHandler,
+      },
     })
   })
 
@@ -168,7 +168,7 @@ describe('EditorHttpController', function () {
         expect(this.res.json).to.have.been.calledWith({
           project: this.projectView,
           privilegeLevel: 'owner',
-          isRestrictedUser: false
+          isRestrictedUser: false,
         })
       })
 
@@ -210,7 +210,7 @@ describe('EditorHttpController', function () {
         expect(this.res.json).to.have.been.calledWith({
           project: this.reducedProjectView,
           privilegeLevel: 'readOnly',
-          isRestrictedUser: true
+          isRestrictedUser: true,
         })
       })
     })
@@ -246,7 +246,7 @@ describe('EditorHttpController', function () {
         expect(this.res.json).to.have.been.calledWith({
           project: this.reducedProjectView,
           privilegeLevel: 'readOnly',
-          isRestrictedUser: true
+          isRestrictedUser: true,
         })
       })
     })
@@ -271,7 +271,7 @@ describe('EditorHttpController', function () {
       this.req.params = { Project_id: this.project._id }
       this.req.body = {
         name: (this.name = 'doc-name'),
-        parent_folder_id: this.parentFolderId
+        parent_folder_id: this.parentFolderId,
       }
     })
 
@@ -328,7 +328,7 @@ describe('EditorHttpController', function () {
       this.req.params = { Project_id: this.project._id }
       this.req.body = {
         name: this.folderName,
-        parent_folder_id: this.parentFolderId
+        parent_folder_id: this.parentFolderId,
       }
     })
 
@@ -399,7 +399,7 @@ describe('EditorHttpController', function () {
       this.req.params = {
         Project_id: this.project._id,
         entity_id: this.entityId,
-        entity_type: this.entityType
+        entity_type: this.entityType,
       }
     })
 
@@ -460,7 +460,7 @@ describe('EditorHttpController', function () {
       this.req.params = {
         Project_id: this.project._id,
         entity_id: this.entityId,
-        entity_type: this.entityType
+        entity_type: this.entityType,
       }
       this.req.body = { folder_id: this.folderId }
       this.res.sendStatus.callsFake(() => done())
@@ -489,7 +489,7 @@ describe('EditorHttpController', function () {
       this.req.params = {
         Project_id: this.project._id,
         entity_id: this.entityId,
-        entity_type: this.entityType
+        entity_type: this.entityType,
       }
       this.res.sendStatus.callsFake(() => done())
       this.EditorHttpController.deleteEntity(this.req, this.res)
@@ -516,7 +516,7 @@ describe('EditorHttpController', function () {
     beforeEach(function (done) {
       this.req.params = {
         Project_id: this.project._id.toString(),
-        entity_id: this.doc._id.toString()
+        entity_id: this.doc._id.toString(),
       }
       this.req.body = { userId: this.user._id.toString() }
       this.res.json.callsFake(() => done())
@@ -536,7 +536,7 @@ describe('EditorHttpController', function () {
 
       it('should return the file id in the response', function () {
         expect(this.res.json).to.have.been.calledWith({
-          fileId: this.file._id.toString()
+          fileId: this.file._id.toString(),
         })
       })
     })

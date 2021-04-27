@@ -16,20 +16,20 @@ export default function SelectCollaborators({
   loading,
   options,
   placeholder,
-  multipleSelectionProps
+  multipleSelectionProps,
 }) {
   const {
     getSelectedItemProps,
     getDropdownProps,
     addSelectedItem,
     removeSelectedItem,
-    selectedItems
+    selectedItems,
   } = multipleSelectionProps
 
   const [inputValue, setInputValue] = useState('')
 
   const selectedEmails = useMemo(() => selectedItems.map(item => item.email), [
-    selectedItems
+    selectedItems,
   ])
 
   const unselectedOptions = useMemo(
@@ -41,7 +41,7 @@ export default function SelectCollaborators({
     () =>
       matchSorter(unselectedOptions, inputValue, {
         keys: ['name', 'email'],
-        threshold: matchSorter.rankings.CONTAINS
+        threshold: matchSorter.rankings.CONTAINS,
       }),
     [unselectedOptions, inputValue]
   )
@@ -76,7 +76,7 @@ export default function SelectCollaborators({
     getComboboxProps,
     highlightedIndex,
     getItemProps,
-    reset
+    reset,
   } = useCombobox({
     inputValue,
     defaultHighlightedIndex: 0,
@@ -99,7 +99,7 @@ export default function SelectCollaborators({
           }
           break
       }
-    }
+    },
   })
 
   const addNewItem = useCallback(
@@ -114,7 +114,7 @@ export default function SelectCollaborators({
         addSelectedItem({
           email,
           display: email,
-          type: 'user'
+          type: 'user',
         })
         setInputValue('')
         reset()
@@ -162,7 +162,7 @@ export default function SelectCollaborators({
               getDropdownProps({
                 className: classnames({
                   input: true,
-                  'invalid-tag': !isValidInput
+                  'invalid-tag': !isValidInput,
                 }),
                 type: 'email',
                 placeholder,
@@ -221,7 +221,7 @@ export default function SelectCollaborators({
                       }
                     }
                   }
-                }
+                },
               })
             )}
           />
@@ -254,8 +254,8 @@ SelectCollaborators.propTypes = {
     getDropdownProps: PropTypes.func.isRequired,
     addSelectedItem: PropTypes.func.isRequired,
     removeSelectedItem: PropTypes.func.isRequired,
-    selectedItems: PropTypes.array.isRequired
-  }).isRequired
+    selectedItems: PropTypes.array.isRequired,
+  }).isRequired,
 }
 
 function Option({ selected, item, getItemProps, index }) {
@@ -273,10 +273,10 @@ function Option({ selected, item, getItemProps, index }) {
 Option.propTypes = {
   selected: PropTypes.bool.isRequired,
   item: PropTypes.shape({
-    display: PropTypes.string.isRequired
+    display: PropTypes.string.isRequired,
   }),
   index: PropTypes.number.isRequired,
-  getItemProps: PropTypes.func.isRequired
+  getItemProps: PropTypes.func.isRequired,
 }
 
 function SelectedItem({
@@ -284,7 +284,7 @@ function SelectedItem({
   selectedItem,
   focusInput,
   getSelectedItemProps,
-  index
+  index,
 }) {
   const handleClick = useCallback(
     event => {
@@ -318,8 +318,8 @@ SelectedItem.propTypes = {
   focusInput: PropTypes.func.isRequired,
   removeSelectedItem: PropTypes.func.isRequired,
   selectedItem: PropTypes.shape({
-    display: PropTypes.string.isRequired
+    display: PropTypes.string.isRequired,
   }),
   getSelectedItemProps: PropTypes.func.isRequired,
-  index: PropTypes.number.isRequired
+  index: PropTypes.number.isRequired,
 }

@@ -49,8 +49,8 @@ App.controller('TagListController', function ($scope, $modal) {
       resolve: {
         tag() {
           return tag
-        }
-      }
+        },
+      },
     })
     modalInstance.result.then(function () {
       // Remove tag from projects
@@ -76,8 +76,8 @@ App.controller('TagListController', function ($scope, $modal) {
       resolve: {
         tag() {
           return tag
-        }
-      }
+        },
+      },
     })
     modalInstance.result.then(newName => (tag.name = newName))
   }
@@ -124,7 +124,7 @@ App.controller(
 
     $scope.state = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $modalInstance.opened.then(() =>
@@ -138,7 +138,7 @@ App.controller(
       $http
         .post('/tag', {
           _csrf: window.csrfToken,
-          name
+          name,
         })
         .then(function (response) {
           const { data } = response
@@ -162,7 +162,7 @@ App.controller(
 
     $scope.state = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $modalInstance.opened.then(() =>
@@ -176,7 +176,7 @@ App.controller(
       return $http
         .post(`/tag/${tag._id}/rename`, {
           _csrf: window.csrfToken,
-          name
+          name,
         })
         .then(function () {
           $scope.state.inflight = false
@@ -198,7 +198,7 @@ export default App.controller(
     $scope.tag = tag
     $scope.state = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $scope.delete = function () {
@@ -208,8 +208,8 @@ export default App.controller(
         method: 'DELETE',
         url: `/tag/${tag._id}`,
         headers: {
-          'X-CSRF-Token': window.csrfToken
-        }
+          'X-CSRF-Token': window.csrfToken,
+        },
       })
         .then(function () {
           $scope.state.inflight = false

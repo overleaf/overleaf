@@ -16,7 +16,7 @@ const extensionsToProxy = [
   '.zip',
   '.eps',
   '.gif',
-  '.jpg'
+  '.jpg',
 ]
 const _ = require('underscore')
 
@@ -27,5 +27,5 @@ module.exports = {
       extension => url.indexOf(extension) !== -1
     )
     return shouldProxy
-  }
+  },
 }

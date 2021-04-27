@@ -8,8 +8,8 @@ const EMAIL_SETTINGS = Settings.email || {}
 module.exports = {
   sendEmail: callbackify(sendEmail),
   promises: {
-    sendEmail
-  }
+    sendEmail,
+  },
 }
 
 async function sendEmail(emailType, opts) {

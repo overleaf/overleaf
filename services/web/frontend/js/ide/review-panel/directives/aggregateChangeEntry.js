@@ -21,7 +21,7 @@ export default App.directive('aggregateChangeEntry', $timeout => ({
     onAccept: '&',
     onReject: '&',
     onIndicatorClick: '&',
-    onBodyClick: '&'
+    onBodyClick: '&',
   },
   link(scope, element, attrs) {
     scope.contentLimit = 17
@@ -63,5 +63,5 @@ export default App.directive('aggregateChangeEntry', $timeout => ({
         (scope.insertionNeedsCollapsing =
           insertionContentLength > scope.contentLimit)
     )
-  }
+  },
 }))

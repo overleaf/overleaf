@@ -34,7 +34,7 @@ const tryEditorAccess = (user, projectId, test, callback) =>
             test(response, body)
             cb()
           }
-        )
+        ),
     ],
     callback
   )
@@ -119,10 +119,10 @@ const tryContentAccess = (user, projcetId, test, callback) => {
       auth: {
         user: settings.apis.web.user,
         pass: settings.apis.web.pass,
-        sendImmediately: true
+        sendImmediately: true,
       },
       json: true,
-      jar: false
+      jar: false,
     },
     (error, response, body) => {
       if (error != null) {
@@ -150,13 +150,13 @@ const tryAnonContentAccess = (user, projectId, token, test, callback) => {
       auth: {
         user: settings.apis.web.user,
         pass: settings.apis.web.pass,
-        sendImmediately: true
+        sendImmediately: true,
       },
       headers: {
-        'x-sl-anonymous-access-token': token
+        'x-sl-anonymous-access-token': token,
       },
       json: true,
-      jar: false
+      jar: false,
     },
     (error, response, body) => {
       if (error != null) {
@@ -188,7 +188,7 @@ describe('TokenAccess', function () {
         cb => this.owner.login(cb),
         cb => this.other1.login(cb),
         cb => this.other2.login(cb),
-        cb => this.anon.getCsrfToken(cb)
+        cb => this.anon.getCsrfToken(cb),
       ],
       done
     )
@@ -231,7 +231,7 @@ describe('TokenAccess', function () {
               },
               cb
             )
-          }
+          },
         ],
         done
       )
@@ -318,7 +318,7 @@ describe('TokenAccess', function () {
               },
               cb
             )
-          }
+          },
         ],
         done
       )
@@ -353,7 +353,7 @@ describe('TokenAccess', function () {
               },
               cb
             )
-          }
+          },
         ],
         done
       )
@@ -405,7 +405,7 @@ describe('TokenAccess', function () {
                   expect(body).to.equal('Forbidden')
                 },
                 cb
-              )
+              ),
           ],
           done
         )
@@ -487,7 +487,7 @@ describe('TokenAccess', function () {
                 )
               },
               cb
-            )
+            ),
         ],
         done
       )
@@ -540,7 +540,7 @@ describe('TokenAccess', function () {
                   expect(body).to.equal('Forbidden')
                 },
                 cb
-              )
+              ),
           ],
           done
         )
@@ -624,7 +624,7 @@ describe('TokenAccess', function () {
                 )
               },
               cb
-            )
+            ),
         ],
         done
       )
@@ -753,7 +753,7 @@ describe('TokenAccess', function () {
                   )
                 },
                 cb
-              )
+              ),
           ],
           done
         )
@@ -807,7 +807,7 @@ describe('TokenAccess', function () {
                 },
                 cb
               )
-            }
+            },
           ],
           done
         )
@@ -862,7 +862,7 @@ describe('TokenAccess', function () {
                   expect(response.statusCode).to.equal(200)
                   expect(body).to.deep.equal({
                     redirect: '/restricted',
-                    anonWriteAccessDenied: true
+                    anonWriteAccessDenied: true,
                   })
                 },
                 cb
@@ -884,7 +884,7 @@ describe('TokenAccess', function () {
                 expect(response.statusCode).to.equal(200)
                 expect(body.redir).to.equal(`/${this.tokens.readAndWrite}`)
                 cb()
-              })
+              }),
           ],
           done
         )
@@ -958,7 +958,7 @@ describe('TokenAccess', function () {
                   expect(body.privilegeLevel).to.equal('readAndWrite')
                 },
                 cb
-              )
+              ),
           ],
           done
         )
@@ -1008,7 +1008,7 @@ describe('TokenAccess', function () {
                     expect(body).to.equal('Forbidden')
                   },
                   cb
-                )
+                ),
             ],
             done
           )
@@ -1032,8 +1032,8 @@ describe('TokenAccess', function () {
                 { _id: project._id },
                 {
                   $set: {
-                    overleaf: { id: 1234 }
-                  }
+                    overleaf: { id: 1234 },
+                  },
                 },
                 err => {
                   expect(err).not.to.exist
@@ -1094,7 +1094,7 @@ describe('TokenAccess', function () {
                 expect(body).to.equal('Forbidden')
               },
               cb
-            )
+            ),
         ],
         done
       )
@@ -1204,7 +1204,7 @@ describe('TokenAccess', function () {
                 expect(body).to.equal('Forbidden')
               },
               cb
-            )
+            ),
         ],
         done
       )
@@ -1291,7 +1291,7 @@ describe('TokenAccess', function () {
                         exists: true,
                         exported: false,
                         has_owner: true,
-                        name: 'Test Project Import Example'
+                        name: 'Test Project Import Example',
                       }
                       MockV1Api.setDocInfo(this.tokens.readAndWrite, docInfo)
                       MockV1Api.setDocInfo(this.tokens.readOnly, docInfo)
@@ -1328,8 +1328,8 @@ describe('TokenAccess', function () {
                     status: 'canDownloadZip',
                     projectId: this.tokens.readAndWrite,
                     hasOwner: true,
-                    name: 'Test Project Import Example'
-                  }
+                    name: 'Test Project Import Example',
+                  },
                 })
               },
               cb
@@ -1348,8 +1348,8 @@ describe('TokenAccess', function () {
                     status: 'canDownloadZip',
                     projectId: this.tokens.readOnly,
                     hasOwner: true,
-                    name: 'Test Project Import Example'
-                  }
+                    name: 'Test Project Import Example',
+                  },
                 })
               },
               cb
@@ -1371,7 +1371,7 @@ describe('TokenAccess', function () {
                 expect(response.statusCode).to.equal(404)
               },
               cb
-            )
+            ),
         ],
         done
       )
@@ -1429,7 +1429,7 @@ describe('TokenAccess', function () {
                   expect(response.statusCode).to.equal(404)
                 },
                 cb
-              )
+              ),
           ],
           done
         )

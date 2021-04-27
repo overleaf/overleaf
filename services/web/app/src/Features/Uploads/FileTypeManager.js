@@ -26,7 +26,7 @@ const FileTypeManager = {
     // Misc/bad
     '.doc',
     '.docx',
-    '.gz'
+    '.gz',
   ],
 
   IGNORE_FILENAMES: ['__MACOSX', '.git', '.gitignore'],
@@ -111,7 +111,7 @@ const FileTypeManager = {
       ignore = true
     }
     callback(null, ignore)
-  }
+  },
 }
 
 function _isTextFilename(filename) {
@@ -135,5 +135,5 @@ function _detectEncoding(bytes) {
 
 module.exports = FileTypeManager
 module.exports.promises = promisifyAll(FileTypeManager, {
-  without: ['getStrictTypeFromContent']
+  without: ['getStrictTypeFromContent'],
 })

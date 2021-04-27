@@ -23,5 +23,5 @@ module.exports = {
       contactsAuthenticationMiddleware(),
       ContactController.getContacts
     )
-  }
+  },
 }

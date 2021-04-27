@@ -34,10 +34,10 @@ module.exports = {
           res.render(Path.resolve(__dirname, '../views/user/activate'), {
             title: 'activate_account',
             email: user.email,
-            token: req.query.token
+            token: req.query.token,
           })
         }
       }
     )
-  }
+  },
 }

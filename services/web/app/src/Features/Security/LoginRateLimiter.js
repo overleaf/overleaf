@@ -9,7 +9,7 @@ function processLoginRequest(email, callback) {
     endpointName: 'login',
     throttle: ATTEMPT_LIMIT,
     timeInterval: ONE_MIN * 2,
-    subjectName: email
+    subjectName: email,
   }
   RateLimiter.addCount(opts, (err, shouldAllow) => callback(err, shouldAllow))
 }
@@ -23,7 +23,7 @@ function recordSuccessfulLogin(email, callback) {
 
 const LoginRateLimiter = {
   processLoginRequest,
-  recordSuccessfulLogin
+  recordSuccessfulLogin,
 }
 LoginRateLimiter.promises = promisifyAll(LoginRateLimiter)
 

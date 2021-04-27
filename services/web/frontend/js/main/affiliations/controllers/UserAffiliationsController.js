@@ -222,7 +222,7 @@ export default App.controller(
         email: '',
         university: null,
         role: null,
-        department: null
+        department: null,
       })
 
     var _resetNewAffiliation = () =>
@@ -231,7 +231,7 @@ export default App.controller(
         country: null,
         university: null,
         role: null,
-        department: null
+        department: null,
       })
 
     var _resetAddingEmail = function () {
@@ -243,7 +243,7 @@ export default App.controller(
 
     var _resetAffiliationSuggestion = () => {
       $scope.newAffiliation = {
-        email: $scope.newAffiliation.email
+        email: $scope.newAffiliation.email,
       }
     }
 
@@ -260,7 +260,7 @@ export default App.controller(
         showChangeAffiliationUI: false,
         isMakingRequest: false,
         isLoadingEmails: false,
-        isAddingNewEmail: false
+        isAddingNewEmail: false,
       }
       _resetAffiliationToChange()
       _resetNewAffiliation()

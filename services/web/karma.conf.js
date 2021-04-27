@@ -8,18 +8,18 @@ module.exports = function (config) {
         // We must disable the Chrome sandbox when running Chrome inside Docker
         // (Chrome's sandbox needs more permissions than Docker allows by
         // default)
-        flags: ['--no-sandbox']
-      }
+        flags: ['--no-sandbox'],
+      },
     },
     browsers: ['ChromeCustom'],
     files: [
       // Import all tests (see comment in the file for why this is necessary)
-      'test/karma/import_tests.js'
+      'test/karma/import_tests.js',
     ],
     middleware: ['fake-img'],
     preprocessors: {
       // Run files through webpack
-      'test/karma/import_tests.js': ['webpack']
+      'test/karma/import_tests.js': ['webpack'],
     },
     frameworks: ['mocha', 'chai-sinon'],
     // Configure webpack in the tests
@@ -34,11 +34,11 @@ module.exports = function (config) {
       // v seems to be supported, according to
       // https://www.npmjs.com/package/webpack-dev-middleware#watchoptions
       watchOptions: {
-        ignored: [/node_modules/, /frontend/, /test/]
+        ignored: [/node_modules/, /frontend/, /test/],
       },
 
       // Disable noisy CLI output
-      stats: 'errors-only'
+      stats: 'errors-only',
     },
     plugins: [
       require('karma-chrome-launcher'),
@@ -46,9 +46,9 @@ module.exports = function (config) {
       require('karma-chai-sinon'),
       require('karma-webpack'),
       require('karma-mocha-reporter'),
-      { 'middleware:fake-img': ['factory', fakeImgMiddlewareFactory] }
+      { 'middleware:fake-img': ['factory', fakeImgMiddlewareFactory] },
     ],
-    reporters: ['mocha']
+    reporters: ['mocha'],
   })
 }
 

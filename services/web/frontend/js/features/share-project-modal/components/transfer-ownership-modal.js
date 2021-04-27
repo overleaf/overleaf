@@ -80,5 +80,5 @@ export default function TransferOwnershipModal({ member, cancel }) {
 }
 TransferOwnershipModal.propTypes = {
   member: PropTypes.object.isRequired,
-  cancel: PropTypes.func.isRequired
+  cancel: PropTypes.func.isRequired,
 }

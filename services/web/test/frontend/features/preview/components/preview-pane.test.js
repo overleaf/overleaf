@@ -9,31 +9,31 @@ describe('<PreviewPane />', function () {
     file: 'main.tex',
     level: 'error',
     line: 17,
-    message: 'Misplaced alignment tab character &.'
+    message: 'Misplaced alignment tab character &.',
   }
   const sampleError2 = {
     content: 'error 1 content',
     file: 'main.tex',
     level: 'error',
     line: 22,
-    message: 'Extra alignment tab has been changed to cr.'
+    message: 'Extra alignment tab has been changed to cr.',
   }
   const sampleWarning = {
     file: 'main.tex',
     level: 'warning',
     line: 30,
-    message: "Reference `idontexist' on page 1 undefined on input line 30."
+    message: "Reference `idontexist' on page 1 undefined on input line 30.",
   }
 
   describe('first error pop-up', function () {
     it('renders a first error pop-up with the first error', function () {
       const propsAfterCompileWithErrors = getProps(false, {
         errors: [sampleError1, sampleError2],
-        warnings: [sampleWarning]
+        warnings: [sampleWarning],
       })
       render(<PreviewPane {...propsAfterCompileWithErrors} />)
       screen.getByRole('alertdialog', {
-        name: 'This project has errors. This is the first one.'
+        name: 'This project has errors. This is the first one.',
       })
       screen.getByText(sampleError1.message)
     })
@@ -41,12 +41,12 @@ describe('<PreviewPane />', function () {
     it('does not render a first error pop-up when there are only warnings', function () {
       const propsAfterCompileWithWarningsOnly = getProps(false, {
         errors: [],
-        warnings: [sampleWarning]
+        warnings: [sampleWarning],
       })
       render(<PreviewPane {...propsAfterCompileWithWarningsOnly} />)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'This project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.',
         })
       ).to.not.exist
     })
@@ -54,12 +54,12 @@ describe('<PreviewPane />', function () {
     it('does not render a first error pop-up when a compile is ongoing', function () {
       const propsWhileCompiling = getProps(true, {
         errors: [sampleError1, sampleError2],
-        warnings: [sampleWarning]
+        warnings: [sampleWarning],
       })
       render(<PreviewPane {...propsWhileCompiling} />)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'This project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.',
         })
       ).to.not.exist
     })
@@ -69,7 +69,7 @@ describe('<PreviewPane />', function () {
         false,
         {
           errors: [sampleError1, sampleError2],
-          warnings: [sampleWarning]
+          warnings: [sampleWarning],
         },
         Date.now(),
         true
@@ -77,7 +77,7 @@ describe('<PreviewPane />', function () {
       render(<PreviewPane {...propsWithErrorsViewingLogs} />)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'This project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.',
         })
       ).to.not.exist
     })
@@ -88,7 +88,7 @@ describe('<PreviewPane />', function () {
         false,
         {
           errors: [sampleError1, sampleError2],
-          warnings: [sampleWarning]
+          warnings: [sampleWarning],
         },
         nowTimestamp,
         true
@@ -97,7 +97,7 @@ describe('<PreviewPane />', function () {
         false,
         {
           errors: [sampleError1, sampleError2],
-          warnings: [sampleWarning]
+          warnings: [sampleWarning],
         },
         nowTimestamp,
         false
@@ -108,7 +108,7 @@ describe('<PreviewPane />', function () {
       rerender(<PreviewPane {...propsWithErrorsAfterViewingLogs} />)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'This project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.',
         })
       ).to.not.exist
     })
@@ -120,7 +120,7 @@ describe('<PreviewPane />', function () {
         false,
         {
           errors: [sampleError1, sampleError2],
-          warnings: [sampleWarning]
+          warnings: [sampleWarning],
         },
         nowTimestamp,
         true
@@ -129,7 +129,7 @@ describe('<PreviewPane />', function () {
         false,
         {
           errors: [sampleError2],
-          warnings: [sampleWarning]
+          warnings: [sampleWarning],
         },
         laterTimestamp,
         false
@@ -139,7 +139,7 @@ describe('<PreviewPane />', function () {
       )
       rerender(<PreviewPane {...propsWithErrorsAfterSecondCompile} />)
       screen.getByRole('alertdialog', {
-        name: 'This project has errors. This is the first one.'
+        name: 'This project has errors. This is the first one.',
       })
       screen.getByText(sampleError2.message)
     })
@@ -147,17 +147,17 @@ describe('<PreviewPane />', function () {
     it('allows dismissing the first error pop-up', function () {
       const propsWithErrors = getProps(false, {
         errors: [sampleError1, sampleError2],
-        warnings: [sampleWarning]
+        warnings: [sampleWarning],
       })
       render(<PreviewPane {...propsWithErrors} />)
       const dismissPopUpButton = screen.getByRole('button', {
-        name: 'Dismiss first error alert'
+        name: 'Dismiss first error alert',
       })
 
       fireEvent.click(dismissPopUpButton)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'This project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.',
         })
       ).to.not.exist
     })
@@ -169,7 +169,7 @@ describe('<PreviewPane />', function () {
         false,
         {
           errors: [sampleError1, sampleError2],
-          warnings: [sampleWarning]
+          warnings: [sampleWarning],
         },
         nowTimestamp
       )
@@ -177,7 +177,7 @@ describe('<PreviewPane />', function () {
         false,
         {
           errors: [sampleError2],
-          warnings: [sampleWarning]
+          warnings: [sampleWarning],
         },
         laterTimestamp
       )
@@ -185,13 +185,13 @@ describe('<PreviewPane />', function () {
         <PreviewPane {...propsWithErrorsForFirstCompile} />
       )
       const dismissPopUpButton = screen.getByRole('button', {
-        name: 'Dismiss first error alert'
+        name: 'Dismiss first error alert',
       })
       fireEvent.click(dismissPopUpButton)
       rerender(<PreviewPane {...propsWithErrorsForSecondCompile} />)
       expect(
         screen.queryByRole('alertdialog', {
-          name: 'This project has errors. This is the first one.'
+          name: 'This project has errors. This is the first one.',
         })
       ).to.not.exist
     })
@@ -203,7 +203,7 @@ describe('<PreviewPane />', function () {
       const warnings = [sampleWarning]
       const propsWithErrorsAndWarnings = getProps(false, {
         errors,
-        warnings
+        warnings,
       })
       render(<PreviewPane {...propsWithErrorsAndWarnings} />)
 
@@ -214,7 +214,7 @@ describe('<PreviewPane />', function () {
     })
     it('renders an accessible description for failed compiles with CLSI errors', function () {
       const sampleCLSIError = {
-        clsiMaintenance: true
+        clsiMaintenance: true,
       }
 
       const propsWithCLSIError = getProps(
@@ -233,7 +233,7 @@ describe('<PreviewPane />', function () {
 
     it('renders an accessible description for failed compiles with validation issues', function () {
       const sampleValidationIssue = {
-        clsiMaintenance: true
+        clsiMaintenance: true,
       }
 
       const propsWithValidationIssue = getProps(
@@ -266,12 +266,12 @@ describe('<PreviewPane />', function () {
       errors: [],
       warnings: [],
       typesetting: [],
-      ...logEntries
+      ...logEntries,
     }
     logEntriesWithDefaults.all = [
       ...logEntriesWithDefaults.errors,
       ...logEntriesWithDefaults.warnings,
-      ...logEntriesWithDefaults.typesetting
+      ...logEntriesWithDefaults.typesetting,
     ]
     return {
       compilerState: {
@@ -285,7 +285,7 @@ describe('<PreviewPane />', function () {
         logEntries: logEntriesWithDefaults,
         compileFailed,
         validationIssues,
-        errors
+        errors,
       },
       onClearCache: () => {},
       onLogEntryLocationClick: () => {},
@@ -300,7 +300,7 @@ describe('<PreviewPane />', function () {
       onSetFullLayout: () => {},
       onStopCompilation: () => {},
       showLogs: isShowingLogs,
-      splitLayout: true
+      splitLayout: true,
     }
   }
 })

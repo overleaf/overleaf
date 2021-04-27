@@ -31,7 +31,7 @@ export default App.factory('preamble', function (ide) {
         paths.push(match[1])
       }
       return paths
-    }
+    },
   }
 
   return Preamble

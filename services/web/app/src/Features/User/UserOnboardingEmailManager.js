@@ -25,10 +25,10 @@ class UserOnboardingEmailManager {
     )
     if (user) {
       await EmailHandler.promises.sendEmail('userOnboardingEmail', {
-        to: user.email
+        to: user.email,
       })
       await UserUpdater.promises.updateUser(user._id, {
-        $set: { onboardingEmailSentAt: new Date() }
+        $set: { onboardingEmailSentAt: new Date() },
       })
     }
   }

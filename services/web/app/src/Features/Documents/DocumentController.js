@@ -45,7 +45,7 @@ module.exports = {
             if (error != null) {
               OError.tag(error, 'error finding element for getDocument', {
                 doc_id,
-                project_id
+                project_id,
               })
               return next(error)
             }
@@ -59,7 +59,7 @@ module.exports = {
                     'error finding doc contents for getDocument',
                     {
                       doc_id,
-                      project_id
+                      project_id,
                     }
                   )
                   return next(error)
@@ -81,7 +81,7 @@ module.exports = {
                     ranges,
                     pathname: path.fileSystem,
                     projectHistoryId,
-                    projectHistoryType
+                    projectHistoryType,
                   })
                 }
               }
@@ -111,7 +111,7 @@ module.exports = {
         if (error != null) {
           OError.tag(error, 'error finding element for getDocument', {
             doc_id,
-            project_id
+            project_id,
           })
           return next(error)
         }
@@ -122,7 +122,7 @@ module.exports = {
         return res.sendStatus(200)
       }
     )
-  }
+  },
 }
 
 function __guard__(value, transform) {

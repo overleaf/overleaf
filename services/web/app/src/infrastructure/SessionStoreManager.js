@@ -22,7 +22,7 @@ function checkValidationToken(req) {
         logger.error(
           {
             sessionToken: sessionToken,
-            clientToken: clientToken
+            clientToken: clientToken,
           },
           'session token validation failed'
         )
@@ -46,7 +46,7 @@ module.exports = {
       Object.defineProperty(req.session, 'validationToken', {
         value: computeValidationToken(req),
         enumerable: true,
-        writable: false
+        writable: false,
       })
       Metrics.inc('security.session', 1, { status: 'new' })
     }
@@ -70,5 +70,5 @@ module.exports = {
     } else {
       return false
     }
-  }
+  },
 }

@@ -12,13 +12,13 @@ const ONE_MINUTE = 60 * 1000
 const user = {
   id: 'fake_user',
   first_name: 'mortimer',
-  email: 'fake@example.com'
+  email: 'fake@example.com',
 }
 
 const user2 = {
   id: 'another_fake_user',
   first_name: 'leopold',
-  email: 'another_fake@example.com'
+  email: 'another_fake@example.com',
 }
 
 function generateMessages(count) {
@@ -34,7 +34,7 @@ function generateMessages(count) {
       id: uuid(),
       content: `message #${i}`,
       user: author,
-      timestamp
+      timestamp,
     })
   }
   return messages
@@ -49,7 +49,7 @@ Conversation.parameters = {
     fetchMock.restore()
     fetchMock.get(/messages/, generateMessages(35))
     fetchMock.post(/messages/, {})
-  }
+  },
 }
 
 export const NoMessages = args => <ChatPane {...args} />
@@ -57,7 +57,7 @@ NoMessages.parameters = {
   setupMocks: () => {
     fetchMock.restore()
     fetchMock.get(/messages/, [])
-  }
+  },
 }
 
 export const Loading = args => <ChatPane {...args} />
@@ -65,19 +65,19 @@ Loading.parameters = {
   setupMocks: () => {
     fetchMock.restore()
     fetchMock.get(/messages/, generateMessages(6), {
-      delay: 1000 * 10
+      delay: 1000 * 10,
     })
-  }
+  },
 }
 
 export default {
   title: 'Chat',
   component: ChatPane,
   argTypes: {
-    resetUnreadMessages: { action: 'resetUnreadMessages' }
+    resetUnreadMessages: { action: 'resetUnreadMessages' },
   },
   args: {
-    resetUnreadMessages: () => {}
+    resetUnreadMessages: () => {},
   },
   decorators: [
     (Story, { parameters: { setupMocks } }) => {
@@ -91,6 +91,6 @@ export default {
           <Story />
         </ContextRoot>
       </>
-    )
-  ]
+    ),
+  ],
 }

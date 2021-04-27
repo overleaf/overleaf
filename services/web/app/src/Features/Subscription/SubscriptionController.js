@@ -53,7 +53,7 @@ module.exports = SubscriptionController = {
             gaOptimize: true,
             recomendedCurrency,
             planFeatures,
-            groupPlans: GroupPlansData
+            groupPlans: GroupPlansData,
           })
         const user_id = AuthenticationController.getLoggedInUserId(req)
         if (user_id != null) {
@@ -123,11 +123,11 @@ module.exports = SubscriptionController = {
                       showStudentPlan: req.query.ssp === 'true',
                       recurlyConfig: JSON.stringify({
                         currency,
-                        subdomain: Settings.apis.recurly.subdomain
+                        subdomain: Settings.apis.recurly.subdomain,
                       }),
                       showCouponField: !!req.query.scf,
                       showVatField: !!req.query.svf,
-                      gaOptimize: true
+                      gaOptimize: true,
                     })
                   }
                 )
@@ -154,7 +154,7 @@ module.exports = SubscriptionController = {
           confirmedMemberAffiliations,
           managedInstitutions,
           managedPublishers,
-          v1SubscriptionStatus
+          v1SubscriptionStatus,
         } = results
         return LimitationsManager.userHasV1OrV2Subscription(
           user,
@@ -176,7 +176,7 @@ module.exports = SubscriptionController = {
               confirmedMemberAffiliations,
               managedInstitutions,
               managedPublishers,
-              v1SubscriptionStatus
+              v1SubscriptionStatus,
             }
             return res.render('subscriptions/dashboard', data)
           }
@@ -190,7 +190,7 @@ module.exports = SubscriptionController = {
     const recurlyTokenIds = {
       billing: req.body.recurly_token_id,
       threeDSecureActionResult:
-        req.body.recurly_three_d_secure_action_result_token_id
+        req.body.recurly_three_d_secure_action_result_token_id,
     }
     const { subscriptionDetails } = req.body
 
@@ -250,7 +250,7 @@ module.exports = SubscriptionController = {
         }
         return res.render('subscriptions/successful_subscription', {
           title: 'thank_you',
-          personalSubscription
+          personalSubscription,
         })
       }
     )
@@ -262,7 +262,7 @@ module.exports = SubscriptionController = {
     return SubscriptionHandler.cancelSubscription(user, function (err) {
       if (err != null) {
         OError.tag(err, 'something went wrong canceling subscription', {
-          user_id: user._id
+          user_id: user._id,
         })
         return next(err)
       }
@@ -275,7 +275,7 @@ module.exports = SubscriptionController = {
   canceledSubscription(req, res, next) {
     const user = AuthenticationController.getSessionUser(req)
     return res.render('subscriptions/canceled_subscription', {
-      title: 'subscription_canceled'
+      title: 'subscription_canceled',
     })
   },
 
@@ -285,7 +285,7 @@ module.exports = SubscriptionController = {
     return V1SubscriptionManager.cancelV1Subscription(user_id, function (err) {
       if (err != null) {
         OError.tag(err, 'something went wrong canceling v1 subscription', {
-          user_id
+          user_id,
         })
         return next(err)
       }
@@ -314,7 +314,7 @@ module.exports = SubscriptionController = {
       function (err) {
         if (err != null) {
           OError.tag(err, 'something went wrong updating subscription', {
-            user_id: user._id
+            user_id: user._id,
           })
           return next(err)
         }
@@ -343,7 +343,7 @@ module.exports = SubscriptionController = {
     return SubscriptionHandler.reactivateSubscription(user, function (err) {
       if (err != null) {
         OError.tag(err, 'something went wrong reactivating subscription', {
-          user_id: user._id
+          user_id: user._id,
         })
         return next(err)
       }
@@ -359,7 +359,7 @@ module.exports = SubscriptionController = {
       [
         'new_subscription_notification',
         'updated_subscription_notification',
-        'expired_subscription_notification'
+        'expired_subscription_notification',
       ].includes(event)
     ) {
       const recurlySubscription = eventData.subscription
@@ -419,7 +419,7 @@ module.exports = SubscriptionController = {
         }
         return res.render('subscriptions/upgradeToAnnual', {
           title: 'Upgrade to annual',
-          planName
+          planName,
         })
       }
     )
@@ -441,7 +441,7 @@ module.exports = SubscriptionController = {
       function (err) {
         if (err != null) {
           OError.tag(err, 'error updating subscription', {
-            user_id: user._id
+            user_id: user._id,
           })
           return next(err)
         }
@@ -495,7 +495,7 @@ module.exports = SubscriptionController = {
       }
       return res.sendStatus(200)
     })
-  }
+  },
 }
 
 function __guard__(value, transform) {

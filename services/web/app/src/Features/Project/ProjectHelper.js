@@ -7,7 +7,7 @@ const ENGINE_TO_COMPILER_MAP = {
   latex_dvipdf: 'latex',
   pdflatex: 'pdflatex',
   xelatex: 'xelatex',
-  lualatex: 'lualatex'
+  lualatex: 'lualatex',
 }
 
 module.exports = {
@@ -19,8 +19,8 @@ module.exports = {
   ensureNameIsUnique,
   getAllowedImagesForUser,
   promises: {
-    ensureNameIsUnique: promisify(ensureNameIsUnique)
-  }
+    ensureNameIsUnique: promisify(ensureNameIsUnique),
+  },
 }
 
 function compilerFromV1Engine(engine) {

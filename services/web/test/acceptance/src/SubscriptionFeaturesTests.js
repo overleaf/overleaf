@@ -15,11 +15,11 @@ describe('Subscriptions', function () {
               this.subscription = new Subscription({
                 adminId: this.adminUser._id,
                 groupPlan: false,
-                planCode: 'professional'
+                planCode: 'professional',
               })
               this.subscription.ensureExists(cb)
             },
-            cb => this.subscription.refreshUsersFeatures(cb)
+            cb => this.subscription.refreshUsersFeatures(cb),
           ],
           done
         )
@@ -46,11 +46,11 @@ describe('Subscriptions', function () {
                 adminId: this.adminUser._id,
                 memberIds: [this.memberUser._id],
                 groupPlan: true,
-                planCode: 'professional'
+                planCode: 'professional',
               })
               this.subscription.ensureExists(cb)
             },
-            cb => this.subscription.refreshUsersFeatures(cb)
+            cb => this.subscription.refreshUsersFeatures(cb),
           ],
           done
         )

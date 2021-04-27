@@ -65,7 +65,7 @@ module.exports = {
       RateLimiterMiddleware.rateLimit({
         endpointName: 'team-invite',
         maxRequests: 10,
-        timeInterval: 60
+        timeInterval: 60,
       }),
       TeamInvitesController.acceptInvite
     )
@@ -134,5 +134,5 @@ module.exports = {
       AuthenticationController.httpAuth,
       SubscriptionController.refreshUserFeatures
     )
-  }
+  },
 }

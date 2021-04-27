@@ -35,8 +35,8 @@ App.controller(
         resolve: {
           diff() {
             return $scope.history.diff
-          }
-        }
+          },
+        },
       })
     }
 

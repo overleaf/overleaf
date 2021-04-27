@@ -26,30 +26,30 @@ describe('NotificationsController', function () {
   beforeEach(function () {
     this.handler = {
       getUserNotifications: sinon.stub().callsArgWith(1),
-      markAsRead: sinon.stub().callsArgWith(2)
+      markAsRead: sinon.stub().callsArgWith(2),
     }
     this.req = {
       params: {
-        notification_id
+        notification_id,
       },
       session: {
         user: {
-          _id: user_id
-        }
+          _id: user_id,
+        },
       },
       i18n: {
-        translate() {}
-      }
+        translate() {},
+      },
     }
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns(this.req.session.user._id)
+      getLoggedInUserId: sinon.stub().returns(this.req.session.user._id),
     }
     return (this.controller = SandboxedModule.require(modulePath, {
       requires: {
         './NotificationsHandler': this.handler,
         '../Authentication/AuthenticationController': this
-          .AuthenticationController
-      }
+          .AuthenticationController,
+      },
     }))
   })
 
@@ -63,7 +63,7 @@ describe('NotificationsController', function () {
         body.should.deep.equal(allNotifications)
         this.handler.getUserNotifications.calledWith(user_id).should.equal(true)
         return done()
-      }
+      },
     })
   })
 
@@ -74,7 +74,7 @@ describe('NotificationsController', function () {
           .calledWith(user_id, notification_id)
           .should.equal(true)
         return done()
-      }
+      },
     })
   })
 })

@@ -62,7 +62,7 @@ const ProjectOptionsHandler = {
     const conditions = { _id: projectId }
     const update = { $unset: { brandVariationId: 1 } }
     Project.updateOne(conditions, update, {}, callback)
-  }
+  },
 }
 
 ProjectOptionsHandler.promises = promisifyAll(ProjectOptionsHandler)

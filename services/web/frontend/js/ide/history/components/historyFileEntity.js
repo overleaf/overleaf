@@ -93,11 +93,11 @@ const historyFileEntityController = function ($scope, $element, $attrs) {
 
 export default App.component('historyFileEntity', {
   require: {
-    historyFileTreeController: '^historyFileTree'
+    historyFileTreeController: '^historyFileTree',
   },
   bindings: {
-    fileEntity: '<'
+    fileEntity: '<',
   },
   controller: historyFileEntityController,
-  templateUrl: 'historyFileEntityTpl'
+  templateUrl: 'historyFileEntityTpl',
 })

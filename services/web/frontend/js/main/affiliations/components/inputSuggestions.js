@@ -64,7 +64,7 @@ export default App.component('inputSuggestions', {
     inputName: '@?',
     inputPlaceholder: '@?',
     inputType: '@?',
-    inputRequired: '=?'
+    inputRequired: '=?',
   },
   controller: inputSuggestionsController,
   template: [
@@ -92,6 +92,6 @@ export default App.component('inputSuggestions', {
     ' ng-attr-type="{{ ::$ctrl.inputType }}"',
     ' ng-attr-name="{{ ::$ctrl.inputName }}"',
     ' ng-required="::$ctrl.inputRequired">',
-    '</div>'
-  ].join('')
+    '</div>',
+  ].join(''),
 })

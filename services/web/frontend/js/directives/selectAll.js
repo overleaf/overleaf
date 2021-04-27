@@ -21,9 +21,9 @@ App.directive('selectAllList', () => ({
       this.deselectAll = () => $scope.$broadcast('select-all:deselect')
 
       this.clearSelectAllState = () => $scope.$broadcast('select-all:clear')
-    }
+    },
   ],
-  link(scope, element, attrs) {}
+  link(scope, element, attrs) {},
 }))
 
 App.directive('selectAll', () => ({
@@ -39,13 +39,13 @@ App.directive('selectAll', () => ({
       }
       return true
     })
-  }
+  },
 }))
 
 App.directive('selectIndividual', () => ({
   require: '^selectAllList',
   scope: {
-    ngModel: '='
+    ngModel: '=',
   },
   link(scope, element, attrs, selectAllListController) {
     let ignoreChanges = false
@@ -87,12 +87,12 @@ App.directive('selectIndividual', () => ({
       })
       return (ignoreChanges = false)
     })
-  }
+  },
 }))
 
 export default App.directive('selectRow', () => ({
   scope: true,
   link(scope, element, attrs) {
     return element.on('click', e => scope.$broadcast('select-all:row-clicked'))
-  }
+  },
 }))

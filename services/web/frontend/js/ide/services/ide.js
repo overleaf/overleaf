@@ -30,7 +30,7 @@ App.factory(
         eventTracking.sendMB('losing-edits', meta)
         // clone the meta object, reportError adds additional fields into it
         ide.reportError('losing-edits', Object.assign({}, meta))
-      }
+      },
     })
 
     this.recentEvents = []
@@ -75,7 +75,7 @@ App.factory(
       return $http.post('/error/client', {
         error: errorObj,
         meta,
-        _csrf: window.csrfToken
+        _csrf: window.csrfToken,
       })
     }
 
@@ -89,8 +89,8 @@ App.factory(
           },
           message() {
             return message
-          }
-        }
+          },
+        },
       })
 
     ide.showOutOfSyncModal = (title, message, editorContent) =>
@@ -108,9 +108,9 @@ App.factory(
           },
           editorContent() {
             return editorContent
-          }
+          },
         },
-        windowClass: 'out-of-sync-modal'
+        windowClass: 'out-of-sync-modal',
       })
 
     ide.showLockEditorMessageModal = (title, message) =>
@@ -126,9 +126,9 @@ App.factory(
           },
           message() {
             return message
-          }
+          },
         },
-        windowClass: 'lock-editor-modal'
+        windowClass: 'lock-editor-modal',
       })
 
     return ide

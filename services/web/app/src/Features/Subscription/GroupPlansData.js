@@ -44,7 +44,7 @@ for (const [usage, planData] of Object.entries(groups)) {
         features: Settings.features[planCode],
         groupPlan: true,
         membersLimit: parseInt(size),
-        membersLimitAddOn: 'additional-license'
+        membersLimitAddOn: 'additional-license',
       })
     }
   }

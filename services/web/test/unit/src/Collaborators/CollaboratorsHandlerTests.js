@@ -19,46 +19,46 @@ describe('CollaboratorsHandler', function () {
     this.userId = ObjectId()
     this.addingUserId = ObjectId()
     this.project = {
-      _id: ObjectId()
+      _id: ObjectId(),
     }
 
     this.archivedProject = {
       _id: ObjectId(),
-      archived: [ObjectId(this.userId)]
+      archived: [ObjectId(this.userId)],
     }
 
     this.oldArchivedProject = {
       _id: ObjectId(),
-      archived: true
+      archived: true,
     }
 
     this.UserGetter = {
       promises: {
-        getUser: sinon.stub().resolves(null)
-      }
+        getUser: sinon.stub().resolves(null),
+      },
     }
     this.ContactManager = {
-      addContact: sinon.stub()
+      addContact: sinon.stub(),
     }
     this.ProjectMock = sinon.mock(Project)
     this.TpdsProjectFlusher = {
       promises: {
-        flushProjectToTpds: sinon.stub().resolves()
-      }
+        flushProjectToTpds: sinon.stub().resolves(),
+      },
     }
     this.ProjectGetter = {
       promises: {
-        getProject: sinon.stub().resolves(this.project)
-      }
+        getProject: sinon.stub().resolves(this.project),
+      },
     }
 
     this.ProjectHelper = {
-      calculateArchivedArray: sinon.stub()
+      calculateArchivedArray: sinon.stub(),
     }
     this.CollaboratorsGetter = {
       promises: {
-        getProjectsUserIsMemberOf: sinon.stub()
-      }
+        getProjectsUserIsMemberOf: sinon.stub(),
+      },
     }
     this.CollaboratorsHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -68,8 +68,8 @@ describe('CollaboratorsHandler', function () {
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Project/ProjectHelper': this.ProjectHelper,
-        './CollaboratorsGetter': this.CollaboratorsGetter
-      }
+        './CollaboratorsGetter': this.CollaboratorsGetter,
+      },
     })
   })
 
@@ -82,7 +82,7 @@ describe('CollaboratorsHandler', function () {
       beforeEach(function () {
         this.ProjectMock.expects('findOne')
           .withArgs({
-            _id: this.project._id
+            _id: this.project._id,
           })
           .chain('exec')
           .resolves(this.project)
@@ -92,7 +92,7 @@ describe('CollaboratorsHandler', function () {
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
-              _id: this.project._id
+              _id: this.project._id,
             },
             {
               $pull: {
@@ -101,8 +101,8 @@ describe('CollaboratorsHandler', function () {
                 tokenAccessReadOnly_refs: this.userId,
                 tokenAccessReadAndWrite_refs: this.userId,
                 archived: this.userId,
-                trashed: this.userId
-              }
+                trashed: this.userId,
+              },
             }
           )
           .chain('exec')
@@ -121,7 +121,7 @@ describe('CollaboratorsHandler', function () {
 
         this.ProjectMock.expects('findOne')
           .withArgs({
-            _id: this.oldArchivedProject._id
+            _id: this.oldArchivedProject._id,
           })
           .chain('exec')
           .resolves(this.oldArchivedProject)
@@ -131,19 +131,19 @@ describe('CollaboratorsHandler', function () {
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
-              _id: this.oldArchivedProject._id
+              _id: this.oldArchivedProject._id,
             },
             {
               $set: {
-                archived: []
+                archived: [],
               },
               $pull: {
                 collaberator_refs: this.userId,
                 readOnly_refs: this.userId,
                 tokenAccessReadOnly_refs: this.userId,
                 tokenAccessReadAndWrite_refs: this.userId,
-                trashed: this.userId
-              }
+                trashed: this.userId,
+              },
             }
           )
           .resolves()
@@ -158,7 +158,7 @@ describe('CollaboratorsHandler', function () {
       beforeEach(function () {
         this.ProjectMock.expects('findOne')
           .withArgs({
-            _id: this.archivedProject._id
+            _id: this.archivedProject._id,
           })
           .chain('exec')
           .resolves(this.archivedProject)
@@ -168,7 +168,7 @@ describe('CollaboratorsHandler', function () {
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
-              _id: this.archivedProject._id
+              _id: this.archivedProject._id,
             },
             {
               $pull: {
@@ -177,8 +177,8 @@ describe('CollaboratorsHandler', function () {
                 tokenAccessReadOnly_refs: this.userId,
                 tokenAccessReadAndWrite_refs: this.userId,
                 archived: this.userId,
-                trashed: this.userId
-              }
+                trashed: this.userId,
+              },
             }
           )
           .resolves()
@@ -196,10 +196,10 @@ describe('CollaboratorsHandler', function () {
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
-              _id: this.project._id
+              _id: this.project._id,
             },
             {
-              $addToSet: { readOnly_refs: this.userId }
+              $addToSet: { readOnly_refs: this.userId },
             }
           )
           .chain('exec')
@@ -231,10 +231,10 @@ describe('CollaboratorsHandler', function () {
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
-              _id: this.project._id
+              _id: this.project._id,
             },
             {
-              $addToSet: { collaberator_refs: this.userId }
+              $addToSet: { collaberator_refs: this.userId },
             }
           )
           .chain('exec')
@@ -308,17 +308,17 @@ describe('CollaboratorsHandler', function () {
         .resolves({
           readAndWrite: [
             { _id: 'read-and-write-0' },
-            { _id: 'read-and-write-1' }
+            { _id: 'read-and-write-1' },
           ],
           readOnly: [{ _id: 'read-only-0' }, { _id: 'read-only-1' }],
           tokenReadAndWrite: [
             { _id: 'token-read-and-write-0' },
-            { _id: 'token-read-and-write-1' }
+            { _id: 'token-read-and-write-1' },
           ],
           tokenReadOnly: [
             { _id: 'token-read-only-0' },
-            { _id: 'token-read-only-1' }
-          ]
+            { _id: 'token-read-only-1' },
+          ],
         })
       const expectedProjects = [
         'read-and-write-0',
@@ -328,12 +328,12 @@ describe('CollaboratorsHandler', function () {
         'token-read-and-write-0',
         'token-read-and-write-1',
         'token-read-only-0',
-        'token-read-only-1'
+        'token-read-only-1',
       ]
       for (const projectId of expectedProjects) {
         this.ProjectMock.expects('findOne')
           .withArgs({
-            _id: projectId
+            _id: projectId,
           })
           .chain('exec')
           .resolves({ _id: projectId })
@@ -341,7 +341,7 @@ describe('CollaboratorsHandler', function () {
         this.ProjectMock.expects('updateOne')
           .withArgs(
             {
-              _id: projectId
+              _id: projectId,
             },
             {
               $pull: {
@@ -350,8 +350,8 @@ describe('CollaboratorsHandler', function () {
                 tokenAccessReadOnly_refs: this.userId,
                 tokenAccessReadAndWrite_refs: this.userId,
                 archived: this.userId,
-                trashed: this.userId
-              }
+                trashed: this.userId,
+              },
             }
           )
           .resolves()
@@ -368,19 +368,19 @@ describe('CollaboratorsHandler', function () {
       this.toUserId = ObjectId()
       this.projects = [
         {
-          _id: ObjectId()
+          _id: ObjectId(),
         },
         {
-          _id: ObjectId()
-        }
+          _id: ObjectId(),
+        },
       ]
       this.ProjectMock.expects('find')
         .withArgs({
           $or: [
             { owner_ref: this.fromUserId },
             { collaberator_refs: this.fromUserId },
-            { readOnly_refs: this.fromUserId }
-          ]
+            { readOnly_refs: this.fromUserId },
+          ],
         })
         .chain('exec')
         .resolves(this.projects)
@@ -395,7 +395,7 @@ describe('CollaboratorsHandler', function () {
         .withArgs(
           { collaberator_refs: this.fromUserId },
           {
-            $addToSet: { collaberator_refs: this.toUserId }
+            $addToSet: { collaberator_refs: this.toUserId },
           }
         )
         .chain('exec')
@@ -404,7 +404,7 @@ describe('CollaboratorsHandler', function () {
         .withArgs(
           { collaberator_refs: this.fromUserId },
           {
-            $pull: { collaberator_refs: this.fromUserId }
+            $pull: { collaberator_refs: this.fromUserId },
           }
         )
         .chain('exec')
@@ -413,7 +413,7 @@ describe('CollaboratorsHandler', function () {
         .withArgs(
           { readOnly_refs: this.fromUserId },
           {
-            $addToSet: { readOnly_refs: this.toUserId }
+            $addToSet: { readOnly_refs: this.toUserId },
           }
         )
         .chain('exec')
@@ -422,7 +422,7 @@ describe('CollaboratorsHandler', function () {
         .withArgs(
           { readOnly_refs: this.fromUserId },
           {
-            $pull: { readOnly_refs: this.fromUserId }
+            $pull: { readOnly_refs: this.fromUserId },
           }
         )
         .chain('exec')
@@ -467,12 +467,12 @@ describe('CollaboratorsHandler', function () {
             _id: this.projectId,
             $or: [
               { collaberator_refs: this.userId },
-              { readOnly_refs: this.userId }
-            ]
+              { readOnly_refs: this.userId },
+            ],
           },
           {
             $pull: { collaberator_refs: this.userId },
-            $addToSet: { readOnly_refs: this.userId }
+            $addToSet: { readOnly_refs: this.userId },
           }
         )
         .chain('exec')
@@ -491,12 +491,12 @@ describe('CollaboratorsHandler', function () {
             _id: this.projectId,
             $or: [
               { collaberator_refs: this.userId },
-              { readOnly_refs: this.userId }
-            ]
+              { readOnly_refs: this.userId },
+            ],
           },
           {
             $addToSet: { collaberator_refs: this.userId },
-            $pull: { readOnly_refs: this.userId }
+            $pull: { readOnly_refs: this.userId },
           }
         )
         .chain('exec')

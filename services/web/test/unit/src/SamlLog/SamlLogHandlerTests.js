@@ -12,7 +12,7 @@ describe('SamlLogHandler', function () {
 
   beforeEach(function () {
     samlLog = {
-      save: sinon.stub()
+      save: sinon.stub(),
     }
     SamlLog = function () {
       return samlLog
@@ -20,8 +20,8 @@ describe('SamlLogHandler', function () {
     SamlLogModel = { SamlLog }
     SamlLogHandler = SandboxedModule.require(modulePath, {
       requires: {
-        '../../models/SamlLog': SamlLogModel
-      }
+        '../../models/SamlLog': SamlLogModel,
+      },
     })
 
     data = { foo: true }

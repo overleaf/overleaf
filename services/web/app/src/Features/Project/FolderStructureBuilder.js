@@ -67,7 +67,7 @@ class FolderStructureBuilder {
       name,
       folders: [],
       docs: [],
-      fileRefs: []
+      fileRefs: [],
     }
   }
 }

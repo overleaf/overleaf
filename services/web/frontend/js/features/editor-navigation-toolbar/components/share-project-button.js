@@ -16,7 +16,7 @@ function ShareProjectButton({ onClick }) {
 }
 
 ShareProjectButton.propTypes = {
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
 }
 
 export default ShareProjectButton

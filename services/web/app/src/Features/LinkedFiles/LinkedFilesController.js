@@ -33,7 +33,7 @@ const {
   NotOriginalImporterError,
   FeatureNotAvailableError,
   RemoteServiceError,
-  FileCannotRefreshError
+  FileCannotRefreshError,
 } = require('./LinkedFilesErrors')
 const Modules = require('../../infrastructure/Modules')
 
@@ -42,7 +42,7 @@ module.exports = LinkedFilesController = {
     {
       url: require('./UrlAgent'),
       project_file: require('./ProjectFileAgent'),
-      project_output_file: require('./ProjectOutputFileAgent')
+      project_output_file: require('./ProjectOutputFileAgent'),
     },
     Modules.linkedFileAgentsIncludes()
   ),
@@ -174,5 +174,5 @@ module.exports = LinkedFilesController = {
     } else {
       return next(error)
     }
-  }
+  },
 }

@@ -28,7 +28,7 @@ describe('<PreviewLogsToggleButton />', function () {
   describe('basic toggle functionality', function () {
     const logsState = {
       nErrors: 0,
-      nWarnings: 0
+      nWarnings: 0,
     }
     const onToggleLogs = () => {}
     it('should render a view logs button when previewing the PDF', function () {
@@ -48,7 +48,7 @@ describe('<PreviewLogsToggleButton />', function () {
     it('should render a view logs button by default', function () {
       const logsState = {
         nErrors: 0,
-        nWarnings: 0
+        nWarnings: 0,
       }
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
       screen.getByText('View logs')
@@ -57,7 +57,7 @@ describe('<PreviewLogsToggleButton />', function () {
     it('should render the code check failed notice', function () {
       const logsState = {
         nErrors: 1,
-        nWarnings: 0
+        nWarnings: 0,
       }
       renderPreviewLogsToggleButton(
         logsState,
@@ -72,7 +72,7 @@ describe('<PreviewLogsToggleButton />', function () {
     it('should render an error status message when there are errors', function () {
       const logsState = {
         nErrors: 1,
-        nWarnings: 0
+        nWarnings: 0,
       }
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
       screen.getByText(`This project has errors (${logsState.nErrors})`)
@@ -81,7 +81,7 @@ describe('<PreviewLogsToggleButton />', function () {
     it('should render an error status message when there are both errors and warnings', function () {
       const logsState = {
         nErrors: 1,
-        nWarnings: 1
+        nWarnings: 1,
       }
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
       screen.getByText(`This project has errors (${logsState.nErrors})`)
@@ -90,7 +90,7 @@ describe('<PreviewLogsToggleButton />', function () {
     it('should render a warning status message when there are warnings but no errors', function () {
       const logsState = {
         nErrors: 0,
-        nWarnings: 1
+        nWarnings: 1,
       }
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
       screen.getByText(`View warnings (${logsState.nWarnings})`)
@@ -99,7 +99,7 @@ describe('<PreviewLogsToggleButton />', function () {
     it('should render 99+ errors when there are more than 99 errors', function () {
       const logsState = {
         nErrors: 100,
-        nWarnings: 0
+        nWarnings: 0,
       }
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
       screen.getByText('This project has errors (99+)')
@@ -107,7 +107,7 @@ describe('<PreviewLogsToggleButton />', function () {
     it('should show the button text when prop showText=true', function () {
       const logsState = {
         nErrors: 0,
-        nWarnings: 0
+        nWarnings: 0,
       }
       const showText = true
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs, showText)
@@ -116,7 +116,7 @@ describe('<PreviewLogsToggleButton />', function () {
     it('should not show the button text when prop showText=false', function () {
       const logsState = {
         nErrors: 0,
-        nWarnings: 0
+        nWarnings: 0,
       }
       const showText = false
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs, showText)

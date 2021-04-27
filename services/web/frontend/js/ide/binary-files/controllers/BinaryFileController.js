@@ -31,7 +31,7 @@ export default App.controller(
       loading: false,
       shouldShowDots: false,
       error: false,
-      data: null
+      data: null,
     }
 
     $scope.refreshing = false
@@ -147,7 +147,7 @@ export default App.controller(
       }
       return $http
         .get(url, {
-          transformResponse: null // Don't parse JSON
+          transformResponse: null, // Don't parse JSON
         })
         .then(response => {
           return response.data

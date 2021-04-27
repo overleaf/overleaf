@@ -34,7 +34,7 @@ UserSessionsManager = {
             'error while adding session key to UserSessions set',
             {
               user_id: user._id,
-              sessionSetKey
+              sessionSetKey,
             }
           )
           return callback(err)
@@ -67,7 +67,7 @@ UserSessionsManager = {
             'error while removing session key from UserSessions set',
             {
               user_id: user._id,
-              sessionSetKey
+              sessionSetKey,
             }
           )
           return callback(err)
@@ -83,7 +83,7 @@ UserSessionsManager = {
     rclient.smembers(sessionSetKey, function (err, sessionKeys) {
       if (err) {
         OError.tag(err, 'error getting all session keys for user from redis', {
-          user_id: user._id
+          user_id: user._id,
         })
         return callback(err)
       }
@@ -99,7 +99,7 @@ UserSessionsManager = {
         function (err, sessions) {
           if (err) {
             OError.tag(err, 'error getting all sessions for user from redis', {
-              user_id: user._id
+              user_id: user._id,
             })
             return callback(err)
           }
@@ -117,7 +117,7 @@ UserSessionsManager = {
 
             result.push({
               ip_address: sessionUser.ip_address,
-              session_created: sessionUser.session_created
+              session_created: sessionUser.session_created,
             })
           }
 
@@ -140,7 +140,7 @@ UserSessionsManager = {
       if (err) {
         OError.tag(err, 'error getting contents of UserSessions set', {
           user_id: user._id,
-          sessionSetKey
+          sessionSetKey,
         })
         return callback(err)
       }
@@ -166,7 +166,7 @@ UserSessionsManager = {
         if (err) {
           OError.tag(err, 'error revoking all sessions for user', {
             user_id: user._id,
-            sessionSetKey
+            sessionSetKey,
           })
           return callback(err)
         }
@@ -174,7 +174,7 @@ UserSessionsManager = {
           if (err) {
             OError.tag(err, 'error removing session set for user', {
               user_id: user._id,
-              sessionSetKey
+              sessionSetKey,
             })
             return callback(err)
           }
@@ -195,7 +195,7 @@ UserSessionsManager = {
       function (err, response) {
         if (err) {
           OError.tag(err, 'error while updating ttl on UserSessions set', {
-            user_id: user._id
+            user_id: user._id,
           })
           return callback(err)
         }
@@ -213,7 +213,7 @@ UserSessionsManager = {
       if (err) {
         OError.tag(err, 'error getting contents of UserSessions set', {
           user_id: user._id,
-          sessionSetKey
+          sessionSetKey,
         })
         return callback(err)
       }
@@ -237,12 +237,12 @@ UserSessionsManager = {
         }
       )
     })
-  }
+  },
 }
 
 UserSessionsManager.promises = {
   getAllUserSessions: promisify(UserSessionsManager.getAllUserSessions),
-  revokeAllUserSessions: promisify(UserSessionsManager.revokeAllUserSessions)
+  revokeAllUserSessions: promisify(UserSessionsManager.revokeAllUserSessions),
 }
 
 module.exports = UserSessionsManager

@@ -83,7 +83,7 @@ if (Settings.exposeHostname) {
 
 webRouter.use(
   express.static(Path.join(__dirname, '/../../../public'), {
-    maxAge: STATIC_CACHE_AGE
+    maxAge: STATIC_CACHE_AGE,
   })
 )
 app.set('views', Path.join(__dirname, '/../../views'))
@@ -111,11 +111,11 @@ webRouter.use(
       domain: Settings.cookieDomain,
       maxAge: Settings.cookieSessionLength, // in milliseconds, see https://github.com/expressjs/session#cookiemaxage
       secure: Settings.secureCookie,
-      sameSite: Settings.sameSiteCookie
+      sameSite: Settings.sameSiteCookie,
     },
     store: sessionStore,
     key: Settings.cookieName,
-    rolling: true
+    rolling: true,
   })
 )
 
@@ -133,7 +133,7 @@ passport.use(
     {
       passReqToCallback: true,
       usernameField: 'email',
-      passwordField: 'password'
+      passwordField: 'password',
     },
     AuthenticationController.doPassportLogin
   )
@@ -218,7 +218,7 @@ webRouter.use(
     // note that more headers are added by default
     dnsPrefetchControl: false,
     referrerPolicy: { policy: 'origin-when-cross-origin' },
-    hsts: false
+    hsts: false,
   })
 )
 
@@ -267,5 +267,5 @@ Router.initialize(webRouter, privateApiRouter, publicApiRouter)
 
 module.exports = {
   app,
-  server
+  server,
 }

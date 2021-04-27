@@ -6,8 +6,8 @@ async function run({ assertHasStatusCode, loginCsrfToken, request }) {
     json: {
       _csrf: loginCsrfToken,
       email: Settings.smokeTest.user,
-      password: Settings.smokeTest.password
-    }
+      password: Settings.smokeTest.password,
+    },
   })
 
   const body = response.body
@@ -26,8 +26,8 @@ async function cleanup({ assertHasStatusCode, getCsrfTokenFor, request }) {
   const response = await request('/logout', {
     method: 'POST',
     headers: {
-      'X-CSRF-Token': logoutCsrfToken
-    }
+      'X-CSRF-Token': logoutCsrfToken,
+    },
   })
   assertHasStatusCode(response, 302)
 }

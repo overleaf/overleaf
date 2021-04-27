@@ -18,7 +18,7 @@ const LANGUAGES = [
   'ru',
   'sv',
   'tr',
-  'zh-CN'
+  'zh-CN',
 ]
 const LOCALES = {}
 LANGUAGES.forEach(loadLocales)
@@ -45,5 +45,5 @@ function transformLocales(mapping, transformLocale) {
 }
 
 module.exports = {
-  transformLocales
+  transformLocales,
 }

@@ -30,6 +30,6 @@ export default App.service('ProjectListService', function () {
       } else {
         return 'None'
       }
-    }
+    },
   }
 })

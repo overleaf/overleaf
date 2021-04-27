@@ -17,7 +17,7 @@ module.exports = UserController = {
         role: true,
         institution: true,
         email: true,
-        signUpDate: true
+        signUpDate: true,
       },
       function (error, user) {
         if (error) {
@@ -71,12 +71,12 @@ module.exports = UserController = {
       'email',
       'signUpDate',
       'role',
-      'institution'
+      'institution',
     ]) {
       if (user[key]) {
         formattedUser[key] = user[key]
       }
     }
     return formattedUser
-  }
+  },
 }

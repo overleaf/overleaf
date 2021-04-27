@@ -38,36 +38,36 @@ describe('ExportsController', function () {
     this.req = {
       params: {
         project_id,
-        brand_variation_id
+        brand_variation_id,
       },
       body: {
         firstName,
-        lastName
+        lastName,
       },
       session: {
         user: {
-          _id: user_id
-        }
+          _id: user_id,
+        },
       },
       i18n: {
-        translate() {}
-      }
+        translate() {},
+      },
     }
     this.res = {
       json: sinon.stub(),
-      status: sinon.stub()
+      status: sinon.stub(),
     }
     this.res.status.returns(this.res)
     this.next = sinon.stub()
     this.AuthenticationController = {
-      getLoggedInUserId: sinon.stub().returns(this.req.session.user._id)
+      getLoggedInUserId: sinon.stub().returns(this.req.session.user._id),
     }
     return (this.controller = SandboxedModule.require(modulePath, {
       requires: {
         './ExportsHandler': this.handler,
         '../Authentication/AuthenticationController': this
-          .AuthenticationController
-      }
+          .AuthenticationController,
+      },
     }))
   })
 
@@ -81,14 +81,14 @@ describe('ExportsController', function () {
         user_id,
         brand_variation_id,
         first_name: firstName,
-        last_name: lastName
+        last_name: lastName,
       }
       return this.controller.exportProject(this.req, {
         json: body => {
           expect(this.handler.exportProject.args[0][0]).to.deep.equal(expected)
           expect(body).to.deep.equal({ export_v1_id: 897, message: undefined })
           return done()
-        }
+        },
       })
     })
   })
@@ -98,24 +98,24 @@ describe('ExportsController', function () {
       this.handler.exportProject = sinon.stub().yields(null, {
         iAmAnExport: true,
         v1_id: 897,
-        message: 'RESUBMISSION'
+        message: 'RESUBMISSION',
       })
       const expected = {
         project_id,
         user_id,
         brand_variation_id,
         first_name: firstName,
-        last_name: lastName
+        last_name: lastName,
       }
       return this.controller.exportProject(this.req, {
         json: body => {
           expect(this.handler.exportProject.args[0][0]).to.deep.equal(expected)
           expect(body).to.deep.equal({
             export_v1_id: 897,
-            message: 'RESUBMISSION'
+            message: 'RESUBMISSION',
           })
           return done()
-        }
+        },
       })
     })
   })
@@ -143,14 +143,14 @@ describe('ExportsController', function () {
         description,
         author,
         license,
-        show_source
+        show_source,
       }
       return this.controller.exportProject(this.req, {
         json: body => {
           expect(this.handler.exportProject.args[0][0]).to.deep.equal(expected)
           expect(body).to.deep.equal({ export_v1_id: 897, message: undefined })
           return done()
-        }
+        },
       })
     })
   })
@@ -196,11 +196,11 @@ describe('ExportsController', function () {
             v2_user_first_name: 'Arthur',
             v2_user_last_name: 'Author',
             title: 'my project',
-            token: 'token'
-          }
+            token: 'token',
+          },
         })
         return done()
-      }
+      },
     })
   })
 })

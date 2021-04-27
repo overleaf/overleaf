@@ -7,7 +7,7 @@ import {
   Button,
   ControlLabel,
   FormControl,
-  FormGroup
+  FormGroup,
 } from 'react-bootstrap'
 import AccessibleModal from '../../../shared/components/accessible-modal'
 
@@ -20,7 +20,7 @@ export default function CloneProjectModalContent({
   setClonedProjectName,
   error,
   inFlight,
-  valid
+  valid,
 }) {
   return (
     <AccessibleModal
@@ -96,5 +96,5 @@ CloneProjectModalContent.propTypes = {
   setClonedProjectName: PropTypes.func.isRequired,
   error: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
   inFlight: PropTypes.bool.isRequired,
-  valid: PropTypes.bool.isRequired
+  valid: PropTypes.bool.isRequired,
 }

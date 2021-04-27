@@ -32,7 +32,7 @@ describe('Sharing', function () {
       )
       const project = await this.ownerSession.getProject(this.projectId)
       expect(project.collaberator_refs).to.be.unordered.ids([
-        this.collaborator._id
+        this.collaborator._id,
       ])
       expect(project.readOnly_refs).to.deep.equal([])
     })

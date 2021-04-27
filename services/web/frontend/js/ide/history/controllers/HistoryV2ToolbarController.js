@@ -22,11 +22,11 @@ export default App.controller(
 
     $scope.restoreState = {
       inflight: false,
-      error: false
+      error: false,
     }
 
     $scope.toolbarUIConfig = {
-      showOnlyLabels: false
+      showOnlyLabels: false,
     }
 
     let _deregistershowOnlyLabelsWatcher = $scope.$watch(
@@ -98,8 +98,8 @@ export default App.controller(
         resolve: {
           update() {
             return $scope.history.selection.update
-          }
-        }
+          },
+        },
       })
     }
 

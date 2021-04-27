@@ -6,7 +6,7 @@ module.exports = {
       expect(response.statusCode).to.equal(401)
       expect(body).to.equal('Unauthorized')
       expect(response.headers['www-authenticate']).to.equal('OverleafLogin')
-    }
+    },
   },
 
   restricted: {
@@ -17,6 +17,6 @@ module.exports = {
     json(response, body) {
       expect(response.statusCode).to.equal(403)
       expect(body).to.deep.equal({ message: 'restricted' })
-    }
-  }
+    },
+  },
 }

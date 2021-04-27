@@ -13,30 +13,30 @@ describe('AuthorizationMiddleware', function () {
     this.token = 'some-token'
     this.AuthenticationController = {
       getLoggedInUserId: sinon.stub().returns(this.userId),
-      isUserLoggedIn: sinon.stub().returns(true)
+      isUserLoggedIn: sinon.stub().returns(true),
     }
     this.AuthorizationManager = {}
     this.HttpErrorHandler = {
-      forbidden: sinon.stub()
+      forbidden: sinon.stub(),
     }
     this.TokenAccessHandler = {
-      getRequestToken: sinon.stub().returns(this.token)
+      getRequestToken: sinon.stub().returns(this.token),
     }
     this.ObjectId = {
-      isValid: sinon.stub().withArgs(this.project_id).returns(true)
+      isValid: sinon.stub().withArgs(this.project_id).returns(true),
     }
     this.AuthorizationManager = {}
     this.AuthorizationMiddleware = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './AuthorizationManager': this.AuthorizationManager,
         mongodb: {
-          ObjectId: this.ObjectId
+          ObjectId: this.ObjectId,
         },
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
-        '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler
-      }
+        '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
+      },
     })
     this.req = {}
     this.res = {}
@@ -87,7 +87,7 @@ describe('AuthorizationMiddleware', function () {
   const METHODS_TO_TEST = {
     ensureUserCanReadProject: 'canUserReadProject',
     ensureUserCanWriteProjectSettings: 'canUserWriteProjectSettings',
-    ensureUserCanWriteProjectContent: 'canUserWriteProjectContent'
+    ensureUserCanWriteProjectContent: 'canUserWriteProjectContent',
   }
   Object.entries(METHODS_TO_TEST).forEach(
     ([middlewareMethod, managerMethod]) => {

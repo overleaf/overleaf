@@ -49,5 +49,5 @@ export default App.directive('infiniteScroll', () => ({
         return loadUntilFull()
       }
     })
-  }
+  },
 }))

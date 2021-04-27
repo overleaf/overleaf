@@ -33,8 +33,8 @@ describe('ProjectDownloadsController', function () {
           '../Project/ProjectGetter': (this.ProjectGetter = {}),
           '@overleaf/metrics': (this.metrics = {}),
           '../DocumentUpdater/DocumentUpdaterHandler': this
-            .DocumentUpdaterHandler
-        }
+            .DocumentUpdaterHandler,
+        },
       }
     ))
   })
@@ -148,7 +148,7 @@ describe('ProjectDownloadsController', function () {
     it('should name the downloaded file after the project', function () {
       return this.res.setContentDisposition
         .calledWith('attachment', {
-          filename: 'Overleaf Projects (2 items).zip'
+          filename: 'Overleaf Projects (2 items).zip',
         })
         .should.equal(true)
     })

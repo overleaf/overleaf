@@ -179,5 +179,5 @@ module.exports = ProjectZipStreamManager = {
         return async.parallelLimit(jobs, 5, callback)
       }
     )
-  }
+  },
 }

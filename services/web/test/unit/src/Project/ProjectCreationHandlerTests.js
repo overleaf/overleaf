@@ -29,8 +29,8 @@ describe('ProjectCreationHandler', function () {
     this.ProjectModel.prototype.rootFolder = [
       {
         _id: rootFolderId,
-        docs: []
-      }
+        docs: [],
+      },
     ]
     this.FolderModel = class Folder {
       constructor(options) {
@@ -40,7 +40,7 @@ describe('ProjectCreationHandler', function () {
     this.ProjectEntityUpdateHandler = {
       addDoc: sinon.stub().callsArgWith(5, null, { _id: docId }),
       addFile: sinon.stub().callsArg(6),
-      setRootDoc: sinon.stub().callsArg(2)
+      setRootDoc: sinon.stub().callsArg(2),
     }
     this.ProjectDetailsHandler = { validateProjectName: sinon.stub().yields() }
     this.HistoryManager = { initializeProject: sinon.stub().callsArg(0) }
@@ -49,8 +49,8 @@ describe('ProjectCreationHandler', function () {
       first_name: 'first name here',
       last_name: 'last name here',
       ace: {
-        spellCheckLanguage: 'de'
-      }
+        spellCheckLanguage: 'de',
+      },
     }
 
     this.User = { findById: sinon.stub().callsArgWith(2, null, this.user) }
@@ -64,7 +64,7 @@ describe('ProjectCreationHandler', function () {
       requires: {
         mongodb: { ObjectId },
         '../../models/User': {
-          User: this.User
+          User: this.User,
         },
         '../../models/Project': { Project: this.ProjectModel },
         '../../models/Folder': { Folder: this.FolderModel },
@@ -75,9 +75,9 @@ describe('ProjectCreationHandler', function () {
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         '@overleaf/metrics': {
           inc() {},
-          timeAsyncMethod() {}
-        }
-      }
+          timeAsyncMethod() {},
+        },
+      },
     })
   })
 
@@ -138,9 +138,9 @@ describe('ProjectCreationHandler', function () {
         const attributes = {
           overleaf: {
             history: {
-              id: overleafId
-            }
-          }
+              id: overleafId,
+            },
+          },
         }
         this.handler.createBlankProject(
           ownerId,
@@ -269,7 +269,7 @@ describe('ProjectCreationHandler', function () {
 
       it('should send a project-created event with template information if provided', function (done) {
         const attributes = {
-          fromV1TemplateId: 100
+          fromV1TemplateId: 100,
         }
         this.handler.createBlankProject(
           ownerId,
@@ -296,9 +296,9 @@ describe('ProjectCreationHandler', function () {
         const attributes = {
           overleaf: {
             history: {
-              id: 100
-            }
-          }
+              id: 100,
+            },
+          },
         }
         this.handler.createBlankProject(
           ownerId,

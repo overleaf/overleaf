@@ -28,8 +28,8 @@ module.exports = {
       return res.status(422).json({
         error: {
           code: 'invalid_email',
-          message: req.i18n.translate('invalid_email')
-        }
+          message: req.i18n.translate('invalid_email'),
+        },
       })
     }
 
@@ -43,16 +43,16 @@ module.exports = {
             return res.status(400).json({
               error: {
                 code: 'user_already_added',
-                message: req.i18n.translate('user_already_added')
-              }
+                message: req.i18n.translate('user_already_added'),
+              },
             })
           }
           if (err.limitReached) {
             return res.status(400).json({
               error: {
                 code: 'group_full',
-                message: req.i18n.translate('group_full')
-              }
+                message: req.i18n.translate('group_full'),
+              },
             })
           }
           return next(err)
@@ -96,7 +96,7 @@ module.exports = {
               inviteToken: invite.token,
               hasIndividualRecurlySubscription,
               appName: settings.appName,
-              expired: req.query.expired
+              expired: req.query.expired,
             })
           }
         )
@@ -139,5 +139,5 @@ module.exports = {
         return res.sendStatus(204)
       }
     )
-  }
+  },
 }

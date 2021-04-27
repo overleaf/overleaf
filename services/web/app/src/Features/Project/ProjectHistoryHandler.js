@@ -79,7 +79,7 @@ const ProjectHistoryHandler = {
       { _id: project_id, 'overleaf.history.id': { $exists: true } },
       {
         'overleaf.history.display': true,
-        'overleaf.history.upgradedAt': new Date()
+        'overleaf.history.upgradedAt': new Date(),
       },
       function (err, result) {
         if (err != null) {
@@ -102,7 +102,7 @@ const ProjectHistoryHandler = {
       { _id: project_id, 'overleaf.history.upgradedAt': { $exists: true } },
       {
         'overleaf.history.display': false,
-        $unset: { 'overleaf.history.upgradedAt': 1 }
+        $unset: { 'overleaf.history.upgradedAt': 1 },
       },
       function (err, result) {
         if (err != null) {
@@ -162,7 +162,7 @@ const ProjectHistoryHandler = {
         })
       }
     )
-  }
+  },
 }
 
 function __guard__(value, transform) {

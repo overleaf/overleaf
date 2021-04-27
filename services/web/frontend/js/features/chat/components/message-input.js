@@ -30,7 +30,7 @@ function MessageInput({ resetUnreadMessages, sendMessage }) {
 
 MessageInput.propTypes = {
   resetUnreadMessages: PropTypes.func.isRequired,
-  sendMessage: PropTypes.func.isRequired
+  sendMessage: PropTypes.func.isRequired,
 }
 
 export default MessageInput

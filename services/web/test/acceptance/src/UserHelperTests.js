@@ -27,7 +27,7 @@ describe('UserHelper', function () {
     describe('with email', function () {
       it('should create new user with provided email and default password', async function () {
         const userHelper = await UserHelper.createUser({
-          email: 'foo@test.com'
+          email: 'foo@test.com',
         })
         userHelper.user.email.should.equal('foo@test.com')
         const authedUser = await AuthenticationManager.promises.authenticate(
@@ -41,7 +41,7 @@ describe('UserHelper', function () {
     describe('with password', function () {
       it('should create new user with provided password and default email', async function () {
         const userHelper = await UserHelper.createUser({
-          password: 'foofoofoo'
+          password: 'foofoofoo',
         })
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
         const authedUser = await AuthenticationManager.promises.authenticate(
@@ -86,7 +86,7 @@ describe('UserHelper', function () {
       it('should login user', async function () {
         const newUserHelper = await UserHelper.loginUser({
           email: userHelper.getDefaultEmail(),
-          password: userHelper.getDefaultPassword()
+          password: userHelper.getDefaultPassword(),
         })
         newUserHelper.user.email.should.equal(userHelper.user.email)
       })
@@ -95,7 +95,7 @@ describe('UserHelper', function () {
     describe('without email', function () {
       it('should throw error', async function () {
         await UserHelper.loginUser({
-          password: userHelper.getDefaultPassword()
+          password: userHelper.getDefaultPassword(),
         }).should.be.rejectedWith('email and password required')
       })
     })
@@ -103,7 +103,7 @@ describe('UserHelper', function () {
     describe('without password', function () {
       it('should throw error', async function () {
         await UserHelper.loginUser({
-          email: userHelper.getDefaultEmail()
+          email: userHelper.getDefaultEmail(),
         }).should.be.rejectedWith('email and password required')
       })
     })
@@ -133,7 +133,7 @@ describe('UserHelper', function () {
     describe('with email', function () {
       it('should create new user with provided email and default password', async function () {
         const userHelper = await UserHelper.registerUser({
-          email: 'foo2@test.com'
+          email: 'foo2@test.com',
         })
         userHelper.user.email.should.equal('foo2@test.com')
         const authedUser = await AuthenticationManager.promises.authenticate(
@@ -147,7 +147,7 @@ describe('UserHelper', function () {
     describe('with password', function () {
       it('should create new user with provided password and default email', async function () {
         const userHelper = await UserHelper.registerUser({
-          password: 'foofoofoo'
+          password: 'foofoofoo',
         })
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
         const authedUser = await AuthenticationManager.promises.authenticate(

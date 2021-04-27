@@ -76,7 +76,7 @@ const ProjectGetter = {
       if (err) {
         OError.tag(err, 'error getting project', {
           query,
-          projection
+          projection,
         })
         return callback(err)
       }
@@ -121,7 +121,7 @@ const ProjectGetter = {
               readAndWrite: projects.readAndWrite || [],
               readOnly: projects.readOnly || [],
               tokenReadAndWrite: projects.tokenReadAndWrite || [],
-              tokenReadOnly: projects.tokenReadOnly || []
+              tokenReadOnly: projects.tokenReadOnly || [],
             }
             callback(null, result)
           }
@@ -158,11 +158,11 @@ const ProjectGetter = {
   getUsersDeletedProjects(userId, callback) {
     DeletedProject.find(
       {
-        'deleterData.deletedProjectOwnerId': userId
+        'deleterData.deletedProjectOwnerId': userId,
       },
       callback
     )
-  }
+  },
 }
 
 ;['getProject', 'getProjectWithoutDocLines'].map(method =>

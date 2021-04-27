@@ -16,7 +16,7 @@ function MenuButton({ onClick }) {
 }
 
 MenuButton.propTypes = {
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
 }
 
 export default MenuButton

@@ -26,7 +26,7 @@ function log(providerId, sessionId, data) {
 }
 
 const SamlLogHandler = {
-  log
+  log,
 }
 
 module.exports = SamlLogHandler

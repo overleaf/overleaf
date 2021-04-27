@@ -27,10 +27,10 @@ describe('Authentication', function () {
             user.request.post(
               {
                 headers: {
-                  'x-csrf-token': oldToken
+                  'x-csrf-token': oldToken,
                 },
                 url: '/project/new',
-                json: { projectName: 'test' }
+                json: { projectName: 'test' },
               },
               (err, response, body) => {
                 expect(err).to.not.exist
@@ -52,14 +52,14 @@ describe('Authentication', function () {
 
     it('should log the user in', async function () {
       const {
-        response: { statusCode }
+        response: { statusCode },
       } = await user.doRequest('GET', '/project')
       expect(statusCode).to.equal(200)
     })
 
     it('should emit an user auditLog entry for the login', async function () {
       const {
-        auditLog: [auditLogEntry]
+        auditLog: [auditLogEntry],
       } = await user.get()
       expect(auditLogEntry).to.exist
       expect(auditLogEntry.timestamp).to.exist
@@ -67,7 +67,7 @@ describe('Authentication', function () {
       expect(auditLogEntry).to.deep.equal({
         operation: 'login',
         ipAddress: '127.0.0.1',
-        initiatorId: ObjectId(user.id)
+        initiatorId: ObjectId(user.id),
       })
     })
   })

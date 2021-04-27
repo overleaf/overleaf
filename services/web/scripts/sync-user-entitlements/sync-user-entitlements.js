@@ -135,7 +135,7 @@ async function syncUserEntitlement(userId, email, hasEntitlement) {
 
 function loadUserEntitlements(userEntitlementsFilename) {
   const userEntitlementsFile = fs.readFileSync(userEntitlementsFilename, {
-    encoding: 'utf8'
+    encoding: 'utf8',
   })
 
   const userEntitlements = {}
@@ -156,7 +156,7 @@ function loadUserEntitlements(userEntitlementsFilename) {
 
 function loadCachedEntitlements(cachedEntitlementsFilename) {
   const cachedEntitlementsFile = fs.readFileSync(cachedEntitlementsFilename, {
-    encoding: 'utf8'
+    encoding: 'utf8',
   })
 
   const cachedEntitlements = {}
@@ -167,7 +167,7 @@ function loadCachedEntitlements(cachedEntitlementsFilename) {
       userId,
       email,
       hasEntitlement,
-      providerId
+      providerId,
     ] = cachedEntitlementLine.split(',')
     let hasEntitlementBoolean
     if (ignoreNulls) {
@@ -180,7 +180,7 @@ function loadCachedEntitlements(cachedEntitlementsFilename) {
       email,
       hasEntitlement: hasEntitlementBoolean,
       providerId,
-      userId
+      userId,
     }
   }
 

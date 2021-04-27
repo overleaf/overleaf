@@ -58,7 +58,7 @@ describe('ThirdPartyIdentityManager', function () {
       it('should merge external data', function (done) {
         this.externalData = {
           test: 'different',
-          another: 'key'
+          another: 'key',
         }
         ThirdPartyIdentityManager.login(
           this.provider,

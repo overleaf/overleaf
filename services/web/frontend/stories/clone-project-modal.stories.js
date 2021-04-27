@@ -27,7 +27,7 @@ export const Interactive = ({
 }
 Interactive.propTypes = {
   mockResponse: PropTypes.number,
-  mockResponseDelay: PropTypes.number
+  mockResponseDelay: PropTypes.number,
 }
 
 export default {
@@ -36,7 +36,7 @@ export default {
   args: {
     projectId: 'original-project',
     projectName: 'Project Title',
-    show: true
+    show: true,
   },
   argTypes: {
     handleHide: { action: 'close modal' },
@@ -48,8 +48,8 @@ export default {
       defaultValue: 200,
       control: {
         type: 'radio',
-        options: [200, 500, 400]
-      }
+        options: [200, 500, 400],
+      },
     },
     mockResponseDelay: {
       name: 'Mock Response Delay',
@@ -60,8 +60,8 @@ export default {
         type: 'range',
         min: 0,
         max: 2500,
-        step: 250
-      }
-    }
-  }
+        step: 250,
+      },
+    },
+  },
 }

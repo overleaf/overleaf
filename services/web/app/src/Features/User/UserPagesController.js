@@ -10,7 +10,7 @@ const UserPagesController = {
   registerPage(req, res) {
     const sharedProjectData = {
       project_name: req.query.project_name,
-      user_first_name: req.query.user_first_name
+      user_first_name: req.query.user_first_name,
     }
 
     const newTemplateData = {}
@@ -22,7 +22,7 @@ const UserPagesController = {
       title: 'register',
       sharedProjectData,
       newTemplateData,
-      samlBeta: req.session.samlBeta
+      samlBeta: req.session.samlBeta,
     })
   },
 
@@ -36,7 +36,7 @@ const UserPagesController = {
       AuthenticationController.setRedirectInSession(req, req.query.redir)
     }
     res.render('user/login', {
-      title: 'login'
+      title: 'login',
     })
   },
 
@@ -56,7 +56,7 @@ const UserPagesController = {
 
   renderReconfirmAccountPage(req, res) {
     const pageData = {
-      reconfirm_email: req.session.reconfirm_email
+      reconfirm_email: req.session.reconfirm_email,
     }
     // when a user must reconfirm their account
     res.render('user/reconfirm', pageData)
@@ -76,7 +76,7 @@ const UserPagesController = {
       // copy object if exists because _.get does not
       institutionLinked = Object.assign(
         {
-          hasEntitlement: _.get(req.session, ['saml', 'hasEntitlement'])
+          hasEntitlement: _.get(req.session, ['saml', 'hasEntitlement']),
         },
         institutionLinked
       )
@@ -84,11 +84,11 @@ const UserPagesController = {
     const samlError = _.get(req.session, ['saml', 'error'])
     const institutionEmailNonCanonical = _.get(req.session, [
       'saml',
-      'emailNonCanonical'
+      'emailNonCanonical',
     ])
     const institutionRequestedEmail = _.get(req.session, [
       'saml',
-      'requestedEmail'
+      'requestedEmail',
     ])
 
     const reconfirmedViaSAML = _.get(req.session, ['saml', 'reconfirmed'])
@@ -128,7 +128,7 @@ const UserPagesController = {
         reconfirmationRemoveEmail,
         samlBeta: req.session.samlBeta,
         ssoError: ssoError,
-        thirdPartyIds: UserPagesController._restructureThirdPartyIds(user)
+        thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
       })
     })
   },
@@ -142,13 +142,13 @@ const UserPagesController = {
       (err, sessions) => {
         if (err != null) {
           OError.tag(err, 'error getting all user sessions', {
-            userId: user._id
+            userId: user._id,
           })
           return next(err)
         }
         res.render('user/sessions', {
           title: 'sessions',
-          sessions
+          sessions,
         })
       }
     )
@@ -183,7 +183,7 @@ const UserPagesController = {
       }
     }
     return result
-  }
+  },
 }
 
 module.exports = UserPagesController

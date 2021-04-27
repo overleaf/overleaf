@@ -9,6 +9,6 @@ import App from '../base'
 
 export default App.controller('ScribtexPopupController', ($scope, $modal) =>
   $modal.open({
-    templateUrl: 'scribtexModalTemplate'
+    templateUrl: 'scribtexModalTemplate',
   })
 )

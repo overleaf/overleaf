@@ -16,7 +16,7 @@ const READ_ONLY_TOKEN_PATTERN = '([a-z]{12})'
 const TokenAccessHandler = {
   TOKEN_TYPES: {
     READ_ONLY: PrivilegeLevels.READ_ONLY,
-    READ_AND_WRITE: PrivilegeLevels.READ_AND_WRITE
+    READ_AND_WRITE: PrivilegeLevels.READ_AND_WRITE,
   },
 
   ANONYMOUS_READ_AND_WRITE_ENABLED:
@@ -93,7 +93,7 @@ const TokenAccessHandler = {
         tokens: 1,
         publicAccesLevel: 1,
         owner_ref: 1,
-        name: 1
+        name: 1,
       },
       callback
     )
@@ -119,7 +119,7 @@ const TokenAccessHandler = {
     const numerics = numericPrefixMatch[1]
     TokenAccessHandler._projectFindOne(
       {
-        'tokens.readAndWritePrefix': numerics
+        'tokens.readAndWritePrefix': numerics,
       },
       function (err, project) {
         if (err != null) {
@@ -168,10 +168,10 @@ const TokenAccessHandler = {
     Analytics.recordEvent(userId, 'project-joined', { mode: 'read-only' })
     Project.updateOne(
       {
-        _id: projectId
+        _id: projectId,
       },
       {
-        $addToSet: { tokenAccessReadOnly_refs: userId }
+        $addToSet: { tokenAccessReadOnly_refs: userId },
       },
       callback
     )
@@ -183,10 +183,10 @@ const TokenAccessHandler = {
     Analytics.recordEvent(userId, 'project-joined', { mode: 'read-write' })
     Project.updateOne(
       {
-        _id: projectId
+        _id: projectId,
       },
       {
-        $addToSet: { tokenAccessReadAndWrite_refs: userId }
+        $addToSet: { tokenAccessReadAndWrite_refs: userId },
       },
       callback
     )
@@ -276,7 +276,7 @@ const TokenAccessHandler = {
     if (!Settings.apis || !Settings.apis.v1) {
       return callback(null, {
         exists: true,
-        exported: false
+        exported: false,
       })
     }
     UserGetter.getUser(v2UserId, { overleaf: 1 }, function (err, user) {
@@ -297,7 +297,7 @@ const TokenAccessHandler = {
         }
       )
     })
-  }
+  },
 }
 
 TokenAccessHandler.promises = promisifyAll(TokenAccessHandler, {
@@ -310,8 +310,8 @@ TokenAccessHandler.promises = promisifyAll(TokenAccessHandler, {
     'grantSessionTokenAccess',
     'getRequestToken',
     'protectTokens',
-    'validateTokenForAnonymousAccess'
-  ]
+    'validateTokenForAnonymousAccess',
+  ],
 })
 
 module.exports = TokenAccessHandler

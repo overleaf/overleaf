@@ -21,7 +21,7 @@ module.exports = CollaboratorsEmailHandler = {
       `${Settings.siteUrl}/project/${project._id}/invite/token/${invite.token}?` +
       [
         `project_name=${encodeURIComponent(project.name)}`,
-        `user_first_name=${encodeURIComponent(project.owner_ref.first_name)}`
+        `user_first_name=${encodeURIComponent(project.owner_ref.first_name)}`,
       ].join('&')
     )
   },
@@ -35,13 +35,13 @@ module.exports = CollaboratorsEmailHandler = {
           to: email,
           replyTo: project.owner_ref.email,
           project: {
-            name: project.name
+            name: project.name,
           },
           inviteUrl: CollaboratorsEmailHandler._buildInviteUrl(project, invite),
           owner: project.owner_ref,
-          sendingUser_id: sendingUser._id
+          sendingUser_id: sendingUser._id,
         }
         return EmailHandler.sendEmail('projectInvite', emailOptions, callback)
       })
-  }
+  },
 }

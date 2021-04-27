@@ -33,7 +33,7 @@ export default PdfManager = class PdfManager {
       showRawLog: false,
       highlights: [],
       position: null,
-      lastCompileTimestamp: null
+      lastCompileTimestamp: null,
     }
   }
 }

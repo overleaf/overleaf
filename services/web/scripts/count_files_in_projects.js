@@ -8,7 +8,7 @@ const Errors = require('../app/src/Features/Errors/Errors')
 
 async function countFiles() {
   const rl = readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
   })
 
   for await (const projectId of rl) {
@@ -19,7 +19,7 @@ async function countFiles() {
       }
       const {
         files,
-        docs
+        docs,
       } = await ProjectEntityHandler.promises.getAllEntitiesFromProject(project)
       console.error(
         projectId,

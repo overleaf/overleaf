@@ -1,9 +1,9 @@
 const {
-  acceptsJson
+  acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')
 
 module.exports = {
-  redirect
+  redirect,
 }
 
 // redirect the request via headers or JSON response depending on the request

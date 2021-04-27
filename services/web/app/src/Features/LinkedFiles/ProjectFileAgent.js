@@ -28,7 +28,7 @@ const {
   BadEntityTypeError,
   SourceFileNotFoundError,
   ProjectNotFoundError,
-  V1ProjectNotFoundError
+  V1ProjectNotFoundError,
 } = require('./LinkedFilesErrors')
 
 module.exports = ProjectFileAgent = {
@@ -193,7 +193,7 @@ module.exports = ProjectFileAgent = {
             {
               project_id: source_project_id,
               path: source_entity_path,
-              exactCaseMatch: true
+              exactCaseMatch: true,
             },
             function (err, entity, type) {
               if (err != null) {
@@ -258,5 +258,5 @@ module.exports = ProjectFileAgent = {
         }
       )
     })
-  }
+  },
 }

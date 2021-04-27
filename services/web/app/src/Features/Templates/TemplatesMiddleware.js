@@ -17,5 +17,5 @@ module.exports = {
       req.session.templateData = req.query
     }
     return next()
-  }
+  },
 }

@@ -128,5 +128,5 @@ module.exports = MetaHandler = {
       projectMeta[doc._id] = MetaHandler.extractMetaFromDoc(doc.lines)
     }
     return projectMeta
-  }
+  },
 }

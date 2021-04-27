@@ -15,16 +15,16 @@ class MockAnalyticsApi extends AbstractMockApi {
         institutionId: 123,
         day: {
           projects: 0,
-          users: 0
+          users: 0,
         },
         week: {
           projects: 0,
-          users: 0
+          users: 0,
         },
         month: {
           projects: 1,
-          users: 2
-        }
+          users: 2,
+        },
       })
     })
   }

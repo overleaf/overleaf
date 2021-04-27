@@ -16,6 +16,6 @@ export default App.controller(
     ($scope.openCloneProjectModal = () =>
       $modal.open({
         templateUrl: 'cloneProjectModalTemplate',
-        controller: 'CloneProjectModalController'
+        controller: 'CloneProjectModalController',
       }))
 )

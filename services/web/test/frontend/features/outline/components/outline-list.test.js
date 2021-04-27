@@ -11,13 +11,13 @@ describe('<OutlineList />', function () {
       {
         title: 'Section 1',
         line: 1,
-        level: 10
+        level: 10,
       },
       {
         title: 'Section 2',
         line: 2,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(<OutlineList outline={outline} isRoot jumpToLine={jumpToLine} />)
 
@@ -30,8 +30,8 @@ describe('<OutlineList />', function () {
       {
         title: 'Section',
         line: 1,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(<OutlineList outline={outline} isRoot jumpToLine={jumpToLine} />)
 
@@ -43,8 +43,8 @@ describe('<OutlineList />', function () {
       {
         title: 'Section',
         line: 1,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(<OutlineList outline={outline} jumpToLine={jumpToLine} />)
 

@@ -19,8 +19,8 @@ export function useProjectOutputFiles(projectId) {
         body: {
           check: 'silent',
           draft: false,
-          incrementalCompilesEnabled: false
-        }
+          incrementalCompilesEnabled: false,
+        },
       })
         .then(data => {
           if (data.status === 'success') {

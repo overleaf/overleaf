@@ -25,8 +25,8 @@ describe('CooldownManager', function () {
     this.RedisWrapper = { client: () => this.rclient }
     return (this.CooldownManager = SandboxedModule.require(modulePath, {
       requires: {
-        '../../infrastructure/RedisWrapper': this.RedisWrapper
-      }
+        '../../infrastructure/RedisWrapper': this.RedisWrapper,
+      },
     }))
   })
 

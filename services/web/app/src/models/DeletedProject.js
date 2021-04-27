@@ -18,13 +18,13 @@ const DeleterDataSchema = new Schema({
   deletedProjectReadOnlyToken: { type: String },
   deletedProjectLastUpdatedAt: { type: Date },
   deletedProjectOverleafId: { type: Number },
-  deletedProjectOverleafHistoryId: { type: Number }
+  deletedProjectOverleafHistoryId: { type: Number },
 })
 
 const DeletedProjectSchema = new Schema(
   {
     deleterData: DeleterDataSchema,
-    project: ProjectSchema
+    project: ProjectSchema,
   },
   { collection: 'deletedProjects' }
 )

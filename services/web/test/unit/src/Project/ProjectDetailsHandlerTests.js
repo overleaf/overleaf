@@ -12,11 +12,11 @@ describe('ProjectDetailsHandler', function () {
     this.user = {
       _id: ObjectId(),
       email: 'user@example.com',
-      features: 'mock-features'
+      features: 'mock-features',
     }
     this.collaborator = {
       _id: ObjectId(),
-      email: 'collaborator@example.com'
+      email: 'collaborator@example.com',
     }
     this.project = {
       _id: ObjectId(),
@@ -25,7 +25,7 @@ describe('ProjectDetailsHandler', function () {
       something: 'should not exist',
       compiler: 'latexxxxxx',
       owner_ref: this.user._id,
-      collaberator_refs: [this.collaborator._id]
+      collaberator_refs: [this.collaborator._id],
     }
     this.ProjectGetter = {
       promises: {
@@ -36,47 +36,47 @@ describe('ProjectDetailsHandler', function () {
           readAndWrite: [],
           readOnly: [],
           tokenReadAndWrite: [],
-          tokenReadOnly: []
-        })
-      }
+          tokenReadOnly: [],
+        }),
+      },
     }
     this.ProjectModelUpdateQuery = {
-      exec: sinon.stub().resolves()
+      exec: sinon.stub().resolves(),
     }
     this.ProjectModel = {
-      updateOne: sinon.stub().returns(this.ProjectModelUpdateQuery)
+      updateOne: sinon.stub().returns(this.ProjectModelUpdateQuery),
     }
     this.UserGetter = {
       promises: {
-        getUser: sinon.stub().resolves(this.user)
-      }
+        getUser: sinon.stub().resolves(this.user),
+      },
     }
     this.TpdsUpdateSender = {
       promises: {
-        moveEntity: sinon.stub().resolves()
-      }
+        moveEntity: sinon.stub().resolves(),
+      },
     }
     this.TokenGenerator = {
       readAndWriteToken: sinon.stub(),
       promises: {
-        generateUniqueReadOnlyToken: sinon.stub()
-      }
+        generateUniqueReadOnlyToken: sinon.stub(),
+      },
     }
     this.settings = {
-      defaultFeatures: 'default-features'
+      defaultFeatures: 'default-features',
     }
     this.handler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './ProjectHelper': ProjectHelper,
         './ProjectGetter': this.ProjectGetter,
         '../../models/Project': {
-          Project: this.ProjectModel
+          Project: this.ProjectModel,
         },
         '../User/UserGetter': this.UserGetter,
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         '../TokenGenerator/TokenGenerator': this.TokenGenerator,
-        'settings-sharelatex': this.settings
-      }
+        'settings-sharelatex': this.settings,
+      },
     })
   })
 
@@ -129,7 +129,7 @@ describe('ProjectDetailsHandler', function () {
     it('should return what the mongo call returns', async function () {
       const expectedDescription = 'cool project'
       this.ProjectGetter.promises.getProject.resolves({
-        description: expectedDescription
+        description: expectedDescription,
       })
       const description = await this.handler.promises.getProjectDescription(
         this.project._id
@@ -174,7 +174,7 @@ describe('ProjectDetailsHandler', function () {
         {
           project_id: this.project._id,
           project_name: this.project.name,
-          newProjectName: this.newName
+          newProjectName: this.newName,
         }
       )
     })
@@ -258,25 +258,25 @@ describe('ProjectDetailsHandler', function () {
           { _id: 137, name: 'numeric (37)' },
           { _id: 138, name: 'numeric (38)' },
           { _id: 139, name: 'numeric (39)' },
-          { _id: 140, name: 'numeric (40)' }
+          { _id: 140, name: 'numeric (40)' },
         ],
         readAndWrite: [
           { _id: 4, name: 'name2' },
-          { _id: 5, name: 'name22' }
+          { _id: 5, name: 'name22' },
         ],
         readOnly: [
           { _id: 6, name: 'name3' },
-          { _id: 7, name: 'name33' }
+          { _id: 7, name: 'name33' },
         ],
         tokenReadAndWrite: [
           { _id: 8, name: 'name4' },
-          { _id: 9, name: 'name44' }
+          { _id: 9, name: 'name44' },
         ],
         tokenReadOnly: [
           { _id: 10, name: 'name5' },
           { _id: 11, name: 'name55' },
-          { _id: 12, name: this.longName }
-        ]
+          { _id: 12, name: this.longName },
+        ],
       }
       this.ProjectGetter.promises.findAllUsersProjects.resolves(usersProjects)
     })
@@ -439,8 +439,8 @@ describe('ProjectDetailsHandler', function () {
           tokens: {
             readOnly: 'aaa',
             readAndWrite: '42bbb',
-            readAndWritePrefix: '42'
-          }
+            readAndWritePrefix: '42',
+          },
         }
         this.ProjectGetter.promises.getProject.resolves(this.project)
       })
@@ -451,7 +451,7 @@ describe('ProjectDetailsHandler', function () {
         expect(this.ProjectGetter.promises.getProject).to.have.been.calledWith(
           this.project._id,
           {
-            tokens: 1
+            tokens: 1,
           }
         )
       })
@@ -481,7 +481,7 @@ describe('ProjectDetailsHandler', function () {
         )
         this.TokenGenerator.readAndWriteToken.returns({
           token: this.readAndWriteToken,
-          numericPrefix: this.readAndWriteTokenPrefix
+          numericPrefix: this.readAndWriteTokenPrefix,
         })
       })
 
@@ -491,7 +491,7 @@ describe('ProjectDetailsHandler', function () {
         expect(this.ProjectGetter.promises.getProject).to.have.been.calledWith(
           this.project._id,
           {
-            tokens: 1
+            tokens: 1,
           }
         )
       })
@@ -509,9 +509,9 @@ describe('ProjectDetailsHandler', function () {
               tokens: {
                 readOnly: this.readOnlyToken,
                 readAndWrite: this.readAndWriteToken,
-                readAndWritePrefix: this.readAndWriteTokenPrefix
-              }
-            }
+                readAndWritePrefix: this.readAndWriteTokenPrefix,
+              },
+            },
           }
         )
       })
@@ -523,7 +523,7 @@ describe('ProjectDetailsHandler', function () {
         expect(tokens).to.deep.equal({
           readOnly: this.readOnlyToken,
           readAndWrite: this.readAndWriteToken,
-          readAndWritePrefix: this.readAndWriteTokenPrefix
+          readAndWritePrefix: this.readAndWriteTokenPrefix,
         })
       })
     })

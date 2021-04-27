@@ -30,5 +30,5 @@ export default App.directive('reviewPanelCollapseHeight', $parse => ({
         }
       }
     )
-  }
+  },
 }))

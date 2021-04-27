@@ -35,35 +35,35 @@ describe('UserMembershipHandler', function () {
       manager_ids: [ObjectId()],
       invited_emails: ['mock-email-1@foo.com'],
       teamInvites: [{ email: 'mock-email-1@bar.com' }],
-      update: sinon.stub().yields(null)
+      update: sinon.stub().yields(null),
     }
     this.institution = {
       _id: 'mock-institution-id',
       v1Id: 123,
       managerIds: [ObjectId(), ObjectId(), ObjectId()],
-      updateOne: sinon.stub().yields(null)
+      updateOne: sinon.stub().yields(null),
     }
     this.publisher = {
       _id: 'mock-publisher-id',
       slug: 'slug',
       managerIds: [ObjectId(), ObjectId()],
-      updateOne: sinon.stub().yields(null)
+      updateOne: sinon.stub().yields(null),
     }
 
     this.UserMembershipViewModel = {
       buildAsync: sinon.stub().yields(null, { _id: 'mock-member-id' }),
-      build: sinon.stub().returns(this.newUser)
+      build: sinon.stub().returns(this.newUser),
     }
     this.UserGetter = {
-      getUserByAnyEmail: sinon.stub().yields(null, this.newUser)
+      getUserByAnyEmail: sinon.stub().yields(null, this.newUser),
     }
     this.Institution = { findOne: sinon.stub().yields(null, this.institution) }
     this.Subscription = {
-      findOne: sinon.stub().yields(null, this.subscription)
+      findOne: sinon.stub().yields(null, this.subscription),
     }
     this.Publisher = {
       findOne: sinon.stub().yields(null, this.publisher),
-      create: sinon.stub().yields(null, this.publisher)
+      create: sinon.stub().yields(null, this.publisher),
     }
     return (this.UserMembershipHandler = SandboxedModule.require(modulePath, {
       requires: {
@@ -71,15 +71,15 @@ describe('UserMembershipHandler', function () {
         './UserMembershipViewModel': this.UserMembershipViewModel,
         '../User/UserGetter': this.UserGetter,
         '../../models/Institution': {
-          Institution: this.Institution
+          Institution: this.Institution,
         },
         '../../models/Subscription': {
-          Subscription: this.Subscription
+          Subscription: this.Subscription,
         },
         '../../models/Publisher': {
-          Publisher: this.Publisher
-        }
-      }
+          Publisher: this.Publisher,
+        },
+      },
     }))
   })
 
@@ -219,7 +219,7 @@ describe('UserMembershipHandler', function () {
           this.email,
           (error, user) => {
             assertCalledWith(this.institution.updateOne, {
-              $addToSet: { managerIds: this.newUser._id }
+              $addToSet: { managerIds: this.newUser._id },
             })
             return done()
           }
@@ -250,7 +250,7 @@ describe('UserMembershipHandler', function () {
           (error, user) => {
             const { lastCall } = this.institution.updateOne
             assertCalledWith(this.institution.updateOne, {
-              $pull: { managerIds: this.newUser._id }
+              $pull: { managerIds: this.newUser._id },
             })
             return done()
           }

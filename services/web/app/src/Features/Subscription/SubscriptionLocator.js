@@ -48,7 +48,7 @@ const SubscriptionLocator = {
     const user_id = SubscriptionLocator._getUserId(user_or_id)
     return Subscription.find({
       manager_ids: user_or_id,
-      groupPlan: true
+      groupPlan: true,
     })
       .populate('admin_id')
       .exec(callback)
@@ -96,7 +96,7 @@ const SubscriptionLocator = {
   getDeletedSubscription(subscriptionId, callback) {
     DeletedSubscription.findOne(
       {
-        'subscription._id': subscriptionId
+        'subscription._id': subscriptionId,
       },
       callback
     )
@@ -108,7 +108,7 @@ const SubscriptionLocator = {
     } else if (user_or_id != null) {
       return user_or_id
     }
-  }
+  },
 }
 
 SubscriptionLocator.promises = {
@@ -134,6 +134,6 @@ SubscriptionLocator.promises = {
   getUserDeletedSubscriptions: promisify(
     SubscriptionLocator.getUserDeletedSubscriptions
   ),
-  getDeletedSubscription: promisify(SubscriptionLocator.getDeletedSubscription)
+  getDeletedSubscription: promisify(SubscriptionLocator.getDeletedSubscription),
 }
 module.exports = SubscriptionLocator

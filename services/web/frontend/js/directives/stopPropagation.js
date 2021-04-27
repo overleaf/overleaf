@@ -13,12 +13,12 @@ App.directive('stopPropagation', $http => ({
   restrict: 'A',
   link(scope, element, attrs) {
     return element.bind(attrs.stopPropagation, e => e.stopPropagation())
-  }
+  },
 }))
 
 export default App.directive('preventDefault', $http => ({
   restrict: 'A',
   link(scope, element, attrs) {
     return element.bind(attrs.preventDefault, e => e.preventDefault())
-  }
+  },
 }))

@@ -54,8 +54,8 @@ const tryLoginThroughRegistrationForm = function (
         url: '/register',
         json: {
           email,
-          password
-        }
+          password,
+        },
       },
       callback
     )
@@ -84,8 +84,8 @@ describe('Registration', function () {
                   url: '/login',
                   json: {
                     email: this.badEmail,
-                    password: this.badPassword
-                  }
+                    password: this.badPassword,
+                  },
                 },
                 (err, response, body) => {
                   const message = body && body.message && body.message.text
@@ -142,11 +142,11 @@ describe('Registration', function () {
               url: '/register',
               json: {
                 email: this.email,
-                password: this.password
+                password: this.password,
               },
               headers: {
-                'x-csrf-token': this.user.csrfToken
-              }
+                'x-csrf-token': this.user.csrfToken,
+              },
             },
             (error, response, body) => {
               expect(err != null).to.equal(false)
@@ -166,11 +166,11 @@ describe('Registration', function () {
               url: '/register',
               json: {
                 email: this.email,
-                password: this.password
+                password: this.password,
               },
               headers: {
-                'x-csrf-token': ''
-              }
+                'x-csrf-token': '',
+              },
             },
             (error, response, body) => {
               expect(response.statusCode).to.equal(403)
@@ -191,11 +191,11 @@ describe('Registration', function () {
                 url: '/register',
                 json: {
                   email: this.email,
-                  password: this.password
+                  password: this.password,
                 },
                 headers: {
-                  'x-csrf-token': oldCsrfToken
-                }
+                  'x-csrf-token': oldCsrfToken,
+                },
               },
               (error, response, body) => {
                 expect(response.statusCode).to.equal(403)
@@ -249,7 +249,7 @@ describe('Registration', function () {
             this.user2.registerWithQuery(
               `?r=${this.user1.referal_id}&rm=d&rs=b`,
               cb
-            )
+            ),
         ],
         done
       )
@@ -277,7 +277,7 @@ describe('Registration', function () {
           cb => redis.clearUserSessions(this.user1, cb),
           cb => this.user2.login(cb),
           cb => this.user2.logout(cb),
-          cb => redis.clearUserSessions(this.user2, cb)
+          cb => redis.clearUserSessions(this.user2, cb),
         ],
         done
       )
@@ -340,7 +340,7 @@ describe('Registration', function () {
               )
             },
             // check user still can't access the project
-            cb => expectNoProjectAccess(this.user2, projectId, done)
+            cb => expectNoProjectAccess(this.user2, projectId, done),
           ],
           done
         )

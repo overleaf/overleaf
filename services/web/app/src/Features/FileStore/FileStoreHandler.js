@@ -49,7 +49,7 @@ const FileStoreHandler = {
           if (err) {
             OError.tag(err, 'Error uploading file, retries failed', {
               projectId,
-              fileArgs
+              fileArgs,
             })
             return callback(err)
           }
@@ -83,8 +83,8 @@ const FileStoreHandler = {
           uri: url,
           timeout: FIVE_MINS_IN_MS,
           headers: {
-            'X-File-Hash-From-Web': hashValue
-          } // send the hash to the filestore as a custom header so it can be checked
+            'X-File-Hash-From-Web': hashValue,
+          }, // send the hash to the filestore as a custom header so it can be checked
         }
         const writeStream = request(opts)
         writeStream.on('error', function (err) {
@@ -118,7 +118,7 @@ const FileStoreHandler = {
       method: 'get',
       uri: `${this._buildUrl(projectId, fileId)}${queryString}`,
       timeout: FIVE_MINS_IN_MS,
-      headers: {}
+      headers: {},
     }
     if (query != null && query.range != null) {
       const rangeText = query.range
@@ -142,7 +142,7 @@ const FileStoreHandler = {
       if (err) {
         OError.tag(err, 'failed to get file size from filestore', {
           projectId,
-          fileId
+          fileId,
         })
         return callback(err)
       }
@@ -166,7 +166,7 @@ const FileStoreHandler = {
     const opts = {
       method: 'delete',
       uri: this._buildUrl(projectId, fileId),
-      timeout: FIVE_MINS_IN_MS
+      timeout: FIVE_MINS_IN_MS,
     }
     return request(opts, function (err, response) {
       if (err) {
@@ -184,7 +184,7 @@ const FileStoreHandler = {
       {
         method: 'delete',
         uri: this._buildUrl(projectId),
-        timeout: FIVE_MINS_IN_MS
+        timeout: FIVE_MINS_IN_MS,
       },
       err => {
         if (err) {
@@ -211,11 +211,11 @@ const FileStoreHandler = {
       json: {
         source: {
           project_id: oldProjectId,
-          file_id: oldFileId
-        }
+          file_id: oldFileId,
+        },
       },
       uri: this._buildUrl(newProjectId, newFileId),
-      timeout: FIVE_MINS_IN_MS
+      timeout: FIVE_MINS_IN_MS,
     }
     return request(opts, function (err, response) {
       if (err) {
@@ -226,7 +226,7 @@ const FileStoreHandler = {
             oldProjectId,
             oldFileId,
             newProjectId,
-            newFileId
+            newFileId,
           }
         )
         return callback(err)
@@ -238,7 +238,7 @@ const FileStoreHandler = {
           `non-ok response from filestore for copyFile: ${response.statusCode}`,
           {
             uri: opts.uri,
-            statusCode: response.statusCode
+            statusCode: response.statusCode,
           }
         )
         return callback(err)
@@ -251,12 +251,12 @@ const FileStoreHandler = {
       `${settings.apis.filestore.url}/project/${projectId}` +
       (fileId ? `/file/${fileId}` : '')
     )
-  }
+  },
 }
 
 module.exports = FileStoreHandler
 module.exports.promises = promisifyAll(FileStoreHandler, {
   multiResult: {
-    uploadFileFromDisk: ['url', 'fileRef']
-  }
+    uploadFileFromDisk: ['url', 'fileRef'],
+  },
 })

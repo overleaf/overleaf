@@ -27,11 +27,11 @@ describe('InactiveProjectManager', function () {
     this.settings = {}
     this.DocstoreManager = {
       unarchiveProject: sinon.stub(),
-      archiveProject: sinon.stub()
+      archiveProject: sinon.stub(),
     }
     this.ProjectUpdateHandler = {
       markAsActive: sinon.stub(),
-      markAsInactive: sinon.stub()
+      markAsInactive: sinon.stub(),
     }
     this.ProjectGetter = { getProject: sinon.stub() }
     this.InactiveProjectManager = SandboxedModule.require(modulePath, {
@@ -41,8 +41,8 @@ describe('InactiveProjectManager', function () {
         '../Docstore/DocstoreManager': this.DocstoreManager,
         '../Project/ProjectUpdateHandler': this.ProjectUpdateHandler,
         '../Project/ProjectGetter': this.ProjectGetter,
-        '../../models/Project': {}
-      }
+        '../../models/Project': {},
+      },
     })
     return (this.project_id = '1234')
   })

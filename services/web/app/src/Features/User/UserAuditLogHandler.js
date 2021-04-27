@@ -26,13 +26,13 @@ async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
     throw new OError('missing required audit log data', {
       operation,
       initiatorId,
-      ipAddress
+      ipAddress,
     })
 
   if (!initiatorId && !_canHaveNoInitiatorId(operation, info)) {
     throw new OError('missing initiatorId for audit log', {
       operation,
-      ipAddress
+      ipAddress,
     })
   }
 
@@ -42,14 +42,14 @@ async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
     initiatorId,
     info,
     ipAddress,
-    timestamp
+    timestamp,
   }
   const result = await User.updateOne(
     { _id: userId },
     {
       $push: {
-        auditLog: { $each: [entry], $slice: -MAX_AUDIT_LOG_ENTRIES }
-      }
+        auditLog: { $each: [entry], $slice: -MAX_AUDIT_LOG_ENTRIES },
+      },
     }
   ).exec()
   if (result.nModified === 0) {
@@ -60,8 +60,8 @@ async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
 const UserAuditLogHandler = {
   addEntry: callbackify(addEntry),
   promises: {
-    addEntry
-  }
+    addEntry,
+  },
 }
 
 module.exports = UserAuditLogHandler

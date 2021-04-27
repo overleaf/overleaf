@@ -6,7 +6,7 @@ const TeamInviteSchema = new Schema({
   email: { type: String, required: true },
   token: { type: String },
   inviterName: { type: String },
-  sentAt: { type: Date }
+  sentAt: { type: Date },
 })
 
 exports.TeamInvite = mongoose.model('TeamInvite', TeamInviteSchema)

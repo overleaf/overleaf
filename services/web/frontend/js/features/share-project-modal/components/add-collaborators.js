@@ -4,7 +4,7 @@ import { Form, FormGroup, FormControl, Button } from 'react-bootstrap'
 import { useMultipleSelection } from 'downshift'
 import {
   useProjectContext,
-  useShareProjectContext
+  useShareProjectContext,
 } from './share-project-modal'
 import SelectCollaborators from './select-collaborators'
 import { resendInvite, sendInvite } from '../utils/api'
@@ -49,7 +49,7 @@ export default function AddCollaborators() {
 
   const multipleSelectionProps = useMultipleSelection({
     initialActiveIndex: 0,
-    initialSelectedItems: []
+    initialSelectedItems: [],
   })
 
   const { reset, selectedItems } = multipleSelectionProps
@@ -108,15 +108,15 @@ export default function AddCollaborators() {
         setInFlight(false)
       } else if (data.invite) {
         updateProject({
-          invites: project.invites.concat(data.invite)
+          invites: project.invites.concat(data.invite),
         })
       } else if (data.users) {
         updateProject({
-          members: project.members.concat(data.users)
+          members: project.members.concat(data.users),
         })
       } else if (data.user) {
         updateProject({
-          members: project.members.concat(data.user)
+          members: project.members.concat(data.user),
         })
       }
 

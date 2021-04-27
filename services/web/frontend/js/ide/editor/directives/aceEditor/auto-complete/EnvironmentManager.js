@@ -18,7 +18,7 @@ let staticSnippets = Array.from(Environments.withoutSnippets).map(env => ({
 \t$1
 \\end{${env}}\
 `,
-  meta: 'env'
+  meta: 'env',
 }))
 
 staticSnippets = staticSnippets.concat([
@@ -30,7 +30,7 @@ staticSnippets = staticSnippets.concat([
 \t$4 & $5
 \\end{array}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{figure}...',
@@ -42,7 +42,7 @@ staticSnippets = staticSnippets.concat([
 \t\\label{\${3:fig:my_label}}
 \\end{figure}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{tabular}...',
@@ -52,7 +52,7 @@ staticSnippets = staticSnippets.concat([
 \t$4 & $5
 \\end{tabular}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{table}...',
@@ -67,7 +67,7 @@ staticSnippets = staticSnippets.concat([
 \t\\label{\${8:tab:my_label}}
 \\end{table}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{list}...',
@@ -76,7 +76,7 @@ staticSnippets = staticSnippets.concat([
 \t\\item $1
 \\end{list}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{enumerate}...',
@@ -85,7 +85,7 @@ staticSnippets = staticSnippets.concat([
 \t\\item $1
 \\end{enumerate}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{itemize}...',
@@ -94,7 +94,7 @@ staticSnippets = staticSnippets.concat([
 \t\\item $1
 \\end{itemize}\
 `,
-    meta: 'env'
+    meta: 'env',
   },
   {
     caption: '\\begin{frame}...',
@@ -103,8 +103,8 @@ staticSnippets = staticSnippets.concat([
 \t$2
 \\end{frame}\
 `,
-    meta: 'env'
-  }
+    meta: 'env',
+  },
 ])
 
 const documentSnippet = {
@@ -114,7 +114,7 @@ const documentSnippet = {
 $1
 \\end{document}\
 `,
-  meta: 'env'
+  meta: 'env',
 }
 
 const bibliographySnippet = {
@@ -125,7 +125,7 @@ const bibliographySnippet = {
 $3
 \\end{thebibliography}\
 `,
-  meta: 'env'
+  meta: 'env',
 }
 staticSnippets.push(documentSnippet)
 
@@ -217,7 +217,7 @@ class EnvironmentManager {
 ${item.whitespace || ''}$0
 \\end{${item.name}}\
 `,
-          meta: 'env'
+          meta: 'env',
         }))
       )
       .concat(
@@ -227,7 +227,7 @@ ${item.whitespace || ''}$0
         parsedItems.map(item => ({
           caption: `\\end{${item.name}}`,
           value: `\\end{${item.name}}`,
-          meta: 'env'
+          meta: 'env',
         }))
       )
     return callback(null, snippets)

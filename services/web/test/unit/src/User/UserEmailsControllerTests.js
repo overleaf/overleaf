@@ -20,19 +20,19 @@ describe('UserEmailsController', function () {
       getUserFullEmails: sinon.stub(),
       getUserByAnyEmail: sinon.stub(),
       promises: {
-        getUser: sinon.stub().resolves(this.user)
-      }
+        getUser: sinon.stub().resolves(this.user),
+      },
     }
     this.AuthenticationController = {
       getSessionUser: sinon.stub().returns(this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
-      setInSessionUser: sinon.stub()
+      setInSessionUser: sinon.stub(),
     }
     this.Features = {
-      hasFeature: sinon.stub()
+      hasFeature: sinon.stub(),
     }
     this.UserSessionsManager = {
-      revokeAllUserSessions: sinon.stub().yields()
+      revokeAllUserSessions: sinon.stub().yields(),
     }
     this.UserUpdater = {
       addEmailAddress: sinon.stub(),
@@ -40,13 +40,13 @@ describe('UserEmailsController', function () {
       setDefaultEmailAddress: sinon.stub(),
       updateV1AndSetDefaultEmailAddress: sinon.stub(),
       promises: {
-        addEmailAddress: sinon.stub().resolves()
-      }
+        addEmailAddress: sinon.stub().resolves(),
+      },
     }
     this.EmailHelper = { parseEmail: sinon.stub() }
     this.endorseAffiliation = sinon.stub().yields()
     this.InstitutionsAPI = {
-      endorseAffiliation: this.endorseAffiliation
+      endorseAffiliation: this.endorseAffiliation,
     }
     this.HttpErrorHandler = { conflict: sinon.stub() }
     this.UserEmailsController = SandboxedModule.require(modulePath, {
@@ -59,19 +59,19 @@ describe('UserEmailsController', function () {
         './UserUpdater': this.UserUpdater,
         '../Email/EmailHandler': (this.EmailHandler = {
           promises: {
-            sendEmail: sinon.stub().resolves()
-          }
+            sendEmail: sinon.stub().resolves(),
+          },
         }),
         '../Helpers/EmailHelper': this.EmailHelper,
         './UserEmailsConfirmationHandler': (this.UserEmailsConfirmationHandler = {
           sendReconfirmationEmail: sinon.stub(),
           promises: {
-            sendConfirmationEmail: sinon.stub().resolves()
-          }
+            sendConfirmationEmail: sinon.stub().resolves(),
+          },
         }),
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
-        '../Errors/HttpErrorHandler': this.HttpErrorHandler
-      }
+        '../Errors/HttpErrorHandler': this.HttpErrorHandler,
+      },
     })
   })
 
@@ -87,7 +87,7 @@ describe('UserEmailsController', function () {
           assert.deepEqual(response, fullEmails)
           assertCalledWith(this.UserGetter.getUserFullEmails, this.user._id)
           done()
-        }
+        },
       })
     })
   })
@@ -99,7 +99,7 @@ describe('UserEmailsController', function () {
         email: this.newEmail,
         university: { name: 'University Name' },
         department: 'Department',
-        role: 'Role'
+        role: 'Role',
       }
       this.EmailHelper.parseEmail.returns(this.newEmail)
       this.UserEmailsConfirmationHandler.sendConfirmationEmail = sinon
@@ -113,7 +113,7 @@ describe('UserEmailsController', function () {
         const addCall = this.UserUpdater.promises.addEmailAddress.lastCall
         expect(addCall.args[3]).to.deep.equal({
           initiatorId: this.user._id,
-          ipAddress: this.req.ip
+          ipAddress: this.req.ip,
         })
         done()
       })
@@ -141,7 +141,7 @@ describe('UserEmailsController', function () {
             affiliationOptions.role.should.equal(this.req.body.role)
 
             done()
-          }
+          },
         },
         this.next
       )
@@ -176,7 +176,7 @@ describe('UserEmailsController', function () {
               this.newEmail
             )
             done()
-          }
+          },
         },
         this.next
       )
@@ -191,7 +191,7 @@ describe('UserEmailsController', function () {
             code.should.equal(422)
             assertNotCalled(this.UserUpdater.promises.addEmailAddress)
             done()
-          }
+          },
         },
         this.next
       )
@@ -252,7 +252,7 @@ describe('UserEmailsController', function () {
             this.email
           )
           done()
-        }
+        },
       })
     })
 
@@ -264,7 +264,7 @@ describe('UserEmailsController', function () {
           code.should.equal(422)
           assertNotCalled(this.UserUpdater.removeEmailAddress)
           done()
-        }
+        },
       })
     })
   })
@@ -295,7 +295,7 @@ describe('UserEmailsController', function () {
             this.email
           )
           done()
-        }
+        },
       })
     })
 
@@ -307,7 +307,7 @@ describe('UserEmailsController', function () {
           code.should.equal(422)
           assertNotCalled(this.UserUpdater.setDefaultEmailAddress)
           done()
-        }
+        },
       })
     })
 
@@ -370,7 +370,7 @@ describe('UserEmailsController', function () {
             'Department'
           )
           done()
-        }
+        },
       })
     })
   })
@@ -382,7 +382,7 @@ describe('UserEmailsController', function () {
         .yields()
       this.res = {
         sendStatus: sinon.stub(),
-        json: sinon.stub()
+        json: sinon.stub(),
       }
       this.res.status = sinon.stub().returns(this.res)
       this.next = sinon.stub()
@@ -429,7 +429,7 @@ describe('UserEmailsController', function () {
         this.res.status.calledWith(404).should.equal(true)
         this.res.json
           .calledWith({
-            message: this.req.i18n.translate('confirmation_token_invalid')
+            message: this.req.i18n.translate('confirmation_token_invalid'),
           })
           .should.equal(true)
       })
@@ -440,13 +440,13 @@ describe('UserEmailsController', function () {
     beforeEach(function () {
       this.EmailHelper.parseEmail.returnsArg(0)
       this.UserGetter.getUserByAnyEmail.yields(undefined, {
-        _id: this.user._id
+        _id: this.user._id,
       })
       this.req = {
-        body: {}
+        body: {},
       }
       this.res = {
-        sendStatus: sinon.stub()
+        sendStatus: sinon.stub(),
       }
       this.next = sinon.stub()
       this.UserEmailsConfirmationHandler.sendConfirmationEmail = sinon
@@ -457,8 +457,8 @@ describe('UserEmailsController', function () {
     it('should send the email', function (done) {
       this.req = {
         body: {
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       }
       this.UserEmailsController.sendReconfirmation(
         this.req,
@@ -472,7 +472,7 @@ describe('UserEmailsController', function () {
 
     it('should return 422 if email not valid', function (done) {
       this.req = {
-        body: {}
+        body: {},
       }
       this.UserEmailsController.resendConfirmation(
         this.req,
@@ -487,14 +487,14 @@ describe('UserEmailsController', function () {
     describe('email on another user account', function () {
       beforeEach(function () {
         this.UserGetter.getUserByAnyEmail.yields(undefined, {
-          _id: 'another-user-id'
+          _id: 'another-user-id',
         })
       })
       it('should return 422', function (done) {
         this.req = {
           body: {
-            email: 'test@example.com'
-          }
+            email: 'test@example.com',
+          },
         }
         this.UserEmailsController.resendConfirmation(
           this.req,
@@ -513,15 +513,15 @@ describe('UserEmailsController', function () {
     beforeEach(function () {
       this.res.sendStatus = sinon.stub()
       this.UserGetter.getUserByAnyEmail.yields(undefined, {
-        _id: this.user._id
+        _id: this.user._id,
       })
       this.EmailHelper.parseEmail.returnsArg(0)
     })
     it('should send the email', function (done) {
       this.req = {
         body: {
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       }
       this.UserEmailsController.sendReconfirmation(
         this.req,
@@ -534,7 +534,7 @@ describe('UserEmailsController', function () {
     })
     it('should return 400 if email not valid', function (done) {
       this.req = {
-        body: {}
+        body: {},
       }
       this.UserEmailsController.sendReconfirmation(
         this.req,
@@ -549,14 +549,14 @@ describe('UserEmailsController', function () {
     describe('email on another user account', function () {
       beforeEach(function () {
         this.UserGetter.getUserByAnyEmail.yields(undefined, {
-          _id: 'another-user-id'
+          _id: 'another-user-id',
         })
       })
       it('should return 422', function (done) {
         this.req = {
           body: {
-            email: 'test@example.com'
-          }
+            email: 'test@example.com',
+          },
         }
         this.UserEmailsController.sendReconfirmation(
           this.req,

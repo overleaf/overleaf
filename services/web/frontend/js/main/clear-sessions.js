@@ -18,7 +18,7 @@ export default App.controller(
     $scope.state = {
       otherSessions: getMeta('ol-otherSessions'),
       error: false,
-      success: false
+      success: false,
     }
 
     return ($scope.clearSessions = function () {
@@ -26,7 +26,7 @@ export default App.controller(
       return $http({
         method: 'POST',
         url: '/user/sessions/clear',
-        headers: { 'X-CSRF-Token': window.csrfToken }
+        headers: { 'X-CSRF-Token': window.csrfToken },
       })
         .then(function () {
           $scope.state.otherSessions = []

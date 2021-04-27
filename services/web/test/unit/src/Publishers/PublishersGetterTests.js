@@ -24,7 +24,7 @@ describe('PublishersGetter', function () {
     this.publisher = {
       _id: 'mock-publsiher-id',
       slug: 'ieee',
-      fetchV1Data: sinon.stub()
+      fetchV1Data: sinon.stub(),
     }
 
     this.PublishersGetter = SandboxedModule.require(modulePath, {
@@ -33,18 +33,18 @@ describe('PublishersGetter', function () {
         '../UserMembership/UserMembershipsHandler': (this.UserMembershipsHandler = {
           getEntitiesByUser: sinon
             .stub()
-            .callsArgWith(2, null, [this.publisher])
+            .callsArgWith(2, null, [this.publisher]),
         }),
         '../UserMembership/UserMembershipEntityConfigs': (this.UserMembershipEntityConfigs = {
           publisher: {
             modelName: 'Publisher',
             canCreate: true,
             fields: {
-              primaryKey: 'slug'
-            }
-          }
-        })
-      }
+              primaryKey: 'slug',
+            },
+          },
+        }),
+      },
     })
 
     return (this.userId = '12345abcde')

@@ -24,7 +24,7 @@ async function rewriteDuplicates(duplicateReferralIds) {
             { referal_id: referralId },
             {
               projection: { _id: 1 },
-              readPreference: ReadPreference.SECONDARY
+              readPreference: ReadPreference.SECONDARY,
             }
           )
           .toArray()
@@ -44,8 +44,8 @@ async function rewriteDuplicates(duplicateReferralIds) {
             { _id: user._id },
             {
               $set: {
-                referal_id: newReferralId
-              }
+                referal_id: newReferralId,
+              },
             }
           )
         }

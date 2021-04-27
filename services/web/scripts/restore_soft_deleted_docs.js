@@ -11,7 +11,7 @@ const FILE_NAMES_TO_RESTORE = ARGV
 
 async function main() {
   const project = await ProjectGetter.promises.getProject(PROJECT_ID, {
-    deletedDocs: 1
+    deletedDocs: 1,
   })
   const docsToRestore = project.deletedDocs.filter(doc =>
     FILE_NAMES_TO_RESTORE.includes(doc.name)
@@ -22,7 +22,7 @@ async function main() {
         PROJECT_ID,
         deletedDoc._id,
         {
-          include_deleted: true
+          include_deleted: true,
         },
         (err, lines, rev, version, ranges) => {
           if (err) return reject(err)

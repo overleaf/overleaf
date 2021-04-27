@@ -5,8 +5,8 @@ import FileTreeModalCreateFile from '../../../js/features/file-tree/components/m
 export const MinimalFeatures = args => <FileTreeModalCreateFile {...args} />
 MinimalFeatures.decorators = [
   createFileModalDecorator({
-    userHasFeature: () => false
-  })
+    userHasFeature: () => false,
+  }),
 ]
 
 export const WithExtraFeatures = args => <FileTreeModalCreateFile {...args} />
@@ -18,16 +18,16 @@ FileLimitReached.decorators = [
     rootFolder: [
       {
         docs: Array.from({ length: 10 }, (_, index) => ({
-          _id: `entity-${index}`
+          _id: `entity-${index}`,
         })),
         fileRefs: [],
-        folders: []
-      }
-    ]
-  })
+        folders: [],
+      },
+    ],
+  }),
 ]
 
 export default {
   title: 'Modals / Create File',
-  component: FileTreeModalCreateFile
+  component: FileTreeModalCreateFile,
 }

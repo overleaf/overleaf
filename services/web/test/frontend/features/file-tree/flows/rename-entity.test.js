@@ -13,7 +13,7 @@ describe('FileTree Rename Entity Flow', function () {
 
   beforeEach(function () {
     window._ide = {
-      socket: new MockedSocket()
+      socket: new MockedSocket(),
     }
     global.requestAnimationFrame = sinon.stub()
   })
@@ -38,13 +38,13 @@ describe('FileTree Rename Entity Flow', function () {
             docs: [],
             fileRefs: [
               { _id: '789ghi', name: 'c.tex' },
-              { _id: '981gkp', name: 'e.tex' }
+              { _id: '981gkp', name: 'e.tex' },
             ],
-            folders: []
-          }
+            folders: [],
+          },
         ],
-        fileRefs: []
-      }
+        fileRefs: [],
+      },
     ]
     render(
       <FileTreeRoot
@@ -127,7 +127,7 @@ describe('FileTree Rename Entity Flow', function () {
 
     await screen.findByRole('alert', {
       name: 'File name is empty or contains invalid characters',
-      hidden: true
+      hidden: true,
     })
   })
 
@@ -138,7 +138,7 @@ describe('FileTree Rename Entity Flow', function () {
 
     await screen.findByRole('alert', {
       name: 'A file or folder with this name already exists',
-      hidden: true
+      hidden: true,
     })
   })
 
@@ -152,7 +152,7 @@ describe('FileTree Rename Entity Flow', function () {
 
     await screen.findByRole('alert', {
       name: 'A file or folder with this name already exists',
-      hidden: true
+      hidden: true,
     })
   })
 
@@ -163,7 +163,7 @@ describe('FileTree Rename Entity Flow', function () {
 
     await screen.findByRole('alert', {
       name: 'This file name is blocked.',
-      hidden: true
+      hidden: true,
     })
   })
 

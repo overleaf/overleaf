@@ -31,7 +31,7 @@ i18n
   .use(middleware.LanguageDetector)
   .init({
     backend: {
-      loadPath: path.join(__dirname, '../../../locales/__lng__.json')
+      loadPath: path.join(__dirname, '../../../locales/__lng__.json'),
     },
 
     // Load translation files synchronously: https://www.i18next.com/overview/configuration-options#initimmediate
@@ -49,17 +49,17 @@ i18n
       escapeValue: Settings.i18n.escapeHTMLInVars,
       // Disable nesting in interpolated values, preventing user input
       // injection via another nested value
-      skipOnVariables: true
+      skipOnVariables: true,
     },
 
     preload: availableLanguageCodes,
     supportedLngs: availableLanguageCodes,
-    fallbackLng: fallbackLanguageCode
+    fallbackLng: fallbackLanguageCode,
   })
 
 // Make custom language detector for Accept-Language header
 const headerLangDetector = new middleware.LanguageDetector(i18n.services, {
-  order: ['header']
+  order: ['header'],
 })
 
 function setLangBasedOnDomainMiddleware(req, res, next) {
@@ -95,5 +95,5 @@ i18n.translate = i18n.t
 module.exports = {
   i18nMiddleware: middleware.handle(i18n),
   setLangBasedOnDomainMiddleware,
-  i18n
+  i18n,
 }

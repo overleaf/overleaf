@@ -35,15 +35,15 @@ describe('ProjectOptionsHandler', function () {
         'settings-sharelatex': {
           languages: [
             { name: 'English', code: 'en' },
-            { name: 'French', code: 'fr' }
+            { name: 'French', code: 'fr' },
           ],
           imageRoot: 'docker-repo/subdir',
           allowedImageNames: [
             { imageName: 'texlive-0000.0', imageDesc: 'test image 0' },
-            { imageName: 'texlive-1234.5', imageDesc: 'test image 1' }
-          ]
-        }
-      }
+            { imageName: 'texlive-1234.5', imageDesc: 'test image 1' },
+          ],
+        },
+      },
     })
   })
 

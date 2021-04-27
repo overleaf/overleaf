@@ -42,7 +42,7 @@ describe('BackFillDocNameForDeletedDocs', function () {
     await db.docs.insertMany([
       { _id: docId1, deleted: true },
       { _id: docId2, deleted: true },
-      { _id: docId3, deleted: true }
+      { _id: docId3, deleted: true },
     ])
   })
   let deletedDocs1, deletedDocs2
@@ -53,7 +53,7 @@ describe('BackFillDocNameForDeletedDocs', function () {
     deletedAt3 = new Date()
     deletedDocs1 = [
       { _id: docId1, name: 'doc1.tex', deletedAt: deletedAt1 },
-      { _id: docId2, name: 'doc2.tex', deletedAt: deletedAt2 }
+      { _id: docId2, name: 'doc2.tex', deletedAt: deletedAt2 },
     ]
     deletedDocs2 = [{ _id: docId3, name: 'doc3.tex', deletedAt: deletedAt3 }]
     await setDeletedDocs(projectId1, deletedDocs1)
@@ -87,7 +87,7 @@ describe('BackFillDocNameForDeletedDocs', function () {
       expect(docs).to.deep.equal([
         { _id: docId1, deleted: true, name: 'doc1.tex', deletedAt: deletedAt1 },
         { _id: docId2, deleted: true, name: 'doc2.tex', deletedAt: deletedAt2 },
-        { _id: docId3, deleted: true, name: 'doc3.tex', deletedAt: deletedAt3 }
+        { _id: docId3, deleted: true, name: 'doc3.tex', deletedAt: deletedAt3 },
       ])
     })
   }

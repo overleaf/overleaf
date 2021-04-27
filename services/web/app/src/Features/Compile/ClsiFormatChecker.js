@@ -23,7 +23,7 @@ module.exports = ClsiFormatChecker = {
 
       sizeCheck(cb) {
         return ClsiFormatChecker._checkDocsAreUnderSizeLimit(resources, cb)
-      }
+      },
     }
 
     return async.series(jobs, function (err, problems) {
@@ -82,5 +82,5 @@ module.exports = ClsiFormatChecker = {
       sizedResources = _.sortBy(sizedResources, 'size').reverse().slice(0, 10)
       return callback(null, { resources: sizedResources, totalSize })
     }
-  }
+  },
 }

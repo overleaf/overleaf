@@ -64,7 +64,7 @@ class MockV1HistoryApi extends AbstractMockApi {
         this.requestedZipPacks++
         this.events.emit('v1-history-pack-zip')
         res.json({
-          zipUrl: `http://localhost:3100/fake-zip-download/${req.params.project_id}/version/${req.params.version}`
+          zipUrl: `http://localhost:3100/fake-zip-download/${req.params.project_id}/version/${req.params.version}`,
         })
       }
     )

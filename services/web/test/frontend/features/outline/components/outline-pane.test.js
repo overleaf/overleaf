@@ -22,8 +22,8 @@ describe('<OutlinePane />', function () {
     Object.defineProperty(global, 'localStorage', {
       value: {
         getItem: sinon.stub().returns(null),
-        setItem: sinon.stub()
-      }
+        setItem: sinon.stub(),
+      },
     })
   })
 
@@ -36,7 +36,7 @@ describe('<OutlinePane />', function () {
 
   after(function () {
     Object.defineProperty(global, 'localStorage', {
-      value: originalLocalStorage
+      value: originalLocalStorage,
     })
   })
 
@@ -45,8 +45,8 @@ describe('<OutlinePane />', function () {
       {
         title: 'Section',
         line: 1,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(
       <OutlinePane
@@ -82,8 +82,8 @@ describe('<OutlinePane />', function () {
       {
         title: 'Section',
         line: 1,
-        level: 10
-      }
+        level: 10,
+      },
     ]
     render(
       <OutlinePane
@@ -97,7 +97,7 @@ describe('<OutlinePane />', function () {
 
     expect(screen.queryByRole('tree')).to.be.null
     const collapseButton = screen.getByRole('button', {
-      name: 'Show File outline'
+      name: 'Show File outline',
     })
     fireEvent.click(collapseButton)
 

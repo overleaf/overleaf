@@ -13,8 +13,8 @@ module.exports = {
   promises: {
     flushProjectToTpds,
     deferProjectFlushToTpds,
-    flushProjectToTpdsIfNeeded
-  }
+    flushProjectToTpdsIfNeeded,
+  },
 }
 
 /**
@@ -23,7 +23,7 @@ module.exports = {
 async function flushProjectToTpds(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     name: true,
-    deferredTpdsFlushCounter: true
+    deferredTpdsFlushCounter: true,
   })
   await _flushProjectToTpds(project)
 }
@@ -34,7 +34,7 @@ async function flushProjectToTpds(projectId) {
 async function flushProjectToTpdsIfNeeded(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     name: true,
-    deferredTpdsFlushCounter: true
+    deferredTpdsFlushCounter: true,
   })
   if (project.deferredTpdsFlushCounter > 0) {
     await _flushProjectToTpds(project)
@@ -47,7 +47,7 @@ async function _flushProjectToTpds(project) {
   await DocumentUpdaterHandler.promises.flushProjectToMongo(project._id)
   const [docs, files] = await Promise.all([
     ProjectEntityHandler.promises.getAllDocs(project._id),
-    ProjectEntityHandler.promises.getAllFiles(project._id)
+    ProjectEntityHandler.promises.getAllFiles(project._id),
   ])
   for (const [docPath, doc] of Object.entries(docs)) {
     await TpdsUpdateSender.promises.addDoc({
@@ -55,7 +55,7 @@ async function _flushProjectToTpds(project) {
       doc_id: doc._id,
       path: docPath,
       project_name: project.name,
-      rev: doc.rev || 0
+      rev: doc.rev || 0,
     })
   }
   for (const [filePath, file] of Object.entries(files)) {
@@ -64,7 +64,7 @@ async function _flushProjectToTpds(project) {
       file_id: file._id,
       path: filePath,
       project_name: project.name,
-      rev: file.rev
+      rev: file.rev,
     })
   }
   await _resetDeferredTpdsFlushCounter(project)
@@ -81,7 +81,7 @@ async function _resetDeferredTpdsFlushCounter(project) {
     await Project.updateOne(
       {
         _id: project._id,
-        deferredTpdsFlushCounter: { $lte: project.deferredTpdsFlushCounter }
+        deferredTpdsFlushCounter: { $lte: project.deferredTpdsFlushCounter },
       },
       { $set: { deferredTpdsFlushCounter: 0 } }
     ).exec()

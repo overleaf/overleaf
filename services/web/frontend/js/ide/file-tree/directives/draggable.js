@@ -15,9 +15,9 @@ export default App.directive('draggable', () => ({
           delay: 250,
           opacity: 0.95,
           scroll: true,
-          helper: scope.$eval(attrs.draggableHelper)
+          helper: scope.$eval(attrs.draggableHelper),
         })
       }
     })
-  }
+  },
 }))

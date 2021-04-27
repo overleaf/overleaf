@@ -36,7 +36,7 @@ function OutlineRoot({ outline, jumpToLine, highlightedLine }) {
 OutlineRoot.propTypes = {
   outline: PropTypes.array.isRequired,
   jumpToLine: PropTypes.func.isRequired,
-  highlightedLine: PropTypes.number
+  highlightedLine: PropTypes.number,
 }
 
 export default OutlineRoot

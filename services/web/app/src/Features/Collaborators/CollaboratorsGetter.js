@@ -38,8 +38,8 @@ module.exports = {
     getProjectsUserIsMemberOf,
     isUserInvitedMemberOfProject,
     userIsTokenMember,
-    getAllInvitedMembers
-  }
+    getAllInvitedMembers,
+  },
 }
 
 async function getMemberIdsWithPrivilegeLevels(projectId) {
@@ -49,7 +49,7 @@ async function getMemberIdsWithPrivilegeLevels(projectId) {
     readOnly_refs: 1,
     tokenAccessReadOnly_refs: 1,
     tokenAccessReadAndWrite_refs: 1,
-    publicAccesLevel: 1
+    publicAccesLevel: 1,
   })
   if (!project) {
     throw new Errors.NotFoundError(`no project found with id ${projectId}`)
@@ -136,7 +136,7 @@ async function getProjectsUserIsMemberOf(userId, fields) {
     readAndWrite,
     readOnly,
     tokenReadAndWrite,
-    tokenReadOnly
+    tokenReadOnly,
   ] = await Promise.all([
     limit(() => Project.find({ collaberator_refs: userId }, fields).exec()),
     limit(() => Project.find({ readOnly_refs: userId }, fields).exec()),
@@ -144,7 +144,7 @@ async function getProjectsUserIsMemberOf(userId, fields) {
       Project.find(
         {
           tokenAccessReadAndWrite_refs: userId,
-          publicAccesLevel: PublicAccessLevels.TOKEN_BASED
+          publicAccesLevel: PublicAccessLevels.TOKEN_BASED,
         },
         fields
       ).exec()
@@ -153,11 +153,11 @@ async function getProjectsUserIsMemberOf(userId, fields) {
       Project.find(
         {
           tokenAccessReadOnly_refs: userId,
-          publicAccesLevel: PublicAccessLevels.TOKEN_BASED
+          publicAccesLevel: PublicAccessLevels.TOKEN_BASED,
         },
         fields
       ).exec()
-    )
+    ),
   ])
   return { readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly }
 }
@@ -182,11 +182,11 @@ async function userIsTokenMember(userId, projectId) {
       _id: projectId,
       $or: [
         { tokenAccessReadOnly_refs: userId },
-        { tokenAccessReadAndWrite_refs: userId }
-      ]
+        { tokenAccessReadAndWrite_refs: userId },
+      ],
     },
     {
-      _id: 1
+      _id: 1,
     }
   ).exec()
   return project != null
@@ -209,20 +209,20 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
   members.push({
     id: ownerId.toString(),
     privilegeLevel: PrivilegeLevels.OWNER,
-    source: Sources.OWNER
+    source: Sources.OWNER,
   })
   for (const memberId of collaboratorIds || []) {
     members.push({
       id: memberId.toString(),
       privilegeLevel: PrivilegeLevels.READ_AND_WRITE,
-      source: Sources.INVITE
+      source: Sources.INVITE,
     })
   }
   for (const memberId of readOnlyIds || []) {
     members.push({
       id: memberId.toString(),
       privilegeLevel: PrivilegeLevels.READ_ONLY,
-      source: Sources.INVITE
+      source: Sources.INVITE,
     })
   }
   if (publicAccessLevel === PublicAccessLevels.TOKEN_BASED) {
@@ -230,14 +230,14 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
       members.push({
         id: memberId.toString(),
         privilegeLevel: PrivilegeLevels.READ_AND_WRITE,
-        source: Sources.TOKEN
+        source: Sources.TOKEN,
       })
     }
     for (const memberId of tokenAccessReadOnlyIds || []) {
       members.push({
         id: memberId.toString(),
         privilegeLevel: PrivilegeLevels.READ_ONLY,
-        source: Sources.TOKEN
+        source: Sources.TOKEN,
       })
     }
   }
@@ -255,7 +255,7 @@ async function _loadMembers(members) {
           features: 1,
           first_name: 1,
           last_name: 1,
-          signUpDate: 1
+          signUpDate: 1,
         })
         if (user != null) {
           return { user, privilegeLevel: member.privilegeLevel }

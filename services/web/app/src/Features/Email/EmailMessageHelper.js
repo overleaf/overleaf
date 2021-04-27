@@ -3,13 +3,13 @@ const sanitizeOptions = {
   html: {
     allowedTags: ['span', 'b', 'br', 'i'],
     allowedAttributes: {
-      span: ['style', 'class']
-    }
+      span: ['style', 'class'],
+    },
   },
   plainText: {
     allowedTags: [],
-    allowedAttributes: {}
-  }
+    allowedAttributes: {},
+  },
 }
 
 function cleanHTML(text, isPlainText) {
@@ -23,5 +23,5 @@ function displayLink(text, url, isPlainText) {
 
 module.exports = {
   cleanHTML,
-  displayLink
+  displayLink,
 }

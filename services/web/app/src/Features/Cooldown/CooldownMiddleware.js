@@ -36,5 +36,5 @@ module.exports = CooldownMiddleware = {
         return next()
       }
     )
-  }
+  },
 }

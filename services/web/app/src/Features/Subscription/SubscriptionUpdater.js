@@ -27,10 +27,10 @@ const SubscriptionUpdater = {
   updateAdmin(subscription, adminId, callback) {
     const query = {
       _id: ObjectId(subscription._id),
-      customAccount: true
+      customAccount: true,
     }
     const update = {
-      $set: { admin_id: ObjectId(adminId) }
+      $set: { admin_id: ObjectId(adminId) },
     }
     if (subscription.groupPlan) {
       update.$addToSet = { manager_ids: ObjectId(adminId) }
@@ -108,7 +108,7 @@ const SubscriptionUpdater = {
       if (err != null) {
         OError.tag(err, 'error removing user from groups', {
           filter,
-          removeOperation
+          removeOperation,
         })
         return callback(err)
       }
@@ -171,7 +171,7 @@ const SubscriptionUpdater = {
           Subscription.deleteOne({ _id: subscription._id }, cb),
         cb =>
           // 3. refresh users features
-          SubscriptionUpdater._refreshUsersFeatures(subscription, cb)
+          SubscriptionUpdater._refreshUsersFeatures(subscription, cb),
       ],
       callback
     )
@@ -204,7 +204,7 @@ const SubscriptionUpdater = {
               DeletedSubscription.deleteOne(
                 { 'subscription._id': subscription._id },
                 callback
-              )
+              ),
           ],
           callback
         )
@@ -226,9 +226,9 @@ const SubscriptionUpdater = {
     const data = {
       deleterData: {
         deleterId: deleterData.id,
-        deleterIpAddress: deleterData.ip
+        deleterIpAddress: deleterData.ip,
       },
-      subscription: subscription
+      subscription: subscription,
     }
     const options = { upsert: true, new: true, setDefaultsOnInsert: true }
     DeletedSubscription.findOneAndUpdate(filter, data, options, callback)
@@ -237,7 +237,7 @@ const SubscriptionUpdater = {
   _createNewSubscription(adminUserId, callback) {
     const subscription = new Subscription({
       admin_id: adminUserId,
-      manager_ids: [adminUserId]
+      manager_ids: [adminUserId],
     })
     subscription.save(err => callback(err, subscription))
   },
@@ -290,7 +290,7 @@ const SubscriptionUpdater = {
       }
       SubscriptionUpdater._refreshUsersFeatures(subscription, callback)
     })
-  }
+  },
 }
 
 SubscriptionUpdater.promises = promisifyAll(SubscriptionUpdater)

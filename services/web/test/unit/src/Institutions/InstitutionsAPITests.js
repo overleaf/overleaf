@@ -13,25 +13,27 @@ describe('InstitutionsAPI', function () {
     this.settings = { apis: { v1: { url: 'v1.url', user: '', pass: '' } } }
     this.request = sinon.stub()
     this.ipMatcherNotification = {
-      read: (this.markAsReadIpMatcher = sinon.stub().callsArgWith(1, null))
+      read: (this.markAsReadIpMatcher = sinon.stub().callsArgWith(1, null)),
     }
     this.InstitutionsAPI = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/metrics': {
-          timeAsyncMethod: sinon.stub()
+          timeAsyncMethod: sinon.stub(),
         },
         'settings-sharelatex': this.settings,
         request: this.request,
         '../Notifications/NotificationsBuilder': {
-          ipMatcherAffiliation: sinon.stub().returns(this.ipMatcherNotification)
-        }
-      }
+          ipMatcherAffiliation: sinon
+            .stub()
+            .returns(this.ipMatcherNotification),
+        },
+      },
     })
 
     this.stubbedUser = {
       _id: '3131231',
       name: 'bob',
-      email: 'hello@world.com'
+      email: 'hello@world.com',
     }
     this.newEmail = 'bob@bob.com'
   })
@@ -77,7 +79,7 @@ describe('InstitutionsAPI', function () {
       this.institutionId = 123
       const responseBody = {
         lag: 'monthly',
-        data: [{ key: 'users', values: [{ x: '2018-01-01', y: 1 }] }]
+        data: [{ key: 'users', values: [{ x: '2018-01-01', y: 1 }] }],
       }
       this.request.yields(null, { statusCode: 200 }, responseBody)
       const startDate = '1417392000'
@@ -113,8 +115,8 @@ describe('InstitutionsAPI', function () {
         date: queryDate,
         data: {
           user_counts: { total: [], new: [] },
-          max_confirmation_months: []
-        }
+          max_confirmation_months: [],
+        },
       }
       this.request.callsArgWith(1, null, { statusCode: 201 }, v1Result)
       this.InstitutionsAPI.getLicencesForAnalytics(
@@ -197,7 +199,7 @@ describe('InstitutionsAPI', function () {
         role: 'Prof',
         department: 'Math',
         confirmedAt: new Date(),
-        entitlement: true
+        entitlement: true,
       }
       this.InstitutionsAPI.addAffiliation(
         this.stubbedUser._id,

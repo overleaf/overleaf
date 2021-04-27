@@ -31,19 +31,19 @@ describe('NewLogsUI helper', function () {
     this.user = {
       alphaProgram: false,
       betaProgram: false,
-      _id: ObjectId('60085414b76eeb00737d93aa')
+      _id: ObjectId('60085414b76eeb00737d93aa'),
     }
     this.settings = {
       logsUIPercentageBeta: 0,
       logsUIPercentageWithoutPopupBeta: 0,
       logsUIPercentage: 0,
-      logsUIPercentageWithoutPopup: 0
+      logsUIPercentageWithoutPopup: 0,
     }
     NewLogsUI = SandboxedModule.require(MODULE_PATH, {
       requires: {
         mongodb: { ObjectId },
-        'settings-sharelatex': this.settings
-      }
+        'settings-sharelatex': this.settings,
+      },
     })
   })
 
