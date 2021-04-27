@@ -756,3 +756,7 @@ module.exports = settings =
 			'app/views/project/list',
 		]
 	}
+
+	unsupportedBrowsers: {
+		ie: '<=11'
+	}
