@@ -13,7 +13,7 @@
     "lodash": "^3.0.0",
     "mongodb": "^2.2.34",
     "mongojs": "2.4.0",
-    "redis": "^2.6.2",
+    "redis": "^3.1.1",
     "rimraf": "~2.2.6",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git",
     "underscore": "^1.7.0"
