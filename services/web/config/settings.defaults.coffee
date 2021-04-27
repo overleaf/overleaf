@@ -236,6 +236,19 @@ module.exports = settings =
 		showSocialButtons: false
 		showComments: false
 
+	splitTests: [
+		{
+			id: 'example-project'
+			active:  process.env['SPLITTEST_EXAMPLE_PROJECT_ACTIVE'] == 'true'
+			variants: [
+				{
+					id: 'example-frog'
+					rolloutPercent: parseInt(process.env['SPLITTEST_EXAMPLE_PROJECT_FROG_VARIANT_ROLLOUT_PERCENT'] || '0', 10)
+				}
+			]
+		}
+	]
+
 	# cdn:
 	# 	web:
 	# 		host:"http://nowhere.sharelatex.dev"

@@ -11,13 +11,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { expect } = require('chai')
-const request = require('./helpers/request')
-const _ = require('underscore')
 
+const { expect } = require('chai')
 const User = require('./helpers/User')
-const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')
-const ExportsHandler = require('../../../app/src/Features/Exports/ExportsHandler.js')
 
 const MockProjectHistoryApiClass = require('./mocks/MockProjectHistoryApi')
 const MockV1ApiClass = require('./mocks/MockV1Api')
