@@ -59,7 +59,7 @@ export default {
   },
   decorators: [
     Story => (
-      <ContextRoot>
+      <ContextRoot ide={window._ide} settings={{}}>
         <Story />
       </ContextRoot>
     ),

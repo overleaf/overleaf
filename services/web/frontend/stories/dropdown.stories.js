@@ -43,7 +43,7 @@ Primary.args = { ...defaultArgs, bsStyle: 'primary' }
 
 export const RightAligned = args => {
   return (
-    <div style={{ 'text-align': 'right' }}>
+    <div style={{ textAlign: 'right' }}>
       <DropdownButton {...args}>
         <MenuItems />
       </DropdownButton>
@@ -54,7 +54,7 @@ RightAligned.args = { ...defaultArgs, pullRight: true }
 
 export const SingleIconTransparent = args => {
   return (
-    <div style={{ 'text-align': 'right' }}>
+    <div style={{ textAlign: 'right' }}>
       <DropdownButton {...args}>
         <MenuItems />
       </DropdownButton>
@@ -71,7 +71,11 @@ SingleIconTransparent.args = {
 
 export const Customized = args => {
   return (
-    <Dropdown pullRight={args.pullRight} defaultOpen={args.defaultOpen}>
+    <Dropdown
+      pullRight={args.pullRight}
+      defaultOpen={args.defaultOpen}
+      id="dropdown-story"
+    >
       <Dropdown.Toggle
         noCaret={args.noCaret}
         className={args.className}

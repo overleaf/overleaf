@@ -5,9 +5,6 @@ export function setupContext() {
   window.user = {
     id: 'fake_user',
   }
-  window.ExposedSettings = {
-    appName: 'Overleaf',
-  }
   let $scope = {}
   if (window._ide) {
     $scope = {
@@ -16,6 +13,7 @@ export function setupContext() {
       $watch: () => {},
       ui: {
         chatOpen: true,
+        pdfLayout: 'flat',
       },
     }
   }
@@ -28,5 +26,6 @@ export function setupContext() {
     },
   }
   window.ExposedSettings = window.ExposedSettings || {}
-  window.ExposedSettings.gitBridgePublicBaseUrl = 'https://git.stories.com'
+  window.ExposedSettings.appName = 'Overleaf'
+  window.gitBridgePublicBaseUrl = 'https://git.stories.com'
 }
