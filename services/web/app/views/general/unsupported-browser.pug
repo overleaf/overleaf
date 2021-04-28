@@ -14,3 +14,9 @@ block body
 							| Sorry, we don't support your browser anymore. Find out more about #[a(href="https://www.overleaf.com/learn/how-to/What_browsers_do_you_support") what browsers we support].
 							br
 							| If you think you're seeing this message in error, please #[a(href="/contact") let us know].
+
+						if fromURL
+							p
+								| URL:
+								|
+								a(href=fromURL) #{fromURL}

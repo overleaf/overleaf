@@ -50,6 +50,7 @@ const UserMembershipRouter = require('./Features/UserMembership/UserMembershipRo
 const SystemMessageController = require('./Features/SystemMessages/SystemMessageController')
 const { Joi, validate } = require('./infrastructure/Validation')
 const {
+  renderUnsupportedBrowserPage,
   unsupportedBrowserMiddleware,
 } = require('./infrastructure/UnsupportedBrowserMiddleware')
 
@@ -1143,9 +1144,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     TokenAccessController.grantTokenAccessReadOnly
   )
 
-  webRouter.get('/unsupported-browser', (req, res) => {
-    res.render('general/unsupported-browser')
-  })
+  webRouter.get('/unsupported-browser', renderUnsupportedBrowserPage)
 
   webRouter.get('*', ErrorController.notFound)
 }
