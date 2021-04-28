@@ -49,8 +49,8 @@ function matchOutline(content) {
   return flatOutline
 }
 
-const DISPLAY_TITLE_REGEX = new RegExp('([^\\\\]*)\\\\([^{]+){([^}]+)}(.*)')
-const END_OF_TITLE_REGEX = new RegExp('^([^{}]*?({[^{}]*?}[^{}]*?)*)}')
+const DISPLAY_TITLE_REGEX = /([^\\]*)\\([^{]+){([^}]+)}(.*)/
+const END_OF_TITLE_REGEX = /^([^{}]*?({[^{}]*?}[^{}]*?)*)}/
 /*
  * Attempt to improve the display of the outline title for titles with commands.
  * Either skip the command (for labels) or display the command's content instead

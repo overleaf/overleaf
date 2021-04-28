@@ -258,7 +258,8 @@ module.exports = CompileController = {
   },
 
   _getSafeProjectName(project) {
-    const safeProjectName = project.name.replace(new RegExp('\\W', 'g'), '_')
+    const wordRegExp = /\W/g
+    const safeProjectName = project.name.replace(wordRegExp, '_')
     return sanitize.escape(safeProjectName)
   },
 

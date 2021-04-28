@@ -20,6 +20,7 @@
 
 const load = function () {
   let SafePath
+  // eslint-disable-next-line prefer-regex-literals
   const BADCHAR_RX = new RegExp(
     `\
 [\
@@ -35,6 +36,7 @@ const load = function () {
     'g'
   )
 
+  // eslint-disable-next-line prefer-regex-literals
   const BADFILE_RX = new RegExp(
     `\
 (^\\.$)\
@@ -52,6 +54,7 @@ const load = function () {
   //
   // The list of property names is taken from
   //   ['prototype'].concat(Object.getOwnPropertyNames(Object.prototype))
+  // eslint-disable-next-line prefer-regex-literals
   const BLOCKEDFILE_RX = new RegExp(`\
 ^(\
 prototype\

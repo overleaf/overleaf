@@ -4,7 +4,7 @@
 //   app/src/Features/Project/SafePath.js
 //   frontend/js/ide/directives/SafePath.js
 //   frontend/js/features/file-tree/util/safe-path.js
-
+// eslint-disable-next-line prefer-regex-literals
 const BADCHAR_RX = new RegExp(
   `\
 [\
@@ -19,7 +19,7 @@ const BADCHAR_RX = new RegExp(
 `,
   'g'
 )
-
+// eslint-disable-next-line prefer-regex-literals
 const BADFILE_RX = new RegExp(
   `\
 (^\\.$)\
@@ -37,6 +37,7 @@ const BADFILE_RX = new RegExp(
 //
 // The list of property names is taken from
 //   ['prototype'].concat(Object.getOwnPropertyNames(Object.prototype))
+// eslint-disable-next-line prefer-regex-literals
 const BLOCKEDFILE_RX = new RegExp(`\
 ^(\
 prototype\

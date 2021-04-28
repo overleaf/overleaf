@@ -937,7 +937,7 @@ describe('UserEmails', function () {
             expect(response.statusCode).to.equal(302)
             expect(response.headers)
               .to.have.property('location')
-              .to.match(new RegExp('^/login'))
+              .to.match(/^\/login/)
             done()
           }
         )

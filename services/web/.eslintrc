@@ -44,7 +44,6 @@
     "no-prototype-builtins": "off",
     "no-var": "off",
     "prefer-const": "off",
-    "prefer-regex-literals": "off",
     "array-callback-return": "off",
     "no-unreachable-loop": "off",
     "no-loss-of-precision": "off",
