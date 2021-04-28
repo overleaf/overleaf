@@ -1,3 +1,4 @@
+const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
 const AbstractMockApi = require('./AbstractMockApi')
 
 class MockDocstoreApi extends AbstractMockApi {
@@ -87,9 +88,10 @@ class MockDocstoreApi extends AbstractMockApi {
       }
     })
 
-    this.app.post('/project/:projectId/destroy', (req, res) => {
+    this.app.post('/project/:projectId/destroy', async (req, res) => {
       const { projectId } = req.params
       delete this.docs[projectId]
+      await db.docs.deleteMany({ project_id: ObjectId(projectId) })
       res.sendStatus(204)
     })
   }
