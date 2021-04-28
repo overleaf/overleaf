@@ -1,8 +1,6 @@
 include ../../_mixins/reconfirm_affiliation
 
 .user-notifications(ng-controller="NotificationsController")
-	include ./unsupported-browser
-
 	ul.list-unstyled(
 		ng-if="notifications.length > 0 && projects.length > 0",
 		ng-cloak
