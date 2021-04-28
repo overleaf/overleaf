@@ -168,9 +168,9 @@
   },
   "devDependencies": {
     "@babel/register": "^7.12.1",
-    "@storybook/addon-a11y": "^6.1.10",
-    "@storybook/addon-essentials": "^6.1.10",
-    "@storybook/react": "^6.1.10",
+    "@storybook/addon-a11y": "^6.2.9",
+    "@storybook/addon-essentials": "^6.2.9",
+    "@storybook/react": "^6.2.9",
     "@testing-library/dom": "^7.29.4",
     "@testing-library/react": "^11.2.3",
     "@testing-library/react-hooks": "^5.1.0",
