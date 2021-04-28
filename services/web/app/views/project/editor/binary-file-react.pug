@@ -1,0 +1,9 @@
+div(
+	ng-controller="ReactBinaryFileController"
+	ng-show="ui.view == 'file'"
+	ng-if="openFile"
+)
+	binary-file(
+		file='file'
+		store-references-keys='storeReferencesKeys'
+	)

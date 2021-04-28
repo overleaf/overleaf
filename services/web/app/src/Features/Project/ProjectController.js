@@ -866,6 +866,8 @@ const ProjectController = {
               showReactShareModal: !wantsOldShareModalUI,
               showReactAddFilesModal: !wantsOldAddFilesModalUI,
               showReactGithubSync: !wantsOldGithubSyncUI && user.alphaProgram,
+              showNewBinaryFileUI:
+                req.query && req.query.new_binary_file === 'true',
             })
             timer.done()
           }

@@ -743,6 +743,8 @@ module.exports = settings =
 		createFileModes: []
 		gitBridge: []
 		publishModal: []
+		tprLinkedFileInfo: []
+		tprLinkedFileRefreshError: []
 	}
 
 	csp: {
