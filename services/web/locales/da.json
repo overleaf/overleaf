@@ -1,4 +1,6 @@
 {
+  "logs_pane_info_message": "Vi tester en ny rude til logge",
+  "logs_pane_info_message_popup": "Vi tester en ny rude til logge. Klik her for at fortælle os din mening",
   "github_symlink_error": "Dit github repository indeholder symbolske lænkefiler, som ikke på nuværende tidpunkt er understøttet af Overleaf. Du må fjerne de filer, og derefter prøve igen.",
   "address_line_1": "Adresse",
   "address_line_2": "Adresse (2. linje, valgfri)",
@@ -769,7 +771,7 @@
   "no_errors_good_job": "Ingen fejl, godt arbejde!",
   "compile_error": "Kompilérings Fejl",
   "generic_failed_compile_message": "Beklager, din LaTeX kode kunne ikke kompilére. Du kan gennemgå fejlmeddelelserne herunder for detaljer, eller se den rå logfil",
-  "other_logs_and_files": "Andre logs &amp; filer",
+  "other_logs_and_files": "Andre logger og filer",
   "view_raw_logs": "Vis rå logs",
   "hide_raw_logs": "Skjul rå logs",
   "clear_cache": "Ryd cache",
