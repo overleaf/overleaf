@@ -1,6 +1,3 @@
-const http = require('http')
-http.globalAgent.maxSockets = 300
-
 module.exports = {
   internal: {
     documentupdater: {
