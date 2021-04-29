@@ -6,4 +6,4 @@ clsi
 --env-pass-through=TEXLIVE_IMAGE
 --node-version=12.21.0
 --public-repo=True
---script-version=3.7.0
+--script-version=3.8.0
