@@ -36,11 +36,11 @@ describe('FileTree Context Menu Flow', function () {
     )
     const treeitem = screen.getByRole('button', { name: 'main.tex' })
 
-    expect(screen.getAllByRole('menu').length).to.equal(1) // toolbar
+    expect(screen.queryByRole('menu')).to.be.null
 
     fireEvent.contextMenu(treeitem)
 
-    expect(screen.getAllByRole('menu').length).to.equal(2) // toolbar + menu
+    screen.getByRole('menu')
   })
 
   it("doesn't open in read only mode", async function () {

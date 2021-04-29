@@ -35,11 +35,6 @@ describe('<FileTreeDoc/>', function () {
     fireEvent.click(treeitem)
 
     screen.getByRole('treeitem', { selected: true })
-    screen.getByRole('menuitem', { name: 'Rename' })
-    screen.getByRole('menuitem', { name: 'Delete' })
-    screen.getByRole('menuitem', { name: 'New File' })
-    screen.getByRole('menuitem', { name: 'New Folder' })
-    screen.getByRole('menuitem', { name: 'Upload' })
   })
 
   it('renders as linked file', function () {

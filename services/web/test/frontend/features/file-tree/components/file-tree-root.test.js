@@ -89,6 +89,8 @@ describe('<FileTreeRoot/>', function () {
     // selected) This is needed to make sure the test fail.
     const treeitemFile = screen.getByRole('treeitem', { name: 'main.tex' })
     fireEvent.click(treeitemFile, { ctrlKey: true })
+    const toggleButton = screen.getByRole('button', { name: 'Menu' })
+    fireEvent.click(toggleButton)
     const deleteButton = screen.getByRole('menuitem', { name: 'Delete' })
     fireEvent.click(deleteButton)
     await waitFor(() => screen.getByRole('button', { name: 'Cancel' }))

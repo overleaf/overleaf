@@ -5,6 +5,7 @@ import { screen, fireEvent } from '@testing-library/react'
 import renderWithContext from '../../helpers/render-with-context'
 
 import FileTreeitemInner from '../../../../../../frontend/js/features/file-tree/components/file-tree-item/file-tree-item-inner'
+import FileTreeContextMenu from '../../../../../../frontend/js/features/file-tree/components/file-tree-context-menu'
 
 describe('<FileTreeitemInner />', function () {
   const setContextMenuCoords = sinon.stub()
@@ -41,18 +42,22 @@ describe('<FileTreeitemInner />', function () {
 
     it('open / close', function () {
       const { container } = renderWithContext(
-        <FileTreeitemInner id="123abc" name="bar.tex" isSelected />
+        <>
+          <FileTreeitemInner id="123abc" name="bar.tex" isSelected />
+          <FileTreeContextMenu />
+        </>
       )
 
+      expect(screen.queryByRole('menu')).to.be.null
+
+      // open the context menu
       const entityElement = container.querySelector('div.entity')
-
-      screen.getByRole('menu', { visible: false })
-
       fireEvent.contextMenu(entityElement)
       screen.getByRole('menu', { visible: true })
 
-      fireEvent.contextMenu(entityElement)
-      screen.getByRole('menu', { visible: false })
+      // close the context menu
+      fireEvent.click(entityElement)
+      expect(screen.queryByRole('menu')).to.be.null
     })
   })
 
@@ -83,7 +88,8 @@ describe('<FileTreeitemInner />', function () {
           },
         }
       )
-
+      const toggleButton = screen.getByRole('button', { name: 'Menu' })
+      fireEvent.click(toggleButton)
       const renameButton = screen.getByRole('menuitem', { name: 'Rename' })
       fireEvent.click(renameButton)
       expect(screen.queryByRole('button', { name: 'bar.tex' })).to.not.exist

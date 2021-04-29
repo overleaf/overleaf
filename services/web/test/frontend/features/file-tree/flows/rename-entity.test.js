@@ -185,6 +185,9 @@ describe('FileTree Rename Entity Flow', function () {
     const treeitem = screen.getByRole('treeitem', { name: treeitemName })
     fireEvent.click(treeitem)
 
+    const toggleButton = screen.getByRole('button', { name: 'Menu' })
+    fireEvent.click(toggleButton)
+
     const renameButton = screen.getByRole('menuitem', { name: 'Rename' })
     fireEvent.click(renameButton)
 

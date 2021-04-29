@@ -1,5 +1,6 @@
 import React from 'react'
 import sinon from 'sinon'
+import { expect } from 'chai'
 import { screen, fireEvent } from '@testing-library/react'
 import renderWithContext from '../../helpers/render-with-context'
 
@@ -20,7 +21,9 @@ describe('<FileTreeitemMenu />', function () {
       />
     )
 
-    screen.getByRole('button', { name: 'Menu' })
+    const toggleButton = screen.getByRole('button', { name: 'Menu' })
+    fireEvent.click(toggleButton)
+
     screen.getByRole('menu')
   })
 
@@ -32,9 +35,9 @@ describe('<FileTreeitemMenu />', function () {
       />
     )
 
-    const toggleButton = screen.getByRole('button', { name: 'Menu' })
+    expect(screen.queryByRole('menu')).to.be.null
 
-    screen.getByRole('menu', { visible: false })
+    const toggleButton = screen.getByRole('button', { name: 'Menu' })
 
     fireEvent.click(toggleButton)
     screen.getByRole('menu', { visible: true })

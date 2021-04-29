@@ -51,13 +51,6 @@ describe('<FileTreeFolder/>', function () {
     fireEvent.click(treeitem)
 
     screen.getByRole('treeitem', { selected: true })
-    screen.getByRole('menuitem', { name: 'Rename' })
-    screen.getByRole('menuitem', { name: 'Delete' })
-    screen.getByRole('menuitem', { name: 'New File' })
-    screen.getByRole('menuitem', { name: 'New Folder' })
-    screen.getByRole('menuitem', { name: 'Upload' })
-
-    screen.getByRole('treeitem', { selected: true })
     expect(screen.queryByRole('tree')).to.not.exist
   })
 

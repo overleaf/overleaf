@@ -53,6 +53,9 @@ describe('FileTree Delete Entity Flow', function () {
       const treeitem = screen.getByRole('treeitem', { name: 'main.tex' })
       fireEvent.click(treeitem)
 
+      const toggleButton = screen.getByRole('button', { name: 'Menu' })
+      fireEvent.click(toggleButton)
+
       const deleteButton = screen.getByRole('menuitem', { name: 'Delete' })
       fireEvent.click(deleteButton)
     })
@@ -186,6 +189,8 @@ describe('FileTree Delete Entity Flow', function () {
       // as a proxy to check that the child entity has been unselect we start
       // a delete and ensure the modal is displayed (the cancel button can be
       // selected) This is needed to make sure the test fail.
+      const toggleButton = screen.getByRole('button', { name: 'Menu' })
+      fireEvent.click(toggleButton)
       const deleteButton = screen.getByRole('menuitem', { name: 'Delete' })
       fireEvent.click(deleteButton)
       await waitFor(() => screen.getByRole('button', { name: 'Cancel' }))
@@ -193,7 +198,7 @@ describe('FileTree Delete Entity Flow', function () {
   })
 
   describe('multiple entities', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       const rootFolder = [
         {
           _id: 'root-folder-id',
@@ -202,6 +207,7 @@ describe('FileTree Delete Entity Flow', function () {
           fileRefs: [{ _id: '789ghi', name: 'my.bib' }],
         },
       ]
+
       render(
         <FileTreeRoot
           rootFolder={rootFolder}
@@ -218,14 +224,23 @@ describe('FileTree Delete Entity Flow', function () {
         />
       )
 
+      // select two files
       const treeitemDoc = screen.getByRole('treeitem', { name: 'main.tex' })
       fireEvent.click(treeitemDoc)
       const treeitemFile = screen.getByRole('treeitem', { name: 'my.bib' })
       fireEvent.click(treeitemFile, { ctrlKey: true })
 
-      const deleteButton = screen.getAllByRole('menuitem', {
-        name: 'Delete',
-      })[0]
+      // open the context menu
+      const treeitemButton = screen.getByRole('button', { name: 'my.bib' })
+      fireEvent.contextMenu(treeitemButton)
+
+      // make sure the menu has opened, with only a "Delete" item (as multiple files are selected)
+      screen.getByRole('menu')
+      const menuItems = await screen.findAllByRole('menuitem')
+      expect(menuItems.length).to.equal(1)
+
+      // select the Delete menu item
+      const deleteButton = screen.getByRole('menuitem', { name: 'Delete' })
       fireEvent.click(deleteButton)
     })
 
