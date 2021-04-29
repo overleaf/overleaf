@@ -51,6 +51,9 @@ describe('index', function () {
       requires: {
         ioredis: this.ioredis,
       },
+      globals: {
+        process: process,
+      },
     })
     return (this.auth_pass = '1234 pass')
   })
