@@ -259,6 +259,8 @@ describe('ProjectDetailsHandler', function () {
           { _id: 138, name: 'numeric (38)' },
           { _id: 139, name: 'numeric (39)' },
           { _id: 140, name: 'numeric (40)' },
+          { _id: 141, name: 'Yearbook (2021)' },
+          { _id: 142, name: 'Yearbook (2021) (1)' },
         ],
         readAndWrite: [
           { _id: 4, name: 'name2' },
@@ -363,6 +365,24 @@ describe('ProjectDetailsHandler', function () {
         []
       )
       expect(name).to.equal('numeric (41)')
+    })
+
+    it('should handle years in name', async function () {
+      const name = await this.handler.promises.generateUniqueName(
+        this.user._id,
+        'unique-name (2021)',
+        []
+      )
+      expect(name).to.equal('unique-name (2021)')
+    })
+
+    it('should handle duplicating with year in name', async function () {
+      const name = await this.handler.promises.generateUniqueName(
+        this.user._id,
+        'Yearbook (2021)',
+        []
+      )
+      expect(name).to.equal('Yearbook (2021) (2)')
     })
   })
 

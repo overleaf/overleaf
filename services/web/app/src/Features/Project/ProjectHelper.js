@@ -141,6 +141,16 @@ function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
     n = parseInt(match[1])
   }
 
+  const prefixMatcher = new RegExp(`^${basename} \\(\\d+\\)$`)
+  const projectNamesWithSamePrefix = Array.from(allProjectNames).filter(name =>
+    prefixMatcher.test(name)
+  )
+  const nIsLikelyAYear = n > 1000 && projectNamesWithSamePrefix.length < n / 2
+  if (nIsLikelyAYear) {
+    basename = name
+    n = 1
+  }
+
   while (n <= last) {
     const candidate = suffixedName(basename, n)
     if (!allProjectNames.has(candidate)) {
