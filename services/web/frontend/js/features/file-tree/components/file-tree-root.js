@@ -15,7 +15,6 @@ import FileTreeError from './file-tree-error'
 import { useFileTreeMutable } from '../contexts/file-tree-mutable'
 import { useDroppable } from '../contexts/file-tree-draggable'
 
-import { useFileTreeAngularListener } from '../hooks/file-tree-angular-listener'
 import { useFileTreeSocketListener } from '../hooks/file-tree-socket-listener'
 import FileTreeModalCreateFile from './modals/file-tree-modal-create-file'
 
@@ -60,7 +59,7 @@ function FileTreeRoot({
         <FileTreeRootFolder />
       </div>
       <FileTreeModalDelete />
-      {window.showReactAddFilesModal && <FileTreeModalCreateFile />}
+      <FileTreeModalCreateFile />
       <FileTreeModalCreateFolder />
       <FileTreeModalError />
     </FileTreeContext>
@@ -69,7 +68,6 @@ function FileTreeRoot({
 
 function FileTreeRootFolder() {
   useFileTreeSocketListener()
-  useFileTreeAngularListener()
   const { fileTreeData } = useFileTreeMutable()
 
   const { isOver, dropRef } = useDroppable(fileTreeData._id)

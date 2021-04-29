@@ -78,23 +78,6 @@ App.controller(
         },
       })
 
-    if (
-      window.showReactFileTree &&
-      !window.FileTreeReactBridgeOpenNewDocModalListened
-    ) {
-      window.FileTreeReactBridgeOpenNewDocModalListened = true
-      window.addEventListener(
-        'FileTreeReactBridge.openNewDocModal',
-        ({ detail }) => {
-          if (detail.mode === 'upload') {
-            $scope.openUploadFileModal(detail.parentFolderId)
-          } else {
-            $scope.openNewDocModal(detail.parentFolderId)
-          }
-        }
-      )
-    }
-
     $scope.orderByFoldersFirst = function (entity) {
       if ((entity != null ? entity.type : undefined) === 'folder') {
         return '0'
@@ -207,24 +190,6 @@ App.controller(
       }
       $modalInstance.dismiss('done')
     })
-
-    if (
-      window.showReactFileTree &&
-      !window.FileTreeReactBridgeOpenNewFileModalListened
-    ) {
-      window.FileTreeReactBridgeOpenNewFileModalListened = true
-      window.addEventListener(
-        'FileTreeReactBridge.openNewFileModal',
-        ({ detail }) => {
-          if (detail.done) {
-            ide.$scope.FileTreeReactBridgePromise.resolve()
-          }
-          if (detail.error) {
-            ide.$scope.FileTreeReactBridgePromise.reject(detail)
-          }
-        }
-      )
-    }
   }
 )
 

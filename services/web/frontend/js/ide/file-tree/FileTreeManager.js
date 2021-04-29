@@ -563,22 +563,6 @@ export default FileTreeManager = class FileTreeManager {
   }
 
   createDoc(name, parent_folder) {
-    if (window.showReactFileTree) {
-      const promise = new Promise((resolve, reject) => {
-        this.$scope.FileTreeReactBridgePromise = {
-          resolve,
-          reject,
-        }
-      })
-      window.dispatchEvent(
-        new CustomEvent('FileTreeReactBridge.createDoc', {
-          detail: {
-            name,
-          },
-        })
-      )
-      return promise
-    }
     // check if a doc/file/folder already exists with this name
     if (parent_folder == null) {
       parent_folder = this.getCurrentFolder()
@@ -613,24 +597,6 @@ export default FileTreeManager = class FileTreeManager {
   }
 
   createLinkedFile(name, parent_folder, provider, data) {
-    if (window.showReactFileTree) {
-      const promise = new Promise((resolve, reject) => {
-        this.$scope.FileTreeReactBridgePromise = {
-          resolve,
-          reject,
-        }
-      })
-      window.dispatchEvent(
-        new CustomEvent('FileTreeReactBridge.createLinkedFile', {
-          detail: {
-            name,
-            provider,
-            data,
-          },
-        })
-      )
-      return promise
-    }
     // check if a doc/file/folder already exists with this name
     if (parent_folder == null) {
       parent_folder = this.getCurrentFolder()

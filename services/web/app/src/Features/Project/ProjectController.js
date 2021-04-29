@@ -739,12 +739,8 @@ const ProjectController = {
         const allowedImageNames = ProjectHelper.getAllowedImagesForUser(
           sessionUser
         )
-        const wantsOldFileTreeUI =
-          req.query && req.query.new_file_tree_ui === 'false'
         const wantsOldShareModalUI =
           req.query && req.query.new_share_modal_ui === 'false'
-        const wantsOldAddFilesModalUI =
-          req.query && req.query.new_add_files_modal_ui === 'false'
         const wantsOldGithubSyncUI =
           req.query && req.query.new_github_sync_ui === 'false'
 
@@ -862,9 +858,7 @@ const ProjectController = {
               logsUISubvariant: logsUIVariant.subvariant,
               showNewNavigationUI:
                 req.query && req.query.new_navigation_ui === 'true',
-              showReactFileTree: !wantsOldFileTreeUI,
               showReactShareModal: !wantsOldShareModalUI,
-              showReactAddFilesModal: !wantsOldAddFilesModalUI,
               showReactGithubSync: !wantsOldGithubSyncUI && user.alphaProgram,
               showNewBinaryFileUI:
                 req.query && req.query.new_binary_file === 'true',

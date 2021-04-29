@@ -312,44 +312,12 @@ export function useFileTreeActionable() {
   )
 
   const startCreatingDocOrFile = useCallback(() => {
-    if (window.showReactAddFilesModal) {
-      startCreatingFile('doc')
-    } else {
-      const parentFolderId = getSelectedParentFolderId(
-        fileTreeData,
-        selectedEntityIds
-      )
-
-      window.dispatchEvent(
-        new CustomEvent('FileTreeReactBridge.openNewDocModal', {
-          detail: {
-            mode: 'doc',
-            parentFolderId,
-          },
-        })
-      )
-    }
-  }, [fileTreeData, selectedEntityIds, startCreatingFile])
+    startCreatingFile('doc')
+  }, [startCreatingFile])
 
   const startUploadingDocOrFile = useCallback(() => {
-    if (window.showReactAddFilesModal) {
-      startCreatingFile('upload')
-    } else {
-      const parentFolderId = getSelectedParentFolderId(
-        fileTreeData,
-        selectedEntityIds
-      )
-
-      window.dispatchEvent(
-        new CustomEvent('FileTreeReactBridge.openNewDocModal', {
-          detail: {
-            mode: 'upload',
-            parentFolderId,
-          },
-        })
-      )
-    }
-  }, [fileTreeData, selectedEntityIds, startCreatingFile])
+    startCreatingFile('upload')
+  }, [startCreatingFile])
 
   const finishCreatingDocOrFile = useCallback(
     entity => {
@@ -357,34 +325,10 @@ export function useFileTreeActionable() {
 
       return finishCreatingEntity(entity)
         .then(() => {
-          if (window.showReactAddFilesModal) {
-            dispatch({ type: ACTION_TYPES.CLEAR })
-          } else {
-            // dispatch FileTreeReactBridge event to update the Angular modal
-            window.dispatchEvent(
-              new CustomEvent('FileTreeReactBridge.openNewFileModal', {
-                detail: {
-                  done: true,
-                },
-              })
-            )
-          }
+          dispatch({ type: ACTION_TYPES.CLEAR })
         })
         .catch(error => {
-          if (window.showReactAddFilesModal) {
-            dispatch({ type: ACTION_TYPES.ERROR, error })
-          } else {
-            // dispatch FileTreeReactBridge event to update the Angular modal with
-            // an error
-            window.dispatchEvent(
-              new CustomEvent('FileTreeReactBridge.openNewFileModal', {
-                detail: {
-                  error: true,
-                  data: error.message,
-                },
-              })
-            )
-          }
+          dispatch({ type: ACTION_TYPES.ERROR, error })
         })
     },
     [dispatch, finishCreatingEntity]
