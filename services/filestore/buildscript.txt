@@ -6,4 +6,4 @@ filestore
 --env-pass-through=
 --node-version=12.20.1
 --public-repo=True
---script-version=3.4.0
+--script-version=3.8.0
