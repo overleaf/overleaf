@@ -58,7 +58,6 @@
     "mocha": "^7.2.0",
     "prettier": "^2.0.0",
     "prettier-eslint-cli": "^5.0.0",
-    "request": "~2.88.2",
     "sandboxed-module": "~2.0.4",
     "sinon": "~9.0.2",
     "sinon-chai": "^3.5.0"
