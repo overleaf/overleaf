@@ -71,6 +71,8 @@ const setupFetchMock = () => {
     .post('express:/project/:projectId/invite/:inviteId/resend', 200, {
       delay,
     })
+    // send analytics event
+    .post('express:/event/:key', 200)
 }
 
 const ideWithProject = project => {

@@ -89,4 +89,9 @@ export const decorators = [withTheme]
 window.ExposedSettings = {
   maxEntitiesPerProject: 10,
   maxUploadSize: 5 * 1024 * 1024,
+  enableSubscriptions: true,
+}
+
+window.user = {
+  id: 'storybook',
 }

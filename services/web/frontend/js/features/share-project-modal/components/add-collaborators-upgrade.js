@@ -2,12 +2,10 @@ import React, { useState } from 'react'
 import { Trans } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
-import { startFreeTrial, upgradePlan } from '../../../main/account-upgrade'
-import { useShareProjectContext } from './share-project-modal'
+import { upgradePlan } from '../../../main/account-upgrade'
+import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 
 export default function AddCollaboratorsUpgrade() {
-  const { eventTracking } = useShareProjectContext()
-
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
 
   return (
@@ -54,20 +52,11 @@ export default function AddCollaboratorsUpgrade() {
 
       <p className="text-center row-spaced-thin">
         {window.user.allowedFreeTrial ? (
-          <Button
-            bsStyle="success"
-            onClick={() => {
-              startFreeTrial(
-                'projectMembers',
-                undefined,
-                undefined,
-                eventTracking
-              )
-              setStartedFreeTrial(true)
-            }}
-          >
-            <Trans i18nKey="start_free_trial" />
-          </Button>
+          <StartFreeTrialButton
+            buttonStyle="success"
+            setStartedFreeTrial={setStartedFreeTrial}
+            source="projectMembers"
+          />
         ) : (
           <Button
             bsStyle="success"
@@ -76,7 +65,7 @@ export default function AddCollaboratorsUpgrade() {
               setStartedFreeTrial(true)
             }}
           >
-            <Trans i18nKey="start_free_trial" />
+            <Trans i18nKey="upgrade" />
           </Button>
         )}
       </p>

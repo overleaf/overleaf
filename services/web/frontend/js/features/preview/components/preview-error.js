@@ -5,7 +5,7 @@ import PreviewLogsPaneEntry from './preview-logs-pane-entry'
 import Icon from '../../../shared/components/icon'
 import { useApplicationContext } from '../../../shared/context/application-context'
 import { useEditorContext } from '../../../shared/context/editor-context'
-import { startFreeTrial } from '../../../main/account-upgrade'
+import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 
 function PreviewError({ name }) {
   const { isProjectOwner } = useEditorContext({
@@ -84,10 +84,6 @@ function PreviewError({ name }) {
 function TimeoutUpgradePrompt({ isProjectOwner }) {
   const { t } = useTranslation()
 
-  function handleStartFreeTrialClick() {
-    startFreeTrial('compile-timeout')
-  }
-
   const timeoutUpgradePromptContent = (
     <>
       <p>{t('free_accounts_have_timeout_upgrade_to_increase')}</p>
@@ -128,12 +124,11 @@ function TimeoutUpgradePrompt({ isProjectOwner }) {
       </div>
       {isProjectOwner ? (
         <p className="text-center">
-          <button
-            className="btn btn-success row-spaced-small"
-            onClick={handleStartFreeTrialClick}
-          >
-            {t('start_free_trial')}
-          </button>
+          <StartFreeTrialButton
+            source="compile-timeout"
+            buttonStyle="success"
+            classes={{ button: 'row-spaced-small' }}
+          />
         </p>
       ) : null}
     </>

@@ -4,6 +4,7 @@ export function setupContext() {
   window.project_id = '1234'
   window.user = {
     id: 'fake_user',
+    allowedFreeTrial: true,
   }
   let $scope = {}
   if (window._ide) {

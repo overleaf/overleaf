@@ -100,7 +100,7 @@ function SampleHumanReadableHintComponent() {
 }
 
 export default {
-  title: 'PreviewLogsPaneEntry',
+  title: 'Preview Logs / Entry',
   component: PreviewLogsPaneEntry,
   args: {
     sourceLocation: {
@@ -113,7 +113,7 @@ export default {
 The LaTeX compiler output
   * With a lot of details
 
-Wrapped in an HTML <pre> element with 
+Wrapped in an HTML <pre> element with
       preformatted text which is to be presented exactly
             as written in the HTML file
 
@@ -129,7 +129,7 @@ LaTeX Font Info:    External font \`cmex10' loaded for size
 <recently read> \\Zlpha
 
  main.tex, line 23
-     
+
 `,
   },
 }
