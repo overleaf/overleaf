@@ -1,0 +1,32 @@
+{
+    "port": 8080,
+    "rootGitDirectory": "/tmp/wlgb",
+    "apiBaseUrl": "https://localhost/api/v0",
+    "username": "$GITBRIDGE_USERNAME",
+    "password": "$GITBRIDGE_PASSWORD",
+    "postbackBaseUrl": "https://localhost",
+    "serviceName": "Overleaf",
+    "oauth2": {
+        "oauth2ClientID": "$GITBRIDGE_OAUTH2_CLIENT_ID",
+        "oauth2ClientSecret": "$GITBRIDGE_OAUTH2_CLIENT_SECRET",
+        "oauth2Server": "https://localhost"
+    },
+    "repoStore": {
+        "maxFileNum": 2000,
+        "maxFileSize": 52428800
+    },
+    "swapStore": {
+        "type": "s3",
+        "awsAccessKey": "asdf",
+        "awsSecret": "asdf",
+        "s3BucketName": "com.overleaf.testbucket",
+        "awsRegion": "us-east-1"
+    },
+    "swapJob": {
+        "minProjects": 50,
+        "lowGiB": 128,
+        "highGiB": 256,
+        "intervalMillis": 3600000,
+        "compressionMethod": "gzip"
+    }
+}

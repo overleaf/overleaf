@@ -21,14 +21,19 @@ RUN make package \
 
 FROM openjdk:8-jre
 
-RUN apt-get update && apt-get install -y git \
+RUN apt-get update && apt-get install -y git gettext-base\
  && rm -rf /var/lib/apt/lists
 
 RUN useradd --create-home node
 
-ENTRYPOINT ["java", "-jar", "/git-bridge.jar"]
-CMD ["/conf/runtime.json"]
+CMD ["/start.sh"]
 
 COPY --from=builder /git-bridge.jar /
+
+COPY conf/envsubst_template.json envsubst_template.json
+COPY start.sh start.sh
+
+RUN mkdir conf
+RUN chown node:node conf
 
 USER node
