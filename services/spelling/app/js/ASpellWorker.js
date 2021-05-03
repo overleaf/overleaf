@@ -233,6 +233,8 @@ class ASpellWorker {
   }
 
   sendCommand(command) {
+    // Sanitize user input. Reject line feed characters.
+    command = command.replace(/[\r\n]/g, '')
     return this.pipe.stdin.write(command + '\n')
   }
 }
