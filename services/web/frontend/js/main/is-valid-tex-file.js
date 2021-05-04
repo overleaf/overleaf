@@ -1,7 +1,5 @@
-import ExposedSettings from './exposed-settings'
-
 const validTeXFileRegExp = new RegExp(
-  `\\.(${ExposedSettings.validRootDocExtensions.join('|')})$`,
+  `\\.(${window.ExposedSettings.validRootDocExtensions.join('|')})$`,
   'i'
 )
 
