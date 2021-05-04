@@ -85,10 +85,62 @@ export const FileTreeMutableProvider = function ({ rootFolder, children }) {
     }
   )
 
+  const dispatchCreateFolder = useCallback((parentFolderId, entity) => {
+    entity.type = 'folder'
+    dispatch({
+      type: ACTION_TYPES.CREATE_ENTITY,
+      parentFolderId,
+      entity,
+    })
+  }, [])
+
+  const dispatchCreateDoc = useCallback((parentFolderId, entity) => {
+    entity.type = 'doc'
+    dispatch({
+      type: ACTION_TYPES.CREATE_ENTITY,
+      parentFolderId,
+      entity,
+    })
+  }, [])
+
+  const dispatchCreateFile = useCallback((parentFolderId, entity) => {
+    entity.type = 'fileRef'
+    dispatch({
+      type: ACTION_TYPES.CREATE_ENTITY,
+      parentFolderId,
+      entity,
+    })
+  }, [])
+
+  const dispatchRename = useCallback((id, newName) => {
+    dispatch({
+      type: ACTION_TYPES.RENAME,
+      newName,
+      id,
+    })
+  }, [])
+
+  const dispatchDelete = useCallback(id => {
+    dispatch({ type: ACTION_TYPES.DELETE, id })
+  }, [])
+
+  const dispatchMove = useCallback((entityId, toFolderId) => {
+    dispatch({ type: ACTION_TYPES.MOVE, entityId, toFolderId })
+  }, [])
+
+  const value = {
+    dispatchCreateDoc,
+    dispatchCreateFile,
+    dispatchCreateFolder,
+    dispatchDelete,
+    dispatchMove,
+    dispatchRename,
+    fileCount,
+    fileTreeData,
+  }
+
   return (
-    <FileTreeMutableContext.Provider
-      value={{ fileTreeData, fileCount, dispatch }}
-    >
+    <FileTreeMutableContext.Provider value={value}>
       {children}
     </FileTreeMutableContext.Provider>
   )
@@ -103,81 +155,15 @@ FileTreeMutableProvider.propTypes = {
 }
 
 export function useFileTreeMutable() {
-  const { fileTreeData, fileCount, dispatch } = useContext(
-    FileTreeMutableContext
-  )
+  const context = useContext(FileTreeMutableContext)
 
-  const dispatchCreateFolder = useCallback(
-    (parentFolderId, entity) => {
-      entity.type = 'folder'
-      dispatch({
-        type: ACTION_TYPES.CREATE_ENTITY,
-        parentFolderId,
-        entity,
-      })
-    },
-    [dispatch]
-  )
-
-  const dispatchCreateDoc = useCallback(
-    (parentFolderId, entity) => {
-      entity.type = 'doc'
-      dispatch({
-        type: ACTION_TYPES.CREATE_ENTITY,
-        parentFolderId,
-        entity,
-      })
-    },
-    [dispatch]
-  )
-
-  const dispatchCreateFile = useCallback(
-    (parentFolderId, entity) => {
-      entity.type = 'fileRef'
-      dispatch({
-        type: ACTION_TYPES.CREATE_ENTITY,
-        parentFolderId,
-        entity,
-      })
-    },
-    [dispatch]
-  )
-
-  const dispatchRename = useCallback(
-    (id, newName) => {
-      dispatch({
-        type: ACTION_TYPES.RENAME,
-        newName,
-        id,
-      })
-    },
-    [dispatch]
-  )
-
-  const dispatchDelete = useCallback(
-    id => {
-      dispatch({ type: ACTION_TYPES.DELETE, id })
-    },
-    [dispatch]
-  )
-
-  const dispatchMove = useCallback(
-    (entityId, toFolderId) => {
-      dispatch({ type: ACTION_TYPES.MOVE, entityId, toFolderId })
-    },
-    [dispatch]
-  )
-
-  return {
-    fileTreeData,
-    fileCount,
-    dispatchRename,
-    dispatchDelete,
-    dispatchMove,
-    dispatchCreateFolder,
-    dispatchCreateDoc,
-    dispatchCreateFile,
+  if (!context) {
+    throw new Error(
+      'useFileTreeMutable is only available in FileTreeMutableProvider'
+    )
   }
+
+  return context
 }
 
 function filesInFolder({ docs, folders, fileRefs }) {

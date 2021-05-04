@@ -124,41 +124,13 @@ export function FileTreeActionableProvider({ hasWritePermissions, children }) {
     defaultState
   )
 
-  return (
-    <FileTreeActionableContext.Provider value={{ ...state, dispatch }}>
-      {children}
-    </FileTreeActionableContext.Provider>
-  )
-}
-
-FileTreeActionableProvider.propTypes = {
-  hasWritePermissions: PropTypes.bool.isRequired,
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
-}
-
-export function useFileTreeActionable() {
-  const {
-    isDeleting,
-    isRenaming,
-    isMoving,
-    isCreatingFile,
-    isCreatingFolder,
-    inFlight,
-    error,
-    actionedEntities,
-    newFileCreateMode,
-    dispatch,
-  } = useContext(FileTreeActionableContext)
   const { projectId } = useFileTreeMainContext()
   const { fileTreeData, dispatchRename, dispatchMove } = useFileTreeMutable()
   const { selectedEntityIds } = useFileTreeSelectable()
 
   const startRenaming = useCallback(() => {
     dispatch({ type: ACTION_TYPES.START_RENAME })
-  }, [dispatch])
+  }, [])
 
   // update the entity with the new name immediately in the tree, but revert to
   // the old name if the sync fails
@@ -185,7 +157,7 @@ export function useFileTreeActionable() {
         }
       )
     },
-    [dispatch, dispatchRename, fileTreeData, projectId, selectedEntityIds]
+    [dispatchRename, fileTreeData, projectId, selectedEntityIds]
   )
 
   const isDuplicate = useCallback(
@@ -203,9 +175,9 @@ export function useFileTreeActionable() {
       entityId => findInTreeOrThrow(fileTreeData, entityId).entity
     )
     dispatch({ type: ACTION_TYPES.START_DELETE, actionedEntities })
-  }, [dispatch, fileTreeData, selectedEntityIds])
+  }, [fileTreeData, selectedEntityIds])
 
-  // deletes entities in serie. Tree will be updated via the socket event
+  // deletes entities in series. Tree will be updated via the socket event
   const finishDeleting = useCallback(() => {
     dispatch({ type: ACTION_TYPES.DELETING })
 
@@ -227,7 +199,7 @@ export function useFileTreeActionable() {
         // set an error and allow user to retry
         dispatch({ type: ACTION_TYPES.ERROR, error })
       })
-  }, [dispatch, fileTreeData, projectId, selectedEntityIds])
+  }, [fileTreeData, projectId, selectedEntityIds])
 
   // moves entities. Tree is updated immediately and data are sync'd after.
   const finishMoving = useCallback(
@@ -266,20 +238,20 @@ export function useFileTreeActionable() {
           dispatch({ type: ACTION_TYPES.ERROR, error })
         })
     },
-    [dispatch, dispatchMove, fileTreeData, projectId]
+    [dispatchMove, fileTreeData, projectId]
   )
 
   const startCreatingFolder = useCallback(() => {
     dispatch({ type: ACTION_TYPES.START_CREATE_FOLDER })
-  }, [dispatch])
+  }, [])
+
+  const parentFolderId = useMemo(
+    () => getSelectedParentFolderId(fileTreeData, selectedEntityIds),
+    [fileTreeData, selectedEntityIds]
+  )
 
   const finishCreatingEntity = useCallback(
     entity => {
-      const parentFolderId = getSelectedParentFolderId(
-        fileTreeData,
-        selectedEntityIds
-      )
-
       const error = validateCreate(fileTreeData, parentFolderId, entity)
       if (error) {
         return Promise.reject(error)
@@ -287,7 +259,7 @@ export function useFileTreeActionable() {
 
       return syncCreateEntity(projectId, parentFolderId, entity)
     },
-    [fileTreeData, projectId, selectedEntityIds]
+    [fileTreeData, parentFolderId, projectId]
   )
 
   const finishCreatingFolder = useCallback(
@@ -301,15 +273,12 @@ export function useFileTreeActionable() {
           dispatch({ type: ACTION_TYPES.ERROR, error })
         })
     },
-    [dispatch, finishCreatingEntity]
+    [finishCreatingEntity]
   )
 
-  const startCreatingFile = useCallback(
-    newFileCreateMode => {
-      dispatch({ type: ACTION_TYPES.START_CREATE_FILE, newFileCreateMode })
-    },
-    [dispatch]
-  )
+  const startCreatingFile = useCallback(newFileCreateMode => {
+    dispatch({ type: ACTION_TYPES.START_CREATE_FILE, newFileCreateMode })
+  }, [])
 
   const startCreatingDocOrFile = useCallback(() => {
     startCreatingFile('doc')
@@ -331,7 +300,7 @@ export function useFileTreeActionable() {
           dispatch({ type: ACTION_TYPES.ERROR, error })
         })
     },
-    [dispatch, finishCreatingEntity]
+    [finishCreatingEntity]
   )
 
   const finishCreatingDoc = useCallback(
@@ -352,28 +321,15 @@ export function useFileTreeActionable() {
 
   const cancel = useCallback(() => {
     dispatch({ type: ACTION_TYPES.CANCEL })
-  }, [dispatch])
+  }, [])
 
-  const parentFolderId = useMemo(
-    () => getSelectedParentFolderId(fileTreeData, selectedEntityIds),
-    [fileTreeData, selectedEntityIds]
-  )
-
-  return {
+  const value = {
     canDelete: selectedEntityIds.size > 0,
     canRename: selectedEntityIds.size === 1,
     canCreate: selectedEntityIds.size < 2,
-    isDeleting,
-    isMoving,
-    isRenaming,
-    isCreatingFile,
-    isCreatingFolder,
-    inFlight,
-    actionedEntities,
-    error,
+    ...state,
     parentFolderId,
     isDuplicate,
-    newFileCreateMode,
     startRenaming,
     finishRenaming,
     startDeleting,
@@ -388,6 +344,32 @@ export function useFileTreeActionable() {
     finishCreatingLinkedFile,
     cancel,
   }
+
+  return (
+    <FileTreeActionableContext.Provider value={value}>
+      {children}
+    </FileTreeActionableContext.Provider>
+  )
+}
+
+FileTreeActionableProvider.propTypes = {
+  hasWritePermissions: PropTypes.bool.isRequired,
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
+}
+
+export function useFileTreeActionable() {
+  const context = useContext(FileTreeActionableContext)
+
+  if (!context) {
+    throw new Error(
+      'useFileTreeActionable is only available inside FileTreeActionableProvider'
+    )
+  }
+
+  return context
 }
 
 function getSelectedParentFolderId(fileTreeData, selectedEntityIds) {

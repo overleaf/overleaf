@@ -141,10 +141,32 @@ export function FileTreeSelectableProvider({
     return () => window.removeEventListener('editor.openDoc', handleOpenDoc)
   }, [fileTreeData])
 
+  const select = useCallback(id => {
+    dispatch({ type: ACTION_TYPES.SELECT, id })
+  }, [])
+
+  const unselect = useCallback(id => {
+    dispatch({ type: ACTION_TYPES.UNSELECT, id })
+  }, [])
+
+  const selectOrMultiSelectEntity = useCallback((id, isMultiSelect) => {
+    const actionType = isMultiSelect
+      ? ACTION_TYPES.MULTI_SELECT
+      : ACTION_TYPES.SELECT
+
+    dispatch({ type: actionType, id })
+  }, [])
+
+  const value = {
+    selectedEntityIds,
+    selectedEntityParentIds,
+    select,
+    unselect,
+    selectOrMultiSelectEntity,
+  }
+
   return (
-    <FileTreeSelectableContext.Provider
-      value={{ selectedEntityIds, selectedEntityParentIds, dispatch }}
-    >
+    <FileTreeSelectableContext.Provider value={value}>
       {children}
     </FileTreeSelectableContext.Provider>
   )
@@ -161,44 +183,43 @@ FileTreeSelectableProvider.propTypes = {
 }
 
 export function useSelectableEntity(id) {
-  const { selectedEntityIds, dispatch } = useContext(FileTreeSelectableContext)
+  const { selectedEntityIds, selectOrMultiSelectEntity } = useContext(
+    FileTreeSelectableContext
+  )
 
   const isSelected = selectedEntityIds.has(id)
 
-  const selectOrMultiSelectEntity = useCallback(
+  const handleEvent = useCallback(
     ev => {
-      const isMultiSelect = ev.ctrlKey || ev.metaKey
-      const actionType = isMultiSelect
-        ? ACTION_TYPES.MULTI_SELECT
-        : ACTION_TYPES.SELECT
-
-      dispatch({ type: actionType, id })
+      selectOrMultiSelectEntity(id, ev.ctrlKey || ev.metaKey)
     },
-    [dispatch, id]
+    [id, selectOrMultiSelectEntity]
   )
 
   const handleClick = useCallback(
     ev => {
-      selectOrMultiSelectEntity(ev)
+      handleEvent(ev)
     },
-    [selectOrMultiSelectEntity]
+    [handleEvent]
   )
 
   const handleKeyPress = useCallback(
     ev => {
       if (ev.key === 'Enter' || ev.key === ' ') {
-        selectOrMultiSelectEntity(ev)
+        handleEvent(ev)
       }
     },
-    [selectOrMultiSelectEntity]
+    [handleEvent]
   )
 
   const handleContextMenu = useCallback(
     ev => {
       // make sure the right-clicked entity gets selected
-      if (!selectedEntityIds.has(id)) selectOrMultiSelectEntity(ev)
+      if (!selectedEntityIds.has(id)) {
+        handleEvent(ev)
+      }
     },
-    [id, selectOrMultiSelectEntity, selectedEntityIds]
+    [id, handleEvent, selectedEntityIds]
   )
 
   const props = useMemo(
@@ -216,28 +237,13 @@ export function useSelectableEntity(id) {
 }
 
 export function useFileTreeSelectable() {
-  const { selectedEntityIds, selectedEntityParentIds, dispatch } = useContext(
-    FileTreeSelectableContext
-  )
+  const context = useContext(FileTreeSelectableContext)
 
-  const select = useCallback(
-    id => {
-      dispatch({ type: ACTION_TYPES.SELECT, id })
-    },
-    [dispatch]
-  )
-
-  const unselect = useCallback(
-    id => {
-      dispatch({ type: ACTION_TYPES.UNSELECT, id })
-    },
-    [dispatch]
-  )
-
-  return {
-    selectedEntityIds,
-    selectedEntityParentIds,
-    select,
-    unselect,
+  if (!context) {
+    throw new Error(
+      `useFileTreeSelectable is only available inside FileTreeSelectableProvider`
+    )
   }
+
+  return context
 }
