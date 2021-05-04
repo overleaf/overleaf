@@ -21,11 +21,18 @@ fetchMock.post('express:/project/:project_id/references/indexAll', {
 
 window.project_id = '1234'
 
+const fileData = {
+  id: 'file-id',
+  name: 'file.tex',
+  created: new Date(),
+}
+
 export const FileFromUrl = args => {
   return <BinaryFile {...args} />
 }
 FileFromUrl.args = {
   file: {
+    ...fileData,
     linkedFileData: {
       url: 'https://overleaf.com',
       provider: 'url',
@@ -38,6 +45,7 @@ export const FileFromProjectWithLinkableProjectId = args => {
 }
 FileFromProjectWithLinkableProjectId.args = {
   file: {
+    ...fileData,
     linkedFileData: {
       source_project_id: 'source-project-id',
       source_entity_path: '/source-entity-path.ext',
@@ -51,6 +59,7 @@ export const FileFromProjectWithoutLinkableProjectId = args => {
 }
 FileFromProjectWithoutLinkableProjectId.args = {
   file: {
+    ...fileData,
     linkedFileData: {
       v1_source_doc_id: 'v1-source-id',
       source_entity_path: '/source-entity-path.ext',
@@ -64,6 +73,7 @@ export const FileFromProjectOutputWithLinkableProject = args => {
 }
 FileFromProjectOutputWithLinkableProject.args = {
   file: {
+    ...fileData,
     linkedFileData: {
       source_project_id: 'source_project_id',
       source_output_file_path: '/source-entity-path.ext',
@@ -77,6 +87,7 @@ export const FileFromProjectOutputWithoutLinkableProjectId = args => {
 }
 FileFromProjectOutputWithoutLinkableProjectId.args = {
   file: {
+    ...fileData,
     linkedFileData: {
       v1_source_doc_id: 'v1-source-id',
       source_output_file_path: '/source-entity-path.ext',
@@ -90,6 +101,7 @@ export const ImageFile = args => {
 }
 ImageFile.args = {
   file: {
+    ...fileData,
     id: '60097ca20454610027c442a8',
     name: 'file.jpg',
     linkedFileData: {
@@ -106,6 +118,7 @@ export const ThirdPartyReferenceFile = args => {
 
 ThirdPartyReferenceFile.args = {
   file: {
+    ...fileData,
     name: 'example.tex',
     linkedFileData: {
       provider: 'zotero',
@@ -116,9 +129,9 @@ ThirdPartyReferenceFile.args = {
 export const ThirdPartyReferenceFileWithError = args => {
   return <BinaryFile {...args} />
 }
-
 ThirdPartyReferenceFileWithError.args = {
   file: {
+    ...fileData,
     id: '500500500500500500500500',
     name: 'example.tex',
     linkedFileData: {
@@ -132,6 +145,7 @@ export const TextFile = args => {
 }
 TextFile.args = {
   file: {
+    ...fileData,
     linkedFileData: {
       source_project_id: 'source-project-id',
       source_entity_path: '/source-entity-path.ext',
@@ -146,6 +160,7 @@ export const UploadedFile = args => {
 }
 UploadedFile.args = {
   file: {
+    ...fileData,
     linkedFileData: null,
     name: 'file.jpg',
   },
@@ -155,11 +170,6 @@ export default {
   title: 'BinaryFile',
   component: BinaryFile,
   args: {
-    file: {
-      id: 'file-id',
-      name: 'file.tex',
-      created: new Date(),
-    },
     storeReferencesKeys: () => {},
   },
   decorators: [
