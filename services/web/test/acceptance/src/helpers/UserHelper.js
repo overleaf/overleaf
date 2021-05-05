@@ -324,19 +324,57 @@ class UserHelper {
     await this.confirmEmail(userId, email)
   }
 
-  async backdateConfirmation(userId, email, days) {
-    const confirmedDate = moment().subtract(days, 'days').toDate()
+  async changeConfirmationDate(userId, email, date) {
     const query = {
       _id: userId,
       'emails.email': email,
     }
     const update = {
       $set: {
-        'emails.$.confirmedAt': confirmedDate,
-        'emails.$.reconfirmedAt': confirmedDate,
+        'emails.$.confirmedAt': date,
+        'emails.$.reconfirmedAt': date,
       },
     }
     await UserUpdater.promises.updateUser(query, update)
+  }
+
+  async changeConfirmedToNotificationPeriod(
+    userId,
+    email,
+    maxConfirmationMonths
+  ) {
+    // set a user's confirmation date so that
+    // it is within the notification period to reconfirm
+    // but not older than the last day to reconfirm
+    const notificationDays = Settings.reconfirmNotificationDays
+    if (!notificationDays) return
+
+    const middleOfNotificationPeriod = Math.ceil(notificationDays / 2)
+    // use the middle of the notification rather than the start or end due to
+    // variations in days in months.
+
+    const lastDayToReconfirm = moment().subtract(
+      maxConfirmationMonths,
+      'months'
+    )
+    const notificationsStart = lastDayToReconfirm
+      .add(middleOfNotificationPeriod, 'days')
+      .toDate()
+    await this.changeConfirmationDate(userId, email, notificationsStart)
+  }
+
+  async changeConfirmedToPastReconfirmation(
+    userId,
+    email,
+    maxConfirmationMonths
+  ) {
+    // set a user's confirmation date so that they are past the reconfirmation window
+    const date = moment()
+      .subtract(maxConfirmationMonths, 'months')
+      .subtract(1, 'week')
+      .toDate()
+
+    await this.changeConfirmationDate(userId, email, date)
   }
 
   async confirmEmail(userId, email) {

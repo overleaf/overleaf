@@ -1006,14 +1006,6 @@ describe('UserEmails', function () {
   describe('notification period', function () {
     let defaultEmail, userHelper, email1, email2, email3
     const maxConfirmationMonths = 12
-    const lastDayToReconfirm = moment()
-      .subtract(maxConfirmationMonths, 'months')
-      .toDate()
-    const oneDayBeforeLastDayToReconfirm = moment(lastDayToReconfirm)
-      .add(1, 'day')
-      .toDate()
-    const daysToBackdate = moment().diff(oneDayBeforeLastDayToReconfirm, 'day')
-    const daysToBackdateForAfterDate = daysToBackdate + 1
 
     beforeEach(async function () {
       if (!Features.hasFeature('affiliations')) {
@@ -1047,12 +1039,20 @@ describe('UserEmails', function () {
         await userHelper.addEmailAndConfirm(userId, email1)
         await userHelper.addEmailAndConfirm(userId, email2)
         await userHelper.addEmailAndConfirm(userId, email3)
-        await userHelper.backdateConfirmation(userId, email1, daysToBackdate)
-        await userHelper.backdateConfirmation(userId, email2, daysToBackdate)
-        await userHelper.backdateConfirmation(
+        await userHelper.changeConfirmedToNotificationPeriod(
+          userId,
+          email1,
+          maxConfirmationMonths
+        )
+        await userHelper.changeConfirmedToNotificationPeriod(
+          userId,
+          email2,
+          maxConfirmationMonths
+        )
+        await userHelper.changeConfirmedToPastReconfirmation(
           userId,
           email3,
-          daysToBackdateForAfterDate
+          maxConfirmationMonths
         )
       })
 
@@ -1096,17 +1096,17 @@ describe('UserEmails', function () {
             .add(14, 'days')
             .toDate()
           const backdatedDays = moment().diff(dateInPeriodButNotExpired, 'days')
-          await userHelper.backdateConfirmation(
+          await userHelper.changeConfirmationDate(
             userHelper.user._id,
             email1,
             backdatedDays
           )
-          await userHelper.backdateConfirmation(
+          await userHelper.changeConfirmationDate(
             userHelper.user._id,
             email2,
             backdatedDays
           )
-          await userHelper.backdateConfirmation(
+          await userHelper.changeConfirmationDate(
             userHelper.user._id,
             email3,
             backdatedDays
