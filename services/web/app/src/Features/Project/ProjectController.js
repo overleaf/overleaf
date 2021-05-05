@@ -739,10 +739,6 @@ const ProjectController = {
         const allowedImageNames = ProjectHelper.getAllowedImagesForUser(
           sessionUser
         )
-        const wantsOldShareModalUI =
-          req.query && req.query.new_share_modal_ui === 'false'
-        const wantsOldGithubSyncUI =
-          req.query && req.query.new_github_sync_ui === 'false'
 
         AuthorizationManager.getPrivilegeLevelForProject(
           userId,
@@ -796,9 +792,14 @@ const ProjectController = {
             }
 
             const logsUIVariant = getNewLogsUIVariantForUser(user)
-            const userShouldSeeNewLogsUI = logsUIVariant.newLogsUI
-            const wantsOldLogsUI =
-              req.query && req.query.new_logs_ui === 'false'
+
+            function shouldDisplayFeature(name, variantFlag) {
+              if (req.query && req.query[name]) {
+                return req.query[name] === 'true'
+              } else {
+                return variantFlag === true
+              }
+            }
 
             res.render('project/editor', {
               title: project.name,
@@ -854,14 +855,24 @@ const ProjectController = {
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support'),
-              showNewLogsUI: userShouldSeeNewLogsUI && !wantsOldLogsUI,
+              showNewLogsUI: shouldDisplayFeature(
+                'new_logs_ui',
+                logsUIVariant.newLogsUI
+              ),
               logsUISubvariant: logsUIVariant.subvariant,
-              showNewNavigationUI:
-                req.query && req.query.new_navigation_ui === 'true',
-              showReactShareModal: !wantsOldShareModalUI,
-              showReactGithubSync: !wantsOldGithubSyncUI && user.alphaProgram,
-              showNewBinaryFileUI:
-                req.query && req.query.new_binary_file === 'true',
+              showNewNavigationUI: shouldDisplayFeature(
+                'new_navigation_ui',
+                user.alphaProgram
+              ),
+              showReactShareModal: shouldDisplayFeature(
+                'new_share_modal_ui',
+                true
+              ),
+              showReactGithubSync: shouldDisplayFeature(
+                'new_github_sync_ui',
+                user.alphaProgram
+              ),
+              showNewBinaryFileUI: shouldDisplayFeature('new_binary_file'),
             })
             timer.done()
           }
