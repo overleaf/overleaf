@@ -32,7 +32,10 @@ describe('DocArchiveManager', function () {
     Settings = {
       docstore: {
         bucket: 'wombat'
-      }
+      },
+      parallelArchiveJobs: 3,
+      destroyBatchSize: 10,
+      destroyRetryCount: 3
     }
     HashDigest = sinon.stub().returns(md5Sum)
     HashUpdate = sinon.stub().returns({ digest: HashDigest })
@@ -435,6 +438,41 @@ describe('DocArchiveManager', function () {
 
       it('should delete the doc in mongo', async function () {
         await DocArchiveManager.promises.destroyDoc(projectId, docId)
+      })
+
+      describe('when the destroy request errors', function () {
+        beforeEach(function () {
+          mongoDocs[0].inS3 = true
+          PersistorManager.deleteObject.onFirstCall().rejects(new Error('1'))
+          PersistorManager.deleteObject.onSecondCall().rejects(new Error('2'))
+          PersistorManager.deleteObject.onThirdCall().resolves()
+        })
+
+        it('should retry', async function () {
+          await DocArchiveManager.promises.destroyDoc(projectId, docId)
+          expect(PersistorManager.deleteObject).to.have.been.calledWith(
+            Settings.docstore.bucket,
+            `${projectId}/${docId}`
+          )
+          expect(PersistorManager.deleteObject.callCount).to.equal(3)
+        })
+      })
+
+      describe('when the destroy request errors permanent', function () {
+        beforeEach(function () {
+          mongoDocs[0].inS3 = true
+          PersistorManager.deleteObject.rejects(new Error('permanent'))
+        })
+
+        it('should retry and fail eventually', async function () {
+          await expect(DocArchiveManager.promises.destroyDoc(projectId, docId))
+            .to.eventually.be.rejected
+          expect(PersistorManager.deleteObject).to.have.been.calledWith(
+            Settings.docstore.bucket,
+            `${projectId}/${docId}`
+          )
+          expect(PersistorManager.deleteObject.callCount).to.equal(4)
+        })
       })
     })
 
