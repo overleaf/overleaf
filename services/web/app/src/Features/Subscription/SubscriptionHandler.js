@@ -193,7 +193,7 @@ const SubscriptionHandler = {
           )
         }
         if (hasSubscription) {
-          RecurlyWrapper.cancelSubscription(
+          RecurlyClient.cancelSubscriptionByUuid(
             subscription.recurlySubscription_id,
             function (error) {
               if (error != null) {
@@ -242,7 +242,7 @@ const SubscriptionHandler = {
           )
         }
         if (hasSubscription) {
-          RecurlyWrapper.reactivateSubscription(
+          RecurlyClient.reactivateSubscriptionByUuid(
             subscription.recurlySubscription_id,
             function (error) {
               if (error != null) {

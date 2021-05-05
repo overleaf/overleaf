@@ -78,8 +78,6 @@ describe('SubscriptionHandler', function () {
       getSubscription: sinon
         .stub()
         .callsArgWith(2, null, this.activeRecurlySubscription),
-      cancelSubscription: sinon.stub().callsArgWith(1),
-      reactivateSubscription: sinon.stub().callsArgWith(1),
       redeemCoupon: sinon.stub().callsArgWith(2),
       createSubscription: sinon
         .stub()
@@ -95,6 +93,10 @@ describe('SubscriptionHandler', function () {
       getSubscription: sinon
         .stub()
         .yields(null, this.activeRecurlyClientSubscription),
+      reactivateSubscriptionByUuid: sinon
+        .stub()
+        .yields(null, this.activeRecurlyClientSubscription),
+      cancelSubscriptionByUuid: sinon.stub().yields(),
     }
 
     this.SubscriptionUpdater = {
@@ -389,7 +391,7 @@ describe('SubscriptionHandler', function () {
       })
 
       it('should redirect to the subscription dashboard', function () {
-        this.RecurlyWrapper.cancelSubscription.called.should.equal(false)
+        this.RecurlyClient.cancelSubscriptionByUuid.called.should.equal(false)
       })
     })
 
@@ -405,8 +407,8 @@ describe('SubscriptionHandler', function () {
       })
 
       it('should cancel the subscription', function () {
-        this.RecurlyWrapper.cancelSubscription.called.should.equal(true)
-        this.RecurlyWrapper.cancelSubscription
+        this.RecurlyClient.cancelSubscriptionByUuid.called.should.equal(true)
+        this.RecurlyClient.cancelSubscriptionByUuid
           .calledWith(this.subscription.recurlySubscription_id)
           .should.equal(true)
       })
@@ -426,7 +428,9 @@ describe('SubscriptionHandler', function () {
       })
 
       it('should redirect to the subscription dashboard', function () {
-        this.RecurlyWrapper.reactivateSubscription.called.should.equal(false)
+        this.RecurlyClient.reactivateSubscriptionByUuid.called.should.equal(
+          false
+        )
       })
 
       it('should not send a notification email', function () {
@@ -446,8 +450,10 @@ describe('SubscriptionHandler', function () {
       })
 
       it('should reactivate the subscription', function () {
-        this.RecurlyWrapper.reactivateSubscription.called.should.equal(true)
-        this.RecurlyWrapper.reactivateSubscription
+        this.RecurlyClient.reactivateSubscriptionByUuid.called.should.equal(
+          true
+        )
+        this.RecurlyClient.reactivateSubscriptionByUuid
           .calledWith(this.subscription.recurlySubscription_id)
           .should.equal(true)
       })

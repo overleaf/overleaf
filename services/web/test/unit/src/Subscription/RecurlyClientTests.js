@@ -264,4 +264,36 @@ describe('RecurlyClient', function () {
       })
     })
   })
+
+  describe('reactivateSubscriptionByUuid', function () {
+    it('should attempt to reactivate the subscription', async function () {
+      this.client.reactivateSubscription = sinon
+        .stub()
+        .resolves(this.recurlySubscription)
+      await expect(
+        this.RecurlyClient.promises.reactivateSubscriptionByUuid(
+          this.subscription.uuid
+        )
+      ).to.eventually.be.an.instanceOf(recurly.Subscription)
+      expect(this.client.reactivateSubscription).to.be.calledWith(
+        'uuid-' + this.subscription.uuid
+      )
+    })
+  })
+
+  describe('cancelSubscriptionByUuid', function () {
+    it('should attempt to cancel the subscription', async function () {
+      this.client.cancelSubscription = sinon
+        .stub()
+        .resolves(this.recurlySubscription)
+      await expect(
+        this.RecurlyClient.promises.cancelSubscriptionByUuid(
+          this.subscription.uuid
+        )
+      ).to.eventually.be.an.instanceOf(recurly.Subscription)
+      expect(this.client.cancelSubscription).to.be.calledWith(
+        'uuid-' + this.subscription.uuid
+      )
+    })
+  })
 })

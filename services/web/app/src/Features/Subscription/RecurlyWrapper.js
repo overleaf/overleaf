@@ -770,49 +770,6 @@ const RecurlyWrapper = {
     )
   },
 
-  cancelSubscription(subscriptionId, callback) {
-    logger.log({ subscriptionId }, 'telling recurly to cancel subscription')
-    return RecurlyWrapper.apiRequest(
-      {
-        url: `subscriptions/${subscriptionId}/cancel`,
-        method: 'put',
-      },
-      function (error, response, body) {
-        if (error != null) {
-          return RecurlyWrapper._parseXml(body, function (_err, parsed) {
-            if (
-              __guard__(
-                parsed != null ? parsed.error : undefined,
-                x1 => x1.description
-              ) === "A canceled subscription can't transition to canceled"
-            ) {
-              // subscription already cancelled, not really an error, proceeding
-              return callback(null)
-            } else {
-              return callback(error)
-            }
-          })
-        } else {
-          return callback(null)
-        }
-      }
-    )
-  },
-
-  reactivateSubscription(subscriptionId, callback) {
-    logger.log(
-      { subscriptionId },
-      'telling recurly to reactivating subscription'
-    )
-    return RecurlyWrapper.apiRequest(
-      {
-        url: `subscriptions/${subscriptionId}/reactivate`,
-        method: 'put',
-      },
-      (error, response, body) => callback(error)
-    )
-  },
-
   redeemCoupon(account_code, coupon_code, callback) {
     const data = {
       account_code,
