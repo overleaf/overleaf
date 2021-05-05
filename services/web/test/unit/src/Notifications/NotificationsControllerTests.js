@@ -1,18 +1,4 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -20,8 +6,8 @@ const modulePath = require('path').join(
 )
 
 describe('NotificationsController', function () {
-  const user_id = '123nd3ijdks'
-  const notification_id = '123njdskj9jlk'
+  const userId = '123nd3ijdks'
+  const notificationId = '123njdskj9jlk'
 
   beforeEach(function () {
     this.handler = {
@@ -30,11 +16,11 @@ describe('NotificationsController', function () {
     }
     this.req = {
       params: {
-        notification_id,
+        notificationId,
       },
       session: {
         user: {
-          _id: user_id,
+          _id: userId,
         },
       },
       i18n: {
@@ -44,36 +30,36 @@ describe('NotificationsController', function () {
     this.AuthenticationController = {
       getLoggedInUserId: sinon.stub().returns(this.req.session.user._id),
     }
-    return (this.controller = SandboxedModule.require(modulePath, {
+    this.controller = SandboxedModule.require(modulePath, {
       requires: {
         './NotificationsHandler': this.handler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
       },
-    }))
+    })
   })
 
   it('should ask the handler for all unread notifications', function (done) {
-    const allNotifications = [{ _id: notification_id, user_id }]
+    const allNotifications = [{ _id: notificationId, user_id: userId }]
     this.handler.getUserNotifications = sinon
       .stub()
       .callsArgWith(1, null, allNotifications)
-    return this.controller.getAllUnreadNotifications(this.req, {
+    this.controller.getAllUnreadNotifications(this.req, {
       send: body => {
         body.should.deep.equal(allNotifications)
-        this.handler.getUserNotifications.calledWith(user_id).should.equal(true)
-        return done()
+        this.handler.getUserNotifications.calledWith(userId).should.equal(true)
+        done()
       },
     })
   })
 
   it('should send a delete request when a delete has been received to mark a notification', function (done) {
-    return this.controller.markNotificationAsRead(this.req, {
+    this.controller.markNotificationAsRead(this.req, {
       sendStatus: () => {
         this.handler.markAsRead
-          .calledWith(user_id, notification_id)
+          .calledWith(userId, notificationId)
           .should.equal(true)
-        return done()
+        done()
       },
     })
   })

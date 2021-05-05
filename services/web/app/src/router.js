@@ -725,7 +725,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     NotificationsController.getAllUnreadNotifications
   )
   webRouter.delete(
-    '/notifications/:notification_id',
+    '/notifications/:notificationId',
     AuthenticationController.requireLogin(),
     NotificationsController.markNotificationAsRead
   )
