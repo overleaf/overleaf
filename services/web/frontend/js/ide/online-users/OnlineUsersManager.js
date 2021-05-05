@@ -43,7 +43,7 @@ export default OnlineUsersManager = (function () {
           'clientTracking.getConnectedUsers',
           (error, connectedUsers) => {
             this.$scope.onlineUsers = {}
-            for (let user of Array.from(connectedUsers || [])) {
+            for (const user of Array.from(connectedUsers || [])) {
               if (user.client_id === this.ide.socket.publicId) {
                 // Don't store myself
                 continue

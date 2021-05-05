@@ -30,11 +30,10 @@ function startFreeTrial(source, version, $scope, eventTracking) {
 function upgradePlan(source, $scope) {
   const w = window.open()
   const go = function () {
-    let url
     if (typeof ga === 'function') {
       ga('send', 'event', 'subscription-funnel', 'upgraded-plan', source)
     }
-    url = '/user/subscription'
+    const url = '/user/subscription'
 
     if ($scope) {
       $scope.startedFreeTrial = true

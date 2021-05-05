@@ -82,7 +82,7 @@ export default ColorManager = {
 
   getHueForId(id) {
     const hash = CryptoJS(id)
-    let hue =
+    const hue =
       parseInt(hash.toString().slice(0, 8), 16) %
       (this.TOTAL_HUES - this.OWN_HUE_BLOCKED_SIZE * 2)
     return hue

@@ -139,8 +139,8 @@ const FeaturesUpdater = {
       ) {
         return callback(null, {})
       }
-      let activeFeaturesOverrides = []
-      for (let featuresOverride of user.featuresOverrides) {
+      const activeFeaturesOverrides = []
+      for (const featuresOverride of user.featuresOverrides) {
         if (
           !featuresOverride.expiresAt ||
           featuresOverride.expiresAt > new Date()
@@ -181,7 +181,7 @@ const FeaturesUpdater = {
 
   _mergeFeatures(featuresA, featuresB) {
     const features = Object.assign({}, featuresA)
-    for (let key in featuresB) {
+    for (const key in featuresB) {
       // Special merging logic for non-boolean features
       if (key === 'compileGroup') {
         if (
@@ -239,7 +239,7 @@ const FeaturesUpdater = {
       return {}
     }
 
-    let mismatchReasons = {}
+    const mismatchReasons = {}
     const featureKeys = [
       ...new Set([
         ...Object.keys(currentFeatures),

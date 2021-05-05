@@ -11,7 +11,7 @@ function ensurePlansAreSetupCorrectly() {
 }
 
 function findLocalPlanInSettings(planCode) {
-  for (let plan of Settings.plans) {
+  for (const plan of Settings.plans) {
     if (plan.planCode === planCode) {
       return plan
     }

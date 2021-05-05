@@ -36,7 +36,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
 
     const submitRequest = function (grecaptchaResponse) {
       const formData = {}
-      for (let data of Array.from(element.serializeArray())) {
+      for (const data of Array.from(element.serializeArray())) {
         formData[data.name] = data.value
       }
 

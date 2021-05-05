@@ -526,7 +526,7 @@ module.exports = CompileController = {
       // do not send any others, there's a proxying loop if Host: is passed!
       if (req.query != null ? req.query.pdfng : undefined) {
         const newHeaders = {}
-        for (let h in req.headers) {
+        for (const h in req.headers) {
           const v = req.headers[h]
           if (/^(If-|Range)/i.test(h)) {
             newHeaders[h] = req.headers[h]

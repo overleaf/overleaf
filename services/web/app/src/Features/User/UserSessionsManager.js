@@ -1,4 +1,3 @@
-let UserSessionsManager
 const OError = require('@overleaf/o-error')
 const Settings = require('settings-sharelatex')
 const logger = require('logger-sharelatex')
@@ -8,7 +7,7 @@ const { promisify } = require('util')
 const UserSessionsRedis = require('./UserSessionsRedis')
 const rclient = UserSessionsRedis.client()
 
-UserSessionsManager = {
+const UserSessionsManager = {
   // mimic the key used by the express sessions
   _sessionKey(sessionId) {
     return `sess:${sessionId}`

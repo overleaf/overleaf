@@ -46,7 +46,7 @@ function findElement(options, _callback) {
           return
         }
         const newPath = {}
-        for (let key of Object.keys(path)) {
+        for (const key of Object.keys(path)) {
           const value = path[key]
           newPath[key] = value
         } // make a value copy of the string
@@ -179,7 +179,7 @@ function _findElementByPathWithProject(
     }
     const needleFolderName = foldersList[level]
     let found = false
-    for (let folder of haystackFolder.folders) {
+    for (const folder of haystackFolder.folders) {
       if (matchFn(folder.name, needleFolderName)) {
         found = true
         if (level === foldersList.length - 1) {
@@ -203,19 +203,19 @@ function _findElementByPathWithProject(
     if (entityName == null) {
       return cb(null, folder, 'folder')
     }
-    for (let file of folder.fileRefs || []) {
+    for (const file of folder.fileRefs || []) {
       if (matchFn(file != null ? file.name : undefined, entityName)) {
         result = file
         type = 'file'
       }
     }
-    for (let doc of folder.docs || []) {
+    for (const doc of folder.docs || []) {
       if (matchFn(doc != null ? doc.name : undefined, entityName)) {
         result = doc
         type = 'doc'
       }
     }
-    for (let childFolder of folder.folders || []) {
+    for (const childFolder of folder.folders || []) {
       if (
         matchFn(childFolder != null ? childFolder.name : undefined, entityName)
       ) {

@@ -91,7 +91,7 @@ export function isCleanPath(path) {
     return false
   }
 
-  for (let element of Array.from(elements)) {
+  for (const element of Array.from(elements)) {
     if (element.length > 0 && !isCleanFilename(element)) {
       return false
     }

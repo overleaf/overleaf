@@ -152,7 +152,7 @@ export default CommandManager = class CommandManager {
 
     const packages = this.metadataManager.getAllPackages()
     const packageCommands = []
-    for (let pkg in packages) {
+    for (const pkg in packages) {
       const snippets = packages[pkg]
       for (snippet of Array.from(snippets)) {
         packageCommands.push(snippet)
@@ -164,7 +164,7 @@ export default CommandManager = class CommandManager {
     const parser = new Parser(doc, prefix)
     const commands = parser.parse()
     let completions = []
-    for (let command of Array.from(commands)) {
+    for (const command of Array.from(commands)) {
       if (!commandNames[command[0]]) {
         let caption = `\\${command[0]}`
         const score = caption === prefix ? 99 : 50

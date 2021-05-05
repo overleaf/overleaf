@@ -565,10 +565,10 @@ App.controller(
       }
 
       function accumulateResults(newEntries) {
-        for (let key of ['all', 'errors', 'warnings', 'typesetting']) {
+        for (const key of ['all', 'errors', 'warnings', 'typesetting']) {
           if (newEntries[key]) {
             if (newEntries.type != null) {
-              for (let entry of newEntries[key]) {
+              for (const entry of newEntries[key]) {
                 entry.type = newEntries.type
               }
             }
@@ -590,7 +590,7 @@ App.controller(
       function processChkTex(log) {
         const errors = []
         const warnings = []
-        for (let line of log.split('\n')) {
+        for (const line of log.split('\n')) {
           var m
           if ((m = line.match(/^(\S+):(\d+):(\d+): (Error|Warning): (.*)/))) {
             const result = {
@@ -731,7 +731,7 @@ App.controller(
       if (doc == null) {
         return null
       }
-      for (let line of doc.split('\n')) {
+      for (const line of doc.split('\n')) {
         if (/^[^%]*\\documentclass/.test(line)) {
           return ide.editorManager.getCurrentDocId()
         }

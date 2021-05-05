@@ -22,7 +22,7 @@ const ScriptLogger = {
     ScriptLogger.mismatchUsersCount += 1
 
     if (user.lastLoggedIn) {
-      let daysSinceLastLoggedIn =
+      const daysSinceLastLoggedIn =
         (new Date() - user.lastLoggedIn) / 1000 / 3600 / 24
       ScriptLogger.allDaysSinceLastLoggedIn.push(daysSinceLastLoggedIn)
     }
@@ -59,7 +59,7 @@ const checkAndUpdateUser = (user, callback) =>
       return callback(error)
     }
 
-    let mismatchReasons = FeaturesUpdater.compareFeatures(
+    const mismatchReasons = FeaturesUpdater.compareFeatures(
       user.features,
       freshFeatures
     )

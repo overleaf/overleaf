@@ -69,7 +69,7 @@ App.controller('ShareProjectModalController', function (
   function processContactsResponse(response) {
     const { data } = response
     $scope.autocompleteContacts = data.contacts || []
-    for (let contact of $scope.autocompleteContacts) {
+    for (const contact of $scope.autocompleteContacts) {
       if (contact.type === 'user') {
         if (
           contact.first_name === contact.email.split('@')[0] &&
@@ -103,7 +103,7 @@ App.controller('ShareProjectModalController', function (
       ) {
         return false
       }
-      for (let text of [contact.name, contact.email]) {
+      for (const text of [contact.name, contact.email]) {
         if (
           text != null &&
           text.toLowerCase().indexOf($query.toLowerCase()) > -1

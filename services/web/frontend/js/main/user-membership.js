@@ -73,7 +73,7 @@ App.controller('UserMembershipController', function ($scope, queuedHttp) {
   $scope.removeMembers = function () {
     $scope.inputs.removeMembers.error = false
     $scope.inputs.removeMembers.errorMessage = null
-    for (let user of Array.from($scope.selectedUsers)) {
+    for (const user of Array.from($scope.selectedUsers)) {
       ;(function (user) {
         let url
         if (window.paths.removeInvite && user.invite && user._id == null) {

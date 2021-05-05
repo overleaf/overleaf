@@ -4,11 +4,11 @@ App.controller(
   'TranslationsPopupController',
   function ($scope, ipCookie, localStorage) {
     function getStoredDismissal() {
-      let localStore = localStorage('hide-i18n-notification')
+      const localStore = localStorage('hide-i18n-notification')
 
       if (localStore === null) {
         // Not stored in localStorage, check cookie
-        let cookieStore = ipCookie('hidei18nNotification')
+        const cookieStore = ipCookie('hidei18nNotification')
 
         // If stored in cookie, set on localStorage for forwards compat
         if (cookieStore) {

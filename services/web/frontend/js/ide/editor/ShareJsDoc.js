@@ -320,7 +320,7 @@ export default ShareJsDoc = (function () {
       // compute size of an op from its components
       // (total number of characters inserted and deleted)
       let size = 0
-      for (let component of Array.from(op || [])) {
+      for (const component of Array.from(op || [])) {
         if ((component != null ? component.i : undefined) != null) {
           size += component.i.length
         }

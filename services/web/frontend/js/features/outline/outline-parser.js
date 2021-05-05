@@ -94,8 +94,8 @@ function matchDisplayTitle(title) {
 }
 
 function nestOutline(flatOutline) {
-  let parentOutlines = {}
-  let nestedOutlines = []
+  const parentOutlines = {}
+  const nestedOutlines = []
   flatOutline.forEach(outline => {
     const parentOutlineLevels = Object.keys(parentOutlines)
 

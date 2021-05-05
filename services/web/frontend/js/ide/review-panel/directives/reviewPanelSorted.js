@@ -48,7 +48,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       }
 
       const entries = []
-      for (let el of Array.from(element.find('.rp-entry-wrapper'))) {
+      for (const el of Array.from(element.find('.rp-entry-wrapper'))) {
         entry = {
           $indicator_el: $(el).find('.rp-entry-indicator'),
           $box_el: $(el).find('.rp-entry'),

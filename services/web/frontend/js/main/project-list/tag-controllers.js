@@ -54,7 +54,7 @@ App.controller('TagListController', function ($scope, $modal) {
     })
     modalInstance.result.then(function () {
       // Remove tag from projects
-      for (let project of $scope.projects) {
+      for (const project of $scope.projects) {
         if (!project.tags) {
           project.tags = []
         }
@@ -87,7 +87,7 @@ App.controller('TagDropdownItemController', function ($scope) {
   $scope.recalculateProjectsInTag = function () {
     let partialSelection
     $scope.areSelectedProjectsInTag = false
-    for (let projectId of $scope.getSelectedProjectIds()) {
+    for (const projectId of $scope.getSelectedProjectIds()) {
       if ($scope.tag.project_ids.includes(projectId)) {
         $scope.areSelectedProjectsInTag = true
       } else {

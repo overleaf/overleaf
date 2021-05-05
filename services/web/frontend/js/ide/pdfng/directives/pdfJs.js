@@ -124,7 +124,7 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
     }
 
     if (attrs.resizeOn != null) {
-      for (let event of Array.from(attrs.resizeOn.split(','))) {
+      for (const event of Array.from(attrs.resizeOn.split(','))) {
         scope.$on(event, function (e) {})
       }
     }

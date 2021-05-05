@@ -88,7 +88,7 @@ const ArchiveManager = {
       return callback() // don't give a destfile for directory
     }
     // check that the file does not use a relative path
-    for (let dir of Array.from(transformedFilename.split('/'))) {
+    for (const dir of Array.from(transformedFilename.split('/'))) {
       if (dir === '..') {
         return callback(new Error('relative path'))
       }

@@ -59,7 +59,7 @@ module.exports = ClsiStateManager = {
         const optionsList = (() => {
           const result = []
           const object = options || {}
-          for (let key in object) {
+          for (const key in object) {
             const value = object[key]
             if (!['isAutoCompile'].includes(key)) {
               result.push(`option ${key}:${value}`)

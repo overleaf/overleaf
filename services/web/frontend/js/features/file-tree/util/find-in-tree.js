@@ -7,7 +7,7 @@ export function findInTreeOrThrow(tree, id) {
 }
 
 export function findAllInTreeOrThrow(tree, ids) {
-  let list = new Set()
+  const list = new Set()
   ids.forEach(id => {
     list.add(findInTreeOrThrow(tree, id))
   })
@@ -26,7 +26,7 @@ export function findAllFolderIdsInFolder(folder) {
 }
 
 export function findAllFolderIdsInFolders(folders) {
-  let list = new Set()
+  const list = new Set()
   folders.forEach(folder => {
     findAllFolderIdsInFolder(folder).forEach(folderId => {
       list.add(folderId)

@@ -90,7 +90,7 @@ class MockV1Api extends AbstractMockApi {
   }
 
   addAffiliation(userId, email) {
-    let institution = {}
+    const institution = {}
     if (!email) return
     if (!this.affiliations[userId]) this.affiliations[userId] = []
 
@@ -272,7 +272,7 @@ class MockV1Api extends AbstractMockApi {
     })
 
     this.app.post('/api/v1/sharelatex/login', (req, res) => {
-      for (let id in this.users) {
+      for (const id in this.users) {
         const user = this.users[id]
         if (
           user &&

@@ -228,7 +228,7 @@ module.exports = ProjectRootDocManager = {
                 return callback(error)
               }
               let rootDocValid = false
-              for (let doc_id in docPaths) {
+              for (const doc_id in docPaths) {
                 const _path = docPaths[doc_id]
                 if (doc_id === project.rootDoc_id) {
                   rootDocValid = true

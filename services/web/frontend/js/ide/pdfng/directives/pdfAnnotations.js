@@ -13,7 +13,7 @@ App.factory('pdfAnnotations', function () {
 
     setAnnotations(annotations) {
       const result = []
-      for (let annotation of annotations) {
+      for (const annotation of annotations) {
         switch (annotation.subtype) {
           case 'Link':
             result.push(this.addLink(annotation))

@@ -69,12 +69,12 @@ class AutoCompleteManager {
           )
           if (match) {
             // eslint-disable-next-line no-unused-vars
-            let commandName = match[1]
+            const commandName = match[1]
             const graphicsPaths = Preamble.getGraphicsPaths()
             const result = []
-            for (let graphic of Graphics.getGraphicsFiles()) {
+            for (const graphic of Graphics.getGraphicsFiles()) {
               let { path } = graphic
-              for (let graphicsPath of graphicsPaths) {
+              for (const graphicsPath of graphicsPaths) {
                 if (path.indexOf(graphicsPath) === 0) {
                   path = path.slice(graphicsPath.length)
                   break
@@ -103,10 +103,10 @@ class AutoCompleteManager {
             // eslint-disable-next-line no-unused-vars
             const commandName = match[1]
             const result = []
-            for (let file of Files.getTeXFiles()) {
+            for (const file of Files.getTeXFiles()) {
               if (file.id !== this.$scope.docId && !file.deleted && file.path) {
                 const { path } = file
-                let cleanPath = path.replace(/(.+)\.tex$/i, '$1')
+                const cleanPath = path.replace(/(.+)\.tex$/i, '$1')
                 result.push({
                   caption: `\\${commandName}{${path}}`,
                   value: `\\${commandName}{${cleanPath}}`,
@@ -141,7 +141,7 @@ class AutoCompleteManager {
                 score: 60,
               })
             }
-            for (let label of metadataManager.getAllLabels()) {
+            for (const label of metadataManager.getAllLabels()) {
               result.push({
                 caption: `\\${commandName}{${label}}`,
                 value: `\\${commandName}{${label}}`,
@@ -414,7 +414,6 @@ class AutoCompleteManager {
       Autocomplete.startCommand = {
         name: 'startAutocomplete',
         exec: editor => {
-          let filtered
           if (!editor.completer) {
             editor.completer = new Autocomplete()
           }
@@ -429,7 +428,7 @@ class AutoCompleteManager {
           )
           container.css({ 'font-size': this.$scope.fontSize + 'px' })
           // Dynamically set width of autocomplete popup
-          filtered =
+          const filtered =
             editor.completer.completions &&
             editor.completer.completions.filtered
           if (filtered) {

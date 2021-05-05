@@ -109,7 +109,7 @@ export default HighlightsManager = class HighlightsManager {
     this._clearMarkers()
     this._clearLabels()
 
-    for (let annotation of Array.from(this.$scope.highlights || [])) {
+    for (const annotation of Array.from(this.$scope.highlights || [])) {
       ;(annotation => {
         const colorScheme = ColorManager.getColorScheme(
           annotation.hue,
@@ -161,7 +161,7 @@ export default HighlightsManager = class HighlightsManager {
 
   showAnnotationLabels(position) {
     let labelToShow = null
-    for (let label of Array.from(this.labels || [])) {
+    for (const label of Array.from(this.labels || [])) {
       if (label.range.contains(position.row, position.column)) {
         labelToShow = label
       }
@@ -252,7 +252,7 @@ export default HighlightsManager = class HighlightsManager {
       let highlightsAfter = 0
       this.lastHiddenHighlightBefore = null
       this.firstHiddenHighlightAfter = null
-      for (let annotation of Array.from(this.$scope.highlights || [])) {
+      for (const annotation of Array.from(this.$scope.highlights || [])) {
         const range = annotation.highlight || annotation.strikeThrough
         if (range == null) {
           continue
@@ -281,7 +281,7 @@ export default HighlightsManager = class HighlightsManager {
   scrollToFirstHighlight() {
     return (() => {
       const result = []
-      for (let annotation of Array.from(this.$scope.highlights || [])) {
+      for (const annotation of Array.from(this.$scope.highlights || [])) {
         const range = annotation.highlight || annotation.strikeThrough
         if (range == null) {
           continue
@@ -294,7 +294,7 @@ export default HighlightsManager = class HighlightsManager {
   }
 
   _clearMarkers() {
-    for (let marker_id of Array.from(this.markerIds)) {
+    for (const marker_id of Array.from(this.markerIds)) {
       this.editor.getSession().removeMarker(marker_id)
     }
     return (this.markerIds = [])

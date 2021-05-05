@@ -15,7 +15,7 @@ const ProjectEntityHandler = {
 
       // Turn array from docstore into a dictionary based on doc id
       const docContents = {}
-      for (let docContent of docContentsArray) {
+      for (const docContent of docContentsArray) {
         docContents[docContent._id] = docContent
       }
 
@@ -27,9 +27,9 @@ const ProjectEntityHandler = {
           return callback(error)
         }
         const docs = {}
-        for (let folderPath in folders) {
+        for (const folderPath in folders) {
           const folder = folders[folderPath]
-          for (let doc of folder.docs || []) {
+          for (const doc of folder.docs || []) {
             const content = docContents[doc._id.toString()]
             if (content != null) {
               docs[path.join(folderPath, doc.name)] = {
@@ -56,9 +56,9 @@ const ProjectEntityHandler = {
         return callback(err)
       }
       const files = {}
-      for (let folderPath in folders) {
+      for (const folderPath in folders) {
         const folder = folders[folderPath]
-        for (let file of folder.fileRefs || []) {
+        for (const file of folder.fileRefs || []) {
           if (file != null) {
             files[path.join(folderPath, file.name)] = file
           }
@@ -91,14 +91,14 @@ const ProjectEntityHandler = {
       }
       const docs = []
       const files = []
-      for (let folderPath in folders) {
+      for (const folderPath in folders) {
         const folder = folders[folderPath]
-        for (let doc of folder.docs || []) {
+        for (const doc of folder.docs || []) {
           if (doc != null) {
             docs.push({ path: path.join(folderPath, doc.name), doc })
           }
         }
-        for (let file of folder.fileRefs || []) {
+        for (const file of folder.fileRefs || []) {
           if (file != null) {
             files.push({ path: path.join(folderPath, file.name), file })
           }
@@ -129,9 +129,9 @@ const ProjectEntityHandler = {
         return callback(err)
       }
       const docPath = {}
-      for (let folderPath in folders) {
+      for (const folderPath in folders) {
         const folder = folders[folderPath]
-        for (let doc of folder.docs || []) {
+        for (const doc of folder.docs || []) {
           docPath[doc._id] = path.join(folderPath, doc.name)
         }
       }
@@ -160,7 +160,7 @@ const ProjectEntityHandler = {
         return callback(new Errors.NotFoundError('no project'))
       }
       function recursivelyFindDocInFolder(basePath, docId, folder) {
-        let docInCurrentFolder = (folder.docs || []).find(
+        const docInCurrentFolder = (folder.docs || []).find(
           currentDoc => currentDoc._id.toString() === docId.toString()
         )
         if (docInCurrentFolder != null) {
@@ -208,7 +208,7 @@ const ProjectEntityHandler = {
     const folders = {}
     function processFolder(basePath, folder) {
       folders[basePath] = folder
-      for (let childFolder of folder.folders || []) {
+      for (const childFolder of folder.folders || []) {
         if (childFolder.name != null) {
           processFolder(path.join(basePath, childFolder.name), childFolder)
         }

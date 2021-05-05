@@ -298,7 +298,7 @@ class SpellCheckManager {
             return null
           }
           const misspelled = []
-          for (let misspelling of result.misspellings) {
+          for (const misspelling of result.misspellings) {
             word = words[misspelling.index]
             const position = positions[misspelling.index]
             misspelled[misspelling.index] = true
@@ -360,7 +360,7 @@ class SpellCheckManager {
     const positions = []
     for (let row = 0; row < lines.length; row++) {
       let line = lines[row]
-      let rowIdx = rowNumsToCheck[row]
+      const rowIdx = rowNumsToCheck[row]
       line = this.blankOutBlacklistedCommands(line)
       var result
       WORD_REGEX.lastIndex = 0 // reset global stateful regexp for this usage

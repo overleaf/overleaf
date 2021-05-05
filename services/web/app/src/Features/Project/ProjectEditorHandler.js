@@ -100,7 +100,7 @@ module.exports = ProjectEditorHandler = {
     let owner = null
     let ownerFeatures = null
     const filteredMembers = []
-    for (let member of Array.from(members || [])) {
+    for (const member of Array.from(members || [])) {
       if (member.privilegeLevel === 'owner') {
         ownerFeatures = member.user.features
         owner = this.buildUserModelView(member.user, 'owner')

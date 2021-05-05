@@ -65,7 +65,7 @@ module.exports = UserController = {
       return {}
     }
     const formattedUser = { id: user._id.toString() }
-    for (let key of [
+    for (const key of [
       'first_name',
       'last_name',
       'email',

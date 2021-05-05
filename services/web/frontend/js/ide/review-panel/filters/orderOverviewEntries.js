@@ -12,7 +12,7 @@ export default App.filter(
   () =>
     function (items) {
       const array = []
-      for (let key in items) {
+      for (const key in items) {
         const value = items[key]
         value.entry_id = key
         array.push(value)

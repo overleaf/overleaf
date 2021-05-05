@@ -28,11 +28,11 @@ const viewList = globby
 
 module.exports = {
   precompileViews(app) {
-    let startTime = Date.now()
+    const startTime = Date.now()
     let success = 0
     let failures = 0
     viewList.forEach(view => {
-      let filename = path.resolve(view + '.pug') // express views are cached using the absolute path
+      const filename = path.resolve(view + '.pug') // express views are cached using the absolute path
       try {
         pug.compileFile(filename, {
           cache: true,

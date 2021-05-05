@@ -11,7 +11,7 @@ export default {
     }
 
     const _getRule = function (logMessage) {
-      for (let rule of ruleset) {
+      for (const rule of ruleset) {
         if (rule.regexToMatch.test(logMessage)) {
           return rule
         }
@@ -20,7 +20,7 @@ export default {
 
     const seenErrorTypes = {} // keep track of types of errors seen
 
-    for (let entry of parsedLogEntries.all) {
+    for (const entry of parsedLogEntries.all) {
       const ruleDetails = _getRule(entry.message)
 
       if (ruleDetails != null) {
@@ -70,7 +70,7 @@ export default {
     }
 
     // filter out the suppressed errors (from the array entries in parsedLogEntries)
-    for (let key in parsedLogEntries) {
+    for (const key in parsedLogEntries) {
       const errors = parsedLogEntries[key]
       if (typeof errors === 'object' && errors.length > 0) {
         parsedLogEntries[key] = Array.from(errors).filter(

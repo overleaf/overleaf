@@ -113,7 +113,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
     if (!Array.isArray(collabratec_users)) {
       callback(new Error('collabratec_users must be array'))
     }
-    for (let collabratec_user of Array.from(collabratec_users)) {
+    for (const collabratec_user of Array.from(collabratec_users)) {
       try {
         collabratec_user.user_id = ObjectId(collabratec_user.user_id)
       } catch (error1) {

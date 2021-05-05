@@ -140,7 +140,7 @@ export default ConnectionManager = (function () {
       // handle network-level websocket errors (e.g. failed dns lookups)
 
       let connectionAttempt = 1
-      let connectionErrorHandler = err => {
+      const connectionErrorHandler = err => {
         if (
           window.wsRetryHandshake &&
           connectionAttempt++ < window.wsRetryHandshake
@@ -195,7 +195,7 @@ export default ConnectionManager = (function () {
         })
 
         // we have passed authentication so we can now join the project
-        let connectionJobId = this.$scope.connection.jobId
+        const connectionJobId = this.$scope.connection.jobId
         setTimeout(() => {
           this.joinProject(connectionJobId)
         }, 100)
@@ -279,7 +279,7 @@ The editor will refresh automatically in ${delay} seconds.\
     updateConnectionManagerState(state) {
       this.$scope.$apply(() => {
         this.$scope.connection.jobId += 1
-        let jobId = this.$scope.connection.jobId
+        const jobId = this.$scope.connection.jobId
         sl_console.log(
           `[updateConnectionManagerState ${jobId}] from ${this.$scope.connection.state} to ${state}`
         )
@@ -473,7 +473,7 @@ Something went wrong connecting to your project. Please refresh if this continue
 
     startAutoReconnectCountdown() {
       this.updateConnectionManagerState('waitingCountdown')
-      let connectionId = this.$scope.connection.jobId
+      const connectionId = this.$scope.connection.jobId
       let countdown
       sl_console.log('[ConnectionManager] starting autoreconnect countdown')
       const twoMinutes = 2 * 60 * 1000

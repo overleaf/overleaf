@@ -244,8 +244,6 @@ App.controller(
     $filter,
     $location
   ) {
-    let switchEvent
-
     $scope.plans = MultiCurrencyPricing.plans
 
     $scope.currencyCode = MultiCurrencyPricing.currencyCode
@@ -331,7 +329,7 @@ App.controller(
 
     var eventLabel = (label, location) => label
 
-    switchEvent = function (e, label, location) {
+    function switchEvent(e, label, location) {
       e.preventDefault()
       const gaLabel = eventLabel(label, location)
       eventTracking.send('subscription-funnel', 'plans-page', gaLabel)
@@ -439,7 +437,7 @@ App.controller(
     }
 
     $scope.recalculatePrice = function () {
-      let { usage, plan_code, currency, size } = $scope.selected
+      const { usage, plan_code, currency, size } = $scope.selected
       const price = $scope.prices[usage][plan_code][currency][size]
       const currencySymbol = $scope.options.currencySymbols[currency]
       $scope.displayPrice = `${currencySymbol}${price}`

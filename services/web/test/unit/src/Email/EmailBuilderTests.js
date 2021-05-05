@@ -114,25 +114,25 @@ describe('EmailBuilder', function () {
         gmailGoToAction: () => {},
       }
       it('should throw an error when missing title', function () {
-        let { title, ...missing } = content
+        const { title, ...missing } = content
         expect(() => {
           this.EmailBuilder.ctaTemplate(missing)
         }).to.throw(Error)
       })
       it('should throw an error when missing message', function () {
-        let { message, ...missing } = content
+        const { message, ...missing } = content
         expect(() => {
           this.EmailBuilder.ctaTemplate(missing)
         }).to.throw(Error)
       })
       it('should throw an error when missing ctaText', function () {
-        let { ctaText, ...missing } = content
+        const { ctaText, ...missing } = content
         expect(() => {
           this.EmailBuilder.ctaTemplate(missing)
         }).to.throw(Error)
       })
       it('should throw an error when missing ctaURL', function () {
-        let { ctaURL, ...missing } = content
+        const { ctaURL, ...missing } = content
         expect(() => {
           this.EmailBuilder.ctaTemplate(missing)
         }).to.throw(Error)

@@ -125,7 +125,7 @@ export default App.controller(
       $scope.monthlyBilling = pricing.items.plan.period.length === 1
 
       $scope.availableCurrencies = {}
-      for (let currencyCode in pricing.items.plan.price) {
+      for (const currencyCode in pricing.items.plan.price) {
         if (MultiCurrencyPricing.plans[currencyCode]) {
           $scope.availableCurrencies[currencyCode] =
             MultiCurrencyPricing.plans[currencyCode]

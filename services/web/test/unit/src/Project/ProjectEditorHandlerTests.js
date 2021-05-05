@@ -171,7 +171,7 @@ describe('ProjectEditorHandler', function () {
 
       it('should gather readOnly_refs and collaberators_refs into a list of members', function () {
         const findMember = id => {
-          for (let member of Array.from(this.result.members)) {
+          for (const member of Array.from(this.result.members)) {
             if (member._id === id) {
               return member
             }

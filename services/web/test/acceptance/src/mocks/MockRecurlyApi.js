@@ -98,7 +98,7 @@ class MockRecurlyApi extends AbstractMockApi {
     this.app.get('/accounts/:id/redemptions', (req, res) => {
       const redemptions = this.redemptions[req.params.id] || []
       let redemptionsListXml = ''
-      for (let redemption of Array.from(redemptions)) {
+      for (const redemption of Array.from(redemptions)) {
         redemptionsListXml += `\
 <redemption>
 	<state>${redemption.state}</state>

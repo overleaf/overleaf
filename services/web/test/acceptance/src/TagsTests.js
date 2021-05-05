@@ -103,7 +103,7 @@ describe('Tags', function () {
         expect(err).to.not.exist
         // Check structure of tags we just created
         expect(tags.length).to.equal(3)
-        for (let tag of tags) {
+        for (const tag of tags) {
           _expectTagStructure(tag)
           expect(tag.user_id).to.equal(this.user._id.toString())
         }
@@ -113,7 +113,7 @@ describe('Tags', function () {
           expect(body).to.be.an.instanceof(Array)
           expect(body.length).to.equal(3)
           // Check structure of each tag in response
-          for (let tag of body) {
+          for (const tag of body) {
             _expectTagStructure(tag)
             expect(tag.user_id).to.equal(this.user._id.toString())
           }

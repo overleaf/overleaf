@@ -187,7 +187,7 @@ const AuthenticationController = {
     if (!sessionUser) {
       return
     }
-    for (let key in props) {
+    for (const key in props) {
       const value = props[key]
       sessionUser[key] = value
     }
@@ -362,7 +362,7 @@ const AuthenticationController = {
   },
 
   httpAuth: basicAuth(function (user, pass) {
-    let expectedPassword = Settings.httpAuthUsers[user]
+    const expectedPassword = Settings.httpAuthUsers[user]
     const isValid =
       expectedPassword &&
       expectedPassword.length === pass.length &&
@@ -499,7 +499,7 @@ function _afterLoginSessionSetup(req, user, callback) {
       req.sessionStore.generate(req)
       // Note: the validation token is not writable, so it does not get
       // transferred to the new session below.
-      for (let key in oldSession) {
+      for (const key in oldSession) {
         const value = oldSession[key]
         if (key !== '__tmp' && key !== 'csrfSecret') {
           req.session[key] = value

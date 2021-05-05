@@ -51,7 +51,7 @@ export default EventEmitter = class EventEmitter {
       } else {
         // Clear only namespaced listeners
         const remaining_events = []
-        for (let callback of Array.from(this.events[event] || [])) {
+        for (const callback of Array.from(this.events[event] || [])) {
           if (callback.namespace !== namespace) {
             remaining_events.push(callback)
           }

@@ -30,7 +30,7 @@ async function setNewUserPassword(req, res, next) {
       password,
       auditLog
     )
-    let { found, reset, userId } = result
+    const { found, reset, userId } = result
     if (!found) return res.sendStatus(404)
     if (!reset) return res.sendStatus(500)
     await UserSessionsManager.promises.revokeAllUserSessions(

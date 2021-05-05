@@ -42,7 +42,7 @@ export default App.factory('pdfHighlights', function () {
     }
 
     clearHighlights() {
-      for (let h of Array.from(this.highlightElements)) {
+      for (const h of Array.from(this.highlightElements)) {
         if (h != null) {
           h.parentNode.removeChild(h)
         }

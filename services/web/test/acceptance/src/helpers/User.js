@@ -154,7 +154,7 @@ class User {
 
   setFeatures(features, callback) {
     const update = {}
-    for (let key in features) {
+    for (const key in features) {
       const value = features[key]
       update[`features.${key}`] = value
     }

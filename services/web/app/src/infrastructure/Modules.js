@@ -12,7 +12,7 @@ const _hooks = {}
 let _viewIncludes = {}
 
 function loadModules() {
-  for (let moduleName of fs.readdirSync(MODULE_BASE_PATH)) {
+  for (const moduleName of fs.readdirSync(MODULE_BASE_PATH)) {
     if (fs.existsSync(Path.join(MODULE_BASE_PATH, moduleName, 'index.js'))) {
       const loadedModule = require(Path.join(
         MODULE_BASE_PATH,
@@ -35,7 +35,7 @@ function applyRouter(webRouter, privateApiRouter, publicApiRouter) {
 }
 
 function applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter) {
-  for (let module of _modules) {
+  for (const module of _modules) {
     if (module.nonCsrfRouter != null) {
       module.nonCsrfRouter.apply(webRouter, privateApiRouter, publicApiRouter)
     }
@@ -53,7 +53,7 @@ function loadViewIncludes(app) {
   _viewIncludes = {}
   for (const module of _modules) {
     const object = module.viewIncludes || {}
-    for (let view in object) {
+    for (const view in object) {
       const partial = object[view]
       if (!_viewIncludes[view]) {
         _viewIncludes[view] = []
@@ -77,7 +77,7 @@ function loadViewIncludes(app) {
 function moduleIncludes(view, locals) {
   const compiledPartials = _viewIncludes[view] || []
   let html = ''
-  for (let compiledPartial of compiledPartials) {
+  for (const compiledPartial of compiledPartials) {
     html += compiledPartial(locals)
   }
   return html
@@ -89,8 +89,8 @@ function moduleIncludesAvailable(view) {
 
 function linkedFileAgentsIncludes() {
   const agents = {}
-  for (let module of _modules) {
-    for (let name in module.linkedFileAgents) {
+  for (const module of _modules) {
+    for (const name in module.linkedFileAgents) {
       const agentFunction = module.linkedFileAgents[name]
       agents[name] = agentFunction()
     }
@@ -101,7 +101,7 @@ function linkedFileAgentsIncludes() {
 function attachHooks() {
   for (var module of _modules) {
     if (module.hooks != null) {
-      for (let hook in module.hooks) {
+      for (const hook in module.hooks) {
         const method = module.hooks[hook]
         attachHook(hook, method)
       }

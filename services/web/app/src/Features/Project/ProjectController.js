@@ -1035,7 +1035,7 @@ const ProjectController = {
       affiliations = []
     }
     const portalTemplates = []
-    for (let aff of affiliations) {
+    for (const aff of affiliations) {
       if (
         aff.portal &&
         aff.portal.slug &&
@@ -1082,7 +1082,7 @@ function generateThemeList() {
     Path.join(__dirname, '/../../../../node_modules/ace-builds/src-noconflict')
   )
   const result = []
-  for (let file of files) {
+  for (const file of files) {
     if (file.slice(-2) === 'js' && /^theme-/.test(file)) {
       const cleanName = file.slice(0, -3).slice(6)
       result.push(THEME_LIST.push(cleanName))

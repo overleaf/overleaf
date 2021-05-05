@@ -10,7 +10,7 @@ const TemplatesManager = require('../Templates/TemplatesManager')
 
 // set of middleware arrays or functions that checks user access to an entity
 // (publisher, institution, group, template, etc.)
-let UserMembershipMiddleware = {
+const UserMembershipMiddleware = {
   requireTeamMetricsAccess: [
     AuthenticationController.requireLogin(),
     fetchEntityConfig('team'),
@@ -198,7 +198,7 @@ function fetchEntityConfig(entityName) {
 // fetch the entity with id and config, and set it in the request
 function fetchEntity() {
   return expressify(async (req, res, next) => {
-    let entity = await UserMembershipHandler.promises.getEntityWithoutAuthorizationCheck(
+    const entity = await UserMembershipHandler.promises.getEntityWithoutAuthorizationCheck(
       req.params.id,
       req.entityConfig
     )
@@ -281,7 +281,7 @@ function requireV1Template() {
 // retur values is truly. Redirect to restricted otherwise
 function allowAccessIfAny(accessFunctions) {
   return (req, res, next) => {
-    for (let accessFunction of accessFunctions) {
+    for (const accessFunction of accessFunctions) {
       if (accessFunction(req)) {
         return next()
       }

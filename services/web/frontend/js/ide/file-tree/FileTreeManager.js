@@ -275,7 +275,7 @@ export default FileTreeManager = class FileTreeManager {
   }
 
   _findEntityByIdInFolder(folder, id) {
-    for (let entity of Array.from(folder.children || [])) {
+    for (const entity of Array.from(folder.children || [])) {
       if (entity.id === id) {
         return entity
       } else if (entity.children != null) {
@@ -309,7 +309,7 @@ export default FileTreeManager = class FileTreeManager {
       return this._findEntityByPathInFolder(folder, rest)
     }
 
-    for (let entity of Array.from(folder.children)) {
+    for (const entity of Array.from(folder.children)) {
       if (entity.name === name) {
         if (rest === '') {
           return entity
@@ -329,7 +329,7 @@ export default FileTreeManager = class FileTreeManager {
 
     return (() => {
       const result = []
-      for (let entity of Array.from(this.$scope.deletedDocs || [])) {
+      for (const entity of Array.from(this.$scope.deletedDocs || [])) {
         result.push(callback(entity))
       }
       return result
@@ -339,7 +339,7 @@ export default FileTreeManager = class FileTreeManager {
   _forEachEntityInFolder(folder, path, callback) {
     return (() => {
       const result = []
-      for (let entity of Array.from(folder.children || [])) {
+      for (const entity of Array.from(folder.children || [])) {
         var childPath
         if (path != null) {
           childPath = path + '/' + entity.name
@@ -362,7 +362,7 @@ export default FileTreeManager = class FileTreeManager {
   }
 
   _getEntityPathInFolder(folder, entity) {
-    for (let child of Array.from(folder.children || [])) {
+    for (const child of Array.from(folder.children || [])) {
       if (child === entity) {
         return entity.name
       } else if (child.type === 'folder') {
@@ -417,7 +417,7 @@ export default FileTreeManager = class FileTreeManager {
       selected: rawFolder._id === this.selected_entity_id,
     }
 
-    for (let doc of Array.from(rawFolder.docs || [])) {
+    for (const doc of Array.from(rawFolder.docs || [])) {
       folder.children.push({
         name: doc.name,
         id: doc._id,
@@ -426,7 +426,7 @@ export default FileTreeManager = class FileTreeManager {
       })
     }
 
-    for (let file of Array.from(rawFolder.fileRefs || [])) {
+    for (const file of Array.from(rawFolder.fileRefs || [])) {
       folder.children.push({
         name: file.name,
         id: file._id,
@@ -437,7 +437,7 @@ export default FileTreeManager = class FileTreeManager {
       })
     }
 
-    for (let childFolder of Array.from(rawFolder.folders || [])) {
+    for (const childFolder of Array.from(rawFolder.folders || [])) {
       folder.children.push(this._parseFolder(childFolder))
     }
 
@@ -487,7 +487,7 @@ export default FileTreeManager = class FileTreeManager {
   }
 
   _getEntityPathInFolder(folder, entity) {
-    for (let child of Array.from(folder.children || [])) {
+    for (const child of Array.from(folder.children || [])) {
       if (child === entity) {
         return entity.name
       } else if (child.type === 'folder') {
@@ -511,7 +511,7 @@ export default FileTreeManager = class FileTreeManager {
     if (startFolder == null) {
       startFolder = this.$scope.rootFolder
     }
-    for (let entity of Array.from(startFolder.children || [])) {
+    for (const entity of Array.from(startFolder.children || [])) {
       // The 'current' folder is either the one selected, or
       // the one containing the selected doc/file
       if (entity.selected) {
@@ -534,7 +534,7 @@ export default FileTreeManager = class FileTreeManager {
   }
 
   projectContainsFolder() {
-    for (let entity of Array.from(this.$scope.rootFolder.children)) {
+    for (const entity of Array.from(this.$scope.rootFolder.children)) {
       if (entity.type === 'folder') {
         return true
       }
@@ -543,7 +543,7 @@ export default FileTreeManager = class FileTreeManager {
   }
 
   existsInThisFolder(folder, name) {
-    for (let entity of Array.from(
+    for (const entity of Array.from(
       (folder != null ? folder.children : undefined) || []
     )) {
       if (entity.name === name) {

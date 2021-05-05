@@ -86,7 +86,7 @@ async function getInvitedMembersWithPrivilegeLevelsFromFields(
   collaboratorIds,
   readOnlyIds
 ) {
-  let members = _getMemberIdsWithPrivilegeLevelsFromFields(
+  const members = _getMemberIdsWithPrivilegeLevelsFromFields(
     ownerId,
     collaboratorIds,
     readOnlyIds,

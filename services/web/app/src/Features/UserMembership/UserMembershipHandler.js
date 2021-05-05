@@ -94,8 +94,8 @@ var getPopulatedListOfMembers = function (entity, attributes, callback) {
   }
   const userObjects = []
 
-  for (let attribute of Array.from(attributes)) {
-    for (let userObject of Array.from(entity[attribute] || [])) {
+  for (const attribute of Array.from(attributes)) {
+    for (const userObject of Array.from(entity[attribute] || [])) {
       // userObject can be an email as String, a user id as ObjectId or an
       // invite as Object with an email attribute as String. We want to pass to
       // UserMembershipViewModel either an email as (String) or a user id (ObjectId)

@@ -69,7 +69,7 @@ module.exports = CompileManager = {
                     if (error != null) {
                       return callback(error)
                     }
-                    for (let key in limits) {
+                    for (const key in limits) {
                       const value = limits[key]
                       options[key] = value
                     }
@@ -175,7 +175,7 @@ module.exports = CompileManager = {
             if (error != null) {
               return callback(error)
             }
-            let ownerFeatures = (owner && owner.features) || {}
+            const ownerFeatures = (owner && owner.features) || {}
             // put alpha users into their own compile group
             if (owner && owner.alphaProgram) {
               ownerFeatures.compileGroup = 'alpha'

@@ -273,10 +273,10 @@ export default HistoryManager = (function () {
         this.$scope.history.updates.length - 1
       ]
 
-      for (let update of Array.from(updates)) {
+      for (const update of Array.from(updates)) {
         update.pathnames = [] // Used for display
         const object = update.docs || {}
-        for (let doc_id in object) {
+        for (const doc_id in object) {
           const doc = object[doc_id]
           doc.entity = this.ide.fileTreeManager.findEntityById(doc_id, {
             includeDeleted: true,
@@ -284,7 +284,7 @@ export default HistoryManager = (function () {
           update.pathnames.push(doc.entity.name)
         }
 
-        for (let user of Array.from(update.meta.users || [])) {
+        for (const user of Array.from(update.meta.users || [])) {
           if (user != null) {
             user.hue = ColorManager.getHueForUserId(user.id)
           }
@@ -322,10 +322,10 @@ export default HistoryManager = (function () {
           ? this.$scope.history.selection.doc.id
           : undefined
 
-      for (let update of Array.from(
+      for (const update of Array.from(
         this.$scope.history.selection.updates || []
       )) {
-        for (let doc_id in update.docs) {
+        for (const doc_id in update.docs) {
           const doc = update.docs[doc_id]
           if (doc_id === selected_doc_id) {
             if (fromV != null && toV != null) {
@@ -353,7 +353,7 @@ export default HistoryManager = (function () {
     _selectDocFromUpdates() {
       let doc, doc_id
       const affected_docs = {}
-      for (let update of Array.from(this.$scope.history.selection.updates)) {
+      for (const update of Array.from(this.$scope.history.selection.updates)) {
         for (doc_id in update.docs) {
           doc = update.docs[doc_id]
           affected_docs[doc_id] = doc.entity
@@ -376,7 +376,7 @@ export default HistoryManager = (function () {
     }
 
     _updateContainsUserId(update, user_id) {
-      for (let user of Array.from(update.meta.users)) {
+      for (const user of Array.from(update.meta.users)) {
         if ((user != null ? user.id : undefined) === user_id) {
           return true
         }

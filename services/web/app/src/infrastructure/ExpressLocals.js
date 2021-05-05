@@ -299,7 +299,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(function (req, res, next) {
     // Clone the nav settings so they can be modified for each request
     res.locals.nav = {}
-    for (let key in Settings.nav) {
+    for (const key in Settings.nav) {
       res.locals.nav[key] = _.clone(Settings.nav[key])
     }
     res.locals.templates = Settings.templateLinks

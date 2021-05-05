@@ -736,7 +736,7 @@ describe('<ShareProjectModal/>', function () {
   it('handles switching between access levels', async function () {
     fetchMock.post('express:/project/:projectId/settings/admin', 204)
 
-    let watchCallbacks = {}
+    const watchCallbacks = {}
 
     const ideWithProject = project => {
       return {

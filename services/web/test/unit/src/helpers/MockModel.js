@@ -15,7 +15,7 @@ const mongoose = require('mongoose')
  */
 
 module.exports = (modelName, requires = {}) => {
-  let model = {}
+  const model = {}
 
   requires['../infrastructure/Mongoose'] = {
     createConnection: () => {

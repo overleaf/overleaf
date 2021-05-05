@@ -101,7 +101,7 @@ describe('TpdsUpdateTests', function () {
           throw error
         }
         const projectFolder = project.rootFolder[0]
-        for (let doc of Array.from(projectFolder.docs)) {
+        for (const doc of Array.from(projectFolder.docs)) {
           if (doc.name === 'main.tex') {
             throw new Error('expected main.tex to have been deleted')
           }

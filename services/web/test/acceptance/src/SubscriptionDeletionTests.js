@@ -34,8 +34,8 @@ describe('Subscriptions', function () {
     })
 
     it('deletes via Recurly callback', function (done) {
-      let url = '/user/subscription/callback'
-      let body = this.recurlySubscription.buildCallbackXml()
+      const url = '/user/subscription/callback'
+      const body = this.recurlySubscription.buildCallbackXml()
 
       request.post({ url, body }, (error, { statusCode }) => {
         if (error) {
@@ -47,8 +47,8 @@ describe('Subscriptions', function () {
     })
 
     it('refresh features', function (done) {
-      let url = '/user/subscription/callback'
-      let body = this.recurlySubscription.buildCallbackXml()
+      const url = '/user/subscription/callback'
+      const body = this.recurlySubscription.buildCallbackXml()
 
       request.post({ url, body }, (error, { statusCode }) => {
         if (error) {
@@ -62,8 +62,8 @@ describe('Subscriptions', function () {
     })
 
     it('allows deletion when deletedSubscription exists', function (done) {
-      let url = '/user/subscription/callback'
-      let body = this.recurlySubscription.buildCallbackXml()
+      const url = '/user/subscription/callback'
+      const body = this.recurlySubscription.buildCallbackXml()
 
       // create fake deletedSubscription
       SubscriptionUpdater._createDeletedSubscription(

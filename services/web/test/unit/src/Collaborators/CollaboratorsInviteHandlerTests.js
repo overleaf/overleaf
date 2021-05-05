@@ -41,7 +41,7 @@ describe('CollaboratorsInviteHandler', function () {
             options = {}
           }
           this._id = ObjectId()
-          for (let k in options) {
+          for (const k in options) {
             const v = options[k]
             this[k] = v
           }

@@ -2,7 +2,7 @@ import App from '../../base'
 
 const ExposedSettings = window.ExposedSettings
 App.controller('NotificationsController', function ($scope, $http) {
-  for (let notification of $scope.notifications || []) {
+  for (const notification of $scope.notifications || []) {
     notification.hide = false
   }
 
@@ -98,7 +98,7 @@ App.controller(
       }
       return false
     }
-    for (let userEmail of $scope.userEmails) {
+    for (const userEmail of $scope.userEmails) {
       userEmail.hide = false
     }
 

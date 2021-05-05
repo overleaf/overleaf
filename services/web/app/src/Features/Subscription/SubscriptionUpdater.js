@@ -184,7 +184,7 @@ const SubscriptionUpdater = {
         if (err) {
           return callback(err)
         }
-        let subscription = deletedSubscription.subscription
+        const subscription = deletedSubscription.subscription
         async.series(
           [
             cb =>

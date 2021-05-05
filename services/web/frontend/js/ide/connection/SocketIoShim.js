@@ -16,7 +16,7 @@ const transparentMethods = [
   'on',
   'removeListener',
 ]
-for (let method of transparentMethods) {
+for (const method of transparentMethods) {
   SocketShimBase.prototype[method] = function () {
     this._socket[method].apply(this._socket, arguments)
   }
