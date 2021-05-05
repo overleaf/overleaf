@@ -47,6 +47,9 @@
     "no-unreachable-loop": "off",
     "no-loss-of-precision": "off",
 
+    // do not allow importing of implicit dependencies.
+    "import/no-extraneous-dependencies": "error",
+
     "node/no-callback-literal": "off",
     "node/no-deprecated-api": "off",
     "node/handle-callback-err": "off",
@@ -100,7 +103,13 @@
       "files": ["**/app/src/**/*.js"],
       "rules": {
         // don't allow console.log in backend code
-        "no-console": "error"
+        "no-console": "error",
+
+        // do not allow importing of implicit dependencies.
+        "import/no-extraneous-dependencies": ["error", {
+          // do not allow importing of devDependencies.
+          "devDependencies": false
+        }]
       }
     },
     {
@@ -144,6 +153,15 @@
             }
           }
         ]
+      }
+    },
+    {
+      "files": ["scripts/ukamf/*.js"],
+      "rules": {
+        // Do not allow importing of any dependencies unless specified in either
+        //  - web/package.json
+        //  - web/scripts/ukamf/package.json
+        "import/no-extraneous-dependencies": ["error", {"packageDir": [".", "scripts/ukamf"]}]
       }
     }
   ]
