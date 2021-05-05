@@ -396,7 +396,7 @@ App.controller(
       plan_code: 'collaborator',
       currency,
       size: '10',
-      usage: 'educational',
+      usage: 'enterprise',
     }
     // selected via query
     if ($location.search()) {

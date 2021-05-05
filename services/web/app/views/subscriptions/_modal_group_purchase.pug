@@ -41,6 +41,8 @@ script(type="text/ng-template", id="groupPlanModalPurchaseTemplate")
 							select.form-control(id="usage", ng-model="selected.usage")
 								option(ng-repeat="usage in options.usages", value="{{usage.code}}") {{ usage.display }}
 							p.small.text-center.row-spaced-small(ng-show="selected.usage == 'educational'")
+								| The 40% Educational discount can be used by students or faculty using Overleaf for teaching
+							p.small.text-center.row-spaced-small(ng-show="selected.usage == 'enterprise'")
 								| Save an additional 40% on groups of 10 or more with our educational discount
 	.modal-footer
 		.text-center
