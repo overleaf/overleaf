@@ -468,6 +468,13 @@ module.exports = RedisManager = {
         logger.error({ err: error, doc_id, newDocLines }, error.message)
         return callback(error)
       }
+      // Do a cheap size check on the serialized blob.
+      if (newDocLines.length > Settings.max_doc_length) {
+        const err = new Error('blocking doc update: doc is too large')
+        const docSize = newDocLines.length
+        logger.error({ project_id, doc_id, err, docSize }, err.message)
+        return callback(err)
+      }
       const newHash = RedisManager._computeHash(newDocLines)
 
       const opVersions = appliedOps.map((op) => (op != null ? op.v : undefined))
