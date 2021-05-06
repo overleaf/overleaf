@@ -238,7 +238,7 @@ module.exports = settings =
 
 	splitTests: [
 		{
-			id: 'example-project'
+			id: 'example-project-v2'
 			active:  process.env['SPLITTEST_EXAMPLE_PROJECT_ACTIVE'] == 'true'
 			variants: [
 				{
