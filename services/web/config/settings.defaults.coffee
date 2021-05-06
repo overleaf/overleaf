@@ -473,6 +473,7 @@ module.exports = settings =
 	# Production Settings
 	# -------------------
 	debugPugTemplates: process.env['DEBUG_PUG_TEMPLATES'] == 'true'
+	precompilePugTemplatesAtBootTime: if process.env['PRECOMPILE_PUG_TEMPLATES_AT_BOOT_TIME'] then process.env['PRECOMPILE_PUG_TEMPLATES_AT_BOOT_TIME'] == 'true' else process.env.NODE_ENV == 'production'
 
 	# Should javascript assets be served minified or not. Note that you will
 	# need to run `grunt compile:minify` within the web-sharelatex directory
