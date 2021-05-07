@@ -2,45 +2,41 @@ const settings = require('settings-sharelatex')
 const Metrics = require('@overleaf/metrics')
 const RedisWrapper = require('./RedisWrapper')
 const rclient = RedisWrapper.client('ratelimiter')
-const RollingRateLimiter = require('rolling-rate-limiter')
-const { promisifyAll } = require('../util/promises')
+const { RedisRateLimiter } = require('rolling-rate-limiter')
+const { callbackify } = require('util')
 
-const RateLimiter = {
-  addCount(opts, callback) {
-    if (settings.disableRateLimits) {
-      return callback(null, true)
-    }
-    if (callback == null) {
-      callback = function () {}
-    }
-    const namespace = `RateLimit:${opts.endpointName}:`
-    const k = `{${opts.subjectName}}`
-    const limiter = RollingRateLimiter({
-      redis: rclient,
-      namespace,
-      interval: opts.timeInterval * 1000,
-      maxInInterval: opts.throttle,
+async function addCount(opts) {
+  if (settings.disableRateLimits) {
+    return true
+  }
+  const namespace = `RateLimit:${opts.endpointName}:`
+  const k = `{${opts.subjectName}}`
+  const limiter = new RedisRateLimiter({
+    client: rclient,
+    namespace,
+    interval: opts.timeInterval * 1000,
+    maxInInterval: opts.throttle,
+  })
+  const rateLimited = await limiter.limit(k)
+  if (rateLimited) {
+    Metrics.inc('rate-limit-hit', 1, {
+      path: opts.endpointName,
     })
-    limiter(k, function (err, timeLeft, actionsLeft) {
-      if (err) {
-        return callback(err)
-      }
-      const allowed = timeLeft === 0
-      if (!allowed) {
-        Metrics.inc('rate-limit-hit', 1, {
-          path: opts.endpointName,
-        })
-      }
-      return callback(null, allowed)
-    })
-  },
-
-  clearRateLimit(endpointName, subject, callback) {
-    // same as the key which will be built by RollingRateLimiter (namespace+k)
-    const keyName = `RateLimit:${endpointName}:{${subject}}`
-    rclient.del(keyName, callback)
-  },
+  }
+  return !rateLimited
 }
 
-RateLimiter.promises = promisifyAll(RateLimiter)
-module.exports = RateLimiter
+async function clearRateLimit(endpointName, subject) {
+  // same as the key which will be built by RollingRateLimiter (namespace+k)
+  const keyName = `RateLimit:${endpointName}:{${subject}}`
+  await rclient.del(keyName)
+}
+
+module.exports = {
+  addCount: callbackify(addCount),
+  clearRateLimit: callbackify(clearRateLimit),
+  promises: {
+    addCount,
+    clearRateLimit,
+  },
+}

@@ -155,7 +155,7 @@
     "request-promise-native": "^1.0.8",
     "requestretry": "^1.13.0",
     "rimraf": "2.2.6",
-    "rolling-rate-limiter": "https://github.com/ShaneKilkelly/rolling-rate-limiter/archive/8a1a2cd8aaf9cd1a75cc81317b7f261157be2149.tar.gz",
+    "rolling-rate-limiter": "^0.2.10",
     "sanitize-html": "^1.27.1",
     "sanitizer": "0.1.1",
     "scroll-into-view-if-needed": "^2.2.25",
