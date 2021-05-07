@@ -2,8 +2,14 @@
 
 MVN_OPTS := "--no-transfer-progress"
 
-run: package
-	java -jar target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar conf/local.json
+runtime-conf:
+	/opt/envsubst < conf/envsubst_template.json > conf/runtime.json
+
+
+run: package runtime-conf
+	java -jar \
+	target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar \
+	conf/runtime.json
 
 
 build:
@@ -22,4 +28,4 @@ package: clean
 	mvn $(MVN_OPTS) package -DskipTests
 
 
-.PHONY: run package build clean test
+.PHONY: run package build clean test runtime-conf
