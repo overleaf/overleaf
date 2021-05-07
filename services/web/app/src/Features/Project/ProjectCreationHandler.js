@@ -224,7 +224,7 @@ async function _buildTemplate(templateName, userId, projectName) {
     year: new Date().getUTCFullYear(),
     month: MONTH_NAMES[new Date().getUTCMonth()],
   }
-  const output = _.template(template.toString(), data)
+  const output = _.template(template.toString())(data)
   return output.split('\n')
 }
 
