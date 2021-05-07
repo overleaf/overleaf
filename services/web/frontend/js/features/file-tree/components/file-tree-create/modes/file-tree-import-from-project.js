@@ -132,8 +132,8 @@ export default function FileTreeImportFromProject() {
         >
           <span>
             {isOutputFilesMode
-              ? 'select from source files'
-              : 'select from output files'}
+              ? t('select_from_source_files')
+              : t('select_from_output_files')}
           </span>
         </Button>
       </div>
@@ -153,6 +153,8 @@ export default function FileTreeImportFromProject() {
 }
 
 function SelectProject({ projectId, selectedProject, setSelectedProject }) {
+  const { t } = useTranslation()
+
   // NOTE: unhandled error
   const { data, loading } = useUserProjects()
 
@@ -166,7 +168,7 @@ function SelectProject({ projectId, selectedProject, setSelectedProject }) {
 
   return (
     <FormGroup className="form-controls" controlId="project-select">
-      <ControlLabel>Select a Project</ControlLabel>
+      <ControlLabel>{t('select_a_project')}</ControlLabel>
 
       {loading && (
         <span>
@@ -186,7 +188,7 @@ function SelectProject({ projectId, selectedProject, setSelectedProject }) {
         }}
       >
         <option disabled value="">
-          - Please Select a Project
+          - {t('please_select_a_project')}
         </option>
 
         {filteredData &&
@@ -198,9 +200,7 @@ function SelectProject({ projectId, selectedProject, setSelectedProject }) {
       </FormControl>
 
       {filteredData && !filteredData.length && (
-        <small>
-          No other projects found, please create another project first
-        </small>
+        <small>{t('no_other_projects_found')}</small>
       )}
     </FormGroup>
   )
@@ -216,6 +216,8 @@ function SelectProjectOutputFile({
   selectedProjectOutputFile,
   setSelectedProjectOutputFile,
 }) {
+  const { t } = useTranslation()
+
   // NOTE: unhandled error
   const { data, loading } = useProjectOutputFiles(selectedProjectId)
 
@@ -224,7 +226,7 @@ function SelectProjectOutputFile({
       className="form-controls row-spaced-small"
       controlId="project-output-file-select"
     >
-      <ControlLabel>Select an Output File</ControlLabel>
+      <ControlLabel>{t('select_an_output_file')}</ControlLabel>
 
       {loading && (
         <span>
@@ -244,7 +246,7 @@ function SelectProjectOutputFile({
         }}
       >
         <option disabled value="">
-          - Please Select an Output File
+          - {t('please_select_an_output_file')}
         </option>
 
         {data &&
@@ -268,6 +270,8 @@ function SelectProjectEntity({
   selectedProjectEntity,
   setSelectedProjectEntity,
 }) {
+  const { t } = useTranslation()
+
   // NOTE: unhandled error
   const { data, loading } = useProjectEntities(selectedProjectId)
 
@@ -276,7 +280,7 @@ function SelectProjectEntity({
       className="form-controls row-spaced-small"
       controlId="project-entity-select"
     >
-      <ControlLabel>Select a File</ControlLabel>
+      <ControlLabel>{t('select_a_file')}</ControlLabel>
 
       {loading && (
         <span>
@@ -296,7 +300,7 @@ function SelectProjectEntity({
         }}
       >
         <option disabled value="">
-          - Please Select a File
+          - {t('please_select_a_file')}
         </option>
 
         {data &&

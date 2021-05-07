@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import FileTreeCreateNewDoc from './modes/file-tree-create-new-doc'
 import FileTreeImportFromUrl from './modes/file-tree-import-from-url'
 import FileTreeImportFromProject from './modes/file-tree-import-from-project'
@@ -13,6 +14,8 @@ import importOverleafModules from '../../../../../macros/import-overleaf-module.
 const createFileModeModules = importOverleafModules('createFileModes')
 
 export default function FileTreeModalCreateFileBody() {
+  const { t } = useTranslation()
+
   const { newFileCreateMode } = useFileTreeActionable()
   const { fileCount } = useFileTreeMutable()
 
@@ -29,26 +32,26 @@ export default function FileTreeModalCreateFileBody() {
               <FileTreeModalCreateFileMode
                 mode="doc"
                 icon="file"
-                label="New File"
+                label={t('new_file')}
               />
 
               <FileTreeModalCreateFileMode
                 mode="upload"
                 icon="upload"
-                label="Upload"
+                label={t('upload')}
               />
 
               <FileTreeModalCreateFileMode
                 mode="project"
                 icon="folder-open"
-                label="From Another Project"
+                label={t('from_another_project')}
               />
 
               {window.ExposedSettings.hasLinkUrlFeature && (
                 <FileTreeModalCreateFileMode
                   mode="url"
                   icon="globe"
-                  label="From External URL"
+                  label={t('from_external_url')}
                 />
               )}
 

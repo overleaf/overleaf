@@ -129,13 +129,14 @@ export default function BinaryFileHeader({ file, storeReferencesKeys }) {
         className="btn btn-info"
       >
         <Icon type="download" modifier="fw" />
-        <span>{' ' + t('download')}</span>
+        &nbsp;
+        <span>{t('download')}</span>
       </a>
       {refreshError && (
         <div className="row">
           <br />
           <div className="alert alert-danger col-md-6 col-md-offset-3">
-            Error: {refreshError}
+            {t('error')}: {refreshError}
             {tprLinkedFileRefreshError.map(
               ({ import: { LinkedFileRefreshError }, path }) => (
                 <LinkedFileRefreshError key={path} file={file} />

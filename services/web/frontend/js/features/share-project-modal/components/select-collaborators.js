@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
-import { Trans } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { matchSorter } from 'match-sorter'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
@@ -286,6 +286,8 @@ function SelectedItem({
   getSelectedItemProps,
   index,
 }) {
+  const { t } = useTranslation()
+
   const handleClick = useCallback(
     event => {
       event.preventDefault()
@@ -306,7 +308,7 @@ function SelectedItem({
       <button
         type="button"
         className="remove-button btn-inline-link"
-        aria-label="Remove"
+        aria-label={t('remove')}
         onClick={handleClick}
       >
         <Icon type="close" modifier="fw" />

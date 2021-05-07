@@ -51,7 +51,7 @@ export default function FileTreeImportFromUrl() {
       onSubmit={handleSubmit}
     >
       <FormGroup controlId="import-from-url">
-        <ControlLabel>URL to fetch the file from</ControlLabel>
+        <ControlLabel>{t('url_to_fetch_the_file_from')}</ControlLabel>
 
         <FormControl
           type="url"

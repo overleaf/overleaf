@@ -2,7 +2,7 @@ import ControlLabel from 'react-bootstrap/lib/ControlLabel'
 import { Alert, FormControl } from 'react-bootstrap'
 import FormGroup from 'react-bootstrap/lib/FormGroup'
 import React, { useCallback } from 'react'
-import { Trans } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { useFileTreeCreateName } from '../../contexts/file-tree-create-name'
 import PropTypes from 'prop-types'
 import {
@@ -16,12 +16,14 @@ import {
  * plus a validation warning and/or an error message when needed
  */
 export default function FileTreeCreateNameInput({
-  label = 'File Name',
+  label,
   focusName = false,
   classes = {},
-  placeholder = 'File Name',
+  placeholder,
   error,
 }) {
+  const { t } = useTranslation()
+
   // the value is stored in a context provider, so it's available elsewhere in the form
   const { name, setName, touchedName, validName } = useFileTreeCreateName()
 
@@ -40,11 +42,11 @@ export default function FileTreeCreateNameInput({
 
   return (
     <FormGroup controlId="new-doc-name" className={classes.formGroup}>
-      <ControlLabel>{label}</ControlLabel>
+      <ControlLabel>{label || t('file_name')}</ControlLabel>
 
       <FormControl
         type="text"
-        placeholder={placeholder}
+        placeholder={placeholder || t('file_name')}
         required
         value={name}
         onChange={event => setName(event.target.value)}

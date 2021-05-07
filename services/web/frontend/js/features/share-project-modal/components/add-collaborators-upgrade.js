@@ -1,17 +1,19 @@
 import React, { useState } from 'react'
-import { Trans } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
 import { upgradePlan } from '../../../main/account-upgrade'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 
 export default function AddCollaboratorsUpgrade() {
+  const { t } = useTranslation()
+
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
 
   return (
     <div className="add-collaborators-upgrade">
       <p className="text-center">
-        <Trans i18nKey="need_to_upgrade_for_more_collabs" />. Also:
+        <Trans i18nKey="need_to_upgrade_for_more_collabs" />. {t('also')}:
       </p>
 
       <ul className="list-unstyled">

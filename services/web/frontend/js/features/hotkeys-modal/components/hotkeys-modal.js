@@ -33,15 +33,24 @@ export default function HotkeysModal({
           <Col xs={4}>
             <Hotkey
               combination={`${ctrl} + F`}
-              description="Find (and replace)"
+              description={t('hotkey_find_and_replace')}
             />
-            <Hotkey combination={`${ctrl} + Enter`} description="Compile" />
+            <Hotkey
+              combination={`${ctrl} + Enter`}
+              description={t('hotkey_compile')}
+            />
           </Col>
           <Col xs={4}>
-            <Hotkey combination={`${ctrl} + Z`} description="Undo" />
+            <Hotkey
+              combination={`${ctrl} + Z`}
+              description={t('hotkey_undo')}
+            />
           </Col>
           <Col xs={4}>
-            <Hotkey combination={`${ctrl} + Y`} description="Redo" />
+            <Hotkey
+              combination={`${ctrl} + Y`}
+              description={t('hotkey_redo')}
+            />
           </Col>
         </Row>
 
@@ -51,17 +60,20 @@ export default function HotkeysModal({
           <Col xs={4}>
             <Hotkey
               combination={`${ctrl} + Home`}
-              description="Beginning of document"
+              description={t('hotkey_beginning_of_document')}
             />
           </Col>
           <Col xs={4}>
             <Hotkey
               combination={`${ctrl} + End`}
-              description="End of document"
+              description={t('hotkey_end_of_document')}
             />
           </Col>
           <Col xs={4}>
-            <Hotkey combination={`${ctrl} + L`} description="Go To Line" />
+            <Hotkey
+              combination={`${ctrl} + L`}
+              description={t('hotkey_go_to_line')}
+            />
           </Col>
         </Row>
 
@@ -69,26 +81,44 @@ export default function HotkeysModal({
 
         <Row>
           <Col xs={4}>
-            <Hotkey combination={`${ctrl} + /`} description="Toggle Comment" />
+            <Hotkey
+              combination={`${ctrl} + /`}
+              description={t('hotkey_toggle_comment')}
+            />
             <Hotkey
               combination={`${ctrl} + D`}
-              description="Delete Current Line"
+              description={t('hotkey_delete_current_line')}
             />
-            <Hotkey combination={`${ctrl} + A`} description="Select All" />
+            <Hotkey
+              combination={`${ctrl} + A`}
+              description={t('hotkey_select_all')}
+            />
           </Col>
 
           <Col xs={4}>
-            <Hotkey combination={`${ctrl} + U`} description="To Uppercase" />
+            <Hotkey
+              combination={`${ctrl} + U`}
+              description={t('hotkey_to_uppercase')}
+            />
             <Hotkey
               combination={`${ctrl} + Shift + U`}
-              description="To Lowercase"
+              description={t('hotkey_to_lowercase')}
             />
-            <Hotkey combination="Tab" description="Indent Selection" />
+            <Hotkey
+              combination="Tab"
+              description={t('hotkey_indent_selection')}
+            />
           </Col>
 
           <Col xs={4}>
-            <Hotkey combination={`${ctrl} + B`} description="Bold text" />
-            <Hotkey combination={`${ctrl} + I`} description="Italic Text" />
+            <Hotkey
+              combination={`${ctrl} + B`}
+              description={t('hotkey_bold_text')}
+            />
+            <Hotkey
+              combination={`${ctrl} + I`}
+              description={t('hotkey_italic_text')}
+            />
           </Col>
         </Row>
 
@@ -98,17 +128,20 @@ export default function HotkeysModal({
           <Col xs={4}>
             <Hotkey
               combination={`${ctrl} + Space`}
-              description="Autocomplete Menu"
+              description={t('hotkey_autocomplete_menu')}
             />
           </Col>
           <Col xs={4}>
             <Hotkey
               combination="Tab / Up / Down"
-              description="Select Candidate"
+              description={t('hotkey_select_candidate')}
             />
           </Col>
           <Col xs={4}>
-            <Hotkey combination="Enter" description="Insert Candidate" />
+            <Hotkey
+              combination="Enter"
+              description={t('hotkey_insert_candidate')}
+            />
           </Col>
         </Row>
 
@@ -123,7 +156,7 @@ export default function HotkeysModal({
           <Col xs={4}>
             <Hotkey
               combination={`${ctrl} + Space `}
-              description="Search References"
+              description={t('hotkey_search_references')}
             />
           </Col>
         </Row>
@@ -136,19 +169,19 @@ export default function HotkeysModal({
               <Col xs={4}>
                 <Hotkey
                   combination={`${ctrl} + J`}
-                  description="Toggle review panel"
+                  description={t('hotkey_toggle_review_panel')}
                 />
               </Col>
               <Col xs={4}>
                 <Hotkey
                   combination={`${ctrl} + Shift + A`}
-                  description="Toggle track changes"
+                  description={t('hotkey_toggle_track_changes')}
                 />
               </Col>
               <Col xs={4}>
                 <Hotkey
                   combination={`${ctrl} + Shift + C`}
-                  description="Add a comment"
+                  description={t('hotkey_add_a_comment')}
                 />
               </Col>
             </Row>

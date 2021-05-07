@@ -62,32 +62,17 @@ export default function ErrorMessage({ error }) {
       // TODO: translations
       switch (error.response?.status) {
         case 400:
-          return (
-            <DangerMessage>
-              Invalid Request. Please correct the data and try again.
-            </DangerMessage>
-          )
+          return <DangerMessage>{t('invalid_request')}</DangerMessage>
 
         case 403:
-          return (
-            <DangerMessage>
-              Session error. Please check you have cookies enabled. If the
-              problem persists, try clearing your cache and cookies.
-            </DangerMessage>
-          )
+          return <DangerMessage>{t('session_error')}</DangerMessage>
 
         case 429:
-          return (
-            <DangerMessage>
-              Too many attempts. Please wait for a while and try again.
-            </DangerMessage>
-          )
+          return <DangerMessage>{t('too_many_attempts')}</DangerMessage>
 
         default:
           return (
-            <DangerMessage>
-              Something went wrong talking to the server :(. Please try again.
-            </DangerMessage>
+            <DangerMessage>{t('something_went_wrong_server')}</DangerMessage>
           )
       }
     }
