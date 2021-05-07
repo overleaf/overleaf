@@ -14,11 +14,6 @@
     }
   }
 
-  img {
-    height: auto;
-    max-width: 100%;
-  }
-
   .page-header {
     a {
       font-size: 0.8em;
@@ -234,5 +229,46 @@
       }
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
     }
+  }
+
+  /* Keep the below rules in sync with the wiki pages */
+  img {
+    height: auto;
+    max-width: 100%;
+  }
+
+  img.add-vertical-space {
+    padding-bottom: 20px;
+    padding-top: 20px;
+  }
+
+  th.no-wrap {
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  /* LATEX and TEX artwork */
+  span.TEX {
+    letter-spacing: -0.125em;
+    padding-right: 0.5ex;
+  }
+  span.TEX span.E {
+    position: relative;
+    top: 0.5ex;
+    padding-right: 0.1ex;
+  }
+  a span.TEX span.E {
+    text-decoration: none;
+  }
+  span.LATEX span.A {
+    position: relative;
+    top: -0.5ex;
+    left: -0.4em;
+    font-size: 75%;
+  }
+  span.LATEX span.TEX {
+    position: relative;
+    left: -0.4em;
+    margin-right: -0.5ex;
   }
 }
