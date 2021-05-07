@@ -109,7 +109,6 @@ const ClsiManager = {
           return callback(
             OError.tag(err, 'CLSI compile failed', {
               submissionId,
-              clsiRequest,
               options,
             })
           )
