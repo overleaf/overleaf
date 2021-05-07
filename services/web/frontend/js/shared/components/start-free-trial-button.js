@@ -19,16 +19,19 @@ export default function StartFreeTrialButton({
 
       eventTracking.send('subscription-funnel', 'upgraded-free-trial', source)
 
-      const plan = 'collaborator_free_trial_7_days'
+      const planCode = 'collaborator_free_trial_7_days'
 
-      eventTracking.sendMB('subscription-start-trial', { source, plan })
+      eventTracking.sendMB('subscription-start-trial', {
+        source,
+        plan: planCode,
+      })
 
       if (setStartedFreeTrial) {
         setStartedFreeTrial(true)
       }
 
       const params = new URLSearchParams({
-        planCode: plan,
+        planCode,
         ssp: 'true',
         itm_campaign: source,
       })
