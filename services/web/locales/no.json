@@ -357,7 +357,6 @@
   "admin": "admin",
   "subscribe": "Abonner",
   "update_billing_details": "Oppdater faktureringsdetaljer",
-  "thank_you": "Takk",
   "group_admin": "Gruppeadministrator",
   "all_templates": "Alle maler",
   "your_settings": "Dine instillinger",
@@ -612,5 +611,6 @@
   "unlink_github": "Koble fra GitHub-konto",
   "link_to_github": "Koble til din GitHub-konto",
   "github_integration": "Integrasjon med GitHub",
-  "github_is_premium": "Synkronisering med GitHub er en premium funksjonalitet"
+  "github_is_premium": "Synkronisering med GitHub er en premium funksjonalitet",
+  "thank_you": "Takk"
 }

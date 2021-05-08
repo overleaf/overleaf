@@ -806,7 +806,6 @@
   "admin": "admin",
   "subscribe": "Inscrever",
   "update_billing_details": "Atualizar Detalhes de Cobrança",
-  "thank_you": "Obrigado",
   "group_admin": "Administrador do Grupo",
   "all_templates": "Todos os Modelos",
   "your_settings": "Suas Configurações",
@@ -1072,5 +1071,6 @@
   "unlink_github": "Desvincular conta do GitHub",
   "link_to_github": "Vincule à sua conta do GitHub",
   "github_integration": "Integração com o GitHub",
-  "github_is_premium": "Sincronizar com GitHub é um recurso premium"
+  "github_is_premium": "Sincronizar com GitHub é um recurso premium",
+  "thank_you": "Obrigado"
 }
