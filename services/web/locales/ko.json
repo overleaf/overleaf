@@ -631,7 +631,6 @@
   "admin": "관리",
   "subscribe": "구독",
   "update_billing_details": "청구서 세부사항 업데이트",
-  "thank_you": "감사합니다",
   "group_admin": "그룹 관리",
   "all_templates": "모든 템플릿",
   "your_settings": "나의 설정",
@@ -896,5 +895,6 @@
   "unlink_github": "GitHub 계정 연결끊기",
   "link_to_github": "GitHub 계정에 연결하기",
   "github_integration": "GitHub 통합",
-  "github_is_premium": "GitHub 동기화는 프리미엄 기능입니다"
+  "github_is_premium": "GitHub 동기화는 프리미엄 기능입니다",
+  "thank_you": "감사합니다"
 }

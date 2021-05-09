@@ -319,7 +319,6 @@
   "admin": "administrátor",
   "subscribe": "Odebírat novinky",
   "update_billing_details": "Aktualizovat fakturační údaje",
-  "thank_you": "Děkujeme",
   "group_admin": "Administrátor skupiny",
   "all_templates": "Všechny šablony",
   "your_settings": "Vaše nastavení",
@@ -530,5 +529,6 @@
   "unlink_github": "Odpojit váš GitHub účet",
   "link_to_github": "Spojit s vašim GitHub účtem",
   "github_integration": "Integrace s GitHubem",
-  "github_is_premium": "Synchronizace s GitHubem je prémiová funkce"
+  "github_is_premium": "Synchronizace s GitHubem je prémiová funkce",
+  "thank_you": "Děkujeme"
 }

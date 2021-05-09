@@ -336,7 +336,6 @@
   "admin": "admin",
   "subscribe": "Abbonati",
   "update_billing_details": "Aggiorna Dettagli Pagamento",
-  "thank_you": "Grazie",
   "group_admin": "Amministratore Gruppo",
   "all_templates": "Tutti i Modelli",
   "your_settings": "Tue impostazioni",
@@ -601,5 +600,6 @@
   "unlink_github": "Scollega il tuo account GitHub",
   "link_to_github": "Collega il tuo account GitHub",
   "github_integration": "Integrazione GitHub",
-  "github_is_premium": "La sincronizzazione GitHub è una funzionalità premium"
+  "github_is_premium": "La sincronizzazione GitHub è una funzionalità premium",
+  "thank_you": "Grazie"
 }

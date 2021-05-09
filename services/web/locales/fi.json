@@ -289,7 +289,6 @@
   "admin": "ylläpitäjä",
   "subscribe": "Tilaa",
   "update_billing_details": "Päivitä laskutustiedot",
-  "thank_you": "Kiitos",
   "group_admin": "Ryhmän ylläpitäjä",
   "all_templates": "Kaikki mallipohjat",
   "your_settings": "Asetuksesi",
@@ -550,5 +549,6 @@
   "unlink_github": "Poista linkitys GitHub-tiliisi",
   "link_to_github": "Linkitä GitHub-tiliisi",
   "github_integration": "GitHub Integraatio",
-  "github_is_premium": "GitHub-synkronointi on premium-ominaisuus"
+  "github_is_premium": "GitHub-synkronointi on premium-ominaisuus",
+  "thank_you": "Kiitos"
 }

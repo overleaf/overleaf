@@ -599,7 +599,6 @@
   "admin": "beheerder",
   "subscribe": "Abonneren",
   "update_billing_details": "Factuurgegevens Bijwerken",
-  "thank_you": "Dankjewel",
   "group_admin": "Groepsbeheerder",
   "all_templates": "Alles Sjablonen",
   "your_settings": "Jouw instellingen",
@@ -865,5 +864,6 @@
   "unlink_github": "Ontkoppel je GitHubaccount",
   "link_to_github": "Verbinden met je GitHubaccount",
   "github_integration": "GitHubintegratie",
-  "github_is_premium": "GitHubsnychronisatie is een premium functie"
+  "github_is_premium": "GitHubsnychronisatie is een premium functie",
+  "thank_you": "Dankjewel"
 }

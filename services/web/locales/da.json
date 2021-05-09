@@ -914,7 +914,6 @@
   "admin": "admin",
   "subscribe": "Tilmeld",
   "update_billing_details": "Opdatere betalingsdetaljer",
-  "thank_you": "Tak",
   "group_admin": "Gruppe admin",
   "all_templates": "Alle skabeloner",
   "your_settings": "Dine indstillinger",
@@ -1180,5 +1179,6 @@
   "link_to_github": "Link til din GitHub konto",
   "github_integration": "Github integration",
   "github_is_premium": "GitHub synkronisering er en betalt funktion",
-  "please_change_primary_to_remove": "Du må ændre din primære e–mailadresse for at kunne fjerne"
+  "please_change_primary_to_remove": "Du må ændre din primære e–mailadresse for at kunne fjerne",
+  "thank_you": "Tak"
 }

@@ -337,7 +337,6 @@
   "admin": "yönetici",
   "subscribe": "Abone Ol",
   "update_billing_details": "Ödeme Bilgilerini Güncelle",
-  "thank_you": "Teşekkürler",
   "group_admin": "Grup Yöneticisi",
   "all_templates": "Tüm Şablonlar",
   "your_settings": "Ayarlarınız",
@@ -590,5 +589,6 @@
   "unlink_github": "GitHub hesabınız ile bağlantıyı koparın",
   "link_to_github": "GitHub hesabınız ile bağlantı oluşturun",
   "github_integration": "GitHub Entegrasyonu",
-  "github_is_premium": "GitHub senkronizasyonu premium bir özelliktir"
+  "github_is_premium": "GitHub senkronizasyonu premium bir özelliktir",
+  "thank_you": "Teşekkürler"
 }

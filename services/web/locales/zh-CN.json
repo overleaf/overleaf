@@ -636,7 +636,6 @@
   "admin": "管理员",
   "subscribe": "提交",
   "update_billing_details": "更新帐单细节",
-  "thank_you": "谢谢您",
   "group_admin": "群组管理员",
   "all_templates": "所有模板",
   "your_settings": "您的设置",
@@ -901,5 +900,6 @@
   "unlink_github": "取消与您的GitHub账户的关联",
   "link_to_github": "建立与您的GitHub账户的关联",
   "github_integration": "GitHub 整合",
-  "github_is_premium": "与GitHub同步是一项付费功能"
+  "github_is_premium": "与GitHub同步是一项付费功能",
+  "thank_you": "谢谢您"
 }

@@ -432,7 +432,6 @@
   "admin": "администратор",
   "subscribe": "Подписаться",
   "update_billing_details": "Обновить детали счёта",
-  "thank_you": "Спасибо!",
   "group_admin": "Администратор группы",
   "all_templates": "Все шаблоны",
   "your_settings": "Ваши настройки",
@@ -697,5 +696,6 @@
   "unlink_github": "Отвязать аккаунт на GitHub",
   "link_to_github": "Привязать аккаунт на GitHub",
   "github_integration": "Интеграция с GitHub",
-  "github_is_premium": "Синхронизация с GitHub доступна только в премиум аккаунте"
+  "github_is_premium": "Синхронизация с GitHub доступна только в премиум аккаунте",
+  "thank_you": "Спасибо!"
 }

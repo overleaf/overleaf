@@ -903,7 +903,7 @@
   "source": "Code source",
   "actions": "Actions",
   "copy_project": "Copier le projet",
-  "publish_as_template": "Publier comme modèle",
+  "publish_as_template": "Gérer le modèle",
   "sync": "Synchroniser",
   "settings": "Réglages",
   "main_document": "Document principal",
@@ -1070,7 +1070,6 @@
   "admin": "admin",
   "subscribe": "S’abonner",
   "update_billing_details": "Mettre à jour vos données de facturation",
-  "thank_you": "Merci",
   "group_admin": "Administrateur du groupe",
   "all_templates": "Tous les modèles",
   "your_settings": "Vos paramètres",
@@ -1341,5 +1340,6 @@
   "github_is_premium": "La synchronisation GitHub est une fonctionnalité premium",
   "remote_service_error": "Le service distant a renvoyé une erreur",
   "linked_file": "Fichier importé",
-  "n_items": "__count__ élément"
+  "n_items": "__count__ élément",
+  "thank_you": "Merci"
 }

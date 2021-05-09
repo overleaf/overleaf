@@ -969,7 +969,6 @@
   "admin": "admin",
   "subscribe": "Prenumerera",
   "update_billing_details": "Uppdatera betalningsinformation",
-  "thank_you": "Tack!",
   "group_admin": "Gruppadministratör",
   "all_templates": "Alla mallar",
   "your_settings": "Dina inställningar",
@@ -1245,5 +1244,6 @@
   "please_change_primary_to_remove": "Vänligen ändra din primära e-post-adress för att ta bort",
   "please_reconfirm_institutional_email": "Vänligen bekräfta din institutionella e-post-adress eller <0>ta bort den</0> från ditt konto.",
   "need_to_add_new_primary_before_remove": "Du måste lägga till en ny primär e-post-adress innan du kan ta bort den här.",
-  "are_you_still_at": "Är du fortfarande vid <0>__institutionName__</0>?"
+  "are_you_still_at": "Är du fortfarande vid <0>__institutionName__</0>?",
+  "thank_you": "Tack!"
 }

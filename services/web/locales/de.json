@@ -556,7 +556,6 @@
   "admin": "Admin",
   "subscribe": "Abonnieren",
   "update_billing_details": "Zahlungsinformationen aktualisieren",
-  "thank_you": "Vielen Dank",
   "group_admin": "Gruppenadministrator",
   "all_templates": "Alle Vorlagen",
   "your_settings": "Deine Einstellungen",
@@ -822,5 +821,6 @@
   "unlink_github": "Löse die Verbindung deines GitHub-Benutzerkontos",
   "link_to_github": "Verbinde mit deinem GitHub-Benutzerkonto",
   "github_integration": "GitHub Einbindung",
-  "github_is_premium": "GitHub syns ist eine Premiumfunktion"
+  "github_is_premium": "GitHub syns ist eine Premiumfunktion",
+  "thank_you": "Vielen Dank"
 }

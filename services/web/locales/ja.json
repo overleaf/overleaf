@@ -495,7 +495,6 @@
   "admin": "管理",
   "subscribe": "定期購読",
   "update_billing_details": "支払い詳細の更新",
-  "thank_you": "ありがとうございます",
   "group_admin": "グループ管理",
   "all_templates": "テンプレート一覧",
   "your_settings": "設定",
@@ -760,5 +759,6 @@
   "unlink_github": "GitHubアカウントの接続を解除",
   "link_to_github": "あなたのGitHubアカウントに接続",
   "github_integration": "GitHub連携",
-  "github_is_premium": "GitHub統合はプレミアム機能です"
+  "github_is_premium": "GitHub統合はプレミアム機能です",
+  "thank_you": "ありがとうございます"
 }
