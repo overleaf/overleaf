@@ -15,6 +15,7 @@ const DocstoreManager = require('../Docstore/DocstoreManager')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const HistoryManager = require('../History/HistoryManager')
 const FilestoreHandler = require('../FileStore/FileStoreHandler')
+const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const moment = require('moment')
 const { promiseMapWithLimit } = require('../../util/promises')
 
@@ -369,6 +370,9 @@ async function expireDeletedProject(projectId) {
         historyId
       ),
       FilestoreHandler.promises.deleteProject(deletedProject.project._id),
+      TpdsUpdateSender.promises.deleteProject({
+        project_id: deletedProject.project._id,
+      }),
       hardDeleteDeletedFiles(deletedProject.project._id),
     ])
 

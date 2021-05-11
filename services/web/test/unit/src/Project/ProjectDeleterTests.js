@@ -127,6 +127,11 @@ describe('ProjectDeleter', function () {
         deleteProject: sinon.stub().resolves(),
       },
     }
+    this.TpdsUpdateSender = {
+      promises: {
+        deleteProject: sinon.stub().resolves(),
+      },
+    }
 
     this.ProjectDeleter = SandboxedModule.require(modulePath, {
       requires: {
@@ -138,6 +143,7 @@ describe('ProjectDeleter', function () {
           .DocumentUpdaterHandler,
         '../Tags/TagsHandler': this.TagsHandler,
         '../FileStore/FileStoreHandler': this.FileStoreHandler,
+        '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Docstore/DocstoreManager': this.DocstoreManager,
@@ -458,6 +464,14 @@ describe('ProjectDeleter', function () {
       expect(
         this.FileStoreHandler.promises.deleteProject
       ).to.have.been.calledWith(this.deletedProjects[0].project._id)
+    })
+
+    it('should destroy the files in project-archiver', function () {
+      expect(
+        this.TpdsUpdateSender.promises.deleteProject
+      ).to.have.been.calledWith({
+        project_id: this.deletedProjects[0].project._id,
+      })
     })
   })
 

@@ -20,6 +20,7 @@ const httpPass = 'pass'
 const siteUrl = 'http://www.localhost:3000'
 const httpAuthSiteUrl = `http://${httpUsername}:${httpPass}@www.localhost:3000`
 const filestoreUrl = 'filestore.sharelatex.com'
+const projectArchiverUrl = 'project-archiver.overleaf.com'
 
 describe('TpdsUpdateSender', function () {
   beforeEach(function () {
@@ -356,6 +357,19 @@ describe('TpdsUpdateSender', function () {
       job0.method.should.equal('post')
       job0.uri.should.equal(`${thirdPartyDataStoreApiUrl}/user/poll`)
       job0.json.user_ids[0].should.equal(userId)
+    })
+  })
+  describe('deleteProject', function () {
+    it('should not call request if there is no project archiver url', async function () {
+      await this.updateSender.promises.deleteProject({ project_id: projectId })
+      this.request.should.not.have.been.called
+    })
+    it('should make a delete request to project archiver', async function () {
+      this.settings.apis.project_archiver = { url: projectArchiverUrl }
+      await this.updateSender.promises.deleteProject({ project_id: projectId })
+      const { uri, method } = this.request.firstCall.args[0]
+      method.should.equal('delete')
+      uri.should.equal(`${projectArchiverUrl}/project/${projectId}`)
     })
   })
 })

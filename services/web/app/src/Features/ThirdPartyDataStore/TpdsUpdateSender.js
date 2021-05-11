@@ -99,6 +99,33 @@ async function deleteEntity(options) {
   }
 }
 
+async function deleteProject(options) {
+  // deletion only applies to project archiver
+  const projectArchiverUrl = _.get(settings, [
+    'apis',
+    'project_archiver',
+    'url',
+  ])
+  // silently do nothing if project archiver url is not in settings
+  if (!projectArchiverUrl) {
+    return
+  }
+  metrics.inc('tpds.delete-project')
+  // send the request directly to project archiver, bypassing third-party-datastore
+  try {
+    const response = await request({
+      uri: `${settings.apis.project_archiver.url}/project/${options.project_id}`,
+      method: 'delete',
+    })
+    return response
+  } catch (err) {
+    logger.error(
+      { err, project_id: options.project_id },
+      'error deleting project in third party datastore (project_archiver)'
+    )
+  }
+}
+
 async function enqueue(group, method, job) {
   const tpdsWorkerUrl = _.get(settings, ['apis', 'tpdsworker', 'url'])
   // silently do nothing if worker url is not in settings
@@ -191,6 +218,7 @@ const TpdsUpdateSender = {
   addEntity: callbackify(addEntity),
   addFile: callbackify(addFile),
   deleteEntity: callbackify(deleteEntity),
+  deleteProject: callbackify(deleteProject),
   enqueue: callbackify(enqueue),
   moveEntity: callbackify(moveEntity),
   pollDropboxForUser: callbackify(pollDropboxForUser),
@@ -199,6 +227,7 @@ const TpdsUpdateSender = {
     addEntity,
     addFile,
     deleteEntity,
+    deleteProject,
     enqueue,
     moveEntity,
     pollDropboxForUser,
