@@ -69,6 +69,18 @@ const InstitutionsAPI = {
     )
   },
 
+  getUsersNeedingReconfirmationsLapsedProcessed(callback) {
+    makeAffiliationRequest(
+      {
+        method: 'GET',
+        path: '/api/v2/institutions/need_reconfirmation_lapsed_processed',
+        defaultErrorMessage:
+          'Could not get users that need reconfirmations lapsed processed',
+      },
+      (error, body) => callback(error, body || [])
+    )
+  },
+
   addAffiliation(userId, email, affiliationOptions, callback) {
     if (!callback) {
       // affiliationOptions is optional
@@ -187,6 +199,19 @@ const InstitutionsAPI = {
         defaultErrorMessage: "Couldn't remove entitlement",
       },
       callback
+    )
+  },
+
+  sendUsersWithReconfirmationsLapsedProcessed(users, callback) {
+    makeAffiliationRequest(
+      {
+        method: 'POST',
+        path: '/api/v2/institutions/reconfirmation_lapsed_processed',
+        body: { users },
+        defaultErrorMessage:
+          'Could not update reconfirmation_lapsed_processed_at',
+      },
+      (error, body) => callback(error, body || [])
     )
   },
 }

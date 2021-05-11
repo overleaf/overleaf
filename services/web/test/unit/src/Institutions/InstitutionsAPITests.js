@@ -188,6 +188,33 @@ describe('InstitutionsAPI', function () {
     })
   })
 
+  describe('getUsersNeedingReconfirmationsLapsedProcessed', function () {
+    it('get the list of users', function (done) {
+      this.request.callsArgWith(1, null, { statusCode: 200 })
+      this.InstitutionsAPI.getUsersNeedingReconfirmationsLapsedProcessed(
+        error => {
+          expect(error).not.to.exist
+          this.request.calledOnce.should.equal(true)
+          const requestOptions = this.request.lastCall.args[0]
+          const expectedUrl = `v1.url/api/v2/institutions/need_reconfirmation_lapsed_processed`
+          requestOptions.url.should.equal(expectedUrl)
+          requestOptions.method.should.equal('GET')
+          done()
+        }
+      )
+    })
+
+    it('handle error', function (done) {
+      this.request.callsArgWith(1, null, { statusCode: 500 })
+      this.InstitutionsAPI.getUsersNeedingReconfirmationsLapsedProcessed(
+        error => {
+          expect(error).to.exist
+          done()
+        }
+      )
+    })
+  })
+
   describe('addAffiliation', function () {
     beforeEach(function () {
       this.request.callsArgWith(1, null, { statusCode: 201 })
@@ -328,6 +355,39 @@ describe('InstitutionsAPI', function () {
           body.email.should.equal(this.newEmail)
           body.role.should.equal('Student')
           body.department.should.equal('Physics')
+          done()
+        }
+      )
+    })
+  })
+
+  describe('sendUsersWithReconfirmationsLapsedProcessed', function () {
+    const users = ['abc123', 'def456']
+
+    it('sends the list of users', function (done) {
+      this.request.callsArgWith(1, null, { statusCode: 200 })
+      this.InstitutionsAPI.sendUsersWithReconfirmationsLapsedProcessed(
+        users,
+        error => {
+          expect(error).not.to.exist
+          this.request.calledOnce.should.equal(true)
+          const requestOptions = this.request.lastCall.args[0]
+          const expectedUrl =
+            'v1.url/api/v2/institutions/reconfirmation_lapsed_processed'
+          requestOptions.url.should.equal(expectedUrl)
+          requestOptions.method.should.equal('POST')
+          expect(requestOptions.body).to.deep.equal({ users })
+          done()
+        }
+      )
+    })
+
+    it('handle error', function (done) {
+      this.request.callsArgWith(1, null, { statusCode: 500 })
+      this.InstitutionsAPI.sendUsersWithReconfirmationsLapsedProcessed(
+        users,
+        error => {
+          expect(error).to.exist
           done()
         }
       )
