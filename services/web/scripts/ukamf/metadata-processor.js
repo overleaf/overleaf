@@ -61,4 +61,13 @@ async function main() {
   console.log(`SSO Entity ID: ${samlConfig.entityId}\n`)
   console.log(`SSO Entry Point: ${samlConfig.entryPoint}\n`)
   console.log(`SSO Certificate: ${samlConfig.cert}\n`)
+  if (samlConfig.hiddenIdP) {
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    console.log('!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!')
+    console.log(
+      `The IdP metadata indicates it should be\nhidden from discovery. Check this is\nthe correct entity ID before using.`
+    )
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+  }
 }
