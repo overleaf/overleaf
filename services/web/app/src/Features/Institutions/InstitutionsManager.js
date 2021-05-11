@@ -86,7 +86,7 @@ var fetchInstitutionAndAffiliations = (institutionId, callback) =>
 
 var refreshFeatures = function (affiliation, callback) {
   const userId = ObjectId(affiliation.user_id)
-  FeaturesUpdater.refreshFeatures(userId, callback)
+  FeaturesUpdater.refreshFeatures(userId, 'refresh-institution-users', callback)
 }
 
 var refreshFeaturesAndNotify = function (affiliation, callback) {
@@ -96,6 +96,7 @@ var refreshFeaturesAndNotify = function (affiliation, callback) {
       cb =>
         FeaturesUpdater.refreshFeatures(
           userId,
+          'refresh-institution-users',
           (err, features, featuresChanged) => cb(err, featuresChanged)
         ),
       (featuresChanged, cb) =>

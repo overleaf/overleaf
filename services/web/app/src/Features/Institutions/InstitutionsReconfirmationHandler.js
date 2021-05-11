@@ -30,7 +30,7 @@ function _validateUserIdList(userIds) {
 }
 
 function _refreshUser(userId, callback) {
-  FeaturesUpdater.refreshFeatures(userId, error => {
+  FeaturesUpdater.refreshFeatures(userId, 'reconfirmation-lapsed', error => {
     if (error) {
       logger.warn(`Failed to refresh features for ${userId}`, error)
       processLapsedLogger.failedToRefresh.push(userId)

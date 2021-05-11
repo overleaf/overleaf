@@ -193,7 +193,7 @@ async function confirmEmail(userId, email) {
   if (res.n === 0) {
     throw new Errors.NotFoundError('user id and email do no match')
   }
-  await FeaturesUpdater.promises.refreshFeatures(userId)
+  await FeaturesUpdater.promises.refreshFeatures(userId, 'confirm-email')
 }
 
 const UserUpdater = {
@@ -308,7 +308,7 @@ const UserUpdater = {
         if (res.n === 0) {
           return callback(new Error('Cannot remove email'))
         }
-        FeaturesUpdater.refreshFeatures(userId, callback)
+        FeaturesUpdater.refreshFeatures(userId, 'remove-email', callback)
       })
     })
   },

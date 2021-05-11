@@ -40,7 +40,7 @@ module.exports = {
               })
               return callback(err)
             }
-            FeaturesUpdater.refreshFeatures(user._id, callback)
+            FeaturesUpdater.refreshFeatures(user._id, 'referral', callback)
           }
         )
       } else {

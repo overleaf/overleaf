@@ -67,7 +67,11 @@ var affiliateUserByReversedHostname = function (
             )
             return innerCallback(error)
           }
-          FeaturesUpdater.refreshFeatures(user._id, innerCallback)
+          FeaturesUpdater.refreshFeatures(
+            user._id,
+            'affiliate-user-by-reversed-hostname',
+            innerCallback
+          )
         }
       )
     },

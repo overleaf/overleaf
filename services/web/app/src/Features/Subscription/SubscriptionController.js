@@ -509,12 +509,16 @@ module.exports = SubscriptionController = {
 
   refreshUserFeatures(req, res, next) {
     const { user_id } = req.params
-    return FeaturesUpdater.refreshFeatures(user_id, function (error) {
-      if (error != null) {
-        return next(error)
+    return FeaturesUpdater.refreshFeatures(
+      user_id,
+      'subscription-controller',
+      function (error) {
+        if (error != null) {
+          return next(error)
+        }
+        return res.sendStatus(200)
       }
-      return res.sendStatus(200)
-    })
+    )
   },
 }
 

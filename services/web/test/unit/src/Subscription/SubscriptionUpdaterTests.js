@@ -225,7 +225,7 @@ describe('SubscriptionUpdater', function () {
 
   describe('_updateSubscriptionFromRecurly', function () {
     beforeEach(function () {
-      this.FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
+      this.FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(2)
       this.SubscriptionUpdater.deleteSubscription = sinon.stub().yields()
     })
 
@@ -441,7 +441,7 @@ describe('SubscriptionUpdater', function () {
 
   describe('addUsersToGroup', function () {
     beforeEach(function () {
-      this.FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
+      this.FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(2)
     })
 
     it('should add the user ids to the group as a set', function (done) {
@@ -477,7 +477,7 @@ describe('SubscriptionUpdater', function () {
 
   describe('removeUserFromGroups', function () {
     beforeEach(function () {
-      this.FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
+      this.FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(2)
       this.UserGetter.getUser.yields(null, {})
       this.fakeSubscriptions = [{ _id: 'fake-id-1' }, { _id: 'fake-id-2' }]
       this.SubscriptionLocator.getMemberSubscriptions.yields(

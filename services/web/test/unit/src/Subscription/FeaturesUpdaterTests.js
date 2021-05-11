@@ -59,6 +59,7 @@ describe('FeaturesUpdater', function () {
     it('should return features and featuresChanged', function () {
       this.FeaturesUpdater.refreshFeatures(
         this.user_id,
+        'test',
         (err, features, featuresChanged) => {
           expect(err).to.not.exist
           expect(features).to.exist
@@ -69,7 +70,11 @@ describe('FeaturesUpdater', function () {
 
     describe('normally', function () {
       beforeEach(function () {
-        this.FeaturesUpdater.refreshFeatures(this.user_id, this.callback)
+        this.FeaturesUpdater.refreshFeatures(
+          this.user_id,
+          'test',
+          this.callback
+        )
       })
 
       it('should get the individual features', function () {
@@ -157,7 +162,11 @@ describe('FeaturesUpdater', function () {
         this.FeaturesUpdater._mergeFeatures = sinon
           .stub()
           .returns({ dropbox: false })
-        this.FeaturesUpdater.refreshFeatures(this.user_id, this.callback)
+        this.FeaturesUpdater.refreshFeatures(
+          this.user_id,
+          'test',
+          this.callback
+        )
       })
       it('should fire module hook to unlink dropbox', function () {
         this.Modules.hooks.fire

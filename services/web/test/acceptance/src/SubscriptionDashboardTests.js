@@ -489,7 +489,6 @@ describe('Subscriptions', function () {
     let userHelper, v1Id
     beforeEach(async function () {
       v1Id = MockV1Api.nextV1Id()
-      console.log('v1Id=', v1Id)
       userHelper = await UserHelper.createUser({ overleaf: { id: v1Id } })
       this.user = userHelper.user
       MockV1Api.setUser(v1Id, (this.v1_user = {}))

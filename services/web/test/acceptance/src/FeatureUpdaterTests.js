@@ -17,7 +17,7 @@ before(function () {
 })
 
 const syncUserAndGetFeatures = function (user, callback) {
-  FeaturesUpdater.refreshFeatures(user._id, error => {
+  FeaturesUpdater.refreshFeatures(user._id, 'test', error => {
     if (error) {
       return callback(error)
     }

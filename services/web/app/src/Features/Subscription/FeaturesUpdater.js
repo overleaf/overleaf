@@ -12,7 +12,7 @@ const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const UserGetter = require('../User/UserGetter')
 
 const FeaturesUpdater = {
-  refreshFeatures(userId, callback = () => {}) {
+  refreshFeatures(userId, reason, callback = () => {}) {
     UserGetter.getUser(userId, { _id: 1, features: 1 }, (err, user) => {
       if (err) {
         return callback(err)
@@ -294,16 +294,17 @@ const FeaturesUpdater = {
           { v1UserId, userId: user._id },
           '[AccountSync] updating user subscription and features'
         )
-        return FeaturesUpdater.refreshFeatures(user._id, callback)
+        return FeaturesUpdater.refreshFeatures(user._id, 'sync-v1', callback)
       }
     )
   },
 }
 
-const refreshFeaturesPromise = userId =>
+const refreshFeaturesPromise = (userId, reason) =>
   new Promise(function (resolve, reject) {
     FeaturesUpdater.refreshFeatures(
       userId,
+      reason,
       (error, features, featuresChanged) => {
         if (error) {
           reject(error)

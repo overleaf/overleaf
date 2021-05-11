@@ -90,7 +90,13 @@ const SubscriptionUpdater = {
         if (err != null) {
           return callback(err)
         }
-        async.map(memberIds, FeaturesUpdater.refreshFeatures, callback)
+        async.map(
+          memberIds,
+          function (userId, cb) {
+            FeaturesUpdater.refreshFeatures(userId, 'add-to-group', cb)
+          },
+          callback
+        )
       }
     )
   },
@@ -116,7 +122,11 @@ const SubscriptionUpdater = {
         if (error) {
           return callback(error)
         }
-        FeaturesUpdater.refreshFeatures(userId, callback)
+        FeaturesUpdater.refreshFeatures(
+          userId,
+          'remove-user-from-groups',
+          callback
+        )
       })
     })
   },
@@ -216,7 +226,13 @@ const SubscriptionUpdater = {
     const userIds = [subscription.admin_id].concat(
       subscription.member_ids || []
     )
-    async.mapSeries(userIds, FeaturesUpdater.refreshFeatures, callback)
+    async.mapSeries(
+      userIds,
+      function (userId, cb) {
+        FeaturesUpdater.refreshFeatures(userId, 'subscription-updater', cb)
+      },
+      callback
+    )
   },
 
   _createDeletedSubscription(subscription, deleterData, callback) {
