@@ -1,27 +1,29 @@
 import React from 'react'
-import fetchMock from 'fetch-mock'
 import PropTypes from 'prop-types'
 
 import CloneProjectModal from '../js/features/clone-project-modal/components/clone-project-modal'
+import useFetchMock from './hooks/use-fetch-mock'
 
 export const Interactive = ({
   mockResponse = 200,
   mockResponseDelay = 500,
   ...args
 }) => {
-  fetchMock.restore().post(
-    'express:/project/:projectId/clone',
-    () => {
-      switch (mockResponse) {
-        case 400:
-          return { status: 400, body: 'The project name is not valid' }
+  useFetchMock(fetchMock => {
+    fetchMock.post(
+      'express:/project/:projectId/clone',
+      () => {
+        switch (mockResponse) {
+          case 400:
+            return { status: 400, body: 'The project name is not valid' }
 
-        default:
-          return mockResponse
-      }
-    },
-    { delay: mockResponseDelay }
-  )
+          default:
+            return mockResponse
+        }
+      },
+      { delay: mockResponseDelay }
+    )
+  })
 
   return <CloneProjectModal {...args} />
 }

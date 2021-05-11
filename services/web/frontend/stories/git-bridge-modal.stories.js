@@ -2,6 +2,7 @@ import React from 'react'
 import { ContextRoot } from '../js/shared/context/root-context'
 import { setupContext } from './fixtures/context'
 import importOverleafModules from '../macros/import-overleaf-module.macro'
+import useFetchMock from './hooks/use-fetch-mock'
 
 const [
   {
@@ -21,7 +22,11 @@ CollaboratorModal.args = {
   type: 'collaborator',
 }
 
-export const TeaserModal = args => <GitBridgeModal {...args} />
+export const TeaserModal = args => {
+  useFetchMock(fetchMock => fetchMock.post('express:/event/:key', 202))
+
+  return <GitBridgeModal {...args} />
+}
 TeaserModal.args = {
   type: 'teaser',
 }
@@ -34,7 +39,6 @@ export default {
   },
   argTypes: {
     handleHide: { action: 'handleHide' },
-    startFreeTrial: { action: 'startFreeTrial' },
   },
   decorators: [
     Story => (

@@ -1,37 +1,39 @@
 import React from 'react'
-import fetchMock from 'fetch-mock'
 import PropTypes from 'prop-types'
 
 import WordCountModal from '../js/features/word-count-modal/components/word-count-modal'
+import useFetchMock from './hooks/use-fetch-mock'
 
 export const Interactive = ({
   mockResponse = 200,
   mockResponseDelay = 500,
   ...args
 }) => {
-  fetchMock.restore().get(
-    'express:/project/:projectId/wordcount',
-    () => {
-      switch (mockResponse) {
-        case 400:
-          return { status: 400, body: 'The project id is not valid' }
+  useFetchMock(fetchMock => {
+    fetchMock.get(
+      'express:/project/:projectId/wordcount',
+      () => {
+        switch (mockResponse) {
+          case 400:
+            return { status: 400, body: 'The project id is not valid' }
 
-        case 200:
-          return {
-            texcount: {
-              headers: 4,
-              mathDisplay: 40,
-              mathInline: 400,
-              textWords: 4000,
-            },
-          }
+          case 200:
+            return {
+              texcount: {
+                headers: 4,
+                mathDisplay: 40,
+                mathInline: 400,
+                textWords: 4000,
+              },
+            }
 
-        default:
-          return mockResponse
-      }
-    },
-    { delay: mockResponseDelay }
-  )
+          default:
+            return mockResponse
+        }
+      },
+      { delay: mockResponseDelay }
+    )
+  })
 
   return <WordCountModal {...args} />
 }

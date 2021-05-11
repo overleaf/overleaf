@@ -1,23 +1,24 @@
 import React from 'react'
 
 import BinaryFile from '../js/features/binary-file/components/binary-file'
-import fetchMock from 'fetch-mock'
+import useFetchMock from './hooks/use-fetch-mock'
 
 window.project_id = 'proj123'
-fetchMock.restore()
-fetchMock.head('express:/project/:project_id/file/:file_id', {
-  status: 201,
-  headers: { 'Content-Length': 10000 },
-})
-fetchMock.get('express:/project/:project_id/file/:file_id', 'Text file content')
 
-fetchMock.post('express:/project/:project_id/linked_file/:file_id/refresh', {
-  status: 204,
-})
-
-fetchMock.post('express:/project/:project_id/references/indexAll', {
-  status: 204,
-})
+const setupFetchMock = fetchMock => {
+  fetchMock
+    .head('express:/project/:project_id/file/:file_id', {
+      status: 201,
+      headers: { 'Content-Length': 10000 },
+    })
+    .get('express:/project/:project_id/file/:file_id', 'Text file content')
+    .post('express:/project/:project_id/linked_file/:file_id/refresh', {
+      status: 204,
+    })
+    .post('express:/project/:project_id/references/indexAll', {
+      status: 204,
+    })
+}
 
 window.project_id = '1234'
 
@@ -173,10 +174,14 @@ export default {
     storeReferencesKeys: () => {},
   },
   decorators: [
-    BinaryFile => (
+    Story => {
+      useFetchMock(setupFetchMock)
+      return <Story />
+    },
+    Story => (
       <>
         <style>{'html, body { height: 100%; }'}</style>
-        <BinaryFile />
+        <Story />
       </>
     ),
   ],

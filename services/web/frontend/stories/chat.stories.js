@@ -1,11 +1,11 @@
 import React from 'react'
-import fetchMock from 'fetch-mock'
 import { v4 as uuid } from 'uuid'
 
 import { ContextRoot } from '../js/shared/context/root-context'
 import ChatPane from '../js/features/chat/components/chat-pane'
 import { stubMathJax } from '../../test/frontend/features/chat/components/stubs'
 import { setupContext } from './fixtures/context'
+import useFetchMock from './hooks/use-fetch-mock'
 
 const ONE_MINUTE = 60 * 1000
 
@@ -43,31 +43,30 @@ function generateMessages(count) {
 stubMathJax()
 setupContext()
 
-export const Conversation = args => <ChatPane {...args} />
-Conversation.parameters = {
-  setupMocks: () => {
-    fetchMock.restore()
-    fetchMock.get(/messages/, generateMessages(35))
-    fetchMock.post(/messages/, {})
-  },
+export const Conversation = args => {
+  useFetchMock(fetchMock => {
+    fetchMock.get(/messages/, generateMessages(35)).post(/messages/, {})
+  })
+
+  return <ChatPane {...args} />
 }
 
-export const NoMessages = args => <ChatPane {...args} />
-NoMessages.parameters = {
-  setupMocks: () => {
-    fetchMock.restore()
+export const NoMessages = args => {
+  useFetchMock(fetchMock => {
     fetchMock.get(/messages/, [])
-  },
+  })
+
+  return <ChatPane {...args} />
 }
 
-export const Loading = args => <ChatPane {...args} />
-Loading.parameters = {
-  setupMocks: () => {
-    fetchMock.restore()
+export const Loading = args => {
+  useFetchMock(fetchMock => {
     fetchMock.get(/messages/, generateMessages(6), {
       delay: 1000 * 10,
     })
-  },
+  })
+
+  return <ChatPane {...args} />
 }
 
 export default {
@@ -80,10 +79,6 @@ export default {
     resetUnreadMessages: () => {},
   },
   decorators: [
-    (Story, { parameters: { setupMocks } }) => {
-      if (setupMocks) setupMocks()
-      return <Story />
-    },
     Story => (
       <>
         <style>{'html, body, .chat { height: 100%; width: 100%; }'}</style>

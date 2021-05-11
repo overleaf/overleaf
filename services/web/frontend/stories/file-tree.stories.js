@@ -1,11 +1,11 @@
 import React from 'react'
-import fetchMock from 'fetch-mock'
 import MockedSocket from 'socket.io-mock'
 
 import { rootFolderBase } from './fixtures/file-tree-base'
 import { rootFolderLimit } from './fixtures/file-tree-limit'
 import FileTreeRoot from '../js/features/file-tree/components/file-tree-root'
 import FileTreeError from '../js/features/file-tree/components/file-tree-error'
+import useFetchMock from './hooks/use-fetch-mock'
 
 const MOCK_DELAY = 2000
 
@@ -13,9 +13,8 @@ window._ide = {
   socket: new MockedSocket(),
 }
 
-function defaultSetupMocks() {
+function defaultSetupMocks(fetchMock) {
   fetchMock
-    .restore()
     .post(
       /\/project\/\w+\/(file|doc|folder)\/\w+\/rename/,
       (path, req) => {
@@ -78,8 +77,11 @@ function defaultSetupMocks() {
     })
 }
 
-export const FullTree = args => <FileTreeRoot {...args} />
-FullTree.parameters = { setupMocks: defaultSetupMocks }
+export const FullTree = args => {
+  useFetchMock(defaultSetupMocks)
+
+  return <FileTreeRoot {...args} />
+}
 
 export const ReadOnly = args => <FileTreeRoot {...args} />
 ReadOnly.args = { hasWritePermissions: false }
@@ -87,28 +89,34 @@ ReadOnly.args = { hasWritePermissions: false }
 export const Disconnected = args => <FileTreeRoot {...args} />
 Disconnected.args = { isConnected: false }
 
-export const NetworkErrors = args => <FileTreeRoot {...args} />
-NetworkErrors.parameters = {
-  setupMocks: () => {
+export const NetworkErrors = args => {
+  useFetchMock(fetchMock => {
     fetchMock
-      .restore()
       .post(/\/project\/\w+\/folder/, 500, {
         delay: MOCK_DELAY,
       })
       .post(/\/project\/\w+\/(file|doc|folder)\/\w+\/rename/, 500, {
         delay: MOCK_DELAY,
       })
+      .post(/\/project\/\w+\/(file|doc|folder)\/\w+\/move/, 500, {
+        delay: MOCK_DELAY,
+      })
       .delete(/\/project\/\w+\/(file|doc|folder)\/\w+/, 500, {
         delay: MOCK_DELAY,
       })
-  },
+  })
+
+  return <FileTreeRoot {...args} />
 }
 
 export const FallbackError = args => <FileTreeError {...args} />
 
-export const FilesLimit = args => <FileTreeRoot {...args} />
+export const FilesLimit = args => {
+  useFetchMock(defaultSetupMocks)
+
+  return <FileTreeRoot {...args} />
+}
 FilesLimit.args = { rootFolder: rootFolderLimit }
-FilesLimit.parameters = { setupMocks: defaultSetupMocks }
 
 export default {
   title: 'File Tree',
@@ -136,10 +144,6 @@ export default {
     onSelect: { action: 'onSelect' },
   },
   decorators: [
-    (Story, { parameters: { setupMocks } }) => {
-      if (setupMocks) setupMocks()
-      return <Story />
-    },
     Story => (
       <>
         <style>{'html, body, .file-tree { height: 100%; width: 100%; }'}</style>

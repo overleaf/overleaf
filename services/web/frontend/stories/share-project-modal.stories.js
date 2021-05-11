@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
-import fetchMock from 'fetch-mock'
 import ShareProjectModal from '../js/features/share-project-modal/components/share-project-modal'
+import useFetchMock from './hooks/use-fetch-mock'
 
 const contacts = [
   // user with edited name
@@ -44,11 +44,10 @@ const contacts = [
   },
 ]
 
-const setupFetchMock = () => {
+const setupFetchMock = fetchMock => {
   const delay = 1000
 
   fetchMock
-    .restore()
     // list contacts
     .get('express:/user/contacts', { contacts }, { delay })
     // change privacy setting
@@ -86,7 +85,7 @@ const ideWithProject = project => {
 }
 
 export const LinkSharingOff = args => {
-  setupFetchMock()
+  useFetchMock(setupFetchMock)
 
   const project = {
     ...args.project,
@@ -97,7 +96,7 @@ export const LinkSharingOff = args => {
 }
 
 export const LinkSharingOn = args => {
-  setupFetchMock()
+  useFetchMock(setupFetchMock)
 
   const project = {
     ...args.project,
@@ -108,7 +107,7 @@ export const LinkSharingOn = args => {
 }
 
 export const LinkSharingLoading = args => {
-  setupFetchMock()
+  useFetchMock(setupFetchMock)
 
   const project = {
     ...args.project,
@@ -167,7 +166,7 @@ export const RestrictedTokenMember = args => {
 }
 
 export const LegacyLinkSharingReadAndWrite = args => {
-  setupFetchMock()
+  useFetchMock(setupFetchMock)
 
   const project = {
     ...args.project,
@@ -178,7 +177,7 @@ export const LegacyLinkSharingReadAndWrite = args => {
 }
 
 export const LegacyLinkSharingReadOnly = args => {
-  setupFetchMock()
+  useFetchMock(setupFetchMock)
 
   const project = {
     ...args.project,
@@ -189,7 +188,7 @@ export const LegacyLinkSharingReadOnly = args => {
 }
 
 export const LimitedCollaborators = args => {
-  setupFetchMock()
+  useFetchMock(setupFetchMock)
 
   const project = {
     ...args.project,
