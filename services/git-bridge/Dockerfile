@@ -43,4 +43,4 @@ RUN chown node:node conf
 
 USER node
 
-ENTRYPOINT ["/start.sh"]
+CMD ["/start.sh"]
