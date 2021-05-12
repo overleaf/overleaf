@@ -1,13 +1,23 @@
 import { expect } from 'chai'
 import React from 'react'
 import sinon from 'sinon'
-import { screen, render, fireEvent } from '@testing-library/react'
+import { screen, fireEvent } from '@testing-library/react'
 
+import {
+  renderWithEditorContext,
+  cleanUpContext,
+} from '../../../helpers/render-with-context'
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 
 describe('FileTree Context Menu Flow', function () {
   const onSelect = sinon.stub()
   const onInit = sinon.stub()
+
+  afterEach(function () {
+    onSelect.reset()
+    onInit.reset()
+    cleanUpContext()
+  })
 
   it('opens on contextMenu event', async function () {
     const rootFolder = [
@@ -18,7 +28,7 @@ describe('FileTree Context Menu Flow', function () {
         fileRefs: [],
       },
     ]
-    render(
+    renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -52,7 +62,7 @@ describe('FileTree Context Menu Flow', function () {
         fileRefs: [],
       },
     ]
-    render(
+    renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"

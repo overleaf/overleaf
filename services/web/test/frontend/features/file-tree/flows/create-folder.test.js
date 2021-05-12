@@ -1,10 +1,14 @@
 import { expect } from 'chai'
 import React from 'react'
 import sinon from 'sinon'
-import { screen, render, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import MockedSocket from 'socket.io-mock'
 
+import {
+  renderWithEditorContext,
+  cleanUpContext,
+} from '../../../helpers/render-with-context'
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 
 describe('FileTree Create Folder Flow', function () {
@@ -13,9 +17,6 @@ describe('FileTree Create Folder Flow', function () {
 
   beforeEach(function () {
     global.requestAnimationFrame = sinon.stub()
-    window._ide = {
-      socket: new MockedSocket(),
-    }
   })
 
   afterEach(function () {
@@ -23,7 +24,7 @@ describe('FileTree Create Folder Flow', function () {
     fetchMock.restore()
     onSelect.reset()
     onInit.reset()
-    delete window._ide
+    cleanUpContext()
   })
 
   it('add to root when no files are selected', async function () {
@@ -35,7 +36,7 @@ describe('FileTree Create Folder Flow', function () {
         fileRefs: [],
       },
     ]
-    render(
+    renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -48,7 +49,8 @@ describe('FileTree Create Folder Flow', function () {
         onSelect={onSelect}
         onInit={onInit}
         isConnected
-      />
+      />,
+      { socket: new MockedSocket() }
     )
 
     const newFolderName = 'Foo Bar In Root'
@@ -95,7 +97,7 @@ describe('FileTree Create Folder Flow', function () {
         fileRefs: [],
       },
     ]
-    render(
+    renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -109,7 +111,8 @@ describe('FileTree Create Folder Flow', function () {
         onSelect={onSelect}
         onInit={onInit}
         isConnected
-      />
+      />,
+      { socket: new MockedSocket() }
     )
 
     const expandButton = screen.getByRole('button', { name: 'Expand' })
@@ -165,7 +168,7 @@ describe('FileTree Create Folder Flow', function () {
         fileRefs: [],
       },
     ]
-    render(
+    renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -179,7 +182,8 @@ describe('FileTree Create Folder Flow', function () {
         onSelect={onSelect}
         onInit={onInit}
         isConnected
-      />
+      />,
+      { socket: new MockedSocket() }
     )
 
     const newFolderName = 'Foo Bar In thefolder'
@@ -224,7 +228,7 @@ describe('FileTree Create Folder Flow', function () {
         fileRefs: [],
       },
     ]
-    render(
+    renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -238,7 +242,8 @@ describe('FileTree Create Folder Flow', function () {
         onSelect={onSelect}
         onInit={onInit}
         isConnected
-      />
+      />,
+      { socket: new MockedSocket() }
     )
 
     var newFolderName = 'existingFile'

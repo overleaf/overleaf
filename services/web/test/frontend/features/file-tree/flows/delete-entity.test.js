@@ -1,27 +1,25 @@
 import { expect } from 'chai'
 import React from 'react'
 import sinon from 'sinon'
-import { screen, render, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import MockedSocket from 'socket.io-mock'
 
+import {
+  renderWithEditorContext,
+  cleanUpContext,
+} from '../../../helpers/render-with-context'
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 
 describe('FileTree Delete Entity Flow', function () {
   const onSelect = sinon.stub()
   const onInit = sinon.stub()
 
-  beforeEach(function () {
-    window._ide = {
-      socket: new MockedSocket(),
-    }
-  })
-
   afterEach(function () {
     fetchMock.restore()
     onSelect.reset()
     onInit.reset()
-    delete window._ide
+    cleanUpContext()
   })
 
   describe('single entity', function () {
@@ -34,7 +32,7 @@ describe('FileTree Delete Entity Flow', function () {
           fileRefs: [],
         },
       ]
-      render(
+      renderWithEditorContext(
         <FileTreeRoot
           rootFolder={rootFolder}
           projectId="123abc"
@@ -47,7 +45,8 @@ describe('FileTree Delete Entity Flow', function () {
           onSelect={onSelect}
           onInit={onInit}
           isConnected
-        />
+        />,
+        { socket: new MockedSocket() }
       )
 
       const treeitem = screen.getByRole('treeitem', { name: 'main.tex' })
@@ -151,7 +150,7 @@ describe('FileTree Delete Entity Flow', function () {
           fileRefs: [],
         },
       ]
-      render(
+      renderWithEditorContext(
         <FileTreeRoot
           rootFolder={rootFolder}
           projectId="123abc"
@@ -164,7 +163,8 @@ describe('FileTree Delete Entity Flow', function () {
           onSelect={onSelect}
           onInit={onInit}
           isConnected
-        />
+        />,
+        { socket: new MockedSocket() }
       )
 
       const expandButton = screen.queryByRole('button', { name: 'Expand' })
@@ -208,7 +208,7 @@ describe('FileTree Delete Entity Flow', function () {
         },
       ]
 
-      render(
+      renderWithEditorContext(
         <FileTreeRoot
           rootFolder={rootFolder}
           projectId="123abc"
@@ -221,7 +221,8 @@ describe('FileTree Delete Entity Flow', function () {
           onSelect={onSelect}
           onInit={onInit}
           isConnected
-        />
+        />,
+        { socket: new MockedSocket() }
       )
 
       // select two files

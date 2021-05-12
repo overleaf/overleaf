@@ -3,6 +3,7 @@ import { react2angular } from 'react2angular'
 import { cloneDeep } from 'lodash'
 
 import FileTreeRoot from '../components/file-tree-root'
+import { rootContext } from '../../../shared/context/root-context'
 
 App.controller('ReactFileTreeController', function (
   $scope,
@@ -115,4 +116,10 @@ App.controller('ReactFileTreeController', function (
   }
 })
 
-App.component('fileTreeRoot', react2angular(FileTreeRoot))
+App.component(
+  'fileTreeRoot',
+  react2angular(
+    rootContext.use(FileTreeRoot),
+    Object.keys(FileTreeRoot.propTypes)
+  )
+)

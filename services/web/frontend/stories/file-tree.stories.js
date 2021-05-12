@@ -1,6 +1,7 @@
 import React from 'react'
 import MockedSocket from 'socket.io-mock'
 
+import { ContextRoot } from '../js/shared/context/root-context'
 import { rootFolderBase } from './fixtures/file-tree-base'
 import { rootFolderLimit } from './fixtures/file-tree-limit'
 import FileTreeRoot from '../js/features/file-tree/components/file-tree-root'
@@ -149,7 +150,9 @@ export default {
         <style>{'html, body, .file-tree { height: 100%; width: 100%; }'}</style>
         <div className="editor-sidebar full-size">
           <div className="file-tree">
-            <Story />
+            <ContextRoot ide={window._ide} settings={{}}>
+              <Story />
+            </ContextRoot>
           </div>
         </div>
       </>

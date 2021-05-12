@@ -1,10 +1,15 @@
 import { useCallback, useEffect } from 'react'
+import PropTypes from 'prop-types'
 
+import { useApplicationContext } from '../../../shared/context/application-context'
 import { useFileTreeMutable } from '../contexts/file-tree-mutable'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
 import { findInTreeOrThrow } from '../util/find-in-tree'
 
 export function useFileTreeSocketListener() {
+  const { user } = useApplicationContext({
+    user: PropTypes.shape({ id: PropTypes.string.isRequired }),
+  })
   const {
     dispatchRename,
     dispatchDelete,
@@ -25,14 +30,17 @@ export function useFileTreeSocketListener() {
   const selectEntityIfCreatedByUser = useCallback(
     // hack to automatically re-open refreshed linked files
     (entityId, entityName, userId) => {
-      if (window.user && window.user.id && window.user.id === userId) {
+      // If the created entity's user exists and is the current user
+      if (userId && user?.id === userId) {
+        // And we're expecting a refreshed socket for this entity
         if (window.expectingLinkedFileRefreshedSocketFor === entityName) {
+          // Then select it
           select(entityId)
           window.expectingLinkedFileRefreshedSocketFor = null
         }
       }
     },
-    [select]
+    [user, select]
   )
 
   useEffect(() => {

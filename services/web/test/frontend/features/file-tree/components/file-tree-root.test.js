@@ -1,9 +1,13 @@
 import { expect } from 'chai'
 import React from 'react'
 import sinon from 'sinon'
-import { screen, render, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 
+import {
+  renderWithEditorContext,
+  cleanUpContext,
+} from '../../../helpers/render-with-context'
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 
 describe('<FileTreeRoot/>', function () {
@@ -19,6 +23,7 @@ describe('<FileTreeRoot/>', function () {
     fetchMock.restore()
     onSelect.reset()
     onInit.reset()
+    cleanUpContext()
     global.localStorage.clear()
   })
 
@@ -31,7 +36,7 @@ describe('<FileTreeRoot/>', function () {
         fileRefs: [],
       },
     ]
-    const { container } = render(
+    const { container } = renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -67,7 +72,7 @@ describe('<FileTreeRoot/>', function () {
         fileRefs: [],
       },
     ]
-    render(
+    renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -106,7 +111,7 @@ describe('<FileTreeRoot/>', function () {
       },
     ]
 
-    const { container } = render(
+    const { container } = renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -138,7 +143,7 @@ describe('<FileTreeRoot/>', function () {
         fileRefs: [],
       },
     ]
-    render(
+    renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -191,7 +196,7 @@ describe('<FileTreeRoot/>', function () {
         fileRefs: [],
       },
     ]
-    render(
+    renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"

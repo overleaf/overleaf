@@ -1,10 +1,14 @@
 import { expect } from 'chai'
 import React from 'react'
 import sinon from 'sinon'
-import { screen, render, fireEvent } from '@testing-library/react'
+import { screen, fireEvent } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import MockedSocket from 'socket.io-mock'
 
+import {
+  renderWithEditorContext,
+  cleanUpContext,
+} from '../../../helpers/render-with-context'
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 
 describe('FileTree Rename Entity Flow', function () {
@@ -12,9 +16,6 @@ describe('FileTree Rename Entity Flow', function () {
   const onInit = sinon.stub()
 
   beforeEach(function () {
-    window._ide = {
-      socket: new MockedSocket(),
-    }
     global.requestAnimationFrame = sinon.stub()
   })
 
@@ -23,7 +24,7 @@ describe('FileTree Rename Entity Flow', function () {
     fetchMock.restore()
     onSelect.reset()
     onInit.reset()
-    delete window._ide
+    cleanUpContext()
   })
 
   beforeEach(function () {
@@ -46,7 +47,7 @@ describe('FileTree Rename Entity Flow', function () {
         fileRefs: [],
       },
     ]
-    render(
+    renderWithEditorContext(
       <FileTreeRoot
         rootFolder={rootFolder}
         projectId="123abc"
@@ -59,7 +60,8 @@ describe('FileTree Rename Entity Flow', function () {
         onSelect={onSelect}
         onInit={onInit}
         isConnected
-      />
+      />,
+      { socket: new MockedSocket() }
     )
   })
 
