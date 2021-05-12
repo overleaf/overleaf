@@ -7,8 +7,8 @@
     "postbackBaseUrl": "${GIT_BRIDGE_POSTBACK_BASE_URL:-https://localhost}",
     "serviceName": "${GIT_BRIDGE_SERVICE_NAME:-Overleaf}",
     "oauth2": {
-      "oauth2ClientID": "${GITBRIDGE_OAUTH2_CLIENT_ID}",
-      "oauth2ClientSecret": "${GITBRIDGE_OAUTH2_CLIENT_SECRET}",
+      "oauth2ClientID": "${GIT_BRIDGE_OAUTH2_CLIENT_ID}",
+      "oauth2ClientSecret": "${GIT_BRIDGE_OAUTH2_CLIENT_SECRET}",
       "oauth2Server": "${GIT_BRIDGE_OAUTH2_SERVER:-https://localhost}"
     },
     "repoStore": {
