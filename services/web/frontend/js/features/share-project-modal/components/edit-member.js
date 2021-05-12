@@ -120,6 +120,7 @@ SelectPrivilege.propTypes = {
 }
 
 function RemoveMemberAction({ member }) {
+  const { t } = useTranslation()
   const { updateProject, monitorRequest } = useShareProjectContext()
   const project = useProjectContext()
 
@@ -148,7 +149,7 @@ function RemoveMemberAction({ member }) {
           bsStyle="link"
           onClick={handleClick}
           className="remove-button"
-          aria-label="Remove from project"
+          aria-label={t('remove_collaborator')}
         >
           <Icon type="times" />
         </Button>

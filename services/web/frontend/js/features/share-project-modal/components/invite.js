@@ -6,7 +6,7 @@ import {
 } from './share-project-modal'
 import Icon from '../../../shared/components/icon'
 import { Button, Col, Row, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { Trans } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import MemberPrivileges from './member-privileges'
 import { resendInvite, revokeInvite } from '../utils/api'
 
@@ -75,6 +75,7 @@ ResendInvite.propTypes = {
 }
 
 function RevokeInvite({ invite }) {
+  const { t } = useTranslation()
   const { updateProject, monitorRequest } = useShareProjectContext()
   const project = useProjectContext()
 
@@ -101,7 +102,7 @@ function RevokeInvite({ invite }) {
         type="button"
         bsStyle="link"
         onClick={handleClick}
-        aria-label="Revoke"
+        aria-label={t('revoke')}
         className="btn-inline-link"
       >
         <Icon type="times" />

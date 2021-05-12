@@ -484,7 +484,7 @@ describe('<ShareProjectModal/>', function () {
     expect(screen.queryAllByText('member-viewer@example.com')).to.have.length(1)
 
     const removeButton = screen.getByRole('button', {
-      name: 'Remove from project',
+      name: 'Remove collaborator',
     })
 
     fireEvent.click(removeButton)

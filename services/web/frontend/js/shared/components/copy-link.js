@@ -1,10 +1,12 @@
 import React, { useCallback, useState } from 'react'
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import PropTypes from 'prop-types'
-import { Trans } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import Icon from './icon'
 
 export default function CopyLink({ link, tooltipId }) {
+  const { t } = useTranslation()
+
   const [copied, setCopied] = useState(false)
 
   const handleClick = useCallback(() => {
@@ -36,7 +38,7 @@ export default function CopyLink({ link, tooltipId }) {
         bsSize="xsmall"
         bsStyle="link"
         className="copy-button"
-        aria-label="Copy"
+        aria-label={t('copy')}
       >
         {copied ? <Icon type="check" /> : <Icon type="clipboard" />}
       </Button>
