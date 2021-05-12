@@ -11,6 +11,7 @@ if [[ "$BRANCH_NAME" == "master" ]]; then
   OPTS="--no-rewrite --url-prefix ~"
   sentry-cli releases new "$SENTRY_RELEASE"
   sentry-cli releases files "$SENTRY_RELEASE" upload-sourcemaps ${OPTS} .
+  sentry-cli releases set-commits --auto "$SENTRY_RELEASE"
   sentry-cli releases finalize "$SENTRY_RELEASE"
 
   rm -rf sentry_upload
