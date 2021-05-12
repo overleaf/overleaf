@@ -54,7 +54,7 @@
     "@pollyjs/adapter-node-http": "^4.2.1",
     "@pollyjs/core": "^4.2.1",
     "@pollyjs/persister-fs": "^4.2.1",
-    "@sentry/browser": "^5.27.6",
+    "@sentry/browser": "^6.3.5",
     "@uppy/core": "^1.15.0",
     "@uppy/dashboard": "^1.11.0",
     "@uppy/react": "^1.11.0",
