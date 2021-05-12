@@ -1,6 +1,9 @@
 *
+!start.sh
+!/conf
 !/lib
 !/src/main
 !/pom.xml
 !/Makefile
 !/LICENSE
+!/vendor

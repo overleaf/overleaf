@@ -1,0 +1,32 @@
+{
+  "port": ${GIT_BRIDGE_PORT:-8000},
+    "rootGitDirectory": "${GIT_BRIDGE_ROOT_DIR:-/tmp/wlgb}",
+    "apiBaseUrl": "${GIT_BRIDGE_API_BASE_URL:-https://localhost/api/v0}",
+    "username": "${GIT_BRIDGE_USERNAME}",
+    "password": "${GIT_BRIDGE_PASSWORD}",
+    "postbackBaseUrl": "${GIT_BRIDGE_POSTBACK_BASE_URL:-https://localhost}",
+    "serviceName": "${GIT_BRIDGE_SERVICE_NAME:-Overleaf}",
+    "oauth2": {
+      "oauth2ClientID": "${GIT_BRIDGE_OAUTH2_CLIENT_ID}",
+      "oauth2ClientSecret": "${GIT_BRIDGE_OAUTH2_CLIENT_SECRET}",
+      "oauth2Server": "${GIT_BRIDGE_OAUTH2_SERVER:-https://localhost}"
+    },
+    "repoStore": {
+      "maxFileNum": ${GIT_BRIDGE_REPOSTORE_MAX_FILE_NUM:-2000},
+      "maxFileSize": ${GIT_BRIDGE_REPOSTORE_MAX_FILE_SIZE:-52428800}
+    },
+    "swapStore": {
+      "type": "${GIT_BRIDGE_SWAPSTORE_TYPE:-noop}",
+      "awsAccessKey": "${GIT_BRIDGE_SWAPSTORE_AWS_ACCESS_KEY}",
+      "awsSecret": "${GIT_BRIDGE_SWAPSTORE_AWS_ACCESS_KEY}",
+      "s3BucketName": "${GIT_BRIDGE_SWAPSTORE_S3_BUCKET_NAME}",
+      "awsRegion": "${GIT_BRIDGE_SWAPSTORE_AWS_REGION:-us-east-1}"
+    },
+    "swapJob": {
+      "minProjects": ${GIT_BRIDGE_SWAPJOB_MIN_PROJECTS:-50},
+      "lowGiB": ${GIT_BRIDGE_SWAPJOB_LOW_GIB:-128},
+      "highGiB": ${GIT_BRIDGE_SWAPJOB_HIGH_GIB:-256},
+      "intervalMillis": ${GIT_BRIDGE_SWAPJOB_INTERVAL_MILLIS:-3600000},
+      "compressionMethod": "${GIT_BRIDGE_SWAPJOB_COMPRESSION_METHOD:-gzip}"
+    }
+}
