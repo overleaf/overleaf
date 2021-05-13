@@ -1,0 +1,75 @@
+.symbol-palette {
+  display: flex;
+  flex-direction: column;
+  background: @symbol-palette-bg;
+  color: @symbol-palette-color;
+  max-width: 600px;
+}
+
+.symbol-palette-header {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  font-family: @font-family-sans-serif;
+  font-size: 16px;
+  background: @symbol-palette-header-background;
+}
+
+.symbol-palette-header [data-reach-tab] {
+  border-bottom: none;
+}
+
+.symbol-palette-header [data-reach-tab][data-selected] {
+  background: @symbol-palette-selected-tab-bg;
+}
+
+.symbol-palette-body {
+  flex: 1;
+}
+
+.symbol-palette-items {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+}
+
+.symbol-palette-item {
+  font-family: 'Stix Two Math', serif;
+  font-size: 24px;
+  line-height: 42px;
+  height: 42px;
+  width: 42px;
+  margin: 5px;
+  color: @symbol-palette-item-color;
+  background: @symbol-palette-item-bg;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.symbol-palette-item-command {
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.symbol-palette-item-notes {
+  margin-top: 5px;
+}
+
+.symbol-palette-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.symbol-palette-search {
+  color: @symbol-palette-search-color;
+  border-radius: 21px;
+  border: none;
+  padding: 2px 10px;
+  margin: 5px;
+  line-height: 1;
+}

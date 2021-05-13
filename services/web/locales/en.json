@@ -1429,6 +1429,13 @@
   "hotkey_toggle_review_panel": "Toggle review panel",
   "hotkey_toggle_track_changes": "Toggle track changes",
   "hotkey_add_a_comment": "Add a comment",
+  "category_greek": "Greek",
+  "category_arrows": "Arrows",
+  "category_operators": "Operators",
+  "category_relations": "Relations",
+  "category_misc": "Misc",
+  "no_symbols_found": "No symbols found",
+  "search": "Search",
   "also": "Also",
   "add_email": "Add Email"
 }
