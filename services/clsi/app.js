@@ -29,6 +29,7 @@ Metrics.memory.monitor(logger)
 
 const ProjectPersistenceManager = require('./app/js/ProjectPersistenceManager')
 const OutputCacheManager = require('./app/js/OutputCacheManager')
+const ContentCacheManager = require('./app/js/ContentCacheManager')
 
 require('./app/js/db').sync()
 
@@ -73,6 +74,26 @@ app.param('build_id', function (req, res, next, buildId) {
     return next()
   } else {
     return next(new Error(`invalid build id ${buildId}`))
+  }
+})
+
+app.param('contentId', function (req, res, next, contentId) {
+  if (
+    contentId != null
+      ? contentId.match(OutputCacheManager.CONTENT_REGEX)
+      : undefined
+  ) {
+    return next()
+  } else {
+    return next(new Error(`invalid content id ${contentId}`))
+  }
+})
+
+app.param('hash', function (req, res, next, hash) {
+  if (hash != null ? hash.match(ContentCacheManager.HASH_REGEX) : undefined) {
+    return next()
+  } else {
+    return next(new Error(`invalid hash ${hash}`))
   }
 })
 

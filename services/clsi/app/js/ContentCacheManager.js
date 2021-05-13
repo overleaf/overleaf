@@ -115,4 +115,7 @@ async function writePdfStream(dir, hash, buffers) {
   return true
 }
 
-module.exports = { update: callbackify(update) }
+module.exports = {
+  HASH_REGEX: /^[0-9a-f]{64}$/,
+  update: callbackify(update)
+}
