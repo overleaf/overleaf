@@ -414,7 +414,7 @@ module.exports = WebsocketController = {
       return callback()
     }
 
-    metrics.inc('editor.get-connected-users')
+    metrics.inc('editor.get-connected-users', { status: client.transport })
     const { project_id, user_id, is_restricted_user } = client.ol_context
     if (is_restricted_user) {
       return callback(null, [])
