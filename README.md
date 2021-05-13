@@ -16,6 +16,9 @@
 </p>
 
 <a href="https://www.overleaf.com"><img src="doc/screenshot.png" alt="Overleaf" ></a>
+<p align="center">
+  Figure 1: A screenshot of Overleaf Server Pro's comments and tracked changes features.
+</p>
 
 ## Key Features
 
