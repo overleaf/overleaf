@@ -13,16 +13,14 @@ function PreviewDownloadFileList({ fileList = [] }) {
 
   if (fileList) {
     topFiles = fileList.filter(file => {
-      if (topFileTypes.includes(file.type)) {
-        return file
-      }
+      return topFileTypes.includes(file.type)
     })
 
     otherFiles = fileList.filter(file => {
       if (!topFileTypes.includes(file.type)) {
-        if (file.type === 'pdf' && file.main === true) return
-        return file
+        return !(file.type === 'pdf' && file.main === true)
       }
+      return false
     })
   }
 

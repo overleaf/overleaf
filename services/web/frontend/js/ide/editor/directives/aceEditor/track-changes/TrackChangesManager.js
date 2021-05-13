@@ -168,7 +168,7 @@ class TrackChangesManager {
       }
     }
 
-    Array.from(this.rangesTracker.comments).map(comment => {
+    Array.from(this.rangesTracker.comments).forEach(comment => {
       if (!this.isCommentResolved(comment)) {
         this.adapter.onCommentAdded(comment)
       }

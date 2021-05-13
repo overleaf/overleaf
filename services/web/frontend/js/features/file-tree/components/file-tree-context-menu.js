@@ -50,4 +50,6 @@ const FakeDropDownToggle = React.forwardRef((props, ref) => {
   return null
 })
 
+FakeDropDownToggle.displayName = 'FakeDropDownToggle'
+
 export default FileTreeContextMenu

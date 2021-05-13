@@ -443,6 +443,7 @@ describe('ChatContext', function () {
 function renderChatContextHook(props) {
   return renderHook(() => useChatContext(), {
     // Wrap with ChatContext.Provider (and the other editor context providers)
+    // eslint-disable-next-line react/display-name
     wrapper: ({ children }) => (
       <ChatProviders {...props}>{children}</ChatProviders>
     ),

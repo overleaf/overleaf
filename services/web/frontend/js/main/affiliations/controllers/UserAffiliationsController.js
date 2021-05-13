@@ -309,9 +309,7 @@ export default App.controller(
           })
           $scope.linkedInstitutionIds = emails
             .filter(email => {
-              if (email.samlProviderId) {
-                return email.samlProviderId
-              }
+              return !!email.samlProviderId
             })
             .map(email => email.samlProviderId)
         })

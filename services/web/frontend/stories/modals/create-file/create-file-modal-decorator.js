@@ -40,6 +40,7 @@ const defaultContextProps = {
 export const createFileModalDecorator = (
   contextProps = {},
   createMode = 'doc'
+  // eslint-disable-next-line react/display-name
 ) => Story => {
   fetchMock
     .restore()
@@ -127,7 +128,6 @@ function OpenCreateFileModal({ children, createMode }) {
 }
 OpenCreateFileModal.propTypes = {
   createMode: PropTypes.string,
-  finishCreating: PropTypes.bool,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,

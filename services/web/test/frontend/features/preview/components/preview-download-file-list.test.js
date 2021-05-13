@@ -50,7 +50,7 @@ describe('<PreviewDownloadFileList />', function () {
     expect(topFileTypes.length).to.be.above(0)
     const outputTopFileTypes = outputFiles
       .filter(file => {
-        if (topFileTypes.includes(file.type)) return file.type
+        return topFileTypes.includes(file.type)
       })
       .map(file => file.type)
     const topMenuItems = menuItems.slice(0, outputTopFileTypes.length)

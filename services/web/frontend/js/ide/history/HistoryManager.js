@@ -364,10 +364,11 @@ export default HistoryManager = (function () {
       if (selected_doc != null && affected_docs[selected_doc.id] != null) {
         // Selected doc is already open
       } else {
-        for (doc_id in affected_docs) {
+        const doc_ids = Object.keys(affected_docs)
+        if (doc_ids.length > 0) {
+          const doc_id = doc_ids[0]
           doc = affected_docs[doc_id]
           selected_doc = doc
-          break
         }
       }
 

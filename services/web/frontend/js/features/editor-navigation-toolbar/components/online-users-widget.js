@@ -112,6 +112,8 @@ const DropDownToggleButton = React.forwardRef((props, ref) => {
   )
 })
 
+DropDownToggleButton.displayName = 'DropDownToggleButton'
+
 DropDownToggleButton.propTypes = {
   onlineUserCount: PropTypes.number.isRequired,
   onClick: PropTypes.func,

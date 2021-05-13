@@ -456,7 +456,7 @@ describe('ArchiveManager', function () {
         isTooLarge.should.equal(true)
         return done()
       })
-      this.zipfile.emit('entry', { uncompressedSize: 1090000000000000042 })
+      this.zipfile.emit('entry', { uncompressedSize: 109e16 })
       return this.zipfile.emit('end')
     })
 

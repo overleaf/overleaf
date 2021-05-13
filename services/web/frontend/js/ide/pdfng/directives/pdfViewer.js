@@ -224,6 +224,7 @@ App.controller(
           let ref
           return ([topPageIdx, topPage] = Array.from((ref = [i, page]))), ref
         }
+        return false
       })
       if (visible && topPage.element != null) {
         // console.log 'found it', topPageIdx

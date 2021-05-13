@@ -41,11 +41,7 @@
 
     // Disable some rules after upgrading ESLint
     // TODO: re-enable and fix
-    "no-prototype-builtins": "off",
     "no-var": "off",
-    "array-callback-return": "off",
-    "no-unreachable-loop": "off",
-    "no-loss-of-precision": "off",
 
     // do not allow importing of implicit dependencies.
     "import/no-extraneous-dependencies": "error",
@@ -55,11 +51,7 @@
     "node/handle-callback-err": "off",
     "node/no-path-concat": "off",
 
-    "react/display-name": "off",
-    "react/no-unescaped-entities": "off",
-    "react/no-unused-prop-types": "off",
     "react/jsx-no-target-blank": "off",
-    "react/jsx-handler-names": "off"
   },
   "overrides": [
     // NOTE: changing paths may require updating them in the Makefile too.

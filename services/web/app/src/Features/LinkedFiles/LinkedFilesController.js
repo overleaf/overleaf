@@ -48,7 +48,12 @@ module.exports = LinkedFilesController = {
   ),
 
   _getAgent(provider) {
-    if (!LinkedFilesController.Agents.hasOwnProperty(provider)) {
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        LinkedFilesController.Agents,
+        provider
+      )
+    ) {
       return null
     }
     if (!Array.from(Settings.enabledLinkedFileTypes).includes(provider)) {
