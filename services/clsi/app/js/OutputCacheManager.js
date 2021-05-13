@@ -22,10 +22,13 @@ const logger = require('logger-sharelatex')
 const _ = require('lodash')
 const Settings = require('settings-sharelatex')
 const crypto = require('crypto')
+const Metrics = require('./Metrics')
 
 const OutputFileOptimiser = require('./OutputFileOptimiser')
+const ContentCacheManager = require('./ContentCacheManager')
 
 module.exports = OutputCacheManager = {
+  CONTENT_SUBDIR: 'content',
   CACHE_SUBDIR: 'generated-files',
   ARCHIVE_SUBDIR: 'archived-logs',
   // build id is HEXDATE-HEXRANDOM from Date.now()and RandomBytes
@@ -59,7 +62,13 @@ module.exports = OutputCacheManager = {
     })
   },
 
-  saveOutputFiles(outputFiles, compileDir, outputDir, callback) {
+  saveOutputFiles(
+    { request, stats, timings },
+    outputFiles,
+    compileDir,
+    outputDir,
+    callback
+  ) {
     if (callback == null) {
       callback = function (error) {}
     }
@@ -72,7 +81,31 @@ module.exports = OutputCacheManager = {
         compileDir,
         outputDir,
         buildId,
-        callback
+        function (err, result) {
+          if (err != null) {
+            return callback(err)
+          }
+          OutputCacheManager.collectOutputPdfSize(
+            result,
+            outputDir,
+            stats,
+            (err, result) => {
+              if (err) return callback(err, result)
+
+              if (!Settings.enablePdfCaching || !request.enablePdfCaching) {
+                return callback(null, result)
+              }
+
+              OutputCacheManager.saveStreamsInContentDir(
+                { stats, timings },
+                result,
+                compileDir,
+                outputDir,
+                callback
+              )
+            }
+          )
+        }
       )
     })
   },
@@ -203,6 +236,107 @@ module.exports = OutputCacheManager = {
           }
         )
       }
+    })
+  },
+
+  collectOutputPdfSize(outputFiles, outputDir, stats, callback) {
+    const outputFile = outputFiles.find((x) => x.path === 'output.pdf')
+    if (!outputFile) return callback(null, outputFiles)
+    const outputFilePath = Path.join(
+      outputDir,
+      OutputCacheManager.path(outputFile.build, outputFile.path)
+    )
+    fs.stat(outputFilePath, (err, stat) => {
+      if (err) return callback(err, outputFiles)
+
+      outputFile.size = stat.size
+      stats['pdf-size'] = outputFile.size
+      callback(null, outputFiles)
+    })
+  },
+
+  saveStreamsInContentDir(
+    { stats, timings },
+    outputFiles,
+    compileDir,
+    outputDir,
+    callback
+  ) {
+    const cacheRoot = Path.join(outputDir, OutputCacheManager.CONTENT_SUBDIR)
+    // check if content dir exists
+    OutputCacheManager.ensureContentDir(cacheRoot, function (err, contentDir) {
+      if (err) return callback(err, outputFiles)
+
+      const outputFile = outputFiles.find((x) => x.path === 'output.pdf')
+      if (outputFile) {
+        // possibly we should copy the file from the build dir here
+        const outputFilePath = Path.join(
+          outputDir,
+          OutputCacheManager.path(outputFile.build, outputFile.path)
+        )
+        const timer = new Metrics.Timer('compute-pdf-ranges')
+        ContentCacheManager.update(contentDir, outputFilePath, function (
+          err,
+          ranges
+        ) {
+          if (err) return callback(err, outputFiles)
+          const [contentRanges, newContentRanges] = ranges
+
+          if (Settings.enablePdfCachingDark) {
+            // In dark mode we are doing the computation only and do not emit
+            //  any ranges to the frontend.
+          } else {
+            outputFile.contentId = Path.basename(contentDir)
+            outputFile.ranges = contentRanges
+          }
+
+          timings['compute-pdf-caching'] = timer.done()
+          stats['pdf-caching-n-ranges'] = contentRanges.length
+          stats['pdf-caching-total-ranges-size'] = contentRanges.reduce(
+            (sum, next) => sum + (next.end - next.start),
+            0
+          )
+          stats['pdf-caching-n-new-ranges'] = newContentRanges.length
+          stats['pdf-caching-new-ranges-size'] = newContentRanges.reduce(
+            (sum, next) => sum + (next.end - next.start),
+            0
+          )
+          callback(null, outputFiles)
+        })
+      } else {
+        callback(null, outputFiles)
+      }
+    })
+  },
+
+  ensureContentDir(contentRoot, callback) {
+    fse.ensureDir(contentRoot, function (err) {
+      if (err != null) {
+        return callback(err)
+      }
+      fs.readdir(contentRoot, function (err, results) {
+        const dirs = results.sort()
+        const contentId = dirs.find((dir) =>
+          OutputCacheManager.BUILD_REGEX.test(dir)
+        )
+        if (contentId) {
+          callback(null, Path.join(contentRoot, contentId))
+        } else {
+          // make a content directory
+          OutputCacheManager.generateBuildId(function (err, contentId) {
+            if (err) {
+              return callback(err)
+            }
+            const contentDir = Path.join(contentRoot, contentId)
+            fse.ensureDir(contentDir, function (err) {
+              if (err) {
+                return callback(err)
+              }
+              return callback(null, contentDir)
+            })
+          })
+        }
+      })
     })
   },
 

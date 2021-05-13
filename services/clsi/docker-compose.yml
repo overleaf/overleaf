@@ -38,5 +38,6 @@ services:
       LOG_LEVEL: ERROR
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      ENABLE_PDF_CACHING: "true"
     command: npm run --silent test:acceptance
 

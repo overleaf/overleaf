@@ -49,7 +49,9 @@ module.exports = CompileController = {
           }
           return CompileManager.doCompileWithLock(request, function (
             error,
-            outputFiles
+            outputFiles,
+            stats,
+            timings
           ) {
             let code, status
             if (outputFiles == null) {
@@ -118,18 +120,30 @@ module.exports = CompileController = {
               compile: {
                 status,
                 error: (error != null ? error.message : undefined) || error,
-                outputFiles: outputFiles.map((file) => ({
-                  url:
-                    `${Settings.apis.clsi.url}/project/${request.project_id}` +
-                    (request.user_id != null
-                      ? `/user/${request.user_id}`
-                      : '') +
-                    (file.build != null ? `/build/${file.build}` : '') +
-                    `/output/${file.path}`,
-                  path: file.path,
-                  type: file.type,
-                  build: file.build
-                }))
+                stats,
+                timings,
+                outputFiles: outputFiles.map((file) => {
+                  const record = {
+                    url:
+                      `${Settings.apis.clsi.url}/project/${request.project_id}` +
+                      (request.user_id != null
+                        ? `/user/${request.user_id}`
+                        : '') +
+                      (file.build != null ? `/build/${file.build}` : '') +
+                      `/output/${file.path}`,
+                    path: file.path,
+                    type: file.type,
+                    build: file.build,
+                    contentId: file.contentId
+                  }
+                  if (file.ranges != null) {
+                    record.ranges = file.ranges
+                  }
+                  if (file.size != null) {
+                    record.size = file.size
+                  }
+                  return record
+                })
               }
             })
           })

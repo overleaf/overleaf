@@ -34,6 +34,7 @@ const os = require('os')
 const async = require('async')
 const Errors = require('./Errors')
 const CommandRunner = require('./CommandRunner')
+const { emitPdfStats } = require('./ContentCacheMetrics')
 
 const getCompileName = function (project_id, user_id) {
   if (user_id != null) {
@@ -77,6 +78,7 @@ module.exports = CompileManager = {
     const compileDir = getCompileDir(request.project_id, request.user_id)
     const outputDir = getOutputDir(request.project_id, request.user_id)
 
+    const timerE2E = new Metrics.Timer('compile-e2e')
     let timer = new Metrics.Timer('write-to-disk')
     logger.log(
       { project_id: request.project_id, user_id: request.user_id },
@@ -249,11 +251,13 @@ module.exports = CompileManager = {
                 return callback(error)
               }
               Metrics.inc('compiles-succeeded')
+              stats = stats || {}
               const object = stats || {}
               for (metric_key in object) {
                 metric_value = object[metric_key]
                 Metrics.count(metric_key, metric_value)
               }
+              timings = timings || {}
               const object1 = timings || {}
               for (metric_key in object1) {
                 metric_value = object1[metric_key]
@@ -297,10 +301,32 @@ module.exports = CompileManager = {
                     return callback(error)
                   }
                   return OutputCacheManager.saveOutputFiles(
+                    { request, stats, timings },
                     outputFiles,
                     compileDir,
                     outputDir,
-                    (error, newOutputFiles) => callback(null, newOutputFiles)
+                    (err, newOutputFiles) => {
+                      if (err) {
+                        const {
+                          project_id: projectId,
+                          user_id: userId
+                        } = request
+                        logger.err(
+                          { projectId, userId, err },
+                          'failed to save output files'
+                        )
+                      }
+
+                      // Emit compile time.
+                      timings.compile = ts
+                      timings.compileE2E = timerE2E.done()
+
+                      if (stats['pdf-size']) {
+                        emitPdfStats(stats, timings)
+                      }
+
+                      callback(null, newOutputFiles, stats, timings)
+                    }
                   )
                 }
               )

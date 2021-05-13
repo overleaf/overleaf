@@ -30,6 +30,10 @@ module.exports = Client = {
     if (callback == null) {
       callback = function (error, res, body) {}
     }
+    if (data) {
+      // Enable pdf caching unless disabled explicitly.
+      data.options = Object.assign({}, { enablePdfCaching: true }, data.options)
+    }
     return request.post(
       {
         url: `${this.host}/project/${project_id}/compile`,

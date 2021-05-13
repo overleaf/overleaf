@@ -71,7 +71,7 @@ describe('CompileManager', function () {
       this.compileDir = `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`
       this.CompileManager.doCompile = sinon
         .stub()
-        .callsArgWith(1, null, this.output_files)
+        .yields(null, this.output_files)
       return (this.LockManager.runWithLock = (lockFile, runner, callback) =>
         runner((err, ...result) => callback(err, ...Array.from(result))))
     })
@@ -172,10 +172,10 @@ describe('CompileManager', function () {
       this.LatexRunner.runLatex = sinon.stub().callsArg(2)
       this.OutputFileFinder.findOutputFiles = sinon
         .stub()
-        .callsArgWith(2, null, this.output_files)
+        .yields(null, this.output_files)
       this.OutputCacheManager.saveOutputFiles = sinon
         .stub()
-        .callsArgWith(3, null, this.build_files)
+        .yields(null, this.build_files)
       this.DraftModeManager.injectDraftMode = sinon.stub().callsArg(1)
       return (this.TikzManager.checkMainFile = sinon.stub().callsArg(3, false))
     })

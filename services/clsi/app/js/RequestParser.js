@@ -50,6 +50,14 @@ module.exports = RequestParser = {
           type: 'string'
         }
       )
+      response.enablePdfCaching = this._parseAttribute(
+        'enablePdfCaching',
+        compile.options.enablePdfCaching,
+        {
+          default: false,
+          type: 'boolean'
+        }
+      )
       response.timeout = this._parseAttribute(
         'timeout',
         compile.options.timeout,

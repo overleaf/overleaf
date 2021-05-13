@@ -113,6 +113,8 @@ describe('CompileController', function () {
       this.ProjectPersistenceManager.markProjectAsJustAccessed = sinon
         .stub()
         .callsArg(1)
+      this.stats = { foo: 1 }
+      this.timings = { bar: 2 }
       this.res.status = sinon.stub().returnsThis()
       return (this.res.send = sinon.stub())
     })
@@ -121,7 +123,7 @@ describe('CompileController', function () {
       beforeEach(function () {
         this.CompileManager.doCompileWithLock = sinon
           .stub()
-          .callsArgWith(1, null, this.output_files)
+          .yields(null, this.output_files, this.stats, this.timings)
         return this.CompileController.compile(this.req, this.res)
       })
 
@@ -150,12 +152,16 @@ describe('CompileController', function () {
             compile: {
               status: 'success',
               error: null,
+              stats: this.stats,
+              timings: this.timings,
               outputFiles: this.output_files.map((file) => {
                 return {
                   url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                   path: file.path,
                   type: file.type,
-                  build: file.build
+                  build: file.build,
+                  // gets dropped by JSON.stringify
+                  contentId: undefined
                 }
               })
             }
@@ -180,7 +186,7 @@ describe('CompileController', function () {
         ]
         this.CompileManager.doCompileWithLock = sinon
           .stub()
-          .callsArgWith(1, null, this.output_files)
+          .yields(null, this.output_files, this.stats, this.timings)
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -191,12 +197,16 @@ describe('CompileController', function () {
             compile: {
               status: 'failure',
               error: null,
+              stats: this.stats,
+              timings: this.timings,
               outputFiles: this.output_files.map((file) => {
                 return {
                   url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                   path: file.path,
                   type: file.type,
-                  build: file.build
+                  build: file.build,
+                  // gets dropped by JSON.stringify
+                  contentId: undefined
                 }
               })
             }
@@ -220,7 +230,10 @@ describe('CompileController', function () {
             compile: {
               status: 'error',
               error: this.message,
-              outputFiles: []
+              outputFiles: [],
+              // JSON.stringify will omit these
+              stats: undefined,
+              timings: undefined
             }
           })
           .should.equal(true)
@@ -244,7 +257,10 @@ describe('CompileController', function () {
             compile: {
               status: 'timedout',
               error: this.message,
-              outputFiles: []
+              outputFiles: [],
+              // JSON.stringify will omit these
+              stats: undefined,
+              timings: undefined
             }
           })
           .should.equal(true)
@@ -266,7 +282,10 @@ describe('CompileController', function () {
             compile: {
               error: null,
               status: 'failure',
-              outputFiles: []
+              outputFiles: [],
+              // JSON.stringify will omit these
+              stats: undefined,
+              timings: undefined
             }
           })
           .should.equal(true)

@@ -29,6 +29,7 @@ services:
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
       TEXLIVE_IMAGE:
+      ENABLE_PDF_CACHING: "true"
     command: npm run test:acceptance:_run
 
 
