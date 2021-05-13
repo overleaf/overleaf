@@ -26,7 +26,7 @@ const layoutContextPropTypes = {
 }
 
 const chatContextPropTypes = {
-  resetUnreadMessageCount: PropTypes.func.isRequired,
+  markMessagesAsRead: PropTypes.func.isRequired,
   unreadMessageCount: PropTypes.number.isRequired,
 }
 
@@ -55,16 +55,16 @@ function EditorNavigationToolbarRoot({
     pdfLayout,
   } = useLayoutContext(layoutContextPropTypes)
 
-  const { resetUnreadMessageCount, unreadMessageCount } = useChatContext(
+  const { markMessagesAsRead, unreadMessageCount } = useChatContext(
     chatContextPropTypes
   )
 
   const toggleChatOpen = useCallback(() => {
     if (!chatIsOpen) {
-      resetUnreadMessageCount()
+      markMessagesAsRead()
     }
     setChatIsOpen(value => !value)
-  }, [chatIsOpen, setChatIsOpen, resetUnreadMessageCount])
+  }, [chatIsOpen, setChatIsOpen, markMessagesAsRead])
 
   const toggleReviewPanelOpen = useCallback(
     () => setReviewPanelOpen(value => !value),
