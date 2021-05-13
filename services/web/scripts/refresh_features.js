@@ -85,7 +85,7 @@ const loopForUsers = (skip, callback) => {
   db.users
     .find({})
     .project({ features: 1, lastLoggedIn: 1 })
-    .sort('_id')
+    .sort({ _id: 1 })
     .skip(skip)
     .limit(FETCH_LIMIT)
     .toArray((error, users) => {
