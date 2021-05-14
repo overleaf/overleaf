@@ -19,6 +19,7 @@ const UrlFetcher = require('./UrlFetcher')
 const Settings = require('settings-sharelatex')
 const crypto = require('crypto')
 const fs = require('fs')
+const fse = require('fs-extra')
 const logger = require('logger-sharelatex')
 const async = require('async')
 
@@ -35,8 +36,12 @@ module.exports = UrlCache = {
         if (error != null) {
           return callback(error)
         }
-        return UrlCache._copyFile(pathToCachedUrl, destPath, function (error) {
+        return fse.copy(pathToCachedUrl, destPath, function (error) {
           if (error != null) {
+            logger.error(
+              { err: error, from: pathToCachedUrl, to: destPath },
+              'error copying file from cache'
+            )
             return UrlCache._clearUrlDetails(project_id, url, () =>
               callback(error)
             )
@@ -161,25 +166,6 @@ module.exports = UrlCache = {
       project_id,
       url
     )}`
-  },
-
-  _copyFile(from, to, _callback) {
-    if (_callback == null) {
-      _callback = function (error) {}
-    }
-    const callbackOnce = function (error) {
-      if (error != null) {
-        logger.error({ err: error, from, to }, 'error copying file from cache')
-      }
-      _callback(error)
-      return (_callback = function () {})
-    }
-    const writeStream = fs.createWriteStream(to)
-    const readStream = fs.createReadStream(from)
-    writeStream.on('error', callbackOnce)
-    readStream.on('error', callbackOnce)
-    writeStream.on('close', callbackOnce)
-    return writeStream.on('open', () => readStream.pipe(writeStream))
   },
 
   _clearUrlFromCache(project_id, url, callback) {
