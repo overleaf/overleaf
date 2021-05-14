@@ -16,6 +16,9 @@ export const TimedOutError = args => {
         owner: {
           _id: window.user.id,
         },
+        features: {
+          compileGroup: 'standard',
+        },
       },
     },
   }
@@ -29,6 +32,39 @@ export const TimedOutError = args => {
   )
 }
 TimedOutError.args = {
+  errors: {
+    timedout: {},
+  },
+}
+
+export const TimedOutErrorWithPriorityCompile = args => {
+  useFetchMock(fetchMock => {
+    fetchMock.post('express:/event/:key', 202)
+  })
+
+  const ide = {
+    $scope: {
+      $watch: () => () => null,
+      project: {
+        owner: {
+          _id: window.user.id,
+        },
+        features: {
+          compileGroup: 'priority',
+        },
+      },
+    },
+  }
+
+  return (
+    <ApplicationProvider>
+      <EditorProvider ide={ide} settings={{}}>
+        <PreviewLogsPane {...args} />
+      </EditorProvider>
+    </ApplicationProvider>
+  )
+}
+TimedOutErrorWithPriorityCompile.args = {
   errors: {
     timedout: {},
   },

@@ -19,6 +19,7 @@ EditorContext.Provider.propTypes = {
       brandedMenu: PropTypes.string,
       submitBtnHtml: PropTypes.string,
     }),
+    hasPremiumCompile: PropTypes.bool,
     loading: PropTypes.bool,
     projectRootDocId: PropTypes.string,
     projectId: PropTypes.string.isRequired,
@@ -66,6 +67,11 @@ export function EditorProvider({ children, ide, settings }) {
     ide.$scope
   )
 
+  const [compileGroup] = useScopeValue(
+    'project.features.compileGroup',
+    ide.$scope
+  )
+
   const [rootFolder] = useScopeValue('rootFolder', ide.$scope)
 
   const renameProject = useCallback(
@@ -98,6 +104,7 @@ export function EditorProvider({ children, ide, settings }) {
 
   const editorContextValue = {
     cobranding,
+    hasPremiumCompile: compileGroup === 'priority',
     loading,
     projectId: window.project_id,
     projectRootDocId,

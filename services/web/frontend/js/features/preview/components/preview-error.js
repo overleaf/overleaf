@@ -8,7 +8,7 @@ import { useEditorContext } from '../../../shared/context/editor-context'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 
 function PreviewError({ name }) {
-  const { isProjectOwner } = useEditorContext({
+  const { hasPremiumCompile, isProjectOwner } = useEditorContext({
     isProjectOwner: PropTypes.bool,
   })
   const {
@@ -74,7 +74,7 @@ function PreviewError({ name }) {
         entryAriaLabel={t('compile_error_entry_description')}
         level="error"
       />
-      {name === 'timedout' && enableSubscriptions ? (
+      {name === 'timedout' && enableSubscriptions && !hasPremiumCompile ? (
         <TimeoutUpgradePrompt isProjectOwner={isProjectOwner} />
       ) : null}
     </>
