@@ -4,19 +4,19 @@ import React from 'react'
 import { screen, render, fireEvent, waitFor } from '@testing-library/react'
 import SymbolPalette from '../../../../../frontend/js/features/symbol-palette/components/symbol-palette'
 
-// eslint-disable-next-line mocha/no-skipped-tests
-describe.skip('symbol palette', function () {
-  // let clock
-  //
-  // beforeEach(function () {
-  //   clock = sinon.useFakeTimers({
-  //     toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
-  //   })
-  // })
-  //
-  // afterEach(function () {
-  //   clock.restore()
-  // })
+describe('symbol palette', function () {
+  let clock
+
+  before(function () {
+    clock = sinon.useFakeTimers({
+      toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
+    })
+  })
+
+  after(function () {
+    clock.runAll()
+    clock.restore()
+  })
 
   it('handles keyboard interaction', async function () {
     this.timeout(10000)
@@ -62,7 +62,7 @@ describe.skip('symbol palette', function () {
     fireEvent.change(input, { target: { value: 'pi' } })
 
     // make sure all scheduled microtasks have executed
-    // clock.runAll()
+    clock.runAll()
 
     // wait for the symbols to be filtered
     await waitFor(async () => {
