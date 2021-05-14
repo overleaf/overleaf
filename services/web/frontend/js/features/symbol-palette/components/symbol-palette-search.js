@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
-import useDebounce from '../hooks/use-debounce'
+import useDebounce from '../../../shared/hooks/use-debounce'
 
 export default function SymbolPaletteSearch({ setInput, inputRef }) {
   const [localInput, setLocalInput] = useState('')
