@@ -94,6 +94,8 @@ script(type='text/ng-template', id='confirmChangePlanModalTemplate')
 	.modal-header
 		h3 #{translate("change_plan")}
 	.modal-body
+		.alert.alert-warning(ng-show="genericError")
+			strong #{translate("generic_something_went_wrong")}. #{translate("try_again")}. #{translate("generic_if_problem_continues_contact_us")}.
 		p !{translate("sure_you_want_to_change_plan", {planName: '{{plan.name}}'}, ['strong'])}
 		div(ng-show="planChangesAtTermEnd")
 			p #{translate("existing_plan_active_until_term_end")}
@@ -114,6 +116,8 @@ script(type='text/ng-template', id='cancelPendingPlanChangeModalTemplate')
 	.modal-header
 		h3 #{translate("change_plan")}
 	.modal-body
+		.alert.alert-warning(ng-show="genericError")
+			strong #{translate("generic_something_went_wrong")}. #{translate("try_again")}. #{translate("generic_if_problem_continues_contact_us")}.
 		p !{translate("sure_you_want_to_cancel_plan_change", {planName: '{{plan.name}}'}, ['strong'])}
 	.modal-footer
 		button.btn.btn-default(

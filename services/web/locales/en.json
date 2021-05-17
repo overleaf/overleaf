@@ -969,6 +969,7 @@
   "ask_proj_owner_to_upgrade_for_history": "Please ask the project owner to upgrade to use the History feature.",
   "anonymous": "Anonymous",
   "generic_something_went_wrong": "Sorry, something went wrong",
+  "generic_if_problem_continues_contact_us": "If the problem continues please contact us",
   "restoring": "Restoring",
   "restore_to_before_these_changes": "Restore to before these changes",
   "profile_complete_percentage": "Your profile is __percentval__% complete",

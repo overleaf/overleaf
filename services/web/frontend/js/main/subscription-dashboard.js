@@ -144,12 +144,16 @@ App.controller(
         _csrf: window.csrfToken,
       }
 
+      $scope.genericError = false
       $scope.inflight = true
 
       return $http
         .post(`${SUBSCRIPTION_URL}?origin=confirmChangePlan`, body)
         .then(() => location.reload())
-        .catch(() => console.log('something went wrong changing plan'))
+        .catch(() => {
+          $scope.genericError = true
+          $scope.inflight = false
+        })
     }
 
     return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
@@ -164,14 +168,16 @@ App.controller(
         _csrf: window.csrfToken,
       }
 
+      $scope.genericError = false
       $scope.inflight = true
 
       return $http
         .post('/user/subscription/cancel-pending', body)
         .then(() => location.reload())
-        .catch(() =>
-          console.log('something went wrong reverting pending plan change')
-        )
+        .catch(() => {
+          $scope.genericError = true
+          $scope.inflight = false
+        })
     }
 
     return ($scope.cancel = () => $modalInstance.dismiss('cancel'))
