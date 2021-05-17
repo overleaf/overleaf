@@ -16,7 +16,7 @@ mixin providerList()
 						span(ng-if="providers[key].ui.isProcessing") #{translate("processing")}
 					//- Link
 					a.btn.btn-primary.text-capitalize(
-						href="{{provider.linkPath}}?intent=link"
+						ng-href="{{provider.linkPath}}?intent=link"
 						ng-if="!thirdPartyIds[key] && !provider.hideWhenNotLinked"
 					) #{translate("link")}
 			//- unlink error

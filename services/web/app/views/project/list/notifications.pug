@@ -62,7 +62,7 @@ include ../../_mixins/reconfirm_affiliation
 						) #{translate("find_out_more_nt")}
 					.notification-action
 						a.pull-right.btn.btn-sm.btn-info(
-							href=`{{samlInitPath}}?university_id={{notification.messageOpts.institutionId}}&auto=/project`
+							ng-href=`{{samlInitPath}}?university_id={{notification.messageOpts.institutionId}}&auto=/project`
 						)
 							| #{translate("link_account")}
 					.notification-close
@@ -138,7 +138,7 @@ include ../../_mixins/reconfirm_affiliation
 						p !{translate("can_link_institution_email_acct_to_institution_acct", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
 						div !{translate("doing_this_allow_log_in_through_institution", {appName: settings.appName})}
 					.notification-action
-						a.btn.btn-sm.btn-info(href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=/project&email={{notification.email}}")
+						a.btn.btn-sm.btn-info(ng-href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=/project&email={{notification.email}}")
 							| #{translate('link_account')}
 
 				.alert.alert-info(
