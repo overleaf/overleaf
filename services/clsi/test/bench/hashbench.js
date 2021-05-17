@@ -33,6 +33,8 @@ function test(hashType, filePath, callback) {
             return callback(err)
           }
           console.log(
+            'uvthreads',
+            process.env.UV_THREADPOOL_SIZE,
             filePath,
             'hashType',
             hashType,
