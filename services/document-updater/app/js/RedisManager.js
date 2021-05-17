@@ -72,6 +72,13 @@ module.exports = RedisManager = {
       logger.error({ err: error, doc_id, docLines }, error.message)
       return callback(error)
     }
+    // Do a cheap size check on the serialized blob.
+    if (docLines.length > Settings.max_doc_length) {
+      const docSize = docLines.length
+      const err = new Error('blocking doc insert into redis: doc is too large')
+      logger.error({ project_id, doc_id, err, docSize }, err.message)
+      return callback(err)
+    }
     const docHash = RedisManager._computeHash(docLines)
     // record bytes sent to redis
     metrics.summary('redis.docLines', docLines.length, { status: 'set' })
@@ -460,6 +467,13 @@ module.exports = RedisManager = {
         // this check was added to catch memory corruption in JSON.stringify
         logger.error({ err: error, doc_id, newDocLines }, error.message)
         return callback(error)
+      }
+      // Do a cheap size check on the serialized blob.
+      if (newDocLines.length > Settings.max_doc_length) {
+        const err = new Error('blocking doc update: doc is too large')
+        const docSize = newDocLines.length
+        logger.error({ project_id, doc_id, err, docSize }, err.message)
+        return callback(err)
       }
       const newHash = RedisManager._computeHash(newDocLines)
 

@@ -87,6 +87,20 @@ module.exports = ShareJsUpdateManager = {
         if (error != null) {
           return callback(error)
         }
+        const docSizeAfter = data.snapshot.length
+        if (docSizeAfter > Settings.max_doc_length) {
+          const docSizeBefore = lines.join('\n').length
+          const err = new Error(
+            'blocking persistence of ShareJs update: doc size exceeds limits'
+          )
+          logger.error(
+            { project_id, doc_id, err, docSizeBefore, docSizeAfter },
+            err.message
+          )
+          metrics.inc('sharejs.other-error')
+          const publicError = 'Update takes doc over max doc size'
+          return callback(publicError)
+        }
         // only check hash when present and no other updates have been applied
         if (update.hash != null && incomingUpdateVersion === version) {
           const ourHash = ShareJsUpdateManager._computeHash(data.snapshot)
