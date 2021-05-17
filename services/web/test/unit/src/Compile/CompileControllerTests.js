@@ -105,7 +105,10 @@ describe('CompileController', function () {
 
       it('should do the compile without the auto compile flag', function () {
         return this.CompileManager.compile
-          .calledWith(this.project_id, this.user_id, { isAutoCompile: false })
+          .calledWith(this.project_id, this.user_id, {
+            isAutoCompile: false,
+            enablePdfCaching: false,
+          })
           .should.equal(true)
       })
 
@@ -132,7 +135,10 @@ describe('CompileController', function () {
 
       it('should do the compile with the auto compile flag', function () {
         return this.CompileManager.compile
-          .calledWith(this.project_id, this.user_id, { isAutoCompile: true })
+          .calledWith(this.project_id, this.user_id, {
+            isAutoCompile: true,
+            enablePdfCaching: false,
+          })
           .should.equal(true)
       })
     })
@@ -147,6 +153,7 @@ describe('CompileController', function () {
         return this.CompileManager.compile
           .calledWith(this.project_id, this.user_id, {
             isAutoCompile: false,
+            enablePdfCaching: false,
             draft: true,
           })
           .should.equal(true)

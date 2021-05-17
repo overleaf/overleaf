@@ -124,17 +124,95 @@ describe('ClsiManager', function () {
             path: 'output.pdf',
             type: 'pdf',
             build: 1234,
+            // gets dropped by JSON.stringify
+            contentId: undefined,
+            ranges: undefined,
+            size: undefined,
           },
           {
             url: `/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.log`,
             path: 'output.log',
             type: 'log',
             build: 1234,
+            // gets dropped by JSON.stringify
+            contentId: undefined,
+            ranges: undefined,
+            size: undefined,
           },
         ]
         this.callback
           .calledWith(null, this.status, outputFiles)
           .should.equal(true)
+      })
+    })
+
+    describe('with ranges on the pdf and stats/timings details', function () {
+      beforeEach(function () {
+        this.ClsiManager._postToClsi = sinon.stub().yields(null, {
+          compile: {
+            status: 'success',
+            stats: { fooStat: 1 },
+            timings: { barTiming: 2 },
+            outputFiles: [
+              {
+                url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.pdf`,
+                path: 'output.pdf',
+                type: 'pdf',
+                build: 1234,
+                contentId: '123-321',
+                ranges: [{ start: 1, end: 42, hash: 'foo' }],
+                size: 42,
+              },
+              {
+                url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.log`,
+                path: 'output.log',
+                type: 'log',
+                build: 1234,
+              },
+            ],
+          },
+        })
+        this.ClsiCookieManager._getServerId.yields(null, 'clsi-server-id-42')
+        this.ClsiManager.sendRequest(
+          this.project_id,
+          this.user_id,
+          { compileGroup: 'standard' },
+          this.callback
+        )
+      })
+
+      it('should emit the caching details and stats/timings', function () {
+        const outputFiles = [
+          {
+            url: `/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.pdf`,
+            path: 'output.pdf',
+            type: 'pdf',
+            build: 1234,
+            contentId: '123-321',
+            ranges: [{ start: 1, end: 42, hash: 'foo' }],
+            size: 42,
+          },
+          {
+            url: `/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.log`,
+            path: 'output.log',
+            type: 'log',
+            build: 1234,
+            // gets dropped by JSON.stringify
+            contentId: undefined,
+            ranges: undefined,
+            size: undefined,
+          },
+        ]
+        const validationError = undefined
+        expect(this.callback).to.have.been.calledWith(
+          null,
+          'success',
+          outputFiles,
+          'clsi-server-id-42',
+          validationError,
+          { fooStat: 1 },
+          { barTiming: 2 }
+        )
       })
     })
 
@@ -317,12 +395,20 @@ describe('ClsiManager', function () {
             path: 'output.pdf',
             type: 'pdf',
             build: 1234,
+            // gets dropped by JSON.stringify
+            contentId: undefined,
+            ranges: undefined,
+            size: undefined,
           },
           {
             url: `/project/${this.submission_id}/build/1234/output/output.log`,
             path: 'output.log',
             type: 'log',
             build: 1234,
+            // gets dropped by JSON.stringify
+            contentId: undefined,
+            ranges: undefined,
+            size: undefined,
           },
         ]
         this.callback
@@ -528,6 +614,7 @@ describe('ClsiManager', function () {
               syncType: undefined, // "full"
               syncState: undefined,
               compileGroup: 'standard',
+              enablePdfCaching: false,
             }, // "01234567890abcdef"
             rootResourcePath: 'main.tex',
             resources: [
@@ -623,6 +710,7 @@ describe('ClsiManager', function () {
               syncType: 'incremental',
               syncState: '01234567890abcdef',
               compileGroup: 'priority',
+              enablePdfCaching: false,
             },
             rootResourcePath: 'main.tex',
             resources: [

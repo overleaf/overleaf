@@ -527,6 +527,9 @@ module.exports = settings =
 	# Domain the client (pdfjs) should download the compiled pdf from
 	pdfDownloadDomain: process.env["PDF_DOWNLOAD_DOMAIN"]  #"http://clsi-lb:3014"
 
+	# By default turn on feature flag, can be overridden per request.
+	enablePdfCaching: process.env["ENABLE_PDF_CACHING"] == "true"
+
 	# Maximum size of text documents in the real-time editing system.
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 

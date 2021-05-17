@@ -874,6 +874,9 @@ const ProjectController = {
               ),
               showNewBinaryFileUI: shouldDisplayFeature('new_binary_file'),
               showSymbolPalette: shouldDisplayFeature('symbol_palette'),
+              enablePdfCaching:
+                Settings.enablePdfCaching &&
+                shouldDisplayFeature('enable_pdf_caching', user.alphaProgram),
             })
             timer.done()
           }

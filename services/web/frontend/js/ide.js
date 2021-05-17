@@ -32,6 +32,7 @@ import MetadataManager from './ide/metadata/MetadataManager'
 import ReviewPanelManager from './ide/review-panel/ReviewPanelManager'
 import OutlineManager from './features/outline/outline-manager'
 import SafariScrollPatcher from './ide/SafariScrollPatcher'
+import { loadServiceWorker } from './ide/pdfng/directives/serviceWorkerManager'
 import './ide/cobranding/CobrandingDataService'
 import './ide/settings/index'
 import './ide/share/index'
@@ -64,6 +65,7 @@ import './main/system-messages'
 import '../../modules/modules-ide.js'
 import './shared/context/controllers/root-context-controller'
 import './features/editor-navigation-toolbar/controllers/editor-navigation-toolbar-controller'
+import getMeta from './utils/meta'
 
 App.controller(
   'IdeController',
@@ -355,6 +357,10 @@ If the project has been renamed please look in your project list for a new proje
     })
   }
 )
+
+if (getMeta('ol-enablePdfCaching')) {
+  loadServiceWorker()
+}
 
 export default angular.bootstrap(document.body, ['SharelatexApp'])
 
