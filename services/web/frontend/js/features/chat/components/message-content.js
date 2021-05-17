@@ -10,7 +10,11 @@ function MessageContent({ content }) {
       return
     }
     const MJHub = window.MathJax.Hub
-    const inlineMathConfig = MJHub.config && MJHub.config.tex2jax.inlineMath
+    const inlineMathConfig =
+      (MJHub.config &&
+        MJHub.config.tex2jax &&
+        MJHub.config.tex2jax.inlineMath) ||
+      []
     const alreadyConfigured = inlineMathConfig.some(
       c => c[0] === '$' && c[1] === '$'
     )
