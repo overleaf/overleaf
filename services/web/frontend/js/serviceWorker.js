@@ -117,7 +117,7 @@ function processPdfRequest(event, { file, clsiServerId, compileGroup }) {
       )
     )
       .then(responses => {
-        responses.map(({ chunk, arrayBuffer }) => {
+        responses.forEach(({ chunk, arrayBuffer }) => {
           // overlap:
           //     | REQUESTED_RANGE |
           //  | CHUNK |
