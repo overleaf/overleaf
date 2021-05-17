@@ -334,12 +334,7 @@ module.exports = ResourceWriter = {
             }
           ) // try and continue compiling even if http resource can not be downloaded at this time
         } else {
-          const process = require('process')
           fs.writeFile(path, resource.content, callback)
-          try {
-            let result
-            return (result = fs.lstatSync(path))
-          } catch (e) {}
         }
       })
     })
