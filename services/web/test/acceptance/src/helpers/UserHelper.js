@@ -9,7 +9,7 @@ const request = require('request-promise-native')
 const { db } = require('../../../../app/src/infrastructure/mongodb')
 const { ObjectId } = require('mongodb')
 
-let globalUserNum = 1
+let globalUserNum = Settings.test.counterInit
 
 class UserHelper {
   /**

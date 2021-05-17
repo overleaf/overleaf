@@ -8,7 +8,7 @@ const { promisify } = require('util')
 const fs = require('fs')
 const Path = require('path')
 
-let count = 0
+let count = settings.test.counterInit
 
 class User {
   constructor(options) {

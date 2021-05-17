@@ -141,6 +141,30 @@ clean_ci: clean_test_acceptance_modules
 test_acceptance_module:
 	$(MAKE) modules/$(MODULE_NAME)/test_acceptance
 
+TEST_ACCEPTANCE_MODULES_MERGED_INNER = $(MODULE_DIRS:=/test_acceptance_merged_inner)
+$(TEST_ACCEPTANCE_MODULES_MERGED_INNER): %/test_acceptance_merged_inner: %/Makefile
+test_acceptance_modules_merged_inner: $(TEST_ACCEPTANCE_MODULES_MERGED_INNER)
+
+test_acceptance_modules_merged: export COMPOSE_PROJECT_NAME = \
+	acceptance_test_modules_merged_$(BUILD_DIR_NAME)
+test_acceptance_modules_merged:
+	$(DOCKER_COMPOSE) down -v -t 0
+	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_modules_merged_inner
+	$(DOCKER_COMPOSE) down -v -t 0
+
+test_acceptance_app_merged_inner:
+	npm run --silent test:acceptance:app
+
+test_acceptance_merged_inner: test_acceptance_app_merged_inner
+test_acceptance_merged_inner: test_acceptance_modules_merged_inner
+
+test_acceptance_merged: export COMPOSE_PROJECT_NAME = \
+	acceptance_test_merged_$(BUILD_DIR_NAME)
+test_acceptance_merged:
+	$(DOCKER_COMPOSE) down -v -t 0
+	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_merged_inner
+	$(DOCKER_COMPOSE) down -v -t 0
+
 #
 # CI tests
 #
@@ -307,6 +331,7 @@ tar:
 
 MODULE_TARGETS = \
 	$(TEST_ACCEPTANCE_MODULES) \
+	$(TEST_ACCEPTANCE_MODULES_MERGED_INNER) \
 	$(CLEAN_TEST_ACCEPTANCE_MODULES) \
 	$(TEST_UNIT_MODULES) \
 

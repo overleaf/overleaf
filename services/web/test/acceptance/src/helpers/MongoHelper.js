@@ -18,7 +18,13 @@ module.exports = {
 
     afterEach(async function () {
       return Promise.all(
-        Object.values(db).map(collection => collection.deleteMany({}))
+        Object.values(db).map(async collection => {
+          if (collection === db.migrations) {
+            // Do not clear the collection for tracking migrations.
+            return
+          }
+          return collection.deleteMany({})
+        })
       )
     })
   },

@@ -33,6 +33,7 @@ endif
 
 ifeq (,$(wildcard test/acceptance))
 test_acceptance:
+test_acceptance_merged_inner:
 clean_test_acceptance:
 
 else
@@ -40,6 +41,11 @@ test_acceptance:
 	$(MAKE) --no-print-directory clean_test_acceptance
 	${DOCKER_COMPOSE_TEST_ACCEPTANCE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
 	$(MAKE) --no-print-directory clean_test_acceptance
+
+test_acceptance_merged_inner:
+	cd ../../ && \
+		SHARELATEX_CONFIG=/app/$(MODULE_DIR)/test/acceptance/config/settings.test.coffee \
+			npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
 
 clean_test_acceptance:
 	${DOCKER_COMPOSE_TEST_ACCEPTANCE} down -v -t 0
