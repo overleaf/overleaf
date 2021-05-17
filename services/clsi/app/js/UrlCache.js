@@ -19,7 +19,6 @@ const UrlFetcher = require('./UrlFetcher')
 const Settings = require('settings-sharelatex')
 const crypto = require('crypto')
 const fs = require('fs')
-const fse = require('fs-extra')
 const logger = require('logger-sharelatex')
 const async = require('async')
 
@@ -36,7 +35,7 @@ module.exports = UrlCache = {
         if (error != null) {
           return callback(error)
         }
-        return fse.copy(pathToCachedUrl, destPath, function (error) {
+        return fs.copyFile(pathToCachedUrl, destPath, function (error) {
           if (error != null) {
             logger.error(
               { err: error, from: pathToCachedUrl, to: destPath },

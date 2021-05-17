@@ -27,8 +27,7 @@ describe('UrlCache', function () {
         'settings-sharelatex': (this.Settings = {
           path: { clsiCacheDir: '/cache/dir' }
         }),
-        fs: (this.fs = {}),
-        'fs-extra': (this.fse = { copy: sinon.stub().yields() })
+        fs: (this.fs = { copyFile: sinon.stub().yields() })
       }
     }))
   })
@@ -249,7 +248,6 @@ describe('UrlCache', function () {
     beforeEach(function () {
       this.cachePath = 'path/to/cached/url'
       this.destPath = 'path/to/destination'
-      this.UrlCache._copyFile = sinon.stub().callsArg(2)
       this.UrlCache._ensureUrlIsInCache = sinon
         .stub()
         .callsArgWith(3, null, this.cachePath)
@@ -269,7 +267,7 @@ describe('UrlCache', function () {
     })
 
     it('should copy the file to the new location', function () {
-      return this.fse.copy
+      return this.fs.copyFile
         .calledWith(this.cachePath, this.destPath)
         .should.equal(true)
     })
