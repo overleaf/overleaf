@@ -51,7 +51,7 @@ function featuresUpgradedByAffiliation(affiliation, user) {
       if (callback == null) {
         callback = function () {}
       }
-      NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
+      NotificationsHandler.markAsReadWithKey(user._id, this.key, callback)
     },
   }
 }
@@ -78,7 +78,7 @@ function redundantPersonalSubscription(affiliation, user) {
       if (callback == null) {
         callback = function () {}
       }
-      NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
+      NotificationsHandler.markAsReadWithKey(user._id, this.key, callback)
     },
   }
 }
