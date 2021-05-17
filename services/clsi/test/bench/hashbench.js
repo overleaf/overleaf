@@ -68,13 +68,6 @@ files.forEach((file) => {
   })
 })
 
-async.timesSeries(
-  10,
-  (n, cb) => {
-    console.log('run', n)
-    async.series(jobs, cb)
-  },
-  () => {
-    console.log('DONE')
-  }
-)
+async.timesSeries(10, (n, cb) => {
+  async.series(jobs, cb)
+})
