@@ -55,7 +55,7 @@ export default function SymbolPaletteContent({ handleSelect }) {
   }, [])
 
   return (
-    <Tabs>
+    <Tabs className="symbol-palette-container">
       <div className="symbol-palette">
         <div className="symbol-palette-header">
           <SymbolPaletteTabs

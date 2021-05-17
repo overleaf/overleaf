@@ -133,6 +133,11 @@ App.directive(
         editor.setOption('behavioursEnabled', scope.autoPairDelimiters || false)
         editor.setOption('wrapBehavioursEnabled', false)
 
+        ide.$scope.$on('editor:replace-selection', (event, text) => {
+          editor.focus()
+          editor.insert(text)
+        })
+
         scope.$watch('autoPairDelimiters', autoPairDelimiters => {
           if (autoPairDelimiters) {
             return editor.setOption('behavioursEnabled', true)

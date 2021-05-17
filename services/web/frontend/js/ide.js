@@ -192,7 +192,12 @@ App.controller(
     ide.loadingManager = new LoadingManager($scope)
     ide.connectionManager = new ConnectionManager(ide, $scope)
     ide.fileTreeManager = new FileTreeManager(ide, $scope)
-    ide.editorManager = new EditorManager(ide, $scope, localStorage)
+    ide.editorManager = new EditorManager(
+      ide,
+      $scope,
+      localStorage,
+      eventTracking
+    )
     ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
     if (window.data.useV2History) {
       ide.historyManager = new HistoryV2Manager(ide, $scope, localStorage)

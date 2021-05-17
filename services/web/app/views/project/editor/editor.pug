@@ -12,80 +12,10 @@ div.full-size(
 	custom-toggler-msg-when-open=hasFeature('custom-togglers') ? translate("tooltip_hide_pdf") : false
 	custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? translate("tooltip_show_pdf") : false
 )
-	.ui-layout-center(
-		ng-controller="ReviewPanelController",
-		ng-class="{\
-			'rp-unsupported': editor.showRichText,\
-			'rp-state-current-file': (reviewPanel.subView === SubViews.CUR_FILE),\
-			'rp-state-current-file-expanded': (reviewPanel.subView === SubViews.CUR_FILE && ui.reviewPanelOpen),\
-			'rp-state-current-file-mini': (reviewPanel.subView === SubViews.CUR_FILE && !ui.reviewPanelOpen),\
-			'rp-state-overview': (reviewPanel.subView === SubViews.OVERVIEW),\
-			'rp-size-mini': ui.miniReviewPanelVisible,\
-			'rp-size-expanded': ui.reviewPanelOpen,\
-			'rp-layout-left': reviewPanel.layoutToLeft,\
-			'rp-loading-threads': reviewPanel.loadingThreads,\
-		}"
-	)
-		.loading-panel(
-			ng-show="(!editor.sharejs_doc || editor.opening) && !editor.error_state",
-			style=showRichText ? "top: 32px" : "",
-		)
-			span(ng-show="editor.open_doc_id")
-				i.fa.fa-spin.fa-refresh
-				| &nbsp;&nbsp;#{translate("loading")}…
-			span(ng-show="!editor.open_doc_id")
-				i.fa.fa-arrow-left
-				| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
-
-		if moduleIncludesAvailable('editor:main')
-			!= moduleIncludes('editor:main', locals)
-		else
-			.toolbar.toolbar-editor
-
-		.multi-selection-ongoing(
-			ng-show="multiSelectedCount > 0"
-		)
-			.multi-selection-message
-				h4 {{ multiSelectedCount }} #{translate('files_selected')}
-
-		#editor(
-			ace-editor="editor",
-			ng-if="!editor.showRichText",
-			ng-show="!!editor.sharejs_doc && !editor.opening && multiSelectedCount === 0 && !editor.error_state",
-			theme="settings.editorTheme",
-			keybindings="settings.mode",
-			font-size="settings.fontSize",
-			auto-complete="settings.autoComplete",
-			auto-pair-delimiters="settings.autoPairDelimiters",
-			spell-check="!anonymous",
-			spell-check-language="project.spellCheckLanguage"
-			highlights="onlineUserCursorHighlights[editor.open_doc_id]"
-			show-print-margin="false",
-			sharejs-doc="editor.sharejs_doc",
-			last-updated="editor.last_updated",
-			cursor-position="editor.cursorPosition",
-			goto-line="editor.gotoLine",
-			resize-on="layout:main:resize,layout:pdf:resize,layout:review:resize,review-panel:toggle,layout:flat-screen:toggle",
-			annotations="pdf.logEntryAnnotations[editor.open_doc_id]",
-			read-only="!permissions.write",
-			file-name="editor.open_doc_name",
-			on-ctrl-enter="recompileViaKey",
-			on-save="recompileViaKey",
-			on-ctrl-j="toggleReviewPanel",
-			on-ctrl-shift-c="addNewCommentFromKbdShortcut",
-			on-ctrl-shift-a="toggleTrackChangesFromKbdShortcut",
-			syntax-validation="settings.syntaxValidation",
-			review-panel="reviewPanel",
-			events-bridge="reviewPanelEventsBridge"
-			track-changes= "editor.trackChanges",
-			doc-id="editor.open_doc_id"
-			renderer-data="reviewPanel.rendererData"
-			font-family="settings.fontFamily"
-			line-height="settings.lineHeight"
-		)
-
-		if !isRestrictedTokenMember
-			include ./review-panel
+	if showSymbolPalette
+		include ./editor-with-symbol-palette
+	else
+		include ./editor-no-symbol-palette
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")

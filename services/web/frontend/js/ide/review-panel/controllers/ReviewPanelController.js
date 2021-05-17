@@ -1224,11 +1224,11 @@ export default App.controller(
       }
     }
 
-    return ($scope.openTrackChangesUpgradeModal = () =>
+    $scope.openTrackChangesUpgradeModal = () =>
       $modal.open({
         templateUrl: 'trackChangesUpgradeModalTemplate',
         controller: 'TrackChangesUpgradeModalController',
         scope: $scope.$new(),
-      }))
+      })
   }
 )
