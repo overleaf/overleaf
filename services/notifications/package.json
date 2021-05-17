@@ -28,7 +28,7 @@
     "mongodb": "^3.6.0",
     "request": "^2.88.2",
     "settings-sharelatex": "^1.1.0",
-    "underscore": "1.9.2"
+    "underscore": "1.13.1"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
