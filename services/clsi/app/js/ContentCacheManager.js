@@ -100,17 +100,27 @@ async function writePdfStream(dir, hash, buffers) {
     //  ETags used for client side caching via browser internals.
     return false
   } catch (e) {}
-  const file = await fs.promises.open(filename, 'w')
+  const atomicWriteFilename = filename + '~'
+  const file = await fs.promises.open(atomicWriteFilename, 'w')
   if (Settings.enablePdfCachingDark) {
     // Write an empty file in dark mode.
     buffers = []
   }
   try {
-    for (const buffer of buffers) {
-      await file.write(buffer)
+    try {
+      for (const buffer of buffers) {
+        await file.write(buffer)
+      }
+    } finally {
+      await file.close()
     }
-  } finally {
-    await file.close()
+    await fs.promises.rename(atomicWriteFilename, filename)
+  } catch (err) {
+    try {
+      await fs.promises.unlink(atomicWriteFilename)
+    } catch (_) {
+      throw err
+    }
   }
   return true
 }
