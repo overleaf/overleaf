@@ -78,7 +78,7 @@ function processPdfRequest(event, { file, clsiServerId, compileGroup }) {
       const path = `${perUserPrefix}/content/${file.contentId}/${chunk.hash}`
       const url = new URL(path, event.request.url)
       if (clsiServerId) {
-        url.searchParams.set('clsiServerId', clsiServerId)
+        url.searchParams.set('clsiserverid', clsiServerId)
       }
       if (compileGroup) {
         url.searchParams.set('compileGroup', compileGroup)
