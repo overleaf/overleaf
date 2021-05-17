@@ -32,6 +32,7 @@ describe('SubscriptionUpdater', function () {
       manager_ids: [this.adminUser._id],
       member_ids: this.allUserIds,
       save: sinon.stub().callsArgWith(0),
+      groupPlan: true,
       planCode: 'group_subscription',
     }
 
@@ -324,6 +325,29 @@ describe('SubscriptionUpdater', function () {
       )
     })
 
+    it('should delete and replace subscription when downgrading from group to individual plan', function (done) {
+      this.PlansLocator.findLocalPlanInSettings
+        .withArgs(this.recurlySubscription.plan.plan_code)
+        .returns({ groupPlan: false })
+      this.SubscriptionUpdater._deleteAndReplaceSubscriptionFromRecurly = sinon
+        .stub()
+        .yields()
+      this.SubscriptionUpdater._updateSubscriptionFromRecurly(
+        this.recurlySubscription,
+        this.groupSubscription,
+        {},
+        err => {
+          if (err != null) {
+            return done(err)
+          }
+          this.SubscriptionUpdater._deleteAndReplaceSubscriptionFromRecurly
+            .calledWithMatch(this.recurlySubscription, this.groupSubscription)
+            .should.equal(true)
+          done()
+        }
+      )
+    })
+
     it('should not set group to true or set groupPlan', function (done) {
       this.SubscriptionUpdater._updateSubscriptionFromRecurly(
         this.recurlySubscription,
@@ -557,6 +581,42 @@ describe('SubscriptionUpdater', function () {
           .calledWith(userId)
           .should.equal(true)
       }
+    })
+  })
+
+  describe('_deleteAndReplaceSubscriptionFromRecurly', function () {
+    beforeEach(function (done) {
+      this.SubscriptionUpdater.deleteSubscription = sinon.stub().yields()
+      this.SubscriptionUpdater._createNewSubscription = sinon
+        .stub()
+        .yields(null, this.subscription)
+      this.SubscriptionUpdater._updateSubscriptionFromRecurly = sinon
+        .stub()
+        .yields()
+      this.SubscriptionUpdater._deleteAndReplaceSubscriptionFromRecurly(
+        this.recurlySubscription,
+        this.groupSubscription,
+        {},
+        done
+      )
+    })
+
+    it('should delete the old subscription', function () {
+      this.SubscriptionUpdater.deleteSubscription
+        .calledWithMatch(this.groupSubscription)
+        .should.equal(true)
+    })
+
+    it('should create a new subscription', function () {
+      this.SubscriptionUpdater._createNewSubscription
+        .calledWith(this.groupSubscription.admin_id)
+        .should.equal(true)
+    })
+
+    it('should update the new subscription', function () {
+      this.SubscriptionUpdater._updateSubscriptionFromRecurly
+        .calledWithMatch(this.recurlySubscription, this.subscription)
+        .should.equal(true)
     })
   })
 })

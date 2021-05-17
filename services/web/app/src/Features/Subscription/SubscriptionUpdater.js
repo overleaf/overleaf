@@ -258,6 +258,34 @@ const SubscriptionUpdater = {
     subscription.save(err => callback(err, subscription))
   },
 
+  _deleteAndReplaceSubscriptionFromRecurly(
+    recurlySubscription,
+    subscription,
+    requesterData,
+    callback
+  ) {
+    const adminUserId = subscription.admin_id
+    SubscriptionUpdater.deleteSubscription(subscription, requesterData, err => {
+      if (err) {
+        return callback(err)
+      }
+      SubscriptionUpdater._createNewSubscription(
+        adminUserId,
+        (err, newSubscription) => {
+          if (err) {
+            return callback(err)
+          }
+          SubscriptionUpdater._updateSubscriptionFromRecurly(
+            recurlySubscription,
+            newSubscription,
+            requesterData,
+            callback
+          )
+        }
+      )
+    })
+  },
+
   _updateSubscriptionFromRecurly(
     recurlySubscription,
     subscription,
@@ -271,19 +299,31 @@ const SubscriptionUpdater = {
         callback
       )
     }
-    subscription.recurlySubscription_id = recurlySubscription.uuid
-    subscription.planCode = recurlySubscription.plan.plan_code
-    const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+    const updatedPlanCode = recurlySubscription.plan.plan_code
+    const plan = PlansLocator.findLocalPlanInSettings(updatedPlanCode)
+
     if (plan == null) {
-      return callback(
-        new Error(`plan code not found: ${subscription.planCode}`)
+      return callback(new Error(`plan code not found: ${updatedPlanCode}`))
+    }
+    if (!plan.groupPlan && subscription.groupPlan) {
+      // If downgrading from group to individual plan, delete group sub and create a new one
+      return SubscriptionUpdater._deleteAndReplaceSubscriptionFromRecurly(
+        recurlySubscription,
+        subscription,
+        requesterData,
+        callback
       )
     }
+
+    subscription.recurlySubscription_id = recurlySubscription.uuid
+    subscription.planCode = updatedPlanCode
+
     if (plan.groupPlan) {
       if (!subscription.groupPlan) {
         subscription.member_ids = subscription.member_ids || []
         subscription.member_ids.push(subscription.admin_id)
       }
+
       subscription.groupPlan = true
       subscription.membersLimit = plan.membersLimit
 
