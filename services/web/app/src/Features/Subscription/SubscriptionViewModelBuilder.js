@@ -200,15 +200,6 @@ module.exports = {
             account: recurlySubscription.account,
           }
           if (recurlySubscription.pending_subscription) {
-            const pendingSubscriptionTax =
-              personalSubscription.recurly.taxRate *
-              recurlySubscription.pending_subscription.unit_amount_in_cents
-            personalSubscription.recurly.price = SubscriptionFormatters.formatPrice(
-              recurlySubscription.pending_subscription.unit_amount_in_cents +
-                addOnPrice +
-                pendingSubscriptionTax,
-              recurlySubscription.currency
-            )
             const pendingPlan = PlansLocator.findLocalPlanInSettings(
               recurlySubscription.pending_subscription.plan.plan_code
             )
@@ -219,6 +210,44 @@ module.exports = {
                 )
               )
             }
+            let pendingAdditionalLicenses = 0
+            let pendingAddOnTax = 0
+            let pendingAddOnPrice = 0
+            if (recurlySubscription.pending_subscription.subscription_add_ons) {
+              if (
+                pendingPlan.membersLimitAddOn &&
+                Array.isArray(
+                  recurlySubscription.pending_subscription.subscription_add_ons
+                )
+              ) {
+                recurlySubscription.pending_subscription.subscription_add_ons.forEach(
+                  addOn => {
+                    if (addOn.add_on_code === pendingPlan.membersLimitAddOn) {
+                      pendingAddOnPrice +=
+                        addOn.quantity * addOn.unit_amount_in_cents
+                      pendingAdditionalLicenses += addOn.quantity
+                    }
+                  }
+                )
+              }
+              // Need to calculate tax ourselves as we don't get tax amounts for pending subs
+              pendingAddOnTax =
+                personalSubscription.recurly.taxRate * pendingAddOnPrice
+            }
+            const pendingSubscriptionTax =
+              personalSubscription.recurly.taxRate *
+              recurlySubscription.pending_subscription.unit_amount_in_cents
+            personalSubscription.recurly.price = SubscriptionFormatters.formatPrice(
+              recurlySubscription.pending_subscription.unit_amount_in_cents +
+                pendingAddOnPrice +
+                pendingAddOnTax +
+                pendingSubscriptionTax,
+              recurlySubscription.currency
+            )
+            const pendingTotalLicenses =
+              (pendingPlan.membersLimit || 0) + pendingAdditionalLicenses
+            personalSubscription.recurly.pendingAdditionalLicenses = pendingAdditionalLicenses
+            personalSubscription.recurly.pendingTotalLicenses = pendingTotalLicenses
             personalSubscription.pendingPlan = pendingPlan
           } else {
             personalSubscription.recurly.price = SubscriptionFormatters.formatPrice(

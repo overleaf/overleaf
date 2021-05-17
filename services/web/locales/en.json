@@ -1021,6 +1021,7 @@
   "change_plan": "Change plan",
   "next_payment_of_x_collectected_on_y": "The next payment of <0>__paymentAmmount__</0> will be collected on <1>__collectionDate__</1>.",
   "additional_licenses": "Your subscription includes <0>__additionalLicenses__</0> additional license(s) for a total of <1>__totalLicenses__</1> licenses.",
+  "pending_additional_licenses": "Your subscription is changing to include <0>__pendingAdditionalLicenses__</0> additional license(s) for a total of <1>__pendingTotalLicenses__</1> licenses.",
   "update_your_billing_details": "Update Your Billing Details",
   "subscription_canceled_and_terminate_on_x": " Your subscription has been canceled and will terminate on <0>__terminateDate__</0>. No further payments will be taken.",
   "your_subscription_has_expired": "Your subscription has expired.",

@@ -8,9 +8,13 @@ div(ng-controller="RecurlySubscriptionController")
 			when "active"
 				p !{translate("currently_subscribed_to_plan", {planName: personalSubscription.plan.name}, ['strong'])}
 					if (personalSubscription.pendingPlan)
-						|
-						| !{translate("your_plan_is_changing_at_term_end", {pendingPlanName: personalSubscription.pendingPlan.name}, ['strong'])}
-					if (personalSubscription.recurly.additionalLicenses > 0)
+						if (personalSubscription.pendingPlan.name != personalSubscription.plan.name)
+							|
+							| !{translate("your_plan_is_changing_at_term_end", {pendingPlanName: personalSubscription.pendingPlan.name}, ['strong'])}
+						if (personalSubscription.recurly.pendingAdditionalLicenses > 0 || personalSubscription.recurly.additionalLicenses > 0)
+							|
+							| !{translate("pending_additional_licenses", {pendingAdditionalLicenses: personalSubscription.recurly.pendingAdditionalLicenses, pendingTotalLicenses: personalSubscription.recurly.pendingTotalLicenses}, ['strong', 'strong'])}
+					else if (personalSubscription.recurly.additionalLicenses > 0)
 						|
 						| !{translate("additional_licenses", {additionalLicenses: personalSubscription.recurly.additionalLicenses, totalLicenses: personalSubscription.recurly.totalLicenses}, ['strong', 'strong'])}
 					| &nbsp;
