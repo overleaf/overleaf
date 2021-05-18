@@ -26,9 +26,10 @@ async function update(contentDir, filePath) {
   const extractor = new PdfStreamsExtractor()
   const ranges = []
   const newRanges = []
-  const seenHashes = new Set()
   // keep track of hashes expire old ones when they reach a generation > N.
   const tracker = await HashFileTracker.from(contentDir)
+  tracker.updateAge()
+
   for await (const chunk of stream) {
     const pdfStreams = extractor.consume(chunk)
     for (const pdfStream of pdfStreams) {
@@ -39,15 +40,12 @@ async function update(contentDir, filePath) {
       ranges.push(range)
 
       // Optimization: Skip writing of duplicate streams.
-      if (seenHashes.has(hash)) continue
-      seenHashes.add(hash)
+      if (tracker.track(range)) continue
 
-      if (await writePdfStream(contentDir, hash, pdfStream.buffers)) {
-        newRanges.push(range)
-      }
+      await writePdfStream(contentDir, hash, pdfStream.buffers)
+      newRanges.push(range)
     }
   }
-  tracker.update(ranges, newRanges)
   const reclaimedSpace = await tracker.deleteStaleHashes(5)
   await tracker.flush()
   return [ranges, newRanges, reclaimedSpace]
@@ -74,15 +72,18 @@ class HashFileTracker {
     return new HashFileTracker(contentDir, state)
   }
 
-  update(ranges, newRanges) {
+  track(range) {
+    const exists = this.hashAge.has(range.hash)
+    if (!exists) {
+      this.hashSize.set(range.hash, range.end - range.start)
+    }
+    this.hashAge.set(range.hash, 0)
+    return exists
+  }
+
+  updateAge() {
     for (const [hash, age] of this.hashAge) {
       this.hashAge.set(hash, age + 1)
-    }
-    for (const range of ranges) {
-      this.hashAge.set(range.hash, 0)
-    }
-    for (const range of newRanges) {
-      this.hashSize.set(range.hash, range.end - range.start)
     }
     return this
   }
@@ -215,13 +216,6 @@ function pdfStreamHash(buffers) {
 
 async function writePdfStream(dir, hash, buffers) {
   const filename = Path.join(dir, hash)
-  try {
-    await fs.promises.stat(filename)
-    // The file exists. Do not rewrite the content.
-    // It would change the modified-time of the file and hence invalidate the
-    //  ETags used for client side caching via browser internals.
-    return false
-  } catch (e) {}
   const atomicWriteFilename = filename + '~'
   const file = await fs.promises.open(atomicWriteFilename, 'w')
   if (Settings.enablePdfCachingDark) {
@@ -244,7 +238,6 @@ async function writePdfStream(dir, hash, buffers) {
       throw err
     }
   }
-  return true
 }
 
 function promiseMapWithLimit(concurrency, array, fn) {
