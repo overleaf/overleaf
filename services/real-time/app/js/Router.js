@@ -153,7 +153,7 @@ module.exports = Router = {
       client.publicId = 'P.' + base64id.generateId()
       client.emit('connectionAccepted', null, client.publicId)
 
-      metrics.inc('socket-io.connection')
+      metrics.inc('socket-io.connection', 1, { status: client.transport })
       metrics.gauge('socket-io.clients', io.sockets.clients().length)
 
       logger.log({ session, client_id: client.id }, 'client connected')
@@ -211,7 +211,7 @@ module.exports = Router = {
       })
 
       client.on('disconnect', function () {
-        metrics.inc('socket-io.disconnect')
+        metrics.inc('socket-io.disconnect', 1, { status: client.transport })
         metrics.gauge('socket-io.clients', io.sockets.clients().length)
 
         WebsocketController.leaveProject(io, client, function (err) {

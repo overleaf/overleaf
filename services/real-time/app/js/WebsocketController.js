@@ -36,7 +36,7 @@ module.exports = WebsocketController = {
       { user_id, project_id, client_id: client.id },
       'user joining project'
     )
-    metrics.inc('editor.join-project')
+    metrics.inc('editor.join-project', 1, { status: client.transport })
     WebApiManager.joinProject(project_id, user, function (
       error,
       project,
@@ -114,7 +114,7 @@ module.exports = WebsocketController = {
       return callback()
     } // client did not join project
 
-    metrics.inc('editor.leave-project')
+    metrics.inc('editor.leave-project', 1, { status: client.transport })
     logger.log(
       { project_id, user_id, client_id: client.id },
       'client leaving project'
@@ -167,7 +167,7 @@ module.exports = WebsocketController = {
     }
 
     const joinLeaveEpoch = ++client.joinLeaveEpoch
-    metrics.inc('editor.join-doc')
+    metrics.inc('editor.join-doc', 1, { status: client.transport })
     const { project_id, user_id, is_restricted_user } = client.ol_context
     if (!project_id) {
       return callback(new NotJoinedError())
@@ -319,7 +319,7 @@ module.exports = WebsocketController = {
   leaveDoc(client, doc_id, callback) {
     // client may have disconnected, but we have to cleanup internal state.
     client.joinLeaveEpoch++
-    metrics.inc('editor.leave-doc')
+    metrics.inc('editor.leave-doc', 1, { status: client.transport })
     const { project_id, user_id } = client.ol_context
     logger.log(
       { user_id, project_id, doc_id, client_id: client.id },
@@ -338,7 +338,9 @@ module.exports = WebsocketController = {
       return callback()
     }
 
-    metrics.inc('editor.update-client-position', 0.1)
+    metrics.inc('editor.update-client-position', 0.1, {
+      status: client.transport
+    })
     const {
       project_id,
       first_name,
@@ -412,7 +414,7 @@ module.exports = WebsocketController = {
       return callback()
     }
 
-    metrics.inc('editor.get-connected-users')
+    metrics.inc('editor.get-connected-users', { status: client.transport })
     const { project_id, user_id, is_restricted_user } = client.ol_context
     if (is_restricted_user) {
       return callback(null, [])
@@ -475,7 +477,7 @@ module.exports = WebsocketController = {
         }
         update.meta.source = client.publicId
         update.meta.user_id = user_id
-        metrics.inc('editor.doc-update', 0.3)
+        metrics.inc('editor.doc-update', 0.3, { status: client.transport })
 
         logger.log(
           {
