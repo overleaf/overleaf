@@ -868,6 +868,10 @@ const ProjectController = {
                 'new_share_modal_ui',
                 true
               ),
+              showReactDropboxModal: shouldDisplayFeature(
+                'new_dropbox_modal_ui',
+                false
+              ),
               showReactGithubSync: shouldDisplayFeature(
                 'new_github_sync_ui',
                 user.alphaProgram

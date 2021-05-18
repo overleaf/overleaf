@@ -35,7 +35,7 @@
     "lint:fix": "eslint --fix .",
     "extract-translations": "i18next-scanner",
     "migrations": "east",
-    "storybook": "start-storybook -p 6006"
+    "storybook": "start-storybook -p 6006 -s ./public"
   },
   "browserslist": [
     "last 1 year",
