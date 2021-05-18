@@ -170,7 +170,7 @@ describe('FeaturesUpdater', function () {
       })
       it('should fire module hook to unlink dropbox', function () {
         this.Modules.hooks.fire
-          .calledWith('removeDropbox', this.user._id)
+          .calledWith('removeDropbox', this.user._id, 'test')
           .should.equal(true)
       })
     })

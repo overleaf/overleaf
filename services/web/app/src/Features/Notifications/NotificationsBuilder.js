@@ -29,6 +29,26 @@ function dropboxDuplicateProjectNames(userId) {
   }
 }
 
+function dropboxUnlinkedDueToLapsedReconfirmation(userId) {
+  return {
+    key: 'drobox-unlinked-due-to-lapsed-reconfirmation',
+    create(callback) {
+      NotificationsHandler.createNotification(
+        userId,
+        this.key,
+        'notification_dropbox_unlinked_due_to_lapsed_reconfirmation',
+        {},
+        null,
+        true,
+        callback
+      )
+    },
+    read(callback) {
+      NotificationsHandler.markAsReadWithKey(userId, this.key, callback)
+    },
+  }
+}
+
 function featuresUpgradedByAffiliation(affiliation, user) {
   return {
     key: `features-updated-by=${affiliation.institutionId}`,
@@ -206,6 +226,7 @@ function tpdsFileLimit(userId) {
 
 const NotificationsBuilder = {
   // Note: notification keys should be url-safe
+  dropboxUnlinkedDueToLapsedReconfirmation,
   dropboxDuplicateProjectNames,
   featuresUpgradedByAffiliation,
   redundantPersonalSubscription,
@@ -215,6 +236,9 @@ const NotificationsBuilder = {
 }
 
 NotificationsBuilder.promises = {
+  dropboxUnlinkedDueToLapsedReconfirmation: function (userId) {
+    return promisifyAll(dropboxUnlinkedDueToLapsedReconfirmation(userId))
+  },
   redundantPersonalSubscription: function (affiliation, user) {
     return promisifyAll(redundantPersonalSubscription(affiliation, user))
   },

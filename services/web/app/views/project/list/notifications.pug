@@ -115,6 +115,17 @@ include ../../_mixins/reconfirm_affiliation
 							span.sr-only #{translate("close")}
 
 				.alert.alert-info(
+					ng-switch-when="notification_dropbox_unlinked_due_to_lapsed_reconfirmation"
+				)
+					.notification-body
+						| !{translate("dropbox_unlinked_premium_feature", {}, ['strong'])}
+						| &nbsp;
+						a(href="/learn/how-to/Institutional_Email_Reconfirmation") #{translate("learn_more")}
+					.notification-close
+						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(
 					ng-switch-default
 				)
 					span(ng-bind-html="notification.html").notification-body

@@ -1,4 +1,4 @@
-const InstitutionsReconfirmationHandler = require('../app/src/Features/Institutions/InstitutionsReconfirmationHandler')
+const InstitutionsReconfirmationHandler = require('../modules/overleaf-integration/app/src/Institutions/InstitutionsReconfirmationHandler')
 
 InstitutionsReconfirmationHandler.processLapsed()
   .then(() => {

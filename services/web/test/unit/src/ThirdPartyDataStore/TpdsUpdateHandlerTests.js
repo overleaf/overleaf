@@ -376,7 +376,8 @@ function expectDropboxUnlinked() {
   it('unlinks Dropbox', function () {
     expect(this.Modules.hooks.fire).to.have.been.calledWith(
       'removeDropbox',
-      this.userId
+      this.userId,
+      'duplicate-projects'
     )
   })
 

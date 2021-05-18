@@ -1,4 +1,5 @@
 const SandboxedModule = require('sandboxed-module')
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -8,20 +9,55 @@ const modulePath = require('path').join(
 describe('NotificationsBuilder', function () {
   const userId = '123nd3ijdks'
 
-  describe('ipMatcherAffiliation', function () {
-    beforeEach(function () {
-      this.handler = { createNotification: sinon.stub().callsArgWith(6) }
-      this.settings = { apis: { v1: { url: 'v1.url', user: '', pass: '' } } }
-      this.request = sinon.stub()
-      this.controller = SandboxedModule.require(modulePath, {
-        requires: {
-          './NotificationsHandler': this.handler,
-          'settings-sharelatex': this.settings,
-          request: this.request,
-        },
+  beforeEach(function () {
+    this.handler = { createNotification: sinon.stub().callsArgWith(6) }
+    this.settings = { apis: { v1: { url: 'v1.url', user: '', pass: '' } } }
+    this.request = sinon.stub()
+    this.controller = SandboxedModule.require(modulePath, {
+      requires: {
+        './NotificationsHandler': this.handler,
+        'settings-sharelatex': this.settings,
+        request: this.request,
+      },
+    })
+  })
+
+  describe('dropboxUnlinkedDueToLapsedReconfirmation', function (done) {
+    it('should create the notification', function (done) {
+      this.controller
+        .dropboxUnlinkedDueToLapsedReconfirmation(userId)
+        .create(error => {
+          expect(error).to.not.exist
+          expect(this.handler.createNotification).to.have.been.calledWith(
+            userId,
+            'drobox-unlinked-due-to-lapsed-reconfirmation',
+            'notification_dropbox_unlinked_due_to_lapsed_reconfirmation',
+            {},
+            null,
+            true
+          )
+          done()
+        })
+    })
+    describe('NotificationsHandler error', function () {
+      let anError
+      beforeEach(function () {
+        anError = new Error('oops')
+        this.handler.createNotification.yields(anError)
+      })
+      it('should return errors from NotificationsHandler', function (done) {
+        this.controller
+          .dropboxUnlinkedDueToLapsedReconfirmation(userId)
+          .create(error => {
+            expect(error).to.exist
+            expect(error).to.deep.equal(anError)
+            done()
+          })
       })
     })
+  })
 
+  describe('ipMatcherAffiliation', function () {
     describe('with portal and with SSO', function () {
       beforeEach(function () {
         this.body = {

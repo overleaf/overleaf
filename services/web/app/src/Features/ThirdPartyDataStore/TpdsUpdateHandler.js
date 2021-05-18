@@ -142,7 +142,7 @@ function getOrCreateProject(userId, projectName, callback) {
 }
 
 function handleDuplicateProjects(userId, projectName, callback) {
-  Modules.hooks.fire('removeDropbox', userId, err => {
+  Modules.hooks.fire('removeDropbox', userId, 'duplicate-projects', err => {
     if (err) {
       return callback(err)
     }

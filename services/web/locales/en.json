@@ -1445,5 +1445,6 @@
   "no_symbols_found": "No symbols found",
   "search": "Search",
   "also": "Also",
-  "add_email": "Add Email"
+  "add_email": "Add Email",
+  "dropbox_unlinked_premium_feature": "<0>Your Dropbox account has been unlinked</0> because Dropbox Sync is a premium feature that you had through an institutional license. Please confirm you are still at the institution or upgrade your account in order to relink your Dropbox account."
 }

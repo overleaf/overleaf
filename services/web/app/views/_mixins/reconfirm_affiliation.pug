@@ -19,7 +19,7 @@ mixin reconfirmAffiliationNotification(location)
 				| !{translate("please_reconfirm_institutional_email", {}, [{name: 'a', attrs: {href: '/user/settings?remove={{userEmail.email}}' }}])}
 
 			| &nbsp;
-			a(href="/learn/how-to/Reconfirm_an_institutional_email_address") #{translate("learn_more")}
+			a(href="/learn/how-to/Institutional_Email_Reconfirmation") #{translate("learn_more")}
 
 		div(ng-if="reconfirm[userEmail.email].reconfirmationSent")
 			| !{translate("please_check_your_inbox_to_confirm", {institutionName: '{{userEmail.affiliation.institution.name}}'}, ['strong'])}
