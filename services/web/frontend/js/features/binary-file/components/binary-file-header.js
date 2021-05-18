@@ -66,9 +66,7 @@ export default function BinaryFileHeader({ file, storeReferencesKeys }) {
     setRefreshing(true)
     // Replacement of the file handled by the file tree
     window.expectingLinkedFileRefreshedSocketFor = file.name
-    postJSON(`/project/${window.project_id}/linked_file/${file.id}/refresh`, {
-      disableAutoLoginRedirect: true,
-    })
+    postJSON(`/project/${window.project_id}/linked_file/${file.id}/refresh`)
       .then(() => {
         if (isMounted.current) {
           setRefreshing(false)
