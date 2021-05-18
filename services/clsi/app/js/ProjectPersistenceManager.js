@@ -38,7 +38,10 @@ module.exports = ProjectPersistenceManager = {
       const lowerExpiry = ProjectPersistenceManager.EXPIRY_TIMEOUT * 0.9
       if (lowDisk && Settings.project_cache_length_ms / 2 < lowerExpiry) {
         logger.warn(
-          { stats: stats },
+          {
+            stats: stats,
+            newExpiryTimeoutInDays: (lowerExpiry / oneDay).toFixed(2)
+          },
           'disk running low on space, modifying EXPIRY_TIMEOUT'
         )
         ProjectPersistenceManager.EXPIRY_TIMEOUT = lowerExpiry
