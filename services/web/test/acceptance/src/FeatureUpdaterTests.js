@@ -379,4 +379,17 @@ describe('FeatureUpdater.refreshFeatures', function () {
       })
     })
   })
+
+  it('should update featuresUpdatedAt', async function () {
+    user = (await UserHelper.getUser({ _id: user._id })).user
+    expect(user.featuresUpdatedAt).to.not.exist // no default set
+    await FeaturesUpdater.promises.refreshFeatures(user._id, 'test')
+    user = (await UserHelper.getUser({ _id: user._id })).user
+    const featuresUpdatedAt = user.featuresUpdatedAt
+    expect(featuresUpdatedAt).to.exist
+    // refresh again
+    await FeaturesUpdater.promises.refreshFeatures(user._id, 'test')
+    user = (await UserHelper.getUser({ _id: user._id })).user
+    expect(user.featuresUpdatedAt > featuresUpdatedAt).to.be.true
+  })
 })
