@@ -15,7 +15,7 @@ import {
   syncMove,
   syncCreateEntity,
 } from '../util/sync-mutation'
-import { findInTreeOrThrow } from '../util/find-in-tree'
+import { findInTree, findInTreeOrThrow } from '../util/find-in-tree'
 import { isNameUniqueInFolder } from '../util/is-name-unique-in-folder'
 import { isBlockedFilename, isCleanFilename } from '../util/safe-path'
 
@@ -380,7 +380,13 @@ function getSelectedParentFolderId(fileTreeData, selectedEntityIds) {
     return fileTreeData._id
   }
 
-  const found = findInTreeOrThrow(fileTreeData, selectedEntityId)
+  const found = findInTree(fileTreeData, selectedEntityId)
+
+  if (!found) {
+    // if the entity isn't in the tree, return the root folder id.
+    return fileTreeData._id
+  }
+
   return found.type === 'folder' ? found.entity._id : found.parentFolderId
 }
 

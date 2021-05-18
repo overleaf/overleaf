@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useReducer,
   useContext,
+  useEffect,
 } from 'react'
 import PropTypes from 'prop-types'
 
@@ -17,6 +18,7 @@ const FileTreeMutableContext = createContext()
 
 const ACTION_TYPES = {
   RENAME: 'RENAME',
+  RESET: 'RESET',
   DELETE: 'DELETE',
   MOVE: 'MOVE',
   CREATE_ENTITY: 'CREATE_ENTITY',
@@ -24,6 +26,15 @@ const ACTION_TYPES = {
 
 function fileTreeMutableReducer({ fileTreeData }, action) {
   switch (action.type) {
+    case ACTION_TYPES.RESET: {
+      const newFileTreeData = action.fileTreeData
+
+      return {
+        fileTreeData: newFileTreeData,
+        fileCount: countFiles(newFileTreeData),
+      }
+    }
+
     case ACTION_TYPES.RENAME: {
       const newFileTreeData = renameInTree(fileTreeData, action.id, {
         newName: action.newName,
@@ -76,14 +87,24 @@ function fileTreeMutableReducer({ fileTreeData }, action) {
   }
 }
 
+const initialState = rootFolder => ({
+  fileTreeData: rootFolder[0],
+  fileCount: countFiles(rootFolder[0]),
+})
+
 export const FileTreeMutableProvider = function ({ rootFolder, children }) {
   const [{ fileTreeData, fileCount }, dispatch] = useReducer(
     fileTreeMutableReducer,
-    {
-      fileTreeData: rootFolder[0],
-      fileCount: countFiles(rootFolder[0]),
-    }
+    rootFolder,
+    initialState
   )
+
+  useEffect(() => {
+    dispatch({
+      type: ACTION_TYPES.RESET,
+      fileTreeData: rootFolder[0],
+    })
+  }, [rootFolder])
 
   const dispatchCreateFolder = useCallback((parentFolderId, entity) => {
     entity.type = 'folder'

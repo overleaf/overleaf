@@ -123,9 +123,9 @@ export function FileTreeSelectableProvider({
 
   // calls `onSelect` on entities selection
   useEffect(() => {
-    const selectedEntities = Array.from(selectedEntityIds).map(id =>
-      findInTree(fileTreeData, id)
-    )
+    const selectedEntities = Array.from(selectedEntityIds)
+      .map(id => findInTree(fileTreeData, id))
+      .filter(Boolean)
     onSelect(selectedEntities)
   }, [fileTreeData, selectedEntityIds, onSelect])
 
