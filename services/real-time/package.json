@@ -37,7 +37,7 @@
     "settings-sharelatex": "^1.1.0",
     "socket.io": "https://github.com/overleaf/socket.io/archive/0.9.19-overleaf-4.tar.gz",
     "socket.io-client": "https://github.com/overleaf/socket.io-client/archive/0.9.17-overleaf-3.tar.gz",
-    "underscore": "1.7.0"
+    "underscore": "1.13.1"
   },
   "devDependencies": {
     "bunyan": "~0.22.3",
