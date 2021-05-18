@@ -10,6 +10,11 @@ const Settings = require('settings-sharelatex')
 
 const MIN_CHUNK_SIZE = Settings.pdfCachingMinChunkSize
 
+const START_OF_STREAM_MARKER = 'stream'
+const END_OF_STREAM_MARKER = 'endstream'
+const START_OF_STREAM_MARKER_LENGTH = START_OF_STREAM_MARKER.length
+const END_OF_STREAM_MARKER_LENGTH = END_OF_STREAM_MARKER.length
+
 /**
  *
  * @param {String} contentDir path to directory where content hash files are cached
@@ -41,15 +46,17 @@ class PdfStreamsExtractor {
     this.inStream = false
     this.streamStartIndex = 0
     this.buffers = []
+    this.lastChunk = Buffer.alloc(0)
   }
 
   consume(chunk) {
     let chunkIndex = 0
     const pdfStreams = []
+    chunk = Buffer.concat([this.lastChunk, chunk])
     while (true) {
       if (!this.inStream) {
         // Not in a stream, look for stream start
-        const index = chunk.indexOf('stream', chunkIndex)
+        const index = chunk.indexOf(START_OF_STREAM_MARKER, chunkIndex)
         if (index === -1) {
           // Couldn't find stream start
           break
@@ -60,13 +67,12 @@ class PdfStreamsExtractor {
         chunkIndex = index
       } else {
         // In a stream, look for stream end
-        const index = chunk.indexOf('endstream', chunkIndex)
+        const index = chunk.indexOf(END_OF_STREAM_MARKER, chunkIndex)
         if (index === -1) {
-          this.buffers.push(chunk.slice(chunkIndex))
           break
         }
         // add "endstream" part
-        const endIndex = index + 9
+        const endIndex = index + END_OF_STREAM_MARKER_LENGTH
         this.buffers.push(chunk.slice(chunkIndex, endIndex))
         pdfStreams.push({
           start: this.streamStartIndex,
@@ -78,7 +84,22 @@ class PdfStreamsExtractor {
         chunkIndex = endIndex
       }
     }
-    this.fileIndex += chunk.length
+
+    const remaining = chunk.length - chunkIndex
+    const nextMarkerLength = this.inStream
+      ? END_OF_STREAM_MARKER_LENGTH
+      : START_OF_STREAM_MARKER_LENGTH
+    if (remaining > nextMarkerLength) {
+      const retainMarkerSection = chunk.length - nextMarkerLength
+      if (this.inStream) {
+        this.buffers.push(chunk.slice(chunkIndex, retainMarkerSection))
+      }
+      this.lastChunk = chunk.slice(retainMarkerSection)
+      this.fileIndex += retainMarkerSection
+    } else {
+      this.lastChunk = chunk.slice(chunkIndex)
+      this.fileIndex += chunkIndex
+    }
     return pdfStreams
   }
 }
