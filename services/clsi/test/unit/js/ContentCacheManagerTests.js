@@ -79,7 +79,13 @@ describe('ContentCacheManager', function () {
             throw new Error()
           }
         },
-        rename: sinon.stub().resolves(),
+        async rename(oldName, newName) {
+          if (!files[oldName]) {
+            throw new Error()
+          }
+          files[newName] = files[oldName]
+          delete files[oldName]
+        },
         unlink: sinon.stub().resolves()
       }
     }
