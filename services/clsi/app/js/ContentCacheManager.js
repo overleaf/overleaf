@@ -7,6 +7,7 @@ const fs = require('fs')
 const crypto = require('crypto')
 const Path = require('path')
 const Settings = require('settings-sharelatex')
+const pLimit = require('p-limit')
 
 const MIN_CHUNK_SIZE = Settings.pdfCachingMinChunkSize
 
@@ -27,9 +28,7 @@ async function update(contentDir, filePath) {
   const newRanges = []
   const seenHashes = new Set()
   // keep track of hashes expire old ones when they reach a generation > N.
-  const tracker = new HashFileTracker()
-  await loadState(contentDir, tracker)
-  
+  const tracker = await HashFileTracker.from(contentDir)
   for await (const chunk of stream) {
     const pdfStreams = extractor.consume(chunk)
     for (const pdfStream of pdfStreams) {
@@ -48,43 +47,98 @@ async function update(contentDir, filePath) {
       }
     }
   }
-  const expiredHashes = tracker.update(ranges).findStale(5)
-  await deleteHashFiles(expiredHashes)
-  return [ranges, newRanges]
+  tracker.update(ranges, newRanges)
+  const reclaimedSpace = await tracker.deleteStaleHashes(5)
+  await tracker.flush()
+  return [ranges, newRanges, reclaimedSpace]
+}
+
+function getStatePath(contentDir) {
+  return Path.join(contentDir, '.state.v0.json')
 }
 
 class HashFileTracker {
-  constructor(contentDir) {
-    this.hashAge = new Map()
+  constructor(contentDir, { hashAge = [], hashSize = [] }) {
+    this.contentDir = contentDir
+    this.hashAge = new Map(hashAge)
+    this.hashSize = new Map(hashSize)
   }
 
-  update(ranges) {
+  static async from(contentDir) {
+    const statePath = getStatePath(contentDir)
+    let state = {}
+    try {
+      const blob = await fs.promises.readFile(statePath)
+      state = JSON.parse(blob)
+    } catch (e) {}
+    return new HashFileTracker(contentDir, state)
+  }
+
+  update(ranges, newRanges) {
     for (const [hash, age] of this.hashAge) {
       this.hashAge.set(hash, age + 1)
     }
-    for (const range in ranges) {
+    for (const range of ranges) {
       this.hashAge.set(range.hash, 0)
     }
+    for (const range of newRanges) {
+      this.hashSize.set(range.hash, range.end - range.start)
+    }
+    return this
   }
 
   findStale(maxAge) {
-    var stale = []
+    const stale = []
     for (const [hash, age] of this.hashAge) {
       if (age > maxAge) {
         stale.push(hash)
-        this.hashAge.delete(hash)
       }
     }
     return stale
   }
-}
 
-async function loadState(contentDir, tracker) {
+  async flush() {
+    const statePath = getStatePath(this.contentDir)
+    const blob = JSON.stringify({
+      hashAge: Array.from(this.hashAge.entries()),
+      hashSize: Array.from(this.hashSize.entries())
+    })
+    const atomicWrite = statePath + '~'
+    try {
+      await fs.promises.writeFile(atomicWrite, blob)
+    } catch (err) {
+      try {
+        await fs.promises.unlink(atomicWrite)
+      } catch (e) {}
+      throw err
+    }
+    try {
+      await fs.promises.rename(atomicWrite, statePath)
+    } catch (err) {
+      try {
+        await fs.promises.unlink(atomicWrite)
+      } catch (e) {}
+      throw err
+    }
+  }
 
-}
+  async deleteStaleHashes(n) {
+    // delete any hash file older than N generations
+    const hashes = this.findStale(n)
 
-async function deleteHashFiles(n) {
-  // delete any hash file older than N generations
+    let reclaimedSpace = 0
+    if (hashes.length === 0) {
+      return reclaimedSpace
+    }
+
+    await promiseMapWithLimit(10, hashes, async (hash) => {
+      await fs.promises.unlink(Path.join(this.contentDir, hash))
+      this.hashAge.delete(hash)
+      reclaimedSpace += this.hashSize.get(hash)
+      this.hashSize.delete(hash)
+    })
+    return reclaimedSpace
+  }
 }
 
 class PdfStreamsExtractor {
@@ -191,6 +245,11 @@ async function writePdfStream(dir, hash, buffers) {
     }
   }
   return true
+}
+
+function promiseMapWithLimit(concurrency, array, fn) {
+  const limit = pLimit(concurrency)
+  return Promise.all(array.map((x) => limit(() => fn(x))))
 }
 
 module.exports = {

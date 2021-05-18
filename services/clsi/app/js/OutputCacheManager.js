@@ -278,10 +278,10 @@ module.exports = OutputCacheManager = {
         const timer = new Metrics.Timer('compute-pdf-ranges')
         ContentCacheManager.update(contentDir, outputFilePath, function (
           err,
-          ranges
+          result
         ) {
           if (err) return callback(err, outputFiles)
-          const [contentRanges, newContentRanges] = ranges
+          const [contentRanges, newContentRanges, reclaimedSpace] = result
 
           if (Settings.enablePdfCachingDark) {
             // In dark mode we are doing the computation only and do not emit
@@ -302,6 +302,7 @@ module.exports = OutputCacheManager = {
             (sum, next) => sum + (next.end - next.start),
             0
           )
+          stats['pdf-caching-reclaimed-space'] = reclaimedSpace
           callback(null, outputFiles)
         })
       } else {

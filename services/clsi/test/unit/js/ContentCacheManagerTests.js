@@ -48,16 +48,19 @@ describe('ContentCacheManager', function () {
       }
     })
   }
-  let contentRanges, newContentRanges
+  let contentRanges, newContentRanges, reclaimed
   function run(filePath, done) {
     ContentCacheManager.update(contentDir, filePath, (err, ranges) => {
       if (err) return done(err)
-      ;[contentRanges, newContentRanges] = ranges
+      let newlyReclaimed
+      ;[contentRanges, newContentRanges, newlyReclaimed] = ranges
+      reclaimed += newlyReclaimed
       done()
     })
   }
 
   beforeEach(function () {
+    reclaimed = 0
     contentDir =
       '/app/output/602cee6f6460fca0ba7921e6/content/1797a7f48f9-5abc1998509dea1f'
     pdfPath =
@@ -70,6 +73,18 @@ describe('ContentCacheManager', function () {
     fs = {
       createReadStream: sinon.stub().returns(Readable.from([])),
       promises: {
+        async writeFile(name, blob) {
+          const file = new FakeFile()
+          await file.write(Buffer.from(blob))
+          await file.close()
+          files[name] = file
+        },
+        async readFile(name) {
+          if (!files[name]) {
+            throw new Error()
+          }
+          return files[name].toJSON().contents
+        },
         async open(name) {
           files[name] = new FakeFile()
           return files[name]
@@ -86,7 +101,12 @@ describe('ContentCacheManager', function () {
           files[newName] = files[oldName]
           delete files[oldName]
         },
-        unlink: sinon.stub().resolves()
+        async unlink(name) {
+          if (!files[name]) {
+            throw new Error()
+          }
+          delete files[name]
+        }
       }
     }
   })
@@ -99,9 +119,12 @@ describe('ContentCacheManager', function () {
 
     describe('when the ranges are split across chunks', function () {
       const RANGE_1 = 'stream123endstream'
-      const RANGE_2 = 'stream(|)endstream'
-      const RANGE_3 = 'stream!$%endstream'
-      beforeEach(function (done) {
+      const RANGE_2 = 'stream(||)endstream'
+      const RANGE_3 = 'stream!$%/=endstream'
+      const h1 = hash(RANGE_1)
+      const h2 = hash(RANGE_2)
+      const h3 = hash(RANGE_3)
+      function runWithSplitStream(done) {
         fs.createReadStream
           .withArgs(pdfPath)
           .returns(
@@ -109,12 +132,15 @@ describe('ContentCacheManager', function () {
               Buffer.from('abcstr'),
               Buffer.from('eam123endstreamABC'),
               Buffer.from('str'),
-              Buffer.from('eam(|'),
+              Buffer.from('eam(||'),
               Buffer.from(')end'),
-              Buffer.from('stream-_~stream!$%endstream')
+              Buffer.from('stream-_~stream!$%/=endstream')
             ])
           )
         run(pdfPath, done)
+      }
+      beforeEach(function (done) {
+        runWithSplitStream(done)
       })
 
       it('should produce three ranges', function () {
@@ -130,12 +156,12 @@ describe('ContentCacheManager', function () {
           },
           {
             start: 24,
-            end: 42,
+            end: 43,
             hash: hash(RANGE_2)
           },
           {
-            start: 45,
-            end: 63,
+            start: 46,
+            end: 66,
             hash: hash(RANGE_3)
           }
         ])
@@ -143,16 +169,31 @@ describe('ContentCacheManager', function () {
 
       it('should store the contents', function () {
         expect(JSON.parse(JSON.stringify(files))).to.deep.equal({
-          [Path.join(contentDir, hash(RANGE_1))]: {
+          [Path.join(contentDir, h1)]: {
             contents: RANGE_1,
             closed: true
           },
-          [Path.join(contentDir, hash(RANGE_2))]: {
+          [Path.join(contentDir, h2)]: {
             contents: RANGE_2,
             closed: true
           },
-          [Path.join(contentDir, hash(RANGE_3))]: {
+          [Path.join(contentDir, h3)]: {
             contents: RANGE_3,
+            closed: true
+          },
+          [Path.join(contentDir, '.state.v0.json')]: {
+            contents: JSON.stringify({
+              hashAge: [
+                [h1, 0],
+                [h2, 0],
+                [h3, 0]
+              ],
+              hashSize: [
+                [h1, 18],
+                [h2, 19],
+                [h3, 20]
+              ]
+            }),
             closed: true
           }
         })
@@ -160,6 +201,140 @@ describe('ContentCacheManager', function () {
 
       it('should mark all ranges as new', function () {
         expect(contentRanges).to.deep.equal(newContentRanges)
+      })
+
+      describe('when re-running with one stream removed', function () {
+        function runWithOneSplitStreamRemoved(done) {
+          fs.createReadStream
+            .withArgs(pdfPath)
+            .returns(
+              Readable.from([
+                Buffer.from('abcstr'),
+                Buffer.from('eam123endstreamABC'),
+                Buffer.from('stream!$%/=endstream')
+              ])
+            )
+          run(pdfPath, done)
+        }
+        beforeEach(function (done) {
+          runWithOneSplitStreamRemoved(done)
+        })
+
+        it('should produce two ranges', function () {
+          expect(contentRanges).to.have.length(2)
+        })
+
+        it('should find the correct offsets', function () {
+          expect(contentRanges).to.deep.equal([
+            {
+              start: 3,
+              end: 21,
+              hash: hash(RANGE_1)
+            },
+            {
+              start: 24,
+              end: 44,
+              hash: hash(RANGE_3)
+            }
+          ])
+        })
+
+        it('should update the age of the 2nd range', function () {
+          expect(JSON.parse(JSON.stringify(files))).to.deep.equal({
+            [Path.join(contentDir, h1)]: {
+              contents: RANGE_1,
+              closed: true
+            },
+            [Path.join(contentDir, h2)]: {
+              contents: RANGE_2,
+              closed: true
+            },
+            [Path.join(contentDir, h3)]: {
+              contents: RANGE_3,
+              closed: true
+            },
+            [Path.join(contentDir, '.state.v0.json')]: {
+              contents: JSON.stringify({
+                hashAge: [
+                  [h1, 0],
+                  [h2, 1],
+                  [h3, 0]
+                ],
+                hashSize: [
+                  [h1, 18],
+                  [h2, 19],
+                  [h3, 20]
+                ]
+              }),
+              closed: true
+            }
+          })
+        })
+
+        it('should find no new ranges', function () {
+          expect(newContentRanges).to.deep.equal([])
+        })
+
+        describe('when re-running 5 more times', function () {
+          for (let i = 0; i < 5; i++) {
+            beforeEach(function (done) {
+              runWithOneSplitStreamRemoved(done)
+            })
+          }
+
+          it('should still produce two ranges', function () {
+            expect(contentRanges).to.have.length(2)
+          })
+
+          it('should still find the correct offsets', function () {
+            expect(contentRanges).to.deep.equal([
+              {
+                start: 3,
+                end: 21,
+                hash: hash(RANGE_1)
+              },
+              {
+                start: 24,
+                end: 44,
+                hash: hash(RANGE_3)
+              }
+            ])
+          })
+
+          it('should delete the 2nd range', function () {
+            expect(JSON.parse(JSON.stringify(files))).to.deep.equal({
+              [Path.join(contentDir, h1)]: {
+                contents: RANGE_1,
+                closed: true
+              },
+              [Path.join(contentDir, h3)]: {
+                contents: RANGE_3,
+                closed: true
+              },
+              [Path.join(contentDir, '.state.v0.json')]: {
+                contents: JSON.stringify({
+                  hashAge: [
+                    [h1, 0],
+                    [h3, 0]
+                  ],
+                  hashSize: [
+                    [h1, 18],
+                    [h3, 20]
+                  ]
+                }),
+                closed: true
+              }
+            })
+          })
+
+          it('should find no new ranges', function () {
+            expect(newContentRanges).to.deep.equal([])
+          })
+
+          it('should yield the reclaimed space', function () {
+            expect(reclaimed).to.equal(RANGE_2.length)
+          })
+        })
       })
     })
   })
