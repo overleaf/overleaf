@@ -25,13 +25,20 @@ async function update(contentDir, filePath) {
   const extractor = new PdfStreamsExtractor()
   const ranges = []
   const newRanges = []
+  const seenHashes = new Set()
   for await (const chunk of stream) {
     const pdfStreams = extractor.consume(chunk)
     for (const pdfStream of pdfStreams) {
       if (pdfStream.end - pdfStream.start < MIN_CHUNK_SIZE) continue
       const hash = pdfStreamHash(pdfStream.buffers)
+
       const range = { start: pdfStream.start, end: pdfStream.end, hash }
       ranges.push(range)
+
+      // Optimization: Skip writing of duplicate streams.
+      if (seenHashes.has(hash)) continue
+      seenHashes.add(hash)
+
       if (await writePdfStream(contentDir, hash, pdfStream.buffers)) {
         newRanges.push(range)
       }
