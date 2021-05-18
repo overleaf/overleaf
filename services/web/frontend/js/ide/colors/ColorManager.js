@@ -13,6 +13,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// NOTE: this file is being refactored over to frontend/js/shared/utils/colors.js
+
 import CryptoJS from 'crypto-js/md5'
 let ColorManager
 

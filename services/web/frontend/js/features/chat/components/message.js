@@ -1,11 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import ColorManager from '../../../ide/colors/ColorManager'
+import { getHueForUserId } from '../../../shared/utils/colors'
 import MessageContent from './message-content'
 
 function Message({ message, userId }) {
   function hue(user) {
-    return user ? ColorManager.getHueForUserId(user.id) : 0
+    return user ? getHueForUserId(user.id, userId) : 0
   }
 
   function getMessageStyle(user) {

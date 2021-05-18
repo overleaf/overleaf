@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { Dropdown, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
-import ColorManager from '../../../ide/colors/ColorManager'
+import { getHueForUserId } from '../../../shared/utils/colors'
 
 function OnlineUsersWidget({ onlineUsers, goToUser }) {
   const { t } = useTranslation()
@@ -64,9 +64,7 @@ OnlineUsersWidget.propTypes = {
 }
 
 function UserIcon({ user, showName, onClick }) {
-  const backgroundColor = `hsl(${ColorManager.getHueForUserId(
-    user.user_id
-  )}, 70%, 50%)`
+  const backgroundColor = `hsl(${getHueForUserId(user.user_id)}, 70%, 50%)`
 
   function handleOnClick() {
     onClick(user)
