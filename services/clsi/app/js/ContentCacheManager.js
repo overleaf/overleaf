@@ -26,6 +26,10 @@ async function update(contentDir, filePath) {
   const ranges = []
   const newRanges = []
   const seenHashes = new Set()
+  // keep track of hashes expire old ones when they reach a generation > N.
+  const tracker = new HashFileTracker()
+  await loadState(contentDir, tracker)
+  
   for await (const chunk of stream) {
     const pdfStreams = extractor.consume(chunk)
     for (const pdfStream of pdfStreams) {
@@ -44,7 +48,43 @@ async function update(contentDir, filePath) {
       }
     }
   }
+  const expiredHashes = tracker.update(ranges).findStale(5)
+  await deleteHashFiles(expiredHashes)
   return [ranges, newRanges]
+}
+
+class HashFileTracker {
+  constructor(contentDir) {
+    this.hashAge = new Map()
+  }
+
+  update(ranges) {
+    for (const [hash, age] of this.hashAge) {
+      this.hashAge.set(hash, age + 1)
+    }
+    for (const range in ranges) {
+      this.hashAge.set(range.hash, 0)
+    }
+  }
+
+  findStale(maxAge) {
+    var stale = []
+    for (const [hash, age] of this.hashAge) {
+      if (age > maxAge) {
+        stale.push(hash)
+        this.hashAge.delete(hash)
+      }
+    }
+    return stale
+  }
+}
+
+async function loadState(contentDir, tracker) {
+
+}
+
+async function deleteHashFiles(n) {
+  // delete any hash file older than N generations
 }
 
 class PdfStreamsExtractor {
