@@ -2,8 +2,8 @@
   "port": ${GIT_BRIDGE_PORT:-8000},
     "rootGitDirectory": "${GIT_BRIDGE_ROOT_DIR:-/tmp/wlgb}",
     "apiBaseUrl": "${GIT_BRIDGE_API_BASE_URL:-https://localhost/api/v0}",
-    "username": "${GIT_BRIDGE_USERNAME}",
-    "password": "${GIT_BRIDGE_PASSWORD}",
+    "username": "${GIT_BRIDGE_USERNAME:-user}",
+    "password": "${GIT_BRIDGE_PASSWORD:-pass}",
     "postbackBaseUrl": "${GIT_BRIDGE_POSTBACK_BASE_URL:-https://localhost}",
     "serviceName": "${GIT_BRIDGE_SERVICE_NAME:-Overleaf}",
     "oauth2": {
