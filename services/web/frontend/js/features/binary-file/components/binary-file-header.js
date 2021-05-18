@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import Icon from '../../../shared/components/icon'
 import { formatTime, relativeDate } from '../../utils/format-date'
 import { Trans, useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { postJSON } from '../../../infrastructure/fetch-json'
+import useIsMounted from '../../../shared/hooks/use-is-mounted'
 
 const tprLinkedFileInfo = importOverleafModules('tprLinkedFileInfo')
 const tprLinkedFileRefreshError = importOverleafModules(
@@ -29,15 +30,11 @@ function shortenedUrl(url) {
 }
 
 export default function BinaryFileHeader({ file, storeReferencesKeys }) {
-  const isMounted = useRef(true)
   const [refreshing, setRefreshing] = useState(false)
   const [refreshError, setRefreshError] = useState(null)
   const { t } = useTranslation()
 
-  useEffect(() => {
-    // set to false on unmount to avoid unmounted component warning when refreshing
-    return () => (isMounted.current = false)
-  }, [])
+  const isMounted = useIsMounted()
 
   let fileInfo
   if (file.linkedFileData) {
