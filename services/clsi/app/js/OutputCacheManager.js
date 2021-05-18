@@ -34,6 +34,7 @@ module.exports = OutputCacheManager = {
   // build id is HEXDATE-HEXRANDOM from Date.now()and RandomBytes
   // for backwards compatibility, make the randombytes part optional
   BUILD_REGEX: /^[0-9a-f]+(-[0-9a-f]+)?$/,
+  CONTENT_REGEX: /^[0-9a-f]+(-[0-9a-f]+)?$/,
   CACHE_LIMIT: 2, // maximum number of cache directories
   CACHE_AGE: 60 * 60 * 1000, // up to one hour old
 
