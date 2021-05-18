@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
-import { useRefWithAutoFocus } from '../../../../infrastructure/auto-focus'
+import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 

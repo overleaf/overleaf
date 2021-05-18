@@ -7,7 +7,7 @@ import PreviewValidationIssue from './preview-validation-issue'
 import PreviewDownloadFileList from './preview-download-file-list'
 import PreviewError from './preview-error'
 import Icon from '../../../shared/components/icon'
-import usePersistedState from '../../../infrastructure/persisted-state-hook'
+import usePersistedState from '../../../shared/hooks/use-persisted-state'
 
 function PreviewLogsPane({
   logEntries = { all: [], errors: [], warnings: [], typesetting: [] },

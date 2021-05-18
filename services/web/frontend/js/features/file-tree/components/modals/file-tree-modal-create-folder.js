@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import { useRefWithAutoFocus } from '../../../../infrastructure/auto-focus'
+import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 

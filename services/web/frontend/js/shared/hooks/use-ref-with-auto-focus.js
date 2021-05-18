@@ -1,12 +1,14 @@
-import { createRef, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 
 export function useRefWithAutoFocus() {
-  const autoFocusedRef = createRef()
+  const autoFocusedRef = useRef()
 
   useEffect(() => {
     if (autoFocusedRef.current) {
       window.requestAnimationFrame(() => {
-        if (autoFocusedRef.current) autoFocusedRef.current.focus()
+        if (autoFocusedRef.current) {
+          autoFocusedRef.current.focus()
+        }
       })
     }
   }, [autoFocusedRef])

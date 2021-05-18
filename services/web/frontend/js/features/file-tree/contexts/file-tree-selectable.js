@@ -13,7 +13,7 @@ import classNames from 'classnames'
 import { findInTree } from '../util/find-in-tree'
 import { useFileTreeMutable } from './file-tree-mutable'
 import { useFileTreeMainContext } from './file-tree-main'
-import usePersistedState from '../../../infrastructure/persisted-state-hook'
+import usePersistedState from '../../../shared/hooks/use-persisted-state'
 
 const FileTreeSelectableContext = createContext()
 

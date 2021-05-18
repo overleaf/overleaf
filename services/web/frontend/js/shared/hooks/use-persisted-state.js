@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import localStorage from './local-storage'
+import localStorage from '../../infrastructure/local-storage'
 
 function usePersistedState(key, defaultValue) {
   const [value, setValue] = useState(() => {

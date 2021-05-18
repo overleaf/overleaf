@@ -13,7 +13,7 @@ import { useApplicationContext } from '../../../shared/context/application-conte
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { getJSON, postJSON } from '../../../infrastructure/fetch-json'
 import { appendMessage, prependMessages } from '../utils/message-list-appender'
-import useBrowserWindow from '../../../infrastructure/browser-window-hook'
+import useBrowserWindow from '../../../shared/hooks/use-browser-window'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 
 const PAGE_SIZE = 50
