@@ -1,3 +1,9 @@
+/* eslint-disable
+    handle-callback-err,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -19,7 +25,7 @@ const getKeysFromNode = function(node, pattern, callback) {
         if (error != null) { return callback(error); }
         [cursor, keys] = Array.from(reply);
         console.log("SCAN", keys.length);
-        for (let key of Array.from(keys)) {
+        for (const key of Array.from(keys)) {
             keySet[key] = true;
         }
         if (cursor === '0') {  // note redis returns string result not numeric

@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-return-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -19,7 +24,7 @@ const rclient2 = redis.createClient({cluster: [{
 let counter = 0;
 const sendPing = function(cb) {
 	if (cb == null) { cb = function() {}; }
-	return rclient1.publish("test-pubsub", counter, function(error) {
+	return rclient1.publish("test-pubsub", counter, (error) => {
 		if (error != null) { console.error("[SENDING ERROR]", error.message); }
 		if ((error == null)) {
 			counter += 1;
@@ -30,7 +35,7 @@ const sendPing = function(cb) {
 
 let previous = null;
 rclient2.subscribe("test-pubsub");
-rclient2.on("message", function(channel, value) {
+rclient2.on("message", (channel, value) => {
 	value = parseInt(value, 10);
 	if ((value % 10) === 0) {
 		console.log(".");

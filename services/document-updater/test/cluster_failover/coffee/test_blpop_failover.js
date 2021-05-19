@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -20,7 +25,7 @@ const rclient2 = redis.createClient({cluster: [{
 let counter = 0;
 const sendPing = function(cb) {
 	if (cb == null) { cb = function() {}; }
-	return rclient1.rpush("test-blpop", counter, function(error) {
+	return rclient1.rpush("test-blpop", counter, (error) => {
 		if (error != null) { console.error("[SENDING ERROR]", error.message); }
 		if ((error == null)) {
 			counter += 1;
@@ -30,7 +35,7 @@ const sendPing = function(cb) {
 };
 
 let previous = null;
-const listenForPing = cb => rclient2.blpop("test-blpop", 200, function(error, result) {
+const listenForPing = cb => rclient2.blpop("test-blpop", 200, (error, result) => {
     if (error != null) { return cb(error); }
     let [key, value] = Array.from(result);
     value = parseInt(value, 10);
@@ -47,7 +52,7 @@ const listenForPing = cb => rclient2.blpop("test-blpop", 200, function(error, re
 const PING_DELAY = 100;
 (sendPings = () => sendPing(() => setTimeout(sendPings, PING_DELAY)))();
 
-(listenInBackground = () => listenForPing(function(error, value) {
+(listenInBackground = () => listenForPing((error, value) => {
     if (error) { console.error("[RECEIVING ERROR]", error.message); }
     return setTimeout(listenInBackground);
 }))();
