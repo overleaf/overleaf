@@ -115,6 +115,12 @@ describe('SubscriptionController', function () {
           unprocessableEntity: sinon.stub(),
         }),
         './Errors': SubscriptionErrors,
+        '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
+          recordEvent: sinon.stub(),
+        }),
+        '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
+          getTestSegmentation: () => {},
+        }),
       },
     })
 

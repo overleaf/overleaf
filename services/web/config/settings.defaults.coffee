@@ -246,6 +246,16 @@ module.exports = settings =
 					rolloutPercent: parseInt(process.env['SPLITTEST_EXAMPLE_PROJECT_FROG_VARIANT_ROLLOUT_PERCENT'] || '0', 10)
 				}
 			]
+		},
+		{
+			id: 'subscription-page'
+			active: process.env['SPLITTEST_SUBSCRIPTION_PAGE_ACTIVE'] == 'true'
+			variants: [
+				{
+					id: 'new'
+					rolloutPercent: parseInt(process.env['SPLITTEST_SUBSCRIPTION_PAGE_NEW_VARIANT_ROLLOUT_PERCENT'] || '0', 10)
+				}
+			]
 		}
 	]
 

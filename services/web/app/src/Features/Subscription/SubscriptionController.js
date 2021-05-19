@@ -32,7 +32,12 @@ const V1SubscriptionManager = require('./V1SubscriptionManager')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const SubscriptionErrors = require('./Errors')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const OError = require('@overleaf/o-error')
+const _ = require('lodash')
+
+const SUBSCRIPTION_PAGE_SPLIT_TEST = 'subscription-page'
 
 module.exports = SubscriptionController = {
   plansPage(req, res, next) {
@@ -166,11 +171,47 @@ module.exports = SubscriptionController = {
             const plans = SubscriptionViewModelBuilder.buildPlansList(
               personalSubscription ? personalSubscription.plan : undefined
             )
+
+            let subscriptionCopy = 'default'
+            if (
+              personalSubscription ||
+              hasSubscription ||
+              (memberGroupSubscriptions &&
+                memberGroupSubscriptions.length > 0) ||
+              (confirmedMemberAffiliations &&
+                confirmedMemberAffiliations.length > 0 &&
+                _.find(confirmedMemberAffiliations, affiliation => {
+                  return affiliation.licence && affiliation.licence !== 'free'
+                }))
+            ) {
+              AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
+            } else {
+              const testSegmentation = SplitTestHandler.getTestSegmentation(
+                user._id,
+                SUBSCRIPTION_PAGE_SPLIT_TEST
+              )
+              if (testSegmentation.enabled) {
+                subscriptionCopy = testSegmentation.variant
+
+                AnalyticsManager.recordEvent(
+                  user._id,
+                  'subscription-page-view',
+                  {
+                    splitTestId: SUBSCRIPTION_PAGE_SPLIT_TEST,
+                    splitTestVariantId: testSegmentation.variant,
+                  }
+                )
+              } else {
+                AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
+              }
+            }
+
             const data = {
               title: 'your_subscription',
               plans,
               user,
               hasSubscription,
+              subscriptionCopy,
               fromPlansPage,
               personalSubscription,
               memberGroupSubscriptions,
