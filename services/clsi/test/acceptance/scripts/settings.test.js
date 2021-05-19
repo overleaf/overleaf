@@ -1,3 +1,8 @@
+/* eslint-disable
+    no-path-concat,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 const Path = require("path");
 
 module.exports = {
@@ -16,14 +21,14 @@ module.exports = {
 	path: {
 		compilesDir:  Path.resolve(__dirname + "/../../../compiles"),
 		clsiCacheDir: Path.resolve(__dirname + "/../../../cache"),
-		//synctexBaseDir: (project_id) -> Path.join(@compilesDir, project_id)
+		// synctexBaseDir: (project_id) -> Path.join(@compilesDir, project_id)
 		synctexBaseDir() { return "/compile"; },
-		sandboxedCompilesHostDir: process.env['SANDBOXED_COMPILES_HOST_DIR']
+		sandboxedCompilesHostDir: process.env.SANDBOXED_COMPILES_HOST_DIR
 	},
 
 	clsi: {
-		//strace: true
-		//archive_logs: true
+		// strace: true
+		// archive_logs: true
 		commandRunner: "docker-runner-sharelatex",
 		latexmkCommandPrefix: ["/usr/bin/time", "-v"],         // on Linux
 		docker: {
