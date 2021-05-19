@@ -2,6 +2,7 @@ const { exec } = require('child_process')
 const { promisify } = require('util')
 const { expect } = require('chai')
 const logger = require('logger-sharelatex')
+const { filterOutput } = require('./helpers/settings')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 
 const DUMMY_NAME = 'unknown.tex'
@@ -134,9 +135,7 @@ describe('BackFillDummyDocMeta', function () {
     }
     let { stderr: stdErr, stdout: stdOut } = result
     stdErr = stdErr.split('\n')
-    stdOut = stdOut
-      .split('\n')
-      .filter(line => !line.includes('Using settings from'))
+    stdOut = stdOut.split('\n').filter(filterOutput)
 
     const oneDayFromProjectId9InSeconds =
       getSecondsFromObjectId(projectIds[9]) + ONE_DAY_IN_S
@@ -166,7 +165,7 @@ describe('BackFillDummyDocMeta', function () {
       ]
     }
 
-    expect(stdOut).to.deep.equal([
+    expect(stdOut.filter(filterOutput)).to.deep.equal([
       `Back filling dummy meta data for ["${docIds[0]}"]`,
       `Orphaned deleted doc ${docIds[0]} (no deletedProjects entry)`,
       `Back filling dummy meta data for ["${docIds[1]}"]`,
@@ -188,7 +187,7 @@ describe('BackFillDummyDocMeta', function () {
       ...overlappingPartStdOut,
       '',
     ])
-    expect(stdErr).to.deep.equal([
+    expect(stdErr.filter(filterOutput)).to.deep.equal([
       ...`Options: ${JSON.stringify(options, null, 2)}`.split('\n'),
       'Waiting for you to double check inputs for 1 ms',
       `Processed 1 until ${getObjectIdFromDate('2021-04-02T00:00:00.000Z')}`,

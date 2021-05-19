@@ -2,6 +2,7 @@ const { exec } = require('child_process')
 const { promisify } = require('util')
 const { expect } = require('chai')
 const logger = require('logger-sharelatex')
+const { filterOutput } = require('./helpers/settings')
 const { db } = require('../../../app/src/infrastructure/mongodb')
 
 const BATCH_SIZE = 100
@@ -110,9 +111,8 @@ describe('RegenerateDuplicateReferralIds', function () {
     stdErr = stdErr
       .split('\n')
       .filter(line => !line.includes('DeprecationWarning'))
-    stdOut = stdOut
-      .split('\n')
-      .filter(line => !line.includes('Using settings from'))
+      .filter(filterOutput)
+    stdOut = stdOut.split('\n').filter(filterOutput)
     expect(stdErr).to.deep.equal([
       `Completed batch ending ${firstBatch[BATCH_SIZE - 1]}`,
       `Completed batch ending ${secondBatch[BATCH_SIZE - 1]}`,
@@ -121,7 +121,7 @@ describe('RegenerateDuplicateReferralIds', function () {
       'Done.',
       '',
     ])
-    expect(stdOut).to.deep.equal([
+    expect(stdOut.filter(filterOutput)).to.deep.equal([
       // only duplicates
       `Running update on batch with ids ${JSON.stringify(firstBatch)}`,
       'Got duplicates from looking at batch.',

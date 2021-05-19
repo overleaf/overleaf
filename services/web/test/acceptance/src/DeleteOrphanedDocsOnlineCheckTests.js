@@ -2,6 +2,7 @@ const { exec } = require('child_process')
 const { promisify } = require('util')
 const { expect } = require('chai')
 const logger = require('logger-sharelatex')
+const { filterOutput } = require('./helpers/settings')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 
 const ONE_DAY_IN_S = 60 * 60 * 24
@@ -129,10 +130,8 @@ describe('DeleteOrphanedDocsOnlineCheck', function () {
       throw error
     }
     let { stderr: stdErr, stdout: stdOut } = result
-    stdErr = stdErr.split('\n')
-    stdOut = stdOut
-      .split('\n')
-      .filter(line => !line.includes('Using settings from'))
+    stdErr = stdErr.split('\n').filter(filterOutput)
+    stdOut = stdOut.split('\n').filter(filterOutput)
 
     const oneDayFromProjectId9InSeconds =
       getSecondsFromObjectId(projectIds[9]) + ONE_DAY_IN_S
