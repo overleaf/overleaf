@@ -11,6 +11,7 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
+const { expect } = require('chai')
 const modulePath = require('path').join(
   __dirname,
   '../../../app/js/LatexRunner'
@@ -58,7 +59,7 @@ describe('LatexRunner', function () {
     })
 
     describe('normally', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         return this.LatexRunner.runLatex(
           this.project_id,
           {
@@ -70,7 +71,10 @@ describe('LatexRunner', function () {
             environment: this.env,
             compileGroup: this.compileGroup
           },
-          this.callback
+          (error, output, stats, timings) => {
+            this.timings = timings
+            done(error)
+          }
         )
       })
 
@@ -95,6 +99,47 @@ describe('LatexRunner', function () {
         this.fs.writeFile
           .calledWith(this.directory + '/' + 'output.stderr', 'this is stderr')
           .should.equal(true)
+      })
+
+      it('should not record cpu metrics', function () {
+        expect(this.timings['cpu-percent']).to.not.exist
+        expect(this.timings['cpu-time']).to.not.exist
+        expect(this.timings['sys-time']).to.not.exist
+      })
+    })
+
+    describe('with time -v', function () {
+      beforeEach(function (done) {
+        this.CommandRunner.run = sinon.stub().callsArgWith(7, null, {
+          stdout: 'this is stdout',
+          stderr:
+            '\tCommand being timed: "sh -c timeout 1 yes > /dev/null"\n' +
+            '\tUser time (seconds): 0.28\n' +
+            '\tSystem time (seconds): 0.70\n' +
+            '\tPercent of CPU this job got: 98%\n'
+        })
+        this.LatexRunner.runLatex(
+          this.project_id,
+          {
+            directory: this.directory,
+            mainFile: this.mainFile,
+            compiler: this.compiler,
+            timeout: (this.timeout = 42000),
+            image: this.image,
+            environment: this.env,
+            compileGroup: this.compileGroup
+          },
+          (error, output, stats, timings) => {
+            this.timings = timings
+            done(error)
+          }
+        )
+      })
+
+      it('should record cpu metrics', function () {
+        expect(this.timings['cpu-percent']).to.equal(98)
+        expect(this.timings['cpu-time']).to.equal(0.28)
+        expect(this.timings['sys-time']).to.equal(0.7)
       })
     })
 
