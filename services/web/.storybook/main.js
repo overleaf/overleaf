@@ -3,7 +3,7 @@ const path = require('path')
 // NOTE: must be set before webpack config is imported
 process.env.SHARELATEX_CONFIG = path.resolve(
   __dirname,
-  '../config/settings.webpack.coffee'
+  '../config/settings.webpack.js'
 )
 
 const customConfig = require('../webpack.config.dev')

@@ -8,7 +8,7 @@ require('jsdom-global')(undefined, { pretendToBeVisual: true })
 const path = require('path')
 process.env.SHARELATEX_CONFIG = path.resolve(
   __dirname,
-  '../../config/settings.webpack.coffee'
+  '../../config/settings.webpack.js'
 )
 
 // Load sinon-chai assertions so expect(stubFn).to.have.been.calledWith('abc')

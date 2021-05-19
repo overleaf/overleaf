@@ -9,7 +9,7 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	BRANCH_NAME=$(BRANCH_NAME) \
 	PROJECT_NAME=$(PROJECT_NAME) \
 	MOCHA_GREP=${MOCHA_GREP} \
-	SHARELATEX_CONFIG=/app/test/acceptance/config/settings.test.coffee \
+	SHARELATEX_CONFIG=/app/test/acceptance/config/settings.test.js \
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )

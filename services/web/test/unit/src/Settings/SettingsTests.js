@@ -3,7 +3,7 @@ const { expect } = chai
 
 function clearSettingsCache() {
   delete require.cache[
-    require.resolve('../../../../config/settings.defaults.coffee')
+    require.resolve('../../../../config/settings.defaults.js')
   ]
   const settingsDeps = Object.keys(require.cache).filter(x =>
     x.includes('/settings-sharelatex/')

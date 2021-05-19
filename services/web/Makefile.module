@@ -10,7 +10,7 @@ DOCKER_COMPOSE := cd ../../ && \
 	BRANCH_NAME=$(BRANCH_NAME) \
 	PROJECT_NAME=$(PROJECT_NAME) \
 	MOCHA_GREP=${MOCHA_GREP} \
-	SHARELATEX_CONFIG=/app/$(MODULE_DIR)/test/acceptance/config/settings.test.coffee \
+	SHARELATEX_CONFIG=/app/$(MODULE_DIR)/test/acceptance/config/settings.test.js \
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
 DOCKER_COMPOSE_TEST_ACCEPTANCE := \
@@ -44,7 +44,7 @@ test_acceptance:
 
 test_acceptance_merged_inner:
 	cd ../../ && \
-		SHARELATEX_CONFIG=/app/$(MODULE_DIR)/test/acceptance/config/settings.test.coffee \
+		SHARELATEX_CONFIG=/app/$(MODULE_DIR)/test/acceptance/config/settings.test.js \
 			npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
 
 clean_test_acceptance:
