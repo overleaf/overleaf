@@ -6,7 +6,7 @@ services:
       ALLOWED_IMAGES: "quay.io/sharelatex/texlive-full:2017.1"
       TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
       TEXLIVE_IMAGE_USER: "tex"
-      SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
+      SHARELATEX_CONFIG: /app/config/settings.defaults.js
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
       SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex
@@ -16,13 +16,13 @@ services:
       - ./cache:/app/cache
       - ./bin/synctex:/app/bin/synctex
 
-      
+
   ci:
     environment:
       ALLOWED_IMAGES: ${TEXLIVE_IMAGE}
       TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
       TEXLIVE_IMAGE_USER: "tex"
-      SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
+      SHARELATEX_CONFIG: /app/config/settings.defaults.js
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
       SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex

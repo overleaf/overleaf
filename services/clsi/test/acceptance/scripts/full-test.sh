@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-export SHARELATEX_CONFIG=`pwd`/test/acceptance/scripts/settings.test.coffee
+export SHARELATEX_CONFIG=`pwd`/test/acceptance/scripts/settings.test.js
 
 echo ">> Starting server..."
 
