@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const http = require('http')
 http.globalAgent.maxSockets = 300
 
@@ -46,18 +41,18 @@ const Settings = {
   parallelArchiveJobs: parseInt(process.env.PARALLEL_ARCHIVE_JOBS, 10) || 5
 }
 
-if (process.env.MONGO_CONNECTION_STRING != null) {
+if (process.env.MONGO_CONNECTION_STRING) {
   Settings.mongo.url = process.env.MONGO_CONNECTION_STRING
-} else if (process.env.MONGO_HOST != null) {
+} else if (process.env.MONGO_HOST) {
   Settings.mongo.url = `mongodb://${process.env.MONGO_HOST}/sharelatex`
 } else {
   Settings.mongo.url = 'mongodb://127.0.0.1/sharelatex'
 }
 
 if (
-  process.env.AWS_ACCESS_KEY_ID != null &&
-  process.env.AWS_SECRET_ACCESS_KEY != null &&
-  process.env.AWS_BUCKET != null
+  process.env.AWS_ACCESS_KEY_ID &&
+  process.env.AWS_SECRET_ACCESS_KEY &&
+  process.env.AWS_BUCKET
 ) {
   Settings.docstore.s3 = {
     key: process.env.AWS_ACCESS_KEY_ID,
