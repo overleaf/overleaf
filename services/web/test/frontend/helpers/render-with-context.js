@@ -19,7 +19,6 @@ export function EditorProviders({
   children,
 }) {
   window.user = user || window.user
-  window.ExposedSettings.appName = 'test'
   window.gitBridgePublicBaseUrl = 'git.overleaf.test'
   window.project_id = projectId != null ? projectId : window.project_id
 

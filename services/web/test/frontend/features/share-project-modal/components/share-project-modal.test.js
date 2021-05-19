@@ -86,16 +86,6 @@ describe('<ShareProjectModal/>', function () {
     handleHide: sinon.stub(),
   }
 
-  const originalExposedSettings = window.ExposedSettings
-
-  before(function () {
-    window.ExposedSettings = { appName: 'Overleaf' }
-  })
-
-  after(function () {
-    window.ExposedSettings = originalExposedSettings
-  })
-
   beforeEach(function () {
     fetchMock.get('/user/contacts', { contacts })
   })

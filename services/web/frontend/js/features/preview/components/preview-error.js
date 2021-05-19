@@ -3,19 +3,12 @@ import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import PreviewLogsPaneEntry from './preview-logs-pane-entry'
 import Icon from '../../../shared/components/icon'
-import { useApplicationContext } from '../../../shared/context/application-context'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 
 function PreviewError({ name }) {
   const { hasPremiumCompile, isProjectOwner } = useEditorContext({
     isProjectOwner: PropTypes.bool,
-  })
-  const {
-    exposedSettings: { enableSubscriptions },
-  } = useApplicationContext({
-    exposedSettings: PropTypes.shape({ enableSubscriptions: PropTypes.bool })
-      .isRequired,
   })
 
   const { t } = useTranslation()
@@ -74,7 +67,9 @@ function PreviewError({ name }) {
         entryAriaLabel={t('compile_error_entry_description')}
         level="error"
       />
-      {name === 'timedout' && enableSubscriptions && !hasPremiumCompile ? (
+      {name === 'timedout' &&
+      window.ExposedSettings.enableSubscriptions &&
+      !hasPremiumCompile ? (
         <TimeoutUpgradePrompt isProjectOwner={isProjectOwner} />
       ) : null}
     </>

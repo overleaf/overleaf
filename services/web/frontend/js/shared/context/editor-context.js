@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from './util/scope-value-hook'
-import { useApplicationContext } from './application-context'
 import useBrowserWindow from '../hooks/use-browser-window'
 
 export const EditorContext = createContext()
@@ -32,13 +31,6 @@ EditorContext.Provider.propTypes = {
 }
 
 export function EditorProvider({ children, ide, settings }) {
-  const {
-    exposedSettings: { appName },
-  } = useApplicationContext({
-    exposedSettings: PropTypes.shape({ appName: PropTypes.string.isRequired })
-      .isRequired,
-  })
-
   const cobranding = window.brandVariation
     ? {
         logoImgUrl: window.brandVariation.logo_url,
@@ -100,9 +92,11 @@ export function EditorProvider({ children, ide, settings }) {
   const { setTitle } = useBrowserWindow()
   useEffect(() => {
     setTitle(
-      `${projectName ? projectName + ' - ' : ''}Online LaTeX Editor ${appName}`
+      `${projectName ? projectName + ' - ' : ''}Online LaTeX Editor ${
+        window.ExposedSettings.appName
+      }`
     )
-  }, [appName, projectName, setTitle])
+  }, [projectName, setTitle])
 
   const editorContextValue = {
     cobranding,
