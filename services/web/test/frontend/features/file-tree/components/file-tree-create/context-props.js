@@ -4,7 +4,7 @@ export const contextProps = {
   projectId: 'test-project',
   hasWritePermissions: true,
   userHasFeature: () => true,
-  refProviders: {},
+  refProviders: { mendeley: false, zotero: false },
   reindexReferences: () => {
     console.log('reindex references')
   },
