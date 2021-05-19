@@ -101,7 +101,7 @@ block content
 										div(ng-show="paymentMethod.value === 'credit_card'")
 											.row
 												.col-xs-6
-													.form-group(ng-class="validation.errorFields.first_name || inputHasError(simpleCCForm.firstName) ? 'has-external-error' : ''")
+													.form-group(ng-class="validation.errorFields.first_name || inputHasError(simpleCCForm.firstName) ? 'has-error' : ''")
 														label(for="first-name") #{translate('first_name')}
 														input#first-name.form-control(
 															type="text"
@@ -111,9 +111,9 @@ block content
 															ng-model="data.first_name"
 															required
 														)
-														span.input-feedback-message  {{ simpleCCForm.firstName.$error.required ? 'This field is required' : '' }}
+														span.input-feedback-message(ng-if="simpleCCForm.firstName.$error.required") #{translate('this_field_is_required')}
 												.col-xs-6
-													.form-group(ng-class="validation.errorFields.last_name || inputHasError(simpleCCForm.lastName)? 'has-external-error' : ''")
+													.form-group(ng-class="validation.errorFields.last_name || inputHasError(simpleCCForm.lastName)? 'has-error' : ''")
 														label(for="last-name") #{translate('last_name')}
 														input#last-name.form-control(
 															type="text"
@@ -123,8 +123,9 @@ block content
 															ng-model="data.last_name"
 															required
 														)
+														span.input-feedback-message(ng-if="simpleCCForm.lastName.$error.required") #{translate('this_field_is_required')}
 
-											.form-group(ng-class="validation.errorFields.number ? 'has-external-error' : ''")
+											.form-group(ng-class="validation.errorFields.number ? 'has-error' : ''")
 												label(for="card-no") #{translate("credit_card_number")}
 												div#card-no(
 													type="text"
@@ -134,7 +135,7 @@ block content
 
 											.row
 												.col-xs-3
-													.form-group.has-feedback(ng-class="validation.errorFields.month ? 'has-external-error' : ''")
+													.form-group.has-feedback(ng-class="validation.errorFields.month ? 'has-error' : ''")
 														label(for="month").capitalised #{translate("month")}
 														div(
 															type="number"
@@ -142,7 +143,7 @@ block content
 															data-recurly="month"
 														)
 												.col-xs-3
-													.form-group.has-feedback(ng-class="validation.errorFields.year ? 'has-external-error' : ''")
+													.form-group.has-feedback(ng-class="validation.errorFields.year ? 'has-error' : ''")
 														label(for="year").capitalised #{translate("year")}
 														div(
 															type="number"
@@ -151,7 +152,7 @@ block content
 														)
 
 												.col-xs-6
-													.form-group.has-feedback(ng-class="validation.errorFields.cvv ? 'has-external-error' : ''")
+													.form-group.has-feedback(ng-class="validation.errorFields.cvv ? 'has-error' : ''")
 														label #{translate("security_code")}
 														div(
 															type="number"
@@ -172,7 +173,7 @@ block content
 										div
 											.row
 												.col-xs-12
-													.form-group(ng-class="validation.errorFields.address1 || inputHasError(simpleCCForm.address1) ? 'has-external-error' : ''")
+													.form-group(ng-class="validation.errorFields.address1 || inputHasError(simpleCCForm.address1) ? 'has-error' : ''")
 														label(for="address-line-1") #{translate('address_line_1')}
 														input#address-line-1.form-control(
 															type="text"
@@ -182,11 +183,11 @@ block content
 															ng-model="data.address1"
 															required
 														)
-														span.input-feedback-message  {{ simpleCCForm.address1.$error.required ? 'This field is required' : '' }}
+														span.input-feedback-message(ng-if="simpleCCForm.address1.$error.required") #{translate('this_field_is_required')}
 
 											.row
 												.col-xs-12
-													.form-group.has-feedback(ng-class="validation.errorFields.address2 ? 'has-external-error' : ''")
+													.form-group.has-feedback(ng-class="validation.errorFields.address2 ? 'has-error' : ''")
 														label(for="address-line-2") #{translate('address_line_2')}
 														input#address-line-2.form-control(
 															type="text"
@@ -198,7 +199,7 @@ block content
 
 											.row
 												.col-xs-4
-													.form-group(ng-class="validation.errorFields.postal_code || inputHasError(simpleCCForm.postalCode) ? 'has-external-error' : ''")
+													.form-group(ng-class="validation.errorFields.postal_code || inputHasError(simpleCCForm.postalCode) ? 'has-error' : ''")
 														label(for="postal-code") #{translate('postal_code')}
 														input#postal-code.form-control(
 															type="text"
@@ -208,10 +209,10 @@ block content
 															ng-model="data.postal_code"
 															required
 														)
-														span.input-feedback-message  {{ simpleCCForm.postalCode.$error.required ? 'This field is required' : '' }}
+														span.input-feedback-message(ng-if="simpleCCForm.postalCode.$error.required") #{translate('this_field_is_required')}
 
 												.col-xs-8
-													.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-external-error' : ''")
+													.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-error' : ''")
 														label(for="country") #{translate('country')}
 														select#country.form-control(
 															data-recurly="country"
@@ -225,7 +226,7 @@ block content
 															option(value='', disabled) #{translate("country")}
 															option(value='-', disabled) --------------
 															option(ng-repeat="country in countries" ng-bind-html="country.name" value="{{country.code}}")
-														span.input-feedback-message {{ simpleCCForm.country.$error.required ? 'This field is required' : '' }}
+														span.input-feedback-message(ng-if="simpleCCForm.country.$error.required") #{translate('this_field_is_required')}
 
 											.form-group
 												.checkbox
@@ -296,15 +297,7 @@ block content
 														| {{ monthlyBilling ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_now")}'}}
 													span(ng-if="paymentMethod.value !== 'credit_card'") #{translate("upgrade_paypal_btn")}
 
-											p.tos-agreement-notice
-												| By subscribing, you agree to our
-												|
-												a(
-													href="/legal#Terms"
-													target="_blank"
-													rel="noopener noreferrer"
-												) terms of service
-												| .
+											p.tos-agreement-notice !{translate("by_subscribing_you_agree_to_our_terms_of_service", {}, [{name: 'a', attrs: {href: '/legal#Terms', target:'_blank', rel:'noopener noreferrer'}}])}
 
 					div.three-d-secure-container.card.card-highlighted.card-border(ng-show="threeDSecureFlow")
 						.alert.alert-info.small(aria-live="assertive")
@@ -334,7 +327,7 @@ block content
 									| #{translate("collabs_per_proj_single", {collabcount:collaboratorCount})}
 								else
 									| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
-							p #{translate("work_on_single_version")}. #{translate("view_collab_edits")} in real time.
+							p #{translate("work_on_single_version")}. #{translate("view_collab_edits_in_real_time")}
 
 							h3 #{translate("full_doc_history")}
 							p.track-changes-example
@@ -350,8 +343,7 @@ block content
 
 							hr
 
-							p.small.text-center(ng-non-bindable) We're confident that you'll love #{settings.appName}, but if not you can cancel anytime. We'll give you your money back, no questions asked, if you let us know within 30 days.
-
+							p.small.text-center(ng-non-bindable) !{translate("cancel_anytime", { appName:'{{settings.appName}}' })} 
 
 	script(type="text/javascript", nonce=scriptNonce).
 		ga('send', 'event', 'pageview', 'payment_form', "#{plan_code}")
@@ -360,5 +352,5 @@ block content
 		type="text/ng-template"
 		id="cvv-tooltip-tpl.html"
 	)
-		p For #[strong Visa, MasterCard and Discover], the #[strong 3 digits] on the #[strong back] of your card.
-		p For #[strong American Express], the #[strong 4 digits] on the #[strong front] of your card.
+		p !{translate("for_visa_mastercard_and_discover", {}, ['strong', 'strong', 'strong'])}
+		p !{translate("for_american_express", {}, ['strong', 'strong', 'strong'])}
