@@ -25,6 +25,10 @@ describe('AnalyticsManager', function () {
       add: sinon.stub().resolves(),
       process: sinon.stub().resolves(),
     }
+    this.analyticsUserPropertiesQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves(),
+    }
     const self = this
     this.Queues = {
       getAnalyticsEventsQueue: () => {
@@ -35,6 +39,9 @@ describe('AnalyticsManager', function () {
       },
       getOnboardingEmailsQueue: () => {
         return self.onboardingEmailsQueue
+      },
+      getAnalyticsUserPropertiesQueue: () => {
+        return self.analyticsUserPropertiesQueue
       },
     }
     this.backgroundRequest = sinon.stub().yields()

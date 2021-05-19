@@ -81,6 +81,7 @@ async function createNewUser(attributes, options = {}) {
   }
 
   Analytics.recordEvent(user._id, 'user-registered')
+  Analytics.setUserProperty(user._id, 'created-at', new Date())
   try {
     await UserOnboardingEmailQueueManager.scheduleOnboardingEmail(user)
   } catch (error) {

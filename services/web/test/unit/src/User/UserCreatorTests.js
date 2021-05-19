@@ -43,6 +43,7 @@ describe('UserCreator', function () {
         }),
         '../Analytics/AnalyticsManager': (this.Analytics = {
           recordEvent: sinon.stub(),
+          setUserProperty: sinon.stub(),
         }),
         './UserOnboardingEmailManager': (this.UserOnboardingEmailManager = {
           scheduleOnboardingEmail: sinon.stub(),
@@ -261,7 +262,7 @@ describe('UserCreator', function () {
         assert.equal(user.emails[0].samlProviderId, '1')
       })
 
-      it('should fire an analytics event on registration', async function () {
+      it('should fire an analytics event and user property on registration', async function () {
         const user = await this.UserCreator.promises.createNewUser({
           email: this.email,
         })
@@ -270,6 +271,11 @@ describe('UserCreator', function () {
           this.Analytics.recordEvent,
           user._id,
           'user-registered'
+        )
+        sinon.assert.calledWith(
+          this.Analytics.setUserProperty,
+          user._id,
+          'created-at'
         )
       })
 

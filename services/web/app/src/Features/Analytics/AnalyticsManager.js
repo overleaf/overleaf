@@ -4,6 +4,7 @@ const Queues = require('../../infrastructure/Queues')
 
 const analyticsEventsQueue = Queues.getAnalyticsEventsQueue()
 const analyticsEditingSessionsQueue = Queues.getAnalyticsEditingSessionsQueue()
+const analyticsUserPropertiesQueue = Queues.getAnalyticsUserPropertiesQueue()
 
 function identifyUser(userId, oldUserId) {
   if (isAnalyticsDisabled() || isSmokeTestUser(userId)) {
@@ -59,6 +60,30 @@ function updateEditingSession(userId, projectId, countryCode) {
     })
 }
 
+function setUserProperty(userId, propertyName, propertyValue) {
+  if (isAnalyticsDisabled() || isSmokeTestUser(userId)) {
+    return
+  }
+  Metrics.analyticsQueue.inc({
+    status: 'adding',
+    event_type: 'user-property',
+  })
+  analyticsUserPropertiesQueue
+    .add({ userId, propertyName, propertyValue })
+    .then(() => {
+      Metrics.analyticsQueue.inc({
+        status: 'added',
+        event_type: 'user-property',
+      })
+    })
+    .catch(() => {
+      Metrics.analyticsQueue.inc({
+        status: 'error',
+        event_type: 'user-property',
+      })
+    })
+}
+
 function isSmokeTestUser(userId) {
   const smokeTestUserId = Settings.smokeTest && Settings.smokeTest.userId
   return smokeTestUserId != null && userId.toString() === smokeTestUserId
@@ -72,4 +97,5 @@ module.exports = {
   identifyUser,
   recordEvent,
   updateEditingSession,
+  setUserProperty,
 }

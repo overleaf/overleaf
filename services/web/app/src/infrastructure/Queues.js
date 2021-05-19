@@ -21,6 +21,12 @@ function getAnalyticsEditingSessionsQueue() {
   }
 }
 
+function getAnalyticsUserPropertiesQueue() {
+  if (Settings.analytics.enabled) {
+    return getOrCreateQueue('analytics-user-properties')
+  }
+}
+
 function getOnboardingEmailsQueue() {
   return getOrCreateQueue('emails-onboarding')
 }
@@ -46,5 +52,6 @@ function getOrCreateQueue(queueName, defaultJobOptions) {
 module.exports = {
   getAnalyticsEventsQueue,
   getAnalyticsEditingSessionsQueue,
+  getAnalyticsUserPropertiesQueue,
   getOnboardingEmailsQueue,
 }
