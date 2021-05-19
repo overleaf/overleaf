@@ -9,8 +9,8 @@ module.exports = {
       username: 'clsi',
       password: null,
       dialect: 'sqlite',
-      storage: Path.resolve('db.sqlite'),
-    },
+      storage: Path.resolve('db.sqlite')
+    }
   },
 
   path: {
@@ -22,7 +22,7 @@ module.exports = {
     synctexBaseDir() {
       return '/compile'
     },
-    sandboxedCompilesHostDir: process.env.SANDBOXED_COMPILES_HOST_DIR,
+    sandboxedCompilesHostDir: process.env.SANDBOXED_COMPILES_HOST_DIR
   },
 
   clsi: {
@@ -35,30 +35,30 @@ module.exports = {
       env: {
         PATH:
           '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2017/bin/x86_64-linux/',
-        HOME: '/tmp',
+        HOME: '/tmp'
       },
       modem: {
-        socketPath: false,
+        socketPath: false
       },
-      user: process.env.SIBLING_CONTAINER_USER || '111',
-    },
+      user: process.env.SIBLING_CONTAINER_USER || '111'
+    }
   },
 
   internal: {
     clsi: {
       port: 3013,
       load_port: 3044,
-      host: 'localhost',
-    },
+      host: 'localhost'
+    }
   },
 
   apis: {
     clsi: {
-      url: 'http://localhost:3013',
-    },
+      url: 'http://localhost:3013'
+    }
   },
 
   smokeTest: false,
   project_cache_length_ms: 1000 * 60 * 60 * 24,
-  parallelFileDownloads: 1,
+  parallelFileDownloads: 1
 }
