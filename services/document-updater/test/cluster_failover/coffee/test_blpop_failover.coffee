@@ -35,7 +35,7 @@ do sendPings = () ->
 	sendPing () ->
 		setTimeout sendPings, PING_DELAY
 
-do listenInBackground = (cb = () ->) ->
+do listenInBackground = () ->
 	listenForPing (error, value) ->
 		console.error "[RECEIVING ERROR]", error.message if error
 		setTimeout listenInBackground
