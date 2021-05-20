@@ -25,8 +25,6 @@ public class Config implements JSONSource {
         return new Config(
                 config.port,
                 config.rootGitDirectory,
-                config.username,
-                "<password>",
                 config.apiBaseURL,
                 config.postbackURL,
                 config.serviceName,
@@ -39,8 +37,6 @@ public class Config implements JSONSource {
 
     private int port;
     private String rootGitDirectory;
-    private String username;
-    private String password;
     private String apiBaseURL;
     private String postbackURL;
     private String serviceName;
@@ -67,8 +63,6 @@ public class Config implements JSONSource {
     public Config(
             int port,
             String rootGitDirectory,
-            String username,
-            String password,
             String apiBaseURL,
             String postbackURL,
             String serviceName,
@@ -79,8 +73,6 @@ public class Config implements JSONSource {
     ) {
         this.port = port;
         this.rootGitDirectory = rootGitDirectory;
-        this.username = username;
-        this.password = password;
         this.apiBaseURL = apiBaseURL;
         this.postbackURL = postbackURL;
         this.serviceName = serviceName;
@@ -98,8 +90,6 @@ public class Config implements JSONSource {
                 configObject,
                 "rootGitDirectory"
         ).getAsString();
-        username = getOptionalString(configObject, "username");
-        password = getOptionalString(configObject, "password");
         String apiBaseURL = getElement(
                 configObject,
                 "apiBaseUrl"
@@ -136,14 +126,6 @@ public class Config implements JSONSource {
 
     public String getRootGitDirectory() {
         return rootGitDirectory;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public String getAPIBaseURL() {

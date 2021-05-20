@@ -18,8 +18,6 @@ public class ConfigTest {
                 "    \"port\": 80,\n" +
                 "    \"rootGitDirectory\": \"/var/wlgb/git\",\n" +
                 "    \"apiBaseUrl\": \"http://127.0.0.1:60000/api/v0\",\n" +
-                "    \"username\": \"REDACTED\",\n" +
-                "    \"password\": \"REDACTED\",\n" +
                 "    \"postbackBaseUrl\": \"http://127.0.0.1\",\n" +
                 "    \"serviceName\": \"Overleaf\",\n" +
                 "    \"oauth2\": {\n" +
@@ -32,8 +30,6 @@ public class ConfigTest {
         assertEquals(80, config.getPort());
         assertEquals("/var/wlgb/git", config.getRootGitDirectory());
         assertEquals("http://127.0.0.1:60000/api/v0/", config.getAPIBaseURL());
-        assertEquals("REDACTED", config.getUsername());
-        assertEquals("REDACTED", config.getPassword());
         assertEquals("http://127.0.0.1/", config.getPostbackURL());
         assertEquals("Overleaf", config.getServiceName());
         assertTrue(config.isUsingOauth2());
@@ -48,8 +44,6 @@ public class ConfigTest {
                 "    \"port\": 80,\n" +
                 "    \"rootGitDirectory\": \"/var/wlgb/git\",\n" +
                 "    \"apiBaseUrl\": \"http://127.0.0.1:60000/api/v0\",\n" +
-                "    \"username\": \"REDACTED\",\n" +
-                "    \"password\": \"REDACTED\",\n" +
                 "    \"postbackBaseUrl\": \"http://127.0.0.1\",\n" +
                 "    \"serviceName\": \"Overleaf\",\n" +
                 "    \"oauth2\": null\n" +
@@ -58,8 +52,6 @@ public class ConfigTest {
         assertEquals(80, config.getPort());
         assertEquals("/var/wlgb/git", config.getRootGitDirectory());
         assertEquals("http://127.0.0.1:60000/api/v0/", config.getAPIBaseURL());
-        assertEquals("REDACTED", config.getUsername());
-        assertEquals("REDACTED", config.getPassword());
         assertEquals("http://127.0.0.1/", config.getPostbackURL());
         assertEquals("Overleaf", config.getServiceName());
         assertFalse(config.isUsingOauth2());
@@ -72,8 +64,6 @@ public class ConfigTest {
                 "    \"port\": 80,\n" +
                 "    \"rootGitDirectory\": \"/var/wlgb/git\",\n" +
                 "    \"apiBaseUrl\": \"http://127.0.0.1:60000/api/v0\",\n" +
-                "    \"username\": \"username\",\n" +
-                "    \"password\": \"my super secret password\",\n" +
                 "    \"postbackBaseUrl\": \"http://127.0.0.1\",\n" +
                 "    \"serviceName\": \"Overleaf\",\n" +
                 "    \"oauth2\": {\n" +
@@ -86,8 +76,6 @@ public class ConfigTest {
         String expected = "{\n" +
                 "  \"port\": 80,\n" +
                 "  \"rootGitDirectory\": \"/var/wlgb/git\",\n" +
-                "  \"username\": \"username\",\n" +
-                "  \"password\": \"<password>\",\n" +
                 "  \"apiBaseURL\": \"http://127.0.0.1:60000/api/v0/\",\n" +
                 "  \"postbackURL\": \"http://127.0.0.1/\",\n" +
                 "  \"serviceName\": \"Overleaf\",\n" +

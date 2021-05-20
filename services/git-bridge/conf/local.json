@@ -2,8 +2,6 @@
     "port": 8000,
     "rootGitDirectory": "/tmp/wlgb",
     "apiBaseUrl": "http://v2.overleaf.test:4000/api/v0",
-    "username": "user",
-    "password": "pass",
     "postbackBaseUrl": "http://git-bridge:8000",
     "serviceName": "Overleaf",
     "oauth2": {

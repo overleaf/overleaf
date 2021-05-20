@@ -11,9 +11,6 @@ import java.io.IOException;
  */
 public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
 
-    private static String USERNAME;
-    private static String PASSWORD;
-
     private static String BASE_URL;
 
     private final Credential oauth2;
@@ -33,25 +30,9 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
     ) throws IOException {
         if (oauth2 != null) {
             request.setInterceptor(request1 -> {
-                new BasicAuthentication(
-                        USERNAME,
-                        PASSWORD
-                ).intercept(request1);
                 oauth2.intercept(request1);
             });
-        } else {
-            request.setInterceptor(request1 -> {
-                new BasicAuthentication(
-                        USERNAME,
-                        PASSWORD
-                ).intercept(request1);
-            });
         }
-    }
-
-    public static void setBasicAuth(String username, String password) {
-        USERNAME = username;
-        PASSWORD = password;
     }
 
     /* baseURL ends with / */

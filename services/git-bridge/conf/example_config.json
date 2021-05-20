@@ -2,8 +2,6 @@
     "port": 8080,
     "rootGitDirectory": "/tmp/wlgb",
     "apiBaseUrl": "https://localhost/api/v0",
-    "username": "user",
-    "password": "pass",
     "postbackBaseUrl": "https://localhost",
     "serviceName": "Overleaf",
     "oauth2": {
