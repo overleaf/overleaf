@@ -604,7 +604,6 @@
   "sl_used_over_x_people_at": "__numberOfUsers__ 이상의 학생과 교육기관이 __appName__(을)를 사용하고 있습니다.",
   "collaboration": "콜라보레이션",
   "work_on_single_version": "단일 버전으로 함께 작업하기",
-  "view_collab_edits": "콜라보레이터 편집 보기 ",
   "ease_of_use": " 쉬운 사용법",
   "no_complicated_latex_install": "LaTex 설치 필요없음",
   "all_packages_and_templates": "전체 패키지와 <0>__templatesLink__</0>",

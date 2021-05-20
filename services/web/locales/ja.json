@@ -468,7 +468,6 @@
   "sl_used_over_x_people_at": "__appName__ は、__numberOfUsers__ 以上の生徒と大学で使用されています：",
   "collaboration": "コラボレーション",
   "work_on_single_version": "1つのバージョンで共同作業",
-  "view_collab_edits": "共同編集者による編集を表示",
   "ease_of_use": "使いやすい",
   "no_complicated_latex_install": "複雑なLaTeXのインストールは不要",
   "all_packages_and_templates": "必要なパッケージと <0>__templatesLink__</0> がすべて",

@@ -609,7 +609,6 @@
   "sl_used_over_x_people_at": "已有来自以下学校的超过 __numberOfUsers__ 学生和学者在使用 __appName__",
   "collaboration": "合作",
   "work_on_single_version": "在单一版本上合作",
-  "view_collab_edits": "查看合作者的编辑 ",
   "ease_of_use": " 易于使用",
   "no_complicated_latex_install": "不需要复杂的LaTeX安装",
   "all_packages_and_templates": "包含所有您所需要的包和<0>__templatesLink__</0>",

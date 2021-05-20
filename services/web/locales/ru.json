@@ -405,7 +405,6 @@
   "sl_used_over_x_people_at": "__appName__ используется более чем __numberOfUsers__ студентами и преподавателями в:",
   "collaboration": "Совместная разработка",
   "work_on_single_version": "Совместная работа над одной версией",
-  "view_collab_edits": "Смотреть правки других участников ",
   "ease_of_use": " Легко использовать",
   "no_complicated_latex_install": "Не требуется сложной установки LaTeX",
   "all_packages_and_templates": "Все нужные пакеты и <0>__templatesLink__</0>",

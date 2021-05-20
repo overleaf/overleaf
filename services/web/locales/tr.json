@@ -310,7 +310,6 @@
   "sl_used_over_x_people_at": "__appName__'in __numberOfUsers__ kişiyi aşkın öğrenci ve akademisyen tarafından kullanıldığı yerlerden bazıları:",
   "collaboration": "İş birliği",
   "work_on_single_version": "Tek bir versiyon üzerinde ortaklaşa çalışın",
-  "view_collab_edits": "Değişiklikleri anlık olarak görün: ",
   "ease_of_use": " Kullanım kolaylığı",
   "no_complicated_latex_install": "Karmaşık bir LaTeX kurulumuna gerek yok",
   "all_packages_and_templates": "İhtiyacınız olan tüm Paketler ve <0>__templatesLink__</0> kullanıma hazır",
