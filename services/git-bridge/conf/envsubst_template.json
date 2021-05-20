@@ -18,7 +18,7 @@
     "swapStore": {
       "type": "${GIT_BRIDGE_SWAPSTORE_TYPE:-noop}",
       "awsAccessKey": "${GIT_BRIDGE_SWAPSTORE_AWS_ACCESS_KEY}",
-      "awsSecret": "${GIT_BRIDGE_SWAPSTORE_AWS_ACCESS_KEY}",
+      "awsSecret": "${GIT_BRIDGE_SWAPSTORE_AWS_SECRET}",
       "s3BucketName": "${GIT_BRIDGE_SWAPSTORE_S3_BUCKET_NAME}",
       "awsRegion": "${GIT_BRIDGE_SWAPSTORE_AWS_REGION:-us-east-1}"
     },
