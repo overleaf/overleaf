@@ -197,6 +197,7 @@ const InstitutionsAPI = {
         path: `/api/v2/users/${userId}/affiliations/remove_entitlement`,
         body: { email },
         defaultErrorMessage: "Couldn't remove entitlement",
+        extraSuccessStatusCodes: [404],
       },
       callback
     )

@@ -509,6 +509,34 @@ templates.securityAlert = NoCTAEmailTemplate({
   },
 })
 
+templates.SAMLDataCleared = ctaTemplate({
+  subject(opts) {
+    return `Institutional Login No Longer Linked - ${settings.appName}`
+  },
+  title(opts) {
+    return 'Institutional Login No Longer Linked'
+  },
+  message(opts, isPlainText) {
+    return [
+      `We're writing to let you know that due to a bug on our end, we've had to temporarily disable logging into your ${settings.appName} through your institution.`,
+      `To get it going again, you'll need to relink your institutional email address to your ${settings.appName} account via your settings.`,
+    ]
+  },
+  secondaryMessage() {
+    return [
+      `If you ordinarily log in to your ${settings.appName} account through your institution, you may need to set or reset your password to regain access to your account first.`,
+      'This bug did not affect the security of any accounts, but it may have affected license entitlements for a small number of users. We are sorry for any inconvenience that this may cause for you.',
+      `If you have any questions, please get in touch with our support team at ${settings.adminEmail} or by replying to this email.`,
+    ]
+  },
+  ctaText(opts) {
+    return 'Update my Emails and Affiliations'
+  },
+  ctaURL(opts) {
+    return `${settings.siteUrl}/user/settings`
+  },
+})
+
 function _formatUserNameAndEmail(user, placeholder) {
   if (user.first_name && user.last_name) {
     const fullName = `${user.first_name} ${user.last_name}`
