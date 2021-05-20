@@ -21,12 +21,15 @@
   background: @symbol-palette-header-background;
 }
 
-.symbol-palette-header [data-reach-tab] {
+.symbol-palette-tab-list[data-reach-tab-list] {
+  background: none;
   border-bottom: none;
 }
 
-.symbol-palette-header [data-reach-tab][data-selected] {
+.symbol-palette-tab[data-reach-tab][data-selected] {
   background: @symbol-palette-selected-tab-bg;
+  color: @symbol-palette-selected-tab-color;
+  border-bottom-color: transparent;
 }
 
 .symbol-palette-body {
@@ -37,7 +40,7 @@
 .symbol-palette-items {
   display: flex;
   flex-wrap: wrap;
-  padding: 5px;
+  padding: @padding-xs;
 }
 
 .symbol-palette-item {
@@ -46,11 +49,11 @@
   line-height: 42px;
   height: 42px;
   width: 42px;
-  margin: 5px;
+  margin: @margin-xs;
   color: @symbol-palette-item-color;
   background: @symbol-palette-item-bg;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: @border-radius-base;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -62,21 +65,20 @@
 }
 
 .symbol-palette-item-notes {
-  margin-top: 5px;
+  margin-top: @margin-xs;
 }
 
 .symbol-palette-empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  padding: @padding-sm;
 }
 
 .symbol-palette-search {
-  color: @symbol-palette-search-color;
-  border-radius: 21px;
-  border: none;
-  padding: 2px 10px;
-  margin: 5px;
+  padding: 2px @padding-sm;
+  margin: @margin-xs;
   line-height: 1;
+  height: auto;
+  width: auto;
 }

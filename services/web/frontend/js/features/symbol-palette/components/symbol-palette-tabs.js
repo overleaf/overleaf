@@ -4,9 +4,13 @@ import PropTypes from 'prop-types'
 
 export default function SymbolPaletteTabs({ categories, disabled }) {
   return (
-    <TabList aria-label="Symbol Categories">
+    <TabList aria-label="Symbol Categories" className="symbol-palette-tab-list">
       {categories.map(category => (
-        <Tab key={category.id} disabled={disabled}>
+        <Tab
+          key={category.id}
+          disabled={disabled}
+          className="symbol-palette-tab"
+        >
           {category.label}
         </Tab>
       ))}

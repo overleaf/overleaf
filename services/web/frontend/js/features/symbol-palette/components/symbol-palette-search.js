@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
+import { FormControl } from 'react-bootstrap'
 import useDebounce from '../../../shared/hooks/use-debounce'
 
 export default function SymbolPaletteSearch({ setInput, inputRef }) {
@@ -15,11 +16,18 @@ export default function SymbolPaletteSearch({ setInput, inputRef }) {
 
   const { t } = useTranslation()
 
+  const inputRefCallback = useCallback(
+    element => {
+      inputRef.current = element
+    },
+    [inputRef]
+  )
+
   return (
-    <input
+    <FormControl
       className="symbol-palette-search"
       type="search"
-      ref={inputRef}
+      inputRef={inputRefCallback}
       id="symbol-palette-input"
       aria-label="Search"
       value={localInput}
