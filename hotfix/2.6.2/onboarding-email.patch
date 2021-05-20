@@ -1,0 +1,25 @@
+--- /var/www/sharelatex/web/app/src/Features/User/UserCreator.js
++++ /var/www/sharelatex/web/app/src/Features/User/UserCreator.js
+@@ -85,13 +85,15 @@ async function createNewUser(attributes, options = {}) {
+   }
+ 
+   Analytics.recordEvent(user._id, 'user-registered')
+-  try {
+-    await UserOnboardingEmailQueueManager.scheduleOnboardingEmail(user)
+-  } catch (error) {
+-    logger.error(
+-      `Failed to schedule sending of onboarding email for user '${user._id}'`,
+-      error
+-    )
++  if(Features.hasFeature('saas')) {
++    try {
++      await UserOnboardingEmailQueueManager.scheduleOnboardingEmail(user)
++    } catch (error) {
++      logger.error(
++          `Failed to schedule sending of onboarding email for user '${user._id}'`,
++          error
++      )
++    }
+   }
+ 
+   return user
