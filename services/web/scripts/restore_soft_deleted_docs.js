@@ -1,7 +1,7 @@
 const { waitForDb } = require('../app/src/infrastructure/mongodb')
 const ProjectEntityUpdateHandler = require('../app/src/Features/Project/ProjectEntityUpdateHandler')
 const ProjectEntityHandler = require('../app/src/Features/Project/ProjectEntityHandler')
-const ProjectGetter = require('../app/src/Features/Project/ProjectGetter')
+const DocstoreManager = require('../app/src/Features/Docstore/DocstoreManager')
 const Path = require('path')
 
 const ARGV = process.argv.slice(2)
@@ -10,10 +10,10 @@ const PROJECT_ID = ARGV.shift()
 const FILE_NAMES_TO_RESTORE = ARGV
 
 async function main() {
-  const project = await ProjectGetter.promises.getProject(PROJECT_ID, {
-    deletedDocs: 1,
-  })
-  const docsToRestore = project.deletedDocs.filter(doc =>
+  const deletedDocs = await DocstoreManager.promises.getAllDeletedDocs(
+    PROJECT_ID
+  )
+  const docsToRestore = deletedDocs.filter(doc =>
     FILE_NAMES_TO_RESTORE.includes(doc.name)
   )
   for (const deletedDoc of docsToRestore) {
