@@ -27,7 +27,7 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
     @Override
     protected void onBeforeRequest(
             HttpRequest request
-    ) throws IOException {
+    ) {
         if (oauth2 != null) {
             request.setInterceptor(request1 -> {
                 oauth2.intercept(request1);
