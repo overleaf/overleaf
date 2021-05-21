@@ -23,6 +23,12 @@ const fs = require('fs')
 
 const ProcessTable = {} // table of currently running jobs (pids or docker container names)
 
+const TIME_V_METRICS = Object.entries({
+  'cpu-percent': /Percent of CPU this job got: (\d+)/m,
+  'cpu-time': /User time.*: (\d+.\d+)/m,
+  'sys-time': /System time.*: (\d+.\d+)/m
+})
+
 module.exports = LatexRunner = {
   runLatex(project_id, options, callback) {
     let command
@@ -116,28 +122,16 @@ module.exports = LatexRunner = {
         stats[`latex-runs-with-errors-${runs}`] = failed ? 1 : 0
         // timing information from /usr/bin/time
         const timings = {}
-        const stderr = output != null ? output.stderr : undefined
-        timings['cpu-percent'] =
-          __guard__(
-            stderr != null
-              ? stderr.match(/Percent of CPU this job got: (\d+)/m)
-              : undefined,
-            (x3) => x3[1]
-          ) || 0
-        timings['cpu-time'] =
-          __guard__(
-            stderr != null
-              ? stderr.match(/User time.*: (\d+.\d+)/m)
-              : undefined,
-            (x4) => x4[1]
-          ) || 0
-        timings['sys-time'] =
-          __guard__(
-            stderr != null
-              ? stderr.match(/System time.*: (\d+.\d+)/m)
-              : undefined,
-            (x5) => x5[1]
-          ) || 0
+        const stderr = (output && output.stderr) || ''
+        if (stderr.includes('Command being timed:')) {
+          // Add metrics for runs with `$ time -v ...`
+          for (const [timing, matcher] of TIME_V_METRICS) {
+            const match = stderr.match(matcher)
+            if (match) {
+              timings[timing] = parseFloat(match[1])
+            }
+          }
+        }
         // record output files
         LatexRunner.writeLogOutput(project_id, directory, output, () => {
           return callback(error, output, stats, timings)
