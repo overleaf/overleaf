@@ -188,6 +188,7 @@ block append meta
 	meta(name="ol-logsUISubvariant" content=logsUISubvariant)
 	meta(name="ol-showSymbolPalette" data-type="boolean" content=showSymbolPalette)
 	meta(name="ol-enablePdfCaching" data-type="boolean" content=enablePdfCaching)
+	meta(name="ol-trackPdfDownload" data-type="boolean" content=trackPdfDownload)
 
 	- var fileActionI18n = ['edited', 'renamed', 'created', 'deleted'].reduce((acc, i) => {acc[i] = translate('file_action_' + i); return acc}, {})
 	meta(name="ol-fileActionI18n" data-type="json" content=fileActionI18n)

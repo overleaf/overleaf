@@ -7,6 +7,7 @@ import { rootContext } from '../../../shared/context/root-context'
 import 'ace/ace'
 import getMeta from '../../../utils/meta'
 import { waitForServiceWorker } from '../../pdfng/directives/serviceWorkerManager'
+import { trackPdfDownload } from './PdfJsMetrics'
 
 const AUTO_COMPILE_MAX_WAIT = 5000
 // We add a 1 second debounce to sending user changes to server if they aren't
@@ -405,25 +406,13 @@ App.controller(
         // convert the qs hash into a query string and append it
         $scope.pdf.url += createQueryString(qs)
 
-        const {
-          onFirstRenderDone,
-          firstRenderDone,
-          updateConsumedBandwidth,
-        } = trackPDFDownload()
-        $scope.pdf.firstRenderDone = firstRenderDone
-        $scope.pdf.updateConsumedBandwidth = updateConsumedBandwidth
-        const { serviceWorkerMetrics } = response
-
-        onFirstRenderDone.then(({ latencyFetch, latencyRender }) => {
-          sl_console.log(
-            JSON.stringify({
-              latencyFetch,
-              latencyRender,
-              totalBandwidthReportedByPdfJs,
-              serviceWorkerMetrics,
-            })
+        if (getMeta('ol-trackPdfDownload')) {
+          const { firstRenderDone, updateConsumedBandwidth } = trackPdfDownload(
+            response
           )
-        })
+          $scope.pdf.firstRenderDone = firstRenderDone
+          $scope.pdf.updateConsumedBandwidth = updateConsumedBandwidth
+        }
 
         // Save all downloads as files
         qs.popupDownload = true
@@ -570,33 +559,6 @@ App.controller(
       $scope.pdf.outputFiles.sort(
         (a, b) => b.main - a.main || a.name.localeCompare(b.name)
       )
-    }
-
-    let totalBandwidthReportedByPdfJs = 0
-    function trackPDFDownload() {
-      const t0 = performance.now()
-      let bandwidth = 0
-      function firstRenderDone({ timePDFFetched, timePDFRendered }) {
-        const latencyFetch = timePDFFetched - t0
-        // The renderer does not yield in case the browser tab is hidden.
-        // It will yield when the browser tab is visible again.
-        // This will skew our performance metrics for rendering!
-        const latencyRender = timePDFRendered - t0
-        done({ latencyFetch, latencyRender })
-      }
-      function updateConsumedBandwidth(bytes) {
-        totalBandwidthReportedByPdfJs += bytes - bandwidth
-        bandwidth = bytes
-      }
-      let done
-      const onFirstRenderDone = new Promise(resolve => {
-        done = resolve
-      })
-      return {
-        onFirstRenderDone,
-        firstRenderDone,
-        updateConsumedBandwidth,
-      }
     }
 
     function fetchLogs(fileByPath, options) {

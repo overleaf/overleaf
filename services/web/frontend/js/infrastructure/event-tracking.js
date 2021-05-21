@@ -11,3 +11,9 @@ export function sendMB(key, body = {}) {
     // ignore errors
   })
 }
+
+export function sendMBSampled(key, body = {}, rate = 0.01) {
+  if (Math.random() < rate) {
+    sendMB(key, body)
+  }
+}

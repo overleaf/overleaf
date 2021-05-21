@@ -1,9 +1,11 @@
+import { v4 as uuid } from 'uuid'
 const COMPILE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/compile$/
 const MIN_CHUNK_SIZE = 128 * 1024
 
 const PDF_FILES = new Map()
 
 const METRICS = {
+  id: uuid(),
   epoch: Date.now(),
   cachedBytes: 0,
   fetchedBytes: 0,
