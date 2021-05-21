@@ -397,6 +397,11 @@ App.controller(
           pdfDownloadDomain,
           fileByPath['output.pdf'].url
         )
+
+        if (window.location.search.includes('verify_chunks=true')) {
+          qs.verify_chunks = 'true'
+        }
+
         // convert the qs hash into a query string and append it
         $scope.pdf.url += createQueryString(qs)
 

@@ -23,6 +23,26 @@ function trackStats({ size, cachedBytes, fetchedBytes }) {
 }
 
 /**
+ * @param {boolean} sizeDiffers
+ * @param {boolean} mismatch
+ * @param {boolean} success
+ */
+function trackChunkVerify({ sizeDiffers, mismatch, success }) {
+  if (sizeDiffers) {
+    METRICS.chunkVerifySizeDiffers |= 0
+    METRICS.chunkVerifySizeDiffers += 1
+  }
+  if (mismatch) {
+    METRICS.chunkVerifyMismatch |= 0
+    METRICS.chunkVerifyMismatch += 1
+  }
+  if (success) {
+    METRICS.chunkVerifySuccess |= 0
+    METRICS.chunkVerifySuccess += 1
+  }
+}
+
+/**
  * @param {FetchEvent} event
  */
 function onFetch(event) {
@@ -83,6 +103,7 @@ function processPdfRequest(
     )
   }
 
+  const verifyChunks = event.request.url.includes('verify_chunks=true')
   const rangeHeader =
     event.request.headers.get('Range') || `bytes=0-${file.size}`
   const [start, last] = rangeHeader
@@ -178,15 +199,42 @@ function processPdfRequest(
           reAssembledBlob.set(new Uint8Array(arrayBuffer), insertPosition)
         })
 
-        trackStats({ size, cachedBytes, fetchedBytes })
-        return new Response(reAssembledBlob, {
-          status: 206,
-          headers: {
-            'Accept-Ranges': 'bytes',
-            'Content-Length': size,
-            'Content-Range': `bytes ${start}-${last}/${file.size}`,
-            'Content-Type': 'application/pdf',
-          },
+        let verifyProcess = Promise.resolve(reAssembledBlob)
+        if (verifyChunks) {
+          verifyProcess = fetch(event.request)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => {
+              const fullBlob = new Uint8Array(arrayBuffer)
+              const metrics = {}
+              if (reAssembledBlob.byteLength !== fullBlob.byteLength) {
+                metrics.sizeDiffers = true
+              } else if (
+                !reAssembledBlob.every((v, idx) => v === fullBlob[idx])
+              ) {
+                metrics.mismatch = true
+              } else {
+                metrics.success = true
+              }
+              trackChunkVerify(metrics)
+              if (metrics.success === true) {
+                return reAssembledBlob
+              } else {
+                return fullBlob
+              }
+            })
+        }
+
+        return verifyProcess.then(blob => {
+          trackStats({ size, cachedBytes, fetchedBytes })
+          return new Response(blob, {
+            status: 206,
+            headers: {
+              'Accept-Ranges': 'bytes',
+              'Content-Length': size,
+              'Content-Range': `bytes ${start}-${last}/${file.size}`,
+              'Content-Type': 'application/pdf',
+            },
+          })
         })
       })
       .catch(error => {
