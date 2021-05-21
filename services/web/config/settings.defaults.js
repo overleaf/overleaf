@@ -343,6 +343,34 @@ module.exports = {
         },
       ],
     },
+    {
+      id: 'enable_pdf_caching',
+      active: process.env.SPLIT_TEST_ENABLE_PDF_CACHING_ACTIVE === 'true',
+      variants: [
+        {
+          id: 'enabled',
+          rolloutPercent: parseInt(
+            process.env.SPLIT_TEST_ENABLE_PDF_CACHING_ENABLE_ROLLOUT_PERCENT ||
+              '0',
+            10
+          ),
+        },
+      ],
+    },
+    {
+      id: 'track_pdf_download',
+      active: process.env.SPLIT_TEST_TRACK_PDF_DOWNLOAD_ACTIVE === 'true',
+      variants: [
+        {
+          id: 'enabled',
+          rolloutPercent: parseInt(
+            process.env.SPLIT_TEST_TRACK_PDF_DOWNLOAD_ENABLE_ROLLOUT_PERCENT ||
+              '0',
+            10
+          ),
+        },
+      ],
+    },
   ],
 
   // cdn:
