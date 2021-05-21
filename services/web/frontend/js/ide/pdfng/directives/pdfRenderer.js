@@ -362,9 +362,20 @@ export default App.factory(
               if (loadTask.cancelled) {
                 return
               } // return from cancelled page load
+              const timePDFFetched = performance.now()
               pageState.renderTask = this.doRender(element, pagenum, pageObject)
               return pageState.renderTask.promise.then(
                 () => {
+                  if (typeof this.options.firstRenderDone === 'function') {
+                    const timePDFRendered = performance.now()
+                    this.options.firstRenderDone({
+                      timePDFFetched,
+                      timePDFRendered,
+                    })
+                    // The rendering pipeline is processed repeatedly, skip the next ones.
+                    this.options.firstRenderDone = null
+                  }
+
                   // render task success
                   this.clearIndicator(page)
                   pageState.complete = true

@@ -281,6 +281,8 @@ div.full-size.pdf(ng-controller="PdfController")
 				resize-on="layout:main:resize,layout:pdf:resize"
 				highlights="pdf.highlights"
 				position="pdf.position"
+				first-render-done="pdf.firstRenderDone"
+				update-consumed-bandwidth="pdf.updateConsumedBandwidth"
 				dbl-click-callback="syncToCode"
 			)
 			iframe(

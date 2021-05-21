@@ -52,6 +52,11 @@ App.controller(
         // add 'pdfng=true' to show that we are using the angular pdfjs viewer
         const queryStringExists = /\?/.test(url)
         url = url + (!queryStringExists ? '?' : '&') + 'pdfng=true'
+
+        // Take references as these must be invoked for this very URL
+        const firstRenderDone = $scope.firstRenderDone
+        const updateConsumedBandwidth = $scope.updateConsumedBandwidth
+
         // for isolated compiles, load the pdf on-demand because nobody will overwrite it
         const onDemandLoading = true
         $scope.document = new PDFRenderer(url, {
@@ -63,11 +68,13 @@ App.controller(
             return $scope.$apply()
           },
           progressCallback(progress) {
+            updateConsumedBandwidth(progress.loaded)
             return $scope.$emit('progress', progress)
           },
           loadedCallback() {
             return $scope.$emit('loaded')
           },
+          firstRenderDone,
           errorCallback(error) {
             // MissingPDFException is "expected" as the pdf file can be on a
             // CLSI server that has been cycled out.
@@ -324,6 +331,8 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
   controllerAs: 'ctrl',
   scope: {
     pdfSrc: '=',
+    firstRenderDone: '=',
+    updateConsumedBandwidth: '=',
     highlights: '=',
     position: '=',
     scale: '=',
