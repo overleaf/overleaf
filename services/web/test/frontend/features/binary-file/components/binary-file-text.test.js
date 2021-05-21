@@ -1,7 +1,8 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import BinaryFileText from '../../../../../frontend/js/features/binary-file/components/binary-file-text.js'
 
 describe('<BinaryFileText/>', function () {
@@ -18,11 +19,6 @@ describe('<BinaryFileText/>', function () {
 
   beforeEach(function () {
     fetchMock.reset()
-    window.project_id = '123abc'
-  })
-
-  afterEach(function () {
-    delete window.project_id
   })
 
   it('renders a text view', async function () {
@@ -35,7 +31,9 @@ describe('<BinaryFileText/>', function () {
       'Text file content'
     )
 
-    render(<BinaryFileText file={file} onError={() => {}} onLoad={() => {}} />)
+    renderWithEditorContext(
+      <BinaryFileText file={file} onError={() => {}} onLoad={() => {}} />
+    )
 
     await screen.findByText('Text file content', { exact: false })
   })

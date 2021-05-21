@@ -1,6 +1,7 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import BinaryFileImage from '../../../../../frontend/js/features/binary-file/components/binary-file-image.js'
 
 describe('<BinaryFileImage />', function () {
@@ -14,7 +15,7 @@ describe('<BinaryFileImage />', function () {
   }
 
   it('renders an image', function () {
-    render(
+    renderWithEditorContext(
       <BinaryFileImage
         fileName={file.name}
         fileId={file.id}

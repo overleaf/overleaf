@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
+import { useEditorContext } from '../../../shared/context/editor-context'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024
 
 export default function BinaryFileText({ file, onLoad, onError }) {
+  const { projectId } = useEditorContext({
+    projectId: PropTypes.string.isRequired,
+  })
+
   const [textPreview, setTextPreview] = useState('')
   const [shouldShowDots, setShouldShowDots] = useState(false)
 
   useEffect(() => {
-    let path = `/project/${window.project_id}/file/${file.id}`
+    let path = `/project/${projectId}/file/${file.id}`
     fetch(path, { method: 'HEAD' })
       .then(response => {
         if (!response.ok) throw new Error('HTTP Error Code: ' + response.status)
@@ -45,7 +50,7 @@ export default function BinaryFileText({ file, onLoad, onError }) {
       .catch(err => {
         onError()
       })
-  }, [file.id, onError, onLoad])
+  }, [projectId, file.id, onError, onLoad])
   return (
     <div>
       {textPreview && (

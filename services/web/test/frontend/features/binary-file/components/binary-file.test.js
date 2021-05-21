@@ -1,12 +1,12 @@
 import React from 'react'
 import {
-  render,
   screen,
   waitForElementToBeRemoved,
   fireEvent,
 } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import BinaryFile from '../../../../../frontend/js/features/binary-file/components/binary-file.js'
 
 describe('<BinaryFile/>', function () {
@@ -35,16 +35,20 @@ describe('<BinaryFile/>', function () {
   })
 
   describe('for a text file', function () {
-    it('it shows a loading indicator while the file is loading', async function () {
-      render(<BinaryFile file={textFile} storeReferencesKeys={() => {}} />)
+    it('shows a loading indicator while the file is loading', async function () {
+      renderWithEditorContext(
+        <BinaryFile file={textFile} storeReferencesKeys={() => {}} />
+      )
 
       await waitForElementToBeRemoved(() =>
         screen.getByText('Loading', { exact: false })
       )
     })
 
-    it('it shows messaging if the text view could not be loaded', async function () {
-      render(<BinaryFile file={textFile} storeReferencesKeys={() => {}} />)
+    it('shows messaging if the text view could not be loaded', async function () {
+      renderWithEditorContext(
+        <BinaryFile file={textFile} storeReferencesKeys={() => {}} />
+      )
 
       await screen.findByText('Sorry, no preview is available', {
         exact: false,
@@ -53,14 +57,18 @@ describe('<BinaryFile/>', function () {
   })
 
   describe('for an image file', function () {
-    it('it shows a loading indicator while the file is loading', async function () {
-      render(<BinaryFile file={imageFile} storeReferencesKeys={() => {}} />)
+    it('shows a loading indicator while the file is loading', async function () {
+      renderWithEditorContext(
+        <BinaryFile file={imageFile} storeReferencesKeys={() => {}} />
+      )
 
       screen.getByText('Loading', { exact: false })
     })
 
-    it('it shows messaging if the image could not be loaded', function () {
-      render(<BinaryFile file={imageFile} storeReferencesKeys={() => {}} />)
+    it('shows messaging if the image could not be loaded', function () {
+      renderWithEditorContext(
+        <BinaryFile file={imageFile} storeReferencesKeys={() => {}} />
+      )
 
       // Fake the image request failing as the request is handled by the browser
       fireEvent.error(screen.getByRole('img'))

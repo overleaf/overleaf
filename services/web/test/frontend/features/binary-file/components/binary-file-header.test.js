@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  render,
   screen,
   fireEvent,
   waitForElementToBeRemoved,
@@ -9,6 +8,7 @@ import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import BinaryFileHeader from '../../../../../frontend/js/features/binary-file/components/binary-file-header.js'
 
 describe('<BinaryFileHeader/>', function () {
@@ -50,16 +50,15 @@ describe('<BinaryFileHeader/>', function () {
     created: new Date(2021, 1, 17, 3, 24).toISOString(),
   }
 
-  let storeReferencesKeys
-
   beforeEach(function () {
     fetchMock.reset()
-    storeReferencesKeys = sinon.stub()
   })
 
   describe('header text', function () {
     it('Renders the correct text for a file with the url provider', function () {
-      render(<BinaryFileHeader file={urlFile} storeReferencesKeys={() => {}} />)
+      renderWithEditorContext(
+        <BinaryFileHeader file={urlFile} storeReferencesKeys={() => {}} />
+      )
       screen.getByText('Imported from', { exact: false })
       screen.getByText('at 3:24 am Wed, 17th Feb 21', {
         exact: false,
@@ -67,7 +66,7 @@ describe('<BinaryFileHeader/>', function () {
     })
 
     it('Renders the correct text for a file with the project_file provider', function () {
-      render(
+      renderWithEditorContext(
         <BinaryFileHeader file={projectFile} storeReferencesKeys={() => {}} />
       )
       screen.getByText('Imported from', { exact: false })
@@ -78,7 +77,7 @@ describe('<BinaryFileHeader/>', function () {
     })
 
     it('Renders the correct text for a file with the project_output_file provider', function () {
-      render(
+      renderWithEditorContext(
         <BinaryFileHeader
           file={projectOutputFile}
           storeReferencesKeys={() => {}}
@@ -93,20 +92,6 @@ describe('<BinaryFileHeader/>', function () {
   })
 
   describe('The refresh button', async function () {
-    let reindexResponse
-
-    beforeEach(function () {
-      window.project_id = '123abc'
-      reindexResponse = {
-        projectId: '123abc',
-        keys: ['reference1', 'reference2', 'reference3', 'reference4'],
-      }
-    })
-
-    afterEach(function () {
-      delete window.project_id
-    })
-
     it('Changes text when the file is refreshing', async function () {
       fetchMock.post(
         'express:/project/:project_id/linked_file/:file_id/refresh',
@@ -115,7 +100,7 @@ describe('<BinaryFileHeader/>', function () {
         }
       )
 
-      render(
+      renderWithEditorContext(
         <BinaryFileHeader file={projectFile} storeReferencesKeys={() => {}} />
       )
 
@@ -135,12 +120,18 @@ describe('<BinaryFileHeader/>', function () {
         }
       )
 
+      const reindexResponse = {
+        projectId: '123abc',
+        keys: ['reference1', 'reference2', 'reference3', 'reference4'],
+      }
       fetchMock.post(
         'express:/project/:project_id/references/indexAll',
         reindexResponse
       )
 
-      render(
+      const storeReferencesKeys = sinon.stub()
+
+      renderWithEditorContext(
         <BinaryFileHeader
           file={thirdPartyReferenceFile}
           storeReferencesKeys={storeReferencesKeys}
@@ -160,7 +151,9 @@ describe('<BinaryFileHeader/>', function () {
 
   describe('The download button', function () {
     it('exists', function () {
-      render(<BinaryFileHeader file={urlFile} storeReferencesKeys={() => {}} />)
+      renderWithEditorContext(
+        <BinaryFileHeader file={urlFile} storeReferencesKeys={() => {}} />
+      )
 
       screen.getByText('Download', { exact: false })
     })

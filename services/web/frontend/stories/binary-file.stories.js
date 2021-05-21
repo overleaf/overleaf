@@ -1,9 +1,8 @@
 import React from 'react'
 
+import { ContextRoot } from '../js/shared/context/root-context'
 import BinaryFile from '../js/features/binary-file/components/binary-file'
 import useFetchMock from './hooks/use-fetch-mock'
-
-window.project_id = 'proj123'
 
 const setupFetchMock = fetchMock => {
   fetchMock
@@ -20,12 +19,10 @@ const setupFetchMock = fetchMock => {
     })
 }
 
-window.project_id = '1234'
-
 const fileData = {
   id: 'file-id',
   name: 'file.tex',
-  created: new Date(),
+  created: new Date().toISOString(),
 }
 
 export const FileFromUrl = args => {
@@ -181,7 +178,9 @@ export default {
     Story => (
       <>
         <style>{'html, body { height: 100%; }'}</style>
-        <Story />
+        <ContextRoot ide={window._ide} settings={{}}>
+          <Story />
+        </ContextRoot>
       </>
     ),
   ],
