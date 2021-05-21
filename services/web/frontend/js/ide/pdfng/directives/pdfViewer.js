@@ -44,7 +44,9 @@ App.controller(
       // prevent race conditions)
       const documentTearDown =
         $scope.document != null ? $scope.document.destroy() : Promise.resolve()
-
+      // Keep track of whether the pdf has loaded (this allows rescale events to
+      // be ignored until we are ready to render the pdf).
+      $scope.isLoaded = false
       return documentTearDown.then(() => {
         $scope.loadCount = $scope.loadCount != null ? $scope.loadCount + 1 : 1
         // TODO need a proper url manipulation library to add to query string
@@ -108,6 +110,8 @@ App.controller(
             ]
             // console.log 'resolved q.all, page size is', result
             $scope.$emit('loaded')
+            // we can now render the document and handle rescale events
+            $scope.isLoaded = true
             return ($scope.numPages = result.numPages)
           })
           .catch(function (error) {
@@ -399,6 +403,9 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
     let rescaleTimer = null
     const queueRescale = function (scale) {
       // console.log 'call to queueRescale'
+      if (!scope.isLoaded) {
+        return // ignore any requests to rescale before the document is loaded
+      }
       if (rescaleTimer != null || layoutTimer != null || elementTimer != null) {
         return
       }
