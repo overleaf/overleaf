@@ -1,7 +1,8 @@
 import App from '../../../base'
 import { react2angular } from 'react2angular'
-import BinaryFile from '../components/binary-file'
 import _ from 'lodash'
+
+import BinaryFile from '../components/binary-file'
 
 export default App.controller(
   'ReactBinaryFileController',
