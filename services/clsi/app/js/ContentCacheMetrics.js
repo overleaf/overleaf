@@ -72,7 +72,10 @@ function emitPdfCachingStats(stats, timings) {
 
   // How much space do the ranges use?
   // This will accumulate the ranges size over time, skipping already written ranges.
-  Metrics.summary('pdf-ranges-disk-size', stats['pdf-caching-new-ranges-size'])
+  Metrics.summary(
+    'pdf-ranges-disk-size',
+    stats['pdf-caching-new-ranges-size'] - stats['pdf-caching-reclaimed-space']
+  )
 }
 
 module.exports = {
