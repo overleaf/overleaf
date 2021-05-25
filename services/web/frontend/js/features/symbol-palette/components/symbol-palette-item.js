@@ -30,9 +30,7 @@ export default function SymbolPaletteItem({
           <div className="symbol-palette-item-description">
             {symbol.description}
           </div>
-          <div className="symbol-palette-item-command" aria-hidden="true">
-            {symbol.command}
-          </div>
+          <div className="symbol-palette-item-command">{symbol.command}</div>
           {symbol.notes && (
             <div className="symbol-palette-item-notes">{symbol.notes}</div>
           )}
@@ -47,9 +45,10 @@ export default function SymbolPaletteItem({
         tabIndex={focused ? 0 : -1}
         ref={buttonRef}
         role="option"
-        aria-selected={focused}
+        aria-label={symbol.description}
+        aria-selected={focused ? 'true' : 'false'}
       >
-        <span aria-hidden="true">{symbol.character}</span>
+        {symbol.character}
       </button>
     </OverlayTrigger>
   )

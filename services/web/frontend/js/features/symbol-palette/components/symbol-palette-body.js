@@ -13,35 +13,44 @@ export default function SymbolPaletteBody({
 }) {
   const { t } = useTranslation()
 
-  // not searching: show the symbols grouped by category
-  if (!filteredSymbols) {
+  // searching with matches: show the matched symbols
+  // searching with no matches: show a message
+  // note: include empty tab panels so that aria-controls on tabs can still reference the panel ids
+  if (filteredSymbols) {
     return (
-      <TabPanels>
-        {categories.map(category => (
-          <TabPanel key={category.id} tabIndex={-1}>
-            <SymbolPaletteItems
-              items={categorisedSymbols[category.id]}
-              handleSelect={handleSelect}
-              focusInput={focusInput}
-            />
-          </TabPanel>
-        ))}
-      </TabPanels>
+      <>
+        {filteredSymbols.length ? (
+          <SymbolPaletteItems
+            items={filteredSymbols}
+            handleSelect={handleSelect}
+            focusInput={focusInput}
+          />
+        ) : (
+          <div className="symbol-palette-empty">{t('no_symbols_found')}</div>
+        )}
+
+        <TabPanels>
+          {categories.map(category => (
+            <TabPanel key={category.id} tabIndex={-1} />
+          ))}
+        </TabPanels>
+      </>
     )
   }
 
-  // searching with no matches: show a message
-  if (!filteredSymbols.length) {
-    return <div className="symbol-palette-empty">{t('no_symbols_found')}</div>
-  }
-
-  // searching with matches: show the matched symbols
+  // not searching: show the symbols grouped by category
   return (
-    <SymbolPaletteItems
-      items={filteredSymbols}
-      handleSelect={handleSelect}
-      focusInput={focusInput}
-    />
+    <TabPanels>
+      {categories.map(category => (
+        <TabPanel key={category.id} tabIndex={-1}>
+          <SymbolPaletteItems
+            items={categorisedSymbols[category.id]}
+            handleSelect={handleSelect}
+            focusInput={focusInput}
+          />
+        </TabPanel>
+      ))}
+    </TabPanels>
   )
 }
 SymbolPaletteBody.propTypes = {
