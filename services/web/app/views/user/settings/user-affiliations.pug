@@ -110,7 +110,7 @@ form.row(
 								+btnMakePrimaryDisabled(translate("please_link_before_making_primary"))
 							.affiliations-table-inline-action-disabled-wrapper(ng-if="!userEmail.ssoAvailable")
 								+btnMakePrimaryDisabled(translate("please_confirm_your_email_before_making_it_default"))
-						.affiliations-table-inline-action-disabled-wrapper(ng-if="inReconfirmNotificationPeriod(userEmail)")
+						.affiliations-table-inline-action-disabled-wrapper(ng-if="!userEmail.default && inReconfirmNotificationPeriod(userEmail)")
 							+btnMakePrimaryDisabled(translate("please_reconfirm_your_affiliation_before_making_this_primary"))
 						button.btn.btn-sm.btn-success.affiliations-table-inline-action(
 							tooltip=translate("make_email_primary_description")
