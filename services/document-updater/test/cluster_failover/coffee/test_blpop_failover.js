@@ -56,7 +56,6 @@ const listenForPing = (cb) =>
 
 const PING_DELAY = 100
 ;(sendPings = () => sendPing(() => setTimeout(sendPings, PING_DELAY)))()
-
 ;(listenInBackground = () =>
   listenForPing((error) => {
     if (error) {
