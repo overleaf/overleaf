@@ -891,7 +891,7 @@ const ProjectController = {
               ),
               showReactGithubSync: shouldDisplayFeature(
                 'new_github_sync_ui',
-                user.alphaProgram
+                user.betaProgram || user.alphaProgram
               ),
               showNewBinaryFileUI: shouldDisplayFeature('new_binary_file'),
               showSymbolPalette: shouldDisplayFeature('symbol_palette'),
