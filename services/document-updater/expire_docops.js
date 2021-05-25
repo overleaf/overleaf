@@ -11,7 +11,7 @@ const getKeysFromNode = function (node, pattern, callback) {
   const keySet = {} // use hash to avoid duplicate results
   // scan over all keys looking for pattern
   const doIteration = () =>
-    node.scan(cursor, 'MATCH', pattern, 'COUNT', 1000, function(error, reply) {
+    node.scan(cursor, 'MATCH', pattern, 'COUNT', 1000, function (error, reply) {
       if (error) {
         return callback(error)
       }
@@ -20,7 +20,7 @@ const getKeysFromNode = function (node, pattern, callback) {
       for (const key of keys) {
         keySet[key] = true
       }
-      if (cursor==='0') {
+      if (cursor === '0') {
         // note redis returns string result not numeric
         return callback(null, Object.keys(keySet))
       } else {
