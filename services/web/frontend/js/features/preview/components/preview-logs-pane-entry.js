@@ -67,12 +67,12 @@ function PreviewLogEntryHeader({
 }) {
   const { t } = useTranslation()
   const logLocationSpanRef = useRef()
-  const [showLocationTooltip, setShowLocationTooltip] = useState(false)
+  const [locationSpanOverflown, setLocationSpanOverflown] = useState(false)
 
   useResizeObserver(
     logLocationSpanRef,
-    showLocationTooltip,
-    setTooltipForLogLocationLinkIfNeeded
+    locationSpanOverflown,
+    checkLocationSpanOverflow
   )
 
   const file = sourceLocation ? sourceLocation.file : null
@@ -95,10 +95,10 @@ function PreviewLogEntryHeader({
     location: file + (line ? `, ${line}` : ''),
   })
 
-  function setTooltipForLogLocationLinkIfNeeded(observedElement) {
+  function checkLocationSpanOverflow(observedElement) {
     const spanEl = observedElement.target
-    const shouldShowTooltip = spanEl.scrollWidth > spanEl.clientWidth
-    setShowLocationTooltip(shouldShowTooltip)
+    const isOverflowing = spanEl.scrollWidth > spanEl.clientWidth
+    setLocationSpanOverflown(isOverflowing)
   }
 
   const locationLinkText =
@@ -132,11 +132,12 @@ function PreviewLogEntryHeader({
     </button>
   ) : null
 
-  const locationTooltip = showLocationTooltip ? (
-    <Tooltip id={locationLinkText} className="log-location-tooltip">
-      {locationLinkText}
-    </Tooltip>
-  ) : null
+  const locationTooltip =
+    locationSpanOverflown && locationLinkText ? (
+      <Tooltip id={locationLinkText} className="log-location-tooltip">
+        {locationLinkText}
+      </Tooltip>
+    ) : null
 
   var headerTitleText = logType ? `${logType} ${headerTitle}` : headerTitle
 
@@ -146,7 +147,7 @@ function PreviewLogEntryHeader({
         <div className="log-entry-header-icon-container">{headerIcon}</div>
       ) : null}
       <h3 className="log-entry-header-title">{headerTitleText}</h3>
-      {showLocationTooltip ? (
+      {locationTooltip ? (
         <OverlayTrigger placement="left" overlay={locationTooltip}>
           {locationLink}
         </OverlayTrigger>
