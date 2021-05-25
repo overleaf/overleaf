@@ -32,10 +32,16 @@ export default function SymbolPaletteContent({ handleSelect }) {
       return null
     }
 
-    return matchSorter(symbols, input, {
-      keys: ['command', 'description'],
-      threshold: matchSorter.rankings.CONTAINS,
-    })
+    const words = input.trim().split(/\W+/)
+
+    return words.reduceRight(
+      (symbols, word) =>
+        matchSorter(symbols, word, {
+          keys: ['command', 'description'],
+          threshold: matchSorter.rankings.CONTAINS,
+        }),
+      symbols
+    )
   }, [input])
 
   const inputRef = useRef(null)
