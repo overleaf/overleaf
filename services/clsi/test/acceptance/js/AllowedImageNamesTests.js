@@ -75,7 +75,7 @@ Hello world
     beforeEach(function (done) {
       Client.compile(this.project_id, this.request, done)
     })
-    it('should error out with an invalid imageName', function () {
+    it('should error out with an invalid imageName', function (done) {
       Client.syncFromCodeWithImage(
         this.project_id,
         'main.tex',
@@ -85,11 +85,12 @@ Hello world
         (error, body) => {
           expect(String(error)).to.include('statusCode=400')
           expect(body).to.equal('invalid image')
+          done()
         }
       )
     })
 
-    it('should produce a mapping a valid imageName', function () {
+    it('should produce a mapping a valid imageName', function (done) {
       Client.syncFromCodeWithImage(
         this.project_id,
         'main.tex',
@@ -103,6 +104,7 @@ Hello world
               { page: 1, h: 133.77, v: 134.76, height: 6.92, width: 343.71 }
             ]
           })
+          done()
         }
       )
     })
@@ -112,7 +114,7 @@ Hello world
     beforeEach(function (done) {
       Client.compile(this.project_id, this.request, done)
     })
-    it('should error out with an invalid imageName', function () {
+    it('should error out with an invalid imageName', function (done) {
       Client.syncFromPdfWithImage(
         this.project_id,
         'main.tex',
@@ -122,11 +124,12 @@ Hello world
         (error, body) => {
           expect(String(error)).to.include('statusCode=400')
           expect(body).to.equal('invalid image')
+          done()
         }
       )
     })
 
-    it('should produce a mapping a valid imageName', function () {
+    it('should produce a mapping a valid imageName', function (done) {
       Client.syncFromPdfWithImage(
         this.project_id,
         1,
@@ -138,6 +141,7 @@ Hello world
           expect(result).to.deep.equal({
             code: [{ file: 'main.tex', line: 3, column: -1 }]
           })
+          done()
         }
       )
     })
@@ -147,7 +151,7 @@ Hello world
     beforeEach(function (done) {
       Client.compile(this.project_id, this.request, done)
     })
-    it('should error out with an invalid imageName', function () {
+    it('should error out with an invalid imageName', function (done) {
       Client.wordcountWithImage(
         this.project_id,
         'main.tex',
@@ -155,11 +159,12 @@ Hello world
         (error, body) => {
           expect(String(error)).to.include('statusCode=400')
           expect(body).to.equal('invalid image')
+          done()
         }
       )
     })
 
-    it('should produce a texcout a valid imageName', function () {
+    it('should produce a texcout a valid imageName', function (done) {
       Client.wordcountWithImage(
         this.project_id,
         'main.tex',
@@ -168,6 +173,7 @@ Hello world
           expect(error).to.not.exist
           expect(result).to.exist
           expect(result.texcount).to.exist
+          done()
         }
       )
     })
