@@ -8,6 +8,7 @@ const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
 const Analytics = require('../Analytics/AnalyticsManager')
 const UserOnboardingEmailQueueManager = require('./UserOnboardingEmailManager')
+const OError = require('@overleaf/o-error')
 
 async function _addAffiliation(user, affiliationOptions) {
   try {
@@ -24,8 +25,10 @@ async function _addAffiliation(user, affiliationOptions) {
     user = await UserGetter.promises.getUser(user._id)
   } catch (error) {
     logger.error(
-      { userId: user._id, email: user.email },
-      'could not get fresh user data'
+      OError.tag(error, 'could not get fresh user data', {
+        userId: user._id,
+        email: user.email,
+      })
     )
   }
   return user
@@ -73,22 +76,26 @@ async function createNewUser(attributes, options = {}) {
     } catch (error) {
       if (options.requireAffiliation) {
         await UserDeleter.promises.deleteMongoUser(user._id)
-        throw error
+        throw OError.tag(error)
       } else {
-        logger.error(error)
+        logger.error(OError.tag(error))
       }
     }
   }
 
   Analytics.recordEvent(user._id, 'user-registered')
   Analytics.setUserProperty(user._id, 'created-at', new Date())
-  try {
-    await UserOnboardingEmailQueueManager.scheduleOnboardingEmail(user)
-  } catch (error) {
-    logger.error(
-      `Failed to schedule sending of onboarding email for user '${user._id}'`,
-      error
-    )
+
+  if (Features.hasFeature('saas')) {
+    try {
+      await UserOnboardingEmailQueueManager.scheduleOnboardingEmail(user)
+    } catch (error) {
+      logger.error(
+        OError.tag(error, 'Failed to schedule sending of onboarding email', {
+          userId: user._id,
+        })
+      )
+    }
   }
 
   return user
