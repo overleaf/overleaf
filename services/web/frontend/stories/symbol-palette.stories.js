@@ -4,7 +4,7 @@ import SymbolPalette from '../js/features/symbol-palette/components/symbol-palet
 
 export const Interactive = args => {
   return (
-    <div style={{ maxWidth: 600 }}>
+    <div style={{ maxWidth: 700, marginTop: 120 }}>
       <SymbolPalette {...args} />
     </div>
   )

@@ -7,10 +7,12 @@ import { matchSorter } from 'match-sorter'
 import symbols from '../data/symbols.json'
 import { buildCategorisedSymbols, createCategories } from '../utils/categories'
 import SymbolPaletteSearch from './symbol-palette-search'
-
-import '@reach/tabs/styles.css'
 import SymbolPaletteBody from './symbol-palette-body'
 import SymbolPaletteTabs from './symbol-palette-tabs'
+// import SymbolPaletteInfoLink from './symbol-palette-info-link'
+import BetaBadge from '../../../shared/components/beta-badge'
+
+import '@reach/tabs/styles.css'
 
 export default function SymbolPaletteContent({ handleSelect }) {
   const [input, setInput] = useState('')
@@ -68,7 +70,20 @@ export default function SymbolPaletteContent({ handleSelect }) {
             categories={categories}
             disabled={input.length > 0}
           />
-          <SymbolPaletteSearch setInput={setInput} inputRef={inputRef} />
+          <div className="symbol-palette-header-group">
+            <BetaBadge
+              tooltip={{
+                id: 'tooltip-symbol-palette-beta',
+                text: t('beta_badge_tooltip', {
+                  feature: 'entering symbols',
+                }),
+                placement: 'top',
+              }}
+            />
+            {/* NOTE: replace the beta badge with this info link when rolling out to all users */}
+            {/* <SymbolPaletteInfoLink /> */}
+            <SymbolPaletteSearch setInput={setInput} inputRef={inputRef} />
+          </div>
         </div>
         <div className="symbol-palette-body">
           <SymbolPaletteBody

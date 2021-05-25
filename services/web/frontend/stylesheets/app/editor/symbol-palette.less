@@ -16,6 +16,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  align-items: center;
   font-family: @font-family-sans-serif;
   font-size: 16px;
   background: @symbol-palette-header-background;
@@ -82,4 +83,17 @@
   line-height: 1;
   height: auto;
   width: auto;
+}
+
+.symbol-palette-header-group {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  margin-left: @margin-xs;
+}
+
+.symbol-palette-info-link,
+.symbol-palette-info-link:focus,
+.symbol-palette-info-link:hover {
+  color: inherit;
 }
