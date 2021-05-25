@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-path-concat,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const Path = require('path')
 
 // environment variables renamed for consistency
@@ -21,10 +11,7 @@ if (process.env.AWS_SECRET && !process.env.AWS_SECRET_ACCESS_KEY) {
 
 // pre-backend setting, fall back to old behaviour
 if (process.env.BACKEND == null) {
-  if (
-    process.env.AWS_ACCESS_KEY_ID != null ||
-    process.env.S3_BUCKET_CREDENTIALS != null
-  ) {
+  if (process.env.AWS_ACCESS_KEY_ID || process.env.S3_BUCKET_CREDENTIALS) {
     process.env.BACKEND = 's3'
     process.env.USER_FILES_BUCKET_NAME =
       process.env.AWS_S3_USER_FILES_BUCKET_NAME
@@ -35,12 +22,15 @@ if (process.env.BACKEND == null) {
   } else {
     process.env.BACKEND = 'fs'
     process.env.USER_FILES_BUCKET_NAME = Path.resolve(
+      // eslint-disable-next-line no-path-concat
       __dirname + '/../user_files'
     )
     process.env.TEMPLATE_FILES_BUCKET_NAME = Path.resolve(
+      // eslint-disable-next-line no-path-concat
       __dirname + '/../template_files'
     )
     process.env.PUBLIC_FILES_BUCKET_NAME = Path.resolve(
+      // eslint-disable-next-line no-path-concat
       __dirname + '/../public_files'
     )
   }
@@ -77,18 +67,16 @@ const settings = {
     },
 
     s3:
-      process.env.AWS_ACCESS_KEY_ID != null ||
-      process.env.S3_BUCKET_CREDENTIALS != null
+      process.env.AWS_ACCESS_KEY_ID || process.env.S3_BUCKET_CREDENTIALS
         ? {
             key: process.env.AWS_ACCESS_KEY_ID,
             secret: process.env.AWS_SECRET_ACCESS_KEY,
             endpoint: process.env.AWS_S3_ENDPOINT,
             pathStyle: process.env.AWS_S3_PATH_STYLE,
             partSize: process.env.AWS_S3_PARTSIZE || 100 * 1024 * 1024,
-            bucketCreds:
-              process.env.S3_BUCKET_CREDENTIALS != null
-                ? JSON.parse(process.env.S3_BUCKET_CREDENTIALS)
-                : undefined
+            bucketCreds: process.env.S3_BUCKET_CREDENTIALS
+              ? JSON.parse(process.env.S3_BUCKET_CREDENTIALS)
+              : undefined
           }
         : undefined,
 
@@ -101,21 +89,21 @@ const settings = {
       public_files: process.env.PUBLIC_FILES_BUCKET_NAME
     },
 
-    fallback:
-      process.env.FALLBACK_BACKEND != null
-        ? {
-            backend: process.env.FALLBACK_BACKEND,
-            // mapping of bucket names on the fallback, to bucket names on the primary.
-            // e.g. { myS3UserFilesBucketName: 'myGoogleUserFilesBucketName' }
-            buckets: JSON.parse(process.env.FALLBACK_BUCKET_MAPPING || '{}'),
-            copyOnMiss: process.env.COPY_ON_MISS === 'true'
-          }
-        : undefined,
+    fallback: process.env.FALLBACK_BACKEND
+      ? {
+          backend: process.env.FALLBACK_BACKEND,
+          // mapping of bucket names on the fallback, to bucket names on the primary.
+          // e.g. { myS3UserFilesBucketName: 'myGoogleUserFilesBucketName' }
+          buckets: JSON.parse(process.env.FALLBACK_BUCKET_MAPPING || '{}'),
+          copyOnMiss: process.env.COPY_ON_MISS === 'true'
+        }
+      : undefined,
 
     allowRedirects: process.env.ALLOW_REDIRECTS === 'true'
   },
 
   path: {
+    // eslint-disable-next-line no-path-concat
     uploadFolder: Path.resolve(__dirname + '/../uploads')
   },
 
@@ -134,10 +122,7 @@ const settings = {
 // Filestore health check
 // ----------------------
 // Project and file details to check in persistor when calling /health_check
-if (
-  process.env.HEALTH_CHECK_PROJECT_ID != null &&
-  process.env.HEALTH_CHECK_FILE_ID != null
-) {
+if (process.env.HEALTH_CHECK_PROJECT_ID && process.env.HEALTH_CHECK_FILE_ID) {
   settings.health_check = {
     project_id: process.env.HEALTH_CHECK_PROJECT_ID,
     file_id: process.env.HEALTH_CHECK_FILE_ID
