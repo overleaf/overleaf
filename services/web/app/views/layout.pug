@@ -35,6 +35,7 @@ html(
 				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 			script(type="text/javascript", nonce=scriptNonce).
 				ga('create', '#{gaToken}', '#{settings.cookieDomain.replace(/^\./, "")}');
+				ga('set', 'anonymizeIp', true);
 				ga('send', 'pageview');
 
 				try {
