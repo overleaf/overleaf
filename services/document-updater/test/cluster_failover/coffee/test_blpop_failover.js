@@ -1,15 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let listenInBackground, sendPings
 const redis = require('@overleaf/redis-wrapper')
 const rclient1 = redis.createClient({
@@ -52,7 +40,7 @@ const listenForPing = (cb) =>
     if (error != null) {
       return cb(error)
     }
-    let [key, value] = Array.from(result)
+    let [, value] = Array.from(result)
     value = parseInt(value, 10)
     if (value % 10 === 0) {
       console.log('.')
@@ -70,7 +58,7 @@ const PING_DELAY = 100
 ;(sendPings = () => sendPing(() => setTimeout(sendPings, PING_DELAY)))()
 
 ;(listenInBackground = () =>
-  listenForPing((error, value) => {
+  listenForPing((error) => {
     if (error) {
       console.error('[RECEIVING ERROR]', error.message)
     }
