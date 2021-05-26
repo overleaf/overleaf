@@ -34,7 +34,7 @@ export default App.controller(
     $scope.switchToStudent = function () {
       const currentPlanCode = window.plan_code
       const planCode = currentPlanCode.replace('collaborator', 'student')
-      eventTracking.sendMB('subscription-form-switch-to-student', {
+      eventTracking.sendMB('payment-page-switch-to-student', {
         plan: window.plan_code,
       })
       eventTracking.send(
@@ -45,7 +45,7 @@ export default App.controller(
       window.location = `/user/subscription/new?planCode=${planCode}&currency=${$scope.currencyCode}&cc=${$scope.data.coupon}&itm_campaign=${window.ITMCampaign}&itm_content=${window.ITMContent}`
     }
 
-    eventTracking.sendMB('subscription-form', { plan: window.plan_code })
+    eventTracking.sendMB('payment-page-view', { plan: window.plan_code })
     eventTracking.send(
       'subscription-funnel',
       'subscription-form-viewed',
@@ -211,7 +211,7 @@ export default App.controller(
       }
       $scope.validation.errorFields = {}
       if (err != null) {
-        eventTracking.sendMB('subscription-error', err)
+        eventTracking.sendMB('payment-page-form-error', err)
         eventTracking.send('subscription-funnel', 'subscription-error')
         // We may or may not be in a digest loop here depending on
         // whether recurly could do validation locally, so do it async
@@ -263,7 +263,7 @@ export default App.controller(
           }
         }
 
-        eventTracking.sendMB('subscription-form-submitted', {
+        eventTracking.sendMB('payment-page-form-submit', {
           currencyCode: postData.subscriptionDetails.currencyCode,
           plan_code: postData.subscriptionDetails.plan_code,
           coupon_code: postData.subscriptionDetails.coupon_code,
@@ -277,7 +277,7 @@ export default App.controller(
         return $http
           .post('/user/subscription/create', postData)
           .then(function () {
-            eventTracking.sendMB('subscription-submission-success')
+            eventTracking.sendMB('payment-page-form-success')
             eventTracking.send(
               'subscription-funnel',
               'subscription-submission-success',
@@ -629,5 +629,9 @@ export default App.controller(
       { code: 'ZM', name: 'Zambia' },
       { code: 'ZW', name: 'Zimbabwe' },
     ]
+
+    $scope.filledForm = function () {
+      eventTracking.sendMBOnce('payment-page-form-fill')
+    }
   }
 )
