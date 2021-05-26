@@ -61,6 +61,15 @@ describe('SubscriptionController', function () {
       syncSubscription: sinon.stub().yields(),
       attemptPaypalInvoiceCollection: sinon.stub().yields(),
       startFreeTrial: sinon.stub(),
+      promises: {
+        createSubscription: sinon.stub().resolves(),
+        updateSubscription: sinon.stub().resolves(),
+        reactivateSubscription: sinon.stub().resolves(),
+        cancelSubscription: sinon.stub().resolves(),
+        syncSubscription: sinon.stub().resolves(),
+        attemptPaypalInvoiceCollection: sinon.stub().resolves(),
+        startFreeTrial: sinon.stub().resolves(),
+      },
     }
 
     this.PlansLocator = { findLocalPlanInSettings: sinon.stub() }
@@ -69,11 +78,19 @@ describe('SubscriptionController', function () {
       hasPaidSubscription: sinon.stub(),
       userHasV1OrV2Subscription: sinon.stub(),
       userHasV2Subscription: sinon.stub(),
+      promises: {
+        hasPaidSubscription: sinon.stub().resolves(),
+        userHasV1OrV2Subscription: sinon.stub().resolves(),
+        userHasV2Subscription: sinon.stub().resolves(),
+      },
     }
 
     this.SubscriptionViewModelBuilder = {
       buildUsersSubscriptionViewModel: sinon.stub().callsArgWith(1, null, {}),
       buildPlansList: sinon.stub(),
+      promises: {
+        buildUsersSubscriptionViewModel: sinon.stub().resolves({}),
+      },
     }
     this.settings = {
       coupon_codes: {
@@ -90,9 +107,17 @@ describe('SubscriptionController', function () {
       siteUrl: 'http://de.sharelatex.dev:3000',
       gaExperiments: {},
     }
-    this.GeoIpLookup = { getCurrencyCode: sinon.stub() }
+    this.GeoIpLookup = {
+      getCurrencyCode: sinon.stub(),
+      promises: {
+        getCurrencyCode: sinon.stub(),
+      },
+    }
     this.UserGetter = {
       getUser: sinon.stub().callsArgWith(2, null, this.user),
+      promises: {
+        getUser: sinon.stub().resolves(this.user),
+      },
     }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
       requires: {
@@ -135,75 +160,26 @@ describe('SubscriptionController', function () {
   describe('plansPage', function () {
     beforeEach(function () {
       this.req.ip = '1234.3123.3131.333 313.133.445.666 653.5345.5345.534'
-      return this.GeoIpLookup.getCurrencyCode.callsArgWith(
-        1,
-        null,
+      return this.GeoIpLookup.promises.getCurrencyCode.resolves(
         this.stubbedCurrencyCode
       )
-    })
-
-    describe('when user is logged in', function (done) {
-      beforeEach(function (done) {
-        this.res.callback = done
-        return this.SubscriptionController.plansPage(this.req, this.res)
-      })
-      it('should fetch the current user', function (done) {
-        this.UserGetter.getUser.callCount.should.equal(1)
-        return done()
-      })
-
-      describe('not dependant on logged in state', function (done) {
-        // these could have been put in 'when user is not logged in' too
-        it('should set the recommended currency from the geoiplookup', function (done) {
-          this.res.renderedVariables.recomendedCurrency.should.equal(
-            this.stubbedCurrencyCode
-          )
-          this.GeoIpLookup.getCurrencyCode
-            .calledWith(this.req.ip)
-            .should.equal(true)
-          return done()
-        })
-        it('should include data for features table', function (done) {
-          this.res.renderedVariables.planFeatures.length.should.not.equal(0)
-          return done()
-        })
-      })
-    })
-
-    describe('when user is not logged in', function (done) {
-      beforeEach(function (done) {
-        this.res.callback = done
-        this.AuthenticationController.getLoggedInUserId = sinon
-          .stub()
-          .returns(null)
-        return this.SubscriptionController.plansPage(this.req, this.res)
-      })
-
-      it('should not fetch the current user', function (done) {
-        this.UserGetter.getUser.callCount.should.equal(0)
-        return done()
-      })
     })
   })
 
   describe('paymentPage', function () {
     beforeEach(function () {
       this.req.headers = {}
-      this.SubscriptionHandler.validateNoSubscriptionInRecurly = sinon
+      this.SubscriptionHandler.promises.validateNoSubscriptionInRecurly = sinon
         .stub()
-        .yields(null, true)
-      return this.GeoIpLookup.getCurrencyCode.callsArgWith(
-        1,
-        null,
-        this.stubbedCurrencyCode
-      )
+        .resolves(true)
+      return this.GeoIpLookup.promises.getCurrencyCode.resolves({
+        recomendedCurrency: this.stubbedCurrencyCode,
+      })
     })
 
     describe('with a user without a subscription', function () {
       beforeEach(function () {
-        this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
-          1,
-          null,
+        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
           false
         )
         return this.PlansLocator.findLocalPlanInSettings.returns({})
@@ -213,9 +189,9 @@ describe('SubscriptionController', function () {
         it('should render the new subscription page', function (done) {
           this.res.render = (page, opts) => {
             page.should.equal('subscriptions/new')
-            return done()
+            done()
           }
-          return this.SubscriptionController.paymentPage(this.req, this.res)
+          this.SubscriptionController.paymentPage(this.req, this.res)
         })
       })
     })
@@ -223,9 +199,7 @@ describe('SubscriptionController', function () {
     describe('with a user with subscription', function () {
       it('should redirect to the subscription dashboard', function (done) {
         this.PlansLocator.findLocalPlanInSettings.returns({})
-        this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
-          1,
-          null,
+        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
           true
         )
         this.res.redirect = url => {
@@ -238,9 +212,7 @@ describe('SubscriptionController', function () {
 
     describe('with an invalid plan code', function () {
       it('should return 422 error - Unprocessable Entity', function (done) {
-        this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
-          1,
-          null,
+        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
           false
         )
         this.PlansLocator.findLocalPlanInSettings.returns(null)
@@ -252,19 +224,13 @@ describe('SubscriptionController', function () {
             done()
           }
         )
-        return this.SubscriptionController.paymentPage(
-          this.req,
-          this.res,
-          this.next
-        )
+        return this.SubscriptionController.paymentPage(this.req, this.res)
       })
     })
 
     describe('which currency to use', function () {
       beforeEach(function () {
-        this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
-          1,
-          null,
+        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
           false
         )
         return this.PlansLocator.findLocalPlanInSettings.returns({})
@@ -293,23 +259,21 @@ describe('SubscriptionController', function () {
         this.req.query.currency = null
         this.res.render = (page, opts) => {
           opts.currency.should.equal(this.stubbedCurrencyCode)
-          return done()
+          done()
         }
-        return this.SubscriptionController.paymentPage(this.req, this.res)
+        this.SubscriptionController.paymentPage(this.req, this.res)
       })
     })
 
     describe('with a recurly subscription already', function () {
       it('should redirect to the subscription dashboard', function (done) {
         this.PlansLocator.findLocalPlanInSettings.returns({})
-        this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
-          1,
-          null,
+        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
           false
         )
-        this.SubscriptionHandler.validateNoSubscriptionInRecurly = sinon
-          .stub()
-          .yields(null, false)
+        this.SubscriptionHandler.promises.validateNoSubscriptionInRecurly.resolves(
+          false
+        )
         this.res.redirect = url => {
           url.should.equal('/user/subscription?hasSubscription=true')
           return done()
@@ -319,7 +283,7 @@ describe('SubscriptionController', function () {
     })
   })
 
-  describe('successful_subscription', function () {
+  describe('successfulSubscription', function () {
     beforeEach(function (done) {
       this.SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(
         1,
@@ -327,7 +291,7 @@ describe('SubscriptionController', function () {
         {}
       )
       this.res.callback = done
-      return this.SubscriptionController.successful_subscription(
+      return this.SubscriptionController.successfulSubscription(
         this.req,
         this.res
       )
@@ -359,12 +323,9 @@ describe('SubscriptionController', function () {
       this.res.render = (view, data) => {
         this.data = data
         expect(view).to.equal('subscriptions/dashboard')
-        return done()
+        done()
       }
-      return this.SubscriptionController.userSubscriptionPage(
-        this.req,
-        this.res
-      )
+      this.SubscriptionController.userSubscriptionPage(this.req, this.res)
     })
 
     it('should load the personal, groups and v1 subscriptions', function () {

@@ -1,4 +1,3 @@
-let LimitationsManager
 const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const ProjectGetter = require('../Project/ProjectGetter')
@@ -9,8 +8,9 @@ const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsInvitesHandler = require('../Collaborators/CollaboratorsInviteHandler')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const { V1ConnectionError } = require('../Errors/Errors')
+const { promisifyAll } = require('../../util/promises')
 
-module.exports = LimitationsManager = {
+const LimitationsManager = {
   allowedNumberOfCollaboratorsInProject(projectId, callback) {
     ProjectGetter.getProject(
       projectId,
@@ -226,3 +226,12 @@ module.exports = LimitationsManager = {
     )
   },
 }
+
+LimitationsManager.promises = promisifyAll(LimitationsManager, {
+  multiResult: {
+    userHasV2Subscription: ['hasSubscription', 'subscription'],
+    userIsMemberOfGroupSubscription: ['isMember', 'subscriptions'],
+    hasGroupMembersLimitReached: ['limitReached', 'subscription'],
+  },
+})
+module.exports = LimitationsManager

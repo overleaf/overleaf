@@ -38,7 +38,7 @@ module.exports = {
     webRouter.get(
       '/user/subscription/thank-you',
       AuthenticationController.requireLogin(),
-      SubscriptionController.successful_subscription
+      SubscriptionController.successfulSubscription
     )
 
     webRouter.get(
