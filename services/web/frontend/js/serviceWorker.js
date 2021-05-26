@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 const COMPILE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/compile$/
-const MIN_CHUNK_SIZE = 128 * 1024
+const PDF_JS_CHUNK_SIZE = 128 * 1024
 
 const PDF_FILES = new Map()
 
@@ -79,6 +79,42 @@ function processCompileRequest(event) {
 }
 
 /**
+ * @param {Request} request
+ * @param {Object} file
+ * @return {Response}
+ */
+function handleProbeRequest(request, file) {
+  // PDF.js starts the pdf download with a probe request that has no
+  //  range headers on it.
+  // Upon seeing the response headers, it decides whether to upgrade the
+  //  transport to chunked requests or keep reading the response body.
+  // For small PDFs (2*chunkSize = 2*128kB) it just sends one request.
+  //  We will fetch all the ranges in bulk and emit them.
+  // For large PDFs it sends this probe request, aborts that request before
+  //  reading any data and then sends multiple range requests.
+  // It would be wasteful to action this probe request with all the ranges
+  //  that are available in the PDF and serve the full PDF content to
+  //  PDF.js for the probe request.
+  // We are emitting a dummy response to the probe request instead.
+  // It triggers the chunked transfer and subsequent fewer ranges need to be
+  //  requested -- only those of visible pages in the pdf viewer.
+  // https://github.com/mozilla/pdf.js/blob/6fd899dc443425747098935207096328e7b55eb2/src/display/network_utils.js#L43-L47
+  const pdfJSWillUseChunkedTransfer = file.size > 2 * PDF_JS_CHUNK_SIZE
+  const isRangeRequest = request.headers.has('Range')
+  if (!isRangeRequest && pdfJSWillUseChunkedTransfer) {
+    const headers = new Headers()
+    headers.set('Accept-Ranges', 'bytes')
+    headers.set('Content-Length', file.size)
+    headers.set('Content-Type', 'application/pdf')
+    return new Response('', {
+      headers,
+      status: 200,
+      statusText: 'OK',
+    })
+  }
+}
+
+/**
  *
  * @param {FetchEvent} event
  * @param {Object} file
@@ -90,19 +126,9 @@ function processPdfRequest(
   event,
   { file, clsiServerId, compileGroup, pdfCreatedAt }
 ) {
-  if (!event.request.headers.has('Range') && file.size > MIN_CHUNK_SIZE) {
-    // skip probe request
-    const headers = new Headers()
-    headers.set('Accept-Ranges', 'bytes')
-    headers.set('Content-Length', file.size)
-    headers.set('Content-Type', 'application/pdf')
-    return event.respondWith(
-      new Response('', {
-        headers,
-        status: 200,
-        statusText: 'OK',
-      })
-    )
+  const response = handleProbeRequest(event.request, file)
+  if (response) {
+    return event.respondWith(response)
   }
 
   const verifyChunks = event.request.url.includes('verify_chunks=true')
