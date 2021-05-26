@@ -400,7 +400,12 @@ App.controller(
         )
 
         if (window.location.search.includes('verify_chunks=true')) {
+          // Instruct the serviceWorker to verify composed ranges.
           qs.verify_chunks = 'true'
+        }
+        if (getMeta('ol-enablePdfCaching')) {
+          // Tag traffic that uses the pdf caching logic.
+          qs.enable_pdf_caching = 'true'
         }
 
         // convert the qs hash into a query string and append it
