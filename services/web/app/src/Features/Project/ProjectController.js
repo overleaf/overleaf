@@ -887,7 +887,7 @@ const ProjectController = {
               ),
               showReactDropboxModal: shouldDisplayFeature(
                 'new_dropbox_modal_ui',
-                false
+                user.betaProgram
               ),
               showReactGithubSync: shouldDisplayFeature(
                 'new_github_sync_ui',
