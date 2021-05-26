@@ -71,7 +71,7 @@ async function createBasicProject(ownerId, projectName) {
 async function createExampleProject(ownerId, projectName) {
   const project = await _createBlankProject(ownerId, projectName)
 
-  const testSegmentation = SplitTestHandler.getTestSegmentation(
+  const testSegmentation = await SplitTestHandler.promises.getTestSegmentation(
     ownerId,
     EXAMPLE_PROJECT_SPLITTEST_ID
   )

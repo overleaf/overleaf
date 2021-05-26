@@ -300,9 +300,7 @@ describe('SubscriptionController', function () {
 
   describe('userSubscriptionPage', function () {
     beforeEach(function (done) {
-      this.SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(
-        1,
-        null,
+      this.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel.resolves(
         {
           personalSubscription: (this.personalSubscription = {
             'personal-subscription': 'mock',
@@ -315,11 +313,7 @@ describe('SubscriptionController', function () {
       this.SubscriptionViewModelBuilder.buildPlansList.returns(
         (this.plans = { plans: 'mock' })
       )
-      this.LimitationsManager.userHasV1OrV2Subscription.callsArgWith(
-        1,
-        null,
-        false
-      )
+      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
       this.res.render = (view, data) => {
         this.data = data
         expect(view).to.equal('subscriptions/dashboard')

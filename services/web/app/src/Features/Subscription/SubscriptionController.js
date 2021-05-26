@@ -91,83 +91,81 @@ async function paymentPage(req, res) {
   }
 }
 
-function userSubscriptionPage(req, res, next) {
+async function userSubscriptionPage(req, res) {
   const user = AuthenticationController.getSessionUser(req)
-  SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
-    user,
-    function (error, results) {
-      if (error) {
-        return next(error)
-      }
-      const {
-        personalSubscription,
-        memberGroupSubscriptions,
-        managedGroupSubscriptions,
-        confirmedMemberAffiliations,
-        managedInstitutions,
-        managedPublishers,
-        v1SubscriptionStatus,
-      } = results
-      LimitationsManager.userHasV1OrV2Subscription(
-        user,
-        function (err, hasSubscription) {
-          if (error) {
-            return next(error)
-          }
-          const fromPlansPage = req.query.hasSubscription
-          const plans = SubscriptionViewModelBuilder.buildPlansList(
-            personalSubscription ? personalSubscription.plan : undefined
-          )
-
-          let subscriptionCopy = 'default'
-          if (
-            personalSubscription ||
-            hasSubscription ||
-            (memberGroupSubscriptions && memberGroupSubscriptions.length > 0) ||
-            (confirmedMemberAffiliations &&
-              confirmedMemberAffiliations.length > 0 &&
-              _.find(confirmedMemberAffiliations, affiliation => {
-                return affiliation.licence && affiliation.licence !== 'free'
-              }))
-          ) {
-            AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
-          } else {
-            const testSegmentation = SplitTestHandler.getTestSegmentation(
-              user._id,
-              SUBSCRIPTION_PAGE_SPLIT_TEST
-            )
-            if (testSegmentation.enabled) {
-              subscriptionCopy = testSegmentation.variant
-
-              AnalyticsManager.recordEvent(user._id, 'subscription-page-view', {
-                splitTestId: SUBSCRIPTION_PAGE_SPLIT_TEST,
-                splitTestVariantId: testSegmentation.variant,
-              })
-            } else {
-              AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
-            }
-          }
-
-          const data = {
-            title: 'your_subscription',
-            plans,
-            user,
-            hasSubscription,
-            subscriptionCopy,
-            fromPlansPage,
-            personalSubscription,
-            memberGroupSubscriptions,
-            managedGroupSubscriptions,
-            confirmedMemberAffiliations,
-            managedInstitutions,
-            managedPublishers,
-            v1SubscriptionStatus,
-          }
-          res.render('subscriptions/dashboard', data)
-        }
-      )
-    }
+  const results = await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+    user
   )
+  const {
+    personalSubscription,
+    memberGroupSubscriptions,
+    managedGroupSubscriptions,
+    confirmedMemberAffiliations,
+    managedInstitutions,
+    managedPublishers,
+    v1SubscriptionStatus,
+  } = results
+  const hasSubscription = await LimitationsManager.promises.userHasV1OrV2Subscription(
+    user
+  )
+  const fromPlansPage = req.query.hasSubscription
+  const plans = SubscriptionViewModelBuilder.buildPlansList(
+    personalSubscription ? personalSubscription.plan : undefined
+  )
+
+  let subscriptionCopy = 'default'
+  if (
+    personalSubscription ||
+    hasSubscription ||
+    (memberGroupSubscriptions && memberGroupSubscriptions.length > 0) ||
+    (confirmedMemberAffiliations &&
+      confirmedMemberAffiliations.length > 0 &&
+      _.find(confirmedMemberAffiliations, affiliation => {
+        return affiliation.licence && affiliation.licence !== 'free'
+      }))
+  ) {
+    AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
+  } else {
+    try {
+      const testSegmentation = await SplitTestHandler.promises.getTestSegmentation(
+        user._id,
+        SUBSCRIPTION_PAGE_SPLIT_TEST
+      )
+      if (testSegmentation.enabled) {
+        subscriptionCopy = testSegmentation.variant
+
+        AnalyticsManager.recordEvent(user._id, 'subscription-page-view', {
+          splitTestId: SUBSCRIPTION_PAGE_SPLIT_TEST,
+          splitTestVariantId: testSegmentation.variant,
+        })
+      } else {
+        AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
+      }
+    } catch (error) {
+      logger.error(
+        { err: error },
+        `Failed to get segmentation for user '${user._id}' and split test '${SUBSCRIPTION_PAGE_SPLIT_TEST}'`
+      )
+      AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
+    }
+  }
+
+  const data = {
+    title: 'your_subscription',
+    plans,
+    user,
+    hasSubscription,
+    subscriptionCopy,
+    fromPlansPage,
+    personalSubscription,
+    memberGroupSubscriptions,
+    managedGroupSubscriptions,
+    confirmedMemberAffiliations,
+    managedInstitutions,
+    managedPublishers,
+    v1SubscriptionStatus,
+  }
+  res.render('subscriptions/dashboard', data)
 }
 
 function createSubscription(req, res, next) {
@@ -481,7 +479,7 @@ async function refreshUserFeatures(req, res) {
 module.exports = {
   plansPage: expressify(plansPage),
   paymentPage: expressify(paymentPage),
-  userSubscriptionPage,
+  userSubscriptionPage: expressify(userSubscriptionPage),
   createSubscription,
   successfulSubscription,
   cancelSubscription,

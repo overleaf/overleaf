@@ -37,7 +37,7 @@ const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandle
 const UserController = require('../User/UserController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Modules = require('../../infrastructure/Modules')
-const { getTestSegmentation } = require('../SplitTests/SplitTestHandler')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const { getNewLogsUIVariantForUser } = require('../Helpers/NewLogsUI')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
@@ -802,103 +802,137 @@ const ProjectController = {
               }
             }
 
-            const trackPdfDownload =
-              Settings.enablePdfCaching &&
-              (user.alphaProgram ||
-                (user.betaProgram &&
-                  getTestSegmentation(userId, 'track_pdf_download').variant ===
-                    'enabled'))
-            const enablePdfCaching =
-              Settings.enablePdfCaching &&
-              shouldDisplayFeature(
-                'enable_pdf_caching',
-                user.alphaProgram ||
-                  (user.betaProgram &&
-                    getTestSegmentation(userId, 'enable_pdf_caching')
-                      .variant === 'enabled')
-              )
+            let trackPdfDownload = false
+            let enablePdfCaching = false
 
-            res.render('project/editor', {
-              title: project.name,
-              priority_title: true,
-              bodyClasses: ['editor'],
-              project_id: project._id,
-              user: {
-                id: userId,
-                email: user.email,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                referal_id: user.referal_id,
-                signUpDate: user.signUpDate,
-                allowedFreeTrial: allowedFreeTrial,
-                featureSwitches: user.featureSwitches,
-                features: user.features,
-                refProviders: _.mapValues(user.refProviders, Boolean),
-                alphaProgram: user.alphaProgram,
-                betaProgram: user.betaProgram,
-                isAdmin: user.isAdmin,
-              },
-              userSettings: {
-                mode: user.ace.mode,
-                editorTheme: user.ace.theme,
-                fontSize: user.ace.fontSize,
-                autoComplete: user.ace.autoComplete,
-                autoPairDelimiters: user.ace.autoPairDelimiters,
-                pdfViewer: user.ace.pdfViewer,
-                syntaxValidation: user.ace.syntaxValidation,
-                fontFamily: user.ace.fontFamily || 'lucida',
-                lineHeight: user.ace.lineHeight || 'normal',
-                overallTheme: user.ace.overallTheme,
-              },
-              privilegeLevel,
-              chatUrl: Settings.apis.chat.url,
-              anonymous,
-              anonymousAccessToken: anonymous ? anonRequestToken : null,
-              isTokenMember,
-              isRestrictedTokenMember: AuthorizationManager.isRestrictedUser(
-                userId,
+            const render = () => {
+              res.render('project/editor', {
+                title: project.name,
+                priority_title: true,
+                bodyClasses: ['editor'],
+                project_id: project._id,
+                user: {
+                  id: userId,
+                  email: user.email,
+                  first_name: user.first_name,
+                  last_name: user.last_name,
+                  referal_id: user.referal_id,
+                  signUpDate: user.signUpDate,
+                  allowedFreeTrial: allowedFreeTrial,
+                  featureSwitches: user.featureSwitches,
+                  features: user.features,
+                  refProviders: _.mapValues(user.refProviders, Boolean),
+                  alphaProgram: user.alphaProgram,
+                  betaProgram: user.betaProgram,
+                  isAdmin: user.isAdmin,
+                },
+                userSettings: {
+                  mode: user.ace.mode,
+                  editorTheme: user.ace.theme,
+                  fontSize: user.ace.fontSize,
+                  autoComplete: user.ace.autoComplete,
+                  autoPairDelimiters: user.ace.autoPairDelimiters,
+                  pdfViewer: user.ace.pdfViewer,
+                  syntaxValidation: user.ace.syntaxValidation,
+                  fontFamily: user.ace.fontFamily || 'lucida',
+                  lineHeight: user.ace.lineHeight || 'normal',
+                  overallTheme: user.ace.overallTheme,
+                },
                 privilegeLevel,
-                isTokenMember
-              ),
-              languages: Settings.languages,
-              editorThemes: THEME_LIST,
-              maxDocLength: Settings.max_doc_length,
-              useV2History:
-                project.overleaf &&
-                project.overleaf.history &&
-                Boolean(project.overleaf.history.display),
-              brandVariation,
-              allowedImageNames,
-              gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
-              wsUrl,
-              showSupport: Features.hasFeature('support'),
-              showNewLogsUI: shouldDisplayFeature(
-                'new_logs_ui',
-                logsUIVariant.newLogsUI
-              ),
-              logsUISubvariant: logsUIVariant.subvariant,
-              showNewNavigationUI: shouldDisplayFeature(
-                'new_navigation_ui',
-                user.alphaProgram
-              ),
-              showReactShareModal: shouldDisplayFeature(
-                'new_share_modal_ui',
-                true
-              ),
-              showReactDropboxModal: shouldDisplayFeature(
-                'new_dropbox_modal_ui',
-                user.betaProgram
-              ),
-              showReactGithubSync: shouldDisplayFeature(
-                'new_github_sync_ui',
-                user.betaProgram || user.alphaProgram
-              ),
-              showNewBinaryFileUI: shouldDisplayFeature('new_binary_file'),
-              showSymbolPalette: shouldDisplayFeature('symbol_palette'),
-              trackPdfDownload,
-              enablePdfCaching,
-            })
-            timer.done()
+                chatUrl: Settings.apis.chat.url,
+                anonymous,
+                anonymousAccessToken: anonymous ? anonRequestToken : null,
+                isTokenMember,
+                isRestrictedTokenMember: AuthorizationManager.isRestrictedUser(
+                  userId,
+                  privilegeLevel,
+                  isTokenMember
+                ),
+                languages: Settings.languages,
+                editorThemes: THEME_LIST,
+                maxDocLength: Settings.max_doc_length,
+                useV2History:
+                  project.overleaf &&
+                  project.overleaf.history &&
+                  Boolean(project.overleaf.history.display),
+                brandVariation,
+                allowedImageNames,
+                gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
+                wsUrl,
+                showSupport: Features.hasFeature('support'),
+                showNewLogsUI: shouldDisplayFeature(
+                  'new_logs_ui',
+                  logsUIVariant.newLogsUI
+                ),
+                logsUISubvariant: logsUIVariant.subvariant,
+                showNewNavigationUI: shouldDisplayFeature(
+                  'new_navigation_ui',
+                  user.alphaProgram
+                ),
+                showReactShareModal: shouldDisplayFeature(
+                  'new_share_modal_ui',
+                  true
+                ),
+                showReactDropboxModal: shouldDisplayFeature(
+                  'new_dropbox_modal_ui',
+                  user.betaProgram
+                ),
+                showReactGithubSync: shouldDisplayFeature(
+                  'new_github_sync_ui',
+                  user.betaProgram || user.alphaProgram
+                ),
+                showNewBinaryFileUI: shouldDisplayFeature('new_binary_file'),
+                showSymbolPalette: shouldDisplayFeature('symbol_palette'),
+                trackPdfDownload,
+                enablePdfCaching,
+              })
+              timer.done()
+            }
+
+            Promise.all([
+              async () => {
+                if (Settings.enablePdfCaching) {
+                  if (user.alphaProgram) {
+                    trackPdfDownload = true
+                  } else if (user.betaProgram) {
+                    const testSegmentation = await SplitTestHandler.promises.getTestSegmentation(
+                      userId,
+                      'track_pdf_download'
+                    )
+                    trackPdfDownload =
+                      testSegmentation.enabled &&
+                      testSegmentation.variant === 'enabled'
+                  }
+                }
+              },
+              async () => {
+                if (Settings.enablePdfCaching) {
+                  if (user.alphaProgram) {
+                    enablePdfCaching = shouldDisplayFeature(
+                      'enable_pdf_caching',
+                      true
+                    )
+                  } else if (user.betaProgram) {
+                    const testSegmentation = await SplitTestHandler.promises.getTestSegmentation(
+                      userId,
+                      'enable_pdf_caching'
+                    )
+                    trackPdfDownload = shouldDisplayFeature(
+                      'enable_pdf_caching',
+                      testSegmentation.enabled &&
+                        testSegmentation.variant === 'enabled'
+                    )
+                  }
+                }
+              },
+            ])
+              .then(() => {
+                render()
+              })
+              .catch(error => {
+                logger.error({ err: error }, 'Failed to get test segmentation')
+                render()
+              })
           }
         )
       }
