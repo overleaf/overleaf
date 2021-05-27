@@ -15,7 +15,9 @@ function ChatPane() {
   const { t } = useTranslation()
 
   const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
-  const { user } = useApplicationContext()
+  const { user } = useApplicationContext({
+    user: PropTypes.shape({ id: PropTypes.string.isRequired }.isRequired),
+  })
 
   const {
     status,

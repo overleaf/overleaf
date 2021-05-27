@@ -8,12 +8,18 @@ import { LayoutProvider } from './layout-context'
 import { CompileProvider } from './compile-context'
 
 export function ContextRoot({ children, ide, settings }) {
+  const isAnonymousUser = window.user.id == null
+
   return (
     <ApplicationProvider>
       <EditorProvider ide={ide} settings={settings}>
         <CompileProvider $scope={ide.$scope}>
           <LayoutProvider $scope={ide.$scope}>
-            <ChatProvider>{children}</ChatProvider>
+            {isAnonymousUser ? (
+              children
+            ) : (
+              <ChatProvider>{children}</ChatProvider>
+            )}
           </LayoutProvider>
         </CompileProvider>
       </EditorProvider>
