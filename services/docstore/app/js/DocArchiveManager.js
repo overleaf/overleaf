@@ -11,6 +11,7 @@ const pMap = require('p-map')
 
 const PARALLEL_JOBS = settings.parallelArchiveJobs
 const DESTROY_BATCH_SIZE = settings.destroyBatchSize
+const DESTROY_RETRY_COUNT = settings.destroyRetryCount
 
 module.exports = {
   archiveAllDocs: callbackify(archiveAllDocs),
@@ -204,12 +205,30 @@ async function destroyDoc(projectId, docId) {
   }
 
   if (doc.inS3) {
-    await PersistorManager.deleteObject(
-      settings.docstore.bucket,
-      `${projectId}/${docId}`
-    )
+    await destroyArchiveWithRetry(projectId, docId)
   }
   await MongoManager.destroyDoc(docId)
+}
+
+async function destroyArchiveWithRetry(projectId, docId) {
+  let attempt = 0
+  let lastError
+  while (attempt++ <= DESTROY_RETRY_COUNT) {
+    try {
+      await PersistorManager.deleteObject(
+        settings.docstore.bucket,
+        `${projectId}/${docId}`
+      )
+      return
+    } catch (err) {
+      lastError = err
+      logger.warn(
+        { projectId, docId, err, attempt },
+        'destroying archive failed'
+      )
+    }
+  }
+  throw lastError
 }
 
 async function _streamToString(stream) {

@@ -38,6 +38,7 @@ const Settings = {
   max_doc_length: parseInt(process.env.MAX_DOC_LENGTH) || 2 * 1024 * 1024, // 2mb
 
   destroyBatchSize: parseInt(process.env.DESTROY_BATCH_SIZE, 10) || 2000,
+  destroyRetryCount: parseInt(process.env.DESTROY_RETRY_COUNT || '3', 10),
   parallelArchiveJobs: parseInt(process.env.PARALLEL_ARCHIVE_JOBS, 10) || 5
 }
 
