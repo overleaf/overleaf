@@ -890,7 +890,7 @@ const ProjectController = {
             }
 
             Promise.all([
-              async () => {
+              (async () => {
                 if (Settings.enablePdfCaching) {
                   if (user.alphaProgram) {
                     trackPdfDownload = true
@@ -904,8 +904,8 @@ const ProjectController = {
                       testSegmentation.variant === 'enabled'
                   }
                 }
-              },
-              async () => {
+              })(),
+              (async () => {
                 if (Settings.enablePdfCaching) {
                   if (user.alphaProgram) {
                     enablePdfCaching = shouldDisplayFeature(
@@ -917,14 +917,19 @@ const ProjectController = {
                       userId,
                       'enable_pdf_caching'
                     )
-                    trackPdfDownload = shouldDisplayFeature(
+                    enablePdfCaching = shouldDisplayFeature(
                       'enable_pdf_caching',
                       testSegmentation.enabled &&
                         testSegmentation.variant === 'enabled'
                     )
+                  } else {
+                    enablePdfCaching = shouldDisplayFeature(
+                      'enable_pdf_caching',
+                      false
+                    )
                   }
                 }
-              },
+              })(),
             ])
               .then(() => {
                 render()

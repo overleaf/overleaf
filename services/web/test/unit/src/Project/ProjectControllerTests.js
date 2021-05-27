@@ -125,6 +125,9 @@ describe('ProjectController', function () {
         .returns({ newLogsUI: false, subvariant: null }),
     }
     this.SplitTestHandler = {
+      promises: {
+        getTestSegmentation: sinon.stub().resolves({ enabled: false }),
+      },
       getTestSegmentation: sinon.stub().returns({ enabled: false }),
     }
 
@@ -172,6 +175,7 @@ describe('ProjectController', function () {
 
     this.projectName = '£12321jkj9ujkljds'
     this.req = {
+      query: {},
       params: {
         Project_id: this.project_id,
       },
@@ -1069,6 +1073,125 @@ describe('ProjectController', function () {
         done()
       }
       this.ProjectController.loadEditor(this.req, this.res)
+    })
+
+    describe('pdf caching feature flags', function () {
+      function expectBandwidthTrackingEnabled() {
+        it('should track pdf bandwidth', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.trackPdfDownload).to.equal(true)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      }
+      function expectPDFCachingEnabled() {
+        it('should enable pdf caching', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.enablePdfCaching).to.equal(true)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      }
+      function expectBandwidthTrackingDisabled() {
+        it('should not track pdf bandwidth', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.trackPdfDownload).to.equal(false)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      }
+      function expectPDFCachingDisabled() {
+        it('should disable pdf caching', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.enablePdfCaching).to.equal(false)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      }
+
+      beforeEach(function () {
+        this.settings.enablePdfCaching = true
+      })
+
+      describe('regular user', function () {
+        describe('with no query', function () {
+          expectBandwidthTrackingDisabled()
+          expectPDFCachingDisabled()
+        })
+
+        describe('with enable_pdf_caching=false', function () {
+          beforeEach(function () {
+            this.req.query.enable_pdf_caching = 'false'
+          })
+          expectBandwidthTrackingDisabled()
+          expectPDFCachingDisabled()
+        })
+
+        describe('with enable_pdf_caching=true', function () {
+          beforeEach(function () {
+            this.req.query.enable_pdf_caching = 'true'
+          })
+          expectBandwidthTrackingDisabled()
+          expectPDFCachingEnabled()
+        })
+      })
+
+      describe('alpha user', function () {
+        beforeEach(function () {
+          this.user.alphaProgram = true
+        })
+        describe('with no query', function () {
+          expectBandwidthTrackingEnabled()
+          expectPDFCachingEnabled()
+        })
+
+        describe('with enable_pdf_caching=false', function () {
+          beforeEach(function () {
+            this.req.query.enable_pdf_caching = 'false'
+          })
+          expectBandwidthTrackingEnabled()
+          expectPDFCachingDisabled()
+        })
+
+        describe('with enable_pdf_caching=true', function () {
+          beforeEach(function () {
+            this.req.query.enable_pdf_caching = 'true'
+          })
+          expectBandwidthTrackingEnabled()
+          expectPDFCachingEnabled()
+        })
+      })
+
+      describe('beta user', function () {
+        beforeEach(function () {
+          this.user.betaProgram = true
+        })
+
+        describe('with no query', function () {
+          expectBandwidthTrackingDisabled()
+          expectPDFCachingDisabled()
+        })
+
+        describe('with enable_pdf_caching=false', function () {
+          beforeEach(function () {
+            this.req.query.enable_pdf_caching = 'false'
+          })
+          expectBandwidthTrackingDisabled()
+          expectPDFCachingDisabled()
+        })
+
+        describe('with enable_pdf_caching=true', function () {
+          beforeEach(function () {
+            this.req.query.enable_pdf_caching = 'true'
+          })
+          expectBandwidthTrackingDisabled()
+          expectPDFCachingEnabled()
+        })
+      })
     })
 
     describe('wsUrl', function () {
