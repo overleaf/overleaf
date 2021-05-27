@@ -25,6 +25,9 @@ describe('FileSystemImportManager', function () {
     }
     this.FileSystemImportManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
+        'settings-sharelatex': {
+          textExtensions: ['tex', 'txt'],
+        },
         '../Editor/EditorController': this.EditorController,
       },
     })
