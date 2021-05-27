@@ -490,6 +490,7 @@ App.controller(
       } else if (response.status === 'failure') {
         $scope.pdf.view = 'errors'
         $scope.pdf.failure = true
+        $scope.pdf.downloadUrl = null
         $scope.shouldShowLogs = true
         fetchLogs(fileByPath, { pdfDownloadDomain })
       } else if (response.status === 'clsi-maintenance') {
@@ -515,31 +516,38 @@ App.controller(
       }
 
       if (window.showNewLogsUI) {
-        $scope.pdf.compileFailed = false
-        // `$scope.clsiErrors` stores the error states nested within `$scope.pdf`
-        // for use with React's <PreviewPane errors={$scope.clsiErrors}/>
-        $scope.clsiErrors = Object.assign(
-          {},
-          $scope.pdf.error ? { error: true } : null,
-          $scope.pdf.renderingError ? { renderingError: true } : null,
-          $scope.pdf.clsiMaintenance ? { clsiMaintenance: true } : null,
-          $scope.pdf.clsiUnavailable ? { clsiUnavailable: true } : null,
-          $scope.pdf.tooRecentlyCompiled ? { tooRecentlyCompiled: true } : null,
-          $scope.pdf.compileTerminated ? { compileTerminated: true } : null,
-          $scope.pdf.rateLimited ? { rateLimited: true } : null,
-          $scope.pdf.compileInProgress ? { compileInProgress: true } : null,
-          $scope.pdf.timedout ? { timedout: true } : null,
-          $scope.pdf.projectTooLarge ? { projectTooLarge: true } : null,
-          $scope.pdf.autoCompileDisabled ? { autoCompileDisabled: true } : null
-        )
+        $scope.$applyAsync(() => {
+          $scope.pdf.compileFailed = false
+          // `$scope.clsiErrors` stores the error states nested within `$scope.pdf`
+          // for use with React's <PreviewPane errors={$scope.clsiErrors}/>
+          $scope.clsiErrors = Object.assign(
+            {},
+            $scope.pdf.error ? { error: true } : null,
+            $scope.pdf.renderingError ? { renderingError: true } : null,
+            $scope.pdf.clsiMaintenance ? { clsiMaintenance: true } : null,
+            $scope.pdf.clsiUnavailable ? { clsiUnavailable: true } : null,
+            $scope.pdf.tooRecentlyCompiled
+              ? { tooRecentlyCompiled: true }
+              : null,
+            $scope.pdf.compileTerminated ? { compileTerminated: true } : null,
+            $scope.pdf.rateLimited ? { rateLimited: true } : null,
+            $scope.pdf.compileInProgress ? { compileInProgress: true } : null,
+            $scope.pdf.timedout ? { timedout: true } : null,
+            $scope.pdf.projectTooLarge ? { projectTooLarge: true } : null,
+            $scope.pdf.autoCompileDisabled
+              ? { autoCompileDisabled: true }
+              : null,
+            $scope.pdf.failure ? { failure: true } : null
+          )
 
-        if (
-          $scope.pdf.view === 'errors' ||
-          $scope.pdf.view === 'validation-problems'
-        ) {
-          $scope.shouldShowLogs = true
-          $scope.pdf.compileFailed = true
-        }
+          if (
+            $scope.pdf.view === 'errors' ||
+            $scope.pdf.view === 'validation-problems'
+          ) {
+            $scope.shouldShowLogs = true
+            $scope.pdf.compileFailed = true
+          }
+        })
       }
 
       const IGNORE_FILES = ['output.fls', 'output.fdb_latexmk']

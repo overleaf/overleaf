@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 import PreviewLogsPaneEntry from './preview-logs-pane-entry'
 import Icon from '../../../shared/components/icon'
 import { useEditorContext } from '../../../shared/context/editor-context'
@@ -59,6 +59,30 @@ function PreviewError({ name }) {
   } else if (name === 'projectTooLarge') {
     errorTitle = t('project_too_large')
     errorContent = <>{t('project_too_much_editable_text')}</>
+  } else if (name === 'failure') {
+    errorTitle = t('no_pdf_error_title')
+    errorContent = (
+      <>
+        <Trans i18nKey="no_pdf_error_explanation" />
+        <ul className="log-entry-formatted-content-list">
+          <li>
+            <Trans i18nKey="no_pdf_error_reason_unrecoverable_error" />
+          </li>
+          <li>
+            <Trans
+              i18nKey="no_pdf_error_reason_no_content"
+              components={{ code: <code /> }}
+            />
+          </li>
+          <li>
+            <Trans
+              i18nKey="no_pdf_error_reason_output_pdf_already_exists"
+              components={{ code: <code /> }}
+            />
+          </li>
+        </ul>
+      </>
+    )
   }
 
   return errorTitle ? (
