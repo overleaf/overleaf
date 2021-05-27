@@ -121,7 +121,7 @@
 		div
 			strong #{translate("create_your_first_project")}
 
-if (showUserDetailsArea)
+if (isOverleaf)
 	span(ng-controller="LeftHandMenuPromoController",  ng-cloak)
 
 		.row-spaced#userProfileInformation(ng-if="hasProjects")

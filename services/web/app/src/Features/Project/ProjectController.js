@@ -584,18 +584,7 @@ const ProjectController = {
             hasSubscription: results.hasSubscription,
             reconfirmedViaSAML,
             zipFileSizeLimit: Settings.maxUploadSize,
-          }
-
-          if (
-            Settings.algolia &&
-            Settings.algolia.app_id &&
-            Settings.algolia.read_only_api_key
-          ) {
-            viewModel.showUserDetailsArea = true
-            viewModel.algolia_api_key = Settings.algolia.read_only_api_key
-            viewModel.algolia_app_id = Settings.algolia.app_id
-          } else {
-            viewModel.showUserDetailsArea = false
+            isOverleaf: !!Settings.overleaf,
           }
 
           const paidUser =
