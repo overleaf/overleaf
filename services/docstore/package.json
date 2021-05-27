@@ -32,7 +32,7 @@
     "request": "^2.88.2",
     "settings-sharelatex": "^1.1.0",
     "streamifier": "^0.1.1",
-    "underscore": "~1.10.2"
+    "underscore": "~1.12.1"
   },
   "devDependencies": {
     "@google-cloud/storage": "^5.1.2",
