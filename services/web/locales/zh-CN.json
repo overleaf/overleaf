@@ -1397,7 +1397,7 @@
   "if_error_persists_try_relinking_provider": "如果此错误仍然存在，请尝试在此处重新链接您的__provider__帐户",
   "select_from_source_files": "从源文件中选择",
   "select_from_output_files": "从输出文件中选择",
-  "select_a_project": "Select a Project",
+  "select_a_project": "选择一个项目",
   "please_select_a_project": "请选择项目",
   "no_other_projects_found": "找不到其他项目，请先创建另一个项目",
   "select_an_output_file": "选择输出文件",
