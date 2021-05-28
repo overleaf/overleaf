@@ -1,4 +1,4 @@
-@overleaf/settings-module
+@overleaf/settings
 ===================
 
 A small module to allow global config settings to be set for all services
