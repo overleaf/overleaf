@@ -23,7 +23,11 @@ syncUserEntitlements(userEntitlements, cachedEntitlements)
 
 async function syncUserEntitlements(userEntitlements, cachedEntitlements) {
   // check for user entitlements in mongo but not in postgres
-  for (const userEntitlement of Object.values(userEntitlements)) {
+  for (const key of Object.keys(userEntitlements)) {
+    const userEntitlement = userEntitlements[key]
+    if (!userEntitlement) {
+      continue
+    }
     // find any email(s) that are linked through sso
     for (const email of userEntitlement.emails) {
       if (!email.samlProviderId) {
@@ -83,7 +87,11 @@ async function syncUserEntitlements(userEntitlements, cachedEntitlements) {
   }
 
   // check for user entitlements in postgres but not in mongo
-  for (const cachedEntitlment of Object.values(cachedEntitlements)) {
+  for (const key of Object.keys(cachedEntitlements)) {
+    const cachedEntitlment = cachedEntitlements[key]
+    if (!cachedEntitlment) {
+      continue
+    }
     if (!cachedEntitlment.hasEntitlement) {
       continue
     }
@@ -134,13 +142,15 @@ async function syncUserEntitlement(userId, email, hasEntitlement) {
 }
 
 function loadUserEntitlements(userEntitlementsFilename) {
-  const userEntitlementsFile = fs.readFileSync(userEntitlementsFilename, {
-    encoding: 'utf8',
-  })
+  const userEntitlementsData = fs
+    .readFileSync(userEntitlementsFilename, {
+      encoding: 'utf8',
+    })
+    .split('\n')
 
   const userEntitlements = {}
 
-  for (const userEntitlementLine of userEntitlementsFile.split('\n')) {
+  for (const userEntitlementLine of userEntitlementsData) {
     if (!userEntitlementLine) {
       continue
     }
@@ -155,13 +165,15 @@ function loadUserEntitlements(userEntitlementsFilename) {
 }
 
 function loadCachedEntitlements(cachedEntitlementsFilename) {
-  const cachedEntitlementsFile = fs.readFileSync(cachedEntitlementsFilename, {
-    encoding: 'utf8',
-  })
+  const cachedEntitlementsData = fs
+    .readFileSync(cachedEntitlementsFilename, {
+      encoding: 'utf8',
+    })
+    .split('\n')
 
   const cachedEntitlements = {}
 
-  for (const cachedEntitlementLine of cachedEntitlementsFile.split('\n')) {
+  for (const cachedEntitlementLine of cachedEntitlementsData) {
     // this is safe because comma is not an allowed value for any column
     const [
       userId,
