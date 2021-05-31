@@ -316,7 +316,7 @@ const AuthenticationController = {
     }
 
     if (req.headers.authorization != null) {
-      AuthenticationController.httpAuth(req, res, next)
+      AuthenticationController.requirePrivateApiAuth()(req, res, next)
     } else if (AuthenticationController.isUserLoggedIn(req)) {
       next()
     } else {
@@ -361,17 +361,23 @@ const AuthenticationController = {
     return next()
   },
 
-  httpAuth: basicAuth(function (user, pass) {
-    const expectedPassword = Settings.httpAuthUsers[user]
-    const isValid =
-      expectedPassword &&
-      expectedPassword.length === pass.length &&
-      crypto.timingSafeEqual(Buffer.from(expectedPassword), Buffer.from(pass))
-    if (!isValid) {
-      logger.err({ user, pass }, 'invalid login details')
-    }
-    return isValid
-  }),
+  requireBasicAuth: function (userDetails) {
+    return basicAuth(function (user, pass) {
+      const expectedPassword = userDetails[user]
+      const isValid =
+        expectedPassword &&
+        expectedPassword.length === pass.length &&
+        crypto.timingSafeEqual(Buffer.from(expectedPassword), Buffer.from(pass))
+      if (!isValid) {
+        logger.err({ user, pass }, 'invalid login details')
+      }
+      return isValid
+    })
+  },
+
+  requirePrivateApiAuth() {
+    return AuthenticationController.requireBasicAuth(Settings.httpAuthUsers)
+  },
 
   setRedirectInSession(req, value) {
     if (value == null) {

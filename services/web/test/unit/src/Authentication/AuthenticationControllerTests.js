@@ -630,7 +630,10 @@ describe('AuthenticationController', function () {
   describe('requireGlobalLogin', function () {
     beforeEach(function () {
       this.req.headers = {}
-      this.AuthenticationController.httpAuth = sinon.stub()
+      this.middleware = sinon.stub()
+      this.AuthenticationController.requirePrivateApiAuth = sinon
+        .stub()
+        .returns(this.middleware)
       this.setRedirect = sinon.spy(
         this.AuthenticationController,
         'setRedirectInSession'
@@ -684,8 +687,8 @@ describe('AuthenticationController', function () {
         )
       })
 
-      it('should pass the request onto httpAuth', function () {
-        this.AuthenticationController.httpAuth
+      it('should pass the request onto requirePrivateApiAuth middleware', function () {
+        this.middleware
           .calledWith(this.req, this.res, this.next)
           .should.equal(true)
       })
@@ -726,7 +729,16 @@ describe('AuthenticationController', function () {
     })
   })
 
-  describe('httpAuth', function () {
+  describe('requireBasicAuth', function () {
+    beforeEach(function () {
+      this.basicAuthUsers = {
+        'basic-auth-user': 'basic-auth-password',
+      }
+      this.middleware = this.AuthenticationController.requireBasicAuth(
+        this.basicAuthUsers
+      )
+    })
+
     describe('with http auth', function () {
       it('should error with incorrect user', function (done) {
         this.req.headers = {
@@ -736,12 +748,12 @@ describe('AuthenticationController', function () {
           expect(status).to.equal('Unauthorized')
           done()
         }
-        this.AuthenticationController.httpAuth(this.req, this.req)
+        this.middleware(this.req, this.req)
       })
 
       it('should error with incorrect password', function (done) {
         this.req.headers = {
-          authorization: `Basic ${Buffer.from('valid-test-user:nope').toString(
+          authorization: `Basic ${Buffer.from('basic-auth-user:nope').toString(
             'base64'
           )}`,
         }
@@ -749,12 +761,12 @@ describe('AuthenticationController', function () {
           expect(status).to.equal('Unauthorized')
           done()
         }
-        this.AuthenticationController.httpAuth(this.req, this.req)
+        this.middleware(this.req, this.req)
       })
 
       it('should fail with empty pass', function (done) {
         this.req.headers = {
-          authorization: `Basic ${Buffer.from(`invalid-test-user:`).toString(
+          authorization: `Basic ${Buffer.from(`basic-auth-user:`).toString(
             'base64'
           )}`,
         }
@@ -762,17 +774,30 @@ describe('AuthenticationController', function () {
           expect(status).to.equal('Unauthorized')
           done()
         }
-        this.AuthenticationController.httpAuth(this.req, this.req)
+        this.middleware(this.req, this.req)
       })
 
       it('should succeed with correct user/pass', function (done) {
         this.req.headers = {
           authorization: `Basic ${Buffer.from(
-            `valid-test-user:${this.httpAuthUsers['valid-test-user']}`
+            `basic-auth-user:${this.basicAuthUsers['basic-auth-user']}`
           ).toString('base64')}`,
         }
-        this.AuthenticationController.httpAuth(this.req, this.res, done)
+        this.middleware(this.req, this.res, done)
       })
+    })
+  })
+
+  describe('requirePrivateApiAuth', function () {
+    beforeEach(function () {
+      this.AuthenticationController.requireBasicAuth = sinon.stub()
+    })
+
+    it('should call requireBasicAuth with the private API user details', function () {
+      this.AuthenticationController.requirePrivateApiAuth()
+      this.AuthenticationController.requireBasicAuth
+        .calledWith(this.httpAuthUsers)
+        .should.equal(true)
     })
   })
 

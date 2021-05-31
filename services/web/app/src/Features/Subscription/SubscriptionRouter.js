@@ -136,7 +136,7 @@ module.exports = {
     // Currently used in acceptance tests only, as a way to trigger the syncing logic
     return publicApiRouter.post(
       '/user/:user_id/features/sync',
-      AuthenticationController.httpAuth,
+      AuthenticationController.requirePrivateApiAuth(),
       SubscriptionController.refreshUserFeatures
     )
   },

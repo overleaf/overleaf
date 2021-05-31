@@ -231,7 +231,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   privateApiRouter.get(
     '/user/:user_id/personal_info',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     UserInfoController.getPersonalInfo
   )
 
@@ -564,7 +564,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   privateApiRouter.post(
     '/project/:Project_id/history/resync',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     HistoryController.resyncProjectHistory
   )
 
@@ -639,28 +639,28 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   privateApiRouter.post(
     '/internal/expire-deleted-projects-after-duration',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     ProjectController.expireDeletedProjectsAfterDuration
   )
   privateApiRouter.post(
     '/internal/expire-deleted-users-after-duration',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     UserController.expireDeletedUsersAfterDuration
   )
   privateApiRouter.post(
     '/internal/project/:projectId/expire-deleted-project',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     ProjectController.expireDeletedProject
   )
   privateApiRouter.post(
     '/internal/users/:userId/expire',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     UserController.expireDeletedUser
   )
 
   privateApiRouter.get(
     '/user/:userId/tag',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     TagsController.apiGetAllTags
   )
   webRouter.get(
@@ -733,35 +733,35 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   // Deprecated in favour of /internal/project/:project_id but still used by versioning
   privateApiRouter.get(
     '/project/:project_id/details',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     ProjectApiController.getProjectDetails
   )
 
   // New 'stable' /internal API end points
   privateApiRouter.get(
     '/internal/project/:project_id',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     ProjectApiController.getProjectDetails
   )
   privateApiRouter.get(
     '/internal/project/:Project_id/zip',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     ProjectDownloadsController.downloadProject
   )
   privateApiRouter.get(
     '/internal/project/:project_id/compile/pdf',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     CompileController.compileAndDownloadPdf
   )
 
   privateApiRouter.post(
     '/internal/deactivateOldProjects',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     InactiveProjectController.deactivateOldProjects
   )
   privateApiRouter.post(
     '/internal/project/:project_id/deactivate',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     InactiveProjectController.deactivateProject
   )
 
@@ -775,40 +775,40 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       req.params = params
       next()
     },
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     CompileController.getFileFromClsi
   )
 
   privateApiRouter.get(
     '/project/:Project_id/doc/:doc_id',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     DocumentController.getDocument
   )
   privateApiRouter.post(
     '/project/:Project_id/doc/:doc_id',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     DocumentController.setDocument
   )
 
   privateApiRouter.post(
     '/user/:user_id/update/*',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     TpdsController.mergeUpdate
   )
   privateApiRouter.delete(
     '/user/:user_id/update/*',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     TpdsController.deleteUpdate
   )
 
   privateApiRouter.post(
     '/project/:project_id/contents/*',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     TpdsController.updateProjectContents
   )
   privateApiRouter.delete(
     '/project/:project_id/contents/*',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     TpdsController.deleteProjectContents
   )
 
@@ -884,7 +884,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   // overleaf-integration module), but may expand beyond that role.
   publicApiRouter.post(
     '/api/clsi/compile/:submission_id',
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     CompileController.compileSubmission
   )
   publicApiRouter.get(
@@ -898,7 +898,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       req.params = params
       next()
     },
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     CompileController.getFileFromClsiWithoutUser
   )
   publicApiRouter.post(
@@ -908,7 +908,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       maxRequests: 1,
       timeInterval: 60,
     }),
-    AuthenticationController.httpAuth,
+    AuthenticationController.requirePrivateApiAuth(),
     InstitutionsController.confirmDomain
   )
 

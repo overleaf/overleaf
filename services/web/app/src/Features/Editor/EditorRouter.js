@@ -57,7 +57,7 @@ module.exports = {
     )
     apiRouter.post(
       '/project/:Project_id/doc/:entity_id/convert-to-file',
-      AuthenticationController.httpAuth,
+      AuthenticationController.requirePrivateApiAuth(),
       validate({
         body: Joi.object({
           userId: Joi.objectId().required(),
@@ -71,7 +71,7 @@ module.exports = {
     // whenever a user joins a project, like updating the deleted status.
     apiRouter.post(
       '/project/:Project_id/join',
-      AuthenticationController.httpAuth,
+      AuthenticationController.requirePrivateApiAuth(),
       RateLimiterMiddleware.rateLimit({
         endpointName: 'join-project',
         params: ['Project_id'],

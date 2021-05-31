@@ -16,7 +16,7 @@ module.exports = {
 
     publicApiRouter.use(
       '/analytics/uniExternalCollaboration',
-      AuthenticationController.httpAuth,
+      AuthenticationController.requirePrivateApiAuth(),
       AnalyticsProxy.call('/uniExternalCollaboration')
     )
   },
