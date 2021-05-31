@@ -770,6 +770,7 @@ module.exports = {
   recaptcha: {
     disabled: {
       invite: true,
+      login: true,
       register: true,
     },
   },
