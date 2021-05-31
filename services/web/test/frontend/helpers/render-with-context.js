@@ -34,6 +34,7 @@ export function EditorProviders({
         pdfLayout: 'flat',
       },
       $watch: () => {},
+      toggleHistory: () => {},
     },
     socket,
   }

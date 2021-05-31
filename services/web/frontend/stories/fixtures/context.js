@@ -16,6 +16,7 @@ export function setupContext() {
         chatOpen: true,
         pdfLayout: 'flat',
       },
+      toggleHistory: () => {},
     }
   }
   window._ide = {

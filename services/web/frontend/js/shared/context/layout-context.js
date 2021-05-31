@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react'
+import React, { createContext, useContext, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from './util/scope-value-hook'
 
@@ -19,7 +19,17 @@ LayoutContext.Provider.propTypes = {
 }
 
 export function LayoutProvider({ children, $scope }) {
-  const [view, setView] = useScopeValue('ui.view', $scope)
+  const [view, _setView] = useScopeValue('ui.view', $scope)
+  const setView = useCallback(
+    value => {
+      _setView(value)
+      if (value === 'history') {
+        $scope.toggleHistory()
+      }
+    },
+    [$scope, _setView]
+  )
+
   const [chatIsOpen, setChatIsOpen] = useScopeValue('ui.chatOpen', $scope)
   const [reviewPanelOpen, setReviewPanelOpen] = useScopeValue(
     'ui.reviewPanelOpen',
@@ -53,7 +63,9 @@ export function LayoutProvider({ children, $scope }) {
 
 LayoutProvider.propTypes = {
   children: PropTypes.any,
-  $scope: PropTypes.any.isRequired,
+  $scope: PropTypes.shape({
+    toggleHistory: PropTypes.func.isRequired,
+  }).isRequired,
 }
 
 export function useLayoutContext(propTypes) {
