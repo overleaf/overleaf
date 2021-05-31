@@ -133,7 +133,7 @@ function processPdfRequest(
 
   const verifyChunks = event.request.url.includes('verify_chunks=true')
   const rangeHeader =
-    event.request.headers.get('Range') || `bytes=0-${file.size}`
+    event.request.headers.get('Range') || `bytes=0-${file.size - 1}`
   const [start, last] = rangeHeader
     .slice('bytes='.length)
     .split('-')
@@ -204,12 +204,15 @@ function processPdfRequest(
             return response.arrayBuffer()
           })
           .then(arrayBuffer => {
-            return { chunk, arrayBuffer }
+            return {
+              chunk,
+              data: backFillObjectContext(chunk, arrayBuffer),
+            }
           })
       )
     )
       .then(responses => {
-        responses.forEach(({ chunk, arrayBuffer }) => {
+        responses.forEach(({ chunk, data }) => {
           // overlap:
           //     | REQUESTED_RANGE |
           //  | CHUNK |
@@ -221,10 +224,10 @@ function processPdfRequest(
           if (offsetStart > 0 || offsetEnd > 0) {
             // compute index positions for slice to handle case where offsetEnd=0
             const chunkSize = chunk.end - chunk.start
-            arrayBuffer = arrayBuffer.slice(offsetStart, chunkSize - offsetEnd)
+            data = data.slice(offsetStart, chunkSize - offsetEnd)
           }
           const insertPosition = Math.max(chunk.start - start, 0)
-          reAssembledBlob.set(new Uint8Array(arrayBuffer), insertPosition)
+          reAssembledBlob.set(data, insertPosition)
         })
 
         let verifyProcess = Promise.resolve(reAssembledBlob)
@@ -304,6 +307,7 @@ function handleCompileResponse(response, body) {
   for (const file of body.outputFiles) {
     if (file.path !== 'output.pdf') continue // not the pdf used for rendering
     if (file.ranges) {
+      file.ranges.forEach(backFillEdgeBounds)
       const { clsiServerId, compileGroup } = body
       PDF_FILES.set(file.url, {
         pdfCreatedAt,
@@ -314,6 +318,33 @@ function handleCompileResponse(response, body) {
     }
     break
   }
+}
+
+const ENCODER = new TextEncoder()
+function backFillEdgeBounds(chunk) {
+  if (chunk.objectId) {
+    chunk.objectId = ENCODER.encode(chunk.objectId)
+    chunk.start -= chunk.objectId.byteLength
+  }
+  return chunk
+}
+
+/**
+ * @param chunk
+ * @param {ArrayBuffer} arrayBuffer
+ * @return {Uint8Array}
+ */
+function backFillObjectContext(chunk, arrayBuffer) {
+  if (!chunk.objectId) {
+    // This is a dynamic chunk
+    return new Uint8Array(arrayBuffer)
+  }
+  const { start, end, objectId } = chunk
+  const header = Uint8Array.from(objectId)
+  const fullBuffer = new Uint8Array(end - start)
+  fullBuffer.set(header, 0)
+  fullBuffer.set(new Uint8Array(arrayBuffer), objectId.length)
+  return fullBuffer
 }
 
 /**
