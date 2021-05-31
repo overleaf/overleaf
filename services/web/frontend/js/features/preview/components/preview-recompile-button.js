@@ -84,7 +84,7 @@ function PreviewRecompileButton({
       id="pdf-recompile-dropdown"
       className={recompileButtonGroupClasses}
     >
-      <button className="btn btn-recompile" onClick={onRecompile}>
+      <button className="btn btn-recompile" onClick={() => onRecompile()}>
         <Icon type="refresh" spin={isCompiling} />
 
         <span id="text-compiling" className="toolbar-text" {...compilingProps}>
