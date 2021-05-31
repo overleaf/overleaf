@@ -1014,6 +1014,16 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     HealthCheckController.checkApi
   )
   publicApiRouter.get(
+    '/health_check/api',
+    HealthCheckController.checkActiveHandles,
+    HealthCheckController.checkApi
+  )
+  privateApiRouter.get(
+    '/health_check/api',
+    HealthCheckController.checkActiveHandles,
+    HealthCheckController.checkApi
+  )
+  publicApiRouter.get(
     '/health_check/full',
     HealthCheckController.checkActiveHandles,
     HealthCheckController.check
