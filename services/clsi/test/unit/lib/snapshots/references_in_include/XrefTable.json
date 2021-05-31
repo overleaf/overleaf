@@ -1,0 +1,90 @@
+[
+  {
+    "offset": 0,
+    "gen": 255,
+    "free": true
+  },
+  {
+    "offset": 5,
+    "gen": 1
+  },
+  {
+    "offset": 5,
+    "gen": 0
+  },
+  {
+    "offset": 15,
+    "gen": 0,
+    "uncompressed": true
+  },
+  {
+    "offset": 5,
+    "gen": 9
+  },
+  {
+    "offset": 15855,
+    "gen": 0,
+    "uncompressed": true
+  },
+  {
+    "offset": 5,
+    "gen": 10
+  },
+  {
+    "offset": 5,
+    "gen": 3
+  },
+  {
+    "offset": 5,
+    "gen": 2
+  },
+  {
+    "offset": 167,
+    "gen": 0,
+    "uncompressed": true
+  },
+  {
+    "offset": 5,
+    "gen": 8
+  },
+  {
+    "offset": 5,
+    "gen": 4
+  },
+  {
+    "offset": 5,
+    "gen": 5
+  },
+  {
+    "offset": 341,
+    "gen": 0,
+    "uncompressed": true
+  },
+  {
+    "offset": 5,
+    "gen": 6
+  },
+  {
+    "offset": 7911,
+    "gen": 0,
+    "uncompressed": true
+  },
+  {
+    "offset": 5,
+    "gen": 7
+  },
+  {
+    "offset": 5,
+    "gen": 11
+  },
+  {
+    "offset": 15608,
+    "gen": 0,
+    "uncompressed": true
+  },
+  {
+    "offset": 16597,
+    "gen": 0,
+    "uncompressed": true
+  }
+]

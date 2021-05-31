@@ -1,201 +1,123 @@
+const fs = require('fs')
 const Path = require('path')
-const crypto = require('crypto')
-const { Readable } = require('stream')
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
 const { expect } = require('chai')
 
 const MODULE_PATH = '../../../app/js/ContentCacheManager'
 
-class FakeFile {
-  constructor() {
-    this.closed = false
-    this.contents = []
-  }
-
-  async write(blob) {
-    this.contents.push(blob)
-    return this
-  }
-
-  async close() {
-    this.closed = true
-    return this
-  }
-
-  toJSON() {
-    return {
-      contents: Buffer.concat(this.contents).toString(),
-      closed: this.closed
-    }
-  }
-}
-
-function hash(blob) {
-  const hash = crypto.createHash('sha256')
-  hash.update(blob)
-  return hash.digest('hex')
-}
-
 describe('ContentCacheManager', function () {
   let contentDir, pdfPath
-  let ContentCacheManager, fs, files, Settings
-  function load() {
-    ContentCacheManager = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        fs,
-        'settings-sharelatex': Settings
-      }
-    })
-  }
+  let ContentCacheManager, files, Settings
+  before(function () {
+    Settings = require('settings-sharelatex')
+    ContentCacheManager = require(MODULE_PATH)
+  })
   let contentRanges, newContentRanges, reclaimed
-  function run(filePath, done) {
-    ContentCacheManager.update(contentDir, filePath, (err, ranges) => {
-      if (err) return done(err)
-      let newlyReclaimed
-      ;[contentRanges, newContentRanges, newlyReclaimed] = ranges
-      reclaimed += newlyReclaimed
-      done()
-    })
-  }
+  async function run(filePath, size) {
+    const result = await ContentCacheManager.promises.update(
+      contentDir,
+      filePath,
+      size
+    )
+    let newlyReclaimed
+    ;[contentRanges, newContentRanges, newlyReclaimed] = result
+    reclaimed += newlyReclaimed
 
-  beforeEach(function () {
-    reclaimed = 0
+    const fileNames = await fs.promises.readdir(contentDir)
+    files = {}
+    for (const fileName of fileNames) {
+      const path = Path.join(contentDir, fileName)
+      files[path] = await fs.promises.readFile(path)
+    }
+  }
+  before(function () {
     contentDir =
       '/app/output/602cee6f6460fca0ba7921e6/content/1797a7f48f9-5abc1998509dea1f'
     pdfPath =
       '/app/output/602cee6f6460fca0ba7921e6/generated-files/1797a7f48ea-8ac6805139f43351/output.pdf'
-    Settings = {
-      pdfCachingMinChunkSize: 1024,
-      enablePdfCachingDark: false
-    }
-    files = {}
-    fs = {
-      createReadStream: sinon.stub().returns(Readable.from([])),
-      promises: {
-        async writeFile(name, blob) {
-          const file = new FakeFile()
-          await file.write(Buffer.from(blob))
-          await file.close()
-          files[name] = file
-        },
-        async readFile(name) {
-          if (!files[name]) {
-            throw new Error()
-          }
-          return files[name].toJSON().contents
-        },
-        async open(name) {
-          files[name] = new FakeFile()
-          return files[name]
-        },
-        async stat(name) {
-          if (!files[name]) {
-            throw new Error()
-          }
-        },
-        async rename(oldName, newName) {
-          if (!files[oldName]) {
-            throw new Error()
-          }
-          files[newName] = files[oldName]
-          delete files[oldName]
-        },
-        async unlink(name) {
-          if (!files[name]) {
-            throw new Error()
-          }
-          delete files[name]
-        }
-      }
-    }
+
+    reclaimed = 0
+    Settings.pdfCachingMinChunkSize = 1024
   })
 
-  describe('with a small minChunkSize', function () {
-    beforeEach(function () {
-      Settings.pdfCachingMinChunkSize = 1
-      load()
+  before(async function () {
+    await fs.promises.rmdir(contentDir, { recursive: true })
+    await fs.promises.mkdir(contentDir, { recursive: true })
+    await fs.promises.mkdir(Path.dirname(pdfPath), { recursive: true })
+  })
+
+  describe('minimal', function () {
+    const PATH_MINIMAL = 'test/acceptance/fixtures/minimal.pdf'
+    const OBJECT_ID_1 = '9 0 '
+    const HASH_LARGE =
+      'd7cfc73ad2fba4578a437517923e3714927bbf35e63ea88bd93c7a8076cf1fcd'
+    const OBJECT_ID_2 = '10 0 '
+    const HASH_SMALL =
+      '896749b8343851b0dc385f71616916a7ba0434fcfb56d1fc7e27cd139eaa2f71'
+    function getChunkPath(hash) {
+      return Path.join('test/unit/js/snapshots/minimalCompile/chunks', hash)
+    }
+    let MINIMAL_SIZE, RANGE_1, RANGE_2, h1, h2, START_1, START_2, END_1, END_2
+    before(async function () {
+      await fs.promises.copyFile(PATH_MINIMAL, pdfPath)
+      const MINIMAL = await fs.promises.readFile(PATH_MINIMAL)
+      MINIMAL_SIZE = (await fs.promises.stat(PATH_MINIMAL)).size
+      RANGE_1 = await fs.promises.readFile(getChunkPath(HASH_LARGE))
+      RANGE_2 = await fs.promises.readFile(getChunkPath(HASH_SMALL))
+      h1 = HASH_LARGE
+      h2 = HASH_SMALL
+      START_1 = MINIMAL.indexOf(RANGE_1)
+      END_1 = START_1 + RANGE_1.byteLength
+      START_2 = MINIMAL.indexOf(RANGE_2)
+      END_2 = START_2 + RANGE_2.byteLength
     })
+    async function runWithMinimal() {
+      await run(pdfPath, MINIMAL_SIZE)
+    }
 
-    describe('when the ranges are split across chunks', function () {
-      const RANGE_1 = 'stream123endstream'
-      const RANGE_2 = 'stream(||)endstream'
-      const RANGE_3 = 'stream!$%/=endstream'
-      const h1 = hash(RANGE_1)
-      const h2 = hash(RANGE_2)
-      const h3 = hash(RANGE_3)
-      function runWithSplitStream(done) {
-        fs.createReadStream
-          .withArgs(pdfPath)
-          .returns(
-            Readable.from([
-              Buffer.from('abcstr'),
-              Buffer.from('eam123endstreamABC'),
-              Buffer.from('str'),
-              Buffer.from('eam(||'),
-              Buffer.from(')end'),
-              Buffer.from('stream-_~stream!$%/=endstream')
-            ])
-          )
-        run(pdfPath, done)
-      }
-      beforeEach(function (done) {
-        runWithSplitStream(done)
+    describe('with two ranges qualifying', function () {
+      before(function () {
+        Settings.pdfCachingMinChunkSize = 500
       })
-
-      it('should produce three ranges', function () {
-        expect(contentRanges).to.have.length(3)
+      before(async function () {
+        await runWithMinimal()
+      })
+      it('should produce two ranges', function () {
+        expect(contentRanges).to.have.length(2)
       })
 
       it('should find the correct offsets', function () {
         expect(contentRanges).to.deep.equal([
           {
-            start: 3,
-            end: 21,
-            hash: hash(RANGE_1)
+            objectId: OBJECT_ID_1,
+            start: START_1,
+            end: END_1,
+            hash: h1
           },
           {
-            start: 24,
-            end: 43,
-            hash: hash(RANGE_2)
-          },
-          {
-            start: 46,
-            end: 66,
-            hash: hash(RANGE_3)
+            objectId: OBJECT_ID_2,
+            start: START_2,
+            end: END_2,
+            hash: h2
           }
         ])
       })
 
       it('should store the contents', function () {
-        expect(JSON.parse(JSON.stringify(files))).to.deep.equal({
-          [Path.join(contentDir, h1)]: {
-            contents: RANGE_1,
-            closed: true
-          },
-          [Path.join(contentDir, h2)]: {
-            contents: RANGE_2,
-            closed: true
-          },
-          [Path.join(contentDir, h3)]: {
-            contents: RANGE_3,
-            closed: true
-          },
-          [Path.join(contentDir, '.state.v0.json')]: {
-            contents: JSON.stringify({
+        expect(files).to.deep.equal({
+          [Path.join(contentDir, h1)]: RANGE_1,
+          [Path.join(contentDir, h2)]: RANGE_2,
+          [Path.join(contentDir, '.state.v0.json')]: Buffer.from(
+            JSON.stringify({
               hashAge: [
                 [h1, 0],
-                [h2, 0],
-                [h3, 0]
+                [h2, 0]
               ],
               hashSize: [
-                [h1, 18],
-                [h2, 19],
-                [h3, 20]
+                [h1, RANGE_1.byteLength],
+                [h2, RANGE_2.byteLength]
               ]
-            }),
-            closed: true
-          }
+            })
+          )
         })
       })
 
@@ -203,71 +125,46 @@ describe('ContentCacheManager', function () {
         expect(contentRanges).to.deep.equal(newContentRanges)
       })
 
-      describe('when re-running with one stream removed', function () {
-        function runWithOneSplitStreamRemoved(done) {
-          fs.createReadStream
-            .withArgs(pdfPath)
-            .returns(
-              Readable.from([
-                Buffer.from('abcstr'),
-                Buffer.from('eam123endstreamABC'),
-                Buffer.from('stream!$%/=endstream')
-              ])
-            )
-          run(pdfPath, done)
-        }
-        beforeEach(function (done) {
-          runWithOneSplitStreamRemoved(done)
+      describe('when re-running with one range too small', function () {
+        before(function () {
+          Settings.pdfCachingMinChunkSize = 1024
         })
 
-        it('should produce two ranges', function () {
-          expect(contentRanges).to.have.length(2)
+        before(async function () {
+          await runWithMinimal()
+        })
+
+        it('should produce one range', function () {
+          expect(contentRanges).to.have.length(1)
         })
 
         it('should find the correct offsets', function () {
           expect(contentRanges).to.deep.equal([
             {
-              start: 3,
-              end: 21,
-              hash: hash(RANGE_1)
-            },
-            {
-              start: 24,
-              end: 44,
-              hash: hash(RANGE_3)
+              objectId: OBJECT_ID_1,
+              start: START_1,
+              end: END_1,
+              hash: h1
             }
           ])
         })
 
         it('should update the age of the 2nd range', function () {
-          expect(JSON.parse(JSON.stringify(files))).to.deep.equal({
-            [Path.join(contentDir, h1)]: {
-              contents: RANGE_1,
-              closed: true
-            },
-            [Path.join(contentDir, h2)]: {
-              contents: RANGE_2,
-              closed: true
-            },
-            [Path.join(contentDir, h3)]: {
-              contents: RANGE_3,
-              closed: true
-            },
-            [Path.join(contentDir, '.state.v0.json')]: {
-              contents: JSON.stringify({
+          expect(files).to.deep.equal({
+            [Path.join(contentDir, h1)]: RANGE_1,
+            [Path.join(contentDir, h2)]: RANGE_2,
+            [Path.join(contentDir, '.state.v0.json')]: Buffer.from(
+              JSON.stringify({
                 hashAge: [
                   [h1, 0],
-                  [h2, 1],
-                  [h3, 0]
+                  [h2, 1]
                 ],
                 hashSize: [
-                  [h1, 18],
-                  [h2, 19],
-                  [h3, 20]
+                  [h1, RANGE_1.byteLength],
+                  [h2, RANGE_2.byteLength]
                 ]
-              }),
-              closed: true
-            }
+              })
+            )
           })
         })
 
@@ -277,53 +174,35 @@ describe('ContentCacheManager', function () {
 
         describe('when re-running 5 more times', function () {
           for (let i = 0; i < 5; i++) {
-            beforeEach(function (done) {
-              runWithOneSplitStreamRemoved(done)
+            before(async function () {
+              await runWithMinimal()
             })
           }
 
-          it('should still produce two ranges', function () {
-            expect(contentRanges).to.have.length(2)
+          it('should still produce one range', function () {
+            expect(contentRanges).to.have.length(1)
           })
 
           it('should still find the correct offsets', function () {
             expect(contentRanges).to.deep.equal([
               {
-                start: 3,
-                end: 21,
-                hash: hash(RANGE_1)
-              },
-              {
-                start: 24,
-                end: 44,
-                hash: hash(RANGE_3)
+                objectId: OBJECT_ID_1,
+                start: START_1,
+                end: END_1,
+                hash: h1
               }
             ])
           })
 
           it('should delete the 2nd range', function () {
-            expect(JSON.parse(JSON.stringify(files))).to.deep.equal({
-              [Path.join(contentDir, h1)]: {
-                contents: RANGE_1,
-                closed: true
-              },
-              [Path.join(contentDir, h3)]: {
-                contents: RANGE_3,
-                closed: true
-              },
-              [Path.join(contentDir, '.state.v0.json')]: {
-                contents: JSON.stringify({
-                  hashAge: [
-                    [h1, 0],
-                    [h3, 0]
-                  ],
-                  hashSize: [
-                    [h1, 18],
-                    [h3, 20]
-                  ]
-                }),
-                closed: true
-              }
+            expect(files).to.deep.equal({
+              [Path.join(contentDir, h1)]: RANGE_1,
+              [Path.join(contentDir, '.state.v0.json')]: Buffer.from(
+                JSON.stringify({
+                  hashAge: [[h1, 0]],
+                  hashSize: [[h1, RANGE_1.byteLength]]
+                })
+              )
             })
           })
 
@@ -332,7 +211,7 @@ describe('ContentCacheManager', function () {
           })
 
           it('should yield the reclaimed space', function () {
-            expect(reclaimed).to.equal(RANGE_2.length)
+            expect(reclaimed).to.equal(RANGE_2.byteLength)
           })
         })
       })

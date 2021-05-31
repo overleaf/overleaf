@@ -275,36 +275,39 @@ module.exports = OutputCacheManager = {
           outputDir,
           OutputCacheManager.path(outputFile.build, outputFile.path)
         )
+        const pdfSize = outputFile.size
         const timer = new Metrics.Timer('compute-pdf-ranges')
-        ContentCacheManager.update(contentDir, outputFilePath, function (
-          err,
-          result
-        ) {
-          if (err) return callback(err, outputFiles)
-          const [contentRanges, newContentRanges, reclaimedSpace] = result
+        ContentCacheManager.update(
+          contentDir,
+          outputFilePath,
+          pdfSize,
+          function (err, result) {
+            if (err) return callback(err, outputFiles)
+            const [contentRanges, newContentRanges, reclaimedSpace] = result
 
-          if (Settings.enablePdfCachingDark) {
-            // In dark mode we are doing the computation only and do not emit
-            //  any ranges to the frontend.
-          } else {
-            outputFile.contentId = Path.basename(contentDir)
-            outputFile.ranges = contentRanges
+            if (Settings.enablePdfCachingDark) {
+              // In dark mode we are doing the computation only and do not emit
+              //  any ranges to the frontend.
+            } else {
+              outputFile.contentId = Path.basename(contentDir)
+              outputFile.ranges = contentRanges
+            }
+
+            timings['compute-pdf-caching'] = timer.done()
+            stats['pdf-caching-n-ranges'] = contentRanges.length
+            stats['pdf-caching-total-ranges-size'] = contentRanges.reduce(
+              (sum, next) => sum + (next.end - next.start),
+              0
+            )
+            stats['pdf-caching-n-new-ranges'] = newContentRanges.length
+            stats['pdf-caching-new-ranges-size'] = newContentRanges.reduce(
+              (sum, next) => sum + (next.end - next.start),
+              0
+            )
+            stats['pdf-caching-reclaimed-space'] = reclaimedSpace
+            callback(null, outputFiles)
           }
-
-          timings['compute-pdf-caching'] = timer.done()
-          stats['pdf-caching-n-ranges'] = contentRanges.length
-          stats['pdf-caching-total-ranges-size'] = contentRanges.reduce(
-            (sum, next) => sum + (next.end - next.start),
-            0
-          )
-          stats['pdf-caching-n-new-ranges'] = newContentRanges.length
-          stats['pdf-caching-new-ranges-size'] = newContentRanges.reduce(
-            (sum, next) => sum + (next.end - next.start),
-            0
-          )
-          stats['pdf-caching-reclaimed-space'] = reclaimedSpace
-          callback(null, outputFiles)
-        })
+        )
       } else {
         callback(null, outputFiles)
       }

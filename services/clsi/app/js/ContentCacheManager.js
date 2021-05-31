@@ -7,45 +7,97 @@ const fs = require('fs')
 const crypto = require('crypto')
 const Path = require('path')
 const Settings = require('settings-sharelatex')
+const OError = require('@overleaf/o-error')
 const pLimit = require('p-limit')
-
-const MIN_CHUNK_SIZE = Settings.pdfCachingMinChunkSize
-
-const START_OF_STREAM_MARKER = 'stream'
-const END_OF_STREAM_MARKER = 'endstream'
-const START_OF_STREAM_MARKER_LENGTH = START_OF_STREAM_MARKER.length
-const END_OF_STREAM_MARKER_LENGTH = END_OF_STREAM_MARKER.length
+const { parseXrefTable } = require('../lib/pdfjs/parseXrefTable')
 
 /**
  *
  * @param {String} contentDir path to directory where content hash files are cached
  * @param {String} filePath the pdf file to scan for streams
+ * @param {number} size the pdf size
  */
-async function update(contentDir, filePath) {
-  const stream = fs.createReadStream(filePath)
-  const extractor = new PdfStreamsExtractor()
+async function update(contentDir, filePath, size) {
   const ranges = []
   const newRanges = []
   // keep track of hashes expire old ones when they reach a generation > N.
   const tracker = await HashFileTracker.from(contentDir)
   tracker.updateAge()
 
-  for await (const chunk of stream) {
-    const pdfStreams = extractor.consume(chunk)
-    for (const pdfStream of pdfStreams) {
-      if (pdfStream.end - pdfStream.start < MIN_CHUNK_SIZE) continue
-      const hash = pdfStreamHash(pdfStream.buffers)
+  const rawTable = await parseXrefTable(filePath, size)
+  rawTable.sort((a, b) => {
+    return a.offset - b.offset
+  })
+  rawTable.forEach((obj, idx) => {
+    obj.idx = idx
+  })
 
-      const range = { start: pdfStream.start, end: pdfStream.end, hash }
+  const uncompressedObjects = []
+  for (const object of rawTable) {
+    if (!object.uncompressed) {
+      continue
+    }
+    const nextObject = rawTable[object.idx + 1]
+    if (!nextObject) {
+      // Ignore this possible edge case.
+      // The last object should be part of the xRef table.
+      continue
+    } else {
+      object.endOffset = nextObject.offset
+    }
+    const size = object.endOffset - object.offset
+    object.size = size
+    if (size < Settings.pdfCachingMinChunkSize) {
+      continue
+    }
+    uncompressedObjects.push(object)
+  }
+
+  const handle = await fs.promises.open(filePath)
+  try {
+    for (const object of uncompressedObjects) {
+      let buffer = Buffer.alloc(object.size, 0)
+      const { bytesRead } = await handle.read(
+        buffer,
+        0,
+        object.size,
+        object.offset
+      )
+      if (bytesRead !== object.size) {
+        throw new OError('could not read full chunk', {
+          object,
+          bytesRead
+        })
+      }
+      const idxObj = buffer.indexOf('obj')
+      if (idxObj > 100) {
+        throw new OError('objectId is too large', {
+          object,
+          idxObj
+        })
+      }
+      const objectIdRaw = buffer.subarray(0, idxObj)
+      buffer = buffer.subarray(objectIdRaw.byteLength)
+
+      const hash = pdfStreamHash(buffer)
+      const range = {
+        objectId: objectIdRaw.toString(),
+        start: object.offset + objectIdRaw.byteLength,
+        end: object.endOffset,
+        hash
+      }
       ranges.push(range)
 
       // Optimization: Skip writing of duplicate streams.
       if (tracker.track(range)) continue
 
-      await writePdfStream(contentDir, hash, pdfStream.buffers)
+      await writePdfStream(contentDir, hash, buffer)
       newRanges.push(range)
     }
+  } finally {
+    await handle.close()
   }
+
   const reclaimedSpace = await tracker.deleteStaleHashes(5)
   await tracker.flush()
   return [ranges, newRanges, reclaimedSpace]
@@ -142,94 +194,21 @@ class HashFileTracker {
   }
 }
 
-class PdfStreamsExtractor {
-  constructor() {
-    this.fileIndex = 0
-    this.inStream = false
-    this.streamStartIndex = 0
-    this.buffers = []
-    this.lastChunk = Buffer.alloc(0)
-  }
-
-  consume(chunk) {
-    let chunkIndex = 0
-    const pdfStreams = []
-    chunk = Buffer.concat([this.lastChunk, chunk])
-    while (true) {
-      if (!this.inStream) {
-        // Not in a stream, look for stream start
-        const index = chunk.indexOf(START_OF_STREAM_MARKER, chunkIndex)
-        if (index === -1) {
-          // Couldn't find stream start
-          break
-        }
-        // Found stream start, start a stream
-        this.inStream = true
-        this.streamStartIndex = this.fileIndex + index
-        chunkIndex = index
-      } else {
-        // In a stream, look for stream end
-        const index = chunk.indexOf(END_OF_STREAM_MARKER, chunkIndex)
-        if (index === -1) {
-          break
-        }
-        // add "endstream" part
-        const endIndex = index + END_OF_STREAM_MARKER_LENGTH
-        this.buffers.push(chunk.slice(chunkIndex, endIndex))
-        pdfStreams.push({
-          start: this.streamStartIndex,
-          end: this.fileIndex + endIndex,
-          buffers: this.buffers
-        })
-        this.inStream = false
-        this.buffers = []
-        chunkIndex = endIndex
-      }
-    }
-
-    const remaining = chunk.length - chunkIndex
-    const nextMarkerLength = this.inStream
-      ? END_OF_STREAM_MARKER_LENGTH
-      : START_OF_STREAM_MARKER_LENGTH
-    if (remaining > nextMarkerLength) {
-      const retainMarkerSection = chunk.length - nextMarkerLength
-      if (this.inStream) {
-        this.buffers.push(chunk.slice(chunkIndex, retainMarkerSection))
-      }
-      this.lastChunk = chunk.slice(retainMarkerSection)
-      this.fileIndex += retainMarkerSection
-    } else {
-      this.lastChunk = chunk.slice(chunkIndex)
-      this.fileIndex += chunkIndex
-    }
-    return pdfStreams
-  }
-}
-
-function pdfStreamHash(buffers) {
+function pdfStreamHash(buffer) {
   const hash = crypto.createHash('sha256')
-  for (const buffer of buffers) {
-    hash.update(buffer)
-  }
+  hash.update(buffer)
   return hash.digest('hex')
 }
 
-async function writePdfStream(dir, hash, buffers) {
+async function writePdfStream(dir, hash, buffer) {
   const filename = Path.join(dir, hash)
   const atomicWriteFilename = filename + '~'
-  const file = await fs.promises.open(atomicWriteFilename, 'w')
   if (Settings.enablePdfCachingDark) {
     // Write an empty file in dark mode.
-    buffers = []
+    buffer = Buffer.alloc(0)
   }
   try {
-    try {
-      for (const buffer of buffers) {
-        await file.write(buffer)
-      }
-    } finally {
-      await file.close()
-    }
+    await fs.promises.writeFile(atomicWriteFilename, buffer)
     await fs.promises.rename(atomicWriteFilename, filename)
   } catch (err) {
     try {
@@ -247,5 +226,8 @@ function promiseMapWithLimit(concurrency, array, fn) {
 
 module.exports = {
   HASH_REGEX: /^[0-9a-f]{64}$/,
-  update: callbackify(update)
+  update: callbackify(update),
+  promises: {
+    update
+  }
 }
