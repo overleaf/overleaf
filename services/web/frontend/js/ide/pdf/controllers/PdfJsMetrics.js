@@ -9,7 +9,7 @@ const pdfJsMetrics = {
 
 const SAMPLING_RATE = 0.01
 
-export function trackPdfDownload(response) {
+export function trackPdfDownload(response, compileTimeClientE2E) {
   const { serviceWorkerMetrics, stats, timings } = response
 
   const t0 = performance.now()
@@ -36,6 +36,7 @@ export function trackPdfDownload(response) {
     submitCompileMetrics({
       latencyFetch,
       latencyRender,
+      compileTimeClientE2E,
       stats,
       timings,
     })
