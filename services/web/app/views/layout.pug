@@ -105,7 +105,7 @@ html(
 
 	body(ng-csp=(cspEnabled ? "no-unsafe-eval" : false))
 		if(settings.recaptcha && settings.recaptcha.siteKeyV3)
-			script(type="text/javascript", nonce=scriptNonce, src="https://www.google.com/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
+			script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
 
 
 		if (typeof(suppressNavbar) == "undefined")
