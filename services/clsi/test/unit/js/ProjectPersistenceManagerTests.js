@@ -28,7 +28,12 @@ describe('ProjectPersistenceManager', function () {
         './CompileManager': (this.CompileManager = {}),
         diskusage: (this.diskusage = { check: sinon.stub() }),
         'settings-sharelatex': (this.settings = {
-          project_cache_length_ms: 1000
+          project_cache_length_ms: 1000,
+          path: {
+            compilesDir: '/compiles',
+            outputDir: '/output',
+            clsiCacheDir: '/cache'
+          }
         }),
         './db': (this.db = {})
       }
@@ -40,7 +45,7 @@ describe('ProjectPersistenceManager', function () {
 
   describe('refreshExpiryTimeout', function () {
     it('should leave expiry alone if plenty of disk', function (done) {
-      this.diskusage.check.callsArgWith(1, null, {
+      this.diskusage.check.resolves({
         available: 40,
         total: 100
       })
@@ -54,7 +59,7 @@ describe('ProjectPersistenceManager', function () {
     })
 
     it('should drop EXPIRY_TIMEOUT 10% if low disk usage', function (done) {
-      this.diskusage.check.callsArgWith(1, null, {
+      this.diskusage.check.resolves({
         available: 5,
         total: 100
       })
@@ -66,7 +71,7 @@ describe('ProjectPersistenceManager', function () {
     })
 
     it('should not drop EXPIRY_TIMEOUT to below 50% of project_cache_length_ms', function (done) {
-      this.diskusage.check.callsArgWith(1, null, {
+      this.diskusage.check.resolves({
         available: 5,
         total: 100
       })
@@ -78,10 +83,7 @@ describe('ProjectPersistenceManager', function () {
     })
 
     it('should not modify EXPIRY_TIMEOUT if there is an error getting disk values', function (done) {
-      this.diskusage.check.callsArgWith(1, 'Error', {
-        available: 5,
-        total: 100
-      })
+      this.diskusage.check.throws(new Error())
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
         this.ProjectPersistenceManager.EXPIRY_TIMEOUT.should.equal(1000)
         done()

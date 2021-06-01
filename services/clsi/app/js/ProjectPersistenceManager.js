@@ -21,34 +21,45 @@ const logger = require('logger-sharelatex')
 const oneDay = 24 * 60 * 60 * 1000
 const Settings = require('settings-sharelatex')
 const diskusage = require('diskusage')
+const { callbackify } = require('util')
 
-module.exports = ProjectPersistenceManager = {
-  EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5,
-
-  refreshExpiryTimeout(callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
-    diskusage.check('/', function (err, stats) {
-      if (err) {
-        logger.err({ err: err }, 'error getting disk usage')
-        return callback(err)
-      }
+async function refreshExpiryTimeout() {
+  const paths = [
+    Settings.path.compilesDir,
+    Settings.path.outputDir,
+    Settings.path.clsiCacheDir
+  ]
+  for (const path of paths) {
+    try {
+      const stats = await diskusage.check(path)
       const lowDisk = stats.available / stats.total < 0.1
+
       const lowerExpiry = ProjectPersistenceManager.EXPIRY_TIMEOUT * 0.9
       if (lowDisk && Settings.project_cache_length_ms / 2 < lowerExpiry) {
         logger.warn(
           {
-            stats: stats,
+            stats,
             newExpiryTimeoutInDays: (lowerExpiry / oneDay).toFixed(2)
           },
           'disk running low on space, modifying EXPIRY_TIMEOUT'
         )
         ProjectPersistenceManager.EXPIRY_TIMEOUT = lowerExpiry
+        break
       }
-      callback()
-    })
+    } catch (err) {
+      logger.err({ err, path }, 'error getting disk usage')
+    }
+  }
+}
+
+module.exports = ProjectPersistenceManager = {
+  EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5,
+
+  promises: {
+    refreshExpiryTimeout
   },
+
+  refreshExpiryTimeout: callbackify(refreshExpiryTimeout),
   markProjectAsJustAccessed(project_id, callback) {
     if (callback == null) {
       callback = function (error) {}
