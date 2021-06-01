@@ -19,7 +19,11 @@ export function trackPdfDownload(response, compileTimeClientE2E) {
     // The renderer does not yield in case the browser tab is hidden.
     // It will yield when the browser tab is visible again.
     // This will skew our performance metrics for rendering!
-    const latencyRender = timePDFRendered - timePDFFetched
+    // We are omitting the render time in case we detect this state.
+    let latencyRender
+    if (timePDFRendered) {
+      latencyRender = timePDFRendered - timePDFFetched
+    }
     done({ latencyFetch, latencyRender })
   }
   function updateConsumedBandwidth(bytes) {

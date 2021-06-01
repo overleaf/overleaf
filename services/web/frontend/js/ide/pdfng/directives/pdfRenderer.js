@@ -363,6 +363,17 @@ export default App.factory(
                 return
               } // return from cancelled page load
               const timePDFFetched = performance.now()
+
+              const visible = !document.hidden
+              if (!visible) {
+                // Flush the fetch time early, omit the render time.
+                if (typeof this.options.firstRenderDone === 'function') {
+                  this.options.firstRenderDone({ timePDFFetched })
+                  // Do not submit the actual rendering time.
+                  this.options.firstRenderDone = null
+                }
+              }
+
               pageState.renderTask = this.doRender(element, pagenum, pageObject)
               return pageState.renderTask.promise.then(
                 () => {
