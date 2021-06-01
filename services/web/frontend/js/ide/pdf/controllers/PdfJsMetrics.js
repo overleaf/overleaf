@@ -51,11 +51,33 @@ export function trackPdfDownload(response, compileTimeClientE2E) {
 }
 
 function submitCompileMetrics(metrics) {
+  let {
+    latencyFetch,
+    latencyRender,
+    compileTimeClientE2E,
+    stats,
+    timings,
+  } = metrics
+  stats = stats || {}
+  timings = timings || {}
+  const leanMetrics = {
+    latencyFetch,
+    latencyRender,
+    pdfSize: stats['pdf-size'],
+    compileTimeClientE2E,
+    compileTimeServerE2E: timings.compileE2E,
+  }
   sl_console.log('/event/compile-metrics', JSON.stringify(metrics))
-  sendMBSampled('compile-metrics', metrics, SAMPLING_RATE)
+  sendMBSampled('compile-metrics', leanMetrics, SAMPLING_RATE)
 }
 
 function submitPDFBandwidth(metrics) {
+  const metricsFlat = {}
+  Object.entries(metrics).forEach(([section, items]) => {
+    Object.entries(items).forEach(([key, value]) => {
+      metricsFlat[section + '_' + key] = value
+    })
+  })
   sl_console.log('/event/pdf-bandwidth', JSON.stringify(metrics))
-  sendMBSampled('pdf-bandwidth', metrics, SAMPLING_RATE)
+  sendMBSampled('pdf-bandwidth', metricsFlat, SAMPLING_RATE)
 }
