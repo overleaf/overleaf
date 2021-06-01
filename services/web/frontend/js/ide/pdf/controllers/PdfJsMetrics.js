@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid'
-import { sendMBSampled } from '../../../infrastructure/event-tracking'
+import { sendMB } from '../../../infrastructure/event-tracking'
 
 const pdfJsMetrics = {
   id: uuid(),
@@ -72,7 +72,7 @@ function submitCompileMetrics(metrics) {
     compileTimeServerE2E: timings.compileE2E,
   }
   sl_console.log('/event/compile-metrics', JSON.stringify(metrics))
-  sendMBSampled('compile-metrics', leanMetrics, SAMPLING_RATE)
+  sendMB('compile-metrics-v2', leanMetrics, SAMPLING_RATE)
 }
 
 function submitPDFBandwidth(metrics) {
@@ -83,5 +83,5 @@ function submitPDFBandwidth(metrics) {
     })
   })
   sl_console.log('/event/pdf-bandwidth', JSON.stringify(metrics))
-  sendMBSampled('pdf-bandwidth', metricsFlat, SAMPLING_RATE)
+  sendMB('pdf-bandwidth-v2', metricsFlat, SAMPLING_RATE)
 }

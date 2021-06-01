@@ -344,27 +344,32 @@ module.exports = {
       ],
     },
     {
-      id: 'enable_pdf_caching',
-      active: process.env.SPLIT_TEST_ENABLE_PDF_CACHING_ACTIVE === 'true',
+      id: 'pdf_caching_beta',
+      active: process.env.SPLIT_TEST_PDF_CACHING_BETA_ACTIVE === 'true',
       variants: [
         {
-          id: 'enabled',
+          id: 'collect-metrics-only',
           rolloutPercent: parseInt(
-            process.env.SPLIT_TEST_ENABLE_PDF_CACHING_ENABLE_ROLLOUT_PERCENT ||
+            process.env
+              .SPLIT_TEST_PDF_CACHING_BETA_COLLECT_METRICS_ONLY_ROLLOUT_PERCENT ||
               '0',
             10
           ),
         },
-      ],
-    },
-    {
-      id: 'track_pdf_download',
-      active: process.env.SPLIT_TEST_TRACK_PDF_DOWNLOAD_ACTIVE === 'true',
-      variants: [
         {
-          id: 'enabled',
+          id: 'collect-metrics-and-enable-caching',
           rolloutPercent: parseInt(
-            process.env.SPLIT_TEST_TRACK_PDF_DOWNLOAD_ENABLE_ROLLOUT_PERCENT ||
+            process.env
+              .SPLIT_TEST_PDF_CACHING_BETA_COLLECT_METRICS_AND_ENABLE_CACHING_ROLLOUT_PERCENT ||
+              '0',
+            10
+          ),
+        },
+        {
+          id: 'enable-caching-only',
+          rolloutPercent: parseInt(
+            process.env
+              .SPLIT_TEST_PDF_CACHING_BETA_ENABLE_CACHING_ONLY_ROLLOUT_PERCENT ||
               '0',
             10
           ),
