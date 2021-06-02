@@ -78,6 +78,7 @@ function submitCompileMetrics(metrics) {
 function submitPDFBandwidth(metrics) {
   const metricsFlat = {}
   Object.entries(metrics).forEach(([section, items]) => {
+    if (!items) return
     Object.entries(items).forEach(([key, value]) => {
       metricsFlat[section + '_' + key] = value
     })
