@@ -2,11 +2,16 @@ import App from '../../../base'
 import { react2angular } from 'react2angular'
 
 import ShareProjectModal from '../components/share-project-modal'
+import { rootContext } from '../../../shared/context/root-context'
 import { listProjectInvites, listProjectMembers } from '../utils/api'
 
 App.component(
   'shareProjectModal',
-  react2angular(ShareProjectModal, undefined, ['ide'])
+  react2angular(
+    rootContext.use(ShareProjectModal),
+    Object.keys(ShareProjectModal.propTypes),
+    ['ide']
+  )
 )
 
 export default App.controller(

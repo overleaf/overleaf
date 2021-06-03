@@ -16,11 +16,13 @@ export function EditorProviders({
     on: sinon.stub(),
     removeListener: sinon.stub(),
   },
+  isRestrictedTokenMember = false,
   children,
 }) {
   window.user = user || window.user
   window.gitBridgePublicBaseUrl = 'git.overleaf.test'
   window.project_id = projectId != null ? projectId : window.project_id
+  window.isRestrictedTokenMember = isRestrictedTokenMember
 
   window._ide = {
     $scope: {
@@ -47,8 +49,13 @@ export function EditorProviders({
   )
 }
 
-export function renderWithEditorContext(children, props) {
-  return render(<EditorProviders {...props}>{children}</EditorProviders>)
+export function renderWithEditorContext(component, contextProps) {
+  return render(component, {
+    // eslint-disable-next-line react/display-name
+    wrapper: ({ children }) => (
+      <EditorProviders {...contextProps}>{children}</EditorProviders>
+    ),
+  })
 }
 
 export function ChatProviders({ children, ...props }) {
@@ -59,8 +66,13 @@ export function ChatProviders({ children, ...props }) {
   )
 }
 
-export function renderWithChatContext(children, props) {
-  return render(<ChatProviders {...props}>{children}</ChatProviders>)
+export function renderWithChatContext(component, props) {
+  return render(component, {
+    // eslint-disable-next-line react/display-name
+    wrapper: ({ children }) => (
+      <ChatProviders {...props}>{children}</ChatProviders>
+    ),
+  })
 }
 
 export function cleanUpContext() {

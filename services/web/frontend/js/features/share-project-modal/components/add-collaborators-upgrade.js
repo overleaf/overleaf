@@ -1,12 +1,19 @@
 import React, { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
+import PropTypes from 'prop-types'
+
+import { useApplicationContext } from '../../../shared/context/application-context'
+
 import Icon from '../../../shared/components/icon'
 import { upgradePlan } from '../../../main/account-upgrade'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 
 export default function AddCollaboratorsUpgrade() {
   const { t } = useTranslation()
+  const { user } = useApplicationContext({
+    user: PropTypes.shape({ allowedFreeTrial: PropTypes.boolean }),
+  })
 
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
 
@@ -53,7 +60,7 @@ export default function AddCollaboratorsUpgrade() {
       </ul>
 
       <p className="text-center row-spaced-thin">
-        {window.user.allowedFreeTrial ? (
+        {user.allowedFreeTrial ? (
           <StartFreeTrialButton
             buttonStyle="success"
             setStartedFreeTrial={setStartedFreeTrial}

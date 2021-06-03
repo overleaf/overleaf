@@ -6,6 +6,7 @@ import Icon from '../../../shared/components/icon'
 import AccessibleModal from '../../../shared/components/accessible-modal'
 import PropTypes from 'prop-types'
 import { ReadOnlyTokenLink } from './link-sharing'
+import { useEditorContext } from '../../../shared/context/editor-context'
 
 export default function ShareProjectModalContent({
   show,
@@ -14,6 +15,10 @@ export default function ShareProjectModalContent({
   inFlight,
   error,
 }) {
+  const { isRestrictedTokenMember } = useEditorContext({
+    isRestrictedTokenMember: PropTypes.bool,
+  })
+
   return (
     <AccessibleModal show={show} onHide={cancel} animation={animation}>
       <Modal.Header closeButton>
@@ -24,11 +29,7 @@ export default function ShareProjectModalContent({
 
       <Modal.Body className="modal-body-share">
         <Grid fluid>
-          {window.isRestrictedTokenMember ? (
-            <ReadOnlyTokenLink />
-          ) : (
-            <ShareModalBody />
-          )}
+          {isRestrictedTokenMember ? <ReadOnlyTokenLink /> : <ShareModalBody />}
         </Grid>
       </Modal.Body>
 
