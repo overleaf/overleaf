@@ -901,7 +901,10 @@ const ProjectController = {
                 user.betaProgram || user.alphaProgram
               ),
               showNewBinaryFileUI: shouldDisplayFeature('new_binary_file'),
-              showSymbolPalette: shouldDisplayFeature('symbol_palette'),
+              showSymbolPalette: shouldDisplayFeature(
+                'symbol_palette',
+                user.alphaProgram
+              ),
               trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
               enablePdfCaching: partOfPdfCachingRollout('enable-caching'),
             })
