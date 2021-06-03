@@ -4,8 +4,11 @@ import PropTypes from 'prop-types'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
+import { useFileTreeMainContext } from '../../contexts/file-tree-main'
 
 function FileTreeItemName({ name, isSelected, setIsDraggable }) {
+  const { hasWritePermissions } = useFileTreeMainContext()
+
   const {
     isRenaming,
     startRenaming,
@@ -17,8 +20,8 @@ function FileTreeItemName({ name, isSelected, setIsDraggable }) {
   const isRenamingEntity = isRenaming && isSelected && !error
 
   useEffect(() => {
-    setIsDraggable(!isRenamingEntity)
-  }, [setIsDraggable, isRenamingEntity])
+    setIsDraggable(hasWritePermissions && !isRenamingEntity)
+  }, [setIsDraggable, hasWritePermissions, isRenamingEntity])
 
   if (isRenamingEntity) {
     return (
