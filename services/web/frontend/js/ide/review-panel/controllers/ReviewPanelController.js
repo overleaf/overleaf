@@ -618,14 +618,14 @@ export default App.controller(
 
     $scope.acceptChanges = function (change_ids) {
       _doAcceptChanges(change_ids)
-      return eventTracking.sendMB('rp-changes-accepted', {
+      eventTracking.sendMB('rp-changes-accepted', {
         view: $scope.ui.reviewPanelOpen ? $scope.reviewPanel.subView : 'mini',
       })
     }
 
     $scope.rejectChanges = function (change_ids) {
       _doRejectChanges(change_ids)
-      return eventTracking.sendMB('rp-changes-rejected', {
+      eventTracking.sendMB('rp-changes-rejected', {
         view: $scope.ui.reviewPanelOpen ? $scope.reviewPanel.subView : 'mini',
       })
     }
@@ -643,7 +643,7 @@ export default App.controller(
 
     const bulkAccept = function () {
       _doAcceptChanges($scope.reviewPanel.selectedEntryIds.slice())
-      return eventTracking.sendMB('rp-bulk-accept', {
+      eventTracking.sendMB('rp-bulk-accept', {
         view: $scope.ui.reviewPanelOpen ? $scope.reviewPanel.subView : 'mini',
         nEntries: $scope.reviewPanel.nVisibleSelectedChanges,
       })
@@ -651,7 +651,7 @@ export default App.controller(
 
     const bulkReject = function () {
       _doRejectChanges($scope.reviewPanel.selectedEntryIds.slice())
-      return eventTracking.sendMB('rp-bulk-reject', {
+      eventTracking.sendMB('rp-bulk-reject', {
         view: $scope.ui.reviewPanelOpen ? $scope.reviewPanel.subView : 'mini',
         nEntries: $scope.reviewPanel.nVisibleSelectedChanges,
       })
@@ -740,7 +740,7 @@ export default App.controller(
         )
       $scope.$broadcast('editor:clearSelection')
       $timeout(() => $scope.$broadcast('review-panel:layout'))
-      return eventTracking.sendMB('rp-new-comment', { size: content.length })
+      eventTracking.sendMB('rp-new-comment', { size: content.length })
     }
 
     $scope.cancelNewComment = entry =>
@@ -777,7 +777,7 @@ export default App.controller(
       entry.replyContent = ''
       entry.replying = false
       $timeout(() => $scope.$broadcast('review-panel:layout'))
-      return eventTracking.sendMB('rp-comment-reply', trackingMetadata)
+      eventTracking.sendMB('rp-comment-reply', trackingMetadata)
     }
 
     $scope.cancelReply = function (entry) {
@@ -793,7 +793,7 @@ export default App.controller(
         { _csrf: window.csrfToken }
       )
       _onCommentResolved(entry.thread_id, ide.$scope.user)
-      return eventTracking.sendMB('rp-comment-resolve', {
+      eventTracking.sendMB('rp-comment-resolve', {
         view: $scope.ui.reviewPanelOpen ? $scope.reviewPanel.subView : 'mini',
       })
     }
@@ -803,7 +803,7 @@ export default App.controller(
       $http.post(`/project/${$scope.project_id}/thread/${thread_id}/reopen`, {
         _csrf: window.csrfToken,
       })
-      return eventTracking.sendMB('rp-comment-reopen')
+      eventTracking.sendMB('rp-comment-reopen')
     }
 
     var _onCommentResolved = function (thread_id, user) {
@@ -867,7 +867,7 @@ export default App.controller(
           'X-CSRF-Token': window.csrfToken,
         },
       })
-      return eventTracking.sendMB('rp-comment-delete')
+      eventTracking.sendMB('rp-comment-delete')
     }
 
     $scope.saveEdit = function (thread_id, comment) {
@@ -895,7 +895,7 @@ export default App.controller(
 
     $scope.setSubView = function (subView) {
       $scope.reviewPanel.subView = subView
-      return eventTracking.sendMB('rp-subview-change', { subView })
+      eventTracking.sendMB('rp-subview-change', { subView })
     }
 
     $scope.gotoEntry = (doc_id, entry) =>

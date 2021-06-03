@@ -93,26 +93,28 @@ App.factory('eventTracking', function ($http, localStorage) {
       if (segmentation == null) {
         segmentation = {}
       }
-      return $http({
-        url: `/event/${key}`,
+      fetch(`/event/${key}`, {
         method: 'POST',
-        data: segmentation,
+        body: JSON.stringify(segmentation),
+        keepalive: true,
         headers: {
           'X-CSRF-Token': window.csrfToken,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
       })
     },
 
     sendMBSampled(key, segmentation, rate = 0.01) {
       if (Math.random() < rate) {
-        return this.sendMB(key, segmentation)
+        this.sendMB(key, segmentation)
       }
     },
 
     sendMBOnce(key, segmentation) {
       if (!_eventInCache(key)) {
         _addEventToCache(key)
-        return this.sendMB(key, segmentation)
+        this.sendMB(key, segmentation)
       }
     },
 

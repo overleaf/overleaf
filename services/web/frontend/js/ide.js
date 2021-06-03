@@ -132,7 +132,7 @@ App.controller(
         return
       }
       $scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
-      return eventTracking.sendMB('rp-toggle-panel', {
+      eventTracking.sendMB('rp-toggle-panel', {
         value: $scope.ui.reviewPanelOpen,
       })
     }
@@ -153,24 +153,25 @@ App.controller(
         $scope.$broadcast('layout:flat-screen:toggle')
       }
       if (newView != null && newView !== 'editor' && newView !== 'pdf') {
-        return eventTracking.sendMBOnce(`ide-open-view-${newView}-once`)
+        eventTracking.sendMBOnce(`ide-open-view-${newView}-once`)
       }
     })
 
     $scope.$watch('ui.chatOpen', function (isOpen) {
       if (isOpen) {
-        return eventTracking.sendMBOnce('ide-open-chat-once')
+        eventTracking.sendMBOnce('ide-open-chat-once')
       }
     })
 
     $scope.$watch('ui.leftMenuShown', function (isOpen) {
       if (isOpen) {
-        return eventTracking.sendMBOnce('ide-open-left-menu-once')
+        eventTracking.sendMBOnce('ide-open-left-menu-once')
       }
     })
 
-    $scope.trackHover = feature =>
+    $scope.trackHover = feature => {
       eventTracking.sendMBOnce(`ide-hover-${feature}-once`)
+    }
     // End of tracking code.
 
     window._ide = ide

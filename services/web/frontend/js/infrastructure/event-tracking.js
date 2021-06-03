@@ -7,7 +7,7 @@ export function send(category, action, label, value) {
 }
 
 export function sendMB(key, body = {}) {
-  postJSON(`/event/${key}`, { body }).catch(() => {
+  postJSON(`/event/${key}`, { body, keepalive: true }).catch(() => {
     // ignore errors
   })
 }
