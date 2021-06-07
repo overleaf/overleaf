@@ -887,10 +887,6 @@ const ProjectController = {
                 'new_navigation_ui',
                 user.alphaProgram
               ),
-              showReactDropboxModal: shouldDisplayFeature(
-                'new_dropbox_modal_ui',
-                user.betaProgram
-              ),
               showNewBinaryFileUI: shouldDisplayFeature('new_binary_file'),
               showSymbolPalette: shouldDisplayFeature(
                 'symbol_palette',
