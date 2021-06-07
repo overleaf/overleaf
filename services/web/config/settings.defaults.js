@@ -228,7 +228,6 @@ module.exports = {
       pubUrl: `http://${process.env.DOCSTORE_HOST || 'localhost'}:3016`,
     },
     chat: {
-      url: `http://${process.env.CHAT_HOST || 'localhost'}:3010`,
       internal_url: `http://${process.env.CHAT_HOST || 'localhost'}:3010`,
     },
     blog: {

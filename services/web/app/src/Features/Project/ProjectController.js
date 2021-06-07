@@ -858,7 +858,6 @@ const ProjectController = {
                 overallTheme: user.ace.overallTheme,
               },
               privilegeLevel,
-              chatUrl: Settings.apis.chat.url,
               anonymous,
               anonymousAccessToken: anonymous ? anonRequestToken : null,
               isTokenMember,
