@@ -891,10 +891,6 @@ const ProjectController = {
                 'new_dropbox_modal_ui',
                 user.betaProgram
               ),
-              showReactGithubSync: shouldDisplayFeature(
-                'new_github_sync_ui',
-                user.betaProgram || user.alphaProgram
-              ),
               showNewBinaryFileUI: shouldDisplayFeature('new_binary_file'),
               showSymbolPalette: shouldDisplayFeature(
                 'symbol_palette',
