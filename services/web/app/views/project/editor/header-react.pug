@@ -1,10 +1,9 @@
-div(ng-controller=showReactShareModal ? 'ReactShareProjectModalController': 'ShareController')
-	if showReactShareModal
-		share-project-modal(
-			handle-hide="handleHide"
-			show="show"
-			is-admin="isAdmin"
-		)
+div(ng-controller="ReactShareProjectModalController")
+	share-project-modal(
+		handle-hide="handleHide"
+		show="show"
+		is-admin="isAdmin"
+	)
 		
 	div(ng-controller="EditorNavigationToolbarController")
 		editor-navigation-toolbar-root(

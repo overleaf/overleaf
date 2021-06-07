@@ -8,7 +8,6 @@ import 'libs/ng-context-menu-0.1.4'
 import 'libs/jquery.storage'
 import 'libs/angular-cookie'
 import 'libs/passfield'
-import 'libs/ng-tags-input-3.0.0'
 import 'libs/select/select'
 
 // CSS

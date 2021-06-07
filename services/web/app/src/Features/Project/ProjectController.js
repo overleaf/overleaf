@@ -887,10 +887,6 @@ const ProjectController = {
                 'new_navigation_ui',
                 user.alphaProgram
               ),
-              showReactShareModal: shouldDisplayFeature(
-                'new_share_modal_ui',
-                true
-              ),
               showReactDropboxModal: shouldDisplayFeature(
                 'new_dropbox_modal_ui',
                 user.betaProgram

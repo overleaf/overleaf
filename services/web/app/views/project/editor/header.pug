@@ -119,17 +119,16 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 		a.btn.btn-full-height(
 			href
 			ng-click="openShareProjectModal(permissions.admin);"
-			ng-controller=(showReactShareModal ? 'ReactShareProjectModalController': 'ShareController')
+			ng-controller="ReactShareProjectModalController"
 		)
 			i.fa.fa-fw.fa-group
 			p.toolbar-label #{translate("share")}
 
-			if showReactShareModal
-				share-project-modal(
-					handle-hide="handleHide"
-					show="show"
-					is-admin="isAdmin"
-				)
+			share-project-modal(
+				handle-hide="handleHide"
+				show="show"
+				is-admin="isAdmin"
+			)
 		!= moduleIncludes('publish:button', locals)
 
 		if !isRestrictedTokenMember

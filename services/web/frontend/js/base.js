@@ -35,7 +35,6 @@ const App = angular
     'ErrorCatcher',
     'localStorage',
     'sessionStorage',
-    'ngTagsInput',
     'ui.select',
   ])
   .config(function ($qProvider, $httpProvider, uiSelectConfig) {
