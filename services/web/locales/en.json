@@ -1,4 +1,6 @@
 {
+  "chat_error": "Could not load chat messages, please try again.",
+  "reconnect": "Try again",
   "logs_pane_info_message": "We are testing a new logs pane",
   "logs_pane_info_message_popup": "We are testing a new logs pane. Click here to give feedback.",
   "github_symlink_error": "Your Github repository contains symbolic link files, which are not currently supported by Overleaf. Please remove these and try again.",

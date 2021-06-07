@@ -72,6 +72,9 @@ export function chatReducer(state, action) {
         unreadMessageCount: 0,
       }
 
+    case 'CLEAR':
+      return { ...initialState }
+
     case 'ERROR':
       return {
         ...state,
@@ -108,6 +111,8 @@ ChatContext.Provider.propTypes = {
     loadMoreMessages: PropTypes.func.isRequired,
     sendMessage: PropTypes.func.isRequired,
     markMessagesAsRead: PropTypes.func.isRequired,
+    reset: PropTypes.func.isRequired,
+    error: PropTypes.object,
   }).isRequired,
 }
 
@@ -129,7 +134,7 @@ export function ChatProvider({ children }) {
 
   const [state, dispatch] = useReducer(chatReducer, initialState)
 
-  const { loadInitialMessages, loadMoreMessages } = useMemo(() => {
+  const { loadInitialMessages, loadMoreMessages, reset } = useMemo(() => {
     function fetchMessages() {
       if (state.atEnd) return
 
@@ -142,12 +147,19 @@ export function ChatProvider({ children }) {
       const queryString = new URLSearchParams(query)
       const url = `/project/${projectId}/messages?${queryString.toString()}`
 
-      getJSON(url).then((messages = []) => {
-        dispatch({
-          type: 'FETCH_MESSAGES_SUCCESS',
-          messages: messages.reverse(),
+      getJSON(url)
+        .then((messages = []) => {
+          dispatch({
+            type: 'FETCH_MESSAGES_SUCCESS',
+            messages: messages.reverse(),
+          })
         })
-      })
+        .catch(error => {
+          dispatch({
+            type: 'ERROR',
+            error: error,
+          })
+        })
     }
 
     function loadInitialMessages() {
@@ -162,9 +174,15 @@ export function ChatProvider({ children }) {
       fetchMessages()
     }
 
+    function reset() {
+      dispatch({ type: 'CLEAR' })
+      fetchMessages()
+    }
+
     return {
       loadInitialMessages,
       loadMoreMessages,
+      reset,
     }
   }, [projectId, state.atEnd, state.initialMessagesLoaded, state.lastTimestamp])
 
@@ -181,6 +199,11 @@ export function ChatProvider({ children }) {
       const url = `/project/${projectId}/messages`
       postJSON(url, {
         body: { content },
+      }).catch(error => {
+        dispatch({
+          type: 'ERROR',
+          error: error,
+        })
       })
     },
     [projectId, user]
@@ -249,8 +272,10 @@ export function ChatProvider({ children }) {
     unreadMessageCount: state.unreadMessageCount,
     loadInitialMessages,
     loadMoreMessages,
+    reset,
     sendMessage,
     markMessagesAsRead,
+    error: state.error,
   }
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>

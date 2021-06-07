@@ -1,6 +1,10 @@
 import React from 'react'
 import { expect } from 'chai'
-import { screen, waitForElementToBeRemoved } from '@testing-library/react'
+import {
+  fireEvent,
+  screen,
+  waitForElementToBeRemoved,
+} from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 
 import ChatPane from '../../../../../frontend/js/features/chat/components/chat-pane'
@@ -50,6 +54,28 @@ describe('<ChatPane />', function () {
 
     await screen.findByText('a message')
     await screen.findByText('another message')
+  })
+
+  it('provides error message with reload button on FetchError', async function () {
+    fetchMock.get(/messages/, 500)
+
+    renderWithChatContext(<ChatPane />, { user })
+
+    // should have hit a FetchError and will prompt user to reconnect
+    await screen.findByText('Try again')
+
+    // bring chat back up
+    fetchMock.reset()
+    fetchMock.get(/messages/, [])
+
+    const reconnectButton = screen.getByRole('button', {
+      name: 'Try again',
+    })
+    expect(reconnectButton).to.exist
+
+    // should now reconnect with placeholder message
+    fireEvent.click(reconnectButton)
+    await screen.findByText('Send your first message to your collaborators')
   })
 
   it('a loading spinner is rendered while the messages are loading, then disappears', async function () {
