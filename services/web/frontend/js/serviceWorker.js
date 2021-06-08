@@ -1,7 +1,8 @@
 import { v4 as uuid } from 'uuid'
 const COMPILE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/compile$/
 const PDF_JS_CHUNK_SIZE = 128 * 1024
-
+const MAX_SUBREQUEST_COUNT = 8
+const MAX_SUBREQUEST_BYTES = 4 * PDF_JS_CHUNK_SIZE
 const PDF_FILES = new Map()
 
 const METRICS = {
@@ -42,6 +43,15 @@ function trackChunkVerify({ sizeDiffers, mismatch, success }) {
     METRICS.chunkVerifySuccess |= 0
     METRICS.chunkVerifySuccess += 1
   }
+}
+
+/**
+ * @param {Array} chunks
+ */
+function countBytes(chunks) {
+  return chunks.reduce((totalBytes, chunk) => {
+    return totalBytes + (chunk.end - chunk.start)
+  }, 0)
 }
 
 /**
@@ -140,9 +150,26 @@ function processPdfRequest(
     .map(i => parseInt(i, 10))
   const end = last + 1
 
+  // Check that handling the range request won't trigger excessive subrequests,
+  // (to avoid unwanted latency compared to the original request).
   const chunks = getMatchingChunks(file.ranges, start, end)
-
   const dynamicChunks = getInterleavingDynamicChunks(chunks, start, end)
+  const chunksSize = countBytes(chunks)
+
+  if (chunks.length + dynamicChunks.length > MAX_SUBREQUEST_COUNT) {
+    // fall back to the original range request when splitting the range creates
+    // too many subrequests.
+    return
+  }
+  if (
+    chunksSize > MAX_SUBREQUEST_BYTES &&
+    !(dynamicChunks.length === 0 && chunks.length === 1)
+  ) {
+    // fall back to the original range request when a very large amount of
+    // object data would be requested, unless it is the only object in the
+    // request.
+    return
+  }
 
   // URL prefix is /project/:id/user/:id/build/... or /project/:id/build/...
   //  for authenticated and unauthenticated users respectively.
