@@ -32,6 +32,8 @@ module.exports = {
       url: 'http://localhost:6034',
       subdomain: 'test',
       apiKey: 'private-nonsense',
+      webhookUser: 'recurly',
+      webhookPass: 'webhook',
     },
   },
 

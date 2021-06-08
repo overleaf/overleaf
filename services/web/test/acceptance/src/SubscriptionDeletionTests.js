@@ -4,12 +4,19 @@ const request = require('./helpers/request')
 const User = require('./helpers/User')
 const RecurlySubscription = require('./helpers/RecurlySubscription')
 const SubscriptionUpdater = require('../../../app/src/Features/Subscription/SubscriptionUpdater')
+const Settings = require('settings-sharelatex')
 
 describe('Subscriptions', function () {
   describe('deletion', function () {
     beforeEach(function (done) {
       this.adminUser = new User()
       this.memberUser = new User()
+      this.auth = {
+        user: Settings.apis.recurly.webhookUser,
+        pass: Settings.apis.recurly.webhookPass,
+        sendImmediately: true,
+      }
+
       async.series(
         [
           cb => this.adminUser.ensureUserExists(cb),
@@ -33,11 +40,24 @@ describe('Subscriptions', function () {
       )
     })
 
-    it('deletes via Recurly callback', function (done) {
+    it('should not allow unauthorized access to the Recurly callback', function (done) {
       const url = '/user/subscription/callback'
       const body = this.recurlySubscription.buildCallbackXml()
 
       request.post({ url, body }, (error, { statusCode }) => {
+        if (error) {
+          return done(error)
+        }
+        expect(statusCode).to.equal(401)
+        done()
+      })
+    })
+
+    it('deletes via Recurly callback', function (done) {
+      const url = '/user/subscription/callback'
+      const body = this.recurlySubscription.buildCallbackXml()
+
+      request.post({ url, body, auth: this.auth }, (error, { statusCode }) => {
         if (error) {
           return done(error)
         }
@@ -50,7 +70,7 @@ describe('Subscriptions', function () {
       const url = '/user/subscription/callback'
       const body = this.recurlySubscription.buildCallbackXml()
 
-      request.post({ url, body }, (error, { statusCode }) => {
+      request.post({ url, body, auth: this.auth }, (error, { statusCode }) => {
         if (error) {
           return done(error)
         }
@@ -75,13 +95,16 @@ describe('Subscriptions', function () {
           }
 
           // try deleting the subscription
-          request.post({ url, body }, (error, { statusCode }) => {
-            if (error) {
-              return done(error)
+          request.post(
+            { url, body, auth: this.auth },
+            (error, { statusCode }) => {
+              if (error) {
+                return done(error)
+              }
+              expect(statusCode).to.equal(200)
+              this.subscription.expectDeleted({ ip: '127.0.0.1' }, done)
             }
-            expect(statusCode).to.equal(200)
-            this.subscription.expectDeleted({ ip: '127.0.0.1' }, done)
-          })
+          )
         }
       )
     })

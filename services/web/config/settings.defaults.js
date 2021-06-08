@@ -256,6 +256,8 @@ module.exports = {
       apiVersion: process.env.RECURLY_API_VERSION,
       subdomain: process.env.RECURLY_SUBDOMAIN || '',
       publicKey: process.env.RECURLY_PUBLIC_KEY || '',
+      webhookUser: process.env.RECURLY_WEBHOOK_USER,
+      webhookPass: process.env.RECURLY_WEBHOOK_PASS,
     },
     geoIpLookup: {
       url: `http://${

@@ -73,6 +73,9 @@ module.exports = {
     // recurly callback
     publicApiRouter.post(
       '/user/subscription/callback',
+      AuthenticationController.requireBasicAuth({
+        [Settings.apis.recurly.webhookUser]: Settings.apis.recurly.webhookPass,
+      }),
       SubscriptionController.recurlyNotificationParser,
       SubscriptionController.recurlyCallback
     )
