@@ -116,24 +116,24 @@ describe('DocArchiveManager', function () {
       deleteObject: sinon.stub().resolves()
     }
 
-    const getNNonArchivedProjectDocs = sinon.stub()
-    getNNonArchivedProjectDocs
+    const getNonArchivedProjectDocs = sinon.stub()
+    getNonArchivedProjectDocs
       .onCall(0)
       .resolves(mongoDocs.filter((doc) => !doc.inS3))
-    getNNonArchivedProjectDocs.onCall(1).resolves([])
+    getNonArchivedProjectDocs.onCall(1).resolves([])
 
-    const getNArchivedProjectDocs = sinon.stub()
-    getNArchivedProjectDocs.onCall(0).resolves(archivedDocs)
-    getNArchivedProjectDocs.onCall(1).resolves([])
+    const getArchivedProjectDocs = sinon.stub()
+    getArchivedProjectDocs.onCall(0).resolves(archivedDocs)
+    getArchivedProjectDocs.onCall(1).resolves([])
 
     MongoManager = {
       promises: {
         markDocAsArchived: sinon.stub().resolves(),
         upsertIntoDocCollection: sinon.stub().resolves(),
         getProjectsDocs: sinon.stub().resolves(mongoDocs),
-        getNNonDeletedArchivedProjectDocs: getNArchivedProjectDocs,
-        getNNonArchivedProjectDocs,
-        getNArchivedProjectDocs,
+        getNonDeletedArchivedProjectDocs: getArchivedProjectDocs,
+        getNonArchivedProjectDocs,
+        getArchivedProjectDocs,
         findDoc: sinon.stub().rejects(new Errors.NotFoundError()),
         destroyDoc: sinon.stub().resolves()
       }

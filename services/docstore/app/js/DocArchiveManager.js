@@ -36,7 +36,7 @@ module.exports = {
 
 async function archiveAllDocs(projectId) {
   while (true) {
-    const docs = await MongoManager.getNNonArchivedProjectDocs(
+    const docs = await MongoManager.getNonArchivedProjectDocs(
       projectId,
       ARCHIVE_BATCH_SIZE
     )
@@ -106,12 +106,12 @@ async function unArchiveAllDocs(projectId) {
   while (true) {
     let docs
     if (settings.docstore.keepSoftDeletedDocsArchived) {
-      docs = await MongoManager.getNNonDeletedArchivedProjectDocs(
+      docs = await MongoManager.getNonDeletedArchivedProjectDocs(
         projectId,
         UN_ARCHIVE_BATCH_SIZE
       )
     } else {
-      docs = await MongoManager.getNArchivedProjectDocs(
+      docs = await MongoManager.getArchivedProjectDocs(
         projectId,
         UN_ARCHIVE_BATCH_SIZE
       )

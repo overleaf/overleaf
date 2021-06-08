@@ -64,29 +64,33 @@ module.exports = MongoManager = {
     db.docs.find(query, queryOptions).toArray(callback)
   },
 
-  getNArchivedProjectDocs(project_id, n, callback) {
+  getArchivedProjectDocs(project_id, maxResults, callback) {
     const query = {
       project_id: ObjectId(project_id.toString()),
       inS3: true
     }
-    db.docs.find(query, { projection: { _id: 1 }, limit: n }).toArray(callback)
+    db.docs
+      .find(query, { projection: { _id: 1 }, limit: maxResults })
+      .toArray(callback)
   },
 
-  getNNonArchivedProjectDocs(project_id, n, callback) {
+  getNonArchivedProjectDocs(project_id, maxResults, callback) {
     const query = {
       project_id: ObjectId(project_id.toString()),
       inS3: { $ne: true }
     }
-    db.docs.find(query, { limit: n }).toArray(callback)
+    db.docs.find(query, { limit: maxResults }).toArray(callback)
   },
 
-  getNNonDeletedArchivedProjectDocs(project_id, n, callback) {
+  getNonDeletedArchivedProjectDocs(project_id, maxResults, callback) {
     const query = {
       project_id: ObjectId(project_id.toString()),
       deleted: { $ne: true },
       inS3: true
     }
-    db.docs.find(query, { projection: { _id: 1 }, limit: n }).toArray(callback)
+    db.docs
+      .find(query, { projection: { _id: 1 }, limit: maxResults })
+      .toArray(callback)
   },
 
   upsertIntoDocCollection(project_id, doc_id, updates, callback) {
