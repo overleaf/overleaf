@@ -59,12 +59,8 @@ function sentryReporter() {
 
 function nullReporter() {
   return Promise.resolve({
-    captureException: error => {
-      console.error(error)
-    },
-    captureMessage: error => {
-      console.error(error)
-    },
+    captureException: console.error,
+    captureMessage: console.error,
   })
 }
 

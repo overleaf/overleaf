@@ -1,4 +1,6 @@
 import { v4 as uuid } from 'uuid'
+const OError = require('@overleaf/o-error')
+
 const COMPILE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/compile$/
 const PDF_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/.*\/output.pdf$/
 const PDF_JS_CHUNK_SIZE = 128 * 1024
@@ -253,10 +255,8 @@ function processPdfRequest(
         fetch(url, init)
           .then(response => {
             if (!(response.status === 206 || response.status === 200)) {
-              throw new Error(
-                `could not fetch ${url} ${JSON.stringify(init)}: ${
-                  response.status
-                }`
+              throw new OError(
+                'non successful response status: ' + response.status
               )
             }
             const blobFetchDate = getServerTime(response)
@@ -282,6 +282,9 @@ function processPdfRequest(
               chunk,
               data: backFillObjectContext(chunk, arrayBuffer),
             }
+          })
+          .catch(error => {
+            throw OError.tag(error, 'cannot fetch chunk', { url })
           })
       )
     )
@@ -343,7 +346,7 @@ function processPdfRequest(
         })
       })
       .catch(error => {
-        console.error('Could not fetch partial pdf chunks', error)
+        reportError(event, OError.tag(error, 'failed to compose pdf response'))
         return fetch(event.request)
       })
   )
@@ -469,8 +472,19 @@ function getInterleavingDynamicChunks(chunks, start, end) {
   return dynamicChunks
 }
 
+/**
+ * @param {FetchEvent} event
+ */
+function onFetchWithErrorHandling(event) {
+  try {
+    onFetch(event)
+  } catch (error) {
+    reportError(event, OError.tag(error, 'low level error in onFetch'))
+  }
+}
+
 // listen to all network requests
-self.addEventListener('fetch', onFetch)
+self.addEventListener('fetch', onFetchWithErrorHandling)
 
 // complete setup ASAP
 self.addEventListener('install', event => {
@@ -479,3 +493,30 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim())
 })
+
+/**
+ *
+ * @param {FetchEvent} event
+ * @param {Error} error
+ */
+function reportError(event, error) {
+  self.clients
+    .get(event.clientId)
+    .then(client => {
+      if (!client) {
+        // The client disconnected.
+        return
+      }
+      client.postMessage(
+        JSON.stringify({
+          extra: { url: event.request.url, info: OError.getFullInfo(error) },
+          error: {
+            name: error.name,
+            message: error.message,
+            stack: OError.getFullStack(error),
+          },
+        })
+      )
+    })
+    .catch(() => {})
+}
