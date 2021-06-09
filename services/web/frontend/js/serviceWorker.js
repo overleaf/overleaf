@@ -11,30 +11,56 @@ const MAX_SUBREQUEST_BYTES = 4 * PDF_JS_CHUNK_SIZE
 // that compile), requests for that pdf file can use the hashes in the compile
 // response, which are stored in the context.
 
-const pdfContext = new Map()
+const CLIENT_CONTEXT = new Map()
 
-function registerPdfContext(clientId, path, context) {
-  let clientMap = pdfContext.get(clientId)
-  if (!clientMap) {
-    clientMap = new Map()
-    pdfContext.set(clientId, clientMap)
+/**
+ * @param {string} clientId
+ */
+function getClientContext(clientId) {
+  let clientContext = CLIENT_CONTEXT.get(clientId)
+  if (!clientContext) {
+    const pdfs = new Map()
+    const metrics = {
+      id: uuid(),
+      epoch: Date.now(),
+      cachedBytes: 0,
+      fetchedBytes: 0,
+      requestedBytes: 0,
+    }
+    clientContext = { pdfs, metrics }
+    CLIENT_CONTEXT.set(clientId, clientContext)
     // clean up old client maps
     expirePdfContexts()
   }
-  // we only need to keep the last 3 contexts
-  for (const key of clientMap.keys()) {
-    if (clientMap.size < 3) {
-      break
-    }
-    clientMap.delete(key) // the map keys are returned in insertion order, so we are deleting the oldest entry here
-  }
-  clientMap.set(path, context)
+  return clientContext
 }
 
+/**
+ * @param {string} clientId
+ * @param {string} path
+ * @param {Object} pdfContext
+ */
+function registerPdfContext(clientId, path, pdfContext) {
+  const clientContext = getClientContext(clientId)
+  const { pdfs, metrics } = clientContext
+  pdfContext.metrics = metrics
+  // we only need to keep the last 3 contexts
+  for (const key of pdfs.keys()) {
+    if (pdfs.size < 3) {
+      break
+    }
+    pdfs.delete(key) // the map keys are returned in insertion order, so we are deleting the oldest entry here
+  }
+  pdfs.set(path, pdfContext)
+}
+
+/**
+ * @param {string} clientId
+ * @param {string} path
+ */
 function getPdfContext(clientId, path) {
-  const clientMap = pdfContext.get(clientId)
-  const context = clientMap && clientMap.get(path)
-  return context
+  const { pdfs } = getClientContext(clientId)
+  return pdfs.get(path)
 }
 
 function expirePdfContexts() {
@@ -44,51 +70,45 @@ function expirePdfContexts() {
     clientList.forEach(client => {
       currentClientSet.add(client.id)
     })
-    pdfContext.forEach((map, clientId) => {
+    CLIENT_CONTEXT.forEach((map, clientId) => {
       if (!currentClientSet.has(clientId)) {
-        pdfContext.delete(clientId)
+        CLIENT_CONTEXT.delete(clientId)
       }
     })
   })
 }
 
-const METRICS = {
-  id: uuid(),
-  epoch: Date.now(),
-  cachedBytes: 0,
-  fetchedBytes: 0,
-  requestedBytes: 0,
-}
-
 /**
  *
+ * @param {Object} metrics
  * @param {number} size
  * @param {number} cachedBytes
  * @param {number} fetchedBytes
  */
-function trackStats({ size, cachedBytes, fetchedBytes }) {
-  METRICS.cachedBytes += cachedBytes
-  METRICS.fetchedBytes += fetchedBytes
-  METRICS.requestedBytes += size
+function trackDownloadStats(metrics, { size, cachedBytes, fetchedBytes }) {
+  metrics.cachedBytes += cachedBytes
+  metrics.fetchedBytes += fetchedBytes
+  metrics.requestedBytes += size
 }
 
 /**
+ * @param {Object} metrics
  * @param {boolean} sizeDiffers
  * @param {boolean} mismatch
  * @param {boolean} success
  */
-function trackChunkVerify({ sizeDiffers, mismatch, success }) {
+function trackChunkVerify(metrics, { sizeDiffers, mismatch, success }) {
   if (sizeDiffers) {
-    METRICS.chunkVerifySizeDiffers |= 0
-    METRICS.chunkVerifySizeDiffers += 1
+    metrics.chunkVerifySizeDiffers |= 0
+    metrics.chunkVerifySizeDiffers += 1
   }
   if (mismatch) {
-    METRICS.chunkVerifyMismatch |= 0
-    METRICS.chunkVerifyMismatch += 1
+    metrics.chunkVerifyMismatch |= 0
+    metrics.chunkVerifyMismatch += 1
   }
   if (success) {
-    METRICS.chunkVerifySuccess |= 0
-    METRICS.chunkVerifySuccess += 1
+    metrics.chunkVerifySuccess |= 0
+    metrics.chunkVerifySuccess += 1
   }
 }
 
@@ -122,6 +142,9 @@ function onFetch(event) {
   // other request, ignore
 }
 
+/**
+ * @param {FetchEvent} event
+ */
 function processCompileRequest(event) {
   event.respondWith(
     fetch(event.request).then(response => {
@@ -129,8 +152,11 @@ function processCompileRequest(event) {
 
       return response.json().then(body => {
         handleCompileResponse(event, response, body)
+
         // Send the service workers metrics to the frontend.
-        body.serviceWorkerMetrics = METRICS
+        const { metrics } = getClientContext(event.clientId)
+        body.serviceWorkerMetrics = metrics
+
         return new Response(JSON.stringify(body), response)
       })
     })
@@ -180,10 +206,11 @@ function handleProbeRequest(request, file) {
  * @param {string} clsiServerId
  * @param {string} compileGroup
  * @param {Date} pdfCreatedAt
+ * @param {Object} metrics
  */
 function processPdfRequest(
   event,
-  { file, clsiServerId, compileGroup, pdfCreatedAt }
+  { file, clsiServerId, compileGroup, pdfCreatedAt, metrics }
 ) {
   const response = handleProbeRequest(event.request, file)
   if (response) {
@@ -313,18 +340,18 @@ function processPdfRequest(
             .then(response => response.arrayBuffer())
             .then(arrayBuffer => {
               const fullBlob = new Uint8Array(arrayBuffer)
-              const metrics = {}
+              const stats = {}
               if (reAssembledBlob.byteLength !== fullBlob.byteLength) {
-                metrics.sizeDiffers = true
+                stats.sizeDiffers = true
               } else if (
                 !reAssembledBlob.every((v, idx) => v === fullBlob[idx])
               ) {
-                metrics.mismatch = true
+                stats.mismatch = true
               } else {
-                metrics.success = true
+                stats.success = true
               }
-              trackChunkVerify(metrics)
-              if (metrics.success === true) {
+              trackChunkVerify(metrics, stats)
+              if (stats.success === true) {
                 return reAssembledBlob
               } else {
                 return fullBlob
@@ -333,7 +360,7 @@ function processPdfRequest(
         }
 
         return verifyProcess.then(blob => {
-          trackStats({ size, cachedBytes, fetchedBytes })
+          trackDownloadStats(metrics, { size, cachedBytes, fetchedBytes })
           return new Response(blob, {
             status: 206,
             headers: {
