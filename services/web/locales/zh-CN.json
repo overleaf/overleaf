@@ -1,4 +1,6 @@
 {
+  "chat_error": "无法加载聊天消息，请重试。",
+  "reconnect": "重试",
   "logs_pane_info_message": "我们正在测试一个新的日志窗格",
   "logs_pane_info_message_popup": "我们正在测试一个新的日志窗格。单击此处提供反馈。",
   "github_symlink_error": "您的Github存储库包含符号链接文件，Overleaf 暂时不支持这些文件。请删除这些文件并重试。",
