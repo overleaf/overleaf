@@ -236,10 +236,12 @@ function processPdfRequest(
   const chunks = getMatchingChunks(file.ranges, start, end)
   const dynamicChunks = getInterleavingDynamicChunks(chunks, start, end)
   const chunksSize = countBytes(chunks)
+  const size = end - start
 
   if (chunks.length + dynamicChunks.length > MAX_SUBREQUEST_COUNT) {
     // fall back to the original range request when splitting the range creates
     // too many subrequests.
+    trackDownloadStats(metrics, { size, cachedBytes: 0, fetchedBytes: size })
     return
   }
   if (
@@ -249,6 +251,7 @@ function processPdfRequest(
     // fall back to the original range request when a very large amount of
     // object data would be requested, unless it is the only object in the
     // request.
+    trackDownloadStats(metrics, { size, cachedBytes: 0, fetchedBytes: size })
     return
   }
 
@@ -277,7 +280,6 @@ function processPdfRequest(
         }
       })
     )
-  const size = end - start
   let cachedBytes = 0
   let fetchedBytes = 0
   const reAssembledBlob = new Uint8Array(size)
@@ -378,6 +380,8 @@ function processPdfRequest(
         })
       })
       .catch(error => {
+        fetchedBytes += size
+        trackDownloadStats(metrics, { size, cachedBytes: 0, fetchedBytes })
         reportError(event, OError.tag(error, 'failed to compose pdf response'))
         return fetch(event.request)
       })
