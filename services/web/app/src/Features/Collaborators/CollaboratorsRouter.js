@@ -5,6 +5,7 @@ const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const CollaboratorsInviteController = require('./CollaboratorsInviteController')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const CaptchaMiddleware = require('../Captcha/CaptchaMiddleware')
+const AnalyticsRegistrationSourceMiddleware = require('../Analytics/AnalyticsRegistrationSourceMiddleware')
 const { Joi, validate } = require('../../infrastructure/Validation')
 
 module.exports = {
@@ -112,14 +113,18 @@ module.exports = {
 
     webRouter.get(
       '/project/:Project_id/invite/token/:token',
+      AnalyticsRegistrationSourceMiddleware.setSource('project-invite'),
       AuthenticationController.requireLogin(),
-      CollaboratorsInviteController.viewInvite
+      CollaboratorsInviteController.viewInvite,
+      AnalyticsRegistrationSourceMiddleware.clearSource()
     )
 
     webRouter.post(
       '/project/:Project_id/invite/token/:token/accept',
+      AnalyticsRegistrationSourceMiddleware.setSource('project-invite'),
       AuthenticationController.requireLogin(),
-      CollaboratorsInviteController.acceptInvite
+      CollaboratorsInviteController.acceptInvite,
+      AnalyticsRegistrationSourceMiddleware.clearSource()
     )
   },
 }
