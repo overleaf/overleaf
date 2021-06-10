@@ -35,6 +35,7 @@ import './components/historyLabelsList'
 import './components/historyLabel'
 import './components/historyFileTree'
 import './components/historyFileEntity'
+import { paywallPrompt } from '../../../../frontend/js/main/account-upgrade'
 let HistoryManager
 
 export default HistoryManager = (function () {
@@ -939,6 +940,7 @@ export default HistoryManager = (function () {
               'editor-click-feature',
               'history'
             )
+            paywallPrompt('history')
           }
           break
         }

@@ -64,13 +64,13 @@ export default function AddCollaboratorsUpgrade() {
           <StartFreeTrialButton
             buttonStyle="success"
             setStartedFreeTrial={setStartedFreeTrial}
-            source="projectMembers"
+            source="project-sharing"
           />
         ) : (
           <Button
             bsStyle="success"
             onClick={() => {
-              upgradePlan('projectMembers')
+              upgradePlan('project-sharing')
               setStartedFreeTrial(true)
             }}
           >

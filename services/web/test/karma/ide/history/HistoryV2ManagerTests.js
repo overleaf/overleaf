@@ -157,11 +157,15 @@ export default describe('HistoryV2Manager', function () {
         $http: $http,
         $filter: $filter,
       }
+      this.eventTracking = {
+        sendMB: () => {},
+      }
       this.localStorage = sinon.stub().returns(null)
       this.historyManager = new HistoryV2Manager(
         this.ide,
         this.$scope,
-        this.localStorage
+        this.localStorage,
+        this.eventTracking
       )
       done()
     })

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import PropTypes from 'prop-types'
@@ -13,25 +13,23 @@ export default function StartFreeTrialButton({
 }) {
   const { t } = useTranslation()
 
+  useEffect(() => {
+    eventTracking.sendMB(`${source}-paywall-prompt`)
+  }, [source])
+
   const handleClick = useCallback(
     event => {
       event.preventDefault()
 
       eventTracking.send('subscription-funnel', 'upgraded-free-trial', source)
-
-      const planCode = 'collaborator_free_trial_7_days'
-
-      eventTracking.sendMB('subscription-start-trial', {
-        source,
-        plan: planCode,
-      })
+      eventTracking.sendMB(`${source}-paywall-click`)
 
       if (setStartedFreeTrial) {
         setStartedFreeTrial(true)
       }
 
       const params = new URLSearchParams({
-        planCode,
+        planCode: 'collaborator_free_trial_7_days',
         ssp: 'true',
         itm_campaign: source,
       })
