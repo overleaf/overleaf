@@ -31,7 +31,10 @@ export default BinaryFilesManager = class BinaryFilesManager {
     return window.setTimeout(
       () => {
         this.$scope.openFile = file
-        return this.$scope.$apply()
+
+        this.$scope.$apply()
+
+        this.$scope.$broadcast('file-view:file-opened')
       },
       0,
       this

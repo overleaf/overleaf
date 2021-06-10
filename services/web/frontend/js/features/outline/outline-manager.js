@@ -42,6 +42,12 @@ class OutlineManager {
       this.broadcastChangeEvent()
     })
 
+    scope.$on('file-view:file-opened', () => {
+      this.isTexFile = false
+      this.updateOutline()
+      this.broadcastChangeEvent()
+    })
+
     scope.$on('cursor:editor:update', (event, cursorPosition) => {
       if (this.ignoreNextCursorUpdate) {
         this.ignoreNextCursorUpdate = false
