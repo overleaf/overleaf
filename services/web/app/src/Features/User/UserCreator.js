@@ -8,6 +8,7 @@ const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
 const Analytics = require('../Analytics/AnalyticsManager')
 const UserOnboardingEmailQueueManager = require('./UserOnboardingEmailManager')
+const UserPostRegistrationAnalyticsManager = require('./UserPostRegistrationAnalyticsManager')
 const OError = require('@overleaf/o-error')
 
 async function _addAffiliation(user, affiliationOptions) {
@@ -89,6 +90,9 @@ async function createNewUser(attributes, options = {}) {
   if (Features.hasFeature('saas')) {
     try {
       await UserOnboardingEmailQueueManager.scheduleOnboardingEmail(user)
+      await UserPostRegistrationAnalyticsManager.schedulePostRegistrationAnalytics(
+        user
+      )
     } catch (error) {
       logger.error(
         OError.tag(error, 'Failed to schedule sending of onboarding email', {

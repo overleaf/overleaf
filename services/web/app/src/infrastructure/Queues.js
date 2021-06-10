@@ -31,6 +31,10 @@ function getOnboardingEmailsQueue() {
   return getOrCreateQueue('emails-onboarding')
 }
 
+function getPostRegistrationAnalyticsQueue() {
+  return getOrCreateQueue('post-registration-analytics')
+}
+
 function getOrCreateQueue(queueName, defaultJobOptions) {
   if (!queues[queueName]) {
     queues[queueName] = new Queue(queueName, {
@@ -54,4 +58,5 @@ module.exports = {
   getAnalyticsEditingSessionsQueue,
   getAnalyticsUserPropertiesQueue,
   getOnboardingEmailsQueue,
+  getPostRegistrationAnalyticsQueue,
 }

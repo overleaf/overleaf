@@ -48,6 +48,9 @@ describe('UserCreator', function () {
         './UserOnboardingEmailManager': (this.UserOnboardingEmailManager = {
           scheduleOnboardingEmail: sinon.stub(),
         }),
+        './UserPostRegistrationAnalyticsManager': (this.UserPostRegistrationAnalyticsManager = {
+          schedulePostRegistrationAnalytics: sinon.stub(),
+        }),
       },
     })
 
@@ -279,7 +282,7 @@ describe('UserCreator', function () {
         )
       })
 
-      it('should schedule an onboarding email on registration with saas feature', async function () {
+      it('should schedule post registration jobs on registration with saas feature', async function () {
         this.Features.hasFeature = sinon.stub().withArgs('saas').returns(true)
         const user = await this.UserCreator.promises.createNewUser({
           email: this.email,
@@ -289,13 +292,22 @@ describe('UserCreator', function () {
           this.UserOnboardingEmailManager.scheduleOnboardingEmail,
           user
         )
+        sinon.assert.calledWith(
+          this.UserPostRegistrationAnalyticsManager
+            .schedulePostRegistrationAnalytics,
+          user
+        )
       })
 
-      it('should not add schedule onboarding email when without saas feature', async function () {
+      it('should not schedule post registration checks when without saas feature', async function () {
         const attributes = { email: this.email }
         await this.UserCreator.promises.createNewUser(attributes)
         sinon.assert.notCalled(
           this.UserOnboardingEmailManager.scheduleOnboardingEmail
+        )
+        sinon.assert.notCalled(
+          this.UserPostRegistrationAnalyticsManager
+            .schedulePostRegistrationAnalytics
         )
       })
     })
