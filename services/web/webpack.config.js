@@ -256,11 +256,6 @@ module.exports = {
       writeToFileEmit: true,
     }),
 
-    // Silence react messages in the dev-tools console
-    new webpack.DefinePlugin({
-      __REACT_DEVTOOLS_GLOBAL_HOOK__: '({ isDisabled: true })',
-    }),
-
     // Prevent moment from loading (very large) locale files that aren't used
     new webpack.IgnorePlugin({
       resourceRegExp: /^\.\/locale$/,

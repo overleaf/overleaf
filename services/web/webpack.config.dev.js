@@ -1,3 +1,4 @@
+const webpack = require('webpack')
 const merge = require('webpack-merge')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
@@ -14,6 +15,14 @@ module.exports = merge(base, {
     new MiniCssExtractPlugin({
       // Output to public/stylesheets directory
       filename: 'stylesheets/[name].css',
+    }),
+
+    // Disable React DevTools if DISABLE_REACT_DEVTOOLS is set to "true"
+    new webpack.DefinePlugin({
+      __REACT_DEVTOOLS_GLOBAL_HOOK__:
+        process.env.DISABLE_REACT_DEVTOOLS === 'true'
+          ? '({ isDisabled: true })'
+          : undefined,
     }),
   ],
 
