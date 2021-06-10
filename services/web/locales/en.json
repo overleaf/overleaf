@@ -1215,6 +1215,7 @@
   "sync_to_dropbox_and_github": "Sync to Dropbox and GitHub",
   "project_too_large": "Project too large",
   "project_too_large_please_reduce": "This project has too much editable text, please try and reduce it. The largest files are:",
+  "project_too_much_editable_text": "This project has too much editable text, please try to reduce it.",
   "please_ask_the_project_owner_to_link_to_github": "Please ask the project owner to link this project to a GitHub repository",
   "go_to_pdf_location_in_code": "Go to PDF location in code",
   "ko": "Korean",

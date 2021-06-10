@@ -57,6 +57,9 @@ function PreviewError({ name }) {
   } else if (name === 'autoCompileDisabled') {
     errorTitle = t('autocompile_disabled')
     errorContent = <>{t('autocompile_disabled_reason')}</>
+  } else if (name === 'projectTooLarge') {
+    errorTitle = t('project_too_large')
+    errorContent = <>{t('project_too_much_editable_text')}</>
   }
 
   return errorTitle ? (

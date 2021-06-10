@@ -522,6 +522,7 @@ App.controller(
           $scope.pdf.rateLimited ? { rateLimited: true } : null,
           $scope.pdf.compileInProgress ? { compileInProgress: true } : null,
           $scope.pdf.timedout ? { timedout: true } : null,
+          $scope.pdf.projectTooLarge ? { projectTooLarge: true } : null,
           $scope.pdf.autoCompileDisabled ? { autoCompileDisabled: true } : null
         )
 
