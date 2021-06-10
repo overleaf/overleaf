@@ -1,6 +1,10 @@
 import { v4 as uuid } from 'uuid'
 const OError = require('@overleaf/o-error')
 
+// VERSION should get incremented when making changes to caching behavior or
+//  adjusting metrics collection.
+const VERSION = 1
+
 const COMPILE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/compile$/
 const PDF_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/.*\/output.pdf$/
 const PDF_JS_CHUNK_SIZE = 128 * 1024
@@ -21,6 +25,7 @@ function getClientContext(clientId) {
   if (!clientContext) {
     const pdfs = new Map()
     const metrics = {
+      version: VERSION,
       id: uuid(),
       epoch: Date.now(),
       cachedBytes: 0,
