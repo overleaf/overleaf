@@ -629,9 +629,5 @@ export default App.controller(
       { code: 'ZM', name: 'Zambia' },
       { code: 'ZW', name: 'Zimbabwe' },
     ]
-
-    $scope.filledForm = function () {
-      eventTracking.sendMBOnce('payment-page-form-fill')
-    }
   }
 )
