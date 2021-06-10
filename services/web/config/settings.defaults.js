@@ -345,35 +345,16 @@ module.exports = {
       ],
     },
     {
-      id: 'pdf_caching_beta',
+      id: 'pdf_caching_beta_full',
       active: process.env.SPLIT_TEST_PDF_CACHING_BETA_ACTIVE === 'true',
       variants: [
         {
           id: 'collect-metrics-only',
-          rolloutPercent: parseInt(
-            process.env
-              .SPLIT_TEST_PDF_CACHING_BETA_COLLECT_METRICS_ONLY_ROLLOUT_PERCENT ||
-              '0',
-            10
-          ),
+          rolloutPercent: 50,
         },
         {
           id: 'collect-metrics-and-enable-caching',
-          rolloutPercent: parseInt(
-            process.env
-              .SPLIT_TEST_PDF_CACHING_BETA_COLLECT_METRICS_AND_ENABLE_CACHING_ROLLOUT_PERCENT ||
-              '0',
-            10
-          ),
-        },
-        {
-          id: 'enable-caching-only',
-          rolloutPercent: parseInt(
-            process.env
-              .SPLIT_TEST_PDF_CACHING_BETA_ENABLE_CACHING_ONLY_ROLLOUT_PERCENT ||
-              '0',
-            10
-          ),
+          rolloutPercent: 50,
         },
       ],
     },

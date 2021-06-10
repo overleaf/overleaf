@@ -715,7 +715,7 @@ const ProjectController = {
           if (!userId) return cb(null, '')
           SplitTestHandler.getTestSegmentation(
             userId,
-            'pdf_caching_beta',
+            'pdf_caching_beta_full',
             (err, segmentation) => {
               if (err) {
                 // Do not fail loading the editor.
