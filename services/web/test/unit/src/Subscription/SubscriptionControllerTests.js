@@ -142,6 +142,7 @@ describe('SubscriptionController', function () {
         './Errors': SubscriptionErrors,
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
           recordEvent: sinon.stub(),
+          setUserProperty: sinon.stub(),
         }),
         '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
           getTestSegmentation: () => {},
@@ -575,8 +576,15 @@ describe('SubscriptionController', function () {
         this.req = {
           body: {
             expired_subscription_notification: {
+              account: {
+                account_code: this.user._id,
+              },
               subscription: {
                 uuid: this.activeRecurlySubscription.uuid,
+                plan: {
+                  plan_code: 'collaborator',
+                  state: 'active',
+                },
               },
             },
           },
@@ -640,8 +648,15 @@ describe('SubscriptionController', function () {
         this.req = {
           body: {
             renewed_subscription_notification: {
+              account: {
+                account_code: this.user._id,
+              },
               subscription: {
                 uuid: this.activeRecurlySubscription.uuid,
+                plan: {
+                  plan_code: 'collaborator',
+                  state: 'active',
+                },
               },
             },
           },

@@ -16,6 +16,7 @@ const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const SubscriptionErrors = require('./Errors')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const RecurlyEventHandler = require('./RecurlyEventHandler')
 const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
 const _ = require('lodash')
@@ -350,6 +351,9 @@ function recurlyCallback(req, res, next) {
   logger.log({ data: req.body }, 'received recurly callback')
   const event = Object.keys(req.body)[0]
   const eventData = req.body[event]
+
+  RecurlyEventHandler.sendRecurlyAnalyticsEvent(event, eventData)
+
   if (
     [
       'new_subscription_notification',

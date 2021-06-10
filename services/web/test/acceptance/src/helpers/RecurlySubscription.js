@@ -43,6 +43,13 @@ class RecurlySubscription {
     return RecurlyWrapper._buildXml('expired_subscription_notification', {
       subscription: {
         uuid: this.uuid,
+        state: 'expired',
+        plan: {
+          plan_code: 'collaborator',
+        },
+      },
+      account: {
+        account_code: this.account.id,
       },
     })
   }
