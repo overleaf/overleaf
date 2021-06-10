@@ -887,7 +887,7 @@ const ProjectController = {
                 'new_navigation_ui',
                 user.alphaProgram
               ),
-              showNewBinaryFileUI: shouldDisplayFeature('new_binary_file'),
+              showNewFileViewUI: shouldDisplayFeature('new_file_view'),
               showSymbolPalette: shouldDisplayFeature(
                 'symbol_palette',
                 user.alphaProgram

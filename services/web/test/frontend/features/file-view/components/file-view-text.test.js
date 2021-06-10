@@ -3,9 +3,9 @@ import { screen } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import BinaryFileText from '../../../../../frontend/js/features/binary-file/components/binary-file-text.js'
+import FileViewText from '../../../../../frontend/js/features/file-view/components/file-view-text.js'
 
-describe('<BinaryFileText/>', function () {
+describe('<FileViewText/>', function () {
   const file = {
     name: 'example.tex',
     linkedFileData: {
@@ -32,7 +32,7 @@ describe('<BinaryFileText/>', function () {
     )
 
     renderWithEditorContext(
-      <BinaryFileText file={file} onError={() => {}} onLoad={() => {}} />
+      <FileViewText file={file} onError={() => {}} onLoad={() => {}} />
     )
 
     await screen.findByText('Text file content', { exact: false })

@@ -3,10 +3,10 @@ import { react2angular } from 'react2angular'
 import _ from 'lodash'
 
 import { rootContext } from '../../../shared/context/root-context'
-import BinaryFile from '../components/binary-file'
+import FileView from '../components/file-view'
 
 export default App.controller(
-  'ReactBinaryFileController',
+  'FileViewController',
   function ($scope, $rootScope) {
     $scope.file = $scope.openFile
 
@@ -18,6 +18,6 @@ export default App.controller(
 )
 
 App.component(
-  'binaryFile',
-  react2angular(rootContext.use(BinaryFile), ['storeReferencesKeys', 'file'])
+  'fileView',
+  react2angular(rootContext.use(FileView), ['storeReferencesKeys', 'file'])
 )

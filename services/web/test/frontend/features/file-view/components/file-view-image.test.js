@@ -2,9 +2,9 @@ import React from 'react'
 import { screen } from '@testing-library/react'
 
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import BinaryFileImage from '../../../../../frontend/js/features/binary-file/components/binary-file-image.js'
+import FileViewImage from '../../../../../frontend/js/features/file-view/components/file-view-image.js'
 
-describe('<BinaryFileImage />', function () {
+describe('<FileViewImage />', function () {
   const file = {
     id: '60097ca20454610027c442a8',
     name: 'file.jpg',
@@ -16,7 +16,7 @@ describe('<BinaryFileImage />', function () {
 
   it('renders an image', function () {
     renderWithEditorContext(
-      <BinaryFileImage
+      <FileViewImage
         fileName={file.name}
         fileId={file.id}
         onError={() => {}}

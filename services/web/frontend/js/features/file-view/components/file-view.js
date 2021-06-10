@@ -2,16 +2,16 @@ import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 
-import BinaryFileHeader from './binary-file-header'
-import BinaryFileImage from './binary-file-image'
-import BinaryFileText from './binary-file-text'
+import FileViewHeader from './file-view-header'
+import FileViewImage from './file-view-image'
+import FileViewText from './file-view-text'
 import Icon from '../../../shared/components/icon'
 
 const imageExtensions = ['png', 'jpg', 'jpeg', 'gif']
 
 const textExtensions = window.ExposedSettings.textExtensions
 
-export default function BinaryFile({ file, storeReferencesKeys }) {
+export default function FileView({ file, storeReferencesKeys }) {
   const [contentLoading, setContentLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
@@ -36,9 +36,9 @@ export default function BinaryFile({ file, storeReferencesKeys }) {
 
   const content = (
     <>
-      <BinaryFileHeader file={file} storeReferencesKeys={storeReferencesKeys} />
+      <FileViewHeader file={file} storeReferencesKeys={storeReferencesKeys} />
       {imageExtensions.includes(extension) && (
-        <BinaryFileImage
+        <FileViewImage
           fileName={file.name}
           fileId={file.id}
           onLoad={handleLoading}
@@ -46,7 +46,7 @@ export default function BinaryFile({ file, storeReferencesKeys }) {
         />
       )}
       {textExtensions.includes(extension) && (
-        <BinaryFileText
+        <FileViewText
           file={file}
           onLoad={handleLoading}
           onError={handleError}
@@ -56,9 +56,9 @@ export default function BinaryFile({ file, storeReferencesKeys }) {
   )
 
   return (
-    <div className="binary-file full-size">
+    <div className="file-view full-size">
       {!hasError && content}
-      {!isUnpreviewableFile && contentLoading && <BinaryFileLoadingIndicator />}
+      {!isUnpreviewableFile && contentLoading && <FileViewLoadingIndicator />}
       {(isUnpreviewableFile || hasError) && (
         <p className="no-preview">{t('no_preview_available')}</p>
       )}
@@ -66,10 +66,10 @@ export default function BinaryFile({ file, storeReferencesKeys }) {
   )
 }
 
-function BinaryFileLoadingIndicator() {
+function FileViewLoadingIndicator() {
   const { t } = useTranslation()
   return (
-    <div className="loading-panel loading-panel-binary-files">
+    <div className="loading-panel loading-panel-file-view">
       <span>
         <Icon type="refresh" modifier="spin" />
         &nbsp;&nbsp;{t('loading')}…
@@ -78,7 +78,7 @@ function BinaryFileLoadingIndicator() {
   )
 }
 
-BinaryFile.propTypes = {
+FileView.propTypes = {
   file: PropTypes.shape({
     id: PropTypes.string,
     name: PropTypes.string,

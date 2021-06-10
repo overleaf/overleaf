@@ -7,9 +7,9 @@ import {
 import fetchMock from 'fetch-mock'
 
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import BinaryFile from '../../../../../frontend/js/features/binary-file/components/binary-file.js'
+import FileView from '../../../../../frontend/js/features/file-view/components/file-view.js'
 
-describe('<BinaryFile/>', function () {
+describe('<FileView/>', function () {
   const textFile = {
     name: 'example.tex',
     linkedFileData: {
@@ -37,7 +37,7 @@ describe('<BinaryFile/>', function () {
   describe('for a text file', function () {
     it('shows a loading indicator while the file is loading', async function () {
       renderWithEditorContext(
-        <BinaryFile file={textFile} storeReferencesKeys={() => {}} />
+        <FileView file={textFile} storeReferencesKeys={() => {}} />
       )
 
       await waitForElementToBeRemoved(() =>
@@ -47,7 +47,7 @@ describe('<BinaryFile/>', function () {
 
     it('shows messaging if the text view could not be loaded', async function () {
       renderWithEditorContext(
-        <BinaryFile file={textFile} storeReferencesKeys={() => {}} />
+        <FileView file={textFile} storeReferencesKeys={() => {}} />
       )
 
       await screen.findByText('Sorry, no preview is available', {
@@ -59,7 +59,7 @@ describe('<BinaryFile/>', function () {
   describe('for an image file', function () {
     it('shows a loading indicator while the file is loading', async function () {
       renderWithEditorContext(
-        <BinaryFile file={imageFile} storeReferencesKeys={() => {}} />
+        <FileView file={imageFile} storeReferencesKeys={() => {}} />
       )
 
       screen.getByText('Loading', { exact: false })
@@ -67,7 +67,7 @@ describe('<BinaryFile/>', function () {
 
     it('shows messaging if the image could not be loaded', function () {
       renderWithEditorContext(
-        <BinaryFile file={imageFile} storeReferencesKeys={() => {}} />
+        <FileView file={imageFile} storeReferencesKeys={() => {}} />
       )
 
       // Fake the image request failing as the request is handled by the browser

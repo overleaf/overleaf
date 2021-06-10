@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { ContextRoot } from '../js/shared/context/root-context'
-import BinaryFile from '../js/features/binary-file/components/binary-file'
+import FileView from '../js/features/file-view/components/file-view'
 import useFetchMock from './hooks/use-fetch-mock'
 
 const setupFetchMock = fetchMock => {
@@ -26,7 +26,7 @@ const fileData = {
 }
 
 export const FileFromUrl = args => {
-  return <BinaryFile {...args} />
+  return <FileView {...args} />
 }
 FileFromUrl.args = {
   file: {
@@ -39,7 +39,7 @@ FileFromUrl.args = {
 }
 
 export const FileFromProjectWithLinkableProjectId = args => {
-  return <BinaryFile {...args} />
+  return <FileView {...args} />
 }
 FileFromProjectWithLinkableProjectId.args = {
   file: {
@@ -53,7 +53,7 @@ FileFromProjectWithLinkableProjectId.args = {
 }
 
 export const FileFromProjectWithoutLinkableProjectId = args => {
-  return <BinaryFile {...args} />
+  return <FileView {...args} />
 }
 FileFromProjectWithoutLinkableProjectId.args = {
   file: {
@@ -67,7 +67,7 @@ FileFromProjectWithoutLinkableProjectId.args = {
 }
 
 export const FileFromProjectOutputWithLinkableProject = args => {
-  return <BinaryFile {...args} />
+  return <FileView {...args} />
 }
 FileFromProjectOutputWithLinkableProject.args = {
   file: {
@@ -81,7 +81,7 @@ FileFromProjectOutputWithLinkableProject.args = {
 }
 
 export const FileFromProjectOutputWithoutLinkableProjectId = args => {
-  return <BinaryFile {...args} />
+  return <FileView {...args} />
 }
 FileFromProjectOutputWithoutLinkableProjectId.args = {
   file: {
@@ -95,7 +95,7 @@ FileFromProjectOutputWithoutLinkableProjectId.args = {
 }
 
 export const ImageFile = args => {
-  return <BinaryFile {...args} />
+  return <FileView {...args} />
 }
 ImageFile.args = {
   file: {
@@ -111,7 +111,7 @@ ImageFile.args = {
 }
 
 export const ThirdPartyReferenceFile = args => {
-  return <BinaryFile {...args} />
+  return <FileView {...args} />
 }
 
 ThirdPartyReferenceFile.args = {
@@ -125,7 +125,7 @@ ThirdPartyReferenceFile.args = {
 }
 
 export const ThirdPartyReferenceFileWithError = args => {
-  return <BinaryFile {...args} />
+  return <FileView {...args} />
 }
 ThirdPartyReferenceFileWithError.args = {
   file: {
@@ -139,7 +139,7 @@ ThirdPartyReferenceFileWithError.args = {
 }
 
 export const TextFile = args => {
-  return <BinaryFile {...args} />
+  return <FileView {...args} />
 }
 TextFile.args = {
   file: {
@@ -154,7 +154,7 @@ TextFile.args = {
 }
 
 export const UploadedFile = args => {
-  return <BinaryFile {...args} />
+  return <FileView {...args} />
 }
 UploadedFile.args = {
   file: {
@@ -165,8 +165,8 @@ UploadedFile.args = {
 }
 
 export default {
-  title: 'BinaryFile',
-  component: BinaryFile,
+  title: 'FileView',
+  component: FileView,
   args: {
     storeReferencesKeys: () => {},
   },

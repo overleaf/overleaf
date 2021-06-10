@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { useEditorContext } from '../../../shared/context/editor-context'
 
-export default function BinaryFileImage({ fileName, fileId, onLoad, onError }) {
+export default function FileViewImage({ fileName, fileId, onLoad, onError }) {
   const { projectId } = useEditorContext({
     projectId: PropTypes.string.isRequired,
   })
@@ -18,7 +18,7 @@ export default function BinaryFileImage({ fileName, fileId, onLoad, onError }) {
   )
 }
 
-BinaryFileImage.propTypes = {
+FileViewImage.propTypes = {
   fileName: PropTypes.string.isRequired,
   fileId: PropTypes.string.isRequired,
   onLoad: PropTypes.func.isRequired,

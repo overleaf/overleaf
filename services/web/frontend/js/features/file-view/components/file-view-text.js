@@ -4,7 +4,7 @@ import { useEditorContext } from '../../../shared/context/editor-context'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024
 
-export default function BinaryFileText({ file, onLoad, onError }) {
+export default function FileViewText({ file, onLoad, onError }) {
   const { projectId } = useEditorContext({
     projectId: PropTypes.string.isRequired,
   })
@@ -65,7 +65,7 @@ export default function BinaryFileText({ file, onLoad, onError }) {
   )
 }
 
-BinaryFileText.propTypes = {
+FileViewText.propTypes = {
   file: PropTypes.shape({ id: PropTypes.string }).isRequired,
   onLoad: PropTypes.func.isRequired,
   onError: PropTypes.func.isRequired,

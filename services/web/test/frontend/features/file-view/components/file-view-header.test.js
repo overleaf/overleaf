@@ -9,9 +9,9 @@ import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import BinaryFileHeader from '../../../../../frontend/js/features/binary-file/components/binary-file-header.js'
+import FileViewHeader from '../../../../../frontend/js/features/file-view/components/file-view-header.js'
 
-describe('<BinaryFileHeader/>', function () {
+describe('<FileViewHeader/>', function () {
   const urlFile = {
     name: 'example.tex',
     linkedFileData: {
@@ -57,7 +57,7 @@ describe('<BinaryFileHeader/>', function () {
   describe('header text', function () {
     it('Renders the correct text for a file with the url provider', function () {
       renderWithEditorContext(
-        <BinaryFileHeader file={urlFile} storeReferencesKeys={() => {}} />
+        <FileViewHeader file={urlFile} storeReferencesKeys={() => {}} />
       )
       screen.getByText('Imported from', { exact: false })
       screen.getByText('at 3:24 am Wed, 17th Feb 21', {
@@ -67,7 +67,7 @@ describe('<BinaryFileHeader/>', function () {
 
     it('Renders the correct text for a file with the project_file provider', function () {
       renderWithEditorContext(
-        <BinaryFileHeader file={projectFile} storeReferencesKeys={() => {}} />
+        <FileViewHeader file={projectFile} storeReferencesKeys={() => {}} />
       )
       screen.getByText('Imported from', { exact: false })
       screen.getByText('Another project', { exact: false })
@@ -78,7 +78,7 @@ describe('<BinaryFileHeader/>', function () {
 
     it('Renders the correct text for a file with the project_output_file provider', function () {
       renderWithEditorContext(
-        <BinaryFileHeader
+        <FileViewHeader
           file={projectOutputFile}
           storeReferencesKeys={() => {}}
         />
@@ -101,7 +101,7 @@ describe('<BinaryFileHeader/>', function () {
       )
 
       renderWithEditorContext(
-        <BinaryFileHeader file={projectFile} storeReferencesKeys={() => {}} />
+        <FileViewHeader file={projectFile} storeReferencesKeys={() => {}} />
       )
 
       fireEvent.click(screen.getByRole('button', { name: 'Refresh' }))
@@ -132,7 +132,7 @@ describe('<BinaryFileHeader/>', function () {
       const storeReferencesKeys = sinon.stub()
 
       renderWithEditorContext(
-        <BinaryFileHeader
+        <FileViewHeader
           file={thirdPartyReferenceFile}
           storeReferencesKeys={storeReferencesKeys}
         />
@@ -152,7 +152,7 @@ describe('<BinaryFileHeader/>', function () {
   describe('The download button', function () {
     it('exists', function () {
       renderWithEditorContext(
-        <BinaryFileHeader file={urlFile} storeReferencesKeys={() => {}} />
+        <FileViewHeader file={urlFile} storeReferencesKeys={() => {}} />
       )
 
       screen.getByText('Download', { exact: false })
