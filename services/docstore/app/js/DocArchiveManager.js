@@ -10,6 +10,8 @@ const PersistorManager = require('./PersistorManager')
 const pMap = require('p-map')
 
 const PARALLEL_JOBS = settings.parallelArchiveJobs
+const ARCHIVE_BATCH_SIZE = settings.archiveBatchSize
+const UN_ARCHIVE_BATCH_SIZE = settings.unArchiveBatchSize
 const DESTROY_BATCH_SIZE = settings.destroyBatchSize
 const DESTROY_RETRY_COUNT = settings.destroyRetryCount
 
@@ -33,20 +35,19 @@ module.exports = {
 }
 
 async function archiveAllDocs(projectId) {
-  const docs = await MongoManager.getProjectsDocs(
-    projectId,
-    { include_deleted: true },
-    { lines: true, ranges: true, rev: true, inS3: true }
-  )
+  while (true) {
+    const docs = await MongoManager.getNonArchivedProjectDocs(
+      projectId,
+      ARCHIVE_BATCH_SIZE
+    )
+    if (!docs || docs.length === 0) {
+      break
+    }
 
-  if (!docs) {
-    throw new Errors.NotFoundError(`No docs for project ${projectId}`)
+    await pMap(docs, (doc) => archiveDoc(projectId, doc), {
+      concurrency: PARALLEL_JOBS
+    })
   }
-
-  const docsToArchive = docs.filter((doc) => !doc.inS3)
-  await pMap(docsToArchive, (doc) => archiveDoc(projectId, doc), {
-    concurrency: PARALLEL_JOBS
-  })
 }
 
 async function archiveDocById(projectId, docId) {
@@ -102,18 +103,26 @@ async function archiveDoc(projectId, doc) {
 }
 
 async function unArchiveAllDocs(projectId) {
-  let docs
-  if (settings.docstore.keepSoftDeletedDocsArchived) {
-    docs = await MongoManager.getNonDeletedArchivedProjectDocs(projectId)
-  } else {
-    docs = await MongoManager.getArchivedProjectDocs(projectId)
+  while (true) {
+    let docs
+    if (settings.docstore.keepSoftDeletedDocsArchived) {
+      docs = await MongoManager.getNonDeletedArchivedProjectDocs(
+        projectId,
+        UN_ARCHIVE_BATCH_SIZE
+      )
+    } else {
+      docs = await MongoManager.getArchivedProjectDocs(
+        projectId,
+        UN_ARCHIVE_BATCH_SIZE
+      )
+    }
+    if (!docs || docs.length === 0) {
+      break
+    }
+    await pMap(docs, (doc) => unarchiveDoc(projectId, doc._id), {
+      concurrency: PARALLEL_JOBS
+    })
   }
-  if (!docs) {
-    throw new Errors.NotFoundError(`No docs for project ${projectId}`)
-  }
-  await pMap(docs, (doc) => unarchiveDoc(projectId, doc._id), {
-    concurrency: PARALLEL_JOBS
-  })
 }
 
 async function unarchiveDoc(projectId, docId) {

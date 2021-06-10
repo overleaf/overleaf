@@ -116,12 +116,24 @@ describe('DocArchiveManager', function () {
       deleteObject: sinon.stub().resolves()
     }
 
+    const getNonArchivedProjectDocs = sinon.stub()
+    getNonArchivedProjectDocs
+      .onCall(0)
+      .resolves(mongoDocs.filter((doc) => !doc.inS3))
+    getNonArchivedProjectDocs.onCall(1).resolves([])
+
+    const getArchivedProjectDocs = sinon.stub()
+    getArchivedProjectDocs.onCall(0).resolves(archivedDocs)
+    getArchivedProjectDocs.onCall(1).resolves([])
+
     MongoManager = {
       promises: {
         markDocAsArchived: sinon.stub().resolves(),
         upsertIntoDocCollection: sinon.stub().resolves(),
         getProjectsDocs: sinon.stub().resolves(mongoDocs),
-        getArchivedProjectDocs: sinon.stub().resolves(archivedDocs),
+        getNonDeletedArchivedProjectDocs: getArchivedProjectDocs,
+        getNonArchivedProjectDocs,
+        getArchivedProjectDocs,
         findDoc: sinon.stub().rejects(new Errors.NotFoundError()),
         destroyDoc: sinon.stub().resolves()
       }
@@ -519,14 +531,6 @@ describe('DocArchiveManager', function () {
         MongoManager.promises.markDocAsArchived
       ).not.to.have.been.calledWith(mongoDocs[3]._id)
     })
-
-    it('should return error if the project has no docs', async function () {
-      MongoManager.promises.getProjectsDocs.resolves(null)
-
-      await expect(
-        DocArchiveManager.promises.archiveAllDocs(projectId)
-      ).to.eventually.be.rejected.and.be.instanceof(Errors.NotFoundError)
-    })
   })
 
   describe('unArchiveAllDocs', function () {
@@ -544,14 +548,6 @@ describe('DocArchiveManager', function () {
           `${projectId}/${doc._id}`
         )
       }
-    })
-
-    it('should return error if the project has no docs', async function () {
-      MongoManager.promises.getArchivedProjectDocs.resolves(null)
-
-      await expect(
-        DocArchiveManager.promises.unArchiveAllDocs(projectId)
-      ).to.eventually.be.rejected.and.be.instanceof(Errors.NotFoundError)
     })
   })
 
