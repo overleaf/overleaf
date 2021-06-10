@@ -371,7 +371,7 @@ const AuthenticationController = {
         expectedPassword.length === pass.length &&
         crypto.timingSafeEqual(Buffer.from(expectedPassword), Buffer.from(pass))
       if (!isValid) {
-        logger.err({ user, pass }, 'invalid login details')
+        logger.err({ user }, 'invalid login details')
       }
       return isValid
     })
