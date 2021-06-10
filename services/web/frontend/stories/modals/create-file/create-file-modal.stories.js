@@ -1,18 +1,86 @@
-import React from 'react'
-import { createFileModalDecorator } from './create-file-modal-decorator'
+import React, { useEffect } from 'react'
+import {
+  createFileModalDecorator,
+  mockCreateFileModalFetch,
+} from './create-file-modal-decorator'
 import FileTreeModalCreateFile from '../../../js/features/file-tree/components/modals/file-tree-modal-create-file'
+import useFetchMock from '../../hooks/use-fetch-mock'
 
-export const MinimalFeatures = args => <FileTreeModalCreateFile {...args} />
+export const MinimalFeatures = args => {
+  useFetchMock(mockCreateFileModalFetch)
+
+  return <FileTreeModalCreateFile {...args} />
+}
 MinimalFeatures.decorators = [
   createFileModalDecorator({
     userHasFeature: () => false,
   }),
 ]
 
-export const WithExtraFeatures = args => <FileTreeModalCreateFile {...args} />
-WithExtraFeatures.decorators = [createFileModalDecorator()]
+export const WithExtraFeatures = args => {
+  useFetchMock(mockCreateFileModalFetch)
 
-export const FileLimitReached = args => <FileTreeModalCreateFile {...args} />
+  useEffect(() => {
+    const originalValue = window.ExposedSettings.hasLinkUrlFeature
+    window.ExposedSettings.hasLinkUrlFeature = true
+
+    return () => {
+      window.ExposedSettings.hasLinkUrlFeature = originalValue
+    }
+  }, [])
+
+  return <FileTreeModalCreateFile {...args} />
+}
+WithExtraFeatures.decorators = [
+  createFileModalDecorator({
+    refProviders: { mendeley: true, zotero: true },
+  }),
+]
+
+export const ErrorImportingFileFromExternalURL = args => {
+  useFetchMock(fetchMock => {
+    mockCreateFileModalFetch(fetchMock)
+
+    fetchMock.post('express:/project/:projectId/linked_file', 500, {
+      overwriteRoutes: true,
+    })
+  })
+
+  useEffect(() => {
+    const originalValue = window.ExposedSettings.hasLinkUrlFeature
+    window.ExposedSettings.hasLinkUrlFeature = true
+
+    return () => {
+      window.ExposedSettings.hasLinkUrlFeature = originalValue
+    }
+  }, [])
+
+  return <FileTreeModalCreateFile {...args} />
+}
+ErrorImportingFileFromExternalURL.decorators = [createFileModalDecorator()]
+
+export const ErrorImportingFileFromReferenceProvider = args => {
+  useFetchMock(fetchMock => {
+    mockCreateFileModalFetch(fetchMock)
+
+    fetchMock.post('express:/project/:projectId/linked_file', 500, {
+      overwriteRoutes: true,
+    })
+  })
+
+  return <FileTreeModalCreateFile {...args} />
+}
+ErrorImportingFileFromReferenceProvider.decorators = [
+  createFileModalDecorator({
+    refProviders: { mendeley: true, zotero: true },
+  }),
+]
+
+export const FileLimitReached = args => {
+  useFetchMock(mockCreateFileModalFetch)
+
+  return <FileTreeModalCreateFile {...args} />
+}
 FileLimitReached.decorators = [
   createFileModalDecorator({
     rootFolder: [

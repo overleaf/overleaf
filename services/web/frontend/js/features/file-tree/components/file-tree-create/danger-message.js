@@ -6,5 +6,5 @@ export default function DangerMessage({ children }) {
   return <Alert bsStyle="danger">{children}</Alert>
 }
 DangerMessage.propTypes = {
-  children: PropTypes.string.isRequired,
+  children: PropTypes.any.isRequired,
 }

@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import fetchMock from 'fetch-mock'
 import FileTreeContext from '../../../js/features/file-tree/components/file-tree-context'
 import FileTreeCreateNameProvider from '../../../js/features/file-tree/contexts/file-tree-create-name'
 import FileTreeCreateFormProvider from '../../../js/features/file-tree/contexts/file-tree-create-form'
@@ -37,13 +36,8 @@ const defaultContextProps = {
   },
 }
 
-export const createFileModalDecorator = (
-  contextProps = {},
-  createMode = 'doc'
-  // eslint-disable-next-line react/display-name
-) => Story => {
+export const mockCreateFileModalFetch = fetchMock =>
   fetchMock
-    .restore()
     .get('path:/user/projects', {
       projects: [
         {
@@ -104,6 +98,11 @@ export const createFileModalDecorator = (
       return 204
     })
 
+export const createFileModalDecorator = (
+  contextProps = {},
+  createMode = 'doc'
+  // eslint-disable-next-line react/display-name
+) => Story => {
   return (
     <FileTreeContext {...defaultContextProps} {...contextProps}>
       <FileTreeCreateNameProvider>

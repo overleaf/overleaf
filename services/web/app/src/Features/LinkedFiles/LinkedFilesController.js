@@ -176,6 +176,10 @@ module.exports = LinkedFilesController = {
       return res.status(400).send('This file cannot be refreshed')
     } else if (error.message === 'project_has_too_many_files') {
       return res.status(400).send('too many files')
+    } else if (/\bECONNREFUSED\b/.test(error.message)) {
+      return res
+        .status(500)
+        .send('Importing references is not currently available')
     } else {
       return next(error)
     }
