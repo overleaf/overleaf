@@ -78,7 +78,7 @@ function _sendSubscriptionExpiredEvent(eventData) {
     quantity,
     is_trial: isTrial,
   })
-  AnalyticsManager.setUserProperty(userId, 'subscription-plan-code', null)
+  AnalyticsManager.setUserProperty(userId, 'subscription-plan-code', planCode)
   AnalyticsManager.setUserProperty(userId, 'subscription-state', state)
   AnalyticsManager.setUserProperty(userId, 'subscription-is-trial', isTrial)
 }

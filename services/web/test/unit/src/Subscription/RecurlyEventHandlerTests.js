@@ -191,6 +191,12 @@ describe('RecurlyEventHandler', function () {
     sinon.assert.calledWith(
       this.AnalyticsManager.setUserProperty,
       this.userId,
+      'subscription-plan-code',
+      this.planCode
+    )
+    sinon.assert.calledWith(
+      this.AnalyticsManager.setUserProperty,
+      this.userId,
       'subscription-state',
       'expired'
     )
