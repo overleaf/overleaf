@@ -18,13 +18,11 @@ module.exports = merge(base, {
     }),
 
     // Disable React DevTools if DISABLE_REACT_DEVTOOLS is set to "true"
-    new webpack.DefinePlugin({
-      __REACT_DEVTOOLS_GLOBAL_HOOK__:
-        process.env.DISABLE_REACT_DEVTOOLS === 'true'
-          ? '({ isDisabled: true })'
-          : undefined,
-    }),
-  ],
+    process.env.DISABLE_REACT_DEVTOOLS === 'true' &&
+      new webpack.DefinePlugin({
+        __REACT_DEVTOOLS_GLOBAL_HOOK__: '({ isDisabled: true })',
+      }),
+  ].filter(Boolean),
 
   devServer: {
     // Expose dev server at www.dev-overleaf.com
