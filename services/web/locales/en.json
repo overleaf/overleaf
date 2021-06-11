@@ -197,7 +197,7 @@
   "account_has_been_link_to_institution_account": "Your __appName__ account on <b>__email__</b> has been linked to your <b>__institutionName__</b> institutional account.",
   "account_linking": "Account Linking",
   "account_with_email_exists": "It looks like an <b>__appName__</b> account with the email <b>__email__</b> already exists.",
-  "acct_linked_to_institution_acct": "This account is <b>linked</b> to your <b>__institutionName__</b> institution account.",
+  "acct_linked_to_institution_acct": "You can <b>log in</b> to Overleaf through your <b>__institutionName__</b> institutional login.",
   "alternatively_create_new_institution_account": "Alternatively, you can create a <b>new account</b> with your institution email (<b>__email__</b>) by clicking <b>__clickText__</b>.",
   "as_a_member_of_sso": "As a member of <b>__institutionName__</b>, you can log in to <b>__appName__</b> through your institution portal.",
   "as_a_member_of_sso_required": "As a member of <b>__institutionName__</b>, you must log in to <b>__appName__</b> through your institution portal.",
