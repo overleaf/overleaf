@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useReducer,
   useContext,
+  useEffect,
 } from 'react'
 import PropTypes from 'prop-types'
 
@@ -321,6 +322,22 @@ export function FileTreeActionableProvider({ hasWritePermissions, children }) {
 
   const cancel = useCallback(() => {
     dispatch({ type: ACTION_TYPES.CANCEL })
+  }, [])
+
+  // listen for `file-tree.start-creating` events
+  useEffect(() => {
+    function handleEvent(event) {
+      dispatch({
+        type: ACTION_TYPES.START_CREATE_FILE,
+        newFileCreateMode: event.detail.mode,
+      })
+    }
+
+    window.addEventListener('file-tree.start-creating', handleEvent)
+
+    return () => {
+      window.removeEventListener('file-tree.start-creating', handleEvent)
+    }
   }, [])
 
   const value = {

@@ -19,29 +19,11 @@ import App from '../../../base'
 App.controller(
   'FileTreeController',
   function ($scope, $modal, ide, $rootScope) {
-    $scope.openNewDocModal = reactBridgeParentFolderId =>
-      $modal.open({
-        templateUrl: 'newFileModalTemplate',
-        controller: 'NewFileModalController',
-        size: 'lg',
-        resolve: {
-          parent_folder() {
-            if (reactBridgeParentFolderId) {
-              return { id: reactBridgeParentFolderId }
-            }
-            return ide.fileTreeManager.getCurrentFolder()
-          },
-          projectFeatures() {
-            return ide.$scope.project.features
-          },
-          type() {
-            return 'doc'
-          },
-          userFeatures() {
-            return ide.$scope.user.features
-          },
-        },
-      })
+    $scope.openNewDocModal = () => {
+      window.dispatchEvent(
+        new CustomEvent('file-tree.start-creating', { detail: { mode: 'doc' } })
+      )
+    }
 
     $scope.openNewFolderModal = () =>
       $modal.open({
