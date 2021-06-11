@@ -155,8 +155,7 @@ export default function FileTreeImportFromProject() {
 function SelectProject({ projectId, selectedProject, setSelectedProject }) {
   const { t } = useTranslation()
 
-  // NOTE: unhandled error
-  const { data, loading } = useUserProjects()
+  const { data, error, loading } = useUserProjects()
 
   const filteredData = useMemo(() => {
     if (!data) {
@@ -165,6 +164,10 @@ function SelectProject({ projectId, selectedProject, setSelectedProject }) {
 
     return data.filter(item => item._id !== projectId)
   }, [data, projectId])
+
+  if (error) {
+    return <ErrorMessage error={error} />
+  }
 
   return (
     <FormGroup className="form-controls" controlId="project-select">
@@ -218,8 +221,11 @@ function SelectProjectOutputFile({
 }) {
   const { t } = useTranslation()
 
-  // NOTE: unhandled error
-  const { data, loading } = useProjectOutputFiles(selectedProjectId)
+  const { data, error, loading } = useProjectOutputFiles(selectedProjectId)
+
+  if (error) {
+    return <ErrorMessage error={error} />
+  }
 
   return (
     <FormGroup
@@ -272,8 +278,11 @@ function SelectProjectEntity({
 }) {
   const { t } = useTranslation()
 
-  // NOTE: unhandled error
-  const { data, loading } = useProjectEntities(selectedProjectId)
+  const { data, error, loading } = useProjectEntities(selectedProjectId)
+
+  if (error) {
+    return <ErrorMessage error={error} />
+  }
 
   return (
     <FormGroup
