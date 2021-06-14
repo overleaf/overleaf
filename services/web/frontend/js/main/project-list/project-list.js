@@ -444,7 +444,7 @@ App.controller('ProjectPageController', function (
         const { data } = response
         $scope.projects.push({
           name,
-          _id: data.project_id,
+          id: data.project_id,
           accessLevel: 'owner',
           owner: data.owner,
           // TODO: Check access level if correct after adding it in
