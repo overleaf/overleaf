@@ -21,6 +21,7 @@ const logger = require('logger-sharelatex')
 const oneDay = 24 * 60 * 60 * 1000
 const Settings = require('settings-sharelatex')
 const diskusage = require('diskusage')
+const Metrics = require('./Metrics')
 
 module.exports = ProjectPersistenceManager = {
   EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5,
@@ -53,6 +54,7 @@ module.exports = ProjectPersistenceManager = {
     if (callback == null) {
       callback = function (error) {}
     }
+    const timer = new Metrics.Timer('db-bump-last-accessed')
     const job = (cb) =>
       db.Project.findOrCreate({ where: { project_id } })
         .spread((project, created) =>
@@ -62,7 +64,10 @@ module.exports = ProjectPersistenceManager = {
             .error(cb)
         )
         .error(cb)
-    return dbQueue.queue.push(job, callback)
+    dbQueue.queue.push(job, (error) => {
+      timer.done()
+      callback(error)
+    })
   },
 
   clearExpiredProjects(callback) {
