@@ -5,6 +5,7 @@ const OError = require('@overleaf/o-error')
 //  adjusting metrics collection.
 const VERSION = 2
 
+const CLEAR_CACHE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/output$/
 const COMPILE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/compile$/
 const PDF_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/.*\/output.pdf$/
 const PDF_JS_CHUNK_SIZE = 128 * 1024
@@ -56,9 +57,14 @@ function getClientContext(clientId) {
  */
 function registerPdfContext(clientId, path, pdfContext) {
   const clientContext = getClientContext(clientId)
-  const { pdfs, metrics, cached } = clientContext
+  const { pdfs, metrics, cached, clsiServerId } = clientContext
   pdfContext.metrics = metrics
   pdfContext.cached = cached
+  if (pdfContext.clsiServerId !== clsiServerId) {
+    // VM changed, this invalidates all browser caches.
+    clientContext.clsiServerId = pdfContext.clsiServerId
+    cached.clear()
+  }
   // we only need to keep the last 3 contexts
   for (const key of pdfs.keys()) {
     if (pdfs.size < 3) {
@@ -162,7 +168,22 @@ function onFetch(event) {
     }
   }
 
+  if (
+    event.request.method === 'DELETE' &&
+    path.match(CLEAR_CACHE_REQUEST_MATCHER)
+  ) {
+    return processClearCacheRequest(event)
+  }
+
   // other request, ignore
+}
+
+/**
+ * @param {FetchEvent} event
+ */
+function processClearCacheRequest(event) {
+  CLIENT_CONTEXT.delete(event.clientId)
+  // use default request proxy.
 }
 
 /**
