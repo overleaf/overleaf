@@ -71,6 +71,7 @@ function submitCompileMetrics(metrics) {
   stats = stats || {}
   timings = timings || {}
   const leanMetrics = {
+    version: VERSION,
     latencyFetch,
     latencyRender,
     pdfSize: stats['pdf-size'],
