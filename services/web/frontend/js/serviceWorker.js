@@ -10,6 +10,7 @@ const PDF_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/.*\/output.pdf$/
 const PDF_JS_CHUNK_SIZE = 128 * 1024
 const MAX_SUBREQUEST_COUNT = 8
 const MAX_SUBREQUEST_BYTES = 4 * PDF_JS_CHUNK_SIZE
+const INCREMENTAL_CACHE_SIZE = 1000
 
 // Each compile request defines a context (essentially the specific pdf file for
 // that compile), requests for that pdf file can use the hashes in the compile
@@ -23,6 +24,7 @@ const CLIENT_CONTEXT = new Map()
 function getClientContext(clientId) {
   let clientContext = CLIENT_CONTEXT.get(clientId)
   if (!clientContext) {
+    const cached = new Set()
     const pdfs = new Map()
     const metrics = {
       version: VERSION,
@@ -39,7 +41,7 @@ function getClientContext(clientId) {
       requestedBytes: 0,
       compileCount: 0,
     }
-    clientContext = { pdfs, metrics }
+    clientContext = { pdfs, metrics, cached }
     CLIENT_CONTEXT.set(clientId, clientContext)
     // clean up old client maps
     expirePdfContexts()
@@ -54,8 +56,9 @@ function getClientContext(clientId) {
  */
 function registerPdfContext(clientId, path, pdfContext) {
   const clientContext = getClientContext(clientId)
-  const { pdfs, metrics } = clientContext
+  const { pdfs, metrics, cached } = clientContext
   pdfContext.metrics = metrics
+  pdfContext.cached = cached
   // we only need to keep the last 3 contexts
   for (const key of pdfs.keys()) {
     if (pdfs.size < 3) {
@@ -228,10 +231,11 @@ function handleProbeRequest(request, file) {
  * @param {string} compileGroup
  * @param {Date} pdfCreatedAt
  * @param {Object} metrics
+ * @param {Set} cached
  */
 function processPdfRequest(
   event,
-  { file, clsiServerId, compileGroup, pdfCreatedAt, metrics }
+  { file, clsiServerId, compileGroup, pdfCreatedAt, metrics, cached }
 ) {
   const response = handleProbeRequest(event.request, file)
   if (response) {
@@ -249,9 +253,13 @@ function processPdfRequest(
 
   // Check that handling the range request won't trigger excessive subrequests,
   // (to avoid unwanted latency compared to the original request).
-  const chunks = getMatchingChunks(file.ranges, start, end)
+  const { chunks, newChunks } = cutRequestAmplification(
+    getMatchingChunks(file.ranges, start, end),
+    cached,
+    metrics
+  )
   const dynamicChunks = getInterleavingDynamicChunks(chunks, start, end)
-  const chunksSize = countBytes(chunks)
+  const chunksSize = countBytes(newChunks)
   const size = end - start
 
   if (chunks.length === 0 && dynamicChunks.length === 1) {
@@ -266,28 +274,12 @@ function processPdfRequest(
     return
   }
   if (
-    chunks.length + (dynamicChunks.length > 0 ? 1 : 0) >
-    MAX_SUBREQUEST_COUNT
-  ) {
-    // fall back to the original range request when splitting the range creates
-    // too many subrequests.
-    metrics.tooManyRequestsCount++
-    trackDownloadStats(metrics, {
-      size,
-      cachedCount: 0,
-      cachedBytes: 0,
-      fetchedCount: 1,
-      fetchedBytes: size,
-    })
-    return
-  }
-  if (
     chunksSize > MAX_SUBREQUEST_BYTES &&
-    !(dynamicChunks.length === 0 && chunks.length === 1)
+    !(dynamicChunks.length === 0 && newChunks.length <= 1)
   ) {
     // fall back to the original range request when a very large amount of
     // object data would be requested, unless it is the only object in the
-    // request.
+    // request or everything is already cached.
     metrics.tooLargeOverheadCount++
     trackDownloadStats(metrics, {
       size,
@@ -370,6 +362,9 @@ function processPdfRequest(
               if (blobFetchDate < pdfCreatedAt) {
                 cachedCount++
                 cachedBytes += chunkSize
+                // Roll the position of the hash in the Map.
+                cached.delete(chunk.hash)
+                cached.add(chunk.hash)
               } else {
                 // Blobs are fetched in bulk.
                 fetchedCount++
@@ -634,6 +629,43 @@ function getMatchingChunks(chunks, start, end) {
     matchingChunks.push(chunk)
   }
   return matchingChunks
+}
+
+/**
+ * @param {Array} potentialChunks
+ * @param {Set} cached
+ * @param {Object} metrics
+ */
+function cutRequestAmplification(potentialChunks, cached, metrics) {
+  const chunks = []
+  const newChunks = []
+  let tooManyRequests = false
+  for (const chunk of potentialChunks) {
+    if (cached.has(chunk.hash)) {
+      chunks.push(chunk)
+      continue
+    }
+    if (newChunks.length < MAX_SUBREQUEST_COUNT) {
+      chunks.push(chunk)
+      newChunks.push(chunk)
+    } else {
+      tooManyRequests = true
+    }
+  }
+  if (tooManyRequests) {
+    metrics.tooManyRequestsCount++
+  }
+  if (cached.size > INCREMENTAL_CACHE_SIZE) {
+    for (const key of cached) {
+      if (cached.size < INCREMENTAL_CACHE_SIZE) {
+        break
+      }
+      // Map keys are stored in insertion order.
+      // We re-insert keys on cache hit, 'cached' is a cheap LRU.
+      cached.delete(key)
+    }
+  }
+  return { chunks, newChunks }
 }
 
 /**
