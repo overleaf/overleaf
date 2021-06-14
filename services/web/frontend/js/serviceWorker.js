@@ -415,7 +415,7 @@ function processPdfRequest(
           if (offsetStart > 0 || offsetEnd > 0) {
             // compute index positions for slice to handle case where offsetEnd=0
             const chunkSize = chunk.end - chunk.start
-            data = data.slice(offsetStart, chunkSize - offsetEnd)
+            data = data.subarray(offsetStart, chunkSize - offsetEnd)
           }
           const insertPosition = Math.max(chunk.start - start, 0)
           reAssembledBlob.set(data, insertPosition)
