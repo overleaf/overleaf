@@ -21,6 +21,7 @@ const crypto = require('crypto')
 const fs = require('fs')
 const logger = require('logger-sharelatex')
 const async = require('async')
+const Metrics = require('./Metrics')
 
 module.exports = UrlCache = {
   downloadUrlToFile(project_id, url, destPath, lastModified, callback) {
@@ -206,17 +207,22 @@ module.exports = UrlCache = {
     if (callback == null) {
       callback = function (error, urlDetails) {}
     }
+    const timer = new Metrics.Timer('db-find-url-details')
     const job = (cb) =>
       db.UrlCache.findOne({ where: { url, project_id } })
         .then((urlDetails) => cb(null, urlDetails))
         .error(cb)
-    return dbQueue.queue.push(job, callback)
+    dbQueue.queue.push(job, (error, urlDetails) => {
+      timer.done()
+      callback(error, urlDetails)
+    })
   },
 
   _updateOrCreateUrlDetails(project_id, url, lastModified, callback) {
     if (callback == null) {
       callback = function (error) {}
     }
+    const timer = new Metrics.Timer('db-update-or-create-url-details')
     const job = (cb) =>
       db.UrlCache.findOrCreate({ where: { url, project_id } })
         .spread((urlDetails, created) =>
@@ -226,24 +232,32 @@ module.exports = UrlCache = {
             .error(cb)
         )
         .error(cb)
-    return dbQueue.queue.push(job, callback)
+    dbQueue.queue.push(job, (error) => {
+      timer.done()
+      callback(error)
+    })
   },
 
   _clearUrlDetails(project_id, url, callback) {
     if (callback == null) {
       callback = function (error) {}
     }
+    const timer = new Metrics.Timer('db-clear-url-details')
     const job = (cb) =>
       db.UrlCache.destroy({ where: { url, project_id } })
         .then(() => cb(null))
         .error(cb)
-    return dbQueue.queue.push(job, callback)
+    dbQueue.queue.push(job, (error) => {
+      timer.done()
+      callback(error)
+    })
   },
 
   _findAllUrlsInProject(project_id, callback) {
     if (callback == null) {
       callback = function (error, urls) {}
     }
+    const timer = new Metrics.Timer('db-find-urls-in-project')
     const job = (cb) =>
       db.UrlCache.findAll({ where: { project_id } })
         .then((urlEntries) =>
@@ -253,6 +267,9 @@ module.exports = UrlCache = {
           )
         )
         .error(cb)
-    return dbQueue.queue.push(job, callback)
+    dbQueue.queue.push(job, (err, urls) => {
+      timer.done()
+      callback(err, urls)
+    })
   }
 }
