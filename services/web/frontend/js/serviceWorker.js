@@ -3,7 +3,7 @@ const OError = require('@overleaf/o-error')
 
 // VERSION should get incremented when making changes to caching behavior or
 //  adjusting metrics collection.
-const VERSION = 1
+const VERSION = 2
 
 const COMPILE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/compile$/
 const PDF_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/.*\/output.pdf$/
@@ -254,7 +254,21 @@ function processPdfRequest(
   const chunksSize = countBytes(chunks)
   const size = end - start
 
-  if (chunks.length + dynamicChunks.length > MAX_SUBREQUEST_COUNT) {
+  if (chunks.length === 0 && dynamicChunks.length === 1) {
+    // fall back to the original range request when no chunks are cached.
+    trackDownloadStats(metrics, {
+      size,
+      cachedCount: 0,
+      cachedBytes: 0,
+      fetchedCount: 1,
+      fetchedBytes: size,
+    })
+    return
+  }
+  if (
+    chunks.length + (dynamicChunks.length > 0 ? 1 : 0) >
+    MAX_SUBREQUEST_COUNT
+  ) {
     // fall back to the original range request when splitting the range creates
     // too many subrequests.
     metrics.tooManyRequestsCount++
@@ -288,6 +302,27 @@ function processPdfRequest(
   // URL prefix is /project/:id/user/:id/build/... or /project/:id/build/...
   //  for authenticated and unauthenticated users respectively.
   const perUserPrefix = file.url.slice(0, file.url.indexOf('/build/'))
+  const byteRanges = dynamicChunks
+    .map(chunk => `${chunk.start}-${chunk.end - 1}`)
+    .join(',')
+  const coalescedDynamicChunks = []
+  switch (dynamicChunks.length) {
+    case 0:
+      break
+    case 1:
+      coalescedDynamicChunks.push({
+        chunk: dynamicChunks[0],
+        url: event.request.url,
+        init: { headers: { Range: `bytes=${byteRanges}` } },
+      })
+      break
+    default:
+      coalescedDynamicChunks.push({
+        chunk: dynamicChunks,
+        url: event.request.url,
+        init: { headers: { Range: `bytes=${byteRanges}` } },
+      })
+  }
   const requests = chunks
     .map(chunk => {
       const path = `${perUserPrefix}/content/${file.contentId}/${chunk.hash}`
@@ -300,16 +335,7 @@ function processPdfRequest(
       }
       return { chunk, url: url.toString() }
     })
-    .concat(
-      dynamicChunks.map(chunk => {
-        const { start, end } = chunk
-        return {
-          chunk,
-          url: event.request.url,
-          init: { headers: { Range: `bytes=${start}-${end - 1}` } },
-        }
-      })
-    )
+    .concat(coalescedDynamicChunks)
   let cachedCount = 0
   let cachedBytes = 0
   let fetchedCount = 0
@@ -324,6 +350,13 @@ function processPdfRequest(
               throw new OError(
                 'non successful response status: ' + response.status
               )
+            }
+            const boundary = getMultipartBoundary(response)
+            if (Array.isArray(chunk) && !boundary) {
+              throw new OError('missing boundary on multipart request', {
+                headers: Object.fromEntries(response.headers.entries()),
+                chunk,
+              })
             }
             const blobFetchDate = getServerTime(response)
             const blobSize = getResponseSize(response)
@@ -343,20 +376,33 @@ function processPdfRequest(
                 fetchedBytes += blobSize
               }
             }
-            return response.arrayBuffer()
-          })
-          .then(arrayBuffer => {
-            return {
-              chunk,
-              data: backFillObjectContext(chunk, arrayBuffer),
-            }
+            return response
+              .blob()
+              .then(blob => blob.arrayBuffer())
+              .then(arraybuffer => {
+                return {
+                  boundary,
+                  chunk,
+                  data: backFillObjectContext(chunk, arraybuffer),
+                }
+              })
           })
           .catch(error => {
             throw OError.tag(error, 'cannot fetch chunk', { url })
           })
       )
     )
-      .then(responses => {
+      .then(rawResponses => {
+        const responses = []
+        for (const response of rawResponses) {
+          if (response.boundary) {
+            responses.push(
+              ...getMultiPartResponses(response, file, metrics, verifyChunks)
+            )
+          } else {
+            responses.push(response)
+          }
+        }
         responses.forEach(({ chunk, data }) => {
           // overlap:
           //     | REQUESTED_RANGE |
@@ -453,6 +499,62 @@ function getResponseSize(response) {
   const raw = response.headers.get('Content-Length')
   if (!raw) return 0
   return parseInt(raw, 10)
+}
+
+/**
+ *
+ * @param {Response} response
+ */
+function getMultipartBoundary(response) {
+  const raw = response.headers.get('Content-Type')
+  if (!raw.includes('multipart/byteranges')) return ''
+  const idx = raw.indexOf('boundary=')
+  if (idx === -1) return ''
+  return raw.slice(idx + 'boundary='.length)
+}
+
+/**
+ * @param {Object} response
+ * @param {Object} file
+ * @param {Object} metrics
+ * @param {boolean} verifyChunks
+ */
+function getMultiPartResponses(response, file, metrics, verifyChunks) {
+  const { chunk: chunks, data, boundary } = response
+  const responses = []
+  let offsetStart = 0
+  for (const chunk of chunks) {
+    const header = `\r\n--${boundary}\r\nContent-Type: application/pdf\r\nContent-Range: bytes ${
+      chunk.start
+    }-${chunk.end - 1}/${file.size}\r\n\r\n`
+    const headerSize = header.length
+
+    // Verify header content. A proxy might have tampered with it.
+    const headerRaw = ENCODER.encode(header)
+    if (
+      !data
+        .subarray(offsetStart, offsetStart + headerSize)
+        .every((v, idx) => v === headerRaw[idx])
+    ) {
+      metrics.headerVerifyFailure |= 0
+      metrics.headerVerifyFailure++
+      throw new OError('multipart response header does not match', {
+        actual: new TextDecoder().decode(
+          data.subarray(offsetStart, offsetStart + headerSize)
+        ),
+        expected: header,
+      })
+    }
+
+    offsetStart += headerSize
+    const chunkSize = chunk.end - chunk.start
+    responses.push({
+      chunk,
+      data: data.subarray(offsetStart, offsetStart + chunkSize),
+    })
+    offsetStart += chunkSize
+  }
+  return responses
 }
 
 /**
