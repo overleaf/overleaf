@@ -8,9 +8,9 @@
 <p align="center">
   <a href="#key-features">Key Features</a> •
   <a href="https://github.com/overleaf/overleaf/wiki">Wiki</a> •
-  <a href="https://www.sharelatex.com/i/university/onsite">Server Pro</a> •
+  <a href="https://www.overleaf.com/for/enterprises">Server Pro</a> •
   <a href="#contributing">Contributing</a> •
-  <a href="https://www.overleaf.com/for/enterprises">Mailing List</a> •
+  <a href="https://mailchi.mp/overleaf.com/community-edition-and-server-pro">Mailing List</a> •
   <a href="#authors">Authors</a> •
   <a href="#license">License</a>
 </p>
@@ -22,9 +22,9 @@
 
 ## Key Features
 
-[Overleaf](https://www.overleaf.com) is an open-source online real-time collaborative LaTeX editor. We run a hosted version at http://www.overleaf.com, but you can also run your own local version, and contribute to the development of Overleaf.
+[Overleaf](https://www.overleaf.com) is an open-source online real-time collaborative LaTeX editor. We run a hosted version at [www.overleaf.com](https://www.overleaf.com), but you can also run your own local version, and contribute to the development of Overleaf.
 
-*[If you want help installing and maintaining Overleaf at your university or workplace, we offer an officially supported version called Overleaf Server Pro. It also comes with extra security and admin features. Click here to find out more!](https://www.overleaf.com/university/onsite.html)*
+*[If you want help installing and maintaining Overleaf in your lab or workplace, we offer an officially supported version called Overleaf Server Pro. It also comes with extra security and admin features. Click here to find out more!](https://www.overleaf.com/for/enterprises)*
 
 ## Keeping up to date
 
