@@ -3,6 +3,7 @@ const OError = require('@overleaf/o-error')
 
 // VERSION should get incremented when making changes to caching behavior or
 //  adjusting metrics collection.
+// Keep in sync with PdfJsMetrics.
 const VERSION = 2
 
 const CLEAR_CACHE_REQUEST_MATCHER = /^\/project\/[0-9a-f]{24}\/output$/
