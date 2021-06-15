@@ -35,6 +35,7 @@
     "p-limit": "^3.1.0",
     "pdfjs-dist": "^2.7.570",
     "request": "^2.88.2",
+    "send": "^0.17.1",
     "sequelize": "^5.21.5",
     "settings-sharelatex": "^1.1.0",
     "sqlite3": "^4.1.1",
