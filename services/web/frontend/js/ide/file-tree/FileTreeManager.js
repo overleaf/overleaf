@@ -19,12 +19,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import './directives/fileEntity'
-import './directives/draggable'
-import './directives/droppable'
 import './controllers/FileTreeController'
 import './controllers/FileTreeEntityController'
 import './controllers/FileTreeFolderController'
-import './controllers/FileTreeRootFolderController'
 import '../../features/file-tree/controllers/file-tree-controller'
 let FileTreeManager
 
@@ -480,24 +477,6 @@ export default FileTreeManager = class FileTreeManager {
         return 0
       }
     })
-  }
-
-  getEntityPath(entity) {
-    return this._getEntityPathInFolder(this.$scope.rootFolder, entity)
-  }
-
-  _getEntityPathInFolder(folder, entity) {
-    for (const child of Array.from(folder.children || [])) {
-      if (child === entity) {
-        return entity.name
-      } else if (child.type === 'folder') {
-        const path = this._getEntityPathInFolder(child, entity)
-        if (path != null) {
-          return child.name + '/' + path
-        }
-      }
-    }
-    return null
   }
 
   getCurrentFolder() {
