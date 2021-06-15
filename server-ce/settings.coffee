@@ -54,7 +54,7 @@ settings =
 		web: redisConfig =
 			host: process.env["SHARELATEX_REDIS_HOST"] or "dockerhost"
 			port: process.env["SHARELATEX_REDIS_PORT"] or "6379"
-			password: process.env["SHARELATEX_REDIS_PASS"] or ""
+			password: process.env["SHARELATEX_REDIS_PASS"] or undefined
 			key_schema:
 				# document-updater
 				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
