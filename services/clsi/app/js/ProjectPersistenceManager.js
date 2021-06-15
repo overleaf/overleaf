@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ProjectPersistenceManager
+const Metrics = require('./Metrics')
 const UrlCache = require('./UrlCache')
 const CompileManager = require('./CompileManager')
 const db = require('./db')
@@ -21,7 +22,6 @@ const logger = require('logger-sharelatex')
 const oneDay = 24 * 60 * 60 * 1000
 const Settings = require('settings-sharelatex')
 const diskusage = require('diskusage')
-const Metrics = require('./Metrics')
 
 module.exports = ProjectPersistenceManager = {
   EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5,
