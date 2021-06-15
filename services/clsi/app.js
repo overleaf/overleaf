@@ -412,8 +412,9 @@ if (!module.parent) {
 module.exports = app
 
 setInterval(() => {
-  ProjectPersistenceManager.refreshExpiryTimeout()
-  ProjectPersistenceManager.clearExpiredProjects()
+  ProjectPersistenceManager.refreshExpiryTimeout(() => {
+    ProjectPersistenceManager.clearExpiredProjects()
+  })
 }, tenMinutes)
 
 function __guard__(value, transform) {
