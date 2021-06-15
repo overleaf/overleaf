@@ -22,7 +22,10 @@
   "rules": {
     // Swap the no-unused-expressions rule with a more chai-friendly one
     "no-unused-expressions": 0,
-    "chai-friendly/no-unused-expressions": "error"
+    "chai-friendly/no-unused-expressions": "error",
+
+    // Do not allow importing of implicit dependencies.
+    "import/no-extraneous-dependencies": "error"
   },
   "overrides": [
     {
@@ -57,7 +60,13 @@
       "files": ["app/**/*.js", "app.js", "index.js"],
       "rules": {
         // don't allow console.log in backend code
-        "no-console": "error"
+        "no-console": "error",
+
+        // Do not allow importing of implicit dependencies.
+        "import/no-extraneous-dependencies": ["error", {
+          // Do not allow importing of devDependencies.
+          "devDependencies": false
+        }]
       }
     }
   ]

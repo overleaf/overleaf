@@ -15,7 +15,7 @@
  */
 let CommandRunner
 const { spawn } = require('child_process')
-const _ = require('underscore')
+const _ = require('lodash')
 const logger = require('logger-sharelatex')
 
 logger.info('using standard command runner')
