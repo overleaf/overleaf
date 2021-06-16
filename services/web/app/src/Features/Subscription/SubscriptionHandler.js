@@ -7,7 +7,6 @@ const logger = require('logger-sharelatex')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
 const LimitationsManager = require('./LimitationsManager')
 const EmailHandler = require('../Email/EmailHandler')
-const Analytics = require('../Analytics/AnalyticsManager')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHelper = require('./SubscriptionHelper')
 
@@ -220,7 +219,6 @@ const SubscriptionHandler = {
                   ),
                 ONE_HOUR_IN_MS
               )
-              Analytics.recordEvent(user._id, 'subscription-canceled')
               callback()
             }
           )
@@ -260,7 +258,6 @@ const SubscriptionHandler = {
                   }
                 }
               )
-              Analytics.recordEvent(user._id, 'subscription-reactivated')
               callback()
             }
           )

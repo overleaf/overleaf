@@ -21,12 +21,18 @@ function sendRecurlyAnalyticsEvent(event, eventData) {
       _sendSubscriptionReactivatedEvent(eventData)
       break
     case 'paid_charge_invoice_notification':
-      if (eventData.invoice.state === 'paid') {
+      if (
+        eventData.invoice.state === 'paid' &&
+        eventData.invoice.total_in_cents > 0
+      ) {
         _sendInvoicePaidEvent(eventData)
       }
       break
     case 'closed_invoice_notification':
-      if (eventData.invoice.state === 'collected') {
+      if (
+        eventData.invoice.state === 'collected' &&
+        eventData.invoice.total_in_cents > 0
+      ) {
         _sendInvoicePaidEvent(eventData)
       }
       break

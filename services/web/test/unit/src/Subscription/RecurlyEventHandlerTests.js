@@ -250,6 +250,7 @@ describe('RecurlyEventHandler', function () {
         },
         invoice: {
           state: 'paid',
+          total_in_cents: 720,
         },
       }
     )
@@ -258,6 +259,22 @@ describe('RecurlyEventHandler', function () {
       this.userId,
       'subscription-invoice-collected'
     )
+  })
+
+  it('with paid_charge_invoice_notification and total_in_cents 0', function () {
+    this.RecurlyEventHandler.sendRecurlyAnalyticsEvent(
+      'paid_charge_invoice_notification',
+      {
+        account: {
+          account_code: this.userId,
+        },
+        invoice: {
+          state: 'paid',
+          total_in_cents: 0,
+        },
+      }
+    )
+    sinon.assert.notCalled(this.AnalyticsManager.recordEvent)
   })
 
   it('with closed_invoice_notification', function () {
@@ -269,6 +286,7 @@ describe('RecurlyEventHandler', function () {
         },
         invoice: {
           state: 'collected',
+          total_in_cents: 720,
         },
       }
     )
@@ -277,5 +295,21 @@ describe('RecurlyEventHandler', function () {
       this.userId,
       'subscription-invoice-collected'
     )
+  })
+
+  it('with closed_invoice_notification and total_in_cents 0', function () {
+    this.RecurlyEventHandler.sendRecurlyAnalyticsEvent(
+      'closed_invoice_notification',
+      {
+        account: {
+          account_code: this.userId,
+        },
+        invoice: {
+          state: 'collected',
+          total_in_cents: 0,
+        },
+      }
+    )
+    sinon.assert.notCalled(this.AnalyticsManager.recordEvent)
   })
 })
