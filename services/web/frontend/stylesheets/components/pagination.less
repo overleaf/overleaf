@@ -10,6 +10,7 @@
   > li {
     display: inline; // Remove list-style and block-level defaults
     > a,
+    > button,
     > span {
       position: relative;
       float: left; // Collapse white-space
@@ -23,6 +24,7 @@
     }
     &:first-child {
       > a,
+      > button,
       > span {
         margin-left: 0;
         .border-left-radius(@border-radius-base);
@@ -30,6 +32,7 @@
     }
     &:last-child {
       > a,
+      > button,
       > span {
         .border-right-radius(@border-radius-base);
       }
@@ -37,6 +40,7 @@
   }
 
   > li > a,
+  > li > button,
   > li > span {
     &:hover,
     &:focus {
@@ -47,6 +51,7 @@
   }
 
   > .active > a,
+  > .active > button,
   > .active > span {
     &,
     &:hover,
@@ -65,12 +70,19 @@
     > span:focus,
     > a,
     > a:hover,
-    > a:focus {
+    > a:focus,
+    > button,
+    > button:hover,
+    > button:focus {
       color: @pagination-disabled-color;
       background-color: @pagination-disabled-bg;
       border-color: @pagination-disabled-border;
       cursor: not-allowed;
     }
+  }
+
+  .ellipses {
+    pointer-events: none;
   }
 }
 
