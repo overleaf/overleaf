@@ -715,7 +715,7 @@ const ProjectController = {
           if (!userId) return cb(null, '')
           SplitTestHandler.getTestSegmentation(
             userId,
-            'pdf_caching_beta_full',
+            'pdf_caching_5',
             (err, segmentation) => {
               if (err) {
                 // Do not fail loading the editor.
@@ -813,8 +813,7 @@ const ProjectController = {
                 return false
               }
               const canSeeFeaturePreview =
-                user.alphaProgram ||
-                (user.betaProgram && pdfCachingFeatureFlag.includes(flag))
+                user.alphaProgram || pdfCachingFeatureFlag.includes(flag)
               if (!canSeeFeaturePreview) {
                 // The user is not in the target group.
                 return false

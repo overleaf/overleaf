@@ -1230,11 +1230,6 @@ describe('ProjectController', function () {
           this.user.alphaProgram = true
         })
       }
-      function tagBeta() {
-        beforeEach(function () {
-          this.user.betaProgram = true
-        })
-      }
 
       beforeEach(function () {
         this.settings.enablePdfCaching = true
@@ -1252,13 +1247,9 @@ describe('ProjectController', function () {
           tagAlpha()
           expectToCollectMetricsAndCachePDF()
         })
-        describe('beta user', function () {
-          tagBeta()
-          expectToNotBeEnrolledAtAll()
-        })
       })
 
-      describe('during beta roll-out', function () {
+      describe('during regular roll-out', function () {
         describe('disabled', function () {
           showNoVariant()
 
@@ -1273,17 +1264,13 @@ describe('ProjectController', function () {
             tagAlpha()
             expectToCollectMetricsAndCachePDF()
           })
-          describe('beta user', function () {
-            tagBeta()
-            expectToNotBeEnrolledAtAll()
-          })
         })
 
         describe('variant=collect-metrics', function () {
           showVariant('collect-metrics')
 
           describe('regular user', function () {
-            expectToNotBeEnrolledAtAll()
+            expectToCollectMetricsOnly()
           })
           describe('anonymous user', function () {
             tagAnonymous()
@@ -1292,10 +1279,6 @@ describe('ProjectController', function () {
           describe('alpha user', function () {
             tagAlpha()
             expectToCollectMetricsAndCachePDF()
-          })
-          describe('beta user', function () {
-            tagBeta()
-            expectToCollectMetricsOnly()
           })
         })
 
@@ -1303,7 +1286,7 @@ describe('ProjectController', function () {
           showVariant('collect-metrics-and-enable-caching')
 
           describe('regular user', function () {
-            expectToNotBeEnrolledAtAll()
+            expectToCollectMetricsAndCachePDF()
           })
           describe('anonymous user', function () {
             tagAnonymous()
@@ -1311,10 +1294,6 @@ describe('ProjectController', function () {
           })
           describe('alpha user', function () {
             tagAlpha()
-            expectToCollectMetricsAndCachePDF()
-          })
-          describe('beta user', function () {
-            tagBeta()
             expectToCollectMetricsAndCachePDF()
           })
         })
@@ -1323,7 +1302,7 @@ describe('ProjectController', function () {
           showVariant('enable-caching-only')
 
           describe('regular user', function () {
-            expectToNotBeEnrolledAtAll()
+            expectToCachePDFOnly()
           })
           describe('anonymous user', function () {
             tagAnonymous()
@@ -1332,10 +1311,6 @@ describe('ProjectController', function () {
           describe('alpha user', function () {
             tagAlpha()
             expectToCollectMetricsAndCachePDF()
-          })
-          describe('beta user', function () {
-            tagBeta()
-            expectToCachePDFOnly()
           })
         })
       })

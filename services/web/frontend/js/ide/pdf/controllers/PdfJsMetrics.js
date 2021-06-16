@@ -79,7 +79,7 @@ function submitCompileMetrics(metrics) {
     compileTimeServerE2E: timings.compileE2E,
   }
   sl_console.log('/event/compile-metrics', JSON.stringify(metrics))
-  sendMB('compile-metrics-v3', leanMetrics, SAMPLING_RATE)
+  sendMB('compile-metrics-v4', leanMetrics, SAMPLING_RATE)
 }
 
 function submitPDFBandwidth(metrics) {
@@ -91,5 +91,5 @@ function submitPDFBandwidth(metrics) {
     })
   })
   sl_console.log('/event/pdf-bandwidth', JSON.stringify(metrics))
-  sendMB('pdf-bandwidth-v3', metricsFlat, SAMPLING_RATE)
+  sendMB('pdf-bandwidth-v4', metricsFlat, SAMPLING_RATE)
 }
