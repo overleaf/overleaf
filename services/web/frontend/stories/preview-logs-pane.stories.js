@@ -3,6 +3,7 @@ import PreviewLogsPane from '../js/features/preview/components/preview-logs-pane
 import { EditorProvider } from '../js/shared/context/editor-context'
 import { ApplicationProvider } from '../js/shared/context/application-context'
 import useFetchMock from './hooks/use-fetch-mock'
+import { IdeProvider } from '../js/shared/context/ide-context'
 
 export const TimedOutError = args => {
   useFetchMock(fetchMock => {
@@ -25,9 +26,11 @@ export const TimedOutError = args => {
 
   return (
     <ApplicationProvider>
-      <EditorProvider ide={ide} settings={{}}>
-        <PreviewLogsPane {...args} />
-      </EditorProvider>
+      <IdeProvider ide={ide}>
+        <EditorProvider settings={{}}>
+          <PreviewLogsPane {...args} />
+        </EditorProvider>
+      </IdeProvider>
     </ApplicationProvider>
   )
 }
@@ -58,9 +61,11 @@ export const TimedOutErrorWithPriorityCompile = args => {
 
   return (
     <ApplicationProvider>
-      <EditorProvider ide={ide} settings={{}}>
-        <PreviewLogsPane {...args} />
-      </EditorProvider>
+      <IdeProvider ide={ide}>
+        <EditorProvider settings={{}}>
+          <PreviewLogsPane {...args} />
+        </EditorProvider>
+      </IdeProvider>
     </ApplicationProvider>
   )
 }

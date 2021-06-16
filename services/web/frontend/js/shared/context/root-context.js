@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import createSharedContext from 'react2angular-shared-context'
 
 import { ApplicationProvider } from './application-context'
+import { IdeProvider } from './ide-context'
 import { EditorProvider } from './editor-context'
 import { CompileProvider } from './compile-context'
 import { LayoutProvider } from './layout-context'
@@ -13,17 +14,19 @@ export function ContextRoot({ children, ide, settings }) {
 
   return (
     <ApplicationProvider>
-      <EditorProvider ide={ide} settings={settings}>
-        <CompileProvider $scope={ide.$scope}>
-          <LayoutProvider $scope={ide.$scope}>
-            {isAnonymousUser ? (
-              children
-            ) : (
-              <ChatProvider>{children}</ChatProvider>
-            )}
-          </LayoutProvider>
-        </CompileProvider>
-      </EditorProvider>
+      <IdeProvider ide={ide}>
+        <EditorProvider settings={settings}>
+          <CompileProvider>
+            <LayoutProvider>
+              {isAnonymousUser ? (
+                children
+              ) : (
+                <ChatProvider>{children}</ChatProvider>
+              )}
+            </LayoutProvider>
+          </CompileProvider>
+        </EditorProvider>
+      </IdeProvider>
     </ApplicationProvider>
   )
 }

@@ -8,6 +8,8 @@ import { ApplicationProvider } from '../../../frontend/js/shared/context/applica
 import { EditorProvider } from '../../../frontend/js/shared/context/editor-context'
 import { LayoutProvider } from '../../../frontend/js/shared/context/layout-context'
 import { ChatProvider } from '../../../frontend/js/features/chat/context/chat-context'
+import { IdeProvider } from '../../../frontend/js/shared/context/ide-context'
+import { get } from 'lodash'
 
 export function EditorProviders({
   user = { id: '123abd' },
@@ -17,6 +19,7 @@ export function EditorProviders({
     removeListener: sinon.stub(),
   },
   isRestrictedTokenMember = false,
+  scope,
   children,
 }) {
   window.user = user || window.user
@@ -24,38 +27,44 @@ export function EditorProviders({
   window.project_id = projectId != null ? projectId : window.project_id
   window.isRestrictedTokenMember = isRestrictedTokenMember
 
-  window._ide = {
-    $scope: {
-      project: {
-        owner: {
-          _id: '124abd',
-        },
+  const $scope = {
+    project: {
+      owner: {
+        _id: '124abd',
       },
-      ui: {
-        chatOpen: true,
-        pdfLayout: 'flat',
-      },
-      $watch: () => {},
-      toggleHistory: () => {},
     },
-    socket,
+    ui: {
+      chatOpen: true,
+      pdfLayout: 'flat',
+    },
+    $watch: (path, callback) => {
+      callback(get($scope, path))
+      return () => null
+    },
+    $applyAsync: () => {},
+    toggleHistory: () => {},
+    ...scope,
   }
+
+  window._ide = { $scope, socket }
+
   return (
     <ApplicationProvider>
-      <EditorProvider ide={window._ide} settings={{}}>
-        <LayoutProvider $scope={window._ide.$scope}>{children}</LayoutProvider>
-      </EditorProvider>
+      <IdeProvider ide={window._ide}>
+        <EditorProvider settings={{}}>
+          <LayoutProvider>{children}</LayoutProvider>
+        </EditorProvider>
+      </IdeProvider>
     </ApplicationProvider>
   )
 }
 
 export function renderWithEditorContext(component, contextProps) {
-  return render(component, {
-    // eslint-disable-next-line react/display-name
-    wrapper: ({ children }) => (
-      <EditorProviders {...contextProps}>{children}</EditorProviders>
-    ),
-  })
+  const EditorProvidersWrapper = ({ children }) => (
+    <EditorProviders {...contextProps}>{children}</EditorProviders>
+  )
+
+  return render(component, { wrapper: EditorProvidersWrapper })
 }
 
 export function ChatProviders({ children, ...props }) {
@@ -67,12 +76,11 @@ export function ChatProviders({ children, ...props }) {
 }
 
 export function renderWithChatContext(component, props) {
-  return render(component, {
-    // eslint-disable-next-line react/display-name
-    wrapper: ({ children }) => (
-      <ChatProviders {...props}>{children}</ChatProviders>
-    ),
-  })
+  const ChatProvidersWrapper = ({ children }) => (
+    <ChatProviders {...props}>{children}</ChatProviders>
+  )
+
+  return render(component, { wrapper: ChatProvidersWrapper })
 }
 
 export function cleanUpContext() {

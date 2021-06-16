@@ -84,12 +84,11 @@ export default function ShareProjectModal({
   show,
   animation = true,
   isAdmin,
-  ide,
 }) {
   const [inFlight, setInFlight] = useState(false)
   const [error, setError] = useState()
 
-  const [project, setProject] = useScopeValue('project', ide.$scope, true)
+  const [project, setProject] = useScopeValue('project', true)
 
   // reset error when the modal is opened
   useEffect(() => {
@@ -167,8 +166,5 @@ ShareProjectModal.propTypes = {
   animation: PropTypes.bool,
   handleHide: PropTypes.func.isRequired,
   isAdmin: PropTypes.bool.isRequired,
-  ide: PropTypes.shape({
-    $scope: PropTypes.object.isRequired,
-  }).isRequired,
   show: PropTypes.bool.isRequired,
 }

@@ -1,17 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
+import PropTypes from 'prop-types'
 import _ from 'lodash'
+import { useIdeContext } from '../ide-context'
 
 /**
  * Binds a property in an Angular scope making it accessible in a React
  * component. The interface is compatible with React.useState(), including
  * the option of passing a function to the setter.
  *
- * @param {string} path - dot '.' path of a property in `sourceScope`.
- * @param {object} $scope - Angular $scope containing the value to bind.
+ * @param {string} path - dot '.' path of a property in the Angular scope.
  * @param {boolean} deep
  * @returns {[any, function]} - Binded value and setter function tuple.
  */
-export default function useScopeValue(path, $scope, deep = false) {
+export default function useScopeValue(path, deep = false) {
+  const { $scope } = useIdeContext({
+    $scope: PropTypes.object.isRequired,
+  })
+
   const [value, setValue] = useState(() => _.get($scope, path))
 
   useEffect(() => {

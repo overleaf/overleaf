@@ -13,11 +13,11 @@ CompileContext.Provider.propTypes = {
   }),
 }
 
-export function CompileProvider({ children, $scope }) {
-  const [pdfUrl] = useScopeValue('pdf.url', $scope)
-  const [pdfDownloadUrl] = useScopeValue('pdf.downloadUrl', $scope)
-  const [logEntries] = useScopeValue('pdf.logEntries', $scope)
-  const [uncompiled] = useScopeValue('pdf.uncompiled', $scope)
+export function CompileProvider({ children }) {
+  const [pdfUrl] = useScopeValue('pdf.url')
+  const [pdfDownloadUrl] = useScopeValue('pdf.downloadUrl')
+  const [logEntries] = useScopeValue('pdf.logEntries')
+  const [uncompiled] = useScopeValue('pdf.uncompiled')
 
   const value = {
     pdfUrl,
@@ -27,17 +27,12 @@ export function CompileProvider({ children, $scope }) {
   }
 
   return (
-    <>
-      <CompileContext.Provider value={value}>
-        {children}
-      </CompileContext.Provider>
-    </>
+    <CompileContext.Provider value={value}>{children}</CompileContext.Provider>
   )
 }
 
 CompileProvider.propTypes = {
   children: PropTypes.any,
-  $scope: PropTypes.any.isRequired,
 }
 
 export function useCompileContext(propTypes) {

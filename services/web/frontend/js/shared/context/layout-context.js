@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from './util/scope-value-hook'
+import { useIdeContext } from './ide-context'
 
 export const LayoutContext = createContext()
 
@@ -18,8 +19,11 @@ LayoutContext.Provider.propTypes = {
   }).isRequired,
 }
 
-export function LayoutProvider({ children, $scope }) {
-  const [view, _setView] = useScopeValue('ui.view', $scope)
+export function LayoutProvider({ children }) {
+  const { $scope } = useIdeContext()
+
+  const [view, _setView] = useScopeValue('ui.view')
+
   const setView = useCallback(
     value => {
       _setView(value)
@@ -30,19 +34,14 @@ export function LayoutProvider({ children, $scope }) {
     [$scope, _setView]
   )
 
-  const [chatIsOpen, setChatIsOpen] = useScopeValue('ui.chatOpen', $scope)
+  const [chatIsOpen, setChatIsOpen] = useScopeValue('ui.chatOpen')
   const [reviewPanelOpen, setReviewPanelOpen] = useScopeValue(
-    'ui.reviewPanelOpen',
-    $scope
+    'ui.reviewPanelOpen'
   )
-  const [leftMenuShown, setLeftMenuShown] = useScopeValue(
-    'ui.leftMenuShown',
-    $scope
-  )
+  const [leftMenuShown, setLeftMenuShown] = useScopeValue('ui.leftMenuShown')
+  const [pdfLayout] = useScopeValue('ui.pdfLayout')
 
-  const [pdfLayout] = useScopeValue('ui.pdfLayout', $scope)
-
-  const layoutContextValue = {
+  const value = {
     view,
     setView,
     chatIsOpen,
@@ -55,17 +54,12 @@ export function LayoutProvider({ children, $scope }) {
   }
 
   return (
-    <LayoutContext.Provider value={layoutContextValue}>
-      {children}
-    </LayoutContext.Provider>
+    <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>
   )
 }
 
 LayoutProvider.propTypes = {
   children: PropTypes.any,
-  $scope: PropTypes.shape({
-    toggleHistory: PropTypes.func.isRequired,
-  }).isRequired,
 }
 
 export function useLayoutContext(propTypes) {

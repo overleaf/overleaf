@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import ShareProjectModal from '../js/features/share-project-modal/components/share-project-modal'
-import { ContextRoot } from '../js/shared/context/root-context'
 import useFetchMock from './hooks/use-fetch-mock'
+import { withContextRoot } from './utils/with-context-root'
 
 export const LinkSharingOff = args => {
   useFetchMock(setupFetchMock)
@@ -11,9 +11,7 @@ export const LinkSharingOff = args => {
     publicAccesLevel: 'private',
   }
 
-  return renderWithContext(
-    <ShareProjectModal {...args} ide={ideWithProject(project)} />
-  )
+  return withContextRoot(<ShareProjectModal {...args} />, { project })
 }
 
 export const LinkSharingOn = args => {
@@ -24,9 +22,7 @@ export const LinkSharingOn = args => {
     publicAccesLevel: 'tokenBased',
   }
 
-  return renderWithContext(
-    <ShareProjectModal {...args} ide={ideWithProject(project)} />
-  )
+  return withContextRoot(<ShareProjectModal {...args} />, { project })
 }
 
 export const LinkSharingLoading = args => {
@@ -38,9 +34,7 @@ export const LinkSharingLoading = args => {
     tokens: undefined,
   }
 
-  return renderWithContext(
-    <ShareProjectModal {...args} ide={ideWithProject(project)} />
-  )
+  return withContextRoot(<ShareProjectModal {...args} />, { project })
 }
 
 export const NonAdminLinkSharingOff = args => {
@@ -49,13 +43,9 @@ export const NonAdminLinkSharingOff = args => {
     publicAccesLevel: 'private',
   }
 
-  return renderWithContext(
-    <ShareProjectModal
-      {...args}
-      isAdmin={false}
-      ide={ideWithProject(project)}
-    />
-  )
+  return withContextRoot(<ShareProjectModal {...args} isAdmin={false} />, {
+    project,
+  })
 }
 
 export const NonAdminLinkSharingOn = args => {
@@ -64,13 +54,9 @@ export const NonAdminLinkSharingOn = args => {
     publicAccesLevel: 'tokenBased',
   }
 
-  return renderWithContext(
-    <ShareProjectModal
-      {...args}
-      isAdmin={false}
-      ide={ideWithProject(project)}
-    />
-  )
+  return withContextRoot(<ShareProjectModal {...args} isAdmin={false} />, {
+    project,
+  })
 }
 
 export const RestrictedTokenMember = args => {
@@ -91,9 +77,7 @@ export const RestrictedTokenMember = args => {
     publicAccesLevel: 'tokenBased',
   }
 
-  return renderWithContext(
-    <ShareProjectModal {...args} ide={ideWithProject(project)} />
-  )
+  return withContextRoot(<ShareProjectModal {...args} />, { project })
 }
 
 export const LegacyLinkSharingReadAndWrite = args => {
@@ -104,9 +88,7 @@ export const LegacyLinkSharingReadAndWrite = args => {
     publicAccesLevel: 'readAndWrite',
   }
 
-  return renderWithContext(
-    <ShareProjectModal {...args} ide={ideWithProject(project)} />
-  )
+  return withContextRoot(<ShareProjectModal {...args} />, { project })
 }
 
 export const LegacyLinkSharingReadOnly = args => {
@@ -117,9 +99,7 @@ export const LegacyLinkSharingReadOnly = args => {
     publicAccesLevel: 'readOnly',
   }
 
-  return renderWithContext(
-    <ShareProjectModal {...args} ide={ideWithProject(project)} />
-  )
+  return withContextRoot(<ShareProjectModal {...args} />, { project })
 }
 
 export const LimitedCollaborators = args => {
@@ -133,9 +113,7 @@ export const LimitedCollaborators = args => {
     },
   }
 
-  return renderWithContext(
-    <ShareProjectModal {...args} ide={ideWithProject(project)} />
-  )
+  return withContextRoot(<ShareProjectModal {...args} />, { project })
 }
 
 const project = {
@@ -197,18 +175,6 @@ export default {
   argTypes: {
     handleHide: { action: 'hide' },
   },
-}
-
-// Unfortunately, we cannot currently use decorators here, since we need to
-// set a value on window, before the contexts are rendered.
-// When using decorators, the contexts are rendered before the story, so we
-// don't have the opportunity to set the window value first.
-function renderWithContext(Story) {
-  return (
-    <ContextRoot ide={window._ide} settings={{}}>
-      {Story}
-    </ContextRoot>
-  )
 }
 
 const contacts = [
@@ -281,14 +247,4 @@ function setupFetchMock(fetchMock) {
     })
     // send analytics event
     .post('express:/event/:key', 200)
-}
-
-function ideWithProject(project) {
-  return {
-    $scope: {
-      $watch: () => () => {},
-      $applyAsync: () => {},
-      project,
-    },
-  }
 }

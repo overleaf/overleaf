@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from './util/scope-value-hook'
 import useBrowserWindow from '../hooks/use-browser-window'
+import { useIdeContext } from './ide-context'
 
 export const EditorContext = createContext()
 
@@ -30,7 +31,9 @@ EditorContext.Provider.propTypes = {
   }),
 }
 
-export function EditorProvider({ children, ide, settings }) {
+export function EditorProvider({ children, settings }) {
+  const ide = useIdeContext()
+
   const cobranding = window.brandVariation
     ? {
         logoImgUrl: window.brandVariation.logo_url,
@@ -45,26 +48,12 @@ export function EditorProvider({ children, ide, settings }) {
       }
     : undefined
 
-  const ownerId =
-    ide.$scope.project && ide.$scope.project.owner
-      ? ide.$scope.project.owner._id
-      : null
-
-  const [loading] = useScopeValue('state.loading', ide.$scope)
-
-  const [projectRootDocId] = useScopeValue('project.rootDoc_id', ide.$scope)
-
-  const [projectName, setProjectName] = useScopeValue(
-    'project.name',
-    ide.$scope
-  )
-
-  const [compileGroup] = useScopeValue(
-    'project.features.compileGroup',
-    ide.$scope
-  )
-
-  const [rootFolder] = useScopeValue('rootFolder', ide.$scope)
+  const [loading] = useScopeValue('state.loading')
+  const [projectRootDocId] = useScopeValue('project.rootDoc_id')
+  const [projectName, setProjectName] = useScopeValue('project.name')
+  const [compileGroup] = useScopeValue('project.features.compileGroup')
+  const [rootFolder] = useScopeValue('rootFolder')
+  const [ownerId] = useScopeValue('project.owner.id')
 
   const renameProject = useCallback(
     newName => {
@@ -112,22 +101,25 @@ export function EditorProvider({ children, ide, settings }) {
   }
 
   return (
-    <>
-      <EditorContext.Provider value={editorContextValue}>
-        {children}
-      </EditorContext.Provider>
-    </>
+    <EditorContext.Provider value={editorContextValue}>
+      {children}
+    </EditorContext.Provider>
   )
 }
 
 EditorProvider.propTypes = {
   children: PropTypes.any,
-  ide: PropTypes.any.isRequired,
   settings: PropTypes.any.isRequired,
 }
 
 export function useEditorContext(propTypes) {
-  const data = useContext(EditorContext)
-  PropTypes.checkPropTypes(propTypes, data, 'data', 'EditorContext.Provider')
-  return data
+  const context = useContext(EditorContext)
+
+  if (!context) {
+    throw new Error('useEditorContext is only available inside EditorProvider')
+  }
+
+  PropTypes.checkPropTypes(propTypes, context, 'data', 'EditorContext.Provider')
+
+  return context
 }

@@ -9,8 +9,7 @@ App.component(
   'shareProjectModal',
   react2angular(
     rootContext.use(ShareProjectModal),
-    Object.keys(ShareProjectModal.propTypes),
-    ['ide']
+    Object.keys(ShareProjectModal.propTypes)
   )
 )
 
