@@ -13,11 +13,35 @@ describe('FeaturesUpdater', function () {
         './UserFeaturesUpdater': (this.UserFeaturesUpdater = {}),
         './SubscriptionLocator': (this.SubscriptionLocator = {}),
         './PlansLocator': (this.PlansLocator = {}),
-        'settings-sharelatex': (this.Settings = {}),
+        'settings-sharelatex': (this.Settings = {
+          features: {
+            personal: {
+              collaborators: 1,
+              dropbox: false,
+              compileTimeout: 60,
+              compileGroup: 'standard',
+            },
+            collaborator: {
+              collaborators: 10,
+              dropbox: true,
+              compileTimeout: 240,
+              compileGroup: 'priority',
+            },
+            professional: {
+              collaborators: -1,
+              dropbox: true,
+              compileTimeout: 240,
+              compileGroup: 'priority',
+            },
+          },
+        }),
         '../Referal/ReferalFeatures': (this.ReferalFeatures = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
         '../Institutions/InstitutionsFeatures': (this.InstitutionsFeatures = {}),
         '../User/UserGetter': (this.UserGetter = {}),
+        '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
+          setUserProperty: sinon.stub(),
+        }),
         '../../infrastructure/Modules': (this.Modules = {
           hooks: { fire: sinon.stub() },
         }),
@@ -55,7 +79,6 @@ describe('FeaturesUpdater', function () {
       this.UserGetter.getUser = sinon.stub().yields(null, this.user)
       this.callback = sinon.stub()
     })
-
     it('should return features and featuresChanged', function () {
       this.FeaturesUpdater.refreshFeatures(
         this.user_id,
@@ -67,7 +90,6 @@ describe('FeaturesUpdater', function () {
         }
       )
     })
-
     describe('normally', function () {
       beforeEach(function () {
         this.FeaturesUpdater.refreshFeatures(
@@ -76,37 +98,31 @@ describe('FeaturesUpdater', function () {
           this.callback
         )
       })
-
       it('should get the individual features', function () {
         this.FeaturesUpdater._getIndividualFeatures
           .calledWith(this.user_id)
           .should.equal(true)
       })
-
       it('should get the group features', function () {
         this.FeaturesUpdater._getGroupFeatureSets
           .calledWith(this.user_id)
           .should.equal(true)
       })
-
       it('should get the institution features', function () {
         this.InstitutionsFeatures.getInstitutionsFeatures
           .calledWith(this.user_id)
           .should.equal(true)
       })
-
       it('should get the v1 features', function () {
         this.FeaturesUpdater._getV1Features
           .calledWith(this.user_id)
           .should.equal(true)
       })
-
       it('should get the bonus features', function () {
         this.ReferalFeatures.getBonusFeatures
           .calledWith(this.user_id)
           .should.equal(true)
       })
-
       it('should merge from the default features', function () {
         this.FeaturesUpdater._mergeFeatures
           .calledWith(this.Settings.defaultFeatures)
@@ -152,6 +168,47 @@ describe('FeaturesUpdater', function () {
           .should.equal(true)
       })
     })
+
+    describe('analytics user properties', function () {
+      it('should send the corresponding feature set user property', function () {
+        this.FeaturesUpdater._mergeFeatures = sinon
+          .stub()
+          .returns(this.Settings.features.personal)
+
+        this.FeaturesUpdater.refreshFeatures(
+          this.user_id,
+          'test',
+          this.callback
+        )
+
+        sinon.assert.calledWith(
+          this.AnalyticsManager.setUserProperty,
+          this.user_id,
+          'feature-set',
+          'personal'
+        )
+      })
+
+      it('should send mixed feature set user property', function () {
+        this.FeaturesUpdater._mergeFeatures = sinon
+          .stub()
+          .returns({ dropbox: true, feature: 'some' })
+
+        this.FeaturesUpdater.refreshFeatures(
+          this.user_id,
+          'test',
+          this.callback
+        )
+
+        sinon.assert.calledWith(
+          this.AnalyticsManager.setUserProperty,
+          this.user_id,
+          'feature-set',
+          'mixed'
+        )
+      })
+    })
+
     describe('when losing dropbox feature', function () {
       beforeEach(function () {
         this.user = {

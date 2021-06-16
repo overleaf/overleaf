@@ -10,6 +10,7 @@ const ReferalFeatures = require('../Referal/ReferalFeatures')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const UserGetter = require('../User/UserGetter')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 
 const FeaturesUpdater = {
   refreshFeatures(userId, reason, callback = () => {}) {
@@ -23,6 +24,16 @@ const FeaturesUpdater = {
           return callback(error)
         }
         logger.log({ userId, features }, 'updating user features')
+
+        const matchedFeatureSet = FeaturesUpdater._getMatchedFeatureSet(
+          features
+        )
+        AnalyticsManager.setUserProperty(
+          userId,
+          'feature-set',
+          matchedFeatureSet
+        )
+
         UserFeaturesUpdater.updateFeatures(
           userId,
           features,
@@ -300,6 +311,15 @@ const FeaturesUpdater = {
         return FeaturesUpdater.refreshFeatures(user._id, 'sync-v1', callback)
       }
     )
+  },
+
+  _getMatchedFeatureSet(features) {
+    for (const [name, featureSet] of Object.entries(Settings.features)) {
+      if (_.isEqual(features, featureSet)) {
+        return name
+      }
+    }
+    return 'mixed'
   },
 }
 
