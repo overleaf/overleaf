@@ -8,7 +8,7 @@ export default App.factory('algoliaSearch', function () {
   const algoliaConfig = getMeta('ol-algolia')
   const wikiIndex = _.get(algoliaConfig, 'indexes.wiki')
   if (wikiIndex) {
-    const client = AlgoliaSearch(algoliaConfig.app_id, algoliaConfig.api_key)
+    const client = AlgoliaSearch(algoliaConfig.appId, algoliaConfig.apiKey)
     wikiIdx = client.initIndex(wikiIndex)
   }
 
