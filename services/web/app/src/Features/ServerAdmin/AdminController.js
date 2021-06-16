@@ -109,6 +109,12 @@ const AdminController = {
     return res.sendStatus(200)
   },
 
+  unregisterServiceWorker: (req, res) => {
+    logger.warn('unregistering service worker for all users')
+    EditorRealTimeController.emitToAll('unregisterServiceWorker')
+    return res.sendStatus(200)
+  },
+
   openEditor(req, res) {
     logger.warn('opening editor')
     Settings.editorIsOpen = true

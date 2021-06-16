@@ -721,9 +721,12 @@ function onFetchWithErrorHandling(event) {
     reportError(event, OError.tag(error, 'low level error in onFetch'))
   }
 }
-
+// allow fetch event listener to be removed if necessary
+const controller = new AbortController()
 // listen to all network requests
-self.addEventListener('fetch', onFetchWithErrorHandling)
+self.addEventListener('fetch', onFetchWithErrorHandling, {
+  signal: controller.signal,
+})
 
 // complete setup ASAP
 self.addEventListener('install', event => {
@@ -731,6 +734,11 @@ self.addEventListener('install', event => {
 })
 self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim())
+})
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'disable') {
+    controller.abort() // removes the fetch event listener
+  }
 })
 
 /**

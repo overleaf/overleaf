@@ -274,6 +274,11 @@ The editor will refresh automatically in ${delay} seconds.\
         sl_console.log('Reconnect gracefully')
         this.reconnectGracefully()
       })
+
+      this.ide.socket.on('unregisterServiceWorker', () => {
+        sl_console.log('Unregister service worker')
+        this.$scope.$broadcast('service-worker:unregister')
+      })
     }
 
     updateConnectionManagerState(state) {

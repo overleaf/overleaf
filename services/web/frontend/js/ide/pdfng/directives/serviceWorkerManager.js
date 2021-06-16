@@ -40,3 +40,18 @@ export function loadServiceWorker() {
       )
   }
 }
+
+export function unregisterServiceWorker() {
+  if (supportsServiceWorker()) {
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'disable',
+      })
+    }
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(worker => {
+        worker.unregister()
+      })
+    })
+  }
+}
