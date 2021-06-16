@@ -81,6 +81,12 @@ if (Settings.exposeHostname) {
   })
 }
 
+webRouter.get(
+  '/serviceWorker.js',
+  express.static(Path.join(__dirname, '/../../../public'), {
+    maxAge: oneDayInMilliseconds,
+  })
+)
 webRouter.use(
   express.static(Path.join(__dirname, '/../../../public'), {
     maxAge: STATIC_CACHE_AGE,
