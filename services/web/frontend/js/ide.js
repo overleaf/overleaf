@@ -32,7 +32,10 @@ import MetadataManager from './ide/metadata/MetadataManager'
 import ReviewPanelManager from './ide/review-panel/ReviewPanelManager'
 import OutlineManager from './features/outline/outline-manager'
 import SafariScrollPatcher from './ide/SafariScrollPatcher'
-import { loadServiceWorker } from './ide/pdfng/directives/serviceWorkerManager'
+import {
+  loadServiceWorker,
+  unregisterServiceWorker,
+} from './ide/pdfng/directives/serviceWorkerManager'
 import './ide/cobranding/CobrandingDataService'
 import './ide/settings/index'
 import './ide/chat/index'
@@ -363,7 +366,9 @@ If the project has been renamed please look in your project list for a new proje
   }
 )
 
-if (getMeta('ol-enablePdfCaching')) {
+if (getMeta('ol-resetServiceWorker')) {
+  unregisterServiceWorker()
+} else if (getMeta('ol-enablePdfCaching')) {
   loadServiceWorker()
 }
 

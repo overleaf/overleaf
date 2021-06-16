@@ -894,6 +894,7 @@ const ProjectController = {
               ),
               trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
               enablePdfCaching: partOfPdfCachingRollout('enable-caching'),
+              resetServiceWorker: Boolean(Settings.resetServiceWorker),
             })
             timer.done()
           }
