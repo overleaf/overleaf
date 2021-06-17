@@ -53,7 +53,7 @@ export function EditorProvider({ children, settings }) {
   const [projectName, setProjectName] = useScopeValue('project.name')
   const [compileGroup] = useScopeValue('project.features.compileGroup')
   const [rootFolder] = useScopeValue('rootFolder')
-  const [ownerId] = useScopeValue('project.owner.id')
+  const [ownerId] = useScopeValue('project.owner._id')
 
   const renameProject = useCallback(
     newName => {
