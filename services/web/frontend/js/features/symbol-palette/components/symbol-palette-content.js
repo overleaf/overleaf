@@ -34,12 +34,12 @@ export default function SymbolPaletteContent({ handleSelect }) {
       return null
     }
 
-    const words = input.trim().split(/\W+/)
+    const words = input.trim().split(/\s+/)
 
     return words.reduceRight(
       (symbols, word) =>
         matchSorter(symbols, word, {
-          keys: ['command', 'description'],
+          keys: ['command', 'description', 'character', 'aliases'],
           threshold: matchSorter.rankings.CONTAINS,
         }),
       symbols

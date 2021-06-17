@@ -91,11 +91,12 @@ describe('symbol palette', function () {
     selectedSymbol.click()
 
     expect(handleSelect).to.have.been.calledWith({
+      aliases: ['Π'],
       category: 'Greek',
       character: 'Π',
       codepoint: 'U+003A0',
       command: '\\Pi',
-      description: 'uppercase Greek letter Pi',
+      description: 'Uppercase Greek letter Pi',
       notes: 'Use \\prod for the product.',
     })
   })
