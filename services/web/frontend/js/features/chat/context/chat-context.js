@@ -118,7 +118,7 @@ ChatContext.Provider.propTypes = {
 
 export function ChatProvider({ children }) {
   const { user } = useApplicationContext({
-    user: PropTypes.shape({ id: PropTypes.string.isRequired }.isRequired),
+    user: PropTypes.shape({ id: PropTypes.string.isRequired }),
   })
   const { projectId } = useEditorContext({
     projectId: PropTypes.string.isRequired,
@@ -222,7 +222,7 @@ export function ChatProvider({ children }) {
       // If the message is from the current user and they just sent a message,
       // then we are receiving the sent message back from the socket. Ignore it
       // to prevent double message
-      const messageIsFromSelf = message?.user?.id === user.id
+      const messageIsFromSelf = message?.user?.id === user?.id
       if (messageIsFromSelf && state.messageWasJustSent) return
 
       dispatch({ type: 'RECEIVE_MESSAGE', message })
@@ -242,7 +242,7 @@ export function ChatProvider({ children }) {
     // We're adding and removing the socket listener every time we send a
     // message (and messageWasJustSent changes). Not great, but no good way
     // around it
-  }, [socket, state.messageWasJustSent, state.unreadMessageCount, user.id])
+  }, [socket, state.messageWasJustSent, state.unreadMessageCount, user])
 
   // Handle unread messages
   useEffect(() => {

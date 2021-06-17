@@ -4,6 +4,11 @@ import ToolbarHeader from './toolbar-header'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { useChatContext } from '../../chat/context/chat-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
+import { useApplicationContext } from '../../../shared/context/application-context'
+
+const applicationContextPropTypes = {
+  user: PropTypes.object,
+}
 
 const editorContextPropTypes = {
   cobranding: PropTypes.object,
@@ -35,6 +40,8 @@ function EditorNavigationToolbarRoot({
   openDoc,
   openShareProjectModal,
 }) {
+  const { user } = useApplicationContext(applicationContextPropTypes)
+
   const {
     cobranding,
     loading,
@@ -111,6 +118,7 @@ function EditorNavigationToolbarRoot({
       onlineUsers={onlineUsersArray}
       goToUser={goToUser}
       isRestrictedTokenMember={isRestrictedTokenMember}
+      isAnonymousUser={user == null}
       projectName={projectName}
       renameProject={renameProject}
       openShareModal={openShareModal}

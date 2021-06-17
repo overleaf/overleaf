@@ -28,6 +28,7 @@ function ToolbarHeader({
   onlineUsers,
   goToUser,
   isRestrictedTokenMember,
+  isAnonymousUser,
   projectName,
   renameProject,
   openShareModal,
@@ -35,6 +36,8 @@ function ToolbarHeader({
   pdfButtonIsVisible,
   togglePdfView,
 }) {
+  const shouldDisplayPublishButton = !isAnonymousUser && PublishButton
+
   return (
     <header className="toolbar toolbar-header toolbar-with-labels">
       <div className="toolbar-left">
@@ -68,7 +71,9 @@ function ToolbarHeader({
           />
         )}
         <ShareProjectButton onClick={openShareModal} />
-        {PublishButton && <PublishButton cobranding={cobranding} />}
+        {shouldDisplayPublishButton && (
+          <PublishButton cobranding={cobranding} />
+        )}
         {!isRestrictedTokenMember && (
           <>
             <HistoryToggleButton
@@ -100,6 +105,7 @@ ToolbarHeader.propTypes = {
   onlineUsers: PropTypes.array.isRequired,
   goToUser: PropTypes.func.isRequired,
   isRestrictedTokenMember: PropTypes.bool,
+  isAnonymousUser: PropTypes.bool,
   projectName: PropTypes.string.isRequired,
   renameProject: PropTypes.func.isRequired,
   openShareModal: PropTypes.func.isRequired,

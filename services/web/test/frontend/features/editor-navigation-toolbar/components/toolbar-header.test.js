@@ -103,4 +103,20 @@ describe('<ToolbarHeader />', function () {
       expect(screen.queryByText('Chat')).to.not.exist
     })
   })
+
+  describe('Publish button', function () {
+    it('is displayed by default', function () {
+      render(<ToolbarHeader {...defaultProps} />)
+      screen.getByText('Submit')
+    })
+
+    it('is not displayed for anonymous users', function () {
+      const props = {
+        ...defaultProps,
+        isAnonymousUser: true,
+      }
+      render(<ToolbarHeader {...props} />)
+      expect(screen.queryByText('Submit')).to.not.exist
+    })
+  })
 })

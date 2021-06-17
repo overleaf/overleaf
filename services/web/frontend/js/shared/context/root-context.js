@@ -10,19 +10,13 @@ import { LayoutProvider } from './layout-context'
 import { ChatProvider } from '../../features/chat/context/chat-context'
 
 export function ContextRoot({ children, ide, settings }) {
-  const isAnonymousUser = window.user.id == null
-
   return (
     <ApplicationProvider>
       <IdeProvider ide={ide}>
         <EditorProvider settings={settings}>
           <CompileProvider>
             <LayoutProvider>
-              {isAnonymousUser ? (
-                children
-              ) : (
-                <ChatProvider>{children}</ChatProvider>
-              )}
+              <ChatProvider>{children}</ChatProvider>
             </LayoutProvider>
           </CompileProvider>
         </EditorProvider>
