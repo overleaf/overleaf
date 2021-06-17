@@ -39,7 +39,9 @@ function ToolbarHeader({
     <header className="toolbar toolbar-header toolbar-with-labels">
       <div className="toolbar-left">
         <MenuButton onClick={onShowLeftMenuClick} />
-        {cobranding ? <CobrandingLogo {...cobranding} /> : null}
+        {cobranding &&
+          cobranding.isProjectCobranded &&
+          cobranding.logoImgUrl && <CobrandingLogo {...cobranding} />}
         <BackToProjectsButton />
       </div>
       {pdfButtonIsVisible && (
