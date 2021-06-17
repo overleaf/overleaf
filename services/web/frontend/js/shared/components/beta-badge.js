@@ -2,7 +2,7 @@ import React from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 
-export default function BetaBadge({ tooltip }) {
+export default function BetaBadge({ tooltip, url = '/beta/participate' }) {
   return (
     <OverlayTrigger
       placement={tooltip.placement || 'bottom'}
@@ -10,7 +10,7 @@ export default function BetaBadge({ tooltip }) {
       delayHide={100}
     >
       <a
-        href="/beta/participate"
+        href={url}
         target="_blank"
         rel="noopener noreferrer"
         className="badge beta-badge"
@@ -27,4 +27,5 @@ BetaBadge.propTypes = {
     text: PropTypes.string.isRequired,
     placement: PropTypes.string,
   }),
+  url: PropTypes.string,
 }
