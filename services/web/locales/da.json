@@ -1,4 +1,6 @@
 {
+  "chat_error": "Kunne ikke indlæse chatbeskeder, prøv venligst igen.",
+  "reconnect": "Prøv igen",
   "logs_pane_info_message": "Vi tester en ny rude til logge",
   "logs_pane_info_message_popup": "Vi tester en ny rude til logge. Klik her for at fortælle os din mening",
   "github_symlink_error": "Dit github repository indeholder symbolske lænkefiler, som ikke på nuværende tidpunkt er understøttet af Overleaf. Du må fjerne de filer, og derefter prøve igen.",
