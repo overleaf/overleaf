@@ -26,10 +26,14 @@ export function LayoutProvider({ children }) {
 
   const setView = useCallback(
     value => {
-      _setView(value)
-      if (value === 'history') {
-        $scope.toggleHistory()
-      }
+      _setView(oldValue => {
+        // ensure that the "history:toggle" event is broadcast when switching in or out of history view
+        if (value === 'history' || oldValue === 'history') {
+          $scope.toggleHistory()
+        }
+
+        return value
+      })
     },
     [$scope, _setView]
   )

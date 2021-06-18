@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Dropdown, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
 import { getHueForUserId } from '../../../shared/utils/colors'
+import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 
 function OnlineUsersWidget({ onlineUsers, goToUser }) {
   const { t } = useTranslation()
@@ -12,7 +13,7 @@ function OnlineUsersWidget({ onlineUsers, goToUser }) {
 
   if (shouldDisplayDropdown) {
     return (
-      <Dropdown id="online-users" className="online-users" pullRight>
+      <ControlledDropdown id="online-users" className="online-users" pullRight>
         <DropDownToggleButton
           bsRole="toggle"
           onlineUserCount={onlineUsers.length}
@@ -30,7 +31,7 @@ function OnlineUsersWidget({ onlineUsers, goToUser }) {
             </MenuItem>
           ))}
         </Dropdown.Menu>
-      </Dropdown>
+      </ControlledDropdown>
     )
   } else {
     return (

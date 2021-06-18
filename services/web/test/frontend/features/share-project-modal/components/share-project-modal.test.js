@@ -658,11 +658,11 @@ describe('<ShareProjectModal/>', function () {
     const submitButton = screen.getByRole('button', { name: 'Share' })
 
     const respondWithError = async function (errorReason) {
-      inputElement.focus()
+      fireEvent.focus(inputElement)
       fireEvent.change(inputElement, {
         target: { value: 'invited-author-1@example.com' },
       })
-      inputElement.blur()
+      fireEvent.blur(inputElement)
 
       fetchMock.postOnce(
         'express:/project/:projectId/invite',

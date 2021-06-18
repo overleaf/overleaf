@@ -8,6 +8,7 @@ import PreviewDownloadFileList from './preview-download-file-list'
 import PreviewError from './preview-error'
 import Icon from '../../../shared/components/icon'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
+import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 
 function PreviewLogsPane({
   logEntries = { all: [], errors: [], warnings: [], typesetting: [] },
@@ -84,7 +85,7 @@ function PreviewLogsPane({
         &nbsp;
         <span>{t('clear_cached_files')}</span>
       </button>
-      <Dropdown
+      <ControlledDropdown
         id="dropdown-files-logs-pane"
         dropup
         pullRight
@@ -98,7 +99,7 @@ function PreviewLogsPane({
         <Dropdown.Menu id="dropdown-files-logs-pane-list">
           <PreviewDownloadFileList fileList={outputFiles} />
         </Dropdown.Menu>
-      </Dropdown>
+      </ControlledDropdown>
     </div>
   )
 
