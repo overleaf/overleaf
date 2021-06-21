@@ -18,7 +18,7 @@ import { useDroppable } from '../contexts/file-tree-draggable'
 import { useFileTreeSocketListener } from '../hooks/file-tree-socket-listener'
 import FileTreeModalCreateFile from './modals/file-tree-modal-create-file'
 
-function FileTreeRoot({
+const FileTreeRoot = React.memo(function FileTreeRoot({
   projectId,
   rootFolder,
   rootDocId,
@@ -64,7 +64,7 @@ function FileTreeRoot({
       <FileTreeModalError />
     </FileTreeContext>
   )
-}
+})
 
 function FileTreeRootFolder() {
   useFileTreeSocketListener()

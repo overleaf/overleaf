@@ -9,7 +9,7 @@ import localStorage from '../../../infrastructure/local-storage'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { useEditorContext } from '../../../shared/context/editor-context'
 
-function OutlinePane({
+const OutlinePane = React.memo(function OutlinePane({
   isTexFile,
   outline,
   jumpToLine,
@@ -73,7 +73,7 @@ function OutlinePane({
       ) : null}
     </div>
   )
-}
+})
 
 OutlinePane.propTypes = {
   isTexFile: PropTypes.bool.isRequired,

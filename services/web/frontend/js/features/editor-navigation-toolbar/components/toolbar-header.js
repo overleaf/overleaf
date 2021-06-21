@@ -15,7 +15,7 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 const [publishModalModules] = importOverleafModules('publishModal')
 const PublishButton = publishModalModules?.import.default
 
-function ToolbarHeader({
+const ToolbarHeader = React.memo(function ToolbarHeader({
   cobranding,
   onShowLeftMenuClick,
   chatIsOpen,
@@ -90,7 +90,7 @@ function ToolbarHeader({
       </div>
     </header>
   )
-}
+})
 
 ToolbarHeader.propTypes = {
   onShowLeftMenuClick: PropTypes.func.isRequired,

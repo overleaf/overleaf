@@ -1,4 +1,10 @@
-import React, { createContext, useCallback, useContext, useEffect } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+} from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from './util/scope-value-hook'
 import useBrowserWindow from '../hooks/use-browser-window'
@@ -34,19 +40,23 @@ EditorContext.Provider.propTypes = {
 export function EditorProvider({ children, settings }) {
   const ide = useIdeContext()
 
-  const cobranding = window.brandVariation
-    ? {
-        logoImgUrl: window.brandVariation.logo_url,
-        brandVariationName: window.brandVariation.name,
-        brandVariationId: window.brandVariation.id,
-        brandId: window.brandVariation.brand_id,
-        brandVariationHomeUrl: window.brandVariation.home_url,
-        publishGuideHtml: window.brandVariation.publish_guide_html,
-        partner: window.brandVariation.partner,
-        brandedMenu: window.brandVariation.branded_menu,
-        submitBtnHtml: window.brandVariation.submit_button_html,
-      }
-    : undefined
+  const cobranding = useMemo(
+    () =>
+      window.brandVariation
+        ? {
+            logoImgUrl: window.brandVariation.logo_url,
+            brandVariationName: window.brandVariation.name,
+            brandVariationId: window.brandVariation.id,
+            brandId: window.brandVariation.brand_id,
+            brandVariationHomeUrl: window.brandVariation.home_url,
+            publishGuideHtml: window.brandVariation.publish_guide_html,
+            partner: window.brandVariation.partner,
+            brandedMenu: window.brandVariation.branded_menu,
+            submitBtnHtml: window.brandVariation.submit_button_html,
+          }
+        : undefined,
+    []
+  )
 
   const [loading] = useScopeValue('state.loading')
   const [projectRootDocId] = useScopeValue('project.rootDoc_id')
@@ -87,23 +97,33 @@ export function EditorProvider({ children, settings }) {
     )
   }, [projectName, setTitle])
 
-  const editorContextValue = {
-    cobranding,
-    hasPremiumCompile: compileGroup === 'priority',
-    loading,
-    projectId: window.project_id,
-    projectRootDocId,
-    projectName: projectName || '', // initially might be empty in Angular
-    renameProject,
-    isProjectOwner: ownerId === window.user.id,
-    isRestrictedTokenMember: window.isRestrictedTokenMember,
-    rootFolder,
-  }
+  const value = useMemo(
+    () => ({
+      cobranding,
+      hasPremiumCompile: compileGroup === 'priority',
+      loading,
+      projectId: window.project_id,
+      projectRootDocId,
+      projectName: projectName || '', // initially might be empty in Angular
+      renameProject,
+      isProjectOwner: ownerId === window.user.id,
+      isRestrictedTokenMember: window.isRestrictedTokenMember,
+      rootFolder,
+    }),
+    [
+      cobranding,
+      compileGroup,
+      loading,
+      ownerId,
+      projectName,
+      projectRootDocId,
+      renameProject,
+      rootFolder,
+    ]
+  )
 
   return (
-    <EditorContext.Provider value={editorContextValue}>
-      {children}
-    </EditorContext.Provider>
+    <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
   )
 }
 

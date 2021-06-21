@@ -79,7 +79,7 @@ export function useProjectContext() {
   return context
 }
 
-export default function ShareProjectModal({
+const ShareProjectModal = React.memo(function ShareProjectModal({
   handleHide,
   show,
   animation = true,
@@ -161,10 +161,12 @@ export default function ShareProjectModal({
       </ProjectContext.Provider>
     </ShareProjectContext.Provider>
   )
-}
+})
 ShareProjectModal.propTypes = {
   animation: PropTypes.bool,
   handleHide: PropTypes.func.isRequired,
   isAdmin: PropTypes.bool.isRequired,
   show: PropTypes.bool.isRequired,
 }
+
+export default ShareProjectModal

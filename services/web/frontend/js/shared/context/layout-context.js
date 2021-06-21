@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useCallback } from 'react'
+import React, { createContext, useContext, useCallback, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from './util/scope-value-hook'
 import { useIdeContext } from './ide-context'
@@ -43,19 +43,32 @@ export function LayoutProvider({ children }) {
     'ui.reviewPanelOpen'
   )
   const [leftMenuShown, setLeftMenuShown] = useScopeValue('ui.leftMenuShown')
-  const [pdfLayout] = useScopeValue('ui.pdfLayout')
+  const [pdfLayout] = useScopeValue('ui.pdfLayout', $scope)
 
-  const value = {
-    view,
-    setView,
-    chatIsOpen,
-    setChatIsOpen,
-    reviewPanelOpen,
-    setReviewPanelOpen,
-    leftMenuShown,
-    setLeftMenuShown,
-    pdfLayout,
-  }
+  const value = useMemo(
+    () => ({
+      view,
+      setView,
+      chatIsOpen,
+      setChatIsOpen,
+      reviewPanelOpen,
+      setReviewPanelOpen,
+      leftMenuShown,
+      setLeftMenuShown,
+      pdfLayout,
+    }),
+    [
+      chatIsOpen,
+      leftMenuShown,
+      pdfLayout,
+      reviewPanelOpen,
+      setChatIsOpen,
+      setLeftMenuShown,
+      setReviewPanelOpen,
+      setView,
+      view,
+    ]
+  )
 
   return (
     <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>

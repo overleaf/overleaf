@@ -35,99 +35,104 @@ const chatContextPropTypes = {
   unreadMessageCount: PropTypes.number.isRequired,
 }
 
-function EditorNavigationToolbarRoot({
-  onlineUsersArray,
-  openDoc,
-  openShareProjectModal,
-}) {
-  const { user } = useApplicationContext(applicationContextPropTypes)
+const EditorNavigationToolbarRoot = React.memo(
+  function EditorNavigationToolbarRoot({
+    onlineUsersArray,
+    openDoc,
+    openShareProjectModal,
+  }) {
+    const { user } = useApplicationContext(applicationContextPropTypes)
 
-  const {
-    cobranding,
-    loading,
-    isRestrictedTokenMember,
-    projectName,
-    renameProject,
-    isProjectOwner,
-  } = useEditorContext(editorContextPropTypes)
+    const {
+      cobranding,
+      loading,
+      isRestrictedTokenMember,
+      projectName,
+      renameProject,
+      isProjectOwner,
+    } = useEditorContext(editorContextPropTypes)
 
-  const {
-    chatIsOpen,
-    setChatIsOpen,
-    reviewPanelOpen,
-    setReviewPanelOpen,
-    view,
-    setView,
-    setLeftMenuShown,
-    pdfLayout,
-  } = useLayoutContext(layoutContextPropTypes)
+    const {
+      chatIsOpen,
+      setChatIsOpen,
+      reviewPanelOpen,
+      setReviewPanelOpen,
+      view,
+      setView,
+      setLeftMenuShown,
+      pdfLayout,
+    } = useLayoutContext(layoutContextPropTypes)
 
-  const { markMessagesAsRead, unreadMessageCount } = useChatContext(
-    chatContextPropTypes
-  )
+    const { markMessagesAsRead, unreadMessageCount } = useChatContext(
+      chatContextPropTypes
+    )
 
-  const toggleChatOpen = useCallback(() => {
-    if (!chatIsOpen) {
-      markMessagesAsRead()
-    }
-    setChatIsOpen(value => !value)
-  }, [chatIsOpen, setChatIsOpen, markMessagesAsRead])
+    const toggleChatOpen = useCallback(() => {
+      if (!chatIsOpen) {
+        markMessagesAsRead()
+      }
+      setChatIsOpen(value => !value)
+    }, [chatIsOpen, setChatIsOpen, markMessagesAsRead])
 
-  const toggleReviewPanelOpen = useCallback(
-    () => setReviewPanelOpen(value => !value),
-    [setReviewPanelOpen]
-  )
+    const toggleReviewPanelOpen = useCallback(
+      () => setReviewPanelOpen(value => !value),
+      [setReviewPanelOpen]
+    )
 
-  const toggleHistoryOpen = useCallback(() => {
-    setView(view === 'history' ? 'editor' : 'history')
-  }, [view, setView])
+    const toggleHistoryOpen = useCallback(() => {
+      setView(view === 'history' ? 'editor' : 'history')
+    }, [view, setView])
 
-  const togglePdfView = useCallback(() => {
-    setView(view === 'pdf' ? 'editor' : 'pdf')
-  }, [view, setView])
+    const togglePdfView = useCallback(() => {
+      setView(view === 'pdf' ? 'editor' : 'pdf')
+    }, [view, setView])
 
-  const openShareModal = useCallback(() => {
-    openShareProjectModal(isProjectOwner)
-  }, [openShareProjectModal, isProjectOwner])
+    const openShareModal = useCallback(() => {
+      openShareProjectModal(isProjectOwner)
+    }, [openShareProjectModal, isProjectOwner])
 
-  const onShowLeftMenuClick = useCallback(
-    () => setLeftMenuShown(value => !value),
-    [setLeftMenuShown]
-  )
+    const onShowLeftMenuClick = useCallback(
+      () => setLeftMenuShown(value => !value),
+      [setLeftMenuShown]
+    )
 
-  function goToUser(user) {
-    if (user.doc && typeof user.row === 'number') {
-      openDoc(user.doc, { gotoLine: user.row + 1 })
-    }
+    const goToUser = useCallback(
+      user => {
+        if (user.doc && typeof user.row === 'number') {
+          openDoc(user.doc, { gotoLine: user.row + 1 })
+        }
+      },
+      [openDoc]
+    )
+
+    // using {display: 'none'} as 1:1 migration from Angular's ng-hide. Using
+    // `loading ? null : <ToolbarHeader/>` causes UI glitches
+    return (
+      <ToolbarHeader
+        style={loading ? { display: 'none' } : {}}
+        cobranding={cobranding}
+        onShowLeftMenuClick={onShowLeftMenuClick}
+        chatIsOpen={chatIsOpen}
+        unreadMessageCount={unreadMessageCount}
+        toggleChatOpen={toggleChatOpen}
+        reviewPanelOpen={reviewPanelOpen}
+        toggleReviewPanelOpen={toggleReviewPanelOpen}
+        historyIsOpen={view === 'history'}
+        toggleHistoryOpen={toggleHistoryOpen}
+        onlineUsers={onlineUsersArray}
+        goToUser={goToUser}
+        isRestrictedTokenMember={isRestrictedTokenMember}
+        isAnonymousUser={user == null}
+        projectName={projectName}
+        renameProject={renameProject}
+        openShareModal={openShareModal}
+        pdfViewIsOpen={view === 'pdf'}
+        pdfButtonIsVisible={pdfLayout === 'flat'}
+        togglePdfView={togglePdfView}
+      />
+    )
   }
-
-  // using {display: 'none'} as 1:1 migration from Angular's ng-hide. Using
-  // `loading ? null : <ToolbarHeader/>` causes UI glitches
-  return (
-    <ToolbarHeader
-      style={loading ? { display: 'none' } : {}}
-      cobranding={cobranding}
-      onShowLeftMenuClick={onShowLeftMenuClick}
-      chatIsOpen={chatIsOpen}
-      unreadMessageCount={unreadMessageCount}
-      toggleChatOpen={toggleChatOpen}
-      reviewPanelOpen={reviewPanelOpen}
-      toggleReviewPanelOpen={toggleReviewPanelOpen}
-      historyIsOpen={view === 'history'}
-      toggleHistoryOpen={toggleHistoryOpen}
-      onlineUsers={onlineUsersArray}
-      goToUser={goToUser}
-      isRestrictedTokenMember={isRestrictedTokenMember}
-      isAnonymousUser={user == null}
-      projectName={projectName}
-      renameProject={renameProject}
-      openShareModal={openShareModal}
-      pdfViewIsOpen={view === 'pdf'}
-      pdfButtonIsVisible={pdfLayout === 'flat'}
-      togglePdfView={togglePdfView}
-    />
-  )
-}
+)
 
 EditorNavigationToolbarRoot.propTypes = {
   onlineUsersArray: PropTypes.array.isRequired,

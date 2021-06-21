@@ -13,7 +13,7 @@ import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { FetchError } from '../../../infrastructure/fetch-json'
 import { useChatContext } from '../context/chat-context'
 
-function ChatPane() {
+const ChatPane = React.memo(function ChatPane() {
   const { t } = useTranslation()
 
   const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
@@ -81,7 +81,7 @@ function ChatPane() {
       />
     </aside>
   )
-}
+})
 
 function LoadingSpinner() {
   const { t } = useTranslation()

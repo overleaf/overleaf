@@ -5,7 +5,7 @@ import PreviewLogsPane from './preview-logs-pane'
 import PreviewFirstErrorPopUp from './preview-first-error-pop-up'
 import { useTranslation } from 'react-i18next'
 
-function PreviewPane({
+const PreviewPane = React.memo(function PreviewPane({
   compilerState,
   onClearCache,
   onRecompile,
@@ -139,7 +139,7 @@ function PreviewPane({
       ) : null}
     </>
   )
-}
+})
 
 PreviewPane.propTypes = {
   compilerState: PropTypes.shape({

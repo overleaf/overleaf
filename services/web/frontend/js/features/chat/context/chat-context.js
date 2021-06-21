@@ -264,19 +264,34 @@ export function ChatProvider({ children }) {
     markMessagesAsRead,
   ])
 
-  const value = {
-    status: state.status,
-    messages: state.messages,
-    initialMessagesLoaded: state.initialMessagesLoaded,
-    atEnd: state.atEnd,
-    unreadMessageCount: state.unreadMessageCount,
-    loadInitialMessages,
-    loadMoreMessages,
-    reset,
-    sendMessage,
-    markMessagesAsRead,
-    error: state.error,
-  }
+  const value = useMemo(
+    () => ({
+      status: state.status,
+      messages: state.messages,
+      initialMessagesLoaded: state.initialMessagesLoaded,
+      atEnd: state.atEnd,
+      unreadMessageCount: state.unreadMessageCount,
+      loadInitialMessages,
+      loadMoreMessages,
+      reset,
+      sendMessage,
+      markMessagesAsRead,
+      error: state.error,
+    }),
+    [
+      loadInitialMessages,
+      loadMoreMessages,
+      markMessagesAsRead,
+      reset,
+      sendMessage,
+      state.atEnd,
+      state.error,
+      state.initialMessagesLoaded,
+      state.messages,
+      state.status,
+      state.unreadMessageCount,
+    ]
+  )
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>
 }
