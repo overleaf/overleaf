@@ -65,6 +65,8 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     webRouter.all('*', AuthenticationController.requireGlobalLogin)
   }
 
+  webRouter.get('*', AnalyticsRegistrationSourceMiddleware.setInbound())
+
   webRouter.get('/login', UserPagesController.loginPage)
   AuthenticationController.addEndpointToLoginWhitelist('/login')
 

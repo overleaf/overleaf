@@ -18,7 +18,7 @@ const UrlHelper = require('../Helpers/UrlHelper')
 const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
 const _ = require('lodash')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
-const AnalyticsRegistrationSourceMiddleware = require('../Analytics/AnalyticsRegistrationSourceMiddleware')
+const AnalyticsRegistrationSourceHelper = require('../Analytics/AnalyticsRegistrationSourceHelper')
 const {
   acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')
@@ -116,7 +116,8 @@ const AuthenticationController = {
               return next(err)
             }
             AuthenticationController._clearRedirectFromSession(req)
-            AnalyticsRegistrationSourceMiddleware.doClearSource(req.session)
+            AnalyticsRegistrationSourceHelper.clearSource(req.session)
+            AnalyticsRegistrationSourceHelper.clearInbound(req.session)
             AsyncFormHelper.redirect(req, res, redir)
           })
         })
