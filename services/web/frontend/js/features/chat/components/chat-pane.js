@@ -18,7 +18,7 @@ const ChatPane = React.memo(function ChatPane() {
 
   const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
   const { user } = useApplicationContext({
-    user: PropTypes.shape({ id: PropTypes.string.isRequired }.isRequired),
+    user: PropTypes.shape({ id: PropTypes.string.isRequired }),
   })
 
   const {
@@ -53,6 +53,10 @@ const ChatPane = React.memo(function ChatPane() {
       return <ChatFallbackError reconnect={reset} />
     }
     throw error
+  }
+
+  if (!user) {
+    return null
   }
 
   return (
