@@ -194,5 +194,23 @@
             <artifactId>commons-compress</artifactId>
             <version>1.15</version>
         </dependency>
+        <!-- prometheus metrics -->
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient</artifactId>
+            <version>0.10.0</version>
+        </dependency>
+        <!-- Hotspot JVM metrics -->
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_hotspot</artifactId>
+            <version>0.10.0</version>
+        </dependency>
+        <!-- Expose metrics via a servlet -->
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_servlet</artifactId>
+            <version>0.10.0</version>
+        </dependency>
     </dependencies>
 </project>
