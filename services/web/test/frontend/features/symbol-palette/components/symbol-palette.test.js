@@ -67,7 +67,6 @@ describe('symbol palette', function () {
     // wait for the symbols to be filtered
     await waitFor(async () => {
       symbols = await screen.findAllByRole('option')
-      console.log(symbols.length)
       expect(symbols).to.have.length(2)
     })
 

@@ -3,7 +3,10 @@ require('@babel/register')
 
 // Load JSDOM to mock the DOM in Node
 // Set pretendToBeVisual to enable requestAnimationFrame
-require('jsdom-global')(undefined, { pretendToBeVisual: true })
+require('jsdom-global')(undefined, {
+  pretendToBeVisual: true,
+  url: 'https://www.test-overleaf.com/',
+})
 
 const path = require('path')
 process.env.SHARELATEX_CONFIG = path.resolve(
