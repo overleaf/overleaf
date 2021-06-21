@@ -1,6 +1,6 @@
 # Dockerfile for git-bridge
 
-FROM maven:3-jdk-8 as base
+FROM maven:3-jdk-11 as base
 
 RUN apt-get update && apt-get install -y make git \
  && rm -rf /var/lib/apt/lists
@@ -23,9 +23,9 @@ RUN make package \
       -name 'writelatex-git-bridge*jar-with-dependencies.jar' \
       -exec mv {} /git-bridge.jar \;
 
-FROM openjdk:8-jre
+FROM openjdk:11-jre
 
-RUN apt-get update && apt-get install -y git sqlite3 \
+RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat \
  && rm -rf /var/lib/apt/lists
 
 RUN useradd --create-home node
