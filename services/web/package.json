@@ -217,7 +217,7 @@
     "glob": "^7.1.6",
     "handlebars-loader": "^1.7.1",
     "i18next-scanner": "^3.0.0",
-    "jsdom": "^16.2.2",
+    "jsdom": "^16.6.0",
     "jsdom-global": "^3.0.2",
     "karma": "^5.0.2",
     "karma-chai-sinon": "^0.1.5",
