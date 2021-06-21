@@ -83,7 +83,7 @@
     "category": "Greek",
     "command": "\\iota",
     "codepoint": "U+1D704",
-    "description": "lowercase Greek letter iota",
+    "description": "Lowercase Greek letter iota",
     "aliases": ["ι"],
     "notes": ""
   },
@@ -647,6 +647,7 @@
     "command": "\\Leftarrow",
     "codepoint": "U+021D0",
     "description": "Is implied by",
+    "aliases": ["<="],
     "notes": ""
   },
   {
@@ -654,6 +655,7 @@
     "command": "\\Rightarrow",
     "codepoint": "U+021D2",
     "description": "Implies",
+    "aliases": ["=>"],
     "notes": ""
   },
   {

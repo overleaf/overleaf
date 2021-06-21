@@ -892,7 +892,7 @@ const ProjectController = {
               ),
               showSymbolPalette: shouldDisplayFeature(
                 'symbol_palette',
-                user.betaProgram
+                user.alphaProgram || user.betaProgram
               ),
               trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
               enablePdfCaching: partOfPdfCachingRollout('enable-caching'),
