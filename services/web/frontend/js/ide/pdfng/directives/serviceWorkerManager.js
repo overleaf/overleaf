@@ -11,9 +11,9 @@ export function waitForServiceWorker() {
   return pendingWorkerSetup
 }
 
-export function loadServiceWorker() {
+export function loadServiceWorker(options) {
   if (supportsServiceWorker()) {
-    pendingWorkerSetup = navigator.serviceWorker
+    const workerSetup = navigator.serviceWorker
       .register('/serviceWorker.js', {
         scope: '/project/',
       })
@@ -38,6 +38,14 @@ export function loadServiceWorker() {
       .catch(error =>
         captureException(OError.tag(error, 'Cannot register serviceWorker'))
       )
+    if (options && options.timeout > 0) {
+      const workerTimeout = new Promise(resolve => {
+        setTimeout(resolve, options.timeout)
+      })
+      pendingWorkerSetup = Promise.race([workerSetup, workerTimeout])
+    } else {
+      pendingWorkerSetup = workerSetup
+    }
   }
 }
 

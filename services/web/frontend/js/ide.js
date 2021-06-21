@@ -369,7 +369,7 @@ If the project has been renamed please look in your project list for a new proje
 if (getMeta('ol-resetServiceWorker')) {
   unregisterServiceWorker()
 } else if (getMeta('ol-enablePdfCaching')) {
-  loadServiceWorker()
+  loadServiceWorker({ timeout: 5000 })
 }
 
 export default angular.bootstrap(document.body, ['SharelatexApp'])
