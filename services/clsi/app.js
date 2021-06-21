@@ -331,7 +331,7 @@ const loadTcpServer = net.createServer(function (socket) {
     const freeLoad = availableWorkingCpus - currentLoad
     let freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
     if (freeLoadPercentage <= 0) {
-      freeLoadPercentage = 1 // when its 0 the server is set to drain and will move projects to different servers
+      freeLoadPercentage = 0 // when its 0 the server is set to drain and will move projects to different servers
     }
     socket.write(`up, ${freeLoadPercentage}%\n`, 'ASCII')
     return socket.end()
