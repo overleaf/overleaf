@@ -18,17 +18,30 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+  * Wrapper for the MetricsServlet from the Prometheus client.
+  *
+  * We wrap this in a handler here, as we use a wildcard servlet context on /*, and adding
+  * an additional servlet context collides with it. Adding a servlet context on /metrics
+  * causes a redirect to /metrics/ which breaks things when jetty doesn't know the full
+  * public URL.
+  * 
+  * There may still be a better way to do this, but it works.
+  **/
+
 public class PrometheusHandler extends AbstractHandler {
 
-  private final Bridge bridge;
-  private final MetricsServlet metricsServlet;
   private final ServletHolder holder;
 
-  public PrometheusHandler(Bridge bridge) {
-    this.bridge = bridge;
-    this.metricsServlet = new MetricsServlet();
-    this.holder = new ServletHolder(metricsServlet);
+  public PrometheusHandler() {
     DefaultExports.initialize();
+
+    this.holder = new ServletHolder(new MetricsServlet());
+    try {
+      this.holder.initialize();
+    } catch (Exception e) {
+      Log.error("Unable to initialise metrics servlet: " + e.getMessage());
+    }
   }
 
   @Override
@@ -45,11 +58,20 @@ public class PrometheusHandler extends AbstractHandler {
         && target.matches("^/metrics/?$")
     ) {
       Log.info(method + " <- /metrics");
-      response.setContentType("application/vnd.git-lfs+json");
-      response.setStatus(200);
+
+      if (!this.holder.isAvailable()) {
+        try {
+          this.holder.start();
+        } catch (Exception e) {
+          Log.error("Unable to start metrics servlet: " + e.getMessage());
+          response.setStatus(500);
+          baseRequest.setHandled(true);
+          return;
+        }
+      }
+
       this.holder.handle(baseRequest, request, response);
       baseRequest.setHandled(true);
     }
   }
-
 }

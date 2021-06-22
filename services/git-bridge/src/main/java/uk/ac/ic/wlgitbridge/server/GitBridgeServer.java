@@ -127,7 +127,7 @@ public class GitBridgeServer {
         handlers.addHandler(new StatusHandler(bridge));
         handlers.addHandler(new HealthCheckHandler(bridge));
         handlers.addHandler(new GitLfsHandler(bridge));
-        handlers.addHandler(new PrometheusHandler(bridge));
+        handlers.addHandler(new PrometheusHandler());
         base.setHandler(handlers);
         return base;
     }
