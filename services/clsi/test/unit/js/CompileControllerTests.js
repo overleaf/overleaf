@@ -157,11 +157,7 @@ describe('CompileController', function () {
               outputFiles: this.output_files.map((file) => {
                 return {
                   url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                  path: file.path,
-                  type: file.type,
-                  build: file.build,
-                  // gets dropped by JSON.stringify
-                  contentId: undefined
+                  ...file
                 }
               })
             }
@@ -202,11 +198,7 @@ describe('CompileController', function () {
               outputFiles: this.output_files.map((file) => {
                 return {
                   url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                  path: file.path,
-                  type: file.type,
-                  build: file.build,
-                  // gets dropped by JSON.stringify
-                  contentId: undefined
+                  ...file
                 }
               })
             }

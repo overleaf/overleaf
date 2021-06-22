@@ -123,7 +123,7 @@ module.exports = CompileController = {
                 stats,
                 timings,
                 outputFiles: outputFiles.map((file) => {
-                  const record = {
+                  return {
                     url:
                       `${Settings.apis.clsi.url}/project/${request.project_id}` +
                       (request.user_id != null
@@ -131,18 +131,8 @@ module.exports = CompileController = {
                         : '') +
                       (file.build != null ? `/build/${file.build}` : '') +
                       `/output/${file.path}`,
-                    path: file.path,
-                    type: file.type,
-                    build: file.build,
-                    contentId: file.contentId
+                    ...file
                   }
-                  if (file.ranges != null) {
-                    record.ranges = file.ranges
-                  }
-                  if (file.size != null) {
-                    record.size = file.size
-                  }
-                  return record
                 })
               }
             })
