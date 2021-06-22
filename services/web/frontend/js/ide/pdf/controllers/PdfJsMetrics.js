@@ -61,25 +61,15 @@ export function trackPdfDownload(response, compileTimeClientE2E) {
 }
 
 function submitCompileMetrics(metrics) {
-  let {
-    latencyFetch,
-    latencyRender,
-    compileTimeClientE2E,
-    stats,
-    timings,
-  } = metrics
-  stats = stats || {}
-  timings = timings || {}
+  const { latencyFetch, latencyRender, compileTimeClientE2E } = metrics
   const leanMetrics = {
     version: VERSION,
     latencyFetch,
     latencyRender,
-    pdfSize: stats['pdf-size'],
     compileTimeClientE2E,
-    compileTimeServerE2E: timings.compileE2E,
   }
   sl_console.log('/event/compile-metrics', JSON.stringify(metrics))
-  sendMB('compile-metrics-v4', leanMetrics, SAMPLING_RATE)
+  sendMB('compile-metrics-v5', leanMetrics, SAMPLING_RATE)
 }
 
 function submitPDFBandwidth(metrics) {
@@ -90,6 +80,24 @@ function submitPDFBandwidth(metrics) {
       metricsFlat[section + '_' + key] = value
     })
   })
+  const leanMetrics = {}
+  Object.entries(metricsFlat).forEach(([metric, value]) => {
+    if (
+      [
+        'serviceWorkerMetrics_id',
+        'serviceWorkerMetrics_cachedBytes',
+        'serviceWorkerMetrics_fetchedBytes',
+        'serviceWorkerMetrics_requestedBytes',
+        'serviceWorkerMetrics_version',
+        'serviceWorkerMetrics_epoch',
+      ].includes(metric)
+    ) {
+      leanMetrics[metric] = value
+    }
+  })
+  if (Object.entries(leanMetrics).length === 0) {
+    return
+  }
   sl_console.log('/event/pdf-bandwidth', JSON.stringify(metrics))
-  sendMB('pdf-bandwidth-v4', metricsFlat, SAMPLING_RATE)
+  sendMB('pdf-bandwidth-v5', leanMetrics, SAMPLING_RATE)
 }
