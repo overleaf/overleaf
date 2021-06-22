@@ -99,6 +99,7 @@ describe('CompileController', function () {
         {
           path: 'output.pdf',
           type: 'pdf',
+          size: 1337,
           build: 1234
         },
         {
@@ -172,6 +173,48 @@ describe('CompileController', function () {
           {
             path: 'fake_output.pdf',
             type: 'pdf',
+            build: 1234
+          },
+          {
+            path: 'output.log',
+            type: 'log',
+            build: 1234
+          }
+        ]
+        this.CompileManager.doCompileWithLock = sinon
+          .stub()
+          .yields(null, this.output_files, this.stats, this.timings)
+        this.CompileController.compile(this.req, this.res)
+      })
+
+      it('should return the JSON response with status failure', function () {
+        this.res.status.calledWith(200).should.equal(true)
+        this.res.send
+          .calledWith({
+            compile: {
+              status: 'failure',
+              error: null,
+              stats: this.stats,
+              timings: this.timings,
+              outputFiles: this.output_files.map((file) => {
+                return {
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  ...file
+                }
+              })
+            }
+          })
+          .should.equal(true)
+      })
+    })
+
+    describe('with an empty output.pdf', function () {
+      beforeEach(function () {
+        this.output_files = [
+          {
+            path: 'output.pdf',
+            type: 'pdf',
+            size: 0,
             build: 1234
           },
           {

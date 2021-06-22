@@ -88,7 +88,7 @@ module.exports = CompileController = {
               let file
               status = 'failure'
               for (file of Array.from(outputFiles)) {
-                if (file.path === 'output.pdf') {
+                if (file.path === 'output.pdf' && file.size > 0) {
                   status = 'success'
                 }
               }
