@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.server;
 
-import io.prometheus.client.exporter.MetricsServlet;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.exporter.common.TextFormat;
 import io.prometheus.client.hotspot.DefaultExports;
 
 import org.eclipse.jetty.server.HttpConnection;
@@ -15,33 +16,18 @@ import uk.ac.ic.wlgitbridge.util.Log;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Arrays;
-
-/**
-  * Wrapper for the MetricsServlet from the Prometheus client.
-  *
-  * We wrap this in a handler here, as we use a wildcard servlet context on /*, and adding
-  * an additional servlet context collides with it. Adding a servlet context on /metrics
-  * causes a redirect to /metrics/ which breaks things when jetty doesn't know the full
-  * public URL.
-  * 
-  * There may still be a better way to do this, but it works.
-  **/
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PrometheusHandler extends AbstractHandler {
 
-  private final ServletHolder holder;
-
   public PrometheusHandler() {
     DefaultExports.initialize();
-
-    this.holder = new ServletHolder(new MetricsServlet());
-    try {
-      this.holder.initialize();
-    } catch (Exception e) {
-      Log.error("Unable to initialise metrics servlet: " + e.getMessage());
-    }
   }
 
   @Override
@@ -58,20 +44,35 @@ public class PrometheusHandler extends AbstractHandler {
         && target.matches("^/metrics/?$")
     ) {
       Log.info(method + " <- /metrics");
-
-      if (!this.holder.isAvailable()) {
-        try {
-          this.holder.start();
-        } catch (Exception e) {
-          Log.error("Unable to start metrics servlet: " + e.getMessage());
-          response.setStatus(500);
-          baseRequest.setHandled(true);
-          return;
-        }
-      }
-
-      this.holder.handle(baseRequest, request, response);
+      this.printMetrics(request, response);
       baseRequest.setHandled(true);
+    }
+  }
+
+  private void printMetrics(
+    HttpServletRequest request,
+    HttpServletResponse response
+  ) throws ServletException, IOException {
+    response.setStatus(200);
+    String contentType = TextFormat.chooseContentType(request.getHeader("Accept"));
+    response.setContentType(contentType);
+
+    Writer writer = new BufferedWriter(response.getWriter());
+
+    try {
+      TextFormat.writeFormat(contentType, writer, CollectorRegistry.defaultRegistry.filteredMetricFamilySamples(parse(request)));
+      writer.flush();
+    } finally {
+      writer.close();
+    }
+  }
+
+  private Set<String> parse(HttpServletRequest req) {
+    String[] includedParam = req.getParameterValues("name[]");
+    if (includedParam == null) {
+      return Collections.emptySet();
+    } else {
+      return new HashSet<String>(Arrays.asList(includedParam));
     }
   }
 }
