@@ -1225,28 +1225,9 @@ describe('ProjectController', function () {
             .returns(false)
         })
       }
-      function tagAlpha() {
-        beforeEach(function () {
-          this.user.alphaProgram = true
-        })
-      }
 
       beforeEach(function () {
         this.settings.enablePdfCaching = true
-      })
-
-      describe('alpha rollout', function () {
-        describe('regular user', function () {
-          expectToNotBeEnrolledAtAll()
-        })
-        describe('anonymous user', function () {
-          tagAnonymous()
-          expectToNotBeEnrolledAtAll()
-        })
-        describe('alpha user', function () {
-          tagAlpha()
-          expectToCollectMetricsAndCachePDF()
-        })
       })
 
       describe('during regular roll-out', function () {
@@ -1258,11 +1239,7 @@ describe('ProjectController', function () {
           })
           describe('anonymous user', function () {
             tagAnonymous()
-            expectToNotBeEnrolledAtAll()
-          })
-          describe('alpha user', function () {
-            tagAlpha()
-            expectToCollectMetricsAndCachePDF()
+            expectToCachePDFOnly()
           })
         })
 
@@ -1274,11 +1251,7 @@ describe('ProjectController', function () {
           })
           describe('anonymous user', function () {
             tagAnonymous()
-            expectToNotBeEnrolledAtAll()
-          })
-          describe('alpha user', function () {
-            tagAlpha()
-            expectToCollectMetricsAndCachePDF()
+            expectToCachePDFOnly()
           })
         })
 
@@ -1290,11 +1263,7 @@ describe('ProjectController', function () {
           })
           describe('anonymous user', function () {
             tagAnonymous()
-            expectToNotBeEnrolledAtAll()
-          })
-          describe('alpha user', function () {
-            tagAlpha()
-            expectToCollectMetricsAndCachePDF()
+            expectToCachePDFOnly()
           })
         })
 
@@ -1306,11 +1275,7 @@ describe('ProjectController', function () {
           })
           describe('anonymous user', function () {
             tagAnonymous()
-            expectToNotBeEnrolledAtAll()
-          })
-          describe('alpha user', function () {
-            tagAlpha()
-            expectToCollectMetricsAndCachePDF()
+            expectToCachePDFOnly()
           })
         })
       })

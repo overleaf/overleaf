@@ -347,16 +347,16 @@ module.exports = {
       ],
     },
     {
-      id: 'pdf_caching_5',
-      active: process.env.SPLIT_TEST_PDF_CACHING_5_ACTIVE === 'true',
+      id: 'pdf_caching_full',
+      active: process.env.SPLIT_TEST_PDF_CACHING_FULL_ACTIVE === 'true',
       variants: [
-        {
-          id: 'collect-metrics-only',
-          rolloutPercent: 5,
-        },
         {
           id: 'collect-metrics-and-enable-caching',
           rolloutPercent: 5,
+        },
+        {
+          id: 'enable-caching-only',
+          rolloutPercent: 95,
         },
       ],
     },

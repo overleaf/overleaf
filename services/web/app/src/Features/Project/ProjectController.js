@@ -712,10 +712,10 @@ const ProjectController = {
         },
         pdfCachingFeatureFlag(cb) {
           if (!Settings.enablePdfCaching) return cb(null, '')
-          if (!userId) return cb(null, '')
+          if (!userId) return cb(null, 'enable-caching-only')
           SplitTestHandler.getTestSegmentation(
             userId,
-            'pdf_caching_5',
+            'pdf_caching_full',
             (err, segmentation) => {
               if (err) {
                 // Do not fail loading the editor.
@@ -812,8 +812,7 @@ const ProjectController = {
                 // The feature is disabled globally.
                 return false
               }
-              const canSeeFeaturePreview =
-                user.alphaProgram || pdfCachingFeatureFlag.includes(flag)
+              const canSeeFeaturePreview = pdfCachingFeatureFlag.includes(flag)
               if (!canSeeFeaturePreview) {
                 // The user is not in the target group.
                 return false
