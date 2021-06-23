@@ -205,13 +205,13 @@ module.exports = ProjectRootDocManager = {
     )
   },
 
+  /**
+   * @param {ObjectId | string} project_id
+   * @param {Function} callback
+   */
   ensureRootDocumentIsValid(project_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
-    return ProjectGetter.getProject(
+    ProjectGetter.getProjectWithoutDocLines(
       project_id,
-      { rootDoc_id: 1 },
       function (error, project) {
         if (error != null) {
           return callback(error)
@@ -221,29 +221,17 @@ module.exports = ProjectRootDocManager = {
         }
 
         if (project.rootDoc_id != null) {
-          return ProjectEntityHandler.getAllDocPathsFromProjectById(
-            project_id,
-            function (error, docPaths) {
-              if (error != null) {
-                return callback(error)
-              }
-              let rootDocValid = false
-              for (const doc_id in docPaths) {
-                const _path = docPaths[doc_id]
-                if (doc_id === project.rootDoc_id) {
-                  rootDocValid = true
-                }
-              }
-              if (rootDocValid) {
-                return callback()
-              } else {
-                return ProjectEntityUpdateHandler.unsetRootDoc(project_id, () =>
-                  ProjectRootDocManager.setRootDocAutomatically(
-                    project_id,
-                    callback
-                  )
+          ProjectEntityHandler.getDocPathFromProjectByDocId(
+            project,
+            project.rootDoc_id,
+            (err, docPath) => {
+              if (docPath) return callback()
+              ProjectEntityUpdateHandler.unsetRootDoc(project_id, () =>
+                ProjectRootDocManager.setRootDocAutomatically(
+                  project_id,
+                  callback
                 )
-              }
+              )
             }
           )
         } else {

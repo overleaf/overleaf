@@ -151,6 +151,11 @@ const ProjectEntityHandler = {
     DocstoreManager.getDoc(projectId, docId, options, callback)
   },
 
+  /**
+   * @param {ObjectID | string} projectId
+   * @param {ObjectID | string} docId
+   * @param {Function} callback
+   */
   getDocPathByProjectIdAndDocId(projectId, docId, callback) {
     ProjectGetter.getProjectWithoutDocLines(projectId, (err, project) => {
       if (err != null) {
@@ -159,37 +164,53 @@ const ProjectEntityHandler = {
       if (project == null) {
         return callback(new Errors.NotFoundError('no project'))
       }
-      function recursivelyFindDocInFolder(basePath, docId, folder) {
-        const docInCurrentFolder = (folder.docs || []).find(
-          currentDoc => currentDoc._id.toString() === docId.toString()
-        )
-        if (docInCurrentFolder != null) {
-          return path.join(basePath, docInCurrentFolder.name)
-        } else {
-          let docPath, childFolder
-          for (childFolder of folder.folders || []) {
-            docPath = recursivelyFindDocInFolder(
-              path.join(basePath, childFolder.name),
-              docId,
-              childFolder
-            )
-            if (docPath != null) {
-              return docPath
-            }
-          }
-          return null
-        }
-      }
-      const docPath = recursivelyFindDocInFolder(
-        '/',
+      ProjectEntityHandler.getDocPathFromProjectByDocId(
+        project,
         docId,
-        project.rootFolder[0]
+        (err, docPath) => {
+          if (err) return callback(Errors.OError.tag(err))
+          if (docPath == null) {
+            return callback(new Errors.NotFoundError('no doc'))
+          }
+          callback(null, docPath)
+        }
       )
-      if (docPath == null) {
-        return callback(new Errors.NotFoundError('no doc'))
-      }
-      callback(null, docPath)
     })
+  },
+
+  /**
+   * @param {Project} project
+   * @param {ObjectID | string} docId
+   * @param {Function} callback
+   */
+  getDocPathFromProjectByDocId(project, docId, callback) {
+    function recursivelyFindDocInFolder(basePath, docId, folder) {
+      const docInCurrentFolder = (folder.docs || []).find(
+        currentDoc => currentDoc._id.toString() === docId.toString()
+      )
+      if (docInCurrentFolder != null) {
+        return path.join(basePath, docInCurrentFolder.name)
+      } else {
+        let docPath, childFolder
+        for (childFolder of folder.folders || []) {
+          docPath = recursivelyFindDocInFolder(
+            path.join(basePath, childFolder.name),
+            docId,
+            childFolder
+          )
+          if (docPath != null) {
+            return docPath
+          }
+        }
+        return null
+      }
+    }
+    const docPath = recursivelyFindDocInFolder(
+      '/',
+      docId,
+      project.rootFolder[0]
+    )
+    callback(null, docPath)
   },
 
   _getAllFolders(projectId, callback) {

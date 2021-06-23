@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const { expect } = require('chai')
+const { ObjectId } = require('mongodb')
 const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Project/ProjectRootDocManager.js'
@@ -20,12 +21,15 @@ const SandboxedModule = require('sandboxed-module')
 describe('ProjectRootDocManager', function () {
   beforeEach(function () {
     this.project_id = 'project-123'
-    this.docPaths = {
-      'doc-id-1': '/chapter1.tex',
-      'doc-id-2': '/main.tex',
-      'doc-id-3': '/nested/chapter1a.tex',
-      'doc-id-4': '/nested/chapter1b.tex',
-    }
+    this.docPaths = {}
+    this.docId1 = new ObjectId()
+    this.docId2 = new ObjectId()
+    this.docId3 = new ObjectId()
+    this.docId4 = new ObjectId()
+    this.docPaths[this.docId1] = '/chapter1.tex'
+    this.docPaths[this.docId2] = '/main.tex'
+    this.docPaths[this.docId3] = '/nested/chapter1a.tex'
+    this.docPaths[this.docId4] = '/nested/chapter1b.tex'
     this.sl_req_id = 'sl-req-id-123'
     this.callback = sinon.stub()
     this.globbyFiles = ['a.tex', 'b.tex', 'main.tex']
@@ -60,7 +64,7 @@ describe('ProjectRootDocManager', function () {
       beforeEach(function (done) {
         this.docs = {
           '/chapter1.tex': {
-            _id: 'doc-id-1',
+            _id: this.docId1,
             lines: [
               'something else',
               '\\begin{document}',
@@ -69,7 +73,7 @@ describe('ProjectRootDocManager', function () {
             ],
           },
           '/main.tex': {
-            _id: 'doc-id-2',
+            _id: this.docId2,
             lines: [
               'different line',
               '\\documentclass{article}',
@@ -77,11 +81,11 @@ describe('ProjectRootDocManager', function () {
             ],
           },
           '/nested/chapter1a.tex': {
-            _id: 'doc-id-3',
+            _id: this.docId3,
             lines: ['Hello world'],
           },
           '/nested/chapter1b.tex': {
-            _id: 'doc-id-4',
+            _id: this.docId4,
             lines: ['Hello world'],
           },
         }
@@ -102,7 +106,7 @@ describe('ProjectRootDocManager', function () {
 
       it('should set the root doc to the doc containing a documentclass', function () {
         return this.ProjectEntityUpdateHandler.setRootDoc
-          .calledWith(this.project_id, 'doc-id-2')
+          .calledWith(this.project_id, this.docId2)
           .should.equal(true)
       })
     })
@@ -111,11 +115,11 @@ describe('ProjectRootDocManager', function () {
       beforeEach(function (done) {
         this.docs = {
           '/chapter1.tex': {
-            _id: 'doc-id-1',
+            _id: this.docId1,
             lines: ['\\begin{document}', 'Hello world', '\\end{document}'],
           },
           '/main.Rtex': {
-            _id: 'doc-id-2',
+            _id: this.docId2,
             lines: ['\\documentclass{article}', '\\input{chapter1}'],
           },
         }
@@ -130,7 +134,7 @@ describe('ProjectRootDocManager', function () {
 
       it('should set the root doc to the doc containing a documentclass', function () {
         return this.ProjectEntityUpdateHandler.setRootDoc
-          .calledWith(this.project_id, 'doc-id-2')
+          .calledWith(this.project_id, this.docId2)
           .should.equal(true)
       })
     })
@@ -139,11 +143,11 @@ describe('ProjectRootDocManager', function () {
       beforeEach(function (done) {
         this.docs = {
           '/chapter1.tex': {
-            _id: 'doc-id-1',
+            _id: this.docId1,
             lines: ['\\begin{document}', 'Hello world', '\\end{document}'],
           },
           '/style.bst': {
-            _id: 'doc-id-2',
+            _id: this.docId2,
             lines: ['%Example: \\documentclass{article}'],
           },
         }
@@ -346,12 +350,6 @@ describe('ProjectRootDocManager', function () {
   describe('setRootDocFromName', function () {
     describe('when there is a suitable root doc', function () {
       beforeEach(function (done) {
-        this.docPaths = {
-          'doc-id-1': '/chapter1.tex',
-          'doc-id-2': '/main.tex',
-          'doc-id-3': '/nested/chapter1a.tex',
-          'doc-id-4': '/nested/chapter1b.tex',
-        }
         this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
           .stub()
           .callsArgWith(1, null, this.docPaths)
@@ -373,7 +371,7 @@ describe('ProjectRootDocManager', function () {
 
       it('should set the root doc to main.tex', function () {
         return this.ProjectEntityUpdateHandler.setRootDoc
-          .calledWith(this.project_id, 'doc-id-2')
+          .calledWith(this.project_id, this.docId2.toString())
           .should.equal(true)
       })
     })
@@ -401,7 +399,7 @@ describe('ProjectRootDocManager', function () {
 
       it('should set the root doc to main.tex', function () {
         return this.ProjectEntityUpdateHandler.setRootDoc
-          .calledWith(this.project_id, 'doc-id-2')
+          .calledWith(this.project_id, this.docId2.toString())
           .should.equal(true)
       })
     })
@@ -429,7 +427,7 @@ describe('ProjectRootDocManager', function () {
 
       it('should set the root doc using the basename', function () {
         return this.ProjectEntityUpdateHandler.setRootDoc
-          .calledWith(this.project_id, 'doc-id-3')
+          .calledWith(this.project_id, this.docId3.toString())
           .should.equal(true)
       })
     })
@@ -457,7 +455,7 @@ describe('ProjectRootDocManager', function () {
 
       it('should set the root doc to main.tex', function () {
         return this.ProjectEntityUpdateHandler.setRootDoc
-          .calledWith(this.project_id, 'doc-id-2')
+          .calledWith(this.project_id, this.docId2.toString())
           .should.equal(true)
       })
     })
@@ -498,7 +496,7 @@ describe('ProjectRootDocManager', function () {
 
     describe('when the root doc is set', function () {
       beforeEach(function () {
-        this.project.rootDoc_id = 'root-doc-id'
+        this.project.rootDoc_id = this.docId2
         return this.ProjectRootDocManager.ensureRootDocumentIsSet(
           this.project_id,
           this.callback
@@ -574,29 +572,32 @@ describe('ProjectRootDocManager', function () {
       this.ProjectGetter.getProject = sinon
         .stub()
         .callsArgWith(2, null, this.project)
+      this.ProjectGetter.getProjectWithoutDocLines = sinon
+        .stub()
+        .callsArgWith(1, null, this.project)
       this.ProjectEntityUpdateHandler.setRootDoc = sinon.stub().yields()
       this.ProjectEntityUpdateHandler.unsetRootDoc = sinon.stub().yields()
-      this.ProjectEntityHandler.getAllDocPathsFromProjectById = sinon
+      this.ProjectRootDocManager.setRootDocAutomatically = sinon
         .stub()
-        .callsArgWith(1, null, this.docPaths)
-      return (this.ProjectRootDocManager.setRootDocAutomatically = sinon
-        .stub()
-        .callsArgWith(1, null))
+        .callsArgWith(1, null)
     })
 
     describe('when the root doc is set', function () {
       describe('when the root doc is valid', function () {
         beforeEach(function () {
-          this.project.rootDoc_id = 'doc-id-2'
+          this.project.rootDoc_id = this.docId2
+          this.ProjectEntityHandler.getDocPathFromProjectByDocId = sinon
+            .stub()
+            .callsArgWith(2, null, this.docPaths[this.docId2])
           return this.ProjectRootDocManager.ensureRootDocumentIsValid(
             this.project_id,
             this.callback
           )
         })
 
-        it('should find the project fetching only the rootDoc_id field', function () {
-          return this.ProjectGetter.getProject
-            .calledWith(this.project_id, { rootDoc_id: 1 })
+        it('should find the project without doc lines', function () {
+          return this.ProjectGetter.getProjectWithoutDocLines
+            .calledWith(this.project_id)
             .should.equal(true)
         })
 
@@ -613,16 +614,19 @@ describe('ProjectRootDocManager', function () {
 
       describe('when the root doc is not valid', function () {
         beforeEach(function () {
-          this.project.rootDoc_id = 'bogus-doc-id'
+          this.project.rootDoc_id = new ObjectId()
+          this.ProjectEntityHandler.getDocPathFromProjectByDocId = sinon
+            .stub()
+            .callsArgWith(2, null, null)
           return this.ProjectRootDocManager.ensureRootDocumentIsValid(
             this.project_id,
             this.callback
           )
         })
 
-        it('should find the project fetching only the rootDoc_id field', function () {
-          return this.ProjectGetter.getProject
-            .calledWith(this.project_id, { rootDoc_id: 1 })
+        it('should find the project without doc lines', function () {
+          return this.ProjectGetter.getProjectWithoutDocLines
+            .calledWith(this.project_id)
             .should.equal(true)
         })
 
@@ -646,15 +650,15 @@ describe('ProjectRootDocManager', function () {
 
     describe('when the root doc is not set', function () {
       beforeEach(function () {
-        return this.ProjectRootDocManager.ensureRootDocumentIsSet(
+        return this.ProjectRootDocManager.ensureRootDocumentIsValid(
           this.project_id,
           this.callback
         )
       })
 
-      it('should find the project fetching only the rootDoc_id fiel', function () {
-        return this.ProjectGetter.getProject
-          .calledWith(this.project_id, { rootDoc_id: 1 })
+      it('should find the project without doc lines', function () {
+        return this.ProjectGetter.getProjectWithoutDocLines
+          .calledWith(this.project_id)
           .should.equal(true)
       })
 
@@ -671,8 +675,10 @@ describe('ProjectRootDocManager', function () {
 
     describe('when the project does not exist', function () {
       beforeEach(function () {
-        this.ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)
-        return this.ProjectRootDocManager.ensureRootDocumentIsSet(
+        this.ProjectGetter.getProjectWithoutDocLines = sinon
+          .stub()
+          .callsArgWith(1, null, null)
+        return this.ProjectRootDocManager.ensureRootDocumentIsValid(
           this.project_id,
           this.callback
         )
