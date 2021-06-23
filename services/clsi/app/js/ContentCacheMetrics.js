@@ -36,7 +36,7 @@ function emitPdfCachingStats(stats, timings) {
       ? timings.compileE2E /
         (timings.compileE2E - timings['compute-pdf-caching'])
       : 1
-  if (fraction > 1.5) {
+  if (fraction > 1.5 && timings.compileE2E > 10 * 1000) {
     logger.warn(
       {
         stats,
