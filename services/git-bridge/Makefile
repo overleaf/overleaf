@@ -7,7 +7,7 @@ runtime-conf:
 
 
 run: package runtime-conf
-	java -jar \
+	java $(GIT_BRIDGE_JVM_ARGS) -jar \
 	target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar \
 	conf/runtime.json
 
