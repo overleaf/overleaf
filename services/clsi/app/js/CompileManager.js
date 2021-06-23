@@ -292,6 +292,8 @@ module.exports = CompileManager = {
                   timings['cpu-time'] / stats['latex-runs']
                 )
               }
+              // Emit compile time.
+              timings.compile = ts
 
               return OutputFileFinder.findOutputFiles(
                 resourceList,
@@ -317,8 +319,7 @@ module.exports = CompileManager = {
                         )
                       }
 
-                      // Emit compile time.
-                      timings.compile = ts
+                      // Emit e2e compile time.
                       timings.compileE2E = timerE2E.done()
 
                       if (stats['pdf-size']) {

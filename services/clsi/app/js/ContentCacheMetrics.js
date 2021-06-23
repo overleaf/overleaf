@@ -19,6 +19,9 @@ function getSystemLoad() {
 const ONE_MB = 1024 * 1024
 
 function emitPdfStats(stats, timings) {
+  if (stats['pdf-caching-timed-out']) {
+    Metrics.inc('pdf-caching-timed-out')
+  }
   if (timings['compute-pdf-caching']) {
     emitPdfCachingStats(stats, timings)
   } else {

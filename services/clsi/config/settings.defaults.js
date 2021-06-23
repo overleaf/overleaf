@@ -68,7 +68,9 @@ module.exports = {
   enablePdfCaching: process.env.ENABLE_PDF_CACHING === 'true',
   enablePdfCachingDark: process.env.ENABLE_PDF_CACHING_DARK === 'true',
   pdfCachingMinChunkSize:
-    parseInt(process.env.PDF_CACHING_MIN_CHUNK_SIZE, 10) || 1024
+    parseInt(process.env.PDF_CACHING_MIN_CHUNK_SIZE, 10) || 1024,
+  pdfCachingMaxProcessingTime:
+    parseInt(process.env.PDF_CACHING_MAX_PROCESSING_TIME, 10) || 10 * 1000
 }
 
 if (process.env.ALLOWED_COMPILE_GROUPS) {

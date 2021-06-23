@@ -10,27 +10,34 @@ const Settings = require('settings-sharelatex')
 const OError = require('@overleaf/o-error')
 const pLimit = require('p-limit')
 const { parseXrefTable } = require('../lib/pdfjs/parseXrefTable')
+const { TimedOutError } = require('./Errors')
 
 /**
  *
  * @param {String} contentDir path to directory where content hash files are cached
  * @param {String} filePath the pdf file to scan for streams
  * @param {number} size the pdf size
+ * @param {number} compileTime
  */
-async function update(contentDir, filePath, size) {
+async function update(contentDir, filePath, size, compileTime) {
+  const checkDeadline = getDeadlineChecker(compileTime)
   const ranges = []
   const newRanges = []
   // keep track of hashes expire old ones when they reach a generation > N.
   const tracker = await HashFileTracker.from(contentDir)
   tracker.updateAge()
 
-  const rawTable = await parseXrefTable(filePath, size)
+  checkDeadline('after init HashFileTracker')
+
+  const rawTable = await parseXrefTable(filePath, size, checkDeadline)
   rawTable.sort((a, b) => {
     return a.offset - b.offset
   })
   rawTable.forEach((obj, idx) => {
     obj.idx = idx
   })
+
+  checkDeadline('after parsing')
 
   const uncompressedObjects = []
   for (const object of rawTable) {
@@ -50,12 +57,14 @@ async function update(contentDir, filePath, size) {
     if (size < Settings.pdfCachingMinChunkSize) {
       continue
     }
-    uncompressedObjects.push(object)
+    uncompressedObjects.push({ object, idx: uncompressedObjects.length })
   }
+
+  checkDeadline('after finding uncompressed')
 
   const handle = await fs.promises.open(filePath)
   try {
-    for (const object of uncompressedObjects) {
+    for (const { object, idx } of uncompressedObjects) {
       let buffer = Buffer.alloc(object.size, 0)
       const { bytesRead } = await handle.read(
         buffer,
@@ -63,6 +72,7 @@ async function update(contentDir, filePath, size) {
         object.size,
         object.offset
       )
+      checkDeadline('after read ' + idx)
       if (bytesRead !== object.size) {
         throw new OError('could not read full chunk', {
           object,
@@ -80,6 +90,7 @@ async function update(contentDir, filePath, size) {
       buffer = buffer.subarray(objectIdRaw.byteLength)
 
       const hash = pdfStreamHash(buffer)
+      checkDeadline('after hash ' + idx)
       const range = {
         objectId: objectIdRaw.toString(),
         start: object.offset + objectIdRaw.byteLength,
@@ -92,12 +103,15 @@ async function update(contentDir, filePath, size) {
       if (tracker.track(range)) continue
 
       await writePdfStream(contentDir, hash, buffer)
+      checkDeadline('after write ' + idx)
       newRanges.push(range)
     }
   } finally {
     await handle.close()
   }
 
+  // NOTE: Bailing out below does not make sense.
+  //       Let the next compile use the already written ranges.
   const reclaimedSpace = await tracker.deleteStaleHashes(5)
   await tracker.flush()
   return [ranges, newRanges, reclaimedSpace]
@@ -216,6 +230,32 @@ async function writePdfStream(dir, hash, buffer) {
     } catch (_) {
       throw err
     }
+  }
+}
+
+function getDeadlineChecker(compileTime) {
+  const maxOverhead = Math.min(
+    // Adding 10s to a  40s compile time is OK.
+    // Adding  1s to a   3s compile time is OK.
+    Math.max(compileTime / 4, 1000),
+    // Adding 30s to a 120s compile time is not OK, limit to 10s.
+    Settings.pdfCachingMaxProcessingTime
+  )
+
+  const deadline = Date.now() + maxOverhead
+  let lastStage = { stage: 'start', now: Date.now() }
+  let completedStages = 0
+  return function (stage) {
+    const now = Date.now()
+    if (now > deadline) {
+      throw new TimedOutError(stage, {
+        completedStages,
+        lastStage: lastStage.stage,
+        diffToLastStage: now - lastStage.now
+      })
+    }
+    completedStages++
+    lastStage = { stage, now }
   }
 }
 
