@@ -23,6 +23,9 @@ const Metrics = require('@overleaf/metrics')
 const Errors = require('../Errors/Errors')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
+// see clsi: RequestParser.MAX_TIMEOUT
+const DEFAULT_TIMEOUT = 600
+const OVERHEAD_SYNC_AND_OUTPUT = 60 * 1000
 
 const ClsiManager = {
   sendRequest(projectId, userId, options, callback) {
@@ -455,10 +458,17 @@ const ClsiManager = {
       userId,
       'compile'
     )
+    const timeout =
+      OVERHEAD_SYNC_AND_OUTPUT +
+      ((req.compile && req.compile.options && req.compile.options.timeout) ||
+        DEFAULT_TIMEOUT) *
+        1000
+
     const opts = {
       url: compileUrl,
       json: req,
       method: 'POST',
+      timeout,
     }
     ClsiManager._makeRequest(projectId, opts, (err, response, body) => {
       if (err != null) {

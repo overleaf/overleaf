@@ -912,7 +912,7 @@ describe('ClsiManager', function () {
 
   describe('_postToClsi', function () {
     beforeEach(function () {
-      this.req = { mock: 'req', compile: {} }
+      this.req = { compile: { options: { timeout: 42 } } }
     })
 
     describe('successfully', function () {
@@ -941,6 +941,7 @@ describe('ClsiManager', function () {
             method: 'POST',
             url,
             json: this.req,
+            timeout: 42 * 1000 + 60 * 1000,
           })
           .should.equal(true)
       })
