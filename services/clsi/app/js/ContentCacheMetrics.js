@@ -30,6 +30,9 @@ function emitPdfStats(stats, timings) {
 function emitPdfCachingStats(stats, timings) {
   if (!stats['pdf-size']) return // double check
 
+  // How much extra time did we spent in PDF.js?
+  Metrics.timing('compute-pdf-caching', timings['compute-pdf-caching'])
+
   // How large is the overhead of hashing up-front?
   const fraction =
     timings.compileE2E - timings['compute-pdf-caching'] !== 0
