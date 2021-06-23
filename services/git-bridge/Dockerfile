@@ -28,6 +28,10 @@ FROM openjdk:11-jre
 RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat \
  && rm -rf /var/lib/apt/lists
 
+RUN mkdir -p /opt/cprof && \
+  wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz \
+  | tar xzv -C /opt/cprof
+
 RUN useradd --create-home node
 
 COPY --from=builder /git-bridge.jar /
