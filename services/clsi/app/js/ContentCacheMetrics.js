@@ -1,4 +1,20 @@
+const logger = require('logger-sharelatex')
 const Metrics = require('./Metrics')
+const os = require('os')
+
+let CACHED_LOAD = {
+  expires: -1,
+  load: [0, 0, 0]
+}
+function getSystemLoad() {
+  if (CACHED_LOAD.expires < Date.now()) {
+    CACHED_LOAD = {
+      expires: Date.now() + 10 * 1000,
+      load: os.loadavg()
+    }
+  }
+  return CACHED_LOAD.load
+}
 
 const ONE_MB = 1024 * 1024
 
@@ -20,6 +36,16 @@ function emitPdfCachingStats(stats, timings) {
       ? timings.compileE2E /
         (timings.compileE2E - timings['compute-pdf-caching'])
       : 1
+  if (fraction > 1.5) {
+    logger.warn(
+      {
+        stats,
+        timings,
+        load: getSystemLoad()
+      },
+      'slow pdf caching'
+    )
+  }
   Metrics.summary('overhead-compute-pdf-ranges', fraction * 100 - 100)
 
   // How does the hashing scale to pdf size in MB?
