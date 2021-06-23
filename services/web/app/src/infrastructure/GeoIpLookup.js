@@ -3,7 +3,7 @@ const settings = require('settings-sharelatex')
 const _ = require('underscore')
 const logger = require('logger-sharelatex')
 const URL = require('url')
-const { promisify } = require('../util/promises')
+const { promisify, promisifyMultiResult } = require('../util/promises')
 
 const currencyMappings = {
   GB: 'GBP',
@@ -91,6 +91,9 @@ module.exports = {
   getCurrencyCode,
   promises: {
     getDetails: promisify(getDetails),
-    getCurrencyCode: promisify(getCurrencyCode),
+    getCurrencyCode: promisifyMultiResult(getCurrencyCode, [
+      'currencyCode',
+      'countryCode',
+    ]),
   },
 }

@@ -26,7 +26,9 @@ const SUBSCRIPTION_PAGE_SPLIT_TEST = 'subscription-page'
 async function plansPage(req, res) {
   const plans = SubscriptionViewModelBuilder.buildPlansList()
 
-  const recommendedCurrency = await GeoIpLookup.promises.getCurrencyCode(
+  const {
+    currencyCode: recommendedCurrency,
+  } = await GeoIpLookup.promises.getCurrencyCode(
     (req.query ? req.query.ip : undefined) || req.ip
   )
 
@@ -66,7 +68,7 @@ async function paymentPage(req, res) {
         ? req.query.currency.toUpperCase()
         : undefined
       const {
-        recomendedCurrency: recommendedCurrency,
+        currencyCode: recommendedCurrency,
         countryCode,
       } = await GeoIpLookup.promises.getCurrencyCode(
         (req.query ? req.query.ip : undefined) || req.ip

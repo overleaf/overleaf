@@ -161,9 +161,9 @@ describe('SubscriptionController', function () {
   describe('plansPage', function () {
     beforeEach(function () {
       this.req.ip = '1234.3123.3131.333 313.133.445.666 653.5345.5345.534'
-      return this.GeoIpLookup.promises.getCurrencyCode.resolves(
-        this.stubbedCurrencyCode
-      )
+      return this.GeoIpLookup.promises.getCurrencyCode.resolves({
+        currencyCode: this.stubbedCurrencyCode,
+      })
     })
   })
 
@@ -174,7 +174,7 @@ describe('SubscriptionController', function () {
         .stub()
         .resolves(true)
       return this.GeoIpLookup.promises.getCurrencyCode.resolves({
-        recomendedCurrency: this.stubbedCurrencyCode,
+        currencyCode: this.stubbedCurrencyCode,
       })
     })
 

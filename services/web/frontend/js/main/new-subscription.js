@@ -103,15 +103,29 @@ export default App.controller(
     const pricing = recurly.Pricing()
     window.pricing = pricing
 
-    pricing
-      .plan(window.plan_code, { quantity: 1 })
-      .address({
-        country: $scope.data.country,
-      })
-      .tax({ tax_code: 'digital', vat_number: '' })
-      .currency($scope.currencyCode)
-      .coupon($scope.data.coupon)
-      .done()
+    function setupPricing() {
+      pricing
+        .plan(window.plan_code, { quantity: 1 })
+        .address({
+          country: $scope.data.country,
+        })
+        .tax({ tax_code: 'digital', vat_number: '' })
+        .currency($scope.currencyCode)
+        .coupon($scope.data.coupon)
+        .catch(function (err) {
+          if (
+            $scope.currencyCode !== 'USD' &&
+            err.name === 'invalid-currency'
+          ) {
+            $scope.currencyCode = 'USD'
+            setupPricing()
+          } else {
+            throw err
+          }
+        })
+        .done()
+    }
+    setupPricing()
 
     pricing.on('change', () => {
       $scope.planName = pricing.items.plan.name
