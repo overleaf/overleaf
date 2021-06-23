@@ -832,27 +832,33 @@ App.controller(
         .then(function (response) {
           const { data } = response
           const compileTimeClientE2E = performance.now() - t0
-          $scope.pdf.view = 'pdf'
-          $scope.pdf.compiling = false
-          parseCompileResponse(data, compileTimeClientE2E)
+          $scope.$applyAsync(() => {
+            $scope.pdf.view = 'pdf'
+            $scope.pdf.compiling = false
+            parseCompileResponse(data, compileTimeClientE2E)
+          })
         })
         .catch(function (response) {
           const { status } = response
-          if (status === 429) {
-            $scope.pdf.rateLimited = true
-          }
-          $scope.pdf.compiling = false
-          $scope.pdf.renderingError = false
-          $scope.pdf.error = true
-          $scope.pdf.view = 'errors'
-          if (window.showNewLogsUI) {
-            $scope.clsiErrors = { error: true }
-            $scope.shouldShowLogs = true
-            $scope.pdf.compileFailed = true
-          }
+          $scope.$applyAsync(() => {
+            if (status === 429) {
+              $scope.pdf.rateLimited = true
+            }
+            $scope.pdf.compiling = false
+            $scope.pdf.renderingError = false
+            $scope.pdf.error = true
+            $scope.pdf.view = 'errors'
+            if (window.showNewLogsUI) {
+              $scope.clsiErrors = { error: true }
+              $scope.shouldShowLogs = true
+              $scope.pdf.compileFailed = true
+            }
+          })
         })
         .finally(() => {
-          $scope.lastFinishedCompileAt = Date.now()
+          $scope.$applyAsync(() => {
+            $scope.lastFinishedCompileAt = Date.now()
+          })
         })
     }
 
