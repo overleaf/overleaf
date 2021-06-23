@@ -92,41 +92,59 @@ function fetchJSON(
     options.body = JSON.stringify(body)
   }
 
-  return fetch(path, options)
-    .catch(error => {
-      // the fetch failed
-      throw new FetchError(
-        'There was an error fetching the JSON',
-        path,
-        options
-      ).withCause(error)
-    })
-    .then(response => {
-      return parseResponseBody(response)
-        .catch(error => {
-          // parsing the response body failed
-          throw new FetchError(
-            'There was an error parsing the response body',
-            path,
-            options,
-            response
-          ).withCause(error)
-        })
-        .then(data => {
-          if (!response.ok) {
-            // the response from the server was not 2xx
-            throw new FetchError(
-              response.statusText,
-              path,
-              options,
-              response,
-              data
+  // The returned Promise and the `.then(handleSuccess, handleError)` handlers are needed
+  // to avoid calling `finally` in a Promise chain (and thus updating the component's state)
+  // after a component has unmounted.
+  // `resolve` will be called when the request succeeds, `reject` will be called when the request fails,
+  // but nothing will be called if the request is cancelled via an AbortController.
+  return new Promise((resolve, reject) => {
+    fetch(path, options).then(
+      response => {
+        return parseResponseBody(response).then(
+          data => {
+            if (response.ok) {
+              resolve(data)
+            } else {
+              // the response from the server was not 2xx
+              reject(
+                new FetchError(
+                  response.statusText,
+                  path,
+                  options,
+                  response,
+                  data
+                )
+              )
+            }
+          },
+          error => {
+            // parsing the response body failed
+            reject(
+              new FetchError(
+                'There was an error parsing the response body',
+                path,
+                options,
+                response
+              ).withCause(error)
             )
           }
-
-          return data
-        })
-    })
+        )
+      },
+      error => {
+        // swallow the error if the fetch was cancelled (e.g. by cancelling an AbortController on component unmount)
+        if (error.name !== 'AbortError') {
+          // the fetch failed
+          reject(
+            new FetchError(
+              'There was an error fetching the JSON',
+              path,
+              options
+            ).withCause(error)
+          )
+        }
+      }
+    )
+  })
 }
 
 /**

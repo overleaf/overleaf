@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getJSON } from '../../../infrastructure/fetch-json'
+import useAbortController from '../../../shared/hooks/use-abort-controller'
 
 const contactCollator = new Intl.Collator('en')
 
@@ -12,14 +13,16 @@ export function useUserContacts() {
   const [data, setData] = useState(null)
   const [error, setError] = useState(false)
 
+  const { signal } = useAbortController()
+
   useEffect(() => {
-    getJSON('/user/contacts')
+    getJSON('/user/contacts', { signal })
       .then(data => {
         setData(data.contacts.map(buildContact).sort(alphabetical))
       })
       .catch(error => setError(error))
       .finally(() => setLoading(false))
-  }, [])
+  }, [signal])
 
   return { loading, data, error }
 }

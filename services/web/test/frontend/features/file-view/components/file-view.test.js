@@ -65,7 +65,7 @@ describe('<FileView/>', function () {
       screen.getByText('Loading', { exact: false })
     })
 
-    it('shows messaging if the image could not be loaded', function () {
+    it('shows messaging if the image could not be loaded', async function () {
       renderWithEditorContext(
         <FileView file={imageFile} storeReferencesKeys={() => {}} />
       )
@@ -73,7 +73,9 @@ describe('<FileView/>', function () {
       // Fake the image request failing as the request is handled by the browser
       fireEvent.error(screen.getByRole('img'))
 
-      screen.findByText('Sorry, no preview is available', { exact: false })
+      await screen.findByText('Sorry, no preview is available', {
+        exact: false,
+      })
     })
   })
 })

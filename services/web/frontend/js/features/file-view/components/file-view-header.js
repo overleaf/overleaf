@@ -5,10 +5,10 @@ import { Trans, useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 import { formatTime, relativeDate } from '../../utils/format-date'
 import { postJSON } from '../../../infrastructure/fetch-json'
-import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { useEditorContext } from '../../../shared/context/editor-context'
 
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import useAbortController from '../../../shared/hooks/use-abort-controller'
 const tprLinkedFileInfo = importOverleafModules('tprLinkedFileInfo')
 const tprLinkedFileRefreshError = importOverleafModules(
   'tprLinkedFileRefreshError'
@@ -36,10 +36,11 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
     projectId: PropTypes.string.isRequired,
   })
   const { t } = useTranslation()
-  const isMounted = useIsMounted()
 
   const [refreshing, setRefreshing] = useState(false)
   const [refreshError, setRefreshError] = useState(null)
+
+  const { signal } = useAbortController()
 
   let fileInfo
   if (file.linkedFileData) {
@@ -68,17 +69,13 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
     setRefreshing(true)
     // Replacement of the file handled by the file tree
     window.expectingLinkedFileRefreshedSocketFor = file.name
-    postJSON(`/project/${projectId}/linked_file/${file.id}/refresh`)
+    postJSON(`/project/${projectId}/linked_file/${file.id}/refresh`, { signal })
       .then(() => {
-        if (isMounted.current) {
-          setRefreshing(false)
-        }
+        setRefreshing(false)
       })
       .catch(err => {
-        if (isMounted.current) {
-          setRefreshing(false)
-          setRefreshError(err.message)
-        }
+        setRefreshing(false)
+        setRefreshError(err.message)
       })
       .finally(() => {
         if (
@@ -104,7 +101,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
           console.log(error)
         })
     }
-  }, [file, projectId, isMounted, storeReferencesKeys])
+  }, [file, projectId, signal, storeReferencesKeys])
 
   return (
     <div>

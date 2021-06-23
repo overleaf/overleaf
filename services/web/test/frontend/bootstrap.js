@@ -8,6 +8,9 @@ require('jsdom-global')(undefined, {
   url: 'https://www.test-overleaf.com/',
 })
 
+// workaround for "keys.js in jsdom-global doesn't include AbortController"
+global.AbortController = window.AbortController
+
 const path = require('path')
 process.env.SHARELATEX_CONFIG = path.resolve(
   __dirname,
@@ -91,7 +94,8 @@ Object.defineProperty(global, 'localStorage', {
 
 // node-fetch doesn't accept relative URL's: https://github.com/node-fetch/node-fetch/blob/master/docs/v2-LIMITS.md#known-differences
 const fetch = require('node-fetch')
-global.fetch = (url, ...options) => fetch('http://localhost' + url, ...options)
+global.fetch = window.fetch = (url, ...options) =>
+  fetch(new URL(url, 'http://localhost'), ...options)
 
 // ignore CSS files
 const { addHook } = require('pirates')
