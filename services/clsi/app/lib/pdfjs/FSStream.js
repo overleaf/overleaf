@@ -4,11 +4,12 @@ const { MissingDataException } = require('pdfjs-dist/lib/core/core_utils')
 const BUF_SIZE = 1024 // read from the file in 1024 byte pages
 
 class FSStream extends Stream {
-  constructor(fh, start, length, dict, cachedBytes) {
+  constructor(fh, start, length, dict, cachedBytes, checkDeadline) {
     const nonEmptyDummyBuffer = Buffer.alloc(1, 0)
     super(nonEmptyDummyBuffer, start, length, dict)
     delete this.bytes
     this.fh = fh
+    this.checkDeadline = checkDeadline
     this.cachedBytes = cachedBytes || []
   }
 
@@ -23,6 +24,7 @@ class FSStream extends Stream {
   // Manage cached reads from the file
 
   requestRange(begin, end) {
+    this.checkDeadline(`request range ${begin} - ${end}`)
     // expand small ranges to read a larger amount
     if (end - begin < BUF_SIZE) {
       end = begin + BUF_SIZE
@@ -123,6 +125,7 @@ class FSStream extends Stream {
   }
 
   makeSubStream(start, length, dict = null) {
+    this.checkDeadline(`make sub stream start=${start}/length=${length}`)
     // BG: had to add this check for null length, it is being called with only
     // the start value at one point in the xref decoding. The intent is clear
     // enough
@@ -131,7 +134,14 @@ class FSStream extends Stream {
     if (!length) {
       length = this.end - start
     }
-    return new FSStream(this.fh, start, length, dict, this.cachedBytes)
+    return new FSStream(
+      this.fh,
+      start,
+      length,
+      dict,
+      this.cachedBytes,
+      this.checkDeadline
+    )
   }
 }
 

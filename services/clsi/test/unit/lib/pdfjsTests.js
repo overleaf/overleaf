@@ -33,7 +33,7 @@ async function loadContext(example) {
 }
 
 async function backFillSnapshot(example, size) {
-  const table = await parseXrefTable(pdfPath(example), size)
+  const table = await parseXrefTable(pdfPath(example), size, () => {})
   await fs.promises.mkdir(Path.dirname(snapshotPath(example)), {
     recursive: true
   })
@@ -50,6 +50,24 @@ describe('pdfjs', function () {
       const path = 'does/not/matter.pdf'
       const table = await parseXrefTable(path, 0)
       expect(table).to.deep.equal([])
+    })
+  })
+
+  describe('when the operation times out', function () {
+    it('should bail out', async function () {
+      const path = pdfPath(EXAMPLES[0])
+      const { size } = await loadContext(EXAMPLES[0])
+      const err = new Error()
+      let table
+      try {
+        table = await parseXrefTable(path, size, () => {
+          throw err
+        })
+      } catch (e) {
+        expect(e).to.equal(err)
+        return
+      }
+      expect(table).to.not.exist
     })
   })
 
@@ -70,7 +88,7 @@ describe('pdfjs', function () {
       })
 
       it('should produce the expected xRef table', async function () {
-        const table = await parseXrefTable(pdfPath(example), size)
+        const table = await parseXrefTable(pdfPath(example), size, () => {})
         expect(table).to.deep.equal(snapshot)
       })
     })

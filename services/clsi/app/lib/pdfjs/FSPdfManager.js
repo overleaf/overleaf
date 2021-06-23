@@ -4,10 +4,10 @@ const { MissingDataException } = require('pdfjs-dist/lib/core/core_utils')
 const { FSStream } = require('./FSStream')
 
 class FSPdfManager extends LocalPdfManager {
-  constructor(docId, options) {
+  constructor(docId, { fh, size, checkDeadline }) {
     const nonEmptyDummyBuffer = Buffer.alloc(1, 0)
     super(docId, nonEmptyDummyBuffer)
-    this.stream = new FSStream(options.fh, 0, options.size)
+    this.stream = new FSStream(fh, 0, size, null, null, checkDeadline)
     this.pdfDocument = new PDFDocument(this, this.stream)
   }
 

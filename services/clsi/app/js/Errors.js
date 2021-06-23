@@ -4,6 +4,8 @@
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
+const OError = require('@overleaf/o-error')
+
 let Errors
 var NotFoundError = function (message) {
   const error = new Error(message)
@@ -29,7 +31,10 @@ var AlreadyCompilingError = function (message) {
 }
 AlreadyCompilingError.prototype.__proto__ = Error.prototype
 
+class TimedOutError extends OError {}
+
 module.exports = Errors = {
+  TimedOutError,
   NotFoundError,
   FilesOutOfSyncError,
   AlreadyCompilingError

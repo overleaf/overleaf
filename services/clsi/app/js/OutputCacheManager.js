@@ -26,6 +26,7 @@ const Metrics = require('./Metrics')
 
 const OutputFileOptimiser = require('./OutputFileOptimiser')
 const ContentCacheManager = require('./ContentCacheManager')
+const { TimedOutError } = require('./Errors')
 
 module.exports = OutputCacheManager = {
   CONTENT_SUBDIR: 'content',
@@ -281,7 +282,16 @@ module.exports = OutputCacheManager = {
           contentDir,
           outputFilePath,
           pdfSize,
+          timings.compile,
           function (err, result) {
+            if (err && err instanceof TimedOutError) {
+              logger.warn(
+                { err, outputDir, stats, timings },
+                'pdf caching timed out'
+              )
+              stats['pdf-caching-timed-out'] = 1
+              return callback(null, outputFiles)
+            }
             if (err) return callback(err, outputFiles)
             const [contentRanges, newContentRanges, reclaimedSpace] = result
 
