@@ -1,4 +1,3 @@
-import React from 'react'
 import { render, screen } from '@testing-library/react'
 import HotkeysModal from '../../../../../frontend/js/features/hotkeys-modal/components/hotkeys-modal'
 import { expect } from 'chai'

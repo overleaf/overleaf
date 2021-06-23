@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import { cloneProject } from '../utils/api'
 import CloneProjectModalContent from './clone-project-modal-content'

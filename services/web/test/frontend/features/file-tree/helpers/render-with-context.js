@@ -1,4 +1,3 @@
-import React from 'react'
 import { render } from '@testing-library/react'
 import FileTreeContext from '../../../../../frontend/js/features/file-tree/components/file-tree-context'
 

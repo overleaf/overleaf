@@ -1,4 +1,3 @@
-import React from 'react'
 import { ContextRoot } from '../../js/shared/context/root-context'
 
 // Unfortunately, we cannot currently use decorators here, since we need to

@@ -1,4 +1,3 @@
-import React from 'react'
 import ErrorMessage from '../../../js/features/file-tree/components/file-tree-create/error-message'
 import { createFileModalDecorator } from './create-file-modal-decorator'
 import { FetchError } from '../../../js/infrastructure/fetch-json'

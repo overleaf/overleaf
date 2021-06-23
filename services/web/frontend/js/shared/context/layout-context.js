@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useCallback, useMemo } from 'react'
+import { createContext, useContext, useCallback, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from './util/scope-value-hook'
 import { useIdeContext } from './ide-context'

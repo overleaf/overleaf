@@ -1,4 +1,3 @@
-import React from 'react'
 import PreviewLogsPaneEntry from '../js/features/preview/components/preview-logs-pane-entry.js'
 import Icon from '../js/shared/components/icon.js'
 

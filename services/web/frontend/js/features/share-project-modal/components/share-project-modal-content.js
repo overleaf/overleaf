@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button, Modal, Grid } from 'react-bootstrap'
 import { Trans } from 'react-i18next'
 import ShareModalBody from './share-modal-body'

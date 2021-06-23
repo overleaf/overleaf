@@ -1,4 +1,3 @@
-import React from 'react'
 import Icon from '../js/shared/components/icon'
 
 export const Type = args => {

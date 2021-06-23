@@ -1,5 +1,4 @@
 /* eslint-disable no-useless-escape */
-import React from 'react'
 import PropTypes from 'prop-types'
 
 function WikiLink({ url, children }) {

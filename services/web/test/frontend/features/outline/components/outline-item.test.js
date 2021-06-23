@@ -1,5 +1,4 @@
 import { expect } from 'chai'
-import React from 'react'
 import sinon from 'sinon'
 import { screen, render, fireEvent } from '@testing-library/react'
 

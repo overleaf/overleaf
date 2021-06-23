@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { ContextRoot } from '../js/shared/context/root-context'
 import FileView from '../js/features/file-view/components/file-view'
 import useFetchMock from './hooks/use-fetch-mock'

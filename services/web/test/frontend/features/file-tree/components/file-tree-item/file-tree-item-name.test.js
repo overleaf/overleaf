@@ -1,5 +1,4 @@
 import { expect } from 'chai'
-import React from 'react'
 import sinon from 'sinon'
 import { screen, fireEvent, cleanup } from '@testing-library/react'
 import renderWithContext from '../../helpers/render-with-context'

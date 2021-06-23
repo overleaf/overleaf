@@ -1,4 +1,3 @@
-import React from 'react'
 import { screen, render, fireEvent } from '@testing-library/react'
 import PreviewPane from '../../../../../frontend/js/features/preview/components/preview-pane'
 const { expect } = require('chai')

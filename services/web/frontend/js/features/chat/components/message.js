@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import { getHueForUserId } from '../../../shared/utils/colors'
 import MessageContent from './message-content'

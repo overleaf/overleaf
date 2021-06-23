@@ -1,4 +1,3 @@
-import React from 'react'
 import { captureException } from './error-reporter'
 import { ErrorBoundary } from 'react-error-boundary'
 

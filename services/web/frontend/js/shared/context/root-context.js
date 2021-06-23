@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import createSharedContext from 'react2angular-shared-context'
 

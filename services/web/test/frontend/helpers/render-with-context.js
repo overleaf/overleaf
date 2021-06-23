@@ -1,7 +1,6 @@
 // Disable prop type checks for test harnesses
 /* eslint-disable react/prop-types */
 
-import React from 'react'
 import { render } from '@testing-library/react'
 import sinon from 'sinon'
 import { ApplicationProvider } from '../../../frontend/js/shared/context/application-context'

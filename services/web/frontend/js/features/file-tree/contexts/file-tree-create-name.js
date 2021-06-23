@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useReducer } from 'react'
+import { createContext, useContext, useMemo, useReducer } from 'react'
 import { isCleanFilename } from '../util/safe-path'
 import PropTypes from 'prop-types'
 

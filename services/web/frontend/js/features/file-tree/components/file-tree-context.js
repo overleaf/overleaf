@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 
 import { FileTreeMainProvider } from '../contexts/file-tree-main'

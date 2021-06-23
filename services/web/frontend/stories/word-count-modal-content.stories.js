@@ -1,5 +1,3 @@
-import React from 'react'
-
 import WordCountModalContent from '../js/features/word-count-modal/components/word-count-modal-content'
 
 export const Basic = args => {

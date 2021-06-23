@@ -1,5 +1,4 @@
 import { expect } from 'chai'
-import React from 'react'
 import { render, screen } from '@testing-library/react'
 
 import ToolbarHeader from '../../../../../frontend/js/features/editor-navigation-toolbar/components/toolbar-header'

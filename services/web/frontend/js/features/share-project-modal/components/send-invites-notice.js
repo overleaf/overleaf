@@ -1,4 +1,3 @@
-import React from 'react'
 import { Col, Row } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import { Trans } from 'react-i18next'

@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 
 import WordCountModal from '../js/features/word-count-modal/components/word-count-modal'

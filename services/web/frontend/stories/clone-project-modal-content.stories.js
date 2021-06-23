@@ -1,5 +1,3 @@
-import React from 'react'
-
 import CloneProjectModalContent from '../js/features/clone-project-modal/components/clone-project-modal-content'
 
 export const Basic = args => {

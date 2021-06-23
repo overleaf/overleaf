@@ -1,5 +1,5 @@
 import { Tabs } from '@reach/tabs'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
 import { matchSorter } from 'match-sorter'

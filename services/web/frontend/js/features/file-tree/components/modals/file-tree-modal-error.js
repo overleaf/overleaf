@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { Button, Modal } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 

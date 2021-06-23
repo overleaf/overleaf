@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import React from 'react'
 import { screen, render, fireEvent, waitFor } from '@testing-library/react'
 import SymbolPalette from '../../../../../frontend/js/features/symbol-palette/components/symbol-palette'
 

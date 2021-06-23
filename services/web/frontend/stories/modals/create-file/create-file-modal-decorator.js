@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import FileTreeContext from '../../../js/features/file-tree/components/file-tree-context'
 import FileTreeCreateNameProvider from '../../../js/features/file-tree/contexts/file-tree-create-name'
 import FileTreeCreateFormProvider from '../../../js/features/file-tree/contexts/file-tree-create-form'

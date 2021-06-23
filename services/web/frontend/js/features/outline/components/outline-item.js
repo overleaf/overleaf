@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createRef, useRef } from 'react'
+import { useState, useEffect, createRef, useRef } from 'react'
 import PropTypes from 'prop-types'
 import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 import classNames from 'classnames'

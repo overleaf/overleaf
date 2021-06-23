@@ -1,5 +1,3 @@
-import React from 'react'
-
 import HotkeysModal from '../js/features/hotkeys-modal/components/hotkeys-modal'
 
 export const ReviewEnabled = args => {

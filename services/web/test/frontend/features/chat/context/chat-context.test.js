@@ -1,7 +1,6 @@
 // Disable prop type checks for test harnesses
 /* eslint-disable react/prop-types */
 
-import React from 'react'
 import { renderHook, act } from '@testing-library/react-hooks/dom'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'

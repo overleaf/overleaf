@@ -1,5 +1,3 @@
-import React from 'react'
-
 /**
  * Wrap modal content in modal classes, without modal behaviours
  */

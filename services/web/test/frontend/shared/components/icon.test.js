@@ -1,5 +1,4 @@
 import { expect } from 'chai'
-import React from 'react'
 import { screen, render } from '@testing-library/react'
 
 import Icon from '../../../../frontend/js/shared/components/icon'

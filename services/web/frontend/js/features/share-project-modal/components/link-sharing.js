@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { Trans } from 'react-i18next'

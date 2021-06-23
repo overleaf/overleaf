@@ -1,4 +1,3 @@
-import React from 'react'
 import { v4 as uuid } from 'uuid'
 
 import { ContextRoot } from '../js/shared/context/root-context'

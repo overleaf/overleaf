@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 
 import OnlineUsersWidget from '../../../../../frontend/js/features/editor-navigation-toolbar/components/online-users-widget'

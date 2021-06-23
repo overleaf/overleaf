@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 
 import CloneProjectModal from '../js/features/clone-project-modal/components/clone-project-modal'

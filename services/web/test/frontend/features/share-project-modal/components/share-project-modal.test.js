@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import React from 'react'
 import {
   screen,
   fireEvent,

@@ -1,4 +1,3 @@
-import React from 'react'
 import sinon from 'sinon'
 import { screen, render, fireEvent } from '@testing-library/react'
 import PreviewRecompileButton from '../../../../../frontend/js/features/preview/components/preview-recompile-button'

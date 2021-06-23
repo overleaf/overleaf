@@ -1,4 +1,3 @@
-import React from 'react'
 import { LinkedFileInfo } from '../../modules/tpr-webmodule/frontend/js/components/linked-file-info'
 
 export const MendeleyLinkedFile = args => {

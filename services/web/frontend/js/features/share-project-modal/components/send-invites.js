@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { Row } from 'react-bootstrap'
 import { useProjectContext } from './share-project-modal'
 import AddCollaborators from './add-collaborators'

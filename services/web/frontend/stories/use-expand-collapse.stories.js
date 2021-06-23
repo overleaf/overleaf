@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import useExpandCollapse from '../js/shared/hooks/use-expand-collapse'
 

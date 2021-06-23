@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import {
   screen,
   render,

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import FileTreeCreateNameInput from '../file-tree-create-name-input'
 import { useFileTreeActionable } from '../../../contexts/file-tree-actionable'
 import { useFileTreeCreateName } from '../../../contexts/file-tree-create-name'

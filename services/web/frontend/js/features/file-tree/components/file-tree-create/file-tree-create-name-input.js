@@ -1,7 +1,7 @@
 import ControlLabel from 'react-bootstrap/lib/ControlLabel'
 import { Alert, FormControl } from 'react-bootstrap'
 import FormGroup from 'react-bootstrap/lib/FormGroup'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { useFileTreeCreateName } from '../../contexts/file-tree-create-name'
 import PropTypes from 'prop-types'

@@ -1,5 +1,4 @@
 import { expect } from 'chai'
-import React from 'react'
 import sinon from 'sinon'
 import { screen, fireEvent, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'

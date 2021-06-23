@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Button } from 'react-bootstrap'
 import { useFileTreeCreateForm } from '../../contexts/file-tree-create-form'

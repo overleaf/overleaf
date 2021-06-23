@@ -1,4 +1,3 @@
-import React from 'react'
 import ToolbarHeader from '../js/features/editor-navigation-toolbar/components/toolbar-header'
 
 import { setupContext } from './fixtures/context'

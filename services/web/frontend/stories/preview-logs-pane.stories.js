@@ -1,4 +1,3 @@
-import React from 'react'
 import PreviewLogsPane from '../js/features/preview/components/preview-logs-pane'
 import { EditorProvider } from '../js/shared/context/editor-context'
 import { ApplicationProvider } from '../js/shared/context/application-context'

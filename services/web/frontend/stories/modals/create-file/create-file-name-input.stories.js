@@ -1,4 +1,3 @@
-import React from 'react'
 import FileTreeCreateNameInput from '../../../js/features/file-tree/components/file-tree-create/file-tree-create-name-input'
 import FileTreeCreateNameProvider from '../../../js/features/file-tree/contexts/file-tree-create-name'
 import {

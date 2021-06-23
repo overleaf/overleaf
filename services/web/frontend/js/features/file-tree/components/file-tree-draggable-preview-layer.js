@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 import PropTypes from 'prop-types'
 import { useDragLayer } from 'react-dnd'
 import classNames from 'classnames'

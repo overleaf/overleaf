@@ -1,4 +1,3 @@
-import React from 'react'
 import { ContextRoot } from '../js/shared/context/root-context'
 import { setupContext } from './fixtures/context'
 import importOverleafModules from '../macros/import-overleaf-module.macro'

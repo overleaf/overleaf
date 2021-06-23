@@ -1,4 +1,3 @@
-import React from 'react'
 import { TabList, Tab } from '@reach/tabs'
 import PropTypes from 'prop-types'
 

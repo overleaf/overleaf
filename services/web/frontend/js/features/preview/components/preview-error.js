@@ -1,4 +1,3 @@
-import React from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import PreviewLogsPaneEntry from './preview-logs-pane-entry'

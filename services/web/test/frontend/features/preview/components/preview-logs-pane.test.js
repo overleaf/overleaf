@@ -1,4 +1,3 @@
-import React from 'react'
 import { screen, fireEvent } from '@testing-library/react'
 import PreviewLogsPane from '../../../../../frontend/js/features/preview/components/preview-logs-pane'
 import sinon from 'sinon'

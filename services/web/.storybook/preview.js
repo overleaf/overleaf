@@ -1,5 +1,3 @@
-import React from 'react'
-
 import './preview.css'
 
 // Storybook does not (currently) support async loading of "stories". Therefore

@@ -49,9 +49,7 @@
     "node/no-callback-literal": "off",
     "node/no-deprecated-api": "off",
     "node/handle-callback-err": "off",
-    "node/no-path-concat": "off",
-
-    "react/jsx-no-target-blank": "off",
+    "node/no-path-concat": "off"
   },
   "overrides": [
     // NOTE: changing paths may require updating them in the Makefile too.
@@ -106,7 +104,7 @@
     },
     {
       // Frontend specific rules
-      "files": ["**/frontend/js/**/*.js"],
+      "files": ["**/frontend/js/**/*.js", "**/frontend/stories/**/*.js", "**/*.stories.js", "**/test/frontend/**/*.js"],
       "globals": {
         "$": true,
         "angular": true,
@@ -127,6 +125,13 @@
           "props": "never",
           "children": "never"
         }],
+
+        // Allow target="_blank" in JSX
+        "react/jsx-no-target-blank": "off",
+
+        // Don't import React for JSX; the JSX runtime is added by a Babel plugin
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-uses-react": "off",
 
         // Fix conflict between prettier & standard by overriding to prefer
         // double quotes

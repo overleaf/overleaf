@@ -1,5 +1,3 @@
-import React from 'react'
-
 import Pagination from '../js/shared/components/pagination'
 
 export const Interactive = args => {

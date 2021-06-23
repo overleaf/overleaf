@@ -1,4 +1,3 @@
-import React from 'react'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import ControlledDropdown from '../js/shared/components/controlled-dropdown'
 

@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import FileTreeCreateNewDoc from './modes/file-tree-create-new-doc'
 import FileTreeImportFromUrl from './modes/file-tree-import-from-url'

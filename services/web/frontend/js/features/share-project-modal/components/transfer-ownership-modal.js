@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Modal, Button } from 'react-bootstrap'
 import { Trans } from 'react-i18next'
 import PropTypes from 'prop-types'

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'

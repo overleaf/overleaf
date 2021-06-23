@@ -1,4 +1,3 @@
-import React from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { expect } from 'chai'
 import CloneProjectModal from '../../../../../frontend/js/features/clone-project-modal/components/clone-project-modal'

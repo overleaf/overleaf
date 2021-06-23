@@ -1,4 +1,3 @@
-import React from 'react'
 import { screen, render } from '@testing-library/react'
 
 import OutlineList from '../../../../../frontend/js/features/outline/components/outline-list'

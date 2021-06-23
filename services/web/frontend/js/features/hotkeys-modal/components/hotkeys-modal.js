@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button, Modal, Row, Col } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'

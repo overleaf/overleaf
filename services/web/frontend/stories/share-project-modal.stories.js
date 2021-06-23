@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import ShareProjectModal from '../js/features/share-project-modal/components/share-project-modal'
 import useFetchMock from './hooks/use-fetch-mock'
 import { withContextRoot } from './utils/with-context-root'

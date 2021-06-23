@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 
 import ProjectNameEditableLabel from '../../../../../frontend/js/features/editor-navigation-toolbar/components/project-name-editable-label'
