@@ -235,22 +235,26 @@ async function writePdfStream(dir, hash, buffer) {
 
 function getDeadlineChecker(compileTime) {
   const maxOverhead = Math.min(
-    // Adding 10s to a 40s compile time is OK.
-    compileTime / 4,
+    // Adding 10s to a  40s compile time is OK.
+    // Adding  1s to a   3s compile time is OK.
+    Math.max(compileTime / 4, 1000),
     // Adding 30s to a 120s compile time is not OK, limit to 10s.
     Settings.pdfCachingMaxProcessingTime
   )
 
   const deadline = Date.now() + maxOverhead
   let lastStage = { stage: 'start', now: Date.now() }
+  let completedStages = 0
   return function (stage) {
     const now = Date.now()
     if (now > deadline) {
       throw new TimedOutError(stage, {
+        completedStages,
         lastStage: lastStage.stage,
         diffToLastStage: now - lastStage.now
       })
     }
+    completedStages++
     lastStage = { stage, now }
   }
 }
