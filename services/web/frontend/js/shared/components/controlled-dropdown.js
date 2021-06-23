@@ -1,25 +1,13 @@
-import React, { useCallback, useState } from 'react'
+import React from 'react'
 import { Dropdown } from 'react-bootstrap'
 import PropTypes from 'prop-types'
+import useDropdown from '../hooks/use-dropdown'
 
 export default function ControlledDropdown(props) {
-  const [open, setOpen] = useState(Boolean(props.defaultOpen))
-
-  const handleClick = useCallback(event => {
-    event.stopPropagation()
-  }, [])
-
-  const handleToggle = useCallback(value => {
-    setOpen(value)
-  }, [])
+  const dropdownProps = useDropdown(Boolean(props.defaultOpen))
 
   return (
-    <Dropdown
-      {...props}
-      open={open}
-      onToggle={handleToggle}
-      onClick={handleClick}
-    >
+    <Dropdown {...props} {...dropdownProps}>
       {React.Children.map(props.children, child => {
         if (!React.isValidElement(child)) {
           return child
@@ -27,12 +15,12 @@ export default function ControlledDropdown(props) {
 
         // Dropdown.Menu
         if ('open' in child.props) {
-          return React.cloneElement(child, { open })
+          return React.cloneElement(child, { open: dropdownProps.open })
         }
 
         // Overlay
         if ('show' in child.props) {
-          return React.cloneElement(child, { show: open })
+          return React.cloneElement(child, { show: dropdownProps.open })
         }
 
         // anything else
