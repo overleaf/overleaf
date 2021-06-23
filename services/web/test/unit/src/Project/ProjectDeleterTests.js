@@ -369,6 +369,12 @@ describe('ProjectDeleter', function () {
 
   describe('expireDeletedProjectsAfterDuration', function () {
     beforeEach(async function () {
+      for (const deletedProject of this.deletedProjects) {
+        this.ProjectMock.expects('findById')
+          .withArgs(deletedProject.deleterData.deletedProjectId)
+          .chain('exec')
+          .resolves(null)
+      }
       this.DeletedProjectMock.expects('find')
         .withArgs({
           'deleterData.deletedAt': {
@@ -414,6 +420,12 @@ describe('ProjectDeleter', function () {
 
   describe('expireDeletedProject', function () {
     beforeEach(async function () {
+      for (const deletedProject of this.deletedProjects) {
+        this.ProjectMock.expects('findById')
+          .withArgs(deletedProject.deleterData.deletedProjectId)
+          .chain('exec')
+          .resolves(null)
+      }
       this.DeletedProjectMock.expects('updateOne')
         .withArgs(
           {

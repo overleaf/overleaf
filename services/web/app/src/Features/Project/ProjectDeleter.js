@@ -342,6 +342,16 @@ async function undeleteProject(projectId, options = {}) {
 
 async function expireDeletedProject(projectId) {
   try {
+    const activeProject = await Project.findById(projectId).exec()
+    if (activeProject) {
+      // That project is active. The deleted project record might be there
+      // because of an incomplete delete or undelete operation. Clean it up and
+      // return.
+      await DeletedProject.deleteOne({
+        'deleterData.deletedProjectId': projectId,
+      })
+      return
+    }
     const deletedProject = await DeletedProject.findOne({
       'deleterData.deletedProjectId': projectId,
     }).exec()
