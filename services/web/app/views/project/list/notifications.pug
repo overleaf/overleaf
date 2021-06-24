@@ -109,6 +109,8 @@ include ../../_mixins/reconfirm_affiliation
 				)
 					.notification-body
 						| !{translate("dropbox_duplicate_project_names", {projectName: '{{notification.messageOpts.projectName}}'}, ['strong'])}
+						| &nbsp;
+						a(href="/learn/how-to/Dropbox_Synchronization#Troubleshooting") #{translate("learn_more")}
 					.notification-close
 						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
 							span(aria-hidden="true") &times;
