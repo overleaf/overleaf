@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.server;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.*;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -71,7 +72,7 @@ public class GitBridgeServer {
                 swapStore,
                 snapshotApi
         );
-        jettyServer = new Server(port);
+        jettyServer = new Server();
         configureJettyServer(config, repoStore, snapshotApi);
         apiBaseURL = config.getAPIBaseURL();
         SnapshotAPIRequest.setBaseURL(apiBaseURL);
@@ -113,6 +114,12 @@ public class GitBridgeServer {
             RepoStore repoStore,
             SnapshotApi snapshotApi
     ) throws ServletException {
+        ServerConnector connector = new ServerConnector(this.jettyServer);
+        connector.setPort(config.getPort());
+        connector.setHost(config.getBindIp());
+        connector.setIdleTimeout(config.getIdleTimeout());
+        this.jettyServer.addConnector(connector);
+
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(initApiHandler());
         handlers.addHandler(initBaseHandler());
