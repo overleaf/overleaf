@@ -1,5 +1,7 @@
 {
     "port": 8080,
+    "bindIp": "127.0.0.1",
+    "idleTimeout": 60000,
     "rootGitDirectory": "/tmp/wlgb",
     "apiBaseUrl": "https://localhost/api/v0",
     "postbackBaseUrl": "https://localhost",
