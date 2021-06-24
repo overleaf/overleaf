@@ -941,7 +941,7 @@ describe('ClsiManager', function () {
             method: 'POST',
             url,
             json: this.req,
-            timeout: 42 * 1000 + 60 * 1000,
+            timeout: 42 * 1000 + 120 * 1000,
           })
           .should.equal(true)
       })

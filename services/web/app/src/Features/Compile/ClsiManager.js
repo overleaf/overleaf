@@ -25,7 +25,7 @@ const Errors = require('../Errors/Errors')
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 // see clsi: RequestParser.MAX_TIMEOUT
 const DEFAULT_TIMEOUT = 600
-const OVERHEAD_SYNC_AND_OUTPUT = 60 * 1000
+const OVERHEAD_SYNC_AND_OUTPUT = 120 * 1000
 
 const ClsiManager = {
   sendRequest(projectId, userId, options, callback) {
