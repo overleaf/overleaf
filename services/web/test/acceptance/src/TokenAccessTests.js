@@ -1211,6 +1211,77 @@ describe('TokenAccess', function () {
     })
   })
 
+  describe('deleted project', function () {
+    beforeEach(function (done) {
+      settings.overleaf = { host: 'http://localhost:5000' }
+      this.owner.createProject(
+        `delete-test${Math.random()}`,
+        (err, projectId) => {
+          if (err != null) {
+            return done(err)
+          }
+          this.projectId = projectId
+          this.owner.makeTokenBased(this.projectId, err => {
+            if (err != null) {
+              return done(err)
+            }
+            this.owner.getProject(this.projectId, (err, project) => {
+              if (err != null) {
+                return done(err)
+              }
+              this.tokens = project.tokens
+              done()
+            })
+          })
+        }
+      )
+    })
+
+    afterEach(function () {
+      delete settings.overleaf
+    })
+
+    it('should 404', function (done) {
+      async.series(
+        [
+          // delete project
+          cb => {
+            this.owner.deleteProject(this.projectId, cb)
+          },
+          cb => {
+            // use read-only token
+            tryReadOnlyTokenAccess(
+              this.other1,
+              this.tokens.readOnly,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              (response, body) => {
+                expect(response.statusCode).to.equal(404)
+              },
+              cb
+            )
+          },
+          cb => {
+            // use read-write token
+            tryReadAndWriteTokenAccess(
+              this.other1,
+              this.tokens.readAndWrite,
+              (response, body) => {
+                expect(response.statusCode).to.equal(200)
+              },
+              (response, body) => {
+                expect(response.statusCode).to.equal(404)
+              },
+              cb
+            )
+          },
+        ],
+        done
+      )
+    })
+  })
+
   describe('unimported v1 project', function () {
     beforeEach(function () {
       settings.overleaf = { host: 'http://localhost:5000' }
@@ -1220,8 +1291,15 @@ describe('TokenAccess', function () {
       delete settings.overleaf
     })
 
-    it('should show error page for read and write token', function (done) {
+    it('should show download option for read and write token', function (done) {
       const unimportedV1Token = '123abcdefabcdef'
+      const docInfo = {
+        exists: true,
+        exported: false,
+        has_owner: true,
+        name: 'test',
+      }
+      MockV1Api.setDocInfo(unimportedV1Token, docInfo)
       tryReadAndWriteTokenAccess(
         this.owner,
         unimportedV1Token,
@@ -1230,14 +1308,28 @@ describe('TokenAccess', function () {
         },
         (response, body) => {
           expect(response.statusCode).to.equal(200)
-          expect(body).to.deep.equal({ v1Import: { status: 'cannotImport' } })
+          expect(body).to.deep.equal({
+            v1Import: {
+              hasOwner: true,
+              name: 'test',
+              projectId: unimportedV1Token,
+              status: 'canDownloadZip',
+            },
+          })
         },
         done
       )
     })
 
-    it('should show error page for read only token to v1', function (done) {
+    it('should show download option for read only token to v1', function (done) {
       const unimportedV1Token = 'aaaaaabbbbbb'
+      const docInfo = {
+        exists: true,
+        exported: false,
+        has_owner: true,
+        name: 'test',
+      }
+      MockV1Api.setDocInfo(unimportedV1Token, docInfo)
       tryReadOnlyTokenAccess(
         this.owner,
         unimportedV1Token,
@@ -1246,7 +1338,14 @@ describe('TokenAccess', function () {
         },
         (response, body) => {
           expect(response.statusCode).to.equal(200)
-          expect(body).to.deep.equal({ v1Import: { status: 'cannotImport' } })
+          expect(body).to.deep.equal({
+            v1Import: {
+              hasOwner: true,
+              name: 'test',
+              projectId: unimportedV1Token,
+              status: 'canDownloadZip',
+            },
+          })
         },
         done
       )

@@ -53,6 +53,8 @@ async function _handleV1Project(token, userId) {
       token,
       userId
     )
+    // This should not happen anymore, but it does show
+    // a nice "contact support" message, so it can stay
     if (!docInfo) {
       return { v1Import: { status: 'cannotImport' } }
     }

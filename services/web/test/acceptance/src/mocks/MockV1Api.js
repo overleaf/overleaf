@@ -353,6 +353,14 @@ class MockV1Api extends AbstractMockApi {
       }
     )
 
+    this.app.get('/api/v1/sharelatex/docs/:token/info', (req, res) => {
+      const info = this.getDocInfo(req.params.token) || {
+        exists: false,
+        exported: false,
+      }
+      res.json(info)
+    })
+
     this.app.get(
       '/api/v1/sharelatex/docs/read_token/:token/exists',
       (req, res) => {

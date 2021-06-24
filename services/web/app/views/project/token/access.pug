@@ -50,7 +50,9 @@ block content
 				.container
 					.row
 						.col-sm-8.col-sm-offset-2
-							h1.text-center Move project to Overleaf v2
+							h1.text-center
+								span(ng-if="v1ImportData.status != 'mustLogin'") Overleaf v1 Project
+								span(ng-if="v1ImportData.status == 'mustLogin'") Please Log In
 							img.v2-import__img(
 								src="/img/v1-import/v2-editor.png"
 								alt="The new V2 editor."
@@ -60,7 +62,7 @@ block content
 								h2.text-center
 									| Cannot Access Overleaf v1 Project
 								p.text-center.row-spaced-small
-									| The project you are attempting to access must be imported to Overleaf v2 before it can be accessed. Please contact the project owner or
+									| Please contact the project owner or
 									|
 									a(href="/contact") contact support
 									|
@@ -68,14 +70,12 @@ block content
 
 							div(ng-if="v1ImportData.status == 'mustLogin'")
 								p.text-center.row-spaced-small
-									| This project has not yet been moved into the new version of
-									| Overleaf. You will need to log in and move it in order to
-									| continue working on it.
+									| You will need to log in to access this project.
 
 								.row-spaced.text-center
 									a.btn.btn-primary(
 										href="/login?redir={{ currentPath() }}"
-									) Log In To Move Project
+									) Log In To Access Project
 
 							div(ng-if="v1ImportData.status == 'canDownloadZip'")
 								p.text-center.row-spaced.small
@@ -98,4 +98,3 @@ block append foot-scripts
 				$('.loading-screen-brand').css('height', '20%')
 			}, 500);
 		});
-

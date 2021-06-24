@@ -38,7 +38,6 @@ describe('TokenAccessHandler', function () {
         mongodb: { ObjectId },
         '../../models/Project': { Project: (this.Project = {}) },
         'settings-sharelatex': (this.settings = {}),
-        '../User/UserGetter': (this.UserGetter = {}),
         '../V1/V1Api': (this.V1Api = {
           request: sinon.stub(),
         }),
@@ -616,7 +615,6 @@ describe('TokenAccessHandler', function () {
 
   describe('getV1DocInfo', function () {
     beforeEach(function () {
-      this.v2UserId = 123
       return (this.callback = sinon.stub())
     })
 
@@ -645,47 +643,8 @@ describe('TokenAccessHandler', function () {
         return (this.settings.apis = { v1: 'v1' })
       })
 
-      describe('on UserGetter.getUser success', function () {
-        beforeEach(function () {
-          this.UserGetter.getUser = sinon.stub().yields(null, {
-            overleaf: { id: 1 },
-          })
-          return this.TokenAccessHandler.getV1DocInfo(
-            this.token,
-            this.v2UserId,
-            this.callback
-          )
-        })
-
-        it('should get user', function () {
-          return expect(
-            this.UserGetter.getUser.calledWith(this.v2UserId)
-          ).to.equal(true)
-        })
-      })
-
-      describe('on UserGetter.getUser error', function () {
-        beforeEach(function () {
-          this.error = new Error('failed to get user')
-          this.UserGetter.getUser = sinon.stub().yields(this.error)
-          return this.TokenAccessHandler.getV1DocInfo(
-            this.token,
-            this.v2UserId,
-            this.callback
-          )
-        })
-
-        it('should callback with error', function () {
-          return expect(this.callback.calledWith(this.error)).to.equal(true)
-        })
-      })
-
       describe('on V1Api.request success', function () {
         beforeEach(function () {
-          this.v1UserId = 1
-          this.UserGetter.getUser = sinon.stub().yields(null, {
-            overleaf: { id: this.v1UserId },
-          })
           this.V1Api.request = sinon
             .stub()
             .callsArgWith(1, null, null, 'mock-data')
@@ -699,7 +658,7 @@ describe('TokenAccessHandler', function () {
         it('should return response body', function () {
           expect(
             this.V1Api.request.calledWith({
-              url: `/api/v1/sharelatex/users/${this.v1UserId}/docs/${this.token}/info`,
+              url: `/api/v1/sharelatex/docs/${this.token}/info`,
             })
           ).to.equal(true)
           return expect(this.callback.calledWith(null, 'mock-data')).to.equal(
@@ -710,9 +669,6 @@ describe('TokenAccessHandler', function () {
 
       describe('on V1Api.request error', function () {
         beforeEach(function () {
-          this.UserGetter.getUser = sinon.stub().yields(null, {
-            overleaf: { id: 1 },
-          })
           this.V1Api.request = sinon.stub().callsArgWith(1, 'error')
           return this.TokenAccessHandler.getV1DocInfo(
             this.token,
