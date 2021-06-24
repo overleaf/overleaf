@@ -151,18 +151,29 @@ function fetchJSON(
  * @param {Response} response
  * @returns {Promise<Object>}
  */
-function parseResponseBody(response) {
+async function parseResponseBody(response) {
   const contentType = response.headers.get('Content-Type')
+
   if (/application\/json/.test(contentType)) {
     return response.json()
-  } else if (
-    /text\/plain/.test(contentType) ||
-    /text\/html/.test(contentType)
-  ) {
-    return response.text().then(message => ({ message }))
-  } else {
-    // response body ignored as content-type is either not set (e.g. 204
-    // responses) or unsupported
-    return Promise.resolve({})
   }
+
+  if (/text\/plain/.test(contentType)) {
+    const message = await response.text()
+
+    return { message }
+  }
+
+  if (/text\/html/.test(contentType)) {
+    const message = await response.text()
+
+    // only use HTML responses which don't start with `<`
+    if (!/^\s*</.test(message)) {
+      return { message }
+    }
+  }
+
+  // response body ignored as content-type is either not set (e.g. 204
+  // responses) or unsupported
+  return {}
 }

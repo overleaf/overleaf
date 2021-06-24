@@ -62,6 +62,80 @@ describe('fetchJSON', function () {
       })
   })
 
+  it('handles JSON error responses', async function () {
+    fetchMock.get('/test', {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: { message: 'lorem ipsum' },
+    })
+
+    return expect(getJSON('/test'))
+      .to.eventually.be.rejectedWith('Internal Server Error')
+      .and.be.an.instanceOf(FetchError)
+      .to.nested.include({
+        'data.message': 'lorem ipsum',
+      })
+  })
+
+  it('handles text error responses', async function () {
+    fetchMock.get('/test', {
+      status: 500,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+      body: 'lorem ipsum',
+    })
+
+    return expect(getJSON('/test'))
+      .to.eventually.be.rejectedWith('Internal Server Error')
+      .and.be.an.instanceOf(FetchError)
+      .to.nested.include({
+        'data.message': 'lorem ipsum',
+      })
+  })
+
+  it('handles text error responses sent as HTML', async function () {
+    fetchMock.get('/test', {
+      status: 500,
+      headers: {
+        'Content-Type': 'text/html',
+      },
+      body: 'lorem ipsum',
+    })
+
+    return expect(getJSON('/test'))
+      .to.eventually.be.rejectedWith('Internal Server Error')
+      .and.be.an.instanceOf(FetchError)
+      .to.nested.include({
+        'data.message': 'lorem ipsum',
+      })
+  })
+
+  it('handles (ignores) HTML error responses sent as HTML', async function () {
+    fetchMock.get('/test', {
+      status: 500,
+      headers: {
+        'Content-Type': 'text/html',
+      },
+      body:
+        '<!doctype html><html lang="en"><body><p>lorem ipsum</p></body></html>',
+    })
+
+    const promise = getJSON('/test')
+
+    expect(promise)
+      .to.eventually.be.rejectedWith('Internal Server Error')
+      .and.be.an.instanceOf(FetchError)
+
+    try {
+      await promise
+    } catch (error) {
+      expect(error.data).to.eql({})
+    }
+  })
+
   it('handles POST requests', function () {
     const body = { example: true }
 
