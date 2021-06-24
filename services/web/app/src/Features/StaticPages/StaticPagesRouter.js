@@ -20,10 +20,6 @@ module.exports = {
       '/planned_maintenance',
       HomeController.externalPage('planned_maintenance', 'Planned Maintenance')
     )
-    webRouter.get(
-      '/style',
-      HomeController.externalPage('style_guide', 'Style Guide')
-    )
 
     webRouter.get(
       '/track-changes-and-comments-in-latex',
