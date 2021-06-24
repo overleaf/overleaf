@@ -472,6 +472,9 @@ const ClsiManager = {
     }
     ClsiManager._makeRequest(projectId, opts, (err, response, body) => {
       if (err != null) {
+        if (err.code === 'ESOCKETTIMEDOUT') {
+          return callback(null, { compile: { status: 'timedout' } })
+        }
         return callback(
           new OError('failed to make request to CLSI', {
             projectId,

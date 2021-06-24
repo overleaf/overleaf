@@ -974,6 +974,27 @@ describe('ClsiManager', function () {
         this.callback.should.have.been.calledWith(sinon.match.instanceOf(Error))
       })
     })
+
+    describe('when the CLSI request times out', function () {
+      beforeEach(function () {
+        this.ClsiManager._makeRequest = sinon
+          .stub()
+          .callsArgWith(2, { code: 'ESOCKETTIMEDOUT' }, null, null)
+        this.ClsiManager._postToClsi(
+          this.project_id,
+          this.user_id,
+          this.req,
+          'standard',
+          this.callback
+        )
+      })
+
+      it('should call the callback with a timed out response', function () {
+        this.callback.should.have.been.calledWith(null, {
+          compile: { status: 'timedout' },
+        })
+      })
+    })
   })
 
   describe('wordCount', function () {
