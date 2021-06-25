@@ -94,7 +94,8 @@ public class ConfigTest {
                 "  },\n" +
                 "  \"repoStore\": null,\n" +
                 "  \"swapStore\": null,\n" +
-                "  \"swapJob\": null\n" +
+                "  \"swapJob\": null,\n" +
+                "  \"sqliteHeapLimitBytes\": 0\n" +
                 "}";
         assertEquals(
                 "sanitised config did not hide sensitive fields",

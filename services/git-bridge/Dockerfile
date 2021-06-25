@@ -2,7 +2,7 @@
 
 FROM maven:3-jdk-11 as base
 
-RUN apt-get update && apt-get install -y make git \
+RUN apt-get update && apt-get install -y make git sqlite3 \
  && rm -rf /var/lib/apt/lists
 
 COPY vendor/envsubst /opt/envsubst
