@@ -61,7 +61,8 @@ public class GitBridgeServer {
         DBStore dbStore = new SqliteDBStore(
                 Paths.get(
                         repoStore.getRootDirectory().getAbsolutePath()
-                ).resolve(".wlgb").resolve("wlgb.db").toFile()
+                ).resolve(".wlgb").resolve("wlgb.db").toFile(),
+                config.getSqliteHeapLimitBytes()
         );
         SwapStore swapStore = SwapStore.fromConfig(config.getSwapStore());
         SnapshotApi snapshotApi = new NetSnapshotApi();

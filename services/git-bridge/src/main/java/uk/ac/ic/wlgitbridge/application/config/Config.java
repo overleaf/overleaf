@@ -33,7 +33,8 @@ public class Config implements JSONSource {
                 Oauth2.asSanitised(config.oauth2),
                 config.repoStore,
                 SwapStoreConfig.sanitisedCopy(config.swapStore),
-                config.swapJob
+                config.swapJob,
+                config.sqliteHeapLimitBytes
         );
     }
 
@@ -52,6 +53,7 @@ public class Config implements JSONSource {
     private SwapStoreConfig swapStore;
     @Nullable
     private SwapJobConfig swapJob;
+    private int sqliteHeapLimitBytes = 0;
 
     public Config(
             String configFilePath
@@ -75,7 +77,8 @@ public class Config implements JSONSource {
             Oauth2 oauth2,
             RepoStoreConfig repoStore,
             SwapStoreConfig swapStore,
-            SwapJobConfig swapJob
+            SwapJobConfig swapJob,
+            int sqliteHeapLimitBytes
     ) {
         this.port = port;
         this.bindIp = bindIp;
@@ -88,6 +91,7 @@ public class Config implements JSONSource {
         this.repoStore = repoStore;
         this.swapStore = swapStore;
         this.swapJob = swapJob;
+        this.sqliteHeapLimitBytes = sqliteHeapLimitBytes;
     }
 
     @Override
@@ -124,6 +128,9 @@ public class Config implements JSONSource {
                 configObject.get("swapJob"),
                 SwapJobConfig.class
         );
+        if (configObject.has("sqliteHeapLimitBytes")) {
+            sqliteHeapLimitBytes = getElement(configObject, "sqliteHeapLimitBytes").getAsInt();
+        }
     }
 
     public String getSanitisedString() {
@@ -144,6 +151,10 @@ public class Config implements JSONSource {
 
     public String getRootGitDirectory() {
         return rootGitDirectory;
+    }
+
+    public int getSqliteHeapLimitBytes() {
+        return this.sqliteHeapLimitBytes;
     }
 
     public String getAPIBaseURL() {

@@ -21,8 +21,14 @@ import java.util.stream.Stream;
 public class SqliteDBStore implements DBStore {
 
     private final Connection connection;
+    private int heapLimitBytes = 0;
 
     public SqliteDBStore(File dbFile) {
+        this(dbFile, 0);
+    }
+
+    public SqliteDBStore(File dbFile, int heapLimitBytes) {
+        this.heapLimitBytes = heapLimitBytes;
         try {
             connection = openConnectionTo(dbFile);
             createTables();
@@ -144,6 +150,7 @@ public class SqliteDBStore implements DBStore {
     private void createTables() {
         /* Migrations */
         /* We need to eat exceptions from here */
+        try { doUpdate(new SetSoftHeapLimitPragma(this.heapLimitBytes)); } catch (SQLException ignore) {}
         try { doUpdate(new ProjectsAddLastAccessed()); } catch (SQLException ignore) {}
         try { doUpdate(new ProjectsAddSwapTime()); } catch (SQLException ignore) {}
         try { doUpdate(new ProjectsAddRestoreTime()); } catch (SQLException ignore) {}

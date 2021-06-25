@@ -28,5 +28,6 @@
     "highGiB": ${GIT_BRIDGE_SWAPJOB_HIGH_GIB:-256},
     "intervalMillis": ${GIT_BRIDGE_SWAPJOB_INTERVAL_MILLIS:-3600000},
     "compressionMethod": "${GIT_BRIDGE_SWAPJOB_COMPRESSION_METHOD:-gzip}"
-  }
+  },
+  "sqliteHeapLimitBytes": ${GIT_BRIDGE_SQLITE_HEAP_LIMIT_BYTES:-0}
 }
