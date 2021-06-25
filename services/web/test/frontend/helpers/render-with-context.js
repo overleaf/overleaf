@@ -3,7 +3,7 @@
 
 import { render } from '@testing-library/react'
 import sinon from 'sinon'
-import { ApplicationProvider } from '../../../frontend/js/shared/context/application-context'
+import { UserProvider } from '../../../frontend/js/shared/context/user-context'
 import { EditorProvider } from '../../../frontend/js/shared/context/editor-context'
 import { LayoutProvider } from '../../../frontend/js/shared/context/layout-context'
 import { ChatProvider } from '../../../frontend/js/features/chat/context/chat-context'
@@ -28,6 +28,7 @@ export function EditorProviders({
   window.isRestrictedTokenMember = isRestrictedTokenMember
 
   const $scope = {
+    user: window.user,
     project: {
       _id: window.project_id,
       name: 'project-name',
@@ -52,15 +53,15 @@ export function EditorProviders({
   window._ide = { $scope, socket }
 
   return (
-    <ApplicationProvider>
-      <IdeProvider ide={window._ide}>
+    <IdeProvider ide={window._ide}>
+      <UserProvider>
         <ProjectProvider>
           <EditorProvider settings={{}}>
             <LayoutProvider>{children}</LayoutProvider>
           </EditorProvider>
         </ProjectProvider>
-      </IdeProvider>
-    </ApplicationProvider>
+      </UserProvider>
+    </IdeProvider>
   )
 }
 

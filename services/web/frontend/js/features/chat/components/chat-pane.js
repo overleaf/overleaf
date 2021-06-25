@@ -8,7 +8,7 @@ import InfiniteScroll from './infinite-scroll'
 import ChatFallbackError from './chat-fallback-error'
 import Icon from '../../../shared/components/icon'
 import { useLayoutContext } from '../../../shared/context/layout-context'
-import { useApplicationContext } from '../../../shared/context/application-context'
+import { useUserContext } from '../../../shared/context/user-context'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { FetchError } from '../../../infrastructure/fetch-json'
 import { useChatContext } from '../context/chat-context'
@@ -17,8 +17,8 @@ const ChatPane = React.memo(function ChatPane() {
   const { t } = useTranslation()
 
   const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })
-  const { user } = useApplicationContext({
-    user: PropTypes.shape({ id: PropTypes.string.isRequired }),
+  const user = useUserContext({
+    id: PropTypes.string.isRequired,
   })
 
   const {

@@ -31,6 +31,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   isAnonymousUser,
   projectName,
   renameProject,
+  hasRenamePermissions,
   openShareModal,
   pdfViewIsOpen,
   pdfButtonIsVisible,
@@ -56,7 +57,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
       <ProjectNameEditableLabel
         className="toolbar-center"
         projectName={projectName}
-        userIsAdmin
+        hasRenamePermissions={hasRenamePermissions}
         onChange={renameProject}
       />
 
@@ -108,6 +109,7 @@ ToolbarHeader.propTypes = {
   isAnonymousUser: PropTypes.bool,
   projectName: PropTypes.string.isRequired,
   renameProject: PropTypes.func.isRequired,
+  hasRenamePermissions: PropTypes.bool,
   openShareModal: PropTypes.func.isRequired,
   pdfViewIsOpen: PropTypes.bool,
   pdfButtonIsVisible: PropTypes.bool,

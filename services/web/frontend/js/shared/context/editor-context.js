@@ -34,6 +34,7 @@ EditorContext.Provider.propTypes = {
     rootFolder: PropTypes.shape({
       children: PropTypes.arrayOf(PropTypes.shape({ type: PropTypes.string })),
     }),
+    permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
   }),
 }
 
@@ -70,6 +71,15 @@ export function EditorProvider({ children, settings }) {
   const [loading] = useScopeValue('state.loading')
   const [projectName, setProjectName] = useScopeValue('project.name')
   const [rootFolder] = useScopeValue('rootFolder')
+  const [permissionsLevel] = useScopeValue('permissionsLevel')
+
+  useEffect(() => {
+    if (ide?.socket) {
+      ide.socket.on('projectNameUpdated', setProjectName)
+      return () =>
+        ide.socket.removeListener('projectNameUpdated', setProjectName)
+    }
+  }, [ide?.socket, setProjectName])
 
   const renameProject = useCallback(
     newName => {
@@ -109,6 +119,7 @@ export function EditorProvider({ children, settings }) {
       hasPremiumCompile: features?.compileGroup === 'priority',
       loading,
       renameProject,
+      permissionsLevel,
       isProjectOwner: owner?._id === window.user.id,
       isRestrictedTokenMember: window.isRestrictedTokenMember,
       rootFolder,
@@ -118,6 +129,7 @@ export function EditorProvider({ children, settings }) {
       features?.compileGroup,
       loading,
       renameProject,
+      permissionsLevel,
       owner?._id,
       rootFolder,
     ]

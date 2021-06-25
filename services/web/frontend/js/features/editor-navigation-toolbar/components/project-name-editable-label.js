@@ -7,7 +7,7 @@ import Icon from '../../../shared/components/icon'
 
 function ProjectNameEditableLabel({
   projectName,
-  userIsAdmin,
+  hasRenamePermissions,
   onChange,
   className,
 }) {
@@ -15,7 +15,7 @@ function ProjectNameEditableLabel({
 
   const [isRenaming, setIsRenaming] = useState(false)
 
-  const canRename = userIsAdmin && !isRenaming
+  const canRename = hasRenamePermissions && !isRenaming
 
   const [inputContent, setInputContent] = useState(projectName)
 
@@ -28,8 +28,10 @@ function ProjectNameEditableLabel({
   }, [isRenaming])
 
   function startRenaming() {
-    setInputContent(projectName)
-    setIsRenaming(true)
+    if (canRename) {
+      setInputContent(projectName)
+      setIsRenaming(true)
+    }
   }
 
   function handleKeyDown(event) {
@@ -84,7 +86,7 @@ function ProjectNameEditableLabel({
 
 ProjectNameEditableLabel.propTypes = {
   projectName: PropTypes.string.isRequired,
-  userIsAdmin: PropTypes.bool,
+  hasRenamePermissions: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   className: PropTypes.string,
 }

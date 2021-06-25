@@ -4,11 +4,11 @@ import ToolbarHeader from './toolbar-header'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { useChatContext } from '../../chat/context/chat-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
-import { useApplicationContext } from '../../../shared/context/application-context'
+import { useUserContext } from '../../../shared/context/user-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 
-const applicationContextPropTypes = {
-  user: PropTypes.object,
+const userContextPropTypes = {
+  id: PropTypes.string,
 }
 
 const projectContextPropTypes = {
@@ -21,6 +21,7 @@ const editorContextPropTypes = {
   isRestrictedTokenMember: PropTypes.bool,
   renameProject: PropTypes.func.isRequired,
   isProjectOwner: PropTypes.bool,
+  permissionsLevel: PropTypes.string,
 }
 
 const layoutContextPropTypes = {
@@ -45,7 +46,7 @@ const EditorNavigationToolbarRoot = React.memo(
     openDoc,
     openShareProjectModal,
   }) {
-    const { user } = useApplicationContext(applicationContextPropTypes)
+    const user = useUserContext(userContextPropTypes)
 
     const { name: projectName } = useProjectContext(projectContextPropTypes)
 
@@ -55,6 +56,7 @@ const EditorNavigationToolbarRoot = React.memo(
       isRestrictedTokenMember,
       renameProject,
       isProjectOwner,
+      permissionsLevel,
     } = useEditorContext(editorContextPropTypes)
 
     const {
@@ -110,6 +112,12 @@ const EditorNavigationToolbarRoot = React.memo(
       [openDoc]
     )
 
+    // the existing angular implementation prevents collaborators from updating a
+    // project's name, but the backend allows that with the following logic:
+    //   `const hasRenamePermissions = permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite'`
+    // See https://github.com/overleaf/issues/issues/4492
+    const hasRenamePermissions = permissionsLevel === 'owner'
+
     // using {display: 'none'} as 1:1 migration from Angular's ng-hide. Using
     // `loading ? null : <ToolbarHeader/>` causes UI glitches
     return (
@@ -130,6 +138,7 @@ const EditorNavigationToolbarRoot = React.memo(
         isAnonymousUser={user == null}
         projectName={projectName}
         renameProject={renameProject}
+        hasRenamePermissions={hasRenamePermissions}
         openShareModal={openShareModal}
         pdfViewIsOpen={view === 'pdf'}
         pdfButtonIsVisible={pdfLayout === 'flat'}

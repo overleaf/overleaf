@@ -13,7 +13,7 @@ describe('<ProjectNameEditableLabel />', function () {
   })
 
   describe('when the name is editable', function () {
-    const editableProps = { ...defaultProps, userIsAdmin: true }
+    const editableProps = { ...defaultProps, hasRenamePermissions: true }
 
     it('displays an editable input when the edit button is clicked', function () {
       render(<ProjectNameEditableLabel {...editableProps} />)
@@ -52,11 +52,17 @@ describe('<ProjectNameEditableLabel />', function () {
   })
 
   describe('when the name is not editable', function () {
-    const nonEditableProps = { userIsAdmin: false, ...defaultProps }
+    const nonEditableProps = { hasRenamePermissions: false, ...defaultProps }
 
     it('the edit button is not displayed', function () {
       render(<ProjectNameEditableLabel {...nonEditableProps} />)
       expect(screen.queryByRole('button')).to.not.exist
+    })
+
+    it('does not display an editable input when the project name is double clicked', function () {
+      render(<ProjectNameEditableLabel {...nonEditableProps} />)
+      fireEvent.doubleClick(screen.getByText('test-project'))
+      expect(screen.queryByRole('textbox')).to.not.exist
     })
   })
 })

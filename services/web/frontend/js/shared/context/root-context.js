@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import createSharedContext from 'react2angular-shared-context'
 
-import { ApplicationProvider } from './application-context'
+import { UserProvider } from './user-context'
 import { IdeProvider } from './ide-context'
 import { EditorProvider } from './editor-context'
 import { CompileProvider } from './compile-context'
@@ -11,8 +11,8 @@ import { ProjectProvider } from './project-context'
 
 export function ContextRoot({ children, ide, settings }) {
   return (
-    <ApplicationProvider>
-      <IdeProvider ide={ide}>
+    <IdeProvider ide={ide}>
+      <UserProvider>
         <ProjectProvider>
           <EditorProvider settings={settings}>
             <CompileProvider>
@@ -22,8 +22,8 @@ export function ContextRoot({ children, ide, settings }) {
             </CompileProvider>
           </EditorProvider>
         </ProjectProvider>
-      </IdeProvider>
-    </ApplicationProvider>
+      </UserProvider>
+    </IdeProvider>
   )
 }
 

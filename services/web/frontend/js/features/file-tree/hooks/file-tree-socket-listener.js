@@ -1,14 +1,14 @@
 import { useCallback, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
-import { useApplicationContext } from '../../../shared/context/application-context'
+import { useUserContext } from '../../../shared/context/user-context'
 import { useFileTreeMutable } from '../contexts/file-tree-mutable'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
 import { findInTreeOrThrow } from '../util/find-in-tree'
 
 export function useFileTreeSocketListener() {
-  const { user } = useApplicationContext({
-    user: PropTypes.shape({ id: PropTypes.string.isRequired }),
+  const user = useUserContext({
+    id: PropTypes.string.isRequired,
   })
   const {
     dispatchRename,

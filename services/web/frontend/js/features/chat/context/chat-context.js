@@ -9,7 +9,7 @@ import {
 import PropTypes from 'prop-types'
 import { v4 as uuid } from 'uuid'
 
-import { useApplicationContext } from '../../../shared/context/application-context'
+import { useUserContext } from '../../../shared/context/user-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { getJSON, postJSON } from '../../../infrastructure/fetch-json'
 import { appendMessage, prependMessages } from '../utils/message-list-appender'
@@ -117,8 +117,8 @@ ChatContext.Provider.propTypes = {
 }
 
 export function ChatProvider({ children }) {
-  const { user } = useApplicationContext({
-    user: PropTypes.shape({ id: PropTypes.string.isRequired }),
+  const user = useUserContext({
+    id: PropTypes.string.isRequired,
   })
   const { _id: projectId } = useProjectContext({
     _id: PropTypes.string.isRequired,
