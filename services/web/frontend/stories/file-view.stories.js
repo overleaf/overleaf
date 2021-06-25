@@ -2,13 +2,28 @@ import { ContextRoot } from '../js/shared/context/root-context'
 import FileView from '../js/features/file-view/components/file-view'
 import useFetchMock from './hooks/use-fetch-mock'
 
+const bodies = {
+  latex: `\\documentclass{article}
+\\begin{document}
+First document. This is a simple example, with no
+extra parameters or packages included.
+\\end{document}`,
+  bibtex: `@book{latexcompanion,
+    author    = "Michel Goossens and Frank Mittelbach and Alexander Samarin",
+    title     = "The \\LaTeX\\ Companion",
+    year      = "1993",
+    publisher = "Addison-Wesley",
+    address   = "Reading, Massachusetts"
+}`,
+  text: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`,
+}
+
 const setupFetchMock = fetchMock => {
-  fetchMock
+  return fetchMock
     .head('express:/project/:project_id/file/:file_id', {
       status: 201,
       headers: { 'Content-Length': 10000 },
     })
-    .get('express:/project/:project_id/file/:file_id', 'Text file content')
     .post('express:/project/:project_id/linked_file/:file_id/refresh', {
       status: 204,
     })
@@ -24,19 +39,33 @@ const fileData = {
 }
 
 export const FileFromUrl = args => {
+  useFetchMock(fetchMock =>
+    setupFetchMock(fetchMock).get(
+      'express:/project/:project_id/file/:file_id',
+      { body: bodies.latex }
+    )
+  )
+
   return <FileView {...args} />
 }
 FileFromUrl.args = {
   file: {
     ...fileData,
     linkedFileData: {
-      url: 'https://overleaf.com',
+      url: 'https://example.com/source-file.tex',
       provider: 'url',
     },
   },
 }
 
 export const FileFromProjectWithLinkableProjectId = args => {
+  useFetchMock(fetchMock =>
+    setupFetchMock(fetchMock).get(
+      'express:/project/:project_id/file/:file_id',
+      { body: bodies.latex }
+    )
+  )
+
   return <FileView {...args} />
 }
 FileFromProjectWithLinkableProjectId.args = {
@@ -44,13 +73,20 @@ FileFromProjectWithLinkableProjectId.args = {
     ...fileData,
     linkedFileData: {
       source_project_id: 'source-project-id',
-      source_entity_path: '/source-entity-path.ext',
+      source_entity_path: '/source-file.tex',
       provider: 'project_file',
     },
   },
 }
 
 export const FileFromProjectWithoutLinkableProjectId = args => {
+  useFetchMock(fetchMock =>
+    setupFetchMock(fetchMock).get(
+      'express:/project/:project_id/file/:file_id',
+      { body: bodies.latex }
+    )
+  )
+
   return <FileView {...args} />
 }
 FileFromProjectWithoutLinkableProjectId.args = {
@@ -58,13 +94,20 @@ FileFromProjectWithoutLinkableProjectId.args = {
     ...fileData,
     linkedFileData: {
       v1_source_doc_id: 'v1-source-id',
-      source_entity_path: '/source-entity-path.ext',
+      source_entity_path: '/source-file.tex',
       provider: 'project_file',
     },
   },
 }
 
 export const FileFromProjectOutputWithLinkableProject = args => {
+  useFetchMock(fetchMock =>
+    setupFetchMock(fetchMock).get(
+      'express:/project/:project_id/file/:file_id',
+      { body: bodies.latex }
+    )
+  )
+
   return <FileView {...args} />
 }
 FileFromProjectOutputWithLinkableProject.args = {
@@ -72,13 +115,20 @@ FileFromProjectOutputWithLinkableProject.args = {
     ...fileData,
     linkedFileData: {
       source_project_id: 'source_project_id',
-      source_output_file_path: '/source-entity-path.ext',
+      source_output_file_path: '/source-file.tex',
       provider: 'project_output_file',
     },
   },
 }
 
 export const FileFromProjectOutputWithoutLinkableProjectId = args => {
+  useFetchMock(fetchMock =>
+    setupFetchMock(fetchMock).get(
+      'express:/project/:project_id/file/:file_id',
+      { body: bodies.latex }
+    )
+  )
+
   return <FileView {...args} />
 }
 FileFromProjectOutputWithoutLinkableProjectId.args = {
@@ -86,15 +136,18 @@ FileFromProjectOutputWithoutLinkableProjectId.args = {
     ...fileData,
     linkedFileData: {
       v1_source_doc_id: 'v1-source-id',
-      source_output_file_path: '/source-entity-path.ext',
+      source_output_file_path: '/source-file.tex',
       provider: 'project_output_file',
     },
   },
 }
 
 export const ImageFile = args => {
+  useFetchMock(setupFetchMock) // NOTE: can't mock img src request
+
   return <FileView {...args} />
 }
+ImageFile.storyName = 'Image File (Error)'
 ImageFile.args = {
   file: {
     ...fileData,
@@ -102,20 +155,27 @@ ImageFile.args = {
     name: 'file.jpg',
     linkedFileData: {
       source_project_id: 'source_project_id',
-      source_entity_path: '/source-entity-path',
+      source_entity_path: '/source-file.jpg',
       provider: 'project_file',
     },
   },
 }
 
 export const ThirdPartyReferenceFile = args => {
+  useFetchMock(fetchMock =>
+    setupFetchMock(fetchMock).get(
+      'express:/project/:project_id/file/:file_id',
+      { body: bodies.bibtex }
+    )
+  )
+
   return <FileView {...args} />
 }
 
 ThirdPartyReferenceFile.args = {
   file: {
     ...fileData,
-    name: 'example.tex',
+    name: 'references.bib',
     linkedFileData: {
       provider: 'zotero',
     },
@@ -123,13 +183,22 @@ ThirdPartyReferenceFile.args = {
 }
 
 export const ThirdPartyReferenceFileWithError = args => {
+  useFetchMock(fetchMock =>
+    setupFetchMock(fetchMock).head(
+      'express:/project/:project_id/file/:file_id',
+      { status: 500 },
+      { overwriteRoutes: true }
+    )
+  )
   return <FileView {...args} />
 }
+ThirdPartyReferenceFileWithError.storyName =
+  'Third Party Reference File (Error)'
 ThirdPartyReferenceFileWithError.args = {
   file: {
     ...fileData,
     id: '500500500500500500500500',
-    name: 'example.tex',
+    name: 'references.bib',
     linkedFileData: {
       provider: 'zotero',
     },
@@ -137,6 +206,13 @@ ThirdPartyReferenceFileWithError.args = {
 }
 
 export const TextFile = args => {
+  useFetchMock(fetchMock =>
+    setupFetchMock(fetchMock).get(
+      'express:/project/:project_id/file/:file_id',
+      { body: bodies.text },
+      { overwriteRoutes: true }
+    )
+  )
   return <FileView {...args} />
 }
 TextFile.args = {
@@ -144,7 +220,7 @@ TextFile.args = {
     ...fileData,
     linkedFileData: {
       source_project_id: 'source-project-id',
-      source_entity_path: '/source-entity-path.ext',
+      source_entity_path: '/source-file.txt',
       provider: 'project_file',
     },
     name: 'file.txt',
@@ -152,8 +228,16 @@ TextFile.args = {
 }
 
 export const UploadedFile = args => {
+  useFetchMock(fetchMock =>
+    setupFetchMock(fetchMock).head(
+      'express:/project/:project_id/file/:file_id',
+      { status: 500 },
+      { overwriteRoutes: true }
+    )
+  )
   return <FileView {...args} />
 }
+UploadedFile.storyName = 'Uploaded File (Error)'
 UploadedFile.args = {
   file: {
     ...fileData,
@@ -165,21 +249,14 @@ UploadedFile.args = {
 export default {
   title: 'FileView',
   component: FileView,
-  args: {
-    storeReferencesKeys: () => {},
+  argTypes: {
+    storeReferencesKeys: { action: 'store references keys' },
   },
   decorators: [
-    Story => {
-      useFetchMock(setupFetchMock)
-      return <Story />
-    },
     Story => (
-      <>
-        <style>{'html, body { height: 100%; }'}</style>
-        <ContextRoot ide={window._ide} settings={{}}>
-          <Story />
-        </ContextRoot>
-      </>
+      <ContextRoot ide={window._ide} settings={{}}>
+        <Story />
+      </ContextRoot>
     ),
   ],
 }
