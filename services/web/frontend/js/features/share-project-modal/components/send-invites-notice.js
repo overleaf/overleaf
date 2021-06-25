@@ -1,7 +1,7 @@
 import { Col, Row } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import { Trans } from 'react-i18next'
-import { useProjectContext } from './share-project-modal'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function SendInvitesNotice() {
   const project = useProjectContext()

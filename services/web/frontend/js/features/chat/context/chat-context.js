@@ -10,7 +10,7 @@ import PropTypes from 'prop-types'
 import { v4 as uuid } from 'uuid'
 
 import { useApplicationContext } from '../../../shared/context/application-context'
-import { useEditorContext } from '../../../shared/context/editor-context'
+import { useProjectContext } from '../../../shared/context/project-context'
 import { getJSON, postJSON } from '../../../infrastructure/fetch-json'
 import { appendMessage, prependMessages } from '../utils/message-list-appender'
 import useBrowserWindow from '../../../shared/hooks/use-browser-window'
@@ -120,8 +120,8 @@ export function ChatProvider({ children }) {
   const { user } = useApplicationContext({
     user: PropTypes.shape({ id: PropTypes.string.isRequired }),
   })
-  const { projectId } = useEditorContext({
-    projectId: PropTypes.string.isRequired,
+  const { _id: projectId } = useProjectContext({
+    _id: PropTypes.string.isRequired,
   })
 
   const { chatIsOpen } = useLayoutContext({ chatIsOpen: PropTypes.bool })

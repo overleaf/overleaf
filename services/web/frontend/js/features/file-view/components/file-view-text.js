@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { useEditorContext } from '../../../shared/context/editor-context'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024
 
 export default function FileViewText({ file, onLoad, onError }) {
-  const { projectId } = useEditorContext({
-    projectId: PropTypes.string.isRequired,
+  const { _id: projectId } = useProjectContext({
+    _id: PropTypes.string.isRequired,
   })
 
   const [textPreview, setTextPreview] = useState('')

@@ -1,14 +1,12 @@
 import { useCallback } from 'react'
 import PropTypes from 'prop-types'
-import {
-  useProjectContext,
-  useShareProjectContext,
-} from './share-project-modal'
+import { useShareProjectContext } from './share-project-modal'
 import Icon from '../../../shared/components/icon'
 import { Button, Col, Row, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 import MemberPrivileges from './member-privileges'
 import { resendInvite, revokeInvite } from '../utils/api'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function Invite({ invite, isAdmin }) {
   return (

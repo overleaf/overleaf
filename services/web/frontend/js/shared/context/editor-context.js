@@ -9,6 +9,7 @@ import PropTypes from 'prop-types'
 import useScopeValue from './util/scope-value-hook'
 import useBrowserWindow from '../hooks/use-browser-window'
 import { useIdeContext } from './ide-context'
+import { useProjectContext } from './project-context'
 
 export const EditorContext = createContext()
 
@@ -27,43 +28,48 @@ EditorContext.Provider.propTypes = {
     }),
     hasPremiumCompile: PropTypes.bool,
     loading: PropTypes.bool,
-    projectRootDocId: PropTypes.string,
-    projectId: PropTypes.string.isRequired,
-    projectName: PropTypes.string.isRequired,
     renameProject: PropTypes.func.isRequired,
     isProjectOwner: PropTypes.bool,
     isRestrictedTokenMember: PropTypes.bool,
-    rootFolder: PropTypes.object,
+    rootFolder: PropTypes.shape({
+      children: PropTypes.arrayOf(PropTypes.shape({ type: PropTypes.string })),
+    }),
   }),
 }
 
 export function EditorProvider({ children, settings }) {
   const ide = useIdeContext()
 
-  const cobranding = useMemo(
-    () =>
-      window.brandVariation
-        ? {
-            logoImgUrl: window.brandVariation.logo_url,
-            brandVariationName: window.brandVariation.name,
-            brandVariationId: window.brandVariation.id,
-            brandId: window.brandVariation.brand_id,
-            brandVariationHomeUrl: window.brandVariation.home_url,
-            publishGuideHtml: window.brandVariation.publish_guide_html,
-            partner: window.brandVariation.partner,
-            brandedMenu: window.brandVariation.branded_menu,
-            submitBtnHtml: window.brandVariation.submit_button_html,
-          }
-        : undefined,
-    []
-  )
+  const { owner, features } = useProjectContext({
+    owner: PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+    }),
+    features: PropTypes.shape({
+      compileGroup: PropTypes.string,
+    }),
+  })
+
+  const cobranding = useMemo(() => {
+    if (window.brandVariation) {
+      return {
+        logoImgUrl: window.brandVariation.logo_url,
+        brandVariationName: window.brandVariation.name,
+        brandVariationId: window.brandVariation.id,
+        brandId: window.brandVariation.brand_id,
+        brandVariationHomeUrl: window.brandVariation.home_url,
+        publishGuideHtml: window.brandVariation.publish_guide_html,
+        partner: window.brandVariation.partner,
+        brandedMenu: window.brandVariation.branded_menu,
+        submitBtnHtml: window.brandVariation.submit_button_html,
+      }
+    } else {
+      return undefined
+    }
+  }, [])
 
   const [loading] = useScopeValue('state.loading')
-  const [projectRootDocId] = useScopeValue('project.rootDoc_id')
   const [projectName, setProjectName] = useScopeValue('project.name')
-  const [compileGroup] = useScopeValue('project.features.compileGroup')
   const [rootFolder] = useScopeValue('rootFolder')
-  const [ownerId] = useScopeValue('project.owner._id')
 
   const renameProject = useCallback(
     newName => {
@@ -100,24 +106,19 @@ export function EditorProvider({ children, settings }) {
   const value = useMemo(
     () => ({
       cobranding,
-      hasPremiumCompile: compileGroup === 'priority',
+      hasPremiumCompile: features?.compileGroup === 'priority',
       loading,
-      projectId: window.project_id,
-      projectRootDocId,
-      projectName: projectName || '', // initially might be empty in Angular
       renameProject,
-      isProjectOwner: ownerId === window.user.id,
+      isProjectOwner: owner?._id === window.user.id,
       isRestrictedTokenMember: window.isRestrictedTokenMember,
       rootFolder,
     }),
     [
       cobranding,
-      compileGroup,
+      features?.compileGroup,
       loading,
-      ownerId,
-      projectName,
-      projectRootDocId,
       renameProject,
+      owner?._id,
       rootFolder,
     ]
   )

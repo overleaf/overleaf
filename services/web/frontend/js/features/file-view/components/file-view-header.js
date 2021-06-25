@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 import { formatTime, relativeDate } from '../../utils/format-date'
 import { postJSON } from '../../../infrastructure/fetch-json'
-import { useEditorContext } from '../../../shared/context/editor-context'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
@@ -32,8 +32,8 @@ function shortenedUrl(url) {
 }
 
 export default function FileViewHeader({ file, storeReferencesKeys }) {
-  const { projectId } = useEditorContext({
-    projectId: PropTypes.string.isRequired,
+  const { _id: projectId } = useProjectContext({
+    _id: PropTypes.string.isRequired,
   })
   const { t } = useTranslation()
 

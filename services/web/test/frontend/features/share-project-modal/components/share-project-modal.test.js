@@ -23,8 +23,10 @@ describe('<ShareProjectModal/>', function () {
     name: 'Test Project',
     features: {
       collaborators: 10,
+      compileGroup: 'standard',
     },
     owner: {
+      _id: 'member_author',
       email: 'project-owner@example.com',
     },
     members: [],
@@ -623,6 +625,7 @@ describe('<ShareProjectModal/>', function () {
           publicAccesLevel: 'tokenBased',
           features: {
             collaborators: 0,
+            compileGroup: 'standard',
           },
         },
       },

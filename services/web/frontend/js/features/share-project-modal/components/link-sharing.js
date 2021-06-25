@@ -3,12 +3,10 @@ import PropTypes from 'prop-types'
 import { Button, Col, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { Trans } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
-import {
-  useProjectContext,
-  useShareProjectContext,
-} from './share-project-modal'
+import { useShareProjectContext } from './share-project-modal'
 import { setProjectAccessLevel } from '../utils/api'
 import CopyLink from '../../../shared/components/copy-link'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function LinkSharing() {
   const [inflight, setInflight] = useState(false)

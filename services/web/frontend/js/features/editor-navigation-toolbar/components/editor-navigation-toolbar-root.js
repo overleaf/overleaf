@@ -5,16 +5,20 @@ import { useEditorContext } from '../../../shared/context/editor-context'
 import { useChatContext } from '../../chat/context/chat-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import { useApplicationContext } from '../../../shared/context/application-context'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 const applicationContextPropTypes = {
   user: PropTypes.object,
+}
+
+const projectContextPropTypes = {
+  name: PropTypes.string.isRequired,
 }
 
 const editorContextPropTypes = {
   cobranding: PropTypes.object,
   loading: PropTypes.bool,
   isRestrictedTokenMember: PropTypes.bool,
-  projectName: PropTypes.string.isRequired,
   renameProject: PropTypes.func.isRequired,
   isProjectOwner: PropTypes.bool,
 }
@@ -43,11 +47,12 @@ const EditorNavigationToolbarRoot = React.memo(
   }) {
     const { user } = useApplicationContext(applicationContextPropTypes)
 
+    const { name: projectName } = useProjectContext(projectContextPropTypes)
+
     const {
       cobranding,
       loading,
       isRestrictedTokenMember,
-      projectName,
       renameProject,
       isProjectOwner,
     } = useEditorContext(editorContextPropTypes)

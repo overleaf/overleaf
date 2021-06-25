@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types'
-import { useEditorContext } from '../../../shared/context/editor-context'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function FileViewImage({ fileName, fileId, onLoad, onError }) {
-  const { projectId } = useEditorContext({
-    projectId: PropTypes.string.isRequired,
+  const { _id: projectId } = useProjectContext({
+    _id: PropTypes.string.isRequired,
   })
 
   return (

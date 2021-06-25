@@ -1,4 +1,4 @@
-import { useProjectContext } from './share-project-modal'
+import { useProjectContext } from '../../../shared/context/project-context'
 import { Col, Row } from 'react-bootstrap'
 import { Trans } from 'react-i18next'
 

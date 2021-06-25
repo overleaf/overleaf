@@ -9,6 +9,7 @@ import { LayoutProvider } from '../../../frontend/js/shared/context/layout-conte
 import { ChatProvider } from '../../../frontend/js/features/chat/context/chat-context'
 import { IdeProvider } from '../../../frontend/js/shared/context/ide-context'
 import { get } from 'lodash'
+import { ProjectProvider } from '../../../frontend/js/shared/context/project-context'
 
 export function EditorProviders({
   user = { id: '123abd' },
@@ -28,8 +29,11 @@ export function EditorProviders({
 
   const $scope = {
     project: {
+      _id: window.project_id,
+      name: 'project-name',
       owner: {
         _id: '124abd',
+        email: 'owner@example.com',
       },
     },
     ui: {
@@ -50,9 +54,11 @@ export function EditorProviders({
   return (
     <ApplicationProvider>
       <IdeProvider ide={window._ide}>
-        <EditorProvider settings={{}}>
-          <LayoutProvider>{children}</LayoutProvider>
-        </EditorProvider>
+        <ProjectProvider>
+          <EditorProvider settings={{}}>
+            <LayoutProvider>{children}</LayoutProvider>
+          </EditorProvider>
+        </ProjectProvider>
       </IdeProvider>
     </ApplicationProvider>
   )

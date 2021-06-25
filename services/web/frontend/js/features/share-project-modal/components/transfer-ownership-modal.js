@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { Modal, Button } from 'react-bootstrap'
 import { Trans } from 'react-i18next'
 import PropTypes from 'prop-types'
-import { useProjectContext } from './share-project-modal'
 import Icon from '../../../shared/components/icon'
 import { transferProjectOwnership } from '../utils/api'
 import AccessibleModal from '../../../shared/components/accessible-modal'
 import { reload } from '../utils/location'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function TransferOwnershipModal({ member, cancel }) {
   const [inflight, setInflight] = useState(false)

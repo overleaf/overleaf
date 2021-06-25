@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
-import {
-  useProjectContext,
-  useShareProjectContext,
-} from './share-project-modal'
+import { useShareProjectContext } from './share-project-modal'
 import Icon from '../../../shared/components/icon'
 import TransferOwnershipModal from './transfer-ownership-modal'
 import {
@@ -17,6 +14,7 @@ import {
   Tooltip,
 } from 'react-bootstrap'
 import { removeMemberFromProject, updateMember } from '../utils/api'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function EditMember({ member }) {
   const [privileges, setPrivileges] = useState(member.privileges)

@@ -1,7 +1,4 @@
-import {
-  useProjectContext,
-  useShareProjectContext,
-} from './share-project-modal'
+import { useShareProjectContext } from './share-project-modal'
 import EditMember from './edit-member'
 import LinkSharing from './link-sharing'
 import Invite from './invite'
@@ -9,6 +6,7 @@ import SendInvites from './send-invites'
 import ViewMember from './view-member'
 import OwnerInfo from './owner-info'
 import SendInvitesNotice from './send-invites-notice'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function ShareModalBody() {
   const { isAdmin } = useShareProjectContext()

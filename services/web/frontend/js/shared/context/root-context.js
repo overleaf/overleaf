@@ -7,18 +7,21 @@ import { EditorProvider } from './editor-context'
 import { CompileProvider } from './compile-context'
 import { LayoutProvider } from './layout-context'
 import { ChatProvider } from '../../features/chat/context/chat-context'
+import { ProjectProvider } from './project-context'
 
 export function ContextRoot({ children, ide, settings }) {
   return (
     <ApplicationProvider>
       <IdeProvider ide={ide}>
-        <EditorProvider settings={settings}>
-          <CompileProvider>
-            <LayoutProvider>
-              <ChatProvider>{children}</ChatProvider>
-            </LayoutProvider>
-          </CompileProvider>
-        </EditorProvider>
+        <ProjectProvider>
+          <EditorProvider settings={settings}>
+            <CompileProvider>
+              <LayoutProvider>
+                <ChatProvider>{children}</ChatProvider>
+              </LayoutProvider>
+            </CompileProvider>
+          </EditorProvider>
+        </ProjectProvider>
       </IdeProvider>
     </ApplicationProvider>
   )

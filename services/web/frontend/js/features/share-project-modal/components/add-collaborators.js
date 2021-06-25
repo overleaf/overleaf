@@ -2,14 +2,12 @@ import { useState, useMemo } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import { Form, FormGroup, FormControl, Button } from 'react-bootstrap'
 import { useMultipleSelection } from 'downshift'
-import {
-  useProjectContext,
-  useShareProjectContext,
-} from './share-project-modal'
+import { useShareProjectContext } from './share-project-modal'
 import SelectCollaborators from './select-collaborators'
 import { resendInvite, sendInvite } from '../utils/api'
 import { useUserContacts } from '../hooks/use-user-contacts'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function AddCollaborators() {
   const [privileges, setPrivileges] = useState('readAndWrite')

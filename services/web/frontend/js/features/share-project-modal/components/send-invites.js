@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { Row } from 'react-bootstrap'
-import { useProjectContext } from './share-project-modal'
 import AddCollaborators from './add-collaborators'
 import AddCollaboratorsUpgrade from './add-collaborators-upgrade'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function SendInvites() {
   const project = useProjectContext()
