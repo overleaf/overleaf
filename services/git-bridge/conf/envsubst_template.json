@@ -1,7 +1,5 @@
 {
   "port": ${GIT_BRIDGE_PORT:-8000},
-  "bindIp": "${GIT_BRIDGE_BIND_IP:-0.0.0.0}",
-  "idleTimeout": ${GIT_BRIDGE_IDLE_TIMEOUT:-600000},
   "rootGitDirectory": "${GIT_BRIDGE_ROOT_DIR:-/tmp/wlgb}",
   "apiBaseUrl": "${GIT_BRIDGE_API_BASE_URL:-https://localhost/api/v0}",
   "postbackBaseUrl": "${GIT_BRIDGE_POSTBACK_BASE_URL:-https://localhost}",

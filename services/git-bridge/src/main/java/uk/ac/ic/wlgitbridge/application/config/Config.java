@@ -24,8 +24,6 @@ public class Config implements JSONSource {
     static Config asSanitised(Config config) {
         return new Config(
                 config.port,
-                config.bindIp,
-                config.idleTimeout,
                 config.rootGitDirectory,
                 config.apiBaseURL,
                 config.postbackURL,
@@ -39,8 +37,6 @@ public class Config implements JSONSource {
     }
 
     private int port;
-    private String bindIp;
-    private int idleTimeout;
     private String rootGitDirectory;
     private String apiBaseURL;
     private String postbackURL;
@@ -68,8 +64,6 @@ public class Config implements JSONSource {
 
     public Config(
             int port,
-            String bindIp,
-            int idleTimeout,
             String rootGitDirectory,
             String apiBaseURL,
             String postbackURL,
@@ -81,8 +75,6 @@ public class Config implements JSONSource {
             int sqliteHeapLimitBytes
     ) {
         this.port = port;
-        this.bindIp = bindIp;
-        this.idleTimeout = idleTimeout;
         this.rootGitDirectory = rootGitDirectory;
         this.apiBaseURL = apiBaseURL;
         this.postbackURL = postbackURL;
@@ -98,8 +90,6 @@ public class Config implements JSONSource {
     public void fromJSON(JsonElement json) {
         JsonObject configObject = json.getAsJsonObject();
         port = getElement(configObject, "port").getAsInt();
-        bindIp = getElement(configObject, "bindIp").getAsString();
-        idleTimeout = getElement(configObject, "idleTimeout").getAsInt();
         rootGitDirectory = getElement(
                 configObject,
                 "rootGitDirectory"
@@ -139,14 +129,6 @@ public class Config implements JSONSource {
 
     public int getPort() {
         return port;
-    }
-
-    public String getBindIp() {
-        return bindIp;
-    }
-
-    public int getIdleTimeout() {
-        return idleTimeout;
     }
 
     public String getRootGitDirectory() {
