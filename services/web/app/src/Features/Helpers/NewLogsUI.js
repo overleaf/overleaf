@@ -11,27 +11,26 @@ const NEW_UI_WITHOUT_POPUP = {
   subvariant: 'new-logs-ui-without-popup',
 }
 
-function _getVariantForPercentile(percentile) {
-  // The current percentages are:
-  // - 33% New UI with pop-up (originally, 5%)
-  // - 33% New UI without pop-up (originally, 5%)
-  // - 34% Existing UI
-  // To ensure group stability, the implementation below respects the original partitions
-  // for the new UI variants: [0, 5[ and [5,10[.
-  // Two new partitions are added: [10, 38[ and [38, 66[. These represent an extra 28p.p.
-  // which, with to the original 5%, add up to 33%.
+function _getVariantForPercentile(
+  percentile,
+  newLogsUIWithPopupPercentage,
+  newLogsUIWithoutPopupPercentage
+) {
+  // The thresholds below are upper thresholds
+  const newLogsUIThreshold = newLogsUIWithPopupPercentage
+  const newLogsUIWithoutPopupThreshold =
+    newLogsUIWithPopupPercentage + newLogsUIWithoutPopupPercentage
 
-  if (percentile < 5) {
-    // This partition represents the "New UI with pop-up" group in the original roll-out (5%)
+  // The partitions for each of the variants (range is 0 to 99) are defined as:
+  // * New UI with pop-up: 0 to newLogsUIThreshold (exc)
+  // * New UI without pop-up: newLogsUIThreshold (inc) to newLogsUIWithoutPopupThreshold (exc)
+  // * Existing UI: newLogsUIWithoutPopupThreshold (inc) to 99
+  if (percentile < newLogsUIThreshold) {
     return NEW_UI_WITH_POPUP
-  } else if (percentile >= 5 && percentile < 10) {
-    // This partition represents the "New UI without pop-up" group in the original roll-out (5%)
-    return NEW_UI_WITHOUT_POPUP
-  } else if (percentile >= 10 && percentile < 38) {
-    // This partition represents an extra 28% of users getting the "New UI with pop-up"
-    return NEW_UI_WITH_POPUP
-  } else if (percentile >= 38 && percentile < 66) {
-    // This partition represents an extra 28% of users getting the "New UI without pop-up"
+  } else if (
+    percentile >= newLogsUIThreshold &&
+    percentile < newLogsUIWithoutPopupThreshold
+  ) {
     return NEW_UI_WITHOUT_POPUP
   } else {
     return EXISTING_UI
@@ -39,10 +38,12 @@ function _getVariantForPercentile(percentile) {
 }
 
 function getNewLogsUIVariantForUser(user) {
-  const { _id: userId, alphaProgram: isAlphaUser } = user
-  const isSaaS = Boolean(Settings.overleaf)
-
-  if (!userId || !isSaaS) {
+  const {
+    _id: userId,
+    alphaProgram: isAlphaUser,
+    betaProgram: isBetaUser,
+  } = user
+  if (!userId) {
     return EXISTING_UI
   }
 
@@ -50,8 +51,18 @@ function getNewLogsUIVariantForUser(user) {
 
   if (isAlphaUser) {
     return NEW_UI_WITH_POPUP
+  } else if (isBetaUser) {
+    return _getVariantForPercentile(
+      userIdAsPercentile,
+      Settings.logsUIPercentageBeta,
+      Settings.logsUIPercentageWithoutPopupBeta
+    )
   } else {
-    return _getVariantForPercentile(userIdAsPercentile)
+    return _getVariantForPercentile(
+      userIdAsPercentile,
+      Settings.logsUIPercentage,
+      Settings.logsUIPercentageWithoutPopup
+    )
   }
 }
 
