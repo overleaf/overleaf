@@ -1,7 +1,5 @@
 {
     "port": 8000,
-    "bindIp": "0.0.0.0",
-    "idleTimeout": 600000,
     "rootGitDirectory": "/tmp/wlgb",
     "apiBaseUrl": "http://v2.overleaf.test:4000/api/v0",
     "postbackBaseUrl": "http://git-bridge:8000",

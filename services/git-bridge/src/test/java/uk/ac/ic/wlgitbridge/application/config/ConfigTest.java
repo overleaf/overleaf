@@ -16,8 +16,6 @@ public class ConfigTest {
      public void testConstructWithOauth() {
         Reader reader = new StringReader("{\n" +
                 "    \"port\": 80,\n" +
-                "    \"bindIp\": \"127.0.0.1\",\n" +
-                "    \"idleTimeout\": 30000,\n" +
                 "    \"rootGitDirectory\": \"/var/wlgb/git\",\n" +
                 "    \"apiBaseUrl\": \"http://127.0.0.1:60000/api/v0\",\n" +
                 "    \"postbackBaseUrl\": \"http://127.0.0.1\",\n" +
@@ -44,8 +42,6 @@ public class ConfigTest {
     public void testConstructWithoutOauth() {
         Reader reader = new StringReader("{\n" +
                 "    \"port\": 80,\n" +
-                "    \"bindIp\": \"127.0.0.1\",\n" +
-                "    \"idleTimeout\": 30000,\n" +
                 "    \"rootGitDirectory\": \"/var/wlgb/git\",\n" +
                 "    \"apiBaseUrl\": \"http://127.0.0.1:60000/api/v0\",\n" +
                 "    \"postbackBaseUrl\": \"http://127.0.0.1\",\n" +
@@ -66,8 +62,6 @@ public class ConfigTest {
     public void asSanitised() throws Exception {
         Reader reader = new StringReader("{\n" +
                 "    \"port\": 80,\n" +
-                "    \"bindIp\": \"127.0.0.1\",\n" +
-                "    \"idleTimeout\": 30000,\n" +
                 "    \"rootGitDirectory\": \"/var/wlgb/git\",\n" +
                 "    \"apiBaseUrl\": \"http://127.0.0.1:60000/api/v0\",\n" +
                 "    \"postbackBaseUrl\": \"http://127.0.0.1\",\n" +
@@ -81,8 +75,6 @@ public class ConfigTest {
         Config config = new Config(reader);
         String expected = "{\n" +
                 "  \"port\": 80,\n" +
-                "  \"bindIp\": \"127.0.0.1\",\n" +
-                "  \"idleTimeout\": 30000,\n" +
                 "  \"rootGitDirectory\": \"/var/wlgb/git\",\n" +
                 "  \"apiBaseURL\": \"http://127.0.0.1:60000/api/v0/\",\n" +
                 "  \"postbackURL\": \"http://127.0.0.1/\",\n" +

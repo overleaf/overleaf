@@ -55,8 +55,6 @@ public class BridgeTest {
                 new Config(
                         0,
                         "",
-                        0,
-                        "",
                         "",
                         "",
                         "",
