@@ -6,7 +6,6 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 
 function PreviewFirstErrorPopUp({
   logEntry,
-  nErrors,
   onGoToErrorLocation,
   onViewLogs,
   onClose,
@@ -53,7 +52,7 @@ function PreviewFirstErrorPopUp({
         >
           <Icon type="file-text-o" />
           &nbsp;
-          {t('view_error', { count: nErrors })}
+          {t('view_all_errors')}
         </button>
       </div>
     </div>
@@ -83,7 +82,6 @@ function FirstErrorPopUpInfoBadge() {
 
 PreviewFirstErrorPopUp.propTypes = {
   logEntry: PropTypes.object.isRequired,
-  nErrors: PropTypes.number.isRequired,
   onGoToErrorLocation: PropTypes.func.isRequired,
   onViewLogs: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,

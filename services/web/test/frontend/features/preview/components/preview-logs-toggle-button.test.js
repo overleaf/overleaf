@@ -68,18 +68,9 @@ describe('<PreviewLogsToggleButton />', function () {
       screen.getByText('Code check failed')
     })
 
-    it('should render an error status message without a count when there is a single error', function () {
+    it('should render an error status message when there are errors', function () {
       const logsState = {
         nErrors: 1,
-        nWarnings: 0,
-      }
-      renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
-      screen.getByText('This project has an error')
-    })
-
-    it('should render an error status message with a count when there are multiple errors', function () {
-      const logsState = {
-        nErrors: 10,
         nWarnings: 0,
       }
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
@@ -92,22 +83,13 @@ describe('<PreviewLogsToggleButton />', function () {
         nWarnings: 1,
       }
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
-      screen.getByText('This project has an error')
+      screen.getByText(`This project has errors (${logsState.nErrors})`)
     })
 
-    it('should render a warning status message without a count when there is a single warning and no errors', function () {
+    it('should render a warning status message when there are warnings but no errors', function () {
       const logsState = {
         nErrors: 0,
         nWarnings: 1,
-      }
-      renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
-      screen.getByText('View warning')
-    })
-
-    it('should render a warning status message with a count when there are multiple warnings and no errors', function () {
-      const logsState = {
-        nErrors: 0,
-        nWarnings: 10,
       }
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
       screen.getByText(`View warnings (${logsState.nWarnings})`)
@@ -121,7 +103,6 @@ describe('<PreviewLogsToggleButton />', function () {
       renderPreviewLogsToggleButton(logsState, onToggleLogs, showLogs)
       screen.getByText('This project has errors (99+)')
     })
-
     it('should show the button text when prop showText=true', function () {
       const logsState = {
         nErrors: 0,
