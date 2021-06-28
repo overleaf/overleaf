@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import PropTypes from 'prop-types'
 import PreviewToolbar from './preview-toolbar'
 import PreviewLogsPane from './preview-logs-pane'
 import PreviewFirstErrorPopUp from './preview-first-error-pop-up'
 import { useTranslation } from 'react-i18next'
 
-const PreviewPane = React.memo(function PreviewPane({
+function PreviewPane({
   compilerState,
   onClearCache,
   onRecompile,
@@ -139,7 +139,7 @@ const PreviewPane = React.memo(function PreviewPane({
       ) : null}
     </>
   )
-})
+}
 
 PreviewPane.propTypes = {
   compilerState: PropTypes.shape({
