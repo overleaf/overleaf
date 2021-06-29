@@ -6,10 +6,6 @@ import { react2angular } from 'react2angular'
 import { rootContext } from '../../../shared/context/root-context'
 import 'ace/ace'
 import getMeta from '../../../utils/meta'
-import {
-  waitForServiceWorker,
-  unregisterServiceWorker,
-} from '../../pdfng/directives/serviceWorkerManager'
 import { trackPdfDownload } from './PdfJsMetrics'
 
 const AUTO_COMPILE_MAX_WAIT = 5000
@@ -275,12 +271,6 @@ App.controller(
       }
     })
 
-    const serviceWorker = getMeta('ol-enablePdfCaching')
-      ? waitForServiceWorker()
-      : Promise.resolve()
-
-    ide.$scope.$on('service-worker:unregister', unregisterServiceWorker)
-
     function sendCompileRequest(options) {
       if (options == null) {
         options = {}
@@ -321,20 +311,18 @@ App.controller(
         checkType = 'silent'
       }
 
-      return serviceWorker.then(() =>
-        $http.post(
-          url,
-          {
-            rootDoc_id: options.rootDocOverride_id || null,
-            draft: $scope.draft,
-            check: checkType,
-            // use incremental compile for all users but revert to a full
-            // compile if there is a server error
-            incrementalCompilesEnabled: !$scope.pdf.error,
-            _csrf: window.csrfToken,
-          },
-          { params }
-        )
+      return $http.post(
+        url,
+        {
+          rootDoc_id: options.rootDocOverride_id || null,
+          draft: $scope.draft,
+          check: checkType,
+          // use incremental compile for all users but revert to a full
+          // compile if there is a server error
+          incrementalCompilesEnabled: !$scope.pdf.error,
+          _csrf: window.csrfToken,
+        },
+        { params }
       )
     }
 
@@ -832,33 +820,27 @@ App.controller(
         .then(function (response) {
           const { data } = response
           const compileTimeClientE2E = performance.now() - t0
-          $scope.$applyAsync(() => {
-            $scope.pdf.view = 'pdf'
-            $scope.pdf.compiling = false
-            parseCompileResponse(data, compileTimeClientE2E)
-          })
+          $scope.pdf.view = 'pdf'
+          $scope.pdf.compiling = false
+          parseCompileResponse(data, compileTimeClientE2E)
         })
         .catch(function (response) {
           const { status } = response
-          $scope.$applyAsync(() => {
-            if (status === 429) {
-              $scope.pdf.rateLimited = true
-            }
-            $scope.pdf.compiling = false
-            $scope.pdf.renderingError = false
-            $scope.pdf.error = true
-            $scope.pdf.view = 'errors'
-            if (window.showNewLogsUI) {
-              $scope.clsiErrors = { error: true }
-              $scope.shouldShowLogs = true
-              $scope.pdf.compileFailed = true
-            }
-          })
+          if (status === 429) {
+            $scope.pdf.rateLimited = true
+          }
+          $scope.pdf.compiling = false
+          $scope.pdf.renderingError = false
+          $scope.pdf.error = true
+          $scope.pdf.view = 'errors'
+          if (window.showNewLogsUI) {
+            $scope.clsiErrors = { error: true }
+            $scope.shouldShowLogs = true
+            $scope.pdf.compileFailed = true
+          }
         })
         .finally(() => {
-          $scope.$applyAsync(() => {
-            $scope.lastFinishedCompileAt = Date.now()
-          })
+          $scope.lastFinishedCompileAt = Date.now()
         })
     }
 

@@ -357,6 +357,9 @@ If the project has been renamed please look in your project list for a new proje
       x => x[1]
     )
 
+    // Allow service worker to be removed via the websocket
+    ide.$scope.$on('service-worker:unregister', unregisterServiceWorker)
+
     return ide.socket.on('project:publicAccessLevel:changed', data => {
       if (data.newAccessLevel != null) {
         ide.$scope.project.publicAccesLevel = data.newAccessLevel
@@ -369,7 +372,7 @@ If the project has been renamed please look in your project list for a new proje
 if (getMeta('ol-resetServiceWorker')) {
   unregisterServiceWorker()
 } else if (getMeta('ol-enablePdfCaching')) {
-  loadServiceWorker({ timeout: 5000 })
+  loadServiceWorker()
 }
 
 export default angular.bootstrap(document.body, ['SharelatexApp'])
