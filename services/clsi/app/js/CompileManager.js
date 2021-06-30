@@ -114,7 +114,7 @@ module.exports = CompileManager = {
         },
         'written files to disk'
       )
-      timer.done()
+      const syncStage = timer.done()
 
       const injectDraftModeIfRequired = function (callback) {
         if (request.draft) {
@@ -295,6 +295,8 @@ module.exports = CompileManager = {
               // Emit compile time.
               timings.compile = ts
 
+              timer = new Metrics.Timer('process-output-files')
+
               return OutputFileFinder.findOutputFiles(
                 resourceList,
                 compileDir,
@@ -318,6 +320,10 @@ module.exports = CompileManager = {
                           'failed to save output files'
                         )
                       }
+
+                      const outputStage = timer.done()
+                      timings.sync = syncStage
+                      timings.output = outputStage
 
                       // Emit e2e compile time.
                       timings.compileE2E = timerE2E.done()
