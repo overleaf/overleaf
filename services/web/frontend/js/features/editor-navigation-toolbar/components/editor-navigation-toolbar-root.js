@@ -4,12 +4,7 @@ import ToolbarHeader from './toolbar-header'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { useChatContext } from '../../chat/context/chat-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
-import { useUserContext } from '../../../shared/context/user-context'
 import { useProjectContext } from '../../../shared/context/project-context'
-
-const userContextPropTypes = {
-  id: PropTypes.string,
-}
 
 const projectContextPropTypes = {
   name: PropTypes.string.isRequired,
@@ -46,8 +41,6 @@ const EditorNavigationToolbarRoot = React.memo(
     openDoc,
     openShareProjectModal,
   }) {
-    const user = useUserContext(userContextPropTypes)
-
     const { name: projectName } = useProjectContext(projectContextPropTypes)
 
     const {
@@ -112,12 +105,6 @@ const EditorNavigationToolbarRoot = React.memo(
       [openDoc]
     )
 
-    // the existing angular implementation prevents collaborators from updating a
-    // project's name, but the backend allows that with the following logic:
-    //   `const hasRenamePermissions = permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite'`
-    // See https://github.com/overleaf/issues/issues/4492
-    const hasRenamePermissions = permissionsLevel === 'owner'
-
     // using {display: 'none'} as 1:1 migration from Angular's ng-hide. Using
     // `loading ? null : <ToolbarHeader/>` causes UI glitches
     return (
@@ -135,10 +122,12 @@ const EditorNavigationToolbarRoot = React.memo(
         onlineUsers={onlineUsersArray}
         goToUser={goToUser}
         isRestrictedTokenMember={isRestrictedTokenMember}
-        isAnonymousUser={user == null}
+        hasPublishPermissions={
+          permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite'
+        }
         projectName={projectName}
         renameProject={renameProject}
-        hasRenamePermissions={hasRenamePermissions}
+        hasRenamePermissions={permissionsLevel === 'owner'}
         openShareModal={openShareModal}
         pdfViewIsOpen={view === 'pdf'}
         pdfButtonIsVisible={pdfLayout === 'flat'}

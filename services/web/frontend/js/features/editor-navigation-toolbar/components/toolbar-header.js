@@ -28,7 +28,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   onlineUsers,
   goToUser,
   isRestrictedTokenMember,
-  isAnonymousUser,
+  hasPublishPermissions,
   projectName,
   renameProject,
   hasRenamePermissions,
@@ -37,7 +37,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   pdfButtonIsVisible,
   togglePdfView,
 }) {
-  const shouldDisplayPublishButton = !isAnonymousUser && PublishButton
+  const shouldDisplayPublishButton = hasPublishPermissions && PublishButton
 
   return (
     <header className="toolbar toolbar-header toolbar-with-labels">
@@ -106,7 +106,7 @@ ToolbarHeader.propTypes = {
   onlineUsers: PropTypes.array.isRequired,
   goToUser: PropTypes.func.isRequired,
   isRestrictedTokenMember: PropTypes.bool,
-  isAnonymousUser: PropTypes.bool,
+  hasPublishPermissions: PropTypes.bool,
   projectName: PropTypes.string.isRequired,
   renameProject: PropTypes.func.isRequired,
   hasRenamePermissions: PropTypes.bool,

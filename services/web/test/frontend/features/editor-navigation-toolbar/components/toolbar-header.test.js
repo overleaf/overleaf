@@ -16,6 +16,7 @@ describe('<ToolbarHeader />', function () {
     renameProject: () => {},
     openShareModal: () => {},
     togglePdfView: () => {},
+    hasPublishPermissions: true,
   }
 
   describe('cobranding logo', function () {
@@ -109,10 +110,10 @@ describe('<ToolbarHeader />', function () {
       screen.getByText('Submit')
     })
 
-    it('is not displayed for anonymous users', function () {
+    it('is not displayed for users with no publish permissions', function () {
       const props = {
         ...defaultProps,
-        isAnonymousUser: true,
+        hasPublishPermissions: false,
       }
       render(<ToolbarHeader {...props} />)
       expect(screen.queryByText('Submit')).to.not.exist
