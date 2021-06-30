@@ -20,10 +20,10 @@ function OnlineUsersWidget({ onlineUsers, goToUser }) {
         />
         <Dropdown.Menu>
           <MenuItem header>{t('connected_users')}</MenuItem>
-          {onlineUsers.map(user => (
+          {onlineUsers.map((user, index) => (
             <MenuItem
               as="button"
-              key={user.user_id}
+              key={`${user.user_id}_${index}`}
               eventKey={user}
               onSelect={goToUser}
             >
@@ -36,9 +36,9 @@ function OnlineUsersWidget({ onlineUsers, goToUser }) {
   } else {
     return (
       <div className="online-users">
-        {onlineUsers.map(user => (
+        {onlineUsers.map((user, index) => (
           <OverlayTrigger
-            key={user.user_id}
+            key={`${user.user_id}_${index}`}
             placement="bottom"
             trigger={['hover', 'focus']}
             overlay={<Tooltip id="tooltip-online-user">{user.name}</Tooltip>}
