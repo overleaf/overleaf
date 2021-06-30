@@ -883,7 +883,7 @@ const ProjectController = {
               logsUISubvariant: logsUIVariant.subvariant,
               showNewNavigationUI: shouldDisplayFeature(
                 'new_navigation_ui',
-                user.alphaProgram
+                user.alphaProgram || user.betaProgram
               ),
               showNewFileViewUI: shouldDisplayFeature(
                 'new_file_view',
