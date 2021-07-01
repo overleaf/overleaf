@@ -1,3 +1,4 @@
+const Features = require('../../infrastructure/Features')
 const Queues = require('../../infrastructure/Queues')
 const EmailHandler = require('../Email/EmailHandler')
 const UserUpdater = require('./UserUpdater')
@@ -34,4 +35,10 @@ class UserOnboardingEmailManager {
   }
 }
 
-module.exports = new UserOnboardingEmailManager()
+class NoopManager {
+  async scheduleOnboardingEmail() {}
+}
+
+module.exports = Features.hasFeature('saas')
+  ? new UserOnboardingEmailManager()
+  : new NoopManager()

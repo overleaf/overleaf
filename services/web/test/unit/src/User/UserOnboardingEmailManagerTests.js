@@ -1,6 +1,7 @@
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
+const { expect } = require('chai')
 
 const MODULE_PATH = path.join(
   __dirname,
@@ -17,11 +18,10 @@ describe('UserOnboardingEmailManager', function () {
         this.queueProcessFunction = callback
       },
     }
-    const self = this
     this.Queues = {
-      getOnboardingEmailsQueue: () => {
-        return self.onboardingEmailsQueue
-      },
+      getOnboardingEmailsQueue: sinon
+        .stub()
+        .returns(this.onboardingEmailsQueue),
     }
     this.UserGetter = {
       promises: {
@@ -41,21 +41,49 @@ describe('UserOnboardingEmailManager', function () {
         updateUser: sinon.stub().resolves(),
       },
     }
+    this.Features = {
+      hasFeature: sinon.stub(),
+    }
     this.request = sinon.stub().yields()
-    this.UserOnboardingEmailManager = SandboxedModule.require(MODULE_PATH, {
-      globals: {
-        console: console,
-      },
-      requires: {
-        '../../infrastructure/Queues': this.Queues,
-        '../Email/EmailHandler': this.EmailHandler,
-        './UserGetter': this.UserGetter,
-        './UserUpdater': this.UserUpdater,
-      },
+
+    this.init = isSAAS => {
+      this.Features.hasFeature.withArgs('saas').returns(isSAAS)
+      this.UserOnboardingEmailManager = SandboxedModule.require(MODULE_PATH, {
+        globals: {
+          console: console,
+        },
+        requires: {
+          '../../infrastructure/Features': this.Features,
+          '../../infrastructure/Queues': this.Queues,
+          '../Email/EmailHandler': this.EmailHandler,
+          './UserGetter': this.UserGetter,
+          './UserUpdater': this.UserUpdater,
+        },
+      })
+    }
+  })
+
+  describe('in Server CE/Pro', function () {
+    beforeEach(function () {
+      this.init(false)
+    })
+
+    it('should not create any queue', function () {
+      expect(this.Queues.getOnboardingEmailsQueue).to.not.have.been.called
+    })
+    it('should not schedule any email', function () {
+      this.UserOnboardingEmailManager.scheduleOnboardingEmail({
+        _id: this.fakeUserId,
+      })
+      expect(this.onboardingEmailsQueue.add).to.not.have.been.called
     })
   })
 
-  describe('schedule email', function () {
+  describe('schedule email in SAAS', function () {
+    beforeEach(function () {
+      this.init(true)
+    })
+
     it('should schedule delayed job on queue', function () {
       this.UserOnboardingEmailManager.scheduleOnboardingEmail({
         _id: this.fakeUserId,

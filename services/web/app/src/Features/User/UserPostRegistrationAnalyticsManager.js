@@ -4,6 +4,7 @@ const {
   promises: InstitutionsAPIPromises,
 } = require('../Institutions/InstitutionsAPI')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const Features = require('../../infrastructure/Features')
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
@@ -47,4 +48,10 @@ async function checkAffiliations(userId) {
   }
 }
 
-module.exports = new UserPostRegistrationAnalyticsManager()
+class NoopManager {
+  async schedulePostRegistrationAnalytics() {}
+}
+
+module.exports = Features.hasFeature('saas')
+  ? new UserPostRegistrationAnalyticsManager()
+  : new NoopManager()
