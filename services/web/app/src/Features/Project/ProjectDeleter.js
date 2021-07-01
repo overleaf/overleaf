@@ -205,6 +205,36 @@ async function deleteProject(projectId, options = {}) {
       throw new Errors.NotFoundError('project not found')
     }
 
+    await DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete(
+      projectId
+    )
+
+    try {
+      // OPTIMIZATION: flush docs out of mongo
+      await DocstoreManager.promises.archiveProject(projectId)
+    } catch (err) {
+      // It is OK to fail here, the docs will get hard-deleted eventually after
+      //  the grace-period for soft-deleted projects has passed.
+      logger.warn(
+        { projectId, err },
+        'failed archiving doc via docstore as part of project soft-deletion'
+      )
+    }
+
+    const memberIds = await CollaboratorsGetter.promises.getMemberIds(projectId)
+
+    // fire these jobs in the background
+    for (const memberId of memberIds) {
+      TagsHandler.promises
+        .removeProjectFromAllTags(memberId, projectId)
+        .catch(err => {
+          logger.err(
+            { err, memberId, projectId },
+            'failed to remove project from tags'
+          )
+        })
+    }
+
     const deleterData = {
       deletedAt: new Date(),
       deleterId:
@@ -238,36 +268,6 @@ async function deleteProject(projectId, options = {}) {
       { project, deleterData },
       { upsert: true }
     )
-
-    await DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete(
-      projectId
-    )
-
-    try {
-      // OPTIMIZATION: flush docs out of mongo
-      await DocstoreManager.promises.archiveProject(projectId)
-    } catch (err) {
-      // It is OK to fail here, the docs will get hard-deleted eventually after
-      //  the grace-period for soft-deleted projects has passed.
-      logger.warn(
-        { projectId, err },
-        'failed archiving doc via docstore as part of project soft-deletion'
-      )
-    }
-
-    const memberIds = await CollaboratorsGetter.promises.getMemberIds(projectId)
-
-    // fire these jobs in the background
-    for (const memberId of memberIds) {
-      TagsHandler.promises
-        .removeProjectFromAllTags(memberId, projectId)
-        .catch(err => {
-          logger.err(
-            { err, memberId, projectId },
-            'failed to remove project from tags'
-          )
-        })
-    }
 
     await Project.deleteOne({ _id: projectId }).exec()
   } catch (err) {
