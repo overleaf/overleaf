@@ -93,5 +93,10 @@ attemptInvoicesCollection(error => {
     },
     { maxArrayLength: null }
   )
-  process.exit()
+
+  if (INVOICES_COLLECTED_SUCCESS === 0) {
+    process.exit(1)
+  } else {
+    process.exit()
+  }
 })
