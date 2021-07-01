@@ -56,26 +56,27 @@ block content
 											button.btn.btn-danger(type="submit") Reopen Editor
 										p.small Will reopen the editor after closing.
 
-							tab(heading="TPDS/Dropbox Management" bookmarkable-tab="tpds")
-								h3 Flush project to TPDS
-								.row
-									form.col-xs-6(method='post',action='/admin/flushProjectToTpds')
-										input(name="_csrf", type="hidden", value=csrfToken)
-										.form-group
-											label(for='project_id') project_id
-											input.form-control(type='text',  name='project_id', placeholder='project_id', required)
-										.form-group
-											button.btn-primary.btn(type='submit') Flush
-								hr
-								h3 Poll Dropbox for user
-								.row
-									form.col-xs-6(method='post',action='/admin/pollDropboxForUser')
-										input(name="_csrf", type="hidden", value=csrfToken)
-										.form-group
-											label(for='user_id') user_id
-											input.form-control(type='text',  name='user_id', placeholder='user_id', required)
-										.form-group
-											button.btn-primary.btn(type='submit') Poll
+							if hasFeature('saas')
+								tab(heading="TPDS/Dropbox Management" bookmarkable-tab="tpds")
+									h3 Flush project to TPDS
+									.row
+										form.col-xs-6(method='post',action='/admin/flushProjectToTpds')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											.form-group
+												label(for='project_id') project_id
+												input.form-control(type='text',  name='project_id', placeholder='project_id', required)
+											.form-group
+												button.btn-primary.btn(type='submit') Flush
+									hr
+									h3 Poll Dropbox for user
+									.row
+										form.col-xs-6(method='post',action='/admin/pollDropboxForUser')
+											input(name="_csrf", type="hidden", value=csrfToken)
+											.form-group
+												label(for='user_id') user_id
+												input.form-control(type='text',  name='user_id', placeholder='user_id', required)
+											.form-group
+												button.btn-primary.btn(type='submit') Poll
 
 							tab(heading="Advanced" bookmarkable-tab="advanced")
 									.row-spaced

@@ -184,10 +184,8 @@ block content
 								hr
 								include settings/user-oauth
 
-							hr
-
-							if !externalAuthenticationSystemUsed() || (settings.createV1AccountOnLogin && settings.overleaf)
-
+							if hasFeature('saas') && (!externalAuthenticationSystemUsed() || (settings.createV1AccountOnLogin && settings.overleaf))
+								hr
 								p.small
 									| #{translate("newsletter_info_and_unsubscribe")}
 									a(
