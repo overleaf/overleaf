@@ -12,7 +12,8 @@ public class GetOldestProjectName implements SQLQuery<String> {
 
     private static final String GET_OLDEST_PROJECT_NAME =
             "SELECT `name`, MIN(`last_accessed`)\n" +
-            "    FROM `projects`";
+            "    FROM `projects` \n" +
+            "    WHERE `last_accessed` IS NOT NULL;";
 
     @Override
     public String getSQL() {
