@@ -1063,6 +1063,8 @@ public class WLGitBridgeIntegrationTest {
         String cfgStr =
                 "{\n" +
                 "    \"port\": " + port + ",\n" +
+                "    \"bindIp\": \"127.0.0.1\",\n" +
+                "    \"idleTimeout\": 30000,\n" +
                 "    \"rootGitDirectory\": \"" +
                         wlgb.getAbsolutePath() +
                         "\",\n" +
