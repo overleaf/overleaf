@@ -24,7 +24,13 @@ describe('UrlFetcher', function () {
           defaults: (this.defaults = sinon.stub().returns((this.request = {})))
         },
         fs: (this.fs = {}),
-        'settings-sharelatex': (this.settings = {})
+        'settings-sharelatex': (this.settings = {
+          apis: {
+            clsiPerf: {
+              host: 'localhost:3043'
+            }
+          }
+        })
       }
     }))
   })
@@ -92,6 +98,19 @@ describe('UrlFetcher', function () {
         this.urlStream.emit('response', this.res)
         this.urlStream.emit('end')
         return this.fileStream.emit('finish')
+      })
+
+      it('should not use override clsiPerf domain when filestoreDomainOveride is set', function (done) {
+        this.settings.filestoreDomainOveride = '192.11.11.11'
+        const url = 'http://localhost:3043/file/here?query=string'
+        this.UrlFetcher.pipeUrlToFile(url, this.path, () => {
+          this.request.get.args[0][0].url.should.equal(url)
+          done()
+        })
+        this.res = { statusCode: 200 }
+        this.urlStream.emit('response', this.res)
+        this.urlStream.emit('end')
+        this.fileStream.emit('finish')
       })
 
       return it('should use override domain when filestoreDomainOveride is set', function (done) {

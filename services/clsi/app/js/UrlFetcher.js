@@ -42,9 +42,12 @@ module.exports = UrlFetcher = {
       return (_callback = function () {})
     }
 
-    if (settings.filestoreDomainOveride != null) {
-      const p = URL.parse(url).path
-      url = `${settings.filestoreDomainOveride}${p}`
+    const u = URL.parse(url)
+    if (
+      settings.filestoreDomainOveride &&
+      u.host !== settings.apis.clsiPerf.host
+    ) {
+      url = `${settings.filestoreDomainOveride}${u.path}`
     }
     var timeoutHandler = setTimeout(
       function () {

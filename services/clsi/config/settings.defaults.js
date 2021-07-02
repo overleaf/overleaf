@@ -51,6 +51,11 @@ module.exports = {
   apis: {
     clsi: {
       url: `http://${process.env.CLSI_HOST || 'localhost'}:3013`
+    },
+    clsiPerf: {
+      host: `${process.env.CLSI_PERF_HOST || 'localhost'}:${
+        process.env.CLSI_PERF_PORT || '3043'
+      }`
     }
   },
 
