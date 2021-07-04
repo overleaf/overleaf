@@ -197,7 +197,7 @@
   "account_has_been_link_to_institution_account": "您在 __appName__ 上的 <b>__email__</b> 帐户已链接到您的 <b>__institutionName__</b> 机构帐户。",
   "account_linking": "帐户链接",
   "account_with_email_exists": "看起来在 <b>__appName__</b> 已经存在一个电子邮件为<b>__email__</b>的账户。",
-  "acct_linked_to_institution_acct": "此帐户已<b>链接</b>到您的 <b>__institutionName__</b> 机构帐户。",
+  "acct_linked_to_institution_acct": "您可以通过 <b>__institutionName__</b> 机构<b>登录</b> Overleaf。",
   "alternatively_create_new_institution_account": "或者，您可以通过单击<b>__clickText__</b>来使用机构电子邮件(<b>__email__</b>)创建一个<b>新帐户</b>。",
   "as_a_member_of_sso": "作为 <b>__institutionName__</b> 的成员，您可以通过您的机构门户网站登录到 <b>__appName__</b> 。",
   "as_a_member_of_sso_required": "作为 <b>__institutionName__</b> 的成员，您必须通过您的机构门户网站登录到 <b>__appName__</b> 。",
@@ -956,6 +956,7 @@
   "clearing": "正在清除",
   "template_description": "模板描述",
   "project_last_published_at": "您的项目最近一次被发布在",
+  "template_title_taken_from_project_title": "模板标题将自动从项目标题中获取",
   "problem_talking_to_publishing_service": "我们的发布服务出现故障，请在几分钟后再试",
   "unpublishing": "取消发布",
   "republish": "重新发布",
@@ -1300,7 +1301,7 @@
   "read_and_write": "读/写",
   "read_only": "只读",
   "publish": "发布",
-  "view_in_template_gallery": "在模板区预览",
+  "view_in_template_gallery": "在模板库查看",
   "unpublish": "未出版",
   "hotkeys": "快捷键",
   "saving": "正在保存",
@@ -1459,5 +1460,10 @@
   "cancel_anytime": "我们相信您会喜欢__appName__，但如果不喜欢，您可以随时取消。如果您在30天内通知我们，我们将把钱还给您，不问任何问题。",
   "for_visa_mastercard_and_discover": "对于<0>Visa卡、万事达卡和Discover卡</0>，这是您卡<2>背面的</2><1>3位数字</1>。",
   "for_american_express": "对于<0>美国运通<0>，这是信用卡<2>正面</2>的<1>4位数字</1>。</0></0>",
-  "request_password_reset_to_reconfirm": "请求密码重置邮件以重新确认"
+  "request_password_reset_to_reconfirm": "请求密码重置邮件以重新确认",
+  "go_next_page": "转到下一页",
+  "go_prev_page": "转到上一页",
+  "page_current": "页面 __page__，当前页面",
+  "go_page": "转到第 __page__ 页",
+  "pagination_navigation": "分页导航"
 }
