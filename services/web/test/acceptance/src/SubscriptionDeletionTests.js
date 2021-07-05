@@ -86,7 +86,7 @@ describe('Subscriptions', function () {
       const body = this.recurlySubscription.buildCallbackXml()
 
       // create fake deletedSubscription
-      SubscriptionUpdater._createDeletedSubscription(
+      SubscriptionUpdater.createDeletedSubscription(
         this.subscription,
         {},
         error => {

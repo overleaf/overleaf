@@ -74,3 +74,4 @@ modules/**/Makefile
 
 # Intellij
 .idea
+.run

@@ -1,5 +1,5 @@
 const SandboxedModule = require('sandboxed-module')
-const { expect } = require('chai')
+const { assert, expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Subscription/FeaturesUpdater'
 const { ObjectId } = require('mongodb')
@@ -487,6 +487,70 @@ describe('FeaturesUpdater', function () {
           done()
         })
       })
+    })
+  })
+
+  describe('isFeatureSetBetter', function () {
+    it('simple comparisons', function () {
+      const result1 = this.FeaturesUpdater.isFeatureSetBetter(
+        {
+          dropbox: true,
+        },
+        {
+          dropbox: false,
+        }
+      )
+      assert.isTrue(result1)
+
+      const result2 = this.FeaturesUpdater.isFeatureSetBetter(
+        {
+          dropbox: false,
+        },
+        {
+          dropbox: true,
+        }
+      )
+      assert.isFalse(result2)
+    })
+
+    it('compound comparisons with same features', function () {
+      const result1 = this.FeaturesUpdater.isFeatureSetBetter(
+        {
+          collaborators: 9,
+          dropbox: true,
+        },
+        {
+          collaborators: 10,
+          dropbox: true,
+        }
+      )
+      assert.isFalse(result1)
+
+      const result2 = this.FeaturesUpdater.isFeatureSetBetter(
+        {
+          collaborators: -1,
+          dropbox: true,
+        },
+        {
+          collaborators: 10,
+          dropbox: true,
+        }
+      )
+      assert.isTrue(result2)
+
+      const result3 = this.FeaturesUpdater.isFeatureSetBetter(
+        {
+          collaborators: -1,
+          compileTimeout: 60,
+          dropbox: true,
+        },
+        {
+          collaborators: 10,
+          compileTimeout: 60,
+          dropbox: true,
+        }
+      )
+      assert.isTrue(result3)
     })
   })
 })

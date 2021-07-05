@@ -52,7 +52,7 @@ class Subscription {
   }
 
   refreshUsersFeatures(callback) {
-    SubscriptionUpdater._refreshUsersFeatures(this, callback)
+    SubscriptionUpdater.refreshUsersFeatures(this, callback)
   }
 
   expectDeleted(deleterData, callback) {

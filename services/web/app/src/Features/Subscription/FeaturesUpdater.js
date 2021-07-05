@@ -1,7 +1,7 @@
 const async = require('async')
 const OError = require('@overleaf/o-error')
 const PlansLocator = require('./PlansLocator')
-const _ = require('underscore')
+const _ = require('lodash')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const UserFeaturesUpdater = require('./UserFeaturesUpdater')
 const Settings = require('settings-sharelatex')
@@ -186,7 +186,7 @@ const FeaturesUpdater = {
           err,
           FeaturesUpdater._mergeFeatures(
             V1SubscriptionManager.getGrandfatheredFeaturesForV1User(v1Id) || {},
-            FeaturesUpdater._planCodeToFeatures(planCode)
+            FeaturesUpdater.planCodeToFeatures(planCode)
           )
         )
       }
@@ -228,13 +228,18 @@ const FeaturesUpdater = {
     return features
   },
 
+  isFeatureSetBetter(featuresA, featuresB) {
+    const mergedFeatures = FeaturesUpdater._mergeFeatures(featuresA, featuresB)
+    return _.isEqual(featuresA, mergedFeatures)
+  },
+
   _subscriptionToFeatures(subscription) {
-    return FeaturesUpdater._planCodeToFeatures(
+    return FeaturesUpdater.planCodeToFeatures(
       subscription ? subscription.planCode : undefined
     )
   },
 
-  _planCodeToFeatures(planCode) {
+  planCodeToFeatures(planCode) {
     if (!planCode) {
       return {}
     }

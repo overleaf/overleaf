@@ -76,6 +76,13 @@ function setUserProperty(userId, propertyName, propertyValue) {
   if (isAnalyticsDisabled() || isSmokeTestUser(userId)) {
     return
   }
+
+  if (propertyValue === undefined) {
+    throw new Error(
+      'propertyValue cannot be undefined, use null to unset a property'
+    )
+  }
+
   Metrics.analyticsQueue.inc({
     status: 'adding',
     event_type: 'user-property',

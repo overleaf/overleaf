@@ -84,7 +84,7 @@ const syncSubscription = (subscription, callback) => {
         return callback()
       }
 
-      SubscriptionUpdater._updateSubscriptionFromRecurly(
+      SubscriptionUpdater.updateSubscriptionFromRecurly(
         recurlySubscription,
         subscription,
         {},

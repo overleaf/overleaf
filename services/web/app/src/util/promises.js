@@ -1,10 +1,11 @@
-const { promisify } = require('util')
+const { promisify, callbackify } = require('util')
 const pLimit = require('p-limit')
 
 module.exports = {
   promisify,
   promisifyAll,
   promisifyMultiResult,
+  callbackify,
   callbackifyMultiResult,
   expressify,
   promiseMapWithLimit,
