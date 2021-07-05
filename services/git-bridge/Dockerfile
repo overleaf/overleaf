@@ -43,7 +43,7 @@ RUN make package \
 
 FROM openjdk:11-jre
 
-RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat \
+RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat binutils graphviz \
  && rm -rf /var/lib/apt/lists
 
 # Install Google Cloud Profiler agent
