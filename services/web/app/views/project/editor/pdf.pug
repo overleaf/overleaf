@@ -12,9 +12,22 @@ div.full-size.pdf(ng-controller="PdfController")
 				lastCompileTimestamp: pdf.lastCompileTimestamp,
 				logEntries: pdf.logEntries,
 				validationIssues: pdf.validation,
-				errors: clsiErrors,
 				rawLog: pdf.rawLog,
-				compileFailed: pdf.compileFailed
+				compileFailed: pdf.compileFailed,
+				errors: {
+					error: pdf.error,
+					renderingError: pdf.renderingError,
+					clsiMaintenance: pdf.clsiMaintenance,
+					clsiUnavailable: pdf.clsiUnavailable,
+					tooRecentlyCompiled: pdf.tooRecentlyCompiled,
+					compileTerminated: pdf.compileTerminated,
+					rateLimited: pdf.rateLimited,
+					compileInProgress: pdf.compileInProgress,
+					timedout: pdf.timedout,
+					projectTooLarge: pdf.projectTooLarge,
+					autoCompileDisabled: pdf.autoCompileDisabled,
+					failure: pdf.failure
+				}
 			}`
 			on-clear-cache="clearCache"
 			on-recompile="recompile"

@@ -23,51 +23,17 @@ function PreviewLogsPane({
   onClearCache,
 }) {
   const { t } = useTranslation()
-  const nowTS = Date.now()
   const {
     all: allCompilerIssues = [],
     errors: compilerErrors = [],
     warnings: compilerWarnings = [],
     typesetting: compilerTypesettingIssues = [],
   } = logEntries
-
-  const errorsUI = Object.keys(errors).map((name, index) => (
-    <PreviewError key={`${nowTS}-${index}`} name={name} />
-  ))
-
-  const validationIssuesUI = Object.keys(
-    validationIssues
-  ).map((name, index) => (
-    <PreviewValidationIssue
-      key={`${nowTS}-${index}`}
-      name={name}
-      details={validationIssues[name]}
-    />
-  ))
-  const logEntriesUI = [
+  const allLogEntries = [
     ...compilerErrors,
     ...compilerWarnings,
     ...compilerTypesettingIssues,
-  ].map((logEntry, index) => (
-    <PreviewLogsPaneEntry
-      key={`${nowTS}-${index}`}
-      headerTitle={logEntry.message}
-      rawContent={logEntry.content}
-      logType={logEntry.type}
-      formattedContent={logEntry.humanReadableHintComponent}
-      extraInfoURL={logEntry.extraInfoURL}
-      level={logEntry.level}
-      entryAriaLabel={t('log_entry_description', {
-        level: logEntry.level,
-      })}
-      sourceLocation={{
-        file: logEntry.file,
-        line: logEntry.line,
-        column: logEntry.column,
-      }}
-      onSourceLocationClick={onLogEntryLocationClick}
-    />
-  ))
+  ]
 
   const actionsUI = (
     <div className="logs-pane-actions">
@@ -118,14 +84,63 @@ function PreviewLogsPane({
           variantWithFirstErrorPopup={variantWithFirstErrorPopup}
         />
         {autoCompileHasLintingError ? <AutoCompileLintingErrorEntry /> : null}
-        {errors ? errorsUI : null}
-        {validationIssues ? validationIssuesUI : null}
-        {allCompilerIssues.length > 0 ? logEntriesUI : null}
+        {errors ? <PreviewErrors errors={errors} /> : null}
+        {validationIssues ? (
+          <PreviewValidationIssues validationIssues={validationIssues} />
+        ) : null}
+        {allCompilerIssues.length > 0 ? (
+          <PreviewLogEntries
+            logEntries={allLogEntries}
+            onLogEntryLocationClick={onLogEntryLocationClick}
+          />
+        ) : null}
         {rawLog && rawLog !== '' ? rawLogUI : null}
         {actionsUI}
       </div>
     </div>
   )
+}
+
+const PreviewErrors = ({ errors }) => {
+  const nowTS = Date.now()
+  return Object.entries(errors).map(([name, exists], index) => {
+    return exists && <PreviewError key={`${nowTS}-${index}`} name={name} />
+  })
+}
+
+const PreviewValidationIssues = ({ validationIssues }) => {
+  const nowTS = Date.now()
+  return Object.keys(validationIssues).map((name, index) => (
+    <PreviewValidationIssue
+      key={`${nowTS}-${index}`}
+      name={name}
+      details={validationIssues[name]}
+    />
+  ))
+}
+const PreviewLogEntries = ({ logEntries, onLogEntryLocationClick }) => {
+  const { t } = useTranslation()
+  const nowTS = Date.now()
+  return logEntries.map((logEntry, index) => (
+    <PreviewLogsPaneEntry
+      key={`${nowTS}-${index}`}
+      headerTitle={logEntry.message}
+      rawContent={logEntry.content}
+      logType={logEntry.type}
+      formattedContent={logEntry.humanReadableHintComponent}
+      extraInfoURL={logEntry.extraInfoURL}
+      level={logEntry.level}
+      entryAriaLabel={t('log_entry_description', {
+        level: logEntry.level,
+      })}
+      sourceLocation={{
+        file: logEntry.file,
+        line: logEntry.line,
+        column: logEntry.column,
+      }}
+      onSourceLocationClick={onLogEntryLocationClick}
+    />
+  ))
 }
 
 function AutoCompileLintingErrorEntry() {
@@ -188,6 +203,19 @@ function LogsPaneInfoNotice({ variantWithFirstErrorPopup }) {
       </div>
     </div>
   )
+}
+
+PreviewErrors.propTypes = {
+  errors: PropTypes.object.isRequired,
+}
+
+PreviewValidationIssues.propTypes = {
+  validationIssues: PropTypes.object.isRequired,
+}
+
+PreviewLogEntries.propTypes = {
+  logEntries: PropTypes.array.isRequired,
+  onLogEntryLocationClick: PropTypes.func.isRequired,
 }
 
 LogsPaneInfoNotice.propTypes = {

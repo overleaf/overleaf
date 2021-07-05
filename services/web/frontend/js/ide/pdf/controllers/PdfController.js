@@ -357,9 +357,7 @@ App.controller(
       $scope.pdf.failedCheck = false
       $scope.pdf.compileInProgress = false
       $scope.pdf.autoCompileDisabled = false
-      if (window.showNewLogsUI) {
-        $scope.clsiErrors = {}
-      }
+      $scope.pdf.compileFailed = false
 
       // make a cache to look up files by name
       const fileByPath = {}
@@ -504,35 +502,6 @@ App.controller(
         $scope.pdf.error = true
       }
 
-      if (window.showNewLogsUI) {
-        $scope.pdf.compileFailed = false
-        // `$scope.clsiErrors` stores the error states nested within `$scope.pdf`
-        // for use with React's <PreviewPane errors={$scope.clsiErrors}/>
-        $scope.clsiErrors = Object.assign(
-          {},
-          $scope.pdf.error ? { error: true } : null,
-          $scope.pdf.renderingError ? { renderingError: true } : null,
-          $scope.pdf.clsiMaintenance ? { clsiMaintenance: true } : null,
-          $scope.pdf.clsiUnavailable ? { clsiUnavailable: true } : null,
-          $scope.pdf.tooRecentlyCompiled ? { tooRecentlyCompiled: true } : null,
-          $scope.pdf.compileTerminated ? { compileTerminated: true } : null,
-          $scope.pdf.rateLimited ? { rateLimited: true } : null,
-          $scope.pdf.compileInProgress ? { compileInProgress: true } : null,
-          $scope.pdf.timedout ? { timedout: true } : null,
-          $scope.pdf.projectTooLarge ? { projectTooLarge: true } : null,
-          $scope.pdf.autoCompileDisabled ? { autoCompileDisabled: true } : null,
-          $scope.pdf.failure ? { failure: true } : null
-        )
-
-        if (
-          $scope.pdf.view === 'errors' ||
-          $scope.pdf.view === 'validation-problems'
-        ) {
-          $scope.shouldShowLogs = true
-          $scope.pdf.compileFailed = true
-        }
-      }
-
       const IGNORE_FILES = ['output.fls', 'output.fdb_latexmk']
       $scope.pdf.outputFiles = []
 
@@ -564,6 +533,23 @@ App.controller(
       // sort the output files into order, main files first, then others
       $scope.pdf.outputFiles.sort(
         (a, b) => b.main - a.main || a.name.localeCompare(b.name)
+      )
+    }
+
+    // In the existing compile UI, errors and validation problems are shown in the PDF pane, whereas in the new
+    // one they're shown in the logs pane. This `$watch`er makes sure we change the view in the new logs UI.
+    // This should be removed once we stop supporting the two different log UIs.
+    if (window.showNewLogsUI) {
+      $scope.$watch(
+        () =>
+          $scope.pdf.view === 'errors' ||
+          $scope.pdf.view === 'validation-problems',
+        newVal => {
+          if (newVal) {
+            $scope.shouldShowLogs = true
+            $scope.pdf.compileFailed = true
+          }
+        }
       )
     }
 
@@ -836,11 +822,6 @@ App.controller(
           $scope.pdf.renderingError = false
           $scope.pdf.error = true
           $scope.pdf.view = 'errors'
-          if (window.showNewLogsUI) {
-            $scope.clsiErrors = { error: true }
-            $scope.shouldShowLogs = true
-            $scope.pdf.compileFailed = true
-          }
         })
         .finally(() => {
           $scope.lastFinishedCompileAt = Date.now()
