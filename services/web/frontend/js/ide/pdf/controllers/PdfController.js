@@ -479,6 +479,7 @@ App.controller(
       } else if (response.status === 'failure') {
         $scope.pdf.view = 'errors'
         $scope.pdf.failure = true
+        $scope.pdf.downloadUrl = null
         $scope.shouldShowLogs = true
         fetchLogs(fileByPath, { pdfDownloadDomain })
       } else if (response.status === 'clsi-maintenance') {
@@ -519,7 +520,8 @@ App.controller(
           $scope.pdf.compileInProgress ? { compileInProgress: true } : null,
           $scope.pdf.timedout ? { timedout: true } : null,
           $scope.pdf.projectTooLarge ? { projectTooLarge: true } : null,
-          $scope.pdf.autoCompileDisabled ? { autoCompileDisabled: true } : null
+          $scope.pdf.autoCompileDisabled ? { autoCompileDisabled: true } : null,
+          $scope.pdf.failure ? { failure: true } : null
         )
 
         if (
