@@ -22,7 +22,7 @@ export default function FileTreeImportFromUrl() {
   // set the name when the URL changes
   useEffect(() => {
     if (url) {
-      const matches = url.match(/^https?:\/\/.+\/([^/]+\.(\w+))$/)
+      const matches = url.match(/^\s*https?:\/\/.+\/([^/]+\.(\w+))\s*$/)
       setName(matches ? matches[1] : '')
     }
   }, [setName, url])
@@ -39,7 +39,7 @@ export default function FileTreeImportFromUrl() {
     finishCreatingLinkedFile({
       name,
       provider: 'url',
-      data: { url },
+      data: { url: url.trim() },
     })
   }
 
