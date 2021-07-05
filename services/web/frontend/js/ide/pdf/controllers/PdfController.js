@@ -348,6 +348,7 @@ App.controller(
       $scope.pdf.updateConsumedBandwidth = noop
       $scope.pdf.firstRenderDone = noop
       $scope.pdf.clsiMaintenance = false
+      $scope.pdf.clsiUnavailable = false
       $scope.pdf.tooRecentlyCompiled = false
       $scope.pdf.renderingError = false
       $scope.pdf.projectTooLarge = false
