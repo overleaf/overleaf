@@ -887,7 +887,7 @@ const ProjectController = {
               ),
               showNewFileViewUI: shouldDisplayFeature(
                 'new_file_view',
-                user.alphaProgram
+                user.alphaProgram || user.betaProgram
               ),
               showSymbolPalette: shouldDisplayFeature(
                 'symbol_palette',

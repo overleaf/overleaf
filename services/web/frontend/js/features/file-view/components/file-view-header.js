@@ -9,6 +9,7 @@ import { useProjectContext } from '../../../shared/context/project-context'
 
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
+import BetaBadge from '../../../shared/components/beta-badge'
 const tprLinkedFileInfo = importOverleafModules('tprLinkedFileInfo')
 const tprLinkedFileRefreshError = importOverleafModules(
   'tprLinkedFileRefreshError'
@@ -105,6 +106,12 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
 
   return (
     <div>
+      <BetaBadge
+        tooltip={{
+          id: 'file-view-beta-tooltip',
+          text: t('beta_badge_tooltip', { feature: 'file views' }),
+        }}
+      />
       {file.linkedFileData && fileInfo}
       {file.linkedFileData &&
         tprLinkedFileInfo.map(({ import: { LinkedFileInfo }, path }) => (
