@@ -119,19 +119,25 @@ function ViewPdf({ textStyle }) {
 
 function LogsCompilationResult({ textStyle, logType, nLogs }) {
   const { t } = useTranslation()
-  const label =
-    logType === 'errors' ? t('your_project_has_errors') : t('view_warnings')
+
+  const logTypeLabel =
+    logType === 'errors'
+      ? t('your_project_has_an_error', { count: nLogs })
+      : t('view_warning', { count: nLogs })
+
+  const errorCountLabel = ` (${
+    nLogs > MAX_ERRORS_COUNT ? `${MAX_ERRORS_COUNT}+` : nLogs
+  })`
+
   return (
     <>
       <Icon type="file-text-o" />
       <span
         className="btn-toggle-logs-label toolbar-text"
-        aria-label={label}
+        aria-label={logTypeLabel}
         style={textStyle}
       >
-        {`${label} (${
-          nLogs > MAX_ERRORS_COUNT ? `${MAX_ERRORS_COUNT}+` : nLogs
-        })`}
+        {`${logTypeLabel}${nLogs > 1 ? errorCountLabel : ''}`}
       </span>
     </>
   )

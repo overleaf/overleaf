@@ -117,6 +117,7 @@ function PreviewPane({
       {showFirstErrorPopUp ? (
         <PreviewFirstErrorPopUp
           logEntry={compilerState.logEntries.errors[0]}
+          nErrors={nErrors}
           onGoToErrorLocation={onLogEntryLocationClick}
           onViewLogs={onToggleLogs}
           onClose={handleFirstErrorPopUpClose}
