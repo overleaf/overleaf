@@ -2,17 +2,7 @@ let defaults, possibleConfigFiles, settingsExist;
 const fs = require("fs");
 const path = require("path");
 const env = (process.env.NODE_ENV || "development").toLowerCase();
-
-const merge = function(settings, defaults) {
-	for (const [key, value] of Object.entries(settings)) {
-		if ((typeof(value) === "object") && !(value instanceof Array)) {
-			defaults[key] = merge(value, defaults[key] || {});
-		} else {
-			defaults[key] = value;
-		}
-	}
-	return defaults;
-};
+const { merge } = require('./merge');
 
 const defaultSettingsPath = path.normalize(__dirname + "/../../config/settings.defaults");
 
