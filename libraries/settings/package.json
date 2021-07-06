@@ -1,13 +1,6 @@
 {
-  "name": "settings-sharelatex",
-  "homepage": "www.sharelatex.com",
-  "description": "A centralised settings system for ShareLaTeX",
-  "version": "1.3.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sharelatex/settings-sharelatex.git"
-  },
-  "dependencies": {
-    "coffee-script": "1.6.0"
-  }
+  "name": "@overleaf/settings",
+  "description": "A centralised settings system for Overleaf",
+  "version": "2.0.0",
+  "repository": "overleaf/settings-module"
 }
