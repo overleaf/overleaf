@@ -4,7 +4,7 @@ const path = require("path");
 const env = (process.env.NODE_ENV || "development").toLowerCase();
 const { merge } = require('./merge');
 
-const defaultSettingsPath = path.normalize(__dirname + "/../../config/settings.defaults");
+const defaultSettingsPath = path.normalize(__dirname + "/../../../config/settings.defaults");
 
 if (fs.existsSync(`${defaultSettingsPath}.js`)) {
 	console.log(`Using default settings from ${defaultSettingsPath}.js`);
@@ -23,10 +23,10 @@ if (process.env.SHARELATEX_CONFIG) {
 } else {
 	possibleConfigFiles = [
 		process.cwd() + `/config/settings.${env}.js`,
-		path.normalize(__dirname + `/../../config/settings.${env}.js`),
+		path.normalize(__dirname + `/../../../config/settings.${env}.js`),
 		// TODO: remove these in the next major version
 		process.cwd() + `/config/settings.${env}.coffee`,
-		path.normalize(__dirname + `/../../config/settings.${env}.coffee`)
+		path.normalize(__dirname + `/../../../config/settings.${env}.coffee`)
 	];
 }
 
