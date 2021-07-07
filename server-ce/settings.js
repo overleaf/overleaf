@@ -1,3 +1,11 @@
+/* eslint-disable
+    camelcase,
+    no-cond-assign,
+    no-dupe-keys,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS205: Consider reworking code to avoid use of IIFEs
@@ -11,7 +19,7 @@ const Path = require('path');
 // These credentials are used for authenticating api requests
 // between services that may need to go over public channels
 const httpAuthUser = "sharelatex";
-const httpAuthPass = process.env["WEB_API_PASSWORD"];
+const httpAuthPass = process.env.WEB_API_PASSWORD;
 const httpAuthUsers = {};
 httpAuthUsers[httpAuthUser] = httpAuthPass;
 
@@ -40,13 +48,13 @@ const TMP_DIR = '/var/lib/sharelatex/tmp';
 const settings = {
 
 	clsi: {
-		optimiseInDocker: process.env['OPTIMISE_PDF'] === 'true'
+		optimiseInDocker: process.env.OPTIMISE_PDF === 'true'
 	},
 
 	brandPrefix: "",
 
 	allowAnonymousReadAndWriteSharing:
-		process.env['SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING'] === 'true',
+		process.env.SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING === 'true',
 
 	// Databases
 	// ---------
@@ -58,7 +66,7 @@ const settings = {
 	//
 	// The following works out of the box with Mongo's default settings:
 	mongo: {
-		url : process.env["SHARELATEX_MONGO_URL"] || 'mongodb://dockerhost/sharelatex'
+		url : process.env.SHARELATEX_MONGO_URL || 'mongodb://dockerhost/sharelatex'
 	},
 
 	// Redis is used in ShareLaTeX for high volume queries, like real-time
@@ -67,9 +75,9 @@ const settings = {
 	// The following config will work with Redis's default settings:
 	redis: {
 		web: (redisConfig = {
-			host: process.env["SHARELATEX_REDIS_HOST"] || "dockerhost",
-			port: process.env["SHARELATEX_REDIS_PORT"] || "6379",
-			password: process.env["SHARELATEX_REDIS_PASS"] || undefined,
+			host: process.env.SHARELATEX_REDIS_HOST || "dockerhost",
+			port: process.env.SHARELATEX_REDIS_PORT || "6379",
+			password: process.env.SHARELATEX_REDIS_PASS || undefined,
 			key_schema: {
 				// document-updater
 				blockingKey({doc_id}) { return `Blocking:${doc_id}`; },
@@ -180,26 +188,26 @@ const settings = {
 
 	// Where your instance of ShareLaTeX can be found publicly. This is used
 	// when emails are sent out and in generated links:
-	siteUrl: (siteUrl = process.env["SHARELATEX_SITE_URL"] || 'http://localhost'),
+	siteUrl: (siteUrl = process.env.SHARELATEX_SITE_URL || 'http://localhost'),
 
 	// The name this is used to describe your ShareLaTeX Installation
-	appName: process.env["SHARELATEX_APP_NAME"] || "ShareLaTeX (Community Edition)",
+	appName: process.env.SHARELATEX_APP_NAME || "ShareLaTeX (Community Edition)",
 
-	restrictInvitesToExistingAccounts: process.env["SHARELATEX_RESTRICT_INVITES_TO_EXISTING_ACCOUNTS"] === 'true',
+	restrictInvitesToExistingAccounts: process.env.SHARELATEX_RESTRICT_INVITES_TO_EXISTING_ACCOUNTS === 'true',
 
 	nav: {
-		title: process.env["SHARELATEX_NAV_TITLE"] ||  process.env["SHARELATEX_APP_NAME"] || "ShareLaTeX Community Edition"
+		title: process.env.SHARELATEX_NAV_TITLE ||  process.env.SHARELATEX_APP_NAME || "ShareLaTeX Community Edition"
 	},
 
 
 	// The email address which users will be directed to as the main point of
 	// contact for this installation of ShareLaTeX.
-	adminEmail: process.env["SHARELATEX_ADMIN_EMAIL"] || "placeholder@example.com",
+	adminEmail: process.env.SHARELATEX_ADMIN_EMAIL || "placeholder@example.com",
 
 	// If provided, a sessionSecret is used to sign cookies so that they cannot be
 	// spoofed. This is recommended.
 	security: {
-		sessionSecret: process.env["SHARELATEX_SESSION_SECRET"] || process.env["CRYPTO_RANDOM"]
+		sessionSecret: process.env.SHARELATEX_SESSION_SECRET || process.env.CRYPTO_RANDOM
 	},
 
 	// These credentials are used for authenticating api requests
@@ -216,22 +224,22 @@ const settings = {
 
 	// If you are running ShareLaTeX over https, set this to true to send the
 	// cookie with a secure flag (recommended).
-	secureCookie: (process.env["SHARELATEX_SECURE_COOKIE"] != null),
+	secureCookie: (process.env.SHARELATEX_SECURE_COOKIE != null),
 
 	// If you are running ShareLaTeX behind a proxy (like Apache, Nginx, etc)
 	// then set this to true to allow it to correctly detect the forwarded IP
 	// address and http/https protocol information.
 
-	behindProxy: process.env["SHARELATEX_BEHIND_PROXY"] || false,
+	behindProxy: process.env.SHARELATEX_BEHIND_PROXY || false,
 
 	i18n: {
 		subdomainLang: {
-			www: {lngCode:process.env["SHARELATEX_SITE_LANGUAGE"] || "en", url: siteUrl}
+			www: {lngCode:process.env.SHARELATEX_SITE_LANGUAGE || "en", url: siteUrl}
 		},
-		defaultLng: process.env["SHARELATEX_SITE_LANGUAGE"] || "en"
+		defaultLng: process.env.SHARELATEX_SITE_LANGUAGE || "en"
 	},
 
-	currentImageName: process.env["TEX_LIVE_DOCKER_IMAGE"],
+	currentImageName: process.env.TEX_LIVE_DOCKER_IMAGE,
 
 	apis: {
 		web: {
@@ -250,7 +258,7 @@ const settings = {
 		collaborators: -1,
 		dropbox: true,
 		versioning: true,
-		compileTimeout: parseIntOrFail(process.env["COMPILE_TIMEOUT"] || 180),
+		compileTimeout: parseIntOrFail(process.env.COMPILE_TIMEOUT || 180),
 		compileGroup: "standard",
 		trackChanges: true,
 		templates: true,
@@ -258,32 +266,32 @@ const settings = {
 	}
 };
 
-//# OPTIONAL CONFIGURABLE SETTINGS
+// # OPTIONAL CONFIGURABLE SETTINGS
 
-if (process.env["SHARELATEX_LEFT_FOOTER"] != null) {
+if (process.env.SHARELATEX_LEFT_FOOTER != null) {
 	try {
-		settings.nav.left_footer = JSON.parse(process.env["SHARELATEX_LEFT_FOOTER"]);
+		settings.nav.left_footer = JSON.parse(process.env.SHARELATEX_LEFT_FOOTER);
 	} catch (error) {
 		e = error;
 		console.error("could not parse SHARELATEX_LEFT_FOOTER, not valid JSON");
 	}
 }
 
-if (process.env["SHARELATEX_RIGHT_FOOTER"] != null) {
-	settings.nav.right_footer = process.env["SHARELATEX_RIGHT_FOOTER"];
+if (process.env.SHARELATEX_RIGHT_FOOTER != null) {
+	settings.nav.right_footer = process.env.SHARELATEX_RIGHT_FOOTER;
 	try {
-		settings.nav.right_footer = JSON.parse(process.env["SHARELATEX_RIGHT_FOOTER"]);
+		settings.nav.right_footer = JSON.parse(process.env.SHARELATEX_RIGHT_FOOTER);
 	} catch (error1) {
 		e = error1;
 		console.error("could not parse SHARELATEX_RIGHT_FOOTER, not valid JSON");
 	}
 }
 
-if (process.env["SHARELATEX_HEADER_IMAGE_URL"] != null) {
-	settings.nav.custom_logo = process.env["SHARELATEX_HEADER_IMAGE_URL"];
+if (process.env.SHARELATEX_HEADER_IMAGE_URL != null) {
+	settings.nav.custom_logo = process.env.SHARELATEX_HEADER_IMAGE_URL;
 }
 
-if (process.env["SHARELATEX_HEADER_NAV_LINKS"] != null) {
+if (process.env.SHARELATEX_HEADER_NAV_LINKS != null) {
 	console.error(`\
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
@@ -295,9 +303,9 @@ if (process.env["SHARELATEX_HEADER_NAV_LINKS"] != null) {
 	);
 }
 
-if (process.env["SHARELATEX_HEADER_EXTRAS"] != null) {
+if (process.env.SHARELATEX_HEADER_EXTRAS != null) {
 	try {
-		settings.nav.header_extras = JSON.parse(process.env["SHARELATEX_HEADER_EXTRAS"]);
+		settings.nav.header_extras = JSON.parse(process.env.SHARELATEX_HEADER_EXTRAS);
 	} catch (error2) {
 		e = error2;
 		console.error("could not parse SHARELATEX_HEADER_EXTRAS, not valid JSON");
@@ -316,76 +324,76 @@ if (process.env["SHARELATEX_HEADER_EXTRAS"] != null) {
 //     http://www.nodemailer.com/docs/transports
 
 
-if (process.env["SHARELATEX_EMAIL_FROM_ADDRESS"] != null) {
+if (process.env.SHARELATEX_EMAIL_FROM_ADDRESS != null) {
 
 	settings.email = {
-		fromAddress: process.env["SHARELATEX_EMAIL_FROM_ADDRESS"],
-		replyTo: process.env["SHARELATEX_EMAIL_REPLY_TO"] || "",
-		driver: process.env["SHARELATEX_EMAIL_DRIVER"],
+		fromAddress: process.env.SHARELATEX_EMAIL_FROM_ADDRESS,
+		replyTo: process.env.SHARELATEX_EMAIL_REPLY_TO || "",
+		driver: process.env.SHARELATEX_EMAIL_DRIVER,
 		parameters: {
-			//AWS Creds
-			AWSAccessKeyID: process.env["SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID"],
-			AWSSecretKey: process.env["SHARELATEX_EMAIL_AWS_SES_SECRET_KEY"],
+			// AWS Creds
+			AWSAccessKeyID: process.env.SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID,
+			AWSSecretKey: process.env.SHARELATEX_EMAIL_AWS_SES_SECRET_KEY,
 
-			//SMTP Creds
-			host: process.env["SHARELATEX_EMAIL_SMTP_HOST"],
-			port: process.env["SHARELATEX_EMAIL_SMTP_PORT"],
-			secure: parse(process.env["SHARELATEX_EMAIL_SMTP_SECURE"]),
-			ignoreTLS: parse(process.env["SHARELATEX_EMAIL_SMTP_IGNORE_TLS"]),
-			name: process.env["SHARELATEX_EMAIL_SMTP_NAME"],
-			logger: process.env["SHARELATEX_EMAIL_SMTP_LOGGER"] === 'true'
+			// SMTP Creds
+			host: process.env.SHARELATEX_EMAIL_SMTP_HOST,
+			port: process.env.SHARELATEX_EMAIL_SMTP_PORT,
+			secure: parse(process.env.SHARELATEX_EMAIL_SMTP_SECURE),
+			ignoreTLS: parse(process.env.SHARELATEX_EMAIL_SMTP_IGNORE_TLS),
+			name: process.env.SHARELATEX_EMAIL_SMTP_NAME,
+			logger: process.env.SHARELATEX_EMAIL_SMTP_LOGGER === 'true'
 		},
 
-		textEncoding:  process.env["SHARELATEX_EMAIL_TEXT_ENCODING"],
+		textEncoding:  process.env.SHARELATEX_EMAIL_TEXT_ENCODING,
 		template: {
-			customFooter: process.env["SHARELATEX_CUSTOM_EMAIL_FOOTER"]
+			customFooter: process.env.SHARELATEX_CUSTOM_EMAIL_FOOTER
 		}
 	};
 
-	if (process.env["SHARELATEX_EMAIL_AWS_SES_REGION"] != null) {
-		settings.email.parameters.region = process.env["SHARELATEX_EMAIL_AWS_SES_REGION"];
+	if (process.env.SHARELATEX_EMAIL_AWS_SES_REGION != null) {
+		settings.email.parameters.region = process.env.SHARELATEX_EMAIL_AWS_SES_REGION;
 	}
 
-	if ((process.env["SHARELATEX_EMAIL_SMTP_USER"] != null) || (process.env["SHARELATEX_EMAIL_SMTP_PASS"] != null)) {
+	if ((process.env.SHARELATEX_EMAIL_SMTP_USER != null) || (process.env.SHARELATEX_EMAIL_SMTP_PASS != null)) {
 		settings.email.parameters.auth = {
-			user: process.env["SHARELATEX_EMAIL_SMTP_USER"],
-			pass: process.env["SHARELATEX_EMAIL_SMTP_PASS"]
+			user: process.env.SHARELATEX_EMAIL_SMTP_USER,
+			pass: process.env.SHARELATEX_EMAIL_SMTP_PASS
 		};
 	}
 
-	if (process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"] != null) {
+	if (process.env.SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH != null) {
 		settings.email.parameters.tls =
-			{rejectUnauthorized: parse(process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"])};
+			{rejectUnauthorized: parse(process.env.SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH)};
 	}
 }
 
 
 // i18n
-if (process.env["SHARELATEX_LANG_DOMAIN_MAPPING"] != null) {
+if (process.env.SHARELATEX_LANG_DOMAIN_MAPPING != null) {
 
-	settings.i18n.subdomainLang = parse(process.env["SHARELATEX_LANG_DOMAIN_MAPPING"]);
+	settings.i18n.subdomainLang = parse(process.env.SHARELATEX_LANG_DOMAIN_MAPPING);
 }
 
 // Password Settings
 // -----------
 // These restrict the passwords users can use when registering
 // opts are from http://antelle.github.io/passfield
-if (process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] || process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] || process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"]) {
+if (process.env.SHARELATEX_PASSWORD_VALIDATION_PATTERN || process.env.SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH || process.env.SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH) {
 
 	settings.passwordStrengthOptions = {
-		pattern: process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] || "aA$3",
-		length: {min:process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] || 8, max: process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"] || 150}
+		pattern: process.env.SHARELATEX_PASSWORD_VALIDATION_PATTERN || "aA$3",
+		length: {min:process.env.SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH || 8, max: process.env.SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH || 150}
 	};
 }
 
 
 
 
-//######################
+// ######################
 // ShareLaTeX Server Pro
-//######################
+// ######################
 
-if (parse(process.env["SHARELATEX_IS_SERVER_PRO"]) === true) {
+if (parse(process.env.SHARELATEX_IS_SERVER_PRO) === true) {
 	settings.bypassPercentageRollouts = true;
 	settings.apis.references =
 		 {url: "http://localhost:3040"};
@@ -395,7 +403,7 @@ if (parse(process.env["SHARELATEX_IS_SERVER_PRO"]) === true) {
 // LDAP - SERVER PRO ONLY
 // ----------
 
-if (process.env["SHARELATEX_LDAP_HOST"]) {
+if (process.env.SHARELATEX_LDAP_HOST) {
 	console.error(`\
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
@@ -407,25 +415,25 @@ if (process.env["SHARELATEX_LDAP_HOST"]) {
 	);
 }
 
-if (process.env["SHARELATEX_LDAP_URL"]) {
+if (process.env.SHARELATEX_LDAP_URL) {
 	let _ldap_connect_timeout, _ldap_group_search_attribs, _ldap_search_attribs, _ldap_timeout;
 	settings.externalAuth = true;
 	settings.ldap = {
-		emailAtt: process.env["SHARELATEX_LDAP_EMAIL_ATT"],
-		nameAtt: process.env["SHARELATEX_LDAP_NAME_ATT"],
-		lastNameAtt: process.env["SHARELATEX_LDAP_LAST_NAME_ATT"],
-		updateUserDetailsOnLogin: process.env["SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN"] === 'true',
-		placeholder: process.env["SHARELATEX_LDAP_PLACEHOLDER"],
+		emailAtt: process.env.SHARELATEX_LDAP_EMAIL_ATT,
+		nameAtt: process.env.SHARELATEX_LDAP_NAME_ATT,
+		lastNameAtt: process.env.SHARELATEX_LDAP_LAST_NAME_ATT,
+		updateUserDetailsOnLogin: process.env.SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN === 'true',
+		placeholder: process.env.SHARELATEX_LDAP_PLACEHOLDER,
 		server: {
-			url: process.env["SHARELATEX_LDAP_URL"],
-			bindDn: process.env["SHARELATEX_LDAP_BIND_DN"],
-			bindCredentials: process.env["SHARELATEX_LDAP_BIND_CREDENTIALS"],
-			bindProperty: process.env["SHARELATEX_LDAP_BIND_PROPERTY"],
-			searchBase: process.env["SHARELATEX_LDAP_SEARCH_BASE"],
-			searchScope: process.env["SHARELATEX_LDAP_SEARCH_SCOPE"],
-			searchFilter: process.env["SHARELATEX_LDAP_SEARCH_FILTER"],
+			url: process.env.SHARELATEX_LDAP_URL,
+			bindDn: process.env.SHARELATEX_LDAP_BIND_DN,
+			bindCredentials: process.env.SHARELATEX_LDAP_BIND_CREDENTIALS,
+			bindProperty: process.env.SHARELATEX_LDAP_BIND_PROPERTY,
+			searchBase: process.env.SHARELATEX_LDAP_SEARCH_BASE,
+			searchScope: process.env.SHARELATEX_LDAP_SEARCH_SCOPE,
+			searchFilter: process.env.SHARELATEX_LDAP_SEARCH_FILTER,
 			searchAttributes: (
-				(_ldap_search_attribs = process.env["SHARELATEX_LDAP_SEARCH_ATTRIBUTES"]) ?
+				(_ldap_search_attribs = process.env.SHARELATEX_LDAP_SEARCH_ATTRIBUTES) ?
 					(() => { try {
 						return JSON.parse(_ldap_search_attribs);
 					} catch (error3) {
@@ -435,12 +443,12 @@ if (process.env["SHARELATEX_LDAP_URL"]) {
 				:
 					undefined
 			),
-			groupDnProperty: process.env["SHARELATEX_LDAP_GROUP_DN_PROPERTY"],
-			groupSearchBase: process.env["SHARELATEX_LDAP_GROUP_SEARCH_BASE"],
-			groupSearchScope: process.env["SHARELATEX_LDAP_GROUP_SEARCH_SCOPE"],
-			groupSearchFilter: process.env["SHARELATEX_LDAP_GROUP_SEARCH_FILTER"],
+			groupDnProperty: process.env.SHARELATEX_LDAP_GROUP_DN_PROPERTY,
+			groupSearchBase: process.env.SHARELATEX_LDAP_GROUP_SEARCH_BASE,
+			groupSearchScope: process.env.SHARELATEX_LDAP_GROUP_SEARCH_SCOPE,
+			groupSearchFilter: process.env.SHARELATEX_LDAP_GROUP_SEARCH_FILTER,
 			groupSearchAttributes: (
-				(_ldap_group_search_attribs = process.env["SHARELATEX_LDAP_GROUP_SEARCH_ATTRIBUTES"]) ?
+				(_ldap_group_search_attribs = process.env.SHARELATEX_LDAP_GROUP_SEARCH_ATTRIBUTES) ?
 					(() => { try {
 						return JSON.parse(_ldap_group_search_attribs);
 					} catch (error4) {
@@ -450,9 +458,9 @@ if (process.env["SHARELATEX_LDAP_URL"]) {
 				:
 					undefined
 			),
-			cache: process.env["SHARELATEX_LDAP_CACHE"] === 'true',
+			cache: process.env.SHARELATEX_LDAP_CACHE === 'true',
 			timeout: (
-				(_ldap_timeout = process.env["SHARELATEX_LDAP_TIMEOUT"]) ?
+				(_ldap_timeout = process.env.SHARELATEX_LDAP_TIMEOUT) ?
 					(() => { try {
 						return parseIntOrFail(_ldap_timeout);
 					} catch (error5) {
@@ -463,7 +471,7 @@ if (process.env["SHARELATEX_LDAP_URL"]) {
 					undefined
 			),
 			connectTimeout: (
-				(_ldap_connect_timeout = process.env["SHARELATEX_LDAP_CONNECT_TIMEOUT"]) ?
+				(_ldap_connect_timeout = process.env.SHARELATEX_LDAP_CONNECT_TIMEOUT) ?
 					(() => { try {
 						return parseIntOrFail(_ldap_connect_timeout);
 					} catch (error6) {
@@ -476,10 +484,10 @@ if (process.env["SHARELATEX_LDAP_URL"]) {
 		}
 	};
 
-	if (process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]) {
+	if (process.env.SHARELATEX_LDAP_TLS_OPTS_CA_PATH) {
 		let ca, ca_paths;
 		try {
-			ca = JSON.parse(process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]);
+			ca = JSON.parse(process.env.SHARELATEX_LDAP_TLS_OPTS_CA_PATH);
 		} catch (error7) {
 			e = error7;
 			console.error("could not parse SHARELATEX_LDAP_TLS_OPTS_CA_PATH, invalid JSON");
@@ -494,7 +502,7 @@ if (process.env["SHARELATEX_LDAP_URL"]) {
 		}
 
 		settings.ldap.server.tlsOptions = {
-			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] === "true",
+			rejectUnauthorized: process.env.SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH === "true",
 			ca:ca_paths  // e.g.'/etc/ldap/ca_certs.pem'
 		};
 	}
@@ -504,37 +512,37 @@ if (process.env["SHARELATEX_LDAP_URL"]) {
 
 
 
-if (process.env["SHARELATEX_SAML_ENTRYPOINT"]) {
+if (process.env.SHARELATEX_SAML_ENTRYPOINT) {
 	// NOTE: see https://github.com/node-saml/passport-saml/blob/master/README.md for docs of `server` options
 	let _saml_additionalAuthorizeParams, _saml_additionalLogoutParams, _saml_additionalParams, _saml_expiration, _saml_skew;
 	settings.externalAuth = true;
 	settings.saml = {
-		updateUserDetailsOnLogin: process.env["SHARELATEX_SAML_UPDATE_USER_DETAILS_ON_LOGIN"] === 'true',
-		identityServiceName: process.env["SHARELATEX_SAML_IDENTITY_SERVICE_NAME"],
-		emailField: process.env["SHARELATEX_SAML_EMAIL_FIELD"] || process.env["SHARELATEX_SAML_EMAIL_FIELD_NAME"],
-		firstNameField: process.env["SHARELATEX_SAML_FIRST_NAME_FIELD"],
-		lastNameField:  process.env["SHARELATEX_SAML_LAST_NAME_FIELD"],
+		updateUserDetailsOnLogin: process.env.SHARELATEX_SAML_UPDATE_USER_DETAILS_ON_LOGIN === 'true',
+		identityServiceName: process.env.SHARELATEX_SAML_IDENTITY_SERVICE_NAME,
+		emailField: process.env.SHARELATEX_SAML_EMAIL_FIELD || process.env.SHARELATEX_SAML_EMAIL_FIELD_NAME,
+		firstNameField: process.env.SHARELATEX_SAML_FIRST_NAME_FIELD,
+		lastNameField:  process.env.SHARELATEX_SAML_LAST_NAME_FIELD,
 		server: {
 			// strings
-			entryPoint: process.env["SHARELATEX_SAML_ENTRYPOINT"],
-			callbackUrl: process.env["SHARELATEX_SAML_CALLBACK_URL"],
-			issuer: process.env["SHARELATEX_SAML_ISSUER"],
-			decryptionPvk: process.env["SHARELATEX_SAML_DECRYPTION_PVK"],
-			decryptionCert: process.env["SHARELATEX_SAML_DECRYPTION_CERT"],
-			signatureAlgorithm: process.env["SHARELATEX_SAML_SIGNATURE_ALGORITHM"],
-			identifierFormat: process.env["SHARELATEX_SAML_IDENTIFIER_FORMAT"],
-			attributeConsumingServiceIndex: process.env["SHARELATEX_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX"],
-			authnContext: process.env["SHARELATEX_SAML_AUTHN_CONTEXT"],
-			authnRequestBinding: process.env["SHARELATEX_SAML_AUTHN_REQUEST_BINDING"],
-			validateInResponseTo: process.env["SHARELATEX_SAML_VALIDATE_IN_RESPONSE_TO"],
-			cacheProvider: process.env["SHARELATEX_SAML_CACHE_PROVIDER"],
-			logoutUrl: process.env["SHARELATEX_SAML_LOGOUT_URL"],
-			logoutCallbackUrl: process.env["SHARELATEX_SAML_LOGOUT_CALLBACK_URL"],
-			disableRequestedAuthnContext: process.env["SHARELATEX_SAML_DISABLE_REQUESTED_AUTHN_CONTEXT"] === 'true',
-			forceAuthn: process.env["SHARELATEX_SAML_FORCE_AUTHN"] === 'true',
-			skipRequestCompression: process.env["SHARELATEX_SAML_SKIP_REQUEST_COMPRESSION"] === 'true',
+			entryPoint: process.env.SHARELATEX_SAML_ENTRYPOINT,
+			callbackUrl: process.env.SHARELATEX_SAML_CALLBACK_URL,
+			issuer: process.env.SHARELATEX_SAML_ISSUER,
+			decryptionPvk: process.env.SHARELATEX_SAML_DECRYPTION_PVK,
+			decryptionCert: process.env.SHARELATEX_SAML_DECRYPTION_CERT,
+			signatureAlgorithm: process.env.SHARELATEX_SAML_SIGNATURE_ALGORITHM,
+			identifierFormat: process.env.SHARELATEX_SAML_IDENTIFIER_FORMAT,
+			attributeConsumingServiceIndex: process.env.SHARELATEX_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX,
+			authnContext: process.env.SHARELATEX_SAML_AUTHN_CONTEXT,
+			authnRequestBinding: process.env.SHARELATEX_SAML_AUTHN_REQUEST_BINDING,
+			validateInResponseTo: process.env.SHARELATEX_SAML_VALIDATE_IN_RESPONSE_TO,
+			cacheProvider: process.env.SHARELATEX_SAML_CACHE_PROVIDER,
+			logoutUrl: process.env.SHARELATEX_SAML_LOGOUT_URL,
+			logoutCallbackUrl: process.env.SHARELATEX_SAML_LOGOUT_CALLBACK_URL,
+			disableRequestedAuthnContext: process.env.SHARELATEX_SAML_DISABLE_REQUESTED_AUTHN_CONTEXT === 'true',
+			forceAuthn: process.env.SHARELATEX_SAML_FORCE_AUTHN === 'true',
+			skipRequestCompression: process.env.SHARELATEX_SAML_SKIP_REQUEST_COMPRESSION === 'true',
 			acceptedClockSkewMs: (
-				(_saml_skew = process.env["SHARELATEX_SAML_ACCEPTED_CLOCK_SKEW_MS"]) ?
+				(_saml_skew = process.env.SHARELATEX_SAML_ACCEPTED_CLOCK_SKEW_MS) ?
 					(() => { try {
 						return parseIntOrFail(_saml_skew);
 					} catch (error8) {
@@ -545,7 +553,7 @@ if (process.env["SHARELATEX_SAML_ENTRYPOINT"]) {
 					undefined
 			),
 			requestIdExpirationPeriodMs: (
-				(_saml_expiration = process.env["SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"]) ?
+				(_saml_expiration = process.env.SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS) ?
 					(() => { try {
 						return parseIntOrFail(_saml_expiration);
 					} catch (error9) {
@@ -556,7 +564,7 @@ if (process.env["SHARELATEX_SAML_ENTRYPOINT"]) {
 					undefined
 			),
 			additionalParams: (
-				(_saml_additionalParams = process.env["SHARELATEX_SAML_ADDITIONAL_PARAMS"]) ?
+				(_saml_additionalParams = process.env.SHARELATEX_SAML_ADDITIONAL_PARAMS) ?
 					(() => { try {
 						return JSON.parse(_saml_additionalParams);
 					} catch (error10) {
@@ -567,7 +575,7 @@ if (process.env["SHARELATEX_SAML_ENTRYPOINT"]) {
 					undefined
 			),
 			additionalAuthorizeParams: (
-				(_saml_additionalAuthorizeParams = process.env["SHARELATEX_SAML_ADDITIONAL_AUTHORIZE_PARAMS"]) ?
+				(_saml_additionalAuthorizeParams = process.env.SHARELATEX_SAML_ADDITIONAL_AUTHORIZE_PARAMS) ?
 					(() => { try {
 						return JSON.parse(_saml_additionalAuthorizeParams );
 					} catch (error11) {
@@ -578,7 +586,7 @@ if (process.env["SHARELATEX_SAML_ENTRYPOINT"]) {
 					undefined
 			),
 			additionalLogoutParams: (
-				(_saml_additionalLogoutParams = process.env["SHARELATEX_SAML_ADDITIONAL_LOGOUT_PARAMS"]) ?
+				(_saml_additionalLogoutParams = process.env.SHARELATEX_SAML_ADDITIONAL_LOGOUT_PARAMS) ?
 					(() => { try {
 						return JSON.parse(_saml_additionalLogoutParams );
 					} catch (error12) {
@@ -593,22 +601,22 @@ if (process.env["SHARELATEX_SAML_ENTRYPOINT"]) {
 
 	// SHARELATEX_SAML_CERT cannot be empty
 	// https://github.com/node-saml/passport-saml/commit/f6b1c885c0717f1083c664345556b535f217c102
-	if (process.env["SHARELATEX_SAML_CERT"]) {
-		settings.saml.server.cert = process.env["SHARELATEX_SAML_CERT"];
-		settings.saml.server.privateCert = process.env["SHARELATEX_SAML_PRIVATE_CERT"];
+	if (process.env.SHARELATEX_SAML_CERT) {
+		settings.saml.server.cert = process.env.SHARELATEX_SAML_CERT;
+		settings.saml.server.privateCert = process.env.SHARELATEX_SAML_PRIVATE_CERT;
 	}
 }
 
 // Compiler
 // --------
-if (process.env["SANDBOXED_COMPILES"] === "true") {
+if (process.env.SANDBOXED_COMPILES === "true") {
 	settings.clsi = {
 		dockerRunner: true,
 		docker: {
-			image: process.env["TEX_LIVE_DOCKER_IMAGE"],
+			image: process.env.TEX_LIVE_DOCKER_IMAGE,
 			env: {
 				HOME: "/tmp",
-				PATH: process.env["COMPILER_PATH"] || "/usr/local/texlive/2015/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+				PATH: process.env.COMPILER_PATH || "/usr/local/texlive/2015/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 			},
 			user: "www-data"
 		}
@@ -618,10 +626,10 @@ if (process.env["SANDBOXED_COMPILES"] === "true") {
 		settings.path = {};
 	}
 	settings.path.synctexBaseDir = () => "/compile";
-	if (process.env['SANDBOXED_COMPILES_SIBLING_CONTAINERS']  === 'true') {
+	if (process.env.SANDBOXED_COMPILES_SIBLING_CONTAINERS  === 'true') {
 		console.log("Using sibling containers for sandboxed compiles");
-		if (process.env['SANDBOXED_COMPILES_HOST_DIR']) {
-			settings.path.sandboxedCompilesHostDir = process.env['SANDBOXED_COMPILES_HOST_DIR'];
+		if (process.env.SANDBOXED_COMPILES_HOST_DIR) {
+			settings.path.sandboxedCompilesHostDir = process.env.SANDBOXED_COMPILES_HOST_DIR;
 		} else {
 			console.error('Sibling containers, but SANDBOXED_COMPILES_HOST_DIR not set');
 		}
@@ -631,37 +639,37 @@ if (process.env["SANDBOXED_COMPILES"] === "true") {
 
 // Templates
 // ---------
-if (process.env["SHARELATEX_TEMPLATES_USER_ID"]) {
+if (process.env.SHARELATEX_TEMPLATES_USER_ID) {
 	settings.templates = {
 		mountPointUrl: "/templates",
-		user_id: process.env["SHARELATEX_TEMPLATES_USER_ID"]
+		user_id: process.env.SHARELATEX_TEMPLATES_USER_ID
 	};
 
-	settings.templateLinks = parse(process.env["SHARELATEX_NEW_PROJECT_TEMPLATE_LINKS"]);
+	settings.templateLinks = parse(process.env.SHARELATEX_NEW_PROJECT_TEMPLATE_LINKS);
 }
 
 
 // /Learn
 // -------
-if (process.env["SHARELATEX_PROXY_LEARN"] != null) {
-	settings.proxyLearn = parse(process.env["SHARELATEX_PROXY_LEARN"]);
+if (process.env.SHARELATEX_PROXY_LEARN != null) {
+	settings.proxyLearn = parse(process.env.SHARELATEX_PROXY_LEARN);
 }
 
 
 // /References
 // -----------
-if (process.env["SHARELATEX_ELASTICSEARCH_URL"] != null) {
+if (process.env.SHARELATEX_ELASTICSEARCH_URL != null) {
 	settings.references.elasticsearch =
-			{host: process.env["SHARELATEX_ELASTICSEARCH_URL"]};
+			{host: process.env.SHARELATEX_ELASTICSEARCH_URL};
 }
 
 // TeX Live Images
 // -----------
-if (process.env["ALL_TEX_LIVE_DOCKER_IMAGES"] != null) {
-	allTexLiveDockerImages = process.env["ALL_TEX_LIVE_DOCKER_IMAGES"].split(',');
+if (process.env.ALL_TEX_LIVE_DOCKER_IMAGES != null) {
+	allTexLiveDockerImages = process.env.ALL_TEX_LIVE_DOCKER_IMAGES.split(',');
 }
-if (process.env["ALL_TEX_LIVE_DOCKER_IMAGE_NAMES"] != null) {
-	allTexLiveDockerImageNames = process.env["ALL_TEX_LIVE_DOCKER_IMAGE_NAMES"].split(',');
+if (process.env.ALL_TEX_LIVE_DOCKER_IMAGE_NAMES != null) {
+	allTexLiveDockerImageNames = process.env.ALL_TEX_LIVE_DOCKER_IMAGE_NAMES.split(',');
 }
 if (allTexLiveDockerImages != null) {
 	settings.allowedImageNames = [];
