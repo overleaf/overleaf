@@ -23,7 +23,7 @@ module.exports = function (grunt) {
         process.exit(1)
       }
 
-      const settings = require('settings-sharelatex')
+      const settings = require('@overleaf/settings')
       const mongodb = require('../web/app/src/infrastructure/mongodb')
       const UserRegistrationHandler = require('../web/app/src/Features/User/UserRegistrationHandler')
       const OneTimeTokenHandler = require('../web/app/src/Features/Security/OneTimeTokenHandler')
@@ -88,7 +88,7 @@ ${settings.siteUrl}/user/password/set?passwordResetToken=${token}
         console.error('Usage: grunt user:delete --email=joe@example.com')
         process.exit(1)
       }
-      const settings = require('settings-sharelatex')
+      const settings = require('@overleaf/settings')
       const mongodb = require('../web/app/src/infrastructure/mongodb')
       const UserGetter = require('../web/app/src/Features/User/UserGetter')
       const UserDeleter = require('../web/app/src/Features/User/UserDeleter')
