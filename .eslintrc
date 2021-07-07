@@ -1,0 +1,17 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "standard",
+    "prettier"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "env": {
+    "node": true
+  },
+  "rules": {
+    // Do not allow importing of implicit dependencies.
+    "import/no-extraneous-dependencies": "error"
+  }
+}
