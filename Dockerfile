@@ -5,7 +5,7 @@
 ARG SHARELATEX_BASE_TAG=sharelatex/sharelatex-base:latest
 FROM $SHARELATEX_BASE_TAG
 
-ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
+ENV SHARELATEX_CONFIG /etc/sharelatex/settings.js
 
 
 # Add required source files
@@ -13,7 +13,7 @@ ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
 ADD ${baseDir}/bin /var/www/sharelatex/bin
 ADD ${baseDir}/doc /var/www/sharelatex/doc
 ADD ${baseDir}/tasks /var/www/sharelatex/tasks
-ADD ${baseDir}/Gruntfile.coffee /var/www/sharelatex/Gruntfile.coffee
+ADD ${baseDir}/Gruntfile.js /var/www/sharelatex/Gruntfile.js
 ADD ${baseDir}/package.json /var/www/sharelatex/package.json
 ADD ${baseDir}/package-lock.json /var/www/sharelatex/package-lock.json
 ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
@@ -85,7 +85,7 @@ COPY ${baseDir}/init_scripts/ /etc/my_init.d/
 
 # Copy app settings files
 # -----------------------
-COPY ${baseDir}/settings.coffee /etc/sharelatex/settings.coffee
+COPY ${baseDir}/settings.js /etc/sharelatex/settings.js
 
 # Set Environment Variables
 # --------------------------------
