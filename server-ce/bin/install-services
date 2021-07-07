@@ -8,7 +8,7 @@ grep 'name:' config/services.js | \
 	do
 		pushd $service
 		echo "Installing service $service"
-		npm install --quiet
+		npm ci
 		popd
 	done
 
