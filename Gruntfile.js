@@ -1,3 +1,12 @@
+/* eslint-disable
+    camelcase,
+    no-return-assign,
+    no-unreachable,
+    no-unused-vars,
+    node/handle-callback-err,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
