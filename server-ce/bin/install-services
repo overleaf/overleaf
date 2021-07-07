@@ -8,7 +8,15 @@ grep 'name:' config/services.js | \
 	do
 		pushd $service
 		echo "Installing service $service"
-		npm ci
+		case $service in
+			web)
+				# install webpack and friends from dev-dependencies.
+				npm ci
+				;;
+			*)
+				npm ci --only=production
+				;;
+		esac
 		popd
 	done
 
