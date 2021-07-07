@@ -39,7 +39,7 @@ describe('ArchiveManager', function () {
 
     this.ArchiveManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': {},
+        '@overleaf/settings': {},
         yauzl: (this.yauzl = {
           open: sinon.stub().callsArgWith(2, null, this.zipfile),
         }),

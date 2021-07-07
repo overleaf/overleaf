@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { URL } = require('url')
 
 function getSafeRedirectPath(value) {

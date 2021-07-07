@@ -1,4 +1,4 @@
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const request = require('request')
 const logger = require('logger-sharelatex')
 const _ = require('lodash')

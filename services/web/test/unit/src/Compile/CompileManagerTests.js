@@ -25,7 +25,7 @@ describe('CompileManager', function () {
     this.ratelimiter = { addCount: sinon.stub() }
     this.CompileManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           redis: { web: { host: 'localhost', port: 42 } },
           rateLimit: { autoCompile: {} },
         }),

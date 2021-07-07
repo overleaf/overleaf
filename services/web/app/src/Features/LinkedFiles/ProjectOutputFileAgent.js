@@ -15,7 +15,7 @@
 let ProjectOutputFileAgent
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const ProjectGetter = require('../Project/ProjectGetter')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const CompileManager = require('../Compile/CompileManager')
 const ClsiManager = require('../Compile/ClsiManager')
 const ProjectFileAgent = require('./ProjectFileAgent')

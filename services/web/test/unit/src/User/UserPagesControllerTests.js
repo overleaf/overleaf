@@ -55,7 +55,7 @@ describe('UserPagesController', function () {
     }
     this.UserPagesController = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         './UserGetter': this.UserGetter,
         './UserSessionsManager': this.UserSessionsManager,
         '../Errors/ErrorController': this.ErrorController,

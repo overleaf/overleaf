@@ -60,7 +60,7 @@ describe('TpdsUpdateSender', function () {
     this.updateSender = SandboxedModule.require(modulePath, {
       requires: {
         mongodb: { ObjectId },
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         'request-promise-native': this.request,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../User/UserGetter.js': this.UserGetter,

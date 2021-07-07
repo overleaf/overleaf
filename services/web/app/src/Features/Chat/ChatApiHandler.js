@@ -14,7 +14,7 @@
 let ChatApiHandler
 const OError = require('@overleaf/o-error')
 const request = require('request')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 module.exports = ChatApiHandler = {
   _apiRequest(opts, callback) {

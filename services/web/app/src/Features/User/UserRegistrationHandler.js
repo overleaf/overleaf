@@ -9,7 +9,7 @@ const crypto = require('crypto')
 const EmailHandler = require('../Email/EmailHandler')
 const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')
 const Analytics = require('../Analytics/AnalyticsManager')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const EmailHelper = require('../Helpers/EmailHelper')
 
 const UserRegistrationHandler = {

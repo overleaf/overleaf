@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const UserCreator = require('../../../../app/src/Features/User/UserCreator')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')

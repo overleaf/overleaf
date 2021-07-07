@@ -1,5 +1,5 @@
 const { createMacro, MacroError } = require('babel-plugin-macros')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const macro = createMacro(importOverleafModuleMacro)
 

@@ -75,7 +75,7 @@ describe('ProjectDetailsHandler', function () {
         '../User/UserGetter': this.UserGetter,
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         '../TokenGenerator/TokenGenerator': this.TokenGenerator,
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
       },
     })
   })

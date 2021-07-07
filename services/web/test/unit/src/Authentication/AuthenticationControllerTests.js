@@ -43,7 +43,7 @@ describe('AuthenticationController', function () {
           identifyUser: sinon.stub(),
         }),
         '../../infrastructure/SessionStoreManager': (this.SessionStoreManager = {}),
-        'settings-sharelatex': (this.Settings = {
+        '@overleaf/settings': (this.Settings = {
           siteUrl: 'http://www.foo.bar',
           httpAuthUsers: this.httpAuthUsers,
         }),

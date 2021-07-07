@@ -13,7 +13,7 @@
 let CollaboratorsEmailHandler
 const { Project } = require('../../models/Project')
 const EmailHandler = require('../Email/EmailHandler')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = CollaboratorsEmailHandler = {
   _buildInviteUrl(project, invite) {

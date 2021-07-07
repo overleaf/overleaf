@@ -58,7 +58,7 @@ describe('FileStoreHandler', function () {
     }
     this.handler = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         request: this.request,
         './FileHashManager': this.FileHashManager,
         // FIXME: need to stub File object here

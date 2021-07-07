@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const request = require('./helpers/request')
 
 // create a string that is longer than the max allowed (as defined in Server.js)

@@ -15,7 +15,7 @@ describe('FileStoreController', function () {
     this.ProjectLocator = { findElement: sinon.stub() }
     this.controller = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '../Project/ProjectLocator': this.ProjectLocator,
         './FileStoreHandler': this.FileStoreHandler,
       },

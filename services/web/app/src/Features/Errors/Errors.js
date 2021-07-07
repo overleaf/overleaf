@@ -1,5 +1,5 @@
 const OError = require('@overleaf/o-error')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 // Error class for legacy errors so they inherit OError while staying
 // backward-compatible (can be instantiated with string as argument instead

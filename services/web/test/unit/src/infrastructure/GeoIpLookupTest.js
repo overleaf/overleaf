@@ -21,7 +21,7 @@ describe('GeoIpLookup', function () {
     this.GeoIpLookup = SandboxedModule.require(modulePath, {
       requires: {
         request: this.request,
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
       },
     })
     this.ipAddress = '12.34.56.78'

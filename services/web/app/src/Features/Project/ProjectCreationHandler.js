@@ -1,7 +1,7 @@
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
 const metrics = require('@overleaf/metrics')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { ObjectId } = require('mongodb')
 const { Project } = require('../../models/Project')
 const { Folder } = require('../../models/Folder')

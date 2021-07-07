@@ -3,7 +3,7 @@ const _ = require('underscore')
 const mkdirp = require('mkdirp')
 const { promisify } = require('util')
 
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const User = require('./helpers/User').promises
 
 const express = require('express')

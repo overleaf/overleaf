@@ -68,7 +68,7 @@ describe('UserUpdater', function () {
             refreshFeatures: sinon.stub().resolves(),
           },
         }),
-        'settings-sharelatex': (this.settings = {}),
+        '@overleaf/settings': (this.settings = {}),
         request: (this.request = {}),
         '../Newsletter/NewsletterManager': this.NewsletterManager,
         '../Subscription/RecurlyWrapper': this.RecurlyWrapper,

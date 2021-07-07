@@ -12,7 +12,7 @@ describe('ReferalFeatures', function () {
         '../../models/User': {
           User: (this.User = {}),
         },
-        'settings-sharelatex': (this.Settings = {}),
+        '@overleaf/settings': (this.Settings = {}),
       },
     })
     this.callback = sinon.stub()

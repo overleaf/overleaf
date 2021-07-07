@@ -33,7 +33,7 @@ describe('RateLimiterMiddleware', function () {
     }
     this.RateLimiterMiddleware = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {}),
+        '@overleaf/settings': (this.settings = {}),
         '../../infrastructure/RateLimiter': (this.RateLimiter = {}),
         './LoginRateLimiter': {},
         '../Authentication/AuthenticationController': this

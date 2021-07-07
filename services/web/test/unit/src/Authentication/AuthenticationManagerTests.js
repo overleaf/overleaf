@@ -20,7 +20,7 @@ describe('AuthenticationManager', function () {
           ObjectId,
         },
         bcrypt: (this.bcrypt = {}),
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '../User/UserGetter': (this.UserGetter = {}),
         './AuthenticationErrors': AuthenticationErrors,
       },

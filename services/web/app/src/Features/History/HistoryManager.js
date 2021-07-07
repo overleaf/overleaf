@@ -1,6 +1,6 @@
 const { callbackify } = require('util')
 const request = require('request-promise-native')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 

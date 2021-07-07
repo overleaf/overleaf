@@ -21,7 +21,7 @@ const sinon = require('sinon')
 const mkdirp = require('mkdirp')
 const Path = require('path')
 const fs = require('fs')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const _ = require('underscore')
 
 const ProjectGetter = require('../../../app/src/Features/Project/ProjectGetter.js')

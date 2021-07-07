@@ -128,7 +128,7 @@ describe('SubscriptionController', function () {
         './SubscriptionViewModelBuilder': this.SubscriptionViewModelBuilder,
         './LimitationsManager': this.LimitationsManager,
         '../../infrastructure/GeoIpLookup': this.GeoIpLookup,
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '../User/UserGetter': this.UserGetter,
         './RecurlyWrapper': (this.RecurlyWrapper = {
           updateAccountEmailAddress: sinon.stub().yields(),

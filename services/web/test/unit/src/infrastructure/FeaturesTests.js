@@ -6,7 +6,7 @@ describe('Features', function () {
   beforeEach(function () {
     this.Features = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {}),
+        '@overleaf/settings': (this.settings = {}),
       },
     })
   })

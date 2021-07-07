@@ -52,7 +52,7 @@ describe('ClsiCookieManager', function () {
       '../../infrastructure/RedisWrapper': (this.RedisWrapper = {
         client: () => this.redis,
       }),
-      'settings-sharelatex': this.settings,
+      '@overleaf/settings': this.settings,
       request: this.request,
     }
     return (this.ClsiCookieManager = SandboxedModule.require(modulePath, {

@@ -1,6 +1,6 @@
 const { callbackify, promisify } = require('util')
 const JWT = require('jsonwebtoken')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const jwtSign = promisify(JWT.sign)
 

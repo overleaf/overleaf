@@ -47,7 +47,7 @@ describe('ReferencesHandler', function () {
     this.docIds = ['aaa', 'ccc']
     this.handler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           apis: {
             references: { url: 'http://some.url/references' },
             docstore: { url: 'http://some.url/docstore' },

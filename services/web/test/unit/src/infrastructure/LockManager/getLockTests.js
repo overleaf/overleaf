@@ -30,7 +30,7 @@ describe('LockManager - getting the lock', function () {
             return { auth() {} }
           },
         },
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           redis: {},
           lockManager: {
             lockTestInterval: 50,

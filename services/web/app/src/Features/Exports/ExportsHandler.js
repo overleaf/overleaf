@@ -21,11 +21,11 @@ const ProjectLocator = require('../Project/ProjectLocator')
 const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
 const UserGetter = require('../User/UserGetter')
 const logger = require('logger-sharelatex')
-let settings = require('settings-sharelatex')
+let settings = require('@overleaf/settings')
 const async = require('async')
 let request = require('request')
 request = request.defaults()
-settings = require('settings-sharelatex')
+settings = require('@overleaf/settings')
 
 module.exports = ExportsHandler = self = {
   exportProject(export_params, callback) {

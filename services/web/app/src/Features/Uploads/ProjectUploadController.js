@@ -19,7 +19,7 @@ const Path = require('path')
 const FileSystemImportManager = require('./FileSystemImportManager')
 const ProjectUploadManager = require('./ProjectUploadManager')
 const AuthenticationController = require('../Authentication/AuthenticationController')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { InvalidZipFileError } = require('./ArchiveErrors')
 const multer = require('multer')
 

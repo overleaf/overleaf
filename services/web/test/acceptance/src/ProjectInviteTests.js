@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const Async = require('async')
 const User = require('./helpers/User')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const CollaboratorsEmailHandler = require('../../../app/src/Features/Collaborators/CollaboratorsEmailHandler')
 const Features = require('../../../app/src/infrastructure/Features')
 

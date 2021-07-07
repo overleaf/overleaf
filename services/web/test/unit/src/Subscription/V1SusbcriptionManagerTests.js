@@ -27,7 +27,7 @@ describe('V1SubscriptionManager', function () {
     this.V1SubscriptionManager = SandboxedModule.require(modulePath, {
       requires: {
         '../User/UserGetter': (this.UserGetter = {}),
-        'settings-sharelatex': (this.Settings = {
+        '@overleaf/settings': (this.Settings = {
           apis: {
             v1: {
               host: (this.host = 'http://overleaf.example.com'),

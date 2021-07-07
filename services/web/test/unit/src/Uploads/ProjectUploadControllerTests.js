@@ -44,7 +44,7 @@ describe('ProjectUploadController', function () {
     return (this.ProjectUploadController = SandboxedModule.require(modulePath, {
       requires: {
         multer: sinon.stub(),
-        'settings-sharelatex': { path: {} },
+        '@overleaf/settings': { path: {} },
         './ProjectUploadManager': (this.ProjectUploadManager = {}),
         './FileSystemImportManager': (this.FileSystemImportManager = {}),
         '@overleaf/metrics': this.metrics,

@@ -24,7 +24,7 @@ describe('EmailHandler', function () {
       requires: {
         './EmailBuilder': this.EmailBuilder,
         './EmailSender': this.EmailSender,
-        'settings-sharelatex': this.Settings,
+        '@overleaf/settings': this.Settings,
       },
     })
   })

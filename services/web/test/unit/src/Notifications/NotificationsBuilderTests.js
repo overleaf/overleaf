@@ -16,7 +16,7 @@ describe('NotificationsBuilder', function () {
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
         './NotificationsHandler': this.handler,
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         request: this.request,
       },
     })

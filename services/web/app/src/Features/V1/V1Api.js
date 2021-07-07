@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const request = require('request')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const Errors = require('../Errors/Errors')
 const { promisifyAll } = require('../../util/promises')
 

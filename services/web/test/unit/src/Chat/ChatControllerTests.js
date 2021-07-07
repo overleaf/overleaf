@@ -33,7 +33,7 @@ describe('ChatController', function () {
     }
     this.ChatController = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         './ChatApiHandler': this.ChatApiHandler,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../Authentication/AuthenticationController': this

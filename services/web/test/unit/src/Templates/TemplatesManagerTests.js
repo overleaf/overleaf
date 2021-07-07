@@ -72,7 +72,7 @@ describe('TemplatesManager', function () {
           getLoggedInUserId: sinon.stub(),
         }),
         '../../infrastructure/FileWriter': this.FileWriter,
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           path: {
             dumpFolder: this.dumpFolder,
           },

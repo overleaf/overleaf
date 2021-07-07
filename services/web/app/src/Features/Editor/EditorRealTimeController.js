@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let EditorRealTimeController
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Metrics = require('@overleaf/metrics')
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('pubsub')

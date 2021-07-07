@@ -16,7 +16,7 @@ let LinkedFilesController
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const EditorController = require('../Editor/EditorController')
 const ProjectLocator = require('../Project/ProjectLocator')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const _ = require('underscore')
 const LinkedFilesHandler = require('./LinkedFilesHandler')

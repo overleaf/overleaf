@@ -27,7 +27,7 @@ describe('RestoreManager', function () {
     tk.freeze(Date.now()) // freeze the time for these tests
     this.RestoreManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': {},
+        '@overleaf/settings': {},
         '../../infrastructure/FileWriter': (this.FileWriter = {}),
         '../Uploads/FileSystemImportManager': (this.FileSystemImportManager = {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),

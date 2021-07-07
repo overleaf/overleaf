@@ -25,7 +25,7 @@ describe('FileSystemImportManager', function () {
     }
     this.FileSystemImportManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           textExtensions: ['tex', 'txt'],
         },
         '../Editor/EditorController': this.EditorController,

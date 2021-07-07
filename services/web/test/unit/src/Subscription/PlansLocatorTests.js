@@ -32,7 +32,7 @@ describe('PlansLocator', function () {
 
     this.PlansLocator = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
       },
     })
   })

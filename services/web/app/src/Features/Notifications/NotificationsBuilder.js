@@ -1,7 +1,7 @@
 const NotificationsHandler = require('./NotificationsHandler')
 const { promisifyAll } = require('../../util/promises')
 const request = require('request')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 function dropboxDuplicateProjectNames(userId) {
   return {

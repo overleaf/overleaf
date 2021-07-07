@@ -13,7 +13,7 @@
  */
 let rclient_secondary
 const OError = require('@overleaf/o-error')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const request = require('request').defaults({ timeout: 30 * 1000 })
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('clsi_cookie')

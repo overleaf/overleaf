@@ -2,7 +2,7 @@ const fs = require('fs')
 const Path = require('path')
 const isUtf8 = require('utf-8-validate')
 const { promisifyAll } = require('../../util/promises')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const FileTypeManager = {
   TEXT_EXTENSIONS: Settings.textExtensions.map(ext => `.${ext}`),

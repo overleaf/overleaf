@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const fs = require('fs')
 
 const publicRegistrationModuleAvailable = fs.existsSync(

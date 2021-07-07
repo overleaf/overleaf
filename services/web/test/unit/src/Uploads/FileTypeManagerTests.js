@@ -2,7 +2,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const isUtf8 = require('utf-8-validate')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const modulePath = '../../../../app/src/Features/Uploads/FileTypeManager.js'
 
 describe('FileTypeManager', function () {
@@ -44,7 +44,7 @@ describe('FileTypeManager', function () {
       requires: {
         fs: this.fs,
         'utf-8-validate': this.isUtf8,
-        'settings-sharelatex': Settings,
+        '@overleaf/settings': Settings,
       },
     })
   })

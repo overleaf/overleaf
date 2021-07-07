@@ -30,7 +30,7 @@ describe('SpellingHandler', function () {
     SpellingHandler = SandboxedModule.require(modulePath, {
       requires: {
         request: request,
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           apis: { spelling: { host: SPELLING_HOST, url: SPELLING_URL } },
         },
       },

@@ -15,7 +15,7 @@
 const request = require('request').defaults({ jar: false })
 const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const Errors = require('../Errors/Errors')
 const { promisifyAll } = require('../../util/promises')
 

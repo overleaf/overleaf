@@ -30,7 +30,7 @@ describe('NotificationsHandler', function () {
     this.request = sinon.stub().callsArgWith(1)
     return (this.handler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           apis: { notifications: { url: notificationUrl } },
         },
         request: this.request,

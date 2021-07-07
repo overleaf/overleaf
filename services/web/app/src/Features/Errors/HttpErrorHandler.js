@@ -1,5 +1,5 @@
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 function renderJSONError(res, message, info = {}) {
   if (info.message) {

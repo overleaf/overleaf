@@ -1,5 +1,5 @@
 const request = require('./request')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
 const UserModel = require('../../../../app/src/models/User').User
 const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')

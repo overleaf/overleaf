@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const request = require('request-promise-native')
 
 async function getQueues(userId) {

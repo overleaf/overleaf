@@ -2,7 +2,7 @@ const RateLimiter = require('../../infrastructure/RateLimiter')
 const logger = require('logger-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const LoginRateLimiter = require('./LoginRateLimiter')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 /*
   Do not allow more than opts.maxRequests from a single client in

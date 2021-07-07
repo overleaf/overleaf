@@ -1,4 +1,4 @@
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const Errors = require('../Errors/Errors')
 const httpProxy = require('express-http-proxy')
 const URL = require('url')

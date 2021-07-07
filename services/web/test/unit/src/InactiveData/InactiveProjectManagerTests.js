@@ -37,7 +37,7 @@ describe('InactiveProjectManager', function () {
     this.InactiveProjectManager = SandboxedModule.require(modulePath, {
       requires: {
         mongodb: { ObjectId },
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '../Docstore/DocstoreManager': this.DocstoreManager,
         '../Project/ProjectUpdateHandler': this.ProjectUpdateHandler,
         '../Project/ProjectGetter': this.ProjectGetter,

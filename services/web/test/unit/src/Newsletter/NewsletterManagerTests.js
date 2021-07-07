@@ -28,7 +28,7 @@ describe('NewsletterManager', function () {
     this.NewsletterManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         'mailchimp-api-v3': this.Mailchimp,
-        'settings-sharelatex': this.Settings,
+        '@overleaf/settings': this.Settings,
       },
     }).promises
 

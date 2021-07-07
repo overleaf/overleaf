@@ -18,7 +18,7 @@ describe('SessionAutostartMiddleware', function () {
 
     SessionAutostartMiddleware = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': Settings,
+        '@overleaf/settings': Settings,
       },
     })
 

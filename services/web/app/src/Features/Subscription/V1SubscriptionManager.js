@@ -14,7 +14,7 @@
 let V1SubscriptionManager
 const UserGetter = require('../User/UserGetter')
 const request = require('request')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { V1ConnectionError, NotFoundError } = require('../Errors/Errors')
 
 module.exports = V1SubscriptionManager = {

@@ -1,6 +1,6 @@
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const ContactController = require('./ContactController')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 function contactsAuthenticationMiddleware() {
   if (!Settings.allowAnonymousReadAndWriteSharing) {

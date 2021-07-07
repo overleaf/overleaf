@@ -3,7 +3,7 @@ const { db } = require('../../infrastructure/mongodb')
 const metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
 const moment = require('moment')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { promisifyAll } = require('../../util/promises')
 const {
   promises: InstitutionsAPIPromises,

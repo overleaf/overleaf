@@ -1,7 +1,7 @@
 const User = require('./helpers/User')
 const request = require('./helpers/request')
 const { expect } = require('chai')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { ObjectId } = require('mongodb')
 
 describe('DocUpdate', function () {

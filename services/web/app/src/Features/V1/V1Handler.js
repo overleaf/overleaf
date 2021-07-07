@@ -16,7 +16,7 @@
 let V1Handler
 const OError = require('@overleaf/o-error')
 const V1Api = require('./V1Api')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 
 module.exports = V1Handler = {

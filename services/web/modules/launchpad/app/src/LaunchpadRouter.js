@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const LaunchpadController = require('./LaunchpadController')
 const AuthenticationController = require('../../../../app/src/Features/Authentication/AuthenticationController')
 const AuthorizationMiddleware = require('../../../../app/src/Features/Authorization/AuthorizationMiddleware')

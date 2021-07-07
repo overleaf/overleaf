@@ -1,5 +1,5 @@
 const async = require('async')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const request = require('request')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')

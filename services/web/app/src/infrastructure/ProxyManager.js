@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ProxyManager
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const request = require('request')
 const URL = require('url')

@@ -30,7 +30,7 @@ describe('BetaProgramController', function () {
         '../User/UserGetter': (this.UserGetter = {
           getUser: sinon.stub(),
         }),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           languages: {},
         }),
         '../Authentication/AuthenticationController': (this.AuthenticationController = {

@@ -1,5 +1,5 @@
 const _ = require('underscore')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 module.exports = _.template(`\
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"

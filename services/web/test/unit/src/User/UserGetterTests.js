@@ -50,7 +50,7 @@ describe('UserGetter', function () {
         '@overleaf/metrics': {
           timeAsyncMethod: sinon.stub(),
         },
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           reconfirmNotificationDays: 14,
         }),
         '../Institutions/InstitutionsAPI': {

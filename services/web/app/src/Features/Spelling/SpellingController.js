@@ -1,5 +1,5 @@
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 

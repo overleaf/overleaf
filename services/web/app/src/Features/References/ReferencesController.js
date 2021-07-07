@@ -13,7 +13,7 @@
 let ReferencesController
 const logger = require('logger-sharelatex')
 const ReferencesHandler = require('./ReferencesHandler')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 
 module.exports = ReferencesController = {

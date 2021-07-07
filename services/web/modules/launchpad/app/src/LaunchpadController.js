@@ -13,7 +13,7 @@
  */
 let LaunchpadController
 const OError = require('@overleaf/o-error')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Path = require('path')
 const Url = require('url')
 const logger = require('logger-sharelatex')

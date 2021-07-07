@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const SystemMessageManager = require('./SystemMessageManager')
 

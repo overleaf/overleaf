@@ -26,7 +26,7 @@ describe('UserEmailsConfirmationHandler', function () {
   beforeEach(function () {
     this.UserEmailsConfirmationHandler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           siteUrl: 'emails.example.com',
         }),
         '../Security/OneTimeTokenHandler': (this.OneTimeTokenHandler = {}),

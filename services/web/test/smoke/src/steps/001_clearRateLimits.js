@@ -1,5 +1,5 @@
 const OError = require('@overleaf/o-error')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const RateLimiter = require('../../../../app/src/infrastructure/RateLimiter')
 
 async function clearRateLimit(endpointName, subject) {

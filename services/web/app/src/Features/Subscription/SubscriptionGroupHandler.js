@@ -24,7 +24,7 @@ const LimitationsManager = require('./LimitationsManager')
 const logger = require('logger-sharelatex')
 const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')
 const EmailHandler = require('../Email/EmailHandler')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const UserMembershipViewModel = require('../UserMembership/UserMembershipViewModel')
 

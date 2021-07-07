@@ -1,7 +1,7 @@
 const { callbackify } = require('util')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const nodemailer = require('nodemailer')
 const sesTransport = require('nodemailer-ses-transport')
 const mandrillTransport = require('nodemailer-mandrill-transport')

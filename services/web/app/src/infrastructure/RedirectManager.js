@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let RedirectManager
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const URL = require('url')
 const querystring = require('querystring')

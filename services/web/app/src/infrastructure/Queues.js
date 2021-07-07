@@ -1,5 +1,5 @@
 const Queue = require('bull')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 // Bull will keep a fixed number of the most recently completed jobs. This is
 // useful to inspect recently completed jobs. The bull prometheus exporter also

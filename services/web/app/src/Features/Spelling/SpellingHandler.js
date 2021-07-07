@@ -1,5 +1,5 @@
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 
 const TIMEOUT = 10 * 1000

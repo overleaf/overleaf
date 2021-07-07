@@ -134,7 +134,7 @@ describe('ProjectController', function () {
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         mongodb: { ObjectId },
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '@overleaf/metrics': this.Metrics,
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
         './ProjectDeleter': this.ProjectDeleter,

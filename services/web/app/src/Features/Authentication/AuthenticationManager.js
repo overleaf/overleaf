@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { User } = require('../../models/User')
 const { db, ObjectId } = require('../../infrastructure/mongodb')
 const bcrypt = require('bcrypt')

@@ -26,7 +26,7 @@ describe('HistoryController', function () {
     this.HistoryController = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = sinon.stub()),
-        'settings-sharelatex': (this.settings = {}),
+        '@overleaf/settings': (this.settings = {}),
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
         './HistoryManager': (this.HistoryManager = {}),

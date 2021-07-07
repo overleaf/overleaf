@@ -35,7 +35,7 @@ describe('ClsiManager', function () {
     }
     this.ClsiManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           apis: {
             filestore: {
               url: 'filestore.example.com',

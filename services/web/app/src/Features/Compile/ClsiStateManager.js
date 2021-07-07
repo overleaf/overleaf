@@ -14,7 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ClsiStateManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const crypto = require('crypto')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')

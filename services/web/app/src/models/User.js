@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const mongoose = require('../infrastructure/Mongoose')
 const TokenGenerator = require('../Features/TokenGenerator/TokenGenerator')
 const { Schema } = mongoose

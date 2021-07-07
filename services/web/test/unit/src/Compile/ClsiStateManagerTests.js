@@ -21,7 +21,7 @@ describe('ClsiStateManager', function () {
   beforeEach(function () {
     this.ClsiStateManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {}),
+        '@overleaf/settings': (this.settings = {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
       },
     })

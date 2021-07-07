@@ -28,7 +28,7 @@ describe('SpellingController', function () {
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
         request: this.request,
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           languages: [
             { name: 'English', code: 'en' },
             { name: 'French', code: 'fr' },

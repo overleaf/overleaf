@@ -10,9 +10,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let UniversityController
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = UniversityController = {
   getPage(req, res, next) {

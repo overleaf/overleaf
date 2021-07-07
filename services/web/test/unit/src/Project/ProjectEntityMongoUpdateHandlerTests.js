@@ -180,7 +180,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
     this.subject = SandboxedModule.require(MODULE_PATH, {
       requires: {
         mongodb: { ObjectId },
-        'settings-sharelatex': this.Settings,
+        '@overleaf/settings': this.Settings,
         '../Cooldown/CooldownManager': this.CooldownManager,
         '../../models/Folder': { Folder: this.FolderModel },
         '../../infrastructure/LockManager': this.LockManager,

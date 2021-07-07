@@ -1,6 +1,6 @@
 const _ = require('underscore')
 const { User } = require('../../models/User')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 let ReferalFeatures
 

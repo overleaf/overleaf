@@ -28,7 +28,7 @@ describe('ThirdPartyIdentityManager', function () {
             findOne: sinon.stub().yields(undefined, undefined),
           }),
         },
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           oauthProviders: {
             google: {
               name: 'Google',

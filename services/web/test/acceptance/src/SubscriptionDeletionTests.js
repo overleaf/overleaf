@@ -4,7 +4,7 @@ const request = require('./helpers/request')
 const User = require('./helpers/User')
 const RecurlySubscription = require('./helpers/RecurlySubscription')
 const SubscriptionUpdater = require('../../../app/src/Features/Subscription/SubscriptionUpdater')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 describe('Subscriptions', function () {
   describe('deletion', function () {

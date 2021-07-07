@@ -54,7 +54,7 @@ describe('CollaboratorsInviteController', function () {
         '../Analytics/AnalyticsManager': this.AnalyticsManger,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
-        'settings-sharelatex': (this.settings = {}),
+        '@overleaf/settings': (this.settings = {}),
         '../../infrastructure/RateLimiter': this.RateLimiter,
       },
     })

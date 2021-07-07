@@ -1,7 +1,7 @@
 const { ObjectId } = require('mongodb')
 const _ = require('lodash')
 const { promisify } = require('util')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const ENGINE_TO_COMPILER_MAP = {
   latex_dvipdf: 'latex',

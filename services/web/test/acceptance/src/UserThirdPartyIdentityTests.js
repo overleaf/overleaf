@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const Errors = require('../../../app/src/Features/Errors/Errors')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const User = require('./helpers/User')
 const ThirdPartyIdentityManager = require('../../../app/src/Features/User/ThirdPartyIdentityManager')
 const { expect } = require('chai')

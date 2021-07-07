@@ -2,7 +2,7 @@ const i18n = require('i18next')
 const fsBackend = require('i18next-fs-backend')
 const middleware = require('i18next-http-middleware')
 const path = require('path')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { URL } = require('url')
 
 const fallbackLanguageCode = Settings.i18n.defaultLng || 'en'

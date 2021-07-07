@@ -27,7 +27,7 @@ describe('ProxyManager', function () {
     })
     this.proxyManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         request: this.request,
       },
     })

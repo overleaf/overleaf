@@ -18,7 +18,7 @@ describe('ContactManager', function () {
     this.ContactManager = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = sinon.stub()),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           apis: {
             contacts: {
               url: 'contacts.sharelatex.com',

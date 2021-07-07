@@ -117,7 +117,7 @@ describe('SubscriptionUpdater', function () {
         './SubscriptionLocator': this.SubscriptionLocator,
         '../User/UserGetter': this.UserGetter,
         './PlansLocator': this.PlansLocator,
-        'settings-sharelatex': this.Settings,
+        '@overleaf/settings': this.Settings,
         '../../infrastructure/mongodb': { db: {}, ObjectId },
         './FeaturesUpdater': this.FeaturesUpdater,
         '../../models/DeletedSubscription': {

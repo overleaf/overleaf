@@ -122,7 +122,7 @@ describe('SubscriptionHandler', function () {
       requires: {
         './RecurlyWrapper': this.RecurlyWrapper,
         './RecurlyClient': this.RecurlyClient,
-        'settings-sharelatex': this.Settings,
+        '@overleaf/settings': this.Settings,
         '../../models/User': {
           User: this.User,
         },

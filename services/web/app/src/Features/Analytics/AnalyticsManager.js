@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Metrics = require('../../infrastructure/Metrics')
 const Queues = require('../../infrastructure/Queues')
 

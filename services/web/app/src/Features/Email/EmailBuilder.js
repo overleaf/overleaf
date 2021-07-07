@@ -1,5 +1,5 @@
 const _ = require('underscore')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const moment = require('moment')
 const EmailMessageHelper = require('./EmailMessageHelper')
 const StringHelper = require('../Helpers/StringHelper')

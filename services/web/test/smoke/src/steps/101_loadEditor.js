@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 async function run({ assertHasStatusCode, request }) {
   const response = await request(`/project/${Settings.smokeTest.projectId}`)

@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let RestoreManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Path = require('path')
 const FileWriter = require('../../infrastructure/FileWriter')
 const FileSystemImportManager = require('../Uploads/FileSystemImportManager')

@@ -5,7 +5,7 @@ const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
 const path = require('path')
 const request = require('request-promise-native')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
   .promises

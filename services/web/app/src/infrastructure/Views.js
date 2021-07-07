@@ -1,7 +1,7 @@
 const logger = require('logger-sharelatex')
 const pug = require('pug')
 const globby = require('globby')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const path = require('path')
 
 // Generate list of view names from app/views

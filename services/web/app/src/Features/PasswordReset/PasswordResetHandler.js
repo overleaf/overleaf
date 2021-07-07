@@ -1,4 +1,4 @@
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 const UserGetter = require('../User/UserGetter')
 const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')

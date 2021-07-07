@@ -29,7 +29,7 @@ describe('OneTimeTokenHandler', function () {
     this.callback = sinon.stub()
     return (this.OneTimeTokenHandler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         crypto: {
           randomBytes: () => this.stubbedToken,
         },

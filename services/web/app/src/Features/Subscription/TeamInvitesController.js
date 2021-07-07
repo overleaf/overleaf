@@ -11,7 +11,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const TeamInvitesHandler = require('./TeamInvitesHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')

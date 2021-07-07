@@ -97,7 +97,7 @@ describe('SubscriptionGroupHandler', function () {
         './LimitationsManager': this.LimitationsManager,
         '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
         '../Email/EmailHandler': this.EmailHandler,
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
         '../UserMembership/UserMembershipViewModel': this
           .UserMembershipViewModel,

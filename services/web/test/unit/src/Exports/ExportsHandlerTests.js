@@ -31,7 +31,7 @@ describe('ExportsHandler', function () {
         '../Project/ProjectLocator': (this.ProjectLocator = {}),
         '../Project/ProjectRootDocManager': (this.ProjectRootDocManager = {}),
         '../User/UserGetter': (this.UserGetter = {}),
-        'settings-sharelatex': (this.settings = {}),
+        '@overleaf/settings': (this.settings = {}),
         request: this.request,
       },
     })

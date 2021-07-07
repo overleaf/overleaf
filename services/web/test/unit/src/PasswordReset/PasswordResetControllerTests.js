@@ -51,7 +51,7 @@ describe('PasswordResetController', function () {
     }
     this.PasswordResetController = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         './PasswordResetHandler': this.PasswordResetHandler,
         '../../infrastructure/RateLimiter': this.RateLimiter,
         '../Authentication/AuthenticationController': (this.AuthenticationController = {

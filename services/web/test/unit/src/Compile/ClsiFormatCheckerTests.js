@@ -20,7 +20,9 @@ describe('ClsiFormatChecker', function () {
   beforeEach(function () {
     this.ClsiFormatChecker = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = { compileBodySizeLimitMb: 5 }),
+        '@overleaf/settings': (this.settings = {
+          compileBodySizeLimitMb: 5,
+        }),
       },
     })
     return (this.project_id = 'project-id')

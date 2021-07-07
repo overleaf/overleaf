@@ -1,6 +1,6 @@
 const Path = require('path')
 const express = require('express')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
 const expressLocals = require('./ExpressLocals')

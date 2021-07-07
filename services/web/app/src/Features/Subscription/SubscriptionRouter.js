@@ -13,7 +13,7 @@ const SubscriptionController = require('./SubscriptionController')
 const SubscriptionGroupController = require('./SubscriptionGroupController')
 const TeamInvitesController = require('./TeamInvitesController')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = {
   apply(webRouter, privateApiRouter, publicApiRouter) {

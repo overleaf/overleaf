@@ -2,7 +2,7 @@ const AuthorizationMiddleware = require('../Authorization/AuthorizationMiddlewar
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const ProjectUploadController = require('./ProjectUploadController')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = {
   apply(webRouter, apiRouter) {

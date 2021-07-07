@@ -13,7 +13,7 @@ describe('FeaturesUpdater', function () {
         './UserFeaturesUpdater': (this.UserFeaturesUpdater = {}),
         './SubscriptionLocator': (this.SubscriptionLocator = {}),
         './PlansLocator': (this.PlansLocator = {}),
-        'settings-sharelatex': (this.Settings = {
+        '@overleaf/settings': (this.Settings = {
           features: {
             personal: {
               collaborators: 1,

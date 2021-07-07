@@ -1,6 +1,6 @@
 const request = require('request').defaults({ timeout: 30 * 100 })
 const OError = require('@overleaf/o-error')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const _ = require('underscore')
 const async = require('async')
 const logger = require('logger-sharelatex')

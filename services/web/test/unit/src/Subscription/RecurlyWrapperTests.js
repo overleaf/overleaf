@@ -145,7 +145,7 @@ describe('RecurlyWrapper', function () {
       modulePath,
       {
         requires: {
-          'settings-sharelatex': this.settings,
+          '@overleaf/settings': this.settings,
           request: sinon.stub(),
           './Errors': SubscriptionErrors,
         },

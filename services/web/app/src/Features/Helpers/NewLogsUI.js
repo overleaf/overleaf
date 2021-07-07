@@ -1,5 +1,5 @@
 const { ObjectId } = require('mongodb')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const EXISTING_UI = { newLogsUI: false, subvariant: null }
 const NEW_UI_WITH_POPUP = {

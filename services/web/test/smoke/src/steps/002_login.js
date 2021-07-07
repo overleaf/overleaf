@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 async function run({ assertHasStatusCode, loginCsrfToken, request }) {
   const response = await request('/login', {

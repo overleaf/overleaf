@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const RecurlyWrapper = require('./RecurlyWrapper')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionFormatters = require('./SubscriptionFormatters')

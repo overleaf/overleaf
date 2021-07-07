@@ -6,7 +6,7 @@ const logger = require('logger-sharelatex')
 const os = require('os')
 const crypto = require('crypto')
 const async = require('async')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 const HOST = os.hostname()
 const PID = process.pid

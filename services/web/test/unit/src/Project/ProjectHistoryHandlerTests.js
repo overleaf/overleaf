@@ -44,7 +44,7 @@ describe('ProjectHistoryHandler', function () {
 
     return (this.ProjectHistoryHandler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.Settings = {}),
+        '@overleaf/settings': (this.Settings = {}),
         '../../models/Project': {
           Project: this.ProjectModel,
         },

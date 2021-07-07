@@ -54,7 +54,7 @@ describe('CollaboratorsInviteHandler', function () {
     this.Crypto = Crypto
     this.CollaboratorsInviteHandler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {}),
+        '@overleaf/settings': (this.settings = {}),
         '../../models/ProjectInvite': { ProjectInvite: this.ProjectInvite },
         './CollaboratorsEmailHandler': (this.CollaboratorsEmailHandler = {}),
         './CollaboratorsHandler': (this.CollaboratorsHandler = {

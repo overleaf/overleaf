@@ -1,5 +1,5 @@
 const Bowser = require('bowser')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Url = require('url')
 const { getSafeRedirectPath } = require('../Features/Helpers/UrlHelper')
 

@@ -55,7 +55,7 @@ describe('UserSessionsManager', function () {
     }
     return (this.UserSessionsManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         './UserSessionsRedis': this.UserSessionsRedis,
       },
     }))

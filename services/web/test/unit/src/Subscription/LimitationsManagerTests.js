@@ -38,7 +38,7 @@ describe('LimitationsManager', function () {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../User/UserGetter': this.UserGetter,
         './SubscriptionLocator': this.SubscriptionLocator,
-        'settings-sharelatex': (this.Settings = {}),
+        '@overleaf/settings': (this.Settings = {}),
         '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
         '../Collaborators/CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),

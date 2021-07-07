@@ -16,7 +16,7 @@ let ReferencesHandler
 const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const request = require('request')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const Features = require('../../infrastructure/Features')
 const ProjectGetter = require('../Project/ProjectGetter')
 const UserGetter = require('../User/UserGetter')

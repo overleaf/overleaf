@@ -48,7 +48,7 @@ describe('AnalyticsManager', function () {
     this.request = sinon.stub().yields()
     this.AnalyticsManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'settings-sharelatex': this.Settings,
+        '@overleaf/settings': this.Settings,
         '../../infrastructure/Queues': this.Queues,
       },
     })

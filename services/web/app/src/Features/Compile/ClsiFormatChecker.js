@@ -12,7 +12,7 @@
 let ClsiFormatChecker
 const _ = require('lodash')
 const async = require('async')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 module.exports = ClsiFormatChecker = {
   checkRecoursesForProblems(resources, callback) {

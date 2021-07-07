@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const User = require('./helpers/User').promises
 
 describe('HealthCheckController', function () {

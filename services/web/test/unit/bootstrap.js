@@ -46,22 +46,6 @@ const SandboxedModule = require('sandboxed-module')
 SandboxedModule.configure({
   requires: getSandboxedModuleRequires(),
   globals: { Buffer, Promise, console, process },
-  sourceTransformers: {
-    coffee(source) {
-      if (this.filename.endsWith('.coffee')) {
-        // Coffeescript mucks with Error.prepareStackTrace, which, in turn,
-        // conflicts with OError. This is a hacky way to prevent Coffeescript
-        // from interfering.
-        //
-        // See https://github.com/jashkenas/coffeescript/blob/07f644c39223e016aceedd2cd71b5941579b5659/src/coffeescript.coffee#L368
-        const originalPrepareStackTrace = Error.prepareStackTrace
-        const compiled = require('coffeescript').compile(source)
-        Error.prepareStackTrace = originalPrepareStackTrace
-        return compiled
-      }
-      return source
-    },
-  },
 })
 
 function getSandboxedModuleRequires() {

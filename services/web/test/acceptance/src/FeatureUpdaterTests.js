@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const UserHelper = require('./helpers/UserHelper')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { ObjectId } = require('mongodb')
 const { Subscription } = require('../../../app/src/models/Subscription')
 const { User } = require('../../../app/src/models/User')

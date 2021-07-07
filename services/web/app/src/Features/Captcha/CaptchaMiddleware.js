@@ -13,7 +13,7 @@
 let CaptchaMiddleware
 const request = require('request')
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = CaptchaMiddleware = {
   validateCaptcha(action) {

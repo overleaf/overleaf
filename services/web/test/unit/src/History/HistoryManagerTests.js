@@ -46,7 +46,7 @@ describe('HistoryManager', function () {
     this.HistoryManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         'request-promise-native': this.request,
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '../User/UserGetter': this.UserGetter,
       },
     })

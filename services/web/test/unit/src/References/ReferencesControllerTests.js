@@ -23,7 +23,7 @@ describe('ReferencesController', function () {
     this.projectId = '2222'
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           apis: { web: { url: 'http://some.url' } },
         }),
         './ReferencesHandler': (this.ReferencesHandler = {

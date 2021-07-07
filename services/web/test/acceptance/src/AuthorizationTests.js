@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const async = require('async')
 const User = require('./helpers/User')
 const request = require('./helpers/request')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 const expectErrorResponse = require('./helpers/expectErrorResponse')
 

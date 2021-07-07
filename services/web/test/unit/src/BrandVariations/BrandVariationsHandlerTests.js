@@ -43,7 +43,7 @@ describe('BrandVariationsHandler', function () {
     this.V1Api = { request: sinon.stub() }
     this.BrandVariationsHandler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '../V1/V1Api': this.V1Api,
       },
     })

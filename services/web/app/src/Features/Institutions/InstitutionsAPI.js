@@ -1,7 +1,7 @@
 const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const request = require('request')
 const { promisifyAll } = require('../../util/promises')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')

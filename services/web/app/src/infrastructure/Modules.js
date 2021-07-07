@@ -3,7 +3,7 @@ const Path = require('path')
 const pug = require('pug')
 const async = require('async')
 const { promisify } = require('util')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const MODULE_BASE_PATH = Path.resolve(__dirname + '/../../../modules')
 

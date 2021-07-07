@@ -86,7 +86,7 @@ describe('TeamInvitesHandler', function () {
       requires: {
         mongodb: { ObjectId },
         crypto: this.crypto,
-        'settings-sharelatex': { siteUrl: 'http://example.com' },
+        '@overleaf/settings': { siteUrl: 'http://example.com' },
         '../../models/TeamInvite': { TeamInvite: (this.TeamInvite = {}) },
         '../../models/Subscription': { Subscription: this.Subscription },
         '../User/UserGetter': this.UserGetter,

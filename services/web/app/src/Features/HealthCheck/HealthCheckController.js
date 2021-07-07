@@ -1,6 +1,6 @@
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('health_check')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const UserGetter = require('../User/UserGetter')
 const {

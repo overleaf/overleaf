@@ -11,7 +11,7 @@ describe('HttpErrorHandler', function () {
 
     this.HttpErrorHandler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           appName: 'Overleaf',
           statusPageUrl: 'https://status.overlaf.com',
         },

@@ -51,7 +51,7 @@ describe('UserRegistrationHandler', function () {
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
           recordEvent: sinon.stub(),
         }),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           siteUrl: 'http://sl.example.com',
         }),
         '../Helpers/EmailHelper': EmailHelper,

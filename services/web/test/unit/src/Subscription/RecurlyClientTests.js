@@ -62,7 +62,7 @@ describe('RecurlyClient', function () {
         console: console,
       },
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         recurly: this.recurly,
         'logger-sharelatex': {
           err: sinon.stub(),

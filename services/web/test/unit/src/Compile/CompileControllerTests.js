@@ -59,7 +59,7 @@ describe('CompileController', function () {
     }
     this.CompileController = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         request: (this.request = sinon.stub()),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),

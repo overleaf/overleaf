@@ -15,7 +15,7 @@
 let ContactManager
 const OError = require('@overleaf/o-error')
 const request = require('request')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 module.exports = ContactManager = {
   getContactIds(user_id, options, callback) {

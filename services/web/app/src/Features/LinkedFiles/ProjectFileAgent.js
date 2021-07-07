@@ -20,7 +20,7 @@ const DocstoreManager = require('../Docstore/DocstoreManager')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const FileStoreHandler = require('../FileStore/FileStoreHandler')
 const _ = require('underscore')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
 const {
   BadDataError,

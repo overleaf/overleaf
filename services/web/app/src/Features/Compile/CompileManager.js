@@ -14,7 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let CompileManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('clsi_recently_compiled')
 const ProjectGetter = require('../Project/ProjectGetter')

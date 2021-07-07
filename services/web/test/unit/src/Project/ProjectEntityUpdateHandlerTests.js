@@ -144,7 +144,7 @@ describe('ProjectEntityUpdateHandler', function () {
     }
     this.ProjectEntityUpdateHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'settings-sharelatex': { validRootDocExtensions: ['tex'] },
+        '@overleaf/settings': { validRootDocExtensions: ['tex'] },
         fs: this.fs,
         '../../models/Doc': { Doc: this.DocModel },
         '../Docstore/DocstoreManager': this.DocstoreManager,

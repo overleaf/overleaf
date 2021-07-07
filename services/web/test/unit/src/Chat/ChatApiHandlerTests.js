@@ -32,7 +32,7 @@ describe('ChatApiHandler', function () {
     this.request = sinon.stub()
     this.ChatApiHandler = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         request: this.request,
       },
     })

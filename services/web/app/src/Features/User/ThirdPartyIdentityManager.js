@@ -6,7 +6,7 @@ const Errors = require('../Errors/Errors')
 const _ = require('lodash')
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { User } = require(`${APP_ROOT}/models/User`)
 const { promisifyAll } = require(`${APP_ROOT}/util/promises`)
 

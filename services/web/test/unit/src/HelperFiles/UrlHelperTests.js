@@ -12,7 +12,7 @@ describe('UrlHelper', function () {
       siteUrl: 'http://localhost:3000',
     }
     this.UrlHelper = SandboxedModule.require(modulePath, {
-      requires: { 'settings-sharelatex': this.settings },
+      requires: { '@overleaf/settings': this.settings },
     })
   })
   describe('getSafeRedirectPath', function () {

@@ -114,7 +114,7 @@ describe('UserController', function () {
         './UserHandler': this.UserHandler,
         './UserSessionsManager': this.UserSessionsManager,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '@overleaf/metrics': {
           inc() {},
         },

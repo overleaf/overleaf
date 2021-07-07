@@ -3,7 +3,7 @@ const logger = require('logger-sharelatex')
 const crypto = require('crypto')
 const async = require('async')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { ObjectId } = require('mongodb')
 
 const { Subscription } = require('../../models/Subscription')

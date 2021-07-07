@@ -1,7 +1,7 @@
 let InstitutionsFeatures
 const UserGetter = require('../User/UserGetter')
 const PlansLocator = require('../Subscription/PlansLocator')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = InstitutionsFeatures = {
   getInstitutionsFeatures(userId, callback) {

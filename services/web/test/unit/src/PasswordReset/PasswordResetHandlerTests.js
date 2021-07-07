@@ -51,7 +51,7 @@ describe('PasswordResetHandler', function () {
         '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
         '../Email/EmailHandler': this.EmailHandler,
         '../Authentication/AuthenticationManager': this.AuthenticationManager,
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
       },
     })
     this.token = '12312321i'

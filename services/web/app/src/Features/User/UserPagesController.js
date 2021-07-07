@@ -2,7 +2,7 @@ const UserGetter = require('./UserGetter')
 const OError = require('@overleaf/o-error')
 const UserSessionsManager = require('./UserSessionsManager')
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const _ = require('lodash')
 

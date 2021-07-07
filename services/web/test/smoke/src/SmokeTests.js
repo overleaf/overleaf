@@ -1,7 +1,7 @@
 const fs = require('fs')
 const Path = require('path')
 
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { getCsrfTokenForFactory } = require('./support/Csrf')
 const { SmokeTestFailure } = require('./support/Errors')
 const {
