@@ -26,7 +26,7 @@ const semver = require('semver')
 const knox = require('knox')
 const crypto = require('crypto')
 const async = require('async')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const _ = require('underscore')
 
 const SERVICES = require('./config/services')

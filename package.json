@@ -9,6 +9,7 @@
     "format:fix": "prettier --write $PWD/'**/*.js'"
   },
   "dependencies": {
+    "@overleaf/settings": "^2.1.1",
     "async": "^0.9.0",
     "bson": "^1.0.4",
     "coffee-script": "^1.11.1",
@@ -21,7 +22,6 @@
     "mongojs": "2.4.0",
     "redis": "^2.6.2",
     "rimraf": "~2.2.6",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git",
     "underscore": "^1.7.0"
   },
   "devDependencies": {
