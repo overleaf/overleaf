@@ -12,7 +12,6 @@
     "@overleaf/settings": "^2.1.1",
     "async": "^0.9.0",
     "bson": "^1.0.4",
-    "coffee-script": "^1.11.1",
     "east": "0.5.7",
     "east-mongo": "0.3.3",
     "grunt-shell": "^1.1.1",
@@ -41,7 +40,6 @@
     "grunt-execute": "~0.1.5",
     "grunt-available-tasks": "~0.4.1",
     "grunt-concurrent": "~0.4.3",
-    "grunt-contrib-coffee": "~0.10.1",
     "prettier": "^2.2.1",
     "semver": "~2.2.1",
     "knox": "~0.8.9"

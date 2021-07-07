@@ -16,7 +16,6 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const coffee = require('coffee-script')
 const fs = require('fs')
 const { spawn } = require('child_process')
 const { exec } = require('child_process')
@@ -38,7 +37,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-execute')
   grunt.loadNpmTasks('grunt-available-tasks')
   grunt.loadNpmTasks('grunt-concurrent')
-  grunt.loadNpmTasks('grunt-contrib-coffee')
   grunt.loadNpmTasks('grunt-shell')
 
   grunt.task.loadTasks('./tasks')
