@@ -2,8 +2,7 @@
 
 set -e
 
-grep 'name:' config/services.js | \
-	sed 's/.*name: "\(.*\)",/\1/' | \
+node ./config/services.js | \
 	while read service
 	do
 		pushd $service
