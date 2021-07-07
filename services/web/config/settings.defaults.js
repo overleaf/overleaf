@@ -1,4 +1,4 @@
-let defaultFeatures, docUpdaterPort, siteUrl, v1Api
+let defaultFeatures, siteUrl
 const http = require('http')
 http.globalAgent.maxSockets = 300
 
@@ -16,20 +16,6 @@ if (httpAuthUser && httpAuthPass) {
 }
 
 const sessionSecret = process.env.SESSION_SECRET || 'secret-please-change'
-
-if (process.env.V1_API_URL || process.env.V1_HOST) {
-  v1Api = {
-    url: process.env.V1_API_URL || `http://${process.env.V1_HOST}:5000`,
-    user: process.env.V1_API_USER,
-    pass: process.env.V1_API_PASSWORD,
-  }
-} else {
-  v1Api = {
-    url: undefined,
-    user: undefined,
-    pass: undefined,
-  }
-}
 
 const intFromEnv = function (name, defaultValue) {
   if (
@@ -174,9 +160,6 @@ module.exports = {
       port: process.env.WEB_PORT || 3000,
       host: process.env.LISTEN_ADDRESS || 'localhost',
     },
-    documentupdater: {
-      port: (docUpdaterPort = 3003),
-    },
   },
 
   gitBridgePublicBaseUrl: `http://${
@@ -199,15 +182,12 @@ module.exports = {
         process.env.DOCUPDATER_HOST ||
         process.env.DOCUMENT_UPDATER_HOST ||
         'localhost'
-      }:${docUpdaterPort}`,
+      }:3003`,
     },
     thirdPartyDataStore: {
       url: `http://${process.env.TPDS_HOST || 'localhost'}:3002`,
       emptyProjectFlushDelayMiliseconds: 5 * seconds,
       dropboxApp: process.env.TPDS_DROPBOX_APP,
-    },
-    tags: {
-      url: `http://${process.env.TAGS_HOST || 'localhost'}:3012`,
     },
     spelling: {
       url: `http://${process.env.SPELLING_HOST || 'localhost'}:3005`,
@@ -300,9 +280,12 @@ module.exports = {
       ),
     },
     v1: {
-      url: v1Api.url,
-      user: v1Api.user,
-      pass: v1Api.pass,
+      url:
+        process.env.V1_API_URL || process.env.V1_HOST
+          ? process.env.V1_API_URL || `http://${process.env.V1_HOST}:5000`
+          : undefined,
+      user: process.env.V1_API_USER || undefined,
+      pass: process.env.V1_API_PASSWORD || undefined,
     },
     v1_history: {
       url: `http://${process.env.V1_HISTORY_HOST || 'localhost'}:3100/api`,
@@ -401,9 +384,6 @@ module.exports = {
 
   // this is only used if cookies are used for clsi backend
   // clsiCookieKey: "clsiserver"
-
-  // Same, but with http auth credentials.
-  httpAuthSiteUrl: `http://${httpAuthUser}:${httpAuthPass}@${siteUrl}`,
 
   robotsNoindex: process.env.ROBOTS_NOINDEX === 'true' || false,
 
@@ -713,7 +693,9 @@ module.exports = {
   appName: process.env.APP_NAME || 'ShareLaTeX (Community Edition)',
 
   adminEmail: process.env.ADMIN_EMAIL || 'placeholder@example.com',
-  adminDomains: JSON.parse(process.env.ADMIN_DOMAINS || 'null'),
+  adminDomains: process.env.ADMIN_DOMAINS
+    ? JSON.parse(process.env.ADMIN_DOMAINS)
+    : undefined,
 
   salesEmail: process.env.SALES_EMAIL || 'placeholder@example.com',
 
