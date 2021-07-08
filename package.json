@@ -10,7 +10,7 @@
     "east-mongo": "0.3.3",
     "grunt-shell": "^1.1.1",
     "load-grunt-config": "^0.19.2",
-    "lodash": "^3.0.0",
+    "lodash": "^4.17.21",
     "mongodb": "^2.2.34",
     "mongojs": "2.4.0",
     "redis": "^2.6.2",
