@@ -22,10 +22,10 @@
     </appender>
 
     <!-- Set log levels for the application (or parts of the application). -->
-    <logger name="uk.ac.ic.wlgitbridge" level="INFO" />
+    <logger name="uk.ac.ic.wlgitbridge" level="DEBUG" />
 
     <!-- The root log level determines how much our dependencies put in the logs. -->
-    <root level="WARN">
+    <root level="INFO">
         <appender-ref ref="stdout" />
         <appender-ref ref="stderr" />
     </root>
