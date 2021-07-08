@@ -1,3 +1,5 @@
+const base = require('../../../config/settings.overrides.saas')
+
 let features
 const v1Api = {
   url: 'http://localhost:5000',
@@ -10,7 +12,7 @@ const httpAuthPass = 'password'
 const httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass
 
-module.exports = {
+module.exports = base.mergeWith({
   cacheStaticAssets: true,
   enableSubscriptions: true,
 
@@ -234,4 +236,4 @@ module.exports = {
   test: {
     counterInit: 0,
   },
-}
+})

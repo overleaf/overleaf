@@ -63,6 +63,8 @@ config/*.coffee
 config/*.js
 !config/settings.defaults.js
 !config/settings.webpack.js
+!config/settings.overrides.saas.js
+!config/settings.overrides.server-pro.js
 
 modules/**/Makefile
 
