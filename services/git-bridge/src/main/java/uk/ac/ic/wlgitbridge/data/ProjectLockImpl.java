@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 /**
  * Created by Winston on 20/11/14.
@@ -35,29 +36,40 @@ public class ProjectLockImpl implements ProjectLock {
 
     @Override
     public void lockForProject(String projectName) {
+        Log.debug("[{}] taking project lock", projectName);
         getLockForProjectName(projectName).lock();
+        Log.debug("[{}] taking reentrant lock", projectName);
         rlock.lock();
+        Log.debug("[{}] taken locks", projectName);
     }
 
     @Override
     public void unlockForProject(String projectName) {
+        Log.debug("[{}] releasing project lock", projectName);
         getLockForProjectName(projectName).unlock();
+        Log.debug("[{}] releasing reentrant lock", projectName);
         rlock.unlock();
+        Log.debug("[{}] released locks", projectName);
         if (waiting) {
+            Log.debug("[{}] waiting for remaining threads", projectName);
             trySignal();
         }
     }
 
     private void trySignal() {
         int threads = rwlock.getReadLockCount();
+        Log.debug("-> waiting for {} threads", threads);
         if (waiter != null && threads > 0) {
             waiter.threadsRemaining(threads);
         }
+        Log.debug("-> finished waiting for threads");
     }
 
     public void lockAll() {
+        Log.debug("-> locking all threads");
         waiting = true;
         trySignal();
+        Log.debug("-> locking reentrant write lock");
         wlock.lock();
     }
 

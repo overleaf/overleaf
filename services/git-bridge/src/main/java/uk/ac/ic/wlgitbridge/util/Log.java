@@ -27,6 +27,10 @@ public class Log {
         logger.debug(msg, t);
     }
 
+    public static void debug(String format, Object... args) {
+        logger.info(format, args);
+    }
+
     public static void info(String msg) {
         logger.info(msg);
     }
