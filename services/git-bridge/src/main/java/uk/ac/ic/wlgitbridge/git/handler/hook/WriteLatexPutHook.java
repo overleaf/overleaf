@@ -65,6 +65,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
             ReceivePack receivePack,
             Collection<ReceiveCommand> receiveCommands
     ) {
+        Log.debug("-> Handling {} commands in {}", receiveCommands.size(), receivePack.getRepository().getDirectory().getAbsolutePath());
         for (ReceiveCommand receiveCommand : receiveCommands) {
             try {
                 handleReceiveCommand(
@@ -73,17 +74,20 @@ public class WriteLatexPutHook implements PreReceiveHook {
                         receiveCommand
                 );
             } catch (IOException e) {
+                Log.debug("IOException on pre receive: {}", e.getMessage());
                 receivePack.sendError(e.getMessage());
                 receiveCommand.setResult(
                         Result.REJECTED_OTHER_REASON,
                         e.getMessage()
                 );
             } catch (OutOfDateException e) {
+                Log.debug("OutOfDateException on pre receive: {}", e.getMessage());
                 receiveCommand.setResult(Result.REJECTED_NONFASTFORWARD);
             } catch (GitUserException e) {
+                Log.debug("GitUserException on pre receive: {}", e.getMessage());
                 handleSnapshotPostException(receivePack, receiveCommand, e);
             } catch (Throwable t) {
-                Log.warn("Throwable on pre receive: ", t);
+                Log.warn("Throwable on pre receive: {}", t.getMessage());
                 handleSnapshotPostException(
                         receivePack,
                         receiveCommand,
@@ -91,6 +95,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
                 );
             }
         }
+        Log.debug("-> Handled {} commands in {}", receiveCommands.size(), receivePack.getRepository().getDirectory().getAbsolutePath());
     }
 
     private void handleSnapshotPostException(
