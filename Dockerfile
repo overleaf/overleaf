@@ -12,7 +12,6 @@ ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
 # -------------------------
 ADD ${baseDir}/bin /var/www/sharelatex/bin
 ADD ${baseDir}/doc /var/www/sharelatex/doc
-ADD ${baseDir}/migrations /var/www/sharelatex/migrations
 ADD ${baseDir}/tasks /var/www/sharelatex/tasks
 ADD ${baseDir}/Gruntfile.coffee /var/www/sharelatex/Gruntfile.coffee
 ADD ${baseDir}/package.json /var/www/sharelatex/package.json
