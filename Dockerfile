@@ -16,7 +16,7 @@ ADD ${baseDir}/migrations /var/www/sharelatex/migrations
 ADD ${baseDir}/tasks /var/www/sharelatex/tasks
 ADD ${baseDir}/Gruntfile.coffee /var/www/sharelatex/Gruntfile.coffee
 ADD ${baseDir}/package.json /var/www/sharelatex/package.json
-ADD ${baseDir}/npm-shrinkwrap.json /var/www/sharelatex/npm-shrinkwrap.json
+ADD ${baseDir}/package-lock.json /var/www/sharelatex/package-lock.json
 ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
 
 
@@ -29,7 +29,7 @@ ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
 # Checkout services
 # -----------------
 RUN cd /var/www/sharelatex \
-&&    npm install \
+&&    npm ci \
 &&    grunt install \
   \
 # Cleanup not needed artifacts
