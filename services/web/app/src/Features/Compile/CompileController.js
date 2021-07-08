@@ -21,7 +21,6 @@ const CompileManager = require('./CompileManager')
 const ClsiManager = require('./ClsiManager')
 const logger = require('logger-sharelatex')
 const request = require('request')
-const sanitize = require('sanitizer')
 const Settings = require('@overleaf/settings')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const UserGetter = require('../User/UserGetter')
@@ -266,7 +265,7 @@ module.exports = CompileController = {
   _getSafeProjectName(project) {
     const wordRegExp = /\W/g
     const safeProjectName = project.name.replace(wordRegExp, '_')
-    return sanitize.escape(safeProjectName)
+    return safeProjectName
   },
 
   deleteAuxFiles(req, res, next) {
