@@ -451,6 +451,7 @@ public class Bridge {
             RawDirectory oldDirectoryContents,
             String hostname
     ) throws SnapshotPostException, IOException, MissingRepositoryException, ForbiddenException, GitUserException {
+        Log.debug("[{}] pushing to Overleaf", projectName);
         try (LockGuard __ = lock.lockGuard(projectName)) {
             pushCritical(
                     oauth2,
@@ -538,10 +539,11 @@ public class Bridge {
         if (maxFileNum.isPresent()) {
           long maxFileNum_ = maxFileNum.get();
           if (directoryContents.getFileTable().size() > maxFileNum_) {
+            Log.debug("[{}] Too many files: {}/{}", projectName, directoryContents.getFileTable().size(), maxFileNum_);
             throw new FileLimitExceededException(directoryContents.getFileTable().size(), maxFileNum_);
           }
         }
-        Log.info("[{}] Pushing", projectName);
+        Log.info("[{}] Pushing files ({} new, {} old)", projectName, directoryContents.getFileTable().size(), oldDirectoryContents.getFileTable().size());
         String postbackKey = postbackManager.makeKeyForProject(projectName);
         Log.info(
                 "[{}] Created postback key: {}",
