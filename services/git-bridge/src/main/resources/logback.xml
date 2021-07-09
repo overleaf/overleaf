@@ -25,7 +25,7 @@
     <logger name="uk.ac.ic.wlgitbridge" level="DEBUG" />
 
     <!-- The root log level determines how much our dependencies put in the logs. -->
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="stdout" />
         <appender-ref ref="stderr" />
     </root>
