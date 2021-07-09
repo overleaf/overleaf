@@ -523,7 +523,7 @@
   "auto_compile_onboarding_description": "When enabled, your project will compile as you type.",
   "try_out_auto_compile_setting": "Try out the new auto compile setting!",
   "got_it": "Got it",
-  "pdf_compile_in_progress_error": "Compile already running in another window",
+  "pdf_compile_in_progress_error": "A previous compile is still running. Please wait a minute and try compiling again.",
   "pdf_compile_try_again": "Please wait for your other compile to finish before trying again.",
   "invalid_email": "An email address is invalid",
   "auto_compile": "Auto Compile",
