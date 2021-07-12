@@ -26,6 +26,7 @@
     "aws-sdk": "^2.643.0",
     "body-parser": "^1.19.0",
     "bson": "^1.1.5",
+    "bunyan": "^1.8.15",
     "byline": "^5.0.0",
     "express": "4.17.1",
     "heap": "^0.2.6",
@@ -42,7 +43,6 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
-    "bunyan": "~2.0.2",
     "chai": "~4.2.0",
     "cli": "^1.0.1",
     "eslint": "^6.8.0",
