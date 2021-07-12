@@ -1,4 +1,4 @@
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 const persistorSettings = settings.docstore
 persistorSettings.Metrics = require('@overleaf/metrics')

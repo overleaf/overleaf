@@ -14,7 +14,7 @@ let MongoManager
 const { db, ObjectId } = require('./mongodb')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { promisify } = require('util')
 
 module.exports = MongoManager = {

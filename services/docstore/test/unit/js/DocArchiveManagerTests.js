@@ -146,7 +146,7 @@ describe('DocArchiveManager', function () {
 
     DocArchiveManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': Settings,
+        '@overleaf/settings': Settings,
         crypto: Crypto,
         streamifier: Streamifier,
         './MongoManager': MongoManager,

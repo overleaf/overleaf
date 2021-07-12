@@ -13,7 +13,7 @@
  */
 let DocstoreClient
 const request = require('request').defaults({ jar: false })
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const Persistor = require('../../../../app/js/PersistorManager')
 
 async function streamToString(stream) {

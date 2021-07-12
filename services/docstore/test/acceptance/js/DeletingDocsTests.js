@@ -15,7 +15,7 @@ const { db, ObjectId } = require('../../../app/js/mongodb')
 const { expect } = require('chai')
 const DocstoreApp = require('./helpers/DocstoreApp')
 const Errors = require('../../../app/js/Errors')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 

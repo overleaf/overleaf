@@ -27,7 +27,7 @@ describe('HttpController', function () {
       requires: {
         './DocManager': (this.DocManager = {}),
         './DocArchiveManager': (this.DocArchiveManager = {}),
-        'settings-sharelatex': settings,
+        '@overleaf/settings': settings,
         './HealthChecker': {}
       }
     })

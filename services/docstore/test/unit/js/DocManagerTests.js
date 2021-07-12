@@ -31,7 +31,7 @@ describe('DocManager', function () {
           },
           shouldUpdateRanges: sinon.stub().returns(false)
         }),
-        'settings-sharelatex': (this.settings = { docstore: {} }),
+        '@overleaf/settings': (this.settings = { docstore: {} }),
         './Errors': Errors
       }
     })

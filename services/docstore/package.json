@@ -22,6 +22,7 @@
     "@overleaf/metrics": "^3.5.1",
     "@overleaf/o-error": "^3.0.0",
     "@overleaf/object-persistor": "https://github.com/overleaf/object-persistor/archive/4ca62157a2beb747e9a56da3ce1569124b90378a.tar.gz",
+    "@overleaf/settings": "^2.1.1",
     "async": "^2.6.3",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
@@ -31,7 +32,6 @@
     "mongodb": "^3.6.0",
     "p-map": "^4.0.0",
     "request": "^2.88.2",
-    "settings-sharelatex": "^1.1.0",
     "streamifier": "^0.1.1",
     "underscore": "~1.12.1"
   },

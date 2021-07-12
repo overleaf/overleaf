@@ -27,7 +27,7 @@ describe('MongoManager', function () {
           ObjectId
         },
         '@overleaf/metrics': { timeAsyncMethod: sinon.stub() },
-        'settings-sharelatex': { max_deleted_docs: 42 }
+        '@overleaf/settings': { max_deleted_docs: 42 }
       }
     })
     this.project_id = ObjectId().toString()

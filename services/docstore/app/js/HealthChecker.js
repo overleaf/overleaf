@@ -15,7 +15,7 @@ const request = require('request')
 const async = require('async')
 const _ = require('underscore')
 const crypto = require('crypto')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { port } = settings.internal.docstore
 const logger = require('logger-sharelatex')
 

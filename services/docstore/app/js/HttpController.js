@@ -17,7 +17,7 @@ const DocManager = require('./DocManager')
 const logger = require('logger-sharelatex')
 const DocArchive = require('./DocArchiveManager')
 const HealthChecker = require('./HealthChecker')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = HttpController = {
   getDoc(req, res, next) {

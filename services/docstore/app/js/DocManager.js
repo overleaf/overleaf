@@ -20,7 +20,7 @@ const logger = require('logger-sharelatex')
 const _ = require('underscore')
 const DocArchive = require('./DocArchiveManager')
 const RangeManager = require('./RangeManager')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = DocManager = {
   // TODO: For historical reasons, the doc version is currently stored in the docOps

@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 process.env.BACKEND = 'gcs'
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
 const { db, ObjectId } = require('../../../app/js/mongodb')
 const async = require('async')
