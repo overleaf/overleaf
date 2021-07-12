@@ -1,6 +1,6 @@
 const request = require('request')
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 
 module.exports = {

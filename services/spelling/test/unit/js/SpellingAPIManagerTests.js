@@ -28,7 +28,7 @@ describe('SpellingAPIManager', function () {
     this.SpellingAPIManager = SandboxedModule.require(modulePath, {
       requires: {
         './ASpell': this.ASpell,
-        'settings-sharelatex': { ignoredMisspellings: ['ShareLaTeX'] },
+        '@overleaf/settings': { ignoredMisspellings: ['ShareLaTeX'] },
         './LearnedWordsManager': this.LearnedWordsManager
       }
     })

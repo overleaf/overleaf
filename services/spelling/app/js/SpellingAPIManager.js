@@ -10,7 +10,7 @@ const ASpell = require('./ASpell')
 const LearnedWordsManager = require('./LearnedWordsManager')
 const { callbackify } = require('util')
 const OError = require('@overleaf/o-error')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 // The max number of words checked in a single request
 const REQUEST_LIMIT = 10000
