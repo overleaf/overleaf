@@ -41,7 +41,7 @@ describe('Notifications Tests', function () {
 
     this.notifications = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': {},
+        '@overleaf/settings': {},
         './mongodb': { db: this.db, ObjectId },
         '@overleaf/metrics': { timeAsyncMethod: sinon.stub() }
       }

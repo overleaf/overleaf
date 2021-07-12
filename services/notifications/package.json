@@ -18,6 +18,7 @@
   "license": "ISC",
   "dependencies": {
     "@overleaf/metrics": "^3.5.1",
+    "@overleaf/settings": "^2.1.1",
     "async": "^2.6.3",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
@@ -28,7 +29,6 @@
     "method-override": "^3.0.0",
     "mongodb": "^3.6.0",
     "request": "^2.88.2",
-    "settings-sharelatex": "^1.1.0",
     "underscore": "1.13.1"
   },
   "devDependencies": {

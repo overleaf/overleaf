@@ -15,7 +15,7 @@ const { db, ObjectId } = require('./mongodb')
 const request = require('request')
 const async = require('async')
 const _ = require('underscore')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { port } = settings.internal.notifications
 const logger = require('logger-sharelatex')
 
