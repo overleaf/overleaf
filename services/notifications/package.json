@@ -20,6 +20,7 @@
     "@overleaf/metrics": "^3.5.1",
     "async": "^2.6.3",
     "body-parser": "^1.19.0",
+    "bunyan": "^1.8.15",
     "coffee-script": "^1.12.7",
     "errorhandler": "^1.5.1",
     "express": "4.17.1",
@@ -32,7 +33,6 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
-    "bunyan": "^1.8.12",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
