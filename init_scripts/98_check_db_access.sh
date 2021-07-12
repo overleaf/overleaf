@@ -2,6 +2,7 @@
 set -e
 
 echo "Checking can connect to mongo and redis"
-cd /var/www/sharelatex && grunt check:redis
-cd /var/www/sharelatex && grunt check:mongo
+cd /var/www/sharelatex/web
+node scripts/server-ce/check-mongodb
+node scripts/server-ce/check-redis
 echo "All checks passed"
