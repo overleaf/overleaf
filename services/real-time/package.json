@@ -28,6 +28,7 @@
     "base64id": "0.1.0",
     "basic-auth-connect": "^1.0.0",
     "body-parser": "^1.19.0",
+    "bunyan": "^1.8.15",
     "connect-redis": "^2.1.0",
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
@@ -40,7 +41,6 @@
     "underscore": "1.13.1"
   },
   "devDependencies": {
-    "bunyan": "~0.22.3",
     "chai": "~1.9.1",
     "cookie-signature": "^1.1.0",
     "eslint": "^6.8.0",
