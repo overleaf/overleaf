@@ -1,5 +1,4 @@
 #!/bin/bash
-export SHARELATEX_CONFIG=/etc/sharelatex/settings.coffee
 
 NODE_PARAMS=""
 if [ "$DEBUG_NODE" == "true" ]; then
