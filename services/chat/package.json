@@ -21,6 +21,7 @@
     "@overleaf/metrics": "^3.5.1",
     "async": "3.2.0",
     "body-parser": "^1.19.0",
+    "bunyan": "^1.8.15",
     "errorhandler": "^1.5.1",
     "express": "4.17.1",
     "logger-sharelatex": "^2.2.0",
@@ -31,7 +32,6 @@
   "devDependencies": {
     "acorn": "^7.1.1",
     "ajv": "^6.12.0",
-    "bunyan": "^1.8.12",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
