@@ -1,5 +1,5 @@
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const fs = require('fs')
 
 // Monitor a status file (e.g. /etc/real_time_status) periodically and close the

@@ -1,6 +1,6 @@
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 
 const ClientMap = new Map() // for each redis client, store a Map of subscribed channels (channelname -> subscribe promise)

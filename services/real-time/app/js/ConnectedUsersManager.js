@@ -2,7 +2,7 @@
     camelcase,
 */
 const async = require('async')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const redis = require('@overleaf/redis-wrapper')
 const OError = require('@overleaf/o-error')

@@ -17,7 +17,7 @@ const io = require('socket.io-client')
 const async = require('async')
 
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(Settings.redis.websessions)
 

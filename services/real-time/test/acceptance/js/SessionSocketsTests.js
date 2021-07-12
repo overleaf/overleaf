@@ -9,7 +9,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const RealTimeClient = require('./helpers/RealTimeClient')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
 
 describe('SessionSockets', function () {

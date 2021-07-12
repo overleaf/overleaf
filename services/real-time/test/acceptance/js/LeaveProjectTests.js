@@ -17,7 +17,7 @@ const FixturesManager = require('./helpers/FixturesManager')
 
 const async = require('async')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
 

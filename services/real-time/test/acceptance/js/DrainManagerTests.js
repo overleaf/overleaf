@@ -16,7 +16,7 @@ const { expect } = require('chai')
 const async = require('async')
 const request = require('request')
 
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const drain = function (rate, callback) {
   request.post(

@@ -1,5 +1,5 @@
 const Metrics = require('@overleaf/metrics')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 Metrics.initialize(Settings.appName || 'real-time')
 const async = require('async')
 

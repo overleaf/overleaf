@@ -53,7 +53,7 @@ const async = require('async')
 const RealTimeClient = require('./helpers/RealTimeClient')
 const FixturesManager = require('./helpers/FixturesManager')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const Keys = settings.redis.documentupdater.key_schema
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)

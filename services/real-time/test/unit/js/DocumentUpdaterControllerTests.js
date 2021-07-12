@@ -28,7 +28,7 @@ describe('DocumentUpdaterController', function () {
     this.RoomEvents = { on: sinon.stub() }
     this.EditorUpdatesController = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           redis: {
             documentupdater: {
               key_schema: {

@@ -41,7 +41,7 @@ describe('DocumentUpdaterManager', function () {
 
     return (this.DocumentUpdaterManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         request: (this.request = {}),
         '@overleaf/redis-wrapper': { createClient: () => this.rclient },
         '@overleaf/metrics': (this.Metrics = {

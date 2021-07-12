@@ -18,7 +18,7 @@ const MockDocUpdaterServer = require('./helpers/MockDocUpdaterServer')
 const MockWebServer = require('./helpers/MockWebServer')
 const FixturesManager = require('./helpers/FixturesManager')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
 const rclientRT = redis.createClient(settings.redis.realtime)

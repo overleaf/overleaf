@@ -56,7 +56,7 @@ describe('ConnectedUsersManager', function () {
 
     this.ConnectedUsersManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '@overleaf/redis-wrapper': {
           createClient: () => {
             return this.rClient

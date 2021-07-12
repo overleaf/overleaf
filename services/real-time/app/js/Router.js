@@ -3,7 +3,7 @@
 */
 const metrics = require('@overleaf/metrics')
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const WebsocketController = require('./WebsocketController')
 const HttpController = require('./HttpController')
 const HttpApiController = require('./HttpApiController')

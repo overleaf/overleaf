@@ -2,7 +2,7 @@
     camelcase,
 */
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const RedisClientManager = require('./RedisClientManager')
 const SafeJsonParse = require('./SafeJsonParse')
 const EventLogger = require('./EventLogger')

@@ -4,7 +4,7 @@
 let EventLogger
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 // keep track of message counters to detect duplicate and out of order events
 // messsage ids have the format "UNIQUEHOSTKEY-COUNTER"
