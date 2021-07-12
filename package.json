@@ -21,7 +21,7 @@
     "mongojs": "2.4.0",
     "redis": "^2.6.2",
     "rimraf": "~2.2.6",
-    "underscore": "^1.7.0"
+    "underscore": "^1.12.1"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
