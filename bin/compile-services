@@ -2,19 +2,18 @@
 
 set -e
 
-grep 'name:' config/services.js | \
-	sed 's/.*name: "\(.*\)",/\1/' | \
+node ./config/services.js | \
 	while read service
 	do
 		pushd $service
 		echo "Compiling Service $service"
-		case $service in 
+		case $service in
 			web)
 				npm run webpack:production
 				;;
 			*)
 				echo "$service doesn't require a compilation"
 				;;
-		esac	
+		esac
 		popd
 	done
