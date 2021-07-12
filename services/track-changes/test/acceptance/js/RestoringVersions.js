@@ -12,7 +12,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('../../../app/js/mongodb')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const TrackChangesApp = require('./helpers/TrackChangesApp')
 const TrackChangesClient = require('./helpers/TrackChangesClient')

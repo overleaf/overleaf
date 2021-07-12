@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let RedisManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(Settings.redis.history)
 const Keys = Settings.redis.history.key_schema

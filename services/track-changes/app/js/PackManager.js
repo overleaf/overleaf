@@ -24,7 +24,7 @@ const LockManager = require('./LockManager')
 const MongoAWS = require('./MongoAWS')
 const Metrics = require('@overleaf/metrics')
 const ProjectIterator = require('./ProjectIterator')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const keys = Settings.redis.lock.key_schema
 
 // Sharejs operations are stored in a 'pack' object

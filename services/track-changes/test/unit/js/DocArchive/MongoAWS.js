@@ -21,7 +21,7 @@ describe('MongoAWS', function () {
     this.MongoAWS = SandboxedModule.require(modulePath, {
       singleOnly: true,
       requires: {
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           trackchanges: {
             s3: {
               secret: 's3-secret',

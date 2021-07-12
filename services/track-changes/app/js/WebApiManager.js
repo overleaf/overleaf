@@ -13,7 +13,7 @@
 let WebApiManager
 const request = require('requestretry') // allow retry on error https://github.com/FGRibreau/node-request-retry
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 // Don't let HTTP calls hang for a long time
 const MAX_HTTP_REQUEST_LENGTH = 15000 // 15 seconds

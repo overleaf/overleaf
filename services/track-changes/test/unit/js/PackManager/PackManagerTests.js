@@ -30,7 +30,7 @@ describe('PackManager', function () {
         './MongoAWS': {},
         '@overleaf/metrics': { inc() {} },
         './ProjectIterator': require('../../../../app/js/ProjectIterator.js'), // Cache for speed
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           redis: { lock: { key_schema: {} } }
         }
       }

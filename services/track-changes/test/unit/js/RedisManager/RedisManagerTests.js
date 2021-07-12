@@ -28,7 +28,7 @@ describe('RedisManager', function () {
             })
           }
         },
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           redis: {
             history: {
               key_schema: {

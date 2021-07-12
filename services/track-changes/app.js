@@ -7,7 +7,7 @@
  */
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize('track-changes')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const TrackChangesLogger = logger.initialize('track-changes').logger
 

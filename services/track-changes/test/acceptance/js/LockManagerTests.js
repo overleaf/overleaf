@@ -11,7 +11,7 @@
  */
 const sinon = require('sinon')
 const { expect } = require('chai')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const LockManager = require('../../../app/js/LockManager')
 const rclient = require('redis').createClient(Settings.redis.history) // Only works locally for now
 const TrackChangesApp = require('./helpers/TrackChangesApp')

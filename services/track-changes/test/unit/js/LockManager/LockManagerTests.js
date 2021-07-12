@@ -34,7 +34,7 @@ describe('LockManager', function () {
             return (this.rclient = { auth: sinon.stub() })
           }
         },
-        'settings-sharelatex': this.Settings
+        '@overleaf/settings': this.Settings
       }
     })
 

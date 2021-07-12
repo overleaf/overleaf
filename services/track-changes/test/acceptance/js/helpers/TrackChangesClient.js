@@ -16,7 +16,7 @@ let TrackChangesClient
 const async = require('async')
 const zlib = require('zlib')
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.history
 ) // Only works locally for now

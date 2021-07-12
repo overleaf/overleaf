@@ -25,7 +25,7 @@ const UpdateTrimmer = require('./UpdateTrimmer')
 const logger = require('logger-sharelatex')
 const async = require('async')
 const _ = require('underscore')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const keys = Settings.redis.lock.key_schema
 
 module.exports = UpdatesManager = {

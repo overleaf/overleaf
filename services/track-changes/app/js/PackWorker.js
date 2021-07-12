@@ -16,7 +16,7 @@
 let LIMIT, pending
 let project_id, doc_id
 const { callbackify } = require('util')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const async = require('async')
 const _ = require('underscore')
 const { db, ObjectId, waitForDb, closeDb } = require('./mongodb')

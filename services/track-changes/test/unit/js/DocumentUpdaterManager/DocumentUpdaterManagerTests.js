@@ -19,7 +19,7 @@ describe('DocumentUpdaterManager', function () {
     this.DocumentUpdaterManager = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = {}),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           apis: { documentupdater: { url: 'http://example.com' } }
         })
       }

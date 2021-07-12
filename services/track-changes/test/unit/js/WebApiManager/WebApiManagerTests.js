@@ -19,7 +19,7 @@ describe('WebApiManager', function () {
     this.WebApiManager = SandboxedModule.require(modulePath, {
       requires: {
         requestretry: (this.request = {}),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           apis: {
             web: {
               url: 'http://example.com',

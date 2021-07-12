@@ -13,7 +13,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('../../../app/js/mongodb')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const request = require('request')
 const rclient = require('redis').createClient(Settings.redis.history) // Only works locally for now
 

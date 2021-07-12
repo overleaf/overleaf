@@ -32,7 +32,7 @@ describe('UpdatesManager', function () {
         './WebApiManager': (this.WebApiManager = {}),
         './UpdateTrimmer': (this.UpdateTrimmer = {}),
         './DocArchiveManager': (this.DocArchiveManager = {}),
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           redis: {
             lock: {
               key_schema: {

@@ -13,7 +13,7 @@
 const { ObjectId } = require('./mongodb')
 const request = require('request')
 const async = require('async')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { port } = settings.internal.trackchanges
 const logger = require('logger-sharelatex')
 const LockManager = require('./LockManager')
