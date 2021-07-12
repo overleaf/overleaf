@@ -181,7 +181,10 @@ async function _createBlankProject(ownerId, projectName, attributes = {}) {
 
   Object.assign(project, attributes)
 
-  if (Settings.apis.project_history.displayHistoryForNewProjects) {
+  // only display full project history when the project has the overleaf history id attribute
+  // (to allow scripted creation of projects without full project history)
+  const historyId = _.get(attributes, ['overleaf', 'history', 'id'])
+  if (Settings.apis.project_history.displayHistoryForNewProjects && historyId) {
     project.overleaf.history.display = true
   }
   if (Settings.currentImageName) {
