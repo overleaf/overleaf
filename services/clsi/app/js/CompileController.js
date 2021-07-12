@@ -15,7 +15,7 @@
 let CompileController
 const RequestParser = require('./RequestParser')
 const CompileManager = require('./CompileManager')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Metrics = require('./Metrics')
 const ProjectPersistenceManager = require('./ProjectPersistenceManager')
 const logger = require('logger-sharelatex')

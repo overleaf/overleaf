@@ -66,7 +66,7 @@ describe('CompileController', function () {
       requires: {
         './CompileManager': (this.CompileManager = {}),
         './RequestParser': (this.RequestParser = {}),
-        'settings-sharelatex': (this.Settings = {
+        '@overleaf/settings': (this.Settings = {
           apis: {
             clsi: {
               url: 'http://clsi.example.com'

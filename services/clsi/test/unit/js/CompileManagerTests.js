@@ -31,7 +31,7 @@ describe('CompileManager', function () {
         './ResourceWriter': (this.ResourceWriter = {}),
         './OutputFileFinder': (this.OutputFileFinder = {}),
         './OutputCacheManager': (this.OutputCacheManager = {}),
-        'settings-sharelatex': (this.Settings = {
+        '@overleaf/settings': (this.Settings = {
           path: {
             compilesDir: '/compiles/dir',
             outputDir: '/output/dir'

@@ -20,7 +20,7 @@ const dbQueue = require('./DbQueue')
 const async = require('async')
 const logger = require('logger-sharelatex')
 const oneDay = 24 * 60 * 60 * 1000
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const diskusage = require('diskusage')
 const { callbackify } = require('util')
 

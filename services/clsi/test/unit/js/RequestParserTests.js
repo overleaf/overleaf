@@ -40,7 +40,7 @@ describe('RequestParser', function () {
     }
     return (this.RequestParser = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {})
+        '@overleaf/settings': (this.settings = {})
       }
     }))
   })

@@ -1,6 +1,6 @@
 const Path = require('path')
 const send = require('send')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const OutputCacheManager = require('./OutputCacheManager')
 
 const ONE_DAY_S = 24 * 60 * 60

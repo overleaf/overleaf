@@ -23,7 +23,7 @@ const OutputFileFinder = require('./OutputFileFinder')
 const ResourceStateManager = require('./ResourceStateManager')
 const Metrics = require('./Metrics')
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 const parallelFileDownloads = settings.parallelFileDownloads || 1
 

@@ -20,7 +20,7 @@ const fse = require('fs-extra')
 const Path = require('path')
 const logger = require('logger-sharelatex')
 const _ = require('lodash')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const crypto = require('crypto')
 const Metrics = require('./Metrics')
 

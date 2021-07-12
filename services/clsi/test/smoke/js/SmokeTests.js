@@ -1,5 +1,5 @@
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const buildUrl = (path) =>
   `http://${Settings.internal.clsi.host}:${Settings.internal.clsi.port}/${path}`

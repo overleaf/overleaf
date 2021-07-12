@@ -30,7 +30,7 @@ describe('StaticServerForbidSymlinks', function () {
     this.fs = {}
     this.ForbidSymlinks = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         fs: this.fs
       }
     })

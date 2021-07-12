@@ -28,7 +28,7 @@ describe('DockerRunner', function () {
     this.container = container = {}
     this.DockerRunner = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.Settings = {
+        '@overleaf/settings': (this.Settings = {
           clsi: { docker: {} },
           path: {}
         }),

@@ -15,7 +15,7 @@
 const app = require('../../../../app')
 require('logger-sharelatex').logger.level('info')
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = {
   running: false,

@@ -16,7 +16,7 @@ let UrlCache
 const db = require('./db')
 const dbQueue = require('./DbQueue')
 const UrlFetcher = require('./UrlFetcher')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const crypto = require('crypto')
 const fs = require('fs')
 const logger = require('logger-sharelatex')

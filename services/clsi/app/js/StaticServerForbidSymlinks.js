@@ -17,7 +17,7 @@
 let ForbidSymlinks
 const Path = require('path')
 const fs = require('fs')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const url = require('url')
 

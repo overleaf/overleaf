@@ -24,7 +24,7 @@ describe('UrlFetcher', function () {
           defaults: (this.defaults = sinon.stub().returns((this.request = {})))
         },
         fs: (this.fs = {}),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           apis: {
             clsiPerf: {
               host: 'localhost:3043'

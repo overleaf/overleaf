@@ -9,7 +9,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const Sequelize = require('sequelize')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const _ = require('lodash')
 const logger = require('logger-sharelatex')
 

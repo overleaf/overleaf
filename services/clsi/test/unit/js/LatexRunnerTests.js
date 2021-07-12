@@ -23,7 +23,7 @@ describe('LatexRunner', function () {
     let Timer
     this.LatexRunner = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.Settings = {
+        '@overleaf/settings': (this.Settings = {
           docker: {
             socketPath: '/var/run/docker.sock'
           }

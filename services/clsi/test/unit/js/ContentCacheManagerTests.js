@@ -8,7 +8,7 @@ describe('ContentCacheManager', function () {
   let contentDir, pdfPath
   let ContentCacheManager, files, Settings
   before(function () {
-    Settings = require('settings-sharelatex')
+    Settings = require('@overleaf/settings')
     ContentCacheManager = require(MODULE_PATH)
   })
   let contentRanges, newContentRanges, reclaimed

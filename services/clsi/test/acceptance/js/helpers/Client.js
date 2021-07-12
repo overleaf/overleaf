@@ -15,7 +15,7 @@
 let Client
 const request = require('request')
 const fs = require('fs')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const host = 'localhost'
 

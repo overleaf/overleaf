@@ -20,7 +20,7 @@ describe('LockManager', function () {
   beforeEach(function () {
     return (this.LockManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.Settings = { clsi: { docker: {} } })
+        '@overleaf/settings': (this.Settings = { clsi: { docker: {} } })
       }
     }))
   })

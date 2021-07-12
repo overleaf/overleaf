@@ -18,7 +18,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let RequestParser
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 module.exports = RequestParser = {
   VALID_COMPILERS: ['pdflatex', 'latex', 'xelatex', 'lualatex'],

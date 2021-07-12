@@ -24,7 +24,7 @@ describe('UrlCache', function () {
       requires: {
         './db': {},
         './UrlFetcher': (this.UrlFetcher = {}),
-        'settings-sharelatex': (this.Settings = {
+        '@overleaf/settings': (this.Settings = {
           path: { clsiCacheDir: '/cache/dir' }
         }),
         fs: (this.fs = { copyFile: sinon.stub().yields() })

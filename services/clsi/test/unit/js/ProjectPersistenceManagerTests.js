@@ -27,7 +27,7 @@ describe('ProjectPersistenceManager', function () {
         './UrlCache': (this.UrlCache = {}),
         './CompileManager': (this.CompileManager = {}),
         diskusage: (this.diskusage = { check: sinon.stub() }),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           project_cache_length_ms: 1000,
           path: {
             compilesDir: '/compiles',
