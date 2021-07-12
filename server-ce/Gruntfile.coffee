@@ -38,20 +38,6 @@ module.exports = (grunt) ->
 				options:
 					limit: SERVICES.length
 					logConcurrentOutput: true
-		coffee:
-			migrate:
-				expand: true,
-				flatten: false,
-				cwd: './',
-				src: ['./migrations/*.coffee'],
-				dest: './',
-				ext: '.js'
-				options:
-					bare:true
-
-		shell:
-			migrate:
-				command: "./node_modules/east/bin/east migrate --adapter east-mongo --url #{settings?.mongo?.url}"
 
 		availabletasks:
 			tasks:
@@ -114,8 +100,6 @@ module.exports = (grunt) ->
 
 	grunt.registerTask "check:make", "Check that make is installed", () ->
 		Helpers.checkMake @async()
-
-	grunt.registerTask 'migrate', "compile migrations and run them", ["coffee:migrate", 'shell:migrate']
 
 
 	Helpers =
