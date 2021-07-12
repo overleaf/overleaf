@@ -4,7 +4,7 @@ const path = require('path')
 const Stream = require('stream')
 const { callbackify, promisify } = require('util')
 const metrics = require('@overleaf/metrics')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { WriteError } = require('./Errors')
 
 module.exports = {

@@ -23,6 +23,7 @@
     "@overleaf/metrics": "^3.5.1",
     "@overleaf/o-error": "^3.0.0",
     "@overleaf/object-persistor": "https://github.com/overleaf/object-persistor/archive/8fbc9ed03206bfb54368578d22b7ac4f285baa25.tar.gz",
+    "@overleaf/settings": "^2.1.1",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "express": "^4.17.1",
@@ -34,7 +35,6 @@
     "range-parser": "^1.2.1",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.8",
-    "settings-sharelatex": "^1.1.0",
     "stream-buffers": "~0.2.6",
     "tiny-async-pool": "^1.1.0"
   },

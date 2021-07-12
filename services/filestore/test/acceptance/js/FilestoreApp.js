@@ -1,5 +1,5 @@
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const fs = require('fs')
 const Path = require('path')
 const { promisify } = require('util')

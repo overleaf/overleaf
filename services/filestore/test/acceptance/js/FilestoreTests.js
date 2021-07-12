@@ -1,7 +1,7 @@
 const chai = require('chai')
 const { expect } = chai
 const fs = require('fs')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Path = require('path')
 const FilestoreApp = require('./FilestoreApp')
 const TestHelper = require('./TestHelper')

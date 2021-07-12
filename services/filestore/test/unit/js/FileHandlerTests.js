@@ -81,7 +81,7 @@ describe('FileHandler', function () {
         './FileConverter': FileConverter,
         './KeyBuilder': KeyBuilder,
         './ImageOptimiser': ImageOptimiser,
-        'settings-sharelatex': Settings,
+        '@overleaf/settings': Settings,
         '@overleaf/object-persistor': ObjectPersistor,
         fs: fs
       },

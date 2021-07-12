@@ -58,7 +58,7 @@ describe('FileController', function () {
         './PersistorManager': PersistorManager,
         './Errors': Errors,
         stream: stream,
-        'settings-sharelatex': settings,
+        '@overleaf/settings': settings,
         '@overleaf/metrics': {
           inc() {}
         }

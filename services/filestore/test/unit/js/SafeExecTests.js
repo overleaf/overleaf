@@ -17,7 +17,7 @@ describe('SafeExec', function () {
     safeExec = SandboxedModule.require(modulePath, {
       globals: { process },
       requires: {
-        'settings-sharelatex': settings,
+        '@overleaf/settings': settings,
         '@overleaf/object-persistor': ObjectPersistor
       }
     })

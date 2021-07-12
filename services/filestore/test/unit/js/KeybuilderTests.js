@@ -8,7 +8,7 @@ describe('KeybuilderTests', function () {
 
   beforeEach(function () {
     KeyBuilder = SandboxedModule.require(modulePath, {
-      requires: { 'settings-sharelatex': {} }
+      requires: { '@overleaf/settings': {} }
     })
   })
 

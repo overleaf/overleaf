@@ -1,5 +1,5 @@
 const metrics = require('@overleaf/metrics')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { callbackify } = require('util')
 
 const safeExec = require('./SafeExec').promises

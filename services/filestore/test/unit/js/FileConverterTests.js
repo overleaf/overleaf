@@ -32,7 +32,7 @@ describe('FileConverter', function () {
           inc: sinon.stub(),
           Timer: sinon.stub().returns({ done: sinon.stub() })
         },
-        'settings-sharelatex': Settings,
+        '@overleaf/settings': Settings,
         '@overleaf/object-persistor': ObjectPersistor
       }
     })

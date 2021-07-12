@@ -1,6 +1,6 @@
 const lodashOnce = require('lodash.once')
 const childProcess = require('child_process')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { ConversionsDisabledError, FailedCommandError } = require('./Errors')
 
 // execute a command in the same way as 'exec' but with a timeout that

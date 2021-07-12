@@ -12,7 +12,7 @@ describe('Settings', function () {
         }
       }
       process.env.S3_BUCKET_CREDENTIALS = JSON.stringify(s3Settings)
-      const settings = SandboxedModule.require('settings-sharelatex', {
+      const settings = SandboxedModule.require('@overleaf/settings', {
         globals: { console, process }
       })
       expect(settings.filestore.s3.bucketCreds).to.deep.equal(s3Settings)

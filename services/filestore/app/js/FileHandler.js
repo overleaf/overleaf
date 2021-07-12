@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { callbackify } = require('util')
 const fs = require('fs')
 const PersistorManager = require('./PersistorManager')

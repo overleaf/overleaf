@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const streamBuffers = require('stream-buffers')
 const { promisify } = require('util')
 const Stream = require('stream')
