@@ -680,7 +680,7 @@ if (process.env.SHARELATEX_SAML_ENTRYPOINT) {
   // https://github.com/node-saml/passport-saml/commit/f6b1c885c0717f1083c664345556b535f217c102
   if (process.env.SHARELATEX_SAML_CERT) {
     settings.saml.server.cert = process.env.SHARELATEX_SAML_CERT
-    settings.saml.server.privateCert = process.env.SHARELATEX_SAML_PRIVATE_CERT
+    settings.saml.server.privateKey = process.env.SHARELATEX_SAML_PRIVATE_CERT
   }
 }
 
