@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@overleaf/metrics": "^3.5.1",
+    "@overleaf/settings": "^2.1.1",
     "async": "3.2.0",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
@@ -26,8 +27,7 @@
     "express": "4.17.1",
     "logger-sharelatex": "^2.2.0",
     "mongodb": "^3.6.0",
-    "request": "^2.88.2",
-    "settings-sharelatex": "^1.1.0"
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "acorn": "^7.1.1",
