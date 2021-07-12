@@ -2,7 +2,6 @@
     camelcase,
     node/handle-callback-err,
     max-len,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -496,7 +495,7 @@ module.exports = CompileController = {
       let qs
       if (err != null) {
         OError.tag(err, 'error getting cookie jar for clsi request')
-        return callback(err)
+        return next(err)
       }
       // expand any url parameter passed in as {url:..., qs:...}
       if (typeof url === 'object') {

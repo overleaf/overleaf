@@ -2,7 +2,6 @@
     camelcase,
     node/handle-callback-err,
     max-len,
-    no-undef,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -165,7 +164,7 @@ module.exports = ProjectZipStreamManager = {
                       { err: error, project_id, file_id: file._id },
                       'something went wrong adding file to zip archive'
                     )
-                    return callback(err)
+                    return callback(error)
                   }
                   if (path[0] === '/') {
                     path = path.slice(1)

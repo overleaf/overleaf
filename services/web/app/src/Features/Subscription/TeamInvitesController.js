@@ -1,6 +1,5 @@
 /* eslint-disable
     max-len,
-    no-undef,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -120,7 +119,7 @@ module.exports = {
     )
   },
 
-  revokeInvite(req, res) {
+  revokeInvite(req, res, next) {
     const subscription = req.entity
     const email = EmailHelper.parseEmail(req.params.email)
     const teamManagerId = AuthenticationController.getLoggedInUserId(req)

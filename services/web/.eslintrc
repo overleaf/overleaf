@@ -106,6 +106,7 @@
       // Frontend specific rules
       "files": ["**/frontend/js/**/*.js", "**/frontend/stories/**/*.js", "**/*.stories.js", "**/test/frontend/**/*.js"],
       "globals": {
+        "__webpack_public_path__": true,
         "$": true,
         "angular": true,
         "ace": true,
