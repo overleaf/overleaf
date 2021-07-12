@@ -14,7 +14,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const async = require('async')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const rclient_history = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.history
 ) // note: this is track changes, not project-history

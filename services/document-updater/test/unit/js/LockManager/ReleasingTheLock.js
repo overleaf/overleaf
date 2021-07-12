@@ -30,7 +30,7 @@ describe('LockManager - releasing the lock', function () {
       '@overleaf/redis-wrapper': {
         createClient: () => this.client
       },
-      'settings-sharelatex': {
+      '@overleaf/settings': {
         redis: {
           lock: {
             key_schema: {

@@ -23,7 +23,7 @@ describe('PersistenceManager', function () {
     this.PersistenceManager = SandboxedModule.require(modulePath, {
       requires: {
         requestretry: this.request,
-        'settings-sharelatex': (this.Settings = {}),
+        '@overleaf/settings': (this.Settings = {}),
         './Metrics': (this.Metrics = {
           Timer: (Timer = (function () {
             Timer = class Timer {

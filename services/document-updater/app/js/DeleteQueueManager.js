@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let DeleteQueueManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const RedisManager = require('./RedisManager')
 const ProjectManager = require('./ProjectManager')
 const logger = require('logger-sharelatex')

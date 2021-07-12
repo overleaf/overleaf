@@ -21,7 +21,7 @@ describe('HistoryManager', function () {
     this.HistoryManager = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = {}),
-        'settings-sharelatex': (this.Settings = {
+        '@overleaf/settings': (this.Settings = {
           apis: {
             project_history: {
               enabled: true,

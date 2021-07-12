@@ -14,7 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ProjectHistoryRedisManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const projectHistoryKeys = __guard__(
   Settings.redis != null ? Settings.redis.project_history : undefined,
   (x) => x.key_schema

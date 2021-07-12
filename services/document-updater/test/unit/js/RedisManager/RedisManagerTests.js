@@ -27,7 +27,7 @@ describe('RedisManager', function () {
     this.RedisManager = SandboxedModule.require(modulePath, {
       requires: {
         './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           documentupdater: { logHashErrors: { write: true, read: true } },
           apis: {
             project_history: { enabled: true }

@@ -2,7 +2,7 @@ const Metrics = require('@overleaf/metrics')
 Metrics.initialize('doc-updater')
 
 const express = require('express')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 logger.initialize('document-updater')
 

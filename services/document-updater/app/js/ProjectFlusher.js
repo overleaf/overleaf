@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const RedisManager = require('./RedisManager')
 const { rclient } = RedisManager
 const docUpdaterKeys = Settings.redis.documentupdater.key_schema

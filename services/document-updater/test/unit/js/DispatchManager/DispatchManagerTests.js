@@ -23,7 +23,7 @@ describe('DispatchManager', function () {
     this.DispatchManager = SandboxedModule.require(modulePath, {
       requires: {
         './UpdateManager': (this.UpdateManager = {}),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           redis: {
             documentupdater: {}
           }
