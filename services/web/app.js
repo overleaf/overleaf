@@ -23,6 +23,11 @@ if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }
 
+const http = require('http')
+const https = require('https')
+http.globalAgent.maxSockets = Settings.limits.httpGlobalAgentMaxSockets
+https.globalAgent.maxSockets = Settings.limits.httpsGlobalAgentMaxSockets
+
 metrics.memory.monitor(logger)
 
 const Server = require('./app/src/infrastructure/Server')

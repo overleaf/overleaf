@@ -1,8 +1,6 @@
 const { merge } = require('@overleaf/settings/merge')
 
 let defaultFeatures, siteUrl
-const http = require('http')
-http.globalAgent.maxSockets = 300
 
 // Make time interval config easier.
 const seconds = 1000
@@ -74,6 +72,11 @@ const parseTextExtensions = function (extensions) {
 }
 
 module.exports = {
+  limits: {
+    httpGlobalAgentMaxSockets: 300,
+    httpsGlobalAgentMaxSockets: 300,
+  },
+
   allowAnonymousReadAndWriteSharing:
     process.env.SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING === 'true',
 
