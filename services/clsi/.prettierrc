@@ -2,6 +2,10 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
 {
+  "arrowParens": "avoid",
   "semi": false,
-  "singleQuote": true
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "useTabs": false
 }
