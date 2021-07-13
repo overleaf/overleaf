@@ -33,12 +33,12 @@ describe('Deleting a project', function () {
           op: [
             {
               i: 'one and a half\n',
-              p: 4
-            }
+              p: 4,
+            },
           ],
-          v: 0
+          v: 0,
         },
-        updatedLines: ['one', 'one and a half', 'two', 'three']
+        updatedLines: ['one', 'one and a half', 'two', 'three'],
       },
       {
         id: (doc_id1 = DocUpdaterClient.randomId()),
@@ -48,18 +48,18 @@ describe('Deleting a project', function () {
           op: [
             {
               i: 'four and a half\n',
-              p: 5
-            }
+              p: 5,
+            },
           ],
-          v: 0
+          v: 0,
         },
-        updatedLines: ['four', 'four and a half', 'five', 'six']
-      }
+        updatedLines: ['four', 'four and a half', 'five', 'six'],
+      },
     ]
     for (const doc of Array.from(this.docs)) {
       MockWebApi.insertDoc(this.project_id, doc.id, {
         lines: doc.lines,
-        version: doc.update.v
+        version: doc.update.v,
       })
     }
 
@@ -73,12 +73,12 @@ describe('Deleting a project', function () {
       sinon.spy(MockProjectHistoryApi, 'flushProject')
 
       return async.series(
-        this.docs.map((doc) => {
-          return (callback) => {
+        this.docs.map(doc => {
+          return callback => {
             return DocUpdaterClient.preloadDoc(
               this.project_id,
               doc.id,
-              (error) => {
+              error => {
                 if (error != null) {
                   return callback(error)
                 }
@@ -86,7 +86,7 @@ describe('Deleting a project', function () {
                   this.project_id,
                   doc.id,
                   doc.update,
-                  (error) => {
+                  error => {
                     return callback(error)
                   }
                 )
@@ -94,7 +94,7 @@ describe('Deleting a project', function () {
             )
           }
         }),
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -122,7 +122,7 @@ describe('Deleting a project', function () {
     })
 
     it('should send each document to the web api', function () {
-      return Array.from(this.docs).map((doc) =>
+      return Array.from(this.docs).map(doc =>
         MockWebApi.setDocument
           .calledWith(this.project_id, doc.id, doc.updatedLines)
           .should.equal(true)
@@ -132,8 +132,8 @@ describe('Deleting a project', function () {
     it('should need to reload the docs if read again', function (done) {
       sinon.spy(MockWebApi, 'getDocument')
       return async.series(
-        this.docs.map((doc) => {
-          return (callback) => {
+        this.docs.map(doc => {
+          return callback => {
             MockWebApi.getDocument
               .calledWith(this.project_id, doc.id)
               .should.equal(false)
@@ -157,7 +157,7 @@ describe('Deleting a project', function () {
     })
 
     it('should flush each doc in track changes', function () {
-      return Array.from(this.docs).map((doc) =>
+      return Array.from(this.docs).map(doc =>
         MockTrackChangesApi.flushDoc.calledWith(doc.id).should.equal(true)
       )
     })
@@ -176,8 +176,8 @@ describe('Deleting a project', function () {
       sinon.spy(MockProjectHistoryApi, 'flushProject')
 
       return async.series(
-        this.docs.map((doc) => {
-          return (callback) => {
+        this.docs.map(doc => {
+          return callback => {
             return DocUpdaterClient.preloadDoc(
               this.project_id,
               doc.id,
@@ -185,7 +185,7 @@ describe('Deleting a project', function () {
             )
           }
         }),
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -232,8 +232,8 @@ describe('Deleting a project', function () {
       sinon.spy(MockProjectHistoryApi, 'flushProject')
 
       return async.series(
-        this.docs.map((doc) => {
-          return (callback) => {
+        this.docs.map(doc => {
+          return callback => {
             return DocUpdaterClient.preloadDoc(
               this.project_id,
               doc.id,
@@ -241,7 +241,7 @@ describe('Deleting a project', function () {
             )
           }
         }),
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -273,7 +273,7 @@ describe('Deleting a project', function () {
     })
 
     it('should send each document to the web api', function () {
-      return Array.from(this.docs).map((doc) =>
+      return Array.from(this.docs).map(doc =>
         MockWebApi.setDocument
           .calledWith(this.project_id, doc.id, doc.updatedLines)
           .should.equal(true)
@@ -281,7 +281,7 @@ describe('Deleting a project', function () {
     })
 
     it('should flush each doc in track changes', function () {
-      return Array.from(this.docs).map((doc) =>
+      return Array.from(this.docs).map(doc =>
         MockTrackChangesApi.flushDoc.calledWith(doc.id).should.equal(true)
       )
     })

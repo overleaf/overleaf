@@ -65,7 +65,7 @@ var type = {
     }
 
     return doc
-  }
+  },
 }
 
 const checkOp = function (op) {
@@ -346,7 +346,7 @@ const transformer = function (op, otherOp, goForwards, side) {
         // transform - insert skips over inserted parts
         if (side === 'left') {
           // The left insert should go first.
-          while (__guard__(peek(), (x) => x.i) !== undefined) {
+          while (__guard__(peek(), x => x.i) !== undefined) {
             append(newOp, take())
           }
         }

@@ -39,7 +39,7 @@ const getKeys = function (pattern, callback) {
   return async.concatSeries(nodes, doKeyLookupForNode, callback)
 }
 
-const expireDocOps = (callback) =>
+const expireDocOps = callback =>
   // eslint-disable-next-line handle-callback-err
   getKeys(keys.docOps({ doc_id: '*' }), (error, keys) =>
     async.mapSeries(

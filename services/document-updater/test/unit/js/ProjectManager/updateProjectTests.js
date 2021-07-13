@@ -8,17 +8,17 @@ describe('ProjectManager', function () {
     this.RedisManager = {}
     this.ProjectHistoryRedisManager = {
       queueRenameEntity: sinon.stub().yields(),
-      queueAddEntity: sinon.stub().yields()
+      queueAddEntity: sinon.stub().yields(),
     }
     this.DocumentManager = {
-      renameDocWithLock: sinon.stub().yields()
+      renameDocWithLock: sinon.stub().yields(),
     }
     this.HistoryManager = {
       flushProjectChangesAsync: sinon.stub(),
-      shouldFlushHistoryOps: sinon.stub().returns(false)
+      shouldFlushHistoryOps: sinon.stub().returns(false),
     }
     this.Metrics = {
-      Timer: class Timer {}
+      Timer: class Timer {},
     }
     this.Metrics.Timer.prototype.done = sinon.stub()
 
@@ -28,8 +28,8 @@ describe('ProjectManager', function () {
         './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
         './DocumentManager': this.DocumentManager,
         './HistoryManager': this.HistoryManager,
-        './Metrics': this.Metrics
-      }
+        './Metrics': this.Metrics,
+      },
     })
 
     this.project_id = 'project-id-123'
@@ -46,24 +46,24 @@ describe('ProjectManager', function () {
           type: 'rename-doc',
           id: 1,
           pathname: 'foo',
-          newPathname: 'foo'
+          newPathname: 'foo',
         }
         this.secondDocUpdate = {
           type: 'rename-doc',
           id: 2,
           pathname: 'bar',
-          newPathname: 'bar2'
+          newPathname: 'bar2',
         }
         this.firstFileUpdate = {
           type: 'rename-file',
           id: 2,
           pathname: 'bar',
-          newPathname: 'bar2'
+          newPathname: 'bar2',
         }
         this.updates = [
           this.firstDocUpdate,
           this.secondDocUpdate,
-          this.firstFileUpdate
+          this.firstFileUpdate,
         ]
       })
 
@@ -81,7 +81,7 @@ describe('ProjectManager', function () {
 
         it('should rename the docs in the updates', function () {
           const firstDocUpdateWithVersion = _.extend({}, this.firstDocUpdate, {
-            version: `${this.version}.0`
+            version: `${this.version}.0`,
           })
           const secondDocUpdateWithVersion = _.extend(
             {},
@@ -201,28 +201,28 @@ describe('ProjectManager', function () {
         this.firstDocUpdate = {
           type: 'add-doc',
           id: 1,
-          docLines: 'a\nb'
+          docLines: 'a\nb',
         }
         this.secondDocUpdate = {
           type: 'add-doc',
           id: 2,
-          docLines: 'a\nb'
+          docLines: 'a\nb',
         }
         this.firstFileUpdate = {
           type: 'add-file',
           id: 3,
-          url: 'filestore.example.com/2'
+          url: 'filestore.example.com/2',
         }
         this.secondFileUpdate = {
           type: 'add-file',
           id: 4,
-          url: 'filestore.example.com/3'
+          url: 'filestore.example.com/3',
         }
         this.updates = [
           this.firstDocUpdate,
           this.secondDocUpdate,
           this.firstFileUpdate,
-          this.secondFileUpdate
+          this.secondFileUpdate,
         ]
       })
 
@@ -240,7 +240,7 @@ describe('ProjectManager', function () {
 
         it('should add the docs in the updates', function () {
           const firstDocUpdateWithVersion = _.extend({}, this.firstDocUpdate, {
-            version: `${this.version}.0`
+            version: `${this.version}.0`,
           })
           const secondDocUpdateWithVersion = _.extend(
             {},

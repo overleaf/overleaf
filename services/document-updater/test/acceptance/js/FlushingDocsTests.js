@@ -31,10 +31,10 @@ describe('Flushing a doc to Mongo', function () {
       op: [
         {
           i: 'one and a half\n',
-          p: 4
-        }
+          p: 4,
+        },
       ],
-      v: this.version
+      v: this.version,
     }
     this.result = ['one', 'one and a half', 'two', 'three']
     return DocUpdaterApp.ensureRunning(done)
@@ -44,19 +44,19 @@ describe('Flushing a doc to Mongo', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       sinon.spy(MockWebApi, 'setDocument')
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
       return DocUpdaterClient.sendUpdates(
         this.project_id,
         this.doc_id,
         [this.update],
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -90,10 +90,10 @@ describe('Flushing a doc to Mongo', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
-        lines: this.lines
+        lines: this.lines,
       })
       sinon.spy(MockWebApi, 'setDocument')
       return DocUpdaterClient.flushDoc(this.project_id, this.doc_id, done)
@@ -112,11 +112,11 @@ describe('Flushing a doc to Mongo', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
       let t = 30000
       sinon

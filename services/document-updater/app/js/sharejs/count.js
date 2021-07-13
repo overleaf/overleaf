@@ -34,4 +34,4 @@ exports.compose = function (op1, op2) {
   return [op1[0], op1[1] + op2[1]]
 }
 
-exports.generateRandomOp = (doc) => [[doc, 1], doc + 1]
+exports.generateRandomOp = doc => [[doc, 1], doc + 1]

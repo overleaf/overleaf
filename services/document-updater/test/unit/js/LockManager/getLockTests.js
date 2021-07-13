@@ -26,7 +26,7 @@ describe('LockManager - getting the lock', function () {
         '@overleaf/redis-wrapper': {
           createClient: () => {
             return { auth() {} }
-          }
+          },
         },
         './Metrics': { inc() {} },
         './Profiler': (Profiler = (function () {
@@ -38,8 +38,8 @@ describe('LockManager - getting the lock', function () {
           }
           Profiler.initClass()
           return Profiler
-        })())
-      }
+        })()),
+      },
     })
     this.callback = sinon.stub()
     return (this.doc_id = 'doc-id-123')

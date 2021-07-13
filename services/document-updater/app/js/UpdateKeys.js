@@ -9,5 +9,5 @@ module.exports = {
   },
   splitProjectIdAndDocId(project_and_doc_id) {
     return project_and_doc_id.split(':')
-  }
+  },
 }

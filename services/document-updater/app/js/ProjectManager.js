@@ -14,7 +14,7 @@ module.exports = {
   getProjectDocsTimestamps,
   getProjectDocsAndFlushIfOld,
   clearProjectState,
-  updateProjectWithLocks
+  updateProjectWithLocks,
 }
 
 function flushProjectWithLocks(projectId, _callback) {
@@ -29,8 +29,8 @@ function flushProjectWithLocks(projectId, _callback) {
       return callback(error)
     }
     const errors = []
-    const jobs = docIds.map((docId) => (callback) => {
-      DocumentManager.flushDocIfLoadedWithLock(projectId, docId, (error) => {
+    const jobs = docIds.map(docId => callback => {
+      DocumentManager.flushDocIfLoadedWithLock(projectId, docId, error => {
         if (error instanceof Errors.NotFoundError) {
           logger.warn(
             { err: error, projectId, docId },
@@ -72,19 +72,14 @@ function flushAndDeleteProjectWithLocks(projectId, options, _callback) {
       return callback(error)
     }
     const errors = []
-    const jobs = docIds.map((docId) => (callback) => {
-      DocumentManager.flushAndDeleteDocWithLock(
-        projectId,
-        docId,
-        {},
-        (error) => {
-          if (error) {
-            logger.error({ err: error, projectId, docId }, 'error deleting doc')
-            errors.push(error)
-          }
-          callback()
+    const jobs = docIds.map(docId => callback => {
+      DocumentManager.flushAndDeleteDocWithLock(projectId, docId, {}, error => {
+        if (error) {
+          logger.error({ err: error, projectId, docId }, 'error deleting doc')
+          errors.push(error)
         }
-      )
+        callback()
+      })
     })
 
     logger.log({ projectId, docIds }, 'deleting docs')
@@ -93,7 +88,7 @@ function flushAndDeleteProjectWithLocks(projectId, options, _callback) {
       // history is completely flushed because the project may be
       // deleted in web after this call completes, and so further
       // attempts to flush would fail after that.
-      HistoryManager.flushProjectChanges(projectId, options, (error) => {
+      HistoryManager.flushProjectChanges(projectId, options, error => {
         if (errors.length > 0) {
           callback(new Error('Errors deleting docs. See log for details'))
         } else if (error) {
@@ -107,7 +102,7 @@ function flushAndDeleteProjectWithLocks(projectId, options, _callback) {
 }
 
 function queueFlushAndDeleteProject(projectId, callback) {
-  RedisManager.queueFlushAndDeleteProject(projectId, (error) => {
+  RedisManager.queueFlushAndDeleteProject(projectId, error => {
     if (error) {
       logger.error(
         { projectId, error },
@@ -176,7 +171,7 @@ function getProjectDocsAndFlushIfOld(
           return callback(error)
         }
         // get the doc lines from redis
-        const jobs = docIds.map((docId) => (cb) => {
+        const jobs = docIds.map(docId => cb => {
           DocumentManager.getDocAndFlushIfOldWithLock(
             projectId,
             docId,
@@ -288,7 +283,7 @@ function updateProjectWithLocks(
     }
   }
 
-  async.eachSeries(updates, handleUpdate, (error) => {
+  async.eachSeries(updates, handleUpdate, error => {
     if (error) {
       return callback(error)
     }

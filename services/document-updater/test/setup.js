@@ -13,16 +13,16 @@ const stubs = {
     log: sandbox.stub(),
     warn: sandbox.stub(),
     err: sandbox.stub(),
-    error: sandbox.stub()
-  }
+    error: sandbox.stub(),
+  },
 }
 
 // SandboxedModule configuration
 SandboxedModule.configure({
   requires: {
-    'logger-sharelatex': stubs.logger
+    'logger-sharelatex': stubs.logger,
   },
-  globals: { Buffer, JSON, Math, console, process }
+  globals: { Buffer, JSON, Math, console, process },
 })
 
 // Mocha hooks
@@ -33,5 +33,5 @@ exports.mochaHooks = {
 
   afterEach() {
     sandbox.reset()
-  }
+  },
 }

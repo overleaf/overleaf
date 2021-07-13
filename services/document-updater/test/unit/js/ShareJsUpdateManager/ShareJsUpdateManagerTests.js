@@ -31,14 +31,14 @@ describe('ShareJsUpdateManager', function () {
         '@overleaf/redis-wrapper': {
           createClient: () => {
             return (this.rclient = { auth() {} })
-          }
+          },
         },
         './RealTimeRedisManager': (this.RealTimeRedisManager = {}),
-        './Metrics': (this.metrics = { inc: sinon.stub() })
+        './Metrics': (this.metrics = { inc: sinon.stub() }),
       },
       globals: {
-        clearTimeout: (this.clearTimeout = sinon.stub())
-      }
+        clearTimeout: (this.clearTimeout = sinon.stub()),
+      },
     }))
   })
 
@@ -58,8 +58,8 @@ describe('ShareJsUpdateManager', function () {
         applyOp: sinon.stub().callsArg(2),
         getSnapshot: sinon.stub(),
         db: {
-          appliedOps: {}
-        }
+          appliedOps: {},
+        },
       }
       this.ShareJsUpdateManager.getNewShareJsModel = sinon
         .stub()
@@ -74,11 +74,10 @@ describe('ShareJsUpdateManager', function () {
       beforeEach(function (done) {
         this.model.getSnapshot.callsArgWith(1, null, {
           snapshot: this.updatedDocLines.join('\n'),
-          v: this.version
+          v: this.version,
         })
-        this.model.db.appliedOps[
-          `${this.project_id}:${this.doc_id}`
-        ] = this.appliedOps = ['mock-ops']
+        this.model.db.appliedOps[`${this.project_id}:${this.doc_id}`] =
+          this.appliedOps = ['mock-ops']
         return this.ShareJsUpdateManager.applyUpdate(
           this.project_id,
           this.doc_id,
@@ -172,11 +171,10 @@ describe('ShareJsUpdateManager', function () {
         this.error = new Error('invalid hash')
         this.model.getSnapshot.callsArgWith(1, null, {
           snapshot: 'unexpected content',
-          v: this.version
+          v: this.version,
         })
-        this.model.db.appliedOps[
-          `${this.project_id}:${this.doc_id}`
-        ] = this.appliedOps = ['mock-ops']
+        this.model.db.appliedOps[`${this.project_id}:${this.doc_id}`] =
+          this.appliedOps = ['mock-ops']
         return this.ShareJsUpdateManager.applyUpdate(
           this.project_id,
           this.doc_id,
@@ -203,7 +201,7 @@ describe('ShareJsUpdateManager', function () {
       this.model = {
         on: (event, callback) => {
           return (this.callback = callback)
-        }
+        },
       }
       sinon.spy(this.model, 'on')
       return this.ShareJsUpdateManager._listenForOps(this.model)
@@ -217,7 +215,7 @@ describe('ShareJsUpdateManager', function () {
       beforeEach(function () {
         this.opData = {
           op: { t: 'foo', p: 1 },
-          meta: { source: 'bar' }
+          meta: { source: 'bar' },
         }
         this.RealTimeRedisManager.sendData = sinon.stub()
         return this.callback(`${this.project_id}:${this.doc_id}`, this.opData)
@@ -228,7 +226,7 @@ describe('ShareJsUpdateManager', function () {
           .calledWith({
             project_id: this.project_id,
             doc_id: this.doc_id,
-            op: this.opData
+            op: this.opData,
           })
           .should.equal(true)
       })

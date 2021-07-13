@@ -59,12 +59,12 @@ json.invertComponent = function (c) {
   return c_
 }
 
-json.invert = (op) =>
-  Array.from(op.slice().reverse()).map((c) => json.invertComponent(c))
+json.invert = op =>
+  Array.from(op.slice().reverse()).map(c => json.invertComponent(c))
 
 json.checkValidOp = function (op) {}
 
-const isArray = (o) => Object.prototype.toString.call(o) === '[object Array]'
+const isArray = o => Object.prototype.toString.call(o) === '[object Array]'
 json.checkList = function (elem) {
   if (!isArray(elem)) {
     throw new Error('Referenced element not a list')
@@ -264,7 +264,7 @@ json.normalize = function (op) {
 // hax, copied from test/types/json. Apparently this is still the fastest way to deep clone an object, assuming
 // we have browser support for JSON.
 // http://jsperf.com/cloning-an-object/12
-var clone = (o) => JSON.parse(JSON.stringify(o))
+var clone = o => JSON.parse(JSON.stringify(o))
 
 json.commonPath = function (p1, p2) {
   p1 = p1.slice()

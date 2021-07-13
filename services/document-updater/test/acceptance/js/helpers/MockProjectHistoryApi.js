@@ -24,7 +24,7 @@ module.exports = MockProjectHistoryApi = {
 
   run() {
     app.post('/project/:project_id/flush', (req, res, next) => {
-      return this.flushProject(req.params.project_id, (error) => {
+      return this.flushProject(req.params.project_id, error => {
         if (error != null) {
           return res.sendStatus(500)
         } else {
@@ -33,12 +33,12 @@ module.exports = MockProjectHistoryApi = {
       })
     })
 
-    return app.listen(3054, (error) => {
+    return app.listen(3054, error => {
       if (error != null) {
         throw error
       }
     })
-  }
+  },
 }
 
 MockProjectHistoryApi.run()

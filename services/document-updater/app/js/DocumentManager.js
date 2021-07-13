@@ -47,94 +47,102 @@ module.exports = DocumentManager = {
       return _callback(...Array.from(args || []))
     }
 
-    return RedisManager.getDoc(project_id, doc_id, function (
-      error,
-      lines,
-      version,
-      ranges,
-      pathname,
-      projectHistoryId,
-      unflushedTime
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (lines == null || version == null) {
-        logger.log(
-          { project_id, doc_id },
-          'doc not in redis so getting from persistence API'
-        )
-        return PersistenceManager.getDoc(project_id, doc_id, function (
-          error,
-          lines,
-          version,
-          ranges,
-          pathname,
-          projectHistoryId,
-          projectHistoryType
-        ) {
-          if (error != null) {
-            return callback(error)
-          }
+    return RedisManager.getDoc(
+      project_id,
+      doc_id,
+      function (
+        error,
+        lines,
+        version,
+        ranges,
+        pathname,
+        projectHistoryId,
+        unflushedTime
+      ) {
+        if (error != null) {
+          return callback(error)
+        }
+        if (lines == null || version == null) {
           logger.log(
-            {
-              project_id,
-              doc_id,
+            { project_id, doc_id },
+            'doc not in redis so getting from persistence API'
+          )
+          return PersistenceManager.getDoc(
+            project_id,
+            doc_id,
+            function (
+              error,
               lines,
               version,
+              ranges,
               pathname,
               projectHistoryId,
               projectHistoryType
-            },
-            'got doc from persistence API'
-          )
-          return RedisManager.putDocInMemory(
-            project_id,
-            doc_id,
-            lines,
-            version,
-            ranges,
-            pathname,
-            projectHistoryId,
-            function (error) {
+            ) {
               if (error != null) {
                 return callback(error)
               }
-              return RedisManager.setHistoryType(
+              logger.log(
+                {
+                  project_id,
+                  doc_id,
+                  lines,
+                  version,
+                  pathname,
+                  projectHistoryId,
+                  projectHistoryType,
+                },
+                'got doc from persistence API'
+              )
+              return RedisManager.putDocInMemory(
+                project_id,
                 doc_id,
-                projectHistoryType,
+                lines,
+                version,
+                ranges,
+                pathname,
+                projectHistoryId,
                 function (error) {
                   if (error != null) {
                     return callback(error)
                   }
-                  return callback(
-                    null,
-                    lines,
-                    version,
-                    ranges || {},
-                    pathname,
-                    projectHistoryId,
-                    null,
-                    false
+                  return RedisManager.setHistoryType(
+                    doc_id,
+                    projectHistoryType,
+                    function (error) {
+                      if (error != null) {
+                        return callback(error)
+                      }
+                      return callback(
+                        null,
+                        lines,
+                        version,
+                        ranges || {},
+                        pathname,
+                        projectHistoryId,
+                        null,
+                        false
+                      )
+                    }
                   )
                 }
               )
             }
           )
-        })
-      } else {
-        return callback(
-          null,
-          lines,
-          version,
-          ranges,
-          pathname,
-          projectHistoryId,
-          unflushedTime,
-          true
-        )
+        } else {
+          return callback(
+            null,
+            lines,
+            version,
+            ranges,
+            pathname,
+            projectHistoryId,
+            unflushedTime,
+            true
+          )
+        }
       }
-    })
+    )
   },
 
   getDocAndRecentOps(project_id, doc_id, fromVersion, _callback) {
@@ -155,49 +163,46 @@ module.exports = DocumentManager = {
       return _callback(...Array.from(args || []))
     }
 
-    return DocumentManager.getDoc(project_id, doc_id, function (
-      error,
-      lines,
-      version,
-      ranges,
-      pathname,
-      projectHistoryId
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (fromVersion === -1) {
-        return callback(
-          null,
-          lines,
-          version,
-          [],
-          ranges,
-          pathname,
-          projectHistoryId
-        )
-      } else {
-        return RedisManager.getPreviousDocOps(
-          doc_id,
-          fromVersion,
-          version,
-          function (error, ops) {
-            if (error != null) {
-              return callback(error)
+    return DocumentManager.getDoc(
+      project_id,
+      doc_id,
+      function (error, lines, version, ranges, pathname, projectHistoryId) {
+        if (error != null) {
+          return callback(error)
+        }
+        if (fromVersion === -1) {
+          return callback(
+            null,
+            lines,
+            version,
+            [],
+            ranges,
+            pathname,
+            projectHistoryId
+          )
+        } else {
+          return RedisManager.getPreviousDocOps(
+            doc_id,
+            fromVersion,
+            version,
+            function (error, ops) {
+              if (error != null) {
+                return callback(error)
+              }
+              return callback(
+                null,
+                lines,
+                version,
+                ops,
+                ranges,
+                pathname,
+                projectHistoryId
+              )
             }
-            return callback(
-              null,
-              lines,
-              version,
-              ops,
-              ranges,
-              pathname,
-              projectHistoryId
-            )
-          }
-        )
+          )
+        }
       }
-    })
+    )
   },
 
   setDoc(project_id, doc_id, newLines, source, user_id, undoing, _callback) {
@@ -215,95 +220,107 @@ module.exports = DocumentManager = {
     }
 
     const UpdateManager = require('./UpdateManager')
-    return DocumentManager.getDoc(project_id, doc_id, function (
-      error,
-      oldLines,
-      version,
-      ranges,
-      pathname,
-      projectHistoryId,
-      unflushedTime,
-      alreadyLoaded
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-
-      if (oldLines != null && oldLines.length > 0 && oldLines[0].text != null) {
-        logger.log(
-          { doc_id, project_id, oldLines, newLines },
-          'document is JSON so not updating'
-        )
-        return callback(null)
-      }
-
-      logger.log(
-        { doc_id, project_id, oldLines, newLines },
-        'setting a document via http'
-      )
-      return DiffCodec.diffAsShareJsOp(oldLines, newLines, function (
+    return DocumentManager.getDoc(
+      project_id,
+      doc_id,
+      function (
         error,
-        op
+        oldLines,
+        version,
+        ranges,
+        pathname,
+        projectHistoryId,
+        unflushedTime,
+        alreadyLoaded
       ) {
         if (error != null) {
           return callback(error)
         }
-        if (undoing) {
-          for (const o of Array.from(op || [])) {
-            o.u = true
-          } // Turn on undo flag for each op for track changes
-        }
-        const update = {
-          doc: doc_id,
-          op,
-          v: version,
-          meta: {
-            type: 'external',
-            source,
-            user_id
-          }
-        }
-        return UpdateManager.applyUpdate(project_id, doc_id, update, function (
-          error
-        ) {
-          if (error != null) {
-            return callback(error)
-          }
-          // If the document was loaded already, then someone has it open
-          // in a project, and the usual flushing mechanism will happen.
-          // Otherwise we should remove it immediately since nothing else
-          // is using it.
-          if (alreadyLoaded) {
-            return DocumentManager.flushDocIfLoaded(
-              project_id,
-              doc_id,
-              function (error) {
-                if (error != null) {
-                  return callback(error)
-                }
-                return callback(null)
-              }
-            )
-          } else {
-            return DocumentManager.flushAndDeleteDoc(
-              project_id,
-              doc_id,
-              {},
-              function (error) {
-                // There is no harm in flushing project history if the previous
-                // call failed and sometimes it is required
-                HistoryManager.flushProjectChangesAsync(project_id)
 
+        if (
+          oldLines != null &&
+          oldLines.length > 0 &&
+          oldLines[0].text != null
+        ) {
+          logger.log(
+            { doc_id, project_id, oldLines, newLines },
+            'document is JSON so not updating'
+          )
+          return callback(null)
+        }
+
+        logger.log(
+          { doc_id, project_id, oldLines, newLines },
+          'setting a document via http'
+        )
+        return DiffCodec.diffAsShareJsOp(
+          oldLines,
+          newLines,
+          function (error, op) {
+            if (error != null) {
+              return callback(error)
+            }
+            if (undoing) {
+              for (const o of Array.from(op || [])) {
+                o.u = true
+              } // Turn on undo flag for each op for track changes
+            }
+            const update = {
+              doc: doc_id,
+              op,
+              v: version,
+              meta: {
+                type: 'external',
+                source,
+                user_id,
+              },
+            }
+            return UpdateManager.applyUpdate(
+              project_id,
+              doc_id,
+              update,
+              function (error) {
                 if (error != null) {
                   return callback(error)
                 }
-                return callback(null)
+                // If the document was loaded already, then someone has it open
+                // in a project, and the usual flushing mechanism will happen.
+                // Otherwise we should remove it immediately since nothing else
+                // is using it.
+                if (alreadyLoaded) {
+                  return DocumentManager.flushDocIfLoaded(
+                    project_id,
+                    doc_id,
+                    function (error) {
+                      if (error != null) {
+                        return callback(error)
+                      }
+                      return callback(null)
+                    }
+                  )
+                } else {
+                  return DocumentManager.flushAndDeleteDoc(
+                    project_id,
+                    doc_id,
+                    {},
+                    function (error) {
+                      // There is no harm in flushing project history if the previous
+                      // call failed and sometimes it is required
+                      HistoryManager.flushProjectChangesAsync(project_id)
+
+                      if (error != null) {
+                        return callback(error)
+                      }
+                      return callback(null)
+                    }
+                  )
+                }
               }
             )
           }
-        })
-      })
-    })
+        )
+      }
+    )
   },
 
   flushDocIfLoaded(project_id, doc_id, _callback) {
@@ -315,42 +332,49 @@ module.exports = DocumentManager = {
       timer.done()
       return _callback(...Array.from(args || []))
     }
-    return RedisManager.getDoc(project_id, doc_id, function (
-      error,
-      lines,
-      version,
-      ranges,
-      pathname,
-      projectHistoryId,
-      unflushedTime,
-      lastUpdatedAt,
-      lastUpdatedBy
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (lines == null || version == null) {
-        logger.log({ project_id, doc_id }, 'doc is not loaded so not flushing')
-        return callback(null) // TODO: return a flag to bail out, as we go on to remove doc from memory?
-      } else {
-        logger.log({ project_id, doc_id, version }, 'flushing doc')
-        return PersistenceManager.setDoc(
-          project_id,
-          doc_id,
-          lines,
-          version,
-          ranges,
-          lastUpdatedAt,
-          lastUpdatedBy,
-          function (error) {
-            if (error != null) {
-              return callback(error)
+    return RedisManager.getDoc(
+      project_id,
+      doc_id,
+      function (
+        error,
+        lines,
+        version,
+        ranges,
+        pathname,
+        projectHistoryId,
+        unflushedTime,
+        lastUpdatedAt,
+        lastUpdatedBy
+      ) {
+        if (error != null) {
+          return callback(error)
+        }
+        if (lines == null || version == null) {
+          logger.log(
+            { project_id, doc_id },
+            'doc is not loaded so not flushing'
+          )
+          return callback(null) // TODO: return a flag to bail out, as we go on to remove doc from memory?
+        } else {
+          logger.log({ project_id, doc_id, version }, 'flushing doc')
+          return PersistenceManager.setDoc(
+            project_id,
+            doc_id,
+            lines,
+            version,
+            ranges,
+            lastUpdatedAt,
+            lastUpdatedBy,
+            function (error) {
+              if (error != null) {
+                return callback(error)
+              }
+              return RedisManager.clearUnflushedTime(doc_id, callback)
             }
-            return RedisManager.clearUnflushedTime(doc_id, callback)
-          }
-        )
+          )
+        }
       }
-    })
+    )
   },
 
   flushAndDeleteDoc(project_id, doc_id, options, _callback) {
@@ -360,32 +384,36 @@ module.exports = DocumentManager = {
       return _callback(...Array.from(args || []))
     }
 
-    return DocumentManager.flushDocIfLoaded(project_id, doc_id, function (
-      error
-    ) {
-      if (error != null) {
-        if (options.ignoreFlushErrors) {
-          logger.warn(
-            { project_id, doc_id, err: error },
-            'ignoring flush error while deleting document'
-          )
-        } else {
-          return callback(error)
-        }
-      }
-
-      // Flush in the background since it requires a http request
-      HistoryManager.flushDocChangesAsync(project_id, doc_id)
-
-      return RedisManager.removeDocFromMemory(project_id, doc_id, function (
-        error
-      ) {
+    return DocumentManager.flushDocIfLoaded(
+      project_id,
+      doc_id,
+      function (error) {
         if (error != null) {
-          return callback(error)
+          if (options.ignoreFlushErrors) {
+            logger.warn(
+              { project_id, doc_id, err: error },
+              'ignoring flush error while deleting document'
+            )
+          } else {
+            return callback(error)
+          }
         }
-        return callback(null)
-      })
-    })
+
+        // Flush in the background since it requires a http request
+        HistoryManager.flushDocChangesAsync(project_id, doc_id)
+
+        return RedisManager.removeDocFromMemory(
+          project_id,
+          doc_id,
+          function (error) {
+            if (error != null) {
+              return callback(error)
+            }
+            return callback(null)
+          }
+        )
+      }
+    )
   },
 
   acceptChanges(project_id, doc_id, change_ids, _callback) {
@@ -401,44 +429,44 @@ module.exports = DocumentManager = {
       return _callback(...Array.from(args || []))
     }
 
-    return DocumentManager.getDoc(project_id, doc_id, function (
-      error,
-      lines,
-      version,
-      ranges
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (lines == null || version == null) {
-        return callback(
-          new Errors.NotFoundError(`document not found: ${doc_id}`)
-        )
-      }
-      return RangesManager.acceptChanges(change_ids, ranges, function (
-        error,
-        new_ranges
-      ) {
+    return DocumentManager.getDoc(
+      project_id,
+      doc_id,
+      function (error, lines, version, ranges) {
         if (error != null) {
           return callback(error)
         }
-        return RedisManager.updateDocument(
-          project_id,
-          doc_id,
-          lines,
-          version,
-          [],
-          new_ranges,
-          {},
-          function (error) {
+        if (lines == null || version == null) {
+          return callback(
+            new Errors.NotFoundError(`document not found: ${doc_id}`)
+          )
+        }
+        return RangesManager.acceptChanges(
+          change_ids,
+          ranges,
+          function (error, new_ranges) {
             if (error != null) {
               return callback(error)
             }
-            return callback()
+            return RedisManager.updateDocument(
+              project_id,
+              doc_id,
+              lines,
+              version,
+              [],
+              new_ranges,
+              {},
+              function (error) {
+                if (error != null) {
+                  return callback(error)
+                }
+                return callback()
+              }
+            )
           }
         )
-      })
-    })
+      }
+    )
   },
 
   deleteComment(project_id, doc_id, comment_id, _callback) {
@@ -451,44 +479,44 @@ module.exports = DocumentManager = {
       return _callback(...Array.from(args || []))
     }
 
-    return DocumentManager.getDoc(project_id, doc_id, function (
-      error,
-      lines,
-      version,
-      ranges
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (lines == null || version == null) {
-        return callback(
-          new Errors.NotFoundError(`document not found: ${doc_id}`)
-        )
-      }
-      return RangesManager.deleteComment(comment_id, ranges, function (
-        error,
-        new_ranges
-      ) {
+    return DocumentManager.getDoc(
+      project_id,
+      doc_id,
+      function (error, lines, version, ranges) {
         if (error != null) {
           return callback(error)
         }
-        return RedisManager.updateDocument(
-          project_id,
-          doc_id,
-          lines,
-          version,
-          [],
-          new_ranges,
-          {},
-          function (error) {
+        if (lines == null || version == null) {
+          return callback(
+            new Errors.NotFoundError(`document not found: ${doc_id}`)
+          )
+        }
+        return RangesManager.deleteComment(
+          comment_id,
+          ranges,
+          function (error, new_ranges) {
             if (error != null) {
               return callback(error)
             }
-            return callback()
+            return RedisManager.updateDocument(
+              project_id,
+              doc_id,
+              lines,
+              version,
+              [],
+              new_ranges,
+              {},
+              function (error) {
+                if (error != null) {
+                  return callback(error)
+                }
+                return callback()
+              }
+            )
           }
         )
-      })
-    })
+      }
+    )
   },
 
   renameDoc(project_id, doc_id, user_id, update, projectHistoryId, _callback) {
@@ -515,73 +543,94 @@ module.exports = DocumentManager = {
     if (callback == null) {
       callback = function (error, doc) {}
     }
-    return DocumentManager.getDoc(project_id, doc_id, function (
-      error,
-      lines,
-      version,
-      ranges,
-      pathname,
-      projectHistoryId,
-      unflushedTime,
-      alreadyLoaded
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      // if doc was already loaded see if it needs to be flushed
-      if (
-        alreadyLoaded &&
-        unflushedTime != null &&
-        Date.now() - unflushedTime > MAX_UNFLUSHED_AGE
+    return DocumentManager.getDoc(
+      project_id,
+      doc_id,
+      function (
+        error,
+        lines,
+        version,
+        ranges,
+        pathname,
+        projectHistoryId,
+        unflushedTime,
+        alreadyLoaded
       ) {
-        return DocumentManager.flushDocIfLoaded(project_id, doc_id, function (
-          error
+        if (error != null) {
+          return callback(error)
+        }
+        // if doc was already loaded see if it needs to be flushed
+        if (
+          alreadyLoaded &&
+          unflushedTime != null &&
+          Date.now() - unflushedTime > MAX_UNFLUSHED_AGE
         ) {
-          if (error != null) {
-            return callback(error)
-          }
+          return DocumentManager.flushDocIfLoaded(
+            project_id,
+            doc_id,
+            function (error) {
+              if (error != null) {
+                return callback(error)
+              }
+              return callback(null, lines, version)
+            }
+          )
+        } else {
           return callback(null, lines, version)
-        })
-      } else {
-        return callback(null, lines, version)
+        }
       }
-    })
+    )
   },
 
   resyncDocContents(project_id, doc_id, callback) {
     logger.log({ project_id, doc_id }, 'start resyncing doc contents')
-    return RedisManager.getDoc(project_id, doc_id, function (
-      error,
-      lines,
-      version,
-      ranges,
-      pathname,
-      projectHistoryId
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
+    return RedisManager.getDoc(
+      project_id,
+      doc_id,
+      function (error, lines, version, ranges, pathname, projectHistoryId) {
+        if (error != null) {
+          return callback(error)
+        }
 
-      if (lines == null || version == null) {
-        logger.log(
-          { project_id, doc_id },
-          'resyncing doc contents - not found in redis - retrieving from web'
-        )
-        return PersistenceManager.getDoc(project_id, doc_id, function (
-          error,
-          lines,
-          version,
-          ranges,
-          pathname,
-          projectHistoryId
-        ) {
-          if (error != null) {
-            logger.error(
-              { project_id, doc_id, getDocError: error },
-              'resyncing doc contents - error retrieving from web'
-            )
-            return callback(error)
-          }
+        if (lines == null || version == null) {
+          logger.log(
+            { project_id, doc_id },
+            'resyncing doc contents - not found in redis - retrieving from web'
+          )
+          return PersistenceManager.getDoc(
+            project_id,
+            doc_id,
+            function (
+              error,
+              lines,
+              version,
+              ranges,
+              pathname,
+              projectHistoryId
+            ) {
+              if (error != null) {
+                logger.error(
+                  { project_id, doc_id, getDocError: error },
+                  'resyncing doc contents - error retrieving from web'
+                )
+                return callback(error)
+              }
+              return ProjectHistoryRedisManager.queueResyncDocContent(
+                project_id,
+                projectHistoryId,
+                doc_id,
+                lines,
+                version,
+                pathname,
+                callback
+              )
+            }
+          )
+        } else {
+          logger.log(
+            { project_id, doc_id },
+            'resyncing doc contents - doc in redis - will queue in redis'
+          )
           return ProjectHistoryRedisManager.queueResyncDocContent(
             project_id,
             projectHistoryId,
@@ -591,23 +640,9 @@ module.exports = DocumentManager = {
             pathname,
             callback
           )
-        })
-      } else {
-        logger.log(
-          { project_id, doc_id },
-          'resyncing doc contents - doc in redis - will queue in redis'
-        )
-        return ProjectHistoryRedisManager.queueResyncDocContent(
-          project_id,
-          projectHistoryId,
-          doc_id,
-          lines,
-          version,
-          pathname,
-          callback
-        )
+        }
       }
-    })
+    )
   },
 
   getDocWithLock(project_id, doc_id, callback) {
@@ -769,5 +804,5 @@ module.exports = DocumentManager = {
       doc_id,
       callback
     )
-  }
+  },
 }

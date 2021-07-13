@@ -110,7 +110,7 @@ text._append = append = function (newOp, c) {
     ) {
       return (newOp[newOp.length - 1] = {
         i: strInject(last.i, c.p - last.p, c.i),
-        p: last.p
+        p: last.p,
       })
     } else if (
       last.d != null &&
@@ -120,7 +120,7 @@ text._append = append = function (newOp, c) {
     ) {
       return (newOp[newOp.length - 1] = {
         d: strInject(c.d, last.p - c.p, last.d),
-        p: c.p
+        p: c.p,
       })
     } else {
       return newOp.push(c)
@@ -142,7 +142,7 @@ text.compose = function (op1, op2) {
 
 // Attempt to compress the op components together 'as much as possible'.
 // This implementation preserves order and preserves create/delete pairs.
-text.compress = (op) => text.compose([], op)
+text.compress = op => text.compose([], op)
 
 text.normalize = function (op) {
   const newOp = []
@@ -216,7 +216,7 @@ text._tc = transformComponent = function (dest, c, otherC, side) {
   if (c.i != null) {
     append(dest, {
       i: c.i,
-      p: transformPosition(c.p, otherC, side === 'right')
+      p: transformPosition(c.p, otherC, side === 'right'),
     })
   } else {
     // Delete
@@ -286,8 +286,8 @@ const invertComponent = function (c) {
 
 // No need to use append for invert, because the components won't be able to
 // cancel with one another.
-text.invert = (op) =>
-  Array.from(op.slice().reverse()).map((c) => invertComponent(c))
+text.invert = op =>
+  Array.from(op.slice().reverse()).map(c => invertComponent(c))
 
 if (typeof WEB !== 'undefined' && WEB !== null) {
   if (!exports.types) {

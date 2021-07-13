@@ -33,5 +33,5 @@ module.exports = {
   db,
   ObjectId,
   healthCheck: require('util').callbackify(healthCheck),
-  waitForDb
+  waitForDb,
 }

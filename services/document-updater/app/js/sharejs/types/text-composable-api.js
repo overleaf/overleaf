@@ -44,7 +44,7 @@ type.api = {
     const op = type.normalize([
       pos,
       { d: this.snapshot.slice(pos, pos + length) },
-      this.snapshot.length - pos - length
+      this.snapshot.length - pos - length,
     ])
 
     this.submitOp(op, callback)
@@ -70,7 +70,7 @@ type.api = {
         return result
       })()
     })
-  }
+  },
 }
 // We don't increment pos, because the position
 // specified is after the delete has happened.

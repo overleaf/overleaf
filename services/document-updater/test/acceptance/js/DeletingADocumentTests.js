@@ -26,10 +26,10 @@ describe('Deleting a document', function () {
       op: [
         {
           i: 'one and a half\n',
-          p: 4
-        }
+          p: 4,
+        },
       ],
-      v: this.version
+      v: this.version,
     }
     this.result = ['one', 'one and a half', 'two', 'three']
 
@@ -47,19 +47,19 @@ describe('Deleting a document', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       sinon.spy(MockWebApi, 'setDocument')
       sinon.spy(MockWebApi, 'getDocument')
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
       return DocUpdaterClient.preloadDoc(
         this.project_id,
         this.doc_id,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -67,7 +67,7 @@ describe('Deleting a document', function () {
             this.project_id,
             this.doc_id,
             this.update,
-            (error) => {
+            error => {
               if (error != null) {
                 throw error
               }
@@ -133,10 +133,10 @@ describe('Deleting a document', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
-        lines: this.lines
+        lines: this.lines,
       })
       sinon.spy(MockWebApi, 'setDocument')
       sinon.spy(MockWebApi, 'getDocument')

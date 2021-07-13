@@ -4,18 +4,18 @@ const rclient1 = redis.createClient({
   cluster: [
     {
       port: '7000',
-      host: 'localhost'
-    }
-  ]
+      host: 'localhost',
+    },
+  ],
 })
 
 const rclient2 = redis.createClient({
   cluster: [
     {
       port: '7000',
-      host: 'localhost'
-    }
-  ]
+      host: 'localhost',
+    },
+  ],
 })
 
 let counter = 0
@@ -23,7 +23,7 @@ const sendPing = function (cb) {
   if (cb == null) {
     cb = function () {}
   }
-  return rclient1.rpush('test-blpop', counter, (error) => {
+  return rclient1.rpush('test-blpop', counter, error => {
     if (error != null) {
       console.error('[SENDING ERROR]', error.message)
     }
@@ -35,7 +35,7 @@ const sendPing = function (cb) {
 }
 
 let previous = null
-const listenForPing = (cb) =>
+const listenForPing = cb =>
   rclient2.blpop('test-blpop', 200, (error, result) => {
     if (error != null) {
       return cb(error)
@@ -57,7 +57,7 @@ const listenForPing = (cb) =>
 const PING_DELAY = 100
 ;(sendPings = () => sendPing(() => setTimeout(sendPings, PING_DELAY)))()
 ;(listenInBackground = () =>
-  listenForPing((error) => {
+  listenForPing(error => {
     if (error) {
       console.error('[RECEIVING ERROR]', error.message)
     }

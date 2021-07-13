@@ -25,19 +25,19 @@ const showUpdateLength = function (update) {
     const copy = _.cloneDeep(update)
     copy.op.forEach(function (element, index) {
       if (
-        __guard__(element != null ? element.i : undefined, (x) => x.length) !=
+        __guard__(element != null ? element.i : undefined, x => x.length) !=
         null
       ) {
         copy.op[index].i = element.i.length
       }
       if (
-        __guard__(element != null ? element.d : undefined, (x1) => x1.length) !=
+        __guard__(element != null ? element.d : undefined, x1 => x1.length) !=
         null
       ) {
         copy.op[index].d = element.d.length
       }
       if (
-        __guard__(element != null ? element.c : undefined, (x2) => x2.length) !=
+        __guard__(element != null ? element.c : undefined, x2 => x2.length) !=
         null
       ) {
         return (copy.op[index].c = element.c.length)
@@ -57,7 +57,7 @@ module.exports = {
   docLines: showLength,
   newDocLines: showLength,
   ranges: showLength,
-  update: showUpdateLength
+  update: showUpdateLength,
 }
 
 function __guard__(value, transform) {

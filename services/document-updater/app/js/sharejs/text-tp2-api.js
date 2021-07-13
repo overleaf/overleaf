@@ -49,7 +49,7 @@ type.api = {
   // Flatten a document into a string
   getText() {
     const strings = Array.from(this.snapshot.data).filter(
-      (elem) => typeof elem === 'string'
+      elem => typeof elem === 'string'
     )
     return strings.join('')
   },
@@ -129,5 +129,5 @@ type.api = {
         }
       }
     })
-  }
+  },
 }

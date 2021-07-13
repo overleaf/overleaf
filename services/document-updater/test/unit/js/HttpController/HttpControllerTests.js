@@ -9,14 +9,14 @@ describe('HttpController', function () {
       requires: {
         './DocumentManager': (this.DocumentManager = {}),
         './HistoryManager': (this.HistoryManager = {
-          flushProjectChangesAsync: sinon.stub()
+          flushProjectChangesAsync: sinon.stub(),
         }),
         './ProjectManager': (this.ProjectManager = {}),
         './ProjectFlusher': { flushAllProjects() {} },
         './DeleteQueueManager': (this.DeleteQueueManager = {}),
         './Metrics': (this.Metrics = {}),
-        './Errors': Errors
-      }
+        './Errors': Errors,
+      },
     })
     this.Metrics.Timer = class Timer {}
     this.Metrics.Timer.prototype.done = sinon.stub()
@@ -27,7 +27,7 @@ describe('HttpController', function () {
     this.res = {
       send: sinon.stub(),
       sendStatus: sinon.stub(),
-      json: sinon.stub()
+      json: sinon.stub(),
     }
   })
 
@@ -42,10 +42,10 @@ describe('HttpController', function () {
       this.req = {
         params: {
           project_id: this.project_id,
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         },
         query: {},
-        body: {}
+        body: {},
       }
     })
 
@@ -79,7 +79,7 @@ describe('HttpController', function () {
             version: this.version,
             ops: [],
             ranges: this.ranges,
-            pathname: this.pathname
+            pathname: this.pathname,
           })
           .should.equal(true)
       })
@@ -129,7 +129,7 @@ describe('HttpController', function () {
             version: this.version,
             ops: this.ops,
             ranges: this.ranges,
-            pathname: this.pathname
+            pathname: this.pathname,
           })
           .should.equal(true)
       })
@@ -186,15 +186,15 @@ describe('HttpController', function () {
         headers: {},
         params: {
           project_id: this.project_id,
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         },
         query: {},
         body: {
           lines: this.lines,
           source: this.source,
           user_id: this.user_id,
-          undoing: (this.undoing = true)
-        }
+          undoing: (this.undoing = true),
+        },
       }
     })
 
@@ -230,7 +230,7 @@ describe('HttpController', function () {
               lines: this.lines,
               source: this.source,
               userId: this.user_id,
-              undoing: this.undoing
+              undoing: this.undoing,
             },
             'setting doc via http'
           )
@@ -280,10 +280,10 @@ describe('HttpController', function () {
     beforeEach(function () {
       this.req = {
         params: {
-          project_id: this.project_id
+          project_id: this.project_id,
         },
         query: {},
-        body: {}
+        body: {},
       }
     })
 
@@ -338,10 +338,10 @@ describe('HttpController', function () {
       this.req = {
         params: {
           project_id: this.project_id,
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         },
         query: {},
-        body: {}
+        body: {},
       }
     })
 
@@ -396,10 +396,10 @@ describe('HttpController', function () {
       this.req = {
         params: {
           project_id: this.project_id,
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         },
         query: {},
-        body: {}
+        body: {},
       }
     })
 
@@ -414,7 +414,7 @@ describe('HttpController', function () {
       it('should flush and delete the doc', function () {
         this.DocumentManager.flushAndDeleteDocWithLock
           .calledWith(this.project_id, this.doc_id, {
-            ignoreFlushErrors: false
+            ignoreFlushErrors: false,
           })
           .should.equal(true)
       })
@@ -485,10 +485,10 @@ describe('HttpController', function () {
     beforeEach(function () {
       this.req = {
         params: {
-          project_id: this.project_id
+          project_id: this.project_id,
         },
         query: {},
-        body: {}
+        body: {},
       }
     })
 
@@ -560,10 +560,10 @@ describe('HttpController', function () {
         params: {
           project_id: this.project_id,
           doc_id: this.doc_id,
-          change_id: (this.change_id = 'mock-change-od-1')
+          change_id: (this.change_id = 'mock-change-od-1'),
         },
         query: {},
-        body: {}
+        body: {},
       }
     })
 
@@ -605,7 +605,7 @@ describe('HttpController', function () {
           'mock-change-od-1',
           'mock-change-od-2',
           'mock-change-od-3',
-          'mock-change-od-4'
+          'mock-change-od-4',
         ]
         this.req.body = { change_ids: this.change_ids }
         this.DocumentManager.acceptChangesWithLock = sinon
@@ -650,10 +650,10 @@ describe('HttpController', function () {
         params: {
           project_id: this.project_id,
           doc_id: this.doc_id,
-          comment_id: (this.comment_id = 'mock-comment-id')
+          comment_id: (this.comment_id = 'mock-comment-id'),
         },
         query: {},
-        body: {}
+        body: {},
       }
     })
 
@@ -681,7 +681,7 @@ describe('HttpController', function () {
             {
               projectId: this.project_id,
               docId: this.doc_id,
-              commentId: this.comment_id
+              commentId: this.comment_id,
             },
             'deleting comment via http'
           )
@@ -712,16 +712,16 @@ describe('HttpController', function () {
       this.state = '01234567890abcdef'
       this.docs = [
         { _id: '1234', lines: 'hello', v: 23 },
-        { _id: '4567', lines: 'world', v: 45 }
+        { _id: '4567', lines: 'world', v: 45 },
       ]
       this.req = {
         params: {
-          project_id: this.project_id
+          project_id: this.project_id,
         },
         query: {
-          state: this.state
+          state: this.state,
         },
-        body: {}
+        body: {},
       }
     })
 
@@ -817,16 +817,16 @@ describe('HttpController', function () {
           type: 'rename-doc',
           id: 1,
           pathname: 'thesis.tex',
-          newPathname: 'book.tex'
+          newPathname: 'book.tex',
         },
         { type: 'add-doc', id: 2, pathname: 'article.tex', docLines: 'hello' },
         {
           type: 'rename-file',
           id: 3,
           pathname: 'apple.png',
-          newPathname: 'banana.png'
+          newPathname: 'banana.png',
         },
-        { type: 'add-file', id: 4, url: 'filestore.example.com/4' }
+        { type: 'add-file', id: 4, url: 'filestore.example.com/4' },
       ]
       this.version = 1234567
       this.req = {
@@ -835,11 +835,11 @@ describe('HttpController', function () {
           projectHistoryId: this.projectHistoryId,
           userId: this.userId,
           updates: this.updates,
-          version: this.version
+          version: this.version,
         },
         params: {
-          project_id: this.project_id
-        }
+          project_id: this.project_id,
+        },
       }
     })
 
@@ -895,11 +895,11 @@ describe('HttpController', function () {
         body: {
           projectHistoryId: this.projectHistoryId,
           docs: this.docs,
-          files: this.files
+          files: this.files,
         },
         params: {
-          project_id: this.project_id
-        }
+          project_id: this.project_id,
+        },
       }
     })
 

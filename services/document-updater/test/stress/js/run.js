@@ -31,7 +31,7 @@ const transform = function (op1, op2) {
   if (op2.p < op1.p) {
     return {
       p: op1.p + op2.i.length,
-      i: op1.i
+      i: op1.i,
     }
   } else {
     return op1
@@ -61,7 +61,7 @@ class StressTestClient {
       conflicts: 0,
       local_updates: 0,
       remote_updates: 0,
-      max_delay: 0
+      max_delay: 0,
     }
 
     DocUpdaterClient.subscribeToAppliedOps((channel, update) => {
@@ -81,7 +81,7 @@ class StressTestClient {
     this.content = insert(this.content, this.pos, data)
     this.inflight_op = {
       i: data,
-      p: this.pos++
+      p: this.pos++,
     }
     this.resendUpdate()
     return (this.inflight_op_sent = Date.now())
@@ -94,9 +94,9 @@ class StressTestClient {
       op: [this.inflight_op],
       v: this.version,
       meta: {
-        source: this.client_id
+        source: this.client_id,
       },
-      dupIfSource: [this.client_id]
+      dupIfSource: [this.client_id],
     })
     return (this.update_timer = setTimeout(() => {
       console.log(
@@ -277,7 +277,7 @@ const checkDocument = function (project_id, doc_id, clients, callback) {
   if (callback == null) {
     callback = function (error) {}
   }
-  const jobs = clients.map((client) => (cb) => client.check(cb))
+  const jobs = clients.map(client => cb => client.check(cb))
   return async.parallel(jobs, callback)
 }
 
@@ -304,7 +304,7 @@ const printSummary = function (doc_id, clients) {
           local_updates: 0,
           remote_updates: 0,
           conflicts: 0,
-          max_delay: 0
+          max_delay: 0,
         })
       )
     }
@@ -326,7 +326,7 @@ for (const doc_and_project_id of Array.from(process.argv.slice(5))) {
       [new Array(CLIENT_COUNT + 2).join('a')],
       null,
       null,
-      (error) => {
+      error => {
         if (error != null) {
           throw error
         }
@@ -360,22 +360,23 @@ for (const doc_and_project_id of Array.from(process.argv.slice(5))) {
                   content,
                   pos,
                   version,
-                  updateDelay: UPDATE_DELAY
+                  updateDelay: UPDATE_DELAY,
                 })
                 return clients.push(client)
               })(pos)
             }
 
             return (runBatch = function () {
-              const jobs = clients.map((client) => (cb) =>
-                client.runForNUpdates(SAMPLE_INTERVAL / UPDATE_DELAY, cb)
+              const jobs = clients.map(
+                client => cb =>
+                  client.runForNUpdates(SAMPLE_INTERVAL / UPDATE_DELAY, cb)
               )
-              return async.parallel(jobs, (error) => {
+              return async.parallel(jobs, error => {
                 if (error != null) {
                   throw error
                 }
                 printSummary(doc_id, clients)
-                return checkDocument(project_id, doc_id, clients, (error) => {
+                return checkDocument(project_id, doc_id, clients, error => {
                   if (error != null) {
                     throw error
                   }

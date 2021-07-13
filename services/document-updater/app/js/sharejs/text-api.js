@@ -42,11 +42,11 @@ text.api = {
 
   _register() {
     return this.on('remoteop', function (op) {
-      return Array.from(op).map((component) =>
+      return Array.from(op).map(component =>
         component.i !== undefined
           ? this.emit('insert', component.p, component.i)
           : this.emit('delete', component.p, component.d)
       )
     })
-  }
+  },
 }

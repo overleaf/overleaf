@@ -4,18 +4,18 @@ const rclient1 = redis.createClient({
   cluster: [
     {
       port: '7000',
-      host: 'localhost'
-    }
-  ]
+      host: 'localhost',
+    },
+  ],
 })
 
 const rclient2 = redis.createClient({
   cluster: [
     {
       port: '7000',
-      host: 'localhost'
-    }
-  ]
+      host: 'localhost',
+    },
+  ],
 })
 
 let counter = 0
@@ -23,7 +23,7 @@ const sendPing = function (cb) {
   if (cb == null) {
     cb = function () {}
   }
-  return rclient1.publish('test-pubsub', counter, (error) => {
+  return rclient1.publish('test-pubsub', counter, error => {
     if (error) {
       console.error('[SENDING ERROR]', error.message)
     }

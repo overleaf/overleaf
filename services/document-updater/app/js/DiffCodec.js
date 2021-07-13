@@ -21,13 +21,13 @@ module.exports = {
       if (type === this.ADDED) {
         ops.push({
           i: content,
-          p: position
+          p: position,
         })
         position += content.length
       } else if (type === this.REMOVED) {
         ops.push({
           d: content,
-          p: position
+          p: position,
         })
       } else if (type === this.UNCHANGED) {
         position += content.length
@@ -36,5 +36,5 @@ module.exports = {
       }
     }
     callback(null, ops)
-  }
+  },
 }

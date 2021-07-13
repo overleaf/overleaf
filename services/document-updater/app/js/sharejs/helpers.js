@@ -31,80 +31,84 @@ exports._bt = bootstrapTransform = function (
   }
 
   // Transforms rightOp by leftOp. Returns ['rightOp', clientOp']
-  type.transformX = type.transformX = transformX = function (leftOp, rightOp) {
-    checkValidOp(leftOp)
-    checkValidOp(rightOp)
+  type.transformX =
+    type.transformX =
+    transformX =
+      function (leftOp, rightOp) {
+        checkValidOp(leftOp)
+        checkValidOp(rightOp)
 
-    const newRightOp = []
+        const newRightOp = []
 
-    for (let rightComponent of Array.from(rightOp)) {
-      // Generate newLeftOp by composing leftOp by rightComponent
-      const newLeftOp = []
+        for (let rightComponent of Array.from(rightOp)) {
+          // Generate newLeftOp by composing leftOp by rightComponent
+          const newLeftOp = []
 
-      let k = 0
-      while (k < leftOp.length) {
-        var l
-        const nextC = []
-        transformComponentX(leftOp[k], rightComponent, newLeftOp, nextC)
-        k++
+          let k = 0
+          while (k < leftOp.length) {
+            var l
+            const nextC = []
+            transformComponentX(leftOp[k], rightComponent, newLeftOp, nextC)
+            k++
 
-        if (nextC.length === 1) {
-          rightComponent = nextC[0]
-        } else if (nextC.length === 0) {
-          for (l of Array.from(leftOp.slice(k))) {
-            append(newLeftOp, l)
+            if (nextC.length === 1) {
+              rightComponent = nextC[0]
+            } else if (nextC.length === 0) {
+              for (l of Array.from(leftOp.slice(k))) {
+                append(newLeftOp, l)
+              }
+              rightComponent = null
+              break
+            } else {
+              // Recurse.
+              const [l_, r_] = Array.from(transformX(leftOp.slice(k), nextC))
+              for (l of Array.from(l_)) {
+                append(newLeftOp, l)
+              }
+              for (const r of Array.from(r_)) {
+                append(newRightOp, r)
+              }
+              rightComponent = null
+              break
+            }
           }
-          rightComponent = null
-          break
-        } else {
-          // Recurse.
-          const [l_, r_] = Array.from(transformX(leftOp.slice(k), nextC))
-          for (l of Array.from(l_)) {
-            append(newLeftOp, l)
+
+          if (rightComponent != null) {
+            append(newRightOp, rightComponent)
           }
-          for (const r of Array.from(r_)) {
-            append(newRightOp, r)
-          }
-          rightComponent = null
-          break
+          leftOp = newLeftOp
         }
-      }
 
-      if (rightComponent != null) {
-        append(newRightOp, rightComponent)
+        return [leftOp, newRightOp]
       }
-      leftOp = newLeftOp
-    }
-
-    return [leftOp, newRightOp]
-  }
 
   // Transforms op with specified type ('left' or 'right') by otherOp.
-  return (type.transform = type.transform = function (op, otherOp, type) {
-    let _
-    if (type !== 'left' && type !== 'right') {
-      throw new Error("type must be 'left' or 'right'")
-    }
+  return (type.transform = type.transform =
+    function (op, otherOp, type) {
+      let _
+      if (type !== 'left' && type !== 'right') {
+        throw new Error("type must be 'left' or 'right'")
+      }
 
-    if (otherOp.length === 0) {
-      return op
-    }
+      if (otherOp.length === 0) {
+        return op
+      }
 
-    // TODO: Benchmark with and without this line. I _think_ it'll make a big difference...?
-    if (op.length === 1 && otherOp.length === 1) {
-      return transformComponent([], op[0], otherOp[0], type)
-    }
+      // TODO: Benchmark with and without this line. I _think_ it'll make a big difference...?
+      if (op.length === 1 && otherOp.length === 1) {
+        return transformComponent([], op[0], otherOp[0], type)
+      }
 
-    if (type === 'left') {
-      let left
-      ;[left, _] = Array.from(transformX(op, otherOp))
-      return left
-    } else {
-      let right
-      ;[_, right] = Array.from(transformX(otherOp, op))
-      return right
-    }
-  })
+      if (type === 'left') {
+        let left
+        ;[left, _] = Array.from(transformX(op, otherOp))
+        return left
+      } else {
+        let right
+        ;[_, right] = Array.from(transformX(otherOp, op))
+        return right
+      }
+    })
 }
 
 if (typeof WEB === 'undefined') {

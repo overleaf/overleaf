@@ -41,5 +41,5 @@ module.exports = HistoryRedisManager = {
         return callback()
       }
     )
-  }
+  },
 }

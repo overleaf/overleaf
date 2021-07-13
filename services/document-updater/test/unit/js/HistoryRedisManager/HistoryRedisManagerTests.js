@@ -20,7 +20,7 @@ describe('HistoryRedisManager', function () {
   beforeEach(function () {
     this.rclient = {
       auth() {},
-      exec: sinon.stub()
+      exec: sinon.stub(),
     }
     this.rclient.multi = () => this.rclient
     this.HistoryRedisManager = SandboxedModule.require(modulePath, {
@@ -35,12 +35,12 @@ describe('HistoryRedisManager', function () {
                 },
                 docsWithHistoryOps({ project_id }) {
                   return `DocsWithHistoryOps:${project_id}`
-                }
-              }
-            })
-          }
-        }
-      }
+                },
+              },
+            }),
+          },
+        },
+      },
     })
     this.doc_id = 'doc-id-123'
     this.project_id = 'project-id-123'

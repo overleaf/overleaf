@@ -41,5 +41,5 @@ module.exports = Errors = {
   NotFoundError,
   OpRangeNotAvailableError,
   ProjectStateChangedError,
-  DeleteMismatchError
+  DeleteMismatchError,
 }

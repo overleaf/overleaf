@@ -29,13 +29,13 @@ describe('Getting a document', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       sinon.spy(MockWebApi, 'getDocument')
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
 
       return DocUpdaterClient.getDoc(
@@ -71,17 +71,17 @@ describe('Getting a document', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
       return DocUpdaterClient.preloadDoc(
         this.project_id,
         this.doc_id,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -115,23 +115,23 @@ describe('Getting a document', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
-        lines: (this.lines = ['one', 'two', 'three'])
+        lines: (this.lines = ['one', 'two', 'three']),
       })
 
-      this.updates = __range__(0, 199, true).map((v) => ({
+      this.updates = __range__(0, 199, true).map(v => ({
         doc_id: this.doc_id,
         op: [{ i: v.toString(), p: 0 }],
-        v
+        v,
       }))
 
       return DocUpdaterClient.sendUpdates(
         this.project_id,
         this.doc_id,
         this.updates,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -191,7 +191,7 @@ describe('Getting a document', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       return DocUpdaterClient.getDoc(
         this.project_id,
@@ -212,7 +212,7 @@ describe('Getting a document', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       sinon
         .stub(MockWebApi, 'getDocument')
@@ -246,7 +246,7 @@ describe('Getting a document', function () {
       this.timeout = 10000
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       sinon
         .stub(MockWebApi, 'getDocument')

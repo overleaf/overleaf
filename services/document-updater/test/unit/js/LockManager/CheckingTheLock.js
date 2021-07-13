@@ -29,9 +29,9 @@ describe('LockManager - checking the lock', function () {
       createClient() {
         return {
           auth() {},
-          exists: existsStub
+          exists: existsStub,
         }
-      }
+      },
     },
     './Metrics': { inc() {} },
     './Profiler': (Profiler = (function () {
@@ -43,7 +43,7 @@ describe('LockManager - checking the lock', function () {
       }
       Profiler.initClass()
       return Profiler
-    })())
+    })()),
   }
   const LockManager = SandboxedModule.require(modulePath, { requires: mocks })
 

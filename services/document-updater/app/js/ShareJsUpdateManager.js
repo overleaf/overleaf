@@ -35,7 +35,7 @@ module.exports = ShareJsUpdateManager = {
     const db = new ShareJsDB(project_id, doc_id, lines, version)
     const model = new ShareJsModel(db, {
       maxDocLength: Settings.max_doc_length,
-      maximumAge: MAX_AGE_OF_OP
+      maximumAge: MAX_AGE_OF_OP,
     })
     model.db = db
     return model
@@ -141,5 +141,5 @@ module.exports = ShareJsUpdateManager = {
       .update('blob ' + content.length + '\x00')
       .update(content, 'utf8')
       .digest('hex')
-  }
+  },
 }
