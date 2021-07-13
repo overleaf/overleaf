@@ -20,9 +20,9 @@ describe('DocumentUpdaterManager', function () {
       requires: {
         request: (this.request = {}),
         '@overleaf/settings': (this.settings = {
-          apis: { documentupdater: { url: 'http://example.com' } }
-        })
-      }
+          apis: { documentupdater: { url: 'http://example.com' } },
+        }),
+      },
     })
     this.callback = sinon.stub()
     this.lines = ['one', 'two', 'three']
@@ -35,7 +35,7 @@ describe('DocumentUpdaterManager', function () {
         this.body = JSON.stringify({
           lines: this.lines,
           version: this.version,
-          ops: []
+          ops: [],
         })
         this.request.get = sinon
           .stub()
@@ -135,8 +135,8 @@ describe('DocumentUpdaterManager', function () {
               lines: this.content.split('\n'),
               source: 'restore',
               user_id: this.user_id,
-              undoing: true
-            }
+              undoing: true,
+            },
           })
           .should.equal(true)
       })

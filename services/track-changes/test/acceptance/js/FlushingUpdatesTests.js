@@ -40,17 +40,17 @@ describe('Flushing updates', function () {
           {
             op: [{ i: 'f', p: 3 }],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 3
-          }
+            v: 3,
+          },
         ],
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
           return TrackChangesClient.flushDoc(
             this.project_id,
             this.doc_id,
-            (error) => {
+            error => {
               if (error != null) {
                 throw error
               }
@@ -67,8 +67,8 @@ describe('Flushing updates', function () {
         expect(updates[0].pack[0].op).to.deep.equal([
           {
             p: 3,
-            i: 'f'
-          }
+            i: 'f',
+          },
         ])
         return done()
       })
@@ -87,8 +87,8 @@ describe('Flushing updates', function () {
 
         MockWebApi.projects[this.project_id] = {
           features: {
-            versioning: true
-          }
+            versioning: true,
+          },
         }
 
         TrackChangesClient.pushRawUpdates(
@@ -98,19 +98,19 @@ describe('Flushing updates', function () {
             {
               op: [{ i: 'g', p: 2 }],
               meta: { ts: Date.now() - 2 * this.weeks, user_id: this.user_id },
-              v: 2
+              v: 2,
             },
             {
               op: [{ i: 'f', p: 3 }],
               meta: { ts: Date.now(), user_id: this.user_id },
-              v: 3
-            }
+              v: 3,
+            },
           ],
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }
-            return TrackChangesClient.flushProject(this.project_id, (error) => {
+            return TrackChangesClient.flushProject(this.project_id, error => {
               if (error != null) {
                 throw error
               }
@@ -154,8 +154,8 @@ describe('Flushing updates', function () {
 
         MockWebApi.projects[this.project_id] = {
           features: {
-            versioning: false
-          }
+            versioning: false,
+          },
         }
 
         TrackChangesClient.pushRawUpdates(
@@ -165,19 +165,19 @@ describe('Flushing updates', function () {
             {
               op: [{ i: 'g', p: 2 }],
               meta: { ts: Date.now() - 2 * this.weeks, user_id: this.user_id },
-              v: 2
+              v: 2,
             },
             {
               op: [{ i: 'f', p: 3 }],
               meta: { ts: Date.now(), user_id: this.user_id },
-              v: 3
-            }
+              v: 3,
+            },
           ],
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }
-            return TrackChangesClient.flushProject(this.project_id, (error) => {
+            return TrackChangesClient.flushProject(this.project_id, error => {
               if (error != null) {
                 throw error
               }
@@ -210,13 +210,13 @@ describe('Flushing updates', function () {
 
         MockWebApi.projects[this.project_id] = {
           features: {
-            versioning: false
-          }
+            versioning: false,
+          },
         }
 
         TrackChangesClient.setPreserveHistoryForProject(
           this.project_id,
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }
@@ -228,23 +228,23 @@ describe('Flushing updates', function () {
                   op: [{ i: 'g', p: 2 }],
                   meta: {
                     ts: Date.now() - 2 * this.weeks,
-                    user_id: this.user_id
+                    user_id: this.user_id,
                   },
-                  v: 2
+                  v: 2,
                 },
                 {
                   op: [{ i: 'f', p: 3 }],
                   meta: { ts: Date.now(), user_id: this.user_id },
-                  v: 3
-                }
+                  v: 3,
+                },
               ],
-              (error) => {
+              error => {
                 if (error != null) {
                   throw error
                 }
                 return TrackChangesClient.flushProject(
                   this.project_id,
-                  (error) => {
+                  error => {
                     if (error != null) {
                       throw error
                     }

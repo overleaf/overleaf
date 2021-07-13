@@ -24,11 +24,11 @@ describe('WebApiManager', function () {
             web: {
               url: 'http://example.com',
               user: 'sharelatex',
-              pass: 'password'
-            }
-          }
-        })
-      }
+              pass: 'password',
+            },
+          },
+        }),
+      },
     })
     this.callback = sinon.stub()
     this.user_id = 'mock-user-id'
@@ -38,7 +38,7 @@ describe('WebApiManager', function () {
       id: this.user_id,
       first_name: 'Leo',
       last_nane: 'Lion',
-      extra_param: 'blah'
+      extra_param: 'blah',
     }
     return (this.project = { features: 'mock-features' })
   })
@@ -60,8 +60,8 @@ describe('WebApiManager', function () {
             auth: {
               user: this.settings.apis.web.user,
               pass: this.settings.apis.web.pass,
-              sendImmediately: true
-            }
+              sendImmediately: true,
+            },
           })
           .should.equal(true)
       })
@@ -72,7 +72,7 @@ describe('WebApiManager', function () {
             id: this.user_id,
             email: this.user_info.email,
             first_name: this.user_info.first_name,
-            last_name: this.user_info.last_name
+            last_name: this.user_info.last_name,
           })
           .should.equal(true)
       })
@@ -150,8 +150,8 @@ describe('WebApiManager', function () {
             auth: {
               user: this.settings.apis.web.user,
               pass: this.settings.apis.web.pass,
-              sendImmediately: true
-            }
+              sendImmediately: true,
+            },
           })
           .should.equal(true)
       })

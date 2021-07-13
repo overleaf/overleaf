@@ -74,16 +74,16 @@ module.exports = MockDocUpdaterApi = {
     })
 
     return app
-      .listen(3003, (error) => {
+      .listen(3003, error => {
         if (error != null) {
           throw error
         }
       })
-      .on('error', (error) => {
+      .on('error', error => {
         console.error('error starting MockDocUpdaterApi:', error.message)
         return process.exit(1)
       })
-  }
+  },
 }
 
 MockDocUpdaterApi.run()

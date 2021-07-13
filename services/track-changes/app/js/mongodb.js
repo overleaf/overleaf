@@ -38,5 +38,5 @@ module.exports = {
   db,
   ObjectId,
   closeDb,
-  waitForDb
+  waitForDb,
 }

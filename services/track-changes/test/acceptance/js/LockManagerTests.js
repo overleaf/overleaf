@@ -27,24 +27,24 @@ describe('Locking document', function () {
       LockManager.LOCK_TTL = 1 // second
       LockManager.runWithLock(
         'doc123',
-        (releaseA) => {
+        releaseA => {
           // we create a lock A and allow it to expire in redis
           return setTimeout(
             () =>
               // now we create a new lock B and try to release A
               LockManager.runWithLock(
                 'doc123',
-                (releaseB) => {
+                releaseB => {
                   return releaseA()
                 }, // try to release lock A to see if it wipes out lock B
-                (error) => {}
+                error => {}
               ),
 
             // we never release lock B so nothing should happen here
             1500
           )
         }, // enough time to wait until the lock has expired
-        (error) =>
+        error =>
           // we get here after trying to release lock A
           done()
       )

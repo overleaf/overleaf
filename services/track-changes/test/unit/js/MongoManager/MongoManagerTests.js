@@ -24,8 +24,8 @@ describe('MongoManager', function () {
       requires: {
         './mongodb': { db: (this.db = {}), ObjectId },
         './PackManager': (this.PackManager = {}),
-        '@overleaf/metrics': { timeAsyncMethod() {} }
-      }
+        '@overleaf/metrics': { timeAsyncMethod() {} },
+      },
     })
     this.callback = sinon.stub()
     this.doc_id = ObjectId().toString()
@@ -166,10 +166,10 @@ describe('MongoManager', function () {
         .calledWith(
           {
             doc_id: ObjectId(this.doc_id),
-            project_id: { $exists: false }
+            project_id: { $exists: false },
           },
           {
-            $set: { project_id: ObjectId(this.project_id) }
+            $set: { project_id: ObjectId(this.project_id) },
           }
         )
         .should.equal(true)
@@ -184,7 +184,7 @@ describe('MongoManager', function () {
     beforeEach(function () {
       this.metadata = { mock: 'metadata' }
       this.db.projectHistoryMetaData = {
-        findOne: sinon.stub().callsArgWith(1, null, this.metadata)
+        findOne: sinon.stub().callsArgWith(1, null, this.metadata),
       }
       return this.MongoManager.getProjectMetaData(
         this.project_id,
@@ -207,7 +207,7 @@ describe('MongoManager', function () {
     beforeEach(function () {
       this.metadata = { mock: 'metadata' }
       this.db.projectHistoryMetaData = {
-        updateOne: sinon.stub().yields()
+        updateOne: sinon.stub().yields(),
       }
       return this.MongoManager.setProjectMetaData(
         this.project_id,
@@ -220,13 +220,13 @@ describe('MongoManager', function () {
       return this.db.projectHistoryMetaData.updateOne
         .calledWith(
           {
-            project_id: ObjectId(this.project_id)
+            project_id: ObjectId(this.project_id),
           },
           {
-            $set: this.metadata
+            $set: this.metadata,
           },
           {
-            upsert: true
+            upsert: true,
           }
         )
         .should.equal(true)

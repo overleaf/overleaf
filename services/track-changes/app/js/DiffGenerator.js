@@ -162,13 +162,11 @@ module.exports = DiffGenerator = {
     if (op.i != null) {
       newDiff.push({
         i: op.i,
-        meta
+        meta,
       })
     } else if (op.d != null) {
-      ;({
-        consumedDiff,
-        remainingDiff
-      } = DiffGenerator._consumeDiffAffectedByDeleteOp(remainingDiff, op, meta))
+      ;({ consumedDiff, remainingDiff } =
+        DiffGenerator._consumeDiffAffectedByDeleteOp(remainingDiff, op, meta))
       newDiff.push(...Array.from(consumedDiff || []))
     }
 
@@ -211,7 +209,7 @@ module.exports = DiffGenerator = {
 
     return {
       consumedDiff,
-      remainingDiff
+      remainingDiff,
     }
   },
 
@@ -220,18 +218,15 @@ module.exports = DiffGenerator = {
     let remainingOp = deleteOp
     while (remainingOp && remainingDiff.length > 0) {
       let newPart
-      ;({
-        newPart,
-        remainingDiff,
-        remainingOp
-      } = DiffGenerator._consumeDeletedPart(remainingDiff, remainingOp, meta))
+      ;({ newPart, remainingDiff, remainingOp } =
+        DiffGenerator._consumeDeletedPart(remainingDiff, remainingOp, meta))
       if (newPart != null) {
         consumedDiff.push(newPart)
       }
     }
     return {
       consumedDiff,
-      remainingDiff
+      remainingDiff,
     }
   },
 
@@ -262,7 +257,7 @@ module.exports = DiffGenerator = {
       if (part.u != null) {
         newPart = {
           d: op.d,
-          meta
+          meta,
         }
       } else if (part.i != null) {
         newPart = null
@@ -282,7 +277,7 @@ module.exports = DiffGenerator = {
       if (part.u != null) {
         newPart = {
           d: op.d,
-          meta
+          meta,
         }
       } else if (part.i != null) {
         newPart = null
@@ -303,7 +298,7 @@ module.exports = DiffGenerator = {
       if (part.u) {
         newPart = {
           d: part.u,
-          meta
+          meta,
         }
       } else if (part.i != null) {
         newPart = null
@@ -311,14 +306,14 @@ module.exports = DiffGenerator = {
 
       remainingOp = {
         p: op.p,
-        d: op.d.slice(DiffGenerator._getLengthOfDiffPart(part))
+        d: op.d.slice(DiffGenerator._getLengthOfDiffPart(part)),
       }
     }
 
     return {
       newPart,
       remainingDiff,
-      remainingOp
+      remainingOp,
     }
   },
 
@@ -341,5 +336,5 @@ module.exports = DiffGenerator = {
 
   _getContentOfPart(part) {
     return part.u || part.d || part.i || ''
-  }
+  },
 }

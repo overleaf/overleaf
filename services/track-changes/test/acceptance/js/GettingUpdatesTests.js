@@ -33,15 +33,15 @@ describe('Getting updates', function () {
 
     MockWebApi.projects[this.project_id] = {
       features: {
-        versioning: true
-      }
+        versioning: true,
+      },
     }
 
     MockWebApi.users[this.user_id] = this.user = {
       email: 'user@sharelatex.com',
       first_name: 'Leo',
       last_name: 'Lion',
-      id: this.user_id
+      id: this.user_id,
     }
     sinon.spy(MockWebApi, 'getUserInfo')
 
@@ -51,14 +51,14 @@ describe('Getting updates', function () {
         op: [{ i: 'a', p: 0 }],
         meta: {
           ts: this.now - (9 - i) * this.hours - 2 * this.minutes,
-          user_id: this.user_id
+          user_id: this.user_id,
         },
-        v: 2 * i + 1
+        v: 2 * i + 1,
       })
       this.updates.push({
         op: [{ i: 'b', p: 0 }],
         meta: { ts: this.now - (9 - i) * this.hours, user_id: this.user_id },
-        v: 2 * i + 2
+        v: 2 * i + 2,
       })
     }
     this.updates[0].meta.user_id = this.deleted_user_id
@@ -68,7 +68,7 @@ describe('Getting updates', function () {
         this.project_id,
         this.doc_id,
         this.updates,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -82,7 +82,7 @@ describe('Getting updates', function () {
     after() {
       MockWebApi.getUserInfo.restore()
       return null
-    }
+    },
   })
 
   describe('getting updates up to the limit', function () {
@@ -118,25 +118,25 @@ describe('Getting updates', function () {
           meta: {
             start_ts: this.to - 2 * this.minutes,
             end_ts: this.to,
-            users: [this.user]
-          }
+            users: [this.user],
+          },
         },
         {
           docs: docs2,
           meta: {
             start_ts: this.to - 1 * this.hours - 2 * this.minutes,
             end_ts: this.to - 1 * this.hours,
-            users: [this.user]
-          }
+            users: [this.user],
+          },
         },
         {
           docs: docs3,
           meta: {
             start_ts: this.to - 2 * this.hours - 2 * this.minutes,
             end_ts: this.to - 2 * this.hours,
-            users: [this.user]
-          }
-        }
+            users: [this.user],
+          },
+        },
       ])
     })
   })
@@ -168,17 +168,17 @@ describe('Getting updates', function () {
           meta: {
             start_ts: this.to - 8 * this.hours - 2 * this.minutes,
             end_ts: this.to - 8 * this.hours,
-            users: [this.user]
-          }
+            users: [this.user],
+          },
         },
         {
           docs: docs2,
           meta: {
             start_ts: this.to - 9 * this.hours - 2 * this.minutes,
             end_ts: this.to - 9 * this.hours,
-            users: [this.user, null]
-          }
-        }
+            users: [this.user, null],
+          },
+        },
       ])
     })
   })

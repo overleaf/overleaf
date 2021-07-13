@@ -36,8 +36,8 @@ module.exports = WebApiManager = {
         auth: {
           user: Settings.apis.web.user,
           pass: Settings.apis.web.pass,
-          sendImmediately: true
-        }
+          sendImmediately: true,
+        },
       },
       function (error, res, body) {
         if (error != null) {
@@ -86,7 +86,7 @@ module.exports = WebApiManager = {
         id: user.id,
         email: user.email,
         first_name: user.first_name,
-        last_name: user.last_name
+        last_name: user.last_name,
       })
     })
   },
@@ -112,5 +112,5 @@ module.exports = WebApiManager = {
       }
       return callback(null, project)
     })
-  }
+  },
 }

@@ -24,9 +24,9 @@ describe('RedisManager', function () {
           createClient: () => {
             return (this.rclient = {
               auth: sinon.stub(),
-              multi: () => this.rclient
+              multi: () => this.rclient,
             })
-          }
+          },
         },
         '@overleaf/settings': {
           redis: {
@@ -37,12 +37,12 @@ describe('RedisManager', function () {
                 },
                 docsWithHistoryOps({ project_id }) {
                   return `DocsWithHistoryOps:${project_id}`
-                }
-              }
-            }
-          }
-        }
-      }
+                },
+              },
+            },
+          },
+        },
+      },
     })
     this.doc_id = 'doc-id-123'
     this.project_id = 'project-id-123'
@@ -54,9 +54,9 @@ describe('RedisManager', function () {
     beforeEach(function () {
       this.rawUpdates = [
         { v: 42, op: 'mock-op-42' },
-        { v: 45, op: 'mock-op-45' }
+        { v: 45, op: 'mock-op-45' },
       ]
-      this.jsonUpdates = Array.from(this.rawUpdates).map((update) =>
+      this.jsonUpdates = Array.from(this.rawUpdates).map(update =>
         JSON.stringify(update)
       )
       this.rclient.lrange = sinon.stub().callsArgWith(3, null, this.jsonUpdates)

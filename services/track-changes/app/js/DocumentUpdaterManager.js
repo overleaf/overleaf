@@ -65,8 +65,8 @@ module.exports = DocumentUpdaterManager = {
           lines: content.split('\n'),
           source: 'restore',
           user_id,
-          undoing: true
-        }
+          undoing: true,
+        },
       },
       function (error, res, body) {
         if (error != null) {
@@ -86,5 +86,5 @@ module.exports = DocumentUpdaterManager = {
         }
       }
     )
-  }
+  },
 }

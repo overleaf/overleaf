@@ -178,7 +178,7 @@ diff_match_patch.prototype.diff_compute_ = function (
     diffs = [
       [DIFF_INSERT, longtext.substring(0, i)],
       [DIFF_EQUAL, shorttext],
-      [DIFF_INSERT, longtext.substring(i + shorttext.length)]
+      [DIFF_INSERT, longtext.substring(i + shorttext.length)],
     ]
     // Swap insertions for deletions if diff is reversed.
     if (text1.length > text2.length) {
@@ -192,7 +192,7 @@ diff_match_patch.prototype.diff_compute_ = function (
     // After the previous speedup, the character can't be an equality.
     return [
       [DIFF_DELETE, text1],
-      [DIFF_INSERT, text2]
+      [DIFF_INSERT, text2],
     ]
   }
 
@@ -415,7 +415,7 @@ diff_match_patch.prototype.diff_bisect_ = function (text1, text2, deadline) {
   // number of diffs equals number of characters, no commonality at all.
   return [
     [DIFF_DELETE, text1],
-    [DIFF_INSERT, text2]
+    [DIFF_INSERT, text2],
   ]
 }
 
@@ -716,7 +716,7 @@ diff_match_patch.prototype.diff_halfMatch_ = function (text1, text2) {
         best_longtext_b,
         best_shorttext_a,
         best_shorttext_b,
-        best_common
+        best_common,
       ]
     } else {
       return null
@@ -809,7 +809,7 @@ diff_match_patch.prototype.diff_cleanupSemantic = function (diffs) {
         // Duplicate record.
         diffs.splice(equalities[equalitiesLength - 1], 0, [
           DIFF_DELETE,
-          lastequality
+          lastequality,
         ])
         // Change second copy to insert.
         diffs[equalities[equalitiesLength - 1] + 1][0] = DIFF_INSERT
@@ -859,7 +859,7 @@ diff_match_patch.prototype.diff_cleanupSemantic = function (diffs) {
           // Overlap found.  Insert an equality and trim the surrounding edits.
           diffs.splice(pointer, 0, [
             DIFF_EQUAL,
-            insertion.substring(0, overlap_length1)
+            insertion.substring(0, overlap_length1),
           ])
           diffs[pointer - 1][1] = deletion.substring(
             0,
@@ -877,7 +877,7 @@ diff_match_patch.prototype.diff_cleanupSemantic = function (diffs) {
           // Insert an equality and swap and trim the surrounding edits.
           diffs.splice(pointer, 0, [
             DIFF_EQUAL,
-            deletion.substring(0, overlap_length2)
+            deletion.substring(0, overlap_length2),
           ])
           diffs[pointer - 1][0] = DIFF_INSERT
           diffs[pointer - 1][1] = insertion.substring(
@@ -1093,7 +1093,7 @@ diff_match_patch.prototype.diff_cleanupEfficiency = function (diffs) {
         // Duplicate record.
         diffs.splice(equalities[equalitiesLength - 1], 0, [
           DIFF_DELETE,
-          lastequality
+          lastequality,
         ])
         // Change second copy to insert.
         diffs[equalities[equalitiesLength - 1] + 1][0] = DIFF_INSERT
@@ -1156,13 +1156,12 @@ diff_match_patch.prototype.diff_cleanupMerge = function (diffs) {
                 diffs[pointer - count_delete - count_insert - 1][0] ==
                   DIFF_EQUAL
               ) {
-                diffs[
-                  pointer - count_delete - count_insert - 1
-                ][1] += text_insert.substring(0, commonlength)
+                diffs[pointer - count_delete - count_insert - 1][1] +=
+                  text_insert.substring(0, commonlength)
               } else {
                 diffs.splice(0, 0, [
                   DIFF_EQUAL,
-                  text_insert.substring(0, commonlength)
+                  text_insert.substring(0, commonlength),
                 ])
                 pointer++
               }
@@ -1189,12 +1188,12 @@ diff_match_patch.prototype.diff_cleanupMerge = function (diffs) {
           if (count_delete === 0) {
             diffs.splice(pointer - count_insert, count_delete + count_insert, [
               DIFF_INSERT,
-              text_insert
+              text_insert,
             ])
           } else if (count_insert === 0) {
             diffs.splice(pointer - count_delete, count_delete + count_insert, [
               DIFF_DELETE,
-              text_delete
+              text_delete,
             ])
           } else {
             diffs.splice(

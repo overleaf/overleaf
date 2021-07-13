@@ -38,12 +38,12 @@ describe('UpdatesManager', function () {
               key_schema: {
                 historyLock({ doc_id }) {
                   return `HistoryLock:${doc_id}`
-                }
-              }
-            }
-          }
-        }
-      }
+                },
+              },
+            },
+          },
+        },
+      },
     })
     this.doc_id = 'doc-id-123'
     this.project_id = 'project-id-123'
@@ -79,7 +79,7 @@ describe('UpdatesManager', function () {
       beforeEach(function () {
         this.rawUpdates = [
           { v: 12, op: 'mock-op-12' },
-          { v: 13, op: 'mock-op-13' }
+          { v: 13, op: 'mock-op-13' },
         ]
         this.compressedUpdates = [{ v: 13, op: 'compressed-op-12' }]
 
@@ -127,7 +127,7 @@ describe('UpdatesManager', function () {
         this.lastCompressedUpdate = { v: 11, op: 'compressed-op-11' }
         this.compressedUpdates = [
           { v: 12, op: 'compressed-op-11+12' },
-          { v: 13, op: 'compressed-op-12' }
+          { v: 13, op: 'compressed-op-12' },
         ]
 
         this.MongoManager.peekLastCompressedUpdate = sinon
@@ -148,7 +148,7 @@ describe('UpdatesManager', function () {
         beforeEach(function () {
           this.rawUpdates = [
             { v: 12, op: 'mock-op-12' },
-            { v: 13, op: 'mock-op-13' }
+            { v: 13, op: 'mock-op-13' },
           ]
           return this.UpdatesManager.compressAndSaveRawUpdates(
             this.project_id,
@@ -192,11 +192,11 @@ describe('UpdatesManager', function () {
         beforeEach(function () {
           this.lastCompressedUpdate = {
             pack: [{ v: 11, op: 'compressed-op-11' }],
-            v: 11
+            v: 11,
           }
           this.rawUpdates = [
             { v: 12, op: 'mock-op-12' },
-            { v: 13, op: 'mock-op-13' }
+            { v: 13, op: 'mock-op-13' },
           ]
           this.MongoManager.peekLastCompressedUpdate = sinon
             .stub()
@@ -250,7 +250,7 @@ describe('UpdatesManager', function () {
             { v: 10, op: 'mock-op-10' },
             { v: 11, op: 'mock-op-11' },
             { v: 12, op: 'mock-op-12' },
-            { v: 13, op: 'mock-op-13' }
+            { v: 13, op: 'mock-op-13' },
           ]
 
           return this.UpdatesManager.compressAndSaveRawUpdates(
@@ -303,7 +303,7 @@ describe('UpdatesManager', function () {
         beforeEach(function () {
           this.rawUpdates = [
             { v: 13, op: 'mock-op-13' },
-            { v: 12, op: 'mock-op-12' }
+            { v: 12, op: 'mock-op-12' },
           ]
           return this.UpdatesManager.compressAndSaveRawUpdates(
             this.project_id,
@@ -347,7 +347,7 @@ describe('UpdatesManager', function () {
         beforeEach(function () {
           this.rawUpdates = [
             { v: 12, op: 'mock-op-12' },
-            { v: 13, op: 'mock-op-13' }
+            { v: 13, op: 'mock-op-13' },
           ]
           return this.UpdatesManager.compressAndSaveRawUpdates(
             this.project_id,
@@ -454,7 +454,7 @@ describe('UpdatesManager', function () {
           'mock-update-1',
           'mock-update-2',
           'mock-update-3',
-          'mock-update-4'
+          'mock-update-4',
         ]
         this.redisArray = this.updates.slice()
         this.RedisManager.getOldestDocUpdates = (
@@ -673,7 +673,7 @@ describe('UpdatesManager', function () {
     })
 
     it('should process the doc ops for the each doc_id', function () {
-      return Array.from(this.doc_ids).map((doc_id) =>
+      return Array.from(this.doc_ids).map(doc_id =>
         this.UpdatesManager._processUncompressedUpdatesForDocWithLock
           .calledWith(this.project_id, doc_id, this.temporary)
           .should.equal(true)
@@ -692,26 +692,26 @@ describe('UpdatesManager', function () {
           doc_id: 123,
           v: 456,
           op: 'mock-updates',
-          meta: { user_id: 123, start_ts: 1233, end_ts: 1234 }
-        }
+          meta: { user_id: 123, start_ts: 1233, end_ts: 1234 },
+        },
       ]
       this.options = { before: 'mock-before', limit: 'mock-limit' }
       this.summarizedUpdates = [
         {
           meta: { user_ids: [123], start_ts: 1233, end_ts: 1234 },
-          docs: { '123': { fromV: 456, toV: 456 } }
-        }
+          docs: { 123: { fromV: 456, toV: 456 } },
+        },
       ]
       this.updatesWithUserInfo = ['updates-with-user-info']
       this.done_state = false
       this.iterator = {
-        next: (cb) => {
+        next: cb => {
           this.done_state = true
           return cb(null, this.updates)
         },
         done: () => {
           return this.done_state
-        }
+        },
       }
       this.PackManager.makeProjectIterator = sinon
         .stub()
@@ -867,22 +867,22 @@ describe('UpdatesManager', function () {
         this.updates = [
           {
             meta: {
-              user_id: this.user_id_1
+              user_id: this.user_id_1,
             },
-            op: 'mock-op-1'
+            op: 'mock-op-1',
           },
           {
             meta: {
-              user_id: this.user_id_1
+              user_id: this.user_id_1,
             },
-            op: 'mock-op-2'
+            op: 'mock-op-2',
           },
           {
             meta: {
-              user_id: this.user_id_2
+              user_id: this.user_id_2,
             },
-            op: 'mock-op-3'
-          }
+            op: 'mock-op-3',
+          },
         ]
         this.user_info = {}
         this.user_info[this.user_id_1] = { email: 'user1@sharelatex.com' }
@@ -920,27 +920,27 @@ describe('UpdatesManager', function () {
           {
             meta: {
               user: {
-                email: 'user1@sharelatex.com'
-              }
+                email: 'user1@sharelatex.com',
+              },
             },
-            op: 'mock-op-1'
+            op: 'mock-op-1',
           },
           {
             meta: {
               user: {
-                email: 'user1@sharelatex.com'
-              }
+                email: 'user1@sharelatex.com',
+              },
             },
-            op: 'mock-op-2'
+            op: 'mock-op-2',
           },
           {
             meta: {
               user: {
-                email: 'user2@sharelatex.com'
-              }
+                email: 'user2@sharelatex.com',
+              },
             },
-            op: 'mock-op-3'
-          }
+            op: 'mock-op-3',
+          },
         ])
       })
     })
@@ -950,16 +950,16 @@ describe('UpdatesManager', function () {
         this.updates = [
           {
             meta: {
-              user_id: null
+              user_id: null,
             },
-            op: 'mock-op-1'
+            op: 'mock-op-1',
           },
           {
             meta: {
-              user_id: 'anonymous-user'
+              user_id: 'anonymous-user',
             },
-            op: 'mock-op-2'
-          }
+            op: 'mock-op-2',
+          },
         ]
         this.WebApiManager.getUserInfo = (user_id, callback) => {
           if (callback == null) {
@@ -986,12 +986,12 @@ describe('UpdatesManager', function () {
         return expect(this.results).to.deep.equal([
           {
             meta: {},
-            op: 'mock-op-1'
+            op: 'mock-op-1',
           },
           {
             meta: {},
-            op: 'mock-op-2'
-          }
+            op: 'mock-op-2',
+          },
         ])
       })
     })
@@ -1011,19 +1011,19 @@ describe('UpdatesManager', function () {
           meta: {
             user_id: this.user_1.id,
             start_ts: this.now + 20,
-            end_ts: this.now + 30
+            end_ts: this.now + 30,
           },
-          v: 5
+          v: 5,
         },
         {
           doc_id: 'doc-id-1',
           meta: {
             user_id: this.user_2.id,
             start_ts: this.now,
-            end_ts: this.now + 10
+            end_ts: this.now + 10,
           },
-          v: 4
-        }
+          v: 4,
+        },
       ])
 
       return expect(result).to.deep.equal([
@@ -1031,15 +1031,15 @@ describe('UpdatesManager', function () {
           docs: {
             'doc-id-1': {
               fromV: 4,
-              toV: 5
-            }
+              toV: 5,
+            },
           },
           meta: {
             user_ids: [this.user_1.id, this.user_2.id],
             start_ts: this.now,
-            end_ts: this.now + 30
-          }
-        }
+            end_ts: this.now + 30,
+          },
+        },
       ])
     })
 
@@ -1051,47 +1051,47 @@ describe('UpdatesManager', function () {
           meta: {
             user_id: this.user_2.id,
             start_ts: this.now + oneDay,
-            end_ts: this.now + oneDay + 10
+            end_ts: this.now + oneDay + 10,
           },
-          v: 5
+          v: 5,
         },
         {
           doc_id: 'doc-id-1',
           meta: {
             user_id: this.user_1.id,
             start_ts: this.now,
-            end_ts: this.now + 10
+            end_ts: this.now + 10,
           },
-          v: 4
-        }
+          v: 4,
+        },
       ])
       return expect(result).to.deep.equal([
         {
           docs: {
             'doc-id-1': {
               fromV: 5,
-              toV: 5
-            }
+              toV: 5,
+            },
           },
           meta: {
             user_ids: [this.user_2.id],
             start_ts: this.now + oneDay,
-            end_ts: this.now + oneDay + 10
-          }
+            end_ts: this.now + oneDay + 10,
+          },
         },
         {
           docs: {
             'doc-id-1': {
               fromV: 4,
-              toV: 4
-            }
+              toV: 4,
+            },
           },
           meta: {
             user_ids: [this.user_1.id],
             start_ts: this.now,
-            end_ts: this.now + 10
-          }
-        }
+            end_ts: this.now + 10,
+          },
+        },
       ])
     })
 
@@ -1103,34 +1103,34 @@ describe('UpdatesManager', function () {
             meta: {
               user_id: this.user_1.id,
               start_ts: this.now + 20,
-              end_ts: this.now + 30
+              end_ts: this.now + 30,
             },
-            v: 5
+            v: 5,
           },
           {
             doc_id: 'doc-id-2',
             meta: {
               user_id: this.user_2.id,
               start_ts: this.now,
-              end_ts: this.now + 10
+              end_ts: this.now + 10,
             },
-            v: 4
-          }
+            v: 4,
+          },
         ],
         [
           {
             docs: {
               'doc-id-1': {
                 fromV: 6,
-                toV: 8
-              }
+                toV: 8,
+              },
             },
             meta: {
               user_ids: [this.user_1.id],
               start_ts: this.now + 40,
-              end_ts: this.now + 50
-            }
-          }
+              end_ts: this.now + 50,
+            },
+          },
         ]
       )
       return expect(result).to.deep.equal([
@@ -1138,19 +1138,19 @@ describe('UpdatesManager', function () {
           docs: {
             'doc-id-1': {
               toV: 8,
-              fromV: 6
+              fromV: 6,
             },
             'doc-id-2': {
               toV: 5,
-              fromV: 4
-            }
+              fromV: 4,
+            },
           },
           meta: {
             user_ids: [this.user_1.id, this.user_2.id],
             start_ts: this.now,
-            end_ts: this.now + 50
-          }
-        }
+            end_ts: this.now + 50,
+          },
+        },
       ])
     })
 
@@ -1161,34 +1161,34 @@ describe('UpdatesManager', function () {
           meta: {
             user_id: this.user_1.id,
             start_ts: this.now + 20,
-            end_ts: this.now + 30
+            end_ts: this.now + 30,
           },
-          v: 5
+          v: 5,
         },
         {
           doc_id: 'doc-id-1',
           meta: {
             user_id: null,
             start_ts: this.now,
-            end_ts: this.now + 10
+            end_ts: this.now + 10,
           },
-          v: 4
-        }
+          v: 4,
+        },
       ])
       return expect(result).to.deep.equal([
         {
           docs: {
             'doc-id-1': {
               fromV: 4,
-              toV: 5
-            }
+              toV: 5,
+            },
           },
           meta: {
             user_ids: [this.user_1.id, null],
             start_ts: this.now,
-            end_ts: this.now + 30
-          }
-        }
+            end_ts: this.now + 30,
+          },
+        },
       ])
     })
 
@@ -1199,34 +1199,34 @@ describe('UpdatesManager', function () {
           meta: {
             user_id: null,
             start_ts: this.now,
-            end_ts: this.now + 10
+            end_ts: this.now + 10,
           },
-          v: 4
+          v: 4,
         },
         {
           doc_id: 'doc-id-1',
           meta: {
             user_id: this.user_1.id,
             start_ts: this.now + 20,
-            end_ts: this.now + 30
+            end_ts: this.now + 30,
           },
-          v: 5
-        }
+          v: 5,
+        },
       ])
       return expect(result).to.deep.equal([
         {
           docs: {
             'doc-id-1': {
               fromV: 4,
-              toV: 5
-            }
+              toV: 5,
+            },
           },
           meta: {
             user_ids: [null, this.user_1.id],
             start_ts: this.now,
-            end_ts: this.now + 30
-          }
-        }
+            end_ts: this.now + 30,
+          },
+        },
       ])
     })
 
@@ -1237,43 +1237,43 @@ describe('UpdatesManager', function () {
           meta: {
             user_id: this.user_1.id,
             start_ts: this.now + 20,
-            end_ts: this.now + 30
+            end_ts: this.now + 30,
           },
-          v: 5
+          v: 5,
         },
         {
           doc_id: 'doc-id-1',
           meta: {
             user_id: null,
             start_ts: this.now,
-            end_ts: this.now + 10
+            end_ts: this.now + 10,
           },
-          v: 4
+          v: 4,
         },
         {
           doc_id: 'doc-id-1',
           meta: {
             user_id: null,
             start_ts: this.now + 2,
-            end_ts: this.now + 4
+            end_ts: this.now + 4,
           },
-          v: 4
-        }
+          v: 4,
+        },
       ])
       return expect(result).to.deep.equal([
         {
           docs: {
             'doc-id-1': {
               fromV: 4,
-              toV: 5
-            }
+              toV: 5,
+            },
           },
           meta: {
             user_ids: [this.user_1.id, null],
             start_ts: this.now,
-            end_ts: this.now + 30
-          }
-        }
+            end_ts: this.now + 30,
+          },
+        },
       ])
     })
 
@@ -1285,19 +1285,19 @@ describe('UpdatesManager', function () {
           meta: {
             user_id: this.user_1.id,
             start_ts: this.now + 20,
-            end_ts: this.now + 30
+            end_ts: this.now + 30,
           },
-          v: 5
+          v: 5,
         },
         {
           doc_id: 'doc-id-1',
           meta: {
             user_id: this.user_2.id,
             start_ts: this.now,
-            end_ts: this.now + 10
+            end_ts: this.now + 10,
           },
-          v: 4
-        }
+          v: 4,
+        },
       ])
 
       return expect(result).to.deep.equal([
@@ -1305,28 +1305,28 @@ describe('UpdatesManager', function () {
           docs: {
             'doc-id-1': {
               fromV: 5,
-              toV: 5
-            }
+              toV: 5,
+            },
           },
           meta: {
             user_ids: [this.user_1.id],
             start_ts: this.now + 20,
-            end_ts: this.now + 30
-          }
+            end_ts: this.now + 30,
+          },
         },
         {
           docs: {
             'doc-id-1': {
               fromV: 4,
-              toV: 4
-            }
+              toV: 4,
+            },
           },
           meta: {
             user_ids: [this.user_2.id],
             start_ts: this.now,
-            end_ts: this.now + 10
-          }
-        }
+            end_ts: this.now + 10,
+          },
+        },
       ])
     })
   })

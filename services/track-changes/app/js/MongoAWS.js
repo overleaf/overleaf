@@ -31,12 +31,12 @@ const createStream = function (streamConstructor, project_id, doc_id, pack_id) {
     accessKeyId: settings.trackchanges.s3.key,
     secretAccessKey: settings.trackchanges.s3.secret,
     endpoint: settings.trackchanges.s3.endpoint,
-    s3ForcePathStyle: settings.trackchanges.s3.pathStyle
+    s3ForcePathStyle: settings.trackchanges.s3.pathStyle,
   }
 
   return streamConstructor(new AWS.S3(AWS_CONFIG), {
     Bucket: settings.trackchanges.stores.doc_history,
-    Key: project_id + '/changes-' + doc_id + '/pack-' + pack_id
+    Key: project_id + '/changes-' + doc_id + '/pack-' + pack_id,
   })
 }
 
@@ -52,7 +52,7 @@ module.exports = MongoAWS = {
 
     const query = {
       _id: ObjectId(pack_id),
-      doc_id: ObjectId(doc_id)
+      doc_id: ObjectId(doc_id),
     }
 
     if (project_id == null) {
@@ -92,14 +92,14 @@ module.exports = MongoAWS = {
             doc_id,
             pack_id,
             origSize: uncompressedData.length,
-            newSize: buf.length
+            newSize: buf.length,
           },
           'compressed pack'
         )
         if (err != null) {
           return callback(err)
         }
-        upload.on('error', (err) => callback(err))
+        upload.on('error', err => callback(err))
         upload.on('finish', function () {
           Metrics.inc('archive-pack')
           logger.log({ project_id, doc_id, pack_id }, 'upload to s3 completed')
@@ -135,8 +135,8 @@ module.exports = MongoAWS = {
     const download = createStream(S3S.ReadStream, project_id, doc_id, pack_id)
 
     const inputStream = download
-      .on('open', (obj) => 1)
-      .on('error', (err) => callback(err))
+      .on('open', obj => 1)
+      .on('error', err => callback(err))
 
     const gunzip = zlib.createGunzip()
     gunzip.setEncoding('utf8')
@@ -150,7 +150,7 @@ module.exports = MongoAWS = {
 
     const outputStream = inputStream.pipe(gunzip)
     const parts = []
-    outputStream.on('error', (err) => callback(err))
+    outputStream.on('error', err => callback(err))
     outputStream.on('end', function () {
       let object
       logger.log({ project_id, doc_id, pack_id }, 'download from s3 completed')
@@ -169,29 +169,31 @@ module.exports = MongoAWS = {
       }
       return callback(null, object)
     })
-    return outputStream.on('data', (data) => parts.push(data))
+    return outputStream.on('data', data => parts.push(data))
   },
 
   unArchivePack(project_id, doc_id, pack_id, callback) {
     if (callback == null) {
       callback = function (error) {}
     }
-    return MongoAWS.readArchivedPack(project_id, doc_id, pack_id, function (
-      err,
-      object
-    ) {
-      if (err != null) {
-        return callback(err)
+    return MongoAWS.readArchivedPack(
+      project_id,
+      doc_id,
+      pack_id,
+      function (err, object) {
+        if (err != null) {
+          return callback(err)
+        }
+        Metrics.inc('unarchive-pack')
+        // allow the object to expire, we can always retrieve it again
+        object.expiresAt = new Date(Date.now() + 7 * DAYS)
+        logger.log({ project_id, doc_id, pack_id }, 'inserting object from s3')
+        return db.docHistory.insertOne(object, (err, confirmation) => {
+          if (err) return callback(err)
+          object._id = confirmation.insertedId
+          callback(null, object)
+        })
       }
-      Metrics.inc('unarchive-pack')
-      // allow the object to expire, we can always retrieve it again
-      object.expiresAt = new Date(Date.now() + 7 * DAYS)
-      logger.log({ project_id, doc_id, pack_id }, 'inserting object from s3')
-      return db.docHistory.insertOne(object, (err, confirmation) => {
-        if (err) return callback(err)
-        object._id = confirmation.insertedId
-        callback(null, object)
-      })
-    })
-  }
+    )
+  },
 }

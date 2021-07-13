@@ -53,8 +53,8 @@ if (!source.match(/^[0-9]+$/)) {
     }
     return result1
   })()
-  pending = _.filter(result, (row) =>
-    __guard__(row != null ? row.doc_id : undefined, (x) =>
+  pending = _.filter(result, row =>
+    __guard__(row != null ? row.doc_id : undefined, x =>
       x.match(/^[a-f0-9]{24}$/)
     )
   )
@@ -101,9 +101,9 @@ const finish = function () {
   })
 }
 
-process.on('exit', (code) => logger.log({ code }, 'pack archive worker exited'))
+process.on('exit', code => logger.log({ code }, 'pack archive worker exited'))
 
-const processUpdates = (pending) =>
+const processUpdates = pending =>
   async.eachSeries(
     pending,
     function (result, callback) {
@@ -170,7 +170,7 @@ waitForDb()
       processFromOneWeekAgo()
     }
   })
-  .catch((err) => {
+  .catch(err => {
     logger.fatal({ err }, 'cannot connect to mongo, exiting')
     process.exit(1)
   })
@@ -184,12 +184,12 @@ function processFromOneWeekAgo() {
         project_id: { $exists: true },
         v_end: { $exists: true },
         _id: { $lt: ObjectIdFromDate(oneWeekAgo) },
-        last_checked: { $lt: oneWeekAgo }
+        last_checked: { $lt: oneWeekAgo },
       },
       { projection: { _id: 1, doc_id: 1, project_id: 1 } }
     )
     .sort({
-      last_checked: 1
+      last_checked: 1,
     })
     .limit(LIMIT)
     .toArray(function (err, results) {
@@ -198,7 +198,7 @@ function processFromOneWeekAgo() {
         finish()
         return
       }
-      pending = _.uniq(results, false, (result) => result.doc_id.toString())
+      pending = _.uniq(results, false, result => result.doc_id.toString())
       TOTAL = pending.length
       logger.log(`found ${TOTAL} documents to archive`)
       return processUpdates(pending)

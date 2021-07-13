@@ -39,20 +39,20 @@ describe('Appending doc ops to the history', function () {
           {
             op: [{ i: 'f', p: 3 }],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 3
+            v: 3,
           },
           {
             op: [{ i: 'o', p: 4 }],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 4
+            v: 4,
           },
           {
             op: [{ i: 'o', p: 5 }],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 5
-          }
+            v: 5,
+          },
         ],
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -76,8 +76,8 @@ describe('Appending doc ops to the history', function () {
       return expect(this.updates[0].pack[0].op).to.deep.equal([
         {
           p: 3,
-          i: 'foo'
-        }
+          i: 'foo',
+        },
       ])
     })
 
@@ -121,20 +121,20 @@ describe('Appending doc ops to the history', function () {
           {
             op: [{ i: 'f', p: 3 }],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 3
+            v: 3,
           },
           {
             op: [{ i: 'o', p: 4 }],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 4
+            v: 4,
           },
           {
             op: [{ i: 'o', p: 5 }],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 5
-          }
+            v: 5,
+          },
         ],
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -162,20 +162,20 @@ describe('Appending doc ops to the history', function () {
             {
               op: [{ i: 'b', p: 6 }],
               meta: { ts: Date.now(), user_id: this.user_id },
-              v: 6
+              v: 6,
             },
             {
               op: [{ i: 'a', p: 7 }],
               meta: { ts: Date.now(), user_id: this.user_id },
-              v: 7
+              v: 7,
             },
             {
               op: [{ i: 'r', p: 8 }],
               meta: { ts: Date.now(), user_id: this.user_id },
-              v: 8
-            }
+              v: 8,
+            },
           ],
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }
@@ -199,8 +199,8 @@ describe('Appending doc ops to the history', function () {
         return expect(this.updates[0].pack[1].op).to.deep.equal([
           {
             p: 6,
-            i: 'bar'
-          }
+            i: 'bar',
+          },
         ])
       })
 
@@ -219,20 +219,20 @@ describe('Appending doc ops to the history', function () {
             {
               op: [{ i: 'b', p: 6 }],
               meta: { ts: Date.now() + oneDay, user_id: this.user_id },
-              v: 6
+              v: 6,
             },
             {
               op: [{ i: 'a', p: 7 }],
               meta: { ts: Date.now() + oneDay, user_id: this.user_id },
-              v: 7
+              v: 7,
             },
             {
               op: [{ i: 'r', p: 8 }],
               meta: { ts: Date.now() + oneDay, user_id: this.user_id },
-              v: 8
-            }
+              v: 8,
+            },
           ],
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }
@@ -256,14 +256,14 @@ describe('Appending doc ops to the history', function () {
         expect(this.updates[0].pack[0].op).to.deep.equal([
           {
             p: 3,
-            i: 'foo'
-          }
+            i: 'foo',
+          },
         ])
         return expect(this.updates[0].pack[1].op).to.deep.equal([
           {
             p: 6,
-            i: 'bar'
-          }
+            i: 'bar',
+          },
         ])
       })
     })
@@ -281,7 +281,7 @@ describe('Appending doc ops to the history', function () {
         updates.push({
           op: [{ i: 'a', p: 0 }],
           meta: { ts: Date.now(), user_id: this.user_id },
-          v: i
+          v: i,
         })
         this.expectedOp[0].i = `a${this.expectedOp[0].i}`
       }
@@ -290,7 +290,7 @@ describe('Appending doc ops to the history', function () {
         this.project_id,
         this.doc_id,
         updates,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -334,22 +334,22 @@ describe('Appending doc ops to the history', function () {
             op: [
               { i: 'f', p: 3 },
               { i: 'o', p: 4 },
-              { i: 'o', p: 5 }
+              { i: 'o', p: 5 },
             ],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 3
+            v: 3,
           },
           {
             op: [
               { i: 'b', p: 6 },
               { i: 'a', p: 7 },
-              { i: 'r', p: 8 }
+              { i: 'r', p: 8 },
             ],
             meta: { ts: Date.now() + oneDay, user_id: this.user_id },
-            v: 4
-          }
+            v: 4,
+          },
         ],
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -373,14 +373,14 @@ describe('Appending doc ops to the history', function () {
       expect(this.updates[0].pack[0].op).to.deep.equal([
         {
           p: 3,
-          i: 'foo'
-        }
+          i: 'foo',
+        },
       ])
       return expect(this.updates[0].pack[1].op).to.deep.equal([
         {
           p: 6,
-          i: 'bar'
-        }
+          i: 'bar',
+        },
       ])
     })
 
@@ -404,15 +404,15 @@ describe('Appending doc ops to the history', function () {
           {
             op: [],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 3
+            v: 3,
           },
           {
             op: [{ i: 'foo', p: 3 }],
             meta: { ts: Date.now() + oneDay, user_id: this.user_id },
-            v: 4
-          }
+            v: 4,
+          },
         ],
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -440,8 +440,8 @@ describe('Appending doc ops to the history', function () {
       return expect(this.updates[0].pack[1].op).to.deep.equal([
         {
           p: 3,
-          i: 'foo'
-        }
+          i: 'foo',
+        },
       ])
     })
 
@@ -464,13 +464,13 @@ describe('Appending doc ops to the history', function () {
           {
             op: [
               { c: 'foo', p: 3 },
-              { d: 'bar', p: 6 }
+              { d: 'bar', p: 6 },
             ],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 3
-          }
+            v: 3,
+          },
         ],
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -492,7 +492,7 @@ describe('Appending doc ops to the history', function () {
 
     it('should ignore the comment op', function () {
       return expect(this.updates[0].pack[0].op).to.deep.equal([
-        { d: 'bar', p: 6 }
+        { d: 'bar', p: 6 },
       ])
     })
 
@@ -515,10 +515,10 @@ describe('Appending doc ops to the history', function () {
           {
             op: [{ i: 'f', p: 3 }],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 3
-          }
+            v: 3,
+          },
         ],
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -557,10 +557,10 @@ describe('Appending doc ops to the history', function () {
           {
             op: [{ i: 'f', p: 3 }],
             meta: { ts: Date.now(), user_id: this.user_id },
-            v: 3
-          }
+            v: 3,
+          },
         ],
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }

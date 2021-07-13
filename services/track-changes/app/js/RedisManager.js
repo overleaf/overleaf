@@ -34,7 +34,7 @@ module.exports = RedisManager = {
       callback = function (error, rawUpdates) {}
     }
     try {
-      rawUpdates = Array.from(jsonUpdates || []).map((update) =>
+      rawUpdates = Array.from(jsonUpdates || []).map(update =>
         JSON.parse(update)
       )
     } catch (e) {
@@ -93,26 +93,30 @@ module.exports = RedisManager = {
     let cursor = 0 // redis iterator
     const keySet = {} // use hash to avoid duplicate results
     // scan over all keys looking for pattern
-    var doIteration = (cb) =>
-      node.scan(cursor, 'MATCH', pattern, 'COUNT', 1000, function (
-        error,
-        reply
-      ) {
-        let keys
-        if (error != null) {
-          return callback(error)
+    var doIteration = cb =>
+      node.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        1000,
+        function (error, reply) {
+          let keys
+          if (error != null) {
+            return callback(error)
+          }
+          ;[cursor, keys] = Array.from(reply)
+          for (const key of Array.from(keys)) {
+            keySet[key] = true
+          }
+          if (cursor === '0') {
+            // note redis returns string result not numeric
+            return callback(null, Object.keys(keySet))
+          } else {
+            return doIteration()
+          }
         }
-        ;[cursor, keys] = Array.from(reply)
-        for (const key of Array.from(keys)) {
-          keySet[key] = true
-        }
-        if (cursor === '0') {
-          // note redis returns string result not numeric
-          return callback(null, Object.keys(keySet))
-        } else {
-          return doIteration()
-        }
-      })
+      )
     return doIteration()
   },
 
@@ -162,5 +166,5 @@ module.exports = RedisManager = {
         return callback(error, doc_ids)
       }
     )
-  }
+  },
 }
