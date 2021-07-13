@@ -33,11 +33,11 @@ module.exports = ContactManager = {
 
     db.contacts.updateOne(
       {
-        user_id
+        user_id,
       },
       update,
       {
-        upsert: true
+        upsert: true,
       },
       callback
     )
@@ -56,7 +56,7 @@ module.exports = ContactManager = {
 
     return db.contacts.findOne(
       {
-        user_id
+        user_id,
       },
       function (error, user) {
         if (error != null) {
@@ -65,9 +65,9 @@ module.exports = ContactManager = {
         return callback(null, user != null ? user.contacts : undefined)
       }
     )
-  }
+  },
 }
-;['touchContact', 'getContacts'].map((method) =>
+;['touchContact', 'getContacts'].map(method =>
   metrics.timeAsyncMethod(
     ContactManager,
     method,

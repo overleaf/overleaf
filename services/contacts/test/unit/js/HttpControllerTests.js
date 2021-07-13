@@ -21,8 +21,8 @@ describe('HttpController', function () {
   beforeEach(function () {
     this.HttpController = SandboxedModule.require(modulePath, {
       requires: {
-        './ContactManager': (this.ContactManager = {})
-      }
+        './ContactManager': (this.ContactManager = {}),
+      },
     })
     this.user_id = 'mock-user-id'
     this.contact_id = 'mock-contact-id'
@@ -87,7 +87,7 @@ describe('HttpController', function () {
       this.contacts = {
         'user-id-1': { n: 2, ts: new Date(now) },
         'user-id-2': { n: 4, ts: new Date(now) },
-        'user-id-3': { n: 2, ts: new Date(now - 1000) }
+        'user-id-3': { n: 2, ts: new Date(now - 1000) },
       }
       return (this.ContactManager.getContacts = sinon
         .stub()
@@ -108,7 +108,7 @@ describe('HttpController', function () {
       return it('should return a sorted list of contacts by count and timestamp', function () {
         return this.res.send
           .calledWith({
-            contact_ids: ['user-id-2', 'user-id-1', 'user-id-3']
+            contact_ids: ['user-id-2', 'user-id-1', 'user-id-3'],
           })
           .should.equal(true)
       })
@@ -123,7 +123,7 @@ describe('HttpController', function () {
       return it('should return the most commonly used contacts up to the limit', function () {
         return this.res.send
           .calledWith({
-            contact_ids: ['user-id-2', 'user-id-1']
+            contact_ids: ['user-id-2', 'user-id-1'],
           })
           .should.equal(true)
       })
@@ -140,7 +140,7 @@ describe('HttpController', function () {
       return it('should return an empty list', function () {
         return this.res.send
           .calledWith({
-            contact_ids: []
+            contact_ids: [],
           })
           .should.equal(true)
       })

@@ -24,5 +24,5 @@ async function setupDb() {
 module.exports = {
   db,
   ObjectId,
-  waitForDb
+  waitForDb,
 }

@@ -33,7 +33,7 @@ describe('Getting Contacts', function () {
         {
           method: 'GET',
           url: `${HOST}/user/${this.user_id}/contacts`,
-          json: true
+          json: true,
         },
         (error, response, body) => {
           response.statusCode.should.equal(200)
@@ -57,8 +57,8 @@ describe('Getting Contacts', function () {
             method: 'POST',
             url: `${HOST}/user/${user_id}/contacts`,
             json: {
-              contact_id
-            }
+              contact_id,
+            },
           },
           cb
         )
@@ -66,11 +66,11 @@ describe('Getting Contacts', function () {
       return async.series(
         [
           // 2 is preferred since touched twice, then 3 since most recent, then 1
-          (cb) => ContactsApp.ensureRunning(cb),
-          (cb) => touchContact(this.user_id, this.contact_id_1, cb),
-          (cb) => touchContact(this.user_id, this.contact_id_2, cb),
-          (cb) => touchContact(this.user_id, this.contact_id_2, cb),
-          (cb) => touchContact(this.user_id, this.contact_id_3, cb)
+          cb => ContactsApp.ensureRunning(cb),
+          cb => touchContact(this.user_id, this.contact_id_1, cb),
+          cb => touchContact(this.user_id, this.contact_id_2, cb),
+          cb => touchContact(this.user_id, this.contact_id_2, cb),
+          cb => touchContact(this.user_id, this.contact_id_3, cb),
         ],
         done
       )
@@ -81,14 +81,14 @@ describe('Getting Contacts', function () {
         {
           method: 'GET',
           url: `${HOST}/user/${this.user_id}/contacts`,
-          json: true
+          json: true,
         },
         (error, response, body) => {
           response.statusCode.should.equal(200)
           body.contact_ids.should.deep.equal([
             this.contact_id_2,
             this.contact_id_3,
-            this.contact_id_1
+            this.contact_id_1,
           ])
           return done()
         }
@@ -100,13 +100,13 @@ describe('Getting Contacts', function () {
         {
           method: 'GET',
           url: `${HOST}/user/${this.user_id}/contacts?limit=2`,
-          json: true
+          json: true,
         },
         (error, response, body) => {
           response.statusCode.should.equal(200)
           body.contact_ids.should.deep.equal([
             this.contact_id_2,
-            this.contact_id_3
+            this.contact_id_3,
           ])
           return done()
         }

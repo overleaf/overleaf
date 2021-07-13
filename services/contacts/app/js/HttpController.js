@@ -64,16 +64,16 @@ module.exports = HttpController = {
         contacts.push({
           user_id,
           n: data.n,
-          ts: data.ts
+          ts: data.ts,
         })
       }
 
       HttpController._sortContacts(contacts)
       contacts = contacts.slice(0, limit)
-      const contact_ids = contacts.map((contact) => contact.user_id)
+      const contact_ids = contacts.map(contact => contact.user_id)
 
       return res.status(200).send({
-        contact_ids
+        contact_ids,
       })
     })
   },
@@ -96,5 +96,5 @@ module.exports = HttpController = {
         }
       }
     })
-  }
+  },
 }

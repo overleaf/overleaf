@@ -60,7 +60,7 @@ if (!module.parent) {
         return logger.info(`contacts starting up, listening on ${host}:${port}`)
       })
     })
-    .catch((err) => {
+    .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
       process.exit(1)
     })

@@ -25,9 +25,9 @@ describe('ContactManager', function () {
       requires: {
         './mongodb': {
           db: (this.db = { contacts: {} }),
-          ObjectId
-        }
-      }
+          ObjectId,
+        },
+      },
     })
     this.user_id = ObjectId().toString()
     this.contact_id = ObjectId().toString()
@@ -57,19 +57,19 @@ describe('ContactManager', function () {
           .calledWith(
             {
               user_id: sinon.match(
-                (o) => o.toString() === this.user_id.toString()
-              )
+                o => o.toString() === this.user_id.toString()
+              ),
             },
             {
               $inc: {
-                'contacts.mock_contact.n': 1
+                'contacts.mock_contact.n': 1,
               },
               $set: {
-                'contacts.mock_contact.ts': new Date()
-              }
+                'contacts.mock_contact.ts': new Date(),
+              },
             },
             {
-              upsert: true
+              upsert: true,
             }
           )
           .should.equal(true)
@@ -98,7 +98,7 @@ describe('ContactManager', function () {
   return describe('getContacts', function () {
     beforeEach(function () {
       this.user = {
-        contacts: ['mock', 'contacts']
+        contacts: ['mock', 'contacts'],
       }
       return (this.db.contacts.findOne = sinon
         .stub()
@@ -113,9 +113,7 @@ describe('ContactManager', function () {
       it("should find the user's contacts", function () {
         return this.db.contacts.findOne
           .calledWith({
-            user_id: sinon.match(
-              (o) => o.toString() === this.user_id.toString()
-            )
+            user_id: sinon.match(o => o.toString() === this.user_id.toString()),
           })
           .should.equal(true)
       })
