@@ -150,6 +150,7 @@ describe('Applying updates to a doc', function () {
           if (error != null) {
             throw error
           }
+          result = parseInt(result, 10)
           result.should.be.within(this.startTime, Date.now())
           this.firstOpTimestamp = result
           return done()
@@ -186,6 +187,7 @@ describe('Applying updates to a doc', function () {
             if (error != null) {
               throw error
             }
+            result = parseInt(result, 10)
             result.should.equal(this.firstOpTimestamp)
             return done()
           }
