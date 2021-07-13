@@ -28,7 +28,8 @@ switch (process.argv.pop()) {
           console.log('npm ci')
           break
         default:
-          console.log('npm ci --only=production')
+          // TODO(das7pad): revert back to npm ci --only=production (https://github.com/overleaf/issues/issues/4544)
+          console.log('npm ci')
       }
       console.log('popd')
     }
