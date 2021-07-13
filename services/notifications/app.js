@@ -7,7 +7,7 @@
  */
 const metrics = require('@overleaf/metrics')
 metrics.initialize('notifications')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 logger.initialize('notifications-sharelatex')
 const express = require('express')
@@ -56,12 +56,12 @@ app.get('*', (req, res) => res.sendStatus(404))
 const host =
   __guard__(
     Settings.internal != null ? Settings.internal.notifications : undefined,
-    (x) => x.host
+    x => x.host
   ) || 'localhost'
 const port =
   __guard__(
     Settings.internal != null ? Settings.internal.notifications : undefined,
-    (x1) => x1.port
+    x1 => x1.port
   ) || 3042
 
 mongodb
@@ -71,7 +71,7 @@ mongodb
       logger.info(`notifications starting up, listening on ${host}:${port}`)
     )
   })
-  .catch((err) => {
+  .catch(err => {
     logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
     process.exit(1)
   })

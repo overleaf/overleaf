@@ -1,7 +1,6 @@
 /* eslint-disable
     camelcase,
     no-dupe-keys,
-    standard/no-callback-literal,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -15,20 +14,20 @@ const { db, ObjectId } = require('./mongodb')
 const request = require('request')
 const async = require('async')
 const _ = require('underscore')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const { port } = settings.internal.notifications
 const logger = require('logger-sharelatex')
 
 module.exports = {
   check(callback) {
     const user_id = ObjectId()
-    const cleanupNotifications = (callback) =>
+    const cleanupNotifications = callback =>
       db.notifications.remove({ user_id }, callback)
 
     let notification_key = `smoke-test-notification-${ObjectId()}`
-    const getOpts = (endPath) => ({
+    const getOpts = endPath => ({
       url: `http://localhost:${port}/user/${user_id}${endPath}`,
-      timeout: 5000
+      timeout: 5000,
     })
     logger.log(
       { user_id, opts: getOpts(), key: notification_key, user_id },
@@ -41,7 +40,7 @@ module.exports = {
           key: notification_key,
           messageOpts: '',
           templateKey: 'f4g5',
-          user_id
+          user_id,
         }
         return request.post(opts, cb)
       },
@@ -59,7 +58,7 @@ module.exports = {
           }
           const hasNotification = _.some(
             body,
-            (notification) =>
+            notification =>
               notification.key === notification_key &&
               notification.user_id === user_id.toString()
           )
@@ -73,7 +72,7 @@ module.exports = {
             return cb('notification not found in response')
           }
         })
-      }
+      },
     ]
     return async.series(jobs, function (err, body) {
       if (err != null) {
@@ -112,5 +111,5 @@ module.exports = {
         })
       }
     })
-  }
+  },
 }

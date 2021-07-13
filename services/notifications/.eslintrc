@@ -3,9 +3,9 @@
 // https://github.com/sharelatex/sharelatex-dev-environment
 {
   "extends": [
+    "eslint:recommended",
     "standard",
-    "prettier",
-    "prettier/standard"
+    "prettier"
   ],
   "parserOptions": {
     "ecmaVersion": 2018
@@ -20,6 +20,19 @@
     "mocha": true
   },
   "rules": {
+    // TODO(das7pad): remove overrides after fixing all the violations manually (https://github.com/overleaf/issues/issues/3882#issuecomment-878999671)
+    // START of temporary overrides
+    "array-callback-return": "off",
+    "no-dupe-else-if": "off",
+    "no-var": "off",
+    "no-empty": "off",
+    "node/handle-callback-err": "off",
+    "no-loss-of-precision": "off",
+    "node/no-callback-literal": "off",
+    "node/no-path-concat": "off",
+    "prefer-regex-literals": "off",
+    // END of temporary overrides
+
     // Swap the no-unused-expressions rule with a more chai-friendly one
     "no-unused-expressions": 0,
     "chai-friendly/no-unused-expressions": "error",
