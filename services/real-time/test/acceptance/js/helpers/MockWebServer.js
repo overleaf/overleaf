@@ -57,7 +57,7 @@ module.exports = MockWebServer = {
           }
           return res.json({
             project,
-            privilegeLevel
+            privilegeLevel,
           })
         }
       )
@@ -75,15 +75,15 @@ module.exports = MockWebServer = {
     const app = express()
     app.post('/project/:project_id/join', MockWebServer.joinProjectRequest)
     return app
-      .listen(3000, (error) => {
+      .listen(3000, error => {
         MockWebServer.running = true
         return callback(error)
       })
-      .on('error', (error) => {
+      .on('error', error => {
         console.error('error starting MockWebServer:', error.message)
         return process.exit(1)
       })
-  }
+  },
 }
 
 sinon.spy(MockWebServer, 'joinProject')

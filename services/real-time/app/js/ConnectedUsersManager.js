@@ -111,66 +111,66 @@ module.exports = {
   },
 
   _getConnectedUser(project_id, client_id, callback) {
-    rclient.hgetall(Keys.connectedUser({ project_id, client_id }), function (
-      err,
-      result
-    ) {
-      if (err) {
-        err = new OError('problem fetching connected user details', {
-          other_client_id: client_id
-        }).withCause(err)
-        return callback(err)
-      }
-      if (!(result && result.user_id)) {
-        result = {
-          connected: false,
-          client_id
+    rclient.hgetall(
+      Keys.connectedUser({ project_id, client_id }),
+      function (err, result) {
+        if (err) {
+          err = new OError('problem fetching connected user details', {
+            other_client_id: client_id,
+          }).withCause(err)
+          return callback(err)
         }
-      } else {
-        result.connected = true
-        result.client_id = client_id
-        result.client_age =
-          (Date.now() - parseInt(result.last_updated_at, 10)) / 1000
-        if (result.cursorData) {
-          try {
-            result.cursorData = JSON.parse(result.cursorData)
-          } catch (e) {
-            OError.tag(e, 'error parsing cursorData JSON', {
-              other_client_id: client_id,
-              cursorData: result.cursorData
-            })
-            return callback(e)
+        if (!(result && result.user_id)) {
+          result = {
+            connected: false,
+            client_id,
+          }
+        } else {
+          result.connected = true
+          result.client_id = client_id
+          result.client_age =
+            (Date.now() - parseInt(result.last_updated_at, 10)) / 1000
+          if (result.cursorData) {
+            try {
+              result.cursorData = JSON.parse(result.cursorData)
+            } catch (e) {
+              OError.tag(e, 'error parsing cursorData JSON', {
+                other_client_id: client_id,
+                cursorData: result.cursorData,
+              })
+              return callback(e)
+            }
           }
         }
+        callback(err, result)
       }
-      callback(err, result)
-    })
+    )
   },
 
   getConnectedUsers(project_id, callback) {
     const self = this
-    rclient.smembers(Keys.clientsInProject({ project_id }), function (
-      err,
-      results
-    ) {
-      if (err) {
-        err = new OError('problem getting clients in project').withCause(err)
-        return callback(err)
-      }
-      const jobs = results.map((client_id) => (cb) =>
-        self._getConnectedUser(project_id, client_id, cb)
-      )
-      async.series(jobs, function (err, users) {
+    rclient.smembers(
+      Keys.clientsInProject({ project_id }),
+      function (err, results) {
         if (err) {
-          OError.tag(err, 'problem getting connected users')
+          err = new OError('problem getting clients in project').withCause(err)
           return callback(err)
         }
-        users = users.filter(
-          (user) =>
-            user && user.connected && user.client_age < REFRESH_TIMEOUT_IN_S
+        const jobs = results.map(
+          client_id => cb => self._getConnectedUser(project_id, client_id, cb)
         )
-        callback(null, users)
-      })
-    })
-  }
+        async.series(jobs, function (err, users) {
+          if (err) {
+            OError.tag(err, 'problem getting connected users')
+            return callback(err)
+          }
+          users = users.filter(
+            user =>
+              user && user.connected && user.client_age < REFRESH_TIMEOUT_IN_S
+          )
+          callback(null, users)
+        })
+      }
+    )
+  },
 }

@@ -19,8 +19,8 @@ describe('DrainManager', function () {
     this.DrainManager = SandboxedModule.require(modulePath, {})
     return (this.io = {
       sockets: {
-        clients: sinon.stub()
-      }
+        clients: sinon.stub(),
+      },
     })
   })
 
@@ -30,7 +30,7 @@ describe('DrainManager', function () {
       for (let i = 0; i <= 5399; i++) {
         this.clients[i] = {
           id: i,
-          emit: sinon.stub()
+          emit: sinon.stub(),
         }
       }
       this.io.sockets.clients.returns(this.clients)
@@ -50,7 +50,7 @@ describe('DrainManager', function () {
       for (let i = 0; i <= 9; i++) {
         this.clients[i] = {
           id: i,
-          emit: sinon.stub()
+          emit: sinon.stub(),
         }
       }
       return this.io.sockets.clients.returns(this.clients)
@@ -62,7 +62,7 @@ describe('DrainManager', function () {
       })
 
       it('should reconnect the first 3 clients', function () {
-        return [0, 1, 2].map((i) =>
+        return [0, 1, 2].map(i =>
           this.clients[i].emit
             .calledWith('reconnectGracefully')
             .should.equal(true)
@@ -70,7 +70,7 @@ describe('DrainManager', function () {
       })
 
       it('should not reconnect any more clients', function () {
-        return [3, 4, 5, 6, 7, 8, 9].map((i) =>
+        return [3, 4, 5, 6, 7, 8, 9].map(i =>
           this.clients[i].emit
             .calledWith('reconnectGracefully')
             .should.equal(false)
@@ -83,7 +83,7 @@ describe('DrainManager', function () {
         })
 
         it('should reconnect the next 3 clients', function () {
-          return [3, 4, 5].map((i) =>
+          return [3, 4, 5].map(i =>
             this.clients[i].emit
               .calledWith('reconnectGracefully')
               .should.equal(true)
@@ -91,7 +91,7 @@ describe('DrainManager', function () {
         })
 
         it('should not reconnect any more clients', function () {
-          return [6, 7, 8, 9].map((i) =>
+          return [6, 7, 8, 9].map(i =>
             this.clients[i].emit
               .calledWith('reconnectGracefully')
               .should.equal(false)
@@ -99,7 +99,7 @@ describe('DrainManager', function () {
         })
 
         it('should not reconnect the first 3 clients again', function () {
-          return [0, 1, 2].map((i) =>
+          return [0, 1, 2].map(i =>
             this.clients[i].emit.calledOnce.should.equal(true)
           )
         })
@@ -110,7 +110,7 @@ describe('DrainManager', function () {
           })
 
           it('should not reconnect the first 6 clients again', function () {
-            return [0, 1, 2, 3, 4, 5].map((i) =>
+            return [0, 1, 2, 3, 4, 5].map(i =>
               this.clients[i].emit.calledOnce.should.equal(true)
             )
           })

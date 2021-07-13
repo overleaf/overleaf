@@ -11,7 +11,7 @@
 const async = require('async')
 const { expect } = require('chai')
 const request = require('request').defaults({
-  baseUrl: 'http://localhost:3026'
+  baseUrl: 'http://localhost:3026',
 })
 
 const RealTimeClient = require('./helpers/RealTimeClient')
@@ -24,7 +24,7 @@ describe('HttpControllerTests', function () {
       return request.get(
         {
           url: `/clients/${client_id}`,
-          json: true
+          json: true,
         },
         (error, response, data) => {
           if (error) {
@@ -41,10 +41,10 @@ describe('HttpControllerTests', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'owner'
+                privilegeLevel: 'owner',
               },
               (error, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -54,7 +54,7 @@ describe('HttpControllerTests', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               {},
@@ -65,12 +65,12 @@ describe('HttpControllerTests', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -78,9 +78,9 @@ describe('HttpControllerTests', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit('joinDoc', this.doc_id, cb)
-          }
+          },
         ],
         done
       )
@@ -90,7 +90,7 @@ describe('HttpControllerTests', function () {
       return request.get(
         {
           url: `/clients/${this.client.socket.sessionid}`,
-          json: true
+          json: true,
         },
         (error, response, data) => {
           if (error) {
@@ -107,7 +107,7 @@ describe('HttpControllerTests', function () {
             last_name: 'Bloggs',
             project_id: this.project_id,
             user_id: this.user_id,
-            rooms: [this.project_id, this.doc_id]
+            rooms: [this.project_id, this.doc_id],
           })
           return done()
         }

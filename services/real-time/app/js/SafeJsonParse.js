@@ -13,5 +13,5 @@ module.exports = {
       return callback(e)
     }
     callback(null, parsed)
-  }
+  },
 }

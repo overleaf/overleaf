@@ -44,10 +44,10 @@ describe('leaveDoc', function () {
     beforeEach(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'readAndWrite'
+                privilegeLevel: 'readAndWrite',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -57,7 +57,7 @@ describe('leaveDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -68,12 +68,12 @@ describe('leaveDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -81,7 +81,7 @@ describe('leaveDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinDoc',
               this.doc_id,
@@ -90,7 +90,7 @@ describe('leaveDoc', function () {
                 return cb(error)
               }
             )
-          }
+          },
         ],
         done
       )
@@ -98,7 +98,7 @@ describe('leaveDoc', function () {
 
     describe('then leaving the doc', function () {
       beforeEach(function (done) {
-        return this.client.emit('leaveDoc', this.doc_id, (error) => {
+        return this.client.emit('leaveDoc', this.doc_id, error => {
           if (error != null) {
             throw error
           }
@@ -123,7 +123,7 @@ describe('leaveDoc', function () {
       beforeEach(function (done) {
         this.client.emit('leaveDoc', this.doc_id, () => {})
         this.client.emit('joinDoc', this.doc_id, () => {})
-        return this.client.emit('leaveDoc', this.doc_id, (error) => {
+        return this.client.emit('leaveDoc', this.doc_id, error => {
           if (error != null) {
             throw error
           }
@@ -154,7 +154,7 @@ describe('leaveDoc', function () {
 
     return describe('when sending a leaveDoc for a room the client has not joined ', function () {
       beforeEach(function (done) {
-        return this.client.emit('leaveDoc', this.other_doc_id, (error) => {
+        return this.client.emit('leaveDoc', this.other_doc_id, error => {
           if (error != null) {
             throw error
           }

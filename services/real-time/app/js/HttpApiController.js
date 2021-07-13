@@ -48,5 +48,5 @@ module.exports = {
     logger.warn({ client_id }, 'api: requesting client disconnect')
     client.on('disconnect', () => res.sendStatus(204))
     client.disconnect()
-  }
+  },
 }

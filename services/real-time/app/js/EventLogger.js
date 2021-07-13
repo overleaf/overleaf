@@ -80,5 +80,5 @@ module.exports = EventLogger = {
         delete EVENT_LOG_TIMESTAMP[key]
       }
     })
-  }
+  },
 }

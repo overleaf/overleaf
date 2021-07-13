@@ -50,7 +50,7 @@ module.exports = DocumentUpdaterController = {
   handleRoomUpdates(rclientSubList) {
     const roomEvents = RoomManager.eventSource()
     roomEvents.on('doc-active', function (doc_id) {
-      const subscribePromises = rclientSubList.map((rclient) =>
+      const subscribePromises = rclientSubList.map(rclient =>
         ChannelManager.subscribe(rclient, 'applied-ops', doc_id)
       )
       RoomManager.emitOnCompletion(
@@ -58,8 +58,8 @@ module.exports = DocumentUpdaterController = {
         `doc-subscribed-${doc_id}`
       )
     })
-    roomEvents.on('doc-empty', (doc_id) =>
-      rclientSubList.map((rclient) =>
+    roomEvents.on('doc-empty', doc_id =>
+      rclientSubList.map(rclient =>
         ChannelManager.unsubscribe(rclient, 'applied-ops', doc_id)
       )
     )
@@ -117,7 +117,7 @@ module.exports = DocumentUpdaterController = {
         doc_id,
         version: update.v,
         source: update.meta && update.meta.source,
-        socketIoClients: clientList.map((client) => client.id)
+        socketIoClients: clientList.map(client => client.id),
       },
       'distributing updates to clients'
     )
@@ -131,7 +131,7 @@ module.exports = DocumentUpdaterController = {
             {
               doc_id,
               version: update.v,
-              source: update.meta.source
+              source: update.meta.source,
             },
             'distributing update to sender'
           )
@@ -143,7 +143,7 @@ module.exports = DocumentUpdaterController = {
               doc_id,
               version: update.v,
               source: update.meta.source,
-              client_id: client.id
+              client_id: client.id,
             },
             'distributing update to collaborator'
           )
@@ -156,7 +156,7 @@ module.exports = DocumentUpdaterController = {
       logger.log(
         {
           doc_id,
-          socketIoClients: clientList.map((client) => client.id)
+          socketIoClients: clientList.map(client => client.id),
         },
         'discarded duplicate clients'
       )
@@ -172,5 +172,5 @@ module.exports = DocumentUpdaterController = {
       client.emit('otUpdateError', error, message)
       client.disconnect()
     }
-  }
+  },
 }

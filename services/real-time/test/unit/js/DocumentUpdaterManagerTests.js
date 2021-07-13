@@ -30,12 +30,12 @@ describe('DocumentUpdaterManager', function () {
           key_schema: {
             pendingUpdates({ doc_id }) {
               return `PendingUpdates:${doc_id}`
-            }
-          }
-        }
+            },
+          },
+        },
       },
       maxUpdateSize: 7 * 1024 * 1024,
-      pendingUpdateListShardCount: 10
+      pendingUpdateListShardCount: 10,
     }
     this.rclient = { auth() {} }
 
@@ -48,9 +48,9 @@ describe('DocumentUpdaterManager', function () {
           summary: sinon.stub(),
           Timer: (Timer = class Timer {
             done() {}
-          })
-        })
-      }
+          }),
+        }),
+      },
     }))
   }) // avoid modifying JSON object directly
 
@@ -65,7 +65,7 @@ describe('DocumentUpdaterManager', function () {
           lines: this.lines,
           version: this.version,
           ops: (this.ops = ['mock-op-1', 'mock-op-2']),
-          ranges: (this.ranges = { mock: 'ranges' })
+          ranges: (this.ranges = { mock: 'ranges' }),
         })
         this.fromVersion = 2
         this.request.get = sinon
@@ -113,7 +113,7 @@ describe('DocumentUpdaterManager', function () {
         return this.callback.calledWith(this.error).should.equal(true)
       })
     })
-    ;[404, 422].forEach((statusCode) =>
+    ;[404, 422].forEach(statusCode =>
       describe(`when the document updater returns a ${statusCode} status code`, function () {
         beforeEach(function () {
           this.request.get = sinon
@@ -133,7 +133,7 @@ describe('DocumentUpdaterManager', function () {
             .calledWith(
               sinon.match({
                 message: 'doc updater could not load requested ops',
-                info: { statusCode }
+                info: { statusCode },
               })
             )
             .should.equal(true)
@@ -164,8 +164,8 @@ describe('DocumentUpdaterManager', function () {
               message: 'doc updater returned a non-success status code',
               info: {
                 action: 'getDocument',
-                statusCode: 500
-              }
+                statusCode: 500,
+              },
             })
           )
           .should.equal(true)
@@ -240,8 +240,8 @@ describe('DocumentUpdaterManager', function () {
               message: 'doc updater returned a non-success status code',
               info: {
                 action: 'flushProjectToMongoAndDelete',
-                statusCode: 500
-              }
+                statusCode: 500,
+              },
             })
           )
           .should.equal(true)
@@ -254,7 +254,7 @@ describe('DocumentUpdaterManager', function () {
       this.change = {
         doc: '1234567890',
         op: [{ d: 'test', p: 345 }],
-        v: 789
+        v: 789,
       }
       this.rclient.rpush = sinon.stub().yields()
       return (this.callback = sinon.stub())
@@ -345,7 +345,7 @@ describe('DocumentUpdaterManager', function () {
     describe('when the update is too large', function () {
       beforeEach(function () {
         this.change = {
-          op: { p: 12, t: 'update is too large'.repeat(1024 * 400) }
+          op: { p: 12, t: 'update is too large'.repeat(1024 * 400) },
         }
         return this.DocumentUpdaterManager.queueChange(
           this.project_id,
@@ -374,7 +374,7 @@ describe('DocumentUpdaterManager', function () {
       beforeEach(function () {
         this.change = {
           op: [{ d: 'test', p: 345 }],
-          version: 789 // not a valid key
+          version: 789, // not a valid key
         }
         return this.DocumentUpdaterManager.queueChange(
           this.project_id,

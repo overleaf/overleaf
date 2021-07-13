@@ -49,7 +49,7 @@ module.exports = {
   emitOnCompletion(promiseList, eventName) {
     Promise.all(promiseList)
       .then(() => RoomEvents.emit(eventName))
-      .catch((err) => RoomEvents.emit(eventName, err))
+      .catch(err => RoomEvents.emit(eventName, err))
   },
 
   eventSource() {
@@ -150,15 +150,15 @@ module.exports = {
     return (
       Object.keys(rooms)
         // drop the namespace
-        .filter((room) => room !== '')
+        .filter(room => room !== '')
         // room names are composed as '<NAMESPACE>/<ROOM>' and the default
         //  namespace is empty (see comments above), just drop the '/'
-        .map((fullRoomPath) => fullRoomPath.slice(1))
+        .map(fullRoomPath => fullRoomPath.slice(1))
     )
   },
 
   _clientAlreadyInRoom(client, room) {
     const rooms = client.manager.roomClients[client.id] || {}
     return !!rooms['/' + room]
-  }
+  },
 }

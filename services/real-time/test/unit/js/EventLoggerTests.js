@@ -20,8 +20,8 @@ describe('EventLogger', function () {
     tk.freeze(new Date(this.start))
     this.EventLogger = SandboxedModule.require(modulePath, {
       requires: {
-        '@overleaf/metrics': (this.metrics = { inc: sinon.stub() })
-      }
+        '@overleaf/metrics': (this.metrics = { inc: sinon.stub() }),
+      },
     })
     this.channel = 'applied-ops'
     this.id_1 = 'random-hostname:abc-1'

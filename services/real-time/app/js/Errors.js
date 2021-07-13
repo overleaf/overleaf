@@ -3,7 +3,7 @@ const OError = require('@overleaf/o-error')
 class ClientRequestedMissingOpsError extends OError {
   constructor(statusCode) {
     super('doc updater could not load requested ops', {
-      statusCode
+      statusCode,
     })
   }
 }
@@ -24,7 +24,7 @@ class DataTooLargeToParseError extends OError {
   constructor(data) {
     super('data too large to parse', {
       head: data.slice(0, 1024),
-      length: data.length
+      length: data.length,
     })
   }
 }
@@ -33,7 +33,7 @@ class DocumentUpdaterRequestFailedError extends OError {
   constructor(action, statusCode) {
     super('doc updater returned a non-success status code', {
       action,
-      statusCode
+      statusCode,
     })
   }
 }
@@ -99,5 +99,5 @@ module.exports = {
   NullBytesInOpError,
   UnexpectedArgumentsError,
   UpdateTooLargeError,
-  WebApiRequestFailedError
+  WebApiRequestFailedError,
 }

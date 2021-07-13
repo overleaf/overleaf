@@ -9,7 +9,7 @@ const {
   CodedError,
   CorruptedJoinProjectResponseError,
   NotAuthorizedError,
-  WebApiRequestFailedError
+  WebApiRequestFailedError,
 } = require('./Errors')
 
 module.exports = {
@@ -28,11 +28,11 @@ module.exports = {
         auth: {
           user: settings.apis.web.user,
           pass: settings.apis.web.pass,
-          sendImmediately: true
+          sendImmediately: true,
         },
         json: true,
         jar: false,
-        headers
+        headers,
       },
       function (error, response, data) {
         if (error) {
@@ -65,5 +65,5 @@ module.exports = {
         }
       }
     )
-  }
+  },
 }

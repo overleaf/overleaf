@@ -11,7 +11,7 @@ const {
   ClientRequestedMissingOpsError,
   DocumentUpdaterRequestFailedError,
   NullBytesInOpError,
-  UpdateTooLargeError
+  UpdateTooLargeError,
 } = require('./Errors')
 
 const rclient = require('@overleaf/redis-wrapper').createClient(
@@ -105,7 +105,7 @@ const DocumentUpdaterManager = {
       'dupIfSource',
       'meta',
       'lastV',
-      'hash'
+      'hash',
     ]
     change = _.pick(change, allowedKeys)
     const jsonChange = JSON.stringify(change)
@@ -125,24 +125,26 @@ const DocumentUpdaterManager = {
     const doc_key = `${project_id}:${doc_id}`
     // Push onto pendingUpdates for doc_id first, because once the doc updater
     // gets an entry on pending-updates-list, it starts processing.
-    rclient.rpush(Keys.pendingUpdates({ doc_id }), jsonChange, function (
-      error
-    ) {
-      if (error) {
-        error = new OError('error pushing update into redis').withCause(error)
-        return callback(error)
-      }
-      const queueKey = DocumentUpdaterManager._getPendingUpdateListKey()
-      rclient.rpush(queueKey, doc_key, function (error) {
+    rclient.rpush(
+      Keys.pendingUpdates({ doc_id }),
+      jsonChange,
+      function (error) {
         if (error) {
-          error = new OError('error pushing doc_id into redis')
-            .withInfo({ queueKey })
-            .withCause(error)
+          error = new OError('error pushing update into redis').withCause(error)
+          return callback(error)
         }
-        callback(error)
-      })
-    })
-  }
+        const queueKey = DocumentUpdaterManager._getPendingUpdateListKey()
+        rclient.rpush(queueKey, doc_key, function (error) {
+          if (error) {
+            error = new OError('error pushing doc_id into redis')
+              .withInfo({ queueKey })
+              .withCause(error)
+          }
+          callback(error)
+        })
+      }
+    )
+  },
 }
 
 module.exports = DocumentUpdaterManager

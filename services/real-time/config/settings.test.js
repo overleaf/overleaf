@@ -1,5 +1,5 @@
 module.exports = {
   errors: {
-    catchUncaughtErrors: false
-  }
+    catchUncaughtErrors: false,
+  },
 }

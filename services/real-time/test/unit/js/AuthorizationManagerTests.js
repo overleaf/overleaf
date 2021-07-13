@@ -20,7 +20,7 @@ describe('AuthorizationManager', function () {
     this.client = { ol_context: {} }
 
     return (this.AuthorizationManager = SandboxedModule.require(modulePath, {
-      requires: {}
+      requires: {},
     }))
   })
 
@@ -29,7 +29,7 @@ describe('AuthorizationManager', function () {
       this.client.ol_context.privilege_level = 'readOnly'
       return this.AuthorizationManager.assertClientCanViewProject(
         this.client,
-        (error) => {
+        error => {
           expect(error).to.be.null
           return done()
         }
@@ -40,7 +40,7 @@ describe('AuthorizationManager', function () {
       this.client.ol_context.privilege_level = 'readAndWrite'
       return this.AuthorizationManager.assertClientCanViewProject(
         this.client,
-        (error) => {
+        error => {
           expect(error).to.be.null
           return done()
         }
@@ -51,7 +51,7 @@ describe('AuthorizationManager', function () {
       this.client.ol_context.privilege_level = 'owner'
       return this.AuthorizationManager.assertClientCanViewProject(
         this.client,
-        (error) => {
+        error => {
           expect(error).to.be.null
           return done()
         }
@@ -62,7 +62,7 @@ describe('AuthorizationManager', function () {
       this.client.ol_context.privilege_level = 'unknown'
       return this.AuthorizationManager.assertClientCanViewProject(
         this.client,
-        (error) => {
+        error => {
           error.message.should.equal('not authorized')
           return done()
         }
@@ -75,7 +75,7 @@ describe('AuthorizationManager', function () {
       this.client.ol_context.privilege_level = 'readOnly'
       return this.AuthorizationManager.assertClientCanEditProject(
         this.client,
-        (error) => {
+        error => {
           error.message.should.equal('not authorized')
           return done()
         }
@@ -86,7 +86,7 @@ describe('AuthorizationManager', function () {
       this.client.ol_context.privilege_level = 'readAndWrite'
       return this.AuthorizationManager.assertClientCanEditProject(
         this.client,
-        (error) => {
+        error => {
           expect(error).to.be.null
           return done()
         }
@@ -97,7 +97,7 @@ describe('AuthorizationManager', function () {
       this.client.ol_context.privilege_level = 'owner'
       return this.AuthorizationManager.assertClientCanEditProject(
         this.client,
-        (error) => {
+        error => {
           expect(error).to.be.null
           return done()
         }
@@ -108,7 +108,7 @@ describe('AuthorizationManager', function () {
       this.client.ol_context.privilege_level = 'unknown'
       return this.AuthorizationManager.assertClientCanEditProject(
         this.client,
-        (error) => {
+        error => {
           error.message.should.equal('not authorized')
           return done()
         }
@@ -134,7 +134,7 @@ describe('AuthorizationManager', function () {
         return this.AuthorizationManager.assertClientCanViewProjectAndDoc(
           this.client,
           this.doc_id,
-          (err) => err.message.should.equal('not authorized')
+          err => err.message.should.equal('not authorized')
         )
       })
 
@@ -151,7 +151,7 @@ describe('AuthorizationManager', function () {
           return this.AuthorizationManager.assertClientCanViewProjectAndDoc(
             this.client,
             this.doc_id,
-            (err) => err.message.should.equal('not authorized')
+            err => err.message.should.equal('not authorized')
           )
         })
       })
@@ -167,7 +167,7 @@ describe('AuthorizationManager', function () {
           return this.AuthorizationManager.assertClientCanViewProjectAndDoc(
             this.client,
             this.doc_id,
-            (err) => err.message.should.equal('not authorized')
+            err => err.message.should.equal('not authorized')
           )
         })
       })
@@ -210,7 +210,7 @@ describe('AuthorizationManager', function () {
           return this.AuthorizationManager.assertClientCanViewProjectAndDoc(
             this.client,
             this.doc_id,
-            (err) => err.message.should.equal('not authorized')
+            err => err.message.should.equal('not authorized')
           )
         })
       })
@@ -233,7 +233,7 @@ describe('AuthorizationManager', function () {
         return this.AuthorizationManager.assertClientCanEditProjectAndDoc(
           this.client,
           this.doc_id,
-          (err) => err.message.should.equal('not authorized')
+          err => err.message.should.equal('not authorized')
         )
       })
 
@@ -250,7 +250,7 @@ describe('AuthorizationManager', function () {
           return this.AuthorizationManager.assertClientCanEditProjectAndDoc(
             this.client,
             this.doc_id,
-            (err) => err.message.should.equal('not authorized')
+            err => err.message.should.equal('not authorized')
           )
         })
       })
@@ -266,7 +266,7 @@ describe('AuthorizationManager', function () {
           return this.AuthorizationManager.assertClientCanEditProjectAndDoc(
             this.client,
             this.doc_id,
-            (err) => err.message.should.equal('not authorized')
+            err => err.message.should.equal('not authorized')
           )
         })
       })
@@ -309,7 +309,7 @@ describe('AuthorizationManager', function () {
           return this.AuthorizationManager.assertClientCanEditProjectAndDoc(
             this.client,
             this.doc_id,
-            (err) => err.message.should.equal('not authorized')
+            err => err.message.should.equal('not authorized')
           )
         })
       })

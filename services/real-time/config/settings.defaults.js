@@ -12,7 +12,7 @@ const settings = {
         process.env.PUBSUB_REDIS_MAX_RETRIES_PER_REQUEST ||
           process.env.REDIS_MAX_RETRIES_PER_REQUEST ||
           '20'
-      )
+      ),
     },
 
     realtime: {
@@ -32,13 +32,13 @@ const settings = {
         },
         connectedUser({ project_id, client_id }) {
           return `connected_user:{${project_id}}:${client_id}`
-        }
+        },
       },
       maxRetriesPerRequest: parseInt(
         process.env.REAL_TIME_REDIS_MAX_RETRIES_PER_REQUEST ||
           process.env.REDIS_MAX_RETRIES_PER_REQUEST ||
           '20'
-      )
+      ),
     },
 
     documentupdater: {
@@ -55,13 +55,13 @@ const settings = {
       key_schema: {
         pendingUpdates({ doc_id }) {
           return `PendingUpdates:{${doc_id}}`
-        }
+        },
       },
       maxRetriesPerRequest: parseInt(
         process.env.DOC_UPDATER_REDIS_MAX_RETRIES_PER_REQUEST ||
           process.env.REDIS_MAX_RETRIES_PER_REQUEST ||
           '20'
-      )
+      ),
     },
 
     websessions: {
@@ -73,8 +73,8 @@ const settings = {
         process.env.WEB_REDIS_MAX_RETRIES_PER_REQUEST ||
           process.env.REDIS_MAX_RETRIES_PER_REQUEST ||
           '20'
-      )
-    }
+      ),
+    },
   },
 
   internal: {
@@ -82,8 +82,8 @@ const settings = {
       port: 3026,
       host: process.env.LISTEN_ADDRESS || 'localhost',
       user: 'sharelatex',
-      pass: 'password'
-    }
+      pass: 'password',
+    },
   },
 
   apis: {
@@ -92,19 +92,19 @@ const settings = {
         process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
       }:${process.env.WEB_API_PORT || process.env.WEB_PORT || 3000}`,
       user: process.env.WEB_API_USER || 'sharelatex',
-      pass: process.env.WEB_API_PASSWORD || 'password'
+      pass: process.env.WEB_API_PASSWORD || 'password',
     },
     documentupdater: {
       url: `http://${
         process.env.DOCUMENT_UPDATER_HOST ||
         process.env.DOCUPDATER_HOST ||
         'localhost'
-      }:3003`
-    }
+      }:3003`,
+    },
   },
 
   security: {
-    sessionSecret: process.env.SESSION_SECRET || 'secret-please-change'
+    sessionSecret: process.env.SESSION_SECRET || 'secret-please-change',
   },
 
   cookieName: process.env.COOKIE_NAME || 'sharelatex.sid',
@@ -155,13 +155,13 @@ const settings = {
   deploymentFile: process.env.DEPLOYMENT_FILE,
 
   sentry: {
-    dsn: process.env.SENTRY_DSN
+    dsn: process.env.SENTRY_DSN,
   },
 
   errors: {
     catchUncaughtErrors: true,
-    shutdownOnUncaughtError: true
-  }
+    shutdownOnUncaughtError: true,
+  },
 }
 
 // console.log settings.redis

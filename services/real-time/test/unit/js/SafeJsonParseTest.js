@@ -20,9 +20,9 @@ describe('SafeJsonParse', function () {
     return (this.SafeJsonParse = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': (this.Settings = {
-          maxUpdateSize: 16 * 1024
-        })
-      }
+          maxUpdateSize: 16 * 1024,
+        }),
+      },
     }))
   })
 

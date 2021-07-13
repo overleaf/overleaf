@@ -13,7 +13,7 @@ const RoomManager = require('./RoomManager')
 const {
   JoinLeaveEpochMismatchError,
   NotAuthorizedError,
-  NotJoinedError
+  NotJoinedError,
 } = require('./Errors')
 
 let WebsocketController
@@ -26,7 +26,7 @@ module.exports = WebsocketController = {
   joinProject(client, user, project_id, callback) {
     if (client.disconnected) {
       metrics.inc('editor.join-project.disconnected', 1, {
-        status: 'immediately'
+        status: 'immediately',
       })
       return callback()
     }
@@ -37,71 +37,70 @@ module.exports = WebsocketController = {
       'user joining project'
     )
     metrics.inc('editor.join-project', 1, { status: client.transport })
-    WebApiManager.joinProject(project_id, user, function (
-      error,
-      project,
-      privilegeLevel,
-      isRestrictedUser
-    ) {
-      if (error) {
-        return callback(error)
-      }
-      if (client.disconnected) {
-        metrics.inc('editor.join-project.disconnected', 1, {
-          status: 'after-web-api-call'
-        })
-        return callback()
-      }
-
-      if (!privilegeLevel) {
-        return callback(new NotAuthorizedError())
-      }
-
-      client.ol_context = {}
-      client.ol_context.privilege_level = privilegeLevel
-      client.ol_context.user_id = user_id
-      client.ol_context.project_id = project_id
-      client.ol_context.owner_id = project.owner && project.owner._id
-      client.ol_context.first_name = user.first_name
-      client.ol_context.last_name = user.last_name
-      client.ol_context.email = user.email
-      client.ol_context.connected_time = new Date()
-      client.ol_context.signup_date = user.signUpDate
-      client.ol_context.login_count = user.loginCount
-      client.ol_context.is_restricted_user = !!isRestrictedUser
-
-      RoomManager.joinProject(client, project_id, function (err) {
-        if (err) {
-          return callback(err)
+    WebApiManager.joinProject(
+      project_id,
+      user,
+      function (error, project, privilegeLevel, isRestrictedUser) {
+        if (error) {
+          return callback(error)
         }
-        logger.log(
-          { user_id, project_id, client_id: client.id },
-          'user joined project'
-        )
-        callback(
-          null,
-          project,
-          privilegeLevel,
-          WebsocketController.PROTOCOL_VERSION
-        )
-      })
+        if (client.disconnected) {
+          metrics.inc('editor.join-project.disconnected', 1, {
+            status: 'after-web-api-call',
+          })
+          return callback()
+        }
 
-      // No need to block for setting the user as connected in the cursor tracking
-      ConnectedUsersManager.updateUserPosition(
-        project_id,
-        client.publicId,
-        user,
-        null,
-        function (err) {
+        if (!privilegeLevel) {
+          return callback(new NotAuthorizedError())
+        }
+
+        client.ol_context = {}
+        client.ol_context.privilege_level = privilegeLevel
+        client.ol_context.user_id = user_id
+        client.ol_context.project_id = project_id
+        client.ol_context.owner_id = project.owner && project.owner._id
+        client.ol_context.first_name = user.first_name
+        client.ol_context.last_name = user.last_name
+        client.ol_context.email = user.email
+        client.ol_context.connected_time = new Date()
+        client.ol_context.signup_date = user.signUpDate
+        client.ol_context.login_count = user.loginCount
+        client.ol_context.is_restricted_user = !!isRestrictedUser
+
+        RoomManager.joinProject(client, project_id, function (err) {
           if (err) {
-            logger.warn(
-              { err, project_id, user_id, client_id: client.id },
-              'background cursor update failed'
-            )
+            return callback(err)
           }
-        }
-      )
-    })
+          logger.log(
+            { user_id, project_id, client_id: client.id },
+            'user joined project'
+          )
+          callback(
+            null,
+            project,
+            privilegeLevel,
+            WebsocketController.PROTOCOL_VERSION
+          )
+        })
+
+        // No need to block for setting the user as connected in the cursor tracking
+        ConnectedUsersManager.updateUserPosition(
+          project_id,
+          client.publicId,
+          user,
+          null,
+          function (err) {
+            if (err) {
+              logger.warn(
+                { err, project_id, user_id, client_id: client.id },
+                'background cursor update failed'
+              )
+            }
+          }
+        )
+      }
+    )
   },
 
   // We want to flush a project if there are no more (local) connected clients
@@ -177,110 +176,112 @@ module.exports = WebsocketController = {
       'client joining doc'
     )
 
-    WebsocketController._assertClientAuthorization(client, doc_id, function (
-      error
-    ) {
-      if (error) {
-        return callback(error)
-      }
-      if (client.disconnected) {
-        metrics.inc('editor.join-doc.disconnected', 1, {
-          status: 'after-client-auth-check'
-        })
-        // the client will not read the response anyways
-        return callback()
-      }
-      if (joinLeaveEpoch !== client.joinLeaveEpoch) {
-        // another joinDoc or leaveDoc rpc overtook us
-        return callback(new JoinLeaveEpochMismatchError())
-      }
-      // ensure the per-doc applied-ops channel is subscribed before sending the
-      // doc to the client, so that no events are missed.
-      RoomManager.joinDoc(client, doc_id, function (error) {
+    WebsocketController._assertClientAuthorization(
+      client,
+      doc_id,
+      function (error) {
         if (error) {
           return callback(error)
         }
         if (client.disconnected) {
           metrics.inc('editor.join-doc.disconnected', 1, {
-            status: 'after-joining-room'
+            status: 'after-client-auth-check',
           })
           // the client will not read the response anyways
           return callback()
         }
-
-        DocumentUpdaterManager.getDocument(
-          project_id,
-          doc_id,
-          fromVersion,
-          function (error, lines, version, ranges, ops) {
-            if (error) {
-              return callback(error)
-            }
-            if (client.disconnected) {
-              metrics.inc('editor.join-doc.disconnected', 1, {
-                status: 'after-doc-updater-call'
-              })
-              // the client will not read the response anyways
-              return callback()
-            }
-
-            if (is_restricted_user && ranges && ranges.comments) {
-              ranges.comments = []
-            }
-
-            // Encode any binary bits of data so it can go via WebSockets
-            // See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
-            const encodeForWebsockets = (text) =>
-              unescape(encodeURIComponent(text))
-            const escapedLines = []
-            for (let line of lines) {
-              try {
-                line = encodeForWebsockets(line)
-              } catch (err) {
-                OError.tag(err, 'error encoding line uri component', { line })
-                return callback(err)
-              }
-              escapedLines.push(line)
-            }
-            if (options.encodeRanges) {
-              try {
-                for (const comment of (ranges && ranges.comments) || []) {
-                  if (comment.op.c) {
-                    comment.op.c = encodeForWebsockets(comment.op.c)
-                  }
-                }
-                for (const change of (ranges && ranges.changes) || []) {
-                  if (change.op.i) {
-                    change.op.i = encodeForWebsockets(change.op.i)
-                  }
-                  if (change.op.d) {
-                    change.op.d = encodeForWebsockets(change.op.d)
-                  }
-                }
-              } catch (err) {
-                OError.tag(err, 'error encoding range uri component', {
-                  ranges
-                })
-                return callback(err)
-              }
-            }
-
-            AuthorizationManager.addAccessToDoc(client, doc_id, () => {})
-            logger.log(
-              {
-                user_id,
-                project_id,
-                doc_id,
-                fromVersion,
-                client_id: client.id
-              },
-              'client joined doc'
-            )
-            callback(null, escapedLines, version, ops, ranges)
+        if (joinLeaveEpoch !== client.joinLeaveEpoch) {
+          // another joinDoc or leaveDoc rpc overtook us
+          return callback(new JoinLeaveEpochMismatchError())
+        }
+        // ensure the per-doc applied-ops channel is subscribed before sending the
+        // doc to the client, so that no events are missed.
+        RoomManager.joinDoc(client, doc_id, function (error) {
+          if (error) {
+            return callback(error)
           }
-        )
-      })
-    })
+          if (client.disconnected) {
+            metrics.inc('editor.join-doc.disconnected', 1, {
+              status: 'after-joining-room',
+            })
+            // the client will not read the response anyways
+            return callback()
+          }
+
+          DocumentUpdaterManager.getDocument(
+            project_id,
+            doc_id,
+            fromVersion,
+            function (error, lines, version, ranges, ops) {
+              if (error) {
+                return callback(error)
+              }
+              if (client.disconnected) {
+                metrics.inc('editor.join-doc.disconnected', 1, {
+                  status: 'after-doc-updater-call',
+                })
+                // the client will not read the response anyways
+                return callback()
+              }
+
+              if (is_restricted_user && ranges && ranges.comments) {
+                ranges.comments = []
+              }
+
+              // Encode any binary bits of data so it can go via WebSockets
+              // See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
+              const encodeForWebsockets = text =>
+                unescape(encodeURIComponent(text))
+              const escapedLines = []
+              for (let line of lines) {
+                try {
+                  line = encodeForWebsockets(line)
+                } catch (err) {
+                  OError.tag(err, 'error encoding line uri component', { line })
+                  return callback(err)
+                }
+                escapedLines.push(line)
+              }
+              if (options.encodeRanges) {
+                try {
+                  for (const comment of (ranges && ranges.comments) || []) {
+                    if (comment.op.c) {
+                      comment.op.c = encodeForWebsockets(comment.op.c)
+                    }
+                  }
+                  for (const change of (ranges && ranges.changes) || []) {
+                    if (change.op.i) {
+                      change.op.i = encodeForWebsockets(change.op.i)
+                    }
+                    if (change.op.d) {
+                      change.op.d = encodeForWebsockets(change.op.d)
+                    }
+                  }
+                } catch (err) {
+                  OError.tag(err, 'error encoding range uri component', {
+                    ranges,
+                  })
+                  return callback(err)
+                }
+              }
+
+              AuthorizationManager.addAccessToDoc(client, doc_id, () => {})
+              logger.log(
+                {
+                  user_id,
+                  project_id,
+                  doc_id,
+                  fromVersion,
+                  client_id: client.id,
+                },
+                'client joined doc'
+              )
+              callback(null, escapedLines, version, ops, ranges)
+            }
+          )
+        })
+      }
+    )
   },
 
   _assertClientAuthorization(client, doc_id, callback) {
@@ -297,16 +298,18 @@ module.exports = WebsocketController = {
           if (error) {
             // No cached access, check docupdater
             const { project_id } = client.ol_context
-            DocumentUpdaterManager.checkDocument(project_id, doc_id, function (
-              error
-            ) {
-              if (error) {
-                return callback(error)
-              } else {
-                // Success
-                AuthorizationManager.addAccessToDoc(client, doc_id, callback)
+            DocumentUpdaterManager.checkDocument(
+              project_id,
+              doc_id,
+              function (error) {
+                if (error) {
+                  return callback(error)
+                } else {
+                  // Success
+                  AuthorizationManager.addAccessToDoc(client, doc_id, callback)
+                }
               }
-            })
+            )
           } else {
             // Access already cached
             callback()
@@ -339,15 +342,10 @@ module.exports = WebsocketController = {
     }
 
     metrics.inc('editor.update-client-position', 0.1, {
-      status: client.transport
+      status: client.transport,
     })
-    const {
-      project_id,
-      first_name,
-      last_name,
-      email,
-      user_id
-    } = client.ol_context
+    const { project_id, first_name, last_name, email, user_id } =
+      client.ol_context
     logger.log(
       { user_id, project_id, client_id: client.id, cursorData },
       'updating client position'
@@ -388,12 +386,12 @@ module.exports = WebsocketController = {
               first_name,
               last_name,
               email,
-              _id: user_id
+              _id: user_id,
             },
             {
               row: cursorData.row,
               column: cursorData.column,
-              doc_id: cursorData.doc_id
+              doc_id: cursorData.doc_id,
             },
             callback
           )
@@ -433,19 +431,19 @@ module.exports = WebsocketController = {
       WebsocketLoadBalancer.emitToRoom(project_id, 'clientTracking.refresh')
       setTimeout(
         () =>
-          ConnectedUsersManager.getConnectedUsers(project_id, function (
-            error,
-            users
-          ) {
-            if (error) {
-              return callback(error)
+          ConnectedUsersManager.getConnectedUsers(
+            project_id,
+            function (error, users) {
+              if (error) {
+                return callback(error)
+              }
+              logger.log(
+                { user_id, project_id, client_id: client.id },
+                'got connected users'
+              )
+              callback(null, users)
             }
-            logger.log(
-              { user_id, project_id, client_id: client.id },
-              'got connected users'
-            )
-            callback(null, users)
-          }),
+          ),
         WebsocketController.CLIENT_REFRESH_DELAY
       )
     })
@@ -485,7 +483,7 @@ module.exports = WebsocketController = {
             doc_id,
             project_id,
             client_id: client.id,
-            version: update.v
+            version: update.v,
           },
           'sending update to doc updater'
         )
@@ -510,13 +508,13 @@ module.exports = WebsocketController = {
               const message = {
                 project_id,
                 doc_id,
-                error: 'update is too large'
+                error: 'update is too large',
               }
               setTimeout(function () {
                 if (client.disconnected) {
                   // skip the message broadcast, the client has moved on
                   return metrics.inc('editor.doc-update.disconnected', 1, {
-                    status: 'at-otUpdateError'
+                    status: 'at-otUpdateError',
                   })
                 }
                 client.emit('otUpdateError', message.error, message)
@@ -527,7 +525,7 @@ module.exports = WebsocketController = {
 
             if (error) {
               OError.tag(error, 'document was not available for update', {
-                version: update.v
+                version: update.v,
               })
               client.disconnect()
             }
@@ -571,5 +569,5 @@ module.exports = WebsocketController = {
       }
     }
     return true
-  }
+  },
 }

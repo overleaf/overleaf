@@ -52,7 +52,7 @@ module.exports = Router = {
       [
         'not authorized',
         'joinLeaveEpoch mismatch',
-        'doc updater could not load requested ops'
+        'doc updater could not load requested ops',
       ].includes(error.message)
     ) {
       logger.warn(attrs, error.message)
@@ -62,7 +62,7 @@ module.exports = Router = {
       logger.error(attrs, `server side error in ${method}`)
       // Don't return raw error to prevent leaking server side info
       const serializedError = {
-        message: 'Something went wrong in real-time service'
+        message: 'Something went wrong in real-time service',
       }
       callback(serializedError)
     }
@@ -201,7 +201,7 @@ module.exports = Router = {
             if (err) {
               Router._handleError(callback, err, client, 'joinProject', {
                 project_id: data.project_id,
-                user_id: user._id
+                user_id: user._id,
               })
             } else {
               callback(null, ...args)
@@ -263,7 +263,7 @@ module.exports = Router = {
             if (err) {
               Router._handleError(callback, err, client, 'joinDoc', {
                 doc_id,
-                fromVersion
+                fromVersion,
               })
             } else {
               callback(null, ...args)
@@ -280,7 +280,7 @@ module.exports = Router = {
         WebsocketController.leaveDoc(client, doc_id, function (err, ...args) {
           if (err) {
             Router._handleError(callback, err, client, 'leaveDoc', {
-              doc_id
+              doc_id,
             })
           } else {
             callback(null, ...args)
@@ -311,36 +311,38 @@ module.exports = Router = {
         })
       })
 
-      client.on('clientTracking.updatePosition', function (
-        cursorData,
-        callback
-      ) {
-        if (!callback) {
-          callback = function () {}
-        }
-        if (typeof callback !== 'function') {
-          return Router._handleInvalidArguments(
+      client.on(
+        'clientTracking.updatePosition',
+        function (cursorData, callback) {
+          if (!callback) {
+            callback = function () {}
+          }
+          if (typeof callback !== 'function') {
+            return Router._handleInvalidArguments(
+              client,
+              'clientTracking.updatePosition',
+              arguments
+            )
+          }
+
+          WebsocketController.updateClientPosition(
             client,
-            'clientTracking.updatePosition',
-            arguments
+            cursorData,
+            function (err) {
+              if (err) {
+                Router._handleError(
+                  callback,
+                  err,
+                  client,
+                  'clientTracking.updatePosition'
+                )
+              } else {
+                callback()
+              }
+            }
           )
         }
-
-        WebsocketController.updateClientPosition(client, cursorData, function (
-          err
-        ) {
-          if (err) {
-            Router._handleError(
-              callback,
-              err,
-              client,
-              'clientTracking.updatePosition'
-            )
-          } else {
-            callback()
-          }
-        })
-      })
+      )
 
       client.on('applyOtUpdate', function (doc_id, update, callback) {
         if (typeof callback !== 'function') {
@@ -351,19 +353,22 @@ module.exports = Router = {
           )
         }
 
-        WebsocketController.applyOtUpdate(client, doc_id, update, function (
-          err
-        ) {
-          if (err) {
-            Router._handleError(callback, err, client, 'applyOtUpdate', {
-              doc_id,
-              update
-            })
-          } else {
-            callback()
+        WebsocketController.applyOtUpdate(
+          client,
+          doc_id,
+          update,
+          function (err) {
+            if (err) {
+              Router._handleError(callback, err, client, 'applyOtUpdate', {
+                doc_id,
+                update,
+              })
+            } else {
+              callback()
+            }
           }
-        })
+        )
       })
     })
-  }
+  },
 }

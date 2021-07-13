@@ -39,7 +39,7 @@ module.exports = {
           metrics.inc(`subscribe.failed.${baseChannel}`)
           // add context for the stack-trace at the call-site
           throw new OError('failed to subscribe to channel', {
-            channel
+            channel,
           }).withCause(err)
         })
     }
@@ -97,5 +97,5 @@ module.exports = {
     // we publish on a different client to the subscribe, so we can't
     // check for the channel existing here
     rclient.publish(channel, data)
-  }
+  },
 }

@@ -9,7 +9,7 @@ const FILE_CHECK_INTERVAL = 5000
 const statusFile = settings.deploymentFile
 const deploymentColour = settings.deploymentColour
 
-var serviceCloseTime
+let serviceCloseTime
 
 function updateDeploymentStatus(fileContent) {
   const closed = fileContent && !fileContent.includes(deploymentColour)
@@ -55,5 +55,5 @@ module.exports = {
   },
   deploymentIsClosed() {
     return settings.serviceIsClosed && Date.now() > serviceCloseTime
-  }
+  },
 }

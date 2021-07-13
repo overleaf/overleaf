@@ -23,9 +23,9 @@ describe('ChannelManager', function () {
         '@overleaf/settings': (this.settings = {}),
         '@overleaf/metrics': (this.metrics = {
           inc: sinon.stub(),
-          summary: sinon.stub()
-        })
-      }
+          summary: sinon.stub(),
+        }),
+      },
     }))
   })
 
@@ -83,7 +83,7 @@ describe('ChannelManager', function () {
           '1234567890abcdef'
         )
         p.then(() => done(new Error('should not subscribe but fail'))).catch(
-          (err) => {
+          err => {
             err.message.should.equal('failed to subscribe to channel')
             err.cause.message.should.equal('some redis error')
             this.ChannelManager.getClientMapEntry(this.rclient)

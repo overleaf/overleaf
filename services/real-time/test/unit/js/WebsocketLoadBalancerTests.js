@@ -23,29 +23,29 @@ describe('WebsocketLoadBalancer', function () {
     this.WebsocketLoadBalancer = SandboxedModule.require(modulePath, {
       requires: {
         './RedisClientManager': {
-          createClientList: () => []
+          createClientList: () => [],
         },
         './SafeJsonParse': (this.SafeJsonParse = {
-          parse: (data, cb) => cb(null, JSON.parse(data))
+          parse: (data, cb) => cb(null, JSON.parse(data)),
         }),
         './EventLogger': { checkEventOrder: sinon.stub() },
         './HealthCheckManager': { check: sinon.stub() },
         './RoomManager': (this.RoomManager = {
-          eventSource: sinon.stub().returns(this.RoomEvents)
+          eventSource: sinon.stub().returns(this.RoomEvents),
         }),
         './ChannelManager': (this.ChannelManager = { publish: sinon.stub() }),
         './ConnectedUsersManager': (this.ConnectedUsersManager = {
-          refreshClient: sinon.stub()
-        })
-      }
+          refreshClient: sinon.stub(),
+        }),
+      },
     })
     this.io = {}
     this.WebsocketLoadBalancer.rclientPubList = [{ publish: sinon.stub() }]
     this.WebsocketLoadBalancer.rclientSubList = [
       {
         subscribe: sinon.stub(),
-        on: sinon.stub()
-      }
+        on: sinon.stub(),
+      },
     ]
 
     this.room_id = 'room-id'
@@ -71,7 +71,7 @@ describe('WebsocketLoadBalancer', function () {
           JSON.stringify({
             room_id: this.room_id,
             message: this.message,
-            payload: this.payload
+            payload: this.payload,
           })
         )
         .should.equal(true)
@@ -139,24 +139,24 @@ describe('WebsocketLoadBalancer', function () {
             {
               id: 'client-id-1',
               emit: (this.emit1 = sinon.stub()),
-              ol_context: {}
+              ol_context: {},
             },
             {
               id: 'client-id-2',
               emit: (this.emit2 = sinon.stub()),
-              ol_context: {}
+              ol_context: {},
             },
             {
               id: 'client-id-1',
               emit: (this.emit3 = sinon.stub()),
-              ol_context: {}
-            } // duplicate client
-          ])
+              ol_context: {},
+            }, // duplicate client
+          ]),
         }
         const data = JSON.stringify({
           room_id: this.room_id,
           message: this.message,
-          payload: this.payload
+          payload: this.payload,
         })
         return this.WebsocketLoadBalancer._processEditorEvent(
           this.io,
@@ -184,29 +184,29 @@ describe('WebsocketLoadBalancer', function () {
             {
               id: 'client-id-1',
               emit: (this.emit1 = sinon.stub()),
-              ol_context: {}
+              ol_context: {},
             },
             {
               id: 'client-id-2',
               emit: (this.emit2 = sinon.stub()),
-              ol_context: {}
+              ol_context: {},
             },
             {
               id: 'client-id-1',
               emit: (this.emit3 = sinon.stub()),
-              ol_context: {}
+              ol_context: {},
             }, // duplicate client
             {
               id: 'client-id-4',
               emit: (this.emit4 = sinon.stub()),
-              ol_context: { is_restricted_user: true }
-            }
-          ])
+              ol_context: { is_restricted_user: true },
+            },
+          ]),
         }
         const data = JSON.stringify({
           room_id: this.room_id,
           message: this.message,
-          payload: this.payload
+          payload: this.payload,
         })
         return this.WebsocketLoadBalancer._processEditorEvent(
           this.io,
@@ -235,29 +235,29 @@ describe('WebsocketLoadBalancer', function () {
             {
               id: 'client-id-1',
               emit: (this.emit1 = sinon.stub()),
-              ol_context: {}
+              ol_context: {},
             },
             {
               id: 'client-id-2',
               emit: (this.emit2 = sinon.stub()),
-              ol_context: {}
+              ol_context: {},
             },
             {
               id: 'client-id-1',
               emit: (this.emit3 = sinon.stub()),
-              ol_context: {}
+              ol_context: {},
             }, // duplicate client
             {
               id: 'client-id-4',
               emit: (this.emit4 = sinon.stub()),
-              ol_context: { is_restricted_user: true }
-            }
-          ])
+              ol_context: { is_restricted_user: true },
+            },
+          ]),
         }
         const data = JSON.stringify({
           room_id: this.room_id,
           message: (this.restrictedMessage = 'new-comment'),
-          payload: this.payload
+          payload: this.payload,
         })
         return this.WebsocketLoadBalancer._processEditorEvent(
           this.io,
@@ -285,7 +285,7 @@ describe('WebsocketLoadBalancer', function () {
         const data = JSON.stringify({
           room_id: 'all',
           message: this.message,
-          payload: this.payload
+          payload: this.payload,
         })
         return this.WebsocketLoadBalancer._processEditorEvent(
           this.io,

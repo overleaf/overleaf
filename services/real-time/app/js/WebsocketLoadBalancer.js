@@ -19,7 +19,7 @@ const RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
   'reciveNewDoc',
   'reciveNewFile',
   'reciveNewFolder',
-  'removeEntity'
+  'removeEntity',
 ]
 
 let WebsocketLoadBalancer
@@ -38,14 +38,14 @@ module.exports = WebsocketLoadBalancer = {
     const data = JSON.stringify({
       room_id,
       message,
-      payload
+      payload,
     })
     logger.log(
       { room_id, message, payload, length: data.length },
       'emitting to room'
     )
 
-    this.rclientPubList.map((rclientPub) =>
+    this.rclientPubList.map(rclientPub =>
       ChannelManager.publish(rclientPub, 'editor-events', room_id, data)
     )
   },
@@ -74,7 +74,7 @@ module.exports = WebsocketLoadBalancer = {
   handleRoomUpdates(rclientSubList) {
     const roomEvents = RoomManager.eventSource()
     roomEvents.on('project-active', function (project_id) {
-      const subscribePromises = rclientSubList.map((rclient) =>
+      const subscribePromises = rclientSubList.map(rclient =>
         ChannelManager.subscribe(rclient, 'editor-events', project_id)
       )
       RoomManager.emitOnCompletion(
@@ -82,8 +82,8 @@ module.exports = WebsocketLoadBalancer = {
         `project-subscribed-${project_id}`
       )
     })
-    roomEvents.on('project-empty', (project_id) =>
-      rclientSubList.map((rclient) =>
+    roomEvents.on('project-empty', project_id =>
+      rclientSubList.map(rclient =>
         ChannelManager.unsubscribe(rclient, 'editor-events', project_id)
       )
     )
@@ -108,7 +108,7 @@ module.exports = WebsocketLoadBalancer = {
             message: message.message,
             room_id: message.room_id,
             message_id: message._id,
-            socketIoClients: clientList.map((client) => client.id)
+            socketIoClients: clientList.map(client => client.id),
           },
           'refreshing client list'
         )
@@ -127,15 +127,14 @@ module.exports = WebsocketLoadBalancer = {
           }
         }
 
-        const is_restricted_message = !RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST.includes(
-          message.message
-        )
+        const is_restricted_message =
+          !RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST.includes(message.message)
 
         // send messages only to unique clients (due to duplicate entries in io.sockets.clients)
         const clientList = io.sockets
           .clients(message.room_id)
           .filter(
-            (client) =>
+            client =>
               !(is_restricted_message && client.ol_context.is_restricted_user)
           )
 
@@ -149,7 +148,7 @@ module.exports = WebsocketLoadBalancer = {
             message: message.message,
             room_id: message.room_id,
             message_id: message._id,
-            socketIoClients: clientList.map((client) => client.id)
+            socketIoClients: clientList.map(client => client.id),
           },
           'distributing event to clients'
         )
@@ -168,5 +167,5 @@ module.exports = WebsocketLoadBalancer = {
         HealthCheckManager.check(channel, message.key)
       }
     })
-  }
+  },
 }

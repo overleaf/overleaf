@@ -34,7 +34,7 @@ const socketIoLogger = {
   },
   info() {},
   debug() {},
-  log() {}
+  log() {},
 }
 
 // monitor status file to take dark deployments out of the load-balancer
@@ -45,7 +45,7 @@ const app = express()
 
 const server = require('http').createServer(app)
 const io = require('socket.io').listen(server, {
-  logger: socketIoLogger
+  logger: socketIoLogger,
 })
 
 // Bind to sessions
@@ -78,7 +78,7 @@ io.configure(function () {
     'flashsocket',
     'htmlfile',
     'xhr-polling',
-    'jsonp-polling'
+    'jsonp-polling',
   ])
 })
 
@@ -195,10 +195,10 @@ function drainAndShutdown(signal) {
           const staleClients = io.sockets.clients()
           if (staleClients.length !== 0) {
             logger.warn(
-              { staleClients: staleClients.map((client) => client.id) },
+              { staleClients: staleClients.map(client => client.id) },
               'forcefully disconnecting stale clients'
             )
-            staleClients.forEach((client) => {
+            staleClients.forEach(client => {
               client.disconnect()
             })
           }
@@ -222,7 +222,7 @@ if (Settings.shutdownDrainTimeWindow) {
     'SIGUSR1',
     'SIGUSR2',
     'SIGTERM',
-    'SIGABRT'
+    'SIGABRT',
   ]) {
     process.on(signal, drainAndShutdown)
   } // signal is passed as argument to event handler
@@ -237,7 +237,7 @@ if (Settings.shutdownDrainTimeWindow) {
           'EHOSTUNREACH',
           'EPIPE',
           'ECONNRESET',
-          'ERR_STREAM_WRITE_AFTER_END'
+          'ERR_STREAM_WRITE_AFTER_END',
         ].includes(error.code)
       ) {
         Metrics.inc('disconnected_write', 1, { status: error.code })
@@ -266,7 +266,7 @@ if (Settings.continualPubsubTraffic) {
     const json = JSON.stringify({
       health_check: true,
       key: checker.id,
-      date: new Date().toString()
+      date: new Date().toString(),
     })
     Metrics.summary(`redis.publish.${channel}`, json.length)
     pubsubClient.publish(channel, json, function (err) {

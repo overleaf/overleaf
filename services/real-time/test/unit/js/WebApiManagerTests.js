@@ -28,11 +28,11 @@ describe('WebApiManager', function () {
             web: {
               url: 'http://web.example.com',
               user: 'username',
-              pass: 'password'
-            }
-          }
-        })
-      }
+              pass: 'password',
+            },
+          },
+        }),
+      },
     }))
   })
 
@@ -42,7 +42,7 @@ describe('WebApiManager', function () {
         this.response = {
           project: { name: 'Test project' },
           privilegeLevel: 'owner',
-          isRestrictedUser: true
+          isRestrictedUser: true,
         }
         this.request.post = sinon
           .stub()
@@ -59,16 +59,16 @@ describe('WebApiManager', function () {
           .calledWith({
             url: `${this.settings.apis.web.url}/project/${this.project_id}/join`,
             qs: {
-              user_id: this.user_id
+              user_id: this.user_id,
             },
             auth: {
               user: this.settings.apis.web.user,
               pass: this.settings.apis.web.pass,
-              sendImmediately: true
+              sendImmediately: true,
             },
             json: true,
             jar: false,
-            headers: {}
+            headers: {},
           })
           .should.equal(true)
       })
@@ -101,7 +101,7 @@ describe('WebApiManager', function () {
         this.callback
           .calledWith(
             sinon.match({
-              message: 'not authorized'
+              message: 'not authorized',
             })
           )
           .should.equal(true)
@@ -125,7 +125,7 @@ describe('WebApiManager', function () {
           .calledWith(
             sinon.match({
               message: 'project not found',
-              info: { code: 'ProjectNotFound' }
+              info: { code: 'ProjectNotFound' },
             })
           )
           .should.equal(true)
@@ -149,7 +149,7 @@ describe('WebApiManager', function () {
           .calledWith(
             sinon.match({
               message: 'non-success status code from web',
-              info: { statusCode: 500 }
+              info: { statusCode: 500 },
             })
           )
           .should.equal(true)
@@ -172,7 +172,7 @@ describe('WebApiManager', function () {
         return this.callback
           .calledWith(
             sinon.match({
-              message: 'no data returned from joinProject request'
+              message: 'no data returned from joinProject request',
             })
           )
           .should.equal(true)
@@ -197,8 +197,8 @@ describe('WebApiManager', function () {
             sinon.match({
               message: 'rate-limit hit when joining project',
               info: {
-                code: 'TooManyRequests'
-              }
+                code: 'TooManyRequests',
+              },
             })
           )
           .should.equal(true)

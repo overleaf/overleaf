@@ -34,34 +34,34 @@ describe('DocumentUpdaterController', function () {
               key_schema: {
                 pendingUpdates({ doc_id }) {
                   return `PendingUpdates:${doc_id}`
-                }
-              }
+                },
+              },
             },
-            pubsub: null
-          }
+            pubsub: null,
+          },
         }),
         './RedisClientManager': {
           createClientList: () => {
             this.redis = {
-              createClient: (name) => {
+              createClient: name => {
                 let rclientStub
                 this.rclient.push((rclientStub = { name }))
                 return rclientStub
-              }
+              },
             }
-          }
+          },
         },
         './SafeJsonParse': (this.SafeJsonParse = {
-          parse: (data, cb) => cb(null, JSON.parse(data))
+          parse: (data, cb) => cb(null, JSON.parse(data)),
         }),
         './EventLogger': (this.EventLogger = { checkEventOrder: sinon.stub() }),
         './HealthCheckManager': { check: sinon.stub() },
         '@overleaf/metrics': (this.metrics = { inc: sinon.stub() }),
         './RoomManager': (this.RoomManager = {
-          eventSource: sinon.stub().returns(this.RoomEvents)
+          eventSource: sinon.stub().returns(this.RoomEvents),
         }),
-        './ChannelManager': (this.ChannelManager = {})
-      }
+        './ChannelManager': (this.ChannelManager = {}),
+      },
     })
   })
 
@@ -70,7 +70,7 @@ describe('DocumentUpdaterController', function () {
       this.rclient.length = 0 // clear any existing clients
       this.EditorUpdatesController.rclientList = [
         this.redis.createClient('first'),
-        this.redis.createClient('second')
+        this.redis.createClient('second'),
       ]
       this.rclient[0].subscribe = sinon.stub()
       this.rclient[0].on = sinon.stub()
@@ -115,9 +115,10 @@ describe('DocumentUpdaterController', function () {
       beforeEach(function () {
         this.message = {
           doc_id: this.doc_id,
-          op: { t: 'foo', p: 12 }
+          op: { t: 'foo', p: 12 },
         }
-        this.EditorUpdatesController._applyUpdateFromDocumentUpdater = sinon.stub()
+        this.EditorUpdatesController._applyUpdateFromDocumentUpdater =
+          sinon.stub()
         return this.EditorUpdatesController._processMessageFromDocumentUpdater(
           this.io,
           'applied-ops',
@@ -136,9 +137,10 @@ describe('DocumentUpdaterController', function () {
       beforeEach(function () {
         this.message = {
           doc_id: this.doc_id,
-          error: 'Something went wrong'
+          error: 'Something went wrong',
         }
-        this.EditorUpdatesController._processErrorFromDocumentUpdater = sinon.stub()
+        this.EditorUpdatesController._processErrorFromDocumentUpdater =
+          sinon.stub()
         return this.EditorUpdatesController._processMessageFromDocumentUpdater(
           this.io,
           'applied-ops',
@@ -162,7 +164,7 @@ describe('DocumentUpdaterController', function () {
         op: [{ t: 'foo', p: 12 }],
         meta: { source: this.sourceClient.publicId },
         v: (this.version = 42),
-        doc: this.doc_id
+        doc: this.doc_id,
       }
       return (this.io.sockets = {
         clients: sinon
@@ -170,8 +172,8 @@ describe('DocumentUpdaterController', function () {
           .returns([
             this.sourceClient,
             ...Array.from(this.otherClients),
-            this.sourceClient
-          ])
+            this.sourceClient,
+          ]),
       })
     }) // include a duplicate client
 
@@ -198,7 +200,7 @@ describe('DocumentUpdaterController', function () {
       })
 
       return it('should send the full update to the other clients', function () {
-        return Array.from(this.otherClients).map((client) =>
+        return Array.from(this.otherClients).map(client =>
           client.emit
             .calledWith('otUpdateApplied', this.update)
             .should.equal(true)
@@ -223,7 +225,7 @@ describe('DocumentUpdaterController', function () {
       })
 
       return it("should not send anything to the other clients (they've already had the op)", function () {
-        return Array.from(this.otherClients).map((client) =>
+        return Array.from(this.otherClients).map(client =>
           client.emit.calledWith('otUpdateApplied').should.equal(false)
         )
       })
@@ -247,7 +249,7 @@ describe('DocumentUpdaterController', function () {
 
     return it('should disconnect all clients in that document', function () {
       this.io.sockets.clients.calledWith(this.doc_id).should.equal(true)
-      return Array.from(this.clients).map((client) =>
+      return Array.from(this.clients).map(client =>
         client.disconnect.called.should.equal(true)
       )
     })

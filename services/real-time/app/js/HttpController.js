@@ -17,7 +17,7 @@ module.exports = HttpController = {
       first_name,
       last_name,
       email,
-      connected_time
+      connected_time,
     } = ioClient.ol_context
     const client = {
       client_id,
@@ -26,14 +26,14 @@ module.exports = HttpController = {
       first_name,
       last_name,
       email,
-      connected_time
+      connected_time,
     }
     client.rooms = Object.keys(ioClient.manager.roomClients[client_id] || {})
       // drop the namespace
-      .filter((room) => room !== '')
+      .filter(room => room !== '')
       // room names are composed as '<NAMESPACE>/<ROOM>' and the default
       //  namespace is empty (see comments in RoomManager), just drop the '/'
-      .map((fullRoomPath) => fullRoomPath.slice(1))
+      .map(fullRoomPath => fullRoomPath.slice(1))
     return client
   },
 
@@ -53,5 +53,5 @@ module.exports = HttpController = {
       return
     }
     res.json(HttpController._getConnectedClientView(ioClient))
-  }
+  },
 }
