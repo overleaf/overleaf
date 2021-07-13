@@ -1,6 +1,11 @@
 {
   "chat_error": "Kunne ikke indlæse chatbeskeder, prøv venligst igen.",
   "reconnect": "Prøv igen",
+  "no_pdf_error_title": "Ingen PDF",
+  "no_pdf_error_explanation": "Denne kompilering producerede ikke nogen PDF. Det kan ske, hvis:",
+  "no_pdf_error_reason_unrecoverable_error": "Der er en uoprettelig LaTeX-fejl. Hvis der er LaTeX-fejl vist herunder, eller i de rå logge, så forsøg at rette dem, og kompiler så ingen.",
+  "no_pdf_error_reason_no_content": "<code>document</code>-blokken har ikke noget indhold. Hvis den er tom, må du give den noget indhold, og så kompilere igen.",
+  "no_pdf_error_reason_output_pdf_already_exists": "Dette projekt indeholder en fil, som hedder <code>output.pdf</code>. Hvis den fil eksisterer, er du nødt til at omnavngive den, og så kompilere igen.",
   "logs_pane_info_message": "Vi tester en ny rude til logge",
   "logs_pane_info_message_popup": "Vi tester en ny rude til logge. Klik her for at fortælle os din mening",
   "github_symlink_error": "Dit github repository indeholder symbolske lænkefiler, som ikke på nuværende tidpunkt er understøttet af Overleaf. Du må fjerne de filer, og derefter prøve igen.",
