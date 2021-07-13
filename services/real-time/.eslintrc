@@ -3,9 +3,9 @@
 // https://github.com/sharelatex/sharelatex-dev-environment
 {
   "extends": [
+    "eslint:recommended",
     "standard",
     "prettier",
-    "prettier/standard"
   ],
   "parserOptions": {
     "ecmaVersion": 2018
