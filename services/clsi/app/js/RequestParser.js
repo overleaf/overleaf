@@ -4,7 +4,6 @@
     no-throw-literal,
     no-unused-vars,
     no-useless-escape,
-    standard/no-callback-literal,
     valid-typeof,
 */
 // TODO: This file was created by bulk-decaffeinate.
