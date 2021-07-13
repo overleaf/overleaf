@@ -109,13 +109,13 @@ module.exports = ResourceWriter = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return this._createDirectory(basePath, (error) => {
+    return this._createDirectory(basePath, error => {
       if (error != null) {
         return callback(error)
       }
-      const jobs = Array.from(resources).map((resource) =>
-        ((resource) => {
-          return (callback) =>
+      const jobs = Array.from(resources).map(resource =>
+        (resource => {
+          return callback =>
             this._writeResourceToDisk(project_id, resource, basePath, callback)
         })(resource)
       )
@@ -127,17 +127,17 @@ module.exports = ResourceWriter = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return this._createDirectory(basePath, (error) => {
+    return this._createDirectory(basePath, error => {
       if (error != null) {
         return callback(error)
       }
-      return this._removeExtraneousFiles(resources, basePath, (error) => {
+      return this._removeExtraneousFiles(resources, basePath, error => {
         if (error != null) {
           return callback(error)
         }
-        const jobs = Array.from(resources).map((resource) =>
-          ((resource) => {
-            return (callback) =>
+        const jobs = Array.from(resources).map(resource =>
+          (resource => {
+            return callback =>
               this._writeResourceToDisk(
                 project_id,
                 resource,
@@ -179,86 +179,86 @@ module.exports = ResourceWriter = {
       return _callback(error, ...Array.from(result))
     }
 
-    return OutputFileFinder.findOutputFiles(resources, basePath, function (
-      error,
-      outputFiles,
-      allFiles
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-
-      const jobs = []
-      for (const file of Array.from(outputFiles || [])) {
-        ;(function (file) {
-          const { path } = file
-          let should_delete = true
-          if (
-            path.match(/^output\./) ||
-            path.match(/\.aux$/) ||
-            path.match(/^cache\//)
-          ) {
-            // knitr cache
-            should_delete = false
-          }
-          if (path.match(/^output-.*/)) {
-            // Tikz cached figures (default case)
-            should_delete = false
-          }
-          if (path.match(/\.(pdf|dpth|md5)$/)) {
-            // Tikz cached figures (by extension)
-            should_delete = false
-          }
-          if (
-            path.match(/\.(pygtex|pygstyle)$/) ||
-            path.match(/(^|\/)_minted-[^\/]+\//)
-          ) {
-            // minted files/directory
-            should_delete = false
-          }
-          if (
-            path.match(/\.md\.tex$/) ||
-            path.match(/(^|\/)_markdown_[^\/]+\//)
-          ) {
-            // markdown files/directory
-            should_delete = false
-          }
-          if (path.match(/-eps-converted-to\.pdf$/)) {
-            // Epstopdf generated files
-            should_delete = false
-          }
-          if (
-            path === 'output.pdf' ||
-            path === 'output.dvi' ||
-            path === 'output.log' ||
-            path === 'output.xdv' ||
-            path === 'output.stdout' ||
-            path === 'output.stderr'
-          ) {
-            should_delete = true
-          }
-          if (path === 'output.tex') {
-            // created by TikzManager if present in output files
-            should_delete = true
-          }
-          if (should_delete) {
-            return jobs.push((callback) =>
-              ResourceWriter._deleteFileIfNotDirectory(
-                Path.join(basePath, path),
-                callback
-              )
-            )
-          }
-        })(file)
-      }
-
-      return async.series(jobs, function (error) {
+    return OutputFileFinder.findOutputFiles(
+      resources,
+      basePath,
+      function (error, outputFiles, allFiles) {
         if (error != null) {
           return callback(error)
         }
-        return callback(null, outputFiles, allFiles)
-      })
-    })
+
+        const jobs = []
+        for (const file of Array.from(outputFiles || [])) {
+          ;(function (file) {
+            const { path } = file
+            let should_delete = true
+            if (
+              path.match(/^output\./) ||
+              path.match(/\.aux$/) ||
+              path.match(/^cache\//)
+            ) {
+              // knitr cache
+              should_delete = false
+            }
+            if (path.match(/^output-.*/)) {
+              // Tikz cached figures (default case)
+              should_delete = false
+            }
+            if (path.match(/\.(pdf|dpth|md5)$/)) {
+              // Tikz cached figures (by extension)
+              should_delete = false
+            }
+            if (
+              path.match(/\.(pygtex|pygstyle)$/) ||
+              path.match(/(^|\/)_minted-[^\/]+\//)
+            ) {
+              // minted files/directory
+              should_delete = false
+            }
+            if (
+              path.match(/\.md\.tex$/) ||
+              path.match(/(^|\/)_markdown_[^\/]+\//)
+            ) {
+              // markdown files/directory
+              should_delete = false
+            }
+            if (path.match(/-eps-converted-to\.pdf$/)) {
+              // Epstopdf generated files
+              should_delete = false
+            }
+            if (
+              path === 'output.pdf' ||
+              path === 'output.dvi' ||
+              path === 'output.log' ||
+              path === 'output.xdv' ||
+              path === 'output.stdout' ||
+              path === 'output.stderr'
+            ) {
+              should_delete = true
+            }
+            if (path === 'output.tex') {
+              // created by TikzManager if present in output files
+              should_delete = true
+            }
+            if (should_delete) {
+              return jobs.push(callback =>
+                ResourceWriter._deleteFileIfNotDirectory(
+                  Path.join(basePath, path),
+                  callback
+                )
+              )
+            }
+          })(file)
+        }
+
+        return async.series(jobs, function (error) {
+          if (error != null) {
+            return callback(error)
+          }
+          return callback(null, outputFiles, allFiles)
+        })
+      }
+    )
   },
 
   _deleteFileIfNotDirectory(path, callback) {
@@ -296,48 +296,51 @@ module.exports = ResourceWriter = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return ResourceWriter.checkPath(basePath, resource.path, function (
-      error,
-      path
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      return fs.mkdir(Path.dirname(path), { recursive: true }, function (
-        error
-      ) {
+    return ResourceWriter.checkPath(
+      basePath,
+      resource.path,
+      function (error, path) {
         if (error != null) {
           return callback(error)
         }
-        // TODO: Don't overwrite file if it hasn't been modified
-        if (resource.url != null) {
-          return UrlCache.downloadUrlToFile(
-            project_id,
-            resource.url,
-            path,
-            resource.modified,
-            function (err) {
-              if (err != null) {
-                logger.err(
-                  {
-                    err,
-                    project_id,
-                    path,
-                    resource_url: resource.url,
-                    modified: resource.modified
-                  },
-                  'error downloading file for resources'
-                )
-                Metrics.inc('download-failed')
-              }
-              return callback()
+        return fs.mkdir(
+          Path.dirname(path),
+          { recursive: true },
+          function (error) {
+            if (error != null) {
+              return callback(error)
             }
-          ) // try and continue compiling even if http resource can not be downloaded at this time
-        } else {
-          fs.writeFile(path, resource.content, callback)
-        }
-      })
-    })
+            // TODO: Don't overwrite file if it hasn't been modified
+            if (resource.url != null) {
+              return UrlCache.downloadUrlToFile(
+                project_id,
+                resource.url,
+                path,
+                resource.modified,
+                function (err) {
+                  if (err != null) {
+                    logger.err(
+                      {
+                        err,
+                        project_id,
+                        path,
+                        resource_url: resource.url,
+                        modified: resource.modified,
+                      },
+                      'error downloading file for resources'
+                    )
+                    Metrics.inc('download-failed')
+                  }
+                  return callback()
+                }
+              ) // try and continue compiling even if http resource can not be downloaded at this time
+            } else {
+              fs.writeFile(path, resource.content, callback)
+            }
+          }
+        )
+      }
+    )
   },
 
   checkPath(basePath, resourcePath, callback) {
@@ -347,5 +350,5 @@ module.exports = ResourceWriter = {
     } else {
       return callback(null, path)
     }
-  }
+  },
 }

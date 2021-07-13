@@ -180,38 +180,42 @@ module.exports = OutputCacheManager = {
             const newFile = _.clone(file)
             const [src, dst] = Array.from([
               Path.join(compileDir, file.path),
-              Path.join(cacheDir, file.path)
+              Path.join(cacheDir, file.path),
             ])
-            return OutputCacheManager._checkFileIsSafe(src, function (
-              err,
-              isSafe
-            ) {
-              if (err != null) {
-                return cb(err)
-              }
-              if (!isSafe) {
-                return cb()
-              }
-              return OutputCacheManager._checkIfShouldCopy(src, function (
-                err,
-                shouldCopy
-              ) {
+            return OutputCacheManager._checkFileIsSafe(
+              src,
+              function (err, isSafe) {
                 if (err != null) {
                   return cb(err)
                 }
-                if (!shouldCopy) {
+                if (!isSafe) {
                   return cb()
                 }
-                return OutputCacheManager._copyFile(src, dst, function (err) {
-                  if (err != null) {
-                    return cb(err)
+                return OutputCacheManager._checkIfShouldCopy(
+                  src,
+                  function (err, shouldCopy) {
+                    if (err != null) {
+                      return cb(err)
+                    }
+                    if (!shouldCopy) {
+                      return cb()
+                    }
+                    return OutputCacheManager._copyFile(
+                      src,
+                      dst,
+                      function (err) {
+                        if (err != null) {
+                          return cb(err)
+                        }
+                        newFile.build = buildId // attach a build id if we cached the file
+                        results.push(newFile)
+                        return cb()
+                      }
+                    )
                   }
-                  newFile.build = buildId // attach a build id if we cached the file
-                  results.push(newFile)
-                  return cb()
-                })
-              })
-            })
+                )
+              }
+            )
           },
           function (err) {
             if (err != null) {
@@ -232,7 +236,7 @@ module.exports = OutputCacheManager = {
               // let file expiry run in the background, expire all previous files if per-user
               return OutputCacheManager.expireOutputFiles(cacheRoot, {
                 keep: buildId,
-                limit: perUser ? 1 : null
+                limit: perUser ? 1 : null,
               })
             }
           }
@@ -242,7 +246,7 @@ module.exports = OutputCacheManager = {
   },
 
   collectOutputPdfSize(outputFiles, outputDir, stats, callback) {
-    const outputFile = outputFiles.find((x) => x.path === 'output.pdf')
+    const outputFile = outputFiles.find(x => x.path === 'output.pdf')
     if (!outputFile) return callback(null, outputFiles)
     const outputFilePath = Path.join(
       outputDir,
@@ -269,7 +273,7 @@ module.exports = OutputCacheManager = {
     OutputCacheManager.ensureContentDir(cacheRoot, function (err, contentDir) {
       if (err) return callback(err, outputFiles)
 
-      const outputFile = outputFiles.find((x) => x.path === 'output.pdf')
+      const outputFile = outputFiles.find(x => x.path === 'output.pdf')
       if (outputFile) {
         // possibly we should copy the file from the build dir here
         const outputFilePath = Path.join(
@@ -331,7 +335,7 @@ module.exports = OutputCacheManager = {
       }
       fs.readdir(contentRoot, function (err, results) {
         const dirs = results.sort()
-        const contentId = dirs.find((dir) =>
+        const contentId = dirs.find(dir =>
           OutputCacheManager.BUILD_REGEX.test(dir)
         )
         if (contentId) {
@@ -374,31 +378,31 @@ module.exports = OutputCacheManager = {
         function (file, cb) {
           const [src, dst] = Array.from([
             Path.join(compileDir, file.path),
-            Path.join(archiveDir, file.path)
+            Path.join(archiveDir, file.path),
           ])
-          return OutputCacheManager._checkFileIsSafe(src, function (
-            err,
-            isSafe
-          ) {
-            if (err != null) {
-              return cb(err)
-            }
-            if (!isSafe) {
-              return cb()
-            }
-            return OutputCacheManager._checkIfShouldArchive(src, function (
-              err,
-              shouldArchive
-            ) {
+          return OutputCacheManager._checkFileIsSafe(
+            src,
+            function (err, isSafe) {
               if (err != null) {
                 return cb(err)
               }
-              if (!shouldArchive) {
+              if (!isSafe) {
                 return cb()
               }
-              return OutputCacheManager._copyFile(src, dst, cb)
-            })
-          })
+              return OutputCacheManager._checkIfShouldArchive(
+                src,
+                function (err, shouldArchive) {
+                  if (err != null) {
+                    return cb(err)
+                  }
+                  if (!shouldArchive) {
+                    return cb()
+                  }
+                  return OutputCacheManager._copyFile(src, dst, cb)
+                }
+              )
+            }
+          )
         },
         callback
       )
@@ -440,7 +444,7 @@ module.exports = OutputCacheManager = {
         // we can get the build time from the first part of the directory name DDDD-RRRR
         // DDDD is date and RRRR is random bytes
         const dirTime = parseInt(
-          __guard__(dir.split('-'), (x) => x[0]),
+          __guard__(dir.split('-'), x => x[0]),
           16
         )
         const age = currentTime - dirTime
@@ -549,7 +553,7 @@ module.exports = OutputCacheManager = {
       return callback(null, true)
     }
     return callback(null, false)
-  }
+  },
 }
 
 function __guard__(value, transform) {

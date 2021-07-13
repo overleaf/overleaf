@@ -34,14 +34,14 @@ class FSStream extends Stream {
     const result = {
       begin: begin,
       end: end,
-      buffer: Buffer.alloc(end - begin, 0)
+      buffer: Buffer.alloc(end - begin, 0),
     }
     this.cachedBytes.push(result)
     return this.fh.read(result.buffer, 0, end - begin, begin)
   }
 
   _ensureGetPos(pos) {
-    const found = this.cachedBytes.find((x) => {
+    const found = this.cachedBytes.find(x => {
       return x.begin <= pos && pos < x.end
     })
     if (!found) {
@@ -52,7 +52,7 @@ class FSStream extends Stream {
 
   _ensureGetRange(begin, end) {
     end = Math.min(end, this.length) // BG: handle overflow case
-    const found = this.cachedBytes.find((x) => {
+    const found = this.cachedBytes.find(x => {
       return x.begin <= begin && end <= x.end
     })
     if (!found) {

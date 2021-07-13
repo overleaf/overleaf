@@ -34,5 +34,5 @@ module.exports = ContentTypeMapper = {
       default:
         return 'application/octet-stream'
     }
-  }
+  },
 }

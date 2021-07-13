@@ -28,7 +28,7 @@ async function refreshExpiryTimeout() {
   const paths = [
     Settings.path.compilesDir,
     Settings.path.outputDir,
-    Settings.path.clsiCacheDir
+    Settings.path.clsiCacheDir,
   ]
   for (const path of paths) {
     try {
@@ -40,7 +40,7 @@ async function refreshExpiryTimeout() {
         logger.warn(
           {
             stats,
-            newExpiryTimeoutInDays: (lowerExpiry / oneDay).toFixed(2)
+            newExpiryTimeoutInDays: (lowerExpiry / oneDay).toFixed(2),
           },
           'disk running low on space, modifying EXPIRY_TIMEOUT'
         )
@@ -57,7 +57,7 @@ module.exports = ProjectPersistenceManager = {
   EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5,
 
   promises: {
-    refreshExpiryTimeout
+    refreshExpiryTimeout,
   },
 
   refreshExpiryTimeout: callbackify(refreshExpiryTimeout),
@@ -66,7 +66,7 @@ module.exports = ProjectPersistenceManager = {
       callback = function (error) {}
     }
     const timer = new Metrics.Timer('db-bump-last-accessed')
-    const job = (cb) =>
+    const job = cb =>
       db.Project.findOrCreate({ where: { project_id } })
         .spread((project, created) =>
           project
@@ -75,7 +75,7 @@ module.exports = ProjectPersistenceManager = {
             .error(cb)
         )
         .error(cb)
-    dbQueue.queue.push(job, (error) => {
+    dbQueue.queue.push(job, error => {
       timer.done()
       callback(error)
     })
@@ -93,16 +93,19 @@ module.exports = ProjectPersistenceManager = {
         return callback(error)
       }
       logger.log({ project_ids }, 'clearing expired projects')
-      const jobs = Array.from(project_ids || []).map((project_id) =>
-        ((project_id) => (callback) =>
-          ProjectPersistenceManager.clearProjectFromCache(project_id, function (
-            err
-          ) {
-            if (err != null) {
-              logger.error({ err, project_id }, 'error clearing project')
-            }
-            return callback()
-          }))(project_id)
+      const jobs = Array.from(project_ids || []).map(project_id =>
+        (
+          project_id => callback =>
+            ProjectPersistenceManager.clearProjectFromCache(
+              project_id,
+              function (err) {
+                if (err != null) {
+                  logger.error({ err, project_id }, 'error clearing project')
+                }
+                return callback()
+              }
+            )
+        )(project_id)
       )
       return async.series(jobs, function (error) {
         if (error != null) {
@@ -110,7 +113,7 @@ module.exports = ProjectPersistenceManager = {
         }
         return CompileManager.clearExpiredProjects(
           ProjectPersistenceManager.EXPIRY_TIMEOUT,
-          (error) => callback()
+          error => callback()
         )
       })
     })
@@ -167,7 +170,7 @@ module.exports = ProjectPersistenceManager = {
       callback = function (error) {}
     }
     logger.log({ project_id }, 'clearing project from database')
-    const job = (cb) =>
+    const job = cb =>
       db.Project.destroy({ where: { project_id } })
         .then(() => cb())
         .error(cb)
@@ -185,17 +188,17 @@ module.exports = ProjectPersistenceManager = {
       const q = {}
       q[db.op.lt] = keepProjectsFrom
       return db.Project.findAll({ where: { lastAccessed: q } })
-        .then((projects) =>
+        .then(projects =>
           cb(
             null,
-            projects.map((project) => project.project_id)
+            projects.map(project => project.project_id)
           )
         )
         .error(cb)
     }
 
     return dbQueue.queue.push(job, callback)
-  }
+  },
 }
 
 logger.log(

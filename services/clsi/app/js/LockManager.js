@@ -30,7 +30,7 @@ module.exports = LockManager = {
     const lockOpts = {
       wait: this.MAX_LOCK_WAIT_TIME,
       pollPeriod: this.LOCK_TEST_INTERVAL,
-      stale: this.LOCK_STALE
+      stale: this.LOCK_STALE,
     }
     return Lockfile.lock(path, lockOpts, function (error) {
       if ((error != null ? error.code : undefined) === 'EEXIST') {
@@ -48,7 +48,7 @@ module.exports = LockManager = {
                   statDir,
                   statDirErr,
                   readdirErr,
-                  readdirDir
+                  readdirDir,
                 },
                 'unable to get lock'
               )
@@ -68,5 +68,5 @@ module.exports = LockManager = {
         )
       }
     })
-  }
+  },
 }

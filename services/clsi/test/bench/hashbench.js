@@ -22,13 +22,13 @@ function test(hashType, filePath, callback) {
       return callback(err)
     }
     const t0 = process.hrtime.bigint()
-    ContentCacheManager.update(dir, filePath, (x) => {
+    ContentCacheManager.update(dir, filePath, x => {
       const t1 = process.hrtime.bigint()
       const cold = Number(t1 - t0) / 1e6
-      ContentCacheManager.update(dir, filePath, (x) => {
+      ContentCacheManager.update(dir, filePath, x => {
         const t2 = process.hrtime.bigint()
         const warm = Number(t2 - t1) / 1e6
-        fs.rmdir(dir, { recursive: true }, (err) => {
+        fs.rmdir(dir, { recursive: true }, err => {
           if (err) {
             return callback(err)
           }
@@ -52,18 +52,18 @@ function test(hashType, filePath, callback) {
   })
 }
 
-var jobs = []
-files.forEach((file) => {
-  jobs.push((cb) => {
+const jobs = []
+files.forEach(file => {
+  jobs.push(cb => {
     test('md5', file, cb)
   })
-  jobs.push((cb) => {
+  jobs.push(cb => {
     test('sha1', file, cb)
   })
-  jobs.push((cb) => {
+  jobs.push(cb => {
     test('hmac-sha1', file, cb)
   })
-  jobs.push((cb) => {
+  jobs.push(cb => {
     test('sha256', file, cb)
   })
 })

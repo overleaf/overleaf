@@ -52,7 +52,7 @@ const DockerRunner = {
 
     const volumes = { [directory]: '/compile' }
 
-    command = command.map((arg) =>
+    command = command.map(arg =>
       arg.toString().replace('$COMPILE_DIR', '/compile')
     )
     if (image == null) {
@@ -96,7 +96,7 @@ const DockerRunner = {
             { err: error, projectId },
             'error running container so destroying and retrying'
           )
-          DockerRunner.destroyContainer(name, null, true, (error) => {
+          DockerRunner.destroyContainer(name, null, true, error => {
             if (error != null) {
               return callback(error)
             }
@@ -120,7 +120,7 @@ const DockerRunner = {
   kill(containerId, callback) {
     logger.log({ containerId }, 'sending kill signal to container')
     const container = dockerode.getContainer(containerId)
-    container.kill((error) => {
+    container.kill(error => {
       if (
         error != null &&
         error.message != null &&
@@ -250,12 +250,12 @@ const DockerRunner = {
           {
             Name: 'cpu',
             Soft: timeoutInSeconds + 5,
-            Hard: timeoutInSeconds + 10
-          }
+            Hard: timeoutInSeconds + 10,
+          },
         ],
         CapDrop: 'ALL',
-        SecurityOpt: ['no-new-privileges']
-      }
+        SecurityOpt: ['no-new-privileges'],
+      },
     }
 
     if (Settings.path != null && Settings.path.synctexBinHostPath != null) {
@@ -303,12 +303,12 @@ const DockerRunner = {
   startContainer(options, volumes, attachStreamHandler, callback) {
     LockManager.runWithLock(
       options.name,
-      (releaseLock) =>
+      releaseLock =>
         // Check that volumes exist before starting the container.
         // When a container is started with volume pointing to a
         // non-existent directory then docker creates the directory but
         // with root ownership.
-        DockerRunner._checkVolumes(options, volumes, (err) => {
+        DockerRunner._checkVolumes(options, volumes, err => {
           if (err != null) {
             return releaseLock(err)
           }
@@ -343,7 +343,7 @@ const DockerRunner = {
       })
     const jobs = []
     for (const vol in volumes) {
-      jobs.push((cb) => checkVolume(vol, cb))
+      jobs.push(cb => checkVolume(vol, cb))
     }
     async.series(jobs, callback)
   },
@@ -368,11 +368,11 @@ const DockerRunner = {
       DockerRunner.attachToContainer(
         options.name,
         attachStreamHandler,
-        (error) => {
+        error => {
           if (error != null) {
             return callback(error)
           }
-          container.start((error) => {
+          container.start(error => {
             if (error != null && error.statusCode !== 304) {
               callback(error)
             } else {
@@ -430,14 +430,14 @@ const DockerRunner = {
                 {
                   containerId,
                   length: this.data.length,
-                  maxLen: MAX_OUTPUT
+                  maxLen: MAX_OUTPUT,
                 },
                 `${name} exceeds max size`
               )
               this.data += `(...truncated at ${MAX_OUTPUT} chars...)`
               this.overflowed = true
             }
-          }
+          },
           // kill container if too much output
           // docker.containers.kill(containerId, () ->)
         }
@@ -448,7 +448,7 @@ const DockerRunner = {
 
       container.modem.demuxStream(stream, stdout, stderr)
 
-      stream.on('error', (err) =>
+      stream.on('error', err =>
         logger.error(
           { err, containerId },
           'error reading from container stream'
@@ -470,7 +470,7 @@ const DockerRunner = {
     const timeoutId = setTimeout(() => {
       timedOut = true
       logger.log({ containerId }, 'timeout reached, killing container')
-      container.kill((err) => {
+      container.kill(err => {
         logger.warn({ err, containerId }, 'failed to kill container')
       })
     }, timeout)
@@ -507,7 +507,7 @@ const DockerRunner = {
     // supplied.
     LockManager.runWithLock(
       containerName,
-      (releaseLock) =>
+      releaseLock =>
         DockerRunner._destroyContainer(
           containerId || containerName,
           shouldForce,
@@ -520,7 +520,7 @@ const DockerRunner = {
   _destroyContainer(containerId, shouldForce, callback) {
     logger.log({ containerId }, 'destroying docker container')
     const container = dockerode.getContainer(containerId)
-    container.remove({ force: shouldForce === true, v: true }, (error) => {
+    container.remove({ force: shouldForce === true, v: true }, error => {
       if (error != null && error.statusCode === 404) {
         logger.warn(
           { err: error, containerId },
@@ -567,7 +567,7 @@ const DockerRunner = {
           // strip the / prefix
           // the LockManager uses the plain container name
           const plainName = name.slice(1)
-          jobs.push((cb) =>
+          jobs.push(cb =>
             DockerRunner.destroyContainer(plainName, id, false, () => cb())
           )
         }
@@ -592,7 +592,7 @@ const DockerRunner = {
     containerMonitorTimeout = setTimeout(() => {
       containerMonitorInterval = setInterval(
         () =>
-          DockerRunner.destroyOldContainers((err) => {
+          DockerRunner.destroyOldContainers(err => {
             if (err) {
               logger.error({ err }, 'failed to destroy old containers')
             }
@@ -611,7 +611,7 @@ const DockerRunner = {
       clearInterval(containerMonitorInterval)
       containerMonitorInterval = undefined
     }
-  }
+  },
 }
 
 DockerRunner.startContainerMonitor()

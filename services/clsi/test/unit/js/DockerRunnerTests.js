@@ -30,7 +30,7 @@ describe('DockerRunner', function () {
       requires: {
         '@overleaf/settings': (this.Settings = {
           clsi: { docker: {} },
-          path: {}
+          path: {},
         }),
         dockerode: (Docker = (function () {
           Docker = class Docker {
@@ -49,21 +49,21 @@ describe('DockerRunner', function () {
           stat: sinon.stub().yields(null, {
             isDirectory() {
               return true
-            }
-          })
+            },
+          }),
         }),
         './Metrics': {
           Timer: (Timer = class Timer {
             done() {}
-          })
+          }),
         },
         './LockManager': {
           runWithLock(key, runner, callback) {
             return runner(callback)
-          }
-        }
+          },
+        },
       },
-      globals: { Math } // used by lodash
+      globals: { Math }, // used by lodash
     })
     this.Docker = Docker
     this.getContainer = Docker.prototype.getContainer
@@ -172,10 +172,10 @@ describe('DockerRunner', function () {
       })
 
       it('should re-write the bind directory', function () {
-        const volumes = this.DockerRunner._runAndWaitForContainer.lastCall
-          .args[1]
+        const volumes =
+          this.DockerRunner._runAndWaitForContainer.lastCall.args[1]
         return expect(volumes).to.deep.equal({
-          '/some/host/dir/compiles/xyz': '/compile'
+          '/some/host/dir/compiles/xyz': '/compile',
         })
       })
 
@@ -294,7 +294,7 @@ describe('DockerRunner', function () {
       beforeEach(function () {
         this.Settings.clsi.docker.allowedImages = [
           'repo/image:tag1',
-          'repo/image:tag2'
+          'repo/image:tag2',
         ]
         this.DockerRunner._runAndWaitForContainer = sinon
           .stub()
@@ -368,9 +368,9 @@ describe('DockerRunner', function () {
       beforeEach(function () {
         this.Settings.clsi.docker.compileGroupConfig = {
           'compile-group': {
-            'HostConfig.newProperty': 'new-property'
+            'HostConfig.newProperty': 'new-property',
           },
-          'other-group': { otherProperty: 'other-property' }
+          'other-group': { otherProperty: 'other-property' },
         }
         this.DockerRunner._runAndWaitForContainer = sinon
           .stub()
@@ -388,14 +388,14 @@ describe('DockerRunner', function () {
       })
 
       it('should set the docker options for the compile group', function () {
-        const options = this.DockerRunner._runAndWaitForContainer.lastCall
-          .args[0]
+        const options =
+          this.DockerRunner._runAndWaitForContainer.lastCall.args[0]
         return expect(options.HostConfig).to.deep.include({
           Binds: ['/local/compile/directory:/compile:rw'],
           LogConfig: { Type: 'none', Config: {} },
           CapDrop: 'ALL',
           SecurityOpt: ['no-new-privileges'],
-          newProperty: 'new-property'
+          newProperty: 'new-property',
         })
       })
 
@@ -588,7 +588,7 @@ describe('DockerRunner', function () {
         this.fs.stat = sinon.stub().yields(null, {
           isDirectory() {
             return false
-          }
+          },
         })
         return this.DockerRunner.startContainer(
           this.options,
@@ -715,23 +715,23 @@ describe('DockerRunner', function () {
         {
           Name: '/project-old-container-name',
           Id: 'old-container-id',
-          Created: nowInSeconds - oneHourInSeconds - 100
+          Created: nowInSeconds - oneHourInSeconds - 100,
         },
         {
           Name: '/project-new-container-name',
           Id: 'new-container-id',
-          Created: nowInSeconds - oneHourInSeconds + 100
+          Created: nowInSeconds - oneHourInSeconds + 100,
         },
         {
           Name: '/totally-not-a-project-container',
           Id: 'some-random-id',
-          Created: nowInSeconds - 2 * oneHourInSeconds
-        }
+          Created: nowInSeconds - 2 * oneHourInSeconds,
+        },
       ]
       this.DockerRunner.MAX_CONTAINER_AGE = oneHourInMilliseconds
       this.listContainers.callsArgWith(1, null, this.containers)
       this.DockerRunner.destroyContainer = sinon.stub().callsArg(3)
-      return this.DockerRunner.destroyOldContainers((error) => {
+      return this.DockerRunner.destroyOldContainers(error => {
         this.callback(error)
         return done()
       })
@@ -778,7 +778,7 @@ describe('DockerRunner', function () {
       return this.DockerRunner._destroyContainer(
         this.containerId,
         false,
-        (err) => {
+        err => {
           this.Docker.prototype.getContainer.callCount.should.equal(1)
           this.Docker.prototype.getContainer
             .calledWith(this.containerId)
@@ -792,7 +792,7 @@ describe('DockerRunner', function () {
       return this.DockerRunner._destroyContainer(
         this.containerId,
         true,
-        (err) => {
+        err => {
           this.fakeContainer.remove.callCount.should.equal(1)
           this.fakeContainer.remove
             .calledWith({ force: true, v: true })
@@ -806,7 +806,7 @@ describe('DockerRunner', function () {
       return this.DockerRunner._destroyContainer(
         this.containerId,
         false,
-        (err) => {
+        err => {
           this.fakeContainer.remove.callCount.should.equal(1)
           this.fakeContainer.remove
             .calledWith({ force: false, v: true })
@@ -820,7 +820,7 @@ describe('DockerRunner', function () {
       return this.DockerRunner._destroyContainer(
         this.containerId,
         false,
-        (err) => {
+        err => {
           expect(err).to.equal(null)
           return done()
         }
@@ -832,7 +832,7 @@ describe('DockerRunner', function () {
         this.fakeError = new Error('woops')
         this.fakeError.statusCode = 404
         this.fakeContainer = {
-          remove: sinon.stub().callsArgWith(1, this.fakeError)
+          remove: sinon.stub().callsArgWith(1, this.fakeError),
         }
         return (this.Docker.prototype.getContainer = sinon
           .stub()
@@ -843,7 +843,7 @@ describe('DockerRunner', function () {
         return this.DockerRunner._destroyContainer(
           this.containerId,
           false,
-          (err) => {
+          err => {
             expect(err).to.equal(null)
             return done()
           }
@@ -856,7 +856,7 @@ describe('DockerRunner', function () {
         this.fakeError = new Error('woops')
         this.fakeError.statusCode = 500
         this.fakeContainer = {
-          remove: sinon.stub().callsArgWith(1, this.fakeError)
+          remove: sinon.stub().callsArgWith(1, this.fakeError),
         }
         return (this.Docker.prototype.getContainer = sinon
           .stub()
@@ -867,7 +867,7 @@ describe('DockerRunner', function () {
         return this.DockerRunner._destroyContainer(
           this.containerId,
           false,
-          (err) => {
+          err => {
             expect(err).to.not.equal(null)
             expect(err).to.equal(this.fakeError)
             return done()
@@ -887,7 +887,7 @@ describe('DockerRunner', function () {
     })
 
     it('should get the container', function (done) {
-      return this.DockerRunner.kill(this.containerId, (err) => {
+      return this.DockerRunner.kill(this.containerId, err => {
         this.Docker.prototype.getContainer.callCount.should.equal(1)
         this.Docker.prototype.getContainer
           .calledWith(this.containerId)
@@ -897,14 +897,14 @@ describe('DockerRunner', function () {
     })
 
     it('should try to force-destroy the container', function (done) {
-      return this.DockerRunner.kill(this.containerId, (err) => {
+      return this.DockerRunner.kill(this.containerId, err => {
         this.fakeContainer.kill.callCount.should.equal(1)
         return done()
       })
     })
 
     it('should not produce an error', function (done) {
-      return this.DockerRunner.kill(this.containerId, (err) => {
+      return this.DockerRunner.kill(this.containerId, err => {
         expect(err).to.equal(undefined)
         return done()
       })
@@ -917,7 +917,7 @@ describe('DockerRunner', function () {
         this.fakeError.message =
           'Cannot kill container <whatever> is not running'
         this.fakeContainer = {
-          kill: sinon.stub().callsArgWith(0, this.fakeError)
+          kill: sinon.stub().callsArgWith(0, this.fakeError),
         }
         return (this.Docker.prototype.getContainer = sinon
           .stub()
@@ -925,7 +925,7 @@ describe('DockerRunner', function () {
       })
 
       return it('should not produce an error', function (done) {
-        return this.DockerRunner.kill(this.containerId, (err) => {
+        return this.DockerRunner.kill(this.containerId, err => {
           expect(err).to.equal(undefined)
           return done()
         })
@@ -938,7 +938,7 @@ describe('DockerRunner', function () {
         this.fakeError.statusCode = 500
         this.fakeError.message = 'Totally legitimate reason to throw an error'
         this.fakeContainer = {
-          kill: sinon.stub().callsArgWith(0, this.fakeError)
+          kill: sinon.stub().callsArgWith(0, this.fakeError),
         }
         return (this.Docker.prototype.getContainer = sinon
           .stub()
@@ -946,7 +946,7 @@ describe('DockerRunner', function () {
       })
 
       return it('should produce an error', function (done) {
-        return this.DockerRunner.kill(this.containerId, (err) => {
+        return this.DockerRunner.kill(this.containerId, err => {
           expect(err).to.not.equal(undefined)
           expect(err).to.equal(this.fakeError)
           return done()

@@ -65,7 +65,7 @@ module.exports = CompileManager = {
       }
       return LockManager.runWithLock(
         lockFile,
-        (releaseLock) => CompileManager.doCompile(request, releaseLock),
+        releaseLock => CompileManager.doCompile(request, releaseLock),
         callback
       )
     })
@@ -84,264 +84,266 @@ module.exports = CompileManager = {
       { project_id: request.project_id, user_id: request.user_id },
       'syncing resources to disk'
     )
-    return ResourceWriter.syncResourcesToDisk(request, compileDir, function (
-      error,
-      resourceList
-    ) {
-      // NOTE: resourceList is insecure, it should only be used to exclude files from the output list
-      if (error != null && error instanceof Errors.FilesOutOfSyncError) {
-        logger.warn(
-          { project_id: request.project_id, user_id: request.user_id },
-          'files out of sync, please retry'
-        )
-        return callback(error)
-      } else if (error != null) {
-        logger.err(
-          {
-            err: error,
-            project_id: request.project_id,
-            user_id: request.user_id
-          },
-          'error writing resources to disk'
-        )
-        return callback(error)
-      }
-      logger.log(
-        {
-          project_id: request.project_id,
-          user_id: request.user_id,
-          time_taken: Date.now() - timer.start
-        },
-        'written files to disk'
-      )
-      const syncStage = timer.done()
-
-      const injectDraftModeIfRequired = function (callback) {
-        if (request.draft) {
-          return DraftModeManager.injectDraftMode(
-            Path.join(compileDir, request.rootResourcePath),
-            callback
+    return ResourceWriter.syncResourcesToDisk(
+      request,
+      compileDir,
+      function (error, resourceList) {
+        // NOTE: resourceList is insecure, it should only be used to exclude files from the output list
+        if (error != null && error instanceof Errors.FilesOutOfSyncError) {
+          logger.warn(
+            { project_id: request.project_id, user_id: request.user_id },
+            'files out of sync, please retry'
           )
-        } else {
-          return callback()
-        }
-      }
-
-      const createTikzFileIfRequired = (callback) =>
-        TikzManager.checkMainFile(
-          compileDir,
-          request.rootResourcePath,
-          resourceList,
-          function (error, needsMainFile) {
-            if (error != null) {
-              return callback(error)
-            }
-            if (needsMainFile) {
-              return TikzManager.injectOutputFile(
-                compileDir,
-                request.rootResourcePath,
-                callback
-              )
-            } else {
-              return callback()
-            }
-          }
-        )
-      // set up environment variables for chktex
-      const env = {}
-      if (Settings.texliveOpenoutAny && Settings.texliveOpenoutAny !== '') {
-        // override default texlive openout_any environment variable
-        env.openout_any = Settings.texliveOpenoutAny
-      }
-      // only run chktex on LaTeX files (not knitr .Rtex files or any others)
-      const isLaTeXFile =
-        request.rootResourcePath != null
-          ? request.rootResourcePath.match(/\.tex$/i)
-          : undefined
-      if (request.check != null && isLaTeXFile) {
-        env.CHKTEX_OPTIONS = '-nall -e9 -e10 -w15 -w16'
-        env.CHKTEX_ULIMIT_OPTIONS = '-t 5 -v 64000'
-        if (request.check === 'error') {
-          env.CHKTEX_EXIT_ON_ERROR = 1
-        }
-        if (request.check === 'validate') {
-          env.CHKTEX_VALIDATE = 1
-        }
-      }
-
-      // apply a series of file modifications/creations for draft mode and tikz
-      return async.series(
-        [injectDraftModeIfRequired, createTikzFileIfRequired],
-        function (error) {
-          if (error != null) {
-            return callback(error)
-          }
-          timer = new Metrics.Timer('run-compile')
-          // find the image tag to log it as a metric, e.g. 2015.1 (convert . to - for graphite)
-          let tag =
-            __guard__(
-              __guard__(
-                request.imageName != null
-                  ? request.imageName.match(/:(.*)/)
-                  : undefined,
-                (x1) => x1[1]
-              ),
-              (x) => x.replace(/\./g, '-')
-            ) || 'default'
-          if (!request.project_id.match(/^[0-9a-f]{24}$/)) {
-            tag = 'other'
-          } // exclude smoke test
-          Metrics.inc('compiles')
-          Metrics.inc(`compiles-with-image.${tag}`)
-          const compileName = getCompileName(
-            request.project_id,
-            request.user_id
-          )
-          return LatexRunner.runLatex(
-            compileName,
+          return callback(error)
+        } else if (error != null) {
+          logger.err(
             {
-              directory: compileDir,
-              mainFile: request.rootResourcePath,
-              compiler: request.compiler,
-              timeout: request.timeout,
-              image: request.imageName,
-              flags: request.flags,
-              environment: env,
-              compileGroup: request.compileGroup
+              err: error,
+              project_id: request.project_id,
+              user_id: request.user_id,
             },
-            function (error, output, stats, timings) {
-              // request was for validation only
-              let metric_key, metric_value
-              if (request.check === 'validate') {
-                const result = (error != null ? error.code : undefined)
-                  ? 'fail'
-                  : 'pass'
-                error = new Error('validation')
-                error.validate = result
-              }
-              // request was for compile, and failed on validation
-              if (
-                request.check === 'error' &&
-                (error != null ? error.message : undefined) === 'exited'
-              ) {
-                error = new Error('compilation')
-                error.validate = 'fail'
-              }
-              // compile was killed by user, was a validation, or a compile which failed validation
-              if (
-                (error != null ? error.terminated : undefined) ||
-                (error != null ? error.validate : undefined) ||
-                (error != null ? error.timedout : undefined)
-              ) {
-                OutputFileFinder.findOutputFiles(
-                  resourceList,
-                  compileDir,
-                  function (err, outputFiles) {
-                    if (err != null) {
-                      return callback(err)
-                    }
-                    error.outputFiles = outputFiles // return output files so user can check logs
-                    return callback(error)
-                  }
-                )
-                return
-              }
-              // compile completed normally
+            'error writing resources to disk'
+          )
+          return callback(error)
+        }
+        logger.log(
+          {
+            project_id: request.project_id,
+            user_id: request.user_id,
+            time_taken: Date.now() - timer.start,
+          },
+          'written files to disk'
+        )
+        const syncStage = timer.done()
+
+        const injectDraftModeIfRequired = function (callback) {
+          if (request.draft) {
+            return DraftModeManager.injectDraftMode(
+              Path.join(compileDir, request.rootResourcePath),
+              callback
+            )
+          } else {
+            return callback()
+          }
+        }
+
+        const createTikzFileIfRequired = callback =>
+          TikzManager.checkMainFile(
+            compileDir,
+            request.rootResourcePath,
+            resourceList,
+            function (error, needsMainFile) {
               if (error != null) {
                 return callback(error)
               }
-              Metrics.inc('compiles-succeeded')
-              stats = stats || {}
-              const object = stats || {}
-              for (metric_key in object) {
-                metric_value = object[metric_key]
-                Metrics.count(metric_key, metric_value)
-              }
-              timings = timings || {}
-              const object1 = timings || {}
-              for (metric_key in object1) {
-                metric_value = object1[metric_key]
-                Metrics.timing(metric_key, metric_value)
-              }
-              const loadavg =
-                typeof os.loadavg === 'function' ? os.loadavg() : undefined
-              if (loadavg != null) {
-                Metrics.gauge('load-avg', loadavg[0])
-              }
-              const ts = timer.done()
-              logger.log(
-                {
-                  project_id: request.project_id,
-                  user_id: request.user_id,
-                  time_taken: ts,
-                  stats,
-                  timings,
-                  loadavg
-                },
-                'done compile'
-              )
-              if ((stats != null ? stats['latex-runs'] : undefined) > 0) {
-                Metrics.timing('run-compile-per-pass', ts / stats['latex-runs'])
-              }
-              if (
-                (stats != null ? stats['latex-runs'] : undefined) > 0 &&
-                (timings != null ? timings['cpu-time'] : undefined) > 0
-              ) {
-                Metrics.timing(
-                  'run-compile-cpu-time-per-pass',
-                  timings['cpu-time'] / stats['latex-runs']
+              if (needsMainFile) {
+                return TikzManager.injectOutputFile(
+                  compileDir,
+                  request.rootResourcePath,
+                  callback
                 )
+              } else {
+                return callback()
               }
-              // Emit compile time.
-              timings.compile = ts
-
-              timer = new Metrics.Timer('process-output-files')
-
-              return OutputFileFinder.findOutputFiles(
-                resourceList,
-                compileDir,
-                function (error, outputFiles) {
-                  if (error != null) {
-                    return callback(error)
-                  }
-                  return OutputCacheManager.saveOutputFiles(
-                    { request, stats, timings },
-                    outputFiles,
-                    compileDir,
-                    outputDir,
-                    (err, newOutputFiles) => {
-                      if (err) {
-                        const {
-                          project_id: projectId,
-                          user_id: userId
-                        } = request
-                        logger.err(
-                          { projectId, userId, err },
-                          'failed to save output files'
-                        )
-                      }
-
-                      const outputStage = timer.done()
-                      timings.sync = syncStage
-                      timings.output = outputStage
-
-                      // Emit e2e compile time.
-                      timings.compileE2E = timerE2E.done()
-
-                      if (stats['pdf-size']) {
-                        emitPdfStats(stats, timings)
-                      }
-
-                      callback(null, newOutputFiles, stats, timings)
-                    }
-                  )
-                }
-              )
             }
           )
+        // set up environment variables for chktex
+        const env = {}
+        if (Settings.texliveOpenoutAny && Settings.texliveOpenoutAny !== '') {
+          // override default texlive openout_any environment variable
+          env.openout_any = Settings.texliveOpenoutAny
         }
-      )
-    })
+        // only run chktex on LaTeX files (not knitr .Rtex files or any others)
+        const isLaTeXFile =
+          request.rootResourcePath != null
+            ? request.rootResourcePath.match(/\.tex$/i)
+            : undefined
+        if (request.check != null && isLaTeXFile) {
+          env.CHKTEX_OPTIONS = '-nall -e9 -e10 -w15 -w16'
+          env.CHKTEX_ULIMIT_OPTIONS = '-t 5 -v 64000'
+          if (request.check === 'error') {
+            env.CHKTEX_EXIT_ON_ERROR = 1
+          }
+          if (request.check === 'validate') {
+            env.CHKTEX_VALIDATE = 1
+          }
+        }
+
+        // apply a series of file modifications/creations for draft mode and tikz
+        return async.series(
+          [injectDraftModeIfRequired, createTikzFileIfRequired],
+          function (error) {
+            if (error != null) {
+              return callback(error)
+            }
+            timer = new Metrics.Timer('run-compile')
+            // find the image tag to log it as a metric, e.g. 2015.1 (convert . to - for graphite)
+            let tag =
+              __guard__(
+                __guard__(
+                  request.imageName != null
+                    ? request.imageName.match(/:(.*)/)
+                    : undefined,
+                  x1 => x1[1]
+                ),
+                x => x.replace(/\./g, '-')
+              ) || 'default'
+            if (!request.project_id.match(/^[0-9a-f]{24}$/)) {
+              tag = 'other'
+            } // exclude smoke test
+            Metrics.inc('compiles')
+            Metrics.inc(`compiles-with-image.${tag}`)
+            const compileName = getCompileName(
+              request.project_id,
+              request.user_id
+            )
+            return LatexRunner.runLatex(
+              compileName,
+              {
+                directory: compileDir,
+                mainFile: request.rootResourcePath,
+                compiler: request.compiler,
+                timeout: request.timeout,
+                image: request.imageName,
+                flags: request.flags,
+                environment: env,
+                compileGroup: request.compileGroup,
+              },
+              function (error, output, stats, timings) {
+                // request was for validation only
+                let metric_key, metric_value
+                if (request.check === 'validate') {
+                  const result = (error != null ? error.code : undefined)
+                    ? 'fail'
+                    : 'pass'
+                  error = new Error('validation')
+                  error.validate = result
+                }
+                // request was for compile, and failed on validation
+                if (
+                  request.check === 'error' &&
+                  (error != null ? error.message : undefined) === 'exited'
+                ) {
+                  error = new Error('compilation')
+                  error.validate = 'fail'
+                }
+                // compile was killed by user, was a validation, or a compile which failed validation
+                if (
+                  (error != null ? error.terminated : undefined) ||
+                  (error != null ? error.validate : undefined) ||
+                  (error != null ? error.timedout : undefined)
+                ) {
+                  OutputFileFinder.findOutputFiles(
+                    resourceList,
+                    compileDir,
+                    function (err, outputFiles) {
+                      if (err != null) {
+                        return callback(err)
+                      }
+                      error.outputFiles = outputFiles // return output files so user can check logs
+                      return callback(error)
+                    }
+                  )
+                  return
+                }
+                // compile completed normally
+                if (error != null) {
+                  return callback(error)
+                }
+                Metrics.inc('compiles-succeeded')
+                stats = stats || {}
+                const object = stats || {}
+                for (metric_key in object) {
+                  metric_value = object[metric_key]
+                  Metrics.count(metric_key, metric_value)
+                }
+                timings = timings || {}
+                const object1 = timings || {}
+                for (metric_key in object1) {
+                  metric_value = object1[metric_key]
+                  Metrics.timing(metric_key, metric_value)
+                }
+                const loadavg =
+                  typeof os.loadavg === 'function' ? os.loadavg() : undefined
+                if (loadavg != null) {
+                  Metrics.gauge('load-avg', loadavg[0])
+                }
+                const ts = timer.done()
+                logger.log(
+                  {
+                    project_id: request.project_id,
+                    user_id: request.user_id,
+                    time_taken: ts,
+                    stats,
+                    timings,
+                    loadavg,
+                  },
+                  'done compile'
+                )
+                if ((stats != null ? stats['latex-runs'] : undefined) > 0) {
+                  Metrics.timing(
+                    'run-compile-per-pass',
+                    ts / stats['latex-runs']
+                  )
+                }
+                if (
+                  (stats != null ? stats['latex-runs'] : undefined) > 0 &&
+                  (timings != null ? timings['cpu-time'] : undefined) > 0
+                ) {
+                  Metrics.timing(
+                    'run-compile-cpu-time-per-pass',
+                    timings['cpu-time'] / stats['latex-runs']
+                  )
+                }
+                // Emit compile time.
+                timings.compile = ts
+
+                timer = new Metrics.Timer('process-output-files')
+
+                return OutputFileFinder.findOutputFiles(
+                  resourceList,
+                  compileDir,
+                  function (error, outputFiles) {
+                    if (error != null) {
+                      return callback(error)
+                    }
+                    return OutputCacheManager.saveOutputFiles(
+                      { request, stats, timings },
+                      outputFiles,
+                      compileDir,
+                      outputDir,
+                      (err, newOutputFiles) => {
+                        if (err) {
+                          const { project_id: projectId, user_id: userId } =
+                            request
+                          logger.err(
+                            { projectId, userId, err },
+                            'failed to save output files'
+                          )
+                        }
+
+                        const outputStage = timer.done()
+                        timings.sync = syncStage
+                        timings.output = outputStage
+
+                        // Emit e2e compile time.
+                        timings.compileE2E = timerE2E.done()
+
+                        if (stats['pdf-size']) {
+                          emitPdfStats(stats, timings)
+                        }
+
+                        callback(null, newOutputFiles, stats, timings)
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          }
+        )
+      }
+    )
   },
 
   stopCompile(project_id, user_id, callback) {
@@ -377,13 +379,13 @@ module.exports = CompileManager = {
         '-f',
         '--',
         compileDir,
-        outputDir
+        outputDir,
       ])
 
       proc.on('error', callback)
 
       let stderr = ''
-      proc.stderr.setEncoding('utf8').on('data', (chunk) => (stderr += chunk))
+      proc.stderr.setEncoding('utf8').on('data', chunk => (stderr += chunk))
 
       return proc.on('close', function (code) {
         if (code === 0) {
@@ -406,7 +408,7 @@ module.exports = CompileManager = {
       if (err != null) {
         return callback(err)
       }
-      const allDirs = Array.from(files).map((file) => Path.join(root, file))
+      const allDirs = Array.from(files).map(file => Path.join(root, file))
       return callback(null, allDirs)
     })
   },
@@ -575,7 +577,7 @@ module.exports = CompileManager = {
     const timeout = 60 * 1000 // increased to allow for large projects
     const compileName = getCompileName(project_id, user_id)
     const compileGroup = 'synctex'
-    CompileManager._checkFileExists(directory, 'output.synctex.gz', (error) => {
+    CompileManager._checkFileExists(directory, 'output.synctex.gz', error => {
       if (error) {
         return callback(error)
       }
@@ -614,7 +616,7 @@ module.exports = CompileManager = {
           h: parseFloat(h),
           v: parseFloat(v),
           height: parseFloat(height),
-          width: parseFloat(width)
+          width: parseFloat(width),
         })
       }
     }
@@ -631,7 +633,7 @@ module.exports = CompileManager = {
         results.push({
           file,
           line: parseInt(line, 10),
-          column: parseInt(column, 10)
+          column: parseInt(column, 10),
         })
       }
     }
@@ -649,7 +651,7 @@ module.exports = CompileManager = {
       '-nocol',
       '-inc',
       file_path,
-      `-out=${file_path}.wc`
+      `-out=${file_path}.wc`,
     ]
     const compileDir = getCompileDir(project_id, user_id)
     const timeout = 60 * 1000
@@ -711,7 +713,7 @@ module.exports = CompileManager = {
       mathInline: 0,
       mathDisplay: 0,
       errors: 0,
-      messages: ''
+      messages: '',
     }
     for (const line of Array.from(output.split('\n'))) {
       const [data, info] = Array.from(line.split(':'))
@@ -749,7 +751,7 @@ module.exports = CompileManager = {
       }
     }
     return results
-  }
+  },
 }
 
 function __guard__(value, transform) {

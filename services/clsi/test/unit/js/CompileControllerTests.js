@@ -24,7 +24,7 @@ function tryImageNameValidation(method, imageNameField) {
       this.Settings.clsi = { docker: {} }
       this.Settings.clsi.docker.allowedImages = [
         'repo/image:tag1',
-        'repo/image:tag2'
+        'repo/image:tag2',
       ]
       this.res.send = sinon.stub()
       this.res.status = sinon.stub().returns({ send: this.res.send })
@@ -69,12 +69,12 @@ describe('CompileController', function () {
         '@overleaf/settings': (this.Settings = {
           apis: {
             clsi: {
-              url: 'http://clsi.example.com'
-            }
-          }
+              url: 'http://clsi.example.com',
+            },
+          },
         }),
-        './ProjectPersistenceManager': (this.ProjectPersistenceManager = {})
-      }
+        './ProjectPersistenceManager': (this.ProjectPersistenceManager = {}),
+      },
     })
     this.Settings.externalUrl = 'http://www.example.com'
     this.req = {}
@@ -85,28 +85,28 @@ describe('CompileController', function () {
   describe('compile', function () {
     beforeEach(function () {
       this.req.body = {
-        compile: 'mock-body'
+        compile: 'mock-body',
       }
       this.req.params = { project_id: (this.project_id = 'project-id-123') }
       this.request = {
-        compile: 'mock-parsed-request'
+        compile: 'mock-parsed-request',
       }
       this.request_with_project_id = {
         compile: this.request.compile,
-        project_id: this.project_id
+        project_id: this.project_id,
       }
       this.output_files = [
         {
           path: 'output.pdf',
           type: 'pdf',
           size: 1337,
-          build: 1234
+          build: 1234,
         },
         {
           path: 'output.log',
           type: 'log',
-          build: 1234
-        }
+          build: 1234,
+        },
       ]
       this.RequestParser.parse = sinon
         .stub()
@@ -155,13 +155,13 @@ describe('CompileController', function () {
               error: null,
               stats: this.stats,
               timings: this.timings,
-              outputFiles: this.output_files.map((file) => {
+              outputFiles: this.output_files.map(file => {
                 return {
                   url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                  ...file
+                  ...file,
                 }
-              })
-            }
+              }),
+            },
           })
           .should.equal(true)
       })
@@ -173,13 +173,13 @@ describe('CompileController', function () {
           {
             path: 'fake_output.pdf',
             type: 'pdf',
-            build: 1234
+            build: 1234,
           },
           {
             path: 'output.log',
             type: 'log',
-            build: 1234
-          }
+            build: 1234,
+          },
         ]
         this.CompileManager.doCompileWithLock = sinon
           .stub()
@@ -196,13 +196,13 @@ describe('CompileController', function () {
               error: null,
               stats: this.stats,
               timings: this.timings,
-              outputFiles: this.output_files.map((file) => {
+              outputFiles: this.output_files.map(file => {
                 return {
                   url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                  ...file
+                  ...file,
                 }
-              })
-            }
+              }),
+            },
           })
           .should.equal(true)
       })
@@ -215,13 +215,13 @@ describe('CompileController', function () {
             path: 'output.pdf',
             type: 'pdf',
             size: 0,
-            build: 1234
+            build: 1234,
           },
           {
             path: 'output.log',
             type: 'log',
-            build: 1234
-          }
+            build: 1234,
+          },
         ]
         this.CompileManager.doCompileWithLock = sinon
           .stub()
@@ -238,13 +238,13 @@ describe('CompileController', function () {
               error: null,
               stats: this.stats,
               timings: this.timings,
-              outputFiles: this.output_files.map((file) => {
+              outputFiles: this.output_files.map(file => {
                 return {
                   url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                  ...file
+                  ...file,
                 }
-              })
-            }
+              }),
+            },
           })
           .should.equal(true)
       })
@@ -268,8 +268,8 @@ describe('CompileController', function () {
               outputFiles: [],
               // JSON.stringify will omit these
               stats: undefined,
-              timings: undefined
-            }
+              timings: undefined,
+            },
           })
           .should.equal(true)
       })
@@ -295,8 +295,8 @@ describe('CompileController', function () {
               outputFiles: [],
               // JSON.stringify will omit these
               stats: undefined,
-              timings: undefined
-            }
+              timings: undefined,
+            },
           })
           .should.equal(true)
       })
@@ -320,8 +320,8 @@ describe('CompileController', function () {
               outputFiles: [],
               // JSON.stringify will omit these
               stats: undefined,
-              timings: undefined
-            }
+              timings: undefined,
+            },
           })
           .should.equal(true)
       })
@@ -338,7 +338,7 @@ describe('CompileController', function () {
       this.req.query = {
         file: this.file,
         line: this.line.toString(),
-        column: this.column.toString()
+        column: this.column.toString(),
       }
       this.res.json = sinon.stub()
 
@@ -363,7 +363,7 @@ describe('CompileController', function () {
     it('should return the positions', function () {
       return this.res.json
         .calledWith({
-          pdf: this.pdfPositions
+          pdf: this.pdfPositions,
         })
         .should.equal(true)
     })
@@ -381,7 +381,7 @@ describe('CompileController', function () {
       this.req.query = {
         page: this.page.toString(),
         h: this.h.toString(),
-        v: this.v.toString()
+        v: this.v.toString(),
       }
       this.res.json = sinon.stub()
 
@@ -400,7 +400,7 @@ describe('CompileController', function () {
     it('should return the positions', function () {
       return this.res.json
         .calledWith({
-          code: this.codePositions
+          code: this.codePositions,
         })
         .should.equal(true)
     })
@@ -415,7 +415,7 @@ describe('CompileController', function () {
       this.req.params = { project_id: this.project_id }
       this.req.query = {
         file: this.file,
-        image: (this.image = 'example.com/image')
+        image: (this.image = 'example.com/image'),
       }
       this.res.json = sinon.stub()
 
@@ -435,7 +435,7 @@ describe('CompileController', function () {
       this.CompileController.wordcount(this.req, this.res, this.next)
       return this.res.json
         .calledWith({
-          texcount: this.texcount
+          texcount: this.texcount,
         })
         .should.equal(true)
     })

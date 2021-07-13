@@ -25,14 +25,14 @@ describe('ResourceStateManager', function () {
       singleOnly: true,
       requires: {
         fs: (this.fs = {}),
-        './SafeReader': (this.SafeReader = {})
-      }
+        './SafeReader': (this.SafeReader = {}),
+      },
     })
     this.basePath = '/path/to/write/files/to'
     this.resources = [
       { path: 'resource-1-mock' },
       { path: 'resource-2-mock' },
-      { path: 'resource-3-mock' }
+      { path: 'resource-3-mock' },
     ]
     this.state = '1234567890'
     this.resourceFileName = `${this.basePath}/.project-sync-state`
@@ -175,7 +175,7 @@ describe('ResourceStateManager', function () {
         this.allFiles = [
           this.resources[0].path,
           this.resources[1].path,
-          this.resources[2].path
+          this.resources[2].path,
         ]
         return this.ResourceStateManager.checkResourceFiles(
           this.resources,
@@ -220,7 +220,7 @@ describe('ResourceStateManager', function () {
         this.allFiles = [
           this.resources[0].path,
           this.resources[1].path,
-          this.resources[2].path
+          this.resources[2].path,
         ]
         return this.ResourceStateManager.checkResourceFiles(
           this.resources,

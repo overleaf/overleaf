@@ -7,7 +7,7 @@ describe('AllowedImageNames', function () {
     this.project_id = Client.randomId()
     this.request = {
       options: {
-        imageName: undefined
+        imageName: undefined,
       },
       resources: [
         {
@@ -17,9 +17,9 @@ describe('AllowedImageNames', function () {
 \\begin{document}
 Hello world
 \\end{document}\
-`
-        }
-      ]
+`,
+        },
+      ],
     }
     ClsiApp.ensureRunning(done)
   })
@@ -101,8 +101,8 @@ Hello world
           expect(error).to.not.exist
           expect(result).to.deep.equal({
             pdf: [
-              { page: 1, h: 133.77, v: 134.76, height: 6.92, width: 343.71 }
-            ]
+              { page: 1, h: 133.77, v: 134.76, height: 6.92, width: 343.71 },
+            ],
           })
           done()
         }
@@ -139,7 +139,7 @@ Hello world
         (error, result) => {
           expect(error).to.not.exist
           expect(result).to.deep.equal({
-            code: [{ file: 'main.tex', line: 3, column: -1 }]
+            code: [{ file: 'main.tex', line: 3, column: -1 }],
           })
           done()
         }

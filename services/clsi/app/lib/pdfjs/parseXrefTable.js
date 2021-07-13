@@ -23,5 +23,5 @@ async function parseXrefTable(path, size, checkDeadline) {
 }
 
 module.exports = {
-  parseXrefTable
+  parseXrefTable,
 }

@@ -23,9 +23,9 @@ describe('Deleting Old Files', function () {
 \\begin{document}
 Hello world
 \\end{document}\
-`
-        }
-      ]
+`,
+        },
+      ],
     }
     return ClsiApp.ensureRunning(done)
   })

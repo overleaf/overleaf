@@ -27,9 +27,9 @@ describe('OutputFileOptimiser', function () {
         fs: (this.fs = {}),
         path: (this.Path = {}),
         child_process: { spawn: (this.spawn = sinon.stub()) },
-        './Metrics': {}
+        './Metrics': {},
       },
-      globals: { Math } // used by lodash
+      globals: { Math }, // used by lodash
     })
     this.directory = '/test/dir'
     return (this.callback = sinon.stub())

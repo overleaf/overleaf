@@ -36,7 +36,7 @@ module.exports = {
       })
     } else {
       logger.log({ state, basePath }, 'writing sync state')
-      const resourceList = resources.map((resource) => resource.path)
+      const resourceList = resources.map(resource => resource.path)
       fs.writeFile(
         stateFile,
         [...resourceList, `stateHash:${state}`].join('\n'),
@@ -48,43 +48,46 @@ module.exports = {
   checkProjectStateMatches(state, basePath, callback) {
     const stateFile = Path.join(basePath, this.SYNC_STATE_FILE)
     const size = this.SYNC_STATE_MAX_SIZE
-    SafeReader.readFile(stateFile, size, 'utf8', function (
-      err,
-      result,
-      bytesRead
-    ) {
-      if (err) {
-        return callback(err)
-      }
-      if (bytesRead === size) {
-        logger.error(
-          { file: stateFile, size, bytesRead },
-          'project state file truncated'
+    SafeReader.readFile(
+      stateFile,
+      size,
+      'utf8',
+      function (err, result, bytesRead) {
+        if (err) {
+          return callback(err)
+        }
+        if (bytesRead === size) {
+          logger.error(
+            { file: stateFile, size, bytesRead },
+            'project state file truncated'
+          )
+        }
+        const array = result ? result.toString().split('\n') : []
+        const adjustedLength = Math.max(array.length, 1)
+        const resourceList = array.slice(0, adjustedLength - 1)
+        const oldState = array[adjustedLength - 1]
+        const newState = `stateHash:${state}`
+        logger.log(
+          { state, oldState, basePath, stateMatches: newState === oldState },
+          'checking sync state'
         )
+        if (newState !== oldState) {
+          return callback(
+            new Errors.FilesOutOfSyncError(
+              'invalid state for incremental update'
+            )
+          )
+        } else {
+          const resources = resourceList.map(path => ({ path }))
+          callback(null, resources)
+        }
       }
-      const array = result ? result.toString().split('\n') : []
-      const adjustedLength = Math.max(array.length, 1)
-      const resourceList = array.slice(0, adjustedLength - 1)
-      const oldState = array[adjustedLength - 1]
-      const newState = `stateHash:${state}`
-      logger.log(
-        { state, oldState, basePath, stateMatches: newState === oldState },
-        'checking sync state'
-      )
-      if (newState !== oldState) {
-        return callback(
-          new Errors.FilesOutOfSyncError('invalid state for incremental update')
-        )
-      } else {
-        const resources = resourceList.map((path) => ({ path }))
-        callback(null, resources)
-      }
-    })
+    )
   },
 
   checkResourceFiles(resources, allFiles, basePath, callback) {
     // check the paths are all relative to current directory
-    const containsRelativePath = (resource) => {
+    const containsRelativePath = resource => {
       const dirs = resource.path.split('/')
       return dirs.indexOf('..') !== -1
     }
@@ -94,8 +97,8 @@ module.exports = {
     // check if any of the input files are not present in list of files
     const seenFiles = new Set(allFiles)
     const missingFiles = resources
-      .map((resource) => resource.path)
-      .filter((path) => !seenFiles.has(path))
+      .map(resource => resource.path)
+      .filter(path => !seenFiles.has(path))
     if (missingFiles.length > 0) {
       logger.err(
         { missingFiles, basePath, allFiles, resources },
@@ -109,5 +112,5 @@ module.exports = {
     } else {
       callback()
     }
-  }
+  },
 }

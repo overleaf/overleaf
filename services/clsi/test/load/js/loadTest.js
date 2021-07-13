@@ -17,7 +17,7 @@ const _ = require('lodash')
 const concurentCompiles = 5
 const totalCompiles = 50
 
-const buildUrl = (path) =>
+const buildUrl = path =>
   `http://${Settings.internal.clsi.host}:${Settings.internal.clsi.port}/${path}`
 
 const mainTexContent = fs.readFileSync('./bulk.tex', 'utf-8')
@@ -51,11 +51,11 @@ const makeRequest = function (compileNumber, callback) {
 \\begin{document}
 ${bodyContent}
 \\end{document}\
-`
-            }
-          ]
-        }
-      }
+`,
+            },
+          ],
+        },
+      },
     },
     (err, response, body) => {
       if (response.statusCode !== 200) {
@@ -74,12 +74,13 @@ ${bodyContent}
   )
 }
 
-const jobs = _.map(__range__(1, totalCompiles, true), (i) => (cb) =>
-  makeRequest(i, cb)
+const jobs = _.map(
+  __range__(1, totalCompiles, true),
+  i => cb => makeRequest(i, cb)
 )
 
 const startTime = new Date()
-async.parallelLimit(jobs, concurentCompiles, (err) => {
+async.parallelLimit(jobs, concurentCompiles, err => {
   if (err != null) {
     console.error(err)
   }

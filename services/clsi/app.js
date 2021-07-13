@@ -157,7 +157,7 @@ const staticCompileServer = ForbidSymlinks(
         res.set('Etag', etag(path, stat))
       }
       return res.set('Content-Type', ContentTypeMapper.map(path))
-    }
+    },
   }
 )
 
@@ -177,7 +177,7 @@ const staticOutputServer = ForbidSymlinks(
         res.set('Etag', etag(path, stat))
       }
       return res.set('Content-Type', ContentTypeMapper.map(path))
-    }
+    },
   }
 )
 
@@ -201,28 +201,29 @@ app.get(
   ContentController.getPdfRange
 )
 
-app.get('/project/:project_id/build/:build_id/output/*', function (
-  req,
-  res,
-  next
-) {
-  // for specific build get the path from the OutputCacheManager (e.g. .clsi/buildId)
-  req.url =
-    `/${req.params.project_id}/` +
-    OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
-  return staticOutputServer(req, res, next)
-})
+app.get(
+  '/project/:project_id/build/:build_id/output/*',
+  function (req, res, next) {
+    // for specific build get the path from the OutputCacheManager (e.g. .clsi/buildId)
+    req.url =
+      `/${req.params.project_id}/` +
+      OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
+    return staticOutputServer(req, res, next)
+  }
+)
 
-app.get('/project/:project_id/user/:user_id/output/*', function (
-  req,
-  res,
-  next
-) {
-  // for specific user get the path to the top level file
-  logger.warn({ url: req.url }, 'direct request for file in compile directory')
-  req.url = `/${req.params.project_id}-${req.params.user_id}/${req.params[0]}`
-  return staticCompileServer(req, res, next)
-})
+app.get(
+  '/project/:project_id/user/:user_id/output/*',
+  function (req, res, next) {
+    // for specific user get the path to the top level file
+    logger.warn(
+      { url: req.url },
+      'direct request for file in compile directory'
+    )
+    req.url = `/${req.params.project_id}-${req.params.user_id}/${req.params[0]}`
+    return staticCompileServer(req, res, next)
+  }
+)
 
 app.get('/project/:project_id/output/*', function (req, res, next) {
   logger.warn({ url: req.url }, 'direct request for file in compile directory')
@@ -271,7 +272,7 @@ if (Settings.processLifespanLimitMs) {
 function runSmokeTest() {
   if (Settings.processTooOld) return
   logger.log('running smoke tests')
-  smokeTest.triggerRun((err) => {
+  smokeTest.triggerRun(err => {
     if (err) logger.error({ err }, 'smoke tests failed')
     setTimeout(runSmokeTest, 30 * 1000)
   })
@@ -364,12 +365,12 @@ loadHttpServer.post('/state/maint', function (req, res, next) {
 const port =
   __guard__(
     Settings.internal != null ? Settings.internal.clsi : undefined,
-    (x) => x.port
+    x => x.port
   ) || 3013
 const host =
   __guard__(
     Settings.internal != null ? Settings.internal.clsi : undefined,
-    (x1) => x1.host
+    x1 => x1.host
   ) || 'localhost'
 
 const loadTcpPort = Settings.internal.load_balancer_agent.load_port
@@ -381,12 +382,12 @@ if (!module.parent) {
   // handle uncaught exceptions when running in production
   if (Settings.catchErrors) {
     process.removeAllListeners('uncaughtException')
-    process.on('uncaughtException', (error) =>
+    process.on('uncaughtException', error =>
       logger.error({ err: error }, 'uncaughtException')
     )
   }
 
-  app.listen(port, host, (error) => {
+  app.listen(port, host, error => {
     if (error) {
       logger.fatal({ error }, `Error starting CLSI on ${host}:${port}`)
     } else {

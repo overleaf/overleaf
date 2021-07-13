@@ -25,19 +25,19 @@ describe('LatexRunner', function () {
       requires: {
         '@overleaf/settings': (this.Settings = {
           docker: {
-            socketPath: '/var/run/docker.sock'
-          }
+            socketPath: '/var/run/docker.sock',
+          },
         }),
         './Metrics': {
           Timer: (Timer = class Timer {
             done() {}
-          })
+          }),
         },
         './CommandRunner': (this.CommandRunner = {}),
         fs: (this.fs = {
-          writeFile: sinon.stub().callsArg(2)
-        })
-      }
+          writeFile: sinon.stub().callsArg(2),
+        }),
+      },
     })
 
     this.directory = '/local/compile/directory'
@@ -54,7 +54,7 @@ describe('LatexRunner', function () {
     beforeEach(function () {
       return (this.CommandRunner.run = sinon.stub().callsArgWith(7, null, {
         stdout: 'this is stdout',
-        stderr: 'this is stderr'
+        stderr: 'this is stderr',
       }))
     })
 
@@ -69,7 +69,7 @@ describe('LatexRunner', function () {
             timeout: (this.timeout = 42000),
             image: this.image,
             environment: this.env,
-            compileGroup: this.compileGroup
+            compileGroup: this.compileGroup,
           },
           (error, output, stats, timings) => {
             this.timings = timings
@@ -116,7 +116,7 @@ describe('LatexRunner', function () {
             '\tCommand being timed: "sh -c timeout 1 yes > /dev/null"\n' +
             '\tUser time (seconds): 0.28\n' +
             '\tSystem time (seconds): 0.70\n' +
-            '\tPercent of CPU this job got: 98%\n'
+            '\tPercent of CPU this job got: 98%\n',
         })
         this.LatexRunner.runLatex(
           this.project_id,
@@ -127,7 +127,7 @@ describe('LatexRunner', function () {
             timeout: (this.timeout = 42000),
             image: this.image,
             environment: this.env,
-            compileGroup: this.compileGroup
+            compileGroup: this.compileGroup,
           },
           (error, output, stats, timings) => {
             this.timings = timings
@@ -152,7 +152,7 @@ describe('LatexRunner', function () {
             mainFile: 'main-file.Rtex',
             compiler: this.compiler,
             image: this.image,
-            timeout: (this.timeout = 42000)
+            timeout: (this.timeout = 42000),
           },
           this.callback
         )
@@ -175,7 +175,7 @@ describe('LatexRunner', function () {
             compiler: this.compiler,
             image: this.image,
             timeout: (this.timeout = 42000),
-            flags: ['-file-line-error', '-halt-on-error']
+            flags: ['-file-line-error', '-halt-on-error'],
           },
           this.callback
         )
@@ -184,7 +184,7 @@ describe('LatexRunner', function () {
       return it('should include the flags in the command', function () {
         const command = this.CommandRunner.run.args[0][1]
         const flags = command.filter(
-          (arg) => arg === '-file-line-error' || arg === '-halt-on-error'
+          arg => arg === '-file-line-error' || arg === '-halt-on-error'
         )
         flags.length.should.equal(2)
         flags[0].should.equal('-file-line-error')

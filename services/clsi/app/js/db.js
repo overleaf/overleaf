@@ -37,10 +37,10 @@ module.exports = {
     {
       url: Sequelize.STRING,
       project_id: Sequelize.STRING,
-      lastModified: Sequelize.DATE
+      lastModified: Sequelize.DATE,
     },
     {
-      indexes: [{ fields: ['url', 'project_id'] }, { fields: ['project_id'] }]
+      indexes: [{ fields: ['url', 'project_id'] }, { fields: ['project_id'] }],
     }
   ),
 
@@ -48,10 +48,10 @@ module.exports = {
     'Project',
     {
       project_id: { type: Sequelize.STRING, primaryKey: true },
-      lastAccessed: Sequelize.DATE
+      lastAccessed: Sequelize.DATE,
     },
     {
-      indexes: [{ fields: ['lastAccessed'] }]
+      indexes: [{ fields: ['lastAccessed'] }],
     }
   ),
 
@@ -62,6 +62,6 @@ module.exports = {
     return sequelize
       .sync()
       .then(() => logger.log('db sync complete'))
-      .catch((err) => console.log(err, 'error syncing'))
-  }
+      .catch(err => console.log(err, 'error syncing'))
+  },
 }

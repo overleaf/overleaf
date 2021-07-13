@@ -21,17 +21,17 @@ describe('UrlFetcher', function () {
     return (this.UrlFetcher = SandboxedModule.require(modulePath, {
       requires: {
         request: {
-          defaults: (this.defaults = sinon.stub().returns((this.request = {})))
+          defaults: (this.defaults = sinon.stub().returns((this.request = {}))),
         },
         fs: (this.fs = {}),
         '@overleaf/settings': (this.settings = {
           apis: {
             clsiPerf: {
-              host: 'localhost:3043'
-            }
-          }
-        })
-      }
+              host: 'localhost:3043',
+            },
+          },
+        }),
+      },
     }))
   })
   describe('pipeUrlToFileWithRetry', function () {
@@ -41,7 +41,7 @@ describe('UrlFetcher', function () {
 
     it('should call pipeUrlToFile', function (done) {
       this.UrlFetcher.pipeUrlToFile.callsArgWith(2)
-      this.UrlFetcher.pipeUrlToFileWithRetry(this.url, this.path, (err) => {
+      this.UrlFetcher.pipeUrlToFileWithRetry(this.url, this.path, err => {
         expect(err).to.equal(undefined)
         this.UrlFetcher.pipeUrlToFile.called.should.equal(true)
         done()
@@ -51,7 +51,7 @@ describe('UrlFetcher', function () {
     it('should call pipeUrlToFile multiple times on error', function (done) {
       const error = new Error("couldn't download file")
       this.UrlFetcher.pipeUrlToFile.callsArgWith(2, error)
-      this.UrlFetcher.pipeUrlToFileWithRetry(this.url, this.path, (err) => {
+      this.UrlFetcher.pipeUrlToFileWithRetry(this.url, this.path, err => {
         expect(err).to.equal(error)
         this.UrlFetcher.pipeUrlToFile.callCount.should.equal(3)
         done()
@@ -61,7 +61,7 @@ describe('UrlFetcher', function () {
     it('should call pipeUrlToFile twice if only 1 error', function (done) {
       this.UrlFetcher.pipeUrlToFile.onCall(0).callsArgWith(2, 'error')
       this.UrlFetcher.pipeUrlToFile.onCall(1).callsArgWith(2)
-      this.UrlFetcher.pipeUrlToFileWithRetry(this.url, this.path, (err) => {
+      this.UrlFetcher.pipeUrlToFileWithRetry(this.url, this.path, err => {
         expect(err).to.equal(undefined)
         this.UrlFetcher.pipeUrlToFile.callCount.should.equal(2)
         done()
@@ -181,7 +181,7 @@ describe('UrlFetcher', function () {
 
       describe('with non success status code', function () {
         beforeEach(function (done) {
-          this.UrlFetcher.pipeUrlToFile(this.url, this.path, (err) => {
+          this.UrlFetcher.pipeUrlToFile(this.url, this.path, err => {
             this.callback(err)
             return done()
           })
@@ -202,7 +202,7 @@ describe('UrlFetcher', function () {
 
       return describe('with error', function () {
         beforeEach(function (done) {
-          this.UrlFetcher.pipeUrlToFile(this.url, this.path, (err) => {
+          this.UrlFetcher.pipeUrlToFile(this.url, this.path, err => {
             this.callback(err)
             return done()
           })

@@ -37,7 +37,7 @@ module.exports = CommandRunner = {
     } else {
       callback = _.once(callback)
     }
-    command = Array.from(command).map((arg) =>
+    command = Array.from(command).map(arg =>
       arg.toString().replace('$COMPILE_DIR', directory)
     )
     logger.log({ project_id, command, directory }, 'running command')
@@ -58,7 +58,7 @@ module.exports = CommandRunner = {
     const proc = spawn(command[0], command.slice(1), { cwd: directory, env })
 
     let stdout = ''
-    proc.stdout.setEncoding('utf8').on('data', (data) => (stdout += data))
+    proc.stdout.setEncoding('utf8').on('data', data => (stdout += data))
 
     proc.on('error', function (err) {
       logger.err(
@@ -99,5 +99,5 @@ module.exports = CommandRunner = {
       return callback(err)
     }
     return callback()
-  }
+  },
 }

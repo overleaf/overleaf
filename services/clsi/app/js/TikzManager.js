@@ -35,63 +35,67 @@ module.exports = TikzManager = {
       }
     }
     // if there's no output.tex, see if we are using tikz/pgf or pstool in the main file
-    return ResourceWriter.checkPath(compileDir, mainFile, function (
-      error,
-      path
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      return SafeReader.readFile(path, 65536, 'utf8', function (
-        error,
-        content
-      ) {
+    return ResourceWriter.checkPath(
+      compileDir,
+      mainFile,
+      function (error, path) {
         if (error != null) {
           return callback(error)
         }
-        const usesTikzExternalize =
-          (content != null
-            ? content.indexOf('\\tikzexternalize')
-            : undefined) >= 0
-        const usesPsTool =
-          (content != null ? content.indexOf('{pstool}') : undefined) >= 0
-        logger.log(
-          { compileDir, mainFile, usesTikzExternalize, usesPsTool },
-          'checked for packages needing main file as output.tex'
+        return SafeReader.readFile(
+          path,
+          65536,
+          'utf8',
+          function (error, content) {
+            if (error != null) {
+              return callback(error)
+            }
+            const usesTikzExternalize =
+              (content != null
+                ? content.indexOf('\\tikzexternalize')
+                : undefined) >= 0
+            const usesPsTool =
+              (content != null ? content.indexOf('{pstool}') : undefined) >= 0
+            logger.log(
+              { compileDir, mainFile, usesTikzExternalize, usesPsTool },
+              'checked for packages needing main file as output.tex'
+            )
+            const needsMainFile = usesTikzExternalize || usesPsTool
+            return callback(null, needsMainFile)
+          }
         )
-        const needsMainFile = usesTikzExternalize || usesPsTool
-        return callback(null, needsMainFile)
-      })
-    })
+      }
+    )
   },
 
   injectOutputFile(compileDir, mainFile, callback) {
     if (callback == null) {
       callback = function (error) {}
     }
-    return ResourceWriter.checkPath(compileDir, mainFile, function (
-      error,
-      path
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      return fs.readFile(path, 'utf8', function (error, content) {
+    return ResourceWriter.checkPath(
+      compileDir,
+      mainFile,
+      function (error, path) {
         if (error != null) {
           return callback(error)
         }
-        logger.log(
-          { compileDir, mainFile },
-          'copied file to output.tex as project uses packages which require it'
-        )
-        // use wx flag to ensure that output file does not already exist
-        return fs.writeFile(
-          Path.join(compileDir, 'output.tex'),
-          content,
-          { flag: 'wx' },
-          callback
-        )
-      })
-    })
-  }
+        return fs.readFile(path, 'utf8', function (error, content) {
+          if (error != null) {
+            return callback(error)
+          }
+          logger.log(
+            { compileDir, mainFile },
+            'copied file to output.tex as project uses packages which require it'
+          )
+          // use wx flag to ensure that output file does not already exist
+          return fs.writeFile(
+            Path.join(compileDir, 'output.tex'),
+            content,
+            { flag: 'wx' },
+            callback
+          )
+        })
+      }
+    )
+  },
 }

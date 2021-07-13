@@ -24,9 +24,9 @@ describe('Simple LaTeX file', function () {
 \\begin{document}
 Hello world
 \\end{document}\
-`
-        }
-      ]
+`,
+        },
+      ],
     }
     return ClsiApp.ensureRunning(() => {
       return Client.compile(

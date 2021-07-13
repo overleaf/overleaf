@@ -37,7 +37,7 @@ module.exports = DraftModeManager = {
         {
           content: content.slice(0, 1024), // \documentclass is normally v near the top
           modified_content: modified_content.slice(0, 1024),
-          filename
+          filename,
         },
         'injected draft class'
       )
@@ -53,5 +53,5 @@ module.exports = DraftModeManager = {
         // Without existing options
         .replace(/\\documentclass\{/g, '\\documentclass[draft]{')
     )
-  }
+  },
 }

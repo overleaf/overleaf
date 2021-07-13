@@ -34,16 +34,16 @@ describe('CompileManager', function () {
         '@overleaf/settings': (this.Settings = {
           path: {
             compilesDir: '/compiles/dir',
-            outputDir: '/output/dir'
+            outputDir: '/output/dir',
           },
           synctexBaseDir() {
             return '/compile'
           },
           clsi: {
             docker: {
-              image: 'SOMEIMAGE'
-            }
-          }
+              image: 'SOMEIMAGE',
+            },
+          },
         }),
 
         child_process: (this.child_process = {}),
@@ -52,8 +52,8 @@ describe('CompileManager', function () {
         './TikzManager': (this.TikzManager = {}),
         './LockManager': (this.LockManager = {}),
         fs: (this.fs = {}),
-        'fs-extra': (this.fse = { ensureDir: sinon.stub().callsArg(1) })
-      }
+        'fs-extra': (this.fse = { ensureDir: sinon.stub().callsArg(1) }),
+      },
     })
     this.callback = sinon.stub()
     this.project_id = 'project-id-123'
@@ -64,7 +64,7 @@ describe('CompileManager', function () {
       this.request = {
         resources: (this.resources = 'mock-resources'),
         project_id: this.project_id,
-        user_id: this.user_id
+        user_id: this.user_id,
       }
       this.output_files = ['foo', 'bar']
       this.Settings.compileDir = 'compiles'
@@ -132,24 +132,24 @@ describe('CompileManager', function () {
       this.output_files = [
         {
           path: 'output.log',
-          type: 'log'
+          type: 'log',
         },
         {
           path: 'output.pdf',
-          type: 'pdf'
-        }
+          type: 'pdf',
+        },
       ]
       this.build_files = [
         {
           path: 'output.log',
           type: 'log',
-          build: 1234
+          build: 1234,
         },
         {
           path: 'output.pdf',
           type: 'pdf',
-          build: 1234
-        }
+          build: 1234,
+        },
       ]
       this.request = {
         resources: (this.resources = 'mock-resources'),
@@ -160,7 +160,7 @@ describe('CompileManager', function () {
         timeout: (this.timeout = 42000),
         imageName: (this.image = 'example.com/image'),
         flags: (this.flags = ['-file-line-error']),
-        compileGroup: (this.compileGroup = 'compile-group')
+        compileGroup: (this.compileGroup = 'compile-group'),
       }
       this.env = {}
       this.Settings.compileDir = 'compiles'
@@ -201,7 +201,7 @@ describe('CompileManager', function () {
             image: this.image,
             flags: this.flags,
             environment: this.env,
-            compileGroup: this.compileGroup
+            compileGroup: this.compileGroup,
           })
           .should.equal(true)
       })
@@ -254,9 +254,9 @@ describe('CompileManager', function () {
             environment: {
               CHKTEX_OPTIONS: '-nall -e9 -e10 -w15 -w16',
               CHKTEX_EXIT_ON_ERROR: 1,
-              CHKTEX_ULIMIT_OPTIONS: '-t 5 -v 64000'
+              CHKTEX_ULIMIT_OPTIONS: '-t 5 -v 64000',
             },
-            compileGroup: this.compileGroup
+            compileGroup: this.compileGroup,
           })
           .should.equal(true)
       })
@@ -279,7 +279,7 @@ describe('CompileManager', function () {
             image: this.image,
             flags: this.flags,
             environment: this.env,
-            compileGroup: this.compileGroup
+            compileGroup: this.compileGroup,
           })
           .should.equal(true)
       })
@@ -293,7 +293,7 @@ describe('CompileManager', function () {
         this.fs.lstat = sinon.stub().callsArgWith(1, null, {
           isDirectory() {
             return true
-          }
+          },
         })
         this.proc = new EventEmitter()
         this.proc.stdout = new EventEmitter()
@@ -315,7 +315,7 @@ describe('CompileManager', function () {
             '-f',
             '--',
             `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`,
-            `${this.Settings.path.outputDir}/${this.project_id}-${this.user_id}`
+            `${this.Settings.path.outputDir}/${this.project_id}-${this.user_id}`,
           ])
           .should.equal(true)
       })
@@ -331,7 +331,7 @@ describe('CompileManager', function () {
         this.fs.lstat = sinon.stub().callsArgWith(1, null, {
           isDirectory() {
             return true
-          }
+          },
         })
         this.proc = new EventEmitter()
         this.proc.stdout = new EventEmitter()
@@ -354,7 +354,7 @@ describe('CompileManager', function () {
             '-f',
             '--',
             `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`,
-            `${this.Settings.path.outputDir}/${this.project_id}-${this.user_id}`
+            `${this.Settings.path.outputDir}/${this.project_id}-${this.user_id}`,
           ])
           .should.equal(true)
       })
@@ -380,7 +380,7 @@ describe('CompileManager', function () {
       this.column = 3
       this.file_name = 'main.tex'
       this.child_process.execFile = sinon.stub()
-      return (this.Settings.path.synctexBaseDir = (project_id) =>
+      return (this.Settings.path.synctexBaseDir = project_id =>
         `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`)
     })
 
@@ -389,7 +389,7 @@ describe('CompileManager', function () {
         this.fs.stat = sinon.stub().callsArgWith(1, null, {
           isFile() {
             return true
-          }
+          },
         })
         this.stdout = `NODE\t${this.page}\t${this.h}\t${this.v}\t${this.width}\t${this.height}\n`
         this.CommandRunner.run = sinon
@@ -419,7 +419,7 @@ describe('CompileManager', function () {
               synctex_path,
               file_path,
               this.line,
-              this.column
+              this.column,
             ],
             `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`,
             this.Settings.clsi.docker.image,
@@ -437,8 +437,8 @@ describe('CompileManager', function () {
               h: this.h,
               v: this.v,
               height: this.height,
-              width: this.width
-            }
+              width: this.width,
+            },
           ])
           .should.equal(true)
       })
@@ -470,7 +470,7 @@ describe('CompileManager', function () {
                 synctex_path,
                 file_path,
                 this.line,
-                this.column
+                this.column,
               ],
               `${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}`,
               customImageName,
@@ -487,7 +487,7 @@ describe('CompileManager', function () {
         this.fs.stat = sinon.stub().callsArgWith(1, null, {
           isFile() {
             return true
-          }
+          },
         })
         this.stdout = `NODE\t${this.Settings.path.compilesDir}/${this.project_id}-${this.user_id}/${this.file_name}\t${this.line}\t${this.column}\n`
         this.CommandRunner.run = sinon
@@ -525,8 +525,8 @@ describe('CompileManager', function () {
             {
               file: this.file_name,
               line: this.line,
-              column: this.column
-            }
+              column: this.column,
+            },
           ])
           .should.equal(true)
       })
@@ -598,7 +598,7 @@ describe('CompileManager', function () {
         '-nocol',
         '-inc',
         this.file_path,
-        `-out=${this.file_path}.wc`
+        `-out=${this.file_path}.wc`,
       ]
 
       return this.CommandRunner.run
@@ -625,7 +625,7 @@ describe('CompileManager', function () {
           mathInline: 0,
           mathDisplay: 0,
           errors: 0,
-          messages: ''
+          messages: '',
         })
         .should.equal(true)
     })
