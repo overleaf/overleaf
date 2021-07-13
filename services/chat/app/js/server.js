@@ -37,5 +37,5 @@ Router.route(app)
 
 module.exports = {
   server,
-  app
+  app,
 }

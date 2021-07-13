@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { MongoClient, ObjectId } = require('mongodb')
 
 const clientPromise = MongoClient.connect(
@@ -25,5 +25,5 @@ async function setupDb() {
 module.exports = {
   db,
   ObjectId,
-  waitForDb
+  waitForDb,
 }

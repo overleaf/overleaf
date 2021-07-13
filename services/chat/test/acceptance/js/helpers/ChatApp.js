@@ -30,7 +30,7 @@ module.exports = {
     this.initing = true
     this.callbacks.push(callback)
     waitForDb().then(() => {
-      return app.listen(3010, 'localhost', (error) => {
+      return app.listen(3010, 'localhost', error => {
         if (error != null) {
           throw error
         }
@@ -44,5 +44,5 @@ module.exports = {
         })()
       })
     })
-  }
+  },
 }

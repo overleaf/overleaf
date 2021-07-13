@@ -32,30 +32,33 @@ module.exports = ThreadManager = {
     if (thread_id === ThreadManager.GLOBAL_THREAD) {
       query = {
         project_id,
-        thread_id: { $exists: false }
+        thread_id: { $exists: false },
       }
       update = {
-        project_id
+        project_id,
       }
     } else {
       query = {
         project_id,
-        thread_id
+        thread_id,
       }
       update = {
         project_id,
-        thread_id
+        thread_id,
       }
     }
 
-    db.rooms.updateOne(query, { $set: update }, { upsert: true }, function (
-      error
-    ) {
-      if (error != null) {
-        return callback(error)
+    db.rooms.updateOne(
+      query,
+      { $set: update },
+      { upsert: true },
+      function (error) {
+        if (error != null) {
+          return callback(error)
+        }
+        db.rooms.findOne(query, callback)
       }
-      db.rooms.findOne(query, callback)
-    })
+    )
   },
 
   findAllThreadRooms(project_id, callback) {
@@ -66,11 +69,11 @@ module.exports = ThreadManager = {
       .find(
         {
           project_id: ObjectId(project_id.toString()),
-          thread_id: { $exists: true }
+          thread_id: { $exists: true },
         },
         {
           thread_id: 1,
-          resolved: 1
+          resolved: 1,
         }
       )
       .toArray(callback)
@@ -83,15 +86,15 @@ module.exports = ThreadManager = {
     db.rooms.updateOne(
       {
         project_id: ObjectId(project_id.toString()),
-        thread_id: ObjectId(thread_id.toString())
+        thread_id: ObjectId(thread_id.toString()),
       },
       {
         $set: {
           resolved: {
             user_id,
-            ts: new Date()
-          }
-        }
+            ts: new Date(),
+          },
+        },
       },
       callback
     )
@@ -104,12 +107,12 @@ module.exports = ThreadManager = {
     db.rooms.updateOne(
       {
         project_id: ObjectId(project_id.toString()),
-        thread_id: ObjectId(thread_id.toString())
+        thread_id: ObjectId(thread_id.toString()),
       },
       {
         $unset: {
-          resolved: true
-        }
+          resolved: true,
+        },
       },
       callback
     )
@@ -119,33 +122,34 @@ module.exports = ThreadManager = {
     if (callback == null) {
       callback = function (error, room_id) {}
     }
-    return this.findOrCreateThread(project_id, thread_id, function (
-      error,
-      room
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      db.rooms.deleteOne(
-        {
-          _id: room._id
-        },
-        function (error) {
-          if (error != null) {
-            return callback(error)
-          }
-          return callback(null, room._id)
+    return this.findOrCreateThread(
+      project_id,
+      thread_id,
+      function (error, room) {
+        if (error != null) {
+          return callback(error)
         }
-      )
-    })
-  }
+        db.rooms.deleteOne(
+          {
+            _id: room._id,
+          },
+          function (error) {
+            if (error != null) {
+              return callback(error)
+            }
+            return callback(null, room._id)
+          }
+        )
+      }
+    )
+  },
 }
 ;[
   'findOrCreateThread',
   'findAllThreadRooms',
   'resolveThread',
   'reopenThread',
-  'deleteThread'
-].map((method) =>
+  'deleteThread',
+].map(method =>
   metrics.timeAsyncMethod(ThreadManager, method, 'mongo.ThreadManager', logger)
 )

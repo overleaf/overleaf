@@ -6,7 +6,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 const mongodb = require('./app/js/mongodb')
 const Server = require('./app/js/server')
@@ -16,12 +16,12 @@ if (!module.parent) {
   const port =
     __guard__(
       settings.internal != null ? settings.internal.chat : undefined,
-      (x) => x.port
+      x => x.port
     ) || 3010
   const host =
     __guard__(
       settings.internal != null ? settings.internal.chat : undefined,
-      (x1) => x1.host
+      x1 => x1.host
     ) || 'localhost'
   mongodb
     .waitForDb()
@@ -34,7 +34,7 @@ if (!module.parent) {
         return logger.info(`Chat starting up, listening on ${host}:${port}`)
       })
     })
-    .catch((err) => {
+    .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
       process.exit(1)
     })

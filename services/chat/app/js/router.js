@@ -80,5 +80,5 @@ module.exports = Router = {
     )
 
     return app.get('/status', (req, res, next) => res.send('chat is alive'))
-  }
+  },
 }

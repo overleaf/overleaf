@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const request = require('request').defaults({
-  baseUrl: 'http://localhost:3010'
+  baseUrl: 'http://localhost:3010',
 })
 
 module.exports = {
@@ -20,8 +20,8 @@ module.exports = {
         url: `/project/${project_id}/messages`,
         json: {
           user_id,
-          content
-        }
+          content,
+        },
       },
       callback
     )
@@ -31,7 +31,7 @@ module.exports = {
     return request.get(
       {
         url: `/project/${project_id}/messages`,
-        json: true
+        json: true,
       },
       callback
     )
@@ -43,8 +43,8 @@ module.exports = {
         url: `/project/${project_id}/thread/${thread_id}/messages`,
         json: {
           user_id,
-          content
-        }
+          content,
+        },
       },
       callback
     )
@@ -54,7 +54,7 @@ module.exports = {
     return request.get(
       {
         url: `/project/${project_id}/threads`,
-        json: true
+        json: true,
       },
       callback
     )
@@ -65,8 +65,8 @@ module.exports = {
       {
         url: `/project/${project_id}/thread/${thread_id}/resolve`,
         json: {
-          user_id
-        }
+          user_id,
+        },
       },
       callback
     )
@@ -75,7 +75,7 @@ module.exports = {
   reopenThread(project_id, thread_id, callback) {
     return request.post(
       {
-        url: `/project/${project_id}/thread/${thread_id}/reopen`
+        url: `/project/${project_id}/thread/${thread_id}/reopen`,
       },
       callback
     )
@@ -84,7 +84,7 @@ module.exports = {
   deleteThread(project_id, thread_id, callback) {
     return request.del(
       {
-        url: `/project/${project_id}/thread/${thread_id}`
+        url: `/project/${project_id}/thread/${thread_id}`,
       },
       callback
     )
@@ -95,8 +95,8 @@ module.exports = {
       {
         url: `/project/${project_id}/thread/${thread_id}/messages/${message_id}/edit`,
         json: {
-          content
-        }
+          content,
+        },
       },
       callback
     )
@@ -105,9 +105,9 @@ module.exports = {
   deleteMessage(project_id, thread_id, message_id, callback) {
     return request.del(
       {
-        url: `/project/${project_id}/thread/${thread_id}/messages/${message_id}`
+        url: `/project/${project_id}/thread/${thread_id}/messages/${message_id}`,
       },
       callback
     )
-  }
+  },
 }

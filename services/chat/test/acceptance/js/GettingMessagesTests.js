@@ -32,20 +32,20 @@ describe('Getting messages', function () {
       this.project_id = ObjectId().toString()
       return async.series(
         [
-          (cb) =>
+          cb =>
             ChatClient.sendGlobalMessage(
               this.project_id,
               this.user_id1,
               this.content1,
               cb
             ),
-          (cb) =>
+          cb =>
             ChatClient.sendGlobalMessage(
               this.project_id,
               this.user_id2,
               this.content2,
               cb
-            )
+            ),
         ],
         done
       )
@@ -74,7 +74,7 @@ describe('Getting messages', function () {
       this.thread_id2 = ObjectId().toString()
       return async.series(
         [
-          (cb) =>
+          cb =>
             ChatClient.sendMessage(
               this.project_id,
               this.thread_id1,
@@ -82,7 +82,7 @@ describe('Getting messages', function () {
               'one',
               cb
             ),
-          (cb) =>
+          cb =>
             ChatClient.sendMessage(
               this.project_id,
               this.thread_id2,
@@ -90,7 +90,7 @@ describe('Getting messages', function () {
               'two',
               cb
             ),
-          (cb) =>
+          cb =>
             ChatClient.sendMessage(
               this.project_id,
               this.thread_id1,
@@ -98,14 +98,14 @@ describe('Getting messages', function () {
               'three',
               cb
             ),
-          (cb) =>
+          cb =>
             ChatClient.sendMessage(
               this.project_id,
               this.thread_id2,
               this.user_id2,
               'four',
               cb
-            )
+            ),
         ],
         done
       )
