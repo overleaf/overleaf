@@ -7,7 +7,7 @@
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize('contacts')
 
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -60,7 +60,7 @@ if (!module.parent) {
         return logger.info(`contacts starting up, listening on ${host}:${port}`)
       })
     })
-    .catch((err) => {
+    .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
       process.exit(1)
     })
