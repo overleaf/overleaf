@@ -22,7 +22,6 @@
     "async": "^2.6.3",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
-    "coffee-script": "^1.12.7",
     "errorhandler": "^1.5.1",
     "express": "4.17.1",
     "logger-sharelatex": "^2.2.0",
