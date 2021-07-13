@@ -20,4 +20,4 @@ updates:
     # future if we reorganise teams
     labels:
       - "dependencies"
-      - "Team-Magma"
+      - "type:maintenance"
