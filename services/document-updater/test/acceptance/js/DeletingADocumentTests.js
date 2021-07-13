@@ -103,6 +103,7 @@ describe('Deleting a document', function () {
     })
 
     it('should need to reload the doc if read again', function (done) {
+      MockWebApi.getDocument.resetHistory()
       MockWebApi.getDocument.called.should.equals(false)
       return DocUpdaterClient.getDoc(
         this.project_id,
