@@ -12,13 +12,13 @@ describe('LearnedWordsManager', function () {
     this.callback = sinon.stub()
     this.db = {
       spellingPreferences: {
-        updateOne: sinon.stub().yields()
-      }
+        updateOne: sinon.stub().yields(),
+      },
     }
     this.cache = {
       get: sinon.stub(),
       set: sinon.stub(),
-      del: sinon.stub()
+      del: sinon.stub(),
     }
     this.LearnedWordsManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -26,9 +26,9 @@ describe('LearnedWordsManager', function () {
         './MongoCache': this.cache,
         '@overleaf/metrics': {
           timeAsyncMethod: sinon.stub(),
-          inc: sinon.stub()
-        }
-      }
+          inc: sinon.stub(),
+        },
+      },
     })
   })
 
@@ -42,13 +42,13 @@ describe('LearnedWordsManager', function () {
       expect(
         this.db.spellingPreferences.updateOne.calledWith(
           {
-            token: this.token
+            token: this.token,
           },
           {
-            $addToSet: { learnedWords: this.word }
+            $addToSet: { learnedWords: this.word },
           },
           {
-            upsert: true
+            upsert: true,
           }
         )
       ).to.equal(true)
@@ -69,10 +69,10 @@ describe('LearnedWordsManager', function () {
       expect(
         this.db.spellingPreferences.updateOne.calledWith(
           {
-            token: this.token
+            token: this.token,
           },
           {
-            $pull: { learnedWords: this.word }
+            $pull: { learnedWords: this.word },
           }
         )
       ).to.equal(true)

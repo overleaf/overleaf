@@ -24,7 +24,7 @@ const wordlist = fs
   .readFileSync(WORDS)
   .toString()
   .split('\n')
-  .filter((w) => w.match(/^[a-z]+$/))
+  .filter(w => w.match(/^[a-z]+$/))
 
 const generateCorrectWords = function (n) {
   const words = []
@@ -154,7 +154,7 @@ q.drain = () => console.log('all items have been processed')
 for (let i = 0; i <= 1000; i++) {
   q.push({
     correct: Math.floor(30 * Math.random()) + 1,
-    incorrect: Math.floor(3 * Math.random())
+    incorrect: Math.floor(3 * Math.random()),
   })
 }
 // if Math.random() < 0.1

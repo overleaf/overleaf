@@ -26,7 +26,7 @@ module.exports = {
         logger.error(
           OError.tag(error, 'error processing spelling request', {
             user_id: token,
-            wordCount
+            wordCount,
           })
         )
         return res.sendStatus(500)
@@ -74,7 +74,7 @@ module.exports = {
     const token = req.params ? req.params.user_id : undefined
     logger.info(
       {
-        token
+        token,
       },
       'getting user dictionary'
     )
@@ -84,5 +84,5 @@ module.exports = {
       }
       res.send(words)
     })
-  }
+  },
 }

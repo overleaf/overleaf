@@ -9,7 +9,7 @@ const modulePath = require('path').join(
   '../../../app/js/SpellingAPIManager'
 )
 
-const promiseStub = (val) => new Promise((resolve) => resolve(val))
+const promiseStub = val => new Promise(resolve => resolve(val))
 
 describe('SpellingAPIManager', function () {
   beforeEach(function () {
@@ -21,16 +21,16 @@ describe('SpellingAPIManager', function () {
       learnWord: sinon.stub().callsArg(2),
       unlearnWord: sinon.stub().callsArg(2),
       promises: {
-        getLearnedWords: sinon.stub().returns(promiseStub(this.learnedWords))
-      }
+        getLearnedWords: sinon.stub().returns(promiseStub(this.learnedWords)),
+      },
     }
 
     this.SpellingAPIManager = SandboxedModule.require(modulePath, {
       requires: {
         './ASpell': this.ASpell,
         '@overleaf/settings': { ignoredMisspellings: ['ShareLaTeX'] },
-        './LearnedWordsManager': this.LearnedWordsManager
-      }
+        './LearnedWordsManager': this.LearnedWordsManager,
+      },
     })
   })
 
@@ -43,14 +43,14 @@ describe('SpellingAPIManager', function () {
         'are',
         'speled',
         'rong',
-        'lerned'
+        'lerned',
       ]
       this.allWords = this.nonLearnedWords.concat(this.learnedWords)
       this.misspellings = [
         { index: 2, suggestions: ['that'] },
         { index: 4, suggestions: ['spelled'] },
         { index: 5, suggestions: ['wrong', 'ring'] },
-        { index: 6, suggestions: ['learned'] }
+        { index: 6, suggestions: ['learned'] },
       ]
       this.misspellingsWithoutLearnedWords = this.misspellings.slice(0, 3)
 
@@ -58,7 +58,7 @@ describe('SpellingAPIManager', function () {
         callback(null, this.misspellings)
       }
       this.ASpell.promises = {
-        checkWords: sinon.stub().returns(promiseStub(this.misspellings))
+        checkWords: sinon.stub().returns(promiseStub(this.misspellings)),
       }
       sinon.spy(this.ASpell, 'checkWords')
     })
@@ -140,7 +140,7 @@ describe('SpellingAPIManager', function () {
           this.token,
           {
             words: this.allWords,
-            language: this.language
+            language: this.language,
           },
           (error, result) => {
             this.result = result
@@ -181,7 +181,7 @@ describe('SpellingAPIManager', function () {
   describe('learnWord', function () {
     describe('without a token', function () {
       beforeEach(function (done) {
-        this.SpellingAPIManager.learnWord(null, { word: 'banana' }, (error) => {
+        this.SpellingAPIManager.learnWord(null, { word: 'banana' }, error => {
           this.error = error
           done()
         })
@@ -196,7 +196,7 @@ describe('SpellingAPIManager', function () {
 
     describe('without a word', function () {
       beforeEach(function (done) {
-        this.SpellingAPIManager.learnWord(this.token, {}, (error) => {
+        this.SpellingAPIManager.learnWord(this.token, {}, error => {
           this.error = error
           done()
         })
@@ -215,7 +215,7 @@ describe('SpellingAPIManager', function () {
         this.SpellingAPIManager.learnWord(
           this.token,
           { word: this.word },
-          (error) => {
+          error => {
             this.error = error
             done()
           }
@@ -233,14 +233,10 @@ describe('SpellingAPIManager', function () {
   describe('unlearnWord', function () {
     describe('without a token', function () {
       beforeEach(function (done) {
-        this.SpellingAPIManager.unlearnWord(
-          null,
-          { word: 'banana' },
-          (error) => {
-            this.error = error
-            done()
-          }
-        )
+        this.SpellingAPIManager.unlearnWord(null, { word: 'banana' }, error => {
+          this.error = error
+          done()
+        })
       })
 
       it('should return an error', function () {
@@ -252,7 +248,7 @@ describe('SpellingAPIManager', function () {
 
     describe('without a word', function () {
       beforeEach(function (done) {
-        this.SpellingAPIManager.unlearnWord(this.token, {}, (error) => {
+        this.SpellingAPIManager.unlearnWord(this.token, {}, error => {
           this.error = error
           done()
         })
@@ -271,7 +267,7 @@ describe('SpellingAPIManager', function () {
         this.SpellingAPIManager.unlearnWord(
           this.token,
           { word: this.word },
-          (error) => {
+          error => {
             this.error = error
             done()
           }

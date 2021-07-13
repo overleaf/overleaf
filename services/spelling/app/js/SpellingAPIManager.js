@@ -52,7 +52,7 @@ const SpellingAPIManager = {
 
   getDic(token, callback) {
     return LearnedWordsManager.getLearnedWords(token, callback)
-  }
+  },
 }
 
 const promises = {
@@ -71,7 +71,7 @@ const promises = {
       const learnedWords = await LearnedWordsManager.promises.getLearnedWords(
         token
       )
-      const notLearntMisspellings = misspellings.filter((m) => {
+      const notLearntMisspellings = misspellings.filter(m => {
         const word = wordSlice[m.index]
         return (
           learnedWords.indexOf(word) === -1 &&
@@ -82,7 +82,7 @@ const promises = {
     } else {
       return { misspellings }
     }
-  }
+  },
 }
 
 SpellingAPIManager.runRequest = callbackify(promises.runRequest)

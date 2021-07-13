@@ -41,7 +41,7 @@ const cacheDump = setInterval(function () {
       logger.log(OError.tag(err, 'error writing cache file'))
       fs.unlink(cacheFsPathTmp, () => {})
     } else {
-      fs.rename(cacheFsPathTmp, cacheFsPath, (err) => {
+      fs.rename(cacheFsPathTmp, cacheFsPath, err => {
         if (err) {
           logger.error(OError.tag(err, 'error renaming cache file'))
         } else {
@@ -100,7 +100,7 @@ class ASpellRunner {
         {
           hits,
           total: words.length,
-          hitrate: (hits / words.length).toFixed(2)
+          hitrate: (hits / words.length).toFixed(2),
         },
         'cache hit rate'
       )
@@ -176,11 +176,11 @@ const ASpell = {
     const runner = new ASpellRunner()
     return runner.checkWords(language, words, callback)
   },
-  ASPELL_TIMEOUT: 10000
+  ASPELL_TIMEOUT: 10000,
 }
 
 const promises = {
-  checkWords: promisify(ASpell.checkWords)
+  checkWords: promisify(ASpell.checkWords),
 }
 
 ASpell.promises = promises

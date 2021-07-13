@@ -25,7 +25,7 @@ class ASpellWorker {
       '-t',
       '--encoding=utf-8',
       '-d',
-      language
+      language,
     ])
     logger.info(
       { process: this.pipe.pid, lang: this.language },
@@ -40,7 +40,7 @@ class ASpellWorker {
       )
       metrics.inc('aspellWorker', 1, {
         status: 'exit',
-        method: this.language
+        method: this.language,
       })
     })
     this.pipe.on('close', () => {
@@ -58,14 +58,14 @@ class ASpellWorker {
             stderr: error.slice(-1024),
             workerState: this.state,
             previousWorkerState,
-            closeReason: this.closeReason
+            closeReason: this.closeReason,
           }
         )
         this.callback(err, [])
         this.callback = null
       }
     })
-    this.pipe.on('error', (err) => {
+    this.pipe.on('error', err => {
       const previousWorkerState = this.state
       if (this.state !== 'killed') {
         this.state = 'error'
@@ -77,7 +77,7 @@ class ASpellWorker {
         lang: this.language,
         workerState: this.state,
         previousWorkerState,
-        closeReason: this.closeReason
+        closeReason: this.closeReason,
       })
 
       if (this.callback != null) {
@@ -87,7 +87,7 @@ class ASpellWorker {
         logger.warn(err)
       }
     })
-    this.pipe.stdin.on('error', (err) => {
+    this.pipe.stdin.on('error', err => {
       const previousWorkerState = this.state
       if (this.state !== 'killed') {
         this.state = 'error'
@@ -100,7 +100,7 @@ class ASpellWorker {
         lang: this.language,
         workerState: this.state,
         previousWorkerState,
-        closeReason: this.closeReason
+        closeReason: this.closeReason,
       })
 
       if (this.callback != null) {
@@ -114,7 +114,7 @@ class ASpellWorker {
     this.pipe.stdout.setEncoding('utf8') // ensure utf8 output is handled correctly
     var output = ''
     const endMarkerRegex = new RegExp('^[a-z][a-z]', 'gm')
-    this.pipe.stdout.on('data', (data) => {
+    this.pipe.stdout.on('data', data => {
       // We receive the language code from Aspell as the end of data marker in
       // the data.  The input is a utf8 encoded string.
       const oldPos = output.length
@@ -133,7 +133,7 @@ class ASpellWorker {
               {
                 process: this.pipe.pid,
                 lang: this.language,
-                workerState: this.state
+                workerState: this.state,
               }
             )
           )
@@ -144,7 +144,7 @@ class ASpellWorker {
     })
 
     var error = ''
-    this.pipe.stderr.on('data', (chunk) => {
+    this.pipe.stderr.on('data', chunk => {
       return (error = error + chunk)
     })
 
@@ -168,7 +168,7 @@ class ASpellWorker {
         new OError('Aspell callback already in use - SHOULD NOT HAPPEN', {
           process: this.pipe.pid,
           lang: this.language,
-          workerState: this.state
+          workerState: this.state,
         })
       )
     }
