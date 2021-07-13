@@ -32,5 +32,5 @@ module.exports = {
   db,
   ObjectId,
   addCollection,
-  waitForDb
+  waitForDb,
 }

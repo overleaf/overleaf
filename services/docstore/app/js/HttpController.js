@@ -98,19 +98,20 @@ module.exports = HttpController = {
   getAllDeletedDocs(req, res, next) {
     const { project_id } = req.params
     logger.log({ project_id }, 'getting all deleted docs')
-    DocManager.getAllDeletedDocs(project_id, { name: true }, function (
-      error,
-      docs
-    ) {
-      if (error) {
-        return next(error)
+    DocManager.getAllDeletedDocs(
+      project_id,
+      { name: true },
+      function (error, docs) {
+        if (error) {
+          return next(error)
+        }
+        res.json(
+          docs.map(doc => {
+            return { _id: doc._id.toString(), name: doc.name }
+          })
+        )
       }
-      res.json(
-        docs.map((doc) => {
-          return { _id: doc._id.toString(), name: doc.name }
-        })
-      )
-    })
+    )
   },
 
   getAllRanges(req, res, next) {
@@ -185,7 +186,7 @@ module.exports = HttpController = {
         }
         return res.json({
           modified,
-          rev
+          rev,
         })
       }
     )
@@ -304,5 +305,5 @@ module.exports = HttpController = {
         return res.sendStatus(200)
       }
     })
-  }
+  },
 }

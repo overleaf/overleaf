@@ -30,8 +30,8 @@ module.exports = {
     unArchiveAllDocs,
     unarchiveDoc,
     destroyAllDocs,
-    destroyDoc
-  }
+    destroyDoc,
+  },
 }
 
 async function archiveAllDocs(projectId) {
@@ -44,8 +44,8 @@ async function archiveAllDocs(projectId) {
       break
     }
 
-    await pMap(docs, (doc) => archiveDoc(projectId, doc), {
-      concurrency: PARALLEL_JOBS
+    await pMap(docs, doc => archiveDoc(projectId, doc), {
+      concurrency: PARALLEL_JOBS,
     })
   }
 }
@@ -55,7 +55,7 @@ async function archiveDocById(projectId, docId) {
     lines: true,
     ranges: true,
     rev: true,
-    inS3: true
+    inS3: true,
   })
 
   if (!doc) {
@@ -83,7 +83,7 @@ async function archiveDoc(projectId, doc) {
   const json = JSON.stringify({
     lines: doc.lines,
     ranges: doc.ranges,
-    schema_v: 1
+    schema_v: 1,
   })
 
   // this should never happen, but protects against memory-corruption errors that
@@ -97,7 +97,7 @@ async function archiveDoc(projectId, doc) {
   const md5 = crypto.createHash('md5').update(json).digest('hex')
   const stream = Streamifier.createReadStream(json)
   await PersistorManager.sendStream(settings.docstore.bucket, key, stream, {
-    sourceMd5: md5
+    sourceMd5: md5,
   })
   await MongoManager.markDocAsArchived(doc._id, doc.rev)
 }
@@ -119,8 +119,8 @@ async function unArchiveAllDocs(projectId) {
     if (!docs || docs.length === 0) {
       break
     }
-    await pMap(docs, (doc) => unarchiveDoc(projectId, doc._id), {
-      concurrency: PARALLEL_JOBS
+    await pMap(docs, doc => unarchiveDoc(projectId, doc._id), {
+      concurrency: PARALLEL_JOBS,
     })
   }
 }
@@ -164,7 +164,7 @@ async function unarchiveDoc(projectId, docId) {
     throw new Errors.Md5MismatchError('md5 mismatch when downloading doc', {
       key,
       sourceMd5,
-      md5
+      md5,
     })
   }
 
@@ -195,8 +195,8 @@ async function destroyAllDocs(projectId) {
     if (!docs || docs.length === 0) {
       break
     }
-    await pMap(docs, (doc) => destroyDoc(projectId, doc._id), {
-      concurrency: PARALLEL_JOBS
+    await pMap(docs, doc => destroyDoc(projectId, doc._id), {
+      concurrency: PARALLEL_JOBS,
     })
   }
 }
@@ -207,7 +207,7 @@ async function destroyDoc(projectId, docId) {
     'removing doc from mongo and persistor'
   )
   const doc = await MongoManager.findDoc(projectId, docId, {
-    inS3: 1
+    inS3: 1,
   })
   if (!doc) {
     throw new Errors.NotFoundError('Doc not found in Mongo')
@@ -243,7 +243,7 @@ async function destroyArchiveWithRetry(projectId, docId) {
 async function _streamToString(stream) {
   const chunks = []
   return new Promise((resolve, reject) => {
-    stream.on('data', (chunk) => chunks.push(chunk))
+    stream.on('data', chunk => chunks.push(chunk))
     stream.on('error', reject)
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
   })

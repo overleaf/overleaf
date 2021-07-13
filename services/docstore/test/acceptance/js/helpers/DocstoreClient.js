@@ -19,7 +19,7 @@ const Persistor = require('../../../../app/js/PersistorManager')
 async function streamToString(stream) {
   const chunks = []
   return new Promise((resolve, reject) => {
-    stream.on('data', (chunk) => chunks.push(chunk))
+    stream.on('data', chunk => chunks.push(chunk))
     stream.on('error', reject)
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
   })
@@ -54,7 +54,7 @@ module.exports = DocstoreClient = {
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`,
         json: true,
-        qs
+        qs,
       },
       callback
     )
@@ -64,7 +64,7 @@ module.exports = DocstoreClient = {
     request.get(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}/deleted`,
-        json: true
+        json: true,
       },
       callback
     )
@@ -77,7 +77,7 @@ module.exports = DocstoreClient = {
     return request.get(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc`,
-        json: true
+        json: true,
       },
       (req, res, body) => {
         callback(req, res, body)
@@ -89,7 +89,7 @@ module.exports = DocstoreClient = {
     request.get(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc-deleted`,
-        json: true
+        json: true,
       },
       (error, res, body) => {
         if (error) return callback(error)
@@ -108,7 +108,7 @@ module.exports = DocstoreClient = {
     return request.get(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/ranges`,
-        json: true
+        json: true,
       },
       callback
     )
@@ -124,8 +124,8 @@ module.exports = DocstoreClient = {
         json: {
           lines,
           version,
-          ranges
-        }
+          ranges,
+        },
       },
       callback
     )
@@ -165,7 +165,7 @@ module.exports = DocstoreClient = {
     request.patch(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`,
-        json: { name, deleted: true, deletedAt }
+        json: { name, deleted: true, deletedAt },
       },
       callback
     )
@@ -177,7 +177,7 @@ module.exports = DocstoreClient = {
     }
     return request.post(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/archive`
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/archive`,
       },
       callback
     )
@@ -189,7 +189,7 @@ module.exports = DocstoreClient = {
     }
     return request.post(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}/archive`
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}/archive`,
       },
       callback
     )
@@ -201,7 +201,7 @@ module.exports = DocstoreClient = {
     }
     return request.post(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/destroy`
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/destroy`,
       },
       callback
     )
@@ -213,9 +213,9 @@ module.exports = DocstoreClient = {
       settings.docstore.bucket,
       `${project_id}/${doc_id}`
     )
-      .then((data) => {
+      .then(data => {
         callback(null, JSON.parse(data))
       })
       .catch(callback)
-  }
+  },
 }

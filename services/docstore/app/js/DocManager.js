@@ -38,58 +38,67 @@ module.exports = DocManager = {
       return callback('must include inS3 when getting doc')
     }
 
-    return MongoManager.findDoc(project_id, doc_id, filter, function (
-      err,
-      doc
-    ) {
-      if (err != null) {
-        return callback(err)
-      } else if (doc == null) {
-        return callback(
-          new Errors.NotFoundError(
-            `No such doc: ${doc_id} in project ${project_id}`
+    return MongoManager.findDoc(
+      project_id,
+      doc_id,
+      filter,
+      function (err, doc) {
+        if (err != null) {
+          return callback(err)
+        } else if (doc == null) {
+          return callback(
+            new Errors.NotFoundError(
+              `No such doc: ${doc_id} in project ${project_id}`
+            )
           )
-        )
-      } else if (doc != null ? doc.inS3 : undefined) {
-        return DocArchive.unarchiveDoc(project_id, doc_id, function (err) {
-          if (err != null) {
-            logger.err({ err, project_id, doc_id }, 'error unarchiving doc')
-            return callback(err)
-          }
-          return DocManager._getDoc(project_id, doc_id, filter, callback)
-        })
-      } else {
-        if (filter.version) {
-          return MongoManager.getDocVersion(doc_id, function (error, version) {
-            if (error != null) {
-              return callback(error)
+        } else if (doc != null ? doc.inS3 : undefined) {
+          return DocArchive.unarchiveDoc(project_id, doc_id, function (err) {
+            if (err != null) {
+              logger.err({ err, project_id, doc_id }, 'error unarchiving doc')
+              return callback(err)
             }
-            doc.version = version
-            return callback(err, doc)
+            return DocManager._getDoc(project_id, doc_id, filter, callback)
           })
         } else {
-          return callback(err, doc)
+          if (filter.version) {
+            return MongoManager.getDocVersion(
+              doc_id,
+              function (error, version) {
+                if (error != null) {
+                  return callback(error)
+                }
+                doc.version = version
+                return callback(err, doc)
+              }
+            )
+          } else {
+            return callback(err, doc)
+          }
         }
       }
-    })
+    )
   },
 
   isDocDeleted(projectId, docId, callback) {
-    MongoManager.findDoc(projectId, docId, { deleted: true }, function (
-      err,
-      doc
-    ) {
-      if (err) {
-        return callback(err)
+    MongoManager.findDoc(
+      projectId,
+      docId,
+      { deleted: true },
+      function (err, doc) {
+        if (err) {
+          return callback(err)
+        }
+        if (!doc) {
+          return callback(
+            new Errors.NotFoundError(
+              `No such project/doc: ${projectId}/${docId}`
+            )
+          )
+        }
+        // `doc.deleted` is `undefined` for non deleted docs
+        callback(null, Boolean(doc.deleted))
       }
-      if (!doc) {
-        return callback(
-          new Errors.NotFoundError(`No such project/doc: ${projectId}/${docId}`)
-        )
-      }
-      // `doc.deleted` is `undefined` for non deleted docs
-      callback(null, Boolean(doc.deleted))
-    })
+    )
   },
 
   getFullDoc(project_id, doc_id, callback) {
@@ -105,7 +114,7 @@ module.exports = DocManager = {
         deleted: true,
         version: true,
         ranges: true,
-        inS3: true
+        inS3: true,
       },
       function (err, doc) {
         if (err != null) {
@@ -181,7 +190,7 @@ module.exports = DocManager = {
         lines: true,
         version: true,
         ranges: true,
-        inS3: true
+        inS3: true,
       },
       function (err, doc) {
         let updateLines, updateRanges, updateVersion
@@ -244,7 +253,7 @@ module.exports = DocManager = {
                 project_id,
                 doc_id,
                 oldVersion: doc != null ? doc.version : undefined,
-                newVersion: version
+                newVersion: version,
               },
               'updating doc version'
             )
@@ -290,7 +299,7 @@ module.exports = DocManager = {
 
       if (meta.deleted && Settings.docstore.archiveOnSoftDelete) {
         // The user will not read this doc anytime soon. Flush it out of mongo.
-        DocArchive.archiveDocById(project_id, doc_id, (err) => {
+        DocArchive.archiveDocById(project_id, doc_id, err => {
           if (err) {
             logger.warn(
               { project_id, doc_id, err },
@@ -302,5 +311,5 @@ module.exports = DocManager = {
 
       MongoManager.patchDoc(project_id, doc_id, meta, callback)
     })
-  }
+  },
 }

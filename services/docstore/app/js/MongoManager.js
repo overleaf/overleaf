@@ -25,10 +25,10 @@ module.exports = MongoManager = {
     db.docs.findOne(
       {
         _id: ObjectId(doc_id.toString()),
-        project_id: ObjectId(project_id.toString())
+        project_id: ObjectId(project_id.toString()),
       },
       {
-        projection: filter
+        projection: filter,
       },
       callback
     )
@@ -39,12 +39,12 @@ module.exports = MongoManager = {
       .find(
         {
           project_id: ObjectId(project_id.toString()),
-          deleted: true
+          deleted: true,
         },
         {
           projection: filter,
           sort: { deletedAt: -1 },
-          limit: Settings.max_deleted_docs
+          limit: Settings.max_deleted_docs,
         }
       )
       .toArray(callback)
@@ -56,7 +56,7 @@ module.exports = MongoManager = {
       query.deleted = { $ne: true }
     }
     const queryOptions = {
-      projection: filter
+      projection: filter,
     }
     if (options.limit) {
       queryOptions.limit = options.limit
@@ -67,7 +67,7 @@ module.exports = MongoManager = {
   getArchivedProjectDocs(project_id, maxResults, callback) {
     const query = {
       project_id: ObjectId(project_id.toString()),
-      inS3: true
+      inS3: true,
     }
     db.docs
       .find(query, { projection: { _id: 1 }, limit: maxResults })
@@ -77,7 +77,7 @@ module.exports = MongoManager = {
   getNonArchivedProjectDocs(project_id, maxResults, callback) {
     const query = {
       project_id: ObjectId(project_id.toString()),
-      inS3: { $ne: true }
+      inS3: { $ne: true },
     }
     db.docs.find(query, { limit: maxResults }).toArray(callback)
   },
@@ -86,7 +86,7 @@ module.exports = MongoManager = {
     const query = {
       project_id: ObjectId(project_id.toString()),
       deleted: { $ne: true },
-      inS3: true
+      inS3: true,
     }
     db.docs
       .find(query, { projection: { _id: 1 }, limit: maxResults })
@@ -97,11 +97,11 @@ module.exports = MongoManager = {
     const update = {
       $set: updates,
       $inc: {
-        rev: 1
+        rev: 1,
       },
       $unset: {
-        inS3: true
-      }
+        inS3: true,
+      },
     }
     update.$set.project_id = ObjectId(project_id)
     db.docs.updateOne(
@@ -116,7 +116,7 @@ module.exports = MongoManager = {
     db.docs.updateOne(
       {
         _id: ObjectId(doc_id),
-        project_id: ObjectId(project_id)
+        project_id: ObjectId(project_id),
       },
       { $set: meta },
       callback
@@ -126,14 +126,14 @@ module.exports = MongoManager = {
   markDocAsArchived(doc_id, rev, callback) {
     const update = {
       $set: {},
-      $unset: {}
+      $unset: {},
     }
     update.$set.inS3 = true
     update.$unset.lines = true
     update.$unset.ranges = true
     const query = {
       _id: doc_id,
-      rev
+      rev,
     }
     db.docs.updateOne(query, update, callback)
   },
@@ -144,12 +144,12 @@ module.exports = MongoManager = {
     }
     db.docOps.findOne(
       {
-        doc_id: ObjectId(doc_id)
+        doc_id: ObjectId(doc_id),
       },
       {
         projection: {
-          version: 1
-        }
+          version: 1,
+        },
       },
       function (error, doc) {
         if (error != null) {
@@ -166,13 +166,13 @@ module.exports = MongoManager = {
     }
     db.docOps.updateOne(
       {
-        doc_id: ObjectId(doc_id)
+        doc_id: ObjectId(doc_id),
       },
       {
-        $set: { version }
+        $set: { version },
       },
       {
-        upsert: true
+        upsert: true,
       },
       callback
     )
@@ -181,7 +181,7 @@ module.exports = MongoManager = {
   destroyDoc(doc_id, callback) {
     db.docs.deleteOne(
       {
-        _id: ObjectId(doc_id)
+        _id: ObjectId(doc_id),
       },
       function (err) {
         if (err != null) {
@@ -189,13 +189,13 @@ module.exports = MongoManager = {
         }
         db.docOps.deleteOne(
           {
-            doc_id: ObjectId(doc_id)
+            doc_id: ObjectId(doc_id),
           },
           callback
         )
       }
     )
-  }
+  },
 }
 
 const methods = Object.getOwnPropertyNames(MongoManager)

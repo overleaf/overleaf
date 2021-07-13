@@ -32,23 +32,19 @@ module.exports = {
     this.initing = true
     this.callbacks.push(callback)
     waitForDb().then(() => {
-      return app.listen(
-        settings.internal.docstore.port,
-        'localhost',
-        (error) => {
-          if (error != null) {
-            throw error
-          }
-          this.running = true
-          return (() => {
-            const result = []
-            for (callback of Array.from(this.callbacks)) {
-              result.push(callback())
-            }
-            return result
-          })()
+      return app.listen(settings.internal.docstore.port, 'localhost', error => {
+        if (error != null) {
+          throw error
         }
-      )
+        this.running = true
+        return (() => {
+          const result = []
+          for (callback of Array.from(this.callbacks)) {
+            result.push(callback())
+          }
+          return result
+        })()
+      })
     })
-  }
+  },
 }

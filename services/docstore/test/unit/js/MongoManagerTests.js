@@ -24,11 +24,11 @@ describe('MongoManager', function () {
       requires: {
         './mongodb': {
           db: (this.db = { docs: {}, docOps: {} }),
-          ObjectId
+          ObjectId,
         },
         '@overleaf/metrics': { timeAsyncMethod: sinon.stub() },
-        '@overleaf/settings': { max_deleted_docs: 42 }
-      }
+        '@overleaf/settings': { max_deleted_docs: 42 },
+      },
     })
     this.project_id = ObjectId().toString()
     this.doc_id = ObjectId().toString()
@@ -54,10 +54,10 @@ describe('MongoManager', function () {
         .calledWith(
           {
             _id: ObjectId(this.doc_id),
-            project_id: ObjectId(this.project_id)
+            project_id: ObjectId(this.project_id),
           },
           {
-            projection: this.filter
+            projection: this.filter,
           }
         )
         .should.equal(true)
@@ -85,10 +85,10 @@ describe('MongoManager', function () {
       this.db.docs.updateOne.should.have.been.calledWith(
         {
           _id: ObjectId(this.doc_id),
-          project_id: ObjectId(this.project_id)
+          project_id: ObjectId(this.project_id),
         },
         {
-          $set: this.meta
+          $set: this.meta,
         },
         this.callback
       )
@@ -105,7 +105,7 @@ describe('MongoManager', function () {
       this.db.docs.find = sinon.stub().returns({
         toArray: sinon
           .stub()
-          .callsArgWith(0, null, [this.doc, this.doc3, this.doc4])
+          .callsArgWith(0, null, [this.doc, this.doc3, this.doc4]),
       })
     })
 
@@ -124,10 +124,10 @@ describe('MongoManager', function () {
           .calledWith(
             {
               project_id: ObjectId(this.project_id),
-              deleted: { $ne: true }
+              deleted: { $ne: true },
             },
             {
-              projection: this.filter
+              projection: this.filter,
             }
           )
           .should.equal(true)
@@ -154,10 +154,10 @@ describe('MongoManager', function () {
         return this.db.docs.find
           .calledWith(
             {
-              project_id: ObjectId(this.project_id)
+              project_id: ObjectId(this.project_id),
             },
             {
-              projection: this.filter
+              projection: this.filter,
             }
           )
           .should.equal(true)
@@ -178,7 +178,7 @@ describe('MongoManager', function () {
       this.doc2 = { _id: '2', name: 'mock-doc2.tex' }
       this.doc3 = { _id: '3', name: 'mock-doc3.tex' }
       this.db.docs.find = sinon.stub().returns({
-        toArray: sinon.stub().yields(null, [this.doc1, this.doc2, this.doc3])
+        toArray: sinon.stub().yields(null, [this.doc1, this.doc2, this.doc3]),
       })
       this.callback.callsFake(done)
       this.MongoManager.getProjectsDeletedDocs(
@@ -192,7 +192,7 @@ describe('MongoManager', function () {
       this.db.docs.find
         .calledWith({
           project_id: ObjectId(this.project_id),
-          deleted: true
+          deleted: true,
         })
         .should.equal(true)
     })
@@ -202,7 +202,7 @@ describe('MongoManager', function () {
         .calledWith(sinon.match.any, {
           projection: this.filter,
           sort: { deletedAt: -1 },
-          limit: 42
+          limit: 42,
         })
         .should.equal(true)
     })
@@ -225,7 +225,7 @@ describe('MongoManager', function () {
         this.project_id,
         this.doc_id,
         { lines: this.lines },
-        (err) => {
+        err => {
           const args = this.db.docs.updateOne.args[0]
           assert.deepEqual(args[0], { _id: ObjectId(this.doc_id) })
           assert.equal(args[1].$set.lines, this.lines)
@@ -241,7 +241,7 @@ describe('MongoManager', function () {
         this.project_id,
         this.doc_id,
         { lines: this.lines },
-        (err) => {
+        err => {
           err.should.equal(this.stubbedErr)
           return done()
         }
@@ -258,13 +258,13 @@ describe('MongoManager', function () {
 
     it('should destroy the doc', function () {
       return sinon.assert.calledWith(this.db.docs.deleteOne, {
-        _id: ObjectId('123456789012')
+        _id: ObjectId('123456789012'),
       })
     })
 
     return it('should destroy the docOps', function () {
       return sinon.assert.calledWith(this.db.docOps.deleteOne, {
-        doc_id: ObjectId('123456789012')
+        doc_id: ObjectId('123456789012'),
       })
     })
   })
@@ -282,7 +282,7 @@ describe('MongoManager', function () {
           .calledWith(
             { doc_id: ObjectId(this.doc_id) },
             {
-              projection: { version: 1 }
+              projection: { version: 1 },
             }
           )
           .should.equal(true)
@@ -320,15 +320,15 @@ describe('MongoManager', function () {
       return this.db.docOps.updateOne
         .calledWith(
           {
-            doc_id: ObjectId(this.doc_id)
+            doc_id: ObjectId(this.doc_id),
           },
           {
             $set: {
-              version: this.version
-            }
+              version: this.version,
+            },
           },
           {
-            upsert: true
+            upsert: true,
           }
         )
         .should.equal(true)
