@@ -54,8 +54,9 @@ describe('EventLogger', function () {
       })
 
       return it('should increment the valid event metric', function () {
-        return this.metrics.inc.calledWith(`event.${this.channel}.valid`, 1)
-          .should.equal.true
+        return this.metrics.inc
+          .calledWith(`event.${this.channel}.valid`, 1)
+          .should.equals(true)
       })
     })
 
@@ -78,8 +79,9 @@ describe('EventLogger', function () {
       })
 
       return it('should increment the duplicate event metric', function () {
-        return this.metrics.inc.calledWith(`event.${this.channel}.duplicate`, 1)
-          .should.equal.true
+        return this.metrics.inc
+          .calledWith(`event.${this.channel}.duplicate`, 1)
+          .should.equals(true)
       })
     })
 
@@ -107,10 +109,9 @@ describe('EventLogger', function () {
       })
 
       return it('should increment the out-of-order event metric', function () {
-        return this.metrics.inc.calledWith(
-          `event.${this.channel}.out-of-order`,
-          1
-        ).should.equal.true
+        return this.metrics.inc
+          .calledWith(`event.${this.channel}.out-of-order`, 1)
+          .should.equals(true)
       })
     })
 
