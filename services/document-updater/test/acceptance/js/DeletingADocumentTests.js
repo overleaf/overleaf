@@ -103,7 +103,7 @@ describe('Deleting a document', function () {
     })
 
     it('should need to reload the doc if read again', function (done) {
-      MockWebApi.getDocument.called.should.equal.false
+      MockWebApi.getDocument.called.should.equals(false)
       return DocUpdaterClient.getDoc(
         this.project_id,
         this.doc_id,
@@ -164,7 +164,7 @@ describe('Deleting a document', function () {
     })
 
     it('should need to reload the doc if read again', function (done) {
-      MockWebApi.getDocument.called.should.equal.false
+      MockWebApi.getDocument.called.should.equals(false)
       return DocUpdaterClient.getDoc(
         this.project_id,
         this.doc_id,
