@@ -6,4 +6,4 @@ spelling
 --env-pass-through=
 --node-version=12.21.0
 --public-repo=False
---script-version=3.8.0
+--script-version=3.11.0
