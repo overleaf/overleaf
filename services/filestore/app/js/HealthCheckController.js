@@ -24,7 +24,7 @@ async function checkCanGetFiles() {
   const bucket = Settings.filestore.stores.user_files
 
   const buffer = new streamBuffers.WritableStreamBuffer({
-    initialSize: 100
+    initialSize: 100,
   })
 
   const sourceStream = await FileHandler.getFile(bucket, key, {})
@@ -62,8 +62,8 @@ module.exports = {
   check(req, res, next) {
     Promise.all([checkCanGetFiles(), checkFileConvert()])
       .then(() => res.sendStatus(200))
-      .catch((err) => {
+      .catch(err => {
         next(err)
       })
-  }
+  },
 }

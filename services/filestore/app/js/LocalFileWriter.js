@@ -10,10 +10,10 @@ const { WriteError } = require('./Errors')
 module.exports = {
   promises: {
     writeStream,
-    deleteFile
+    deleteFile,
   },
   writeStream: callbackify(writeStream),
-  deleteFile: callbackify(deleteFile)
+  deleteFile: callbackify(deleteFile),
 }
 
 const pipeline = promisify(Stream.pipeline)

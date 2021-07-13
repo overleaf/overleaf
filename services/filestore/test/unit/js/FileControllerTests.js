@@ -17,9 +17,9 @@ describe('FileController', function () {
   const settings = {
     s3: {
       buckets: {
-        user_files: 'user_files'
-      }
-    }
+        user_files: 'user_files',
+      },
+    },
   }
   const fileSize = 1234
   const fileStream = 'fileStream'
@@ -33,7 +33,7 @@ describe('FileController', function () {
     PersistorManager = {
       sendStream: sinon.stub().yields(),
       copyObject: sinon.stub().resolves(),
-      deleteObject: sinon.stub().yields()
+      deleteObject: sinon.stub().yields(),
     }
 
     FileHandler = {
@@ -43,12 +43,12 @@ describe('FileController', function () {
       deleteProject: sinon.stub().yields(),
       insertFile: sinon.stub().yields(),
       getDirectorySize: sinon.stub().yields(null, fileSize),
-      getRedirectUrl: sinon.stub().yields(null, null)
+      getRedirectUrl: sinon.stub().yields(null, null),
     }
 
     LocalFileWriter = {}
     stream = {
-      pipeline: sinon.stub()
+      pipeline: sinon.stub(),
     }
 
     FileController = SandboxedModule.require(modulePath, {
@@ -60,10 +60,10 @@ describe('FileController', function () {
         stream: stream,
         '@overleaf/settings': settings,
         '@overleaf/metrics': {
-          inc() {}
-        }
+          inc() {},
+        },
       },
-      globals: { console }
+      globals: { console },
     })
 
     req = {
@@ -73,19 +73,19 @@ describe('FileController', function () {
       query: {},
       params: {
         project_id: projectId,
-        file_id: fileId
+        file_id: fileId,
       },
       headers: {},
       requestLogger: {
         setMessage: sinon.stub(),
-        addFields: sinon.stub()
-      }
+        addFields: sinon.stub(),
+      },
     }
 
     res = {
       set: sinon.stub().returnsThis(),
       sendStatus: sinon.stub().returnsThis(),
-      status: sinon.stub().returnsThis()
+      status: sinon.stub().returnsThis(),
     }
 
     next = sinon.stub()
@@ -104,7 +104,7 @@ describe('FileController', function () {
 
     it('should send a 200 if the cacheWarm param is true', function (done) {
       req.query.cacheWarm = true
-      res.sendStatus = (statusCode) => {
+      res.sendStatus = statusCode => {
         statusCode.should.equal(200)
         done()
       }
@@ -165,7 +165,7 @@ describe('FileController', function () {
           bucket,
           key,
           format: undefined,
-          style: undefined
+          style: undefined,
         }
       })
 
@@ -220,7 +220,7 @@ describe('FileController', function () {
         new Errors.NotFoundError({ message: 'not found', info: {} })
       )
 
-      res.sendStatus = (code) => {
+      res.sendStatus = code => {
         expect(code).to.equal(404)
         done()
       }
@@ -238,7 +238,7 @@ describe('FileController', function () {
 
   describe('insertFile', function () {
     it('should send bucket name key and res to PersistorManager', function (done) {
-      res.sendStatus = (code) => {
+      res.sendStatus = code => {
         expect(FileHandler.insertFile).to.have.been.calledWith(bucket, key, req)
         expect(code).to.equal(200)
         done()
@@ -256,13 +256,13 @@ describe('FileController', function () {
       req.body = {
         source: {
           project_id: oldProjectId,
-          file_id: oldFileId
-        }
+          file_id: oldFileId,
+        },
       }
     })
 
     it('should send bucket name and both keys to PersistorManager', function (done) {
-      res.sendStatus = (code) => {
+      res.sendStatus = code => {
         code.should.equal(200)
         expect(PersistorManager.copyObject).to.have.been.calledWith(
           bucket,
@@ -278,7 +278,7 @@ describe('FileController', function () {
       PersistorManager.copyObject.rejects(
         new Errors.NotFoundError({ message: 'not found', info: {} })
       )
-      res.sendStatus = (code) => {
+      res.sendStatus = code => {
         code.should.equal(404)
         done()
       }
@@ -287,7 +287,7 @@ describe('FileController', function () {
 
     it('should send an error if there was an error', function (done) {
       PersistorManager.copyObject.rejects(error)
-      FileController.copyFile(req, res, (err) => {
+      FileController.copyFile(req, res, err => {
         expect(err).to.equal(error)
         done()
       })
@@ -296,7 +296,7 @@ describe('FileController', function () {
 
   describe('delete file', function () {
     it('should tell the file handler', function (done) {
-      res.sendStatus = (code) => {
+      res.sendStatus = code => {
         code.should.equal(204)
         expect(FileHandler.deleteFile).to.have.been.calledWith(bucket, key)
         done()
@@ -313,7 +313,7 @@ describe('FileController', function () {
 
   describe('delete project', function () {
     it('should tell the file handler', function (done) {
-      res.sendStatus = (code) => {
+      res.sendStatus = code => {
         code.should.equal(204)
         expect(FileHandler.deleteProject).to.have.been.calledWith(bucket, key)
         done()
@@ -331,10 +331,10 @@ describe('FileController', function () {
   describe('directorySize', function () {
     it('should return total directory size bytes', function (done) {
       FileController.directorySize(req, {
-        json: (result) => {
+        json: result => {
           expect(result['total bytes']).to.equal(fileSize)
           done()
-        }
+        },
       })
     })
 

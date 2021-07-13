@@ -1,6 +1,6 @@
 const streamifier = require('streamifier')
 const rp = require('request-promise-native').defaults({
-  resolveWithFullResponse: true
+  resolveWithFullResponse: true,
 })
 
 const { expect } = require('chai')
@@ -11,7 +11,7 @@ module.exports = {
   expectPersistorToHaveFile,
   expectPersistorNotToHaveFile,
   streamToString,
-  getMetric
+  getMetric,
 }
 
 async function getMetric(filestoreUrl, metric) {
@@ -25,7 +25,7 @@ async function getMetric(filestoreUrl, metric) {
 function streamToString(stream) {
   const chunks = []
   return new Promise((resolve, reject) => {
-    stream.on('data', (chunk) => chunks.push(chunk))
+    stream.on('data', chunk => chunks.push(chunk))
     stream.on('error', reject)
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
     stream.resume()

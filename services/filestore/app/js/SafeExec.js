@@ -45,7 +45,7 @@ function safeExec(command, options, callback) {
           new FailedCommandError('failed to kill process after timeout', {
             command,
             options,
-            pid: child.pid
+            pid: child.pid,
           })
         )
       }
@@ -62,13 +62,13 @@ function safeExec(command, options, callback) {
     cleanup()
   })
 
-  child.on('error', (err) => {
+  child.on('error', err => {
     cleanup(err)
   })
-  child.stdout.on('data', (chunk) => {
+  child.stdout.on('data', chunk => {
     stdout += chunk
   })
-  child.stderr.on('data', (chunk) => {
+  child.stderr.on('data', chunk => {
     stderr += chunk
   })
 }

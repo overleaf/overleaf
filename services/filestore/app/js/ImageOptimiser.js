@@ -6,8 +6,8 @@ const safeExec = require('./SafeExec').promises
 module.exports = {
   compressPng: callbackify(compressPng),
   promises: {
-    compressPng
-  }
+    compressPng,
+  },
 }
 
 async function compressPng(localPath, callback) {
@@ -15,7 +15,7 @@ async function compressPng(localPath, callback) {
   const args = ['optipng', localPath]
   const opts = {
     timeout: 30 * 1000,
-    killSignal: 'SIGKILL'
+    killSignal: 'SIGKILL',
   }
 
   try {

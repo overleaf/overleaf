@@ -11,7 +11,7 @@ class FailedCommandError extends OError {
   constructor(command, code, stdout, stderr) {
     super('command failed with error exit code', {
       command,
-      code
+      code,
     })
     this.stdout = stdout
     this.stderr = stderr
@@ -26,5 +26,5 @@ module.exports = {
   HealthCheckError,
   TimeoutError,
   InvalidParametersError,
-  ...Errors
+  ...Errors,
 }

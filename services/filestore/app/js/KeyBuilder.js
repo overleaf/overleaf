@@ -8,7 +8,7 @@ module.exports = {
   publicFileKeyMiddleware,
   publicProjectKeyMiddleware,
   bucketFileKeyMiddleware,
-  templateFileKeyMiddleware
+  templateFileKeyMiddleware,
 }
 
 function getConvertedFolderKey(key) {
@@ -68,7 +68,7 @@ function templateFileKeyMiddleware(req, res, next) {
     template_id: templateId,
     format,
     version,
-    sub_type: subType
+    sub_type: subType,
   } = req.params
 
   req.key = `${templateId}/v/${version}/${format}`

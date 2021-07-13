@@ -8,7 +8,7 @@ describe('KeybuilderTests', function () {
 
   beforeEach(function () {
     KeyBuilder = SandboxedModule.require(modulePath, {
-      requires: { '@overleaf/settings': {} }
+      requires: { '@overleaf/settings': {} },
     })
   })
 
@@ -28,7 +28,7 @@ describe('KeybuilderTests', function () {
     it('should add format first, then style', function () {
       const opts = {
         style: 'thumbnail',
-        format: 'png'
+        format: 'png',
       }
       const newKey = KeyBuilder.addCachingToKey(key, opts)
       newKey.should.equal(`${key}-converted-cache/format-png-style-thumbnail`)
