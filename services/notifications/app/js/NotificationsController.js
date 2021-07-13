@@ -50,7 +50,7 @@ module.exports = {
     logger.log(
       {
         user_id: req.params.user_id,
-        notification_id: req.params.notification_id
+        notification_id: req.params.notification_id,
       },
       'mark id notification as read'
     )
@@ -83,5 +83,5 @@ module.exports = {
       notification_key,
       (err, notifications) => res.sendStatus(200)
     )
-  }
+  },
 }

@@ -35,23 +35,23 @@ describe('Notifications Tests', function () {
         find: this.findStub,
         count: this.countStub,
         updateOne: this.updateOneStub,
-        deleteOne: this.deleteOneStub
-      }
+        deleteOne: this.deleteOneStub,
+      },
     }
 
     this.notifications = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': {},
         './mongodb': { db: this.db, ObjectId },
-        '@overleaf/metrics': { timeAsyncMethod: sinon.stub() }
-      }
+        '@overleaf/metrics': { timeAsyncMethod: sinon.stub() },
+      },
     })
 
     this.stubbedNotification = {
       user_id: ObjectId(user_id),
       key: 'notification-key',
       messageOpts: 'some info',
-      templateKey: 'template-key'
+      templateKey: 'template-key',
     }
     return (this.stubbedNotificationArray = [this.stubbedNotification])
   })
@@ -65,7 +65,7 @@ describe('Notifications Tests', function () {
           notifications.should.equal(this.stubbedNotificationArray)
           assert.deepEqual(this.findStub.args[0][0], {
             user_id: ObjectId(user_id),
-            templateKey: { $exists: true }
+            templateKey: { $exists: true },
           })
           return done()
         }
@@ -79,17 +79,17 @@ describe('Notifications Tests', function () {
         user_id: ObjectId(user_id),
         key: 'notification-key',
         messageOpts: 'some info',
-        templateKey: 'template-key'
+        templateKey: 'template-key',
       }
       this.expectedDocument = {
         user_id: this.stubbedNotification.user_id,
         key: 'notification-key',
         messageOpts: 'some info',
-        templateKey: 'template-key'
+        templateKey: 'template-key',
       }
       this.expectedQuery = {
         user_id: this.stubbedNotification.user_id,
-        key: 'notification-key'
+        key: 'notification-key',
       }
       this.updateOneStub.yields()
       return this.countStub.yields(null, 0)
@@ -99,7 +99,7 @@ describe('Notifications Tests', function () {
       return this.notifications.addNotification(
         user_id,
         this.stubbedNotification,
-        (err) => {
+        err => {
           expect(err).not.to.exist
           sinon.assert.calledWith(
             this.updateOneStub,
@@ -121,7 +121,7 @@ describe('Notifications Tests', function () {
         return this.notifications.addNotification(
           user_id,
           this.stubbedNotification,
-          (err) => {
+          err => {
             expect(err).not.to.exist
             sinon.assert.notCalled(this.updateOneStub)
             return done()
@@ -134,7 +134,7 @@ describe('Notifications Tests', function () {
         return this.notifications.addNotification(
           user_id,
           this.stubbedNotification,
-          (err) => {
+          err => {
             expect(err).not.to.exist
             sinon.assert.calledWith(
               this.updateOneStub,
@@ -155,18 +155,18 @@ describe('Notifications Tests', function () {
           key: 'notification-key',
           messageOpts: 'some info',
           templateKey: 'template-key',
-          expires: '2922-02-13T09:32:56.289Z'
+          expires: '2922-02-13T09:32:56.289Z',
         }
         this.expectedDocument = {
           user_id: this.stubbedNotification.user_id,
           key: 'notification-key',
           messageOpts: 'some info',
           templateKey: 'template-key',
-          expires: new Date(this.stubbedNotification.expires)
+          expires: new Date(this.stubbedNotification.expires),
         }
         return (this.expectedQuery = {
           user_id: this.stubbedNotification.user_id,
-          key: 'notification-key'
+          key: 'notification-key',
         })
       })
 
@@ -174,7 +174,7 @@ describe('Notifications Tests', function () {
         return this.notifications.addNotification(
           user_id,
           this.stubbedNotification,
-          (err) => {
+          err => {
             expect(err).not.to.exist
             sinon.assert.calledWith(
               this.updateOneStub,
@@ -195,14 +195,14 @@ describe('Notifications Tests', function () {
           key: 'notification-key',
           messageOpts: 'some info',
           templateKey: 'template-key',
-          expires: 'WAT'
+          expires: 'WAT',
         }
         return (this.expectedDocument = {
           user_id: this.stubbedNotification.user_id,
           key: 'notification-key',
           messageOpts: 'some info',
           templateKey: 'template-key',
-          expires: new Date(this.stubbedNotification.expires)
+          expires: new Date(this.stubbedNotification.expires),
         })
       })
 
@@ -210,7 +210,7 @@ describe('Notifications Tests', function () {
         return this.notifications.addNotification(
           user_id,
           this.stubbedNotification,
-          (err) => {
+          err => {
             ;(err instanceof Error).should.equal(true)
             sinon.assert.notCalled(this.updateOneStub)
             return done()
@@ -227,13 +227,13 @@ describe('Notifications Tests', function () {
       return this.notifications.removeNotificationId(
         user_id,
         notification_id,
-        (err) => {
+        err => {
           const searchOps = {
             user_id: ObjectId(user_id),
-            _id: ObjectId(notification_id)
+            _id: ObjectId(notification_id),
           }
           const updateOperation = {
-            $unset: { templateKey: true, messageOpts: true }
+            $unset: { templateKey: true, messageOpts: true },
           }
           assert.deepEqual(this.updateOneStub.args[0][0], searchOps)
           assert.deepEqual(this.updateOneStub.args[0][1], updateOperation)
@@ -250,13 +250,13 @@ describe('Notifications Tests', function () {
       return this.notifications.removeNotificationKey(
         user_id,
         notification_key,
-        (err) => {
+        err => {
           const searchOps = {
             user_id: ObjectId(user_id),
-            key: notification_key
+            key: notification_key,
           }
           const updateOperation = {
-            $unset: { templateKey: true }
+            $unset: { templateKey: true },
           }
           assert.deepEqual(this.updateOneStub.args[0][0], searchOps)
           assert.deepEqual(this.updateOneStub.args[0][1], updateOperation)
@@ -272,7 +272,7 @@ describe('Notifications Tests', function () {
 
       return this.notifications.removeNotificationByKeyOnly(
         notification_key,
-        (err) => {
+        err => {
           const searchOps = { key: notification_key }
           const updateOperation = { $unset: { templateKey: true } }
           assert.deepEqual(this.updateOneStub.args[0][0], searchOps)
@@ -289,7 +289,7 @@ describe('Notifications Tests', function () {
 
       return this.notifications.deleteNotificationByKeyOnly(
         notification_key,
-        (err) => {
+        err => {
           const searchOps = { key: notification_key }
           assert.deepEqual(this.deleteOneStub.args[0][0], searchOps)
           return done()

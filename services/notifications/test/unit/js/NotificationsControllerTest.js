@@ -27,17 +27,17 @@ describe('Notifications Controller', function () {
       requires: {
         './Notifications': this.notifications,
         '@overleaf/metrics': {
-          inc: sinon.stub()
-        }
-      }
+          inc: sinon.stub(),
+        },
+      },
     })
 
     return (this.stubbedNotification = [
       {
         key: notification_key,
         messageOpts: 'some info',
-        templateKey: 'template-key'
-      }
+        templateKey: 'template-key',
+      },
     ])
   })
 
@@ -48,17 +48,17 @@ describe('Notifications Controller', function () {
         .callsArgWith(1, null, this.stubbedNotification)
       const req = {
         params: {
-          user_id
-        }
+          user_id,
+        },
       }
       return this.controller.getUserNotifications(req, {
-        json: (result) => {
+        json: result => {
           result.should.equal(this.stubbedNotification)
           this.notifications.getUserNotifications
             .calledWith(user_id)
             .should.equal(true)
           return done()
-        }
+        },
       })
     })
   })
@@ -68,18 +68,18 @@ describe('Notifications Controller', function () {
       this.notifications.addNotification = sinon.stub().callsArgWith(2)
       const req = {
         params: {
-          user_id
+          user_id,
         },
-        body: this.stubbedNotification
+        body: this.stubbedNotification,
       }
       return this.controller.addNotification(req, {
-        sendStatus: (code) => {
+        sendStatus: code => {
           this.notifications.addNotification
             .calledWith(user_id, this.stubbedNotification)
             .should.equal(true)
           code.should.equal(200)
           return done()
-        }
+        },
       })
     })
   })
@@ -90,17 +90,17 @@ describe('Notifications Controller', function () {
       const req = {
         params: {
           user_id,
-          notification_id
-        }
+          notification_id,
+        },
       }
       return this.controller.removeNotificationId(req, {
-        sendStatus: (code) => {
+        sendStatus: code => {
           this.notifications.removeNotificationId
             .calledWith(user_id, notification_id)
             .should.equal(true)
           code.should.equal(200)
           return done()
-        }
+        },
       })
     })
   })
@@ -110,18 +110,18 @@ describe('Notifications Controller', function () {
       this.notifications.removeNotificationKey = sinon.stub().callsArgWith(2)
       const req = {
         params: {
-          user_id
+          user_id,
         },
-        body: { key: notification_key }
+        body: { key: notification_key },
       }
       return this.controller.removeNotificationKey(req, {
-        sendStatus: (code) => {
+        sendStatus: code => {
           this.notifications.removeNotificationKey
             .calledWith(user_id, notification_key)
             .should.equal(true)
           code.should.equal(200)
           return done()
-        }
+        },
       })
     })
   })
@@ -133,17 +133,17 @@ describe('Notifications Controller', function () {
         .callsArgWith(1)
       const req = {
         params: {
-          key: notification_key
-        }
+          key: notification_key,
+        },
       }
       return this.controller.removeNotificationByKeyOnly(req, {
-        sendStatus: (code) => {
+        sendStatus: code => {
           this.notifications.removeNotificationByKeyOnly
             .calledWith(notification_key)
             .should.equal(true)
           code.should.equal(200)
           return done()
-        }
+        },
       })
     })
   })
