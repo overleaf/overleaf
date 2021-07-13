@@ -43,7 +43,7 @@ module.exports = EventLogger = {
     // store the last count in a hash for each host
     const previous = EventLogger._storeEventCount(key, count)
     if (!previous || count === previous + 1) {
-      metrics.inc(`event.${channel}.valid`, 0.001) // downsample high rate docupdater events
+      metrics.inc(`event.${channel}.valid`)
       return // order is ok
     }
     if (count === previous) {
