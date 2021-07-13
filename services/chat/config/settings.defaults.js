@@ -2,8 +2,8 @@ module.exports = {
   internal: {
     chat: {
       host: process.env.LISTEN_ADDRESS || 'localhost',
-      port: 3010
-    }
+      port: 3010,
+    },
   },
 
   apis: {
@@ -12,17 +12,17 @@ module.exports = {
         process.env.WEB_PORT || 3000
       }`,
       user: process.env.WEB_API_USER || 'sharelatex',
-      pass: process.env.WEB_API_PASSWORD || 'password'
-    }
+      pass: process.env.WEB_API_PASSWORD || 'password',
+    },
   },
 
   mongo: {
     options: {
       useUnifiedTopology:
-        (process.env.MONGO_USE_UNIFIED_TOPOLOGY || 'true') === 'true'
+        (process.env.MONGO_USE_UNIFIED_TOPOLOGY || 'true') === 'true',
     },
     url:
       process.env.MONGO_CONNECTION_STRING ||
-      `mongodb://${process.env.MONGO_HOST || 'localhost'}/sharelatex`
-  }
+      `mongodb://${process.env.MONGO_HOST || 'localhost'}/sharelatex`,
+  },
 }

@@ -26,7 +26,7 @@ module.exports = MessageManager = {
       content,
       room_id,
       user_id,
-      timestamp
+      timestamp,
     }
     newMessageOpts = this._ensureIdsAreObjectIds(newMessageOpts)
     db.messages.insertOne(newMessageOpts, function (error, confirmation) {
@@ -60,7 +60,7 @@ module.exports = MessageManager = {
     }
     db.messages
       .find({
-        room_id: { $in: room_ids }
+        room_id: { $in: room_ids },
       })
       .toArray(callback)
   },
@@ -71,7 +71,7 @@ module.exports = MessageManager = {
     }
     db.messages.deleteMany(
       {
-        room_id
+        room_id,
       },
       callback
     )
@@ -83,15 +83,15 @@ module.exports = MessageManager = {
     }
     const query = this._ensureIdsAreObjectIds({
       _id: message_id,
-      room_id
+      room_id,
     })
     db.messages.updateOne(
       query,
       {
         $set: {
           content,
-          edited_at: timestamp
-        }
+          edited_at: timestamp,
+        },
       },
       callback
     )
@@ -103,7 +103,7 @@ module.exports = MessageManager = {
     }
     const query = this._ensureIdsAreObjectIds({
       _id: message_id,
-      room_id
+      room_id,
     })
     db.messages.deleteOne(query, callback)
   },
@@ -119,15 +119,15 @@ module.exports = MessageManager = {
       query._id = ObjectId(query._id)
     }
     return query
-  }
+  },
 }
 ;[
   'createMessage',
   'getMessages',
   'findAllMessagesInRooms',
   'updateMessage',
-  'deleteMessage'
-].map((method) =>
+  'deleteMessage',
+].map(method =>
   metrics.timeAsyncMethod(
     MessageManager,
     method,

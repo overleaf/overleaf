@@ -16,12 +16,12 @@ if (!module.parent) {
   const port =
     __guard__(
       settings.internal != null ? settings.internal.chat : undefined,
-      (x) => x.port
+      x => x.port
     ) || 3010
   const host =
     __guard__(
       settings.internal != null ? settings.internal.chat : undefined,
-      (x1) => x1.host
+      x1 => x1.host
     ) || 'localhost'
   mongodb
     .waitForDb()
@@ -34,7 +34,7 @@ if (!module.parent) {
         return logger.info(`Chat starting up, listening on ${host}:${port}`)
       })
     })
-    .catch((err) => {
+    .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
       process.exit(1)
     })

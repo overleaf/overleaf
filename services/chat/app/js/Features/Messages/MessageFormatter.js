@@ -22,7 +22,7 @@ module.exports = MessageFormatter = {
       id: message.id,
       content: message.content,
       timestamp: message.timestamp,
-      user_id: message.user_id
+      user_id: message.user_id,
     }
     if (message.edited_at != null) {
       formattedMessage.edited_at = message.edited_at
@@ -31,7 +31,7 @@ module.exports = MessageFormatter = {
   },
 
   formatMessagesForClientSide(messages) {
-    return Array.from(messages).map((message) =>
+    return Array.from(messages).map(message =>
       this.formatMessageForClientSide(message)
     )
   },
@@ -76,5 +76,5 @@ module.exports = MessageFormatter = {
     }
 
     return threads
-  }
+  },
 }
