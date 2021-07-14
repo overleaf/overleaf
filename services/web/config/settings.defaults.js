@@ -702,7 +702,7 @@ module.exports = {
     tprLinkedFileRefreshError: [],
   },
 
-  moduleImportSequence: ['launchpad', 'user-activate'],
+  moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],
 
   csp: {
     percentage: parseFloat(process.env.CSP_PERCENTAGE) || 0,

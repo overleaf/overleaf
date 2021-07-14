@@ -50,6 +50,7 @@ RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
 FROM webpack as app
 
 RUN find /app/public -name '*.js.map' -delete
+RUN rm /app/modules/server-ce-scripts -rf
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]
