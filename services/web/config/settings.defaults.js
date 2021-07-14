@@ -567,10 +567,6 @@ module.exports = {
   },
 
   reloadModuleViewsOnEachRequest: process.env.NODE_ENV === 'development',
-  disableModule: {
-    'user-activate': process.env.DISABLE_MODULE_USER_ACTIVATE === 'true',
-    launchpad: process.env.DISABLE_MODULE_LAUNCHPAD === 'true',
-  },
 
   rateLimit: {
     autoCompile: {
@@ -705,6 +701,8 @@ module.exports = {
     tprLinkedFileInfo: [],
     tprLinkedFileRefreshError: [],
   },
+
+  moduleImportSequence: ['launchpad', 'user-activate'],
 
   csp: {
     percentage: parseFloat(process.env.CSP_PERCENTAGE) || 0,
