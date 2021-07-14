@@ -5,57 +5,32 @@
 ARG SHARELATEX_BASE_TAG=sharelatex/sharelatex-base:latest
 FROM $SHARELATEX_BASE_TAG
 
-ENV SHARELATEX_CONFIG /etc/sharelatex/settings.js
-
+WORKDIR /var/www/sharelatex
 
 # Add required source files
 # -------------------------
-ADD ${baseDir}/bin /var/www/sharelatex/bin
-ADD ${baseDir}/doc /var/www/sharelatex/doc
-ADD ${baseDir}/tasks /var/www/sharelatex/tasks
-ADD ${baseDir}/Gruntfile.js /var/www/sharelatex/Gruntfile.js
-ADD ${baseDir}/package.json /var/www/sharelatex/package.json
-ADD ${baseDir}/package-lock.json /var/www/sharelatex/package-lock.json
-ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
-
-
-# Copy build dependencies
-# -----------------------
-ADD ${baseDir}/git-revision.sh /var/www/git-revision.sh
-ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
-
+ADD ${baseDir}/genScript.js /var/www/sharelatex/genScript.js
+ADD ${baseDir}/services.js /var/www/sharelatex/services.js
 
 # Checkout services
 # -----------------
-RUN cd /var/www/sharelatex \
-&&    npm ci \
-&&    grunt install \
+RUN node genScript checkout | bash \
   \
-# Cleanup not needed artifacts
-# ----------------------------
-&&  rm -rf /root/.cache /root/.npm $(find /tmp/ -mindepth 1 -maxdepth 1) \
-# Stores the version installed for each service
+# Store the revision for each service
 # ---------------------------------------------
-&&  cd /var/www \
-&&    ./git-revision.sh > revisions.txt \
+&&  node genScript revisions | bash > revisions.txt \
   \
 # Cleanup the git history
 # -------------------
-&&  rm -rf $(find /var/www/sharelatex -name .git)
+&&  node genScript cleanup-git | bash
 
 # Install npm dependencies
 # ------------------------
-RUN cd /var/www/sharelatex \
-&&    bash ./bin/install-services \
-  \
-# Cleanup not needed artifacts
-# ----------------------------
-&&  rm -rf /root/.cache /root/.npm $(find /tmp/ -mindepth 1 -maxdepth 1)
+RUN node genScript install | bash
 
-# Compile CoffeeScript
+# Compile
 # --------------------
-RUN cd /var/www/sharelatex \
-&&    bash ./bin/compile-services
+RUN node genScript compile | bash
 
 # Links CLSI synctex to its default location
 # ------------------------------------------
@@ -87,8 +62,15 @@ COPY ${baseDir}/init_scripts/ /etc/my_init.d/
 # -----------------------
 COPY ${baseDir}/settings.js /etc/sharelatex/settings.js
 
+# Copy grunt thin wrapper
+# -----------------------
+ADD ${baseDir}/bin/grunt /usr/local/bin/grunt
+RUN chmod +x /usr/local/bin/grunt
+
 # Set Environment Variables
 # --------------------------------
+ENV SHARELATEX_CONFIG /etc/sharelatex/settings.js
+
 ENV WEB_API_USER "sharelatex"
 
 ENV SHARELATEX_APP_NAME "Overleaf Community Edition"

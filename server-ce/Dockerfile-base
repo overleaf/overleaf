@@ -35,12 +35,6 @@ RUN apt-get update \
 ADD ./vendor/envsubst /usr/bin/envsubst
 RUN chmod +x /usr/bin/envsubst
 
-# Install Grunt
-# ------------
-RUN npm install -g \
-      grunt-cli \
-&&  rm -rf /root/.npm
-
 # Install TexLive
 # ---------------
 # CTAN mirrors occasionally fail, in that case install TexLive against an
