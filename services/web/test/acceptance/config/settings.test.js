@@ -13,10 +13,17 @@ const httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass
 
 module.exports = base.mergeWith({
+  catchErrors: false,
+  clsiCookie: undefined,
+
   cacheStaticAssets: true,
   enableSubscriptions: true,
 
   httpAuthUsers,
+  secureCookie: false,
+  security: {
+    sessionSecret: 'static-secret-for-tests',
+  },
   adminDomains: ['example.com'],
 
   apis: {
@@ -37,6 +44,10 @@ module.exports = base.mergeWith({
       webhookUser: 'recurly',
       webhookPass: 'webhook',
     },
+    tpdsworker: {
+      // Disable tpdsworker in CI.
+      url: undefined,
+    },
   },
 
   // for registration via SL, set enableLegacyRegistration to true
@@ -56,6 +67,7 @@ module.exports = base.mergeWith({
       references: false,
       referencesSearch: false,
       mendeley: true,
+      zotero: true,
       compileTimeout: 60,
       compileGroup: 'standard',
       trackChanges: false,
@@ -70,6 +82,7 @@ module.exports = base.mergeWith({
       references: false,
       referencesSearch: false,
       mendeley: false,
+      zotero: false,
       compileTimeout: 60,
       compileGroup: 'standard',
       trackChanges: false,
@@ -84,6 +97,7 @@ module.exports = base.mergeWith({
       references: true,
       referencesSearch: true,
       mendeley: true,
+      zotero: true,
       compileTimeout: 180,
       compileGroup: 'priority',
       trackChanges: true,
@@ -98,6 +112,7 @@ module.exports = base.mergeWith({
       references: true,
       referencesSearch: true,
       mendeley: true,
+      zotero: true,
       compileTimeout: 180,
       compileGroup: 'priority',
       trackChanges: true,
@@ -223,9 +238,10 @@ module.exports = base.mergeWith({
     },
   },
 
-  // setting to true since many features are enabled/disabled after availability of this
-  // property (check Features.js)
-  overleaf: true,
+  overleaf: {
+    oauth: undefined,
+  },
+  saml: undefined,
 
   reconfirmNotificationDays: 14,
 
@@ -233,7 +249,17 @@ module.exports = base.mergeWith({
     ie: '<=11',
   },
 
+  // Disable contentful module.
+  contentful: undefined,
+
+  // No email in tests
+  email: undefined,
+
   test: {
     counterInit: 0,
   },
 })
+
+for (const redisKey of Object.keys(base.redis)) {
+  base.redis[redisKey].host = process.env.REDIS_HOST || 'localhost'
+}
