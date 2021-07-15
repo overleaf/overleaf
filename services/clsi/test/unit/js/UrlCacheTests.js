@@ -24,11 +24,11 @@ describe('UrlCache', function () {
       requires: {
         './db': {},
         './UrlFetcher': (this.UrlFetcher = {}),
-        'settings-sharelatex': (this.Settings = {
-          path: { clsiCacheDir: '/cache/dir' }
+        '@overleaf/settings': (this.Settings = {
+          path: { clsiCacheDir: '/cache/dir' },
         }),
-        fs: (this.fs = { copyFile: sinon.stub().yields() })
-      }
+        fs: (this.fs = { copyFile: sinon.stub().yields() }),
+      },
     }))
   })
 
@@ -339,7 +339,7 @@ describe('UrlCache', function () {
     })
 
     it('should clear the cache for each url in the project', function () {
-      return Array.from(this.urls).map((url) =>
+      return Array.from(this.urls).map(url =>
         this.UrlCache._clearUrlFromCache
           .calledWith(this.project_id, url)
           .should.equal(true)

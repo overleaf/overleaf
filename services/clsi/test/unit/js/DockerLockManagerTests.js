@@ -20,8 +20,8 @@ describe('LockManager', function () {
   beforeEach(function () {
     return (this.LockManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.Settings = { clsi: { docker: {} } })
-      }
+        '@overleaf/settings': (this.Settings = { clsi: { docker: {} } }),
+      },
     }))
   })
 
@@ -31,7 +31,7 @@ describe('LockManager', function () {
         this.callback = sinon.stub()
         return this.LockManager.runWithLock(
           'lock-one',
-          (releaseLock) =>
+          releaseLock =>
             setTimeout(() => releaseLock(null, 'hello', 'world'), 100),
 
           (err, ...args) => {
@@ -54,7 +54,7 @@ describe('LockManager', function () {
         this.callback2 = sinon.stub()
         this.LockManager.runWithLock(
           'lock-one',
-          (releaseLock) =>
+          releaseLock =>
             setTimeout(() => releaseLock(null, 'hello', 'world', 'one'), 100),
 
           (err, ...args) => {
@@ -63,7 +63,7 @@ describe('LockManager', function () {
         )
         return this.LockManager.runWithLock(
           'lock-two',
-          (releaseLock) =>
+          releaseLock =>
             setTimeout(() => releaseLock(null, 'hello', 'world', 'two'), 200),
 
           (err, ...args) => {
@@ -95,7 +95,7 @@ describe('LockManager', function () {
           this.callback2 = sinon.stub()
           this.LockManager.runWithLock(
             'lock',
-            (releaseLock) =>
+            releaseLock =>
               setTimeout(() => releaseLock(null, 'hello', 'world', 'one'), 100),
 
             (err, ...args) => {
@@ -104,7 +104,7 @@ describe('LockManager', function () {
           )
           return this.LockManager.runWithLock(
             'lock',
-            (releaseLock) =>
+            releaseLock =>
               setTimeout(() => releaseLock(null, 'hello', 'world', 'two'), 200),
 
             (err, ...args) => {
@@ -149,7 +149,7 @@ describe('LockManager', function () {
           }
           this.LockManager.runWithLock(
             'lock',
-            (releaseLock) =>
+            releaseLock =>
               setTimeout(
                 () => releaseLock(null, 'hello', 'world', 'one'),
                 1100
@@ -162,7 +162,7 @@ describe('LockManager', function () {
           )
           return this.LockManager.runWithLock(
             'lock',
-            (releaseLock) =>
+            releaseLock =>
               setTimeout(() => releaseLock(null, 'hello', 'world', 'two'), 100),
 
             (err, ...args) => {
@@ -206,7 +206,7 @@ describe('LockManager', function () {
           }
           this.LockManager.runWithLock(
             'lock',
-            (releaseLock) =>
+            releaseLock =>
               setTimeout(
                 () => releaseLock(null, 'hello', 'world', 'one'),
                 1500
@@ -219,7 +219,7 @@ describe('LockManager', function () {
           )
           return this.LockManager.runWithLock(
             'lock',
-            (releaseLock) =>
+            releaseLock =>
               setTimeout(() => releaseLock(null, 'hello', 'world', 'two'), 100),
 
             (err, ...args) => {

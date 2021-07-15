@@ -25,7 +25,7 @@ describe('RequestParser', function () {
     this.validResource = {
       path: 'main.tex',
       date: '12:00 01/02/03',
-      content: 'Hello world'
+      content: 'Hello world',
     }
     this.validRequest = {
       compile: {
@@ -33,15 +33,15 @@ describe('RequestParser', function () {
         options: {
           imageName: 'basicImageName/here:2017-1',
           compiler: 'pdflatex',
-          timeout: 42
+          timeout: 42,
         },
-        resources: []
-      }
+        resources: [],
+      },
     }
     return (this.RequestParser = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {})
-      }
+        '@overleaf/settings': (this.settings = {}),
+      },
     }))
   })
 
@@ -118,7 +118,7 @@ describe('RequestParser', function () {
       this.settings.clsi = { docker: {} }
       this.settings.clsi.docker.allowedImages = [
         'repo/name:tag1',
-        'repo/name:tag2'
+        'repo/name:tag2',
       ]
     })
 
@@ -402,7 +402,7 @@ describe('RequestParser', function () {
       this.validRequest.compile.resources.push({
         path: this.badPath,
         date: '12:00 01/02/03',
-        content: 'Hello world'
+        content: 'Hello world',
       })
       this.RequestParser.parse(this.validRequest, this.callback)
       return (this.data = this.callback.args[0][1])

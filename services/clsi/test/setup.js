@@ -12,8 +12,8 @@ SandboxedModule.configure({
       info() {},
       warn() {},
       error() {},
-      err() {}
-    }
+      err() {},
+    },
   },
-  globals: { Buffer, console, process }
+  globals: { Buffer, console, process },
 })

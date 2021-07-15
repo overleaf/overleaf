@@ -15,7 +15,7 @@
  */
 let LatexRunner
 const Path = require('path')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const Metrics = require('./Metrics')
 const CommandRunner = require('./CommandRunner')
@@ -26,7 +26,7 @@ const ProcessTable = {} // table of currently running jobs (pids or docker conta
 const TIME_V_METRICS = Object.entries({
   'cpu-percent': /Percent of CPU this job got: (\d+)/m,
   'cpu-time': /User time.*: (\d+.\d+)/m,
-  'sys-time': /System time.*: (\d+.\d+)/m
+  'sys-time': /System time.*: (\d+.\d+)/m,
 })
 
 module.exports = LatexRunner = {
@@ -43,7 +43,7 @@ module.exports = LatexRunner = {
       image,
       environment,
       flags,
-      compileGroup
+      compileGroup,
     } = options
     if (!compiler) {
       compiler = 'pdflatex'
@@ -60,7 +60,7 @@ module.exports = LatexRunner = {
         mainFile,
         environment,
         flags,
-        compileGroup
+        compileGroup,
       },
       'starting compile'
     )
@@ -102,13 +102,13 @@ module.exports = LatexRunner = {
         }
         const runs =
           __guard__(
-            __guard__(output != null ? output.stderr : undefined, (x1) =>
+            __guard__(output != null ? output.stderr : undefined, x1 =>
               x1.match(/^Run number \d+ of .*latex/gm)
             ),
-            (x) => x.length
+            x => x.length
           ) || 0
         const failed =
-          __guard__(output != null ? output.stdout : undefined, (x2) =>
+          __guard__(output != null ? output.stdout : undefined, x2 =>
             x2.match(/^Latexmk: Errors/m)
           ) != null
             ? 1
@@ -147,7 +147,7 @@ module.exports = LatexRunner = {
     // internal method for writing non-empty log files
     function _writeFile(file, content, cb) {
       if (content && content.length > 0) {
-        fs.writeFile(file, content, (err) => {
+        fs.writeFile(file, content, err => {
           if (err) {
             logger.error({ project_id, file }, 'error writing log file') // don't fail on error
           }
@@ -188,7 +188,7 @@ module.exports = LatexRunner = {
       '-auxdir=$COMPILE_DIR',
       '-outdir=$COMPILE_DIR',
       '-synctex=1',
-      '-interaction=batchmode'
+      '-interaction=batchmode',
     ]
     if (flags) {
       args = args.concat(flags)
@@ -196,7 +196,7 @@ module.exports = LatexRunner = {
     return (
       __guard__(
         Settings != null ? Settings.clsi : undefined,
-        (x) => x.latexmkCommandPrefix
+        x => x.latexmkCommandPrefix
       ) || []
     ).concat(args)
   },
@@ -204,30 +204,30 @@ module.exports = LatexRunner = {
   _pdflatexCommand(mainFile, flags) {
     return LatexRunner._latexmkBaseCommand(flags).concat([
       '-pdf',
-      Path.join('$COMPILE_DIR', mainFile)
+      Path.join('$COMPILE_DIR', mainFile),
     ])
   },
 
   _latexCommand(mainFile, flags) {
     return LatexRunner._latexmkBaseCommand(flags).concat([
       '-pdfdvi',
-      Path.join('$COMPILE_DIR', mainFile)
+      Path.join('$COMPILE_DIR', mainFile),
     ])
   },
 
   _xelatexCommand(mainFile, flags) {
     return LatexRunner._latexmkBaseCommand(flags).concat([
       '-xelatex',
-      Path.join('$COMPILE_DIR', mainFile)
+      Path.join('$COMPILE_DIR', mainFile),
     ])
   },
 
   _lualatexCommand(mainFile, flags) {
     return LatexRunner._latexmkBaseCommand(flags).concat([
       '-lualatex',
-      Path.join('$COMPILE_DIR', mainFile)
+      Path.join('$COMPILE_DIR', mainFile),
     ])
-  }
+  },
 }
 
 function __guard__(value, transform) {

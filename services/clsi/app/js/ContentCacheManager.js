@@ -6,7 +6,7 @@ const { callbackify } = require('util')
 const fs = require('fs')
 const crypto = require('crypto')
 const Path = require('path')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const pLimit = require('p-limit')
 const { parseXrefTable } = require('../lib/pdfjs/parseXrefTable')
@@ -76,14 +76,14 @@ async function update(contentDir, filePath, size, compileTime) {
       if (bytesRead !== object.size) {
         throw new OError('could not read full chunk', {
           object,
-          bytesRead
+          bytesRead,
         })
       }
       const idxObj = buffer.indexOf('obj')
       if (idxObj > 100) {
         throw new OError('objectId is too large', {
           object,
-          idxObj
+          idxObj,
         })
       }
       const objectIdRaw = buffer.subarray(0, idxObj)
@@ -95,7 +95,7 @@ async function update(contentDir, filePath, size, compileTime) {
         objectId: objectIdRaw.toString(),
         start: object.offset + objectIdRaw.byteLength,
         end: object.endOffset,
-        hash
+        hash,
       }
       ranges.push(range)
 
@@ -168,7 +168,7 @@ class HashFileTracker {
     const statePath = getStatePath(this.contentDir)
     const blob = JSON.stringify({
       hashAge: Array.from(this.hashAge.entries()),
-      hashSize: Array.from(this.hashSize.entries())
+      hashSize: Array.from(this.hashSize.entries()),
     })
     const atomicWrite = statePath + '~'
     try {
@@ -198,7 +198,7 @@ class HashFileTracker {
       return reclaimedSpace
     }
 
-    await promiseMapWithLimit(10, hashes, async (hash) => {
+    await promiseMapWithLimit(10, hashes, async hash => {
       await fs.promises.unlink(Path.join(this.contentDir, hash))
       this.hashAge.delete(hash)
       reclaimedSpace += this.hashSize.get(hash)
@@ -251,7 +251,7 @@ function getDeadlineChecker(compileTime) {
       throw new TimedOutError(stage, {
         completedStages,
         lastStage: lastStage.stage,
-        diffToLastStage: now - lastStage.now
+        diffToLastStage: now - lastStage.now,
       })
     }
     completedStages++
@@ -261,13 +261,13 @@ function getDeadlineChecker(compileTime) {
 
 function promiseMapWithLimit(concurrency, array, fn) {
   const limit = pLimit(concurrency)
-  return Promise.all(array.map((x) => limit(() => fn(x))))
+  return Promise.all(array.map(x => limit(() => fn(x))))
 }
 
 module.exports = {
   HASH_REGEX: /^[0-9a-f]{64}$/,
   update: callbackify(update),
   promises: {
-    update
-  }
+    update,
+  },
 }

@@ -27,7 +27,7 @@ describe('ResourceWriter', function () {
       requires: {
         fs: (this.fs = {
           mkdir: sinon.stub().callsArg(1),
-          unlink: sinon.stub().callsArg(1)
+          unlink: sinon.stub().callsArg(1),
         }),
         './ResourceStateManager': (this.ResourceStateManager = {}),
         wrench: (this.wrench = {}),
@@ -43,9 +43,9 @@ describe('ResourceWriter', function () {
             }
             Timer.initClass()
             return Timer
-          })())
-        })
-      }
+          })()),
+        }),
+      },
     })
     this.project_id = 'project-id-123'
     this.basePath = '/path/to/write/files/to'
@@ -62,7 +62,7 @@ describe('ResourceWriter', function () {
         {
           project_id: this.project_id,
           syncState: (this.syncState = '0123456789abcdef'),
-          resources: this.resources
+          resources: this.resources,
         },
         this.basePath,
         this.callback
@@ -76,7 +76,7 @@ describe('ResourceWriter', function () {
     })
 
     it('should write each resource to disk', function () {
-      return Array.from(this.resources).map((resource) =>
+      return Array.from(this.resources).map(resource =>
         this.ResourceWriter._writeResourceToDisk
           .calledWith(this.project_id, resource, this.basePath)
           .should.equal(true)
@@ -111,7 +111,7 @@ describe('ResourceWriter', function () {
           project_id: this.project_id,
           syncType: 'incremental',
           syncState: (this.syncState = '1234567890abcdef'),
-          resources: this.resources
+          resources: this.resources,
         },
         this.basePath,
         this.callback
@@ -137,7 +137,7 @@ describe('ResourceWriter', function () {
     })
 
     it('should write each resource to disk', function () {
-      return Array.from(this.resources).map((resource) =>
+      return Array.from(this.resources).map(resource =>
         this.ResourceWriter._writeResourceToDisk
           .calledWith(this.project_id, resource, this.basePath)
           .should.equal(true)
@@ -160,7 +160,7 @@ describe('ResourceWriter', function () {
           project_id: this.project_id,
           syncType: 'incremental',
           syncState: (this.syncState = '1234567890abcdef'),
-          resources: this.resources
+          resources: this.resources,
         },
         this.basePath,
         this.callback
@@ -183,58 +183,57 @@ describe('ResourceWriter', function () {
       this.output_files = [
         {
           path: 'output.pdf',
-          type: 'pdf'
+          type: 'pdf',
         },
         {
           path: 'extra/file.tex',
-          type: 'tex'
+          type: 'tex',
         },
         {
           path: 'extra.aux',
-          type: 'aux'
+          type: 'aux',
         },
         {
-          path: 'cache/_chunk1'
+          path: 'cache/_chunk1',
         },
         {
           path: 'figures/image-eps-converted-to.pdf',
-          type: 'pdf'
+          type: 'pdf',
         },
         {
           path: 'foo/main-figure0.md5',
-          type: 'md5'
+          type: 'md5',
         },
         {
           path: 'foo/main-figure0.dpth',
-          type: 'dpth'
+          type: 'dpth',
         },
         {
           path: 'foo/main-figure0.pdf',
-          type: 'pdf'
+          type: 'pdf',
         },
         {
           path: '_minted-main/default-pyg-prefix.pygstyle',
-          type: 'pygstyle'
+          type: 'pygstyle',
         },
         {
           path: '_minted-main/default.pygstyle',
-          type: 'pygstyle'
+          type: 'pygstyle',
         },
         {
-          path:
-            '_minted-main/35E248B60965545BD232AE9F0FE9750D504A7AF0CD3BAA7542030FC560DFCC45.pygtex',
-          type: 'pygtex'
+          path: '_minted-main/35E248B60965545BD232AE9F0FE9750D504A7AF0CD3BAA7542030FC560DFCC45.pygtex',
+          type: 'pygtex',
         },
         {
           path: '_markdown_main/30893013dec5d869a415610079774c2f.md.tex',
-          type: 'tex'
+          type: 'tex',
         },
         {
-          path: 'output.stdout'
+          path: 'output.stdout',
         },
         {
-          path: 'output.stderr'
-        }
+          path: 'output.stderr',
+        },
       ]
       this.resources = 'mock-resources'
       this.OutputFileFinder.findOutputFiles = sinon
@@ -368,7 +367,7 @@ describe('ResourceWriter', function () {
         this.resource = {
           path: 'main.tex',
           url: 'http://www.example.com/main.tex',
-          modified: Date.now()
+          modified: Date.now(),
         }
         this.UrlCache.downloadUrlToFile = sinon
           .stub()
@@ -413,7 +412,7 @@ describe('ResourceWriter', function () {
       beforeEach(function () {
         this.resource = {
           path: 'main.tex',
-          content: 'Hello world'
+          content: 'Hello world',
         }
         this.fs.writeFile = sinon.stub().callsArg(2)
         this.fs.mkdir = sinon.stub().callsArg(2)
@@ -451,7 +450,7 @@ describe('ResourceWriter', function () {
       beforeEach(function () {
         this.resource = {
           path: '../../main.tex',
-          content: 'Hello world'
+          content: 'Hello world',
         }
         this.fs.writeFile = sinon.stub().callsArg(2)
         return this.ResourceWriter._writeResourceToDisk(

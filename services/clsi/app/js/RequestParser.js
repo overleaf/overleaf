@@ -4,7 +4,6 @@
     no-throw-literal,
     no-unused-vars,
     no-useless-escape,
-    standard/no-callback-literal,
     valid-typeof,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -18,7 +17,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let RequestParser
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 module.exports = RequestParser = {
   VALID_COMPILERS: ['pdflatex', 'latex', 'xelatex', 'lualatex'],
@@ -47,7 +46,7 @@ module.exports = RequestParser = {
         {
           validValues: this.VALID_COMPILERS,
           default: 'pdflatex',
-          type: 'string'
+          type: 'string',
         }
       )
       response.enablePdfCaching = this._parseAttribute(
@@ -55,7 +54,7 @@ module.exports = RequestParser = {
         compile.options.enablePdfCaching,
         {
           default: false,
-          type: 'boolean'
+          type: 'boolean',
         }
       )
       response.timeout = this._parseAttribute(
@@ -63,7 +62,7 @@ module.exports = RequestParser = {
         compile.options.timeout,
         {
           default: RequestParser.MAX_TIMEOUT,
-          type: 'number'
+          type: 'number',
         }
       )
       response.imageName = this._parseAttribute(
@@ -74,19 +73,19 @@ module.exports = RequestParser = {
           validValues:
             settings.clsi &&
             settings.clsi.docker &&
-            settings.clsi.docker.allowedImages
+            settings.clsi.docker.allowedImages,
         }
       )
       response.draft = this._parseAttribute('draft', compile.options.draft, {
         default: false,
-        type: 'boolean'
+        type: 'boolean',
       })
       response.check = this._parseAttribute('check', compile.options.check, {
-        type: 'string'
+        type: 'string',
       })
       response.flags = this._parseAttribute('flags', compile.options.flags, {
         default: [],
-        type: 'object'
+        type: 'object',
       })
       if (settings.allowedCompileGroups) {
         response.compileGroup = this._parseAttribute(
@@ -95,7 +94,7 @@ module.exports = RequestParser = {
           {
             validValues: settings.allowedCompileGroups,
             default: '',
-            type: 'string'
+            type: 'string',
           }
         )
       }
@@ -107,7 +106,7 @@ module.exports = RequestParser = {
         compile.options.syncType,
         {
           validValues: ['full', 'incremental'],
-          type: 'string'
+          type: 'string',
         }
       )
 
@@ -144,13 +143,12 @@ module.exports = RequestParser = {
         compile.rootResourcePath,
         {
           default: 'main.tex',
-          type: 'string'
+          type: 'string',
         }
       )
       const originalRootResourcePath = rootResourcePath
-      const sanitizedRootResourcePath = RequestParser._sanitizePath(
-        rootResourcePath
-      )
+      const sanitizedRootResourcePath =
+        RequestParser._sanitizePath(rootResourcePath)
       response.rootResourcePath = RequestParser._checkPath(
         sanitizedRootResourcePath
       )
@@ -195,7 +193,7 @@ module.exports = RequestParser = {
       path: resource.path,
       modified,
       url: resource.url,
-      content: resource.content
+      content: resource.content,
     }
   },
 
@@ -237,5 +235,5 @@ module.exports = RequestParser = {
       }
     }
     return path
-  }
+  },
 }

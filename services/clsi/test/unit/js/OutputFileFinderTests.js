@@ -25,11 +25,11 @@ describe('OutputFileFinder', function () {
     this.OutputFileFinder = SandboxedModule.require(modulePath, {
       requires: {
         fs: (this.fs = {}),
-        child_process: { spawn: (this.spawn = sinon.stub()) }
+        child_process: { spawn: (this.spawn = sinon.stub()) },
       },
       globals: {
-        Math // used by lodash
-      }
+        Math, // used by lodash
+      },
     })
     this.directory = '/test/dir'
     return (this.callback = sinon.stub())
@@ -57,12 +57,12 @@ describe('OutputFileFinder', function () {
       return expect(this.outputFiles).to.deep.equal([
         {
           path: 'output.pdf',
-          type: 'pdf'
+          type: 'pdf',
         },
         {
           path: 'extra/file.tex',
-          type: 'tex'
-        }
+          type: 'tex',
+        },
       ])
     })
   })

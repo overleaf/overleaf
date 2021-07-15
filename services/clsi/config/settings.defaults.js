@@ -12,12 +12,12 @@ module.exports = {
         process.env.SQLITE_PATH || Path.resolve(__dirname, '../db/db.sqlite'),
       pool: {
         max: 1,
-        min: 1
+        min: 1,
       },
       retry: {
-        max: 10
-      }
-    }
+        max: 10,
+      },
+    },
   },
 
   compileSizeLimit: process.env.COMPILE_SIZE_LIMIT || '7mb',
@@ -33,30 +33,30 @@ module.exports = {
     clsiCacheDir: Path.resolve(__dirname, '../cache'),
     synctexBaseDir(projectId) {
       return Path.join(this.compilesDir, projectId)
-    }
+    },
   },
 
   internal: {
     clsi: {
       port: 3013,
-      host: process.env.LISTEN_ADDRESS || 'localhost'
+      host: process.env.LISTEN_ADDRESS || 'localhost',
     },
 
     load_balancer_agent: {
       report_load: true,
       load_port: 3048,
-      local_port: 3049
-    }
+      local_port: 3049,
+    },
   },
   apis: {
     clsi: {
-      url: `http://${process.env.CLSI_HOST || 'localhost'}:3013`
+      url: `http://${process.env.CLSI_HOST || 'localhost'}:3013`,
     },
     clsiPerf: {
       host: `${process.env.CLSI_PERF_HOST || 'localhost'}:${
         process.env.CLSI_PERF_PORT || '3043'
-      }`
-    }
+      }`,
+    },
   },
 
   smokeTest: process.env.SMOKE_TEST || false,
@@ -67,7 +67,7 @@ module.exports = {
   texliveImageNameOveride: process.env.TEX_LIVE_IMAGE_NAME_OVERRIDE,
   texliveOpenoutAny: process.env.TEXLIVE_OPENOUT_ANY,
   sentry: {
-    dsn: process.env.SENTRY_DSN
+    dsn: process.env.SENTRY_DSN,
   },
 
   enablePdfCaching: process.env.ENABLE_PDF_CACHING === 'true',
@@ -75,14 +75,13 @@ module.exports = {
   pdfCachingMinChunkSize:
     parseInt(process.env.PDF_CACHING_MIN_CHUNK_SIZE, 10) || 1024,
   pdfCachingMaxProcessingTime:
-    parseInt(process.env.PDF_CACHING_MAX_PROCESSING_TIME, 10) || 10 * 1000
+    parseInt(process.env.PDF_CACHING_MAX_PROCESSING_TIME, 10) || 10 * 1000,
 }
 
 if (process.env.ALLOWED_COMPILE_GROUPS) {
   try {
-    module.exports.allowedCompileGroups = process.env.ALLOWED_COMPILE_GROUPS.split(
-      ' '
-    )
+    module.exports.allowedCompileGroups =
+      process.env.ALLOWED_COMPILE_GROUPS.split(' ')
   } catch (error) {
     console.error(error, 'could not apply allowed compile group setting')
     process.exit(1)
@@ -98,14 +97,14 @@ if (process.env.DOCKER_RUNNER) {
       image:
         process.env.TEXLIVE_IMAGE || 'quay.io/sharelatex/texlive-full:2017.1',
       env: {
-        HOME: '/tmp'
+        HOME: '/tmp',
       },
       socketPath: '/var/run/docker.sock',
-      user: process.env.TEXLIVE_IMAGE_USER || 'tex'
+      user: process.env.TEXLIVE_IMAGE_USER || 'tex',
     },
     optimiseInDocker: true,
     expireProjectAfterIdleMs: 24 * 60 * 60 * 1000,
-    checkProjectsIntervalMs: 10 * 60 * 1000
+    checkProjectsIntervalMs: 10 * 60 * 1000,
   }
 
   try {
@@ -120,7 +119,7 @@ if (process.env.DOCKER_RUNNER) {
     // Automatically clean up wordcount and synctex containers
     const defaultCompileGroupConfig = {
       wordcount: { 'HostConfig.AutoRemove': true },
-      synctex: { 'HostConfig.AutoRemove': true }
+      synctex: { 'HostConfig.AutoRemove': true },
     }
     module.exports.clsi.docker.compileGroupConfig = Object.assign(
       defaultCompileGroupConfig,
@@ -146,9 +145,8 @@ if (process.env.DOCKER_RUNNER) {
 
   if (process.env.ALLOWED_IMAGES) {
     try {
-      module.exports.clsi.docker.allowedImages = process.env.ALLOWED_IMAGES.split(
-        ' '
-      )
+      module.exports.clsi.docker.allowedImages =
+        process.env.ALLOWED_IMAGES.split(' ')
     } catch (error) {
       console.error(error, 'could not apply allowed images setting')
       process.exit(1)

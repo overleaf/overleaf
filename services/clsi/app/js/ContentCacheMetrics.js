@@ -4,13 +4,13 @@ const os = require('os')
 
 let CACHED_LOAD = {
   expires: -1,
-  load: [0, 0, 0]
+  load: [0, 0, 0],
 }
 function getSystemLoad() {
   if (CACHED_LOAD.expires < Date.now()) {
     CACHED_LOAD = {
       expires: Date.now() + 10 * 1000,
-      load: os.loadavg()
+      load: os.loadavg(),
     }
   }
   return CACHED_LOAD.load
@@ -47,7 +47,7 @@ function emitPdfCachingStats(stats, timings) {
       {
         stats,
         timings,
-        load: getSystemLoad()
+        load: getSystemLoad(),
       },
       'slow pdf caching'
     )
@@ -111,5 +111,5 @@ function emitPdfCachingStats(stats, timings) {
 }
 
 module.exports = {
-  emitPdfStats
+  emitPdfStats,
 }

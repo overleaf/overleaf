@@ -16,7 +16,7 @@ let UrlFetcher
 const request = require('request').defaults({ jar: false })
 const fs = require('fs')
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const URL = require('url')
 const async = require('async')
 
@@ -127,5 +127,5 @@ module.exports = UrlFetcher = {
         )
       }
     })
-  }
+  },
 }

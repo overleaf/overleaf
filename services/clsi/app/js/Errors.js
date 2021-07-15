@@ -37,5 +37,5 @@ module.exports = Errors = {
   TimedOutError,
   NotFoundError,
   FilesOutOfSyncError,
-  AlreadyCompilingError
+  AlreadyCompilingError,
 }

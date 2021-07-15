@@ -23,16 +23,16 @@ describe('StaticServerForbidSymlinks', function () {
   beforeEach(function () {
     this.settings = {
       path: {
-        compilesDir: '/compiles/here'
-      }
+        compilesDir: '/compiles/here',
+      },
     }
 
     this.fs = {}
     this.ForbidSymlinks = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
-        fs: this.fs
-      }
+        '@overleaf/settings': this.settings,
+        fs: this.fs,
+      },
     })
 
     this.dummyStatic = (rootDir, options) => (req, res, next) =>
@@ -46,8 +46,8 @@ describe('StaticServerForbidSymlinks', function () {
     )
     this.req = {
       params: {
-        project_id: '12345'
-      }
+        project_id: '12345',
+      },
     }
 
     this.res = {}

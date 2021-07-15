@@ -44,17 +44,20 @@ module.exports = SafeReader = {
           return callback(null, ...Array.from(result))
         })
       const buff = Buffer.alloc(size) // fills with zeroes by default
-      return fs.read(fd, buff, 0, buff.length, 0, function (
-        err,
-        bytesRead,
-        buffer
-      ) {
-        if (err != null) {
-          return callbackWithClose(err)
+      return fs.read(
+        fd,
+        buff,
+        0,
+        buff.length,
+        0,
+        function (err, bytesRead, buffer) {
+          if (err != null) {
+            return callbackWithClose(err)
+          }
+          const result = buffer.toString(encoding, 0, bytesRead)
+          return callbackWithClose(null, result, bytesRead)
         }
-        const result = buffer.toString(encoding, 0, bytesRead)
-        return callbackWithClose(null, result, bytesRead)
-      })
+      )
     })
-  }
+  },
 }

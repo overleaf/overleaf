@@ -8,7 +8,7 @@ describe('ContentCacheManager', function () {
   let contentDir, pdfPath
   let ContentCacheManager, files, Settings
   before(function () {
-    Settings = require('settings-sharelatex')
+    Settings = require('@overleaf/settings')
     ContentCacheManager = require(MODULE_PATH)
   })
   let contentRanges, newContentRanges, reclaimed
@@ -91,14 +91,14 @@ describe('ContentCacheManager', function () {
             objectId: OBJECT_ID_1,
             start: START_1,
             end: END_1,
-            hash: h1
+            hash: h1,
           },
           {
             objectId: OBJECT_ID_2,
             start: START_2,
             end: END_2,
-            hash: h2
-          }
+            hash: h2,
+          },
         ])
       })
 
@@ -110,14 +110,14 @@ describe('ContentCacheManager', function () {
             JSON.stringify({
               hashAge: [
                 [h1, 0],
-                [h2, 0]
+                [h2, 0],
               ],
               hashSize: [
                 [h1, RANGE_1.byteLength],
-                [h2, RANGE_2.byteLength]
-              ]
+                [h2, RANGE_2.byteLength],
+              ],
             })
-          )
+          ),
         })
       })
 
@@ -144,8 +144,8 @@ describe('ContentCacheManager', function () {
               objectId: OBJECT_ID_1,
               start: START_1,
               end: END_1,
-              hash: h1
-            }
+              hash: h1,
+            },
           ])
         })
 
@@ -157,14 +157,14 @@ describe('ContentCacheManager', function () {
               JSON.stringify({
                 hashAge: [
                   [h1, 0],
-                  [h2, 1]
+                  [h2, 1],
                 ],
                 hashSize: [
                   [h1, RANGE_1.byteLength],
-                  [h2, RANGE_2.byteLength]
-                ]
+                  [h2, RANGE_2.byteLength],
+                ],
               })
-            )
+            ),
           })
         })
 
@@ -189,8 +189,8 @@ describe('ContentCacheManager', function () {
                 objectId: OBJECT_ID_1,
                 start: START_1,
                 end: END_1,
-                hash: h1
-              }
+                hash: h1,
+              },
             ])
           })
 
@@ -200,9 +200,9 @@ describe('ContentCacheManager', function () {
               [Path.join(contentDir, '.state.v0.json')]: Buffer.from(
                 JSON.stringify({
                   hashAge: [[h1, 0]],
-                  hashSize: [[h1, RANGE_1.byteLength]]
+                  hashSize: [[h1, RANGE_1.byteLength]],
                 })
-              )
+              ),
             })
           })
 

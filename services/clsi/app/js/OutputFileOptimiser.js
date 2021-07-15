@@ -29,15 +29,15 @@ module.exports = OutputFileOptimiser = {
       callback = function (error) {}
     }
     if (src.match(/\/output\.pdf$/)) {
-      return OutputFileOptimiser.checkIfPDFIsOptimised(src, function (
-        err,
-        isOptimised
-      ) {
-        if (err != null || isOptimised) {
-          return callback(null)
+      return OutputFileOptimiser.checkIfPDFIsOptimised(
+        src,
+        function (err, isOptimised) {
+          if (err != null || isOptimised) {
+            return callback(null)
+          }
+          return OutputFileOptimiser.optimisePDF(src, dst, callback)
         }
-        return OutputFileOptimiser.optimisePDF(src, dst, callback)
-      })
+      )
     } else {
       return callback(null)
     }
@@ -77,7 +77,7 @@ module.exports = OutputFileOptimiser = {
     const timer = new Metrics.Timer('qpdf')
     const proc = spawn('qpdf', args)
     let stdout = ''
-    proc.stdout.setEncoding('utf8').on('data', (chunk) => (stdout += chunk))
+    proc.stdout.setEncoding('utf8').on('data', chunk => (stdout += chunk))
     callback = _.once(callback) // avoid double call back for error and close event
     proc.on('error', function (err) {
       logger.warn({ err, args }, 'qpdf failed')
@@ -99,5 +99,5 @@ module.exports = OutputFileOptimiser = {
         return callback(null)
       })
     })
-  } // ignore the error
+  }, // ignore the error
 }

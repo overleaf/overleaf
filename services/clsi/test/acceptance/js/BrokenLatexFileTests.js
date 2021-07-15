@@ -23,9 +23,9 @@ describe('Broken LaTeX file', function () {
 \\begin{documen % :(
 Broken
 \\end{documen % :(\
-`
-        }
-      ]
+`,
+        },
+      ],
     }
     this.correct_request = {
       resources: [
@@ -36,9 +36,9 @@ Broken
 \\begin{document}
 Hello world
 \\end{document}\
-`
-        }
-      ]
+`,
+        },
+      ],
     }
     return ClsiApp.ensureRunning(done)
   })

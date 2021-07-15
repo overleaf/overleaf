@@ -35,7 +35,7 @@ const Server = {
 
   randomId() {
     return Math.random().toString(16).slice(2)
-  }
+  },
 }
 
 Server.run()
@@ -55,13 +55,13 @@ describe('Url Caching', function () {
 \\begin{document}
 \\includegraphics{lion.png}
 \\end{document}\
-`
+`,
           },
           {
             path: 'lion.png',
-            url: `http://${host}:31415/${this.file}`
-          }
-        ]
+            url: `http://${host}:31415/${this.file}`,
+          },
+        ],
       }
 
       sinon.spy(Server, 'getFile')
@@ -102,14 +102,14 @@ describe('Url Caching', function () {
 \\begin{document}
 \\includegraphics{lion.png}
 \\end{document}\
-`
+`,
           },
           (this.image_resource = {
             path: 'lion.png',
             url: `http://${host}:31415/${this.file}`,
-            modified: Date.now()
-          })
-        ]
+            modified: Date.now(),
+          }),
+        ],
       }
 
       return Client.compile(
@@ -157,14 +157,14 @@ describe('Url Caching', function () {
 \\begin{document}
 \\includegraphics{lion.png}
 \\end{document}\
-`
+`,
           },
           (this.image_resource = {
             path: 'lion.png',
             url: `http://${host}:31415/${this.file}`,
-            modified: (this.last_modified = Date.now())
-          })
-        ]
+            modified: (this.last_modified = Date.now()),
+          }),
+        ],
       }
 
       return Client.compile(
@@ -213,14 +213,14 @@ describe('Url Caching', function () {
 \\begin{document}
 \\includegraphics{lion.png}
 \\end{document}\
-`
+`,
           },
           (this.image_resource = {
             path: 'lion.png',
             url: `http://${host}:31415/${this.file}`,
-            modified: (this.last_modified = Date.now())
-          })
-        ]
+            modified: (this.last_modified = Date.now()),
+          }),
+        ],
       }
 
       return Client.compile(
@@ -269,14 +269,14 @@ describe('Url Caching', function () {
 \\begin{document}
 \\includegraphics{lion.png}
 \\end{document}\
-`
+`,
           },
           (this.image_resource = {
             path: 'lion.png',
             url: `http://${host}:31415/${this.file}`,
-            modified: (this.last_modified = Date.now())
-          })
-        ]
+            modified: (this.last_modified = Date.now()),
+          }),
+        ],
       }
 
       return Client.compile(
@@ -325,17 +325,17 @@ describe('Url Caching', function () {
 \\begin{document}
 \\includegraphics{lion.png}
 \\end{document}\
-`
+`,
           },
           (this.image_resource = {
             path: 'lion.png',
             url: `http://${host}:31415/${this.file}`,
-            modified: (this.last_modified = Date.now())
-          })
-        ]
+            modified: (this.last_modified = Date.now()),
+          }),
+        ],
       }
 
-      return Client.compile(this.project_id, this.request, (error) => {
+      return Client.compile(this.project_id, this.request, error => {
         if (error != null) {
           throw error
         }

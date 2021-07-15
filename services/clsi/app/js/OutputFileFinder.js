@@ -6,9 +6,7 @@ const logger = require('logger-sharelatex')
 
 module.exports = OutputFileFinder = {
   findOutputFiles(resources, directory, callback) {
-    const incomingResources = new Set(
-      resources.map((resource) => resource.path)
-    )
+    const incomingResources = new Set(resources.map(resource => resource.path))
 
     OutputFileFinder._getAllFiles(directory, function (error, allFiles) {
       if (allFiles == null) {
@@ -23,7 +21,7 @@ module.exports = OutputFileFinder = {
         if (!incomingResources.has(file)) {
           outputFiles.push({
             path: file,
-            type: Path.extname(file).replace(/^\./, '') || undefined
+            type: Path.extname(file).replace(/^\./, '') || undefined,
           })
         }
       }
@@ -42,7 +40,7 @@ module.exports = OutputFileFinder = {
       '.archive',
       '-o',
       '-name',
-      '.project-*'
+      '.project-*',
     ]
     const args = [
       directory,
@@ -53,13 +51,13 @@ module.exports = OutputFileFinder = {
       '-o',
       '-type',
       'f',
-      '-print'
+      '-print',
     ]
     logger.log({ args }, 'running find command')
 
     const proc = spawn('find', args)
     let stdout = ''
-    proc.stdout.setEncoding('utf8').on('data', (chunk) => (stdout += chunk))
+    proc.stdout.setEncoding('utf8').on('data', chunk => (stdout += chunk))
     proc.on('error', callback)
     proc.on('close', function (code) {
       if (code !== 0) {
@@ -76,5 +74,5 @@ module.exports = OutputFileFinder = {
       })
       callback(null, fileList)
     })
-  }
+  },
 }

@@ -39,5 +39,5 @@ class FSPdfManager extends LocalPdfManager {
 }
 
 module.exports = {
-  FSPdfManager
+  FSPdfManager,
 }

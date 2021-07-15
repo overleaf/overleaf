@@ -22,13 +22,13 @@ describe('DockerLockManager', function () {
   beforeEach(function () {
     this.LockManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': {},
+        '@overleaf/settings': {},
         fs: {
           lstat: sinon.stub().callsArgWith(1),
-          readdir: sinon.stub().callsArgWith(1)
+          readdir: sinon.stub().callsArgWith(1),
         },
-        lockfile: (this.Lockfile = {})
-      }
+        lockfile: (this.Lockfile = {}),
+      },
     })
     return (this.lockFile = '/local/compile/directory/.project-lock')
   })

@@ -15,7 +15,7 @@
 let Client
 const request = require('request')
 const fs = require('fs')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const host = 'localhost'
 
@@ -38,8 +38,8 @@ module.exports = Client = {
       {
         url: `${this.host}/project/${project_id}/compile`,
         json: {
-          compile: data
-        }
+          compile: data,
+        },
       },
       callback
     )
@@ -66,7 +66,7 @@ module.exports = Client = {
     const app = express()
     app.use(express.static(directory))
     console.log('starting test server on', port, host)
-    return app.listen(port, host).on('error', (error) => {
+    return app.listen(port, host).on('error', error => {
       console.error('error starting server:', error.message)
       return process.exit(1)
     })
@@ -87,9 +87,9 @@ module.exports = Client = {
           imageName,
           file,
           line,
-          column
+          column,
         },
-        json: true
+        json: true,
       },
       (error, response, body) => {
         if (error != null) {
@@ -118,9 +118,9 @@ module.exports = Client = {
           imageName,
           page,
           h,
-          v
+          v,
         },
-        json: true
+        json: true,
       },
       (error, response, body) => {
         if (error != null) {
@@ -148,7 +148,7 @@ module.exports = Client = {
         entities = entities.concat(
           fs
             .readdirSync(`${baseDirectory}/${directory}/${entity}`)
-            .map((subEntity) => {
+            .map(subEntity => {
               if (subEntity === 'main.tex') {
                 rootResourcePath = `${entity}/${subEntity}`
               }
@@ -167,14 +167,14 @@ module.exports = Client = {
             'Rtex',
             'ist',
             'md',
-            'Rmd'
+            'Rmd',
           ].indexOf(extension) > -1
         ) {
           resources.push({
             path: entity,
             content: fs
               .readFileSync(`${baseDirectory}/${directory}/${entity}`)
-              .toString()
+              .toString(),
           })
         } else if (
           ['eps', 'ttf', 'png', 'jpg', 'pdf', 'jpeg'].indexOf(extension) > -1
@@ -182,7 +182,7 @@ module.exports = Client = {
           resources.push({
             path: entity,
             url: `http://${host}:${serverPort}/${directory}/${entity}`,
-            modified: stat.mtime
+            modified: stat.mtime,
           })
         }
       }
@@ -193,7 +193,7 @@ module.exports = Client = {
       (error, body) => {
         const req = {
           resources,
-          rootResourcePath
+          rootResourcePath,
         }
 
         if (error == null) {
@@ -220,8 +220,8 @@ module.exports = Client = {
         url: `${this.host}/project/${project_id}/wordcount`,
         qs: {
           image,
-          file
-        }
+          file,
+        },
       },
       (error, response, body) => {
         if (error != null) {
@@ -233,5 +233,5 @@ module.exports = Client = {
         return callback(null, JSON.parse(body))
       }
     )
-  }
+  },
 }

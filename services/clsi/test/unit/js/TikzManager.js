@@ -21,8 +21,8 @@ describe('TikzManager', function () {
       requires: {
         './ResourceWriter': (this.ResourceWriter = {}),
         './SafeReader': (this.SafeReader = {}),
-        fs: (this.fs = {})
-      }
+        fs: (this.fs = {}),
+      },
     }))
   })
 

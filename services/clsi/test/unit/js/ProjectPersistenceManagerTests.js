@@ -27,16 +27,16 @@ describe('ProjectPersistenceManager', function () {
         './UrlCache': (this.UrlCache = {}),
         './CompileManager': (this.CompileManager = {}),
         diskusage: (this.diskusage = { check: sinon.stub() }),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           project_cache_length_ms: 1000,
           path: {
             compilesDir: '/compiles',
             outputDir: '/output',
-            clsiCacheDir: '/cache'
-          }
+            clsiCacheDir: '/cache',
+          },
         }),
-        './db': (this.db = {})
-      }
+        './db': (this.db = {}),
+      },
     })
     this.callback = sinon.stub()
     this.project_id = 'project-id-123'
@@ -47,7 +47,7 @@ describe('ProjectPersistenceManager', function () {
     it('should leave expiry alone if plenty of disk', function (done) {
       this.diskusage.check.resolves({
         available: 40,
-        total: 100
+        total: 100,
       })
 
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
@@ -61,7 +61,7 @@ describe('ProjectPersistenceManager', function () {
     it('should drop EXPIRY_TIMEOUT 10% if low disk usage', function (done) {
       this.diskusage.check.resolves({
         available: 5,
-        total: 100
+        total: 100,
       })
 
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
@@ -73,7 +73,7 @@ describe('ProjectPersistenceManager', function () {
     it('should not drop EXPIRY_TIMEOUT to below 50% of project_cache_length_ms', function (done) {
       this.diskusage.check.resolves({
         available: 5,
-        total: 100
+        total: 100,
       })
       this.ProjectPersistenceManager.EXPIRY_TIMEOUT = 500
       this.ProjectPersistenceManager.refreshExpiryTimeout(() => {
@@ -105,7 +105,7 @@ describe('ProjectPersistenceManager', function () {
     })
 
     it('should clear each expired project', function () {
-      return Array.from(this.project_ids).map((project_id) =>
+      return Array.from(this.project_ids).map(project_id =>
         this.ProjectPersistenceManager.clearProjectFromCache
           .calledWith(project_id)
           .should.equal(true)

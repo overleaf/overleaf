@@ -27,9 +27,9 @@ Hello world
       resources: [
         {
           path: 'main.tex',
-          content
-        }
-      ]
+          content,
+        },
+      ],
     }
     this.project_id = Client.randomId()
     return ClsiApp.ensureRunning(() => {
@@ -59,8 +59,8 @@ Hello world
           }
           expect(pdfPositions).to.deep.equal({
             pdf: [
-              { page: 1, h: 133.77, v: 134.76, height: 6.92, width: 343.71 }
-            ]
+              { page: 1, h: 133.77, v: 134.76, height: 6.92, width: 343.71 },
+            ],
           })
           return done()
         }
@@ -80,7 +80,7 @@ Hello world
             throw error
           }
           expect(codePositions).to.deep.equal({
-            code: [{ file: 'main.tex', line: 3, column: -1 }]
+            code: [{ file: 'main.tex', line: 3, column: -1 }],
           })
           return done()
         }
@@ -132,9 +132,9 @@ Hello world
         resources: [
           {
             path: 'main.tex',
-            content
-          }
-        ]
+            content,
+          },
+        ],
       }
       Client.compile(
         this.broken_project_id,

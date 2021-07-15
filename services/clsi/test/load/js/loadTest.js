@@ -1,6 +1,3 @@
-/* eslint-disable
-    standard/no-callback-literal,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -10,14 +7,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const async = require('async')
 const fs = require('fs')
 const _ = require('lodash')
 const concurentCompiles = 5
 const totalCompiles = 50
 
-const buildUrl = (path) =>
+const buildUrl = path =>
   `http://${Settings.internal.clsi.host}:${Settings.internal.clsi.port}/${path}`
 
 const mainTexContent = fs.readFileSync('./bulk.tex', 'utf-8')
@@ -51,11 +48,11 @@ const makeRequest = function (compileNumber, callback) {
 \\begin{document}
 ${bodyContent}
 \\end{document}\
-`
-            }
-          ]
-        }
-      }
+`,
+            },
+          ],
+        },
+      },
     },
     (err, response, body) => {
       if (response.statusCode !== 200) {
@@ -74,12 +71,13 @@ ${bodyContent}
   )
 }
 
-const jobs = _.map(__range__(1, totalCompiles, true), (i) => (cb) =>
-  makeRequest(i, cb)
+const jobs = _.map(
+  __range__(1, totalCompiles, true),
+  i => cb => makeRequest(i, cb)
 )
 
 const startTime = new Date()
-async.parallelLimit(jobs, concurentCompiles, (err) => {
+async.parallelLimit(jobs, concurentCompiles, err => {
   if (err != null) {
     console.error(err)
   }

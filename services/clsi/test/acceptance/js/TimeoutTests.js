@@ -16,7 +16,7 @@ describe('Timed out compile', function () {
   before(function (done) {
     this.request = {
       options: {
-        timeout: 10
+        timeout: 10,
       }, // seconds
       resources: [
         {
@@ -27,9 +27,9 @@ describe('Timed out compile', function () {
 \\def\\x{Hello!\\par\\x}
 \\x
 \\end{document}\
-`
-        }
-      ]
+`,
+        },
+      ],
     }
     this.project_id = Client.randomId()
     return ClsiApp.ensureRunning(() => {
@@ -55,7 +55,7 @@ describe('Timed out compile', function () {
   })
 
   return it('should return the log output file name', function () {
-    const outputFilePaths = this.body.compile.outputFiles.map((x) => x.path)
+    const outputFilePaths = this.body.compile.outputFiles.map(x => x.path)
     return outputFilePaths.should.include('output.log')
   })
 })

@@ -1,9 +1,9 @@
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 after(function (done) {
   request(
     {
-      url: `${Settings.apis.clsi.url}/metrics`
+      url: `${Settings.apis.clsi.url}/metrics`,
     },
     (err, response, body) => {
       if (err) return done(err)

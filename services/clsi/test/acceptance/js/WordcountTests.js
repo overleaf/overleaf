@@ -25,9 +25,9 @@ describe('Syncing', function () {
           content: fs.readFileSync(
             path.join(__dirname, '../fixtures/naugty_strings.txt'),
             'utf-8'
-          )
-        }
-      ]
+          ),
+        },
+      ],
     }
     this.project_id = Client.randomId()
     return ClsiApp.ensureRunning(() => {
@@ -61,8 +61,8 @@ describe('Syncing', function () {
             mathInline: 6,
             mathDisplay: 0,
             errors: 0,
-            messages: ''
-          }
+            messages: '',
+          },
         })
         return done()
       })

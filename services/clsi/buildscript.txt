@@ -4,6 +4,6 @@ clsi
 --docker-repos=gcr.io/overleaf-ops
 --env-add=
 --env-pass-through=TEXLIVE_IMAGE
---node-version=12.21.0
+--node-version=12.22.3
 --public-repo=True
---script-version=3.8.0
+--script-version=3.11.0

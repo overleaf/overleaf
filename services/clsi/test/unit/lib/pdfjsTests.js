@@ -28,14 +28,14 @@ async function loadContext(example) {
   const snapshot = blob ? JSON.parse(blob) : null
   return {
     size,
-    snapshot
+    snapshot,
   }
 }
 
 async function backFillSnapshot(example, size) {
   const table = await parseXrefTable(pdfPath(example), size, () => {})
   await fs.promises.mkdir(Path.dirname(snapshotPath(example)), {
-    recursive: true
+    recursive: true,
   })
   await fs.promises.writeFile(
     snapshotPath(example),

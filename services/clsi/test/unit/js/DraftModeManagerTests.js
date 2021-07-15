@@ -19,8 +19,8 @@ describe('DraftModeManager', function () {
   beforeEach(function () {
     return (this.DraftModeManager = SandboxedModule.require(modulePath, {
       requires: {
-        fs: (this.fs = {})
-      }
+        fs: (this.fs = {}),
+      },
     }))
   })
 

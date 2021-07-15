@@ -9,7 +9,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const Sequelize = require('sequelize')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const _ = require('lodash')
 const logger = require('logger-sharelatex')
 
@@ -37,10 +37,10 @@ module.exports = {
     {
       url: Sequelize.STRING,
       project_id: Sequelize.STRING,
-      lastModified: Sequelize.DATE
+      lastModified: Sequelize.DATE,
     },
     {
-      indexes: [{ fields: ['url', 'project_id'] }, { fields: ['project_id'] }]
+      indexes: [{ fields: ['url', 'project_id'] }, { fields: ['project_id'] }],
     }
   ),
 
@@ -48,10 +48,10 @@ module.exports = {
     'Project',
     {
       project_id: { type: Sequelize.STRING, primaryKey: true },
-      lastAccessed: Sequelize.DATE
+      lastAccessed: Sequelize.DATE,
     },
     {
-      indexes: [{ fields: ['lastAccessed'] }]
+      indexes: [{ fields: ['lastAccessed'] }],
     }
   ),
 
@@ -62,6 +62,6 @@ module.exports = {
     return sequelize
       .sync()
       .then(() => logger.log('db sync complete'))
-      .catch((err) => console.log(err, 'error syncing'))
-  }
+      .catch(err => console.log(err, 'error syncing'))
+  },
 }
