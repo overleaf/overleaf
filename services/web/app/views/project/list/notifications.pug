@@ -124,7 +124,12 @@ include ../../_mixins/reconfirm_affiliation
 					ng-switch-when="notification_dropbox_unlinked_due_to_lapsed_reconfirmation"
 				)
 					.notification-body
-						| !{translate("dropbox_unlinked_premium_feature", {}, ['strong'])}
+						if user.features.dropbox
+							| !{translate("dropbox_unlinked_premium_feature", {}, ['strong'])}
+							| !{translate("can_now_relink_dropbox", {}, [{name: 'a', attrs: {href: '/user/settings#dropboxSettings' }}])}
+						else
+							| !{translate("dropbox_unlinked_premium_feature", {}, ['strong'])}
+							| !{translate("confirm_affiliation_to_relink_dropbox")}
 						| &nbsp;
 						a(href="/learn/how-to/Institutional_Email_Reconfirmation") #{translate("learn_more")}
 					.notification-close

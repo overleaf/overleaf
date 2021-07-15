@@ -1463,7 +1463,8 @@
   "search": "Search",
   "also": "Also",
   "add_email": "Add Email",
-  "dropbox_unlinked_premium_feature": "<0>Your Dropbox account has been unlinked</0> because Dropbox Sync is a premium feature that you had through an institutional license. Please confirm you are still at the institution or upgrade your account in order to relink your Dropbox account.",
+  "dropbox_unlinked_premium_feature": "<0>Your Dropbox account has been unlinked</0> because Dropbox Sync is a premium feature that you had through an institutional license.",
+  "confirm_affiliation_to_relink_dropbox": "Please confirm you are still at the institution and on their license, or upgrade your account in order to relink your Dropbox account.",
   "pay_with_visa_mastercard_or_amex": "Pay with Mastercard, Visa, or Amex",
   "pay_with_paypal": "Pay with PayPal",
   "this_field_is_required": "This field is required",
@@ -1476,5 +1477,6 @@
   "go_prev_page": "Go to Previous Page",
   "page_current": "Page __page__, Current Page",
   "go_page": "Go to page __page__",
-  "pagination_navigation": "Pagination Navigation"
+  "pagination_navigation": "Pagination Navigation",
+  "can_now_relink_dropbox": "You can now <0>relink your Dropbox account</0>."
 }
