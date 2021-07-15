@@ -30,10 +30,10 @@ describe('Getting a doc', function () {
           op: { i: 'foo', p: 3 },
           meta: {
             user_id: ObjectId().toString(),
-            ts: new Date().toString()
-          }
-        }
-      ]
+            ts: new Date().toString(),
+          },
+        },
+      ],
     }
     return DocstoreApp.ensureRunning(() => {
       return DocstoreClient.createDoc(
@@ -42,7 +42,7 @@ describe('Getting a doc', function () {
         this.lines,
         this.version,
         this.ranges,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -92,7 +92,7 @@ describe('Getting a doc', function () {
         this.lines,
         this.version,
         this.ranges,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }

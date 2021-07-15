@@ -25,9 +25,9 @@ describe('RangeManager', function () {
     return (this.RangeManager = SandboxedModule.require(modulePath, {
       requires: {
         './mongodb': {
-          ObjectId
-        }
-      }
+          ObjectId,
+        },
+      },
     }))
   })
 
@@ -45,16 +45,16 @@ describe('RangeManager', function () {
             op: { i: 'foo', p: 3 },
             metadata: {
               user_id,
-              ts
-            }
-          }
+              ts,
+            },
+          },
         ],
         comments: [
           {
             id: comment_id,
-            op: { c: 'foo', p: 3, t: thread_id }
-          }
-        ]
+            op: { c: 'foo', p: 3, t: thread_id },
+          },
+        ],
       }).should.deep.equal({
         changes: [
           {
@@ -62,16 +62,16 @@ describe('RangeManager', function () {
             op: { i: 'foo', p: 3 },
             metadata: {
               user_id: ObjectId(user_id),
-              ts: new Date(ts)
-            }
-          }
+              ts: new Date(ts),
+            },
+          },
         ],
         comments: [
           {
             id: ObjectId(comment_id),
-            op: { c: 'foo', p: 3, t: ObjectId(thread_id) }
-          }
-        ]
+            op: { c: 'foo', p: 3, t: ObjectId(thread_id) },
+          },
+        ],
       })
     })
 
@@ -84,29 +84,29 @@ describe('RangeManager', function () {
           {
             id: change_id,
             metadata: {
-              user_id
-            }
-          }
+              user_id,
+            },
+          },
         ],
         comments: [
           {
-            id: comment_id
-          }
-        ]
+            id: comment_id,
+          },
+        ],
       }).should.deep.equal({
         changes: [
           {
             id: change_id,
             metadata: {
-              user_id
-            }
-          }
+              user_id,
+            },
+          },
         ],
         comments: [
           {
-            id: comment_id
-          }
-        ]
+            id: comment_id,
+          },
+        ],
       })
     })
 
@@ -123,16 +123,16 @@ describe('RangeManager', function () {
             op: { i: 'foo', p: 3 },
             metadata: {
               user_id,
-              ts
-            }
-          }
+              ts,
+            },
+          },
         ],
         comments: [
           {
             id: comment_id,
-            op: { c: 'foo', p: 3, t: thread_id }
-          }
-        ]
+            op: { c: 'foo', p: 3, t: thread_id },
+          },
+        ],
       }
       const ranges1_copy = JSON.parse(JSON.stringify(ranges1)) // jsonRangesToMongo modifies in place
       const ranges2 = JSON.parse(
@@ -151,16 +151,16 @@ describe('RangeManager', function () {
             op: { i: 'foo', p: 3 },
             metadata: {
               user_id: ObjectId(),
-              ts: new Date()
-            }
-          }
+              ts: new Date(),
+            },
+          },
         ],
         comments: [
           {
             id: ObjectId(),
-            op: { c: 'foo', p: 3, t: ObjectId() }
-          }
-        ]
+            op: { c: 'foo', p: 3, t: ObjectId() },
+          },
+        ],
       }
       return (this.ranges_copy = this.RangeManager.jsonRangesToMongo(
         JSON.parse(JSON.stringify(this.ranges))

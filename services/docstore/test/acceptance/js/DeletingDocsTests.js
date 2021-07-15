@@ -15,7 +15,7 @@ const { db, ObjectId } = require('../../../app/js/mongodb')
 const { expect } = require('chai')
 const DocstoreApp = require('./helpers/DocstoreApp')
 const Errors = require('../../../app/js/Errors')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
@@ -33,7 +33,7 @@ function deleteTestSuite(deleteDoc) {
         this.lines,
         this.version,
         this.ranges,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -92,7 +92,7 @@ function deleteTestSuite(deleteDoc) {
 
     it('should not export the doc to s3', function (done) {
       setTimeout(() => {
-        DocstoreClient.getS3Doc(this.project_id, this.doc_id, (error) => {
+        DocstoreClient.getS3Doc(this.project_id, this.doc_id, error => {
           expect(error).to.be.instanceOf(Errors.NotFoundError)
           done()
         })
@@ -311,7 +311,7 @@ describe('Delete via PATCH', function () {
         (error, deletedDocs) => {
           if (error) return done(error)
           expect(deletedDocs).to.deep.equal([
-            { _id: this.doc_id.toString(), name: 'main.tex' }
+            { _id: this.doc_id.toString(), name: 'main.tex' },
           ])
           done()
         }
@@ -366,7 +366,7 @@ describe('Delete via PATCH', function () {
             expect(deletedDocs).to.deep.equal([
               { _id: this.doc_id3.toString(), name: 'three.tex' },
               { _id: this.doc_id2.toString(), name: 'two.tex' },
-              { _id: this.doc_id.toString(), name: 'main.tex' }
+              { _id: this.doc_id.toString(), name: 'main.tex' },
             ])
             done()
           }
@@ -391,7 +391,7 @@ describe('Delete via PATCH', function () {
 
               expect(deletedDocs).to.deep.equal([
                 { _id: this.doc_id3.toString(), name: 'three.tex' },
-                { _id: this.doc_id2.toString(), name: 'two.tex' }
+                { _id: this.doc_id2.toString(), name: 'two.tex' },
                 // dropped main.tex
               ])
               done()
@@ -436,7 +436,7 @@ describe("Destroying a project's documents", function () {
 
   return describe('when the doc is archived', function () {
     beforeEach(function (done) {
-      return DocstoreClient.archiveAllDoc(this.project_id, (err) => {
+      return DocstoreClient.archiveAllDoc(this.project_id, err => {
         if (err != null) {
           return done(err)
         }
@@ -461,7 +461,7 @@ describe("Destroying a project's documents", function () {
     })
 
     return it('should remove the doc contents from s3', function (done) {
-      return DocstoreClient.getS3Doc(this.project_id, this.doc_id, (error) => {
+      return DocstoreClient.getS3Doc(this.project_id, this.doc_id, error => {
         expect(error).to.be.instanceOf(Errors.NotFoundError)
         done()
       })

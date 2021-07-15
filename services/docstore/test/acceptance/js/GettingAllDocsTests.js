@@ -26,31 +26,31 @@ describe('Getting all docs', function () {
         _id: ObjectId(),
         lines: ['one', 'two', 'three'],
         ranges: { mock: 'one' },
-        rev: 2
+        rev: 2,
       },
       {
         _id: ObjectId(),
         lines: ['aaa', 'bbb', 'ccc'],
         ranges: { mock: 'two' },
-        rev: 4
+        rev: 4,
       },
       {
         _id: ObjectId(),
         lines: ['111', '222', '333'],
         ranges: { mock: 'three' },
-        rev: 6
-      }
+        rev: 6,
+      },
     ]
     this.deleted_doc = {
       _id: ObjectId(),
       lines: ['deleted'],
       ranges: { mock: 'four' },
-      rev: 8
+      rev: 8,
     }
     const version = 42
-    const jobs = Array.from(this.docs).map((doc) =>
-      ((doc) => {
-        return (callback) => {
+    const jobs = Array.from(this.docs).map(doc =>
+      (doc => {
+        return callback => {
           return DocstoreClient.createDoc(
             this.project_id,
             doc._id,
@@ -62,14 +62,14 @@ describe('Getting all docs', function () {
         }
       })(doc)
     )
-    jobs.push((cb) => {
+    jobs.push(cb => {
       return DocstoreClient.createDoc(
         this.project_id,
         this.deleted_doc._id,
         this.deleted_doc.lines,
         version,
         this.deleted_doc.ranges,
-        (err) => {
+        err => {
           return DocstoreClient.deleteDoc(
             this.project_id,
             this.deleted_doc._id,
@@ -78,7 +78,7 @@ describe('Getting all docs', function () {
         }
       )
     })
-    jobs.unshift((cb) => DocstoreApp.ensureRunning(cb))
+    jobs.unshift(cb => DocstoreApp.ensureRunning(cb))
     return async.series(jobs, done)
   })
 

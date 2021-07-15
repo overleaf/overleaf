@@ -6,14 +6,14 @@
  */
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize('docstore')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const express = require('express')
 const bodyParser = require('body-parser')
 const {
   celebrate: validate,
   Joi,
-  errors: handleValidationErrors
+  errors: handleValidationErrors,
 } = require('celebrate')
 const mongodb = require('./app/js/mongodb')
 const Errors = require('./app/js/Errors')
@@ -67,8 +67,8 @@ app.patch(
     body: {
       deleted: Joi.boolean(),
       name: Joi.string().when('deleted', { is: true, then: Joi.required() }),
-      deletedAt: Joi.date().when('deleted', { is: true, then: Joi.required() })
-    }
+      deletedAt: Joi.date().when('deleted', { is: true, then: Joi.required() }),
+    },
   }),
   HttpController.patchDoc
 )
@@ -111,7 +111,7 @@ if (!module.parent) {
         return logger.info(`Docstore starting up, listening on ${host}:${port}`)
       })
     })
-    .catch((err) => {
+    .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
       process.exit(1)
     })
