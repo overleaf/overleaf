@@ -4,18 +4,18 @@ module.exports = {
   internal: {
     spelling: {
       port: 3005,
-      host: process.env.LISTEN_ADDRESS || 'localhost'
-    }
+      host: process.env.LISTEN_ADDRESS || 'localhost',
+    },
   },
 
   mongo: {
     options: {
       useUnifiedTopology:
-        (process.env.MONGO_USE_UNIFIED_TOPOLOGY || 'true') === 'true'
+        (process.env.MONGO_USE_UNIFIED_TOPOLOGY || 'true') === 'true',
     },
     url:
       process.env.MONGO_CONNECTION_STRING ||
-      `mongodb://${process.env.MONGO_HOST || 'localhost'}/sharelatex`
+      `mongodb://${process.env.MONGO_HOST || 'localhost'}/sharelatex`,
   },
 
   cacheDir: Path.resolve('cache'),
@@ -32,10 +32,10 @@ module.exports = {
         'LaTeX',
         'http',
         'https',
-        'www'
+        'www',
       ],
 
   sentry: {
-    dsn: process.env.SENTRY_DSN
-  }
+    dsn: process.env.SENTRY_DSN,
+  },
 }

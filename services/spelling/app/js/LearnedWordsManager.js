@@ -13,13 +13,13 @@ const LearnedWordsManager = {
     mongoCache.del(userToken)
     return db.spellingPreferences.updateOne(
       {
-        token: userToken
+        token: userToken,
       },
       {
-        $addToSet: { learnedWords: word }
+        $addToSet: { learnedWords: word },
       },
       {
-        upsert: true
+        upsert: true,
       },
       callback
     )
@@ -32,10 +32,10 @@ const LearnedWordsManager = {
     mongoCache.del(userToken)
     return db.spellingPreferences.updateOne(
       {
-        token: userToken
+        token: userToken,
       },
       {
-        $pull: { learnedWords: word }
+        $pull: { learnedWords: word },
       },
       callback
     )
@@ -54,24 +54,24 @@ const LearnedWordsManager = {
     metrics.inc('mongoCache', 0.1, { status: 'miss' })
     logger.info({ userToken }, 'mongoCache miss')
 
-    db.spellingPreferences.findOne({ token: userToken }, function (
-      error,
-      preferences
-    ) {
-      if (error != null) {
-        return callback(OError.tag(error))
+    db.spellingPreferences.findOne(
+      { token: userToken },
+      function (error, preferences) {
+        if (error != null) {
+          return callback(OError.tag(error))
+        }
+        let words =
+          (preferences != null ? preferences.learnedWords : undefined) || []
+        if (words) {
+          // remove duplicates
+          words = words.filter(
+            (value, index, self) => self.indexOf(value) === index
+          )
+        }
+        mongoCache.set(userToken, words)
+        callback(null, words)
       }
-      let words =
-        (preferences != null ? preferences.learnedWords : undefined) || []
-      if (words) {
-        // remove duplicates
-        words = words.filter(
-          (value, index, self) => self.indexOf(value) === index
-        )
-      }
-      mongoCache.set(userToken, words)
-      callback(null, words)
-    })
+    )
   },
 
   deleteUsersLearnedWords(userToken, callback) {
@@ -79,7 +79,7 @@ const LearnedWordsManager = {
       callback = () => {}
     }
     db.spellingPreferences.deleteOne({ token: userToken }, callback)
-  }
+  },
 }
 
 const promises = {
@@ -88,13 +88,13 @@ const promises = {
   getLearnedWords: promisify(LearnedWordsManager.getLearnedWords),
   deleteUsersLearnedWords: promisify(
     LearnedWordsManager.deleteUsersLearnedWords
-  )
+  ),
 }
 
 LearnedWordsManager.promises = promises
 
 module.exports = LearnedWordsManager
-;['learnWord', 'unlearnWord', 'getLearnedWords'].map((method) =>
+;['learnWord', 'unlearnWord', 'getLearnedWords'].map(method =>
   metrics.timeAsyncMethod(
     LearnedWordsManager,
     method,

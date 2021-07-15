@@ -1,6 +1,6 @@
 const request = require('request')
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 
 module.exports = {
@@ -9,9 +9,9 @@ module.exports = {
       url: `http://localhost:3005/user/${settings.healthCheckUserId}/check`,
       json: {
         words: ['helllo'],
-        language: 'en'
+        language: 'en',
       },
-      timeout: 1000 * 20
+      timeout: 1000 * 20,
     }
     return request.post(opts, function (err, response, body) {
       if (err != null) {
@@ -35,5 +35,5 @@ module.exports = {
         res.sendStatus(500)
       }
     })
-  }
+  },
 }

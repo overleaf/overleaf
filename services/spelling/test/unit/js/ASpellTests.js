@@ -18,9 +18,9 @@ describe('ASpell', function () {
       requires: {
         '@overleaf/metrics': {
           gauge() {},
-          inc() {}
-        }
-      }
+          inc() {},
+        },
+      },
     }))
   })
   afterEach(function () {
@@ -111,7 +111,7 @@ describe('ASpell', function () {
 
   return describe('when the request times out', function () {
     beforeEach(function (done) {
-      const words = __range__(0, 1000, true).map((i) => 'abcdefg')
+      const words = __range__(0, 1000, true).map(i => 'abcdefg')
       this.ASpell.ASPELL_TIMEOUT = 1
       this.start = Date.now()
       return this.ASpell.checkWords('en', words, (error, result) => {

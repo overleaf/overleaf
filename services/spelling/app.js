@@ -8,7 +8,7 @@
 const metrics = require('@overleaf/metrics')
 metrics.initialize('spelling')
 
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 logger.initialize('spelling')
 if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
@@ -55,7 +55,7 @@ if (!module.parent) {
         return logger.info(`spelling starting up, listening on ${host}:${port}`)
       })
     })
-    .catch((err) => {
+    .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
       process.exit(1)
     })

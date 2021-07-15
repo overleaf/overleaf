@@ -16,10 +16,10 @@ describe('ASpellWorker', function () {
         requires: {
           '@overleaf/metrics': {
             gauge() {},
-            inc() {}
+            inc() {},
           },
-          child_process: this.child_process
-        }
+          child_process: this.child_process,
+        },
       }
     ))
   })
@@ -31,7 +31,7 @@ describe('ASpellWorker', function () {
         stderr: { on: sinon.stub() },
         stdin: { on: sinon.stub() },
         on: sinon.stub(),
-        pid: 12345
+        pid: 12345,
       }
       this.child_process.spawn = sinon.stub().returns(this.pipe)
       this.pipe.stdout.setEncoding = sinon.stub()
@@ -92,7 +92,7 @@ describe('ASpellWorker', function () {
     describe('with everything split across chunks', function () {
       beforeEach(function () {
         this.callback = worker.callback = sinon.stub()
-        '& hello\n& world\nen\n& goodbye'.split('').forEach((x) => {
+        '& hello\n& world\nen\n& goodbye'.split('').forEach(x => {
           this.pipe.stdout.emit('data', x)
         })
       })

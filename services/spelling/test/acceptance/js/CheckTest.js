@@ -8,8 +8,8 @@ const checkWord = (words, language) =>
     url: `/user/${USER_ID}/check`,
     body: JSON.stringify({
       words,
-      language
-    })
+      language,
+    }),
   })
 
 describe('checking words', function () {
@@ -27,7 +27,7 @@ describe('checking words', function () {
     it('should return the list of misspellings', async function () {
       const body = JSON.parse(response.body)
       expect(body).to.deep.equal({
-        misspellings: [{ index: 0, suggestions: ['anther', 'another'] }]
+        misspellings: [{ index: 0, suggestions: ['anther', 'another'] }],
       })
     })
   })
@@ -44,7 +44,7 @@ describe('checking words', function () {
 
     it('should have misspelling suggestions with consecutive indexes', async function () {
       const body = JSON.parse(response.body)
-      const indexes = body.misspellings.map((mspl) => mspl.index)
+      const indexes = body.misspellings.map(mspl => mspl.index)
       expect(indexes).to.deep.equal([0, 1, 2])
     })
 
@@ -72,7 +72,7 @@ describe('checking words', function () {
 
     it('should have misspelling suggestions with consecutive indexes', async function () {
       const body = JSON.parse(response.body)
-      const indexList = body.misspellings.map((mspl) => mspl.index)
+      const indexList = body.misspellings.map(mspl => mspl.index)
       expect(indexList.length).to.equal(10000) // avoid testing over an incorrect array
       for (let i = 0; i < indexList.length - 1; i++) {
         expect(indexList[i] + 1).to.equal(indexList[i + 1])
@@ -96,7 +96,7 @@ describe('checking words', function () {
 
     it('should have misspelling suggestions with consecutive indexes', async function () {
       const body = JSON.parse(response.body)
-      const indexList = body.misspellings.map((mspl) => mspl.index)
+      const indexList = body.misspellings.map(mspl => mspl.index)
       expect(indexList.length).to.equal(10000) // avoid testing over an incorrect array
       for (let i = 0; i < indexList.length - 1; i++) {
         expect(indexList[i] + 1).to.equal(indexList[i + 1])
@@ -116,7 +116,7 @@ describe('checking words', function () {
 
     it('should have misspelling suggestions with consecutive indexes', async function () {
       const body = JSON.parse(response.body)
-      const indexes = body.misspellings.map((mspl) => mspl.index)
+      const indexes = body.misspellings.map(mspl => mspl.index)
       expect(indexes).to.deep.equal([0, 1, 2, 3])
     })
 

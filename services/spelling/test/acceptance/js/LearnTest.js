@@ -3,38 +3,38 @@ const request = require('./helpers/request')
 
 const USER_ID = 101
 
-const checkWord = (words) =>
+const checkWord = words =>
   request.post({
     url: `/user/${USER_ID}/check`,
     body: JSON.stringify({
-      words
-    })
+      words,
+    }),
   })
 
-const learnWord = (word) =>
+const learnWord = word =>
   request.post({
     url: `/user/${USER_ID}/learn`,
     body: JSON.stringify({
-      word
-    })
+      word,
+    }),
   })
 
-const unlearnWord = (word) =>
+const unlearnWord = word =>
   request.post({
     url: `/user/${USER_ID}/unlearn`,
     body: JSON.stringify({
-      word
-    })
+      word,
+    }),
   })
 
 const getDict = () =>
   request.get({
-    url: `/user/${USER_ID}`
+    url: `/user/${USER_ID}`,
   })
 
 const deleteDict = () =>
   request.del({
-    url: `/user/${USER_ID}`
+    url: `/user/${USER_ID}`,
   })
 
 describe('learning words', function () {
