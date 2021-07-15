@@ -21,6 +21,8 @@ RUN apt-get update && \
 WORKDIR /build/jemalloc-5.1.0
 RUN dpkg-buildpackage
 
+ADD install-all-dev-packages.sh /install-all-dev-packages.sh
+
 RUN rm -rf /var/lib/apt/lists
 
 COPY vendor/envsubst /opt/envsubst
@@ -41,7 +43,10 @@ RUN make package \
       -name 'writelatex-git-bridge*jar-with-dependencies.jar' \
       -exec mv {} /git-bridge.jar \;
 
-FROM openjdk:11-jre
+FROM builder
+# FROM openjdk:11-jre <-- disabled while we are memory profiling
+
+WORKDIR /
 
 RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat binutils graphviz \
  && rm -rf /var/lib/apt/lists
@@ -56,12 +61,16 @@ RUN mkdir /opt/cdbg && \
   wget -qO- https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_gce.tar.gz | \
   tar xvz -C /opt/cdbg
 
-RUN useradd --create-home node
+# Disabled while we are memory profiling (these are already in the image)
+# RUN useradd --create-home node
 
-COPY --from=builder /git-bridge.jar /
-COPY --from=builder /build/*.deb /tmp/
+# COPY --from=builder /git-bridge.jar /
+# COPY --from=builder /build/*.deb /tmp/
 
-RUN dpkg -i /tmp/libjemalloc*.deb
+# RUN dpkg -i /tmp/libjemalloc*.deb
+RUN dpkg -i /build/*.deb
+
+RUN apt-get -y update && /install-all-dev-packages.sh && rm -rf /var/lib/apt/lists
 
 COPY vendor/envsubst /opt/envsubst
 RUN chmod +x /opt/envsubst
