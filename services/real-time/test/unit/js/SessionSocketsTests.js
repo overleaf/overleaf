@@ -23,7 +23,7 @@ describe('SessionSockets', function () {
     this.id2 = Math.random().toString()
     const redisResponses = {
       error: [new Error('Redis: something went wrong'), null],
-      unknownId: [null, null]
+      unknownId: [null, null],
     }
     redisResponses[this.id1] = [null, { user: { _id: '123' } }]
     redisResponses[this.id2] = [null, { user: { _id: 'abc' } }]
@@ -31,7 +31,7 @@ describe('SessionSockets', function () {
     this.sessionStore = {
       get: sinon
         .stub()
-        .callsFake((id, fn) => fn.apply(null, redisResponses[id]))
+        .callsFake((id, fn) => fn.apply(null, redisResponses[id])),
     }
     this.cookieParser = function (req, res, next) {
       req.signedCookies = req._signedCookies
@@ -55,7 +55,7 @@ describe('SessionSockets', function () {
     })
 
     it('should return a lookup error', function (done) {
-      return this.checkSocket(this.socket, (error) => {
+      return this.checkSocket(this.socket, error => {
         expect(error).to.exist
         expect(error.message).to.equal('could not look up session by key')
         return done()
@@ -76,7 +76,7 @@ describe('SessionSockets', function () {
     })
 
     it('should return a lookup error', function (done) {
-      return this.checkSocket(this.socket, (error) => {
+      return this.checkSocket(this.socket, error => {
         expect(error).to.exist
         expect(error.message).to.equal('could not look up session by key')
         return done()
@@ -94,7 +94,7 @@ describe('SessionSockets', function () {
   describe('with a valid cookie and a failing session lookup', function () {
     before(function () {
       return (this.socket = {
-        handshake: { _signedCookies: { 'ol.sid': 'error' } }
+        handshake: { _signedCookies: { 'ol.sid': 'error' } },
       })
     })
 
@@ -106,7 +106,7 @@ describe('SessionSockets', function () {
     })
 
     return it('should return a redis error', function (done) {
-      return this.checkSocket(this.socket, (error) => {
+      return this.checkSocket(this.socket, error => {
         expect(error).to.exist
         expect(error.message).to.equal('Redis: something went wrong')
         return done()
@@ -117,7 +117,7 @@ describe('SessionSockets', function () {
   describe('with a valid cookie and no matching session', function () {
     before(function () {
       return (this.socket = {
-        handshake: { _signedCookies: { 'ol.sid': 'unknownId' } }
+        handshake: { _signedCookies: { 'ol.sid': 'unknownId' } },
       })
     })
 
@@ -129,7 +129,7 @@ describe('SessionSockets', function () {
     })
 
     return it('should return a lookup error', function (done) {
-      return this.checkSocket(this.socket, (error) => {
+      return this.checkSocket(this.socket, error => {
         expect(error).to.exist
         expect(error.message).to.equal('could not look up session by key')
         return done()
@@ -140,7 +140,7 @@ describe('SessionSockets', function () {
   describe('with a valid cookie and a matching session', function () {
     before(function () {
       return (this.socket = {
-        handshake: { _signedCookies: { 'ol.sid': this.id1 } }
+        handshake: { _signedCookies: { 'ol.sid': this.id1 } },
       })
     })
 
@@ -152,7 +152,7 @@ describe('SessionSockets', function () {
     })
 
     it('should not return an error', function (done) {
-      return this.checkSocket(this.socket, (error) => {
+      return this.checkSocket(this.socket, error => {
         expect(error).to.not.exist
         return done()
       })
@@ -169,7 +169,7 @@ describe('SessionSockets', function () {
   return describe('with a different valid cookie and matching session', function () {
     before(function () {
       return (this.socket = {
-        handshake: { _signedCookies: { 'ol.sid': this.id2 } }
+        handshake: { _signedCookies: { 'ol.sid': this.id2 } },
       })
     })
 
@@ -181,7 +181,7 @@ describe('SessionSockets', function () {
     })
 
     it('should not return an error', function (done) {
-      return this.checkSocket(this.socket, (error) => {
+      return this.checkSocket(this.socket, error => {
         expect(error).to.not.exist
         return done()
       })

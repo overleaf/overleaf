@@ -32,13 +32,8 @@ module.exports = FixturesManager = {
     if (!options.project) {
       options.project = { name: 'Test Project' }
     }
-    const {
-      project_id,
-      user_id,
-      privilegeLevel,
-      project,
-      publicAccess
-    } = options
+    const { project_id, user_id, privilegeLevel, project, publicAccess } =
+      options
 
     const privileges = {}
     privileges[user_id] = privilegeLevel
@@ -47,7 +42,7 @@ module.exports = FixturesManager = {
     }
 
     MockWebServer.createMockProject(project_id, privileges, project)
-    return MockWebServer.run((error) => {
+    return MockWebServer.run(error => {
       if (error != null) {
         throw error
       }
@@ -56,10 +51,10 @@ module.exports = FixturesManager = {
           user: {
             _id: user_id,
             first_name: 'Joe',
-            last_name: 'Bloggs'
-          }
+            last_name: 'Bloggs',
+          },
         },
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -67,7 +62,7 @@ module.exports = FixturesManager = {
             project_id,
             user_id,
             privilegeLevel,
-            project
+            project,
           })
         }
       )
@@ -99,9 +94,9 @@ module.exports = FixturesManager = {
       lines,
       version,
       ops,
-      ranges
+      ranges,
     })
-    return MockDocUpdaterServer.run((error) => {
+    return MockDocUpdaterServer.run(error => {
       if (error != null) {
         throw error
       }
@@ -131,5 +126,5 @@ module.exports = FixturesManager = {
       .update(Math.random().toString())
       .digest('hex')
       .slice(0, 24)
-  }
+  },
 }

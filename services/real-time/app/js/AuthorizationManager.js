@@ -63,5 +63,5 @@ module.exports = AuthorizationManager = {
   removeAccessToDoc(client, doc_id, callback) {
     delete client.ol_context[`doc:${doc_id}`]
     callback(null)
-  }
+  },
 }

@@ -29,7 +29,7 @@ describe('WebsocketController', function () {
       last_name: 'Allen',
       email: 'james@example.com',
       signUpDate: new Date('2014-01-01'),
-      loginCount: 42
+      loginCount: 42,
     }
     this.callback = sinon.stub()
     this.client = {
@@ -39,7 +39,7 @@ describe('WebsocketController', function () {
       ol_context: {},
       joinLeaveEpoch: 0,
       join: sinon.stub(),
-      leave: sinon.stub()
+      leave: sinon.stub(),
     }
     return (this.WebsocketController = SandboxedModule.require(modulePath, {
       requires: {
@@ -50,10 +50,10 @@ describe('WebsocketController', function () {
         './WebsocketLoadBalancer': (this.WebsocketLoadBalancer = {}),
         '@overleaf/metrics': (this.metrics = {
           inc: sinon.stub(),
-          set: sinon.stub()
+          set: sinon.stub(),
         }),
-        './RoomManager': (this.RoomManager = {})
-      }
+        './RoomManager': (this.RoomManager = {}),
+      },
     }))
   })
 
@@ -68,8 +68,8 @@ describe('WebsocketController', function () {
         this.project = {
           name: 'Test Project',
           owner: {
-            _id: (this.owner_id = 'mock-owner-id-123')
-          }
+            _id: (this.owner_id = 'mock-owner-id-123'),
+          },
         }
         this.privilegeLevel = 'owner'
         this.ConnectedUsersManager.updateUserPosition = sinon
@@ -205,8 +205,8 @@ describe('WebsocketController', function () {
         this.project = {
           name: 'Test Project',
           owner: {
-            _id: (this.owner_id = 'mock-owner-id-123')
-          }
+            _id: (this.owner_id = 'mock-owner-id-123'),
+          },
         }
         this.privilegeLevel = 'owner'
         this.ConnectedUsersManager.updateUserPosition = sinon
@@ -264,7 +264,7 @@ describe('WebsocketController', function () {
       return it('should increment the editor.join-project.disconnected metric with a status', function () {
         return expect(
           this.metrics.inc.calledWith('editor.join-project.disconnected', 1, {
-            status: 'immediately'
+            status: 'immediately',
           })
         ).to.equal(true)
       })
@@ -297,7 +297,7 @@ describe('WebsocketController', function () {
       return it('should increment the editor.join-project.disconnected metric with a status', function () {
         return expect(
           this.metrics.inc.calledWith('editor.join-project.disconnected', 1, {
-            status: 'after-web-api-call'
+            status: 'after-web-api-call',
           })
         ).to.equal(true)
       })
@@ -317,13 +317,13 @@ describe('WebsocketController', function () {
       this.clientsInRoom = []
       this.io = {
         sockets: {
-          clients: (room_id) => {
+          clients: room_id => {
             if (room_id !== this.project_id) {
               throw 'expected room_id to be project_id'
             }
             return this.clientsInRoom
-          }
-        }
+          },
+        },
       }
       this.client.ol_context.project_id = this.project_id
       this.client.ol_context.user_id = this.user_id
@@ -396,13 +396,13 @@ describe('WebsocketController', function () {
         this.clientsInRoom = ['mock-remaining-client']
         this.io = {
           sockets: {
-            clients: (room_id) => {
+            clients: room_id => {
               if (room_id !== this.project_id) {
                 throw 'expected room_id to be project_id'
               }
               return this.clientsInRoom
-            }
-          }
+            },
+          },
         }
         return this.WebsocketController.leaveProject(this.io, this.client, done)
       })
@@ -729,7 +729,7 @@ describe('WebsocketController', function () {
       it('should increment the editor.join-doc.disconnected metric with a status', function () {
         return expect(
           this.metrics.inc.calledWith('editor.join-doc.disconnected', 1, {
-            status: 'immediately'
+            status: 'immediately',
           })
         ).to.equal(true)
       })
@@ -775,7 +775,7 @@ describe('WebsocketController', function () {
       it('should increment the editor.join-doc.disconnected metric with a status', function () {
         expect(
           this.metrics.inc.calledWith('editor.join-doc.disconnected', 1, {
-            status: 'after-client-auth-check'
+            status: 'after-client-auth-check',
           })
         ).to.equal(true)
       })
@@ -894,7 +894,7 @@ describe('WebsocketController', function () {
       it('should increment the editor.join-doc.disconnected metric with a status', function () {
         return expect(
           this.metrics.inc.calledWith('editor.join-doc.disconnected', 1, {
-            status: 'after-joining-room'
+            status: 'after-joining-room',
           })
         ).to.equal(true)
       })
@@ -940,7 +940,7 @@ describe('WebsocketController', function () {
       return it('should increment the editor.join-doc.disconnected metric with a status', function () {
         return expect(
           this.metrics.inc.calledWith('editor.join-doc.disconnected', 1, {
-            status: 'after-doc-updater-call'
+            status: 'after-doc-updater-call',
           })
         ).to.equal(true)
       })
@@ -1110,7 +1110,7 @@ describe('WebsocketController', function () {
       return (this.update = {
         doc_id: (this.doc_id = 'doc-id-123'),
         row: (this.row = 42),
-        column: (this.column = 37)
+        column: (this.column = 37),
       })
     })
 
@@ -1121,7 +1121,7 @@ describe('WebsocketController', function () {
           first_name: (this.first_name = 'Douglas'),
           last_name: (this.last_name = 'Adams'),
           email: (this.email = 'joe@example.com'),
-          user_id: (this.user_id = 'user-id-123')
+          user_id: (this.user_id = 'user-id-123'),
         }
 
         this.populatedCursorData = {
@@ -1131,7 +1131,7 @@ describe('WebsocketController', function () {
           row: this.row,
           column: this.column,
           email: this.email,
-          user_id: this.user_id
+          user_id: this.user_id,
         }
         this.WebsocketController.updateClientPosition(
           this.client,
@@ -1159,12 +1159,12 @@ describe('WebsocketController', function () {
               _id: this.user_id,
               email: this.email,
               first_name: this.first_name,
-              last_name: this.last_name
+              last_name: this.last_name,
             },
             {
               row: this.row,
               column: this.column,
-              doc_id: this.doc_id
+              doc_id: this.doc_id,
             }
           )
           .should.equal(true)
@@ -1185,7 +1185,7 @@ describe('WebsocketController', function () {
           first_name: (this.first_name = 'Douglas'),
           last_name: undefined,
           email: (this.email = 'joe@example.com'),
-          user_id: (this.user_id = 'user-id-123')
+          user_id: (this.user_id = 'user-id-123'),
         }
 
         this.populatedCursorData = {
@@ -1195,7 +1195,7 @@ describe('WebsocketController', function () {
           row: this.row,
           column: this.column,
           email: this.email,
-          user_id: this.user_id
+          user_id: this.user_id,
         }
         this.WebsocketController.updateClientPosition(
           this.client,
@@ -1223,12 +1223,12 @@ describe('WebsocketController', function () {
               _id: this.user_id,
               email: this.email,
               first_name: this.first_name,
-              last_name: undefined
+              last_name: undefined,
             },
             {
               row: this.row,
               column: this.column,
-              doc_id: this.doc_id
+              doc_id: this.doc_id,
             }
           )
           .should.equal(true)
@@ -1249,7 +1249,7 @@ describe('WebsocketController', function () {
           first_name: undefined,
           last_name: (this.last_name = 'Adams'),
           email: (this.email = 'joe@example.com'),
-          user_id: (this.user_id = 'user-id-123')
+          user_id: (this.user_id = 'user-id-123'),
         }
 
         this.populatedCursorData = {
@@ -1259,7 +1259,7 @@ describe('WebsocketController', function () {
           row: this.row,
           column: this.column,
           email: this.email,
-          user_id: this.user_id
+          user_id: this.user_id,
         }
         this.WebsocketController.updateClientPosition(
           this.client,
@@ -1287,12 +1287,12 @@ describe('WebsocketController', function () {
               _id: this.user_id,
               email: this.email,
               first_name: undefined,
-              last_name: this.last_name
+              last_name: this.last_name,
             },
             {
               row: this.row,
               column: this.column,
-              doc_id: this.doc_id
+              doc_id: this.doc_id,
             }
           )
           .should.equal(true)
@@ -1312,7 +1312,7 @@ describe('WebsocketController', function () {
           first_name: undefined,
           last_name: undefined,
           email: (this.email = 'joe@example.com'),
-          user_id: (this.user_id = 'user-id-123')
+          user_id: (this.user_id = 'user-id-123'),
         }
         return this.WebsocketController.updateClientPosition(
           this.client,
@@ -1330,7 +1330,7 @@ describe('WebsocketController', function () {
             name: '',
             row: this.row,
             column: this.column,
-            email: this.email
+            email: this.email,
           })
           .should.equal(true)
       })
@@ -1339,7 +1339,7 @@ describe('WebsocketController', function () {
     describe('with an anonymous user', function () {
       beforeEach(function (done) {
         this.client.ol_context = {
-          project_id: this.project_id
+          project_id: this.project_id,
         }
         return this.WebsocketController.updateClientPosition(
           this.client,
@@ -1355,7 +1355,7 @@ describe('WebsocketController', function () {
             id: this.client.publicId,
             name: '',
             row: this.row,
-            column: this.column
+            column: this.column,
           })
           .should.equal(true)
       })
@@ -1369,7 +1369,8 @@ describe('WebsocketController', function () {
     return describe('when the client has disconnected', function () {
       beforeEach(function (done) {
         this.client.disconnected = true
-        this.AuthorizationManager.assertClientCanViewProjectAndDoc = sinon.stub()
+        this.AuthorizationManager.assertClientCanViewProjectAndDoc =
+          sinon.stub()
         return this.WebsocketController.updateClientPosition(
           this.client,
           this.update,
@@ -1526,9 +1527,9 @@ describe('WebsocketController', function () {
             user_id: this.user_id,
             project_id: this.project_id,
             doc_id: this.doc_id,
-            updateSize: 7372835
+            updateSize: 7372835,
           },
-          'update is too large'
+          'update is too large',
         ])
       })
 
@@ -1565,7 +1566,7 @@ describe('WebsocketController', function () {
         return it('should increment the editor.doc-update.disconnected metric with a status', function () {
           return expect(
             this.metrics.inc.calledWith('editor.doc-update.disconnected', 1, {
-              status: 'at-otUpdateError'
+              status: 'at-otUpdateError',
             })
           ).to.equal(true)
         })
@@ -1578,12 +1579,13 @@ describe('WebsocketController', function () {
       this.edit_update = {
         op: [
           { i: 'foo', p: 42 },
-          { c: 'bar', p: 132 }
-        ]
+          { c: 'bar', p: 132 },
+        ],
       } // comments may still be in an edit op
       this.comment_update = { op: [{ c: 'bar', p: 132 }] }
       this.AuthorizationManager.assertClientCanEditProjectAndDoc = sinon.stub()
-      return (this.AuthorizationManager.assertClientCanViewProjectAndDoc = sinon.stub())
+      return (this.AuthorizationManager.assertClientCanViewProjectAndDoc =
+        sinon.stub())
     })
 
     describe('with a read-write client', function () {
@@ -1593,7 +1595,7 @@ describe('WebsocketController', function () {
           this.client,
           this.doc_id,
           this.edit_update,
-          (error) => {
+          error => {
             expect(error).to.be.null
             return done()
           }
@@ -1611,7 +1613,7 @@ describe('WebsocketController', function () {
           this.client,
           this.doc_id,
           this.edit_update,
-          (error) => {
+          error => {
             expect(error.message).to.equal('not authorized')
             return done()
           }
@@ -1629,7 +1631,7 @@ describe('WebsocketController', function () {
           this.client,
           this.doc_id,
           this.comment_update,
-          (error) => {
+          error => {
             expect(error).to.be.null
             return done()
           }
@@ -1649,7 +1651,7 @@ describe('WebsocketController', function () {
           this.client,
           this.doc_id,
           this.comment_update,
-          (error) => {
+          error => {
             expect(error.message).to.equal('not authorized')
             return done()
           }

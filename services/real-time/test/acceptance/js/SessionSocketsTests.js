@@ -9,7 +9,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const RealTimeClient = require('./helpers/RealTimeClient')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
 
 describe('SessionSockets', function () {
@@ -28,7 +28,7 @@ describe('SessionSockets', function () {
     })
 
     return it('should return a lookup error', function (done) {
-      return this.checkSocket((error) => {
+      return this.checkSocket(error => {
         expect(error).to.exist
         expect(error.message).to.equal('invalid session')
         return done()
@@ -42,7 +42,7 @@ describe('SessionSockets', function () {
     })
 
     return it('should return a lookup error', function (done) {
-      return this.checkSocket((error) => {
+      return this.checkSocket(error => {
         expect(error).to.exist
         expect(error.message).to.equal('invalid session')
         return done()
@@ -52,7 +52,7 @@ describe('SessionSockets', function () {
 
   describe('with an invalid cookie', function () {
     before(function (done) {
-      RealTimeClient.setSession({}, (error) => {
+      RealTimeClient.setSession({}, error => {
         if (error) {
           return done(error)
         }
@@ -65,7 +65,7 @@ describe('SessionSockets', function () {
     })
 
     return it('should return a lookup error', function (done) {
-      return this.checkSocket((error) => {
+      return this.checkSocket(error => {
         expect(error).to.exist
         expect(error.message).to.equal('invalid session')
         return done()
@@ -79,7 +79,7 @@ describe('SessionSockets', function () {
     })
 
     return it('should return a lookup error', function (done) {
-      return this.checkSocket((error) => {
+      return this.checkSocket(error => {
         expect(error).to.exist
         expect(error.message).to.equal('invalid session')
         return done()
@@ -94,7 +94,7 @@ describe('SessionSockets', function () {
     })
 
     return it('should not return an error', function (done) {
-      return this.checkSocket((error) => {
+      return this.checkSocket(error => {
         expect(error).to.not.exist
         return done()
       })

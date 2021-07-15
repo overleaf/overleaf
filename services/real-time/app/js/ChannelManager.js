@@ -1,6 +1,6 @@
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 
 const ClientMap = new Map() // for each redis client, store a Map of subscribed channels (channelname -> subscribe promise)
@@ -39,7 +39,7 @@ module.exports = {
           metrics.inc(`subscribe.failed.${baseChannel}`)
           // add context for the stack-trace at the call-site
           throw new OError('failed to subscribe to channel', {
-            channel
+            channel,
           }).withCause(err)
         })
     }
@@ -97,5 +97,5 @@ module.exports = {
     // we publish on a different client to the subscribe, so we can't
     // check for the channel existing here
     rclient.publish(channel, data)
-  }
+  },
 }

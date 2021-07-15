@@ -21,9 +21,9 @@ describe('Session', function () {
       this.user_id = 'mock-user-id'
       RealTimeClient.setSession(
         {
-          user: { _id: this.user_id }
+          user: { _id: this.user_id },
         },
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }

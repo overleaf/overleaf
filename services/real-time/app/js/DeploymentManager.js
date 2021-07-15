@@ -1,5 +1,5 @@
 const logger = require('logger-sharelatex')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const fs = require('fs')
 
 // Monitor a status file (e.g. /etc/real_time_status) periodically and close the
@@ -9,7 +9,7 @@ const FILE_CHECK_INTERVAL = 5000
 const statusFile = settings.deploymentFile
 const deploymentColour = settings.deploymentColour
 
-var serviceCloseTime
+let serviceCloseTime
 
 function updateDeploymentStatus(fileContent) {
   const closed = fileContent && !fileContent.includes(deploymentColour)
@@ -55,5 +55,5 @@ module.exports = {
   },
   deploymentIsClosed() {
     return settings.serviceIsClosed && Date.now() > serviceCloseTime
-  }
+  },
 }

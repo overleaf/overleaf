@@ -19,7 +19,7 @@ const FixturesManager = require('./helpers/FixturesManager')
 
 const async = require('async')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
 
@@ -31,11 +31,11 @@ describe('receiveUpdate', function () {
 
     return async.series(
       [
-        (cb) => {
+        cb => {
           return FixturesManager.setUpProject(
             {
               privilegeLevel: 'owner',
-              project: { name: 'Test Project' }
+              project: { name: 'Test Project' },
             },
             (error, { user_id, project_id }) => {
               this.user_id = user_id
@@ -45,7 +45,7 @@ describe('receiveUpdate', function () {
           )
         },
 
-        (cb) => {
+        cb => {
           return FixturesManager.setUpDoc(
             this.project_id,
             { lines: this.lines, version: this.version, ops: this.ops },
@@ -56,49 +56,49 @@ describe('receiveUpdate', function () {
           )
         },
 
-        (cb) => {
+        cb => {
           this.clientA = RealTimeClient.connect()
           return this.clientA.on('connectionAccepted', cb)
         },
 
-        (cb) => {
+        cb => {
           this.clientB = RealTimeClient.connect()
           return this.clientB.on('connectionAccepted', cb)
         },
 
-        (cb) => {
+        cb => {
           return this.clientA.emit(
             'joinProject',
             {
-              project_id: this.project_id
+              project_id: this.project_id,
             },
             cb
           )
         },
 
-        (cb) => {
+        cb => {
           return this.clientA.emit('joinDoc', this.doc_id, cb)
         },
 
-        (cb) => {
+        cb => {
           return this.clientB.emit(
             'joinProject',
             {
-              project_id: this.project_id
+              project_id: this.project_id,
             },
             cb
           )
         },
 
-        (cb) => {
+        cb => {
           return this.clientB.emit('joinDoc', this.doc_id, cb)
         },
 
-        (cb) => {
+        cb => {
           return FixturesManager.setUpProject(
             {
               privilegeLevel: 'owner',
-              project: { name: 'Test Project' }
+              project: { name: 'Test Project' },
             },
             (
               error,
@@ -111,7 +111,7 @@ describe('receiveUpdate', function () {
           )
         },
 
-        (cb) => {
+        cb => {
           return FixturesManager.setUpDoc(
             this.project_id_second,
             { lines: this.lines, version: this.version, ops: this.ops },
@@ -122,52 +122,52 @@ describe('receiveUpdate', function () {
           )
         },
 
-        (cb) => {
+        cb => {
           this.clientC = RealTimeClient.connect()
           return this.clientC.on('connectionAccepted', cb)
         },
 
-        (cb) => {
+        cb => {
           return this.clientC.emit(
             'joinProject',
             {
-              project_id: this.project_id_second
+              project_id: this.project_id_second,
             },
             cb
           )
         },
-        (cb) => {
+        cb => {
           return this.clientC.emit('joinDoc', this.doc_id_second, cb)
         },
 
-        (cb) => {
+        cb => {
           this.clientAUpdates = []
-          this.clientA.on('otUpdateApplied', (update) =>
+          this.clientA.on('otUpdateApplied', update =>
             this.clientAUpdates.push(update)
           )
           this.clientBUpdates = []
-          this.clientB.on('otUpdateApplied', (update) =>
+          this.clientB.on('otUpdateApplied', update =>
             this.clientBUpdates.push(update)
           )
           this.clientCUpdates = []
-          this.clientC.on('otUpdateApplied', (update) =>
+          this.clientC.on('otUpdateApplied', update =>
             this.clientCUpdates.push(update)
           )
 
           this.clientAErrors = []
-          this.clientA.on('otUpdateError', (error) =>
+          this.clientA.on('otUpdateError', error =>
             this.clientAErrors.push(error)
           )
           this.clientBErrors = []
-          this.clientB.on('otUpdateError', (error) =>
+          this.clientB.on('otUpdateError', error =>
             this.clientBErrors.push(error)
           )
           this.clientCErrors = []
-          this.clientC.on('otUpdateError', (error) =>
+          this.clientC.on('otUpdateError', error =>
             this.clientCErrors.push(error)
           )
           return cb()
-        }
+        },
       ],
       done
     )
@@ -189,12 +189,12 @@ describe('receiveUpdate', function () {
         doc_id: this.doc_id,
         op: {
           meta: {
-            source: this.clientA.publicId
+            source: this.clientA.publicId,
           },
           v: this.version,
           doc: this.doc_id,
-          op: [{ i: 'foo', p: 50 }]
-        }
+          op: [{ i: 'foo', p: 50 }],
+        },
       }
       rclient.publish('applied-ops', JSON.stringify(this.update))
       return setTimeout(done, 200)
@@ -208,8 +208,8 @@ describe('receiveUpdate', function () {
       return this.clientAUpdates.should.deep.equal([
         {
           v: this.version,
-          doc: this.doc_id
-        }
+          doc: this.doc_id,
+        },
       ])
     })
 
@@ -224,12 +224,12 @@ describe('receiveUpdate', function () {
         doc_id: this.doc_id_second,
         op: {
           meta: {
-            source: this.clientC.publicId
+            source: this.clientC.publicId,
           },
           v: this.version,
           doc: this.doc_id_second,
-          op: [{ i: 'update from clientC', p: 50 }]
-        }
+          op: [{ i: 'update from clientC', p: 50 }],
+        },
       }
       rclient.publish('applied-ops', JSON.stringify(this.update))
       return setTimeout(done, 200)
@@ -247,8 +247,8 @@ describe('receiveUpdate', function () {
       return this.clientCUpdates.should.deep.equal([
         {
           v: this.version,
-          doc: this.doc_id_second
-        }
+          doc: this.doc_id_second,
+        },
       ])
     })
   })
@@ -259,12 +259,12 @@ describe('receiveUpdate', function () {
         doc_id: this.doc_id,
         op: {
           meta: {
-            source: 'this-is-a-remote-client-id'
+            source: 'this-is-a-remote-client-id',
           },
           v: this.version,
           doc: this.doc_id,
-          op: [{ i: 'foo', p: 50 }]
-        }
+          op: [{ i: 'foo', p: 50 }],
+        },
       }
       rclient.publish('applied-ops', JSON.stringify(this.update))
       return setTimeout(done, 200)
@@ -289,7 +289,7 @@ describe('receiveUpdate', function () {
         'applied-ops',
         JSON.stringify({
           doc_id: this.doc_id,
-          error: (this.error = 'something went wrong')
+          error: (this.error = 'something went wrong'),
         })
       )
       return setTimeout(done, 200)
@@ -320,7 +320,7 @@ describe('receiveUpdate', function () {
         'applied-ops',
         JSON.stringify({
           doc_id: this.doc_id_second,
-          error: (this.error = 'something went wrong')
+          error: (this.error = 'something went wrong'),
         })
       )
       return setTimeout(done, 200)

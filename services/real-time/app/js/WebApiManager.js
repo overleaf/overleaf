@@ -3,13 +3,13 @@
 */
 const request = require('request')
 const OError = require('@overleaf/o-error')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const {
   CodedError,
   CorruptedJoinProjectResponseError,
   NotAuthorizedError,
-  WebApiRequestFailedError
+  WebApiRequestFailedError,
 } = require('./Errors')
 
 module.exports = {
@@ -28,11 +28,11 @@ module.exports = {
         auth: {
           user: settings.apis.web.user,
           pass: settings.apis.web.pass,
-          sendImmediately: true
+          sendImmediately: true,
         },
         json: true,
         jar: false,
-        headers
+        headers,
       },
       function (error, response, data) {
         if (error) {
@@ -65,5 +65,5 @@ module.exports = {
         }
       }
     )
-  }
+  },
 }

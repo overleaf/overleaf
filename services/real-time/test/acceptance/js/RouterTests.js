@@ -22,17 +22,17 @@ describe('Router', function () {
       })
 
       before(function (done) {
-        this.onUnhandled = (error) => done(error)
+        this.onUnhandled = error => done(error)
         process.on('unhandledRejection', this.onUnhandled)
         return async.series(
           [
-            (cb) => {
+            cb => {
               return FixturesManager.setUpProject(
                 {
                   privilegeLevel: 'owner',
                   project: {
-                    name: 'Test Project'
-                  }
+                    name: 'Test Project',
+                  },
                 },
                 (e, { project_id, user_id }) => {
                   this.project_id = project_id
@@ -42,20 +42,20 @@ describe('Router', function () {
               )
             },
 
-            (cb) => {
+            cb => {
               this.client = RealTimeClient.connect()
               return this.client.on('connectionAccepted', cb)
             },
 
-            (cb) => {
+            cb => {
               this.client = RealTimeClient.connect()
               return this.client.on('connectionAccepted', cb)
             },
 
-            (cb) => {
+            cb => {
               this.client.emit('joinProject', { project_id: this.project_id })
               return setTimeout(cb, 100)
-            }
+            },
           ],
           done
         )
@@ -72,17 +72,17 @@ describe('Router', function () {
       })
 
       before(function (done) {
-        this.onUnhandled = (error) => done(error)
+        this.onUnhandled = error => done(error)
         process.on('unhandledRejection', this.onUnhandled)
         return async.series(
           [
-            (cb) => {
+            cb => {
               return FixturesManager.setUpProject(
                 {
                   privilegeLevel: 'owner',
                   project: {
-                    name: 'Test Project'
-                  }
+                    name: 'Test Project',
+                  },
                 },
                 (e, { project_id, user_id }) => {
                   this.project_id = project_id
@@ -92,22 +92,22 @@ describe('Router', function () {
               )
             },
 
-            (cb) => {
+            cb => {
               this.client = RealTimeClient.connect()
               return this.client.on('connectionAccepted', cb)
             },
 
-            (cb) => {
+            cb => {
               this.client = RealTimeClient.connect()
               return this.client.on('connectionAccepted', cb)
             },
 
-            (cb) => {
-              return this.client.emit('joinProject', 1, 2, 3, 4, 5, (error) => {
+            cb => {
+              return this.client.emit('joinProject', 1, 2, 3, 4, 5, error => {
                 this.error = error
                 return cb()
               })
-            }
+            },
           ],
           done
         )

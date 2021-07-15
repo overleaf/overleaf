@@ -4,7 +4,7 @@
 let EventLogger
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 
 // keep track of message counters to detect duplicate and out of order events
 // messsage ids have the format "UNIQUEHOSTKEY-COUNTER"
@@ -43,7 +43,7 @@ module.exports = EventLogger = {
     // store the last count in a hash for each host
     const previous = EventLogger._storeEventCount(key, count)
     if (!previous || count === previous + 1) {
-      metrics.inc(`event.${channel}.valid`, 0.001) // downsample high rate docupdater events
+      metrics.inc(`event.${channel}.valid`)
       return // order is ok
     }
     if (count === previous) {
@@ -80,5 +80,5 @@ module.exports = EventLogger = {
         delete EVENT_LOG_TIMESTAMP[key]
       }
     })
-  }
+  },
 }

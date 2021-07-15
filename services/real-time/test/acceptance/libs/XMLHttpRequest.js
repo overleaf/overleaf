@@ -12,36 +12,36 @@
  */
 
 const { URL } = require('url')
-var spawn = require('child_process').spawn
-var fs = require('fs')
+const spawn = require('child_process').spawn
+const fs = require('fs')
 
 exports.XMLHttpRequest = function () {
   /**
    * Private variables
    */
-  var self = this
-  var http = require('http')
-  var https = require('https')
+  const self = this
+  const http = require('http')
+  const https = require('https')
 
   // Holds http.js objects
-  var request
-  var response
+  let request
+  let response
 
   // Request settings
-  var settings = {}
+  let settings = {}
 
   // Set some default headers
-  var defaultHeaders = {
+  const defaultHeaders = {
     'User-Agent': 'node-XMLHttpRequest',
-    Accept: '*/*'
+    Accept: '*/*',
   }
 
-  var headers = defaultHeaders
+  let headers = defaultHeaders
 
   // These headers are not user setable.
   // The following are allowed but banned in the spec:
   // * user-agent
-  var forbiddenRequestHeaders = [
+  const forbiddenRequestHeaders = [
     'accept-charset',
     'accept-encoding',
     'access-control-request-headers',
@@ -61,19 +61,19 @@ exports.XMLHttpRequest = function () {
     'trailer',
     'transfer-encoding',
     'upgrade',
-    'via'
+    'via',
   ]
 
   // These request methods are not allowed
-  var forbiddenRequestMethods = ['TRACE', 'TRACK', 'CONNECT']
+  const forbiddenRequestMethods = ['TRACE', 'TRACK', 'CONNECT']
 
   // Send flag
-  var sendFlag = false
+  let sendFlag = false
   // Error flag, used when errors occur or abort is called
-  var errorFlag = false
+  let errorFlag = false
 
   // Event listeners
-  var listeners = {}
+  const listeners = {}
 
   /**
    * Constants
@@ -111,7 +111,7 @@ exports.XMLHttpRequest = function () {
    * @param string header Header to validate
    * @return boolean False if not allowed, otherwise true
    */
-  var isAllowedHttpHeader = function (header) {
+  const isAllowedHttpHeader = function (header) {
     return (
       header && forbiddenRequestHeaders.indexOf(header.toLowerCase()) === -1
     )
@@ -123,7 +123,7 @@ exports.XMLHttpRequest = function () {
    * @param string method Request method to validate
    * @return boolean False if not allowed, otherwise true
    */
-  var isAllowedHttpMethod = function (method) {
+  const isAllowedHttpMethod = function (method) {
     return method && forbiddenRequestMethods.indexOf(method) === -1
   }
 
@@ -154,7 +154,7 @@ exports.XMLHttpRequest = function () {
       url: url.toString(),
       async: typeof async !== 'boolean' ? true : async,
       user: user || null,
-      password: password || null
+      password: password || null,
     }
 
     setState(this.OPENED)
@@ -210,9 +210,9 @@ exports.XMLHttpRequest = function () {
     if (this.readyState < this.HEADERS_RECEIVED || errorFlag) {
       return ''
     }
-    var result = ''
+    let result = ''
 
-    for (var i in response.headers) {
+    for (const i in response.headers) {
       // Cookie headers are excluded
       if (i !== 'set-cookie' && i !== 'set-cookie2') {
         result += i + ': ' + response.headers[i] + '\r\n'
@@ -252,10 +252,10 @@ exports.XMLHttpRequest = function () {
       throw new Error('INVALID_STATE_ERR: send has already been called')
     }
 
-    var host
-    var ssl = false
-    var local = false
-    var url = new URL(settings.url)
+    let host
+    let ssl = false
+    let local = false
+    const url = new URL(settings.url)
 
     // Determine the server
     switch (url.protocol) {
@@ -311,9 +311,9 @@ exports.XMLHttpRequest = function () {
 
     // Default to port 80. If accessing localhost on another port be sure
     // to use http://localhost:port/path
-    var port = url.port || (ssl ? 443 : 80)
+    const port = url.port || (ssl ? 443 : 80)
     // Add query string if one is used
-    var uri = url.pathname + (url.search ? url.search : '')
+    const uri = url.pathname + (url.search ? url.search : '')
 
     // Set the Host header or the server may reject the request
     headers.Host = host
@@ -326,7 +326,7 @@ exports.XMLHttpRequest = function () {
       if (typeof settings.password === 'undefined') {
         settings.password = ''
       }
-      var authBuf = Buffer.from(settings.user + ':' + settings.password)
+      const authBuf = Buffer.from(settings.user + ':' + settings.password)
       headers.Authorization = 'Basic ' + authBuf.toString('base64')
     }
 
@@ -345,12 +345,12 @@ exports.XMLHttpRequest = function () {
       headers['Content-Length'] = 0
     }
 
-    var options = {
+    const options = {
       host: host,
       port: port,
       path: uri,
       method: settings.method,
-      headers: headers
+      headers: headers,
     }
 
     // Reset error flag
@@ -359,7 +359,7 @@ exports.XMLHttpRequest = function () {
     // Handle async requests
     if (settings.async) {
       // Use the proper protocol
-      var doRequest = ssl ? https.request : http.request
+      const doRequest = ssl ? https.request : http.request
 
       // Request is being sent, set send flag
       sendFlag = true
@@ -368,14 +368,14 @@ exports.XMLHttpRequest = function () {
       self.dispatchEvent('readystatechange')
 
       // Create the request
-      request = doRequest(options, (resp) => {
+      request = doRequest(options, resp => {
         response = resp
         response.setEncoding('utf8')
 
         setState(self.HEADERS_RECEIVED)
         self.status = response.statusCode
 
-        response.on('data', (chunk) => {
+        response.on('data', chunk => {
           // Make sure there's some data
           if (chunk) {
             self.responseText += chunk
@@ -394,10 +394,10 @@ exports.XMLHttpRequest = function () {
           }
         })
 
-        response.on('error', (error) => {
+        response.on('error', error => {
           self.handleError(error)
         })
-      }).on('error', (error) => {
+      }).on('error', error => {
         self.handleError(error)
       })
 
@@ -412,10 +412,10 @@ exports.XMLHttpRequest = function () {
     } else {
       // Synchronous
       // Create a temporary file for communication with the other Node process
-      var syncFile = '.node-xmlhttprequest-sync-' + process.pid
+      const syncFile = '.node-xmlhttprequest-sync-' + process.pid
       fs.writeFileSync(syncFile, '', 'utf8')
       // The async request the other Node process executes
-      var execString =
+      const execString =
         "var http = require('http'), https = require('https'), fs = require('fs');" +
         'var doRequest = http' +
         (ssl ? 's' : '') +
@@ -457,7 +457,7 @@ exports.XMLHttpRequest = function () {
       fs.unlinkSync(syncFile)
       if (self.responseText.match(/^NODE-XMLHTTPREQUEST-ERROR:/)) {
         // If the file returned an error, handle it
-        var errorObj = self.responseText.replace(
+        const errorObj = self.responseText.replace(
           /^NODE-XMLHTTPREQUEST-ERROR:/,
           ''
         )
@@ -532,7 +532,7 @@ exports.XMLHttpRequest = function () {
   this.removeEventListener = function (event, callback) {
     if (event in listeners) {
       // Filter will return a new array with the callback removed
-      listeners[event] = listeners[event].filter((ev) => {
+      listeners[event] = listeners[event].filter(ev => {
         return ev !== callback
       })
     }
@@ -546,7 +546,7 @@ exports.XMLHttpRequest = function () {
       self['on' + event]()
     }
     if (event in listeners) {
-      for (var i = 0, len = listeners[event].length; i < len; i++) {
+      for (let i = 0, len = listeners[event].length; i < len; i++) {
         listeners[event][i].call(self)
       }
     }

@@ -25,11 +25,11 @@ describe('clientTracking', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
-                project: { name: 'Test Project' }
+                project: { name: 'Test Project' },
               },
               (error, { user_id, project_id }) => {
                 this.user_id = user_id
@@ -39,7 +39,7 @@ describe('clientTracking', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -50,43 +50,43 @@ describe('clientTracking', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             this.clientB = RealTimeClient.connect()
             return this.clientB.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               {
-                project_id: this.project_id
+                project_id: this.project_id,
               },
               cb
             )
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit('joinDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientB.emit(
               'joinProject',
               {
-                project_id: this.project_id
+                project_id: this.project_id,
               },
               cb
             )
           },
 
-          (cb) => {
+          cb => {
             this.updates = []
-            this.clientB.on('clientTracking.clientUpdated', (data) => {
+            this.clientB.on('clientTracking.clientUpdated', data => {
               return this.updates.push(data)
             })
 
@@ -95,16 +95,16 @@ describe('clientTracking', function () {
               {
                 row: (this.row = 42),
                 column: (this.column = 36),
-                doc_id: this.doc_id
+                doc_id: this.doc_id,
               },
-              (error) => {
+              error => {
                 if (error != null) {
                   throw error
                 }
                 return setTimeout(cb, 300)
               }
             )
-          } // Give the message a chance to reach client B.
+          }, // Give the message a chance to reach client B.
         ],
         done
       )
@@ -118,8 +118,8 @@ describe('clientTracking', function () {
           doc_id: this.doc_id,
           id: this.clientA.publicId,
           user_id: this.user_id,
-          name: 'Joe Bloggs'
-        }
+          name: 'Joe Bloggs',
+        },
       ])
     })
 
@@ -132,7 +132,7 @@ describe('clientTracking', function () {
               expect(user.cursorData).to.deep.equal({
                 row: this.row,
                 column: this.column,
-                doc_id: this.doc_id
+                doc_id: this.doc_id,
               })
               return done()
             }
@@ -147,12 +147,12 @@ describe('clientTracking', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: { name: 'Test Project' },
-                publicAccess: 'readAndWrite'
+                publicAccess: 'readAndWrite',
               },
               (error, { user_id, project_id }) => {
                 this.user_id = user_id
@@ -162,7 +162,7 @@ describe('clientTracking', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -173,47 +173,47 @@ describe('clientTracking', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               {
-                project_id: this.project_id
+                project_id: this.project_id,
               },
               cb
             )
           },
 
-          (cb) => {
+          cb => {
             return RealTimeClient.setSession({}, cb)
           },
 
-          (cb) => {
+          cb => {
             this.anonymous = RealTimeClient.connect()
             return this.anonymous.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.anonymous.emit(
               'joinProject',
               {
-                project_id: this.project_id
+                project_id: this.project_id,
               },
               cb
             )
           },
 
-          (cb) => {
+          cb => {
             return this.anonymous.emit('joinDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             this.updates = []
-            this.clientA.on('clientTracking.clientUpdated', (data) => {
+            this.clientA.on('clientTracking.clientUpdated', data => {
               return this.updates.push(data)
             })
 
@@ -222,16 +222,16 @@ describe('clientTracking', function () {
               {
                 row: (this.row = 42),
                 column: (this.column = 36),
-                doc_id: this.doc_id
+                doc_id: this.doc_id,
               },
-              (error) => {
+              error => {
                 if (error != null) {
                   throw error
                 }
                 return setTimeout(cb, 300)
               }
             )
-          } // Give the message a chance to reach client B.
+          }, // Give the message a chance to reach client B.
         ],
         done
       )
@@ -245,8 +245,8 @@ describe('clientTracking', function () {
           doc_id: this.doc_id,
           id: this.anonymous.publicId,
           user_id: 'anonymous-user',
-          name: ''
-        }
+          name: '',
+        },
       ])
     })
   })

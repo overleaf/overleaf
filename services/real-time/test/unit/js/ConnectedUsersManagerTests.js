@@ -31,10 +31,10 @@ describe('ConnectedUsersManager', function () {
             },
             connectedUser({ project_id, client_id }) {
               return `connected_user:${project_id}:${client_id}`
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     }
     this.rClient = {
       auth() {},
@@ -50,19 +50,19 @@ describe('ConnectedUsersManager', function () {
       exec: sinon.stub(),
       multi: () => {
         return this.rClient
-      }
+      },
     }
     tk.freeze(new Date())
 
     this.ConnectedUsersManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': this.settings,
+        '@overleaf/settings': this.settings,
         '@overleaf/redis-wrapper': {
           createClient: () => {
             return this.rClient
-          }
-        }
-      }
+          },
+        },
+      },
     })
     this.client_id = '32132132'
     this.project_id = 'dskjh2u21321'
@@ -70,12 +70,12 @@ describe('ConnectedUsersManager', function () {
       _id: 'user-id-123',
       first_name: 'Joe',
       last_name: 'Bloggs',
-      email: 'joe@example.com'
+      email: 'joe@example.com',
     }
     return (this.cursorData = {
       row: 12,
       column: 9,
-      doc_id: '53c3b8c85fee64000023dc6e'
+      doc_id: '53c3b8c85fee64000023dc6e',
     })
   })
 
@@ -94,7 +94,7 @@ describe('ConnectedUsersManager', function () {
         this.client_id,
         this.user,
         null,
-        (err) => {
+        err => {
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -113,7 +113,7 @@ describe('ConnectedUsersManager', function () {
         this.client_id,
         this.user,
         null,
-        (err) => {
+        err => {
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -132,7 +132,7 @@ describe('ConnectedUsersManager', function () {
         this.client_id,
         this.user,
         null,
-        (err) => {
+        err => {
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -151,7 +151,7 @@ describe('ConnectedUsersManager', function () {
         this.client_id,
         this.user,
         null,
-        (err) => {
+        err => {
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -170,7 +170,7 @@ describe('ConnectedUsersManager', function () {
         this.client_id,
         this.user,
         null,
-        (err) => {
+        err => {
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -189,7 +189,7 @@ describe('ConnectedUsersManager', function () {
         this.client_id,
         this.user,
         null,
-        (err) => {
+        err => {
           this.rClient.sadd
             .calledWith(`clients_in_project:${this.project_id}`, this.client_id)
             .should.equal(true)
@@ -204,7 +204,7 @@ describe('ConnectedUsersManager', function () {
         this.client_id,
         this.user,
         null,
-        (err) => {
+        err => {
           this.rClient.expire
             .calledWith(
               `clients_in_project:${this.project_id}`,
@@ -222,7 +222,7 @@ describe('ConnectedUsersManager', function () {
         this.client_id,
         this.user,
         null,
-        (err) => {
+        err => {
           this.rClient.expire
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -240,7 +240,7 @@ describe('ConnectedUsersManager', function () {
         this.client_id,
         this.user,
         this.cursorData,
-        (err) => {
+        err => {
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -263,7 +263,7 @@ describe('ConnectedUsersManager', function () {
       return this.ConnectedUsersManager.markUserAsDisconnected(
         this.project_id,
         this.client_id,
-        (err) => {
+        err => {
           this.rClient.srem
             .calledWith(`clients_in_project:${this.project_id}`, this.client_id)
             .should.equal(true)
@@ -276,7 +276,7 @@ describe('ConnectedUsersManager', function () {
       return this.ConnectedUsersManager.markUserAsDisconnected(
         this.project_id,
         this.client_id,
-        (err) => {
+        err => {
           this.rClient.del
             .calledWith(`connected_user:${this.project_id}:${this.client_id}`)
             .should.equal(true)
@@ -289,7 +289,7 @@ describe('ConnectedUsersManager', function () {
       return this.ConnectedUsersManager.markUserAsDisconnected(
         this.project_id,
         this.client_id,
-        (err) => {
+        err => {
           this.rClient.expire
             .calledWith(
               `clients_in_project:${this.project_id}`,
@@ -309,7 +309,7 @@ describe('ConnectedUsersManager', function () {
         connected_at: new Date(),
         user_id: this.user._id,
         last_updated_at: `${Date.now()}`,
-        cursorData
+        cursorData,
       })
       return this.ConnectedUsersManager._getConnectedUser(
         this.project_id,
@@ -359,28 +359,28 @@ describe('ConnectedUsersManager', function () {
         .callsArgWith(2, null, {
           connected: true,
           client_age: 2,
-          client_id: this.users[0]
+          client_id: this.users[0],
         })
       this.ConnectedUsersManager._getConnectedUser
         .withArgs(this.project_id, this.users[1])
         .callsArgWith(2, null, {
           connected: false,
           client_age: 1,
-          client_id: this.users[1]
+          client_id: this.users[1],
         })
       this.ConnectedUsersManager._getConnectedUser
         .withArgs(this.project_id, this.users[2])
         .callsArgWith(2, null, {
           connected: true,
           client_age: 3,
-          client_id: this.users[2]
+          client_id: this.users[2],
         })
       return this.ConnectedUsersManager._getConnectedUser
         .withArgs(this.project_id, this.users[3])
         .callsArgWith(2, null, {
           connected: true,
           client_age: 11,
-          client_id: this.users[3]
+          client_id: this.users[3],
         })
     }) // connected but old
 
@@ -392,12 +392,12 @@ describe('ConnectedUsersManager', function () {
           users[0].should.deep.equal({
             client_id: this.users[0],
             client_age: 2,
-            connected: true
+            connected: true,
           })
           users[1].should.deep.equal({
             client_id: this.users[2],
             client_age: 3,
-            connected: true
+            connected: true,
           })
           return done()
         }

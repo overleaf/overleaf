@@ -16,7 +16,7 @@ const { expect } = require('chai')
 const async = require('async')
 const request = require('request')
 
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const drain = function (rate, callback) {
   request.post(
@@ -24,8 +24,8 @@ const drain = function (rate, callback) {
       url: `http://localhost:3026/drain?rate=${rate}`,
       auth: {
         user: Settings.internal.realTime.user,
-        pass: Settings.internal.realTime.pass
-      }
+        pass: Settings.internal.realTime.pass,
+      },
     },
     (error, response, data) => callback(error, data)
   )
@@ -38,8 +38,8 @@ describe('DrainManagerTests', function () {
       {
         privilegeLevel: 'owner',
         project: {
-          name: 'Test Project'
-        }
+          name: 'Test Project',
+        },
       },
       (e, { project_id, user_id }) => {
         this.project_id = project_id
@@ -71,17 +71,17 @@ describe('DrainManagerTests', function () {
     beforeEach(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             this.clientB = RealTimeClient.connect()
             return this.clientB.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -89,13 +89,13 @@ describe('DrainManagerTests', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.clientB.emit(
               'joinProject',
               { project_id: this.project_id },
               cb
             )
-          }
+          },
         ],
         done
       )
@@ -105,14 +105,14 @@ describe('DrainManagerTests', function () {
       beforeEach(function (done) {
         return async.parallel(
           [
-            (cb) => {
+            cb => {
               return this.clientA.on('reconnectGracefully', cb)
             },
-            (cb) => {
+            cb => {
               return this.clientB.on('reconnectGracefully', cb)
             },
 
-            (cb) => drain(2, cb)
+            cb => drain(2, cb),
           ],
           done
         )

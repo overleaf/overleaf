@@ -17,7 +17,7 @@ const io = require('socket.io-client')
 const async = require('async')
 
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(Settings.redis.websessions)
 
@@ -45,19 +45,15 @@ module.exports = Client = {
     }
     const sessionId = uid(24)
     session.cookie = {}
-    return rclient.set(
-      'sess:' + sessionId,
-      JSON.stringify(session),
-      (error) => {
-        if (error != null) {
-          return callback(error)
-        }
-        const secret = Settings.security.sessionSecret
-        const cookieKey = 's:' + signature.sign(sessionId, secret)
-        Client.cookie = `${Settings.cookieName}=${cookieKey}`
-        return callback()
+    return rclient.set('sess:' + sessionId, JSON.stringify(session), error => {
+      if (error != null) {
+        return callback(error)
       }
-    )
+      const secret = Settings.security.sessionSecret
+      const cookieKey = 's:' + signature.sign(sessionId, secret)
+      Client.cookie = `${Settings.cookieName}=${cookieKey}`
+      return callback()
+    })
   },
 
   unsetSession(callback) {
@@ -70,7 +66,7 @@ module.exports = Client = {
 
   connect(cookie) {
     const client = io.connect('http://localhost:3026', {
-      'force new connection': true
+      'force new connection': true,
     })
     client.on(
       'connectionAccepted',
@@ -86,7 +82,7 @@ module.exports = Client = {
     return request.get(
       {
         url: 'http://localhost:3026/clients',
-        json: true
+        json: true,
       },
       (error, response, data) => callback(error, data)
     )
@@ -99,7 +95,7 @@ module.exports = Client = {
     return request.get(
       {
         url: `http://localhost:3026/clients/${client_id}`,
-        json: true
+        json: true,
       },
       (error, response, data) => callback(error, data)
     )
@@ -111,8 +107,8 @@ module.exports = Client = {
         url: `http://localhost:3026/client/${client_id}/disconnect`,
         auth: {
           user: Settings.internal.realTime.user,
-          pass: Settings.internal.realTime.pass
-        }
+          pass: Settings.internal.realTime.pass,
+        },
       },
       (error, response, data) => callback(error, data)
     )
@@ -127,5 +123,5 @@ module.exports = Client = {
         callback
       )
     )
-  }
+  },
 }

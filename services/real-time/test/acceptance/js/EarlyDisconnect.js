@@ -18,7 +18,7 @@ const MockDocUpdaterServer = require('./helpers/MockDocUpdaterServer')
 const MockWebServer = require('./helpers/MockWebServer')
 const FixturesManager = require('./helpers/FixturesManager')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
 const rclientRT = redis.createClient(settings.redis.realtime)
@@ -45,13 +45,13 @@ describe('EarlyDisconnect', function () {
     beforeEach(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -61,12 +61,12 @@ describe('EarlyDisconnect', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             this.clientA.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -77,10 +77,10 @@ describe('EarlyDisconnect', function () {
             return this.clientA.disconnect()
           },
 
-          (cb) => {
+          cb => {
             // wait for joinDoc and subscribe
             return setTimeout(cb, 500)
-          }
+          },
         ],
         done
       )
@@ -88,7 +88,7 @@ describe('EarlyDisconnect', function () {
 
     // we can force the race condition, there is no need to repeat too often
     return Array.from(Array.from({ length: 5 }).map((_, i) => i + 1)).map(
-      (attempt) =>
+      attempt =>
         it(`should not subscribe to the pub/sub channel anymore (race ${attempt})`, function (done) {
           rclient.pubsub('CHANNELS', (err, resp) => {
             if (err) {
@@ -106,13 +106,13 @@ describe('EarlyDisconnect', function () {
     beforeEach(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -122,12 +122,12 @@ describe('EarlyDisconnect', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -140,7 +140,7 @@ describe('EarlyDisconnect', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -151,17 +151,17 @@ describe('EarlyDisconnect', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA.emit('joinDoc', this.doc_id, () => {})
             // disconnect before joinDoc completes
             this.clientA.on('disconnect', () => cb())
             return this.clientA.disconnect()
           },
 
-          (cb) => {
+          cb => {
             // wait for subscribe and unsubscribe
             return setTimeout(cb, 100)
-          }
+          },
         ],
         done
       )
@@ -169,7 +169,7 @@ describe('EarlyDisconnect', function () {
 
     // we can not force the race condition, so we have to try many times
     return Array.from(Array.from({ length: 20 }).map((_, i) => i + 1)).map(
-      (attempt) =>
+      attempt =>
         it(`should not subscribe to the pub/sub channels anymore (race ${attempt})`, function (done) {
           rclient.pubsub('CHANNELS', (err, resp) => {
             if (err) {
@@ -194,13 +194,13 @@ describe('EarlyDisconnect', function () {
     beforeEach(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -210,12 +210,12 @@ describe('EarlyDisconnect', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -228,7 +228,7 @@ describe('EarlyDisconnect', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -239,17 +239,17 @@ describe('EarlyDisconnect', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit('joinDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             this.clientA.emit(
               'clientTracking.updatePosition',
               {
                 row: 42,
                 column: 36,
-                doc_id: this.doc_id
+                doc_id: this.doc_id,
               },
               () => {}
             )
@@ -258,10 +258,10 @@ describe('EarlyDisconnect', function () {
             return this.clientA.disconnect()
           },
 
-          (cb) => {
+          cb => {
             // wait for updateClientPosition
             return setTimeout(cb, 100)
-          }
+          },
         ],
         done
       )
@@ -269,7 +269,7 @@ describe('EarlyDisconnect', function () {
 
     // we can not force the race condition, so we have to try many times
     return Array.from(Array.from({ length: 20 }).map((_, i) => i + 1)).map(
-      (attempt) =>
+      attempt =>
         it(`should not show the client as connected (race ${attempt})`, function (done) {
           rclientRT.smembers(
             KeysRT.clientsInProject({ project_id: this.project_id }),

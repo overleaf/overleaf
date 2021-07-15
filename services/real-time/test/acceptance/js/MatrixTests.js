@@ -53,7 +53,7 @@ const async = require('async')
 const RealTimeClient = require('./helpers/RealTimeClient')
 const FixturesManager = require('./helpers/FixturesManager')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const Keys = settings.redis.documentupdater.key_schema
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
@@ -81,7 +81,7 @@ describe('MatrixTests', function () {
           privateClient.emit(
             'joinProject',
             { project_id: privateProjectId },
-            (err) => {
+            err => {
               if (err) return done(err)
               privateClient.emit('joinDoc', privateDocId, done)
             }
@@ -94,7 +94,7 @@ describe('MatrixTests', function () {
   before(function setupReadWriteProject(done) {
     FixturesManager.setUpEditorSession(
       {
-        publicAccess: 'readAndWrite'
+        publicAccess: 'readAndWrite',
       },
       (err, { project_id, doc_id }) => {
         readWriteProjectId = project_id
@@ -107,13 +107,13 @@ describe('MatrixTests', function () {
   const USER_SETUP = {
     anonymous: {
       setup(cb) {
-        RealTimeClient.setSession({}, (err) => {
+        RealTimeClient.setSession({}, err => {
           if (err) return cb(err)
           cb(null, {
-            client: RealTimeClient.connect()
+            client: RealTimeClient.connect(),
           })
         })
-      }
+      },
     },
 
     registered: {
@@ -124,18 +124,18 @@ describe('MatrixTests', function () {
             user: {
               _id: user_id,
               first_name: 'Joe',
-              last_name: 'Bloggs'
-            }
+              last_name: 'Bloggs',
+            },
           },
-          (err) => {
+          err => {
             if (err) return cb(err)
             cb(null, {
               user_id,
-              client: RealTimeClient.connect()
+              client: RealTimeClient.connect(),
             })
           }
         )
-      }
+      },
     },
 
     registeredWithOwnedProject: {
@@ -148,16 +148,16 @@ describe('MatrixTests', function () {
               user_id,
               project_id,
               doc_id,
-              client: RealTimeClient.connect()
+              client: RealTimeClient.connect(),
             })
           }
         )
       },
-      hasOwnProject: true
-    }
+      hasOwnProject: true,
+    },
   }
 
-  Object.entries(USER_SETUP).forEach((level0) => {
+  Object.entries(USER_SETUP).forEach(level0 => {
     const [userDescription, userItem] = level0
     let options, client
 
@@ -166,46 +166,46 @@ describe('MatrixTests', function () {
         getActions(cb) {
           cb(null, [])
         },
-        needsOwnProject: false
+        needsOwnProject: false,
       },
 
       joinReadWriteProject: {
         getActions(cb) {
           cb(null, [
-            { rpc: 'joinProject', args: [{ project_id: readWriteProjectId }] }
+            { rpc: 'joinProject', args: [{ project_id: readWriteProjectId }] },
           ])
         },
-        needsOwnProject: false
+        needsOwnProject: false,
       },
 
       joinReadWriteProjectAndDoc: {
         getActions(cb) {
           cb(null, [
             { rpc: 'joinProject', args: [{ project_id: readWriteProjectId }] },
-            { rpc: 'joinDoc', args: [readWriteDocId] }
+            { rpc: 'joinDoc', args: [readWriteDocId] },
           ])
         },
-        needsOwnProject: false
+        needsOwnProject: false,
       },
 
       joinOwnProject: {
         getActions(cb) {
           cb(null, [
-            { rpc: 'joinProject', args: [{ project_id: options.project_id }] }
+            { rpc: 'joinProject', args: [{ project_id: options.project_id }] },
           ])
         },
-        needsOwnProject: true
+        needsOwnProject: true,
       },
 
       joinOwnProjectAndDoc: {
         getActions(cb) {
           cb(null, [
             { rpc: 'joinProject', args: [{ project_id: options.project_id }] },
-            { rpc: 'joinDoc', args: [options.doc_id] }
+            { rpc: 'joinDoc', args: [options.doc_id] },
           ])
         },
-        needsOwnProject: true
-      }
+        needsOwnProject: true,
+      },
     }
 
     function performActions(getActions, done) {
@@ -245,13 +245,13 @@ describe('MatrixTests', function () {
         })
       })
 
-      Object.entries(SESSION_SETUP).forEach((level1) => {
+      Object.entries(SESSION_SETUP).forEach(level1 => {
         const [sessionSetupDescription, sessionSetupItem] = level1
         const INVALID_REQUESTS = {
           noop: {
             getActions(cb) {
               cb(null, [])
-            }
+            },
           },
 
           joinProjectWithDocId: {
@@ -260,16 +260,16 @@ describe('MatrixTests', function () {
                 {
                   rpc: 'joinProject',
                   args: [{ project_id: privateDocId }],
-                  fails: 1
-                }
+                  fails: 1,
+                },
               ])
-            }
+            },
           },
 
           joinDocWithDocId: {
             getActions(cb) {
               cb(null, [{ rpc: 'joinDoc', args: [privateDocId], fails: 1 }])
-            }
+            },
           },
 
           joinProjectWithProjectId: {
@@ -278,16 +278,16 @@ describe('MatrixTests', function () {
                 {
                   rpc: 'joinProject',
                   args: [{ project_id: privateProjectId }],
-                  fails: 1
-                }
+                  fails: 1,
+                },
               ])
-            }
+            },
           },
 
           joinDocWithProjectId: {
             getActions(cb) {
               cb(null, [{ rpc: 'joinDoc', args: [privateProjectId], fails: 1 }])
-            }
+            },
           },
 
           joinProjectWithProjectIdThenJoinDocWithDocId: {
@@ -296,12 +296,12 @@ describe('MatrixTests', function () {
                 {
                   rpc: 'joinProject',
                   args: [{ project_id: privateProjectId }],
-                  fails: 1
+                  fails: 1,
                 },
-                { rpc: 'joinDoc', args: [privateDocId], fails: 1 }
+                { rpc: 'joinDoc', args: [privateDocId], fails: 1 },
               ])
-            }
-          }
+            },
+          },
         }
 
         // skip some areas of the matrix
@@ -314,7 +314,7 @@ describe('MatrixTests', function () {
             performActions(sessionSetupItem.getActions, done)
           })
 
-          Object.entries(INVALID_REQUESTS).forEach((level2) => {
+          Object.entries(INVALID_REQUESTS).forEach(level2 => {
             const [InvalidRequestDescription, InvalidRequestItem] = level2
             describe(InvalidRequestDescription, function () {
               beforeEach(function performInvalidRequests(done) {
@@ -354,10 +354,10 @@ describe('MatrixTests', function () {
                       meta: { source: privateClient.publicId },
                       v: 42,
                       doc: privateDocId,
-                      op: [{ i: 'foo', p: 50 }]
-                    }
+                      op: [{ i: 'foo', p: 50 }],
+                    },
                   }
-                  client.on('otUpdateApplied', (update) => {
+                  client.on('otUpdateApplied', update => {
                     receivedMessages.push(update)
                   })
                   privateClient.once('otUpdateApplied', () => {
@@ -378,7 +378,7 @@ describe('MatrixTests', function () {
                     room_id: privateProjectId,
                     message: 'removeEntity',
                     payload: ['foo', 'convertDocToFile'],
-                    _id: 'web:123'
+                    _id: 'web:123',
                   }
                   client.on('removeEntity', (...args) => {
                     receivedMessages.push(args)
@@ -408,14 +408,14 @@ describe('MatrixTests', function () {
                       v: 43,
                       lastV: 42,
                       doc: privateDocId,
-                      op: [{ i: 'foo', p: 50 }]
-                    }
+                      op: [{ i: 'foo', p: 50 }],
+                    },
                   }
                 })
 
                 beforeEach(function sendAsUser(done) {
                   const userUpdate = Object.assign({}, update, {
-                    hash: 'user'
+                    hash: 'user',
                   })
 
                   client.emit(
@@ -431,7 +431,7 @@ describe('MatrixTests', function () {
 
                 beforeEach(function sendAsPrivateUserForReferenceOp(done) {
                   const privateUpdate = Object.assign({}, update, {
-                    hash: 'private'
+                    hash: 'private',
                   })
 
                   privateClient.emit(
@@ -457,7 +457,7 @@ describe('MatrixTests', function () {
                   expect(
                     [
                       'no project_id found on client',
-                      'not authorized'
+                      'not authorized',
                     ].includes(receivedArgs[0].message)
                   ).to.equal(true)
                 })

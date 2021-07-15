@@ -20,8 +20,8 @@ describe('EventLogger', function () {
     tk.freeze(new Date(this.start))
     this.EventLogger = SandboxedModule.require(modulePath, {
       requires: {
-        '@overleaf/metrics': (this.metrics = { inc: sinon.stub() })
-      }
+        '@overleaf/metrics': (this.metrics = { inc: sinon.stub() }),
+      },
     })
     this.channel = 'applied-ops'
     this.id_1 = 'random-hostname:abc-1'
@@ -54,8 +54,9 @@ describe('EventLogger', function () {
       })
 
       return it('should increment the valid event metric', function () {
-        return this.metrics.inc.calledWith(`event.${this.channel}.valid`, 1)
-          .should.equal.true
+        return this.metrics.inc
+          .calledWith(`event.${this.channel}.valid`)
+          .should.equals(true)
       })
     })
 
@@ -78,8 +79,9 @@ describe('EventLogger', function () {
       })
 
       return it('should increment the duplicate event metric', function () {
-        return this.metrics.inc.calledWith(`event.${this.channel}.duplicate`, 1)
-          .should.equal.true
+        return this.metrics.inc
+          .calledWith(`event.${this.channel}.duplicate`)
+          .should.equals(true)
       })
     })
 
@@ -107,10 +109,9 @@ describe('EventLogger', function () {
       })
 
       return it('should increment the out-of-order event metric', function () {
-        return this.metrics.inc.calledWith(
-          `event.${this.channel}.out-of-order`,
-          1
-        ).should.equal.true
+        return this.metrics.inc
+          .calledWith(`event.${this.channel}.out-of-order`)
+          .should.equals(true)
       })
     })
 

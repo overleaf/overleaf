@@ -23,13 +23,13 @@ describe('joinProject', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -39,12 +39,12 @@ describe('joinProject', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -55,7 +55,7 @@ describe('joinProject', function () {
                 return cb(error)
               }
             )
-          }
+          },
         ],
         done
       )
@@ -69,7 +69,7 @@ describe('joinProject', function () {
 
     it('should return the project', function () {
       return this.project.should.deep.equal({
-        name: 'Test Project'
+        name: 'Test Project',
       })
     })
 
@@ -118,13 +118,13 @@ describe('joinProject', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: null,
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -134,12 +134,12 @@ describe('joinProject', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -151,7 +151,7 @@ describe('joinProject', function () {
                 return cb()
               }
             )
-          }
+          },
         ],
         done
       )
@@ -178,14 +178,14 @@ describe('joinProject', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 project_id: 'forbidden',
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -195,12 +195,12 @@ describe('joinProject', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -212,7 +212,7 @@ describe('joinProject', function () {
                 cb()
               }
             )
-          }
+          },
         ],
         done
       )
@@ -239,14 +239,14 @@ describe('joinProject', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 project_id: 'not-found',
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -256,12 +256,12 @@ describe('joinProject', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -273,7 +273,7 @@ describe('joinProject', function () {
                 cb()
               }
             )
-          }
+          },
         ],
         done
       )
@@ -300,21 +300,21 @@ describe('joinProject', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: 'rate-limited' },
-              (error) => {
+              error => {
                 this.error = error
                 return cb()
               }
             )
-          }
+          },
         ],
         done
       )

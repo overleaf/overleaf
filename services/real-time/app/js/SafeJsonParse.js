@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { DataTooLargeToParseError } = require('./Errors')
 
 module.exports = {
@@ -13,5 +13,5 @@ module.exports = {
       return callback(e)
     }
     callback(null, parsed)
-  }
+  },
 }

@@ -15,7 +15,7 @@ const FixturesManager = require('./helpers/FixturesManager')
 
 const async = require('async')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
 
@@ -28,13 +28,13 @@ describe('PubSubRace', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -44,12 +44,12 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connect', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -62,7 +62,7 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -73,16 +73,16 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA.emit('joinDoc', this.doc_id, () => {})
             // leave before joinDoc completes
             return this.clientA.emit('leaveDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             // wait for subscribe and unsubscribe
             return setTimeout(cb, 100)
-          }
+          },
         ],
         done
       )
@@ -104,13 +104,13 @@ describe('PubSubRace', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -120,12 +120,12 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connect', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -138,7 +138,7 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -149,7 +149,7 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA.emit('joinDoc', this.doc_id, () => {})
             this.clientA.emit('leaveDoc', this.doc_id, () => {})
             this.clientA.emit('joinDoc', this.doc_id, () => {})
@@ -162,10 +162,10 @@ describe('PubSubRace', function () {
             return this.clientA.emit('leaveDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             // wait for subscribe and unsubscribe
             return setTimeout(cb, 100)
-          }
+          },
         ],
         done
       )
@@ -187,13 +187,13 @@ describe('PubSubRace', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -203,12 +203,12 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connect', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -221,7 +221,7 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -232,7 +232,7 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA.emit('joinDoc', this.doc_id, () => {})
             this.clientA.emit('leaveDoc', this.doc_id, () => {})
             this.clientA.emit('joinDoc', this.doc_id, () => {})
@@ -244,10 +244,10 @@ describe('PubSubRace', function () {
             return this.clientA.emit('joinDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             // wait for subscribe and unsubscribe
             return setTimeout(cb, 100)
-          }
+          },
         ],
         done
       )
@@ -269,13 +269,13 @@ describe('PubSubRace', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -285,12 +285,12 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connect', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -303,7 +303,7 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -314,7 +314,7 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             let joinDocCompleted = false
             this.clientA.emit(
               'joinDoc',
@@ -339,10 +339,10 @@ describe('PubSubRace', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             // wait for subscribe and unsubscribe
             return setTimeout(cb, 100)
-          }
+          },
         ],
         done
       )

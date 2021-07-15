@@ -31,10 +31,10 @@ describe('joinDoc', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'readAndWrite'
+                privilegeLevel: 'readAndWrite',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -44,14 +44,14 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               {
                 lines: this.lines,
                 version: this.version,
                 ops: this.ops,
-                ranges: this.ranges
+                ranges: this.ranges,
               },
               (e, { doc_id }) => {
                 this.doc_id = doc_id
@@ -60,12 +60,12 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -73,7 +73,7 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinDoc',
               this.doc_id,
@@ -82,7 +82,7 @@ describe('joinDoc', function () {
                 return cb(error)
               }
             )
-          }
+          },
         ],
         done
       )
@@ -99,7 +99,7 @@ describe('joinDoc', function () {
         this.lines,
         this.version,
         this.ops,
-        this.ranges
+        this.ranges,
       ])
     })
 
@@ -118,10 +118,10 @@ describe('joinDoc', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'readOnly'
+                privilegeLevel: 'readOnly',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -131,14 +131,14 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               {
                 lines: this.lines,
                 version: this.version,
                 ops: this.ops,
-                ranges: this.ranges
+                ranges: this.ranges,
               },
               (e, { doc_id }) => {
                 this.doc_id = doc_id
@@ -147,12 +147,12 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -160,7 +160,7 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinDoc',
               this.doc_id,
@@ -169,7 +169,7 @@ describe('joinDoc', function () {
                 return cb(error)
               }
             )
-          }
+          },
         ],
         done
       )
@@ -186,7 +186,7 @@ describe('joinDoc', function () {
         this.lines,
         this.version,
         this.ops,
-        this.ranges
+        this.ranges,
       ])
     })
 
@@ -205,10 +205,10 @@ describe('joinDoc', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'owner'
+                privilegeLevel: 'owner',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -218,14 +218,14 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               {
                 lines: this.lines,
                 version: this.version,
                 ops: this.ops,
-                ranges: this.ranges
+                ranges: this.ranges,
               },
               (e, { doc_id }) => {
                 this.doc_id = doc_id
@@ -234,12 +234,12 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -247,7 +247,7 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinDoc',
               this.doc_id,
@@ -256,7 +256,7 @@ describe('joinDoc', function () {
                 return cb(error)
               }
             )
-          }
+          },
         ],
         done
       )
@@ -273,7 +273,7 @@ describe('joinDoc', function () {
         this.lines,
         this.version,
         this.ops,
-        this.ranges
+        this.ranges,
       ])
     })
 
@@ -297,10 +297,10 @@ describe('joinDoc', function () {
       this.fromVersion = 36
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'readAndWrite'
+                privilegeLevel: 'readAndWrite',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -310,14 +310,14 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               {
                 lines: this.lines,
                 version: this.version,
                 ops: this.ops,
-                ranges: this.ranges
+                ranges: this.ranges,
               },
               (e, { doc_id }) => {
                 this.doc_id = doc_id
@@ -326,12 +326,12 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -339,7 +339,7 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinDoc',
               this.doc_id,
@@ -349,7 +349,7 @@ describe('joinDoc', function () {
                 return cb(error)
               }
             )
-          }
+          },
         ],
         done
       )
@@ -366,7 +366,7 @@ describe('joinDoc', function () {
         this.lines,
         this.version,
         this.ops,
-        this.ranges
+        this.ranges,
       ])
     })
 
@@ -386,10 +386,10 @@ describe('joinDoc', function () {
       this.options = { encodeRanges: true }
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'readAndWrite'
+                privilegeLevel: 'readAndWrite',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -399,14 +399,14 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               {
                 lines: this.lines,
                 version: this.version,
                 ops: this.ops,
-                ranges: this.ranges
+                ranges: this.ranges,
               },
               (e, { doc_id }) => {
                 this.doc_id = doc_id
@@ -415,12 +415,12 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -428,7 +428,7 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinDoc',
               this.doc_id,
@@ -438,7 +438,7 @@ describe('joinDoc', function () {
                 return cb(error)
               }
             )
-          }
+          },
         ],
         done
       )
@@ -455,7 +455,7 @@ describe('joinDoc', function () {
         this.lines,
         this.version,
         this.ops,
-        this.ranges
+        this.ranges,
       ])
     })
 
@@ -476,10 +476,10 @@ describe('joinDoc', function () {
       this.options = { encodeRanges: true }
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'readAndWrite'
+                privilegeLevel: 'readAndWrite',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -489,14 +489,14 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               {
                 lines: this.lines,
                 version: this.version,
                 ops: this.ops,
-                ranges: this.ranges
+                ranges: this.ranges,
               },
               (e, { doc_id }) => {
                 this.doc_id = doc_id
@@ -505,12 +505,12 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -518,7 +518,7 @@ describe('joinDoc', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinDoc',
               this.doc_id,
@@ -529,7 +529,7 @@ describe('joinDoc', function () {
                 return cb(error)
               }
             )
-          }
+          },
         ],
         done
       )
@@ -546,7 +546,7 @@ describe('joinDoc', function () {
         this.lines,
         this.version,
         this.ops,
-        this.ranges
+        this.ranges,
       ])
     })
 

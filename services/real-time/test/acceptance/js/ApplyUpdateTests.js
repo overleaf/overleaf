@@ -18,13 +18,13 @@ const { expect } = require('chai')
 const RealTimeClient = require('./helpers/RealTimeClient')
 const FixturesManager = require('./helpers/FixturesManager')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.documentupdater)
 
 const redisSettings = settings.redis
 
-const PENDING_UPDATES_LIST_KEYS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
+const PENDING_UPDATES_LIST_KEYS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => {
   let key = 'pending-updates-list'
   if (n !== 0) {
     key += `-${n}`
@@ -33,10 +33,8 @@ const PENDING_UPDATES_LIST_KEYS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
 })
 
 function getPendingUpdatesList(cb) {
-  Promise.all(
-    PENDING_UPDATES_LIST_KEYS.map((key) => rclient.lrange(key, 0, -1))
-  )
-    .then((results) => {
+  Promise.all(PENDING_UPDATES_LIST_KEYS.map(key => rclient.lrange(key, 0, -1)))
+    .then(results => {
       cb(
         null,
         results.reduce((acc, more) => {
@@ -51,7 +49,7 @@ function getPendingUpdatesList(cb) {
 }
 
 function clearPendingUpdatesList(cb) {
-  Promise.all(PENDING_UPDATES_LIST_KEYS.map((key) => rclient.del(key)))
+  Promise.all(PENDING_UPDATES_LIST_KEYS.map(key => rclient.del(key)))
     .then(() => cb(null))
     .catch(cb)
 }
@@ -59,17 +57,17 @@ function clearPendingUpdatesList(cb) {
 describe('applyOtUpdate', function () {
   before(function () {
     return (this.update = {
-      op: [{ i: 'foo', p: 42 }]
+      op: [{ i: 'foo', p: 42 }],
     })
   })
   describe('when authorized', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'readAndWrite'
+                privilegeLevel: 'readAndWrite',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -79,7 +77,7 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -90,12 +88,12 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -103,18 +101,18 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit('joinDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'applyOtUpdate',
               this.doc_id,
               this.update,
               cb
             )
-          }
+          },
         ],
         done
       )
@@ -132,7 +130,7 @@ describe('applyOtUpdate', function () {
     it('should push the update into redis', function (done) {
       rclient.lrange(
         redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         }),
         0,
         -1,
@@ -142,7 +140,7 @@ describe('applyOtUpdate', function () {
           update.op.should.deep.equal(this.update.op)
           update.meta.should.deep.equal({
             source: this.client.publicId,
-            user_id: this.user_id
+            user_id: this.user_id,
           })
           return done()
         }
@@ -153,20 +151,20 @@ describe('applyOtUpdate', function () {
     return after(function (done) {
       return async.series(
         [
-          (cb) => clearPendingUpdatesList(cb),
-          (cb) =>
+          cb => clearPendingUpdatesList(cb),
+          cb =>
             rclient.del(
               'DocsWithPendingUpdates',
               `${this.project_id}:${this.doc_id}`,
               cb
             ),
-          (cb) =>
+          cb =>
             rclient.del(
               redisSettings.documentupdater.key_schema.pendingUpdates(
                 this.doc_id
               ),
               cb
-            )
+            ),
         ],
         done
       )
@@ -178,15 +176,15 @@ describe('applyOtUpdate', function () {
       this.update = {
         op: {
           p: 12,
-          t: 'update is too large'.repeat(1024 * 400) // >7MB
-        }
+          t: 'update is too large'.repeat(1024 * 400), // >7MB
+        },
       }
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'readAndWrite'
+                privilegeLevel: 'readAndWrite',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -196,7 +194,7 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -207,15 +205,15 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             this.client.on('connectionAccepted', cb)
-            return this.client.on('otUpdateError', (otUpdateError) => {
+            return this.client.on('otUpdateError', otUpdateError => {
               this.otUpdateError = otUpdateError
             })
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -223,21 +221,21 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit('joinDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'applyOtUpdate',
               this.doc_id,
               this.update,
-              (error) => {
+              error => {
                 this.error = error
                 return cb()
               }
             )
-          }
+          },
         ],
         done
       )
@@ -264,7 +262,7 @@ describe('applyOtUpdate', function () {
     return it('should not put the update in redis', function (done) {
       rclient.llen(
         redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         }),
         (error, len) => {
           len.should.equal(0)
@@ -279,10 +277,10 @@ describe('applyOtUpdate', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'readOnly'
+                privilegeLevel: 'readOnly',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -292,7 +290,7 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -303,12 +301,12 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -316,21 +314,21 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit('joinDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'applyOtUpdate',
               this.doc_id,
               this.update,
-              (error) => {
+              error => {
                 this.error = error
                 return cb()
               }
             )
-          }
+          },
         ],
         done
       )
@@ -350,7 +348,7 @@ describe('applyOtUpdate', function () {
     return it('should not put the update in redis', function (done) {
       rclient.llen(
         redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         }),
         (error, len) => {
           len.should.equal(0)
@@ -364,14 +362,14 @@ describe('applyOtUpdate', function () {
   return describe('when authorized to read-only with a comment update', function () {
     before(function (done) {
       this.comment_update = {
-        op: [{ c: 'foo', p: 42 }]
+        op: [{ c: 'foo', p: 42 }],
       }
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
-                privilegeLevel: 'readOnly'
+                privilegeLevel: 'readOnly',
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -381,7 +379,7 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -392,12 +390,12 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.client = RealTimeClient.connect()
             return this.client.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -405,18 +403,18 @@ describe('applyOtUpdate', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit('joinDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             return this.client.emit(
               'applyOtUpdate',
               this.doc_id,
               this.comment_update,
               cb
             )
-          }
+          },
         ],
         done
       )
@@ -434,7 +432,7 @@ describe('applyOtUpdate', function () {
     it('should push the update into redis', function (done) {
       rclient.lrange(
         redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id
+          doc_id: this.doc_id,
         }),
         0,
         -1,
@@ -444,7 +442,7 @@ describe('applyOtUpdate', function () {
           update.op.should.deep.equal(this.comment_update.op)
           update.meta.should.deep.equal({
             source: this.client.publicId,
-            user_id: this.user_id
+            user_id: this.user_id,
           })
           return done()
         }
@@ -455,20 +453,20 @@ describe('applyOtUpdate', function () {
     return after(function (done) {
       return async.series(
         [
-          (cb) => clearPendingUpdatesList(cb),
-          (cb) =>
+          cb => clearPendingUpdatesList(cb),
+          cb =>
             rclient.del(
               'DocsWithPendingUpdates',
               `${this.project_id}:${this.doc_id}`,
               cb
             ),
-          (cb) =>
+          cb =>
             rclient.del(
               redisSettings.documentupdater.key_schema.pendingUpdates({
-                doc_id: this.doc_id
+                doc_id: this.doc_id,
               }),
               cb
-            )
+            ),
         ],
         done
       )

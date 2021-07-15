@@ -17,7 +17,7 @@ const FixturesManager = require('./helpers/FixturesManager')
 
 const async = require('async')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
 
@@ -30,13 +30,13 @@ describe('leaveProject', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -46,25 +46,25 @@ describe('leaveProject', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connectionAccepted', cb)
           },
 
-          (cb) => {
+          cb => {
             this.clientB = RealTimeClient.connect()
             this.clientB.on('connectionAccepted', cb)
 
             this.clientBDisconnectMessages = []
             return this.clientB.on(
               'clientTracking.clientDisconnected',
-              (data) => {
+              data => {
                 return this.clientBDisconnectMessages.push(data)
               }
             )
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -77,7 +77,7 @@ describe('leaveProject', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.clientB.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -90,7 +90,7 @@ describe('leaveProject', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -101,23 +101,23 @@ describe('leaveProject', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit('joinDoc', this.doc_id, cb)
           },
-          (cb) => {
+          cb => {
             return this.clientB.emit('joinDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             // leaveProject is called when the client disconnects
             this.clientA.on('disconnect', () => cb())
             return this.clientA.disconnect()
           },
 
-          (cb) => {
+          cb => {
             // The API waits a little while before flushing changes
             return setTimeout(done, 1000)
-          }
+          },
         ],
         done
       )
@@ -125,7 +125,7 @@ describe('leaveProject', function () {
 
     it('should emit a disconnect message to the room', function () {
       return this.clientBDisconnectMessages.should.deep.equal([
-        this.clientA.publicId
+        this.clientA.publicId,
       ])
     })
 
@@ -176,13 +176,13 @@ describe('leaveProject', function () {
     before(function (done) {
       return async.series(
         [
-          (cb) => {
+          cb => {
             return FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
                 project: {
-                  name: 'Test Project'
-                }
+                  name: 'Test Project',
+                },
               },
               (e, { project_id, user_id }) => {
                 this.project_id = project_id
@@ -192,12 +192,12 @@ describe('leaveProject', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             this.clientA = RealTimeClient.connect()
             return this.clientA.on('connect', cb)
           },
 
-          (cb) => {
+          cb => {
             return this.clientA.emit(
               'joinProject',
               { project_id: this.project_id },
@@ -210,7 +210,7 @@ describe('leaveProject', function () {
             )
           },
 
-          (cb) => {
+          cb => {
             return FixturesManager.setUpDoc(
               this.project_id,
               { lines: this.lines, version: this.version, ops: this.ops },
@@ -220,20 +220,20 @@ describe('leaveProject', function () {
               }
             )
           },
-          (cb) => {
+          cb => {
             return this.clientA.emit('joinDoc', this.doc_id, cb)
           },
 
-          (cb) => {
+          cb => {
             // leaveProject is called when the client disconnects
             this.clientA.on('disconnect', () => cb())
             return this.clientA.disconnect()
           },
 
-          (cb) => {
+          cb => {
             // The API waits a little while before flushing changes
             return setTimeout(done, 1000)
-          }
+          },
         ],
         done
       )

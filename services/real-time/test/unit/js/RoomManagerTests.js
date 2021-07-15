@@ -23,9 +23,9 @@ describe('RoomManager', function () {
     this.client = { namespace: { name: '' }, id: 'first-client' }
     this.RoomManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {}),
-        '@overleaf/metrics': (this.metrics = { gauge: sinon.stub() })
-      }
+        '@overleaf/settings': (this.settings = {}),
+        '@overleaf/metrics': (this.metrics = { gauge: sinon.stub() }),
+      },
     })
     this.RoomManager._clientsInRoom = sinon.stub()
     this.RoomManager._clientAlreadyInRoom = sinon.stub()
@@ -41,7 +41,7 @@ describe('RoomManager', function () {
       })
 
       beforeEach(function (done) {
-        this.onUnhandled = (error) => {
+        this.onUnhandled = error => {
           this.unhandledError = error
           return done(new Error(`unhandledRejection: ${error.message}`))
         }
@@ -71,7 +71,7 @@ describe('RoomManager', function () {
           .returns(0)
         this.client.join = sinon.stub()
         this.callback = sinon.stub()
-        this.RoomEvents.on('project-active', (id) => {
+        this.RoomEvents.on('project-active', id => {
           return setTimeout(() => {
             return this.RoomEvents.emit(`project-subscribed-${id}`)
           }, 100)
@@ -79,7 +79,7 @@ describe('RoomManager', function () {
         return this.RoomManager.joinProject(
           this.client,
           this.project_id,
-          (err) => {
+          err => {
             this.callback(err)
             return done()
           }
@@ -136,12 +136,12 @@ describe('RoomManager', function () {
           .returns(0)
         this.client.join = sinon.stub()
         this.callback = sinon.stub()
-        this.RoomEvents.on('doc-active', (id) => {
+        this.RoomEvents.on('doc-active', id => {
           return setTimeout(() => {
             return this.RoomEvents.emit(`doc-subscribed-${id}`)
           }, 100)
         })
-        return this.RoomManager.joinDoc(this.client, this.doc_id, (err) => {
+        return this.RoomManager.joinDoc(this.client, this.doc_id, err => {
           this.callback(err)
           return done()
         })
@@ -301,12 +301,12 @@ describe('RoomManager', function () {
             .returns(true)
             .withArgs(this.client, this.project_id)
             .returns(true)
-          this.RoomEvents.on('project-active', (id) => {
+          this.RoomEvents.on('project-active', id => {
             return setTimeout(() => {
               return this.RoomEvents.emit(`project-subscribed-${id}`)
             }, 100)
           })
-          this.RoomEvents.on('doc-active', (id) => {
+          this.RoomEvents.on('doc-active', id => {
             return setTimeout(() => {
               return this.RoomEvents.emit(`doc-subscribed-${id}`)
             }, 100)

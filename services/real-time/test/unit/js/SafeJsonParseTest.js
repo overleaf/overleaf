@@ -19,10 +19,10 @@ describe('SafeJsonParse', function () {
   beforeEach(function () {
     return (this.SafeJsonParse = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.Settings = {
-          maxUpdateSize: 16 * 1024
-        })
-      }
+        '@overleaf/settings': (this.Settings = {
+          maxUpdateSize: 16 * 1024,
+        }),
+      },
     }))
   })
 

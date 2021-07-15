@@ -14,7 +14,7 @@
  */
 const app = require('../../../../app')
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = {
   running: false,
@@ -34,10 +34,10 @@ module.exports = {
       return app.listen(
         __guard__(
           Settings.internal != null ? Settings.internal.realtime : undefined,
-          (x) => x.port
+          x => x.port
         ),
         'localhost',
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -54,7 +54,7 @@ module.exports = {
         }
       )
     }
-  }
+  },
 }
 
 function __guard__(value, transform) {
