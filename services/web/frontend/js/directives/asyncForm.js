@@ -24,6 +24,10 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
       attrs.newEmail
 
     const validateCaptchaIfEnabled = function (callback) {
+      scope.$applyAsync(() => {
+        scope[attrs.name].inflight = true
+      })
+
       if (attrs.captchaActionName) {
         validateCaptchaV3(attrs.captchaActionName)
       }
@@ -34,7 +38,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
       }
     }
 
-    const submitRequest = function (grecaptchaResponse) {
+    const _submitRequest = function (grecaptchaResponse) {
       const formData = {}
       for (const data of Array.from(element.serializeArray())) {
         formData[data.name] = data.value
@@ -46,7 +50,6 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
 
       // clear the response object which may be referenced downstream
       Object.keys(response).forEach(field => delete response[field])
-      scope[attrs.name].inflight = true
 
       // for asyncForm prevent automatic redirect to /login if
       // authentication fails, we will handle it ourselves
@@ -143,7 +146,7 @@ App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
     }
 
     const submit = () =>
-      validateCaptchaIfEnabled(response => submitRequest(response))
+      validateCaptchaIfEnabled(response => _submitRequest(response))
 
     const _httpRequestFn = (method = 'post') => {
       const $HTTP_FNS = {
