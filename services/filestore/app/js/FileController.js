@@ -14,7 +14,7 @@ module.exports = {
   copyFile,
   deleteFile,
   deleteProject,
-  directorySize
+  directorySize,
 }
 
 function getFile(req, res, next) {
@@ -24,7 +24,7 @@ function getFile(req, res, next) {
     key,
     bucket,
     format,
-    style
+    style,
   }
 
   metrics.inc('getFile')
@@ -34,7 +34,7 @@ function getFile(req, res, next) {
     bucket,
     format,
     style,
-    cacheWarm: req.query.cacheWarm
+    cacheWarm: req.query.cacheWarm,
   })
 
   if (req.headers.range) {
@@ -70,7 +70,7 @@ function getFile(req, res, next) {
         return res.sendStatus(200).end()
       }
 
-      pipeline(fileStream, res, (err) => {
+      pipeline(fileStream, res, err => {
         if (err && err.code === 'ERR_STREAM_PREMATURE_CLOSE') {
           res.end()
         } else if (err) {
@@ -134,13 +134,13 @@ function copyFile(req, res, next) {
     key,
     bucket,
     oldProject_id: oldProjectId,
-    oldFile_id: oldFileId
+    oldFile_id: oldFileId,
   })
   req.requestLogger.setMessage('copying file')
 
   PersistorManager.copyObject(bucket, `${oldProjectId}/${oldFileId}`, key)
     .then(() => res.sendStatus(200))
-    .catch((err) => {
+    .catch(err => {
       if (err) {
         if (err instanceof Errors.NotFoundError) {
           res.sendStatus(404)

@@ -14,13 +14,13 @@ describe('FileConverter', function () {
   const errorMessage = 'guru meditation error'
   const Settings = {
     commands: {
-      convertCommandPrefix: []
-    }
+      convertCommandPrefix: [],
+    },
   }
 
   beforeEach(function () {
     SafeExec = {
-      promises: sinon.stub().resolves(destPath)
+      promises: sinon.stub().resolves(destPath),
     }
 
     const ObjectPersistor = { Errors }
@@ -30,11 +30,11 @@ describe('FileConverter', function () {
         './SafeExec': SafeExec,
         '@overleaf/metrics': {
           inc: sinon.stub(),
-          Timer: sinon.stub().returns({ done: sinon.stub() })
+          Timer: sinon.stub().returns({ done: sinon.stub() }),
         },
-        'settings-sharelatex': Settings,
-        '@overleaf/object-persistor': ObjectPersistor
-      }
+        '@overleaf/settings': Settings,
+        '@overleaf/object-persistor': ObjectPersistor,
+      },
     })
   })
 

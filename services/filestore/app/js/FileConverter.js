@@ -1,5 +1,5 @@
 const metrics = require('@overleaf/metrics')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { callbackify } = require('util')
 
 const safeExec = require('./SafeExec').promises
@@ -16,8 +16,8 @@ module.exports = {
   promises: {
     convert,
     thumbnail,
-    preview
-  }
+    preview,
+  },
 }
 
 async function convert(sourcePath, requestedFormat) {
@@ -29,7 +29,7 @@ async function convert(sourcePath, requestedFormat) {
     '-flatten',
     '-density',
     '300',
-    `${sourcePath}[0]`
+    `${sourcePath}[0]`,
   ])
 }
 
@@ -46,7 +46,7 @@ async function thumbnail(sourcePath) {
     `pdf:fit-page=${width}`,
     `${sourcePath}[0]`,
     '-resize',
-    width
+    width,
   ])
 }
 
@@ -63,14 +63,14 @@ async function preview(sourcePath) {
     `pdf:fit-page=${width}`,
     `${sourcePath}[0]`,
     '-resize',
-    width
+    width,
   ])
 }
 
 async function _convert(sourcePath, requestedFormat, command) {
   if (!APPROVED_FORMATS.includes(requestedFormat)) {
     throw new ConversionError('invalid format requested', {
-      format: requestedFormat
+      format: requestedFormat,
     })
   }
 
@@ -83,7 +83,7 @@ async function _convert(sourcePath, requestedFormat, command) {
   try {
     await safeExec(command, {
       killSignal: KILL_SIGNAL,
-      timeout: FOURTY_SECONDS
+      timeout: FOURTY_SECONDS,
     })
   } catch (err) {
     throw new ConversionError(

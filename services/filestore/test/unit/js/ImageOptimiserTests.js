@@ -11,29 +11,29 @@ describe('ImageOptimiser', function () {
 
   beforeEach(function () {
     SafeExec = {
-      promises: sinon.stub().resolves()
+      promises: sinon.stub().resolves(),
     }
     logger = {
-      warn: sinon.stub()
+      warn: sinon.stub(),
     }
     ImageOptimiser = SandboxedModule.require(modulePath, {
       requires: {
         './SafeExec': SafeExec,
         'logger-sharelatex': logger,
         '@overleaf/metrics': {
-          Timer: sinon.stub().returns({ done: sinon.stub() })
-        }
-      }
+          Timer: sinon.stub().returns({ done: sinon.stub() }),
+        },
+      },
     })
   })
 
   describe('compressPng', function () {
     it('should convert the file', function (done) {
-      ImageOptimiser.compressPng(sourcePath, (err) => {
+      ImageOptimiser.compressPng(sourcePath, err => {
         expect(err).not.to.exist
         expect(SafeExec.promises).to.have.been.calledWith([
           'optipng',
-          sourcePath
+          sourcePath,
         ])
         done()
       })
@@ -41,7 +41,7 @@ describe('ImageOptimiser', function () {
 
     it('should return the error', function (done) {
       SafeExec.promises.rejects('wombat herding failure')
-      ImageOptimiser.compressPng(sourcePath, (err) => {
+      ImageOptimiser.compressPng(sourcePath, err => {
         expect(err.toString()).to.equal('wombat herding failure')
         done()
       })
@@ -54,7 +54,7 @@ describe('ImageOptimiser', function () {
 
     beforeEach(function (done) {
       SafeExec.promises.rejects(expectedError)
-      ImageOptimiser.compressPng(sourcePath, (err) => {
+      ImageOptimiser.compressPng(sourcePath, err => {
         error = err
         done()
       })

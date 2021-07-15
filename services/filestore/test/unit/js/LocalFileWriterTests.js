@@ -17,10 +17,10 @@ describe('LocalFileWriter', function () {
   beforeEach(function () {
     fs = {
       createWriteStream: sinon.stub().returns(writeStream),
-      unlink: sinon.stub().yields()
+      unlink: sinon.stub().yields(),
     }
     stream = {
-      pipeline: sinon.stub().yields()
+      pipeline: sinon.stub().yields(),
     }
 
     const ObjectPersistor = { Errors }
@@ -29,13 +29,13 @@ describe('LocalFileWriter', function () {
       requires: {
         fs,
         stream,
-        'settings-sharelatex': settings,
+        '@overleaf/settings': settings,
         '@overleaf/metrics': {
           inc: sinon.stub(),
-          Timer: sinon.stub().returns({ done: sinon.stub() })
+          Timer: sinon.stub().returns({ done: sinon.stub() }),
         },
-        '@overleaf/object-persistor': ObjectPersistor
-      }
+        '@overleaf/object-persistor': ObjectPersistor,
+      },
     })
   })
 
@@ -57,7 +57,7 @@ describe('LocalFileWriter', function () {
       })
 
       it('should wrap the error', function () {
-        LocalFileWriter.writeStream(readStream, filename, (err) => {
+        LocalFileWriter.writeStream(readStream, filename, err => {
           expect(err).to.exist
           expect(err.cause).to.equal(error)
         })
@@ -73,7 +73,7 @@ describe('LocalFileWriter', function () {
 
   describe('deleteFile', function () {
     it('should unlink the file', function (done) {
-      LocalFileWriter.deleteFile(fsPath, (err) => {
+      LocalFileWriter.deleteFile(fsPath, err => {
         expect(err).not.to.exist
         expect(fs.unlink).to.have.been.calledWith(fsPath)
         done()
@@ -81,7 +81,7 @@ describe('LocalFileWriter', function () {
     })
 
     it('should not call unlink with an empty path', function (done) {
-      LocalFileWriter.deleteFile('', (err) => {
+      LocalFileWriter.deleteFile('', err => {
         expect(err).not.to.exist
         expect(fs.unlink).not.to.have.been.called
         done()
@@ -92,7 +92,7 @@ describe('LocalFileWriter', function () {
       const error = new Error('file not found')
       error.code = 'ENOENT'
       fs.unlink = sinon.stub().yields(error)
-      LocalFileWriter.deleteFile(fsPath, (err) => {
+      LocalFileWriter.deleteFile(fsPath, err => {
         expect(err).not.to.exist
         done()
       })
@@ -101,7 +101,7 @@ describe('LocalFileWriter', function () {
     it('should wrap the error', function (done) {
       const error = new Error('failed to reticulate splines')
       fs.unlink = sinon.stub().yields(error)
-      LocalFileWriter.deleteFile(fsPath, (err) => {
+      LocalFileWriter.deleteFile(fsPath, err => {
         expect(err).to.exist
         expect(err.cause).to.equal(error)
         done()

@@ -1,12 +1,12 @@
 const chai = require('chai')
 const { expect } = chai
 const fs = require('fs')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Path = require('path')
 const FilestoreApp = require('./FilestoreApp')
 const TestHelper = require('./TestHelper')
 const rp = require('request-promise-native').defaults({
-  resolveWithFullResponse: true
+  resolveWithFullResponse: true,
 })
 const S3 = require('aws-sdk/clients/s3')
 const Stream = require('stream')
@@ -29,7 +29,7 @@ if (!process.env.AWS_ACCESS_KEY_ID) {
   throw new Error('please provide credentials for the AWS S3 test server')
 }
 
-process.on('unhandledRejection', (e) => {
+process.on('unhandledRejection', e => {
   // eslint-disable-next-line no-console
   console.log('** Unhandled Promise Rejection **\n', e)
   throw e
@@ -51,7 +51,7 @@ describe('Filestore', function () {
 
       const badSockets = []
       for (const socket of stdout.split('\n')) {
-        const fields = socket.split(' ').filter((part) => part !== '')
+        const fields = socket.split(' ').filter(part => part !== '')
         if (
           fields.length > 2 &&
           parseInt(fields[1]) &&
@@ -79,7 +79,7 @@ describe('Filestore', function () {
   }
 
   // redefine the test suite for every available backend
-  Object.keys(BackendSettings).forEach((backend) => {
+  Object.keys(BackendSettings).forEach(backend => {
     describe(backend, function () {
       let app, previousEgress, previousIngress, metricPrefix, projectId
 
@@ -150,7 +150,7 @@ describe('Filestore', function () {
           constantFileContent = [
             'hello world',
             `line 2 goes here ${Math.random()}`,
-            'there are 3 lines in all'
+            'there are 3 lines in all',
           ].join('\n')
 
           await fsWriteFile(localFileReadPath, constantFileContent)
@@ -204,8 +204,8 @@ describe('Filestore', function () {
           const options = {
             uri: fileUrl,
             headers: {
-              Range: 'bytes=0-8'
-            }
+              Range: 'bytes=0-8',
+            },
           }
           const res = await rp.get(options)
           expect(res.body).to.equal('hello wor')
@@ -215,8 +215,8 @@ describe('Filestore', function () {
           const options = {
             uri: fileUrl,
             headers: {
-              Range: 'bytes=4-10'
-            }
+              Range: 'bytes=4-10',
+            },
           }
           const res = await rp.get(options)
           expect(res.body).to.equal('o world')
@@ -240,9 +240,9 @@ describe('Filestore', function () {
             json: {
               source: {
                 project_id: projectId,
-                file_id: fileId
-              }
-            }
+                file_id: fileId,
+              },
+            },
           }
           let response = await rp(opts)
           expect(response.statusCode).to.equal(200)
@@ -288,8 +288,8 @@ describe('Filestore', function () {
             const options = {
               uri: fileUrl,
               headers: {
-                Range: 'bytes=0-8'
-              }
+                Range: 'bytes=0-8',
+              },
             }
             await rp.get(options)
             const metric = await TestHelper.getMetric(
@@ -305,25 +305,25 @@ describe('Filestore', function () {
         let fileIds, fileUrls, projectUrl
         const localFileReadPaths = [
           '/tmp/filestore_acceptance_tests_file_read_1.txt',
-          '/tmp/filestore_acceptance_tests_file_read_2.txt'
+          '/tmp/filestore_acceptance_tests_file_read_2.txt',
         ]
         const constantFileContents = [
           [
             'hello world',
             `line 2 goes here ${Math.random()}`,
-            'there are 3 lines in all'
+            'there are 3 lines in all',
           ].join('\n'),
           [
             `for reference: ${Math.random()}`,
             'cats are the best animals',
-            'wombats are a close second'
-          ].join('\n')
+            'wombats are a close second',
+          ].join('\n'),
         ]
 
         before(async function () {
           return Promise.all([
             fsWriteFile(localFileReadPaths[0], constantFileContents[0]),
-            fsWriteFile(localFileReadPaths[1], constantFileContents[1])
+            fsWriteFile(localFileReadPaths[1], constantFileContents[1]),
           ])
         })
 
@@ -332,25 +332,25 @@ describe('Filestore', function () {
           fileIds = [ObjectId().toString(), ObjectId().toString()]
           fileUrls = [
             `${projectUrl}/file/${fileIds[0]}`,
-            `${projectUrl}/file/${fileIds[1]}`
+            `${projectUrl}/file/${fileIds[1]}`,
           ]
 
           const writeStreams = [
             request.post(fileUrls[0]),
-            request.post(fileUrls[1])
+            request.post(fileUrls[1]),
           ]
           const readStreams = [
             fs.createReadStream(localFileReadPaths[0]),
-            fs.createReadStream(localFileReadPaths[1])
+            fs.createReadStream(localFileReadPaths[1]),
           ]
           // hack to consume the result to ensure the http request has been fully processed
           const resultStreams = [
             fs.createWriteStream('/dev/null'),
-            fs.createWriteStream('/dev/null')
+            fs.createWriteStream('/dev/null'),
           ]
           return Promise.all([
             pipeline(readStreams[0], writeStreams[0], resultStreams[0]),
-            pipeline(readStreams[1], writeStreams[1], resultStreams[1])
+            pipeline(readStreams[1], writeStreams[1], resultStreams[1]),
           ])
         })
 
@@ -433,7 +433,7 @@ describe('Filestore', function () {
           for (let i = 0; i < 5; i++) {
             // test is not 100% reliable, so repeat
             // create a new connection and have it time out before reading any data
-            await new Promise((resolve) => {
+            await new Promise(resolve => {
               const streamThatHangs = new Stream.PassThrough()
               const stream = request({ url: fileUrl, timeout: 1000 })
               stream.pipe(streamThatHangs)
@@ -461,24 +461,24 @@ describe('Filestore', function () {
             const s3ClientSettings = {
               credentials: {
                 accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
               },
               endpoint: process.env.AWS_S3_ENDPOINT,
               sslEnabled: false,
-              s3ForcePathStyle: true
+              s3ForcePathStyle: true,
             }
 
             const s3 = new S3(s3ClientSettings)
             await s3
               .createBucket({
-                Bucket: bucketName
+                Bucket: bucketName,
               })
               .promise()
             await s3
               .upload({
                 Bucket: bucketName,
                 Key: fileId,
-                Body: constantFileContent
+                Body: constantFileContent,
               })
               .promise()
           })
@@ -648,9 +648,9 @@ describe('Filestore', function () {
                   json: {
                     source: {
                       project_id: projectId,
-                      file_id: fileId
-                    }
-                  }
+                      file_id: fileId,
+                    },
+                  },
                 }
               })
 
@@ -752,9 +752,8 @@ describe('Filestore', function () {
           describe('when sending a file', function () {
             beforeEach(async function () {
               const writeStream = request.post(fileUrl)
-              const readStream = streamifier.createReadStream(
-                constantFileContent
-              )
+              const readStream =
+                streamifier.createReadStream(constantFileContent)
               // hack to consume the result to ensure the http request has been fully processed
               const resultStream = fs.createWriteStream('/dev/null')
               await pipeline(readStream, writeStream, resultStream)

@@ -38,7 +38,7 @@ class RequestLogger {
         metrics.timing('http_request', responseTime, null, {
           method: req.method,
           status_code: res.statusCode,
-          path: routePath.replace(/\//g, '_').replace(/:/g, '').slice(1)
+          path: routePath.replace(/\//g, '_').replace(/:/g, '').slice(1),
         })
       }
 
@@ -57,14 +57,14 @@ class RequestLogger {
                 req.socket.socket &&
                 req.socket.socket.remoteAddress),
             'user-agent': req.headers['user-agent'],
-            'content-length': req.headers['content-length']
+            'content-length': req.headers['content-length'],
           },
           res: {
             'content-length': res._headers['content-length'],
             statusCode: res.statusCode,
-            'response-time': responseTime
+            'response-time': responseTime,
           },
-          info: req.requestLogger._logInfo
+          info: req.requestLogger._logInfo,
         },
         req.requestLogger._logMessage
       )

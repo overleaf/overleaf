@@ -17,9 +17,9 @@ describe('SafeExec', function () {
     safeExec = SandboxedModule.require(modulePath, {
       globals: { process },
       requires: {
-        'settings-sharelatex': settings,
-        '@overleaf/object-persistor': ObjectPersistor
-      }
+        '@overleaf/settings': settings,
+        '@overleaf/object-persistor': ObjectPersistor,
+      },
     })
   })
 
@@ -35,14 +35,14 @@ describe('SafeExec', function () {
 
     it('should error when conversions are disabled', function (done) {
       settings.enableConversions = false
-      safeExec(['/bin/echo', 'hello'], options, (err) => {
+      safeExec(['/bin/echo', 'hello'], options, err => {
         expect(err).to.exist
         done()
       })
     })
 
     it('should execute a command with non-zero exit status', function (done) {
-      safeExec(['/usr/bin/env', 'false'], options, (err) => {
+      safeExec(['/usr/bin/env', 'false'], options, err => {
         expect(err).to.exist
         expect(err.name).to.equal('FailedCommandError')
         expect(err.code).to.equal(1)
@@ -53,7 +53,7 @@ describe('SafeExec', function () {
     })
 
     it('should handle an invalid command', function (done) {
-      safeExec(['/bin/foobar'], options, (err) => {
+      safeExec(['/bin/foobar'], options, err => {
         err.code.should.equal('ENOENT')
         done()
       })
@@ -63,7 +63,7 @@ describe('SafeExec', function () {
       safeExec(
         ['/bin/sleep', '10'],
         { timeout: 500, killSignal: 'SIGTERM' },
-        (err) => {
+        err => {
           expect(err).to.exist
           expect(err.name).to.equal('FailedCommandError')
           expect(err.code).to.equal('SIGTERM')

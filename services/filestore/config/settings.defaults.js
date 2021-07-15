@@ -40,8 +40,8 @@ const settings = {
   internal: {
     filestore: {
       port: 3009,
-      host: process.env.LISTEN_ADDRESS || 'localhost'
-    }
+      host: process.env.LISTEN_ADDRESS || 'localhost',
+    },
   },
 
   filestore: {
@@ -57,13 +57,13 @@ const settings = {
         ? {
             apiEndpoint: process.env.GCS_API_ENDPOINT,
             apiScheme: process.env.GCS_API_SCHEME,
-            projectId: process.env.GCS_PROJECT_ID
+            projectId: process.env.GCS_PROJECT_ID,
           }
         : undefined,
       unlockBeforeDelete: process.env.GCS_UNLOCK_BEFORE_DELETE === 'true', // unlock an event-based hold before deleting. default false
       deletedBucketSuffix: process.env.GCS_DELETED_BUCKET_SUFFIX, // if present, copy file to another bucket on delete. default null
       deleteConcurrency: parseInt(process.env.GCS_DELETE_CONCURRENCY) || 50,
-      signedUrlExpiryInMs: parseInt(process.env.LINK_EXPIRY_TIMEOUT || 60000)
+      signedUrlExpiryInMs: parseInt(process.env.LINK_EXPIRY_TIMEOUT || 60000),
     },
 
     s3:
@@ -76,7 +76,7 @@ const settings = {
             partSize: process.env.AWS_S3_PARTSIZE || 100 * 1024 * 1024,
             bucketCreds: process.env.S3_BUCKET_CREDENTIALS
               ? JSON.parse(process.env.S3_BUCKET_CREDENTIALS)
-              : undefined
+              : undefined,
           }
         : undefined,
 
@@ -86,7 +86,7 @@ const settings = {
     stores: {
       user_files: process.env.USER_FILES_BUCKET_NAME,
       template_files: process.env.TEMPLATE_FILES_BUCKET_NAME,
-      public_files: process.env.PUBLIC_FILES_BUCKET_NAME
+      public_files: process.env.PUBLIC_FILES_BUCKET_NAME,
     },
 
     fallback: process.env.FALLBACK_BACKEND
@@ -95,28 +95,28 @@ const settings = {
           // mapping of bucket names on the fallback, to bucket names on the primary.
           // e.g. { myS3UserFilesBucketName: 'myGoogleUserFilesBucketName' }
           buckets: JSON.parse(process.env.FALLBACK_BUCKET_MAPPING || '{}'),
-          copyOnMiss: process.env.COPY_ON_MISS === 'true'
+          copyOnMiss: process.env.COPY_ON_MISS === 'true',
         }
       : undefined,
 
-    allowRedirects: process.env.ALLOW_REDIRECTS === 'true'
+    allowRedirects: process.env.ALLOW_REDIRECTS === 'true',
   },
 
   path: {
     // eslint-disable-next-line no-path-concat
-    uploadFolder: Path.resolve(__dirname + '/../uploads')
+    uploadFolder: Path.resolve(__dirname + '/../uploads'),
   },
 
   commands: {
     // Any commands to wrap the convert utility in, for example ["nice"], or ["firejail", "--profile=/etc/firejail/convert.profile"]
-    convertCommandPrefix: []
+    convertCommandPrefix: [],
   },
 
   enableConversions: process.env.ENABLE_CONVERSIONS === 'true',
 
   sentry: {
-    dsn: process.env.SENTRY_DSN
-  }
+    dsn: process.env.SENTRY_DSN,
+  },
 }
 
 // Filestore health check
@@ -125,7 +125,7 @@ const settings = {
 if (process.env.HEALTH_CHECK_PROJECT_ID && process.env.HEALTH_CHECK_FILE_ID) {
   settings.health_check = {
     project_id: process.env.HEALTH_CHECK_PROJECT_ID,
-    file_id: process.env.HEALTH_CHECK_FILE_ID
+    file_id: process.env.HEALTH_CHECK_FILE_ID,
   }
 }
 

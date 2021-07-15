@@ -1,4 +1,4 @@
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const { callbackify } = require('util')
 const fs = require('fs')
 const PersistorManager = require('./PersistorManager')
@@ -23,8 +23,8 @@ module.exports = {
     deleteFile,
     deleteProject,
     getFileSize,
-    getDirectorySize
-  }
+    getDirectorySize,
+  },
 }
 
 async function insertFile(bucket, key, stream) {
@@ -33,7 +33,7 @@ async function insertFile(bucket, key, stream) {
     throw new InvalidParametersError('key does not match validation regex', {
       bucket,
       key,
-      convertedKey
+      convertedKey,
     })
   }
   if (Settings.enableConversions) {
@@ -48,7 +48,7 @@ async function deleteFile(bucket, key) {
     throw new InvalidParametersError('key does not match validation regex', {
       bucket,
       key,
-      convertedKey
+      convertedKey,
     })
   }
   const jobs = [PersistorManager.deleteObject(bucket, key)]
@@ -62,7 +62,7 @@ async function deleteProject(bucket, key) {
   if (!key.match(/^[0-9a-f]{24}\//i)) {
     throw new InvalidParametersError('key does not match validation regex', {
       bucket,
-      key
+      key,
     })
   }
   await PersistorManager.deleteDirectory(bucket, key)
@@ -172,7 +172,7 @@ async function _convertFile(bucket, originalKey, opts) {
     throw new ConversionError('invalid file conversion options', {
       bucket,
       originalKey,
-      opts
+      opts,
     })
   }
   let destPath

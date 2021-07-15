@@ -4,7 +4,7 @@ Metrics.initialize(process.env.METRICS_APP_NAME || 'filestore')
 const logger = require('logger-sharelatex')
 logger.initialize(process.env.METRICS_APP_NAME || 'filestore')
 
-const settings = require('settings-sharelatex')
+const settings = require('@overleaf/settings')
 const express = require('express')
 const bodyParser = require('body-parser')
 
@@ -140,7 +140,7 @@ const host = '0.0.0.0'
 
 if (!module.parent) {
   // Called directly
-  app.listen(port, host, (error) => {
+  app.listen(port, host, error => {
     if (error) {
       logger.error('Error starting Filestore', error)
       throw error
@@ -153,7 +153,7 @@ process
   .on('unhandledRejection', (reason, p) => {
     logger.err(reason, 'Unhandled Rejection at Promise', p)
   })
-  .on('uncaughtException', (err) => {
+  .on('uncaughtException', err => {
     logger.err(err, 'Uncaught Exception thrown')
     process.exit(1)
   })
