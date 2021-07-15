@@ -76,6 +76,7 @@
     "bowser": "^2.11.0",
     "bufferedstream": "1.6.0",
     "bull": "^3.18.0",
+    "bunyan": "^1.8.15",
     "celebrate": "^10.0.1",
     "classnames": "^2.2.6",
     "codemirror": "^5.33.0",
