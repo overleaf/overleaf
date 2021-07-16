@@ -48,7 +48,7 @@ FROM builder
 
 WORKDIR /
 
-RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat binutils graphviz \
+RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat binutils graphviz gdb \
  && rm -rf /var/lib/apt/lists
 
 # Install Google Cloud Profiler agent
