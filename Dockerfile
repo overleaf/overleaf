@@ -18,7 +18,7 @@ RUN node genScript checkout | bash \
   \
 # Store the revision for each service
 # ---------------------------------------------
-&&  node genScript revisions | bash > revisions.txt \
+&&  node genScript revisions | bash > /var/www/revisions.txt \
   \
 # Cleanup the git history
 # -------------------
