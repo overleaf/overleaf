@@ -19,8 +19,8 @@ describe('RestoreManager', function () {
     this.RestoreManager = SandboxedModule.require(modulePath, {
       requires: {
         './DocumentUpdaterManager': (this.DocumentUpdaterManager = {}),
-        './DiffManager': (this.DiffManager = {})
-      }
+        './DiffManager': (this.DiffManager = {}),
+      },
     })
     this.callback = sinon.stub()
     this.project_id = 'mock-project-id'

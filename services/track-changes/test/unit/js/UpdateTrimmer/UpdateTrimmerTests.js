@@ -23,8 +23,8 @@ describe('UpdateTrimmer', function () {
     this.UpdateTrimmer = SandboxedModule.require(modulePath, {
       requires: {
         './WebApiManager': (this.WebApiManager = {}),
-        './MongoManager': (this.MongoManager = {})
-      }
+        './MongoManager': (this.MongoManager = {}),
+      },
     })
 
     this.callback = sinon.stub()

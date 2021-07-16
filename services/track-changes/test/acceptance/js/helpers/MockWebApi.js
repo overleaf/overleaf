@@ -61,16 +61,16 @@ module.exports = MockWebApi = {
     })
 
     return app
-      .listen(3000, (error) => {
+      .listen(3000, error => {
         if (error != null) {
           throw error
         }
       })
-      .on('error', (error) => {
+      .on('error', error => {
         console.error('error starting MockWebApiServer:', error.message)
         return process.exit(1)
       })
-  }
+  },
 }
 
 MockWebApi.run()

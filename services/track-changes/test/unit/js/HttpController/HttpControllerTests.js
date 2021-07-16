@@ -24,8 +24,8 @@ describe('HttpController', function () {
         './RestoreManager': (this.RestoreManager = {}),
         './PackManager': (this.PackManager = {}),
         './DocArchiveManager': (this.DocArchiveManager = {}),
-        './HealthChecker': (this.HealthChecker = {})
-      }
+        './HealthChecker': (this.HealthChecker = {}),
+      },
     })
     this.doc_id = 'doc-id-123'
     this.project_id = 'project-id-123'
@@ -39,8 +39,8 @@ describe('HttpController', function () {
       this.req = {
         params: {
           doc_id: this.doc_id,
-          project_id: this.project_id
-        }
+          project_id: this.project_id,
+        },
       }
       this.res = { sendStatus: sinon.stub() }
       this.UpdatesManager.processUncompressedUpdatesWithLock = sinon
@@ -64,8 +64,8 @@ describe('HttpController', function () {
     beforeEach(function () {
       this.req = {
         params: {
-          project_id: this.project_id
-        }
+          project_id: this.project_id,
+        },
       }
       this.res = { sendStatus: sinon.stub() }
       this.UpdatesManager.processUncompressedUpdatesForProject = sinon
@@ -92,12 +92,12 @@ describe('HttpController', function () {
       this.req = {
         params: {
           doc_id: this.doc_id,
-          project_id: this.project_id
+          project_id: this.project_id,
         },
         query: {
           from: this.from.toString(),
-          to: this.to.toString()
-        }
+          to: this.to.toString(),
+        },
       }
       this.res = { json: sinon.stub() }
       this.diff = [{ u: 'mock-diff' }]
@@ -128,12 +128,12 @@ describe('HttpController', function () {
       this.min_count = 10
       this.req = {
         params: {
-          project_id: this.project_id
+          project_id: this.project_id,
         },
         query: {
           before: this.before.toString(),
-          min_count: this.min_count.toString()
-        }
+          min_count: this.min_count.toString(),
+        },
       }
       this.res = { json: sinon.stub() }
       this.updates = ['mock-summarized-updates']
@@ -147,7 +147,7 @@ describe('HttpController', function () {
       return this.UpdatesManager.getSummarizedProjectUpdates
         .calledWith(this.project_id, {
           before: this.before,
-          min_count: this.min_count
+          min_count: this.min_count,
         })
         .should.equal(true)
     })
@@ -156,7 +156,7 @@ describe('HttpController', function () {
       return this.res.json
         .calledWith({
           updates: this.updates,
-          nextBeforeTimestamp: this.nextBeforeTimestamp
+          nextBeforeTimestamp: this.nextBeforeTimestamp,
         })
         .should.equal(true)
     })
@@ -169,11 +169,11 @@ describe('HttpController', function () {
         params: {
           doc_id: this.doc_id,
           project_id: this.project_id,
-          version: this.version
+          version: this.version,
         },
         headers: {
-          'x-user-id': this.user_id
-        }
+          'x-user-id': this.user_id,
+        },
       }
       this.res = { sendStatus: sinon.stub() }
 

@@ -15,18 +15,18 @@ const modulePath = '../../../../app/js/UpdateCompressor.js'
 const SandboxedModule = require('sandboxed-module')
 
 const bigstring = __range__(0, 2 * 1024 * 1024, true)
-  .map((i) => 'a')
+  .map(i => 'a')
   .join('')
 const mediumstring = __range__(0, 1024 * 1024, true)
-  .map((j) => 'a')
+  .map(j => 'a')
   .join('')
 
 describe('UpdateCompressor', function () {
   beforeEach(function () {
     this.UpdateCompressor = SandboxedModule.require(modulePath, {
       requires: {
-        '../lib/diff_match_patch': require('../../../../app/lib/diff_match_patch')
-      }
+        '../lib/diff_match_patch': require('../../../../app/lib/diff_match_patch'),
+      },
     })
     this.user_id = 'user-id-1'
     this.other_user_id = 'user-id-2'
@@ -41,37 +41,37 @@ describe('UpdateCompressor', function () {
           {
             op: [
               (this.op1 = { p: 0, i: 'Foo' }),
-              (this.op2 = { p: 6, i: 'bar' })
+              (this.op2 = { p: 6, i: 'bar' }),
             ],
             meta: { ts: this.ts1, user_id: this.user_id },
-            v: 42
+            v: 42,
           },
           {
             op: [(this.op3 = { p: 10, i: 'baz' })],
             meta: { ts: this.ts2, user_id: this.other_user_id },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       ).to.deep.equal([
         {
           op: this.op1,
           meta: { start_ts: this.ts1, end_ts: this.ts1, user_id: this.user_id },
-          v: 42
+          v: 42,
         },
         {
           op: this.op2,
           meta: { start_ts: this.ts1, end_ts: this.ts1, user_id: this.user_id },
-          v: 42
+          v: 42,
         },
         {
           op: this.op3,
           meta: {
             start_ts: this.ts2,
             end_ts: this.ts2,
-            user_id: this.other_user_id
+            user_id: this.other_user_id,
           },
-          v: 43
-        }
+          v: 43,
+        },
       ])
     })
 
@@ -81,15 +81,15 @@ describe('UpdateCompressor', function () {
           {
             op: [],
             meta: { ts: this.ts1, user_id: this.user_id },
-            v: 42
-          }
+            v: 42,
+          },
         ])
       ).to.deep.equal([
         {
           op: this.UpdateCompressor.NOOP,
           meta: { start_ts: this.ts1, end_ts: this.ts1, user_id: this.user_id },
-          v: 42
-        }
+          v: 42,
+        },
       ])
     })
 
@@ -100,23 +100,23 @@ describe('UpdateCompressor', function () {
             op: [
               (this.op1 = { p: 0, i: 'Foo' }),
               (this.op2 = { p: 9, c: 'baz' }),
-              (this.op3 = { p: 6, i: 'bar' })
+              (this.op3 = { p: 6, i: 'bar' }),
             ],
             meta: { ts: this.ts1, user_id: this.user_id },
-            v: 42
-          }
+            v: 42,
+          },
         ])
       ).to.deep.equal([
         {
           op: this.op1,
           meta: { start_ts: this.ts1, end_ts: this.ts1, user_id: this.user_id },
-          v: 42
+          v: 42,
         },
         {
           op: this.op3,
           meta: { start_ts: this.ts1, end_ts: this.ts1, user_id: this.user_id },
-          v: 42
-        }
+          v: 42,
+        },
       ])
     })
   })
@@ -130,44 +130,44 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: (this.op2 = { p: 6, i: 'bar' }),
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: (this.op3 = { p: 10, i: 'baz' }),
             meta: {
               start_ts: this.ts2,
               end_ts: this.ts2,
-              user_id: this.other_user_id
+              user_id: this.other_user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       ).to.deep.equal([
         {
           op: [this.op1, this.op2],
           meta: { start_ts: this.ts1, end_ts: this.ts1, user_id: this.user_id },
-          v: 42
+          v: 42,
         },
         {
           op: [this.op3],
           meta: {
             start_ts: this.ts2,
             end_ts: this.ts2,
-            user_id: this.other_user_id
+            user_id: this.other_user_id,
           },
-          v: 43
-        }
+          v: 43,
+        },
       ])
     })
 
@@ -179,17 +179,17 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
-          }
+            v: 42,
+          },
         ])
       ).to.deep.equal([
         {
           op: [],
           meta: { start_ts: this.ts1, end_ts: this.ts1, user_id: this.user_id },
-          v: 42
-        }
+          v: 42,
+        },
       ])
     })
   })
@@ -202,13 +202,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: 'foo' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 6, i: 'bar' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -216,10 +216,10 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -229,13 +229,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: 'foo' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 5, i: 'bar' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -243,10 +243,10 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -256,13 +256,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: 'foo' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 9, i: 'bar' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -270,19 +270,19 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: { p: 9, i: 'bar' },
             meta: {
               start_ts: this.ts2,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -292,13 +292,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: 'foo' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 6, i: bigstring },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -306,19 +306,19 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: { p: 6, i: bigstring },
             meta: {
               start_ts: this.ts2,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -328,13 +328,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: bigstring },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 3 + bigstring.length, i: 'bar' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -342,19 +342,19 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: { p: 3 + bigstring.length, i: 'bar' },
             meta: {
               start_ts: this.ts2,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -364,13 +364,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: mediumstring },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 3 + mediumstring.length, i: mediumstring },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -378,19 +378,19 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: { p: 3 + mediumstring.length, i: mediumstring },
             meta: {
               start_ts: this.ts2,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
     })
@@ -402,13 +402,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, d: 'foo' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 3, d: 'bar' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -416,10 +416,10 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -429,13 +429,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, d: 'foo' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 1, d: 'bar' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -443,10 +443,10 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -456,13 +456,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, d: 'foo' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 9, d: 'bar' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -470,19 +470,19 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: { p: 9, d: 'bar' },
             meta: {
               start_ts: this.ts2,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
     })
@@ -494,13 +494,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: 'foo' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 5, d: 'o' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -508,10 +508,10 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -521,13 +521,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: 'fobaro' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 5, d: 'bar' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -535,10 +535,10 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -548,13 +548,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: 'foo' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 3, d: 'foo' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -562,10 +562,10 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -575,13 +575,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: 'foo' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 9, d: 'bar' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -589,19 +589,19 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: { p: 9, d: 'bar' },
             meta: {
               start_ts: this.ts2,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -611,13 +611,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, i: 'foobar' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 6, d: 'bardle' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -625,19 +625,19 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: { p: 6, d: 'bardle' },
             meta: {
               start_ts: this.ts2,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
     })
@@ -649,13 +649,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, d: 'one two three four five six seven eight' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 3, i: 'one 2 three four five six seven eight' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -663,19 +663,19 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
+            v: 43,
           },
           {
             op: { p: 7, i: '2' },
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
 
@@ -685,13 +685,13 @@ describe('UpdateCompressor', function () {
             {
               op: { p: 3, d: 'one two three four five six seven eight' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 3, i: 'one two three four five six seven eight' },
               meta: { ts: this.ts2, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -699,10 +699,10 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
     })
@@ -714,13 +714,13 @@ describe('UpdateCompressor', function () {
             {
               op: this.UpdateCompressor.NOOP,
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 6, i: 'bar' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -728,19 +728,19 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: { p: 6, i: 'bar' },
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
     })
@@ -752,13 +752,13 @@ describe('UpdateCompressor', function () {
             {
               op: this.UpdateCompressor.NOOP,
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 42
+              v: 42,
             },
             {
               op: { p: 6, d: 'bar' },
               meta: { ts: this.ts1, user_id: this.user_id },
-              v: 43
-            }
+              v: 43,
+            },
           ])
         ).to.deep.equal([
           {
@@ -766,19 +766,19 @@ describe('UpdateCompressor', function () {
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: { p: 6, d: 'bar' },
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
     })
@@ -792,45 +792,45 @@ describe('UpdateCompressor', function () {
             {
               op: [
                 { p: 1000, d: 'hello' },
-                { p: 1000, i: 'HELLO()' }
+                { p: 1000, i: 'HELLO()' },
               ],
               meta: {
                 start_ts: this.ts1,
                 end_ts: this.ts1,
-                user_id: this.user_id
+                user_id: this.user_id,
               },
-              v: 42
+              v: 42,
             },
             [
               {
                 op: [{ p: 1006, i: 'WORLD' }],
                 meta: { ts: this.ts2, user_id: this.user_id },
-                v: 43
-              }
+                v: 43,
+              },
             ]
           )
         ).to.deep.equal([
           {
             op: [
               { p: 1000, d: 'hello' },
-              { p: 1000, i: 'HELLO()' }
+              { p: 1000, i: 'HELLO()' },
             ],
             meta: {
               start_ts: this.ts1,
               end_ts: this.ts1,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 42
+            v: 42,
           },
           {
             op: [{ p: 1006, i: 'WORLD' }],
             meta: {
               start_ts: this.ts2,
               end_ts: this.ts2,
-              user_id: this.user_id
+              user_id: this.user_id,
             },
-            v: 43
-          }
+            v: 43,
+          },
         ])
       })
     })

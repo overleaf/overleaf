@@ -50,50 +50,53 @@ module.exports = MongoManager = {
     if (callback == null) {
       callback = function (error, update, version) {}
     }
-    return MongoManager.getLastCompressedUpdate(doc_id, function (
-      error,
-      update
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (update != null) {
-        if (update.broken) {
-          // marked as broken so we will force a new op
-          return callback(null, null)
-        } else if (update.pack != null) {
-          if (update.finalised) {
-            // no more ops can be appended
-            return callback(
-              null,
-              null,
-              update.pack[0] != null ? update.pack[0].v : undefined
-            )
+    return MongoManager.getLastCompressedUpdate(
+      doc_id,
+      function (error, update) {
+        if (error != null) {
+          return callback(error)
+        }
+        if (update != null) {
+          if (update.broken) {
+            // marked as broken so we will force a new op
+            return callback(null, null)
+          } else if (update.pack != null) {
+            if (update.finalised) {
+              // no more ops can be appended
+              return callback(
+                null,
+                null,
+                update.pack[0] != null ? update.pack[0].v : undefined
+              )
+            } else {
+              return callback(
+                null,
+                update,
+                update.pack[0] != null ? update.pack[0].v : undefined
+              )
+            }
           } else {
-            return callback(
-              null,
-              update,
-              update.pack[0] != null ? update.pack[0].v : undefined
-            )
+            return callback(null, update, update.v)
           }
         } else {
-          return callback(null, update, update.v)
+          return PackManager.getLastPackFromIndex(
+            doc_id,
+            function (error, pack) {
+              if (error != null) {
+                return callback(error)
+              }
+              if (
+                (pack != null ? pack.inS3 : undefined) != null &&
+                (pack != null ? pack.v_end : undefined) != null
+              ) {
+                return callback(null, null, pack.v_end)
+              }
+              return callback(null, null)
+            }
+          )
         }
-      } else {
-        return PackManager.getLastPackFromIndex(doc_id, function (error, pack) {
-          if (error != null) {
-            return callback(error)
-          }
-          if (
-            (pack != null ? pack.inS3 : undefined) != null &&
-            (pack != null ? pack.v_end : undefined) != null
-          ) {
-            return callback(null, null, pack.v_end)
-          }
-          return callback(null, null)
-        })
       }
-    })
+    )
   },
 
   backportProjectId(project_id, doc_id, callback) {
@@ -103,10 +106,10 @@ module.exports = MongoManager = {
     return db.docHistory.updateMany(
       {
         doc_id: ObjectId(doc_id.toString()),
-        project_id: { $exists: false }
+        project_id: { $exists: false },
       },
       {
-        $set: { project_id: ObjectId(project_id.toString()) }
+        $set: { project_id: ObjectId(project_id.toString()) },
       },
       callback
     )
@@ -118,7 +121,7 @@ module.exports = MongoManager = {
     }
     return db.projectHistoryMetaData.findOne(
       {
-        project_id: ObjectId(project_id.toString())
+        project_id: ObjectId(project_id.toString()),
       },
       callback
     )
@@ -130,13 +133,13 @@ module.exports = MongoManager = {
     }
     return db.projectHistoryMetaData.updateOne(
       {
-        project_id: ObjectId(project_id)
+        project_id: ObjectId(project_id),
       },
       {
-        $set: metadata
+        $set: metadata,
       },
       {
-        upsert: true
+        upsert: true,
       },
       callback
     )
@@ -151,11 +154,11 @@ module.exports = MongoManager = {
       {
         project_id: ObjectId(project_id),
         temporary: true,
-        expiresAt: { $exists: true }
+        expiresAt: { $exists: true },
       },
       {
         $set: { temporary: false },
-        $unset: { expiresAt: '' }
+        $unset: { expiresAt: '' },
       },
       callback
     )
@@ -191,12 +194,9 @@ module.exports = MongoManager = {
       { project_id: 1 },
       { background: true }
     )
-  }
+  },
 }
-;[
-  'getLastCompressedUpdate',
-  'getProjectMetaData',
-  'setProjectMetaData'
-].map((method) =>
-  metrics.timeAsyncMethod(MongoManager, method, 'mongo.MongoManager', logger)
+;['getLastCompressedUpdate', 'getProjectMetaData', 'setProjectMetaData'].map(
+  method =>
+    metrics.timeAsyncMethod(MongoManager, method, 'mongo.MongoManager', logger)
 )

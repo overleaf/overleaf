@@ -42,16 +42,16 @@ module.exports = UpdateCompressor = {
     const splitUpdates = []
     for (const update of Array.from(updates)) {
       // Reject any non-insert or delete ops, i.e. comments
-      const ops = update.op.filter((o) => o.i != null || o.d != null)
+      const ops = update.op.filter(o => o.i != null || o.d != null)
       if (ops.length === 0) {
         splitUpdates.push({
           op: UpdateCompressor.NOOP,
           meta: {
             start_ts: update.meta.start_ts || update.meta.ts,
             end_ts: update.meta.end_ts || update.meta.ts,
-            user_id: update.meta.user_id
+            user_id: update.meta.user_id,
           },
-          v: update.v
+          v: update.v,
         })
       } else {
         for (const op of Array.from(ops)) {
@@ -60,9 +60,9 @@ module.exports = UpdateCompressor = {
             meta: {
               start_ts: update.meta.start_ts || update.meta.ts,
               end_ts: update.meta.end_ts || update.meta.ts,
-              user_id: update.meta.user_id
+              user_id: update.meta.user_id,
             },
-            v: update.v
+            v: update.v,
           })
         }
       }
@@ -82,7 +82,7 @@ module.exports = UpdateCompressor = {
         const nextUpdate = {
           op: [],
           meta: update.meta,
-          v: update.v
+          v: update.v,
         }
         if (update.op !== UpdateCompressor.NOOP) {
           nextUpdate.op.push(update.op)
@@ -97,7 +97,7 @@ module.exports = UpdateCompressor = {
     if (
       __guard__(
         lastPreviousUpdate != null ? lastPreviousUpdate.op : undefined,
-        (x) => x.length
+        x => x.length
       ) > 1
     ) {
       // if the last previous update was an array op, don't compress onto it.
@@ -144,18 +144,18 @@ module.exports = UpdateCompressor = {
       meta: {
         user_id: firstUpdate.meta.user_id || null,
         start_ts: firstUpdate.meta.start_ts || firstUpdate.meta.ts,
-        end_ts: firstUpdate.meta.end_ts || firstUpdate.meta.ts
+        end_ts: firstUpdate.meta.end_ts || firstUpdate.meta.ts,
       },
-      v: firstUpdate.v
+      v: firstUpdate.v,
     }
     secondUpdate = {
       op: secondUpdate.op,
       meta: {
         user_id: secondUpdate.meta.user_id || null,
         start_ts: secondUpdate.meta.start_ts || secondUpdate.meta.ts,
-        end_ts: secondUpdate.meta.end_ts || secondUpdate.meta.ts
+        end_ts: secondUpdate.meta.end_ts || secondUpdate.meta.ts,
       },
-      v: secondUpdate.v
+      v: secondUpdate.v,
     }
 
     if (firstUpdate.meta.user_id !== secondUpdate.meta.user_id) {
@@ -192,14 +192,14 @@ module.exports = UpdateCompressor = {
           meta: {
             start_ts: firstUpdate.meta.start_ts,
             end_ts: secondUpdate.meta.end_ts,
-            user_id: firstUpdate.meta.user_id
+            user_id: firstUpdate.meta.user_id,
           },
           op: {
             p: firstOp.p,
-            i: strInject(firstOp.i, secondOp.p - firstOp.p, secondOp.i)
+            i: strInject(firstOp.i, secondOp.p - firstOp.p, secondOp.i),
           },
-          v: secondUpdate.v
-        }
+          v: secondUpdate.v,
+        },
       ]
       // Two deletes
     } else if (
@@ -214,14 +214,14 @@ module.exports = UpdateCompressor = {
           meta: {
             start_ts: firstUpdate.meta.start_ts,
             end_ts: secondUpdate.meta.end_ts,
-            user_id: firstUpdate.meta.user_id
+            user_id: firstUpdate.meta.user_id,
           },
           op: {
             p: secondOp.p,
-            d: strInject(secondOp.d, firstOp.p - secondOp.p, firstOp.d)
+            d: strInject(secondOp.d, firstOp.p - secondOp.p, firstOp.d),
           },
-          v: secondUpdate.v
-        }
+          v: secondUpdate.v,
+        },
       ]
       // An insert and then a delete
     } else if (
@@ -240,14 +240,14 @@ module.exports = UpdateCompressor = {
             meta: {
               start_ts: firstUpdate.meta.start_ts,
               end_ts: secondUpdate.meta.end_ts,
-              user_id: firstUpdate.meta.user_id
+              user_id: firstUpdate.meta.user_id,
             },
             op: {
               p: firstOp.p,
-              i: insert
+              i: insert,
             },
-            v: secondUpdate.v
-          }
+            v: secondUpdate.v,
+          },
         ]
       } else {
         // This will only happen if the delete extends outside the insert
@@ -269,14 +269,14 @@ module.exports = UpdateCompressor = {
             meta: {
               start_ts: firstUpdate.meta.start_ts,
               end_ts: secondUpdate.meta.end_ts,
-              user_id: firstUpdate.meta.user_id
+              user_id: firstUpdate.meta.user_id,
             },
             op: {
               p: firstOp.p,
-              i: ''
+              i: '',
             },
-            v: secondUpdate.v
-          }
+            v: secondUpdate.v,
+          },
         ]
       } else {
         return diff_ops.map(function (op) {
@@ -285,10 +285,10 @@ module.exports = UpdateCompressor = {
             meta: {
               start_ts: firstUpdate.meta.start_ts,
               end_ts: secondUpdate.meta.end_ts,
-              user_id: firstUpdate.meta.user_id
+              user_id: firstUpdate.meta.user_id,
             },
             op,
-            v: secondUpdate.v
+            v: secondUpdate.v,
           }
         })
       }
@@ -315,13 +315,13 @@ module.exports = UpdateCompressor = {
       if (type === this.ADDED) {
         ops.push({
           i: content,
-          p: position
+          p: position,
         })
         position += content.length
       } else if (type === this.REMOVED) {
         ops.push({
           d: content,
-          p: position
+          p: position,
         })
       } else if (type === this.UNCHANGED) {
         position += content.length
@@ -330,7 +330,7 @@ module.exports = UpdateCompressor = {
       }
     }
     return ops
-  }
+  },
 }
 
 function __guard__(value, transform) {

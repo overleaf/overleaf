@@ -25,7 +25,7 @@ const UpdateTrimmer = require('./UpdateTrimmer')
 const logger = require('logger-sharelatex')
 const async = require('async')
 const _ = require('underscore')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const keys = Settings.redis.lock.key_schema
 
 module.exports = UpdatesManager = {
@@ -50,7 +50,7 @@ module.exports = UpdatesManager = {
       const op = rawUpdates[i]
       if (i > 0) {
         const thisVersion = op != null ? op.v : undefined
-        const prevVersion = __guard__(rawUpdates[i - 1], (x) => x.v)
+        const prevVersion = __guard__(rawUpdates[i - 1], x => x.v)
         if (!(prevVersion < thisVersion)) {
           logger.error(
             {
@@ -59,7 +59,7 @@ module.exports = UpdatesManager = {
               rawUpdates,
               temporary,
               thisVersion,
-              prevVersion
+              prevVersion,
             },
             'op versions out of order'
           )
@@ -69,138 +69,137 @@ module.exports = UpdatesManager = {
 
     // FIXME: we no longer need the lastCompressedUpdate, so change functions not to need it
     // CORRECTION:  we do use it to log the time in case of error
-    return MongoManager.peekLastCompressedUpdate(doc_id, function (
-      error,
-      lastCompressedUpdate,
-      lastVersion
-    ) {
-      // lastCompressedUpdate is the most recent update in Mongo, and
-      // lastVersion is its sharejs version number.
-      //
-      // The peekLastCompressedUpdate method may pass the update back
-      // as 'null' (for example if the previous compressed update has
-      // been archived).  In this case it can still pass back the
-      // lastVersion from the update to allow us to check consistency.
-      let op
-      if (error != null) {
-        return callback(error)
-      }
-
-      // Ensure that raw updates start where lastVersion left off
-      if (lastVersion != null) {
-        const discardedUpdates = []
-        rawUpdates = rawUpdates.slice(0)
-        while (rawUpdates[0] != null && rawUpdates[0].v <= lastVersion) {
-          discardedUpdates.push(rawUpdates.shift())
-        }
-        if (discardedUpdates.length) {
-          logger.error(
-            { project_id, doc_id, discardedUpdates, temporary, lastVersion },
-            'discarded updates already present'
-          )
+    return MongoManager.peekLastCompressedUpdate(
+      doc_id,
+      function (error, lastCompressedUpdate, lastVersion) {
+        // lastCompressedUpdate is the most recent update in Mongo, and
+        // lastVersion is its sharejs version number.
+        //
+        // The peekLastCompressedUpdate method may pass the update back
+        // as 'null' (for example if the previous compressed update has
+        // been archived).  In this case it can still pass back the
+        // lastVersion from the update to allow us to check consistency.
+        let op
+        if (error != null) {
+          return callback(error)
         }
 
-        if (rawUpdates[0] != null && rawUpdates[0].v !== lastVersion + 1) {
-          const ts = __guard__(
-            lastCompressedUpdate != null
-              ? lastCompressedUpdate.meta
-              : undefined,
-            (x1) => x1.end_ts
-          )
-          const last_timestamp = ts != null ? new Date(ts) : 'unknown time'
-          error = new Error(
-            `Tried to apply raw op at version ${rawUpdates[0].v} to last compressed update with version ${lastVersion} from ${last_timestamp}`
-          )
-          logger.error(
-            {
-              err: error,
-              doc_id,
-              project_id,
-              prev_end_ts: ts,
-              temporary,
-              lastCompressedUpdate
-            },
-            'inconsistent doc versions'
-          )
-          if (
-            (Settings.trackchanges != null
-              ? Settings.trackchanges.continueOnError
-              : undefined) &&
-            rawUpdates[0].v > lastVersion + 1
-          ) {
-            // we have lost some ops - continue to write into the database, we can't recover at this point
-            lastCompressedUpdate = null
-          } else {
-            return callback(error)
+        // Ensure that raw updates start where lastVersion left off
+        if (lastVersion != null) {
+          const discardedUpdates = []
+          rawUpdates = rawUpdates.slice(0)
+          while (rawUpdates[0] != null && rawUpdates[0].v <= lastVersion) {
+            discardedUpdates.push(rawUpdates.shift())
           }
-        }
-      }
-
-      if (rawUpdates.length === 0) {
-        return callback()
-      }
-
-      // some old large ops in redis need to be rejected, they predate
-      // the size limit that now prevents them going through the system
-      const REJECT_LARGE_OP_SIZE = 4 * 1024 * 1024
-      for (var rawUpdate of Array.from(rawUpdates)) {
-        const opSizes = (() => {
-          const result = []
-          for (op of Array.from(
-            (rawUpdate != null ? rawUpdate.op : undefined) || []
-          )) {
-            result.push(
-              (op.i != null ? op.i.length : undefined) ||
-                (op.d != null ? op.d.length : undefined)
+          if (discardedUpdates.length) {
+            logger.error(
+              { project_id, doc_id, discardedUpdates, temporary, lastVersion },
+              'discarded updates already present'
             )
           }
-          return result
-        })()
-        const size = _.max(opSizes)
-        if (size > REJECT_LARGE_OP_SIZE) {
-          error = new Error(
-            `dropped op exceeding maximum allowed size of ${REJECT_LARGE_OP_SIZE}`
-          )
-          logger.error(
-            { err: error, doc_id, project_id, size, rawUpdate },
-            'dropped op - too big'
-          )
-          rawUpdate.op = []
-        }
-      }
 
-      const compressedUpdates = UpdateCompressor.compressRawUpdates(
-        null,
-        rawUpdates
-      )
-      return PackManager.insertCompressedUpdates(
-        project_id,
-        doc_id,
-        lastCompressedUpdate,
-        compressedUpdates,
-        temporary,
-        function (error, result) {
-          if (error != null) {
-            return callback(error)
-          }
-          if (result != null) {
-            logger.log(
+          if (rawUpdates[0] != null && rawUpdates[0].v !== lastVersion + 1) {
+            const ts = __guard__(
+              lastCompressedUpdate != null
+                ? lastCompressedUpdate.meta
+                : undefined,
+              x1 => x1.end_ts
+            )
+            const last_timestamp = ts != null ? new Date(ts) : 'unknown time'
+            error = new Error(
+              `Tried to apply raw op at version ${rawUpdates[0].v} to last compressed update with version ${lastVersion} from ${last_timestamp}`
+            )
+            logger.error(
               {
-                project_id,
+                err: error,
                 doc_id,
-                orig_v:
-                  lastCompressedUpdate != null
-                    ? lastCompressedUpdate.v
-                    : undefined,
-                new_v: result.v
+                project_id,
+                prev_end_ts: ts,
+                temporary,
+                lastCompressedUpdate,
               },
-              'inserted updates into pack'
+              'inconsistent doc versions'
             )
+            if (
+              (Settings.trackchanges != null
+                ? Settings.trackchanges.continueOnError
+                : undefined) &&
+              rawUpdates[0].v > lastVersion + 1
+            ) {
+              // we have lost some ops - continue to write into the database, we can't recover at this point
+              lastCompressedUpdate = null
+            } else {
+              return callback(error)
+            }
           }
+        }
+
+        if (rawUpdates.length === 0) {
           return callback()
         }
-      )
-    })
+
+        // some old large ops in redis need to be rejected, they predate
+        // the size limit that now prevents them going through the system
+        const REJECT_LARGE_OP_SIZE = 4 * 1024 * 1024
+        for (var rawUpdate of Array.from(rawUpdates)) {
+          const opSizes = (() => {
+            const result = []
+            for (op of Array.from(
+              (rawUpdate != null ? rawUpdate.op : undefined) || []
+            )) {
+              result.push(
+                (op.i != null ? op.i.length : undefined) ||
+                  (op.d != null ? op.d.length : undefined)
+              )
+            }
+            return result
+          })()
+          const size = _.max(opSizes)
+          if (size > REJECT_LARGE_OP_SIZE) {
+            error = new Error(
+              `dropped op exceeding maximum allowed size of ${REJECT_LARGE_OP_SIZE}`
+            )
+            logger.error(
+              { err: error, doc_id, project_id, size, rawUpdate },
+              'dropped op - too big'
+            )
+            rawUpdate.op = []
+          }
+        }
+
+        const compressedUpdates = UpdateCompressor.compressRawUpdates(
+          null,
+          rawUpdates
+        )
+        return PackManager.insertCompressedUpdates(
+          project_id,
+          doc_id,
+          lastCompressedUpdate,
+          compressedUpdates,
+          temporary,
+          function (error, result) {
+            if (error != null) {
+              return callback(error)
+            }
+            if (result != null) {
+              logger.log(
+                {
+                  project_id,
+                  doc_id,
+                  orig_v:
+                    lastCompressedUpdate != null
+                      ? lastCompressedUpdate.v
+                      : undefined,
+                  new_v: result.v,
+                },
+                'inserted updates into pack'
+              )
+            }
+            return callback()
+          }
+        )
+      }
+    )
   },
 
   // Check whether the updates are temporary (per-project property)
@@ -208,15 +207,15 @@ module.exports = UpdatesManager = {
     if (callback == null) {
       callback = function (error, temporary) {}
     }
-    return UpdateTrimmer.shouldTrimUpdates(project_id, function (
-      error,
-      temporary
-    ) {
-      if (error != null) {
-        return callback(error)
+    return UpdateTrimmer.shouldTrimUpdates(
+      project_id,
+      function (error, temporary) {
+        if (error != null) {
+          return callback(error)
+        }
+        return callback(null, temporary)
       }
-      return callback(null, temporary)
-    })
+    )
   },
 
   // Check for project id on document history (per-document property)
@@ -248,71 +247,71 @@ module.exports = UpdatesManager = {
         }
         const { length } = docUpdates
         // parse the redis strings into ShareJs updates
-        return RedisManager.expandDocUpdates(docUpdates, function (
-          error,
-          rawUpdates
-        ) {
-          if (error != null) {
-            logger.err(
-              { project_id, doc_id, docUpdates },
-              'failed to parse docUpdates'
-            )
-            return callback(error)
-          }
-          logger.log(
-            { project_id, doc_id, rawUpdates },
-            'retrieved raw updates from redis'
-          )
-          return UpdatesManager.compressAndSaveRawUpdates(
-            project_id,
-            doc_id,
-            rawUpdates,
-            temporary,
-            function (error) {
-              if (error != null) {
-                return callback(error)
-              }
-              logger.log(
-                { project_id, doc_id },
-                'compressed and saved doc updates'
+        return RedisManager.expandDocUpdates(
+          docUpdates,
+          function (error, rawUpdates) {
+            if (error != null) {
+              logger.err(
+                { project_id, doc_id, docUpdates },
+                'failed to parse docUpdates'
               )
-              // delete the applied updates from redis
-              return RedisManager.deleteAppliedDocUpdates(
-                project_id,
-                doc_id,
-                docUpdates,
-                function (error) {
-                  if (error != null) {
-                    return callback(error)
-                  }
-                  if (length === UpdatesManager.REDIS_READ_BATCH_SIZE) {
-                    // There might be more updates
-                    logger.log(
-                      { project_id, doc_id },
-                      'continuing processing updates'
-                    )
-                    return setTimeout(
-                      () =>
-                        UpdatesManager.processUncompressedUpdates(
-                          project_id,
-                          doc_id,
-                          temporary,
-                          callback
-                        ),
-                      0
-                    )
-                  } else {
-                    logger.log(
-                      { project_id, doc_id },
-                      'all raw updates processed'
-                    )
-                    return callback()
-                  }
-                }
-              )
+              return callback(error)
             }
-          )
-        })
+            logger.log(
+              { project_id, doc_id, rawUpdates },
+              'retrieved raw updates from redis'
+            )
+            return UpdatesManager.compressAndSaveRawUpdates(
+              project_id,
+              doc_id,
+              rawUpdates,
+              temporary,
+              function (error) {
+                if (error != null) {
+                  return callback(error)
+                }
+                logger.log(
+                  { project_id, doc_id },
+                  'compressed and saved doc updates'
+                )
+                // delete the applied updates from redis
+                return RedisManager.deleteAppliedDocUpdates(
+                  project_id,
+                  doc_id,
+                  docUpdates,
+                  function (error) {
+                    if (error != null) {
+                      return callback(error)
+                    }
+                    if (length === UpdatesManager.REDIS_READ_BATCH_SIZE) {
+                      // There might be more updates
+                      logger.log(
+                        { project_id, doc_id },
+                        'continuing processing updates'
+                      )
+                      return setTimeout(
+                        () =>
+                          UpdatesManager.processUncompressedUpdates(
+                            project_id,
+                            doc_id,
+                            temporary,
+                            callback
+                          ),
+                        0
+                      )
+                    } else {
+                      logger.log(
+                        { project_id, doc_id },
+                        'all raw updates processed'
+                      )
+                      return callback()
+                    }
+                  }
+                )
+              }
+            )
+          }
+        )
       }
     )
   },
@@ -322,20 +321,20 @@ module.exports = UpdatesManager = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return UpdatesManager._prepareProjectForUpdates(project_id, function (
-      error,
-      temporary
-    ) {
-      if (error != null) {
-        return callback(error)
+    return UpdatesManager._prepareProjectForUpdates(
+      project_id,
+      function (error, temporary) {
+        if (error != null) {
+          return callback(error)
+        }
+        return UpdatesManager._processUncompressedUpdatesForDocWithLock(
+          project_id,
+          doc_id,
+          temporary,
+          callback
+        )
       }
-      return UpdatesManager._processUncompressedUpdatesForDocWithLock(
-        project_id,
-        doc_id,
-        temporary,
-        callback
-      )
-    })
+    )
   },
 
   // Process updates for a doc when the whole project is flushed (internal method)
@@ -348,24 +347,26 @@ module.exports = UpdatesManager = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return UpdatesManager._prepareDocForUpdates(project_id, doc_id, function (
-      error
-    ) {
-      if (error != null) {
-        return callback(error)
+    return UpdatesManager._prepareDocForUpdates(
+      project_id,
+      doc_id,
+      function (error) {
+        if (error != null) {
+          return callback(error)
+        }
+        return LockManager.runWithLock(
+          keys.historyLock({ doc_id }),
+          releaseLock =>
+            UpdatesManager.processUncompressedUpdates(
+              project_id,
+              doc_id,
+              temporary,
+              releaseLock
+            ),
+          callback
+        )
       }
-      return LockManager.runWithLock(
-        keys.historyLock({ doc_id }),
-        (releaseLock) =>
-          UpdatesManager.processUncompressedUpdates(
-            project_id,
-            doc_id,
-            temporary,
-            releaseLock
-          ),
-        callback
-      )
-    })
+    )
   },
 
   // Process all updates for a project, only check project-level information once
@@ -373,32 +374,32 @@ module.exports = UpdatesManager = {
     if (callback == null) {
       callback = function (error) {}
     }
-    return RedisManager.getDocIdsWithHistoryOps(project_id, function (
-      error,
-      doc_ids
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      return UpdatesManager._prepareProjectForUpdates(project_id, function (
-        error,
-        temporary
-      ) {
-        const jobs = []
-        for (const doc_id of Array.from(doc_ids)) {
-          ;((doc_id) =>
-            jobs.push((cb) =>
-              UpdatesManager._processUncompressedUpdatesForDocWithLock(
-                project_id,
-                doc_id,
-                temporary,
-                cb
-              )
-            ))(doc_id)
+    return RedisManager.getDocIdsWithHistoryOps(
+      project_id,
+      function (error, doc_ids) {
+        if (error != null) {
+          return callback(error)
         }
-        return async.parallelLimit(jobs, 5, callback)
-      })
-    })
+        return UpdatesManager._prepareProjectForUpdates(
+          project_id,
+          function (error, temporary) {
+            const jobs = []
+            for (const doc_id of Array.from(doc_ids)) {
+              ;(doc_id =>
+                jobs.push(cb =>
+                  UpdatesManager._processUncompressedUpdatesForDocWithLock(
+                    project_id,
+                    doc_id,
+                    temporary,
+                    cb
+                  )
+                ))(doc_id)
+            }
+            return async.parallelLimit(jobs, 5, callback)
+          }
+        )
+      }
+    )
   },
 
   // flush all outstanding changes
@@ -417,7 +418,7 @@ module.exports = UpdatesManager = {
       logger.log(
         {
           count: project_ids != null ? project_ids.length : undefined,
-          project_ids
+          project_ids,
         },
         'found projects'
       )
@@ -426,11 +427,11 @@ module.exports = UpdatesManager = {
       const selectedProjects =
         limit < 0 ? project_ids : project_ids.slice(0, limit)
       for (project_id of Array.from(selectedProjects)) {
-        ;((project_id) =>
-          jobs.push((cb) =>
+        ;(project_id =>
+          jobs.push(cb =>
             UpdatesManager.processUncompressedUpdatesForProject(
               project_id,
-              (err) => cb(null, { failed: err != null, project_id })
+              err => cb(null, { failed: err != null, project_id })
             )
           ))(project_id)
       }
@@ -460,7 +461,7 @@ module.exports = UpdatesManager = {
         return callback(null, {
           failed: failedProjects,
           succeeded: succeededProjects,
-          all: project_ids
+          all: project_ids,
         })
       })
     })
@@ -485,7 +486,7 @@ module.exports = UpdatesManager = {
           return callback(error)
         }
         // function to get doc_ids for each project
-        const task = (cb) =>
+        const task = cb =>
           async.concatSeries(
             all_project_ids,
             RedisManager.getDocIdsWithHistoryOps,
@@ -542,20 +543,22 @@ module.exports = UpdatesManager = {
     if (callback == null) {
       callback = function (error, updates) {}
     }
-    return UpdatesManager.getDocUpdates(project_id, doc_id, options, function (
-      error,
-      updates
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      return UpdatesManager.fillUserInfo(updates, function (error, updates) {
+    return UpdatesManager.getDocUpdates(
+      project_id,
+      doc_id,
+      options,
+      function (error, updates) {
         if (error != null) {
           return callback(error)
         }
-        return callback(null, updates)
-      })
-    })
+        return UpdatesManager.fillUserInfo(updates, function (error, updates) {
+          if (error != null) {
+            return callback(error)
+          }
+          return callback(null, updates)
+        })
+      }
+    )
   },
 
   getSummarizedProjectUpdates(project_id, options, callback) {
@@ -577,63 +580,65 @@ module.exports = UpdatesManager = {
         if (error != null) {
           return callback(error)
         }
-        return PackManager.makeProjectIterator(project_id, before, function (
-          err,
-          iterator
-        ) {
-          if (err != null) {
-            return callback(err)
-          }
-          // repeatedly get updates and pass them through the summariser to get an final output with user info
-          return async.whilst(
-            () =>
-              // console.log "checking iterator.done", iterator.done()
-              summarizedUpdates.length < options.min_count && !iterator.done(),
+        return PackManager.makeProjectIterator(
+          project_id,
+          before,
+          function (err, iterator) {
+            if (err != null) {
+              return callback(err)
+            }
+            // repeatedly get updates and pass them through the summariser to get an final output with user info
+            return async.whilst(
+              () =>
+                // console.log "checking iterator.done", iterator.done()
+                summarizedUpdates.length < options.min_count &&
+                !iterator.done(),
 
-            (cb) =>
-              iterator.next(function (err, partialUpdates) {
-                if (err != null) {
-                  return callback(err)
-                }
-                // logger.log {partialUpdates}, 'got partialUpdates'
-                if (partialUpdates.length === 0) {
-                  return cb()
-                } // # FIXME should try to avoid this happening
-                nextBeforeTimestamp =
-                  partialUpdates[partialUpdates.length - 1].meta.end_ts
-                // add the updates to the summary list
-                summarizedUpdates = UpdatesManager._summarizeUpdates(
-                  partialUpdates,
-                  summarizedUpdates
-                )
-                return cb()
-              }),
-
-            () =>
-              // finally done all updates
-              // console.log 'summarized Updates', summarizedUpdates
-              UpdatesManager.fillSummarizedUserInfo(
-                summarizedUpdates,
-                function (err, results) {
+              cb =>
+                iterator.next(function (err, partialUpdates) {
                   if (err != null) {
                     return callback(err)
                   }
-                  return callback(
-                    null,
-                    results,
-                    !iterator.done() ? nextBeforeTimestamp : undefined
+                  // logger.log {partialUpdates}, 'got partialUpdates'
+                  if (partialUpdates.length === 0) {
+                    return cb()
+                  } // # FIXME should try to avoid this happening
+                  nextBeforeTimestamp =
+                    partialUpdates[partialUpdates.length - 1].meta.end_ts
+                  // add the updates to the summary list
+                  summarizedUpdates = UpdatesManager._summarizeUpdates(
+                    partialUpdates,
+                    summarizedUpdates
                   )
-                }
-              )
-          )
-        })
+                  return cb()
+                }),
+
+              () =>
+                // finally done all updates
+                // console.log 'summarized Updates', summarizedUpdates
+                UpdatesManager.fillSummarizedUserInfo(
+                  summarizedUpdates,
+                  function (err, results) {
+                    if (err != null) {
+                      return callback(err)
+                    }
+                    return callback(
+                      null,
+                      results,
+                      !iterator.done() ? nextBeforeTimestamp : undefined
+                    )
+                  }
+                )
+            )
+          }
+        )
       }
     )
   },
 
   exportProject(projectId, consumer) {
     // Flush anything before collecting updates.
-    UpdatesManager.processUncompressedUpdatesForProject(projectId, (err) => {
+    UpdatesManager.processUncompressedUpdatesForProject(projectId, err => {
       if (err) return consumer(err)
 
       // Fetch all the packs.
@@ -646,7 +651,7 @@ module.exports = UpdatesManager = {
         async.whilst(
           () => !iterator.done(),
 
-          (cb) =>
+          cb =>
             iterator.next((err, updatesFromASinglePack) => {
               if (err) return cb(err)
 
@@ -656,7 +661,7 @@ module.exports = UpdatesManager = {
                 //  call.
                 return cb()
               }
-              updatesFromASinglePack.forEach((update) => {
+              updatesFromASinglePack.forEach(update => {
                 accumulatedUserIds.add(
                   // Super defensive access on update details.
                   String(update && update.meta && update.meta.user_id)
@@ -666,7 +671,7 @@ module.exports = UpdatesManager = {
               consumer(null, { updates: updatesFromASinglePack }, cb)
             }),
 
-          (err) => {
+          err => {
             if (err) return consumer(err)
 
             // Adding undefined can happen for broken updates.
@@ -674,7 +679,7 @@ module.exports = UpdatesManager = {
 
             consumer(null, {
               updates: [],
-              userIds: Array.from(accumulatedUserIds).sort()
+              userIds: Array.from(accumulatedUserIds).sort(),
             })
           }
         )
@@ -689,8 +694,8 @@ module.exports = UpdatesManager = {
     const jobs = []
     const fetchedUserInfo = {}
     for (const user_id in users) {
-      ;((user_id) =>
-        jobs.push((callback) =>
+      ;(user_id =>
+        jobs.push(callback =>
           WebApiManager.getUserInfo(user_id, function (error, userInfo) {
             if (error != null) {
               return callback(error)
@@ -722,22 +727,22 @@ module.exports = UpdatesManager = {
       }
     }
 
-    return UpdatesManager.fetchUserInfo(users, function (
-      error,
-      fetchedUserInfo
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      for (update of Array.from(updates)) {
-        ;({ user_id } = update.meta)
-        delete update.meta.user_id
-        if (UpdatesManager._validUserId(user_id)) {
-          update.meta.user = fetchedUserInfo[user_id]
+    return UpdatesManager.fetchUserInfo(
+      users,
+      function (error, fetchedUserInfo) {
+        if (error != null) {
+          return callback(error)
         }
+        for (update of Array.from(updates)) {
+          ;({ user_id } = update.meta)
+          delete update.meta.user_id
+          if (UpdatesManager._validUserId(user_id)) {
+            update.meta.user = fetchedUserInfo[user_id]
+          }
+        }
+        return callback(null, updates)
       }
-      return callback(null, updates)
-    })
+    )
   },
 
   fillSummarizedUserInfo(updates, callback) {
@@ -755,27 +760,27 @@ module.exports = UpdatesManager = {
       }
     }
 
-    return UpdatesManager.fetchUserInfo(users, function (
-      error,
-      fetchedUserInfo
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      for (update of Array.from(updates)) {
-        user_ids = update.meta.user_ids || []
-        update.meta.users = []
-        delete update.meta.user_ids
-        for (user_id of Array.from(user_ids)) {
-          if (UpdatesManager._validUserId(user_id)) {
-            update.meta.users.push(fetchedUserInfo[user_id])
-          } else {
-            update.meta.users.push(null)
+    return UpdatesManager.fetchUserInfo(
+      users,
+      function (error, fetchedUserInfo) {
+        if (error != null) {
+          return callback(error)
+        }
+        for (update of Array.from(updates)) {
+          user_ids = update.meta.user_ids || []
+          update.meta.users = []
+          delete update.meta.user_ids
+          for (user_id of Array.from(user_ids)) {
+            if (UpdatesManager._validUserId(user_id)) {
+              update.meta.users.push(fetchedUserInfo[user_id])
+            } else {
+              update.meta.users.push(null)
+            }
           }
         }
+        return callback(null, updates)
       }
-      return callback(null, updates)
-    })
+    )
   },
 
   _validUserId(user_id) {
@@ -830,7 +835,7 @@ module.exports = UpdatesManager = {
         // check if the user in this update is already present in the earliest update,
         // if not, add them to the users list of the earliest update
         earliestUpdate.meta.user_ids = _.union(earliestUpdate.meta.user_ids, [
-          update.meta.user_id
+          update.meta.user_id,
         ])
 
         doc_id = update.doc_id.toString()
@@ -841,7 +846,7 @@ module.exports = UpdatesManager = {
         } else {
           earliestUpdate.docs[doc_id] = {
             fromV: update.v,
-            toV: update.v
+            toV: update.v,
           }
         }
 
@@ -858,14 +863,14 @@ module.exports = UpdatesManager = {
           meta: {
             user_ids: [],
             start_ts: update.meta.start_ts,
-            end_ts: update.meta.end_ts
+            end_ts: update.meta.end_ts,
           },
-          docs: {}
+          docs: {},
         }
 
         newUpdate.docs[update.doc_id.toString()] = {
           fromV: update.v,
-          toV: update.v
+          toV: update.v,
         }
         newUpdate.meta.user_ids.push(update.meta.user_id)
         summarizedUpdates.push(newUpdate)
@@ -873,7 +878,7 @@ module.exports = UpdatesManager = {
     }
 
     return summarizedUpdates
-  }
+  },
 }
 
 function __guard__(value, transform) {

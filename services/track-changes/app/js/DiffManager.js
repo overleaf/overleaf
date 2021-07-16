@@ -24,30 +24,30 @@ module.exports = DiffManager = {
     if (callback == null) {
       callback = function (error, content, version, updates) {}
     }
-    return DocumentUpdaterManager.getDocument(project_id, doc_id, function (
-      error,
-      content,
-      version
-    ) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (fromVersion == null) {
-        // If we haven't been given a version, just return lastest doc and no updates
-        return callback(null, content, version, [])
-      }
-      return UpdatesManager.getDocUpdatesWithUserInfo(
-        project_id,
-        doc_id,
-        { from: fromVersion },
-        function (error, updates) {
-          if (error != null) {
-            return callback(error)
-          }
-          return callback(null, content, version, updates)
+    return DocumentUpdaterManager.getDocument(
+      project_id,
+      doc_id,
+      function (error, content, version) {
+        if (error != null) {
+          return callback(error)
         }
-      )
-    })
+        if (fromVersion == null) {
+          // If we haven't been given a version, just return lastest doc and no updates
+          return callback(null, content, version, [])
+        }
+        return UpdatesManager.getDocUpdatesWithUserInfo(
+          project_id,
+          doc_id,
+          { from: fromVersion },
+          function (error, updates) {
+            if (error != null) {
+              return callback(error)
+            }
+            return callback(null, content, version, updates)
+          }
+        )
+      }
+    )
   },
 
   getDiff(project_id, doc_id, fromVersion, toVersion, callback) {
@@ -167,7 +167,7 @@ module.exports = DiffManager = {
           {
             docVersion: version,
             lastUpdateVersion: lastUpdate != null ? lastUpdate.v : undefined,
-            updateCount: updates.length
+            updateCount: updates.length,
           },
           'rewinding updates'
         )
@@ -184,5 +184,5 @@ module.exports = DiffManager = {
         return callback(null, startingContent, tryUpdates)
       }
     )
-  }
+  },
 }

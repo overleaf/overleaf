@@ -12,7 +12,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('../../../app/js/mongodb')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const TrackChangesApp = require('./helpers/TrackChangesApp')
 const TrackChangesClient = require('./helpers/TrackChangesClient')
@@ -35,7 +35,7 @@ describe('Getting a diff', function () {
       email: 'user@sharelatex.com',
       first_name: 'Leo',
       last_name: 'Lion',
-      id: this.user_id
+      id: this.user_id,
     }
     sinon.spy(MockWebApi, 'getUserInfo')
 
@@ -45,23 +45,23 @@ describe('Getting a diff', function () {
       {
         op: [{ i: 'one ', p: 0 }],
         meta: { ts: this.from - twoMinutes, user_id: this.user_id },
-        v: 3
+        v: 3,
       },
       {
         op: [{ i: 'two ', p: 4 }],
         meta: { ts: this.from + twoMinutes, user_id: this.user_id },
-        v: (this.fromVersion = 4)
+        v: (this.fromVersion = 4),
       },
       {
         op: [{ i: 'three ', p: 8 }],
         meta: { ts: this.to - twoMinutes, user_id: this.user_id },
-        v: (this.toVersion = 5)
+        v: (this.toVersion = 5),
       },
       {
         op: [{ i: 'four', p: 14 }],
         meta: { ts: this.to + twoMinutes, user_id: this.user_id },
-        v: 6
-      }
+        v: 6,
+      },
     ]
     this.lines = ['one two three four']
     this.expected_diff = [
@@ -71,21 +71,21 @@ describe('Getting a diff', function () {
         meta: {
           start_ts: this.from + twoMinutes,
           end_ts: this.to - twoMinutes,
-          user: this.user
-        }
-      }
+          user: this.user,
+        },
+      },
     ]
 
     MockDocUpdaterApi.docs[this.doc_id] = {
       lines: this.lines,
-      version: 7
+      version: 7,
     }
     TrackChangesApp.ensureRunning(() => {
       return TrackChangesClient.pushRawUpdates(
         this.project_id,
         this.doc_id,
         this.updates,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }

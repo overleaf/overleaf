@@ -24,7 +24,7 @@ describe('DiffGenerator', function () {
     return (this.meta = {
       start_ts: this.ts,
       end_ts: this.ts,
-      user_id: this.user_id
+      user_id: this.user_id,
     })
   })
 
@@ -34,7 +34,7 @@ describe('DiffGenerator', function () {
         const content = 'hello world'
         const rewoundContent = this.DiffGenerator.rewindOp(content, {
           p: 6,
-          i: 'wo'
+          i: 'wo',
         })
         return rewoundContent.should.equal('hello rld')
       })
@@ -45,7 +45,7 @@ describe('DiffGenerator', function () {
         const content = 'hello rld'
         const rewoundContent = this.DiffGenerator.rewindOp(content, {
           p: 6,
-          d: 'wo'
+          d: 'wo',
         })
         return rewoundContent.should.equal('hello world')
       })
@@ -65,7 +65,7 @@ describe('DiffGenerator', function () {
         const content = 'foobar'
         const rewoundContent = this.DiffGenerator.rewindOp(content, {
           p: 4,
-          i: 'bar'
+          i: 'bar',
         })
         return rewoundContent.should.equal('foo')
       })
@@ -78,8 +78,8 @@ describe('DiffGenerator', function () {
       const update = {
         op: [
           { p: 3, i: 'bbb' },
-          { p: 6, i: 'ccc' }
-        ]
+          { p: 6, i: 'ccc' },
+        ],
       }
       const rewoundContent = this.DiffGenerator.rewindUpdate(content, update)
       return rewoundContent.should.equal('aaa')
@@ -91,7 +91,7 @@ describe('DiffGenerator', function () {
       const content = 'aaabbbccc'
       const updates = [
         { op: [{ p: 3, i: 'bbb' }] },
-        { op: [{ p: 6, i: 'ccc' }] }
+        { op: [{ p: 6, i: 'ccc' }] },
       ]
       const rewoundContent = this.DiffGenerator.rewindUpdates(content, updates)
       return rewoundContent.should.equal('aaa')
@@ -105,7 +105,7 @@ describe('DiffGenerator', function () {
       this.updates = [
         { i: 'mock-update-1' },
         { i: 'mock-update-2' },
-        { i: 'mock-update-3' }
+        { i: 'mock-update-3' },
       ]
       this.DiffGenerator.applyUpdateToDiff = sinon.stub().returns(this.diff)
       this.DiffGenerator.compressDiff = sinon.stub().returns(this.diff)
@@ -124,8 +124,8 @@ describe('DiffGenerator', function () {
         .calledWith(
           [
             {
-              u: this.content
-            }
+              u: this.content,
+            },
           ],
           this.updates[0]
         )
@@ -133,7 +133,7 @@ describe('DiffGenerator', function () {
     })
 
     it('should apply each update', function () {
-      return Array.from(this.updates).map((update) =>
+      return Array.from(this.updates).map(update =>
         this.DiffGenerator.applyUpdateToDiff
           .calledWith(sinon.match.any, update)
           .should.equal(true)
@@ -153,18 +153,18 @@ describe('DiffGenerator', function () {
         const diff = this.DiffGenerator.compressDiff([
           {
             i: 'foo',
-            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } }
+            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } },
           },
           {
             i: 'bar',
-            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id } }
-          }
+            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id } },
+          },
         ])
         return expect(diff).to.deep.equal([
           {
             i: 'foobar',
-            meta: { start_ts: 5, end_ts: 20, user: { id: this.user_id } }
-          }
+            meta: { start_ts: 5, end_ts: 20, user: { id: this.user_id } },
+          },
         ])
       })
     })
@@ -174,12 +174,12 @@ describe('DiffGenerator', function () {
         const input = [
           {
             i: 'foo',
-            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } }
+            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } },
           },
           {
             i: 'bar',
-            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id_2 } }
-          }
+            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id_2 } },
+          },
         ]
         const output = this.DiffGenerator.compressDiff(input)
         return expect(output).to.deep.equal(input)
@@ -191,18 +191,18 @@ describe('DiffGenerator', function () {
         const diff = this.DiffGenerator.compressDiff([
           {
             d: 'foo',
-            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } }
+            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } },
           },
           {
             d: 'bar',
-            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id } }
-          }
+            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id } },
+          },
         ])
         return expect(diff).to.deep.equal([
           {
             d: 'foobar',
-            meta: { start_ts: 5, end_ts: 20, user: { id: this.user_id } }
-          }
+            meta: { start_ts: 5, end_ts: 20, user: { id: this.user_id } },
+          },
         ])
       })
     })
@@ -212,12 +212,12 @@ describe('DiffGenerator', function () {
         const input = [
           {
             d: 'foo',
-            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } }
+            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } },
           },
           {
             d: 'bar',
-            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id_2 } }
-          }
+            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id_2 } },
+          },
         ]
         const output = this.DiffGenerator.compressDiff(input)
         return expect(output).to.deep.equal(input)
@@ -230,34 +230,34 @@ describe('DiffGenerator', function () {
       it('should insert into the middle of (u)nchanged text', function () {
         const diff = this.DiffGenerator.applyUpdateToDiff([{ u: 'foobar' }], {
           op: [{ p: 3, i: 'baz' }],
-          meta: this.meta
+          meta: this.meta,
         })
         return expect(diff).to.deep.equal([
           { u: 'foo' },
           { i: 'baz', meta: this.meta },
-          { u: 'bar' }
+          { u: 'bar' },
         ])
       })
 
       it('should insert into the start of (u)changed text', function () {
         const diff = this.DiffGenerator.applyUpdateToDiff([{ u: 'foobar' }], {
           op: [{ p: 0, i: 'baz' }],
-          meta: this.meta
+          meta: this.meta,
         })
         return expect(diff).to.deep.equal([
           { i: 'baz', meta: this.meta },
-          { u: 'foobar' }
+          { u: 'foobar' },
         ])
       })
 
       it('should insert into the end of (u)changed text', function () {
         const diff = this.DiffGenerator.applyUpdateToDiff([{ u: 'foobar' }], {
           op: [{ p: 6, i: 'baz' }],
-          meta: this.meta
+          meta: this.meta,
         })
         return expect(diff).to.deep.equal([
           { u: 'foobar' },
-          { i: 'baz', meta: this.meta }
+          { i: 'baz', meta: this.meta },
         ])
       })
 
@@ -269,7 +269,7 @@ describe('DiffGenerator', function () {
         return expect(diff).to.deep.equal([
           { i: 'foo', meta: this.meta },
           { i: 'baz', meta: this.meta },
-          { i: 'bar', meta: this.meta }
+          { i: 'bar', meta: this.meta },
         ])
       })
 
@@ -282,7 +282,7 @@ describe('DiffGenerator', function () {
           { d: 'deleted', meta: this.meta },
           { u: 'foo' },
           { i: 'baz', meta: this.meta },
-          { u: 'bar' }
+          { u: 'bar' },
         ])
       })
     })
@@ -297,7 +297,7 @@ describe('DiffGenerator', function () {
           return expect(diff).to.deep.equal([
             { u: 'foo' },
             { d: 'baz', meta: this.meta },
-            { u: 'bar' }
+            { u: 'bar' },
           ])
         })
 
@@ -308,7 +308,7 @@ describe('DiffGenerator', function () {
           )
           return expect(diff).to.deep.equal([
             { d: 'foo', meta: this.meta },
-            { u: 'bazbar' }
+            { u: 'bazbar' },
           ])
         })
 
@@ -319,7 +319,7 @@ describe('DiffGenerator', function () {
           )
           return expect(diff).to.deep.equal([
             { u: 'foobaz' },
-            { d: 'bar', meta: this.meta }
+            { d: 'bar', meta: this.meta },
           ])
         })
 
@@ -333,7 +333,7 @@ describe('DiffGenerator', function () {
             { d: 'o', meta: this.meta },
             { d: 'baz', meta: this.meta },
             { d: 'b', meta: this.meta },
-            { u: 'ar' }
+            { u: 'ar' },
           ])
         })
       })
@@ -346,7 +346,7 @@ describe('DiffGenerator', function () {
           )
           return expect(diff).to.deep.equal([
             { i: 'foo', meta: this.meta },
-            { i: 'bar', meta: this.meta }
+            { i: 'bar', meta: this.meta },
           ])
         })
 
@@ -375,7 +375,7 @@ describe('DiffGenerator', function () {
             { u: 'fo' },
             { d: 'o', meta: this.meta },
             { d: 'b', meta: this.meta },
-            { u: 'ar' }
+            { u: 'ar' },
           ])
         })
       })
@@ -391,7 +391,7 @@ describe('DiffGenerator', function () {
             { d: 'o', meta: this.meta },
             { d: 'baz', meta: this.meta },
             { d: 'b', meta: this.meta },
-            { u: 'ar' }
+            { u: 'ar' },
           ])
         })
       })
@@ -401,7 +401,7 @@ describe('DiffGenerator', function () {
           return expect(() =>
             this.DiffGenerator.applyUpdateToDiff([{ u: 'foobazbar' }], {
               op: [{ p: 3, d: 'xxx' }],
-              meta: this.meta
+              meta: this.meta,
             })
           ).to.throw(this.DiffGenerator.ConsistencyError)
         })
@@ -410,7 +410,7 @@ describe('DiffGenerator', function () {
           return expect(() =>
             this.DiffGenerator.applyUpdateToDiff([{ u: 'foobazbar' }], {
               op: [{ p: 0, d: 'xxx' }],
-              meta: this.meta
+              meta: this.meta,
             })
           ).to.throw(this.DiffGenerator.ConsistencyError)
         })
@@ -419,7 +419,7 @@ describe('DiffGenerator', function () {
           return expect(() =>
             this.DiffGenerator.applyUpdateToDiff([{ u: 'foobazbar' }], {
               op: [{ p: 6, d: 'xxx' }],
-              meta: this.meta
+              meta: this.meta,
             })
           ).to.throw(this.DiffGenerator.ConsistencyError)
         })
@@ -434,7 +434,7 @@ describe('DiffGenerator', function () {
           return expect(diff).to.deep.equal([
             { u: 'foo' },
             { i: 'baz', meta: this.meta },
-            { d: 'bar', meta: this.meta }
+            { d: 'bar', meta: this.meta },
           ])
         })
       })
@@ -447,7 +447,7 @@ describe('DiffGenerator', function () {
           )
           return expect(diff).to.deep.equal([
             { d: 'bar', meta: this.meta },
-            { i: 'baz', meta: this.meta }
+            { i: 'baz', meta: this.meta },
           ])
         })
       })

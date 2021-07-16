@@ -15,7 +15,7 @@
 const app = require('../../../../app')
 const { waitForDb } = require('../../../../app/js/mongodb')
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = {
   running: false,
@@ -38,10 +38,10 @@ module.exports = {
           Settings.internal != null
             ? Settings.internal.trackchanges
             : undefined,
-          (x) => x.port
+          x => x.port
         ),
         'localhost',
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -58,7 +58,7 @@ module.exports = {
         }
       )
     })
-  }
+  },
 }
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

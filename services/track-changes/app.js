@@ -7,7 +7,7 @@
  */
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize('track-changes')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const TrackChangesLogger = logger.initialize('track-changes').logger
 
@@ -16,7 +16,7 @@ if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
 }
 
 // log updates as truncated strings
-const truncateFn = (updates) =>
+const truncateFn = updates =>
   JSON.parse(
     JSON.stringify(updates, function (key, value) {
       let len
@@ -35,7 +35,7 @@ TrackChangesLogger.addSerializers({
   rawUpdate: truncateFn,
   rawUpdates: truncateFn,
   newUpdates: truncateFn,
-  lastUpdate: truncateFn
+  lastUpdate: truncateFn,
 })
 
 const Path = require('path')
@@ -91,7 +91,7 @@ app.post('/pack', function (req, res, next) {
       [
         req.query.limit || 1000,
         req.query.delay || 1000,
-        req.query.timeout || 30 * 60 * 1000
+        req.query.timeout || 30 * 60 * 1000,
       ]
     )
     packWorker.on('exit', function (code, signal) {
@@ -120,12 +120,12 @@ app.use(function (error, req, res, next) {
 const port =
   __guard__(
     Settings.internal != null ? Settings.internal.trackchanges : undefined,
-    (x) => x.port
+    x => x.port
   ) || 3015
 const host =
   __guard__(
     Settings.internal != null ? Settings.internal.trackchanges : undefined,
-    (x1) => x1.host
+    x1 => x1.host
   ) || 'localhost'
 
 if (!module.parent) {
@@ -146,7 +146,7 @@ if (!module.parent) {
         }
       })
     })
-    .catch((err) => {
+    .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
       process.exit(1)
     })

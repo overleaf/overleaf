@@ -21,8 +21,8 @@ describe('DiffManager', function () {
       requires: {
         './UpdatesManager': (this.UpdatesManager = {}),
         './DocumentUpdaterManager': (this.DocumentUpdaterManager = {}),
-        './DiffGenerator': (this.DiffGenerator = {})
-      }
+        './DiffGenerator': (this.DiffGenerator = {}),
+      },
     })
     this.callback = sinon.stub()
     this.from = new Date()
@@ -114,23 +114,23 @@ describe('DiffManager', function () {
         {
           op: 'mock-4',
           v: 42,
-          meta: { start_ts: new Date(this.to.getTime() + 20) }
+          meta: { start_ts: new Date(this.to.getTime() + 20) },
         },
         {
           op: 'mock-3',
           v: 41,
-          meta: { start_ts: new Date(this.to.getTime() + 10) }
+          meta: { start_ts: new Date(this.to.getTime() + 10) },
         },
         {
           op: 'mock-2',
           v: 40,
-          meta: { start_ts: new Date(this.to.getTime() - 10) }
+          meta: { start_ts: new Date(this.to.getTime() - 10) },
         },
         {
           op: 'mock-1',
           v: 39,
-          meta: { start_ts: new Date(this.to.getTime() - 20) }
-        }
+          meta: { start_ts: new Date(this.to.getTime() - 20) },
+        },
       ]
       this.fromVersion = 39
       this.toVersion = 40
@@ -333,23 +333,23 @@ describe('DiffManager', function () {
         {
           op: 'mock-4',
           v: 42,
-          meta: { start_ts: new Date(this.to.getTime() + 20) }
+          meta: { start_ts: new Date(this.to.getTime() + 20) },
         },
         {
           op: 'mock-3',
           v: 41,
-          meta: { start_ts: new Date(this.to.getTime() + 10) }
+          meta: { start_ts: new Date(this.to.getTime() + 10) },
         },
         {
           op: 'mock-2',
           v: 40,
-          meta: { start_ts: new Date(this.to.getTime() - 10) }
+          meta: { start_ts: new Date(this.to.getTime() - 10) },
         },
         {
           op: 'mock-1',
           v: 39,
-          meta: { start_ts: new Date(this.to.getTime() - 20) }
-        }
+          meta: { start_ts: new Date(this.to.getTime() - 20) },
+        },
       ]
       this.fromVersion = 39
       this.rewound_content = 'rewound-content'
@@ -400,7 +400,7 @@ describe('DiffManager', function () {
         this.version = 50
         this.updates = [
           { op: 'mock-1', v: 40 },
-          { op: 'mock-1', v: 39 }
+          { op: 'mock-1', v: 39 },
         ]
         this.DiffManager.getLatestDocAndUpdates = sinon
           .stub()

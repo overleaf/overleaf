@@ -16,7 +16,7 @@ let TrackChangesClient
 const async = require('async')
 const zlib = require('zlib')
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.history
 ) // Only works locally for now
@@ -28,7 +28,7 @@ const s3 = new aws.S3({
   accessKeyId: Settings.trackchanges.s3.key,
   secretAccessKey: Settings.trackchanges.s3.secret,
   endpoint: Settings.trackchanges.s3.endpoint,
-  s3ForcePathStyle: Settings.trackchanges.s3.pathStyle
+  s3ForcePathStyle: Settings.trackchanges.s3.pathStyle,
 })
 const S3_BUCKET = Settings.trackchanges.stores.doc_history
 
@@ -37,7 +37,7 @@ module.exports = TrackChangesClient = {
     if (callback == null) {
       callback = function (error, updates) {}
     }
-    return TrackChangesClient.flushDoc(project_id, doc_id, (error) => {
+    return TrackChangesClient.flushDoc(project_id, doc_id, error => {
       if (error != null) {
         return callback(error)
       }
@@ -51,7 +51,7 @@ module.exports = TrackChangesClient = {
     }
     return request.post(
       {
-        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/flush`
+        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/flush`,
       },
       (error, response, body) => {
         response.statusCode.should.equal(204)
@@ -66,7 +66,7 @@ module.exports = TrackChangesClient = {
     }
     return request.post(
       {
-        url: `http://localhost:3015/project/${project_id}/flush`
+        url: `http://localhost:3015/project/${project_id}/flush`,
       },
       (error, response, body) => {
         response.statusCode.should.equal(204)
@@ -91,7 +91,7 @@ module.exports = TrackChangesClient = {
     }
     return db.projectHistoryMetaData.findOne(
       {
-        project_id: ObjectId(project_id)
+        project_id: ObjectId(project_id),
       },
       callback
     )
@@ -103,13 +103,13 @@ module.exports = TrackChangesClient = {
     }
     return db.projectHistoryMetaData.updateOne(
       {
-        project_id: ObjectId(project_id)
+        project_id: ObjectId(project_id),
       },
       {
-        $set: { preserveHistory: true }
+        $set: { preserveHistory: true },
       },
       {
-        upsert: true
+        upsert: true,
       },
       callback
     )
@@ -122,13 +122,13 @@ module.exports = TrackChangesClient = {
     return rclient.sadd(
       Keys.docsWithHistoryOps({ project_id }),
       doc_id,
-      (error) => {
+      error => {
         if (error != null) {
           return callback(error)
         }
         return rclient.rpush(
           Keys.uncompressedHistoryOps({ doc_id }),
-          ...Array.from(Array.from(updates).map((u) => JSON.stringify(u))),
+          ...Array.from(Array.from(updates).map(u => JSON.stringify(u))),
           callback
         )
       }
@@ -141,7 +141,7 @@ module.exports = TrackChangesClient = {
     }
     return request.get(
       {
-        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/diff?from=${from}&to=${to}`
+        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/diff?from=${from}&to=${to}`,
       },
       (error, response, body) => {
         response.statusCode.should.equal(200)
@@ -156,7 +156,7 @@ module.exports = TrackChangesClient = {
     }
     return request.get(
       {
-        url: `http://localhost:3015/project/${project_id}/updates?before=${options.before}&min_count=${options.min_count}`
+        url: `http://localhost:3015/project/${project_id}/updates?before=${options.before}&min_count=${options.min_count}`,
       },
       (error, response, body) => {
         response.statusCode.should.equal(200)
@@ -184,8 +184,8 @@ module.exports = TrackChangesClient = {
       {
         url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/version/${version}/restore`,
         headers: {
-          'X-User-Id': user_id
-        }
+          'X-User-Id': user_id,
+        },
       },
       (error, response, body) => {
         response.statusCode.should.equal(204)
@@ -200,7 +200,7 @@ module.exports = TrackChangesClient = {
     }
     return request.post(
       {
-        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/push`
+        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/push`,
       },
       (error, response, body) => {
         response.statusCode.should.equal(204)
@@ -215,7 +215,7 @@ module.exports = TrackChangesClient = {
     }
     return request.post(
       {
-        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/pull`
+        url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/pull`,
       },
       (error, response, body) => {
         response.statusCode.should.equal(204)
@@ -254,7 +254,7 @@ module.exports = TrackChangesClient = {
     }
     const params = {
       Bucket: S3_BUCKET,
-      Key: `${project_id}/changes-${doc_id}/pack-${pack_id}`
+      Key: `${project_id}/changes-${doc_id}/pack-${pack_id}`,
     }
 
     return s3.getObject(params, (error, data) => {
@@ -280,7 +280,7 @@ module.exports = TrackChangesClient = {
     }
     let params = {
       Bucket: S3_BUCKET,
-      Prefix: `${project_id}/changes-${doc_id}`
+      Prefix: `${project_id}/changes-${doc_id}`,
     }
 
     return s3.listObjects(params, (error, data) => {
@@ -291,11 +291,11 @@ module.exports = TrackChangesClient = {
       params = {
         Bucket: S3_BUCKET,
         Delete: {
-          Objects: data.Contents.map((s3object) => ({ Key: s3object.Key }))
-        }
+          Objects: data.Contents.map(s3object => ({ Key: s3object.Key })),
+        },
       }
 
       return s3.deleteObjects(params, callback)
     })
-  }
+  },
 }

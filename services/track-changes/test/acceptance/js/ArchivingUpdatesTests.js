@@ -17,7 +17,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const { db, ObjectId } = require('../../../app/js/mongodb')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const request = require('request')
 const rclient = require('redis').createClient(Settings.redis.history) // Only works locally for now
 
@@ -32,9 +32,9 @@ describe('Archiving updates', function () {
       __guard__(
         __guard__(
           Settings != null ? Settings.trackchanges : undefined,
-          (x1) => x1.s3
+          x1 => x1.s3
         ),
-        (x) => x.key.length
+        x => x.key.length
       ) < 1
     ) {
       const message = new Error('s3 keys not setup, this test setup will fail')
@@ -57,8 +57,8 @@ describe('Archiving updates', function () {
 
     MockWebApi.projects[this.project_id] = {
       features: {
-        versioning: true
-      }
+        versioning: true,
+      },
     }
     sinon.spy(MockWebApi, 'getProjectDetails')
 
@@ -66,13 +66,13 @@ describe('Archiving updates', function () {
       email: 'user@sharelatex.com',
       first_name: 'Leo',
       last_name: 'Lion',
-      id: this.user_id
+      id: this.user_id,
     }
     sinon.spy(MockWebApi, 'getUserInfo')
 
     MockDocStoreApi.docs[this.doc_id] = this.doc = {
       _id: this.doc_id,
-      project_id: this.project_id
+      project_id: this.project_id,
     }
     sinon.spy(MockDocStoreApi, 'getAllDoc')
 
@@ -85,15 +85,15 @@ describe('Archiving updates', function () {
       this.updates.push({
         op: [{ i: 'a', p: 0 }],
         meta: { ts: this.now + (i - 2048) * this.hours, user_id: this.user_id },
-        v: 2 * i + 1
+        v: 2 * i + 1,
       })
       this.updates.push({
         op: [{ i: 'b', p: 0 }],
         meta: {
           ts: this.now + (i - 2048) * this.hours + 10 * this.minutes,
-          user_id: this.user_id_2
+          user_id: this.user_id_2,
         },
-        v: 2 * i + 2
+        v: 2 * i + 2,
       })
     }
     TrackChangesApp.ensureRunning(() => {
@@ -101,14 +101,14 @@ describe('Archiving updates', function () {
         this.project_id,
         this.doc_id,
         this.updates,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
           return TrackChangesClient.flushDoc(
             this.project_id,
             this.doc_id,
-            (error) => {
+            error => {
               if (error != null) {
                 throw error
               }
@@ -163,7 +163,7 @@ describe('Archiving updates', function () {
         const expectedExportedUpdates = this.updates
           .slice()
           .reverse()
-          .map((update) => {
+          .map(update => {
             // clone object, updates are created once in before handler
             const exportedUpdate = Object.assign({}, update)
             exportedUpdate.meta = Object.assign({}, update.meta)
@@ -180,7 +180,7 @@ describe('Archiving updates', function () {
         expect(this.exportedUpdates).to.deep.equal(expectedExportedUpdates)
         expect(this.exportedUserIds).to.deep.equal([
           this.user_id,
-          this.user_id_2
+          this.user_id_2,
         ])
       })
     })
@@ -192,16 +192,12 @@ describe('Archiving updates', function () {
 
   describe("archiving a doc's updates", function () {
     before(function (done) {
-      TrackChangesClient.pushDocHistory(
-        this.project_id,
-        this.doc_id,
-        (error) => {
-          if (error != null) {
-            throw error
-          }
-          return done()
+      TrackChangesClient.pushDocHistory(this.project_id, this.doc_id, error => {
+        if (error != null) {
+          throw error
         }
-      )
+        return done()
+      })
       return null
     })
 
@@ -222,7 +218,7 @@ describe('Archiving updates', function () {
       return db.docHistory.deleteMany(
         {
           doc_id: ObjectId(this.doc_id),
-          expiresAt: { $exists: true }
+          expiresAt: { $exists: true },
         },
         (err, result) => {
           if (typeof error !== 'undefined' && error !== null) {
@@ -295,16 +291,12 @@ describe('Archiving updates', function () {
 
   return describe("unarchiving a doc's updates", function () {
     before(function (done) {
-      TrackChangesClient.pullDocHistory(
-        this.project_id,
-        this.doc_id,
-        (error) => {
-          if (error != null) {
-            throw error
-          }
-          return done()
+      TrackChangesClient.pullDocHistory(this.project_id, this.doc_id, error => {
+        if (error != null) {
+          throw error
         }
-      )
+        return done()
+      })
       return null
     })
 

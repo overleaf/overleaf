@@ -24,18 +24,18 @@ describe('LockManager', function () {
   beforeEach(function () {
     this.Settings = {
       redis: {
-        lock: {}
-      }
+        lock: {},
+      },
     }
     this.LockManager = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/redis-wrapper': {
           createClient: () => {
             return (this.rclient = { auth: sinon.stub() })
-          }
+          },
         },
-        'settings-sharelatex': this.Settings
-      }
+        '@overleaf/settings': this.Settings,
+      },
     })
 
     this.key = 'lock-key'
@@ -240,7 +240,7 @@ describe('LockManager', function () {
     describe('when the runner function returns an error', function () {
       beforeEach(function () {
         this.error = new Error('oops')
-        this.runner = (releaseLock) => {
+        this.runner = releaseLock => {
           if (releaseLock == null) {
             releaseLock = function (error) {}
           }

@@ -21,16 +21,16 @@ describe('MongoAWS', function () {
     this.MongoAWS = SandboxedModule.require(modulePath, {
       singleOnly: true,
       requires: {
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           trackchanges: {
             s3: {
               secret: 's3-secret',
-              key: 's3-key'
+              key: 's3-key',
             },
             stores: {
-              doc_history: 's3-bucket'
-            }
-          }
+              doc_history: 's3-bucket',
+            },
+          },
         }),
         child_process: (this.child_process = {}),
         'mongo-uri': (this.mongouri = {}),
@@ -40,8 +40,8 @@ describe('MongoAWS', function () {
         './mongodb': { db: (this.db = {}), ObjectId },
         JSONStream: (this.JSONStream = {}),
         'readline-stream': (this.readline = sinon.stub()),
-        '@overleaf/metrics': { inc() {} }
-      }
+        '@overleaf/metrics': { inc() {} },
+      },
     })
 
     this.project_id = ObjectId().toString()

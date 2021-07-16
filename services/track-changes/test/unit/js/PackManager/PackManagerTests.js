@@ -30,10 +30,10 @@ describe('PackManager', function () {
         './MongoAWS': {},
         '@overleaf/metrics': { inc() {} },
         './ProjectIterator': require('../../../../app/js/ProjectIterator.js'), // Cache for speed
-        'settings-sharelatex': {
-          redis: { lock: { key_schema: {} } }
-        }
-      }
+        '@overleaf/settings': {
+          redis: { lock: { key_schema: {} } },
+        },
+      },
     })
     this.callback = sinon.stub()
     this.doc_id = ObjectId().toString()
@@ -51,20 +51,20 @@ describe('PackManager', function () {
         _id: '12345',
         pack: [
           { op: 'op-1', meta: 'meta-1', v: 1 },
-          { op: 'op-2', meta: 'meta-2', v: 2 }
+          { op: 'op-2', meta: 'meta-2', v: 2 },
         ],
         n: 2,
-        sz: 100
+        sz: 100,
       }
       this.newUpdates = [
         { op: 'op-3', meta: 'meta-3', v: 3 },
-        { op: 'op-4', meta: 'meta-4', v: 4 }
+        { op: 'op-4', meta: 'meta-4', v: 4 },
       ]
       return (this.db.docHistory = {
         insertOne: sinon.stub().yields(),
         insert: sinon.stub().callsArg(1),
         updateOne: sinon.stub().yields(),
-        findAndModify: sinon.stub().callsArg(1)
+        findAndModify: sinon.stub().callsArg(1),
       })
     })
 
@@ -95,10 +95,10 @@ describe('PackManager', function () {
 
       return describe('for many small updates', function () {
         beforeEach(function () {
-          this.newUpdates = __range__(0, 2048, true).map((i) => ({
+          this.newUpdates = __range__(0, 2048, true).map(i => ({
             op: `op-${i}`,
             meta: `meta-${i}`,
-            v: i
+            v: i,
           }))
           return this.PackManager.insertCompressedUpdates(
             this.project_id,
@@ -209,10 +209,10 @@ describe('PackManager', function () {
 
       describe('for many small updates', function () {
         beforeEach(function () {
-          this.newUpdates = __range__(0, 2048, true).map((i) => ({
+          this.newUpdates = __range__(0, 2048, true).map(i => ({
             op: `op-${i}`,
             meta: `meta-${i}`,
-            v: i
+            v: i,
           }))
           return this.PackManager.insertCompressedUpdates(
             this.project_id,
@@ -292,12 +292,12 @@ describe('PackManager', function () {
             0.75 * this.PackManager.MAX_SIZE,
             true
           )
-            .map((j) => 'a')
+            .map(j => 'a')
             .join('')
-          this.newUpdates = [0, 1, 2, 3, 4].map((i) => ({
+          this.newUpdates = [0, 1, 2, 3, 4].map(i => ({
             op: `op-${i}-${longString}`,
             meta: `meta-${i}`,
-            v: i
+            v: i,
           }))
           return this.PackManager.insertCompressedUpdates(
             this.project_id,
@@ -393,7 +393,7 @@ describe('PackManager', function () {
                 doc_id: ObjectId(this.doc_id),
                 n: this.newUpdates.length,
                 v: this.newUpdates[0].v,
-                v_end: this.newUpdates[this.newUpdates.length - 1].v
+                v_end: this.newUpdates[this.newUpdates.length - 1].v,
               })
               .should.equal(true)
           })
@@ -401,7 +401,7 @@ describe('PackManager', function () {
           it('should set an expiry time in the future', function () {
             return this.db.docHistory.insertOne
               .calledWithMatch({
-                expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000)
+                expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000),
               })
               .should.equal(true)
           })
@@ -419,12 +419,12 @@ describe('PackManager', function () {
           _id: '12345',
           pack: [
             { op: 'op-1', meta: 'meta-1', v: 1 },
-            { op: 'op-2', meta: 'meta-2', v: 2 }
+            { op: 'op-2', meta: 'meta-2', v: 2 },
           ],
           n: 2,
           sz: 100,
           meta: { start_ts: Date.now() - 6 * 3600 * 1000 },
-          expiresAt: new Date(Date.now())
+          expiresAt: new Date(Date.now()),
         }
 
         return this.PackManager.flushCompressedUpdates(
@@ -444,7 +444,7 @@ describe('PackManager', function () {
               { _id: this.lastUpdate._id },
               {
                 $push: { pack: { $each: this.newUpdates } },
-                $set: { v_end: this.newUpdates[this.newUpdates.length - 1].v }
+                $set: { v_end: this.newUpdates[this.newUpdates.length - 1].v },
               }
             )
             .should.equal(true)
@@ -453,7 +453,7 @@ describe('PackManager', function () {
         it('should set an expiry time in the future', function () {
           return this.db.docHistory.updateOne
             .calledWithMatch(sinon.match.any, {
-              $set: { expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000) }
+              $set: { expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000) },
             })
             .should.equal(true)
         })
@@ -472,12 +472,12 @@ describe('PackManager', function () {
           _id: '12345',
           pack: [
             { op: 'op-1', meta: 'meta-1', v: 1 },
-            { op: 'op-2', meta: 'meta-2', v: 2 }
+            { op: 'op-2', meta: 'meta-2', v: 2 },
           ],
           n: 2,
           sz: 100,
           meta: { start_ts: Date.now() - 6 * 3600 * 1000 },
-          expiresAt: new Date(Date.now())
+          expiresAt: new Date(Date.now()),
         }
 
         return this.PackManager.flushCompressedUpdates(
@@ -499,7 +499,7 @@ describe('PackManager', function () {
               doc_id: ObjectId(this.doc_id),
               n: this.newUpdates.length,
               v: this.newUpdates[0].v,
-              v_end: this.newUpdates[this.newUpdates.length - 1].v
+              v_end: this.newUpdates[this.newUpdates.length - 1].v,
             })
             .should.equal(true)
         })
@@ -522,12 +522,12 @@ describe('PackManager', function () {
           _id: '12345',
           pack: [
             { op: 'op-1', meta: 'meta-1', v: 1 },
-            { op: 'op-2', meta: 'meta-2', v: 2 }
+            { op: 'op-2', meta: 'meta-2', v: 2 },
           ],
           n: 2,
           sz: 100,
           meta: { start_ts: Date.now() - 30 * 24 * 3600 * 1000 },
-          expiresAt: new Date(Date.now() - 30 * 24 * 3600 * 1000)
+          expiresAt: new Date(Date.now() - 30 * 24 * 3600 * 1000),
         }
 
         return this.PackManager.flushCompressedUpdates(
@@ -549,7 +549,7 @@ describe('PackManager', function () {
               doc_id: ObjectId(this.doc_id),
               n: this.newUpdates.length,
               v: this.newUpdates[0].v,
-              v_end: this.newUpdates[this.newUpdates.length - 1].v
+              v_end: this.newUpdates[this.newUpdates.length - 1].v,
             })
             .should.equal(true)
         })
@@ -557,7 +557,7 @@ describe('PackManager', function () {
         it('should set an expiry time in the future', function () {
           return this.db.docHistory.insertOne
             .calledWithMatch({
-              expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000)
+              expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000),
             })
             .should.equal(true)
         })
@@ -602,7 +602,7 @@ describe('PackManager', function () {
     describe('when an archive is in progress', function () {
       beforeEach(function () {
         this.db.docHistoryIndex = {
-          findOne: sinon.stub().callsArgWith(2, null, { inS3: false })
+          findOne: sinon.stub().callsArgWith(2, null, { inS3: false }),
         }
         return this.PackManager.checkArchiveNotInProgress(
           this.project_id,
@@ -624,7 +624,7 @@ describe('PackManager', function () {
     describe('when an archive is completed', function () {
       beforeEach(function () {
         this.db.docHistoryIndex = {
-          findOne: sinon.stub().callsArgWith(2, null, { inS3: true })
+          findOne: sinon.stub().callsArgWith(2, null, { inS3: true }),
         }
         return this.PackManager.checkArchiveNotInProgress(
           this.project_id,
@@ -646,7 +646,7 @@ describe('PackManager', function () {
     return describe('when the archive has not started or completed', function () {
       beforeEach(function () {
         this.db.docHistoryIndex = {
-          findOne: sinon.stub().callsArgWith(2, null, {})
+          findOne: sinon.stub().callsArgWith(2, null, {}),
         }
         return this.PackManager.checkArchiveNotInProgress(
           this.project_id,

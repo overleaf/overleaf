@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let LockManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(Settings.redis.lock)
 const os = require('os')
@@ -43,19 +43,23 @@ module.exports = LockManager = {
       callback = function (err, gotLock) {}
     }
     const lockValue = LockManager.randomLock()
-    return rclient.set(key, lockValue, 'EX', this.LOCK_TTL, 'NX', function (
-      err,
-      gotLock
-    ) {
-      if (err != null) {
-        return callback(err)
+    return rclient.set(
+      key,
+      lockValue,
+      'EX',
+      this.LOCK_TTL,
+      'NX',
+      function (err, gotLock) {
+        if (err != null) {
+          return callback(err)
+        }
+        if (gotLock === 'OK') {
+          return callback(err, true, lockValue)
+        } else {
+          return callback(err, false)
+        }
       }
-      if (gotLock === 'OK') {
-        return callback(err, true, lockValue)
-      } else {
-        return callback(err, false)
-      }
-    })
+    )
   },
 
   getLock(key, callback) {
@@ -102,23 +106,26 @@ module.exports = LockManager = {
   },
 
   releaseLock(key, lockValue, callback) {
-    return rclient.eval(LockManager.unlockScript, 1, key, lockValue, function (
-      err,
-      result
-    ) {
-      if (err != null) {
-        return callback(err)
+    return rclient.eval(
+      LockManager.unlockScript,
+      1,
+      key,
+      lockValue,
+      function (err, result) {
+        if (err != null) {
+          return callback(err)
+        }
+        if (result != null && result !== 1) {
+          // successful unlock should release exactly one key
+          logger.error(
+            { key, lockValue, redis_err: err, redis_result: result },
+            'unlocking error'
+          )
+          return callback(new Error('tried to release timed out lock'))
+        }
+        return callback(err, result)
       }
-      if (result != null && result !== 1) {
-        // successful unlock should release exactly one key
-        logger.error(
-          { key, lockValue, redis_err: err, redis_result: result },
-          'unlocking error'
-        )
-        return callback(new Error('tried to release timed out lock'))
-      }
-      return callback(err, result)
-    })
+    )
   },
 
   runWithLock(key, runner, callback) {
@@ -129,7 +136,7 @@ module.exports = LockManager = {
       if (error != null) {
         return callback(error)
       }
-      return runner((error1) =>
+      return runner(error1 =>
         LockManager.releaseLock(key, lockValue, function (error2) {
           error = error1 || error2
           if (error != null) {
@@ -142,7 +149,7 @@ module.exports = LockManager = {
   },
 
   healthCheck(callback) {
-    const action = (releaseLock) => releaseLock()
+    const action = releaseLock => releaseLock()
     return LockManager.runWithLock(
       `HistoryLock:HealthCheck:host=${HOST}:pid=${PID}:random=${RND}`,
       action,
@@ -153,5 +160,5 @@ module.exports = LockManager = {
   close(callback) {
     rclient.quit()
     return rclient.once('end', callback)
-  }
+  },
 }

@@ -14,7 +14,7 @@
 let DocumentUpdaterManager
 const request = require('request')
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 module.exports = DocumentUpdaterManager = {
   getDocument(project_id, doc_id, callback) {
@@ -65,8 +65,8 @@ module.exports = DocumentUpdaterManager = {
           lines: content.split('\n'),
           source: 'restore',
           user_id,
-          undoing: true
-        }
+          undoing: true,
+        },
       },
       function (error, res, body) {
         if (error != null) {
@@ -86,5 +86,5 @@ module.exports = DocumentUpdaterManager = {
         }
       }
     )
-  }
+  },
 }
