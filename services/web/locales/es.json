@@ -307,7 +307,7 @@
   "disconnected": "Desconectado",
   "please_refresh": "Por favor actualiza la página para continuar.",
   "lost_connection": "Conexión perdida",
-  "reconnecting_in_x_secs": "Volviendo a coectar en __seconds__ segundos",
+  "reconnecting_in_x_secs": "Volviendo a conectar en __seconds__ segundos",
   "try_now": "Intenta ahora",
   "reconnecting": "Volviendo a conectar",
   "saving_notification_with_seconds": "Guardando __docname__... (__seconds__ segundos de cambios no guardados)",
