@@ -14,7 +14,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const async = require('async')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const rclient_history = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.history
 ) // note: this is track changes, not project-history
@@ -42,10 +42,10 @@ describe('Applying updates to a doc', function () {
       op: [
         {
           i: 'one and a half\n',
-          p: 4
-        }
+          p: 4,
+        },
       ],
-      v: this.version
+      v: this.version,
     }
     this.result = ['one', 'one and a half', 'two', 'three']
     return DocUpdaterApp.ensureRunning(done)
@@ -55,19 +55,19 @@ describe('Applying updates to a doc', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       sinon.spy(MockWebApi, 'getDocument')
       this.startTime = Date.now()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
       DocUpdaterClient.sendUpdate(
         this.project_id,
         this.doc_id,
         this.update,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -144,12 +144,13 @@ describe('Applying updates to a doc', function () {
     it('should set the first op timestamp', function (done) {
       rclient_project_history.get(
         ProjectHistoryKeys.projectHistoryFirstOpTimestamp({
-          project_id: this.project_id
+          project_id: this.project_id,
         }),
         (error, result) => {
           if (error != null) {
             throw error
           }
+          result = parseInt(result, 10)
           result.should.be.within(this.startTime, Date.now())
           this.firstOpTimestamp = result
           return done()
@@ -167,7 +168,7 @@ describe('Applying updates to a doc', function () {
           this.project_id,
           this.doc_id,
           this.second_update,
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }
@@ -180,12 +181,13 @@ describe('Applying updates to a doc', function () {
       return it('should not change the first op timestamp', function (done) {
         rclient_project_history.get(
           ProjectHistoryKeys.projectHistoryFirstOpTimestamp({
-            project_id: this.project_id
+            project_id: this.project_id,
           }),
           (error, result) => {
             if (error != null) {
               throw error
             }
+            result = parseInt(result, 10)
             result.should.equal(this.firstOpTimestamp)
             return done()
           }
@@ -199,14 +201,14 @@ describe('Applying updates to a doc', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
-      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, (error) => {
+      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
         if (error != null) {
           throw error
         }
@@ -215,7 +217,7 @@ describe('Applying updates to a doc', function () {
           this.project_id,
           this.doc_id,
           this.update,
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }
@@ -284,15 +286,15 @@ describe('Applying updates to a doc', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
         version: this.version,
-        projectHistoryType: 'project-history'
+        projectHistoryType: 'project-history',
       })
-      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, (error) => {
+      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
         if (error != null) {
           throw error
         }
@@ -301,7 +303,7 @@ describe('Applying updates to a doc', function () {
           this.project_id,
           this.doc_id,
           this.update,
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }
@@ -360,12 +362,12 @@ describe('Applying updates to a doc', function () {
       before(function (done) {
         ;[this.project_id, this.doc_id] = Array.from([
           DocUpdaterClient.randomId(),
-          DocUpdaterClient.randomId()
+          DocUpdaterClient.randomId(),
         ])
         const lines = ['', '', '']
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines,
-          version: 0
+          version: 0,
         })
         this.updates = [
           { doc_id: this.doc_id, v: 0, op: [{ i: 'h', p: 0 }] },
@@ -378,7 +380,7 @@ describe('Applying updates to a doc', function () {
           { doc_id: this.doc_id, v: 7, op: [{ i: 'o', p: 7 }] },
           { doc_id: this.doc_id, v: 8, op: [{ i: 'r', p: 8 }] },
           { doc_id: this.doc_id, v: 9, op: [{ i: 'l', p: 9 }] },
-          { doc_id: this.doc_id, v: 10, op: [{ i: 'd', p: 10 }] }
+          { doc_id: this.doc_id, v: 10, op: [{ i: 'd', p: 10 }] },
         ]
         this.my_result = ['hello world', '', '']
         return done()
@@ -388,8 +390,8 @@ describe('Applying updates to a doc', function () {
         let update
         const actions = []
         for (update of Array.from(this.updates.slice(0, 6))) {
-          ;((update) => {
-            return actions.push((callback) =>
+          ;(update => {
+            return actions.push(callback =>
               DocUpdaterClient.sendUpdate(
                 this.project_id,
                 this.doc_id,
@@ -399,12 +401,12 @@ describe('Applying updates to a doc', function () {
             )
           })(update)
         }
-        actions.push((callback) =>
+        actions.push(callback =>
           DocUpdaterClient.deleteDoc(this.project_id, this.doc_id, callback)
         )
         for (update of Array.from(this.updates.slice(6))) {
-          ;((update) => {
-            return actions.push((callback) =>
+          ;(update => {
+            return actions.push(callback =>
               DocUpdaterClient.sendUpdate(
                 this.project_id,
                 this.doc_id,
@@ -415,7 +417,7 @@ describe('Applying updates to a doc', function () {
           })(update)
         }
 
-        async.series(actions, (error) => {
+        async.series(actions, error => {
           if (error != null) {
             throw error
           }
@@ -437,7 +439,7 @@ describe('Applying updates to a doc', function () {
           0,
           -1,
           (error, updates) => {
-            updates = Array.from(updates).map((u) => JSON.parse(u))
+            updates = Array.from(updates).map(u => JSON.parse(u))
             for (let i = 0; i < this.updates.length; i++) {
               const appliedUpdate = this.updates[i]
               appliedUpdate.op.should.deep.equal(updates[i].op)
@@ -462,7 +464,7 @@ describe('Applying updates to a doc', function () {
           0,
           -1,
           (error, updates) => {
-            updates = Array.from(updates).map((u) => JSON.parse(u))
+            updates = Array.from(updates).map(u => JSON.parse(u))
             for (let i = 0; i < this.updates.length; i++) {
               const appliedUpdate = this.updates[i]
               appliedUpdate.op.should.deep.equal(updates[i].op)
@@ -478,12 +480,12 @@ describe('Applying updates to a doc', function () {
       before(function (done) {
         ;[this.project_id, this.doc_id] = Array.from([
           DocUpdaterClient.randomId(),
-          DocUpdaterClient.randomId()
+          DocUpdaterClient.randomId(),
         ])
         const lines = ['', '', '']
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines,
-          version: 0
+          version: 0,
         })
         this.updates = [
           { doc_id: this.doc_id, v: 0, op: [{ i: 'h', p: 0 }] },
@@ -491,7 +493,7 @@ describe('Applying updates to a doc', function () {
           { doc_id: this.doc_id, v: 2, op: [{ i: 'l', p: 2 }] },
           { doc_id: this.doc_id, v: 3, op: [{ i: 'l', p: 3 }] },
           { doc_id: this.doc_id, v: 4, op: [{ i: 'o', p: 4 }] },
-          { doc_id: this.doc_id, v: 0, op: [{ i: 'world', p: 1 }] }
+          { doc_id: this.doc_id, v: 0, op: [{ i: 'world', p: 1 }] },
         ]
         this.my_result = ['hello', 'world', '']
         return done()
@@ -501,8 +503,8 @@ describe('Applying updates to a doc', function () {
         let update
         const actions = []
         for (update of Array.from(this.updates.slice(0, 5))) {
-          ;((update) => {
-            return actions.push((callback) =>
+          ;(update => {
+            return actions.push(callback =>
               DocUpdaterClient.sendUpdate(
                 this.project_id,
                 this.doc_id,
@@ -512,12 +514,12 @@ describe('Applying updates to a doc', function () {
             )
           })(update)
         }
-        actions.push((callback) =>
+        actions.push(callback =>
           DocUpdaterClient.deleteDoc(this.project_id, this.doc_id, callback)
         )
         for (update of Array.from(this.updates.slice(5))) {
-          ;((update) => {
-            return actions.push((callback) =>
+          ;(update => {
+            return actions.push(callback =>
               DocUpdaterClient.sendUpdate(
                 this.project_id,
                 this.doc_id,
@@ -528,7 +530,7 @@ describe('Applying updates to a doc', function () {
           })(update)
         }
 
-        async.series(actions, (error) => {
+        async.series(actions, error => {
           if (error != null) {
             throw error
           }
@@ -550,16 +552,16 @@ describe('Applying updates to a doc', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       this.broken_update = {
         doc_id: this.doc_id,
         v: this.version,
-        op: [{ d: 'not the correct content', p: 0 }]
+        op: [{ d: 'not the correct content', p: 0 }],
       }
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
 
       DocUpdaterClient.subscribeToAppliedOps(
@@ -570,7 +572,7 @@ describe('Applying updates to a doc', function () {
         this.project_id,
         this.doc_id,
         this.broken_update,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -599,7 +601,7 @@ describe('Applying updates to a doc', function () {
       return JSON.parse(message).should.deep.include({
         project_id: this.project_id,
         doc_id: this.doc_id,
-        error: 'Delete component does not match'
+        error: 'Delete component does not match',
       })
     })
   })
@@ -608,7 +610,7 @@ describe('Applying updates to a doc', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       const updates = []
       for (let v = 0; v <= 199; v++) {
@@ -616,7 +618,7 @@ describe('Applying updates to a doc', function () {
         updates.push({
           doc_id: this.doc_id,
           op: [{ i: v.toString(), p: 0 }],
-          v
+          v,
         })
       }
 
@@ -624,14 +626,14 @@ describe('Applying updates to a doc', function () {
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: 0
+        version: 0,
       })
 
       // Send updates in chunks to causes multiple flushes
       const actions = []
       for (let i = 0; i <= 19; i++) {
-        ;((i) => {
-          return actions.push((cb) => {
+        ;(i => {
+          return actions.push(cb => {
             return DocUpdaterClient.sendUpdates(
               this.project_id,
               this.doc_id,
@@ -641,7 +643,7 @@ describe('Applying updates to a doc', function () {
           })
         })(i)
       }
-      async.series(actions, (error) => {
+      async.series(actions, error => {
         if (error != null) {
           throw error
         }
@@ -663,22 +665,22 @@ describe('Applying updates to a doc', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
-        lines: this.lines
+        lines: this.lines,
       })
 
       const update = {
         doc: this.doc_id,
         op: this.update.op,
-        v: 0
+        v: 0,
       }
       DocUpdaterClient.sendUpdate(
         this.project_id,
         this.doc_id,
         update,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -705,11 +707,11 @@ describe('Applying updates to a doc', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
 
       DocUpdaterClient.subscribeToAppliedOps(
@@ -725,15 +727,15 @@ describe('Applying updates to a doc', function () {
           op: [
             {
               i: 'one and a half\n',
-              p: 4
-            }
+              p: 4,
+            },
           ],
           v: this.version,
           meta: {
-            source: 'ikHceq3yfAdQYzBo4-xZ'
-          }
+            source: 'ikHceq3yfAdQYzBo4-xZ',
+          },
         },
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -746,16 +748,16 @@ describe('Applying updates to a doc', function () {
                 op: [
                   {
                     i: 'one and a half\n',
-                    p: 4
-                  }
+                    p: 4,
+                  },
                 ],
                 v: this.version,
                 dupIfSource: ['ikHceq3yfAdQYzBo4-xZ'],
                 meta: {
-                  source: 'ikHceq3yfAdQYzBo4-xZ'
-                }
+                  source: 'ikHceq3yfAdQYzBo4-xZ',
+                },
               },
-              (error) => {
+              error => {
                 if (error != null) {
                   throw error
                 }
@@ -795,12 +797,12 @@ describe('Applying updates to a doc', function () {
     before(function (done) {
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
       this.non_existing = {
         doc_id: this.doc_id,
         v: this.version,
-        op: [{ d: 'content', p: 0 }]
+        op: [{ d: 'content', p: 0 }],
       }
 
       DocUpdaterClient.subscribeToAppliedOps(
@@ -811,7 +813,7 @@ describe('Applying updates to a doc', function () {
         this.project_id,
         this.doc_id,
         this.non_existing,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -840,7 +842,7 @@ describe('Applying updates to a doc', function () {
       return JSON.parse(message).should.deep.include({
         project_id: this.project_id,
         doc_id: this.doc_id,
-        error: `doc not not found: /project/${this.project_id}/doc/${this.doc_id}`
+        error: `doc not not found: /project/${this.project_id}/doc/${this.doc_id}`,
       })
     })
   })

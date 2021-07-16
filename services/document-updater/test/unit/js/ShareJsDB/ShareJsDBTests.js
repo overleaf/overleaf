@@ -25,8 +25,8 @@ describe('ShareJsDB', function () {
     this.ShareJsDB = SandboxedModule.require(modulePath, {
       requires: {
         './RedisManager': (this.RedisManager = {}),
-        './Errors': Errors
-      }
+        './Errors': Errors,
+      },
     })
 
     this.version = 42
@@ -130,14 +130,14 @@ describe('ShareJsDB', function () {
         this.opData = {
           op: { p: 20, t: 'foo' },
           meta: { source: 'bar' },
-          v: this.version
+          v: this.version,
         }
         return this.db.writeOp(this.doc_key, this.opData, this.callback)
       })
 
       it('should write into appliedOps', function () {
         return expect(this.db.appliedOps[this.doc_key]).to.deep.equal([
-          this.opData
+          this.opData,
         ])
       })
 

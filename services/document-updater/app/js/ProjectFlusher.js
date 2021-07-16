@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const RedisManager = require('./RedisManager')
 const { rclient } = RedisManager
 const docUpdaterKeys = Settings.redis.documentupdater.key_schema
@@ -45,27 +45,31 @@ var ProjectFlusher = {
     var doIteration = (
       cb // avoid hitting redis too hard
     ) =>
-      node.scan(cursor, 'MATCH', pattern, 'COUNT', batchSize, function (
-        error,
-        reply
-      ) {
-        let keys
-        if (error != null) {
-          return callback(error)
+      node.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        batchSize,
+        function (error, reply) {
+          let keys
+          if (error != null) {
+            return callback(error)
+          }
+          ;[cursor, keys] = Array.from(reply)
+          for (const key of Array.from(keys)) {
+            keySet[key] = true
+          }
+          keys = Object.keys(keySet)
+          const noResults = cursor === '0' // redis returns string results not numeric
+          const limitReached = limit != null && keys.length >= limit
+          if (noResults || limitReached) {
+            return callback(null, keys)
+          } else {
+            return setTimeout(doIteration, 10)
+          }
         }
-        ;[cursor, keys] = Array.from(reply)
-        for (const key of Array.from(keys)) {
-          keySet[key] = true
-        }
-        keys = Object.keys(keySet)
-        const noResults = cursor === '0' // redis returns string results not numeric
-        const limitReached = limit != null && keys.length >= limit
-        if (noResults || limitReached) {
-          return callback(null, keys)
-        } else {
-          return setTimeout(doIteration, 10)
-        }
-      })
+      )
     return doIteration()
   },
 
@@ -97,12 +101,14 @@ var ProjectFlusher = {
         if (options.dryRun) {
           return callback(null, project_ids)
         }
-        const jobs = _.map(project_ids, (project_id) => (cb) =>
-          ProjectManager.flushAndDeleteProjectWithLocks(
-            project_id,
-            { background: true },
-            cb
-          )
+        const jobs = _.map(
+          project_ids,
+          project_id => cb =>
+            ProjectManager.flushAndDeleteProjectWithLocks(
+              project_id,
+              { background: true },
+              cb
+            )
         )
         return async.parallelLimit(
           async.reflectAll(jobs),
@@ -123,7 +129,7 @@ var ProjectFlusher = {
         )
       }
     )
-  }
+  },
 }
 
 module.exports = ProjectFlusher

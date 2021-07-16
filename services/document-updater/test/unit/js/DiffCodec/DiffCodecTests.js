@@ -32,8 +32,8 @@ describe('DiffCodec', function () {
           expect(ops).to.deep.equal([
             {
               i: 'beautiful ',
-              p: 6
-            }
+              p: 6,
+            },
           ])
           return done()
         }
@@ -49,7 +49,7 @@ describe('DiffCodec', function () {
         (error, ops) => {
           expect(ops).to.deep.equal([
             { i: 'tall ', p: 4 },
-            { i: 'red ', p: 29 }
+            { i: 'red ', p: 29 },
           ])
           return done()
         }
@@ -66,8 +66,8 @@ describe('DiffCodec', function () {
           expect(ops).to.deep.equal([
             {
               d: 'beautiful ',
-              p: 6
-            }
+              p: 6,
+            },
           ])
           return done()
         }
@@ -83,7 +83,7 @@ describe('DiffCodec', function () {
         (error, ops) => {
           expect(ops).to.deep.equal([
             { d: 'tall ', p: 4 },
-            { d: 'red ', p: 24 }
+            { d: 'red ', p: 24 },
           ])
           return done()
         }

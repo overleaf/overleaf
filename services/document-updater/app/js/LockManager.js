@@ -13,7 +13,7 @@
  */
 let LockManager
 const metrics = require('./Metrics')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(Settings.redis.lock)
 const keys = Settings.redis.lock.key_schema
@@ -54,36 +54,41 @@ module.exports = LockManager = {
     const lockValue = LockManager.randomLock()
     const key = keys.blockingKey({ doc_id })
     const profile = new Profiler('tryLock', { doc_id, key, lockValue })
-    return rclient.set(key, lockValue, 'EX', this.LOCK_TTL, 'NX', function (
-      err,
-      gotLock
-    ) {
-      if (err != null) {
-        return callback(err)
-      }
-      if (gotLock === 'OK') {
-        metrics.inc('doc-not-blocking')
-        const timeTaken = profile.log('got lock').end()
-        if (timeTaken > MAX_REDIS_REQUEST_LENGTH) {
-          // took too long, so try to free the lock
-          return LockManager.releaseLock(doc_id, lockValue, function (
-            err,
-            result
-          ) {
-            if (err != null) {
-              return callback(err)
-            } // error freeing lock
-            return callback(null, false)
-          }) // tell caller they didn't get the lock
-        } else {
-          return callback(null, true, lockValue)
+    return rclient.set(
+      key,
+      lockValue,
+      'EX',
+      this.LOCK_TTL,
+      'NX',
+      function (err, gotLock) {
+        if (err != null) {
+          return callback(err)
         }
-      } else {
-        metrics.inc('doc-blocking')
-        profile.log('doc is locked').end()
-        return callback(null, false)
+        if (gotLock === 'OK') {
+          metrics.inc('doc-not-blocking')
+          const timeTaken = profile.log('got lock').end()
+          if (timeTaken > MAX_REDIS_REQUEST_LENGTH) {
+            // took too long, so try to free the lock
+            return LockManager.releaseLock(
+              doc_id,
+              lockValue,
+              function (err, result) {
+                if (err != null) {
+                  return callback(err)
+                } // error freeing lock
+                return callback(null, false)
+              }
+            ) // tell caller they didn't get the lock
+          } else {
+            return callback(null, true, lockValue)
+          }
+        } else {
+          metrics.inc('doc-blocking')
+          profile.log('doc is locked').end()
+          return callback(null, false)
+        }
       }
-    })
+    )
   },
 
   getLock(doc_id, callback) {
@@ -145,25 +150,28 @@ module.exports = LockManager = {
   releaseLock(doc_id, lockValue, callback) {
     const key = keys.blockingKey({ doc_id })
     const profile = new Profiler('releaseLock', { doc_id, key, lockValue })
-    return rclient.eval(LockManager.unlockScript, 1, key, lockValue, function (
-      err,
-      result
-    ) {
-      if (err != null) {
-        return callback(err)
-      } else if (result != null && result !== 1) {
-        // successful unlock should release exactly one key
-        profile.log('unlockScript:expired-lock').end()
-        logger.error(
-          { doc_id, key, lockValue, redis_err: err, redis_result: result },
-          'unlocking error'
-        )
-        metrics.inc('unlock-error')
-        return callback(new Error('tried to release timed out lock'))
-      } else {
-        profile.log('unlockScript:ok').end()
-        return callback(null, result)
+    return rclient.eval(
+      LockManager.unlockScript,
+      1,
+      key,
+      lockValue,
+      function (err, result) {
+        if (err != null) {
+          return callback(err)
+        } else if (result != null && result !== 1) {
+          // successful unlock should release exactly one key
+          profile.log('unlockScript:expired-lock').end()
+          logger.error(
+            { doc_id, key, lockValue, redis_err: err, redis_result: result },
+            'unlocking error'
+          )
+          metrics.inc('unlock-error')
+          return callback(new Error('tried to release timed out lock'))
+        } else {
+          profile.log('unlockScript:ok').end()
+          return callback(null, result)
+        }
       }
-    })
-  }
+    )
+  },
 }

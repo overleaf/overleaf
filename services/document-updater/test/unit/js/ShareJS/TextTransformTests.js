@@ -105,7 +105,7 @@ describe('ShareJS text type', function () {
         text._tc(dest, { d: 'foo', p: 3 }, { i: 'bar', p: 4 })
         return dest.should.deep.equal([
           { d: 'f', p: 3 },
-          { d: 'oo', p: 6 }
+          { d: 'oo', p: 6 },
         ])
       })
     })
@@ -418,7 +418,7 @@ describe('ShareJS text type', function () {
                       op1_t,
                       op2_t,
                       rt12_comments: rt12.comments,
-                      rt21_comments: rt21.comments
+                      rt21_comments: rt21.comments,
                     },
                     'Comments are not consistent'
                   )

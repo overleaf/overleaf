@@ -42,7 +42,7 @@ module.exports = RangesManager = {
       for (const op of Array.from(update.op)) {
         try {
           rangesTracker.applyOp(op, {
-            user_id: update.meta != null ? update.meta.user_id : undefined
+            user_id: update.meta != null ? update.meta.user_id : undefined,
           })
         } catch (error1) {
           error = error1
@@ -86,7 +86,7 @@ module.exports = RangesManager = {
           response.changes != null ? response.changes.length : undefined,
         commentsCount:
           response.comments != null ? response.comments.length : undefined,
-        rangesWereCollapsed
+        rangesWereCollapsed,
       },
       'applied updates to ranges'
     )
@@ -159,5 +159,5 @@ module.exports = RangesManager = {
       }
     }
     return count
-  }
+  },
 }

@@ -23,10 +23,10 @@ describe('DispatchManager', function () {
     this.DispatchManager = SandboxedModule.require(modulePath, {
       requires: {
         './UpdateManager': (this.UpdateManager = {}),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           redis: {
-            documentupdater: {}
-          }
+            documentupdater: {},
+          },
         }),
         '@overleaf/redis-wrapper': (this.redis = {}),
         './RateLimitManager': {},
@@ -40,15 +40,15 @@ describe('DispatchManager', function () {
             }
             Timer.initClass()
             return Timer
-          })())
-        })
-      }
+          })()),
+        }),
+      },
     })
     this.callback = sinon.stub()
     return (this.RateLimiter = {
       run(task, cb) {
         return task(cb)
-      }
+      },
     })
   }) // run task without rate limit
 
@@ -144,7 +144,7 @@ describe('DispatchManager', function () {
         beforeEach(function (done) {
           this.client = {
             auth: sinon.stub(),
-            blpop: sinon.stub().callsArgWith(2)
+            blpop: sinon.stub().callsArgWith(2),
           }
           this.redis.createClient = sinon.stub().returns(this.client)
           this.queueShardNumber = 7
@@ -166,7 +166,7 @@ describe('DispatchManager', function () {
     return describe('run', function () {
       return it('should call _waitForUpdateThenDispatchWorker until shutting down', function (done) {
         let callCount = 0
-        this.worker._waitForUpdateThenDispatchWorker = (callback) => {
+        this.worker._waitForUpdateThenDispatchWorker = callback => {
           if (callback == null) {
             callback = function (error) {}
           }

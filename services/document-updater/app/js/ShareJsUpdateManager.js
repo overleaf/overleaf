@@ -16,7 +16,7 @@ let ShareJsUpdateManager
 const ShareJsModel = require('./sharejs/server/model')
 const ShareJsDB = require('./ShareJsDB')
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Keys = require('./UpdateKeys')
 const { EventEmitter } = require('events')
 const util = require('util')
@@ -35,7 +35,7 @@ module.exports = ShareJsUpdateManager = {
     const db = new ShareJsDB(project_id, doc_id, lines, version)
     const model = new ShareJsModel(db, {
       maxDocLength: Settings.max_doc_length,
-      maximumAge: MAX_AGE_OF_OP
+      maximumAge: MAX_AGE_OF_OP,
     })
     model.db = db
     return model
@@ -141,5 +141,5 @@ module.exports = ShareJsUpdateManager = {
       .update('blob ' + content.length + '\x00')
       .update(content, 'utf8')
       .digest('hex')
-  }
+  },
 }

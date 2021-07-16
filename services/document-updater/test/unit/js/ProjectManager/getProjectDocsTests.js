@@ -33,10 +33,10 @@ describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
             }
             Timer.initClass()
             return Timer
-          })())
+          })()),
         }),
-        './Errors': Errors
-      }
+        './Errors': Errors,
+      },
     })
     this.project_id = 'project-id-123'
     this.callback = sinon.stub()
@@ -49,24 +49,24 @@ describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
       this.doc_lines = [
         ['aaa', 'aaa'],
         ['bbb', 'bbb'],
-        ['ccc', 'ccc']
+        ['ccc', 'ccc'],
       ]
       this.docs = [
         {
           _id: this.doc_ids[0],
           lines: this.doc_lines[0],
-          v: this.doc_versions[0]
+          v: this.doc_versions[0],
         },
         {
           _id: this.doc_ids[1],
           lines: this.doc_lines[1],
-          v: this.doc_versions[1]
+          v: this.doc_versions[1],
         },
         {
           _id: this.doc_ids[2],
           lines: this.doc_lines[2],
-          v: this.doc_versions[2]
-        }
+          v: this.doc_versions[2],
+        },
       ]
       this.RedisManager.checkOrSetProjectState = sinon
         .stub()
@@ -200,7 +200,7 @@ describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
   return describe('clearing the project state with clearProjectState', function () {
     beforeEach(function (done) {
       this.RedisManager.clearProjectState = sinon.stub().callsArg(1)
-      return this.ProjectManager.clearProjectState(this.project_id, (error) => {
+      return this.ProjectManager.clearProjectState(this.project_id, error => {
         this.callback(error)
         return done()
       })

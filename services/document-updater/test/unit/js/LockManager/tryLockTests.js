@@ -24,33 +24,37 @@ describe('LockManager - trying the lock', function () {
           createClient: () => {
             return {
               auth() {},
-              set: (this.set = sinon.stub())
+              set: (this.set = sinon.stub()),
             }
-          }
+          },
         },
         './Metrics': { inc() {} },
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           redis: {
             lock: {
               key_schema: {
                 blockingKey({ doc_id }) {
                   return `Blocking:${doc_id}`
+                },
+              },
+            },
+          },
+        },
+        './Profiler':
+          (this.Profiler = Profiler =
+            (function () {
+              Profiler = class Profiler {
+                static initClass() {
+                  this.prototype.log = sinon
+                    .stub()
+                    .returns({ end: sinon.stub() })
+                  this.prototype.end = sinon.stub()
                 }
               }
-            }
-          }
-        },
-        './Profiler': (this.Profiler = Profiler = (function () {
-          Profiler = class Profiler {
-            static initClass() {
-              this.prototype.log = sinon.stub().returns({ end: sinon.stub() })
-              this.prototype.end = sinon.stub()
-            }
-          }
-          Profiler.initClass()
-          return Profiler
-        })())
-      }
+              Profiler.initClass()
+              return Profiler
+            })()),
+      },
     })
 
     this.callback = sinon.stub()

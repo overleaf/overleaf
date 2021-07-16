@@ -24,7 +24,7 @@ module.exports = MockTrackChangesApi = {
 
   run() {
     app.post('/project/:project_id/doc/:doc_id/flush', (req, res, next) => {
-      return this.flushDoc(req.params.doc_id, (error) => {
+      return this.flushDoc(req.params.doc_id, error => {
         if (error != null) {
           return res.sendStatus(500)
         } else {
@@ -34,16 +34,16 @@ module.exports = MockTrackChangesApi = {
     })
 
     return app
-      .listen(3015, (error) => {
+      .listen(3015, error => {
         if (error != null) {
           throw error
         }
       })
-      .on('error', (error) => {
+      .on('error', error => {
         console.error('error starting MockTrackChangesApi:', error.message)
         return process.exit(1)
       })
-  }
+  },
 }
 
 MockTrackChangesApi.run()

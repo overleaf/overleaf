@@ -1,6 +1,6 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const docUpdaterRedis = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
@@ -21,10 +21,10 @@ describe('Setting a document', function () {
       op: [
         {
           i: 'one and a half\n',
-          p: 4
-        }
+          p: 4,
+        },
       ],
-      v: this.version
+      v: this.version,
     }
     this.result = ['one', 'one and a half', 'two', 'three']
     this.newLines = ['these', 'are', 'the', 'new', 'lines']
@@ -49,9 +49,9 @@ describe('Setting a document', function () {
       this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
-      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, (error) => {
+      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
         if (error) {
           throw error
         }
@@ -59,7 +59,7 @@ describe('Setting a document', function () {
           this.project_id,
           this.doc_id,
           this.update,
-          (error) => {
+          error => {
             if (error) {
               throw error
             }
@@ -149,7 +149,7 @@ describe('Setting a document', function () {
       this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
       DocUpdaterClient.setDocLines(
         this.project_id,
@@ -212,23 +212,23 @@ describe('Setting a document', function () {
     {
       desc: 'when the updated doc is too large for the body parser',
       size: Settings.maxJsonRequestSize,
-      expectedStatusCode: 413
+      expectedStatusCode: 413,
     },
     {
       desc: 'when the updated doc is larger than the HTTP controller limit',
       size: Settings.max_doc_length,
-      expectedStatusCode: 406
-    }
+      expectedStatusCode: 406,
+    },
   ]
 
-  DOC_TOO_LARGE_TEST_CASES.forEach((testCase) => {
+  DOC_TOO_LARGE_TEST_CASES.forEach(testCase => {
     describe(testCase.desc, function () {
       before(function (done) {
         this.project_id = DocUpdaterClient.randomId()
         this.doc_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines: this.lines,
-          version: this.version
+          version: this.version,
         })
         this.newLines = []
         while (JSON.stringify(this.newLines).length <= testCase.size) {
@@ -281,7 +281,7 @@ describe('Setting a document', function () {
       this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
 
       this.newLines = []
@@ -333,14 +333,14 @@ describe('Setting a document', function () {
         op: [
           {
             d: 'one and a half\n',
-            p: 4
-          }
+            p: 4,
+          },
         ],
         meta: {
           tc: this.id_seed,
-          user_id: this.user_id
+          user_id: this.user_id,
         },
-        v: this.version
+        v: this.version,
       }
     })
 
@@ -350,9 +350,9 @@ describe('Setting a document', function () {
         this.doc_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines: this.lines,
-          version: this.version
+          version: this.version,
         })
-        DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, (error) => {
+        DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
           if (error) {
             throw error
           }
@@ -360,7 +360,7 @@ describe('Setting a document', function () {
             this.project_id,
             this.doc_id,
             this.update,
-            (error) => {
+            error => {
               if (error) {
                 throw error
               }
@@ -413,9 +413,9 @@ describe('Setting a document', function () {
         this.doc_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines: this.lines,
-          version: this.version
+          version: this.version,
         })
-        DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, (error) => {
+        DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
           if (error) {
             throw error
           }
@@ -423,7 +423,7 @@ describe('Setting a document', function () {
             this.project_id,
             this.doc_id,
             this.update,
-            (error) => {
+            error => {
               if (error) {
                 throw error
               }

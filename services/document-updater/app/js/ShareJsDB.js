@@ -70,7 +70,7 @@ module.exports = ShareJsDB = class ShareJsDB {
       return callback(null, {
         snapshot: this.lines.join('\n'),
         v: parseInt(this.version, 10),
-        type: 'text'
+        type: 'text',
       })
     }
   }

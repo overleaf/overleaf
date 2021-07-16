@@ -15,7 +15,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let DispatchManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const Keys = require('./UpdateKeys')
 const redis = require('@overleaf/redis-wrapper')
@@ -57,7 +57,7 @@ module.exports = DispatchManager = {
             Keys.splitProjectIdAndDocId(doc_key)
           )
           // Dispatch this in the background
-          const backgroundTask = (cb) =>
+          const backgroundTask = cb =>
             UpdateManager.processOutstandingUpdatesWithLock(
               project_id,
               doc_id,
@@ -91,7 +91,7 @@ module.exports = DispatchManager = {
         if (Settings.shuttingDown) {
           return
         }
-        return worker._waitForUpdateThenDispatchWorker((error) => {
+        return worker._waitForUpdateThenDispatchWorker(error => {
           if (error != null) {
             logger.error({ err: error }, 'Error in worker process')
             throw error
@@ -99,7 +99,7 @@ module.exports = DispatchManager = {
             return worker.run()
           }
         })
-      }
+      },
     }
 
     return worker
@@ -110,5 +110,5 @@ module.exports = DispatchManager = {
     _.times(number, function (shardNumber) {
       return DispatchManager.createDispatcher(RateLimiter, shardNumber).run()
     })
-  }
+  },
 }

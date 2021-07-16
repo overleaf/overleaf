@@ -15,7 +15,7 @@ let HistoryManager
 const async = require('async')
 const logger = require('logger-sharelatex')
 const request = require('request')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const HistoryRedisManager = require('./HistoryRedisManager')
 const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const RedisManager = require('./RedisManager')
@@ -32,44 +32,44 @@ module.exports = HistoryManager = {
       )
       return
     }
-    return RedisManager.getHistoryType(doc_id, function (
-      err,
-      projectHistoryType
-    ) {
-      if (err != null) {
-        logger.warn({ err, doc_id }, 'error getting history type')
+    return RedisManager.getHistoryType(
+      doc_id,
+      function (err, projectHistoryType) {
+        if (err != null) {
+          logger.warn({ err, doc_id }, 'error getting history type')
+        }
+        // if there's an error continue and flush to track-changes for safety
+        if (
+          Settings.disableDoubleFlush &&
+          projectHistoryType === 'project-history'
+        ) {
+          return logger.debug(
+            { doc_id, projectHistoryType },
+            'skipping track-changes flush'
+          )
+        } else {
+          metrics.inc('history-flush', 1, { status: 'track-changes' })
+          const url = `${Settings.apis.trackchanges.url}/project/${project_id}/doc/${doc_id}/flush`
+          logger.log(
+            { project_id, doc_id, url, projectHistoryType },
+            'flushing doc in track changes api'
+          )
+          return request.post(url, function (error, res, body) {
+            if (error != null) {
+              return logger.error(
+                { error, doc_id, project_id },
+                'track changes doc to track changes api'
+              )
+            } else if (res.statusCode < 200 && res.statusCode >= 300) {
+              return logger.error(
+                { doc_id, project_id },
+                `track changes api returned a failure status code: ${res.statusCode}`
+              )
+            }
+          })
+        }
       }
-      // if there's an error continue and flush to track-changes for safety
-      if (
-        Settings.disableDoubleFlush &&
-        projectHistoryType === 'project-history'
-      ) {
-        return logger.debug(
-          { doc_id, projectHistoryType },
-          'skipping track-changes flush'
-        )
-      } else {
-        metrics.inc('history-flush', 1, { status: 'track-changes' })
-        const url = `${Settings.apis.trackchanges.url}/project/${project_id}/doc/${doc_id}/flush`
-        logger.log(
-          { project_id, doc_id, url, projectHistoryType },
-          'flushing doc in track changes api'
-        )
-        return request.post(url, function (error, res, body) {
-          if (error != null) {
-            return logger.error(
-              { error, doc_id, project_id },
-              'track changes doc to track changes api'
-            )
-          } else if (res.statusCode < 200 && res.statusCode >= 300) {
-            return logger.error(
-              { doc_id, project_id },
-              `track changes api returned a failure status code: ${res.statusCode}`
-            )
-          }
-        })
-      }
-    })
+    )
   },
 
   // flush changes in the background
@@ -77,7 +77,7 @@ module.exports = HistoryManager = {
     if (
       !__guard__(
         Settings.apis != null ? Settings.apis.project_history : undefined,
-        (x) => x.enabled
+        x => x.enabled
       )
     ) {
       return
@@ -97,7 +97,7 @@ module.exports = HistoryManager = {
     if (
       !__guard__(
         Settings.apis != null ? Settings.apis.project_history : undefined,
-        (x) => x.enabled
+        x => x.enabled
       )
     ) {
       return callback()
@@ -157,7 +157,7 @@ module.exports = HistoryManager = {
     if (
       __guard__(
         Settings.apis != null ? Settings.apis.project_history : undefined,
-        (x) => x.enabled
+        x => x.enabled
       )
     ) {
       if (
@@ -253,7 +253,7 @@ module.exports = HistoryManager = {
         )
       }
     )
-  }
+  },
 }
 
 function __guard__(value, transform) {

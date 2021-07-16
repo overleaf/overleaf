@@ -32,39 +32,39 @@ describe('RangesManager', function () {
       this.updates = [
         {
           meta: {
-            user_id: this.user_id
+            user_id: this.user_id,
           },
           op: [
             {
               i: 'two ',
-              p: 4
-            }
-          ]
-        }
+              p: 4,
+            },
+          ],
+        },
       ]
       this.entries = {
         comments: [
           {
             op: {
               c: 'three ',
-              p: 4
+              p: 4,
             },
             metadata: {
-              user_id: this.user_id
-            }
-          }
+              user_id: this.user_id,
+            },
+          },
         ],
         changes: [
           {
             op: {
               i: 'five',
-              p: 15
+              p: 15,
             },
             metadata: {
-              user_id: this.user_id
-            }
-          }
-        ]
+              user_id: this.user_id,
+            },
+          },
+        ],
       }
       return (this.newDocLines = ['one two three four five'])
     }) // old is "one three four five"
@@ -90,11 +90,11 @@ describe('RangesManager', function () {
         expect(ranges_were_collapsed).to.equal(false)
         entries.comments[0].op.should.deep.equal({
           c: 'three ',
-          p: 8
+          p: 8,
         })
         return entries.changes[0].op.should.deep.equal({
           i: 'five',
-          p: 19
+          p: 19,
         })
       })
     })
@@ -149,16 +149,16 @@ describe('RangesManager', function () {
         this.updates = [
           {
             meta: {
-              user_id: this.user_id
+              user_id: this.user_id,
             },
             op: [
               {
                 c: 'one',
                 p: 0,
-                t: 'thread-id-1'
-              }
-            ]
-          }
+                t: 'thread-id-1',
+              },
+            ],
+          },
         ]
         this.entries = {
           comments: [
@@ -166,24 +166,24 @@ describe('RangesManager', function () {
               op: {
                 c: 'three ',
                 p: 4,
-                t: 'thread-id-2'
+                t: 'thread-id-2',
               },
               metadata: {
-                user_id: this.user_id
-              }
+                user_id: this.user_id,
+              },
             },
             {
               op: {
                 c: 'four ',
                 p: 10,
-                t: 'thread-id-3'
+                t: 'thread-id-3',
               },
               metadata: {
-                user_id: this.user_id
-              }
-            }
+                user_id: this.user_id,
+              },
+            },
           ],
-          changes: []
+          changes: [],
         }
         return this.RangesManager.applyUpdate(
           this.project_id,
@@ -212,38 +212,38 @@ describe('RangesManager', function () {
           {
             meta: {
               user_id: this.user_id,
-              tc: 'track-changes-id-yes'
+              tc: 'track-changes-id-yes',
             },
             op: [
               {
                 i: 'one ',
-                p: 0
-              }
-            ]
-          }
+                p: 0,
+              },
+            ],
+          },
         ]
         this.entries = {
           changes: [
             {
               op: {
                 i: 'three',
-                p: 4
+                p: 4,
               },
               metadata: {
-                user_id: this.user_id
-              }
+                user_id: this.user_id,
+              },
             },
             {
               op: {
                 i: 'four',
-                p: 10
+                p: 10,
               },
               metadata: {
-                user_id: this.user_id
-              }
-            }
+                user_id: this.user_id,
+              },
+            },
           ],
-          comments: []
+          comments: [],
         }
         this.newDocLines = ['one two three four']
         return this.RangesManager.applyUpdate(
@@ -272,15 +272,15 @@ describe('RangesManager', function () {
         this.updates = [
           {
             meta: {
-              user_id: this.user_id
+              user_id: this.user_id,
             },
             op: [
               {
                 c: "doesn't match",
-                p: 0
-              }
-            ]
-          }
+                p: 0,
+              },
+            ],
+          },
         ]
         return this.RangesManager.applyUpdate(
           this.project_id,
@@ -308,16 +308,16 @@ describe('RangesManager', function () {
         this.updates = [
           {
             meta: {
-              user_id: this.user_id
+              user_id: this.user_id,
             },
             op: [
               {
                 d: 'one',
                 p: 0,
-                t: 'thread-id-1'
-              }
-            ]
-          }
+                t: 'thread-id-1',
+              },
+            ],
+          },
         ]
         this.entries = {
           comments: [
@@ -325,14 +325,14 @@ describe('RangesManager', function () {
               op: {
                 c: 'n',
                 p: 1,
-                t: 'thread-id-2'
+                t: 'thread-id-2',
               },
               metadata: {
-                user_id: this.user_id
-              }
-            }
+                user_id: this.user_id,
+              },
+            },
           ],
-          changes: []
+          changes: [],
         }
         return this.RangesManager.applyUpdate(
           this.project_id,
@@ -360,8 +360,8 @@ describe('RangesManager', function () {
         requires: {
           './RangesTracker': (this.RangesTracker = SandboxedModule.require(
             '../../../../app/js/RangesTracker.js'
-          ))
-        }
+          )),
+        },
       })
 
       this.ranges = {
@@ -371,38 +371,38 @@ describe('RangesManager', function () {
             id: 'a1',
             op: {
               i: 'lorem',
-              p: 0
-            }
+              p: 0,
+            },
           },
           {
             id: 'a2',
             op: {
               i: 'ipsum',
-              p: 10
-            }
+              p: 10,
+            },
           },
           {
             id: 'a3',
             op: {
               i: 'dolor',
-              p: 20
-            }
+              p: 20,
+            },
           },
           {
             id: 'a4',
             op: {
               i: 'sit',
-              p: 30
-            }
+              p: 30,
+            },
           },
           {
             id: 'a5',
             op: {
               i: 'amet',
-              p: 40
-            }
-          }
-        ]
+              p: 40,
+            },
+          },
+        ],
       }
       return (this.removeChangeIdsSpy = sinon.spy(
         this.RangesTracker.prototype,
@@ -438,7 +438,7 @@ describe('RangesManager', function () {
       it('should remove the change', function () {
         return expect(
           this.rangesResponse.changes.find(
-            (change) => change.id === this.ranges.changes[1].id
+            change => change.id === this.ranges.changes[1].id
           )
         ).to.be.undefined
       })
@@ -450,10 +450,10 @@ describe('RangesManager', function () {
       })
 
       return it('should not touch other changes', function () {
-        return [0, 2, 3, 4].map((i) =>
+        return [0, 2, 3, 4].map(i =>
           expect(
             this.rangesResponse.changes.find(
-              (change) => change.id === this.ranges.changes[i].id
+              change => change.id === this.ranges.changes[i].id
             )
           ).to.deep.equal(this.ranges.changes[i])
         )
@@ -465,7 +465,7 @@ describe('RangesManager', function () {
         this.change_ids = [
           this.ranges.changes[1].id,
           this.ranges.changes[3].id,
-          this.ranges.changes[4].id
+          this.ranges.changes[4].id,
         ]
         return this.RangesManager.acceptChanges(
           this.change_ids,
@@ -491,10 +491,10 @@ describe('RangesManager', function () {
 
       it('should remove the changes', function () {
         return [1, 3, 4].map(
-          (i) =>
+          i =>
             expect(
               this.rangesResponse.changes.find(
-                (change) => change.id === this.ranges.changes[1].id
+                change => change.id === this.ranges.changes[1].id
               )
             ).to.be.undefined
         )
@@ -507,10 +507,10 @@ describe('RangesManager', function () {
       })
 
       return it('should not touch other changes', function () {
-        return [0, 2].map((i) =>
+        return [0, 2].map(i =>
           expect(
             this.rangesResponse.changes.find(
-              (change) => change.id === this.ranges.changes[i].id
+              change => change.id === this.ranges.changes[i].id
             )
           ).to.deep.equal(this.ranges.changes[i])
         )

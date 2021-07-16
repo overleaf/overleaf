@@ -353,5 +353,5 @@ json.api = {
         return result
       })()
     })
-  }
+  },
 }

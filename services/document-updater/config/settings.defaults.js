@@ -2,8 +2,8 @@ module.exports = {
   internal: {
     documentupdater: {
       host: process.env.LISTEN_ADDRESS || 'localhost',
-      port: 3003
-    }
+      port: 3003,
+    },
   },
 
   apis: {
@@ -12,15 +12,15 @@ module.exports = {
         process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
       }:${process.env.WEB_API_PORT || process.env.WEB_PORT || 3000}`,
       user: process.env.WEB_API_USER || 'sharelatex',
-      pass: process.env.WEB_API_PASSWORD || 'password'
+      pass: process.env.WEB_API_PASSWORD || 'password',
     },
     trackchanges: {
-      url: `http://${process.env.TRACK_CHANGES_HOST || 'localhost'}:3015`
+      url: `http://${process.env.TRACK_CHANGES_HOST || 'localhost'}:3015`,
     },
     project_history: {
       enabled: true,
-      url: `http://${process.env.PROJECT_HISTORY_HOST || 'localhost'}:3054`
-    }
+      url: `http://${process.env.PROJECT_HISTORY_HOST || 'localhost'}:3054`,
+    },
   },
 
   redis: {
@@ -32,7 +32,7 @@ module.exports = {
         process.env.PUBSUB_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
-      )
+      ),
     },
 
     history: {
@@ -50,8 +50,8 @@ module.exports = {
         },
         docsWithHistoryOps({ project_id: projectId }) {
           return `DocsWithHistoryOps:{${projectId}}`
-        }
-      }
+        },
+      },
     },
 
     project_history: {
@@ -74,8 +74,8 @@ module.exports = {
         },
         projectHistoryFirstOpTimestamp({ project_id: projectId }) {
           return `ProjectHistory:FirstOpTimestamp:{${projectId}}`
-        }
-      }
+        },
+      },
     },
 
     lock: {
@@ -90,8 +90,8 @@ module.exports = {
       key_schema: {
         blockingKey({ doc_id: docId }) {
           return `Blocking:{${docId}}`
-        }
-      }
+        },
+      },
     },
 
     documentupdater: {
@@ -159,9 +159,9 @@ module.exports = {
         },
         flushAndDeleteQueue() {
           return 'DocUpdaterFlushAndDeleteQueue'
-        }
-      }
-    }
+        },
+      },
+    },
   },
 
   max_doc_length: 2 * 1024 * 1024, // 2mb
@@ -173,15 +173,15 @@ module.exports = {
   mongo: {
     options: {
       useUnifiedTopology:
-        (process.env.MONGO_USE_UNIFIED_TOPOLOGY || 'true') === 'true'
+        (process.env.MONGO_USE_UNIFIED_TOPOLOGY || 'true') === 'true',
     },
     url:
       process.env.MONGO_CONNECTION_STRING ||
-      `mongodb://${process.env.MONGO_HOST || '127.0.0.1'}/sharelatex`
+      `mongodb://${process.env.MONGO_HOST || '127.0.0.1'}/sharelatex`,
   },
 
   sentry: {
-    dsn: process.env.SENTRY_DSN
+    dsn: process.env.SENTRY_DSN,
   },
 
   publishOnIndividualChannels:
@@ -191,5 +191,5 @@ module.exports = {
 
   smoothingOffset: process.env.SMOOTHING_OFFSET || 1000, // milliseconds
 
-  disableDoubleFlush: process.env.DISABLE_DOUBLE_FLUSH || false // don't flush track-changes for projects using project-history
+  disableDoubleFlush: process.env.DISABLE_DOUBLE_FLUSH || false, // don't flush track-changes for projects using project-history
 }

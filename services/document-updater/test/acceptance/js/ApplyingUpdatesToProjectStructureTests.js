@@ -1,5 +1,5 @@
 const sinon = require('sinon')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const rclientProjectHistory = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
 )
@@ -23,10 +23,10 @@ describe("Applying updates to a project's structure", function () {
         type: 'rename-file',
         id: DocUpdaterClient.randomId(),
         pathname: '/file-path',
-        newPathname: '/new-file-path'
+        newPathname: '/new-file-path',
       }
       this.updates = [this.fileUpdate]
-      DocUpdaterApp.ensureRunning((error) => {
+      DocUpdaterApp.ensureRunning(error => {
         if (error) {
           return done(error)
         }
@@ -35,7 +35,7 @@ describe("Applying updates to a project's structure", function () {
           this.user_id,
           this.updates,
           this.version,
-          (error) => {
+          error => {
             if (error) {
               return done(error)
             }
@@ -75,7 +75,7 @@ describe("Applying updates to a project's structure", function () {
         type: 'rename-doc',
         id: DocUpdaterClient.randomId(),
         pathname: '/doc-path',
-        newPathname: '/new-doc-path'
+        newPathname: '/new-doc-path',
       }
       this.updates = [this.update]
     })
@@ -88,7 +88,7 @@ describe("Applying updates to a project's structure", function () {
           this.user_id,
           this.updates,
           this.version,
-          (error) => {
+          error => {
             if (error) {
               return done(error)
             }
@@ -125,28 +125,24 @@ describe("Applying updates to a project's structure", function () {
       before(function (done) {
         this.project_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.update.id, {})
-        DocUpdaterClient.preloadDoc(
-          this.project_id,
-          this.update.id,
-          (error) => {
-            if (error) {
-              return done(error)
-            }
-            sinon.spy(MockWebApi, 'getDocument')
-            DocUpdaterClient.sendProjectUpdate(
-              this.project_id,
-              this.user_id,
-              this.updates,
-              this.version,
-              (error) => {
-                if (error) {
-                  return done(error)
-                }
-                setTimeout(done, 200)
-              }
-            )
+        DocUpdaterClient.preloadDoc(this.project_id, this.update.id, error => {
+          if (error) {
+            return done(error)
           }
-        )
+          sinon.spy(MockWebApi, 'getDocument')
+          DocUpdaterClient.sendProjectUpdate(
+            this.project_id,
+            this.user_id,
+            this.updates,
+            this.version,
+            error => {
+              if (error) {
+                return done(error)
+              }
+              setTimeout(done, 200)
+            }
+          )
+        })
       })
 
       after(function () {
@@ -198,31 +194,31 @@ describe("Applying updates to a project's structure", function () {
         type: 'rename-doc',
         id: DocUpdaterClient.randomId(),
         pathname: '/doc-path0',
-        newPathname: '/new-doc-path0'
+        newPathname: '/new-doc-path0',
       }
       this.docUpdate1 = {
         type: 'rename-doc',
         id: DocUpdaterClient.randomId(),
         pathname: '/doc-path1',
-        newPathname: '/new-doc-path1'
+        newPathname: '/new-doc-path1',
       }
       this.fileUpdate0 = {
         type: 'rename-file',
         id: DocUpdaterClient.randomId(),
         pathname: '/file-path0',
-        newPathname: '/new-file-path0'
+        newPathname: '/new-file-path0',
       }
       this.fileUpdate1 = {
         type: 'rename-file',
         id: DocUpdaterClient.randomId(),
         pathname: '/file-path1',
-        newPathname: '/new-file-path1'
+        newPathname: '/new-file-path1',
       }
       this.updates = [
         this.docUpdate0,
         this.docUpdate1,
         this.fileUpdate0,
-        this.fileUpdate1
+        this.fileUpdate1,
       ]
     })
 
@@ -234,7 +230,7 @@ describe("Applying updates to a project's structure", function () {
           this.user_id,
           this.updates,
           this.version,
-          (error) => {
+          error => {
             if (error) {
               return done(error)
             }
@@ -299,7 +295,7 @@ describe("Applying updates to a project's structure", function () {
         type: 'add-file',
         id: DocUpdaterClient.randomId(),
         pathname: '/file-path',
-        url: 'filestore.example.com'
+        url: 'filestore.example.com',
       }
       this.updates = [this.fileUpdate]
       DocUpdaterClient.sendProjectUpdate(
@@ -307,7 +303,7 @@ describe("Applying updates to a project's structure", function () {
         this.user_id,
         this.updates,
         this.version,
-        (error) => {
+        error => {
           if (error) {
             return done(error)
           }
@@ -347,7 +343,7 @@ describe("Applying updates to a project's structure", function () {
         type: 'add-doc',
         id: DocUpdaterClient.randomId(),
         pathname: '/file-path',
-        docLines: 'a\nb'
+        docLines: 'a\nb',
       }
       this.updates = [this.docUpdate]
       DocUpdaterClient.sendProjectUpdate(
@@ -355,7 +351,7 @@ describe("Applying updates to a project's structure", function () {
         this.user_id,
         this.updates,
         this.version,
-        (error) => {
+        error => {
           if (error) {
             return done(error)
           }
@@ -401,7 +397,7 @@ describe("Applying updates to a project's structure", function () {
           type: 'add-doc',
           id: DocUpdaterClient.randomId(),
           pathname: '/file-' + v,
-          docLines: 'a\nb'
+          docLines: 'a\nb',
         })
       }
 
@@ -424,7 +420,7 @@ describe("Applying updates to a project's structure", function () {
             userId,
             updates.slice(250),
             this.version1,
-            (error) => {
+            error => {
               if (error) {
                 return done(error)
               }
@@ -460,7 +456,7 @@ describe("Applying updates to a project's structure", function () {
           type: 'add-doc',
           id: DocUpdaterClient.randomId(),
           pathname: '/file-' + v,
-          docLines: 'a\nb'
+          docLines: 'a\nb',
         })
       }
 
@@ -483,7 +479,7 @@ describe("Applying updates to a project's structure", function () {
             userId,
             updates.slice(10),
             this.version1,
-            (error) => {
+            error => {
               if (error) {
                 return done(error)
               }

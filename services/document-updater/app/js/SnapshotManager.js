@@ -38,7 +38,7 @@ module.exports = SnapshotManager = {
         lines,
         pathname,
         ranges: SnapshotManager.jsonRangesToMongo(ranges),
-        ts: new Date()
+        ts: new Date(),
       },
       callback
     )
@@ -83,5 +83,5 @@ module.exports = SnapshotManager = {
     } catch (error) {
       return data
     }
-  }
+  },
 }

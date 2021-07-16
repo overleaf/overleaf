@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let RateLimiter
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const Metrics = require('./Metrics')
 
@@ -47,7 +47,7 @@ module.exports = RateLimiter = class RateLimiter {
     }
     this.ActiveWorkerCount++
     Metrics.gauge('processingUpdates', this.ActiveWorkerCount)
-    return task((err) => {
+    return task(err => {
       this.ActiveWorkerCount--
       Metrics.gauge('processingUpdates', this.ActiveWorkerCount)
       return callback(err)
@@ -65,11 +65,11 @@ module.exports = RateLimiter = class RateLimiter {
       logger.log(
         {
           active: this.ActiveWorkerCount,
-          currentLimit: Math.ceil(this.CurrentWorkerLimit)
+          currentLimit: Math.ceil(this.CurrentWorkerLimit),
         },
         'hit rate limit'
       )
-      return this._trackAndRun(task, (err) => {
+      return this._trackAndRun(task, err => {
         if (err == null) {
           this._adjustLimitUp()
         } // don't increment rate limit if there was an error

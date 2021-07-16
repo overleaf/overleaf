@@ -36,9 +36,9 @@ describe('ProjectManager - flushProject', function () {
             }
             Timer.initClass()
             return Timer
-          })())
-        })
-      }
+          })()),
+        }),
+      },
     })
     this.project_id = 'project-id-123'
     return (this.callback = sinon.stub())
@@ -53,7 +53,7 @@ describe('ProjectManager - flushProject', function () {
       this.DocumentManager.flushDocIfLoadedWithLock = sinon.stub().callsArg(2)
       return this.ProjectManager.flushProjectWithLocks(
         this.project_id,
-        (error) => {
+        error => {
           this.callback(error)
           return done()
         }
@@ -67,7 +67,7 @@ describe('ProjectManager - flushProject', function () {
     })
 
     it('should flush each doc in the project', function () {
-      return Array.from(this.doc_ids).map((doc_id) =>
+      return Array.from(this.doc_ids).map(doc_id =>
         this.DocumentManager.flushDocIfLoadedWithLock
           .calledWith(this.project_id, doc_id)
           .should.equal(true)
@@ -105,7 +105,7 @@ describe('ProjectManager - flushProject', function () {
       )
       return this.ProjectManager.flushProjectWithLocks(
         this.project_id,
-        (error) => {
+        error => {
           this.callback(error)
           return done()
         }
@@ -113,7 +113,7 @@ describe('ProjectManager - flushProject', function () {
     })
 
     it('should still flush each doc in the project', function () {
-      return Array.from(this.doc_ids).map((doc_id) =>
+      return Array.from(this.doc_ids).map(doc_id =>
         this.DocumentManager.flushDocIfLoadedWithLock
           .calledWith(this.project_id, doc_id)
           .should.equal(true)

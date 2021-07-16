@@ -19,39 +19,39 @@ describe('RealTimeRedisManager', function () {
   beforeEach(function () {
     this.rclient = {
       auth() {},
-      exec: sinon.stub()
+      exec: sinon.stub(),
     }
     this.rclient.multi = () => this.rclient
     this.pubsubClient = { publish: sinon.stub() }
     this.RealTimeRedisManager = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/redis-wrapper': {
-          createClient: (config) =>
-            config.name === 'pubsub' ? this.pubsubClient : this.rclient
+          createClient: config =>
+            config.name === 'pubsub' ? this.pubsubClient : this.rclient,
         },
-        'settings-sharelatex': {
+        '@overleaf/settings': {
           redis: {
             documentupdater: (this.settings = {
               key_schema: {
                 pendingUpdates({ doc_id }) {
                   return `PendingUpdates:${doc_id}`
-                }
-              }
+                },
+              },
             }),
             pubsub: {
-              name: 'pubsub'
-            }
-          }
+              name: 'pubsub',
+            },
+          },
         },
         crypto: (this.crypto = {
           randomBytes: sinon
             .stub()
             .withArgs(4)
-            .returns(Buffer.from([0x1, 0x2, 0x3, 0x4]))
+            .returns(Buffer.from([0x1, 0x2, 0x3, 0x4])),
         }),
         os: (this.os = { hostname: sinon.stub().returns('somehost') }),
-        './Metrics': (this.metrics = { summary: sinon.stub() })
-      }
+        './Metrics': (this.metrics = { summary: sinon.stub() }),
+      },
     })
 
     this.doc_id = 'doc-id-123'
@@ -69,9 +69,9 @@ describe('RealTimeRedisManager', function () {
       beforeEach(function () {
         this.updates = [
           { op: [{ i: 'foo', p: 4 }] },
-          { op: [{ i: 'foo', p: 4 }] }
+          { op: [{ i: 'foo', p: 4 }] },
         ]
-        this.jsonUpdates = this.updates.map((update) => JSON.stringify(update))
+        this.jsonUpdates = this.updates.map(update => JSON.stringify(update))
         this.rclient.exec = sinon
           .stub()
           .callsArgWith(0, null, [this.jsonUpdates])
@@ -102,7 +102,7 @@ describe('RealTimeRedisManager', function () {
       beforeEach(function () {
         this.jsonUpdates = [
           JSON.stringify({ op: [{ i: 'foo', p: 4 }] }),
-          'broken json'
+          'broken json',
         ]
         this.rclient.exec = sinon
           .stub()

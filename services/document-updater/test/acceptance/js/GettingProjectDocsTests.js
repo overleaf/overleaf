@@ -30,17 +30,17 @@ describe('Getting documents for project', function () {
       this.projectStateHash = DocUpdaterClient.randomId()
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
       return DocUpdaterClient.preloadDoc(
         this.project_id,
         this.doc_id,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -67,17 +67,17 @@ describe('Getting documents for project', function () {
       this.projectStateHash = DocUpdaterClient.randomId()
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
       return DocUpdaterClient.preloadDoc(
         this.project_id,
         this.doc_id,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -110,7 +110,7 @@ describe('Getting documents for project', function () {
 
     return it('should return the documents', function () {
       return this.returnedDocs.should.deep.equal([
-        { _id: this.doc_id, lines: this.lines, v: this.version }
+        { _id: this.doc_id, lines: this.lines, v: this.version },
       ])
     })
   })
@@ -120,17 +120,17 @@ describe('Getting documents for project', function () {
       this.projectStateHash = DocUpdaterClient.randomId()
       ;[this.project_id, this.doc_id] = Array.from([
         DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId()
+        DocUpdaterClient.randomId(),
       ])
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        version: this.version
+        version: this.version,
       })
       return DocUpdaterClient.preloadDoc(
         this.project_id,
         this.doc_id,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }

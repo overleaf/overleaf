@@ -20,7 +20,7 @@ describe('RateLimitManager', function () {
     let Timer
     this.RateLimitManager = SandboxedModule.require(modulePath, {
       requires: {
-        'settings-sharelatex': (this.settings = {}),
+        '@overleaf/settings': (this.settings = {}),
         './Metrics': (this.Metrics = {
           Timer: (Timer = (function () {
             Timer = class Timer {
@@ -31,9 +31,9 @@ describe('RateLimitManager', function () {
             Timer.initClass()
             return Timer
           })()),
-          gauge: sinon.stub()
-        })
-      }
+          gauge: sinon.stub(),
+        }),
+      },
     })
     this.callback = sinon.stub()
     return (this.RateLimiter = new this.RateLimitManager(1))
@@ -63,18 +63,18 @@ describe('RateLimitManager', function () {
     beforeEach(function (done) {
       this.task = sinon.stub()
       this.finalTask = sinon.stub()
-      const task = (cb) => {
+      const task = cb => {
         this.task()
         return setTimeout(cb, 100)
       }
-      const finalTask = (cb) => {
+      const finalTask = cb => {
         this.finalTask()
         return setTimeout(cb, 100)
       }
       this.RateLimiter.run(task, this.callback)
       this.RateLimiter.run(task, this.callback)
       this.RateLimiter.run(task, this.callback)
-      return this.RateLimiter.run(finalTask, (err) => {
+      return this.RateLimiter.run(finalTask, err => {
         this.callback(err)
         return done()
       })
@@ -101,14 +101,14 @@ describe('RateLimitManager', function () {
     beforeEach(function (done) {
       this.task = sinon.stub()
       this.finalTask = sinon.stub()
-      const finalTask = (cb) => {
+      const finalTask = cb => {
         this.finalTask()
         return setTimeout(cb, 100)
       }
       this.RateLimiter.run(this.task, this.callback)
       this.RateLimiter.run(this.task, this.callback)
       this.RateLimiter.run(this.task, this.callback)
-      return this.RateLimiter.run(finalTask, (err) => {
+      return this.RateLimiter.run(finalTask, err => {
         this.callback(err)
         return done()
       })

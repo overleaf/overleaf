@@ -1,5 +1,5 @@
 let DocUpdaterClient
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const _ = require('lodash')
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
@@ -40,12 +40,12 @@ module.exports = DocUpdaterClient = {
     rclient.rpush(
       keys.pendingUpdates({ doc_id: docId }),
       JSON.stringify(update),
-      (error) => {
+      error => {
         if (error) {
           return callback(error)
         }
         const docKey = `${projectId}:${docId}`
-        rclient.sadd('DocsWithPendingUpdates', docKey, (error) => {
+        rclient.sadd('DocsWithPendingUpdates', docKey, error => {
           if (error) {
             return callback(error)
           }
@@ -61,14 +61,14 @@ module.exports = DocUpdaterClient = {
   },
 
   sendUpdates(projectId, docId, updates, callback) {
-    DocUpdaterClient.preloadDoc(projectId, docId, (error) => {
+    DocUpdaterClient.preloadDoc(projectId, docId, error => {
       if (error) {
         return callback(error)
       }
-      const jobs = updates.map((update) => (callback) => {
+      const jobs = updates.map(update => callback => {
         DocUpdaterClient.sendUpdate(projectId, docId, update, callback)
       })
-      async.series(jobs, (err) => {
+      async.series(jobs, err => {
         if (err) {
           return callback(err)
         }
@@ -80,7 +80,7 @@ module.exports = DocUpdaterClient = {
   waitForPendingUpdates(projectId, docId, callback) {
     async.retry(
       { times: 30, interval: 100 },
-      (cb) =>
+      cb =>
         rclient.llen(keys.pendingUpdates({ doc_id: docId }), (err, length) => {
           if (err) {
             return cb(err)
@@ -138,8 +138,8 @@ module.exports = DocUpdaterClient = {
           lines,
           source,
           user_id: userId,
-          undoing
-        }
+          undoing,
+        },
       },
       (error, res, body) => callback(error, res, body)
     )
@@ -204,9 +204,9 @@ module.exports = DocUpdaterClient = {
     request.post(
       {
         url: `http://localhost:3003/project/${projectId}`,
-        json: { userId, updates, version }
+        json: { userId, updates, version },
       },
       (error, res, body) => callback(error, res, body)
     )
-  }
+  },
 }

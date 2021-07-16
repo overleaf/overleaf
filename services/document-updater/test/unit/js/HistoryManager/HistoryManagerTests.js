@@ -21,23 +21,23 @@ describe('HistoryManager', function () {
     this.HistoryManager = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = {}),
-        'settings-sharelatex': (this.Settings = {
+        '@overleaf/settings': (this.Settings = {
           apis: {
             project_history: {
               enabled: true,
-              url: 'http://project_history.example.com'
+              url: 'http://project_history.example.com',
             },
             trackchanges: {
-              url: 'http://trackchanges.example.com'
-            }
-          }
+              url: 'http://trackchanges.example.com',
+            },
+          },
         }),
         './DocumentManager': (this.DocumentManager = {}),
         './HistoryRedisManager': (this.HistoryRedisManager = {}),
         './RedisManager': (this.RedisManager = {}),
         './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
-        './Metrics': (this.metrics = { inc: sinon.stub() })
-      }
+        './Metrics': (this.metrics = { inc: sinon.stub() }),
+      },
     })
     this.project_id = 'mock-project-id'
     this.doc_id = 'mock-doc-id'
@@ -118,7 +118,7 @@ describe('HistoryManager', function () {
       return this.request.post
         .calledWith({
           url: `${this.Settings.apis.project_history.url}/project/${this.project_id}/flush`,
-          qs: { background: true }
+          qs: { background: true },
         })
         .should.equal(true)
     })
@@ -131,7 +131,7 @@ describe('HistoryManager', function () {
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
         return this.HistoryManager.flushProjectChanges(this.project_id, {
-          background: true
+          background: true,
         })
       })
 
@@ -139,7 +139,7 @@ describe('HistoryManager', function () {
         return this.request.post
           .calledWith({
             url: `${this.Settings.apis.project_history.url}/project/${this.project_id}/flush`,
-            qs: { background: true }
+            qs: { background: true },
           })
           .should.equal(true)
       })
@@ -149,7 +149,7 @@ describe('HistoryManager', function () {
       beforeEach(function () {
         this.request.post = sinon.stub()
         return this.HistoryManager.flushProjectChanges(this.project_id, {
-          skip_history_flush: true
+          skip_history_flush: true,
         })
       })
 
@@ -372,15 +372,15 @@ describe('HistoryManager', function () {
       this.docs = [
         {
           doc: this.doc_id,
-          path: 'main.tex'
-        }
+          path: 'main.tex',
+        },
       ]
       this.files = [
         {
           file: 'mock-file-id',
           path: 'universe.png',
-          url: `www.filestore.test/${this.project_id}/mock-file-id`
-        }
+          url: `www.filestore.test/${this.project_id}/mock-file-id`,
+        },
       ]
       this.ProjectHistoryRedisManager.queueResyncProjectStructure = sinon
         .stub()

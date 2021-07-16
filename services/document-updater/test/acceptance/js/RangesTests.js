@@ -32,36 +32,36 @@ describe('Ranges', function () {
       this.id_seed = '587357bd35e64f6157'
       this.doc = {
         id: DocUpdaterClient.randomId(),
-        lines: ['aaa']
+        lines: ['aaa'],
       }
       this.updates = [
         {
           doc: this.doc.id,
           op: [{ i: '123', p: 1 }],
           v: 0,
-          meta: { user_id: this.user_id }
+          meta: { user_id: this.user_id },
         },
         {
           doc: this.doc.id,
           op: [{ i: '456', p: 5 }],
           v: 1,
-          meta: { user_id: this.user_id, tc: this.id_seed }
+          meta: { user_id: this.user_id, tc: this.id_seed },
         },
         {
           doc: this.doc.id,
           op: [{ d: '12', p: 1 }],
           v: 2,
-          meta: { user_id: this.user_id }
-        }
+          meta: { user_id: this.user_id },
+        },
       ]
       MockWebApi.insertDoc(this.project_id, this.doc.id, {
         lines: this.doc.lines,
-        version: 0
+        version: 0,
       })
       const jobs = []
       for (const update of Array.from(this.updates)) {
-        ;((update) => {
-          return jobs.push((callback) =>
+        ;(update => {
+          return jobs.push(callback =>
             DocUpdaterClient.sendUpdate(
               this.project_id,
               this.doc.id,
@@ -72,18 +72,18 @@ describe('Ranges', function () {
         })(update)
       }
 
-      return DocUpdaterApp.ensureRunning((error) => {
+      return DocUpdaterApp.ensureRunning(error => {
         if (error != null) {
           throw error
         }
         return DocUpdaterClient.preloadDoc(
           this.project_id,
           this.doc.id,
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }
-            return async.series(jobs, (error) => {
+            return async.series(jobs, error => {
               if (error != null) {
                 throw error
               }
@@ -119,25 +119,25 @@ describe('Ranges', function () {
           this.user_id = DocUpdaterClient.randomId()
           this.doc = {
             id: DocUpdaterClient.randomId(),
-            lines: ['foo bar baz']
+            lines: ['foo bar baz'],
           }
           this.updates = [
             {
               doc: this.doc.id,
               op: [
-                { c: 'bar', p: 4, t: (this.tid = DocUpdaterClient.randomId()) }
+                { c: 'bar', p: 4, t: (this.tid = DocUpdaterClient.randomId()) },
               ],
-              v: 0
-            }
+              v: 0,
+            },
           ]
           MockWebApi.insertDoc(this.project_id, this.doc.id, {
             lines: this.doc.lines,
-            version: 0
+            version: 0,
           })
           const jobs = []
           for (const update of Array.from(this.updates)) {
-            ;((update) => {
-              return jobs.push((callback) =>
+            ;(update => {
+              return jobs.push(callback =>
                 DocUpdaterClient.sendUpdate(
                   this.project_id,
                   this.doc.id,
@@ -150,11 +150,11 @@ describe('Ranges', function () {
           return DocUpdaterClient.preloadDoc(
             this.project_id,
             this.doc.id,
-            (error) => {
+            error => {
               if (error != null) {
                 throw error
               }
-              return async.series(jobs, (error) => {
+              return async.series(jobs, error => {
                 if (error != null) {
                   throw error
                 }
@@ -188,31 +188,31 @@ describe('Ranges', function () {
           this.user_id = DocUpdaterClient.randomId()
           this.doc = {
             id: DocUpdaterClient.randomId(),
-            lines: ['foo bar baz']
+            lines: ['foo bar baz'],
           }
           this.updates = [
             {
               doc: this.doc.id,
               op: [{ i: 'ABC', p: 3 }],
               v: 0,
-              meta: { user_id: this.user_id }
+              meta: { user_id: this.user_id },
             },
             {
               doc: this.doc.id,
               op: [
-                { c: 'bar', p: 4, t: (this.tid = DocUpdaterClient.randomId()) }
+                { c: 'bar', p: 4, t: (this.tid = DocUpdaterClient.randomId()) },
               ],
-              v: 0
-            }
+              v: 0,
+            },
           ]
           MockWebApi.insertDoc(this.project_id, this.doc.id, {
             lines: this.doc.lines,
-            version: 0
+            version: 0,
           })
           const jobs = []
           for (const update of Array.from(this.updates)) {
-            ;((update) => {
-              return jobs.push((callback) =>
+            ;(update => {
+              return jobs.push(callback =>
                 DocUpdaterClient.sendUpdate(
                   this.project_id,
                   this.doc.id,
@@ -225,11 +225,11 @@ describe('Ranges', function () {
           return DocUpdaterClient.preloadDoc(
             this.project_id,
             this.doc.id,
-            (error) => {
+            error => {
               if (error != null) {
                 throw error
               }
-              return async.series(jobs, (error) => {
+              return async.series(jobs, error => {
                 if (error != null) {
                   throw error
                 }
@@ -265,13 +265,13 @@ describe('Ranges', function () {
       this.id_seed = '587357bd35e64f6157'
       this.doc = {
         id: DocUpdaterClient.randomId(),
-        lines: ['a123aa']
+        lines: ['a123aa'],
       }
       this.update = {
         doc: this.doc.id,
         op: [{ i: '456', p: 5 }],
         v: 0,
-        meta: { user_id: this.user_id, tc: this.id_seed }
+        meta: { user_id: this.user_id, tc: this.id_seed },
       }
       MockWebApi.insertDoc(this.project_id, this.doc.id, {
         lines: this.doc.lines,
@@ -282,16 +282,16 @@ describe('Ranges', function () {
               op: { i: '123', p: 1 },
               metadata: {
                 user_id: this.user_id,
-                ts: new Date()
-              }
-            }
-          ]
-        }
+                ts: new Date(),
+              },
+            },
+          ],
+        },
       })
       return DocUpdaterClient.preloadDoc(
         this.project_id,
         this.doc.id,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -299,7 +299,7 @@ describe('Ranges', function () {
             this.project_id,
             this.doc.id,
             this.update,
-            (error) => {
+            error => {
               if (error != null) {
                 throw error
               }
@@ -327,25 +327,21 @@ describe('Ranges', function () {
     })
 
     return it('should flush the ranges to the persistence layer again', function (done) {
-      return DocUpdaterClient.flushDoc(
-        this.project_id,
-        this.doc.id,
-        (error) => {
-          if (error != null) {
-            throw error
-          }
-          return MockWebApi.getDocument(
-            this.project_id,
-            this.doc.id,
-            (error, doc) => {
-              const { changes } = doc.ranges
-              changes[0].op.should.deep.equal({ i: '123', p: 1 })
-              changes[1].op.should.deep.equal({ i: '456', p: 5 })
-              return done()
-            }
-          )
+      return DocUpdaterClient.flushDoc(this.project_id, this.doc.id, error => {
+        if (error != null) {
+          throw error
         }
-      )
+        return MockWebApi.getDocument(
+          this.project_id,
+          this.doc.id,
+          (error, doc) => {
+            const { changes } = doc.ranges
+            changes[0].op.should.deep.equal({ i: '123', p: 1 })
+            changes[1].op.should.deep.equal({ i: '456', p: 5 })
+            return done()
+          }
+        )
+      })
     })
   })
 
@@ -356,22 +352,22 @@ describe('Ranges', function () {
       this.id_seed = '587357bd35e64f6157'
       this.doc = {
         id: DocUpdaterClient.randomId(),
-        lines: ['aaa']
+        lines: ['aaa'],
       }
       this.update = {
         doc: this.doc.id,
         op: [{ i: '456', p: 1 }],
         v: 0,
-        meta: { user_id: this.user_id, tc: this.id_seed }
+        meta: { user_id: this.user_id, tc: this.id_seed },
       }
       MockWebApi.insertDoc(this.project_id, this.doc.id, {
         lines: this.doc.lines,
-        version: 0
+        version: 0,
       })
       return DocUpdaterClient.preloadDoc(
         this.project_id,
         this.doc.id,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -379,7 +375,7 @@ describe('Ranges', function () {
             this.project_id,
             this.doc.id,
             this.update,
-            (error) => {
+            error => {
               if (error != null) {
                 throw error
               }
@@ -411,7 +407,7 @@ describe('Ranges', function () {
         this.project_id,
         this.doc.id,
         this.id_seed + '000001',
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -437,21 +433,21 @@ describe('Ranges', function () {
       this.user_id = DocUpdaterClient.randomId()
       this.doc = {
         id: DocUpdaterClient.randomId(),
-        lines: ['foo bar']
+        lines: ['foo bar'],
       }
       this.update = {
         doc: this.doc.id,
         op: [{ c: 'bar', p: 4, t: (this.tid = DocUpdaterClient.randomId()) }],
-        v: 0
+        v: 0,
       }
       MockWebApi.insertDoc(this.project_id, this.doc.id, {
         lines: this.doc.lines,
-        version: 0
+        version: 0,
       })
       return DocUpdaterClient.preloadDoc(
         this.project_id,
         this.doc.id,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -459,7 +455,7 @@ describe('Ranges', function () {
             this.project_id,
             this.doc.id,
             this.update,
-            (error) => {
+            error => {
               if (error != null) {
                 throw error
               }
@@ -518,7 +514,7 @@ describe('Ranges', function () {
       this.id_seed = DocUpdaterClient.randomId()
       this.doc = {
         id: DocUpdaterClient.randomId(),
-        lines: ['aaa']
+        lines: ['aaa'],
       }
       this.i = new Array(3 * 1024 * 1024).join('a')
       this.updates = [
@@ -526,17 +522,17 @@ describe('Ranges', function () {
           doc: this.doc.id,
           op: [{ i: this.i, p: 1 }],
           v: 0,
-          meta: { user_id: this.user_id, tc: this.id_seed }
-        }
+          meta: { user_id: this.user_id, tc: this.id_seed },
+        },
       ]
       MockWebApi.insertDoc(this.project_id, this.doc.id, {
         lines: this.doc.lines,
-        version: 0
+        version: 0,
       })
       const jobs = []
       for (const update of Array.from(this.updates)) {
-        ;((update) => {
-          return jobs.push((callback) =>
+        ;(update => {
+          return jobs.push(callback =>
             DocUpdaterClient.sendUpdate(
               this.project_id,
               this.doc.id,
@@ -549,11 +545,11 @@ describe('Ranges', function () {
       return DocUpdaterClient.preloadDoc(
         this.project_id,
         this.doc.id,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
-          return async.series(jobs, (error) => {
+          return async.series(jobs, error => {
             if (error != null) {
               throw error
             }
@@ -593,34 +589,34 @@ describe('Ranges', function () {
               op: {
                 c: 'a',
                 p: 5,
-                tid: (this.tid = DocUpdaterClient.randomId())
+                tid: (this.tid = DocUpdaterClient.randomId()),
               },
               metadata: {
                 user_id: this.user_id,
-                ts: new Date()
-              }
-            }
-          ]
-        }
+                ts: new Date(),
+              },
+            },
+          ],
+        },
       })
       this.updates = [
         {
           doc: this.doc_id,
           op: [{ d: 'foo ', p: 0 }],
           v: 0,
-          meta: { user_id: this.user_id }
+          meta: { user_id: this.user_id },
         },
         {
           doc: this.doc_id,
           op: [{ d: 'bar ', p: 0 }],
           v: 1,
-          meta: { user_id: this.user_id }
-        }
+          meta: { user_id: this.user_id },
+        },
       ]
       const jobs = []
       for (const update of Array.from(this.updates)) {
-        ;((update) => {
-          return jobs.push((callback) =>
+        ;(update => {
+          return jobs.push(callback =>
             DocUpdaterClient.sendUpdate(
               this.project_id,
               this.doc_id,
@@ -633,7 +629,7 @@ describe('Ranges', function () {
       return DocUpdaterClient.preloadDoc(
         this.project_id,
         this.doc_id,
-        (error) => {
+        error => {
           if (error != null) {
             throw error
           }
@@ -669,7 +665,7 @@ describe('Ranges', function () {
           db.docSnapshots
             .find({
               project_id: ObjectId(this.project_id),
-              doc_id: ObjectId(this.doc_id)
+              doc_id: ObjectId(this.doc_id),
             })
             .toArray((error, docSnapshots) => {
               if (error != null) {
@@ -681,7 +677,7 @@ describe('Ranges', function () {
               expect(docSnapshots[0].ranges.comments[0].op).to.deep.equal({
                 c: 'a',
                 p: 1,
-                tid: this.tid
+                tid: this.tid,
               })
               return done()
             })

@@ -38,9 +38,9 @@ describe('UpdateManager', function () {
             }
             Timer.initClass()
             return Timer
-          })())
+          })()),
         }),
-        'settings-sharelatex': (this.Settings = {}),
+        '@overleaf/settings': (this.Settings = {}),
         './DocumentManager': (this.DocumentManager = {}),
         './RangesManager': (this.RangesManager = {}),
         './SnapshotManager': (this.SnapshotManager = {}),
@@ -53,8 +53,8 @@ describe('UpdateManager', function () {
           }
           Profiler.initClass()
           return Profiler
-        })())
-      }
+        })()),
+      },
     }))
   })
 
@@ -272,7 +272,7 @@ describe('UpdateManager', function () {
       })
 
       it('should apply the updates', function () {
-        return Array.from(this.updates).map((update) =>
+        return Array.from(this.updates).map(update =>
           this.UpdateManager.applyUpdate
             .calledWith(this.project_id, this.doc_id, update)
             .should.equal(true)
@@ -320,7 +320,7 @@ describe('UpdateManager', function () {
       this.updated_ranges = { entries: 'updated', comments: 'updated' }
       this.appliedOps = [
         { v: 42, op: 'mock-op-42' },
-        { v: 45, op: 'mock-op-45' }
+        { v: 45, op: 'mock-op-45' },
       ]
       this.doc_ops_length = sinon.stub()
       this.project_ops_length = sinon.stub()
@@ -465,7 +465,7 @@ describe('UpdateManager', function () {
           .calledWith({
             project_id: this.project_id,
             doc_id: this.doc_id,
-            error: this.error.message
+            error: this.error.message,
           })
           .should.equal(true)
       })
@@ -512,17 +512,17 @@ describe('UpdateManager', function () {
           v: 42,
           op: [
             { i: 'foo', p: 4 },
-            { i: 'bar', p: 6 }
-          ]
+            { i: 'bar', p: 6 },
+          ],
         },
         {
           v: 45,
           op: [
             { d: 'qux', p: 4 },
-            { i: 'bazbaz', p: 14 }
-          ]
+            { i: 'bazbaz', p: 14 },
+          ],
         },
-        { v: 49, op: [{ i: 'penguin', p: 18 }] }
+        { v: 49, op: [{ i: 'penguin', p: 18 }] },
       ]
       this.UpdateManager._addProjectHistoryMetadataToOps(
         appliedOps,
@@ -536,24 +536,24 @@ describe('UpdateManager', function () {
           v: 42,
           op: [
             { i: 'foo', p: 4 },
-            { i: 'bar', p: 6 }
+            { i: 'bar', p: 6 },
           ],
           meta: {
             pathname: this.pathname,
-            doc_length: 14
-          }
+            doc_length: 14,
+          },
         },
         {
           projectHistoryId: this.projectHistoryId,
           v: 45,
           op: [
             { d: 'qux', p: 4 },
-            { i: 'bazbaz', p: 14 }
+            { i: 'bazbaz', p: 14 },
           ],
           meta: {
             pathname: this.pathname,
-            doc_length: 20
-          } // 14 + 'foo' + 'bar'
+            doc_length: 20,
+          }, // 14 + 'foo' + 'bar'
         },
         {
           projectHistoryId: this.projectHistoryId,
@@ -561,9 +561,9 @@ describe('UpdateManager', function () {
           op: [{ i: 'penguin', p: 18 }],
           meta: {
             pathname: this.pathname,
-            doc_length: 23
-          } // 14 - 'qux' + 'bazbaz'
-        }
+            doc_length: 23,
+          }, // 14 - 'qux' + 'bazbaz'
+        },
       ])
     })
   })

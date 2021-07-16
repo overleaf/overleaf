@@ -96,7 +96,7 @@ module.exports = MockWebApi = {
           req.body.ranges,
           req.body.lastUpdatedAt,
           req.body.lastUpdatedBy,
-          (error) => {
+          error => {
             if (error != null) {
               return res.sendStatus(500)
             } else {
@@ -108,16 +108,16 @@ module.exports = MockWebApi = {
     )
 
     return app
-      .listen(3000, (error) => {
+      .listen(3000, error => {
         if (error != null) {
           throw error
         }
       })
-      .on('error', (error) => {
+      .on('error', error => {
         console.error('error starting MockWebApi:', error.message)
         return process.exit(1)
       })
-  }
+  },
 }
 
 MockWebApi.run()

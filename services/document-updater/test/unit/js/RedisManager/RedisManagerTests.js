@@ -27,10 +27,10 @@ describe('RedisManager', function () {
     this.RedisManager = SandboxedModule.require(modulePath, {
       requires: {
         './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
-        'settings-sharelatex': (this.settings = {
+        '@overleaf/settings': (this.settings = {
           documentupdater: { logHashErrors: { write: true, read: true } },
           apis: {
-            project_history: { enabled: true }
+            project_history: { enabled: true },
           },
           redis: {
             documentupdater: {
@@ -82,8 +82,8 @@ describe('RedisManager', function () {
                 },
                 lastUpdatedAt({ doc_id }) {
                   return `lastUpdatedAt:${doc_id}`
-                }
-              }
+                },
+              },
             },
             history: {
               key_schema: {
@@ -92,13 +92,13 @@ describe('RedisManager', function () {
                 },
                 docsWithHistoryOps({ project_id }) {
                   return `DocsWithHistoryOps:${project_id}`
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         }),
         '@overleaf/redis-wrapper': {
-          createClient: () => this.rclient
+          createClient: () => this.rclient,
         },
         './Metrics': (this.metrics = {
           inc: sinon.stub(),
@@ -112,10 +112,10 @@ describe('RedisManager', function () {
               const timeSpan = new Date() - this.start
               return timeSpan
             }
-          })
+          }),
         }),
-        './Errors': Errors
-      }
+        './Errors': Errors,
+      },
     })
 
     this.doc_id = 'doc-id-123'
@@ -151,7 +151,7 @@ describe('RedisManager', function () {
           this.json_ranges,
           this.pathname,
           this.projectHistoryId.toString(),
-          this.unflushed_time
+          this.unflushed_time,
         ])
     })
 
@@ -212,7 +212,7 @@ describe('RedisManager', function () {
             this.version,
             this.badHash,
             this.project_id,
-            this.json_ranges
+            this.json_ranges,
           ])
         return this.RedisManager.getDoc(
           this.project_id,
@@ -244,7 +244,7 @@ describe('RedisManager', function () {
             this.another_project_id,
             this.json_ranges,
             this.pathname,
-            this.unflushed_time
+            this.unflushed_time,
           ])
         }
 
@@ -278,7 +278,7 @@ describe('RedisManager', function () {
             this.another_project_id,
             this.json_ranges,
             this.pathname,
-            this.unflushed_time
+            this.unflushed_time,
           ])
         return this.RedisManager.getDoc(
           this.project_id,
@@ -304,7 +304,7 @@ describe('RedisManager', function () {
         this.start = 50
         this.end = 60
         this.ops = [{ mock: 'op-1' }, { mock: 'op-2' }]
-        this.jsonOps = this.ops.map((op) => JSON.stringify(op))
+        this.jsonOps = this.ops.map(op => JSON.stringify(op))
         this.rclient.llen = sinon.stub().callsArgWith(1, null, this.length)
         this.rclient.get = sinon
           .stub()
@@ -353,7 +353,7 @@ describe('RedisManager', function () {
         this.start = 50
         this.end = -1
         this.ops = [{ mock: 'op-1' }, { mock: 'op-2' }]
-        this.jsonOps = this.ops.map((op) => JSON.stringify(op))
+        this.jsonOps = this.ops.map(op => JSON.stringify(op))
         this.rclient.llen = sinon.stub().callsArgWith(1, null, this.length)
         this.rclient.get = sinon
           .stub()
@@ -390,7 +390,7 @@ describe('RedisManager', function () {
         this.start = 20
         this.end = -1
         this.ops = [{ mock: 'op-1' }, { mock: 'op-2' }]
-        this.jsonOps = this.ops.map((op) => JSON.stringify(op))
+        this.jsonOps = this.ops.map(op => JSON.stringify(op))
         this.rclient.llen = sinon.stub().callsArgWith(1, null, this.length)
         this.rclient.get = sinon
           .stub()
@@ -423,7 +423,7 @@ describe('RedisManager', function () {
         this.start = 50
         this.end = 60
         this.ops = [{ mock: 'op-1' }, { mock: 'op-2' }]
-        this.jsonOps = this.ops.map((op) => JSON.stringify(op))
+        this.jsonOps = this.ops.map(op => JSON.stringify(op))
         this.rclient.llen = sinon.stub().callsArgWith(1, null, this.length)
         this.rclient.get = sinon
           .stub()
@@ -483,7 +483,7 @@ describe('RedisManager', function () {
           null,
           this.doc_update_list_length,
           null,
-          null
+          null,
         ])
       return (this.ProjectHistoryRedisManager.queueOps = sinon
         .stub()
@@ -529,7 +529,7 @@ describe('RedisManager', function () {
               [`DocHash:${this.doc_id}`]: this.hash,
               [`Ranges:${this.doc_id}`]: JSON.stringify(this.ranges),
               [`lastUpdatedAt:${this.doc_id}`]: Date.now(),
-              [`lastUpdatedBy:${this.doc_id}`]: 'last-author-fake-id'
+              [`lastUpdatedBy:${this.doc_id}`]: 'last-author-fake-id',
             })
             .should.equal(true)
         })
@@ -728,7 +728,7 @@ describe('RedisManager', function () {
             [`DocHash:${this.doc_id}`]: this.hash,
             [`Ranges:${this.doc_id}`]: JSON.stringify(this.ranges),
             [`lastUpdatedAt:${this.doc_id}`]: Date.now(),
-            [`lastUpdatedBy:${this.doc_id}`]: 'last-author-fake-id'
+            [`lastUpdatedBy:${this.doc_id}`]: 'last-author-fake-id',
           })
           .should.equal(true)
       })
@@ -759,7 +759,7 @@ describe('RedisManager', function () {
             [`DocHash:${this.doc_id}`]: this.hash,
             [`Ranges:${this.doc_id}`]: null,
             [`lastUpdatedAt:${this.doc_id}`]: Date.now(),
-            [`lastUpdatedBy:${this.doc_id}`]: 'last-author-fake-id'
+            [`lastUpdatedBy:${this.doc_id}`]: 'last-author-fake-id',
           })
           .should.equal(true)
       })
@@ -856,7 +856,7 @@ describe('RedisManager', function () {
             [`DocHash:${this.doc_id}`]: this.hash,
             [`Ranges:${this.doc_id}`]: JSON.stringify(this.ranges),
             [`lastUpdatedAt:${this.doc_id}`]: Date.now(),
-            [`lastUpdatedBy:${this.doc_id}`]: undefined
+            [`lastUpdatedBy:${this.doc_id}`]: undefined,
           })
           .should.equal(true)
       })
@@ -900,7 +900,7 @@ describe('RedisManager', function () {
             [`DocHash:${this.doc_id}`]: this.hash,
             [`Ranges:${this.doc_id}`]: JSON.stringify(this.ranges),
             [`Pathname:${this.doc_id}`]: this.pathname,
-            [`ProjectHistoryId:${this.doc_id}`]: this.projectHistoryId
+            [`ProjectHistoryId:${this.doc_id}`]: this.projectHistoryId,
           })
           .should.equal(true)
       })
@@ -939,7 +939,7 @@ describe('RedisManager', function () {
             [`DocHash:${this.doc_id}`]: this.hash,
             [`Ranges:${this.doc_id}`]: null,
             [`Pathname:${this.doc_id}`]: this.pathname,
-            [`ProjectHistoryId:${this.doc_id}`]: this.projectHistoryId
+            [`ProjectHistoryId:${this.doc_id}`]: this.projectHistoryId,
           })
           .should.equal(true)
       })
@@ -1070,7 +1070,7 @@ describe('RedisManager', function () {
       return (this.update = {
         id: this.doc_id,
         pathname: (this.pathname = 'pathname'),
-        newPathname: (this.newPathname = 'new-pathname')
+        newPathname: (this.newPathname = 'new-pathname'),
       })
     })
 

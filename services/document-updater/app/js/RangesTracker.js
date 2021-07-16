@@ -120,7 +120,7 @@ const load = function () {
       if (comment == null) {
         return
       }
-      this.comments = this.comments.filter((c) => c.id !== comment_id)
+      this.comments = this.comments.filter(c => c.id !== comment_id)
       return this._markAsDirty(comment, 'comment', 'removed')
     }
 
@@ -257,7 +257,7 @@ const load = function () {
       if (metadata == null) {
         metadata = {}
       }
-      return Array.from(ops).map((op) => this.applyOp(op, metadata))
+      return Array.from(ops).map(op => this.applyOp(op, metadata))
     }
 
     addComment(op, metadata) {
@@ -274,9 +274,9 @@ const load = function () {
               // Copy because we'll modify in place
               c: op.c,
               p: op.p,
-              t: op.t
+              t: op.t,
             },
-            metadata
+            metadata,
           })
         )
         this._markAsDirty(comment, 'comment', 'added')
@@ -488,9 +488,9 @@ const load = function () {
             const after_change = {
               op: {
                 i: after_content,
-                p: change_start + offset + op_length
+                p: change_start + offset + op_length,
               },
-              metadata: {}
+              metadata: {},
             }
             for (const key in change.metadata) {
               const value = change.metadata[key]
@@ -606,7 +606,7 @@ const load = function () {
                 delete_removed_start,
                 delete_removed_start + delete_removed_length
               ),
-              p: delete_removed_start
+              p: delete_removed_start,
             }
             if (modification.d.length > 0) {
               op_modifications.push(modification)
@@ -643,7 +643,7 @@ const load = function () {
       // Copy rather than modify because we still need to apply it to comments
       op = {
         p: op.p,
-        d: this._applyOpModifications(op.d, op_modifications)
+        d: this._applyOpModifications(op.d, op_modifications),
       }
 
       for (change of Array.from(remove_changes)) {
@@ -678,7 +678,7 @@ const load = function () {
         moved_changes = moved_changes.concat(results.moved_changes)
         for (change of Array.from(results.remove_changes)) {
           this._removeChange(change)
-          moved_changes = moved_changes.filter((c) => c !== change)
+          moved_changes = moved_changes.filter(c => c !== change)
         }
       }
 
@@ -695,7 +695,7 @@ const load = function () {
       const change = {
         id: this.newId(),
         op: this._clone(op), // Don't take a reference to the existing op since we'll modify this in place with future changes
-        metadata: this._clone(metadata)
+        metadata: this._clone(metadata),
       }
       this.changes.push(change)
 
@@ -717,7 +717,7 @@ const load = function () {
     }
 
     _removeChange(change) {
-      this.changes = this.changes.filter((c) => c.id !== change.id)
+      this.changes = this.changes.filter(c => c.id !== change.id)
       return this._markAsDirty(change, 'change', 'removed')
     }
 
@@ -813,13 +813,13 @@ const load = function () {
         comment: {
           moved: {},
           removed: {},
-          added: {}
+          added: {},
         },
         change: {
           moved: {},
           removed: {},
-          added: {}
-        }
+          added: {},
+        },
       })
     }
 

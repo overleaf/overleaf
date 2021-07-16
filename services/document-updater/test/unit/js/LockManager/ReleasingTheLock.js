@@ -24,22 +24,22 @@ describe('LockManager - releasing the lock', function () {
     let Profiler
     this.client = {
       auth() {},
-      eval: sinon.stub()
+      eval: sinon.stub(),
     }
     const mocks = {
       '@overleaf/redis-wrapper': {
-        createClient: () => this.client
+        createClient: () => this.client,
       },
-      'settings-sharelatex': {
+      '@overleaf/settings': {
         redis: {
           lock: {
             key_schema: {
               blockingKey({ doc_id }) {
                 return `Blocking:${doc_id}`
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
       './Metrics': { inc() {} },
       './Profiler': (Profiler = (function () {
@@ -51,7 +51,7 @@ describe('LockManager - releasing the lock', function () {
         }
         Profiler.initClass()
         return Profiler
-      })())
+      })()),
     }
     this.LockManager = SandboxedModule.require(modulePath, { requires: mocks })
     this.lockValue = 'lock-value-stub'

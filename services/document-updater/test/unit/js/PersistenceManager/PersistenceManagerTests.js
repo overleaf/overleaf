@@ -23,7 +23,7 @@ describe('PersistenceManager', function () {
     this.PersistenceManager = SandboxedModule.require(modulePath, {
       requires: {
         requestretry: this.request,
-        'settings-sharelatex': (this.Settings = {}),
+        '@overleaf/settings': (this.Settings = {}),
         './Metrics': (this.Metrics = {
           Timer: (Timer = (function () {
             Timer = class Timer {
@@ -34,10 +34,10 @@ describe('PersistenceManager', function () {
             Timer.initClass()
             return Timer
           })()),
-          inc: sinon.stub()
+          inc: sinon.stub(),
         }),
-        './Errors': Errors
-      }
+        './Errors': Errors,
+      },
     })
     this.project_id = 'project-id-123'
     this.projectHistoryId = 'history-id-123'
@@ -53,8 +53,8 @@ describe('PersistenceManager', function () {
       web: {
         url: (this.url = 'www.example.com'),
         user: (this.user = 'sharelatex'),
-        pass: (this.pass = 'password')
-      }
+        pass: (this.pass = 'password'),
+      },
     })
   })
 
@@ -65,7 +65,7 @@ describe('PersistenceManager', function () {
         version: this.version,
         ranges: this.ranges,
         pathname: this.pathname,
-        projectHistoryId: this.projectHistoryId
+        projectHistoryId: this.projectHistoryId,
       })
     })
 
@@ -90,15 +90,15 @@ describe('PersistenceManager', function () {
             url: `${this.url}/project/${this.project_id}/doc/${this.doc_id}`,
             method: 'GET',
             headers: {
-              accept: 'application/json'
+              accept: 'application/json',
             },
             auth: {
               user: this.user,
               pass: this.pass,
-              sendImmediately: true
+              sendImmediately: true,
             },
             jar: false,
-            timeout: 5000
+            timeout: 5000,
           })
           .should.equal(true)
       })
@@ -309,16 +309,16 @@ describe('PersistenceManager', function () {
               version: this.version,
               ranges: this.ranges,
               lastUpdatedAt: this.lastUpdatedAt,
-              lastUpdatedBy: this.lastUpdatedBy
+              lastUpdatedBy: this.lastUpdatedBy,
             },
             method: 'POST',
             auth: {
               user: this.user,
               pass: this.pass,
-              sendImmediately: true
+              sendImmediately: true,
             },
             jar: false,
-            timeout: 5000
+            timeout: 5000,
           })
           .should.equal(true)
       })

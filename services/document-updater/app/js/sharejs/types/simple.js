@@ -50,5 +50,5 @@ module.exports = {
     }
 
     return { position: pos, text: op1.text }
-  }
+  },
 }

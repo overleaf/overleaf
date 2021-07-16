@@ -75,7 +75,7 @@ const checkOp = function (op) {
 
 // Makes a function for appending components to a given op.
 // Exported for the randomOpGenerator.
-moduleExport._makeAppend = makeAppend = (op) =>
+moduleExport._makeAppend = makeAppend = op =>
   function (component) {
     if (component === 0 || component.i === '' || component.d === '') {
     } else if (op.length === 0) {

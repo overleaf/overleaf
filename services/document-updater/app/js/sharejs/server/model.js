@@ -1,7 +1,6 @@
 /* eslint-disable
     no-console,
     no-return-assign,
-    standard/no-callback-literal,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -27,7 +26,7 @@ const { EventEmitter } = require('events')
 const queue = require('./syncqueue')
 const types = require('../types')
 
-const isArray = (o) => Object.prototype.toString.call(o) === '[object Array]'
+const isArray = o => Object.prototype.toString.call(o) === '[object Array]'
 
 // This constructor creates a new Model object. There will be one model object
 // per server context.
@@ -232,7 +231,7 @@ module.exports = Model = function (db, options) {
             return callback(error)
           }
 
-          __guardMethod__(options.stats, 'writeOp', (o) => o.writeOp())
+          __guardMethod__(options.stats, 'writeOp', o => o.writeOp())
 
           // This is needed when we emit the 'change' event, below.
           const oldSnapshot = doc.snapshot
@@ -310,7 +309,7 @@ module.exports = Model = function (db, options) {
         // Version of the snapshot thats in the database
         committedVersion: committedVersion != null ? committedVersion : data.v,
         snapshotWriteLock: false,
-        dbMeta
+        dbMeta,
       }
 
       doc.opQueue = makeOpQueue(docName, doc)
@@ -359,9 +358,7 @@ module.exports = Model = function (db, options) {
   const load = function (docName, callback) {
     if (docs[docName]) {
       // The document is already loaded. Return immediately.
-      __guardMethod__(options.stats, 'cacheHit', (o) =>
-        o.cacheHit('getSnapshot')
-      )
+      __guardMethod__(options.stats, 'cacheHit', o => o.cacheHit('getSnapshot'))
       return callback(null, docs[docName])
     }
 
@@ -377,7 +374,7 @@ module.exports = Model = function (db, options) {
       return callbacks.push(callback)
     }
 
-    __guardMethod__(options.stats, 'cacheMiss', (o1) =>
+    __guardMethod__(options.stats, 'cacheMiss', o1 =>
       o1.cacheMiss('getSnapshot')
     )
 
@@ -454,20 +451,21 @@ module.exports = Model = function (db, options) {
       ) {
         let reapTimer
         clearTimeout(doc.reapTimer)
-        return (doc.reapTimer = reapTimer = setTimeout(
-          () =>
-            tryWriteSnapshot(docName, function () {
-              // If the reaping timeout has been refreshed while we're writing the snapshot, or if we're
-              // in the middle of applying an operation, don't reap.
-              if (
-                docs[docName].reapTimer === reapTimer &&
-                doc.opQueue.busy === false
-              ) {
-                return delete docs[docName]
-              }
-            }),
-          options.reapTime
-        ))
+        return (doc.reapTimer = reapTimer =
+          setTimeout(
+            () =>
+              tryWriteSnapshot(docName, function () {
+                // If the reaping timeout has been refreshed while we're writing the snapshot, or if we're
+                // in the middle of applying an operation, don't reap.
+                if (
+                  docs[docName].reapTimer === reapTimer &&
+                  doc.opQueue.busy === false
+                ) {
+                  return delete docs[docName]
+                }
+              }),
+            options.reapTime
+          ))
       }
     })
   }
@@ -497,7 +495,7 @@ module.exports = Model = function (db, options) {
 
     doc.snapshotWriteLock = true
 
-    __guardMethod__(options.stats, 'writeSnapshot', (o) => o.writeSnapshot())
+    __guardMethod__(options.stats, 'writeSnapshot', o => o.writeSnapshot())
 
     const writeSnapshot =
       (db != null ? db.writeSnapshot : undefined) ||
@@ -508,7 +506,7 @@ module.exports = Model = function (db, options) {
       meta: doc.meta,
       snapshot: doc.snapshot,
       // The database doesn't know about object types.
-      type: doc.type.name
+      type: doc.type.name,
     }
 
     // Commit snapshot.
@@ -558,7 +556,7 @@ module.exports = Model = function (db, options) {
       snapshot: type.create(),
       type: type.name,
       meta: meta || {},
-      v: 0
+      v: 0,
     }
 
     const done = function (error, dbMeta) {
@@ -871,7 +869,7 @@ module.exports = Model = function (db, options) {
 
   // Close the database connection. This is needed so nodejs can shut down cleanly.
   this.closeDb = function () {
-    __guardMethod__(db, 'close', (o) => o.close())
+    __guardMethod__(db, 'close', o => o.close())
     return (db = null)
   }
 }

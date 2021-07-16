@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let RealTimeRedisManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
@@ -45,7 +45,7 @@ module.exports = RealTimeRedisManager = {
       for (jsonUpdate of Array.from(jsonUpdates)) {
         // record metric for each update removed from queue
         metrics.summary('redis.pendingUpdates', jsonUpdate.length, {
-          status: 'pop'
+          status: 'pop',
         })
       }
       const updates = []
@@ -83,5 +83,5 @@ module.exports = RealTimeRedisManager = {
     } else {
       return pubsubClient.publish('applied-ops', blob)
     }
-  }
+  },
 }

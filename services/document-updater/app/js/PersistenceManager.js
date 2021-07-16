@@ -15,13 +15,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let PersistenceManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Errors = require('./Errors')
 const Metrics = require('./Metrics')
 const logger = require('logger-sharelatex')
 const request = require('requestretry').defaults({
   maxAttempts: 2,
-  retryDelay: 10
+  retryDelay: 10,
 })
 
 // We have to be quick with HTTP calls because we're holding a lock that
@@ -75,15 +75,15 @@ module.exports = PersistenceManager = {
         url: `${Settings.apis.web.url}${urlPath}`,
         method: 'GET',
         headers: {
-          accept: 'application/json'
+          accept: 'application/json',
         },
         auth: {
           user: Settings.apis.web.user,
           pass: Settings.apis.web.pass,
-          sendImmediately: true
+          sendImmediately: true,
         },
         jar: false,
-        timeout: MAX_HTTP_REQUEST_LENGTH
+        timeout: MAX_HTTP_REQUEST_LENGTH,
       },
       function (error, res, body) {
         updateMetric('getDoc', error, res)
@@ -164,15 +164,15 @@ module.exports = PersistenceManager = {
           ranges,
           version,
           lastUpdatedBy,
-          lastUpdatedAt
+          lastUpdatedAt,
         },
         auth: {
           user: Settings.apis.web.user,
           pass: Settings.apis.web.pass,
-          sendImmediately: true
+          sendImmediately: true,
         },
         jar: false,
-        timeout: MAX_HTTP_REQUEST_LENGTH
+        timeout: MAX_HTTP_REQUEST_LENGTH,
       },
       function (error, res, body) {
         updateMetric('setDoc', error, res)
@@ -196,5 +196,5 @@ module.exports = PersistenceManager = {
         }
       }
     )
-  }
+  },
 }

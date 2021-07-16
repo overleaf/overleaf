@@ -14,10 +14,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ProjectHistoryRedisManager
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const projectHistoryKeys = __guard__(
   Settings.redis != null ? Settings.redis.project_history : undefined,
-  (x) => x.key_schema
+  x => x.key_schema
 )
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
@@ -70,10 +70,10 @@ module.exports = ProjectHistoryRedisManager = {
       new_pathname: projectUpdate.newPathname,
       meta: {
         user_id,
-        ts: new Date()
+        ts: new Date(),
       },
       version: projectUpdate.version,
-      projectHistoryId
+      projectHistoryId,
     }
     projectUpdate[entity_type] = entity_id
 
@@ -104,10 +104,10 @@ module.exports = ProjectHistoryRedisManager = {
       url: projectUpdate.url,
       meta: {
         user_id,
-        ts: new Date()
+        ts: new Date(),
       },
       version: projectUpdate.version,
-      projectHistoryId
+      projectHistoryId,
     }
     projectUpdate[entity_type] = entitiy_id
 
@@ -132,8 +132,8 @@ module.exports = ProjectHistoryRedisManager = {
       resyncProjectStructure: { docs, files },
       projectHistoryId,
       meta: {
-        ts: new Date()
-      }
+        ts: new Date(),
+      },
     }
     const jsonUpdate = JSON.stringify(projectUpdate)
     return ProjectHistoryRedisManager.queueOps(project_id, jsonUpdate, callback)
@@ -155,18 +155,18 @@ module.exports = ProjectHistoryRedisManager = {
     const projectUpdate = {
       resyncDocContent: {
         content: lines.join('\n'),
-        version
+        version,
       },
       projectHistoryId,
       path: pathname,
       doc: doc_id,
       meta: {
-        ts: new Date()
-      }
+        ts: new Date(),
+      },
     }
     const jsonUpdate = JSON.stringify(projectUpdate)
     return ProjectHistoryRedisManager.queueOps(project_id, jsonUpdate, callback)
-  }
+  },
 }
 
 function __guard__(value, transform) {

@@ -3,7 +3,7 @@ const HistoryManager = require('./HistoryManager')
 const ProjectManager = require('./ProjectManager')
 const Errors = require('./Errors')
 const logger = require('logger-sharelatex')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const Metrics = require('./Metrics')
 const ProjectFlusher = require('./ProjectFlusher')
 const DeleteQueueManager = require('./DeleteQueueManager')
@@ -24,7 +24,7 @@ module.exports = {
   updateProject,
   resyncProjectHistory,
   flushAllProjects,
-  flushQueuedProjects
+  flushQueuedProjects,
 }
 
 function getDoc(req, res, next) {
@@ -59,7 +59,7 @@ function getDoc(req, res, next) {
         version,
         ops,
         ranges,
-        pathname
+        pathname,
       })
     }
   )
@@ -104,7 +104,7 @@ function getProjectDocsAndFlushIfOld(req, res, next) {
         logger.log(
           {
             projectId,
-            result: result.map((doc) => `${doc._id}:${doc.v}`)
+            result: result.map(doc => `${doc._id}:${doc.v}`),
           },
           'got docs via http'
         )
@@ -118,7 +118,7 @@ function clearProjectState(req, res, next) {
   const projectId = req.params.project_id
   const timer = new Metrics.Timer('http.clearProjectState')
   logger.log({ projectId }, 'clearing project state via http')
-  ProjectManager.clearProjectState(projectId, (error) => {
+  ProjectManager.clearProjectState(projectId, error => {
     timer.done()
     if (error) {
       next(error)
@@ -152,7 +152,7 @@ function setDoc(req, res, next) {
     source,
     userId,
     undoing,
-    (error) => {
+    error => {
       timer.done()
       if (error) {
         return next(error)
@@ -168,7 +168,7 @@ function flushDocIfLoaded(req, res, next) {
   const projectId = req.params.project_id
   logger.log({ projectId, docId }, 'flushing doc via http')
   const timer = new Metrics.Timer('http.flushDoc')
-  DocumentManager.flushDocIfLoadedWithLock(projectId, docId, (error) => {
+  DocumentManager.flushDocIfLoadedWithLock(projectId, docId, error => {
     timer.done()
     if (error) {
       return next(error)
@@ -188,7 +188,7 @@ function deleteDoc(req, res, next) {
     projectId,
     docId,
     { ignoreFlushErrors },
-    (error) => {
+    error => {
       timer.done()
       // There is no harm in flushing project history if the previous call
       // failed and sometimes it is required
@@ -207,7 +207,7 @@ function flushProject(req, res, next) {
   const projectId = req.params.project_id
   logger.log({ projectId }, 'flushing project via http')
   const timer = new Metrics.Timer('http.flushProject')
-  ProjectManager.flushProjectWithLocks(projectId, (error) => {
+  ProjectManager.flushProjectWithLocks(projectId, error => {
     timer.done()
     if (error) {
       return next(error)
@@ -228,7 +228,7 @@ function deleteProject(req, res, next) {
     options.skip_history_flush = true
   } // don't flush history when realtime shuts down
   if (req.query.background) {
-    ProjectManager.queueFlushAndDeleteProject(projectId, (error) => {
+    ProjectManager.queueFlushAndDeleteProject(projectId, error => {
       if (error) {
         return next(error)
       }
@@ -237,18 +237,14 @@ function deleteProject(req, res, next) {
     }) // No Content
   } else {
     const timer = new Metrics.Timer('http.deleteProject')
-    ProjectManager.flushAndDeleteProjectWithLocks(
-      projectId,
-      options,
-      (error) => {
-        timer.done()
-        if (error) {
-          return next(error)
-        }
-        logger.log({ projectId }, 'deleted project via http')
-        res.sendStatus(204) // No Content
+    ProjectManager.flushAndDeleteProjectWithLocks(projectId, options, error => {
+      timer.done()
+      if (error) {
+        return next(error)
       }
-    )
+      logger.log({ projectId }, 'deleted project via http')
+      res.sendStatus(204) // No Content
+    })
   }
 }
 
@@ -261,7 +257,7 @@ function deleteMultipleProjects(req, res, next) {
       logger.log({ projectId }, 'queue delete of project via http')
       ProjectManager.queueFlushAndDeleteProject(projectId, cb)
     },
-    (error) => {
+    error => {
       if (error) {
         return next(error)
       }
@@ -281,45 +277,35 @@ function acceptChanges(req, res, next) {
     `accepting ${changeIds.length} changes via http`
   )
   const timer = new Metrics.Timer('http.acceptChanges')
-  DocumentManager.acceptChangesWithLock(
-    projectId,
-    docId,
-    changeIds,
-    (error) => {
-      timer.done()
-      if (error) {
-        return next(error)
-      }
-      logger.log(
-        { projectId, docId },
-        `accepted ${changeIds.length} changes via http`
-      )
-      res.sendStatus(204) // No Content
+  DocumentManager.acceptChangesWithLock(projectId, docId, changeIds, error => {
+    timer.done()
+    if (error) {
+      return next(error)
     }
-  )
+    logger.log(
+      { projectId, docId },
+      `accepted ${changeIds.length} changes via http`
+    )
+    res.sendStatus(204) // No Content
+  })
 }
 
 function deleteComment(req, res, next) {
   const {
     project_id: projectId,
     doc_id: docId,
-    comment_id: commentId
+    comment_id: commentId,
   } = req.params
   logger.log({ projectId, docId, commentId }, 'deleting comment via http')
   const timer = new Metrics.Timer('http.deleteComment')
-  DocumentManager.deleteCommentWithLock(
-    projectId,
-    docId,
-    commentId,
-    (error) => {
-      timer.done()
-      if (error) {
-        return next(error)
-      }
-      logger.log({ projectId, docId, commentId }, 'deleted comment via http')
-      res.sendStatus(204) // No Content
+  DocumentManager.deleteCommentWithLock(projectId, docId, commentId, error => {
+    timer.done()
+    if (error) {
+      return next(error)
     }
-  )
+    logger.log({ projectId, docId, commentId }, 'deleted comment via http')
+    res.sendStatus(204) // No Content
+  })
 }
 
 function updateProject(req, res, next) {
@@ -333,7 +319,7 @@ function updateProject(req, res, next) {
     userId,
     updates,
     version,
-    (error) => {
+    error => {
       timer.done()
       if (error) {
         return next(error)
@@ -357,7 +343,7 @@ function resyncProjectHistory(req, res, next) {
     projectHistoryId,
     docs,
     files,
-    (error) => {
+    error => {
       if (error) {
         return next(error)
       }
@@ -372,7 +358,7 @@ function flushAllProjects(req, res, next) {
   const options = {
     limit: req.query.limit || 1000,
     concurrency: req.query.concurrency || 5,
-    dryRun: req.query.dryRun || false
+    dryRun: req.query.dryRun || false,
   }
   ProjectFlusher.flushAllProjects(options, (err, projectIds) => {
     if (err) {
@@ -389,7 +375,7 @@ function flushQueuedProjects(req, res, next) {
   const options = {
     limit: req.query.limit || 1000,
     timeout: 5 * 60 * 1000,
-    min_delete_age: req.query.min_delete_age || 5 * 60 * 1000
+    min_delete_age: req.query.min_delete_age || 5 * 60 * 1000,
   }
   DeleteQueueManager.flushAndDeleteOldProjects(options, (err, flushed) => {
     if (err) {

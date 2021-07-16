@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 
 const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
@@ -16,10 +16,10 @@ describe('SizeChecks', function () {
       op: [
         {
           i: 'insert some more lines that will bring it above the limit\n',
-          p: 42
-        }
+          p: 42,
+        },
       ],
-      v: this.version
+      v: this.version,
     }
     this.project_id = DocUpdaterClient.randomId()
     this.doc_id = DocUpdaterClient.randomId()
@@ -30,7 +30,7 @@ describe('SizeChecks', function () {
       this.lines = ['0123456789'.repeat(Settings.max_doc_length / 10 + 1)]
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        v: this.version
+        v: this.version,
       })
     })
 
@@ -47,13 +47,13 @@ describe('SizeChecks', function () {
         const update = {
           doc: this.doc_id,
           op: this.update.op,
-          v: this.version
+          v: this.version,
         }
         DocUpdaterClient.sendUpdate(
           this.project_id,
           this.doc_id,
           update,
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }
@@ -77,7 +77,7 @@ describe('SizeChecks', function () {
       this.lines = ['0123456789'.repeat(Settings.max_doc_length / 10 - 1)]
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
-        v: this.version
+        v: this.version,
       })
     })
 
@@ -98,13 +98,13 @@ describe('SizeChecks', function () {
         const update = {
           doc: this.doc_id,
           op: this.update.op,
-          v: this.version
+          v: this.version,
         }
         DocUpdaterClient.sendUpdate(
           this.project_id,
           this.doc_id,
           update,
-          (error) => {
+          error => {
             if (error != null) {
               throw error
             }

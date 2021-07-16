@@ -2,7 +2,7 @@ const Metrics = require('@overleaf/metrics')
 Metrics.initialize('doc-updater')
 
 const express = require('express')
-const Settings = require('settings-sharelatex')
+const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 logger.initialize('document-updater')
 
@@ -114,7 +114,7 @@ const pubsubClient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.pubsub
 )
 app.get('/health_check/redis', (req, res, next) => {
-  pubsubClient.healthCheck((error) => {
+  pubsubClient.healthCheck(error => {
     if (error) {
       logger.err({ err: error }, 'failed redis health check')
       return res.sendStatus(500)
@@ -128,7 +128,7 @@ const docUpdaterRedisClient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
 app.get('/health_check/redis_cluster', (req, res, next) => {
-  docUpdaterRedisClient.healthCheck((error) => {
+  docUpdaterRedisClient.healthCheck(error => {
     if (error) {
       logger.err({ err: error }, 'failed redis cluster health check')
       return res.sendStatus(500)
@@ -141,32 +141,32 @@ app.get('/health_check/redis_cluster', (req, res, next) => {
 app.get('/health_check', (req, res, next) => {
   async.series(
     [
-      (cb) => {
-        pubsubClient.healthCheck((error) => {
+      cb => {
+        pubsubClient.healthCheck(error => {
           if (error) {
             logger.err({ err: error }, 'failed redis health check')
           }
           cb(error)
         })
       },
-      (cb) => {
-        docUpdaterRedisClient.healthCheck((error) => {
+      cb => {
+        docUpdaterRedisClient.healthCheck(error => {
           if (error) {
             logger.err({ err: error }, 'failed redis cluster health check')
           }
           cb(error)
         })
       },
-      (cb) => {
-        mongodb.healthCheck((error) => {
+      cb => {
+        mongodb.healthCheck(error => {
           if (error) {
             logger.err({ err: error }, 'failed mongo health check')
           }
           cb(error)
         })
-      }
+      },
     ],
-    (error) => {
+    error => {
       if (error) {
         return res.sendStatus(500)
       } else {
@@ -189,7 +189,7 @@ app.use((error, req, res, next) => {
   }
 })
 
-const shutdownCleanly = (signal) => () => {
+const shutdownCleanly = signal => () => {
   logger.log({ signal }, 'received interrupt, cleaning up')
   Settings.shuttingDown = true
   setTimeout(() => {
@@ -198,8 +198,8 @@ const shutdownCleanly = (signal) => () => {
   }, 10000)
 }
 
-const watchForEvent = (eventName) => {
-  docUpdaterRedisClient.on(eventName, (e) => {
+const watchForEvent = eventName => {
+  docUpdaterRedisClient.on(eventName, e => {
     console.log(`redis event: ${eventName} ${e}`) // eslint-disable-line no-console
   })
 }
@@ -236,7 +236,7 @@ if (!module.parent) {
         }
       })
     })
-    .catch((err) => {
+    .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
       process.exit(1)
     })
@@ -251,7 +251,7 @@ for (const signal of [
   'SIGUSR1',
   'SIGUSR2',
   'SIGTERM',
-  'SIGABRT'
+  'SIGABRT',
 ]) {
   process.on(signal, shutdownCleanly(signal))
 }

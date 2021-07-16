@@ -29,7 +29,7 @@ describe('DocumentManager', function () {
         './PersistenceManager': (this.PersistenceManager = {}),
         './HistoryManager': (this.HistoryManager = {
           flushDocChangesAsync: sinon.stub(),
-          flushProjectChangesAsync: sinon.stub()
+          flushProjectChangesAsync: sinon.stub(),
         }),
         './Metrics': (this.Metrics = {
           Timer: (Timer = (function () {
@@ -40,14 +40,14 @@ describe('DocumentManager', function () {
             }
             Timer.initClass()
             return Timer
-          })())
+          })()),
         }),
         './RealTimeRedisManager': (this.RealTimeRedisManager = {}),
         './DiffCodec': (this.DiffCodec = {}),
         './UpdateManager': (this.UpdateManager = {}),
         './RangesManager': (this.RangesManager = {}),
-        './Errors': Errors
-      }
+        './Errors': Errors,
+      },
     })
     this.project_id = 'project-id-123'
     this.projectHistoryId = 'history-id-123'
@@ -123,7 +123,7 @@ describe('DocumentManager', function () {
           this.project_id,
           this.doc_id,
           {},
-          (error) => {
+          error => {
             error.should.exist
             this.RedisManager.removeDocFromMemory.called.should.equal(false)
             return done()
@@ -137,7 +137,7 @@ describe('DocumentManager', function () {
             this.project_id,
             this.doc_id,
             { ignoreFlushErrors: true },
-            (error) => {
+            error => {
               if (error != null) {
                 return done(error)
               }
@@ -484,7 +484,7 @@ describe('DocumentManager', function () {
         this.afterLines = ['after', 'lines']
         this.ops = [
           { i: 'foo', p: 4 },
-          { d: 'bar', p: 42 }
+          { d: 'bar', p: 42 },
         ]
         this.DocumentManager.getDoc = sinon
           .stub()
@@ -543,8 +543,8 @@ describe('DocumentManager', function () {
               meta: {
                 type: 'external',
                 source: this.source,
-                user_id: this.user_id
-              }
+                user_id: this.user_id,
+              },
             })
             .should.equal(true)
         })
@@ -636,7 +636,7 @@ describe('DocumentManager', function () {
           // Copy ops so we don't interfere with other tests
           this.ops = [
             { i: 'foo', p: 4 },
-            { d: 'bar', p: 42 }
+            { d: 'bar', p: 42 },
           ]
           this.DiffCodec.diffAsShareJsOp = sinon
             .stub()
@@ -653,7 +653,7 @@ describe('DocumentManager', function () {
         })
 
         return it('should set the undo flag on each op', function () {
-          return Array.from(this.ops).map((op) => op.u.should.equal(true))
+          return Array.from(this.ops).map(op => op.u.should.equal(true))
         })
       })
     })
@@ -666,7 +666,7 @@ describe('DocumentManager', function () {
         'mock-change-id-1',
         'mock-change-id-2',
         'mock-change-id-3',
-        'mock-change-id-4'
+        'mock-change-id-4',
       ]
       this.version = 34
       this.lines = ['original', 'lines']

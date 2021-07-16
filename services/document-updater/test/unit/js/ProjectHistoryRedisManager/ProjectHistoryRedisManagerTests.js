@@ -28,7 +28,7 @@ describe('ProjectHistoryRedisManager', function () {
       modulePath,
       {
         requires: {
-          'settings-sharelatex': (this.settings = {
+          '@overleaf/settings': (this.settings = {
             redis: {
               project_history: {
                 key_schema: {
@@ -37,16 +37,16 @@ describe('ProjectHistoryRedisManager', function () {
                   },
                   projectHistoryFirstOpTimestamp({ project_id }) {
                     return `ProjectHistory:FirstOpTimestamp:${project_id}`
-                  }
-                }
-              }
-            }
+                  },
+                },
+              },
+            },
           }),
           '@overleaf/redis-wrapper': {
-            createClient: () => this.rclient
+            createClient: () => this.rclient,
           },
-          './Metrics': (this.metrics = { summary: sinon.stub() })
-        }
+          './Metrics': (this.metrics = { summary: sinon.stub() }),
+        },
       }
     ))
   })
@@ -97,7 +97,7 @@ describe('ProjectHistoryRedisManager', function () {
       this.rawUpdate = {
         pathname: (this.pathname = '/old'),
         newPathname: (this.newPathname = '/new'),
-        version: (this.version = 2)
+        version: (this.version = 2),
       }
 
       this.ProjectHistoryRedisManager.queueOps = sinon.stub()
@@ -118,11 +118,11 @@ describe('ProjectHistoryRedisManager', function () {
         new_pathname: this.newPathname,
         meta: {
           user_id: this.user_id,
-          ts: new Date()
+          ts: new Date(),
         },
         version: this.version,
         projectHistoryId: this.projectHistoryId,
-        file: this.file_id
+        file: this.file_id,
       }
 
       return this.ProjectHistoryRedisManager.queueOps
@@ -144,7 +144,7 @@ describe('ProjectHistoryRedisManager', function () {
         pathname: (this.pathname = '/old'),
         docLines: (this.docLines = 'a\nb'),
         version: (this.version = 2),
-        url: (this.url = 'filestore.example.com')
+        url: (this.url = 'filestore.example.com'),
       }
 
       this.ProjectHistoryRedisManager.queueOps = sinon.stub()
@@ -166,11 +166,11 @@ describe('ProjectHistoryRedisManager', function () {
         url: this.url,
         meta: {
           user_id: this.user_id,
-          ts: new Date()
+          ts: new Date(),
         },
         version: this.version,
         projectHistoryId: this.projectHistoryId,
-        doc: this.doc_id
+        doc: this.doc_id,
       }
 
       return this.ProjectHistoryRedisManager.queueOps

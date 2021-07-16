@@ -25,7 +25,7 @@ describe('ProjectManager - flushAndDeleteProject', function () {
         './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
         './DocumentManager': (this.DocumentManager = {}),
         './HistoryManager': (this.HistoryManager = {
-          flushProjectChanges: sinon.stub().callsArg(2)
+          flushProjectChanges: sinon.stub().callsArg(2),
         }),
         './Metrics': (this.Metrics = {
           Timer: (Timer = (function () {
@@ -36,9 +36,9 @@ describe('ProjectManager - flushAndDeleteProject', function () {
             }
             Timer.initClass()
             return Timer
-          })())
-        })
-      }
+          })()),
+        }),
+      },
     })
     this.project_id = 'project-id-123'
     return (this.callback = sinon.stub())
@@ -54,7 +54,7 @@ describe('ProjectManager - flushAndDeleteProject', function () {
       return this.ProjectManager.flushAndDeleteProjectWithLocks(
         this.project_id,
         {},
-        (error) => {
+        error => {
           this.callback(error)
           return done()
         }
@@ -68,7 +68,7 @@ describe('ProjectManager - flushAndDeleteProject', function () {
     })
 
     it('should delete each doc in the project', function () {
-      return Array.from(this.doc_ids).map((doc_id) =>
+      return Array.from(this.doc_ids).map(doc_id =>
         this.DocumentManager.flushAndDeleteDocWithLock
           .calledWith(this.project_id, doc_id, {})
           .should.equal(true)
@@ -110,7 +110,7 @@ describe('ProjectManager - flushAndDeleteProject', function () {
       return this.ProjectManager.flushAndDeleteProjectWithLocks(
         this.project_id,
         {},
-        (error) => {
+        error => {
           this.callback(error)
           return done()
         }
@@ -118,7 +118,7 @@ describe('ProjectManager - flushAndDeleteProject', function () {
     })
 
     it('should still flush each doc in the project', function () {
-      return Array.from(this.doc_ids).map((doc_id) =>
+      return Array.from(this.doc_ids).map(doc_id =>
         this.DocumentManager.flushAndDeleteDocWithLock
           .calledWith(this.project_id, doc_id, {})
           .should.equal(true)
