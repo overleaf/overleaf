@@ -2,28 +2,8 @@
 
 FROM maven:3-jdk-11 as base
 
-RUN apt-get update && apt-get install -y make git sqlite3 build-essential dpkg-dev
-
-RUN echo "deb-src http://deb.debian.org/debian buster main" >> /etc/apt/sources.list && \
-    echo "deb-src http://deb.debian.org/debian buster-updates main" >> /etc/apt/sources.list && \
-    echo "deb-src http://security.debian.org/debian-security buster/updates main" >> /etc/apt/sources.list
-
-RUN mkdir -p /build
-WORKDIR /build
-
-RUN apt-get update && \
-    apt-get -y source libjemalloc-dev && \
-    apt-get -y build-dep libjemalloc-dev && \
-    echo "override_dh_auto_configure:" >> jemalloc-5.1.0/debian/rules && \
-    echo "\tdh_auto_configure -- --enable-debug --enable-fill --enable-prof --enable-stat" >> jemalloc-5.1.0/debian/rules && \
-    cat jemalloc-5.1.0/debian/rules
-
-WORKDIR /build/jemalloc-5.1.0
-RUN dpkg-buildpackage
-
-ADD install-all-dev-packages.sh /install-all-dev-packages.sh
-
-RUN rm -rf /var/lib/apt/lists
+RUN apt-get update && apt-get install -y make git sqlite3 \
+ && rm -rf /var/lib/apt/lists
 
 COPY vendor/envsubst /opt/envsubst
 RUN chmod +x /opt/envsubst
@@ -43,12 +23,9 @@ RUN make package \
       -name 'writelatex-git-bridge*jar-with-dependencies.jar' \
       -exec mv {} /git-bridge.jar \;
 
-FROM builder
-# FROM openjdk:11-jre <-- disabled while we are memory profiling
+FROM openjdk:11-jre
 
-WORKDIR /
-
-RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat binutils graphviz gdb \
+RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat \
  && rm -rf /var/lib/apt/lists
 
 # Install Google Cloud Profiler agent
@@ -61,16 +38,9 @@ RUN mkdir /opt/cdbg && \
   wget -qO- https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_gce.tar.gz | \
   tar xvz -C /opt/cdbg
 
-# Disabled while we are memory profiling (these are already in the image)
-# RUN useradd --create-home node
+RUN useradd --create-home node
 
-# COPY --from=builder /git-bridge.jar /
-# COPY --from=builder /build/*.deb /tmp/
-
-# RUN dpkg -i /tmp/libjemalloc*.deb
-RUN dpkg -i /build/*.deb
-
-RUN apt-get -y update && /install-all-dev-packages.sh && rm -rf /var/lib/apt/lists
+COPY --from=builder /git-bridge.jar /
 
 COPY vendor/envsubst /opt/envsubst
 RUN chmod +x /opt/envsubst

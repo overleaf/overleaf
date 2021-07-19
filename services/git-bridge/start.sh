@@ -16,6 +16,4 @@ if [ "$ENABLE_DEBUG_AGENT" == "true" ]; then
   GIT_BRIDGE_JVM_ARGS="-agentpath:/opt/cdbg/cdbg_java_agent.so -Dcom.google.cdbg.module=git-bridge -Dcom.google.cdbg.version=$VERSION ${GIT_BRIDGE_JVM_ARGS}"
 fi
 
-export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so
-export MALLOC_CONF=prof:true,lg_prof_interval:30,lg_prof_sample:17,prof_prefix:/tmp/jemalloc
 exec java $GIT_BRIDGE_JVM_ARGS -jar /git-bridge.jar /conf/runtime.json
