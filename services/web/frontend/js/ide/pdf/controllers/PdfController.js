@@ -732,11 +732,7 @@ App.controller(
           newLogsUI: window.showNewLogsUI,
           subvariant: window.showNewLogsUI ? window.logsUISubvariant : null,
         }
-        eventTracking.sendMBSampled(
-          'compile-result',
-          JSON.stringify(metadata),
-          0.01
-        )
+        eventTracking.sendMBSampled('compile-result', metadata, 0.01)
       }
     }
 
