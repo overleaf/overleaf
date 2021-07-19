@@ -667,3 +667,11 @@ CodeMirror
     bottom: 100%;
   }
 }
+
+// The source editor container is managed by jQuery's UI layout library, which adds an `overflow: hidden`
+// rule to it. This is problematic because we need overflowing content to be visible (the review panel
+// previews are shown on hover, visually outside the source editor container). As the `overflow: hidden`
+// rule is added automatically (inline and not configurable), the only workaround is to use `!important`.
+.editor-container {
+  overflow: visible !important;
+}
