@@ -25,8 +25,10 @@ RUN make package \
 
 FROM openjdk:11-jre
 
-RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat \
+RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat libjemalloc2 \
  && rm -rf /var/lib/apt/lists
+
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 # Install Google Cloud Profiler agent
 RUN mkdir -p /opt/cprof && \
