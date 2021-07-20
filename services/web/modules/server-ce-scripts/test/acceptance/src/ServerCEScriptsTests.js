@@ -1,5 +1,6 @@
 const { execSync } = require('child_process')
 const { expect } = require('chai')
+const { db } = require('../../../../../app/src/infrastructure/mongodb')
 const User = require('../../../../../test/acceptance/src/helpers/User').promises
 
 /**
@@ -16,6 +17,10 @@ function run(cmd) {
     stdio: ['ignore', 'pipe', 'ignore'],
     cwd: 'modules/server-ce-scripts/scripts',
   }).toString()
+}
+
+async function getUser(email) {
+  return db.users.findOne({ email }, { projection: { _id: 0, isAdmin: 1 } })
 }
 
 describe('ServerCEScripts', function () {
@@ -55,15 +60,25 @@ describe('ServerCEScripts', function () {
     })
   })
 
-  describe('create-admin', function () {
+  describe('create-user', function () {
     it('should exit with code 0 on success', function () {
-      const out = run('node create-admin --email=foo@bar.com')
-      expect(out).to.include('/user/password/set?passwordResetToken=')
+      const out = run('node create-user --email=foo@bar.com')
+      expect(out).to.include('/user/activate?token=')
+    })
+
+    it('should create a regular user by default', async function () {
+      run('node create-user --email=foo@bar.com')
+      expect(await getUser('foo@bar.com')).to.deep.equal({ isAdmin: false })
+    })
+
+    it('should create an admin user with --admin flag', async function () {
+      run('node create-user --admin --email=foo@bar.com')
+      expect(await getUser('foo@bar.com')).to.deep.equal({ isAdmin: true })
     })
 
     it('should exit with code 1 on missing email', function () {
       try {
-        run('node create-admin')
+        run('node create-user')
       } catch (e) {
         expect(e.status).to.equal(1)
         return
