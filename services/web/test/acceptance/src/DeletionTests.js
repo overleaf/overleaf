@@ -4,8 +4,6 @@ const async = require('async')
 const { expect } = require('chai')
 const settings = require('@overleaf/settings')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
-const { Subscription } = require('../../../app/src/models/Subscription')
-const SubscriptionViewModelBuilder = require('../../../app/src/Features/Subscription/SubscriptionViewModelBuilder')
 const MockDocstoreApiClass = require('./mocks/MockDocstoreApi')
 const MockFilestoreApiClass = require('./mocks/MockFilestoreApi')
 
@@ -73,29 +71,6 @@ describe('Deleting a user', function () {
         )
       })
     })
-  })
-
-  it('Should fail if the user has a subscription', function (done) {
-    Subscription.create(
-      {
-        admin_id: this.user._id,
-        manager_ids: [this.user._id],
-        planCode: 'collaborator',
-      },
-      error => {
-        expect(error).not.to.exist
-        SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
-          this.user,
-          error => {
-            expect(error).not.to.exist
-            this.user.deleteUser(error => {
-              expect(error).to.exist
-              done()
-            })
-          }
-        )
-      }
-    )
   })
 
   it("Should delete the user's projects", function (done) {
@@ -433,152 +408,6 @@ describe('Deleting a project', function () {
               }
             )
           }
-        )
-      })
-    })
-  })
-
-  describe('when the deleted project has deletedFiles', function () {
-    beforeEach('delete project', function (done) {
-      this.user.deleteProject(this.projectId, done)
-    })
-    let fileId1, fileId2
-    beforeEach('create files', function () {
-      // take a short cut and just allocate file ids
-      fileId1 = ObjectId()
-      fileId2 = ObjectId()
-    })
-    const otherFileDetails = {
-      name: 'universe.jpg',
-      linkedFileData: null,
-      hash: 'ed19e7d6779b47d8c63f6fa5a21954dcfb6cac00',
-      deletedAt: new Date(),
-    }
-    beforeEach('insert deletedFiles', async function () {
-      const deletedFiles = [
-        { _id: fileId1, ...otherFileDetails },
-        { _id: fileId2, ...otherFileDetails },
-        // duplicate entry
-        { _id: fileId1, ...otherFileDetails },
-      ]
-      await db.deletedProjects.updateOne(
-        { 'deleterData.deletedProjectId': ObjectId(this.projectId) },
-        { $set: { 'project.deletedFiles': deletedFiles } }
-      )
-    })
-    describe('when undelete the project', function () {
-      let admin
-      beforeEach('create admin', function (done) {
-        admin = new User()
-        async.series(
-          [
-            cb => admin.ensureUserExists(cb),
-            cb => admin.ensureAdmin(cb),
-            cb => admin.login(cb),
-          ],
-          done
-        )
-      })
-      beforeEach('undelete project', function (done) {
-        admin.undeleteProject(this.projectId, done)
-      })
-
-      it('should not insert deletedFiles into the projects collection', function (done) {
-        this.user.getProject(this.projectId, (error, project) => {
-          if (error) return done(error)
-          expect(project.deletedFiles).to.deep.equal([])
-          done()
-        })
-      })
-
-      it('should insert unique entries into the deletedFiles collection', async function () {
-        const docs = await db.deletedFiles
-          .find({}, { sort: { _id: 1 } })
-          .toArray()
-        expect(docs).to.deep.equal([
-          {
-            _id: fileId1,
-            projectId: ObjectId(this.projectId),
-            ...otherFileDetails,
-          },
-          {
-            _id: fileId2,
-            projectId: ObjectId(this.projectId),
-            ...otherFileDetails,
-          },
-        ])
-      })
-    })
-  })
-
-  describe('when the deleted project has deletedDocs', function () {
-    beforeEach('delete project', function (done) {
-      this.user.deleteProject(this.projectId, done)
-    })
-
-    let deletedDocs
-    beforeEach('set deletedDocs', function () {
-      deletedDocs = [
-        { _id: ObjectId(), name: 'foo.tex', deletedAt: new Date() },
-        { _id: ObjectId(), name: 'bar.tex', deletedAt: new Date() },
-      ]
-      deletedDocs.forEach(doc => {
-        MockDocstoreApi.createLegacyDeletedDoc(
-          this.projectId,
-          doc._id.toString()
-        )
-      })
-    })
-
-    beforeEach('insert deletedDocs', async function () {
-      await db.deletedProjects.updateOne(
-        { 'deleterData.deletedProjectId': ObjectId(this.projectId) },
-        { $set: { 'project.deletedDocs': deletedDocs } }
-      )
-    })
-
-    it('should not see any doc names before', async function () {
-      const docs = MockDocstoreApi.getDeletedDocs(this.projectId)
-      expect(docs).to.deep.equal(
-        deletedDocs.map(doc => {
-          const { _id } = doc
-          return { _id: _id.toString(), name: undefined }
-        })
-      )
-    })
-
-    describe('when undeleting the project', function () {
-      let admin
-      beforeEach('create admin', function (done) {
-        admin = new User()
-        async.series(
-          [
-            cb => admin.ensureUserExists(cb),
-            cb => admin.ensureAdmin(cb),
-            cb => admin.login(cb),
-          ],
-          done
-        )
-      })
-      beforeEach('undelete project', function (done) {
-        admin.undeleteProject(this.projectId, done)
-      })
-
-      it('should not insert deletedDocs into the projects collection', function (done) {
-        this.user.getProject(this.projectId, (error, project) => {
-          if (error) return done(error)
-          expect(project.deletedDocs).to.deep.equal([])
-          done()
-        })
-      })
-
-      it('should back fill deleted docs context', async function () {
-        const docs = MockDocstoreApi.getDeletedDocs(this.projectId)
-        expect(docs).to.deep.equal(
-          deletedDocs.map(doc => {
-            const { _id, name } = doc
-            return { _id: _id.toString(), name }
-          })
         )
       })
     })

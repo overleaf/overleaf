@@ -129,11 +129,27 @@ test_frontend:
 #
 
 test_acceptance: test_acceptance_app test_acceptance_modules
+test_acceptance_saas: test_acceptance_app_saas test_acceptance_modules_merged_saas
+test_acceptance_server_ce: test_acceptance_app_server_ce test_acceptance_modules_merged_server_ce
+test_acceptance_server_pro: test_acceptance_app_server_pro test_acceptance_modules_merged_server_pro
 
-test_acceptance_app:
-	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_acceptance
-	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+TEST_ACCEPTANCE_APP :=  \
+	test_acceptance_app_saas \
+	test_acceptance_app_server_ce \
+	test_acceptance_app_server_pro \
+
+test_acceptance_app: $(TEST_ACCEPTANCE_APP)
+test_acceptance_app_saas: export COMPOSE_PROJECT_NAME=acceptance_test_saas_$(BUILD_DIR_NAME)
+test_acceptance_app_saas: export SHARELATEX_CONFIG=$(CFG_SAAS)
+test_acceptance_app_server_ce: export COMPOSE_PROJECT_NAME=acceptance_test_server_ce_$(BUILD_DIR_NAME)
+test_acceptance_app_server_ce: export SHARELATEX_CONFIG=$(CFG_SERVER_CE)
+test_acceptance_app_server_pro: export COMPOSE_PROJECT_NAME=acceptance_test_server_pro_$(BUILD_DIR_NAME)
+test_acceptance_app_server_pro: export SHARELATEX_CONFIG=$(CFG_SERVER_PRO)
+
+$(TEST_ACCEPTANCE_APP):
+	$(DOCKER_COMPOSE) down -v -t 0
+	$(DOCKER_COMPOSE) run --rm test_acceptance
+	$(DOCKER_COMPOSE) down -v -t 0
 
 # We are using _make magic_ for turning these file-targets into calls to
 #  sub-Makefiles in the individual modules.
@@ -259,19 +275,6 @@ $(TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS):
 	$(DOCKER_COMPOSE) down -v -t 0
 
 test_acceptance_modules: $(TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS)
-
-test_acceptance_app_merged_inner:
-	npm run --silent test:acceptance:app
-
-test_acceptance_merged_inner: test_acceptance_app_merged_inner
-test_acceptance_merged_inner: test_acceptance_modules_merged_inner
-
-test_acceptance_merged: export COMPOSE_PROJECT_NAME = \
-	acceptance_test_merged_$(BUILD_DIR_NAME)
-test_acceptance_merged:
-	$(DOCKER_COMPOSE) down -v -t 0
-	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_merged_inner
-	$(DOCKER_COMPOSE) down -v -t 0
 
 #
 # CI tests

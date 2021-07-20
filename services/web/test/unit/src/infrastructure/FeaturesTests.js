@@ -6,7 +6,9 @@ describe('Features', function () {
   beforeEach(function () {
     this.Features = SandboxedModule.require(modulePath, {
       requires: {
-        '@overleaf/settings': (this.settings = {}),
+        '@overleaf/settings': (this.settings = {
+          moduleImportSequence: [],
+        }),
       },
     })
   })
@@ -45,10 +47,11 @@ describe('Features', function () {
   describe('hasFeature', function () {
     describe('without any settings', function () {
       it('should return true', function () {
-        expect(this.Features.hasFeature('registration')).to.be.true
+        expect(this.Features.hasFeature('registration-page')).to.be.true
         expect(this.Features.hasFeature('templates-server-pro')).to.be.true
       })
       it('should return false', function () {
+        expect(this.Features.hasFeature('registration')).to.be.false
         expect(this.Features.hasFeature('affiliations')).to.be.false
         expect(this.Features.hasFeature('analytics')).to.be.false
         expect(this.Features.hasFeature('custom-togglers')).to.be.false

@@ -132,9 +132,13 @@ describe('ProjectDeleter', function () {
         deleteProject: sinon.stub().resolves(),
       },
     }
+    this.Features = {
+      hasFeature: sinon.stub().returns(true),
+    }
 
     this.ProjectDeleter = SandboxedModule.require(modulePath, {
       requires: {
+        '../../infrastructure/Features': this.Features,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../../models/Project': { Project: Project },
         './ProjectHelper': this.ProjectHelper,
@@ -483,6 +487,53 @@ describe('ProjectDeleter', function () {
         ).to.have.been.calledWith({
           project_id: this.deletedProjects[0].project._id,
         })
+      })
+    })
+
+    describe('when history-v1 is not available', function () {
+      beforeEach(async function () {
+        this.Features.hasFeature.returns(false)
+
+        this.ProjectMock.expects('findById')
+          .withArgs(this.deletedProjects[0].deleterData.deletedProjectId)
+          .chain('exec')
+          .resolves(null)
+        this.DeletedProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: this.deletedProjects[0]._id,
+            },
+            {
+              $set: {
+                'deleterData.deleterIpAddress': null,
+                project: null,
+              },
+            }
+          )
+          .chain('exec')
+          .resolves()
+
+        this.DeletedProjectMock.expects('findOne')
+          .withArgs({
+            'deleterData.deletedProjectId': this.deletedProjects[0].project._id,
+          })
+          .chain('exec')
+          .resolves(this.deletedProjects[0])
+
+        await this.ProjectDeleter.promises.expireDeletedProject(
+          this.deletedProjects[0].project._id
+        )
+      })
+
+      it('should destroy the docs in docstore', function () {
+        expect(
+          this.DocstoreManager.promises.destroyProject
+        ).to.have.been.calledWith(this.deletedProjects[0].project._id)
+      })
+
+      it('should not call project history', function () {
+        expect(this.HistoryManager.promises.deleteProject).to.not.have.been
+          .called
       })
     })
 

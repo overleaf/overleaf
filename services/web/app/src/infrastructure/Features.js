@@ -1,17 +1,18 @@
 const _ = require('lodash')
 const Settings = require('@overleaf/settings')
-const fs = require('fs')
 
-const publicRegistrationModuleAvailable = fs.existsSync(
-  `${__dirname}/../../../modules/public-registration`
+const publicRegistrationModuleAvailable = Settings.moduleImportSequence.includes(
+  'public-registration'
 )
 
-const supportModuleAvailable = fs.existsSync(
-  `${__dirname}/../../../modules/support`
+const supportModuleAvailable = Settings.moduleImportSequence.includes('support')
+
+const historyV1ModuleAvailable = Settings.moduleImportSequence.includes(
+  'history-v1'
 )
 
-const trackChangesModuleAvailable = fs.existsSync(
-  `${__dirname}/../../../modules/track-changes`
+const trackChangesModuleAvailable = Settings.moduleImportSequence.includes(
+  'track-changes'
 )
 
 /**
@@ -56,11 +57,13 @@ const Features = {
         return Boolean(Settings.overleaf)
       case 'homepage':
         return Boolean(Settings.enableHomepage)
-      case 'registration':
+      case 'registration-page':
         return (
           !Features.externalAuthenticationSystemUsed() ||
           Boolean(Settings.overleaf)
         )
+      case 'registration':
+        return publicRegistrationModuleAvailable || Boolean(Settings.overleaf)
       case 'github-sync':
         return Boolean(Settings.enableGithubSync)
       case 'git-bridge':
@@ -71,6 +74,8 @@ const Features = {
         return Boolean(Settings.oauth)
       case 'templates-server-pro':
         return !Settings.overleaf
+      case 'history-v1':
+        return historyV1ModuleAvailable
       case 'affiliations':
       case 'analytics':
         return Boolean(_.get(Settings, ['apis', 'v1', 'url']))

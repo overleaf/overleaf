@@ -10,9 +10,6 @@ const UserPromises = require('./helpers/User').promises
 const redis = require('./helpers/redis')
 const Features = require('../../../app/src/infrastructure/Features')
 
-// Currently this is testing registration via the 'public-registration' module,
-// whereas in production we're using the 'overleaf-integration' module.
-
 // Expectations
 const expectProjectAccess = function (user, projectId, callback) {
   // should have access to project
@@ -220,7 +217,7 @@ describe('Registration', function () {
 
   describe('CSRF protection', function () {
     before(function () {
-      if (!Features.hasFeature('public-registration')) {
+      if (!Features.hasFeature('registration')) {
         this.skip()
       }
     })
@@ -311,7 +308,7 @@ describe('Registration', function () {
 
   describe('Register', function () {
     before(function () {
-      if (!Features.hasFeature('public-registration')) {
+      if (!Features.hasFeature('registration')) {
         this.skip()
       }
     })
@@ -328,39 +325,6 @@ describe('Registration', function () {
         user.emails.should.be.a('array')
         user.emails.length.should.equal(1)
         user.emails[0].email.should.equal(this.user.email)
-        return done()
-      })
-    })
-  })
-
-  describe('Register with bonus referal id', function () {
-    before(function () {
-      if (!Features.hasFeature('public-registration')) {
-        this.skip()
-      }
-    })
-
-    beforeEach(function (done) {
-      this.user1 = new User()
-      this.user2 = new User()
-      async.series(
-        [
-          cb => this.user1.register(cb),
-          cb =>
-            this.user2.registerWithQuery(
-              `?r=${this.user1.referal_id}&rm=d&rs=b`,
-              cb
-            ),
-        ],
-        done
-      )
-    })
-
-    it('Adds a referal when an id is supplied and the referal source is "bonus"', function (done) {
-      this.user1.get((error, user) => {
-        expect(error).to.not.exist
-        user.refered_user_count.should.eql(1)
-
         return done()
       })
     })
@@ -387,7 +351,7 @@ describe('Registration', function () {
 
     describe('[Security] Trying to register/login as another user', function () {
       before(function () {
-        if (!Features.hasFeature('public-registration')) {
+        if (!Features.hasFeature('registration')) {
           this.skip()
         }
       })

@@ -44,7 +44,7 @@ describe('siteIsOpen', function () {
       request.get('/some/route', { json: true }, (error, response, body) => {
         response.statusCode.should.equal(503)
         body.message.should.match(/maintenance/)
-        body.message.should.match(/status.overleaf.com/)
+        body.message.should.match(/status.example.com/)
         done()
       })
     })

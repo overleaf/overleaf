@@ -4,9 +4,9 @@ const Features = require('../../../app/src/infrastructure/Features')
 const { expect } = require('chai')
 
 describe('UserHelper', function () {
-  // Disable all tests unless the public-registration feature is enabled
+  // Disable all tests unless the registration feature is enabled
   beforeEach(function () {
-    if (!Features.hasFeature('public-registration')) {
+    if (!Features.hasFeature('registration')) {
       this.skip()
     }
   })

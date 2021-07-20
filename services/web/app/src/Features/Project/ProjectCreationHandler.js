@@ -3,6 +3,7 @@ const OError = require('@overleaf/o-error')
 const metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
 const { ObjectId } = require('mongodb')
+const Features = require('../../infrastructure/Features')
 const { Project } = require('../../models/Project')
 const { Folder } = require('../../models/Folder')
 const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
@@ -184,7 +185,11 @@ async function _createBlankProject(ownerId, projectName, attributes = {}) {
   // only display full project history when the project has the overleaf history id attribute
   // (to allow scripted creation of projects without full project history)
   const historyId = _.get(attributes, ['overleaf', 'history', 'id'])
-  if (Settings.apis.project_history.displayHistoryForNewProjects && historyId) {
+  if (
+    Features.hasFeature('history-v1') &&
+    Settings.apis.project_history.displayHistoryForNewProjects &&
+    historyId
+  ) {
     project.overleaf.history.display = true
   }
   if (Settings.currentImageName) {

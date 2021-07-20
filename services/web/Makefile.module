@@ -44,8 +44,11 @@ ALL_TEST_ACCEPTANCE_VARIANTS := \
   test_acceptance_server_pro \
 
 ifeq (,$(wildcard test/acceptance))
-$(ALL_TEST_ACCEPTANCE_VARIANTS):
-test_acceptance_merged_inner:
+$(ALL_TEST_ACCEPTANCE_VARIANTS) test_acceptance_merged_inner:
+	@echo
+	@echo Module $(MODULE_NAME) does not have acceptance tests.
+	@echo
+
 clean_test_acceptance:
 
 else

@@ -631,7 +631,7 @@ describe('ProjectInviteTests', function () {
     describe('user is not logged in initially', function () {
       describe('registration prompt workflow with valid token', function () {
         before(function () {
-          if (!Features.hasFeature('public-registration')) {
+          if (!Features.hasFeature('registration')) {
             this.skip()
           }
         })
@@ -662,7 +662,7 @@ describe('ProjectInviteTests', function () {
 
       describe('registration prompt workflow with non-valid token', function () {
         before(function () {
-          if (!Features.hasFeature('public-registration')) {
+          if (!Features.hasFeature('registration')) {
             this.skip()
           }
         })

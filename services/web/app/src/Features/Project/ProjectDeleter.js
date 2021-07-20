@@ -1,3 +1,4 @@
+const Features = require('../../infrastructure/Features')
 const _ = require('lodash')
 const { db, ObjectId } = require('../../infrastructure/mongodb')
 const { callbackify } = require('util')
@@ -375,10 +376,12 @@ async function expireDeletedProject(projectId) {
 
     await Promise.all([
       DocstoreManager.promises.destroyProject(deletedProject.project._id),
-      HistoryManager.promises.deleteProject(
-        deletedProject.project._id,
-        historyId
-      ),
+      Features.hasFeature('history-v1')
+        ? HistoryManager.promises.deleteProject(
+            deletedProject.project._id,
+            historyId
+          )
+        : Promise.resolve(),
       FilestoreHandler.promises.deleteProject(deletedProject.project._id),
       TpdsUpdateSender.promises.deleteProject({
         project_id: deletedProject.project._id,

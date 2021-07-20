@@ -7,8 +7,6 @@ module.exports = {
 
     before(function (done) {
       exec('bin/east migrate', (error, stdout, stderr) => {
-        console.log(stdout)
-        console.error(stderr)
         if (error) {
           throw error
         }
