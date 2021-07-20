@@ -12,6 +12,7 @@ switch (process.argv.pop()) {
     break
   case 'revisions':
     for (const service of services) {
+      console.log(`echo -n /var/www/sharelatex/${service.name},`)
       console.log(`git -C ${service.name} rev-parse HEAD`)
     }
     break
