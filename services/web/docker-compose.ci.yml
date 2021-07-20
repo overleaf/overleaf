@@ -11,6 +11,8 @@ services:
     user: node
     command: npm run test:unit:app
     environment:
+      BASE_CONFIG:
+      SHARELATEX_CONFIG:
       NODE_OPTIONS: "--unhandled-rejections=strict"
 
   test_acceptance:
@@ -29,6 +31,7 @@ services:
       LOCK_MANAGER_MAX_LOCK_WAIT_TIME: 30000
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      BASE_CONFIG:
       SHARELATEX_CONFIG:
       COOKIE_DOMAIN: .overleaf.test
       PUBLIC_URL: 'http://www.overleaf.test:3000'

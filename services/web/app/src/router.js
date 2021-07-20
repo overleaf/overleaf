@@ -72,6 +72,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.post('/login', AuthenticationController.passportLogin)
 
+  if (Settings.enableLegacyLogin) {
+    AuthenticationController.addEndpointToLoginWhitelist('/login/legacy')
+    webRouter.get('/login/legacy', UserPagesController.loginPage)
+    webRouter.post('/login/legacy', AuthenticationController.passportLogin)
+  }
+
   webRouter.get(
     '/read-only/one-time-login',
     UserPagesController.oneTimeLoginPage

@@ -5,11 +5,17 @@ BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 PROJECT_NAME = web
 BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
 
+export SHARELATEX_CONFIG ?= /app/test/acceptance/config/settings.test.saas.js
+export BASE_CONFIG ?= ${SHARELATEX_CONFIG}
+
+CFG_SAAS=/app/test/acceptance/config/settings.test.saas.js
+CFG_SERVER_CE=/app/test/acceptance/config/settings.test.server-ce.js
+CFG_SERVER_PRO=/app/test/acceptance/config/settings.test.server-pro.js
+
 DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	BRANCH_NAME=$(BRANCH_NAME) \
 	PROJECT_NAME=$(PROJECT_NAME) \
 	MOCHA_GREP=${MOCHA_GREP} \
-	SHARELATEX_CONFIG=/app/test/acceptance/config/settings.test.js \
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
@@ -129,28 +135,130 @@ test_acceptance_app:
 	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_acceptance
 	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
+# We are using _make magic_ for turning these file-targets into calls to
+#  sub-Makefiles in the individual modules.
+# These sub-Makefiles need to be kept in sync with the template, hence we
+#  add a dependency on each modules Makefile and cross-link that to the
+#  template at the very top of this file.
+# Example: `web$ make modules/server-ce-scripts/test_acceptance_server_ce`
+# Description: Run the acceptance tests of the server-ce-scripts module in a
+#               Server CE Environment.
+# Break down:
+#  Target: modules/server-ce-scripts/test_acceptance_server_ce
+#    -> depends on modules/server-ce-scripts/Makefile
+#    -> add environment variable BASE_CONFIG=$(CFG_SERVER_CE)
+#    -> BASE_CONFIG=/app/test/acceptance/config/settings.test.server-ce.js
+#    -> automatic target: `make -C server-ce-scripts test_acceptance_server_ce`
+#    -> automatic target: run `make test_acceptance_server_ce` in module
+#  Target: modules/server-ce-scripts/Makefile
+#    -> depends on Makefile.module
+#    -> automatic target: copies the file when changed
 TEST_ACCEPTANCE_MODULES = $(MODULE_DIRS:=/test_acceptance)
 $(TEST_ACCEPTANCE_MODULES): %/test_acceptance: %/Makefile
-test_acceptance_modules: $(TEST_ACCEPTANCE_MODULES)
+$(TEST_ACCEPTANCE_MODULES): modules/%/test_acceptance:
+	$(MAKE) test_acceptance_module MODULE_NAME=$*
+
+TEST_ACCEPTANCE_MODULES_SAAS = $(MODULE_DIRS:=/test_acceptance_saas)
+$(TEST_ACCEPTANCE_MODULES_SAAS): %/test_acceptance_saas: %/Makefile
+$(TEST_ACCEPTANCE_MODULES_SAAS): export BASE_CONFIG = $(CFG_SAAS)
+
+# This line adds `/test_acceptance_saas` suffix to all items in $(MODULE_DIRS).
+TEST_ACCEPTANCE_MODULES_SERVER_CE = $(MODULE_DIRS:=/test_acceptance_server_ce)
+# This line adds a dependency on the modules Makefile.
+$(TEST_ACCEPTANCE_MODULES_SERVER_CE): %/test_acceptance_server_ce: %/Makefile
+# This line adds the environment variable BASE_CONFIG=$(CFG_SERVER_CE) to all
+#  invocations of `web$ make modules/foo/test_acceptance_server_ce`.
+$(TEST_ACCEPTANCE_MODULES_SERVER_CE): export BASE_CONFIG = $(CFG_SERVER_CE)
+
+TEST_ACCEPTANCE_MODULES_SERVER_PRO = $(MODULE_DIRS:=/test_acceptance_server_pro)
+$(TEST_ACCEPTANCE_MODULES_SERVER_PRO): %/test_acceptance_server_pro: %/Makefile
+$(TEST_ACCEPTANCE_MODULES_SERVER_PRO): export BASE_CONFIG = $(CFG_SERVER_PRO)
 
 CLEAN_TEST_ACCEPTANCE_MODULES = $(MODULE_DIRS:=/clean_test_acceptance)
 $(CLEAN_TEST_ACCEPTANCE_MODULES): %/clean_test_acceptance: %/Makefile
 clean_test_acceptance_modules: $(CLEAN_TEST_ACCEPTANCE_MODULES)
 clean_ci: clean_test_acceptance_modules
 
-test_acceptance_module:
-	$(MAKE) modules/$(MODULE_NAME)/test_acceptance
+test_acceptance_module_noop:
+	@echo
+	@echo Module '$(MODULE_NAME)' does not run in ${LABEL}.
+	@echo
 
+TEST_ACCEPTANCE_MODULE_MAYBE_IN := \
+	test_acceptance_module_maybe_in_saas \
+	test_acceptance_module_maybe_in_server_ce \
+	test_acceptance_module_maybe_in_server_pro \
+
+test_acceptance_module: $(TEST_ACCEPTANCE_MODULE_MAYBE_IN)
+test_acceptance_module_maybe_in_saas: export BASE_CONFIG=$(CFG_SAAS)
+test_acceptance_module_maybe_in_server_ce: export BASE_CONFIG=$(CFG_SERVER_CE)
+test_acceptance_module_maybe_in_server_pro: export BASE_CONFIG=$(CFG_SERVER_PRO)
+
+# We need to figure out whether the module is loaded in a given environment.
+# This information is stored in the (base-)settings.
+# We get the full list of modules and check for a matching module entry.
+# Either the grep will find and emit the module, or exits with code 1, which
+#  we handle with a fallback to a noop make target.
+# Run the node command in a docker-compose container which provides the needed
+#  npm dependencies (from disk in dev-env or from the CI image in CI).
+# Pick the test_unit service which is very light-weight -- the test_acceptance
+#  service would start mongo/redis.
+$(TEST_ACCEPTANCE_MODULE_MAYBE_IN): test_acceptance_module_maybe_in_%:
+	$(MAKE) $(shell \
+		SHARELATEX_CONFIG=$(BASE_CONFIG) \
+		$(DOCKER_COMPOSE) run --rm test_unit \
+		node test/acceptance/getModuleTargets test_acceptance_$* \
+		| grep -e /$(MODULE_NAME)/ || echo test_acceptance_module_noop LABEL=$* \
+	)
+
+# See docs for test_acceptance_server_ce how this works.
+test_acceptance_module_saas: export BASE_CONFIG = $(CFG_SAAS)
+test_acceptance_module_saas:
+	$(MAKE) modules/$(MODULE_NAME)/test_acceptance_saas
+
+test_acceptance_module_server_ce: export BASE_CONFIG = $(CFG_SERVER_CE)
+test_acceptance_module_server_ce:
+	$(MAKE) modules/$(MODULE_NAME)/test_acceptance_server_ce
+
+test_acceptance_module_server_pro: export BASE_CONFIG = $(CFG_SERVER_PRO)
+test_acceptance_module_server_pro:
+	$(MAKE) modules/$(MODULE_NAME)/test_acceptance_server_pro
+
+# See docs for test_acceptance_server_ce how this works.
 TEST_ACCEPTANCE_MODULES_MERGED_INNER = $(MODULE_DIRS:=/test_acceptance_merged_inner)
 $(TEST_ACCEPTANCE_MODULES_MERGED_INNER): %/test_acceptance_merged_inner: %/Makefile
-test_acceptance_modules_merged_inner: $(TEST_ACCEPTANCE_MODULES_MERGED_INNER)
+test_acceptance_modules_merged_inner:
+	$(MAKE) $(shell \
+		SHARELATEX_CONFIG=$(BASE_CONFIG) \
+		node test/acceptance/getModuleTargets test_acceptance_merged_inner \
+	)
 
-test_acceptance_modules_merged: export COMPOSE_PROJECT_NAME = \
-	acceptance_test_modules_merged_$(BUILD_DIR_NAME)
-test_acceptance_modules_merged:
+# See docs for test_acceptance_server_ce how this works.
+test_acceptance_modules_merged_saas: export COMPOSE_PROJECT_NAME = \
+	acceptance_test_modules_merged_saas_$(BUILD_DIR_NAME)
+test_acceptance_modules_merged_saas: export BASE_CONFIG = $(CFG_SAAS)
+
+test_acceptance_modules_merged_server_ce: export COMPOSE_PROJECT_NAME = \
+	acceptance_test_modules_merged_server_ce_$(BUILD_DIR_NAME)
+test_acceptance_modules_merged_server_ce: export BASE_CONFIG = $(CFG_SERVER_CE)
+
+test_acceptance_modules_merged_server_pro: export COMPOSE_PROJECT_NAME = \
+	acceptance_test_modules_merged_server_pro_$(BUILD_DIR_NAME)
+test_acceptance_modules_merged_server_pro: export BASE_CONFIG = $(CFG_SERVER_PRO)
+
+# All these variants run the same command.
+# Each target has a different set of environment defined above.
+TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS = \
+	test_acceptance_modules_merged_saas \
+	test_acceptance_modules_merged_server_ce \
+	test_acceptance_modules_merged_server_pro \
+
+$(TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS):
 	$(DOCKER_COMPOSE) down -v -t 0
 	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_modules_merged_inner
 	$(DOCKER_COMPOSE) down -v -t 0
+
+test_acceptance_modules: $(TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS)
 
 test_acceptance_app_merged_inner:
 	npm run --silent test:acceptance:app
@@ -330,7 +438,9 @@ tar:
 	COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 MODULE_TARGETS = \
-	$(TEST_ACCEPTANCE_MODULES) \
+	$(TEST_ACCEPTANCE_MODULES_SAAS) \
+	$(TEST_ACCEPTANCE_MODULES_SERVER_CE) \
+	$(TEST_ACCEPTANCE_MODULES_SERVER_PRO) \
 	$(TEST_ACCEPTANCE_MODULES_MERGED_INNER) \
 	$(CLEAN_TEST_ACCEPTANCE_MODULES) \
 	$(TEST_UNIT_MODULES) \

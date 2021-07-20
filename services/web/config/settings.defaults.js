@@ -72,6 +72,8 @@ const parseTextExtensions = function (extensions) {
 }
 
 module.exports = {
+  env: 'server-ce',
+
   limits: {
     httpGlobalAgentMaxSockets: 300,
     httpsGlobalAgentMaxSockets: 300,

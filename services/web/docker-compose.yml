@@ -13,6 +13,8 @@ services:
       - .:/app
     working_dir: /app
     environment:
+      BASE_CONFIG:
+      SHARELATEX_CONFIG:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_OPTIONS: "--unhandled-rejections=strict"
     command: npm run --silent test:unit:app
@@ -39,6 +41,7 @@ services:
       MONGO_SERVER_SELECTION_TIMEOUT: 600000
       MONGO_SOCKET_TIMEOUT: 300000
       # SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
+      BASE_CONFIG:
       SHARELATEX_CONFIG:
       COOKIE_DOMAIN: .overleaf.test
       PUBLIC_URL: 'http://www.overleaf.test:3000'

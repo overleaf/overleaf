@@ -3,6 +3,13 @@ MODULE_NAME := $(notdir $(shell pwd))
 MODULE_DIR := modules/$(MODULE_NAME)
 PROJECT_NAME = web
 
+export SHARELATEX_CONFIG = /app/$(MODULE_DIR)/test/acceptance/config/settings.test.js
+export BASE_CONFIG ?= /app/test/acceptance/config/settings.test.saas.js
+
+CFG_SAAS=/app/test/acceptance/config/settings.test.saas.js
+CFG_SERVER_CE=/app/test/acceptance/config/settings.test.server-ce.js
+CFG_SERVER_PRO=/app/test/acceptance/config/settings.test.server-pro.js
+
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml --log-level ERROR
 DOCKER_COMPOSE := cd ../../ && \
 	MODULE_DIR=$(MODULE_DIR) \
@@ -10,7 +17,6 @@ DOCKER_COMPOSE := cd ../../ && \
 	BRANCH_NAME=$(BRANCH_NAME) \
 	PROJECT_NAME=$(PROJECT_NAME) \
 	MOCHA_GREP=${MOCHA_GREP} \
-	SHARELATEX_CONFIG=/app/$(MODULE_DIR)/test/acceptance/config/settings.test.js \
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
 DOCKER_COMPOSE_TEST_ACCEPTANCE := \
@@ -31,20 +37,29 @@ test_unit:
 
 endif
 
+ALL_TEST_ACCEPTANCE_VARIANTS := \
+  test_acceptance \
+  test_acceptance_saas \
+  test_acceptance_server_ce \
+  test_acceptance_server_pro \
+
 ifeq (,$(wildcard test/acceptance))
-test_acceptance:
+$(ALL_TEST_ACCEPTANCE_VARIANTS):
 test_acceptance_merged_inner:
 clean_test_acceptance:
 
 else
-test_acceptance:
+test_acceptance_saas: export BASE_CONFIG = $(CFG_SAAS)
+test_acceptance_server_ce: export BASE_CONFIG = $(CFG_SERVER_CE)
+test_acceptance_server_pro: export BASE_CONFIG = $(CFG_SERVER_PRO)
+
+$(ALL_TEST_ACCEPTANCE_VARIANTS):
 	$(MAKE) --no-print-directory clean_test_acceptance
 	${DOCKER_COMPOSE_TEST_ACCEPTANCE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
 	$(MAKE) --no-print-directory clean_test_acceptance
 
 test_acceptance_merged_inner:
 	cd ../../ && \
-		SHARELATEX_CONFIG=/app/$(MODULE_DIR)/test/acceptance/config/settings.test.js \
 			npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
 
 clean_test_acceptance:
