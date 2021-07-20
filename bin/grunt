@@ -9,7 +9,7 @@ cd /var/www/sharelatex/web/modules/server-ce-scripts/scripts
 
 case "$TASK" in
   user:create-admin)
-    node create-admin "$@"
+    node create-user --admin "$@"
     ;;
 
   user:delete)
