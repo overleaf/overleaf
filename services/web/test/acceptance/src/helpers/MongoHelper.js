@@ -1,12 +1,25 @@
-const { exec } = require('child_process')
+const { execFile } = require('child_process')
 const { waitForDb, db } = require('../../../../app/src/infrastructure/mongodb')
+const Settings = require('@overleaf/settings')
+
+const DEFAULT_ENV = 'saas'
 
 module.exports = {
   initialize() {
     before(waitForDb)
 
     before(function (done) {
-      exec('bin/east migrate', (error, stdout, stderr) => {
+      const args = [
+        'run',
+        'migrations',
+        '--',
+        'migrate',
+        '-t',
+        Settings.env || DEFAULT_ENV,
+      ]
+      execFile('npm', args, (error, stdout, stderr) => {
+        console.log(stdout)
+        console.error(stderr)
         if (error) {
           throw error
         }
