@@ -270,6 +270,12 @@ const DockerRunner = {
       )
     }
 
+    if (Settings.clsi.docker.apparmor_profile != null) {
+      options.HostConfig.SecurityOpt.push(
+        `apparmor=${Settings.clsi.docker.apparmor_profile}`
+      )
+    }
+
     if (Settings.clsi.docker.runtime) {
       options.HostConfig.Runtime = Settings.clsi.docker.runtime
     }
