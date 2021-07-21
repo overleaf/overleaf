@@ -130,3 +130,11 @@ html(
 					//- Set query param, server will not set CDN url
 					window.location.search += "&nocdn=true";
 				}
+			if hasFeature('saas')
+				script(type="text/javascript", nonce=scriptNonce).
+					//- Test for CDN availability and report to sentry if loading failed
+					var cdnLoadTest = document.createElement('img')
+					cdnLoadTest.addEventListener('error', function () {
+						throw new Error('CDN test image load error (cdn.overleaf.net)')
+					})
+					cdnLoadTest.src = 'https://cdn.overleaf.net/img/1p.gif'
