@@ -119,7 +119,16 @@ export default App.controller(
           ) {
             $scope.currencyCode = 'USD'
             setupPricing()
+          } else if (err.name === 'api-error' && err.code === 'not-found') {
+            // not-found here should refer to the coupon code, plan_code should be valid
+            $scope.$applyAsync(() => {
+              $scope.couponError = 'Coupon code is not valid for selected plan'
+            })
           } else {
+            // Bail out on other errors, form state will not be correct
+            $scope.$applyAsync(() => {
+              $scope.recurlyLoadError = true
+            })
             throw err
           }
         })
@@ -175,7 +184,25 @@ export default App.controller(
       $scope.$apply()
     })
 
-    $scope.applyCoupon = () => pricing.coupon($scope.data.coupon).done()
+    $scope.applyCoupon = () => {
+      $scope.couponError = ''
+      pricing
+        .coupon($scope.data.coupon)
+        .catch(err => {
+          if (err.name === 'api-error' && err.code === 'not-found') {
+            $scope.$applyAsync(() => {
+              $scope.couponError = 'Coupon code is not valid for selected plan'
+            })
+          } else {
+            $scope.$applyAsync(() => {
+              $scope.couponError =
+                'An error occured when verifying the coupon code'
+            })
+            throw err
+          }
+        })
+        .done()
+    }
 
     $scope.applyVatNumber = () =>
       pricing
@@ -184,7 +211,19 @@ export default App.controller(
 
     $scope.changeCurrency = function (newCurrency) {
       $scope.currencyCode = newCurrency
-      return pricing.currency(newCurrency).done()
+      return pricing
+        .currency(newCurrency)
+        .catch(function (err) {
+          if (
+            $scope.currencyCode !== 'USD' &&
+            err.name === 'invalid-currency'
+          ) {
+            $scope.changeCurrency('USD')
+          } else {
+            throw err
+          }
+        })
+        .done()
     }
 
     $scope.inputHasError = function (formItem) {

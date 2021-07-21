@@ -98,6 +98,9 @@ block content
 										.alert.alert-warning.small(ng-show="genericError")
 											strong {{genericError}}
 
+										.alert.alert-warning.small(ng-show="couponError")
+											strong {{couponError}}
+
 										div(ng-show="paymentMethod.value === 'credit_card'")
 											.row
 												.col-xs-6
