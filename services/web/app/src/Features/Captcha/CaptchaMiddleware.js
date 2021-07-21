@@ -24,11 +24,7 @@ module.exports = CaptchaMiddleware = {
       ) {
         return next()
       }
-      const inviteAndCaptchaDisabled =
-        action === 'invite' && Settings.recaptcha.disabled.invite
-      const registerAndCaptchaDisabled =
-        action === 'register' && Settings.recaptcha.disabled.register
-      if (inviteAndCaptchaDisabled || registerAndCaptchaDisabled) {
+      if (Settings.recaptcha.disabled[action]) {
         return next()
       }
       const response = req.body['g-recaptcha-response']

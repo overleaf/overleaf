@@ -38,7 +38,6 @@ describe('PasswordResetController', function () {
           .resolves({ found: true, reset: true, userID: this.user_id }),
       },
     }
-    this.RateLimiter = { addCount: sinon.stub() }
     this.UserSessionsManager = {
       promises: {
         revokeAllUserSessions: sinon.stub().resolves(),
@@ -53,7 +52,6 @@ describe('PasswordResetController', function () {
       requires: {
         '@overleaf/settings': this.settings,
         './PasswordResetHandler': this.PasswordResetHandler,
-        '../../infrastructure/RateLimiter': this.RateLimiter,
         '../Authentication/AuthenticationController': (this.AuthenticationController = {
           getLoggedInUserId: sinon.stub(),
           finishLogin: sinon.stub(),
@@ -70,23 +68,7 @@ describe('PasswordResetController', function () {
   })
 
   describe('requestReset', function () {
-    it('should error if the rate limit is hit', function (done) {
-      this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
-        1,
-        null,
-        'primary'
-      )
-      this.RateLimiter.addCount.callsArgWith(1, null, false)
-      this.PasswordResetController.requestReset(this.req, this.res)
-      this.PasswordResetHandler.generateAndEmailResetToken
-        .calledWith(this.email)
-        .should.equal(false)
-      this.res.statusCode.should.equal(429)
-      done()
-    })
-
     it('should tell the handler to process that email', function (done) {
-      this.RateLimiter.addCount.callsArgWith(1, null, true)
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
         null,
@@ -101,7 +83,6 @@ describe('PasswordResetController', function () {
     })
 
     it('should send a 500 if there is an error', function (done) {
-      this.RateLimiter.addCount.callsArgWith(1, null, true)
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
         new Error('error')
@@ -113,7 +94,6 @@ describe('PasswordResetController', function () {
     })
 
     it("should send a 404 if the email doesn't exist", function (done) {
-      this.RateLimiter.addCount.callsArgWith(1, null, true)
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
         null,
@@ -125,7 +105,6 @@ describe('PasswordResetController', function () {
     })
 
     it('should send a 404 if the email is registered as a secondard email', function (done) {
-      this.RateLimiter.addCount.callsArgWith(1, null, true)
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
         null,
@@ -139,7 +118,6 @@ describe('PasswordResetController', function () {
     it('should normalize the email address', function (done) {
       this.email = '  UPperCaseEMAILWithSpacesAround@example.Com '
       this.req.body.email = this.email
-      this.RateLimiter.addCount.callsArgWith(1, null, true)
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
         null,

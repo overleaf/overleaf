@@ -558,6 +558,7 @@ module.exports = {
     disabled: {
       invite: true,
       login: true,
+      passwordReset: true,
       register: true,
     },
   },

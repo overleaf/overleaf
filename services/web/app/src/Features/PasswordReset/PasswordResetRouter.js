@@ -1,9 +1,18 @@
 const PasswordResetController = require('./PasswordResetController')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const CaptchaMiddleware = require('../../Features/Captcha/CaptchaMiddleware')
+const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const { Joi, validate } = require('../../infrastructure/Validation')
 
 module.exports = {
   apply(webRouter, apiRouter) {
+    const rateLimit = RateLimiterMiddleware.rateLimit({
+      endpointName: 'password_reset_rate_limit',
+      ipOnly: true,
+      maxRequests: 6,
+      timeInterval: 60,
+    })
+
     webRouter.get(
       '/user/password/reset',
       PasswordResetController.renderRequestResetForm
@@ -15,6 +24,8 @@ module.exports = {
           email: Joi.string().required(),
         }),
       }),
+      rateLimit,
+      CaptchaMiddleware.validateCaptcha('passwordReset'),
       PasswordResetController.requestReset
     )
     AuthenticationController.addEndpointToLoginWhitelist('/user/password/reset')
@@ -31,6 +42,7 @@ module.exports = {
           passwordResetToken: Joi.string().required(),
         }),
       }),
+      rateLimit,
       PasswordResetController.setNewUserPassword
     )
     AuthenticationController.addEndpointToLoginWhitelist('/user/password/set')
@@ -42,6 +54,8 @@ module.exports = {
           email: Joi.string().required(),
         }),
       }),
+      rateLimit,
+      CaptchaMiddleware.validateCaptcha('passwordReset'),
       PasswordResetController.requestReset
     )
   },

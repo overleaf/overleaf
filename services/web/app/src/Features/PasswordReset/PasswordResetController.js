@@ -1,5 +1,4 @@
 const PasswordResetHandler = require('./PasswordResetHandler')
-const RateLimiter = require('../../infrastructure/RateLimiter')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
@@ -61,44 +60,31 @@ module.exports = {
   },
 
   requestReset(req, res, next) {
-    const email = req.body.email.trim().toLowerCase()
-    const opts = {
-      endpointName: 'password_reset_rate_limit',
-      timeInterval: 60,
-      subjectName: req.ip,
-      throttle: 6,
+    const email = EmailsHelper.parseEmail(req.body.email)
+    if (!email) {
+      return res.status(400).send({
+        message: req.i18n.translate('must_be_email_address'),
+      })
     }
-    RateLimiter.addCount(opts, (err, canContinue) => {
+    PasswordResetHandler.generateAndEmailResetToken(email, (err, status) => {
       if (err != null) {
-        return next(
-          new OError('rate-limit password reset failed').withCause(err)
-        )
-      }
-      if (!canContinue) {
-        return res.status(429).send({
-          message: req.i18n.translate('rate_limit_hit_wait'),
+        OError.tag(err, 'failed to generate and email password reset token', {
+          email,
+        })
+        next(err)
+      } else if (status === 'primary') {
+        res.status(200).send({
+          message: { text: req.i18n.translate('password_reset_email_sent') },
+        })
+      } else if (status === 'secondary') {
+        res.status(404).send({
+          message: req.i18n.translate('secondary_email_password_reset'),
+        })
+      } else {
+        res.status(404).send({
+          message: req.i18n.translate('cant_find_email'),
         })
       }
-      PasswordResetHandler.generateAndEmailResetToken(email, (err, status) => {
-        if (err != null) {
-          OError.tag(err, 'failed to generate and email password reset token', {
-            email,
-          })
-          next(err)
-        } else if (status === 'primary') {
-          res.status(200).send({
-            message: { text: req.i18n.translate('password_reset_email_sent') },
-          })
-        } else if (status === 'secondary') {
-          res.status(404).send({
-            message: req.i18n.translate('secondary_email_password_reset'),
-          })
-        } else {
-          res.status(404).send({
-            message: req.i18n.translate('cant_find_email'),
-          })
-        }
-      })
     })
   },
 
