@@ -143,6 +143,15 @@ if (process.env.DOCKER_RUNNER) {
     process.exit(1)
   }
 
+  if (process.env.APPARMOR_PROFILE) {
+    try {
+      module.exports.clsi.docker.apparmor_profile = process.env.APPARMOR_PROFILE
+    } catch (error) {
+      console.error(error, 'could not apply apparmor profile setting')
+      process.exit(1)
+    }
+  }
+
   if (process.env.ALLOWED_IMAGES) {
     try {
       module.exports.clsi.docker.allowedImages =
