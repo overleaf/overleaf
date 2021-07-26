@@ -23,7 +23,7 @@ EditorContext.Provider.propTypes = {
       brandVariationHomeUrl: PropTypes.string.isRequired,
       publishGuideHtml: PropTypes.string,
       partner: PropTypes.string,
-      brandedMenu: PropTypes.string,
+      brandedMenu: PropTypes.bool,
       submitBtnHtml: PropTypes.string,
     }),
     hasPremiumCompile: PropTypes.bool,
