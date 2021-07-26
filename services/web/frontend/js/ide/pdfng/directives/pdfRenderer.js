@@ -71,22 +71,23 @@ export default App.factory(
             disableAutoFetch: !!this.options.disableAutoFetch,
             disableStream: !!this.options.disableAutoFetch,
           })
+          this.errorCallback = this.options.errorCallback
+          this.pageSizeChangeCallback = this.options.pageSizeChangeCallback
           this.pdfjs.onProgress = this.options.progressCallback
           this.document = this.pdfjs
           this.navigateFn = this.options.navigateFn
           this.spinner = new pdfSpinner()
           this.resetState()
-          this.document.promise.then(pdfDocument => {
-            return pdfDocument.getDownloadInfo().then(() => {
-              return this.options.loadedCallback()
+          this.document.promise
+            .then(pdfDocument => {
+              return pdfDocument.getDownloadInfo().then(() => {
+                return this.options.loadedCallback()
+              })
             })
-          })
-          this.errorCallback = this.options.errorCallback
-          this.pageSizeChangeCallback = this.options.pageSizeChangeCallback
-          this.pdfjs.promise.catch(exception => {
-            // error getting document
-            return this.errorCallback(exception)
-          })
+            .catch(exception => {
+              // error getting document
+              return this.errorCallback(exception)
+            })
         }
 
         resetState() {
@@ -525,10 +526,12 @@ export default App.factory(
         destroy() {
           this.shuttingDown = true
           this.resetState()
-          return this.pdfjs.promise.then(function (document) {
-            document.cleanup()
-            return document.destroy()
-          })
+          return this.pdfjs.promise
+            .then(function (document) {
+              document.cleanup()
+              return document.destroy()
+            })
+            .catch(() => {})
         }
       }
       PDFRenderer.initClass()
