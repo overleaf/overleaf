@@ -114,14 +114,8 @@ function _getPercentile(userId, splitTestId) {
 }
 
 module.exports = {
-  /**
-   * @deprecated: use SplitTestV2Handler.getAssignment instead
-   */
   getTestSegmentation: callbackify(getTestSegmentation),
   promises: {
-    /**
-     * @deprecated: use SplitTestV2Handler.promises.getAssignment instead
-     */
     getTestSegmentation,
   },
 }
