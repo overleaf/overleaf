@@ -49,6 +49,7 @@ const InstitutionsController = require('./Features/Institutions/InstitutionsCont
 const UserMembershipRouter = require('./Features/UserMembership/UserMembershipRouter')
 const SystemMessageController = require('./Features/SystemMessages/SystemMessageController')
 const AnalyticsRegistrationSourceMiddleware = require('./Features/Analytics/AnalyticsRegistrationSourceMiddleware')
+const SplitTestRouter = require('./Features/SplitTests/SplitTestRouter')
 const { Joi, validate } = require('./infrastructure/Validation')
 const {
   renderUnsupportedBrowserPage,
@@ -107,6 +108,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   LinkedFilesRouter.apply(webRouter, privateApiRouter, publicApiRouter)
   TemplatesRouter.apply(webRouter)
   UserMembershipRouter.apply(webRouter)
+  SplitTestRouter.apply(webRouter)
 
   Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
 
