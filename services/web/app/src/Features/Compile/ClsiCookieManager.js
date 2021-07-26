@@ -99,7 +99,7 @@ module.exports = function (backendGroup) {
         return rclient.expire(
           this.buildKey(project_id),
           Settings.clsiCookie.ttl,
-          callback
+          err => callback(err, undefined)
         )
       }
       if (rclient_secondary != null) {
@@ -134,10 +134,10 @@ module.exports = function (backendGroup) {
 
     getCookieJar(project_id, callback) {
       if (callback == null) {
-        callback = function (err, jar) {}
+        callback = function (err, jar, clsiServerId) {}
       }
       if (!clsiCookiesEnabled) {
-        return callback(null, request.jar())
+        return callback(null, request.jar(), undefined)
       }
       return this._getServerId(project_id, (err, serverId) => {
         if (err != null) {
@@ -151,7 +151,7 @@ module.exports = function (backendGroup) {
         )
         const jar = request.jar()
         jar.setCookie(serverCookie, Settings.apis.clsi.url)
-        return callback(null, jar)
+        return callback(null, jar, serverId)
       })
     },
   }

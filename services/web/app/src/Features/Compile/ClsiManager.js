@@ -237,7 +237,7 @@ const ClsiManager = {
           userId,
           req,
           options.compileGroup,
-          (err, response) => {
+          (err, response, clsiServerId) => {
             if (err != null) {
               return callback(
                 OError.tag(err, 'error sending request to clsi', {
@@ -246,31 +246,24 @@ const ClsiManager = {
                 })
               )
             }
-            ClsiCookieManager._getServerId(projectId, (err, clsiServerId) => {
-              if (err != null) {
-                return callback(
-                  OError.tag(err, 'error getting server id', { projectId })
-                )
-              }
-              const outputFiles = ClsiManager._parseOutputFiles(
-                projectId,
-                response && response.compile && response.compile.outputFiles
-              )
-              const compile = (response && response.compile) || {}
-              const status = compile.status
-              const stats = compile.stats
-              const timings = compile.timings
-              const validationProblems = undefined
-              callback(
-                null,
-                status,
-                outputFiles,
-                clsiServerId,
-                validationProblems,
-                stats,
-                timings
-              )
-            })
+            const outputFiles = ClsiManager._parseOutputFiles(
+              projectId,
+              response && response.compile && response.compile.outputFiles
+            )
+            const compile = (response && response.compile) || {}
+            const status = compile.status
+            const stats = compile.stats
+            const timings = compile.timings
+            const validationProblems = undefined
+            callback(
+              null,
+              status,
+              outputFiles,
+              clsiServerId,
+              validationProblems,
+              stats,
+              timings
+            )
           }
         )
       }
@@ -299,43 +292,59 @@ const ClsiManager = {
       {
         currentBackend(cb) {
           const startTime = new Date()
-          ClsiCookieManager.getCookieJar(projectId, (err, jar) => {
-            if (err != null) {
-              return callback(
-                OError.tag(err, 'error getting cookie jar for CLSI request', {
-                  projectId,
-                })
-              )
-            }
-            opts.jar = jar
-            const timer = new Metrics.Timer('compile.currentBackend')
-            request(opts, (err, response, body) => {
+          ClsiCookieManager.getCookieJar(
+            projectId,
+            (err, jar, clsiServerId) => {
               if (err != null) {
                 return callback(
-                  OError.tag(err, 'error making request to CLSI', { projectId })
+                  OError.tag(err, 'error getting cookie jar for CLSI request', {
+                    projectId,
+                  })
                 )
               }
-              timer.done()
-              Metrics.inc(
-                `compile.currentBackend.response.${response.statusCode}`
-              )
-              ClsiCookieManager.setServerId(projectId, response, err => {
+              opts.jar = jar
+              const timer = new Metrics.Timer('compile.currentBackend')
+              request(opts, (err, response, body) => {
                 if (err != null) {
-                  callback(
-                    OError.tag(err, 'error setting server id', { projectId })
+                  return callback(
+                    OError.tag(err, 'error making request to CLSI', {
+                      projectId,
+                    })
                   )
-                } else {
-                  // return as soon as the standard compile has returned
-                  callback(null, response, body)
                 }
-                cb(err, {
+                timer.done()
+                Metrics.inc(
+                  `compile.currentBackend.response.${response.statusCode}`
+                )
+                ClsiCookieManager.setServerId(
+                  projectId,
                   response,
-                  body,
-                  finishTime: new Date() - startTime,
-                })
+                  (err, newClsiServerId) => {
+                    if (err != null) {
+                      callback(
+                        OError.tag(err, 'error setting server id', {
+                          projectId,
+                        })
+                      )
+                    } else {
+                      // return as soon as the standard compile has returned
+                      callback(
+                        null,
+                        response,
+                        body,
+                        newClsiServerId || clsiServerId
+                      )
+                    }
+                    cb(err, {
+                      response,
+                      body,
+                      finishTime: new Date() - startTime,
+                    })
+                  }
+                )
               })
-            })
-          })
+            }
+          )
         },
         newBackend(cb) {
           const startTime = new Date()
@@ -460,40 +469,47 @@ const ClsiManager = {
       json: req,
       method: 'POST',
     }
-    ClsiManager._makeRequest(projectId, opts, (err, response, body) => {
-      if (err != null) {
-        return callback(
-          new OError('failed to make request to CLSI', {
-            projectId,
-            userId,
-            compileOptions: req.compile.options,
-            rootResourcePath: req.compile.rootResourcePath,
-          })
-        )
+    ClsiManager._makeRequest(
+      projectId,
+      opts,
+      (err, response, body, clsiServerId) => {
+        if (err != null) {
+          return callback(
+            new OError('failed to make request to CLSI', {
+              projectId,
+              userId,
+              compileOptions: req.compile.options,
+              rootResourcePath: req.compile.rootResourcePath,
+            })
+          )
+        }
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          callback(null, body, clsiServerId)
+        } else if (response.statusCode === 413) {
+          callback(null, { compile: { status: 'project-too-large' } })
+        } else if (response.statusCode === 409) {
+          callback(null, { compile: { status: 'conflict' } })
+        } else if (response.statusCode === 423) {
+          callback(null, { compile: { status: 'compile-in-progress' } })
+        } else if (response.statusCode === 503) {
+          callback(null, { compile: { status: 'unavailable' } })
+        } else {
+          callback(
+            new OError(
+              `CLSI returned non-success code: ${response.statusCode}`,
+              {
+                projectId,
+                userId,
+                compileOptions: req.compile.options,
+                rootResourcePath: req.compile.rootResourcePath,
+                clsiResponse: body,
+                statusCode: response.statusCode,
+              }
+            )
+          )
+        }
       }
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        callback(null, body)
-      } else if (response.statusCode === 413) {
-        callback(null, { compile: { status: 'project-too-large' } })
-      } else if (response.statusCode === 409) {
-        callback(null, { compile: { status: 'conflict' } })
-      } else if (response.statusCode === 423) {
-        callback(null, { compile: { status: 'compile-in-progress' } })
-      } else if (response.statusCode === 503) {
-        callback(null, { compile: { status: 'unavailable' } })
-      } else {
-        callback(
-          new OError(`CLSI returned non-success code: ${response.statusCode}`, {
-            projectId,
-            userId,
-            compileOptions: req.compile.options,
-            rootResourcePath: req.compile.rootResourcePath,
-            clsiResponse: body,
-            statusCode: response.statusCode,
-          })
-        )
-      }
-    })
+    )
   },
 
   _parseOutputFiles(projectId, rawOutputFiles = []) {

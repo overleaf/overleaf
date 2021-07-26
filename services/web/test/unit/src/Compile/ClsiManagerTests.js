@@ -148,30 +148,34 @@ describe('ClsiManager', function () {
 
     describe('with ranges on the pdf and stats/timings details', function () {
       beforeEach(function () {
-        this.ClsiManager._postToClsi = sinon.stub().yields(null, {
-          compile: {
-            status: 'success',
-            stats: { fooStat: 1 },
-            timings: { barTiming: 2 },
-            outputFiles: [
-              {
-                url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.pdf`,
-                path: 'output.pdf',
-                type: 'pdf',
-                build: 1234,
-                contentId: '123-321',
-                ranges: [{ start: 1, end: 42, hash: 'foo' }],
-                size: 42,
-              },
-              {
-                url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.log`,
-                path: 'output.log',
-                type: 'log',
-                build: 1234,
-              },
-            ],
+        this.ClsiManager._postToClsi = sinon.stub().yields(
+          null,
+          {
+            compile: {
+              status: 'success',
+              stats: { fooStat: 1 },
+              timings: { barTiming: 2 },
+              outputFiles: [
+                {
+                  url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.pdf`,
+                  path: 'output.pdf',
+                  type: 'pdf',
+                  build: 1234,
+                  contentId: '123-321',
+                  ranges: [{ start: 1, end: 42, hash: 'foo' }],
+                  size: 42,
+                },
+                {
+                  url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.log`,
+                  path: 'output.log',
+                  type: 'log',
+                  build: 1234,
+                },
+              ],
+            },
           },
-        })
+          'clsi-server-id-43'
+        )
         this.ClsiCookieManager._getServerId.yields(null, 'clsi-server-id-42')
         this.ClsiManager.sendRequest(
           this.project_id,
@@ -208,7 +212,7 @@ describe('ClsiManager', function () {
           null,
           'success',
           outputFiles,
-          'clsi-server-id-42',
+          'clsi-server-id-43',
           validationError,
           { fooStat: 1 },
           { barTiming: 2 }
