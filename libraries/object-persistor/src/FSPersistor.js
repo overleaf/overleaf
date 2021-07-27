@@ -163,9 +163,9 @@ module.exports = class FSPersistor extends AbstractPersistor {
 
     try {
       await Promise.all(
-        (await fsGlob(`${location}/${filteredName}_*`)).map((file) =>
-          fsUnlink(file)
-        )
+        (
+          await fsGlob(`${location}/${filteredName}_*`)
+        ).map((file) => fsUnlink(file))
       )
     } catch (err) {
       throw PersistorHelper.wrapError(
