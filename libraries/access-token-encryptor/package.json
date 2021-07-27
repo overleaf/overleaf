@@ -12,7 +12,7 @@
   "dependencies": {},
   "devDependencies": {
     "bunyan": "~0.22.3",
-    "chai": "",
+    "chai": "^4.3.4",
     "mocha": "^6.2.2",
     "nock": "0.15.2",
     "sandboxed-module": "^2.0.3",
