@@ -11,8 +11,12 @@ export default function FileViewText({ file, onLoad, onError }) {
 
   const [textPreview, setTextPreview] = useState('')
   const [shouldShowDots, setShouldShowDots] = useState(false)
+  const [inFlight, setInFlight] = useState(false)
 
   useEffect(() => {
+    if (inFlight) {
+      return
+    }
     let path = `/project/${projectId}/file/${file.id}`
     fetch(path, { method: 'HEAD' })
       .then(response => {
@@ -30,27 +34,26 @@ export default function FileViewText({ file, onLoad, onError }) {
         if (maxSize != null) {
           path += `?range=0-${maxSize}`
         }
-        fetch(path)
-          .then(response => {
-            response.text().then(text => {
-              if (truncated) {
-                text = text.replace(/\n.*$/, '')
-              }
+        return fetch(path).then(response => {
+          return response.text().then(text => {
+            if (truncated) {
+              text = text.replace(/\n.*$/, '')
+            }
 
-              setTextPreview(text)
-              onLoad()
-              setShouldShowDots(truncated)
-            })
+            setTextPreview(text)
+            onLoad()
+            setShouldShowDots(truncated)
           })
-          .catch(err => {
-            onError()
-            console.error(err)
-          })
+        })
       })
       .catch(err => {
+        console.error(err)
         onError()
       })
-  }, [projectId, file.id, onError, onLoad])
+      .finally(() => {
+        setInFlight(false)
+      })
+  }, [projectId, file.id, onError, onLoad, inFlight])
   return (
     <div>
       {textPreview && (

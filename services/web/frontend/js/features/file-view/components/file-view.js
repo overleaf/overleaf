@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 
@@ -21,18 +21,16 @@ export default function FileView({ file, storeReferencesKeys }) {
   const isUnpreviewableFile =
     !imageExtensions.includes(extension) && !textExtensions.includes(extension)
 
-  function handleLoading() {
-    if (contentLoading) {
-      setContentLoading(false)
-    }
-  }
+  const handleLoad = useCallback(() => {
+    setContentLoading(false)
+  }, [])
 
-  function handleError() {
+  const handleError = useCallback(() => {
     if (!hasError) {
       setContentLoading(false)
       setHasError(true)
     }
-  }
+  }, [hasError])
 
   const content = (
     <>
@@ -41,16 +39,12 @@ export default function FileView({ file, storeReferencesKeys }) {
         <FileViewImage
           fileName={file.name}
           fileId={file.id}
-          onLoad={handleLoading}
+          onLoad={handleLoad}
           onError={handleError}
         />
       )}
       {textExtensions.includes(extension) && (
-        <FileViewText
-          file={file}
-          onLoad={handleLoading}
-          onError={handleError}
-        />
+        <FileViewText file={file} onLoad={handleLoad} onError={handleError} />
       )}
     </>
   )
