@@ -3,7 +3,7 @@
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>TRACE</level>
+            <level>INFO</level>
         </filter>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{0}: %msg%n</pattern>
