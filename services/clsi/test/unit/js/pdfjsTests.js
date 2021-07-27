@@ -3,7 +3,7 @@ const Path = require('path')
 const { expect } = require('chai')
 const { parseXrefTable } = require('../../../app/lib/pdfjs/parseXrefTable')
 const PATH_EXAMPLES = 'test/acceptance/fixtures/examples/'
-const PATH_SNAPSHOTS = 'test/unit/lib/snapshots/'
+const PATH_SNAPSHOTS = 'test/unit/js/snapshots/pdfjs/'
 const EXAMPLES = fs.readdirSync(PATH_EXAMPLES)
 
 function snapshotPath(example) {
