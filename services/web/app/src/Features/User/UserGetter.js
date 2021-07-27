@@ -11,6 +11,7 @@ const {
 const InstitutionsHelper = require('../Institutions/InstitutionsHelper')
 const Errors = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')
+const { User } = require('../../models/User')
 const { normalizeQuery, normalizeMultiQuery } = require('../Helpers/Mongo')
 
 function _lastDayToReconfirm(emailData, institutionData) {
@@ -81,7 +82,22 @@ async function getUserFullEmails(userId) {
   )
 }
 
+async function getSsoUsersAtInstitution(institutionId, projection) {
+  if (!projection) {
+    throw new Error('missing projection')
+  }
+
+  return await User.find(
+    {
+      'samlIdentifiers.providerId': institutionId.toString(),
+    },
+    projection
+  ).exec()
+}
+
 const UserGetter = {
+  getSsoUsersAtInstitution: callbackify(getSsoUsersAtInstitution),
+
   getUser(query, projection, callback) {
     if (arguments.length === 2) {
       callback = projection
@@ -253,8 +269,9 @@ var decorateFullEmails = (
 )
 
 UserGetter.promises = promisifyAll(UserGetter, {
-  without: ['getUserFullEmails'],
+  without: ['getSsoUsersAtInstitution', 'getUserFullEmails'],
 })
 UserGetter.promises.getUserFullEmails = getUserFullEmails
+UserGetter.promises.getSsoUsersAtInstitution = getSsoUsersAtInstitution
 
 module.exports = UserGetter

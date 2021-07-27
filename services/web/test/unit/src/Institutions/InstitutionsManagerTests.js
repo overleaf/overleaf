@@ -6,6 +6,7 @@ const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Institutions/InstitutionsManager'
 )
+const Features = require('../../../../app/src/infrastructure/Features')
 
 describe('InstitutionsManager', function () {
   beforeEach(function () {
@@ -13,9 +14,43 @@ describe('InstitutionsManager', function () {
     this.user = {}
     this.getInstitutionAffiliations = sinon.stub()
     this.refreshFeatures = sinon.stub().yields()
+    this.users = [
+      { _id: 'lapsed', features: {} },
+      { _id: '1a', features: {} },
+      { _id: '2b', features: {} },
+      { _id: '3c', features: {} },
+    ]
+    this.ssoUsers = [
+      {
+        _id: '1a',
+        samlIdentifiers: [{ providerId: this.institutionId.toString() }],
+      },
+      {
+        _id: '2b',
+        samlIdentifiers: [
+          {
+            providerId: this.institutionId.toString(),
+            hasEntitlement: true,
+          },
+        ],
+      },
+      {
+        _id: 'lapsed',
+        samlIdentifiers: [{ providerId: this.institutionId.toString() }],
+        hasEntitlement: true,
+      },
+    ]
+
     this.UserGetter = {
       getUsersByAnyConfirmedEmail: sinon.stub().yields(),
       getUser: sinon.stub().callsArgWith(1, null, this.user),
+      promises: {
+        getUsers: sinon.stub().resolves(this.users),
+        getUsersByAnyConfirmedEmail: sinon.stub().resolves(),
+        getSsoUsersAtInstitution: (this.getSsoUsersAtInstitution = sinon
+          .stub()
+          .resolves(this.ssoUsers)),
+      },
     }
     this.creator = { create: sinon.stub().callsArg(0) }
     this.NotificationsBuilder = {
@@ -37,9 +72,6 @@ describe('InstitutionsManager', function () {
       },
     }
     this.subscriptionExec = sinon.stub().yields()
-    this.SAMLIdentityManager = {
-      userHasEntitlement: sinon.stub().returns(false),
-    }
     const SubscriptionModel = {
       Subscription: {
         find: () => ({
@@ -51,13 +83,30 @@ describe('InstitutionsManager', function () {
     }
     this.Mongo = { ObjectId: sinon.stub().returnsArg(0) }
 
+    this.v1Counts = {
+      user_ids: this.users.map(user => user._id),
+      current_users_count: 3,
+      lapsed_user_ids: ['lapsed'],
+      entitled_via_sso: 1, // 2 entitled, but 1 lapsed
+      with_confirmed_email: 2, // 1 non entitled SSO + 1 email user
+    }
+
     this.InstitutionsManager = SandboxedModule.require(modulePath, {
       requires: {
         './InstitutionsAPI': {
           getInstitutionAffiliations: this.getInstitutionAffiliations,
+          promises: {
+            getInstitutionAffiliations: (this.getInstitutionAffiliationsPromise = sinon
+              .stub()
+              .resolves(this.affiliations)),
+            getInstitutionAffiliationsCounts: (this.getInstitutionAffiliationsCounts = sinon
+              .stub()
+              .resolves(this.v1Counts)),
+          },
         },
         '../Subscription/FeaturesUpdater': {
           refreshFeatures: this.refreshFeatures,
+          isFeatureSetBetter: (this.isFeatureSetBetter = sinon.stub()),
         },
         '../User/UserGetter': this.UserGetter,
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
@@ -65,7 +114,6 @@ describe('InstitutionsManager', function () {
         '../../models/Institution': this.InstitutionModel,
         '../../models/Subscription': SubscriptionModel,
         mongodb: this.Mongo,
-        '../User/SAMLIdentityManager': this.SAMLIdentityManager,
       },
     })
   })
@@ -154,49 +202,91 @@ describe('InstitutionsManager', function () {
   })
 
   describe('checkInstitutionUsers', function () {
-    it('check all users Features', function (done) {
-      const affiliations = [{ email: 'foo@bar.com' }, { email: 'baz@boo.edu' }]
-      const stubbedUsers = [
-        {
-          _id: '123abc123abc123abc123abc',
-          features: { collaborators: -1, trackChanges: true },
-        },
-        {
-          _id: '456def456def456def456def',
-          features: { collaborators: 10, trackChanges: false },
-        },
-        {
-          _id: '789def789def789def789def',
-          features: { collaborators: -1, trackChanges: false },
-        },
-      ]
-      this.getInstitutionAffiliations.yields(null, affiliations)
-      this.UserGetter.getUsersByAnyConfirmedEmail.yields(null, stubbedUsers)
-      this.SAMLIdentityManager.userHasEntitlement.onCall(0).returns(true)
-      this.SAMLIdentityManager.userHasEntitlement.onCall(1).returns(true)
-      this.SAMLIdentityManager.userHasEntitlement.onCall(2).returns(false)
-      this.InstitutionsManager.checkInstitutionUsers(
-        this.institutionId,
-        (error, usersSummary) => {
-          expect(error).not.to.exist
+    it('returns entitled/not, sso/not, lapsed/current, and pro counts', async function () {
+      if (Features.hasFeature('saas')) {
+        this.isFeatureSetBetter.returns(true)
+        const usersSummary = await this.InstitutionsManager.promises.checkInstitutionUsers(
+          this.institutionId
+        )
+        expect(usersSummary).to.deep.equal({
+          emailUsers: {
+            total: 1,
+            current: 1,
+            lapsed: 0,
+            pro: {
+              current: 1, // isFeatureSetBetter stubbed to return true for all
+              lapsed: 0,
+            },
+            nonPro: {
+              current: 0,
+              lapsed: 0,
+            },
+          },
+          ssoUsers: {
+            total: 3,
+            lapsed: 1,
+            current: {
+              entitled: 1,
+              notEntitled: 1,
+            },
+            pro: {
+              current: 2,
+              lapsed: 1, // isFeatureSetBetter stubbed to return true for all users
+            },
+            nonPro: {
+              current: 0,
+              lapsed: 0,
+            },
+          },
+        })
+      }
+    })
 
-          usersSummary.confirmedEmailUsers.total.should.equal(3)
-          usersSummary.confirmedEmailUsers.totalProUsers.should.equal(1)
-          usersSummary.confirmedEmailUsers.totalNonProUsers.should.equal(2)
-          expect(usersSummary.confirmedEmailUsers.nonProUsers).to.deep.equal([
-            '456def456def456def456def',
-            '789def789def789def789def',
-          ])
-
-          usersSummary.entitledSSOUsers.total.should.equal(2)
-          usersSummary.entitledSSOUsers.totalProUsers.should.equal(1)
-          usersSummary.entitledSSOUsers.totalNonProUsers.should.equal(1)
-          expect(usersSummary.entitledSSOUsers.nonProUsers).to.deep.equal([
-            '456def456def456def456def',
-          ])
-          done()
-        }
-      )
+    it('includes withConfirmedEmailMismatch when v1 and v2 counts do not add up', async function () {
+      if (Features.hasFeature('saas')) {
+        this.isFeatureSetBetter.returns(true)
+        this.v1Counts.with_confirmed_email = 100
+        const usersSummary = await this.InstitutionsManager.promises.checkInstitutionUsers(
+          this.institutionId
+        )
+        expect(usersSummary).to.deep.equal({
+          emailUsers: {
+            total: 1,
+            current: 1,
+            lapsed: 0,
+            pro: {
+              current: 1, // isFeatureSetBetter stubbed to return true for all
+              lapsed: 0,
+            },
+            nonPro: {
+              current: 0,
+              lapsed: 0,
+            },
+          },
+          ssoUsers: {
+            total: 3,
+            lapsed: 1,
+            current: {
+              entitled: 1,
+              notEntitled: 1,
+            },
+            pro: {
+              current: 2,
+              lapsed: 1, // isFeatureSetBetter stubbed to return true for all users
+            },
+            nonPro: {
+              current: 0,
+              lapsed: 0,
+            },
+          },
+          databaseMismatch: {
+            withConfirmedEmail: {
+              v1: 100,
+              v2: 2,
+            },
+          },
+        })
+      }
     })
   })
 

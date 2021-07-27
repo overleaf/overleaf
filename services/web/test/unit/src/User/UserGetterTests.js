@@ -61,7 +61,20 @@ describe('UserGetter', function () {
         '../../infrastructure/Features': {
           hasFeature: sinon.stub().returns(true),
         },
+        '../../models/User': {
+          User: (this.User = {}),
+        },
       },
+    })
+  })
+
+  describe('getSsoUsersAtInstitution', function () {
+    it('should throw an error when no projection is passed', function (done) {
+      this.UserGetter.getSsoUsersAtInstitution(1, undefined, error => {
+        expect(error).to.exist
+        expect(error.message).to.equal('missing projection')
+        done()
+      })
     })
   })
 

@@ -22,6 +22,17 @@ const InstitutionsAPI = {
     )
   },
 
+  getInstitutionAffiliationsCounts(institutionId, callback) {
+    makeAffiliationRequest(
+      {
+        method: 'GET',
+        path: `/api/v2/institutions/${institutionId.toString()}/affiliations_counts`,
+        defaultErrorMessage: "Couldn't get institution counts",
+      },
+      (error, body) => callback(error, body || [])
+    )
+  },
+
   getLicencesForAnalytics(lag, queryDate, callback) {
     makeAffiliationRequest(
       {

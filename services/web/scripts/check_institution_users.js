@@ -12,16 +12,10 @@ waitForDb()
     process.exit(1)
   })
 
-function main() {
-  InstitutionsManager.checkInstitutionUsers(
-    institutionId,
-    function (error, usersSummary) {
-      if (error) {
-        console.log(error)
-      } else {
-        console.log(usersSummary)
-      }
-      process.exit()
-    }
+async function main() {
+  const usersSummary = await InstitutionsManager.promises.checkInstitutionUsers(
+    institutionId
   )
+  console.log(usersSummary)
+  process.exit()
 }
