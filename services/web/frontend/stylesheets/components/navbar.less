@@ -585,3 +585,27 @@
     padding: @navbar-default-padding-v 0;
   }
 }
+
+// Accessibility
+.skip-to-content {
+  color: @navbar-default-link-color;
+  background-color: @navbar-default-link-bg;
+  border: 2px solid transparent;
+  border-radius: @navbar-btn-border-radius;
+  font-size: @navbar-btn-font-size;
+  font-weight: @navbar-btn-font-weight;
+  left: @navbar-brand-width + @padding-lg;
+  line-height: @navbar-btn-line-height;
+  padding: @navbar-btn-padding;
+  position: absolute;
+  top: -200px;
+  z-index: @zindex-navbar + 1;
+
+  &:focus {
+    background-color: @navbar-default-link-hover-bg;
+    border: 2px solid @navbar-default-link-hover-color;
+    color: @white;
+    text-decoration: none;
+    top: @navbar-default-padding-v;
+  }
+}

@@ -107,6 +107,8 @@ html(
 		if(settings.recaptcha && settings.recaptcha.siteKeyV3)
 			script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
 
+		if (typeof(suppressSkipToContent) == "undefined")
+			a(class="skip-to-content" href="#main-content") #{translate('skip_to_content')}
 
 		if (typeof(suppressNavbar) == "undefined")
 			include layout/navbar

@@ -11,7 +11,7 @@ block append meta
 	meta(name="ol-groupPlans" data-type="json" content=groupPlans)
 
 block content
-	.content.content-alt
+	main.content.content-alt#main-content
 		.container
 			.user-notifications
 				ul.list-unstyled(ng-cloak)
@@ -21,7 +21,7 @@ block content
 								span To help you work from home throughout 2021, we're providing discounted plans and special initiatives.
 							.notification-action
 								a.btn.btn-sm.btn-info(href="https://www.overleaf.com/events/wfh2021" event-tracking="Event-Pages" event-tracking-trigger="click" event-tracking-ga="WFH-Offer-Click" event-tracking-label="Plans-Banner") Upgrade
-		main.content-page
+		.content-page
 			.plans(ng-controller="PlansController")
 				.container(ng-cloak)
 					.row

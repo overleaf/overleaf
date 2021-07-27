@@ -3,6 +3,7 @@ extends ../layout
 block vars
 	- var suppressNavbar = true
 	- var suppressFooter = true
+	- var suppressSkipToContent = true
 
 block content
 	script(type="template", id="gateway-data")!= StringHelper.stringifyJsonForScript({ params: form_data })
