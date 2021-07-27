@@ -77,7 +77,10 @@ module.exports = ProjectUploadController = {
         { projectId: project_id, fileName: name },
         'bad name when trying to upload file'
       )
-      return res.send({ success: false })
+      return res.status(422).send({
+        success: false,
+        error: 'invalid_filename',
+      })
     }
     const user_id = AuthenticationController.getLoggedInUserId(req)
 
@@ -103,17 +106,17 @@ module.exports = ProjectUploadController = {
             'error uploading file'
           )
           if (error.name === 'InvalidNameError') {
-            return res.send({
+            return res.status(422).send({
               success: false,
-              error: req.i18n.translate('invalid_filename'),
+              error: 'invalid_filename',
             })
           } else if (error.message === 'project_has_too_many_files') {
-            return res.send({
+            return res.status(422).send({
               success: false,
-              error: req.i18n.translate('project_has_too_many_files'),
+              error: 'project_has_too_many_files',
             })
           } else {
-            return res.send({ success: false })
+            return res.status(422).send({ success: false })
           }
         } else {
           return res.send({

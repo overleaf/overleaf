@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 import { FetchError } from '../../../../infrastructure/fetch-json'
 import RedirectToLogin from './redirect-to-login'
 import {
@@ -11,6 +11,7 @@ import DangerMessage from './danger-message'
 
 export default function ErrorMessage({ error }) {
   const { t } = useTranslation()
+  const fileNameLimit = 150
 
   // the error is a string
   // TODO: translate? always? is this a key or a message?
@@ -24,6 +25,18 @@ export default function ErrorMessage({ error }) {
 
       case 'remote-service-error':
         return <DangerMessage>{t('remote_service_error')}</DangerMessage>
+
+      case 'invalid_filename':
+        return (
+          <DangerMessage>
+            <Trans
+              i18nKey="invalid_filename"
+              values={{
+                nameLimit: fileNameLimit,
+              }}
+            />
+          </DangerMessage>
+        )
 
       case 'rate-limit-hit':
         return (

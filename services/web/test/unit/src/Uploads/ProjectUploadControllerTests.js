@@ -248,7 +248,7 @@ describe('ProjectUploadController', function () {
       })
     })
 
-    describe('with a bad request', function () {
+    describe('with an invalid filename', function () {
       beforeEach(function () {
         this.req.file.originalname = ''
         return this.ProjectUploadController.uploadFile(this.req, this.res)
@@ -257,6 +257,7 @@ describe('ProjectUploadController', function () {
       it('should return a a non success response', function () {
         return expect(this.res.body).to.deep.equal({
           success: false,
+          error: 'invalid_filename',
         })
       })
     })

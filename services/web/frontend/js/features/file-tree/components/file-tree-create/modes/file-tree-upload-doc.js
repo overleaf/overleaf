@@ -105,7 +105,7 @@ export default function FileTreeUploadDoc() {
               break
 
             default:
-              // TODO
+              setError(response.body.error)
               break
           }
         })

@@ -18,7 +18,12 @@ import { useFileTreeActionable } from '../../../../../../frontend/js/features/fi
 import { useFileTreeMutable } from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-mutable'
 
 describe('<FileTreeModalCreateFile/>', function () {
+  beforeEach(function () {
+    window.csrfToken = 'token'
+  })
+
   afterEach(function () {
+    delete window.csrfToken
     fetchMock.restore()
     cleanup()
   })
@@ -397,6 +402,51 @@ describe('<FileTreeModalCreateFile/>', function () {
     const [request] = requests
     expect(request.url).to.equal('/project/test-project/upload')
     expect(request.method).to.equal('POST')
+
+    xhr.restore()
+  })
+
+  it('displays upload errors', async function () {
+    const xhr = sinon.useFakeXMLHttpRequest()
+    const requests = []
+    xhr.onCreate = request => {
+      requests.push(request)
+    }
+
+    render(
+      <FileTreeContext {...contextProps}>
+        <OpenWithMode mode="upload" />
+      </FileTreeContext>
+    )
+
+    // the submit button should not be present
+    expect(screen.queryByRole('button', { name: 'Create' })).to.be.null
+
+    const dropzone = screen.getByLabelText('File Uploader')
+
+    expect(dropzone).not.to.be.null
+
+    fireEvent.paste(dropzone, {
+      clipboardData: {
+        files: [new File(['test'], 'tes!t.tex', { type: 'text/plain' })],
+      },
+    })
+
+    await waitFor(() => expect(requests).to.have.length(1))
+
+    const [request] = requests
+    expect(request.url).to.equal('/project/test-project/upload')
+    expect(request.method).to.equal('POST')
+
+    request.respond(
+      422,
+      { 'Content-Type': 'application/json' },
+      '{ "success": false, "error": "invalid_filename" }'
+    )
+
+    await screen.findByText(
+      `Upload failed: check that the file name doesn't contain special characters, trailing/leading whitespace or more than 150 characters`
+    )
 
     xhr.restore()
   })
