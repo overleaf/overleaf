@@ -1,9 +1,35 @@
-let InstitutionsGetter
+const { callbackify } = require('util')
 const UserGetter = require('../User/UserGetter')
 const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
 const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEntityConfigs')
 
-module.exports = InstitutionsGetter = {
+async function _getCurrentAffiliations(userId) {
+  const fullEmails = await UserGetter.promises.getUserFullEmails(userId)
+  // current are those confirmed and not with lapsed reconfirmations
+  return fullEmails
+    .filter(
+      emailData =>
+        emailData.confirmedAt &&
+        emailData.affiliation &&
+        emailData.affiliation.institution &&
+        emailData.affiliation.institution.confirmed &&
+        !emailData.affiliation.pastReconfirmDate
+    )
+    .map(emailData => emailData.affiliation)
+}
+
+async function getCurrentInstitutionIds(userId) {
+  // current are those confirmed and not with lapsed reconfirmations
+  // only 1 record returned per current institutionId
+  const institutionIds = new Set()
+  const currentAffiliations = await _getCurrentAffiliations(userId)
+  currentAffiliations.forEach(affiliation => {
+    institutionIds.add(affiliation.institution.id)
+  })
+  return [...institutionIds]
+}
+
+const InstitutionsGetter = {
   getConfirmedAffiliations(userId, callback) {
     UserGetter.getUserFullEmails(userId, function (error, emailsData) {
       if (error) {
@@ -24,23 +50,7 @@ module.exports = InstitutionsGetter = {
     })
   },
 
-  getConfirmedInstitutions(userId, callback) {
-    InstitutionsGetter.getConfirmedAffiliations(
-      userId,
-      (error, confirmedAffiliations) => {
-        if (error) {
-          return callback(error)
-        }
-
-        const confirmedInstitutions = confirmedAffiliations.map(
-          confirmedAffiliation =>
-            confirmedAffiliation ? confirmedAffiliation.institution : undefined
-        )
-
-        callback(null, confirmedInstitutions)
-      }
-    )
-  },
+  getCurrentInstitutionIds: callbackify(getCurrentInstitutionIds),
 
   getManagedInstitutions(userId, callback) {
     UserMembershipsHandler.getEntitiesByUser(
@@ -50,3 +60,9 @@ module.exports = InstitutionsGetter = {
     )
   },
 }
+
+InstitutionsGetter.promises = {
+  getCurrentInstitutionIds,
+}
+
+module.exports = InstitutionsGetter
