@@ -9,3 +9,6 @@ node_modules/
 
 /public/js/chat.js
 plato/
+
+.npmrc
+Dockerfile
