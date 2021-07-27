@@ -18,7 +18,9 @@ module.exports = {
   security: {
     sessionSecret: 'static-secret-for-tests',
   },
-  adminDomains: ['example.com'],
+  adminDomains: process.env.ADMIN_DOMAINS
+    ? JSON.parse(process.env.ADMIN_DOMAINS)
+    : ['example.com'],
 
   statusPageUrl: 'status.example.com',
 

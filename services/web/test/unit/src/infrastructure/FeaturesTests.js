@@ -20,7 +20,7 @@ describe('Features', function () {
     })
     describe('with ldap setting', function () {
       beforeEach(function () {
-        this.settings.ldap = true
+        this.settings.ldap = { enable: true }
       })
       it('should return true', function () {
         expect(this.Features.externalAuthenticationSystemUsed()).to.be.true
@@ -28,7 +28,7 @@ describe('Features', function () {
     })
     describe('with saml setting', function () {
       beforeEach(function () {
-        this.settings.saml = true
+        this.settings.saml = { enable: true }
       })
       it('should return true', function () {
         expect(this.Features.externalAuthenticationSystemUsed()).to.be.true

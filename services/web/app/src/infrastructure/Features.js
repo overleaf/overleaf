@@ -39,8 +39,8 @@ const Features = {
    */
   externalAuthenticationSystemUsed() {
     return (
-      Boolean(Settings.ldap) ||
-      Boolean(Settings.saml) ||
+      (Boolean(Settings.ldap) && Boolean(Settings.ldap.enable)) ||
+      (Boolean(Settings.saml) && Boolean(Settings.saml.enable)) ||
       Boolean(_.get(Settings, ['overleaf', 'oauth']))
     )
   },

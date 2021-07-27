@@ -25,33 +25,22 @@ services:
     volumes:
       - .:/app
     working_dir: /app
+    env_file: docker-compose.common.env
     environment:
-      BCRYPT_ROUNDS: 1
-      REDIS_HOST: redis
-      QUEUES_REDIS_HOST: redis
-      MONGO_URL: "mongodb://mongo/sharelatex"
-      SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
-      PROJECT_HISTORY_ENABLED: 'true'
-      LINKED_URL_PROXY: 'http://localhost:6543'
-      ENABLED_LINKED_FILE_TYPES: 'url,project_file,project_output_file,mendeley,zotero'
+      BASE_CONFIG:
+      SHARELATEX_CONFIG:
       MOCHA_GREP: ${MOCHA_GREP}
-      NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
-      LOCK_MANAGER_MAX_LOCK_WAIT_TIME: 30000
       MONGO_SERVER_SELECTION_TIMEOUT: 600000
       MONGO_SOCKET_TIMEOUT: 300000
       # SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
-      BASE_CONFIG:
-      SHARELATEX_CONFIG:
-      COOKIE_DOMAIN: .overleaf.test
-      PUBLIC_URL: 'http://www.overleaf.test:3000'
-      HTTP_TEST_HOST: www.overleaf.test
-      OT_JWT_AUTH_KEY: "very secret key"
+
     extra_hosts:
       - 'www.overleaf.test:127.0.0.1'
     depends_on:
       - redis
       - mongo
+      - saml
+      - ldap
     command: npm run --silent test:acceptance:app
 
   test_karma:
@@ -83,3 +72,15 @@ services:
 
   mongo:
     image: mongo:4.0.19
+
+  ldap:
+    restart: always
+    image: rroemhild/test-openldap:1.1
+
+  saml:
+      restart: always
+      image: gcr.io/overleaf-ops/saml-test
+      environment:
+          SAML_BASE_URL_PATH: 'http://saml/simplesaml/'
+          SAML_TEST_SP_ENTITY_ID: 'sharelatex-test-saml'
+          SAML_TEST_SP_LOCATION: 'http://www.overleaf.test:3000/saml/callback'
