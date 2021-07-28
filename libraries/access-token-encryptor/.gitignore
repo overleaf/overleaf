@@ -42,3 +42,6 @@ data/*/*
 
 /log.json
 hash_folder
+
+.npmrc
+Dockerfile
