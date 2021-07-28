@@ -54,6 +54,9 @@ describe('ProjectController', function () {
         .stub()
         .callsArgWith(2, null, { _id: this.project_id }),
     }
+    this.ProjectHistoryHandler = {
+      ensureHistoryExistsForProject: sinon.stub().callsArg(1),
+    }
     this.SubscriptionLocator = { getUsersSubscription: sinon.stub() }
     this.LimitationsManager = { hasPaidSubscription: sinon.stub() }
     this.TagsHandler = { getAllTags: sinon.stub() }
@@ -140,6 +143,7 @@ describe('ProjectController', function () {
         './ProjectDeleter': this.ProjectDeleter,
         './ProjectDuplicator': this.ProjectDuplicator,
         './ProjectCreationHandler': this.ProjectCreationHandler,
+        './ProjectHistoryHandler': this.ProjectHistoryHandler,
         '../Editor/EditorController': this.EditorController,
         '../User/UserController': this.UserController,
         './ProjectHelper': this.ProjectHelper,
@@ -1017,6 +1021,18 @@ describe('ProjectController', function () {
     it('should reactivateProjectIfRequired', function (done) {
       this.res.render = (pageName, opts) => {
         this.InactiveProjectManager.reactivateProjectIfRequired
+          .calledWith(this.project_id)
+          .should.equal(true)
+        done()
+      }
+      this.ProjectController.loadEditor(this.req, this.res)
+    })
+
+    it('should ensureHistoryExistsForProject if saas and project_history enabled', function (done) {
+      this.Features.hasFeature.withArgs('saas').returns(true)
+      this.settings.apis.project_history = 'enabled'
+      this.res.render = (pageName, opts) => {
+        this.ProjectHistoryHandler.ensureHistoryExistsForProject
           .calledWith(this.project_id)
           .should.equal(true)
         done()
