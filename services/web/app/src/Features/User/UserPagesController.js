@@ -4,6 +4,7 @@ const UserSessionsManager = require('./UserSessionsManager')
 const logger = require('logger-sharelatex')
 const Settings = require('@overleaf/settings')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const _ = require('lodash')
 
 const UserPagesController = {
@@ -63,7 +64,7 @@ const UserPagesController = {
   },
 
   settingsPage(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const reconfirmationRemoveEmail = req.query.remove
     // SSO
     const ssoError = req.session.ssoError
@@ -134,7 +135,7 @@ const UserPagesController = {
   },
 
   sessionsPage(req, res, next) {
-    const user = AuthenticationController.getSessionUser(req)
+    const user = SessionManager.getSessionUser(req.session)
     logger.log({ userId: user._id }, 'loading sessions page')
     UserSessionsManager.getAllUserSessions(
       user,

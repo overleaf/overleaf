@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ContactsController
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const ContactManager = require('./ContactManager')
 const UserGetter = require('../User/UserGetter')
 const logger = require('logger-sharelatex')
@@ -21,7 +21,7 @@ const Modules = require('../../infrastructure/Modules')
 
 module.exports = ContactsController = {
   getContacts(req, res, next) {
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const user_id = SessionManager.getLoggedInUserId(req.session)
     return ContactManager.getContactIds(
       user_id,
       { limit: 50 },

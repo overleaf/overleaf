@@ -4,7 +4,7 @@ const { ObjectId } = require('mongodb')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
 const CollaboratorsGetter = require('./CollaboratorsGetter')
 const OwnershipTransferHandler = require('./OwnershipTransferHandler')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const TagsHandler = require('../Tags/TagsHandler')
 const Errors = require('../Errors/Errors')
@@ -31,7 +31,7 @@ async function removeUserFromProject(req, res, next) {
 
 async function removeSelfFromProject(req, res, next) {
   const projectId = req.params.Project_id
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   await _removeUserIdFromProject(projectId, userId)
   res.sendStatus(204)
 }
@@ -74,7 +74,7 @@ async function setCollaboratorInfo(req, res, next) {
 }
 
 async function transferOwnership(req, res, next) {
-  const sessionUser = AuthenticationController.getSessionUser(req)
+  const sessionUser = SessionManager.getSessionUser(req.session)
   const projectId = req.params.Project_id
   const toUserId = req.body.user_id
   try {

@@ -16,8 +16,7 @@
 let ChatController
 const ChatApiHandler = require('./ChatApiHandler')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
-const logger = require('logger-sharelatex')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const UserInfoManager = require('../User/UserInfoManager')
 const UserInfoController = require('../User/UserInfoController')
 const async = require('async')
@@ -26,7 +25,7 @@ module.exports = ChatController = {
   sendMessage(req, res, next) {
     const { project_id } = req.params
     const { content } = req.body
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const user_id = SessionManager.getLoggedInUserId(req.session)
     if (user_id == null) {
       const err = new Error('no logged-in user')
       return next(err)

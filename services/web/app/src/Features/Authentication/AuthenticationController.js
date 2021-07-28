@@ -1,4 +1,5 @@
 const AuthenticationManager = require('./AuthenticationManager')
+const SessionManager = require('./SessionManager')
 const OError = require('@overleaf/o-error')
 const LoginRateLimiter = require('../Security/LoginRateLimiter')
 const UserUpdater = require('../User/UserUpdater')
@@ -185,58 +186,16 @@ const AuthenticationController = {
     })
   },
 
-  setInSessionUser(req, props) {
-    const sessionUser = AuthenticationController.getSessionUser(req)
-    if (!sessionUser) {
-      return
-    }
-    for (const key in props) {
-      const value = props[key]
-      sessionUser[key] = value
-    }
-    return null
-  },
-
-  isUserLoggedIn(req) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
-    return ![null, undefined, false].includes(userId)
-  },
-
-  // TODO: perhaps should produce an error if the current user is not present
-  getLoggedInUserId(req) {
-    const user = AuthenticationController.getSessionUser(req)
-    if (user) {
-      return user._id
-    } else {
-      return null
-    }
-  },
-
-  getLoggedInUserV1Id(req) {
-    const user = AuthenticationController.getSessionUser(req)
-    if ((user != null ? user.v1_id : undefined) != null) {
-      return user.v1_id
-    } else {
-      return null
-    }
-  },
-
-  getSessionUser(req) {
-    const sessionUser = _.get(req, ['session', 'user'])
-    const sessionPassportUser = _.get(req, ['session', 'passport', 'user'])
-    return sessionUser || sessionPassportUser || null
-  },
-
   requireLogin() {
     const doRequest = function (req, res, next) {
       if (next == null) {
         next = function () {}
       }
-      if (!AuthenticationController.isUserLoggedIn(req)) {
+      if (!SessionManager.isUserLoggedIn(req.session)) {
         if (acceptsJson(req)) return send401WithChallenge(res)
         return AuthenticationController._redirectToLoginOrRegisterPage(req, res)
       } else {
-        req.user = AuthenticationController.getSessionUser(req)
+        req.user = SessionManager.getSessionUser(req.session)
         return next()
       }
     }
@@ -320,7 +279,7 @@ const AuthenticationController = {
 
     if (req.headers.authorization != null) {
       AuthenticationController.requirePrivateApiAuth()(req, res, next)
-    } else if (AuthenticationController.isUserLoggedIn(req)) {
+    } else if (SessionManager.isUserLoggedIn(req.session)) {
       next()
     } else {
       logger.log(
@@ -341,7 +300,7 @@ const AuthenticationController = {
     ) {
       return next()
     }
-    const user = AuthenticationController.getSessionUser(req)
+    const user = SessionManager.getSessionUser(req.session)
     if (!(user && user.isAdmin)) {
       return next()
     }

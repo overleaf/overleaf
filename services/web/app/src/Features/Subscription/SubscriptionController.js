@@ -1,4 +1,4 @@
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const SubscriptionHandler = require('./SubscriptionHandler')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionViewModelBuilder = require('./SubscriptionViewModelBuilder')
@@ -45,7 +45,7 @@ async function plansPage(req, res) {
 
 // get to show the recurly.js page
 async function paymentPage(req, res) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   const plan = PlansLocator.findLocalPlanInSettings(req.query.planCode)
   if (!plan) {
     return HttpErrorHandler.unprocessableEntity(req, res, 'Plan not found')
@@ -95,7 +95,7 @@ async function paymentPage(req, res) {
 }
 
 async function userSubscriptionPage(req, res) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   const results = await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
     user
   )
@@ -172,7 +172,7 @@ async function userSubscriptionPage(req, res) {
 }
 
 function createSubscription(req, res, next) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   const recurlyTokenIds = {
     billing: req.body.recurly_token_id,
     threeDSecureActionResult:
@@ -224,7 +224,7 @@ function createSubscription(req, res, next) {
 }
 
 function successfulSubscription(req, res, next) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   return SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
     user,
     function (error, { personalSubscription }) {
@@ -244,7 +244,7 @@ function successfulSubscription(req, res, next) {
 }
 
 function cancelSubscription(req, res, next) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   logger.log({ user_id: user._id }, 'canceling subscription')
   SubscriptionHandler.cancelSubscription(user, function (err) {
     if (err) {
@@ -266,7 +266,7 @@ function canceledSubscription(req, res, next) {
 }
 
 function cancelV1Subscription(req, res, next) {
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   logger.log({ userId }, 'canceling v1 subscription')
   V1SubscriptionManager.cancelV1Subscription(userId, function (err) {
     if (err) {
@@ -281,7 +281,7 @@ function cancelV1Subscription(req, res, next) {
 
 function updateSubscription(req, res, next) {
   const origin = req && req.query ? req.query.origin : null
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   const planCode = req.body.plan_code
   if (planCode == null) {
     const err = new Error('plan_code is not defined')
@@ -304,7 +304,7 @@ function updateSubscription(req, res, next) {
 }
 
 function cancelPendingSubscriptionChange(req, res, next) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   logger.log({ user_id: user._id }, 'canceling pending subscription change')
   SubscriptionHandler.cancelPendingSubscriptionChange(user, function (err) {
     if (err) {
@@ -322,7 +322,7 @@ function cancelPendingSubscriptionChange(req, res, next) {
 }
 
 function updateAccountEmailAddress(req, res, next) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   RecurlyWrapper.updateAccountEmailAddress(
     user._id,
     user.email,
@@ -336,7 +336,7 @@ function updateAccountEmailAddress(req, res, next) {
 }
 
 function reactivateSubscription(req, res, next) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   logger.log({ user_id: user._id }, 'reactivating subscription')
   SubscriptionHandler.reactivateSubscription(user, function (err) {
     if (err) {
@@ -391,7 +391,7 @@ function recurlyCallback(req, res, next) {
 }
 
 function renderUpgradeToAnnualPlanPage(req, res, next) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   LimitationsManager.userHasV2Subscription(
     user,
     function (err, hasSubscription, subscription) {
@@ -424,7 +424,7 @@ function renderUpgradeToAnnualPlanPage(req, res, next) {
 }
 
 function processUpgradeToAnnualPlan(req, res, next) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   const { planName } = req.body
   const couponCode = Settings.coupon_codes.upgradeToAnnualPromo[planName]
   const annualPlanName = `${planName}-annual`
@@ -449,7 +449,7 @@ function processUpgradeToAnnualPlan(req, res, next) {
 }
 
 async function extendTrial(req, res) {
-  const user = AuthenticationController.getSessionUser(req)
+  const user = SessionManager.getSessionUser(req.session)
   const {
     subscription,
   } = await LimitationsManager.promises.userHasV2Subscription(user)

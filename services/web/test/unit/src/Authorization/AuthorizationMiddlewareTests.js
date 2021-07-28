@@ -11,7 +11,8 @@ describe('AuthorizationMiddleware', function () {
     this.userId = 'user-id-123'
     this.project_id = 'project-id-123'
     this.token = 'some-token'
-    this.AuthenticationController = {
+    this.AuthenticationController = {}
+    this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.userId),
       isUserLoggedIn: sinon.stub().returns(true),
     }
@@ -35,6 +36,7 @@ describe('AuthorizationMiddleware', function () {
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
       },
     })
@@ -49,9 +51,7 @@ describe('AuthorizationMiddleware', function () {
     })
 
     it('should get the user from session', function (done) {
-      this.AuthenticationController.getLoggedInUserId = sinon
-        .stub()
-        .returns('1234')
+      this.SessionManager.getLoggedInUserId = sinon.stub().returns('1234')
       this.AuthorizationMiddleware._getUserId(this.req, (err, userId) => {
         expect(err).to.not.exist
         expect(userId).to.equal('1234')
@@ -60,9 +60,7 @@ describe('AuthorizationMiddleware', function () {
     })
 
     it('should get oauth_user from request', function (done) {
-      this.AuthenticationController.getLoggedInUserId = sinon
-        .stub()
-        .returns(null)
+      this.SessionManager.getLoggedInUserId = sinon.stub().returns(null)
       this.req.oauth_user = { _id: '5678' }
       this.AuthorizationMiddleware._getUserId(this.req, (err, userId) => {
         expect(err).to.not.exist
@@ -72,9 +70,7 @@ describe('AuthorizationMiddleware', function () {
     })
 
     it('should fall back to null', function (done) {
-      this.AuthenticationController.getLoggedInUserId = sinon
-        .stub()
-        .returns(null)
+      this.SessionManager.getLoggedInUserId = sinon.stub().returns(null)
       this.req.oauth_user = undefined
       this.AuthorizationMiddleware._getUserId(this.req, (err, userId) => {
         expect(err).to.not.exist
@@ -117,7 +113,7 @@ describe('AuthorizationMiddleware', function () {
 
         describe('with logged in user', function () {
           beforeEach(function () {
-            this.AuthenticationController.getLoggedInUserId.returns(this.userId)
+            this.SessionManager.getLoggedInUserId.returns(this.userId)
           })
 
           describe('when user has permission', function () {
@@ -161,7 +157,7 @@ describe('AuthorizationMiddleware', function () {
         describe('with anonymous user', function () {
           describe('when user has permission', function () {
             beforeEach(function () {
-              this.AuthenticationController.getLoggedInUserId.returns(null)
+              this.SessionManager.getLoggedInUserId.returns(null)
               this.AuthorizationManager[managerMethod]
                 .withArgs(null, this.project_id, this.token)
                 .yields(null, true)
@@ -179,7 +175,7 @@ describe('AuthorizationMiddleware', function () {
 
           describe("when user doesn't have permission", function () {
             beforeEach(function () {
-              this.AuthenticationController.getLoggedInUserId.returns(null)
+              this.SessionManager.getLoggedInUserId.returns(null)
               this.AuthorizationManager[managerMethod]
                 .withArgs(null, this.project_id, this.token)
                 .yields(null, false)
@@ -244,7 +240,7 @@ describe('AuthorizationMiddleware', function () {
 
     describe('with logged in user', function () {
       beforeEach(function () {
-        this.AuthenticationController.getLoggedInUserId.returns(this.userId)
+        this.SessionManager.getLoggedInUserId.returns(this.userId)
       })
 
       describe('when user has permission', function () {
@@ -284,7 +280,7 @@ describe('AuthorizationMiddleware', function () {
     describe('with anonymous user', function () {
       describe('when user has permission', function () {
         beforeEach(function () {
-          this.AuthenticationController.getLoggedInUserId.returns(null)
+          this.SessionManager.getLoggedInUserId.returns(null)
           this.AuthorizationManager.canUserAdminProject
             .withArgs(null, this.project_id, this.token)
             .yields(null, true)
@@ -302,7 +298,7 @@ describe('AuthorizationMiddleware', function () {
 
       describe("when user doesn't have permission", function () {
         beforeEach(function () {
-          this.AuthenticationController.getLoggedInUserId.returns(null)
+          this.SessionManager.getLoggedInUserId.returns(null)
           this.AuthorizationManager.canUserAdminProject
             .withArgs(null, this.project_id, this.token)
             .yields(null, false)
@@ -345,7 +341,7 @@ describe('AuthorizationMiddleware', function () {
 
     describe('with logged in user', function () {
       beforeEach(function () {
-        this.AuthenticationController.getLoggedInUserId.returns(this.userId)
+        this.SessionManager.getLoggedInUserId.returns(this.userId)
       })
 
       describe('when user has permission', function () {
@@ -389,7 +385,7 @@ describe('AuthorizationMiddleware', function () {
     describe('with anonymous user', function () {
       describe('when user has permission', function () {
         beforeEach(function () {
-          this.AuthenticationController.getLoggedInUserId.returns(null)
+          this.SessionManager.getLoggedInUserId.returns(null)
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(null)
             .yields(null, true)
@@ -407,7 +403,7 @@ describe('AuthorizationMiddleware', function () {
 
       describe("when user doesn't have permission", function () {
         beforeEach(function () {
-          this.AuthenticationController.getLoggedInUserId.returns(null)
+          this.SessionManager.getLoggedInUserId.returns(null)
           this.AuthorizationManager.isUserSiteAdmin
             .withArgs(null)
             .yields(null, false)
@@ -486,7 +482,7 @@ describe('AuthorizationMiddleware', function () {
 
     describe('with logged in user', function () {
       beforeEach(function () {
-        this.AuthenticationController.getLoggedInUserId.returns(this.userId)
+        this.SessionManager.getLoggedInUserId.returns(this.userId)
       })
 
       describe('when user has permission to access all projects', function () {
@@ -537,7 +533,7 @@ describe('AuthorizationMiddleware', function () {
       describe('when user has permission', function () {
         describe('when user has permission to access all projects', function () {
           beforeEach(function () {
-            this.AuthenticationController.getLoggedInUserId.returns(null)
+            this.SessionManager.getLoggedInUserId.returns(null)
             this.AuthorizationManager.canUserReadProject
               .withArgs(null, 'project1', this.token)
               .yields(null, true)
@@ -558,7 +554,7 @@ describe('AuthorizationMiddleware', function () {
 
         describe("when user doesn't have permission to access one of the projects", function () {
           beforeEach(function () {
-            this.AuthenticationController.getLoggedInUserId.returns(null)
+            this.SessionManager.getLoggedInUserId.returns(null)
             this.AuthorizationManager.canUserReadProject
               .withArgs(null, 'project1', this.token)
               .yields(null, true)

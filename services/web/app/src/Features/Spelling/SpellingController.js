@@ -1,7 +1,7 @@
 const request = require('request')
 const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 
 const TEN_SECONDS = 1000 * 10
 
@@ -28,7 +28,7 @@ module.exports = {
       }
     }
 
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     url = `/user/${userId}${url}`
     req.headers.Host = Settings.apis.spelling.host
     return request({

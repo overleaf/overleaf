@@ -18,7 +18,7 @@ const fs = require('fs')
 const Path = require('path')
 const FileSystemImportManager = require('./FileSystemImportManager')
 const ProjectUploadManager = require('./ProjectUploadManager')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const Settings = require('@overleaf/settings')
 const { InvalidZipFileError } = require('./ArchiveErrors')
 const multer = require('multer')
@@ -33,7 +33,7 @@ const upload = multer({
 module.exports = ProjectUploadController = {
   uploadProject(req, res, next) {
     const timer = new metrics.Timer('project-upload')
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const user_id = SessionManager.getLoggedInUserId(req.session)
     const { originalname, path } = req.file
     const name = Path.basename(originalname, '.zip')
     return ProjectUploadManager.createProjectFromZipArchive(
@@ -82,7 +82,7 @@ module.exports = ProjectUploadController = {
         error: 'invalid_filename',
       })
     }
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const user_id = SessionManager.getLoggedInUserId(req.session)
 
     return FileSystemImportManager.addEntity(
       user_id,

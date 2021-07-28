@@ -4,7 +4,7 @@ const async = require('async')
 const logger = require('logger-sharelatex')
 const request = require('request')
 const settings = require('@overleaf/settings')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const UserGetter = require('../User/UserGetter')
 const Errors = require('../Errors/Errors')
 const HistoryManager = require('./HistoryManager')
@@ -40,7 +40,7 @@ module.exports = HistoryController = {
   },
 
   proxyToHistoryApi(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const url =
       HistoryController.buildHistoryServiceUrl(req.useProjectHistory) + req.url
 
@@ -59,7 +59,7 @@ module.exports = HistoryController = {
   },
 
   proxyToHistoryApiAndInjectUserDetails(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const url =
       HistoryController.buildHistoryServiceUrl(req.useProjectHistory) + req.url
     HistoryController._makeRequest(
@@ -111,7 +111,7 @@ module.exports = HistoryController = {
   restoreFileFromV2(req, res, next) {
     const { project_id: projectId } = req.params
     const { version, pathname } = req.body
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     RestoreManager.restoreFileFromV2(
       userId,
       projectId,
@@ -132,7 +132,7 @@ module.exports = HistoryController = {
   restoreDocFromDeletedDoc(req, res, next) {
     const { project_id: projectId, doc_id: docId } = req.params
     const { name } = req.body
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     if (name == null) {
       return res.sendStatus(400) // Malformed request
     }
@@ -175,7 +175,7 @@ module.exports = HistoryController = {
   createLabel(req, res, next) {
     const projectId = req.params.Project_id
     const { comment, version } = req.body
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     HistoryController._makeRequest(
       {
         method: 'POST',
@@ -268,7 +268,7 @@ module.exports = HistoryController = {
 
   deleteLabel(req, res, next) {
     const { Project_id: projectId, label_id: labelId } = req.params
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     HistoryController._makeRequest(
       {
         method: 'DELETE',

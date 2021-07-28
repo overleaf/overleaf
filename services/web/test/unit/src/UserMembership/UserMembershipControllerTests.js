@@ -54,7 +54,7 @@ describe('UserMembershipController', function () {
       },
     ]
 
-    this.AuthenticationController = {
+    this.SessionManager = {
       getSessionUser: sinon.stub().returns(this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
     }
@@ -69,8 +69,7 @@ describe('UserMembershipController', function () {
       modulePath,
       {
         requires: {
-          '../Authentication/AuthenticationController': this
-            .AuthenticationController,
+          '../Authentication/SessionManager': this.SessionManager,
           './UserMembershipHandler': this.UserMembershipHandler,
         },
       }

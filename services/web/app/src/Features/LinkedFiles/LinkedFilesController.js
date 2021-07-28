@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let LinkedFilesController
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const EditorController = require('../Editor/EditorController')
 const ProjectLocator = require('../Project/ProjectLocator')
 const Settings = require('@overleaf/settings')
@@ -65,7 +65,7 @@ module.exports = LinkedFilesController = {
   createLinkedFile(req, res, next) {
     const { project_id } = req.params
     const { name, provider, data, parent_folder_id } = req.body
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const user_id = SessionManager.getLoggedInUserId(req.session)
 
     const Agent = LinkedFilesController._getAgent(provider)
     if (Agent == null) {
@@ -91,7 +91,7 @@ module.exports = LinkedFilesController = {
 
   refreshLinkedFile(req, res, next) {
     const { project_id, file_id } = req.params
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const user_id = SessionManager.getLoggedInUserId(req.session)
 
     return LinkedFilesHandler.getFileById(
       project_id,

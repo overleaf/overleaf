@@ -1,10 +1,10 @@
 const NotificationsHandler = require('./NotificationsHandler')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const _ = require('underscore')
 
 module.exports = {
   getAllUnreadNotifications(req, res) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     NotificationsHandler.getUserNotifications(
       userId,
       function (err, unreadNotifications) {
@@ -24,7 +24,7 @@ module.exports = {
   },
 
   markNotificationAsRead(req, res) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const { notificationId } = req.params
     NotificationsHandler.markAsRead(userId, notificationId, () =>
       res.sendStatus(200)

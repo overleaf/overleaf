@@ -11,13 +11,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const ExportsHandler = require('./ExportsHandler')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const logger = require('logger-sharelatex')
 
 module.exports = {
   exportProject(req, res, next) {
     const { project_id, brand_variation_id } = req.params
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const user_id = SessionManager.getLoggedInUserId(req.session)
     const export_params = {
       project_id,
       brand_variation_id,
@@ -111,7 +111,7 @@ module.exports = {
   exportDownload(req, res, next) {
     const { type, export_id } = req.params
 
-    AuthenticationController.getLoggedInUserId(req)
+    SessionManager.getLoggedInUserId(req.session)
     return ExportsHandler.fetchDownload(
       export_id,
       type,

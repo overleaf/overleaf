@@ -46,12 +46,12 @@ describe('SubscriptionGroupController', function () {
       getSubscription: sinon.stub().callsArgWith(1, null, this.subscription),
     }
 
-    this.AuthenticationController = {
-      getLoggedInUserId(req) {
-        return req.session.user._id
+    this.SessionManager = {
+      getLoggedInUserId(session) {
+        return session.user._id
       },
-      getSessionUser(req) {
-        return req.session.user
+      getSessionUser(session) {
+        return session.user
       },
     }
 
@@ -59,8 +59,7 @@ describe('SubscriptionGroupController', function () {
       requires: {
         './SubscriptionGroupHandler': this.GroupHandler,
         './SubscriptionLocator': this.SubscriptionLocator,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
       },
     }))
   })

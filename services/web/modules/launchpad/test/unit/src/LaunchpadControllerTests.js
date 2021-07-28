@@ -38,6 +38,7 @@ describe('LaunchpadController', function () {
         '../../../../app/src/Features/User/UserGetter': (this.UserGetter = {}),
         '../../../../app/src/models/User': { User: this.User },
         '../../../../app/src/Features/Authentication/AuthenticationController': (this.AuthenticationController = {}),
+        '../../../../app/src/Features/Authentication/SessionManager': (this.SessionManager = {}),
       },
     })
 
@@ -74,9 +75,7 @@ describe('LaunchpadController', function () {
 
     describe('when the user is not logged in', function () {
       beforeEach(function () {
-        this.AuthenticationController.getSessionUser = sinon
-          .stub()
-          .returns(null)
+        this.SessionManager.getSessionUser = sinon.stub().returns(null)
         return (this.res.render = sinon.stub())
       })
 
@@ -134,9 +133,7 @@ describe('LaunchpadController', function () {
           _id: 'abcd',
           email: 'abcd@example.com',
         }
-        this.AuthenticationController.getSessionUser = sinon
-          .stub()
-          .returns(this.user)
+        this.SessionManager.getSessionUser = sinon.stub().returns(this.user)
         this._atLeastOneAdminExists.callsArgWith(0, null, true)
         this.res.render = sinon.stub()
         return (this.res.redirect = sinon.stub())

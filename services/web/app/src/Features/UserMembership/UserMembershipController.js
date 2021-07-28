@@ -10,7 +10,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const UserMembershipHandler = require('./UserMembershipHandler')
 const Errors = require('../Errors/Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
@@ -104,7 +104,7 @@ module.exports = {
       return next(new Errors.NotFoundError('Cannot remove users from entity'))
     }
 
-    const loggedInUserId = AuthenticationController.getLoggedInUserId(req)
+    const loggedInUserId = SessionManager.getLoggedInUserId(req.session)
     if (loggedInUserId === userId) {
       return res.status(400).json({
         error: {

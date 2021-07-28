@@ -1,5 +1,5 @@
 const TagsHandler = require('./TagsHandler')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const Errors = require('../Errors/Errors')
 
 const TagsController = {
@@ -21,12 +21,12 @@ const TagsController = {
   },
 
   getAllTags(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     TagsController._getTags(userId, req, res, next)
   },
 
   createTag(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const { name } = req.body
     TagsHandler.createTag(userId, name, function (error, tag) {
       if (error != null) {
@@ -37,7 +37,7 @@ const TagsController = {
   },
 
   addProjectToTag(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const { tagId, projectId } = req.params
     TagsHandler.addProjectToTag(userId, tagId, projectId, function (error) {
       if (error) {
@@ -48,7 +48,7 @@ const TagsController = {
   },
 
   removeProjectFromTag(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const { tagId, projectId } = req.params
     TagsHandler.removeProjectFromTag(
       userId,
@@ -64,7 +64,7 @@ const TagsController = {
   },
 
   deleteTag(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const { tagId } = req.params
     TagsHandler.deleteTag(userId, tagId, function (error) {
       if (error) {
@@ -75,7 +75,7 @@ const TagsController = {
   },
 
   renameTag(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const { tagId } = req.params
     const name = req.body != null ? req.body.name : undefined
     if (!name) {

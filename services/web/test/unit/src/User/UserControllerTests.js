@@ -44,6 +44,8 @@ describe('UserController', function () {
     this.UserRegistrationHandler = { registerNewUser: sinon.stub() }
     this.AuthenticationController = {
       establishUserSession: sinon.stub().callsArg(2),
+    }
+    this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       getSessionUser: sinon.stub().returns(this.req.session.user),
       setInSessionUser: sinon.stub(),
@@ -102,6 +104,7 @@ describe('UserController', function () {
         './UserRegistrationHandler': this.UserRegistrationHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         '../Authentication/AuthenticationManager': this.AuthenticationManager,
         '../../infrastructure/Features': (this.Features = {
           hasFeature: sinon.stub(),
@@ -142,7 +145,7 @@ describe('UserController', function () {
       this.req.body.password = 'wat'
       this.req.logout = sinon.stub()
       this.req.session.destroy = sinon.stub().callsArgWith(0, null)
-      this.AuthenticationController.getLoggedInUserId = sinon
+      this.SessionManager.getLoggedInUserId = sinon
         .stub()
         .returns(this.user._id)
       this.AuthenticationManager.authenticate = sinon
@@ -397,8 +400,8 @@ describe('UserController', function () {
       }
       this.res.sendStatus = code => {
         code.should.equal(200)
-        this.AuthenticationController.setInSessionUser
-          .calledWith(this.req, {
+        this.SessionManager.setInSessionUser
+          .calledWith(this.req.session, {
             email: this.newEmail,
             first_name: undefined,
             last_name: undefined,

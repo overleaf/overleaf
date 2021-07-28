@@ -1,4 +1,5 @@
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const TokenAccessHandler = require('./TokenAccessHandler')
 const Errors = require('../Errors/Errors')
 const logger = require('logger-sharelatex')
@@ -213,7 +214,7 @@ async function checkAndGetProjectOrResponseAction(
 
 async function grantTokenAccessReadAndWrite(req, res, next) {
   const { token } = req.params
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   if (!TokenAccessHandler.isReadAndWriteToken(token)) {
     return res.sendStatus(400)
   }
@@ -254,7 +255,7 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
 
 async function grantTokenAccessReadOnly(req, res, next) {
   const { token } = req.params
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   if (!TokenAccessHandler.isReadOnlyToken(token)) {
     return res.sendStatus(400)
   }

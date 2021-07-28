@@ -23,7 +23,7 @@ const InactiveProjectManager = require('../InactiveData/InactiveProjectManager')
 const ProjectUpdateHandler = require('./ProjectUpdateHandler')
 const ProjectGetter = require('./ProjectGetter')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const Sources = require('../Authorization/Sources')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
@@ -141,7 +141,7 @@ const ProjectController = {
 
   deleteProject(req, res) {
     const projectId = req.params.Project_id
-    const user = AuthenticationController.getSessionUser(req)
+    const user = SessionManager.getSessionUser(req.session)
     const cb = err => {
       if (err != null) {
         res.sendStatus(500)
@@ -158,7 +158,7 @@ const ProjectController = {
 
   archiveProject(req, res, next) {
     const projectId = req.params.Project_id
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
 
     ProjectDeleter.archiveProject(projectId, userId, function (err) {
       if (err != null) {
@@ -171,7 +171,7 @@ const ProjectController = {
 
   unarchiveProject(req, res, next) {
     const projectId = req.params.Project_id
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
 
     ProjectDeleter.unarchiveProject(projectId, userId, function (err) {
       if (err != null) {
@@ -184,7 +184,7 @@ const ProjectController = {
 
   trashProject(req, res, next) {
     const projectId = req.params.project_id
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
 
     ProjectDeleter.trashProject(projectId, userId, function (err) {
       if (err != null) {
@@ -197,7 +197,7 @@ const ProjectController = {
 
   untrashProject(req, res, next) {
     const projectId = req.params.project_id
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
 
     ProjectDeleter.untrashProject(projectId, userId, function (err) {
       if (err != null) {
@@ -246,10 +246,10 @@ const ProjectController = {
     const projectId = req.params.Project_id
     const { projectName } = req.body
     logger.log({ projectId, projectName }, 'cloning project')
-    if (!AuthenticationController.isUserLoggedIn(req)) {
+    if (!SessionManager.isUserLoggedIn(req.session)) {
       return res.send({ redir: '/register' })
     }
-    const currentUser = AuthenticationController.getSessionUser(req)
+    const currentUser = SessionManager.getSessionUser(req.session)
     const { first_name: firstName, last_name: lastName, email } = currentUser
     ProjectDuplicator.duplicate(
       currentUser,
@@ -279,7 +279,7 @@ const ProjectController = {
   },
 
   newProject(req, res, next) {
-    const currentUser = AuthenticationController.getSessionUser(req)
+    const currentUser = SessionManager.getSessionUser(req.session)
     const {
       first_name: firstName,
       last_name: lastName,
@@ -330,7 +330,7 @@ const ProjectController = {
   },
 
   userProjectsJson(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     ProjectGetter.findAllUsersProjects(
       userId,
       'name lastUpdated publicAccesLevel archived trashed owner_ref tokens',
@@ -377,8 +377,8 @@ const ProjectController = {
 
   projectListPage(req, res, next) {
     const timer = new metrics.Timer('project-list')
-    const userId = AuthenticationController.getLoggedInUserId(req)
-    const currentUser = AuthenticationController.getSessionUser(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    const currentUser = SessionManager.getSessionUser(req.session)
     async.parallel(
       {
         tags(cb) {
@@ -617,9 +617,9 @@ const ProjectController = {
     }
 
     let anonymous, userId, sessionUser
-    if (AuthenticationController.isUserLoggedIn(req)) {
-      sessionUser = AuthenticationController.getSessionUser(req)
-      userId = AuthenticationController.getLoggedInUserId(req)
+    if (SessionManager.isUserLoggedIn(req.session)) {
+      sessionUser = SessionManager.getSessionUser(req.session)
+      userId = SessionManager.getLoggedInUserId(req.session)
       anonymous = false
     } else {
       sessionUser = null

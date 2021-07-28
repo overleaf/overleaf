@@ -1,5 +1,5 @@
 const logger = require('logger-sharelatex')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
 const UserSessionsManager = require('./UserSessionsManager')
@@ -24,7 +24,7 @@ async function _sendSecurityAlertEmail(user, email) {
 }
 
 async function add(req, res, next) {
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
   if (!email) {
     return res.sendStatus(422)
@@ -62,7 +62,7 @@ async function add(req, res, next) {
 }
 
 function resendConfirmation(req, res, next) {
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
   if (!email) {
     return res.sendStatus(422)
@@ -88,7 +88,7 @@ function resendConfirmation(req, res, next) {
 }
 
 function sendReconfirmation(req, res, next) {
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
   if (!email) {
     return res.sendStatus(400)
@@ -115,7 +115,7 @@ function sendReconfirmation(req, res, next) {
 
 const UserEmailsController = {
   list(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     UserGetter.getUserFullEmails(userId, function (error, fullEmails) {
       if (error) {
         return next(error)
@@ -127,7 +127,7 @@ const UserEmailsController = {
   add: expressify(add),
 
   remove(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const email = EmailHelper.parseEmail(req.body.email)
     if (!email) {
       return res.sendStatus(422)
@@ -142,7 +142,7 @@ const UserEmailsController = {
   },
 
   setDefault(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const email = EmailHelper.parseEmail(req.body.email)
     if (!email) {
       return res.sendStatus(422)
@@ -161,8 +161,8 @@ const UserEmailsController = {
         if (err) {
           return UserEmailsController._handleEmailError(err, req, res, next)
         }
-        AuthenticationController.setInSessionUser(req, { email: email })
-        const user = AuthenticationController.getSessionUser(req)
+        SessionManager.setInSessionUser(req.session, { email: email })
+        const user = SessionManager.getSessionUser(req.session)
         UserSessionsManager.revokeAllUserSessions(
           user,
           [req.sessionID],
@@ -180,7 +180,7 @@ const UserEmailsController = {
   },
 
   endorse(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const email = EmailHelper.parseEmail(req.body.email)
     if (!email) {
       return res.sendStatus(422)

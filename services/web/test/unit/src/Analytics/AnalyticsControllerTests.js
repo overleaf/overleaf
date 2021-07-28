@@ -8,7 +8,7 @@ const sinon = require('sinon')
 
 describe('AnalyticsController', function () {
   beforeEach(function () {
-    this.AuthenticationController = { getLoggedInUserId: sinon.stub() }
+    this.SessionManager = { getLoggedInUserId: sinon.stub() }
 
     this.AnalyticsManager = {
       updateEditingSession: sinon.stub(),
@@ -22,8 +22,7 @@ describe('AnalyticsController', function () {
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
         './AnalyticsManager': this.AnalyticsManager,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         '../../infrastructure/Features': this.Features,
         '../../infrastructure/GeoIpLookup': (this.GeoIpLookup = {
           getDetails: sinon.stub(),
@@ -50,7 +49,7 @@ describe('AnalyticsController', function () {
     })
 
     it('delegates to the AnalyticsManager', function (done) {
-      this.AuthenticationController.getLoggedInUserId.returns('1234')
+      this.SessionManager.getLoggedInUserId.returns('1234')
       this.controller.updateEditingSession(this.req, this.res)
 
       this.AnalyticsManager.updateEditingSession
@@ -73,7 +72,7 @@ describe('AnalyticsController', function () {
     })
 
     it('should use the user_id', function (done) {
-      this.AuthenticationController.getLoggedInUserId.returns('1234')
+      this.SessionManager.getLoggedInUserId.returns('1234')
       this.controller.recordEvent(this.req, this.res)
       this.AnalyticsManager.recordEvent
         .calledWith('1234', this.req.params.event, this.req.body)

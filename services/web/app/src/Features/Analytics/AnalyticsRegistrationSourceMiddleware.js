@@ -1,7 +1,7 @@
 const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
 const AnalyticsRegistrationSourceHelper = require('./AnalyticsRegistrationSourceHelper')
-const AuthenticationController = require('../../Features/Authentication/AuthenticationController')
+const SessionManager = require('../../Features/Authentication/SessionManager')
 
 function setSource(source) {
   return function (req, res, next) {
@@ -25,7 +25,7 @@ function setInbound() {
       return next() // don't overwrite referrer
     }
 
-    if (AuthenticationController.isUserLoggedIn(req)) {
+    if (SessionManager.isUserLoggedIn(req.session)) {
       return next() // don't store referrer if user is alread logged in
     }
 

@@ -1,11 +1,11 @@
 let UserController
 const UserGetter = require('./UserGetter')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const { ObjectId } = require('mongodb')
 
 module.exports = UserController = {
   getLoggedInUsersPersonalInfo(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     if (!userId) {
       return next(new Error('User is not logged in'))
     }

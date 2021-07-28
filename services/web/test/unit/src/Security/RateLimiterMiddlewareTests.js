@@ -20,7 +20,7 @@ const modulePath = require('path').join(
 
 describe('RateLimiterMiddleware', function () {
   beforeEach(function () {
-    this.AuthenticationController = {
+    this.SessionManager = {
       getLoggedInUserId: () => {
         return __guard__(
           __guard__(
@@ -36,8 +36,7 @@ describe('RateLimiterMiddleware', function () {
         '@overleaf/settings': (this.settings = {}),
         '../../infrastructure/RateLimiter': (this.RateLimiter = {}),
         './LoginRateLimiter': {},
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
       },
     })
     this.req = { params: {} }

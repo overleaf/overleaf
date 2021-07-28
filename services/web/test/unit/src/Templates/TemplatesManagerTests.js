@@ -68,7 +68,7 @@ describe('TemplatesManager', function () {
         '../Project/ProjectOptionsHandler': this.ProjectOptionsHandler,
         '../Project/ProjectRootDocManager': this.ProjectRootDocManager,
         '../Project/ProjectDetailsHandler': this.ProjectDetailsHandler,
-        '../Authentication/AuthenticationController': (this.AuthenticationController = {
+        '../Authentication/SessionManager': (this.SessionManager = {
           getLoggedInUserId: sinon.stub(),
         }),
         '../../infrastructure/FileWriter': this.FileWriter,

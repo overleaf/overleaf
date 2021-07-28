@@ -37,6 +37,7 @@ const ErrorController = require('../Features/Errors/ErrorController')
 const HttpErrorHandler = require('../Features/Errors/HttpErrorHandler')
 const UserSessionsManager = require('../Features/User/UserSessionsManager')
 const AuthenticationController = require('../Features/Authentication/AuthenticationController')
+const SessionManager = require('../Features/Authentication/SessionManager')
 
 const STATIC_CACHE_AGE = Settings.cacheStaticAssets
   ? oneDayInMilliseconds * 365
@@ -164,9 +165,9 @@ webRouter.use(translations.setLangBasedOnDomainMiddleware)
 webRouter.use(function (req, res, next) {
   if (!req.session.noSessionCallback) {
     req.session.touch()
-    if (AuthenticationController.isUserLoggedIn(req)) {
+    if (SessionManager.isUserLoggedIn(req.session)) {
       UserSessionsManager.touch(
-        AuthenticationController.getSessionUser(req),
+        SessionManager.getSessionUser(req.session),
         err => {
           if (err) {
             logger.err({ err }, 'error extending user session')
@@ -187,8 +188,8 @@ webRouter.use(function (req, res, next) {
   if (Settings.siteIsOpen) {
     next()
   } else if (
-    AuthenticationController.getSessionUser(req) &&
-    AuthenticationController.getSessionUser(req).isAdmin
+    SessionManager.getSessionUser(req.session) &&
+    SessionManager.getSessionUser(req.session).isAdmin
   ) {
     next()
   } else {
@@ -211,7 +212,7 @@ webRouter.use(AuthenticationController.validateAdmin)
 // add security headers using Helmet
 const noCacheMiddleware = require('nocache')()
 webRouter.use(function (req, res, next) {
-  const isLoggedIn = AuthenticationController.isUserLoggedIn(req)
+  const isLoggedIn = SessionManager.isUserLoggedIn(req.session)
   const isProjectPage = !!req.path.match('^/project/[a-f0-9]{24}$')
   if (isLoggedIn || isProjectPage) {
     noCacheMiddleware(req, res, next)

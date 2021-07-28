@@ -41,7 +41,7 @@ describe('CollaboratorsController', function () {
         removeProjectFromAllTags: sinon.stub().resolves(),
       },
     }
-    this.AuthenticationController = {
+    this.SessionManager = {
       getSessionUser: sinon.stub().returns(this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
     }
@@ -60,8 +60,7 @@ describe('CollaboratorsController', function () {
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../../Features/Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Tags/TagsHandler': this.TagsHandler,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
       },
     })
   })

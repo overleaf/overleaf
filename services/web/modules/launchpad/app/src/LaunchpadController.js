@@ -24,6 +24,7 @@ const _ = require('underscore')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const { User } = require('../../../../app/src/models/User')
 const AuthenticationController = require('../../../../app/src/Features/Authentication/AuthenticationController')
+const SessionManager = require('../../../../app/src/Features/Authentication/SessionManager')
 
 module.exports = LaunchpadController = {
   _getAuthMethod() {
@@ -39,7 +40,7 @@ module.exports = LaunchpadController = {
   launchpadPage(req, res, next) {
     // TODO: check if we're using external auth?
     //   * how does all this work with ldap and saml?
-    const sessionUser = AuthenticationController.getSessionUser(req)
+    const sessionUser = SessionManager.getSessionUser(req.session)
     const authMethod = LaunchpadController._getAuthMethod()
     return LaunchpadController._atLeastOneAdminExists(function (
       err,

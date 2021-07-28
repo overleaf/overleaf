@@ -13,14 +13,14 @@
 const settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const TeamInvitesHandler = require('./TeamInvitesHandler')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const ErrorController = require('../Errors/ErrorController')
 const EmailHelper = require('../Helpers/EmailHelper')
 
 module.exports = {
   createInvite(req, res, next) {
-    const teamManagerId = AuthenticationController.getLoggedInUserId(req)
+    const teamManagerId = SessionManager.getLoggedInUserId(req.session)
     const subscription = req.entity
     const email = EmailHelper.parseEmail(req.body.email)
     if (email == null) {
@@ -63,7 +63,7 @@ module.exports = {
 
   viewInvite(req, res, next) {
     const { token } = req.params
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
 
     return TeamInvitesHandler.getInvite(
       token,
@@ -105,7 +105,7 @@ module.exports = {
 
   acceptInvite(req, res, next) {
     const { token } = req.params
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
 
     return TeamInvitesHandler.acceptInvite(
       token,
@@ -122,7 +122,7 @@ module.exports = {
   revokeInvite(req, res, next) {
     const subscription = req.entity
     const email = EmailHelper.parseEmail(req.params.email)
-    const teamManagerId = AuthenticationController.getLoggedInUserId(req)
+    const teamManagerId = SessionManager.getLoggedInUserId(req.session)
     if (email == null) {
       return res.sendStatus(400)
     }

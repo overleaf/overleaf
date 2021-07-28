@@ -24,7 +24,7 @@ const Settings = require('@overleaf/settings')
 const EmailHelper = require('../Helpers/EmailHelper')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const rateLimiter = require('../../infrastructure/RateLimiter')
 
 module.exports = CollaboratorsInviteController = {
@@ -99,7 +99,7 @@ module.exports = CollaboratorsInviteController = {
   inviteToProject(req, res, next) {
     const projectId = req.params.Project_id
     let { email } = req.body
-    const sendingUser = AuthenticationController.getSessionUser(req)
+    const sendingUser = SessionManager.getSessionUser(req.session)
     const sendingUserId = sendingUser._id
     if (email === sendingUser.email) {
       logger.log(
@@ -230,7 +230,7 @@ module.exports = CollaboratorsInviteController = {
     const projectId = req.params.Project_id
     const inviteId = req.params.invite_id
     logger.log({ projectId, inviteId }, 'resending invite')
-    const sendingUser = AuthenticationController.getSessionUser(req)
+    const sendingUser = SessionManager.getSessionUser(req.session)
     return CollaboratorsInviteController._checkRateLimit(
       sendingUser._id,
       function (error, underRateLimit) {
@@ -270,7 +270,7 @@ module.exports = CollaboratorsInviteController = {
       return res.render('project/invite/not-valid', { title: 'Invalid Invite' })
     }
     // check if the user is already a member of the project
-    const currentUser = AuthenticationController.getSessionUser(req)
+    const currentUser = SessionManager.getSessionUser(req.session)
     return CollaboratorsGetter.isUserInvitedMemberOfProject(
       currentUser._id,
       projectId,
@@ -355,7 +355,7 @@ module.exports = CollaboratorsInviteController = {
   acceptInvite(req, res, next) {
     const projectId = req.params.Project_id
     const { token } = req.params
-    const currentUser = AuthenticationController.getSessionUser(req)
+    const currentUser = SessionManager.getSessionUser(req.session)
     logger.log(
       { projectId, userId: currentUser._id, token },
       'got request to accept invite'

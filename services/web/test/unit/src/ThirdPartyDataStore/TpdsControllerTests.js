@@ -9,7 +9,7 @@ const modulePath = require('path').join(
 describe('TpdsController', function () {
   beforeEach(function () {
     this.TpdsUpdateHandler = {}
-    this.AuthenticationController = {
+    this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns('user-id'),
     }
     this.TpdsQueueManager = {
@@ -24,8 +24,7 @@ describe('TpdsController', function () {
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
           tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() }),
         }),
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         './TpdsQueueManager': this.TpdsQueueManager,
         '@overleaf/metrics': {
           inc() {},
@@ -271,8 +270,7 @@ describe('TpdsController', function () {
       })
 
       it('should use userId from session', function () {
-        this.AuthenticationController.getLoggedInUserId.should.have.been
-          .calledOnce
+        this.SessionManager.getLoggedInUserId.should.have.been.calledOnce
         this.TpdsQueueManager.promises.getQueues.should.have.been.calledWith(
           'user-id'
         )

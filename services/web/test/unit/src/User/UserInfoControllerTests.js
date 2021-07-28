@@ -31,7 +31,7 @@ describe('UserInfoController', function () {
         './UserGetter': this.UserGetter,
         './UserUpdater': this.UserUpdater,
         './UserDeleter': this.UserDeleter,
-        '../Authentication/AuthenticationController': (this.AuthenticationController = {
+        '../Authentication/SessionManager': (this.SessionManager = {
           getLoggedInUserId: sinon.stub(),
         }),
       },
@@ -49,7 +49,7 @@ describe('UserInfoController', function () {
       this.req.session.user = this.user
       this.UserInfoController.sendFormattedPersonalInfo = sinon.stub()
       this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)
-      this.AuthenticationController.getLoggedInUserId = sinon
+      this.SessionManager.getLoggedInUserId = sinon
         .stub()
         .returns(this.user._id)
       return this.UserInfoController.getLoggedInUsersPersonalInfo(

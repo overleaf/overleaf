@@ -15,7 +15,7 @@ const SubscriptionGroupHandler = require('./SubscriptionGroupHandler')
 const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const SubscriptionLocator = require('./SubscriptionLocator')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const _ = require('underscore')
 const async = require('async')
 
@@ -45,7 +45,7 @@ module.exports = {
 
   removeSelfFromGroup(req, res, next) {
     const subscriptionId = req.query.subscriptionId
-    const userToRemove_id = AuthenticationController.getLoggedInUserId(req)
+    const userToRemove_id = SessionManager.getLoggedInUserId(req.session)
     return SubscriptionLocator.getSubscription(
       subscriptionId,
       function (error, subscription) {

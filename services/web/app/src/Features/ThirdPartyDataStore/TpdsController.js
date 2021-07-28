@@ -7,7 +7,7 @@ const logger = require('logger-sharelatex')
 const Path = require('path')
 const metrics = require('@overleaf/metrics')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const TpdsQueueManager = require('./TpdsQueueManager').promises
 
 module.exports = {
@@ -111,7 +111,7 @@ module.exports = {
   },
 
   async getQueues(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     try {
       res.json(await TpdsQueueManager.getQueues(userId))
     } catch (err) {

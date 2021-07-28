@@ -13,7 +13,7 @@
  */
 let TemplatesController
 const path = require('path')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const TemplatesManager = require('./TemplatesManager')
 const ProjectHelper = require('../Project/ProjectHelper')
 const logger = require('logger-sharelatex')
@@ -47,7 +47,7 @@ module.exports = TemplatesController = {
   },
 
   createProjectFromV1Template(req, res, next) {
-    const user_id = AuthenticationController.getLoggedInUserId(req)
+    const user_id = SessionManager.getLoggedInUserId(req.session)
     return TemplatesManager.createProjectFromV1Template(
       req.body.brandVariationId,
       req.body.compiler,

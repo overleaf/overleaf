@@ -76,7 +76,7 @@ describe('ProjectController', function () {
       isArchivedOrTrashed: sinon.stub(),
       getAllowedImagesForUser: sinon.stub().returns([]),
     }
-    this.AuthenticationController = {
+    this.SessionManager = {
       getLoggedInUser: sinon.stub().callsArgWith(1, null, this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       getSessionUser: sinon.stub().returns(this.user),
@@ -153,8 +153,7 @@ describe('ProjectController', function () {
         './ProjectUpdateHandler': this.ProjectUpdateHandler,
         './ProjectGetter': this.ProjectGetter,
         './ProjectDetailsHandler': this.ProjectDetailsHandler,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         './ProjectEntityHandler': this.ProjectEntityHandler,
@@ -1220,9 +1219,7 @@ describe('ProjectController', function () {
 
       function tagAnonymous() {
         beforeEach(function () {
-          this.AuthenticationController.isUserLoggedIn = sinon
-            .stub()
-            .returns(false)
+          this.SessionManager.isUserLoggedIn = sinon.stub().returns(false)
         })
       }
 
@@ -1563,7 +1560,7 @@ describe('ProjectController', function () {
         .stub()
         .callsArgWith(2, null, [])
       this.ProjectController._buildProjectList = sinon.stub().returns(projects)
-      this.AuthenticationController.getLoggedInUserId = sinon
+      this.SessionManager.getLoggedInUserId = sinon
         .stub()
         .returns(this.user._id)
       done()
@@ -1585,9 +1582,7 @@ describe('ProjectController', function () {
 
   describe('projectEntitiesJson', function () {
     beforeEach(function () {
-      this.AuthenticationController.getLoggedInUserId = sinon
-        .stub()
-        .returns('abc')
+      this.SessionManager.getLoggedInUserId = sinon.stub().returns('abc')
       this.req.params = { Project_id: 'abcd' }
       this.project = { _id: 'abcd' }
       this.docs = [

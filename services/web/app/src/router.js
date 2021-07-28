@@ -11,6 +11,7 @@ const UploadsRouter = require('./Features/Uploads/UploadsRouter')
 const metrics = require('@overleaf/metrics')
 const ReferalController = require('./Features/Referal/ReferalController')
 const AuthenticationController = require('./Features/Authentication/AuthenticationController')
+const SessionManager = require('./Features/Authentication/SessionManager')
 const TagsController = require('./Features/Tags/TagsController')
 const NotificationsController = require('./Features/Notifications/NotificationsController')
 const CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
@@ -923,7 +924,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get('/chrome', function (req, res, next) {
     // Match v1 behaviour - this is used for a Chrome web app
-    if (AuthenticationController.isUserLoggedIn(req)) {
+    if (SessionManager.isUserLoggedIn(req.session)) {
       res.redirect('/project')
     } else {
       res.redirect('/register')

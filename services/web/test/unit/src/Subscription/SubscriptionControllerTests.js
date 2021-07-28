@@ -47,7 +47,7 @@ describe('SubscriptionController', function () {
     this.activeRecurlySubscription =
       mockSubscriptions['subscription-123-active']
 
-    this.AuthenticationController = {
+    this.SessionManager = {
       getLoggedInUser: sinon.stub().callsArgWith(1, null, this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       getSessionUser: sinon.stub().returns(this.user),
@@ -121,8 +121,7 @@ describe('SubscriptionController', function () {
     }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
       requires: {
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         './SubscriptionHandler': this.SubscriptionHandler,
         './PlansLocator': this.PlansLocator,
         './SubscriptionViewModelBuilder': this.SubscriptionViewModelBuilder,

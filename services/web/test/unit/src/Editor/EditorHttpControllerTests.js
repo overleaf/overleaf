@@ -111,7 +111,7 @@ describe('EditorHttpController', function () {
       getRequestToken: sinon.stub().returns(this.token),
       protectTokens: sinon.stub(),
     }
-    this.AuthenticationController = {
+    this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user._id),
     }
     this.ProjectEntityUpdateHandler = {
@@ -141,8 +141,7 @@ describe('EditorHttpController', function () {
         '../Collaborators/CollaboratorsInviteHandler': this
           .CollaboratorsInviteHandler,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         '../../infrastructure/FileWriter': this.FileWriter,
         '../Project/ProjectEntityUpdateHandler': this
           .ProjectEntityUpdateHandler,

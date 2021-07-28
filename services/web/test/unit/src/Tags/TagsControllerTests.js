@@ -32,16 +32,15 @@ describe('TagsController', function () {
       renameTag: sinon.stub().callsArg(3),
       createTag: sinon.stub(),
     }
-    this.AuthenticationController = {
-      getLoggedInUserId: req => {
-        return req.session.user._id
+    this.SessionManager = {
+      getLoggedInUserId: session => {
+        return session.user._id
       },
     }
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
         './TagsHandler': this.handler,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
       },
     })
     this.req = {

@@ -1,6 +1,6 @@
 const RateLimiter = require('../../infrastructure/RateLimiter')
 const logger = require('logger-sharelatex')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const LoginRateLimiter = require('./LoginRateLimiter')
 const settings = require('@overleaf/settings')
 
@@ -17,7 +17,7 @@ const settings = require('@overleaf/settings')
 */
 function rateLimit(opts) {
   return function (req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req) || req.ip
+    const userId = SessionManager.getLoggedInUserId(req.session) || req.ip
     if (
       settings.smokeTest &&
       settings.smokeTest.userId &&

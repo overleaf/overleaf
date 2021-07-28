@@ -6,6 +6,7 @@ const { ObjectId } = require('mongodb')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 
 module.exports = AuthorizationMiddleware = {
@@ -244,7 +245,7 @@ module.exports = AuthorizationMiddleware = {
 
   _getUserId(req, callback) {
     const userId =
-      AuthenticationController.getLoggedInUserId(req) ||
+      SessionManager.getLoggedInUserId(req.session) ||
       (req.oauth_user && req.oauth_user._id) ||
       null
     callback(null, userId)
@@ -258,7 +259,7 @@ module.exports = AuthorizationMiddleware = {
   },
 
   restricted(req, res, next) {
-    if (AuthenticationController.isUserLoggedIn(req)) {
+    if (SessionManager.isUserLoggedIn(req.session)) {
       return res.render('user/restricted', { title: 'restricted' })
     }
     const { from } = req.query

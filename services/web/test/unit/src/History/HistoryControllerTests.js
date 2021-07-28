@@ -20,15 +20,14 @@ describe('HistoryController', function () {
   beforeEach(function () {
     this.callback = sinon.stub()
     this.user_id = 'user-id-123'
-    this.AuthenticationController = {
+    this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user_id),
     }
     this.HistoryController = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = sinon.stub()),
         '@overleaf/settings': (this.settings = {}),
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         './HistoryManager': (this.HistoryManager = {}),
         '../Project/ProjectDetailsHandler': (this.ProjectDetailsHandler = {}),
         '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
@@ -117,8 +116,8 @@ describe('HistoryController', function () {
       })
 
       it('should get the user id', function () {
-        return this.AuthenticationController.getLoggedInUserId
-          .calledWith(this.req)
+        return this.SessionManager.getLoggedInUserId
+          .calledWith(this.req.session)
           .should.equal(true)
       })
 
@@ -150,8 +149,8 @@ describe('HistoryController', function () {
       })
 
       it('should get the user id', function () {
-        return this.AuthenticationController.getLoggedInUserId
-          .calledWith(this.req)
+        return this.SessionManager.getLoggedInUserId
+          .calledWith(this.req.session)
           .should.equal(true)
       })
 
@@ -209,8 +208,8 @@ describe('HistoryController', function () {
       })
 
       it('should get the user id', function () {
-        return this.AuthenticationController.getLoggedInUserId
-          .calledWith(this.req)
+        return this.SessionManager.getLoggedInUserId
+          .calledWith(this.req.session)
           .should.equal(true)
       })
 
@@ -249,8 +248,8 @@ describe('HistoryController', function () {
       })
 
       it('should get the user id', function () {
-        return this.AuthenticationController.getLoggedInUserId
-          .calledWith(this.req)
+        return this.SessionManager.getLoggedInUserId
+          .calledWith(this.req.session)
           .should.equal(true)
       })
 

@@ -10,7 +10,7 @@ const pug = require('pug-runtime')
 const IS_DEV_ENV = ['development', 'test'].includes(process.env.NODE_ENV)
 
 const Features = require('./Features')
-const AuthenticationController = require('../Features/Authentication/AuthenticationController')
+const SessionManager = require('../Features/Authentication/SessionManager')
 const PackageVersions = require('./PackageVersions')
 const Modules = require('./Modules')
 const SafeHTMLSubstitute = require('../Features/Helpers/SafeHTMLSubstitution')
@@ -62,7 +62,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     const cdnAvailable =
       Settings.cdn && Settings.cdn.web && !!Settings.cdn.web.host
     const cdnBlocked = req.query.nocdn === 'true' || req.session.cdnBlocked
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     if (cdnBlocked && req.session.cdnBlocked == null) {
       logger.log(
         { user_id: userId, ip: req != null ? req.ip : undefined },
@@ -222,7 +222,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.use(function (req, res, next) {
     res.locals.getUserEmail = function () {
-      const user = AuthenticationController.getSessionUser(req)
+      const user = SessionManager.getSessionUser(req.session)
       const email = (user != null ? user.email : undefined) || ''
       return email
     }
@@ -237,7 +237,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(function (req, res, next) {
     res.locals.buildReferalUrl = function (referalMedium) {
       let url = Settings.siteUrl
-      const currentUser = AuthenticationController.getSessionUser(req)
+      const currentUser = SessionManager.getSessionUser(req.session)
       if (
         currentUser != null &&
         (currentUser != null ? currentUser.referal_id : undefined) != null
@@ -247,7 +247,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       return url
     }
     res.locals.getReferalId = function () {
-      const currentUser = AuthenticationController.getSessionUser(req)
+      const currentUser = SessionManager.getSessionUser(req.session)
       if (
         currentUser != null &&
         (currentUser != null ? currentUser.referal_id : undefined) != null
@@ -277,7 +277,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
-    const currentUser = AuthenticationController.getSessionUser(req)
+    const currentUser = SessionManager.getSessionUser(req.session)
     if (currentUser != null) {
       res.locals.user = {
         email: currentUser.email,
@@ -290,9 +290,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.use(function (req, res, next) {
     res.locals.getLoggedInUserId = () =>
-      AuthenticationController.getLoggedInUserId(req)
-    res.locals.getSessionUser = () =>
-      AuthenticationController.getSessionUser(req)
+      SessionManager.getLoggedInUserId(req.session)
+    res.locals.getSessionUser = () => SessionManager.getSessionUser(req.session)
     next()
   })
 

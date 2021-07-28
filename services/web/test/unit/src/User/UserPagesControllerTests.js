@@ -47,9 +47,11 @@ describe('UserPagesController', function () {
     this.UserSessionsManager = { getAllUserSessions: sinon.stub() }
     this.dropboxStatus = {}
     this.ErrorController = { notFound: sinon.stub() }
-    this.AuthenticationController = {
+    this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       getSessionUser: sinon.stub().returns(this.user),
+    }
+    this.AuthenticationController = {
       _getRedirectFromSession: sinon.stub(),
       setRedirectInSession: sinon.stub(),
     }
@@ -61,6 +63,7 @@ describe('UserPagesController', function () {
         '../Errors/ErrorController': this.ErrorController,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         request: (this.request = sinon.stub()),
       },
     })

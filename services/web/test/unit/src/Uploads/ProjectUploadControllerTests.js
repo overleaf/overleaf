@@ -37,7 +37,7 @@ describe('ProjectUploadController', function () {
         return Timer
       })()),
     }
-    this.AuthenticationController = {
+    this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user_id),
     }
 
@@ -48,8 +48,7 @@ describe('ProjectUploadController', function () {
         './ProjectUploadManager': (this.ProjectUploadManager = {}),
         './FileSystemImportManager': (this.FileSystemImportManager = {}),
         '@overleaf/metrics': this.metrics,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         './ArchiveErrors': ArchiveErrors,
         fs: (this.fs = {}),
       },

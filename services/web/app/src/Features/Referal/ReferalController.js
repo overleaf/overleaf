@@ -1,9 +1,9 @@
 const ReferalHandler = require('./ReferalHandler')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 
 module.exports = {
   bonus(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     ReferalHandler.getReferedUsers(
       userId,
       (err, referedUsers, referedUserCount) => {

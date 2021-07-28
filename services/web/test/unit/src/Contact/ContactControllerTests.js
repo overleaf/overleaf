@@ -18,15 +18,13 @@ const SandboxedModule = require('sandboxed-module')
 
 describe('ContactController', function () {
   beforeEach(function () {
-    this.AuthenticationController = { getLoggedInUserId: sinon.stub() }
+    this.SessionManager = { getLoggedInUserId: sinon.stub() }
     this.ContactController = SandboxedModule.require(modulePath, {
       requires: {
         '../User/UserGetter': (this.UserGetter = {}),
         './ContactManager': (this.ContactManager = {}),
-        '../Authentication/AuthenticationController': (this.AuthenticationController = {}),
+        '../Authentication/SessionManager': (this.SessionManager = {}),
         '../../infrastructure/Modules': (this.Modules = { hooks: {} }),
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
       },
     })
 
@@ -65,9 +63,7 @@ describe('ContactController', function () {
           unsued: 'foo',
         },
       ]
-      this.AuthenticationController.getLoggedInUserId = sinon
-        .stub()
-        .returns(this.user_id)
+      this.SessionManager.getLoggedInUserId = sinon.stub().returns(this.user_id)
       this.ContactManager.getContactIds = sinon
         .stub()
         .callsArgWith(2, null, this.contact_ids)
@@ -80,8 +76,8 @@ describe('ContactController', function () {
     })
 
     it('should look up the logged in user id', function () {
-      return this.AuthenticationController.getLoggedInUserId
-        .calledWith(this.req)
+      return this.SessionManager.getLoggedInUserId
+        .calledWith(this.req.session)
         .should.equal(true)
     })
 

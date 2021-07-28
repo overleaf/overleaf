@@ -9,7 +9,7 @@ const CollaboratorsInviteHandler = require('../Collaborators/CollaboratorsInvite
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
@@ -160,7 +160,7 @@ async function addDoc(req, res, next) {
   const projectId = req.params.Project_id
   const { name } = req.body
   const parentFolderId = req.body.parent_folder_id
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
 
   if (!_nameIsAcceptableLength(name)) {
     return res.sendStatus(400)
@@ -188,7 +188,7 @@ async function addFolder(req, res, next) {
   const projectId = req.params.Project_id
   const { name } = req.body
   const parentFolderId = req.body.parent_folder_id
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   if (!_nameIsAcceptableLength(name)) {
     return res.sendStatus(400)
   }
@@ -220,7 +220,7 @@ async function renameEntity(req, res, next) {
   if (!_nameIsAcceptableLength(name)) {
     return res.sendStatus(400)
   }
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   await EditorController.promises.renameEntity(
     projectId,
     entityId,
@@ -236,7 +236,7 @@ async function moveEntity(req, res, next) {
   const entityId = req.params.entity_id
   const entityType = req.params.entity_type
   const folderId = req.body.folder_id
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   await EditorController.promises.moveEntity(
     projectId,
     entityId,
@@ -266,7 +266,7 @@ async function deleteEntity(req, res, next) {
   const projectId = req.params.Project_id
   const entityId = req.params.entity_id
   const entityType = req.params.entity_type
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   await EditorController.promises.deleteEntity(
     projectId,
     entityId,

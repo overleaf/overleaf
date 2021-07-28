@@ -20,7 +20,7 @@ const Path = require('path')
 const fs = require('fs')
 
 const ErrorController = require('../Errors/ErrorController')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 
 const homepageExists = fs.existsSync(
   Path.resolve(__dirname + '/../../../views/external/home/v2.pug')
@@ -28,7 +28,7 @@ const homepageExists = fs.existsSync(
 
 module.exports = HomeController = {
   index(req, res) {
-    if (AuthenticationController.isUserLoggedIn(req)) {
+    if (SessionManager.isUserLoggedIn(req.session)) {
       if (req.query.scribtex_path != null) {
         return res.redirect(`/project?scribtex_path=${req.query.scribtex_path}`)
       } else {

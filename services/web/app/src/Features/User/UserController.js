@@ -7,7 +7,7 @@ const UserRegistrationHandler = require('./UserRegistrationHandler')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
 const AuthenticationManager = require('../Authentication/AuthenticationManager')
-const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const Features = require('../../infrastructure/Features')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
 const UserSessionsManager = require('./UserSessionsManager')
@@ -64,7 +64,7 @@ async function _ensureAffiliation(userId, emailData) {
 
 async function changePassword(req, res, next) {
   metrics.inc('user.password-change')
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
 
   const user = await AuthenticationManager.promises.authenticate(
     { _id: userId },
@@ -119,7 +119,7 @@ async function changePassword(req, res, next) {
 
 async function clearSessions(req, res, next) {
   metrics.inc('user.clear-sessions')
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   const user = await UserGetter.promises.getUser(userId, { email: 1 })
   const sessions = await UserSessionsManager.promises.getAllUserSessions(user, [
     req.sessionID,
@@ -165,7 +165,7 @@ async function ensureAffiliationMiddleware(req, res, next) {
   if (!Features.hasFeature('affiliations') || !req.query.ensureAffiliation) {
     return next()
   }
-  const userId = AuthenticationController.getLoggedInUserId(req)
+  const userId = SessionManager.getLoggedInUserId(req.session)
   try {
     user = await UserGetter.promises.getUser(userId)
   } catch (error) {
@@ -183,7 +183,7 @@ const UserController = {
   clearSessions: expressify(clearSessions),
 
   tryDeleteUser(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const { password } = req.body
 
     if (password == null || password === '') {
@@ -256,7 +256,7 @@ const UserController = {
   },
 
   unsubscribe(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     UserGetter.getUser(userId, (err, user) => {
       if (err != null) {
         return next(err)
@@ -274,7 +274,7 @@ const UserController = {
   },
 
   updateUserSettings(req, res, next) {
-    const userId = AuthenticationController.getLoggedInUserId(req)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     User.findById(userId, (err, user) => {
       if (err != null || user == null) {
         logger.err({ err, userId }, 'problem updaing user settings')
@@ -341,7 +341,7 @@ const UserController = {
           req.externalAuthenticationSystemUsed()
         ) {
           // end here, don't update email
-          AuthenticationController.setInSessionUser(req, {
+          SessionManager.setInSessionUser(req.session, {
             first_name: user.first_name,
             last_name: user.last_name,
           })
@@ -382,7 +382,7 @@ const UserController = {
                 )
                 return res.sendStatus(500)
               }
-              AuthenticationController.setInSessionUser(req, {
+              SessionManager.setInSessionUser(req.session, {
                 email: user.email,
                 first_name: user.first_name,
                 last_name: user.last_name,
@@ -403,7 +403,7 @@ const UserController = {
 
   doLogout(req, cb) {
     metrics.inc('user.logout')
-    const user = AuthenticationController.getSessionUser(req)
+    const user = SessionManager.getSessionUser(req.session)
     logger.log({ user }, 'logging out')
     const sessionId = req.sessionID
     if (typeof req.logout === 'function') {

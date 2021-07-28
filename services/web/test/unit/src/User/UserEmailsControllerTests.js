@@ -23,7 +23,7 @@ describe('UserEmailsController', function () {
         getUser: sinon.stub().resolves(this.user),
       },
     }
-    this.AuthenticationController = {
+    this.SessionManager = {
       getSessionUser: sinon.stub().returns(this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       setInSessionUser: sinon.stub(),
@@ -51,8 +51,7 @@ describe('UserEmailsController', function () {
     this.HttpErrorHandler = { conflict: sinon.stub() }
     this.UserEmailsController = SandboxedModule.require(modulePath, {
       requires: {
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/SessionManager': this.SessionManager,
         '../../infrastructure/Features': this.Features,
         './UserSessionsManager': this.UserSessionsManager,
         './UserGetter': this.UserGetter,
@@ -274,7 +273,7 @@ describe('UserEmailsController', function () {
       this.email = 'email_to_set_default@bar.com'
       this.req.body.email = this.email
       this.EmailHelper.parseEmail.returns(this.email)
-      this.AuthenticationController.setInSessionUser.returns(null)
+      this.SessionManager.setInSessionUser.returns(null)
     })
 
     it('sets default email', function (done) {
@@ -285,9 +284,11 @@ describe('UserEmailsController', function () {
           code.should.equal(200)
           assertCalledWith(this.EmailHelper.parseEmail, this.email)
           assertCalledWith(
-            this.AuthenticationController.setInSessionUser,
-            this.req,
-            { email: this.email }
+            this.SessionManager.setInSessionUser,
+            this.req.session,
+            {
+              email: this.email,
+            }
           )
           assertCalledWith(
             this.UserUpdater.setDefaultEmailAddress,

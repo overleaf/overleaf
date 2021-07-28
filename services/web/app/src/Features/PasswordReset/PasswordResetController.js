@@ -1,5 +1,6 @@
 const PasswordResetHandler = require('./PasswordResetHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const SessionManager = require('../Authentication/SessionManager')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const UserSessionsManager = require('../User/UserSessionsManager')
@@ -16,7 +17,7 @@ async function setNewUserPassword(req, res, next) {
   passwordResetToken = passwordResetToken.trim()
   delete req.session.resetToken
 
-  const initiatorId = AuthenticationController.getLoggedInUserId(req)
+  const initiatorId = SessionManager.getLoggedInUserId(req.session)
   // password reset via tokens can be done while logged in, or not
   const auditLog = {
     initiatorId,
