@@ -9,7 +9,6 @@ const { ObjectId } = require('mongodb')
 const ProjectDeleter = require('./ProjectDeleter')
 const ProjectDuplicator = require('./ProjectDuplicator')
 const ProjectCreationHandler = require('./ProjectCreationHandler')
-const ProjectHistoryHandler = require('./ProjectHistoryHandler')
 const EditorController = require('../Editor/EditorController')
 const ProjectHelper = require('./ProjectHelper')
 const metrics = require('@overleaf/metrics')
@@ -680,24 +679,6 @@ const ProjectController = {
         },
         activate(cb) {
           InactiveProjectManager.reactivateProjectIfRequired(projectId, cb)
-        },
-        ensureHistoryExists(cb) {
-          // enable full project history in background for older projects
-          if (!Settings.apis.project_history || !Features.hasFeature('saas')) {
-            return cb()
-          }
-          ProjectHistoryHandler.ensureHistoryExistsForProject(
-            projectId,
-            err => {
-              if (err) {
-                logger.error(
-                  { err, projectId },
-                  'error ensuring history exists for project'
-                )
-              }
-              cb()
-            }
-          )
         },
         markAsOpened(cb) {
           // don't need to wait for this to complete
