@@ -2,3 +2,6 @@ dist
 .nyc_output
 coverage
 node_modules/
+
+.npmrc
+Dockerfile
