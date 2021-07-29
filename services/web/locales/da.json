@@ -58,7 +58,7 @@
   "you_can_opt_in_and_out_of_the_program_at_any_time_on_this_page": "Du kan på denne side til enhver tid til– og framelde dig programmet",
   "give_feedback": "Giv feedback",
   "beta_feature_badge": "Betafunktions–skilt",
-  "invalid_filename": "Overførsel mislykkedes: Check filnavnet for specialtegn eller ekstra mellemrum",
+  "invalid_filename": "Overførsel mislykkedes: Check filnavnet for specialtegn eller ekstra mellemrum, og at det er kortere end __nameLimit__ tegn",
   "clsi_unavailable": "Beklager, kompileringsserveren til dit projekt var midlertidigt utilgængelig. Prøv igen om lidt.",
   "x_price_per_month": "<0>__price__</0> per måned",
   "x_price_per_year": "<0>__price__</0> per år",
