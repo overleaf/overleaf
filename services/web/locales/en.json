@@ -1080,6 +1080,7 @@
   "sl_used_over_x_people_at": "__appName__ is used by over __numberOfUsers__ students and academics at:",
   "collaboration": "Collaboration",
   "work_on_single_version": "Work together on a single version",
+  "view_collab_edits": "View collaborator edits ",
   "view_collab_edits_in_real_time": "View collaborator edits in real time.",
   "ease_of_use": " Ease of Use",
   "no_complicated_latex_install": "No complicated LaTeX installation",
