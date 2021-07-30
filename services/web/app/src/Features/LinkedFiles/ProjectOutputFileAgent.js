@@ -21,6 +21,7 @@ const ClsiManager = require('../Compile/ClsiManager')
 const ProjectFileAgent = require('./ProjectFileAgent')
 const _ = require('underscore')
 const {
+  CompileFailedError,
   BadDataError,
   AccessDeniedError,
   BadEntityTypeError,
@@ -268,7 +269,7 @@ module.exports = ProjectOutputFileAgent = {
             return callback(err)
           }
           if (status !== 'success') {
-            return callback(new OutputFileFetchFailedError())
+            return callback(new CompileFailedError())
           }
           const outputFile = _.find(
             outputFiles,

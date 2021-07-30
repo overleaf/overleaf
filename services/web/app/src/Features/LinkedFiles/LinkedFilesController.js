@@ -21,6 +21,7 @@ const logger = require('logger-sharelatex')
 const _ = require('underscore')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
 const {
+  CompileFailedError,
   UrlFetchFailedError,
   InvalidUrlError,
   OutputFileFetchFailedError,
@@ -152,6 +153,10 @@ module.exports = LinkedFilesController = {
         .send(
           'Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file'
         )
+    } else if (error instanceof CompileFailedError) {
+      return res
+        .status(422)
+        .send(res.locals.translate('generic_linked_file_compile_error'))
     } else if (error instanceof OutputFileFetchFailedError) {
       return res.status(404).send('Could not get output file')
     } else if (error instanceof UrlFetchFailedError) {

@@ -1,4 +1,5 @@
 {
+  "generic_linked_file_compile_error": "This project's output files are not available because it failed to compile. Please open the project to see the compilation error details.",
   "chat_error": "Could not load chat messages, please try again.",
   "reconnect": "Try again",
   "no_pdf_error_title": "No PDF",

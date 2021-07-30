@@ -52,6 +52,13 @@ export default function ErrorMessage({ error }) {
           </DangerMessage>
         )
 
+      case 'linked-project-compile-error':
+        return (
+          <DangerMessage>
+            {t('generic_linked_file_compile_error')}
+          </DangerMessage>
+        )
+
       default:
         // TODO: convert error.response.data to an error key and try again?
         // return error

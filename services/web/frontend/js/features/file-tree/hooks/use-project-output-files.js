@@ -34,7 +34,7 @@ export function useProjectOutputFiles(projectId) {
 
             setData(filteredFiles.sort(alphabetical))
           } else {
-            setError(true)
+            setError('linked-project-compile-error')
           }
         })
         .catch(error => setError(error))

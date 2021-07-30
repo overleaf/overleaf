@@ -76,7 +76,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
       })
       .catch(err => {
         setRefreshing(false)
-        setRefreshError(err.message)
+        setRefreshError(err.data?.message || err.message)
       })
       .finally(() => {
         if (
