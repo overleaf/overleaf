@@ -15,7 +15,7 @@ const path = require('path')
 const { callbackify } = require('util')
 const _ = require('underscore')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const SplitTestV2Handler = require('../SplitTests/SplitTestV2Handler')
 
 const MONTH_NAMES = [
   'January',
@@ -31,7 +31,7 @@ const MONTH_NAMES = [
   'November',
   'December',
 ]
-const EXAMPLE_PROJECT_SPLITTEST_ID = 'example-project-v2'
+const EXAMPLE_PROJECT_SPLITTEST_ID = 'example-project-v3'
 
 async function createBlankProject(ownerId, projectName, attributes = {}) {
   const isImport = attributes && attributes.overleaf
@@ -72,28 +72,21 @@ async function createBasicProject(ownerId, projectName) {
 async function createExampleProject(ownerId, projectName) {
   const project = await _createBlankProject(ownerId, projectName)
 
-  const testSegmentation = await SplitTestHandler.promises.getTestSegmentation(
+  const assignment = await SplitTestV2Handler.promises.getAssignment(
     ownerId,
     EXAMPLE_PROJECT_SPLITTEST_ID
   )
 
-  if (testSegmentation.variant === 'example-frog') {
+  if (assignment.variant === 'example-frog') {
     await _addSplitTestExampleProjectFiles(ownerId, projectName, project)
   } else {
     await _addDefaultExampleProjectFiles(ownerId, projectName, project)
   }
 
-  if (testSegmentation.enabled) {
-    AnalyticsManager.recordEvent(ownerId, 'project-created', {
-      projectId: project._id,
-      splitTestId: EXAMPLE_PROJECT_SPLITTEST_ID,
-      splitTestVariantId: testSegmentation.variant,
-    })
-  } else {
-    AnalyticsManager.recordEvent(ownerId, 'project-created', {
-      projectId: project._id,
-    })
-  }
+  AnalyticsManager.recordEvent(ownerId, 'project-created', {
+    projectId: project._id,
+    ...assignment.analytics.segmentation,
+  })
 
   return project
 }

@@ -31,8 +31,8 @@ const BETA_PHASE = 'beta'
  *
  * @param userId the user's ID
  * @param splitTestName the unique name of the split test
- * @param options {sync: boolean} - for test purposes only, to force the synchronous update of the user's profile
- * @returns {Promise<{analytics: {segmentation: {}}, variant: string}|{analytics: {segmentation: {phase, splitTest, variant: string, versionNumber}}, variant: string}>}
+ * @param options {Object<sync: boolean>} - for test purposes only, to force the synchronous update of the user's profile
+ * @returns {Promise<{variant: string, analytics: {segmentation: {splitTest: string, variant: string, phase: string, versionNumber: number}|{}}}>}
  */
 async function getAssignment(userId, splitTestName, options) {
   const splitTest = await splitTestCache.get(splitTestName)

@@ -14,7 +14,7 @@ class SplitTestCache extends CacheLoader {
   }
 
   serialize(value) {
-    return value.toObject()
+    return value ? value.toObject() : undefined
   }
 
   deserialize(value) {
