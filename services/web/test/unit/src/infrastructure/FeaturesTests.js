@@ -8,6 +8,7 @@ describe('Features', function () {
       requires: {
         '@overleaf/settings': (this.settings = {
           moduleImportSequence: [],
+          enabledLinkedFileTypes: [],
         }),
       },
     })
@@ -106,12 +107,12 @@ describe('Features', function () {
             expect(this.Features.hasFeature('affiliations')).to.be.true
             expect(this.Features.hasFeature('analytics')).to.be.true
             expect(this.Features.hasFeature('custom-togglers')).to.be.true
-            expect(this.Features.hasFeature('link-url')).to.be.true
             expect(this.Features.hasFeature('overleaf-integration')).to.be.true
             expect(this.Features.hasFeature('references')).to.be.true
             expect(this.Features.hasFeature('registration')).to.be.true
           })
           it('should return false', function () {
+            expect(this.Features.hasFeature('link-url')).to.be.false
             expect(this.Features.hasFeature('git-bridge')).to.be.false
             expect(this.Features.hasFeature('github-sync')).to.be.false
             expect(this.Features.hasFeature('homepage')).to.be.false
@@ -126,8 +127,10 @@ describe('Features', function () {
               this.settings.enableGithubSync = true
               this.settings.enableSaml = true
               this.settings.oauth = true
+              this.settings.enabledLinkedFileTypes = ['url', 'project_file']
             })
             it('should return true or return value', function () {
+              expect(this.Features.hasFeature('link-url')).to.be.true
               expect(this.Features.hasFeature('affiliations')).to.be.true
               expect(this.Features.hasFeature('analytics')).to.be.true
               expect(this.Features.hasFeature('custom-togglers')).to.be.true

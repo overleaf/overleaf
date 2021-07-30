@@ -16,6 +16,13 @@ import ErrorMessage from '../error-message'
 export default function FileTreeImportFromProject() {
   const { t } = useTranslation()
 
+  const {
+    hasLinkedProjectFileFeature,
+    hasLinkedProjectOutputFileFeature,
+  } = window.ExposedSettings
+  const canSwitchOutputFilesMode =
+    hasLinkedProjectFileFeature && hasLinkedProjectOutputFileFeature
+
   const { name, setName, validName } = useFileTreeCreateName()
   const { setValid } = useFileTreeCreateForm()
   const { projectId } = useFileTreeMainContext()
@@ -24,7 +31,10 @@ export default function FileTreeImportFromProject() {
   const [selectedProject, setSelectedProject] = useState()
   const [selectedProjectEntity, setSelectedProjectEntity] = useState()
   const [selectedProjectOutputFile, setSelectedProjectOutputFile] = useState()
-  const [isOutputFilesMode, setOutputFilesMode] = useState(false)
+  const [isOutputFilesMode, setOutputFilesMode] = useState(
+    // default to project file mode, unless the feature is not enabled
+    !hasLinkedProjectFileFeature
+  )
 
   // use the basename of a path as the file name
   const setNameFromPath = useCallback(
@@ -123,20 +133,22 @@ export default function FileTreeImportFromProject() {
         />
       )}
 
-      <div className="toggle-file-type-button">
-        or&nbsp;
-        <Button
-          bsStyle="link"
-          type="button"
-          onClick={() => setOutputFilesMode(value => !value)}
-        >
-          <span>
-            {isOutputFilesMode
-              ? t('select_from_source_files')
-              : t('select_from_output_files')}
-          </span>
-        </Button>
-      </div>
+      {canSwitchOutputFilesMode && (
+        <div className="toggle-file-type-button">
+          or&nbsp;
+          <Button
+            bsStyle="link"
+            type="button"
+            onClick={() => setOutputFilesMode(value => !value)}
+          >
+            <span>
+              {isOutputFilesMode
+                ? t('select_from_source_files')
+                : t('select_from_output_files')}
+            </span>
+          </Button>
+        </div>
+      )}
 
       <FileTreeCreateNameInput
         label={t('file_name_in_this_project')}

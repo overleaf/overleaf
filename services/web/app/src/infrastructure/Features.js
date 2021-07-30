@@ -85,8 +85,17 @@ const Features = {
         return Boolean(_.get(Settings, ['apis', 'references', 'url']))
       case 'saml':
         return Boolean(Settings.enableSaml)
+      case 'linked-project-file':
+        return Boolean(Settings.enabledLinkedFileTypes.includes('project_file'))
+      case 'linked-project-output-file':
+        return Boolean(
+          Settings.enabledLinkedFileTypes.includes('project_output_file')
+        )
       case 'link-url':
-        return Boolean(_.get(Settings, ['apis', 'linkedUrlProxy', 'url']))
+        return Boolean(
+          _.get(Settings, ['apis', 'linkedUrlProxy', 'url']) &&
+            Settings.enabledLinkedFileTypes.includes('url')
+        )
       case 'public-registration':
         return publicRegistrationModuleAvailable
       case 'support':

@@ -259,6 +259,7 @@ describe('<FileTreeModalCreateFile/>', function () {
 
     // click on the button to toggle between source and output files
     const sourceTypeButton = screen.getByRole('button', {
+      // NOTE: When changing the label, update the other tests with this label as well.
       name: 'select from output files',
     })
     await fireEvent.click(sourceTypeButton)
@@ -293,6 +294,48 @@ describe('<FileTreeModalCreateFile/>', function () {
         },
       })
     ).to.be.true
+  })
+
+  describe('when the output files feature is not available', function () {
+    const flagBefore = window.ExposedSettings.hasLinkedProjectOutputFileFeature
+    before(function () {
+      window.ExposedSettings.hasLinkedProjectOutputFileFeature = false
+    })
+    after(function () {
+      window.ExposedSettings.hasLinkedProjectOutputFileFeature = flagBefore
+    })
+
+    it('should not show the import from output file mode', async function () {
+      fetchMock.get('path:/user/projects', {
+        projects: [
+          {
+            _id: 'test-project',
+            name: 'This Project',
+          },
+          {
+            _id: 'project-1',
+            name: 'Project One',
+          },
+          {
+            _id: 'project-2',
+            name: 'Project Two',
+          },
+        ],
+      })
+
+      render(
+        <FileTreeContext {...contextProps}>
+          <OpenWithMode mode="project" />
+        </FileTreeContext>
+      )
+
+      // should not show the toggle
+      expect(
+        screen.queryByRole('button', {
+          name: 'select from output files',
+        })
+      ).to.be.null
+    })
   })
 
   it('import from a URL when the form is submitted', async function () {

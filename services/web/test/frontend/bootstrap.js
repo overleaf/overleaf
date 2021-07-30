@@ -29,6 +29,9 @@ window.ExposedSettings = {
   maxEntitiesPerProject: 10,
   maxUploadSize: 5 * 1024 * 1024,
   siteUrl: 'https://www.dev-overleaf.com',
+  hasLinkUrlFeature: true,
+  hasLinkedProjectFileFeature: true,
+  hasLinkedProjectOutputFileFeature: true,
   textExtensions: [
     'tex',
     'latex',

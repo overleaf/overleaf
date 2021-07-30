@@ -346,6 +346,10 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       hasSamlFeature: Features.hasFeature('saml'),
       samlInitPath: _.get(Settings, ['saml', 'ukamf', 'initPath']),
       hasLinkUrlFeature: Features.hasFeature('link-url'),
+      hasLinkedProjectFileFeature: Features.hasFeature('linked-project-file'),
+      hasLinkedProjectOutputFileFeature: Features.hasFeature(
+        'linked-project-output-file'
+      ),
       siteUrl: Settings.siteUrl,
       emailConfirmationDisabled: Settings.emailConfirmationDisabled,
       maxEntitiesPerProject: Settings.maxEntitiesPerProject,
