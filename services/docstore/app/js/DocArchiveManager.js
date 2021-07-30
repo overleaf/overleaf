@@ -23,6 +23,7 @@ module.exports = {
   unarchiveDoc: callbackify(unarchiveDoc),
   destroyAllDocs: callbackify(destroyAllDocs),
   destroyDoc: callbackify(destroyDoc),
+  getDoc: callbackify(getDoc),
   promises: {
     archiveAllDocs,
     archiveDocById,
@@ -31,6 +32,7 @@ module.exports = {
     unarchiveDoc,
     destroyAllDocs,
     destroyDoc,
+    getDoc,
   },
 }
 
@@ -125,38 +127,17 @@ async function unArchiveAllDocs(projectId) {
   }
 }
 
-async function unarchiveDoc(projectId, docId) {
-  logger.log(
-    { project_id: projectId, doc_id: docId },
-    'getting doc from persistor'
-  )
-  const originalDoc = await MongoManager.findDoc(projectId, docId, { inS3: 1 })
-  if (!originalDoc.inS3) {
-    // return if it's not actually in S3 as there's nothing to do
-    return
-  }
+// get the doc from the PersistorManager without storing it in mongo
+async function getDoc(projectId, docId) {
   const key = `${projectId}/${docId}`
-  let stream, sourceMd5
-  try {
-    sourceMd5 = await PersistorManager.getObjectMd5Hash(
-      settings.docstore.bucket,
-      key
-    )
-    stream = await PersistorManager.getObjectStream(
-      settings.docstore.bucket,
-      key
-    )
-  } catch (err) {
-    // if we get a 404, we could be in a race and something else has unarchived the doc already
-    if (err instanceof Errors.NotFoundError) {
-      const doc = await MongoManager.findDoc(projectId, docId, { inS3: 1 })
-      if (!doc.inS3) {
-        // the doc has been archived while we were looking for it, so no error
-        return
-      }
-    }
-    throw err
-  }
+  const sourceMd5 = await PersistorManager.getObjectMd5Hash(
+    settings.docstore.bucket,
+    key
+  )
+  const stream = await PersistorManager.getObjectStream(
+    settings.docstore.bucket,
+    key
+  )
   stream.resume()
   const json = await _streamToString(stream)
   const md5 = crypto.createHash('md5').update(json).digest('hex')
@@ -180,6 +161,36 @@ async function unarchiveDoc(projectId, docId) {
     mongoDoc.lines = doc
   } else {
     throw new Error("I don't understand the doc format in s3")
+  }
+
+  return mongoDoc
+}
+
+// get the doc and unarchive it to mongo
+async function unarchiveDoc(projectId, docId) {
+  logger.log(
+    { project_id: projectId, doc_id: docId },
+    'getting doc from persistor'
+  )
+  const key = `${projectId}/${docId}`
+  const originalDoc = await MongoManager.findDoc(projectId, docId, { inS3: 1 })
+  if (!originalDoc.inS3) {
+    // return if it's not actually in S3 as there's nothing to do
+    return
+  }
+  let mongoDoc
+  try {
+    mongoDoc = await getDoc(projectId, docId)
+  } catch (err) {
+    // if we get a 404, we could be in a race and something else has unarchived the doc already
+    if (err instanceof Errors.NotFoundError) {
+      const doc = await MongoManager.findDoc(projectId, docId, { inS3: 1 })
+      if (!doc.inS3) {
+        // the doc has been archived while we were looking for it, so no error
+        return
+      }
+    }
+    throw err
   }
   await MongoManager.upsertIntoDocCollection(projectId, docId, mongoDoc)
   await PersistorManager.deleteObject(settings.docstore.bucket, key)
