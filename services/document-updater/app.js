@@ -53,6 +53,7 @@ app.param('doc_id', (req, res, next, docId) => {
 })
 
 app.get('/project/:project_id/doc/:doc_id', HttpController.getDoc)
+app.get('/project/:project_id/doc/:doc_id/peek', HttpController.peekDoc)
 // temporarily keep the GET method for backwards compatibility
 app.get('/project/:project_id/doc', HttpController.getProjectDocsAndFlushIfOld)
 // will migrate to the POST method of get_and_flush_if_old instead
