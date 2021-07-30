@@ -54,6 +54,7 @@ app.get('/project/:project_id/ranges', HttpController.getAllRanges)
 app.get('/project/:project_id/doc/:doc_id', HttpController.getDoc)
 app.get('/project/:project_id/doc/:doc_id/deleted', HttpController.isDocDeleted)
 app.get('/project/:project_id/doc/:doc_id/raw', HttpController.getRawDoc)
+app.get('/project/:project_id/doc/:doc_id/peek', HttpController.peekDoc)
 // Add 64kb overhead for the JSON encoding, and double the size to allow for ranges in the json payload
 app.post(
   '/project/:project_id/doc/:doc_id',

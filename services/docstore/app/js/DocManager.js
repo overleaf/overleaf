@@ -124,6 +124,70 @@ module.exports = DocManager = {
     )
   },
 
+  // returns the doc without any version information
+  _peekRawDoc(project_id, doc_id, callback) {
+    MongoManager.findDoc(
+      project_id,
+      doc_id,
+      {
+        lines: true,
+        rev: true,
+        deleted: true,
+        version: true,
+        ranges: true,
+        inS3: true,
+      },
+      (err, doc) => {
+        if (err) return callback(err)
+        if (doc == null) {
+          return callback(
+            new Errors.NotFoundError(
+              `No such doc: ${doc_id} in project ${project_id}`
+            )
+          )
+        }
+        if (doc && !doc.inS3) {
+          return callback(null, doc)
+        }
+        // skip the unarchiving to mongo when getting a doc
+        DocArchive.getDoc(project_id, doc_id, function (err, archivedDoc) {
+          if (err != null) {
+            logger.err(
+              { err, project_id, doc_id },
+              'error getting doc from archive'
+            )
+            return callback(err)
+          }
+          doc = _.extend(doc, archivedDoc)
+          callback(null, doc)
+        })
+      }
+    )
+  },
+
+  // get the doc from mongo if possible, or from the persistent store otherwise,
+  // without unarchiving it (avoids unnecessary writes to mongo)
+  peekDoc(project_id, doc_id, callback) {
+    DocManager._peekRawDoc(project_id, doc_id, (err, doc) => {
+      if (err) {
+        return callback(err)
+      }
+      MongoManager.WithRevCheck(
+        doc,
+        MongoManager.getDocVersion,
+        function (error, version) {
+          // If the doc has been modified while we were retrieving it, we
+          // will get a DocModified error
+          if (error != null) {
+            return callback(error)
+          }
+          doc.version = version
+          return callback(err, doc)
+        }
+      )
+    })
+  },
+
   getDocLines(project_id, doc_id, callback) {
     if (callback == null) {
       callback = function (err, doc) {}

@@ -44,6 +44,22 @@ module.exports = HttpController = {
     })
   },
 
+  peekDoc(req, res, next) {
+    const { project_id } = req.params
+    const { doc_id } = req.params
+    logger.log({ project_id, doc_id }, 'peeking doc')
+    DocManager.peekDoc(project_id, doc_id, function (error, doc) {
+      if (error) {
+        return next(error)
+      }
+      if (doc == null) {
+        return res.sendStatus(404)
+      } else {
+        return res.json(HttpController._buildDocView(doc))
+      }
+    })
+  },
+
   isDocDeleted(req, res, next) {
     const { doc_id: docId, project_id: projectId } = req.params
     DocManager.isDocDeleted(projectId, docId, function (error, deleted) {

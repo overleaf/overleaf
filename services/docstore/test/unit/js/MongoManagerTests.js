@@ -17,6 +17,7 @@ const modulePath = require('path').join(
 )
 const { ObjectId } = require('mongodb')
 const { assert } = require('chai')
+const Errors = require('../../../app/js/Errors')
 
 describe('MongoManager', function () {
   beforeEach(function () {
@@ -28,6 +29,7 @@ describe('MongoManager', function () {
         },
         '@overleaf/metrics': { timeAsyncMethod: sinon.stub() },
         '@overleaf/settings': { max_deleted_docs: 42 },
+        './Errors': { Errors },
       },
     })
     this.project_id = ObjectId().toString()
