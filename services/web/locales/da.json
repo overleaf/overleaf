@@ -891,6 +891,7 @@
   "sl_used_over_x_people_at": "__appName__ bliver brugt af mere end __numberOfUsers__ studerende og akademikere på:",
   "collaboration": "Samarbejde",
   "work_on_single_version": "Arbejd sammen på en enkelt version",
+  "view_collab_edits": "Vis samarbejdspartners ændringer ",
   "ease_of_use": "Nem af bruge",
   "no_complicated_latex_install": "Ingen kompliceret LaTeX installation",
   "all_packages_and_templates": "Alle de pakker og <0>__templatesLink__</0> du har brug for",

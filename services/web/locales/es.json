@@ -374,6 +374,7 @@
   "sl_used_over_x_people_at": "__appName__ es usado por más de __numberOfUsers__ estudiantes y académicos en:",
   "collaboration": "Colaboración",
   "work_on_single_version": "Trabajen juntos en una sola versión",
+  "view_collab_edits": "Ver ediciones de los colaboradores ",
   "ease_of_use": " Facilidad de uso",
   "no_complicated_latex_install": "Sin instalaciones complicadas de LaTeX",
   "all_packages_and_templates": "Todos los paquetes y <0>__templatesLink__</0> que necesitas",
