@@ -172,7 +172,7 @@ module.exports = DocManager = {
       if (err) {
         return callback(err)
       }
-      MongoManager.WithRevCheck(
+      MongoManager.withRevCheck(
         doc,
         MongoManager.getDocVersion,
         function (error, version) {

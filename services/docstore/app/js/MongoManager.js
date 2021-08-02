@@ -199,7 +199,7 @@ module.exports = MongoManager = {
   // Helper method  to support optimistic locking. Call the provided method for
   // an existing doc and return the result if the rev in mongo is unchanged when
   // checked afterwards. If the rev has changed, return a DocModifiedError.
-  WithRevCheck(doc, method, callback) {
+  withRevCheck(doc, method, callback) {
     method(doc._id, function (err, result) {
       if (err) return callback(err)
       MongoManager.getDocRev(doc._id, function (err, currentRev) {
