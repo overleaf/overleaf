@@ -15,7 +15,7 @@ const { db, ObjectId } = require('./mongodb')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
-const { DocModifiedError } = require('./Errors')
+const Errors = require('./Errors')
 const { promisify } = require('util')
 
 module.exports = MongoManager = {
@@ -206,7 +206,7 @@ module.exports = MongoManager = {
         if (err) return callback(err)
         if (doc.rev !== currentRev) {
           return callback(
-            new DocModifiedError('doc rev has changed', {
+            new Errors.DocModifiedError('doc rev has changed', {
               doc_id: doc._id,
               rev: doc.rev,
               currentRev,
