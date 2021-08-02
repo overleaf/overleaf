@@ -123,6 +123,18 @@ module.exports = DocUpdaterClient = {
     DocUpdaterClient.getDoc(projectId, docId, callback)
   },
 
+  peekDoc(projectId, docId, callback) {
+    request.get(
+      `http://localhost:3003/project/${projectId}/doc/${docId}/peek`,
+      (error, res, body) => {
+        if (body != null && res.statusCode >= 200 && res.statusCode < 300) {
+          body = JSON.parse(body)
+        }
+        callback(error, res, body)
+      }
+    )
+  },
+
   flushDoc(projectId, docId, callback) {
     request.post(
       `http://localhost:3003/project/${projectId}/doc/${docId}/flush`,
