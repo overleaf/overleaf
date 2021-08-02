@@ -55,6 +55,7 @@ module.exports = HttpController = {
       if (doc == null) {
         return res.sendStatus(404)
       } else {
+        res.setHeader('x-doc-status', doc.inS3 ? 'archived' : 'active')
         return res.json(HttpController._buildDocView(doc))
       }
     })
