@@ -91,6 +91,8 @@ app.use(function (error, req, res, next) {
   logger.error({ err: error, req }, 'request errored')
   if (error instanceof Errors.NotFoundError) {
     return res.sendStatus(404)
+  } else if (error instanceof Errors.DocModifiedError) {
+    return res.sendStatus(409)
   } else {
     return res.status(500).send('Oops, something went wrong')
   }
