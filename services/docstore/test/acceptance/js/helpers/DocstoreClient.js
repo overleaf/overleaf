@@ -1,16 +1,6 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
-    no-unused-vars,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let DocstoreClient
 const request = require('request').defaults({ jar: false })
 const settings = require('@overleaf/settings')
@@ -33,9 +23,6 @@ async function getStringFromPersistor(persistor, bucket, key) {
 
 module.exports = DocstoreClient = {
   createDoc(project_id, doc_id, lines, version, ranges, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
     return DocstoreClient.updateDoc(
       project_id,
       doc_id,
@@ -47,10 +34,7 @@ module.exports = DocstoreClient = {
   },
 
   getDoc(project_id, doc_id, qs, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.get(
+    request.get(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`,
         json: true,
@@ -82,10 +66,7 @@ module.exports = DocstoreClient = {
   },
 
   getAllDocs(project_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.get(
+    request.get(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc`,
         json: true,
@@ -113,10 +94,7 @@ module.exports = DocstoreClient = {
   },
 
   getAllRanges(project_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.get(
+    request.get(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/ranges`,
         json: true,
@@ -126,9 +104,6 @@ module.exports = DocstoreClient = {
   },
 
   updateDoc(project_id, doc_id, lines, version, ranges, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
     return request.post(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`,
@@ -183,10 +158,7 @@ module.exports = DocstoreClient = {
   },
 
   archiveAllDoc(project_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.post(
+    request.post(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/archive`,
       },
@@ -195,10 +167,7 @@ module.exports = DocstoreClient = {
   },
 
   archiveDocById(project_id, doc_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.post(
+    request.post(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}/archive`,
       },
@@ -207,10 +176,7 @@ module.exports = DocstoreClient = {
   },
 
   destroyAllDoc(project_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.post(
+    request.post(
       {
         url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/destroy`,
       },
