@@ -1,34 +1,8 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-process.env.BACKEND = 'gcs'
 const Settings = require('@overleaf/settings')
-const { expect } = require('chai')
-const { db, ObjectId } = require('../../../app/js/mongodb')
-const async = require('async')
+const { ObjectId } = require('../../../app/js/mongodb')
 const DocstoreApp = require('./helpers/DocstoreApp')
 const DocstoreClient = require('./helpers/DocstoreClient')
 const { Storage } = require('@google-cloud/storage')
-const Persistor = require('../../../app/js/PersistorManager')
-const Streamifier = require('streamifier')
-
-function uploadContent(path, json, callback) {
-  const stream = Streamifier.createReadStream(JSON.stringify(json))
-  Persistor.sendStream(Settings.docstore.bucket, path, stream)
-    .then(() => callback())
-    .catch(callback)
-}
 
 describe('Getting A Doc from Archive', function () {
   before(function (done) {
