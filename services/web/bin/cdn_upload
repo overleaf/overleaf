@@ -44,8 +44,8 @@ function upload_into_bucket() {
 
 }
 
-# Upload to staging CDN if branch is either 'master' or 'staging-master'
-if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "staging-master" ]]; then
+# Upload to staging CDN if branch is either 'master' or 'staging-master' or main variants
+if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "staging-master" || "$BRANCH_NAME" == "main" || "$BRANCH_NAME" == "staging-main" ]]; then
   tar --directory=/tmp/ -xf build.tar
 
   # delete source maps
@@ -53,7 +53,7 @@ if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "staging-master" ]]; then
 
   upload_into_bucket $CDN_STAG
   # Only upload to production CDN if branch is
-  if [[ "$BRANCH_NAME" == "master" ]]; then
+  if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "main" ]]; then
     upload_into_bucket $CDN_PROD
   fi
 fi

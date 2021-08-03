@@ -433,6 +433,7 @@ format_in_docker:
 IMAGE_CI ?= ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 IMAGE_REPO ?= gcr.io/overleaf-ops/$(PROJECT_NAME)
 IMAGE_REPO_BRANCH ?= $(IMAGE_REPO):$(BRANCH_NAME)
+IMAGE_REPO_MAIN ?= $(IMAGE_REPO):main
 IMAGE_REPO_MASTER ?= $(IMAGE_REPO):master
 IMAGE_REPO_FINAL ?= $(IMAGE_REPO_BRANCH)-$(BUILD_NUMBER)
 
@@ -441,6 +442,7 @@ export SENTRY_RELEASE ?= ${COMMIT_SHA}
 build_deps:
 	docker build --pull \
 		--cache-from $(IMAGE_REPO_BRANCH)-deps \
+		--cache-from $(IMAGE_REPO_MAIN)-deps \
 		--cache-from $(IMAGE_REPO_MASTER)-deps \
 		--tag $(IMAGE_REPO_BRANCH)-deps \
 		--target deps \
