@@ -29,7 +29,6 @@ describe('<ToolbarHeader />', function () {
       const props = {
         ...defaultProps,
         cobranding: {
-          isProjectCobranded: true,
           brandVariationHomeUrl: 'http://cobranding',
           brandVariationName: 'variation',
           logoImgUrl: 'http://cobranding/logo',

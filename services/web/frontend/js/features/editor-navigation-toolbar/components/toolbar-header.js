@@ -43,9 +43,9 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
     <header className="toolbar toolbar-header toolbar-with-labels">
       <div className="toolbar-left">
         <MenuButton onClick={onShowLeftMenuClick} />
-        {cobranding &&
-          cobranding.isProjectCobranded &&
-          cobranding.logoImgUrl && <CobrandingLogo {...cobranding} />}
+        {cobranding && cobranding.logoImgUrl && (
+          <CobrandingLogo {...cobranding} />
+        )}
         <BackToProjectsButton />
       </div>
       {pdfButtonIsVisible && (
