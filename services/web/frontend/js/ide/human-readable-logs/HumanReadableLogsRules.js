@@ -1,18 +1,20 @@
 /* eslint-disable no-useless-escape */
 import PropTypes from 'prop-types'
 
-function WikiLink({ url, children }) {
-  return window.wikiEnabled ? (
-    <a href={url} target="_blank">
-      {children}
-    </a>
-  ) : (
-    <>{children}</>
-  )
+function WikiLink({ url, children, skipPlainRendering }) {
+  if (window.wikiEnabled) {
+    return (
+      <a href={url} target="_blank">
+        {children}
+      </a>
+    )
+  } else {
+    return <>{children}</>
+  }
 }
 
 WikiLink.propTypes = {
-  url: PropTypes.string,
+  url: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
 }
 
@@ -70,23 +72,25 @@ const rules = [
     extraInfoURL: 'https://www.overleaf.com/learn/Errors/Missing_$_inserted',
     humanReadableHintComponent: (
       <>
-        Check that your $'s match around math expressions. If they do, then
-        you've probably used a symbol in normal text that needs to be in math
-        mode. Symbols such as subscripts ( _ ), integrals ( \int ), Greek
-        letters ( \alpha, \beta, \delta ), and modifiers (\vec
-        {'{x}'}, \tilde
-        {'{x}'} ) must be written in math mode. See the full list{' '}
-        <WikiLink url="https://www.overleaf.com/learn/Errors/Missing_$_inserted">
-          here
-        </WikiLink>
-        . If you intended to use mathematics mode, then use $ … $ for 'inline
-        math mode', $$ … $$ for 'display math mode' or alternatively \begin
-        {'{math}'} … \end
-        {'{math}'}.
+        <p>
+          You need to enclose all mathematical expressions and symbols with
+          special markers. These special markers create a ‘math mode’.
+        </p>
+        <p>
+          Use <code>$...$</code> for inline math mode, and <code>\[...\]</code>
+          or one of the mathematical environments (e.g. equation) for display
+          math mode.
+        </p>
+        <p>
+          This applies to symbols such as subscripts ( <code>_</code> ),
+          integrals ( <code>\int</code> ), Greek letters ( <code>\alpha</code>,{' '}
+          <code>\beta</code>, <code>\delta</code> ) and modifiers{' '}
+          <code>{'(\\vec{x}'}</code>, <code>{'\\tilde{x}'})</code>.
+        </p>
       </>
     ),
     humanReadableHint:
-      'Check that your $&#x27;s match around math expressions. If they do, then you&#x27;ve probably used a symbol in normal text that needs to be in math mode. Symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ), and modifiers (\\vec{x}, \\tilde{x} ) must be written in math mode. See the full list <a href="https://www.overleaf.com/learn/Errors/Missing_$_inserted" target="_blank">here</a>. If you intended to use mathematics mode, then use $ … $ for &#x27;inline math mode&#x27;, $$ … $$ for &#x27;display math mode&#x27; or alternatively \\begin{math} … \\end{math}.',
+      'You need to enclose all mathematical expressions and symbols with special markers. These special markers create a ‘math mode’. Use $...$ for inline math mode, and \\[...\\] or one of the mathematical environments (e.g. equation) for display math mode.  This applies to symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ) and modifiers (\\vec{x}, \\tilde{x} ).',
   },
   {
     regexToMatch: /(undefined )?[rR]eference(s)?.+(undefined)?/,
