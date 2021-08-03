@@ -4,6 +4,8 @@ const sinonChai = require('sinon-chai')
 const chaiAsPromised = require('chai-as-promised')
 const SandboxedModule = require('sandboxed-module')
 
+process.env.BACKEND = 'gcs'
+
 // Chai configuration
 chai.should()
 chai.use(sinonChai)
