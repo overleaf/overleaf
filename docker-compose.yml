@@ -34,7 +34,7 @@ services:
             SHARELATEX_REDIS_HOST: redis
             REDIS_HOST: redis
 
-            ENABLED_LINKED_FILE_TYPES: 'url,project_file'
+            ENABLED_LINKED_FILE_TYPES: 'project_file,project_output_file'
 
             # Enables Thumbnail generation using ImageMagick
             ENABLE_CONVERSIONS: 'true'
