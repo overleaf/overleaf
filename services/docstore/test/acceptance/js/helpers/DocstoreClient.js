@@ -60,6 +60,17 @@ module.exports = DocstoreClient = {
     )
   },
 
+  peekDoc(project_id, doc_id, qs, callback) {
+    request.get(
+      {
+        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}/peek`,
+        json: true,
+        qs,
+      },
+      callback
+    )
+  },
+
   isDocDeleted(project_id, doc_id, callback) {
     request.get(
       {

@@ -15,6 +15,7 @@ const { db, ObjectId } = require('./mongodb')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
+const Errors = require('./Errors')
 const { promisify } = require('util')
 
 module.exports = MongoManager = {
@@ -176,6 +177,45 @@ module.exports = MongoManager = {
       },
       callback
     )
+  },
+
+  getDocRev(doc_id, callback) {
+    db.docs.findOne(
+      {
+        _id: ObjectId(doc_id.toString()),
+      },
+      {
+        projection: { rev: 1 },
+      },
+      function (err, doc) {
+        if (err != null) {
+          return callback(err)
+        }
+        callback(null, doc && doc.rev)
+      }
+    )
+  },
+
+  // Helper method  to support optimistic locking. Call the provided method for
+  // an existing doc and return the result if the rev in mongo is unchanged when
+  // checked afterwards. If the rev has changed, return a DocModifiedError.
+  withRevCheck(doc, method, callback) {
+    method(doc._id, function (err, result) {
+      if (err) return callback(err)
+      MongoManager.getDocRev(doc._id, function (err, currentRev) {
+        if (err) return callback(err)
+        if (doc.rev !== currentRev) {
+          return callback(
+            new Errors.DocModifiedError('doc rev has changed', {
+              doc_id: doc._id,
+              rev: doc.rev,
+              currentRev,
+            })
+          )
+        }
+        return callback(null, result)
+      })
+    })
   },
 
   destroyDoc(doc_id, callback) {

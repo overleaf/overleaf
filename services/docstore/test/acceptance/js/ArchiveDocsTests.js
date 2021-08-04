@@ -12,7 +12,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-process.env.BACKEND = 'gcs'
+
 const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
 const { db, ObjectId } = require('../../../app/js/mongodb')

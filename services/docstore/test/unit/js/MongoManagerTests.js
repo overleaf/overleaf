@@ -17,6 +17,7 @@ const modulePath = require('path').join(
 )
 const { ObjectId } = require('mongodb')
 const { assert } = require('chai')
+const Errors = require('../../../app/js/Errors')
 
 describe('MongoManager', function () {
   beforeEach(function () {
@@ -28,6 +29,7 @@ describe('MongoManager', function () {
         },
         '@overleaf/metrics': { timeAsyncMethod: sinon.stub() },
         '@overleaf/settings': { max_deleted_docs: 42 },
+        './Errors': Errors,
       },
     })
     this.project_id = ObjectId().toString()
@@ -305,7 +307,7 @@ describe('MongoManager', function () {
     })
   })
 
-  return describe('setDocVersion', function () {
+  describe('setDocVersion', function () {
     beforeEach(function () {
       this.version = 42
       this.db.docOps.updateOne = sinon.stub().callsArg(3)
@@ -336,6 +338,38 @@ describe('MongoManager', function () {
 
     return it('should call the callback', function () {
       return this.callback.called.should.equal(true)
+    })
+  })
+
+  describe('withRevCheck', function () {
+    this.beforeEach(function () {
+      this.doc = { _id: ObjectId(), name: 'mock-doc', rev: 1 }
+      this.testFunction = sinon.stub().yields(null, 'foo')
+    })
+
+    it('should call the callback when the rev has not changed', function (done) {
+      this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: 1 })
+      this.MongoManager.withRevCheck(
+        this.doc,
+        this.testFunction,
+        (err, result) => {
+          result.should.equal('foo')
+          assert.isNull(err)
+          done()
+        }
+      )
+    })
+
+    it('should return an error when the rev has changed', function (done) {
+      this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: 2 })
+      this.MongoManager.withRevCheck(
+        this.doc,
+        this.testFunction,
+        (err, result) => {
+          err.should.be.instanceof(Errors.DocModifiedError)
+          done()
+        }
+      )
     })
   })
 })

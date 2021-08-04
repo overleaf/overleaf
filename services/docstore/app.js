@@ -54,6 +54,7 @@ app.get('/project/:project_id/ranges', HttpController.getAllRanges)
 app.get('/project/:project_id/doc/:doc_id', HttpController.getDoc)
 app.get('/project/:project_id/doc/:doc_id/deleted', HttpController.isDocDeleted)
 app.get('/project/:project_id/doc/:doc_id/raw', HttpController.getRawDoc)
+app.get('/project/:project_id/doc/:doc_id/peek', HttpController.peekDoc)
 // Add 64kb overhead for the JSON encoding, and double the size to allow for ranges in the json payload
 app.post(
   '/project/:project_id/doc/:doc_id',
@@ -90,6 +91,8 @@ app.use(function (error, req, res, next) {
   logger.error({ err: error, req }, 'request errored')
   if (error instanceof Errors.NotFoundError) {
     return res.sendStatus(404)
+  } else if (error instanceof Errors.DocModifiedError) {
+    return res.sendStatus(409)
   } else {
     return res.status(500).send('Oops, something went wrong')
   }
