@@ -7,13 +7,13 @@ if (process.env.BATCH_LAST_ID) {
   BATCH_LAST_ID = ObjectId(process.env.BATCH_LAST_ID)
 }
 
-async function getNextBatch(collection, query, maxId, projection) {
+async function getNextBatch(collection, query, maxId, projection, options) {
   maxId = maxId || BATCH_LAST_ID
   if (maxId) {
     query._id = { $gt: maxId }
   }
   const entries = await collection
-    .find(query, { readPreference: ReadPreference.SECONDARY })
+    .find(query, options)
     .project(projection)
     .sort({ _id: 1 })
     .limit(BATCH_SIZE)
@@ -28,17 +28,31 @@ async function performUpdate(collection, nextBatch, update) {
   )
 }
 
-async function batchedUpdate(collectionName, query, update, projection) {
+async function batchedUpdate(
+  collectionName,
+  query,
+  update,
+  projection,
+  options
+) {
   await waitForDb()
   const collection = db[collectionName]
+
+  options = options || {}
+  options.readPreference = ReadPreference.SECONDARY
 
   projection = projection || { _id: 1 }
   let nextBatch
   let updated = 0
   let maxId
   while (
-    (nextBatch = await getNextBatch(collection, query, maxId, projection))
-      .length
+    (nextBatch = await getNextBatch(
+      collection,
+      query,
+      maxId,
+      projection,
+      options
+    )).length
   ) {
     maxId = nextBatch[nextBatch.length - 1]._id
     updated += nextBatch.length

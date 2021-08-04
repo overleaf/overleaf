@@ -79,6 +79,9 @@ async function main() {
     _id: 1,
     overleaf: 1,
   }
+  const options = {
+    hint: { _id: 1 },
+  }
   await batchedUpdate(
     'projects',
     {
@@ -88,7 +91,8 @@ async function main() {
       ],
     },
     processBatch,
-    projection
+    projection,
+    options
   )
   console.log('Final')
   console.log(RESULT)
