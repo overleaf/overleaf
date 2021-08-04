@@ -188,7 +188,15 @@ describe('BackFillDummyDocMeta', function () {
       '',
     ])
     expect(stdErr.filter(filterOutput)).to.deep.equal([
-      ...`Options: ${JSON.stringify(options, null, 2)}`.split('\n'),
+      `Options: {`,
+      `  "dryRun": ${options.DRY_RUN},`,
+      `  "cacheSize": ${options.CACHE_SIZE},`,
+      `  "firstProjectId": "${options.FIRST_PROJECT_ID}",`,
+      `  "incrementByS": ${options.INCREMENT_BY_S},`,
+      `  "batchSize": ${options.BATCH_SIZE},`,
+      `  "stopAtS": ${options.STOP_AT_S},`,
+      `  "letUserDoubleCheckInputsFor": ${options.LET_USER_DOUBLE_CHECK_INPUTS_FOR}`,
+      '}',
       'Waiting for you to double check inputs for 1 ms',
       `Processed 1 until ${getObjectIdFromDate('2021-04-02T00:00:00.000Z')}`,
       `Processed 2 until ${getObjectIdFromDate('2021-04-03T00:00:00.000Z')}`,

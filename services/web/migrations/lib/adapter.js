@@ -7,7 +7,11 @@ const {
 
 class Adapter {
   constructor(params) {
-    if (!(process.argv.includes('-t') || process.argv.includes('--tags'))) {
+    if (
+      !process.env.SKIP_TAG_CHECK &&
+      !process.argv.includes('create') &&
+      !(process.argv.includes('-t') || process.argv.includes('--tags'))
+    ) {
       console.error("ERROR: must pass tags using '-t' or '--tags', exiting")
       process.exit(1)
     }

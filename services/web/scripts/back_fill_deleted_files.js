@@ -1,58 +1,62 @@
-const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
-
 const { batchedUpdate } = require('./helpers/batchedUpdate')
 const { promiseMapWithLimit, promisify } = require('../app/src/util/promises')
 const { db } = require('../app/src/infrastructure/mongodb')
 const sleep = promisify(setTimeout)
+const _ = require('lodash')
 
-const PERFORM_CLEANUP = process.argv.includes('--perform-cleanup')
-const FIX_PARTIAL_INSERTS = process.argv.includes('--fix-partial-inserts')
-const LET_USER_DOUBLE_CHECK_INPUTS_FOR = parseInt(
-  process.env.LET_USER_DOUBLE_CHECK_INPUTS_FOR || 10 * 1000,
-  10
-)
+async function main(options) {
+  if (!options) {
+    options = {}
+  }
+  _.defaults(options, {
+    writeConcurrency: parseInt(process.env.WRITE_CONCURRENCY, 10) || 10,
+    performCleanup: process.argv.includes('--perform-cleanup'),
+    fixPartialInserts: process.argv.includes('--fix-partial-inserts'),
+    letUserDoubleCheckInputsFor: parseInt(
+      process.env.LET_USER_DOUBLE_CHECK_INPUTS_FOR || 10 * 1000,
+      10
+    ),
+  })
 
-async function main() {
-  await letUserDoubleCheckInputs()
+  await letUserDoubleCheckInputs(options)
 
   await batchedUpdate(
     'projects',
     // array is not empty ~ array has one item
     { 'deletedFiles.0': { $exists: true } },
-    processBatch,
+    async (x, projects) => {
+      await processBatch(x, projects, options)
+    },
     { _id: 1, deletedFiles: 1 }
   )
 }
 
-main()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(error => {
-    console.error({ error })
-    process.exit(1)
-  })
-
-async function processBatch(_, projects) {
-  await promiseMapWithLimit(WRITE_CONCURRENCY, projects, processProject)
+async function processBatch(_, projects, options) {
+  await promiseMapWithLimit(
+    options.writeConcurrency,
+    projects,
+    async project => {
+      await processProject(project, options)
+    }
+  )
 }
 
-async function processProject(project) {
-  await backFillFiles(project)
+async function processProject(project, options) {
+  await backFillFiles(project, options)
 
-  if (PERFORM_CLEANUP) {
+  if (options.performCleanup) {
     await cleanupProject(project)
   }
 }
 
-async function backFillFiles(project) {
+async function backFillFiles(project, options) {
   const projectId = project._id
   filterDuplicatesInPlace(project)
   project.deletedFiles.forEach(file => {
     file.projectId = projectId
   })
 
-  if (FIX_PARTIAL_INSERTS) {
+  if (options.fixPartialInserts) {
     await fixPartialInserts(project)
   } else {
     await db.deletedFiles.insertMany(project.deletedFiles)
@@ -98,8 +102,8 @@ async function cleanupProject(project) {
   )
 }
 
-async function letUserDoubleCheckInputs() {
-  if (PERFORM_CLEANUP) {
+async function letUserDoubleCheckInputs(options) {
+  if (options.performCleanup) {
     console.error('BACK FILLING AND PERFORMING CLEANUP')
   } else {
     console.error(
@@ -108,8 +112,21 @@ async function letUserDoubleCheckInputs() {
   }
   console.error(
     'Waiting for you to double check inputs for',
-    LET_USER_DOUBLE_CHECK_INPUTS_FOR,
+    options.letUserDoubleCheckInputsFor,
     'ms'
   )
-  await sleep(LET_USER_DOUBLE_CHECK_INPUTS_FOR)
+  await sleep(options.letUserDoubleCheckInputsFor)
+}
+
+module.exports = main
+
+if (require.main === module) {
+  main()
+    .then(() => {
+      process.exit(0)
+    })
+    .catch(error => {
+      console.error({ error })
+      process.exit(1)
+    })
 }
