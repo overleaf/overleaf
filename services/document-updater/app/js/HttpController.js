@@ -1,6 +1,7 @@
 const DocumentManager = require('./DocumentManager')
 const HistoryManager = require('./HistoryManager')
 const ProjectManager = require('./ProjectManager')
+const RedisManager = require('./RedisManager')
 const Errors = require('./Errors')
 const logger = require('logger-sharelatex')
 const Settings = require('@overleaf/settings')
@@ -11,6 +12,7 @@ const async = require('async')
 
 module.exports = {
   getDoc,
+  peekDoc,
   getProjectDocsAndFlushIfOld,
   clearProjectState,
   setDoc,
@@ -63,6 +65,22 @@ function getDoc(req, res, next) {
       })
     }
   )
+}
+
+// return the doc from redis if present, but don't load it from mongo
+function peekDoc(req, res, next) {
+  const docId = req.params.doc_id
+  const projectId = req.params.project_id
+  logger.log({ projectId, docId }, 'peeking at doc via http')
+  RedisManager.getDoc(projectId, docId, function (error, lines, version) {
+    if (error) {
+      return next(error)
+    }
+    if (lines == null || version == null) {
+      return next(new Errors.NotFoundError('document not found'))
+    }
+    res.json({ id: docId, lines, version })
+  })
 }
 
 function _getTotalSizeOfLines(lines) {

@@ -14,6 +14,7 @@ describe('HttpController', function () {
         './ProjectManager': (this.ProjectManager = {}),
         './ProjectFlusher': { flushAllProjects() {} },
         './DeleteQueueManager': (this.DeleteQueueManager = {}),
+        './RedisManager': (this.RedisManager = {}),
         './Metrics': (this.Metrics = {}),
         './Errors': Errors,
       },
