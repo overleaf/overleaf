@@ -1,16 +1,3 @@
-/* eslint-disable
-    camelcase,
-    handle-callback-err,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let DocstoreClient
 const request = require('request').defaults({ jar: false })
 const settings = require('@overleaf/settings')
@@ -32,13 +19,10 @@ async function getStringFromPersistor(persistor, bucket, key) {
 }
 
 module.exports = DocstoreClient = {
-  createDoc(project_id, doc_id, lines, version, ranges, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
+  createDoc(projectId, docId, lines, version, ranges, callback) {
     return DocstoreClient.updateDoc(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       lines,
       version,
       ranges,
@@ -46,13 +30,10 @@ module.exports = DocstoreClient = {
     )
   },
 
-  getDoc(project_id, doc_id, qs, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.get(
+  getDoc(projectId, docId, qs, callback) {
+    request.get(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}`,
         json: true,
         qs,
       },
@@ -60,10 +41,10 @@ module.exports = DocstoreClient = {
     )
   },
 
-  peekDoc(project_id, doc_id, qs, callback) {
+  peekDoc(projectId, docId, qs, callback) {
     request.get(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}/peek`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}/peek`,
         json: true,
         qs,
       },
@@ -71,23 +52,20 @@ module.exports = DocstoreClient = {
     )
   },
 
-  isDocDeleted(project_id, doc_id, callback) {
+  isDocDeleted(projectId, docId, callback) {
     request.get(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}/deleted`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}/deleted`,
         json: true,
       },
       callback
     )
   },
 
-  getAllDocs(project_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.get(
+  getAllDocs(projectId, callback) {
+    request.get(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/doc`,
         json: true,
       },
       (req, res, body) => {
@@ -96,10 +74,10 @@ module.exports = DocstoreClient = {
     )
   },
 
-  getAllDeletedDocs(project_id, callback) {
+  getAllDeletedDocs(projectId, callback) {
     request.get(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc-deleted`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/doc-deleted`,
         json: true,
       },
       (error, res, body) => {
@@ -112,26 +90,20 @@ module.exports = DocstoreClient = {
     )
   },
 
-  getAllRanges(project_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.get(
+  getAllRanges(projectId, callback) {
+    request.get(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/ranges`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/ranges`,
         json: true,
       },
       callback
     )
   },
 
-  updateDoc(project_id, doc_id, lines, version, ranges, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
+  updateDoc(projectId, docId, lines, version, ranges, callback) {
     return request.post(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}`,
         json: {
           lines,
           version,
@@ -142,87 +114,78 @@ module.exports = DocstoreClient = {
     )
   },
 
-  deleteDoc(project_id, doc_id, callback) {
+  deleteDoc(projectId, docId, callback) {
     DocstoreClient.deleteDocWithDateAndName(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       new Date(),
       'main.tex',
       callback
     )
   },
 
-  deleteDocWithDate(project_id, doc_id, date, callback) {
+  deleteDocWithDate(projectId, docId, date, callback) {
     DocstoreClient.deleteDocWithDateAndName(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       date,
       'main.tex',
       callback
     )
   },
 
-  deleteDocWithName(project_id, doc_id, name, callback) {
+  deleteDocWithName(projectId, docId, name, callback) {
     DocstoreClient.deleteDocWithDateAndName(
-      project_id,
-      doc_id,
+      projectId,
+      docId,
       new Date(),
       name,
       callback
     )
   },
 
-  deleteDocWithDateAndName(project_id, doc_id, deletedAt, name, callback) {
+  deleteDocWithDateAndName(projectId, docId, deletedAt, name, callback) {
     request.patch(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}`,
         json: { name, deleted: true, deletedAt },
       },
       callback
     )
   },
 
-  archiveAllDoc(project_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.post(
+  archiveAllDoc(projectId, callback) {
+    request.post(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/archive`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/archive`,
       },
       callback
     )
   },
 
-  archiveDocById(project_id, doc_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.post(
+  archiveDocById(projectId, docId, callback) {
+    request.post(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/doc/${doc_id}/archive`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}/archive`,
       },
       callback
     )
   },
 
-  destroyAllDoc(project_id, callback) {
-    if (callback == null) {
-      callback = function (error, res, body) {}
-    }
-    return request.post(
+  destroyAllDoc(projectId, callback) {
+    request.post(
       {
-        url: `http://localhost:${settings.internal.docstore.port}/project/${project_id}/destroy`,
+        url: `http://localhost:${settings.internal.docstore.port}/project/${projectId}/destroy`,
       },
       callback
     )
   },
 
-  getS3Doc(project_id, doc_id, callback) {
+  getS3Doc(projectId, docId, callback) {
     getStringFromPersistor(
       Persistor,
       settings.docstore.bucket,
-      `${project_id}/${doc_id}`
+      `${projectId}/${docId}`
     )
       .then(data => {
         callback(null, JSON.parse(data))
