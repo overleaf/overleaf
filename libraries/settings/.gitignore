@@ -1,2 +1,3 @@
-.npmrc
-Dockerfile
+/.npmrc
+/Dockerfile
+/node_modules
