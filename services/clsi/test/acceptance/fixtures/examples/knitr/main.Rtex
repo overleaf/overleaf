@@ -1,0 +1,13 @@
+\documentclass{article}
+\begin{document}
+
+Hello world $x^2 = 0$.
+
+%% chunk options: cache this chunk
+%% begin.rcode my-cache, cache=TRUE
+% set.seed(123)
+% x = runif(10)
+% sd(x)  # standard deviation
+%% end.rcode
+
+\end{document}

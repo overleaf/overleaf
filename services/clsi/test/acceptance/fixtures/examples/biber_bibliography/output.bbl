@@ -1,0 +1,48 @@
+% $ biblatex auxiliary file $
+% $ biblatex version 1.5 $
+% $ biber version 0.9.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber or bibtex as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \entry{DouglasAdams}{book}{}
+    \name{labelname}{1}{}{%
+      {{}{Adams}{A\bibinitperiod}{Douglas}{D\bibinitperiod}{}{}{}{}}%
+    }
+    \name{author}{1}{}{%
+      {{}{Adams}{A\bibinitperiod}{Douglas}{D\bibinitperiod}{}{}{}{}}%
+    }
+    \list{publisher}{1}{%
+      {San Val}%
+    }
+    \strng{namehash}{AD1}
+    \strng{fullhash}{AD1}
+    \field{sortinit}{A}
+    \field{isbn}{9781417642595}
+    \field{title}{The Hitchhiker's Guide to the Galaxy}
+    \field{year}{1995}
+    \verb{url}
+    \verb http://books.google.com/books?id=W-xMPgAACAAJ
+    \endverb
+  \endentry
+
+  \lossort
+  \endlossort
+
+\endrefsection
+\endinput
+

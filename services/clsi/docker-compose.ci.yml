@@ -1,0 +1,42 @@
+# This file was auto-generated, do not edit it directly.
+# Instead run bin/update_build_scripts from
+# https://github.com/sharelatex/sharelatex-dev-environment
+
+version: "2.3"
+
+services:
+  test_unit:
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    command: npm run test:unit:_run
+    environment:
+      NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+
+
+  test_acceptance:
+    build: .
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    extends:
+      file: docker-compose-config.yml
+      service: ci
+    environment:
+      ELASTIC_SEARCH_DSN: es:9200
+      REDIS_HOST: redis
+      QUEUES_REDIS_HOST: redis
+      MONGO_HOST: mongo
+      POSTGRES_HOST: postgres
+      MOCHA_GREP: ${MOCHA_GREP}
+      NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+      TEXLIVE_IMAGE:
+      ENABLE_PDF_CACHING: "true"
+    command: npm run test:acceptance:_run
+
+
+  tar:
+    build: .
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    volumes:
+      - ./:/tmp/build/
+    command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
+    user: root

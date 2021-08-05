@@ -1,0 +1,26 @@
+\documentclass{article}
+\usepackage{pgfplots}
+\usepackage{nopageno}
+
+\pgfplotsset{compat=newest}
+
+\begin{document}
+
+\begin{tikzpicture}
+  \begin{axis}
+    \addplot +[no markers,
+      raw gnuplot,
+      thick,
+      empty line = jump
+      ] gnuplot {
+      set contour base;
+      set cntrparam levels discrete 0.003;
+      unset surface;
+      set view map;
+      set isosamples 500;
+      splot x**3-3*x+3-y**2;
+    };
+  \end{axis}
+\end{tikzpicture}
+
+\end{document}
