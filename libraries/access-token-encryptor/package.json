@@ -1,0 +1,21 @@
+{
+  "name": "access-token-encryptor-sharelatex",
+  "version": "2.0.0",
+  "description": "",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/**/*.js"
+  },
+  "author": "",
+  "license": "Proprietary",
+  "dependencies": {},
+  "devDependencies": {
+    "bunyan": "~0.22.3",
+    "chai": "^4.3.4",
+    "mocha": "^6.2.2",
+    "nock": "0.15.2",
+    "sandboxed-module": "^2.0.3",
+    "sinon": "^7.5.0"
+  }
+}
