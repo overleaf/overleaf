@@ -1,0 +1,57 @@
+{
+  "name": "document-updater-sharelatex",
+  "version": "0.1.4",
+  "description": "An API for applying incoming updates to documents in real-time",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sharelatex/document-updater-sharelatex.git"
+  },
+  "scripts": {
+    "start": "node $NODE_APP_OPTIONS app.js",
+    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
+    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
+    "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
+    "nodemon": "nodemon --config nodemon.json",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "lint:fix": "eslint --fix ."
+  },
+  "dependencies": {
+    "@overleaf/metrics": "^3.5.1",
+    "@overleaf/o-error": "^3.3.1",
+    "@overleaf/redis-wrapper": "^2.0.1",
+    "@overleaf/settings": "^2.1.1",
+    "async": "^2.5.0",
+    "body-parser": "^1.19.0",
+    "bunyan": "^1.8.15",
+    "diff-match-patch": "https://github.com/overleaf/diff-match-patch/archive/89805f9c671a77a263fc53461acd62aa7498f688.tar.gz",
+    "express": "4.17.1",
+    "lodash": "^4.17.21",
+    "logger-sharelatex": "^2.2.0",
+    "mongodb": "^3.6.6",
+    "request": "^2.88.2",
+    "requestretry": "^4.1.2"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "cluster-key-slot": "^1.0.5",
+    "eslint": "^7.21.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-chai-expect": "^2.2.0",
+    "eslint-plugin-chai-friendly": "^0.6.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-promise": "^4.2.1",
+    "mocha": "^8.3.2",
+    "prettier": "^2.2.1",
+    "sandboxed-module": "^2.0.4",
+    "sinon": "^9.0.2",
+    "timekeeper": "^2.0.0"
+  }
+}
