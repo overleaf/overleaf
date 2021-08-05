@@ -1,0 +1,75 @@
+# This file was auto-generated, do not edit it directly.
+# Instead run bin/update_build_scripts from
+# https://github.com/sharelatex/sharelatex-dev-environment
+
+version: "2.3"
+
+services:
+  test_unit:
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    user: node
+    command: npm run test:unit:_run
+    environment:
+      NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+
+
+  test_acceptance:
+    build: .
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    environment:
+      ELASTIC_SEARCH_DSN: es:9200
+      REDIS_HOST: redis
+      QUEUES_REDIS_HOST: redis
+      MONGO_HOST: mongo
+      POSTGRES_HOST: postgres
+      AWS_S3_ENDPOINT: http://s3:9090
+      AWS_S3_PATH_STYLE: 'true'
+      AWS_ACCESS_KEY_ID: fake
+      AWS_SECRET_ACCESS_KEY: fake
+      GCS_API_ENDPOINT: gcs:9090
+      GCS_API_SCHEME: http
+      GCS_PROJECT_ID: fake
+      STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
+      MOCHA_GREP: ${MOCHA_GREP}
+      NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+      ENABLE_CONVERSIONS: "true"
+      USE_PROM_METRICS: "true"
+      AWS_S3_USER_FILES_BUCKET_NAME: fake_user_files
+      AWS_S3_TEMPLATE_FILES_BUCKET_NAME: fake_template_files
+      AWS_S3_PUBLIC_FILES_BUCKET_NAME: fake_public_files
+      GCS_USER_FILES_BUCKET_NAME: fake_userfiles
+      GCS_TEMPLATE_FILES_BUCKET_NAME: fake_templatefiles
+      GCS_PUBLIC_FILES_BUCKET_NAME: fake_publicfiles
+    depends_on:
+      s3:
+        condition: service_healthy
+      gcs:
+        condition: service_healthy
+    user: node
+    command: npm run test:acceptance:_run
+
+
+  tar:
+    build: .
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    volumes:
+      - ./:/tmp/build/
+    command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
+    user: root
+  s3:
+    image: adobe/s3mock
+    environment:
+      - initialBuckets=fake_user_files,fake_template_files,fake_public_files,bucket
+    healthcheck:
+      test: wget --quiet --output-document=/dev/null http://localhost:9090
+      interval: 1s
+      retries: 20
+  gcs:
+    image: fsouza/fake-gcs-server:v1.21.2
+    command: ["--port=9090", "--scheme=http"]
+    healthcheck:
+      test: wget --quiet --output-document=/dev/null http://localhost:9090/storage/v1/b
+      interval: 1s
+      retries: 20

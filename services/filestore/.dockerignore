@@ -1,0 +1,10 @@
+node_modules/*
+gitrev
+.git
+.gitignore
+.npm
+.nvmrc
+nodemon.json
+uploads/
+user_files/
+template_files/
