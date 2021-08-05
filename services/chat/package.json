@@ -1,0 +1,55 @@
+{
+  "name": "chat-sharelatex",
+  "version": "0.1.4",
+  "description": "The backend API that powers ShareLaTeX chat",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sharelatex/chat-sharelatex.git"
+  },
+  "scripts": {
+    "start": "node $NODE_APP_OPTIONS app.js",
+    "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
+    "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
+    "nodemon": "nodemon --config nodemon.json",
+    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "lint:fix": "eslint --fix ."
+  },
+  "dependencies": {
+    "@overleaf/metrics": "^3.5.1",
+    "@overleaf/settings": "^2.1.1",
+    "async": "3.2.0",
+    "body-parser": "^1.19.0",
+    "bunyan": "^1.8.15",
+    "errorhandler": "^1.5.1",
+    "express": "4.17.1",
+    "logger-sharelatex": "^2.2.0",
+    "mongodb": "^3.6.0",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "acorn": "^7.1.1",
+    "ajv": "^6.12.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^7.21.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-chai-expect": "^2.2.0",
+    "eslint-plugin-chai-friendly": "^0.6.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-promise": "^4.2.1",
+    "mocha": "^8.3.2",
+    "nodemon": "^2.0.2",
+    "prettier": "^2.2.1",
+    "sandboxed-module": "^2.0.3",
+    "sinon": "^9.0.0",
+    "timekeeper": "^2.2.0"
+  }
+}
