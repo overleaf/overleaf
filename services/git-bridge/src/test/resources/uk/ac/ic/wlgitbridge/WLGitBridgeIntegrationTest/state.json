@@ -1,0 +1,198 @@
+[
+	{
+		"project": "1826rqgsdb",
+		"getDoc": {
+			"versionID": 243,
+			"createdAt": "2014-11-30T18:40:58.123Z",
+			"email": "jdleesmiller+1@gmail.com",
+			"name": "John+1"
+		},
+		"getSavedVers": [
+        	{
+        		"versionID": 243,
+        		"comment": "added more info on doc GET and error details",
+        		"email": "jdleesmiller+1@gmail.com",
+        		"name": "John+1",
+        		"createdAt": "2014-11-30T18:47:01.456Z"
+        	},
+        	{
+        		"versionID": 185,
+        		"comment": "with more details on POST request",
+        		"email": "jdleesmiller+1@gmail.com",
+        		"name": "John+1",
+        		"createdAt": "2014-11-11T17:18:40.789Z"
+        	},
+        	{
+        		"versionID": 175,
+        		"comment": "with updated PUT/POST request",
+        		"email": "jdleesmiller+1@gmail.com",
+        		"name": "John+1",
+        		"createdAt": "2014-11-09T23:09:13.123Z"
+        	},
+        	{
+        		"versionID": 146,
+        		"comment": "added PUT format",
+        		"email": "jdleesmiller@gmail.com",
+        		"name": "John Lees-Miller",
+        		"createdAt": "2014-11-07T15:11:35.456Z"
+        	},
+        	{
+        		"versionID": 74,
+        		"comment": "with example output",
+        		"email": "jdleesmiller@gmail.com",
+        		"name": "John Lees-Miller",
+        		"createdAt": "2014-11-05T18:09:41.789Z"
+        	},
+        	{
+        		"versionID": 39,
+        		"comment": "with more files",
+        		"email": "jdleesmiller@gmail.com",
+        		"name": "John Lees-Miller",
+        		"createdAt": "2014-11-05T18:02:19.123Z"
+        	},
+        	{
+        		"versionID": 24,
+        		"comment": "first draft",
+        		"email": "jdleesmiller@gmail.com",
+        		"name": "John Lees-Miller",
+        		"createdAt": "2014-11-05T17:56:58.456Z"
+        	}
+		],
+		"getForVers": [
+			{
+				"versionID": 243,
+				"srcs": [
+                    {
+                    	"content": "\\\\documentclass[a4paper]{article}\\n\\n\\\\usepackage[english]{babel}\\n\\\\usepackage[utf8]{inputenc}\\n\\\\usepackage{graphicx}\\n\\\\usepackage{fullpage}\\n\\\\usepackage{listings}\\n\\\\usepackage{courier}\\n\\\\usepackage{url}\\n\\n\\\\lstset{basicstyle=\\\\ttfamily,breaklines=true}\\n\\n\\\\begin{document}\\n\\\\title{API for the writeLaTeX-Git Bridge}\\n\\\\author{JLM}\\n\\\\date{\\\\today}\\n\\\\maketitle\\n\\n\\\\section{Fetching a Project from WriteLaTeX}\\n\\nThere are three API calls that will likely be of interest. You can run them against this server, \\\\url{radiant-wind-3058.herokuapp.com}, but they're not on the production server yet.\\n\\n\\\\subsection{Get Doc}\\n\\nA ``doc'' is our internal term for a ``project''. This endpoint returns the latest version id, when the latest version was created (ISO8601), and the user that last edited the project (if any, otherwise null).\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb\\n# => {\\n  \\\"latestVerId\\\": 39,\\n  \\\"latestVerAt\\\": \\\"2014-11-30T18:35:27Z\\\",\\n  \\\"latestVerBy\\\": {\\n    \\\"email\\\": \\\"jdleesmiller@gmail.com\\\",\\n    \\\"name\\\": \\\"John Lees-Miller\\\"\\n  }}\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Saved Vers}\\n\\nA ``saved ver'' is a version of a doc, saved by via the versions menu. Note that this query is not currently paginated.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/saved_vers\\n# => [\\n  {\\\"versionId\\\":39,\\n   \\\"comment\\\":\\\"with more files\\\",\\n   \\\"user\\\":{\\n     \\\"email\\\":\\\"jdleesmiller@gmail.com\\\",\\n     \\\"name\\\":\\\"John Lees-Miller\\\"},\\n   \\\"createdAt\\\":\\\"2014-11-05T18:02:19Z\\\"},\\n  {\\\"versionId\\\":24,\\n   \\\"comment\\\":\\\"first draft\\\",\\n   \\\"user\\\":{\\n     \\\"email\\\":\\\"jdleesmiller@gmail.com\\\",\\n     \\\"name\\\":\\\"John Lees-Miller\\\"},\\n   \\\"createdAt\\\":\\\"2014-11-05T17:56:58Z\\\"}]\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Snapshot for Version}\\n\\nA snapshot contains the content of a project in the given version. You can safely request a snapshot of any version that is, or was at any point in the last 24 hours, (1) a saved version, or (2) the current version. (Older versions may or may not have been moved to cold storage.)\\n\\nThe srcs array contains (content, file name) pairs; the atts array contains (URL, file name) pairs.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/snapshots/39\\n# => {\\n  \\\"srcs\\\":[\\n    [\\\"This text is from another file.\\\",\\\"foo/bar/test.tex\\\"],\\n    [\\\"\\\\\\\\documentclass[a4paper]{article}\\\\n...\\\",\\\"main.tex\\\"]],\\n  \\\"atts\\\":[\\n    [\\\"https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png\\\",\\\"min_mean_wait_evm_7_eps_150dpi.png\\\"]]}\\n\\\\end{lstlisting}\\n\\n\\\\section{Pushing a Project to WriteLaTeX}\\n\\n\\\\subsection{Push a Project}\\n\\n\\\\begin{lstlisting}\\n# NB: JLM originally said PUT, but he now thinks POST is better\\n# NB: you must set a Content-Type: application/json header for this request\\n# in order to specify the data as JSON in the request body\\nPOST https://.../api/v0/docs/1826rqgsdb/snapshots\\nData:\\n{\\n  latestVerId: integer,\\n  files: [\\n    {\\n      name: string path (forward slashes, relative to root)\\n      url: string (but only if the file is modified; else no url given)\\n    }, ...\\n  ]\\n  postbackUrl: url to post result back to\\n}\\nResponse on success:\\n{\\n  status: 202,\\n  code: \\\"accepted\\\",\\n  message: \\\"Accepted\\\"\\n}\\nResponse on out of date:\\n{\\n  status: 409, # Conflict\\n  code: \\\"outOfDate\\\",\\n  message: \\\"Out of Date\\\"\\n}\\n\\nPostback Data (METHOD POST):\\nOn success:\\n{\\n  code: \\\"upToDate\\\",\\n  latestVerId: integer\\n}\\nOn out of date:\\n{\\n  code: \\\"outOfDate\\\",\\n  message: \\\"Out of Date\\\"\\n}\\nOn error with the files list (e.g. file extension not allowed):\\n{\\n  code: \\\"invalidFiles\\\",\\n  errors: [ {\\n    file: the file name from the snapshot,\\n    state: \\\"error\\\"|\\\"disallowed\\\"|\\\"unclean_name\\\"\\n  }, ... ]\\n}\\nIf the file's error state is unclean_name, the error object will alsocontain a property cleanFile that contains the name of the file after it has been \\\"cleaned\\\" to meet our file naming requirements; for other file error states, this property is not present.\\nOn error with the project as a whole (e.g. over quota):\\n{\\n  code: \\\"invalidProject\\\",\\n  message: short string message for debugging\\n  errors: [ array of zero or more string messages for the user ]\\n}\\nOn unexpected error (bug):\\n{\\n  code: \\\"error\\\",\\n  message: \\\"Unexpected Error\\\"\\n}\\n\\\\end{lstlisting}\\n\\n\\\\section{Test Data}\\n\\nYou can use this project as one of your test projects. I've added an attachment and a file in a subfolder to make it a bit more interesting.\\n\\n\\\\input{foo/bar/test}\\n\\n\\\\includegraphics[width=\\\\linewidth]{min_mean_wait_evm_7_eps_150dpi}\\n\\n\\\\end{document}",
+                    	"path": "main.tex"
+                    },
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "foo/bar/test.tex"
+                    }
+	            ],
+	            "atts": [
+	            	{
+	            		"url": "https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png",
+	            		"path": "min_mean_wait_evm_7_eps_150dpi.png"
+	            	}
+	            ]
+	        },
+            {
+            	"versionID": 185,
+            	"srcs": [
+                    {
+                    	"content": "\\\\documentclass[a4paper]{article}\\n\\n\\\\usepackage[english]{babel}\\n\\\\usepackage[utf8]{inputenc}\\n\\\\usepackage{graphicx}\\n\\\\usepackage{fullpage}\\n\\\\usepackage{listings}\\n\\\\usepackage{courier}\\n\\\\usepackage{url}\\n\\n\\\\lstset{basicstyle=\\\\ttfamily,breaklines=true}\\n\\n\\\\begin{document}\\n\\\\title{API for the writeLaTeX-Git Bridge}\\n\\\\author{JLM}\\n\\\\date{\\\\today}\\n\\\\maketitle\\n\\n\\\\section{Fetching a Project from WriteLaTeX}\\n\\nThere are three API calls that will likely be of interest. You can run them against this server, \\\\url{radiant-wind-3058.herokuapp.com}, but they're not on the production server yet.\\n\\n\\\\subsection{Get Doc}\\n\\nA ``doc'' is our internal term for a ``project''. At present, this just returns the latest version number.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb\\n# => { latestVerId: 39 }\\nTODO will also include updatedAt time and user (if it was not anonymous)\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Saved Vers}\\n\\nA ``saved ver'' is a version of a doc, saved by via the versions menu. Note that this query is not currently paginated.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/saved_vers\\n# => [\\n  {\\\"versionId\\\":39,\\n   \\\"comment\\\":\\\"with more files\\\",\\n   \\\"user\\\":{\\n     \\\"email\\\":\\\"jdleesmiller@gmail.com\\\",\\n     \\\"name\\\":\\\"John Lees-Miller\\\"},\\n   \\\"createdAt\\\":\\\"2014-11-05T18:02:19Z\\\"},\\n  {\\\"versionId\\\":24,\\n   \\\"comment\\\":\\\"first draft\\\",\\n   \\\"user\\\":{\\n     \\\"email\\\":\\\"jdleesmiller@gmail.com\\\",\\n     \\\"name\\\":\\\"John Lees-Miller\\\"},\\n   \\\"createdAt\\\":\\\"2014-11-05T17:56:58Z\\\"}]\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Snapshot for Version}\\n\\nA snapshot contains the content of a project in the given version. You can safely request a snapshot of any version that is, or was at any point in the last 24 hours, (1) a saved version, or (2) the current version. (Older versions may or may not have been moved to cold storage.)\\n\\nThe srcs array contains (content, file name) pairs; the atts array contains (URL, file name) pairs.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/snapshots/39\\n# => {\\n  \\\"srcs\\\":[\\n    [\\\"This text is from another file.\\\",\\\"foo/bar/test.tex\\\"],\\n    [\\\"\\\\\\\\documentclass[a4paper]{article}\\\\n...\\\",\\\"main.tex\\\"]],\\n  \\\"atts\\\":[\\n    [\\\"https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png\\\",\\\"min_mean_wait_evm_7_eps_150dpi.png\\\"]]}\\n\\\\end{lstlisting}\\n\\n\\\\section{Pushing a Project to WriteLaTeX}\\n\\n\\\\subsection{Push a Project}\\n\\n\\\\begin{lstlisting}\\n# NB: JLM originally said PUT, but he now thinks POST is better\\n# NB: you must set a Content-Type: application/json header for this request\\n# in order to specify the data as JSON in the request body\\nPOST https://.../api/v0/docs/1826rqgsdb/snapshots\\nData:\\n{\\n  latestVerId: integer,\\n  files: [\\n    {\\n      name: string path (forward slashes, relative to root)\\n      url: string (but only if the file is modified; else no url given)\\n    }, ...\\n  ]\\n  postbackUrl: url to post result back to\\n}\\nResponse on success:\\n{\\n  status: 202,\\n  code: \\\"accepted\\\",\\n  message: \\\"Accepted\\\"\\n}\\nResponse on out of date:\\n{\\n  status: 409, # Conflict\\n  code: \\\"outOfDate\\\",\\n  message: \\\"Out of Date\\\"\\n}\\n\\nPostback Data (METHOD POST):\\nOn success:\\n{\\n  code: \\\"upToDate\\\",\\n  latestVerId: integer\\n}\\nOn out of date:\\n{\\n  code: \\\"outOfDate\\\",\\n  message: \\\"Out of Date\\\"\\n}\\nOn error with the files list (e.g. file extension not allowed):\\n{\\n  code: \\\"invalidFiles\\\",\\n  errors: TODO\\n}\\nOn error with the project as a whole (e.g. over quota):\\n{\\n  code: \\\"invalidProject\\\",\\n  errors: TODO\\n}\\nOn unexpected error (bug):\\n{\\n  code: \\\"error\\\",\\n  message: \\\"Unexpected Error\\\"\\n}\\n\\\\end{lstlisting}\\n\\n\\\\section{Test Data}\\n\\nYou can use this project as one of your test projects. I've added an attachment and a file in a subfolder to make it a bit more interesting.\\n\\n\\\\input{foo/bar/test}\\n\\n\\\\includegraphics[width=\\\\linewidth]{min_mean_wait_evm_7_eps_150dpi}\\n\\n\\\\end{document}",
+                    	"path": "main.tex"
+                    },
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "foo/bar/test.tex"
+                    }
+                ],
+                "atts": [
+                	{
+                		"url": "https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png",
+                		"path": "min_mean_wait_evm_7_eps_150dpi.png"
+                	}
+                ]
+            },
+            {
+            	"versionID": 175,
+            	"srcs": [
+                    {
+                    	"content": "\\\\documentclass[a4paper]{article}\\n\\n\\\\usepackage[english]{babel}\\n\\\\usepackage[utf8]{inputenc}\\n\\\\usepackage{graphicx}\\n\\\\usepackage{fullpage}\\n\\\\usepackage{listings}\\n\\\\usepackage{courier}\\n\\\\usepackage{url}\\n\\n\\\\lstset{basicstyle=\\\\ttfamily,breaklines=true}\\n\\n\\\\begin{document}\\n\\\\title{API for the writeLaTeX-Git Bridge}\\n\\\\author{JLM}\\n\\\\date{\\\\today}\\n\\\\maketitle\\n\\n\\\\section{Fetching a Project from WriteLaTeX}\\n\\nThere are three API calls that will likely be of interest. You can run them against this server, \\\\url{radiant-wind-3058.herokuapp.com}, but they're not on the production server yet.\\n\\n\\\\subsection{Get Doc}\\n\\nA ``doc'' is our internal term for a ``project''. At present, this just returns the latest version number.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb\\n# => { latestVerId: 39 }\\nTODO will also include updatedAt time and user (if it was not anonymous)\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Saved Vers}\\n\\nA ``saved ver'' is a version of a doc, saved by via the versions menu. Note that this query is not currently paginated.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/saved_vers\\n# => [\\n  {\\\"versionId\\\":39,\\n   \\\"comment\\\":\\\"with more files\\\",\\n   \\\"user\\\":{\\n     \\\"email\\\":\\\"jdleesmiller@gmail.com\\\",\\n     \\\"name\\\":\\\"John Lees-Miller\\\"},\\n   \\\"createdAt\\\":\\\"2014-11-05T18:02:19Z\\\"},\\n  {\\\"versionId\\\":24,\\n   \\\"comment\\\":\\\"first draft\\\",\\n   \\\"user\\\":{\\n     \\\"email\\\":\\\"jdleesmiller@gmail.com\\\",\\n     \\\"name\\\":\\\"John Lees-Miller\\\"},\\n   \\\"createdAt\\\":\\\"2014-11-05T17:56:58Z\\\"}]\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Snapshot for Version}\\n\\nA snapshot contains the content of a project in the given version. You can safely request a snapshot of any version that is, or was at any point in the last 24 hours, (1) a saved version, or (2) the current version. (Older versions may or may not have been moved to cold storage.)\\n\\nThe srcs array contains (content, file name) pairs; the atts array contains (URL, file name) pairs.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/snapshots/39\\n# => {\\n  \\\"srcs\\\":[\\n    [\\\"This text is from another file.\\\",\\\"foo/bar/test.tex\\\"],\\n    [\\\"\\\\\\\\documentclass[a4paper]{article}\\\\n...\\\",\\\"main.tex\\\"]],\\n  \\\"atts\\\":[\\n    [\\\"https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png\\\",\\\"min_mean_wait_evm_7_eps_150dpi.png\\\"]]}\\n\\\\end{lstlisting}\\n\\n\\\\section{Pushing a Project to WriteLaTeX}\\n\\n\\\\subsection{Push a Project}\\n\\n\\\\begin{lstlisting}\\n# NB: JLM originally said PUT, but he now thinks POST is better\\n# NB: you must set a Content-Type: application/json header for this request\\n# in order to specify the data as JSON in the request body\\nPOST https://.../api/v0/docs/1826rqgsdb/snapshots\\nData:\\n{\\n  latestVerId: integer,\\n  files: [\\n    {\\n      name: string path (forward slashes, relative to root)\\n      url: string (but only if the file is modified; else no url given)\\n    }, ...\\n  ]\\n  postbackUrl: url to post result back to\\n}\\nResponse on success:\\n{\\n  status: 202,\\n  code: \\\"accepted\\\",\\n  message: \\\"Accepted\\\"\\n}\\nResponse on out of date:\\n{\\n  status: 409, # Conflict\\n  code: \\\"outOfDate\\\",\\n  message: \\\"Out of Date\\\"\\n}\\n\\nPostback Data (METHOD POST):\\nOn success:\\n{\\n  code: \\\"upToDate\\\",\\n  latestVerId: integer\\n}\\nOn out of date:\\n{\\n  code: \\\"outOfDate\\\",\\n  message: \\\"Out of Date\\\"\\n}\\nOn error:\\n{\\n  code: \\\"invalidFile\\\",\\n  TODO\\n}\\n\\\\end{lstlisting}\\n\\n\\\\section{Test Data}\\n\\nYou can use this project as one of your test projects. I've added an attachment and a file in a subfolder to make it a bit more interesting.\\n\\n\\\\input{foo/bar/test}\\n\\n\\\\includegraphics[width=\\\\linewidth]{min_mean_wait_evm_7_eps_150dpi}\\n\\n\\\\end{document}",
+                    	"path": "main.tex"
+                   	},
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "foo/bar/test.tex"
+                    }
+                ],
+                "atts": [
+                	{
+	                	"url": "https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png",
+	                	"path": "min_mean_wait_evm_7_eps_150dpi.png"
+                	}
+                ]
+            },
+            {
+            	"versionID": 146,
+            	"srcs": [
+                    {
+                    	"content": "\\\\documentclass[a4paper]{article}\\n\\n\\\\usepackage[english]{babel}\\n\\\\usepackage[utf8]{inputenc}\\n\\\\usepackage{graphicx}\\n\\\\usepackage{fullpage}\\n\\\\usepackage{listings}\\n\\\\usepackage{courier}\\n\\\\usepackage{url}\\n\\n\\\\lstset{basicstyle=\\\\ttfamily,breaklines=true}\\n\\n\\\\begin{document}\\n\\\\title{API for the writeLaTeX-Git Bridge}\\n\\\\author{JLM}\\n\\\\date{\\\\today}\\n\\\\maketitle\\n\\n\\\\section{Fetching a Project from WriteLaTeX}\\n\\nThere are three API calls that will likely be of interest. You can run them against this server, \\\\url{radiant-wind-3058.herokuapp.com}, but they're not on the production server yet.\\n\\n\\\\subsection{Get Doc}\\n\\nA ``doc'' is our internal term for a ``project''. At present, this just returns the latest version number.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb\\n# => { latestVerId: 39 }\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Saved Vers}\\n\\nA ``saved ver'' is a version of a doc, saved by via the versions menu. Note that this query is not currently paginated.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/saved_vers\\n# => [\\n  {\\\"versionId\\\":39,\\n   \\\"comment\\\":\\\"with more files\\\",\\n   \\\"user\\\":{\\n     \\\"email\\\":\\\"jdleesmiller@gmail.com\\\",\\n     \\\"name\\\":\\\"John Lees-Miller\\\"},\\n   \\\"createdAt\\\":\\\"2014-11-05T18:02:19Z\\\"},\\n  {\\\"versionId\\\":24,\\n   \\\"comment\\\":\\\"first draft\\\",\\n   \\\"user\\\":{\\n     \\\"email\\\":\\\"jdleesmiller@gmail.com\\\",\\n     \\\"name\\\":\\\"John Lees-Miller\\\"},\\n   \\\"createdAt\\\":\\\"2014-11-05T17:56:58Z\\\"}]\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Snapshot for Version}\\n\\nA snapshot contains the content of a project in the given version. You can safely request a snapshot of any version that is, or was at any point in the last 24 hours, (1) a saved version, or (2) the current version. (Older versions may or may not have been moved to cold storage.)\\n\\nThe srcs array contains (content, file name) pairs; the atts array contains (URL, file name) pairs.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/snapshots/39\\n# => {\\n  \\\"srcs\\\":[\\n    [\\\"This text is from another file.\\\",\\\"foo/bar/test.tex\\\"],\\n    [\\\"\\\\\\\\documentclass[a4paper]{article}\\\\n...\\\",\\\"main.tex\\\"]],\\n  \\\"atts\\\":[\\n    [\\\"https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png\\\",\\\"min_mean_wait_evm_7_eps_150dpi.png\\\"]]}\\n\\\\end{lstlisting}\\n\\n\\\\section{Pushing a Project to WriteLaTeX}\\n\\n\\\\subsection{Push a Project}\\n\\n\\\\begin{lstlisting}\\nPUT https://.../api/v0/docs/1826rqgsdb/snapshots\\nData:\\n{\\n  latestVerId: integer,\\n  files: [\\n    {\\n      name: string path (forward slashes, relative to root)\\n      url: string (but only if the file is modified; else no url given)\\n    }, ...\\n  ]\\n  postbackUrl: url to post result back to\\n}\\nResponse on success:\\n{\\n  status: 20x,\\n}\\nResponse on out of date:\\n{\\n  status: 40x,\\n  code: \\\"outOfDate\\\",\\n  message: \\\"Out of Date\\\"\\n}\\n\\nPostback Data (METHOD POST):\\nOn success:\\n{\\n  code: \\\"upToDate\\\",\\n  latestVerId: integer\\n}\\nOn out of date:\\n{\\n  code: \\\"outOfDate\\\",\\n  message: \\\"Out of Date\\\"\\n}\\nOn error:\\n{\\n  code: \\\"invalidFile\\\",\\n  TODO\\n}\\n\\\\end{lstlisting}\\n\\n\\\\section{Test Data}\\n\\nYou can use this project as one of your test projects. I've added an attachment and a file in a subfolder to make it a bit more interesting.\\n\\n\\\\input{foo/bar/test}\\n\\n\\\\includegraphics[width=\\\\linewidth]{min_mean_wait_evm_7_eps_150dpi}\\n\\n\\\\end{document}",
+                    	"path": "main.tex"
+                   	},
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "foo/bar/test.tex"
+                    }
+                ],
+                "atts": [
+                	{
+	                	"url": "https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png",
+	                	"path": "min_mean_wait_evm_7_eps_150dpi.png"
+	                }
+                ]
+            },
+            {
+            	"versionID": 74,
+            	"srcs": [
+                    {
+                    	"content": "\\\\documentclass[a4paper]{article}\\n\\n\\\\usepackage[english]{babel}\\n\\\\usepackage[utf8]{inputenc}\\n\\\\usepackage{graphicx}\\n\\\\usepackage{fullpage}\\n\\\\usepackage{listings}\\n\\\\usepackage{courier}\\n\\\\usepackage{url}\\n\\n\\\\lstset{basicstyle=\\\\ttfamily,breaklines=true}\\n\\n\\\\begin{document}\\n\\\\title{API for the writeLaTeX-Git Bridge}\\n\\\\author{JLM}\\n\\\\date{\\\\today}\\n\\\\maketitle\\n\\n\\\\section{Fetching a Project from WriteLaTeX}\\n\\nThere are three API calls that will likely be of interest. You can run them against this server, \\\\url{radiant-wind-3058.herokuapp.com}, but they're not on the production server yet.\\n\\n\\\\subsection{Get Doc}\\n\\nA ``doc'' is our internal term for a ``project''. At present, this just returns the latest version number.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb\\n# => { latestVerId: 39 }\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Saved Vers}\\n\\nA ``saved ver'' is a version of a doc, saved by via the versions menu. Note that this query is not currently paginated.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/saved_vers\\n# => [\\n  {\\\"versionId\\\":39,\\n   \\\"comment\\\":\\\"with more files\\\",\\n   \\\"user\\\":{\\n     \\\"email\\\":\\\"jdleesmiller@gmail.com\\\",\\n     \\\"name\\\":\\\"John Lees-Miller\\\"},\\n   \\\"createdAt\\\":\\\"2014-11-05T18:02:19Z\\\"},\\n  {\\\"versionId\\\":24,\\n   \\\"comment\\\":\\\"first draft\\\",\\n   \\\"user\\\":{\\n     \\\"email\\\":\\\"jdleesmiller@gmail.com\\\",\\n     \\\"name\\\":\\\"John Lees-Miller\\\"},\\n   \\\"createdAt\\\":\\\"2014-11-05T17:56:58Z\\\"}]\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Snapshot for Version}\\n\\nA snapshot contains the content of a project in the given version. You can safely request a snapshot of any version that is, or was at any point in the last 24 hours, (1) a saved version, or (2) the current version. (Older versions may or may not have been moved to cold storage.)\\n\\nThe srcs array contains (content, file name) pairs; the atts array contains (URL, file name) pairs.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/snapshots/39\\n# => {\\n  \\\"srcs\\\":[\\n    [\\\"This text is from another file.\\\",\\\"foo/bar/test.tex\\\"],\\n    [\\\"\\\\\\\\documentclass[a4paper]{article}\\\\n...\\\",\\\"main.tex\\\"]],\\n  \\\"atts\\\":[\\n    [\\\"https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png\\\",\\\"min_mean_wait_evm_7_eps_150dpi.png\\\"]]}\\n\\\\end{lstlisting}\\n\\n\\\\section{Pushing a Project to WriteLaTeX}\\n\\nTODO still working on this part\\n\\n\\\\section{Test Data}\\n\\nYou can use this project as a test project. I've added an attachment and a file in a subfolder to make it a bit more interesting.\\n\\n\\\\input{foo/bar/test}\\n\\n\\\\includegraphics[width=\\\\linewidth]{min_mean_wait_evm_7_eps_150dpi}\\n\\n\\\\end{document}",
+                    	"path": "main.tex"
+                   	},
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "foo/bar/test.tex"
+                    }
+                ],
+                "atts": [
+                	{
+                		"url": "https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png",
+                		"path": "min_mean_wait_evm_7_eps_150dpi.png"
+                	}
+                ]
+            },
+            {
+            	"versionID": 39,
+            	"srcs": [
+                    {
+                    	"content": "\\\\documentclass[a4paper]{article}\\n\\n\\\\usepackage[english]{babel}\\n\\\\usepackage[utf8]{inputenc}\\n\\\\usepackage{graphicx}\\n\\\\usepackage{fullpage}\\n\\\\usepackage{listings}\\n\\\\usepackage{courier}\\n\\\\usepackage{url}\\n\\n\\\\lstset{basicstyle=\\\\ttfamily,breaklines=true}\\n\\n\\\\begin{document}\\n\\\\title{API for the writeLaTeX-Git Bridge}\\n\\\\author{JLM}\\n\\\\date{\\\\today}\\n\\\\maketitle\\n\\n\\\\section{Fetching a Project from WriteLaTeX}\\n\\nThere are three API calls that will likely be of interest. You can run them against this server, \\\\url{radiant-wind-3058.herokuapp.com}, but they're not on the production server yet.\\n\\n\\\\subsection{Get Doc}\\n\\nA ``doc'' is our internal term for a ``project''. At present, this just returns the latest version number.\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Saved Vers}\\n\\nA ``saved ver'' is a version of a doc, saved by via the versions menu. To list saved versions for a doc:\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/saved_vers\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Snapshot for Version}\\n\\nA snapshot contains the content of a project in the given version. You can safely request a snapshot of any version that is, or was at any point in the last 24 hours, (1) a saved version, or (2) the current version. (Older versions may or may not have been moved to cold storage.)\\n\\n\\\\begin{lstlisting}\\nGET https://.../api/v0/docs/1826rqgsdb/snapshots/1\\n\\\\end{lstlisting}\\n\\n\\\\section{Pushing a Project to WriteLaTeX}\\n\\nTODO still working on this part\\n\\n\\\\section{Test Data}\\n\\nYou can use this project as a test project. I've added an attachment and a file in a subfolder to make it a bit more interesting.\\n\\n\\\\input{foo/bar/test}\\n\\n\\\\includegraphics[width=\\\\linewidth]{min_mean_wait_evm_7_eps_150dpi}\\n\\n\\\\end{document}",
+                    	"path": "main.tex"
+                    },
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "foo/bar/test.tex"
+                    }
+                ],
+                "atts": [
+                	{
+                		"url": "https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png",
+                		"path": "min_mean_wait_evm_7_eps_150dpi.png"
+                	}
+                ]
+            },
+            {
+            	"versionID": 24,
+            	"srcs": [
+                    {
+                    	"content": "\\\\documentclass[a4paper]{article}\\n\\n\\\\usepackage[english]{babel}\\n\\\\usepackage[utf8]{inputenc}\\n\\\\usepackage{graphicx}\\n\\\\usepackage{fullpage}\\n\\\\usepackage{listings}\\n\\\\usepackage{courier}\\n\\\\usepackage{url}\\n\\n\\\\lstset{basicstyle=\\\\ttfamily,breaklines=true}\\n\\n\\\\begin{document}\\n\\\\title{API for the writeLaTeX-Git Bridge}\\n\\\\author{JLM}\\n\\\\date{\\\\today}\\n\\\\maketitle\\n\\n\\\\section{Fetching a Project from WriteLaTeX}\\n\\nThere are three API calls that will likely be of interest. You can run them against this server (radiant-wind-3058.herokuapp.com).\\n\\n\\\\subsection{Get Doc}\\n\\nA ``doc'' is our internal term for a ``project''. At present, this just returns the latest version number.\\n\\n\\\\begin{lstlisting}\\nGET https://radiant-wind.....com/api/v0/docs/1826rqgsdb\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Saved Vers}\\n\\nA ``saved ver'' is a version of a doc, saved by via the versions menu. To list saved versions for a doc:\\n\\n\\\\begin{lstlisting}\\nGET https://radiant-wind.....com/api/v0/docs/1826rqgsdb/saved_vers\\n\\\\end{lstlisting}\\n\\n\\\\subsection{Get Snapshot for Version}\\n\\nA snapshot contains the content of a project in the given version. You can safely request a snapshot of any version that is, or was at any point in the last 24 hours, (1) a saved version, or (2) the current version. (Older versions may or may not have been moved to cold storage.)\\n\\n\\\\begin{lstlisting}\\nGET https://radiant-wind.....com/api/v0/docs/1826rqgsdb/snapshots/1\\n\\\\end{lstlisting}\\n\\n\\\\section{Pushing a Project to WriteLaTeX}\\n\\nTODO still working on this part\\n\\n\\\\section{Test Data}\\n\\nYou can use this project as a test project. Here is an extra file to make it a bit more interesting.\\n\\n\\\\includegraphics[width=\\\\linewidth]{min_mean_wait_evm_7_eps_150dpi}\\n\\n\\\\end{document}",
+                    	"path": "main.tex"
+                    }
+                ],
+                "atts": [
+                	{
+                		"url": "https://writelatex-staging.s3.amazonaws.com/filepicker/1ENnu6zJSGyslI3DuNZD_min_mean_wait_evm_7.eps.150dpi.png",
+                		"path": "min_mean_wait_evm_7_eps_150dpi.png"
+                	}
+                ]
+            }
+		],
+		"push": "success",
+		"postback": {
+			"type": "success",
+			"versionID": 244
+		}
+	}
+]

@@ -1,0 +1,28 @@
+{
+    "port": 8000,
+    "bindIp": "0.0.0.0",
+    "idleTimeout": 30000,
+    "rootGitDirectory": "/tmp/wlgb",
+    "apiBaseUrl": "http://v2.overleaf.test:4000/api/v0",
+    "postbackBaseUrl": "http://git-bridge:8000",
+    "serviceName": "Overleaf",
+    "oauth2": {
+        "oauth2ClientID": "264c723c925c13590880751f861f13084934030c13b4452901e73bdfab226edc",
+        "oauth2ClientSecret": "e6b2e9eee7ae2bb653823250bb69594a91db0547fe3790a7135acb497108e62d",
+        "oauth2Server": "http://v2.overleaf.test:4000"
+    },
+    "repoStore": {
+        "maxFileNum": 2000,
+        "maxFileSize": 52428800
+    },
+    "swapStore": {
+        "type": "noop"
+    },
+    "swapJob": {
+        "minProjects": 50,
+        "lowGiB": 128,
+        "highGiB": 256,
+        "intervalMillis": 3600000,
+        "compressionMethod": "gzip"
+    }
+}

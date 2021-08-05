@@ -1,0 +1,173 @@
+[
+	{
+		"project": "protected",
+		"getDoc": {
+            "error": 403,
+            "versionID": 1,
+            "createdAt": "2014-11-30T18:40:58.123Z",
+            "email": "jdleesmiller+1@gmail.com",
+            "name": "John+1"
+		},
+		"getSavedVers": [
+        	{
+        		"versionID": 1,
+        		"comment": "added more info on doc GET and error details",
+        		"email": "jdleesmiller+1@gmail.com",
+        		"name": "John+1",
+        		"createdAt": "2014-11-30T18:47:01.456Z"
+        	}
+		],
+		"getForVers": [
+			{
+				"versionID": 1,
+				"srcs": [
+                    {
+                    	"content": "contentchanged\n",
+                    	"path": "main.tex"
+                    },
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "foo/bar/test.tex"
+                    }
+	            ],
+	            "atts": []
+	        }
+		],
+		"push": "success",
+		"postback": {
+			"type": "outOfDate"
+		}
+	},
+	{
+		"project": "invalidFiles",
+		"getDoc": {
+			"versionID": 1,
+			"createdAt": "2014-11-30T18:40:58.123Z",
+			"email": "jdleesmiller+1@gmail.com",
+			"name": "John+1"
+		},
+		"getSavedVers": [
+        	{
+        		"versionID": 1,
+        		"comment": "added more info on doc GET and error details",
+        		"email": "jdleesmiller+1@gmail.com",
+        		"name": "John+1",
+        		"createdAt": "2014-11-30T18:47:01.456Z"
+        	}
+		],
+		"getForVers": [
+			{
+				"versionID": 1,
+				"srcs": [
+                    {
+                    	"content": "changedñcontent\n",
+                    	"path": "main.tex"
+                    },
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "foo/bar/test.tex"
+                    }
+	            ],
+	            "atts": []
+	        }
+		],
+		"push": "success",
+		"postback": {
+			"type": "invalidFiles",
+			"errors": [
+				{
+					"file": "file.invalid",
+					"state": "error"
+				},
+				{
+					"file": "virus.exe",
+					"state": "disallowed"
+				},
+				{
+					"file": "my image.jpg",
+					"state": "unclean_name",
+					"cleanFile": "my_image.jpg"
+				}
+			]
+		}
+	},
+	{
+		"project": "invalidProject",
+		"getDoc": {
+			"versionID": 1,
+			"createdAt": "2014-11-30T18:40:58.123Z",
+			"email": "jdleesmiller+1@gmail.com",
+			"name": "John+1"
+		},
+		"getSavedVers": [
+        	{
+        		"versionID": 1,
+        		"comment": "added more info on doc GET and error details",
+        		"email": "jdleesmiller+1@gmail.com",
+        		"name": "John+1",
+        		"createdAt": "2014-11-30T18:47:01Z"
+        	}
+		],
+		"getForVers": [
+			{
+				"versionID": 1,
+				"srcs": [
+                    {
+                    	"content": "content\n",
+                    	"path": "main.tex"
+                    },
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "foo/bar/test.tex"
+                    }
+	            ],
+	            "atts": []
+	        }
+		],
+		"push": "success",
+		"postback": {
+			"type": "invalidProject",
+			"errors": [
+				"No main.tex file exists."
+			]
+		}
+	},
+	{
+		"project": "error",
+		"getDoc": {
+			"versionID": 1,
+			"createdAt": "2014-11-30T18:40:58.123Z",
+			"email": "jdleesmiller+1@gmail.com",
+			"name": "John+1"
+		},
+		"getSavedVers": [
+        	{
+        		"versionID": 1,
+        		"comment": "added more info on doc GET and error details",
+        		"email": "jdleesmiller+1@gmail.com",
+        		"name": "John+1",
+        		"createdAt": "2014-11-30T18:47:01.456Z"
+        	}
+		],
+		"getForVers": [
+			{
+				"versionID": 1,
+				"srcs": [
+                    {
+                    	"content": "content\n",
+                    	"path": "main.tex"
+                    },
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "foo/bar/test.tex"
+                    }
+	            ],
+	            "atts": []
+	        }
+		],
+		"push": "success",
+		"postback": {
+			"type": "error"
+		}
+	}
+]

@@ -1,0 +1,32 @@
+<configuration>
+    <!-- Log everything (subject to logger and root levels set below) to stdout. -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{0}: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Log warnings and errors to stderr. We send them to a log aggregation service for monitoring. -->
+    <appender name="stderr" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{0}: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Set log levels for the application (or parts of the application). -->
+    <logger name="uk.ac.ic.wlgitbridge" level="INFO" />
+
+    <!-- The root log level determines how much our dependencies put in the logs. -->
+    <root level="WARN">
+        <appender-ref ref="stdout" />
+        <appender-ref ref="stderr" />
+    </root>
+</configuration>

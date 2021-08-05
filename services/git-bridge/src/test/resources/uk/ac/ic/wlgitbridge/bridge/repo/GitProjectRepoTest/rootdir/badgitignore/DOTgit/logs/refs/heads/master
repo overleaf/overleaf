@@ -1,0 +1,3 @@
+0000000000000000000000000000000000000000 4a64431a59519ff25eff2cd94a561081146059b7 Winston Li <git@winston.li> 1475933347 +0100	commit (initial): Initial commit
+4a64431a59519ff25eff2cd94a561081146059b7 71ebe5d70c8634f7531cc09c1cad5dae951a9052 Winston Li <git@winston.li> 1475933399 +0100	commit: Add ignored file
+71ebe5d70c8634f7531cc09c1cad5dae951a9052 fe5adb3985be3ef5e790eaf9b1b41f862d64dfc1 Winston Li <git@winston.li> 1475938853 +0100	commit: Commit bad gitignore
