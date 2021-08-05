@@ -1,0 +1,8 @@
+track-changes
+--dependencies=mongo,redis,s3
+--docker-repos=gcr.io/overleaf-ops
+--env-add=AWS_BUCKET=bucket
+--env-pass-through=
+--node-version=12.22.3
+--public-repo=True
+--script-version=3.11.0

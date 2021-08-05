@@ -1,0 +1,7 @@
+**.swp
+node_modules/
+forever/
+*.js.map
+
+# managed by dev-environment$ bin/update_build_scripts
+.npmrc
