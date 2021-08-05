@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -e
+
+TEMPLATES_EXTENDING_META_BLOCK=$(\
+  grep \
+    --files-with-matches \
+    --recursive app/views modules/*/app/views \
+    --regex 'block append meta' \
+    --regex 'block prepend meta' \
+    --regex 'append meta' \
+    --regex 'prepend meta' \
+)
+
+for file in ${TEMPLATES_EXTENDING_META_BLOCK}; do
+    if ! grep "$file" --quiet --extended-regexp -e 'extends .+layout'; then
+      cat <<MSG >&2
+
+ERROR: $file is a partial template and extends 'block meta'.
+
+Using block append/prepend in a partial will duplicate the block contents into
+ the <body> due to a bug in pug.
+Putting meta tags in the <body> can lead to Angular XSS.
+
+You will need to refactor the partial and move the block into the top level
+ page template that extends the global layout.pug.
+
+MSG
+      exit 1
+    fi
+done

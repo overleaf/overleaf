@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "main" ]]; then
+  rm -rf sentry_upload
+  mkdir sentry_upload
+  tar --directory sentry_upload -xf build.tar
+  cd sentry_upload/public
+
+  SENTRY_RELEASE=${COMMIT_SHA}
+  OPTS="--no-rewrite --url-prefix ~"
+  sentry-cli releases new "$SENTRY_RELEASE"
+  sentry-cli releases files "$SENTRY_RELEASE" upload-sourcemaps ${OPTS} .
+  sentry-cli releases set-commits --auto --ignore-missing "$SENTRY_RELEASE"
+  sentry-cli releases finalize "$SENTRY_RELEASE"
+
+  rm -rf sentry_upload
+fi

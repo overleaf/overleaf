@@ -1,0 +1,430 @@
+div.full-size.pdf(ng-controller="PdfController")
+	if showNewLogsUI
+		preview-pane(
+			compiler-state=`{
+				autoCompileHasChanges: changesToAutoCompile,
+				autoCompileHasLintingError: autoCompileLintingError,
+				isAutoCompileOn: autocompile_enabled,
+				isClearingCache: pdf.clearingCache,
+				isCompiling: pdf.compiling,
+				isDraftModeOn: draft,
+				isSyntaxCheckOn: stop_on_validation_error,
+				lastCompileTimestamp: pdf.lastCompileTimestamp,
+				logEntries: pdf.logEntries,
+				validationIssues: pdf.validation,
+				rawLog: pdf.rawLog,
+				compileFailed: pdf.compileFailed,
+				errors: {
+					error: pdf.error,
+					renderingError: pdf.renderingError,
+					clsiMaintenance: pdf.clsiMaintenance,
+					clsiUnavailable: pdf.clsiUnavailable,
+					tooRecentlyCompiled: pdf.tooRecentlyCompiled,
+					compileTerminated: pdf.compileTerminated,
+					rateLimited: pdf.rateLimited,
+					compileInProgress: pdf.compileInProgress,
+					timedout: pdf.timedout,
+					projectTooLarge: pdf.projectTooLarge,
+					autoCompileDisabled: pdf.autoCompileDisabled,
+					failure: pdf.failure
+				}
+			}`
+			on-clear-cache="clearCache"
+			on-recompile="recompile"
+			on-recompile-from-scratch="recompileFromScratch"
+			on-run-syntax-check-now="runSyntaxCheckNow"
+			on-set-auto-compile="setAutoCompile"
+			on-set-draft-mode="setDraftMode"
+			on-set-syntax-check="setSyntaxCheck"
+			on-toggle-logs="toggleLogs"
+			output-files="pdf.outputFiles"
+			pdf-download-url="pdf.downloadUrl"
+			split-layout="ui.pdfLayout === 'sideBySide'"
+			on-set-split-layout="setPdfSplitLayout"
+			on-set-full-layout="setPdfFullLayout"
+			on-stop-compilation="stop"
+			variant-with-first-error-popup="logsUISubvariant === 'new-logs-ui-with-popup'"
+			show-logs="shouldShowLogs"
+			on-log-entry-location-click="openInEditor"
+		)
+	else
+		.toolbar.toolbar-pdf(ng-class="{ 'changes-to-autocompile': changesToAutoCompile && !autoCompileLintingError }")
+			.btn-group.btn-recompile-group#recompile(
+				dropdown,
+				tooltip-html="'"+translate('recompile_pdf')+" <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
+				tooltip-class="keyboard-tooltip"
+				tooltip-popup-delay="500"
+				tooltip-append-to-body="true"
+				tooltip-placement="bottom"
+			)
+				a.btn.btn-recompile(
+					href,
+					ng-disabled="pdf.compiling",
+					ng-click="recompile()"
+				)
+					i.fa.fa-refresh(
+						ng-class="{'fa-spin': pdf.compiling }"
+					)
+					span.btn-recompile-label(ng-show="!pdf.compiling") #{translate("recompile")}
+					span.btn-recompile-label(ng-show="pdf.compiling") #{translate("compiling")}…
+					
+				a.btn.btn-recompile.dropdown-toggle(
+					href,
+					ng-disabled="pdf.compiling",
+					dropdown-toggle
+				)
+					span.caret
+				ul.dropdown-menu.dropdown-menu-left
+					li.dropdown-header #{translate("auto_compile")}
+					li
+						a(href, ng-click="autocompile_enabled = true")
+							i.fa.fa-fw(ng-class="{'fa-check': autocompile_enabled}")
+							| &nbsp;#{translate('on')}
+					li
+						a(href, ng-click="autocompile_enabled = false")
+							i.fa.fa-fw(ng-class="{'fa-check': !autocompile_enabled}")
+							| &nbsp;#{translate('off')}
+					li.dropdown-header #{translate("compile_mode")}
+					li
+						a(href, ng-click="draft = false")
+							i.fa.fa-fw(ng-class="{'fa-check': !draft}")
+							| &nbsp;#{translate("normal")}
+					li
+						a(href, ng-click="draft = true")
+							i.fa.fa-fw(ng-class="{'fa-check': draft}")
+							| &nbsp;#{translate("fast")}&nbsp;
+							span.subdued [draft]
+					li.dropdown-header #{translate("compile_time_checks")}
+					li
+						a(href, ng-click="stop_on_validation_error = true")
+							i.fa.fa-fw(ng-class="{'fa-check': stop_on_validation_error}")
+							| &nbsp;#{translate("stop_on_validation_error")}
+					li
+						a(href, ng-click="stop_on_validation_error = false")
+							i.fa.fa-fw(ng-class="{'fa-check': !stop_on_validation_error}")
+							| &nbsp;#{translate("ignore_validation_errors")}
+					li
+						a(href, ng-click="recompile({check:true})")
+							i.fa.fa-fw()
+							| &nbsp;#{translate("run_syntax_check_now")}
+			a(
+				href
+				ng-click="stop()"
+				ng-show="pdf.compiling",
+				tooltip=translate('stop_compile')
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-stop()
+			a.log-btn(
+				href
+				ng-click="toggleLogs()"
+				ng-class="{ 'active': shouldShowLogs == true }"
+				tooltip=translate('logs_and_output_files')
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-file-text-o
+				span.label(
+					ng-show="pdf.logEntries.warnings.length + pdf.logEntries.errors.length > 0"
+					ng-class="{\
+						'label-warning': pdf.logEntries.errors.length == 0,\
+						'label-danger': pdf.logEntries.errors.length > 0\
+					}"
+				) {{ pdf.logEntries.errors.length + pdf.logEntries.warnings.length }}
+				
+			a(
+				ng-if="!pdf.downloadUrl"
+				disabled
+				href="#"
+				tooltip=translate('please_compile_pdf_before_download')
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-download
+			a(
+				ng-href="{{pdf.downloadUrl || pdf.url}}"
+				target="_blank"
+				ng-if="pdf.url"
+				tooltip=translate('download_pdf')
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-fw.fa-download
+				
+			.toolbar-right
+				span.auto-compile-status.small(
+					ng-show="changesToAutoCompile && !compiling && !autoCompileLintingError"
+				) #{translate('uncompiled_changes')}
+				span.auto-compile-status.auto-compile-error.small(
+					ng-show="autoCompileLintingError"
+					tooltip-placement="bottom"
+					tooltip=translate("code_check_failed_explanation")
+					tooltip-append-to-body="true"
+				)
+					i.fa.fa-fw.fa-exclamation-triangle
+					|
+					| #{translate("code_check_failed")}
+				a(
+					href,
+					ng-click="switchToFlatLayout('pdf')"
+					ng-show="ui.pdfLayout == 'sideBySide'"
+					tooltip=translate('full_screen')
+					tooltip-placement="bottom"
+					tooltip-append-to-body="true"
+				)
+					i.fa.fa-expand
+				a(
+					href,
+					ng-click="switchToSideBySideLayout('editor')"
+					ng-show="ui.pdfLayout == 'flat'"
+					tooltip=translate('split_screen')
+					tooltip-placement="bottom"
+					tooltip-append-to-body="true"
+				)
+					i.fa.fa-compress
+		// end of toolbar
+
+		// logs view
+		.pdf-logs(ng-show="shouldShowLogs")
+			.alert.alert-success(ng-show="pdf.logEntries.all.length == 0 && !pdf.failure")
+				| #{translate("no_errors_good_job")}
+
+			.alert.alert-danger(ng-show="pdf.failure")
+				strong #{translate("compile_error")}. 
+				span #{translate("generic_failed_compile_message")}.
+
+			.alert.alert-danger(ng-show="pdf.failedCheck")
+				strong #{translate("failed_compile_check")}.
+				p
+				p.text-center(ng-show="!check")
+					a.text-info(
+						href,
+						ng-disabled="pdf.compiling",
+						ng-click="recompile({try:true})"
+					) #{translate("failed_compile_check_try")}
+					| &#32;#{translate("failed_compile_option_or")}&#32;
+					a.text-info(
+						href,
+						ng-disabled="pdf.compiling",
+						ng-click="recompile({force:true})"
+					) #{translate("failed_compile_check_ignore")}
+					| .
+
+			div(ng-repeat="entry in pdf.logEntries.all")
+				.alert(
+					ng-class="{\
+						'alert-danger':  entry.level == 'error',\
+						'alert-warning': entry.level == 'warning',\
+						'alert-info':    entry.level == 'typesetting'\
+					}"
+					ng-click="openInEditor(entry)"
+				)
+					span.line-no
+						i.fa.fa-link(aria-hidden="true")
+						| &nbsp;
+						span(ng-show="entry.file") {{ entry.file }}
+						span(ng-show="entry.line") , line {{ entry.line }}
+					p.entry-message(ng-show="entry.message")
+						| {{ entry.type }} {{ entry.message }}
+					.card.card-hint(
+						ng-if="entry.humanReadableHint"
+						stop-propagation="click"
+					)
+						figure.card-hint-icon-container
+							i.fa.fa-lightbulb-o(aria-hidden="true")
+						p.card-hint-text(
+							ng-show="entry.humanReadableHint",
+							ng-bind-html="entry.humanReadableHint")
+						.card-hint-footer.clearfix
+							.card-hint-ext-link(ng-if="entry.extraInfoURL")
+								a(
+									ng-href="{{ entry.extraInfoURL }}",
+									ng-click="trackLogHintsLearnMore()"
+									target="_blank"
+								)
+									i.fa.fa-external-link
+									|&nbsp;#{translate("log_hint_extra_info")}
+
+					p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
+
+			div
+				.files-dropdown-container
+					a.btn.btn-default.btn-sm(
+						href,
+						tooltip=translate('clear_cached_files'),
+						tooltip-placement="top",
+						tooltip-append-to-body="true",
+						ng-click="openClearCacheModal()"
+					)
+						i.fa.fa-trash-o
+					| &nbsp;
+					div.files-dropdown(
+						ng-class="shouldDropUp ? 'dropup' : 'dropdown'"
+						dropdown
+					)
+						a.btn.btn-default.btn-sm(
+							href
+							dropdown-toggle
+						)
+							| #{translate("other_logs_and_files")}
+							span.caret
+						ul.dropdown-menu.dropdown-menu-right
+							li(ng-repeat="file in pdf.outputFiles")
+								a(
+									ng-href="{{file.url}}"
+									target="_blank"
+								) {{ file.name }}
+				a.btn.btn-info.btn-sm(href, ng-click="toggleRawLog()")
+					span(ng-show="!pdf.showRawLog") #{translate("view_raw_logs")}
+					span(ng-show="pdf.showRawLog") #{translate("hide_raw_logs")}
+
+			pre(ng-bind="pdf.rawLog", ng-show="pdf.showRawLog")
+	
+	
+	// non-log views (pdf and errors)
+	div(ng-show="!shouldShowLogs", ng-switch on="pdf.view")
+		.pdf-uncompiled(ng-switch-when="uncompiled" ng-show="!pdf.compiling")
+			| &nbsp;
+			i.fa.fa-level-up.fa-flip-horizontal.fa-2x
+			| &nbsp;&nbsp;#{translate('click_here_to_preview_pdf')}
+		
+		.pdf-viewer(ng-switch-when="pdf")
+			div(
+				pdfng
+				ng-if="settings.pdfViewer == 'pdfjs'"
+				pdf-src="pdf.url"
+				key="{{ project_id }}"
+				resize-on="layout:main:resize,layout:pdf:resize"
+				highlights="pdf.highlights"
+				position="pdf.position"
+				first-render-done="pdf.firstRenderDone"
+				update-consumed-bandwidth="pdf.updateConsumedBandwidth"
+				dbl-click-callback="syncToCode"
+			)
+			iframe(
+				ng-src="{{ pdf.url | trusted }}"
+				ng-if="settings.pdfViewer == 'native'"
+			)
+
+		if !showNewLogsUI
+			.pdf-validation-problems(ng-switch-when="validation-problems")
+
+				.alert.alert-danger(ng-show="pdf.validation.sizeCheck")
+					strong #{translate("project_too_large")} 
+					div #{translate("project_too_large_please_reduce")}
+					div
+						li(ng-repeat="entry in pdf.validation.sizeCheck.resources") {{ '/'+entry['path'] }} - {{entry['kbSize']}}kb
+		
+				.alert.alert-danger(ng-show="pdf.validation.conflictedPaths")
+					div
+						strong #{translate("conflicting_paths_found")}
+					div !{translate("following_paths_conflict")}
+					div
+						li(ng-repeat="entry in pdf.validation.conflictedPaths") {{ '/'+entry['path'] }}
+
+				.alert.alert-danger(ng-show="pdf.validation.mainFile")
+					strong #{translate("main_file_not_found")} 
+					span #{translate("please_set_main_file")}
+
+			.pdf-errors(ng-switch-when="errors")
+		
+				.alert.alert-danger(ng-show="pdf.error")
+					strong #{translate("server_error")} 
+					span #{translate("somthing_went_wrong_compiling")}
+
+				.alert.alert-danger(ng-show="pdf.renderingError")
+					strong #{translate("pdf_rendering_error")} 
+					span #{translate("something_went_wrong_rendering_pdf")}
+		
+				.alert.alert-danger(ng-show="pdf.clsiMaintenance")
+					strong #{translate("server_error")} 
+					span #{translate("clsi_maintenance")}
+
+				.alert.alert-danger(ng-show="pdf.clsiUnavailable")
+					strong #{translate("server_error")} 
+					span #{translate("clsi_unavailable")}
+
+				.alert.alert-danger(ng-show="pdf.tooRecentlyCompiled")
+					strong #{translate("server_error")} 
+					span #{translate("too_recently_compiled")}
+
+				.alert.alert-danger(ng-show="pdf.compileTerminated")
+					strong #{translate("terminated")}. 
+					span #{translate("compile_terminated_by_user")}
+				
+				.alert.alert-danger(ng-show="pdf.rateLimited")
+					strong #{translate("pdf_compile_rate_limit_hit")} 
+					span #{translate("project_flagged_too_many_compiles")}
+
+				.alert.alert-danger(ng-show="pdf.compileInProgress")
+					strong #{translate("pdf_compile_in_progress_error")}. 
+					span #{translate("pdf_compile_try_again")}
+
+				.alert.alert-danger(ng-show="pdf.timedout")
+					p
+						strong #{translate("timedout")}. 
+						span #{translate("proj_timed_out_reason")}
+					p
+						a.text-info(href="https://www.sharelatex.com/learn/Debugging_Compilation_timeout_errors", target="_blank")
+							| #{translate("learn_how_to_make_documents_compile_quickly")}
+
+				if settings.enableSubscriptions
+					.alert.alert-success(ng-show="pdf.timedout && !hasPremiumCompile")
+						p(ng-if="project.owner._id == user.id")
+							strong #{translate("upgrade_for_longer_compiles")}
+						p(ng-if="project.owner._id != user.id")
+							strong #{translate("ask_proj_owner_to_upgrade_for_longer_compiles")}
+						p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
+						p #{translate("plus_upgraded_accounts_receive")}:
+						div
+							ul.list-unstyled
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("unlimited_projects")}
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("full_doc_history")}
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("sync_to_dropbox")}
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("sync_to_github")}
+								li
+									i.fa.fa-check &nbsp;
+									|#{translate("compile_larger_projects")}
+						p(ng-controller="FreeTrialModalController", ng-if="project.owner._id == user.id")
+							a.btn.btn-success.row-spaced-small(
+								href
+								ng-class="buttonClass"
+								ng-click="startFreeTrial('compile-timeout')"
+							) #{translate("start_free_trial")}
+
+				.alert.alert-danger(ng-show="pdf.autoCompileDisabled")
+					p
+						strong #{translate("autocompile_disabled")}. 
+						span #{translate("autocompile_disabled_reason")}
+
+				.alert.alert-danger(ng-show="pdf.projectTooLarge")
+					strong #{translate("project_too_large")} 
+					span #{translate("project_too_much_editable_text")}
+
+
+script(type='text/ng-template', id='clearCacheModalTemplate')
+	.modal-header
+		h3 #{translate("clear_cache")}?
+	.modal-body
+		p #{translate("clear_cache_explanation")}
+		p #{translate("clear_cache_is_safe")}
+		.alert.alert-danger(ng-if="state.error") #{translate("generic_something_went_wrong")}.
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+			ng-disabled="state.inflight"
+		) #{translate("cancel")}
+		button.btn.btn-info(
+			ng-click="clear()"
+			ng-disabled="state.inflight"
+		) 
+			span(ng-show="!state.inflight") #{translate("clear_cache")}
+			span(ng-show="state.inflight") #{translate("clearing")}…

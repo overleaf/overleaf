@@ -1,0 +1,872 @@
+[
+  {
+    "category": "Greek",
+    "command": "\\alpha",
+    "codepoint": "U+1D6FC",
+    "description": "Lowercase Greek letter alpha",
+    "aliases": ["a", "α"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\beta",
+    "codepoint": "U+1D6FD",
+    "description": "Lowercase Greek letter beta",
+    "aliases": ["b", "β"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\gamma",
+    "codepoint": "U+1D6FE",
+    "description": "Lowercase Greek letter gamma",
+    "aliases": ["γ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\delta",
+    "codepoint": "U+1D6FF",
+    "description": "Lowercase Greek letter delta",
+    "aliases": ["δ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\varepsilon",
+    "codepoint": "U+1D700",
+    "description": "Lowercase Greek letter epsilon, varepsilon",
+    "aliases": ["ε"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\epsilon",
+    "codepoint": "U+1D716",
+    "description": "Lowercase Greek letter epsilon lunate",
+    "aliases": ["ε"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\zeta",
+    "codepoint": "U+1D701",
+    "description": "Lowercase Greek letter zeta",
+    "aliases": ["ζ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\eta",
+    "codepoint": "U+1D702",
+    "description": "Lowercase Greek letter eta",
+    "aliases": ["η"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\vartheta",
+    "codepoint": "U+1D717",
+    "description": "Lowercase Greek letter curly theta, vartheta",
+    "aliases": ["θ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\theta",
+    "codepoint": "U+1D703",
+    "description": "Lowercase Greek letter theta",
+    "aliases": ["θ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\iota",
+    "codepoint": "U+1D704",
+    "description": "Lowercase Greek letter iota",
+    "aliases": ["ι"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\kappa",
+    "codepoint": "U+1D705",
+    "description": "Lowercase Greek letter kappa",
+    "aliases": ["κ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\lambda",
+    "codepoint": "U+1D706",
+    "description": "Lowercase Greek letter lambda",
+    "aliases": ["λ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\mu",
+    "codepoint": "U+1D707",
+    "description": "Lowercase Greek letter mu",
+    "aliases": ["μ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\nu",
+    "codepoint": "U+1D708",
+    "description": "Lowercase Greek letter nu",
+    "aliases": ["ν"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\xi",
+    "codepoint": "U+1D709",
+    "description": "Lowercase Greek letter xi",
+    "aliases": ["ξ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\pi",
+    "codepoint": "U+1D70B",
+    "description": "Lowercase Greek letter pi",
+    "aliases": ["π"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\varrho",
+    "codepoint": "U+1D71A",
+    "description": "Lowercase Greek letter rho, varrho",
+    "aliases": ["ρ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\rho",
+    "codepoint": "U+1D70C",
+    "description": "Lowercase Greek letter rho",
+    "aliases": ["ρ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\sigma",
+    "codepoint": "U+1D70E",
+    "description": "Lowercase Greek letter sigma",
+    "aliases": ["σ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\varsigma",
+    "codepoint": "U+1D70D",
+    "description": "Lowercase Greek letter final sigma, varsigma",
+    "aliases": ["ς"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\tau",
+    "codepoint": "U+1D70F",
+    "description": "Lowercase Greek letter tau",
+    "aliases": ["τ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\upsilon",
+    "codepoint": "U+1D710",
+    "description": "Lowercase Greek letter upsilon",
+    "aliases": ["υ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\phi",
+    "codepoint": "U+1D719",
+    "description": "Lowercase Greek letter phi",
+    "aliases": ["φ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\varphi",
+    "codepoint": "U+1D711",
+    "description": "Lowercase Greek letter phi, varphi",
+    "aliases": ["φ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\chi",
+    "codepoint": "U+1D712",
+    "description": "Lowercase Greek letter chi",
+    "aliases": ["χ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\psi",
+    "codepoint": "U+1D713",
+    "description": "Lowercase Greek letter psi",
+    "aliases": ["ψ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\omega",
+    "codepoint": "U+1D714",
+    "description": "Lowercase Greek letter omega",
+    "aliases": ["ω"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\Gamma",
+    "codepoint": "U+00393",
+    "description": "Uppercase Greek letter Gamma",
+    "aliases": ["Γ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\Delta",
+    "codepoint": "U+00394",
+    "description": "Uppercase Greek letter Delta",
+    "aliases": ["Δ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\Theta",
+    "codepoint": "U+00398",
+    "description": "Uppercase Greek letter Theta",
+    "aliases": ["Θ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\Lambda",
+    "codepoint": "U+0039B",
+    "description": "Uppercase Greek letter Lambda",
+    "aliases": ["Λ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\Xi",
+    "codepoint": "U+0039E",
+    "description": "Uppercase Greek letter Xi",
+    "aliases": ["Ξ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\Pi",
+    "codepoint": "U+003A0",
+    "description": "Uppercase Greek letter Pi",
+    "aliases": ["Π"],
+    "notes": "Use \\prod for the product."
+  },
+  {
+    "category": "Greek",
+    "command": "\\Sigma",
+    "codepoint": "U+003A3",
+    "description": "Uppercase Greek letter Sigma",
+    "aliases": ["Σ"],
+    "notes": "Use \\sum for the sum."
+  },
+  {
+    "category": "Greek",
+    "command": "\\Upsilon",
+    "codepoint": "U+003A5",
+    "description": "Uppercase Greek letter Upsilon",
+    "aliases": ["Υ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\Phi",
+    "codepoint": "U+003A6",
+    "description": "Uppercase Greek letter Phi",
+    "aliases": ["Φ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\Psi",
+    "codepoint": "U+003A8",
+    "description": "Uppercase Greek letter Psi",
+    "aliases": ["Ψ"],
+    "notes": ""
+  },
+  {
+    "category": "Greek",
+    "command": "\\Omega",
+    "codepoint": "U+003A9",
+    "description": "Uppercase Greek letter Omega",
+    "aliases": ["Ω"],
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\neq",
+    "codepoint": "U+02260",
+    "description": "Not equal",
+    "aliases": ["!="],
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\leq",
+    "codepoint": "U+02264",
+    "description": "Less than or equal",
+    "aliases": ["<="],
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\geq",
+    "codepoint": "U+02265",
+    "description": "Greater than or equal",
+    "aliases": [">="],
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\ll",
+    "codepoint": "U+0226A",
+    "description": "Much less than",
+    "aliases": ["<<"],
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\gg",
+    "codepoint": "U+0226B",
+    "description": "Much greater than",
+    "aliases": [">>"],
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\prec",
+    "codepoint": "U+0227A",
+    "description": "Precedes",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\succ",
+    "codepoint": "U+0227B",
+    "description": "Succeeds",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\in",
+    "codepoint": "U+02208",
+    "description": "Set membership",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\notin",
+    "codepoint": "U+02209",
+    "description": "Negated set membership",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\ni",
+    "codepoint": "U+0220B",
+    "description": "Contains",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\subset",
+    "codepoint": "U+02282",
+    "description": "Subset",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\subseteq",
+    "codepoint": "U+02286",
+    "description": "Subset or equals",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\supset",
+    "codepoint": "U+02283",
+    "description": "Superset",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\simeq",
+    "codepoint": "U+02243",
+    "description": "Similar",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\approx",
+    "codepoint": "U+02248",
+    "description": "Approximate",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\equiv",
+    "codepoint": "U+02261",
+    "description": "Identical with",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\cong",
+    "codepoint": "U+02245",
+    "description": "Congruent with",
+    "notes": ""
+  },
+  {
+    "category": "Relations",
+    "command": "\\mid",
+    "codepoint": "U+02223",
+    "description": "Mid, divides, vertical bar, modulus, absolute value",
+    "notes": "Use \\lvert...\\rvert for the absolute value."
+  },
+  {
+    "category": "Relations",
+    "command": "\\nmid",
+    "codepoint": "U+02224",
+    "description": "Negated mid, not divides",
+    "notes": "Requires \\usepackage{amssymb}."
+  },
+  {
+    "category": "Relations",
+    "command": "\\parallel",
+    "codepoint": "U+02225",
+    "description": "Parallel, double vertical bar, norm",
+    "notes": "Use \\lVert...\\rVert for the norm."
+  },
+  {
+    "category": "Relations",
+    "command": "\\perp",
+    "codepoint": "U+027C2",
+    "description": "Perpendicular",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\times",
+    "codepoint": "U+000D7",
+    "description": "Cross product, multiplication",
+    "aliases": ["x"],
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\div",
+    "codepoint": "U+000F7",
+    "description": "Division",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\cap",
+    "codepoint": "U+02229",
+    "description": "Intersection",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\cup",
+    "codepoint": "U+0222A",
+    "description": "Union",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\cdot",
+    "codepoint": "U+022C5",
+    "description": "Dot product, multiplication",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\cdots",
+    "codepoint": "U+022EF",
+    "description": "Centered dots",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\bullet",
+    "codepoint": "U+02219",
+    "description": "Bullet",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\circ",
+    "codepoint": "U+025E6",
+    "description": "Circle",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\wedge",
+    "codepoint": "U+02227",
+    "description": "Wedge, logical and",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\vee",
+    "codepoint": "U+02228",
+    "description": "Vee, logical or",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\setminus",
+    "codepoint": "U+0005C",
+    "description": "Set minus, backslash",
+    "notes": "Use \\backslash for a backslash."
+  },
+  {
+    "category": "Operators",
+    "command": "\\oplus",
+    "codepoint": "U+02295",
+    "description": "Plus sign in circle",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\otimes",
+    "codepoint": "U+02297",
+    "description": "Multiply sign in circle",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\sum",
+    "codepoint": "U+02211",
+    "description": "Summation operator",
+    "notes": "Use \\Sigma for the letter Sigma."
+  },
+  {
+    "category": "Operators",
+    "command": "\\prod",
+    "codepoint": "U+0220F",
+    "description": "Product operator",
+    "notes": "Use \\Pi for the letter Pi."
+  },
+  {
+    "category": "Operators",
+    "command": "\\bigcap",
+    "codepoint": "U+022C2",
+    "description": "Intersection operator",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\bigcup",
+    "codepoint": "U+022C3",
+    "description": "Union operator",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\int",
+    "codepoint": "U+0222B",
+    "description": "Integral operator",
+    "notes": ""
+  },
+  {
+    "category": "Operators",
+    "command": "\\iint",
+    "codepoint": "U+0222C",
+    "description": "Double integral operator",
+    "notes": "Requires \\usepackage{amsmath}."
+  },
+  {
+    "category": "Operators",
+    "command": "\\iiint",
+    "codepoint": "U+0222D",
+    "description": "Triple integral operator",
+    "notes": "Requires \\usepackage{amsmath}."
+  },
+  {
+    "category": "Arrows",
+    "command": "\\leftarrow",
+    "codepoint": "U+02190",
+    "description": "Leftward arrow",
+    "aliases": ["<-"],
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\rightarrow",
+    "codepoint": "U+02192",
+    "description": "Rightward arrow",
+    "aliases": ["->"],
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\leftrightarrow",
+    "codepoint": "U+02194",
+    "description": "Left and right arrow",
+    "aliases": ["<->"],
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\uparrow",
+    "codepoint": "U+02191",
+    "description": "Upward arrow",
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\downarrow",
+    "codepoint": "U+02193",
+    "description": "Downward arrow",
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\Leftarrow",
+    "codepoint": "U+021D0",
+    "description": "Is implied by",
+    "aliases": ["<="],
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\Rightarrow",
+    "codepoint": "U+021D2",
+    "description": "Implies",
+    "aliases": ["=>"],
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\Leftrightarrow",
+    "codepoint": "U+021D4",
+    "description": "Left and right double arrow",
+    "aliases": ["<=>"],
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\mapsto",
+    "codepoint": "U+021A6",
+    "description": "Maps to, rightward",
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\nearrow",
+    "codepoint": "U+02197",
+    "description": "NE pointing arrow",
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\searrow",
+    "codepoint": "U+02198",
+    "description": "SE pointing arrow",
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\rightleftharpoons",
+    "codepoint": "U+021CC",
+    "description": "Right harpoon over left",
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\leftharpoonup",
+    "codepoint": "U+021BC",
+    "description": "Left harpoon up",
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\rightharpoonup",
+    "codepoint": "U+021C0",
+    "description": "Right harpoon up",
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\leftharpoondown",
+    "codepoint": "U+021BD",
+    "description": "Left harpoon down",
+    "notes": ""
+  },
+  {
+    "category": "Arrows",
+    "command": "\\rightharpoondown",
+    "codepoint": "U+021C1",
+    "description": "Right harpoon down",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\infty",
+    "codepoint": "U+0221E",
+    "description": "Infinity",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\partial",
+    "codepoint": "U+1D715",
+    "description": "Partial differential",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\nabla",
+    "codepoint": "U+02207",
+    "description": "Nabla, del, hamilton operator",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\varnothing",
+    "codepoint": "U+02300",
+    "description": "Empty set",
+    "notes": "Requires \\usepackage{amssymb}."
+  },
+  {
+    "category": "Misc",
+    "command": "\\forall",
+    "codepoint": "U+02200",
+    "description": "For all",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\exists",
+    "codepoint": "U+02203",
+    "description": "There exists",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\neg",
+    "codepoint": "U+000AC",
+    "description": "Not sign",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\Re",
+    "codepoint": "U+0211C",
+    "description": "Real part",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\Im",
+    "codepoint": "U+02111",
+    "description": "Imaginary part",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\Box",
+    "codepoint": "U+025A1",
+    "description": "Square",
+    "notes": "Requires \\usepackage{amssymb}."
+  },
+  {
+    "category": "Misc",
+    "command": "\\triangle",
+    "codepoint": "U+025B3",
+    "description": "Triangle",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\aleph",
+    "codepoint": "U+02135",
+    "description": "Hebrew letter aleph",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\wp",
+    "codepoint": "U+02118",
+    "description": "Weierstrass letter p",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\#",
+    "codepoint": "U+00023",
+    "description": "Number sign, hashtag",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\$",
+    "codepoint": "U+00024",
+    "description": "Dollar sign",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\%",
+    "codepoint": "U+00025",
+    "description": "Percent sign",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\&",
+    "codepoint": "U+00026",
+    "description": "Et sign, and, ampersand",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\{",
+    "codepoint": "U+0007B",
+    "description": "Left curly brace",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\}",
+    "codepoint": "U+0007D",
+    "description": "Right curly brace",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\langle",
+    "codepoint": "U+027E8",
+    "description": "Left angle bracket, bra",
+    "notes": ""
+  },
+  {
+    "category": "Misc",
+    "command": "\\rangle",
+    "codepoint": "U+027E9",
+    "description": "Right angle bracket, ket",
+    "notes": ""
+  }
+]

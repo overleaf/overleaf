@@ -1,0 +1,129 @@
+#! /usr/bin/env node
+
+const acorn = require('acorn')
+const acornWalk = require('acorn-walk')
+const fs = require('fs')
+const _ = require('lodash')
+const glob = require('glob')
+print = console.log
+
+const Methods = new Set([
+  'get',
+  'head',
+  'post',
+  'put',
+  'delete',
+  'connect',
+  'options',
+  'trace',
+  'patch'
+])
+
+const isMethod = str => {
+  return Methods.has(str)
+}
+
+// Check if the expression is a call on a router, return data about it, or null
+const routerCall = callExpression => {
+  const callee = callExpression.callee
+  const property = callee.property
+  const args = callExpression.arguments
+  if (!callee.object || !callee.object.name) {
+    return false
+  }
+  const routerName = callee.object.name
+  if ( // Match known names for the Express routers: app, webRouter, whateverRouter, etc...
+    isMethod(property.name) &&
+    (routerName === 'app' || routerName.match('^.*[rR]outer$'))
+  ) {
+    return {
+      routerName: routerName,
+      method: property.name,
+      args: args
+    }
+  } else {
+    return null
+  }
+}
+
+const formatMethodCall = expression => {
+  if (!expression.object || !expression.property) {
+    return '????'
+  }
+  return `${expression.object.name}.${expression.property.name}`
+}
+
+const parseAndPrintRoutesSync = path => {
+  const content = fs.readFileSync(path)
+  // Walk the AST (Abstract Syntax Tree)
+  acornWalk.simple(acorn.parse(content), {
+    // We only care about call expression ( like `a.b()` )
+    CallExpression(node) {
+      const call = routerCall(node)
+      if (call) {
+        const firstArg = _.first(call.args)
+        const lastArg = _.last(call.args)
+        try {
+          print(
+            `  ${formatRouterName(call.routerName)}\t .${call.method} \t: ${
+              firstArg.value
+            } => ${formatMethodCall(lastArg)}`
+          )
+        } catch (e) {
+          print('>> Error')
+          print(e)
+          print(JSON.stringify(call))
+          process.exit(1)
+        }
+      }
+    }
+  })
+}
+
+const routerNameMapping = {
+  'privateApiRouter': 'privateApi',
+  'publicApiRouter': 'publicApi'
+}
+const formatRouterName = (name) => {
+  return routerNameMapping[name] || name
+}
+
+const main = () => {
+  // Take an optional filter to apply to file names
+  const filter = process.argv[2] || null
+
+  if (filter && (filter === '--help' || filter == 'help')) {
+    print('')
+    print('  Usage: bin/routes [filter]')
+    print('  Examples:')
+    print('    bin/routes')
+    print('    bin/routes GitBridge')
+    print('')
+    process.exit(0)
+  }
+
+  // Find all routers
+  glob('*[rR]outer.js', { matchBase: true }, (err, files) => {
+    for (file of files) {
+      if (file.match('^node_modules.*$') || file.match('.*/public/.*')) {
+        continue
+      }
+      // Restrict to the filter (if filter is present)
+      if (filter && !file.match(`.*${filter}.*`)) {
+        continue
+      }
+      print(`[${file}]`)
+      try {
+        parseAndPrintRoutesSync(file)
+      } catch (_e) {
+        print('>> Error parsing file')
+        continue
+      }
+    }
+    process.exit(0)
+  })
+}
+
+if (require.main === module) {
+  main()
+}

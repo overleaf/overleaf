@@ -1,0 +1,74 @@
+mixin pagination(pages, page_path, max_btns)
+	//- @param pages.current_page the current page viewed
+	//- @param pages.total_pages previously calculated,
+	//- based on total entries and entries per page
+	//- @param page_path the relative path, minus a trailing slash and page param
+	//- @param max_btns max number of buttons on either side of the current page
+	//- button and excludes first, prev, next, last
+
+	if pages && pages.current_page && pages.total_pages && pages.total_pages > 1
+		- var max_btns = max_btns || 4
+		- var prev_page = Math.max(parseInt(pages.current_page, 10) - max_btns, 1)
+		- var next_page = parseInt(pages.current_page, 10) + 1
+		- var next_index = 0;
+		- var full_page_path = page_path + "/page/"
+
+		nav(role="navigation" aria-label="Pagination Navigation")
+			ul.pagination
+				if pages.current_page > 1
+					li
+						a(
+							aria-label="Go to first page"
+							href=page_path
+						) « First
+					li
+						a(
+							aria-label="Go to previous page"
+							href=full_page_path + (parseInt(pages.current_page, 10) - 1)
+							rel="prev"
+						) ‹ Prev
+
+				if pages.current_page - max_btns > 1
+					li
+						span …
+
+				while prev_page < pages.current_page
+					li
+						a(
+							aria-label="Go to page " + prev_page
+							href=full_page_path + prev_page
+						) #{prev_page}
+						- prev_page++
+
+				li(class="active")
+					span(
+						aria-label="Current Page, Page " + pages.current_page
+						aria-current="true"
+					) #{pages.current_page}
+
+				if pages.current_page < pages.total_pages
+					while next_page <= pages.total_pages && next_index < max_btns
+						li
+							a(
+								aria-label="Go to page " + next_page
+								href=full_page_path + next_page
+							) #{next_page}
+						- next_page++
+						- next_index++
+
+					if next_page <= pages.total_pages 
+						li
+							span …
+
+					li
+						a(
+							aria-label="Go to next page"
+							href=full_page_path + (parseInt(pages.current_page, 10) + 1)
+							rel="next"
+						) Next ›
+
+					li
+						a(
+							aria-label="Go to last page"
+							href=full_page_path + pages.total_pages
+						) Last »

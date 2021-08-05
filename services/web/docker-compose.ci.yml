@@ -1,0 +1,81 @@
+version: "2.3"
+
+volumes:
+  data:
+
+services:
+
+  test_unit:
+    build: .
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    user: node
+    command: npm run test:unit:app
+    environment:
+      BASE_CONFIG:
+      SHARELATEX_CONFIG:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+
+  test_acceptance:
+    build: .
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    working_dir: /app
+    env_file: docker-compose.common.env
+    environment:
+      BASE_CONFIG:
+      SHARELATEX_CONFIG:
+    extra_hosts:
+      - 'www.overleaf.test:127.0.0.1'
+    command: npm run test:acceptance:app
+    user: root
+    depends_on:
+      - redis
+      - mongo
+      - saml
+      - ldap
+
+  test_karma:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.ci
+      args:
+        PROJECT_NAME: $PROJECT_NAME
+        BRANCH_NAME: $BRANCH_NAME
+        BUILD_NUMBER: $BUILD_NUMBER
+    working_dir: /app
+    command: npm run test:karma:single
+    user: node
+    environment:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+
+  test_frontend:
+    build: .
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    user: node
+    command: npm run test:frontend
+    environment:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+
+  tar:
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER-webpack
+    volumes:
+      - ./:/tmp/build/
+    command: tar -cf /tmp/build/build.tar public/
+    user: root
+
+  redis:
+    image: redis
+
+  mongo:
+    image: mongo:4.0.19
+
+  ldap:
+    restart: always
+    image: rroemhild/test-openldap:1.1
+
+  saml:
+      restart: always
+      image: gcr.io/overleaf-ops/saml-test
+      environment:
+          SAML_BASE_URL_PATH: 'http://saml/simplesaml/'
+          SAML_TEST_SP_ENTITY_ID: 'sharelatex-test-saml'
+          SAML_TEST_SP_LOCATION: 'http://www.overleaf.test:3000/saml/callback'

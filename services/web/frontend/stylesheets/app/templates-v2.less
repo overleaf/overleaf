@@ -1,0 +1,206 @@
+.gallery-title {
+  margin-bottom: @margin-xl;
+}
+
+.field-title {
+  font-weight: bold;
+}
+
+.filters {
+  float: right;
+  margin-bottom: @margin-lg;
+
+  @media (max-width: @screen-md-min) {
+    float: none;
+  }
+}
+
+.cta-links {
+  .cta-link.btn {
+    margin: 0 @margin-sm @margin-sm 0;
+  }
+}
+
+.popular-tags {
+  .gallery-thumbnail {
+    margin: 0 0 1em 0 !important;
+  }
+}
+
+.tag-link {
+  margin: 0 @margin-xs @margin-sm 0;
+  max-width: 100%;
+  white-space: inherit;
+}
+
+.gallery-abstract {
+  word-break: break-word;
+  hyphens: auto;
+  a {
+    hyphens: none;
+  }
+}
+
+.gallery-thumbnail {
+  display: inline-block;
+  margin: 0 0 2em;
+  width: 100%;
+
+  .thumbnail {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 0 0 @margin-sm 0;
+    padding: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    width: 100%;
+
+    h3 {
+      color: @link-color-alt;
+      margin: 10px 0px 10px 20px;
+    }
+
+    &.thumbnail-tag {
+      height: 100px;
+    }
+  }
+
+  .caption {
+    // Override ShareLatex template styles
+    background: none;
+    border: none;
+    text-align: center;
+  }
+
+  .caption__description {
+    font-style: italic;
+    padding: 0 0 5px 0;
+    .text-overflow();
+  }
+
+  .caption__title {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    .text-overflow();
+  }
+}
+
+.gallery-large-pdf-preview {
+  border: solid 1px @gray-lightest;
+  margin-top: @margin-lg;
+  img {
+    max-width: 100%;
+  }
+}
+
+/* Media Queries */
+@media (max-width: @screen-xs-max) {
+  .gallery-container {
+    column-count: 2;
+    column-gap: 2em;
+  }
+}
+@media (min-width: @screen-sm-min) {
+  .gallery-container {
+    &.use-column {
+      column-count: 3;
+      column-gap: 3em;
+    }
+    &.use-percent {
+      margin: 0 -1.5em;
+      .gallery-thumbnail {
+        width: 33.3333333%;
+        padding: 0 1.5em;
+      }
+    }
+  }
+}
+@media (min-width: @screen-md-min) {
+  .gallery-large-pdf-preview {
+    margin-top: 0;
+  }
+}
+
+.section-tags {
+  margin-bottom: @margin-xl;
+  margin-top: @margin-md;
+}
+
+.search__container--addsearch {
+  .search__input-bar {
+    display: flex;
+  }
+
+  .search__input {
+    flex: 1;
+    margin-right: 10px;
+    padding: 0 10px;
+  }
+
+  // AddSearch overrides
+  #addsearch-results {
+    min-height: 0 !important;
+
+    .addsearch-result-item-container {
+      background-size: auto 80px !important; // Resize image to be smaller
+      padding: 10px;
+      margin-left: 10px;
+      margin-right: 10px;
+      border-bottom: 2px solid rgb(236, 236, 236);
+    }
+
+    .addsearch-result-item-sub {
+      min-height: 0 !important;
+      background: none !important;
+      border-bottom: none !important;
+
+      h2 {
+        font-family: @font-family-sans-serif;
+      }
+
+      // Unfortunately AddSearch doesn't add very useful classes, so have to use
+      // some horrible nesting :/
+      & > div {
+        min-height: 0 !important;
+        padding-left: 90px !important;
+
+        // Hide some unnecessary metadata
+        span {
+          display: none !important;
+        }
+      }
+
+      a {
+        color: @link-color-alt !important;
+      }
+
+      &:hover a {
+        color: @link-hover-color-alt !important;
+      }
+    }
+  }
+
+  #addsearch-results-bottom {
+    height: auto !important;
+    background: none !important;
+    padding-top: 0 !important;
+
+    #addsearch-rp-paging {
+      margin-bottom: 10px;
+
+      a {
+        color: @link-color-alt !important;
+
+        &.currentResultPage {
+          color: @ol-blue-gray-5 !important;
+        }
+      }
+    }
+  }
+
+  #addsearch-logo {
+    display: none !important;
+  }
+}

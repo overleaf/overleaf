@@ -1,0 +1,18 @@
+-if (user.email !== personalSubscription.recurly.account.email)
+	div
+		hr
+		form(async-form="updateAccountEmailAddress", name="updateAccountEmailAddress", action='/user/subscription/account/email', method="POST")
+			input(name='_csrf', type='hidden', value=csrfToken)
+			.form-group
+				form-messages(for="updateAccountEmailAddress")
+					.alert.alert-success(ng-show="updateAccountEmailAddress.response.success")
+						| #{translate('recurly_email_updated')}
+				div(ng-hide="updateAccountEmailAddress.response.success")
+					p(ng-non-bindable) !{translate("recurly_email_update_needed", { recurlyEmail: personalSubscription.recurly.account.email, userEmail: user.email }, ['em', 'em'])}
+					.actions
+						button.btn-primary.btn(
+							type='submit',
+							ng-disabled="updateAccountEmailAddress.inflight"
+						)
+							span(ng-show="!updateAccountEmailAddress.inflight") #{translate("update")}
+							span(ng-show="updateAccountEmailAddress.inflight") #{translate("updating")}…

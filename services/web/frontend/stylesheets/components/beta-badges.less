@@ -1,0 +1,40 @@
+.info-badge,
+.beta-badge {
+  display: inline-block;
+  width: @line-height-computed * 0.75;
+  height: @line-height-computed * 0.75;
+  line-height: @line-height-computed * 0.75;
+  text-align: center;
+  color: #fff;
+
+  &:hover,
+  &:focus {
+    color: #fff;
+    text-decoration: none;
+  }
+}
+
+.info-badge {
+  background-color: @info-badge-bg;
+  border-radius: @line-height-computed * 0.75;
+  font-family: @font-family-serif;
+  font-style: italic;
+
+  &::before {
+    content: 'i';
+  }
+}
+
+.info-badge-fade-bg {
+  .info-badge;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.beta-badge {
+  background-color: @orange;
+  border-radius: @border-radius-base;
+
+  &::before {
+    content: 'β';
+  }
+}

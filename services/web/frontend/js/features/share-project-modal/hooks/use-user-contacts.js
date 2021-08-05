@@ -1,0 +1,45 @@
+import { useEffect, useState } from 'react'
+import { getJSON } from '../../../infrastructure/fetch-json'
+import useAbortController from '../../../shared/hooks/use-abort-controller'
+
+const contactCollator = new Intl.Collator('en')
+
+const alphabetical = (a, b) =>
+  contactCollator.compare(a.name, b.name) ||
+  contactCollator.compare(a.email, b.email)
+
+export function useUserContacts() {
+  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState(null)
+  const [error, setError] = useState(false)
+
+  const { signal } = useAbortController()
+
+  useEffect(() => {
+    getJSON('/user/contacts', { signal })
+      .then(data => {
+        setData(data.contacts.map(buildContact).sort(alphabetical))
+      })
+      .catch(error => setError(error))
+      .finally(() => setLoading(false))
+  }, [signal])
+
+  return { loading, data, error }
+}
+
+function buildContact(contact) {
+  const [emailPrefix] = contact.email.split('@')
+
+  // the name is not just the default "email prefix as first name"
+  const hasName = contact.last_name || contact.first_name !== emailPrefix
+
+  const name = hasName
+    ? [contact.first_name, contact.last_name].filter(Boolean).join(' ')
+    : ''
+
+  return {
+    ...contact,
+    name,
+    display: name ? `${name} <${contact.email}>` : contact.email,
+  }
+}

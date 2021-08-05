@@ -1,0 +1,57 @@
+aside.editor-sidebar.full-size(
+	ng-controller="HistoryV2FileTreeController"
+	ng-if="ui.view == 'history' && history.isV2"
+)
+	.history-file-tree-inner
+		history-file-tree(
+			files="history.selection.files"
+			selected-pathname="history.selection.pathname"
+			on-selected-file-change="handleFileSelection(file)"
+			is-loading="history.loadingFileTree"
+		)
+
+script(type="text/ng-template", id="historyFileTreeTpl")
+	.history-file-tree
+		history-file-entity(
+			ng-repeat="fileEntity in $ctrl._fileTree | orderBy : [ '-type', 'operation', 'name' ]"
+			file-entity="fileEntity"
+			ng-show="!$ctrl.isLoading"
+		)
+
+script(type="text/ng-template", id="historyFileEntityTpl")
+	.history-file-entity-wrapper
+		a.history-file-entity-link(
+			href
+			ng-click="$ctrl.isSelected ? '' : $ctrl.handleClick()"
+			ng-class="{ 'history-file-entity-link-selected': $ctrl.isSelected }"
+		)
+			span.history-file-entity-name-container
+				i.history-file-entity-icon.history-file-entity-icon-folder-state.fa.fa-fw(
+					ng-class="{\
+						'fa-chevron-down': ($ctrl.fileEntity.type === 'folder' && $ctrl.isOpen),\
+						'fa-chevron-right': ($ctrl.fileEntity.type === 'folder' && !$ctrl.isOpen)\
+					}"
+				)
+				i.history-file-entity-icon.fa(
+					ng-class="::$ctrl.entityTypeIconClass"
+				)
+				span.history-file-entity-name(
+					ng-class="::$ctrl.entityOpTextClass"
+				) {{ ::$ctrl.fileEntity.name }}
+				span.history-file-entity-operation-badge(
+					ng-if="::$ctrl.hasOperation && $ctrl.fileEntity.operation !== 'renamed' && $ctrl.fileEntity.operation !== 'removed'"
+				) {{ ::$ctrl.getFileOperationName() }}
+				span.history-file-entity-operation-badge(
+					ng-if="::$ctrl.hasOperation && $ctrl.fileEntity.operation === 'renamed'"
+					tooltip-append-to-body="true"
+					tooltip-placement="right"
+					tooltip-class="tooltip-history-file-tree"
+					tooltip-html=`::$ctrl.getRenameTooltip()`
+				) {{ ::$ctrl.getFileOperationName() }}
+		div(
+			ng-show="$ctrl.isOpen"
+		)
+			history-file-entity(
+				ng-repeat="childEntity in $ctrl.fileEntity.children"
+				file-entity="childEntity"
+			)

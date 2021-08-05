@@ -1,0 +1,478 @@
+.fake-full-width-bg(@bg-color) {
+  &::before {
+    content: '\00a0';
+    position: absolute;
+    width: 100%;
+    right: 100%;
+    background-color: @bg-color;
+  }
+}
+
+.editor-sidebar {
+  display: flex;
+  flex-direction: column;
+  background-color: @file-tree-bg;
+}
+
+.file-tree {
+  display: flex !important; // To work around jQuery layout's inline styles
+  flex-direction: column;
+  flex-grow: 1;
+  max-height: 100%;
+
+  .toolbar.toolbar-filetree {
+    .toolbar-small-mixin;
+    .toolbar-alt-mixin;
+    padding: 0 5px;
+    flex-shrink: 0;
+  }
+
+  > file-tree-root,
+  .file-tree-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow-y: auto;
+    width: inherit;
+    height: inherit;
+
+    &.no-toolbar {
+      top: 0;
+    }
+  }
+
+  // TODO; Consolidate with "Project files" in Overleaf
+  h3 {
+    font-size: 1rem;
+    border-bottom: 1px solid @gray;
+    padding-bottom: (@line-height-computed / 4);
+    margin: (@line-height-computed / 2);
+  }
+
+  &-history {
+    .entity-name {
+      padding-left: 6px;
+      &.deleted {
+        text-decoration: line-through;
+      }
+    }
+    .loading {
+      padding-left: 6px;
+      color: #fff;
+
+      i.fa {
+        color: #fff;
+      }
+    }
+  }
+
+  li.dnd-droppable-hover .entity-name,
+  li .entity-name.droppable-hover {
+    font-weight: bold;
+    background-color: @file-tree-item-hover-bg;
+    .fake-full-width-bg(@file-tree-item-hover-bg);
+  }
+
+  ul.droppable-hover li div.entity-name:hover {
+    background-color: transparent;
+    .fake-full-width-bg(transparent);
+    &.droppable-hover {
+      background-color: @file-tree-item-hover-bg;
+      .fake-full-width-bg(@file-tree-item-hover-bg);
+    }
+  }
+
+  ul.file-tree-list {
+    margin: 0;
+    overflow-x: hidden;
+    height: 100%;
+    flex-grow: 1;
+    position: relative;
+    overflow-y: auto;
+
+    .entity > ul,
+    ul[role='tree'] {
+      margin-left: (@line-height-computed / 2);
+    }
+
+    li.bottom-buffer {
+      min-height: @line-height-computed;
+    }
+
+    li {
+      line-height: @file-tree-line-height;
+      position: relative;
+      &:focus {
+        outline: none;
+      }
+
+      .entity {
+        user-select: none;
+        &:focus {
+          outline: none;
+        }
+      }
+
+      .entity > .entity-name > button {
+        background-color: transparent;
+        border: 0;
+        padding: 0;
+        &:focus {
+          outline: none;
+        }
+        &.item-name-button {
+          width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: left;
+          padding-right: 32px;
+        }
+      }
+
+      .entity-name {
+        color: @file-tree-item-color;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        &.entity-name-react {
+          text-overflow: clip;
+        }
+        &:focus {
+          outline: none;
+        }
+        &:hover {
+          background-color: @file-tree-item-hover-bg;
+        }
+        &:hover {
+          // When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
+          // element not fill the entire file-tree width (as it's spaced from the left-hand side via margin)
+          // and, in consequence, the background gets clipped. The ::before pseudo-selector is used to fill
+          // the empty space.
+          .fake-full-width-bg(@file-tree-item-hover-bg);
+        }
+        input {
+          line-height: 1.6;
+        }
+        .dropdown-toggle > i {
+          color: white;
+          font-size: 18px;
+        }
+      }
+
+      .entity.dnd-draggable-dragging {
+        .entity-name:hover {
+          background-color: transparent;
+          .fake-full-width-bg(transparent);
+        }
+      }
+
+      i.fa {
+        color: @file-tree-item-icon-color;
+        font-size: 14px;
+        &.linked-file-highlight {
+          & {
+            color: white;
+          }
+          position: relative;
+          top: 4px;
+          left: -8px;
+          font-size: 12px;
+        }
+      }
+
+      i.fa-folder-open,
+      i.fa-folder {
+        color: @file-tree-item-folder-color;
+        font-size: 14px;
+      }
+
+      i.spaced {
+        margin-left: 18px;
+      }
+
+      i.toggle {
+        width: 24px;
+        padding: 6px;
+        font-size: 16px;
+        color: @file-tree-item-toggle-color;
+      }
+
+      .file-tree-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        color: #fff;
+        line-height: 1.6;
+        font-size: 20px;
+        padding: 0 4px 0 18px;
+
+        &:hover,
+        &:focus {
+          text-decoration: none;
+        }
+        &::before {
+          content: '\00B7\00B7\00B7';
+          transform: rotate(90deg);
+          letter-spacing: 0.5px;
+        }
+      }
+
+      &.multi-selected {
+        > .entity {
+          > .entity-name {
+            > div > i.fa,
+            > button > i.fa,
+            > i.fa,
+            .entity-menu-toggle i.fa {
+              color: #fff;
+            }
+            > i.fa i.linked-file-highlight {
+              color: @blue;
+            }
+            color: #fff;
+            font-weight: bold;
+            background-color: @file-tree-multiselect-bg;
+            .fake-full-width-bg(@file-tree-multiselect-bg);
+            &:hover {
+              background-color: @file-tree-multiselect-hover-bg;
+              .fake-full-width-bg(@file-tree-multiselect-hover-bg);
+            }
+          }
+        }
+      }
+
+      .dropdown {
+        position: absolute;
+        right: 0;
+      }
+
+      .rename-input {
+        display: block;
+        position: absolute;
+        top: 1px;
+        left: 44px;
+        right: 32px;
+        color: @file-tree-item-input-color;
+        input {
+          width: 100%;
+        }
+      }
+
+      > .entity > .entity-name {
+        .entity-menu-toggle {
+          display: none;
+        }
+      }
+
+      .entity-limit-hit {
+        color: @file-tree-item-color;
+        line-height: 2.05;
+        margin-left: (@line-height-computed / 2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .entity-limit-hit-message {
+        font-style: italic;
+      }
+
+      i.fa.entity-limit-hit-tooltip-trigger {
+        margin-left: (@line-height-computed / 4);
+        cursor: pointer;
+      }
+    }
+  }
+
+  &:not(.multi-selected) {
+    ul.file-tree-list li.selected {
+      > .entity {
+        > .entity-name {
+          color: @file-tree-item-selected-color;
+          > div > i.fa,
+          > button > i.fa,
+          > i.fa,
+          .entity-menu-toggle i.fa {
+            color: @file-tree-item-selected-color;
+          }
+          > i.fa i.linked-file-highlight {
+            color: @blue;
+          }
+          background-color: @file-tree-item-selected-bg;
+          font-weight: bold;
+          padding-right: 32px;
+          .fake-full-width-bg(@file-tree-item-selected-bg);
+
+          .entity-menu-toggle {
+            display: inline-block;
+          }
+        }
+      }
+    }
+    ul.file-tree-list li.selected.dnd-droppable-hover {
+      > .entity {
+        > .entity-name {
+          background-color: @file-tree-item-hover-bg;
+          .fake-full-width-bg(@file-tree-item-hover-bg);
+        }
+      }
+    }
+  }
+
+  .dnd-draggable-preview-layer {
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    &.dnd-droppable-hover {
+      border: 3px solid @file-tree-item-selected-bg;
+    }
+  }
+
+  .dnd-draggable-preview-item,
+  .ui-draggable-dragging {
+    background-color: fade(@file-tree-item-selected-bg, 60%);
+    color: @file-tree-item-selected-color;
+    width: 75%;
+    padding-left: @line-height-computed;
+  }
+
+  .dnd-draggable-preview-item {
+    line-height: @file-tree-line-height;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .disconnected-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background: @file-tree-bg;
+    opacity: 0.5;
+    cursor: wait;
+  }
+}
+
+.modal-new-file {
+  padding: 0;
+  table {
+    width: 100%;
+    td {
+      vertical-align: top;
+    }
+  }
+  /* old modal */
+  .toggle-output-files-button {
+    font-size: 80%;
+  }
+  /* new modal */
+  .toggle-file-type-button {
+    font-size: 80%;
+    margin-top: -12px;
+    .btn {
+      display: inline-block;
+      padding: 0;
+      vertical-align: baseline;
+      font-size: inherit;
+    }
+    .btn:focus-within {
+      outline: none;
+      text-decoration: none;
+    }
+  }
+}
+.modal-new-file--list {
+  background-color: @modal-footer-background-color;
+  width: 220px;
+  ul {
+    li {
+      /* old modal (a) */
+      a {
+        color: @text-color;
+        padding: (@line-height-computed / 4);
+        display: block;
+        text-decoration: none;
+      }
+      /* new modal (button) */
+      .btn {
+        color: @text-color;
+        padding: (@line-height-computed / 4);
+      }
+      .btn:hover {
+        text-decoration: none;
+      }
+      .btn:focus {
+        outline: none;
+        text-decoration: none;
+        background-color: white;
+      }
+    }
+    li.active {
+      background-color: white;
+      /* old modal (a) */
+      a {
+        color: @link-color;
+      }
+      /* new modal (button) */
+      .btn {
+        color: @link-color;
+        text-decoration: none;
+      }
+    }
+    li:hover {
+      background-color: white;
+    }
+  }
+}
+
+.file-tree-error {
+  text-align: center;
+  color: @file-tree-error-color;
+  padding: 20px;
+}
+
+.file-tree-modal-alert {
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
+.btn.modal-new-file-mode {
+  text-align: left;
+}
+
+.modal-new-file--body {
+  padding: 20px;
+  padding-top: (@line-height-computed / 4);
+}
+
+.modal-new-file--body-upload {
+  padding-top: 20px;
+}
+
+.modal-footer {
+  .approaching-file-limit {
+    font-weight: bold;
+  }
+
+  .at-file-limit {
+    text-align: left;
+  }
+}
+
+.modal-new-file--body-upload .uppy-Root {
+  font-family: inherit;
+}
+
+.modal-new-file--body-upload .uppy-size--md {
+  .uppy-Dashboard-AddFiles-title {
+    font-size: inherit;
+  }
+}

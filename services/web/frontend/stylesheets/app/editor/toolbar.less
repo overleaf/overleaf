@@ -1,0 +1,377 @@
+@toolbar-height: 40px;
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  height: @toolbar-height;
+  border-bottom: @toolbar-border-bottom;
+
+  > a,
+  .toolbar-right > a {
+    position: relative;
+    .label {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 0.15em 0.6em 0.2em;
+      font-size: 60%;
+      pointer-events: none; // Labels were capturing button/anchor clicks.
+    }
+  }
+
+  > a:focus {
+    outline: none;
+  }
+
+  > a:not(.btn),
+  > button,
+  .toolbar-left > a:not(.btn),
+  .toolbar-left > button,
+  .toolbar-right > a:not(.btn),
+  .toolbar-right > button {
+    display: inline-block;
+    color: @toolbar-icon-btn-color;
+    background-color: transparent;
+    padding: 4px 2px;
+    line-height: 1;
+    height: 24px;
+    border-radius: @border-radius-small;
+    &.toolbar-header-back-projects {
+      padding: 5px 10px 4px;
+      margin-bottom: 1px;
+    }
+
+    &:hover {
+      text-shadow: @toolbar-icon-btn-hover-shadow;
+      color: @toolbar-icon-btn-hover-color;
+      background-color: transparent;
+      text-decoration: none;
+    }
+    &.active,
+    &:active {
+      .label {
+        display: none;
+      }
+      color: white;
+      background-color: @link-color;
+      box-shadow: @toolbar-icon-btn-hover-boxshadow;
+      &:hover {
+        color: white;
+      }
+    }
+  }
+
+  &.toolbar-pdf > a:not(.btn) {
+    margin-right: 3px;
+  }
+
+  .btn-full-height {
+    border: none;
+    border-radius: 0;
+    border-right: 1px solid @toolbar-header-btn-border-color;
+    color: @toolbar-btn-color;
+    padding: 3px 10px 5px;
+    font-size: 20px;
+    max-height: 39px;
+    &:hover {
+      text-shadow: @toolbar-btn-hover-text-shadow;
+      background-color: @toolbar-btn-hover-bg-color;
+      color: @toolbar-btn-hover-color;
+    }
+    &.active,
+    &:active {
+      color: @toolbar-btn-active-color;
+      background-color: @toolbar-btn-active-bg-color;
+      box-shadow: @toolbar-btn-active-shadow;
+    }
+    .label {
+      top: 4px;
+      right: 4px;
+    }
+
+    &.header-cobranding-logo-container {
+      height: @toolbar-height - 1;
+      padding: 8px 10px;
+      background-color: @toolbar-header-branded-btn-bg-color;
+    }
+  }
+  .btn-full-height-no-border {
+    border-right: 0;
+    border-left: 0;
+  }
+
+  .toolbar-left {
+    display: flex;
+    float: left;
+    text-align: center;
+    align-items: center;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: flex-end;
+    .btn-full-height {
+      border-right: 0;
+      border-left: 1px solid @toolbar-header-btn-border-color;
+    }
+  }
+
+  .toolbar-center {
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    // At small screen sizes, center relative to the left menu and right buttons
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  &.toolbar-header {
+    background-color: @toolbar-header-bg-color;
+    box-shadow: @toolbar-header-shadow;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+  }
+
+  &.toolbar-small {
+    .toolbar-small-mixin;
+  }
+
+  &.toolbar-tall {
+    .toolbar-small-mixin;
+  }
+
+  &.toolbar-alt {
+    .toolbar-alt-mixin;
+  }
+}
+
+.header-cobranding-logo {
+  display: block;
+  width: auto;
+  max-height: 100%;
+}
+
+.toolbar-small-mixin() {
+  height: @toolbar-small-height;
+}
+
+.toolbar-tall-mixin() {
+  height: @toolbar-tall-height;
+  padding-top: 10px;
+}
+.toolbar-alt-mixin() {
+  background-color: @toolbar-alt-bg-color;
+}
+
+.toolbar-label {
+  display: none;
+  margin: 0 4px;
+  font-size: @toolbar-font-size;
+  font-weight: 600;
+  margin-bottom: 2px;
+  vertical-align: middle;
+  text-align: left;
+
+  @media (min-width: @screen-md-min) {
+    display: inline-block;
+  }
+
+  &.toolbar-label-multiline {
+    line-height: 1.1;
+  }
+}
+
+.editor-dark {
+  .toolbar-alt {
+    background-color: darken(@editor-dark-background-color, 0%);
+  }
+  .toolbar {
+    border-color: @editor-dark-toolbar-border-color;
+    .btn-full-height {
+      border-color: @editor-dark-toolbar-border-color;
+      &:hover {
+        background-color: black;
+        color: lighten(@link-color, 10%);
+      }
+    }
+    &.toolbar-header {
+      box-shadow: none;
+    }
+    > a:not(.btn) {
+      color: @gray;
+      &:hover {
+        color: @gray-light;
+      }
+    }
+  }
+}
+
+/**************************************
+	Toggle Switch
+***************************************/
+
+.toggle-wrapper {
+  min-width: 200px;
+  height: 24px;
+}
+
+.toggle-switch {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background-color: @toggle-switch-bg;
+  border-radius: @btn-border-radius-base;
+}
+
+.toggle-switch-label {
+  position: relative;
+  display: block;
+  font-weight: normal;
+  z-index: 2;
+  float: left;
+  width: 50%;
+  height: 100%;
+  line-height: 24px;
+  text-align: center;
+  margin-bottom: 0;
+  cursor: pointer;
+  user-select: none;
+  color: @text-color;
+  transition: color 0.12s ease-out;
+}
+
+.toggle-switch-input {
+  position: absolute;
+  opacity: 0;
+}
+
+.toggle-switch-input:checked + .toggle-switch-label {
+  color: #fff;
+  font-weight: bold;
+}
+
+.toggle-switch-selection {
+  display: block;
+  position: absolute;
+  z-index: 1;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  width: calc(~'50% - 2px');
+  height: calc(~'100% - 4px');
+  background: @toggle-switch-highlight-color;
+  border-radius: @btn-border-radius-base 0 0 @btn-border-radius-base;
+  transition: transform 0.12s ease-out, border-radius 0.12s ease-out;
+}
+
+.toggle-switch-input:checked:nth-child(4) ~ .toggle-switch-selection {
+  transform: translate(100%);
+  border-radius: 0 @btn-border-radius-base @btn-border-radius-base 0;
+}
+
+/**************************************
+	Formatting buttons
+***************************************/
+.formatting-buttons {
+  width: 100%;
+  overflow: hidden;
+}
+
+.formatting-buttons-wrapper {
+  display: flex;
+}
+
+.formatting-btn {
+  color: @formatting-btn-color;
+  background-color: @formatting-btn-bg;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  border: none;
+  border-left: 1px solid @formatting-btn-border;
+  border-radius: 0;
+
+  &:hover {
+    color: @formatting-btn-color;
+  }
+
+  &.active {
+    color: @toolbar-btn-active-color;
+    background-color: @toolbar-btn-active-bg-color;
+    box-shadow: @toolbar-btn-active-shadow;
+  }
+
+  &:focus {
+    color: @formatting-btn-color;
+  }
+}
+
+.formatting-btn--icon {
+  min-width: 32px;
+  width: 32px;
+}
+
+.formatting-btn--icon:last-of-type {
+  border-right: 1px solid @formatting-btn-border;
+}
+
+.formatting-btn--more {
+  padding-left: 9px;
+  padding-right: 9px;
+
+  .caret {
+    margin-top: 1px;
+  }
+}
+
+.formatting-icon {
+  font-style: normal;
+  line-height: 1.5;
+}
+
+.formatting-icon--small {
+  font-size: small;
+  line-height: 1.9;
+}
+
+.formatting-icon--serif {
+  font-family: @font-family-serif;
+}
+
+.formatting-more {
+  margin-left: auto;
+}
+
+.formatting-menu {
+  min-width: auto;
+  max-width: 130px;
+  background-color: @formatting-menu-bg;
+}
+
+.formatting-menu-item {
+  float: left;
+}
+
+.formatting-menu-item > .formatting-btn {
+  border-right: none;
+}
+
+// Disable border on left-most icon in menu
+.formatting-menu-item:nth-of-type(4n + 1) > .formatting-btn {
+  border-left: none;
+}
+
+.toolbar.toolbar-pdf > a[disabled] {
+  cursor: not-allowed;
+  .opacity(0.65);
+  .box-shadow(none);
+}

@@ -1,0 +1,249 @@
+/*
+  v2
+  CMS Generated Pages, 
+  including About and Blog
+*/
+.cms-page {
+  padding-bottom: 0;
+  img {
+    height: auto;
+    max-width: 100%;
+  }
+  .btn-description {
+    margin-right: @margin-sm;
+  }
+
+  /*
+    Tabs
+  */
+  .tab-content {
+    padding: 0;
+    width: 100%;
+  }
+
+  /*
+    When on preview mode
+  */
+  .cms-preview {
+    background-color: @blue;
+    color: white;
+    font-weight: bold;
+    height: @navbar-padding-vertical;
+    left: 0;
+    line-height: @navbar-padding-vertical;
+    opacity: 0.8;
+    position: fixed;
+    text-align: center;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+    &:after {
+      content: 'Preview';
+      width: 100%;
+      top: 0;
+      left: 0;
+    }
+  }
+
+  .tab-pane {
+    .row:first-child {
+      margin-top: 0;
+    }
+  }
+
+  /*
+    quotes
+  */
+  blockquote {
+    margin: 0;
+    /*
+      type.less sets <p> inline, so that quotation mark is inline
+      but sometimes we have multiple <p>,
+      so hide quotation mark from type.less and add one here
+    */
+    &:before {
+      /* hide quotation from type.less */
+      display: none;
+    }
+    p {
+      display: block;
+    }
+    p:first-child {
+      /* below copied from type.less */
+      &:before {
+        content: open-quote;
+        font-size: @blockquote-font-size * 3;
+        color: @blockquote-border-color;
+        margin-right: 0.25em;
+        vertical-align: -0.4em;
+        line-height: 0.1em;
+      }
+    }
+  }
+  .quote-full-width {
+    img {
+      margin-right: @margin-sm;
+      margin-bottom: @margin-sm;
+    }
+  }
+
+  /*
+    Tables
+  */
+  .table-styled {
+    overflow: hidden;
+    overflow-x: auto;
+    table {
+      background: white;
+      max-width: none;
+      th,
+      td {
+        border: 1px solid @gray-lighter;
+        padding: @padding-sm;
+        text-align: center;
+        word-break: normal;
+      }
+    }
+  }
+  .table-styled,
+  .features-table {
+    .fa-check-square,
+    .fa-check {
+      color: @ol-green;
+    }
+  }
+  .features-table {
+    max-width: none;
+    th,
+    td {
+      border: 1px solid @gray-lighter;
+      hyphens: auto;
+      padding: @padding-sm;
+      text-align: center;
+    }
+    th,
+    td {
+      width: 20%;
+    }
+    .btn {
+      max-width: 100%;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    &.left-align-first-col {
+      td,
+      th {
+        text-align: left;
+      }
+      td + td,
+      th + th {
+        text-align: center;
+      }
+    }
+    .hidden-row-above-xs {
+      display: none;
+    }
+    @media screen and (max-width: @screen-xs-max) {
+      tbody,
+      thead {
+        display: block;
+      }
+      tr {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-around;
+      }
+
+      td,
+      th {
+        display: block;
+        width: 25%;
+      }
+      tr:first-child {
+        th {
+          width: 50%;
+        }
+        th:first-child {
+          width: 100%;
+        }
+      }
+
+      td:first-child {
+        text-align: center;
+        width: 100%;
+      }
+
+      .hidden-row-xs {
+        display: none;
+      }
+      .hidden-row-above-xs {
+        display: flex;
+      }
+      .table-header {
+        text-align: center;
+      }
+    }
+  }
+
+  /*
+    universities page
+  */
+  #universities-container {
+    padding: @padding-md;
+    width: 100%;
+    .row {
+      border-bottom: 1px solid @gray-lightest;
+      div {
+        padding: @padding-md;
+        vertical-align: middle;
+      }
+    }
+    .row:first-child {
+      // parent container contains padding
+      div {
+        padding-top: 0;
+      }
+    }
+    .row:last-child {
+      border: 0;
+      // parent container contains padding
+      div {
+        border: 0;
+        padding-bottom: 0;
+      }
+    }
+    p {
+      margin: 0 auto;
+      width: 100%;
+    }
+    // Logos
+    .uni-logo {
+      margin: 0 auto;
+      max-height: 55px;
+      min-width: 55px;
+    }
+    .university-claim-btn {
+      text-align: center;
+    }
+    @media only screen and (min-width: @screen-xs-min) {
+      display: table;
+      table-layout: fixed;
+      .row {
+        display: table-row;
+        div {
+          border-bottom: 1px solid @gray-lightest;
+          display: table-cell;
+          float: none;
+        }
+      }
+    }
+  }
+
+  /*
+    videos
+  */
+  video {
+    height: auto;
+    max-width: 100%;
+  }
+}

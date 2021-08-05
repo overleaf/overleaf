@@ -1,0 +1,628 @@
+#review-panel
+	.rp-in-editor-widgets
+		a.rp-track-changes-indicator(
+			href
+			ng-if="editor.wantTrackChanges"
+			ng-click="toggleReviewPanel();"
+			ng-class="{ 'rp-track-changes-indicator-on-dark' : darkTheme }"
+		) !{translate("track_changes_is_on")}
+		a.rp-bulk-actions-btn(
+			href
+			ng-if="reviewPanel.nVisibleSelectedChanges > 1"
+			ng-click="showBulkAcceptDialog();"
+		)
+			i.fa.fa-check
+			| &nbsp;#{translate("accept_all")}
+			| ({{ reviewPanel.nVisibleSelectedChanges }})
+		a.rp-bulk-actions-btn(
+			href
+			ng-if="reviewPanel.nVisibleSelectedChanges > 1"
+			ng-click="showBulkRejectDialog();"
+		)
+			i.fa.fa-times
+			| &nbsp;#{translate("reject_all")}
+			| ({{ reviewPanel.nVisibleSelectedChanges }})
+		if hasFeature('track-changes')
+			a.rp-add-comment-btn(
+				href
+				ng-if="reviewPanel.entries[editor.open_doc_id]['add-comment'] != null && permissions.comment"
+				ng-click="addNewComment();"
+			)
+				i.fa.fa-comment
+				| &nbsp;#{translate("add_comment")}
+	a.review-panel-toggler(
+		href
+		ng-click="handleTogglerClick($event);"
+	)
+	.review-panel-toolbar
+		resolved-comments-dropdown(
+			class="rp-flex-block"
+			entries="reviewPanel.resolvedComments"
+			threads="reviewPanel.commentThreads"
+			resolved-ids="reviewPanel.resolvedThreadIds"
+			docs="docs"
+			on-open="refreshResolvedCommentsDropdown();"
+			on-unresolve="unresolveComment(threadId);"
+			on-delete="deleteThread(entryId, docId, threadId);"
+			is-loading="reviewPanel.dropdown.loading"
+			permissions="permissions"
+		)
+		span.review-panel-toolbar-label
+			span.review-panel-toolbar-icon-on(
+				ng-if="editor.wantTrackChanges === true"
+			)
+				i.fa.fa-circle
+			span(ng-click="toggleFullTCStateCollapse();")
+				span(ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
+				span(ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
+				span.rp-tc-state-collapse(
+					ng-class="{ 'rp-tc-state-collapse-on': reviewPanel.fullTCStateCollapsed }"
+				)
+					i.fa.fa-angle-down
+		ul.rp-tc-state(
+			review-panel-collapse-height="reviewPanel.fullTCStateCollapsed"
+		)
+			li.rp-tc-state-item.rp-tc-state-item-everyone
+				span.rp-tc-state-item-name(
+					tooltip=translate('tc_switch_everyone_tip')
+					tooltip-placement="left"
+					tooltip-append-to-body="true"
+					tooltip-popup-delay="1000"
+				) !{translate("tc_everyone")}
+				review-panel-toggle(
+					description="Track changes for everyone"
+					ng-model="reviewPanel.trackChangesOnForEveryone"
+					on-toggle="toggleTrackChangesForEveryone(isOn);"
+					is-disabled="!project.features.trackChanges || !permissions.write"
+				)
+			li.rp-tc-state-item(
+				ng-repeat="member in reviewPanel.formattedProjectMembers"
+			)
+				span.rp-tc-state-item-name(
+					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
+					style="color: hsl({{ member.hue }}, 70%, 40%);"
+					tooltip=translate('tc_switch_user_tip')
+					tooltip-placement="left"
+					tooltip-append-to-body="true"
+					tooltip-popup-delay="1000"
+				) {{ member.name }}
+				review-panel-toggle(
+					description="Track changes for {{ member.name }}"
+					ng-model="reviewPanel.trackChangesState[member.id].value"
+					on-toggle="toggleTrackChangesForUser(isOn, member.id);"
+					is-disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
+				)
+
+			li.rp-tc-state-separator
+			li.rp-tc-state-item.rp-tc-state-item-guests
+				span.rp-tc-state-item-name(
+					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
+					tooltip=translate('tc_switch_guests_tip')
+					tooltip-placement="left"
+					tooltip-append-to-body="true"
+					tooltip-popup-delay="1000"
+				) !{translate("tc_guests")}
+				review-panel-toggle(
+					description="Track changes for guests"
+					ng-model="reviewPanel.trackChangesOnForGuests"
+					on-toggle="toggleTrackChangesForGuests(isOn);"
+					is-disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write || !reviewPanel.trackChangesForGuestsAvailable"
+				)
+
+	.rp-entry-list(
+		review-panel-sorted
+		ng-if="reviewPanel.subView === SubViews.CUR_FILE"
+	)
+		.rp-entry-list-inner
+			.rp-entry-wrapper(
+				ng-repeat="(entry_id, entry) in reviewPanel.entries[editor.open_doc_id]"
+				ng-if="entry.visible"
+			)
+				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
+					change-entry(
+						entry="entry"
+						user="users[entry.metadata.user_id]"
+						on-reject="rejectChanges(entry.entry_ids);"
+						on-accept="acceptChanges(entry.entry_ids);"
+						on-indicator-click="toggleReviewPanel();"
+						on-body-click="gotoEntry(editor.open_doc_id, entry)"
+						permissions="permissions"
+					)
+
+				div(ng-if="entry.type === 'aggregate-change'")
+					aggregate-change-entry(
+						entry="entry"
+						user="users[entry.metadata.user_id]"
+						on-reject="rejectChanges(entry.entry_ids);"
+						on-accept="acceptChanges(entry.entry_ids);"
+						on-indicator-click="toggleReviewPanel();"
+						on-body-click="gotoEntry(editor.open_doc_id, entry)"
+						permissions="permissions"
+					)
+
+				div(ng-if="entry.type === 'comment'")
+					comment-entry(
+						entry="entry"
+						threads="reviewPanel.commentThreads"
+						on-resolve="resolveComment(entry, entry_id)"
+						on-reply="submitReply(entry, entry_id);"
+						on-indicator-click="toggleReviewPanel();"
+						on-save-edit="saveEdit(entry.thread_id, comment)"
+						on-delete="deleteComment(entry.thread_id, comment)"
+						on-body-click="gotoEntry(editor.open_doc_id, entry)"
+						permissions="permissions"
+						ng-if="!reviewPanel.loadingThreads"
+					)
+
+				div(ng-if="entry.type === 'add-comment' && permissions.comment")
+					add-comment-entry(
+						on-start-new="startNewComment();"
+						on-submit="submitNewComment(content);"
+						on-cancel="cancelNewComment();"
+					)
+				div(ng-if="entry.type === 'bulk-actions'")
+					bulk-actions-entry(
+						on-bulk-accept="showBulkAcceptDialog();"
+						on-bulk-reject="showBulkRejectDialog();"
+						n-entries="reviewPanel.nVisibleSelectedChanges"
+					)
+
+	.rp-entry-list(
+		ng-if="reviewPanel.subView === SubViews.OVERVIEW"
+	)
+		.rp-loading(ng-if="reviewPanel.overview.loading")
+			i.fa.fa-spinner.fa-spin
+		.rp-overview-file(
+			ng-repeat="doc in docs"
+			ng-if="!reviewPanel.overview.loading"
+		)
+			.rp-overview-file-header(
+				ng-if="(reviewPanel.entries[doc.doc.id] != null) && (reviewPanel.entries[doc.doc.id] | notEmpty)"
+				ng-click="reviewPanel.overview.docsCollapsedState[doc.doc.id] = ! reviewPanel.overview.docsCollapsedState[doc.doc.id]"
+			)
+				span.rp-overview-file-header-collapse(
+					ng-class="{ 'rp-overview-file-header-collapse-on': reviewPanel.overview.docsCollapsedState[doc.doc.id] }"
+				)
+					i.fa.fa-angle-down
+				| {{ doc.path }}
+				span.rp-overview-file-num-entries(
+					ng-show="reviewPanel.overview.docsCollapsedState[doc.doc.id]"
+				) &nbsp;({{ reviewPanel.entries[doc.doc.id] | numKeys }})
+
+			.rp-overview-file-entries(
+				review-panel-collapse-height="reviewPanel.overview.docsCollapsedState[doc.doc.id]"
+			)
+				.rp-entry-wrapper(
+					ng-repeat="(entry_id, entry) in reviewPanel.entries[doc.doc.id] | orderOverviewEntries"
+					ng-if="!(entry.type === 'comment' && reviewPanel.commentThreads[entry.thread_id].resolved === true)"
+				)
+					div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
+						change-entry(
+							entry="entry"
+							user="users[entry.metadata.user_id]"
+							ng-click="gotoEntry(doc.doc.id, entry)"
+							permissions="permissions"
+						)
+
+					div(ng-if="entry.type === 'aggregate-change'")
+						aggregate-change-entry(
+							entry="entry"
+							user="users[entry.metadata.user_id]"
+							ng-click="gotoEntry(editor.open_doc_id, entry)"
+							permissions="permissions"
+						)
+
+					div(ng-if="entry.type === 'comment'")
+						comment-entry(
+							entry="entry"
+							threads="reviewPanel.commentThreads"
+							on-reply="submitReply(entry, entry_id);"
+							on-save-edit="saveEdit(entry.thread_id, comment)"
+							on-delete="deleteComment(entry.thread_id, comment)"
+							ng-click="gotoEntry(doc.doc.id, entry)"
+							permissions="permissions"
+						)
+
+	.rp-nav
+		a.rp-nav-item(
+			href
+			ng-click="setSubView(SubViews.CUR_FILE);"
+			ng-class="{ 'rp-nav-item-active' : reviewPanel.subView === SubViews.CUR_FILE }"
+		)
+			i.fa.fa-file-text-o
+			span.rp-nav-label #{translate("current_file")}
+		a.rp-nav-item(
+			href
+			ng-click="setSubView(SubViews.OVERVIEW);"
+			ng-class="{ 'rp-nav-item-active' : reviewPanel.subView === SubViews.OVERVIEW }"
+		)
+			i.fa.fa-list
+			span.rp-nav-label #{translate("overview")}
+
+	.rp-unsupported-msg-wrapper
+		.rp-unsupported-msg
+			i.fa.fa-5x.fa-exclamation-triangle
+			p.rp-unsupported-msg-title Track Changes support in rich text mode is a work in progress.
+			p You can see tracked insertions and deletions, but you can't see comments and changes in this side bar yet.
+			p We're working hard to add them as soon as they're ready.
+
+
+script(type='text/ng-template', id='changeEntryTemplate')
+	div
+		.rp-entry-callout(
+			ng-class="'rp-entry-callout-' + entry.type"
+		)
+		.rp-entry-indicator(
+			ng-switch="entry.type"
+			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
+			ng-click="onIndicatorClick();"
+		)
+			i.fa.fa-pencil(ng-switch-when="insert")
+			i.rp-icon-delete(ng-switch-when="delete")
+		.rp-entry(
+			ng-class="[ 'rp-entry-' + entry.type, (entry.focused ? 'rp-entry-focused' : '')]"
+		)
+			.rp-entry-body
+				.rp-entry-action-icon(ng-switch="entry.type")
+					i.fa.fa-pencil(ng-switch-when="insert")
+					i.rp-icon-delete(ng-switch-when="delete")
+				.rp-entry-details
+					.rp-entry-description(ng-switch="entry.type")
+						span(ng-switch-when="insert") #{translate("tracked_change_added")}&nbsp;
+							ins.rp-content-highlight {{ entry.content | limitTo:(isCollapsed ? contentLimit : entry.content.length) }}
+							a.rp-collapse-toggle(
+								href
+								ng-if="needsCollapsing"
+								ng-click="toggleCollapse();"
+							) {{ isCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+						span(ng-switch-when="delete") #{translate("tracked_change_deleted")}&nbsp;
+							del.rp-content-highlight {{ entry.content | limitTo:(isCollapsed ? contentLimit : entry.content.length) }}
+							a.rp-collapse-toggle(
+								href
+								ng-if="needsCollapsing"
+								ng-click="toggleCollapse();"
+							) {{ isCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+					.rp-entry-metadata
+						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
+						span.rp-entry-user(ng-switch="user.name" style="color: hsl({{ user.hue }}, 70%, 40%);")
+							span(ng-switch-when="undefined") #{translate("anonymous")}
+							span(ng-switch-default) {{ user.name }}
+			.rp-entry-actions(ng-if="permissions.write")
+				a.rp-entry-button(href, ng-click="onReject();")
+					i.fa.fa-times
+					| &nbsp;#{translate("reject")}
+				a.rp-entry-button(href, ng-click="onAccept();")
+					i.fa.fa-check
+					| &nbsp;#{translate("accept")}
+
+script(type='text/ng-template', id='aggregateChangeEntryTemplate')
+	div
+		.rp-entry-callout.rp-entry-callout-aggregate
+		.rp-entry-indicator(
+			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
+			ng-click="onIndicatorClick();"
+		)
+			i.fa.fa-pencil
+		.rp-entry.rp-entry-aggregate(
+			ng-class="{ 'rp-entry-focused': entry.focused }"
+		)
+			.rp-entry-body
+				.rp-entry-action-icon
+					i.fa.fa-pencil
+				.rp-entry-details
+					.rp-entry-description
+						| #{translate("aggregate_changed")}&nbsp;
+						del.rp-content-highlight
+							| {{ entry.metadata.replaced_content | limitTo:(isDeletionCollapsed ? contentLimit : entry.metadata.replaced_contentlength) }}
+						a.rp-collapse-toggle(
+							href
+							ng-if="deletionNeedsCollapsing"
+							ng-click="toggleDeletionCollapse();"
+						) {{ isDeletionCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+						|  #{translate("aggregate_to")}&nbsp;
+						ins.rp-content-highlight
+							| {{ entry.content | limitTo:(isInsertionCollapsed ? contentLimit : entry.contentlength) }}
+						a.rp-collapse-toggle(
+							href
+							ng-if="insertionNeedsCollapsing"
+							ng-click="toggleInsertionCollapse();"
+						) {{ isInsertionCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+					.rp-entry-metadata
+						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
+						span.rp-entry-user(ng-switch="user.name" style="color: hsl({{ user.hue }}, 70%, 40%);")
+							span(ng-switch-when="undefined") #{translate("anonymous")}
+							span(ng-switch-default) {{ user.name }}
+			.rp-entry-actions(ng-if="permissions.write")
+				a.rp-entry-button(href, ng-click="onReject();")
+					i.fa.fa-times
+					| &nbsp;#{translate("reject")}
+				a.rp-entry-button(href, ng-click="onAccept();")
+					i.fa.fa-check
+					| &nbsp;#{translate("accept")}
+
+script(type='text/ng-template', id='commentEntryTemplate')
+	.rp-comment-wrapper(
+		ng-class="{ 'rp-comment-wrapper-resolving': state.animating }"
+	)
+		.rp-entry-callout.rp-entry-callout-comment
+		.rp-entry-indicator(
+			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
+			ng-click="onIndicatorClick();"
+		)
+			i.fa.fa-comment
+		.rp-entry.rp-entry-comment(
+			ng-class="{ 'rp-entry-focused': entry.focused, 'rp-entry-comment-resolving': state.animating }"
+		)
+
+			.rp-loading(ng-if="!threads[entry.thread_id].submitting && (!threads[entry.thread_id] || threads[entry.thread_id].messages.length == 0)")
+				| #{translate("no_comments")}
+			.rp-comment-loaded
+				.rp-comment(
+					ng-repeat="comment in threads[entry.thread_id].messages track by comment.id"
+				)
+					p.rp-comment-content
+						span(ng-if="!comment.editing")
+							span.rp-entry-user(
+								style="color: hsl({{ comment.user.hue }}, 70%, 40%);",
+							) {{ comment.user.name }}:&nbsp;
+							span(ng-bind-html="comment.content | linky:'_blank':{rel: 'noreferrer noopener'}")
+						textarea.rp-comment-input(
+							expandable-text-area
+							ng-if="comment.editing"
+							ng-model="comment.content"
+							ng-keypress="saveEditOnEnter($event, comment);"
+							ng-blur="saveEdit(comment)"
+							autofocus
+							stop-propagation="click"
+						)
+					.rp-entry-metadata(ng-if="!comment.editing")
+						span(ng-if="!comment.deleting") {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
+						span.rp-comment-actions(ng-if="comment.user.isSelf && !comment.deleting")
+							| &nbsp;&bull;&nbsp;
+							a(href, ng-click="startEditing(comment)") #{translate("edit")}
+							span(ng-if="threads[entry.thread_id].messages.length > 1")
+								| &nbsp;&bull;&nbsp;
+								a(href, ng-click="confirmDelete(comment)") #{translate("delete")}
+						span.rp-confim-delete(ng-if="comment.user.isSelf && comment.deleting")
+							| #{translate("are_you_sure")}
+							| &bull;&nbsp;
+							a(href, ng-click="doDelete(comment)") #{translate("delete")}
+							| &nbsp;&bull;&nbsp;
+							a(href, ng-click="cancelDelete(comment)") #{translate("cancel")}
+
+			.rp-loading(ng-if="threads[entry.thread_id].submitting")
+				i.fa.fa-spinner.fa-spin
+			.rp-comment-reply(ng-if="permissions.comment")
+				textarea.rp-comment-input(
+					expandable-text-area
+					ng-model="entry.replyContent"
+					ng-keypress="handleCommentReplyKeyPress($event);"
+					stop-propagation="click"
+					placeholder=translate("hit_enter_to_reply")
+				)
+			.rp-entry-actions
+				button.rp-entry-button(
+					ng-click="animateAndCallOnResolve();"
+					ng-if="permissions.comment && permissions.write"
+				)
+					i.fa.fa-inbox
+					| &nbsp;#{translate("resolve")}
+				button.rp-entry-button(
+					ng-click="onReply();"
+					ng-if="permissions.comment"
+					ng-disabled="!entry.replyContent.length"
+				)
+					i.fa.fa-reply
+					| &nbsp;#{translate("reply")}
+
+script(type='text/ng-template', id='resolvedCommentEntryTemplate')
+	.rp-resolved-comment
+		div
+			.rp-resolved-comment-context
+				| #{translate("quoted_text_in")}&nbsp;
+				span.rp-resolved-comment-context-file {{ thread.docName }}
+				p.rp-resolved-comment-context-quote
+					span {{ thread.content | limitTo:(isCollapsed ? contentLimit : thread.content.length)}}
+					a.rp-collapse-toggle(
+						href
+						ng-if="needsCollapsing"
+						ng-click="toggleCollapse();"
+					) &nbsp;{{ isCollapsed ? '… (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+			.rp-comment(
+				ng-repeat="comment in thread.messages track by comment.id"
+			)
+				p.rp-comment-content
+					span.rp-entry-user(
+						style="color: hsl({{ comment.user.hue }}, 70%, 40%);"
+						ng-if="$first || comment.user.id !== thread.messages[$index - 1].user.id"
+					) {{ comment.user.name }}:&nbsp;
+					span(ng-bind-html="comment.content | linky:'_blank':{rel: 'noreferrer noopener'}")
+				.rp-entry-metadata
+					| {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
+			.rp-comment.rp-comment-resolver
+				p.rp-comment-resolver-content
+					span.rp-entry-user(
+						style="color: hsl({{ thread.resolved_by_user.hue }}, 70%, 40%);"
+					) {{ thread.resolved_by_user.name }}:&nbsp;
+					| #{translate("mark_as_resolved")}.
+				.rp-entry-metadata
+					| {{ thread.resolved_at | date : 'MMM d, y h:mm a' }}
+
+		.rp-entry-actions(ng-if="permissions.comment && permissions.write")
+			a.rp-entry-button(
+				href
+				ng-click="onUnresolve({ 'threadId': thread.threadId });"
+			)
+				| &nbsp;#{translate("reopen")}
+			a.rp-entry-button(
+				href
+				ng-click="onDelete({ 'entryId': thread.entryId, 'docId': thread.docId, 'threadId': thread.threadId });"
+			)
+				| &nbsp;#{translate("delete")}
+
+
+script(type='text/ng-template', id='addCommentEntryTemplate')
+	div
+		.rp-entry-callout.rp-entry-callout-add-comment
+		.rp-entry.rp-entry-add-comment(
+			ng-class="[ (state.isAdding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
+		)
+			a.rp-add-comment-btn(
+				href
+				ng-if="!state.isAdding"
+				ng-click="startNewComment();"
+			)
+				i.fa.fa-comment
+				| &nbsp;#{translate("add_comment")}
+			div(ng-if="state.isAdding")
+				.rp-new-comment
+					textarea.rp-comment-input(
+						expandable-text-area
+						ng-model="state.content"
+						ng-keypress="handleCommentKeyPress($event);"
+						placeholder=translate("add_your_comment_here")
+						focus-on="comment:new:open"
+					)
+				.rp-entry-actions
+					button.rp-entry-button.rp-entry-button-cancel(
+						ng-click="cancelNewComment();"
+					)
+						i.fa.fa-times
+						| &nbsp;#{translate("cancel")}
+					button.rp-entry-button(
+						ng-click="submitNewComment()"
+						ng-disabled="!state.content.length"
+					)
+						i.fa.fa-comment
+						| &nbsp;#{translate("comment")}
+
+script(type='text/ng-template', id='bulkActionsEntryTemplate')
+	div(ng-if="nEntries > 1")
+		.rp-entry-callout.rp-entry-callout-bulk-actions
+		.rp-entry.rp-entry-bulk-actions
+			a.rp-bulk-actions-btn(
+				href
+				ng-click="bulkReject();"
+			)
+				i.fa.fa-times
+				| &nbsp;#{translate("reject_all")}
+				| ({{ nEntries }})
+			a.rp-bulk-actions-btn(
+				href
+				ng-click="bulkAccept();"
+			)
+				i.fa.fa-check
+				| &nbsp;#{translate("accept_all")}
+				| ({{ nEntries }})
+
+script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
+	.resolved-comments
+		.resolved-comments-backdrop(
+			ng-class="{ 'resolved-comments-backdrop-visible' : state.isOpen }"
+			ng-click="state.isOpen = false"
+		)
+		a.resolved-comments-toggle(
+			href
+			ng-click="toggleOpenState();"
+			tooltip=translate("resolved_comments")
+			tooltip-placement="bottom"
+			tooltip-append-to-body="true"
+		)
+			i.fa.fa-inbox
+		.resolved-comments-dropdown(
+			ng-class="{ 'resolved-comments-dropdown-open' : state.isOpen }"
+		)
+			.rp-loading(ng-if="isLoading")
+				i.fa.fa-spinner.fa-spin
+			.resolved-comments-scroller(
+				ng-if="!isLoading"
+			)
+				resolved-comment-entry(
+					ng-repeat="thread in resolvedComments | orderBy:'resolved_at':true"
+					thread="thread"
+					on-unresolve="handleUnresolve(threadId);"
+					on-delete="handleDelete(entryId, docId, threadId);"
+					permissions="permissions"
+				)
+				.rp-loading(ng-if="!resolvedComments.length")
+					| #{translate("no_resolved_threads")}.
+
+script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3 #{translate("upgrade_to_track_changes")}
+	.modal-body
+		.teaser-video-container
+			video.teaser-video(autoplay, loop)
+				source(ng-src="{{ '/img/teasers/track-changes/teaser-track-changes.mp4' }}", type="video/mp4")
+				img(src="/img/teasers/track-changes/teaser-track-changes.gif")
+
+		h4.teaser-title #{translate("see_changes_in_your_documents_live")}
+
+		p.small(ng-show="startedFreeTrial")
+			| #{translate("refresh_page_after_starting_free_trial")}
+
+		.row
+			.col-md-10.col-md-offset-1
+				ul.list-unstyled
+					li
+						i.fa.fa-check &nbsp;
+						| #{translate("track_any_change_in_real_time")}
+
+					li
+						i.fa.fa-check &nbsp;
+						| #{translate("review_your_peers_work")}
+
+					li
+						i.fa.fa-check &nbsp;
+						| #{translate("accept_or_reject_each_changes_individually")}
+
+		.row.text-center
+			div(ng-show="user.allowedFreeTrial" ng-controller="FreeTrialModalController")
+				a.btn.btn-success(
+					href
+					ng-click="startFreeTrial('track-changes')"
+					ng-show="project.owner._id == user.id"
+				) #{translate("try_it_for_free")}
+			div(ng-show="!user.allowedFreeTrial" ng-controller="UpgradeModalController")
+				a.btn.btn-success(
+					href
+					ng-click="upgradePlan('project-sharing')"
+					ng-show="project.owner._id == user.id"
+				) #{translate("upgrade")}
+			p(ng-show="project.owner._id != user.id"): strong #{translate("please_ask_the_project_owner_to_upgrade_to_track_changes")}
+
+	.modal-footer()
+		button.btn.btn-default(
+			ng-click="cancel()"
+		)
+			span #{translate("close")}
+
+script(type="text/ng-template", id="bulkActionsModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3 {{ isAccept ? '#{translate("accept_all")}' : '#{translate("reject_all")}' }}
+	.modal-body
+		p(ng-if="isAccept") #{translate("bulk_accept_confirm", { nChanges: "{{ nChanges }}"})}
+		p(ng-if="!isAccept") #{translate("bulk_reject_confirm", { nChanges: "{{ nChanges }}"})}
+	.modal-footer()
+		button.btn.btn-default(
+			ng-click="cancel()"
+		)
+			span #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-click="confirm()"
+		)
+			span #{translate("ok")}

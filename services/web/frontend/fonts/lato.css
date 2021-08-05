@@ -1,0 +1,24 @@
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Lato Light'), local('Lato-Light'),
+    url('lato-v16-latin-ext-300.woff2') format('woff2'),
+    url('lato-v16-latin-ext-300.woff') format('woff');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Lato Regular'), local('Lato-Regular'),
+    url('lato-v16-latin-ext-regular.woff2') format('woff2'),
+    url('lato-v16-latin-ext-regular.woff') format('woff');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Lato Bold'), local('Lato-Bold'),
+    url('lato-v16-latin-ext-700.woff2') format('woff2'),
+    url('lato-v16-latin-ext-700.woff') format('woff');
+}

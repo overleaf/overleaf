@@ -1,0 +1,116 @@
+.modal-body-share {
+  h3 {
+    border-bottom: 1px solid @gray-lighter;
+    padding-bottom: @line-height-computed / 4;
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .project-member.form-group {
+    margin-bottom: 0;
+  }
+
+  .project-member .form-control-static.text-center {
+    padding-top: 0;
+  }
+
+  .project-member .remove-button {
+    font-size: inherit;
+  }
+
+  .project-member,
+  .project-invite,
+  .public-access-level {
+    padding: (@line-height-computed / 2) 0;
+    border-bottom: 1px solid @gray-lighter;
+    font-size: 14px;
+  }
+
+  .public-access-level {
+    padding-top: 0;
+    font-size: 13px;
+    padding-bottom: @modal-inner-padding;
+    .access-token-display-area {
+      margin-top: @line-height-computed / 4;
+      .access-token-wrapper {
+        padding-top: @line-height-computed / 4;
+        .access-token {
+          margin-top: @line-height-computed / 4;
+          background-color: @gray-lightest;
+          border: 1px solid @gray-lighter;
+          padding: 6px 12px 6px 12px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+    }
+  }
+
+  .public-access-level.public-access-level--notice {
+    background-color: @gray-lightest;
+    border-bottom: none;
+    margin-top: @margin-md;
+    padding-top: @margin-md;
+  }
+
+  .project-member,
+  .project-invite {
+    &:hover {
+      background-color: @gray-lightest;
+    }
+  }
+
+  .invite-controls {
+    .small {
+      padding: 2px;
+      margin-bottom: 0;
+    }
+    padding: @line-height-computed / 2;
+    background-color: @gray-lightest;
+    margin-top: @line-height-computed / 2;
+    form {
+      .form-group {
+        margin-bottom: @line-height-computed / 2;
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+      .privileges {
+        display: inline-block;
+        width: auto;
+        height: 30px;
+        font-size: 14px;
+      }
+    }
+    .add-collaborators-upgrade {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  .rbt-menu > .dropdown-item {
+    display: block;
+    padding: 0.25rem 1rem;
+    color: #212529;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:hover {
+      text-decoration: none;
+      background-color: @gray-lightest;
+    }
+  }
+}
+.modal-footer-share {
+  .modal-footer-left {
+    max-width: 70%;
+    text-align: left;
+  }
+}
+
+.copy-button:focus-within {
+  outline: none;
+}

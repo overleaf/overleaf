@@ -1,0 +1,24 @@
+each managedGroupSubscription in managedGroupSubscriptions
+	p
+		| You are a manager of
+		|
+		+teamName(managedGroupSubscription)
+	p
+		a.btn.btn-primary(href="/manage/groups/" + managedGroupSubscription._id + "/members")
+			i.fa.fa-fw.fa-users
+			| &nbsp;
+			| Manage members
+		| &nbsp;
+	p
+		a(href="/manage/groups/" + managedGroupSubscription._id + "/managers")
+			i.fa.fa-fw.fa-users
+			| &nbsp;
+			| Manage group managers
+		| &nbsp;
+	p
+		a(href="/metrics/groups/" + managedGroupSubscription._id)
+			i.fa.fa-fw.fa-line-chart
+			| &nbsp;
+			| View metrics
+
+	hr

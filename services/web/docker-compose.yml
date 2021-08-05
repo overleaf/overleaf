@@ -1,0 +1,86 @@
+version: "2.3"
+
+volumes:
+  data:
+
+services:
+
+  test_unit:
+    build:
+      context: .
+      target: base
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      BASE_CONFIG:
+      SHARELATEX_CONFIG:
+      MOCHA_GREP: ${MOCHA_GREP}
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+    command: npm run --silent test:unit:app
+    user: node
+
+  test_acceptance:
+    image: node:12.22.3
+    volumes:
+      - .:/app
+    working_dir: /app
+    env_file: docker-compose.common.env
+    environment:
+      BASE_CONFIG:
+      SHARELATEX_CONFIG:
+      MOCHA_GREP: ${MOCHA_GREP}
+      MONGO_SERVER_SELECTION_TIMEOUT: 600000
+      MONGO_SOCKET_TIMEOUT: 300000
+      # SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
+
+    extra_hosts:
+      - 'www.overleaf.test:127.0.0.1'
+    depends_on:
+      - redis
+      - mongo
+      - saml
+      - ldap
+    command: npm run --silent test:acceptance:app
+
+  test_karma:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    volumes:
+      - .:/app
+    environment:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+    working_dir: /app
+    command: npm run --silent test:karma:single
+
+  test_frontend:
+    build:
+      context: .
+      target: base
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      MOCHA_GREP: ${MOCHA_GREP}
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+    command: npm run --silent test:frontend
+    user: node
+
+  redis:
+    image: redis
+
+  mongo:
+    image: mongo:4.0.19
+
+  ldap:
+    restart: always
+    image: rroemhild/test-openldap:1.1
+
+  saml:
+      restart: always
+      image: gcr.io/overleaf-ops/saml-test
+      environment:
+          SAML_BASE_URL_PATH: 'http://saml/simplesaml/'
+          SAML_TEST_SP_ENTITY_ID: 'sharelatex-test-saml'
+          SAML_TEST_SP_LOCATION: 'http://www.overleaf.test:3000/saml/callback'

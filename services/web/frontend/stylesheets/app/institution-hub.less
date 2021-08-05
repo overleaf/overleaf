@@ -1,0 +1,38 @@
+#institution-hub {
+  .section_header {
+    .dropdown {
+      margin-right: 10px;
+    }
+  }
+
+  #usage {
+    .recent-activity {
+      .overbox {
+        font-size: 16px;
+      }
+      .hub-big-number,
+      .hub-number-label,
+      .worked-on {
+        display: block;
+        width: 50%;
+      }
+      .hub-big-number {
+        padding-right: 10px;
+        text-align: right;
+      }
+      .hub-number-label,
+      .worked-on {
+        float: right;
+      }
+      .hub-number-label {
+        &:nth-child(odd) {
+          margin-top: 16px;
+        }
+      }
+      .worked-on {
+        color: @text-small-color;
+        font-style: italic;
+      }
+    }
+  }
+}

@@ -1,0 +1,386 @@
+include ../../_mixins/reconfirm_affiliation
+
+mixin aboutInstitutionLink()
+	a(href="/learn/how-to/Institutional_Login") #{translate("find_out_more_about_institution_login")}.
+
+mixin btnMakePrimaryDisabled(tooltip)
+	div(
+		tooltip=tooltip
+		tooltip-enable="!ui.isMakingRequest"
+	)
+		button.btn.btn-sm.btn-success.affiliations-table-inline-action(
+			disabled
+			type="button"
+		) #{translate("make_primary")}
+
+mixin btnRemoveEmail()
+	.affiliations-table-inline-action-disabled-wrapper(ng-if="userEmail.default")
+		div(
+			tooltip=translate("please_change_primary_to_remove")
+			tooltip-enable="!ui.isMakingRequest"
+			tooltip-placement="left"
+		)
+			button.btn.btn-sm.btn-danger(disabled)
+				i.fa.fa-fw.fa-trash(aria-hidden="true")
+				span.sr-only #{translate("please_change_primary_to_remove")}
+	button.btn.btn-sm.btn-danger.affiliations-table-inline-action(
+		ng-if="!userEmail.default"
+		ng-click="removeUserEmail(userEmail)"
+		ng-disabled="ui.isMakingRequest"
+		tooltip=translate("remove")
+		type="button"
+	)
+		i.fa.fa-fw.fa-trash(aria-hidden="true")
+		span.sr-only #{translate("remove")}
+
+form.row(
+	ng-controller="UserAffiliationsController"
+	name="affiliationsForm"
+)
+	.col-md-12
+		h3 #{translate("emails_and_affiliations_title")}
+		p.small #{translate("emails_and_affiliations_explanation")}
+		table.table.affiliations-table
+			thead
+				tr
+					th.affiliations-table-email  #{translate("email")}
+					th.affiliations-table-institution  #{translate("institution_and_role")}
+					th.affiliations-table-inline-actions
+			tbody
+				tr(
+					ng-repeat-start="userEmail in userEmails"
+				)
+					td
+						| {{ userEmail.email + (userEmail.default ? ' (primary)' : '') }}
+						div(ng-if="!userEmail.confirmedAt").small
+							strong #{translate('unconfirmed')}.
+								span(ng-if="!userEmail.ssoAvailable") &nbsp;#{translate('please_check_your_inbox')}.
+							br
+							a(
+								href,
+								ng-click="resendConfirmationEmail(userEmail)",
+								ng-if="!userEmail.ssoAvailable"
+							) #{translate('resend_confirmation_email')}
+						div(ng-if="userEmail.confirmedAt && userEmail.affiliation.institution && userEmail.affiliation.institution.confirmed && userEmail.affiliation.licence && userEmail.affiliation.licence != 'free'").small
+							span.label.label-primary #{translate("professional")}
+					td
+						div(ng-if="userEmail.affiliation.institution")
+							div {{ userEmail.affiliation.institution.name }}
+							span.small
+								a(
+									href
+									ng-if="!isChangingAffiliation(userEmail.email) && !userEmail.affiliation.role && !userEmail.affiliation.department"
+									ng-click="changeAffiliation(userEmail);"
+								)  #{translate("add_role_and_department")}
+							div.small(
+								ng-if="!isChangingAffiliation(userEmail.email) && (userEmail.affiliation.role || userEmail.affiliation.department)"
+							)
+								span(ng-if="userEmail.affiliation.role") {{ userEmail.affiliation.role }}
+								span(ng-if="userEmail.affiliation.role && userEmail.affiliation.department") ,&ensp;
+								span(ng-if="userEmail.affiliation.department") {{ userEmail.affiliation.department }}
+								br
+								a(
+									href
+									ng-click="changeAffiliation(userEmail);"
+								) #{translate("change")}
+							.affiliation-change-container(
+								ng-if="isChangingAffiliation(userEmail.email)"
+							)
+								affiliation-form(
+									affiliation-data="affiliationToChange"
+									show-university-and-country="false"
+									show-role-and-department="true"
+								)
+								.affiliation-change-actions.small
+									button.btn.btn-sm.btn-success(
+										ng-click="saveAffiliationChange(userEmail);"
+										ng-disabled="!(affiliationToChange.role && affiliationToChange.department)"
+										type="button"
+									) #{translate("save_or_cancel-save")}
+									| &emsp;#{translate("save_or_cancel-or" )}&emsp;
+									a(
+										href
+										ng-click="cancelAffiliationChange();"
+									) #{translate("save_or_cancel-cancel")}
+					td.affiliations-table-inline-actions
+						// Disabled buttons don't work with tooltips, due to pointer-events: none,
+						// so create a wrapper for the tooltip
+						span(ng-if="!userEmail.default && (!userEmail.confirmedAt || ui.isMakingRequest) && !institutionAlreadyLinked(userEmail) && !inReconfirmNotificationPeriod(userEmail)")
+							.affiliations-table-inline-action-disabled-wrapper(ng-if="userEmail.ssoAvailable")
+								+btnMakePrimaryDisabled(translate("please_link_before_making_primary"))
+							.affiliations-table-inline-action-disabled-wrapper(ng-if="!userEmail.ssoAvailable")
+								+btnMakePrimaryDisabled(translate("please_confirm_your_email_before_making_it_default"))
+						.affiliations-table-inline-action-disabled-wrapper(ng-if="!userEmail.default && inReconfirmNotificationPeriod(userEmail)")
+							+btnMakePrimaryDisabled(translate("please_reconfirm_your_affiliation_before_making_this_primary"))
+						button.btn.btn-sm.btn-success.affiliations-table-inline-action(
+							tooltip=translate("make_email_primary_description")
+							ng-if="!userEmail.default && (userEmail.confirmedAt && !ui.isMakingRequest) && !inReconfirmNotificationPeriod(userEmail)"
+							ng-click="setDefaultUserEmail(userEmail)"
+							type="button"
+						) #{translate("make_primary")}
+						| &nbsp;
+						+btnRemoveEmail()
+				tr.affiliations-table-saml-row(ng-if="userEmail.affiliation && userEmail.affiliation && userEmail.ssoAvailable")
+					td
+					td(ng-attr-colspan="{{userEmail.samlProviderId ? '2' : '1'}}" ng-class="institutionAlreadyLinked(userEmail) ? '' : 'with-border'")
+						p.small(ng-if="userEmail.samlProviderId")
+							| !{translate("acct_linked_to_institution_acct", {institutionName: '{{userEmail.affiliation.institution.name}}'})}
+						div(ng-if="!userEmail.samlProviderId && !institutionAlreadyLinked(userEmail)")
+							//- this email is not linked to institution login but
+							//- cannot have multiple emails at same institution linked for "institution login"
+							//- so check if institution is already linked
+							p.small
+								| !{translate("can_link_your_institution_acct", {institutionName: '{{userEmail.affiliation.institution.name}}'})}
+							p.small
+								| !{translate("doing_this_allow_log_in_through_institution")}&nbsp;
+								+aboutInstitutionLink()
+					td.with-border.affiliations-table-inline-actions(ng-if="!userEmail.samlProviderId && !institutionAlreadyLinked(userEmail)")
+						button.btn-sm.btn.btn-info(
+							ng-click="linkInstitutionAcct(userEmail.email, userEmail.affiliation.institution.id)"
+							ng-disabled="ui.isMakingRequest"
+							type="button"
+						)
+							| #{translate("link_accounts")}
+				tr(
+					class="reconfirm-row"
+					ng-if="userEmail.samlIdentifier && userEmail.samlIdentifier.providerId === reconfirmedViaSAML"
+				)
+					td(colspan="3")
+						+reconfirmedAffiliationNotification()
+				tr(
+					class="reconfirm-row"
+					ng-repeat-end
+				)
+					td(
+						colspan="3"
+						ng-if="userEmail.affiliation && userEmail.affiliation.inReconfirmNotificationPeriod"
+					)
+						div(ng-class="{'alert alert-info': reconfirmationRemoveEmail === userEmail.email}")
+							+reconfirmAffiliationNotification('/user/settings')
+
+				tr.affiliations-table-highlighted-row(
+					ng-if="!ui.showAddEmailUI && !ui.isMakingRequest"
+				)
+					td(colspan="3")
+						a(
+							href
+							ng-click="showAddEmailForm()"
+						) #{translate("add_another_email")}
+
+				tr.affiliations-table-highlighted-row(
+					ng-if="ui.showAddEmailUI && !ui.isLoadingEmails"
+				)
+					td
+						.affiliations-form-group
+							input-suggestions(
+								ng-model="newAffiliation.email"
+								ng-model-options="{ allowInvalid: true }"
+								get-suggestion="getEmailSuggestion(userInput)"
+								on-blur="handleEmailInputBlur()"
+								input-id="affilitations-email"
+								input-name="affilitationsEmail"
+								input-placeholder="e.g. johndoe@mit.edu"
+								input-type="email"
+								input-required="true"
+							)
+					td(
+						colspan="2"
+						ng-if="newAffiliation.ssoAvailable"
+					)
+						p.affiliations-table-label {{ newAffiliation.university.name }}
+						p !{translate("to_add_email_accounts_need_to_be_linked", {institutionName: "{{newAffiliation.university.name}}"})}
+						p !{translate("doing_this_will_verify_affiliation_and_allow_log_in", {institutionName: "{{newAffiliation.university.name}}"})}&nbsp;
+							+aboutInstitutionLink()
+						button.btn-sm.btn.btn-primary.btn-link-accounts(
+							ng-click="linkInstitutionAcct(newAffiliation.email, newAffiliation.university.id)"
+							ng-disabled="ui.isMakingRequest"
+							type="button"
+						)
+							| #{translate("link_accounts_and_add_email")}
+					td(
+						ng-if="!newAffiliation.ssoAvailable"
+					)
+						p.affiliations-table-label(
+							ng-if="newAffiliation.university && !ui.showManualUniversitySelectionUI"
+						)
+							| {{ newAffiliation.university.name }}
+							span.small
+								|  (
+								a(
+									href
+									ng-click="selectUniversityManually();"
+								) #{translate("change")}
+								| )
+						.affiliations-table-label(
+							ng-if="!newAffiliation.university && !ui.isValidEmail && !ui.showManualUniversitySelectionUI"
+						) #{translate("start_by_adding_your_email")}
+						.affiliations-table-label(
+							ng-if="!newAffiliation.university && ui.isValidEmail && !ui.isBlacklistedEmail && !ui.showManualUniversitySelectionUI"
+						)
+							| #{translate("is_email_affiliated")}
+							br
+							a(
+								href
+								ng-click="selectUniversityManually();"
+							) #{translate("let_us_know")}
+						affiliation-form(
+							affiliation-data="newAffiliation"
+							show-university-and-country="ui.showManualUniversitySelectionUI"
+							show-role-and-department="ui.isValidEmail && newAffiliation.university"
+						)
+					td(
+						ng-if="!newAffiliation.ssoAvailable"
+					)
+						button.btn.btn-sm.btn-primary(
+							ng-disabled="affiliationsForm.$invalid || ui.isMakingRequest"
+							ng-click="addNewEmail()"
+						)
+							| #{translate("add_new_email")}
+				tr.affiliations-table-highlighted-row(
+					ng-if="ui.isMakingRequest"
+				)
+					td.text-center(colspan="3", ng-if="ui.isLoadingEmails")
+						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
+						| &nbsp;#{translate("loading")}…
+					td.text-center(colspan="3", ng-if="ui.isResendingConfirmation")
+						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
+						| &nbsp;#{translate("sending")}…
+					td.text-center.text-capitalize(colspan="3", ng-if="ui.isProcessing")
+						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
+						| &nbsp;#{translate("processing")}
+					td.text-center(colspan="3", ng-if="!ui.isLoadingEmails && !ui.isResendingConfirmation && !ui.isProcessing")
+						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
+						| &nbsp;#{translate("saving")}
+				tr.affiliations-table-error-row(
+					ng-if="ui.hasError"
+				)
+					td.text-center(colspan="3")
+						div
+							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
+							span(ng-if="!ui.errorMessage") &nbsp;#{translate("error_performing_request")}
+							span(ng-if="ui.errorMessage") &nbsp;{{ui.errorMessage}}
+				if institutionLinked
+					tr.affiliations-table-info-row(ng-if="!hideInstitutionNotifications.info")
+						td.text-center(aria-live="assertive" colspan="3")
+							button.close(
+								type="button"
+								data-dismiss="modal"
+								ng-click="closeInstitutionNotification('info')"
+								aria-label=translate("close")
+							)
+								span(aria-hidden="true") &times;
+							.small(ng-non-bindable) !{translate("institution_acct_successfully_linked", {institutionName: institutionLinked.universityName})}
+							if institutionLinked.hasEntitlement
+								.small !{translate("this_grants_access_to_features", {featureType: translate("professional")})}
+					if institutionEmailNonCanonical
+						tr.affiliations-table-warning-row(ng-if="!hideInstitutionNotifications.warning")
+							td.text-center(aria-live="assertive" colspan="3")
+								button.close(
+									type="button"
+									data-dismiss="modal"
+									ng-click="closeInstitutionNotification('warning')"
+									aria-label=translate("close")
+								)
+									span(aria-hidden="true") &times;
+								.small
+									i.fa.fa-exclamation-triangle(aria-hidden="true")
+									| &nbsp;
+									| !{translate("in_order_to_match_institutional_metadata", {email: institutionEmailNonCanonical})}
+
+				if samlError
+					tr.affiliations-table-error-row(ng-if="!hideInstitutionNotifications.linkError")
+						td.text-center(aria-live="assertive" colspan="3")
+							button.close(
+								type="button"
+								data-dismiss="modal"
+								ng-click="closeInstitutionNotification('linkError')"
+								aria-label=translate("close")
+							)
+								span(aria-hidden="true") &times;
+							.small
+								i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
+								| &nbsp;#{translate("generic_something_went_wrong")}.
+								br
+								if samlError.translatedMessage
+									span(ng-non-bindable) !{samlError.translatedMessage}
+								else if samlError.message
+									span(ng-non-bindable) #{samlError.message}
+								if samlError.tryAgain
+									br
+									| &nbsp;#{translate("try_again")}.
+
+script(type="text/ng-template", id="affiliationFormTpl")
+	.affiliations-form-group(
+		ng-if="$ctrl.showUniversityAndCountry"
+	)
+		ui-select(
+			ng-model="$ctrl.affiliationData.country"
+		)
+			ui-select-match(
+				placeholder="Country"
+			) {{ $select.selected.name }}
+			ui-select-choices(
+				repeat="country in $ctrl.countries | filter: $select.search"
+			)
+				span(
+					ng-bind="country.name"
+				)
+	.affiliations-form-group(
+		ng-if="$ctrl.showUniversityAndCountry"
+	)
+		ui-select(
+			ng-model="$ctrl.affiliationData.university"
+			ng-disabled="!$ctrl.affiliationData.country"
+			tagging="$ctrl.addUniversityToSelection"
+			tagging-label="false"
+		)
+			ui-select-match(
+				placeholder="Institution"
+			) {{ $select.selected.name }}
+			ui-select-choices(
+				repeat="university in $ctrl.universities | filter: $select.search"
+				refresh="$ctrl.handleFreeformInputChange($select, 'name');"
+				refresh-delay="10"
+			)
+				span(
+					ng-bind="university.name"
+				)
+	.affiliations-form-group(
+		ng-if="$ctrl.showRoleAndDepartment"
+	)
+		ui-select(
+			ng-model="$ctrl.affiliationData.role"
+			tagging
+			tagging-label="false"
+		)
+			ui-select-match(
+				placeholder="Role"
+			) {{ $select.selected }}
+			ui-select-choices(
+				repeat="role in $ctrl.roles | filter: $select.search"
+				refresh="$ctrl.handleFreeformInputChange($select);"
+				refresh-delay="10"
+			)
+				span(
+					ng-bind="role"
+				)
+
+	.affiliations-form-group(
+		ng-if="$ctrl.showRoleAndDepartment"
+	)
+		ui-select(
+			ng-model="$ctrl.affiliationData.department"
+			tagging
+			tagging-label="false"
+		)
+			ui-select-match(
+				placeholder="Department"
+			) {{ $select.selected }}
+			ui-select-choices(
+				repeat="department in $ctrl.departments | filter: $select.search"
+				refresh="$ctrl.handleFreeformInputChange($select);"
+				refresh-delay="10"
+			)
+				span(
+					ng-bind="department"
+				)

@@ -1,0 +1,33 @@
+.plv-page-view {
+  position: relative;
+}
+.plv-text-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  color: #000;
+  font-family: sans-serif;
+  overflow: hidden;
+  pointer-events: none;
+}
+.plv-text-layer > span {
+  color: transparent;
+  position: absolute;
+  line-height: 1;
+  white-space: pre;
+  cursor: text;
+  pointer-events: auto;
+  -webkit-transform-origin: 0% 0%;
+  -moz-transform-origin: 0% 0%;
+  -o-transform-origin: 0% 0%;
+  -ms-transform-origin: 0% 0%;
+  transform-origin: 0% 0%;
+}
+.plv-text-layer > span::selection {
+  background: rgba(0, 0, 255, 0.3);
+}
+.plv-text-layer > span::-moz-selection {
+  background: rgba(0, 0, 255, 0.3);
+}

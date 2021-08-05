@@ -1,0 +1,57 @@
+extends ../layout
+
+block vars
+	- var suppressNavContentLinks = true
+
+block append meta
+	meta(name="ol-projects" data-type="json" content=projects)
+	meta(name="ol-tags" data-type="json" content=tags)
+	meta(name="ol-notifications" data-type="json" content=notifications)
+	meta(name="ol-notificationsInstitution" data-type="json" content=notificationsInstitution)
+	meta(name="ol-userAffiliations" data-type="json" content=userAffiliations)
+	meta(name="ol-userEmails" data-type="json" content=userEmails)
+	meta(name="ol-userHasNoSubscription" data-type="boolean" content=!!(settings.enableSubscriptions && !hasSubscription))
+	meta(name="ol-allInReconfirmNotificationPeriods" data-type="json" content=allInReconfirmNotificationPeriods)
+	meta(name="ol-reconfirmedViaSAML" content=reconfirmedViaSAML)
+
+block content
+
+	main.content.content-alt.project-list-page#main-content(
+		ng-controller="ProjectPageController"
+		role="main"
+	)
+		.system-messages(
+			ng-cloak
+			ng-controller="SystemMessagesController"
+		)
+			.system-message(
+				ng-repeat="message in messages"
+				ng-controller="SystemMessageController"
+				ng-hide="hidden"
+			)
+				button(ng-hide="protected",ng-click="hide()").close.pull-right
+					span(aria-hidden="true") &times;
+					span.sr-only #{translate("close")}
+				.system-message-content(ng-bind-html="htmlContent")
+
+			include ../translations/translation_message
+
+		.project-list-content(event-tracking=settings.overleaf ? "loads_v2_dash" : "", onboard=settings.overleaf ? "true" : "", event-tracking-trigger=settings.overleaf ? "load" : "", event-tracking-mb="true", event-segmentation="{location: 'dash', v2_onboard: true}")
+			.project-list-row(ng-cloak)
+				.project-list-container.row(ng-if="projects.length > 0")
+					.project-list-sidebar-wrapper.col-md-2.col-xs-3
+						aside.project-list-sidebar
+							include ./list/side-bar
+
+					.project-list-main.col-md-10.col-xs-9
+						include ./list/notifications
+						include ./list/project-list
+
+				.project-list-empty.row(ng-if="projects.length === 0")
+					.project-list-empty-col.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8.col-xs-offset-2
+						include ./list/empty-project-list
+						.row.row-spaced
+							.col-sm-12
+								include ./list/notifications
+
+		include ./list/modals

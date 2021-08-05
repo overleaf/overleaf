@@ -1,0 +1,100 @@
+extends ../layout
+
+include _plans_page_mixins
+include _plans_page_tables
+
+block vars
+	- metadata = { viewport: true }
+
+block append meta
+	meta(name="ol-recomendedCurrency" content=recomendedCurrency)
+	meta(name="ol-groupPlans" data-type="json" content=groupPlans)
+
+block content
+	main.content.content-alt#main-content
+		.container
+			.user-notifications
+				ul.list-unstyled(ng-cloak)
+					li.notification-entry
+						.alert.alert-info
+							.notification-body
+								span To help you work from home throughout 2021, we're providing discounted plans and special initiatives.
+							.notification-action
+								a.btn.btn-sm.btn-info(href="https://www.overleaf.com/events/wfh2021" event-tracking="Event-Pages" event-tracking-trigger="click" event-tracking-ga="WFH-Offer-Click" event-tracking-label="Plans-Banner") Upgrade
+		.content-page
+			.plans(ng-controller="PlansController")
+				.container(ng-cloak)
+					.row
+						.col-md-12
+							.page-header.centered.plans-header.text-centered
+								h1.text-capitalize(ng-non-bindable) #{translate('get_instant_access_to')} #{settings.appName}
+					.row
+						.col-md-8.col-md-offset-2
+							p.text-centered #{translate("sl_benefits_plans")}
+
+					+allCardsAndControls()
+
+					.row.row-spaced-large.text-centered
+						.col-xs-12
+							p.text-centered !{translate('also_provides_free_plan', { appName:'{{settings.appName}}' }, [{ name: 'a', attrs: { href: '/register' }}])}
+							i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Mastercard accepted
+							i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Visa accepted
+							i.fa.fa-cc-amex.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Amex accepted
+							i.fa.fa-cc-paypal.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Paypal accepted
+							div.text-centered #{translate('change_plans_any_time')}<br/> #{translate('billed_after_x_days', {len:'{{trial_len}}'})}
+							br
+							div.text-centered #{translate('subject_to_additional_vat')}<br/> #{translate('select_country_vat')}
+
+					.row.row-spaced-large
+						.col-md-8.col-md-offset-2
+							.card.text-centered
+								.card-header
+									h2 #{translate('looking_multiple_licenses')}
+								span #{translate('reduce_costs_group_licenses')}
+								br
+								br
+								a.btn.btn-default(
+									href="#groups"
+									ng-click="openGroupPlanModal()"
+								) #{translate('find_out_more')}
+
+					.row.row-spaced-large
+						.col-sm-12
+							.page-header.plans-header.plans-subheader.text-centered
+								h2 #{translate('compare_plan_features')}
+					.row
+						.col-md-6.col-md-offset-3
+							+plan_switch('table')
+						.col-md-3.text-right
+							+currency_dropdown
+					.row(event-tracking="features-table-viewed" event-tracking-ga="subscription-funnel" event-tracking-trigger="scroll" event-tracking-send-once="true" event-tracking-label=`exp-{{plansVariant}}`)
+						.col-sm-12(ng-if="ui.view != 'student'")
+							+table_premium
+						.col-sm-12(ng-if="ui.view == 'student'")
+							+table_student
+
+					include _plans_quotes
+
+					include _plans_faq
+
+					#bottom-cards.row.row-spaced(style="display: none;")
+						.col-sm-12
+							+allCardsAndControls(true, 'bottom')
+
+					.row.row-spaced-large
+						.col-md-12
+							.plans-header.plans-subheader.text-centered
+								h2.header-with-btn #{translate('still_have_questions')}
+									button.btn.btn-default.btn-header.text-capitalize(
+										ng-controller="ContactGeneralModal"
+										ng-click="openModal()"
+									) #{translate('get_in_touch')}
+									!= moduleIncludes("contactModalGeneral", locals)
+
+					.row.row-spaced
+
+	include _modal_group_purchase

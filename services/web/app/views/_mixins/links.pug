@@ -1,0 +1,118 @@
+mixin linkAdvisors(linkText, linkClass, track)
+	//- To Do: verify path
+	- var gaCategory = track && track.category ? track.category : 'All'
+	- var gaAction = track && track.action ? track.action : null
+	- var gaLabel = track && track.label ? track.label : null
+	- var mb = track && track.mb ? 'true' : null
+	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
+	- var trigger = track && track.trigger ? track.trigger : null
+	a(href="/advisors" 
+		class=linkClass ? linkClass : ''
+		event-tracking-ga=gaCategory
+		event-tracking=gaAction
+		event-tracking-label=gaLabel
+		event-tracking-trigger=trigger
+		event-tracking-mb=mb
+		event-segmentation=mbSegmentation
+	)
+		span(ng-non-bindable) #{linkText ? linkText : 'advisor programme'}
+
+mixin linkBenefits(linkText, linkClass)
+	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/authors" class=linkClass ? linkClass : '', ng-non-bindable)
+		| #{linkText ? linkText : 'benefits'}
+		
+mixin linkBlog(linkText, linkClass, slug)
+	if slug
+		a(href=(settings.siteUrl ? settings.siteUrl : '') + "/blog/" + slug class=linkClass ? linkClass : '', ng-non-bindable)
+			| #{linkText ? linkText : 'blog'}
+
+mixin linkContact(linkText, linkClass)
+	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/contact" class=linkClass ? linkClass : '', ng-non-bindable)
+		| #{linkText ? linkText : 'contact'}
+
+mixin linkDash(linkText, linkClass)
+	a(href="/project" class=linkClass ? linkClass : '', ng-non-bindable)
+		| #{linkText ? linkText : 'project dashboard'}
+
+mixin linkEducation(linkText, linkClass)
+	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/edu" class=linkClass ? linkClass : '', ng-non-bindable)
+		| #{linkText ? linkText : 'teaching toolkit'}
+
+mixin linkInvite(linkText, linkClass, track)
+	- var gaCategory = track && track.category ? track.category : 'All'
+	- var gaAction = track && track.action ? track.action : null
+	- var gaLabel = track && track.label ? track.label : null
+	- var mb = track && track.mb ? 'true' : null
+	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
+	- var trigger = track && track.trigger ? track.trigger : null
+
+	a(href="/user/bonus"
+		class=linkClass ? linkClass : ''
+		event-tracking-ga=gaCategory
+		event-tracking=gaAction
+		event-tracking-label=gaLabel
+		event-tracking-trigger=trigger
+		event-tracking-mb=mb
+		event-segmentation=mbSegmentation
+	)
+		span(ng-non-bindable) #{linkText ? linkText : 'invite your friends'}
+
+mixin linkPlansAndPricing(linkText, linkClass)
+	a(href="/user/subscription/plans" class=linkClass ? linkClass : '', ng-non-bindable)
+		| #{linkText ? linkText : 'plans and pricing'}
+
+mixin linkPrintNewTab(linkText, linkClass, icon, track)
+	- var gaCategory = track && track.category ? track.category : null
+	- var gaAction = track && track.action ? track.action : null
+	- var gaLabel = track && track.label ? track.label : null
+	- var mb = track && track.mb ? 'true' : null
+	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
+	- var trigger = track && track.trigger ? track.trigger : null
+
+	a(href='?media=print'
+		class=linkClass ? linkClass : ''
+		event-tracking-ga=gaCategory
+		event-tracking=gaAction
+		event-tracking-label=gaLabel
+		event-tracking-trigger=trigger
+		event-tracking-mb=mb
+		event-segmentation=mbSegmentation
+		target="_BLANK",
+		rel="noopener noreferrer"
+	)
+		if icon
+			i(class="fa fa-print")
+			| &nbsp;
+		span(ng-non-bindable) #{linkText ? linkText : 'print'}
+
+mixin linkSignIn(linkText, linkClass, redirect)
+	a(href=`/login${redirect ? '?redir=' + redirect : ''}` class=linkClass ? linkClass : '', ng-non-bindable)
+		| #{linkText ? linkText : 'sign in'}
+
+mixin linkSignUp(linkText, linkClass, redirect)
+	a(href=`/register${redirect ? '?redir=' + redirect : ''}` class=linkClass ? linkClass : '', ng-non-bindable)
+		| #{linkText ? linkText : 'sign up'}
+
+mixin linkTweet(linkText, linkClass, tweetText, track)
+	//- twitter-share-button is required by twitter
+	- var gaCategory = track && track.category ? track.category : 'All'
+	- var gaAction = track && track.action ? track.action : null
+	- var gaLabel = track && track.label ? track.label : null
+	- var mb = track && track.mb ? 'true' : null
+	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
+	- var trigger = track && track.trigger ? track.trigger : null
+	a(class="twitter-share-button " + linkClass
+		event-tracking-ga=gaCategory
+		event-tracking=gaAction
+		event-tracking-label=gaLabel
+		event-tracking-trigger=trigger
+		event-tracking-mb=mb
+		event-segmentation=mbSegmentation
+		href="https://twitter.com/intent/tweet?text=" + tweetText
+		target="_BLANK",
+		rel="noopener noreferrer"
+	) #{linkText ? linkText : 'tweet'}
+
+mixin linkUniversities(linkText, linkClass)
+	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/universities" class=linkClass ? linkClass : '', ng-non-bindable)
+		| #{linkText ? linkText : 'universities'}

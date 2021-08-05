@@ -1,0 +1,69 @@
+extends ../layout
+
+include ./dashboard/_team_name_mixin
+
+block head-scripts
+	script(type="text/javascript", nonce=scriptNonce, src="https://js.recurly.com/v4/recurly.js")
+
+block append meta
+	meta(name="ol-managedInstitutions", data-type="json", content=managedInstitutions)
+	meta(name="ol-planCodesChangingAtTermEnd", data-type="json", content=plans.planCodesChangingAtTermEnd)
+	if (personalSubscription && personalSubscription.recurly)
+		meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
+		meta(name="ol-subscription" data-type="json" content=personalSubscription)
+		meta(name="ol-recomendedCurrency" content=personalSubscription.recurly.currency)
+
+block content
+	main.content.content-alt#main-content(ng-cloak)
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					if (fromPlansPage)
+						.alert.alert-warning
+							p You already have a subscription
+					.card
+						.page-header
+							h1 #{translate("your_subscription")}
+
+						-var hasDisplayedSubscription = false
+						if (personalSubscription)
+							-hasDisplayedSubscription = true
+							include ./dashboard/_personal_subscription
+
+						if (managedGroupSubscriptions && managedGroupSubscriptions.length > 0)
+							include ./dashboard/_managed_groups
+
+						if (managedInstitutions && managedInstitutions.length > 0)
+							include ./dashboard/_managed_institutions
+
+						if (managedPublishers && managedPublishers.length > 0)
+							include ./dashboard/_managed_publishers
+
+						if (memberGroupSubscriptions && memberGroupSubscriptions.length > 0)
+							-hasDisplayedSubscription = true
+							include ./dashboard/_group_memberships
+
+						if (confirmedMemberAffiliations && confirmedMemberAffiliations.length > 0)
+							include ./dashboard/_institution_memberships
+
+						if (v1SubscriptionStatus)
+							include ./dashboard/_v1_subscription_status
+
+						if (!hasDisplayedSubscription)
+							if (hasSubscription)
+								-hasDisplayedSubscription = true
+								p(ng-non-bindable) You're on an #{settings.appName} Paid plan. Contact
+									a(href="mailto:support@overleaf.com") support@overleaf.com
+									|  to find out more.
+							else
+								if (subscriptionCopy === 'new')
+									p(ng-non-bindable) You are on the #{settings.appName} Free plan. Upgrade to access these Premium Features:
+									ul
+										li Invite more collaborators
+										for feature in ['realtime_track_changes', 'full_doc_history', 'reference_search', 'reference_sync', 'dropbox_integration_lowercase', 'github_integration_lowercase', 'priority_support']
+											li #{translate(feature)}
+									a(ng-controller="UpgradeSubscriptionController" href="/user/subscription/plans" ng-click="upgradeSubscription()").btn.btn-primary Upgrade now
+								else
+									p(ng-non-bindable) You're on the #{settings.appName} Free plan.
+									|
+									a(ng-controller="UpgradeSubscriptionController" href="/user/subscription/plans" ng-click="upgradeSubscription()").btn.btn-primary Upgrade now

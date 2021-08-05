@@ -1,0 +1,42 @@
+.project-list-sidebar-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-list-sidebar {
+  flex-grow: 1;
+  height: 100%;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.project-list-sidebar-v2-pane {
+  flex-grow: 0;
+  flex-shrink: 0;
+  text-align: center;
+  background-color: @v2-dash-pane-bg;
+  color: @v2-dash-pane-color;
+  font-size: 13px;
+  padding: @line-height-computed / 2;
+}
+
+.project-list-sidebar-v2-pane a {
+  color: @v2-dash-pane-link-color;
+  text-decoration: underline;
+}
+
+.project-list-sidebar-v2-pane a:hover {
+  text-decoration: none;
+}
+
+.project-list-sidebar-v2-pane-toggle {
+  color: @v2-dash-pane-toggle-color;
+  padding: 0;
+  line-height: 1;
+  &:hover,
+  &:active,
+  &:focus {
+    color: @v2-dash-pane-toggle-color;
+  }
+}

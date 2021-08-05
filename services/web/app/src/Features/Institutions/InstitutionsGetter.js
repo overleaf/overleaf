@@ -1,0 +1,68 @@
+const { callbackify } = require('util')
+const UserGetter = require('../User/UserGetter')
+const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
+const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEntityConfigs')
+
+async function _getCurrentAffiliations(userId) {
+  const fullEmails = await UserGetter.promises.getUserFullEmails(userId)
+  // current are those confirmed and not with lapsed reconfirmations
+  return fullEmails
+    .filter(
+      emailData =>
+        emailData.confirmedAt &&
+        emailData.affiliation &&
+        emailData.affiliation.institution &&
+        emailData.affiliation.institution.confirmed &&
+        !emailData.affiliation.pastReconfirmDate
+    )
+    .map(emailData => emailData.affiliation)
+}
+
+async function getCurrentInstitutionIds(userId) {
+  // current are those confirmed and not with lapsed reconfirmations
+  // only 1 record returned per current institutionId
+  const institutionIds = new Set()
+  const currentAffiliations = await _getCurrentAffiliations(userId)
+  currentAffiliations.forEach(affiliation => {
+    institutionIds.add(affiliation.institution.id)
+  })
+  return [...institutionIds]
+}
+
+const InstitutionsGetter = {
+  getConfirmedAffiliations(userId, callback) {
+    UserGetter.getUserFullEmails(userId, function (error, emailsData) {
+      if (error) {
+        return callback(error)
+      }
+
+      const confirmedAffiliations = emailsData
+        .filter(
+          emailData =>
+            emailData.confirmedAt &&
+            emailData.affiliation &&
+            emailData.affiliation.institution &&
+            emailData.affiliation.institution.confirmed
+        )
+        .map(emailData => emailData.affiliation)
+
+      callback(null, confirmedAffiliations)
+    })
+  },
+
+  getCurrentInstitutionIds: callbackify(getCurrentInstitutionIds),
+
+  getManagedInstitutions(userId, callback) {
+    UserMembershipsHandler.getEntitiesByUser(
+      UserMembershipEntityConfigs.institution,
+      userId,
+      callback
+    )
+  },
+}
+
+InstitutionsGetter.promises = {
+  getCurrentInstitutionIds,
+}
+
+module.exports = InstitutionsGetter

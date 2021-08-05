@@ -1,0 +1,31 @@
+extends ../../layout
+
+block content
+  .editor.full-size
+    .loading-screen()
+      .loading-screen-brand-container
+        .loading-screen-brand(
+          style="height: 20%;"
+        )
+
+      h3.loading-screen-label() #{translate("Opening template")}
+        span.loading-screen-ellip .
+        span.loading-screen-ellip .
+        span.loading-screen-ellip .
+
+  form(id='create_form' method='POST' action='/project/new/template/' ng-non-bindable)
+    input(type="hidden", name="_csrf", value=csrfToken)
+    input(type="hidden" name="templateId" value=templateId)
+    input(type="hidden" name="templateVersionId" value=templateVersionId)
+    input(type="hidden" name="templateName" value=name)
+    input(type="hidden" name="compiler" value=compiler)
+    input(type="hidden" name="imageName" value=imageName)
+    input(type="hidden" name="mainFile" value=mainFile)
+    if brandVariationId
+      input(type="hidden" name="brandVariationId" value=brandVariationId)
+
+block append foot-scripts
+  script(type="text/javascript", nonce=scriptNonce).
+    $(document).ready(function(){
+      $('#create_form').submit();
+    });

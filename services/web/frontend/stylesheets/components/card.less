@@ -1,0 +1,67 @@
+.card {
+  background-color: white;
+  border-radius: @border-radius-base;
+  box-shadow: @card-box-shadow;
+  padding: @line-height-computed;
+  .page-header {
+    margin: 0 0 1.5625rem;
+    h1,
+    h2,
+    h3 {
+      margin-top: 0;
+    }
+  }
+  > .container-fluid {
+    padding: 0;
+  }
+
+  .card-header {
+    border-bottom: 1px solid @gray-lighter;
+    padding-bottom: @line-height-computed;
+    margin-bottom: @line-height-computed;
+    h2 {
+      margin: 0;
+    }
+  }
+
+  > :first-child {
+    margin-top: 0;
+  }
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+.card-thin {
+  padding: @line-height-computed / 2;
+}
+
+.card-group {
+  .card {
+    margin: @line-height-computed -15px 0 -15px;
+    border-radius: 0;
+
+    &.card-highlighted {
+      // Make it taller and card like
+      margin-top: 0;
+      border-radius: @border-radius-base;
+    }
+
+    &.card-first {
+      border-top-left-radius: @border-radius-base;
+      border-bottom-left-radius: @border-radius-base;
+    }
+    &.card-last {
+      border-top-right-radius: @border-radius-base;
+      border-bottom-right-radius: @border-radius-base;
+    }
+  }
+}
+
+.card-border {
+  border: @border-width-base solid @border-color-base;
+}
+
+.card-content {
+  padding: @padding-md;
+}

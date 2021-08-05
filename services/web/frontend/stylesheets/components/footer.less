@@ -1,0 +1,47 @@
+footer.site-footer {
+  background-color: @footer-bg-color;
+  border-top: 1px solid @gray-lighter;
+  font-size: 0.9rem;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: @footer-height;
+  line-height: @footer-height - 1; // Hack — in Chrome, using the full @footer-height would generate vertical scrolling
+
+  ul {
+    list-style: none;
+    margin: 0px;
+    li {
+      display: inline-block;
+      margin: 0 0.5em;
+    }
+    i {
+      font-size: 1.2rem;
+    }
+  }
+  li.lngOption {
+    text-align: left;
+    display: list-item;
+
+    img {
+      vertical-align: text-bottom;
+    }
+  }
+
+  a {
+    color: @footer-link-color;
+    &:hover,
+    &:focus {
+      color: @footer-link-hover-color;
+    }
+  }
+}
+
+.site-footer-content {
+  .container-fluid;
+}
+
+.sprite-icon-lang {
+  display: inline-block;
+  vertical-align: middle;
+}

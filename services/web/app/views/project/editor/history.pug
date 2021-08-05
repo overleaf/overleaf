@@ -1,0 +1,89 @@
+div#history(ng-show="ui.view == 'history' && history.updates.length > 0")
+	include ./history/entriesListV1
+	include ./history/entriesListV2
+
+	include ./history/diffPanelV1
+	include ./history/previewPanelV2
+
+.full-size(ng-if="ui.view == 'history' && history.updates.length === 0 && !isHistoryLoading()")
+	.no-history-available
+		h3
+			| #{translate('no_history_available')}
+script(type="text/ng-template", id="historyRestoreDiffModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3 #{translate("restore")} {{diff.doc.name}}
+	.modal-body.modal-body-share
+		p !{translate("sure_you_want_to_restore_before", {filename: "{{diff.doc.name}}", date:"{{diff.start_ts | formatDate}}"}, ['strong'])}
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()",
+			ng-disabled="state.inflight"
+		) #{translate("cancel")}
+		button.btn.btn-danger(
+			ng-click="restore()",
+			ng-disabled="state.inflight"
+		)
+			span(ng-show="!state.inflight") #{translate("restore")}
+			span(ng-show="state.inflight") #{translate("restoring")} …
+
+
+script(type="text/ng-template", id="historyLabelTpl")
+	.history-label(
+		ng-class="{\
+			'history-label-own' : $ctrl.isOwnedByCurrentUser,\
+			'history-label-pseudo-current-state': $ctrl.isPseudoCurrentStateLabel,\
+		}"
+	)
+		span.history-label-comment(
+			tooltip-append-to-body="true"
+			tooltip-template="'historyLabelTooltipTpl'"
+			tooltip-placement="left"
+			tooltip-enable="$ctrl.showTooltip"
+		)
+			i.fa.fa-tag
+			| &nbsp;{{ ::$ctrl.isPseudoCurrentStateLabel ? '#{translate("history_label_project_current_state")}' : $ctrl.labelText }}
+		button.history-label-delete-btn(
+			ng-if="$ctrl.isOwnedByCurrentUser && !$ctrl.isPseudoCurrentStateLabel"
+			stop-propagation="click"
+			ng-click="$ctrl.onLabelDelete()"
+			aria-label=translate("delete")
+		)
+			span(aria-hidden="true") &times;
+
+script(type="text/ng-template", id="historyLabelTooltipTpl")
+	.history-label-tooltip
+		p.history-label-tooltip-title 
+			i.fa.fa-tag
+			| &nbsp;{{ $ctrl.labelText }}
+		p.history-label-tooltip-owner #{translate("history_label_created_by")} {{ $ctrl.labelOwnerName }}
+		time.history-label-tooltip-datetime {{ $ctrl.labelCreationDateTime | formatDate }}
+
+
+script(type="text/ng-template", id="historyV2DeleteLabelModalTemplate")
+	.modal-header
+		h3 #{translate("history_delete_label")}
+	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
+		p(ng-if="labelDetails")
+			| #{translate("history_are_you_sure_delete_label")}
+			strong  "{{ labelDetails.comment }}"
+			| ?
+	.modal-footer
+		button.btn.btn-default(
+			type="button"
+			ng-disabled="state.inflight"
+			ng-click="$dismiss()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			type="button"
+			ng-click="deleteLabel()"
+			ng-disabled="state.inflight"
+		) {{ state.inflight ? '#{translate("history_deleting_label")}' : '#{translate("history_delete_label")}' }}

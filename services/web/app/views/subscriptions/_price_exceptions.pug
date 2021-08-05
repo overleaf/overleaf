@@ -1,0 +1,9 @@
+p
+	i * !{translate("subject_to_additional_vat")}
+
+if (personalSubscription.recurly.activeCoupons.length > 0)
+	i * !{translate("coupons_not_included")}:
+	ul
+		each coupon in personalSubscription.recurly.activeCoupons
+			li
+				i= coupon.description || coupon.name

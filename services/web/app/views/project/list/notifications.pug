@@ -1,0 +1,271 @@
+include ../../_mixins/reconfirm_affiliation
+
+.user-notifications(ng-controller="NotificationsController")
+	ul.list-unstyled(
+		ng-if="notifications.length > 0 && projects.length > 0",
+		ng-cloak
+	)
+		li.notification-entry(
+			ng-repeat="notification in notifications"
+		)
+			div(ng-switch="notification.templateKey" ng-hide="notification.hide")
+				.alert.alert-info(
+					ng-switch-when="notification_project_invite",
+					ng-controller="ProjectInviteNotificationController"
+				)
+					.notification-body
+						span(ng-show="!notification.accepted") !{translate("notification_project_invite_message", { userName: "{{ userName }}", projectName: "{{ projectName }}" })}
+						span(ng-show="notification.accepted") !{translate("notification_project_invite_accepted_message", { projectName: "{{ projectName }}" })}
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(
+							ng-show="notification.accepted",
+							href="/project/{{ notification.messageOpts.projectId }}"
+						) #{translate("open_project")}
+						a.pull-right.btn.btn-sm.btn-info(
+							href,
+							ng-click="accept()",
+							ng-disabled="notification.inflight",
+							ng-show="!notification.accepted"
+						)
+							span(ng-show="!notification.inflight") #{translate("join_project")}
+							span(ng-show="notification.inflight")
+								i.fa.fa-fw.fa-spinner.fa-spin(aria-hidden="true")
+								| &nbsp;
+								| #{translate("joining")}…
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(
+					ng-switch-when="wfh_2020_upgrade_offer"
+				)
+					.notification-body
+						span Important notice: Your free WFH2020 upgrade came to an end on June 30th 2020. We're still providing a number of special initiatives to help you continue collaborating throughout 2020.
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(href="https://www.overleaf.com/events/wfh2020") View
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(
+					ng-switch-when="notification_ip_matched_affiliation"
+					ng-if="notification.messageOpts.ssoEnabled"
+				)
+					.notification-body
+						| !{translate("looks_like_youre_at", {institutionName: '{{notification.messageOpts.university_name}}'}, ['strong'])}
+						br
+						| !{translate("you_can_now_log_in_sso", {}, ['strong'])}
+						br
+						| #{translate("link_institutional_email_get_started", {}, ['strong'])}&nbsp;
+						a(
+							ng-href="{{notification.messageOpts.portalPath || 'https://www.overleaf.com/learn/how-to/Institutional_Login'}}"
+						) #{translate("find_out_more_nt")}
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(
+							ng-href=`{{samlInitPath}}?university_id={{notification.messageOpts.institutionId}}&auto=/project`
+						)
+							| #{translate("link_account")}
+					.notification-close
+						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(
+					ng-switch-when="notification_ip_matched_affiliation"
+					ng-if="!notification.messageOpts.ssoEnabled"
+				)
+					.notification-body
+						| !{translate("looks_like_youre_at", {institutionName: '{{notification.messageOpts.university_name}}'}, ['strong'])}
+						br
+						| !{translate("did_you_know_institution_providing_professional", {institutionName: '{{notification.messageOpts.university_name}}'}, ['strong'])}
+						br
+						| #{translate("add_email_to_claim_features")}
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(
+							href="/user/settings"
+						) #{translate("add_affiliation")}
+					.notification-close
+						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+				.alert.alert-danger(
+					ng-switch-when="notification_tpds_file_limit"
+				)
+					.notification-body
+						| Error: Your project
+						strong  {{ notification.messageOpts.projectName }}
+						|	has gone over the 2000 file limit using an integration (e.g. Dropbox or Github) <br/>
+						| Please decrease the size of your project to prevent further errors.
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(href="/user/settings")
+							| Account Settings
+					.notification-close
+						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+				.alert.alert-warning(
+					ng-switch-when="notification_dropbox_duplicate_project_names"
+				)
+					.notification-body
+						p()
+							| !{translate("dropbox_duplicate_project_names", { projectName: '{{notification.messageOpts.projectName}}'}, ['strong'])}
+						p()
+							| !{translate("dropbox_duplicate_project_names_suggestion", {}, ['strong'])}
+							| &nbsp;
+							a(href="/learn/how-to/Dropbox_Synchronization#Troubleshooting") #{translate("learn_more")}
+							|.
+					.notification-close
+						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+				.alert.alert-info(
+					ng-switch-when="notification_dropbox_unlinked_due_to_lapsed_reconfirmation"
+				)
+					.notification-body
+						if user.features.dropbox
+							| !{translate("dropbox_unlinked_premium_feature", {}, ['strong'])}
+							| !{translate("can_now_relink_dropbox", {}, [{name: 'a', attrs: {href: '/user/settings#dropboxSettings' }}])}
+						else
+							| !{translate("dropbox_unlinked_premium_feature", {}, ['strong'])}
+							| !{translate("confirm_affiliation_to_relink_dropbox")}
+						| &nbsp;
+						a(href="/learn/how-to/Institutional_Email_Reconfirmation") #{translate("learn_more")}
+					.notification-close
+						button.btn-sm(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+				.alert.alert-info(
+					ng-switch-default
+				)
+					span(ng-bind-html="notification.html").notification-body
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+	ul.list-unstyled(
+		ng-if="notificationsInstitution.length > 0",
+		ng-cloak
+	)
+		li.notification-entry(
+			ng-repeat="notification in notificationsInstitution"
+		)
+			div(ng-switch="notification.templateKey" ng-hide="notification.hide")
+				.alert.alert-info(
+						ng-switch-when="notification_institution_sso_available"
+					)
+					.notification-body
+						p !{translate("can_link_institution_email_acct_to_institution_acct", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
+						div !{translate("doing_this_allow_log_in_through_institution", {appName: settings.appName})}
+					.notification-action
+						a.btn.btn-sm.btn-info(ng-href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=/project&email={{notification.email}}")
+							| #{translate('link_account')}
+
+				.alert.alert-info(
+					ng-switch-when="notification_institution_sso_linked"
+				)
+					.notification-body
+						div !{translate("account_has_been_link_to_institution_account", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+				.alert.alert-warning(
+					ng-switch-when="notification_institution_sso_non_canonical"
+				)
+					.notification-body
+						div
+							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
+							| !{translate("tried_to_log_in_with_email", {email: "{{notification.requestedEmail}}"})} !{translate("in_order_to_match_institutional_metadata_associated", {email: "{{notification.institutionEmail}}"})}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+				.alert.alert-info(
+					ng-switch-when="notification_institution_sso_already_registered"
+				)
+					.notification-body
+						| !{translate("tried_to_register_with_email", {appName: settings.appName, email: "{{notification.email}}"})}
+						| #{translate("we_logged_you_in")}
+					.notification-action
+						a.btn.btn-sm.btn-info(href="/learn/how-to/Institutional_Login")
+							| #{translate("find_out_more")}
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+				.alert.alert-danger(ng-switch-when="notification_institution_sso_error")
+					.notification-body
+						div
+							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
+							| &nbsp;#{translate("generic_something_went_wrong")}.
+							div(ng-if="notification.error.translatedMessage" ng-bind-html="notification.error.translatedMessage")
+							div(ng-else="notification.error.message") {{ notification.error.message}}
+							div(ng-if="notification.error.tryAgain") #{translate("try_again")}.
+
+					.notification-close
+						button(ng-click="dismiss(notification)").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}
+
+	ul.list-unstyled(
+		ng-controller="EmailNotificationController",
+		ng-cloak
+	)
+		li.notification-entry(
+			ng-repeat="userEmail in userEmails",
+			ng-if="showConfirmEmail(userEmail) && projects.length > 0"
+		)
+			.alert.alert-warning
+				.notification-body
+					div(ng-if="!userEmail.confirmationInflight")
+						| #{translate("please_confirm_email", {emailAddress: "{{ userEmail.email }}"})}
+						|
+						a(
+							href
+							ng-click="resendConfirmationEmail(userEmail)"
+						) (#{translate('resend_confirmation_email')})
+					div(ng-if="userEmail.confirmationInflight")
+						i.fa.fa-spinner.fa-spin(aria-hidden="true")
+						|
+						| #{translate('resending_confirmation_email')}&hellip;
+					div(ng-if="!userEmail.confirmationInflight && userEmail.error" aria-live="polite")
+						span(ng-if="userEmail.errorMessage") {{ userEmail.errorMessage }}
+						span(ng-if="!userEmail.errorMessage") #{translate('generic_something_went_wrong')}
+
+	ui.list-unstyled(ng-controller="UserAffiliationsReconfirmController")
+		li.notification-entry(
+			ng-repeat="userEmail in allInReconfirmNotificationPeriods"
+		)
+			.alert.alert-info()
+				+reconfirmAffiliationNotification('/project')
+
+		li.notification-entry(
+			ng-repeat="userEmail in userEmails"
+			ng-if="userEmail.samlIdentifier && userEmail.samlIdentifier.providerId === reconfirmedViaSAML"
+		)
+			+reconfirmedAffiliationNotification()
+
+	- var hasPaidAffiliation = userAffiliations.some(affiliation => affiliation.licence && affiliation.licence !== 'free')
+	if settings.enableSubscriptions && !hasSubscription && !hasPaidAffiliation
+		ul.list-unstyled(
+			ng-controller="DismissableNotificationsController",
+			ng-cloak
+		)
+			li.notification-entry(
+				ng-if="shouldShowNotification && projects.length > 0"
+			)
+				.alert.alert-info
+					.notification-body
+						span To help you work from home throughout 2021, we're providing discounted plans and special initiatives.
+					.notification-action
+						a.pull-right.btn.btn-sm.btn-info(href="https://www.overleaf.com/events/wfh2021" event-tracking="Event-Pages" event-tracking-trigger="click" event-tracking-ga="WFH-Offer-Click" event-tracking-label="Dash-Banner") Upgrade
+					.notification-close
+						button(ng-click="dismiss()").close.pull-right
+							span(aria-hidden="true") &times;
+							span.sr-only #{translate("close")}

@@ -1,0 +1,166 @@
+{
+  "root": true,
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
+    "standard",
+    "standard-jsx",
+    "standard-react",
+    "prettier"
+  ],
+  "plugins": [
+    "jsx-a11y",
+    "mocha",
+    "chai-expect",
+    "chai-friendly"
+  ],
+  "env": {
+    "browser": true,
+    "mocha": true,
+    "node": true,
+    "es2020": true
+  },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "settings": {
+    // Tell eslint-plugin-react to detect which version of React we are using
+    "react": {
+      "version": "detect"
+    }
+  },
+  "rules": {
+    // Swap the no-unused-expressions rule with a more chai-friendly one
+    "no-unused-expressions": "off",
+    "chai-friendly/no-unused-expressions": "error",
+
+    // Disable some rules after upgrading ESLint
+    // TODO: re-enable and fix
+    "no-var": "off",
+
+    // do not allow importing of implicit dependencies.
+    "import/no-extraneous-dependencies": "error",
+
+    "node/no-callback-literal": "off",
+    "node/no-deprecated-api": "off",
+    "node/handle-callback-err": "off",
+    "node/no-path-concat": "off"
+  },
+  "overrides": [
+    // NOTE: changing paths may require updating them in the Makefile too.
+    {
+      // Test specific rules
+      "files": ["**/test/*/src/**/*.js", "**/test/**/*.test.js"],
+      "globals": {
+        "expect": true
+      },
+      "rules": {
+        // mocha-specific rules
+        "mocha/handle-done-callback": "error",
+        "mocha/no-exclusive-tests": "error",
+        "mocha/no-global-tests": "error",
+        "mocha/no-identical-title": "error",
+        "mocha/no-nested-tests": "error",
+        "mocha/no-pending-tests": "error",
+        "mocha/no-skipped-tests": "error",
+        "mocha/no-mocha-arrows": "error",
+
+        // chai-specific rules
+        "chai-expect/missing-assertion": "error",
+        "chai-expect/terminating-properties": "error",
+
+        // prefer-arrow-callback applies to all callbacks, not just ones in mocha tests.
+        // we don't enforce this at the top-level - just in tests to manage `this` scope
+        // based on mocha's context mechanism
+        "mocha/prefer-arrow-callback": "error"
+      }
+    },
+    {
+      // Frontend test specific rules
+      "files": ["**/test/karma/**/*.js"],
+      "globals": {
+        "expect": true,
+        "$": true
+      }
+    },
+    {
+      // Backend specific rules
+      "files": ["**/app/src/**/*.js"],
+      "rules": {
+        // don't allow console.log in backend code
+        "no-console": "error",
+
+        // do not allow importing of implicit dependencies.
+        "import/no-extraneous-dependencies": ["error", {
+          // do not allow importing of devDependencies.
+          "devDependencies": false
+        }]
+      }
+    },
+    {
+      // Frontend specific rules
+      "files": ["**/frontend/js/**/*.js", "**/frontend/stories/**/*.js", "**/*.stories.js", "**/test/frontend/**/*.js"],
+      "globals": {
+        "__webpack_public_path__": true,
+        "$": true,
+        "angular": true,
+        "ace": true,
+        "ga": true,
+        "sl_console": true,
+        "sl_debugging": true,
+        // Injected in layout.pug
+        "user_id": true,
+        "ExposedSettings": true
+      },
+      "rules": {
+        // Prevent usage of legacy string refs
+        "react/no-string-refs": "error",
+
+        // Prevent curly braces around strings (as they're unnecessary)
+        "react/jsx-curly-brace-presence": ["error", {
+          "props": "never",
+          "children": "never"
+        }],
+
+        // Allow target="_blank" in JSX
+        "react/jsx-no-target-blank": "off",
+
+        // Don't import React for JSX; the JSX runtime is added by a Babel plugin
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-uses-react": "off",
+
+        // Fix conflict between prettier & standard by overriding to prefer
+        // double quotes
+        "jsx-quotes": ["error", "prefer-double"],
+
+        // Override weird behaviour of jsx-a11y label-has-for (says labels must be
+        // nested *and* have for/id attributes)
+        "jsx-a11y/label-has-for": [
+          "error",
+          {
+            "required": {
+              "some": [
+                "nesting",
+                "id"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "files": ["scripts/ukamf/*.js"],
+      "rules": {
+        // Do not allow importing of any dependencies unless specified in either
+        //  - web/package.json
+        //  - web/scripts/ukamf/package.json
+        "import/no-extraneous-dependencies": ["error", {"packageDir": [".", "scripts/ukamf"]}]
+      }
+    }
+  ]
+}

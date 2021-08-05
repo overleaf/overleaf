@@ -1,0 +1,127 @@
+#left-menu {
+  position: absolute;
+  width: @left-menu-width;
+  padding: (@line-height-computed / 2);
+  top: 0;
+  bottom: 0;
+  background-color: #f4f4f4;
+  z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-transition: left ease-in-out @left-menu-animation-duration;
+  transition: left ease-in-out @left-menu-animation-duration;
+  font-size: 14px;
+
+  left: -280px;
+  &.shown {
+    left: 0;
+  }
+
+  h4 {
+    font-family: @font-family-sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    margin: (@line-height-computed / 2) 0;
+    padding-bottom: (@line-height-computed / 4);
+    color: @gray-light;
+    border-bottom: 1px solid @gray-lighter;
+  }
+
+  > h4:first-child {
+    margin-top: 0;
+  }
+
+  ul.nav {
+    a {
+      cursor: pointer;
+      &:hover,
+      &:active,
+      &:focus {
+        background-color: @link-color;
+        color: white;
+        i {
+          color: white;
+        }
+      }
+      i {
+        color: @gray;
+      }
+      padding: (@line-height-computed / 4);
+      font-weight: 700;
+    }
+    .link-disabled {
+      color: @gray-light;
+    }
+  }
+
+  > ul.nav:last-child {
+    margin-bottom: @line-height-computed / 2;
+  }
+
+  ul.nav-downloads {
+    li {
+      display: inline-block;
+      text-align: center;
+      width: 100px;
+      a {
+        color: @gray-dark;
+      }
+      i {
+        margin: (@line-height-computed / 4) 0;
+      }
+    }
+  }
+
+  form.settings {
+    label {
+      font-weight: normal;
+      color: @gray-dark;
+      flex: 1 0 50%;
+      margin-bottom: 0;
+      margin-top: 9px;
+      padding-right: 5px;
+      white-space: nowrap;
+    }
+    select {
+      width: 50%;
+      margin: 9px 0;
+    }
+    .form-controls {
+      clear: both;
+      padding: 0 9px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: flex-end;
+      border-bottom: solid 1px rgba(0, 0, 0, 0.07);
+      &:first-child {
+        margin-top: -9px;
+      }
+      &:last-child {
+        border-bottom: 0;
+      }
+      &:hover {
+        background-color: @link-color;
+        // select.form-control {
+        // 	color: white;
+        // }
+        label,
+        i.fa {
+          color: white;
+        }
+      }
+      &:after {
+        content: '';
+        display: table;
+        clear: both;
+      }
+    }
+  }
+}
+
+#left-menu-mask {
+  .full-size;
+  opacity: 0.4;
+  background-color: #999;
+  z-index: 99;
+}

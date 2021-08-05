@@ -1,0 +1,303 @@
+script(type='text/ng-template', id='newTagModalTemplate')
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3 #{translate("create_new_folder")}
+	.modal-body
+		form(name="newTagForm", novalidate)
+			input.form-control(
+				type="text",
+				placeholder="New Folder Name",
+				required,
+				ng-model="inputs.newTagName",
+				on-enter="create()",
+				focus-on="open",
+				stop-propagation="click"
+			)
+	.modal-footer
+		.modal-footer-left
+			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
+		//- We stop propagation to stop the clicks from closing the
+		//- 'move to folder' menu.
+		button.btn.btn-default(
+			ng-click="cancel()"
+			stop-propagation="click"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-disabled="newTagForm.$invalid || state.inflight"
+			ng-click="create()"
+			stop-propagation="click"
+		)
+			span(ng-show="!state.inflight") #{translate("create")}
+			span(ng-show="state.inflight") #{translate("creating")}…
+
+script(type='text/ng-template', id='deleteTagModalTemplate')
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3 #{translate("delete_folder")}
+	.modal-body
+		p #{translate("about_to_delete_folder")}
+		ul
+			li
+				strong {{tag.name}}
+	.modal-footer
+		.modal-footer-left
+			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-danger(
+			ng-click="delete()",
+			ng-disabled="state.inflight"
+		)
+			span(ng-show="state.inflight") #{translate("deleting")}…
+			span(ng-show="!state.inflight") #{translate("delete")}
+
+script(type='text/ng-template', id='renameTagModalTemplate')
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3 #{translate("rename_folder")}
+	.modal-body
+		form(name="renameTagForm", novalidate)
+			input.form-control(
+				type="text",
+				placeholder="Tag Name",
+				ng-model="inputs.tagName",
+				required,
+				on-enter="rename()",
+				focus-on="open"
+			)
+	.modal-footer
+		.modal-footer-left
+			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
+		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-click="rename()",
+			ng-disabled="renameTagForm.$invalid || state.inflight"
+		)
+			span(ng-show="!state.inflight") #{translate("rename")}
+			span(ng-show="state.inflight") #{translate("renaming")}…
+
+script(type='text/ng-template', id='renameProjectModalTemplate')
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3 #{translate("rename_project")}
+	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{state.error.message}}
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
+		form(name="renameProjectForm", novalidate)
+			input.form-control(
+				type="text",
+				placeholder="Project Name",
+				ng-model="inputs.projectName",
+				required,
+				on-enter="rename()",
+				focus-on="open"
+			)
+	.modal-footer
+		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-click="rename()",
+			ng-disabled="renameProjectForm.$invalid || state.inflight"
+		)
+			span(ng-show="!state.inflight") #{translate("rename")}
+			span(ng-show="state.inflight") #{translate("renaming")}…
+
+script(type='text/ng-template', id='cloneProjectModalTemplate')
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3 #{translate("copy_project")}
+	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{state.error.message === "invalid element name" ? "#{translate("invalid_element_name")}" : state.error.message}}
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
+		form(name="cloneProjectForm", novalidate)
+			.form-group
+				label #{translate("new_name")}
+				input.form-control(
+					type="text",
+					placeholder="New Project Name",
+					required,
+					ng-model="inputs.projectName",
+					on-enter="clone()",
+					focus-on="open"
+				)
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-disabled="cloneProjectForm.$invalid || state.inflight"
+			ng-click="clone()"
+		)
+			span(ng-hide="state.inflight") #{translate("copy")}
+			span(ng-show="state.inflight") #{translate("copying")} …
+
+script(type='text/ng-template', id='newProjectModalTemplate')
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3 #{translate("new_project")}
+	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{state.error.message}}
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
+		form(novalidate, name="newProjectForm")
+			input.form-control(
+				type="text",
+				placeholder="Project Name",
+				required,
+				ng-model="inputs.projectName",
+				on-enter="create()",
+				focus-on="open"
+			)
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-disabled="newProjectForm.$invalid || state.inflight"
+			ng-click="create()"
+		)
+			span(ng-hide="state.inflight") #{translate("create")}
+			span(ng-show="state.inflight") #{translate("creating")} …
+
+script(type='text/ng-template', id='archiveTrashLeaveOrDeleteProjectsModalTemplate')
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3(ng-if="action === 'archive'") #{translate("archive_projects")}
+		h3(ng-if="action === 'trash'") #{translate("trash_projects")}
+		h3(ng-if="action === 'leave'") #{translate("leave_projects")}
+		h3(ng-if="action === 'delete'") #{translate("delete_projects")}
+		h3(ng-if="action === 'leaveOrDelete'") #{translate("delete_and_leave_projects")}
+	.modal-body
+		div(ng-if="action !== 'leaveOrDelete'")
+			p(ng-if="action === 'archive'") #{translate("about_to_archive_projects")}
+			p(ng-if="action === 'trash'") #{translate("about_to_trash_projects")}
+			p(ng-if="action === 'leave'") #{translate("about_to_leave_projects")}
+			p(ng-if="action === 'delete'") #{translate("about_to_delete_projects")}
+			ul
+				li(ng-repeat="project in projects | orderBy:'name'")
+					strong {{project.name}}
+			div(ng-if="action === 'archive'")
+				p #{translate("archiving_projects_wont_affect_collaborators")}
+					| &nbsp;
+					a(
+						href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized"
+						target="_blank"
+					) #{translate("find_out_more_nt")}
+			div(ng-if="action === 'trash'")
+				p #{translate("trashing_projects_wont_affect_collaborators")}
+					| &nbsp;
+					a(
+						href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized"
+						target="_blank"
+					) #{translate("find_out_more_nt")}
+			.project-action-alert.alert.alert-warning(ng-if="action === 'leave' || action === 'delete'")
+				i.fa.fa-fw.fa-exclamation-triangle
+				.project-action-alert-msg #{translate("this_action_cannot_be_undone")}
+		div(ng-if="action === 'leaveOrDelete'")
+			p #{translate("about_to_delete_projects")}
+			ul
+				li(ng-repeat="project in projects | filter:{accessLevel: 'owner'} | orderBy:'name'")
+					strong {{project.name}}
+			p #{translate("about_to_leave_projects")}
+			ul
+				li(ng-repeat="project in projects | filter:{accessLevel: '!owner'} | orderBy:'name'")
+					strong {{project.name}}
+			.project-action-alert.alert.alert-warning
+				i.fa.fa-fw.fa-exclamation-triangle
+				.project-action-alert-msg #{translate("this_action_cannot_be_undone")}
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-danger(
+			ng-click="confirm()"
+		) #{translate("confirm")}
+
+script(type="text/template", id="qq-project-uploader-template")
+	div.qq-uploader-selector
+		div(qq-hide-dropzone="").qq-upload-drop-area-selector.qq-upload-drop-area
+			span.qq-upload-drop-area-text-selector #{translate('drop_files_here_to_upload')}
+		div.qq-upload-button-selector.btn.btn-primary.btn-lg
+			div #{translate('select_a_zip_file')}
+		span.or.btn-lg #{translate('or')}
+		span.drag-here.btn-lg #{translate('drag_a_zip_file')}
+		ul.qq-upload-list-selector
+			li
+				div.qq-progress-bar-container-selector
+					div(
+						role="progressbar"
+						aria-valuenow="0"
+						aria-valuemin="0"
+						aria-valuemax="100"
+						class="qq-progress-bar-selector qq-progress-bar"
+					)
+				span.qq-upload-file-selector.qq-upload-file
+				span.qq-upload-size-selector.qq-upload-size
+				a(type="button").qq-btn.qq-upload-cancel-selector.qq-upload-cancel #{translate('cancel')}
+				button(type="button").qq-btn.qq-upload-retry-selector.qq-upload-retry #{translate('retry')}
+				span(role="status").qq-upload-status-text-selector.qq-upload-status-text
+
+script(type="text/ng-template", id="uploadProjectModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+			aria-label="Close"
+		)
+			span(aria-hidden="true") &times;
+		h3 #{translate("upload_zipped_project")}
+	.modal-body(
+		fine-upload
+		endpoint="/project/new/upload"
+		template-id="qq-project-uploader-template"
+		multiple="false"
+		size-limit=zipFileSizeLimit
+		allowed-extensions="['zip']"
+		on-complete-callback="onComplete"
+	)
+	.modal-footer
+		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}

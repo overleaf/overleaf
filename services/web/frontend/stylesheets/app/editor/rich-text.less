@@ -1,0 +1,254 @@
+@rt-font-family-serif: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+@rt-line-padding: 8%;
+
+.rich-text .CodeMirror {
+  font-family: @rt-font-family-serif;
+  font-size: 1.15em;
+
+  pre {
+    font-family: @rt-font-family-serif;
+  }
+
+  .CodeMirror-line {
+    // Add horizontal padding, to emulate a manuscript more closely
+    padding: 0 @rt-line-padding;
+  }
+
+  .CodeMirror-linenumber {
+    font-size: 0.8em;
+  }
+
+  // TODO: Change prefix away from wl- ?
+
+  /****************************************************************************/
+
+  .preamble h1 {
+    text-align: center;
+    font-size: 2em;
+    color: @text-color;
+  }
+
+  .preamble ul.authors {
+    margin-left: 0;
+    padding-left: 0;
+    list-style: none;
+    text-align: center;
+  }
+
+  .preamble ul.authors li {
+    padding-bottom: 5px;
+  }
+
+  /****************************************************************************/
+
+  // wl-indent-X is used to add extra left padding to nested itemize/enumerate
+  // environments, so that the inner list appears more indented than the outer
+  .wl-indent-0 {
+    padding-left: calc(~'2.5em + @{rt-line-padding}') !important;
+  }
+
+  .wl-indent-1 {
+    padding-left: calc(~'3.5em + @{rt-line-padding}') !important;
+  }
+
+  .wl-indent-2 {
+    padding-left: calc(~'4.5em + @{rt-line-padding}') !important;
+  }
+
+  .wl-indent-3 {
+    padding-left: calc(~'5.5em + @{rt-line-padding}') !important;
+  }
+
+  .wl-indent-4 {
+    padding-left: calc(~'6.5em + @{rt-line-padding}') !important;
+  }
+
+  // wl-indent-env-X is used to add extra left padding to empty nested itemize/
+  // enumerate environments
+  .wl-indent-env-0 {
+    padding-left: calc(~'4px + @{rt-line-padding}') !important;
+  }
+
+  .wl-indent-env-1 {
+    padding-left: calc(~'1.5em + @{rt-line-padding}') !important;
+  }
+
+  .wl-indent-env-2 {
+    padding-left: calc(~'2.5em + @{rt-line-padding}') !important;
+  }
+
+  .wl-indent-env-3 {
+    padding-left: calc(~'3.5em + @{rt-line-padding}') !important;
+  }
+
+  .wl-indent-env-4 {
+    padding-left: calc(~'4.5em + @{rt-line-padding}') !important;
+  }
+
+  .wl-enumerate-item-open {
+    text-align: right;
+    width: 1.5em;
+    display: inline-block;
+    padding-right: 0.2em;
+  }
+
+  .wl-item-open {
+    text-align: right;
+    width: 1.5em;
+    display: inline-block;
+    padding-right: 0.2em;
+  }
+
+  .wl-input {
+    font-style: oblique;
+  }
+
+  /****************************************************************************/
+
+  .wl-abstract-open,
+  .wl-abstract-close {
+    border-top: 1px solid #999;
+    font-size: large;
+    font-weight: bold;
+    width: 100%;
+  }
+
+  .wl-figure {
+    max-height: 120px;
+    width: auto;
+    margin: 0 auto;
+  }
+
+  .wl-figure-wrap {
+    padding: 10px 0;
+    background-color: #f5f5f5;
+    box-shadow: 1.3px 2px 2px #dfdfdf;
+    width: 96%;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .wl-figure-caption {
+    padding: 3px 0 4px;
+    font-size: small;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  /****************************************************************************/
+
+  .wl-chapter,
+  .wl-chapter-open,
+  .wl-chapter-close {
+    font-size: 2.2em;
+    font-weight: bold;
+  }
+
+  .wl-chapter-open,
+  .wl-chapter-close {
+    color: #999;
+  }
+
+  /****************************************************************************/
+
+  .wl-section,
+  .wl-section-open,
+  .wl-section-close {
+    font-size: 1.8em;
+    font-weight: bold;
+  }
+
+  .wl-section-open,
+  .wl-section-close {
+    color: #999;
+  }
+
+  /****************************************************************************/
+  .wl-subsection,
+  .wl-subsection-open,
+  .wl-subsection-close {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+
+  .wl-subsection-open,
+  .wl-subsection-close {
+    color: #999;
+  }
+
+  /****************************************************************************/
+  .wl-subsubsection,
+  .wl-subsubsection-open,
+  .wl-subsubsection-close {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+
+  .wl-subsubsection-open,
+  .wl-subsubsection-close {
+    color: #999;
+  }
+
+  /****************************************************************************/
+  .wl-textbf {
+    font-weight: bold;
+  }
+
+  .wl-textbf-open {
+    font-weight: bold;
+    color: #999;
+  }
+
+  .wl-textbf-close {
+    font-weight: bold;
+    color: #999;
+  }
+
+  .wl-label-bracket {
+    font-weight: bold;
+    color: #999;
+  }
+
+  .wl-label-open,
+  .wl-input-link {
+    .wl-icon {
+      padding-left: 5px;
+      padding-right: 2px;
+      vertical-align: middle;
+      // @include wl-icon-size(inherit);
+    }
+  }
+
+  .wl-img-default {
+    width: 0.9em;
+    padding: 0 1px 1px;
+  }
+
+  .wl-label-close {
+    background-color: #f7f7f9;
+    border: 1px solid #e1e1e8;
+    border-radius: 4px;
+    font-size: small;
+  }
+
+  /****************************************************************************/
+  .wl-textit {
+    font-style: italic;
+  }
+
+  .wl-textit-open {
+    font-style: italic;
+    color: #999;
+  }
+
+  .wl-textit-close {
+    font-style: italic;
+    color: #999;
+  }
+
+  .spelling-error {
+    background-image: url(/img/spellcheck-underline.png);
+    background-repeat: repeat-x;
+    background-position: bottom;
+  }
+}

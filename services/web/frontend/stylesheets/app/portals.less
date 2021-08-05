@@ -1,0 +1,148 @@
+.content-portal {
+  padding-top: @navbar-height!important;
+  .join-rider {
+    margin-top: -(@line-height-computed / 2); // negate bottom margin from h4
+  }
+  /*
+    Begin Header
+  */
+  .banner-image {
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    height: 375px;
+  }
+
+  .image-fill {
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+  }
+
+  .institution-logo {
+    left: 50%;
+    margin-left: -100px;
+    padding: 0;
+    position: absolute;
+    div {
+      background-color: @white;
+      box-shadow: 1px 11px 22px -9px @black-alpha-strong;
+      display: inline-block;
+      height: 125px;
+      overflow: hidden;
+      position: absolute;
+      text-align: center;
+      top: -110px;
+      white-space: nowrap;
+      width: @btn-portal-width;
+    }
+    img {
+      max-height: 75px;
+      max-width: 150px;
+      vertical-align: middle;
+    }
+  }
+
+  .portal-name {
+    background-color: @ol-blue-gray-0;
+    padding-bottom: @line-height-computed; //- center header when no tabs
+    padding-top: @padding-md;
+    text-align: center;
+    width: 100%;
+  }
+  // End Header
+
+  /*
+    Begin Layout
+  */
+  .button-pull,
+  .content-pull {
+    float: left;
+  }
+
+  .button-pull {
+    text-align: right;
+    > a.btn {
+      white-space: normal;
+      width: @btn-portal-width;
+      text-align: center;
+    }
+  }
+  .content-pull {
+    padding-right: @padding-sm;
+    width: calc(~'100% - ' @btn-portal-width);
+  }
+  // End Layout
+
+  /*
+    Begin Card
+  */
+  .card {
+    margin-bottom: @margin-md;
+  }
+  // End Card
+
+  /*
+    Begin Actions
+  */
+  .portal-actions {
+    i {
+      margin-bottom: @margin-sm;
+    }
+  }
+  // End Actions
+
+  .nav-tabs {
+    margin-bottom: @margin-md;
+  }
+
+  /*
+    Begin Print
+  */
+  .print {
+    .basic-metrics {
+      margin-bottom: 50px; /* get Departments header on next page */
+    }
+    .container {
+      width: auto;
+    }
+    .custom-donut-container svg {
+      max-width: 570px; /* safe width for printing */
+    }
+    .hidden-print {
+      display: none;
+    }
+    .portal-col {
+      /* for firefox */
+      margin: 0;
+      width: 100%;
+    }
+    .portal-name {
+      padding: 0;
+    }
+    .visible-print {
+      display: block !important;
+    }
+  }
+  @media print and (color) {
+    &:extend(.print);
+  }
+  // End Print
+
+  .nav-tabs {
+    background-color: @ol-blue-gray-0;
+  }
+
+  @media (max-width: @screen-size-sm-max) {
+    .content-pull {
+      padding: 0;
+      width: auto;
+    }
+
+    .button-pull {
+      > a.btn {
+        width: auto;
+      }
+    }
+  }
+}

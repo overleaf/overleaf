@@ -1,0 +1,169 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container.bonus
+			.row
+				.col-md-8.col-md-offset-2
+					.card
+						.container-fluid(ng-controller="BonusLinksController")
+							.row
+								.col-md-12
+									.page-header
+										h1 #{translate("help_us_spread_word")}.
+
+
+							.row
+								.col-md-10.col-md-offset-1
+									h2 #{translate("share_sl_to_get_rewards")}
+
+							.row
+								.col-md-8.col-md-offset-2.bonus-banner
+									.bonus-top
+
+							.row
+								.col-md-8.col-md-offset-2.bonus-banner
+									.title
+										a(href='https://twitter.com/share?text='+encodeURIComponent(translate("bonus_twitter_share_text"))+'&url='+encodeURIComponent(buildReferalUrl("t"))+'&counturl='+settings.social.twitter.counturl, target="_blank").twitter
+											i.fa.fa-fw.fa-2x.fa-twitter(aria-hidden="true")
+											|
+											| Tweet
+
+							.row
+								.col-md-8.col-md-offset-2.bonus-banner
+									.title
+										a(href='#').facebook
+											i.fa.fa-fw.fa-2x.fa-facebook-square(aria-hidden="true")
+											|
+											| #{translate("post_on_facebook")}
+
+							.row
+								.col-md-8.col-md-offset-2.bonus-banner
+									.title
+										a(href='mailto:?subject='+encodeURIComponent(translate("bonus_email_share_header"))+'&body='+encodeURIComponent(translate("bonus_email_share_body")+' ')+encodeURIComponent(buildReferalUrl("e")), title='Share by Email').email
+											i.fa.fa-fw.fa-2x.fa-envelope-open-o(aria-hidden="true")
+											|
+											| #{translate("email_us_to_your_friends")}
+
+							.row
+								.col-md-8.col-md-offset-2.bonus-banner
+									.title
+										a(href='#link-modal', data-toggle="modal", ng-click="openLinkToUsModal()").link
+											i.fa.fa-fw.fa-2x.fa-globe(aria-hidden="true")
+											|
+											| #{translate("link_to_us")}
+
+							.row
+								.col-md-10.col-md-offset-1.bonus-banner
+									h2.direct-link #{translate("direct_link")}
+									pre.text-centered #{buildReferalUrl("d")}
+
+							.row.ab-bonus
+								.col-md-10.col-md-offset-1.bonus-banner
+									p.thanks !{translate("sl_gives_you_free_stuff_see_progress_below")}
+							.row.ab-bonus
+								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 30px; margin-top: 20px;")
+									- for (var i = 0; i <= 10; i++) {
+										if (refered_user_count == i)
+											.number(style="left: "+i+"0%").active #{i}
+										else
+											.number(style="left: "+i+"0%") #{i}
+									- }
+
+							.row.ab-bonus
+								.col-md-10.col-md-offset-1.bonus-banner
+									.progress
+										if (refered_user_count == 0)
+											div(style="text-align: center; padding: 4px;") #{translate("spread_the_word_and_fill_bar")}
+										.progress-bar.progress-bar-info(style="width: "+refered_user_count+"0%")
+
+							.row.ab-bonus
+								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 110px;")
+									.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") #{translate("one_free_collab")}
+									.perk(style="left: 30%;", class = refered_user_count >= 3 ? "active" : "") #{translate("three_free_collab")}
+									.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("three_free_collab")}
+									.perk(style="left: 90%;", class = refered_user_count >= 9 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("unlimited_collabs")}
+							.row &nbsp;
+
+							.row.ab-bonus
+								.col-md-10.col-md-offset-1.bonus-banner.bonus-status
+									if (refered_user_count == 0)
+										p.thanks !{translate("you_not_introed_anyone_to_sl")}
+									else if (refered_user_count == 1)
+										p.thanks !{translate("you_introed_small_number", {numberOfPeople: refered_user_count}, ['strong'])}
+									else
+										p.thanks !{translate("you_introed_high_number", {numberOfPeople: refered_user_count}, ['strong'])}
+
+						script(type="text/ng-template", id="BonusLinkToUsModal")
+							.modal-header
+								button.close(
+									type="button"
+									data-dismiss="modal"
+									ng-click="cancel()"
+									aria-label="Close"
+								)
+									span(aria-hidden="true") &times;
+								h3 #{translate("link_to_sl")}
+							.modal-body.modal-body-share.link-modal
+
+								p #{translate("can_link_to_sl_with_html")}
+								p
+									textarea.col-md-12(readonly=true)
+										<a href="#{buildReferalUrl("d")}">#{translate("bonus_share_link_text")}</a>
+
+								p #{translate("thanks")}!
+
+
+							.modal-footer()
+								button.btn.btn-default(
+									ng-click="cancel()",
+								)
+									span #{translate("close")}
+
+
+block append foot-scripts
+	script(type="text/javascript", nonce=scriptNonce).
+		$(document).ready(function () {
+			$.ajax({dataType: "script", cache: true, url: "//connect.facebook.net/en_US/all.js"}).done(function () {
+				window.fbAsyncInit = function() {
+					FB.init({appId: '#{settings.social.facebook.appId}', xfbml: true});
+				}
+			});
+		});
+
+		function postToFeed() {
+			// calling the API ...
+			var obj = {
+				method: 'feed',
+				redirect_uri: '#{settings.social.facebook.redirectUri}',
+				link: '!{buildReferalUrl("fb")}',
+				picture: '#{settings.social.facebook.picture}',
+				name: '#{translate("bonus_facebook_name").replace(/\'/g, "\\x27")}',
+				caption: '#{translate("bonus_facebook_caption").replace(/\'/g, "\\x27")}',
+				description: '#{translate("bonus_facebook_description").replace(/\'/g, "\\x27")}'
+			};
+
+			if (typeof FB !== "undefined" && FB !== null) {
+				FB.ui(obj);
+			}
+		}
+
+	script(type="text/javascript", nonce=scriptNonce, src='//platform.twitter.com/widgets.js')
+
+	script(type="text/javascript", nonce=scriptNonce).
+		$(function() {
+			$(".twitter").click(function() {
+				ga('send', 'event', 'referal-button', 'clicked', "twitter")
+			});
+			$(".email").click(function() {
+				ga('send', 'event', 'referal-button', 'clicked', "email")
+			});
+			$(".facebook").click(function(e) {
+				ga('send', 'event', 'referal-button', 'clicked', "facebook")
+				postToFeed()
+				e.preventDefault()
+			});
+			$(".link").click(function() {
+				ga('send', 'event', 'referal-button', 'clicked', "direct-link")
+			});
+		});

@@ -1,0 +1,132 @@
+div(ng-controller="RecurlySubscriptionController")
+	div(ng-show="!showCancellation")
+		if (personalSubscription.recurly.account.has_past_due_invoice && personalSubscription.recurly.account.has_past_due_invoice._ == 'true')
+			.alert.alert-danger #{translate("account_has_past_due_invoice_change_plan_warning")} 
+				| &nbsp;
+				a(href=personalSubscription.recurly.accountManagementLink, target="_blank") #{translate("view_your_invoices")}.
+		case personalSubscription.recurly.state
+			when "active"
+				p !{translate("currently_subscribed_to_plan", {planName: personalSubscription.plan.name}, ['strong'])}
+					if (personalSubscription.pendingPlan)
+						if (personalSubscription.pendingPlan.name != personalSubscription.plan.name)
+							|
+							| !{translate("your_plan_is_changing_at_term_end", {pendingPlanName: personalSubscription.pendingPlan.name}, ['strong'])}
+						if (personalSubscription.recurly.pendingAdditionalLicenses > 0 || personalSubscription.recurly.additionalLicenses > 0)
+							|
+							| !{translate("pending_additional_licenses", {pendingAdditionalLicenses: personalSubscription.recurly.pendingAdditionalLicenses, pendingTotalLicenses: personalSubscription.recurly.pendingTotalLicenses}, ['strong', 'strong'])}
+					else if (personalSubscription.recurly.additionalLicenses > 0)
+						|
+						| !{translate("additional_licenses", {additionalLicenses: personalSubscription.recurly.additionalLicenses, totalLicenses: personalSubscription.recurly.totalLicenses}, ['strong', 'strong'])}
+					| &nbsp;
+					a(href, ng-click="switchToChangePlanView()", ng-if="showChangePlanButton") !{translate("change_plan")}.
+				if (personalSubscription.pendingPlan)
+					p #{translate("want_change_to_apply_before_plan_end")}
+				if (personalSubscription.recurly.trialEndsAtFormatted && personalSubscription.recurly.trial_ends_at > Date.now())
+					p You're on a free trial which ends on <strong ng-non-bindable>#{personalSubscription.recurly.trialEndsAtFormatted}</strong>
+				p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount: personalSubscription.recurly.price, collectionDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong', 'strong'])}
+				include ./../_price_exceptions
+				p.pull-right
+				p
+					a(href=personalSubscription.recurly.billingDetailsLink, target="_blank").btn.btn-info #{translate("update_your_billing_details")}
+					| &nbsp;
+					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-info #{translate("view_your_invoices")}
+					| &nbsp;
+					a(href, ng-click="switchToCancellationView()", ng-hide="recurlyLoadError").btn.btn-danger !{translate("cancel_your_subscription")}
+			when "canceled"
+				p !{translate("currently_subscribed_to_plan", {planName: personalSubscription.plan.name}, ['strong'])}
+				p !{translate("subscription_canceled_and_terminate_on_x", {terminateDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong'])}
+				p
+					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-info #{translate("view_your_invoices")}
+					p: form(action="/user/subscription/reactivate",method="post")
+						input(type="hidden", name="_csrf", value=csrfToken)
+						input(type="submit",value="Reactivate your subscription").btn.btn-success
+			when "expired"
+				p !{translate("your_subscription_has_expired")}
+				p
+					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-info #{translate("view_your_invoices")}
+					| &nbsp;
+					a(href="/user/subscription/plans").btn.btn-success !{translate("create_new_subscription")}
+			default
+				p !{translate("problem_with_subscription_contact_us")}
+
+		.alert.alert-warning(ng-show="recurlyLoadError")
+			strong #{translate('payment_provider_unreachable_error')}
+
+	include ./_change_plans_mixins
+	div(ng-show="showChangePlan", ng-cloak)
+		h2 !{translate("change_plan")}
+		p: table.table
+			tr
+				th !{translate("name")}
+				th !{translate("price")}
+				th
+			+printPlans(plans.studentAccounts)
+			+printPlans(plans.individualMonthlyPlans)
+			+printPlans(plans.individualAnnualPlans)
+
+
+	.div(ng-controller="RecurlyCancellationController", ng-show="showCancellation").text-center
+		p
+			strong #{translate("wed_love_you_to_stay")}
+
+		div(ng-show="showExtendFreeTrial")
+			p !{translate("have_more_days_to_try", {days:14})}
+			p
+				button(type="submit", ng-click="extendTrial()", ng-disabled='inflight').btn.btn-success #{translate("ill_take_it")}
+			p
+				a(href, ng-click="cancelSubscription()", ng-disabled='inflight') #{translate("no_thanks_cancel_now")}
+
+		div(ng-show="showDowngradeToStudent")
+			div(ng-controller="ChangePlanFormController")
+				p !{translate("interested_in_cheaper_plan",{price:'{{studentPrice}}'})}
+				p
+					button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_move_me_to_student_plan")}
+				p
+					a(href, ng-click="cancelSubscription()", ng-disabled='inflight')  #{translate("no_thanks_cancel_now")}
+
+		div(ng-show="showBasicCancel")
+			p
+				a(href, ng-click="switchToDefaultView()").btn.btn-info #{translate("i_want_to_stay")}
+			p
+				a(href, ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
+
+script(type='text/ng-template', id='confirmChangePlanModalTemplate')
+	.modal-header
+		h3 #{translate("change_plan")}
+	.modal-body
+		.alert.alert-warning(ng-show="genericError")
+			strong #{translate("generic_something_went_wrong")}. #{translate("try_again")}. #{translate("generic_if_problem_continues_contact_us")}.
+		p !{translate("sure_you_want_to_change_plan", {planName: '{{plan.name}}'}, ['strong'])}
+		div(ng-show="planChangesAtTermEnd")
+			p #{translate("existing_plan_active_until_term_end")}
+			p #{translate("want_change_to_apply_before_plan_end")}
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="inflight"
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-success(
+			ng-disabled="state.inflight"
+			ng-click="confirmChangePlan()"
+		)
+			span(ng-hide="inflight") #{translate("change_plan")}
+			span(ng-show="inflight") #{translate("processing")}…
+
+script(type='text/ng-template', id='cancelPendingPlanChangeModalTemplate')
+	.modal-header
+		h3 #{translate("change_plan")}
+	.modal-body
+		.alert.alert-warning(ng-show="genericError")
+			strong #{translate("generic_something_went_wrong")}. #{translate("try_again")}. #{translate("generic_if_problem_continues_contact_us")}.
+		p !{translate("sure_you_want_to_cancel_plan_change", {planName: '{{plan.name}}'}, ['strong'])}
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="inflight"
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-success(
+			ng-disabled="state.inflight"
+			ng-click="confirmCancelPendingPlanChange()"
+		)
+			span(ng-hide="inflight") #{translate("revert_pending_plan_change")}
+			span(ng-show="inflight") #{translate("processing")}…

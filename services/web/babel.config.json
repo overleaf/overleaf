@@ -1,0 +1,40 @@
+{
+  "presets": [
+    [
+      "@babel/react",
+      {
+        "runtime": "automatic"
+      }
+    ],
+    [
+      "@babel/env",
+      {
+        "useBuiltIns": "usage",
+        "corejs": { "version": 3 }
+      }
+    ]
+  ],
+  "plugins": ["angularjs-annotate", "macros"],
+  // Target our current Node version in test environment, to transform and
+  // polyfill only what's necessary
+  "env": {
+    "test": {
+      "presets": [
+        [
+          "@babel/react",
+          {
+            "runtime": "automatic"
+          }
+        ],
+        [
+          "@babel/env",
+          {
+            "targets": { "node": "12.21" },
+            "useBuiltIns": "usage",
+            "corejs": { "version": 3 }
+          }
+        ]
+      ]
+    }
+  }
+}

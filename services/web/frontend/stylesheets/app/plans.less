@@ -1,0 +1,486 @@
+.plans {
+  p {
+    color: @gray-dark;
+    margin-bottom: @line-height-computed;
+  }
+  .best-value {
+    color: @brand-secondary;
+    line-height: @line-height-computed;
+    text-transform: capitalize;
+  }
+  blockquote {
+    footer {
+      /* accessibility fix */
+      color: @gray-med;
+    }
+  }
+  .btn-header {
+    font-family: @font-family-sans-serif;
+    margin-left: 10px;
+    margin-top: -10px;
+    text-shadow: 0 0 0;
+  }
+  .card .btn {
+    white-space: normal;
+  }
+  .card.features {
+    margin-top: @line-height-computed;
+    i {
+      color: @red;
+    }
+    p {
+      margin: 0;
+    }
+  }
+  .btn-header {
+    font-family: @font-family-sans-serif;
+    margin-left: 10px;
+    margin-top: -10px;
+    text-shadow: 0 0 0;
+  }
+  .card .btn {
+    white-space: normal;
+  }
+  .card-group {
+    .card-highlighted {
+      padding-top: @line-height-computed * 2;
+      padding-bottom: @line-height-computed * 2;
+    }
+  }
+  .card-first,
+  .card-last {
+    background: @plans-non-highlighted;
+  }
+  .card-highlighted {
+    border: @border-width-base solid @border-color-base;
+    padding-top: 10px !important;
+    .best-value {
+      margin-bottom: 15px;
+    }
+    .card-header {
+      padding-bottom: 22px; /* align hr with other plans */
+    }
+  }
+  .card-header {
+    margin-bottom: 15px;
+  }
+  .circle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 46px 18px;
+    margin: 0 auto @line-height-computed;
+    text-shadow: 0 -1px 1px darken(@link-color, 10%);
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: @brand-secondary;
+    color: white;
+    white-space: nowrap;
+    line-height: 1;
+    span.small {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: @font-size-base * 0.8;
+    }
+  }
+  .circle-lg {
+    width: 150px;
+    height: 150px;
+    padding-top: 50px;
+  }
+  .circle-subtext {
+    font-size: 1rem;
+  }
+  .circle-img {
+    float: right;
+  }
+  .faq {
+    p {
+      margin: 0;
+    }
+  }
+  .header-with-btn {
+    line-height: 1.6;
+  }
+  .plans-header {
+    h1,
+    h2,
+    p {
+      text-shadow: 0 -1px 1px white;
+    }
+    h1,
+    h2 {
+      color: @red;
+    }
+    p {
+      margin-bottom: 0;
+    }
+  }
+  .plans-subheader {
+    margin-bottom: @line-height-computed;
+  }
+  .tagline {
+    margin-bottom: 20px;
+  }
+  ul.nav-pills {
+    text-align: center;
+    margin-bottom: @line-height-computed;
+    li {
+      float: none;
+      display: inline-block;
+    }
+    > li + li {
+      margin-left: @line-height-computed / 2;
+    }
+  }
+}
+
+#changePlanSection {
+  padding-top: 30px;
+  .changePlanButton {
+    padding-top: 15px;
+  }
+}
+
+.paymentPageFeatures {
+  h1,
+  h2,
+  h3 {
+    color: @gray-dark;
+  }
+  h3 {
+    font-size: 18px;
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+  p {
+    font-size: 14px;
+    color: @gray;
+  }
+  .small {
+    font-size: 12px;
+  }
+}
+
+.plansPageStudentLink {
+  margin-left: 20px;
+  margin-top: 20px;
+}
+
+/**
+	Plans Test
+*/
+@best-val-height: 35px;
+@border-width-base: 3px;
+@gray-med: #6d6d6d;
+
+/* Media Queries */
+@media (max-width: @screen-sm-max) {
+  .plans {
+    .card-group {
+      /*override style in cards.less */
+      .card {
+        margin-left: 0;
+        margin-right: 0;
+      }
+      .card-highlighted {
+        margin-top: @line-height-computed!important;
+      }
+    }
+    .circle-img {
+      float: left;
+      margin: 0 15px;
+    }
+    ul.nav-pills {
+      margin-bottom: @margin-xs;
+      li {
+        margin-bottom: @margin-sm;
+      }
+    }
+  }
+}
+@media (min-width: @screen-md-min) {
+  .plans {
+    blockquote {
+      margin-bottom: 0;
+    }
+    .faq {
+      .row:nth-child(2) {
+        h3 {
+          margin-top: 0;
+        }
+      }
+    }
+    .top-switch {
+      .currency-dropdown {
+        margin-right: -15px;
+      }
+    }
+  }
+}
+
+.student-disclaimer {
+  font-size: 14px; /* match .paymentPageFeatures p */
+  color: @gray; /* match .paymentPageFeatures p */
+  margin: 12.5px 0 0 0;
+}
+
+/**
+	Plans Table
+*/
+.plans-table {
+  border: 1px solid @gray-lighter;
+  background-color: @plans-non-highlighted;
+  margin: @best-val-height 0 15px 0;
+  table-layout: fixed;
+  width: 100%;
+
+  th,
+  td {
+    -moz-background-clip: padding;
+    -webkit-background-clip: padding;
+    background-clip: padding-box; /* needed for firefox when there is bg color */
+    border: 1px solid @gray-lighter;
+    padding: 6px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  td {
+    font-weight: bold;
+  }
+
+  th {
+    border-top: 0;
+    font-family: @headings-font-family;
+    font-size: @font-size-h2;
+    font-weight: @headings-font-weight;
+    hyphens: auto;
+    line-height: @headings-line-height;
+    padding: 18px;
+  }
+
+  th:first-child,
+  td:first-child {
+    border-left: 0;
+  }
+
+  th:last-child,
+  td:last-child {
+    border-right: 0;
+  }
+
+  td:first-child {
+    font-weight: bold;
+    padding-left: 18px;
+    text-align: left;
+  }
+
+  tr:first-child {
+    th {
+      position: relative;
+      /* keep here position here, otherwise messes up border on safari */
+    }
+  }
+
+  tr:last-child {
+    td {
+      border-bottom: 0;
+      padding: 18px;
+    }
+    td:first-child {
+      border: 0;
+    }
+  }
+
+  .fa-check {
+    color: @green;
+  }
+
+  /* accessibility fixes */
+  .small {
+    color: @gray-med;
+  }
+
+  .outer {
+    left: -@border-width-base;
+    right: -@border-width-base;
+    position: absolute;
+
+    .outer-content {
+      background: white;
+      border: @border-width-base solid @border-color-base;
+      border-radius: @border-radius-base;
+      font-size: @font-size-base;
+      font-family: @font-family-sans-serif;
+      font-weight: bold;
+      height: @best-val-height;
+      padding-top: 10px;
+    }
+  }
+  .outer.outer-top {
+    top: -@best-val-height;
+    .outer-content {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-bottom: 0;
+    }
+  }
+  .outer.outer-btm {
+    bottom: -@best-val-height / 2;
+    .outer-content {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      border-top: 0;
+      height: @best-val-height / 2;
+    }
+  }
+
+  @media (min-width: @screen-sm-min) {
+    /* highlight rows on hover */
+    tr:hover {
+      td {
+        background-color: @table-hover-bg;
+      }
+    }
+    tr:first-child:hover {
+      background-color: transparent;
+    }
+    tr:last-child:hover {
+      background-color: transparent;
+      td {
+        background-color: transparent;
+      }
+    }
+  }
+
+  /* tooltip */
+  sup {
+    color: @brand-secondary;
+    cursor: pointer;
+    margin-left: 5px;
+  }
+  .tooltip.in {
+    min-width: 200px;
+  }
+
+  /* Media Queries */
+  @media (max-width: @screen-sm-max) {
+    font-size: @font-size-small;
+    hyphens: auto;
+    margin-top: @best-val-height*2;
+    th {
+      font-size: @font-size-base;
+      padding-left: @padding-xs;
+      padding-right: @padding-xs;
+    }
+    td:first-child {
+      padding-left: @padding-xs;
+    }
+    tr:last-child {
+      td {
+        padding: @padding-xs;
+        .btn {
+          word-break: normal;
+        }
+      }
+    }
+    .best-value {
+      line-height: 1;
+    }
+    .btn {
+      font-size: @font-size-small;
+    }
+  }
+
+  @media screen and (max-width: @screen-xs-max) {
+    tbody,
+    thead {
+      display: block;
+    }
+    tr {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-around;
+    }
+    th {
+      font-size: 12px;
+    }
+    /* hide the first column header */
+    tr:first-child {
+      th:first-child {
+        display: none;
+      }
+    }
+    /* make the first column into a row */
+    td:first-child {
+      text-align: center;
+      background: @gray-lightest;
+      width: 100%;
+    }
+  }
+}
+
+.plans-table-main {
+  td:nth-child(4),
+  th:nth-child(4) {
+    background-color: white;
+    border-left: @border-width-base solid @border-color-base;
+    border-right: @border-width-base solid @border-color-base;
+  }
+  tr:last-child {
+    /* highlighted column */
+    td:nth-child(4) {
+      position: relative;
+      /* keep here position here, otherwise messes up border on safari when there is a bg color */
+      &:before {
+        /* needed for safafi */
+        border-top: 1px solid @border-color-base;
+        content: '';
+        left: 0;
+        position: absolute;
+        top: -1px;
+        width: 100%;
+      }
+    }
+  }
+  @media screen and (max-width: @screen-xs-max) {
+    td,
+    th {
+      display: block;
+      width: 25%;
+    }
+  }
+}
+
+.plans-table-student {
+  td:nth-child(3),
+  th:nth-child(3) {
+    background-color: white;
+    border-left: @border-width-base solid @border-color-base;
+    border-right: @border-width-base solid @border-color-base;
+  }
+  tr:last-child {
+    /* highlighted column */
+    td:nth-child(3) {
+      position: relative;
+      /* keep here position here, otherwise messes up border on safari when there is a bg color */
+      &:before {
+        /* needed for safafi */
+        border-top: 1px solid @border-color-base;
+        content: '';
+        left: 0;
+        position: absolute;
+        top: -1px;
+        width: 100%;
+      }
+    }
+  }
+  @media screen and (max-width: @screen-xs-max) {
+    td,
+    th {
+      display: block;
+      width: 33.3%;
+    }
+  }
+}

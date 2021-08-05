@@ -1,0 +1,55 @@
+.ui-layout-center(
+		ng-controller="ReviewPanelController",
+		ng-class="{\
+			'rp-unsupported': editor.showRichText,\
+			'rp-state-current-file': (reviewPanel.subView === SubViews.CUR_FILE),\
+			'rp-state-current-file-expanded': (reviewPanel.subView === SubViews.CUR_FILE && ui.reviewPanelOpen),\
+			'rp-state-current-file-mini': (reviewPanel.subView === SubViews.CUR_FILE && !ui.reviewPanelOpen),\
+			'rp-state-overview': (reviewPanel.subView === SubViews.OVERVIEW),\
+			'rp-size-mini': ui.miniReviewPanelVisible,\
+			'rp-size-expanded': ui.reviewPanelOpen,\
+			'rp-layout-left': reviewPanel.layoutToLeft,\
+			'rp-loading-threads': reviewPanel.loadingThreads,\
+		}"
+	)
+
+		.editor-container.full-size(
+			vertical-resizable-panes="symbol-palette-resizer"
+			vertical-resizable-panes-hidden-externally-on="symbol-palette-toggled"
+			vertical-resizable-panes-hidden-initially="true"
+			vertical-resizable-panes-default-size="196"
+			vertical-resizable-panes-min-size="144"
+			vertical-resizable-panes-max-size="336"
+			vertical-resizable-panes-resize-on="left-pane-resize-all"
+		)
+			.div(vertical-resizable-top)
+
+				.loading-panel(
+					ng-show="(!editor.sharejs_doc || editor.opening) && !editor.error_state",
+					style=showRichText ? "top: 32px" : "",
+				)
+					span(ng-show="editor.open_doc_id")
+						i.fa.fa-spin.fa-refresh
+						| &nbsp;&nbsp;#{translate("loading")}…
+					span(ng-show="!editor.open_doc_id")
+						i.fa.fa-arrow-left
+						| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
+
+				if moduleIncludesAvailable('editor:main')
+					!= moduleIncludes('editor:main', locals)
+				else
+					.toolbar.toolbar-editor
+
+				.multi-selection-ongoing(
+					ng-show="multiSelectedCount > 0"
+				)
+					.multi-selection-message
+						h4 {{ multiSelectedCount }} #{translate('files_selected')}
+
+				include ./source-editor
+
+				if !isRestrictedTokenMember
+							include ./review-panel
+
+			.div(vertical-resizable-bottom)
+				include ./symbol-palette

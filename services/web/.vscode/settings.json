@@ -1,0 +1,6 @@
+{
+  "files.exclude": {
+    "node_modules": true,
+    "data": true
+  }
+}

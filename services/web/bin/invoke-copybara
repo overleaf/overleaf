@@ -1,0 +1,22 @@
+#!/bin/bash
+
+KNOWN_HOSTS=/root/.ssh/known_hosts 
+
+if [[ "$BRANCH_NAME" == "master" && "$COPYBARA" == "run" ]]; then
+  set -e
+  chmod -R 0600 /root/.ssh
+  ssh-keyscan github.com > $KNOWN_HOSTS
+  ssh-keygen -lf $KNOWN_HOSTS | grep "SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8 github.com"
+  git config --global user.name Copybot
+  git config --global user.email copybot@overleaf.com
+  set +e
+  copybara --git-committer-email=copybot@overleaf.com --git-committer-name=Copybot
+  COPYBARA_EXIT_CODE=$?
+  # Exit codes are documented in java/com/google/copybara/util/ExitCode.java
+  # 0 is success, 4 is no-op (i.e. no change), anything else is an error
+  if [[ $COPYBARA_EXIT_CODE -eq 0 || $COPYBARA_EXIT_CODE -eq 4 ]]; then
+    exit 0
+  else
+    exit $COPYBARA_EXIT_CODE
+  fi
+fi

@@ -1,0 +1,49 @@
+#publisher-hub {
+  .recent-activity {
+    .hub-big-number {
+      text-align: right;
+      padding-right: 15px;
+    }
+  }
+
+  #templates-container {
+    width: 100%;
+    tr {
+      border: 1px solid @ol-blue-gray-0;
+    }
+    td {
+      padding: 15px;
+    }
+    td:last-child {
+      text-align: right;
+    }
+    .title-cell {
+      max-width: 300px;
+    }
+    .title-text {
+      font-weight: bold;
+    }
+    .hub-big-number {
+      width: 60%;
+      padding-right: 10px;
+      padding-top: 10px;
+      text-align: right;
+    }
+    .hub-number-label,
+    .since {
+      width: 35%;
+      float: right;
+      @media screen and (max-width: 940px) {
+        float: none;
+      }
+    }
+    .hub-long-big-number {
+      padding-right: 40px;
+    }
+    .created-on {
+      color: @gray-light;
+      font-style: italic;
+      font-size: 14px;
+    }
+  }
+}

@@ -1,0 +1,240 @@
+//- Buy Buttons
+mixin btn_buy_collaborator(location)
+	a.btn.btn-primary(
+		ng-href="/user/subscription/new?planCode={{ getCollaboratorPlanCode() }}&currency={{currencyCode}}&itm_campaign=plans&itm_content=" + location,
+		ng-click="signUpNowClicked('collaborator','" + location + "')"
+	)
+		span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
+		span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
+mixin btn_buy_personal(location)
+	a.btn.btn-primary(
+		ng-href="/user/subscription/new?planCode={{ getPersonalPlanCode() }}&currency={{currencyCode}}&itm_campaign=plans&itm_content=" + location,
+		ng-click="signUpNowClicked('personal','" + location + "')"
+	)
+		span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
+		span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
+mixin btn_buy_free(location)
+	a.btn.btn-primary(
+		href="/register"
+		style=(getLoggedInUserId() === null ? "" : "visibility: hidden")
+		ng-click="signUpNowClicked('free','" + location + "')"
+	)
+		span.text-capitalize #{translate('get_started_now')}
+mixin btn_buy_professional(location)
+	a.btn.btn-primary(
+		ng-href="/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}&itm_campaign=plans&itm_content=" + location,
+		ng-click="signUpNowClicked('professional','" + location + "')"
+	)
+		span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
+		span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
+mixin btn_buy_student(location, plan)
+	if plan == 'annual'
+		a.btn.btn-primary(
+			ng-href="/user/subscription/new?planCode=student-annual&currency={{currencyCode}}&itm_campaign=plans&itm_content=" + location,
+			ng-click="signUpNowClicked('student-annual','" + location + "')"
+		) #{translate("buy_now")}
+	else
+		//- planQueryString will contain _free_trial_7_days
+		a.btn.btn-primary(
+			ng-href="/user/subscription/new?planCode=student{{planQueryString}}&currency={{currencyCode}}&itm_campaign=plans&itm_content=" + location,
+			ng-click="signUpNowClicked('student-monthly','" + location + "')"
+		) #{translate("start_free_trial")}
+
+//- Cards
+mixin card_student_annual(location)
+	.best-value
+		strong #{translate('best_value')}
+	.card-header
+		h2 #{translate("student")} (#{translate("annual")})
+	h5.tagline #{translate('tagline_student_annual')}
+	.circle
+		span
+			+price_student_annual
+	+features_student(location, 'annual')
+mixin card_student_monthly(location)
+	.card-header
+		h2 #{translate("student")}
+	h5.tagline #{translate('tagline_student_monthly')}
+	.circle
+		span
+			+price_student_monthly
+	+features_student(location, 'monthly')
+
+//- Features Lists, used within cards
+mixin features_collaborator(location)
+	ul.list-unstyled
+		li
+			strong #{translate("collabs_per_proj", {collabcount:10})}
+		+features_premium
+		li
+			br
+			+btn_buy_collaborator(location)
+mixin features_free(location)
+	ul.list-unstyled
+		li #{translate("one_collaborator")}
+		li(class="hidden-xs hidden-sm") &nbsp;
+		li(class="hidden-xs hidden-sm") &nbsp;
+		li(class="hidden-xs hidden-sm") &nbsp;
+		li(class="hidden-xs hidden-sm") &nbsp;
+		li(class="hidden-xs hidden-sm") &nbsp;
+		li(class="hidden-xs hidden-sm") &nbsp;
+		li
+			br
+			+btn_buy_free(location)
+mixin features_personal(location)
+	ul.list-unstyled
+		li #{translate("one_collaborator")}
+		li &nbsp;
+		li
+			strong #{translate('premium_features')}
+		li #{translate('sync_dropbox_github')}
+		li #{translate('full_doc_history')}
+		li + #{translate('more').toLowerCase()}
+		li(class="hidden-xs hidden-sm") &nbsp;
+		li
+			br
+			+btn_buy_personal(location)
+mixin features_premium
+	li &nbsp;
+	li
+		strong #{translate('all_premium_features')}
+	li #{translate('sync_dropbox_github')}
+	li #{translate('full_doc_history')}
+	li #{translate('track_changes')}
+	li + #{translate('more').toLowerCase()}
+mixin features_professional(location)
+	ul.list-unstyled
+		li
+			strong #{translate("unlimited_collabs")}
+			+features_premium
+		li
+			br
+			+btn_buy_professional(location)
+mixin features_student(location, plan)
+	ul.list-unstyled
+		li
+			strong #{translate("collabs_per_proj", {collabcount:6})}
+			+features_premium
+			li
+				br
+				+btn_buy_student(location, plan)
+
+//- Prices
+mixin price_personal
+	span(ng-if="ui.view == 'monthly'")
+		| {{plans[currencyCode]['personal']['monthly']}}
+		span.small /mo
+	span(ng-if="ui.view == 'annual'")
+		| {{plans[currencyCode]['personal']['annual']}}
+		span.small /yr
+mixin price_collaborator
+	span(ng-if="ui.view == 'monthly'")
+		| {{plans[currencyCode]['collaborator']['monthly']}}
+		span.small /mo
+	span(ng-if="ui.view == 'annual'")
+		| {{plans[currencyCode]['collaborator']['annual']}}
+		span.small /yr
+mixin price_professional
+	span(ng-if="ui.view == 'monthly'")
+		| {{plans[currencyCode]['professional']['monthly']}}
+		span.small /mo
+	span(ng-if="ui.view == 'annual'")
+		| {{plans[currencyCode]['professional']['annual']}}
+		span.small /yr
+mixin price_student_annual
+	| {{plans[currencyCode]['student']['annual']}}
+	span.small /yr
+mixin price_student_monthly
+	| {{plans[currencyCode]['student']['monthly']}}
+	span.small /mo
+
+//- UI Control
+mixin currency_dropdown
+	.dropdown.currency-dropdown(dropdown)
+		a.btn.btn-default.dropdown-toggle(
+			href="#",
+			data-toggle="dropdown",
+			dropdown-toggle
+		)
+			| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
+			span.caret
+
+		ul.dropdown-menu.dropdown-menu-right.text-right(role="menu")
+			li(ng-repeat="(currency, value) in plans")
+				a(
+					href="#",
+					ng-click="changeCurreny($event, currency)"
+				) {{currency}} ({{value['symbol']}})
+mixin plan_switch(location)
+	ul.nav.nav-pills
+		li(ng-class="{'active': ui.view == 'monthly'}")
+			a.btn.btn-default-outline(
+				href="#"
+				ng-click="switchToMonthly($event,'" + location + "')"
+			) #{translate("monthly")}
+		li(ng-class="{'active': ui.view == 'annual'}")
+			a.btn.btn-default-outline(
+				href="#"
+				ng-click="switchToAnnual($event,'" + location + "')"
+			) #{translate("annual")}
+		li(ng-class="{'active': ui.view == 'student'}")
+			a.btn.btn-default-outline(
+				href="#"
+				ng-click="switchToStudent($event,'" + location + "')"
+			) #{translate("special_price_student")}
+
+mixin allCardsAndControls(controlsRowSpaced, listLocation)
+	- var location = listLocation ? 'card_' + listLocation : 'card'
+	.row.top-switch(class=controlsRowSpaced ? "row-spaced" : "")
+		.col-md-6.col-md-offset-3
+			+plan_switch('card')
+		.col-md-2.text-right
+			+currency_dropdown
+
+	.row
+		.col-md-10.col-md-offset-1
+			.row
+				.card-group.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
+					.col-md-4
+						.card.card-first
+							.card-header
+								h2 #{translate("personal")}
+							h5.tagline #{translate("tagline_personal")}
+							.circle
+								+price_personal
+							+features_personal(location)
+					.col-md-4
+						.card.card-highlighted
+							.best-value
+								strong #{translate('best_value')}
+							.card-header
+								h2 #{translate("collaborator")}
+							h5.tagline #{translate("tagline_collaborator")}
+							.circle
+								+price_collaborator
+							+features_collaborator(location)
+					.col-md-4
+						.card.card-last
+							.card-header
+								h2 #{translate("professional")}
+							h5.tagline #{translate("tagline_professional")}
+							.circle
+								+price_professional
+							+features_professional(location)
+
+				.card-group.text-centered(ng-if="ui.view == 'student'")
+					.col-md-4
+						.card.card-first
+							.card-header
+								h2 #{translate("free")}
+							h5.tagline #{translate("tagline_free")}
+							.circle #{translate("free")}
+							+features_free(location)
+
+					.col-md-4
+						.card.card-highlighted
+							+card_student_annual(location)
+
+					.col-md-4
+						.card.card-last
+							+card_student_monthly(location)

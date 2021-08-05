@@ -1,0 +1,30 @@
+extends ../../layout
+
+block content
+	main.content.content-alt#main-content
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.card.project-invite-accept
+						.page-header.text-centered
+							h1(ng-non-bindable) #{translate("user_wants_you_to_see_project", {username:owner.first_name, projectname:""})}
+								br
+								em(ng-non-bindable) #{project.name}
+						.row.text-center
+							.col-md-12
+								p
+									| #{translate("accepting_invite_as")}&nbsp;
+									em(ng-non-bindable) #{user.email}
+						.row
+							.col-md-12
+								form.form(
+									name="acceptForm",
+									method="POST",
+									action="/project/"+invite.projectId+"/invite/token/"+invite.token+"/accept"
+								)
+									input(name='_csrf', type='hidden', value=csrfToken)
+									input(name='token', type='hidden', value=invite.token)
+									.form-group.text-center
+										button.btn.btn-lg.btn-primary(type="submit")
+											| #{translate("join_project")}
+									.form-group.text-center

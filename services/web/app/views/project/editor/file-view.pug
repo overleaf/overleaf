@@ -1,0 +1,9 @@
+div(
+	ng-controller="FileViewController"
+	ng-show="ui.view == 'file'"
+	ng-if="openFile"
+)
+	file-view(
+		file='file'
+		store-references-keys='storeReferencesKeys'
+	)

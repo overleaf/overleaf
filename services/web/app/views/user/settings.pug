@@ -1,0 +1,287 @@
+extends ../layout
+
+block append meta
+	meta(name="ol-reconfirmationRemoveEmail", content=reconfirmationRemoveEmail)
+	meta(name="ol-reconfirmedViaSAML", content=reconfirmedViaSAML)
+	meta(name="ol-passwordStrengthOptions", data-type="json", content=settings.passwordStrengthOptions || {})
+	meta(name="ol-oauthProviders", data-type="json", content=oauthProviders)
+	meta(name="ol-thirdPartyIds", data-type="json", content=thirdPartyIds)
+
+block content
+	main.content.content-alt#main-content
+		.container
+			.row
+				.col-md-12.col-lg-10.col-lg-offset-1
+					if ssoError
+						.alert.alert-danger
+							| #{translate('sso_link_error')}: #{translate(ssoError)}
+					.card
+						.page-header
+							h1  #{translate("account_settings")}
+						.account-settings(ng-controller="AccountSettingsController", ng-cloak)
+
+							if hasFeature('affiliations')
+								include settings/user-affiliations
+
+							.row
+								.col-md-5
+									h3 #{translate("update_account_info")}
+									form(async-form="settings", name="settingsForm", method="POST", action="/user/settings", novalidate)
+										input(type="hidden", name="_csrf", value=csrfToken)
+										if !hasFeature('affiliations')
+											if !externalAuthenticationSystemUsed()
+												.form-group
+													label(for='email')  #{translate("email")}
+													input.form-control(
+														id="email"
+														type='email',
+														name='email',
+														placeholder="email@example.com"
+														required,
+														ng-model="email",
+														ng-model-options="{ updateOn: 'blur' }"
+													)
+													span.small.text-danger(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
+														|  #{translate("must_be_email_address")}
+											else
+												// show the email, non-editable
+												.form-group
+													label.control-label #{translate("email")}
+													div.form-control(
+														readonly="true",
+														ng-non-bindable
+													) #{user.email}
+
+										if shouldAllowEditingDetails
+											.form-group
+												label(for='firstName').control-label #{translate("first_name")}
+												input.form-control(
+													id="firstName"
+													type='text',
+													name='first_name',
+													value=user.first_name
+													ng-non-bindable
+												)
+											.form-group
+												label(for='lastName').control-label #{translate("last_name")}
+												input.form-control(
+													id="lastName"
+													type='text',
+													name='last_name',
+													value=user.last_name
+													ng-non-bindable
+												)
+											.form-group
+												form-messages(aria-live="polite" for="settingsForm")
+													.alert.alert-success(ng-show="settingsForm.response.success")
+														|  #{translate("thanks_settings_updated")}
+											.actions
+												button.btn.btn-primary(
+													type='submit',
+													ng-disabled="settingsForm.$invalid"
+												)  #{translate("update")}
+										else
+											.form-group
+												label.control-label #{translate("first_name")}
+												div.form-control(
+													readonly="true",
+													ng-non-bindable
+												) #{user.first_name}
+											.form-group
+												label.control-label #{translate("last_name")}
+												div.form-control(
+													readonly="true",
+													ng-non-bindable
+												) #{user.last_name}
+
+								.col-md-5.col-md-offset-1
+									h3 #{translate("change_password")}
+									if externalAuthenticationSystemUsed() && !settings.overleaf
+										p
+											Password settings are managed externally
+									else if !hasPassword
+										p
+											| #[a(href="/user/password/reset", target='_blank') #{translate("no_existing_password")}]
+									else
+										- var submitAction
+										- submitAction = '/user/password/update'
+										form(
+											async-form="changepassword"
+											name="changePasswordForm"
+											action=submitAction
+											method="POST"
+											novalidate
+										)
+											input(type="hidden", name="_csrf", value=csrfToken)
+											.form-group
+												label(for='currentPassword') #{translate("current_password")}
+												input.form-control(
+													id="currentPassword"
+													type='password',
+													name='currentPassword',
+													placeholder='*********',
+													ng-model="currentPassword",
+													required
+												)
+												span.small.text-danger(ng-show="changePasswordForm.currentPassword.$invalid && changePasswordForm.currentPassword.$dirty" aria-live="polite")
+													| #{translate("required")}
+											.form-group
+												label(for='passwordField') #{translate("new_password")}
+												input.form-control(
+													id='passwordField',
+													type='password',
+													name='newPassword1',
+													placeholder='*********',
+													ng-model="newPassword1",
+													required,
+													complex-password
+												)
+												span.small.text-danger(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.newPassword1.$dirty", ng-bind-html="complexPasswordErrorMessage" aria-live="polite")
+											.form-group
+												label(for='newPassword2') #{translate("confirm_new_password")}
+												input.form-control(
+													id="newPassword2"
+													type='password',
+													name='newPassword2',
+													placeholder='*********',
+													ng-model="newPassword2",
+													equals="passwordField"
+												)
+												span.small.text-danger(ng-show="changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$dirty" aria-live="polite")
+													| #{translate("doesnt_match")}
+												span.small.text-danger(ng-show="!changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty" aria-live="polite")
+													| #{translate("invalid_password")}
+											.form-group
+												form-messages(aria-live="polite" for="changePasswordForm")
+											.actions
+												button.btn.btn-primary(
+													type='submit',
+													ng-disabled="changePasswordForm.$invalid"
+												) #{translate("change")}
+
+							| !{moduleIncludes("userSettings", locals)}
+							hr
+
+							h3
+								| #{translate("sharelatex_beta_program")}
+
+							if (user.betaProgram)
+								p.small
+									| #{translate("beta_program_already_participating")}
+
+							div
+								a(id="beta-program-participate-link" href="/beta/participate") #{translate("manage_beta_program_membership")}
+
+							hr
+
+							h3
+								| #{translate("sessions")}
+
+							div
+								a(id="sessions-link", href="/user/sessions") #{translate("manage_sessions")}
+
+							if hasFeature('oauth')
+								hr
+								include settings/user-oauth
+
+							if hasFeature('saas') && (!externalAuthenticationSystemUsed() || (settings.createV1AccountOnLogin && settings.overleaf))
+								hr
+								p.small
+									| #{translate("newsletter_info_and_unsubscribe")}
+									a(
+										href,
+										ng-click="unsubscribe()",
+										ng-show="subscribed && !unsubscribing"
+									) #{translate("unsubscribe")}
+									span(
+										ng-show="unsubscribing"
+									)
+										i.fa.fa-spin.fa-refresh(aria-hidden="true")
+										| #{translate("unsubscribing")}
+									span.text-success(
+										ng-show="!subscribed"
+									)
+										i.fa.fa-check(aria-hidden="true")
+										| #{translate("unsubscribed")}
+
+									if !settings.overleaf && user.overleaf
+										p
+											| Please note: If you have linked your account with Overleaf
+											| v2, then deleting your ShareLaTeX account will also delete
+											| account and all of it's associated projects and data.
+									p #{translate("need_to_leave")}
+										a(href, ng-click="deleteAccount()")  #{translate("delete_your_account")}
+
+
+	script(type='text/ng-template', id='deleteAccountModalTemplate')
+		.modal-header
+			h3 #{translate("delete_account")}
+		div.modal-body#delete-account-modal
+			p !{translate("delete_account_warning_message_3")}
+			if settings.createV1AccountOnLogin && settings.overleaf
+				p
+					strong
+						| Your Overleaf v2 projects will be deleted if you delete your account.
+						| If you want to remove any remaining Overleaf v1 projects in your account,
+						| please first make sure they are imported to Overleaf v2.
+
+			if settings.overleaf && !hasPassword
+				p
+					b
+						| #[a(href="/user/password/reset", target='_blank') #{translate("delete_acct_no_existing_pw")}].
+			else
+				form(novalidate, name="deleteAccountForm")
+					label #{translate('email')}
+					input.form-control(
+						type="text",
+						autocomplete="off",
+						placeholder="",
+						ng-model="state.deleteText",
+						focus-on="open",
+						ng-keyup="checkValidation()"
+					)
+
+					label #{translate('password')}
+					input.form-control(
+						type="password",
+						autocomplete="off",
+						placeholder="",
+						ng-model="state.password",
+						ng-keyup="checkValidation()"
+					)
+
+					div.confirmation-checkbox-wrapper
+						input(
+							type="checkbox"
+							ng-model="state.confirmSharelatexDelete"
+							ng-change="checkValidation()"
+						).pull-left
+						label(style="display: inline") &nbsp;I understand this will delete all projects in my Overleaf account with email address #[em {{ userDefaultEmail }}]
+
+			div(ng-if="state.error")
+				div.alert.alert-danger(ng-switch="state.error.code")
+					span(ng-switch-when="InvalidCredentialsError")
+						| #{translate('email_or_password_wrong_try_again')}
+					span(ng-switch-when="SubscriptionAdminDeletionError")
+						| #{translate('subscription_admins_cannot_be_deleted')}
+					span(ng-switch-when="UserDeletionError")
+						| #{translate('user_deletion_error')}
+					span(ng-switch-default)
+						| #{translate('generic_something_went_wrong')}
+			if settings.createV1AccountOnLogin && settings.overleaf
+				div(ng-if="state.error && state.error.code == 'InvalidCredentialsError'")
+					div.alert.alert-info
+						| If you can't remember your password, or if you are using Single-Sign-On with another provider
+						| to sign in (such as Twitter or Google), please
+						| #[a(href="/user/password/reset", target='_blank') reset your password],
+						| and try again.
+		.modal-footer
+			button.btn.btn-default(
+				ng-click="cancel()"
+			) #{translate("cancel")}
+			button.btn.btn-danger(
+				ng-disabled="!state.isValid || state.inflight"
+				ng-click="delete()"
+			)
+				span(ng-hide="state.inflight") #{translate("delete")}
+				span(ng-show="state.inflight") #{translate("deleting")}…

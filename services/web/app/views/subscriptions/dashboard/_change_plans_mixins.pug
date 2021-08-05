@@ -1,0 +1,28 @@
+mixin printPlan(plan)
+	if (!plan.hideFromUsers)
+		tr(ng-controller="ChangePlanFormController", ng-init="plan="+JSON.stringify(plan))
+			td
+				strong(ng-non-bindable) #{plan.name}
+			td
+				if (plan.annual)
+					| {{price}} / #{translate("year")}
+				else
+					| {{price}} / #{translate("month")}
+			td
+				if (typeof(personalSubscription.planCode) != "undefined" && plan.planCode == personalSubscription.planCode.split("_")[0])
+					if (personalSubscription.pendingPlan)
+						form
+							input(type="hidden", ng-model="plan_code", name="plan_code", value=plan.planCode)
+							input(type="submit", ng-click="cancelPendingPlanChange()", value=translate("keep_current_plan")).btn.btn-success
+					else
+						button.btn.disabled #{translate("your_plan")}
+				else if (personalSubscription.pendingPlan && typeof(personalSubscription.pendingPlan.planCode) != "undefined" && plan.planCode == personalSubscription.pendingPlan.planCode.split("_")[0])
+					button.btn.disabled #{translate("your_new_plan")}
+				else
+					form
+						input(type="hidden", ng-model="plan_code", name="plan_code", value=plan.planCode)
+						input(type="submit", ng-click="changePlan()", value=translate("change_to_this_plan")).btn.btn-success
+
+mixin printPlans(plans)
+	each plan in plans
+		+printPlan(plan)

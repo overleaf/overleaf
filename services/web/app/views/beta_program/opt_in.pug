@@ -1,0 +1,56 @@
+extends ../layout
+
+block content
+	main.content.content-alt#main-content
+		.container.beta-opt-in-wrapper
+			.row
+				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
+					.card
+						.page-header.text-centered
+							h1 
+								| #{translate("sharelatex_beta_program")}
+						.beta-opt-in
+							.container-fluid
+								.row
+									.col-md-12
+										if user.betaProgram
+											p #{translate("beta_program_already_participating")}.
+											p #{translate("thank_you_for_being_part_of_our_beta_program")}.
+										else
+											p #{translate("beta_program_benefits")}
+
+										p #[strong How it works:]
+										ul
+											li #{translate("beta_program_badge_description")}&nbsp;#[span(aria-label=translate("beta_feature_badge") role="img").beta-badge]
+											li #{translate("you_will_be_able_to_contact_us_any_time_to_share_your_feedback")}.
+											li #{translate("we_may_also_contact_you_from_time_to_time_by_email_with_a_survey")}.
+											li #{translate("you_can_opt_in_and_out_of_the_program_at_any_time_on_this_page")}.
+
+								.row.text-centered
+									.col-md-12
+										if user.betaProgram
+											form(id="beta-program-opt-out", method="post", action="/beta/opt-out", novalidate)
+												input(type="hidden", name="_csrf", value=csrfToken)
+												.form-group
+													a(
+														href="https://forms.gle/CFEsmvZQTAwHCd3X9"
+														target="_blank"
+														rel="noopener noreferrer"
+													).btn.btn-primary.btn-lg #{translate("give_feedback")}
+												.form-group
+													button.btn.btn-info.btn-sm(
+														type="submit"
+													)
+														span #{translate("beta_program_opt_out_action")}
+												.form-group
+													a(href="/project").btn.btn-link.btn-sm #{translate("back_to_your_projects")}
+										else
+											form(id="beta-program-opt-in", method="post", action="/beta/opt-in", novalidate)
+												input(type="hidden", name="_csrf", value=csrfToken)
+												.form-group
+													button.btn.btn-primary(
+														type="submit"
+													)
+														span #{translate("beta_program_opt_in_action")}
+												.form-group
+													a(href="/project").btn.btn-link.btn-sm #{translate("back_to_your_projects")}

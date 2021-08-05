@@ -1,0 +1,312 @@
+@register-v-spacing: 20px;
+
+.deprecated-sl-masthead {
+  display: inline-block;
+  margin-top: @header-height;
+  width: 100%;
+  text-align: center;
+  h1 {
+    font-size: 3.3rem;
+    line-height: 5rem;
+    margin-bottom: 0;
+    margin-top: @line-height-computed;
+  }
+  .img {
+    max-width: 420px;
+    background-image: url('/img/ol_plus_sl.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    margin: 20px auto 0;
+    height: 197px;
+  }
+}
+.deprecated-sl-login-buttons {
+  margin: 35px 0;
+}
+.deprecated-sl-msg {
+  width: 80%;
+  margin: 35px auto 0;
+}
+.deprecated-sl-long-cta {
+  padding-top: 12.5px;
+  padding-bottom: 93px;
+  .card {
+    margin-top: 12.5px;
+    min-height: 397px;
+  }
+  h3 {
+    margin-top: 0;
+  }
+}
+
+.masthead {
+  background-image: -webkit-linear-gradient(
+    to left,
+    rgba(79, 156, 69, 1),
+    rgba(28, 91, 38, 1)
+  );
+  background-image: linear-gradient(
+    to left,
+    rgba(79, 156, 69, 1),
+    rgba(28, 91, 38, 1)
+  );
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+  padding-top: @header-height;
+  h1,
+  p,
+  label {
+    color: white;
+    text-align: center;
+  }
+  h1 {
+    font-size: 4.75rem;
+    line-height: 6.25rem;
+    margin-bottom: 0;
+    margin-top: @line-height-computed;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.42);
+    span {
+      font-family: @font-family-sans-serif;
+      font-weight: 100;
+      letter-spacing: 5px;
+    }
+  }
+  p:first-of-type {
+    font-size: @line-height-computed;
+    font-weight: 200;
+    margin-top: 0;
+    text-rendering: auto;
+    margin-bottom: @line-height-computed;
+  }
+  label {
+    display: block;
+  }
+  .register-banner {
+    background-image: -webkit-linear-gradient(
+      top,
+      rgba(0, 0, 0, 0.7),
+      rgba(0, 0, 0, 0.9)
+    );
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.7),
+      rgba(0, 0, 0, 0.9)
+    );
+    padding: @register-v-spacing 0;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    h2 {
+      color: white;
+      margin-top: 0;
+      font-family: @font-family-sans-serif;
+      font-weight: 500;
+      letter-spacing: 1px;
+      margin-bottom: @register-v-spacing;
+    }
+    .form-group {
+      margin-left: @line-height-computed / 2;
+    }
+    .input-lg {
+      border-radius: 9999px;
+    }
+  }
+  .hp-register-password-error {
+    margin-bottom: 9px;
+  }
+  .register-banner__password-error {
+    padding: 5px 9px;
+    border: none;
+    border-radius: @btn-border-radius-base;
+  }
+  .screenshot {
+    height: 600px;
+    margin: auto;
+    margin-bottom: -50px;
+    overflow-y: hidden;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.67);
+    max-width: 960px;
+    .img {
+      max-width: 960px;
+      background-image: url('/img/homepage.png');
+      background-size: 100%;
+      background-repeat: no-repeat;
+      margin: auto;
+      height: 672px;
+    }
+    @media only screen and (-webkit-min-device-pixel-ratio: 2),
+      only screen and (min--moz-device-pixel-ratio: 2),
+      only screen and (-o-min-device-pixel-ratio: 2/1),
+      only screen and (min-device-pixel-ratio: 2),
+      only screen and (min-resolution: 192dpi),
+      only screen and (min-resolution: 2dppx) {
+      .img {
+        background-image: url('/img/homepage@2x.png');
+      }
+    }
+  }
+}
+
+.hp-register-external-separator {
+  margin: 0 0 (@register-v-spacing / 2);
+  color: #fff;
+}
+
+.hp-register-external-separator-or {
+  vertical-align: middle;
+  &::before,
+  &::after {
+    content: '';
+    display: inline-block;
+    vertical-align: middle;
+    width: 5em;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  &::before {
+    margin-right: 1.25em;
+  }
+  &::after {
+    margin-left: 1.25em;
+  }
+}
+
+.hp-register-newsletter-checkbox {
+  font-size: 90%;
+  & > .checkbox-newsletter {
+    text-align: left;
+    @media only screen and (min-width: @screen-sm-min) {
+      text-align: center;
+    }
+  }
+}
+
+.hp-login-btn {
+  .login-btn;
+  min-width: 220px;
+
+  background-color: @ol-blue-gray-3;
+
+  &:hover,
+  &:focus,
+  &:active {
+    background-color: darken(@ol-blue-gray-3, 8%);
+  }
+}
+
+.hp-register-form-email-pwd {
+  position: relative;
+}
+
+.hp-register-form-email-pwd-btn-container.form-group {
+  display: block;
+  margin-top: (@register-v-spacing / 2);
+  @media only screen and (min-width: @screen-md-min) {
+    position: absolute;
+    display: inline-block;
+    height: 100%;
+    top: -(@register-v-spacing / 2);
+    & > .btn-hero {
+      height: 100%;
+    }
+  }
+}
+
+.universities-container {
+  border-bottom: 1px solid @gray-lighter;
+}
+.universities {
+  text-align: center;
+  .uni-logo {
+    display: inline-block;
+    padding: 0 @padding-md;
+    width: 20%;
+  }
+}
+
+.pattern-container {
+  background: url('/img/pattern-home.png') repeat #f1f1f1;
+  border-top: 1px solid @gray-lightest;
+  border-bottom: 1px solid @gray-lightest;
+}
+
+.pattern-grid {
+  background: url('/img/grid.png') repeat @content-alt-bg-color;
+  border-top: 1px solid @gray-lighter;
+  border-bottom: 1px solid @gray-lighter;
+}
+
+.real-time-example {
+  .cursor {
+    background-color: hsl(200, 70%, 70%);
+    display: inline-block;
+    width: 2px;
+    color: transparent;
+    line-height: 1.4;
+    position: relative;
+    &:after {
+      content: 'Joe';
+      top: 22px;
+      right: 0;
+      position: absolute;
+      display: block;
+      background-color: hsl(200, 70%, 70%);
+      padding: (@line-height-computed / 4) (@line-height-computed / 2);
+      font-size: 0.8rem;
+      z-index: 100;
+      font-family: @font-family-sans-serif;
+      color: white;
+      font-weight: 700;
+    }
+  }
+}
+
+.track-changes-example {
+  .removed,
+  .added {
+    color: #333;
+    margin: 0 -1px;
+    padding: 0 3px;
+  }
+  .added {
+    background-color: hsl(200, 70%, 80%);
+  }
+
+  .removed {
+    background-color: hsl(200, 70%, 95%);
+    position: relative;
+    &:after {
+      content: ' ';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      border-top: 1px solid hsl(200, 70%, 40%);
+    }
+  }
+}
+
+.real-time-example-code {
+  border-radius: 3px;
+  border-left: 42px solid @gray-lighter;
+  background-color: white;
+  padding: 12px;
+  font-family: @font-family-monospace;
+  .highlight {
+    color: @blue;
+  }
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+@media only screen and (max-width: @screen-sm-max) {
+  .doc-history-example {
+    margin-bottom: @margin-md;
+  }
+  .universities {
+    .uni-logo {
+      padding: @padding-md;
+      width: 50%;
+    }
+  }
+}
