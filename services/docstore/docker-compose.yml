@@ -1,0 +1,63 @@
+# This file was auto-generated, do not edit it directly.
+# Instead run bin/update_build_scripts from
+# https://github.com/sharelatex/sharelatex-dev-environment
+
+version: "2.3"
+
+services:
+  test_unit:
+    image: node:12.22.3
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      MOCHA_GREP: ${MOCHA_GREP}
+      NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+    command: npm run --silent test:unit
+    user: node
+
+  test_acceptance:
+    image: node:12.22.3
+    volumes:
+      - .:/app
+    working_dir: /app
+    extends:
+      file: docker-compose-config.yml
+      service: dev
+    environment:
+      ELASTIC_SEARCH_DSN: es:9200
+      REDIS_HOST: redis
+      QUEUES_REDIS_HOST: redis
+      MONGO_HOST: mongo
+      POSTGRES_HOST: postgres
+      GCS_API_ENDPOINT: gcs:9090
+      GCS_API_SCHEME: http
+      GCS_PROJECT_ID: fake
+      STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
+      MOCHA_GREP: ${MOCHA_GREP}
+      LOG_LEVEL: ERROR
+      NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
+    user: node
+    depends_on:
+      mongo:
+        condition: service_healthy
+      gcs:
+        condition: service_healthy
+    command: npm run --silent test:acceptance
+
+  mongo:
+    image: mongo:4.0
+    healthcheck:
+      test: "mongo --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"
+      interval: 1s
+      retries: 20
+
+  gcs:
+    image: fsouza/fake-gcs-server:v1.21.2
+    command: ["--port=9090", "--scheme=http"]
+    healthcheck:
+      test: wget --quiet --output-document=/dev/null http://localhost:9090/storage/v1/b
+      interval: 1s
+      retries: 20
