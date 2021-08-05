@@ -1,0 +1,6 @@
+{
+  "name": "@overleaf/settings",
+  "description": "A centralised settings system for Overleaf",
+  "version": "2.1.1",
+  "repository": "overleaf/settings-module"
+}
