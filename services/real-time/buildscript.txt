@@ -1,0 +1,8 @@
+real-time
+--dependencies=redis
+--docker-repos=gcr.io/overleaf-ops
+--env-add=
+--env-pass-through=
+--node-version=12.22.3
+--public-repo=True
+--script-version=3.11.0
