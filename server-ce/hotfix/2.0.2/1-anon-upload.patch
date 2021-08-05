@@ -1,0 +1,60 @@
+--- UploadsRouter.js
++++ UploadsRouter.js
+@@ -1,13 +1,3 @@
+-/* eslint-disable
+-    no-unused-vars,
+-*/
+-// TODO: This file was created by bulk-decaffeinate.
+-// Fix any style issues and re-enable lint.
+-/*
+- * decaffeinate suggestions:
+- * DS102: Remove unnecessary code created because of implicit returns
+- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+- */
+ const AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
+ const AuthenticationController = require('../Authentication/AuthenticationController')
+ const ProjectUploadController = require('./ProjectUploadController')
+@@ -28,18 +18,30 @@ module.exports = {
+       ProjectUploadController.uploadProject
+     )
+
+-    return webRouter.post(
+-      '/Project/:Project_id/upload',
+-      RateLimiterMiddleware.rateLimit({
+-        endpointName: 'file-upload',
+-        params: ['Project_id'],
+-        maxRequests: 200,
+-        timeInterval: 60 * 30
+-      }),
+-      AuthenticationController.requireLogin(),
+-      AuthorizationMiddleware.ensureUserCanWriteProjectContent,
+-      ProjectUploadController.multerMiddleware,
+-      ProjectUploadController.uploadFile
+-    )
++    const fileUploadEndpoint = '/Project/:Project_id/upload'
++    const fileUploadRateLimit = RateLimiterMiddleware.rateLimit({
++      endpointName: 'file-upload',
++      params: ['Project_id'],
++      maxRequests: 200,
++      timeInterval: 60 * 30
++    })
++    if (Settings.allowAnonymousReadAndWriteSharing) {
++      webRouter.post(
++        fileUploadEndpoint,
++        fileUploadRateLimit,
++        AuthorizationMiddleware.ensureUserCanWriteProjectContent,
++        ProjectUploadController.multerMiddleware,
++        ProjectUploadController.uploadFile
++      )
++    } else {
++      webRouter.post(
++        fileUploadEndpoint,
++        fileUploadRateLimit,
++        AuthenticationController.requireLogin(),
++        AuthorizationMiddleware.ensureUserCanWriteProjectContent,
++        ProjectUploadController.multerMiddleware,
++        ProjectUploadController.uploadFile
++      )
++    }
+   }
+ }

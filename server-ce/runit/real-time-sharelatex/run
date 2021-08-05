@@ -1,0 +1,2 @@
+#!/bin/bash
+exec /sbin/setuser www-data /usr/bin/node /var/www/sharelatex/real-time/app.js >> /var/log/sharelatex/real-time.log 2>&1

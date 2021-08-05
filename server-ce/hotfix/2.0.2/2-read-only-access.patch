@@ -1,0 +1,11 @@
+--- TokenAccessHandler.js
++++ TokenAccessHandler.js
+@@ -255,7 +255,7 @@ const TokenAccessHandler = {
+ 
+   getV1DocPublishedInfo(token, callback) {
+     // default to allowing access
+-    if (!Settings.apis || !Settings.apis.v1) {
++    if (!Settings.apis.v1 || !Settings.apis.v1.url) {
+       return callback(null, { allow: true })
+     }
+     V1Api.request(

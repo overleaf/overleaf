@@ -1,0 +1,10 @@
+--- Features.js
++++ Features.js
+@@ -41,6 +41,7 @@ module.exports = Features = {
+       case 'templates-server-pro':
+         return Settings.overleaf == null
+       case 'affiliations':
++      case 'analytics':
+         // Checking both properties is needed for the time being to allow
+         // enabling the feature in web-api and disabling in Server Pro
+         // see https://github.com/overleaf/web-internal/pull/2127

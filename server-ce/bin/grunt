@@ -1,0 +1,31 @@
+#!/bin/bash
+# Thin wrapper on old grunt tasks to ease migrating.
+
+set -e
+TASK="$1"
+shift 1
+
+cd /var/www/sharelatex/web/modules/server-ce-scripts/scripts
+
+case "$TASK" in
+  user:create-admin)
+    node create-user --admin "$@"
+    ;;
+
+  user:delete)
+    node delete-user "$@"
+    ;;
+
+  check:mongo)
+    node check-mongodb
+    ;;
+
+  check:redis)
+    node check-redis
+    ;;
+
+  *)
+    echo "Unknown task $TASK"
+    exit 1
+    ;;
+esac

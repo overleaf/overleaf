@@ -1,0 +1,26 @@
+--- AnalyticsController.js
++++ AnalyticsController.js
+@@ -3,9 +3,13 @@ const Errors = require('../Errors/Errors')
+ const AuthenticationController = require('../Authentication/AuthenticationController')
+ const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
+ const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
++const Features = require('../../infrastructure/Features')
+ 
+ module.exports = {
+   updateEditingSession(req, res, next) {
++    if (!Features.hasFeature('analytics')) {
++      return res.send(204)
++    }
+     const userId = AuthenticationController.getLoggedInUserId(req)
+     const { projectId } = req.params
+     let countryCode = null
+@@ -28,6 +32,9 @@ module.exports = {
+   },
+ 
+   recordEvent(req, res, next) {
++    if (!Features.hasFeature('analytics')) {
++      return res.send(204)
++    }
+     const userId =
+       AuthenticationController.getLoggedInUserId(req) || req.sessionID
+     AnalyticsManager.recordEvent(userId, req.params.event, req.body, error =>

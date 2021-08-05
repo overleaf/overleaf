@@ -1,0 +1,11 @@
+--- settings.coffee
++++ settings.coffee
+@@ -200,6 +200,8 @@ settings =
+ 		# is not available
+ 		v1:
+ 			url: ""
++		project_history:
++			enabled: false
+ 	references:{}
+ 	notifications:undefined
+

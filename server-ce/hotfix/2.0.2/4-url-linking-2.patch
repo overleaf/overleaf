@@ -1,0 +1,20 @@
+--- new-file-modal.pug
++++ new-file-modal.pug
+@@ -21,11 +21,12 @@ script(type='text/ng-template', id='newFileModalTemplate')
+ 								i.fa.fa-fw.fa-folder-open
+ 								|
+ 								| From Another Project
+-						li(ng-class="type == 'url' ? 'active' : null")
+-							a(href, ng-click="type = 'url'")
+-								i.fa.fa-fw.fa-globe
+-								|
+-								| From External URL
++						if hasFeature('link-url')
++							li(ng-class="type == 'url' ? 'active' : null")
++								a(href, ng-click="type = 'url'")
++									i.fa.fa-fw.fa-globe
++									|
++									| From External URL
+ 						!= moduleIncludes("newFileModal:selector", locals)
+ 
+ 				td(class="modal-new-file--body modal-new-file--body-{{type}}")

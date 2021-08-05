@@ -1,0 +1,31 @@
+#!/bin/bash
+
+NODE_PARAMS=""
+if [ "$DEBUG_NODE" == "true" ]; then
+    echo "running debug - clsi"
+    NODE_PARAMS="--inspect=0.0.0.0:30130"
+fi
+
+# Set permissions on docker.sock if present,
+# To enable sibling-containers (see entrypoint.sh in clsi project)
+if [ -e '/var/run/docker.sock' ]; then
+  echo ">> Setting permissions on docker socket"
+  DOCKER_GROUP=$(stat -c '%g' /var/run/docker.sock)
+  groupadd --non-unique --gid ${DOCKER_GROUP} dockeronhost
+  usermod -aG dockeronhost www-data
+fi
+
+# Copies over CSLI synctex to the host mounted volume, so it
+# can be subsequently mounted in TexLive containers on Sandbox Compilation
+SYNCTEX=/var/lib/sharelatex/bin/synctex
+if [ ! -f "$SYNCTEX" ]; then
+    if [ "$DISABLE_SYNCTEX_BINARY_COPY" == "true" ]; then
+        echo ">> Copy of synctex executable disabled by DISABLE_SYNCTEX_BINARY_COPY flag, feature may not work"
+    else
+        echo ">> Copying synctex executable to the host"
+        mkdir -p $(dirname $SYNCTEX )
+        cp /var/www/sharelatex/clsi/bin/synctex $SYNCTEX
+    fi
+fi
+
+exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /var/www/sharelatex/clsi/app.js >> /var/log/sharelatex/clsi.log 2>&1

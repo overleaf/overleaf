@@ -1,0 +1,11 @@
+--- Features.js
++++ Features.js
+@@ -53,6 +53,8 @@ module.exports = Features = {
+         return Settings.apis.references.url != null
+       case 'saml':
+         return Settings.enableSaml
++      case 'link-url':
++        return Settings.apis.linkedUrlProxy && Settings.apis.linkedUrlProxy.url
+       default:
+         throw new Error(`unknown feature: ${feature}`)
+     }
