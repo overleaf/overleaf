@@ -1,0 +1,17 @@
+{
+  "ignore": [
+    ".git",
+    "node_modules/"
+  ],
+  "verbose": true,
+  "legacyWatch": true,
+  "execMap": {
+    "js": "npm run start"
+  },
+  "watch": [
+    "app/js/",
+    "app.js",
+    "config/"
+  ],
+  "ext": "js"
+}
