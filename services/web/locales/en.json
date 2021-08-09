@@ -1482,5 +1482,6 @@
   "go_page": "Go to page __page__",
   "pagination_navigation": "Pagination Navigation",
   "can_now_relink_dropbox": "You can now <0>relink your Dropbox account</0>.",
-  "skip_to_content": "Skip to content"
+  "skip_to_content": "Skip to content",
+  "logging_out": "Logging out"
 }
