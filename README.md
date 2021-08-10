@@ -69,12 +69,12 @@ dependencies, and it's nice to not have to rebuild all of that every time.
 The `sharelatex/sharelatex` image extends the base image and adds the actual Overleaf code
 and services.
 
-Use `make build-base` and `make build-community` to build these images.
+Use `make build-base` and `make build-community` from `server-ce/` to build these images.
 
 We use the [Phusion base-image](https://github.com/phusion/baseimage-docker)
 (which is extended by our `base` image) to provide us with a VM-like container
 in which to run the Overleaf services. Baseimage uses the `runit` service
-manager to manage services, and we add our init-scripts from the `./runit`
+manager to manage services, and we add our init-scripts from the `server-ce/runit`
 folder.
 
 
