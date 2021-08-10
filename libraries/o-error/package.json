@@ -29,7 +29,9 @@
     "test": "mocha",
     "test:coverage": "nyc --reporter=lcov --reporter=text-summary npm run test",
     "typecheck": "tsc --allowJs --checkJs --noEmit --moduleResolution node --strict --target ES6 *.js test/**/*.js",
-    "update-readme": "doc/update-readme.js"
+    "update-readme": "doc/update-readme.js",
+    "format": "echo noop",
+    "test:ci": "npm run typecheck && npm run test"
   },
   "author": "Overleaf (https://www.overleaf.com)",
   "license": "MIT",

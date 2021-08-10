@@ -170,8 +170,8 @@ describe('Metrics module', function() {
           await expectMetricValue(keyServer1, 2)
         })
 
-        it('emits 2 open_connections for server1', async function() {
-          await expectMetricValue(keyServer1, 2)
+        it('emits 2 open_connections for server2', async function() {
+          await expectMetricValue(keyServer2, 2)
         })
       })
 

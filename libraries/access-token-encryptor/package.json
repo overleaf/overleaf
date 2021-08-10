@@ -5,7 +5,10 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/**/*.js"
+    "test": "mocha test/**/*.js",
+    "lint": "echo noop",
+    "format": "echo noop",
+    "test:ci": "npm run test"
   },
   "author": "",
   "license": "Proprietary",

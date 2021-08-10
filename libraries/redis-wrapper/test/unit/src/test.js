@@ -4,7 +4,7 @@
  * DS206: Consider reworking classes to avoid initClass
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const should = require('chai').should()
+require('chai').should()
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -91,7 +91,7 @@ describe('index', function () {
     })
 
     return it('should call createClient for the ioredis driver in single-instance mode if a non array is passed', function () {
-      const client = this.redis.createClient(this.standardOpts)
+      this.redis.createClient(this.standardOpts)
       return this.ioredisConstructor
         .calledWith(sinon.match(this.standardOpts))
         .should.equal(true)

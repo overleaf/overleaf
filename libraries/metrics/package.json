@@ -39,6 +39,7 @@
     "test:acceptance": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/acceptance",
     "test": "npm run test:unit && npm run test:acceptance",
     "format": "prettier-eslint $PWD'/**/*.js' --list-different",
-    "format:fix": "prettier-eslint $PWD'/**/*.js' --write"
+    "format:fix": "prettier-eslint $PWD'/**/*.js' --write",
+    "test:ci": "npm run test"
   }
 }

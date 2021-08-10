@@ -14,7 +14,8 @@
     "lint": "eslint --max-warnings 0 .",
     "format": "prettier-eslint $PWD'/**/*.js' --list-different",
     "format:fix": "prettier-eslint $PWD'/**/*.js' --write",
-    "test": "mocha --recursive test/unit/src/"
+    "test": "mocha --recursive test/unit/src/",
+    "test:ci": "npm run test"
   },
   "peerDependencies": {
     "@overleaf/o-error": "^3.1.0"

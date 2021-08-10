@@ -2,5 +2,11 @@
   "name": "@overleaf/settings",
   "description": "A centralised settings system for Overleaf",
   "version": "2.1.1",
-  "repository": "overleaf/settings-module"
+  "repository": "overleaf/settings-module",
+  "scripts": {
+    "lint": "echo noop",
+    "format": "echo noop",
+    "test": "echo noop",
+    "test:ci": "echo noop"
+  }
 }
