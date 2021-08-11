@@ -43,11 +43,21 @@ describe('<ProjectNameEditableLabel />', function () {
       expect(props.onChange).to.be.calledWith('new project name')
     })
 
-    it('cancels renaming when the input loses focus', function () {
-      render(<ProjectNameEditableLabel {...editableProps} />)
+    it('calls "onChange" when the input loses focus', function () {
+      const props = {
+        ...editableProps,
+        onChange: sinon.stub(),
+      }
+      render(<ProjectNameEditableLabel {...props} />)
+
       fireEvent.doubleClick(screen.getByText('test-project'))
+      const input = screen.getByRole('textbox')
+
+      fireEvent.change(input, { target: { value: 'new project name' } })
+
       fireEvent.blur(screen.getByRole('textbox'))
-      expect(screen.queryByRole('textbox')).to.not.exist
+
+      expect(props.onChange).to.be.calledWith('new project name')
     })
   })
 

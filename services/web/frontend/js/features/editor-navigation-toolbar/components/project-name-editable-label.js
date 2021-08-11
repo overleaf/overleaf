@@ -34,11 +34,15 @@ function ProjectNameEditableLabel({
     }
   }
 
+  function finishRenaming() {
+    setIsRenaming(false)
+    onChange(inputContent)
+  }
+
   function handleKeyDown(event) {
     if (event.key === 'Enter') {
       event.preventDefault()
-      setIsRenaming(false)
-      onChange(event.target.value)
+      finishRenaming()
     }
   }
 
@@ -47,7 +51,9 @@ function ProjectNameEditableLabel({
   }
 
   function handleBlur() {
-    setIsRenaming(false)
+    if (isRenaming) {
+      finishRenaming()
+    }
   }
 
   return (
