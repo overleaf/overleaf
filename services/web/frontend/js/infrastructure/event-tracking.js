@@ -1,4 +1,3 @@
-import { postJSON } from './fetch-json'
 import sessionStorage from '../infrastructure/session-storage'
 
 const CACHE_KEY = 'mbEvents'
@@ -10,11 +9,7 @@ export function send(category, action, label, value) {
 }
 
 export function sendMB(key, segmentation = {}) {
-  postJSON(`/event/${key}`, { body: segmentation, keepalive: true }).catch(
-    () => {
-      // ignore errors
-    }
-  )
+  sendBeacon(key, segmentation)
 }
 
 export function sendMBOnce(key, segmentation = {}) {
@@ -38,4 +33,14 @@ export function sendMBSampled(key, body = {}, rate = 0.01) {
   if (Math.random() < rate) {
     sendMB(key, body)
   }
+}
+
+function sendBeacon(key, data) {
+  if (!navigator || !navigator.sendBeacon) return
+
+  data._csrf = window.csrfToken
+  const blob = new Blob([JSON.stringify(data)], {
+    type: 'application/json; charset=UTF-8',
+  })
+  navigator.sendBeacon(`/event/${key}`, blob)
 }

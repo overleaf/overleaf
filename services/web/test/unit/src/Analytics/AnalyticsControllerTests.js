@@ -61,21 +61,28 @@ describe('AnalyticsController', function () {
 
   describe('recordEvent', function () {
     beforeEach(function () {
+      const body = {
+        foo: 'stuff',
+        _csrf: 'atoken123',
+      }
       this.req = {
         params: {
           event: 'i_did_something',
         },
-        body: 'stuff',
+        body,
         sessionID: 'sessionIDHere',
         session: {},
       }
+
+      this.expectedData = Object.assign({}, body)
+      delete this.expectedData._csrf
     })
 
     it('should use the user_id', function (done) {
       this.SessionManager.getLoggedInUserId.returns('1234')
       this.controller.recordEvent(this.req, this.res)
       this.AnalyticsManager.recordEvent
-        .calledWith('1234', this.req.params.event, this.req.body)
+        .calledWith('1234', this.req.params.event, this.expectedData)
         .should.equal(true)
       done()
     })
@@ -83,7 +90,23 @@ describe('AnalyticsController', function () {
     it('should use the session id', function (done) {
       this.controller.recordEvent(this.req, this.res)
       this.AnalyticsManager.recordEvent
-        .calledWith(this.req.sessionID, this.req.params.event, this.req.body)
+        .calledWith(
+          this.req.sessionID,
+          this.req.params.event,
+          this.expectedData
+        )
+        .should.equal(true)
+      done()
+    })
+
+    it('should remove the CSRF token before sending to the manager', function (done) {
+      this.controller.recordEvent(this.req, this.res)
+      this.AnalyticsManager.recordEvent
+        .calledWith(
+          this.req.sessionID,
+          this.req.params.event,
+          this.expectedData
+        )
         .should.equal(true)
       done()
     })

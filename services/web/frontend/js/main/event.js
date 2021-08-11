@@ -15,6 +15,7 @@
 import moment from 'moment'
 import App from '../base'
 import '../modules/localStorage'
+import { sendMB } from '../infrastructure/event-tracking'
 const CACHE_KEY = 'mbEvents'
 
 // keep track of how many heartbeats we've sent so we can calculate how
@@ -89,21 +90,7 @@ App.factory('eventTracking', function ($http, localStorage) {
       return (nextHeartbeat = moment().add(backoffSecs, 'seconds').toDate())
     },
 
-    sendMB(key, segmentation) {
-      if (segmentation == null) {
-        segmentation = {}
-      }
-      fetch(`/event/${key}`, {
-        method: 'POST',
-        body: JSON.stringify(segmentation),
-        keepalive: true,
-        headers: {
-          'X-CSRF-Token': window.csrfToken,
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-      })
-    },
+    sendMB,
 
     sendMBSampled(key, segmentation, rate = 0.01) {
       if (Math.random() < rate) {
