@@ -1,4 +1,4 @@
-const _ = require('underscore')
+const _ = require('lodash')
 
 module.exports = _.template(`\
 	<table class="row" style="border-collapse: collapse; border-spacing: 0; display: table; padding: 0; position: relative; text-align: left; vertical-align: top; width: 100%;">

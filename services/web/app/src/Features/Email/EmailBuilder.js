@@ -1,4 +1,4 @@
-const _ = require('underscore')
+const _ = require('lodash')
 const settings = require('@overleaf/settings')
 const moment = require('moment')
 const EmailMessageHelper = require('./EmailMessageHelper')

@@ -7,7 +7,7 @@ const sesTransport = require('nodemailer-ses-transport')
 const mandrillTransport = require('nodemailer-mandrill-transport')
 const OError = require('@overleaf/o-error')
 const RateLimiter = require('../../infrastructure/RateLimiter')
-const _ = require('underscore')
+const _ = require('lodash')
 
 const EMAIL_SETTINGS = Settings.email || {}
 

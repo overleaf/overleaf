@@ -1,4 +1,4 @@
-const _ = require('underscore')
+const _ = require('lodash')
 const settings = require('@overleaf/settings')
 
 module.exports = _.template(`\
