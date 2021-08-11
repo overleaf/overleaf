@@ -21,8 +21,8 @@ ProjectContext.Provider.propTypes = {
     ),
     features: PropTypes.shape({
       collaborators: PropTypes.number,
-      compileGroup: PropTypes.oneOf(['alpha', 'standard', 'priority'])
-        .isRequired,
+      compileGroup: PropTypes.oneOf(['alpha', 'standard', 'priority']),
+      trackChangesVisible: PropTypes.bool,
     }),
     publicAccesLevel: PropTypes.string,
     tokens: PropTypes.shape({
@@ -60,7 +60,7 @@ export function ProjectProvider({ children }) {
 
   // when the provider is created the project is still not added to the Angular scope.
   // Name is also populated to prevent errors in existing React components
-  const value = project || { _id: window.project_id, name: '' }
+  const value = project || { _id: window.project_id, name: '', features: {} }
 
   return (
     <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>

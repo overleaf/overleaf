@@ -17,6 +17,7 @@ describe('<ToolbarHeader />', function () {
     openShareModal: () => {},
     togglePdfView: () => {},
     hasPublishPermissions: true,
+    trackChangesVisible: true,
   }
 
   describe('cobranding logo', function () {
@@ -65,6 +66,15 @@ describe('<ToolbarHeader />', function () {
       const props = {
         ...defaultProps,
         isRestrictedTokenMember: true,
+      }
+      render(<ToolbarHeader {...props} />)
+      expect(screen.queryByText('Review')).to.not.exist
+    })
+
+    it('is not displayed when "trackChangesVisible" prop is set to false', function () {
+      const props = {
+        ...defaultProps,
+        trackChangesVisible: false,
       }
       render(<ToolbarHeader {...props} />)
       expect(screen.queryByText('Review')).to.not.exist

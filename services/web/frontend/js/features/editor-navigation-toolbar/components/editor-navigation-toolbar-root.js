@@ -8,6 +8,9 @@ import { useProjectContext } from '../../../shared/context/project-context'
 
 const projectContextPropTypes = {
   name: PropTypes.string.isRequired,
+  features: PropTypes.shape({
+    trackChangesVisible: PropTypes.bool,
+  }).isRequired,
 }
 
 const editorContextPropTypes = {
@@ -41,7 +44,10 @@ const EditorNavigationToolbarRoot = React.memo(
     openDoc,
     openShareProjectModal,
   }) {
-    const { name: projectName } = useProjectContext(projectContextPropTypes)
+    const {
+      name: projectName,
+      features: { trackChangesVisible },
+    } = useProjectContext(projectContextPropTypes)
 
     const {
       cobranding,
@@ -132,6 +138,7 @@ const EditorNavigationToolbarRoot = React.memo(
         pdfViewIsOpen={view === 'pdf'}
         pdfButtonIsVisible={pdfLayout === 'flat'}
         togglePdfView={togglePdfView}
+        trackChangesVisible={trackChangesVisible}
       />
     )
   }

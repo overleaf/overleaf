@@ -36,8 +36,11 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   pdfViewIsOpen,
   pdfButtonIsVisible,
   togglePdfView,
+  trackChangesVisible,
 }) {
   const shouldDisplayPublishButton = hasPublishPermissions && PublishButton
+  const shouldDisplayTrackChangesButton =
+    trackChangesVisible && !isRestrictedTokenMember
 
   return (
     <header className="toolbar toolbar-header toolbar-with-labels">
@@ -64,7 +67,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
       <div className="toolbar-right">
         <OnlineUsersWidget onlineUsers={onlineUsers} goToUser={goToUser} />
 
-        {!isRestrictedTokenMember && (
+        {shouldDisplayTrackChangesButton && (
           <TrackChangesToggleButton
             onClick={toggleReviewPanelOpen}
             disabled={historyIsOpen}
@@ -114,6 +117,7 @@ ToolbarHeader.propTypes = {
   pdfViewIsOpen: PropTypes.bool,
   pdfButtonIsVisible: PropTypes.bool,
   togglePdfView: PropTypes.func.isRequired,
+  trackChangesVisible: PropTypes.bool,
 }
 
 export default ToolbarHeader
