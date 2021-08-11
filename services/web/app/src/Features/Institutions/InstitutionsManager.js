@@ -55,29 +55,19 @@ async function _checkUsersFeatures(userIds) {
     nonProUserIds: [],
   }
 
-  await new Promise((resolve, reject) => {
-    async.eachLimit(
-      users,
-      ASYNC_LIMIT,
-      (user, callback) => {
-        const hasProFeaturesOrBetter = FeaturesUpdater.isFeatureSetBetter(
-          user.features,
-          Settings.features.professional
-        )
-
-        if (hasProFeaturesOrBetter) {
-          result.proUserIds.push(user._id)
-        } else {
-          result.nonProUserIds.push(user._id)
-        }
-        callback()
-      },
-      error => {
-        if (error) return reject(error)
-        resolve()
-      }
+  users.forEach(user => {
+    const hasProFeaturesOrBetter = FeaturesUpdater.isFeatureSetBetter(
+      user.features,
+      Settings.features.professional
     )
+
+    if (hasProFeaturesOrBetter) {
+      result.proUserIds.push(user._id)
+    } else {
+      result.nonProUserIds.push(user._id)
+    }
   })
+
   return result
 }
 
