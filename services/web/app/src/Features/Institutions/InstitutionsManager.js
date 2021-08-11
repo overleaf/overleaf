@@ -1,5 +1,4 @@
 const async = require('async')
-const _ = require('underscore')
 const { callbackify } = require('util')
 const { ObjectId } = require('mongodb')
 const Settings = require('@overleaf/settings')
@@ -189,11 +188,10 @@ const InstitutionsManager = {
       [
         cb => fetchInstitutionAndAffiliations(institutionId, cb),
         function (institution, affiliations, cb) {
-          affiliations = _.map(affiliations, function (affiliation) {
+          for (const affiliation of affiliations) {
             affiliation.institutionName = institution.name
             affiliation.institutionId = institutionId
-            return affiliation
-          })
+          }
           async.eachLimit(affiliations, ASYNC_LIMIT, refreshFunction, err =>
             cb(err)
           )
