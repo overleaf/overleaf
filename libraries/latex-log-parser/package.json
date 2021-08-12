@@ -1,0 +1,17 @@
+{
+  "name": "latex-log-parser-sharelatex",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "lint": "echo noop",
+    "format": "echo noop",
+    "test:ci": "echo noop",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "sh ./bin/compile.sh"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "coffee-script": "^1.10.0"
+  }
+}
