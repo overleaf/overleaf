@@ -1,0 +1,12 @@
+version: "2.3"
+
+services:
+  onesky-client-jail:
+    build: .
+    volumes:
+      # NOTE: Limit code access with targeted bind mount:
+      # Give it read-and-write access to the locales.
+      - ../../locales:/app/locales:rw
+    environment:
+      - ONE_SKY_PUBLIC_KEY
+      - ONE_SKY_PRIVATE_KEY
