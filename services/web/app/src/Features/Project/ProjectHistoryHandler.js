@@ -19,7 +19,6 @@ const logger = require('logger-sharelatex')
 const settings = require('@overleaf/settings')
 const HistoryManager = require('../History/HistoryManager')
 const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const { promisifyAll } = require('../../util/promises')
 
 const ProjectHistoryHandler = {
@@ -135,44 +134,31 @@ const ProjectHistoryHandler = {
         if (history_id != null) {
           return callback()
         } // history already exists, success
-        return HistoryManager.flushProject(project_id, function (err) {
+        return HistoryManager.initializeProject(function (err, history) {
           if (err != null) {
             return callback(err)
           }
-          return HistoryManager.initializeProject(function (err, history) {
-            if (err != null) {
-              return callback(err)
-            }
-            if (!history || !history.overleaf_id) {
-              return callback(new Error('failed to initialize history id'))
-            }
-            return ProjectHistoryHandler.setHistoryId(
-              project_id,
-              history.overleaf_id,
-              function (err) {
-                if (err != null) {
-                  return callback(err)
-                }
-                return DocumentUpdaterHandler.flushProjectToMongoAndDelete(
-                  project_id,
-                  function (err) {
-                    if (err != null) {
-                      return callback(err)
-                    }
-                    return HistoryManager.forceResyncProject(
-                      project_id,
-                      function (err) {
-                        if (err != null) {
-                          return callback(err)
-                        }
-                        return HistoryManager.flushProject(project_id, callback)
-                      }
-                    )
-                  }
-                )
+          if (!(history != null ? history.overleaf_id : undefined)) {
+            return callback(new Error('failed to initialize history id'))
+          }
+          return ProjectHistoryHandler.setHistoryId(
+            project_id,
+            history.overleaf_id,
+            function (err) {
+              if (err != null) {
+                return callback(err)
               }
-            )
-          })
+              return ProjectEntityUpdateHandler.resyncProjectHistory(
+                project_id,
+                function (err) {
+                  if (err != null) {
+                    return callback(err)
+                  }
+                  return HistoryManager.flushProject(project_id, callback)
+                }
+              )
+            }
+          )
         })
       }
     )

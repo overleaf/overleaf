@@ -51,7 +51,6 @@ describe('ProjectHistoryHandler', function () {
         './ProjectDetailsHandler': (this.ProjectDetailsHandler = {}),
         '../History/HistoryManager': (this.HistoryManager = {}),
         './ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
-        '../DocumentUpdater/DocumentUpdaterHandler': (this.DocumentUpdaterHandler = {}),
       },
     }))
   })
@@ -63,10 +62,9 @@ describe('ProjectHistoryHandler', function () {
         .stub()
         .callsArgWith(0, null, { overleaf_id: this.newHistoryId })
       this.HistoryManager.flushProject = sinon.stub().callsArg(1)
-      this.HistoryManager.forceResyncProject = sinon.stub().callsArg(1)
-      this.DocumentUpdaterHandler.flushProjectToMongoAndDelete = sinon
+      return (this.ProjectEntityUpdateHandler.resyncProjectHistory = sinon
         .stub()
-        .callsArg(1)
+        .callsArg(1))
     })
 
     describe('when the history does not already exist', function () {
@@ -103,21 +101,14 @@ describe('ProjectHistoryHandler', function () {
           .should.equal(true)
       })
 
-      it('should trigger a hard resync of the project history', function () {
-        return this.HistoryManager.forceResyncProject
+      it('should resync the project history', function () {
+        return this.ProjectEntityUpdateHandler.resyncProjectHistory
           .calledWith(project_id)
           .should.equal(true)
       })
 
-      it('should flush the project history (twice)', function () {
-        this.HistoryManager.flushProject.calledTwice.should.equal(true)
+      it('should flush the project history', function () {
         return this.HistoryManager.flushProject
-          .alwaysCalledWith(project_id)
-          .should.equal(true)
-      })
-
-      it('should tell docupdater to flush and delete', function () {
-        return this.DocumentUpdaterHandler.flushProjectToMongoAndDelete
           .calledWith(project_id)
           .should.equal(true)
       })
@@ -155,8 +146,10 @@ describe('ProjectHistoryHandler', function () {
         return this.ProjectModel.updateOne.called.should.equal(false)
       })
 
-      it('should not trigger a hard resync of the project history', function () {
-        return this.HistoryManager.forceResyncProject.called.should.equal(false)
+      it('should not resync the project history', function () {
+        return this.ProjectEntityUpdateHandler.resyncProjectHistory.called.should.equal(
+          false
+        )
       })
 
       it('should not flush the project history', function () {

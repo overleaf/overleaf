@@ -128,10 +128,6 @@ class MockProjectHistoryApi extends AbstractMockApi {
     this.app.post('/project/:projectId/flush', (req, res) => {
       res.sendStatus(200)
     })
-
-    this.app.post('/project/:projectId/resync', (req, res) => {
-      res.sendStatus(204)
-    })
   }
 }
 

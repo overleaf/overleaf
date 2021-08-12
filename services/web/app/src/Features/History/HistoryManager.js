@@ -8,14 +8,12 @@ module.exports = {
   initializeProject: callbackify(initializeProject),
   flushProject: callbackify(flushProject),
   resyncProject: callbackify(resyncProject),
-  forceResyncProject: callbackify(forceResyncProject),
   deleteProject: callbackify(deleteProject),
   injectUserDetails: callbackify(injectUserDetails),
   promises: {
     initializeProject,
     flushProject,
     resyncProject,
-    forceResyncProject,
     deleteProject,
     injectUserDetails,
   },
@@ -64,18 +62,6 @@ async function resyncProject(projectId) {
     })
   } catch (err) {
     throw OError.tag(err, 'failed to resync project history', { projectId })
-  }
-}
-
-async function forceResyncProject(projectId) {
-  try {
-    await request.post({
-      url: `${settings.apis.project_history.url}/project/${projectId}/resync?force=true`,
-    })
-  } catch (err) {
-    throw OError.tag(err, 'failed to force resync project history', {
-      projectId,
-    })
   }
 }
 
