@@ -40,22 +40,6 @@ We have detailed installation instructions in our wiki:
 
 If you are upgrading from a previous version of Overleaf, please see the [Release Notes section on the Wiki](https://github.com/overleaf/overleaf/wiki/Home) for all of the versions between your current version and the version you are upgrading to.
 
-## Other repositories
-
-This repository does not contain any code. It acts a wrapper and toolkit for managing the many different Overleaf  services. These each run as their own Node.js process and have their own GitHub repository.
-
-| Service | Description |
-| ------- | ----------- |
-| **[web](https://github.com/overleaf/web)** | The front facing web server that serves all the HTML pages, CSS and JavaScript to the client. Also contains a lot of logic around creating and editing projects, and account management. |
-| **[document-updater](https://github.com/overleaf/document-updater)** | Processes updates that come in from the editor when users modify documents. Ensures that the updates are applied in the right order, and that only one operation is modifying the document at a time. Also caches the documents in redis for very fast but persistent modifications. |
-| **[CLSI](https://github.com/overleaf/clsi)** | The Common LaTeX Service Interface (CLSI) which provides an API for compiling LaTeX documents. |
-| **[docstore](https://github.com/overleaf/docstore)** | An API for performing CRUD (Create, Read, Update and Delete) operations on text files stored in Overleaf. |
-| **[real-time](https://github.com/overleaf/real-time)** | The websocket process clients connect to. |
-| **[filestore](https://github.com/overleaf/filestore)** | An API for performing CRUD (Create, Read, Update and Delete) operations on binary files (like images) stored in Overleaf. |
-| **[track-changes](https://github.com/overleaf/track-changes)** | An API for compressing and storing the updates applied to a document, and then rendering a diff of the changes between any two time points. |
-| **[chat](https://github.com/overleaf/chat)** | The backend API for storing and fetching chat messages. |
-| **[spelling](https://github.com/overleaf/spelling)** | An API for running server-side spelling checking on Overleaf documents. |
-
 ## Overleaf Docker Image
 
 This repo contains two dockerfiles, `Dockerfile-base`, which builds the
