@@ -1482,5 +1482,6 @@
   "go_page": "Aller à la page __page__",
   "pagination_navigation": "Navigation pagination",
   "can_now_relink_dropbox": "Vous pouvez désormais <0>reconnecter votre compte Dropbox</0>.",
-  "skip_to_content": "Aller au contenu"
+  "skip_to_content": "Aller au contenu",
+  "logging_out": "Déconnexion de"
 }

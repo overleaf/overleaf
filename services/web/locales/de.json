@@ -1,4 +1,5 @@
 {
+  "address_line_1": "Adresse",
   "tex_live_version": "TeX Live Version",
   "git": "Git",
   "pdf_compile_in_progress_error": "Kompiliervorgang läuft bereits in einem anderen Fenster",
@@ -87,7 +88,6 @@
   "history": "Verlauf",
   "joining": "Trete bei",
   "open_project": "Öffne Projekt",
-  "files_cannot_include_invalid_characters": "Dateien dürfen die Zeichen '*' oder '/' nicht enthalten.",
   "invalid_file_name": "Ungültiger Dateiname",
   "autocomplete_references": "Referenzautovervollständigung (in einem <code>\\cite{}</code>-Block)",
   "autocomplete": "Autovervollständigung",
