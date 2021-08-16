@@ -29,6 +29,19 @@ async function getCurrentInstitutionIds(userId) {
   return [...institutionIds]
 }
 
+async function getCurrentInstitutionsWithLicence(userId) {
+  // current are those confirmed and not with lapsed reconfirmations
+  // only 1 record returned per current institution
+  const institutions = {}
+  const currentAffiliations = await _getCurrentAffiliations(userId)
+  currentAffiliations.forEach(affiliation => {
+    if (affiliation.licence && affiliation.licence !== 'free') {
+      institutions[affiliation.institution.id] = affiliation.institution
+    }
+  })
+  return Object.values(institutions)
+}
+
 const InstitutionsGetter = {
   getConfirmedAffiliations(userId, callback) {
     UserGetter.getUserFullEmails(userId, function (error, emailsData) {
@@ -51,6 +64,9 @@ const InstitutionsGetter = {
   },
 
   getCurrentInstitutionIds: callbackify(getCurrentInstitutionIds),
+  getCurrentInstitutionsWithLicence: callbackify(
+    getCurrentInstitutionsWithLicence
+  ),
 
   getManagedInstitutions(userId, callback) {
     UserMembershipsHandler.getEntitiesByUser(
@@ -63,6 +79,7 @@ const InstitutionsGetter = {
 
 InstitutionsGetter.promises = {
   getCurrentInstitutionIds,
+  getCurrentInstitutionsWithLicence,
 }
 
 module.exports = InstitutionsGetter

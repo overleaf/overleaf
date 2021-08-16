@@ -88,8 +88,8 @@ function buildUsersSubscriptionViewModel(user, callback) {
       managedGroupSubscriptions(cb) {
         SubscriptionLocator.getManagedGroupSubscriptions(user, cb)
       },
-      confirmedMemberAffiliations(cb) {
-        InstitutionsGetter.getConfirmedAffiliations(user._id, cb)
+      currentInstitutionsWithLicence(cb) {
+        InstitutionsGetter.getCurrentInstitutionsWithLicence(user._id, cb)
       },
       managedInstitutions(cb) {
         InstitutionsGetter.getManagedInstitutions(user._id, cb)
@@ -117,7 +117,7 @@ function buildUsersSubscriptionViewModel(user, callback) {
         personalSubscription,
         memberGroupSubscriptions,
         managedGroupSubscriptions,
-        confirmedMemberAffiliations,
+        currentInstitutionsWithLicence,
         managedInstitutions,
         managedPublishers,
         v1SubscriptionStatus,
@@ -125,14 +125,12 @@ function buildUsersSubscriptionViewModel(user, callback) {
         recurlyCoupons,
         plan,
       } = results
+
       if (memberGroupSubscriptions == null) {
         memberGroupSubscriptions = []
       }
       if (managedGroupSubscriptions == null) {
         managedGroupSubscriptions = []
-      }
-      if (confirmedMemberAffiliations == null) {
-        confirmedMemberAffiliations = []
       }
       if (managedInstitutions == null) {
         managedInstitutions = []
@@ -269,7 +267,7 @@ function buildUsersSubscriptionViewModel(user, callback) {
         personalSubscription,
         managedGroupSubscriptions,
         memberGroupSubscriptions,
-        confirmedMemberAffiliations,
+        currentInstitutionsWithLicence,
         managedInstitutions,
         managedPublishers,
         v1SubscriptionStatus,

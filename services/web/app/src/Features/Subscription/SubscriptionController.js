@@ -19,7 +19,6 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const RecurlyEventHandler = require('./RecurlyEventHandler')
 const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
-const _ = require('lodash')
 
 const SUBSCRIPTION_PAGE_SPLIT_TEST = 'subscription-page'
 
@@ -103,7 +102,7 @@ async function userSubscriptionPage(req, res) {
     personalSubscription,
     memberGroupSubscriptions,
     managedGroupSubscriptions,
-    confirmedMemberAffiliations,
+    currentInstitutionsWithLicence,
     managedInstitutions,
     managedPublishers,
     v1SubscriptionStatus,
@@ -121,11 +120,7 @@ async function userSubscriptionPage(req, res) {
     personalSubscription ||
     hasSubscription ||
     (memberGroupSubscriptions && memberGroupSubscriptions.length > 0) ||
-    (confirmedMemberAffiliations &&
-      confirmedMemberAffiliations.length > 0 &&
-      _.find(confirmedMemberAffiliations, affiliation => {
-        return affiliation.licence && affiliation.licence !== 'free'
-      }))
+    currentInstitutionsWithLicence.length > 0
   ) {
     AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
   } else {
@@ -163,10 +158,10 @@ async function userSubscriptionPage(req, res) {
     personalSubscription,
     memberGroupSubscriptions,
     managedGroupSubscriptions,
-    confirmedMemberAffiliations,
     managedInstitutions,
     managedPublishers,
     v1SubscriptionStatus,
+    currentInstitutionsWithLicence,
   }
   res.render('subscriptions/dashboard', data)
 }

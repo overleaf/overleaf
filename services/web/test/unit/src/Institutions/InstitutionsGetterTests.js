@@ -37,6 +37,36 @@ describe('InstitutionsGetter', function () {
         pastReconfirmDate: true,
       },
     }
+    this.licencedAffiliation = {
+      confirmedAt: new Date(),
+      affiliation: {
+        licence: 'pro_plus',
+        institution: { id: 777, confirmed: true },
+        pastReconfirmDate: false,
+      },
+    }
+    this.licencedAffiliationPastReconfirmation = {
+      confirmedAt: new Date('2000-01-01'),
+      affiliation: {
+        licence: 'pro_plus',
+        institution: { id: 888, confirmed: true },
+        pastReconfirmDate: true,
+      },
+    }
+    this.unconfirmedEmailLicensedAffiliation = {
+      confirmedAt: null,
+      affiliation: {
+        licence: 'pro_plus',
+        institution: { id: 123, confirmed: true, pastReconfirmDate: false },
+      },
+    }
+    this.unconfirmedDomainLicensedAffiliation = {
+      confirmedAt: new Date(),
+      affiliation: {
+        licence: 'pro_plus',
+        institution: { id: 789, confirmed: false, pastReconfirmDate: false },
+      },
+    }
     this.userEmails = [
       {
         confirmedAt: null,
@@ -88,6 +118,25 @@ describe('InstitutionsGetter', function () {
         e = error
       }
       expect(e.message).to.equal('oops')
+    })
+  })
+
+  describe('getCurrentInstitutionsWithLicence', function () {
+    it('returns one result per institution and filters out affiliations without license', async function () {
+      this.UserGetter.promises.getUserFullEmails.resolves([
+        this.licencedAffiliation,
+        this.licencedAffiliation,
+        this.licencedAffiliationPastReconfirmation,
+        this.confirmedAffiliation,
+        this.unconfirmedDomainLicensedAffiliation,
+        this.unconfirmedEmailLicensedAffiliation,
+      ])
+      const institutions = await this.InstitutionsGetter.promises.getCurrentInstitutionsWithLicence(
+        this.userId
+      )
+      expect(institutions.map(institution => institution.id)).to.deep.equal([
+        this.licencedAffiliation.affiliation.institution.id,
+      ])
     })
   })
 })
