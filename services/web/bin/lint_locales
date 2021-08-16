@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+
+TEMPLATES_EXTENDING_META_BLOCK=$(\
+  grep \
+    --files-with-matches \
+    --recursive locales/ \
+    --regex "'" \
+  || echo "all-good"
+)
+if [[ "$TEMPLATES_EXTENDING_META_BLOCK" == "all-good" ]]; then
+  exit 0
+fi
+
+for file in ${TEMPLATES_EXTENDING_META_BLOCK}; do
+  cat <<MSG >&2
+
+ERROR: $file contains a locale with a single quote.
+
+---
+$(grep "$file" --regex "'")
+---
+
+Using single quotes in locales can lead to Angular XSS.
+
+You will need to replace the quote with a similar looking character.
+’ (\u2019) is a good candidate.
+
+Links:
+ - https://en.wikipedia.org/wiki/Right_single_quotation_mark
+ - https://github.com/overleaf/issues/issues/4478
+
+MSG
+  exit 1
+done

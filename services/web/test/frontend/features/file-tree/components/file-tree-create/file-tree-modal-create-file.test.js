@@ -488,7 +488,7 @@ describe('<FileTreeModalCreateFile/>', function () {
     )
 
     await screen.findByText(
-      `Upload failed: check that the file name doesn't contain special characters, trailing/leading whitespace or more than 150 characters`
+      `Upload failed: check that the file name doesn’t contain special characters, trailing/leading whitespace or more than 150 characters`
     )
 
     xhr.restore()

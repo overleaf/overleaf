@@ -337,7 +337,7 @@
   "history": "Histórico",
   "joining": "Participando",
   "open_project": "Abrir Projeto",
-  "files_cannot_include_invalid_characters": "Arquivos não podem ter os caracteres '*' ou '/'",
+  "files_cannot_include_invalid_characters": "Arquivos não podem ter os caracteres ‘*’ ou ‘/’",
   "invalid_file_name": "Nome de Arquivo Inválido",
   "autocomplete_references": "Referência Autocompletar (dentro do bloco <code>\\cite{}</code>)",
   "autocomplete": "Autocompletar",

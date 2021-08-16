@@ -53,6 +53,12 @@ run()
  * @returns {string}
  */
 function sanitize(input) {
+  // Block Angular XSS
+  // Ticket: https://github.com/overleaf/issues/issues/4478
+  input = input.replace(/'/g, '’')
+  // Use left quote where (likely) appropriate.
+  input.replace(/ ’/g, ' ‘')
+
   return sanitizeHtml(input, {
     // Allow "replacement" tags (in the format <0>, <1>, <2>, etc) used by
     // react-i18next to allow for HTML insertion via the Trans component.

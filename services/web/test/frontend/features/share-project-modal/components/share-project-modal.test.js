@@ -683,7 +683,7 @@ describe('<ShareProjectModal/>', function () {
 
     await respondWithError('cannot_invite_non_user')
     await screen.findByText(
-      `Can't send invite. Recipient must already have a Overleaf account`
+      `Can’t send invite. Recipient must already have a Overleaf account`
     )
 
     await respondWithError('cannot_verify_user_not_robot')
@@ -692,7 +692,7 @@ describe('<ShareProjectModal/>', function () {
     )
 
     await respondWithError('cannot_invite_self')
-    await screen.findByText(`Can't send invite to yourself`)
+    await screen.findByText(`Can’t send invite to yourself`)
 
     await respondWithError('invalid_email')
     await screen.findByText(`An email address is invalid`)

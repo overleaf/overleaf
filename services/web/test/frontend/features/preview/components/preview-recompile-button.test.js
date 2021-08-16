@@ -23,7 +23,7 @@ describe('<PreviewRecompileButton />', function () {
       'Normal',
       'Fast [draft]',
       'Check syntax before compile',
-      "Don't check syntax",
+      'Don’t check syntax',
       'Run syntax check now',
       'Stop compilation',
       'Recompile from scratch',

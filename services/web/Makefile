@@ -406,6 +406,10 @@ lint: lint_pug
 lint_pug:
 	bin/lint_pug_templates
 
+lint: lint_locales
+lint_locales:
+	bin/lint_locales
+
 lint_in_docker:
 	$(RUN_LINT_FORMAT) make lint -j --output-sync
 

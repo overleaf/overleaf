@@ -15,7 +15,7 @@
   "syntax_validation": "Проверка кода",
   "history": "История",
   "open_project": "Открыть проект",
-  "files_cannot_include_invalid_characters": "Файлы не могут содержать символы '*' и '/'",
+  "files_cannot_include_invalid_characters": "Файлы не могут содержать символы ‘*’ и ‘/’",
   "invalid_file_name": "Неверное имя файла",
   "autocomplete_references": "Автодополнение ссылок (внутри блока <code>\\cite{}</code>)",
   "autocomplete": "Автозавершение",
