@@ -90,7 +90,7 @@
     "csurf": "^1.11.0",
     "d3": "^3.5.16",
     "dateformat": "1.0.4-1.2.3",
-    "daterangepicker": "https://github.com/40thieves/daterangepicker/archive/e496d2d44ca53e208c930e4cb4bcf29bcefa4550.tar.gz",
+    "daterangepicker": "https://github.com/overleaf/daterangepicker/archive/e496d2d44ca53e208c930e4cb4bcf29bcefa4550.tar.gz",
     "downshift": "^6.1.0",
     "east": "^2.0.2",
     "express": "4.17.1",
