@@ -1,23 +1,39 @@
 {
-  "name": "access-token-encryptor-sharelatex",
-  "version": "2.0.0",
+  "name": "@overleaf/access-token-encryptor",
+  "version": "2.1.0",
   "description": "",
-  "private": true,
   "main": "index.js",
   "scripts": {
     "test": "mocha test/**/*.js",
-    "lint": "echo noop",
-    "format": "echo noop",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
     "test:ci": "npm run test"
   },
   "author": "",
-  "license": "Proprietary",
+  "license": "AGPL-3.0-only",
   "dependencies": {},
+  "peerDependencies": {
+    "logger-sharelatex": "^2.2.0"
+  },
   "devDependencies": {
-    "bunyan": "~0.22.3",
+    "bunyan": "^1.8.15",
     "chai": "^4.3.4",
+    "eslint": "^7.21.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-chai-expect": "^2.2.0",
+    "eslint-plugin-chai-friendly": "^0.6.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-promise": "^4.2.1",
+    "logger-sharelatex": "^2.2.0",
     "mocha": "^6.2.2",
     "nock": "0.15.2",
+    "prettier": "^2.2.1",
     "sandboxed-module": "^2.0.3",
     "sinon": "^7.5.0"
   }

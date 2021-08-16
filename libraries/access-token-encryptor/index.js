@@ -1,1 +1,1 @@
-module.exports = require('./lib/js/AccessTokenEncryptor');
+module.exports = require('./lib/js/AccessTokenEncryptor')
