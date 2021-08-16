@@ -17,11 +17,11 @@ const logger = require('logger-sharelatex')
 const Settings = require('@overleaf/settings')
 
 module.exports = DocumentUpdaterManager = {
-  getDocument(project_id, doc_id, callback) {
+  _requestDocument(project_id, doc_id, url, callback) {
     if (callback == null) {
       callback = function (error, content, version) {}
     }
-    const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}`
+
     logger.log({ project_id, doc_id }, 'getting doc from document updater')
     return request.get(url, function (error, res, body) {
       if (error != null) {
@@ -50,6 +50,16 @@ module.exports = DocumentUpdaterManager = {
         return callback(error)
       }
     })
+  },
+
+  getDocument(project_id, doc_id, callback) {
+    const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}`
+    DocumentUpdaterManager._requestDocument(project_id, doc_id, url, callback)
+  },
+
+  peekDocument(project_id, doc_id, callback) {
+    const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}/peek`
+    DocumentUpdaterManager._requestDocument(project_id, doc_id, url, callback)
   },
 
   setDocument(project_id, doc_id, content, user_id, callback) {
@@ -86,5 +96,25 @@ module.exports = DocumentUpdaterManager = {
         }
       }
     )
+  },
+}
+
+module.exports.promises = {
+  // peekDocument returns two arguments so we can't use util.promisify, which only handles a single argument, we need
+  // to treat this it as a special case.
+  peekDocument: (project_id, doc_id) => {
+    return new Promise((resolve, reject) => {
+      DocumentUpdaterManager.peekDocument(
+        project_id,
+        doc_id,
+        (err, content, version) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve([content, version])
+          }
+        }
+      )
+    })
   },
 }

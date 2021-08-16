@@ -40,7 +40,8 @@
     "request": "~2.88.2",
     "requestretry": "^4.1.0",
     "s3-streams": "^0.4.0",
-    "underscore": "~1.13.1"
+    "underscore": "~1.13.1",
+    "yazl": "^2.5.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",

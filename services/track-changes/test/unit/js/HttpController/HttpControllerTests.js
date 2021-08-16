@@ -25,6 +25,7 @@ describe('HttpController', function () {
         './PackManager': (this.PackManager = {}),
         './DocArchiveManager': (this.DocArchiveManager = {}),
         './HealthChecker': (this.HealthChecker = {}),
+        './ZipManager': (this.ZipManager = {}),
       },
     })
     this.doc_id = 'doc-id-123'

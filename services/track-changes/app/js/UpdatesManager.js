@@ -27,6 +27,7 @@ const async = require('async')
 const _ = require('underscore')
 const Settings = require('@overleaf/settings')
 const keys = Settings.redis.lock.key_schema
+const util = require('util')
 
 module.exports = UpdatesManager = {
   compressAndSaveRawUpdates(
@@ -879,6 +880,12 @@ module.exports = UpdatesManager = {
 
     return summarizedUpdates
   },
+}
+
+module.exports.promises = {
+  processUncompressedUpdatesForProject: util.promisify(
+    UpdatesManager.processUncompressedUpdatesForProject
+  ),
 }
 
 function __guard__(value, transform) {

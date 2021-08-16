@@ -66,6 +66,8 @@ app.get('/project/:project_id/doc/:doc_id/check', HttpController.checkDoc)
 app.get('/project/:project_id/updates', HttpController.getUpdates)
 app.get('/project/:project_id/export', HttpController.exportProject)
 
+app.get('/project/:project_id/zip', HttpController.zipProject)
+
 app.post('/project/:project_id/flush', HttpController.flushProject)
 
 app.post(

@@ -17,9 +17,12 @@ const UpdatesManager = require('./UpdatesManager')
 const DiffManager = require('./DiffManager')
 const PackManager = require('./PackManager')
 const RestoreManager = require('./RestoreManager')
+const ZipManager = require('./ZipManager')
 const logger = require('logger-sharelatex')
 const HealthChecker = require('./HealthChecker')
 const _ = require('underscore')
+const Path = require('path')
+const { pipeline } = require('stream')
 
 module.exports = HttpController = {
   flushDoc(req, res, next) {
@@ -201,6 +204,29 @@ module.exports = HttpController = {
         })
       }
     )
+  },
+
+  zipProject(req, res, next) {
+    const { project_id: projectId } = req.params
+    logger.log({ projectId }, 'exporting project history as zip file')
+    ZipManager.makeTempDirectory((err, tmpdir) => {
+      if (err) {
+        return next(err)
+      }
+      const zipFilePath = Path.join(tmpdir, 'export.zip')
+      ZipManager.exportProject(projectId, zipFilePath, err => {
+        if (err) {
+          ZipManager.cleanupTempDirectory(tmpdir)
+          return next(err)
+        }
+        res.download(zipFilePath, `${projectId}-track-changes.zip`, err => {
+          ZipManager.cleanupTempDirectory(tmpdir)
+          if (err && !res.headersSent) {
+            return next(err)
+          }
+        })
+      })
+    })
   },
 
   exportProject(req, res, next) {
