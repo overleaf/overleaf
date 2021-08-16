@@ -30,6 +30,9 @@ function sentryReporter() {
             // Ignore spurious error from Ace internals - see https://github.com/overleaf/issues/issues/3321
             'ResizeObserver loop limit exceeded',
             'ResizeObserver loop completed with undelivered notifications.',
+            // Microsoft Outlook SafeLink crawler
+            // https://forum.sentry.io/t/unhandledrejection-non-error-promise-rejection-captured-with-value/14062
+            /Non-Error promise rejection captured with value: Object Not Found Matching Id/,
           ],
 
           beforeSend(event) {
