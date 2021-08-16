@@ -1,8 +1,16 @@
 const { User } = require('../../models/User')
 
+function _featuresChanged(newFeatures, featuresBefore) {
+  for (const feature in newFeatures) {
+    if (featuresBefore[feature] !== newFeatures[feature]) {
+      return true
+    }
+  }
+  return false
+}
+
 module.exports = {
   updateFeatures(userId, features, callback) {
-    const conditions = { _id: userId }
     const update = {
       featuresUpdatedAt: new Date(),
     }
@@ -10,16 +18,24 @@ module.exports = {
       const value = features[key]
       update[`features.${key}`] = value
     }
-    User.updateOne(conditions, update, (err, result) =>
-      callback(err, features, (result ? result.nModified : 0) === 1)
-    )
+    User.findByIdAndUpdate(userId, update, (err, docBeforeUpdate) => {
+      let featuresChanged = false
+      if (docBeforeUpdate) {
+        featuresChanged = _featuresChanged(features, docBeforeUpdate.features)
+      }
+
+      return callback(err, features, featuresChanged)
+    })
   },
 
   overrideFeatures(userId, features, callback) {
-    const conditions = { _id: userId }
     const update = { features, featuresUpdatedAt: new Date() }
-    User.updateOne(conditions, update, (err, result) =>
-      callback(err, (result ? result.nModified : 0) === 1)
-    )
+    User.findByIdAndUpdate(userId, update, (err, docBeforeUpdate) => {
+      let featuresChanged = false
+      if (docBeforeUpdate) {
+        featuresChanged = _featuresChanged(features, docBeforeUpdate.features)
+      }
+      return callback(err, featuresChanged)
+    })
   },
 }

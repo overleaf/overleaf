@@ -6,7 +6,24 @@ const modulePath =
 
 describe('UserFeaturesUpdater', function () {
   beforeEach(function () {
-    this.User = { updateOne: sinon.stub().callsArgWith(2) }
+    this.features = {
+      collaborators: 6,
+      dropbox: true,
+      github: true,
+      gitBridge: true,
+      versioning: true,
+      compileTimeout: 180,
+      compileGroup: 'priority',
+      references: true,
+      templates: true,
+      trackChanges: true,
+      referencesSearch: true,
+      zotero: true,
+      mendeley: true,
+    }
+    this.User = {
+      findByIdAndUpdate: sinon.stub().yields(null, { features: this.features }),
+    }
     this.UserFeaturesUpdater = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
@@ -19,26 +36,25 @@ describe('UserFeaturesUpdater', function () {
   describe('updateFeatures', function () {
     it('should send the users features', function (done) {
       const userId = '5208dd34438842e2db000005'
-      this.features = { versioning: true, collaborators: 10 }
+      const update = {
+        versioning: true,
+        collaborators: 10,
+      }
       this.UserFeaturesUpdater.updateFeatures(
         userId,
-        this.features,
+        update,
         (err, features) => {
-          const update = {
-            'features.versioning': true,
-            'features.collaborators': 10,
-          }
-          const updateArgs = this.User.updateOne.lastCall.args
-          expect(updateArgs[0]).to.deep.equal({ _id: userId })
+          const updateArgs = this.User.findByIdAndUpdate.lastCall.args
+          expect(updateArgs[0]).to.deep.equal(userId)
           expect(Object.keys(updateArgs[1]).length).to.equal(3)
           expect(updateArgs[1]['features.versioning']).to.equal(
-            update['features.versioning']
+            update.versioning
           )
           expect(updateArgs[1]['features.collaborators']).to.equal(
-            update['features.collaborators']
+            update.collaborators
           )
           expect(updateArgs[1].featuresUpdatedAt instanceof Date).to.be.true
-          features.should.deep.equal(this.features)
+          features.should.deep.equal(update)
           done()
         }
       )
@@ -48,26 +64,17 @@ describe('UserFeaturesUpdater', function () {
   describe('overrideFeatures', function () {
     it('should send the users features', function (done) {
       const userId = '5208dd34438842e2db000005'
-      this.features = { versioning: true, collaborators: 10 }
-      this.UserFeaturesUpdater.updateFeatures(
+      const update = Object.assign({}, { mendeley: !this.features.mendeley })
+      this.UserFeaturesUpdater.overrideFeatures(
         userId,
-        this.features,
-        (err, features) => {
-          const update = {
-            'features.versioning': true,
-            'features.collaborators': 10,
-          }
-          const updateArgs = this.User.updateOne.lastCall.args
-          expect(updateArgs[0]).to.deep.equal({ _id: userId })
-          expect(Object.keys(updateArgs[1]).length).to.equal(3)
-          expect(updateArgs[1]['features.versioning']).to.equal(
-            update['features.versioning']
-          )
-          expect(updateArgs[1]['features.collaborators']).to.equal(
-            update['features.collaborators']
-          )
+        update,
+        (err, featuresChanged) => {
+          const updateArgs = this.User.findByIdAndUpdate.lastCall.args
+          expect(updateArgs[0]).to.equal(userId)
+          expect(Object.keys(updateArgs[1]).length).to.equal(2)
+          expect(updateArgs[1].features).to.deep.equal(update)
           expect(updateArgs[1].featuresUpdatedAt instanceof Date).to.be.true
-          features.should.deep.equal(this.features)
+          featuresChanged.should.equal(true)
           done()
         }
       )
