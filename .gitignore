@@ -1,25 +1,6 @@
-/config
-config-local
+# docker image build
+.dockerignore
 
-node_modules/
-api-data
-versions/
-
-web
-document-updater
-clsi
-filestore
-track-changes
-docstore
-chat
-spelling
-real-time
-migrations/*.js
-
-data
-tmp
-
-db.sqlite
-
-.DS_Store
-.vagrant
+# user defined files
+.env
+docker-compose.override.yml

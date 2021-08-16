@@ -1,3 +1,4 @@
 .DS_Store
 .git/
-node_modules/
+libraries/
+services/git-bridge
