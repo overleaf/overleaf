@@ -31,6 +31,7 @@ https.globalAgent.maxSockets = Settings.limits.httpsGlobalAgentMaxSockets
 metrics.memory.monitor(logger)
 
 const Server = require('./app/src/infrastructure/Server')
+const QueueWorkers = require('./app/src/infrastructure/QueueWorkers')
 const mongodb = require('./app/src/infrastructure/mongodb')
 const mongoose = require('./app/src/infrastructure/Mongoose')
 
@@ -60,6 +61,7 @@ if (!module.parent) {
         // wait until the process is ready before monitoring the event loop
         metrics.event_loop.monitor(logger)
       })
+      QueueWorkers.start()
     })
     .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')

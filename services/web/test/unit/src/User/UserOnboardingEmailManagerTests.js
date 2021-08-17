@@ -25,12 +25,15 @@ describe('UserOnboardingEmailManager', function () {
     }
     this.UserGetter = {
       promises: {
-        getUser: sinon.stub().resolves({
-          _id: this.fakeUserId,
-          email: this.fakeUserEmail,
-        }),
+        getUser: sinon.stub().resolves(null),
       },
     }
+    this.UserGetter.promises.getUser
+      .withArgs({ _id: this.fakeUserId })
+      .resolves({
+        _id: this.fakeUserId,
+        email: this.fakeUserEmail,
+      })
     this.EmailHandler = {
       promises: {
         sendEmail: sinon.stub().resolves(),
@@ -41,93 +44,50 @@ describe('UserOnboardingEmailManager', function () {
         updateUser: sinon.stub().resolves(),
       },
     }
-    this.Features = {
-      hasFeature: sinon.stub(),
-    }
-    this.request = sinon.stub().yields()
 
-    this.init = isSAAS => {
-      this.Features.hasFeature.withArgs('saas').returns(isSAAS)
-      this.UserOnboardingEmailManager = SandboxedModule.require(MODULE_PATH, {
-        globals: {
-          console: console,
-        },
-        requires: {
-          '../../infrastructure/Features': this.Features,
-          '../../infrastructure/Queues': this.Queues,
-          '../Email/EmailHandler': this.EmailHandler,
-          './UserGetter': this.UserGetter,
-          './UserUpdater': this.UserUpdater,
-        },
-      })
-    }
-  })
-
-  describe('in Server CE/Pro', function () {
-    beforeEach(function () {
-      this.init(false)
-    })
-
-    it('should not create any queue', function () {
-      expect(this.Queues.getOnboardingEmailsQueue).to.not.have.been.called
-    })
-    it('should not schedule any email', function () {
-      this.UserOnboardingEmailManager.scheduleOnboardingEmail({
-        _id: this.fakeUserId,
-      })
-      expect(this.onboardingEmailsQueue.add).to.not.have.been.called
+    this.UserOnboardingEmailManager = SandboxedModule.require(MODULE_PATH, {
+      requires: {
+        '../../infrastructure/Queues': this.Queues,
+        '../Email/EmailHandler': this.EmailHandler,
+        './UserGetter': this.UserGetter,
+        './UserUpdater': this.UserUpdater,
+      },
     })
   })
 
-  describe('schedule email in SAAS', function () {
-    beforeEach(function () {
-      this.init(true)
-    })
-
-    it('should schedule delayed job on queue', function () {
-      this.UserOnboardingEmailManager.scheduleOnboardingEmail({
+  describe('scheduleOnboardingEmail', function () {
+    it('should schedule delayed job on queue', async function () {
+      await this.UserOnboardingEmailManager.scheduleOnboardingEmail({
         _id: this.fakeUserId,
       })
-      sinon.assert.calledWith(
-        this.onboardingEmailsQueue.add,
+      expect(this.onboardingEmailsQueue.add).to.have.been.calledWith(
         { userId: this.fakeUserId },
         { delay: 24 * 60 * 60 * 1000 }
       )
     })
+  })
 
-    it('queue process callback should send onboarding email and update user', async function () {
-      await this.queueProcessFunction({ data: { userId: this.fakeUserId } })
-      sinon.assert.calledWith(
-        this.UserGetter.promises.getUser,
-        { _id: this.fakeUserId },
-        { email: 1 }
-      )
-      sinon.assert.calledWith(
-        this.EmailHandler.promises.sendEmail,
+  describe('sendOnboardingEmail', function () {
+    it('should send onboarding email and update user', async function () {
+      await this.UserOnboardingEmailManager.sendOnboardingEmail(this.fakeUserId)
+      expect(this.EmailHandler.promises.sendEmail).to.have.been.calledWith(
         'userOnboardingEmail',
         {
           to: this.fakeUserEmail,
         }
       )
-      sinon.assert.calledWith(
-        this.UserUpdater.promises.updateUser,
+      expect(this.UserUpdater.promises.updateUser).to.have.been.calledWith(
         this.fakeUserId,
-        {
-          $set: { onboardingEmailSentAt: sinon.match.date },
-        }
+        { $set: { onboardingEmailSentAt: sinon.match.date } }
       )
     })
 
-    it('queue process callback should stop if user is not found', async function () {
-      this.UserGetter.promises.getUser = sinon.stub().resolves()
-      await this.queueProcessFunction({ data: { userId: 'deleted-user' } })
-      sinon.assert.calledWith(
-        this.UserGetter.promises.getUser,
-        { _id: 'deleted-user' },
-        { email: 1 }
-      )
-      sinon.assert.notCalled(this.EmailHandler.promises.sendEmail)
-      sinon.assert.notCalled(this.UserUpdater.promises.updateUser)
+    it('should stop if user is not found', async function () {
+      await this.UserOnboardingEmailManager.sendOnboardingEmail({
+        data: { userId: 'deleted-user' },
+      })
+      expect(this.EmailHandler.promises.sendEmail).not.to.have.been.called
+      expect(this.UserUpdater.promises.updateUser).not.to.have.been.called
     })
   })
 })

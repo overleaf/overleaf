@@ -4,22 +4,14 @@ const {
   promises: InstitutionsAPIPromises,
 } = require('../Institutions/InstitutionsAPI')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const Features = require('../../infrastructure/Features')
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
-class UserPostRegistrationAnalyticsManager {
-  constructor() {
-    this.queue = Queues.getPostRegistrationAnalyticsQueue()
-    this.queue.process(async job => {
-      const { userId } = job.data
-      await postRegistrationAnalytics(userId)
-    })
-  }
-
-  async schedulePostRegistrationAnalytics(user) {
-    await this.queue.add({ userId: user._id }, { delay: ONE_DAY_MS })
-  }
+async function schedulePostRegistrationAnalytics(user) {
+  await Queues.getPostRegistrationAnalyticsQueue().add(
+    { userId: user._id },
+    { delay: ONE_DAY_MS }
+  )
 }
 
 async function postRegistrationAnalytics(userId) {
@@ -48,10 +40,7 @@ async function checkAffiliations(userId) {
   }
 }
 
-class NoopManager {
-  async schedulePostRegistrationAnalytics() {}
+module.exports = {
+  schedulePostRegistrationAnalytics,
+  postRegistrationAnalytics,
 }
-
-module.exports = Features.hasFeature('saas')
-  ? new UserPostRegistrationAnalyticsManager()
-  : new NoopManager()
