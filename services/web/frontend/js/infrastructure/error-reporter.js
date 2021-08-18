@@ -11,6 +11,7 @@ function sentryReporter() {
 
         Sentry.init({
           dsn: window.ExposedSettings.sentryDsn,
+          environment: window.ExposedSettings.sentryEnvironment,
           release: window.ExposedSettings.sentryRelease,
           autoSessionTracking: false,
 
