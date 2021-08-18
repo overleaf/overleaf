@@ -4,6 +4,7 @@ const InstitutionsManager = require('../app/src/Features/Institutions/Institutio
 const institutionId = parseInt(process.argv[2])
 if (isNaN(institutionId)) throw new Error('No institution id')
 console.log('Checking users of institution', institutionId)
+const emitNonProUserIds = process.argv.includes('--emit-non-pro-user-ids')
 
 waitForDb()
   .then(main)
@@ -14,7 +15,8 @@ waitForDb()
 
 async function main() {
   const usersSummary = await InstitutionsManager.promises.checkInstitutionUsers(
-    institutionId
+    institutionId,
+    emitNonProUserIds
   )
   console.log(usersSummary)
   process.exit()

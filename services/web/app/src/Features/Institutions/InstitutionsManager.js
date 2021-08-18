@@ -70,7 +70,7 @@ async function _checkUsersFeatures(userIds) {
   return result
 }
 
-async function checkInstitutionUsers(institutionId) {
+async function checkInstitutionUsers(institutionId, emitNonProUserIds) {
   /*
     v1 has affiliation data. Via getInstitutionAffiliationsCounts, v1 will send
     lapsed_user_ids, which includes all user types
@@ -178,6 +178,9 @@ async function checkInstitutionUsers(institutionId) {
       result.emailUsers.nonPro[userType]++
     }
   })
+  if (emitNonProUserIds) {
+    result.nonProUserIds = nonProUserIds
+  }
   return result
 }
 
