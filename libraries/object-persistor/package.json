@@ -1,6 +1,6 @@
 {
   "name": "@overleaf/object-persistor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Module for storing objects in multiple backends, with fallback on 404 to assist migration between them",
   "main": "index.js",
   "scripts": {
