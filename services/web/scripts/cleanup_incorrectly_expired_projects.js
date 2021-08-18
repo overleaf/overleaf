@@ -25,9 +25,14 @@ waitForDb()
   })
 
 async function main() {
-  await batchedUpdate('deletedProjects', {}, processDeletedProjects, {
-    'deleterData.deletedProjectId': 1,
-  })
+  await batchedUpdate(
+    'deletedProjects',
+    { project: null },
+    processDeletedProjects,
+    {
+      'deleterData.deletedProjectId': 1,
+    }
+  )
   if (DRY_RUN) {
     console.log(
       '\nThis was a dry run. Re-run with DRY_RUN=false to delete broken refs and projects.'
