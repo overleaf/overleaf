@@ -191,6 +191,60 @@ describe('DocumentController', function () {
       })
     })
 
+    describe('when project exists that was migrated with downgrades allowed', function () {
+      beforeEach(function () {
+        this.doc = { _id: this.doc_id }
+        this.projectHistoryId = 1234
+        this.projectHistoryDisplay = true
+        this.projectHistoryType = undefined
+        this.project = {
+          _id: this.project_id,
+          overleaf: {
+            history: {
+              id: this.projectHistoryId,
+              display: this.projectHistoryDisplay,
+              allowDowngrade: true,
+            },
+          },
+        }
+        this.ProjectGetter.getProject = sinon
+          .stub()
+          .callsArgWith(2, null, this.project)
+        this.ProjectLocator.findElement = sinon
+          .stub()
+          .callsArgWith(1, null, this.doc, { fileSystem: this.pathname })
+        this.ProjectEntityHandler.getDoc = sinon
+          .stub()
+          .callsArgWith(
+            2,
+            null,
+            this.doc_lines,
+            this.rev,
+            this.version,
+            this.ranges
+          )
+        return this.DocumentController.getDocument(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+
+      it('should return the history id in the JSON but not history type, sending history to both services', function () {
+        this.res.type.should.equal('application/json')
+        return this.res.body.should.equal(
+          JSON.stringify({
+            lines: this.doc_lines,
+            version: this.version,
+            ranges: this.ranges,
+            pathname: this.pathname,
+            projectHistoryId: this.projectHistoryId,
+            projectHistoryType: this.projectHistoryType,
+          })
+        )
+      })
+    })
+
     describe('when the project does not exist', function () {
       beforeEach(function () {
         this.ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)

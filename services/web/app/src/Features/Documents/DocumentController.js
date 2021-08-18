@@ -69,12 +69,21 @@ module.exports = {
                   return res.send(lines.join('\n'))
                 } else {
                   const projectHistoryId = _.get(project, 'overleaf.history.id')
-                  const projectHistoryType = _.get(
+                  const projectHistoryDisplay = _.get(
                     project,
                     'overleaf.history.display'
                   )
-                    ? 'project-history'
-                    : undefined // for backwards compatibility, don't send anything if the project is still on track-changes
+                  const sendToBothHistorySystems = _.get(
+                    project,
+                    'overleaf.history.allowDowngrade'
+                  )
+                  // if project has been switched but has 'allowDowngrade' set
+                  // then leave projectHistoryType undefined to (temporarily)
+                  // continue sending updates to both SL and full project history
+                  const projectHistoryType =
+                    projectHistoryDisplay && !sendToBothHistorySystems
+                      ? 'project-history'
+                      : undefined // for backwards compatibility, don't send anything if the project is still on track-changes
                   return res.json({
                     lines,
                     version,
