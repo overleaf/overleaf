@@ -65,11 +65,11 @@ describe('ProjectDuplicateNames', function () {
             )
             this.refBibDoc = _.find(
               project.rootFolder[0].docs,
-              doc => doc.name === 'references.bib'
+              doc => doc.name === 'sample.bib'
             )
             this.imageFile = _.find(
               project.rootFolder[0].fileRefs,
-              file => file.name === 'universe.jpg'
+              file => file.name === 'frog.jpg'
             )
             this.rootFolderId = project.rootFolder[0]._id.toString()
             // create a folder called 'testfolder'
@@ -181,7 +181,7 @@ describe('ProjectDuplicateNames', function () {
             {
               uri: `/project/${this.example_project_id}/doc`,
               json: {
-                name: 'universe.jpg',
+                name: 'frog.jpg',
                 parent_folder_id: this.rootFolderId,
               },
             },
@@ -203,7 +203,7 @@ describe('ProjectDuplicateNames', function () {
             {
               uri: `/project/${this.example_project_id}/folder`,
               json: {
-                name: 'universe.jpg',
+                name: 'frog.jpg',
                 parent_folder_id: this.rootFolderId,
               },
             },
@@ -227,7 +227,7 @@ describe('ProjectDuplicateNames', function () {
               json: true,
               qs: {
                 folder_id: this.rootFolderId,
-                qqfilename: 'universe.jpg',
+                qqfilename: 'frog.jpg',
               },
               formData: {
                 qqfile: {
@@ -235,7 +235,7 @@ describe('ProjectDuplicateNames', function () {
                     Path.resolve(__dirname + '/../files/1pixel.png')
                   ),
                   options: {
-                    filename: 'universe.jpg',
+                    filename: 'frog.jpg',
                     contentType: 'image/jpeg',
                   },
                 },
@@ -310,7 +310,7 @@ describe('ProjectDuplicateNames', function () {
               json: true,
               qs: {
                 folder_id: this.rootFolderId,
-                qqfilename: 'universe.jpg',
+                qqfilename: 'frog.jpg',
               },
               formData: {
                 qqfile: {
@@ -409,7 +409,7 @@ describe('ProjectDuplicateNames', function () {
             {
               uri: `/project/${this.example_project_id}/doc/${this.refBibDoc._id}/rename`,
               json: {
-                name: 'universe.jpg',
+                name: 'frog.jpg',
               },
             },
             (err, res, body) => {
@@ -430,7 +430,7 @@ describe('ProjectDuplicateNames', function () {
             {
               uri: `/project/${this.example_project_id}/folder/${this.testFolderId}/rename`,
               json: {
-                name: 'universe.jpg',
+                name: 'frog.jpg',
               },
             },
             (err, res, body) => {
@@ -451,7 +451,7 @@ describe('ProjectDuplicateNames', function () {
             {
               uri: `/project/${this.example_project_id}/file/${this.imageFile._id}/rename`,
               json: {
-                name: 'universe.jpg',
+                name: 'frog.jpg',
               },
             },
             (err, res, body) => {
@@ -547,7 +547,7 @@ describe('ProjectDuplicateNames', function () {
               {
                 uri: `/project/${this.example_project_id}/doc`,
                 json: {
-                  name: 'universe.jpg',
+                  name: 'frog.jpg',
                   parent_folder_id: this.testFolderId,
                 },
               },

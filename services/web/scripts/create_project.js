@@ -45,30 +45,34 @@ async function _createRootDoc(project, ownerId, docLines) {
 }
 
 async function _addDefaultExampleProjectFiles(ownerId, projectName, project) {
-  const mainDocLines = await _buildTemplate('main.tex', ownerId, projectName)
+  const mainDocLines = await _buildTemplate(
+    'example-project/main.tex',
+    ownerId,
+    projectName
+  )
   await _createRootDoc(project, ownerId, mainDocLines)
 
-  const referenceDocLines = await _buildTemplate(
-    'references.bib',
+  const bibDocLines = await _buildTemplate(
+    'example-project/sample.bib',
     ownerId,
     projectName
   )
   await ProjectEntityUpdateHandler.promises.addDoc(
     project._id,
     project.rootFolder[0]._id,
-    'references.bib',
-    referenceDocLines,
+    'sample.bib',
+    bibDocLines,
     ownerId
   )
 
-  const universePath = path.resolve(
-    __dirname + '/../app/templates/project_files/universe.jpg'
+  const frogPath = path.resolve(
+    __dirname + '/../app/templates/project_files/example-project/frog.jpg'
   )
   await ProjectEntityUpdateHandler.promises.addFile(
     project._id,
     project.rootFolder[0]._id,
-    'universe.jpg',
-    universePath,
+    'frog.jpg',
+    frogPath,
     null,
     ownerId
   )

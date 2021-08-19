@@ -15,7 +15,6 @@ const path = require('path')
 const { callbackify } = require('util')
 const _ = require('underscore')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const SplitTestV2Handler = require('../SplitTests/SplitTestV2Handler')
 
 const MONTH_NAMES = [
   'January',
@@ -31,7 +30,6 @@ const MONTH_NAMES = [
   'November',
   'December',
 ]
-const EXAMPLE_PROJECT_SPLITTEST_ID = 'example-project-v3'
 
 async function createBlankProject(ownerId, projectName, attributes = {}) {
   const isImport = attributes && attributes.overleaf
@@ -61,76 +59,39 @@ async function createProjectFromSnippet(ownerId, projectName, docLines) {
 
 async function createBasicProject(ownerId, projectName) {
   const project = await _createBlankProject(ownerId, projectName)
+
+  const docLines = await _buildTemplate('mainbasic.tex', ownerId, projectName)
+  await _createRootDoc(project, ownerId, docLines)
+
   AnalyticsManager.recordEvent(ownerId, 'project-created', {
     projectId: project._id,
   })
-  const docLines = await _buildTemplate('mainbasic.tex', ownerId, projectName)
-  await _createRootDoc(project, ownerId, docLines)
+
   return project
 }
 
 async function createExampleProject(ownerId, projectName) {
   const project = await _createBlankProject(ownerId, projectName)
 
-  const assignment = await SplitTestV2Handler.promises.getAssignment(
-    ownerId,
-    EXAMPLE_PROJECT_SPLITTEST_ID
-  )
-
-  if (assignment.variant === 'example-frog') {
-    await _addSplitTestExampleProjectFiles(ownerId, projectName, project)
-  } else {
-    await _addDefaultExampleProjectFiles(ownerId, projectName, project)
-  }
+  await _addExampleProjectFiles(ownerId, projectName, project)
 
   AnalyticsManager.recordEvent(ownerId, 'project-created', {
     projectId: project._id,
-    ...assignment.analytics.segmentation,
   })
 
   return project
 }
 
-async function _addDefaultExampleProjectFiles(ownerId, projectName, project) {
-  const mainDocLines = await _buildTemplate('main.tex', ownerId, projectName)
-  await _createRootDoc(project, ownerId, mainDocLines)
-
-  const referenceDocLines = await _buildTemplate(
-    'references.bib',
-    ownerId,
-    projectName
-  )
-  await ProjectEntityUpdateHandler.promises.addDoc(
-    project._id,
-    project.rootFolder[0]._id,
-    'references.bib',
-    referenceDocLines,
-    ownerId
-  )
-
-  const universePath = path.resolve(
-    __dirname + '/../../../templates/project_files/universe.jpg'
-  )
-  await ProjectEntityUpdateHandler.promises.addFile(
-    project._id,
-    project.rootFolder[0]._id,
-    'universe.jpg',
-    universePath,
-    null,
-    ownerId
-  )
-}
-
-async function _addSplitTestExampleProjectFiles(ownerId, projectName, project) {
+async function _addExampleProjectFiles(ownerId, projectName, project) {
   const mainDocLines = await _buildTemplate(
-    'test-example-project/main.tex',
+    'example-project/main.tex',
     ownerId,
     projectName
   )
   await _createRootDoc(project, ownerId, mainDocLines)
 
   const bibDocLines = await _buildTemplate(
-    'test-example-project/sample.bib',
+    'example-project/sample.bib',
     ownerId,
     projectName
   )
@@ -143,8 +104,7 @@ async function _addSplitTestExampleProjectFiles(ownerId, projectName, project) {
   )
 
   const frogPath = path.resolve(
-    __dirname +
-      '/../../../templates/project_files/test-example-project/frog.jpg'
+    __dirname + '/../../../templates/project_files/example-project/frog.jpg'
   )
   await ProjectEntityUpdateHandler.promises.addFile(
     project._id,
