@@ -1,17 +1,3 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS206: Consider reworking classes to avoid initClass
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const modulePath = '../../../../app/js/DocumentManager.js'
 const SandboxedModule = require('sandboxed-module')
@@ -20,8 +6,12 @@ const tk = require('timekeeper')
 
 describe('DocumentManager', function () {
   beforeEach(function () {
-    let Timer
     tk.freeze(new Date())
+    this.Metrics = {
+      Timer: class Timer {},
+    }
+    this.Metrics.Timer.prototype.done = sinon.stub()
+
     this.DocumentManager = SandboxedModule.require(modulePath, {
       requires: {
         './RedisManager': (this.RedisManager = {}),
@@ -31,17 +21,7 @@ describe('DocumentManager', function () {
           flushDocChangesAsync: sinon.stub(),
           flushProjectChangesAsync: sinon.stub(),
         }),
-        './Metrics': (this.Metrics = {
-          Timer: (Timer = (function () {
-            Timer = class Timer {
-              static initClass() {
-                this.prototype.done = sinon.stub()
-              }
-            }
-            Timer.initClass()
-            return Timer
-          })()),
-        }),
+        './Metrics': this.Metrics,
         './RealTimeRedisManager': (this.RealTimeRedisManager = {}),
         './DiffCodec': (this.DiffCodec = {}),
         './UpdateManager': (this.UpdateManager = {}),
@@ -61,11 +41,11 @@ describe('DocumentManager', function () {
     this.pathname = '/a/b/c.tex'
     this.unflushedTime = Date.now()
     this.lastUpdatedAt = Date.now()
-    return (this.lastUpdatedBy = 'last-author-id')
+    this.lastUpdatedBy = 'last-author-id'
   })
 
   afterEach(function () {
-    return tk.reset()
+    tk.reset()
   })
 
   describe('flushAndDeleteDoc', function () {
@@ -73,7 +53,7 @@ describe('DocumentManager', function () {
       beforeEach(function () {
         this.RedisManager.removeDocFromMemory = sinon.stub().callsArg(2)
         this.DocumentManager.flushDocIfLoaded = sinon.stub().callsArgWith(2)
-        return this.DocumentManager.flushAndDeleteDoc(
+        this.DocumentManager.flushAndDeleteDoc(
           this.project_id,
           this.doc_id,
           {},
@@ -82,67 +62,65 @@ describe('DocumentManager', function () {
       })
 
       it('should flush the doc', function () {
-        return this.DocumentManager.flushDocIfLoaded
+        this.DocumentManager.flushDocIfLoaded
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should remove the doc from redis', function () {
-        return this.RedisManager.removeDocFromMemory
+        this.RedisManager.removeDocFromMemory
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should call the callback without error', function () {
-        return this.callback.calledWith(null).should.equal(true)
+        this.callback.calledWith(null).should.equal(true)
       })
 
       it('should time the execution', function () {
-        return this.Metrics.Timer.prototype.done.called.should.equal(true)
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
       })
 
-      return it('should flush to the history api', function () {
-        return this.HistoryManager.flushDocChangesAsync
+      it('should flush to the history api', function () {
+        this.HistoryManager.flushDocChangesAsync
           .calledWithExactly(this.project_id, this.doc_id)
           .should.equal(true)
       })
     })
 
-    return describe('when a flush error occurs', function () {
+    describe('when a flush error occurs', function () {
       beforeEach(function () {
         this.DocumentManager.flushDocIfLoaded = sinon
           .stub()
           .callsArgWith(2, new Error('boom!'))
-        return (this.RedisManager.removeDocFromMemory = sinon
-          .stub()
-          .callsArg(2))
+        this.RedisManager.removeDocFromMemory = sinon.stub().callsArg(2)
       })
 
       it('should not remove the doc from redis', function (done) {
-        return this.DocumentManager.flushAndDeleteDoc(
+        this.DocumentManager.flushAndDeleteDoc(
           this.project_id,
           this.doc_id,
           {},
           error => {
             error.should.exist
             this.RedisManager.removeDocFromMemory.called.should.equal(false)
-            return done()
+            done()
           }
         )
       })
 
-      return describe('when ignoring flush errors', function () {
-        return it('should remove the doc from redis', function (done) {
-          return this.DocumentManager.flushAndDeleteDoc(
+      describe('when ignoring flush errors', function () {
+        it('should remove the doc from redis', function (done) {
+          this.DocumentManager.flushAndDeleteDoc(
             this.project_id,
             this.doc_id,
             { ignoreFlushErrors: true },
             error => {
-              if (error != null) {
+              if (error) {
                 return done(error)
               }
               this.RedisManager.removeDocFromMemory.called.should.equal(true)
-              return done()
+              done()
             }
           )
         })
@@ -171,7 +149,7 @@ describe('DocumentManager', function () {
           .stub()
           .callsArgWith(1, null)
         this.PersistenceManager.setDoc = sinon.stub().yields()
-        return this.DocumentManager.flushDocIfLoaded(
+        this.DocumentManager.flushDocIfLoaded(
           this.project_id,
           this.doc_id,
           this.callback
@@ -179,13 +157,13 @@ describe('DocumentManager', function () {
       })
 
       it('should get the doc from redis', function () {
-        return this.RedisManager.getDoc
+        this.RedisManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should write the doc lines to the persistence layer', function () {
-        return this.PersistenceManager.setDoc
+        this.PersistenceManager.setDoc
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -199,21 +177,21 @@ describe('DocumentManager', function () {
       })
 
       it('should call the callback without error', function () {
-        return this.callback.calledWith(null).should.equal(true)
+        this.callback.calledWith(null).should.equal(true)
       })
 
-      return it('should time the execution', function () {
-        return this.Metrics.Timer.prototype.done.called.should.equal(true)
+      it('should time the execution', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
       })
     })
 
-    return describe('when the document is not in Redis', function () {
+    describe('when the document is not in Redis', function () {
       beforeEach(function () {
         this.RedisManager.getDoc = sinon
           .stub()
           .callsArgWith(2, null, null, null, null)
         this.PersistenceManager.setDoc = sinon.stub().yields()
-        return this.DocumentManager.flushDocIfLoaded(
+        this.DocumentManager.flushDocIfLoaded(
           this.project_id,
           this.doc_id,
           this.callback
@@ -221,7 +199,7 @@ describe('DocumentManager', function () {
       })
 
       it('should get the doc from redis', function () {
-        return this.RedisManager.getDoc
+        this.RedisManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
@@ -231,11 +209,11 @@ describe('DocumentManager', function () {
       })
 
       it('should call the callback without error', function () {
-        return this.callback.calledWith(null).should.equal(true)
+        this.callback.calledWith(null).should.equal(true)
       })
 
-      return it('should time the execution', function () {
-        return this.Metrics.Timer.prototype.done.called.should.equal(true)
+      it('should time the execution', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
       })
     })
   })
@@ -257,7 +235,7 @@ describe('DocumentManager', function () {
         this.RedisManager.getPreviousDocOps = sinon
           .stub()
           .callsArgWith(3, null, this.ops)
-        return this.DocumentManager.getDocAndRecentOps(
+        this.DocumentManager.getDocAndRecentOps(
           this.project_id,
           this.doc_id,
           this.fromVersion,
@@ -266,19 +244,19 @@ describe('DocumentManager', function () {
       })
 
       it('should get the doc', function () {
-        return this.DocumentManager.getDoc
+        this.DocumentManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should get the doc ops', function () {
-        return this.RedisManager.getPreviousDocOps
+        this.RedisManager.getPreviousDocOps
           .calledWith(this.doc_id, this.fromVersion, this.version)
           .should.equal(true)
       })
 
       it('should call the callback with the doc info', function () {
-        return this.callback
+        this.callback
           .calledWith(
             null,
             this.lines,
@@ -291,12 +269,12 @@ describe('DocumentManager', function () {
           .should.equal(true)
       })
 
-      return it('should time the execution', function () {
-        return this.Metrics.Timer.prototype.done.called.should.equal(true)
+      it('should time the execution', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
       })
     })
 
-    return describe('with no previous version specified', function () {
+    describe('with no previous version specified', function () {
       beforeEach(function () {
         this.DocumentManager.getDoc = sinon
           .stub()
@@ -312,7 +290,7 @@ describe('DocumentManager', function () {
         this.RedisManager.getPreviousDocOps = sinon
           .stub()
           .callsArgWith(3, null, this.ops)
-        return this.DocumentManager.getDocAndRecentOps(
+        this.DocumentManager.getDocAndRecentOps(
           this.project_id,
           this.doc_id,
           -1,
@@ -321,17 +299,17 @@ describe('DocumentManager', function () {
       })
 
       it('should get the doc', function () {
-        return this.DocumentManager.getDoc
+        this.DocumentManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should not need to get the doc ops', function () {
-        return this.RedisManager.getPreviousDocOps.called.should.equal(false)
+        this.RedisManager.getPreviousDocOps.called.should.equal(false)
       })
 
       it('should call the callback with the doc info', function () {
-        return this.callback
+        this.callback
           .calledWith(
             null,
             this.lines,
@@ -344,8 +322,8 @@ describe('DocumentManager', function () {
           .should.equal(true)
       })
 
-      return it('should time the execution', function () {
-        return this.Metrics.Timer.prototype.done.called.should.equal(true)
+      it('should time the execution', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
       })
     })
   })
@@ -365,21 +343,17 @@ describe('DocumentManager', function () {
             this.projectHistoryId,
             this.unflushedTime
           )
-        return this.DocumentManager.getDoc(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
+        this.DocumentManager.getDoc(this.project_id, this.doc_id, this.callback)
       })
 
       it('should get the doc from Redis', function () {
-        return this.RedisManager.getDoc
+        this.RedisManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should call the callback with the doc info', function () {
-        return this.callback
+        this.callback
           .calledWith(
             null,
             this.lines,
@@ -393,12 +367,12 @@ describe('DocumentManager', function () {
           .should.equal(true)
       })
 
-      return it('should time the execution', function () {
-        return this.Metrics.Timer.prototype.done.called.should.equal(true)
+      it('should time the execution', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
       })
     })
 
-    return describe('when the doc does not exist in Redis', function () {
+    describe('when the doc does not exist in Redis', function () {
       beforeEach(function () {
         this.RedisManager.getDoc = sinon
           .stub()
@@ -417,27 +391,23 @@ describe('DocumentManager', function () {
           )
         this.RedisManager.putDocInMemory = sinon.stub().yields()
         this.RedisManager.setHistoryType = sinon.stub().yields()
-        return this.DocumentManager.getDoc(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
+        this.DocumentManager.getDoc(this.project_id, this.doc_id, this.callback)
       })
 
       it('should try to get the doc from Redis', function () {
-        return this.RedisManager.getDoc
+        this.RedisManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should get the doc from the PersistenceManager', function () {
-        return this.PersistenceManager.getDoc
+        this.PersistenceManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should set the doc in Redis', function () {
-        return this.RedisManager.putDocInMemory
+        this.RedisManager.putDocInMemory
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -451,13 +421,13 @@ describe('DocumentManager', function () {
       })
 
       it('should set the history type in Redis', function () {
-        return this.RedisManager.setHistoryType
+        this.RedisManager.setHistoryType
           .calledWith(this.doc_id, this.projectHistoryType)
           .should.equal(true)
       })
 
       it('should call the callback with the doc info', function () {
-        return this.callback
+        this.callback
           .calledWith(
             null,
             this.lines,
@@ -471,14 +441,14 @@ describe('DocumentManager', function () {
           .should.equal(true)
       })
 
-      return it('should time the execution', function () {
-        return this.Metrics.Timer.prototype.done.called.should.equal(true)
+      it('should time the execution', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
       })
     })
   })
 
   describe('setDoc', function () {
-    return describe('with plain tex lines', function () {
+    describe('with plain tex lines', function () {
       beforeEach(function () {
         this.beforeLines = ['before', 'lines']
         this.afterLines = ['after', 'lines']
@@ -504,14 +474,12 @@ describe('DocumentManager', function () {
           .callsArgWith(2, null, this.ops)
         this.UpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null)
         this.DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
-        return (this.DocumentManager.flushAndDeleteDoc = sinon
-          .stub()
-          .callsArg(3))
+        this.DocumentManager.flushAndDeleteDoc = sinon.stub().callsArg(3)
       })
 
       describe('when already loaded', function () {
         beforeEach(function () {
-          return this.DocumentManager.setDoc(
+          this.DocumentManager.setDoc(
             this.project_id,
             this.doc_id,
             this.afterLines,
@@ -523,19 +491,19 @@ describe('DocumentManager', function () {
         })
 
         it('should get the current doc lines', function () {
-          return this.DocumentManager.getDoc
+          this.DocumentManager.getDoc
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
 
         it('should return a diff of the old and new lines', function () {
-          return this.DiffCodec.diffAsShareJsOp
+          this.DiffCodec.diffAsShareJsOp
             .calledWith(this.beforeLines, this.afterLines)
             .should.equal(true)
         })
 
         it('should apply the diff as a ShareJS op', function () {
-          return this.UpdateManager.applyUpdate
+          this.UpdateManager.applyUpdate
             .calledWith(this.project_id, this.doc_id, {
               doc: this.doc_id,
               v: this.version,
@@ -550,23 +518,23 @@ describe('DocumentManager', function () {
         })
 
         it('should flush the doc to Mongo', function () {
-          return this.DocumentManager.flushDocIfLoaded
+          this.DocumentManager.flushDocIfLoaded
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
 
         it('should not flush the project history', function () {
-          return this.HistoryManager.flushProjectChangesAsync.called.should.equal(
+          this.HistoryManager.flushProjectChangesAsync.called.should.equal(
             false
           )
         })
 
         it('should call the callback', function () {
-          return this.callback.calledWith(null).should.equal(true)
+          this.callback.calledWith(null).should.equal(true)
         })
 
-        return it('should time the execution', function () {
-          return this.Metrics.Timer.prototype.done.called.should.equal(true)
+        it('should time the execution', function () {
+          this.Metrics.Timer.prototype.done.called.should.equal(true)
         })
       })
 
@@ -583,7 +551,7 @@ describe('DocumentManager', function () {
               null,
               false
             )
-          return this.DocumentManager.setDoc(
+          this.DocumentManager.setDoc(
             this.project_id,
             this.doc_id,
             this.afterLines,
@@ -595,13 +563,13 @@ describe('DocumentManager', function () {
         })
 
         it('should flush and delete the doc from the doc updater', function () {
-          return this.DocumentManager.flushAndDeleteDoc
+          this.DocumentManager.flushAndDeleteDoc
             .calledWith(this.project_id, this.doc_id, {})
             .should.equal(true)
         })
 
-        return it('should not flush the project history', function () {
-          return this.HistoryManager.flushProjectChangesAsync
+        it('should not flush the project history', function () {
+          this.HistoryManager.flushProjectChangesAsync
             .calledWithExactly(this.project_id)
             .should.equal(true)
         })
@@ -609,7 +577,7 @@ describe('DocumentManager', function () {
 
       describe('without new lines', function () {
         beforeEach(function () {
-          return this.DocumentManager.setDoc(
+          this.DocumentManager.setDoc(
             this.project_id,
             this.doc_id,
             null,
@@ -621,17 +589,15 @@ describe('DocumentManager', function () {
         })
 
         it('should return the callback with an error', function () {
-          return this.callback.calledWith(
-            new Error('No lines were passed to setDoc')
-          )
+          this.callback.calledWith(new Error('No lines were passed to setDoc'))
         })
 
-        return it('should not try to get the doc lines', function () {
-          return this.DocumentManager.getDoc.called.should.equal(false)
+        it('should not try to get the doc lines', function () {
+          this.DocumentManager.getDoc.called.should.equal(false)
         })
       })
 
-      return describe('with the undoing flag', function () {
+      describe('with the undoing flag', function () {
         beforeEach(function () {
           // Copy ops so we don't interfere with other tests
           this.ops = [
@@ -641,7 +607,7 @@ describe('DocumentManager', function () {
           this.DiffCodec.diffAsShareJsOp = sinon
             .stub()
             .callsArgWith(2, null, this.ops)
-          return this.DocumentManager.setDoc(
+          this.DocumentManager.setDoc(
             this.project_id,
             this.doc_id,
             this.afterLines,
@@ -652,8 +618,8 @@ describe('DocumentManager', function () {
           )
         })
 
-        return it('should set the undo flag on each op', function () {
-          return Array.from(this.ops).map(op => op.u.should.equal(true))
+        it('should set the undo flag on each op', function () {
+          this.ops.map(op => op.u.should.equal(true))
         })
       })
     })
@@ -678,12 +644,12 @@ describe('DocumentManager', function () {
       this.RangesManager.acceptChanges = sinon
         .stub()
         .yields(null, this.updated_ranges)
-      return (this.RedisManager.updateDocument = sinon.stub().yields())
+      this.RedisManager.updateDocument = sinon.stub().yields()
     })
 
     describe('successfully with a single change', function () {
       beforeEach(function () {
-        return this.DocumentManager.acceptChanges(
+        this.DocumentManager.acceptChanges(
           this.project_id,
           this.doc_id,
           [this.change_id],
@@ -692,19 +658,19 @@ describe('DocumentManager', function () {
       })
 
       it("should get the document's current ranges", function () {
-        return this.DocumentManager.getDoc
+        this.DocumentManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should apply the accept change to the ranges', function () {
-        return this.RangesManager.acceptChanges
+        this.RangesManager.acceptChanges
           .calledWith([this.change_id], this.ranges)
           .should.equal(true)
       })
 
       it('should save the updated ranges', function () {
-        return this.RedisManager.updateDocument
+        this.RedisManager.updateDocument
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -717,14 +683,14 @@ describe('DocumentManager', function () {
           .should.equal(true)
       })
 
-      return it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+      it('should call the callback', function () {
+        this.callback.called.should.equal(true)
       })
     })
 
     describe('successfully with multiple changes', function () {
       beforeEach(function () {
-        return this.DocumentManager.acceptChanges(
+        this.DocumentManager.acceptChanges(
           this.project_id,
           this.doc_id,
           this.change_ids,
@@ -732,19 +698,19 @@ describe('DocumentManager', function () {
         )
       })
 
-      return it('should apply the accept change to the ranges', function () {
-        return this.RangesManager.acceptChanges
+      it('should apply the accept change to the ranges', function () {
+        this.RangesManager.acceptChanges
           .calledWith(this.change_ids, this.ranges)
           .should.equal(true)
       })
     })
 
-    return describe('when the doc is not found', function () {
+    describe('when the doc is not found', function () {
       beforeEach(function () {
         this.DocumentManager.getDoc = sinon
           .stub()
           .yields(null, null, null, null)
-        return this.DocumentManager.acceptChanges(
+        this.DocumentManager.acceptChanges(
           this.project_id,
           this.doc_id,
           [this.change_id],
@@ -753,11 +719,11 @@ describe('DocumentManager', function () {
       })
 
       it('should not save anything', function () {
-        return this.RedisManager.updateDocument.called.should.equal(false)
+        this.RedisManager.updateDocument.called.should.equal(false)
       })
 
-      return it('should call the callback with a not found error', function () {
-        return this.callback
+      it('should call the callback with a not found error', function () {
+        this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
       })
@@ -777,12 +743,12 @@ describe('DocumentManager', function () {
       this.RangesManager.deleteComment = sinon
         .stub()
         .yields(null, this.updated_ranges)
-      return (this.RedisManager.updateDocument = sinon.stub().yields())
+      this.RedisManager.updateDocument = sinon.stub().yields()
     })
 
     describe('successfully', function () {
       beforeEach(function () {
-        return this.DocumentManager.deleteComment(
+        this.DocumentManager.deleteComment(
           this.project_id,
           this.doc_id,
           this.comment_id,
@@ -791,19 +757,19 @@ describe('DocumentManager', function () {
       })
 
       it("should get the document's current ranges", function () {
-        return this.DocumentManager.getDoc
+        this.DocumentManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should delete the comment from the ranges', function () {
-        return this.RangesManager.deleteComment
+        this.RangesManager.deleteComment
           .calledWith(this.comment_id, this.ranges)
           .should.equal(true)
       })
 
       it('should save the updated ranges', function () {
-        return this.RedisManager.updateDocument
+        this.RedisManager.updateDocument
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -816,17 +782,17 @@ describe('DocumentManager', function () {
           .should.equal(true)
       })
 
-      return it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+      it('should call the callback', function () {
+        this.callback.called.should.equal(true)
       })
     })
 
-    return describe('when the doc is not found', function () {
+    describe('when the doc is not found', function () {
       beforeEach(function () {
         this.DocumentManager.getDoc = sinon
           .stub()
           .yields(null, null, null, null)
-        return this.DocumentManager.acceptChanges(
+        this.DocumentManager.acceptChanges(
           this.project_id,
           this.doc_id,
           [this.comment_id],
@@ -835,11 +801,11 @@ describe('DocumentManager', function () {
       })
 
       it('should not save anything', function () {
-        return this.RedisManager.updateDocument.called.should.equal(false)
+        this.RedisManager.updateDocument.called.should.equal(false)
       })
 
-      return it('should call the callback with a not found error', function () {
-        return this.callback
+      it('should call the callback with a not found error', function () {
+        this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
       })
@@ -848,7 +814,7 @@ describe('DocumentManager', function () {
 
   describe('getDocAndFlushIfOld', function () {
     beforeEach(function () {
-      return (this.DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2))
+      this.DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
     })
 
     describe('when the doc is in Redis', function () {
@@ -867,7 +833,7 @@ describe('DocumentManager', function () {
               Date.now() - 1e9,
               true
             )
-          return this.DocumentManager.getDocAndFlushIfOld(
+          this.DocumentManager.getDocAndFlushIfOld(
             this.project_id,
             this.doc_id,
             this.callback
@@ -875,25 +841,25 @@ describe('DocumentManager', function () {
         })
 
         it('should get the doc', function () {
-          return this.DocumentManager.getDoc
+          this.DocumentManager.getDoc
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
 
         it('should flush the doc', function () {
-          return this.DocumentManager.flushDocIfLoaded
+          this.DocumentManager.flushDocIfLoaded
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
 
-        return it('should call the callback with the lines and versions', function () {
-          return this.callback
+        it('should call the callback with the lines and versions', function () {
+          this.callback
             .calledWith(null, this.lines, this.version)
             .should.equal(true)
         })
       })
 
-      return describe("and has only changes that don't need to be flushed", function () {
+      describe("and has only changes that don't need to be flushed", function () {
         beforeEach(function () {
           this.DocumentManager.getDoc = sinon
             .stub()
@@ -907,7 +873,7 @@ describe('DocumentManager', function () {
               Date.now() - 100,
               true
             )
-          return this.DocumentManager.getDocAndFlushIfOld(
+          this.DocumentManager.getDocAndFlushIfOld(
             this.project_id,
             this.doc_id,
             this.callback
@@ -915,26 +881,24 @@ describe('DocumentManager', function () {
         })
 
         it('should get the doc', function () {
-          return this.DocumentManager.getDoc
+          this.DocumentManager.getDoc
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
 
         it('should not flush the doc', function () {
-          return this.DocumentManager.flushDocIfLoaded.called.should.equal(
-            false
-          )
+          this.DocumentManager.flushDocIfLoaded.called.should.equal(false)
         })
 
-        return it('should call the callback with the lines and versions', function () {
-          return this.callback
+        it('should call the callback with the lines and versions', function () {
+          this.callback
             .calledWith(null, this.lines, this.version)
             .should.equal(true)
         })
       })
     })
 
-    return describe('when the doc is not in Redis', function () {
+    describe('when the doc is not in Redis', function () {
       beforeEach(function () {
         this.DocumentManager.getDoc = sinon
           .stub()
@@ -947,7 +911,7 @@ describe('DocumentManager', function () {
             null,
             false
           )
-        return this.DocumentManager.getDocAndFlushIfOld(
+        this.DocumentManager.getDocAndFlushIfOld(
           this.project_id,
           this.doc_id,
           this.callback
@@ -955,17 +919,17 @@ describe('DocumentManager', function () {
       })
 
       it('should get the doc', function () {
-        return this.DocumentManager.getDoc
+        this.DocumentManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should not flush the doc', function () {
-        return this.DocumentManager.flushDocIfLoaded.called.should.equal(false)
+        this.DocumentManager.flushDocIfLoaded.called.should.equal(false)
       })
 
-      return it('should call the callback with the lines and versions', function () {
-        return this.callback
+      it('should call the callback with the lines and versions', function () {
+        this.callback
           .calledWith(null, this.lines, this.version)
           .should.equal(true)
       })
@@ -975,12 +939,12 @@ describe('DocumentManager', function () {
   describe('renameDoc', function () {
     beforeEach(function () {
       this.update = 'some-update'
-      return (this.RedisManager.renameDoc = sinon.stub().yields())
+      this.RedisManager.renameDoc = sinon.stub().yields()
     })
 
-    return describe('successfully', function () {
+    describe('successfully', function () {
       beforeEach(function () {
-        return this.DocumentManager.renameDoc(
+        this.DocumentManager.renameDoc(
           this.project_id,
           this.doc_id,
           this.user_id,
@@ -991,7 +955,7 @@ describe('DocumentManager', function () {
       })
 
       it('should rename the document', function () {
-        return this.RedisManager.renameDoc
+        this.RedisManager.renameDoc
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -1002,13 +966,13 @@ describe('DocumentManager', function () {
           .should.equal(true)
       })
 
-      return it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+      it('should call the callback', function () {
+        this.callback.called.should.equal(true)
       })
     })
   })
 
-  return describe('resyncDocContents', function () {
+  describe('resyncDocContents', function () {
     describe('when doc is loaded in redis', function () {
       beforeEach(function () {
         this.RedisManager.getDoc = sinon
@@ -1023,7 +987,7 @@ describe('DocumentManager', function () {
             this.projectHistoryId
           )
         this.ProjectHistoryRedisManager.queueResyncDocContent = sinon.stub()
-        return this.DocumentManager.resyncDocContents(
+        this.DocumentManager.resyncDocContents(
           this.project_id,
           this.doc_id,
           this.callback
@@ -1031,13 +995,13 @@ describe('DocumentManager', function () {
       })
 
       it('gets the doc contents from redis', function () {
-        return this.RedisManager.getDoc
+        this.RedisManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
-      return it('queues a resync doc content update', function () {
-        return this.ProjectHistoryRedisManager.queueResyncDocContent
+      it('queues a resync doc content update', function () {
+        this.ProjectHistoryRedisManager.queueResyncDocContent
           .calledWith(
             this.project_id,
             this.projectHistoryId,
@@ -1051,13 +1015,12 @@ describe('DocumentManager', function () {
       })
     })
 
-    return describe('when doc is not loaded in redis', function () {
+    describe('when doc is not loaded in redis', function () {
       beforeEach(function () {
         this.RedisManager.getDoc = sinon.stub().callsArgWith(2, null)
         this.PersistenceManager.getDoc = sinon
           .stub()
-          .callsArgWith(
-            2,
+          .yields(
             null,
             this.lines,
             this.version,
@@ -1066,7 +1029,7 @@ describe('DocumentManager', function () {
             this.projectHistoryId
           )
         this.ProjectHistoryRedisManager.queueResyncDocContent = sinon.stub()
-        return this.DocumentManager.resyncDocContents(
+        this.DocumentManager.resyncDocContents(
           this.project_id,
           this.doc_id,
           this.callback
@@ -1074,19 +1037,19 @@ describe('DocumentManager', function () {
       })
 
       it('tries to get the doc contents from redis', function () {
-        return this.RedisManager.getDoc
+        this.RedisManager.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('gets the doc contents from web', function () {
-        return this.PersistenceManager.getDoc
-          .calledWith(this.project_id, this.doc_id)
+        this.PersistenceManager.getDoc
+          .calledWith(this.project_id, this.doc_id, { peek: true })
           .should.equal(true)
       })
 
-      return it('queues a resync doc content update', function () {
-        return this.ProjectHistoryRedisManager.queueResyncDocContent
+      it('queues a resync doc content update', function () {
+        this.ProjectHistoryRedisManager.queueResyncDocContent
           .calledWith(
             this.project_id,
             this.projectHistoryId,

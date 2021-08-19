@@ -600,6 +600,7 @@ module.exports = DocumentManager = {
           return PersistenceManager.getDoc(
             project_id,
             doc_id,
+            { peek: true },
             function (
               error,
               lines,

@@ -1,14 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Docstore/DocstoreManager'
 const SandboxedModule = require('sandboxed-module')
@@ -37,7 +26,7 @@ describe('DocstoreManager', function () {
 
     this.project_id = 'project-id-123'
     this.doc_id = 'doc-id-123'
-    return (this.callback = sinon.stub())
+    this.callback = sinon.stub()
   })
 
   describe('deleteDoc', function () {
@@ -54,7 +43,7 @@ describe('DocstoreManager', function () {
         this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
-        return this.DocstoreManager.deleteDoc(
+        this.DocstoreManager.deleteDoc(
           this.project_id,
           this.doc_id,
           'wombat.tex',
@@ -64,7 +53,7 @@ describe('DocstoreManager', function () {
       })
 
       it('should delete the doc in the docstore api', function () {
-        return this.request.patch
+        this.request.patch
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
             json: { deleted: true, deletedAt: new Date(), name: 'wombat.tex' },
@@ -74,7 +63,7 @@ describe('DocstoreManager', function () {
       })
 
       it('should call the callback without an error', function () {
-        return this.callback.calledWith(null).should.equal(true)
+        this.callback.calledWith(null).should.equal(true)
       })
     })
 
@@ -83,7 +72,7 @@ describe('DocstoreManager', function () {
         this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.DocstoreManager.deleteDoc(
+        this.DocstoreManager.deleteDoc(
           this.project_id,
           this.doc_id,
           'main.tex',
@@ -93,7 +82,7 @@ describe('DocstoreManager', function () {
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Error)
@@ -113,7 +102,7 @@ describe('DocstoreManager', function () {
         this.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 404 }, '')
-        return this.DocstoreManager.deleteDoc(
+        this.DocstoreManager.deleteDoc(
           this.project_id,
           this.doc_id,
           'main.tex',
@@ -145,7 +134,7 @@ describe('DocstoreManager', function () {
       this.rev = 5
       this.version = 42
       this.ranges = { mock: 'ranges' }
-      return (this.modified = true)
+      this.modified = true
     })
 
     describe('with a successful response code', function () {
@@ -158,7 +147,7 @@ describe('DocstoreManager', function () {
             { statusCode: 204 },
             { modified: this.modified, rev: this.rev }
           )
-        return this.DocstoreManager.updateDoc(
+        this.DocstoreManager.updateDoc(
           this.project_id,
           this.doc_id,
           this.lines,
@@ -169,7 +158,7 @@ describe('DocstoreManager', function () {
       })
 
       it('should update the doc in the docstore api', function () {
-        return this.request.post
+        this.request.post
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
             timeout: 30 * 1000,
@@ -183,7 +172,7 @@ describe('DocstoreManager', function () {
       })
 
       it('should call the callback with the modified status and revision', function () {
-        return this.callback
+        this.callback
           .calledWith(null, this.modified, this.rev)
           .should.equal(true)
       })
@@ -194,7 +183,7 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.DocstoreManager.updateDoc(
+        this.DocstoreManager.updateDoc(
           this.project_id,
           this.doc_id,
           this.lines,
@@ -205,7 +194,7 @@ describe('DocstoreManager', function () {
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Error)
@@ -223,12 +212,12 @@ describe('DocstoreManager', function () {
 
   describe('getDoc', function () {
     beforeEach(function () {
-      return (this.doc = {
+      this.doc = {
         lines: (this.lines = ['mock', 'doc', 'lines']),
         rev: (this.rev = 5),
         version: (this.version = 42),
         ranges: (this.ranges = { mock: 'ranges' }),
-      })
+      }
     })
 
     describe('with a successful response code', function () {
@@ -236,25 +225,19 @@ describe('DocstoreManager', function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, this.doc)
-        return this.DocstoreManager.getDoc(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
+        this.DocstoreManager.getDoc(this.project_id, this.doc_id, this.callback)
       })
 
       it('should get the doc from the docstore api', function () {
-        return this.request.get
-          .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
-            timeout: 30 * 1000,
-            json: true,
-          })
-          .should.equal(true)
+        this.request.get.should.have.been.calledWith({
+          url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
+          timeout: 30 * 1000,
+          json: true,
+        })
       })
 
       it('should call the callback with the lines, version and rev', function () {
-        return this.callback
+        this.callback
           .calledWith(null, this.lines, this.rev, this.version, this.ranges)
           .should.equal(true)
       })
@@ -265,15 +248,11 @@ describe('DocstoreManager', function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.DocstoreManager.getDoc(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
+        this.DocstoreManager.getDoc(this.project_id, this.doc_id, this.callback)
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Error)
@@ -293,7 +272,7 @@ describe('DocstoreManager', function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, this.doc)
-        return this.DocstoreManager.getDoc(
+        this.DocstoreManager.getDoc(
           this.project_id,
           this.doc_id,
           { include_deleted: true },
@@ -302,19 +281,40 @@ describe('DocstoreManager', function () {
       })
 
       it('should get the doc from the docstore api (including deleted)', function () {
-        return this.request.get
-          .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}?include_deleted=true`,
-            timeout: 30 * 1000,
-            json: true,
-          })
-          .should.equal(true)
+        this.request.get.should.have.been.calledWith({
+          url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
+          qs: { include_deleted: 'true' },
+          timeout: 30 * 1000,
+          json: true,
+        })
       })
 
       it('should call the callback with the lines, version and rev', function () {
-        return this.callback
+        this.callback
           .calledWith(null, this.lines, this.rev, this.version, this.ranges)
           .should.equal(true)
+      })
+    })
+
+    describe('with peek=true', function () {
+      beforeEach(function () {
+        this.request.get = sinon
+          .stub()
+          .callsArgWith(1, null, { statusCode: 204 }, this.doc)
+        this.DocstoreManager.getDoc(
+          this.project_id,
+          this.doc_id,
+          { peek: true },
+          this.callback
+        )
+      })
+
+      it('should call the docstore peek url', function () {
+        this.request.get.should.have.been.calledWith({
+          url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}/peek`,
+          timeout: 30 * 1000,
+          json: true,
+        })
       })
     })
 
@@ -323,15 +323,11 @@ describe('DocstoreManager', function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 404 }, '')
-        return this.DocstoreManager.getDoc(
-          this.project_id,
-          this.doc_id,
-          this.callback
-        )
+        this.DocstoreManager.getDoc(this.project_id, this.doc_id, this.callback)
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Errors.NotFoundError)
@@ -353,11 +349,11 @@ describe('DocstoreManager', function () {
             { statusCode: 204 },
             (this.docs = [{ _id: 'mock-doc-id' }])
           )
-        return this.DocstoreManager.getAllDocs(this.project_id, this.callback)
+        this.DocstoreManager.getAllDocs(this.project_id, this.callback)
       })
 
       it('should get all the project docs in the docstore api', function () {
-        return this.request.get
+        this.request.get
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc`,
             timeout: 30 * 1000,
@@ -367,7 +363,7 @@ describe('DocstoreManager', function () {
       })
 
       it('should call the callback with the docs', function () {
-        return this.callback.calledWith(null, this.docs).should.equal(true)
+        this.callback.calledWith(null, this.docs).should.equal(true)
       })
     })
 
@@ -376,11 +372,11 @@ describe('DocstoreManager', function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.DocstoreManager.getAllDocs(this.project_id, this.callback)
+        this.DocstoreManager.getAllDocs(this.project_id, this.callback)
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Error)
@@ -473,11 +469,11 @@ describe('DocstoreManager', function () {
             { statusCode: 204 },
             (this.docs = [{ _id: 'mock-doc-id', ranges: 'mock-ranges' }])
           )
-        return this.DocstoreManager.getAllRanges(this.project_id, this.callback)
+        this.DocstoreManager.getAllRanges(this.project_id, this.callback)
       })
 
       it('should get all the project doc ranges in the docstore api', function () {
-        return this.request.get
+        this.request.get
           .calledWith({
             url: `${this.settings.apis.docstore.url}/project/${this.project_id}/ranges`,
             timeout: 30 * 1000,
@@ -487,7 +483,7 @@ describe('DocstoreManager', function () {
       })
 
       it('should call the callback with the docs', function () {
-        return this.callback.calledWith(null, this.docs).should.equal(true)
+        this.callback.calledWith(null, this.docs).should.equal(true)
       })
     })
 
@@ -496,11 +492,11 @@ describe('DocstoreManager', function () {
         this.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
-        return this.DocstoreManager.getAllRanges(this.project_id, this.callback)
+        this.DocstoreManager.getAllRanges(this.project_id, this.callback)
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Error)
@@ -522,14 +518,11 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
-        return this.DocstoreManager.archiveProject(
-          this.project_id,
-          this.callback
-        )
+        this.DocstoreManager.archiveProject(this.project_id, this.callback)
       })
 
       it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+        this.callback.called.should.equal(true)
       })
     })
 
@@ -538,14 +531,11 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
-        return this.DocstoreManager.archiveProject(
-          this.project_id,
-          this.callback
-        )
+        this.DocstoreManager.archiveProject(this.project_id, this.callback)
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Error)
@@ -567,14 +557,11 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
-        return this.DocstoreManager.unarchiveProject(
-          this.project_id,
-          this.callback
-        )
+        this.DocstoreManager.unarchiveProject(this.project_id, this.callback)
       })
 
       it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+        this.callback.called.should.equal(true)
       })
     })
 
@@ -583,14 +570,11 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
-        return this.DocstoreManager.unarchiveProject(
-          this.project_id,
-          this.callback
-        )
+        this.DocstoreManager.unarchiveProject(this.project_id, this.callback)
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Error)
@@ -612,14 +596,11 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
-        return this.DocstoreManager.destroyProject(
-          this.project_id,
-          this.callback
-        )
+        this.DocstoreManager.destroyProject(this.project_id, this.callback)
       })
 
       it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
+        this.callback.called.should.equal(true)
       })
     })
 
@@ -628,14 +609,11 @@ describe('DocstoreManager', function () {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
-        return this.DocstoreManager.destroyProject(
-          this.project_id,
-          this.callback
-        )
+        this.DocstoreManager.destroyProject(this.project_id, this.callback)
       })
 
       it('should call the callback with an error', function () {
-        return this.callback
+        this.callback
           .calledWith(
             sinon.match
               .instanceOf(Error)
