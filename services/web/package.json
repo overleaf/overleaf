@@ -49,7 +49,7 @@
     "@babel/preset-react": "^7.14.5",
     "@overleaf/metrics": "^3.5.1",
     "@overleaf/o-error": "^3.3.1",
-    "@overleaf/object-persistor": "https://github.com/overleaf/object-persistor/archive/8fbc9ed03206bfb54368578d22b7ac4f285baa25.tar.gz",
+    "@overleaf/object-persistor": "^1.0.1",
     "@overleaf/redis-wrapper": "^2.0.0",
     "@overleaf/settings": "^2.1.1",
     "@pollyjs/adapter-node-http": "^4.2.1",
