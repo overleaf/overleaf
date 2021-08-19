@@ -7,6 +7,7 @@ import { useShareProjectContext } from './share-project-modal'
 import { setProjectAccessLevel } from '../utils/api'
 import CopyLink from '../../../shared/components/copy-link'
 import { useProjectContext } from '../../../shared/context/project-context'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
 export default function LinkSharing() {
   const [inflight, setInflight] = useState(false)
@@ -75,7 +76,10 @@ function PrivateSharing({ setAccessLevel, inflight }) {
           type="button"
           bsStyle="link"
           className="btn-inline-link"
-          onClick={() => setAccessLevel('tokenBased')}
+          onClick={() => {
+            setAccessLevel('tokenBased')
+            eventTracking.sendMB('link-sharing-click')
+          }}
           disabled={inflight}
         >
           <Trans i18nKey="turn_on_link_sharing" />

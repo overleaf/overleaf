@@ -981,6 +981,7 @@
   "share_with_your_collabs": "Share with your collaborators",
   "share": "Share",
   "need_to_upgrade_for_more_collabs": "You need to upgrade your account to add more collaborators",
+  "need_to_upgrade_for_more_collabs_variant": "You have reached the maximum number of collaborators. Upgrade your account to add more.",
   "make_project_public": "Make project public",
   "make_project_public_consequences": "If you make your project public then anyone with the URL will be able to access it.",
   "allow_public_editing": "Allow public editing",

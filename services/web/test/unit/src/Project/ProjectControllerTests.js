@@ -130,6 +130,14 @@ describe('ProjectController', function () {
       },
       getTestSegmentation: sinon.stub().yields(null, { enabled: false }),
     }
+    this.SplitTestV2Handler = {
+      promises: {
+        getAssignment: sinon.stub().resolves({ active: false }),
+        assignInLocalsContext: sinon.stub().resolves(),
+      },
+      getAssignment: sinon.stub().yields(null, { active: false }),
+      assignInLocalsContext: sinon.stub().yields(null),
+    }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -137,6 +145,7 @@ describe('ProjectController', function () {
         '@overleaf/settings': this.settings,
         '@overleaf/metrics': this.Metrics,
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
+        '../SplitTests/SplitTestV2Handler': this.SplitTestV2Handler,
         './ProjectDeleter': this.ProjectDeleter,
         './ProjectDuplicator': this.ProjectDuplicator,
         './ProjectCreationHandler': this.ProjectCreationHandler,

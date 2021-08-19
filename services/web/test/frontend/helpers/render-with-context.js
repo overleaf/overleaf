@@ -10,6 +10,7 @@ import { ChatProvider } from '../../../frontend/js/features/chat/context/chat-co
 import { IdeProvider } from '../../../frontend/js/shared/context/ide-context'
 import { get } from 'lodash'
 import { ProjectProvider } from '../../../frontend/js/shared/context/project-context'
+import { SplitTestProvider } from '../../../frontend/js/shared/context/split-test-context'
 
 export function EditorProviders({
   user = { id: '123abd' },
@@ -53,15 +54,17 @@ export function EditorProviders({
   window._ide = { $scope, socket }
 
   return (
-    <IdeProvider ide={window._ide}>
-      <UserProvider>
-        <ProjectProvider>
-          <EditorProvider settings={{}}>
-            <LayoutProvider>{children}</LayoutProvider>
-          </EditorProvider>
-        </ProjectProvider>
-      </UserProvider>
-    </IdeProvider>
+    <SplitTestProvider>
+      <IdeProvider ide={window._ide}>
+        <UserProvider>
+          <ProjectProvider>
+            <EditorProvider settings={{}}>
+              <LayoutProvider>{children}</LayoutProvider>
+            </EditorProvider>
+          </ProjectProvider>
+        </UserProvider>
+      </IdeProvider>
+    </SplitTestProvider>
   )
 }
 

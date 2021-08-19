@@ -81,6 +81,14 @@ async function getAssignment(userId, splitTestName, options) {
   }
 }
 
+async function assignInLocalsContext(res, userId, splitTestName, options) {
+  const assignment = await getAssignment(userId, splitTestName, options)
+  if (!res.locals.splitTestVariants) {
+    res.locals.splitTestVariants = {}
+  }
+  res.locals.splitTestVariants[splitTestName] = assignment.variant
+}
+
 async function _getAssignmentMetadata(userId, splitTest) {
   const currentVersion = splitTest.getCurrentVersion()
   const phase = currentVersion.phase
@@ -171,7 +179,9 @@ async function _getUser(id) {
 
 module.exports = {
   getAssignment: callbackify(getAssignment),
+  assignInLocalsContext: callbackify(assignInLocalsContext),
   promises: {
     getAssignment,
+    assignInLocalsContext,
   },
 }

@@ -38,6 +38,7 @@ const UserController = require('../User/UserController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Modules = require('../../infrastructure/Modules')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const SplitTestV2Handler = require('../SplitTests/SplitTestV2Handler')
 const { getNewLogsUIVariantForUser } = require('../Helpers/NewLogsUI')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
@@ -725,23 +726,36 @@ const ProjectController = {
             }
           )
         },
+        sharingModalSplitTest(cb) {
+          SplitTestV2Handler.assignInLocalsContext(
+            res,
+            userId,
+            'project-share-modal-paywall',
+            err => {
+              cb(err, null)
+            }
+          )
+        },
       },
-      (err, results) => {
+      (
+        err,
+        {
+          project,
+          user,
+          subscription,
+          isTokenMember,
+          brandVariation,
+          pdfCachingFeatureFlag,
+        }
+      ) => {
         if (err != null) {
           OError.tag(err, 'error getting details for project page')
           return next(err)
         }
-        const { project } = results
-        const { user } = results
-        const { subscription } = results
-        const { brandVariation } = results
-        const { pdfCachingFeatureFlag } = results
-
         const anonRequestToken = TokenAccessHandler.getRequestToken(
           req,
           projectId
         )
-        const { isTokenMember } = results
         const allowedImageNames = ProjectHelper.getAllowedImagesForUser(
           sessionUser
         )
