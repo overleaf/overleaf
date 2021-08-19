@@ -20,7 +20,7 @@ export default function SymbolPaletteInfoLink() {
         className="symbol-palette-info-link"
         href="https://www.overleaf.com/learn/latex/List_of_Greek_letters_and_math_symbols"
         target="_blank"
-        rel="noopener noreferer"
+        rel="noopener noreferrer"
       >
         <span className="info-badge" />
       </Button>

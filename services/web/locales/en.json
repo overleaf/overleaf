@@ -480,6 +480,7 @@
   "tooltip_hide_filetree": "Click to hide the file-tree",
   "tooltip_show_filetree": "Click to show the file-tree",
   "cannot_verify_user_not_robot": "Sorry, we could not verify that you are not a robot. Please check that Google reCAPTCHA is not being blocked by an ad blocker or firewall.",
+  "recaptcha_conditions": "This site is protected by reCAPTCHA and the Google <1>Privacy Policy</1> and <2>Terms of Service</2> apply.",
   "uncompiled_changes": "Uncompiled Changes",
   "code_check_failed": "Code check failed",
   "code_check_failed_explanation": "Your code has errors that need to be fixed before the auto-compile can run",

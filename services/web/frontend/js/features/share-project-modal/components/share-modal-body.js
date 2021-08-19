@@ -7,6 +7,7 @@ import ViewMember from './view-member'
 import OwnerInfo from './owner-info'
 import SendInvitesNotice from './send-invites-notice'
 import { useProjectContext } from '../../../shared/context/project-context'
+import RecaptchaConditions from '../../../shared/components/recaptcha-conditions'
 
 export default function ShareModalBody() {
   const { isAdmin } = useShareProjectContext()
@@ -32,6 +33,9 @@ export default function ShareModalBody() {
       ))}
 
       {isAdmin ? <SendInvites /> : <SendInvitesNotice />}
+      {!window.ExposedSettings.recaptchaDisabled?.invite && (
+        <RecaptchaConditions />
+      )}
     </>
   )
 }
