@@ -2,7 +2,7 @@
 
 const Helpers = require('./lib/helpers')
 
-exports.tags = ['server-ce', 'server-pro', 'saas']
+exports.tags = ['saas']
 
 const indexes = [
   {
