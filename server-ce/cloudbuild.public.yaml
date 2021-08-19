@@ -1,0 +1,56 @@
+---
+
+steps:
+  - id: build-base
+    name: gcr.io/overleaf-ops/cloud-builder
+    dir: copybara/public/repo/server-ce
+    args:
+      - 'build-base'
+      - 'SHARELATEX_BASE_CACHE=${_IMAGE_BASE_CACHE}'
+      - 'SHARELATEX_BASE_TAG=${_IMAGE_BASE}'
+  - id: build-community
+    name: gcr.io/overleaf-ops/cloud-builder
+    dir: copybara/public/repo/server-ce
+    args:
+      - build-community
+      - 'SHARELATEX_BASE_CACHE=${_IMAGE_BASE_CACHE}'
+      - 'SHARELATEX_BASE_TAG=${_IMAGE_BASE}'
+      - 'SHARELATEX_TAG=${_IMAGE_TAG}'
+  - id: tag_master_latest_base
+    name: gcr.io/cloud-builders/docker
+    args:
+      - '-e'
+      - '-c'
+      - >-
+        if [ ${BRANCH_NAME} == main ]; then
+          docker tag ${_IMAGE_BASE} ${_IMAGE_BASE_CACHE};
+          docker push ${_IMAGE_BASE_CACHE};
+        fi
+    entrypoint: /bin/bash
+  - id: tag_master_latest
+    name: gcr.io/cloud-builders/docker
+    args:
+      - '-e'
+      - '-c'
+      - >-
+        if [ $BRANCH_NAME == main ]; then
+          docker tag ${_IMAGE_TAG} ${_IMAGE_CE};
+          docker push ${_IMAGE_CE};
+        fi
+    entrypoint: /bin/bash
+timeout: 3600s
+options:
+  env:
+    - 'BRANCH_NAME=${BRANCH_NAME}'
+images:
+  - '${_IMAGE_BASE}'
+  - '${_IMAGE_TAG}'
+substitutions:
+  _IMAGE_BASE: 'gcr.io/overleaf-ops/sharelatex-base:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
+  _IMAGE_BASE_CACHE: 'gcr.io/overleaf-ops/sharelatex-base:latest'
+  _IMAGE_CE: 'gcr.io/overleaf-ops/sharelatex:latest'
+  _IMAGE_TAG: 'gcr.io/overleaf-ops/sharelatex:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
+tags:
+  - 'overleaf-public'
+  - '${BRANCH_NAME}'
+  - '${SHORT_SHA}'
