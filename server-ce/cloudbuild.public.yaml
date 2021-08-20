@@ -3,14 +3,14 @@
 steps:
   - id: build-base
     name: gcr.io/overleaf-ops/cloud-builder
-    dir: copybara/public/repo/server-ce
+    dir: server-ce
     args:
       - 'build-base'
       - 'SHARELATEX_BASE_CACHE=${_IMAGE_BASE_CACHE}'
       - 'SHARELATEX_BASE_TAG=${_IMAGE_BASE}'
   - id: build-community
     name: gcr.io/overleaf-ops/cloud-builder
-    dir: copybara/public/repo/server-ce
+    dir: server-ce
     args:
       - build-community
       - 'SHARELATEX_BASE_CACHE=${_IMAGE_BASE_CACHE}'
