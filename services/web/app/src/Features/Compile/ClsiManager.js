@@ -132,7 +132,7 @@ const ClsiManager = {
       url: compilerUrl,
       method: 'POST',
     }
-    ClsiManager._makeRequest(projectId, userId, opts, callback)
+    ClsiManager._makeRequest(projectId, opts, callback)
   },
 
   deleteAuxFiles(projectId, userId, options, clsiserverid, callback) {
@@ -150,14 +150,13 @@ const ClsiManager = {
     }
     ClsiManager._makeRequestWithClsiServerId(
       projectId,
-      userId,
       opts,
       clsiserverid,
       clsiErr => {
         // always clear the project state from the docupdater, even if there
         // was a problem with the request to the clsi
         DocumentUpdaterHandler.clearProjectState(projectId, docUpdaterErr => {
-          ClsiCookieManager.clearServerId(projectId, userId, redisError => {
+          ClsiCookieManager.clearServerId(projectId, redisError => {
             if (clsiErr) {
               return callback(
                 OError.tag(clsiErr, 'Failed to delete aux files', { projectId })
@@ -195,7 +194,7 @@ const ClsiManager = {
     }
     if (options.forceNewClsiServer) {
       // Clear clsi cookie, then try again
-      return ClsiCookieManager.clearServerId(projectId, userId, err => {
+      return ClsiCookieManager.clearServerId(projectId, err => {
         if (err) {
           return callback(err)
         }
@@ -271,13 +270,7 @@ const ClsiManager = {
     )
   },
 
-  _makeRequestWithClsiServerId(
-    projectId,
-    userId,
-    opts,
-    clsiserverid,
-    callback
-  ) {
+  _makeRequestWithClsiServerId(projectId, opts, clsiserverid, callback) {
     if (clsiserverid) {
       // ignore cookies and newBackend, go straight to the clsi node
       opts.qs = Object.assign({ clsiserverid }, opts.qs)
@@ -290,18 +283,17 @@ const ClsiManager = {
         callback(null, response, body)
       })
     } else {
-      ClsiManager._makeRequest(projectId, userId, opts, callback)
+      ClsiManager._makeRequest(projectId, opts, callback)
     }
   },
 
-  _makeRequest(projectId, userId, opts, callback) {
+  _makeRequest(projectId, opts, callback) {
     async.series(
       {
         currentBackend(cb) {
           const startTime = new Date()
           ClsiCookieManager.getCookieJar(
             projectId,
-            userId,
             (err, jar, clsiServerId) => {
               if (err != null) {
                 return callback(
@@ -326,7 +318,6 @@ const ClsiManager = {
                 )
                 ClsiCookieManager.setServerId(
                   projectId,
-                  userId,
                   response,
                   (err, newClsiServerId) => {
                     if (err != null) {
@@ -359,7 +350,6 @@ const ClsiManager = {
           const startTime = new Date()
           ClsiManager._makeNewBackendRequest(
             projectId,
-            userId,
             opts,
             (err, response, body) => {
               if (err != null) {
@@ -406,7 +396,7 @@ const ClsiManager = {
     )
   },
 
-  _makeNewBackendRequest(projectId, userId, baseOpts, callback) {
+  _makeNewBackendRequest(projectId, baseOpts, callback) {
     if (Settings.apis.clsi_new == null || Settings.apis.clsi_new.url == null) {
       return callback()
     }
@@ -417,47 +407,42 @@ const ClsiManager = {
         Settings.apis.clsi_new.url
       ),
     }
-    NewBackendCloudClsiCookieManager.getCookieJar(
-      projectId,
-      userId,
-      (err, jar) => {
+    NewBackendCloudClsiCookieManager.getCookieJar(projectId, (err, jar) => {
+      if (err != null) {
+        return callback(
+          OError.tag(err, 'error getting cookie jar for CLSI request', {
+            projectId,
+          })
+        )
+      }
+      opts.jar = jar
+      const timer = new Metrics.Timer('compile.newBackend')
+      request(opts, (err, response, body) => {
+        timer.done()
         if (err != null) {
           return callback(
-            OError.tag(err, 'error getting cookie jar for CLSI request', {
+            OError.tag(err, 'error making request to new CLSI', {
               projectId,
+              opts,
             })
           )
         }
-        opts.jar = jar
-        const timer = new Metrics.Timer('compile.newBackend')
-        request(opts, (err, response, body) => {
-          timer.done()
-          if (err != null) {
-            return callback(
-              OError.tag(err, 'error making request to new CLSI', {
-                projectId,
-                opts,
-              })
-            )
-          }
-          NewBackendCloudClsiCookieManager.setServerId(
-            projectId,
-            userId,
-            response,
-            err => {
-              if (err != null) {
-                return callback(
-                  OError.tag(err, 'error setting server id on new backend', {
-                    projectId,
-                  })
-                )
-              }
-              callback(null, response, body)
+        NewBackendCloudClsiCookieManager.setServerId(
+          projectId,
+          response,
+          err => {
+            if (err != null) {
+              return callback(
+                OError.tag(err, 'error setting server id on new backend', {
+                  projectId,
+                })
+              )
             }
-          )
-        })
-      }
-    )
+            callback(null, response, body)
+          }
+        )
+      })
+    })
   },
 
   _getCompilerUrl(compileGroup, projectId, userId, action) {
@@ -486,7 +471,6 @@ const ClsiManager = {
     }
     ClsiManager._makeRequest(
       projectId,
-      userId,
       opts,
       (err, response, body, clsiServerId) => {
         if (err != null) {
@@ -661,7 +645,7 @@ const ClsiManager = {
 
   getOutputFileStream(projectId, userId, buildId, outputFilePath, callback) {
     const url = `${Settings.apis.clsi.url}/project/${projectId}/user/${userId}/build/${buildId}/output/${outputFilePath}`
-    ClsiCookieManager.getCookieJar(projectId, userId, (err, jar) => {
+    ClsiCookieManager.getCookieJar(projectId, (err, jar) => {
       if (err != null) {
         return callback(
           OError.tag(err, 'Failed to get cookie jar', {
@@ -892,7 +876,6 @@ const ClsiManager = {
       }
       ClsiManager._makeRequestWithClsiServerId(
         projectId,
-        userId,
         opts,
         clsiserverid,
         (err, response, body) => {

@@ -29,50 +29,43 @@ const clsiCookiesEnabled =
 
 module.exports = function (backendGroup) {
   return {
-    buildKey(project_id, user_id) {
+    buildKey(project_id) {
       if (backendGroup != null) {
-        return `clsiserver:${backendGroup}:${project_id}:${user_id}`
+        return `clsiserver:${backendGroup}:${project_id}`
       } else {
-        return `clsiserver:${project_id}:${user_id}`
+        return `clsiserver:${project_id}`
       }
     },
 
-    _getServerId(project_id, user_id, callback) {
+    _getServerId(project_id, callback) {
       if (callback == null) {
         callback = function (err, serverId) {}
       }
-      return rclient.get(
-        this.buildKey(project_id, user_id),
-        (err, serverId) => {
-          if (err != null) {
-            return callback(err)
-          }
-          if (serverId == null || serverId === '') {
-            return this._populateServerIdViaRequest(
-              project_id,
-              user_id,
-              callback
-            )
-          } else {
-            return callback(null, serverId)
-          }
+      return rclient.get(this.buildKey(project_id), (err, serverId) => {
+        if (err != null) {
+          return callback(err)
         }
-      )
+        if (serverId == null || serverId === '') {
+          return this._populateServerIdViaRequest(project_id, callback)
+        } else {
+          return callback(null, serverId)
+        }
+      })
     },
 
-    _populateServerIdViaRequest(project_id, user_id, callback) {
+    _populateServerIdViaRequest(project_id, callback) {
       if (callback == null) {
         callback = function (err, serverId) {}
       }
       const url = `${Settings.apis.clsi.url}/project/${project_id}/status`
-      request.post(url, (err, res, body) => {
+      return request.post(url, (err, res, body) => {
         if (err != null) {
           OError.tag(err, 'error getting initial server id for project', {
             project_id,
           })
           return callback(err)
         }
-        this.setServerId(project_id, user_id, res, function (err, serverId) {
+        return this.setServerId(project_id, res, function (err, serverId) {
           if (err != null) {
             logger.warn(
               { err, project_id },
@@ -93,7 +86,7 @@ module.exports = function (backendGroup) {
       return cookies != null ? cookies[Settings.clsiCookie.key] : undefined
     },
 
-    setServerId(project_id, user_id, response, callback) {
+    setServerId(project_id, response, callback) {
       if (callback == null) {
         callback = function (err, serverId) {}
       }
@@ -103,55 +96,50 @@ module.exports = function (backendGroup) {
       const serverId = this._parseServerIdFromResponse(response)
       if (serverId == null) {
         // We don't get a cookie back if it hasn't changed
-        rclient.expire(
-          this.buildKey(project_id, user_id),
+        return rclient.expire(
+          this.buildKey(project_id),
           Settings.clsiCookie.ttl,
           err => callback(err, undefined)
         )
       }
       if (rclient_secondary != null) {
-        this._setServerIdInRedis(
-          rclient_secondary,
-          project_id,
-          user_id,
-          serverId
-        )
+        this._setServerIdInRedis(rclient_secondary, project_id, serverId)
       }
-      this._setServerIdInRedis(rclient, project_id, user_id, serverId, err =>
+      return this._setServerIdInRedis(rclient, project_id, serverId, err =>
         callback(err, serverId)
       )
     },
 
-    _setServerIdInRedis(rclient, project_id, user_id, serverId, callback) {
+    _setServerIdInRedis(rclient, project_id, serverId, callback) {
       if (callback == null) {
         callback = function (err) {}
       }
       rclient.setex(
-        this.buildKey(project_id, user_id),
+        this.buildKey(project_id),
         Settings.clsiCookie.ttl,
         serverId,
         callback
       )
     },
 
-    clearServerId(project_id, user_id, callback) {
+    clearServerId(project_id, callback) {
       if (callback == null) {
         callback = function (err) {}
       }
       if (!clsiCookiesEnabled) {
         return callback()
       }
-      return rclient.del(this.buildKey(project_id, user_id), callback)
+      return rclient.del(this.buildKey(project_id), callback)
     },
 
-    getCookieJar(project_id, user_id, callback) {
+    getCookieJar(project_id, callback) {
       if (callback == null) {
         callback = function (err, jar, clsiServerId) {}
       }
       if (!clsiCookiesEnabled) {
         return callback(null, request.jar(), undefined)
       }
-      return this._getServerId(project_id, user_id, (err, serverId) => {
+      return this._getServerId(project_id, (err, serverId) => {
         if (err != null) {
           OError.tag(err, 'error getting server id', {
             project_id,

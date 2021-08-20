@@ -572,11 +572,10 @@ module.exports = CompileController = {
 
 function _getPersistenceOptions(req, projectId, callback) {
   const { clsiserverid } = req.query
-  const user_id = SessionManager.getLoggedInUserId(req)
   if (clsiserverid && typeof clsiserverid === 'string') {
     callback(null, { qs: { clsiserverid } })
   } else {
-    ClsiCookieManager.getCookieJar(projectId, user_id, (err, jar) => {
+    ClsiCookieManager.getCookieJar(projectId, (err, jar) => {
       callback(err, { jar })
     })
   }
