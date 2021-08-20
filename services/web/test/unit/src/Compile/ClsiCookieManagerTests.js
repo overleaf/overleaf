@@ -25,7 +25,8 @@ describe('ClsiCookieManager', function () {
       get: sinon.stub(),
       setex: sinon.stub().callsArg(3),
     }
-    this.project_id = '123423431321'
+    this.project_id = '123423431321-proj-id'
+    this.user_id = 'abc-user-id'
     this.request = {
       post: sinon.stub(),
       cookie: realRequst.cookie,
@@ -65,9 +66,10 @@ describe('ClsiCookieManager', function () {
       this.redis.get.callsArgWith(1, null, 'clsi-7')
       return this.ClsiCookieManager._getServerId(
         this.project_id,
+        this.user_id,
         (err, serverId) => {
           this.redis.get
-            .calledWith(`clsiserver:${this.project_id}`)
+            .calledWith(`clsiserver:${this.project_id}:${this.user_id}`)
             .should.equal(true)
           serverId.should.equal('clsi-7')
           return done()
@@ -78,13 +80,14 @@ describe('ClsiCookieManager', function () {
     it('should _populateServerIdViaRequest if no key is found', function (done) {
       this.ClsiCookieManager._populateServerIdViaRequest = sinon
         .stub()
-        .callsArgWith(1)
+        .callsArgWith(2)
       this.redis.get.callsArgWith(1, null)
       return this.ClsiCookieManager._getServerId(
         this.project_id,
+        this.user_id,
         (err, serverId) => {
           this.ClsiCookieManager._populateServerIdViaRequest
-            .calledWith(this.project_id)
+            .calledWith(this.project_id, this.user_id)
             .should.equal(true)
           return done()
         }
@@ -94,13 +97,14 @@ describe('ClsiCookieManager', function () {
     it('should _populateServerIdViaRequest if no key is blank', function (done) {
       this.ClsiCookieManager._populateServerIdViaRequest = sinon
         .stub()
-        .callsArgWith(1)
+        .callsArgWith(2)
       this.redis.get.callsArgWith(1, null, '')
       return this.ClsiCookieManager._getServerId(
         this.project_id,
+        this.user_id,
         (err, serverId) => {
           this.ClsiCookieManager._populateServerIdViaRequest
-            .calledWith(this.project_id)
+            .calledWith(this.project_id, this.user_id)
             .should.equal(true)
           return done()
         }
@@ -114,16 +118,18 @@ describe('ClsiCookieManager', function () {
       this.request.post.callsArgWith(1, null, this.response)
       return (this.ClsiCookieManager.setServerId = sinon
         .stub()
-        .callsArgWith(2, null, 'clsi-9'))
+        .callsArgWith(3, null, 'clsi-9'))
     })
 
     it('should make a request to the clsi', function (done) {
       return this.ClsiCookieManager._populateServerIdViaRequest(
         this.project_id,
+        this.user_id,
         (err, serverId) => {
           const args = this.ClsiCookieManager.setServerId.args[0]
           args[0].should.equal(this.project_id)
-          args[1].should.deep.equal(this.response)
+          args[1].should.equal(this.user_id)
+          args[2].should.deep.equal(this.response)
           return done()
         }
       )
@@ -132,6 +138,7 @@ describe('ClsiCookieManager', function () {
     it('should return the server id', function (done) {
       return this.ClsiCookieManager._populateServerIdViaRequest(
         this.project_id,
+        this.user_id,
         (err, serverId) => {
           serverId.should.equal('clsi-9')
           return done()
@@ -151,11 +158,12 @@ describe('ClsiCookieManager', function () {
     it('should set the server id with a ttl', function (done) {
       return this.ClsiCookieManager.setServerId(
         this.project_id,
+        this.user_id,
         this.response,
         err => {
           this.redis.setex
             .calledWith(
-              `clsiserver:${this.project_id}`,
+              `clsiserver:${this.project_id}:${this.user_id}`,
               this.settings.clsiCookie.ttl,
               'clsi-8'
             )
@@ -168,6 +176,7 @@ describe('ClsiCookieManager', function () {
     it('should return the server id', function (done) {
       return this.ClsiCookieManager.setServerId(
         this.project_id,
+        this.user_id,
         this.response,
         (err, serverId) => {
           serverId.should.equal('clsi-8')
@@ -186,6 +195,7 @@ describe('ClsiCookieManager', function () {
       })()
       return this.ClsiCookieManager.setServerId(
         this.project_id,
+        this.user_id,
         this.response,
         (err, serverId) => {
           this.redis.setex.called.should.equal(false)
@@ -200,6 +210,7 @@ describe('ClsiCookieManager', function () {
         .returns(null)
       return this.ClsiCookieManager.setServerId(
         this.project_id,
+        this.user_id,
         this.response,
         (err, serverId) => {
           this.redis.setex.called.should.equal(false)
@@ -227,11 +238,12 @@ describe('ClsiCookieManager', function () {
         .returns('clsi-8')
       return this.ClsiCookieManager.setServerId(
         this.project_id,
+        this.user_id,
         this.response,
         (err, serverId) => {
           this.redis_secondary.setex
             .calledWith(
-              `clsiserver:${this.project_id}`,
+              `clsiserver:${this.project_id}:${this.user_id}`,
               this.settings.clsiCookie.ttl,
               'clsi-8'
             )
@@ -246,12 +258,13 @@ describe('ClsiCookieManager', function () {
     beforeEach(function () {
       return (this.ClsiCookieManager._getServerId = sinon
         .stub()
-        .callsArgWith(1, null, 'clsi-11'))
+        .callsArgWith(2, null, 'clsi-11'))
     })
 
     it('should return a jar with the cookie set populated from redis', function (done) {
       return this.ClsiCookieManager.getCookieJar(
         this.project_id,
+        this.user_id,
         (err, jar) => {
           jar._jar.store.idx['clsi.example.com']['/'][
             this.settings.clsiCookie.key
@@ -274,6 +287,7 @@ describe('ClsiCookieManager', function () {
       })()
       return this.ClsiCookieManager.getCookieJar(
         this.project_id,
+        this.user_id,
         (err, jar) => {
           assert.deepEqual(jar, realRequst.jar())
           return done()

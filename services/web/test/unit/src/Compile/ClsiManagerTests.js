@@ -8,8 +8,8 @@ describe('ClsiManager', function () {
     this.jar = { cookie: 'stuff' }
     this.ClsiCookieManager = {
       clearServerId: sinon.stub().yields(),
-      getCookieJar: sinon.stub().callsArgWith(1, null, this.jar),
-      setServerId: sinon.stub().callsArgWith(2),
+      getCookieJar: sinon.stub().callsArgWith(2, null, this.jar),
+      setServerId: sinon.stub().callsArgWith(3),
       _getServerId: sinon.stub(),
     }
     this.ClsiStateManager = {
@@ -73,7 +73,7 @@ describe('ClsiManager', function () {
       this.ClsiManager._buildRequest = sinon
         .stub()
         .callsArgWith(2, null, (this.request = 'mock-request'))
-      this.ClsiCookieManager._getServerId.callsArgWith(1, null, 'clsi3')
+      this.ClsiCookieManager._getServerId.callsArgWith(2, null, 'clsi3')
     })
 
     describe('with a successful compile', function () {
@@ -354,7 +354,7 @@ describe('ClsiManager', function () {
     beforeEach(function () {
       this.submission_id = 'submission-id'
       this.clsi_request = 'mock-request'
-      this.ClsiCookieManager._getServerId.callsArgWith(1, null, 'clsi3')
+      this.ClsiCookieManager._getServerId.callsArgWith(2, null, 'clsi3')
     })
 
     describe('with a successful compile', function () {
@@ -490,6 +490,7 @@ describe('ClsiManager', function () {
         this.ClsiManager._makeRequestWithClsiServerId
           .calledWith(
             this.project_id,
+            this.user_id,
             {
               method: 'DELETE',
               url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}`,
@@ -507,7 +508,7 @@ describe('ClsiManager', function () {
 
       it('should clear the clsi persistance', function () {
         this.ClsiCookieManager.clearServerId
-          .calledWith(this.project_id)
+          .calledWith(this.project_id, this.user_id)
           .should.equal(true)
       })
 
@@ -924,7 +925,7 @@ describe('ClsiManager', function () {
         this.ClsiManager._makeRequest = sinon
           .stub()
           .callsArgWith(
-            2,
+            3,
             null,
             { statusCode: 204 },
             (this.body = { mock: 'foo' })
@@ -941,7 +942,7 @@ describe('ClsiManager', function () {
       it('should send the request to the CLSI', function () {
         const url = `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/compile`
         this.ClsiManager._makeRequest
-          .calledWith(this.project_id, {
+          .calledWith(this.project_id, this.user_id, {
             method: 'POST',
             url,
             json: this.req,
@@ -959,7 +960,7 @@ describe('ClsiManager', function () {
         this.ClsiManager._makeRequest = sinon
           .stub()
           .callsArgWith(
-            2,
+            3,
             null,
             { statusCode: 500 },
             (this.body = { mock: 'foo' })
@@ -1009,6 +1010,7 @@ describe('ClsiManager', function () {
         this.ClsiManager._makeRequestWithClsiServerId
           .calledWith(
             this.project_id,
+            this.user_id,
             {
               method: 'GET',
               url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
@@ -1043,6 +1045,7 @@ describe('ClsiManager', function () {
         this.ClsiManager._makeRequestWithClsiServerId
           .calledWith(
             this.project_id,
+            this.user_id,
             {
               method: 'GET',
               url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
@@ -1072,6 +1075,7 @@ describe('ClsiManager', function () {
         this.ClsiManager._makeRequestWithClsiServerId
           .calledWith(
             this.project_id,
+            this.user_id,
             {
               method: 'GET',
               url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
@@ -1095,22 +1099,32 @@ describe('ClsiManager', function () {
     })
 
     it('should process a request with a cookie jar', function (done) {
-      this.ClsiManager._makeRequest(this.project_id, this.opts, () => {
-        const args = this.request.args[0]
-        args[0].method.should.equal(this.opts.method)
-        args[0].url.should.equal(this.opts.url)
-        args[0].jar.should.equal(this.jar)
-        done()
-      })
+      this.ClsiManager._makeRequest(
+        this.project_id,
+        this.user_id,
+        this.opts,
+        () => {
+          const args = this.request.args[0]
+          args[0].method.should.equal(this.opts.method)
+          args[0].url.should.equal(this.opts.url)
+          args[0].jar.should.equal(this.jar)
+          done()
+        }
+      )
     })
 
     it('should set the cookie again on response as it might have changed', function (done) {
-      this.ClsiManager._makeRequest(this.project_id, this.opts, () => {
-        this.ClsiCookieManager.setServerId
-          .calledWith(this.project_id, this.response)
-          .should.equal(true)
-        done()
-      })
+      this.ClsiManager._makeRequest(
+        this.project_id,
+        this.user_id,
+        this.opts,
+        () => {
+          this.ClsiCookieManager.setServerId
+            .calledWith(this.project_id, this.user_id, this.response)
+            .should.equal(true)
+          done()
+        }
+      )
     })
   })
 
@@ -1128,6 +1142,7 @@ describe('ClsiManager', function () {
       it('should process a request with a cookie jar', function (done) {
         this.ClsiManager._makeRequestWithClsiServerId(
           this.project_id,
+          this.user_id,
           this.opts,
           undefined,
           err => {
@@ -1145,12 +1160,13 @@ describe('ClsiManager', function () {
       it('should persist the cookie from the response', function (done) {
         this.ClsiManager._makeRequestWithClsiServerId(
           this.project_id,
+          this.user_id,
           this.opts,
           undefined,
           err => {
             if (err) return done(err)
             this.ClsiCookieManager.setServerId
-              .calledWith(this.project_id, this.response)
+              .calledWith(this.project_id, this.user_id, this.response)
               .should.equal(true)
             done()
           }
@@ -1162,6 +1178,7 @@ describe('ClsiManager', function () {
       it('should not add a cookie jar', function (done) {
         this.ClsiManager._makeRequestWithClsiServerId(
           this.project_id,
+          this.user_id,
           this.opts,
           'node-1',
           err => {
@@ -1179,6 +1196,7 @@ describe('ClsiManager', function () {
       it('should not persist a cookie on response', function (done) {
         this.ClsiManager._makeRequestWithClsiServerId(
           this.project_id,
+          this.user_id,
           this.opts,
           'node-1',
           err => {
@@ -1204,6 +1222,7 @@ describe('ClsiManager', function () {
     it('should change the domain on the url', function (done) {
       this.ClsiManager._makeNewBackendRequest(
         this.project_id,
+        this.user_id,
         this.opts,
         () => {
           const args = this.request.args[0]
@@ -1219,6 +1238,7 @@ describe('ClsiManager', function () {
       this.settings.apis.clsi_new = undefined
       this.ClsiManager._makeNewBackendRequest(
         this.project_id,
+        this.user_id,
         this.opts,
         err => {
           expect(err).to.equal(undefined)
