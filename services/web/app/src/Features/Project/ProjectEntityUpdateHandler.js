@@ -1365,6 +1365,7 @@ const ProjectEntityUpdateHandler = {
               file: file.file._id,
               path: file.path,
               url: FileStoreHandler._buildUrl(projectId, file.file._id),
+              _hash: file.file.hash,
             }))
 
             DocumentUpdaterHandler.resyncProjectHistory(

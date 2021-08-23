@@ -1929,6 +1929,7 @@ describe('ProjectEntityUpdateHandler', function () {
           {
             file: {
               _id: fileId,
+              hash: '123456',
             },
             path: 'universe.png',
           },
@@ -1970,6 +1971,7 @@ describe('ProjectEntityUpdateHandler', function () {
             file: fileId,
             path: 'universe.png',
             url: `www.filestore.test/${projectId}/${fileId}`,
+            _hash: '123456',
           },
         ]
         this.DocumentUpdaterHandler.resyncProjectHistory
