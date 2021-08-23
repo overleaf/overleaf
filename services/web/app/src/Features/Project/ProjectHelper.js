@@ -141,7 +141,8 @@ function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
     n = parseInt(match[1])
   }
 
-  const prefixMatcher = new RegExp(`^${basename} \\(\\d+\\)$`)
+  const prefixMatcher = new RegExp(`^${_.escapeRegExp(basename)} \\(\\d+\\)$`)
+
   const projectNamesWithSamePrefix = Array.from(allProjectNames).filter(name =>
     prefixMatcher.test(name)
   )

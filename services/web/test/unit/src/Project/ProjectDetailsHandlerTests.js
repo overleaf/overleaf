@@ -261,6 +261,7 @@ describe('ProjectDetailsHandler', function () {
           { _id: 140, name: 'numeric (40)' },
           { _id: 141, name: 'Yearbook (2021)' },
           { _id: 142, name: 'Yearbook (2021) (1)' },
+          { _id: 142, name: 'Resume (2020' },
         ],
         readAndWrite: [
           { _id: 4, name: 'name2' },
@@ -383,6 +384,24 @@ describe('ProjectDetailsHandler', function () {
         []
       )
       expect(name).to.equal('Yearbook (2021) (2)')
+    })
+    describe('title with that causes invalid regex', function () {
+      it('should create the project with a suffix when project name exists', async function () {
+        const name = await this.handler.promises.generateUniqueName(
+          this.user._id,
+          'Resume (2020',
+          []
+        )
+        expect(name).to.equal('Resume (2020 (1)')
+      })
+      it('should create the project with the provided name', async function () {
+        const name = await this.handler.promises.generateUniqueName(
+          this.user._id,
+          'Yearbook (2021',
+          []
+        )
+        expect(name).to.equal('Yearbook (2021')
+      })
     })
   })
 
