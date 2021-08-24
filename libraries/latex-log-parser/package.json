@@ -1,6 +1,6 @@
 {
-  "name": "latex-log-parser-sharelatex",
-  "version": "1.0.0",
+  "name": "@overleaf/latex-log-parser",
+  "version": "2.0.0",
   "description": "",
   "scripts": {
     "lint": "echo noop",
@@ -12,6 +12,5 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "coffee-script": "^1.10.0"
   }
 }

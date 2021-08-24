@@ -1,6 +1,6 @@
 define([
-	"../dist/latex-log-parser",
-	"../dist/bib-log-parser",
+	"../src/js/latex-log-parser",
+	"../src/js/bib-log-parser",
 	"text!logs/errors.log",
 	"text!logs/warnings.log",
 	"text!logs/bad-boxes.log",
@@ -182,17 +182,17 @@ function(LatexParser, BibLogParser, errorLog, warningLog, badBoxesLog,
 			}
 		}
 	});
-	
+
 	module("Runaway Arguments");
 
 	test("Runaway Arguments parsing", function() {
 		var errors = LatexParser.parse(runawayArgumentsLog).errors;
-		
+
 		var expectedErrors = [
 			[null, "Runaway argument?", "/compile/runaway_argument.tex"] + "",
 			[null, "Emergency stop.", "/compile/runaway_argument.tex"] + ""
 		];
-		
+
 		expect(expectedErrors.length);
 		for (var i = 0; i < errors.length; i++) {
 			if (expectedErrors.indexOf([errors[i].line, errors[i].message, errors[i].file] + "") > -1) {
@@ -202,7 +202,7 @@ function(LatexParser, BibLogParser, errorLog, warningLog, badBoxesLog,
 			}
 		}
 	});
-	
+
 	module("General");
 
 	test("Ignore Duplicates", function() {
