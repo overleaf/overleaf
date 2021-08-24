@@ -43,6 +43,31 @@ export function deleteJSON(path, options) {
   return fetchJSON(path, { ...options, method: 'DELETE' })
 }
 
+/**
+ * @param {number} statusCode
+ * @returns {string}
+ */
+function getErrorMessageForStatusCode(statusCode) {
+  switch (statusCode) {
+    case 400:
+      return 'Bad Request'
+    case 401:
+      return 'Unauthorized'
+    case 403:
+      return 'Forbidden'
+    case 404:
+      return 'Not Found'
+    case 500:
+      return 'Internal Server Error'
+    case 502:
+      return 'Bad Gateway'
+    case 503:
+      return 'Service Unavailable'
+    default:
+      return `Unexpected Error: ${statusCode}`
+  }
+}
+
 export class FetchError extends OError {
   /**
    * @param {string} message
@@ -52,6 +77,13 @@ export class FetchError extends OError {
    * @param {Object} [data]
    */
   constructor(message, url, options, response, data) {
+    // On HTTP2, the `statusText` property is not set,
+    // so this `message` will be undefined. We need to
+    // set a message based on the response `status`, so
+    // our error UI rendering will work
+    if (!message) {
+      message = getErrorMessageForStatusCode(response.status)
+    }
     super(message, { statusCode: response ? response.status : undefined })
     this.url = url
     this.options = options

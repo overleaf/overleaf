@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
+import { Response } from 'node-fetch'
 import {
   deleteJSON,
   FetchError,
@@ -134,6 +135,29 @@ describe('fetchJSON', function () {
     } catch (error) {
       expect(error.data).to.eql({})
     }
+  })
+
+  it('handles 5xx responses without a status message', async function () {
+    // It's hard to make a Response object with statusText=null,
+    // so we need to do some monkey-work to make it happen
+    const response = new Response('weird scary error', {
+      ok: false,
+      status: 599,
+    })
+    Object.defineProperty(response, 'statusText', {
+      get: () => null,
+      set: () => {},
+    })
+    fetchMock.get('/test', response)
+
+    return expect(getJSON('/test'))
+      .to.eventually.be.rejectedWith('Unexpected Error: 599')
+      .and.be.an.instanceOf(FetchError)
+      .to.nested.include({
+        'response.status': 599,
+        'info.statusCode': 599,
+        message: 'Unexpected Error: 599',
+      })
   })
 
   it('handles POST requests', function () {
