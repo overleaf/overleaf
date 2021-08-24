@@ -1237,6 +1237,9 @@ describe('ProjectController', function () {
       })
 
       describe('during regular roll-out', function () {
+        before(function () {
+          this.skip()
+        })
         describe('disabled', function () {
           showNoVariant()
 
@@ -1283,6 +1286,29 @@ describe('ProjectController', function () {
             tagAnonymous()
             expectToCachePDFOnly()
           })
+        })
+      })
+
+      describe('during opt-in only', function () {
+        describe('with no query', function () {
+          expectBandwidthTrackingDisabled()
+          expectPDFCachingDisabled()
+        })
+
+        describe('with enable_pdf_caching=false', function () {
+          beforeEach(function () {
+            this.req.query.enable_pdf_caching = 'false'
+          })
+          expectBandwidthTrackingDisabled()
+          expectPDFCachingDisabled()
+        })
+
+        describe('with enable_pdf_caching=true', function () {
+          beforeEach(function () {
+            this.req.query.enable_pdf_caching = 'true'
+          })
+          expectBandwidthTrackingEnabled()
+          expectPDFCachingEnabled()
         })
       })
     })

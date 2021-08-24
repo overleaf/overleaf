@@ -37,7 +37,6 @@ const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandle
 const UserController = require('../User/UserController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Modules = require('../../infrastructure/Modules')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SplitTestV2Handler = require('../SplitTests/SplitTestV2Handler')
 const { getNewLogsUIVariantForUser } = require('../Helpers/NewLogsUI')
 
@@ -711,21 +710,6 @@ const ProjectController = {
         flushToTpds: cb => {
           TpdsProjectFlusher.flushProjectToTpdsIfNeeded(projectId, cb)
         },
-        pdfCachingFeatureFlag(cb) {
-          if (!Settings.enablePdfCaching) return cb(null, '')
-          if (!userId) return cb(null, 'enable-caching-only')
-          SplitTestHandler.getTestSegmentation(
-            userId,
-            'pdf_caching_full',
-            (err, segmentation) => {
-              if (err) {
-                // Do not fail loading the editor.
-                return cb(null, '')
-              }
-              cb(null, (segmentation && segmentation.variant) || '')
-            }
-          )
-        },
         sharingModalSplitTest(cb) {
           SplitTestV2Handler.assignInLocalsContext(
             res,
@@ -737,17 +721,7 @@ const ProjectController = {
           )
         },
       },
-      (
-        err,
-        {
-          project,
-          user,
-          subscription,
-          isTokenMember,
-          brandVariation,
-          pdfCachingFeatureFlag,
-        }
-      ) => {
+      (err, { project, user, subscription, isTokenMember, brandVariation }) => {
         if (err != null) {
           OError.tag(err, 'error getting details for project page')
           return next(err)
@@ -826,15 +800,10 @@ const ProjectController = {
                 // The feature is disabled globally.
                 return false
               }
-              const canSeeFeaturePreview = pdfCachingFeatureFlag.includes(flag)
-              if (!canSeeFeaturePreview) {
-                // The user is not in the target group.
-                return false
-              }
-              // Optionally let the user opt-out.
-              // The will opt-out of both caching and metrics collection,
+              // Let the user opt-in only.
+              // The flag will opt-out of both caching and metrics collection,
               //  as if this editing session never happened.
-              return shouldDisplayFeature('enable_pdf_caching', true)
+              return shouldDisplayFeature('enable_pdf_caching', false)
             }
 
             res.render('project/editor', {
@@ -909,7 +878,9 @@ const ProjectController = {
               ),
               trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
               enablePdfCaching: partOfPdfCachingRollout('enable-caching'),
-              resetServiceWorker: Boolean(Settings.resetServiceWorker),
+              resetServiceWorker:
+                Boolean(Settings.resetServiceWorker) &&
+                !shouldDisplayFeature('enable_pdf_caching', false),
             })
             timer.done()
           }
