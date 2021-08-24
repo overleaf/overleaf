@@ -108,6 +108,7 @@ describe('SubscriptionController', function () {
       gaExperiments: {},
     }
     this.GeoIpLookup = {
+      isValidCurrencyParam: sinon.stub().returns(true),
       getCurrencyCode: sinon.stub(),
       promises: {
         getCurrencyCode: sinon.stub(),
@@ -257,6 +258,16 @@ describe('SubscriptionController', function () {
 
       it('should use the geo ip currency if non is provided', function (done) {
         this.req.query.currency = null
+        this.res.render = (page, opts) => {
+          opts.currency.should.equal(this.stubbedCurrencyCode)
+          done()
+        }
+        this.SubscriptionController.paymentPage(this.req, this.res)
+      })
+
+      it('should use the geo ip currency if not valid', function (done) {
+        this.req.query.currency = 'WAT'
+        this.GeoIpLookup.isValidCurrencyParam.returns(false)
         this.res.render = (page, opts) => {
           opts.currency.should.equal(this.stubbedCurrencyCode)
           done()

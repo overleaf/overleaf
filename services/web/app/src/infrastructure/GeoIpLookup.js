@@ -17,6 +17,8 @@ const currencyMappings = {
   SE: 'SEK',
 }
 
+const validCurrencyParams = Object.values(currencyMappings).concat(['EUR'])
+
 // Countries which would likely prefer Euro's
 const EuroCountries = [
   'AT',
@@ -47,6 +49,13 @@ const EuroCountries = [
 ]
 
 _.each(EuroCountries, country => (currencyMappings[country] = 'EUR'))
+
+function isValidCurrencyParam(currency) {
+  if (!currency) {
+    return false
+  }
+  return validCurrencyParams.includes(currency)
+}
 
 function getDetails(ip, callback) {
   if (!ip) {
@@ -89,6 +98,7 @@ function getCurrencyCode(ip, callback) {
 module.exports = {
   getDetails,
   getCurrencyCode,
+  isValidCurrencyParam,
   promises: {
     getDetails: promisify(getDetails),
     getCurrencyCode: promisifyMultiResult(getCurrencyCode, [

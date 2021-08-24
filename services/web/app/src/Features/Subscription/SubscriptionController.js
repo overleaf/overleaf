@@ -63,9 +63,13 @@ async function paymentPage(req, res) {
     if (!valid) {
       res.redirect('/user/subscription?hasSubscription=true')
     } else {
-      let currency = req.query.currency
-        ? req.query.currency.toUpperCase()
-        : undefined
+      let currency = null
+      if (req.query.currency) {
+        const queryCurrency = req.query.currency.toUpperCase()
+        if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
+          currency = queryCurrency
+        }
+      }
       const {
         currencyCode: recommendedCurrency,
         countryCode,

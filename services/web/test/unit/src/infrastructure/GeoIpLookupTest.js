@@ -41,6 +41,18 @@ describe('GeoIpLookup', function () {
     }
   })
 
+  describe('isValidCurrencyParam', function () {
+    it('should reject invalid currency codes', function () {
+      expect(this.GeoIpLookup.isValidCurrencyParam('GBP')).to.equal(true)
+      expect(this.GeoIpLookup.isValidCurrencyParam('USD')).to.equal(true)
+      expect(this.GeoIpLookup.isValidCurrencyParam('AUD')).to.equal(true)
+      expect(this.GeoIpLookup.isValidCurrencyParam('EUR')).to.equal(true)
+      expect(this.GeoIpLookup.isValidCurrencyParam('WAT')).to.equal(false)
+      expect(this.GeoIpLookup.isValidCurrencyParam('NON')).to.equal(false)
+      expect(this.GeoIpLookup.isValidCurrencyParam('LOL')).to.equal(false)
+    })
+  })
+
   describe('getDetails', function () {
     beforeEach(function () {
       this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
