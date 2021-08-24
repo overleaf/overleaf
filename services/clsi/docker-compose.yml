@@ -39,5 +39,6 @@ services:
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
       ENABLE_PDF_CACHING: "true"
+      PDF_CACHING_ENABLE_WORKER_POOL: "true"
     command: npm run --silent test:acceptance
 

@@ -31,9 +31,11 @@ var AlreadyCompilingError = function (message) {
 }
 AlreadyCompilingError.prototype.__proto__ = Error.prototype
 
+class QueueLimitReachedError extends OError {}
 class TimedOutError extends OError {}
 
 module.exports = Errors = {
+  QueueLimitReachedError,
   TimedOutError,
   NotFoundError,
   FilesOutOfSyncError,

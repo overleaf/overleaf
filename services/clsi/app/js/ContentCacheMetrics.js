@@ -22,6 +22,9 @@ function emitPdfStats(stats, timings) {
   if (stats['pdf-caching-timed-out']) {
     Metrics.inc('pdf-caching-timed-out')
   }
+  if (stats['pdf-caching-queue-limit-reached']) {
+    Metrics.inc('pdf-caching-queue-limit-reached')
+  }
   if (timings['compute-pdf-caching']) {
     emitPdfCachingStats(stats, timings)
   } else {
