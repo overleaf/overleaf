@@ -14,6 +14,7 @@ const entryPoints = {
   serviceWorker: './frontend/js/serviceWorker.js',
   main: './frontend/js/main.js',
   ide: './frontend/js/ide.js',
+  'cdn-load-test': './frontend/js/cdn-load-test.js',
   style: './frontend/stylesheets/style.less',
   'ieee-style': './frontend/stylesheets/ieee-style.less',
   'light-style': './frontend/stylesheets/light-style.less',
