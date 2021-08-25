@@ -467,8 +467,10 @@ const RecurlyWrapper = {
           },
           'error returned from recurly'
         )
-        // TODO: this should be an Error object not a string
-        error = `Recurly API returned with status code: ${response.statusCode}`
+        error = new OError(
+          `Recurly API returned with status code: ${response.statusCode}`,
+          { statusCode: response.statusCode }
+        )
       }
       return callback(error, response, body)
     })
