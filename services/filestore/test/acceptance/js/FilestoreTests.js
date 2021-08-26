@@ -81,7 +81,12 @@ describe('Filestore', function () {
   // redefine the test suite for every available backend
   Object.keys(BackendSettings).forEach(backend => {
     describe(backend, function () {
-      let app, previousEgress, previousIngress, metricPrefix, projectId
+      let app,
+        previousEgress,
+        previousIngress,
+        metricPrefix,
+        projectId,
+        otherProjectId
 
       before(async function () {
         // create the app with the relevant filestore settings
@@ -123,6 +128,7 @@ describe('Filestore', function () {
           )
         }
         projectId = ObjectId().toString()
+        otherProjectId = ObjectId().toString()
       })
 
       it('should send a 200 for the status endpoint', async function () {
@@ -302,10 +308,11 @@ describe('Filestore', function () {
       })
 
       describe('with multiple files', function () {
-        let fileIds, fileUrls, projectUrl
+        let fileIds, fileUrls, otherFileUrls, projectUrl, otherProjectUrl
         const localFileReadPaths = [
           '/tmp/filestore_acceptance_tests_file_read_1.txt',
           '/tmp/filestore_acceptance_tests_file_read_2.txt',
+          '/tmp/filestore_acceptance_tests_file_read_3.txt',
         ]
         const constantFileContents = [
           [
@@ -318,39 +325,55 @@ describe('Filestore', function () {
             'cats are the best animals',
             'wombats are a close second',
           ].join('\n'),
+          [
+            `another file: ${Math.random()}`,
+            'with multiple lines',
+            'the end',
+          ].join('\n'),
         ]
 
         before(async function () {
           return Promise.all([
             fsWriteFile(localFileReadPaths[0], constantFileContents[0]),
             fsWriteFile(localFileReadPaths[1], constantFileContents[1]),
+            fsWriteFile(localFileReadPaths[2], constantFileContents[2]),
           ])
         })
 
         beforeEach(async function () {
           projectUrl = `${filestoreUrl}/project/${projectId}`
-          fileIds = [ObjectId().toString(), ObjectId().toString()]
+          otherProjectUrl = `${filestoreUrl}/project/${otherProjectId}`
+          fileIds = [
+            ObjectId().toString(),
+            ObjectId().toString(),
+            ObjectId().toString(),
+          ]
           fileUrls = [
             `${projectUrl}/file/${fileIds[0]}`,
             `${projectUrl}/file/${fileIds[1]}`,
           ]
+          otherFileUrls = [`${otherProjectUrl}/file/${fileIds[2]}`]
 
           const writeStreams = [
             request.post(fileUrls[0]),
             request.post(fileUrls[1]),
+            request.post(otherFileUrls[0]),
           ]
           const readStreams = [
             fs.createReadStream(localFileReadPaths[0]),
             fs.createReadStream(localFileReadPaths[1]),
+            fs.createReadStream(localFileReadPaths[2]),
           ]
           // hack to consume the result to ensure the http request has been fully processed
           const resultStreams = [
+            fs.createWriteStream('/dev/null'),
             fs.createWriteStream('/dev/null'),
             fs.createWriteStream('/dev/null'),
           ]
           return Promise.all([
             pipeline(readStreams[0], writeStreams[0], resultStreams[0]),
             pipeline(readStreams[1], writeStreams[1], resultStreams[1]),
+            pipeline(readStreams[2], writeStreams[2], resultStreams[2]),
           ])
         })
 
@@ -382,6 +405,14 @@ describe('Filestore', function () {
             await expect(
               rp.get(fileUrls[index])
             ).to.eventually.be.rejected.and.have.property('statusCode', 404)
+          }
+        })
+
+        it('should not delete files in other projects', async function () {
+          for (const index in otherFileUrls) {
+            await expect(
+              rp.get(otherFileUrls[index])
+            ).to.eventually.have.property('statusCode', 200)
           }
         })
 
