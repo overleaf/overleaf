@@ -330,11 +330,19 @@ const loadTcpServer = net.createServer(function (socket) {
     }
 
     const freeLoad = availableWorkingCpus - currentLoad
-    let freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
+    const freeLoadPercentage = Math.round(
+      (freeLoad / availableWorkingCpus) * 100
+    )
     if (freeLoadPercentage <= 0) {
-      freeLoadPercentage = 0 // when its 0 the server is set to drain and will move projects to different servers
+      // When its 0 the server is set to drain implicitly.
+      // Drain will move new projects to different servers.
+      // Drain will keep existing projects assigned to the same server.
+      // Maint will more existing and new projects to different servers.
+      socket.write(`maint, 0%\n`, 'ASCII')
+    } else {
+      // Ready will cancel the maint state.
+      socket.write(`up, ready, ${freeLoadPercentage}%\n`, 'ASCII')
     }
-    socket.write(`up, ${freeLoadPercentage}%\n`, 'ASCII')
     return socket.end()
   } else {
     socket.write(`${STATE}\n`, 'ASCII')
