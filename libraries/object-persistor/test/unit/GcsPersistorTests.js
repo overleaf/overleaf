@@ -556,18 +556,30 @@ describe('GcsPersistorTests', function () {
     const directoryName = `${ObjectId()}/${ObjectId()}`
     describe('with valid parameters', function () {
       beforeEach(async function () {
+        GcsBucket.getFiles = sinon.stub()
+        // set up multiple paginated calls to getFiles
+        GcsBucket.getFiles
+          .withArgs({ directory: directoryName, autoPaginate: false })
+          .resolves([['aaa', 'bbb'], 'call-1'])
+        GcsBucket.getFiles
+          .withArgs('call-1')
+          .resolves([['ccc', 'ddd', 'eee'], 'call-2'])
+        GcsBucket.getFiles.withArgs('call-2').resolves([['fff', 'ggg']])
         return GcsPersistor.deleteDirectory(bucket, directoryName)
       })
 
       it('should list the objects in the directory', function () {
         expect(Storage.prototype.bucket).to.have.been.calledWith(bucket)
         expect(GcsBucket.getFiles).to.have.been.calledWith({
-          directory: directoryName
+          directory: directoryName,
+          autoPaginate: false
         })
+        expect(GcsBucket.getFiles).to.have.been.calledWith('call-1')
+        expect(GcsBucket.getFiles).to.have.been.calledWith('call-2')
       })
 
       it('should delete the files', function () {
-        expect(GcsFile.delete).to.have.been.calledTwice
+        expect(GcsFile.delete.callCount).to.equal(7)
       })
     })
 

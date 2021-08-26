@@ -216,32 +216,36 @@ module.exports = class GcsPersistor extends AbstractPersistor {
   }
 
   async deleteDirectory(bucketName, key) {
-    try {
-      const [files] = await this.storage
-        .bucket(bucketName)
-        .getFiles({ directory: key })
-
-      if (Array.isArray(files) && files.length > 0) {
-        await asyncPool(
-          this.settings.deleteConcurrency,
-          files,
-          async (file) => {
-            await this.deleteObject(bucketName, file.name)
-          }
+    let query = { directory: key, autoPaginate: false }
+    do {
+      try {
+        const [files, nextQuery] = await this.storage
+          .bucket(bucketName)
+          .getFiles(query)
+        // iterate over paginated results using the nextQuery returned by getFiles
+        query = nextQuery
+        if (Array.isArray(files) && files.length > 0) {
+          await asyncPool(
+            this.settings.deleteConcurrency,
+            files,
+            async (file) => {
+              await this.deleteObject(bucketName, file.name)
+            }
+          )
+        }
+      } catch (err) {
+        const error = PersistorHelper.wrapError(
+          err,
+          'failed to delete directory in GCS',
+          { bucketName, key },
+          WriteError
         )
+        if (error instanceof NotFoundError) {
+          return
+        }
+        throw error
       }
-    } catch (err) {
-      const error = PersistorHelper.wrapError(
-        err,
-        'failed to delete directory in GCS',
-        { bucketName, key },
-        WriteError
-      )
-      if (error instanceof NotFoundError) {
-        return
-      }
-      throw error
-    }
+    } while (query)
   }
 
   async directorySize(bucketName, key) {
