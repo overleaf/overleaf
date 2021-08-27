@@ -136,7 +136,7 @@ app.get('/health_check', healthCheckController.check)
 app.use(RequestLogger.errorHandler)
 
 const port = settings.internal.filestore.port || 3009
-const host = '0.0.0.0'
+const host = settings.internal.filestore.host || '0.0.0.0'
 
 if (!module.parent) {
   // Called directly
