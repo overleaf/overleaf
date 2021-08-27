@@ -74,4 +74,4 @@ Please see the [CONTRIBUTING](https://github.com/overleaf/overleaf/blob/master/C
 
 The code in this repository is released under the GNU AFFERO GENERAL PUBLIC LICENSE, version 3. A copy can be found in the `LICENSE` file.
 
-Copyright (c) Overleaf, 2014-2021.
+Copyright (c) Overleaf, 2014-2019.
