@@ -9,7 +9,7 @@ describe('ClsiManager', function () {
     this.ClsiCookieManager = {
       clearServerId: sinon.stub().yields(),
       getCookieJar: sinon.stub().callsArgWith(2, null, this.jar),
-      setServerId: sinon.stub().callsArgWith(3),
+      setServerId: sinon.stub().yields(null),
       _getServerId: sinon.stub(),
     }
     this.ClsiStateManager = {

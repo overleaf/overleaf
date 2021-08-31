@@ -22,6 +22,7 @@ if (Settings.redis.clsi_cookie_secondary != null) {
 }
 const Cookie = require('cookie')
 const logger = require('logger-sharelatex')
+const Metrics = require('@overleaf/metrics')
 
 const clsiCookiesEnabled =
   (Settings.clsiCookie != null ? Settings.clsiCookie.key : undefined) != null &&
@@ -72,15 +73,21 @@ module.exports = function (backendGroup) {
           })
           return callback(err)
         }
-        this.setServerId(project_id, user_id, res, function (err, serverId) {
-          if (err != null) {
-            logger.warn(
-              { err, project_id },
-              'error setting server id via populate request'
-            )
+        this.setServerId(
+          project_id,
+          user_id,
+          res,
+          null,
+          function (err, serverId) {
+            if (err != null) {
+              logger.warn(
+                { err, project_id },
+                'error setting server id via populate request'
+              )
+            }
+            return callback(err, serverId)
           }
-          return callback(err, serverId)
-        })
+        )
       })
     },
 
@@ -93,7 +100,7 @@ module.exports = function (backendGroup) {
       return cookies != null ? cookies[Settings.clsiCookie.key] : undefined
     },
 
-    setServerId(project_id, user_id, response, callback) {
+    setServerId(project_id, user_id, response, previous, callback) {
       if (callback == null) {
         callback = function (err, serverId) {}
       }
@@ -108,6 +115,12 @@ module.exports = function (backendGroup) {
           Settings.clsiCookie.ttl,
           err => callback(err, undefined)
         )
+      }
+      if (!previous) {
+        // Initial assignment of a user+project or after clearing cache.
+        Metrics.inc('clsi-lb-assign-initial-backend')
+      } else {
+        Metrics.inc('clsi-lb-switch-backend')
       }
       if (rclient_secondary != null) {
         this._setServerIdInRedis(

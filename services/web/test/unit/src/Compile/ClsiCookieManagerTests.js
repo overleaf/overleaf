@@ -118,7 +118,7 @@ describe('ClsiCookieManager', function () {
       this.request.post.callsArgWith(1, null, this.response)
       return (this.ClsiCookieManager.setServerId = sinon
         .stub()
-        .callsArgWith(3, null, 'clsi-9'))
+        .yields(null, 'clsi-9'))
     })
 
     it('should make a request to the clsi', function (done) {
@@ -160,6 +160,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         this.response,
+        null,
         err => {
           this.redis.setex
             .calledWith(
@@ -178,6 +179,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         this.response,
+        null,
         (err, serverId) => {
           serverId.should.equal('clsi-8')
           return done()
@@ -197,6 +199,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         this.response,
+        null,
         (err, serverId) => {
           this.redis.setex.called.should.equal(false)
           return done()
@@ -212,6 +215,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         this.response,
+        null,
         (err, serverId) => {
           this.redis.setex.called.should.equal(false)
           return done()
@@ -240,6 +244,7 @@ describe('ClsiCookieManager', function () {
         this.project_id,
         this.user_id,
         this.response,
+        null,
         (err, serverId) => {
           this.redis_secondary.setex
             .calledWith(

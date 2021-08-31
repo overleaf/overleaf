@@ -328,6 +328,7 @@ const ClsiManager = {
                   projectId,
                   userId,
                   response,
+                  clsiServerId,
                   (err, newClsiServerId) => {
                     if (err != null) {
                       callback(
@@ -420,7 +421,7 @@ const ClsiManager = {
     NewBackendCloudClsiCookieManager.getCookieJar(
       projectId,
       userId,
-      (err, jar) => {
+      (err, jar, clsiServerId) => {
         if (err != null) {
           return callback(
             OError.tag(err, 'error getting cookie jar for CLSI request', {
@@ -444,6 +445,7 @@ const ClsiManager = {
             projectId,
             userId,
             response,
+            clsiServerId,
             err => {
               if (err != null) {
                 return callback(
