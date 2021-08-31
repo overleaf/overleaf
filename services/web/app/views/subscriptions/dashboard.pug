@@ -55,14 +55,9 @@ block content
 									a(href="mailto:support@overleaf.com") support@overleaf.com
 									|  to find out more.
 							else
-								if (subscriptionCopy === 'new')
-									p(ng-non-bindable) You are on the #{settings.appName} Free plan. Upgrade to access these Premium Features:
-									ul
-										li Invite more collaborators
-										for feature in ['realtime_track_changes', 'full_doc_history', 'reference_search', 'reference_sync', 'dropbox_integration_lowercase', 'github_integration_lowercase', 'priority_support']
-											li #{translate(feature)}
-									a(ng-controller="UpgradeSubscriptionController" href="/user/subscription/plans" ng-click="upgradeSubscription()").btn.btn-primary Upgrade now
-								else
-									p(ng-non-bindable) You're on the #{settings.appName} Free plan.
-									|
-									a(ng-controller="UpgradeSubscriptionController" href="/user/subscription/plans" ng-click="upgradeSubscription()").btn.btn-primary Upgrade now
+								p(ng-non-bindable) You are on the #{settings.appName} Free plan. Upgrade to access these Premium Features:
+								ul
+									li #{translate('invite_more_collabs')}
+									for feature in ['realtime_track_changes', 'full_doc_history', 'reference_search', 'reference_sync', 'dropbox_integration_lowercase', 'github_integration_lowercase', 'priority_support']
+										li #{translate(feature)}
+								a(ng-controller="UpgradeSubscriptionController" href="/user/subscription/plans" ng-click="upgradeSubscription()").btn.btn-primary Upgrade now

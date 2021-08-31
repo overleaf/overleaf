@@ -14,13 +14,10 @@ const V1SubscriptionManager = require('./V1SubscriptionManager')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const SubscriptionErrors = require('./Errors')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const RecurlyEventHandler = require('./RecurlyEventHandler')
 const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
-
-const SUBSCRIPTION_PAGE_SPLIT_TEST = 'subscription-page'
 
 async function plansPage(req, res) {
   const plans = SubscriptionViewModelBuilder.buildPlansList()
@@ -119,45 +116,13 @@ async function userSubscriptionPage(req, res) {
     personalSubscription ? personalSubscription.plan : undefined
   )
 
-  let subscriptionCopy = 'default'
-  if (
-    personalSubscription ||
-    hasSubscription ||
-    (memberGroupSubscriptions && memberGroupSubscriptions.length > 0) ||
-    currentInstitutionsWithLicence.length > 0
-  ) {
-    AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
-  } else {
-    try {
-      const testSegmentation = await SplitTestHandler.promises.getTestSegmentation(
-        user._id,
-        SUBSCRIPTION_PAGE_SPLIT_TEST
-      )
-      if (testSegmentation.enabled) {
-        subscriptionCopy = testSegmentation.variant
-
-        AnalyticsManager.recordEvent(user._id, 'subscription-page-view', {
-          splitTestId: SUBSCRIPTION_PAGE_SPLIT_TEST,
-          splitTestVariantId: testSegmentation.variant,
-        })
-      } else {
-        AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
-      }
-    } catch (error) {
-      logger.error(
-        { err: error },
-        `Failed to get segmentation for user '${user._id}' and split test '${SUBSCRIPTION_PAGE_SPLIT_TEST}'`
-      )
-      AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
-    }
-  }
+  AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
 
   const data = {
     title: 'your_subscription',
     plans,
     user,
     hasSubscription,
-    subscriptionCopy,
     fromPlansPage,
     personalSubscription,
     memberGroupSubscriptions,

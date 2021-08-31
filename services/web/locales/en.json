@@ -455,6 +455,7 @@
   "github_integration_info": "Push and pull commits to and from GitHub or directly from Git, so you or your collaborators can work offline with Git and online with Overleaf.",
   "latex_editor_info": "Everything you need in a modern LaTeX editor --- spell check, intelligent autocomplete, syntax highlighting, dozens of color themes, vim and emacs bindings, help with LaTeX warnings and error messages, and much more.",
   "change_plans_any_time": "You can change plans or change your account at any time. ",
+  "invite_more_collab": "Invite more collaborators",
   "number_collab": "Number of collaborators",
   "unlimited_private_info": "All your projects are private by default. Invite collaborators to read or edit by email address or by sending them a secret link.",
   "unlimited_private": "Unlimited private projects",
