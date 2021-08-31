@@ -236,6 +236,7 @@
   "linked_collabratec_description": "Use Collabratec to manage your __appName__ projects.",
   "reset_from_sl": "Please reset your password from ShareLaTeX and login there to move your account to Overleaf",
   "dropbox_already_linked_error": "Your Dropbox account cannot be linked as it is already linked with another Overleaf account.",
+  "dropbox_already_linked_error_with_email": "Your Dropbox account cannot be linked as it is already linked with another Overleaf account using email address __otherUsersEmail__.",
   "github_too_many_files_error": "This repository cannot be imported as it exceeds the maximum number of files allowed",
   "linked_accounts": "linked accounts",
   "linked_accounts_explained": "You can link your __appName__ account with other services to enable the features described below",
