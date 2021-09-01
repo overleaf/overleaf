@@ -119,6 +119,19 @@ describe('leaveDoc', function () {
       })
     })
 
+    describe('then leaving an invalid doc', function () {
+      beforeEach(function (done) {
+        return this.client.emit('leaveDoc', 'bad-id', error => {
+          this.error = error
+          return done()
+        })
+      })
+
+      return it('should return an error', function () {
+        return expect(this.error).to.exist
+      })
+    })
+
     describe('when sending a leaveDoc request before the previous joinDoc request has completed', function () {
       beforeEach(function (done) {
         this.client.emit('leaveDoc', this.doc_id, () => {})

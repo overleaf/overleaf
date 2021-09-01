@@ -22,6 +22,7 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "@overleaf/metrics": "^3.5.1",
     "@overleaf/o-error": "^3.1.0",
     "@overleaf/redis-wrapper": "^2.0.0",

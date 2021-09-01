@@ -292,6 +292,90 @@ describe('joinDoc', function () {
   // project, since joinProject already catches that. If you can join a project,
   // then you can join a doc in that project.
 
+  describe('for an invalid doc', function () {
+    before(function (done) {
+      return async.series(
+        [
+          cb => {
+            return FixturesManager.setUpProject(
+              {
+                privilegeLevel: 'owner',
+              },
+              (e, { project_id, user_id }) => {
+                this.project_id = project_id
+                this.user_id = user_id
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            return FixturesManager.setUpDoc(
+              this.project_id,
+              {
+                lines: this.lines,
+                version: this.version,
+                ops: this.ops,
+                ranges: this.ranges,
+              },
+              (e, { doc_id }) => {
+                this.doc_id = doc_id
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            this.client = RealTimeClient.connect()
+            return this.client.on('connectionAccepted', cb)
+          },
+
+          cb => {
+            return this.client.emit(
+              'joinProject',
+              { project_id: this.project_id },
+              cb
+            )
+          },
+
+          cb => {
+            return this.client.emit(
+              'joinDoc',
+              'invalid-doc-id',
+              (error, ...rest) => {
+                this.error = error
+                return cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should not get the doc from the doc updater', function () {
+      return MockDocUpdaterServer.getDocument
+        .calledWith(this.project_id, 'invalid-doc-id')
+        .should.equal(false)
+    })
+
+    it('should return an invalid id error', function () {
+      this.error.message.should.equal('invalid id')
+    })
+
+    return it('should not have joined the doc room', function (done) {
+      return RealTimeClient.getConnectedClient(
+        this.client.socket.sessionid,
+        (error, client) => {
+          expect(Array.from(client.rooms).includes('invalid-doc-id')).to.equal(
+            false
+          )
+          return done()
+        }
+      )
+    })
+  })
+
   describe('with a fromVersion', function () {
     before(function (done) {
       this.fromVersion = 36

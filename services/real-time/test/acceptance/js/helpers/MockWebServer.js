@@ -39,13 +39,16 @@ module.exports = MockWebServer = {
   joinProjectRequest(req, res, next) {
     const { project_id } = req.params
     const { user_id } = req.query
-    if (project_id === 'not-found') {
+    if (project_id === '404404404404404404404404') {
+      // not-found
       return res.status(404).send()
     }
-    if (project_id === 'forbidden') {
+    if (project_id === '403403403403403403403403') {
+      // forbidden
       return res.status(403).send()
     }
-    if (project_id === 'rate-limited') {
+    if (project_id === '429429429429429429429429') {
+      // rate-limited
       return res.status(429).send()
     } else {
       return MockWebServer.joinProject(

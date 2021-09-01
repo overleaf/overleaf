@@ -181,7 +181,7 @@ describe('joinProject', function () {
           cb => {
             return FixturesManager.setUpProject(
               {
-                project_id: 'forbidden',
+                project_id: '403403403403403403403403', // forbidden
                 privilegeLevel: 'owner',
                 project: {
                   name: 'Test Project',
@@ -242,7 +242,7 @@ describe('joinProject', function () {
           cb => {
             return FixturesManager.setUpProject(
               {
-                project_id: 'not-found',
+                project_id: '404404404404404404404404', // not-found
                 privilegeLevel: 'owner',
                 project: {
                   name: 'Test Project',
@@ -296,6 +296,115 @@ describe('joinProject', function () {
     })
   })
 
+  describe('when invalid', function () {
+    before(function (done) {
+      MockWebServer.joinProject.resetHistory()
+      return async.series(
+        [
+          cb => {
+            this.client = RealTimeClient.connect()
+            return this.client.on('connectionAccepted', cb)
+          },
+
+          cb => {
+            return this.client.emit(
+              'joinProject',
+              { project_id: 'invalid-id' },
+              error => {
+                this.error = error
+                return cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should return an invalid id error', function () {
+      this.error.message.should.equal('invalid id')
+    })
+
+    it('should not call to web', function () {
+      MockWebServer.joinProject.called.should.equal(false)
+    })
+  })
+
+  describe('when joining more than one project', function () {
+    before(function (done) {
+      return async.series(
+        [
+          cb => {
+            return FixturesManager.setUpProject(
+              {
+                privilegeLevel: 'owner',
+                project: {
+                  name: 'Other Project',
+                },
+              },
+              (e, { project_id, user_id }) => {
+                this.other_project_id = project_id
+                this.other_user_id = user_id
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            return FixturesManager.setUpProject(
+              {
+                user_id: this.other_user_id,
+                privilegeLevel: 'owner',
+                project: {
+                  name: 'Test Project',
+                },
+              },
+              (e, { project_id, user_id }) => {
+                this.project_id = project_id
+                this.user_id = user_id
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            this.client = RealTimeClient.connect()
+            return this.client.on('connectionAccepted', cb)
+          },
+
+          cb => {
+            return this.client.emit(
+              'joinProject',
+              { project_id: this.project_id },
+              (error, project, privilegeLevel, protocolVersion) => {
+                this.project = project
+                this.privilegeLevel = privilegeLevel
+                this.protocolVersion = protocolVersion
+                return cb(error)
+              }
+            )
+          },
+
+          cb => {
+            return this.client.emit(
+              'joinProject',
+              { project_id: this.other_project_id },
+              error => {
+                this.error = error
+                return cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    return it('should return an error', function () {
+      this.error.message.should.equal('cannot join multiple projects')
+    })
+  })
+
   return describe('when over rate limit', function () {
     before(function (done) {
       return async.series(
@@ -308,7 +417,7 @@ describe('joinProject', function () {
           cb => {
             return this.client.emit(
               'joinProject',
-              { project_id: 'rate-limited' },
+              { project_id: '429429429429429429429429' }, // rate-limited
               error => {
                 this.error = error
                 return cb()

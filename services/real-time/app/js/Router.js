@@ -10,6 +10,7 @@ const HttpApiController = require('./HttpApiController')
 const bodyParser = require('body-parser')
 const base64id = require('base64id')
 const { UnexpectedArgumentsError } = require('./Errors')
+const Joi = require('@hapi/joi')
 
 const basicAuth = require('basic-auth-connect')
 const httpAuth = basicAuth(function (user, pass) {
@@ -24,6 +25,11 @@ const httpAuth = basicAuth(function (user, pass) {
 
 const HOSTNAME = require('os').hostname()
 
+const JOI_OBJECT_ID = Joi.string()
+  .required()
+  .regex(/^[0-9a-f]{24}$/)
+  .message('invalid id')
+
 let Router
 module.exports = Router = {
   _handleError(callback, error, client, method, attrs) {
@@ -34,7 +40,21 @@ module.exports = Router = {
     attrs.client_id = client.id
     attrs.err = error
     attrs.method = method
-    if (error.name === 'CodedError') {
+    if (Joi.isError(error)) {
+      logger.warn(attrs, 'validation error')
+      var message = 'invalid'
+      try {
+        message = error.details[0].message
+      } catch (e) {
+        // ignore unexpected errors
+        logger.warn({ error, e }, 'unexpected validation error')
+      }
+      const serializedError = { message }
+      metrics.inc('validation-error', 1, {
+        status: method,
+      })
+      callback(serializedError)
+    } else if (error.name === 'CodedError') {
       logger.warn(attrs, error.message)
       const serializedError = { message: error.message, code: error.info.code }
       callback(serializedError)
@@ -53,6 +73,8 @@ module.exports = Router = {
         'not authorized',
         'joinLeaveEpoch mismatch',
         'doc updater could not load requested ops',
+        'no project_id found on client',
+        'cannot join multiple projects',
       ].includes(error.message)
     ) {
       logger.warn(attrs, error.message)
@@ -65,6 +87,11 @@ module.exports = Router = {
         message: 'Something went wrong in real-time service',
       }
       callback(serializedError)
+    }
+    if (attrs.disconnect) {
+      setTimeout(function () {
+        client.disconnect()
+      }, 100)
     }
   },
 
@@ -189,18 +216,45 @@ module.exports = Router = {
             arguments
           )
         }
-
-        if (data.anonymousAccessToken) {
-          user.anonymousAccessToken = data.anonymousAccessToken
+        try {
+          Joi.assert(
+            data,
+            Joi.object({
+              project_id: JOI_OBJECT_ID,
+              anonymousAccessToken: Joi.string(),
+            })
+          )
+        } catch (error) {
+          return Router._handleError(callback, error, client, 'joinProject', {
+            disconnect: 1,
+          })
+        }
+        const { project_id, anonymousAccessToken } = data
+        // only allow connection to a single project
+        if (
+          client.ol_current_project_id &&
+          project_id !== client.ol_current_project_id
+        ) {
+          return Router._handleError(
+            callback,
+            new Error('cannot join multiple projects'),
+            client,
+            'joinProject',
+            { disconnect: 1 }
+          )
+        }
+        client.ol_current_project_id = project_id
+        if (anonymousAccessToken) {
+          user.anonymousAccessToken = anonymousAccessToken
         }
         WebsocketController.joinProject(
           client,
           user,
-          data.project_id,
+          project_id,
           function (err, ...args) {
             if (err) {
               Router._handleError(callback, err, client, 'joinProject', {
-                project_id: data.project_id,
+                project_id: project_id,
                 user_id: user._id,
               })
             } else {
@@ -253,7 +307,20 @@ module.exports = Router = {
         } else {
           return Router._handleInvalidArguments(client, 'joinDoc', arguments)
         }
-
+        try {
+          Joi.assert(
+            { doc_id, fromVersion, options },
+            Joi.object({
+              doc_id: JOI_OBJECT_ID,
+              fromVersion: Joi.number().integer(),
+              options: Joi.object().required(),
+            })
+          )
+        } catch (error) {
+          return Router._handleError(callback, error, client, 'joinDoc', {
+            disconnect: 1,
+          })
+        }
         WebsocketController.joinDoc(
           client,
           doc_id,
@@ -276,7 +343,13 @@ module.exports = Router = {
         if (typeof callback !== 'function') {
           return Router._handleInvalidArguments(client, 'leaveDoc', arguments)
         }
-
+        try {
+          Joi.assert(doc_id, JOI_OBJECT_ID)
+        } catch (error) {
+          return Router._handleError(callback, error, client, 'joinDoc', {
+            disconnect: 1,
+          })
+        }
         WebsocketController.leaveDoc(client, doc_id, function (err, ...args) {
           if (err) {
             Router._handleError(callback, err, client, 'leaveDoc', {
@@ -352,7 +425,19 @@ module.exports = Router = {
             arguments
           )
         }
-
+        try {
+          Joi.assert(
+            { doc_id, update },
+            Joi.object({
+              doc_id: JOI_OBJECT_ID,
+              update: Joi.object().required(),
+            })
+          )
+        } catch (error) {
+          return Router._handleError(callback, error, client, 'applyOtUpdate', {
+            disconnect: 1,
+          })
+        }
         WebsocketController.applyOtUpdate(
           client,
           doc_id,
