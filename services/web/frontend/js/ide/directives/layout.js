@@ -162,7 +162,9 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
             }
           }
 
-          return element.layout().resizeAll()
+          ide.$timeout(() => {
+            element.layout().resizeAll()
+          })
         }
 
         element.layout(options)
