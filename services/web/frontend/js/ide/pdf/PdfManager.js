@@ -9,6 +9,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import './controllers/PdfController'
+import './controllers/PdfSynctexController'
 import './controllers/PdfViewToggleController'
 import '../pdfng/directives/pdfJs'
 
