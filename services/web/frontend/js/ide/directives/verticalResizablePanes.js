@@ -96,8 +96,10 @@ export default App.directive('verticalResizablePanes', (localStorage, ide) => ({
     }
 
     if (resizeOn) {
-      scope.$on(resizeOn, () => {
-        layoutHandle.resizeAll()
+      ide.$scope.$on(resizeOn, () => {
+        ide.$timeout(() => {
+          layoutHandle.resizeAll()
+        })
       })
     }
 
