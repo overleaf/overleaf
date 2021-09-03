@@ -19,7 +19,10 @@ div.full-size(
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")
-			include ./pdf
+			if showNewPdfPreview
+				pdf-preview-pane()
+			else
+				include ./pdf
 
 	.ui-layout-resizer-controls.synctex-controls(
 		ng-show="!!pdf.url && settings.pdfViewer == 'pdfjs'"
@@ -48,7 +51,10 @@ div.full-size(
 	ng-if="ui.pdfLayout == 'flat'"
 	ng-show="ui.view == 'pdf'"
 )
-	include ./pdf
+	if showNewPdfPreview
+		pdf-preview-pane()
+	else
+		include ./pdf
 
 // fallback, shown when no file/view is selected
 div.full-size.no-file-selection(

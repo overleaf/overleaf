@@ -872,6 +872,7 @@ const ProjectController = {
                 'new_file_view',
                 user.alphaProgram || user.betaProgram
               ),
+              showNewPdfPreview: shouldDisplayFeature('new_pdf_preview', false),
               showSymbolPalette: shouldDisplayFeature(
                 'symbol_palette',
                 user.alphaProgram || user.betaProgram

@@ -66,6 +66,7 @@ import './main/system-messages'
 import '../../modules/modules-ide.js'
 import './shared/context/controllers/root-context-controller'
 import './features/editor-navigation-toolbar/controllers/editor-navigation-toolbar-controller'
+import './features/pdf-preview/controllers/pdf-preview-controller'
 import './features/share-project-modal/controllers/react-share-project-modal-controller'
 import getMeta from './utils/meta'
 
