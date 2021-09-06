@@ -3,14 +3,26 @@
   "version": "2.0.0",
   "description": "",
   "scripts": {
-    "lint": "echo noop",
-    "format": "echo noop",
-    "test:ci": "echo noop",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "sh ./bin/compile.sh"
+    "lint": "eslint --max-warnings 0 --format unix src || /bin/true",
+    "lint:fix": "eslint --fix src",
+    "format": "prettier --list-different $PWD/src/'**/*.js'",
+    "format:fix": "prettier --write $PWD/src/'**/*.js'",
+    "test:ci": "echo ci tests not implemented"
   },
   "author": "",
   "license": "MIT",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^7.21.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-chai-expect": "^2.2.0",
+    "eslint-plugin-chai-friendly": "^0.7.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-mocha": "^9.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-promise": "^5.1.0",
+    "prettier": "^2.2.1"
   }
 }
