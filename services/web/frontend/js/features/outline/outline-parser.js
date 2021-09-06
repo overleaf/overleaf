@@ -5,7 +5,7 @@ const COMMAND_LEVELS = {
   chapter: 30,
   addchap: 30,
   section: 40,
-  addsect: 40,
+  addsec: 40,
   subsection: 50,
   subsubsection: 60,
   paragraph: 70,
