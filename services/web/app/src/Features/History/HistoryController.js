@@ -352,9 +352,30 @@ module.exports = HistoryController = {
         })
         return next(err)
       }
+      if (response.statusCode !== 200) {
+        if (response.statusCode === 404) {
+          return next(new Errors.NotFoundError('zip not found'))
+        } else {
+          return next(
+            new OError('Error while getting zip for download', {
+              v1ProjectId,
+              statusCode: response.statusCode,
+            })
+          )
+        }
+      }
       if (req.aborted) {
         // client has disconnected -- skip delayed s3 download
         return
+      }
+      if (!body.zipUrl) {
+        return next(
+          new OError('Missing zipUrl, cannot fetch zip file', {
+            v1ProjectId,
+            body,
+            statusCode: response.statusCode,
+          })
+        )
       }
       let retryAttempt = 0
       let retryDelay = 2000
