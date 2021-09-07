@@ -15,17 +15,4 @@ if [ -e '/var/run/docker.sock' ]; then
   usermod -aG dockeronhost www-data
 fi
 
-# Copies over CSLI synctex to the host mounted volume, so it
-# can be subsequently mounted in TexLive containers on Sandbox Compilation
-SYNCTEX=/var/lib/sharelatex/bin/synctex
-if [ ! -f "$SYNCTEX" ]; then
-    if [ "$DISABLE_SYNCTEX_BINARY_COPY" == "true" ]; then
-        echo ">> Copy of synctex executable disabled by DISABLE_SYNCTEX_BINARY_COPY flag, feature may not work"
-    else
-        echo ">> Copying synctex executable to the host"
-        mkdir -p $(dirname $SYNCTEX )
-        cp /var/www/sharelatex/clsi/bin/synctex $SYNCTEX
-    fi
-fi
-
 exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /var/www/sharelatex/clsi/app.js >> /var/log/sharelatex/clsi.log 2>&1

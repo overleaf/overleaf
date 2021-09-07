@@ -26,11 +26,6 @@ RUN node genScript install | bash
 # --------------------
 RUN node genScript compile | bash
 
-# Links CLSI synctex to its default location
-# ------------------------------------------
-RUN ln -s /var/www/sharelatex/clsi/bin/synctex /opt/synctex
-
-
 # Copy runit service startup scripts to its location
 # --------------------------------------------------
 ADD server-ce/runit /etc/service

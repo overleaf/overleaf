@@ -61,6 +61,7 @@ RUN mkdir /install-tl-unx \
 &&  tlmgr install --repository ${TEXLIVE_MIRROR} \
       latexmk \
       texcount \
+      synctex \
     \
 &&  rm -rf /install-tl-unx
 

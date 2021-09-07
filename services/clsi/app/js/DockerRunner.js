@@ -258,12 +258,6 @@ const DockerRunner = {
       },
     }
 
-    if (Settings.path != null && Settings.path.synctexBinHostPath != null) {
-      options.HostConfig.Binds.push(
-        `${Settings.path.synctexBinHostPath}:/opt/synctex:ro`
-      )
-    }
-
     if (Settings.clsi.docker.seccomp_profile != null) {
       options.HostConfig.SecurityOpt.push(
         `seccomp=${Settings.clsi.docker.seccomp_profile}`

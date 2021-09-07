@@ -101,7 +101,13 @@ Hello world
           expect(error).to.not.exist
           expect(result).to.deep.equal({
             pdf: [
-              { page: 1, h: 133.77, v: 134.76, height: 6.92, width: 343.71 },
+              {
+                page: 1,
+                h: 133.768356,
+                v: 134.764618,
+                height: 6.918498,
+                width: 343.71106,
+              },
             ],
           })
           done()

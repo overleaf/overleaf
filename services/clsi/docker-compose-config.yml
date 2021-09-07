@@ -9,12 +9,10 @@ services:
       SHARELATEX_CONFIG: /app/config/settings.defaults.js
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
-      SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./compiles:/app/compiles
       - ./cache:/app/cache
-      - ./bin/synctex:/app/bin/synctex
 
 
   ci:
@@ -25,10 +23,8 @@ services:
       SHARELATEX_CONFIG: /app/config/settings.defaults.js
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
-      SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex
       SQLITE_PATH: /app/compiles/db.sqlite
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - ./compiles:/app/compiles
       - ./cache:/app/cache
-      - ./bin/synctex:/app/bin/synctex

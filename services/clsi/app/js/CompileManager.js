@@ -17,6 +17,7 @@ const async = require('async')
 const Errors = require('./Errors')
 const CommandRunner = require('./CommandRunner')
 const { emitPdfStats } = require('./ContentCacheMetrics')
+const SynctexOutputParser = require('./SynctexOutputParser')
 
 function getCompileName(projectId, userId) {
   if (userId != null) {
@@ -428,32 +429,44 @@ function syncFromCode(
   // wherever it is on the host.
   const compileName = getCompileName(projectId, userId)
   const baseDir = Settings.path.synctexBaseDir(compileName)
-  const filePath = baseDir + '/' + filename
-  const synctexPath = `${baseDir}/output.pdf`
-  const command = ['code', synctexPath, filePath, line, column]
+  const inputFilePath = Path.join(baseDir, filename)
+  const outputFilePath = Path.join(baseDir, 'output.pdf')
+  const command = [
+    'synctex',
+    'view',
+    '-i',
+    `${line}:${column}:${inputFilePath}`,
+    '-o',
+    outputFilePath,
+  ]
   _runSynctex(projectId, userId, command, imageName, (error, stdout) => {
     if (error) {
       return callback(error)
     }
-    logger.log(
+    logger.debug(
       { projectId, userId, filename, line, column, command, stdout },
       'synctex code output'
     )
-    callback(null, _parseSynctexFromCodeOutput(stdout))
+    callback(null, SynctexOutputParser.parseViewOutput(stdout))
   })
 }
 
 function syncFromPdf(projectId, userId, page, h, v, imageName, callback) {
   const compileName = getCompileName(projectId, userId)
   const baseDir = Settings.path.synctexBaseDir(compileName)
-  const synctexPath = `${baseDir}/output.pdf`
-  const command = ['pdf', synctexPath, page, h, v]
+  const outputFilePath = `${baseDir}/output.pdf`
+  const command = [
+    'synctex',
+    'edit',
+    '-o',
+    `${page}:${h}:${v}:${outputFilePath}`,
+  ]
   _runSynctex(projectId, userId, command, imageName, (error, stdout) => {
     if (error != null) {
       return callback(error)
     }
     logger.log({ projectId, userId, page, h, v, stdout }, 'synctex pdf output')
-    callback(null, _parseSynctexFromPdfOutput(stdout, baseDir))
+    callback(null, SynctexOutputParser.parseEditOutput(stdout, baseDir))
   })
 }
 
@@ -482,12 +495,12 @@ function _checkFileExists(dir, filename, callback) {
 }
 
 function _runSynctex(projectId, userId, command, imageName, callback) {
-  command.unshift('/opt/synctex')
-
   const directory = getCompileDir(projectId, userId)
   const timeout = 60 * 1000 // increased to allow for large projects
   const compileName = getCompileName(projectId, userId)
   const compileGroup = 'synctex'
+  const defaultImageName =
+    Settings.clsi && Settings.clsi.docker && Settings.clsi.docker.image
   _checkFileExists(directory, 'output.synctex.gz', error => {
     if (error) {
       return callback(error)
@@ -496,10 +509,7 @@ function _runSynctex(projectId, userId, command, imageName, callback) {
       compileName,
       command,
       directory,
-      imageName ||
-        (Settings.clsi && Settings.clsi.docker
-          ? Settings.clsi.docker.image
-          : undefined),
+      imageName || defaultImageName,
       timeout,
       {},
       compileGroup,
@@ -515,39 +525,6 @@ function _runSynctex(projectId, userId, command, imageName, callback) {
       }
     )
   })
-}
-
-function _parseSynctexFromCodeOutput(output) {
-  const results = []
-  for (const line of output.split('\n')) {
-    const [node, page, h, v, width, height] = line.split('\t')
-    if (node === 'NODE') {
-      results.push({
-        page: parseInt(page, 10),
-        h: parseFloat(h),
-        v: parseFloat(v),
-        height: parseFloat(height),
-        width: parseFloat(width),
-      })
-    }
-  }
-  return results
-}
-
-function _parseSynctexFromPdfOutput(output, baseDir) {
-  const results = []
-  for (const line of output.split('\n')) {
-    const [node, filePath, lineNum, column] = line.split('\t')
-    if (node === 'NODE') {
-      const file = filePath.slice(baseDir.length + 1)
-      results.push({
-        file,
-        line: parseInt(lineNum, 10),
-        column: parseInt(column, 10),
-      })
-    }
-  }
-  return results
 }
 
 function wordcount(projectId, userId, filename, image, callback) {

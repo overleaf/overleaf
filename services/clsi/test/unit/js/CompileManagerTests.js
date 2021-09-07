@@ -34,6 +34,12 @@ describe('CompileManager', function () {
         build: 1234,
       },
     ]
+    this.commandOutput = 'Dummy output'
+    this.compileBaseDir = '/compile/dir'
+    this.outputBaseDir = '/output/dir'
+    this.compileDir = `${this.compileBaseDir}/${this.projectId}-${this.userId}`
+    this.outputDir = `${this.outputBaseDir}/${this.projectId}-${this.userId}`
+
     this.proc = new EventEmitter()
     this.proc.stdout = new EventEmitter()
     this.proc.stderr = new EventEmitter()
@@ -53,11 +59,9 @@ describe('CompileManager', function () {
     }
     this.Settings = {
       path: {
-        compilesDir: '/compiles/dir',
-        outputDir: '/output/dir',
-      },
-      synctexBaseDir() {
-        return '/compile'
+        compilesDir: this.compileBaseDir,
+        outputDir: this.outputBaseDir,
+        synctexBaseDir: sinon.stub(),
       },
       clsi: {
         docker: {
@@ -65,12 +69,15 @@ describe('CompileManager', function () {
         },
       },
     }
+    this.Settings.path.synctexBaseDir
+      .withArgs(`${this.projectId}-${this.userId}`)
+      .returns(this.compileDir)
     this.child_process = {
       exec: sinon.stub(),
       spawn: sinon.stub().returns(this.proc),
     }
     this.CommandRunner = {
-      run: sinon.stub().yields(),
+      run: sinon.stub().yields(null, { stdout: this.commandOutput }),
     }
     this.DraftModeManager = {
       injectDraftMode: sinon.stub().yields(),
@@ -83,6 +90,11 @@ describe('CompileManager', function () {
         runner((err, ...result) => callback(err, ...result))
       }),
     }
+    this.SynctexOutputParser = {
+      parseViewOutput: sinon.stub(),
+      parseEditOutput: sinon.stub(),
+    }
+
     this.fs = {
       lstat: sinon.stub(),
       stat: sinon.stub(),
@@ -104,6 +116,7 @@ describe('CompileManager', function () {
         './DraftModeManager': this.DraftModeManager,
         './TikzManager': this.TikzManager,
         './LockManager': this.LockManager,
+        './SynctexOutputParser': this.SynctexOutputParser,
         fs: this.fs,
         'fs-extra': this.fse,
       },
@@ -124,9 +137,6 @@ describe('CompileManager', function () {
         compileGroup: (this.compileGroup = 'compile-group'),
       }
       this.env = {}
-      this.Settings.compileDir = 'compiles'
-      this.compileDir = `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}`
-      this.outputDir = `${this.Settings.path.outputDir}/${this.projectId}-${this.userId}`
     })
 
     describe('when the project is locked', function () {
@@ -278,13 +288,7 @@ describe('CompileManager', function () {
 
       it('should remove the project directory', function () {
         this.child_process.spawn
-          .calledWith('rm', [
-            '-r',
-            '-f',
-            '--',
-            `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}`,
-            `${this.Settings.path.outputDir}/${this.projectId}-${this.userId}`,
-          ])
+          .calledWith('rm', ['-r', '-f', '--', this.compileDir, this.outputDir])
           .should.equal(true)
       })
 
@@ -312,13 +316,7 @@ describe('CompileManager', function () {
 
       it('should remove the project directory', function () {
         this.child_process.spawn
-          .calledWith('rm', [
-            '-r',
-            '-f',
-            '--',
-            `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}`,
-            `${this.Settings.path.outputDir}/${this.projectId}-${this.userId}`,
-          ])
+          .calledWith('rm', ['-r', '-f', '--', this.compileDir, this.outputDir])
           .should.equal(true)
       })
 
@@ -326,7 +324,7 @@ describe('CompileManager', function () {
         this.callback.calledWithExactly(sinon.match(Error)).should.equal(true)
 
         this.callback.args[0][0].message.should.equal(
-          `rm -r ${this.Settings.path.compilesDir}/${this.projectId}-${this.userId} ${this.Settings.path.outputDir}/${this.projectId}-${this.userId} failed: ${this.error}`
+          `rm -r ${this.compileDir} ${this.outputDir} failed: ${this.error}`
         )
       })
     })
@@ -341,9 +339,7 @@ describe('CompileManager', function () {
       this.height = 234.56
       this.line = 5
       this.column = 3
-      this.file_name = 'main.tex'
-      this.Settings.path.synctexBaseDir = projectId =>
-        `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}`
+      this.filename = 'main.tex'
     })
 
     describe('syncFromCode', function () {
@@ -353,12 +349,14 @@ describe('CompileManager', function () {
             return true
           },
         })
-        this.stdout = `NODE\t${this.page}\t${this.h}\t${this.v}\t${this.width}\t${this.height}\n`
-        this.CommandRunner.run.yields(null, { stdout: this.stdout })
+        this.records = [{ page: 1, h: 2, v: 3, width: 4, height: 5 }]
+        this.SynctexOutputParser.parseViewOutput
+          .withArgs(this.commandOutput)
+          .returns(this.records)
         this.CompileManager.syncFromCode(
           this.projectId,
           this.userId,
-          this.file_name,
+          this.filename,
           this.line,
           this.column,
           '',
@@ -367,39 +365,30 @@ describe('CompileManager', function () {
       })
 
       it('should execute the synctex binary', function () {
-        const synctexPath = `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}/output.pdf`
-        const filePath = `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}/${this.file_name}`
-        this.CommandRunner.run
-          .calledWith(
-            `${this.projectId}-${this.userId}`,
-            [
-              '/opt/synctex',
-              'code',
-              synctexPath,
-              filePath,
-              this.line,
-              this.column,
-            ],
-            `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}`,
-            this.Settings.clsi.docker.image,
-            60000,
-            {}
-          )
-          .should.equal(true)
+        const outputFilePath = `${this.compileDir}/output.pdf`
+        const inputFilePath = `${this.compileDir}/${this.filename}`
+        this.CommandRunner.run.should.have.been.calledWith(
+          `${this.projectId}-${this.userId}`,
+          [
+            'synctex',
+            'view',
+            '-i',
+            `${this.line}:${this.column}:${inputFilePath}`,
+            '-o',
+            outputFilePath,
+          ],
+          this.compileDir,
+          this.Settings.clsi.docker.image,
+          60000,
+          {}
+        )
       })
 
       it('should call the callback with the parsed output', function () {
-        this.callback
-          .calledWith(null, [
-            {
-              page: this.page,
-              h: this.h,
-              v: this.v,
-              height: this.height,
-              width: this.width,
-            },
-          ])
-          .should.equal(true)
+        this.callback.should.have.been.calledWith(
+          null,
+          sinon.match.array.deepEquals(this.records)
+        )
       })
 
       describe('with a custom imageName', function () {
@@ -409,7 +398,7 @@ describe('CompileManager', function () {
           this.CompileManager.syncFromCode(
             this.projectId,
             this.userId,
-            this.file_name,
+            this.filename,
             this.line,
             this.column,
             customImageName,
@@ -418,25 +407,23 @@ describe('CompileManager', function () {
         })
 
         it('should execute the synctex binary in a custom docker image', function () {
-          const synctexPath = `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}/output.pdf`
-          const filePath = `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}/${this.file_name}`
-          this.CommandRunner.run
-            .calledWith(
-              `${this.projectId}-${this.userId}`,
-              [
-                '/opt/synctex',
-                'code',
-                synctexPath,
-                filePath,
-                this.line,
-                this.column,
-              ],
-              `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}`,
-              customImageName,
-              60000,
-              {}
-            )
-            .should.equal(true)
+          const outputFilePath = `${this.compileDir}/output.pdf`
+          const inputFilePath = `${this.compileDir}/${this.filename}`
+          this.CommandRunner.run.should.have.been.calledWith(
+            `${this.projectId}-${this.userId}`,
+            [
+              'synctex',
+              'view',
+              '-i',
+              `${this.line}:${this.column}:${inputFilePath}`,
+              '-o',
+              outputFilePath,
+            ],
+            this.compileDir,
+            customImageName,
+            60000,
+            {}
+          )
         })
       })
     })
@@ -448,8 +435,10 @@ describe('CompileManager', function () {
             return true
           },
         })
-        this.stdout = `NODE\t${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}/${this.file_name}\t${this.line}\t${this.column}\n`
-        this.CommandRunner.run.yields(null, { stdout: this.stdout })
+        this.records = [{ file: 'main.tex', line: 1, column: 1 }]
+        this.SynctexOutputParser.parseEditOutput
+          .withArgs(this.commandOutput, this.compileDir)
+          .returns(this.records)
         this.CompileManager.syncFromPdf(
           this.projectId,
           this.userId,
@@ -462,29 +451,27 @@ describe('CompileManager', function () {
       })
 
       it('should execute the synctex binary', function () {
-        const synctexPath = `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}/output.pdf`
-        this.CommandRunner.run
-          .calledWith(
-            `${this.projectId}-${this.userId}`,
-            ['/opt/synctex', 'pdf', synctexPath, this.page, this.h, this.v],
-            `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}`,
-            this.Settings.clsi.docker.image,
-            60000,
-            {}
-          )
-          .should.equal(true)
+        const outputFilePath = `${this.compileDir}/output.pdf`
+        this.CommandRunner.run.should.have.been.calledWith(
+          `${this.projectId}-${this.userId}`,
+          [
+            'synctex',
+            'edit',
+            '-o',
+            `${this.page}:${this.h}:${this.v}:${outputFilePath}`,
+          ],
+          this.compileDir,
+          this.Settings.clsi.docker.image,
+          60000,
+          {}
+        )
       })
 
       it('should call the callback with the parsed output', function () {
-        this.callback
-          .calledWith(null, [
-            {
-              file: this.file_name,
-              line: this.line,
-              column: this.column,
-            },
-          ])
-          .should.equal(true)
+        this.callback.should.have.been.calledWith(
+          null,
+          sinon.match.array.deepEquals(this.records)
+        )
       })
 
       describe('with a custom imageName', function () {
@@ -503,12 +490,17 @@ describe('CompileManager', function () {
         })
 
         it('should execute the synctex binary in a custom docker image', function () {
-          const synctexPath = `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}/output.pdf`
+          const outputFilePath = `${this.compileDir}/output.pdf`
           this.CommandRunner.run
             .calledWith(
               `${this.projectId}-${this.userId}`,
-              ['/opt/synctex', 'pdf', synctexPath, this.page, this.h, this.v],
-              `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}`,
+              [
+                'synctex',
+                'edit',
+                '-o',
+                `${this.page}:${this.h}:${this.v}:${outputFilePath}`,
+              ],
+              this.compileDir,
               customImageName,
               60000,
               {}
@@ -525,22 +517,20 @@ describe('CompileManager', function () {
       this.fs.readFile.yields(null, this.stdout)
 
       this.timeout = 60 * 1000
-      this.file_name = 'main.tex'
-      this.Settings.path.compilesDir = '/local/compile/directory'
+      this.filename = 'main.tex'
       this.image = 'example.com/image'
 
       this.CompileManager.wordcount(
         this.projectId,
         this.userId,
-        this.file_name,
+        this.filename,
         this.image,
         this.callback
       )
     })
 
     it('should run the texcount command', function () {
-      this.directory = `${this.Settings.path.compilesDir}/${this.projectId}-${this.userId}`
-      this.filePath = `$COMPILE_DIR/${this.file_name}`
+      this.filePath = `$COMPILE_DIR/${this.filename}`
       this.command = [
         'texcount',
         '-nocol',
@@ -553,7 +543,7 @@ describe('CompileManager', function () {
         .calledWith(
           `${this.projectId}-${this.userId}`,
           this.command,
-          this.directory,
+          this.compileDir,
           this.image,
           this.timeout,
           {}
