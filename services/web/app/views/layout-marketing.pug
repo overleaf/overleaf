@@ -121,7 +121,7 @@ html(
 		if (typeof(suppressFooter) == "undefined")
 			include layout/footer-marketing
 
-		!= moduleIncludes("contactModal", locals)
+		!= moduleIncludes("contactModal-marketing", locals)
 
 		block foot-scripts
 			each file in entrypointScripts(entrypoint)

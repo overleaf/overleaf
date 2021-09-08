@@ -26,6 +26,7 @@ function formSubmitHelper(formEl) {
       const captchaResponse = await validateCaptcha(formEl)
 
       const data = await sendFormRequest(formEl, captchaResponse)
+      formEl.dispatchEvent(new Event('sent'))
 
       // Handle redirects. From poking around, this still appears to be the
       // "correct" way of handling redirects with fetch
@@ -110,16 +111,27 @@ function formInflightHelper(el) {
     disabledEl.disabled = false
     toggleDisplay(showWhenInflightEl, showWhenNotInflightEl)
   })
+}
 
-  function toggleDisplay(hideEl, showEl) {
-    hideEl.setAttribute('hidden', '')
-    showEl.removeAttribute('hidden')
-  }
+function formSentHelper(el) {
+  const showWhenPending = el.querySelector('[data-ol-not-sent]')
+  const showWhenDone = el.querySelector('[data-ol-sent]')
+  if (!showWhenDone) return
+
+  el.addEventListener('sent', () => {
+    toggleDisplay(showWhenPending, showWhenDone)
+  })
+}
+
+function toggleDisplay(hideEl, showEl) {
+  hideEl.setAttribute('hidden', '')
+  showEl.removeAttribute('hidden')
 }
 
 export function hydrateForm(el) {
   formSubmitHelper(el)
   formInflightHelper(el)
+  formSentHelper(el)
 }
 
 document.querySelectorAll(`[data-ol-form]`).forEach(form => hydrateForm(form))
