@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
-const ManifestPlugin = require('webpack-manifest-plugin')
+const WebpackAssetsManifest = require('webpack-assets-manifest')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const PackageVersions = require('./app/src/infrastructure/PackageVersions')
@@ -41,6 +41,8 @@ module.exports = {
   // kept in memory for speed
   output: {
     path: path.join(__dirname, '/public'),
+
+    publicPath: '/',
 
     // By default write into js directory
     filename: 'js/[name].js',
@@ -250,11 +252,9 @@ module.exports = {
   plugins: [
     // Generate a manifest.json file which is used by the backend to map the
     // base filenames to the generated output filenames
-    new ManifestPlugin({
-      // Always write the manifest file to disk (even if in dev mode, where
-      // files are held in memory). This is needed because the server will read
-      // this file (from disk) when building the script's url
-      writeToFileEmit: true,
+    new WebpackAssetsManifest({
+      entrypoints: true,
+      publicPath: true,
     }),
 
     // Prevent moment from loading (very large) locale files that aren't used

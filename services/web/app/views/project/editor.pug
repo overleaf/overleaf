@@ -6,8 +6,9 @@ block vars
 	- var suppressSkipToContent = true
 	- metadata.robotsNoindexNofollow = true
 
-block _headLinks
-	link(rel='stylesheet', href=buildStylesheetPath("ide.css"))
+block css
+	each file in entrypointStyles('ide')
+		link(rel='stylesheet', href=file)
 
 block content
 	.editor(ng-controller="IdeController").full-size
@@ -200,5 +201,5 @@ block append meta
 block foot-scripts
 	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
 	script(type="text/javascript", nonce=scriptNonce, src=mathJaxPath)
-	script(type="text/javascript", nonce=scriptNonce, src=buildJsPath('libraries.js'))
-	script(type="text/javascript", nonce=scriptNonce, src=buildJsPath('ide.js'))
+	each file in entrypointScripts("ide")
+		script(type="text/javascript", nonce=scriptNonce, src=file)

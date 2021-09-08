@@ -256,9 +256,9 @@
     "to-string-loader": "^1.1.6",
     "val-loader": "^1.1.1",
     "webpack": "^4.44.2",
+    "webpack-assets-manifest": "^4.0.6",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0",
-    "webpack-manifest-plugin": "^2.2.0",
     "webpack-merge": "^4.2.2"
   }
 }

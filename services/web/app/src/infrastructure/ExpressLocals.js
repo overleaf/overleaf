@@ -6,9 +6,7 @@ const Url = require('url')
 const Path = require('path')
 const moment = require('moment')
 const pug = require('pug-runtime')
-
-const IS_DEV_ENV = ['development', 'test'].includes(process.env.NODE_ENV)
-
+const request = require('request')
 const Features = require('./Features')
 const SessionManager = require('../Features/Authentication/SessionManager')
 const PackageVersions = require('./PackageVersions')
@@ -16,17 +14,63 @@ const Modules = require('./Modules')
 const SafeHTMLSubstitute = require('../Features/Helpers/SafeHTMLSubstitution')
 
 let webpackManifest
-if (!IS_DEV_ENV) {
-  // Only load webpack manifest file in production. In dev, the web and webpack
-  // containers can't coordinate, so there no guarantee that the manifest file
-  // exists when the web server boots. We therefore ignore the manifest file in
-  // dev reload
-  webpackManifest = require(`../../../public/manifest.json`)
+switch (process.env.NODE_ENV) {
+  case 'production':
+    // Only load webpack manifest file in production.
+    webpackManifest = require(`../../../public/manifest.json`)
+    break
+  case 'development':
+    // In dev, fetch the manifest from the webpack container.
+    loadManifestFromWebpackDevServer()
+    setInterval(loadManifestFromWebpackDevServer, 10 * 1000)
+    break
+  default:
+    // In ci, all entries are undefined.
+    webpackManifest = {}
+}
+function loadManifestFromWebpackDevServer(done = function () {}) {
+  request(
+    {
+      uri: `${Settings.apis.webpack.url}/manifest.json`,
+      headers: { Host: 'localhost' },
+      json: true,
+    },
+    (err, res, body) => {
+      if (!err && res.statusCode !== 200) {
+        err = new Error(`webpack responded with statusCode: ${res.statusCode}`)
+      }
+      if (err) {
+        logger.err({ err }, 'cannot fetch webpack manifest')
+        return done(err)
+      }
+      webpackManifest = body
+      done()
+    }
+  )
+}
+const IN_CI = process.env.NODE_ENV === 'test'
+function getWebpackAssets(entrypoint, section) {
+  if (IN_CI) {
+    // Emit an empty list of entries in CI.
+    return []
+  }
+  return webpackManifest.entrypoints[entrypoint].assets[section] || []
 }
 
 const I18N_HTML_INJECTIONS = new Set()
 
 module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
+  if (process.env.NODE_ENV === 'development') {
+    // In the dev-env, delay requests until we fetched the manifest once.
+    webRouter.use(function (req, res, next) {
+      if (!webpackManifest) {
+        loadManifestFromWebpackDevServer(next)
+      } else {
+        next()
+      }
+    })
+  }
+
   webRouter.use(function (req, res, next) {
     res.locals.session = req.session
     next()
@@ -81,43 +125,25 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     res.locals.buildBaseAssetPath = function () {
       // Return the base asset path (including the CDN url) so that webpack can
       // use this to dynamically fetch scripts (e.g. PDFjs worker)
-      return Url.resolve(staticFilesBase, '/')
+      return staticFilesBase + '/'
     }
 
     res.locals.buildJsPath = function (jsFile) {
-      let path
-      if (IS_DEV_ENV) {
-        // In dev: resolve path within JS asset directory
-        // We are *not* guaranteed to have a manifest file when the server
-        // starts up
-        path = Path.join('/js', jsFile)
-      } else {
-        // In production: resolve path from webpack manifest file
-        // We are guaranteed to have a manifest file since webpack compiles in
-        // the build
-        path = `/${webpackManifest[jsFile]}`
-      }
-
-      return Url.resolve(staticFilesBase, path)
+      return staticFilesBase + webpackManifest[jsFile]
     }
 
-    // Temporary hack while jQuery/Angular dependencies are *not* bundled,
-    // instead copied into output directory
     res.locals.buildCopiedJsAssetPath = function (jsFile) {
-      let path
-      if (IS_DEV_ENV) {
-        // In dev: resolve path to root directory
-        // We are *not* guaranteed to have a manifest file when the server
-        // starts up
-        path = Path.join('/', jsFile)
-      } else {
-        // In production: resolve path from webpack manifest file
-        // We are guaranteed to have a manifest file since webpack compiles in
-        // the build
-        path = `/${webpackManifest[jsFile]}`
-      }
+      return staticFilesBase + (webpackManifest[jsFile] || '/' + jsFile)
+    }
 
-      return Url.resolve(staticFilesBase, path)
+    res.locals.entrypointScripts = function (entrypoint) {
+      const chunks = getWebpackAssets(entrypoint, 'js')
+      return chunks.map(chunk => staticFilesBase + chunk)
+    }
+
+    res.locals.entrypointStyles = function (entrypoint) {
+      const chunks = getWebpackAssets(entrypoint, 'css')
+      return chunks.map(chunk => staticFilesBase + chunk)
     }
 
     res.locals.mathJaxPath = `/js/libs/mathjax/MathJax.js?${querystring.stringify(
@@ -150,20 +176,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     }
 
     res.locals.buildStylesheetPath = function (cssFileName) {
-      let path
-      if (IS_DEV_ENV) {
-        // In dev: resolve path within CSS asset directory
-        // We are *not* guaranteed to have a manifest file when the server
-        // starts up
-        path = Path.join('/stylesheets/', cssFileName)
-      } else {
-        // In production: resolve path from webpack manifest file
-        // We are guaranteed to have a manifest file since webpack compiles in
-        // the build
-        path = `/${webpackManifest[cssFileName]}`
-      }
-
-      return Url.resolve(staticFilesBase, path)
+      return staticFilesBase + webpackManifest[cssFileName]
     }
 
     res.locals.buildCssPath = function (themeModifier = '') {
@@ -172,7 +185,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
     res.locals.buildImgPath = function (imgFile) {
       const path = Path.join('/img/', imgFile)
-      return Url.resolve(staticFilesBase, path)
+      return staticFilesBase + path
     }
 
     next()

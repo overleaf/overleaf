@@ -15,7 +15,9 @@ html(
 
 		//- Stylesheet
 		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation)), id="main-stylesheet")
-		link(rel='stylesheet', href=buildStylesheetPath("libraries.css"))
+		block css
+			each file in entrypointStyles('main')
+				link(rel='stylesheet', href=file)
 
 		block _headLinks
 
@@ -122,8 +124,8 @@ html(
 		!= moduleIncludes("contactModal", locals)
 
 		block foot-scripts
-			script(type="text/javascript", nonce=scriptNonce, src=buildJsPath('libraries.js'))
-			script(type="text/javascript", nonce=scriptNonce, src=buildJsPath('main.js'))
+			each file in entrypointScripts("main")
+				script(type="text/javascript", nonce=scriptNonce, src=file)
 			script(type="text/javascript", nonce=scriptNonce).
 				//- Look for bundle
 				var cdnBlocked = typeof Frontend === 'undefined'
