@@ -1,23 +1,21 @@
-
-
 footer.site-footer
 	.site-footer-content.hidden-print
 		.row
 			ul.col-md-9
+
 				if Object.keys(settings.i18n.subdomainLang).length > 1
-					li.dropdown.dropup.subdued(dropdown)
+					li.dropdown.dropup.subdued
 						a.dropdown-toggle(
-							href="#",
-							dropdown-toggle,
 							data-toggle="dropdown",
 							aria-haspopup="true",
 							aria-expanded="false",
-							aria-label="Select " + translate('language')
-							tooltip=translate('language')
+							aria-label="Select " + translate('language'),
+							data-ol-lang-selector-tooltip,
+							title=translate('language')
 						)
 							figure(class="sprite-icon sprite-icon-lang sprite-icon-"+currentLngCode alt=translate(currentLngCode))
 
-						ul.dropdown-menu
+						ul.dropdown-menu(role="menu")
 							li.dropdown-header #{translate("language")}
 							each subdomainDetails, subdomain in settings.i18n.subdomainLang
 								if !subdomainDetails.hide
@@ -25,7 +23,7 @@ footer.site-footer
 										a.menu-indent(href=subdomainDetails.url+currentUrlWithQueryParams)
 											figure(class="sprite-icon sprite-icon-lang sprite-icon-"+subdomainDetails.lngCode alt=translate(subdomainDetails.lngCode))
 											|  #{translate(subdomainDetails.lngCode)}
-
+										//- img(src="/img/flags/24/.png")
 				each item in nav.left_footer
 					li
 						if item.url
@@ -34,8 +32,9 @@ footer.site-footer
 							| !{item.text}
 
 			ul.col-md-3.text-right
+
 				each item in nav.right_footer
-					li
+					li(ng-non-bindable)
 						if item.url
 							a(href=item.url, class=item.class, aria-label=item.label) !{item.text}
 						else

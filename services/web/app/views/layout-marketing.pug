@@ -1,0 +1,128 @@
+doctype html
+html(
+	lang=(currentLngCode || 'en')
+)
+	- metadata = metadata || {}
+	- entrypoint = 'marketing'
+
+	//- hook for overriding metadata/page
+	block vars
+
+	head
+		include ./_metadata.pug
+
+		if (typeof(gaExperiments) != "undefined")
+			|!{gaExperiments}
+
+		//- Stylesheet
+		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation)), id="main-stylesheet")
+		block css
+			each file in entrypointStyles(entrypoint)
+				link(rel='stylesheet', href=file)
+
+		block _headLinks
+
+		if settings.i18n.subdomainLang
+			each subdomainDetails in settings.i18n.subdomainLang
+				if !subdomainDetails.hide
+					link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
+
+		//- Scripts
+
+		//- Google Analytics
+		if (typeof(gaToken) != "undefined")
+			script(type="text/javascript", nonce=scriptNonce).
+				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			script(type="text/javascript", nonce=scriptNonce).
+				ga('create', '#{gaToken}', '#{settings.cookieDomain.replace(/^\./, "")}');
+				ga('set', 'anonymizeIp', true);
+				ga('send', 'pageview');
+
+				try {
+					ga.isBlocked = localStorage.getItem('gaBlocked') === 'true'
+					if (!ga.isBlocked) {
+						window.addEventListener('load', function () {
+							setTimeout(function () {
+								if (!ga.loaded) localStorage.setItem('gaBlocked', 'true')
+							}, 4000)
+						})
+					}
+				} catch (e) {}
+			if gaOptimize === true && typeof(gaOptimizeId) != "undefined"
+				//- Anti-flicker snippet
+				style(type='text/css') .async-hide { opacity: 0 !important}
+				script(type="text/javascript", nonce=scriptNonce).
+					if (!ga.isBlocked) {
+						ga('require', '#{gaOptimizeId}');
+						ga('send', 'event', 'pageview',  document.title.substring(0, 499), window.location.href.substring(0, 499));
+						(function(a,s,y,n,c,h,i,d,e){s.className+=' '+y;h.start=1*new Date;
+						h.end=i=function(){s.className=s.className.replace(RegExp(' ?'+y),'')};
+						(a[n]=a[n]||[]).hide=h;setTimeout(function(){i();h.end=null},c);h.timeout=c;
+						})(window,document.documentElement,'async-hide','dataLayer',4000,
+						{'#{gaOptimizeId}':true});
+					}
+
+		else
+			script(type="text/javascript", nonce=scriptNonce).
+				window.ga = function() { console.log("would send to GA", arguments) };
+
+		block meta
+			meta(name="ol-csrfToken" content=csrfToken)
+			//- Configure dynamically loaded assets (via webpack) to be downloaded from CDN
+			//- See: https://webpack.js.org/guides/public-path/#on-the-fly
+			meta(name="ol-baseAssetPath" content=buildBaseAssetPath())
+
+			meta(name="ol-usersEmail" content=getUserEmail())
+			meta(name="ol-sharelatex" data-type="json" content={
+				siteUrl: settings.siteUrl,
+				wsUrl,
+			})
+			meta(name="ol-ab" data-type="json" content={})
+			meta(name="ol-user_id" content=getLoggedInUserId())
+			//- Internationalisation settings
+			meta(name="ol-i18n" data-type="json" content={
+				currentLangCode: currentLngCode
+			})
+			//- Expose some settings globally to the frontend
+			meta(name="ol-ExposedSettings" data-type="json" content=ExposedSettings)
+
+			if (typeof(settings.algolia) != "undefined")
+				meta(name="ol-algolia" data-type="json" content={
+					appId: settings.algolia.app_id,
+					apiKey: settings.algolia.read_only_api_key,
+					indexes: settings.algolia.indexes
+				})
+
+			if (typeof(settings.templates) != "undefined")
+				meta(name="ol-sharelatex.templates" data-type="json" content={
+					user_id : settings.templates.user_id,
+					cdnDomain : settings.templates.cdnDomain,
+					indexName : settings.templates.indexName
+				})
+
+		block head-scripts
+
+
+	body
+		if(settings.recaptcha && settings.recaptcha.siteKeyV3)
+			script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
+
+		if (typeof(suppressSkipToContent) == "undefined")
+			a(class="skip-to-content" href="#main-content") #{translate('skip_to_content')}
+
+		if (typeof(suppressNavbar) == "undefined")
+			include layout/navbar-marketing
+
+		block content
+
+		if (typeof(suppressFooter) == "undefined")
+			include layout/footer-marketing
+
+		!= moduleIncludes("contactModal", locals)
+
+		block foot-scripts
+			each file in entrypointScripts(entrypoint)
+				script(type="text/javascript", nonce=scriptNonce, src=file)

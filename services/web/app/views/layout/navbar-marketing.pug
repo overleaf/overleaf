@@ -1,0 +1,118 @@
+nav.navbar.navbar-default.navbar-main
+	.container-fluid
+		.navbar-header
+			button.navbar-toggle.collapsed(
+				type="button",
+				data-toggle="collapse",
+				data-target="[data-ol-navbar-main-collapse]"
+				aria-label="Toggle " + translate('navigation')
+			)
+				i.fa.fa-bars(aria-hidden="true")
+			if settings.nav.custom_logo
+				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
+			else if (nav.title)
+				a(href='/', aria-label=settings.appName).navbar-title #{nav.title}
+			else
+				a(href='/', aria-label=settings.appName).navbar-brand
+
+		.navbar-collapse.collapse(data-ol-navbar-main-collapse)
+			ul.nav.navbar-nav.navbar-right
+				if (getSessionUser() && getSessionUser().isAdmin)
+					li.dropdown.subdued
+						a.dropdown-toggle(
+							href="#",
+							role="button",
+							aria-haspopup="true",
+							aria-expanded="false",
+							data-toggle="dropdown"
+						)
+							| Admin
+							span.caret
+						ul.dropdown-menu
+							li
+								a(href="/admin") Manage Site
+							li
+								a(href="/admin/user") Manage Users
+
+
+				// loop over header_extras
+				each item in nav.header_extras
+					-
+						if ((item.only_when_logged_in && getSessionUser())
+							|| (item.only_when_logged_out && (!getSessionUser()))
+							|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
+							|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
+						){
+							var showNavItem = true
+						} else {
+							var showNavItem = false
+						}
+
+					if showNavItem
+						if item.dropdown
+							li.dropdown(class=item.class)
+								a.dropdown-toggle(
+									href="#",
+									role="button",
+									aria-haspopup="true",
+									aria-expanded="false",
+									data-toggle="dropdown"
+								)
+									| !{translate(item.text)}
+									span.caret
+								ul.dropdown-menu
+									each child in item.dropdown
+										if child.divider
+											li.divider
+										else
+											li
+												if child.url
+													a(href=child.url, class=child.class) !{translate(child.text)}
+												else
+													| !{translate(child.text)}
+						else
+							li(class=item.class)
+								if item.url
+									a(href=item.url, class=item.class) !{translate(item.text)}
+								else
+									| !{translate(item.text)}
+
+				// logged out
+				if !getSessionUser()
+					// register link
+					if hasFeature('registration-page')
+						li
+							a(href="/register") #{translate('register')}
+
+					// login link
+					li
+						a(href="/login") #{translate('log_in')}
+
+				// projects link and account menu
+				if getSessionUser()
+					li
+						a(href="/project") #{translate('Projects')}
+					li.dropdown
+						a.dropdown-toggle(
+							href="#",
+							role="button",
+							aria-haspopup="true",
+							aria-expanded="false",
+							data-toggle="dropdown"
+						)
+							| #{translate('Account')}
+							span.caret
+						ul.dropdown-menu
+							li
+								div.subdued #{getSessionUser().email}
+							li.divider.hidden-xs.hidden-sm
+							li
+								a(href="/user/settings") #{translate('Account Settings')}
+							if nav.showSubscriptionLink
+								li
+									a(href="/user/subscription") #{translate('subscription')}
+							li.divider.hidden-xs.hidden-sm
+							li
+								form(method="POST" action="/logout")
+									input(name='_csrf', type='hidden', value=csrfToken)
+									button.btn-link.text-left.dropdown-menu-button #{translate('log_out')}

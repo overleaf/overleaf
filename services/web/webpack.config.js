@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const glob = require('glob')
 const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 const WebpackAssetsManifest = require('webpack-assets-manifest')
@@ -15,6 +16,7 @@ const entryPoints = {
   main: './frontend/js/main.js',
   ide: './frontend/js/ide.js',
   'cdn-load-test': './frontend/js/cdn-load-test.js',
+  marketing: './frontend/js/marketing.js',
   style: './frontend/stylesheets/style.less',
   'ieee-style': './frontend/stylesheets/ieee-style.less',
   'light-style': './frontend/stylesheets/light-style.less',
@@ -30,6 +32,15 @@ if (fs.existsSync(MODULES_PATH)) {
     return acc
   }, entryPoints)
 }
+
+glob.sync(path.join(__dirname, 'frontend/js/pages/**/*.js')).forEach(page => {
+  // in: /workspace/services/web/frontend/js/pages/marketing/homepage.js
+  // out: pages/marketing/homepage
+  const name = path
+    .relative(path.join(__dirname, 'frontend/js/'), page)
+    .replace(/.js$/, '')
+  entryPoints[name] = './' + path.relative(__dirname, page)
+})
 
 module.exports = {
   // Defines the "entry point(s)" for the application - i.e. the file which

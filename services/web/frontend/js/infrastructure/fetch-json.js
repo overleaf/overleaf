@@ -57,6 +57,8 @@ function getErrorMessageForStatusCode(statusCode) {
       return 'Forbidden'
     case 404:
       return 'Not Found'
+    case 429:
+      return 'Too Many Requests'
     case 500:
       return 'Internal Server Error'
     case 502:
@@ -89,6 +91,27 @@ export class FetchError extends OError {
     this.options = options
     this.response = response
     this.data = data
+  }
+
+  /**
+   * @returns {string}
+   */
+  getUserFacingMessage() {
+    const statusCode = this.response?.status
+    const defaultMessage = getErrorMessageForStatusCode(statusCode)
+    const message = this.data?.message?.text || this.data?.message
+    if (message && message !== defaultMessage) return message
+
+    switch (statusCode) {
+      case 400:
+        return 'Invalid Request. Please correct the data and try again.'
+      case 403:
+        return 'Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies.'
+      case 429:
+        return 'Too many attempts. Please wait for a while and try again.'
+      default:
+        return 'Something went wrong talking to the server :(. Please try again.'
+    }
   }
 }
 
