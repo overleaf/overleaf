@@ -65,6 +65,48 @@ describe('UnsupportedBrowsers', function () {
     )
   })
 
+  it('redirects unsupported browsers from any page', function (done) {
+    const url = '/foo/bar/baz'
+    this.user.request(
+      {
+        url,
+        headers: {
+          // IE11 user agent
+          'user-agent':
+            'Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko',
+        },
+      },
+      (error, response) => {
+        expect(error).to.not.exist
+        expect(response.statusCode).to.equal(302)
+        expect(response.headers.location).to.equal(
+          '/unsupported-browser?fromURL=' + encodeURIComponent(url)
+        )
+        done()
+      }
+    )
+  })
+
+  it('should render the unsupported browser page for unsupported browser', function (done) {
+    const url =
+      '/unsupported-browser?fromURL=' + encodeURIComponent('/foo/bar/baz')
+    this.user.request(
+      {
+        url,
+        headers: {
+          // IE11 user agent
+          'user-agent':
+            'Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko',
+        },
+      },
+      (error, response) => {
+        expect(error).to.not.exist
+        expect(response.statusCode).to.equal(200)
+        done()
+      }
+    )
+  })
+
   it('shows the previous URL', function (done) {
     const url = '/project/60867f47174dfd13f1e00000'
     this.user.request(

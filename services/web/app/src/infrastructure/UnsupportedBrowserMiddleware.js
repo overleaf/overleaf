@@ -6,6 +6,10 @@ const { getSafeRedirectPath } = require('../Features/Helpers/UrlHelper')
 function unsupportedBrowserMiddleware(req, res, next) {
   if (!Settings.unsupportedBrowsers) return next()
 
+  // Prevent redirect loop
+  const path = Url.parse(req.url).pathname
+  if (path === '/unsupported-browser') return next()
+
   const userAgent = req.headers['user-agent']
 
   if (!userAgent) return next()
@@ -33,7 +37,8 @@ function renderUnsupportedBrowserPage(req, res) {
   let fromURL
   if (typeof req.query.fromURL === 'string') {
     try {
-      fromURL = Settings.siteUrl + getSafeRedirectPath(req.query.fromURL)
+      fromURL =
+        Settings.siteUrl + (getSafeRedirectPath(req.query.fromURL) || '/')
     } catch (e) {}
   }
   res.render('general/unsupported-browser', { fromURL })
