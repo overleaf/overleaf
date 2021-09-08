@@ -12,8 +12,7 @@ html(lang="en")
 
 		link(rel="icon", href="/favicon.ico")
 
-		if entrypointStyles
-			each file in entrypointStyles('main')
-				link(rel='stylesheet', href=file)
+		if buildCssPath
+			link(rel="stylesheet", href=buildCssPath())
 
 block body
