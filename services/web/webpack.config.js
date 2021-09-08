@@ -231,21 +231,11 @@ module.exports = {
     },
   },
 
-  // Split out vendored dependencies that are shared between 2 or more "real
-  // bundles" (e.g. ide.js/main.js) as a separate "libraries" bundle and ensure
-  // that they are de-duplicated from the other bundles. This allows the
-  // libraries bundle to be independently cached (as it likely will change less
-  // than the other bundles)
+  // Split out files into separate (derived) bundles if they are shared between
+  // multiple (explicit) bundles, according to some webpack heuristics
   optimization: {
     splitChunks: {
-      cacheGroups: {
-        libraries: {
-          test: /[\\/]node_modules[\\/]|[\\/]frontend[\\/]js[\\/]vendor[\\/]libs[\\/]/,
-          name: 'libraries',
-          chunks: 'initial',
-          minChunks: 2,
-        },
-      },
+      chunks: 'all',
     },
   },
 
