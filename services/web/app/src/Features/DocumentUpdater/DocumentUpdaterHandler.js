@@ -1,4 +1,4 @@
-const request = require('request').defaults({ timeout: 30 * 100 })
+const request = require('request').defaults({ timeout: 30 * 1000 })
 const OError = require('@overleaf/o-error')
 const settings = require('@overleaf/settings')
 const _ = require('underscore')
