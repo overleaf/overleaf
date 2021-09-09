@@ -36,7 +36,7 @@ describe('UserPostRegistrationAnalyticsManager', function () {
       },
     }
     this.AnalyticsManager = {
-      setUserProperty: sinon.stub().resolves(),
+      setUserPropertyForUser: sinon.stub().resolves(),
     }
     this.UserPostRegistrationAnalyticsManager = SandboxedModule.require(
       MODULE_PATH,
@@ -72,7 +72,8 @@ describe('UserPostRegistrationAnalyticsManager', function () {
       )
       expect(this.InstitutionsAPI.promises.getUserAffiliations).not.to.have.been
         .called
-      expect(this.AnalyticsManager.setUserProperty).not.to.have.been.called
+      expect(this.AnalyticsManager.setUserPropertyForUser).not.to.have.been
+        .called
     })
 
     it('sets user property if user has commons account affiliationd', async function () {
@@ -92,7 +93,9 @@ describe('UserPostRegistrationAnalyticsManager', function () {
       await this.UserPostRegistrationAnalyticsManager.postRegistrationAnalytics(
         this.fakeUserId
       )
-      expect(this.AnalyticsManager.setUserProperty).to.have.been.calledWith(
+      expect(
+        this.AnalyticsManager.setUserPropertyForUser
+      ).to.have.been.calledWith(
         this.fakeUserId,
         'registered-from-commons-account',
         true
@@ -110,7 +113,8 @@ describe('UserPostRegistrationAnalyticsManager', function () {
       await this.UserPostRegistrationAnalyticsManager.postRegistrationAnalytics(
         this.fakeUserId
       )
-      expect(this.AnalyticsManager.setUserProperty).not.to.have.been.called
+      expect(this.AnalyticsManager.setUserPropertyForUser).not.to.have.been
+        .called
     })
   })
 })

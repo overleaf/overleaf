@@ -15,6 +15,7 @@ const sessionsRedisClient = UserSessionsRedis.client()
 
 const SessionAutostartMiddleware = require('./SessionAutostartMiddleware')
 const SessionStoreManager = require('./SessionStoreManager')
+const AnalyticsManager = require('../Features/Analytics/AnalyticsManager')
 const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
 const bodyParser = require('./BodyParserWrapper')
@@ -32,6 +33,7 @@ const ProxyManager = require('./ProxyManager')
 const translations = require('./Translations')
 const Modules = require('./Modules')
 const Views = require('./Views')
+const Features = require('./Features')
 
 const ErrorController = require('../Features/Errors/ErrorController')
 const HttpErrorHandler = require('../Features/Errors/HttpErrorHandler')
@@ -125,6 +127,9 @@ webRouter.use(
     rolling: true,
   })
 )
+if (Features.hasFeature('saas')) {
+  webRouter.use(AnalyticsManager.analyticsIdMiddleware)
+}
 
 // patch the session store to generate a validation token for every new session
 SessionStoreManager.enableValidationToken(sessionStore)

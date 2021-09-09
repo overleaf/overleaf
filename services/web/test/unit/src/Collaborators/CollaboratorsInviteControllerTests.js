@@ -24,7 +24,7 @@ const { ObjectId } = require('mongodb')
 describe('CollaboratorsInviteController', function () {
   beforeEach(function () {
     this.user = { _id: 'id' }
-    this.AnalyticsManger = { recordEvent: sinon.stub() }
+    this.AnalyticsManger = { recordEventForUser: sinon.stub() }
     this.sendingUser = null
     this.AuthenticationController = {
       getSessionUser: req => {

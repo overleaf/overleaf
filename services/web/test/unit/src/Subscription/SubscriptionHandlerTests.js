@@ -108,7 +108,7 @@ describe('SubscriptionHandler', function () {
 
     this.EmailHandler = { sendEmail: sinon.stub() }
 
-    this.AnalyticsManager = { recordEvent: sinon.stub() }
+    this.AnalyticsManager = { recordEventForUser: sinon.stub() }
 
     this.PlansLocator = {
       findLocalPlanInSettings: sinon.stub().returns({ planCode: 'plan' }),

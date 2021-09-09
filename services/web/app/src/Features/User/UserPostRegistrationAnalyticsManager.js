@@ -32,7 +32,7 @@ async function checkAffiliations(userId) {
   )
 
   if (hasCommonsAccountAffiliation) {
-    await AnalyticsManager.setUserProperty(
+    await AnalyticsManager.setUserPropertyForUser(
       userId,
       'registered-from-commons-account',
       true

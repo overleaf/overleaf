@@ -24,6 +24,7 @@ describe('UserController', function () {
           _id: this.user_id,
           email: 'old@something.com',
         },
+        analyticsId: this.user_id,
       },
       sessionID: '123',
       body: {},
@@ -544,9 +545,10 @@ describe('UserController', function () {
     })
 
     it('should register the user and send them an email', function () {
-      this.UserRegistrationHandler.registerNewUserAndSendActivationEmail
-        .calledWith(this.email)
-        .should.equal(true)
+      sinon.assert.calledWith(
+        this.UserRegistrationHandler.registerNewUserAndSendActivationEmail,
+        this.email
+      )
     })
 
     it('should return the user and activation url', function () {
