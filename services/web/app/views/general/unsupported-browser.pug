@@ -11,12 +11,35 @@ block body
 					.error-details
 						h1.error-status Unsupported Browser
 						p.error-description
-							| Sorry, we don't support your browser anymore. Find out more about #[a(href="https://www.overleaf.com/learn/how-to/What_browsers_do_you_support") what browsers we support].
+							| Sorry, we don't support your browser anymore. Please see below what browsers we support.
 							br
-							| If you think you're seeing this message in error, please #[a(href="/contact") let us know].
+							| If you think you're seeing this message in error,
+							|
+							a(href="mailto:" + settings.adminEmail) please let us know
+							| .
 
 						if fromURL
 							p
 								| URL:
 								|
 								a(href=fromURL) #{fromURL}
+
+						hr
+
+						p
+							| Overleaf officially supports versions of Chrome, Firefox, Safari and Microsoft Edge released in the last 12 months.
+							br
+							| Firefox ESR is also supported for 12 months.
+						p
+							| Support for beta or developer-preview browser versions cannot be guaranteed. Please
+							|
+							a(href="mailto:" + settings.adminEmail) get in touch
+							|
+							| if you encounter any issues while using the service with beta or developer-preview releases of supported browsers.
+						p
+							strong Overleaf has stopped supporting Internet Explorer as of April 26, 2021, and access is now blocked.
+						p
+							| If you cannot upgrade to one of the supported browsers,
+							|
+							a(href="mailto:" + settings.adminEmail) please let us know
+							| .
