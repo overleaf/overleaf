@@ -360,7 +360,7 @@ async function _sendUserGroupPlanCodeUserProperty(userId) {
         bestFeatures = plan.features
       }
     }
-    AnalyticsManager.setUserPropertyForUser(
+    AnalyticsManager.setUserProperty(
       userId,
       'group-subscription-plan-code',
       bestPlanCode

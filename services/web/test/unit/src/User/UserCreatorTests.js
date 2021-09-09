@@ -42,8 +42,8 @@ describe('UserCreator', function () {
           },
         }),
         '../Analytics/AnalyticsManager': (this.Analytics = {
-          recordEventForUser: sinon.stub(),
-          setUserPropertyForUser: sinon.stub(),
+          recordEvent: sinon.stub(),
+          setUserProperty: sinon.stub(),
         }),
         './UserOnboardingEmailManager': (this.UserOnboardingEmailManager = {
           scheduleOnboardingEmail: sinon.stub(),
@@ -271,12 +271,12 @@ describe('UserCreator', function () {
         })
         assert.equal(user.email, this.email)
         sinon.assert.calledWith(
-          this.Analytics.recordEventForUser,
+          this.Analytics.recordEvent,
           user._id,
           'user-registered'
         )
         sinon.assert.calledWith(
-          this.Analytics.setUserPropertyForUser,
+          this.Analytics.setUserProperty,
           user._id,
           'created-at'
         )

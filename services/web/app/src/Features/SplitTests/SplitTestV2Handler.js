@@ -1,7 +1,6 @@
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
 const crypto = require('crypto')
 const _ = require('lodash')
 const { callbackify } = require('util')
@@ -25,7 +24,7 @@ const BETA_PHASE = 'beta'
  *   // execute the default behaviour (control group)
  * }
  * // then record an event
- * AnalyticsManager.recordEventForUser(userId, 'example-project-created', {
+ * AnalyticsManager.recordEvent(userId, 'example-project-created', {
  *   projectId: project._id,
  *   ...assignment.analytics.segmentation
  * })
@@ -36,50 +35,8 @@ const BETA_PHASE = 'beta'
  * @returns {Promise<{variant: string, analytics: {segmentation: {splitTest: string, variant: string, phase: string, versionNumber: number}|{}}}>}
  */
 async function getAssignment(userId, splitTestName, options) {
-  if (!userId) {
-    return { variant: 'default', analytics: { segmentation: {} } }
-  }
-  const analyticsId = await UserAnalyticsIdCache.get(userId)
-  return _getAssignment(analyticsId, userId, undefined, splitTestName, options)
-}
-
-/**
- * Get the assignment of a user to a split test by their session.
- *
- * @example
- * // Assign user and record an event
- *
- * const assignment = await SplitTestV2Handler.getAssignment(req.session, 'example-project')
- * if (assignment.variant === 'awesome-new-version') {
- *   // execute my awesome change
- * }
- * else {
- *   // execute the default behaviour (control group)
- * }
- * // then record an event
- * AnalyticsManager.recordEventForSession(req.session, 'example-project-created', {
- *   projectId: project._id,
- *   ...assignment.analytics.segmentation
- * })
- *
- * @param session the request session
- * @param splitTestName the unique name of the split test
- * @param options {Object<sync: boolean>} - for test purposes only, to force the synchronous update of the user's profile
- * @returns {Promise<{variant: string, analytics: {segmentation: {splitTest: string, variant: string, phase: string, versionNumber: number}|{}}}>}
- */
-async function getAssignmentForSession(session, splitTestName, options) {
-  const { userId, analyticsId } = AnalyticsManager.getIdsFromSession(session)
-  return _getAssignment(analyticsId, userId, session, splitTestName, options)
-}
-
-async function _getAssignment(
-  analyticsId,
-  userId,
-  session,
-  splitTestName,
-  options
-) {
   const splitTest = await splitTestCache.get(splitTestName)
+
   if (splitTest) {
     const currentVersion = splitTest.getCurrentVersion()
     if (currentVersion.active) {
@@ -88,12 +45,10 @@ async function _getAssignment(
         selectedVariantName,
         phase,
         versionNumber,
-      } = await _getAssignmentMetadata(analyticsId, userId, splitTest)
+      } = await _getAssignmentMetadata(userId, splitTest)
       if (activeForUser) {
         const assignmentConfig = {
           userId,
-          analyticsId,
-          session,
           splitTestName,
           variantName: selectedVariantName,
           phase,
@@ -134,44 +89,21 @@ async function assignInLocalsContext(res, userId, splitTestName, options) {
   res.locals.splitTestVariants[splitTestName] = assignment.variant
 }
 
-async function assignInLocalsContextForSession(
-  res,
-  session,
-  splitTestName,
-  options
-) {
-  const assignment = await getAssignmentForSession(
-    session,
-    splitTestName,
-    options
-  )
-  if (!res.locals.splitTestVariants) {
-    res.locals.splitTestVariants = {}
-  }
-  res.locals.splitTestVariants[splitTestName] = assignment.variant
-}
-
-async function _getAssignmentMetadata(analyticsId, userId, splitTest) {
+async function _getAssignmentMetadata(userId, splitTest) {
   const currentVersion = splitTest.getCurrentVersion()
   const phase = currentVersion.phase
   if ([ALPHA_PHASE, BETA_PHASE].includes(phase)) {
-    if (userId) {
-      const user = await _getUser(userId)
-      if (
-        (phase === ALPHA_PHASE && !(user && user.alphaProgram)) ||
-        (phase === BETA_PHASE && !(user && user.betaProgram))
-      ) {
-        return {
-          activeForUser: false,
-        }
-      }
-    } else {
+    const user = await _getUser(userId)
+    if (
+      (phase === ALPHA_PHASE && !(user && user.alphaProgram)) ||
+      (phase === BETA_PHASE && !(user && user.betaProgram))
+    ) {
       return {
         activeForUser: false,
       }
     }
   }
-  const percentile = _getPercentile(analyticsId, splitTest.name, phase)
+  const percentile = _getPercentile(userId, splitTest.name, phase)
   const selectedVariantName = _getVariantFromPercentile(
     currentVersion.variants,
     percentile
@@ -184,10 +116,10 @@ async function _getAssignmentMetadata(analyticsId, userId, splitTest) {
   }
 }
 
-function _getPercentile(analyticsId, splitTestName, splitTestPhase) {
+function _getPercentile(userId, splitTestName, splitTestPhase) {
   const hash = crypto
     .createHash('md5')
-    .update(analyticsId + splitTestName + splitTestPhase)
+    .update(userId + splitTestName + splitTestPhase)
     .digest('hex')
   const hashPrefix = hash.substr(0, 8)
   return Math.floor(
@@ -207,52 +139,29 @@ function _getVariantFromPercentile(variants, percentile) {
 
 async function _updateVariantAssignment({
   userId,
-  analyticsId,
-  session,
   splitTestName,
   phase,
   versionNumber,
   variantName,
 }) {
-  const persistedAssignment = {
-    variantName,
-    versionNumber,
-    phase,
-    assignedAt: new Date(),
-  }
-  if (userId) {
-    const user = await _getUser(userId)
-    if (user) {
-      const assignedSplitTests = user.splitTests || []
-      const assignmentLog = assignedSplitTests[splitTestName] || []
-      const existingAssignment = _.find(assignmentLog, { versionNumber })
-      if (!existingAssignment) {
-        await UserUpdater.promises.updateUser(userId, {
-          $addToSet: {
-            [`splitTests.${splitTestName}`]: persistedAssignment,
-          },
-        })
-        AnalyticsManager.setUserPropertyForAnalyticsId(
-          analyticsId,
-          `split-test-${splitTestName}-${versionNumber}`,
-          variantName
-        )
-      }
-    }
-  } else if (session) {
-    if (!session.splitTests) {
-      session.splitTests = {}
-    }
-    if (!session.splitTests[splitTestName]) {
-      session.splitTests[splitTestName] = []
-    }
-    const existingAssignment = _.find(session.splitTests[splitTestName], {
-      versionNumber,
-    })
+  const user = await _getUser(userId)
+  if (user) {
+    const assignedSplitTests = user.splitTests || []
+    const assignmentLog = assignedSplitTests[splitTestName] || []
+    const existingAssignment = _.find(assignmentLog, { versionNumber })
     if (!existingAssignment) {
-      session.splitTests[splitTestName].push(persistedAssignment)
-      AnalyticsManager.setUserPropertyForAnalyticsId(
-        analyticsId,
+      await UserUpdater.promises.updateUser(userId, {
+        $addToSet: {
+          [`splitTests.${splitTestName}`]: {
+            variantName,
+            versionNumber,
+            phase,
+            assignedAt: new Date(),
+          },
+        },
+      })
+      AnalyticsManager.setUserProperty(
+        userId,
         `split-test-${splitTestName}-${versionNumber}`,
         variantName
       )
@@ -270,13 +179,9 @@ async function _getUser(id) {
 
 module.exports = {
   getAssignment: callbackify(getAssignment),
-  getAssignmentForSession: callbackify(getAssignmentForSession),
   assignInLocalsContext: callbackify(assignInLocalsContext),
-  assignInLocalsContextForSession: callbackify(assignInLocalsContextForSession),
   promises: {
     getAssignment,
-    getAssignmentForSession,
     assignInLocalsContext,
-    assignInLocalsContextForSession,
   },
 }

@@ -30,12 +30,10 @@ module.exports = {
     if (!Features.hasFeature('analytics')) {
       return res.sendStatus(202)
     }
+    const userId =
+      SessionManager.getLoggedInUserId(req.session) || req.sessionID
     delete req.body._csrf
-    AnalyticsManager.recordEventForSession(
-      req.session,
-      req.params.event,
-      req.body
-    )
+    AnalyticsManager.recordEvent(userId, req.params.event, req.body)
     res.sendStatus(202)
   },
 }

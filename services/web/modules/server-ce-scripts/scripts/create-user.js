@@ -18,7 +18,7 @@ async function main() {
 
   await new Promise((resolve, reject) => {
     UserRegistrationHandler.registerNewUserAndSendActivationEmail(
-      email,
+        email,
       (error, user, setNewPasswordUrl) => {
         if (error) {
           return reject(error)

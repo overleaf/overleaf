@@ -48,7 +48,6 @@ const AuthenticationController = {
       ip_address: user._login_req_ip,
       must_reconfirm: user.must_reconfirm,
       v1_id: user.overleaf != null ? user.overleaf.id : undefined,
-      analyticsId: user.analyticsId || user._id,
     }
     callback(null, lightUser)
   },
@@ -83,9 +82,6 @@ const AuthenticationController = {
       return res.redirect('/login')
     } // OAuth2 'state' mismatch
 
-    const anonymousAnalyticsId = req.session.analyticsId
-    const isNewUser = req.session.justRegistered || false
-
     const Modules = require('../../infrastructure/Modules')
     Modules.hooks.fire(
       'preFinishLogin',
@@ -110,7 +106,7 @@ const AuthenticationController = {
 
         const redir =
           AuthenticationController._getRedirectFromSession(req) || '/project'
-        _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser)
+        _loginAsyncHandlers(req, user)
         const userId = user._id
         UserAuditLogHandler.addEntry(userId, 'login', userId, req.ip, err => {
           if (err) {
@@ -490,8 +486,7 @@ function _afterLoginSessionSetup(req, user, callback) {
     })
   })
 }
-
-function _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser) {
+function _loginAsyncHandlers(req, user) {
   UserHandler.setupLoginData(user, err => {
     if (err != null) {
       logger.warn({ err }, 'error setting up login data')
@@ -500,14 +495,12 @@ function _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser) {
   LoginRateLimiter.recordSuccessfulLogin(user.email)
   AuthenticationController._recordSuccessfulLogin(user._id)
   AuthenticationController.ipMatchCheck(req, user)
-  Analytics.recordEventForUser(user._id, 'user-logged-in')
-  Analytics.identifyUser(user._id, anonymousAnalyticsId, isNewUser)
-
+  Analytics.recordEvent(user._id, 'user-logged-in')
+  Analytics.identifyUser(user._id, req.sessionID)
   logger.log(
     { email: user.email, user_id: user._id.toString() },
     'successful log in'
   )
-
   req.session.justLoggedIn = true
   // capture the request ip for use when creating the session
   return (user._login_req_ip = req.ip)

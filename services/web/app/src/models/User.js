@@ -166,7 +166,6 @@ const UserSchema = new Schema({
   onboardingEmailSentAt: { type: Date },
   auditLog: [AuditLogEntrySchema],
   splitTests: Schema.Types.Mixed,
-  analyticsId: { type: String },
 })
 
 exports.User = mongoose.model('User', UserSchema)

@@ -12,7 +12,7 @@ describe('AnalyticsController', function () {
 
     this.AnalyticsManager = {
       updateEditingSession: sinon.stub(),
-      recordEventForSession: sinon.stub(),
+      recordEvent: sinon.stub(),
     }
 
     this.Features = {
@@ -42,7 +42,6 @@ describe('AnalyticsController', function () {
         params: {
           projectId: 'a project id',
         },
-        session: {},
       }
       this.GeoIpLookup.getDetails = sinon
         .stub()
@@ -79,18 +78,35 @@ describe('AnalyticsController', function () {
       delete this.expectedData._csrf
     })
 
-    it('should use the session', function (done) {
+    it('should use the user_id', function (done) {
+      this.SessionManager.getLoggedInUserId.returns('1234')
       this.controller.recordEvent(this.req, this.res)
-      this.AnalyticsManager.recordEventForSession
-        .calledWith(this.req.session, this.req.params.event, this.expectedData)
+      this.AnalyticsManager.recordEvent
+        .calledWith('1234', this.req.params.event, this.expectedData)
+        .should.equal(true)
+      done()
+    })
+
+    it('should use the session id', function (done) {
+      this.controller.recordEvent(this.req, this.res)
+      this.AnalyticsManager.recordEvent
+        .calledWith(
+          this.req.sessionID,
+          this.req.params.event,
+          this.expectedData
+        )
         .should.equal(true)
       done()
     })
 
     it('should remove the CSRF token before sending to the manager', function (done) {
       this.controller.recordEvent(this.req, this.res)
-      this.AnalyticsManager.recordEventForSession
-        .calledWith(this.req.session, this.req.params.event, this.expectedData)
+      this.AnalyticsManager.recordEvent
+        .calledWith(
+          this.req.sessionID,
+          this.req.params.event,
+          this.expectedData
+        )
         .should.equal(true)
       done()
     })

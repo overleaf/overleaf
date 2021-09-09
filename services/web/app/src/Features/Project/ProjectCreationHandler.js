@@ -35,12 +35,12 @@ async function createBlankProject(ownerId, projectName, attributes = {}) {
   const isImport = attributes && attributes.overleaf
   const project = await _createBlankProject(ownerId, projectName, attributes)
   if (isImport) {
-    AnalyticsManager.recordEventForUser(ownerId, 'project-imported', {
+    AnalyticsManager.recordEvent(ownerId, 'project-imported', {
       projectId: project._id,
       attributes,
     })
   } else {
-    AnalyticsManager.recordEventForUser(ownerId, 'project-created', {
+    AnalyticsManager.recordEvent(ownerId, 'project-created', {
       projectId: project._id,
       attributes,
     })
@@ -50,7 +50,7 @@ async function createBlankProject(ownerId, projectName, attributes = {}) {
 
 async function createProjectFromSnippet(ownerId, projectName, docLines) {
   const project = await _createBlankProject(ownerId, projectName)
-  AnalyticsManager.recordEventForUser(ownerId, 'project-created', {
+  AnalyticsManager.recordEvent(ownerId, 'project-created', {
     projectId: project._id,
   })
   await _createRootDoc(project, ownerId, docLines)
@@ -63,7 +63,7 @@ async function createBasicProject(ownerId, projectName) {
   const docLines = await _buildTemplate('mainbasic.tex', ownerId, projectName)
   await _createRootDoc(project, ownerId, docLines)
 
-  AnalyticsManager.recordEventForUser(ownerId, 'project-created', {
+  AnalyticsManager.recordEvent(ownerId, 'project-created', {
     projectId: project._id,
   })
 
@@ -75,7 +75,7 @@ async function createExampleProject(ownerId, projectName) {
 
   await _addExampleProjectFiles(ownerId, projectName, project)
 
-  AnalyticsManager.recordEventForUser(ownerId, 'project-created', {
+  AnalyticsManager.recordEvent(ownerId, 'project-created', {
     projectId: project._id,
   })
 

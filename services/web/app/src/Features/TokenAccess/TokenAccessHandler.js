@@ -164,9 +164,7 @@ const TokenAccessHandler = {
   addReadOnlyUserToProject(userId, projectId, callback) {
     userId = ObjectId(userId.toString())
     projectId = ObjectId(projectId.toString())
-    Analytics.recordEventForUser(userId, 'project-joined', {
-      mode: 'read-only',
-    })
+    Analytics.recordEvent(userId, 'project-joined', { mode: 'read-only' })
     Project.updateOne(
       {
         _id: projectId,
@@ -181,9 +179,7 @@ const TokenAccessHandler = {
   addReadAndWriteUserToProject(userId, projectId, callback) {
     userId = ObjectId(userId.toString())
     projectId = ObjectId(projectId.toString())
-    Analytics.recordEventForUser(userId, 'project-joined', {
-      mode: 'read-write',
-    })
+    Analytics.recordEvent(userId, 'project-joined', { mode: 'read-write' })
     Project.updateOne(
       {
         _id: projectId,

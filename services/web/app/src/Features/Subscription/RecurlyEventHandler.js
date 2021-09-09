@@ -39,133 +39,85 @@ function sendRecurlyAnalyticsEvent(event, eventData) {
   }
 }
 
-async function _sendSubscriptionStartedEvent(eventData) {
+function _sendSubscriptionStartedEvent(eventData) {
   const userId = _getUserId(eventData)
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-started', {
+  AnalyticsManager.recordEvent(userId, 'subscription-started', {
     plan_code: planCode,
     quantity,
     is_trial: isTrial,
   })
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-plan-code',
-    planCode
-  )
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-is-trial',
-    isTrial
-  )
+  AnalyticsManager.setUserProperty(userId, 'subscription-plan-code', planCode)
+  AnalyticsManager.setUserProperty(userId, 'subscription-state', state)
+  AnalyticsManager.setUserProperty(userId, 'subscription-is-trial', isTrial)
 }
 
-async function _sendSubscriptionUpdatedEvent(eventData) {
+function _sendSubscriptionUpdatedEvent(eventData) {
   const userId = _getUserId(eventData)
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-updated', {
+  AnalyticsManager.recordEvent(userId, 'subscription-updated', {
     plan_code: planCode,
     quantity,
   })
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-plan-code',
-    planCode
-  )
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-is-trial',
-    isTrial
-  )
+  AnalyticsManager.setUserProperty(userId, 'subscription-plan-code', planCode)
+  AnalyticsManager.setUserProperty(userId, 'subscription-state', state)
+  AnalyticsManager.setUserProperty(userId, 'subscription-is-trial', isTrial)
 }
 
-async function _sendSubscriptionCancelledEvent(eventData) {
+function _sendSubscriptionCancelledEvent(eventData) {
   const userId = _getUserId(eventData)
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-cancelled', {
+  AnalyticsManager.recordEvent(userId, 'subscription-cancelled', {
     plan_code: planCode,
     quantity,
     is_trial: isTrial,
   })
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-is-trial',
-    isTrial
-  )
+  AnalyticsManager.setUserProperty(userId, 'subscription-state', state)
+  AnalyticsManager.setUserProperty(userId, 'subscription-is-trial', isTrial)
 }
 
-async function _sendSubscriptionExpiredEvent(eventData) {
+function _sendSubscriptionExpiredEvent(eventData) {
   const userId = _getUserId(eventData)
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-expired', {
+  AnalyticsManager.recordEvent(userId, 'subscription-expired', {
     plan_code: planCode,
     quantity,
     is_trial: isTrial,
   })
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-plan-code',
-    planCode
-  )
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-is-trial',
-    isTrial
-  )
+  AnalyticsManager.setUserProperty(userId, 'subscription-plan-code', planCode)
+  AnalyticsManager.setUserProperty(userId, 'subscription-state', state)
+  AnalyticsManager.setUserProperty(userId, 'subscription-is-trial', isTrial)
 }
 
-async function _sendSubscriptionRenewedEvent(eventData) {
+function _sendSubscriptionRenewedEvent(eventData) {
   const userId = _getUserId(eventData)
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-renewed', {
+  AnalyticsManager.recordEvent(userId, 'subscription-renewed', {
     plan_code: planCode,
     quantity,
     is_trial: isTrial,
   })
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-plan-code',
-    planCode
-  )
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-is-trial',
-    isTrial
-  )
+  AnalyticsManager.setUserProperty(userId, 'subscription-plan-code', planCode)
+  AnalyticsManager.setUserProperty(userId, 'subscription-state', state)
+  AnalyticsManager.setUserProperty(userId, 'subscription-is-trial', isTrial)
 }
 
-async function _sendSubscriptionReactivatedEvent(eventData) {
+function _sendSubscriptionReactivatedEvent(eventData) {
   const userId = _getUserId(eventData)
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-reactivated', {
+  AnalyticsManager.recordEvent(userId, 'subscription-reactivated', {
     plan_code: planCode,
     quantity,
   })
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-plan-code',
-    planCode
-  )
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-is-trial',
-    isTrial
-  )
+  AnalyticsManager.setUserProperty(userId, 'subscription-plan-code', planCode)
+  AnalyticsManager.setUserProperty(userId, 'subscription-state', state)
+  AnalyticsManager.setUserProperty(userId, 'subscription-is-trial', isTrial)
 }
 
-async function _sendInvoicePaidEvent(eventData) {
+function _sendInvoicePaidEvent(eventData) {
   const userId = _getUserId(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-invoice-collected')
-  AnalyticsManager.setUserPropertyForUser(
-    userId,
-    'subscription-is-trial',
-    false
-  )
+  AnalyticsManager.recordEvent(userId, 'subscription-invoice-collected')
+  AnalyticsManager.setUserProperty(userId, 'subscription-is-trial', false)
 }
 
 function _getUserId(eventData) {

@@ -28,7 +28,7 @@ const FeaturesUpdater = {
         const matchedFeatureSet = FeaturesUpdater._getMatchedFeatureSet(
           features
         )
-        AnalyticsManager.setUserPropertyForUser(
+        AnalyticsManager.setUserProperty(
           userId,
           'feature-set',
           matchedFeatureSet

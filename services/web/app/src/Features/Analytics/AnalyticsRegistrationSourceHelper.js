@@ -79,7 +79,7 @@ function addUserProperties(userId, session) {
   }
 
   if (session.referal_id) {
-    AnalyticsManager.setUserPropertyForUser(
+    AnalyticsManager.setUserProperty(
       userId,
       `registered-from-bonus-scheme`,
       true
@@ -87,7 +87,7 @@ function addUserProperties(userId, session) {
   }
 
   if (session.required_login_for) {
-    AnalyticsManager.setUserPropertyForUser(
+    AnalyticsManager.setUserProperty(
       userId,
       `registered-from-${session.required_login_for}`,
       true
@@ -96,7 +96,7 @@ function addUserProperties(userId, session) {
 
   if (session.inbound) {
     if (session.inbound.referrer) {
-      AnalyticsManager.setUserPropertyForUser(
+      AnalyticsManager.setUserProperty(
         userId,
         `registered-from-referrer-${session.inbound.referrer.medium}`,
         session.inbound.referrer.detail || 'other'
@@ -106,7 +106,7 @@ function addUserProperties(userId, session) {
     if (session.inbound.utm) {
       for (const utmKey of UTM_KEYS) {
         if (session.inbound.utm[utmKey]) {
-          AnalyticsManager.setUserPropertyForUser(
+          AnalyticsManager.setUserProperty(
             userId,
             `registered-from-${utmKey.replace('_', '-')}`,
             session.inbound.utm[utmKey]

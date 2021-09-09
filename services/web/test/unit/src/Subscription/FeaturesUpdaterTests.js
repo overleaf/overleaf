@@ -40,7 +40,7 @@ describe('FeaturesUpdater', function () {
         '../Institutions/InstitutionsFeatures': (this.InstitutionsFeatures = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
-          setUserPropertyForUser: sinon.stub(),
+          setUserProperty: sinon.stub(),
         }),
         '../../infrastructure/Modules': (this.Modules = {
           hooks: { fire: sinon.stub() },
@@ -182,7 +182,7 @@ describe('FeaturesUpdater', function () {
         )
 
         sinon.assert.calledWith(
-          this.AnalyticsManager.setUserPropertyForUser,
+          this.AnalyticsManager.setUserProperty,
           this.user_id,
           'feature-set',
           'personal'
@@ -201,7 +201,7 @@ describe('FeaturesUpdater', function () {
         )
 
         sinon.assert.calledWith(
-          this.AnalyticsManager.setUserPropertyForUser,
+          this.AnalyticsManager.setUserProperty,
           this.user_id,
           'feature-set',
           'mixed'

@@ -105,7 +105,7 @@ describe('SubscriptionUpdater', function () {
       findOneAndUpdate: sinon.stub().yields(),
     }
     this.AnalyticsManager = {
-      setUserPropertyForUser: sinon.stub(),
+      setUserProperty: sinon.stub(),
     }
     this.SubscriptionUpdater = SandboxedModule.require(modulePath, {
       requires: {
@@ -527,7 +527,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId,
         () => {
           sinon.assert.calledWith(
-            this.AnalyticsManager.setUserPropertyForUser,
+            this.AnalyticsManager.setUserProperty,
             this.otherUserId,
             'group-subscription-plan-code',
             'group_subscription'
@@ -547,7 +547,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForUser,
+        this.AnalyticsManager.setUserProperty,
         this.otherUserId,
         'group-subscription-plan-code',
         'group_subscription'
@@ -564,7 +564,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForUser,
+        this.AnalyticsManager.setUserProperty,
         this.otherUserId,
         'group-subscription-plan-code',
         'better_group_subscription'
@@ -581,7 +581,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForUser,
+        this.AnalyticsManager.setUserProperty,
         this.otherUserId,
         'group-subscription-plan-code',
         'better_group_subscription'
@@ -622,7 +622,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId,
         () => {
           sinon.assert.calledWith(
-            this.AnalyticsManager.setUserPropertyForUser,
+            this.AnalyticsManager.setUserProperty,
             this.otherUserId,
             'group-subscription-plan-code',
             null
@@ -635,7 +635,7 @@ describe('SubscriptionUpdater', function () {
     it('should set the group plan code user property when removing user from all groups', function (done) {
       this.SubscriptionUpdater.removeUserFromAllGroups(this.otherUserId, () => {
         sinon.assert.calledWith(
-          this.AnalyticsManager.setUserPropertyForUser,
+          this.AnalyticsManager.setUserProperty,
           this.otherUserId,
           'group-subscription-plan-code',
           null

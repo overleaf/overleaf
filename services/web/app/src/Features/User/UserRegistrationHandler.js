@@ -8,6 +8,7 @@ const logger = require('logger-sharelatex')
 const crypto = require('crypto')
 const EmailHandler = require('../Email/EmailHandler')
 const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')
+const Analytics = require('../Analytics/AnalyticsManager')
 const settings = require('@overleaf/settings')
 const EmailHelper = require('../Helpers/EmailHelper')
 
@@ -30,7 +31,6 @@ const UserRegistrationHandler = {
           email: userDetails.email,
           first_name: userDetails.first_name,
           last_name: userDetails.last_name,
-          analyticsId: userDetails.analyticsId,
         },
         {},
         callback
@@ -87,6 +87,7 @@ const UserRegistrationHandler = {
             }, // this can be slow, just fire it off
           ],
           error => {
+            Analytics.recordEvent(user._id, 'user-registered')
             callback(error, user)
           }
         )

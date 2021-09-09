@@ -28,7 +28,6 @@ describe('AuthenticationController', function () {
     this.res = new MockResponse()
     this.callback = sinon.stub()
     this.next = sinon.stub()
-    this.req.session.analyticsId = 'abc-123'
 
     this.AuthenticationController = SandboxedModule.require(modulePath, {
       requires: {
@@ -54,9 +53,8 @@ describe('AuthenticationController', function () {
           setupLoginData: sinon.stub(),
         }),
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
-          recordEventForUser: sinon.stub(),
+          recordEvent: sinon.stub(),
           identifyUser: sinon.stub(),
-          getIdsFromSession: sinon.stub().returns({ userId: this.user._id }),
         }),
         '../../infrastructure/SessionStoreManager': (this.SessionStoreManager = {}),
         '@overleaf/settings': (this.Settings = {
@@ -1238,11 +1236,9 @@ describe('AuthenticationController', function () {
       })
 
       it('should call identifyUser', function () {
-        sinon.assert.calledWith(
-          this.AnalyticsManager.identifyUser,
-          this.user._id,
-          this.req.session.analyticsId
-        )
+        this.AnalyticsManager.identifyUser
+          .calledWith(this.user._id, this.req.sessionID)
+          .should.equal(true)
       })
 
       it('should setup the user data in the background', function () {
@@ -1275,11 +1271,9 @@ describe('AuthenticationController', function () {
       })
 
       it('should track the login event', function () {
-        sinon.assert.calledWith(
-          this.AnalyticsManager.recordEventForUser,
-          this.user._id,
-          'user-logged-in'
-        )
+        this.AnalyticsManager.recordEvent
+          .calledWith(this.user._id, 'user-logged-in')
+          .should.equal(true)
       })
     })
   })

@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
+const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
 const modulePath = path.join(
@@ -42,7 +43,7 @@ describe('TokenAccessHandler', function () {
         }),
         crypto: (this.Crypto = require('crypto')),
         '../Analytics/AnalyticsManager': (this.Analytics = {
-          recordEventForUser: sinon.stub(),
+          recordEvent: sinon.stub(),
         }),
       },
     }))
@@ -137,7 +138,7 @@ describe('TokenAccessHandler', function () {
             this.Project.updateOne.lastCall.args[1].$addToSet
           ).to.have.keys('tokenAccessReadOnly_refs')
           sinon.assert.calledWith(
-            this.Analytics.recordEventForUser,
+            this.Analytics.recordEvent,
             this.userId,
             'project-joined',
             { mode: 'read-only' }
@@ -198,7 +199,7 @@ describe('TokenAccessHandler', function () {
             this.Project.updateOne.lastCall.args[1].$addToSet
           ).to.have.keys('tokenAccessReadAndWrite_refs')
           sinon.assert.calledWith(
-            this.Analytics.recordEventForUser,
+            this.Analytics.recordEvent,
             this.userId,
             'project-joined',
             { mode: 'read-write' }
