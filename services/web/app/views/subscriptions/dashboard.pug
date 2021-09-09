@@ -12,7 +12,6 @@ block append meta
 		meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
 		meta(name="ol-subscription" data-type="json" content=personalSubscription)
 		meta(name="ol-recomendedCurrency" content=personalSubscription.recurly.currency)
-		meta(name="ol-groupPlans" data-type="json" content=groupPlans)
 
 block content
 	main.content.content-alt#main-content(ng-cloak)

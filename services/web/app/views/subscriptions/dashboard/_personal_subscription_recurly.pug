@@ -21,8 +21,6 @@ div(ng-controller="RecurlySubscriptionController")
 					a(href, ng-click="switchToChangePlanView()", ng-if="showChangePlanButton") !{translate("change_plan")}.
 				if (personalSubscription.pendingPlan)
 					p #{translate("want_change_to_apply_before_plan_end")}
-				else if (personalSubscription.plan.groupPlan)
-					p #{translate("contact_support_to_change_group_subscription")}
 				if (personalSubscription.recurly.trialEndsAtFormatted && personalSubscription.recurly.trial_ends_at > Date.now())
 					p You're on a free trial which ends on <strong ng-non-bindable>#{personalSubscription.recurly.trialEndsAtFormatted}</strong>
 				p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount: personalSubscription.recurly.price, collectionDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong', 'strong'])}
@@ -65,19 +63,6 @@ div(ng-controller="RecurlySubscriptionController")
 			+printPlans(plans.studentAccounts)
 			+printPlans(plans.individualMonthlyPlans)
 			+printPlans(plans.individualAnnualPlans)
-
-		div(ng-controller="ChangePlanToGroupFormController")
-			h2 #{translate('looking_multiple_licenses')}
-			div(ng-show="isValidCurrencyForUpgrade")
-				span #{translate('reduce_costs_group_licenses')}
-				br
-				br
-				a.btn.btn-success(
-					href="#groups"
-					ng-click="openGroupPlanModal()"
-				) #{translate('change_to_group_plan')}
-			div(ng-hide="isValidCurrencyForUpgrade")
-				span #{translate('contact_support_to_upgrade_to_group_subscription')}
 
 
 	.div(ng-controller="RecurlyCancellationController", ng-show="showCancellation").text-center
@@ -145,6 +130,3 @@ script(type='text/ng-template', id='cancelPendingPlanChangeModalTemplate')
 		)
 			span(ng-hide="inflight") #{translate("revert_pending_plan_change")}
 			span(ng-show="inflight") #{translate("processing")}…
-
-include ../_plans_page_mixins
-include ../_modal_group_upgrade

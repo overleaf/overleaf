@@ -121,7 +121,6 @@ async function userSubscriptionPage(req, res) {
   const data = {
     title: 'your_subscription',
     plans,
-    groupPlans: GroupPlansData,
     user,
     hasSubscription,
     fromPlansPage,
