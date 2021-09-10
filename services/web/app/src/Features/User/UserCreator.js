@@ -84,8 +84,16 @@ async function createNewUser(attributes, options = {}) {
     }
   }
 
-  Analytics.recordEvent(user._id, 'user-registered')
-  Analytics.setUserProperty(user._id, 'created-at', new Date())
+  await Analytics.recordEventForUser(user._id, 'user-registered')
+  await Analytics.setUserPropertyForUser(user._id, 'created-at', new Date())
+  await Analytics.setUserPropertyForUser(user._id, 'user-id', user._id)
+  if (attributes.analyticsId) {
+    await Analytics.setUserPropertyForUser(
+      user._id,
+      'analytics-id',
+      attributes.analyticsId
+    )
+  }
 
   if (Features.hasFeature('saas')) {
     try {

@@ -141,8 +141,9 @@ describe('SubscriptionController', function () {
         }),
         './Errors': SubscriptionErrors,
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
-          recordEvent: sinon.stub(),
-          setUserProperty: sinon.stub(),
+          recordEventForUser: sinon.stub(),
+          recordEventForSession: sinon.stub(),
+          setUserPropertyForUser: sinon.stub(),
         }),
         '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
           getTestSegmentation: () => {},

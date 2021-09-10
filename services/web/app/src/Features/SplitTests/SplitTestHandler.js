@@ -96,7 +96,7 @@ async function assignUserToVariant(userId, splitTest) {
       [`splitTests.${splitTest.id}`]: selectedVariant,
     },
   })
-  AnalyticsManager.setUserProperty(
+  AnalyticsManager.setUserPropertyForUser(
     userId,
     `split-test-${splitTest.id}`,
     selectedVariant

@@ -24,7 +24,11 @@ const EmailHelper = require('../../../../app/src/Features/Helpers/EmailHelper')
 
 describe('UserRegistrationHandler', function () {
   beforeEach(function () {
-    this.user = { _id: (this.user_id = '31j2lk21kjl') }
+    this.analyticsId = '123456'
+    this.user = {
+      _id: (this.user_id = '31j2lk21kjl'),
+      analyticsId: this.analyticsId,
+    }
     this.User = { updateOne: sinon.stub().callsArgWith(2) }
     this.UserGetter = { getUserByAnyEmail: sinon.stub() }
     this.UserCreator = {
@@ -49,7 +53,9 @@ describe('UserRegistrationHandler', function () {
         '../Email/EmailHandler': this.EmailHandler,
         '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
-          recordEvent: sinon.stub(),
+          recordEventForUser: sinon.stub(),
+          setUserPropertyForUser: sinon.stub(),
+          identifyUser: sinon.stub(),
         }),
         '@overleaf/settings': (this.settings = {
           siteUrl: 'http://sl.example.com',
@@ -58,10 +64,11 @@ describe('UserRegistrationHandler', function () {
       },
     })
 
-    return (this.passingRequest = {
+    this.passingRequest = {
       email: 'something@email.com',
       password: '123',
-    })
+      analyticsId: this.analyticsId,
+    }
   })
 
   describe('validate Register Request', function () {
@@ -167,16 +174,15 @@ describe('UserRegistrationHandler', function () {
       })
 
       it('should create a new user', function (done) {
-        return this.handler.registerNewUser(this.passingRequest, err => {
-          this.UserCreator.createNewUser
-            .calledWith({
-              email: this.passingRequest.email,
-              holdingAccount: false,
-              first_name: this.passingRequest.first_name,
-              last_name: this.passingRequest.last_name,
-            })
-            .should.equal(true)
-          return done()
+        this.handler.registerNewUser(this.passingRequest, err => {
+          sinon.assert.calledWith(this.UserCreator.createNewUser, {
+            email: this.passingRequest.email,
+            holdingAccount: false,
+            first_name: this.passingRequest.first_name,
+            last_name: this.passingRequest.last_name,
+            analyticsId: this.user.analyticsId,
+          })
+          done()
         })
       })
 
@@ -227,15 +233,6 @@ describe('UserRegistrationHandler', function () {
           return done()
         })
       })
-
-      it('should track the registration event', function (done) {
-        return this.handler.registerNewUser(this.passingRequest, err => {
-          this.AnalyticsManager.recordEvent
-            .calledWith(this.user._id, 'user-registered')
-            .should.equal(true)
-          return done()
-        })
-      })
     })
 
     it('should call the ReferalAllocator', function (done) {
@@ -270,12 +267,10 @@ describe('UserRegistrationHandler', function () {
       })
 
       it('should ask the UserRegistrationHandler to register user', function () {
-        return this.handler.registerNewUser
-          .calledWith({
-            email: this.email,
-            password: this.password,
-          })
-          .should.equal(true)
+        sinon.assert.calledWith(this.handler.registerNewUser, {
+          email: this.email,
+          password: this.password,
+        })
       })
 
       it('should generate a new password reset token', function () {

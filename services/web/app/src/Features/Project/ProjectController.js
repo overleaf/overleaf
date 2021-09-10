@@ -780,7 +780,7 @@ const ProjectController = {
             metrics.inc(metricName)
 
             if (userId) {
-              AnalyticsManager.recordEvent(userId, 'project-opened', {
+              AnalyticsManager.recordEventForUser(userId, 'project-opened', {
                 projectId: project._id,
               })
             }

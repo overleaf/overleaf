@@ -173,7 +173,7 @@ describe('ProjectController', function () {
           .BrandVariationsHandler,
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../../models/Project': {},
-        '../Analytics/AnalyticsManager': { recordEvent: () => {} },
+        '../Analytics/AnalyticsManager': { recordEventForUser: () => {} },
         '../../infrastructure/Modules': {
           hooks: { fire: sinon.stub().yields(null, []) },
         },

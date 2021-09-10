@@ -116,7 +116,7 @@ async function userSubscriptionPage(req, res) {
     personalSubscription ? personalSubscription.plan : undefined
   )
 
-  AnalyticsManager.recordEvent(user._id, 'subscription-page-view')
+  AnalyticsManager.recordEventForSession(req.session, 'subscription-page-view')
 
   const data = {
     title: 'your_subscription',

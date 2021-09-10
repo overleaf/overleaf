@@ -10,6 +10,7 @@ const MODULE_PATH = path.join(
 describe('AnalyticsManager', function () {
   beforeEach(function () {
     this.fakeUserId = '123abc'
+    this.analyticsId = '123456'
     this.Settings = {
       analytics: { enabled: true },
     }
@@ -50,6 +51,9 @@ describe('AnalyticsManager', function () {
       requires: {
         '@overleaf/settings': this.Settings,
         '../../infrastructure/Queues': this.Queues,
+        './UserAnalyticsIdCache': (this.UserAnalyticsIdCache = {
+          get: sinon.stub().resolves(this.analyticsId),
+        }),
       },
     })
   })
@@ -70,21 +74,26 @@ describe('AnalyticsManager', function () {
 
   describe('queues the appropriate message for', function () {
     it('identifyUser', function () {
-      const oldUserId = '456def'
-      this.AnalyticsManager.identifyUser(this.fakeUserId, oldUserId)
+      const analyticsId = '456def'
+      this.AnalyticsManager.identifyUser(this.fakeUserId, analyticsId)
       sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'identify', {
         userId: this.fakeUserId,
-        oldUserId,
+        analyticsId,
       })
     })
 
-    it('recordEvent', function () {
+    it('recordEventForUser', async function () {
       const event = 'fake-event'
-      this.AnalyticsManager.recordEvent(this.fakeUserId, event, null)
-      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
+      await this.AnalyticsManager.recordEventForUser(
+        this.fakeUserId,
         event,
-        userId: this.fakeUserId,
+        null
+      )
+      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'event', {
+        analyticsId: this.analyticsId,
+        event,
         segmentation: null,
+        isLoggedIn: true,
       })
     })
 
