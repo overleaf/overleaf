@@ -178,7 +178,11 @@ function _setUserProperty({ analyticsId, propertyName, propertyValue }) {
 
 function _isSmokeTestUser(userId) {
   const smokeTestUserId = Settings.smokeTest && Settings.smokeTest.userId
-  return smokeTestUserId != null && userId.toString() === smokeTestUserId
+  return (
+    smokeTestUserId != null &&
+    userId != null &&
+    userId.toString() === smokeTestUserId
+  )
 }
 
 function _isAnalyticsDisabled() {
