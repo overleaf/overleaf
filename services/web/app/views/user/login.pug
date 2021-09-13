@@ -1,4 +1,4 @@
-extends ../layout
+extends ../layout-marketing
 
 block vars
 	- metadata = { viewport: true }
@@ -11,36 +11,29 @@ block content
 					.card
 						.page-header
 							h1 #{translate("log_in")}
-						form(async-form="login", name="loginForm", action='/login', method="POST", ng-cloak)
+						form(data-ol-form, name="loginForm", action='/login', method="POST")
 							input(name='_csrf', type='hidden', value=csrfToken)
-							form-messages(for="loginForm")
+							div(data-ol-form-messages)
 							.form-group
 								input.form-control(
 									type='email',
 									name='email',
 									required,
 									placeholder='email@example.com',
-									ng-model="email",
-									ng-model-options="{ updateOn: 'blur' }",
 									focus="true"
 								)
-								span.small.text-primary(ng-show="loginForm.email.$invalid && loginForm.email.$dirty")
-									| #{translate("must_be_email_address")}
 							.form-group
 								input.form-control(
 									type='password',
 									name='password',
 									required,
 									placeholder='********',
-									ng-model="password"
 								)
-								span.small.text-primary(ng-show="loginForm.password.$invalid && loginForm.password.$dirty")
-									| #{translate("required")}
 							.actions
 								button.btn-primary.btn(
 									type='submit',
-									ng-disabled="loginForm.inflight"
+									data-ol-disabled-inflight
 								)
-									span(ng-show="!loginForm.inflight") #{translate("login")}
-									span(ng-show="loginForm.inflight") #{translate("logging_in")}…
+									span(data-ol-not-inflight-text) #{translate("login")}
+									span(hidden data-ol-inflight-text) #{translate("logging_in")}…
 								a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?

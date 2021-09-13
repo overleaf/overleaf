@@ -49,6 +49,7 @@ function formSubmitHelper(formEl) {
       }
       messageBag.push({
         type: 'error',
+        key: error.data?.message?.key,
         text,
       })
     } finally {
@@ -84,9 +85,21 @@ function showMessages(formEl, messageBag) {
 
   // Clear content
   messagesEl.textContent = ''
+  formEl.querySelectorAll('[data-ol-custom-form-message]').forEach(el => {
+    el.hidden = true
+  })
 
   // Render messages
   messageBag.forEach(message => {
+    if (message.key) {
+      formEl
+        .querySelectorAll(`[data-ol-custom-form-message="${message.key}"]`)
+        .forEach(el => {
+          el.hidden = false
+        })
+      return
+    }
+
     const messageEl = document.createElement('div')
     messageEl.className = classNames('alert', {
       'alert-danger': message.type === 'error',
