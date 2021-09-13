@@ -33,6 +33,24 @@ function tryReadAccess(user, projectId, test, callback) {
   )
 }
 
+function tryRenameProjectAccess(user, projectId, test, callback) {
+  user.request.post(
+    {
+      uri: `/project/${projectId}/settings`,
+      json: {
+        name: 'new name',
+      },
+    },
+    (error, response, body) => {
+      if (error != null) {
+        return callback(error)
+      }
+      test(response, body)
+      callback()
+    }
+  )
+}
+
 function trySettingsWriteAccess(user, projectId, test, callback) {
   async.series(
     [
@@ -166,6 +184,17 @@ function expectContentWriteAccess(user, projectId, callback) {
   )
 }
 
+function expectRenameProjectAccess(user, projectId, callback) {
+  tryRenameProjectAccess(
+    user,
+    projectId,
+    (response, body) => {
+      expect(response.statusCode).to.be.oneOf([200, 204])
+    },
+    callback
+  )
+}
+
 function expectSettingsWriteAccess(user, projectId, callback) {
   trySettingsWriteAccess(
     user,
@@ -184,7 +213,7 @@ function expectAdminAccess(user, projectId, callback) {
   )
 }
 
-function expectNoReadAccess(user, projectId, options, callback) {
+function expectNoReadAccess(user, projectId, callback) {
   async.series(
     [
       cb =>
@@ -214,8 +243,17 @@ function expectNoContentWriteAccess(user, projectId, callback) {
   )
 }
 
-function expectNoSettingsWriteAccess(user, projectId, options, callback) {
+function expectNoSettingsWriteAccess(user, projectId, callback) {
   trySettingsWriteAccess(
+    user,
+    projectId,
+    expectErrorResponse.restricted.json,
+    callback
+  )
+}
+
+function expectNoRenameProjectAccess(user, projectId, callback) {
+  tryRenameProjectAccess(
     user,
     projectId,
     expectErrorResponse.restricted.json,
@@ -325,6 +363,10 @@ describe('Authorization', function () {
       expectSettingsWriteAccess(this.owner, this.projectId, done)
     })
 
+    it('should allow the owner to rename the project', function (done) {
+      expectRenameProjectAccess(this.owner, this.projectId, done)
+    })
+
     it('should allow the owner admin access to it', function (done) {
       expectAdminAccess(this.owner, this.projectId, done)
     })
@@ -334,12 +376,7 @@ describe('Authorization', function () {
     })
 
     it('should not allow another user read access to the project', function (done) {
-      expectNoReadAccess(
-        this.other1,
-        this.projectId,
-        { redirect_to: '/restricted' },
-        done
-      )
+      expectNoReadAccess(this.other1, this.projectId, done)
     })
 
     it('should not allow another user write access to its content', function (done) {
@@ -347,12 +384,11 @@ describe('Authorization', function () {
     })
 
     it('should not allow another user write access to its settings', function (done) {
-      expectNoSettingsWriteAccess(
-        this.other1,
-        this.projectId,
-        { redirect_to: '/restricted' },
-        done
-      )
+      expectNoSettingsWriteAccess(this.other1, this.projectId, done)
+    })
+
+    it('should not allow another user to rename the project', function (done) {
+      expectNoRenameProjectAccess(this.other1, this.projectId, done)
     })
 
     it('should not allow another user admin access to it', function (done) {
@@ -364,12 +400,7 @@ describe('Authorization', function () {
     })
 
     it('should not allow anonymous user read access to it', function (done) {
-      expectNoReadAccess(
-        this.anon,
-        this.projectId,
-        { redirect_to: '/restricted' },
-        done
-      )
+      expectNoReadAccess(this.anon, this.projectId, done)
     })
 
     it('should not allow anonymous user write access to its content', function (done) {
@@ -377,12 +408,11 @@ describe('Authorization', function () {
     })
 
     it('should not allow anonymous user write access to its settings', function (done) {
-      expectNoSettingsWriteAccess(
-        this.anon,
-        this.projectId,
-        { redirect_to: '/restricted' },
-        done
-      )
+      expectNoSettingsWriteAccess(this.anon, this.projectId, done)
+    })
+
+    it('should not allow anonymous user to rename the project', function (done) {
+      expectNoRenameProjectAccess(this.anon, this.projectId, done)
     })
 
     it('should not allow anonymous user admin access to it', function (done) {
@@ -403,6 +433,10 @@ describe('Authorization', function () {
 
     it('should allow site admin users write access to its settings', function (done) {
       expectSettingsWriteAccess(this.site_admin, this.projectId, done)
+    })
+
+    it('should allow site admin users to rename the project', function (done) {
+      expectRenameProjectAccess(this.site_admin, this.projectId, done)
     })
 
     it('should allow site admin users admin access to it', function (done) {
@@ -456,12 +490,11 @@ describe('Authorization', function () {
     })
 
     it('should not allow the read-only user write access to its settings', function (done) {
-      expectNoSettingsWriteAccess(
-        this.ro_user,
-        this.projectId,
-        { redirect_to: '/restricted' },
-        done
-      )
+      expectNoSettingsWriteAccess(this.ro_user, this.projectId, done)
+    })
+
+    it('should not allow the read-only user to rename the project', function (done) {
+      expectNoRenameProjectAccess(this.ro_user, this.projectId, done)
     })
 
     it('should not allow the read-only user admin access to it', function (done) {
@@ -478,6 +511,10 @@ describe('Authorization', function () {
 
     it('should allow the read-write user write access to its settings', function (done) {
       expectSettingsWriteAccess(this.rw_user, this.projectId, done)
+    })
+
+    it('should not allow the read-write user to rename the project', function (done) {
+      expectNoRenameProjectAccess(this.rw_user, this.projectId, done)
     })
 
     it('should not allow the read-write user admin access to it', function (done) {
@@ -513,12 +550,11 @@ describe('Authorization', function () {
     })
 
     it('should not allow a user write access to its settings', function (done) {
-      expectNoSettingsWriteAccess(
-        this.other1,
-        this.projectId,
-        { redirect_to: '/restricted' },
-        done
-      )
+      expectNoSettingsWriteAccess(this.other1, this.projectId, done)
+    })
+
+    it('should not allow a user to rename the project', function (done) {
+      expectNoRenameProjectAccess(this.other1, this.projectId, done)
     })
 
     it('should not allow a user admin access to it', function (done) {
@@ -538,12 +574,11 @@ describe('Authorization', function () {
     })
 
     it('should not allow an anonymous user write access to its settings', function (done) {
-      expectNoSettingsWriteAccess(
-        this.anon,
-        this.projectId,
-        { redirect_to: '/restricted' },
-        done
-      )
+      expectNoSettingsWriteAccess(this.anon, this.projectId, done)
+    })
+
+    it('should not allow an anonymous user to rename the project', function (done) {
+      expectNoRenameProjectAccess(this.anon, this.projectId, done)
     })
 
     it('should not allow an anonymous user admin access to it', function (done) {
@@ -571,12 +606,11 @@ describe('Authorization', function () {
     })
 
     it('should not allow a user write access to its settings', function (done) {
-      expectNoSettingsWriteAccess(
-        this.other1,
-        this.projectId,
-        { redirect_to: '/restricted' },
-        done
-      )
+      expectNoSettingsWriteAccess(this.other1, this.projectId, done)
+    })
+
+    it('should not allow a user to rename the project', function (done) {
+      expectNoRenameProjectAccess(this.other1, this.projectId, done)
     })
 
     it('should not allow a user admin access to it', function (done) {
@@ -597,12 +631,11 @@ describe('Authorization', function () {
     })
 
     it('should not allow an anonymous user write access to its settings', function (done) {
-      expectNoSettingsWriteAccess(
-        this.anon,
-        this.projectId,
-        { redirect_to: '/restricted' },
-        done
-      )
+      expectNoSettingsWriteAccess(this.anon, this.projectId, done)
+    })
+
+    it('should not allow an anonymous user to rename the project', function (done) {
+      expectNoRenameProjectAccess(this.anon, this.projectId, done)
     })
 
     it('should not allow an anonymous user admin access to it', function (done) {

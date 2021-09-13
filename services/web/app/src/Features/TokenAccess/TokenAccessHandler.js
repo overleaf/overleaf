@@ -302,8 +302,10 @@ TokenAccessHandler.promises = promisifyAll(TokenAccessHandler, {
     'grantSessionTokenAccess',
     'getRequestToken',
     'protectTokens',
-    'validateTokenForAnonymousAccess',
   ],
+  multiResult: {
+    validateTokenForAnonymousAccess: ['isValidReadAndWrite', 'isValidReadOnly'],
+  },
 })
 
 module.exports = TokenAccessHandler

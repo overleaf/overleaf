@@ -1,6 +1,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors.js')
 
 const MODULE_PATH =
@@ -8,31 +9,34 @@ const MODULE_PATH =
 
 describe('AuthorizationMiddleware', function () {
   beforeEach(function () {
-    this.userId = 'user-id-123'
-    this.project_id = 'project-id-123'
+    this.userId = new ObjectId().toString()
+    this.project_id = new ObjectId().toString()
     this.token = 'some-token'
     this.AuthenticationController = {}
     this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.userId),
       isUserLoggedIn: sinon.stub().returns(true),
     }
-    this.AuthorizationManager = {}
+    this.AuthorizationManager = {
+      promises: {
+        canUserReadProject: sinon.stub(),
+        canUserWriteProjectSettings: sinon.stub(),
+        canUserWriteProjectContent: sinon.stub(),
+        canUserAdminProject: sinon.stub(),
+        canUserRenameProject: sinon.stub(),
+        isUserSiteAdmin: sinon.stub(),
+        isRestrictedUserForProject: sinon.stub(),
+      },
+    }
     this.HttpErrorHandler = {
       forbidden: sinon.stub(),
     }
     this.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns(this.token),
     }
-    this.ObjectId = {
-      isValid: sinon.stub().withArgs(this.project_id).returns(true),
-    }
-    this.AuthorizationManager = {}
     this.AuthorizationMiddleware = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './AuthorizationManager': this.AuthorizationManager,
-        mongodb: {
-          ObjectId: this.ObjectId,
-        },
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
         '../Authentication/AuthenticationController': this
           .AuthenticationController,
@@ -40,542 +44,355 @@ describe('AuthorizationMiddleware', function () {
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
       },
     })
-    this.req = {}
-    this.res = {}
+    this.req = {
+      params: {
+        project_id: this.project_id,
+      },
+      body: {},
+    }
+    this.res = {
+      redirect: sinon.stub(),
+      locals: {
+        currentUrl: '/current/url',
+      },
+    }
     this.next = sinon.stub()
   })
 
-  describe('_getUserId', function () {
-    beforeEach(function () {
-      this.req = {}
+  describe('ensureCanReadProject', function () {
+    testMiddleware('ensureUserCanReadProject', 'canUserReadProject')
+  })
+
+  describe('ensureUserCanWriteProjectContent', function () {
+    testMiddleware(
+      'ensureUserCanWriteProjectContent',
+      'canUserWriteProjectContent'
+    )
+  })
+
+  describe('ensureUserCanWriteProjectSettings', function () {
+    describe('when renaming a project', function () {
+      beforeEach(function () {
+        this.req.body.name = 'new project name'
+      })
+
+      testMiddleware(
+        'ensureUserCanWriteProjectSettings',
+        'canUserRenameProject'
+      )
     })
 
-    it('should get the user from session', function (done) {
-      this.SessionManager.getLoggedInUserId = sinon.stub().returns('1234')
-      this.AuthorizationMiddleware._getUserId(this.req, (err, userId) => {
-        expect(err).to.not.exist
-        expect(userId).to.equal('1234')
-        done()
+    describe('when setting another parameter', function () {
+      beforeEach(function () {
+        this.req.body.compiler = 'texlive-2017'
       })
-    })
 
-    it('should get oauth_user from request', function (done) {
-      this.SessionManager.getLoggedInUserId = sinon.stub().returns(null)
-      this.req.oauth_user = { _id: '5678' }
-      this.AuthorizationMiddleware._getUserId(this.req, (err, userId) => {
-        expect(err).to.not.exist
-        expect(userId).to.equal('5678')
-        done()
-      })
-    })
-
-    it('should fall back to null', function (done) {
-      this.SessionManager.getLoggedInUserId = sinon.stub().returns(null)
-      this.req.oauth_user = undefined
-      this.AuthorizationMiddleware._getUserId(this.req, (err, userId) => {
-        expect(err).to.not.exist
-        expect(userId).to.equal(null)
-        done()
-      })
+      testMiddleware(
+        'ensureUserCanWriteProjectSettings',
+        'canUserWriteProjectSettings'
+      )
     })
   })
 
-  const METHODS_TO_TEST = {
-    ensureUserCanReadProject: 'canUserReadProject',
-    ensureUserCanWriteProjectSettings: 'canUserWriteProjectSettings',
-    ensureUserCanWriteProjectContent: 'canUserWriteProjectContent',
-  }
-  Object.entries(METHODS_TO_TEST).forEach(
-    ([middlewareMethod, managerMethod]) => {
-      describe(middlewareMethod, function () {
-        beforeEach(function () {
-          this.req.params = { project_id: this.project_id }
-          this.AuthorizationManager[managerMethod] = sinon.stub()
-          this.AuthorizationMiddleware.redirectToRestricted = sinon.stub()
-        })
-
-        describe('with missing project_id', function () {
-          beforeEach(function () {
-            this.req.params = {}
-          })
-
-          it('should return an error to next', function () {
-            this.AuthorizationMiddleware[middlewareMethod](
-              this.req,
-              this.res,
-              this.next
-            )
-            this.next
-              .calledWith(sinon.match.instanceOf(Error))
-              .should.equal(true)
-          })
-        })
-
-        describe('with logged in user', function () {
-          beforeEach(function () {
-            this.SessionManager.getLoggedInUserId.returns(this.userId)
-          })
-
-          describe('when user has permission', function () {
-            beforeEach(function () {
-              this.AuthorizationManager[managerMethod]
-                .withArgs(this.userId, this.project_id, this.token)
-                .yields(null, true)
-            })
-
-            it('should return next', function () {
-              this.AuthorizationMiddleware[middlewareMethod](
-                this.req,
-                this.res,
-                this.next
-              )
-              this.next.called.should.equal(true)
-            })
-          })
-
-          describe("when user doesn't have permission", function () {
-            beforeEach(function () {
-              this.AuthorizationManager[managerMethod]
-                .withArgs(this.userId, this.project_id, this.token)
-                .yields(null, false)
-            })
-
-            it('should raise a 403', function () {
-              this.AuthorizationMiddleware[middlewareMethod](
-                this.req,
-                this.res,
-                this.next
-              )
-              this.next.called.should.equal(false)
-              this.HttpErrorHandler.forbidden
-                .calledWith(this.req, this.res)
-                .should.equal(true)
-            })
-          })
-        })
-
-        describe('with anonymous user', function () {
-          describe('when user has permission', function () {
-            beforeEach(function () {
-              this.SessionManager.getLoggedInUserId.returns(null)
-              this.AuthorizationManager[managerMethod]
-                .withArgs(null, this.project_id, this.token)
-                .yields(null, true)
-            })
-
-            it('should return next', function () {
-              this.AuthorizationMiddleware[middlewareMethod](
-                this.req,
-                this.res,
-                this.next
-              )
-              this.next.called.should.equal(true)
-            })
-          })
-
-          describe("when user doesn't have permission", function () {
-            beforeEach(function () {
-              this.SessionManager.getLoggedInUserId.returns(null)
-              this.AuthorizationManager[managerMethod]
-                .withArgs(null, this.project_id, this.token)
-                .yields(null, false)
-            })
-
-            it('should redirect to redirectToRestricted', function () {
-              this.AuthorizationMiddleware[middlewareMethod](
-                this.req,
-                this.res,
-                this.next
-              )
-              this.next.called.should.equal(false)
-              this.HttpErrorHandler.forbidden
-                .calledWith(this.req, this.res)
-                .should.equal(true)
-            })
-          })
-        })
-
-        describe('with malformed project id', function () {
-          beforeEach(function () {
-            this.req.params = { project_id: 'blah' }
-            this.ObjectId.isValid = sinon.stub().returns(false)
-          })
-
-          it('should return a not found error', function (done) {
-            this.AuthorizationMiddleware[middlewareMethod](
-              this.req,
-              this.res,
-              error => {
-                error.should.be.instanceof(Errors.NotFoundError)
-                return done()
-              }
-            )
-          })
-        })
-      })
-    }
-  )
-
   describe('ensureUserCanAdminProject', function () {
-    beforeEach(function () {
-      this.req.params = { project_id: this.project_id }
-      this.AuthorizationManager.canUserAdminProject = sinon.stub()
-      this.AuthorizationMiddleware.redirectToRestricted = sinon.stub()
-    })
-
-    describe('with missing project_id', function () {
-      beforeEach(function () {
-        this.req.params = {}
-      })
-
-      it('should return an error to next', function () {
-        this.AuthorizationMiddleware.ensureUserCanAdminProject(
-          this.req,
-          this.res,
-          this.next
-        )
-        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
-      })
-    })
-
-    describe('with logged in user', function () {
-      beforeEach(function () {
-        this.SessionManager.getLoggedInUserId.returns(this.userId)
-      })
-
-      describe('when user has permission', function () {
-        beforeEach(function () {
-          this.AuthorizationManager.canUserAdminProject
-            .withArgs(this.userId, this.project_id, this.token)
-            .yields(null, true)
-        })
-
-        it('should return next', function () {
-          this.AuthorizationMiddleware.ensureUserCanAdminProject(
-            this.req,
-            this.res,
-            this.next
-          )
-          this.next.called.should.equal(true)
-        })
-      })
-
-      describe("when user doesn't have permission", function () {
-        beforeEach(function () {
-          this.AuthorizationManager.canUserAdminProject
-            .withArgs(this.userId, this.project_id, this.token)
-            .yields(null, false)
-        })
-
-        it('should invoke HTTP forbidden error handler', function (done) {
-          this.HttpErrorHandler.forbidden = sinon.spy(() => done())
-          this.AuthorizationMiddleware.ensureUserCanAdminProject(
-            this.req,
-            this.res
-          )
-        })
-      })
-    })
-
-    describe('with anonymous user', function () {
-      describe('when user has permission', function () {
-        beforeEach(function () {
-          this.SessionManager.getLoggedInUserId.returns(null)
-          this.AuthorizationManager.canUserAdminProject
-            .withArgs(null, this.project_id, this.token)
-            .yields(null, true)
-        })
-
-        it('should return next', function () {
-          this.AuthorizationMiddleware.ensureUserCanAdminProject(
-            this.req,
-            this.res,
-            this.next
-          )
-          this.next.called.should.equal(true)
-        })
-      })
-
-      describe("when user doesn't have permission", function () {
-        beforeEach(function () {
-          this.SessionManager.getLoggedInUserId.returns(null)
-          this.AuthorizationManager.canUserAdminProject
-            .withArgs(null, this.project_id, this.token)
-            .yields(null, false)
-        })
-
-        it('should invoke HTTP forbidden error handler', function (done) {
-          this.HttpErrorHandler.forbidden = sinon.spy(() => done())
-          this.AuthorizationMiddleware.ensureUserCanAdminProject(
-            this.req,
-            this.res
-          )
-        })
-      })
-    })
-
-    describe('with malformed project id', function () {
-      beforeEach(function () {
-        this.req.params = { project_id: 'blah' }
-        this.ObjectId.isValid = sinon.stub().returns(false)
-      })
-
-      it('should return a not found error', function (done) {
-        this.AuthorizationMiddleware.ensureUserCanAdminProject(
-          this.req,
-          this.res,
-          error => {
-            error.should.be.instanceof(Errors.NotFoundError)
-            return done()
-          }
-        )
-      })
-    })
+    testMiddleware('ensureUserCanAdminProject', 'canUserAdminProject')
   })
 
   describe('ensureUserIsSiteAdmin', function () {
-    beforeEach(function () {
-      this.AuthorizationManager.isUserSiteAdmin = sinon.stub()
-      this.AuthorizationMiddleware.redirectToRestricted = sinon.stub()
-    })
-
     describe('with logged in user', function () {
-      beforeEach(function () {
-        this.SessionManager.getLoggedInUserId.returns(this.userId)
-      })
-
       describe('when user has permission', function () {
-        beforeEach(function () {
-          this.AuthorizationManager.isUserSiteAdmin
-            .withArgs(this.userId)
-            .yields(null, true)
-        })
-
-        it('should return next', function () {
-          this.AuthorizationMiddleware.ensureUserIsSiteAdmin(
-            this.req,
-            this.res,
-            this.next
-          )
-          this.next.called.should.equal(true)
-        })
+        setupSiteAdmin(true)
+        invokeMiddleware('ensureUserIsSiteAdmin')
+        expectNext()
       })
 
       describe("when user doesn't have permission", function () {
-        beforeEach(function () {
-          this.AuthorizationManager.isUserSiteAdmin
-            .withArgs(this.userId)
-            .yields(null, false)
-        })
+        setupSiteAdmin(false)
+        invokeMiddleware('ensureUserIsSiteAdmin')
+        expectRedirectToRestricted()
+      })
+    })
 
-        it('should redirect to redirectToRestricted', function () {
-          this.AuthorizationMiddleware.ensureUserIsSiteAdmin(
-            this.req,
-            this.res,
-            this.next
-          )
-          this.next.called.should.equal(false)
-          this.AuthorizationMiddleware.redirectToRestricted
-            .calledWith(this.req, this.res, this.next)
-            .should.equal(true)
-        })
+    describe('with oauth user', function () {
+      setupOAuthUser()
+
+      describe('when user has permission', function () {
+        setupSiteAdmin(true)
+        invokeMiddleware('ensureUserIsSiteAdmin')
+        expectNext()
+      })
+
+      describe("when user doesn't have permission", function () {
+        setupSiteAdmin(false)
+        invokeMiddleware('ensureUserIsSiteAdmin')
+        expectRedirectToRestricted()
       })
     })
 
     describe('with anonymous user', function () {
-      describe('when user has permission', function () {
-        beforeEach(function () {
-          this.SessionManager.getLoggedInUserId.returns(null)
-          this.AuthorizationManager.isUserSiteAdmin
-            .withArgs(null)
-            .yields(null, true)
-        })
-
-        it('should return next', function () {
-          this.AuthorizationMiddleware.ensureUserIsSiteAdmin(
-            this.req,
-            this.res,
-            this.next
-          )
-          this.next.called.should.equal(true)
-        })
-      })
-
-      describe("when user doesn't have permission", function () {
-        beforeEach(function () {
-          this.SessionManager.getLoggedInUserId.returns(null)
-          this.AuthorizationManager.isUserSiteAdmin
-            .withArgs(null)
-            .yields(null, false)
-        })
-
-        it('should redirect to redirectToRestricted', function () {
-          this.AuthorizationMiddleware.ensureUserIsSiteAdmin(
-            this.req,
-            this.res,
-            this.next
-          )
-          this.next.called.should.equal(false)
-          this.AuthorizationMiddleware.redirectToRestricted
-            .calledWith(this.req, this.res, this.next)
-            .should.equal(true)
-        })
-      })
+      setupAnonymousUser()
+      invokeMiddleware('ensureUserIsSiteAdmin')
+      expectRedirectToRestricted()
     })
   })
 
   describe('blockRestrictedUserFromProject', function () {
-    beforeEach(function () {
-      this.AuthorizationMiddleware._getUserAndProjectId = sinon
-        .stub()
-        .callsArgWith(1, null, this.userId, this.project_id)
+    describe('for a restricted user', function () {
+      setupPermission('isRestrictedUserForProject', true)
+      invokeMiddleware('blockRestrictedUserFromProject')
+      expectForbidden()
     })
 
-    it('should issue a 401 response for a restricted user', function (done) {
-      this.AuthorizationManager.isRestrictedUserForProject = sinon
-        .stub()
-        .callsArgWith(3, null, true)
-      this.req = {}
-      this.next = sinon.stub()
-      this.res.sendStatus = status => {
-        expect(status).to.equal(403)
-        expect(
-          this.AuthorizationManager.isRestrictedUserForProject.called
-        ).to.equal(true)
-        expect(this.next.called).to.equal(false)
-        done()
-      }
-      this.AuthorizationMiddleware.blockRestrictedUserFromProject(
-        this.req,
-        this.res,
-        this.next
-      )
-    })
-
-    it('should pass through for a regular user', function (done) {
-      this.AuthorizationManager.isRestrictedUserForProject = sinon
-        .stub()
-        .callsArgWith(3, null, false)
-      this.req = {}
-      this.res.sendStatus = sinon.stub()
-      this.next = status => {
-        expect(
-          this.AuthorizationManager.isRestrictedUserForProject.called
-        ).to.equal(true)
-        expect(this.res.sendStatus.called).to.equal(false)
-        done()
-      }
-      this.AuthorizationMiddleware.blockRestrictedUserFromProject(
-        this.req,
-        this.res,
-        this.next
-      )
+    describe('for a regular user', function (done) {
+      setupPermission('isRestrictedUserForProject', false)
+      invokeMiddleware('blockRestrictedUserFromProject')
+      expectNext()
     })
   })
 
   describe('ensureUserCanReadMultipleProjects', function () {
     beforeEach(function () {
-      this.AuthorizationManager.canUserReadProject = sinon.stub()
-      this.AuthorizationMiddleware.redirectToRestricted = sinon.stub()
       this.req.query = { project_ids: 'project1,project2' }
     })
 
     describe('with logged in user', function () {
-      beforeEach(function () {
-        this.SessionManager.getLoggedInUserId.returns(this.userId)
-      })
-
       describe('when user has permission to access all projects', function () {
         beforeEach(function () {
-          this.AuthorizationManager.canUserReadProject
+          this.AuthorizationManager.promises.canUserReadProject
             .withArgs(this.userId, 'project1', this.token)
-            .yields(null, true)
-          this.AuthorizationManager.canUserReadProject
+            .resolves(true)
+          this.AuthorizationManager.promises.canUserReadProject
             .withArgs(this.userId, 'project2', this.token)
-            .yields(null, true)
+            .resolves(true)
         })
 
-        it('should return next', function () {
-          this.AuthorizationMiddleware.ensureUserCanReadMultipleProjects(
-            this.req,
-            this.res,
-            this.next
-          )
-          this.next.called.should.equal(true)
-        })
+        invokeMiddleware('ensureUserCanReadMultipleProjects')
+        expectNext()
       })
 
       describe("when user doesn't have permission to access one of the projects", function () {
         beforeEach(function () {
-          this.AuthorizationManager.canUserReadProject
+          this.AuthorizationManager.promises.canUserReadProject
             .withArgs(this.userId, 'project1', this.token)
-            .yields(null, true)
-          this.AuthorizationManager.canUserReadProject
+            .resolves(true)
+          this.AuthorizationManager.promises.canUserReadProject
             .withArgs(this.userId, 'project2', this.token)
-            .yields(null, false)
+            .resolves(false)
         })
 
-        it('should redirect to redirectToRestricted', function () {
-          this.AuthorizationMiddleware.ensureUserCanReadMultipleProjects(
-            this.req,
-            this.res,
-            this.next
-          )
-          this.next.called.should.equal(false)
-          this.AuthorizationMiddleware.redirectToRestricted
-            .calledWith(this.req, this.res, this.next)
-            .should.equal(true)
-        })
+        invokeMiddleware('ensureUserCanReadMultipleProjects')
+        expectRedirectToRestricted()
       })
     })
 
+    describe('with oauth user', function () {
+      setupOAuthUser()
+
+      beforeEach(function () {
+        this.AuthorizationManager.promises.canUserReadProject
+          .withArgs(this.userId, 'project1', this.token)
+          .resolves(true)
+        this.AuthorizationManager.promises.canUserReadProject
+          .withArgs(this.userId, 'project2', this.token)
+          .resolves(true)
+      })
+
+      invokeMiddleware('ensureUserCanReadMultipleProjects')
+      expectNext()
+    })
+
     describe('with anonymous user', function () {
+      setupAnonymousUser()
+
       describe('when user has permission', function () {
         describe('when user has permission to access all projects', function () {
           beforeEach(function () {
-            this.SessionManager.getLoggedInUserId.returns(null)
-            this.AuthorizationManager.canUserReadProject
+            this.AuthorizationManager.promises.canUserReadProject
               .withArgs(null, 'project1', this.token)
-              .yields(null, true)
-            this.AuthorizationManager.canUserReadProject
+              .resolves(true)
+            this.AuthorizationManager.promises.canUserReadProject
               .withArgs(null, 'project2', this.token)
-              .yields(null, true)
+              .resolves(true)
           })
 
-          it('should return next', function () {
-            this.AuthorizationMiddleware.ensureUserCanReadMultipleProjects(
-              this.req,
-              this.res,
-              this.next
-            )
-            this.next.called.should.equal(true)
-          })
+          invokeMiddleware('ensureUserCanReadMultipleProjects')
+          expectNext()
         })
 
         describe("when user doesn't have permission to access one of the projects", function () {
           beforeEach(function () {
-            this.SessionManager.getLoggedInUserId.returns(null)
-            this.AuthorizationManager.canUserReadProject
+            this.AuthorizationManager.promises.canUserReadProject
               .withArgs(null, 'project1', this.token)
-              .yields(null, true)
-            this.AuthorizationManager.canUserReadProject
+              .resolves(true)
+            this.AuthorizationManager.promises.canUserReadProject
               .withArgs(null, 'project2', this.token)
-              .yields(null, false)
+              .resolves(false)
           })
 
-          it('should redirect to redirectToRestricted', function () {
-            this.AuthorizationMiddleware.ensureUserCanReadMultipleProjects(
-              this.req,
-              this.res,
-              this.next
-            )
-            this.next.called.should.equal(false)
-            this.AuthorizationMiddleware.redirectToRestricted
-              .calledWith(this.req, this.res, this.next)
-              .should.equal(true)
-          })
+          invokeMiddleware('ensureUserCanReadMultipleProjects')
+          expectRedirectToRestricted()
         })
       })
     })
   })
 })
+
+function testMiddleware(middleware, permission) {
+  describe(middleware, function () {
+    describe('with missing project_id', function () {
+      setupMissingProjectId()
+      invokeMiddleware(middleware)
+      expectError()
+    })
+
+    describe('with logged in user', function () {
+      describe('when user has permission', function () {
+        setupPermission(permission, true)
+        invokeMiddleware(middleware)
+        expectNext()
+      })
+
+      describe("when user doesn't have permission", function () {
+        setupPermission(permission, false)
+        invokeMiddleware(middleware)
+        expectForbidden()
+      })
+    })
+
+    describe('with oauth user', function () {
+      setupOAuthUser()
+
+      describe('when user has permission', function () {
+        setupPermission(permission, true)
+        invokeMiddleware(middleware)
+        expectNext()
+      })
+
+      describe("when user doesn't have permission", function () {
+        setupPermission(permission, false)
+        invokeMiddleware(middleware)
+        expectForbidden()
+      })
+    })
+
+    describe('with anonymous user', function () {
+      setupAnonymousUser()
+
+      describe('when user has permission', function () {
+        setupAnonymousPermission(permission, true)
+        invokeMiddleware(middleware)
+        expectNext()
+      })
+
+      describe("when user doesn't have permission", function () {
+        setupAnonymousPermission(permission, false)
+        invokeMiddleware(middleware)
+        expectForbidden()
+      })
+    })
+
+    describe('with malformed project id', function () {
+      setupMalformedProjectId()
+      invokeMiddleware(middleware)
+      expectNotFound()
+    })
+  })
+}
+
+function setupAnonymousUser() {
+  beforeEach('set up anonymous user', function () {
+    this.SessionManager.getLoggedInUserId.returns(null)
+    this.SessionManager.isUserLoggedIn.returns(false)
+  })
+}
+
+function setupOAuthUser() {
+  beforeEach('set up oauth user', function () {
+    this.SessionManager.getLoggedInUserId.returns(null)
+    this.req.oauth_user = { _id: this.userId }
+  })
+}
+
+function setupPermission(permission, value) {
+  beforeEach(`set permission ${permission} to ${value}`, function () {
+    this.AuthorizationManager.promises[permission]
+      .withArgs(this.userId, this.project_id, this.token)
+      .resolves(value)
+  })
+}
+
+function setupAnonymousPermission(permission, value) {
+  beforeEach(`set anonymous permission ${permission} to ${value}`, function () {
+    this.AuthorizationManager.promises[permission]
+      .withArgs(null, this.project_id, this.token)
+      .resolves(value)
+  })
+}
+
+function setupSiteAdmin(value) {
+  beforeEach(`set site admin to ${value}`, function () {
+    this.AuthorizationManager.promises.isUserSiteAdmin
+      .withArgs(this.userId)
+      .resolves(value)
+  })
+}
+
+function setupMissingProjectId() {
+  beforeEach('set up missing project id', function () {
+    delete this.req.params.project_id
+  })
+}
+
+function setupMalformedProjectId() {
+  beforeEach('set up malformed project id', function () {
+    this.req.params = { project_id: 'bad-project-id' }
+  })
+}
+
+function invokeMiddleware(method) {
+  beforeEach(`invoke ${method}`, function (done) {
+    this.next.callsFake(() => done())
+    this.HttpErrorHandler.forbidden.callsFake(() => done())
+    this.res.redirect.callsFake(() => done())
+    this.AuthorizationMiddleware[method](this.req, this.res, this.next)
+  })
+}
+
+function expectNext() {
+  it('calls the next middleware', function () {
+    expect(this.next).to.have.been.calledWithExactly()
+  })
+}
+
+function expectError() {
+  it('calls the error middleware', function () {
+    expect(this.next).to.have.been.calledWith(sinon.match.instanceOf(Error))
+  })
+}
+
+function expectNotFound() {
+  it('raises a 404', function () {
+    expect(this.next).to.have.been.calledWith(
+      sinon.match.instanceOf(Errors.NotFoundError)
+    )
+  })
+}
+
+function expectForbidden() {
+  it('raises a 403', function () {
+    expect(this.HttpErrorHandler.forbidden).to.have.been.calledWith(
+      this.req,
+      this.res
+    )
+    expect(this.next).not.to.have.been.called
+  })
+}
+
+function expectRedirectToRestricted() {
+  it('redirects to restricted', function () {
+    expect(this.res.redirect).to.have.been.calledWith(
+      '/restricted?from=%2Fcurrent%2Furl'
+    )
+    expect(this.next).not.to.have.been.called
+  })
+}

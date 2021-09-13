@@ -316,6 +316,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.post(
     '/project/:Project_id/settings',
+    validate({ body: Joi.object() }),
     AuthorizationMiddleware.ensureUserCanWriteProjectSettings,
     ProjectController.updateProjectSettings
   )
