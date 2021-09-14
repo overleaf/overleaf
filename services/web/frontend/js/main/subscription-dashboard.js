@@ -91,6 +91,112 @@ App.factory('RecurlyPricing', function ($q, MultiCurrencyPricing) {
   }
 })
 
+App.controller('ChangePlanToGroupFormController', function ($scope, $modal) {
+  if (!ensureRecurlyIsSetup()) return
+
+  const subscription = getMeta('ol-subscription')
+  const currency = subscription.recurly.currency
+
+  if (['USD', 'GBP', 'EUR'].includes(currency)) {
+    $scope.isValidCurrencyForUpgrade = true
+  }
+
+  $scope.openGroupPlanModal = function () {
+    const planCode = subscription.plan.planCode
+    $scope.defaultGroupPlan = planCode.includes('professional')
+      ? 'professional'
+      : 'collaborator'
+    $scope.currentPlanCurrency = currency
+    $modal.open({
+      templateUrl: 'groupPlanModalUpgradeTemplate',
+      controller: 'GroupPlansModalUpgradeController',
+      scope: $scope,
+    })
+  }
+})
+
+App.controller(
+  'GroupPlansModalUpgradeController',
+  function ($scope, $modal, $location, $http) {
+    $scope.options = {
+      plan_codes: [
+        {
+          display: 'Collaborator',
+          code: 'collaborator',
+        },
+        {
+          display: 'Professional',
+          code: 'professional',
+        },
+      ],
+      currencies: [
+        {
+          display: 'USD ($)',
+          code: 'USD',
+        },
+        {
+          display: 'GBP (£)',
+          code: 'GBP',
+        },
+        {
+          display: 'EUR (€)',
+          code: 'EUR',
+        },
+      ],
+      currencySymbols: {
+        USD: '$',
+        EUR: '€',
+        GBP: '£',
+      },
+      sizes: [2, 3, 4, 5, 10, 20, 50],
+      usages: [
+        {
+          display: 'Enterprise',
+          code: 'enterprise',
+        },
+        {
+          display: 'Educational',
+          code: 'educational',
+        },
+      ],
+    }
+
+    $scope.prices = getMeta('ol-groupPlans')
+
+    const currency = $scope.currentPlanCurrency
+
+    // default selected
+    $scope.selected = {
+      plan_code: $scope.defaultGroupPlan || 'collaborator',
+      currency,
+      size: '10',
+      usage: 'enterprise',
+    }
+
+    $scope.recalculatePrice = function () {
+      const { usage, plan_code, currency, size } = $scope.selected
+      const price = $scope.prices[usage][plan_code][currency][size]
+      const currencySymbol = $scope.options.currencySymbols[currency]
+      $scope.displayPrice = `${currencySymbol}${price}`
+    }
+
+    $scope.$watch('selected', $scope.recalculatePrice, true)
+    $scope.recalculatePrice()
+
+    $scope.upgrade = function () {
+      const { plan_code, size, usage } = $scope.selected
+      const body = {
+        _csrf: window.csrfToken,
+        plan_code: `group_${plan_code}_${size}_${usage}`,
+      }
+      $scope.inflight = true
+      $http
+        .post(`/user/subscription/update`, body)
+        .then(() => location.reload())
+    }
+  }
+)
+
 App.controller(
   'ChangePlanFormController',
   function ($scope, $modal, RecurlyPricing) {

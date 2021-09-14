@@ -3,7 +3,17 @@
  * This is to avoid unintended/artifical credits on users Recurly accounts.
  */
 function shouldPlanChangeAtTermEnd(oldPlan, newPlan) {
-  return oldPlan.price > newPlan.price
+  return getPlanPrice(oldPlan) > getPlanPrice(newPlan)
+}
+
+/**
+ * Group plans have their price in dollars, but individual plans store the price in cents
+ */
+function getPlanPrice(plan) {
+  if (plan.groupPlan) {
+    return plan.price * 100
+  }
+  return plan.price
 }
 
 module.exports = {

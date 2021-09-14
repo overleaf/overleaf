@@ -6,15 +6,25 @@ const modulePath =
 const plans = {
   expensive: {
     planCode: 'expensive',
-    price: 15,
+    price: 1500,
   },
   cheaper: {
     planCode: 'cheaper',
-    price: 5,
+    price: 500,
   },
   alsoCheap: {
     plancode: 'also-cheap',
-    price: 5,
+    price: 500,
+  },
+  expensiveGroup: {
+    plancode: 'group_expensive',
+    price: 495,
+    groupPlan: true,
+  },
+  cheapGroup: {
+    plancode: 'group_cheap',
+    price: 10,
+    groupPlan: true,
   },
   bad: {},
 }
@@ -45,6 +55,20 @@ describe('SubscriptionHelper', function () {
         plans.alsoCheap
       )
       expect(changeAtTermEnd).to.be.false
+    })
+    it('should return false if the change is from an individual plan to a more expensive group plan', function () {
+      const changeAtTermEnd = this.SubscriptionHelper.shouldPlanChangeAtTermEnd(
+        plans.expensive,
+        plans.expensiveGroup
+      )
+      expect(changeAtTermEnd).to.be.false
+    })
+    it('should return true if the change is from an individual plan to a cheaper group plan', function () {
+      const changeAtTermEnd = this.SubscriptionHelper.shouldPlanChangeAtTermEnd(
+        plans.expensive,
+        plans.cheapGroup
+      )
+      expect(changeAtTermEnd).to.be.true
     })
   })
 })
