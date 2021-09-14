@@ -23,7 +23,7 @@ const DocumentUpdaterManager = {
   getDocument(project_id, doc_id, fromVersion, callback) {
     const timer = new metrics.Timer('get-document')
     const url = `${settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}?fromVersion=${fromVersion}`
-    logger.log(
+    logger.debug(
       { project_id, doc_id, fromVersion },
       'getting doc from document updater'
     )
@@ -34,7 +34,7 @@ const DocumentUpdaterManager = {
         return callback(err)
       }
       if (res.statusCode >= 200 && res.statusCode < 300) {
-        logger.log(
+        logger.debug(
           { project_id, doc_id },
           'got doc from document document updater'
         )
@@ -63,7 +63,7 @@ const DocumentUpdaterManager = {
 
   flushProjectToMongoAndDelete(project_id, callback) {
     // this method is called when the last connected user leaves the project
-    logger.log({ project_id }, 'deleting project from document updater')
+    logger.debug({ project_id }, 'deleting project from document updater')
     const timer = new metrics.Timer('delete.mongo.project')
     // flush the project in the background when all users have left
     const url =
@@ -75,7 +75,7 @@ const DocumentUpdaterManager = {
         OError.tag(err, 'error deleting project from document updater')
         callback(err)
       } else if (res.statusCode >= 200 && res.statusCode < 300) {
-        logger.log({ project_id }, 'deleted project from document updater')
+        logger.debug({ project_id }, 'deleted project from document updater')
         callback(null)
       } else {
         callback(

@@ -18,7 +18,7 @@ module.exports = DocumentUpdaterController = {
   rclientList: RedisClientManager.createClientList(settings.redis.pubsub),
 
   listenForUpdatesFromDocumentUpdater(io) {
-    logger.log(
+    logger.debug(
       { rclients: this.rclientList.length },
       'listening for applied-ops events'
     )
@@ -112,7 +112,7 @@ module.exports = DocumentUpdaterController = {
       return
     }
     // send updates to clients
-    logger.log(
+    logger.debug(
       {
         doc_id,
         version: update.v,
@@ -127,7 +127,7 @@ module.exports = DocumentUpdaterController = {
       if (!seen[client.id]) {
         seen[client.id] = true
         if (client.publicId === update.meta.source) {
-          logger.log(
+          logger.debug(
             {
               doc_id,
               version: update.v,
@@ -138,7 +138,7 @@ module.exports = DocumentUpdaterController = {
           client.emit('otUpdateApplied', { v: update.v, doc: update.doc })
         } else if (!update.dup) {
           // Duplicate ops should just be sent back to sending client for acknowledgement
-          logger.log(
+          logger.debug(
             {
               doc_id,
               version: update.v,
@@ -153,7 +153,7 @@ module.exports = DocumentUpdaterController = {
     }
     if (Object.keys(seen).length < clientList.length) {
       metrics.inc('socket-io.duplicate-clients', 0.1)
-      logger.log(
+      logger.debug(
         {
           doc_id,
           socketIoClients: clientList.map(client => client.id),

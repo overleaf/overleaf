@@ -31,7 +31,7 @@ module.exports = {
           }
         })
         .then(function () {
-          logger.log({ channel }, 'subscribed to channel')
+          logger.debug({ channel }, 'subscribed to channel')
           metrics.inc(`subscribe.${baseChannel}`)
         })
         .catch(function (err) {
@@ -50,7 +50,7 @@ module.exports = {
       actualSubscribe
     )
     clientChannelMap.set(channel, subscribePromise)
-    logger.log({ channel }, 'planned to subscribe to channel')
+    logger.debug({ channel }, 'planned to subscribe to channel')
     return subscribePromise
   },
 
@@ -67,7 +67,7 @@ module.exports = {
           }
         })
         .then(function () {
-          logger.log({ channel }, 'unsubscribed from channel')
+          logger.debug({ channel }, 'unsubscribed from channel')
           metrics.inc(`unsubscribe.${baseChannel}`)
         })
         .catch(function (err) {
@@ -82,7 +82,7 @@ module.exports = {
       actualUnsubscribe
     )
     clientChannelMap.set(channel, unsubscribePromise)
-    logger.log({ channel }, 'planned to unsubscribe from channel')
+    logger.debug({ channel }, 'planned to unsubscribe from channel')
     return unsubscribePromise
   },
 

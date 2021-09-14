@@ -21,7 +21,10 @@ module.exports = {
   // update. This way we don't care if the connected_user key has expired when
   // we receive a cursor update.
   updateUserPosition(project_id, client_id, user, cursorData, callback) {
-    logger.log({ project_id, client_id }, 'marking user as joined or connected')
+    logger.debug(
+      { project_id, client_id },
+      'marking user as joined or connected'
+    )
 
     const multi = rclient.multi()
 
@@ -75,7 +78,7 @@ module.exports = {
   },
 
   refreshClient(project_id, client_id) {
-    logger.log({ project_id, client_id }, 'refreshing connected client')
+    logger.debug({ project_id, client_id }, 'refreshing connected client')
     const multi = rclient.multi()
     multi.hset(
       Keys.connectedUser({ project_id, client_id }),
@@ -97,7 +100,7 @@ module.exports = {
   },
 
   markUserAsDisconnected(project_id, client_id, callback) {
-    logger.log({ project_id, client_id }, 'marking user as disconnected')
+    logger.debug({ project_id, client_id }, 'marking user as disconnected')
     const multi = rclient.multi()
     multi.srem(Keys.clientsInProject({ project_id }), client_id)
     multi.expire(Keys.clientsInProject({ project_id }), FOUR_DAYS_IN_S)

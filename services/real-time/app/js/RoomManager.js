@@ -39,7 +39,7 @@ module.exports = {
     // explicitly, and then socket.io will just regard this as a client that
     // has not joined any rooms and do a final disconnection.
     const roomsToLeave = this._roomsClientIsIn(client)
-    logger.log({ client: client.id, roomsToLeave }, 'client leaving project')
+    logger.debug({ client: client.id, roomsToLeave }, 'client leaving project')
     for (const id of roomsToLeave) {
       const entity = IdMap.get(id)
       this.leaveEntity(client, entity, id)
@@ -63,14 +63,14 @@ module.exports = {
     client.join(id)
     // is this a new room? if so, subscribe
     if (beforeCount === 0) {
-      logger.log({ entity, id }, 'room is now active')
+      logger.debug({ entity, id }, 'room is now active')
       RoomEvents.once(`${entity}-subscribed-${id}`, function (err) {
         // only allow the client to join when all the relevant channels have subscribed
         if (err) {
           OError.tag(err, 'error joining', { entity, id })
           return callback(err)
         }
-        logger.log(
+        logger.debug(
           { client: client.id, entity, id, beforeCount },
           'client joined new room and subscribed to channel'
         )
@@ -81,7 +81,7 @@ module.exports = {
       // keep track of the number of listeners
       metrics.gauge('room-listeners', RoomEvents.eventNames().length)
     } else {
-      logger.log(
+      logger.debug(
         { client: client.id, entity, id, beforeCount },
         'client joined existing room'
       )
@@ -96,7 +96,7 @@ module.exports = {
     // This can now happen all the time, as we skip the join for clients that
     //  disconnect before joinProject/joinDoc completed.
     if (!this._clientAlreadyInRoom(client, id)) {
-      logger.log(
+      logger.debug(
         { client: client.id, entity, id },
         'ignoring request from client to leave room it is not in'
       )
@@ -104,7 +104,7 @@ module.exports = {
     }
     client.leave(id)
     const afterCount = this._clientsInRoom(client, id)
-    logger.log(
+    logger.debug(
       { client: client.id, entity, id, afterCount },
       'client left room'
     )
@@ -114,7 +114,7 @@ module.exports = {
       return
     }
     if (afterCount === 0) {
-      logger.log({ entity, id }, 'room is now empty')
+      logger.debug({ entity, id }, 'room is now empty')
       RoomEvents.emit(`${entity}-empty`, id)
       IdMap.delete(id)
       metrics.gauge('room-listeners', RoomEvents.eventNames().length)

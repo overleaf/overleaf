@@ -32,8 +32,14 @@ module.exports = WebsocketController = {
     }
 
     const user_id = user._id
-    logger.log(
-      { user_id, project_id, client_id: client.id },
+    logger.info(
+      {
+        user_id,
+        project_id,
+        client_id: client.id,
+        remote_ip: client.remoteIp,
+        user_agent: client.userAgent,
+      },
       'user joining project'
     )
     metrics.inc('editor.join-project', 1, { status: client.transport })
@@ -45,6 +51,10 @@ module.exports = WebsocketController = {
           return callback(error)
         }
         if (client.disconnected) {
+          logger.info(
+            { user_id, project_id, client_id: client.id },
+            'client disconnected before joining project'
+          )
           metrics.inc('editor.join-project.disconnected', 1, {
             status: 'after-web-api-call',
           })
@@ -72,8 +82,14 @@ module.exports = WebsocketController = {
           if (err) {
             return callback(err)
           }
-          logger.log(
-            { user_id, project_id, client_id: client.id },
+          logger.debug(
+            {
+              user_id,
+              project_id,
+              client_id: client.id,
+              privilegeLevel,
+              isRestrictedUser,
+            },
             'user joined project'
           )
           callback(
@@ -114,7 +130,7 @@ module.exports = WebsocketController = {
     } // client did not join project
 
     metrics.inc('editor.leave-project', 1, { status: client.transport })
-    logger.log(
+    logger.info(
       { project_id, user_id, client_id: client.id },
       'client leaving project'
     )
@@ -171,7 +187,7 @@ module.exports = WebsocketController = {
     if (!project_id) {
       return callback(new NotJoinedError())
     }
-    logger.log(
+    logger.debug(
       { user_id, project_id, doc_id, fromVersion, client_id: client.id },
       'client joining doc'
     )
@@ -266,7 +282,7 @@ module.exports = WebsocketController = {
               }
 
               AuthorizationManager.addAccessToDoc(client, doc_id, () => {})
-              logger.log(
+              logger.debug(
                 {
                   user_id,
                   project_id,
@@ -324,7 +340,7 @@ module.exports = WebsocketController = {
     client.joinLeaveEpoch++
     metrics.inc('editor.leave-doc', 1, { status: client.transport })
     const { project_id, user_id } = client.ol_context
-    logger.log(
+    logger.debug(
       { user_id, project_id, doc_id, client_id: client.id },
       'client leaving doc'
     )
@@ -346,7 +362,7 @@ module.exports = WebsocketController = {
     })
     const { project_id, first_name, last_name, email, user_id } =
       client.ol_context
-    logger.log(
+    logger.debug(
       { user_id, project_id, client_id: client.id, cursorData },
       'updating client position'
     )
@@ -356,7 +372,7 @@ module.exports = WebsocketController = {
       cursorData.doc_id,
       function (error) {
         if (error) {
-          logger.info(
+          logger.debug(
             { err: error, client_id: client.id, project_id, user_id },
             "silently ignoring unauthorized updateClientPosition. Client likely hasn't called joinProject yet."
           )
@@ -420,7 +436,7 @@ module.exports = WebsocketController = {
     if (!project_id) {
       return callback(new NotJoinedError())
     }
-    logger.log(
+    logger.debug(
       { user_id, project_id, client_id: client.id },
       'getting connected users'
     )
@@ -437,7 +453,7 @@ module.exports = WebsocketController = {
               if (error) {
                 return callback(error)
               }
-              logger.log(
+              logger.debug(
                 { user_id, project_id, client_id: client.id },
                 'got connected users'
               )
@@ -477,7 +493,7 @@ module.exports = WebsocketController = {
         update.meta.user_id = user_id
         metrics.inc('editor.doc-update', 0.3, { status: client.transport })
 
-        logger.log(
+        logger.debug(
           {
             user_id,
             doc_id,

@@ -27,10 +27,10 @@ const DeploymentManager = require('./app/js/DeploymentManager')
 // NOTE: debug is invoked for every blob that is put on the wire
 const socketIoLogger = {
   error(...message) {
-    logger.info({ fromSocketIo: true, originalLevel: 'error' }, ...message)
+    logger.debug({ fromSocketIo: true, originalLevel: 'error' }, ...message)
   },
   warn(...message) {
-    logger.info({ fromSocketIo: true, originalLevel: 'warn' }, ...message)
+    logger.debug({ fromSocketIo: true, originalLevel: 'warn' }, ...message)
   },
   info() {},
   debug() {},
@@ -60,7 +60,6 @@ const sessionSockets = new SessionSockets(
 )
 
 Metrics.injectMetricsRoute(app)
-app.use(Metrics.http.monitor(logger))
 
 io.configure(function () {
   io.enable('browser client minification')
@@ -102,7 +101,7 @@ app.get('/status', function (req, res) {
 
 app.get('/debug/events', function (req, res) {
   Settings.debugEvents = parseInt(req.query.count, 10) || 20
-  logger.log({ count: Settings.debugEvents }, 'starting debug mode')
+  logger.info({ count: Settings.debugEvents }, 'starting debug mode')
   res.send(`debug mode will log next ${Settings.debugEvents} events`)
 })
 
@@ -137,6 +136,9 @@ app.get(
 
 app.get('/health_check/redis', healthCheck)
 
+// log http requests for routes defined from this point onwards
+app.use(Metrics.http.monitor(logger))
+
 const Router = require('./app/js/Router')
 Router.configure(app, io, sessionSockets)
 
@@ -162,10 +164,10 @@ Error.stackTraceLimit = 10
 function shutdownCleanly(signal) {
   const connectedClients = io.sockets.clients().length
   if (connectedClients === 0) {
-    logger.warn('no clients connected, exiting')
+    logger.info('no clients connected, exiting')
     process.exit()
   } else {
-    logger.warn(
+    logger.info(
       { connectedClients },
       'clients still connected, not shutting down yet'
     )
@@ -175,18 +177,18 @@ function shutdownCleanly(signal) {
 
 function drainAndShutdown(signal) {
   if (Settings.shutDownInProgress) {
-    logger.warn({ signal }, 'shutdown already in progress, ignoring signal')
+    logger.info({ signal }, 'shutdown already in progress, ignoring signal')
   } else {
     Settings.shutDownInProgress = true
     const { statusCheckInterval } = Settings
     if (statusCheckInterval) {
-      logger.warn(
+      logger.info(
         { signal },
         `received interrupt, delay drain by ${statusCheckInterval}ms`
       )
     }
     setTimeout(function () {
-      logger.warn(
+      logger.info(
         { signal },
         `received interrupt, starting drain over ${shutdownDrainTimeWindow} mins`
       )
@@ -194,7 +196,7 @@ function drainAndShutdown(signal) {
         setTimeout(() => {
           const staleClients = io.sockets.clients()
           if (staleClients.length !== 0) {
-            logger.warn(
+            logger.info(
               { staleClients: staleClients.map(client => client.id) },
               'forcefully disconnecting stale clients'
             )
@@ -214,7 +216,7 @@ function drainAndShutdown(signal) {
 Settings.shutDownInProgress = false
 const shutdownDrainTimeWindow = parseInt(Settings.shutdownDrainTimeWindow, 10)
 if (Settings.shutdownDrainTimeWindow) {
-  logger.log({ shutdownDrainTimeWindow }, 'shutdownDrainTimeWindow enabled')
+  logger.info({ shutdownDrainTimeWindow }, 'shutdownDrainTimeWindow enabled')
   for (const signal of [
     'SIGINT',
     'SIGHUP',
@@ -255,7 +257,7 @@ if (Settings.shutdownDrainTimeWindow) {
 }
 
 if (Settings.continualPubsubTraffic) {
-  logger.warn('continualPubsubTraffic enabled')
+  logger.debug('continualPubsubTraffic enabled')
 
   const pubsubClient = redis.createClient(Settings.redis.pubsub)
   const clusterClient = redis.createClient(Settings.redis.websessions)

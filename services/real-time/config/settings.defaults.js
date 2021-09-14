@@ -162,6 +162,9 @@ const settings = {
     catchUncaughtErrors: true,
     shutdownOnUncaughtError: true,
   },
+
+  behindProxy: process.env.BEHIND_PROXY === 'true',
+  trustedProxyIps: process.env.TRUSTED_PROXY_IPS,
 }
 
 // console.log settings.redis

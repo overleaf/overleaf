@@ -7,6 +7,7 @@ const settings = require('@overleaf/settings')
 const WebsocketController = require('./WebsocketController')
 const HttpController = require('./HttpController')
 const HttpApiController = require('./HttpApiController')
+const WebsocketAddressManager = require('./WebsocketAddressManager')
 const bodyParser = require('body-parser')
 const base64id = require('base64id')
 const { UnexpectedArgumentsError } = require('./Errors')
@@ -41,7 +42,7 @@ module.exports = Router = {
     attrs.err = error
     attrs.method = method
     if (Joi.isError(error)) {
-      logger.warn(attrs, 'validation error')
+      logger.info(attrs, 'validation error')
       var message = 'invalid'
       try {
         message = error.details[0].message
@@ -59,8 +60,8 @@ module.exports = Router = {
       const serializedError = { message: error.message, code: error.info.code }
       callback(serializedError)
     } else if (error.message === 'unexpected arguments') {
-      // the payload might be very large, put it on level info
-      logger.log(attrs, 'unexpected arguments')
+      // the payload might be very large; put it on level debug
+      logger.debug(attrs, 'unexpected arguments')
       metrics.inc('unexpected-arguments', 1, { status: method })
       const serializedError = { message: error.message }
       callback(serializedError)
@@ -107,6 +108,15 @@ module.exports = Router = {
 
   configure(app, io, session) {
     app.set('io', io)
+
+    if (settings.behindProxy) {
+      app.set('trust proxy', settings.trustedProxyIps)
+    }
+    const websocketAddressManager = new WebsocketAddressManager(
+      settings.behindProxy,
+      settings.trustedProxyIps
+    )
+
     app.get('/clients', HttpController.getConnectedClients)
     app.get('/clients/:client_id', HttpController.getConnectedClient)
 
@@ -180,10 +190,14 @@ module.exports = Router = {
       client.publicId = 'P.' + base64id.generateId()
       client.emit('connectionAccepted', null, client.publicId)
 
+      client.remoteIp = websocketAddressManager.getRemoteIp(client.handshake)
+      const headers = client.handshake && client.handshake.headers
+      client.userAgent = headers && headers['user-agent']
+
       metrics.inc('socket-io.connection', 1, { status: client.transport })
       metrics.gauge('socket-io.clients', io.sockets.clients().length)
 
-      logger.log({ session, client_id: client.id }, 'client connected')
+      logger.debug({ session, client_id: client.id }, 'client connected')
 
       let user
       if (session && session.passport && session.passport.user) {

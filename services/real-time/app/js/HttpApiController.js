@@ -7,7 +7,7 @@ const logger = require('logger-sharelatex')
 
 module.exports = {
   sendMessage(req, res) {
-    logger.log({ message: req.params.message }, 'sending message')
+    logger.debug({ message: req.params.message }, 'sending message')
     if (Array.isArray(req.body)) {
       for (const payload of req.body) {
         WebsocketLoadBalancer.emitToRoom(
@@ -30,7 +30,7 @@ module.exports = {
     const io = req.app.get('io')
     let rate = req.query.rate || '4'
     rate = parseFloat(rate) || 0
-    logger.log({ rate }, 'setting client drain rate')
+    logger.info({ rate }, 'setting client drain rate')
     DrainManager.startDrain(io, rate)
     res.sendStatus(204)
   },
@@ -41,11 +41,11 @@ module.exports = {
     const client = io.sockets.sockets[client_id]
 
     if (!client) {
-      logger.info({ client_id }, 'api: client already disconnected')
+      logger.debug({ client_id }, 'api: client already disconnected')
       res.sendStatus(404)
       return
     }
-    logger.warn({ client_id }, 'api: requesting client disconnect')
+    logger.info({ client_id }, 'api: requesting client disconnect')
     client.on('disconnect', () => res.sendStatus(204))
     client.disconnect()
   },

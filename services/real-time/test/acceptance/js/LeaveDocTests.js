@@ -30,14 +30,14 @@ describe('leaveDoc', function () {
     this.ops = ['mock', 'doc', 'ops']
     sinon.spy(logger, 'error')
     sinon.spy(logger, 'warn')
-    sinon.spy(logger, 'log')
+    sinon.spy(logger, 'debug')
     return (this.other_doc_id = FixturesManager.getRandomId())
   })
 
   after(function () {
     logger.error.restore() // remove the spy
     logger.warn.restore()
-    return logger.log.restore()
+    return logger.debug.restore()
   })
 
   return describe('when joined to a doc', function () {
@@ -177,7 +177,7 @@ describe('leaveDoc', function () {
 
       return it('should trigger a low level message only', function () {
         return sinon.assert.calledWith(
-          logger.log,
+          logger.debug,
           sinon.match.any,
           'ignoring request from client to leave room it is not in'
         )

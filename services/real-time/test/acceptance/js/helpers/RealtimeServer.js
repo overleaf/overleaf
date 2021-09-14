@@ -42,7 +42,7 @@ module.exports = {
             throw error
           }
           this.running = true
-          logger.log('clsi running in dev mode')
+          logger.info('clsi running in dev mode')
 
           return (() => {
             const result = []

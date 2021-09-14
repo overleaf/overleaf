@@ -15,7 +15,7 @@ const {
 module.exports = {
   joinProject(project_id, user, callback) {
     const user_id = user._id
-    logger.log({ project_id, user_id }, 'sending join project request to web')
+    logger.debug({ project_id, user_id }, 'sending join project request to web')
     const url = `${settings.apis.web.url}/project/${project_id}/join`
     const headers = {}
     if (user.anonymousAccessToken) {

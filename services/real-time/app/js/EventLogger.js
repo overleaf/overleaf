@@ -21,7 +21,7 @@ module.exports = EventLogger = {
 
   debugEvent(channel, message) {
     if (settings.debugEvents > 0) {
-      logger.log({ channel, message, counter: COUNTER++ }, 'logging event')
+      logger.info({ channel, message, counter: COUNTER++ }, 'logging event')
       settings.debugEvents--
     }
   },

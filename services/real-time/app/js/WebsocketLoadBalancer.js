@@ -40,7 +40,7 @@ module.exports = WebsocketLoadBalancer = {
       message,
       payload,
     })
-    logger.log(
+    logger.debug(
       { room_id, message, payload, length: data.length },
       'emitting to room'
     )
@@ -55,7 +55,7 @@ module.exports = WebsocketLoadBalancer = {
   },
 
   listenForEditorEvents(io) {
-    logger.log(
+    logger.debug(
       { rclients: this.rclientSubList.length },
       'listening for editor events'
     )
@@ -102,7 +102,7 @@ module.exports = WebsocketLoadBalancer = {
         message.room_id
       ) {
         const clientList = io.sockets.clients(message.room_id)
-        logger.log(
+        logger.debug(
           {
             channel,
             message: message.message,
@@ -142,7 +142,7 @@ module.exports = WebsocketLoadBalancer = {
         if (clientList.length === 0) {
           return
         }
-        logger.log(
+        logger.debug(
           {
             channel,
             message: message.message,

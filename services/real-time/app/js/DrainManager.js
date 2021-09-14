@@ -10,7 +10,7 @@ module.exports = {
   startDrain(io, rate, callback) {
     // Clear out any old interval
     clearInterval(this.interval)
-    logger.log({ rate }, 'starting drain')
+    logger.info({ rate }, 'starting drain')
     if (rate === 0) {
       return
     }
@@ -38,7 +38,7 @@ module.exports = {
     for (const client of io.sockets.clients()) {
       if (!this.RECONNECTED_CLIENTS[client.id]) {
         this.RECONNECTED_CLIENTS[client.id] = true
-        logger.log(
+        logger.debug(
           { client_id: client.id },
           'Asking client to reconnect gracefully'
         )
@@ -51,7 +51,7 @@ module.exports = {
       }
     }
     if (drainedCount < N) {
-      logger.log('All clients have been told to reconnectGracefully')
+      logger.info('All clients have been told to reconnectGracefully')
       return true
     }
     return false

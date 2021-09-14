@@ -37,6 +37,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "logger-sharelatex": "^2.2.0",
+    "proxy-addr": "^2.0.7",
     "request": "^2.88.2",
     "socket.io": "https://github.com/overleaf/socket.io/archive/0.9.19-overleaf-5.tar.gz",
     "socket.io-client": "https://github.com/overleaf/socket.io-client/archive/0.9.17-overleaf-3.tar.gz",

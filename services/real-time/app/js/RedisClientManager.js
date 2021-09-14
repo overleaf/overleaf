@@ -12,7 +12,7 @@ module.exports = {
         : x.host
         ? 'single'
         : 'unknown'
-      logger.log({ redis: redisType }, 'creating redis client')
+      logger.debug({ redis: redisType }, 'creating redis client')
       return redis.createClient(x)
     })
   },

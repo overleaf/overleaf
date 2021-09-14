@@ -16,10 +16,10 @@ function updateDeploymentStatus(fileContent) {
   if (closed && !settings.serviceIsClosed) {
     settings.serviceIsClosed = true
     serviceCloseTime = Date.now() + 60 * 1000 // delay closing by 1 minute
-    logger.warn({ fileContent }, 'closing service')
+    logger.info({ fileContent }, 'closing service')
   } else if (!closed && settings.serviceIsClosed) {
     settings.serviceIsClosed = false
-    logger.warn({ fileContent }, 'opening service')
+    logger.info({ fileContent }, 'opening service')
   }
 }
 
@@ -45,7 +45,7 @@ function checkStatusFileSync() {
 module.exports = {
   initialise() {
     if (statusFile && deploymentColour) {
-      logger.log(
+      logger.info(
         { statusFile, deploymentColour, interval: FILE_CHECK_INTERVAL },
         'monitoring deployment status file'
       )

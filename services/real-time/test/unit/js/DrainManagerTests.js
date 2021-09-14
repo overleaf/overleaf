@@ -116,7 +116,7 @@ describe('DrainManager', function () {
           })
 
           return it('should log out that it reached the end', function () {
-            return this.logger.log
+            return this.logger.info
               .calledWith('All clients have been told to reconnectGracefully')
               .should.equal(true)
           })
