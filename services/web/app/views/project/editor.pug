@@ -109,10 +109,8 @@ block content
 					.ui-layout-center
 						include ./editor/editor
 
-						if showNewFileViewUI
-							include ./editor/file-view
-						else
-							include ./editor/binary-file
+						include ./editor/file-view
+
 						include ./editor/history
 
 			if !isRestrictedTokenMember
