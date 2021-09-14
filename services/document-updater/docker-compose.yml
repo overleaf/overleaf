@@ -48,7 +48,7 @@ services:
       retries: 20
 
   mongo:
-    image: mongo:4.0
+    image: mongo:4.2.15
     healthcheck:
       test: "mongo --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"
       interval: 1s
