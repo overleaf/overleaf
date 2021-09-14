@@ -1,26 +1,20 @@
-import { Row, Col, Modal, Grid, Alert, Button } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
+import { Alert, Button, Modal, Row, Col, Grid } from 'react-bootstrap'
+import { useIdeContext } from '../../../shared/context/ide-context'
+import { useProjectContext } from '../../../shared/context/project-context'
+import { useWordCount } from '../hooks/use-word-count'
 import Icon from '../../../shared/components/icon'
-import AccessibleModal from '../../../shared/components/accessible-modal'
 
-export default function WordCountModalContent({
-  animation = true,
-  show,
-  data,
-  error,
-  handleHide,
-  loading,
-}) {
+// NOTE: this component is only mounted when the modal is open
+export default function WordCountModalContent({ handleHide }) {
+  const { _id: projectId } = useProjectContext()
+  const { clsiServerId } = useIdeContext()
   const { t } = useTranslation()
+  const { data, error, loading } = useWordCount(projectId, clsiServerId)
 
   return (
-    <AccessibleModal
-      animation={animation}
-      show={show}
-      onHide={handleHide}
-      id="clone-project-modal"
-    >
+    <>
       <Modal.Header closeButton>
         <Modal.Title>{t('word_count')}</Modal.Title>
       </Modal.Header>
@@ -82,21 +76,10 @@ export default function WordCountModalContent({
       <Modal.Footer>
         <Button onClick={handleHide}>{t('done')}</Button>
       </Modal.Footer>
-    </AccessibleModal>
+    </>
   )
 }
 
 WordCountModalContent.propTypes = {
-  animation: PropTypes.bool,
-  show: PropTypes.bool.isRequired,
   handleHide: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired,
-  error: PropTypes.bool,
-  data: PropTypes.shape({
-    messages: PropTypes.string,
-    headers: PropTypes.number,
-    mathDisplay: PropTypes.number,
-    mathInline: PropTypes.number,
-    textWords: PropTypes.number,
-  }),
 }

@@ -20,6 +20,7 @@ export function EditorProviders({
     removeListener: sinon.stub(),
   },
   isRestrictedTokenMember = false,
+  clsiServerId = '1234',
   scope,
   children,
 }) {
@@ -51,7 +52,7 @@ export function EditorProviders({
     ...scope,
   }
 
-  window._ide = { $scope, socket }
+  window._ide = { $scope, socket, clsiServerId }
 
   return (
     <SplitTestProvider>

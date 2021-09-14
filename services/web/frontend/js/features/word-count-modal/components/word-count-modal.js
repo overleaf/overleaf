@@ -1,52 +1,28 @@
-import { useEffect, useState } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import WordCountModalContent from './word-count-modal-content'
-import { fetchWordCount } from '../utils/api'
+import AccessibleModal from '../../../shared/components/accessible-modal'
+import withErrorBoundary from '../../../infrastructure/error-boundary'
 
-function WordCountModal({ clsiServerId, handleHide, projectId, show }) {
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
-  const [data, setData] = useState()
-
-  useEffect(() => {
-    if (!show) {
-      return
-    }
-
-    setData(undefined)
-    setError(false)
-    setLoading(true)
-
-    fetchWordCount(projectId, clsiServerId)
-      .then(data => {
-        setData(data.texcount)
-      })
-      .catch(error => {
-        if (error.cause?.name !== 'AbortError') {
-          setError(true)
-        }
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }, [show, projectId, clsiServerId])
-
+const WordCountModal = React.memo(function WordCountModal({
+  show,
+  handleHide,
+}) {
   return (
-    <WordCountModalContent
-      data={data}
-      error={error}
+    <AccessibleModal
+      animation
       show={show}
-      handleHide={handleHide}
-      loading={loading}
-    />
+      onHide={handleHide}
+      id="clone-project-modal"
+    >
+      <WordCountModalContent handleHide={handleHide} />
+    </AccessibleModal>
   )
-}
+})
 
 WordCountModal.propTypes = {
-  clsiServerId: PropTypes.string,
+  show: PropTypes.bool,
   handleHide: PropTypes.func.isRequired,
-  projectId: PropTypes.string.isRequired,
-  show: PropTypes.bool.isRequired,
 }
 
-export default WordCountModal
+export default withErrorBoundary(WordCountModal)

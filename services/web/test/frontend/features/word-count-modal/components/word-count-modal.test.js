@@ -1,24 +1,27 @@
-import { render, screen, cleanup } from '@testing-library/react'
-import WordCountModal from '../../../../../frontend/js/features/word-count-modal/components/word-count-modal'
+import { screen } from '@testing-library/react'
 import { expect } from 'chai'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
+import WordCountModal from '../../../../../frontend/js/features/word-count-modal/components/word-count-modal'
 
 describe('<WordCountModal />', function () {
   afterEach(function () {
     fetchMock.reset()
-    cleanup()
   })
 
-  const modalProps = {
+  const contextProps = {
     projectId: 'project-1',
     clsiServerId: 'clsi-server-1',
-    show: true,
-    handleHide: sinon.stub(),
   }
 
   it('renders the translated modal title', async function () {
-    render(<WordCountModal {...modalProps} />)
+    const handleHide = sinon.stub()
+
+    renderWithEditorContext(
+      <WordCountModal show handleHide={handleHide} />,
+      contextProps
+    )
 
     await screen.findByText('Word Count')
   })
@@ -28,7 +31,12 @@ describe('<WordCountModal />', function () {
       return { status: 200, body: { texcount: { messages: 'This is a test' } } }
     })
 
-    render(<WordCountModal {...modalProps} />)
+    const handleHide = sinon.stub()
+
+    renderWithEditorContext(
+      <WordCountModal show handleHide={handleHide} />,
+      contextProps
+    )
 
     await screen.findByText('Loading…')
 
@@ -38,7 +46,12 @@ describe('<WordCountModal />', function () {
   it('renders an error message and hides loading message on error', async function () {
     fetchMock.get('express:/project/:projectId/wordcount', 500)
 
-    render(<WordCountModal {...modalProps} />)
+    const handleHide = sinon.stub()
+
+    renderWithEditorContext(
+      <WordCountModal show handleHide={handleHide} />,
+      contextProps
+    )
 
     await screen.findByText('Sorry, something went wrong')
 
@@ -57,7 +70,12 @@ describe('<WordCountModal />', function () {
       }
     })
 
-    render(<WordCountModal {...modalProps} />)
+    const handleHide = sinon.stub()
+
+    renderWithEditorContext(
+      <WordCountModal show handleHide={handleHide} />,
+      contextProps
+    )
 
     await screen.findByText('This is a test')
   })
@@ -77,7 +95,12 @@ describe('<WordCountModal />', function () {
       }
     })
 
-    render(<WordCountModal {...modalProps} />)
+    const handleHide = sinon.stub()
+
+    renderWithEditorContext(
+      <WordCountModal show handleHide={handleHide} />,
+      contextProps
+    )
 
     await screen.findByText((content, element) =>
       element.textContent.trim().match(/^Total Words\s*:\s*100$/)
