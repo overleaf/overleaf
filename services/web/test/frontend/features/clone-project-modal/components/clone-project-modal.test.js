@@ -1,24 +1,36 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { expect } from 'chai'
-import CloneProjectModal from '../../../../../frontend/js/features/clone-project-modal/components/clone-project-modal'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
+import CloneProjectModal from '../../../../../frontend/js/features/clone-project-modal/components/clone-project-modal'
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 describe('<CloneProjectModal />', function () {
-  afterEach(function () {
+  beforeEach(function () {
     fetchMock.reset()
   })
 
-  const modalProps = {
-    handleHide: sinon.stub(),
-    projectId: 'project-1',
-    projectName: 'Test Project',
-    openProject: sinon.stub(),
-    show: true,
+  after(function () {
+    fetchMock.reset()
+  })
+
+  const project = {
+    _id: 'project-1',
+    name: 'Test Project',
   }
 
   it('renders the translated modal title', async function () {
-    render(<CloneProjectModal {...modalProps} />)
+    const handleHide = sinon.stub()
+    const openProject = sinon.stub()
+
+    renderWithEditorContext(
+      <CloneProjectModal
+        handleHide={handleHide}
+        openProject={openProject}
+        show
+      />,
+      { scope: { project } }
+    )
 
     await screen.findByText('Copy Project')
   })
@@ -28,14 +40,22 @@ describe('<CloneProjectModal />', function () {
       'express:/project/:projectId/clone',
       {
         status: 200,
-        body: { project_id: modalProps.projectId },
+        body: { project_id: 'cloned-project' },
       },
       { delay: 10 }
     )
 
+    const handleHide = sinon.stub()
     const openProject = sinon.stub()
 
-    render(<CloneProjectModal {...modalProps} openProject={openProject} />)
+    renderWithEditorContext(
+      <CloneProjectModal
+        handleHide={handleHide}
+        openProject={openProject}
+        show
+      />,
+      { scope: { project } }
+    )
 
     const cancelButton = await screen.findByRole('button', { name: 'Cancel' })
     expect(cancelButton.disabled).to.be.false
@@ -88,9 +108,17 @@ describe('<CloneProjectModal />', function () {
       body: 'There was an error!',
     })
 
+    const handleHide = sinon.stub()
     const openProject = sinon.stub()
 
-    render(<CloneProjectModal {...modalProps} openProject={openProject} />)
+    renderWithEditorContext(
+      <CloneProjectModal
+        handleHide={handleHide}
+        openProject={openProject}
+        show
+      />,
+      { scope: { project } }
+    )
 
     const button = await screen.findByRole('button', { name: 'Copy' })
     expect(button.disabled).to.be.false
@@ -117,9 +145,17 @@ describe('<CloneProjectModal />', function () {
       body: 'There was an error!',
     })
 
+    const handleHide = sinon.stub()
     const openProject = sinon.stub()
 
-    render(<CloneProjectModal {...modalProps} openProject={openProject} />)
+    renderWithEditorContext(
+      <CloneProjectModal
+        handleHide={handleHide}
+        openProject={openProject}
+        show
+      />,
+      { scope: { project } }
+    )
 
     const button = await screen.findByRole('button', { name: 'Copy' })
     expect(button.disabled).to.be.false

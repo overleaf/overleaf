@@ -1,15 +1,12 @@
 import App from '../../../base'
 import { react2angular } from 'react2angular'
-
 import CloneProjectModal from '../components/clone-project-modal'
-
-App.component('cloneProjectModal', react2angular(CloneProjectModal))
+import { rootContext } from '../../../shared/context/root-context'
 
 export default App.controller(
   'LeftMenuCloneProjectModalController',
-  function ($scope, ide) {
+  function ($scope) {
     $scope.show = false
-    $scope.projectId = ide.$scope.project_id
 
     $scope.handleHide = () => {
       $scope.$applyAsync(() => {
@@ -17,21 +14,22 @@ export default App.controller(
       })
     }
 
+    $scope.openCloneProjectModal = () => {
+      $scope.$applyAsync(() => {
+        $scope.show = true
+      })
+    }
+
     $scope.openProject = projectId => {
       window.location.assign(`/project/${projectId}`)
     }
-
-    $scope.openCloneProjectModal = () => {
-      $scope.$applyAsync(() => {
-        const { project } = ide.$scope
-
-        if (project) {
-          $scope.projectId = project._id
-          $scope.projectName = project.name
-
-          $scope.show = true
-        }
-      })
-    }
   }
+)
+
+App.component(
+  'cloneProjectModal',
+  react2angular(
+    rootContext.use(CloneProjectModal),
+    Object.keys(CloneProjectModal.propTypes)
+  )
 )
