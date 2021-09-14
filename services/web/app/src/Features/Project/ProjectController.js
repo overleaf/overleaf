@@ -428,6 +428,10 @@ const ProjectController = {
               'allInReconfirmNotificationPeriodsForUser',
               fullEmails,
               (error, results) => {
+                if (error != null) {
+                  return cb(error)
+                }
+
                 // Module.hooks.fire accepts multiple methods
                 // and does async.series
                 const allInReconfirmNotificationPeriods =

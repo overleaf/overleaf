@@ -1,3 +1,4 @@
+const Path = require('path')
 const fs = require('fs')
 
 const LANGUAGES = [
@@ -38,7 +39,7 @@ function transformLocales(mapping, transformLocale) {
     })
 
     fs.writeFileSync(
-      `${__dirname}/../../locales/${language}.json`,
+      Path.join(__dirname, `/../../locales/${language}.json`),
       JSON.stringify(translatedLocales, null, 2) + '\n'
     )
   })

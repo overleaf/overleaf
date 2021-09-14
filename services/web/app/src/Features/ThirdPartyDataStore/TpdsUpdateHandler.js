@@ -33,6 +33,9 @@ function newUpdate(userId, projectName, path, updateRequest, source, callback) {
           )
         }
         FileTypeManager.shouldIgnore(path, (err, shouldIgnore) => {
+          if (err) {
+            return callback(err)
+          }
           if (shouldIgnore) {
             return callback()
           }

@@ -30,11 +30,10 @@ describe('ProjectDuplicateNames', function () {
         'example-project',
         { template: 'example' },
         (error, projectId) => {
-          if (error) {
-            throw error
-          }
+          expect(error).to.not.exist
           this.example_project_id = projectId
           this.owner.getProject(projectId, (error, project) => {
+            expect(error).to.not.exist
             this.project = project
             this.mainTexDoc = _.find(
               project.rootFolder[0].docs,
@@ -59,6 +58,7 @@ describe('ProjectDuplicateNames', function () {
                 },
               },
               (err, res, body) => {
+                expect(err).to.not.exist
                 this.testFolderId = body._id
                 done()
               }
@@ -95,6 +95,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -117,6 +118,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -141,6 +143,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -163,6 +166,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -187,7 +191,7 @@ describe('ProjectDuplicateNames', function () {
               formData: {
                 qqfile: {
                   value: fs.createReadStream(
-                    Path.resolve(__dirname + '/../files/1pixel.png')
+                    Path.join(__dirname, '/../files/1pixel.png')
                   ),
                   options: {
                     filename: 'frog.jpg',
@@ -197,6 +201,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.body = body
               // update the image id because we have replaced the file
               this.imageFile._id = this.body.entity_id
@@ -224,6 +229,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -246,6 +252,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -270,7 +277,7 @@ describe('ProjectDuplicateNames', function () {
               formData: {
                 qqfile: {
                   value: fs.createReadStream(
-                    Path.resolve(__dirname + '/../files/1pixel.png')
+                    Path.join(__dirname, '/../files/1pixel.png')
                   ),
                   options: {
                     filename: 'testfolder',
@@ -280,6 +287,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.body = body
               done()
             }
@@ -303,6 +311,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -324,6 +333,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -345,6 +355,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -368,6 +379,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -389,6 +401,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -410,6 +423,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -433,6 +447,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -454,6 +469,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -475,6 +491,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -498,6 +515,9 @@ describe('ProjectDuplicateNames', function () {
             },
           },
           (err, res, body) => {
+            if (err) {
+              throw err
+            }
             this.owner.request.post(
               {
                 uri: `/project/${this.example_project_id}/doc`,
@@ -507,6 +527,9 @@ describe('ProjectDuplicateNames', function () {
                 },
               },
               (err, res, body) => {
+                if (err) {
+                  throw err
+                }
                 this.owner.request.post(
                   {
                     uri: `/project/${this.example_project_id}/folder`,
@@ -516,6 +539,9 @@ describe('ProjectDuplicateNames', function () {
                     },
                   },
                   (err, res, body) => {
+                    if (err) {
+                      throw err
+                    }
                     this.subFolderId = body._id
                     this.owner.request.post(
                       {
@@ -526,6 +552,9 @@ describe('ProjectDuplicateNames', function () {
                         },
                       },
                       (err, res, body) => {
+                        if (err) {
+                          throw err
+                        }
                         this.otherFolderId = body._id
                         done()
                       }
@@ -548,6 +577,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -569,6 +599,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -590,6 +621,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }
@@ -611,6 +643,7 @@ describe('ProjectDuplicateNames', function () {
               },
             },
             (err, res, body) => {
+              expect(err).to.not.exist
               this.res = res
               done()
             }

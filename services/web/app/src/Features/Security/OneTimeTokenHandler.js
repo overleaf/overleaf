@@ -11,9 +11,6 @@ const OneTimeTokenHandler = {
     if (!options) {
       options = {}
     }
-    if (!callback) {
-      callback = function (error, data) {}
-    }
     if (typeof options === 'function') {
       callback = options
       options = {}
@@ -40,9 +37,6 @@ const OneTimeTokenHandler = {
   },
 
   getValueFromTokenAndExpire(use, token, callback) {
-    if (!callback) {
-      callback = function (error, data) {}
-    }
     const now = new Date()
     db.tokens.findOneAndUpdate(
       {

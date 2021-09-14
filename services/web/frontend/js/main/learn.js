@@ -81,6 +81,10 @@ App.controller(
           hitsPerPage: $scope.config_hits_per_page,
         },
         function (err, response) {
+          if (err) {
+            $scope.searchError = err
+          }
+
           $scope.processingSearch = false
           if (response.hits.length === 0) {
             updateHits([])

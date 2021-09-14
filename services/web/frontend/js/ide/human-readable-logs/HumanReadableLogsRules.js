@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 function WikiLink({ url, children, skipPlainRendering }) {
   if (window.wikiEnabled) {
     return (
-      <a href={url} target="_blank">
+      <a href={url} target="_blank" rel="noopener">
         {children}
       </a>
     )

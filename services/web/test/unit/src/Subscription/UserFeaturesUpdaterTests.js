@@ -1,5 +1,6 @@
 const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
+const assert = require('assert')
 const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/UserFeaturesUpdater'
@@ -46,6 +47,7 @@ describe('UserFeaturesUpdater', function () {
         (err, features) => {
           const updateArgs = this.User.findByIdAndUpdate.lastCall.args
           expect(updateArgs[0]).to.deep.equal(userId)
+          assert.equal(err, null)
           expect(Object.keys(updateArgs[1]).length).to.equal(3)
           expect(updateArgs[1]['features.versioning']).to.equal(
             update.versioning
@@ -69,6 +71,7 @@ describe('UserFeaturesUpdater', function () {
         userId,
         update,
         (err, featuresChanged) => {
+          assert.equal(err, null)
           const updateArgs = this.User.findByIdAndUpdate.lastCall.args
           expect(updateArgs[0]).to.equal(userId)
           expect(Object.keys(updateArgs[1]).length).to.equal(2)

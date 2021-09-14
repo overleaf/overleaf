@@ -1,3 +1,4 @@
+const Path = require('path')
 const { promises: fs } = require('fs')
 const { promisify } = require('util')
 const oneSky = require('@brainly/onesky-utils')
@@ -12,7 +13,9 @@ async function uploadLocales() {
       fileName: 'en-US.json',
       language: 'en-GB',
       format: 'HIERARCHICAL_JSON',
-      content: await fs.readFile(`${__dirname}/../../locales/en.json`),
+      content: await fs.readFile(
+        Path.join(__dirname, '/../../locales/en.json')
+      ),
       keepStrings: false, // deprecate locales that no longer exist in en.json
     })
   )

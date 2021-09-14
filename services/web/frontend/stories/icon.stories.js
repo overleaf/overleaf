@@ -8,7 +8,7 @@ export const Type = args => {
         <a
           href="https://fontawesome.com/v4.7.0/icons/"
           target="_blank"
-          rel="noopener"
+          rel="noopener noreferrer"
         >
           Font Awesome icons
         </a>

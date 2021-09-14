@@ -103,8 +103,9 @@ async function _addExampleProjectFiles(ownerId, projectName, project) {
     ownerId
   )
 
-  const frogPath = path.resolve(
-    __dirname + '/../../../templates/project_files/example-project/frog.jpg'
+  const frogPath = path.join(
+    __dirname,
+    '/../../../templates/project_files/example-project/frog.jpg'
   )
   await ProjectEntityUpdateHandler.promises.addFile(
     project._id,
@@ -175,8 +176,9 @@ async function _createRootDoc(project, ownerId, docLines) {
 async function _buildTemplate(templateName, userId, projectName) {
   const user = await User.findById(userId, 'first_name last_name')
 
-  const templatePath = path.resolve(
-    __dirname + `/../../../templates/project_files/${templateName}`
+  const templatePath = path.join(
+    __dirname,
+    `/../../../templates/project_files/${templateName}`
   )
   const template = fs.readFileSync(templatePath)
   const data = {

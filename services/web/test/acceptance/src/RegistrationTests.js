@@ -1,7 +1,3 @@
-/* eslint-disable
-    handle-callback-err
-*/
-
 const { expect } = require('chai')
 const async = require('async')
 const metrics = require('./helpers/metrics')
@@ -13,9 +9,6 @@ const Features = require('../../../app/src/infrastructure/Features')
 // Expectations
 const expectProjectAccess = function (user, projectId, callback) {
   // should have access to project
-  if (callback == null) {
-    callback = function (err, result) {}
-  }
   user.openProject(projectId, err => {
     expect(err).to.be.oneOf([null, undefined])
     return callback()
@@ -24,9 +17,6 @@ const expectProjectAccess = function (user, projectId, callback) {
 
 const expectNoProjectAccess = function (user, projectId, callback) {
   // should not have access to project page
-  if (callback == null) {
-    callback = function (err, result) {}
-  }
   user.openProject(projectId, err => {
     expect(err).to.be.instanceof(Error)
     return callback()
@@ -40,9 +30,6 @@ const tryLoginThroughRegistrationForm = function (
   password,
   callback
 ) {
-  if (callback == null) {
-    callback = function (err, response, body) {}
-  }
   user.getCsrfToken(err => {
     if (err != null) {
       return callback(err)
@@ -234,7 +221,9 @@ describe('Registration', function () {
 
     it('should register with the csrf token', function (done) {
       this.user.request.get('/login', (err, res, body) => {
+        expect(err).to.not.exist
         this.user.getCsrfToken(error => {
+          expect(error).to.not.exist
           this.user.request.post(
             {
               url: '/register',
@@ -247,7 +236,7 @@ describe('Registration', function () {
               },
             },
             (error, response, body) => {
-              expect(err != null).to.equal(false)
+              expect(error).to.not.exist
               expect(response.statusCode).to.equal(200)
               return done()
             }
@@ -258,7 +247,9 @@ describe('Registration', function () {
 
     it('should fail with no csrf token', function (done) {
       this.user.request.get('/login', (err, res, body) => {
+        expect(err).to.not.exist
         this.user.getCsrfToken(error => {
+          expect(error).to.not.exist
           this.user.request.post(
             {
               url: '/register',
@@ -271,6 +262,7 @@ describe('Registration', function () {
               },
             },
             (error, response, body) => {
+              expect(error).to.not.exist
               expect(response.statusCode).to.equal(403)
               return done()
             }
@@ -281,9 +273,12 @@ describe('Registration', function () {
 
     it('should fail with a stale csrf token', function (done) {
       this.user.request.get('/login', (err, res, body) => {
+        expect(err).to.not.exist
         this.user.getCsrfToken(error => {
+          expect(error).to.not.exist
           const oldCsrfToken = this.user.csrfToken
           this.user.logout(err => {
+            expect(err).to.not.exist
             this.user.request.post(
               {
                 url: '/register',
@@ -296,6 +291,7 @@ describe('Registration', function () {
                 },
               },
               (error, response, body) => {
+                expect(error).to.not.exist
                 expect(response.statusCode).to.equal(403)
                 return done()
               }
@@ -359,9 +355,11 @@ describe('Registration', function () {
       it('should not allow sign in with secondary email', function (done) {
         const secondaryEmail = 'acceptance-test-secondary@example.com'
         this.user1.addEmail(secondaryEmail, err => {
+          expect(err).to.not.exist
           this.user1.loginWith(secondaryEmail, err => {
             expect(err != null).to.equal(false)
             this.user1.isLoggedIn((err, isLoggedIn) => {
+              expect(err).to.not.exist
               expect(isLoggedIn).to.equal(false)
               return done()
             })
@@ -396,6 +394,7 @@ describe('Registration', function () {
                 this.user1.email,
                 'totally_not_the_right_password',
                 (err, response, body) => {
+                  expect(err).to.not.exist
                   expect(body.redir != null).to.equal(false)
                   expect(body.message != null).to.equal(true)
                   expect(body.message).to.have.all.keys('type', 'text')

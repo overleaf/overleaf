@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    node/handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -21,9 +20,6 @@ const logger = require('logger-sharelatex')
 
 module.exports = V1Handler = {
   authWithV1(email, password, callback) {
-    if (callback == null) {
-      callback = function (err, isValid, v1Profile) {}
-    }
     return V1Api.request(
       {
         method: 'POST',
@@ -64,10 +60,6 @@ module.exports = V1Handler = {
   },
 
   doPasswordReset(v1_user_id, password, callback) {
-    if (callback == null) {
-      callback = function (err, created) {}
-    }
-
     return V1Api.request(
       {
         method: 'POST',

@@ -1,7 +1,6 @@
 /* eslint-disable
     node/handle-callback-err,
     max-len,
-    no-path-concat,
     no-unused-vars,
     node/no-deprecated-api,
 */
@@ -23,7 +22,7 @@ const ErrorController = require('../Errors/ErrorController')
 const SessionManager = require('../Authentication/SessionManager')
 
 const homepageExists = fs.existsSync(
-  Path.resolve(__dirname + '/../../../views/external/home/v2.pug')
+  Path.join(__dirname, '/../../../views/external/home/v2.pug')
 )
 
 module.exports = HomeController = {
@@ -52,9 +51,7 @@ module.exports = HomeController = {
       if (next == null) {
         next = function (error) {}
       }
-      const path = Path.resolve(
-        __dirname + `/../../../views/external/${page}.pug`
-      )
+      const path = Path.join(__dirname, `/../../../views/external/${page}.pug`)
       return fs.exists(path, function (exists) {
         // No error in this callback - old method in Node.js!
         if (exists) {

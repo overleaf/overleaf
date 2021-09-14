@@ -1,4 +1,5 @@
 const SandboxedModule = require('sandboxed-module')
+const assert = require('assert')
 const sinon = require('sinon')
 const modulePath = require('path').join(
   __dirname,
@@ -374,6 +375,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasV2Subscription(
         this.user,
         (err, hasSubscription) => {
+          assert.equal(err, null)
           hasSubscription.should.equal(true)
           done()
         }
@@ -386,6 +388,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasV2Subscription(
         this.user,
         (err, hasSubscription) => {
+          assert.equal(err, null)
           hasSubscription.should.equal(false)
           done()
         }
@@ -397,6 +400,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasV2Subscription(
         this.user,
         (err, hasSubscription) => {
+          assert.equal(err, null)
           hasSubscription.should.equal(false)
           done()
         }
@@ -413,6 +417,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasV2Subscription(
         this.user,
         (err, hasSubOrIsGroupMember, subscription) => {
+          assert.equal(err, null)
           subscription.should.deep.equal(stubbedSubscription)
           done()
         }
@@ -433,6 +438,7 @@ describe('LimitationsManager', function () {
         this.LimitationsManager.userHasV2Subscription(
           this.user,
           (err, hasSubscription, subscription) => {
+            assert.equal(err, null)
             hasSubscription.should.equal(true)
             done()
           }
@@ -443,6 +449,7 @@ describe('LimitationsManager', function () {
         this.LimitationsManager.userHasV2Subscription(
           this.user,
           (err, hasSubscription, subscription) => {
+            assert.equal(err, null)
             subscription.should.deep.equal(this.fakeSubscription)
             done()
           }
@@ -461,6 +468,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userIsMemberOfGroupSubscription(
         this.user,
         (err, isMember) => {
+          assert.equal(err, null)
           isMember.should.equal(false)
           done()
         }
@@ -477,6 +485,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userIsMemberOfGroupSubscription(
         this.user,
         (err, isMember, retSubscriptions) => {
+          assert.equal(err, null)
           isMember.should.equal(true)
           retSubscriptions.should.equal(subscriptions)
           done()
@@ -505,6 +514,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.hasPaidSubscription(
         this.user,
         (err, hasSubOrIsGroupMember) => {
+          assert.equal(err, null)
           hasSubOrIsGroupMember.should.equal(true)
           done()
         }
@@ -518,6 +528,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.hasPaidSubscription(
         this.user,
         (err, hasSubOrIsGroupMember) => {
+          assert.equal(err, null)
           hasSubOrIsGroupMember.should.equal(true)
           done()
         }
@@ -531,6 +542,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.hasPaidSubscription(
         this.user,
         (err, hasSubOrIsGroupMember) => {
+          assert.equal(err, null)
           hasSubOrIsGroupMember.should.equal(true)
           done()
         }
@@ -541,6 +553,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.hasPaidSubscription(
         this.user,
         (err, hasSubOrIsGroupMember) => {
+          assert.equal(err, null)
           hasSubOrIsGroupMember.should.equal(false)
           done()
         }
@@ -551,6 +564,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasSubscriptionOrIsGroupMember(
         this.user,
         (err, hasSubOrIsGroupMember) => {
+          assert.equal(err, null)
           hasSubOrIsGroupMember.should.equal(false)
           done()
         }
@@ -575,6 +589,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasV1OrV2Subscription(
         this.user,
         (err, hasSub) => {
+          assert.equal(err, null)
           hasSub.should.equal(true)
           done()
         }
@@ -588,6 +603,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasV1OrV2Subscription(
         this.user,
         (err, hasSub) => {
+          assert.equal(err, null)
           hasSub.should.equal(true)
           done()
         }
@@ -598,6 +614,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasV1OrV2Subscription(
         this.user,
         (err, hasSub) => {
+          assert.equal(err, null)
           hasSub.should.equal(false)
           done()
         }
@@ -626,6 +643,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.hasGroupMembersLimitReached(
         this.subscriptionId,
         (err, limitReached) => {
+          assert.equal(err, null)
           limitReached.should.equal(true)
           done()
         }
@@ -642,6 +660,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.hasGroupMembersLimitReached(
         this.subscriptionId,
         (err, limitReached) => {
+          assert.equal(err, null)
           limitReached.should.equal(false)
           done()
         }
@@ -658,6 +677,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.hasGroupMembersLimitReached(
         this.subscriptionId,
         (err, limitReached) => {
+          assert.equal(err, null)
           limitReached.should.equal(true)
           done()
         }
@@ -673,6 +693,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasV1Subscription(
         this.user,
         (error, result) => {
+          assert.equal(error, null)
           this.V1SubscriptionManager.getSubscriptionsFromV1
             .calledWith(this.userId)
             .should.equal(true)
@@ -689,6 +710,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasV1Subscription(
         this.user,
         (error, result) => {
+          assert.equal(error, null)
           this.V1SubscriptionManager.getSubscriptionsFromV1
             .calledWith(this.userId)
             .should.equal(true)
@@ -705,6 +727,7 @@ describe('LimitationsManager', function () {
       this.LimitationsManager.userHasV1Subscription(
         this.user,
         (error, result) => {
+          assert.equal(error, null)
           this.V1SubscriptionManager.getSubscriptionsFromV1
             .calledWith(this.userId)
             .should.equal(true)

@@ -213,6 +213,7 @@ function ProjectFilePathProvider({ file }) {
                 <a
                   href={`/project/${file.linkedFileData.source_project_id}`}
                   target="_blank"
+                  rel="noopener"
                 />,
               ]
         }
@@ -252,6 +253,7 @@ function ProjectOutputFileProvider({ file }) {
                 <a
                   href={`/project/${file.linkedFileData.source_project_id}`}
                   target="_blank"
+                  rel="noopener"
                 />,
               ]
         }

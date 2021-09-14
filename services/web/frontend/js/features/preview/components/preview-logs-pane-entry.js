@@ -224,7 +224,7 @@ function PreviewLogEntryContent({
       ) : null}
       {extraInfoURL ? (
         <div className="log-entry-content-link">
-          <a href={extraInfoURL} target="_blank">
+          <a href={extraInfoURL} target="_blank" rel="noopener">
             {t('log_hint_extra_info')}
           </a>
         </div>

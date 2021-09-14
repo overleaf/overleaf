@@ -38,9 +38,6 @@ const LimitationsManager = {
   },
 
   canAddXCollaborators(projectId, numberOfNewCollaborators, callback) {
-    if (!callback) {
-      callback = function (error, allowed) {}
-    }
     this.allowedNumberOfCollaboratorsInProject(
       projectId,
       (error, allowedNumber) => {
@@ -77,9 +74,6 @@ const LimitationsManager = {
   },
 
   hasPaidSubscription(user, callback) {
-    if (!callback) {
-      callback = function (err, hasSubscriptionOrIsMember) {}
-    }
     this.userHasV2Subscription(user, (err, hasSubscription, subscription) => {
       if (err) {
         return callback(err)
@@ -112,9 +106,6 @@ const LimitationsManager = {
   },
 
   userHasV2Subscription(user, callback) {
-    if (!callback) {
-      callback = function (err, hasSubscription, subscription) {}
-    }
     SubscriptionLocator.getUsersSubscription(
       user._id,
       function (err, subscription) {
@@ -136,9 +127,6 @@ const LimitationsManager = {
   },
 
   userHasV1OrV2Subscription(user, callback) {
-    if (!callback) {
-      callback = function (err, hasSubscription) {}
-    }
     this.userHasV2Subscription(user, (err, hasV2Subscription) => {
       if (err) {
         return callback(err)
@@ -159,9 +147,6 @@ const LimitationsManager = {
   },
 
   userIsMemberOfGroupSubscription(user, callback) {
-    if (!callback) {
-      callback = function (error, isMember, subscriptions) {}
-    }
     SubscriptionLocator.getMemberSubscriptions(
       user._id,
       function (err, subscriptions) {
@@ -177,9 +162,6 @@ const LimitationsManager = {
   },
 
   userHasV1Subscription(user, callback) {
-    if (!callback) {
-      callback = function (error, hasV1Subscription) {}
-    }
     V1SubscriptionManager.getSubscriptionsFromV1(
       user._id,
       function (err, v1Subscription) {
@@ -201,9 +183,6 @@ const LimitationsManager = {
   },
 
   hasGroupMembersLimitReached(subscriptionId, callback) {
-    if (!callback) {
-      callback = function (err, limitReached, subscription) {}
-    }
     SubscriptionLocator.getSubscription(
       subscriptionId,
       function (err, subscription) {

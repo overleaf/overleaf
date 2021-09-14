@@ -47,9 +47,7 @@
     "import/no-extraneous-dependencies": "error",
 
     "node/no-callback-literal": "off",
-    "node/no-deprecated-api": "off",
-    "node/handle-callback-err": "off",
-    "node/no-path-concat": "off"
+    "node/no-deprecated-api": "off"
   },
   "overrides": [
     // NOTE: changing paths may require updating them in the Makefile too.
@@ -118,6 +116,9 @@
         "ExposedSettings": true
       },
       "rules": {
+        "react/jsx-no-target-blank": ["error", {
+          "allowReferrer": true
+        }],
         // Prevent usage of legacy string refs
         "react/no-string-refs": "error",
 
@@ -126,9 +127,6 @@
           "props": "never",
           "children": "never"
         }],
-
-        // Allow target="_blank" in JSX
-        "react/jsx-no-target-blank": "off",
 
         // Don't import React for JSX; the JSX runtime is added by a Babel plugin
         "react/react-in-jsx-scope": "off",

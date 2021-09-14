@@ -47,6 +47,7 @@ function PreviewError({ name }) {
           <a
             href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F"
             target="_blank"
+            rel="noopener"
           >
             {t('learn_how_to_make_documents_compile_quickly')}
           </a>

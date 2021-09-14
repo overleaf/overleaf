@@ -3,11 +3,14 @@ const SessionManager = require('../Authentication/SessionManager')
 const _ = require('underscore')
 
 module.exports = {
-  getAllUnreadNotifications(req, res) {
+  getAllUnreadNotifications(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
     NotificationsHandler.getUserNotifications(
       userId,
       function (err, unreadNotifications) {
+        if (err) {
+          return next(err)
+        }
         unreadNotifications = _.map(
           unreadNotifications,
           function (notification) {

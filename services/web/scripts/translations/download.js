@@ -1,3 +1,4 @@
+const path = require('path')
 const { promises: fs } = require('fs')
 const oneSky = require('@brainly/onesky-utils')
 const sanitizeHtml = require('sanitize-html')
@@ -35,7 +36,7 @@ async function run() {
       }
 
       await fs.writeFile(
-        `${__dirname}/../../locales/${code}.json`,
+        path.join(__dirname, `/../../locales/${code}.json`),
         JSON.stringify(lang.translation, null, 2) + '\n'
       )
     }

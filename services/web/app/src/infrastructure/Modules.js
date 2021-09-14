@@ -5,7 +5,7 @@ const async = require('async')
 const { promisify } = require('util')
 const Settings = require('@overleaf/settings')
 
-const MODULE_BASE_PATH = Path.resolve(__dirname + '/../../../modules')
+const MODULE_BASE_PATH = Path.join(__dirname, '/../../../modules')
 
 const _modules = []
 const _hooks = {}

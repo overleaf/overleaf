@@ -38,7 +38,7 @@ export default App.controller(
         .then(() => {
           $scope.reconfirm[email].reconfirmationSent = true
         })
-        .catch(error => {
+        .catch(_ => {
           $scope.ui.hasError = true
         })
         .finally(() => ($scope.ui.isMakingRequest = false))
