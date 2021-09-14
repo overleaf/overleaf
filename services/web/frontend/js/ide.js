@@ -314,6 +314,18 @@ If the project has been renamed please look in your project list for a new proje
       $scope.switchToSideBySideLayout()
     }
 
+    $scope.handleKeyDown = event => {
+      if (event.shiftKey || event.altKey) {
+        return
+      }
+
+      // Ctrl+s or Cmd+s => recompile
+      if (event.key === 's' && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault()
+        $scope.recompileViaKey()
+      }
+    }
+
     try {
       ;({ userAgent } = navigator)
       ide.browserIsSafari =
