@@ -5,7 +5,7 @@ import _ from 'lodash'
     max-len
 */
 import App from '../base'
-import 'libs/passfield'
+import '../vendor/libs/passfield'
 App.directive('complexPassword', () => ({
   require: ['^asyncForm', 'ngModel'],
 

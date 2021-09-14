@@ -17,7 +17,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import EventEmitter from '../../utils/EventEmitter'
-import ShareJs from 'libs/sharejs'
+import ShareJs from '../../vendor/libs/sharejs'
 import EditorWatchdogManager from '../connection/EditorWatchdogManager'
 
 let ShareJsDoc

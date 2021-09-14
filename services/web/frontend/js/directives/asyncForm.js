@@ -1,5 +1,5 @@
 import App from '../base'
-import 'libs/passfield'
+import '../vendor/libs/passfield'
 App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
   controller: [
     '$scope',

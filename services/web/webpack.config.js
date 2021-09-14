@@ -229,8 +229,6 @@ module.exports = {
     alias: {
       // Aliases for AMD modules
 
-      // Shortcut to vendored dependencies in frontend/js/vendor/libs
-      libs: path.join(__dirname, 'frontend/js/vendor/libs'),
       // Enables ace/ace shortcut
       ace: 'ace-builds/src-noconflict',
       // fineupload vendored dependency (which we're aliasing to fineuploadER

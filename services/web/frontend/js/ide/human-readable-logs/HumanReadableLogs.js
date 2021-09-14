@@ -1,4 +1,4 @@
-import LogParser from 'libs/latex-log-parser'
+import LogParser from '../../vendor/libs/latex-log-parser'
 import ruleset from './HumanReadableLogsRules'
 
 export default {

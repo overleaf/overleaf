@@ -1,6 +1,6 @@
 import App from '../../../base'
 import HumanReadableLogs from '../../human-readable-logs/HumanReadableLogs'
-import BibLogParser from 'libs/bib-log-parser'
+import BibLogParser from '../../../vendor/libs/bib-log-parser'
 import PreviewPane from '../../../features/preview/components/preview-pane'
 import { react2angular } from 'react2angular'
 import { rootContext } from '../../../shared/context/root-context'
