@@ -56,7 +56,7 @@ block content
 														required,
 														ng-model="email",
 														ng-model-options="{ updateOn: 'blur' }",
-														focus="true"
+														autofocus="true"
 													)
 													span.small.text-primary(ng-show="registerForm.email.$invalid && registerForm.email.$dirty")
 														| #{translate("must_be_email_address")}
@@ -100,7 +100,7 @@ block content
 														required,
 														ng-model="email",
 														ng-model-options="{ updateOn: 'blur' }",
-														focus="true"
+														autofocus="true"
 													)
 													span.small.text-primary(ng-show="registerLdapForm.email.$invalid && registerLdapForm.email.$dirty")
 														| #{translate("must_be_email_address")}
@@ -133,7 +133,7 @@ block content
 														required,
 														ng-model="email",
 														ng-model-options="{ updateOn: 'blur' }",
-														focus="true"
+														autofocus="true"
 													)
 													span.small.text-primary(ng-show="registerSamlForm.email.$invalid && registerSamlForm.email.$dirty")
 														| #{translate("must_be_email_address")}
