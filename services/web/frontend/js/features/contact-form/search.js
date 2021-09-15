@@ -1,22 +1,6 @@
 import _ from 'lodash'
-import { searchWiki } from '../algolia-search/search-wiki'
+import { formatWikiHit, searchWiki } from '../algolia-search/search-wiki'
 import { sendMB } from '../../infrastructure/event-tracking'
-
-function formatHit(hit) {
-  const pageUnderscored = hit.pageName.replace(/\s/g, '_')
-  const pageSlug = encodeURIComponent(pageUnderscored)
-  const pagePath = hit.kb ? 'how-to' : 'latex'
-
-  let pageAnchor = ''
-  let pageName = hit._highlightResult.pageName.value
-  if (hit.sectionName) {
-    pageAnchor = `#${hit.sectionName.replace(/\s/g, '_')}`
-    pageName += ' - ' + hit.sectionName
-  }
-
-  const url = `/learn/${pagePath}/${pageSlug}${pageAnchor}`
-  return { url, pageName }
-}
 
 export function setupSearch(formEl) {
   const inputEl = formEl.querySelector('[name="subject"]')
@@ -48,7 +32,7 @@ export function setupSearch(formEl) {
       resultsEl.innerText = ''
 
       for (const hit of hits) {
-        const { url, pageName } = formatHit(hit)
+        const { url, pageName } = formatWikiHit(hit)
         const liEl = document.createElement('li')
 
         const linkEl = document.createElement('a')

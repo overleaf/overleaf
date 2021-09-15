@@ -17,3 +17,25 @@ export async function searchWiki(...args) {
   }
   return wikiIdx.search(...args)
 }
+
+export function formatWikiHit(hit) {
+  const pageUnderscored = hit.pageName.replace(/\s/g, '_')
+  const pageSlug = encodeURIComponent(pageUnderscored)
+  const pagePath = hit.kb ? 'how-to' : 'latex'
+
+  let pageAnchor = ''
+  let pageName = hit._highlightResult.pageName.value
+  if (hit.sectionName) {
+    pageAnchor = `#${hit.sectionName.replace(/\s/g, '_')}`
+    pageName += ' - ' + hit.sectionName
+  }
+
+  const body = hit._highlightResult.content.value
+  const content = body
+    .split('\n')
+    .filter(line => line.includes('<em>') && !line.includes('[edit]'))
+    .join('\n...\n')
+
+  const url = `/learn/${pagePath}/${pageSlug}${pageAnchor}`
+  return { url, pageName, content }
+}

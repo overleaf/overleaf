@@ -1,5 +1,3 @@
-/* global MathJax */
-
 /* eslint-disable
     camelcase,
     max-len,
@@ -24,6 +22,7 @@ import './modules/errorCatcher'
 import './modules/localStorage'
 import './modules/sessionStorage'
 import getMeta from './utils/meta'
+import { configureMathJax } from './features/mathjax/configure'
 
 const App = angular
   .module('SharelatexApp', [
@@ -42,42 +41,7 @@ const App = angular
     $qProvider.errorOnUnhandledRejections(false)
     uiSelectConfig.spinnerClass = 'fa fa-refresh ui-select-spin'
 
-    return __guard__(
-      typeof MathJax !== 'undefined' && MathJax !== null
-        ? MathJax.Hub
-        : undefined,
-      x =>
-        x.Config({
-          messageStyle: 'none',
-          imageFont: null,
-          // Fast preview, introduced in 2.5, is unhelpful due to extra codemirror refresh
-          // and disabling it avoids issues with math processing errors
-          // github.com/overleaf/write_latex/pull/1375
-          'fast-preview': { disabled: true },
-          'HTML-CSS': {
-            availableFonts: ['TeX'],
-            // MathJax's automatic font scaling does not work well when we render math
-            // that isn't yet on the page, so we disable it and set a global font
-            // scale factor
-            scale: 110,
-            matchFontHeight: false,
-          },
-          TeX: {
-            equationNumbers: { autoNumber: 'AMS' },
-            useLabelIDs: false,
-          },
-          skipStartupTypeset: true,
-          tex2jax: {
-            processEscapes: true,
-            // Dollar delimiters are added by the mathjax directive
-            inlineMath: [['\\(', '\\)']],
-            displayMath: [
-              ['$$', '$$'],
-              ['\\[', '\\]'],
-            ],
-          },
-        })
-    )
+    configureMathJax()
   })
 
 App.run(($rootScope, $templateCache) => {
@@ -97,9 +61,3 @@ window.sl_debugging = sl_debugging // make a global flag for debugging code
 window.sl_console = sl_debugging ? console : { log() {} }
 
 export default App
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
