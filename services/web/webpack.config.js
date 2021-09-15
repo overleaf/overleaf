@@ -33,6 +33,19 @@ if (fs.existsSync(MODULES_PATH)) {
   }, entryPoints)
 }
 
+// Add entrypoints for each "page"
+glob
+  .sync(path.join(__dirname, 'modules/*/frontend/js/pages/**/*.js'))
+  .forEach(page => {
+    // in: /workspace/services/web/modules/foo/frontend/js/pages/bar.js
+    // out: modules/foo/pages/bar
+    const name = path
+      .relative(__dirname, page)
+      .replace(/frontend[/]js[/]/, '')
+      .replace(/.js$/, '')
+    entryPoints[name] = './' + path.relative(__dirname, page)
+  })
+
 glob.sync(path.join(__dirname, 'frontend/js/pages/**/*.js')).forEach(page => {
   // in: /workspace/services/web/frontend/js/pages/marketing/homepage.js
   // out: pages/marketing/homepage
