@@ -762,8 +762,10 @@ App.controller(
       path = path.replace(/^\/compile\//, '')
 
       const rootDocDirname = ide.fileTreeManager.getRootDocDirname()
-      if (rootDocDirname != null) {
+      if (rootDocDirname) {
         path = path.replace(/^\.\//, rootDocDirname + '/')
+      } else {
+        path = path.replace(/^\.\//, '')
       }
 
       return path
