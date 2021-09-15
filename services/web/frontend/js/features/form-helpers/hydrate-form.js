@@ -1,6 +1,7 @@
 import classNames from 'classnames'
 import { FetchError, postJSON } from '../../infrastructure/fetch-json'
 import { validateCaptchaV2 } from './captcha'
+import inputValidator from './input-validator'
 
 // Form helper(s) to handle:
 // - Attaching to the relevant form elements
@@ -145,6 +146,15 @@ export function hydrateForm(el) {
   formSubmitHelper(el)
   formInflightHelper(el)
   formSentHelper(el)
+
+  el.querySelectorAll('input').forEach(inputEl => {
+    if (
+      inputEl.willValidate &&
+      !inputEl.hasAttribute('data-ol-no-custom-form-validation-messages')
+    ) {
+      inputValidator(inputEl)
+    }
+  })
 }
 
 document.querySelectorAll(`[data-ol-form]`).forEach(form => hydrateForm(form))

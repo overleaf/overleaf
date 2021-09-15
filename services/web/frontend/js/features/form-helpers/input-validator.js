@@ -1,72 +1,61 @@
-export default function inputValidator(options) {
-  const { selector } = options
+export default function inputValidator(inputEl) {
+  const messageEl = document.createElement('span')
+  messageEl.className =
+    inputEl.getAttribute('data-ol-validation-message-classes') ||
+    'small text-danger'
+  messageEl.hidden = true
+  inputEl.insertAdjacentElement('afterend', messageEl)
 
-  const inputEl = document.querySelector(selector)
+  // Hide messages until the user leaves the input field or submits the form.
+  let canDisplayErrorMessages = false
 
-  inputEl.addEventListener('input', markDirty)
-  inputEl.addEventListener('change', markDirty)
-  inputEl.addEventListener('blur', insertInvalidMessage)
+  // Handle all kinds of inputs.
+  inputEl.addEventListener('input', handleUpdate)
+  inputEl.addEventListener('change', handleUpdate)
 
-  // Mark an input as "dirty": the user has typed something in at some point
-  function markDirty() {
-    // Note: this is used for the input styling as well as checks when inserting invalid
-    // message below
-    inputEl.dataset.olDirty = true
+  // The user has left the input field.
+  inputEl.addEventListener('blur', displayValidationMessages)
+
+  // The user has submitted the form and the current field has errors.
+  inputEl.addEventListener('invalid', e => {
+    // Block the display of browser error messages.
+    e.preventDefault()
+
+    // Force the display of messages.
+    inputEl.setAttribute('data-ol-dirty', '')
+
+    displayValidationMessages()
+  })
+
+  function handleUpdate() {
+    // Mark an input as "dirty": the user has typed something in at some point
+    inputEl.setAttribute('data-ol-dirty', '')
+
+    // Provide live updates to content sensitive error message like this:
+    // Please include an '@' in the email address. 'foo' is missing an '@'.
+    // We should not leave a stale message as the user types.
+    updateValidationMessageContent()
   }
 
-  function insertInvalidMessage() {
-    if (!inputEl.validity.valid) {
-      // Already have a invalid message, don't insert another
-      if (inputEl._invalid_message_el) return
+  function displayValidationMessages() {
+    // Display all the error messages and highlight fields with red border.
+    canDisplayErrorMessages = true
 
-      // Only show the message if the input is "dirty"
-      if (!inputEl.dataset.olDirty) return
+    updateValidationMessageContent()
+  }
 
-      const messageEl = createMessageEl({
-        message: getMessage(inputEl),
-        ...options,
-      })
-      inputEl.insertAdjacentElement('afterend', messageEl)
+  function updateValidationMessageContent() {
+    if (!canDisplayErrorMessages) return
+    if (!inputEl.hasAttribute('data-ol-dirty')) return
 
-      // Add a reference so we can remove the element when the input becomes valid
-      inputEl._invalid_message_el = messageEl
+    if (inputEl.validity.valid) {
+      messageEl.hidden = true
+
+      // Require another blur before displaying errors again.
+      canDisplayErrorMessages = false
     } else {
-      if (!inputEl._invalid_message_el) return
-
-      // Remove the message element
-      inputEl._invalid_message_el.remove()
-      // Clean up the reference
-      delete inputEl._invalid_message_el
+      messageEl.textContent = inputEl.validationMessage
+      messageEl.hidden = false
     }
-  }
-
-  function cleanUp() {
-    inputEl.removeEventListener('input change', markDirty)
-    inputEl.removeEventListener('blue', insertInvalidMessage)
-    delete inputEl._invalid_message_el
-    delete inputEl.dataset.olDirty
-  }
-
-  return cleanUp
-}
-
-function createMessageEl({ message, messageClasses = [] }) {
-  const el = document.createElement('span')
-  // From what I understand, using textContent means that we're safe from XSS
-  el.textContent = message
-  el.classList.add(...messageClasses)
-
-  return el
-}
-
-function getMessage(el) {
-  // Could be extended to all ValidityState properties: https://developer.mozilla.org/en-US/docs/Web/API/ValidityState
-  const { valueMissing, typeMismatch } = el.validity
-  if (valueMissing) {
-    return el.dataset.olInvalidValueMissing || 'Missing required value'
-  } else if (typeMismatch) {
-    return el.dataset.olInvalidTypeMismatch || 'Invalid type' // FIXME: Bad default
-  } else {
-    return 'Invalid'
   }
 }
