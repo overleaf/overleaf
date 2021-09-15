@@ -1,4 +1,3 @@
-const fs = require('fs')
 const path = require('path')
 const glob = require('glob')
 const webpack = require('webpack')
@@ -7,8 +6,6 @@ const WebpackAssetsManifest = require('webpack-assets-manifest')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const PackageVersions = require('./app/src/infrastructure/PackageVersions')
-
-const MODULES_PATH = path.join(__dirname, '/modules')
 
 // Generate a hash of entry points, including modules
 const entryPoints = {
@@ -20,17 +17,6 @@ const entryPoints = {
   style: './frontend/stylesheets/style.less',
   'ieee-style': './frontend/stylesheets/ieee-style.less',
   'light-style': './frontend/stylesheets/light-style.less',
-}
-
-// Attempt to load frontend entry-points from modules, if they exist
-if (fs.existsSync(MODULES_PATH)) {
-  fs.readdirSync(MODULES_PATH).reduce((acc, module) => {
-    const entryPath = path.join(MODULES_PATH, module, '/frontend/js/index.js')
-    if (fs.existsSync(entryPath)) {
-      acc[module] = entryPath
-    }
-    return acc
-  }, entryPoints)
 }
 
 // Add entrypoints for each "page"
