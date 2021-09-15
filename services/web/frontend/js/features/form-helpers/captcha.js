@@ -4,7 +4,14 @@ let recaptchaId
 const recaptchaCallbacks = []
 
 export async function validateCaptchaV2() {
-  if (typeof grecaptcha === 'undefined') {
+  if (
+    // Detect blocked recaptcha
+    typeof grecaptcha === 'undefined' ||
+    // Detect stubbed recaptcha
+    typeof grecaptcha.render !== 'function' ||
+    typeof grecaptcha.execute !== 'function' ||
+    typeof grecaptcha.reset !== 'function'
+  ) {
     return
   }
   if (recaptchaId === undefined) {
