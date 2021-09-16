@@ -9,7 +9,7 @@ block content
 						.page-header
 							h1 #{translate("confirm_email")}
 						form(
-							data-ol-form,
+							data-ol-async-form,
 							data-ol-auto-submit,
 							name="confirmEmailForm"
 							action="/user/emails/confirm",
@@ -27,9 +27,9 @@ block content
 										type='submit',
 										data-ol-disabled-inflight
 									)
-										span(data-ol-not-inflight-text)
+										span(data-ol-inflight="idle")
 											| #{translate('confirm')}
-										span(hidden data-ol-inflight-text)
+										span(hidden data-ol-inflight="pending")
 											i.fa.fa-fw.fa-spin.fa-spinner(aria-hidden="true")
 											| &nbsp;#{translate('confirming')}… 
 

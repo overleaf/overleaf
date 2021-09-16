@@ -10,7 +10,7 @@ block content
 				.login-register-header
 					h1.login-register-header-heading #{translate("log_out")}
 				form.login-register-form(
-					data-ol-form,
+					data-ol-async-form,
 					name="logoutForm",
 					action='/logout',
 					method="POST"
@@ -23,5 +23,5 @@ block content
 							data-ol-disabled-inflight,
 							type='submit'
 						)
-							span(data-ol-not-inflight-text aria-label=translate('log_out')) #{translate('log_out')}
-							span(hidden data-ol-inflight-text aria-label=translate("logging_out")) #{translate('logging_out')}…
+							span(data-ol-inflight="idle" aria-label=translate('log_out')) #{translate('log_out')}
+							span(hidden data-ol-inflight="pending" aria-label=translate("logging_out")) #{translate('logging_out')}…

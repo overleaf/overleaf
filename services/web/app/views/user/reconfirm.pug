@@ -25,7 +25,7 @@ block content
 							a(href=`mailto:${settings.adminEmail}`, ng-non-bindable) #{settings.adminEmail}
 							| .
 						form(
-							data-ol-form
+							data-ol-async-form
 							name="reconfirmAccountForm"
 							action="/user/reconfirm",
 							method="POST",
@@ -53,9 +53,9 @@ block content
 									data-ol-disabled-inflight,
 									aria-label=translate('request_password_reset_to_reconfirm')
 								)
-									span(data-ol-not-inflight-text)
+									span(data-ol-inflight="idle")
 										| #{translate('request_password_reset_to_reconfirm')}
-									span(hidden data-ol-inflight-text)
+									span(hidden data-ol-inflight="pending")
 										| #{translate('request_password_reset_to_reconfirm')}… 
 			.row
 				.col-sm-12.col-md-6.col-md-offset-3

@@ -16,11 +16,8 @@ function formSubmitHelper(formEl) {
   formEl.addEventListener('submit', async e => {
     e.preventDefault()
 
-    formEl.dispatchEvent(new Event('inflight'))
+    formEl.dispatchEvent(new Event('pending'))
 
-    // We currently only have capacity to show 1 error, so this is probably
-    // unnecessary but I've used a similar data structure in the past and it was
-    // nice to be able to handle multiple (e.g. validation) errors at once
     const messageBag = []
 
     try {
@@ -29,8 +26,7 @@ function formSubmitHelper(formEl) {
       const data = await sendFormRequest(formEl, captchaResponse)
       formEl.dispatchEvent(new Event('sent'))
 
-      // Handle redirects. From poking around, this still appears to be the
-      // "correct" way of handling redirects with fetch
+      // Handle redirects
       if (data.redir) {
         window.location = data.redir
         return
@@ -54,10 +50,9 @@ function formSubmitHelper(formEl) {
         text,
       })
     } finally {
-      // Possibly this could be wired up through events too?
       showMessages(formEl, messageBag)
 
-      formEl.dispatchEvent(new Event('not-inflight'))
+      formEl.dispatchEvent(new Event('idle'))
     }
   })
   if (formEl.hasAttribute('data-ol-auto-submit')) {
@@ -123,15 +118,15 @@ function showMessages(formEl, messageBag) {
 
 function formInflightHelper(el) {
   const disabledEl = el.querySelector('[data-ol-disabled-inflight]')
-  const showWhenNotInflightEl = el.querySelector('[data-ol-not-inflight-text]')
-  const showWhenInflightEl = el.querySelector('[data-ol-inflight-text]')
+  const showWhenNotInflightEl = el.querySelector('[data-ol-inflight="idle"]')
+  const showWhenInflightEl = el.querySelector('[data-ol-inflight="pending"]')
 
-  el.addEventListener('inflight', () => {
+  el.addEventListener('pending', () => {
     disabledEl.disabled = true
     toggleDisplay(showWhenNotInflightEl, showWhenInflightEl)
   })
 
-  el.addEventListener('not-inflight', () => {
+  el.addEventListener('idle', () => {
     disabledEl.disabled = false
     toggleDisplay(showWhenInflightEl, showWhenNotInflightEl)
   })
@@ -167,4 +162,6 @@ export function hydrateForm(el) {
   })
 }
 
-document.querySelectorAll(`[data-ol-form]`).forEach(form => hydrateForm(form))
+document
+  .querySelectorAll(`[data-ol-async-form]`)
+  .forEach(form => hydrateForm(form))

@@ -11,7 +11,7 @@ block content
 					.card
 						.page-header
 							h1 #{translate("log_in")}
-						form(data-ol-form, name="loginForm", action='/login', method="POST")
+						form(data-ol-async-form, name="loginForm", action='/login', method="POST")
 							input(name='_csrf', type='hidden', value=csrfToken)
 							div(data-ol-form-messages)
 							.form-group
@@ -34,6 +34,6 @@ block content
 									type='submit',
 									data-ol-disabled-inflight
 								)
-									span(data-ol-not-inflight-text) #{translate("login")}
-									span(hidden data-ol-inflight-text) #{translate("logging_in")}…
+									span(data-ol-inflight="idle") #{translate("login")}
+									span(hidden data-ol-inflight="pending") #{translate("logging_in")}…
 								a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?
