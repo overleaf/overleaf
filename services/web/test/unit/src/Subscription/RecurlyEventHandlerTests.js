@@ -120,6 +120,7 @@ describe('RecurlyEventHandler', function () {
       {
         plan_code: this.planCode,
         quantity: 1,
+        is_trial: true,
       }
     )
     sinon.assert.calledWith(

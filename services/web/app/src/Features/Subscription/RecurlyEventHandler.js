@@ -66,6 +66,7 @@ async function _sendSubscriptionUpdatedEvent(eventData) {
   AnalyticsManager.recordEventForUser(userId, 'subscription-updated', {
     plan_code: planCode,
     quantity,
+    is_trial: isTrial,
   })
   AnalyticsManager.setUserPropertyForUser(
     userId,

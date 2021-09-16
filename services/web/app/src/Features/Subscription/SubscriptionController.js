@@ -421,6 +421,10 @@ async function extendTrial(req, res) {
 
   try {
     await SubscriptionHandler.promises.extendTrial(subscription, 14)
+    AnalyticsManager.recordEventForSession(
+      req.session,
+      'subscription-trial-extended'
+    )
   } catch (error) {
     return res.sendStatus(500)
   }
