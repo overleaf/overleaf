@@ -19,6 +19,9 @@ const EmailHandler = require('../Email/EmailHandler')
 const UrlHelper = require('../Helpers/UrlHelper')
 const { promisify } = require('util')
 const { expressify } = require('../../util/promises')
+const {
+  acceptsJson,
+} = require('../../infrastructure/RequestContentTypeDetection')
 
 async function _sendSecurityAlertClearedSessions(user) {
   const emailOptions = {
@@ -431,7 +434,11 @@ const UserController = {
       if (err != null) {
         return next(err)
       }
-      res.redirect(redirectUrl)
+      if (acceptsJson(req)) {
+        res.status(200).json({ redir: redirectUrl })
+      } else {
+        res.redirect(redirectUrl)
+      }
     })
   },
 

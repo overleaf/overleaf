@@ -60,6 +60,11 @@ function formSubmitHelper(formEl) {
       formEl.dispatchEvent(new Event('not-inflight'))
     }
   })
+  if (formEl.hasAttribute('data-ol-auto-submit')) {
+    setTimeout(() => {
+      formEl.querySelector('[type="submit"]').click()
+    }, 0)
+  }
 }
 
 async function validateCaptcha(formEl) {

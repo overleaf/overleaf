@@ -1,4 +1,4 @@
-extends ../layout
+extends ../layout-marketing
 
 block vars
 	- metadata = { viewport: true }
@@ -9,12 +9,19 @@ block content
 			.card.login-register-card
 				.login-register-header
 					h1.login-register-header-heading #{translate("log_out")}
-				form.login-register-form(name="logoutForm", action='/logout', method="POST" ng-init="$scope.inflight=true" auto-submit-form)
+				form.login-register-form(
+					data-ol-form,
+					name="logoutForm",
+					action='/logout',
+					method="POST"
+					data-ol-auto-submit
+				)
 					input(name='_csrf', type='hidden', value=csrfToken)
+					div(data-ol-form-messages)
 					.actions
 						button#submit-logout.btn-primary.btn.btn-block(
-							type='submit',
-							ng-disabled="$scope.inflight"
+							data-ol-disabled-inflight,
+							type='submit'
 						)
-							span(ng-show="!$scope.inflight") #{translate("log_out")}
-							span(ng-show="$scope.inflight" ng-cloak) #{translate("logging_out")}…
+							span(data-ol-not-inflight-text aria-label=translate('log_out')) #{translate('log_out')}
+							span(hidden data-ol-inflight-text aria-label=translate("logging_out")) #{translate('logging_out')}…
