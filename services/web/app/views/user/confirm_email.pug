@@ -1,4 +1,4 @@
-extends ../layout
+extends ../layout-marketing
 
 block content
 	main.content.content-alt#main-content
@@ -9,20 +9,30 @@ block content
 						.page-header
 							h1 #{translate("confirm_email")}
 						form(
-							async-form="confirm-email",
+							data-ol-form,
+							data-ol-auto-submit,
 							name="confirmEmailForm"
 							action="/user/emails/confirm",
 							method="POST",
 							id="confirmEmailForm",
-							auto-submit="true",
-							ng-cloak
 						)
 							input(type="hidden", name="_csrf", value=csrfToken)
-							input(type="hidden", name="token", value=token ng-non-bindable)
-							form-messages(for="confirmEmailForm")
-								.alert.alert-success(ng-show="confirmEmailForm.response.success")
-									| Thank you, your email is now confirmed
-							p.text-center(ng-show="!confirmEmailForm.response.success && !confirmEmailForm.response.error")
-								i.fa.fa-fw.fa-spin.fa-spinner(aria-hidden="true")
-								|
-								| Confirming your email…
+							input(type="hidden", name="token", value=token)
+
+							div(data-ol-not-sent)
+								div(data-ol-form-messages)
+
+								.actions
+									button.btn-primary.btn.btn-block(
+										type='submit',
+										data-ol-disabled-inflight
+									)
+										span(data-ol-not-inflight-text)
+											| #{translate('confirm')}
+										span(hidden data-ol-inflight-text)
+											i.fa.fa-fw.fa-spin.fa-spinner(aria-hidden="true")
+											| &nbsp;#{translate('confirming')}… 
+
+							div(hidden data-ol-sent)
+								.alert.alert-success
+									| #{translate('thank_you_email_confirmed')}

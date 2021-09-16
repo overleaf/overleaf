@@ -112,6 +112,11 @@ function showMessages(formEl, messageBag) {
       'alert-success': message.type !== 'error',
     })
     messageEl.textContent = message.text
+    messageEl.setAttribute('aria-live', 'assertive')
+    messageEl.setAttribute(
+      'role',
+      message.type === 'error' ? 'alert' : 'status'
+    )
     messagesEl.append(messageEl)
   })
 }
