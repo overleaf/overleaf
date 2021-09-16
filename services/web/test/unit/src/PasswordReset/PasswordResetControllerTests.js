@@ -68,6 +68,9 @@ describe('PasswordResetController', function () {
   })
 
   describe('requestReset', function () {
+    beforeEach(function () {
+      this.res.json = sinon.stub()
+    })
     it('should tell the handler to process that email', function (done) {
       this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
         1,
@@ -79,6 +82,7 @@ describe('PasswordResetController', function () {
         .calledWith(this.email)
         .should.equal(true)
       this.res.statusCode.should.equal(200)
+      this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
       done()
     })
 
@@ -101,6 +105,7 @@ describe('PasswordResetController', function () {
       )
       this.PasswordResetController.requestReset(this.req, this.res)
       this.res.statusCode.should.equal(404)
+      this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
       done()
     })
 
@@ -112,6 +117,7 @@ describe('PasswordResetController', function () {
       )
       this.PasswordResetController.requestReset(this.req, this.res)
       this.res.statusCode.should.equal(404)
+      this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
       done()
     })
 
@@ -128,6 +134,7 @@ describe('PasswordResetController', function () {
         .calledWith(this.email.toLowerCase().trim())
         .should.equal(true)
       this.res.statusCode.should.equal(200)
+      this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
       done()
     })
   })
