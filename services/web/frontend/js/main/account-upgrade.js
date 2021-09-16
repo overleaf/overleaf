@@ -9,7 +9,7 @@ function startFreeTrial(source, version, $scope) {
     if (typeof ga === 'function') {
       ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
     }
-    eventTracking.sendMB(`${source}-paywall-click`)
+    eventTracking.sendMB('paywall-click', { 'paywall-type': source })
 
     url = `/user/subscription/new?planCode=${plan}&ssp=true`
     url = `${url}&itm_campaign=${source}`
@@ -46,7 +46,7 @@ function upgradePlan(source, $scope) {
 }
 
 function paywallPrompt(source) {
-  eventTracking.sendMB(`${source}-paywall-prompt`)
+  eventTracking.sendMB('paywall-prompt', { 'paywall-type': source })
 }
 
 export { startFreeTrial, upgradePlan, paywallPrompt }

@@ -14,7 +14,7 @@ export default function StartFreeTrialButton({
   const { t } = useTranslation()
 
   useEffect(() => {
-    eventTracking.sendMB(`${source}-paywall-prompt`)
+    eventTracking.sendMB('paywall-prompt', { 'paywall-type': source })
   }, [source])
 
   const handleClick = useCallback(
@@ -22,7 +22,7 @@ export default function StartFreeTrialButton({
       event.preventDefault()
 
       eventTracking.send('subscription-funnel', 'upgraded-free-trial', source)
-      eventTracking.sendMB(`${source}-paywall-click`)
+      eventTracking.sendMB('paywall-click', { 'paywall-type': source })
 
       if (setStartedFreeTrial) {
         setStartedFreeTrial(true)

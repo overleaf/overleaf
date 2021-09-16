@@ -612,7 +612,11 @@ describe('<ShareProjectModal/>', function () {
   })
 
   it('displays a message when the collaborator limit is reached', async function () {
-    fetchMock.post('/event/project-sharing-paywall-prompt', {})
+    fetchMock.post(
+      '/event/paywall-prompt',
+      {},
+      { body: { 'paywall-type': 'project-sharing' } }
+    )
 
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
       user: {

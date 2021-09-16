@@ -435,7 +435,9 @@ App.controller(
             'editor-click-feature',
             'compile-timeout'
           )
-          eventTracking.sendMB('compile-timeout-paywall-prompt')
+          eventTracking.sendMB('paywall-prompt', {
+            'paywall-type': 'compile-timeout',
+          })
         }
       } else if (response.status === 'terminated') {
         $scope.pdf.view = 'errors'

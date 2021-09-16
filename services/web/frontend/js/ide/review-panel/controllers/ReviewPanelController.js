@@ -917,7 +917,9 @@ export default App.controller(
         'editor-click-feature',
         'real-time-track-changes'
       )
-      eventTracking.sendMB('track-changes-paywall-prompt')
+      eventTracking.sendMB('paywall-prompt', {
+        'paywall-type': 'track-changes',
+      })
     }
 
     const _setUserTCState = function (userId, newValue, isLocal) {
