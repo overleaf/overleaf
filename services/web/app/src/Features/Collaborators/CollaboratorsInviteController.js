@@ -382,7 +382,6 @@ module.exports = CollaboratorsInviteController = {
           'project-invite-accept',
           {
             projectId,
-            userId: currentUser._id,
           }
         )
         if (req.xhr) {

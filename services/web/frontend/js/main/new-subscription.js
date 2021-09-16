@@ -35,7 +35,7 @@ export default App.controller(
       const currentPlanCode = window.plan_code
       const planCode = currentPlanCode.replace('collaborator', 'student')
       eventTracking.sendMB('payment-page-switch-to-student', {
-        plan: window.plan_code,
+        plan_code: window.plan_code,
       })
       eventTracking.send(
         'subscription-funnel',
