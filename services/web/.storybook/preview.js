@@ -124,3 +124,5 @@ window.ExposedSettings = {
 window.user = {
   id: 'storybook',
 }
+
+window.project_id = 'storybook-project'
