@@ -155,6 +155,7 @@ export default App.directive('pdfng', ($timeout, localStorage) => ({
 <div
     data-pdf-viewer
     class="pdfjs-viewer"
+    tabindex="0"
     pdf-src='pdfSrc'
     position='position'
     scale='scale'
