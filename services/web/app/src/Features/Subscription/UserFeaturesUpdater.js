@@ -1,4 +1,5 @@
 const { User } = require('../../models/User')
+const { promisifyAll } = require('../../util/promises')
 
 function _featuresChanged(newFeatures, featuresBefore) {
   for (const feature in newFeatures) {
@@ -39,3 +40,9 @@ module.exports = {
     })
   },
 }
+
+module.exports.promises = promisifyAll(module.exports, {
+  multiResult: {
+    updateFeatures: ['features', 'featuresChanged'],
+  },
+})

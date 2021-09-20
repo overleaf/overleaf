@@ -1,4 +1,5 @@
 const _ = require('underscore')
+const { promisify } = require('util')
 const { User } = require('../../models/User')
 const Settings = require('@overleaf/settings')
 
@@ -46,4 +47,8 @@ module.exports = ReferalFeatures = {
     })
     return highestBonusLevel
   },
+}
+
+module.exports.promises = {
+  getBonusFeatures: promisify(module.exports.getBonusFeatures),
 }

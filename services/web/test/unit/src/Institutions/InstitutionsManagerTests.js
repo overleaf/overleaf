@@ -106,6 +106,8 @@ describe('InstitutionsManager', function () {
         },
         '../Subscription/FeaturesUpdater': {
           refreshFeatures: this.refreshFeatures,
+        },
+        '../Subscription/FeaturesHelper': {
           isFeatureSetBetter: (this.isFeatureSetBetter = sinon.stub()),
         },
         '../User/UserGetter': this.UserGetter,

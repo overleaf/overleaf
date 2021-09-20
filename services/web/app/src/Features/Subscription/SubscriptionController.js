@@ -447,7 +447,7 @@ function recurlyNotificationParser(req, res, next) {
 
 async function refreshUserFeatures(req, res) {
   const { user_id: userId } = req.params
-  await FeaturesUpdater.promises.refreshFeatures(userId)
+  await FeaturesUpdater.promises.refreshFeatures(userId, 'acceptance-test')
   res.sendStatus(200)
 }
 

@@ -7,6 +7,7 @@ const {
   promises: InstitutionsAPIPromises,
 } = require('./InstitutionsAPI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
+const FeaturesHelper = require('../Subscription/FeaturesHelper')
 const UserGetter = require('../User/UserGetter')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
@@ -55,7 +56,7 @@ async function _checkUsersFeatures(userIds) {
   }
 
   users.forEach(user => {
-    const hasProFeaturesOrBetter = FeaturesUpdater.isFeatureSetBetter(
+    const hasProFeaturesOrBetter = FeaturesHelper.isFeatureSetBetter(
       user.features,
       Settings.features.professional
     )

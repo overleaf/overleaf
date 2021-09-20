@@ -3,6 +3,7 @@ const minimist = require('minimist')
 const _ = require('lodash')
 const async = require('async')
 const FeaturesUpdater = require('../app/src/Features/Subscription/FeaturesUpdater')
+const FeaturesHelper = require('../app/src/Features/Subscription/FeaturesHelper')
 const UserFeaturesUpdater = require('../app/src/Features/Subscription/UserFeaturesUpdater')
 
 const ScriptLogger = {
@@ -54,12 +55,12 @@ const ScriptLogger = {
 }
 
 const checkAndUpdateUser = (user, callback) =>
-  FeaturesUpdater._computeFeatures(user._id, (error, freshFeatures) => {
+  FeaturesUpdater.computeFeatures(user._id, (error, freshFeatures) => {
     if (error) {
       return callback(error)
     }
 
-    const mismatchReasons = FeaturesUpdater.compareFeatures(
+    const mismatchReasons = FeaturesHelper.compareFeatures(
       user.features,
       freshFeatures
     )

@@ -2,7 +2,8 @@ const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const chai = require('chai')
 const { expect } = chai
-const modulePath =
+
+const MODULE_PATH =
   '../../../../app/src/Features/Subscription/SubscriptionHandler'
 
 const mockRecurlySubscriptions = {
@@ -47,6 +48,8 @@ const mockSubscriptionChanges = {
 
 describe('SubscriptionHandler', function () {
   beforeEach(function () {
+    this.callback = sinon.stub()
+
     this.Settings = {
       plans: [
         {
@@ -85,6 +88,7 @@ describe('SubscriptionHandler', function () {
       getBillingInfo: sinon.stub().yields(),
       getAccountPastDueInvoices: sinon.stub().yields(),
       attemptInvoiceCollection: sinon.stub().yields(),
+      listAccountActiveSubscriptions: sinon.stub().yields(null, []),
     }
     this.RecurlyClient = {
       changeSubscriptionByUuid: sinon
@@ -118,7 +122,7 @@ describe('SubscriptionHandler', function () {
       shouldPlanChangeAtTermEnd: sinon.stub(),
     }
 
-    this.SubscriptionHandler = SandboxedModule.require(modulePath, {
+    this.SubscriptionHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './RecurlyWrapper': this.RecurlyWrapper,
         './RecurlyClient': this.RecurlyClient,
@@ -134,23 +138,15 @@ describe('SubscriptionHandler', function () {
         './SubscriptionHelper': this.SubscriptionHelper,
       },
     })
-
-    this.SubscriptionHandler.syncSubscriptionToUser = sinon
-      .stub()
-      .callsArgWith(2)
   })
 
   describe('createSubscription', function () {
     beforeEach(function () {
-      this.callback = sinon.stub()
       this.subscriptionDetails = {
         cvv: '123',
         number: '12345',
       }
       this.recurlyTokenIds = { billing: '45555666' }
-      this.SubscriptionHandler.validateNoSubscriptionInRecurly = sinon
-        .stub()
-        .yields(null, true)
     })
 
     describe('successfully', function () {
@@ -182,9 +178,9 @@ describe('SubscriptionHandler', function () {
 
     describe('when there is already a subscription in Recurly', function () {
       beforeEach(function () {
-        this.SubscriptionHandler.validateNoSubscriptionInRecurly = sinon
-          .stub()
-          .yields(null, false)
+        this.RecurlyWrapper.listAccountActiveSubscriptions.yields(null, [
+          this.subscription,
+        ])
         this.SubscriptionHandler.createSubscription(
           this.user,
           this.subscriptionDetails,
@@ -235,9 +231,9 @@ describe('SubscriptionHandler', function () {
             callback(null, this.user)
           }
           this.plan_code = 'collaborator'
-          this.SubscriptionHelper.shouldPlanChangeAtTermEnd = sinon
-            .stub()
-            .returns(shouldPlanChangeAtTermEnd)
+          this.SubscriptionHelper.shouldPlanChangeAtTermEnd.returns(
+            shouldPlanChangeAtTermEnd
+          )
           this.LimitationsManager.userHasV2Subscription.callsArgWith(
             1,
             null,
@@ -277,14 +273,13 @@ describe('SubscriptionHandler', function () {
             callback(null, this.user)
           }
           this.plan_code = 'collaborator'
-          this.PlansLocator.findLocalPlanInSettings = sinon.stub().returns(null)
+          this.PlansLocator.findLocalPlanInSettings.returns(null)
           this.LimitationsManager.userHasV2Subscription.callsArgWith(
             1,
             null,
             true,
             this.subscription
           )
-          this.callback = sinon.stub()
           this.SubscriptionHandler.updateSubscription(
             this.user,
             this.plan_code,
@@ -322,9 +317,7 @@ describe('SubscriptionHandler', function () {
 
       it('should redirect to the subscription dashboard', function () {
         this.RecurlyClient.changeSubscriptionByUuid.called.should.equal(false)
-        this.SubscriptionHandler.syncSubscriptionToUser.called.should.equal(
-          false
-        )
+        this.SubscriptionUpdater.syncSubscription.called.should.equal(false)
       })
     })
 
@@ -561,18 +554,11 @@ describe('SubscriptionHandler', function () {
   })
 
   describe('validateNoSubscriptionInRecurly', function () {
-    beforeEach(function () {
-      this.subscriptions = []
-      this.RecurlyWrapper.listAccountActiveSubscriptions = sinon
-        .stub()
-        .yields(null, this.subscriptions)
-      this.SubscriptionUpdater.syncSubscription = sinon.stub().yields()
-      this.callback = sinon.stub()
-    })
-
-    describe('with no subscription in recurly', function () {
+    describe('with a subscription in recurly', function () {
       beforeEach(function () {
-        this.subscriptions.push((this.subscription = { mock: 'subscription' }))
+        this.RecurlyWrapper.listAccountActiveSubscriptions.yields(null, [
+          this.subscription,
+        ])
         this.SubscriptionHandler.validateNoSubscriptionInRecurly(
           this.user_id,
           this.callback
@@ -596,7 +582,7 @@ describe('SubscriptionHandler', function () {
       })
     })
 
-    describe('with a subscription in recurly', function () {
+    describe('with no subscription in recurly', function () {
       beforeEach(function () {
         this.SubscriptionHandler.validateNoSubscriptionInRecurly(
           this.user_id,

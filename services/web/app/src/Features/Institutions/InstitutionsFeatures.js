@@ -2,6 +2,7 @@ let InstitutionsFeatures
 const UserGetter = require('../User/UserGetter')
 const PlansLocator = require('../Subscription/PlansLocator')
 const Settings = require('@overleaf/settings')
+const { promisifyAll } = require('../../util/promises')
 
 module.exports = InstitutionsFeatures = {
   getInstitutionsFeatures(userId, callback) {
@@ -44,3 +45,5 @@ module.exports = InstitutionsFeatures = {
     })
   },
 }
+
+module.exports.promises = promisifyAll(module.exports)

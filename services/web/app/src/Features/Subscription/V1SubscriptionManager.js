@@ -16,6 +16,7 @@ const UserGetter = require('../User/UserGetter')
 const request = require('request')
 const settings = require('@overleaf/settings')
 const { V1ConnectionError, NotFoundError } = require('../Errors/Errors')
+const { promisifyAll } = require('../../util/promises')
 
 module.exports = V1SubscriptionManager = {
   // Returned planCode = 'v1_pro' | 'v1_pro_plus' | 'v1_student' | 'v1_free' | null
@@ -214,3 +215,10 @@ function __guard__(value, transform) {
     ? transform(value)
     : undefined
 }
+
+module.exports.promises = promisifyAll(module.exports, {
+  without: ['getGrandfatheredFeaturesForV1User'],
+  multiResult: {
+    getPlanCodeFromV1: ['planCode', 'v1Id'],
+  },
+})
