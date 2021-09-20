@@ -14,7 +14,6 @@ const express = require('express')
 const app = express()
 const methodOverride = require('method-override')
 const bodyParser = require('body-parser')
-const errorHandler = require('errorhandler')
 const mongodb = require('./app/js/mongodb')
 const controller = require('./app/js/NotificationsController')
 
@@ -25,7 +24,6 @@ const HealthCheckController = require('./app/js/HealthCheckController')
 app.use(methodOverride())
 app.use(bodyParser())
 app.use(metrics.http.monitor(logger))
-app.use(errorHandler())
 
 metrics.injectMetricsRoute(app)
 
