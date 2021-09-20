@@ -32,7 +32,7 @@ class MockRecurlyApi extends AbstractMockApi {
       } else {
         res.send(`\
 <subscription>
-	<plan_code>${subscription.plan_code}</plan_code>
+	<plan><plan_code>${subscription.planCode}</plan_code></plan>
 	<currency>${subscription.currency}</currency>
 	<state>${subscription.state}</state>
 	<tax_in_cents type="integer">${subscription.tax_in_cents}</tax_in_cents>

@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const {
   promisifyAll,
+  promisifyClass,
   callbackifyMultiResult,
 } = require('../../../../app/src/util/promises')
 
@@ -48,7 +49,7 @@ describe('promisifyAll', function () {
           return a + b
         },
       }
-      this.promisified = promisifyAll(this.module, { without: 'syncAdd' })
+      this.promisified = promisifyAll(this.module, { without: ['syncAdd'] })
     })
 
     it('does not promisify excluded functions', function () {
@@ -83,6 +84,93 @@ describe('promisifyAll', function () {
 
     it('promisifies other functions normally', async function () {
       const sum = await this.promisified.asyncAdd(6, 1)
+      expect(sum).to.equal(7)
+    })
+  })
+})
+
+describe('promisifyClass', function () {
+  describe('basic functionality', function () {
+    before(function () {
+      this.Class = class {
+        constructor(a) {
+          this.a = a
+        }
+
+        asyncAdd(b, callback) {
+          callback(null, this.a + b)
+        }
+      }
+      this.Promisified = promisifyClass(this.Class)
+    })
+
+    it('promisifies the class methods', async function () {
+      const adder = new this.Promisified(1)
+      const sum = await adder.asyncAdd(2)
+      expect(sum).to.equal(3)
+    })
+  })
+
+  describe('without option', function () {
+    before(function () {
+      this.Class = class {
+        constructor(a) {
+          this.a = a
+        }
+
+        asyncAdd(b, callback) {
+          callback(null, this.a + b)
+        }
+
+        syncAdd(b) {
+          return this.a + b
+        }
+      }
+      this.Promisified = promisifyClass(this.Class, { without: ['syncAdd'] })
+    })
+
+    it('does not promisify excluded functions', function () {
+      const adder = new this.Promisified(10)
+      const sum = adder.syncAdd(12)
+      expect(sum).to.equal(22)
+    })
+
+    it('promisifies other functions', async function () {
+      const adder = new this.Promisified(23)
+      const sum = await adder.asyncAdd(3)
+      expect(sum).to.equal(26)
+    })
+  })
+
+  describe('multiResult option', function () {
+    before(function () {
+      this.Class = class {
+        constructor(a) {
+          this.a = a
+        }
+
+        asyncAdd(b, callback) {
+          callback(null, this.a + b)
+        }
+
+        asyncArithmetic(b, callback) {
+          callback(null, this.a + b, this.a * b)
+        }
+      }
+      this.Promisified = promisifyClass(this.Class, {
+        multiResult: { asyncArithmetic: ['sum', 'product'] },
+      })
+    })
+
+    it('promisifies multi-result functions', async function () {
+      const adder = new this.Promisified(3)
+      const result = await adder.asyncArithmetic(6)
+      expect(result).to.deep.equal({ sum: 9, product: 18 })
+    })
+
+    it('promisifies other functions normally', async function () {
+      const adder = new this.Promisified(6)
+      const sum = await adder.asyncAdd(1)
       expect(sum).to.equal(7)
     })
   })

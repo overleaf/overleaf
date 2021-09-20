@@ -4,6 +4,7 @@ const pLimit = require('p-limit')
 module.exports = {
   promisify,
   promisifyAll,
+  promisifyClass,
   promisifyMultiResult,
   callbackify,
   callbackifyMultiResult,
@@ -58,6 +59,34 @@ function promisifyAll(module, opts = {}) {
 }
 
 /**
+ * Promisify all methods in a class.
+ *
+ * Options are the same as for promisifyAll
+ */
+function promisifyClass(cls, opts = {}) {
+  const promisified = class extends cls {}
+  const { without = [], multiResult = {} } = opts
+  for (const propName of Object.getOwnPropertyNames(cls.prototype)) {
+    if (propName === 'constructor' || without.includes(propName)) {
+      continue
+    }
+    const propValue = cls.prototype[propName]
+    if (typeof propValue !== 'function') {
+      continue
+    }
+    if (multiResult[propName] != null) {
+      promisified.prototype[propName] = promisifyMultiResult(
+        propValue,
+        multiResult[propName]
+      )
+    } else {
+      promisified.prototype[propName] = promisify(propValue)
+    }
+  }
+  return promisified
+}
+
+/**
  * Promisify a function that returns multiple results via additional callback
  * parameters.
  *
@@ -78,7 +107,7 @@ function promisifyMultiResult(fn, resultNames) {
   function promisified(...args) {
     return new Promise((resolve, reject) => {
       try {
-        fn(...args, (err, ...results) => {
+        fn.bind(this)(...args, (err, ...results) => {
           if (err != null) {
             return reject(err)
           }

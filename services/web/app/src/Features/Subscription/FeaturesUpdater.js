@@ -12,7 +12,19 @@ const V1SubscriptionManager = require('./V1SubscriptionManager')
 const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const UserGetter = require('../User/UserGetter')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const Queues = require('../../infrastructure/Queues')
 
+/**
+ * Enqueue a job for refreshing features for the given user
+ */
+async function scheduleRefreshFeatures(userId, reason) {
+  const queue = Queues.getRefreshFeaturesQueue()
+  await queue.add({ userId, reason })
+}
+
+/**
+ * Refresh features for the given user
+ */
 async function refreshFeatures(userId, reason) {
   const user = await UserGetter.promises.getUser(userId, {
     _id: 1,
@@ -45,6 +57,9 @@ async function refreshFeatures(userId, reason) {
   return { features: newFeatures, featuresChanged }
 }
 
+/**
+ * Return the features that the given user should have.
+ */
 async function computeFeatures(userId) {
   const individualFeatures = await _getIndividualFeatures(userId)
   const groupFeatureSets = await _getGroupFeatureSets(userId)
@@ -191,9 +206,11 @@ module.exports = {
     'features',
     'featuresChanged',
   ]),
+  scheduleRefreshFeatures: callbackify(scheduleRefreshFeatures),
   promises: {
     computeFeatures,
     refreshFeatures,
+    scheduleRefreshFeatures,
     doSyncFromV1,
   },
 }

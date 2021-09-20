@@ -60,6 +60,7 @@ function getSandboxedModuleRequires() {
   ]
   const externalLibs = [
     'async',
+    'bull',
     'json2csv',
     'lodash',
     'marked',

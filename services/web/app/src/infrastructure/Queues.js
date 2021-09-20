@@ -27,6 +27,10 @@ function getAnalyticsUserPropertiesQueue() {
   }
 }
 
+function getRefreshFeaturesQueue() {
+  return getOrCreateQueue('refresh-features', { attempts: 3 })
+}
+
 function getOnboardingEmailsQueue() {
   return getOrCreateQueue('emails-onboarding')
 }
@@ -35,7 +39,7 @@ function getPostRegistrationAnalyticsQueue() {
   return getOrCreateQueue('post-registration-analytics')
 }
 
-function getOrCreateQueue(queueName, defaultJobOptions) {
+function getOrCreateQueue(queueName, jobOptions = {}) {
   if (!queues[queueName]) {
     queues[queueName] = new Queue(queueName, {
       redis: Settings.redis.queues,
@@ -47,6 +51,7 @@ function getOrCreateQueue(queueName, defaultJobOptions) {
           type: 'exponential',
           delay: 3000,
         },
+        ...jobOptions,
       },
     })
   }
@@ -57,6 +62,7 @@ module.exports = {
   getAnalyticsEventsQueue,
   getAnalyticsEditingSessionsQueue,
   getAnalyticsUserPropertiesQueue,
+  getRefreshFeaturesQueue,
   getOnboardingEmailsQueue,
   getPostRegistrationAnalyticsQueue,
 }

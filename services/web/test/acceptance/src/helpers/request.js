@@ -7,6 +7,7 @@ const request = require('request').defaults({
 })
 
 module.exports = request
+module.exports.BASE_URL = BASE_URL
 
 module.exports.promises = {
   request: function (options) {

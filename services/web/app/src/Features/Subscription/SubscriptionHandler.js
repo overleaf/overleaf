@@ -287,7 +287,7 @@ function syncSubscription(recurlySubscription, requesterData, callback) {
           }
           SubscriptionUpdater.syncSubscription(
             recurlySubscription,
-            user != null ? user._id : undefined,
+            user._id,
             requesterData,
             callback
           )

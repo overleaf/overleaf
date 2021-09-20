@@ -125,6 +125,7 @@ describe('SubscriptionUpdater', function () {
 
     this.FeaturesUpdater = {
       promises: {
+        scheduleRefreshFeatures: sinon.stub().resolves(),
         refreshFeatures: sinon.stub().resolves({}),
       },
     }
@@ -249,9 +250,9 @@ describe('SubscriptionUpdater', function () {
         this.recurlySubscription.plan.plan_code
       )
       this.subscription.save.called.should.equal(true)
-      this.FeaturesUpdater.promises.refreshFeatures
-        .calledWith(this.adminUser._id)
-        .should.equal(true)
+      expect(
+        this.FeaturesUpdater.promises.scheduleRefreshFeatures
+      ).to.have.been.calledWith(this.adminUser._id)
     })
 
     it('should remove the subscription when expired', async function () {
@@ -270,18 +271,18 @@ describe('SubscriptionUpdater', function () {
         this.subscription,
         {}
       )
-      this.FeaturesUpdater.promises.refreshFeatures
-        .calledWith(this.adminUser._id)
-        .should.equal(true)
-      this.FeaturesUpdater.promises.refreshFeatures
-        .calledWith(this.allUserIds[0])
-        .should.equal(true)
-      this.FeaturesUpdater.promises.refreshFeatures
-        .calledWith(this.allUserIds[1])
-        .should.equal(true)
-      this.FeaturesUpdater.promises.refreshFeatures
-        .calledWith(this.allUserIds[2])
-        .should.equal(true)
+      expect(
+        this.FeaturesUpdater.promises.scheduleRefreshFeatures
+      ).to.have.been.calledWith(this.adminUser._id)
+      expect(
+        this.FeaturesUpdater.promises.scheduleRefreshFeatures
+      ).to.have.been.calledWith(this.allUserIds[0])
+      expect(
+        this.FeaturesUpdater.promises.scheduleRefreshFeatures
+      ).to.have.been.calledWith(this.allUserIds[1])
+      expect(
+        this.FeaturesUpdater.promises.scheduleRefreshFeatures
+      ).to.have.been.calledWith(this.allUserIds[2])
     })
 
     it('should set group to true and save how many members can be added to group', async function () {
@@ -538,16 +539,16 @@ describe('SubscriptionUpdater', function () {
     })
 
     it('should downgrade the admin_id', function () {
-      this.FeaturesUpdater.promises.refreshFeatures
-        .calledWith(this.subscription.admin_id)
-        .should.equal(true)
+      expect(
+        this.FeaturesUpdater.promises.scheduleRefreshFeatures
+      ).to.have.been.calledWith(this.subscription.admin_id)
     })
 
     it('should downgrade all of the members', function () {
       for (const userId of this.subscription.member_ids) {
-        this.FeaturesUpdater.promises.refreshFeatures
-          .calledWith(userId)
-          .should.equal(true)
+        expect(
+          this.FeaturesUpdater.promises.scheduleRefreshFeatures
+        ).to.have.been.calledWith(userId)
       }
     })
   })

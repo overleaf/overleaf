@@ -110,7 +110,7 @@ async function deleteSubscription(subscription, deleterData) {
   await Subscription.deleteOne({ _id: subscription._id }).exec()
 
   // 3. refresh users features
-  await refreshUsersFeatures(subscription)
+  await _scheduleRefreshFeatures(subscription)
 }
 
 async function restoreSubscription(subscriptionId) {
@@ -138,6 +138,16 @@ async function refreshUsersFeatures(subscription) {
   const userIds = [subscription.admin_id].concat(subscription.member_ids || [])
   for (const userId of userIds) {
     await FeaturesUpdater.promises.refreshFeatures(
+      userId,
+      'subscription-updater'
+    )
+  }
+}
+
+async function _scheduleRefreshFeatures(subscription) {
+  const userIds = [subscription.admin_id].concat(subscription.member_ids || [])
+  for (const userId of userIds) {
+    await FeaturesUpdater.promises.scheduleRefreshFeatures(
       userId,
       'subscription-updater'
     )
@@ -234,7 +244,7 @@ async function updateSubscriptionFromRecurly(
     }
   }
   await subscription.save()
-  await refreshUsersFeatures(subscription)
+  await _scheduleRefreshFeatures(subscription)
 }
 
 async function _sendUserGroupPlanCodeUserProperty(userId) {

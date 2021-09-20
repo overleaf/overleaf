@@ -2,6 +2,7 @@ const { ObjectId } = require('mongodb')
 const Subscription = require('./Subscription')
 const MockRecurlyApiClass = require('../mocks/MockRecurlyApi')
 const RecurlyWrapper = require('../../../../app/src/Features/Subscription/RecurlyWrapper')
+const { promisifyClass } = require('../../../../app/src/util/promises')
 
 let MockRecurlyApi
 
@@ -27,6 +28,7 @@ class RecurlySubscription {
       email: options.account && options.account.email,
       hosted_login_token: options.account && options.account.hosted_login_token,
     }
+    this.planCode = options.planCode || 'personal'
   }
 
   ensureExists(callback) {
@@ -39,13 +41,13 @@ class RecurlySubscription {
     })
   }
 
-  buildCallbackXml() {
-    return RecurlyWrapper._buildXml('expired_subscription_notification', {
+  buildCallbackXml(event) {
+    return RecurlyWrapper._buildXml(event, {
       subscription: {
         uuid: this.uuid,
-        state: 'expired',
+        state: this.state,
         plan: {
-          plan_code: 'collaborator',
+          plan_code: this.planCode,
         },
       },
       account: {
@@ -56,3 +58,6 @@ class RecurlySubscription {
 }
 
 module.exports = RecurlySubscription
+module.exports.promises = promisifyClass(RecurlySubscription, {
+  without: ['buildCallbackXml'],
+})

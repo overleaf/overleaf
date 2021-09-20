@@ -2,6 +2,7 @@ const Features = require('./Features')
 const Queues = require('./Queues')
 const UserOnboardingEmailManager = require('../Features/User/UserOnboardingEmailManager')
 const UserPostRegistrationAnalyticsManager = require('../Features/User/UserPostRegistrationAnalyticsManager')
+const FeaturesUpdater = require('../Features/Subscription/FeaturesUpdater')
 
 function start() {
   if (!Features.hasFeature('saas')) {
@@ -18,6 +19,12 @@ function start() {
   postRegistrationAnalyticsQueue.process(async job => {
     const { userId } = job.data
     await UserPostRegistrationAnalyticsManager.postRegistrationAnalytics(userId)
+  })
+
+  const refreshFeaturesQueue = Queues.getRefreshFeaturesQueue()
+  refreshFeaturesQueue.process(async job => {
+    const { userId, reason } = job.data
+    await FeaturesUpdater.promises.refreshFeatures(userId, reason)
   })
 }
 
