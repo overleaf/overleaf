@@ -8,6 +8,7 @@ const Settings = require('@overleaf/settings')
 const Metrics = require('./Metrics')
 const ProjectFlusher = require('./ProjectFlusher')
 const DeleteQueueManager = require('./DeleteQueueManager')
+const { getTotalSizeOfLines } = require('./Limits')
 const async = require('async')
 
 module.exports = {
@@ -83,14 +84,6 @@ function peekDoc(req, res, next) {
   })
 }
 
-function _getTotalSizeOfLines(lines) {
-  let size = 0
-  for (const line of lines) {
-    size += line.length + 1
-  }
-  return size
-}
-
 function getProjectDocsAndFlushIfOld(req, res, next) {
   const projectId = req.params.project_id
   const projectStateHash = req.query.state
@@ -150,7 +143,7 @@ function setDoc(req, res, next) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
   const { lines, source, user_id: userId, undoing } = req.body
-  const lineSize = _getTotalSizeOfLines(lines)
+  const lineSize = getTotalSizeOfLines(lines)
   if (lineSize > Settings.max_doc_length) {
     logger.log(
       { projectId, docId, source, lineSize, userId },

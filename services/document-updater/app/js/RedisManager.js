@@ -24,6 +24,7 @@ const Errors = require('./Errors')
 const crypto = require('crypto')
 const async = require('async')
 const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
+const { docIsTooLarge } = require('./Limits')
 
 // Sometimes Redis calls take an unexpectedly long time.  We have to be
 // quick with Redis calls because we're holding a lock that expires
@@ -64,6 +65,7 @@ module.exports = RedisManager = {
       timer.done()
       return _callback(error)
     }
+    const docLinesArray = docLines
     docLines = JSON.stringify(docLines)
     if (docLines.indexOf('\u0000') !== -1) {
       const error = new Error('null bytes found in doc lines')
@@ -72,8 +74,10 @@ module.exports = RedisManager = {
       logger.error({ err: error, doc_id, docLines }, error.message)
       return callback(error)
     }
-    // Do a cheap size check on the serialized blob.
-    if (docLines.length > Settings.max_doc_length) {
+    // Do an optimised size check on the docLines using the serialised
+    // length as an upper bound
+    const sizeBound = docLines.length
+    if (docIsTooLarge(sizeBound, docLinesArray, Settings.max_doc_length)) {
       const docSize = docLines.length
       const err = new Error('blocking doc insert into redis: doc is too large')
       logger.error({ project_id, doc_id, err, docSize }, err.message)
@@ -468,8 +472,10 @@ module.exports = RedisManager = {
           logger.error({ err: error, doc_id, newDocLines }, error.message)
           return callback(error)
         }
-        // Do a cheap size check on the serialized blob.
-        if (newDocLines.length > Settings.max_doc_length) {
+        // Do an optimised size check on the docLines using the serialised
+        // length as an upper bound
+        const sizeBound = newDocLines.length
+        if (docIsTooLarge(sizeBound, docLines, Settings.max_doc_length)) {
           const err = new Error('blocking doc update: doc is too large')
           const docSize = newDocLines.length
           logger.error({ project_id, doc_id, err, docSize }, err.message)
