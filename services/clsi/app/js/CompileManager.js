@@ -131,6 +131,10 @@ function doCompile(request, callback) {
         // override default texlive openout_any environment variable
         env.openout_any = Settings.texliveOpenoutAny
       }
+      if (Settings.texliveMaxPrintLine && Settings.texliveMaxPrintLine !== '') {
+        // override default texlive max_print_line environment variable
+        env.max_print_line = Settings.texliveMaxPrintLine
+      }
       // only run chktex on LaTeX files (not knitr .Rtex files or any others)
       const isLaTeXFile =
         request.rootResourcePath != null

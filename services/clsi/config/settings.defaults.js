@@ -66,6 +66,7 @@ module.exports = {
   filestoreDomainOveride: process.env.FILESTORE_DOMAIN_OVERRIDE,
   texliveImageNameOveride: process.env.TEX_LIVE_IMAGE_NAME_OVERRIDE,
   texliveOpenoutAny: process.env.TEXLIVE_OPENOUT_ANY,
+  texliveMaxPrintLine: process.env.TEXLIVE_MAX_PRINT_LINE,
   sentry: {
     dsn: process.env.SENTRY_DSN,
   },
