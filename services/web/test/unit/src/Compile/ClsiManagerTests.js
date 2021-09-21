@@ -620,6 +620,7 @@ describe('ClsiManager', function () {
               syncState: undefined,
               compileGroup: 'standard',
               enablePdfCaching: false,
+              flags: undefined,
             }, // "01234567890abcdef"
             rootResourcePath: 'main.tex',
             resources: [
@@ -716,6 +717,7 @@ describe('ClsiManager', function () {
               syncState: '01234567890abcdef',
               compileGroup: 'priority',
               enablePdfCaching: false,
+              flags: undefined,
             },
             rootResourcePath: 'main.tex',
             resources: [

@@ -175,7 +175,7 @@ describe('LatexRunner', function () {
             compiler: this.compiler,
             image: this.image,
             timeout: (this.timeout = 42000),
-            flags: ['-file-line-error', '-halt-on-error'],
+            flags: ['-shell-restricted', '-halt-on-error'],
           },
           this.callback
         )
@@ -184,10 +184,10 @@ describe('LatexRunner', function () {
       return it('should include the flags in the command', function () {
         const command = this.CommandRunner.run.args[0][1]
         const flags = command.filter(
-          arg => arg === '-file-line-error' || arg === '-halt-on-error'
+          arg => arg === '-shell-restricted' || arg === '-halt-on-error'
         )
         flags.length.should.equal(2)
-        flags[0].should.equal('-file-line-error')
+        flags[0].should.equal('-shell-restricted')
         return flags[1].should.equal('-halt-on-error')
       })
     })

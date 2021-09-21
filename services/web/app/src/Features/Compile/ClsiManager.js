@@ -787,6 +787,7 @@ const ClsiManager = {
 
   _finaliseRequest(projectId, options, project, docs, files, callback) {
     const resources = []
+    let flags
     let rootResourcePath = null
     let rootResourcePathOverride = null
     let hasMainFile = false
@@ -847,6 +848,10 @@ const ClsiManager = {
       })
     }
 
+    if (options.fileLineErrors) {
+      flags = ['-file-line-error']
+    }
+
     callback(null, {
       compile: {
         options: {
@@ -860,6 +865,7 @@ const ClsiManager = {
           compileGroup: options.compileGroup,
           enablePdfCaching:
             (Settings.enablePdfCaching && options.enablePdfCaching) || false,
+          flags: flags,
         },
         rootResourcePath,
         resources,

@@ -44,10 +44,12 @@ module.exports = CompileController = {
     const project_id = req.params.Project_id
     const isAutoCompile = !!req.query.auto_compile
     const enablePdfCaching = !!req.query.enable_pdf_caching
+    const fileLineErrors = !!req.query.file_line_errors
     const user_id = SessionManager.getLoggedInUserId(req.session)
     const options = {
       isAutoCompile,
       enablePdfCaching,
+      fileLineErrors,
     }
 
     if (req.body.rootDoc_id) {

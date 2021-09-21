@@ -283,6 +283,9 @@ App.controller(
       if (getMeta('ol-enablePdfCaching')) {
         params.enable_pdf_caching = true
       }
+      if (window.location.search.includes('file_line_errors=true')) {
+        params.file_line_errors = 'true'
+      }
       // if the previous run was a check, clear the error logs
       if ($scope.check) {
         $scope.pdf.logEntries = {}

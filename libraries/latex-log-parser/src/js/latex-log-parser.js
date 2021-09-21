@@ -102,6 +102,9 @@ define(function () {
               content: '',
               raw: this.currentLine + '\n',
             }
+          } else if (this.currentLineIsFileLineError()) {
+            this.state = state.ERROR
+            this.parseFileLineError()
           } else if (this.currentLineIsRunawayArgument()) {
             this.parseRunawayArgumentError()
           } else if (this.currentLineIsWarning()) {
@@ -128,7 +131,7 @@ define(function () {
             .join('\n')
           this.currentError.raw += this.currentError.content
           const lineNo = this.currentError.raw.match(/l\.([0-9]+)/)
-          if (lineNo) {
+          if (lineNo && this.currentError.line === null) {
             this.currentError.line = parseInt(lineNo[1], 10)
           }
           this.data.push(this.currentError)
@@ -140,6 +143,10 @@ define(function () {
 
     this.currentLineIsError = function () {
       return this.currentLine[0] === '!'
+    }
+
+    this.currentLineIsFileLineError = function () {
+      return /^\/.*:\d+: .*/.test(this.currentLine)
     }
 
     this.currentLineIsRunawayArgument = function () {
@@ -156,6 +163,18 @@ define(function () {
 
     this.currentLineIsHboxWarning = function () {
       return !!this.currentLine.match(HBOX_WARNING_REGEX)
+    }
+
+    this.parseFileLineError = function () {
+      const result = this.currentLine.match(/^(\/.*):(\d+): (.*)/)
+      this.currentError = {
+        line: result[2],
+        file: result[1],
+        level: 'error',
+        message: result[3],
+        content: '',
+        raw: this.currentLine + '\n',
+      }
     }
 
     this.parseRunawayArgumentError = function () {
