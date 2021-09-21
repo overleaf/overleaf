@@ -107,7 +107,7 @@ function sendReconfirmation(req, res, next) {
         if (error) {
           return next(error)
         }
-        res.sendStatus(200)
+        res.sendStatus(204)
       }
     )
   })

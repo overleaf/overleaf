@@ -116,40 +116,48 @@ function showMessages(formEl, messageBag) {
   })
 }
 
-function formInflightHelper(el) {
-  const disabledEl = el.querySelector('[data-ol-disabled-inflight]')
-  const showWhenNotInflightEl = el.querySelector('[data-ol-inflight="idle"]')
-  const showWhenInflightEl = el.querySelector('[data-ol-inflight="pending"]')
+export function inflightHelper(el) {
+  const disabledInflight = el.querySelectorAll('[data-ol-disabled-inflight]')
+  const showWhenNotInflight = el.querySelectorAll('[data-ol-inflight="idle"]')
+  const showWhenInflight = el.querySelectorAll('[data-ol-inflight="pending"]')
 
   el.addEventListener('pending', () => {
-    disabledEl.disabled = true
-    toggleDisplay(showWhenNotInflightEl, showWhenInflightEl)
+    disabledInflight.forEach(el => {
+      el.disabled = true
+    })
+    toggleDisplay(showWhenNotInflight, showWhenInflight)
   })
 
   el.addEventListener('idle', () => {
-    disabledEl.disabled = false
-    toggleDisplay(showWhenInflightEl, showWhenNotInflightEl)
+    disabledInflight.forEach(el => {
+      el.disabled = false
+    })
+    toggleDisplay(showWhenInflight, showWhenNotInflight)
   })
 }
 
 function formSentHelper(el) {
-  const showWhenPending = el.querySelector('[data-ol-not-sent]')
-  const showWhenDone = el.querySelector('[data-ol-sent]')
-  if (!showWhenDone) return
+  const showWhenPending = el.querySelectorAll('[data-ol-not-sent]')
+  const showWhenDone = el.querySelectorAll('[data-ol-sent]')
+  if (showWhenDone.length === 0) return
 
   el.addEventListener('sent', () => {
     toggleDisplay(showWhenPending, showWhenDone)
   })
 }
 
-function toggleDisplay(hideEl, showEl) {
-  hideEl.setAttribute('hidden', '')
-  showEl.removeAttribute('hidden')
+function toggleDisplay(hide, show) {
+  hide.forEach(el => {
+    el.hidden = true
+  })
+  show.forEach(el => {
+    el.hidden = false
+  })
 }
 
 export function hydrateForm(el) {
   formSubmitHelper(el)
-  formInflightHelper(el)
+  inflightHelper(el)
   formSentHelper(el)
 
   el.querySelectorAll('input').forEach(inputEl => {
