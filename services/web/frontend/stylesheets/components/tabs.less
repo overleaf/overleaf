@@ -38,3 +38,14 @@
     border: none !important;
   }
 }
+
+// Scroll the page up a bit to allow tab links to be shown when navigating to
+// a bookmarked tab hash
+[data-ol-bookmarkable-tabset] .tab-pane {
+  scroll-margin-top: calc(
+    @line-height-computed + // Computed text height
+    20px + // nav-link-padding top & bottom
+    @padding-md + // ol-tabs bottom padding
+    (@line-height-computed / 2) // tab-content top padding
+  );
+}
