@@ -66,6 +66,9 @@ ENV SHARELATEX_APP_NAME "Overleaf Community Edition"
 
 ENV OPTIMISE_PDF "true"
 
+ENV NODE_ENV "production"
+ENV LOG_LEVEL "info"
+
 
 EXPOSE 80
 
