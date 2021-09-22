@@ -1,5 +1,19 @@
-.gallery-title {
+.gallery-item-title {
+  * {
+    vertical-align: middle;
+  }
+  margin-top: @line-height-computed; // match h1 header margin-top
   margin-bottom: @margin-xl;
+  h1 {
+    display: inline;
+    margin: 0;
+  }
+}
+.gallery-official {
+  margin-left: @margin-sm;
+  &:extend(.label);
+  &:extend(.label-info);
+  cursor: default;
 }
 
 .field-title {
@@ -79,11 +93,30 @@
     .text-overflow();
   }
 
+  .gallery-list-item-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    * {
+      flex-basis: content;
+      cursor: inherit;
+    }
+  }
+
   .caption__title {
     display: inline-block;
     width: 100%;
     text-align: center;
     .text-overflow();
+  }
+
+  a {
+    &:hover {
+      text-decoration: none; // disable underlining label
+      .caption__title {
+        text-decoration: underline;
+      }
+    }
   }
 }
 
