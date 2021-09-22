@@ -1,0 +1,86 @@
+div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
+	.modal-dialog(role="document")
+		.modal-content
+			.modal-header
+				h3 Save 30% or more with a group license
+			.modal-body.plans
+				.container-fluid
+					.row
+						.col-md-6.text-center
+							.circle.circle-lg
+								span(data-ol-group-plan-display-price) ...
+								span.small / year
+								br
+								span.circle-subtext(data-ol-group-plan-for-n-users) For ... users
+							ul.list-unstyled
+								li Each user will have access to:
+								li &nbsp;
+								li(
+									hidden=(groupPlanModalDefaults.plan_code !== 'collaborator')
+									data-ol-group-plan-plan-code='collaborator'
+								)
+									strong #{translate("collabs_per_proj", {collabcount:10})}
+								li(
+									hidden=(groupPlanModalDefaults.plan_code !== 'professional')
+									data-ol-group-plan-plan-code='professional'
+								)
+									strong #{translate("unlimited_collabs")}
+								+features_premium
+						.col-md-6
+							form.form(data-ol-group-plan-form)
+								.form-group
+									label(for='plan_code')
+										| Plan
+									select.form-control(id="plan_code")
+										for plan_code in groupPlanModalOptions.plan_codes
+											option(
+												value=plan_code.code
+												selected=(plan_code.code === groupPlanModalDefaults.plan_code)
+											) #{plan_code.display}
+								.form-group
+									label(for='size')
+										| Number of users
+									select.form-control(id="size")
+										for size in groupPlanModalOptions.sizes
+											option(
+												value=size
+												selected=(size === groupPlanModalDefaults.size)
+											) #{size}
+								.form-group
+									label(for='currency')
+										| Currency
+									select.form-control(id="currency")
+										for currency in groupPlanModalOptions.currencies
+											option(
+												value=currency.code
+												selected=(currency.code === groupPlanModalDefaults.currency)
+											) #{currency.display}
+								.form-group
+									label(for='usage')
+										| Usage
+									select.form-control(id="usage")
+										for usage in groupPlanModalOptions.usages
+											option(
+												value=usage.code
+												selected=(usage.code === groupPlanModalDefaults.usage)
+											) #{usage.display}
+									p.small.text-center.row-spaced-small
+										span(
+											hidden=(groupPlanModalDefaults.usage !== 'educational')
+											data-ol-group-plan-usage='educational'
+										)
+											| The 40% educational discount can be used by students or faculty using Overleaf for teaching
+										span(
+											hidden=(groupPlanModalDefaults.usage !== 'enterprise')
+											data-ol-group-plan-usage='enterprise'
+										)
+											| Save an additional 40% on groups of 10 or more with our educational discount
+			.modal-footer
+				.text-center
+					button.btn.btn-primary.btn-lg(data-ol-purchase-group-plan) Purchase Now
+					hr.thin
+					a(
+						href
+						data-ol-open-contact-form-for-more-than-50-licenses
+					) Need more than 50 licenses? Please get in touch
+

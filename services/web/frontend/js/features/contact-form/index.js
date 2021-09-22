@@ -7,6 +7,15 @@ document
 document.querySelectorAll('a[ng-click="contactUsModal()"]').forEach(el => {
   el.addEventListener('click', function (e) {
     e.preventDefault()
-    $('[data-ol-contact-form-modal]').modal()
+    $('[data-ol-contact-form-modal="contact-us"]').modal()
   })
 })
+
+document
+  .querySelectorAll('[data-ol-open-contact-form-modal="general"]')
+  .forEach(el => {
+    el.addEventListener('click', function (e) {
+      e.preventDefault()
+      $('[data-ol-contact-form-modal="general"]').modal()
+    })
+  })

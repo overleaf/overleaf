@@ -18,6 +18,17 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const RecurlyEventHandler = require('./RecurlyEventHandler')
 const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
+const {
+  getAssignmentForSession,
+} = require('../SplitTests/SplitTestV2Handler').promises
+
+const groupPlanModalOptions = Settings.groupPlanModalOptions
+const validGroupPlanModalOptions = {
+  plan_code: groupPlanModalOptions.plan_codes.map(item => item.code),
+  currency: groupPlanModalOptions.currencies.map(item => item.code),
+  size: groupPlanModalOptions.sizes,
+  usage: groupPlanModalOptions.usages.map(item => item.code),
+}
 
 async function plansPage(req, res) {
   const plans = SubscriptionViewModelBuilder.buildPlansList()
@@ -28,14 +39,46 @@ async function plansPage(req, res) {
     (req.query ? req.query.ip : undefined) || req.ip
   )
 
-  res.render('subscriptions/plans', {
+  function getDefault(param, category, defaultValue) {
+    const v = req.query && req.query[param]
+    if (v && validGroupPlanModalOptions[category].includes(v)) {
+      return v
+    }
+    return defaultValue
+  }
+
+  let defaultGroupPlanModalCurrency = 'USD'
+  if (validGroupPlanModalOptions.currency.includes(recommendedCurrency)) {
+    defaultGroupPlanModalCurrency = recommendedCurrency
+  }
+  const groupPlanModalDefaults = {
+    plan_code: getDefault('plan', 'plan_code', 'collaborator'),
+    size: getDefault('number', 'size', '10'),
+    currency: getDefault('currency', 'currency', defaultGroupPlanModalCurrency),
+    usage: getDefault('usage', 'usage', 'enterprise'),
+  }
+
+  const { variant: templateVariant } = await getAssignmentForSession(
+    req.session,
+    'plans-page-de-ng'
+  )
+  const template =
+    templateVariant === 'de-ng'
+      ? 'subscriptions/plans-marketing'
+      : 'subscriptions/plans'
+
+  res.render(template, {
     title: 'plans_and_pricing',
     plans,
     gaExperiments: Settings.gaExperiments.plansPage,
     gaOptimize: true,
+    itm_content: req.query && req.query.itm_content,
     recomendedCurrency: recommendedCurrency,
+    recommendedCurrency,
     planFeatures,
     groupPlans: GroupPlansData,
+    groupPlanModalOptions,
+    groupPlanModalDefaults,
   })
 }
 

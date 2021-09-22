@@ -248,10 +248,6 @@ App.controller(
 
     $scope.currencyCode = MultiCurrencyPricing.currencyCode
 
-    $scope.trial_len = 7
-
-    $scope.planQueryString = '_free_trial_7_days'
-
     $scope.ui = { view: 'monthly' }
 
     $scope.changeCurreny = function (e, newCurrency) {
@@ -265,7 +261,7 @@ App.controller(
       if (view === 'annual') {
         return 'collaborator-annual'
       } else {
-        return `collaborator${$scope.planQueryString}`
+        return `collaborator_free_trial_7_days`
       }
     }
 
@@ -274,7 +270,7 @@ App.controller(
       if (view === 'annual') {
         return 'paid-personal-annual'
       } else {
-        return `paid-personal${$scope.planQueryString}`
+        return `paid-personal_free_trial_7_days`
       }
     }
 

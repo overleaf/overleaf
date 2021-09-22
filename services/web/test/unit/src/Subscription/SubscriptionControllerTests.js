@@ -99,6 +99,17 @@ describe('SubscriptionController', function () {
           collaborator: 'COLLABORATORCODEHERE',
         },
       },
+      groupPlanModalOptions: {
+        plan_codes: [],
+        currencies: [
+          {
+            display: 'GBP (£)',
+            code: 'GBP',
+          },
+        ],
+        sizes: ['42'],
+        usages: [{ code: 'foo', display: 'Foo' }],
+      },
       apis: {
         recurly: {
           subdomain: 'sl',
@@ -120,8 +131,14 @@ describe('SubscriptionController', function () {
         getUser: sinon.stub().resolves(this.user),
       },
     }
+    this.SplitTestV2Hander = {
+      promises: {
+        getAssignmentForSession: sinon.stub().resolves({ variant: 'default' }),
+      },
+    }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
       requires: {
+        '../SplitTests/SplitTestV2Handler': this.SplitTestV2Hander,
         '../Authentication/SessionManager': this.SessionManager,
         './SubscriptionHandler': this.SubscriptionHandler,
         './PlansLocator': this.PlansLocator,
@@ -164,6 +181,80 @@ describe('SubscriptionController', function () {
       this.req.ip = '1234.3123.3131.333 313.133.445.666 653.5345.5345.534'
       return this.GeoIpLookup.promises.getCurrencyCode.resolves({
         currencyCode: this.stubbedCurrencyCode,
+      })
+    })
+
+    describe('splitTest', function () {
+      const cases = [
+        {
+          variant: 'default',
+          template: 'subscriptions/plans',
+        },
+        {
+          variant: 'de-ng',
+          template: 'subscriptions/plans-marketing',
+        },
+      ]
+      for (const { variant, template } of cases) {
+        describe(variant, function () {
+          beforeEach(function () {
+            const assignment = { variant }
+            this.SplitTestV2Hander.promises.getAssignmentForSession.resolves(
+              assignment
+            )
+          })
+          it(`should render template ${template}`, function (done) {
+            this.res.render = page => {
+              page.should.equal(template)
+              done()
+            }
+            this.SubscriptionController.plansPage(this.req, this.res)
+          })
+        })
+      }
+    })
+
+    describe('groupPlanModal data', function () {
+      it('should pass local currency if valid', function (done) {
+        this.res.render = (page, opts) => {
+          page.should.equal('subscriptions/plans')
+          opts.groupPlanModalDefaults.currency.should.equal('GBP')
+          done()
+        }
+        this.GeoIpLookup.promises.getCurrencyCode.resolves({
+          currencyCode: 'GBP',
+        })
+        this.SubscriptionController.plansPage(this.req, this.res)
+      })
+
+      it('should fallback to USD when valid', function (done) {
+        this.res.render = (page, opts) => {
+          page.should.equal('subscriptions/plans')
+          opts.groupPlanModalDefaults.currency.should.equal('USD')
+          done()
+        }
+        this.GeoIpLookup.promises.getCurrencyCode.resolves({
+          currencyCode: 'FOO',
+        })
+        this.SubscriptionController.plansPage(this.req, this.res)
+      })
+
+      it('should pass valid options for group plan modal and discard invalid', function (done) {
+        this.res.render = (page, opts) => {
+          page.should.equal('subscriptions/plans')
+          opts.groupPlanModalDefaults.size.should.equal('42')
+          opts.groupPlanModalDefaults.plan_code.should.equal('collaborator')
+          opts.groupPlanModalDefaults.currency.should.equal('GBP')
+          opts.groupPlanModalDefaults.usage.should.equal('foo')
+          done()
+        }
+        this.req.query = {
+          number: '42',
+          currency: 'ABC',
+          plan: 'does-not-exist',
+          usage: 'foo',
+        }
+        this.SubscriptionController.plansPage(this.req, this.res)
       })
     })
   })

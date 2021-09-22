@@ -300,6 +300,12 @@ module.exports = {
     personal: defaultFeatures,
   },
 
+  groupPlanModalOptions: {
+    plan_codes: [],
+    currencies: [],
+    sizes: [],
+    usages: [],
+  },
   plans: [
     {
       planCode: 'personal',
