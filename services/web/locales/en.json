@@ -1497,5 +1497,11 @@
   "share_thoughts_on_gallery": "Share your thoughts on the Overleaf Template Gallery!",
   "take_short_survey": "Take a short survey",
   "official": "Official",
-  "template_approved_by_publisher": "This template has been approved by the publisher"
+  "template_approved_by_publisher": "This template has been approved by the publisher",
+  "author": "Author",
+  "open_as_template": "Open as Template",
+  "view_source": "View Source",
+  "license": "License",
+  "abstract": "Abstract",
+  "tags": "Tags"
 }
