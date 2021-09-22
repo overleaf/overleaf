@@ -7,7 +7,7 @@
     "url": "http://github.com/sharelatex/logger-sharelatex.git"
   },
   "license": "AGPL-3.0-only",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "scripts": {
     "test": "mocha --grep=$MOCHA_GREP test/**/*.js",
     "format": "prettier-eslint $PWD'/**/*.js' --list-different",
@@ -18,9 +18,9 @@
   "dependencies": {
     "@google-cloud/logging-bunyan": "^3.1.0",
     "@overleaf/o-error": "^3.0.0",
+    "@sentry/node": "^6.13.2",
     "bunyan": "^1.8.14",
     "node-fetch": "^2.6.1",
-    "raven": "^2.6.4",
     "yn": "^4.0.0"
   },
   "devDependencies": {

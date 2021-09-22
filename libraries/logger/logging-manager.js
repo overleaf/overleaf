@@ -72,9 +72,9 @@ const Logger = (module.exports = {
     return res.text()
   },
 
-  initializeErrorReporting(sentryDsn, options) {
-    const raven = require('raven')
-    this.raven = new raven.Client(sentryDsn, options)
+  initializeErrorReporting(dsn, options) {
+    this.Sentry = require('@sentry/node')
+    this.Sentry.init({ dsn, ...options })
     this.lastErrorTimeStamp = 0 // for rate limiting on sentry reporting
     this.lastErrorCount = 0
   },
@@ -142,7 +142,7 @@ const Logger = (module.exports = {
         }
 
         // send the error to sentry
-        this.raven.captureException(error, { tags, extra, level })
+        this.Sentry.captureException(error, { tags, extra, level })
 
         // put a flag on the errors to avoid reporting them multiple times
         for (key in attributes) {
@@ -152,7 +152,7 @@ const Logger = (module.exports = {
           }
         }
       } catch (err) {
-        // ignore Raven errors
+        // ignore Sentry errors
       }
     }
   },
@@ -176,7 +176,7 @@ const Logger = (module.exports = {
       })
     }
     this.logger.error(attributes, message, ...Array.from(args))
-    if (this.raven != null) {
+    if (this.Sentry) {
       const MAX_ERRORS = 5 // maximum number of errors in 1 minute
       const now = new Date()
       // have we recently reported an error?
@@ -207,22 +207,10 @@ const Logger = (module.exports = {
     return this.logger.warn.apply(this.logger, arguments)
   },
 
-  fatal(attributes, message, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  fatal(attributes, message) {
     this.logger.fatal(attributes, message)
-    if (this.raven != null) {
-      var cb = function (e) {
-        // call the callback once after 'logged' or 'error' event
-        callback()
-        return (cb = function () {})
-      }
+    if (this.Sentry) {
       this.captureException(attributes, message, 'fatal')
-      this.raven.once('logged', cb)
-      return this.raven.once('error', cb)
-    } else {
-      return callback()
     }
   },
 
