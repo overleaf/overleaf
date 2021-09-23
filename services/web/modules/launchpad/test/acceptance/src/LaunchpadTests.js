@@ -37,9 +37,7 @@ describe('Launchpad', function () {
       },
     })
     expect(postResponse.statusCode).to.equal(200)
-    expect(postResponse.body.redir).to.equal('')
-    expect(postResponse.body.email).to.equal(adminEmail)
-    expect(postResponse.body.id).to.exist
+    expect(postResponse.body).to.deep.equal({ redir: '/launchpad' })
 
     // Try to load the page again
     const secondPageResponse = await user.request.get('/launchpad', {

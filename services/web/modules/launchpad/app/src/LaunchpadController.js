@@ -102,7 +102,9 @@ module.exports = LaunchpadController = {
     const { email } = req.body
     if (!email) {
       logger.log({}, 'no email address supplied')
-      return res.sendStatus(400)
+      return res.status(400).json({
+        message: 'no email address supplied',
+      })
     }
     logger.log({ email }, 'sending test email')
     const emailOptions = { to: email }
@@ -114,7 +116,7 @@ module.exports = LaunchpadController = {
         return next(err)
       }
       logger.log({ email }, 'sent test email')
-      return res.sendStatus(201)
+      res.json({ message: res.locals.translate('email_sent') })
     })
   },
 
@@ -245,19 +247,11 @@ module.exports = LaunchpadController = {
                 return next(err)
               }
 
-              AuthenticationController.setRedirectInSession(req, '/launchpad')
               logger.log(
                 { email, user_id: user._id },
                 'created first admin account'
               )
-              return res.json({
-                redir: '',
-                id: user._id.toString(),
-                first_name: user.first_name,
-                last_name: user.last_name,
-                email: user.email,
-                created: Date.now(),
-              })
+              res.json({ redir: '/launchpad' })
             }
           )
         }

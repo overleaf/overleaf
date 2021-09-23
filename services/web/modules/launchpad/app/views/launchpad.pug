@@ -1,24 +1,37 @@
-extends ../../../../app/views/layout
+extends ../../../../app/views/layout-marketing
+
+mixin launchpad-check(section)
+	div(data-ol-launchpad-check=section)
+		span(data-ol-inflight="pending")
+			i.fa.fa-fw.fa-spinner.fa-spin
+			span &nbsp;#{translate('checking')}
+	
+		span(hidden data-ol-inflight="idle")
+			div(data-ol-result="success")
+				i.fa.fa-check
+				span &nbsp;#{translate('ok')}
+				button.btn.btn-inline-link
+					span.text-danger &nbsp;#{translate('retry')}
+			div(hidden data-ol-result="error")
+				i.fa.fa-exclamation
+				span &nbsp;#{translate('error')}
+				button.btn.btn-inline-link
+					span.text-danger &nbsp;#{translate('retry')}
+				div.alert.alert-danger
+					span(data-ol-error)
+
+block vars
+	- entrypoint = 'modules/launchpad/pages/launchpad'
+	- metadata = metadata || {}
 
 block append meta
 	meta(name="ol-adminUserExists" data-type="boolean" content=adminUserExists)
 	meta(name="ol-ideJsPath" content=buildJsPath('ide.js'))
-	meta(name="ol-authMethod" content=authMethod)
 
 block content
 	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
 
-	style.
-		hr { margin-bottom: 5px; }
-		.status-check {
-			margin-bottom: 15px;
-		}
-		.alert { margin-top: 15px; margin-bottom: 15px; }
-		a small { cursor: pointer; color: #a93529; }
-		.launchpad-body img { width: 150px; margin-top: 15px; }
-
-
-	.content.content-alt(ng-controller="LaunchpadController")
+	.content.content-alt
 		.container(ng-cloak)
 			.row
 				.col-md-8.col-md-offset-2
@@ -36,191 +49,133 @@ block content
 
 
 								<!-- create first admin form -->
-								.row(ng-if="shouldShowAdminForm()")
-									.col-md-12
-										h2 #{translate('create_first_admin_account')}
+								if !adminUserExists
+									.row(data-ol-not-sent)
+										.col-md-12
+											h2 #{translate('create_first_admin_account')}
 
-										// Local Auth Form
-										div(ng-if="authMethod == 'local'")
-											form(async-form="register", name="registerForm", on-success="onCreateAdminSuccess"
-													on-error="onCreateAdminError"
-													action="/launchpad/register_admin", method="POST", ng-cloak)
-												input(name='_csrf', type='hidden', value=csrfToken)
-												form-messages(for="registerForm")
-												.form-group
-													label(for='email') #{translate("email")}
-													input.form-control(
-														type='email',
-														name='email',
-														placeholder="email@example.com"
-														required,
-														ng-model="email",
-														ng-model-options="{ updateOn: 'blur' }",
-														autofocus="true"
-													)
-													span.small.text-primary(ng-show="registerForm.email.$invalid && registerForm.email.$dirty")
-														| #{translate("must_be_email_address")}
-												.form-group
-													label(for='password') #{translate("password")}
-													input.form-control#passwordField(
-														type='password',
-														name='password',
-														placeholder="********",
-														required,
-														ng-model="password",
-														complex-password
-													)
-													span.small.text-primary(ng-show="registerForm.password.$error.complexPassword",
-																									ng-bind-html="complexPasswordErrorMessage")
-												.actions
-													button.btn-primary.btn(
-														type='submit'
-														ng-disabled="registerForm.inflight || registerForm.password.$error.required|| registerForm.password.$error.complexPassword || createAdminSuccess"
-													)
-														span(ng-show="!registerForm.inflight") #{translate("register")}
-														span(ng-show="registerForm.inflight") #{translate("registering")}…
+											// Local Auth Form
+											if authMethod === 'local'
+												form(
+													data-ol-async-form
+													data-ol-register-admin
+													action="/launchpad/register_admin"
+													method="POST"
+												)
+													input(name='_csrf', type='hidden', value=csrfToken)
+													div(data-ol-form-messages)
+													.form-group
+														label(for='email') #{translate("email")}
+														input.form-control(
+															type='email',
+															name='email',
+															placeholder="email@example.com"
+															required,
+															autofocus="true"
+														)
+													.form-group
+														label(for='password') #{translate("password")}
+														input.form-control#passwordField(
+															type='password',
+															name='password',
+															placeholder="********",
+															required,
+														)
+													.actions
+														button.btn-primary.btn(
+															type='submit'
+															data-ol-disabled-inflight
+														)
+															span(data-ol-inflight="idle") #{translate("register")}
+															span(hidden data-ol-inflight="pending") #{translate("registering")}…
 
-										// Ldap Form
-										div(ng-if="authMethod == 'ldap'")
-											h3 #{translate('ldap')}
-											p
-												| #{translate('ldap_create_admin_instructions')}
+											// Ldap Form
+											if authMethod === 'ldap'
+												h3 #{translate('ldap')}
+												p
+													| #{translate('ldap_create_admin_instructions')}
 
-											form(async-form="register", name="registerLdapForm", on-success="onCreateAdminSuccess"
-													on-error="onCreateAdminError"
-													action="/launchpad/register_ldap_admin", method="POST", ng-cloak)
-												input(name='_csrf', type='hidden', value=csrfToken)
-												form-messages(for="registerLdapForm")
-												.form-group
-													label(for='email') #{translate("email")}
-													input.form-control(
-														type='email',
-														name='email',
-														placeholder="email@example.com"
-														required,
-														ng-model="email",
-														ng-model-options="{ updateOn: 'blur' }",
-														autofocus="true"
-													)
-													span.small.text-primary(ng-show="registerLdapForm.email.$invalid && registerLdapForm.email.$dirty")
-														| #{translate("must_be_email_address")}
-												.actions
-													button.btn-primary.btn(
-														type='submit'
-														ng-disabled="registerLdapForm.inflight || registerLdapForm.password.$error.required|| registerLdapForm.password.$error.complexPassword || createAdminSuccess"
-													)
-														span(ng-show="!registerLdapForm.inflight") #{translate("register")}
-														span(ng-show="registerLdapForm.inflight") #{translate("registering")}…
+												form(
+													data-ol-async-form
+													data-ol-register-admin
+													action="/launchpad/register_ldap_admin"
+													method="POST"
+												)
+													input(name='_csrf', type='hidden', value=csrfToken)
+													div(data-ol-form-messages)
+													.form-group
+														label(for='email') #{translate("email")}
+														input.form-control(
+															type='email',
+															name='email',
+															placeholder="email@example.com"
+															required,
+															autofocus="true"
+														)
+													.actions
+														button.btn-primary.btn(
+															type='submit'
+															data-ol-disabled-inflight
+														)
+															span(data-ol-inflight="idle") #{translate("register")}
+															span(hidden data-ol-inflight="pending") #{translate("registering")}…
 
+											// Saml Form
+											if authMethod === 'saml'
+												h3 #{translate('saml')}
+												p
+													| #{translate('saml_create_admin_instructions')}
 
-										// Saml Form
-										div(ng-if="authMethod == 'saml'")
-											h3 #{translate('saml')}
-											p
-												| #{translate('saml_create_admin_instructions')}
+												form(
+													data-ol-async-form
+													data-ol-register-admin
+													action="/launchpad/register_saml_admin"
+													method="POST"
+												)
+													input(name='_csrf', type='hidden', value=csrfToken)
+													div(data-ol-form-messages)
+													.form-group
+														label(for='email') #{translate("email")}
+														input.form-control(
+															type='email',
+															name='email',
+															placeholder="email@example.com"
+															required,
+															autofocus="true"
+														)
+													.actions
+														button.btn-primary.btn(
+															type='submit'
+															data-ol-disabled-inflight
+														)
+															span(data-ol-inflight="idle") #{translate("register")}
+															span(hidden data-ol-inflight="pending") #{translate("registering")}…
 
-											form(async-form="register", name="registerSamlForm", on-success="onCreateAdminSuccess"
-													on-error="onCreateAdminError"
-													action="/launchpad/register_saml_admin", method="POST", ng-cloak)
-												input(name='_csrf', type='hidden', value=csrfToken)
-												form-messages(for="registerSamlForm")
-												.form-group
-													label(for='email') #{translate("email")}
-													input.form-control(
-														type='email',
-														name='email',
-														placeholder="email@example.com"
-														required,
-														ng-model="email",
-														ng-model-options="{ updateOn: 'blur' }",
-														autofocus="true"
-													)
-													span.small.text-primary(ng-show="registerSamlForm.email.$invalid && registerSamlForm.email.$dirty")
-														| #{translate("must_be_email_address")}
-												.actions
-													button.btn-primary.btn(
-														type='submit'
-														ng-disabled="registerSamlForm.inflight || registerSamlForm.password.$error.required|| registerSamlForm.password.$error.complexPassword || createAdminSuccess"
-													)
-														span(ng-show="!registerSamlForm.inflight") #{translate("register")}
-														span(ng-show="registerSamlForm.inflight") #{translate("registering")}…
+									br
 
-
-										<!-- success message -->
-										.row(ng-if="createAdminSuccess")
-											.col-md-12.text-center
-												.alert.alert-success
-													| !{translate('admin_user_created_message', {link: '/login?redir=/launchpad'})}
-
-										<!-- error message -->
-										.row(ng-if="createAdminError")
-											.col-md-12.text-center
-												.alert.alert-danger
-													| #{translate('generic_something_went_wrong')}
-
-										br
-
-									<!-- status indicators -->
-								div(ng-if="!shouldShowAdminForm()")
+								<!-- status indicators -->
+								if adminUserExists
 									.row
 										.col-md-12.status-indicators
 
 											h2 #{translate('status_checks')}
 
 											<!-- ide js -->
-											.row.status-check
+											.row.row-spaced-small
 												.col-sm-5
 													| #{translate('editor_resources')}
 												.col-sm-7
-													div(ng-switch="statusChecks.ideJs.status")
-
-														span(ng-switch-when="inflight")
-															i.fa.fa-fw.fa-spinner.fa-spin
-															span &nbsp;#{translate('checking')}
-
-														span(ng-switch-when="ok")
-															i.fa.fa-check
-															span &nbsp;#{translate('ok')}
-															a(ng-click="tryFetchIdeJs()")
-																small &nbsp;#{translate('retry')}
-
-														span(ng-switch-when="error")
-															i.fa.fa-exclamation
-															span &nbsp;#{translate('error')}
-															a(ng-click="tryFetchIdeJs()")
-																small &nbsp;#{translate('retry')}
-															div.alert.alert-danger
-																| {{ statusChecks.ideJs.error }}
-
+													+launchpad-check('ide')
 
 											<!-- websocket -->
-											.row.status-check
+											.row.row-spaced-small
 												.col-sm-5
 													| #{translate('websockets')}
 												.col-sm-7
-													div(ng-switch="statusChecks.websocket.status")
-
-														span(ng-switch-when="inflight")
-															i.fa.fa-fw.fa-spinner.fa-spin
-															span &nbsp;#{translate('checking')}
-
-														span(ng-switch-when="ok")
-															i.fa.fa-check
-															span &nbsp;#{translate('ok')}
-															a(ng-click="tryOpenWebSocket()")
-																small &nbsp;#{translate('retry')}
-
-														span(ng-switch-when="error")
-															i.fa.fa-exclamation
-															span &nbsp;#{translate('error')}
-															a(ng-click="tryOpenWebSocket()")
-																small &nbsp;#{translate('retry')}
-															div.alert.alert-danger
-																| {{ statusChecks.websocket.error }}
-
+													+launchpad-check('websocket')
 
 									<!-- break -->
-									hr
+									hr.thin
 
 									<!-- other actions -->
 									.row
@@ -228,26 +183,33 @@ block content
 											h2 #{translate('other_actions')}
 
 											h3 #{translate('send_test_email')}
-											form.form
+											form.form(
+												data-ol-async-form
+												action="/launchpad/send_test_email"
+												method="POST"
+											)
 												.form-group
-													label(for="emailInput") Email
-													input(type="text", name="emailInput" ng-model="testEmail.emailAddress").form-control
-												button(ng-click="sendTestEmail()", ng-disabled="testEmail.inflight").btn.btn-primary
-													span(ng-show="!testEmail.inflight") #{translate("send")}
-													span(ng-show="testEmail.inflight") #{translate("sending")}…
-											div(ng-if="testEmail.status == 'ok'")
-												.alert.alert-success
-													| #{translate('email_sent')}
-											div(ng-if="testEmail.status == 'error'")
-												.alert.alert-danger
-													| #{translate('generic_something_went_wrong')}
+													label(for="email") Email
+													input.form-control(
+														type="text"
+														id="email"
+														name="email"
+														required
+													)
+												button.btn-primary.btn(
+													type='submit'
+													data-ol-disabled-inflight
+												)
+													span(data-ol-inflight="idle") #{translate("send")}
+													span(hidden data-ol-inflight="pending") #{translate("sending")}…
 
-
+												p
+													div(data-ol-form-messages)
 
 
 
 									<!-- break -->
-									hr
+									hr.thin
 
 
 									<!-- Go to app -->

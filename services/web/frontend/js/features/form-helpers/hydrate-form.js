@@ -146,7 +146,7 @@ function formSentHelper(el) {
   })
 }
 
-function toggleDisplay(hide, show) {
+export function toggleDisplay(hide, show) {
   hide.forEach(el => {
     el.hidden = true
   })

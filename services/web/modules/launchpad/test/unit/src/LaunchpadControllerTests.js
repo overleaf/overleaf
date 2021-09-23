@@ -53,9 +53,16 @@ describe('LaunchpadController', function () {
     this.res = {
       render: sinon.stub(),
       redirect: sinon.stub(),
+      json: sinon.stub(),
       send: sinon.stub(),
       sendStatus: sinon.stub(),
+      locals: {
+        translate(key) {
+          return key
+        },
+      },
     }
+    this.res.status = sinon.stub().returns(this.res)
 
     return (this.next = sinon.stub())
   })
@@ -252,10 +259,13 @@ describe('LaunchpadController', function () {
       return (this.next = sinon.stub())
     })
 
-    it('should produce a 201 response', function () {
+    it('should produce a 200 response', function () {
       this.LaunchpadController.sendTestEmail(this.req, this.res, this.next)
-      this.res.sendStatus.callCount.should.equal(1)
-      return this.res.sendStatus.calledWith(201).should.equal(true)
+      this.res.json
+        .calledWith({
+          message: 'email_sent',
+        })
+        .should.equal(true)
     })
 
     it('should not call next with an error', function () {
@@ -292,8 +302,12 @@ describe('LaunchpadController', function () {
 
       it('should produce a 400 response', function () {
         this.LaunchpadController.sendTestEmail(this.req, this.res, this.next)
-        this.res.sendStatus.callCount.should.equal(1)
-        return this.res.sendStatus.calledWith(400).should.equal(true)
+        this.res.status.calledWith(400).should.equal(true)
+        this.res.json
+          .calledWith({
+            message: 'no email address supplied',
+          })
+          .should.equal(true)
       })
     })
   })
@@ -337,7 +351,7 @@ describe('LaunchpadController', function () {
 
       it('should send back a json response', function () {
         this.res.json.callCount.should.equal(1)
-        return expect(this.res.json.lastCall.args[0].email).to.equal(this.email)
+        expect(this.res.json).to.have.been.calledWith({ redir: '/launchpad' })
       })
 
       it('should have checked for existing admins', function () {
@@ -363,15 +377,6 @@ describe('LaunchpadController', function () {
               },
             }
           )
-          .should.equal(true)
-      })
-
-      it('should have set a redirect in session', function () {
-        this.AuthenticationController.setRedirectInSession.callCount.should.equal(
-          1
-        )
-        return this.AuthenticationController.setRedirectInSession
-          .calledWith(this.req, '/launchpad')
           .should.equal(true)
       })
     })
@@ -648,7 +653,7 @@ describe('LaunchpadController', function () {
 
       it('should send back a json response', function () {
         this.res.json.callCount.should.equal(1)
-        return expect(this.res.json.lastCall.args[0].email).to.equal(this.email)
+        expect(this.res.json).to.have.been.calledWith({ redir: '/launchpad' })
       })
 
       it('should have checked for existing admins', function () {
@@ -673,15 +678,6 @@ describe('LaunchpadController', function () {
               },
             }
           )
-          .should.equal(true)
-      })
-
-      it('should have set a redirect in session', function () {
-        this.AuthenticationController.setRedirectInSession.callCount.should.equal(
-          1
-        )
-        return this.AuthenticationController.setRedirectInSession
-          .calledWith(this.req, '/launchpad')
           .should.equal(true)
       })
     })
