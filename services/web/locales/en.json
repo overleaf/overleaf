@@ -1113,6 +1113,7 @@
   "support_lots_of_features": "We support almost all LaTeX features, including inserting images, bibliographies, equations, and much more! Read about all the exciting things you can do with __appName__ in our <0>__help_guides_link__</0>",
   "latex_guides": "LaTeX guides",
   "reset_password": "Reset Password",
+  "request_new_password_reset_email": "Request a new password reset email",
   "set_password": "Set Password",
   "updating_site": "Updating Site",
   "bonus_please_recommend_us": "Bonus - Please recommend us",

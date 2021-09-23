@@ -22,7 +22,9 @@ describe('PasswordResetController', function () {
         password: this.password,
       },
       i18n: {
-        translate() {},
+        translate() {
+          return '.'
+        },
       },
       session: {},
       query: {},
@@ -174,8 +176,12 @@ describe('PasswordResetController', function () {
         reset: false,
         userId: this.user_id,
       })
-      this.res.sendStatus = code => {
+      this.res.status = code => {
         code.should.equal(404)
+        return this.res
+      }
+      this.res.json = data => {
+        data.message.key.should.equal('token-expired')
         done()
       }
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
@@ -187,8 +193,12 @@ describe('PasswordResetController', function () {
         reset: false,
         userId: this.user_id,
       })
-      this.res.sendStatus = code => {
+      this.res.status = code => {
         code.should.equal(500)
+        return this.res
+      }
+      this.res.json = data => {
+        expect(data.message).to.exist
         done()
       }
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
@@ -196,8 +206,12 @@ describe('PasswordResetController', function () {
 
     it('should return 400 (Bad Request) if there is no password', function (done) {
       this.req.body.password = ''
-      this.res.sendStatus = code => {
+      this.res.status = code => {
         code.should.equal(400)
+        return this.res
+      }
+      this.res.json = data => {
+        data.message.key.should.equal('invalid-password')
         this.PasswordResetHandler.promises.setNewUserPassword.called.should.equal(
           false
         )
@@ -208,8 +222,12 @@ describe('PasswordResetController', function () {
 
     it('should return 400 (Bad Request) if there is no passwordResetToken', function (done) {
       this.req.body.passwordResetToken = ''
-      this.res.sendStatus = code => {
+      this.res.status = code => {
         code.should.equal(400)
+        return this.res
+      }
+      this.res.json = data => {
+        data.message.key.should.equal('invalid-password')
         this.PasswordResetHandler.promises.setNewUserPassword.called.should.equal(
           false
         )
@@ -223,8 +241,12 @@ describe('PasswordResetController', function () {
       const err = new Error('bad')
       err.name = 'InvalidPasswordError'
       this.PasswordResetHandler.promises.setNewUserPassword.rejects(err)
-      this.res.sendStatus = code => {
+      this.res.status = code => {
         code.should.equal(400)
+        return this.res
+      }
+      this.res.json = data => {
+        data.message.key.should.equal('invalid-password')
         this.PasswordResetHandler.promises.setNewUserPassword.called.should.equal(
           true
         )
@@ -265,8 +287,12 @@ describe('PasswordResetController', function () {
         const anError = new Error('oops')
         anError.name = 'NotFoundError'
         this.PasswordResetHandler.promises.setNewUserPassword.rejects(anError)
-        this.res.sendStatus = code => {
+        this.res.status = code => {
           code.should.equal(404)
+          return this.res
+        }
+        this.res.json = data => {
+          data.message.key.should.equal('token-expired')
           done()
         }
         this.PasswordResetController.setNewUserPassword(this.req, this.res)
@@ -275,8 +301,12 @@ describe('PasswordResetController', function () {
         const anError = new Error('oops')
         anError.name = 'InvalidPasswordError'
         this.PasswordResetHandler.promises.setNewUserPassword.rejects(anError)
-        this.res.sendStatus = code => {
+        this.res.status = code => {
           code.should.equal(400)
+          return this.res
+        }
+        this.res.json = data => {
+          data.message.key.should.equal('invalid-password')
           done()
         }
         this.PasswordResetController.setNewUserPassword(this.req, this.res)
@@ -284,6 +314,14 @@ describe('PasswordResetController', function () {
       it('should return 500 for other errors', function (done) {
         const anError = new Error('oops')
         this.PasswordResetHandler.promises.setNewUserPassword.rejects(anError)
+        this.res.status = code => {
+          code.should.equal(500)
+          return this.res
+        }
+        this.res.json = data => {
+          expect(data.message).to.exist
+          done()
+        }
         this.res.sendStatus = code => {
           code.should.equal(500)
           done()
