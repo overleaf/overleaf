@@ -8,7 +8,11 @@ module.exports = {
   apply(app) {
     app.get(
       '/project/new/template/:Template_version_id',
-      AnalyticsRegistrationSourceMiddleware.setSource('template'),
+      (req, res, next) =>
+        AnalyticsRegistrationSourceMiddleware.setSource(
+          'template',
+          req.params.Template_version_id
+        )(req, res, next),
       TemplatesMiddleware.saveTemplateDataInSession,
       AuthenticationController.requireLogin(),
       TemplatesController.getV1Template,

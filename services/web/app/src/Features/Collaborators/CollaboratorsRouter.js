@@ -113,7 +113,10 @@ module.exports = {
 
     webRouter.get(
       '/project/:Project_id/invite/token/:token',
-      AnalyticsRegistrationSourceMiddleware.setSource('project-invite'),
+      AnalyticsRegistrationSourceMiddleware.setSource(
+        'collaboration',
+        'project-invite'
+      ),
       AuthenticationController.requireLogin(),
       CollaboratorsInviteController.viewInvite,
       AnalyticsRegistrationSourceMiddleware.clearSource()
@@ -121,7 +124,10 @@ module.exports = {
 
     webRouter.post(
       '/project/:Project_id/invite/token/:token/accept',
-      AnalyticsRegistrationSourceMiddleware.setSource('project-invite'),
+      AnalyticsRegistrationSourceMiddleware.setSource(
+        'collaboration',
+        'project-invite'
+      ),
       AuthenticationController.requireLogin(),
       CollaboratorsInviteController.acceptInvite,
       AnalyticsRegistrationSourceMiddleware.clearSource()

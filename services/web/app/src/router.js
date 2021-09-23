@@ -1137,7 +1137,10 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       maxRequests: 15,
       timeInterval: 60,
     }),
-    AnalyticsRegistrationSourceMiddleware.setSource('link-sharing'),
+    AnalyticsRegistrationSourceMiddleware.setSource(
+      'collaboration',
+      'link-sharing'
+    ),
     TokenAccessController.tokenAccessPage,
     AnalyticsRegistrationSourceMiddleware.clearSource()
   )
@@ -1149,7 +1152,10 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       maxRequests: 15,
       timeInterval: 60,
     }),
-    AnalyticsRegistrationSourceMiddleware.setSource('link-sharing'),
+    AnalyticsRegistrationSourceMiddleware.setSource(
+      'collaboration',
+      'link-sharing'
+    ),
     TokenAccessController.tokenAccessPage,
     AnalyticsRegistrationSourceMiddleware.clearSource()
   )
