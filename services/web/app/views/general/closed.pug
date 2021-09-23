@@ -1,4 +1,4 @@
-extends ../layout
+extends ../layout-marketing
 
 block content
 	main.content#main-content
@@ -10,7 +10,7 @@ block content
 					p(ng-non-bindable)
 						if settings.statusPageUrl
 							| #{settings.appName} is currently down for maintenance.
-							| Please check our #[a(href='http://' + settings.statusPageUrl) status page]
+							| Please check our #[a(href='https://' + settings.statusPageUrl) status page]
 							| for updates.
 						else
 							| #{settings.appName} is currently down for maintenance.
