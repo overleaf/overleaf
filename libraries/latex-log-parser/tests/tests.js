@@ -9,6 +9,7 @@ define([
   'text!logs/geometry-warnings.log',
   'text!logs/caption-warnings.log',
   'text!logs/runaway-arguments.log',
+  'text!logs/filenames.log',
   'text!logs/file-line-error.log',
   'text!logs/biber.blg',
   'text!logs/bibtex.blg',
@@ -23,6 +24,7 @@ define([
   geometryWarningsLog,
   captionWarningsLog,
   runawayArgumentsLog,
+  filenamesLog,
   fileLineErrorLog,
   biberBlg,
   bibtexBlg
@@ -346,6 +348,76 @@ define([
         ok(true, 'Found error: ' + errors[i].message)
       } else {
         ok(false, 'Unexpected error found: ' + errors[i].message)
+      }
+    }
+  })
+
+  module('Filename Errors')
+
+  test('Filename parsing', function () {
+    var { errors, warnings, typesetting } = LatexParser.parse(filenamesLog)
+
+    var expectedErrors = [
+      [
+        1,
+        'Undefined control sequence.',
+        '/compile/a folder with spaces/a subfolder with spaces/a subsubfolder with spaces/another file with spaces.tex',
+      ] + '',
+    ]
+
+    var expectedWarnings = [
+      [
+        9,
+        "Citation `Peeters:2001np' on page 13 undefined on input line 9.",
+        '/compile/main',
+      ] + '',
+    ]
+
+    var expectedTypesetting = [
+      [
+        123,
+        'Overfull \\hbox (4.56pt too wide) in paragraph at lines 123--456',
+        '/compile/otherfile',
+      ] + '',
+    ]
+
+    expect(
+      expectedErrors.length +
+        expectedWarnings.length +
+        expectedTypesetting.length
+    )
+    for (var i = 0; i < errors.length; i++) {
+      if (
+        expectedErrors.indexOf(
+          [errors[i].line, errors[i].message, errors[i].file] + ''
+        ) > -1
+      ) {
+        ok(true, 'Found error: ' + errors[i].message)
+      } else {
+        ok(false, 'Unexpected error found: ' + errors[i].message)
+      }
+    }
+    for (var i = 0; i < warnings.length; i++) {
+      if (
+        expectedWarnings.indexOf(
+          [warnings[i].line, warnings[i].message, warnings[i].file] + ''
+        ) > -1
+      ) {
+        ok(true, 'Found error: ' + warnings[i].message)
+      } else {
+        ok(false, 'Unexpected error found: ' + warnings[i].message)
+      }
+    }
+    for (var i = 0; i < typesetting.length; i++) {
+      if (
+        expectedTypesetting.indexOf(
+          [typesetting[i].line, typesetting[i].message, typesetting[i].file] +
+            ''
+        ) > -1
+      ) {
+        ok(true, 'Found error: ' + typesetting[i].message)
+      } else {
+        ok(false, 'Unexpected error found: ' + typesetting[i].message)
       }
     }
   })

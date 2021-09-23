@@ -307,13 +307,35 @@ define(function () {
 
     this.consumeFilePath = function () {
       // Our heuristic for detecting file names are rather crude
-      // A file may not contain a space, or ) in it
+      // A file may not contain a ')' in it
       // To be a file path it must have at least one /
-      if (!this.currentLine.match(/^\/?([^ \)]+\/)+/)) {
+      if (!this.currentLine.match(/^\/?([^ )]+\/)+/)) {
         return false
       }
-      const endOfFilePath = this.currentLine.search(RegExp(' |\\)'))
-      let path = undefined
+
+      let endOfFilePath = this.currentLine.search(/ |\)/)
+
+      // handle the case where there is a space in a filename
+      while (endOfFilePath !== -1 && this.currentLine[endOfFilePath] === ' ') {
+        const partialPath = this.currentLine.slice(0, endOfFilePath)
+        // consider the file matching done if the space is preceded by a file extension (e.g. ".tex")
+        if (/\.\w+$/.test(partialPath)) {
+          break
+        }
+        // advance to next space or ) or end of line
+        const remainingPath = this.currentLine.slice(endOfFilePath + 1)
+        // consider file matching done if current path is followed by any of "()[]
+        if (/^\s*["()[\]]/.test(remainingPath)) {
+          break
+        }
+        const nextEndOfPath = remainingPath.search(/[ "()[\]]/)
+        if (nextEndOfPath === -1) {
+          endOfFilePath = -1
+        } else {
+          endOfFilePath += nextEndOfPath + 1
+        }
+      }
+      let path
       if (endOfFilePath === -1) {
         path = this.currentLine
         this.currentLine = ''
