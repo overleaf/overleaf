@@ -3,18 +3,23 @@ import localStorage from '../../infrastructure/local-storage'
 
 function usePersistedState(key, defaultValue) {
   const [value, setValue] = useState(() => {
-    const keyExists = localStorage.getItem(key) != null
-    return keyExists ? localStorage.getItem(key) : defaultValue
+    return localStorage.getItem(key) ?? defaultValue
   })
 
   const updateFunction = useCallback(
     newValue => {
-      if (newValue === defaultValue) {
-        localStorage.removeItem(key)
-      } else {
-        localStorage.setItem(key, newValue)
-      }
-      setValue(newValue)
+      setValue(value => {
+        const actualNewValue =
+          typeof newValue === 'function' ? newValue(value) : newValue
+
+        if (actualNewValue === defaultValue) {
+          localStorage.removeItem(key)
+        } else {
+          localStorage.setItem(key, actualNewValue)
+        }
+
+        return actualNewValue
+      })
     },
     [key, defaultValue]
   )
