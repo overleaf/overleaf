@@ -1,7 +1,4 @@
-extends ../../../../../app/views/layout
-
-block append meta
-	meta(name="ol-passwordStrengthOptions" data-type="json" content=settings.passwordStrengthOptions)
+extends ../../../../../app/views/layout-marketing
 
 block content
 	main.content.content-alt#main-content
@@ -15,31 +12,45 @@ block content
 						.page-header
 							h1 #{translate("please_set_a_password")}
 						form(
-							async-form="activate",
+							data-ol-async-form
 							name="activationForm",
 							action="/user/password/set",
 							method="POST",
-							ng-cloak
 						)
+							div(data-ol-form-messages)
+
+							div.alert.alert-danger(
+								hidden
+								role="alert"
+								aria-live="assertive"
+								data-ol-custom-form-message='token-expired'
+							)
+								| #{translate("activation_token_expired")}
+
+							div.alert.alert-danger(
+								hidden
+								role="alert"
+								aria-live="assertive"
+								data-ol-custom-form-message='invalid-password'
+							)
+								| #{translate('invalid_password')}
+
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(
 								type="hidden",
 								name="passwordResetToken",
 								value=token
-								ng-non-bindable
 							)
-							.alert.alert-danger(ng-show="activationForm.response.error")
-								| #{translate("activation_token_expired")}
 
 							.form-group
 								label(for='email') #{translate("email")}
 								input.form-control(
+									aria-label="email",
 									type='email',
 									name='email',
-									placeholder="email@example.com"
+									placeholder="email@example.com",
+									value=email
 									required,
-									ng-model="email",
-									ng-model-options="{ updateOn: 'blur' }",
 									disabled
 								)
 							.form-group
@@ -48,16 +59,19 @@ block content
 									type='password',
 									name='password',
 									placeholder="********",
+									autocomplete="new-password",
+									autofocus,
 									required,
-									ng-model="password",
-									complex-password,
-									autofocus="true"
+									minlength=settings.passwordStrengthOptions.length.min,
+									maxlength=settings.passwordStrengthOptions.length.max
 								)
-								span.small.text-primary(ng-show="activationForm.password.$error.complexPassword", ng-bind-html="complexPasswordErrorMessage")
 							.actions
-								button.btn-primary.btn(
-									type='submit'
-									ng-disabled="activationForm.inflight || activationForm.password.$error.required|| activationForm.password.$error.complexPassword"
+								button.btn.btn-primary(
+									type='submit',
+									data-ol-disabled-inflight
+									aria-label=translate('activate')
 								)
-									span(ng-show="!activationForm.inflight") #{translate("activate")}
-									span(ng-show="activationForm.inflight") #{translate("activating")}…
+									span(data-ol-inflight="idle")
+										| #{translate('activate')}
+									span(hidden data-ol-inflight="pending")
+										| #{translate('activating')}…
