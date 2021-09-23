@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import PreviewDownloadButton from './preview-download-button'
 import PreviewRecompileButton from './preview-recompile-button'
 import PreviewLogsToggleButton from './preview-logs-toggle-button'
-import useResizeObserver from '../../../shared/hooks/use-resize-observer'
+import useResizeObserver from '../hooks/use-resize-observer'
 import Icon from '../../../shared/components/icon'
 
 function _getElementWidth(element) {
