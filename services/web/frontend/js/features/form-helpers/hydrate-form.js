@@ -36,7 +36,7 @@ function formSubmitHelper(formEl) {
       if (data.message) {
         messageBag.push({
           type: 'message',
-          text: data.message,
+          text: data.message.text || data.message,
         })
       }
     } catch (error) {
