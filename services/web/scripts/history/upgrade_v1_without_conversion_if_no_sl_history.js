@@ -37,7 +37,7 @@ async function processProject(project) {
 
 async function doUpgradeForV1WithoutConversion(project) {
   if (!DRY_RUN) {
-    db.projects.updateOne(
+    await db.projects.updateOne(
       { _id: project._id },
       {
         $set: {

@@ -70,7 +70,7 @@ async function doUpgradeForV1WithoutConversion(project, allowDowngrade) {
     setProperties['overleaf.history.allowDowngrade'] = true
   }
   if (!DRY_RUN) {
-    db.projects.updateOne(
+    await db.projects.updateOne(
       { _id: project._id },
       {
         $set: setProperties,
