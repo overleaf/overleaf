@@ -26,10 +26,10 @@ describe('FSPersistorTests', function () {
     readStream = {
       name: 'readStream',
       on: sinon.stub().yields(),
-      pipe: sinon.stub()
+      pipe: sinon.stub(),
     }
     uuid = {
-      v1: () => randomNumber
+      v1: () => randomNumber,
     }
     tempFile = `/tmp/${randomNumber}`
     fs = {
@@ -37,21 +37,21 @@ describe('FSPersistorTests', function () {
       createWriteStream: sinon.stub().returns(writeStream),
       unlink: sinon.stub().yields(),
       open: sinon.stub().yields(null, fd),
-      stat: sinon.stub().yields(null, stat)
+      stat: sinon.stub().yields(null, stat),
     }
     glob = sinon.stub().yields(null, globs)
     stream = {
       pipeline: sinon.stub().yields(),
-      Transform: StreamModule.Transform
+      Transform: StreamModule.Transform,
     }
     Hash = {
       end: sinon.stub(),
       read: sinon.stub().returns(md5),
       digest: sinon.stub().returns(md5),
-      setEncoding: sinon.stub()
+      setEncoding: sinon.stub(),
     }
     crypto = {
-      createHash: sinon.stub().returns(Hash)
+      createHash: sinon.stub().returns(Hash),
     }
     FSPersistor = new (SandboxedModule.require(modulePath, {
       requires: {
@@ -60,11 +60,11 @@ describe('FSPersistorTests', function () {
         glob,
         stream,
         crypto,
-        'node-uuid': uuid,
+        uuid: uuid,
         // imported by PersistorHelper but otherwise unused here
-        'logger-sharelatex': {}
+        'logger-sharelatex': {},
       },
-      globals: { console }
+      globals: { console },
     }))({ paths: { uploadFolder: '/tmp' } })
   })
 
@@ -114,7 +114,7 @@ describe('FSPersistorTests', function () {
       it('should return a write error', async function () {
         await expect(
           FSPersistor.sendStream(location, files[0], remoteStream, {
-            sourceMd5: '00000000'
+            sourceMd5: '00000000',
           })
         )
           .to.eventually.be.rejected.and.be.an.instanceOf(Errors.WriteError)
@@ -124,7 +124,7 @@ describe('FSPersistorTests', function () {
       it('deletes the copied file', async function () {
         try {
           await FSPersistor.sendStream(location, files[0], remoteStream, {
-            sourceMd5: '00000000'
+            sourceMd5: '00000000',
           })
         } catch (_) {}
         expect(fs.unlink).to.have.been.calledWith(
@@ -145,12 +145,12 @@ describe('FSPersistorTests', function () {
     it('should pass the options to createReadStream', async function () {
       await FSPersistor.getObjectStream(location, files[0], {
         start: 0,
-        end: 8
+        end: 8,
       })
       expect(fs.createReadStream).to.have.been.calledWith(null, {
         start: 0,
         end: 8,
-        fd
+        fd,
       })
     })
 

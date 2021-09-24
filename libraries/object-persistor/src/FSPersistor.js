@@ -1,6 +1,6 @@
 const fs = require('fs')
 const glob = require('glob')
-const uuid = require('node-uuid')
+const uuid = require('uuid')
 const path = require('path')
 const Stream = require('stream')
 const { promisify } = require('util')

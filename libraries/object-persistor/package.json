@@ -1,6 +1,6 @@
 {
   "name": "@overleaf/object-persistor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Module for storing objects in multiple backends, with fallback on 404 to assist migration between them",
   "main": "index.js",
   "scripts": {
@@ -24,9 +24,9 @@
     "fast-crc32c": "^2.0.0",
     "glob": "^7.1.6",
     "logger-sharelatex": "^2.1.1",
-    "node-uuid": "^1.4.8",
     "range-parser": "^1.2.1",
-    "tiny-async-pool": "^1.1.0"
+    "tiny-async-pool": "^1.1.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",
