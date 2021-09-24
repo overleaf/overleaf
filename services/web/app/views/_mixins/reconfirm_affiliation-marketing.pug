@@ -5,7 +5,7 @@ mixin reconfirmAffiliationNotification-marketing(userEmail, location)
 	)
 		input(name="_csrf" type="hidden" value=csrfToken)
 		input(name="email" type="hidden" value=userEmail.email)
-		div(data-ol-form-messages)
+		+formMessages()
 
 		.reconfirm-notification
 			div(data-ol-not-sent style="width:100%;")

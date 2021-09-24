@@ -17,22 +17,12 @@ block content
 							action="/user/password/set",
 							method="POST",
 						)
-							div(data-ol-form-messages)
+							+formMessages()
 
-							div.alert.alert-danger(
-								hidden
-								role="alert"
-								aria-live="assertive"
-								data-ol-custom-form-message='token-expired'
-							)
+							+customFormMessage('token-expired', 'danger')
 								| #{translate("activation_token_expired")}
 
-							div.alert.alert-danger(
-								hidden
-								role="alert"
-								aria-live="assertive"
-								data-ol-custom-form-message='invalid-password'
-							)
+							+customFormMessage('invalid-password', 'danger')
 								| #{translate('invalid_password')}
 
 							input(name='_csrf', type='hidden', value=csrfToken)

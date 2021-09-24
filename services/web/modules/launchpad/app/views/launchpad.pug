@@ -63,7 +63,7 @@ block content
 													method="POST"
 												)
 													input(name='_csrf', type='hidden', value=csrfToken)
-													div(data-ol-form-messages)
+													+formMessages()
 													.form-group
 														label(for='email') #{translate("email")}
 														input.form-control(
@@ -102,7 +102,7 @@ block content
 													method="POST"
 												)
 													input(name='_csrf', type='hidden', value=csrfToken)
-													div(data-ol-form-messages)
+													+formMessages()
 													.form-group
 														label(for='email') #{translate("email")}
 														input.form-control(
@@ -133,7 +133,7 @@ block content
 													method="POST"
 												)
 													input(name='_csrf', type='hidden', value=csrfToken)
-													div(data-ol-form-messages)
+													+formMessages()
 													.form-group
 														label(for='email') #{translate("email")}
 														input.form-control(
@@ -204,7 +204,7 @@ block content
 													span(hidden data-ol-inflight="pending") #{translate("sending")}…
 
 												p
-													div(data-ol-form-messages)
+													+formMessages()
 
 
 

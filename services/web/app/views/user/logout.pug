@@ -17,7 +17,7 @@ block content
 					data-ol-auto-submit
 				)
 					input(name='_csrf', type='hidden', value=csrfToken)
-					div(data-ol-form-messages)
+					+formMessages()
 					.actions
 						button#submit-logout.btn-primary.btn.btn-block(
 							data-ol-disabled-inflight,

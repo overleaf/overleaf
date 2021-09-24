@@ -13,7 +13,7 @@ block content
 							h1 #{translate("log_in")}
 						form(data-ol-async-form, name="loginForm", action='/login', method="POST")
 							input(name='_csrf', type='hidden', value=csrfToken)
-							div(data-ol-form-messages)
+							+formMessages()
 							.form-group
 								input.form-control(
 									type='email',

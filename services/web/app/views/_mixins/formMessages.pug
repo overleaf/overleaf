@@ -1,0 +1,31 @@
+mixin formMessages()
+	div(
+		data-ol-form-messages='',
+		role="alert"
+	)
+
+mixin customFormMessage(key, kind)
+	if kind === 'success'
+		div.alert.alert-success(
+			hidden,
+			data-ol-custom-form-message=key,
+			role="alert"
+			aria-live="polite"
+		)
+			block
+	else if kind === 'danger'
+		div.alert.alert-danger(
+			hidden,
+			data-ol-custom-form-message=key,
+			role="alert"
+			aria-live="assertive"
+		)
+			block
+	else
+		div.alert.alert-warning(
+			hidden,
+			data-ol-custom-form-message=key,
+			role="alert"
+			aria-live="polite"
+		)
+			block
