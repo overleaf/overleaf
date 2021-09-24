@@ -60,7 +60,7 @@ function updateLinkTargets() {
 
     const plan = el.getAttribute('data-ol-start-new-subscription')
     const view = el.getAttribute('data-ol-item-view') || currentView
-    const suffix = view === 'annual' ? `_annual` : `_free_trial_7_days`
+    const suffix = view === 'annual' ? `-annual` : `_free_trial_7_days`
     const planCode = `${plan}${suffix}`
 
     const location = el.getAttribute('data-ol-location')
