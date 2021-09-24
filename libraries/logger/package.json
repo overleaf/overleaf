@@ -1,10 +1,10 @@
 {
-  "name": "logger-sharelatex",
-  "homepage": "www.sharelatex.com",
-  "description": "A centralised logging system for ShareLaTeX",
+  "name": "@overleaf/logger",
+  "homepage": "www.overleaf.com",
+  "description": "A centralised logging system for Overleaf",
   "repository": {
     "type": "git",
-    "url": "http://github.com/sharelatex/logger-sharelatex.git"
+    "url": "https://github.com/overleaf/overleaf"
   },
   "license": "AGPL-3.0-only",
   "version": "2.3.0",
