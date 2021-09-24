@@ -996,11 +996,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AdminController.unregisterServiceWorker
   )
 
-  privateApiRouter.post(
-    '/disconnectAllUsers',
-    AdminController.disconnectAllUsers
-  )
-
   privateApiRouter.get('/perfTest', (req, res) => res.send('hello'))
 
   publicApiRouter.get('/status', (req, res) => {

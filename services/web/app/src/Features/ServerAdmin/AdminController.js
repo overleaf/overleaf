@@ -52,6 +52,13 @@ var updateOpenConnetionsMetrics = function () {
 setTimeout(updateOpenConnetionsMetrics, oneMinInMs)
 
 const AdminController = {
+  _sendDisconnectAllUsersMessage: delay => {
+    return EditorRealTimeController.emitToAll(
+      'forceDisconnect',
+      'Sorry, we are performing a quick update to the editor and need to close it down. Please refresh the page to continue.',
+      delay
+    )
+  },
   index: (req, res, next) => {
     let agents, url
     let agent
@@ -101,11 +108,7 @@ const AdminController = {
   disconnectAllUsers: (req, res) => {
     logger.warn('disconecting everyone')
     const delay = (req.query && req.query.delay) > 0 ? req.query.delay : 10
-    EditorRealTimeController.emitToAll(
-      'forceDisconnect',
-      'Sorry, we are performing a quick update to the editor and need to close it down. Please refresh the page to continue.',
-      delay
-    )
+    this._sendDisconnectAllUsersMessage(delay)
     return res.sendStatus(200)
   },
 
