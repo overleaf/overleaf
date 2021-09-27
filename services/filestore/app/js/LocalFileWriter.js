@@ -1,5 +1,5 @@
 const fs = require('fs')
-const uuid = require('uuid')
+const uuid = require('node-uuid')
 const path = require('path')
 const Stream = require('stream')
 const { callbackify, promisify } = require('util')

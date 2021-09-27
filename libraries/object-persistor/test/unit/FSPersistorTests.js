@@ -60,7 +60,7 @@ describe('FSPersistorTests', function () {
         glob,
         stream,
         crypto,
-        uuid: uuid,
+        'node-uuid': uuid,
         // imported by PersistorHelper but otherwise unused here
         'logger-sharelatex': {}
       },
