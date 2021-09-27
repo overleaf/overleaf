@@ -285,6 +285,7 @@ App.controller(
       }
       if (
         window.user.alphaProgram ||
+        window.user.betaProgram ||
         window.location.search.includes('file_line_errors=true')
       ) {
         params.file_line_errors = 'true'
