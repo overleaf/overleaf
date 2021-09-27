@@ -2,6 +2,7 @@ import classNames from 'classnames'
 import { FetchError, postJSON } from '../../infrastructure/fetch-json'
 import { validateCaptchaV2 } from './captcha'
 import inputValidator from './input-validator'
+import { disableElement, enableElement } from '../utils/disableElement'
 
 // Form helper(s) to handle:
 // - Attaching to the relevant form elements
@@ -122,16 +123,12 @@ export function inflightHelper(el) {
   const showWhenInflight = el.querySelectorAll('[data-ol-inflight="pending"]')
 
   el.addEventListener('pending', () => {
-    disabledInflight.forEach(el => {
-      el.disabled = true
-    })
+    disabledInflight.forEach(disableElement)
     toggleDisplay(showWhenNotInflight, showWhenInflight)
   })
 
   el.addEventListener('idle', () => {
-    disabledInflight.forEach(el => {
-      el.disabled = false
-    })
+    disabledInflight.forEach(enableElement)
     toggleDisplay(showWhenInflight, showWhenNotInflight)
   })
 }
@@ -146,20 +143,7 @@ function formSentHelper(el) {
   })
 }
 
-export function toggleDisplay(hide, show) {
-  hide.forEach(el => {
-    el.hidden = true
-  })
-  show.forEach(el => {
-    el.hidden = false
-  })
-}
-
-export function hydrateForm(el) {
-  formSubmitHelper(el)
-  inflightHelper(el)
-  formSentHelper(el)
-
+function formValidationHelper(el) {
   el.querySelectorAll('input').forEach(inputEl => {
     if (
       inputEl.willValidate &&
@@ -170,6 +154,31 @@ export function hydrateForm(el) {
   })
 }
 
-document
-  .querySelectorAll(`[data-ol-async-form]`)
-  .forEach(form => hydrateForm(form))
+export function toggleDisplay(hide, show) {
+  hide.forEach(el => {
+    el.hidden = true
+  })
+  show.forEach(el => {
+    el.hidden = false
+  })
+}
+
+function hydrateAsyncForm(el) {
+  formSubmitHelper(el)
+  inflightHelper(el)
+  formSentHelper(el)
+  formValidationHelper(el)
+}
+
+function hydrateRegularForm(el) {
+  inflightHelper(el)
+  formValidationHelper(el)
+
+  el.addEventListener('submit', () => {
+    el.dispatchEvent(new Event('pending'))
+  })
+}
+
+document.querySelectorAll(`[data-ol-async-form]`).forEach(hydrateAsyncForm)
+
+document.querySelectorAll(`[data-ol-regular-form]`).forEach(hydrateRegularForm)
