@@ -150,6 +150,7 @@ describe('SubscriptionController', function () {
         './RecurlyWrapper': (this.RecurlyWrapper = {
           updateAccountEmailAddress: sinon.stub().yields(),
         }),
+        './RecurlyEventHandler': { sendRecurlyAnalyticsEvent: sinon.stub() },
         './FeaturesUpdater': (this.FeaturesUpdater = {}),
         './GroupPlansData': (this.GroupPlansData = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),

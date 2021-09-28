@@ -26,6 +26,14 @@ describe('RecurlyEventHandler', function () {
 
     this.RecurlyEventHandler = SandboxedModule.require(modulePath, {
       requires: {
+        './SubscriptionEmailHandler': (this.SubscriptionEmailHandler = {
+          sendTrialOnboardingEmail: sinon.stub(),
+        }),
+        '../SplitTests/SplitTestV2Handler': (this.SplitTestV2Handler = {
+          promises: {
+            getAssignment: sinon.stub().resolves({ active: false }),
+          },
+        }),
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
           recordEventForUser: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
@@ -67,6 +75,30 @@ describe('RecurlyEventHandler', function () {
       'subscription-is-trial',
       true
     )
+    sinon.assert.calledWith(
+      this.SplitTestV2Handler.promises.getAssignment,
+      this.userId,
+      'trial-onboarding-email'
+    )
+  })
+
+  it('sends free trial onboarding email if user in ab group', async function () {
+    this.SplitTestV2Handler.promises.getAssignment = sinon
+      .stub()
+      .resolves({ active: true, variant: 'send-email' })
+    this.userId = '123456789trial'
+    this.eventData.account.account_code = this.userId
+
+    // testing directly on the send subscription started event to ensure the split handler
+    // promise is resolved before checking calls
+    await this.RecurlyEventHandler.sendSubscriptionStartedEvent(this.eventData)
+
+    sinon.assert.calledWith(
+      this.SplitTestV2Handler.promises.getAssignment,
+      this.userId,
+      'trial-onboarding-email'
+    )
+    sinon.assert.called(this.SubscriptionEmailHandler.sendTrialOnboardingEmail)
   })
 
   it('with new_subscription_notification - no free trial', function () {

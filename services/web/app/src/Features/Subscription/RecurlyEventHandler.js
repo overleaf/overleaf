@@ -1,9 +1,11 @@
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const SplitTestV2Handler = require('../SplitTests/SplitTestV2Handler')
+const SubscriptionEmailHandler = require('./SubscriptionEmailHandler')
 
 function sendRecurlyAnalyticsEvent(event, eventData) {
   switch (event) {
     case 'new_subscription_notification':
-      _sendSubscriptionStartedEvent(eventData)
+      sendSubscriptionStartedEvent(eventData)
       break
     case 'updated_subscription_notification':
       _sendSubscriptionUpdatedEvent(eventData)
@@ -39,7 +41,7 @@ function sendRecurlyAnalyticsEvent(event, eventData) {
   }
 }
 
-async function _sendSubscriptionStartedEvent(eventData) {
+async function sendSubscriptionStartedEvent(eventData) {
   const userId = _getUserId(eventData)
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUser(userId, 'subscription-started', {
@@ -58,6 +60,18 @@ async function _sendSubscriptionStartedEvent(eventData) {
     'subscription-is-trial',
     isTrial
   )
+
+  // send the trial onboarding email
+  if (isTrial) {
+    const assignment = await SplitTestV2Handler.promises.getAssignment(
+      userId,
+      'trial-onboarding-email'
+    )
+
+    if (assignment.variant === 'send-email') {
+      SubscriptionEmailHandler.sendTrialOnboardingEmail(userId)
+    }
+  }
 }
 
 async function _sendSubscriptionUpdatedEvent(eventData) {
@@ -197,4 +211,5 @@ function _getSubscriptionData(eventData) {
 
 module.exports = {
   sendRecurlyAnalyticsEvent,
+  sendSubscriptionStartedEvent,
 }
