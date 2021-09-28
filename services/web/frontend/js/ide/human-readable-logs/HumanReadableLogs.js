@@ -1,11 +1,12 @@
-import LogParser from '../../vendor/libs/latex-log-parser'
+import LatexLogParser from '../log-parser/latex-log-parser'
 import ruleset from './HumanReadableLogsRules'
 
 export default {
   parse(rawLog, options) {
     let parsedLogEntries
     if (typeof rawLog === 'string') {
-      parsedLogEntries = LogParser.parse(rawLog, options)
+      const latexLogParser = new LatexLogParser(rawLog, options)
+      parsedLogEntries = latexLogParser.parse()
     } else {
       parsedLogEntries = rawLog
     }

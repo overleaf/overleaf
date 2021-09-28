@@ -1,0 +1,87 @@
+This is BibTeX, Version 0.99d (TeX Live 2014)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: output.aux
+The style file: apj.bst
+Database file #1: outputNotes.bib
+Database file #2: references.bib
+I was expecting a `,' or a `}'---line 196 of file references.bib
+ :
+ : @ARTICLE{Biviano03,
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+I was expecting a `,' or a `}'---line 1133 of file references.bib
+ :
+ : @ARTICLE{Saro13,
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+Repeated entry---line 541 of file references.bib
+ :  @article{abe1984influence
+ :                           ,
+I'm skipping whatever remains of this entry
+I was expecting a `,' or a `}'---line 1213 of file references.bib
+ :
+ : @ARTICLE{Springel05,
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+You're missing a field part---line 1255 of file references.bib
+ :     month =
+ :             ,
+I'm skipping whatever remains of this entry
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Warning--string name "something" is undefined
+--line 152 of file references.bib
+Warning--can't use both author and editor fields in Binney87
+Warning--empty booktitle in Dietterich-00
+Warning--empty publisher in Binney87
+Warning--string name "august" is undefined
+--line 152 of file references.bib
+Warning--empty note in Svensmark14
+A bad cross reference---entry "conf/icde/FilhoTTF01"
+refers to entry "conf/icde/2001", which doesn't exist
+I couldn't open style file aa.bst
+---line 31 of file output.aux
+ : \bibstyle{aa
+ :             }
+I'm skipping whatever remains of this command
+You've used 48 entries,
+            3010 wiz_defined-function locations,
+            957 strings with 17710 characters,
+and the built_in function-call counts, 25881 in all, are:
+= -- 1937
+> -- 2358
+< -- 11
++ -- 783
+- -- 852
+* -- 2444
+:= -- 5047
+add.period$ -- 48
+call.type$ -- 48
+change.case$ -- 320
+chr.to.int$ -- 48
+cite$ -- 51
+duplicate$ -- 899
+empty$ -- 1291
+format.name$ -- 904
+if$ -- 4963
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 47
+newline$ -- 148
+num.names$ -- 193
+pop$ -- 349
+preamble$ -- 1
+purify$ -- 320
+quote$ -- 0
+skip$ -- 744
+stack$ -- 0
+substring$ -- 989
+swap$ -- 1
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 429
+warning$ -- 3
+while$ -- 173
+width$ -- 0
+write$ -- 478
+(There were 4 error messages)
