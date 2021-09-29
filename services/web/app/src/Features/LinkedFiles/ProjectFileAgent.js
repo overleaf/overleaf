@@ -197,7 +197,7 @@ module.exports = ProjectFileAgent = {
             },
             function (err, entity, type) {
               if (err != null) {
-                if (/^not found.*/.test(err.toString())) {
+                if (/^not found.*/.test(err.message)) {
                   err = new SourceFileNotFoundError()
                 }
                 return callback(err)

@@ -22,6 +22,7 @@ describe('LinkedFiles', function () {
   let projectOne, projectOneId, projectOneRootFolderId
   let projectTwo, projectTwoId, projectTwoRootFolderId
   const sourceDocName = 'test.txt'
+  let sourceDocId
   let owner
 
   before(function (done) {
@@ -48,7 +49,7 @@ describe('LinkedFiles', function () {
       projectTwo = await owner.getProject(projectTwoId)
       projectTwoRootFolderId = projectTwo.rootFolder[0]._id.toString()
 
-      await owner.createDocInProject(
+      sourceDocId = await owner.createDocInProject(
         projectTwoId,
         projectTwoRootFolderId,
         sourceDocName
@@ -153,6 +154,41 @@ describe('LinkedFiles', function () {
       }))
       expect(response.statusCode).to.equal(403)
       expect(body).to.equal('You do not have access to this project')
+    })
+
+    it('should generate a proper error message when the source file has been deleted', async function () {
+      // import the file from the source project
+      let { response, body } = await owner.doRequest('post', {
+        url: `/project/${projectOneId}/linked_file`,
+        json: {
+          name: 'test-link.txt',
+          parent_folder_id: projectOneRootFolderId,
+          provider: 'project_file',
+          data: {
+            source_project_id: projectTwoId,
+            source_entity_path: `/${sourceDocName}`,
+          },
+        },
+      })
+      expect(response.statusCode).to.equal(200)
+      const existingFileId = body.new_file_id
+      expect(existingFileId).to.exist
+
+      // rename the source file
+      await owner.renameItemInProject(
+        projectTwoId,
+        'doc',
+        sourceDocId,
+        'renamed-doc.txt'
+      )
+
+      // refresh the file
+      ;({ response, body } = await owner.doRequest('post', {
+        url: `/project/${projectOneId}/linked_file/${existingFileId}/refresh`,
+        json: true,
+      }))
+      expect(response.statusCode).to.equal(404)
+      expect(body).to.equal('Source file not found')
     })
   })
 
