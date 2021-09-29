@@ -1504,5 +1504,9 @@
   "view_source": "View Source",
   "license": "License",
   "abstract": "Abstract",
-  "tags": "Tags"
+  "tags": "Tags",
+  "showing_x_results_of_total": "Showing __x__ results of __total__",
+  "showing_x_results": "Showing __x__ results",
+  "showing_1_result": "Showing 1 result",
+  "showing_1_result_of_total": "Showing 1 result of __total__"
 }
