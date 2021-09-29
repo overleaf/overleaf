@@ -7,9 +7,9 @@ import localStorage from '../../../../frontend/js/infrastructure/local-storage'
 
 describe('usePersistedState', function () {
   beforeEach(function () {
-    sinon.spy(global.localStorage, 'getItem')
-    sinon.spy(global.localStorage, 'removeItem')
-    sinon.spy(global.localStorage, 'setItem')
+    sinon.spy(window.Storage.prototype, 'getItem')
+    sinon.spy(window.Storage.prototype, 'removeItem')
+    sinon.spy(window.Storage.prototype, 'setItem')
   })
 
   afterEach(function () {
@@ -19,7 +19,7 @@ describe('usePersistedState', function () {
   it('reads the value from localStorage', function () {
     const key = 'test'
     localStorage.setItem(key, 'foo')
-    expect(global.localStorage.setItem).to.have.callCount(1)
+    expect(window.Storage.prototype.setItem).to.have.callCount(1)
 
     const Test = () => {
       const [value] = usePersistedState(key)
@@ -30,9 +30,9 @@ describe('usePersistedState', function () {
     render(<Test />)
     screen.getByText('foo')
 
-    expect(global.localStorage.getItem).to.have.callCount(1)
-    expect(global.localStorage.removeItem).to.have.callCount(0)
-    expect(global.localStorage.setItem).to.have.callCount(1)
+    expect(window.Storage.prototype.getItem).to.have.callCount(1)
+    expect(window.Storage.prototype.removeItem).to.have.callCount(0)
+    expect(window.Storage.prototype.setItem).to.have.callCount(1)
 
     expect(localStorage.getItem(key)).to.equal('foo')
   })
@@ -49,9 +49,9 @@ describe('usePersistedState', function () {
     render(<Test />)
     screen.getByText('foo')
 
-    expect(global.localStorage.getItem).to.have.callCount(1)
-    expect(global.localStorage.removeItem).to.have.callCount(0)
-    expect(global.localStorage.setItem).to.have.callCount(0)
+    expect(window.Storage.prototype.getItem).to.have.callCount(1)
+    expect(window.Storage.prototype.removeItem).to.have.callCount(0)
+    expect(window.Storage.prototype.setItem).to.have.callCount(0)
 
     expect(localStorage.getItem(key)).to.be.null
   })
@@ -59,7 +59,7 @@ describe('usePersistedState', function () {
   it('stores the new value in localStorage', function () {
     const key = 'test:store'
     localStorage.setItem(key, 'foo')
-    expect(global.localStorage.setItem).to.have.callCount(1)
+    expect(window.Storage.prototype.setItem).to.have.callCount(1)
 
     const Test = () => {
       const [value, setValue] = usePersistedState(key, 'bar')
@@ -75,9 +75,9 @@ describe('usePersistedState', function () {
 
     screen.getByText('baz')
 
-    expect(global.localStorage.getItem).to.have.callCount(1)
-    expect(global.localStorage.removeItem).to.have.callCount(0)
-    expect(global.localStorage.setItem).to.have.callCount(2)
+    expect(window.Storage.prototype.getItem).to.have.callCount(1)
+    expect(window.Storage.prototype.removeItem).to.have.callCount(0)
+    expect(window.Storage.prototype.setItem).to.have.callCount(2)
 
     expect(localStorage.getItem(key)).to.equal('baz')
   })
@@ -85,7 +85,7 @@ describe('usePersistedState', function () {
   it('removes the value from localStorage if it equals the default value', function () {
     const key = 'test:store-default'
     localStorage.setItem(key, 'foo')
-    expect(global.localStorage.setItem).to.have.callCount(1)
+    expect(window.Storage.prototype.setItem).to.have.callCount(1)
 
     const Test = () => {
       const [value, setValue] = usePersistedState(key, 'bar')
@@ -106,9 +106,9 @@ describe('usePersistedState', function () {
 
     screen.getByText('bar')
 
-    expect(global.localStorage.getItem).to.have.callCount(2)
-    expect(global.localStorage.removeItem).to.have.callCount(1)
-    expect(global.localStorage.setItem).to.have.callCount(2)
+    expect(window.Storage.prototype.getItem).to.have.callCount(2)
+    expect(window.Storage.prototype.removeItem).to.have.callCount(1)
+    expect(window.Storage.prototype.setItem).to.have.callCount(2)
 
     expect(localStorage.getItem(key)).to.be.null
   })
@@ -116,7 +116,7 @@ describe('usePersistedState', function () {
   it('handles function values', function () {
     const key = 'test:store'
     localStorage.setItem(key, 'foo')
-    expect(global.localStorage.setItem).to.have.callCount(1)
+    expect(window.Storage.prototype.setItem).to.have.callCount(1)
 
     const Test = () => {
       const [value, setValue] = usePersistedState(key)
@@ -132,9 +132,9 @@ describe('usePersistedState', function () {
 
     screen.getByText('foobar')
 
-    expect(global.localStorage.getItem).to.have.callCount(1)
-    expect(global.localStorage.removeItem).to.have.callCount(0)
-    expect(global.localStorage.setItem).to.have.callCount(2)
+    expect(window.Storage.prototype.getItem).to.have.callCount(1)
+    expect(window.Storage.prototype.removeItem).to.have.callCount(0)
+    expect(window.Storage.prototype.setItem).to.have.callCount(2)
 
     expect(localStorage.getItem(key)).to.equal('foobar')
   })

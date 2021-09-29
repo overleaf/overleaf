@@ -180,6 +180,7 @@
   },
   "devDependencies": {
     "@babel/register": "^7.14.5",
+    "@juggle/resize-observer": "^3.3.1",
     "@storybook/addon-a11y": "^6.2.9",
     "@storybook/addon-essentials": "^6.2.9",
     "@storybook/react": "^6.2.9",

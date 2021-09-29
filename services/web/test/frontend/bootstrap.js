@@ -8,9 +8,6 @@ require('jsdom-global')(undefined, {
   url: 'https://www.test-overleaf.com/',
 })
 
-// workaround for "keys.js in jsdom-global doesn't include AbortController"
-global.AbortController = window.AbortController
-
 const path = require('path')
 process.env.SHARELATEX_CONFIG = path.resolve(
   __dirname,
@@ -80,20 +77,18 @@ moment.updateLocale('en', {
   },
 })
 
-let inMemoryLocalStorage = {}
-Object.defineProperty(global, 'localStorage', {
-  value: {
-    // localStorage returns `null` when the item does not exist
-    getItem: key =>
-      inMemoryLocalStorage[key] !== undefined
-        ? inMemoryLocalStorage[key]
-        : null,
-    setItem: (key, value) => (inMemoryLocalStorage[key] = value),
-    clear: () => (inMemoryLocalStorage = {}),
-    removeItem: key => delete inMemoryLocalStorage[key],
-  },
-  writable: true,
-})
+// workaround for missing keys in jsdom-global's keys.js
+global.AbortController = window.AbortController
+global.MutationObserver = window.MutationObserver
+global.StorageEvent = window.StorageEvent
+global.SVGElement = window.SVGElement
+global.localStorage = window.localStorage
+global.performance = window.performance
+global.requestAnimationFrame = window.requestAnimationFrame
+global.sessionStorage = window.sessionStorage
+
+// add polyfill for ResizeObserver
+global.ResizeObserver = window.ResizeObserver = require('@juggle/resize-observer').ResizeObserver
 
 // node-fetch doesn't accept relative URL's: https://github.com/node-fetch/node-fetch/blob/master/docs/v2-LIMITS.md#known-differences
 const fetch = require('node-fetch')
