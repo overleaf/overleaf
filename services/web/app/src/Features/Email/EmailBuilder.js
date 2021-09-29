@@ -466,7 +466,7 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
       'Thanks again for using Overleaf :)',
       `John`,
       `Dr John Hammersley <br />Co-founder & CEO <br />${siteLink}<hr>`,
-      `Don't want onboarding emails like this from us? Don't worry, this is the only one. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`,
+      `You're receiving this email because you've recently signed up for an Overleaf account. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`,
     ]
   },
 })
