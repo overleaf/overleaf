@@ -138,4 +138,46 @@ describe('usePersistedState', function () {
 
     expect(localStorage.getItem(key)).to.equal('foobar')
   })
+
+  it('handles syncing values via storage event', async function () {
+    const key = 'test:sync'
+    localStorage.setItem(key, 'foo')
+    expect(window.Storage.prototype.setItem).to.have.callCount(1)
+
+    // listen for storage events
+    const storageEventListener = sinon.stub()
+    window.addEventListener('storage', storageEventListener)
+
+    const Test = () => {
+      const [value, setValue] = usePersistedState(key, 'bar', true)
+
+      useEffect(() => {
+        setValue('baz')
+      }, [setValue])
+
+      return <div>{value}</div>
+    }
+
+    render(<Test />)
+
+    screen.getByText('baz')
+
+    expect(window.Storage.prototype.getItem).to.have.callCount(1)
+    expect(window.Storage.prototype.removeItem).to.have.callCount(0)
+    expect(window.Storage.prototype.setItem).to.have.callCount(2)
+
+    expect(localStorage.getItem(key)).to.equal('baz')
+
+    expect(storageEventListener).to.have.callCount(0)
+
+    // set the new value in localStorage
+    localStorage.setItem(key, 'cat')
+
+    // dispatch a "storage" event and check that it's picked up by the hook
+    window.dispatchEvent(new StorageEvent('storage', { key }))
+
+    await screen.findByText('cat')
+
+    expect(storageEventListener).to.have.callCount(1)
+  })
 })
