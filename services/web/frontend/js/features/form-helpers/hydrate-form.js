@@ -56,11 +56,6 @@ function formSubmitHelper(formEl) {
       formEl.dispatchEvent(new Event('idle'))
     }
   })
-  if (formEl.hasAttribute('data-ol-auto-submit')) {
-    setTimeout(() => {
-      formEl.querySelector('[type="submit"]').click()
-    }, 0)
-  }
 }
 
 async function validateCaptcha(formEl) {
@@ -154,6 +149,14 @@ function formValidationHelper(el) {
   })
 }
 
+function formAutoSubmitHelper(el) {
+  if (el.hasAttribute('data-ol-auto-submit')) {
+    setTimeout(() => {
+      el.querySelector('[type="submit"]').click()
+    }, 0)
+  }
+}
+
 export function toggleDisplay(hide, show) {
   hide.forEach(el => {
     el.hidden = true
@@ -168,6 +171,7 @@ function hydrateAsyncForm(el) {
   inflightHelper(el)
   formSentHelper(el)
   formValidationHelper(el)
+  formAutoSubmitHelper(el)
 }
 
 function hydrateRegularForm(el) {
@@ -177,6 +181,8 @@ function hydrateRegularForm(el) {
   el.addEventListener('submit', () => {
     el.dispatchEvent(new Event('pending'))
   })
+
+  formAutoSubmitHelper(el)
 }
 
 document.querySelectorAll(`[data-ol-async-form]`).forEach(hydrateAsyncForm)

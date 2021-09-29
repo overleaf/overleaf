@@ -1,4 +1,4 @@
-extends ../layout
+extends ../layout-marketing
 
 block vars
 	- var suppressNavbar = true
@@ -6,8 +6,6 @@ block vars
 	- var suppressSkipToContent = true
 
 block content
-	script(type="template", id="gateway-data")!= StringHelper.stringifyJsonForScript({ params: form_data })
-
 	.content.content-alt
 		.container
 			.row
@@ -16,6 +14,11 @@ block content
 						p.text-center #{translate('processing_your_request')}
 
 	form(
-		ng-controller="PostGatewayController",
-		ng-init="handleGateway();"
-		id='gateway' method='POST')
+		data-ol-regular-form
+		data-ol-auto-submit
+		method="POST"
+	)
+		input(name="_csrf" type="hidden" value=csrfToken)
+		input(hidden name="viaGateway" type="submit" value="true")
+		for name in Object.keys(form_data)
+			input(name=name type="hidden" value=form_data[name])

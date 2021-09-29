@@ -1,0 +1,9 @@
+mixin bookmarkable-tabset-header(id, title, active)
+	li(role="presentation" class=(active ? 'active' : ''))
+		a(
+			href='#' + id
+			aria-controls=id
+			role="tab"
+			data-toggle="tab"
+			data-ol-bookmarkable-tab
+		) #{title}

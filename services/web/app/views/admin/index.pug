@@ -1,4 +1,5 @@
-extends ../layout
+extends ../layout-marketing
+include ../_mixins/bookmarkable_tabset
 
 block content
 	.content.content-alt
@@ -8,77 +9,100 @@ block content
 					.card
 						.page-header
 							h1 Admin Panel
-						tabset(bookmarkable-tabset ng-cloak)
-							tab(heading="System Messages" bookmarkable-tab="system-messages")
-								each message in systemMessages
-									.alert.alert-info.row-spaced(ng-non-bindable) #{message.content}
-								hr
-								form(method='post', action='/admin/messages')
-									input(name="_csrf", type="hidden", value=csrfToken)
-									.form-group
-										label(for="content")
-										input.form-control(name="content", type="text", placeholder="Message…", required)
-									button.btn.btn-primary(type="submit") Post Message
-								hr
-								form(method='post', action='/admin/messages/clear')
-									input(name="_csrf", type="hidden", value=csrfToken)
-									button.btn.btn-danger(type="submit") Clear all messages
-
-
-							tab(heading="Open Sockets" bookmarkable-tab="open-sockets")
-								.row-spaced
-									ul
-										each agents, url in openSockets
-											li(ng-non-bindable) #{url} - total : #{agents.length}
-												ul
-													each agent in agents
-														li(ng-non-bindable) #{agent}
-
-							tab(heading="Open/Close Editor" bookmarkable-tab="open-close-editor")
+						div(data-ol-bookmarkable-tabset)
+							ul.nav.nav-tabs(role="tablist")
+								+bookmarkable-tabset-header('system-messages', 'System Messages', true)
+								+bookmarkable-tabset-header('open-sockets', 'Open Sockets')
+								+bookmarkable-tabset-header('open-close-editor', 'Open/Close Editor')
 								if hasFeature('saas')
-									| The "Open/Close Editor" feature is not available in SAAS.
-								else
-									.row-spaced
-										form(method='post',action='/admin/closeEditor')
-											input(name="_csrf", type="hidden", value=csrfToken)
-											button.btn.btn-danger(type="submit") Close Editor
-										p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
+									+bookmarkable-tabset-header('tpds', 'TPDS/Dropbox Management')
+								+bookmarkable-tabset-header('advanced', 'Advanced')
 
-									.row-spaced
-										form(method='post',action='/admin/disconnectAllUsers')
-											input(name="_csrf", type="hidden", value=csrfToken)
-											button.btn.btn-danger(type="submit") Disconnect all users
-										p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.
-
-									.row-spaced
-										form(method='post',action='/admin/openEditor')
-											input(name="_csrf", type="hidden", value=csrfToken)
-											button.btn.btn-danger(type="submit") Reopen Editor
-										p.small Will reopen the editor after closing.
-
-							if hasFeature('saas')
-								tab(heading="TPDS/Dropbox Management" bookmarkable-tab="tpds")
-									h3 Flush project to TPDS
-									.row
-										form.col-xs-6(method='post',action='/admin/flushProjectToTpds')
-											input(name="_csrf", type="hidden", value=csrfToken)
-											.form-group
-												label(for='project_id') project_id
-												input.form-control(type='text',  name='project_id', placeholder='project_id', required)
-											.form-group
-												button.btn-primary.btn(type='submit') Flush
+							.tab-content
+								.tab-pane.active(
+									role="tabpanel"
+									id='system-messages'
+								)
+									each message in systemMessages
+										.alert.alert-info.row-spaced(ng-non-bindable) #{message.content}
 									hr
-									h3 Poll Dropbox for user
-									.row
-										form.col-xs-6(method='post',action='/admin/pollDropboxForUser')
-											input(name="_csrf", type="hidden", value=csrfToken)
-											.form-group
-												label(for='user_id') user_id
-												input.form-control(type='text',  name='user_id', placeholder='user_id', required)
-											.form-group
-												button.btn-primary.btn(type='submit') Poll
+									form(method='post', action='/admin/messages')
+										input(name="_csrf", type="hidden", value=csrfToken)
+										.form-group
+											label(for="content")
+											input.form-control(name="content", type="text", placeholder="Message…", required)
+										button.btn.btn-primary(type="submit") Post Message
+									hr
+									form(method='post', action='/admin/messages/clear')
+										input(name="_csrf", type="hidden", value=csrfToken)
+										button.btn.btn-danger(type="submit") Clear all messages
 
-							tab(heading="Advanced" bookmarkable-tab="advanced")
+								.tab-pane(
+									role="tabpanel"
+									id='open-sockets'
+								)
+									.row-spaced
+										ul
+											each agents, url in openSockets
+												li(ng-non-bindable) #{url} - total : #{agents.length}
+													ul
+														each agent in agents
+															li(ng-non-bindable) #{agent}
+
+								.tab-pane(
+									role="tabpanel"
+									id='open-close-editor'
+								)
+									if hasFeature('saas')
+										| The "Open/Close Editor" feature is not available in SAAS.
+									else
+										.row-spaced
+											form(method='post',action='/admin/closeEditor')
+												input(name="_csrf", type="hidden", value=csrfToken)
+												button.btn.btn-danger(type="submit") Close Editor
+											p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
+
+										.row-spaced
+											form(method='post',action='/admin/disconnectAllUsers')
+												input(name="_csrf", type="hidden", value=csrfToken)
+												button.btn.btn-danger(type="submit") Disconnect all users
+											p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.
+
+										.row-spaced
+											form(method='post',action='/admin/openEditor')
+												input(name="_csrf", type="hidden", value=csrfToken)
+												button.btn.btn-danger(type="submit") Reopen Editor
+											p.small Will reopen the editor after closing.
+
+								if hasFeature('saas')
+									.tab-pane(
+										role="tabpanel"
+										id='tpds'
+									)
+										h3 Flush project to TPDS
+										.row
+											form.col-xs-6(method='post',action='/admin/flushProjectToTpds')
+												input(name="_csrf", type="hidden", value=csrfToken)
+												.form-group
+													label(for='project_id') project_id
+													input.form-control(type='text',  name='project_id', placeholder='project_id', required)
+												.form-group
+													button.btn-primary.btn(type='submit') Flush
+										hr
+										h3 Poll Dropbox for user
+										.row
+											form.col-xs-6(method='post',action='/admin/pollDropboxForUser')
+												input(name="_csrf", type="hidden", value=csrfToken)
+												.form-group
+													label(for='user_id') user_id
+													input.form-control(type='text',  name='user_id', placeholder='user_id', required)
+												.form-group
+													button.btn-primary.btn(type='submit') Poll
+
+								.tab-pane(
+									role="tabpanel"
+									id='advanced'
+								)
 									.row-spaced
 										form(method='post',action='/admin/unregisterServiceWorker')
 											input(name="_csrf", type="hidden", value=csrfToken)
