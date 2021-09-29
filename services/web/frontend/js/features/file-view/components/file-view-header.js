@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 import { formatTime, relativeDate } from '../../utils/format-date'
 import { postJSON } from '../../../infrastructure/fetch-json'
+import { useEditorContext } from '../../../shared/context/editor-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
@@ -34,6 +35,9 @@ function shortenedUrl(url) {
 export default function FileViewHeader({ file, storeReferencesKeys }) {
   const { _id: projectId } = useProjectContext({
     _id: PropTypes.string.isRequired,
+  })
+  const { permissionsLevel } = useEditorContext({
+    permissionsLevel: PropTypes.string.isRequired,
   })
   const { t } = useTranslation()
 
@@ -110,7 +114,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
         tprLinkedFileInfo.map(({ import: { LinkedFileInfo }, path }) => (
           <LinkedFileInfo key={path} file={file} />
         ))}
-      {file.linkedFileData && (
+      {file.linkedFileData && permissionsLevel !== 'readOnly' && (
         <button
           className="btn btn-success"
           onClick={refreshFile}
