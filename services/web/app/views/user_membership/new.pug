@@ -1,4 +1,4 @@
-extends ../layout
+extends ../layout-marketing
 
 block content
 	main.content.content-alt#main-content
@@ -7,7 +7,7 @@ block content
 				.col-md-10.col-md-offset-1
 					h3(ng-non-bindable) #{entityName} "#{entityId}" does not exists in v2
 					form(
-						enctype='application/json',
+						data-ol-regular-form
 						method='post',
 						action=''
 					)
@@ -15,4 +15,7 @@ block content
 						button.btn.btn-primary.text-capitalize(
 							type="submit",
 							ng-non-bindable
-						) Create #{entityName} in v2
+							data-ol-disabled-inflight
+						)
+							span(data-ol-inflight="idle") Create #{entityName} in v2
+							span(hidden data-ol-inflight="pending") #{translate("creating")}…

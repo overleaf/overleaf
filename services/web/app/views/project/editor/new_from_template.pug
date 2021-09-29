@@ -1,4 +1,4 @@
-extends ../../layout
+extends ../../layout-marketing
 
 block content
   .editor.full-size
@@ -13,7 +13,12 @@ block content
         span.loading-screen-ellip .
         span.loading-screen-ellip .
 
-  form(id='create_form' method='POST' action='/project/new/template/' ng-non-bindable)
+  form(
+    data-ol-regular-form
+    data-ol-auto-submit
+    method='POST'
+    action='/project/new/template/'
+  )
     input(type="hidden", name="_csrf", value=csrfToken)
     input(type="hidden" name="templateId" value=templateId)
     input(type="hidden" name="templateVersionId" value=templateVersionId)
@@ -23,9 +28,4 @@ block content
     input(type="hidden" name="mainFile" value=mainFile)
     if brandVariationId
       input(type="hidden" name="brandVariationId" value=brandVariationId)
-
-block append foot-scripts
-  script(type="text/javascript", nonce=scriptNonce).
-    $(document).ready(function(){
-      $('#create_form').submit();
-    });
+    input(hidden type="submit")

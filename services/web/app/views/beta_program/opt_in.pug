@@ -1,4 +1,4 @@
-extends ../layout
+extends ../layout-marketing
 
 block content
 	main.content.content-alt#main-content
@@ -29,7 +29,12 @@ block content
 								.row.text-centered
 									.col-md-12
 										if user.betaProgram
-											form(id="beta-program-opt-out", method="post", action="/beta/opt-out", novalidate)
+											form(
+												data-ol-regular-form
+												method="post"
+												action="/beta/opt-out"
+												novalidate
+											)
 												input(type="hidden", name="_csrf", value=csrfToken)
 												.form-group
 													a(
@@ -40,17 +45,25 @@ block content
 												.form-group
 													button.btn.btn-info.btn-sm(
 														type="submit"
+														data-ol-disabled-inflight
 													)
-														span #{translate("beta_program_opt_out_action")}
+														span(data-ol-inflight="idle") #{translate("beta_program_opt_out_action")}
+														span(hidden data-ol-inflight="pending") #{translate("processing")}…
 												.form-group
 													a(href="/project").btn.btn-link.btn-sm #{translate("back_to_your_projects")}
 										else
-											form(id="beta-program-opt-in", method="post", action="/beta/opt-in", novalidate)
+											form(
+												data-ol-regular-form
+												method="post",
+												action="/beta/opt-in"
+											)
 												input(type="hidden", name="_csrf", value=csrfToken)
 												.form-group
 													button.btn.btn-primary(
 														type="submit"
+														data-ol-disabled-inflight
 													)
-														span #{translate("beta_program_opt_in_action")}
+														span(data-ol-inflight="idle") #{translate("beta_program_opt_in_action")}
+														span(hidden data-ol-inflight="pending") #{translate("joining")}…
 												.form-group
 													a(href="/project").btn.btn-link.btn-sm #{translate("back_to_your_projects")}
