@@ -212,7 +212,7 @@ async function analyticsIdMiddleware(req, res, next) {
     }
   } else {
     if (sessionUser) {
-      session.analyticsId = sessionUser.analyticsId
+      session.analyticsId = sessionUser.analyticsId || sessionUser.userId // backfill for logged-in sessions created before we added the analyticsId
     } else {
       session.analyticsId = uuid.v4()
     }
