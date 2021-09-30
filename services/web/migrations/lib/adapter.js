@@ -28,6 +28,7 @@ class Adapter {
     await addCollection('projectImportFailures')
     await addCollection('samllog')
     await addCollection('user')
+    await addCollection('splittests')
 
     return { db }
   }
