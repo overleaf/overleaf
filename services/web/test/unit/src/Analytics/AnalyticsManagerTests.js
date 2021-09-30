@@ -70,6 +70,16 @@ describe('AnalyticsManager', function () {
       this.AnalyticsManager.identifyUser(this.fakeUserId, '')
       sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
+
+    it('userId or analyticsId is missing', function () {
+      this.AnalyticsManager.identifyUser(this.fakeUserId, undefined)
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+    })
+
+    it('userId equal analyticsId', function () {
+      this.AnalyticsManager.identifyUser(this.fakeUserId, this.fakeUserId)
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+    })
   })
 
   describe('queues the appropriate message for', function () {
