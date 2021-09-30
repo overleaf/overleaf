@@ -126,7 +126,7 @@ module.exports = UpdateManager = {
         if (error != null) {
           return callback(error)
         }
-        logger.log(
+        logger.debug(
           { project_id, doc_id, count: updates.length },
           'processing updates'
         )
@@ -235,7 +235,7 @@ module.exports = UpdateManager = {
                           return callback(error)
                         }
                         if (ranges_were_collapsed) {
-                          logger.log(
+                          logger.debug(
                             {
                               project_id,
                               doc_id,

@@ -30,78 +30,10 @@ Metrics.mongodb.monitor(
 Metrics.event_loop.monitor(logger, 100)
 
 const app = express()
-app.use(Metrics.http.monitor(logger))
 app.use(bodyParser.json({ limit: Settings.maxJsonRequestSize }))
 Metrics.injectMetricsRoute(app)
 
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount)
-
-app.param('project_id', (req, res, next, projectId) => {
-  if (projectId != null && projectId.match(/^[0-9a-f]{24}$/)) {
-    return next()
-  } else {
-    return next(new Error('invalid project id'))
-  }
-})
-
-app.param('doc_id', (req, res, next, docId) => {
-  if (docId != null && docId.match(/^[0-9a-f]{24}$/)) {
-    return next()
-  } else {
-    return next(new Error('invalid doc id'))
-  }
-})
-
-app.get('/project/:project_id/doc/:doc_id', HttpController.getDoc)
-app.get('/project/:project_id/doc/:doc_id/peek', HttpController.peekDoc)
-// temporarily keep the GET method for backwards compatibility
-app.get('/project/:project_id/doc', HttpController.getProjectDocsAndFlushIfOld)
-// will migrate to the POST method of get_and_flush_if_old instead
-app.post(
-  '/project/:project_id/get_and_flush_if_old',
-  HttpController.getProjectDocsAndFlushIfOld
-)
-app.post('/project/:project_id/clearState', HttpController.clearProjectState)
-app.post('/project/:project_id/doc/:doc_id', HttpController.setDoc)
-app.post(
-  '/project/:project_id/doc/:doc_id/flush',
-  HttpController.flushDocIfLoaded
-)
-app.delete('/project/:project_id/doc/:doc_id', HttpController.deleteDoc)
-app.delete('/project/:project_id', HttpController.deleteProject)
-app.delete('/project', HttpController.deleteMultipleProjects)
-app.post('/project/:project_id', HttpController.updateProject)
-app.post(
-  '/project/:project_id/history/resync',
-  HttpController.resyncProjectHistory
-)
-app.post('/project/:project_id/flush', HttpController.flushProject)
-app.post(
-  '/project/:project_id/doc/:doc_id/change/:change_id/accept',
-  HttpController.acceptChanges
-)
-app.post(
-  '/project/:project_id/doc/:doc_id/change/accept',
-  HttpController.acceptChanges
-)
-app.delete(
-  '/project/:project_id/doc/:doc_id/comment/:comment_id',
-  HttpController.deleteComment
-)
-
-app.get('/flush_all_projects', HttpController.flushAllProjects)
-app.get('/flush_queued_projects', HttpController.flushQueuedProjects)
-
-app.get('/total', (req, res, next) => {
-  const timer = new Metrics.Timer('http.allDocList')
-  RedisManager.getCountOfDocsInMemory((err, count) => {
-    if (err) {
-      return next(err)
-    }
-    timer.done()
-    res.send({ total: count })
-  })
-})
 
 app.get('/status', (req, res) => {
   if (Settings.shuttingDown) {
@@ -177,6 +109,76 @@ app.get('/health_check', (req, res, next) => {
   )
 })
 
+// record http metrics for the routes below this point
+app.use(Metrics.http.monitor(logger))
+
+app.param('project_id', (req, res, next, projectId) => {
+  if (projectId != null && projectId.match(/^[0-9a-f]{24}$/)) {
+    return next()
+  } else {
+    return next(new Error('invalid project id'))
+  }
+})
+
+app.param('doc_id', (req, res, next, docId) => {
+  if (docId != null && docId.match(/^[0-9a-f]{24}$/)) {
+    return next()
+  } else {
+    return next(new Error('invalid doc id'))
+  }
+})
+
+app.get('/project/:project_id/doc/:doc_id', HttpController.getDoc)
+app.get('/project/:project_id/doc/:doc_id/peek', HttpController.peekDoc)
+// temporarily keep the GET method for backwards compatibility
+app.get('/project/:project_id/doc', HttpController.getProjectDocsAndFlushIfOld)
+// will migrate to the POST method of get_and_flush_if_old instead
+app.post(
+  '/project/:project_id/get_and_flush_if_old',
+  HttpController.getProjectDocsAndFlushIfOld
+)
+app.post('/project/:project_id/clearState', HttpController.clearProjectState)
+app.post('/project/:project_id/doc/:doc_id', HttpController.setDoc)
+app.post(
+  '/project/:project_id/doc/:doc_id/flush',
+  HttpController.flushDocIfLoaded
+)
+app.delete('/project/:project_id/doc/:doc_id', HttpController.deleteDoc)
+app.delete('/project/:project_id', HttpController.deleteProject)
+app.delete('/project', HttpController.deleteMultipleProjects)
+app.post('/project/:project_id', HttpController.updateProject)
+app.post(
+  '/project/:project_id/history/resync',
+  HttpController.resyncProjectHistory
+)
+app.post('/project/:project_id/flush', HttpController.flushProject)
+app.post(
+  '/project/:project_id/doc/:doc_id/change/:change_id/accept',
+  HttpController.acceptChanges
+)
+app.post(
+  '/project/:project_id/doc/:doc_id/change/accept',
+  HttpController.acceptChanges
+)
+app.delete(
+  '/project/:project_id/doc/:doc_id/comment/:comment_id',
+  HttpController.deleteComment
+)
+
+app.get('/flush_all_projects', HttpController.flushAllProjects)
+app.get('/flush_queued_projects', HttpController.flushQueuedProjects)
+
+app.get('/total', (req, res, next) => {
+  const timer = new Metrics.Timer('http.allDocList')
+  RedisManager.getCountOfDocsInMemory((err, count) => {
+    if (err) {
+      return next(err)
+    }
+    timer.done()
+    res.send({ total: count })
+  })
+})
+
 app.use((error, req, res, next) => {
   if (error instanceof Errors.NotFoundError) {
     return res.sendStatus(404)
@@ -191,10 +193,10 @@ app.use((error, req, res, next) => {
 })
 
 const shutdownCleanly = signal => () => {
-  logger.log({ signal }, 'received interrupt, cleaning up')
+  logger.info({ signal }, 'received interrupt, cleaning up')
   Settings.shuttingDown = true
   setTimeout(() => {
-    logger.log({ signal }, 'shutting down')
+    logger.info({ signal }, 'shutting down')
     process.exit()
   }, 10000)
 }

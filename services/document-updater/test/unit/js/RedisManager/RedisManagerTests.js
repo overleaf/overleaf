@@ -410,8 +410,8 @@ describe('RedisManager', function () {
           .should.equal(true)
       })
 
-      return it('should log out the problem', function () {
-        return this.logger.warn.called.should.equal(true)
+      return it('should log out the problem as a debug message', function () {
+        return this.logger.debug.called.should.equal(true)
       })
     })
 

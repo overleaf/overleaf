@@ -78,7 +78,7 @@ module.exports = RangesManager = {
     const emptyRangeCountAfter = RangesManager._emptyRangesCount(rangesTracker)
     const rangesWereCollapsed = emptyRangeCountAfter > emptyRangeCountBefore
     const response = RangesManager._getRanges(rangesTracker)
-    logger.log(
+    logger.debug(
       {
         project_id,
         doc_id,
@@ -98,7 +98,7 @@ module.exports = RangesManager = {
       callback = function (error, ranges) {}
     }
     const { changes, comments } = ranges
-    logger.log(`accepting ${change_ids.length} changes in ranges`)
+    logger.debug(`accepting ${change_ids.length} changes in ranges`)
     const rangesTracker = new RangesTracker(changes, comments)
     rangesTracker.removeChangeIds(change_ids)
     const response = RangesManager._getRanges(rangesTracker)
@@ -110,7 +110,7 @@ module.exports = RangesManager = {
       callback = function (error, ranges) {}
     }
     const { changes, comments } = ranges
-    logger.log({ comment_id }, 'deleting comment in ranges')
+    logger.debug({ comment_id }, 'deleting comment in ranges')
     const rangesTracker = new RangesTracker(changes, comments)
     rangesTracker.removeCommentId(comment_id)
     const response = RangesManager._getRanges(rangesTracker)

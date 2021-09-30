@@ -52,7 +52,7 @@ module.exports = Profiler = (function () {
         args.updateTimes = this.updateTimes
         args.start = this.start
         args.end = new Date()
-        logger.log(args, this.name)
+        logger.debug(args, this.name)
       }
       return totalTime
     }

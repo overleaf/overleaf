@@ -34,7 +34,7 @@ function getDoc(req, res, next) {
   let fromVersion
   const docId = req.params.doc_id
   const projectId = req.params.project_id
-  logger.log({ projectId, docId }, 'getting doc via http')
+  logger.debug({ projectId, docId }, 'getting doc via http')
   const timer = new Metrics.Timer('http.getDoc')
 
   if (req.query.fromVersion != null) {
@@ -52,7 +52,7 @@ function getDoc(req, res, next) {
       if (error) {
         return next(error)
       }
-      logger.log({ projectId, docId }, 'got doc via http')
+      logger.debug({ projectId, docId }, 'got doc via http')
       if (lines == null || version == null) {
         return next(new Errors.NotFoundError('document not found'))
       }
@@ -72,7 +72,7 @@ function getDoc(req, res, next) {
 function peekDoc(req, res, next) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
-  logger.log({ projectId, docId }, 'peeking at doc via http')
+  logger.debug({ projectId, docId }, 'peeking at doc via http')
   RedisManager.getDoc(projectId, docId, function (error, lines, version) {
     if (error) {
       return next(error)
@@ -90,14 +90,14 @@ function getProjectDocsAndFlushIfOld(req, res, next) {
   // exclude is string of existing docs "id:version,id:version,..."
   const excludeItems =
     req.query.exclude != null ? req.query.exclude.split(',') : []
-  logger.log({ projectId, exclude: excludeItems }, 'getting docs via http')
+  logger.debug({ projectId, exclude: excludeItems }, 'getting docs via http')
   const timer = new Metrics.Timer('http.getAllDocs')
   const excludeVersions = {}
   for (const item of excludeItems) {
     const [id, version] = item.split(':')
     excludeVersions[id] = version
   }
-  logger.log(
+  logger.debug(
     { projectId, projectStateHash, excludeVersions },
     'excluding versions'
   )
@@ -112,7 +112,7 @@ function getProjectDocsAndFlushIfOld(req, res, next) {
       } else if (error) {
         next(error)
       } else {
-        logger.log(
+        logger.debug(
           {
             projectId,
             result: result.map(doc => `${doc._id}:${doc.v}`),
@@ -128,7 +128,7 @@ function getProjectDocsAndFlushIfOld(req, res, next) {
 function clearProjectState(req, res, next) {
   const projectId = req.params.project_id
   const timer = new Metrics.Timer('http.clearProjectState')
-  logger.log({ projectId }, 'clearing project state via http')
+  logger.debug({ projectId }, 'clearing project state via http')
   ProjectManager.clearProjectState(projectId, error => {
     timer.done()
     if (error) {
@@ -145,13 +145,13 @@ function setDoc(req, res, next) {
   const { lines, source, user_id: userId, undoing } = req.body
   const lineSize = getTotalSizeOfLines(lines)
   if (lineSize > Settings.max_doc_length) {
-    logger.log(
+    logger.warn(
       { projectId, docId, source, lineSize, userId },
       'document too large, returning 406 response'
     )
     return res.sendStatus(406)
   }
-  logger.log(
+  logger.debug(
     { projectId, docId, lines, source, userId, undoing },
     'setting doc via http'
   )
@@ -168,7 +168,7 @@ function setDoc(req, res, next) {
       if (error) {
         return next(error)
       }
-      logger.log({ projectId, docId }, 'set doc via http')
+      logger.debug({ projectId, docId }, 'set doc via http')
       res.sendStatus(204) // No Content
     }
   )
@@ -177,14 +177,14 @@ function setDoc(req, res, next) {
 function flushDocIfLoaded(req, res, next) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
-  logger.log({ projectId, docId }, 'flushing doc via http')
+  logger.debug({ projectId, docId }, 'flushing doc via http')
   const timer = new Metrics.Timer('http.flushDoc')
   DocumentManager.flushDocIfLoadedWithLock(projectId, docId, error => {
     timer.done()
     if (error) {
       return next(error)
     }
-    logger.log({ projectId, docId }, 'flushed doc via http')
+    logger.debug({ projectId, docId }, 'flushed doc via http')
     res.sendStatus(204) // No Content
   })
 }
@@ -194,7 +194,7 @@ function deleteDoc(req, res, next) {
   const projectId = req.params.project_id
   const ignoreFlushErrors = req.query.ignore_flush_errors === 'true'
   const timer = new Metrics.Timer('http.deleteDoc')
-  logger.log({ projectId, docId }, 'deleting doc via http')
+  logger.debug({ projectId, docId }, 'deleting doc via http')
   DocumentManager.flushAndDeleteDocWithLock(
     projectId,
     docId,
@@ -208,7 +208,7 @@ function deleteDoc(req, res, next) {
       if (error) {
         return next(error)
       }
-      logger.log({ projectId, docId }, 'deleted doc via http')
+      logger.debug({ projectId, docId }, 'deleted doc via http')
       res.sendStatus(204) // No Content
     }
   )
@@ -216,21 +216,21 @@ function deleteDoc(req, res, next) {
 
 function flushProject(req, res, next) {
   const projectId = req.params.project_id
-  logger.log({ projectId }, 'flushing project via http')
+  logger.debug({ projectId }, 'flushing project via http')
   const timer = new Metrics.Timer('http.flushProject')
   ProjectManager.flushProjectWithLocks(projectId, error => {
     timer.done()
     if (error) {
       return next(error)
     }
-    logger.log({ projectId }, 'flushed project via http')
+    logger.debug({ projectId }, 'flushed project via http')
     res.sendStatus(204) // No Content
   })
 }
 
 function deleteProject(req, res, next) {
   const projectId = req.params.project_id
-  logger.log({ projectId }, 'deleting project via http')
+  logger.debug({ projectId }, 'deleting project via http')
   const options = {}
   if (req.query.background) {
     options.background = true
@@ -243,7 +243,7 @@ function deleteProject(req, res, next) {
       if (error) {
         return next(error)
       }
-      logger.log({ projectId }, 'queue delete of project via http')
+      logger.debug({ projectId }, 'queue delete of project via http')
       res.sendStatus(204)
     }) // No Content
   } else {
@@ -253,7 +253,7 @@ function deleteProject(req, res, next) {
       if (error) {
         return next(error)
       }
-      logger.log({ projectId }, 'deleted project via http')
+      logger.debug({ projectId }, 'deleted project via http')
       res.sendStatus(204) // No Content
     })
   }
@@ -261,11 +261,11 @@ function deleteProject(req, res, next) {
 
 function deleteMultipleProjects(req, res, next) {
   const projectIds = req.body.project_ids || []
-  logger.log({ projectIds }, 'deleting multiple projects via http')
+  logger.debug({ projectIds }, 'deleting multiple projects via http')
   async.eachSeries(
     projectIds,
     (projectId, cb) => {
-      logger.log({ projectId }, 'queue delete of project via http')
+      logger.debug({ projectId }, 'queue delete of project via http')
       ProjectManager.queueFlushAndDeleteProject(projectId, cb)
     },
     error => {
@@ -283,7 +283,7 @@ function acceptChanges(req, res, next) {
   if (changeIds == null) {
     changeIds = [req.params.change_id]
   }
-  logger.log(
+  logger.debug(
     { projectId, docId },
     `accepting ${changeIds.length} changes via http`
   )
@@ -293,7 +293,7 @@ function acceptChanges(req, res, next) {
     if (error) {
       return next(error)
     }
-    logger.log(
+    logger.debug(
       { projectId, docId },
       `accepted ${changeIds.length} changes via http`
     )
@@ -307,14 +307,14 @@ function deleteComment(req, res, next) {
     doc_id: docId,
     comment_id: commentId,
   } = req.params
-  logger.log({ projectId, docId, commentId }, 'deleting comment via http')
+  logger.debug({ projectId, docId, commentId }, 'deleting comment via http')
   const timer = new Metrics.Timer('http.deleteComment')
   DocumentManager.deleteCommentWithLock(projectId, docId, commentId, error => {
     timer.done()
     if (error) {
       return next(error)
     }
-    logger.log({ projectId, docId, commentId }, 'deleted comment via http')
+    logger.debug({ projectId, docId, commentId }, 'deleted comment via http')
     res.sendStatus(204) // No Content
   })
 }
@@ -323,7 +323,7 @@ function updateProject(req, res, next) {
   const timer = new Metrics.Timer('http.updateProject')
   const projectId = req.params.project_id
   const { projectHistoryId, userId, updates = [], version } = req.body
-  logger.log({ projectId, updates, version }, 'updating project via http')
+  logger.debug({ projectId, updates, version }, 'updating project via http')
   ProjectManager.updateProjectWithLocks(
     projectId,
     projectHistoryId,
@@ -335,7 +335,7 @@ function updateProject(req, res, next) {
       if (error) {
         return next(error)
       }
-      logger.log({ projectId }, 'updated project via http')
+      logger.debug({ projectId }, 'updated project via http')
       res.sendStatus(204) // No Content
     }
   )
@@ -345,7 +345,7 @@ function resyncProjectHistory(req, res, next) {
   const projectId = req.params.project_id
   const { projectHistoryId, docs, files } = req.body
 
-  logger.log(
+  logger.debug(
     { projectId, docs, files },
     'queuing project history resync via http'
   )
@@ -358,7 +358,7 @@ function resyncProjectHistory(req, res, next) {
       if (error) {
         return next(error)
       }
-      logger.log({ projectId }, 'queued project history resync via http')
+      logger.debug({ projectId }, 'queued project history resync via http')
       res.sendStatus(204)
     }
   )
@@ -393,7 +393,7 @@ function flushQueuedProjects(req, res, next) {
       logger.err({ err }, 'error flushing old projects')
       res.sendStatus(500)
     } else {
-      logger.log({ flushed }, 'flush of queued projects completed')
+      logger.info({ flushed }, 'flush of queued projects completed')
       res.send({ flushed })
     }
   })

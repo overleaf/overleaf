@@ -50,7 +50,7 @@ module.exports = DeleteQueueManager = {
             return callback(err)
           }
           if (timestamps.length === 0) {
-            logger.log(
+            logger.debug(
               { project_id },
               'skipping flush of queued project - no timestamps'
             )
@@ -67,7 +67,10 @@ module.exports = DeleteQueueManager = {
               return cb()
             }
           }
-          logger.log({ project_id, flushTimestamp }, 'flushing queued project')
+          logger.debug(
+            { project_id, flushTimestamp },
+            'flushing queued project'
+          )
           return ProjectManager.flushAndDeleteProjectWithLocks(
             project_id,
             { skip_history_flush: false },
@@ -85,11 +88,11 @@ module.exports = DeleteQueueManager = {
     var flushNextProject = function () {
       const now = Date.now()
       if (now - startTime > options.timeout) {
-        logger.log('hit time limit on flushing old projects')
+        logger.debug('hit time limit on flushing old projects')
         return callback(null, count)
       }
       if (count > options.limit) {
-        logger.log('hit count limit on flushing old projects')
+        logger.debug('hit count limit on flushing old projects')
         return callback(null, count)
       }
       return RedisManager.getNextProjectToFlushAndDelete(
@@ -101,7 +104,7 @@ module.exports = DeleteQueueManager = {
           if (project_id == null) {
             return callback(null, count)
           }
-          logger.log({ project_id, queueLength }, 'flushing queued project')
+          logger.debug({ project_id, queueLength }, 'flushing queued project')
           metrics.globalGauge('queued-flush-backlog', queueLength)
           return flushProjectIfNotModified(
             project_id,
@@ -125,7 +128,7 @@ module.exports = DeleteQueueManager = {
     const LONG_DELAY = 1000
     var doFlush = function () {
       if (Settings.shuttingDown) {
-        logger.warn('discontinuing background flush due to shutdown')
+        logger.info('discontinuing background flush due to shutdown')
         return
       }
       return DeleteQueueManager.flushAndDeleteOldProjects(

@@ -30,7 +30,10 @@ module.exports = HistoryRedisManager = {
     if (ops.length === 0) {
       return callback(new Error('cannot push no ops')) // This should never be called with no ops, but protect against a redis error if we sent an empty array to rpush
     }
-    logger.log({ project_id, doc_id }, 'marking doc in project for history ops')
+    logger.debug(
+      { project_id, doc_id },
+      'marking doc in project for history ops'
+    )
     return rclient.sadd(
       Keys.docsWithHistoryOps({ project_id }),
       doc_id,

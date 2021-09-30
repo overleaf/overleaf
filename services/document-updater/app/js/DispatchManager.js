@@ -44,7 +44,7 @@ module.exports = DispatchManager = {
         }
         const timer = new Metrics.Timer('worker.waiting')
         return worker.client.blpop(pendingListKey, 0, function (error, result) {
-          logger.log(`getting ${queueShardNumber}`, error, result)
+          logger.debug(`getting ${queueShardNumber}`, error, result)
           timer.done()
           if (error != null) {
             return callback(error)
@@ -65,11 +65,11 @@ module.exports = DispatchManager = {
                 // log everything except OpRangeNotAvailable errors, these are normal
                 if (error != null) {
                   // downgrade OpRangeNotAvailable and "Delete component" errors so they are not sent to sentry
-                  const logAsWarning =
+                  const logAsDebug =
                     error instanceof Errors.OpRangeNotAvailableError ||
                     error instanceof Errors.DeleteMismatchError
-                  if (logAsWarning) {
-                    logger.warn(
+                  if (logAsDebug) {
+                    logger.debug(
                       { err: error, project_id, doc_id },
                       'error processing update'
                     )

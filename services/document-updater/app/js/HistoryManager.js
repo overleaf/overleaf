@@ -50,7 +50,7 @@ module.exports = HistoryManager = {
         } else {
           metrics.inc('history-flush', 1, { status: 'track-changes' })
           const url = `${Settings.apis.trackchanges.url}/project/${project_id}/doc/${doc_id}/flush`
-          logger.log(
+          logger.debug(
             { project_id, doc_id, url, projectHistoryType },
             'flushing doc in track changes api'
           )
@@ -103,7 +103,7 @@ module.exports = HistoryManager = {
       return callback()
     }
     if (options.skip_history_flush) {
-      logger.log({ project_id }, 'skipping flush of project history')
+      logger.debug({ project_id }, 'skipping flush of project history')
       return callback()
     }
     metrics.inc('history-flush', 1, { status: 'project-history' })
@@ -112,7 +112,7 @@ module.exports = HistoryManager = {
     if (options.background) {
       qs.background = true
     } // pass on the background flush option if present
-    logger.log({ project_id, url, qs }, 'flushing doc in project history api')
+    logger.debug({ project_id, url, qs }, 'flushing doc in project history api')
     return request.post({ url, qs }, function (error, res, body) {
       if (error != null) {
         logger.error(
@@ -169,7 +169,7 @@ module.exports = HistoryManager = {
       ) {
         // Do this in the background since it uses HTTP and so may be too
         // slow to wait for when processing a doc update.
-        logger.log(
+        logger.debug(
           { project_ops_length, project_id },
           'flushing project history api'
         )
@@ -205,7 +205,7 @@ module.exports = HistoryManager = {
         ) {
           // Do this in the background since it uses HTTP and so may be too
           // slow to wait for when processing a doc update.
-          logger.log(
+          logger.debug(
             { doc_ops_length, doc_id, project_id },
             'flushing track changes api'
           )

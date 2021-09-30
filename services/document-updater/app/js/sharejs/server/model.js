@@ -185,7 +185,6 @@ module.exports = Model = function (db, options) {
             }
           } catch (error1) {
             error = error1
-            console.error(error.stack)
             return callback(error.message)
           }
         }
@@ -194,7 +193,6 @@ module.exports = Model = function (db, options) {
           snapshot = doc.type.apply(doc.snapshot, opData.op)
         } catch (error2) {
           error = error2
-          console.error(error.stack)
           return callback(error.message)
         }
 

@@ -86,7 +86,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { docId: this.doc_id, projectId: this.project_id },
             'getting doc via http'
@@ -136,7 +136,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { docId: this.doc_id, projectId: this.project_id },
             'getting doc via http'
@@ -223,7 +223,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             {
               docId: this.doc_id,
@@ -305,7 +305,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { projectId: this.project_id },
             'flushing project via http'
@@ -365,7 +365,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { docId: this.doc_id, projectId: this.project_id },
             'flushing doc via http'
@@ -431,7 +431,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { docId: this.doc_id, projectId: this.project_id },
             'deleting doc via http'
@@ -512,7 +512,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { projectId: this.project_id },
             'deleting project via http'
@@ -587,7 +587,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { projectId: this.project_id, docId: this.doc_id },
             'accepting 1 changes via http'
@@ -622,7 +622,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request with the correct number of changes', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { projectId: this.project_id, docId: this.doc_id },
             `accepting ${this.change_ids.length} changes via http`
@@ -677,7 +677,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             {
               projectId: this.project_id,
@@ -749,7 +749,7 @@ describe('HttpController', function () {
       })
 
       it('should log the request', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { projectId: this.project_id, exclude: [] },
             'getting docs via http'
@@ -758,7 +758,7 @@ describe('HttpController', function () {
       })
 
       it('should log the response', function () {
-        this.logger.log
+        this.logger.debug
           .calledWith(
             { projectId: this.project_id, result: ['1234:23', '4567:45'] },
             'got docs via http'

@@ -424,7 +424,7 @@ describe('RangesManager', function () {
       })
 
       it('should log the call with the correct number of changes', function () {
-        return this.logger.log
+        return this.logger.debug
           .calledWith('accepting 1 changes in ranges')
           .should.equal(true)
       })
@@ -478,7 +478,7 @@ describe('RangesManager', function () {
       })
 
       it('should log the call with the correct number of changes', function () {
-        return this.logger.log
+        return this.logger.debug
           .calledWith(`accepting ${this.change_ids.length} changes in ranges`)
           .should.equal(true)
       })

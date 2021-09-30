@@ -47,7 +47,7 @@ function flushProjectWithLocks(projectId, _callback) {
       })
     })
 
-    logger.log({ projectId, docIds }, 'flushing docs')
+    logger.debug({ projectId, docIds }, 'flushing docs')
     async.series(jobs, () => {
       if (errors.length > 0) {
         callback(new Error('Errors flushing docs. See log for details'))
@@ -82,7 +82,7 @@ function flushAndDeleteProjectWithLocks(projectId, options, _callback) {
       })
     })
 
-    logger.log({ projectId, docIds }, 'deleting docs')
+    logger.debug({ projectId, docIds }, 'deleting docs')
     async.series(jobs, () =>
       // When deleting the project here we want to ensure that project
       // history is completely flushed because the project may be

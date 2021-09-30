@@ -45,7 +45,7 @@ module.exports = ShareJsUpdateManager = {
     if (callback == null) {
       callback = function (error, updatedDocLines) {}
     }
-    logger.log({ project_id, doc_id, update }, 'applying sharejs updates')
+    logger.debug({ project_id, doc_id, update }, 'applying sharejs updates')
     const jobs = []
     // record the update version before it is modified
     const incomingUpdateVersion = update.v
@@ -61,7 +61,7 @@ module.exports = ShareJsUpdateManager = {
       if (error != null) {
         if (error === 'Op already submitted') {
           metrics.inc('sharejs.already-submitted')
-          logger.warn(
+          logger.debug(
             { project_id, doc_id, update },
             'op has already been submitted'
           )
@@ -69,7 +69,7 @@ module.exports = ShareJsUpdateManager = {
           ShareJsUpdateManager._sendOp(project_id, doc_id, update)
         } else if (/^Delete component/.test(error)) {
           metrics.inc('sharejs.delete-mismatch')
-          logger.warn(
+          logger.debug(
             { project_id, doc_id, update, shareJsErr: error },
             'sharejs delete does not match'
           )
@@ -82,7 +82,7 @@ module.exports = ShareJsUpdateManager = {
           return callback(error)
         }
       }
-      logger.log({ project_id, doc_id, error }, 'applied update')
+      logger.debug({ project_id, doc_id, error }, 'applied update')
       return model.getSnapshot(doc_key, (error, data) => {
         if (error != null) {
           return callback(error)

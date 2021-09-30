@@ -77,7 +77,7 @@ module.exports = ProjectHistoryRedisManager = {
     }
     projectUpdate[entity_type] = entity_id
 
-    logger.log(
+    logger.debug(
       { project_id, projectUpdate },
       'queue rename operation to project-history'
     )
@@ -111,7 +111,7 @@ module.exports = ProjectHistoryRedisManager = {
     }
     projectUpdate[entity_type] = entitiy_id
 
-    logger.log(
+    logger.debug(
       { project_id, projectUpdate },
       'queue add operation to project-history'
     )
@@ -127,7 +127,7 @@ module.exports = ProjectHistoryRedisManager = {
     files,
     callback
   ) {
-    logger.log({ project_id, docs, files }, 'queue project structure resync')
+    logger.debug({ project_id, docs, files }, 'queue project structure resync')
     const projectUpdate = {
       resyncProjectStructure: { docs, files },
       projectHistoryId,
@@ -148,7 +148,7 @@ module.exports = ProjectHistoryRedisManager = {
     pathname,
     callback
   ) {
-    logger.log(
+    logger.debug(
       { project_id, doc_id, lines, version, pathname },
       'queue doc content resync'
     )

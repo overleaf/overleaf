@@ -131,8 +131,8 @@ describe('DispatchManager', function () {
           return this.worker._waitForUpdateThenDispatchWorker(this.callback)
         })
 
-        it('should log a warning', function () {
-          return this.logger.warn.called.should.equal(true)
+        it('should log a debug message', function () {
+          return this.logger.debug.called.should.equal(true)
         })
 
         return it('should call the callback', function () {

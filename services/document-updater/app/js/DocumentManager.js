@@ -63,7 +63,7 @@ module.exports = DocumentManager = {
           return callback(error)
         }
         if (lines == null || version == null) {
-          logger.log(
+          logger.debug(
             { project_id, doc_id },
             'doc not in redis so getting from persistence API'
           )
@@ -82,7 +82,7 @@ module.exports = DocumentManager = {
               if (error != null) {
                 return callback(error)
               }
-              logger.log(
+              logger.debug(
                 {
                   project_id,
                   doc_id,
@@ -242,14 +242,14 @@ module.exports = DocumentManager = {
           oldLines.length > 0 &&
           oldLines[0].text != null
         ) {
-          logger.log(
+          logger.debug(
             { doc_id, project_id, oldLines, newLines },
             'document is JSON so not updating'
           )
           return callback(null)
         }
 
-        logger.log(
+        logger.debug(
           { doc_id, project_id, oldLines, newLines },
           'setting a document via http'
         )
@@ -350,13 +350,13 @@ module.exports = DocumentManager = {
           return callback(error)
         }
         if (lines == null || version == null) {
-          logger.log(
+          logger.debug(
             { project_id, doc_id },
             'doc is not loaded so not flushing'
           )
           return callback(null) // TODO: return a flag to bail out, as we go on to remove doc from memory?
         } else {
-          logger.log({ project_id, doc_id, version }, 'flushing doc')
+          logger.debug({ project_id, doc_id, version }, 'flushing doc')
           return PersistenceManager.setDoc(
             project_id,
             doc_id,
@@ -583,7 +583,7 @@ module.exports = DocumentManager = {
   },
 
   resyncDocContents(project_id, doc_id, callback) {
-    logger.log({ project_id, doc_id }, 'start resyncing doc contents')
+    logger.debug({ project_id, doc_id }, 'start resyncing doc contents')
     return RedisManager.getDoc(
       project_id,
       doc_id,
@@ -593,7 +593,7 @@ module.exports = DocumentManager = {
         }
 
         if (lines == null || version == null) {
-          logger.log(
+          logger.debug(
             { project_id, doc_id },
             'resyncing doc contents - not found in redis - retrieving from web'
           )
@@ -628,7 +628,7 @@ module.exports = DocumentManager = {
             }
           )
         } else {
-          logger.log(
+          logger.debug(
             { project_id, doc_id },
             'resyncing doc contents - doc in redis - will queue in redis'
           )

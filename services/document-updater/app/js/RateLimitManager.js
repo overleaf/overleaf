@@ -34,7 +34,7 @@ module.exports = RateLimiter = class RateLimiter {
       this.BaseWorkerCount,
       this.CurrentWorkerLimit * 0.9
     )
-    logger.log(
+    logger.debug(
       { currentLimit: Math.ceil(this.CurrentWorkerLimit) },
       'reducing rate limit'
     )
@@ -62,7 +62,7 @@ module.exports = RateLimiter = class RateLimiter {
         return this._adjustLimitDown()
       }
     } else {
-      logger.log(
+      logger.debug(
         {
           active: this.ActiveWorkerCount,
           currentLimit: Math.ceil(this.CurrentWorkerLimit),

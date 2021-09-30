@@ -86,7 +86,7 @@ module.exports = RedisManager = {
     const docHash = RedisManager._computeHash(docLines)
     // record bytes sent to redis
     metrics.summary('redis.docLines', docLines.length, { status: 'set' })
-    logger.log(
+    logger.debug(
       { project_id, doc_id, version, docHash, pathname, projectHistoryId },
       'putting doc in redis'
     )
@@ -116,13 +116,13 @@ module.exports = RedisManager = {
   },
 
   removeDocFromMemory(project_id, doc_id, _callback) {
-    logger.log({ project_id, doc_id }, 'removing doc from redis')
+    logger.debug({ project_id, doc_id }, 'removing doc from redis')
     const callback = function (err) {
       if (err != null) {
         logger.err({ project_id, doc_id, err }, 'error removing doc from redis')
         return _callback(err)
       } else {
-        logger.log({ project_id, doc_id }, 'removed doc from redis')
+        logger.debug({ project_id, doc_id }, 'removed doc from redis')
         return _callback()
       }
     }
@@ -169,7 +169,7 @@ module.exports = RedisManager = {
       if (error != null) {
         return callback(error)
       }
-      logger.log(
+      logger.debug(
         { project_id, newState, oldState: response[0] },
         'checking project state'
       )
@@ -342,7 +342,7 @@ module.exports = RedisManager = {
             error = new Errors.OpRangeNotAvailableError(
               'doc ops range is not loaded in redis'
             )
-            logger.warn(
+            logger.debug(
               { err: error, doc_id, length, version, start, end },
               'doc ops range is not loaded in redis'
             )
@@ -484,7 +484,7 @@ module.exports = RedisManager = {
         const newHash = RedisManager._computeHash(newDocLines)
 
         const opVersions = appliedOps.map(op => (op != null ? op.v : undefined))
-        logger.log(
+        logger.debug(
           {
             doc_id,
             version: newVersion,
@@ -529,7 +529,7 @@ module.exports = RedisManager = {
             multi.expire(keys.docOps({ doc_id }), RedisManager.DOC_OPS_TTL) // index 6
             if (projectHistoryType === 'project-history') {
               metrics.inc('history-queue', 1, { status: 'skip-track-changes' })
-              logger.log(
+              logger.debug(
                 { doc_id },
                 'skipping push of uncompressed ops for project using project-history'
               )

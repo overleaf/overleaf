@@ -88,7 +88,7 @@ var ProjectFlusher = {
   },
 
   flushAllProjects(options, callback) {
-    logger.log({ options }, 'flushing all projects')
+    logger.info({ options }, 'flushing all projects')
     return ProjectFlusher._getKeys(
       docUpdaterKeys.docsInProject({ project_id: '*' }),
       options.limit,
@@ -123,7 +123,10 @@ var ProjectFlusher = {
                 return success.push(project_ids[i])
               }
             })
-            logger.log({ success, failure }, 'finished flushing all projects')
+            logger.info(
+              { successCount: success.length, failureCount: failure.length },
+              'finished flushing all projects'
+            )
             return callback(error, { success, failure })
           }
         )
