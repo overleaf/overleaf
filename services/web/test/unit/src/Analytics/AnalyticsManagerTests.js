@@ -105,11 +105,15 @@ describe('AnalyticsManager', function () {
         projectId,
         countryCode
       )
-      sinon.assert.calledWithMatch(this.analyticsEditingSessionQueue.add, {
-        userId: this.fakeUserId,
-        projectId,
-        countryCode,
-      })
+      sinon.assert.calledWithMatch(
+        this.analyticsEditingSessionQueue.add,
+        'editing-session',
+        {
+          userId: this.fakeUserId,
+          projectId,
+          countryCode,
+        }
+      )
     })
   })
 })
