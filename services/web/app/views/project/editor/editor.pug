@@ -18,14 +18,17 @@ div.full-size(
 		include ./editor-no-symbol-palette
 
 	.ui-layout-east
-		div(ng-if="ui.pdfLayout == 'sideBySide'")
-			if showNewPdfPreview
-				pdf-preview-pane()
-			else
+		// The pdf-preview component needs to always be rendered, even when the editor is in "full-width" mode and it's not visible. 
+		// It doesn't recompile while hidden, due to the ui.pdfHidden flag, but maintains its state for when it's shown again.
+		if showNewPdfPreview
+			div(ng-show="ui.pdfLayout == 'sideBySide'")
+				pdf-preview()
+		else
+			div(ng-if="ui.pdfLayout == 'sideBySide'")
 				include ./pdf
 
 	.ui-layout-resizer-controls.synctex-controls(
-		ng-show="!!pdf.url && settings.pdfViewer == 'pdfjs'"
+		ng-show="!!pdf.url && settings.pdfViewer !== 'native'"
 		ng-controller="PdfSynctexController"
 	)
 		a.btn.btn-default.btn-xs.synctex-control.synctex-control-goto-pdf(
@@ -52,7 +55,7 @@ div.full-size(
 	ng-show="ui.view == 'pdf'"
 )
 	if showNewPdfPreview
-		pdf-preview-pane()
+		pdf-preview()
 	else
 		include ./pdf
 

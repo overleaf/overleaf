@@ -1,0 +1,126 @@
+// NOTE: using "legacy" build as main build requires webpack v5
+// import PDFJS from 'pdfjs-dist/webpack'
+import * as PDFJS from 'pdfjs-dist/legacy/build/pdf'
+import * as PDFJSViewer from 'pdfjs-dist/legacy/web/pdf_viewer'
+import PDFJSWorker from 'pdfjs-dist/legacy/build/pdf.worker'
+import 'pdfjs-dist/legacy/web/pdf_viewer.css'
+import getMeta from '../../../utils/meta'
+
+if (typeof window !== 'undefined' && 'Worker' in window) {
+  PDFJS.GlobalWorkerOptions.workerPort = new PDFJSWorker()
+}
+
+const params = new URLSearchParams(window.location.search)
+const disableFontFace = params.get('disable-font-face') === 'true'
+const cMapUrl = getMeta('ol-pdfCMapsPath')
+const imageResourcesPath = getMeta('ol-pdfImageResourcesPath')
+
+const rangeChunkSize = 128 * 1024 // 128K chunks
+
+export default class PDFJSWrapper {
+  constructor(container) {
+    this.container = container
+
+    // create the event bus
+    const eventBus = new PDFJSViewer.EventBus()
+
+    // create the link service
+    const linkService = new PDFJSViewer.PDFLinkService({
+      eventBus,
+      externalLinkTarget: 2,
+      externalLinkRel: 'noopener',
+    })
+
+    // create the localization
+    const l10n = new PDFJSViewer.GenericL10n('en-GB') // TODO: locale mapping?
+
+    // create the viewer
+    const viewer = new PDFJSViewer.PDFViewer({
+      container,
+      eventBus,
+      imageResourcesPath,
+      linkService,
+      l10n,
+      enableScripting: false, // default is false, but set explicitly to be sure
+      renderInteractiveForms: false,
+    })
+
+    linkService.setViewer(viewer)
+
+    this.eventBus = eventBus
+    this.linkService = linkService
+    this.viewer = viewer
+  }
+
+  // load a document from a URL
+  async loadDocument(url) {
+    const doc = await PDFJS.getDocument({
+      url,
+      cMapUrl,
+      cMapPacked: true,
+      disableFontFace,
+      rangeChunkSize,
+      disableAutoFetch: true,
+      disableStream: true,
+      textLayerMode: 2, // PDFJSViewer.TextLayerMode.ENABLE,
+    }).promise
+
+    this.viewer.setDocument(doc)
+    this.linkService.setDocument(doc)
+
+    return doc
+  }
+
+  // update the current scale value if the container size changes
+  updateOnResize() {
+    const currentScaleValue = this.viewer.currentScaleValue
+
+    if (
+      currentScaleValue === 'auto' ||
+      currentScaleValue === 'page-fit' ||
+      currentScaleValue === 'page-width'
+    ) {
+      this.viewer.currentScaleValue = currentScaleValue
+    }
+
+    this.viewer.update()
+  }
+
+  // get the page and offset of a click event
+  clickPosition(event, pageElement, textLayer) {
+    const { viewport } = this.viewer.getPageView(textLayer.pageNumber - 1)
+
+    const pageRect = pageElement.querySelector('canvas').getBoundingClientRect()
+
+    const dx = event.clientX - pageRect.left
+    const dy = event.clientY - pageRect.top
+
+    const [left, top] = viewport.convertToPdfPoint(dx, dy)
+
+    return {
+      page: textLayer.pageNumber - 1,
+      offset: {
+        left,
+        top: viewport.viewBox[3] - top,
+      },
+    }
+  }
+
+  // get the current page, offset and page size
+  get currentPosition() {
+    const pageIndex = this.viewer.currentPageNumber - 1
+    const pageView = this.viewer.getPageView(pageIndex)
+    const pageRect = pageView.div.getBoundingClientRect()
+
+    const containerRect = this.container.getBoundingClientRect()
+    const dy = containerRect.top - pageRect.top
+    const [, , width, height] = pageView.viewport.viewBox
+    const [, top] = pageView.viewport.convertToPdfPoint(0, dy)
+
+    return {
+      page: pageIndex,
+      offset: { top, left: 0 },
+      pageSize: { height, width },
+    }
+  }
+}

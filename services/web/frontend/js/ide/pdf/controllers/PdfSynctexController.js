@@ -1,4 +1,5 @@
 import App from '../../../base'
+import { sendMBOnce } from '../../../infrastructure/event-tracking'
 
 App.controller('PdfSynctexController', function ($scope, synctex, ide) {
   this.cursorPosition = null
@@ -27,17 +28,41 @@ App.controller('PdfSynctexController', function ($scope, synctex, ide) {
 
   ide.$scope.$on('cursor:editor:syncToPdf', $scope.syncToPdf)
 
-  $scope.syncToCode = function () {
-    synctex
-      .syncToCode($scope.pdf.position, {
-        includeVisualOffset: true,
-        fromPdfPosition: true,
+  function syncToPosition(position, options) {
+    synctex.syncToCode(position, options).then(data => {
+      ide.editorManager.openDoc(data.doc, {
+        gotoLine: data.line,
       })
-      .then(function (data) {
-        const { doc, line } = data
-        ide.editorManager.openDoc(doc, { gotoLine: line })
-      })
+    })
   }
+
+  $scope.syncToCode = function () {
+    syncToPosition($scope.pdf.position, {
+      includeVisualOffset: true,
+      fromPdfPosition: true,
+    })
+  }
+
+  window.addEventListener('synctex:sync-to-position', event => {
+    syncToPosition(event.detail, {
+      fromPdfPosition: true,
+    })
+  })
+
+  window.addEventListener('synctex:sync-to-entry', event => {
+    sendMBOnce('logs-jump-to-location-once')
+
+    const entry = event.detail
+
+    const entity = ide.fileTreeManager.findEntityByPath(entry.file)
+
+    if (entity && entity.type === 'doc') {
+      ide.editorManager.openDoc(entity, {
+        gotoLine: entry.line ?? undefined,
+        gotoColumn: entry.column ?? undefined,
+      })
+    }
+  })
 })
 
 App.factory('synctex', function (ide, $http, $q) {

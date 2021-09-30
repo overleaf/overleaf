@@ -143,7 +143,7 @@
     "passport-orcid": "0.0.4",
     "passport-saml": "https://github.com/overleaf/passport-saml/releases/download/v3.0.0-overleaf/passport-saml-3.0.0-overleaf.tar.gz",
     "passport-twitter": "^1.0.4",
-    "pdfjs-dist": "^2.2.228",
+    "pdfjs-dist": "^2.9.359",
     "prop-types": "^15.7.2",
     "pug": "^3.0.1",
     "pug-runtime": "^3.0.1",
@@ -261,6 +261,7 @@
     "webpack-assets-manifest": "^4.0.6",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0",
-    "webpack-merge": "^4.2.2"
+    "webpack-merge": "^4.2.2",
+    "worker-loader": "^2.0.0"
   }
 }

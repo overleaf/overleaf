@@ -834,10 +834,6 @@ App.controller(
 
     // This needs to be public.
     ide.$scope.recompile = $scope.recompile
-    // This method is a simply wrapper and exists only for tracking purposes.
-    ide.$scope.recompileViaKey = function () {
-      $scope.recompile({ keyShortcut: true })
-    }
 
     $scope.stop = function () {
       if (!$scope.pdf.compiling) {

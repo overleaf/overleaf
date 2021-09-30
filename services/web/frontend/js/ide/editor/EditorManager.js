@@ -96,6 +96,12 @@ export default EditorManager = (function () {
       this.$scope.$on('flush-changes', () => {
         return Document.flushAll()
       })
+
+      // event dispatched by pdf preview
+      window.addEventListener('flush-changes', () => {
+        Document.flushAll()
+      })
+
       window.addEventListener('blur', () => {
         // The browser may put the tab into sleep as it looses focus.
         // Flushing the documents should help with keeping the documents in
@@ -111,6 +117,11 @@ export default EditorManager = (function () {
           return
         }
         return this._syncTrackChangesState(this.$scope.editor.sharejs_doc)
+      })
+
+      window.addEventListener('editor:open-doc', event => {
+        const { doc, ...options } = event.detail
+        this.openDoc(doc, options)
       })
     }
 

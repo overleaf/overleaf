@@ -13,6 +13,7 @@ export function setupContext() {
       user: window.user,
       project: {},
       $watch: () => {},
+      $applyAsync: () => {},
       ui: {
         chatOpen: true,
         pdfLayout: 'flat',
@@ -26,6 +27,10 @@ export function setupContext() {
     socket: {
       on: sinon.stub(),
       removeListener: sinon.stub(),
+    },
+    fileTreeManager: {
+      findEntityByPath: () => null,
+      getRootDocDirname: () => undefined,
     },
   }
   window.ExposedSettings = window.ExposedSettings || {}

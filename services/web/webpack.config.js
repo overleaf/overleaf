@@ -160,6 +160,21 @@ module.exports = {
         ],
       },
       {
+        // Load images (static files)
+        test: /\.(svg|gif|png|jpg|pdf)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              // Output to public/images
+              outputPath: 'images',
+              publicPath: '/images/',
+              name: '[name].[ext]',
+            },
+          },
+        ],
+      },
+      {
         // These options are necessary for handlebars to have access to helper
         // methods
         test: /\.handlebars$/,
@@ -288,9 +303,13 @@ module.exports = {
         from: 'node_modules/ace-builds/src-min-noconflict',
         to: `js/ace-${PackageVersions.version.ace}/`,
       },
-      // Copy CMap files from pdfjs-dist package to build output. These are used
-      // to provide support for non-Latin characters
+      // Copy CMap files (used to provide support for non-Latin characters)
+      // and static images from pdfjs-dist package to build output.
       { from: 'node_modules/pdfjs-dist/cmaps', to: 'js/cmaps' },
+      {
+        from: 'node_modules/pdfjs-dist/legacy/web/images',
+        to: 'images',
+      },
     ]),
   ],
 }

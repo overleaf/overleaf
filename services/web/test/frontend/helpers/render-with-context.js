@@ -11,6 +11,7 @@ import { IdeProvider } from '../../../frontend/js/shared/context/ide-context'
 import { get } from 'lodash'
 import { ProjectProvider } from '../../../frontend/js/shared/context/project-context'
 import { SplitTestProvider } from '../../../frontend/js/shared/context/split-test-context'
+import { CompileProvider } from '../../../frontend/js/shared/context/compile-context'
 
 export function EditorProviders({
   user = { id: '123abd' },
@@ -52,7 +53,17 @@ export function EditorProviders({
     ...scope,
   }
 
-  window._ide = { $scope, socket, clsiServerId }
+  const fileTreeManager = {
+    findEntityByPath: () => null,
+    getRootDocDirname: () => '',
+  }
+
+  window._ide = {
+    $scope,
+    socket,
+    clsiServerId,
+    fileTreeManager,
+  }
 
   return (
     <SplitTestProvider>
@@ -60,7 +71,9 @@ export function EditorProviders({
         <UserProvider>
           <ProjectProvider>
             <EditorProvider settings={{}}>
-              <LayoutProvider>{children}</LayoutProvider>
+              <CompileProvider>
+                <LayoutProvider>{children}</LayoutProvider>
+              </CompileProvider>
             </EditorProvider>
           </ProjectProvider>
         </UserProvider>

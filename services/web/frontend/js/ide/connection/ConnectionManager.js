@@ -450,6 +450,9 @@ Something went wrong connecting to your project. Please refresh if this continue
             this.$scope.project = { ...defaultProjectAttributes, ...project }
             this.$scope.permissionsLevel = permissionsLevel
             this.ide.loadingManager.socketLoaded()
+            window.dispatchEvent(
+              new CustomEvent('project:joined', { detail: this.$scope.project })
+            )
             this.$scope.$broadcast('project:joined')
           })
         }

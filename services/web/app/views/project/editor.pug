@@ -179,8 +179,9 @@ block append meta
 	meta(name="ol-gitBridgePublicBaseUrl" content=gitBridgePublicBaseUrl)
 	//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
 	meta(name="ol-aceBasePath" content="/js/" + lib('ace'))
-	//- Set path for PDFjs CMaps
+	//- Set path for PDFjs CMaps and images
 	meta(name="ol-pdfCMapsPath" content="/js/cmaps/")
+	meta(name="ol-pdfImageResourcesPath" content="/images/")
 	//- enable doc hash checking for all projects
 	//- used in public/js/libs/sharejs.js
 	meta(name="ol-useShareJsHash" data-type="boolean" content=true)

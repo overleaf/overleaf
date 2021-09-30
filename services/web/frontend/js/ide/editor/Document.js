@@ -653,12 +653,18 @@ export default Document = (function () {
       })
       this.doc.on('change', (ops, oldSnapshot, msg) => {
         this._applyOpsToRanges(ops, oldSnapshot, msg)
+        window.dispatchEvent(
+          new CustomEvent('doc:changed', { detail: { id: this.doc_id } })
+        )
         return this.ide.$scope.$emit('doc:changed', { doc_id: this.doc_id })
       })
       this.doc.on('flipped_pending_to_inflight', () => {
         return this.trigger('flipped_pending_to_inflight')
       })
       return this.doc.on('saved', () => {
+        window.dispatchEvent(
+          new CustomEvent('doc:saved', { detail: { id: this.doc_id } })
+        )
         return this.ide.$scope.$emit('doc:saved', { doc_id: this.doc_id })
       })
     }
