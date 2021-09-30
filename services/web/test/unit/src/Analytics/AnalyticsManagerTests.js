@@ -1,6 +1,9 @@
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
+const MockRequest = require('../helpers/MockRequest')
+const MockResponse = require('../helpers/MockResponse')
+const { assert } = require('chai')
 
 const MODULE_PATH = path.join(
   __dirname,
@@ -10,7 +13,7 @@ const MODULE_PATH = path.join(
 describe('AnalyticsManager', function () {
   beforeEach(function () {
     this.fakeUserId = '123abc'
-    this.analyticsId = '123456'
+    this.analyticsId = 'ecdb935a-52f3-4f91-aebc-7a70d2ffbb55'
     this.Settings = {
       analytics: { enabled: true },
     }
@@ -124,6 +127,112 @@ describe('AnalyticsManager', function () {
           countryCode,
         }
       )
+    })
+  })
+
+  describe('AnalyticsIdMiddleware', function () {
+    beforeEach(function () {
+      this.userId = '123abc'
+      this.analyticsId = 'bccd308c-5d72-426e-a106-662e88557795'
+      this.AnalyticsManager = SandboxedModule.require(MODULE_PATH, {
+        requires: {
+          '@overleaf/settings': {},
+          '../../infrastructure/Queues': {
+            getAnalyticsEventsQueue: () => {},
+            getAnalyticsEditingSessionsQueue: () => {},
+            getOnboardingEmailsQueue: () => {},
+            getAnalyticsUserPropertiesQueue: () => {},
+          },
+          './UserAnalyticsIdCache': {},
+          uuid: {
+            v4: () => this.analyticsId,
+          },
+        },
+      })
+      this.req = new MockRequest()
+      this.req.session = {}
+      this.res = new MockResponse()
+      this.next = () => {}
+    })
+
+    it('sets session.analyticsId with no user in session', async function () {
+      await this.AnalyticsManager.analyticsIdMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      assert.equal(this.analyticsId, this.req.session.analyticsId)
+    })
+
+    it('does not update analyticsId when existing, with no user in session', async function () {
+      this.req.session.analyticsId = 'foo'
+      await this.AnalyticsManager.analyticsIdMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      assert.equal('foo', this.req.session.analyticsId)
+    })
+
+    it('sets session.analyticsId with a logged in user in session having an analyticsId', async function () {
+      this.req.session.user = {
+        userId: this.userId,
+        analyticsId: this.analyticsId,
+      }
+      await this.AnalyticsManager.analyticsIdMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      assert.equal(this.analyticsId, this.req.session.analyticsId)
+    })
+
+    it('sets session.analyticsId with a legacy user session without an analyticsId', async function () {
+      this.req.session.user = {
+        userId: this.userId,
+        analyticsId: undefined,
+      }
+      await this.AnalyticsManager.analyticsIdMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      assert.equal(this.userId, this.req.session.analyticsId)
+    })
+
+    it('updates session.analyticsId with a legacy user session without an analyticsId if different', async function () {
+      this.req.session.user = {
+        userId: this.userId,
+        analyticsId: undefined,
+      }
+      this.req.analyticsId = 'foo'
+      await this.AnalyticsManager.analyticsIdMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      assert.equal(this.userId, this.req.session.analyticsId)
+    })
+
+    it('does not update session.analyticsId with a legacy user session without an analyticsId if same', async function () {
+      this.req.session.user = {
+        userId: this.userId,
+        analyticsId: undefined,
+      }
+      this.req.analyticsId = this.userId
+      await this.AnalyticsManager.analyticsIdMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      assert.equal(this.userId, this.req.session.analyticsId)
+
+      await this.AnalyticsManager.analyticsIdMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      assert.equal(this.userId, this.req.session.analyticsId)
     })
   })
 })

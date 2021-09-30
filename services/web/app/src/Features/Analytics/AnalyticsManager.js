@@ -229,17 +229,15 @@ function getIdsFromSession(session) {
 async function analyticsIdMiddleware(req, res, next) {
   const session = req.session
   const sessionUser = SessionManager.getSessionUser(session)
-  if (session.analyticsId) {
-    if (sessionUser && session.analyticsId !== sessionUser.analyticsId) {
-      session.analyticsId = sessionUser.analyticsId
-    }
-  } else {
-    if (sessionUser) {
-      session.analyticsId = sessionUser.analyticsId || sessionUser.userId // backfill for logged-in sessions created before we added the analyticsId
-    } else {
-      session.analyticsId = uuid.v4()
-    }
+
+  if (sessionUser) {
+    // ensure `session.analyticsId` is set to the user's `analyticsId`, and fallback to their `userId` for pre-analyticsId users
+    session.analyticsId = sessionUser.analyticsId || sessionUser.userId
+  } else if (!session.analyticsId) {
+    // generate an `analyticsId` if needed
+    session.analyticsId = uuid.v4()
   }
+
   next()
 }
 
