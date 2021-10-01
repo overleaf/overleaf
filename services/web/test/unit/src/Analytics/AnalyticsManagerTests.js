@@ -4,6 +4,7 @@ const sinon = require('sinon')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const { assert } = require('chai')
+const { ObjectID } = require('mongodb')
 
 const MODULE_PATH = path.join(
   __dirname,
@@ -12,7 +13,7 @@ const MODULE_PATH = path.join(
 
 describe('AnalyticsManager', function () {
   beforeEach(function () {
-    this.fakeUserId = '123abc'
+    this.fakeUserId = 'dbfc9438d14996f73dd172fb'
     this.analyticsId = 'ecdb935a-52f3-4f91-aebc-7a70d2ffbb55'
     this.Settings = {
       analytics: { enabled: true },
@@ -74,13 +75,34 @@ describe('AnalyticsManager', function () {
       sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
 
-    it('userId or analyticsId is missing', function () {
+    it('userId is missing', function () {
+      this.AnalyticsManager.identifyUser(undefined, this.analyticsId)
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+    })
+
+    it('analyticsId is missing', function () {
       this.AnalyticsManager.identifyUser(this.fakeUserId, undefined)
       sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
 
-    it('userId equal analyticsId', function () {
+    it('userId equals analyticsId', function () {
       this.AnalyticsManager.identifyUser(this.fakeUserId, this.fakeUserId)
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+    })
+
+    it('Mongo userId equals string userId', function () {
+      this.AnalyticsManager.identifyUser(
+        new ObjectID(this.fakeUserId),
+        this.fakeUserId
+      )
+      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+    })
+
+    it('userId and analyticsId are the same Mongo ID', function () {
+      this.AnalyticsManager.identifyUser(
+        new ObjectID(this.fakeUserId),
+        new ObjectID(this.fakeUserId)
+      )
       sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
   })

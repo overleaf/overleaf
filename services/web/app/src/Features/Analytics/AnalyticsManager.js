@@ -15,7 +15,7 @@ const analyticsUserPropertiesQueue = Queues.getAnalyticsUserPropertiesQueue()
 const ONE_MINUTE_MS = 60 * 1000
 
 function identifyUser(userId, analyticsId, isNewUser) {
-  if (!userId || !analyticsId || userId === analyticsId) {
+  if (!userId || !analyticsId || userId.toString() === analyticsId.toString()) {
     return
   }
   if (_isAnalyticsDisabled() || _isSmokeTestUser(userId)) {
