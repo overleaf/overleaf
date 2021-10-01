@@ -742,7 +742,7 @@
   "notification_group_invite": "您被邀请加入 __groupName__ ， <a href=\"’/user/subscription/__subscription_id__/group/invited’\">点击加入</a>。",
   "search_references": "搜索此项目中的.bib文件",
   "no_search_results": "没有搜索到结果",
-  "email_already_registered": "改邮箱已被注册",
+  "email_already_registered": "该邮箱已被注册",
   "compile_mode": "编译模式",
   "normal": "常规",
   "fast": "快速",
