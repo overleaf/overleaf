@@ -37,7 +37,7 @@ jobs:
         run: cd server-ce && make build-community 
         
       - name: tag docker
-        run: docker image tag sharelatex/sharelatex:latest ${{secrets.DOCKER_USERNAME}}/sharelatex:$(date +%s)
+        run: docker image tag sharelatex/sharelatex:latest ${{secrets.DOCKER_USERNAME}}/sharelatex:latest
         
       - name: Docker Push
-        run: docker push ${{secrets.DOCKER_USERNAME}}/sharelatex
+        run: docker push ${{secrets.DOCKER_USERNAME}}/sharelatex:latest
