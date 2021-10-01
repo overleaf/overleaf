@@ -1,4 +1,5 @@
 import './utils/webpack-public-path'
+import './infrastructure/error-reporter'
 import 'jquery'
 import 'bootstrap'
 import './features/form-helpers/hydrate-form'
