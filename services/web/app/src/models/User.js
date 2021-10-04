@@ -169,5 +169,19 @@ const UserSchema = new Schema({
   analyticsId: { type: String },
 })
 
+function formatSplitTestsSchema(next) {
+  if (this.splitTests) {
+    for (const splitTestKey of Object.keys(this.splitTests)) {
+      for (const variantIndex in this.splitTests[splitTestKey]) {
+        this.splitTests[splitTestKey][variantIndex].assignedAt = new Date(
+          this.splitTests[splitTestKey][variantIndex].assignedAt
+        )
+      }
+    }
+  }
+  next()
+}
+UserSchema.pre('save', formatSplitTestsSchema)
+
 exports.User = mongoose.model('User', UserSchema)
 exports.UserSchema = UserSchema

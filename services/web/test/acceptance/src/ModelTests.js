@@ -17,6 +17,34 @@ describe('mongoose', function () {
       await expect(User.create({ email: email })).to.be.rejected
       await expect(User.countDocuments({ email: email })).to.eventually.equal(1)
     })
+
+    it('formats assignedAt as Date', async function () {
+      await expect(
+        User.create({
+          email,
+          splitTests: {
+            'some-test': [
+              {
+                variantName: 'control',
+                versionNumber: 1,
+                phase: 'release',
+                assignedAt: '2021-09-24T11:53:18.313Z',
+              },
+              {
+                variantName: 'control',
+                versionNumber: 2,
+                phase: 'release',
+                assignedAt: new Date(),
+              },
+            ],
+          },
+        })
+      ).to.be.fulfilled
+
+      const user = await User.findOne({ email })
+      expect(user.splitTests['some-test'][0].assignedAt).to.be.a('date')
+      expect(user.splitTests['some-test'][1].assignedAt).to.be.a('date')
+    })
   })
 
   describe('Subsription', function () {
