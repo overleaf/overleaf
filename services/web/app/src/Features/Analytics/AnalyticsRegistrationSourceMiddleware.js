@@ -6,7 +6,6 @@ const SessionManager = require('../../Features/Authentication/SessionManager')
 function setSource(medium, source) {
   return function (req, res, next) {
     if (req.session) {
-      req.session.required_login_for = medium
       req.session.required_login_from_product_medium = medium
       if (source) {
         req.session.required_login_from_product_source = source

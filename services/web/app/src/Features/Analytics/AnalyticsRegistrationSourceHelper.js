@@ -4,7 +4,6 @@ const AnalyticsManager = require('./AnalyticsManager')
 
 function clearSource(session) {
   if (session) {
-    delete session.required_login_for
     delete session.required_login_from_product_medium
     delete session.required_login_from_product_source
   }
@@ -102,14 +101,6 @@ function addUserProperties(userId, session) {
       userId,
       `registered-from-product-medium`,
       'bonus-scheme'
-    )
-  }
-
-  if (session.required_login_for) {
-    AnalyticsManager.setUserPropertyForUser(
-      userId,
-      `registered-from-${session.required_login_for}`,
-      true
     )
   }
 
