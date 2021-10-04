@@ -105,7 +105,7 @@ ${content.message(opts, true).join('\r\n\r\n')}
 
 Regards,
 The ${settings.appName} Team - ${settings.siteUrl}\
-`
+      `
     },
     compiledTemplate(opts) {
       return NoCTAEmailBody({
@@ -244,27 +244,54 @@ templates.confirmEmail = ctaTemplate({
 
 templates.projectInvite = ctaTemplate({
   subject(opts) {
-    return `${_.escape(
-      SpamSafe.safeProjectName(opts.project.name, 'New Project')
-    )} - shared by ${_.escape(
-      SpamSafe.safeEmail(opts.owner.email, 'a collaborator')
-    )}`
+    const safeName = SpamSafe.isSafeProjectName(opts.project.name)
+    const safeEmail = SpamSafe.isSafeEmail(opts.owner.email)
+
+    if (safeName && safeEmail) {
+      return `"${_.escape(opts.project.name)}" — shared by ${_.escape(
+        opts.owner.email
+      )}`
+    }
+    if (safeName) {
+      return `${settings.appName} project shared with you — "${_.escape(
+        opts.project.name
+      )}"`
+    }
+    if (safeEmail) {
+      return `${_.escape(opts.owner.email)} shared an ${
+        settings.appName
+      } project with you`
+    }
+
+    return `An ${settings.appName} project has been shared with you`
   },
   title(opts) {
-    return `${_.escape(
-      SpamSafe.safeProjectName(opts.project.name, 'New Project')
-    )} - shared by ${_.escape(
-      SpamSafe.safeEmail(opts.owner.email, 'a collaborator')
-    )}`
+    return 'Project Invite'
   },
-  message(opts) {
-    return [
-      `${_.escape(
-        SpamSafe.safeEmail(opts.owner.email, 'a collaborator')
-      )} wants to share ${_.escape(
-        SpamSafe.safeProjectName(opts.project.name, 'a new project')
-      )} with you.`,
-    ]
+  greeting(opts) {
+    return ''
+  },
+  message(opts, isPlainText) {
+    // build message depending on spam-safe variables
+    var message = [`You have been invited to an ${settings.appName} project.`]
+
+    if (SpamSafe.isSafeProjectName(opts.project.name)) {
+      message.push('<br/> Project:')
+      message.push(`<b>${_.escape(opts.project.name)}</b>`)
+    }
+
+    if (SpamSafe.isSafeEmail(opts.owner.email)) {
+      message.push(`<br/> Shared by:`)
+      message.push(`<b>${_.escape(opts.owner.email)}</b>`)
+    }
+
+    if (message.length === 1) {
+      message.push('<br/> Please view the project to find out more.')
+    }
+
+    return message.map(m => {
+      return EmailMessageHelper.cleanHTML(m, isPlainText)
+    })
   },
   ctaText() {
     return 'View project'

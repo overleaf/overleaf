@@ -63,18 +63,44 @@ describe('EmailBuilder', function () {
     })
 
     describe('when someone is up to no good', function () {
-      beforeEach(function () {
+      it('should not contain the project name at all if unsafe', function () {
         this.opts.project.name = "<img src='http://evilsite.com/evil.php'>"
         this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
+        expect(this.email.html).to.not.contain('evilsite.com')
+        expect(this.email.subject).to.not.contain('evilsite.com')
+
+        // but email should appear
+        expect(this.email.html).to.contain(this.opts.owner.email)
+        expect(this.email.subject).to.contain(this.opts.owner.email)
       })
 
-      it('should not contain unescaped html in the html part', function () {
-        expect(this.email.html).to.contain('New Project')
+      it('should not contain the inviter email at all if unsafe', function () {
+        this.opts.owner.email =
+          'verylongemailaddressthatwillfailthecheck@longdomain.domain'
+        this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
+
+        expect(this.email.html).to.not.contain(this.opts.owner.email)
+        expect(this.email.subject).to.not.contain(this.opts.owner.email)
+
+        // but title should appear
+        expect(this.email.html).to.contain(this.opts.project.name)
+        expect(this.email.subject).to.contain(this.opts.project.name)
       })
 
-      it('should not have undefined in it', function () {
-        this.email.html.indexOf('undefined').should.equal(-1)
-        this.email.subject.indexOf('undefined').should.equal(-1)
+      it('should handle both email and title being unsafe', function () {
+        this.opts.project.name = "<img src='http://evilsite.com/evil.php'>"
+        this.opts.owner.email =
+          'verylongemailaddressthatwillfailthecheck@longdomain.domain'
+        this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
+
+        expect(this.email.html).to.not.contain('evilsite.com')
+        expect(this.email.subject).to.not.contain('evilsite.com')
+        expect(this.email.html).to.not.contain(this.opts.owner.email)
+        expect(this.email.subject).to.not.contain(this.opts.owner.email)
+
+        expect(this.email.html).to.contain(
+          'Please view the project to find out more'
+        )
       })
     })
   })
@@ -84,7 +110,7 @@ describe('EmailBuilder', function () {
       this.opts = {
         to: 'bob@joe.com',
         first_name: 'bob',
-        owner: {
+        newOwner: {
           email: 'sally@hally.com',
         },
         inviteUrl: 'http://example.com/invite',
@@ -93,12 +119,14 @@ describe('EmailBuilder', function () {
           name: 'come buy my product at http://notascam.com',
         },
       }
-      this.email = this.EmailBuilder.buildEmail('projectInvite', this.opts)
+      this.email = this.EmailBuilder.buildEmail(
+        'ownershipTransferConfirmationPreviousOwner',
+        this.opts
+      )
     })
 
     it('should replace spammy project name', function () {
-      this.email.html.indexOf('a new project').should.not.equal(-1)
-      this.email.subject.indexOf('New Project').should.not.equal(-1)
+      this.email.html.indexOf('your project').should.not.equal(-1)
     })
   })
 
