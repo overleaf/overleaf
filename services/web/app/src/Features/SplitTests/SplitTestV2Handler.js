@@ -10,6 +10,12 @@ const splitTestCache = require('./SplitTestCache')
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
 const BETA_PHASE = 'beta'
+const DEFAULT_ASSIGNMENT = {
+  variant: DEFAULT_VARIANT,
+  analytics: {
+    segmentation: {},
+  },
+}
 
 /**
  * Get the assignment of a user to a split test.
@@ -37,7 +43,7 @@ const BETA_PHASE = 'beta'
  */
 async function getAssignment(userId, splitTestName, options) {
   if (!userId) {
-    return { variant: 'default', analytics: { segmentation: {} } }
+    return DEFAULT_ASSIGNMENT
   }
   const analyticsId = await UserAnalyticsIdCache.get(userId)
   return _getAssignment(analyticsId, userId, undefined, splitTestName, options)
@@ -72,6 +78,31 @@ async function getAssignmentForSession(session, splitTestName, options) {
   return _getAssignment(analyticsId, userId, session, splitTestName, options)
 }
 
+async function assignInLocalsContext(res, userId, splitTestName, options) {
+  const assignment = await getAssignment(userId, splitTestName, options)
+  if (!res.locals.splitTestVariants) {
+    res.locals.splitTestVariants = {}
+  }
+  res.locals.splitTestVariants[splitTestName] = assignment.variant
+}
+
+async function assignInLocalsContextForSession(
+  res,
+  session,
+  splitTestName,
+  options
+) {
+  const assignment = await getAssignmentForSession(
+    session,
+    splitTestName,
+    options
+  )
+  if (!res.locals.splitTestVariants) {
+    res.locals.splitTestVariants = {}
+  }
+  res.locals.splitTestVariants[splitTestName] = assignment.variant
+}
+
 async function _getAssignment(
   analyticsId,
   userId,
@@ -79,6 +110,9 @@ async function _getAssignment(
   splitTestName,
   options
 ) {
+  if (!analyticsId && !userId) {
+    return DEFAULT_ASSIGNMENT
+  }
   const splitTest = await splitTestCache.get(splitTestName)
   if (splitTest) {
     const currentVersion = splitTest.getCurrentVersion()
@@ -118,37 +152,7 @@ async function _getAssignment(
       }
     }
   }
-  return {
-    variant: DEFAULT_VARIANT,
-    analytics: {
-      segmentation: {},
-    },
-  }
-}
-
-async function assignInLocalsContext(res, userId, splitTestName, options) {
-  const assignment = await getAssignment(userId, splitTestName, options)
-  if (!res.locals.splitTestVariants) {
-    res.locals.splitTestVariants = {}
-  }
-  res.locals.splitTestVariants[splitTestName] = assignment.variant
-}
-
-async function assignInLocalsContextForSession(
-  res,
-  session,
-  splitTestName,
-  options
-) {
-  const assignment = await getAssignmentForSession(
-    session,
-    splitTestName,
-    options
-  )
-  if (!res.locals.splitTestVariants) {
-    res.locals.splitTestVariants = {}
-  }
-  res.locals.splitTestVariants[splitTestName] = assignment.variant
+  return DEFAULT_ASSIGNMENT
 }
 
 async function _getAssignmentMetadata(analyticsId, userId, splitTest) {

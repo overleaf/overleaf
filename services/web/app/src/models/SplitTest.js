@@ -66,6 +66,10 @@ const VersionSchema = new Schema(
       required: true,
     },
     variants: [VariantSchema],
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   { _id: false }
 )
