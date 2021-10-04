@@ -232,7 +232,7 @@ async function analyticsIdMiddleware(req, res, next) {
 
   if (sessionUser) {
     // ensure `session.analyticsId` is set to the user's `analyticsId`, and fallback to their `userId` for pre-analyticsId users
-    session.analyticsId = sessionUser.analyticsId || sessionUser.userId
+    session.analyticsId = sessionUser.analyticsId || sessionUser._id
   } else if (!session.analyticsId) {
     // generate an `analyticsId` if needed
     session.analyticsId = uuid.v4()

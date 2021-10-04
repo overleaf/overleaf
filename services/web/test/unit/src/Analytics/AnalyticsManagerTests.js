@@ -198,7 +198,7 @@ describe('AnalyticsManager', function () {
 
     it('sets session.analyticsId with a logged in user in session having an analyticsId', async function () {
       this.req.session.user = {
-        userId: this.userId,
+        _id: this.userId,
         analyticsId: this.analyticsId,
       }
       await this.AnalyticsManager.analyticsIdMiddleware(
@@ -211,7 +211,7 @@ describe('AnalyticsManager', function () {
 
     it('sets session.analyticsId with a legacy user session without an analyticsId', async function () {
       this.req.session.user = {
-        userId: this.userId,
+        _id: this.userId,
         analyticsId: undefined,
       }
       await this.AnalyticsManager.analyticsIdMiddleware(
@@ -224,7 +224,7 @@ describe('AnalyticsManager', function () {
 
     it('updates session.analyticsId with a legacy user session without an analyticsId if different', async function () {
       this.req.session.user = {
-        userId: this.userId,
+        _id: this.userId,
         analyticsId: undefined,
       }
       this.req.analyticsId = 'foo'
@@ -238,7 +238,7 @@ describe('AnalyticsManager', function () {
 
     it('does not update session.analyticsId with a legacy user session without an analyticsId if same', async function () {
       this.req.session.user = {
-        userId: this.userId,
+        _id: this.userId,
         analyticsId: undefined,
       }
       this.req.analyticsId = this.userId
