@@ -424,18 +424,12 @@ if (process.env.SHARELATEX_LANG_DOMAIN_MAPPING != null) {
 // -----------
 // These restrict the passwords users can use when registering
 // opts are from http://antelle.github.io/passfield
-if (
-  process.env.SHARELATEX_PASSWORD_VALIDATION_PATTERN ||
-  process.env.SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH ||
-  process.env.SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH
-) {
-  settings.passwordStrengthOptions = {
-    pattern: process.env.SHARELATEX_PASSWORD_VALIDATION_PATTERN || 'aA$3',
-    length: {
-      min: process.env.SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH || 8,
-      max: process.env.SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH || 150,
-    },
-  }
+settings.passwordStrengthOptions = {
+  pattern: process.env.SHARELATEX_PASSWORD_VALIDATION_PATTERN || 'aA$3',
+  length: {
+    min: process.env.SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH || 8,
+    max: process.env.SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH || 150,
+  },
 }
 
 // ######################
