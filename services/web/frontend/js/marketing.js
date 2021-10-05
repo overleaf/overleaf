@@ -1,6 +1,7 @@
 import './utils/webpack-public-path'
 import 'jquery'
 import 'bootstrap'
+import './cdn-load-test'
 import './features/form-helpers/hydrate-form'
 import './features/link-helpers/slow-link'
 import './features/bookmarkable-tab'

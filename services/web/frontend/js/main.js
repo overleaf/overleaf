@@ -52,6 +52,7 @@ import './services/validateCaptcha'
 import './services/validateCaptchaV3'
 import './filters/formatDate'
 import '../../modules/modules-main.js'
+import './cdn-load-test'
 angular.module('SharelatexApp').config(function ($locationProvider) {
   try {
     return $locationProvider.html5Mode({
