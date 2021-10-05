@@ -27,6 +27,9 @@ describe('BetaProgramHandler', function () {
             updateUser: sinon.stub().resolves(),
           },
         }),
+        '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
+          setUserPropertyForUser: sinon.stub().resolves(),
+        }),
       },
     })
   })
@@ -43,6 +46,19 @@ describe('BetaProgramHandler', function () {
       this.call(err => {
         expect(err).to.not.exist
         this.UserUpdater.promises.updateUser.callCount.should.equal(1)
+        done()
+      })
+    })
+
+    it('should set beta-program user property to true', function (done) {
+      this.call(err => {
+        expect(err).to.not.exist
+        sinon.assert.calledWith(
+          this.AnalyticsManager.setUserPropertyForUser,
+          this.user_id,
+          'beta-program',
+          true
+        )
         done()
       })
     })
@@ -81,6 +97,19 @@ describe('BetaProgramHandler', function () {
       this.call(err => {
         expect(err).to.not.exist
         this.UserUpdater.promises.updateUser.callCount.should.equal(1)
+        done()
+      })
+    })
+
+    it('should set beta-program user property to false', function (done) {
+      this.call(err => {
+        expect(err).to.not.exist
+        sinon.assert.calledWith(
+          this.AnalyticsManager.setUserPropertyForUser,
+          this.user_id,
+          'beta-program',
+          false
+        )
         done()
       })
     })
