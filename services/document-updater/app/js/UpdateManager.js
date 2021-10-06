@@ -167,7 +167,7 @@ module.exports = UpdateManager = {
 
     var profile = new Profiler('applyUpdate', { project_id, doc_id })
     UpdateManager._sanitizeUpdate(update)
-    profile.log('sanitizeUpdate')
+    profile.log('sanitizeUpdate', { sync: true })
     return DocumentManager.getDoc(
       project_id,
       doc_id,
@@ -182,6 +182,7 @@ module.exports = UpdateManager = {
           )
         }
         const previousVersion = version
+        const incomingUpdateVersion = update.v
         return ShareJsUpdateManager.applyUpdate(
           project_id,
           doc_id,
@@ -189,7 +190,11 @@ module.exports = UpdateManager = {
           lines,
           version,
           function (error, updatedDocLines, version, appliedOps) {
-            profile.log('sharejs.applyUpdate')
+            profile.log('sharejs.applyUpdate', {
+              // only synchronous when the update applies directly to the
+              // doc version, otherwise getPreviousDocOps is called.
+              sync: incomingUpdateVersion === previousVersion,
+            })
             if (error != null) {
               return callback(error)
             }
@@ -206,7 +211,7 @@ module.exports = UpdateManager = {
                   projectHistoryId,
                   lines
                 )
-                profile.log('RangesManager.applyUpdate')
+                profile.log('RangesManager.applyUpdate', { sync: true })
                 if (error != null) {
                   return callback(error)
                 }

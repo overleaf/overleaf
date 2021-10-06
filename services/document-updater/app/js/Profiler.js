@@ -21,7 +21,8 @@ const deltaMs = function (ta, tb) {
 module.exports = Profiler = (function () {
   Profiler = class Profiler {
     static initClass() {
-      this.prototype.LOG_CUTOFF_TIME = 1000
+      this.prototype.LOG_CUTOFF_TIME = 15 * 1000
+      this.prototype.LOG_SYNC_CUTOFF_TIME = 1000
     }
 
     constructor(name, args) {
@@ -30,20 +31,24 @@ module.exports = Profiler = (function () {
       this.t0 = this.t = process.hrtime()
       this.start = new Date()
       this.updateTimes = []
+      this.totalSyncTime = 0
     }
 
-    log(label) {
+    log(label, options = {}) {
       const t1 = process.hrtime()
       const dtMilliSec = deltaMs(t1, this.t)
       this.t = t1
+      this.totalSyncTime += options.sync ? dtMilliSec : 0
       this.updateTimes.push([label, dtMilliSec]) // timings in ms
       return this // make it chainable
     }
 
     end(message) {
       const totalTime = deltaMs(this.t, this.t0)
-      if (totalTime > this.LOG_CUTOFF_TIME) {
-        // log anything greater than cutoff
+      const exceedsCutoff = totalTime > this.LOG_CUTOFF_TIME
+      const exceedsSyncCutoff = this.totalSyncTime > this.LOG_SYNC_CUTOFF_TIME
+      if (exceedsCutoff || exceedsSyncCutoff) {
+        // log anything greater than cutoffs
         const args = {}
         for (const k in this.args) {
           const v = this.args[k]
@@ -52,7 +57,8 @@ module.exports = Profiler = (function () {
         args.updateTimes = this.updateTimes
         args.start = this.start
         args.end = new Date()
-        logger.debug(args, this.name)
+        args.status = { exceedsCutoff, exceedsSyncCutoff }
+        logger.warn(args, this.name)
       }
       return totalTime
     }

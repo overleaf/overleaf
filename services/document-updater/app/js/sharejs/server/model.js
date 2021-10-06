@@ -26,6 +26,8 @@ const { EventEmitter } = require('events')
 const queue = require('./syncqueue')
 const types = require('../types')
 
+const Profiler = require('../../Profiler')
+
 const isArray = o => Object.prototype.toString.call(o) === '[object Array]'
 
 // This constructor creates a new Model object. There will be one model object
@@ -167,6 +169,7 @@ module.exports = Model = function (db, options) {
 
         if (ops.length > 0) {
           try {
+            const profile = new Profiler('model.transform')
             // If there's enough ops, it might be worth spinning this out into a webworker thread.
             for (const oldOp of Array.from(ops)) {
               // Dup detection works by sending the id(s) the op has been submitted with previously.
@@ -183,6 +186,7 @@ module.exports = Model = function (db, options) {
               opData.op = doc.type.transform(opData.op, oldOp.op, 'left')
               opData.v++
             }
+            profile.log('transform', { sync: true }).end()
           } catch (error1) {
             error = error1
             return callback(error.message)
@@ -190,7 +194,9 @@ module.exports = Model = function (db, options) {
         }
 
         try {
+          const profile = new Profiler('model.apply')
           snapshot = doc.type.apply(doc.snapshot, opData.op)
+          profile.log('model.apply', { sync: true }).end()
         } catch (error2) {
           error = error2
           return callback(error.message)
