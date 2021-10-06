@@ -418,11 +418,13 @@ module.exports = {
   // -----------
   // These restrict the passwords users can use when registering
   // opts are from http://antelle.github.io/passfield
-  // passwordStrengthOptions:
-  // 	pattern: "aA$3"
-  // 	length:
-  // 		min: 6
-  // 		max: 128
+  passwordStrengthOptions: {
+    length: {
+      min: 6,
+      // Bcrypt does not support longer passwords than that.
+      max: 72,
+    },
+  },
 
   // Email support
   // -------------
