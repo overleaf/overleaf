@@ -32,7 +32,7 @@ export default class PDFJSWrapper {
     })
 
     // create the localization
-    const l10n = new PDFJSViewer.GenericL10n('en-GB') // TODO: locale mapping?
+    // const l10n = new PDFJSViewer.GenericL10n('en-GB') // TODO: locale mapping?
 
     // create the viewer
     const viewer = new PDFJSViewer.PDFViewer({
@@ -40,7 +40,7 @@ export default class PDFJSWrapper {
       eventBus,
       imageResourcesPath,
       linkService,
-      l10n,
+      // l10n, // commented out since it currently breaks `aria-label` rendering in pdf pages
       enableScripting: false, // default is false, but set explicitly to be sure
       renderInteractiveForms: false,
     })
@@ -53,22 +53,48 @@ export default class PDFJSWrapper {
   }
 
   // load a document from a URL
-  async loadDocument(url) {
-    const doc = await PDFJS.getDocument({
-      url,
-      cMapUrl,
-      cMapPacked: true,
-      disableFontFace,
-      rangeChunkSize,
-      disableAutoFetch: true,
-      disableStream: true,
-      textLayerMode: 2, // PDFJSViewer.TextLayerMode.ENABLE,
-    }).promise
+  loadDocument(url) {
+    // prevents any previous loading task from populating the viewer
+    this.loadDocumentTask = undefined
 
-    this.viewer.setDocument(doc)
-    this.linkService.setDocument(doc)
+    return new Promise((resolve, reject) => {
+      this.loadDocumentTask = PDFJS.getDocument({
+        url,
+        cMapUrl,
+        cMapPacked: true,
+        disableFontFace,
+        rangeChunkSize,
+        disableAutoFetch: true,
+        disableStream: true,
+        textLayerMode: 2, // PDFJSViewer.TextLayerMode.ENABLE,
+      })
 
-    return doc
+      this.loadDocumentTask.promise
+        .then(doc => {
+          if (!this.loadDocumentTask) {
+            return // ignoring the response since loading task has been aborted
+          }
+
+          const previousDoc = this.viewer.pdfDocument
+
+          this.viewer.setDocument(doc)
+          this.linkService.setDocument(doc)
+          resolve(doc)
+
+          if (previousDoc) {
+            previousDoc.cleanup().catch(console.error)
+            previousDoc.destroy()
+          }
+        })
+        .catch(error => {
+          if (this.loadDocumentTask) {
+            reject(error)
+          }
+        })
+        .finally(() => {
+          this.loadDocumentTask = undefined
+        })
+    })
   }
 
   // update the current scale value if the container size changes
@@ -122,5 +148,17 @@ export default class PDFJSWrapper {
       offset: { top, left: 0 },
       pageSize: { height, width },
     }
+  }
+
+  abortDocumentLoading() {
+    this.loadDocumentTask = undefined
+  }
+
+  destroy() {
+    if (this.loadDocumentTask) {
+      this.loadDocumentTask.destroy()
+      this.loadDocumentTask = undefined
+    }
+    this.viewer.destroy()
   }
 }
