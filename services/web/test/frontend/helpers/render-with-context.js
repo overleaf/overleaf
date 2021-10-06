@@ -14,7 +14,7 @@ import { SplitTestProvider } from '../../../frontend/js/shared/context/split-tes
 import { CompileProvider } from '../../../frontend/js/shared/context/compile-context'
 
 export function EditorProviders({
-  user = { id: '123abd' },
+  user = { id: '123abd', email: 'testuser@example.com' },
   projectId = 'project123',
   socket = {
     on: sinon.stub(),

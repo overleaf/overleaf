@@ -8,6 +8,7 @@ UserContext.Provider.propTypes = {
   value: PropTypes.shape({
     user: PropTypes.shape({
       id: PropTypes.string,
+      email: PropTypes.string,
       allowedFreeTrial: PropTypes.boolean,
       first_name: PropTypes.string,
       last_name: PropTypes.string,

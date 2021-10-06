@@ -2,8 +2,8 @@ import { memo, Suspense } from 'react'
 import PdfLogsViewer from './pdf-logs-viewer'
 import PdfViewer from './pdf-viewer'
 import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
-import withErrorBoundary from '../../../infrastructure/error-boundary'
 import PdfPreviewToolbar from './pdf-preview-toolbar'
+import LoadingSpinner from '../../../shared/components/loading-spinner'
 
 function PdfPreviewPane() {
   const { showLogs } = usePdfPreviewContext()
@@ -11,7 +11,7 @@ function PdfPreviewPane() {
   return (
     <div className="pdf full-size">
       <PdfPreviewToolbar />
-      <Suspense fallback={<div>Loading…</div>}>
+      <Suspense fallback={<LoadingPreview />}>
         <div className="pdf-viewer">
           <PdfViewer />
         </div>
@@ -21,4 +21,12 @@ function PdfPreviewPane() {
   )
 }
 
-export default memo(withErrorBoundary(PdfPreviewPane))
+function LoadingPreview() {
+  return (
+    <div className="pdf-loading-spinner-container">
+      <LoadingSpinner />
+    </div>
+  )
+}
+
+export default memo(PdfPreviewPane)

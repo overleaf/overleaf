@@ -8,6 +8,8 @@ import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import useScopeValue from '../../../shared/context/util/scope-value-hook'
 import { buildHighlightElement } from '../util/highlights'
 import PDFJSWrapper from '../util/pdf-js-wrapper'
+import withErrorBoundary from '../../../infrastructure/error-boundary'
+import ErrorBoundaryFallback from './error-boundary-fallback'
 
 function PdfJsViewer({ url }) {
   const { _id: projectId } = useProjectContext()
@@ -248,4 +250,6 @@ PdfJsViewer.propTypes = {
   url: PropTypes.string.isRequired,
 }
 
-export default memo(PdfJsViewer)
+export default withErrorBoundary(memo(PdfJsViewer), () => (
+  <ErrorBoundaryFallback type="pdf" />
+))

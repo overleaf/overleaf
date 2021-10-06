@@ -712,6 +712,7 @@ module.exports = {
     publishModal: [],
     tprLinkedFileInfo: [],
     tprLinkedFileRefreshError: [],
+    contactUsModal: [],
   },
 
   moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],

@@ -12,6 +12,7 @@ import { useUserContext } from '../../../shared/context/user-context'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { FetchError } from '../../../infrastructure/fetch-json'
 import { useChatContext } from '../context/chat-context'
+import LoadingSpinner from '../../../shared/components/loading-spinner'
 
 const ChatPane = React.memo(function ChatPane() {
   const { t } = useTranslation()
@@ -86,16 +87,6 @@ const ChatPane = React.memo(function ChatPane() {
     </aside>
   )
 })
-
-function LoadingSpinner() {
-  const { t } = useTranslation()
-  return (
-    <div className="loading">
-      <Icon type="fw" modifier="refresh" spin />
-      {`  ${t('loading')}…`}
-    </div>
-  )
-}
 
 function Placeholder() {
   const { t } = useTranslation()

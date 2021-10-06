@@ -9,6 +9,8 @@ import PdfPreviewError from './pdf-preview-error'
 import PdfClearCacheButton from './pdf-clear-cache-button'
 import PdfDownloadFilesButton from './pdf-download-files-button'
 import PdfLogsEntries from './pdf-logs-entries'
+import withErrorBoundary from '../../../infrastructure/error-boundary'
+import ErrorBoundaryFallback from './error-boundary-fallback'
 
 function PdfLogsViewer() {
   const {
@@ -67,4 +69,6 @@ function PdfLogsViewer() {
   )
 }
 
-export default memo(PdfLogsViewer)
+export default withErrorBoundary(memo(PdfLogsViewer), () => (
+  <ErrorBoundaryFallback type="logs" />
+))
