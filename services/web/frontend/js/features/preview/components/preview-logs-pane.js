@@ -2,12 +2,15 @@ import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { Dropdown } from 'react-bootstrap'
 import PreviewLogsPaneEntry from './preview-logs-pane-entry'
+import PreviewLogsPaneMaxEntries from './preview-logs-pane-max-entries'
 import PreviewValidationIssue from './preview-validation-issue'
 import PreviewDownloadFileList from './preview-download-file-list'
 import PreviewError from './preview-error'
 import Icon from '../../../shared/components/icon'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
+
+const LOG_PREVIEW_LIMIT = 100
 
 function PreviewLogsPane({
   logEntries = { all: [], errors: [], warnings: [], typesetting: [] },
@@ -121,7 +124,14 @@ const PreviewValidationIssues = ({ validationIssues }) => {
 const PreviewLogEntries = ({ logEntries, onLogEntryLocationClick }) => {
   const { t } = useTranslation()
   const nowTS = Date.now()
-  return logEntries.map((logEntry, index) => (
+
+  const totalLogEntries = logEntries.length
+
+  if (totalLogEntries > LOG_PREVIEW_LIMIT) {
+    logEntries = logEntries.slice(0, 100)
+  }
+
+  logEntries = logEntries.map((logEntry, index) => (
     <PreviewLogsPaneEntry
       key={`${nowTS}-${index}`}
       headerTitle={logEntry.message}
@@ -141,6 +151,19 @@ const PreviewLogEntries = ({ logEntries, onLogEntryLocationClick }) => {
       onSourceLocationClick={onLogEntryLocationClick}
     />
   ))
+
+  if (totalLogEntries > LOG_PREVIEW_LIMIT) {
+    // Prepend log limit exceeded message to logs array
+    logEntries = [
+      <PreviewLogsPaneMaxEntries
+        key={`${nowTS}-${LOG_PREVIEW_LIMIT}`}
+        totalEntries={totalLogEntries}
+        entriesShown={LOG_PREVIEW_LIMIT}
+      />,
+    ].concat(logEntries)
+  }
+
+  return logEntries
 }
 
 function AutoCompileLintingErrorEntry() {

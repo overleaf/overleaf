@@ -113,6 +113,35 @@ entering extended mode
     })
   })
 
+  describe('with over 100 log entries', function () {
+    it('renders only 100 with a warning message', function () {
+      const errors = Array(200).fill(sampleError1)
+      const logEntries = {
+        all: [...errors, ...warnings, ...typesetting],
+        errors,
+        warnings,
+        typesetting,
+      }
+
+      renderWithEditorContext(
+        <PreviewLogsPane
+          logEntries={logEntries}
+          rawLog={sampleRawLog}
+          onLogEntryLocationClick={onLogEntryLocationClick}
+          onClearCache={noOp}
+        />
+      )
+
+      const displayedLogEntries = screen.getAllByLabelText(
+        `Log entry with level`,
+        { exact: false }
+      )
+      screen.getByLabelText(`Maximum log entries limit hit`)
+      // should only show the first 100 errors and stop
+      expect(displayedLogEntries).to.have.lengthOf(100)
+    })
+  })
+
   describe('with validation issues', function () {
     const sampleValidationIssues = {
       sizeCheck: {
