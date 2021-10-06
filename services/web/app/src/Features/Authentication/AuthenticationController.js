@@ -72,6 +72,8 @@ const AuthenticationController = {
         if (info.redir != null) {
           return res.json({ redir: info.redir })
         } else {
+          res.status(info.status || 200)
+          delete info.status
           return res.json({ message: info })
         }
       }
@@ -154,6 +156,7 @@ const AuthenticationController = {
             return done(null, null, {
               text: req.i18n.translate('to_many_login_requests_2_mins'),
               type: 'error',
+              status: 429,
             })
           }
           AuthenticationManager.authenticate(
@@ -172,6 +175,7 @@ const AuthenticationController = {
                 done(null, false, {
                   text: req.i18n.translate('email_or_password_wrong_try_again'),
                   type: 'error',
+                  status: 401,
                 })
               }
             }

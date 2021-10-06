@@ -1,5 +1,6 @@
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
+const Settings = require('@overleaf/settings')
 const User = require('./helpers/User').promises
 
 describe('Authentication', function () {
@@ -69,6 +70,24 @@ describe('Authentication', function () {
         ipAddress: '127.0.0.1',
         initiatorId: ObjectId(user.id),
       })
+    })
+  })
+
+  describe('failed login', function () {
+    beforeEach('fetchCsrfToken', async function () {
+      await user.getCsrfToken()
+    })
+    it('should return a 401', async function () {
+      const {
+        response: { statusCode },
+      } = await user.doRequest('POST', {
+        url: Settings.enableLegacyLogin ? '/login/legacy' : '/login',
+        json: {
+          email: user.email,
+          password: 'foo-bar-baz',
+        },
+      })
+      expect(statusCode).to.equal(401)
     })
   })
 })
