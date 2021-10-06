@@ -1,17 +1,3 @@
-/* eslint-disable
-    camelcase,
-    node/handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let ProjectZipStreamManager
 const archiver = require('archiver')
 const async = require('async')
@@ -21,162 +7,124 @@ const ProjectGetter = require('../Project/ProjectGetter')
 const FileStoreHandler = require('../FileStore/FileStoreHandler')
 
 module.exports = ProjectZipStreamManager = {
-  createZipStreamForMultipleProjects(project_ids, callback) {
+  createZipStreamForMultipleProjects(projectIds, callback) {
     // We'll build up a zip file that contains multiple zip files
-
-    if (callback == null) {
-      callback = function (error, stream) {}
-    }
     const archive = archiver('zip')
     archive.on('error', err =>
       logger.err(
-        { err, project_ids },
+        { err, projectIds },
         'something went wrong building archive of project'
       )
     )
     callback(null, archive)
 
-    const jobs = []
-    for (const project_id of Array.from(project_ids || [])) {
-      ;(project_id =>
-        jobs.push(callback =>
-          ProjectGetter.getProject(
-            project_id,
-            { name: true },
-            function (error, project) {
-              if (error != null) {
-                return callback(error)
-              }
-              logger.log(
-                { project_id, name: project.name },
-                'appending project to zip stream'
-              )
-              return ProjectZipStreamManager.createZipStreamForProject(
-                project_id,
-                function (error, stream) {
-                  if (error != null) {
-                    return callback(error)
-                  }
-                  archive.append(stream, { name: `${project.name}.zip` })
-                  return stream.on('end', function () {
-                    logger.log(
-                      { project_id, name: project.name },
-                      'zip stream ended'
-                    )
-                    return callback()
-                  })
-                }
-              )
+    const jobs = projectIds.map(projectId => cb => {
+      ProjectGetter.getProject(projectId, { name: true }, (error, project) => {
+        if (error) {
+          return cb(error)
+        }
+        logger.log(
+          { projectId, name: project.name },
+          'appending project to zip stream'
+        )
+        ProjectZipStreamManager.createZipStreamForProject(
+          projectId,
+          (error, stream) => {
+            if (error) {
+              return cb(error)
             }
-          )
-        ))(project_id)
-    }
+            archive.append(stream, { name: `${project.name}.zip` })
+            stream.on('end', () => {
+              logger.log({ projectId, name: project.name }, 'zip stream ended')
+              cb()
+            })
+          }
+        )
+      })
+    })
 
-    return async.series(jobs, function () {
+    async.series(jobs, () => {
       logger.log(
-        { project_ids },
+        { projectIds },
         'finished creating zip stream of multiple projects'
       )
-      return archive.finalize()
+      archive.finalize()
     })
   },
 
-  createZipStreamForProject(project_id, callback) {
-    if (callback == null) {
-      callback = function (error, stream) {}
-    }
+  createZipStreamForProject(projectId, callback) {
     const archive = archiver('zip')
     // return stream immediately before we start adding things to it
     archive.on('error', err =>
       logger.err(
-        { err, project_id },
+        { err, projectId },
         'something went wrong building archive of project'
       )
     )
     callback(null, archive)
-    return this.addAllDocsToArchive(project_id, archive, error => {
-      if (error != null) {
+    this.addAllDocsToArchive(projectId, archive, error => {
+      if (error) {
         logger.error(
-          { err: error, project_id },
+          { err: error, projectId },
           'error adding docs to zip stream'
         )
       }
-      return this.addAllFilesToArchive(project_id, archive, error => {
-        if (error != null) {
+      this.addAllFilesToArchive(projectId, archive, error => {
+        if (error) {
           logger.error(
-            { err: error, project_id },
+            { err: error, projectId },
             'error adding files to zip stream'
           )
         }
-        return archive.finalize()
+        archive.finalize()
       })
     })
   },
 
-  addAllDocsToArchive(project_id, archive, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
-    return ProjectEntityHandler.getAllDocs(project_id, function (error, docs) {
-      if (error != null) {
+  addAllDocsToArchive(projectId, archive, callback) {
+    ProjectEntityHandler.getAllDocs(projectId, (error, docs) => {
+      if (error) {
         return callback(error)
       }
-      const jobs = []
-      for (const path in docs) {
-        const doc = docs[path]
-        ;(function (path, doc) {
-          if (path[0] === '/') {
-            path = path.slice(1)
-          }
-          return jobs.push(function (callback) {
-            logger.log({ project_id }, 'Adding doc')
-            archive.append(doc.lines.join('\n'), { name: path })
-            return callback()
-          })
-        })(path, doc)
-      }
-      return async.series(jobs, callback)
+      const jobs = Object.entries(docs).map(([path, doc]) => cb => {
+        if (path[0] === '/') {
+          path = path.slice(1)
+        }
+        logger.log({ projectId }, 'Adding doc')
+        archive.append(doc.lines.join('\n'), { name: path })
+        setImmediate(cb)
+      })
+      async.series(jobs, callback)
     })
   },
 
-  addAllFilesToArchive(project_id, archive, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
-    return ProjectEntityHandler.getAllFiles(
-      project_id,
-      function (error, files) {
-        if (error != null) {
-          return callback(error)
-        }
-        const jobs = []
-        for (const path in files) {
-          const file = files[path]
-          ;((path, file) =>
-            jobs.push(callback =>
-              FileStoreHandler.getFileStream(
-                project_id,
-                file._id,
-                {},
-                function (error, stream) {
-                  if (error != null) {
-                    logger.warn(
-                      { err: error, project_id, file_id: file._id },
-                      'something went wrong adding file to zip archive'
-                    )
-                    return callback(error)
-                  }
-                  if (path[0] === '/') {
-                    path = path.slice(1)
-                  }
-                  archive.append(stream, { name: path })
-                  return stream.on('end', () => callback())
-                }
-              )
-            ))(path, file)
-        }
-        return async.parallelLimit(jobs, 5, callback)
+  addAllFilesToArchive(projectId, archive, callback) {
+    ProjectEntityHandler.getAllFiles(projectId, (error, files) => {
+      if (error) {
+        return callback(error)
       }
-    )
+      const jobs = Object.entries(files).map(([path, file]) => cb => {
+        FileStoreHandler.getFileStream(
+          projectId,
+          file._id,
+          {},
+          (error, stream) => {
+            if (error) {
+              logger.warn(
+                { err: error, projectId, file_id: file._id },
+                'something went wrong adding file to zip archive'
+              )
+              return cb(error)
+            }
+            if (path[0] === '/') {
+              path = path.slice(1)
+            }
+            archive.append(stream, { name: path })
+            stream.on('end', () => cb())
+          }
+        )
+      })
+      async.parallelLimit(jobs, 5, callback)
+    })
   },
 }
