@@ -23,7 +23,10 @@ describe('UrlFetcher', function () {
         request: {
           defaults: (this.defaults = sinon.stub().returns((this.request = {}))),
         },
-        fs: (this.fs = {}),
+        fs: (this.fs = {
+          rename: sinon.stub().yields(),
+          unlink: sinon.stub().yields(),
+        }),
         '@overleaf/settings': (this.settings = {
           apis: {
             clsiPerf: {
@@ -162,9 +165,15 @@ describe('UrlFetcher', function () {
             .should.equal(true)
         })
 
-        it('should open the file for writing', function () {
+        it('should open the atomic file for writing', function () {
           return this.fs.createWriteStream
-            .calledWith(this.path)
+            .calledWith(this.path + '~')
+            .should.equal(true)
+        })
+
+        it('should move the atomic file to the target', function () {
+          return this.fs.rename
+            .calledWith(this.path + '~', this.path)
             .should.equal(true)
         })
 

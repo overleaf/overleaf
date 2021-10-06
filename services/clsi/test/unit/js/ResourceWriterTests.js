@@ -30,7 +30,9 @@ describe('ResourceWriter', function () {
           unlink: sinon.stub().callsArg(1),
         }),
         './ResourceStateManager': (this.ResourceStateManager = {}),
-        './UrlCache': (this.UrlCache = {}),
+        './UrlCache': (this.UrlCache = {
+          createProjectDir: sinon.stub().yields(),
+        }),
         './OutputFileFinder': (this.OutputFileFinder = {}),
         './Metrics': (this.Metrics = {
           inc: sinon.stub(),

@@ -76,12 +76,16 @@ module.exports = ResourceWriter = {
           )
         }
       )
-    } else {
-      logger.log(
-        { project_id: request.project_id, user_id: request.user_id },
-        'full sync'
-      )
-      return this.saveAllResourcesToDisk(
+    }
+    logger.log(
+      { project_id: request.project_id, user_id: request.user_id },
+      'full sync'
+    )
+    UrlCache.createProjectDir(request.project_id, error => {
+      if (error != null) {
+        return callback(error)
+      }
+      this.saveAllResourcesToDisk(
         request.project_id,
         request.resources,
         basePath,
@@ -102,7 +106,7 @@ module.exports = ResourceWriter = {
           )
         }
       )
-    }
+    })
   },
 
   saveIncrementalResourcesToDisk(project_id, resources, basePath, callback) {

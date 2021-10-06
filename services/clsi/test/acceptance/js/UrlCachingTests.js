@@ -250,8 +250,8 @@ describe('Url Caching', function () {
       return Server.getFile.restore()
     })
 
-    return it('should not download the image again', function () {
-      return Server.getFile.called.should.equal(false)
+    return it('should download the other revision', function () {
+      return Server.getFile.called.should.equal(true)
     })
   })
 
