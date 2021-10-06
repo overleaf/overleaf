@@ -12,17 +12,19 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ProjectPersistenceManager
-const Metrics = require('./Metrics')
 const UrlCache = require('./UrlCache')
 const CompileManager = require('./CompileManager')
-const db = require('./db')
-const dbQueue = require('./DbQueue')
 const async = require('async')
 const logger = require('logger-sharelatex')
 const oneDay = 24 * 60 * 60 * 1000
 const Settings = require('@overleaf/settings')
 const diskusage = require('diskusage')
 const { callbackify } = require('util')
+const Path = require('path')
+const fs = require('fs')
+
+// projectId -> timestamp mapping.
+const LAST_ACCESS = new Map()
 
 async function refreshExpiryTimeout() {
   const paths = [
@@ -61,24 +63,48 @@ module.exports = ProjectPersistenceManager = {
   },
 
   refreshExpiryTimeout: callbackify(refreshExpiryTimeout),
-  markProjectAsJustAccessed(project_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
-    const timer = new Metrics.Timer('db-bump-last-accessed')
-    const job = cb =>
-      db.Project.findOrCreate({ where: { project_id } })
-        .spread((project, created) =>
-          project
-            .update({ lastAccessed: new Date() })
-            .then(() => cb())
-            .error(cb)
-        )
-        .error(cb)
-    dbQueue.queue.push(job, error => {
-      timer.done()
-      callback(error)
+
+  init() {
+    fs.readdir(Settings.path.compilesDir, (err, dirs) => {
+      if (err) {
+        logger.warn({ err }, 'cannot get project listing')
+        dirs = []
+      }
+
+      async.eachLimit(
+        dirs,
+        10,
+        (projectAndUserId, cb) => {
+          const compileDir = Path.join(
+            Settings.path.compilesDir,
+            projectAndUserId
+          )
+          const projectId = projectAndUserId.slice(0, 24)
+          fs.stat(compileDir, (err, stats) => {
+            if (err) {
+              // Schedule for immediate cleanup
+              LAST_ACCESS.set(projectId, 0)
+            } else {
+              // Cleanup eventually.
+              LAST_ACCESS.set(projectId, stats.mtime.getTime())
+            }
+            cb()
+          })
+        },
+        () => {
+          setInterval(() => {
+            ProjectPersistenceManager.refreshExpiryTimeout(() => {
+              ProjectPersistenceManager.clearExpiredProjects()
+            })
+          }, 10 * 60 * 1000)
+        }
+      )
     })
+  },
+
+  markProjectAsJustAccessed(project_id, callback) {
+    LAST_ACCESS.set(project_id, Date.now())
+    callback()
   },
 
   clearExpiredProjects(callback) {
@@ -166,38 +192,20 @@ module.exports = ProjectPersistenceManager = {
   },
 
   _clearProjectFromDatabase(project_id, callback) {
-    if (callback == null) {
-      callback = function (error) {}
-    }
-    logger.log({ project_id }, 'clearing project from database')
-    const job = cb =>
-      db.Project.destroy({ where: { project_id } })
-        .then(() => cb())
-        .error(cb)
-    return dbQueue.queue.push(job, callback)
+    LAST_ACCESS.delete(project_id)
+    callback()
   },
 
   _findExpiredProjectIds(callback) {
-    if (callback == null) {
-      callback = function (error, project_ids) {}
+    const expiredFrom = Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT
+    const expiredProjectsIds = []
+    for (const [projectId, lastAccess] of LAST_ACCESS.entries()) {
+      if (lastAccess < expiredFrom) {
+        expiredProjectsIds.push(projectId)
+      }
     }
-    const job = function (cb) {
-      const keepProjectsFrom = new Date(
-        Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT
-      )
-      const q = {}
-      q[db.op.lt] = keepProjectsFrom
-      return db.Project.findAll({ where: { lastAccessed: q } })
-        .then(projects =>
-          cb(
-            null,
-            projects.map(project => project.project_id)
-          )
-        )
-        .error(cb)
-    }
-
-    return dbQueue.queue.push(job, callback)
+    // ^ may be a fairly busy loop, continue detached.
+    setTimeout(() => callback(null, expiredProjectsIds), 0)
   },
 }
 
