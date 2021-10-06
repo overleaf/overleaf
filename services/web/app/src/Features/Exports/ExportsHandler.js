@@ -190,7 +190,8 @@ module.exports = ExportsHandler = self = {
             `v1 export returned failure; forwarding: ${body}`
           )
           // pass the v1 error along for the publish modal to handle
-          return callback({ forwardResponse: body })
+          const err = { forwardResponse: body }
+          return callback(err)
         }
       }
     )

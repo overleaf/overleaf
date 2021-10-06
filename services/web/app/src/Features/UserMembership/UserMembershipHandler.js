@@ -61,10 +61,12 @@ const UserMembershipHandler = {
         return callback(error)
       }
       if (!user) {
-        return callback({ userNotFound: true })
+        const err = { userNotFound: true }
+        return callback(err)
       }
       if (entity[attribute].some(managerId => managerId.equals(user._id))) {
-        return callback({ alreadyAdded: true })
+        error = { alreadyAdded: true }
+        return callback(error)
       }
 
       return addUserToEntity(entity, attribute, user, error =>
@@ -79,7 +81,8 @@ const UserMembershipHandler = {
     }
     const attribute = entityConfig.fields.write
     if (entity.admin_id != null ? entity.admin_id.equals(userId) : undefined) {
-      return callback({ isAdmin: true })
+      const error = { isAdmin: true }
+      return callback(error)
     }
     return removeUserFromEntity(entity, attribute, userId, callback)
   },

@@ -21,9 +21,9 @@ describe('FileStoreHandler', function () {
     }
     this.writeStream = {
       my: 'writeStream',
-      on(type, cb) {
+      on(type, fn) {
         if (type === 'response') {
-          cb({ statusCode: 200 })
+          fn({ statusCode: 200 })
         }
       },
     }
@@ -200,9 +200,9 @@ describe('FileStoreHandler', function () {
 
     describe('when upload fails', function () {
       beforeEach(function () {
-        this.writeStream.on = function (type, cb) {
+        this.writeStream.on = function (type, fn) {
           if (type === 'response') {
-            cb({ statusCode: 500 })
+            fn({ statusCode: 500 })
           }
         }
       })

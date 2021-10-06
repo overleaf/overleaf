@@ -59,10 +59,10 @@ export default App.factory('queuedHttp', function ($http, $q) {
     const doRequest = () =>
       $http(...Array.from(args || []))
         .then((...args) =>
-          Array.from(successCallbacks).map(cb => cb(...Array.from(args || [])))
+          Array.from(successCallbacks).map(fn => fn(...Array.from(args || [])))
         )
         .catch((...args) =>
-          Array.from(errorCallbacks).map(cb => cb(...Array.from(args || [])))
+          Array.from(errorCallbacks).map(fn => fn(...Array.from(args || [])))
         )
 
     pendingRequests.push(doRequest)

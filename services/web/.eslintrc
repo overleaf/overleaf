@@ -22,7 +22,6 @@
     // do not allow importing of implicit dependencies.
     "import/no-extraneous-dependencies": "error",
 
-    "node/no-callback-literal": "off",
     "node/no-deprecated-api": "off"
   },
   "overrides": [
