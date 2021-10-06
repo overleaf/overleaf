@@ -7,5 +7,4 @@ gitrev
 nodemon.json
 cache/
 compiles/
-db/
 output/

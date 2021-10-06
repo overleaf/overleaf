@@ -1,25 +1,6 @@
 const Path = require('path')
 
 module.exports = {
-  // Options are passed to Sequelize.
-  // See http://sequelizejs.com/documentation#usage-options for details
-  mysql: {
-    clsi: {
-      database: 'clsi',
-      username: 'clsi',
-      dialect: 'sqlite',
-      storage:
-        process.env.SQLITE_PATH || Path.resolve(__dirname, '../db/db.sqlite'),
-      pool: {
-        max: 1,
-        min: 1,
-      },
-      retry: {
-        max: 10,
-      },
-    },
-  },
-
   compileSizeLimit: process.env.COMPILE_SIZE_LIMIT || '7mb',
 
   processLifespanLimitMs:

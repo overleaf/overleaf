@@ -1,18 +1,6 @@
 const Path = require('path')
 
 module.exports = {
-  // Options are passed to Sequelize.
-  // See http://sequelizejs.com/documentation#usage-options for details
-  mysql: {
-    clsi: {
-      database: 'clsi',
-      username: 'clsi',
-      password: null,
-      dialect: 'sqlite',
-      storage: Path.resolve('db.sqlite'),
-    },
-  },
-
   path: {
     // eslint-disable-next-line no-path-concat
     compilesDir: Path.resolve(__dirname + '/../../../compiles'),

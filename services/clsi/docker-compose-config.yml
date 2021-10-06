@@ -23,7 +23,6 @@ services:
       SHARELATEX_CONFIG: /app/config/settings.defaults.js
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
-      SQLITE_PATH: /app/compiles/db.sqlite
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - ./compiles:/app/compiles

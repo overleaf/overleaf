@@ -7,9 +7,6 @@ output
 *~
 cache
 .vagrant
-db.sqlite
-db.sqlite-wal
-db.sqlite-shm
 config/*
 npm-debug.log
 

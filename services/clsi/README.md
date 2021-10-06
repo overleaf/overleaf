@@ -30,7 +30,6 @@ The CLSI can be configured through the following environment variables:
 * `PROCESS_LIFE_SPAN_LIMIT_MS` - Process life span limit in milliseconds
 * `SENTRY_DSN` - Sentry [Data Source Name](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)
 * `SMOKE_TEST` - Whether to run smoke tests
-* `SQLITE_PATH` - Path to SQLite database
 * `TEXLIVE_IMAGE` - The TeX Live Docker image to use for sibling containers, e.g. `gcr.io/overleaf-ops/texlive-full:2017.1`
 * `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the Docker image e.g. `gcr.io/overleaf-ops`
 * `TEXLIVE_IMAGE_USER` - When using sibling containers, the user to run as in the TeX Live image. Defaults to `tex`

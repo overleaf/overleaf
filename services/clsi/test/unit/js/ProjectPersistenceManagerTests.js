@@ -35,7 +35,6 @@ describe('ProjectPersistenceManager', function () {
             clsiCacheDir: '/cache',
           },
         }),
-        './db': (this.db = {}),
       },
     })
     this.callback = sinon.stub()

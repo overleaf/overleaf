@@ -22,7 +22,7 @@ COPY . /app
 FROM base
 
 COPY --from=app /app /app
-RUN mkdir -p cache compiles db output \
-&&  chown node:node cache compiles db output
+RUN mkdir -p cache compiles output \
+&&  chown node:node cache compiles output
 
 CMD ["node", "--expose-gc", "app.js"]
