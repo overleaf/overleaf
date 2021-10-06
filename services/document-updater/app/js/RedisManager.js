@@ -18,7 +18,7 @@ const Settings = require('@overleaf/settings')
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
 const Errors = require('./Errors')
 const crypto = require('crypto')

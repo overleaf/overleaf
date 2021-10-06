@@ -20,7 +20,7 @@ const stubs = {
 // SandboxedModule configuration
 SandboxedModule.configure({
   requires: {
-    'logger-sharelatex': stubs.logger,
+    '@overleaf/logger': stubs.logger,
   },
   globals: { Buffer, JSON, Math, console, process },
 })

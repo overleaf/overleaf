@@ -19,6 +19,7 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
+    "@overleaf/logger": "^2.3.0",
     "@overleaf/metrics": "^3.5.1",
     "@overleaf/o-error": "^3.3.1",
     "@overleaf/redis-wrapper": "^2.0.1",
@@ -29,7 +30,6 @@
     "diff-match-patch": "https://github.com/overleaf/diff-match-patch/archive/89805f9c671a77a263fc53461acd62aa7498f688.tar.gz",
     "express": "4.17.1",
     "lodash": "^4.17.21",
-    "logger-sharelatex": "^2.2.0",
     "mongodb": "^3.6.6",
     "request": "^2.88.2",
     "requestretry": "^4.1.2"

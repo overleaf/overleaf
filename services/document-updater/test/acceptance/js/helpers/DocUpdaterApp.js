@@ -13,7 +13,7 @@
  */
 const app = require('../../../../app')
 const { waitForDb } = require('../../../../app/js/mongodb')
-require('logger-sharelatex').logger.level('fatal')
+require('@overleaf/logger').logger.level('fatal')
 
 module.exports = {
   running: false,

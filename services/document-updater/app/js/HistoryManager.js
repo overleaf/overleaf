@@ -13,7 +13,7 @@
  */
 let HistoryManager
 const async = require('async')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const request = require('request')
 const Settings = require('@overleaf/settings')
 const HistoryRedisManager = require('./HistoryRedisManager')

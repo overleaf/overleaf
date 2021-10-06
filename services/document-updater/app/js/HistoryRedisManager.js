@@ -17,7 +17,7 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.history
 )
 const Keys = Settings.redis.history.key_schema
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = HistoryRedisManager = {
   recordDocHasHistoryOps(project_id, doc_id, ops, callback) {

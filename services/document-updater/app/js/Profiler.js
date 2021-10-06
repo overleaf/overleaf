@@ -10,7 +10,7 @@
  */
 let Profiler
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 const deltaMs = function (ta, tb) {
   const nanoSeconds = (ta[0] - tb[0]) * 1e9 + (ta[1] - tb[1])

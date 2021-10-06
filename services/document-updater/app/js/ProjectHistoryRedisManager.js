@@ -22,7 +22,7 @@ const projectHistoryKeys = __guard__(
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
 )
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
 
 module.exports = ProjectHistoryRedisManager = {

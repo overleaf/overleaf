@@ -20,7 +20,7 @@ const docUpdaterKeys = Settings.redis.documentupdater.key_schema
 const async = require('async')
 const ProjectManager = require('./ProjectManager')
 const _ = require('lodash')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 var ProjectFlusher = {
   // iterate over keys asynchronously using redis scan (non-blocking)

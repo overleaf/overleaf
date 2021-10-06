@@ -16,7 +16,7 @@ let DeleteQueueManager
 const Settings = require('@overleaf/settings')
 const RedisManager = require('./RedisManager')
 const ProjectManager = require('./ProjectManager')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
 const async = require('async')
 

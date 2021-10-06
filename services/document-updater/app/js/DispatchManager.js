@@ -16,7 +16,7 @@
  */
 let DispatchManager
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Keys = require('./UpdateKeys')
 const redis = require('@overleaf/redis-wrapper')
 const Errors = require('./Errors')

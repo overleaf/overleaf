@@ -3,7 +3,7 @@ Metrics.initialize('doc-updater')
 
 const express = require('express')
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 logger.initialize('document-updater')
 
 logger.logger.addSerializers(require('./app/js/LoggerSerializers'))

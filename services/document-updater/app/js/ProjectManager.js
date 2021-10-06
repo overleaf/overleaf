@@ -3,7 +3,7 @@ const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const DocumentManager = require('./DocumentManager')
 const HistoryManager = require('./HistoryManager')
 const async = require('async')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
 const Errors = require('./Errors')
 

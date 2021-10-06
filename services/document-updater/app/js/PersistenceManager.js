@@ -1,7 +1,7 @@
 const Settings = require('@overleaf/settings')
 const Errors = require('./Errors')
 const Metrics = require('./Metrics')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const request = require('requestretry').defaults({
   maxAttempts: 2,
   retryDelay: 10,

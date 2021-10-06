@@ -13,7 +13,7 @@
  */
 let RangesManager
 const RangesTracker = require('./RangesTracker')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const _ = require('lodash')
 
 module.exports = RangesManager = {

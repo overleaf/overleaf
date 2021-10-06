@@ -11,7 +11,7 @@
  */
 let RateLimiter
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
 
 module.exports = RateLimiter = class RateLimiter {

@@ -15,7 +15,7 @@
 let ShareJsUpdateManager
 const ShareJsModel = require('./sharejs/server/model')
 const ShareJsDB = require('./ShareJsDB')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const Keys = require('./UpdateKeys')
 const { EventEmitter } = require('events')

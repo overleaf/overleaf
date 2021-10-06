@@ -17,7 +17,7 @@ const Settings = require('@overleaf/settings')
 const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(Settings.redis.lock)
 const keys = Settings.redis.lock.key_schema
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const os = require('os')
 const crypto = require('crypto')
 
