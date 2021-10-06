@@ -2,31 +2,11 @@
   "root": true,
   "extends": [
     "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "plugin:jsx-a11y/recommended",
     "standard",
-    "standard-jsx",
-    "standard-react",
     "prettier"
   ],
-  "plugins": [
-    "jsx-a11y",
-    "mocha",
-    "chai-expect",
-    "chai-friendly"
-  ],
   "env": {
-    "browser": true,
-    "mocha": true,
-    "node": true,
     "es2020": true
-  },
-  "parserOptions": {
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
   },
   "settings": {
     // Tell eslint-plugin-react to detect which version of React we are using
@@ -35,10 +15,6 @@
     }
   },
   "rules": {
-    // Swap the no-unused-expressions rule with a more chai-friendly one
-    "no-unused-expressions": "off",
-    "chai-friendly/no-unused-expressions": "error",
-
     // Disable some rules after upgrading ESLint
     // TODO: re-enable and fix
     "no-var": "off",
@@ -52,10 +28,29 @@
   "overrides": [
     // NOTE: changing paths may require updating them in the Makefile too.
     {
+      // Node
+      "files": [
+        "**/app/src/**/*.js",
+        "app.js",
+        "i18next-scanner.config.js",
+        "karma.conf.js",
+        "scripts/**/*.js",
+        "webpack.config*.js"
+      ],
+      "env": {
+        "node": true
+      }
+    },
+    {
       // Test specific rules
-      "files": ["**/test/*/src/**/*.js", "**/test/**/*.test.js"],
-      "globals": {
-        "expect": true
+      "files": ["**/test/**/*.js"],
+      "plugins": [
+        "mocha",
+        "chai-expect",
+        "chai-friendly"
+      ],
+      "env": {
+        "mocha": true
       },
       "rules": {
         // mocha-specific rules
@@ -67,6 +62,11 @@
         "mocha/no-pending-tests": "error",
         "mocha/no-skipped-tests": "error",
         "mocha/no-mocha-arrows": "error",
+
+
+        // Swap the no-unused-expressions rule with a more chai-friendly one
+        "no-unused-expressions": "off",
+        "chai-friendly/no-unused-expressions": "error",
 
         // chai-specific rules
         "chai-expect/missing-assertion": "error",
@@ -88,7 +88,7 @@
     },
     {
       // Backend specific rules
-      "files": ["**/app/src/**/*.js"],
+      "files": ["**/app/src/**/*.js", "app.js"],
       "rules": {
         // don't allow console.log in backend code
         "no-console": "error",
@@ -103,6 +103,26 @@
     {
       // Frontend specific rules
       "files": ["**/frontend/js/**/*.js", "**/frontend/stories/**/*.js", "**/*.stories.js", "**/test/frontend/**/*.js"],
+      "env": {
+        "browser": true
+      },
+      "parserOptions": {
+        "sourceType": "module",
+        "ecmaFeatures": {
+          "jsx": true
+        }
+      },
+      "plugins": [
+        "jsx-a11y"
+      ],
+      "extends": [
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
+        "plugin:jsx-a11y/recommended",
+        "standard-jsx",
+        "standard-react",
+        "prettier"
+      ],
       "globals": {
         "__webpack_public_path__": true,
         "$": true,
