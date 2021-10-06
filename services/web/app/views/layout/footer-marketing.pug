@@ -1,11 +1,25 @@
 footer.site-footer
+	- var showLanguagePicker = Object.keys(settings.i18n.subdomainLang).length > 1
+	- var hasCustomLeftNav = nav.left_footer && nav.left_footer.length > 0
 	.site-footer-content.hidden-print
 		.row
 			ul.col-md-9
+				if hasFeature('saas')
+					li © #{new Date().getFullYear()} Overleaf
+				else if !settings.nav.hide_powered_by
+					li
+						| © 2021
+						|
+						a(href='https://www.overleaf.com/for/enterprises') Powered by Overleaf
 
-				if Object.keys(settings.i18n.subdomainLang).length > 1
+					if showLanguagePicker || hasCustomLeftNav
+						li
+							strong.text-muted |
+
+				if showLanguagePicker
 					li.dropdown.dropup.subdued
 						a.dropdown-toggle(
+							href="#",
 							data-toggle="dropdown",
 							aria-haspopup="true",
 							aria-expanded="false",
@@ -13,7 +27,9 @@ footer.site-footer
 							data-ol-lang-selector-tooltip,
 							title=translate('language')
 						)
-							figure(class="sprite-icon sprite-icon-lang sprite-icon-"+currentLngCode alt=translate(currentLngCode))
+							i.fa.fa-fw.fa-language
+							|
+							| #{settings.translatedLanguages[currentLngCode]}
 
 						ul.dropdown-menu(role="menu")
 							li.dropdown-header #{translate("language")}
@@ -21,9 +37,12 @@ footer.site-footer
 								if !subdomainDetails.hide
 									li.lngOption
 										a.menu-indent(href=subdomainDetails.url+currentUrlWithQueryParams)
-											figure(class="sprite-icon sprite-icon-lang sprite-icon-"+subdomainDetails.lngCode alt=translate(subdomainDetails.lngCode))
-											|  #{translate(subdomainDetails.lngCode)}
-										//- img(src="/img/flags/24/.png")
+											| #{settings.translatedLanguages[subdomainDetails.lngCode]}
+
+				if showLanguagePicker && hasCustomLeftNav
+					li
+						strong.text-muted |
+
 				each item in nav.left_footer
 					li
 						if item.url
