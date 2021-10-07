@@ -34,16 +34,23 @@ const MONTH_NAMES = [
 async function createBlankProject(ownerId, projectName, attributes = {}) {
   const isImport = attributes && attributes.overleaf
   const project = await _createBlankProject(ownerId, projectName, attributes)
+  const segmentation = _.pick(attributes, [
+    'fromV1TemplateId',
+    'fromV1TemplateVersionId',
+  ])
+  segmentation.projectId = project._id
   if (isImport) {
-    AnalyticsManager.recordEventForUser(ownerId, 'project-imported', {
-      projectId: project._id,
-      attributes,
-    })
+    AnalyticsManager.recordEventForUser(
+      ownerId,
+      'project-imported',
+      segmentation
+    )
   } else {
-    AnalyticsManager.recordEventForUser(ownerId, 'project-created', {
-      projectId: project._id,
-      attributes,
-    })
+    AnalyticsManager.recordEventForUser(
+      ownerId,
+      'project-created',
+      segmentation
+    )
   }
   return project
 }
