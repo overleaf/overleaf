@@ -14,8 +14,7 @@ import ErrorBoundaryFallback from './error-boundary-fallback'
 
 function PdfLogsViewer() {
   const {
-    autoCompileLintingError,
-    stopOnValidationError,
+    codeCheckFailed,
     error,
     logEntries,
     rawLog,
@@ -27,7 +26,7 @@ function PdfLogsViewer() {
   return (
     <div className="logs-pane">
       <div className="logs-pane-content">
-        {autoCompileLintingError && stopOnValidationError && (
+        {codeCheckFailed && (
           <div className="log-entry">
             <div className="log-entry-header log-entry-header-error">
               <div className="log-entry-header-icon-container">

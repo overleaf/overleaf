@@ -6,7 +6,7 @@ import { memo } from 'react'
 export function PdfLogsButtonContent({
   showLogs,
   logEntries,
-  autoCompileLintingError,
+  codeCheckFailed,
 }) {
   const { t } = useTranslation()
 
@@ -19,7 +19,7 @@ export function PdfLogsButtonContent({
     )
   }
 
-  if (autoCompileLintingError) {
+  if (codeCheckFailed) {
     return (
       <>
         <Icon type="exclamation-triangle" />
@@ -59,7 +59,7 @@ export function PdfLogsButtonContent({
 }
 
 PdfLogsButtonContent.propTypes = {
-  autoCompileLintingError: PropTypes.bool,
+  codeCheckFailed: PropTypes.bool,
   showLogs: PropTypes.bool,
   logEntries: PropTypes.object,
 }

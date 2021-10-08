@@ -3,7 +3,7 @@ import Icon from '../../../shared/components/icon'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import { useTranslation } from 'react-i18next'
 import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
-import { memo, useCallback } from 'react'
+import { memo } from 'react'
 import classnames from 'classnames'
 
 function PdfCompileButton() {
@@ -12,10 +12,10 @@ function PdfCompileButton() {
     compiling,
     draft,
     hasChanges,
-    recompile,
     setAutoCompile,
     setDraft,
     setStopOnValidationError,
+    startCompile,
     stopCompile,
     stopOnValidationError,
     recompileFromScratch,
@@ -24,10 +24,6 @@ function PdfCompileButton() {
   const { t } = useTranslation()
 
   const compileButtonLabel = compiling ? t('compiling') + '…' : t('recompile')
-
-  const startCompile = useCallback(() => {
-    recompile()
-  }, [recompile])
 
   return (
     <ControlledDropdown

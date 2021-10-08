@@ -6,8 +6,7 @@ import { sendMBOnce } from '../../../infrastructure/event-tracking'
 
 function PdfLogsButton() {
   const {
-    autoCompileLintingError,
-    stopOnValidationError,
+    codeCheckFailed,
     error,
     logEntries,
     showLogs,
@@ -19,7 +18,7 @@ function PdfLogsButton() {
       return 'default'
     }
 
-    if (autoCompileLintingError && stopOnValidationError) {
+    if (codeCheckFailed) {
       return 'danger'
     }
 
@@ -34,7 +33,7 @@ function PdfLogsButton() {
     }
 
     return 'default'
-  }, [autoCompileLintingError, logEntries, showLogs, stopOnValidationError])
+  }, [codeCheckFailed, logEntries, showLogs])
 
   const handleClick = useCallback(() => {
     setShowLogs(value => {
@@ -57,9 +56,7 @@ function PdfLogsButton() {
       <PdfLogsButtonContent
         showLogs={showLogs}
         logEntries={logEntries}
-        autoCompileLintingError={
-          autoCompileLintingError && stopOnValidationError
-        }
+        codeCheckFailed={codeCheckFailed}
       />
     </Button>
   )

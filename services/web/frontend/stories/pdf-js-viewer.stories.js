@@ -109,6 +109,6 @@ export const Interactive = () => {
       <PdfJsViewer url="/build/output.pdf" />
       <Inner />
     </div>,
-    { scope: { project } }
+    { project }
   )
 }

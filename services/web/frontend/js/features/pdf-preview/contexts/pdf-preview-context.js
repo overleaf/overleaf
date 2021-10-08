@@ -9,32 +9,20 @@ import {
 import PropTypes from 'prop-types'
 import useScopeValue from '../../../shared/context/util/scope-value-hook'
 import { useProjectContext } from '../../../shared/context/project-context'
-import getMeta from '../../../utils/meta'
-import { deleteJSON, postJSON } from '../../../infrastructure/fetch-json'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import {
   buildLogEntryAnnotations,
   handleOutputFiles,
 } from '../util/output-files'
-import { debounce } from 'lodash'
-import { useIdeContext } from '../../../shared/context/ide-context'
 import {
   send,
   sendMB,
   sendMBSampled,
 } from '../../../infrastructure/event-tracking'
 import { useEditorContext } from '../../../shared/context/editor-context'
-import { isMainFile } from '../util/editor-files'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
-
-const AUTO_COMPILE_MAX_WAIT = 5000
-// We add a 1 second debounce to sending user changes to server if they aren't
-// collaborating with anyone. This needs to be higher than that, and allow for
-// client to server latency, otherwise we compile before the op reaches the server
-// and then again on ack.
-const AUTO_COMPILE_DEBOUNCE = 2000
-
-const searchParams = new URLSearchParams(window.location.search)
+import DocumentCompiler from '../util/compiler'
+import { useIdeContext } from '../../../shared/context/ide-context'
 
 export const PdfPreviewContext = createContext(undefined)
 
@@ -45,7 +33,9 @@ PdfPreviewProvider.propTypes = {
 export default function PdfPreviewProvider({ children }) {
   const ide = useIdeContext()
 
-  const { _id: projectId, rootDoc_id: rootDocId } = useProjectContext()
+  const project = useProjectContext()
+
+  const projectId = project._id
 
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
 
@@ -65,10 +55,7 @@ export default function PdfPreviewProvider({ children }) {
   const [, setLogEntryAnnotations] = useScopeValue('pdf.logEntryAnnotations')
 
   // the id of the CLSI server which ran the compile
-  const [clsiServerId, setClsiServerId] = useScopeValue('ide.clsiServerId')
-
-  // the compile group (standard or priority)
-  const [compileGroup, setCompileGroup] = useScopeValue('ide.compileGroup')
+  const [, setClsiServerId] = useScopeValue('ide.clsiServerId')
 
   // whether to display the editor and preview side-by-side or full-width ("flat")
   const [pdfLayout, setPdfLayout] = useScopeValue('ui.pdfLayout')
@@ -78,6 +65,9 @@ export default function PdfPreviewProvider({ children }) {
 
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
+
+  // data received in response to a compile request
+  const [data, setData] = useState()
 
   // whether the project has been compiled yet
   const [compiledOnce, setCompiledOnce] = useState(false)
@@ -117,10 +107,7 @@ export default function PdfPreviewProvider({ children }) {
     true
   )
 
-  // the id of the currently open document in the editor
-  const [currentDocId] = useScopeValue('editor.open_doc_id')
-
-  // the Document currently open in the editor?
+  // the Document currently open in the editor
   const [currentDoc] = useScopeValue('editor.sharejs_doc')
 
   // whether the PDF view is hidden
@@ -137,6 +124,35 @@ export default function PdfPreviewProvider({ children }) {
 
   const { signal } = useAbortController()
 
+  // the document compiler
+  const [compiler] = useState(() => {
+    return new DocumentCompiler({
+      project,
+      setChangedAt,
+      setCompiling,
+      setData,
+      setError,
+      signal,
+    })
+  })
+
+  // clean up the compiler on unmount
+  useEffect(() => {
+    return () => {
+      compiler.destroy()
+    }
+  }, [compiler])
+
+  // keep currentDoc in sync with the compiler
+  useEffect(() => {
+    compiler.currentDoc = currentDoc
+  }, [compiler, currentDoc])
+
+  // keep draft setting in sync with the compiler
+  useEffect(() => {
+    compiler.draft = draft
+  }, [compiler, draft])
+
   // pass the "uncompiled" value up into the scope for use outside this context provider
   useEffect(() => {
     setUncompiled(changedAt > 0)
@@ -151,46 +167,26 @@ export default function PdfPreviewProvider({ children }) {
     [_setAutoCompile]
   )
 
-  // parse the text of the current doc in the editor
-  // if it contains "\documentclass" then use this as the root doc
-  const getRootDocOverrideId = useCallback(() => {
-    if (currentDocId === rootDocId) {
-      return null // no need to override when in the root doc itself
+  // always compile the PDF once after opening the project, after the doc has loaded
+  useEffect(() => {
+    if (!compiledOnce && currentDoc) {
+      setCompiledOnce(true)
+      compiler.compile({ isAutoCompileOnLoad: true })
     }
-
-    if (currentDoc) {
-      const doc = currentDoc.getSnapshot()
-
-      if (doc) {
-        return isMainFile(doc)
-      }
-    }
-
-    return null
-  }, [currentDoc, currentDocId, rootDocId])
-
-  // TODO: remove this?
-  const sendCompileMetrics = useCallback(() => {
-    if (compiledOnce && !error && !window.user.alphaProgram) {
-      const metadata = {
-        errors: logEntries.errors.length,
-        warnings: logEntries.warnings.length,
-        typesetting: logEntries.typesetting.length,
-        newPdfPreview: true,
-      }
-      sendMBSampled('compile-result', metadata, 0.01)
-    }
-  }, [compiledOnce, error, logEntries])
+  }, [compiledOnce, currentDoc, compiler])
 
   // handle the data returned from a compile request
-  const handleCompileData = useCallback(
-    (data, options) => {
+  // note: this should _only_ run when `data` changes,
+  // the other dependencies must all be static
+  useEffect(() => {
+    if (data) {
       if (data.clsiServerId) {
-        setClsiServerId(data.clsiServerId)
+        setClsiServerId(data.clsiServerId) // set in scope, for PdfSynctexController
+        compiler.clsiServerId = data.clsiServerId
       }
 
       if (data.compileGroup) {
-        setCompileGroup(data.compileGroup)
+        compiler.compileGroup = data.compileGroup
       }
 
       if (data.outputFiles) {
@@ -203,13 +199,27 @@ export default function PdfPreviewProvider({ children }) {
           setPdfDownloadUrl(result.pdfDownloadUrl)
           setPdfUrl(result.pdfUrl)
           setRawLog(result.log)
+
+          // sample compile stats for real users
+          if (!window.user.alphaProgram && data.status === 'success') {
+            sendMBSampled(
+              'compile-result',
+              {
+                errors: result.logEntries.errors.length,
+                warnings: result.logEntries.warnings.length,
+                typesetting: result.logEntries.typesetting.length,
+                newPdfPreview: true, // TODO: is this useful?
+              },
+              0.01
+            )
+          }
         })
       }
 
       switch (data.status) {
         case 'success':
           setError(undefined)
-          setShowLogs(false) // TODO: always?
+          setShowLogs(false)
           break
 
         case 'clsi-maintenance':
@@ -238,7 +248,7 @@ export default function PdfPreviewProvider({ children }) {
           break
 
         case 'autocompile-backoff':
-          if (!options.isAutoCompileOnLoad) {
+          if (!data.options.isAutoCompileOnLoad) {
             setError('autocompile-disabled')
             setAutoCompile(false)
             sendMB('autocompile-rate-limited', { hasPremiumCompile })
@@ -258,97 +268,21 @@ export default function PdfPreviewProvider({ children }) {
           setError('error')
           break
       }
-    },
-    [
-      hasPremiumCompile,
-      ide.fileTreeManager,
-      isProjectOwner,
-      projectId,
-      setAutoCompile,
-      setClsiServerId,
-      setCompileGroup,
-      setLogEntries,
-      setLogEntryAnnotations,
-      setPdfDownloadUrl,
-      setPdfUrl,
-    ]
-  )
-
-  const buildCompileParams = useCallback(
-    options => {
-      const params = new URLSearchParams()
-
-      if (clsiServerId) {
-        params.set('clsiserverid', clsiServerId)
-      }
-
-      if (options.isAutoCompileOnLoad || options.isAutoCompileOnChange) {
-        params.set('auto_compile', 'true')
-      }
-
-      if (getMeta('ol-enablePdfCaching')) {
-        params.set('enable_pdf_caching', 'true')
-      }
-
-      if (searchParams.get('file_line_errors') === 'true') {
-        params.file_line_errors = 'true'
-      }
-
-      return params
-    },
-    [clsiServerId]
-  )
-
-  // run a compile
-  const recompile = useCallback(
-    (options = {}) => {
-      if (compiling) {
-        return
-      }
-
-      sendMBSampled('editor-recompile-sampled', options)
-
-      setChangedAt(0) // NOTE: this sets uncompiled to false
-      setCompiling(true)
-      setValidationIssues(undefined)
-
-      window.dispatchEvent(new CustomEvent('flush-changes')) // TODO: wait for this?
-
-      postJSON(`/project/${projectId}/compile?${buildCompileParams(options)}`, {
-        body: {
-          rootDoc_id: getRootDocOverrideId(),
-          draft,
-          check: 'silent', // NOTE: 'error' and 'validate' are possible, but unused
-          // use incremental compile for all users but revert to a full compile
-          // if there was previously a server error
-          incrementalCompilesEnabled: !error,
-        },
-        signal,
-      })
-        .then(data => {
-          handleCompileData(data, options)
-        })
-        .catch(error => {
-          // console.error(error)
-          setError(error.info?.statusCode === 429 ? 'rate-limited' : 'error')
-        })
-        .finally(() => {
-          setCompiling(false)
-          sendCompileMetrics()
-        })
-    },
-    [
-      compiling,
-      projectId,
-      buildCompileParams,
-      getRootDocOverrideId,
-      draft,
-      error,
-      handleCompileData,
-      sendCompileMetrics,
-      signal,
-    ]
-  )
+    }
+  }, [
+    compiler,
+    data,
+    ide,
+    hasPremiumCompile,
+    isProjectOwner,
+    projectId,
+    setAutoCompile,
+    setClsiServerId,
+    setLogEntries,
+    setLogEntryAnnotations,
+    setPdfDownloadUrl,
+    setPdfUrl,
+  ])
 
   // switch to logs if there's an error
   useEffect(() => {
@@ -360,7 +294,7 @@ export default function PdfPreviewProvider({ children }) {
   // recompile on key press
   useEffect(() => {
     const listener = event => {
-      recompile(event.detail)
+      compiler.compile(event.detail)
     }
 
     window.addEventListener('pdf:recompile', listener)
@@ -368,73 +302,40 @@ export default function PdfPreviewProvider({ children }) {
     return () => {
       window.removeEventListener('pdf:recompile', listener)
     }
-  }, [recompile])
-
-  // always compile the PDF once, when joining the project
-  useEffect(() => {
-    const listener = () => {
-      if (!compiledOnce) {
-        setCompiledOnce(true)
-        recompile({ isAutoCompileOnLoad: true })
-      }
-    }
-
-    window.addEventListener('project:joined', listener)
-
-    return () => {
-      window.removeEventListener('project:joined', listener)
-    }
-  }, [compiledOnce, recompile])
+  }, [compiler])
 
   // whether there has been an autocompile linting error, if syntax validation is switched on
   const autoCompileLintingError = Boolean(
     autoCompile && syntaxValidation && hasLintingError
   )
 
-  // the project has visible changes
+  const codeCheckFailed = stopOnValidationError && autoCompileLintingError
+
+  // show that the project has pending changes
   const hasChanges = Boolean(
-    autoCompile &&
-      uncompiled &&
-      compiledOnce &&
-      !(stopOnValidationError && autoCompileLintingError)
+    autoCompile && uncompiled && compiledOnce && !codeCheckFailed
   )
 
   // the project is available for auto-compiling
   const canAutoCompile = Boolean(
-    autoCompile &&
-      !compiling &&
-      !pdfHidden &&
-      !(stopOnValidationError && autoCompileLintingError)
+    autoCompile && !compiling && !pdfHidden && !codeCheckFailed
   )
 
-  // a debounced wrapper around the recompile function, used for auto-compile
-  const [debouncedAutoCompile] = useState(() => {
-    return debounce(
-      () => {
-        recompile({ isAutoCompileOnChange: true })
-      },
-      AUTO_COMPILE_DEBOUNCE,
-      {
-        maxWait: AUTO_COMPILE_MAX_WAIT,
-      }
-    )
-  })
-
-  // call the debounced recompile function if the project is available for auto-compiling and it has changed
+  // call the debounced autocompile function if the project is available for auto-compiling and it has changed
   useEffect(() => {
     if (canAutoCompile && changedAt > 0) {
-      debouncedAutoCompile()
+      compiler.debouncedAutoCompile()
     } else {
-      debouncedAutoCompile.cancel()
+      compiler.debouncedAutoCompile.cancel()
     }
-  }, [canAutoCompile, debouncedAutoCompile, recompile, changedAt])
+  }, [compiler, canAutoCompile, changedAt])
 
   // cancel debounced recompile on unmount
   useEffect(() => {
     return () => {
-      debouncedAutoCompile.cancel()
+      compiler.debouncedAutoCompile.cancel()
     }
-  }, [debouncedAutoCompile])
+  }, [compiler])
 
   // record doc changes when notified by the editor
   useEffect(() => {
@@ -451,52 +352,31 @@ export default function PdfPreviewProvider({ children }) {
     }
   }, [])
 
-  // send a request to stop the current compile
+  // start a compile manually
+  const startCompile = useCallback(() => {
+    compiler.compile()
+  }, [compiler])
+
+  // stop a compile manually
   const stopCompile = useCallback(() => {
-    // TODO: stoppingCompile state?
+    compiler.stopCompile()
+  }, [compiler])
 
-    const params = new URLSearchParams()
-
-    if (clsiServerId) {
-      params.set('clsiserverid', clsiServerId)
-    }
-
-    return postJSON(`/project/${projectId}/compile/stop?${params}`, { signal })
-      .catch(error => {
-        setError(error)
-      })
-      .finally(() => {
-        setCompiling(false)
-      })
-  }, [projectId, clsiServerId, signal])
-
+  // clear the compile cache
   const clearCache = useCallback(() => {
     setClearingCache(true)
 
-    const params = new URLSearchParams()
-
-    if (clsiServerId) {
-      params.set('clsiserverid', clsiServerId)
-    }
-
-    return deleteJSON(`/project/${projectId}/output?${params}`, { signal })
-      .catch(error => {
-        console.error(error)
-        setError('clear-cache')
-      })
-      .finally(() => {
-        setClearingCache(false)
-      })
-  }, [clsiServerId, projectId, setError, signal])
+    return compiler.clearCache().finally(() => {
+      setClearingCache(false)
+    })
+  }, [compiler])
 
   // clear the cache then run a compile, triggered by a menu item
   const recompileFromScratch = useCallback(() => {
-    setClearingCache(true)
     clearCache().then(() => {
-      setClearingCache(false)
-      recompile()
+      compiler.compile()
     })
-  }, [clearCache, recompile])
+  }, [clearCache, compiler])
 
   // switch to either side-by-side or flat (full-width) layout
   const switchLayout = useCallback(() => {
@@ -512,12 +392,9 @@ export default function PdfPreviewProvider({ children }) {
   const value = useMemo(() => {
     return {
       autoCompile,
-      autoCompileLintingError,
+      codeCheckFailed,
       clearCache,
       clearingCache,
-      clsiServerId,
-      compileGroup,
-      compiledOnce,
       compiling,
       draft,
       error,
@@ -529,23 +406,14 @@ export default function PdfPreviewProvider({ children }) {
       pdfLayout,
       pdfUrl,
       rawLog,
-      recompile,
       recompileFromScratch,
       setAutoCompile,
-      setClsiServerId,
-      setCompileGroup,
-      setCompiledOnce,
       setDraft,
-      setError,
-      setHasLintingError, // for story
-      setLogEntries,
-      setPdfDownloadUrl,
-      setPdfLayout,
-      setPdfUrl,
+      setHasLintingError, // only for stories
       setShowLogs,
       setStopOnValidationError,
-      setUiView,
       showLogs,
+      startCompile,
       stopCompile,
       stopOnValidationError,
       switchLayout,
@@ -554,12 +422,9 @@ export default function PdfPreviewProvider({ children }) {
     }
   }, [
     autoCompile,
-    autoCompileLintingError,
+    codeCheckFailed,
     clearCache,
     clearingCache,
-    clsiServerId,
-    compileGroup,
-    compiledOnce,
     compiling,
     draft,
     error,
@@ -571,22 +436,13 @@ export default function PdfPreviewProvider({ children }) {
     pdfLayout,
     pdfUrl,
     rawLog,
-    recompile,
     recompileFromScratch,
     setAutoCompile,
-    setClsiServerId,
-    setCompileGroup,
-    setCompiledOnce,
     setDraft,
-    setError,
-    setHasLintingError,
-    setLogEntries,
-    setPdfDownloadUrl,
-    setPdfLayout,
-    setPdfUrl,
+    setHasLintingError, // only for stories
     setStopOnValidationError,
-    setUiView,
     showLogs,
+    startCompile,
     stopCompile,
     stopOnValidationError,
     switchLayout,
@@ -604,12 +460,9 @@ export default function PdfPreviewProvider({ children }) {
 PdfPreviewContext.Provider.propTypes = {
   value: PropTypes.shape({
     autoCompile: PropTypes.bool.isRequired,
-    autoCompileLintingError: PropTypes.bool.isRequired,
     clearCache: PropTypes.func.isRequired,
     clearingCache: PropTypes.bool.isRequired,
-    clsiServerId: PropTypes.string,
-    compileGroup: PropTypes.string,
-    compiledOnce: PropTypes.bool.isRequired,
+    codeCheckFailed: PropTypes.bool.isRequired,
     compiling: PropTypes.bool.isRequired,
     draft: PropTypes.bool.isRequired,
     error: PropTypes.string,
@@ -621,23 +474,14 @@ PdfPreviewContext.Provider.propTypes = {
     pdfLayout: PropTypes.string,
     pdfUrl: PropTypes.string,
     rawLog: PropTypes.string,
-    recompile: PropTypes.func.isRequired,
     recompileFromScratch: PropTypes.func.isRequired,
     setAutoCompile: PropTypes.func.isRequired,
-    setClsiServerId: PropTypes.func.isRequired,
-    setCompileGroup: PropTypes.func.isRequired,
-    setCompiledOnce: PropTypes.func.isRequired,
     setDraft: PropTypes.func.isRequired,
-    setError: PropTypes.func.isRequired,
     setHasLintingError: PropTypes.func.isRequired, // only for storybook
-    setLogEntries: PropTypes.func.isRequired,
-    setPdfDownloadUrl: PropTypes.func.isRequired,
-    setPdfLayout: PropTypes.func.isRequired,
-    setPdfUrl: PropTypes.func.isRequired,
     setShowLogs: PropTypes.func.isRequired,
     setStopOnValidationError: PropTypes.func.isRequired,
-    setUiView: PropTypes.func.isRequired,
     showLogs: PropTypes.bool.isRequired,
+    startCompile: PropTypes.func.isRequired,
     stopCompile: PropTypes.func.isRequired,
     stopOnValidationError: PropTypes.bool.isRequired,
     switchLayout: PropTypes.func.isRequired,

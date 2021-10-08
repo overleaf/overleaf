@@ -9,7 +9,7 @@ const outputFiles = [
   {
     path: 'output.pdf',
     build: '123',
-    // url: 'about:blank', // TODO: PDF URL to render
+    url: '/build/output.pdf', // TODO: PDF URL to render
     type: 'pdf',
   },
   {
@@ -119,6 +119,18 @@ const storeAndFireEvent = (key, value) => {
   fireEvent(window, new StorageEvent('storage', { key }))
 }
 
+const scope = {
+  settings: {
+    syntaxValidation: false,
+  },
+  editor: {
+    sharejs_doc: {
+      doc_id: 'test-doc',
+      getSnapshot: () => 'some doc content',
+    },
+  },
+}
+
 describe('<PdfPreview/>', function () {
   var clock
 
@@ -138,50 +150,31 @@ describe('<PdfPreview/>', function () {
     localStorage.clear()
   })
 
-  it('renders the PDF preview', function () {
-    renderWithEditorContext(<PdfPreview />)
-
-    screen.getByRole('button', { name: 'Recompile' })
-  })
-
-  it('runs a compile only on the first project:joined event', async function () {
+  it('renders the PDF preview', async function () {
     mockCompile()
     mockBuildFile()
 
-    renderWithEditorContext(<PdfPreview />)
+    renderWithEditorContext(<PdfPreview />, { scope })
 
-    // fire a project:joined event => compile
-    screen.getByRole('button', { name: 'Recompile' })
-    fireEvent(window, new CustomEvent('project:joined'))
-    screen.getByRole('button', { name: 'Compiling…' })
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
-
-    // fire another project:joined event => no compile
-    fireEvent(window, new CustomEvent('project:joined'))
-    screen.getByRole('button', { name: 'Recompile' })
-
-    expect(fetchMock.calls()).to.have.length(3)
-
-    expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
-    expect(fetchMock.called('express:/build/:file')).to.be.true // TODO: actual path
   })
 
   it('runs a compile when the Recompile button is pressed', async function () {
     mockCompile()
     mockBuildFile()
 
-    renderWithEditorContext(<PdfPreview />)
+    renderWithEditorContext(<PdfPreview />, { scope })
 
-    // fire a project:joined event => compile
-    screen.getByRole('button', { name: 'Recompile' })
-    fireEvent(window, new CustomEvent('project:joined'))
-    screen.getByRole('button', { name: 'Compiling…' })
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
 
     // press the Recompile button => compile
     const button = screen.getByRole('button', { name: 'Recompile' })
     button.click()
-    screen.getByRole('button', { name: 'Compiling…' })
+    await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
 
     expect(fetchMock.calls()).to.have.length(6)
@@ -191,12 +184,10 @@ describe('<PdfPreview/>', function () {
     mockCompile()
     mockBuildFile()
 
-    renderWithEditorContext(<PdfPreview />)
+    renderWithEditorContext(<PdfPreview />, { scope })
 
-    // fire a project:joined event => compile
-    screen.getByRole('button', { name: 'Recompile' })
-    fireEvent(window, new CustomEvent('project:joined'))
-    screen.getByRole('button', { name: 'Compiling…' })
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
 
     // switch on auto compile
@@ -206,7 +197,7 @@ describe('<PdfPreview/>', function () {
     fireEvent(window, new CustomEvent('doc:changed'))
     clock.tick(2000) // AUTO_COMPILE_DEBOUNCE
 
-    await screen.findByText('Compiling…')
+    await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
 
     expect(fetchMock.calls()).to.have.length(6)
@@ -216,17 +207,14 @@ describe('<PdfPreview/>', function () {
     mockCompile()
     mockBuildFile()
 
-    renderWithEditorContext(<PdfPreview />)
+    renderWithEditorContext(<PdfPreview />, { scope })
 
-    // fire a project:joined event => compile
-    screen.getByRole('button', { name: 'Recompile' })
-    fireEvent(window, new CustomEvent('project:joined'))
-    screen.getByRole('button', { name: 'Compiling…' })
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
 
     // make sure auto compile is switched off
     storeAndFireEvent('autocompile_enabled:project123', false)
-    screen.getByRole('button', { name: 'Recompile' })
 
     // fire a doc:changed event => no compile
     fireEvent(window, new CustomEvent('doc:changed'))
@@ -242,21 +230,19 @@ describe('<PdfPreview/>', function () {
 
     renderWithEditorContext(<PdfPreview />, {
       scope: {
+        ...scope,
         'settings.syntaxValidation': true, // enable linting in the editor
         hasLintingError: true, // mock a linting error
       },
     })
 
-    // fire a project:joined event => compile
-    screen.getByRole('button', { name: 'Recompile' })
-    fireEvent(window, new CustomEvent('project:joined'))
-    screen.getByRole('button', { name: 'Compiling…' })
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
 
     // switch on auto compile and syntax checking
     storeAndFireEvent('autocompile_enabled:project123', true)
     storeAndFireEvent('stop_on_validation_error:project123', true)
-    screen.getByRole('button', { name: 'Recompile' })
 
     // fire a doc:changed event => no compile
     fireEvent(window, new CustomEvent('doc:changed'))
@@ -270,37 +256,15 @@ describe('<PdfPreview/>', function () {
   it('displays an error message if there was a compile error', async function () {
     mockCompileError('compile-in-progress')
 
-    renderWithEditorContext(<PdfPreview />)
+    renderWithEditorContext(<PdfPreview />, { scope })
 
-    // fire a project:joined event => compile
-    screen.getByRole('button', { name: 'Recompile' })
-    fireEvent(window, new CustomEvent('project:joined'))
-    screen.getByRole('button', { name: 'Compiling…' })
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
+
     screen.getByText(
       'Please wait for your other compile to finish before trying again.'
     )
-
-    expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
-    expect(fetchMock.called('express:/build/:file')).to.be.false // TODO: actual path
-  })
-
-  it('disables the view logs button if there is a compile error', async function () {
-    mockCompileError()
-    mockBuildFile()
-
-    renderWithEditorContext(<PdfPreview />)
-
-    const logsButton = screen.getByRole('button', { name: 'View logs' })
-    expect(logsButton.hasAttribute('disabled')).to.be.false
-
-    // fire a project:joined event => compile
-    screen.getByRole('button', { name: 'Recompile' })
-    fireEvent(window, new CustomEvent('project:joined'))
-    screen.getByRole('button', { name: 'Compiling…' })
-    expect(logsButton.hasAttribute('disabled')).to.be.false
-    await screen.findByRole('button', { name: 'Recompile' })
-    expect(logsButton.hasAttribute('disabled')).to.be.true
 
     expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
     expect(fetchMock.called('express:/build/:file')).to.be.false // TODO: actual path
@@ -327,13 +291,12 @@ describe('<PdfPreview/>', function () {
 
     mockValidationProblems(validationProblems)
 
-    renderWithEditorContext(<PdfPreview />)
+    renderWithEditorContext(<PdfPreview />, { scope })
 
-    // fire a project:joined event => compile
-    screen.getByRole('button', { name: 'Recompile' })
-    fireEvent(window, new CustomEvent('project:joined'))
-    screen.getByRole('button', { name: 'Compiling…' })
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
+
     screen.getByText('Project too large')
     screen.getByText('Unknown main document')
     screen.getByText('Conflicting Paths Found')
@@ -347,24 +310,18 @@ describe('<PdfPreview/>', function () {
     mockBuildFile()
     mockClearCache()
 
-    renderWithEditorContext(<PdfPreview />)
+    renderWithEditorContext(<PdfPreview />, { scope })
 
-    const logsButton = screen.getByRole('button', { name: 'View logs' })
-    logsButton.click()
-
-    let clearCacheButton = screen.getByRole('button', {
-      name: 'Clear cached files',
-    })
-    expect(clearCacheButton.hasAttribute('disabled')).to.be.false
-
-    // fire a project:joined event => compile
-    screen.getByRole('button', { name: 'Recompile' })
-    fireEvent(window, new CustomEvent('project:joined'))
-    screen.getByRole('button', { name: 'Compiling…' })
-    expect(clearCacheButton.hasAttribute('disabled')).to.be.true
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
+
+    const logsButton = screen.getByRole('button', {
+      name: 'This project has an error',
+    })
     logsButton.click()
-    clearCacheButton = await screen.findByRole('button', {
+
+    const clearCacheButton = await screen.findByRole('button', {
       name: 'Clear cached files',
     })
     expect(clearCacheButton.hasAttribute('disabled')).to.be.false
@@ -377,6 +334,45 @@ describe('<PdfPreview/>', function () {
     })
 
     expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
+    expect(fetchMock.called('express:/build/:file')).to.be.true // TODO: actual path
+  })
+
+  it('handle "recompile from scratch"', async function () {
+    mockCompile()
+    mockBuildFile()
+    mockClearCache()
+
+    renderWithEditorContext(<PdfPreview />, { scope })
+
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
+    await screen.findByRole('button', { name: 'Recompile' })
+
+    // show the logs UI
+    const logsButton = screen.getByRole('button', {
+      name: 'This project has an error',
+    })
+    logsButton.click()
+
+    const clearCacheButton = await screen.findByRole('button', {
+      name: 'Clear cached files',
+    })
+    expect(clearCacheButton.hasAttribute('disabled')).to.be.false
+
+    const recompileFromScratch = screen.getByRole('menuitem', {
+      name: 'Recompile from scratch',
+      hidden: true,
+    })
+    recompileFromScratch.click()
+
+    expect(clearCacheButton.hasAttribute('disabled')).to.be.true
+
+    // wait for compile to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
+    await screen.findByRole('button', { name: 'Recompile' })
+
+    expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
+    expect(fetchMock.called('express:/project/:projectId/output')).to.be.true
     expect(fetchMock.called('express:/build/:file')).to.be.true // TODO: actual path
   })
 })

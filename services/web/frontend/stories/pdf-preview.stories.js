@@ -47,6 +47,12 @@ const scope = {
   },
   hasLintingError: false,
   $applyAsync: () => {},
+  editor: {
+    sharejs_doc: {
+      doc_id: 'test-doc',
+      getSnapshot: () => 'some doc content',
+    },
+  },
 }
 
 const dispatchProjectJoined = () => {
