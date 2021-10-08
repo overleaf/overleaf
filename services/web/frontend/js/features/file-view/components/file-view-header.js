@@ -37,7 +37,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
     _id: PropTypes.string.isRequired,
   })
   const { permissionsLevel } = useEditorContext({
-    permissionsLevel: PropTypes.string.isRequired,
+    permissionsLevel: PropTypes.string,
   })
   const { t } = useTranslation()
 

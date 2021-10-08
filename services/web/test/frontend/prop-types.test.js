@@ -15,7 +15,7 @@ before(function () {
     originalConsoleError(message, ...args)
 
     // Check if the error is from prop-types
-    if (/Failed prop type/.test(message)) {
+    if (/Failed (prop|data) type/.test(message)) {
       // Throw an error, causing the test to fail
       throw new Error(message)
     }
