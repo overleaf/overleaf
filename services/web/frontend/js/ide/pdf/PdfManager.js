@@ -35,6 +35,8 @@ export default PdfManager = class PdfManager {
       highlights: [],
       position: null,
       lastCompileTimestamp: null,
+      clsiServerId: null,
+      compileGroup: null,
     }
   }
 }

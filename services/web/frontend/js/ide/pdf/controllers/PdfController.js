@@ -374,11 +374,11 @@ App.controller(
       let qs = {}
       // add a query string parameter for the compile group
       if (response.compileGroup != null) {
-        ide.compileGroup = qs.compileGroup = response.compileGroup
+        $scope.pdf.compileGroup = qs.compileGroup = response.compileGroup
       }
       // add a query string parameter for the clsi server id
       if (response.clsiServerId != null) {
-        ide.clsiServerId = qs.clsiserverid = response.clsiServerId
+        $scope.pdf.clsiServerId = qs.clsiserverid = response.clsiServerId
       }
 
       // TODO(das7pad): drop this hack once 2747f0d40af8729304 has landed in clsi
@@ -573,8 +573,8 @@ App.controller(
           method: 'GET',
           url: buildPdfDownloadUrl(options.pdfDownloadDomain, file.url),
           params: {
-            compileGroup: ide.compileGroup,
-            clsiserverid: ide.clsiServerId,
+            compileGroup: $scope.pdf.compileGroup,
+            clsiserverid: $scope.pdf.clsiServerId,
           },
         }
         return $http(opts)
@@ -844,7 +844,7 @@ App.controller(
         url: `/project/${$scope.project_id}/compile/stop`,
         method: 'POST',
         params: {
-          clsiserverid: ide.clsiServerId,
+          clsiserverid: $scope.pdf.clsiServerId,
         },
         headers: {
           'X-Csrf-Token': window.csrfToken,
@@ -865,7 +865,7 @@ App.controller(
         url: `/project/${$scope.project_id}/output`,
         method: 'DELETE',
         params: {
-          clsiserverid: ide.clsiServerId,
+          clsiserverid: $scope.pdf.clsiServerId,
         },
         headers: {
           'X-Csrf-Token': window.csrfToken,

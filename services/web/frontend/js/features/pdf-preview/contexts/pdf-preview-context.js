@@ -55,7 +55,7 @@ export default function PdfPreviewProvider({ children }) {
   const [, setLogEntryAnnotations] = useScopeValue('pdf.logEntryAnnotations')
 
   // the id of the CLSI server which ran the compile
-  const [, setClsiServerId] = useScopeValue('ide.clsiServerId')
+  const [, setClsiServerId] = useScopeValue('pdf.clsiServerId')
 
   // whether to display the editor and preview side-by-side or full-width ("flat")
   const [pdfLayout, setPdfLayout] = useScopeValue('ui.pdfLayout')

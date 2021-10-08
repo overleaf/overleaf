@@ -107,7 +107,7 @@ App.factory('synctex', function (ide, $http, $q) {
           file: path,
           line: row + 1,
           column,
-          clsiserverid: ide.clsiServerId,
+          clsiserverid: ide.$scope.pdf.clsiServerId,
         },
       })
         .then(response => {
@@ -172,7 +172,7 @@ App.factory('synctex', function (ide, $http, $q) {
           page: position.page + 1,
           h: h.toFixed(2),
           v: v.toFixed(2),
-          clsiserverid: ide.clsiServerId,
+          clsiserverid: ide.$scope.pdf.clsiServerId,
         },
       })
         .then(response => {
