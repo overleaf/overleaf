@@ -843,7 +843,11 @@ App.directive(
             const hasErrors =
               session
                 .getAnnotations()
-                .filter(annotation => annotation.type !== 'info').length > 0
+                .filter(
+                  annotation =>
+                    annotation.type !== 'info' &&
+                    annotation.source !== 'compile'
+                ).length > 0
 
             if ($rootScope.hasLintingError !== hasErrors) {
               return ($rootScope.hasLintingError = hasErrors)
