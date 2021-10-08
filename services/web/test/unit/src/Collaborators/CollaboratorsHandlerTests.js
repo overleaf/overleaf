@@ -285,13 +285,24 @@ describe('CollaboratorsHandler', function () {
     })
 
     describe('with null addingUserId', function () {
-      beforeEach(function () {
-        this.CollaboratorsHandler.promises.addUserIdToProject(
+      beforeEach(async function () {
+        this.project.collaberator_refs = []
+        this.ProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: this.project._id,
+            },
+            {
+              $addToSet: { collaberator_refs: this.userId },
+            }
+          )
+          .chain('exec')
+          .resolves()
+        await this.CollaboratorsHandler.promises.addUserIdToProject(
           this.project._id,
           null,
           this.userId,
-          'readAndWrite',
-          this.callback
+          'readAndWrite'
         )
       })
 
