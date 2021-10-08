@@ -23,6 +23,8 @@ import { useEditorContext } from '../../../shared/context/editor-context'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
 import DocumentCompiler from '../util/compiler'
 import { useIdeContext } from '../../../shared/context/ide-context'
+import { useLayoutContext } from '../../../shared/context/layout-context'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 export const PdfPreviewContext = createContext(undefined)
 
@@ -33,35 +35,26 @@ PdfPreviewProvider.propTypes = {
 export default function PdfPreviewProvider({ children }) {
   const ide = useIdeContext()
 
+  const { pdfHidden, pdfLayout, setPdfLayout, setView } = useLayoutContext()
+
   const project = useProjectContext()
 
   const projectId = project._id
 
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
 
-  // the URL for loading the PDF in the preview pane
-  const [pdfUrl, setPdfUrl] = useScopeValue('pdf.url')
-
-  // the URL for downloading the PDF
-  const [pdfDownloadUrl, setPdfDownloadUrl] = useScopeValue('pdf.downloadUrl')
-
-  // the log entries parsed from the compile output log
-  const [logEntries, setLogEntries] = useScopeValue('pdf.logEntries')
-
-  // the project is considered to be "uncompiled" if a doc has changed since the last compile started
-  const [uncompiled, setUncompiled] = useScopeValue('pdf.uncompiled')
-
-  // annotations for display in the editor, built from the log entries
-  const [, setLogEntryAnnotations] = useScopeValue('pdf.logEntryAnnotations')
-
-  // the id of the CLSI server which ran the compile
-  const [, setClsiServerId] = useScopeValue('pdf.clsiServerId')
-
-  // whether to display the editor and preview side-by-side or full-width ("flat")
-  const [pdfLayout, setPdfLayout] = useScopeValue('ui.pdfLayout')
-
-  // what to show in the "flat" view (editor or pdf)
-  const [, setUiView] = useScopeValue('ui.view')
+  const {
+    logEntries,
+    pdfDownloadUrl,
+    pdfUrl,
+    setClsiServerId,
+    setLogEntries,
+    setLogEntryAnnotations,
+    setPdfDownloadUrl,
+    setPdfUrl,
+    setUncompiled,
+    uncompiled,
+  } = useCompileContext()
 
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
@@ -109,9 +102,6 @@ export default function PdfPreviewProvider({ children }) {
 
   // the Document currently open in the editor
   const [currentDoc] = useScopeValue('editor.sharejs_doc')
-
-  // whether the PDF view is hidden
-  const [pdfHidden] = useScopeValue('ui.pdfHidden')
 
   // whether the editor linter found errors
   const [hasLintingError, setHasLintingError] = useScopeValue('hasLintingError')
@@ -379,14 +369,15 @@ export default function PdfPreviewProvider({ children }) {
   }, [clearCache, compiler])
 
   // switch to either side-by-side or flat (full-width) layout
+  // TODO: move this into LayoutContext?
   const switchLayout = useCallback(() => {
     setPdfLayout(layout => {
       const newLayout = layout === 'sideBySide' ? 'flat' : 'sideBySide'
-      setUiView(newLayout === 'sideBySide' ? 'editor' : 'pdf')
+      setView(newLayout === 'sideBySide' ? 'editor' : 'pdf')
       setPdfLayout(newLayout)
       window.localStorage.setItem('pdf.layout', newLayout)
     })
-  }, [setPdfLayout, setUiView])
+  }, [setPdfLayout, setView])
 
   // the context value, memoized to minimize re-rendering
   const value = useMemo(() => {

@@ -22,6 +22,7 @@ LayoutContext.Provider.propTypes = {
 export function LayoutProvider({ children }) {
   const { $scope } = useIdeContext()
 
+  // what to show in the "flat" view (editor or pdf)
   const [view, _setView] = useScopeValue('ui.view')
 
   const setView = useCallback(
@@ -38,32 +39,46 @@ export function LayoutProvider({ children }) {
     [$scope, _setView]
   )
 
+  // whether the chat pane is open
   const [chatIsOpen, setChatIsOpen] = useScopeValue('ui.chatOpen')
+
+  // whether the review pane is open
   const [reviewPanelOpen, setReviewPanelOpen] = useScopeValue(
     'ui.reviewPanelOpen'
   )
+
+  // whether the menu pane is open
   const [leftMenuShown, setLeftMenuShown] = useScopeValue('ui.leftMenuShown')
-  const [pdfLayout] = useScopeValue('ui.pdfLayout', $scope)
+
+  // whether to display the editor and preview side-by-side or full-width ("flat")
+  const [pdfLayout, setPdfLayout] = useScopeValue('ui.pdfLayout')
+
+  // whether the PDF preview pane is hidden
+  const [pdfHidden] = useScopeValue('ui.pdfHidden')
 
   const value = useMemo(
     () => ({
-      view,
-      setView,
       chatIsOpen,
-      setChatIsOpen,
-      reviewPanelOpen,
-      setReviewPanelOpen,
       leftMenuShown,
-      setLeftMenuShown,
+      pdfHidden,
       pdfLayout,
+      reviewPanelOpen,
+      setChatIsOpen,
+      setLeftMenuShown,
+      setPdfLayout,
+      setReviewPanelOpen,
+      setView,
+      view,
     }),
     [
       chatIsOpen,
       leftMenuShown,
+      pdfHidden,
       pdfLayout,
       reviewPanelOpen,
       setChatIsOpen,
       setLeftMenuShown,
+      setPdfLayout,
       setReviewPanelOpen,
       setView,
       view,
