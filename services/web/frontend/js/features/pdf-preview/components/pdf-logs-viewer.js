@@ -11,6 +11,7 @@ import PdfDownloadFilesButton from './pdf-download-files-button'
 import PdfLogsEntries from './pdf-logs-entries'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
+import { LogsPaneInfoNotice } from '../../preview/components/preview-logs-pane'
 
 function PdfLogsViewer() {
   const {
@@ -26,6 +27,7 @@ function PdfLogsViewer() {
   return (
     <div className="logs-pane">
       <div className="logs-pane-content">
+        <LogsPaneInfoNotice />
         {codeCheckFailed && (
           <div className="log-entry">
             <div className="log-entry-header log-entry-header-error">

@@ -182,7 +182,8 @@ function AutoCompileLintingErrorEntry() {
   )
 }
 
-function LogsPaneInfoNotice({ variantWithFirstErrorPopup }) {
+// exported to be used by pdf-viewer during React migration
+export function LogsPaneInfoNotice({ variantWithFirstErrorPopup }) {
   const { t } = useTranslation()
   const [dismissedInfoNotice, setDismissedInfoNotice] = usePersistedState(
     `logs_pane.dismissed_info_notice`,
