@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react'
 import PropTypes from 'prop-types'
-import useScopeValue from '../../../shared/context/util/scope-value-hook'
+import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { useProjectContext } from '../../../shared/context/project-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import {

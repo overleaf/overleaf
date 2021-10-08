@@ -5,7 +5,7 @@ import { Button } from 'react-bootstrap'
 import { useCallback } from 'react'
 import { withContextRoot } from './utils/with-context-root'
 import { setupContext } from './fixtures/context'
-import useScopeValue from '../js/shared/context/util/scope-value-hook'
+import useScopeValue from '../js/shared/hooks/use-scope-value'
 
 setupContext()
 

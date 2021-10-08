@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
-import { useIdeContext } from '../ide-context'
+import { useIdeContext } from '../context/ide-context'
 
 /**
  * Binds a property in an Angular scope making it accessible in a React
@@ -23,7 +23,11 @@ export default function useScopeValue(path, deep = false) {
     return $scope.$watch(
       path,
       newValue => {
-        setValue(deep ? _.cloneDeep(newValue) : newValue)
+        setValue(() => {
+          // NOTE: this is deliberately wrapped in a function,
+          // to avoid calling setValue directly with a value that's a function
+          return deep ? _.cloneDeep(newValue) : newValue
+        })
       },
       deep
     )

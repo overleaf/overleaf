@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo } from 'react'
 import PropTypes from 'prop-types'
-import useScopeValue from './util/scope-value-hook'
+import useScopeValue from '../hooks/use-scope-value'
 
 export const CompileContext = createContext()
 

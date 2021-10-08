@@ -1,4 +1,4 @@
-import useScopeValue from '../../../shared/context/util/scope-value-hook'
+import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { lazy, memo, useEffect } from 'react'
 

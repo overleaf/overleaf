@@ -6,7 +6,7 @@ import {
   useMemo,
 } from 'react'
 import PropTypes from 'prop-types'
-import useScopeValue from './util/scope-value-hook'
+import useScopeValue from '../hooks/use-scope-value'
 import useBrowserWindow from '../hooks/use-browser-window'
 import { useIdeContext } from './ide-context'
 import { useProjectContext } from './project-context'
