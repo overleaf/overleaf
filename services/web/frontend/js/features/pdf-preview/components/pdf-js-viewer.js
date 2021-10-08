@@ -228,10 +228,35 @@ function PdfJsViewer({ url }) {
     }
   }, [pdfJsWrapper])
 
+  const handleKeyDown = useCallback(
+    event => {
+      if (!initialised) {
+        return
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key === '=') {
+        event.preventDefault()
+        setZoom('zoom-in')
+      } else if ((event.metaKey || event.ctrlKey) && event.key === '-') {
+        event.preventDefault()
+        setZoom('zoom-out')
+      } else if ((event.metaKey || event.ctrlKey) && event.key === '0') {
+        event.preventDefault()
+        setZoom('fit-width')
+      }
+    },
+    [initialised, setZoom]
+  )
+
   /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
+  /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
   return (
     <div className="pdfjs-viewer" ref={handleContainer}>
-      <div className="pdfjs-viewer-inner" tabIndex="0">
+      <div
+        className="pdfjs-viewer-inner"
+        role="tabpanel"
+        tabIndex="0"
+        onKeyDown={handleKeyDown}
+      >
         <div className="pdfViewer" />
       </div>
       <div className="pdfjs-controls">
