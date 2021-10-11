@@ -404,16 +404,16 @@ export const CompileError = () => {
   })
 
   const Inner = () => {
-    const { recompile } = usePdfPreviewContext()
+    const { startCompile } = usePdfPreviewContext()
 
     const handleStatusChange = useCallback(
       event => {
         setStatus(event.target.value)
         window.setTimeout(() => {
-          recompile()
+          startCompile()
         }, 0)
       },
-      [recompile]
+      [startCompile]
     )
 
     return (

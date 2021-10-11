@@ -6,8 +6,8 @@ import { pathToFileURL } from 'url'
 import PdfJsViewer from '../../../../../frontend/js/features/pdf-preview/components/pdf-js-viewer'
 
 const example = pathToFileURL(
-  path.join(__dirname, '../fixtures/test-example.pdf').toString()
-)
+  path.join(__dirname, '../fixtures/test-example.pdf')
+).toString()
 
 const exampleCorrupt = pathToFileURL(
   path.join(__dirname, '../fixtures/test-example-corrupt.pdf')

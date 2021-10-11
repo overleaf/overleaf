@@ -46,7 +46,6 @@ export default class DocumentCompiler {
   }
 
   destroy() {
-    this.signal.abort()
     this.debouncedAutoCompile.cancel()
   }
 

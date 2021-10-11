@@ -10,6 +10,7 @@ import FileView from '../../../../../frontend/js/features/file-view/components/f
 
 describe('<FileView/>', function () {
   const textFile = {
+    id: 'text-file',
     name: 'example.tex',
     linkedFileData: {
       v1_source_doc_id: 'v1-source-id',
@@ -35,6 +36,15 @@ describe('<FileView/>', function () {
 
   describe('for a text file', function () {
     it('shows a loading indicator while the file is loading', async function () {
+      fetchMock.head('express:/project/:project_id/file/:file_id', {
+        status: 201,
+        headers: { 'Content-Length': 10000 },
+      })
+      fetchMock.get(
+        'express:/project/:project_id/file/:file_id',
+        'Text file content'
+      )
+
       renderWithEditorContext(
         <FileView file={textFile} storeReferencesKeys={() => {}} />
       )
@@ -45,8 +55,13 @@ describe('<FileView/>', function () {
     })
 
     it('shows messaging if the text view could not be loaded', async function () {
+      const unpreviewableTextFile = {
+        ...textFile,
+        name: 'example.not-tex',
+      }
+
       renderWithEditorContext(
-        <FileView file={textFile} storeReferencesKeys={() => {}} />
+        <FileView file={unpreviewableTextFile} storeReferencesKeys={() => {}} />
       )
 
       await screen.findByText('Sorry, no preview is available', {
