@@ -872,7 +872,10 @@ const ProjectController = {
                 'new_navigation_ui',
                 true
               ),
-              showNewPdfPreview: shouldDisplayFeature('new_pdf_preview', false),
+              showNewPdfPreview: shouldDisplayFeature(
+                'new_pdf_preview',
+                user.alphaProgram
+              ),
               showSymbolPalette: shouldDisplayFeature(
                 'symbol_palette',
                 user.alphaProgram || user.betaProgram
