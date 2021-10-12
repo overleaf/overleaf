@@ -1,7 +1,6 @@
 import getMeta from '../../../utils/meta'
 import HumanReadableLogs from '../../../ide/human-readable-logs/HumanReadableLogs'
 import BibLogParser from '../../../ide/log-parser/bib-log-parser'
-import { ChkTeXParser } from './chktex-log-parser'
 import { buildFileList } from './file-list'
 
 const searchParams = new URLSearchParams(window.location.search)
@@ -104,18 +103,6 @@ export const handleOutputFiles = async (projectId, data) => {
     const { errors, warnings } = new BibLogParser(log, {}).parse()
 
     accumulateResults({ errors, warnings }, 'BibTeX:')
-  }
-
-  const chktexFile = outputFiles.get('output.chktex')
-
-  if (chktexFile) {
-    const response = await fetch(`${chktexFile.url}?${params}`)
-
-    const log = await response.text()
-
-    const { errors, warnings } = ChkTeXParser.parse(log)
-
-    accumulateResults({ errors, warnings }, 'Syntax')
   }
 
   result.fileList = buildFileList(outputFiles, data.clsiServerId)
