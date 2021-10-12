@@ -1,4 +1,5 @@
 const path = require('path')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 // NOTE: must be set before webpack config is imported
 process.env.SHARELATEX_CONFIG = path.resolve(
@@ -22,8 +23,7 @@ module.exports = {
       ...storybookConfig.module.rules.filter(
         rule => !rule.test.toString().includes('woff')
       ),
-      // Replace the less rule, adding to-string-loader
-      // Filter out the MiniCSS extraction, which conflicts with the built-in CSS loader
+      // Replace the LESS rule, and the CSS rule which conflicts with the built-in CSS loader
       ...customConfig.module.rules.filter(
         rule =>
           !rule.test.toString().includes('less') &&
@@ -31,7 +31,7 @@ module.exports = {
       ),
       {
         test: /\.less$/,
-        use: ['to-string-loader', 'css-loader', 'less-loader'],
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader'],
       },
     ]
 

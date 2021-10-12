@@ -65,7 +65,9 @@ export const loaders = [
       // NOTE: this uses `${theme}style.less` rather than `${theme}.less`
       // so that webpack only bundles files ending with "style.less"
       activeStyle: await import(
-        `../frontend/stylesheets/${theme === 'default-' ? '' : theme}style.less`
+        `!!to-string-loader!css-loader!less-loader!../frontend/stylesheets/${
+          theme === 'default-' ? '' : theme
+        }style.less`
       ),
     }
   },
