@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import { screen } from '@testing-library/react'
 import path from 'path'
+import nock from 'nock'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import { pathToFileURL } from 'url'
 import PdfJsViewer from '../../../../../frontend/js/features/pdf-preview/components/pdf-js-viewer'
@@ -12,8 +13,6 @@ const example = pathToFileURL(
 const exampleCorrupt = pathToFileURL(
   path.join(__dirname, '../fixtures/test-example-corrupt.pdf')
 ).toString()
-
-const invalidURL = 'http://nonexisting.com/doc'
 
 describe('<PdfJSViewer/>', function () {
   it('loads all PDF pages', async function () {
@@ -43,16 +42,34 @@ describe('<PdfJSViewer/>', function () {
 
   describe('with an invalid URL', function () {
     it('renders an error alert', async function () {
-      renderWithEditorContext(<PdfJsViewer url={invalidURL} />)
+      nock('https://www.test-overleaf.com')
+        .get('/invalid/doc.pdf')
+        .replyWithError({
+          message: 'something awful happened',
+          code: 'AWFUL_ERROR',
+        })
+
+      renderWithEditorContext(<PdfJsViewer url="/invalid/doc.pdf" />)
+
       await screen.findByRole('alert')
+      screen.getByText('something awful happened')
+
       expect(screen.queryByLabelText('Page 1')).to.not.exist
     })
 
     it('can load another document after the error', async function () {
+      nock('https://www.test-overleaf.com')
+        .get('/invalid/doc.pdf')
+        .replyWithError({
+          message: 'something awful happened',
+          code: 'AWFUL_ERROR',
+        })
+
       const { rerender } = renderWithEditorContext(
-        <PdfJsViewer url={invalidURL} />
+        <PdfJsViewer url="/invalid/doc.pdf" />
       )
       await screen.findByRole('alert')
+      screen.getByText('something awful happened')
 
       rerender(<PdfJsViewer url={example} />)
 
