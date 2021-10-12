@@ -42,6 +42,8 @@ function getPostRegistrationAnalyticsQueue() {
 function getOrCreateQueue(queueName, jobOptions = {}) {
   if (!queues[queueName]) {
     queues[queueName] = new Queue(queueName, {
+      // this configuration is duplicated in /services/analytics/app/js/Queues.js
+      // and needs to be manually kept in sync whenever modified
       redis: Settings.redis.queues,
       defaultJobOptions: {
         removeOnComplete: MAX_COMPLETED_JOBS_RETAINED,
