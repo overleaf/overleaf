@@ -74,8 +74,7 @@ export default class DocumentCompiler {
 
       window.dispatchEvent(new CustomEvent('flush-changes')) // TODO: wait for this?
 
-      const params = this.buildQueryParams()
-      this.addCompileParams(params, options)
+      const params = this.buildCompileParams(options)
 
       const data = await postJSON(
         `/project/${this.project._id}/compile?${params}`,
@@ -116,8 +115,8 @@ export default class DocumentCompiler {
     return null
   }
 
-  // build the query parameters added to all requests
-  buildQueryParams() {
+  // build the query parameters added to post-compile requests
+  buildPostCompileParams() {
     const params = new URLSearchParams()
 
     // the id of the CLSI server that processed the previous compile request
@@ -128,8 +127,13 @@ export default class DocumentCompiler {
     return params
   }
 
-  // add extra query parameters to the compile request
-  addCompileParams(params, options) {
+  // build the query parameters for the compile request
+  buildCompileParams(options) {
+    const params = new URLSearchParams()
+
+    // note: no clsiserverid query param is set on "compile" requests,
+    // as this is added in the backend by the web api
+
     // tell the server whether this is an automatic or manual compile request
     if (options.isAutoCompileOnLoad || options.isAutoCompileOnChange) {
       params.set('auto_compile', 'true')
@@ -144,6 +148,8 @@ export default class DocumentCompiler {
     if (searchParams.get('file_line_errors') === 'true') {
       params.file_line_errors = 'true'
     }
+
+    return params
   }
 
   // send a request to stop the current compile
@@ -151,7 +157,7 @@ export default class DocumentCompiler {
     // NOTE: no stoppingCompile state, as this should happen fairly quickly
     // and doesn't matter if it runs twice.
 
-    const params = this.buildQueryParams()
+    const params = this.buildPostCompileParams()
 
     return postJSON(`/project/${this.project._id}/compile/stop?${params}`, {
       signal: this.signal,
@@ -165,8 +171,9 @@ export default class DocumentCompiler {
       })
   }
 
+  // send a request to clear the cache
   clearCache() {
-    const params = this.buildQueryParams()
+    const params = this.buildPostCompileParams()
 
     return deleteJSON(`/project/${this.project._id}/output?${params}`, {
       signal: this.signal,
