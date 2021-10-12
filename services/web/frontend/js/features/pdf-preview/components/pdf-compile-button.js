@@ -1,10 +1,18 @@
-import { Button, Dropdown, MenuItem } from 'react-bootstrap'
+import {
+  Button,
+  Dropdown,
+  MenuItem,
+  OverlayTrigger,
+  Tooltip,
+} from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import { useTranslation } from 'react-i18next'
 import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { memo } from 'react'
 import classnames from 'classnames'
+
+const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
 function PdfCompileButton() {
   const {
@@ -34,17 +42,28 @@ function PdfCompileButton() {
       })}
       id="pdf-recompile-dropdown"
     >
-      <Button
-        className="btn-recompile"
-        bsStyle="success"
-        onClick={compiling ? stopCompile : startCompile}
-        aria-label={compileButtonLabel}
+      <OverlayTrigger
+        placement="bottom"
+        delayShow={500}
+        overlay={
+          <Tooltip id="tooltip-logs-toggle" className="keyboard-tooltip">
+            {t('recompile_pdf')}{' '}
+            <span className="keyboard-shortcut">({modifierKey} + Enter)</span>
+          </Tooltip>
+        }
       >
-        <Icon type="refresh" spin={compiling} />
-        <span className="toolbar-text toolbar-hide-medium toolbar-hide-small">
-          {compileButtonLabel}
-        </span>
-      </Button>
+        <Button
+          className="btn-recompile"
+          bsStyle="success"
+          onClick={compiling ? stopCompile : startCompile}
+          aria-label={compileButtonLabel}
+        >
+          <Icon type="refresh" spin={compiling} />
+          <span className="toolbar-hide-medium toolbar-hide-small btn-recompile-label">
+            {compileButtonLabel}
+          </span>
+        </Button>
+      </OverlayTrigger>
 
       <Dropdown.Toggle
         aria-label={t('toggle_compile_options_menu')}

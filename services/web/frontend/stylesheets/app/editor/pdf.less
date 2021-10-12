@@ -12,6 +12,7 @@
   .toolbar-small-mixin;
   .toolbar-alt-mixin;
   padding-right: 5px;
+  margin-left: 0;
   &.changes-to-autocompile {
     // prettier-ignore
     #gradient > .striped(@color: rgba(255, 255, 255, 0.1), @angle: -45deg);
@@ -54,6 +55,61 @@
 }
 .btn-toggle-logs-label {
   padding-left: @line-height-computed / 4;
+}
+
+.toolbar-pdf-hybrid {
+  .btn:not(.btn-recompile) {
+    display: inline-block;
+    color: @toolbar-btn-color;
+    background-color: transparent;
+    padding: 4px 2px;
+    line-height: 1;
+    height: 24px;
+    border-radius: 2px;
+
+    &:hover,
+    &:active,
+    &:focus {
+      color: @toolbar-btn-color;
+    }
+
+    .label {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 0.15em 0.6em 0.2em;
+      font-size: 60%;
+      pointer-events: none;
+    }
+
+    .btn {
+      display: inline-block;
+      color: #fff;
+      background-color: transparent;
+      padding: 4px 2px;
+      line-height: 1;
+      height: 24px;
+      border-radius: 2px;
+    }
+
+    &.log-btn {
+      margin-right: 3px;
+
+      &.active {
+        color: white;
+        background-color: @link-color;
+        box-shadow: @toolbar-icon-btn-hover-boxshadow;
+
+        &:hover {
+          color: white;
+        }
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
 }
 
 .pdf {

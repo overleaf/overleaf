@@ -317,7 +317,7 @@ describe('<PdfPreview/>', function () {
     await screen.findByRole('button', { name: 'Recompile' })
 
     const logsButton = screen.getByRole('button', {
-      name: 'This project has an error',
+      name: 'View logs',
     })
     logsButton.click()
 
@@ -350,7 +350,7 @@ describe('<PdfPreview/>', function () {
 
     // show the logs UI
     const logsButton = screen.getByRole('button', {
-      name: 'This project has an error',
+      name: 'View logs',
     })
     logsButton.click()
 

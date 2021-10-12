@@ -2,15 +2,20 @@ import { memo, Suspense } from 'react'
 import PdfLogsViewer from './pdf-logs-viewer'
 import PdfViewer from './pdf-viewer'
 import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
-import PdfPreviewToolbar from './pdf-preview-toolbar'
 import LoadingSpinner from '../../../shared/components/loading-spinner'
+import PdfHybridPreviewToolbar from './pdf-preview-hybrid-toolbar'
+import PdfPreviewToolbar from './pdf-preview-toolbar'
+
+const newPreviewToolbar = new URLSearchParams(window.location.search).has(
+  'new_preview_toolbar'
+)
 
 function PdfPreviewPane() {
   const { showLogs } = usePdfPreviewContext()
 
   return (
     <div className="pdf full-size">
-      <PdfPreviewToolbar />
+      {newPreviewToolbar ? <PdfPreviewToolbar /> : <PdfHybridPreviewToolbar />}
       <Suspense fallback={<LoadingPreview />}>
         <div className="pdf-viewer">
           <PdfViewer />

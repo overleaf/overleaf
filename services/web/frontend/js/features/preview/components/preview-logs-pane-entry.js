@@ -78,6 +78,16 @@ function PreviewLogEntryContent({
 
   return (
     <div className="log-entry-content">
+      {formattedContent ? (
+        <div className="log-entry-formatted-content">{formattedContent}</div>
+      ) : null}
+      {extraInfoURL ? (
+        <div className="log-entry-content-link">
+          <a href={extraInfoURL} target="_blank" rel="noopener">
+            {t('log_hint_extra_info')}
+          </a>
+        </div>
+      ) : null}
       {rawContent ? (
         <div className="log-entry-content-raw-container">
           <div {...expandableProps}>
@@ -102,16 +112,6 @@ function PreviewLogEntryContent({
               </button>
             </div>
           ) : null}
-        </div>
-      ) : null}
-      {formattedContent ? (
-        <div className="log-entry-formatted-content">{formattedContent}</div>
-      ) : null}
-      {extraInfoURL ? (
-        <div className="log-entry-content-link">
-          <a href={extraInfoURL} target="_blank" rel="noopener">
-            {t('log_hint_extra_info')}
-          </a>
         </div>
       ) : null}
     </div>

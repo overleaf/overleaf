@@ -14,6 +14,7 @@ import { buildFileList } from '../js/features/pdf-preview/util/file-list'
 import PdfLogsViewer from '../js/features/pdf-preview/components/pdf-logs-viewer'
 import examplePdf from './fixtures/storybook-example.pdf'
 import PdfPreviewError from '../js/features/pdf-preview/components/pdf-preview-error'
+import PdfPreviewHybridToolbar from '../js/features/pdf-preview/components/pdf-preview-hybrid-toolbar'
 
 setupContext()
 
@@ -22,6 +23,7 @@ export default {
   component: PdfPreview,
   subcomponents: {
     PdfPreviewToolbar,
+    PdfPreviewHybridToolbar,
     PdfFileList,
     PdfPreviewError,
   },
@@ -490,6 +492,22 @@ export const Toolbar = () => {
     <PdfPreviewProvider>
       <div className="pdf">
         <PdfPreviewToolbar />
+      </div>
+    </PdfPreviewProvider>,
+    scope
+  )
+}
+
+export const HybridToolbar = () => {
+  useFetchMock(fetchMock => {
+    mockCompile(fetchMock, 500)
+    mockBuildFile(fetchMock)
+  })
+
+  return withContextRoot(
+    <PdfPreviewProvider>
+      <div className="pdf">
+        <PdfPreviewHybridToolbar />
       </div>
     </PdfPreviewProvider>,
     scope

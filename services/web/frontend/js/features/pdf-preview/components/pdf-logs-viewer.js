@@ -1,4 +1,3 @@
-import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import PreviewLogsPaneEntry from '../../preview/components/preview-logs-pane-entry'
 import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
@@ -11,7 +10,8 @@ import PdfDownloadFilesButton from './pdf-download-files-button'
 import PdfLogsEntries from './pdf-logs-entries'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
-import { LogsPaneInfoNotice } from '../../preview/components/preview-logs-pane'
+import PdfCodeCheckFailedNotice from '../../preview/components/pdf-code-check-failed-notice'
+import PdfLogsPaneInfoNotice from '../../preview/components/pdf-logs-pane-info-notice'
 
 function PdfLogsViewer() {
   const {
@@ -27,19 +27,9 @@ function PdfLogsViewer() {
   return (
     <div className="logs-pane">
       <div className="logs-pane-content">
-        <LogsPaneInfoNotice />
-        {codeCheckFailed && (
-          <div className="log-entry">
-            <div className="log-entry-header log-entry-header-error">
-              <div className="log-entry-header-icon-container">
-                <Icon type="exclamation-triangle" modifier="fw" />
-              </div>
-              <h3 className="log-entry-header-title">
-                {t('code_check_failed_explanation')}
-              </h3>
-            </div>
-          </div>
-        )}
+        <PdfLogsPaneInfoNotice />
+
+        {codeCheckFailed && <PdfCodeCheckFailedNotice />}
 
         {error && <PdfPreviewError error={error} />}
 
