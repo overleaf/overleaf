@@ -144,7 +144,7 @@
     "passport-orcid": "0.0.4",
     "passport-saml": "https://github.com/overleaf/passport-saml/releases/download/v3.0.0-overleaf/passport-saml-3.0.0-overleaf.tar.gz",
     "passport-twitter": "^1.0.4",
-    "pdfjs-dist": "^2.9.359",
+    "pdfjs-dist": "^2.10.377",
     "prop-types": "^15.7.2",
     "pug": "^3.0.1",
     "pug-runtime": "^3.0.1",

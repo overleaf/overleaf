@@ -42,6 +42,7 @@ export default class PDFJSWrapper {
       linkService,
       // l10n, // commented out since it currently breaks `aria-label` rendering in pdf pages
       enableScripting: false, // default is false, but set explicitly to be sure
+      enableXfa: false, // default is false (2021-10-12), but set explicitly to be sure
       renderInteractiveForms: false,
     })
 
