@@ -1,6 +1,6 @@
 const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
-Metrics.initialize(process.env.METRICS_APP_NAME || 'real-time')
+Metrics.initialize(Settings.appName || 'real-time')
 const async = require('async')
 
 const logger = require('logger-sharelatex')
