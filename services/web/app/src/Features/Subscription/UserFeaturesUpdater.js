@@ -39,6 +39,14 @@ module.exports = {
       return callback(err, featuresChanged)
     })
   },
+
+  createFeaturesOverride(userId, featuresOverride, callback) {
+    User.updateOne(
+      { _id: userId },
+      { $push: { featuresOverrides: featuresOverride } },
+      callback
+    )
+  },
 }
 
 module.exports.promises = promisifyAll(module.exports, {
