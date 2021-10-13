@@ -56,6 +56,7 @@ module.exports = {
       compileTimeout: 60,
       compileGroup: 'standard',
       trackChanges: false,
+      symbolPalette: false,
     },
     personal: {
       collaborators: 1,
@@ -71,6 +72,7 @@ module.exports = {
       compileTimeout: 60,
       compileGroup: 'standard',
       trackChanges: false,
+      symbolPalette: false,
     },
     collaborator: {
       collaborators: 10,
@@ -86,6 +88,7 @@ module.exports = {
       compileTimeout: 180,
       compileGroup: 'priority',
       trackChanges: true,
+      symbolPalette: true,
     },
     professional: {
       collaborators: -1,
@@ -101,6 +104,7 @@ module.exports = {
       compileTimeout: 180,
       compileGroup: 'priority',
       trackChanges: true,
+      symbolPalette: true,
     },
   }),
 

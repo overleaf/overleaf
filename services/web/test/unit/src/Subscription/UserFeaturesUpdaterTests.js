@@ -21,6 +21,7 @@ describe('UserFeaturesUpdater', function () {
       referencesSearch: true,
       zotero: true,
       mendeley: true,
+      symbolPalette: true,
     }
     this.User = {
       findByIdAndUpdate: sinon.stub().yields(null, { features: this.features }),

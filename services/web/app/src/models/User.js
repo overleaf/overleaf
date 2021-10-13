@@ -102,6 +102,10 @@ const UserSchema = new Schema({
       type: Boolean,
       default: Settings.defaultFeatures.referencesSearch,
     },
+    symbolPalette: {
+      type: Boolean,
+      default: Settings.defaultFeatures.symbolPalette,
+    },
   },
   featuresOverrides: [
     {
@@ -126,6 +130,7 @@ const UserSchema = new Schema({
         mendeley: { type: Boolean },
         zotero: { type: Boolean },
         referencesSearch: { type: Boolean },
+        symbolPalette: { type: Boolean },
       },
     },
   ],

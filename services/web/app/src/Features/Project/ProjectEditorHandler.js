@@ -80,6 +80,7 @@ module.exports = ProjectEditorHandler = {
       mendeley: false,
       trackChanges: false,
       trackChangesVisible: ProjectEditorHandler.trackChangesAvailable,
+      symbolPalette: false,
     })
 
     if (result.features.trackChanges) {
