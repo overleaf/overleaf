@@ -17,4 +17,4 @@ build-community:
 	docker build --build-arg SHARELATEX_BASE_TAG --build-arg MONOREPO_REVISION -f Dockerfile -t $(SHARELATEX_TAG) $(MONOREPO_ROOT)
 
 
-PHONY: build-base build-community
+.PHONY: build-base build-community
