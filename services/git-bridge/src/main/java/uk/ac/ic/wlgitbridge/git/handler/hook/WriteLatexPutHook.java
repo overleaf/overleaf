@@ -74,20 +74,20 @@ public class WriteLatexPutHook implements PreReceiveHook {
                         receiveCommand
                 );
             } catch (IOException e) {
-                Log.debug("IOException on pre receive: {}", e.getMessage());
+                Log.error("IOException on pre receive", e);
                 receivePack.sendError(e.getMessage());
                 receiveCommand.setResult(
                         Result.REJECTED_OTHER_REASON,
                         e.getMessage()
                 );
             } catch (OutOfDateException e) {
-                Log.debug("OutOfDateException on pre receive: {}", e.getMessage());
+                Log.error("OutOfDateException on pre receive", e);
                 receiveCommand.setResult(Result.REJECTED_NONFASTFORWARD);
             } catch (GitUserException e) {
-                Log.debug("GitUserException on pre receive: {}", e.getMessage());
+                Log.error("GitUserException on pre receive", e);
                 handleSnapshotPostException(receivePack, receiveCommand, e);
             } catch (Throwable t) {
-                Log.warn("Throwable on pre receive: {}", t.getMessage());
+                Log.error("Throwable on pre receive", t);
                 handleSnapshotPostException(
                         receivePack,
                         receiveCommand,
