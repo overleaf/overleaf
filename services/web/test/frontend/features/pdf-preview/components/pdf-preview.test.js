@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
-import { screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
 import PdfPreview from '../../../../../frontend/js/features/pdf-preview/components/pdf-preview'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
@@ -255,20 +255,41 @@ describe('<PdfPreview/>', function () {
   })
 
   it('displays an error message if there was a compile error', async function () {
-    mockCompileError('compile-in-progress')
+    const compileErrorStatuses = {
+      'clear-cache':
+        'Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.',
+      'clsi-maintenance':
+        'The compile servers are down for maintenance, and will be back shortly.',
+      'compile-in-progress':
+        'A previous compile is still running. Please wait a minute and try compiling again.',
+      exited: 'Server Error',
+      failure: 'No PDF',
+      generic: 'Server Error',
+      'project-too-large': 'Project too large',
+      'rate-limited': 'Compile rate limit hit',
+      terminated: 'Compilation cancelled',
+      timedout: 'Timed out',
+      'too-recently-compiled':
+        'This project was compiled very recently, so this compile has been skipped.',
+      unavailable:
+        'Sorry, the compile server for your project was temporarily unavailable. Please try again in a few moments.',
+      foo:
+        'Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.',
+    }
 
-    renderWithEditorContext(<PdfPreview />, { scope })
+    for (const [status, message] of Object.entries(compileErrorStatuses)) {
+      cleanup()
+      fetchMock.restore()
+      mockCompileError(status)
 
-    // wait for "compile on load" to finish
-    await screen.findByRole('button', { name: 'Compiling…' })
-    await screen.findByRole('button', { name: 'Recompile' })
+      renderWithEditorContext(<PdfPreview />, { scope })
 
-    screen.getByText(
-      'Please wait for your other compile to finish before trying again.'
-    )
+      // wait for "compile on load" to finish
+      await screen.findByRole('button', { name: 'Compiling…' })
+      await screen.findByRole('button', { name: 'Recompile' })
 
-    expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
-    expect(fetchMock.called('express:/build/:file')).to.be.false // TODO: actual path
+      screen.getByText(message)
+    }
   })
 
   it('displays expandable raw logs', async function () {

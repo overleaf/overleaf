@@ -11,7 +11,7 @@ function TimeoutUpgradePrompt() {
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
 
   if (!window.ExposedSettings.enableSubscriptions || hasPremiumCompile) {
-    return
+    return null
   }
 
   return (
