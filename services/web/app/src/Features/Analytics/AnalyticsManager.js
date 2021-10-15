@@ -14,8 +14,10 @@ const analyticsUserPropertiesQueue = Queues.getAnalyticsUserPropertiesQueue()
 
 const ONE_MINUTE_MS = 60 * 1000
 
+const UUID_REGEXP = /^[\w]{8}(-[\w]{4}){3}-[\w]{12}$/
+
 function identifyUser(userId, analyticsId, isNewUser) {
-  if (!userId || !analyticsId || userId.toString() === analyticsId.toString()) {
+  if (!userId || !analyticsId || !analyticsId.toString().match(UUID_REGEXP)) {
     return
   }
   if (_isAnalyticsDisabled() || _isSmokeTestUser(userId)) {

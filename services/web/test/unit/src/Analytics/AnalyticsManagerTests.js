@@ -81,16 +81,14 @@ describe('AnalyticsManager', function () {
     })
 
     it('analyticsId is missing', function () {
-      this.AnalyticsManager.identifyUser(this.fakeUserId, undefined)
+      this.AnalyticsManager.identifyUser(
+        new ObjectID(this.fakeUserId),
+        undefined
+      )
       sinon.assert.notCalled(this.analyticsEventsQueue.add)
     })
 
-    it('userId equals analyticsId', function () {
-      this.AnalyticsManager.identifyUser(this.fakeUserId, this.fakeUserId)
-      sinon.assert.notCalled(this.analyticsEventsQueue.add)
-    })
-
-    it('Mongo userId equals string userId', function () {
+    it('analyticsId is not a valid UUID', function () {
       this.AnalyticsManager.identifyUser(
         new ObjectID(this.fakeUserId),
         this.fakeUserId
@@ -109,7 +107,7 @@ describe('AnalyticsManager', function () {
 
   describe('queues the appropriate message for', function () {
     it('identifyUser', function () {
-      const analyticsId = '456def'
+      const analyticsId = 'bd101c4c-722f-4204-9e2d-8303e5d9c120'
       this.AnalyticsManager.identifyUser(this.fakeUserId, analyticsId)
       sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'identify', {
         userId: this.fakeUserId,
