@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { useEditorContext } from '../../../shared/context/editor-context'
-import PreviewLogsPaneEntry from '../../preview/components/preview-logs-pane-entry'
 import Icon from '../../../shared/components/icon'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 import { memo } from 'react'
+import PdfLogEntry from './pdf-log-entry'
 
 function TimeoutUpgradePrompt() {
   const { t } = useTranslation()
@@ -15,7 +15,7 @@ function TimeoutUpgradePrompt() {
   }
 
   return (
-    <PreviewLogsPaneEntry
+    <PdfLogEntry
       headerTitle={
         isProjectOwner
           ? t('upgrade_for_longer_compiles')

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import { useTranslation, Trans } from 'react-i18next'
-import PreviewLogsPaneEntry from '../../preview/components/preview-logs-pane-entry'
 import { memo } from 'react'
+import PdfLogEntry from './pdf-log-entry'
 
 function PdfPreviewError({ error }) {
   const { t } = useTranslation()
@@ -140,7 +140,7 @@ function ErrorLogEntry({ title, children }) {
   const { t } = useTranslation()
 
   return (
-    <PreviewLogsPaneEntry
+    <PdfLogEntry
       headerTitle={title}
       formattedContent={children}
       entryAriaLabel={t('compile_error_entry_description')}

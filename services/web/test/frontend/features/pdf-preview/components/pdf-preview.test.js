@@ -317,6 +317,7 @@ describe('<PdfPreview/>', function () {
   it('displays expandable raw logs', async function () {
     mockCompile()
     mockBuildFile()
+    mockValidPdf()
 
     // pretend that the content is large enough to trigger a "collapse"
     // (in jsdom these values are always zero)
@@ -335,11 +336,11 @@ describe('<PdfPreview/>', function () {
     await screen.findByRole('button', { name: 'View PDF' })
 
     // expand the log
-    const expandButton = screen.getByRole('button', { name: 'Expand' })
+    const [expandButton] = screen.getAllByRole('button', { name: 'Expand' })
     expandButton.click()
 
     // collapse the log
-    const collapseButton = screen.getByRole('button', { name: 'Collapse' })
+    const [collapseButton] = screen.getAllByRole('button', { name: 'Collapse' })
     collapseButton.click()
   })
 

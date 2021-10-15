@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
-import PreviewLogsPaneEntry from '../../preview/components/preview-logs-pane-entry'
+import PdfLogEntry from './pdf-log-entry'
 
 PdfValidationIssue.propTypes = {
   name: PropTypes.string.isRequired,
@@ -14,7 +14,7 @@ function PdfValidationIssue({ issue, name }) {
   switch (name) {
     case 'sizeCheck':
       return (
-        <PreviewLogsPaneEntry
+        <PdfLogEntry
           headerTitle={t('project_too_large')}
           formattedContent={
             <>
@@ -36,7 +36,7 @@ function PdfValidationIssue({ issue, name }) {
 
     case 'conflictedPaths':
       return (
-        <PreviewLogsPaneEntry
+        <PdfLogEntry
           headerTitle={t('conflicting_paths_found')}
           formattedContent={
             <>
@@ -55,7 +55,7 @@ function PdfValidationIssue({ issue, name }) {
 
     case 'mainFile':
       return (
-        <PreviewLogsPaneEntry
+        <PdfLogEntry
           headerTitle={t('main_file_not_found')}
           formattedContent={t('please_set_main_file')}
           entryAriaLabel={t('validation_issue_entry_description')}

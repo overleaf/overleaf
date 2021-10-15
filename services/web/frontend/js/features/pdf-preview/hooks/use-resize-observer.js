@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-export const useResizeObserver = callback => {
+export const useResizeObserver = handleResize => {
   const resizeRef = useRef(null)
 
   const elementRef = useCallback(
@@ -11,15 +11,17 @@ export const useResizeObserver = callback => {
         }
 
         const observer = new ResizeObserver(([entry]) => {
-          callback(entry)
+          handleResize(entry.target)
         })
 
         resizeRef.current = { element, observer }
 
         observer.observe(element)
+
+        handleResize(element) // trigger the callback once
       }
     },
-    [callback]
+    [handleResize]
   )
 
   useEffect(() => {

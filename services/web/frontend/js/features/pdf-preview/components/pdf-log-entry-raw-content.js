@@ -13,8 +13,8 @@ export default function PdfLogEntryRawContent({
   const [expanded, setExpanded] = useState(false)
   const [needsExpander, setNeedsExpander] = useState(false)
 
-  const containerRef = useResizeObserver(entry => {
-    setNeedsExpander(entry.target.scrollHeight > collapsedSize)
+  const containerRef = useResizeObserver(element => {
+    setNeedsExpander(element.scrollHeight > collapsedSize)
   })
 
   const { t } = useTranslation()
