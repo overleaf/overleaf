@@ -146,12 +146,19 @@ function PdfJsViewer({ url }) {
   // when highlights are created, build the highlight elements
   useEffect(() => {
     if (pdfJsWrapper && highlights?.length) {
-      const elements = highlights.map(highlight =>
-        buildHighlightElement(highlight, pdfJsWrapper.viewer)
-      )
+      const elements = []
+
+      for (const highlight of highlights) {
+        try {
+          const element = buildHighlightElement(highlight, pdfJsWrapper.viewer)
+          elements.push(element)
+        } catch (error) {
+          // ignore invalid highlights
+        }
+      }
 
       // scroll to the first highlighted element
-      elements[0].scrollIntoView({
+      elements[0]?.scrollIntoView({
         block: 'start',
         inline: 'nearest',
         behavior: 'smooth',
