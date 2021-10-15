@@ -15,7 +15,7 @@ describe('OutlineParser', function () {
       \\chapter{Chapter}
       \\addchap{Chapter 2}
       \\section{Section 1}
-      \\addsect{Section 1b}
+      \\addsec{Section 1b}
       \\subsection{Subsection}
       \\subsubsection{Subsubsection}
       \\section{Section 2}
