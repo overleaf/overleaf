@@ -33,7 +33,7 @@ export function sendMB(key, segmentation = {}) {
 export function sendMBOnce(key, segmentation = {}) {
   if (alreadySent(key)) return
   sendMB(key, segmentation)
-  markAsSent()
+  markAsSent(key)
 }
 
 export function sendMBSampled(key, body = {}, rate = 0.01) {
