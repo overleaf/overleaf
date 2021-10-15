@@ -1,8 +1,8 @@
 import { memo, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
-import PreviewLogsPaneEntry from '../../preview/components/preview-logs-pane-entry'
 import PreviewLogsPaneMaxEntries from '../../preview/components/preview-logs-pane-max-entries'
+import PdfLogEntry from './pdf-log-entry'
 
 const LOG_PREVIEW_LIMIT = 100
 
@@ -23,13 +23,12 @@ function PdfLogsEntries({ entries }) {
     <>
       {entries.length > LOG_PREVIEW_LIMIT && (
         <PreviewLogsPaneMaxEntries
-          key={`${entries.length}-${LOG_PREVIEW_LIMIT}`}
           totalEntries={entries.length}
           entriesShown={LOG_PREVIEW_LIMIT}
         />
       )}
       {logEntries.map(logEntry => (
-        <PreviewLogsPaneEntry
+        <PdfLogEntry
           key={logEntry.key}
           headerTitle={logEntry.message}
           rawContent={logEntry.content}

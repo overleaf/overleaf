@@ -148,6 +148,7 @@ describe('<PdfPreview/>', function () {
     // xhrMock.teardown()
     fetchMock.reset()
     localStorage.clear()
+    sinon.restore()
   })
 
   it('renders the PDF preview', async function () {
@@ -268,6 +269,35 @@ describe('<PdfPreview/>', function () {
 
     expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
     expect(fetchMock.called('express:/build/:file')).to.be.false // TODO: actual path
+  })
+
+  it('displays expandable raw logs', async function () {
+    mockCompile()
+    mockBuildFile()
+
+    // pretend that the content is large enough to trigger a "collapse"
+    // (in jsdom these values are always zero)
+    sinon.stub(HTMLElement.prototype, 'scrollHeight').value(500)
+    sinon.stub(HTMLElement.prototype, 'scrollWidth').value(500)
+
+    renderWithEditorContext(<PdfPreview />, { scope })
+
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
+    await screen.findByRole('button', { name: 'Recompile' })
+
+    const logsButton = screen.getByRole('button', { name: 'View logs' })
+    logsButton.click()
+
+    await screen.findByRole('button', { name: 'View PDF' })
+
+    // expand the log
+    const expandButton = screen.getByRole('button', { name: 'Expand' })
+    expandButton.click()
+
+    // collapse the log
+    const collapseButton = screen.getByRole('button', { name: 'Collapse' })
+    collapseButton.click()
   })
 
   it('displays error messages if there were validation problems', async function () {
