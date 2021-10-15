@@ -1,8 +1,8 @@
 import { memo, useCallback, useMemo } from 'react'
 import { Button } from 'react-bootstrap'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { PdfLogsButtonContent } from './pdf-logs-button-content'
 import { sendMBOnce } from '../../../infrastructure/event-tracking'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 function PdfLogsButton() {
   const {
@@ -11,7 +11,7 @@ function PdfLogsButton() {
     logEntries,
     showLogs,
     setShowLogs,
-  } = usePdfPreviewContext()
+  } = useCompileContext()
 
   const buttonStyle = useMemo(() => {
     if (showLogs) {

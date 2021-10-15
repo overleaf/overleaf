@@ -19,10 +19,6 @@ function PdfJsViewer({ url }) {
     `pdf-viewer-scale:${projectId}`,
     'page-width'
   )
-  const [, setScrollTop] = usePersistedState(
-    `pdf-viewer-scroll-top:${projectId}`,
-    0
-  )
 
   // state values shared with Angular scope (highlights => editor, position => synctex buttons
   const [highlights] = useScopeValue('pdf.highlights')
@@ -63,23 +59,10 @@ function PdfJsViewer({ url }) {
     }
   }, [pdfJsWrapper, url])
 
-  useEffect(() => {
-    if (pdfJsWrapper) {
-      // listen for 'pdf:scroll-to-position' events
-      const eventListener = event => {
-        pdfJsWrapper.container.scrollTop = event.data.position
-      }
-
-      window.addEventListener('pdf:scroll-to-position', eventListener)
-
-      return () => {
-        window.removeEventListener('pdf:scroll-to-position', eventListener)
-      }
-    }
-  }, [pdfJsWrapper])
-
   // listen for scroll events
   useEffect(() => {
+    let storePositionTimer
+
     if (initialised && pdfJsWrapper) {
       // store the scroll position in localStorage, for the synctex button
       const storePosition = debounce(pdfViewer => {
@@ -87,33 +70,30 @@ function PdfJsViewer({ url }) {
         try {
           setPosition(pdfViewer.currentPosition)
         } catch (error) {
-          // TODO
-          console.error(error)
+          // TODO: investigate handling missing offsetParent in jsdom
+          // console.error(error)
         }
       }, 500)
 
-      // store the scroll position in localStorage, for use when reloading
-      const storeScrollTop = debounce(pdfViewer => {
-        // set position for "sync to code" button
-        setScrollTop(pdfViewer.container.scrollTop)
-      }, 500)
-
-      storePosition(pdfJsWrapper)
+      storePositionTimer = window.setTimeout(() => {
+        storePosition(pdfJsWrapper)
+      }, 100)
 
       const scrollListener = () => {
-        storeScrollTop(pdfJsWrapper)
         storePosition(pdfJsWrapper)
       }
 
       pdfJsWrapper.container.addEventListener('scroll', scrollListener)
 
       return () => {
-        storePosition.cancel()
-        storeScrollTop.cancel()
         pdfJsWrapper.container.removeEventListener('scroll', scrollListener)
+        if (storePositionTimer) {
+          window.clearTimeout(storePositionTimer)
+        }
+        storePosition.cancel()
       }
     }
-  }, [setPosition, setScrollTop, pdfJsWrapper, initialised])
+  }, [setPosition, pdfJsWrapper, initialised])
 
   // listen for double-click events
   useEffect(() => {
@@ -147,14 +127,14 @@ function PdfJsViewer({ url }) {
       })
 
       // restore the scroll position
-      setScrollTop(scrollTop => {
-        if (scrollTop > 0) {
-          pdfJsWrapper.container.scrollTop = scrollTop
+      setPosition(position => {
+        if (position) {
+          pdfJsWrapper.currentPosition = position
         }
-        return scrollTop
+        return position
       })
     }
-  }, [initialised, setScale, setScrollTop, pdfJsWrapper])
+  }, [initialised, setScale, setPosition, pdfJsWrapper])
 
   // transmit scale value to the viewer when it changes
   useEffect(() => {

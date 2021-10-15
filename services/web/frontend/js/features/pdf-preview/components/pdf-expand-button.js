@@ -1,11 +1,11 @@
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { memo, useMemo } from 'react'
+import { useLayoutContext } from '../../../shared/context/layout-context'
 
 function PdfExpandButton() {
-  const { pdfLayout, switchLayout } = usePdfPreviewContext()
+  const { pdfLayout, switchLayout } = useLayoutContext()
 
   const { t } = useTranslation()
 

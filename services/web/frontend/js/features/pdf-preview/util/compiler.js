@@ -45,10 +45,6 @@ export default class DocumentCompiler {
     )
   }
 
-  destroy() {
-    this.debouncedAutoCompile.cancel()
-  }
-
   // The main "compile" function.
   // Call this directly to run a compile now, otherwise call debouncedAutoCompile.
   async compile(options = {}) {

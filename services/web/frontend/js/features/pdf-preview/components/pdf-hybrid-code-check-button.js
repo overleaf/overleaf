@@ -1,12 +1,12 @@
 import { memo, useCallback } from 'react'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { sendMBOnce } from '../../../infrastructure/event-tracking'
 import { Button } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 function PdfHybridCodeCheckButton() {
-  const { codeCheckFailed, error, setShowLogs } = usePdfPreviewContext()
+  const { codeCheckFailed, error, setShowLogs } = useCompileContext()
 
   const { t } = useTranslation()
 

@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { memo } from 'react'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 function PdfHybridDownloadButton() {
-  const { pdfDownloadUrl } = usePdfPreviewContext()
+  const { pdfDownloadUrl } = useCompileContext()
 
   const { t } = useTranslation()
 

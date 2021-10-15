@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import PreviewLogsPaneEntry from '../../preview/components/preview-logs-pane-entry'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { memo } from 'react'
+import classnames from 'classnames'
 import PdfValidationIssue from './pdf-validation-issue'
 import TimeoutUpgradePrompt from './timeout-upgrade-prompt'
 import PdfPreviewError from './pdf-preview-error'
@@ -12,6 +12,7 @@ import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
 import PdfCodeCheckFailedNotice from '../../preview/components/pdf-code-check-failed-notice'
 import PdfLogsPaneInfoNotice from '../../preview/components/pdf-logs-pane-info-notice'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 function PdfLogsViewer() {
   const {
@@ -20,12 +21,13 @@ function PdfLogsViewer() {
     logEntries,
     rawLog,
     validationIssues,
-  } = usePdfPreviewContext()
+    showLogs,
+  } = useCompileContext()
 
   const { t } = useTranslation()
 
   return (
-    <div className="logs-pane">
+    <div className={classnames('logs-pane', { hidden: !showLogs })}>
       <div className="logs-pane-content">
         <PdfLogsPaneInfoNotice />
 

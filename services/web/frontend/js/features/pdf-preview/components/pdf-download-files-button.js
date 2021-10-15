@@ -2,11 +2,11 @@ import { Dropdown } from 'react-bootstrap'
 import PdfFileList from './pdf-file-list'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import { memo } from 'react'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { useTranslation } from 'react-i18next'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 function PdfDownloadFilesButton() {
-  const { compiling, fileList } = usePdfPreviewContext()
+  const { compiling, fileList } = useCompileContext()
 
   const { t } = useTranslation()
 

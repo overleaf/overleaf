@@ -3,11 +3,11 @@ import { Button, Dropdown } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import PdfFileList from './pdf-file-list'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { memo } from 'react'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 function PdfDownloadButton() {
-  const { compiling, pdfDownloadUrl, fileList } = usePdfPreviewContext()
+  const { compiling, pdfDownloadUrl, fileList } = useCompileContext()
 
   const { t } = useTranslation()
 

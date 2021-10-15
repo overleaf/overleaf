@@ -1,11 +1,11 @@
 import Icon from '../../../shared/components/icon'
 import { Button } from 'react-bootstrap'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 function PdfClearCacheButton() {
-  const { compiling, clearCache, clearingCache } = usePdfPreviewContext()
+  const { compiling, clearCache, clearingCache } = useCompileContext()
 
   const { t } = useTranslation()
 

@@ -18,13 +18,10 @@ div.full-size(
 		include ./editor-no-symbol-palette
 
 	.ui-layout-east
-		// The pdf-preview component needs to always be rendered, even when the editor is in "full-width" mode and it's not visible. 
-		// It doesn't recompile while hidden, due to the ui.pdfHidden flag, but maintains its state for when it's shown again.
-		if showNewPdfPreview
-			div(ng-show="ui.pdfLayout == 'sideBySide'")
+		div(ng-if="ui.pdfLayout == 'sideBySide'")
+			if showNewPdfPreview
 				pdf-preview()
-		else
-			div(ng-if="ui.pdfLayout == 'sideBySide'")
+			else
 				include ./pdf
 
 	.ui-layout-resizer-controls.synctex-controls(

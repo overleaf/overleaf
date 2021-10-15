@@ -1,12 +1,12 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Label, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { sendMBOnce } from '../../../infrastructure/event-tracking'
 import Icon from '../../../shared/components/icon'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 function PdfHybridLogsButton() {
-  const { error, logEntries, setShowLogs, showLogs } = usePdfPreviewContext()
+  const { error, logEntries, setShowLogs, showLogs } = useCompileContext()
 
   const { t } = useTranslation()
 

@@ -151,6 +151,23 @@ export default class PDFJSWrapper {
     }
   }
 
+  set currentPosition(position) {
+    const destArray = [
+      null,
+      {
+        name: 'XYZ', // 'XYZ' = scroll to the given coordinates
+      },
+      position.offset.left,
+      position.offset.top,
+      null,
+    ]
+
+    this.viewer.scrollPageIntoView({
+      pageNumber: position.page + 1,
+      destArray,
+    })
+  }
+
   abortDocumentLoading() {
     this.loadDocumentTask = undefined
   }

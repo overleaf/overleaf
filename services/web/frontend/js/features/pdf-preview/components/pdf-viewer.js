@@ -1,6 +1,6 @@
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { lazy, memo, useEffect } from 'react'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 const PdfJsViewer = lazy(() =>
   import(/* webpackChunkName: "pdf-js-viewer" */ './pdf-js-viewer')
@@ -19,7 +19,7 @@ function PdfViewer() {
     }
   }, [setPdfViewer])
 
-  const { pdfUrl } = usePdfPreviewContext()
+  const { pdfUrl } = useCompileContext()
 
   if (!pdfUrl) {
     return null

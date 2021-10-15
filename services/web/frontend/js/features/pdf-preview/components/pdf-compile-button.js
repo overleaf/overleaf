@@ -8,9 +8,9 @@ import {
 import Icon from '../../../shared/components/icon'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import { useTranslation } from 'react-i18next'
-import { usePdfPreviewContext } from '../contexts/pdf-preview-context'
 import { memo } from 'react'
 import classnames from 'classnames'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
@@ -23,11 +23,11 @@ function PdfCompileButton() {
     setAutoCompile,
     setDraft,
     setStopOnValidationError,
+    stopOnValidationError,
     startCompile,
     stopCompile,
-    stopOnValidationError,
     recompileFromScratch,
-  } = usePdfPreviewContext()
+  } = useCompileContext()
 
   const { t } = useTranslation()
 

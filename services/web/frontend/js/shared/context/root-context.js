@@ -17,11 +17,11 @@ export function ContextRoot({ children, ide, settings }) {
         <UserProvider>
           <ProjectProvider>
             <EditorProvider settings={settings}>
-              <CompileProvider>
-                <LayoutProvider>
+              <LayoutProvider>
+                <CompileProvider>
                   <ChatProvider>{children}</ChatProvider>
-                </LayoutProvider>
-              </CompileProvider>
+                </CompileProvider>
+              </LayoutProvider>
             </EditorProvider>
           </ProjectProvider>
         </UserProvider>

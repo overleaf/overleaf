@@ -3,9 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import useFetchMock from './hooks/use-fetch-mock'
 import { setupContext } from './fixtures/context'
 import { Button } from 'react-bootstrap'
-import PdfPreviewProvider, {
-  usePdfPreviewContext,
-} from '../js/features/pdf-preview/contexts/pdf-preview-context'
 import PdfPreviewPane from '../js/features/pdf-preview/components/pdf-preview-pane'
 import PdfPreview from '../js/features/pdf-preview/components/pdf-preview'
 import PdfPreviewToolbar from '../js/features/pdf-preview/components/pdf-preview-toolbar'
@@ -15,6 +12,7 @@ import PdfLogsViewer from '../js/features/pdf-preview/components/pdf-logs-viewer
 import examplePdf from './fixtures/storybook-example.pdf'
 import PdfPreviewError from '../js/features/pdf-preview/components/pdf-preview-error'
 import PdfPreviewHybridToolbar from '../js/features/pdf-preview/components/pdf-preview-hybrid-toolbar'
+import { useCompileContext } from '../js/shared/context/compile-context'
 
 setupContext()
 
@@ -230,7 +228,7 @@ export const Interactive = () => {
   }, [])
 
   const Inner = () => {
-    const context = usePdfPreviewContext()
+    const context = useCompileContext()
 
     const { setHasLintingError } = context
 
@@ -369,10 +367,8 @@ export const Interactive = () => {
 
   return withContextRoot(
     <div className="pdf-viewer">
-      <PdfPreviewProvider>
-        <PdfPreviewPane />
-        <Inner />
-      </PdfPreviewProvider>
+      <PdfPreviewPane />
+      <Inner />
     </div>,
     scope
   )
@@ -406,7 +402,7 @@ export const CompileError = () => {
   })
 
   const Inner = () => {
-    const { startCompile } = usePdfPreviewContext()
+    const { startCompile } = useCompileContext()
 
     const handleStatusChange = useCallback(
       event => {
@@ -441,10 +437,10 @@ export const CompileError = () => {
   }
 
   return withContextRoot(
-    <PdfPreviewProvider>
+    <>
       <PdfPreviewPane />
       <Inner />
-    </PdfPreviewProvider>,
+    </>,
     scope
   )
 }
@@ -470,7 +466,7 @@ const compileErrors = [
 
 export const DisplayError = () => {
   return withContextRoot(
-    <PdfPreviewProvider>
+    <>
       {compileErrors.map(error => (
         <div
           key={error}
@@ -480,7 +476,7 @@ export const DisplayError = () => {
           <PdfPreviewError error={error} />
         </div>
       ))}
-    </PdfPreviewProvider>,
+    </>,
     scope
   )
 }
@@ -489,11 +485,9 @@ export const Toolbar = () => {
   useFetchMock(fetchMock => mockCompile(fetchMock, 500))
 
   return withContextRoot(
-    <PdfPreviewProvider>
-      <div className="pdf">
-        <PdfPreviewToolbar />
-      </div>
-    </PdfPreviewProvider>,
+    <div className="pdf">
+      <PdfPreviewToolbar />
+    </div>,
     scope
   )
 }
@@ -505,11 +499,9 @@ export const HybridToolbar = () => {
   })
 
   return withContextRoot(
-    <PdfPreviewProvider>
-      <div className="pdf">
-        <PdfPreviewHybridToolbar />
-      </div>
-    </PdfPreviewProvider>,
+    <div className="pdf">
+      <PdfPreviewHybridToolbar />
+    </div>,
     scope
   )
 }
@@ -530,21 +522,15 @@ export const FileList = () => {
 
 export const Logs = () => {
   useFetchMock(fetchMock => {
-    mockCompile(fetchMock, 0)
+    mockCompileError(fetchMock, 400, 0)
     mockBuildFile(fetchMock)
     mockClearCache(fetchMock)
   })
 
-  useEffect(() => {
-    dispatchProjectJoined()
-  }, [])
-
   return withContextRoot(
-    <PdfPreviewProvider>
-      <div className="pdf">
-        <PdfLogsViewer />
-      </div>
-    </PdfPreviewProvider>,
+    <div className="pdf">
+      <PdfLogsViewer />
+    </div>,
     scope
   )
 }
@@ -577,10 +563,5 @@ export const ValidationIssues = () => {
     dispatchProjectJoined()
   }, [])
 
-  return withContextRoot(
-    <PdfPreviewProvider>
-      <PdfPreviewPane />
-    </PdfPreviewProvider>,
-    scope
-  )
+  return withContextRoot(<PdfPreviewPane />, scope)
 }

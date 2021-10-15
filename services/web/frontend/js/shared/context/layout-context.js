@@ -2,6 +2,7 @@ import { createContext, useContext, useCallback, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from '../hooks/use-scope-value'
 import { useIdeContext } from './ide-context'
+import localStorage from '../../infrastructure/local-storage'
 
 export const LayoutContext = createContext()
 
@@ -15,7 +16,7 @@ LayoutContext.Provider.propTypes = {
     setReviewPanelOpen: PropTypes.func.isRequired,
     leftMenuShown: PropTypes.bool,
     setLeftMenuShown: PropTypes.func.isRequired,
-    pdfLayout: PropTypes.oneOf(['sideBySide', 'flat', 'split']).isRequired,
+    pdfLayout: PropTypes.oneOf(['sideBySide', 'flat']).isRequired,
   }).isRequired,
 }
 
@@ -53,14 +54,20 @@ export function LayoutProvider({ children }) {
   // whether to display the editor and preview side-by-side or full-width ("flat")
   const [pdfLayout, setPdfLayout] = useScopeValue('ui.pdfLayout')
 
-  // whether the PDF preview pane is hidden
-  const [pdfHidden] = useScopeValue('ui.pdfHidden')
+  // switch to either side-by-side or flat (full-width) layout
+  const switchLayout = useCallback(() => {
+    setPdfLayout(layout => {
+      const newLayout = layout === 'sideBySide' ? 'flat' : 'sideBySide'
+      setView(newLayout === 'sideBySide' ? 'editor' : 'pdf')
+      setPdfLayout(newLayout)
+      localStorage.setItem('pdf.layout', newLayout)
+    })
+  }, [setPdfLayout, setView])
 
   const value = useMemo(
     () => ({
       chatIsOpen,
       leftMenuShown,
-      pdfHidden,
       pdfLayout,
       reviewPanelOpen,
       setChatIsOpen,
@@ -68,12 +75,12 @@ export function LayoutProvider({ children }) {
       setPdfLayout,
       setReviewPanelOpen,
       setView,
+      switchLayout,
       view,
     }),
     [
       chatIsOpen,
       leftMenuShown,
-      pdfHidden,
       pdfLayout,
       reviewPanelOpen,
       setChatIsOpen,
@@ -81,6 +88,7 @@ export function LayoutProvider({ children }) {
       setPdfLayout,
       setReviewPanelOpen,
       setView,
+      switchLayout,
       view,
     ]
   )
