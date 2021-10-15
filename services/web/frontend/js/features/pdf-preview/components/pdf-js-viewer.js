@@ -237,7 +237,7 @@ function PdfJsViewer({ url }) {
   /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
   /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
   return (
-    <div className="pdfjs-viewer" ref={handleContainer}>
+    <div className="pdfjs-viewer pdfjs-viewer-outer" ref={handleContainer}>
       <div
         className="pdfjs-viewer-inner"
         role="tabpanel"

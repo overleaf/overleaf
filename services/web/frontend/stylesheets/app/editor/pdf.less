@@ -268,6 +268,12 @@
   }
 }
 
+// The new viewer UI has overflow on the inner element,
+// so disable the overflow on the outer element
+.pdf-viewer .pdfjs-viewer.pdfjs-viewer-outer {
+  overflow: hidden;
+}
+
 .pdf-logs {
   overflow: auto;
   .alert {
