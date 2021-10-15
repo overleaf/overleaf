@@ -4,12 +4,19 @@ import fetchMock from 'fetch-mock'
 import { screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
 import PdfPreview from '../../../../../frontend/js/features/pdf-preview/components/pdf-preview'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
+import nock from 'nock'
+import path from 'path'
+import fs from 'fs'
+import { cloneDeep } from 'lodash'
+
+const examplePDF = path.join(__dirname, '../fixtures/test-example.pdf')
+const corruptPDF = path.join(__dirname, '../fixtures/test-example-corrupt.pdf')
 
 const outputFiles = [
   {
     path: 'output.pdf',
     build: '123',
-    url: '/build/output.pdf', // TODO: PDF URL to render
+    url: '/build/output.pdf',
     type: 'pdf',
   },
   {
@@ -51,7 +58,7 @@ const mockCompile = () =>
       clsiServerId: 'foo',
       compileGroup: 'priority',
       pdfDownloadDomain: '',
-      outputFiles,
+      outputFiles: cloneDeep(outputFiles),
     },
   })
 
@@ -77,7 +84,14 @@ const mockValidationProblems = validationProblems =>
 const mockClearCache = () =>
   fetchMock.delete('express:/project/:projectId/output', 204)
 
+const mockValidPdf = () => {
+  nock('https://www.test-overleaf.com')
+    .get(/^\/build\/output\.pdf/)
+    .replyWithFile(200, examplePDF)
+}
+
 const defaultFileResponses = {
+  '/build/output.pdf': () => fs.createReadStream(examplePDF),
   '/build/output.blg': 'This is BibTeX, Version 4.0', // FIXME
   '/build/output.log': `
 The LaTeX compiler output
@@ -139,13 +153,12 @@ describe('<PdfPreview/>', function () {
       shouldAdvanceTime: true,
       now: Date.now(),
     })
-    // xhrMock.setup()
+    nock.cleanAll()
   })
 
   afterEach(function () {
     clock.runAll()
     clock.restore()
-    // xhrMock.teardown()
     fetchMock.reset()
     localStorage.clear()
     sinon.restore()
@@ -154,6 +167,7 @@ describe('<PdfPreview/>', function () {
   it('renders the PDF preview', async function () {
     mockCompile()
     mockBuildFile()
+    mockValidPdf()
 
     renderWithEditorContext(<PdfPreview />, { scope })
 
@@ -165,12 +179,15 @@ describe('<PdfPreview/>', function () {
   it('runs a compile when the Recompile button is pressed', async function () {
     mockCompile()
     mockBuildFile()
+    mockValidPdf()
 
     renderWithEditorContext(<PdfPreview />, { scope })
 
     // wait for "compile on load" to finish
     await screen.findByRole('button', { name: 'Compiling…' })
     await screen.findByRole('button', { name: 'Recompile' })
+
+    mockValidPdf()
 
     // press the Recompile button => compile
     const button = screen.getByRole('button', { name: 'Recompile' })
@@ -184,6 +201,7 @@ describe('<PdfPreview/>', function () {
   it('runs a compile on doc change if autocompile is enabled', async function () {
     mockCompile()
     mockBuildFile()
+    mockValidPdf()
 
     renderWithEditorContext(<PdfPreview />, { scope })
 
@@ -193,6 +211,8 @@ describe('<PdfPreview/>', function () {
 
     // switch on auto compile
     storeAndFireEvent('autocompile_enabled:project123', true)
+
+    mockValidPdf()
 
     // fire a doc:changed event => compile
     fireEvent(window, new CustomEvent('doc:changed'))
@@ -207,6 +227,7 @@ describe('<PdfPreview/>', function () {
   it('does not run a compile on doc change if autocompile is disabled', async function () {
     mockCompile()
     mockBuildFile()
+    mockValidPdf()
 
     renderWithEditorContext(<PdfPreview />, { scope })
 
@@ -228,6 +249,7 @@ describe('<PdfPreview/>', function () {
   it('does not run a compile on doc change if autocompile is blocked by syntax check', async function () {
     mockCompile()
     mockBuildFile()
+    mockValidPdf()
 
     renderWithEditorContext(<PdfPreview />, {
       scope: {
@@ -359,7 +381,7 @@ describe('<PdfPreview/>', function () {
   it('sends a clear cache request when the button is pressed', async function () {
     mockCompile()
     mockBuildFile()
-    mockClearCache()
+    mockValidPdf()
 
     renderWithEditorContext(<PdfPreview />, { scope })
 
@@ -377,6 +399,8 @@ describe('<PdfPreview/>', function () {
     })
     expect(clearCacheButton.hasAttribute('disabled')).to.be.false
 
+    mockClearCache()
+
     // click the button
     clearCacheButton.click()
     expect(clearCacheButton.hasAttribute('disabled')).to.be.true
@@ -391,7 +415,7 @@ describe('<PdfPreview/>', function () {
   it('handle "recompile from scratch"', async function () {
     mockCompile()
     mockBuildFile()
-    mockClearCache()
+    mockValidPdf()
 
     renderWithEditorContext(<PdfPreview />, { scope })
 
@@ -410,6 +434,9 @@ describe('<PdfPreview/>', function () {
     })
     expect(clearCacheButton.hasAttribute('disabled')).to.be.false
 
+    mockValidPdf()
+    mockClearCache()
+
     const recompileFromScratch = screen.getByRole('menuitem', {
       name: 'Recompile from scratch',
       hidden: true,
@@ -425,5 +452,52 @@ describe('<PdfPreview/>', function () {
     expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
     expect(fetchMock.called('express:/project/:projectId/output')).to.be.true
     expect(fetchMock.called('express:/build/:file')).to.be.true // TODO: actual path
+  })
+
+  it('shows an error for an invalid URL', async function () {
+    mockCompile()
+    mockBuildFile()
+
+    nock('https://www.test-overleaf.com')
+      .get(/^\/build\/output.pdf/)
+      .replyWithError({
+        message: 'something awful happened',
+        code: 'AWFUL_ERROR',
+      })
+
+    const { rerender } = renderWithEditorContext(<PdfPreview />, { scope })
+
+    await screen.findByText('Something went wrong while rendering this PDF.')
+    expect(screen.queryByLabelText('Page 1')).to.not.exist
+
+    mockValidPdf()
+
+    rerender(<PdfPreview />)
+
+    await screen.findByLabelText('Page 1')
+    expect(screen.queryByText('Something went wrong while rendering this PDF.'))
+      .to.not.exist
+  })
+
+  it('shows an error for a corrupt PDF', async function () {
+    mockCompile()
+    mockBuildFile()
+
+    nock('https://www.test-overleaf.com')
+      .get(/^\/build\/output.pdf/)
+      .replyWithFile(200, corruptPDF)
+
+    const { rerender } = renderWithEditorContext(<PdfPreview />, { scope })
+
+    await screen.findByText('Something went wrong while rendering this PDF.')
+    expect(screen.queryByLabelText('Page 1')).to.not.exist
+
+    mockValidPdf()
+
+    rerender(<PdfPreview />)
+
+    await screen.findByLabelText('Page 1')
+    expect(screen.queryByText('Something went wrong while rendering this PDF.'))
+      .to.not.exist
   })
 })

@@ -15,6 +15,7 @@ const params = new URLSearchParams(window.location.search)
 const disableFontFace = params.get('disable-font-face') === 'true'
 const cMapUrl = getMeta('ol-pdfCMapsPath')
 const imageResourcesPath = getMeta('ol-pdfImageResourcesPath')
+const disableStream = process.env.NODE_ENV !== 'test'
 
 const rangeChunkSize = 128 * 1024 // 128K chunks
 
@@ -56,8 +57,11 @@ export default class PDFJSWrapper {
 
   // load a document from a URL
   loadDocument(url) {
-    // prevents any previous loading task from populating the viewer
-    this.loadDocumentTask = undefined
+    // cancel any previous loading task
+    if (this.loadDocumentTask) {
+      this.loadDocumentTask.destroy()
+      this.loadDocumentTask = undefined
+    }
 
     return new Promise((resolve, reject) => {
       this.loadDocumentTask = PDFJS.getDocument({
@@ -67,7 +71,7 @@ export default class PDFJSWrapper {
         disableFontFace,
         rangeChunkSize,
         disableAutoFetch: true,
-        disableStream: true,
+        disableStream,
         textLayerMode: 2, // PDFJSViewer.TextLayerMode.ENABLE,
       })
 

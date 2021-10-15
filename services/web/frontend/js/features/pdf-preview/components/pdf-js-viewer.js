@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { debounce } from 'lodash'
-import { Alert } from 'react-bootstrap'
 import PdfViewerControls from './pdf-viewer-controls'
 import { useProjectContext } from '../../../shared/context/project-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
@@ -10,9 +9,12 @@ import { buildHighlightElement } from '../util/highlights'
 import PDFJSWrapper from '../util/pdf-js-wrapper'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
+import { useCompileContext } from '../../../shared/context/compile-context'
 
 function PdfJsViewer({ url }) {
   const { _id: projectId } = useProjectContext()
+
+  const { setError } = useCompileContext()
 
   // state values persisted in localStorage to restore on load
   const [scale, setScale] = usePersistedState(
@@ -27,7 +29,6 @@ function PdfJsViewer({ url }) {
   // local state values
   const [pdfJsWrapper, setPdfJsWrapper] = useState()
   const [initialised, setInitialised] = useState(false)
-  const [error, setError] = useState()
 
   // create the viewer when the container is mounted
   const handleContainer = useCallback(parent => {
@@ -52,12 +53,14 @@ function PdfJsViewer({ url }) {
     if (pdfJsWrapper && url) {
       setInitialised(false)
       setError(undefined)
-      // TODO: anything else to be reset?
 
-      pdfJsWrapper.loadDocument(url).catch(error => setError(error))
+      pdfJsWrapper.loadDocument(url).catch(error => {
+        console.error(error)
+        setError('rendering-error')
+      })
       return () => pdfJsWrapper.abortDocumentLoading()
     }
-  }, [pdfJsWrapper, url])
+  }, [pdfJsWrapper, url, setError])
 
   // listen for scroll events
   useEffect(() => {
@@ -249,11 +252,6 @@ function PdfJsViewer({ url }) {
       <div className="pdfjs-controls">
         <PdfViewerControls setZoom={setZoom} />
       </div>
-      {error && (
-        <div className="pdfjs-error">
-          <Alert bsStyle="danger">{error.message}</Alert>
-        </div>
-      )}
     </div>
   )
 }

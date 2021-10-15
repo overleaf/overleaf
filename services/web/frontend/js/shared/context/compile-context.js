@@ -45,6 +45,7 @@ CompileContext.Provider.propTypes = {
     rawLog: PropTypes.string,
     setAutoCompile: PropTypes.func.isRequired,
     setDraft: PropTypes.func.isRequired,
+    setError: PropTypes.func.isRequired,
     setHasLintingError: PropTypes.func.isRequired, // only for storybook
     setShowLogs: PropTypes.func.isRequired,
     setStopOnValidationError: PropTypes.func.isRequired,
@@ -411,6 +412,7 @@ export function CompileProvider({ children }) {
       setClearingCache,
       setCompiling,
       setDraft,
+      setError,
       setHasLintingError, // only for stories
       setShowLogs,
       setStopOnValidationError,
@@ -441,6 +443,7 @@ export function CompileProvider({ children }) {
       recompileFromScratch,
       setAutoCompile,
       setDraft,
+      setError,
       setHasLintingError,
       setStopOnValidationError,
       showLogs,
