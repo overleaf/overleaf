@@ -216,6 +216,10 @@
     &:focus-within {
       outline: none;
     }
+    /* Avoids https://github.com/mozilla/pdf.js/issues/13840 in Chrome */
+    .textLayer br::selection {
+      background: transparent;
+    }
   }
   .progress-thin {
     position: absolute;
