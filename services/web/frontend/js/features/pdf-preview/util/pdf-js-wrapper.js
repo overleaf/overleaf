@@ -5,6 +5,7 @@ import * as PDFJSViewer from 'pdfjs-dist/legacy/web/pdf_viewer'
 import PDFJSWorker from 'pdfjs-dist/legacy/build/pdf.worker'
 import 'pdfjs-dist/legacy/web/pdf_viewer.css'
 import getMeta from '../../../utils/meta'
+import { captureMessage } from '../../../infrastructure/error-reporter'
 
 if (typeof window !== 'undefined' && 'Worker' in window) {
   PDFJS.GlobalWorkerOptions.workerPort = new PDFJSWorker()
@@ -89,6 +90,10 @@ export default class PDFJSWrapper {
         })
         .catch(error => {
           if (this.loadDocumentTask) {
+            if (error.name !== 'MissingPDFException') {
+              captureMessage(`pdf preview error ${error}`)
+            }
+
             reject(error)
           }
         })
