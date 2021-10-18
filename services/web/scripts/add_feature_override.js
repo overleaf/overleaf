@@ -56,6 +56,7 @@ function _validateUserIdList(userIds) {
 }
 
 async function _handleUser(userId) {
+  console.log('updating user', userId)
   const user = await UserGetter.promises.getUser(userId, {
     features: 1,
     featuresOverrides: 1,
@@ -99,7 +100,6 @@ async function _handleUser(userId) {
       )
     }
   }
-
   if (!COMMIT) {
     // not saving features; nothing else to do
     return
@@ -167,10 +167,15 @@ async function processUsers(userIds) {
   console.log(`---Starting to process ${userIds.length} users---`)
 
   const limit = pLimit(CONCURRENCY)
-  await Promise.all(
+  const results = await Promise.allSettled(
     userIds.map(userId => limit(() => _handleUser(ObjectId(userId))))
   )
-
+  results.forEach((result, idx) => {
+    if (result.status !== 'fulfilled') {
+      console.log(userIds[idx], 'failed', result.reason)
+      processLogger.failed.push(userIds[idx])
+    }
+  })
   processLogger.printSummary()
   process.exit()
 }

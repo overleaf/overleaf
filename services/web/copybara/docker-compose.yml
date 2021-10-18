@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  copybara:
+    image: sharelatex/copybara:2019-08.01
+    volumes:
+      # Mount the host ssh folder
+      - ~/.ssh/id_rsa:/root/.ssh/id_rsa
+      - ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub
+      - ~/.ssh/known_hosts:/root/.ssh/known_hosts
+      # Mount this directory to the place the base image expects
+      - .:/usr/src/app
+      # Mount the cache
+      - ./.cache/:/root/copybara/cache/
+      # Mount the hosts git configuration
+      - $HOME/.gitconfig:/root/.gitconfig
+      # Mount the hosts git credentials, required for migrating PRs via the github API
+      - $HOME/.git-credentials:/root/.git-credentials
+    environment:
+      COPYBARA_CONFIG: "./community/copy.bara.sky"
+
+      # Uncomment this to force copybara to start syncing from a certain commit
+      # COPYBARA_OPTIONS: "--last-rev=67edeed2c2d8c1d478c9a65d19020a301174cc8e"
+
+      # Uncomment this to force copybara to bootstrap a sync in a new repository
+      # COPYBARA_OPTIONS: "--init-history"
+
+    command: copybara
