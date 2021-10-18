@@ -21,7 +21,6 @@
     "@google-cloud/storage": "^5.1.2",
     "@overleaf/o-error": "^3.0.0",
     "aws-sdk": "^2.718.0",
-    "fast-crc32c": "^2.0.0",
     "glob": "^7.1.6",
     "logger-sharelatex": "^2.1.1",
     "node-uuid": "^1.4.8",
