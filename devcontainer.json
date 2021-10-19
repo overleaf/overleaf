@@ -1,0 +1,15 @@
+{
+	"name": "Overleaf Community Edition Codespace",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": { "VARIANT": "14" }
+	},
+
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+
+    "forwardPorts": [80],
+
+	"remoteUser": "node"
+}
