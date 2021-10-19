@@ -11,5 +11,5 @@
 
     "forwardPorts": [80],
 
-	"remoteUser": "node"
+	"remoteUser": "sharelatex"
 }
