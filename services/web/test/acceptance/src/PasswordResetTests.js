@@ -175,7 +175,7 @@ describe('PasswordReset', function () {
         expect(auditLog).to.deep.equal([])
       })
 
-      it('without a valid password should return 400 and not log the change', async function () {
+      it('without a valid password should return 400 and log the change', async function () {
         // send reset request
         response = await userHelper.request.post('/user/password/set', {
           form: {
@@ -188,7 +188,7 @@ describe('PasswordReset', function () {
         userHelper = await UserHelper.getUser({ email })
 
         const auditLog = userHelper.getAuditLogWithoutNoise()
-        expect(auditLog).to.deep.equal([])
+        expect(auditLog.length).to.equal(1)
       })
     })
   })

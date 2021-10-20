@@ -356,7 +356,7 @@ describe('PasswordResetHandler', function () {
                     this.UserAuditLogHandler.promises.addEntry.callCount
                   ).to.equal(1)
                   expect(this.AuthenticationManager.promises.setUserPassword).to
-                    .have.been.called
+                    .not.have.been.called
                   done()
                 }
               )
