@@ -9,19 +9,6 @@ block content
 						.page-header
 							h1  #{translate("your_sessions")}
 
-						if currentSession
-							h3 #{translate("current_session")}
-							div
-								table.table.table-striped
-									thead
-										tr
-											th #{translate("ip_address")}
-											th #{translate("session_created_at")}
-										tr
-											td #{currentSession.ip_address}
-											td #{moment(currentSession.session_created).utc().format('Do MMM YYYY, h:mm a')} UTC
-
-						h3 #{translate("other_sessions")}
 						div
 							p.small
 								| !{translate("clear_sessions_description")}

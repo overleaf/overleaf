@@ -137,19 +137,22 @@ const UserPagesController = {
   sessionsPage(req, res, next) {
     const user = SessionManager.getSessionUser(req.session)
     logger.log({ userId: user._id }, 'loading sessions page')
-    UserSessionsManager.getAllUserSessions(user, (err, sessions) => {
-      if (err != null) {
-        OError.tag(err, 'error getting all user sessions', {
-          userId: user._id,
+    UserSessionsManager.getAllUserSessions(
+      user,
+      [req.sessionID],
+      (err, sessions) => {
+        if (err != null) {
+          OError.tag(err, 'error getting all user sessions', {
+            userId: user._id,
+          })
+          return next(err)
+        }
+        res.render('user/sessions', {
+          title: 'sessions',
+          sessions,
         })
-        return next(err)
       }
-      res.render('user/sessions', {
-        title: 'sessions',
-        sessions: sessions.filter(session => session.id !== req.sessionID),
-        currentSession: sessions.find(session => session.id === req.sessionID),
-      })
-    })
+    )
   },
 
   _restructureThirdPartyIds(user) {

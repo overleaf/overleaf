@@ -606,8 +606,8 @@ describe('UserSessionsManager', function () {
     it('should get sessions', function (done) {
       return this.call((err, sessions) => {
         expect(sessions).to.deep.equal([
-          { id: 'one', ip_address: 'a', session_created: 'b' },
-          { id: 'three', ip_address: 'c', session_created: 'd' },
+          { ip_address: 'a', session_created: 'b' },
+          { ip_address: 'c', session_created: 'd' },
         ])
         return done()
       })
