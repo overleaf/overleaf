@@ -35,6 +35,8 @@ app.delete(
 )
 app.delete('/user/:user_id', controller.removeNotificationKey)
 app.delete('/key/:key', controller.removeNotificationByKeyOnly)
+app.get('/key/:key/count', controller.countNotificationsByKeyOnly)
+app.delete('/key/:key/bulk', controller.deleteUnreadNotificationsByKeyOnlyBulk)
 
 app.get('/status', (req, res) => res.send('notifications sharelatex up'))
 

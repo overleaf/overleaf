@@ -84,4 +84,29 @@ module.exports = {
       (err, notifications) => res.sendStatus(200)
     )
   },
+
+  countNotificationsByKeyOnly(req, res) {
+    const notificationKey = req.params.key
+    Notifications.countNotificationsByKeyOnly(notificationKey, (err, count) => {
+      if (err) {
+        logger.err({ err, notificationKey }, 'cannot count by key')
+        return res.sendStatus(500)
+      }
+      res.json({ count })
+    })
+  },
+
+  deleteUnreadNotificationsByKeyOnlyBulk(req, res) {
+    const notificationKey = req.params.key
+    Notifications.deleteUnreadNotificationsByKeyOnlyBulk(
+      notificationKey,
+      (err, count) => {
+        if (err) {
+          logger.err({ err, notificationKey }, 'cannot bulk remove by key')
+          return res.sendStatus(500)
+        }
+        res.json({ count })
+      }
+    )
+  },
 }

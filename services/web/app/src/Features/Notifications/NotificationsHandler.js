@@ -101,4 +101,38 @@ module.exports = {
     }
     makeRequest(opts, callback)
   },
+
+  previewMarkAsReadByKeyOnlyBulk(key, callback) {
+    const opts = {
+      uri: `${notificationsApi}/key/${key}/count`,
+      method: 'GET',
+      timeout: 10 * oneSecond,
+      json: true,
+    }
+    makeRequest(opts, (err, res, body) => {
+      if (err) return callback(err)
+      if (res.statusCode !== 200) {
+        return callback(
+          new Error('cannot preview bulk delete notification: ' + key)
+        )
+      }
+      callback(null, (body && body.count) || 0)
+    })
+  },
+
+  markAsReadByKeyOnlyBulk(key, callback) {
+    const opts = {
+      uri: `${notificationsApi}/key/${key}/bulk`,
+      method: 'DELETE',
+      timeout: 10 * oneSecond,
+      json: true,
+    }
+    makeRequest(opts, (err, res, body) => {
+      if (err) return callback(err)
+      if (res.statusCode !== 200) {
+        return callback(new Error('cannot bulk delete notification: ' + key))
+      }
+      callback(null, (body && body.count) || 0)
+    })
+  },
 }

@@ -1,5 +1,5 @@
 const async = require('async')
-const { callbackify } = require('util')
+const { callbackify, promisify } = require('util')
 const { ObjectId } = require('mongodb')
 const Settings = require('@overleaf/settings')
 const {
@@ -10,6 +10,7 @@ const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const FeaturesHelper = require('../Subscription/FeaturesHelper')
 const UserGetter = require('../User/UserGetter')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const NotificationsHandler = require('../Notifications/NotificationsHandler')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const { Institution } = require('../../models/Institution')
 const { Subscription } = require('../../models/Subscription')
@@ -186,6 +187,34 @@ async function checkInstitutionUsers(institutionId, emitNonProUserIds) {
 }
 
 const InstitutionsManager = {
+  clearInstitutionNotifications(institutionId, dryRun, callback) {
+    function clear(key, cb) {
+      const run = dryRun
+        ? NotificationsHandler.previewMarkAsReadByKeyOnlyBulk
+        : NotificationsHandler.markAsReadByKeyOnlyBulk
+
+      run(key, cb)
+    }
+
+    async.series(
+      {
+        ipMatcherAffiliation(cb) {
+          const key = `ip-matched-affiliation-${institutionId}`
+          clear(key, cb)
+        },
+        featuresUpgradedByAffiliation(cb) {
+          const key = `features-updated-by=${institutionId}`
+          clear(key, cb)
+        },
+        redundantPersonalSubscription(cb) {
+          const key = `redundant-personal-subscription-${institutionId}`
+          clear(key, cb)
+        },
+      },
+      callback
+    )
+  },
+
   refreshInstitutionUsers(institutionId, notify, callback) {
     const refreshFunction = notify ? refreshFeaturesAndNotify : refreshFeatures
     async.waterfall(
@@ -313,6 +342,9 @@ var notifyUser = (user, affiliation, subscription, featuresChanged, callback) =>
 
 InstitutionsManager.promises = {
   checkInstitutionUsers,
+  clearInstitutionNotifications: promisify(
+    InstitutionsManager.clearInstitutionNotifications
+  ),
 }
 
 module.exports = InstitutionsManager

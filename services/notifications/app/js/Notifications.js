@@ -112,6 +112,22 @@ module.exports = Notifications = {
     db.notifications.updateOne(searchOps, updateOperation, callback)
   },
 
+  countNotificationsByKeyOnly(notificationKey, callback) {
+    const searchOps = { key: notificationKey, templateKey: { $exists: true } }
+    db.notifications.count(searchOps, callback)
+  },
+
+  deleteUnreadNotificationsByKeyOnlyBulk(notificationKey, callback) {
+    if (typeof notificationKey !== 'string') {
+      throw new Error('refusing to bulk delete arbitrary notifications')
+    }
+    const searchOps = { key: notificationKey, templateKey: { $exists: true } }
+    db.notifications.deleteMany(searchOps, (err, result) => {
+      if (err) return callback(err)
+      callback(null, result.deletedCount)
+    })
+  },
+
   // hard delete of doc, rather than removing the templateKey
   deleteNotificationByKeyOnly(notification_key, callback) {
     const searchOps = { key: notification_key }
