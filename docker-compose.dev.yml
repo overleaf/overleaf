@@ -1,7 +1,9 @@
 version: '2.2'
 services:
     sharelatex:
-        dockerfile: Dockerfile
+        build:
+          context: ./
+          dockerfile: Dockerfile
         depends_on:
             mongo:
                 condition: service_healthy
