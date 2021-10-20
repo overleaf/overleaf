@@ -3,7 +3,7 @@ services:
     sharelatex:
         build:
           context: ../
-          dockerfile: Dockerfile
+          dockerfile: .devcontainer/Dockerfile
         depends_on:
             mongo:
                 condition: service_healthy
@@ -34,4 +34,3 @@ services:
 
     redis:
         image: redis:5
-       
