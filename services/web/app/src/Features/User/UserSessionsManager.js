@@ -77,6 +77,10 @@ const UserSessionsManager = {
   },
 
   getAllUserSessions(user, exclude, callback) {
+    if (typeof exclude === 'function') {
+      callback = exclude
+      exclude = []
+    }
     exclude = _.map(exclude, UserSessionsManager._sessionKey)
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
     rclient.smembers(sessionSetKey, function (err, sessionKeys) {
@@ -94,7 +98,14 @@ const UserSessionsManager = {
 
       Async.mapSeries(
         sessionKeys,
-        (k, cb) => rclient.get(k, cb),
+        (k, cb) => {
+          rclient.get(k, (err, res) => {
+            if (err) {
+              return cb(err)
+            }
+            cb(null, { id: k, data: res })
+          })
+        },
         function (err, sessions) {
           if (err) {
             OError.tag(err, 'error getting all sessions for user from redis', {
@@ -104,17 +115,18 @@ const UserSessionsManager = {
           }
 
           const result = []
-          for (let session of Array.from(sessions)) {
+          for (const session of Array.from(sessions)) {
             if (!session) {
               continue
             }
-            session = JSON.parse(session)
-            let sessionUser = session.passport && session.passport.user
+            const sessionData = JSON.parse(session.data)
+            let sessionUser = sessionData.passport && sessionData.passport.user
             if (!sessionUser) {
-              sessionUser = session.user
+              sessionUser = sessionData.user
             }
 
             result.push({
+              id: session.id.replace('sess:', ''),
               ip_address: sessionUser.ip_address,
               session_created: sessionUser.session_created,
             })

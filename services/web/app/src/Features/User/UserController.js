@@ -22,6 +22,7 @@ const { expressify } = require('../../util/promises')
 const {
   acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')
+const _ = require('lodash')
 
 async function _sendSecurityAlertClearedSessions(user) {
   const emailOptions = {
@@ -132,7 +133,11 @@ async function clearSessions(req, res, next) {
     'clear-sessions',
     user._id,
     req.ip,
-    { sessions }
+    {
+      sessions: sessions.map(
+        session => _.pick(session, ['ip_address', 'session_created']) // omit other session data from log
+      ),
+    }
   )
   await UserSessionsManager.promises.revokeAllUserSessions(user, [
     req.sessionID,

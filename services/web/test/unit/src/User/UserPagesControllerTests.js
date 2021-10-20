@@ -154,7 +154,7 @@ describe('UserPagesController', function () {
   describe('sessionsPage', function () {
     beforeEach(function () {
       return this.UserSessionsManager.getAllUserSessions.callsArgWith(
-        2,
+        1,
         null,
         []
       )
@@ -179,7 +179,7 @@ describe('UserPagesController', function () {
     describe('when getAllUserSessions produces an error', function () {
       beforeEach(function () {
         return this.UserSessionsManager.getAllUserSessions.callsArgWith(
-          2,
+          1,
           new Error('woops')
         )
       })

@@ -74,7 +74,7 @@ describe('UserController', function () {
       untrackSession: sinon.stub(),
       revokeAllUserSessions: sinon.stub().callsArgWith(2, null),
       promises: {
-        getAllUserSessions: sinon.stub().resolves(),
+        getAllUserSessions: sinon.stub().resolves([]),
         revokeAllUserSessions: sinon.stub().resolves(),
       },
     }
@@ -619,6 +619,25 @@ describe('UserController', function () {
           done()
         })
 
+        this.UserController.clearSessions(this.req, this.res)
+      })
+
+      it('should include only relevant session data in the audit log', function (done) {
+        this.UserSessionsManager.promises.getAllUserSessions.resolves([
+          { id: 'session-id', ip_address: 'ip', session_created: 'created' },
+        ])
+        this.res.sendStatus.callsFake(status => {
+          this.UserAuditLogHandler.promises.addEntry.callCount.should.equal(1)
+          const addEntryCall = this.UserAuditLogHandler.promises.addEntry
+            .lastCall
+          expect(addEntryCall.args[4].sessions).to.be.instanceOf(Array)
+          expect(addEntryCall.args[4].sessions[0]).to.have.keys([
+            'ip_address',
+            'session_created',
+          ])
+          expect(addEntryCall.args[4].sessions[0]).to.not.have.keys(['id'])
+          done()
+        })
         this.UserController.clearSessions(this.req, this.res)
       })
     })

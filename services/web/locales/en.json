@@ -625,6 +625,8 @@
   "clear_sessions_success": "Sessions Cleared",
   "sessions": "Sessions",
   "manage_sessions": "Manage Your Sessions",
+  "current_session": "Current Session",
+  "other_sessions": "Other Sessions",
   "syntax_validation": "Code check",
   "history": "History",
   "joining": "Joining",
