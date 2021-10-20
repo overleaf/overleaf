@@ -4,6 +4,7 @@ services:
         build:
           context: ../
           dockerfile: .devcontainer/Dockerfile
+        entrypoint: "echo hola!"
         depends_on:
             mongo:
                 condition: service_healthy
