@@ -2,11 +2,16 @@
 	"name": "Overleaf Community Edition Codespace",
     "dockerComposeFile": "docker-compose.dev.yml",
     "service": "sharelatex",
-    "workspaceFolder": "/app",
+    "workspaceFolder": "/var/www/sharelatex",
 
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash"
 	},
+
+	"extensions": [
+		"ms-azuretools.vscode-docker",
+		
+	],
 
     "forwardPorts": [80],
 

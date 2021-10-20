@@ -1,1 +1,0 @@
-FROM sharelatex/sharelatex
