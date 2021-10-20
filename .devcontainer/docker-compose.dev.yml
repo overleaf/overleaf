@@ -2,7 +2,7 @@ version: '2.2'
 services:
     sharelatex:
         build:
-          context: ./
+          context: ../
           dockerfile: Dockerfile
         depends_on:
             mongo:
