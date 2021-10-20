@@ -4,7 +4,7 @@ const request = require('request')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 const logger = require('logger-sharelatex')
-const Url = require('url')
+const { URL } = require('url')
 const OError = require('@overleaf/o-error')
 
 const ClsiCookieManager = require('./ClsiCookieManager')(
@@ -535,7 +535,7 @@ const ClsiManager = {
     for (const file of rawOutputFiles) {
       outputFiles.push({
         path: file.path, // the clsi is now sending this to web
-        url: Url.parse(file.url).path, // the location of the file on the clsi, excluding the host part
+        url: new URL(file.url).pathname, // the location of the file on the clsi, excluding the host part
         type: file.type,
         build: file.build,
         contentId: file.contentId,

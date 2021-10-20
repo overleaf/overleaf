@@ -27,7 +27,7 @@ describe('ProjectController', function () {
           url: 'chat.com',
         },
       },
-      siteUrl: 'mysite.com',
+      siteUrl: 'https://overleaf.com',
       algolia: {},
     }
     this.brandVariationDetails = {

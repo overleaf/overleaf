@@ -7,7 +7,7 @@ function unsupportedBrowserMiddleware(req, res, next) {
   if (!Settings.unsupportedBrowsers) return next()
 
   // Prevent redirect loop
-  const path = Url.parse(req.url).pathname
+  const path = req.path
   if (path === '/unsupported-browser') return next()
 
   const userAgent = req.headers['user-agent']

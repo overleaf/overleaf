@@ -8,13 +8,13 @@ class MockClsiApi extends AbstractMockApi {
         error: null,
         outputFiles: [
           {
-            url: `/project/${req.params.project_id}/build/1234/output/project.pdf`,
+            url: `http://clsi:3013/project/${req.params.project_id}/build/1234/output/project.pdf`,
             path: 'project.pdf',
             type: 'pdf',
             build: 1234,
           },
           {
-            url: `/project/${req.params.project_id}/build/1234/output/project.log`,
+            url: `http://clsi:3013/project/${req.params.project_id}/build/1234/output/project.log`,
             path: 'project.log',
             type: 'log',
             build: 1234,

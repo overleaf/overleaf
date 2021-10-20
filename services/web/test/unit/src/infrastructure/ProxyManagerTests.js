@@ -82,14 +82,6 @@ describe('ProxyManager', function () {
       return this.request.reset()
     })
 
-    it('does not calls next when match', function () {
-      const target = '/'
-      this.settings.proxyUrls[this.proxyPath] = target
-      this.proxyManager.createProxy(target)(this.req, this.res, this.next)
-      sinon.assert.notCalled(this.next)
-      return sinon.assert.called(this.request)
-    })
-
     it('proxy full URL', function () {
       const targetUrl = 'https://user:pass@foo.bar:123/pa/th.ext?query#hash'
       this.settings.proxyUrls[this.proxyPath] = targetUrl
@@ -98,31 +90,32 @@ describe('ProxyManager', function () {
     })
 
     it('overwrite query', function () {
-      const targetUrl = 'foo.bar/baz?query'
+      const targetUrl = 'https://foo.bar/baz?query'
       this.req.query = { requestQuery: 'important' }
       this.settings.proxyUrls[this.proxyPath] = targetUrl
       this.proxyManager.createProxy(targetUrl)(this.req)
-      const newTargetUrl = 'foo.bar/baz?requestQuery=important'
+      const newTargetUrl = 'https://foo.bar/baz?requestQuery=important'
       return assertCalledWith(this.request, { url: newTargetUrl })
     })
 
     it('handles target objects', function () {
-      const target = { baseUrl: 'api.v1', path: '/pa/th' }
+      const target = { baseUrl: 'https://api.v1', path: '/pa/th' }
       this.settings.proxyUrls[this.proxyPath] = target
       this.proxyManager.createProxy(target)(this.req, this.res, this.next)
-      return assertCalledWith(this.request, { url: 'api.v1/pa/th' })
+      return assertCalledWith(this.request, { url: 'https://api.v1/pa/th' })
     })
 
     it('handles missing baseUrl', function () {
       const target = { path: '/pa/th' }
       this.settings.proxyUrls[this.proxyPath] = target
-      this.proxyManager.createProxy(target)(this.req, this.res, this.next)
-      return assertCalledWith(this.request, { url: 'undefined/pa/th' })
+      expect(() =>
+        this.proxyManager.createProxy(target)(this.req, this.res, this.next)
+      ).to.throw
     })
 
     it('handles dynamic path', function () {
       const target = {
-        baseUrl: 'api.v1',
+        baseUrl: 'https://api.v1',
         path(params) {
           return `/resource/${params.id}`
         },
@@ -132,12 +125,14 @@ describe('ProxyManager', function () {
       this.req.route.path = '/res/:id'
       this.req.params = { id: 123 }
       this.proxyManager.createProxy(target)(this.req, this.res, this.next)
-      return assertCalledWith(this.request, { url: 'api.v1/resource/123' })
+      return assertCalledWith(this.request, {
+        url: 'https://api.v1/resource/123',
+      })
     })
 
     it('set arbitrary options on request', function () {
       const target = {
-        baseUrl: 'api.v1',
+        baseUrl: 'https://api.v1',
         path: '/foo',
         options: { foo: 'bar' },
       }
@@ -146,12 +141,12 @@ describe('ProxyManager', function () {
       this.proxyManager.createProxy(target)(this.req, this.res, this.next)
       return assertCalledWith(this.request, {
         foo: 'bar',
-        url: 'api.v1/foo',
+        url: 'https://api.v1/foo',
       })
     })
 
     it('passes cookies', function () {
-      const target = { baseUrl: 'api.v1', path: '/foo' }
+      const target = { baseUrl: 'https://api.v1', path: '/foo' }
       this.req.url = '/foo'
       this.req.route.path = '/foo'
       this.req.headers = { cookie: 'cookie' }
@@ -160,13 +155,13 @@ describe('ProxyManager', function () {
         headers: {
           Cookie: 'cookie',
         },
-        url: 'api.v1/foo',
+        url: 'https://api.v1/foo',
       })
     })
 
     it('passes body for post', function () {
       const target = {
-        baseUrl: 'api.v1',
+        baseUrl: 'https://api.v1',
         path: '/foo',
         options: { method: 'post' },
       }
@@ -179,13 +174,13 @@ describe('ProxyManager', function () {
           foo: 'bar',
         },
         method: 'post',
-        url: 'api.v1/foo',
+        url: 'https://api.v1/foo',
       })
     })
 
     it('passes body for put', function () {
       const target = {
-        baseUrl: 'api.v1',
+        baseUrl: 'https://api.v1',
         path: '/foo',
         options: { method: 'put' },
       }
@@ -198,7 +193,7 @@ describe('ProxyManager', function () {
           foo: 'bar',
         },
         method: 'put',
-        url: 'api.v1/foo',
+        url: 'https://api.v1/foo',
       })
     })
   })

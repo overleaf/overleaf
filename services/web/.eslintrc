@@ -20,9 +20,7 @@
     "no-var": "off",
 
     // do not allow importing of implicit dependencies.
-    "import/no-extraneous-dependencies": "error",
-
-    "node/no-deprecated-api": "off"
+    "import/no-extraneous-dependencies": "error"
   },
   "overrides": [
     // NOTE: changing paths may require updating them in the Makefile too.

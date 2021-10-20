@@ -2,7 +2,7 @@ const logger = require('logger-sharelatex')
 const Settings = require('@overleaf/settings')
 const querystring = require('querystring')
 const _ = require('lodash')
-const Url = require('url')
+const { URL } = require('url')
 const Path = require('path')
 const moment = require('moment')
 const pug = require('pug-runtime')
@@ -221,9 +221,10 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     }
     // Don't include the query string parameters, otherwise Google
     // treats ?nocdn=true as the canonical version
-    const parsedOriginalUrl = Url.parse(req.originalUrl)
+    const parsedOriginalUrl = new URL(req.originalUrl, Settings.siteUrl)
     res.locals.currentUrl = parsedOriginalUrl.pathname
-    res.locals.currentUrlWithQueryParams = parsedOriginalUrl.path
+    res.locals.currentUrlWithQueryParams =
+      parsedOriginalUrl.pathname + parsedOriginalUrl.search
     res.locals.capitalize = function (string) {
       if (string.length === 0) {
         return ''

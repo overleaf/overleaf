@@ -2,7 +2,7 @@ const request = require('request')
 const settings = require('@overleaf/settings')
 const _ = require('underscore')
 const logger = require('logger-sharelatex')
-const URL = require('url')
+const { URL } = require('url')
 const { promisify, promisifyMultiResult } = require('../util/promises')
 
 const currencyMappings = {
@@ -63,7 +63,7 @@ function getDetails(ip, callback) {
   }
   ip = ip.trim().split(' ')[0]
   const opts = {
-    url: URL.resolve(settings.apis.geoIpLookup.url, ip),
+    url: new URL(ip, settings.apis.geoIpLookup.url).href,
     timeout: 1000,
     json: true,
   }

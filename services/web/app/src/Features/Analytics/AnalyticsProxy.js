@@ -1,7 +1,7 @@
 const settings = require('@overleaf/settings')
 const Errors = require('../Errors/Errors')
 const httpProxy = require('express-http-proxy')
-const URL = require('url')
+const { URL } = require('url')
 
 module.exports = {
   call(basePath) {
@@ -16,7 +16,8 @@ module.exports = {
 
     return httpProxy(settings.apis.analytics.url, {
       proxyReqPathResolver(req) {
-        const requestPath = URL.parse(req.url).path
+        const u = new URL(req.originalUrl, settings.siteUrl)
+        const requestPath = u.pathname + u.search
         return `${basePath}${requestPath}`
       },
       proxyReqOptDecorator(proxyReqOpts, srcReq) {

@@ -1,5 +1,5 @@
 const OError = require('@overleaf/o-error')
-const url = require('url')
+const { URL } = require('url')
 const settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const V1Api = require('../V1/V1Api')
@@ -78,5 +78,5 @@ function setV1AsHostIfRelativeURL(urlString) {
   // As it only applies if the second argument is not absolute, we can use it to transform relative URLs into
   // absolute ones using v1 as the host. If the URL is absolute (e.g. a filepicker one), then the base
   // argument is just ignored
-  return url.resolve(settings.apis.v1.url, urlString)
+  return new URL(urlString, settings.apis.v1.url).href
 }

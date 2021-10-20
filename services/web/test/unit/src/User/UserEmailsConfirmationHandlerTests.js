@@ -27,7 +27,7 @@ describe('UserEmailsConfirmationHandler', function () {
     this.UserEmailsConfirmationHandler = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': (this.settings = {
-          siteUrl: 'emails.example.com',
+          siteUrl: 'https://emails.example.com',
         }),
         '../Security/OneTimeTokenHandler': (this.OneTimeTokenHandler = {}),
         './UserUpdater': (this.UserUpdater = {}),
@@ -80,7 +80,7 @@ describe('UserEmailsConfirmationHandler', function () {
           .calledWith('confirmEmail', {
             to: this.email,
             confirmEmailUrl:
-              'emails.example.com/user/emails/confirm?token=new-token',
+              'https://emails.example.com/user/emails/confirm?token=new-token',
             sendingUser_id: this.user_id,
           })
           .should.equal(true)

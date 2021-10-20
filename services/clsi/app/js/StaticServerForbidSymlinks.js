@@ -19,14 +19,13 @@ const Path = require('path')
 const fs = require('fs')
 const Settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
-const url = require('url')
 
 module.exports = ForbidSymlinks = function (staticFn, root, options) {
   const expressStatic = staticFn(root, options)
   const basePath = Path.resolve(root)
   return function (req, res, next) {
     let file, project_id, result
-    const path = __guard__(url.parse(req.url), x => x.pathname)
+    const path = req.url
     // check that the path is of the form /project_id_or_name/path/to/file.log
     if ((result = path.match(/^\/?([a-zA-Z0-9_-]+)\/(.*)/))) {
       project_id = result[1]

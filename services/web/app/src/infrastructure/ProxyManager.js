@@ -14,7 +14,7 @@ let ProxyManager
 const settings = require('@overleaf/settings')
 const logger = require('logger-sharelatex')
 const request = require('request')
-const URL = require('url')
+const { URL, URLSearchParams } = require('url')
 
 module.exports = ProxyManager = {
   apply(publicApiRouter) {
@@ -68,12 +68,11 @@ module.exports = ProxyManager = {
 // make a URL from a proxy target.
 // if the query is specified, set/replace the target's query with the given query
 var makeTargetUrl = function (target, req) {
-  const targetUrl = URL.parse(parseSettingUrl(target, req))
+  const targetUrl = new URL(parseSettingUrl(target, req))
   if (req.query != null && Object.keys(req.query).length > 0) {
-    targetUrl.query = req.query
-    targetUrl.search = null // clear `search` as it takes precedence over `query`
+    targetUrl.search = new URLSearchParams(req.query).toString()
   }
-  return targetUrl.format()
+  return targetUrl.href
 }
 
 var parseSettingUrl = function (target, { params }) {
