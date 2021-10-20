@@ -1,9 +1,8 @@
 {
 	"name": "Overleaf Community Edition Codespace",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"args": { "VARIANT": "14" }
-	},
+    "dockerComposeFile": "docker-compose.dev.yml",
+    "service": "sharelatex",
+    "workspaceFolder": "/app",
 
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash"

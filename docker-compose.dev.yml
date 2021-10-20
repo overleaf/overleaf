@@ -1,0 +1,35 @@
+version: '2.2'
+services:
+    sharelatex:
+        dockerfile: Dockerfile
+        depends_on:
+            mongo:
+                condition: service_healthy
+            redis:
+                condition: service_started
+        ports:
+            - 80:80
+        links:
+            - mongo
+            - redis
+        environment:
+            SHARELATEX_APP_NAME: Overleaf CE Codebase Dev Environment
+            SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
+            SHARELATEX_REDIS_HOST: redis
+            REDIS_HOST: redis
+            ENABLED_LINKED_FILE_TYPES: 'project_file,project_output_file'
+            ENABLE_CONVERSIONS: 'true'
+            EMAIL_CONFIRMATION_DISABLED: 'true'
+
+    mongo:
+        restart: always
+        image: mongo:4.2
+        healthcheck:
+            test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+            interval: 10s
+            timeout: 10s
+            retries: 5
+
+    redis:
+        image: redis:5
+       
