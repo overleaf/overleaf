@@ -13,7 +13,5 @@
 		
 	],
 
-    "forwardPorts": [80],
-
-	"remoteUser": "sharelatex"
+    "forwardPorts": [80]
 }
