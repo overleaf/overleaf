@@ -3,6 +3,7 @@ import getMeta from '../../../utils/meta'
 import { sendMBSampled } from '../../../infrastructure/event-tracking'
 import { deleteJSON, postJSON } from '../../../infrastructure/fetch-json'
 import { debounce } from 'lodash'
+import { trackPdfDownload } from '../../../ide/pdf/controllers/PdfJsMetrics'
 
 const AUTO_COMPILE_MAX_WAIT = 5000
 // We add a 1 second debounce to sending user changes to server if they aren't
@@ -19,6 +20,7 @@ export default class DocumentCompiler {
     setChangedAt,
     setCompiling,
     setData,
+    setFirstRenderDone,
     setError,
     signal,
   }) {
@@ -26,6 +28,7 @@ export default class DocumentCompiler {
     this.setChangedAt = setChangedAt
     this.setCompiling = setCompiling
     this.setData = setData
+    this.setFirstRenderDone = setFirstRenderDone
     this.setError = setError
     this.signal = signal
 
@@ -72,6 +75,8 @@ export default class DocumentCompiler {
 
       const params = this.buildCompileParams(options)
 
+      const t0 = performance.now()
+
       const data = await postJSON(
         `/project/${this.project._id}/compile?${params}`,
         {
@@ -86,6 +91,9 @@ export default class DocumentCompiler {
           signal: this.signal,
         }
       )
+      const compileTimeClientE2E = performance.now() - t0
+      const { firstRenderDone } = trackPdfDownload(data, compileTimeClientE2E)
+      this.setFirstRenderDone(() => firstRenderDone)
       data.options = options
       this.setData(data)
     } catch (error) {

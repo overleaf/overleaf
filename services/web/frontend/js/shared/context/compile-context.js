@@ -53,6 +53,7 @@ CompileContext.Provider.propTypes = {
     stopOnValidationError: PropTypes.bool.isRequired,
     uncompiled: PropTypes.bool,
     validationIssues: PropTypes.object,
+    firstRenderDone: PropTypes.func,
   }),
 }
 
@@ -90,6 +91,9 @@ export function CompileProvider({ children }) {
 
   // data received in response to a compile request
   const [data, setData] = useState()
+
+  // callback to be invoked for PdfJsMetrics
+  const [firstRenderDone, setFirstRenderDone] = useState()
 
   // whether the project has been compiled yet
   const [compiledOnce, setCompiledOnce] = useState(false)
@@ -150,6 +154,7 @@ export function CompileProvider({ children }) {
       setChangedAt,
       setCompiling,
       setData,
+      setFirstRenderDone,
       setError,
       signal,
     })
@@ -422,6 +427,7 @@ export function CompileProvider({ children }) {
       stopOnValidationError,
       uncompiled,
       validationIssues,
+      firstRenderDone,
     }),
     [
       autoCompile,
@@ -452,6 +458,7 @@ export function CompileProvider({ children }) {
       stopOnValidationError,
       uncompiled,
       validationIssues,
+      firstRenderDone,
     ]
   )
 

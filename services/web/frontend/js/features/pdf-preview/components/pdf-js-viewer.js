@@ -10,11 +10,13 @@ import PDFJSWrapper from '../util/pdf-js-wrapper'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
 import { useCompileContext } from '../../../shared/context/compile-context'
+import getMeta from '../../../utils/meta'
 
 function PdfJsViewer({ url }) {
   const { _id: projectId } = useProjectContext()
 
-  const { setError } = useCompileContext()
+  const { setError, firstRenderDone } = useCompileContext()
+  const [timePDFFetched, setTimePDFFetched] = useState()
 
   // state values persisted in localStorage to restore on load
   const [scale, setScale] = usePersistedState(
@@ -42,15 +44,32 @@ function PdfJsViewer({ url }) {
   // listen for initialize event
   useEffect(() => {
     if (pdfJsWrapper) {
-      const handlePagesinit = () => setInitialised(true)
+      const handlePagesinit = () => {
+        setInitialised(true)
+        if (getMeta('ol-trackPdfDownload') && firstRenderDone) {
+          const visible = !document.hidden
+          if (!visible) {
+            firstRenderDone({
+              timePDFFetched,
+            })
+          } else {
+            const timePDFRendered = performance.now()
+            firstRenderDone({
+              timePDFFetched,
+              timePDFRendered,
+            })
+          }
+        }
+      }
       pdfJsWrapper.eventBus.on('pagesinit', handlePagesinit)
       return () => pdfJsWrapper.eventBus.off('pagesinit', handlePagesinit)
     }
-  }, [pdfJsWrapper])
+  }, [pdfJsWrapper, firstRenderDone, timePDFFetched])
 
   // load the PDF document from the URL
   useEffect(() => {
     if (pdfJsWrapper && url) {
+      setTimePDFFetched(performance.now())
       setInitialised(false)
       setError(undefined)
 
