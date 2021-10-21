@@ -172,7 +172,9 @@ export function CompileProvider({ children }) {
 
   // pass the "uncompiled" value up into the scope for use outside this context provider
   useEffect(() => {
-    setUncompiled(changedAt > 0)
+    if (window.showNewPdfPreview) {
+      setUncompiled(changedAt > 0)
+    }
   }, [setUncompiled, changedAt])
 
   // record changes to the autocompile setting

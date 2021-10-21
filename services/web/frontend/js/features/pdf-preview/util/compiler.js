@@ -51,6 +51,11 @@ export default class DocumentCompiler {
   // The main "compile" function.
   // Call this directly to run a compile now, otherwise call debouncedAutoCompile.
   async compile(options = {}) {
+    // only compile if the feature flag is enabled
+    if (!window.showNewPdfPreview) {
+      return
+    }
+
     // set "compiling" to true (in the React component's state), and return if it was already true
     let wasCompiling
 

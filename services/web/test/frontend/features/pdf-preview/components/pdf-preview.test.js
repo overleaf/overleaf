@@ -149,6 +149,7 @@ describe('<PdfPreview/>', function () {
   var clock
 
   beforeEach(function () {
+    window.showNewPdfPreview = true
     clock = sinon.useFakeTimers({
       shouldAdvanceTime: true,
       now: Date.now(),
@@ -157,6 +158,7 @@ describe('<PdfPreview/>', function () {
   })
 
   afterEach(function () {
+    window.showNewPdfPreview = undefined
     clock.runAll()
     clock.restore()
     fetchMock.reset()

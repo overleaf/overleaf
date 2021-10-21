@@ -10,6 +10,14 @@ const example = pathToFileURL(
 ).toString()
 
 describe('<PdfJSViewer/>', function () {
+  beforeEach(function () {
+    window.showNewPdfPreview = true
+  })
+
+  afterEach(function () {
+    window.showNewPdfPreview = undefined
+  })
+
   it('loads all PDF pages', async function () {
     renderWithEditorContext(<PdfJsViewer url={example} />)
 

@@ -128,3 +128,4 @@ window.user = {
 }
 
 window.project_id = 'storybook-project'
+window.showNewPdfPreview = true
