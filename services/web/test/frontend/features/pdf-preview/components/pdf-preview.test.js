@@ -473,7 +473,7 @@ describe('<PdfPreview/>', function () {
     mockCompile()
     mockBuildFile()
 
-    nock('https://www.test-overleaf.com')
+    nock('https://clsi.test-overleaf.com')
       .get(/^\/build\/output.pdf/)
       .replyWithError({
         message: 'something awful happened',
@@ -484,6 +484,8 @@ describe('<PdfPreview/>', function () {
 
     await screen.findByText('Something went wrong while rendering this PDF.')
     expect(screen.queryByLabelText('Page 1')).to.not.exist
+
+    expect(nock.isDone()).to.be.true
 
     mockValidPdf()
 
@@ -498,7 +500,7 @@ describe('<PdfPreview/>', function () {
     mockCompile()
     mockBuildFile()
 
-    nock('https://www.test-overleaf.com')
+    nock('https://clsi.test-overleaf.com')
       .get(/^\/build\/output.pdf/)
       .replyWithFile(200, corruptPDF)
 
@@ -506,6 +508,8 @@ describe('<PdfPreview/>', function () {
 
     await screen.findByText('Something went wrong while rendering this PDF.')
     expect(screen.queryByLabelText('Page 1')).to.not.exist
+
+    expect(nock.isDone()).to.be.true
 
     mockValidPdf()
 

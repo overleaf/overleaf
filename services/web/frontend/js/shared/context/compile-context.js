@@ -38,15 +38,20 @@ CompileContext.Provider.propTypes = {
     fileList: PropTypes.object,
     hasChanges: PropTypes.bool.isRequired,
     hasLintingError: PropTypes.bool,
+    highlights: PropTypes.arrayOf(PropTypes.object),
     logEntries: PropTypes.object,
     logEntryAnnotations: PropTypes.object,
     pdfDownloadUrl: PropTypes.string,
     pdfUrl: PropTypes.string,
+    pdfViewer: PropTypes.string,
+    position: PropTypes.object,
     rawLog: PropTypes.string,
     setAutoCompile: PropTypes.func.isRequired,
     setDraft: PropTypes.func.isRequired,
     setError: PropTypes.func.isRequired,
     setHasLintingError: PropTypes.func.isRequired, // only for storybook
+    setHighlights: PropTypes.func.isRequired,
+    setPosition: PropTypes.func.isRequired,
     setShowLogs: PropTypes.func.isRequired,
     setStopOnValidationError: PropTypes.func.isRequired,
     showLogs: PropTypes.bool.isRequired,
@@ -70,24 +75,27 @@ export function CompileProvider({ children }) {
   const [compiling, setCompiling] = useState(false)
 
   // the log entries parsed from the compile output log
-  const [logEntries, setLogEntries] = useScopeValue('pdf.logEntries')
+  const [logEntries, setLogEntries] = useState()
 
   // annotations for display in the editor, built from the log entries
   const [logEntryAnnotations, setLogEntryAnnotations] = useScopeValue(
     'pdf.logEntryAnnotations'
   )
 
+  // the PDF viewer
+  const [pdfViewer] = useScopeValue('settings.pdfViewer')
+
   // the URL for downloading the PDF
-  const [pdfDownloadUrl, setPdfDownloadUrl] = useScopeValue('pdf.downloadUrl')
+  const [pdfDownloadUrl, setPdfDownloadUrl] = useState()
 
   // the URL for loading the PDF in the preview pane
-  const [pdfUrl, setPdfUrl] = useScopeValue('pdf.url')
+  const [pdfUrl, setPdfUrl] = useState()
 
   // the project is considered to be "uncompiled" if a doc has changed since the last compile started
-  const [uncompiled, setUncompiled] = useScopeValue('pdf.uncompiled')
+  const [uncompiled, setUncompiled] = useState()
 
   // the id of the CLSI server which ran the compile
-  const [clsiServerId, setClsiServerId] = useScopeValue('pdf.clsiServerId')
+  const [clsiServerId, setClsiServerId] = useState()
 
   // data received in response to a compile request
   const [data, setData] = useState()
@@ -115,6 +123,12 @@ export function CompileProvider({ children }) {
 
   // validation issues from CLSI
   const [validationIssues, setValidationIssues] = useState()
+
+  // areas to highlight on the PDF, from synctex
+  const [highlights, setHighlights] = useState()
+
+  // scroll position of the PDF
+  const [position, setPosition] = usePersistedState(`pdf.position.${projectId}`)
 
   // whether autocompile is switched on
   const [autoCompile, _setAutoCompile] = usePersistedState(
@@ -331,18 +345,18 @@ export function CompileProvider({ children }) {
 
   const codeCheckFailed = stopOnValidationError && autoCompileLintingError
 
-  // show that the project has pending changes
-  const hasChanges = Boolean(
-    autoCompile && uncompiled && compiledOnce && !codeCheckFailed
-  )
-
   // the project is available for auto-compiling
-  const canAutoCompile = Boolean(autoCompile && !compiling && !codeCheckFailed)
+  const canAutoCompile = Boolean(autoCompile && !codeCheckFailed)
+
+  // show that the project has pending changes
+  const hasChanges = Boolean(canAutoCompile && uncompiled && compiledOnce)
 
   // call the debounced autocompile function if the project is available for auto-compiling and it has changed
   useEffect(() => {
-    if (canAutoCompile && changedAt > 0) {
-      compiler.debouncedAutoCompile()
+    if (canAutoCompile) {
+      if (changedAt > 0) {
+        compiler.debouncedAutoCompile()
+      }
     } else {
       compiler.debouncedAutoCompile.cancel()
     }
@@ -409,10 +423,13 @@ export function CompileProvider({ children }) {
       fileList,
       hasChanges,
       hasLintingError,
+      highlights,
       logEntries,
       logEntryAnnotations,
       pdfDownloadUrl,
       pdfUrl,
+      pdfViewer,
+      position,
       rawLog,
       recompileFromScratch,
       setAutoCompile,
@@ -421,6 +438,8 @@ export function CompileProvider({ children }) {
       setDraft,
       setError,
       setHasLintingError, // only for stories
+      setHighlights,
+      setPosition,
       setShowLogs,
       setStopOnValidationError,
       showLogs,
@@ -443,16 +462,21 @@ export function CompileProvider({ children }) {
       fileList,
       hasChanges,
       hasLintingError,
+      highlights,
       logEntries,
       logEntryAnnotations,
+      position,
       pdfDownloadUrl,
       pdfUrl,
+      pdfViewer,
       rawLog,
       recompileFromScratch,
       setAutoCompile,
       setDraft,
       setError,
       setHasLintingError,
+      setHighlights,
+      setPosition,
       setStopOnValidationError,
       showLogs,
       startCompile,

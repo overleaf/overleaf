@@ -18,6 +18,9 @@ export function setupContext() {
         chatOpen: true,
         pdfLayout: 'flat',
       },
+      settings: {
+        pdfViewer: 'js',
+      },
       toggleHistory: () => {},
     }
   }
@@ -29,8 +32,16 @@ export function setupContext() {
       removeListener: sinon.stub(),
     },
     fileTreeManager: {
+      findEntityById: () => null,
       findEntityByPath: () => null,
+      getEntityPath: () => null,
       getRootDocDirname: () => undefined,
+    },
+    editorManager: {
+      getCurrentDocId: () => 'foo',
+      openDoc: (id, options) => {
+        console.log('open doc', id, options)
+      },
     },
   }
   window.ExposedSettings = window.ExposedSettings || {}

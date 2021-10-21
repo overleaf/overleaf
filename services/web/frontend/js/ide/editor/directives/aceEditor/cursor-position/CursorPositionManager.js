@@ -99,7 +99,12 @@ export default CursorPositionManager = class CursorPositionManager {
 
   emitCursorUpdateEvent() {
     const cursor = this.adapter.getCursor()
-    return this.$scope.$emit(`cursor:${this.$scope.name}:update`, cursor)
+    this.$scope.$emit(`cursor:${this.$scope.name}:update`, cursor)
+    window.dispatchEvent(
+      new CustomEvent(`cursor:${this.$scope.name}:update`, {
+        detail: cursor,
+      })
+    )
   }
 
   gotoStoredPosition() {

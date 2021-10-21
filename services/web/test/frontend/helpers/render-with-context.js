@@ -48,20 +48,28 @@ export function EditorProviders({
       callback(get($scope, path))
       return () => null
     },
-    $applyAsync: () => {},
-    toggleHistory: () => {},
+    $applyAsync: sinon.stub(),
+    toggleHistory: sinon.stub(),
     ...scope,
   }
 
   const fileTreeManager = {
+    findEntityById: () => null,
     findEntityByPath: () => null,
+    getEntityPath: () => '',
     getRootDocDirname: () => '',
+  }
+
+  const editorManager = {
+    getCurrentDocId: () => 'foo',
+    openDoc: sinon.stub(),
   }
 
   window._ide = {
     $scope,
     socket,
     clsiServerId,
+    editorManager,
     fileTreeManager,
   }
 

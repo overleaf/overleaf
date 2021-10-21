@@ -4,7 +4,6 @@ import { debounce } from 'lodash'
 import PdfViewerControls from './pdf-viewer-controls'
 import { useProjectContext } from '../../../shared/context/project-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
-import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { buildHighlightElement } from '../util/highlights'
 import PDFJSWrapper from '../util/pdf-js-wrapper'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
@@ -15,7 +14,12 @@ import getMeta from '../../../utils/meta'
 function PdfJsViewer({ url }) {
   const { _id: projectId } = useProjectContext()
 
-  const { setError, firstRenderDone } = useCompileContext()
+  const {
+    setError,
+    firstRenderDone,
+    highlights,
+    setPosition,
+  } = useCompileContext()
   const [timePDFFetched, setTimePDFFetched] = useState()
 
   // state values persisted in localStorage to restore on load
@@ -23,10 +27,6 @@ function PdfJsViewer({ url }) {
     `pdf-viewer-scale:${projectId}`,
     'page-width'
   )
-
-  // state values shared with Angular scope (highlights => editor, position => synctex buttons
-  const [highlights] = useScopeValue('pdf.highlights')
-  const [, setPosition] = useScopeValue('pdf.position')
 
   // local state values
   const [pdfJsWrapper, setPdfJsWrapper] = useState()
@@ -144,16 +144,16 @@ function PdfJsViewer({ url }) {
   useEffect(() => {
     if (initialised && pdfJsWrapper) {
       setScale(scale => {
-        pdfJsWrapper.viewer.currentScaleValue = scale
-        return scale
-      })
+        setPosition(position => {
+          if (position) {
+            pdfJsWrapper.scrollToPosition(position, scale)
+          } else {
+            pdfJsWrapper.viewer.currentScaleValue = scale
+          }
+          return position
+        })
 
-      // restore the scroll position
-      setPosition(position => {
-        if (position) {
-          pdfJsWrapper.currentPosition = position
-        }
-        return position
+        return scale
       })
     }
   }, [initialised, setScale, setPosition, pdfJsWrapper])

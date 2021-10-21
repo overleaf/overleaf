@@ -362,6 +362,10 @@
   background-color: fade(@btn-default-bg, 80%);
   transition: background 0.15s ease;
 
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+
   &[disabled] {
     opacity: 1;
     background-color: fade(@btn-default-bg, 60%);

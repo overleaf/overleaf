@@ -160,7 +160,7 @@ export default class PDFJSWrapper {
     }
   }
 
-  set currentPosition(position) {
+  scrollToPosition(position, scale = null) {
     const destArray = [
       null,
       {
@@ -168,7 +168,7 @@ export default class PDFJSWrapper {
       },
       position.offset.left,
       position.offset.top,
-      null,
+      scale,
     ]
 
     this.viewer.scrollPageIntoView({

@@ -24,6 +24,9 @@ export function withContextRoot(Story, scope) {
           }
         }, 0)
       },
+      $on: (eventName, callback) => {
+        //
+      },
     },
   }
 
