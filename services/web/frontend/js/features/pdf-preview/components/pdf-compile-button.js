@@ -55,7 +55,7 @@ function PdfCompileButton() {
         <Button
           className="btn-recompile"
           bsStyle="success"
-          onClick={compiling ? stopCompile : startCompile}
+          onClick={startCompile}
           aria-label={compileButtonLabel}
         >
           <Icon type="refresh" spin={compiling} />
