@@ -24,7 +24,7 @@ export default function PdfLogEntryRawContent({
       <div
         className="expand-collapse-container"
         style={{
-          height: expanded ? 'auto' : collapsedSize,
+          height: expanded || !needsExpander ? 'auto' : collapsedSize,
         }}
       >
         <pre className="log-entry-content-raw" ref={containerRef}>
