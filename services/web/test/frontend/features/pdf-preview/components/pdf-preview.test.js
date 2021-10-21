@@ -57,7 +57,7 @@ const mockCompile = () =>
       status: 'success',
       clsiServerId: 'foo',
       compileGroup: 'priority',
-      pdfDownloadDomain: '',
+      pdfDownloadDomain: 'https://clsi.test-overleaf.com',
       outputFiles: cloneDeep(outputFiles),
     },
   })
@@ -85,7 +85,7 @@ const mockClearCache = () =>
   fetchMock.delete('express:/project/:projectId/output', 204)
 
 const mockValidPdf = () => {
-  nock('https://www.test-overleaf.com')
+  nock('https://clsi.test-overleaf.com')
     .get(/^\/build\/output\.pdf/)
     .replyWithFile(200, examplePDF)
 }
@@ -117,7 +117,17 @@ LaTeX Font Info:    External font \`cmex10' loaded for size
 `,
 }
 
-const mockBuildFile = (responses = defaultFileResponses) =>
+const mockBuildFile = (responses = defaultFileResponses) => {
+  fetchMock.get('begin:https://clsi.test-overleaf.com/', _url => {
+    const url = new URL(_url, 'https://clsi.test-overleaf.com')
+
+    if (url.pathname in responses) {
+      return responses[url.pathname]
+    }
+
+    return 404
+  })
+
   fetchMock.get('express:/build/:file', (_url, options, request) => {
     const url = new URL(_url, 'https://example.com')
 
@@ -127,6 +137,7 @@ const mockBuildFile = (responses = defaultFileResponses) =>
 
     return 404
   })
+}
 
 const storeAndFireEvent = (key, value) => {
   localStorage.setItem(key, value)
@@ -378,7 +389,8 @@ describe('<PdfPreview/>', function () {
     screen.getByText('Conflicting Paths Found')
 
     expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
-    expect(fetchMock.called('express:/build/:file')).to.be.false // TODO: actual path
+    expect(fetchMock.called('begin:https://clsi.test-overleaf.com/')).to.be
+      .false // TODO: actual path
   })
 
   it('sends a clear cache request when the button is pressed', async function () {
@@ -412,7 +424,7 @@ describe('<PdfPreview/>', function () {
     })
 
     expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
-    expect(fetchMock.called('express:/build/:file')).to.be.true // TODO: actual path
+    expect(fetchMock.called('begin:https://clsi.test-overleaf.com/')).to.be.true // TODO: actual path
   })
 
   it('handle "recompile from scratch"', async function () {
@@ -454,7 +466,7 @@ describe('<PdfPreview/>', function () {
 
     expect(fetchMock.called('express:/project/:projectId/compile')).to.be.true // TODO: auto_compile query param
     expect(fetchMock.called('express:/project/:projectId/output')).to.be.true
-    expect(fetchMock.called('express:/build/:file')).to.be.true // TODO: actual path
+    expect(fetchMock.called('begin:https://clsi.test-overleaf.com/')).to.be.true // TODO: actual path
   })
 
   it('shows an error for an invalid URL', async function () {

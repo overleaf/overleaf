@@ -80,7 +80,9 @@ export const handleOutputFiles = async (projectId, data) => {
   const logFile = outputFiles.get('output.log')
 
   if (logFile) {
-    const response = await fetch(`${logFile.url}?${params}`)
+    const response = await fetch(
+      `${data.pdfDownloadDomain}${logFile.url}?${params}`
+    )
 
     const log = await response.text()
 
@@ -96,7 +98,9 @@ export const handleOutputFiles = async (projectId, data) => {
   const blgFile = outputFiles.get('output.blg')
 
   if (blgFile) {
-    const response = await fetch(`${blgFile.url}?${params}`)
+    const response = await fetch(
+      `${data.pdfDownloadDomain}${blgFile.url}?${params}`
+    )
 
     const log = await response.text()
 
