@@ -75,7 +75,7 @@ export function CompileProvider({ children }) {
   const [compiling, setCompiling] = useState(false)
 
   // the log entries parsed from the compile output log
-  const [logEntries, setLogEntries] = useState()
+  const [logEntries, setLogEntries] = useScopeValue('pdf.logEntries')
 
   // annotations for display in the editor, built from the log entries
   const [logEntryAnnotations, setLogEntryAnnotations] = useScopeValue(
@@ -86,13 +86,13 @@ export function CompileProvider({ children }) {
   const [pdfViewer] = useScopeValue('settings.pdfViewer')
 
   // the URL for downloading the PDF
-  const [pdfDownloadUrl, setPdfDownloadUrl] = useState()
+  const [pdfDownloadUrl, setPdfDownloadUrl] = useScopeValue('pdf.downloadUrl')
 
   // the URL for loading the PDF in the preview pane
-  const [pdfUrl, setPdfUrl] = useState()
+  const [pdfUrl, setPdfUrl] = useScopeValue('pdf.url')
 
   // the project is considered to be "uncompiled" if a doc has changed since the last compile started
-  const [uncompiled, setUncompiled] = useState()
+  const [uncompiled, setUncompiled] = useScopeValue('pdf.uncompiled')
 
   // the id of the CLSI server which ran the compile
   const [clsiServerId, setClsiServerId] = useState()
