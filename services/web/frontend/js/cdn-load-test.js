@@ -6,4 +6,10 @@ if (window.ExposedSettings.isOverleaf) {
     captureMessage('CDN test image load error (cdn.overleaf.net)')
   })
   cdnLoadTest.src = 'https://cdn.overleaf.net/img/1p.gif'
+
+  const cdnLoadTestOld = document.createElement('img')
+  cdnLoadTestOld.addEventListener('error', function () {
+    captureMessage('CDN test image load error (cdn.overleaf.com)')
+  })
+  cdnLoadTestOld.src = 'https://cdn.overleaf.com/img/1p.gif'
 }
