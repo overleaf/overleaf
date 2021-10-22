@@ -21,7 +21,7 @@ services:
     user: node
 
   test_acceptance:
-    image: node:12.22.3
+    image: node:12.22.7
     volumes:
       - .:/app
     working_dir: /app
