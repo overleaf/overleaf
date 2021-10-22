@@ -71,6 +71,14 @@ html(
 			script(type="text/javascript", nonce=scriptNonce).
 				window.ga = function() { console.log("would send to GA", arguments) };
 
+		if (typeof(gaTokenV4) != "undefined")
+			script(async, nonce=scriptNonce, src='https://www.googletagmanager.com/gtag/js?id=' + gaTokenV4)
+			script(type="text/javascript", nonce=scriptNonce).
+				window.dataLayer = window.dataLayer || [];
+				function gtag(){dataLayer.push(arguments);}
+				gtag('js', new Date());
+				gtag('config', '#{gaTokenV4}');
+
 		block meta
 			meta(name="ol-csrfToken" content=csrfToken)
 			//- Configure dynamically loaded assets (via webpack) to be downloaded from CDN
