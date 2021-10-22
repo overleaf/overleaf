@@ -45,30 +45,6 @@ const InstitutionsAPI = {
     )
   },
 
-  getInstitutionLicences(institutionId, startDate, endDate, lag, callback) {
-    makeAffiliationRequest(
-      {
-        method: 'GET',
-        path: `/api/v2/institutions/${institutionId.toString()}/institution_licences`,
-        body: { start_date: startDate, end_date: endDate, lag },
-        defaultErrorMessage: "Couldn't get institution licences",
-      },
-      callback
-    )
-  },
-
-  getInstitutionNewLicences(institutionId, startDate, endDate, lag, callback) {
-    makeAffiliationRequest(
-      {
-        method: 'GET',
-        path: `/api/v2/institutions/${institutionId.toString()}/new_institution_licences`,
-        body: { start_date: startDate, end_date: endDate, lag },
-        defaultErrorMessage: "Couldn't get institution new licences",
-      },
-      callback
-    )
-  },
-
   getUserAffiliations(userId, callback) {
     makeAffiliationRequest(
       {

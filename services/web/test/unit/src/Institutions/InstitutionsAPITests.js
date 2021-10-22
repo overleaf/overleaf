@@ -74,38 +74,6 @@ describe('InstitutionsAPI', function () {
     })
   })
 
-  describe('getInstitutionLicences', function () {
-    it('get licences', function (done) {
-      this.institutionId = 123
-      const responseBody = {
-        lag: 'monthly',
-        data: [{ key: 'users', values: [{ x: '2018-01-01', y: 1 }] }],
-      }
-      this.request.yields(null, { statusCode: 200 }, responseBody)
-      const startDate = '1417392000'
-      const endDate = '1420848000'
-      this.InstitutionsAPI.getInstitutionLicences(
-        this.institutionId,
-        startDate,
-        endDate,
-        'monthly',
-        (err, body) => {
-          expect(err).not.to.exist
-          this.request.calledOnce.should.equal(true)
-          const requestOptions = this.request.lastCall.args[0]
-          const expectedUrl = `v1.url/api/v2/institutions/${this.institutionId}/institution_licences`
-          requestOptions.url.should.equal(expectedUrl)
-          requestOptions.method.should.equal('GET')
-          requestOptions.body.start_date.should.equal(startDate)
-          requestOptions.body.end_date.should.equal(endDate)
-          requestOptions.body.lag.should.equal('monthly')
-          body.should.equal(responseBody)
-          done()
-        }
-      )
-    })
-  })
-
   describe('getLicencesForAnalytics', function () {
     const lag = 'daily'
     const queryDate = '2017-01-07:00:00.000Z'
