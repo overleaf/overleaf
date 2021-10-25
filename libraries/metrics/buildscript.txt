@@ -4,6 +4,6 @@ metrics
 --env-add=
 --env-pass-through=
 --is-library=True
---node-version=12.22.3
+--node-version=12.22.7
 --public-repo=False
 --script-version=3.11.0
