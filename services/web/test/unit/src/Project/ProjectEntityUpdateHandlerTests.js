@@ -104,6 +104,7 @@ describe('ProjectEntityUpdateHandler', function () {
       markAsUpdated: sinon.stub(),
     }
     this.ProjectEntityHandler = {
+      getDoc: sinon.stub(),
       getDocPathByProjectIdAndDocId: sinon.stub(),
       getAllEntitiesFromProject: sinon.stub(),
     }
