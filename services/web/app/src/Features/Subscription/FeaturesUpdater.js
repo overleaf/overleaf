@@ -18,7 +18,7 @@ const Queues = require('../../infrastructure/Queues')
  * Enqueue a job for refreshing features for the given user
  */
 async function scheduleRefreshFeatures(userId, reason) {
-  const queue = Queues.getRefreshFeaturesQueue()
+  const queue = Queues.getQueue('refresh-features')
   await queue.add({ userId, reason })
 }
 

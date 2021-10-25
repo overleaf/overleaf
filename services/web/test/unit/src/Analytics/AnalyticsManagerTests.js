@@ -36,18 +36,21 @@ describe('AnalyticsManager', function () {
     }
     const self = this
     this.Queues = {
-      getAnalyticsEventsQueue: () => {
-        return self.analyticsEventsQueue
+      getQueue: queueName => {
+        switch (queueName) {
+          case 'analytics-events':
+            return self.analyticsEventsQueue
+          case 'analytics-editing-sessions':
+            return self.analyticsEditingSessionQueue
+          case 'emails-onboarding':
+            return self.onboardingEmailsQueue
+          case 'analytics-user-properties':
+            return self.analyticsUserPropertiesQueue
+          default:
+            throw new Error('Unexpected queue name')
+        }
       },
-      getAnalyticsEditingSessionsQueue: () => {
-        return self.analyticsEditingSessionQueue
-      },
-      getOnboardingEmailsQueue: () => {
-        return self.onboardingEmailsQueue
-      },
-      getAnalyticsUserPropertiesQueue: () => {
-        return self.analyticsUserPropertiesQueue
-      },
+      createScheduledJob: sinon.stub().resolves(),
     }
     this.backgroundRequest = sinon.stub().yields()
     this.request = sinon.stub().yields()
@@ -66,18 +69,18 @@ describe('AnalyticsManager', function () {
     it('user is smoke test user', function () {
       this.Settings.smokeTest = { userId: this.fakeUserId }
       this.AnalyticsManager.identifyUser(this.fakeUserId, '')
-      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+      sinon.assert.notCalled(this.Queues.createScheduledJob)
     })
 
     it('analytics service is disabled', function () {
       this.Settings.analytics.enabled = false
       this.AnalyticsManager.identifyUser(this.fakeUserId, '')
-      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+      sinon.assert.notCalled(this.Queues.createScheduledJob)
     })
 
     it('userId is missing', function () {
       this.AnalyticsManager.identifyUser(undefined, this.analyticsId)
-      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+      sinon.assert.notCalled(this.Queues.createScheduledJob)
     })
 
     it('analyticsId is missing', function () {
@@ -85,7 +88,7 @@ describe('AnalyticsManager', function () {
         new ObjectID(this.fakeUserId),
         undefined
       )
-      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+      sinon.assert.notCalled(this.Queues.createScheduledJob)
     })
 
     it('analyticsId is not a valid UUID', function () {
@@ -93,7 +96,7 @@ describe('AnalyticsManager', function () {
         new ObjectID(this.fakeUserId),
         this.fakeUserId
       )
-      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+      sinon.assert.notCalled(this.Queues.createScheduledJob)
     })
 
     it('userId and analyticsId are the same Mongo ID', function () {
@@ -101,18 +104,28 @@ describe('AnalyticsManager', function () {
         new ObjectID(this.fakeUserId),
         new ObjectID(this.fakeUserId)
       )
-      sinon.assert.notCalled(this.analyticsEventsQueue.add)
+      sinon.assert.notCalled(this.Queues.createScheduledJob)
     })
   })
 
   describe('queues the appropriate message for', function () {
     it('identifyUser', function () {
       const analyticsId = 'bd101c4c-722f-4204-9e2d-8303e5d9c120'
-      this.AnalyticsManager.identifyUser(this.fakeUserId, analyticsId)
-      sinon.assert.calledWithMatch(this.analyticsEventsQueue.add, 'identify', {
-        userId: this.fakeUserId,
-        analyticsId,
-      })
+      this.AnalyticsManager.identifyUser(this.fakeUserId, analyticsId, true)
+      sinon.assert.calledWithMatch(
+        this.Queues.createScheduledJob,
+        'analytics-events',
+        {
+          name: 'identify',
+          data: {
+            userId: this.fakeUserId,
+            analyticsId,
+            isNewUser: true,
+            createdAt: sinon.match.date,
+          },
+        },
+        60000
+      )
     })
 
     it('recordEventForUser', async function () {
@@ -154,14 +167,25 @@ describe('AnalyticsManager', function () {
     beforeEach(function () {
       this.userId = '123abc'
       this.analyticsId = 'bccd308c-5d72-426e-a106-662e88557795'
+      const self = this
       this.AnalyticsManager = SandboxedModule.require(MODULE_PATH, {
         requires: {
           '@overleaf/settings': {},
           '../../infrastructure/Queues': {
-            getAnalyticsEventsQueue: () => {},
-            getAnalyticsEditingSessionsQueue: () => {},
-            getOnboardingEmailsQueue: () => {},
-            getAnalyticsUserPropertiesQueue: () => {},
+            getQueue: queueName => {
+              switch (queueName) {
+                case 'analytics-events':
+                  return self.analyticsEventsQueue
+                case 'analytics-editing-sessions':
+                  return self.analyticsEditingSessionQueue
+                case 'emails-onboarding':
+                  return self.onboardingEmailsQueue
+                case 'analytics-user-properties':
+                  return self.analyticsUserPropertiesQueue
+                default:
+                  throw new Error('Unexpected queue name')
+              }
+            },
           },
           './UserAnalyticsIdCache': {},
           uuid: {

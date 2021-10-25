@@ -7,40 +7,25 @@ const Settings = require('@overleaf/settings')
 const MAX_COMPLETED_JOBS_RETAINED = 10000
 const MAX_FAILED_JOBS_RETAINED = 50000
 
+const QUEUES_JOB_OPTIONS = {
+  'analytics-events': {},
+  'analytics-editing-sessions': {},
+  'analytics-user-properties': {},
+  'refresh-features': {
+    attempts: 3,
+  },
+  'emails-onboarding': {},
+  'post-registration-analytics': {},
+  'scheduled-jobs': {
+    attempts: 1,
+  },
+}
+
 const queues = {}
 
-function getAnalyticsEventsQueue() {
-  if (Settings.analytics.enabled) {
-    return getOrCreateQueue('analytics-events')
-  }
-}
-
-function getAnalyticsEditingSessionsQueue() {
-  if (Settings.analytics.enabled) {
-    return getOrCreateQueue('analytics-editing-sessions')
-  }
-}
-
-function getAnalyticsUserPropertiesQueue() {
-  if (Settings.analytics.enabled) {
-    return getOrCreateQueue('analytics-user-properties')
-  }
-}
-
-function getRefreshFeaturesQueue() {
-  return getOrCreateQueue('refresh-features', { attempts: 3 })
-}
-
-function getOnboardingEmailsQueue() {
-  return getOrCreateQueue('emails-onboarding')
-}
-
-function getPostRegistrationAnalyticsQueue() {
-  return getOrCreateQueue('post-registration-analytics')
-}
-
-function getOrCreateQueue(queueName, jobOptions = {}) {
+function getQueue(queueName) {
   if (!queues[queueName]) {
+    const jobOptions = QUEUES_JOB_OPTIONS[queueName] || {}
     queues[queueName] = new Queue(queueName, {
       // this configuration is duplicated in /services/analytics/app/js/Queues.js
       // and needs to be manually kept in sync whenever modified
@@ -60,11 +45,16 @@ function getOrCreateQueue(queueName, jobOptions = {}) {
   return queues[queueName]
 }
 
+async function createScheduledJob(queueName, { name, data, options }, delay) {
+  await getQueue('scheduled-jobs').add(
+    { queueName, name, data, options },
+    {
+      delay,
+    }
+  )
+}
+
 module.exports = {
-  getAnalyticsEventsQueue,
-  getAnalyticsEditingSessionsQueue,
-  getAnalyticsUserPropertiesQueue,
-  getRefreshFeaturesQueue,
-  getOnboardingEmailsQueue,
-  getPostRegistrationAnalyticsQueue,
+  getQueue,
+  createScheduledJob,
 }

@@ -11,16 +11,8 @@ const MODULE_PATH = path.join(
 describe('UserPostRegistrationAnalyticsManager', function () {
   beforeEach(function () {
     this.fakeUserId = '123abc'
-    this.postRegistrationAnalyticsQueue = {
-      add: sinon.stub().resolves(),
-      process: callback => {
-        this.queueProcessFunction = callback
-      },
-    }
     this.Queues = {
-      getPostRegistrationAnalyticsQueue: sinon
-        .stub()
-        .returns(this.postRegistrationAnalyticsQueue),
+      createScheduledJob: sinon.stub().resolves(),
     }
     this.UserGetter = {
       promises: {
@@ -58,9 +50,11 @@ describe('UserPostRegistrationAnalyticsManager', function () {
           _id: this.fakeUserId,
         }
       )
-      expect(this.postRegistrationAnalyticsQueue.add).to.have.been.calledWith(
-        { userId: this.fakeUserId },
-        { delay: 24 * 60 * 60 * 1000 }
+      sinon.assert.calledWith(
+        this.Queues.createScheduledJob,
+        'post-registration-analytics',
+        { data: { userId: this.fakeUserId } },
+        24 * 60 * 60 * 1000
       )
     })
   })

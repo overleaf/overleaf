@@ -19,9 +19,7 @@ describe('UserOnboardingEmailManager', function () {
       },
     }
     this.Queues = {
-      getOnboardingEmailsQueue: sinon
-        .stub()
-        .returns(this.onboardingEmailsQueue),
+      createScheduledJob: sinon.stub().resolves(),
     }
     this.UserGetter = {
       promises: {
@@ -60,9 +58,11 @@ describe('UserOnboardingEmailManager', function () {
       await this.UserOnboardingEmailManager.scheduleOnboardingEmail({
         _id: this.fakeUserId,
       })
-      expect(this.onboardingEmailsQueue.add).to.have.been.calledWith(
-        { userId: this.fakeUserId },
-        { delay: 24 * 60 * 60 * 1000 }
+      sinon.assert.calledWith(
+        this.Queues.createScheduledJob,
+        'emails-onboarding',
+        { data: { userId: this.fakeUserId } },
+        24 * 60 * 60 * 1000
       )
     })
   })

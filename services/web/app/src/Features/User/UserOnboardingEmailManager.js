@@ -6,9 +6,10 @@ const UserGetter = require('./UserGetter')
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
 async function scheduleOnboardingEmail(user) {
-  await Queues.getOnboardingEmailsQueue().add(
-    { userId: user._id },
-    { delay: ONE_DAY_MS }
+  await Queues.createScheduledJob(
+    'emails-onboarding',
+    { data: { userId: user._id } },
+    ONE_DAY_MS
   )
 }
 
