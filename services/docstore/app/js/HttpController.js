@@ -117,14 +117,18 @@ module.exports = HttpController = {
     logger.log({ project_id }, 'getting all deleted docs')
     DocManager.getAllDeletedDocs(
       project_id,
-      { name: true },
+      { name: true, deletedAt: true },
       function (error, docs) {
         if (error) {
           return next(error)
         }
         res.json(
           docs.map(doc => {
-            return { _id: doc._id.toString(), name: doc.name }
+            return {
+              _id: doc._id.toString(),
+              name: doc.name,
+              deletedAt: doc.deletedAt,
+            }
           })
         )
       }

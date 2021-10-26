@@ -302,7 +302,13 @@ describe('Delete via PATCH', function () {
 
   describe('when the doc gets a name on delete', function () {
     beforeEach(function (done) {
-      DocstoreClient.deleteDoc(this.project_id, this.doc_id, done)
+      this.deletedAt = new Date()
+      DocstoreClient.deleteDocWithDate(
+        this.project_id,
+        this.doc_id,
+        this.deletedAt,
+        done
+      )
     })
 
     it('should show the doc in deleted docs response', function (done) {
@@ -311,7 +317,11 @@ describe('Delete via PATCH', function () {
         (error, deletedDocs) => {
           if (error) return done(error)
           expect(deletedDocs).to.deep.equal([
-            { _id: this.doc_id.toString(), name: 'main.tex' },
+            {
+              _id: this.doc_id.toString(),
+              name: 'main.tex',
+              deletedAt: this.deletedAt.toISOString(),
+            },
           ])
           done()
         }
@@ -331,9 +341,11 @@ describe('Delete via PATCH', function () {
         )
       })
       beforeEach('delete doc2', function (done) {
-        DocstoreClient.deleteDocWithName(
+        this.deletedAt2 = new Date()
+        DocstoreClient.deleteDocWithDateAndName(
           this.project_id,
           this.doc_id2,
+          this.deletedAt2,
           'two.tex',
           done
         )
@@ -350,9 +362,11 @@ describe('Delete via PATCH', function () {
         )
       })
       beforeEach('delete doc3', function (done) {
-        DocstoreClient.deleteDocWithName(
+        this.deletedAt3 = new Date()
+        DocstoreClient.deleteDocWithDateAndName(
           this.project_id,
           this.doc_id3,
+          this.deletedAt3,
           'three.tex',
           done
         )
@@ -364,9 +378,21 @@ describe('Delete via PATCH', function () {
             if (error) return done(error)
 
             expect(deletedDocs).to.deep.equal([
-              { _id: this.doc_id3.toString(), name: 'three.tex' },
-              { _id: this.doc_id2.toString(), name: 'two.tex' },
-              { _id: this.doc_id.toString(), name: 'main.tex' },
+              {
+                _id: this.doc_id3.toString(),
+                name: 'three.tex',
+                deletedAt: this.deletedAt3.toISOString(),
+              },
+              {
+                _id: this.doc_id2.toString(),
+                name: 'two.tex',
+                deletedAt: this.deletedAt2.toISOString(),
+              },
+              {
+                _id: this.doc_id.toString(),
+                name: 'main.tex',
+                deletedAt: this.deletedAt.toISOString(),
+              },
             ])
             done()
           }
@@ -390,8 +416,16 @@ describe('Delete via PATCH', function () {
               if (error) return done(error)
 
               expect(deletedDocs).to.deep.equal([
-                { _id: this.doc_id3.toString(), name: 'three.tex' },
-                { _id: this.doc_id2.toString(), name: 'two.tex' },
+                {
+                  _id: this.doc_id3.toString(),
+                  name: 'three.tex',
+                  deletedAt: this.deletedAt3.toISOString(),
+                },
+                {
+                  _id: this.doc_id2.toString(),
+                  name: 'two.tex',
+                  deletedAt: this.deletedAt2.toISOString(),
+                },
                 // dropped main.tex
               ])
               done()
