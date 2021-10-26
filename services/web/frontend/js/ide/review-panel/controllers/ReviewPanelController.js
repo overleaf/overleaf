@@ -247,14 +247,14 @@ export default App.controller(
       return $scope.reviewPanel.resolvedComments[doc_id]
     }
 
-    var getThread = function (thread_id) {
+    function getThread(thread_id) {
       if ($scope.reviewPanel.commentThreads[thread_id] == null) {
         $scope.reviewPanel.commentThreads[thread_id] = { messages: [] }
       }
       return $scope.reviewPanel.commentThreads[thread_id]
     }
 
-    var getChangeTracker = function (doc_id) {
+    function getChangeTracker(doc_id) {
       if (rangesTrackers[doc_id] == null) {
         rangesTrackers[doc_id] = new RangesTracker()
         rangesTrackers[doc_id].resolvedThreadIds =
@@ -272,7 +272,7 @@ export default App.controller(
       }
     )
 
-    var updateScrollbar = function () {
+    function updateScrollbar() {
       if (
         scrollbar.isVisible &&
         $scope.reviewPanel.subView === $scope.SubViews.CUR_FILE &&
@@ -360,7 +360,7 @@ export default App.controller(
           nEntries > 0 && $scope.project.features.trackChangesVisible)
     )
 
-    var regenerateTrackChangesId = function (doc) {
+    function regenerateTrackChangesId(doc) {
       const old_id = getChangeTracker(doc.doc_id).getIdSeed()
       const new_id = RangesTracker.generateIdSeed()
       getChangeTracker(doc.doc_id).setIdSeed(new_id)
@@ -394,7 +394,7 @@ export default App.controller(
           })()
         })
 
-    var refreshOverviewPanel = function () {
+    function refreshOverviewPanel() {
       $scope.reviewPanel.overview.loading = true
       return refreshRanges()
         .then(() => ($scope.reviewPanel.overview.loading = false))
@@ -409,8 +409,7 @@ export default App.controller(
       return q
     }
 
-    var updateEntries = function (doc_id) {
-      let change, entry_id, key, new_entry, value
+    function updateEntries(doc_id) {
       const rangesTracker = getChangeTracker(doc_id)
       const entries = getDocEntries(doc_id)
       const resolvedComments = getDocResolvedComments(doc_id)
@@ -419,17 +418,17 @@ export default App.controller(
 
       // Assume we'll delete everything until we see it, then we'll remove it from this object
       const delete_changes = {}
-      for (var id in entries) {
-        change = entries[id]
+      for (const id in entries) {
+        const change = entries[id]
         if (!['add-comment', 'bulk-actions'].includes(id)) {
-          for (entry_id of Array.from(change.entry_ids)) {
+          for (const entry_id of Array.from(change.entry_ids)) {
             delete_changes[entry_id] = true
           }
         }
       }
-      for (id in resolvedComments) {
-        change = resolvedComments[id]
-        for (entry_id of Array.from(change.entry_ids)) {
+      for (const id in resolvedComments) {
+        const change = resolvedComments[id]
+        for (const entry_id of Array.from(change.entry_ids)) {
           delete_changes[entry_id] = true
         }
       }
@@ -437,7 +436,7 @@ export default App.controller(
       let potential_aggregate = false
       let prev_insertion = null
 
-      for (change of Array.from(rangesTracker.changes)) {
+      for (const change of Array.from(rangesTracker.changes)) {
         changed = true
 
         if (
@@ -455,16 +454,15 @@ export default App.controller(
             entries[change.id] = {}
           }
           delete delete_changes[change.id]
-          new_entry = {
+          const new_entry = {
             type: change.op.i ? 'insert' : 'delete',
             entry_ids: [change.id],
             content: change.op.i || change.op.d,
             offset: change.op.p,
             metadata: change.metadata,
           }
-          for (key in new_entry) {
-            value = new_entry[key]
-            entries[change.id][key] = value
+          for (const key in new_entry) {
+            entries[change.id][key] = new_entry[key]
           }
         }
 
@@ -486,7 +484,7 @@ export default App.controller(
       }
 
       for (const comment of Array.from(rangesTracker.comments)) {
-        var new_comment
+        let new_comment
         changed = true
         delete delete_changes[comment.id]
         if ($scope.reviewPanel.resolvedThreadIds[comment.op.t]) {
@@ -502,16 +500,15 @@ export default App.controller(
               : (entries[comment.id] = {})
           delete resolvedComments[comment.id]
         }
-        new_entry = {
+        const new_entry = {
           type: 'comment',
           thread_id: comment.op.t,
           entry_ids: [comment.id],
           content: comment.op.c,
           offset: comment.op.p,
         }
-        for (key in new_entry) {
-          value = new_entry[key]
-          new_comment[key] = value
+        for (const key in new_entry) {
+          new_comment[key] = new_entry[key]
         }
       }
 
@@ -630,7 +627,7 @@ export default App.controller(
       })
     }
 
-    var _doAcceptChanges = function (change_ids) {
+    function _doAcceptChanges(change_ids) {
       $http.post(
         `/project/${$scope.project_id}/doc/${$scope.editor.open_doc_id}/changes/accept`,
         { change_ids, _csrf: window.csrfToken }
@@ -638,7 +635,7 @@ export default App.controller(
       return $scope.$broadcast('changes:accept', change_ids)
     }
 
-    var _doRejectChanges = change_ids =>
+    const _doRejectChanges = change_ids =>
       $scope.$broadcast('changes:reject', change_ids)
 
     const bulkAccept = function () {
@@ -661,7 +658,7 @@ export default App.controller(
 
     $scope.showBulkRejectDialog = () => showBulkActionsDialog(false)
 
-    var showBulkActionsDialog = isAccept =>
+    const showBulkActionsDialog = isAccept =>
       $modal
         .open({
           templateUrl: 'bulkActionsModalTemplate',
@@ -806,7 +803,7 @@ export default App.controller(
       eventTracking.sendMB('rp-comment-reopen')
     }
 
-    var _onCommentResolved = function (thread_id, user) {
+    function _onCommentResolved(thread_id, user) {
       const thread = getThread(thread_id)
       if (thread == null) {
         return
@@ -818,7 +815,7 @@ export default App.controller(
       return $scope.$broadcast('comment:resolve_threads', [thread_id])
     }
 
-    var _onCommentReopened = function (thread_id) {
+    function _onCommentReopened(thread_id) {
       const thread = getThread(thread_id)
       if (thread == null) {
         return
@@ -830,13 +827,13 @@ export default App.controller(
       return $scope.$broadcast('comment:unresolve_thread', thread_id)
     }
 
-    var _onThreadDeleted = function (thread_id) {
+    function _onThreadDeleted(thread_id) {
       delete $scope.reviewPanel.resolvedThreadIds[thread_id]
       delete $scope.reviewPanel.commentThreads[thread_id]
       return $scope.$broadcast('comment:remove', thread_id)
     }
 
-    var _onCommentEdited = function (thread_id, comment_id, content) {
+    function _onCommentEdited(thread_id, comment_id, content) {
       const thread = getThread(thread_id)
       if (thread == null) {
         return
@@ -849,7 +846,7 @@ export default App.controller(
       return updateEntries()
     }
 
-    var _onCommentDeleted = function (thread_id, comment_id) {
+    function _onCommentDeleted(thread_id, comment_id) {
       const thread = getThread(thread_id)
       if (thread == null) {
         return
@@ -965,7 +962,7 @@ export default App.controller(
       return _setUserTCState(project.owner._id, newValue, isLocal)
     }
 
-    var _setGuestsTCState = function (newValue, isLocal) {
+    function _setGuestsTCState(newValue, isLocal) {
       if (isLocal == null) {
         isLocal = false
       }
@@ -1103,7 +1100,7 @@ export default App.controller(
 
     let _refreshingRangeUsers = false
     const _refreshedForUserIds = {}
-    var refreshChangeUsers = function (refresh_for_user_id) {
+    function refreshChangeUsers(refresh_for_user_id) {
       if (refresh_for_user_id != null) {
         if (_refreshedForUserIds[refresh_for_user_id] != null) {
           // We've already tried to refresh to get this user id, so stop it looping
@@ -1147,7 +1144,7 @@ export default App.controller(
     }
 
     let _threadsLoaded = false
-    var ensureThreadsAreLoaded = function () {
+    function ensureThreadsAreLoaded() {
       if (_threadsLoaded) {
         // We get any updates in real time so only need to load them once.
         return
@@ -1159,11 +1156,11 @@ export default App.controller(
         .then(function (response) {
           const threads = response.data
           $scope.reviewPanel.loadingThreads = false
-          for (var thread_id in $scope.reviewPanel.resolvedThreadIds) {
+          for (const thread_id in $scope.reviewPanel.resolvedThreadIds) {
             const _ = $scope.reviewPanel.resolvedThreadIds[thread_id]
             delete $scope.reviewPanel.resolvedThreadIds[thread_id]
           }
-          for (thread_id in threads) {
+          for (const thread_id in threads) {
             const thread = threads[thread_id]
             for (const comment of Array.from(thread.messages)) {
               formatComment(comment)
@@ -1179,13 +1176,13 @@ export default App.controller(
         })
     }
 
-    var formatComment = function (comment) {
+    function formatComment(comment) {
       comment.user = formatUser(comment.user)
       comment.timestamp = new Date(comment.timestamp)
       return comment
     }
 
-    var formatUser = function (user) {
+    function formatUser(user) {
       let isSelf, name
       const id =
         (user != null ? user._id : undefined) ||

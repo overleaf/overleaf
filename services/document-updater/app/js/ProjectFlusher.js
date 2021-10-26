@@ -22,7 +22,7 @@ const ProjectManager = require('./ProjectManager')
 const _ = require('lodash')
 const logger = require('@overleaf/logger')
 
-var ProjectFlusher = {
+const ProjectFlusher = {
   // iterate over keys asynchronously using redis scan (non-blocking)
   // handle all the cluster nodes or single redis server
   _getKeys(pattern, limit, callback) {
@@ -42,7 +42,7 @@ var ProjectFlusher = {
     const keySet = {} // use hash to avoid duplicate results
     const batchSize = limit != null ? Math.min(limit, 1000) : 1000
     // scan over all keys looking for pattern
-    var doIteration = (
+    const doIteration = (
       cb // avoid hitting redis too hard
     ) =>
       node.scan(

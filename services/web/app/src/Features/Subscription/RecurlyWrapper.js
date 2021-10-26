@@ -556,7 +556,7 @@ const RecurlyWrapper = {
   getPaginatedEndpoint(resource, queryParams, callback) {
     queryParams.per_page = queryParams.per_page || 200
     let allItems = []
-    var getPage = (cursor = null) => {
+    const getPage = (cursor = null) => {
       const opts = {
         url: resource,
         qs: queryParams,
@@ -950,7 +950,7 @@ const RecurlyWrapper = {
   },
 
   _parseXml(xml, callback) {
-    var convertDataTypes = function (data) {
+    function convertDataTypes(data) {
       let key, value
       if (data != null && data.$ != null) {
         if (data.$.nil === 'nil') {

@@ -615,7 +615,7 @@ App.controller(
         const errors = []
         const warnings = []
         for (const line of log.split('\n')) {
-          var m
+          let m
           if ((m = line.match(/^(\S+):(\d+):(\d+): (Error|Warning): (.*)/))) {
             const result = {
               file: m[1],

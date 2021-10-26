@@ -24,7 +24,6 @@
     // START of temporary overrides
     "array-callback-return": "off",
     "no-dupe-else-if": "off",
-    "no-var": "off",
     "no-empty": "off",
     "node/handle-callback-err": "off",
     "no-loss-of-precision": "off",

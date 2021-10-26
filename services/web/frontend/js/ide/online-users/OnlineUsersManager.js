@@ -92,7 +92,7 @@ export default OnlineUsersManager = (function () {
     refreshOnlineUsers() {
       this.$scope.onlineUsersArray = []
 
-      for (var client_id in this.$scope.onlineUsers) {
+      for (const client_id in this.$scope.onlineUsers) {
         const user = this.$scope.onlineUsers[client_id]
         if (user.doc_id != null) {
           user.doc = this.ide.fileTreeManager.findEntityById(user.doc_id)
@@ -120,7 +120,7 @@ export default OnlineUsersManager = (function () {
       this.$scope.onlineUsersCount = this.$scope.onlineUsersArray.length
 
       this.$scope.onlineUserCursorHighlights = {}
-      for (client_id in this.$scope.onlineUsers) {
+      for (const client_id in this.$scope.onlineUsers) {
         const client = this.$scope.onlineUsers[client_id]
         const { doc_id } = client
         if (doc_id == null || client.row == null || client.column == null) {

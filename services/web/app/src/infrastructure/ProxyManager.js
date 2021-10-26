@@ -20,7 +20,7 @@ module.exports = ProxyManager = {
   apply(publicApiRouter) {
     return (() => {
       const result = []
-      for (var proxyUrl in settings.proxyUrls) {
+      for (const proxyUrl in settings.proxyUrls) {
         const target = settings.proxyUrls[proxyUrl]
         result.push(
           (function (target) {
@@ -67,7 +67,7 @@ module.exports = ProxyManager = {
 
 // make a URL from a proxy target.
 // if the query is specified, set/replace the target's query with the given query
-var makeTargetUrl = function (target, req) {
+function makeTargetUrl(target, req) {
   const targetUrl = new URL(parseSettingUrl(target, req))
   if (req.query != null && Object.keys(req.query).length > 0) {
     targetUrl.search = new URLSearchParams(req.query).toString()
@@ -75,7 +75,7 @@ var makeTargetUrl = function (target, req) {
   return targetUrl.href
 }
 
-var parseSettingUrl = function (target, { params }) {
+function parseSettingUrl(target, { params }) {
   let path
   if (typeof target === 'string') {
     return target

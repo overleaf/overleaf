@@ -103,7 +103,7 @@ const compareMultiplePages = function (project_id, callback) {
   if (callback == null) {
     callback = function (error) {}
   }
-  var compareNext = function (page_no, callback) {
+  function compareNext(page_no, callback) {
     const path = `tmp/${project_id}-source-${page_no}.png`
     return fs.stat(fixturePath(path), (error, stat) => {
       if (error != null) {

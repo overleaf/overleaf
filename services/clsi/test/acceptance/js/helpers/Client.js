@@ -142,7 +142,7 @@ module.exports = Client = {
     let entities = fs.readdirSync(`${baseDirectory}/${directory}`)
     let rootResourcePath = 'main.tex'
     while (entities.length > 0) {
-      var entity = entities.pop()
+      const entity = entities.pop()
       const stat = fs.statSync(`${baseDirectory}/${directory}/${entity}`)
       if (stat.isDirectory()) {
         entities = entities.concat(

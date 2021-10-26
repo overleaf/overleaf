@@ -205,7 +205,7 @@ const UserGetter = {
   },
 }
 
-var decorateFullEmails = (
+const decorateFullEmails = (
   defaultEmail,
   emailsData,
   affiliationsData,

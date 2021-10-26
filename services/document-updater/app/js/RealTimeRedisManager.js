@@ -50,7 +50,7 @@ module.exports = RealTimeRedisManager = {
       }
       const updates = []
       for (jsonUpdate of Array.from(jsonUpdates)) {
-        var update
+        let update
         try {
           update = JSON.parse(jsonUpdate)
         } catch (e) {

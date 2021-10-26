@@ -89,7 +89,7 @@ describe('ProjectStructureMongoLock', function () {
         'renameEntity',
         'addFolder',
       ]
-      for (var methodName of Array.from(LOCKING_UPDATE_METHODS)) {
+      for (const methodName of Array.from(LOCKING_UPDATE_METHODS)) {
         it(`cannot call ProjectEntityMongoUpdateHandler.${methodName}`, function (done) {
           const method = ProjectEntityMongoUpdateHandler[methodName]
           const args = _.times(method.length - 2, _.constant(null))

@@ -228,7 +228,7 @@ moduleExport.transform = function (op, otherOp, side) {
   const [take, peek] = Array.from(makeTake(op))
 
   for (component of Array.from(otherOp)) {
-    var chunk, length
+    let chunk, length
     if (typeof component === 'number') {
       // Skip
       length = component
@@ -305,7 +305,7 @@ moduleExport.compose = function (op1, op2) {
   const [take, _] = Array.from(makeTake(op1))
 
   for (component of Array.from(op2)) {
-    var chunk, length
+    let chunk, length
     if (typeof component === 'number') {
       // Skip
       length = component

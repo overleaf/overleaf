@@ -93,7 +93,7 @@ module.exports = RedisManager = {
     let cursor = 0 // redis iterator
     const keySet = {} // use hash to avoid duplicate results
     // scan over all keys looking for pattern
-    var doIteration = cb =>
+    const doIteration = cb =>
       node.scan(
         cursor,
         'MATCH',

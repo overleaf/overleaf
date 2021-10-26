@@ -264,7 +264,7 @@ json.normalize = function (op) {
 // hax, copied from test/types/json. Apparently this is still the fastest way to deep clone an object, assuming
 // we have browser support for JSON.
 // http://jsperf.com/cloning-an-object/12
-var clone = o => JSON.parse(JSON.stringify(o))
+const clone = o => JSON.parse(JSON.stringify(o))
 
 json.commonPath = function (p1, p2) {
   p1 = p1.slice()

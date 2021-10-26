@@ -99,7 +99,7 @@ type.api = {
       const docPos = { index: 0, offset: 0 }
 
       for (const component of Array.from(op)) {
-        var part, remainder
+        let part, remainder
         if (typeof component === 'number') {
           // Skip
           remainder = component

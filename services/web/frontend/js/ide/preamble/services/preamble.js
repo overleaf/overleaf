@@ -12,7 +12,7 @@
 import App from '../../../base'
 
 export default App.factory('preamble', function (ide) {
-  var Preamble = {
+  const Preamble = {
     getPreambleText() {
       const text = ide.editorManager.getCurrentDocValue().slice(0, 5000)
       const preamble =

@@ -222,7 +222,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       }
     }
 
-    var scrollAce = scrollTop =>
+    const scrollAce = scrollTop =>
       scope.reviewPanelEventsBridge.emit('externalScroll', scrollTop)
 
     scope.reviewPanelEventsBridge.on('aceScroll', scrollPanel)

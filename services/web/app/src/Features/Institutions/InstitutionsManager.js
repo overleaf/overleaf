@@ -254,7 +254,7 @@ const InstitutionsManager = {
   },
 }
 
-var fetchInstitutionAndAffiliations = (institutionId, callback) =>
+const fetchInstitutionAndAffiliations = (institutionId, callback) =>
   async.waterfall(
     [
       cb =>
@@ -271,12 +271,12 @@ var fetchInstitutionAndAffiliations = (institutionId, callback) =>
     callback
   )
 
-var refreshFeatures = function (affiliation, callback) {
+function refreshFeatures(affiliation, callback) {
   const userId = ObjectId(affiliation.user_id)
   FeaturesUpdater.refreshFeatures(userId, 'refresh-institution-users', callback)
 }
 
-var refreshFeaturesAndNotify = function (affiliation, callback) {
+function refreshFeaturesAndNotify(affiliation, callback) {
   const userId = ObjectId(affiliation.user_id)
   async.waterfall(
     [
@@ -297,7 +297,7 @@ var refreshFeaturesAndNotify = function (affiliation, callback) {
   )
 }
 
-var getUserInfo = (userId, callback) =>
+const getUserInfo = (userId, callback) =>
   async.waterfall(
     [
       cb => UserGetter.getUser(userId, cb),
@@ -309,7 +309,13 @@ var getUserInfo = (userId, callback) =>
     callback
   )
 
-var notifyUser = (user, affiliation, subscription, featuresChanged, callback) =>
+const notifyUser = (
+  user,
+  affiliation,
+  subscription,
+  featuresChanged,
+  callback
+) =>
   async.parallel(
     [
       function (cb) {

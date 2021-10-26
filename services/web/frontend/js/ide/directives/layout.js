@@ -135,7 +135,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
         }
 
         // Someone moved the resizer
-        var onInternalResize = function () {
+        function onInternalResize() {
           state = element.layout().readState()
           scope.$broadcast(`layout:${name}:resize`, state)
           repositionControls()
@@ -212,7 +212,7 @@ ng-click=\"handleClick()\">\
           element.append(customTogglerEl)
         }
 
-        var onPaneOpen = function (pane) {
+        function onPaneOpen(pane) {
           if (!hasCustomToggler && pane !== customTogglerPane) {
             return
           }
@@ -221,7 +221,7 @@ ng-click=\"handleClick()\">\
             .$applyAsync(() => (customTogglerEl.scope().isOpen = true))
         }
 
-        var onPaneClose = function (pane) {
+        function onPaneClose(pane) {
           if (!hasCustomToggler && pane !== customTogglerPane) {
             return
           }

@@ -91,7 +91,7 @@ const UserMembershipHandler = {
 UserMembershipHandler.promises = promisifyAll(UserMembershipHandler)
 module.exports = UserMembershipHandler
 
-var getPopulatedListOfMembers = function (entity, attributes, callback) {
+function getPopulatedListOfMembers(entity, attributes, callback) {
   if (callback == null) {
     callback = function (error, users) {}
   }
@@ -110,7 +110,7 @@ var getPopulatedListOfMembers = function (entity, attributes, callback) {
   return async.map(userObjects, UserMembershipViewModel.buildAsync, callback)
 }
 
-var addUserToEntity = function (entity, attribute, user, callback) {
+function addUserToEntity(entity, attribute, user, callback) {
   if (callback == null) {
     callback = function (error) {}
   }
@@ -119,7 +119,7 @@ var addUserToEntity = function (entity, attribute, user, callback) {
   return entity.updateOne({ $addToSet: fieldUpdate }, callback)
 }
 
-var removeUserFromEntity = function (entity, attribute, userId, callback) {
+function removeUserFromEntity(entity, attribute, userId, callback) {
   if (callback == null) {
     callback = function (error) {}
   }
@@ -128,7 +128,7 @@ var removeUserFromEntity = function (entity, attribute, userId, callback) {
   return entity.updateOne({ $pull: fieldUpdate }, callback)
 }
 
-var buildEntityQuery = function (entityId, entityConfig, loggedInUser) {
+function buildEntityQuery(entityId, entityConfig, loggedInUser) {
   if (ObjectId.isValid(entityId.toString())) {
     entityId = ObjectId(entityId)
   }

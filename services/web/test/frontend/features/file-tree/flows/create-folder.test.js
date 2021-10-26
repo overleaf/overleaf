@@ -245,7 +245,7 @@ describe('FileTree Create Folder Flow', function () {
       { socket: new MockedSocket() }
     )
 
-    var newFolderName = 'existingFile'
+    let newFolderName = 'existingFile'
 
     await fireCreateFolder(newFolderName)
 

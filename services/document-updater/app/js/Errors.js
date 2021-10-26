@@ -5,7 +5,7 @@
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 let Errors
-var NotFoundError = function (message) {
+function NotFoundError(message) {
   const error = new Error(message)
   error.name = 'NotFoundError'
   error.__proto__ = NotFoundError.prototype
@@ -13,7 +13,7 @@ var NotFoundError = function (message) {
 }
 NotFoundError.prototype.__proto__ = Error.prototype
 
-var OpRangeNotAvailableError = function (message) {
+function OpRangeNotAvailableError(message) {
   const error = new Error(message)
   error.name = 'OpRangeNotAvailableError'
   error.__proto__ = OpRangeNotAvailableError.prototype
@@ -21,7 +21,7 @@ var OpRangeNotAvailableError = function (message) {
 }
 OpRangeNotAvailableError.prototype.__proto__ = Error.prototype
 
-var ProjectStateChangedError = function (message) {
+function ProjectStateChangedError(message) {
   const error = new Error(message)
   error.name = 'ProjectStateChangedError'
   error.__proto__ = ProjectStateChangedError.prototype
@@ -29,7 +29,7 @@ var ProjectStateChangedError = function (message) {
 }
 ProjectStateChangedError.prototype.__proto__ = Error.prototype
 
-var DeleteMismatchError = function (message) {
+function DeleteMismatchError(message) {
   const error = new Error(message)
   error.name = 'DeleteMismatchError'
   error.__proto__ = DeleteMismatchError.prototype

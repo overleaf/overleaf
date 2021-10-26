@@ -40,7 +40,7 @@ App.controller('ProjectPageController', function (
     newVal => ($scope.nUntagged = newVal)
   )
 
-  var recalculateProjectListHeight = function () {
+  function recalculateProjectListHeight() {
     const $projListCard = $('.project-list-card')
     if (!$projListCard || !$projListCard.offset()) return
 
@@ -52,17 +52,17 @@ App.controller('ProjectPageController', function (
   }
 
   function defaultComparator(v1, v2) {
-    var result = 0
-    var type1 = v1.type
-    var type2 = v2.type
+    let result = 0
+    const type1 = v1.type
+    const type2 = v2.type
 
     if ($scope.predicate === 'ownerName') {
       return
     }
 
     if (type1 === type2) {
-      var value1 = v1.value
-      var value2 = v2.value
+      let value1 = v1.value
+      let value2 = v2.value
 
       if (type1 === 'string') {
         // Compare strings case-insensitively

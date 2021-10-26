@@ -557,7 +557,7 @@ exports.XMLHttpRequest = function () {
    *
    * @param int state New state
    */
-  var setState = function (state) {
+  function setState(state) {
     if (self.readyState !== state) {
       self.readyState = state
 

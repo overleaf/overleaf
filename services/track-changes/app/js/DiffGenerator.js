@@ -13,7 +13,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let DiffGenerator
-var ConsistencyError = function (message) {
+function ConsistencyError(message) {
   const error = new Error(message)
   error.name = 'ConsistencyError'
   error.__proto__ = ConsistencyError.prototype

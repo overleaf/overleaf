@@ -165,7 +165,7 @@ module.exports = UpdateManager = {
       return _callback(error)
     }
 
-    var profile = new Profiler('applyUpdate', { project_id, doc_id })
+    const profile = new Profiler('applyUpdate', { project_id, doc_id })
     UpdateManager._sanitizeUpdate(update)
     profile.log('sanitizeUpdate', { sync: true })
     return DocumentManager.getDoc(

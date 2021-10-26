@@ -839,7 +839,7 @@ export default HistoryManager = (function () {
       let text = ''
       const iterable = diff || []
       for (let i = 0; i < iterable.length; i++) {
-        var endColumn, endRow
+        let endColumn, endRow
         const entry = iterable[i]
         let content = entry.u || entry.i || entry.d
         if (!content) {

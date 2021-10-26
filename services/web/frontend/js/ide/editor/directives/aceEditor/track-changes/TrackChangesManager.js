@@ -203,7 +203,7 @@ class TrackChangesManager {
 
     let updateMarkers = false
 
-    for (var id in dirty.change.added) {
+    for (const id in dirty.change.added) {
       change = dirty.change.added[id]
       if (change.op.i != null) {
         this.adapter.onInsertAdded(change)
@@ -211,7 +211,7 @@ class TrackChangesManager {
         this.adapter.onDeleteAdded(change)
       }
     }
-    for (id in dirty.change.removed) {
+    for (const id in dirty.change.removed) {
       change = dirty.change.removed[id]
       if (change.op.i != null) {
         this.adapter.onInsertRemoved(change)
@@ -219,25 +219,25 @@ class TrackChangesManager {
         this.adapter.onDeleteRemoved(change)
       }
     }
-    for (id in dirty.change.moved) {
+    for (const id in dirty.change.moved) {
       change = dirty.change.moved[id]
       updateMarkers = true
       this.adapter.onChangeMoved(change)
     }
 
-    for (id in dirty.comment.added) {
+    for (const id in dirty.comment.added) {
       comment = dirty.comment.added[id]
       if (!this.isCommentResolved(comment)) {
         this.adapter.onCommentAdded(comment)
       }
     }
-    for (id in dirty.comment.removed) {
+    for (const id in dirty.comment.removed) {
       comment = dirty.comment.removed[id]
       if (!this.isCommentResolved(comment)) {
         this.adapter.onCommentRemoved(comment)
       }
     }
-    for (id in dirty.comment.moved) {
+    for (const id in dirty.comment.moved) {
       comment = dirty.comment.moved[id]
       if (this.adapter.onCommentMoved && !this.isCommentResolved(comment)) {
         updateMarkers = true
@@ -487,13 +487,13 @@ class TrackChangesManager {
     // Make a copy of session.getMarkers() so we can modify it
     const markers = {}
     const object = session.getMarkers()
-    for (var marker_id in object) {
+    for (const marker_id in object) {
       marker = object[marker_id]
       markers[marker_id] = marker
     }
 
     const expected_markers = []
-    for (var change of Array.from(this.rangesTracker.changes)) {
+    for (const change of Array.from(this.rangesTracker.changes)) {
       if (this.adapter.changeIdToMarkerIdMap[change.id] != null) {
         ;({ op } = change)
         ;({
@@ -542,7 +542,7 @@ class TrackChangesManager {
       }
     }
 
-    for ({ marker_id, start, end } of Array.from(expected_markers)) {
+    for (const { marker_id, start, end } of Array.from(expected_markers)) {
       marker = markers[marker_id]
       delete markers[marker_id]
       if (
@@ -552,7 +552,6 @@ class TrackChangesManager {
         marker.range.end.column !== end.column
       ) {
         console.error("Change doesn't match marker anymore", {
-          change,
           marker,
           start,
           end,
@@ -562,7 +561,7 @@ class TrackChangesManager {
 
     return (() => {
       const result = []
-      for (marker_id in markers) {
+      for (const marker_id in markers) {
         marker = markers[marker_id]
         if (/track-changes/.test(marker.clazz)) {
           result.push(console.error('Orphaned ace marker', marker))

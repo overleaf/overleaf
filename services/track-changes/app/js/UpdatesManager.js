@@ -142,7 +142,7 @@ module.exports = UpdatesManager = {
         // some old large ops in redis need to be rejected, they predate
         // the size limit that now prevents them going through the system
         const REJECT_LARGE_OP_SIZE = 4 * 1024 * 1024
-        for (var rawUpdate of Array.from(rawUpdates)) {
+        for (const rawUpdate of Array.from(rawUpdates)) {
           const opSizes = (() => {
             const result = []
             for (op of Array.from(
@@ -801,7 +801,7 @@ module.exports = UpdatesManager = {
     const summarizedUpdates = existingSummarizedUpdates.slice()
     let previousUpdateWasBigDelete = false
     for (const update of Array.from(updates)) {
-      var doc_id
+      let doc_id
       const earliestUpdate = summarizedUpdates[summarizedUpdates.length - 1]
       let shouldConcat = false
 

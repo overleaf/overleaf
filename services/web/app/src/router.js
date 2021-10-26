@@ -1067,7 +1067,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
         ClsiCookieManager.clearServerId(projectId)
       }) // force every compile to a new server
       // set a timeout
-      var handler = setTimeout(function () {
+      let handler = setTimeout(function () {
         sendRes(500, 'Compiler timed out')
         handler = null
       }, 10000)

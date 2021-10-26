@@ -15,7 +15,7 @@ import 'ace/ace'
 import 'ace/ext-language_tools'
 const { Range } = ace.require('ace/range')
 
-var Helpers = {
+const Helpers = {
   getLastCommandFragment(lineUpToCursor) {
     let index
     if ((index = Helpers.getLastCommandFragmentIndex(lineUpToCursor)) > -1) {

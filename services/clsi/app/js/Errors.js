@@ -7,7 +7,7 @@
 const OError = require('@overleaf/o-error')
 
 let Errors
-var NotFoundError = function (message) {
+function NotFoundError(message) {
   const error = new Error(message)
   error.name = 'NotFoundError'
   error.__proto__ = NotFoundError.prototype
@@ -15,7 +15,7 @@ var NotFoundError = function (message) {
 }
 NotFoundError.prototype.__proto__ = Error.prototype
 
-var FilesOutOfSyncError = function (message) {
+function FilesOutOfSyncError(message) {
   const error = new Error(message)
   error.name = 'FilesOutOfSyncError'
   error.__proto__ = FilesOutOfSyncError.prototype
@@ -23,7 +23,7 @@ var FilesOutOfSyncError = function (message) {
 }
 FilesOutOfSyncError.prototype.__proto__ = Error.prototype
 
-var AlreadyCompilingError = function (message) {
+function AlreadyCompilingError(message) {
   const error = new Error(message)
   error.name = 'AlreadyCompilingError'
   error.__proto__ = AlreadyCompilingError.prototype

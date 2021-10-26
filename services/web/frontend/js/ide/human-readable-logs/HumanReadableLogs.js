@@ -25,7 +25,7 @@ export default {
       const ruleDetails = _getRule(entry.message)
 
       if (ruleDetails != null) {
-        var type
+        let type
         if (ruleDetails.ruleId != null) {
           entry.ruleId = ruleDetails.ruleId
         } else if (ruleDetails.regexToMatch != null) {

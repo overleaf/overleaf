@@ -24,15 +24,15 @@ export default App.directive('infiniteScroll', () => ({
       }
     }
 
-    var atTopOfListView = () => element.scrollTop() < 30
+    const atTopOfListView = () => element.scrollTop() < 30
 
-    var atBottomOfListView = () =>
+    const atBottomOfListView = () =>
       element.scrollTop() + element.height() >= innerElement.height() - 30
 
     const listShorterThanContainer = () =>
       element.height() > innerElement.height()
 
-    var loadUntilFull = function () {
+    function loadUntilFull() {
       if (
         (listShorterThanContainer() || atEndOfListView()) &&
         !scope.$eval(attrs.infiniteScrollDisabled)

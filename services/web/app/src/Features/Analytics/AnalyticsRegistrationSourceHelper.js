@@ -1,4 +1,4 @@
-var RefererParser = require('referer-parser')
+const RefererParser = require('referer-parser')
 const { URL } = require('url')
 const AnalyticsManager = require('./AnalyticsManager')
 
@@ -18,7 +18,7 @@ const UTM_KEYS = [
 ]
 
 function parseUtm(query) {
-  var utmValues = {}
+  const utmValues = {}
   for (const utmKey of UTM_KEYS) {
     if (query[utmKey]) {
       utmValues[utmKey] = query[utmKey]

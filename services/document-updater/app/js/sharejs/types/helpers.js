@@ -46,7 +46,7 @@ exports._bt = bootstrapTransform = function (
 
           let k = 0
           while (k < leftOp.length) {
-            var l
+            let l
             const nextC = []
             transformComponentX(leftOp[k], rightComponent, newLeftOp, nextC)
             k++

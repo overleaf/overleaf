@@ -31,7 +31,7 @@ const ensureRecurlyIsSetup = _.once(() => {
 
 App.controller('MetricsEmailController', function ($scope, $http) {
   $scope.institutionEmailSubscription = function (institutionId) {
-    var inst = _.find(window.managedInstitutions, function (institution) {
+    const inst = _.find(window.managedInstitutions, function (institution) {
       return institution.v1Id === parseInt(institutionId)
     })
     if (inst.metricsEmail.optedOutUserIds.includes(window.user_id)) {

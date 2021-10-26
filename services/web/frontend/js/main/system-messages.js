@@ -14,7 +14,7 @@ const MESSAGE_POLL_INTERVAL = 15 * 60 * 1000
 // Controller for messages (array)
 App.controller('SystemMessagesController', ($http, $scope) => {
   $scope.messages = []
-  var pollSystemMessages = function () {
+  function pollSystemMessages() {
     // Ignore polling if tab is hidden or browser is offline
     if (document.hidden || !navigator.onLine) {
       return

@@ -40,8 +40,9 @@ const historyFileEntityController = function ($scope, $element, $attrs) {
     const path1Parts = path1.split('/')
     const path2Parts = path2.split('/')
     const maxIterations = Math.min(path1Parts.length, path2Parts.length) - 1
+    let commonPartIndex
     for (
-      var commonPartIndex = 0;
+      commonPartIndex = 0;
       commonPartIndex < maxIterations;
       commonPartIndex++
     ) {
@@ -61,7 +62,7 @@ const historyFileEntityController = function ($scope, $element, $attrs) {
 
   const _handleFileClick = () =>
     ctrl.historyFileTreeController.handleEntityClick(ctrl.fileEntity)
-  var _getFolderIcon = function () {
+  function _getFolderIcon() {
     if (ctrl.isOpen) {
       return 'fa-folder-open'
     } else {

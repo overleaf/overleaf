@@ -58,7 +58,7 @@ describe('TokenAccessHandler', function () {
         '': null,
         abc123def: null,
       }
-      for (var token of Object.keys(specs)) {
+      for (const token of Object.keys(specs)) {
         expect(this.TokenAccessHandler.getTokenType(token)).to.equal(
           specs[token]
         )

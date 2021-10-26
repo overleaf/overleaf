@@ -36,7 +36,7 @@ module.exports = DispatchManager = {
     }
 
     const client = redis.createClient(Settings.redis.documentupdater)
-    var worker = {
+    const worker = {
       client,
       _waitForUpdateThenDispatchWorker(callback) {
         if (callback == null) {

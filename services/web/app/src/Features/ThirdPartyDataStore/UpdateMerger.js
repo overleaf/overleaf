@@ -59,7 +59,7 @@ module.exports = UpdateMerger = {
         if (err != null) {
           return callback(err)
         }
-        var existingFileType = null
+        let existingFileType = null
         if (_.some(files, f => f.path === path)) {
           existingFileType = 'file'
         }

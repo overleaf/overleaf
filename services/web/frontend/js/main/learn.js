@@ -60,7 +60,7 @@ App.controller(
       return result
     }
 
-    var updateHits = (hits, hitsTotal = 0) => {
+    const updateHits = (hits, hitsTotal = 0) => {
       $scope.safeApply(() => {
         $scope.hits = hits
         $scope.hits_total = hitsTotal

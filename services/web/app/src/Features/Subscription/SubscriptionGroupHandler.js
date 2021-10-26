@@ -106,7 +106,7 @@ const SubscriptionGroupHandler = {
   },
 }
 
-var replaceInArray = function (model, property, oldValue, newValue, callback) {
+function replaceInArray(model, property, oldValue, newValue, callback) {
   // Mongo won't let us pull and addToSet in the same query, so do it in
   // two. Note we need to add first, since the query is based on the old user.
   const query = {}

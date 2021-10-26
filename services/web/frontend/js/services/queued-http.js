@@ -16,7 +16,7 @@ export default App.factory('queuedHttp', function ($http, $q) {
   const pendingRequests = []
   let inflight = false
 
-  var processPendingRequests = function () {
+  function processPendingRequests() {
     if (inflight) {
       return
     }

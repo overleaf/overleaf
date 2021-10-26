@@ -85,7 +85,7 @@ module.exports = DeleteQueueManager = {
         }
       )
 
-    var flushNextProject = function () {
+    function flushNextProject() {
       const now = Date.now()
       if (now - startTime > options.timeout) {
         logger.debug('hit time limit on flushing old projects')
@@ -126,7 +126,7 @@ module.exports = DeleteQueueManager = {
   startBackgroundFlush() {
     const SHORT_DELAY = 10
     const LONG_DELAY = 1000
-    var doFlush = function () {
+    function doFlush() {
       if (Settings.shuttingDown) {
         logger.info('discontinuing background flush due to shutdown')
         return

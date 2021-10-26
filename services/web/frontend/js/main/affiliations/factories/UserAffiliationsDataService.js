@@ -528,7 +528,7 @@ App.factory('UserAffiliationsDataService', function ($http, $q) {
       _csrf: window.csrfToken,
     })
 
-  var isDomainBlacklisted = domain => domain.toLowerCase() in domainsBlackList
+  const isDomainBlacklisted = domain => domain.toLowerCase() in domainsBlackList
 
   return {
     getCountries,

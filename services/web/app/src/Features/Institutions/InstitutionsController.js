@@ -17,7 +17,7 @@ module.exports = {
   },
 }
 
-var affiliateUsers = function (hostname, callback) {
+function affiliateUsers(hostname, callback) {
   const reversedHostname = hostname.trim().split('').reverse().join('')
   UserGetter.getUsersByHostname(hostname, { _id: 1 }, function (error, users) {
     if (error) {
@@ -40,11 +40,7 @@ var affiliateUsers = function (hostname, callback) {
   })
 }
 
-var affiliateUserByReversedHostname = function (
-  user,
-  reversedHostname,
-  callback
-) {
+function affiliateUserByReversedHostname(user, reversedHostname, callback) {
   const matchingEmails = user.emails.filter(
     email => email.reversedHostname === reversedHostname
   )

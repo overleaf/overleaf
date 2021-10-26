@@ -91,7 +91,7 @@ function PreviewLogEntryHeader({
       </Tooltip>
     ) : null
 
-  var headerTitleText = logType ? `${logType} ${headerTitle}` : headerTitle
+  const headerTitleText = logType ? `${logType} ${headerTitle}` : headerTitle
 
   return (
     <header className={logEntryHeaderClasses}>

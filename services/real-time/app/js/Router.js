@@ -43,7 +43,7 @@ module.exports = Router = {
     attrs.method = method
     if (Joi.isError(error)) {
       logger.info(attrs, 'validation error')
-      var message = 'invalid'
+      let message = 'invalid'
       try {
         message = error.details[0].message
       } catch (e) {

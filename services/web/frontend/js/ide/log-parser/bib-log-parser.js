@@ -28,9 +28,9 @@ const parserReducer = function (accumulator, parser) {
 
       // Too many log entries can cause browser crashes
       // Construct a too many files error from the last match
-      var maxErrors = 100
+      const maxErrors = 100
       if (iterationCount >= maxErrors) {
-        var level = newEntry.level + 's'
+        const level = newEntry.level + 's'
         newEntry.message = [
           'Over',
           maxErrors,

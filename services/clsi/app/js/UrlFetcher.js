@@ -50,7 +50,7 @@ module.exports = UrlFetcher = {
     ) {
       url = `${settings.filestoreDomainOveride}${u.pathname}${u.search}`
     }
-    var timeoutHandler = setTimeout(
+    let timeoutHandler = setTimeout(
       function () {
         timeoutHandler = null
         logger.error({ url, filePath }, 'Timed out downloading file to cache')

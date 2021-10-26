@@ -39,7 +39,7 @@
 // would be represented by a document snapshot of ['Hello ', 5, 'world']
 
 let append, appendDoc, takeDoc
-var type = {
+const type = {
   name: 'text-tp2',
   tp2: true,
   create() {
@@ -183,7 +183,7 @@ type.apply = function (doc, op) {
   const position = { index: 0, offset: 0 }
 
   for (const component of Array.from(op)) {
-    var part, remainder
+    let part, remainder
     if (typeof component === 'number') {
       remainder = component
       while (remainder > 0) {
@@ -337,7 +337,7 @@ const transformer = function (op, otherOp, goForwards, side) {
   const [take, peek] = Array.from(makeTake(op))
 
   for (component of Array.from(otherOp)) {
-    var chunk
+    let chunk
     let length = componentLength(component)
 
     if (component.i !== undefined) {
@@ -431,7 +431,7 @@ type.compose = function (op1, op2) {
   const [take, _] = Array.from(makeTake(op1))
 
   for (component of Array.from(op2)) {
-    var chunk, length
+    let chunk, length
     if (typeof component === 'number') {
       // Skip
       // Just copy from op1.

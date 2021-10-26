@@ -27,7 +27,7 @@ const SystemMessageManager = require('../SystemMessages/SystemMessageManager')
 
 const oneMinInMs = 60 * 1000
 
-var updateOpenConnetionsMetrics = function () {
+function updateOpenConnetionsMetrics() {
   metrics.gauge(
     'open_connections.socketio',
     __guard__(

@@ -62,7 +62,7 @@ App.controller('HistoryListController', function ($scope, $modal, ide) {
     return (() => {
       const result = []
       for (const update of Array.from($scope.history.updates)) {
-        var inSelection
+        let inSelection
         if (update.selectedTo) {
           inSelection = true
           beforeSelection = false
@@ -91,7 +91,7 @@ App.controller('HistoryListController', function ($scope, $modal, ide) {
     let inHoverSelection
     let hoverSelectedFrom = false
     let hoverSelectedTo = false
-    for (var update of Array.from($scope.history.updates)) {
+    for (const update of Array.from($scope.history.updates)) {
       // Figure out whether the to or from selector is hovered over
       if (update.hoverSelectedFrom) {
         hoverSelectedFrom = true
@@ -104,7 +104,7 @@ App.controller('HistoryListController', function ($scope, $modal, ide) {
     if (hoverSelectedFrom) {
       // We want to 'hover select' everything between hoverSelectedFrom and selectedTo
       inHoverSelection = false
-      for (update of Array.from($scope.history.updates)) {
+      for (const update of Array.from($scope.history.updates)) {
         if (update.selectedTo) {
           update.hoverSelectedTo = true
           inHoverSelection = true
@@ -120,7 +120,7 @@ App.controller('HistoryListController', function ($scope, $modal, ide) {
       inHoverSelection = false
       return (() => {
         const result = []
-        for (update of Array.from($scope.history.updates)) {
+        for (const update of Array.from($scope.history.updates)) {
           if (update.hoverSelectedTo) {
             inHoverSelection = true
           }

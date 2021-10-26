@@ -29,7 +29,7 @@ export default App.controller(
     const MAX_UNSAVED_SECONDS = 15 // lock the editor after this time if unsaved
 
     $scope.docSavingStatus = {}
-    var pollSavedStatus = function () {
+    function pollSavedStatus() {
       let t
       const oldStatus = $scope.docSavingStatus
       const oldUnsavedCount = $scope.docSavingStatusCount

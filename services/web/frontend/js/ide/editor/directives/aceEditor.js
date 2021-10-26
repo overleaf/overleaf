@@ -450,7 +450,7 @@ App.directive(
           return setScrollMargins(marginTop, marginBottom)
         })
 
-        var setScrollMargins = function (marginTop, marginBottom) {
+        function setScrollMargins(marginTop, marginBottom) {
           let marginChanged = false
           if (editor.renderer.scrollMargin.top !== marginTop) {
             editor.renderer.scrollMargin.top = marginTop
@@ -744,7 +744,7 @@ App.directive(
           scope.$broadcast('editorInit')
         )
 
-        var attachToAce = function (sharejs_doc) {
+        function attachToAce(sharejs_doc) {
           let mode
           const lines = sharejs_doc.getSnapshot().split('\n')
           let session = editor.getSession()
@@ -862,7 +862,7 @@ App.directive(
           return editor.focus()
         }
 
-        var detachFromAce = function (sharejs_doc) {
+        function detachFromAce(sharejs_doc) {
           tearDownSpellCheck()
           tearDownTrackChanges()
           tearDownUndo()

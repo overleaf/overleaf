@@ -70,8 +70,8 @@ export default App.directive('resolvedCommentsDropdown', () => ({
 
       return (() => {
         const result = []
-        for (var docId in scope.entries) {
-          var docEntries = scope.entries[docId]
+        for (const docId in scope.entries) {
+          const docEntries = scope.entries[docId]
           result.push(
             (() => {
               const result1 = []

@@ -217,7 +217,7 @@ export default App.controller(
       return _getUserEmails()
     }
 
-    var _resetAffiliationToChange = () =>
+    const _resetAffiliationToChange = () =>
       ($scope.affiliationToChange = {
         email: '',
         university: null,
@@ -225,7 +225,7 @@ export default App.controller(
         department: null,
       })
 
-    var _resetNewAffiliation = () =>
+    const _resetNewAffiliation = () =>
       ($scope.newAffiliation = {
         email: '',
         country: null,
@@ -234,26 +234,26 @@ export default App.controller(
         department: null,
       })
 
-    var _resetAddingEmail = function () {
+    function _resetAddingEmail() {
       $scope.ui.showAddEmailUI = false
       $scope.ui.isValidEmail = false
       $scope.ui.isBlacklistedEmail = false
       $scope.ui.showManualUniversitySelectionUI = false
     }
 
-    var _resetAffiliationSuggestion = () => {
+    const _resetAffiliationSuggestion = () => {
       $scope.newAffiliation = {
         email: $scope.newAffiliation.email,
       }
     }
 
-    var _resetMakingRequestType = function () {
+    function _resetMakingRequestType() {
       $scope.ui.isLoadingEmails = false
       $scope.ui.isProcessing = false
       $scope.ui.isResendingConfirmation = false
     }
 
-    var _reset = function () {
+    function _reset() {
       $scope.ui = {
         hasError: false,
         errorMessage: '',
@@ -268,7 +268,7 @@ export default App.controller(
     }
     _reset()
 
-    var _monitorRequest = function (promise) {
+    function _monitorRequest(promise) {
       $scope.ui.hasError = false
       $scope.ui.isMakingRequest = true
       promise
@@ -296,7 +296,7 @@ export default App.controller(
     }
 
     // Populates the emails table
-    var _getUserEmails = function () {
+    function _getUserEmails() {
       _resetMakingRequestType()
       $scope.ui.isLoadingEmails = true
       _monitorRequest(

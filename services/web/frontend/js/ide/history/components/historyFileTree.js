@@ -23,8 +23,8 @@ const historyFileTreeController = function ($scope, $element, $attrs) {
     const filePathParts = fileObject.pathname.split('/')
     let currentFileTreeLocation = currentFileTree
     for (let index = 0; index < filePathParts.length; index++) {
-      var fileTreeEntity
-      var pathPart = filePathParts[index]
+      let fileTreeEntity
+      const pathPart = filePathParts[index]
       const isFile = index === filePathParts.length - 1
       if (isFile) {
         fileTreeEntity = _.clone(fileObject)

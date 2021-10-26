@@ -15,10 +15,6 @@
     }
   },
   "rules": {
-    // Disable some rules after upgrading ESLint
-    // TODO: re-enable and fix
-    "no-var": "off",
-
     // do not allow importing of implicit dependencies.
     "import/no-extraneous-dependencies": "error"
   },

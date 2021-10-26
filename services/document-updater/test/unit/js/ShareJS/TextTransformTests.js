@@ -350,7 +350,7 @@ describe('ShareJS text type', function () {
         asc1 ? p <= end1 : p >= end1;
         asc1 ? p++ : p--
       ) {
-        var asc2, end2
+        let asc2, end2
         for (
           length = 1, end2 = SNAPSHOT.length - p, asc2 = end2 >= 1;
           asc2 ? length <= end2 : length >= end2;
@@ -364,7 +364,7 @@ describe('ShareJS text type', function () {
         asc3 ? p <= end3 : p >= end3;
         asc3 ? p++ : p--
       ) {
-        var asc4, end4
+        let asc4, end4
         for (
           length = 1, end4 = SNAPSHOT.length - p, asc4 = end4 >= 1;
           asc4 ? length <= end4 : length >= end4;
@@ -376,7 +376,7 @@ describe('ShareJS text type', function () {
 
       return (() => {
         const result = []
-        for (var op1 of Array.from(OPS)) {
+        for (const op1 of Array.from(OPS)) {
           result.push(
             (() => {
               const result1 = []

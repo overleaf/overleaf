@@ -360,7 +360,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return scope.document.renderPages(pages)
     }
 
-    var getVisiblePages = function () {
+    function getVisiblePages() {
       const top = element[0].scrollTop
       const bottom = top + element[0].clientHeight
       const visiblePages = _.filter(scope.pages, function (page) {
@@ -376,7 +376,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return visiblePages
     }
 
-    var getExtraPages = function (visiblePages) {
+    function getExtraPages(visiblePages) {
       const extra = []
       if (visiblePages.length > 0) {
         const firstVisiblePage = visiblePages[0].pageNum
@@ -417,7 +417,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
     }
 
     let spinnerTimer = null
-    var doRescale = function (scale) {
+    function doRescale(scale) {
       // console.log 'doRescale', scale
       if (scale == null) {
         return
@@ -455,8 +455,8 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       })
     }
 
-    var elementTimer = null
-    var updateLayout = function () {
+    let elementTimer = null
+    function updateLayout() {
       // if element is zero-sized keep checking until it is ready
       // console.log 'checking element ready', element.height(), element.width()
       if (element.height() === 0 || element.width() === 0) {
@@ -477,7 +477,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       }
     }
 
-    var layoutTimer = null
+    let layoutTimer = null
     const queueLayout = function () {
       // console.log 'call to queue layout'
       if (layoutTimer != null) {
@@ -571,7 +571,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
 
     let mouseUpHandler = null // keep track of the handler to avoid adding multiple times
 
-    var _setMouseUpHandler = function () {
+    function _setMouseUpHandler() {
       if (mouseUpHandler == null) {
         return (mouseUpHandler = $(document.body).one(
           'mouseup',
@@ -580,7 +580,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       }
     }
 
-    var _handleSelectionMouseUp = function () {
+    function _handleSelectionMouseUp() {
       mouseUpHandler = null // reset handler, has now fired
       window.setTimeout(function () {
         const removedClass = _removeClassIfNoSelection()
@@ -592,7 +592,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return true
     }
 
-    var _removeClassIfNoSelection = function () {
+    function _removeClassIfNoSelection() {
       if (_hasSelection()) {
         return false // didn't remove the text layer
       } else {
@@ -601,7 +601,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       }
     }
 
-    var _hasSelection = function () {
+    function _hasSelection() {
       const selection =
         typeof window.getSelection === 'function'
           ? window.getSelection()
@@ -616,7 +616,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       )
     }
 
-    var _isSelectionWithinPDF = function (selection) {
+    function _isSelectionWithinPDF(selection) {
       if (selection.rangeCount === 0) {
         return false
       }
@@ -642,7 +642,7 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       return (scope.scrollHandlerTimeout = setTimeout(scrollHandler, 25))
     })
 
-    var scrollHandler = function () {
+    function scrollHandler() {
       renderVisiblePages()
       const newPosition = ctrl.getPdfPosition()
       if (newPosition != null) {

@@ -146,7 +146,7 @@ export default CommandManager = class CommandManager {
 
   getCompletions(editor, session, pos, prefix, callback) {
     const commandNames = {}
-    for (var snippet of Array.from(topHundred)) {
+    for (const snippet of Array.from(topHundred)) {
       commandNames[snippet.caption.match(/\w+/)[0]] = true
     }
 
@@ -154,7 +154,7 @@ export default CommandManager = class CommandManager {
     const packageCommands = []
     for (const pkg in packages) {
       const snippets = packages[pkg]
-      for (snippet of Array.from(snippets)) {
+      for (const snippet of Array.from(snippets)) {
         packageCommands.push(snippet)
         commandNames[snippet.caption.match(/\w+/)[0]] = true
       }
@@ -168,8 +168,8 @@ export default CommandManager = class CommandManager {
       if (!commandNames[command[0]]) {
         let caption = `\\${command[0]}`
         const score = caption === prefix ? 99 : 50
-        snippet = caption
-        var i = 1
+        let snippet = caption
+        let i = 1
         _.times(command[1], function () {
           snippet += `[\${${i}}]`
           caption += '[]'

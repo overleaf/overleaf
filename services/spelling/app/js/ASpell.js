@@ -112,7 +112,7 @@ class ASpellRunner {
     const lines = output.split('\n')
     const suggestions = {}
     for (const line of Array.from(lines)) {
-      var parts, word
+      let parts, word
       if (line[0] === '&') {
         // Suggestions found
         parts = line.split(' ')
@@ -187,5 +187,5 @@ ASpell.promises = promises
 
 module.exports = ASpell
 
-var WorkerPool = new ASpellWorkerPool()
+const WorkerPool = new ASpellWorkerPool()
 module.exports.cacheDump = cacheDump

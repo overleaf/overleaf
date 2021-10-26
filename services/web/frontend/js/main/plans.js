@@ -323,7 +323,7 @@ App.controller(
       $scope.openGroupPlanModal()
     }
 
-    var eventLabel = (label, location) => label
+    const eventLabel = (label, location) => label
 
     function switchEvent(e, label, location) {
       e.preventDefault()

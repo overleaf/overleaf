@@ -273,7 +273,7 @@ templates.projectInvite = ctaTemplate({
   },
   message(opts, isPlainText) {
     // build message depending on spam-safe variables
-    var message = [`You have been invited to an ${settings.appName} project.`]
+    const message = [`You have been invited to an ${settings.appName} project.`]
 
     if (SpamSafe.isSafeProjectName(opts.project.name)) {
       message.push('<br/> Project:')

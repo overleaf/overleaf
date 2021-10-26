@@ -180,12 +180,12 @@ export default FileTreeManager = class FileTreeManager {
     // problems with reserved Object properties
     const entities = this.getMultiSelectedEntities()
     const paths = {}
-    for (var entity of Array.from(entities)) {
+    for (const entity of Array.from(entities)) {
       paths['/' + this.getEntityPath(entity)] = entity
     }
     const prefixes = {}
-    for (var path in paths) {
-      entity = paths[path]
+    for (const path in paths) {
+      const entity = paths[path]
       const parts = path.split('/')
       if (parts.length <= 2) {
         continue
@@ -201,10 +201,10 @@ export default FileTreeManager = class FileTreeManager {
       }
     }
     const child_entities = []
-    for (path in paths) {
+    for (const path in paths) {
       // If the path is in the prefixes, then it's a parent folder and
       // should be ignore
-      entity = paths[path]
+      const entity = paths[path]
       if (prefixes[path] == null) {
         child_entities.push(entity)
       }
@@ -337,7 +337,7 @@ export default FileTreeManager = class FileTreeManager {
     return (() => {
       const result = []
       for (const entity of Array.from(folder.children || [])) {
-        var childPath
+        let childPath
         if (path != null) {
           childPath = path + '/' + entity.name
         } else {

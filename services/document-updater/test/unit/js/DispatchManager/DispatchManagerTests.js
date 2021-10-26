@@ -180,7 +180,7 @@ describe('DispatchManager', function () {
 
         this.worker.run()
 
-        var checkStatus = () => {
+        const checkStatus = () => {
           if (!this.settings.shuttingDown) {
             // retry until shutdown
             setTimeout(checkStatus, 100)

@@ -230,7 +230,7 @@ export default App.factory(
         startIndicators() {
           // make an array of the pages in the queue
           this.queuedPages = []
-          for (var page of Array.from(this.renderQueue)) {
+          for (const page of Array.from(this.renderQueue)) {
             this.queuedPages[page.pagenum] = true
           }
           // clear any unfinished spinner timers on pages that aren't in the queue any more
@@ -243,7 +243,7 @@ export default App.factory(
           // add indicators for any new pages in the current queue
           return (() => {
             const result = []
-            for (page of Array.from(this.renderQueue)) {
+            for (const page of Array.from(this.renderQueue)) {
               if (
                 !this.spinTimer[page.pagenum] &&
                 !this.spinTimerDone[page.pagenum]
@@ -348,7 +348,7 @@ export default App.factory(
               : undefined
           }, this.PAGE_LOAD_TIMEOUT)
 
-          var loadTask = this.getPage(pagenum)
+          const loadTask = this.getPage(pagenum)
 
           loadTask.cancel = function () {
             return (this.cancelled = true)

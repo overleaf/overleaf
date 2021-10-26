@@ -38,7 +38,7 @@ module.exports = function (process) {
 
   enqueue.busy = false
 
-  var flush = function () {
+  function flush() {
     if (enqueue.busy || queue.length === 0) {
       return
     }

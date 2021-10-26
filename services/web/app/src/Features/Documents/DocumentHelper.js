@@ -22,7 +22,7 @@ module.exports = DocumentHelper = {
     for (const line of Array.from(
       DocumentHelper._getLinesFromContent(content, maxContentToScan)
     )) {
-      var match
+      let match
       if (
         (match =
           line.match(TITLE_WITH_CURLY_BRACES) ||

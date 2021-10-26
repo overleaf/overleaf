@@ -106,7 +106,7 @@ function linkedFileAgentsIncludes() {
 }
 
 function attachHooks() {
-  for (var module of _modules) {
+  for (const module of _modules) {
     if (module.hooks != null) {
       for (const hook in module.hooks) {
         const method = module.hooks[hook]

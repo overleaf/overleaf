@@ -1065,7 +1065,7 @@ const ProjectController = {
   },
 }
 
-var defaultSettingsForAnonymousUser = userId => ({
+const defaultSettingsForAnonymousUser = userId => ({
   id: userId,
   ace: {
     mode: 'none',
@@ -1088,7 +1088,7 @@ var defaultSettingsForAnonymousUser = userId => ({
   betaProgram: false,
 })
 
-var THEME_LIST = []
+const THEME_LIST = []
 function generateThemeList() {
   const files = fs.readdirSync(
     Path.join(__dirname, '/../../../../node_modules/ace-builds/src-noconflict')

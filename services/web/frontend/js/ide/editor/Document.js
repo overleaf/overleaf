@@ -302,7 +302,7 @@ export default Document = (function () {
       const orig = char
       let copy = null
       let pos = 0
-      var timer = () => {
+      const timer = () => {
         if (copy == null || !copy.length) {
           copy = orig.slice() + ' ' + new Date() + '\n'
           line += Math.random() > 0.1 ? 1 : -2
@@ -751,11 +751,11 @@ export default Document = (function () {
       this.ranges.changes = changes
       this.ranges.comments = comments
       this.ranges.track_changes = this.doc.track_changes
-      for (var op of Array.from(this.doc.getInflightOp() || [])) {
+      for (const op of Array.from(this.doc.getInflightOp() || [])) {
         this.ranges.setIdSeed(this.doc.track_changes_id_seeds.inflight)
         this.ranges.applyOp(op, { user_id: this.track_changes_as })
       }
-      for (op of Array.from(this.doc.getPendingOp() || [])) {
+      for (const op of Array.from(this.doc.getPendingOp() || [])) {
         this.ranges.setIdSeed(this.doc.track_changes_id_seeds.pending)
         this.ranges.applyOp(op, { user_id: this.track_changes_as })
       }

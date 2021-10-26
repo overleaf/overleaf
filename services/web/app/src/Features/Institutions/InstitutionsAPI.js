@@ -204,7 +204,7 @@ const InstitutionsAPI = {
   },
 }
 
-var makeAffiliationRequest = function (requestOptions, callback) {
+function makeAffiliationRequest(requestOptions, callback) {
   if (!settings.apis.v1.url) {
     return callback(null)
   } // service is not configured

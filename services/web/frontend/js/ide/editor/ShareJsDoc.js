@@ -214,7 +214,7 @@ export default ShareJsDoc = (function () {
         this._pushOntoQueue(message)
         return // defer processing this update for now
       }
-      var error = this.processUpdateFromServer(message)
+      const error = this.processUpdateFromServer(message)
       if (
         error instanceof Error &&
         error.message === 'Invalid version from server'
@@ -383,7 +383,7 @@ export default ShareJsDoc = (function () {
 
     _startInflightOpTimeout(update) {
       this._startFatalTimeoutTimer(update)
-      var retryOp = () => {
+      const retryOp = () => {
         // Only send the update again if inflightOp is still populated
         // This can be cleared when hard reloading the document in which
         // case we don't want to keep trying to send it.

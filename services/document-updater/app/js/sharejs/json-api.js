@@ -226,12 +226,12 @@ json.api = {
       return (() => {
         const result = []
         for (const c of Array.from(op)) {
-          var i
+          let i
           if (c.na !== undefined || c.si !== undefined || c.sd !== undefined) {
             // no change to structure
             continue
           }
-          var to_remove = []
+          const to_remove = []
           for (i = 0; i < this._listeners.length; i++) {
             // Transform a dummy op by the incoming op to work out what
             // should happen to the listener.
@@ -267,14 +267,14 @@ json.api = {
     return this.on('remoteop', function (op) {
       return (() => {
         const result = []
-        for (var c of Array.from(op)) {
-          var match_path =
+        for (const c of Array.from(op)) {
+          const match_path =
             c.na === undefined ? c.p.slice(0, c.p.length - 1) : c.p
           result.push(
             (() => {
               const result1 = []
               for (const { path, event, cb } of Array.from(this._listeners)) {
-                var common
+                let common
                 if (pathEquals(path, match_path)) {
                   switch (event) {
                     case 'insert':

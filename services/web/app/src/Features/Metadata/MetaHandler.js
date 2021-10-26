@@ -86,10 +86,10 @@ module.exports = MetaHandler = {
     const package_re = MetaHandler.usepackageRegex()
     const req_package_re = MetaHandler.ReqPackageRegex()
     for (const line of Array.from(lines)) {
-      var labelMatch
-      var clean, messy, packageMatch
+      let labelMatch
+      let clean, messy, packageMatch
       while ((labelMatch = label_re.exec(line))) {
-        var label
+        let label
         if ((label = labelMatch[1])) {
           docMeta.labels.push(label)
         }

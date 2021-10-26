@@ -157,7 +157,7 @@ const scope = {
 }
 
 describe('<PdfPreview/>', function () {
-  var clock
+  let clock
 
   beforeEach(function () {
     window.showNewPdfPreview = true

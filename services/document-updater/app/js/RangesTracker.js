@@ -324,7 +324,7 @@ const load = function () {
             // delete is fully after comment, nothing to do
           } else {
             // delete and comment overlap
-            var remaining_after, remaining_before
+            let remaining_after, remaining_before
             if (op_start <= comment_start) {
               remaining_before = ''
             } else {
@@ -402,7 +402,7 @@ const load = function () {
             }
           }
         } else if (change.op.i != null) {
-          var offset
+          let offset
           const change_end = change_start + change.op.i.length
           const is_change_overlapping =
             op_start >= change_start && op_start <= change_end
@@ -537,7 +537,7 @@ const load = function () {
       // offset indexes as we go.
       const op_modifications = []
       for (change of Array.from(this.changes)) {
-        var change_start
+        let change_start
         if (change.op.i != null) {
           change_start = change.op.p
           const change_end = change_start + change.op.i.length
@@ -551,7 +551,7 @@ const load = function () {
             // When the new delete overlaps an insert, we should remove the part of the insert that
             // is now deleted, and also remove the part of the new delete that overlapped. I.e.
             // the two cancel out where they overlap.
-            var delete_remaining_after,
+            let delete_remaining_after,
               delete_remaining_before,
               insert_remaining_after,
               insert_remaining_before

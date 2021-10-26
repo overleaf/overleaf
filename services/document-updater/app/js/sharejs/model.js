@@ -421,7 +421,7 @@ module.exports = Model = function (db, options) {
   // Documents are stored so long as either:
   // - They have been accessed within the past #{PERIOD}
   // - At least one client has the document open
-  var refreshReapingTimeout = function (docName) {
+  function refreshReapingTimeout(docName) {
     const doc = docs[docName]
     if (!doc) {
       return
@@ -461,7 +461,7 @@ module.exports = Model = function (db, options) {
     })
   }
 
-  var tryWriteSnapshot = function (docName, callback) {
+  function tryWriteSnapshot(docName, callback) {
     if (!db) {
       return typeof callback === 'function' ? callback() : undefined
     }
@@ -784,7 +784,7 @@ module.exports = Model = function (db, options) {
           return (() => {
             const result = []
             for (const op of Array.from(data)) {
-              var needle
+              let needle
               listener(op)
 
               // The listener may well remove itself during the catchup phase. If this happens, break early.

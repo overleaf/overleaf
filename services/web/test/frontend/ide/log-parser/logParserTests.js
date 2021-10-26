@@ -99,7 +99,7 @@ describe('logParser', function (done) {
     ]
 
     expect(errors.length).to.equal(expectedErrors.length)
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
       expect(
         expectedErrors.indexOf([errors[i].line, errors[i].message] + '')
       ).to.equal(i)
@@ -124,7 +124,7 @@ describe('logParser', function (done) {
     ]
 
     expect(errors.length).to.equal(expectedErrors.length)
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
       expect(
         expectedErrors.indexOf([errors[i].line, errors[i].message] + '')
       ).to.equal(i)
@@ -217,7 +217,7 @@ describe('logParser', function (done) {
     const offsetErrorLen = errors.length - 1
     expect(offsetErrorLen).to.equal(expectedErrors.length)
 
-    for (var i = 0; i < offsetErrorLen; i++) {
+    for (let i = 0; i < offsetErrorLen; i++) {
       expect(expectedErrors[i]).to.equal(
         [errors[i].line, errors[i].message, errors[i].file] + ''
       )
@@ -252,7 +252,7 @@ describe('logParser', function (done) {
     ]
 
     expect(errors.length).to.equal(expectedErrors.length)
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
       expect(expectedErrors[i]).to.equal(
         [errors[i].line, errors[i].message, errors[i].file] + ''
       )
@@ -263,7 +263,7 @@ describe('logParser', function (done) {
     const latexParser = new LatexLogParser(this.natbibWarningsLog)
     const errors = latexParser.parse().warnings
 
-    var expectedErrors = [
+    const expectedErrors = [
       [
         6,
         "Package natbib Warning: Citation `blah' on page 1 undefined on input line 6.",
@@ -277,7 +277,7 @@ describe('logParser', function (done) {
     ]
 
     expect(errors.length).to.equal(expectedErrors.length)
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
       expect(expectedErrors[i]).to.equal(
         [errors[i].line, errors[i].message, errors[i].file] + ''
       )
@@ -288,7 +288,7 @@ describe('logParser', function (done) {
     const latexParser = new LatexLogParser(this.geometryWarningsLog)
     const errors = latexParser.parse().warnings
 
-    var expectedErrors = [
+    const expectedErrors = [
       [
         null,
         "Package geometry Warning: Over-specification in `h'-direction. `width' (597.50787pt) is ignored.",
@@ -302,7 +302,7 @@ describe('logParser', function (done) {
     ]
 
     expect(errors.length).to.equal(expectedErrors.length)
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
       expect(expectedErrors[i]).to.equal(
         [errors[i].line, errors[i].message, errors[i].file] + ''
       )
@@ -313,7 +313,7 @@ describe('logParser', function (done) {
     const latexParser = new LatexLogParser(this.captionWarningsLog)
     const errors = latexParser.parse().warnings
 
-    var expectedErrors = [
+    const expectedErrors = [
       [
         null,
         'Package caption Warning: Unsupported document class (or package) detected, usage of the caption package is not recommended. See the caption package documentation for explanation.',
@@ -327,7 +327,7 @@ describe('logParser', function (done) {
     ]
 
     expect(errors.length).to.equal(expectedErrors.length)
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
       expect(expectedErrors[i]).to.equal(
         [errors[i].line, errors[i].message, errors[i].file] + ''
       )
@@ -338,13 +338,13 @@ describe('logParser', function (done) {
     const latexParser = new LatexLogParser(this.runawayArgumentsLog)
     const errors = latexParser.parse().errors
 
-    var expectedErrors = [
+    const expectedErrors = [
       [null, 'Runaway argument?', '/compile/runaway_argument.tex'] + '',
       [null, 'Emergency stop.', '/compile/runaway_argument.tex'] + '',
     ]
 
     expect(errors.length).to.equal(expectedErrors.length)
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
       expect(expectedErrors[i]).to.equal(
         [errors[i].line, errors[i].message, errors[i].file] + ''
       )
@@ -353,9 +353,9 @@ describe('logParser', function (done) {
 
   it('should parse filenames', function () {
     const latexParser = new LatexLogParser(this.filenamesLog)
-    var { errors, warnings, typesetting } = latexParser.parse()
+    const { errors, warnings, typesetting } = latexParser.parse()
 
-    var expectedErrors = [
+    const expectedErrors = [
       [
         1,
         'Undefined control sequence.',
@@ -363,7 +363,7 @@ describe('logParser', function (done) {
       ] + '',
     ]
 
-    var expectedWarnings = [
+    const expectedWarnings = [
       [
         9,
         "Citation `Peeters:2001np' on page 13 undefined on input line 9.",
@@ -371,7 +371,7 @@ describe('logParser', function (done) {
       ] + '',
     ]
 
-    var expectedTypesetting = [
+    const expectedTypesetting = [
       [
         123,
         'Overfull \\hbox (4.56pt too wide) in paragraph at lines 123--456',
@@ -383,17 +383,17 @@ describe('logParser', function (done) {
     expect(warnings.length).to.equal(warnings.length)
     expect(typesetting.length).to.equal(typesetting.length)
 
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
       expect(expectedErrors[i]).to.equal(
         [errors[i].line, errors[i].message, errors[i].file] + ''
       )
     }
-    for (var j = 0; i < warnings.length; i++) {
+    for (let j = 0; j < warnings.length; j++) {
       expect(expectedWarnings[j]).to.equal(
         [warnings[j].line, warnings[j].message, warnings[j].file] + ''
       )
     }
-    for (var k = 0; i < typesetting.length; i++) {
+    for (let k = 0; k < typesetting.length; k++) {
       expect(expectedTypesetting[k]).to.equal(
         [typesetting[k].line, typesetting[k].message, typesetting[k].file] + ''
       )
@@ -404,7 +404,7 @@ describe('logParser', function (done) {
     const latexParser = new LatexLogParser(this.fileLineErrorLog)
     const errors = latexParser.parse().errors
 
-    var expectedErrors = [
+    const expectedErrors = [
       [
         1,
         'Undefined control sequence.',
@@ -413,7 +413,7 @@ describe('logParser', function (done) {
     ]
 
     expect(errors.length).to.equal(expectedErrors.length)
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
       expect(expectedErrors[i]).to.equal(
         [errors[i].line, errors[i].message, errors[i].file] + ''
       )
@@ -421,8 +421,8 @@ describe('logParser', function (done) {
   })
 
   it('should ignore duplicates', function () {
-    var latexParser = new LatexLogParser(this.errorLog)
-    var errors = latexParser.parse().errors
+    let latexParser = new LatexLogParser(this.errorLog)
+    let errors = latexParser.parse().errors
 
     // duplicates included
     expect(errors.length).to.equal(10)
@@ -435,10 +435,10 @@ describe('logParser', function (done) {
   })
 
   it('should get file paths', function () {
-    var latexParser = new LatexLogParser(this.errorLog)
-    var errors = latexParser.parse().errors
+    let latexParser = new LatexLogParser(this.errorLog)
+    let errors = latexParser.parse().errors
 
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
       expect(errors[i].file).to.equal(
         'compiles/dff0c37d892f346e58fc14975a16bf69/sections/appendices.tex'
       )
@@ -446,7 +446,7 @@ describe('logParser', function (done) {
 
     latexParser = new LatexLogParser(this.badBoxesLog)
     errors = latexParser.parse().all
-    for (var j = 0; j < errors.length; j++) {
+    for (let j = 0; j < errors.length; j++) {
       expect(errors[j].file).to.equal(
         'compiles/b6cf470376785e64ad84c57e3296c912/logs/bad-boxes.tex'
       )

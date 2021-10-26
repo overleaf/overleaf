@@ -129,7 +129,7 @@ module.exports = TeamInvitesHandler = {
   },
 }
 
-var createInvite = function (subscription, email, inviter, callback) {
+function createInvite(subscription, email, inviter, callback) {
   checkIfInviteIsPossible(
     subscription,
     email,
@@ -205,7 +205,7 @@ var createInvite = function (subscription, email, inviter, callback) {
   )
 }
 
-var removeInviteFromTeam = function (subscriptionId, email, callback) {
+function removeInviteFromTeam(subscriptionId, email, callback) {
   const searchConditions = { _id: new ObjectId(subscriptionId.toString()) }
   const removeInvite = { $pull: { teamInvites: { email } } }
 
@@ -218,7 +218,7 @@ var removeInviteFromTeam = function (subscriptionId, email, callback) {
   )
 }
 
-var removeLegacyInvite = (subscriptionId, email, callback) =>
+const removeLegacyInvite = (subscriptionId, email, callback) =>
   Subscription.updateOne(
     {
       _id: new ObjectId(subscriptionId.toString()),
@@ -231,7 +231,7 @@ var removeLegacyInvite = (subscriptionId, email, callback) =>
     callback
   )
 
-var checkIfInviteIsPossible = function (subscription, email, callback) {
+function checkIfInviteIsPossible(subscription, email, callback) {
   if (!subscription.groupPlan) {
     logger.log(
       { subscriptionId: subscription.id },
@@ -272,7 +272,7 @@ var checkIfInviteIsPossible = function (subscription, email, callback) {
   })
 }
 
-var getInviterName = function (inviter) {
+function getInviterName(inviter) {
   let inviterName
   if (inviter.first_name && inviter.last_name) {
     inviterName = `${inviter.first_name} ${inviter.last_name} (${inviter.email})`

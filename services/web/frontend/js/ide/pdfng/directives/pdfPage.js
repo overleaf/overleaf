@@ -61,7 +61,7 @@ export default App.directive(
         } else {
           // shouldn't get here - the default page size should now
           // always be set before redraw is called
-          var handler = scope.$watch(
+          const handler = scope.$watch(
             'defaultPageSize',
             function (defaultPageSize) {
               if (defaultPageSize == null) {

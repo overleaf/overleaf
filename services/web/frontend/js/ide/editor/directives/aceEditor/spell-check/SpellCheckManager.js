@@ -362,7 +362,7 @@ class SpellCheckManager {
       let line = lines[row]
       const rowIdx = rowNumsToCheck[row]
       line = this.blankOutBlacklistedCommands(line)
-      var result
+      let result
       WORD_REGEX.lastIndex = 0 // reset global stateful regexp for this usage
       while ((result = WORD_REGEX.exec(line))) {
         let word = result[0]
