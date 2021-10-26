@@ -105,6 +105,10 @@ describe('ProjectController', function () {
     this.Features = {
       hasFeature: sinon.stub(),
     }
+    this.FeaturesUpdater = {
+      featuresEpochIsCurrent: sinon.stub().returns(true),
+      refreshFeatures: sinon.stub().yields(null, this.user),
+    }
     this.BrandVariationsHandler = {
       getBrandVariationById: sinon
         .stub()
@@ -167,6 +171,7 @@ describe('ProjectController', function () {
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         './ProjectEntityHandler': this.ProjectEntityHandler,
         '../../infrastructure/Features': this.Features,
+        '../Subscription/FeaturesUpdater': this.FeaturesUpdater,
         '../Notifications/NotificationsBuilder': this.NotificationBuilder,
         '../User/UserGetter': this.UserGetter,
         '../BrandVariations/BrandVariationsHandler': this
@@ -1077,6 +1082,18 @@ describe('ProjectController', function () {
       this.res.render = () => {
         this.TpdsProjectFlusher.flushProjectToTpdsIfNeeded.should.have.been.calledWith(
           this.project_id
+        )
+        done()
+      }
+      this.ProjectController.loadEditor(this.req, this.res)
+    })
+
+    it('should refresh the user features if the epoch is outdated', function (done) {
+      this.FeaturesUpdater.featuresEpochIsCurrent = sinon.stub().returns(false)
+      this.res.render = () => {
+        this.FeaturesUpdater.refreshFeatures.should.have.been.calledWith(
+          this.user._id,
+          'load-editor'
         )
         done()
       }

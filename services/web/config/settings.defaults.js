@@ -296,6 +296,8 @@ module.exports = {
     trackChanges: true,
   }),
 
+  // featuresEpoch: 'YYYY-MM-DD',
+
   features: {
     personal: defaultFeatures,
   },

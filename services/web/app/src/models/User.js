@@ -135,6 +135,9 @@ const UserSchema = new Schema({
     },
   ],
   featuresUpdatedAt: { type: Date },
+  featuresEpoch: {
+    type: String,
+  },
   // when auto-merged from SL and must-reconfirm is set, we may end up using
   // `sharelatexHashedPassword` to recover accounts...
   sharelatexHashedPassword: String,

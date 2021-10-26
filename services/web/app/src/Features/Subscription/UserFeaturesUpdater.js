@@ -1,5 +1,6 @@
 const { User } = require('../../models/User')
 const { promisifyAll } = require('../../util/promises')
+const Settings = require('@overleaf/settings')
 
 function _featuresChanged(newFeatures, featuresBefore) {
   for (const feature in newFeatures) {
@@ -14,6 +15,10 @@ module.exports = {
   updateFeatures(userId, features, callback) {
     const update = {
       featuresUpdatedAt: new Date(),
+    }
+    // record the system-wide features epoch, if defined
+    if (Settings.featuresEpoch) {
+      update.featuresEpoch = Settings.featuresEpoch
     }
     for (const key in features) {
       const value = features[key]
