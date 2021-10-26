@@ -216,7 +216,9 @@ type._append = append = function (op, component) {
     component.i === 0 ||
     component.d === 0
   ) {
-  } else if (op.length === 0) {
+    return
+  }
+  if (op.length === 0) {
     return op.push(component)
   } else {
     const last = op[op.length - 1]

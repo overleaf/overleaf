@@ -78,7 +78,9 @@ const checkOp = function (op) {
 moduleExport._makeAppend = makeAppend = op =>
   function (component) {
     if (component === 0 || component.i === '' || component.d === '') {
-    } else if (op.length === 0) {
+      return
+    }
+    if (op.length === 0) {
       return op.push(component)
     } else if (
       typeof component === 'number' &&
