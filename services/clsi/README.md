@@ -104,11 +104,6 @@ sudo chmod g+s compiles
 This is a facet of the way docker works on Linux. See this [upstream issue](https://github.com/moby/moby/issues/7198)
 
 
-Config
-------
-
-The CLSI will use a SQLite database by default, but you can optionally set up a MySQL database and then fill in the database name, username and password in the config file at `config/settings.development.js`.
-
 API
 ---
 
