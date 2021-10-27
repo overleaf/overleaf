@@ -2,10 +2,8 @@ const Path = require('path')
 
 module.exports = {
   path: {
-    // eslint-disable-next-line no-path-concat
-    compilesDir: Path.resolve(__dirname + '/../../../compiles'),
-    // eslint-disable-next-line no-path-concat
-    clsiCacheDir: Path.resolve(__dirname + '/../../../cache'),
+    compilesDir: Path.join(__dirname, '../../../compiles'),
+    clsiCacheDir: Path.join(__dirname, '../../../cache'),
     // synctexBaseDir: (project_id) -> Path.join(@compilesDir, project_id)
     synctexBaseDir() {
       return '/compile'

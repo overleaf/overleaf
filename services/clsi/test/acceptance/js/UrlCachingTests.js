@@ -1,5 +1,4 @@
 /* eslint-disable
-    no-path-concat,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -10,6 +9,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+const Path = require('path')
 const Client = require('./helpers/Client')
 const sinon = require('sinon')
 const ClsiApp = require('./helpers/ClsiApp')
@@ -21,7 +21,7 @@ const Server = {
     const express = require('express')
     const app = express()
 
-    const staticServer = express.static(__dirname + '/../fixtures/')
+    const staticServer = express.static(Path.join(__dirname, '../fixtures/'))
     app.get('/:random_id/*', (req, res, next) => {
       this.getFile(req.url)
       req.url = `/${req.params[0]}`

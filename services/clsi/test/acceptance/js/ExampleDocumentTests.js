@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    no-path-concat,
     no-return-assign,
     no-unused-vars,
 */
@@ -26,7 +25,7 @@ const fixturePath = path => {
   if (path.slice(0, 3) === 'tmp') {
     return '/tmp/clsi_acceptance_tests' + path.slice(3)
   }
-  return Path.normalize(__dirname + '/../fixtures/' + path)
+  return Path.join(__dirname, '../fixtures/', path)
 }
 const process = require('process')
 console.log(

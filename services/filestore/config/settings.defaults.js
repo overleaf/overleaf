@@ -21,17 +21,14 @@ if (process.env.BACKEND == null) {
       process.env.AWS_S3_PUBLIC_FILES_BUCKET_NAME
   } else {
     process.env.BACKEND = 'fs'
-    process.env.USER_FILES_BUCKET_NAME = Path.resolve(
-      // eslint-disable-next-line no-path-concat
-      __dirname + '/../user_files'
+    process.env.USER_FILES_BUCKET_NAME = Path.join(__dirname, '../user_files')
+    process.env.TEMPLATE_FILES_BUCKET_NAME = Path.join(
+      __dirname,
+      '../template_files'
     )
-    process.env.TEMPLATE_FILES_BUCKET_NAME = Path.resolve(
-      // eslint-disable-next-line no-path-concat
-      __dirname + '/../template_files'
-    )
-    process.env.PUBLIC_FILES_BUCKET_NAME = Path.resolve(
-      // eslint-disable-next-line no-path-concat
-      __dirname + '/../public_files'
+    process.env.PUBLIC_FILES_BUCKET_NAME = Path.join(
+      __dirname,
+      '../public_files'
     )
   }
 }
@@ -103,8 +100,7 @@ const settings = {
   },
 
   path: {
-    // eslint-disable-next-line no-path-concat
-    uploadFolder: Path.resolve(__dirname + '/../uploads'),
+    uploadFolder: Path.join(__dirname, '../uploads'),
   },
 
   commands: {
