@@ -12,7 +12,8 @@
     "test": "mocha --grep=$MOCHA_GREP test/**/*.js",
     "format": "prettier-eslint $PWD'/**/*.js' --list-different",
     "format:fix": "prettier-eslint $PWD'/**/*.js' --write",
-    "lint": "eslint -f unix .",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix .",
     "test:ci": "npm run test"
   },
   "dependencies": {

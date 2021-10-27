@@ -33,7 +33,8 @@
     "sinon": "^9.0.2"
   },
   "scripts": {
-    "lint": "eslint --max-warnings 0 .",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix .",
     "test:unit": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/unit",
     "test:acceptance": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/acceptance",
     "test": "npm run test:unit && npm run test:acceptance",

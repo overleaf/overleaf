@@ -11,7 +11,8 @@
   "repository": "github:overleaf/redis-wrapper",
   "license": "ISC",
   "scripts": {
-    "lint": "eslint --max-warnings 0 .",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix .",
     "format": "prettier-eslint $PWD'/**/*.js' --list-different",
     "format:fix": "prettier-eslint $PWD'/**/*.js' --write",
     "test": "mocha --recursive test/unit/src/",

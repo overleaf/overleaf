@@ -5,6 +5,8 @@
   "repository": "overleaf/settings-module",
   "scripts": {
     "lint": "echo noop",
+    "lint:fix": "echo noop",
+    "format:fix": "echo noop",
     "format": "echo noop",
     "test": "echo noop",
     "test:ci": "echo noop"
