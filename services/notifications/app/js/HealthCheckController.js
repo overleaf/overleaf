@@ -69,7 +69,7 @@ module.exports = {
               { body, notification_key },
               'Health Check: notification not in response'
             )
-            return cb('notification not found in response')
+            return cb(new Error('notification not found in response'))
           }
         })
       },

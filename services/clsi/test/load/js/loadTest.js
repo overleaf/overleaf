@@ -55,13 +55,13 @@ ${bodyContent}
       },
     },
     (err, response, body) => {
-      if (response.statusCode !== 200) {
-        failedCount++
-        return callback(`compile ${compileNumber} failed`)
-      }
       if (err != null) {
         failedCount++
-        return callback('failed')
+        return callback(new Error(`compile ${compileNumber} failed`))
+      }
+      if (response.statusCode !== 200) {
+        failedCount++
+        return callback(new Error(`compile ${compileNumber} failed`))
       }
       const totalTime = new Date() - startTime
       console.log(totalTime + 'ms')

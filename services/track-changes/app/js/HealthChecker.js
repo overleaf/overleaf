@@ -34,7 +34,9 @@ module.exports = {
               )
               return cb(err)
             } else if ((res != null ? res.statusCode : undefined) !== 200) {
-              return cb(`status code not 200, it's ${res.statusCode}`)
+              return cb(
+                new Error(`status code not 200, it's ${res.statusCode}`)
+              )
             } else {
               return cb()
             }
@@ -48,7 +50,9 @@ module.exports = {
               logger.err({ err, project_id }, 'error flushing for health check')
               return cb(err)
             } else if ((res != null ? res.statusCode : undefined) !== 204) {
-              return cb(`status code not 204, it's ${res.statusCode}`)
+              return cb(
+                new Error(`status code not 204, it's ${res.statusCode}`)
+              )
             } else {
               return cb()
             }
@@ -65,7 +69,9 @@ module.exports = {
               )
               return cb(err)
             } else if ((res != null ? res.statusCode : undefined) !== 200) {
-              return cb(`status code not 200, it's ${res.statusCode}`)
+              return cb(
+                new Error(`status code not 200, it's ${res.statusCode}`)
+              )
             } else {
               return cb()
             }

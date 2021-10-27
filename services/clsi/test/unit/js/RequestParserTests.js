@@ -54,9 +54,10 @@ describe('RequestParser', function () {
     })
 
     return it('should return an error', function () {
-      return this.callback
-        .calledWith('top level object should have a compile attribute')
-        .should.equal(true)
+      expect(this.callback).to.have.been.called
+      expect(this.callback.args[0][0].message).to.equal(
+        'top level object should have a compile attribute'
+      )
     })
   })
 
@@ -66,9 +67,10 @@ describe('RequestParser', function () {
     })
 
     return it('should return an error', function () {
-      return this.callback
-        .calledWith('top level object should have a compile attribute')
-        .should.equal(true)
+      expect(this.callback).to.have.been.called
+      expect(this.callback.args[0][0].message).to.equal(
+        'top level object should have a compile attribute'
+      )
     })
   })
 

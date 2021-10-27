@@ -30,7 +30,9 @@ module.exports = RequestParser = {
     const response = {}
 
     if (body.compile == null) {
-      return callback('top level object should have a compile attribute')
+      return callback(
+        new Error('top level object should have a compile attribute')
+      )
     }
 
     const { compile } = body

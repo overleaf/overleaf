@@ -33,7 +33,7 @@ module.exports = DocManager = {
       callback = function () {}
     }
     if (filter.inS3 !== true) {
-      return callback('must include inS3 when getting doc')
+      return callback(new Error('must include inS3 when getting doc'))
     }
 
     return MongoManager.findDoc(

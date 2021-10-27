@@ -46,16 +46,20 @@ module.exports = {
             logger.err({ err }, 'docstore returned a error in health check get')
             return cb(err)
           } else if (res == null) {
-            return cb('no response from docstore with get check')
+            return cb(new Error('no response from docstore with get check'))
           } else if ((res != null ? res.statusCode : undefined) !== 200) {
-            return cb(`status code not 200, its ${res.statusCode}`)
+            return cb(new Error(`status code not 200, its ${res.statusCode}`))
           } else if (
             _.isEqual(body != null ? body.lines : undefined, lines) &&
             (body != null ? body._id : undefined) === doc_id.toString()
           ) {
             return cb()
           } else {
-            return cb(`health check lines not equal ${body.lines} != ${lines}`)
+            return cb(
+              new Error(
+                `health check lines not equal ${body.lines} != ${lines}`
+              )
+            )
           }
         })
       },
