@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const os = require('os')
 const ExpressCompression = require('compression')
 const promClient = require('prom-client')
@@ -169,30 +170,27 @@ function close() {
   }
 }
 
-module.exports = {
-  configure,
-  initialize,
-  registerDestructor,
-  injectMetricsRoute,
-  buildPromKey,
-  sanitizeValue,
-  set,
-  inc,
-  count,
-  summary,
-  timing,
-  Timer,
-  gauge,
-  globalGauge,
-  close,
-  prom: promClient,
+module.exports.configure = configure
+module.exports.initialize = initialize
+module.exports.registerDestructor = registerDestructor
+module.exports.injectMetricsRoute = injectMetricsRoute
+module.exports.buildPromKey = buildPromKey
+module.exports.sanitizeValue = sanitizeValue
+module.exports.set = set
+module.exports.inc = inc
+module.exports.count = count
+module.exports.summary = summary
+module.exports.timing = timing
+module.exports.Timer = Timer
+module.exports.gauge = gauge
+module.exports.globalGauge = globalGauge
+module.exports.close = close
+module.exports.prom = promClient
+module.exports.register = promWrapper.registry
 
-  register: promWrapper.registry,
-
-  mongodb: require('./mongodb'),
-  http: require('./http'),
-  open_sockets: require('./open_sockets'),
-  event_loop: require('./event_loop'),
-  memory: require('./memory'),
-  timeAsyncMethod: require('./timeAsyncMethod')
-}
+module.exports.http = require('./http')
+module.exports.mongodb = require('./mongodb')
+module.exports.open_sockets = require('./open_sockets')
+module.exports.event_loop = require('./event_loop')
+module.exports.memory = require('./memory')
+module.exports.timeAsyncMethod = require('./timeAsyncMethod')

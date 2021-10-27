@@ -1,28 +1,16 @@
+const Stream = require('stream')
 const bunyan = require('bunyan')
-const fetch = require('node-fetch')
-const fs = require('fs')
 const yn = require('yn')
-const OError = require('@overleaf/o-error')
-const GCPLogging = require('@google-cloud/logging-bunyan')
+const GCPManager = require('./gcp-manager')
+const SentryManager = require('./sentry-manager')
+const Serializers = require('./serializers')
+const {
+  FileLogLevelChecker,
+  GCEMetadataLogLevelChecker
+} = require('./log-level-checker')
 
-// bunyan error serializer
-const errSerializer = function (err) {
-  if (!err || !err.stack) {
-    return err
-  }
-  return {
-    message: err.message,
-    name: err.name,
-    stack: OError.getFullStack(err),
-    info: OError.getFullInfo(err),
-    code: err.code,
-    signal: err.signal
-  }
-}
-
-const Logger = (module.exports = {
+const LoggingManager = {
   initialize(name) {
-    this.logLevelSource = (process.env.LOG_LEVEL_SOURCE || 'file').toLowerCase()
     this.isProduction =
       (process.env.NODE_ENV || '').toLowerCase() === 'production'
     this.defaultLevel =
@@ -31,130 +19,19 @@ const Logger = (module.exports = {
     this.logger = bunyan.createLogger({
       name,
       serializers: {
-        err: errSerializer,
-        req: bunyan.stdSerializers.req,
-        res: bunyan.stdSerializers.res
+        err: Serializers.err,
+        req: Serializers.req,
+        res: Serializers.res
       },
-      streams: [{ level: this.defaultLevel, stream: process.stdout }]
+      streams: [this._getOutputStreamConfig()]
     })
     this._setupRingBuffer()
-    this._setupStackdriver()
     this._setupLogLevelChecker()
     return this
   },
 
-  async checkLogLevel() {
-    try {
-      const end = await this.getTracingEndTime()
-      if (parseInt(end, 10) > Date.now()) {
-        this.logger.level('trace')
-      } else {
-        this.logger.level(this.defaultLevel)
-      }
-    } catch (err) {
-      this.logger.level(this.defaultLevel)
-    }
-  },
-
-  async getTracingEndTimeFile() {
-    return fs.promises.readFile('/logging/tracingEndTime')
-  },
-
-  async getTracingEndTimeMetadata() {
-    const options = {
-      headers: {
-        'Metadata-Flavor': 'Google'
-      }
-    }
-    const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.loggerName}-setLogLevelEndTime`
-    const res = await fetch(uri, options)
-    if (!res.ok) throw new Error('Metadata not okay')
-    return res.text()
-  },
-
   initializeErrorReporting(dsn, options) {
-    this.Sentry = require('@sentry/node')
-    this.Sentry.init({ dsn, ...options })
-    this.lastErrorTimeStamp = 0 // for rate limiting on sentry reporting
-    this.lastErrorCount = 0
-  },
-
-  captureException(attributes, message, level) {
-    // handle case of logger.error "message"
-    let key, value
-    if (typeof attributes === 'string') {
-      attributes = { err: new Error(attributes) }
-    }
-    // extract any error object
-    let error = attributes.err || attributes.error
-    // avoid reporting errors twice
-    for (key in attributes) {
-      value = attributes[key]
-      if (value instanceof Error && value.reportedToSentry) {
-        return
-      }
-    }
-    // include our log message in the error report
-    if (error == null) {
-      if (typeof message === 'string') {
-        error = { message }
-      }
-    } else if (message != null) {
-      attributes.description = message
-    }
-    // report the error
-    if (error != null) {
-      // capture attributes and use *_id objects as tags
-      const tags = {}
-      const extra = {}
-      for (key in attributes) {
-        value = attributes[key]
-        if (key.match(/_id/) && typeof value === 'string') {
-          tags[key] = value
-        }
-        extra[key] = value
-      }
-      // capture req object if available
-      const { req } = attributes
-      if (req != null) {
-        extra.req = {
-          method: req.method,
-          url: req.originalUrl,
-          query: req.query,
-          headers: req.headers,
-          ip: req.ip
-        }
-      }
-      // recreate error objects that have been converted to a normal object
-      if (!(error instanceof Error) && typeof error === 'object') {
-        const newError = new Error(error.message)
-        for (key of Object.keys(error || {})) {
-          value = error[key]
-          newError[key] = value
-        }
-        error = newError
-      }
-      // filter paths from the message to avoid duplicate errors in sentry
-      // (e.g. errors from `fs` methods which have a path attribute)
-      try {
-        if (error.path) {
-          error.message = error.message.replace(` '${error.path}'`, '')
-        }
-
-        // send the error to sentry
-        this.Sentry.captureException(error, { tags, extra, level })
-
-        // put a flag on the errors to avoid reporting them multiple times
-        for (key in attributes) {
-          value = attributes[key]
-          if (value instanceof Error) {
-            value.reportedToSentry = true
-          }
-        }
-      } catch (err) {
-        // ignore Sentry errors
-      }
-    }
+    this.sentryManager = new SentryManager()
   },
 
   debug() {
@@ -176,26 +53,8 @@ const Logger = (module.exports = {
       })
     }
     this.logger.error(attributes, message, ...Array.from(args))
-    if (this.Sentry) {
-      const MAX_ERRORS = 5 // maximum number of errors in 1 minute
-      const now = new Date()
-      // have we recently reported an error?
-      const recentSentryReport = now - this.lastErrorTimeStamp < 60 * 1000
-      // if so, increment the error count
-      if (recentSentryReport) {
-        this.lastErrorCount++
-      } else {
-        this.lastErrorCount = 0
-        this.lastErrorTimeStamp = now
-      }
-      // only report 5 errors every minute to avoid overload
-      if (this.lastErrorCount < MAX_ERRORS) {
-        // add a note if the rate limit has been hit
-        const note =
-          this.lastErrorCount + 1 === MAX_ERRORS ? '(rate limited)' : ''
-        // report the exception
-        return this.captureException(attributes, message, `error${note}`)
-      }
+    if (this.sentryManager) {
+      this.sentryManager.captureExceptionRateLimited(attributes, message)
     }
   },
 
@@ -209,8 +68,25 @@ const Logger = (module.exports = {
 
   fatal(attributes, message) {
     this.logger.fatal(attributes, message)
-    if (this.Sentry) {
-      this.captureException(attributes, message, 'fatal')
+    if (this.sentryManager) {
+      this.sentryManager.captureException(attributes, message, 'fatal')
+    }
+  },
+
+  _getOutputStreamConfig() {
+    const gcpEnabled = yn(process.env.GCP_LOGGING)
+    if (gcpEnabled) {
+      const stream = new Stream.Writable({
+        objectMode: true,
+        write(entry, encoding, callback) {
+          const gcpEntry = GCPManager.convertLogEntry(entry)
+          console.log(JSON.stringify(gcpEntry, bunyan.safeCycles()))
+          setImmediate(callback)
+        }
+      })
+      return { level: this.defaultLevel, type: 'raw', stream }
+    } else {
+      return { level: this.defaultLevel, stream: process.stdout }
     }
   },
 
@@ -228,40 +104,36 @@ const Logger = (module.exports = {
     }
   },
 
-  _setupStackdriver() {
-    const stackdriverEnabled = yn(process.env.STACKDRIVER_LOGGING)
-    if (!stackdriverEnabled) {
-      return
-    }
-    const stackdriverClient = new GCPLogging.LoggingBunyan({
-      logName: this.loggerName,
-      serviceContext: { service: this.loggerName }
-    })
-    this.logger.addStream(stackdriverClient.stream(this.defaultLevel))
-  },
-
   _setupLogLevelChecker() {
+    const logLevelSource = (
+      process.env.LOG_LEVEL_SOURCE || 'file'
+    ).toLowerCase()
+
+    if (this.logLevelChecker) {
+      this.logLevelChecker.stop()
+      this.logLevelChecker = null
+    }
+
     if (this.isProduction) {
-      // clear interval if already set
-      if (this.checkInterval) {
-        clearInterval(this.checkInterval)
+      switch (logLevelSource) {
+        case 'file':
+          this.logLevelChecker = new FileLogLevelChecker(this.logger)
+          break
+        case 'gce_metadata':
+          this.logLevelChecker = new GCEMetadataLogLevelChecker(this.logger)
+          break
+        case 'none':
+          break
+        default:
+          console.log(`Unrecognised log level source: ${logLevelSource}`)
       }
-      if (this.logLevelSource === 'file') {
-        this.getTracingEndTime = this.getTracingEndTimeFile
-      } else if (this.logLevelSource === 'gce_metadata') {
-        this.getTracingEndTime = this.getTracingEndTimeMetadata
-      } else if (this.logLevelSource === 'none') {
-        return
-      } else {
-        console.log('Unrecognised log level source')
-        return
+      if (this.logLevelChecker) {
+        this.logLevelChecker.start()
       }
-      // check for log level override on startup
-      this.checkLogLevel()
-      // re-check log level every minute
-      this.checkInterval = setInterval(this.checkLogLevel.bind(this), 1000 * 60)
     }
   }
-})
+}
 
-Logger.initialize('default-sharelatex')
+LoggingManager.initialize('default-sharelatex')
+
+module.exports = LoggingManager

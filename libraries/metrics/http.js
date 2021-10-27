@@ -1,23 +1,15 @@
-const yn = require('yn')
-
-const STACKDRIVER_LOGGING = yn(process.env.STACKDRIVER_LOGGING)
+const Metrics = require('./index')
 
 module.exports.monitor = logger =>
   function(req, res, next) {
-    const Metrics = require('./index')
-    const startTime = process.hrtime()
+    const startTime = Date.now()
     const { end } = res
-    res.end = function() {
-      end.apply(this, arguments)
-      const responseTime = process.hrtime(startTime)
-      const responseTimeMs = Math.round(
-        responseTime[0] * 1000 + responseTime[1] / 1000000
-      )
+    res.end = function(...args) {
+      end.apply(this, args)
+      const responseTimeMs = Date.now() - startTime
       const requestSize = parseInt(req.headers['content-length'], 10)
       const routePath = getRoutePath(req)
-      const remoteIp = getRemoteIp(req)
       const reqUrl = req.originalUrl || req.url
-      const referrer = req.headers.referer || req.headers.referrer
 
       if (routePath != null) {
         Metrics.timing('http_request', responseTimeMs, null, {
@@ -33,44 +25,7 @@ module.exports.monitor = logger =>
           })
         }
       }
-
-      let info
-      if (STACKDRIVER_LOGGING) {
-        info = {
-          httpRequest: {
-            requestMethod: req.method,
-            requestUrl: reqUrl,
-            requestSize,
-            status: res.statusCode,
-            responseSize: res.getHeader('content-length'),
-            userAgent: req.headers['user-agent'],
-            remoteIp,
-            referer: referrer,
-            latency: {
-              seconds: responseTime[0],
-              nanos: responseTime[1]
-            },
-            protocol: req.protocol
-          }
-        }
-      } else {
-        info = {
-          req: {
-            url: reqUrl,
-            method: req.method,
-            referrer,
-            'remote-addr': remoteIp,
-            'user-agent': req.headers['user-agent'],
-            'content-length': req.headers['content-length']
-          },
-          res: {
-            'content-length': res.getHeader('content-length'),
-            statusCode: res.statusCode
-          },
-          'response-time': responseTimeMs
-        }
-      }
-      logger.info(info, '%s %s', req.method, reqUrl)
+      logger.info({ req, res, responseTimeMs }, '%s %s', req.method, reqUrl)
     }
     next()
   }
@@ -85,20 +40,6 @@ function getRoutePath(req) {
   }
   if (req.swagger && req.swagger.apiPath != null) {
     return req.swagger.apiPath
-  }
-  return null
-}
-
-function getRemoteIp(req) {
-  if (req.ip) {
-    return req.ip
-  }
-  if (req.socket) {
-    if (req.socket.socket && req.socket.socket.remoteAddress) {
-      return req.socket.socket.remoteAddress
-    } else if (req.socket.remoteAddress) {
-      return req.socket.remoteAddress
-    }
   }
   return null
 }

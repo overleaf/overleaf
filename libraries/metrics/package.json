@@ -1,6 +1,6 @@
 {
   "name": "@overleaf/metrics",
-  "version": "3.5.2",
+  "version": "4.0.0",
   "description": "A drop-in metrics and monitoring module for node.js apps",
   "repository": {
     "type": "git",
@@ -41,5 +41,8 @@
     "format": "prettier-eslint $PWD'/**/*.js' --list-different",
     "format:fix": "prettier-eslint $PWD'/**/*.js' --write",
     "test:ci": "npm run test"
+  },
+  "peerDependencies": {
+    "@overleaf/logger": ">= 3.0.0"
   }
 }

@@ -7,7 +7,7 @@
     "url": "https://github.com/overleaf/overleaf"
   },
   "license": "AGPL-3.0-only",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "scripts": {
     "test": "mocha --grep=$MOCHA_GREP test/**/*.js",
     "format": "prettier-eslint $PWD'/**/*.js' --list-different",
@@ -42,5 +42,8 @@
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.0.2",
     "sinon-chai": "^3.5.0"
+  },
+  "peerDependencies": {
+    "@overleaf/metrics": ">= 4.0.0"
   }
 }
