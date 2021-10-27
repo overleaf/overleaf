@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -26,7 +25,7 @@ const MAX_HTTP_REQUEST_LENGTH = 15000 // 15 seconds
 module.exports = WebApiManager = {
   sendRequest(url, callback) {
     if (callback == null) {
-      callback = function (error, body) {}
+      callback = function () {}
     }
     return request.get(
       {
@@ -61,7 +60,7 @@ module.exports = WebApiManager = {
 
   getUserInfo(user_id, callback) {
     if (callback == null) {
-      callback = function (error, userInfo) {}
+      callback = function () {}
     }
     const url = `/user/${user_id}/personal_info`
     logger.log({ user_id }, 'getting user info from web')
@@ -93,7 +92,7 @@ module.exports = WebApiManager = {
 
   getProjectDetails(project_id, callback) {
     if (callback == null) {
-      callback = function (error, details) {}
+      callback = function () {}
     }
     const url = `/project/${project_id}/details`
     logger.log({ project_id }, 'getting project details from web')

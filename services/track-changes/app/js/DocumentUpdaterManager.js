@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -19,7 +18,7 @@ const Settings = require('@overleaf/settings')
 module.exports = DocumentUpdaterManager = {
   _requestDocument(project_id, doc_id, url, callback) {
     if (callback == null) {
-      callback = function (error, content, version) {}
+      callback = function () {}
     }
 
     logger.log({ project_id, doc_id }, 'getting doc from document updater')
@@ -64,7 +63,7 @@ module.exports = DocumentUpdaterManager = {
 
   setDocument(project_id, doc_id, content, user_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const url = `${Settings.apis.documentupdater.url}/project/${project_id}/doc/${doc_id}`
     logger.log({ project_id, doc_id }, 'setting doc in document updater')

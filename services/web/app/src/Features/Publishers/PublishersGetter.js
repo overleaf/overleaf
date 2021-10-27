@@ -21,7 +21,7 @@ const _ = require('underscore')
 module.exports = PublishersGetter = {
   getManagedPublishers(user_id, callback) {
     if (callback == null) {
-      callback = function (error, managedPublishers) {}
+      callback = function () {}
     }
     return UserMembershipsHandler.getEntitiesByUser(
       UserMembershipEntityConfigs.publisher,

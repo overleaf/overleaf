@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -30,16 +29,7 @@ const MAX_UNFLUSHED_AGE = 300 * 1000 // 5 mins, document should be flushed to mo
 module.exports = DocumentManager = {
   getDoc(project_id, doc_id, _callback) {
     if (_callback == null) {
-      _callback = function (
-        error,
-        lines,
-        version,
-        ranges,
-        pathname,
-        projectHistoryId,
-        unflushedTime,
-        alreadyLoaded
-      ) {}
+      _callback = function () {}
     }
     const timer = new Metrics.Timer('docManager.getDoc')
     const callback = function (...args) {
@@ -147,15 +137,7 @@ module.exports = DocumentManager = {
 
   getDocAndRecentOps(project_id, doc_id, fromVersion, _callback) {
     if (_callback == null) {
-      _callback = function (
-        error,
-        lines,
-        version,
-        ops,
-        ranges,
-        pathname,
-        projectHistoryId
-      ) {}
+      _callback = function () {}
     }
     const timer = new Metrics.Timer('docManager.getDocAndRecentOps')
     const callback = function (...args) {
@@ -207,7 +189,7 @@ module.exports = DocumentManager = {
 
   setDoc(project_id, doc_id, newLines, source, user_id, undoing, _callback) {
     if (_callback == null) {
-      _callback = function (error) {}
+      _callback = function () {}
     }
     const timer = new Metrics.Timer('docManager.setDoc')
     const callback = function (...args) {
@@ -325,7 +307,7 @@ module.exports = DocumentManager = {
 
   flushDocIfLoaded(project_id, doc_id, _callback) {
     if (_callback == null) {
-      _callback = function (error) {}
+      _callback = function () {}
     }
     const timer = new Metrics.Timer('docManager.flushDocIfLoaded')
     const callback = function (...args) {
@@ -421,7 +403,7 @@ module.exports = DocumentManager = {
       change_ids = []
     }
     if (_callback == null) {
-      _callback = function (error) {}
+      _callback = function () {}
     }
     const timer = new Metrics.Timer('docManager.acceptChanges')
     const callback = function (...args) {
@@ -471,7 +453,7 @@ module.exports = DocumentManager = {
 
   deleteComment(project_id, doc_id, comment_id, _callback) {
     if (_callback == null) {
-      _callback = function (error) {}
+      _callback = function () {}
     }
     const timer = new Metrics.Timer('docManager.deleteComment')
     const callback = function (...args) {
@@ -521,7 +503,7 @@ module.exports = DocumentManager = {
 
   renameDoc(project_id, doc_id, user_id, update, projectHistoryId, _callback) {
     if (_callback == null) {
-      _callback = function (error) {}
+      _callback = function () {}
     }
     const timer = new Metrics.Timer('docManager.updateProject')
     const callback = function (...args) {
@@ -541,7 +523,7 @@ module.exports = DocumentManager = {
 
   getDocAndFlushIfOld(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error, doc) {}
+      callback = function () {}
     }
     return DocumentManager.getDoc(
       project_id,
@@ -648,7 +630,7 @@ module.exports = DocumentManager = {
 
   getDocWithLock(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error, lines, version) {}
+      callback = function () {}
     }
     const UpdateManager = require('./UpdateManager')
     return UpdateManager.lockUpdatesAndDo(
@@ -661,15 +643,7 @@ module.exports = DocumentManager = {
 
   getDocAndRecentOpsWithLock(project_id, doc_id, fromVersion, callback) {
     if (callback == null) {
-      callback = function (
-        error,
-        lines,
-        version,
-        ops,
-        ranges,
-        pathname,
-        projectHistoryId
-      ) {}
+      callback = function () {}
     }
     const UpdateManager = require('./UpdateManager')
     return UpdateManager.lockUpdatesAndDo(
@@ -683,7 +657,7 @@ module.exports = DocumentManager = {
 
   getDocAndFlushIfOldWithLock(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error, doc) {}
+      callback = function () {}
     }
     const UpdateManager = require('./UpdateManager')
     return UpdateManager.lockUpdatesAndDo(
@@ -704,7 +678,7 @@ module.exports = DocumentManager = {
     callback
   ) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const UpdateManager = require('./UpdateManager')
     return UpdateManager.lockUpdatesAndDo(
@@ -721,7 +695,7 @@ module.exports = DocumentManager = {
 
   flushDocIfLoadedWithLock(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const UpdateManager = require('./UpdateManager')
     return UpdateManager.lockUpdatesAndDo(
@@ -745,7 +719,7 @@ module.exports = DocumentManager = {
 
   acceptChangesWithLock(project_id, doc_id, change_ids, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const UpdateManager = require('./UpdateManager')
     return UpdateManager.lockUpdatesAndDo(
@@ -759,7 +733,7 @@ module.exports = DocumentManager = {
 
   deleteCommentWithLock(project_id, doc_id, thread_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const UpdateManager = require('./UpdateManager')
     return UpdateManager.lockUpdatesAndDo(
@@ -780,7 +754,7 @@ module.exports = DocumentManager = {
     callback
   ) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const UpdateManager = require('./UpdateManager')
     return UpdateManager.lockUpdatesAndDo(
@@ -796,7 +770,7 @@ module.exports = DocumentManager = {
 
   resyncDocContentsWithLock(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const UpdateManager = require('./UpdateManager')
     return UpdateManager.lockUpdatesAndDo(

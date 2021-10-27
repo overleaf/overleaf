@@ -1,6 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -23,7 +20,7 @@ module.exports = LockManager = {
   tryLock(key, callback) {
     let lockValue
     if (callback == null) {
-      callback = function (err, gotLock) {}
+      callback = function () {}
     }
     const existingLock = LockState[key]
     if (existingLock != null) {
@@ -46,7 +43,7 @@ module.exports = LockManager = {
   getLock(key, callback) {
     let attempt
     if (callback == null) {
-      callback = function (error, lockValue) {}
+      callback = function () {}
     }
     const startTime = Date.now()
     return (attempt = () =>
@@ -68,7 +65,7 @@ module.exports = LockManager = {
 
   releaseLock(key, lockValue, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const existingLock = LockState[key]
     if (existingLock === lockValue) {
@@ -93,7 +90,7 @@ module.exports = LockManager = {
 
   runWithLock(key, runner, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return LockManager.getLock(key, function (error, lockValue) {
       if (error != null) {

@@ -25,7 +25,7 @@ const ProjectHistoryHandler = {
   setHistoryId(project_id, history_id, callback) {
     // reject invalid history ids
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     if (!history_id || typeof history_id !== 'number') {
       return callback(new Error('invalid history id'))
@@ -48,7 +48,7 @@ const ProjectHistoryHandler = {
 
   getHistoryId(project_id, callback) {
     if (callback == null) {
-      callback = function (err, result) {}
+      callback = function () {}
     }
     return ProjectDetailsHandler.getDetails(
       project_id,
@@ -73,7 +73,7 @@ const ProjectHistoryHandler = {
   upgradeHistory(project_id, callback) {
     // project must have an overleaf.history.id before allowing display of new history
     if (callback == null) {
-      callback = function (err, result) {}
+      callback = function () {}
     }
     return Project.updateOne(
       { _id: project_id, 'overleaf.history.id': { $exists: true } },
@@ -96,7 +96,7 @@ const ProjectHistoryHandler = {
 
   downgradeHistory(project_id, callback) {
     if (callback == null) {
-      callback = function (err, result) {}
+      callback = function () {}
     }
     return Project.updateOne(
       { _id: project_id, 'overleaf.history.upgradedAt': { $exists: true } },
@@ -123,7 +123,7 @@ const ProjectHistoryHandler = {
     // state. Setting a history id when one wasn't present before is ok,
     // because undefined history ids aren't cached.
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     return ProjectHistoryHandler.getHistoryId(
       project_id,

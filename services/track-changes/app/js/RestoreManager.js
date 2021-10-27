@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -19,7 +18,7 @@ const logger = require('logger-sharelatex')
 module.exports = RestoreManager = {
   restoreToBeforeVersion(project_id, doc_id, version, user_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     logger.log({ project_id, doc_id, version, user_id }, 'restoring document')
     return DiffManager.getDocumentBeforeVersion(

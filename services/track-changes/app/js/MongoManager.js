@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -22,7 +21,7 @@ const logger = require('logger-sharelatex')
 module.exports = MongoManager = {
   getLastCompressedUpdate(doc_id, callback) {
     if (callback == null) {
-      callback = function (error, update) {}
+      callback = function () {}
     }
     return db.docHistory
       .find(
@@ -48,7 +47,7 @@ module.exports = MongoManager = {
     // to start, we pass it back as callback(null,null,version), just
     // giving the version so we can check consistency.
     if (callback == null) {
-      callback = function (error, update, version) {}
+      callback = function () {}
     }
     return MongoManager.getLastCompressedUpdate(
       doc_id,
@@ -101,7 +100,7 @@ module.exports = MongoManager = {
 
   backportProjectId(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return db.docHistory.updateMany(
       {
@@ -117,7 +116,7 @@ module.exports = MongoManager = {
 
   getProjectMetaData(project_id, callback) {
     if (callback == null) {
-      callback = function (error, metadata) {}
+      callback = function () {}
     }
     return db.projectHistoryMetaData.findOne(
       {
@@ -129,7 +128,7 @@ module.exports = MongoManager = {
 
   setProjectMetaData(project_id, metadata, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return db.projectHistoryMetaData.updateOne(
       {
@@ -148,7 +147,7 @@ module.exports = MongoManager = {
   upgradeHistory(project_id, callback) {
     // preserve the project's existing history
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return db.docHistory.updateMany(
       {

@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-undef
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -30,6 +29,7 @@ describe('ASpell', function () {
   describe('a correctly spelled word', function () {
     beforeEach(function (done) {
       return this.ASpell.checkWords('en', ['word'], (error, result) => {
+        if (error) return done(error)
         this.result = result
         return done()
       })
@@ -43,6 +43,7 @@ describe('ASpell', function () {
   describe('a misspelled word', function () {
     beforeEach(function (done) {
       return this.ASpell.checkWords('en', ['bussines'], (error, result) => {
+        if (error) return done(error)
         this.result = result
         return done()
       })
@@ -60,6 +61,7 @@ describe('ASpell', function () {
         'en',
         ['bussines', 'word', 'neccesary'],
         (error, result) => {
+          if (error) return done(error)
           this.result = result
           return done()
         }
@@ -115,6 +117,7 @@ describe('ASpell', function () {
       this.ASpell.ASPELL_TIMEOUT = 1
       this.start = Date.now()
       return this.ASpell.checkWords('en', words, (error, result) => {
+        expect(error).to.exist
         this.result = result
         return done()
       })

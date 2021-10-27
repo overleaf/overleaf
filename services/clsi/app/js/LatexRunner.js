@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -33,7 +32,7 @@ module.exports = LatexRunner = {
   runLatex(project_id, options, callback) {
     let command
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     let {
       directory,
@@ -167,7 +166,7 @@ module.exports = LatexRunner = {
 
   killLatex(project_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const id = `${project_id}`
     logger.log({ id }, 'killing running compile')

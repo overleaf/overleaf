@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -26,7 +25,7 @@ module.exports = MockWebServer = {
 
   joinProject(project_id, user_id, callback) {
     if (callback == null) {
-      callback = function (error, project, privilegeLevel) {}
+      callback = function () {}
     }
     return callback(
       null,
@@ -70,7 +69,7 @@ module.exports = MockWebServer = {
   running: false,
   run(callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     if (MockWebServer.running) {
       return callback()

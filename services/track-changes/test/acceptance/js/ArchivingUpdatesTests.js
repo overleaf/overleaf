@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-undef,
     no-unused-vars,
 */
@@ -221,9 +220,7 @@ describe('Archiving updates', function () {
           expiresAt: { $exists: true },
         },
         (err, result) => {
-          if (typeof error !== 'undefined' && error !== null) {
-            throw error
-          }
+          if (err) return done(err)
           return db.docHistory.count(
             { doc_id: ObjectId(this.doc_id) },
             (error, count) => {
@@ -277,6 +274,7 @@ describe('Archiving updates', function () {
             this.doc_id,
             pack_id,
             (error, doc) => {
+              if (error) return done(error)
               doc.n.should.equal(1024)
               doc.pack.length.should.equal(1024)
               return done()

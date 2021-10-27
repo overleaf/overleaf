@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -25,7 +24,7 @@ module.exports = HistoryRedisManager = {
       ops = []
     }
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     if (ops.length === 0) {
       return callback(new Error('cannot push no ops')) // This should never be called with no ops, but protect against a redis error if we sent an empty array to rpush

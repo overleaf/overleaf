@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -78,7 +77,7 @@ module.exports = PackManager = {
     callback
   ) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     if (newUpdates.length === 0) {
       return callback()
@@ -144,7 +143,7 @@ module.exports = PackManager = {
     callback
   ) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     if (newUpdates.length === 0) {
       return callback()
@@ -194,7 +193,7 @@ module.exports = PackManager = {
     callback
   ) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const first = newUpdates[0]
     const last = newUpdates[newUpdates.length - 1]
@@ -244,7 +243,7 @@ module.exports = PackManager = {
     callback
   ) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const first = newUpdates[0]
     const last = newUpdates[newUpdates.length - 1]
@@ -284,7 +283,7 @@ module.exports = PackManager = {
 
   getOpsByVersionRange(project_id, doc_id, fromVersion, toVersion, callback) {
     if (callback == null) {
-      callback = function (error, updates) {}
+      callback = function () {}
     }
     return PackManager.loadPacksByVersionRange(
       project_id,
@@ -292,6 +291,7 @@ module.exports = PackManager = {
       fromVersion,
       toVersion,
       function (error) {
+        if (error) return callback(error)
         const query = { doc_id: ObjectId(doc_id.toString()) }
         if (toVersion != null) {
           query.v = { $lte: toVersion }
@@ -436,6 +436,7 @@ module.exports = PackManager = {
               { projection: { pack: false } }
             )
             .toArray((err, packs) => {
+              if (err) return callback(err)
               packs.forEach(pack => {
                 docIdSet.add(pack.doc_id.toString())
               })
@@ -446,6 +447,7 @@ module.exports = PackManager = {
           db.docHistoryIndex
             .find({ project_id: ObjectId(project_id) })
             .toArray((err, indexes) => {
+              if (err) return callback(err)
               indexes.forEach(index => {
                 docIdSet.add(index._id.toString())
               })
@@ -879,6 +881,7 @@ module.exports = PackManager = {
         doc_id,
         pack_id,
         function (err, result) {
+          if (err) return callback(err)
           delete result.last_checked
           delete pack.last_checked
           // need to compare ids as ObjectIds with .equals()

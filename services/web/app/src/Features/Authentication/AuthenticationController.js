@@ -187,7 +187,10 @@ const AuthenticationController = {
 
   ipMatchCheck(req, user) {
     if (req.ip !== user.lastLoginIp) {
-      NotificationsBuilder.ipMatcherAffiliation(user._id).create(req.ip)
+      NotificationsBuilder.ipMatcherAffiliation(user._id).create(
+        req.ip,
+        () => {}
+      )
     }
     return UserUpdater.updateUser(user._id.toString(), {
       $set: { lastLoginIp: req.ip },
@@ -501,8 +504,8 @@ function _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser) {
       logger.warn({ err }, 'error setting up login data')
     }
   })
-  LoginRateLimiter.recordSuccessfulLogin(user.email)
-  AuthenticationController._recordSuccessfulLogin(user._id)
+  LoginRateLimiter.recordSuccessfulLogin(user.email, () => {})
+  AuthenticationController._recordSuccessfulLogin(user._id, () => {})
   AuthenticationController.ipMatchCheck(req, user)
   Analytics.recordEventForUser(user._id, 'user-logged-in')
   Analytics.identifyUser(user._id, anonymousAnalyticsId, isNewUser)

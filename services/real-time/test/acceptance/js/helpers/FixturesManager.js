@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -21,7 +20,7 @@ module.exports = FixturesManager = {
       options = {}
     }
     if (callback == null) {
-      callback = function (error, data) {}
+      callback = function () {}
     }
     if (!options.user_id) {
       options.user_id = FixturesManager.getRandomId()
@@ -74,7 +73,7 @@ module.exports = FixturesManager = {
       options = {}
     }
     if (callback == null) {
-      callback = function (error, data) {}
+      callback = function () {}
     }
     if (!options.doc_id) {
       options.doc_id = FixturesManager.getRandomId()

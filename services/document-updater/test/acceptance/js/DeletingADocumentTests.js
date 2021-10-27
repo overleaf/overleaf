@@ -1,6 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -76,6 +73,7 @@ describe('Deleting a document', function () {
                   this.project_id,
                   this.doc_id,
                   (error, res, body) => {
+                    if (error) return done(error)
                     this.statusCode = res.statusCode
                     return setTimeout(done, 200)
                   }
@@ -109,6 +107,7 @@ describe('Deleting a document', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           MockWebApi.getDocument
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
@@ -145,6 +144,7 @@ describe('Deleting a document', function () {
         this.project_id,
         this.doc_id,
         (error, res, body) => {
+          if (error) return done(error)
           this.statusCode = res.statusCode
           return setTimeout(done, 200)
         }
@@ -170,6 +170,7 @@ describe('Deleting a document', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           MockWebApi.getDocument
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)

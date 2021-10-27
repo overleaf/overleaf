@@ -78,7 +78,7 @@ module.exports = ReferencesHandler = {
 
   _isFullIndex(project, callback) {
     if (callback == null) {
-      callback = function (err, result) {}
+      callback = function () {}
     }
     return UserGetter.getUser(
       project.owner_ref,
@@ -99,7 +99,7 @@ module.exports = ReferencesHandler = {
 
   indexAll(projectId, callback) {
     if (callback == null) {
-      callback = function (err, data) {}
+      callback = function () {}
     }
     return ProjectGetter.getProject(
       projectId,
@@ -127,7 +127,7 @@ module.exports = ReferencesHandler = {
 
   index(projectId, docIds, callback) {
     if (callback == null) {
-      callback = function (err, data) {}
+      callback = function () {}
     }
     return ProjectGetter.getProject(
       projectId,

@@ -151,7 +151,9 @@ async function makeTempDirectory() {
  */
 function cleanupTempDirectory(tmpdir) {
   fs.promises.rmdir(tmpdir, { recursive: true }).catch(err => {
-    logger.warn({ tmpdir }, 'Failed to clean up temp directory')
+    if (err) {
+      logger.warn({ err, tmpdir }, 'Failed to clean up temp directory')
+    }
   })
 }
 

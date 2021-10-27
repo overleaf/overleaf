@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-dupe-keys,
     no-return-assign,
     no-unused-vars,
@@ -57,6 +56,7 @@ describe('DocManager', function () {
         this.project_id,
         this.doc_id,
         (err, doc) => {
+          if (err) return done(err)
           doc.should.equal(this.doc)
           this.DocManager._getDoc
             .calledWith(this.project_id, this.doc_id, {
@@ -98,6 +98,7 @@ describe('DocManager', function () {
         this.project_id,
         this.doc_id,
         (err, doc) => {
+          if (err) return done(err)
           doc.should.equal(this.doc)
           this.DocManager._getDoc
             .calledWith(this.project_id, this.doc_id, {

@@ -30,7 +30,7 @@ settings = require('@overleaf/settings')
 module.exports = ExportsHandler = self = {
   exportProject(export_params, callback) {
     if (callback == null) {
-      callback = function (error, export_data) {}
+      callback = function () {}
     }
     return self._buildExport(export_params, function (err, export_data) {
       if (err != null) {
@@ -50,7 +50,7 @@ module.exports = ExportsHandler = self = {
 
   _buildExport(export_params, callback) {
     if (callback == null) {
-      callback = function (err, export_data) {}
+      callback = function () {}
     }
     const {
       project_id,
@@ -168,7 +168,7 @@ module.exports = ExportsHandler = self = {
 
   _requestExport(export_data, callback) {
     if (callback == null) {
-      callback = function (err, export_v1_id) {}
+      callback = function () {}
     }
     return request.post(
       {
@@ -199,7 +199,7 @@ module.exports = ExportsHandler = self = {
 
   _requestVersion(project_id, callback) {
     if (callback == null) {
-      callback = function (err, export_v1_id) {}
+      callback = function () {}
     }
     return request.get(
       {
@@ -227,7 +227,7 @@ module.exports = ExportsHandler = self = {
 
   fetchExport(export_id, callback) {
     if (callback == null) {
-      callback = function (err, export_json) {}
+      callback = function () {}
     }
     return request.get(
       {
@@ -255,7 +255,7 @@ module.exports = ExportsHandler = self = {
 
   fetchDownload(export_id, type, callback) {
     if (callback == null) {
-      callback = function (err, file_url) {}
+      callback = function () {}
     }
     return request.get(
       {

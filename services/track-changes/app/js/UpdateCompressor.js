@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     new-cap,
     no-throw-literal,
     no-unused-vars,
@@ -302,7 +301,7 @@ module.exports = UpdateCompressor = {
   UNCHANGED: 0,
   diffAsShareJsOps(before, after, callback) {
     if (callback == null) {
-      callback = function (error, ops) {}
+      callback = function () {}
     }
     const diffs = dmp.diff_main(before, after)
     dmp.diff_cleanupSemantic(diffs)

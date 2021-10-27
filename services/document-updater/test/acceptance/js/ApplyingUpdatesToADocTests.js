@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -92,6 +91,7 @@ describe('Applying updates to a doc', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.result)
           return done()
         }
@@ -241,6 +241,7 @@ describe('Applying updates to a doc', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.result)
           return done()
         }
@@ -254,11 +255,13 @@ describe('Applying updates to a doc', function () {
         0,
         -1,
         (error, updates) => {
+          if (error) return done(error)
           JSON.parse(updates[0]).op.should.deep.equal(this.update.op)
           return rclient_history.sismember(
             HistoryKeys.docsWithHistoryOps({ project_id: this.project_id }),
             this.doc_id,
             (error, result) => {
+              if (error) return done(error)
               result.should.equal(1)
               return done()
             }
@@ -274,6 +277,7 @@ describe('Applying updates to a doc', function () {
         0,
         -1,
         (error, updates) => {
+          if (error) return done(error)
           JSON.parse(updates[0]).op.should.deep.equal(this.update.op)
           return done()
         }
@@ -323,6 +327,7 @@ describe('Applying updates to a doc', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.result)
           return done()
         }
@@ -336,6 +341,7 @@ describe('Applying updates to a doc', function () {
         0,
         -1,
         (error, updates) => {
+          if (error) return done(error)
           updates.length.should.equal(0)
           return done()
         }
@@ -349,6 +355,7 @@ describe('Applying updates to a doc', function () {
         0,
         -1,
         (error, updates) => {
+          if (error) return done(error)
           JSON.parse(updates[0]).op.should.deep.equal(this.update.op)
           return done()
         }
@@ -425,6 +432,7 @@ describe('Applying updates to a doc', function () {
             this.project_id,
             this.doc_id,
             (error, res, doc) => {
+              if (error) return done(error)
               doc.lines.should.deep.equal(this.my_result)
               return done()
             }
@@ -439,6 +447,7 @@ describe('Applying updates to a doc', function () {
           0,
           -1,
           (error, updates) => {
+            if (error) return done(error)
             updates = Array.from(updates).map(u => JSON.parse(u))
             for (let i = 0; i < this.updates.length; i++) {
               const appliedUpdate = this.updates[i]
@@ -449,6 +458,7 @@ describe('Applying updates to a doc', function () {
               HistoryKeys.docsWithHistoryOps({ project_id: this.project_id }),
               this.doc_id,
               (error, result) => {
+                if (error) return done(error)
                 result.should.equal(1)
                 return done()
               }
@@ -464,6 +474,7 @@ describe('Applying updates to a doc', function () {
           0,
           -1,
           (error, updates) => {
+            if (error) return done(error)
             updates = Array.from(updates).map(u => JSON.parse(u))
             for (let i = 0; i < this.updates.length; i++) {
               const appliedUpdate = this.updates[i]
@@ -538,6 +549,7 @@ describe('Applying updates to a doc', function () {
             this.project_id,
             this.doc_id,
             (error, res, doc) => {
+              if (error) return done(error)
               doc.lines.should.deep.equal(this.my_result)
               return done()
             }
@@ -587,6 +599,7 @@ describe('Applying updates to a doc', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.lines)
           return done()
         }
@@ -695,6 +708,7 @@ describe('Applying updates to a doc', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.result)
           return done()
         }
@@ -775,6 +789,7 @@ describe('Applying updates to a doc', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.result)
           return done()
         }
@@ -828,6 +843,7 @@ describe('Applying updates to a doc', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           res.statusCode.should.equal(404)
           return done()
         }

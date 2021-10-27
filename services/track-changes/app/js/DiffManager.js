@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -22,7 +21,7 @@ module.exports = DiffManager = {
     // Get updates last, since then they must be ahead and it
     // might be possible to rewind to the same version as the doc.
     if (callback == null) {
-      callback = function (error, content, version, updates) {}
+      callback = function () {}
     }
     return DocumentUpdaterManager.getDocument(
       project_id,
@@ -52,7 +51,7 @@ module.exports = DiffManager = {
 
   getDiff(project_id, doc_id, fromVersion, toVersion, callback) {
     if (callback == null) {
-      callback = function (error, diff) {}
+      callback = function () {}
     }
     return DiffManager.getDocumentBeforeVersion(
       project_id,
@@ -94,7 +93,7 @@ module.exports = DiffManager = {
     // versions.
     let retry
     if (_callback == null) {
-      _callback = function (error, document, rewoundUpdates) {}
+      _callback = function () {}
     }
     let retries = 3
     const callback = function (error, ...args) {
@@ -126,7 +125,7 @@ module.exports = DiffManager = {
 
   _tryGetDocumentBeforeVersion(project_id, doc_id, version, callback) {
     if (callback == null) {
-      callback = function (error, document, rewoundUpdates) {}
+      callback = function () {}
     }
     logger.log(
       { project_id, doc_id, version },

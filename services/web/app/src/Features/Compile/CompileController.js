@@ -109,7 +109,7 @@ module.exports = CompileController = {
 
   stopCompile(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const project_id = req.params.Project_id
     const user_id = SessionManager.getLoggedInUserId(req.session)
@@ -124,7 +124,7 @@ module.exports = CompileController = {
   // Used for submissions through the public API
   compileSubmission(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     res.setTimeout(COMPILE_TIMEOUT_MS)
     const { submission_id } = req.params
@@ -194,7 +194,7 @@ module.exports = CompileController = {
 
   downloadPdf(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     Metrics.inc('pdf-downloads')
     const project_id = req.params.Project_id
@@ -308,7 +308,7 @@ module.exports = CompileController = {
 
   getFileFromClsi(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const project_id = req.params.Project_id
     return CompileController._downloadAsUser(req, function (error, user_id) {
@@ -327,7 +327,7 @@ module.exports = CompileController = {
 
   getFileFromClsiWithoutUser(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const { submission_id } = req.params
     const url = CompileController._getFileUrl(
@@ -377,7 +377,7 @@ module.exports = CompileController = {
 
   proxySyncPdf(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const project_id = req.params.Project_id
     const { page, h, v } = req.query
@@ -413,7 +413,7 @@ module.exports = CompileController = {
 
   proxySyncCode(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const project_id = req.params.Project_id
     const { file, line, column } = req.query
@@ -457,7 +457,7 @@ module.exports = CompileController = {
 
   proxyToClsi(project_id, url, req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     if (req.query != null ? req.query.compileGroup : undefined) {
       return CompileController.proxyToClsiWithLimits(
@@ -490,7 +490,7 @@ module.exports = CompileController = {
 
   proxyToClsiWithLimits(project_id, url, limits, req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     _getPersistenceOptions(req, project_id, (err, persistenceOptions) => {
       let qs

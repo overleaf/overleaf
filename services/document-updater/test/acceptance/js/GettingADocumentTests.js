@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -42,6 +41,7 @@ describe('Getting a document', function () {
         this.project_id,
         this.doc_id,
         (error, res, returnedDoc) => {
+          if (error) return done(error)
           this.returnedDoc = returnedDoc
           return done()
         }
@@ -90,6 +90,7 @@ describe('Getting a document', function () {
             this.project_id,
             this.doc_id,
             (error, res, returnedDoc) => {
+              if (error) return done(error)
               this.returnedDoc = returnedDoc
               return done()
             }
@@ -152,6 +153,7 @@ describe('Getting a document', function () {
           this.doc_id,
           190,
           (error, res, returnedDoc) => {
+            if (error) return done(error)
             this.returnedDoc = returnedDoc
             return done()
           }
@@ -174,6 +176,7 @@ describe('Getting a document', function () {
           this.doc_id,
           10,
           (error, res, returnedDoc) => {
+            if (error) return done(error)
             this.res = res
             this.returnedDoc = returnedDoc
             return done()
@@ -197,6 +200,7 @@ describe('Getting a document', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           this.statusCode = res.statusCode
           return done()
         }
@@ -218,7 +222,7 @@ describe('Getting a document', function () {
         .stub(MockWebApi, 'getDocument')
         .callsFake((project_id, doc_id, callback) => {
           if (callback == null) {
-            callback = function (error, doc) {}
+            callback = function () {}
           }
           return callback(new Error('oops'))
         })
@@ -226,6 +230,7 @@ describe('Getting a document', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           this.statusCode = res.statusCode
           return done()
         }
@@ -252,7 +257,7 @@ describe('Getting a document', function () {
         .stub(MockWebApi, 'getDocument')
         .callsFake((project_id, doc_id, callback) => {
           if (callback == null) {
-            callback = function (error, doc) {}
+            callback = function () {}
           }
           return setTimeout(callback, 30000)
         })
@@ -269,6 +274,7 @@ describe('Getting a document', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           res.statusCode.should.equal(500)
           const delta = Date.now() - start
           expect(delta).to.be.below(20000)

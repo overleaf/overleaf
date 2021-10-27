@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -19,7 +18,7 @@ module.exports = MockDocUpdaterApi = {
 
   getAllDoc(project_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return callback(null, this.docs)
   },

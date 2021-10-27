@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -20,7 +19,7 @@ const logger = require('logger-sharelatex')
 module.exports = UpdateTrimmer = {
   shouldTrimUpdates(project_id, callback) {
     if (callback == null) {
-      callback = function (error, shouldTrim) {}
+      callback = function () {}
     }
     return MongoManager.getProjectMetaData(
       project_id,

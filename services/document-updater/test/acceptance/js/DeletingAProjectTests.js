@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -102,6 +101,7 @@ describe('Deleting a project', function () {
             return DocUpdaterClient.deleteProject(
               this.project_id,
               (error, res, body) => {
+                if (error) return done(error)
                 this.statusCode = res.statusCode
                 return done()
               }
@@ -141,6 +141,7 @@ describe('Deleting a project', function () {
               this.project_id,
               doc.id,
               (error, res, returnedDoc) => {
+                if (error) return done(error)
                 MockWebApi.getDocument
                   .calledWith(this.project_id, doc.id)
                   .should.equal(true)
@@ -193,6 +194,7 @@ describe('Deleting a project', function () {
             return DocUpdaterClient.deleteProjectOnShutdown(
               this.project_id,
               (error, res, body) => {
+                if (error) return done(error)
                 this.statusCode = res.statusCode
                 return done()
               }
@@ -249,6 +251,7 @@ describe('Deleting a project', function () {
             return DocUpdaterClient.deleteProjectOnShutdown(
               this.project_id,
               (error, res, body) => {
+                if (error) return done(error)
                 this.statusCode = res.statusCode
                 // after deleting the project and putting it in the queue, flush the queue
                 return setTimeout(

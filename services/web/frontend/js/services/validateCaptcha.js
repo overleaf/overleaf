@@ -23,7 +23,7 @@ export default App.factory('validateCaptcha', function () {
   let recaptchaId = null
   const validateCaptcha = (callback, captchaDisabled) => {
     if (callback == null) {
-      callback = function (response) {}
+      callback = function () {}
     }
     if (
       typeof grecaptcha === 'undefined' ||

@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -107,6 +106,7 @@ describe('joinDoc', function () {
       return RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
           return done()
         }
@@ -194,6 +194,7 @@ describe('joinDoc', function () {
       return RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
           return done()
         }
@@ -281,6 +282,7 @@ describe('joinDoc', function () {
       return RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
           return done()
         }
@@ -367,6 +369,7 @@ describe('joinDoc', function () {
       return RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes('invalid-doc-id')).to.equal(
             false
           )
@@ -458,6 +461,7 @@ describe('joinDoc', function () {
       return RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
           return done()
         }
@@ -547,6 +551,7 @@ describe('joinDoc', function () {
       return RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
           return done()
         }
@@ -638,6 +643,7 @@ describe('joinDoc', function () {
       return RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(true)
           return done()
         }

@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -133,7 +132,7 @@ describe('Flushing a doc to Mongo', function () {
             callback
           ) => {
             if (callback == null) {
-              callback = function (error) {}
+              callback = function () {}
             }
             setTimeout(callback, t)
             return (t = 0)
@@ -152,6 +151,7 @@ describe('Flushing a doc to Mongo', function () {
         this.project_id,
         this.doc_id,
         (error, res, doc) => {
+          if (error) return done(error)
           res.statusCode.should.equal(204)
           const delta = Date.now() - start
           expect(delta).to.be.below(20000)

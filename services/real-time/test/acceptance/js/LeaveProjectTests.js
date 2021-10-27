@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-throw-literal,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -133,6 +132,7 @@ describe('leaveProject', function () {
       return this.clientB.emit(
         'clientTracking.getConnectedUsers',
         (error, users) => {
+          if (error) return done(error)
           for (const user of Array.from(users)) {
             if (user.client_id === this.clientA.publicId) {
               throw 'Expected clientA to not be listed in connected users'

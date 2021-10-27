@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -59,6 +58,7 @@ function deleteTestSuite(deleteDoc) {
   describe('when the doc exists', function () {
     beforeEach(function (done) {
       deleteDoc(this.project_id, this.doc_id, (error, res, doc) => {
+        if (error) return done(error)
         this.res = res
         return done()
       })
@@ -83,6 +83,7 @@ function deleteTestSuite(deleteDoc) {
 
     it('should insert a deleted doc into the docs collection', function (done) {
       return db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
+        if (error) return done(error)
         docs[0]._id.should.deep.equal(this.doc_id)
         docs[0].lines.should.deep.equal(this.lines)
         docs[0].deleted.should.equal(true)
@@ -112,6 +113,7 @@ function deleteTestSuite(deleteDoc) {
 
     beforeEach('delete Doc', function (done) {
       deleteDoc(this.project_id, this.doc_id, (error, res) => {
+        if (error) return done(error)
         this.res = res
         done()
       })
@@ -196,6 +198,7 @@ function deleteTestSuite(deleteDoc) {
     return it('should return a 404', function (done) {
       const missing_doc_id = ObjectId()
       deleteDoc(this.project_id, missing_doc_id, (error, res, doc) => {
+        if (error) return done(error)
         res.statusCode.should.equal(404)
         return done()
       })

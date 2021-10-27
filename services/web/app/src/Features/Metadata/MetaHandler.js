@@ -33,7 +33,7 @@ module.exports = MetaHandler = {
 
   getAllMetaForProject(projectId, callback) {
     if (callback == null) {
-      callback = function (err, projectMeta) {}
+      callback = function () {}
     }
     return DocumentUpdaterHandler.flushProjectToMongo(
       projectId,
@@ -54,7 +54,7 @@ module.exports = MetaHandler = {
 
   getMetaForDoc(projectId, docId, callback) {
     if (callback == null) {
-      callback = function (err, docMeta) {}
+      callback = function () {}
     }
     return DocumentUpdaterHandler.flushDocToMongo(
       projectId,

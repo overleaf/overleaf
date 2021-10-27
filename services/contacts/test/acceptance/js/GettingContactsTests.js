@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-undef,
     no-unused-vars,
 */
@@ -36,6 +35,7 @@ describe('Getting Contacts', function () {
           json: true,
         },
         (error, response, body) => {
+          if (error) return done(error)
           response.statusCode.should.equal(200)
           body.contact_ids.should.deep.equal([])
           return done()
@@ -84,6 +84,7 @@ describe('Getting Contacts', function () {
           json: true,
         },
         (error, response, body) => {
+          if (error) return done(error)
           response.statusCode.should.equal(200)
           body.contact_ids.should.deep.equal([
             this.contact_id_2,
@@ -103,6 +104,7 @@ describe('Getting Contacts', function () {
           json: true,
         },
         (error, response, body) => {
+          if (error) return done(error)
           response.statusCode.should.equal(200)
           body.contact_ids.should.deep.equal([
             this.contact_id_2,

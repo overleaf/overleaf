@@ -43,7 +43,7 @@ const SubscriptionLocator = {
 
   getManagedGroupSubscriptions(user_or_id, callback) {
     if (callback == null) {
-      callback = function (error, managedSubscriptions) {}
+      callback = function () {}
     }
     const user_id = SubscriptionLocator._getUserId(user_or_id)
     return Subscription.find({

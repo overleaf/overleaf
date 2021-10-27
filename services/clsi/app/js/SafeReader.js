@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-unused-vars,
     node/no-deprecated-api,
 */
@@ -22,7 +21,7 @@ module.exports = SafeReader = {
 
   readFile(file, size, encoding, callback) {
     if (callback == null) {
-      callback = function (error, result) {}
+      callback = function () {}
     }
     return fs.open(file, 'r', function (err, fd) {
       if (err != null && err.code === 'ENOENT') {

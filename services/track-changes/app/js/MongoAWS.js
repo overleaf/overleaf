@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -43,7 +42,7 @@ const createStream = function (streamConstructor, project_id, doc_id, pack_id) {
 module.exports = MongoAWS = {
   archivePack(project_id, doc_id, pack_id, _callback) {
     if (_callback == null) {
-      _callback = function (error) {}
+      _callback = function () {}
     }
     const callback = function (...args) {
       _callback(...Array.from(args || []))
@@ -113,7 +112,7 @@ module.exports = MongoAWS = {
 
   readArchivedPack(project_id, doc_id, pack_id, _callback) {
     if (_callback == null) {
-      _callback = function (error, result) {}
+      _callback = function () {}
     }
     const callback = function (...args) {
       _callback(...Array.from(args || []))
@@ -174,7 +173,7 @@ module.exports = MongoAWS = {
 
   unArchivePack(project_id, doc_id, pack_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return MongoAWS.readArchivedPack(
       project_id,

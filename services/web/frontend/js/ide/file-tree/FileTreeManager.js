@@ -320,7 +320,7 @@ export default FileTreeManager = class FileTreeManager {
 
   forEachEntity(callback) {
     if (callback == null) {
-      callback = function (entity, parent_folder, path) {}
+      callback = function () {}
     }
     this._forEachEntityInFolder(this.$scope.rootFolder, null, callback)
 
@@ -621,7 +621,7 @@ export default FileTreeManager = class FileTreeManager {
 
   renameEntity(entity, name, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     if (entity.name === name) {
       return
@@ -651,7 +651,7 @@ export default FileTreeManager = class FileTreeManager {
     // We'll wait for the socket.io notification to
     // delete from scope.
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return this.ide.queuedHttp({
       method: 'DELETE',

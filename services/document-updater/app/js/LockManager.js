@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -49,7 +48,7 @@ module.exports = LockManager = {
 
   tryLock(doc_id, callback) {
     if (callback == null) {
-      callback = function (err, isFree) {}
+      callback = function () {}
     }
     const lockValue = LockManager.randomLock()
     const key = keys.blockingKey({ doc_id })
@@ -94,7 +93,7 @@ module.exports = LockManager = {
   getLock(doc_id, callback) {
     let attempt
     if (callback == null) {
-      callback = function (error, lockValue) {}
+      callback = function () {}
     }
     const startTime = Date.now()
     let testInterval = LockManager.LOCK_TEST_INTERVAL
@@ -129,7 +128,7 @@ module.exports = LockManager = {
 
   checkLock(doc_id, callback) {
     if (callback == null) {
-      callback = function (err, isFree) {}
+      callback = function () {}
     }
     const key = keys.blockingKey({ doc_id })
     return rclient.exists(key, function (err, exists) {

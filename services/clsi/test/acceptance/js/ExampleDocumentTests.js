@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-path-concat,
     no-return-assign,
     no-unused-vars,
@@ -42,7 +41,7 @@ const MOCHA_LATEX_TIMEOUT = 60 * 1000
 
 const convertToPng = function (pdfPath, pngPath, callback) {
   if (callback == null) {
-    callback = function (error) {}
+    callback = function () {}
   }
   const command = `convert ${fixturePath(pdfPath)} ${fixturePath(pngPath)}`
   console.log('COMMAND')
@@ -56,7 +55,7 @@ const convertToPng = function (pdfPath, pngPath, callback) {
 
 const compare = function (originalPath, generatedPath, callback) {
   if (callback == null) {
-    callback = function (error, same) {}
+    callback = function () {}
   }
   const diff_file = `${fixturePath(generatedPath)}-diff.png`
   const proc = ChildProcess.exec(
@@ -84,7 +83,7 @@ const compare = function (originalPath, generatedPath, callback) {
 
 const checkPdfInfo = function (pdfPath, callback) {
   if (callback == null) {
-    callback = function (error, output) {}
+    callback = function () {}
   }
   const proc = ChildProcess.exec(`pdfinfo ${fixturePath(pdfPath)}`)
   let stdout = ''
@@ -101,7 +100,7 @@ const checkPdfInfo = function (pdfPath, callback) {
 
 const compareMultiplePages = function (project_id, callback) {
   if (callback == null) {
-    callback = function (error) {}
+    callback = function () {}
   }
   function compareNext(page_no, callback) {
     const path = `tmp/${project_id}-source-${page_no}.png`
@@ -128,7 +127,7 @@ const compareMultiplePages = function (project_id, callback) {
 
 const comparePdf = function (project_id, example_dir, callback) {
   if (callback == null) {
-    callback = function (error) {}
+    callback = function () {}
   }
   console.log('CONVERT')
   console.log(`tmp/${project_id}.pdf`, `tmp/${project_id}-generated.png`)
@@ -184,7 +183,7 @@ const downloadAndComparePdf = function (
   callback
 ) {
   if (callback == null) {
-    callback = function (error) {}
+    callback = function () {}
   }
   const writeStream = fs.createWriteStream(fixturePath(`tmp/${project_id}.pdf`))
   request.get(url).pipe(writeStream)

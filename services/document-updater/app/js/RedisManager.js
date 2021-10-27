@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -160,7 +159,7 @@ module.exports = RedisManager = {
 
   checkOrSetProjectState(project_id, newState, callback) {
     if (callback == null) {
-      callback = function (error, stateChanged) {}
+      callback = function () {}
     }
     const multi = rclient.multi()
     multi.getset(keys.projectState({ project_id }), newState)
@@ -179,22 +178,14 @@ module.exports = RedisManager = {
 
   clearProjectState(project_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return rclient.del(keys.projectState({ project_id }), callback)
   },
 
   getDoc(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (
-        error,
-        lines,
-        version,
-        ranges,
-        pathname,
-        projectHistoryId,
-        unflushedTime
-      ) {}
+      callback = function () {}
     }
     const timer = new metrics.Timer('redis.get-doc')
     const collectKeys = [
@@ -292,7 +283,7 @@ module.exports = RedisManager = {
 
   getDocVersion(doc_id, callback) {
     if (callback == null) {
-      callback = function (error, version, projectHistoryType) {}
+      callback = function () {}
     }
     return rclient.mget(
       keys.docVersion({ doc_id }),
@@ -310,7 +301,7 @@ module.exports = RedisManager = {
 
   getDocLines(doc_id, callback) {
     if (callback == null) {
-      callback = function (error, version) {}
+      callback = function () {}
     }
     return rclient.get(keys.docLines({ doc_id }), function (error, docLines) {
       if (error != null) {
@@ -322,7 +313,7 @@ module.exports = RedisManager = {
 
   getPreviousDocOps(doc_id, start, end, callback) {
     if (callback == null) {
-      callback = function (error, jsonOps) {}
+      callback = function () {}
     }
     const timer = new metrics.Timer('redis.get-prev-docops')
     return rclient.llen(keys.docOps({ doc_id }), function (error, length) {
@@ -392,7 +383,7 @@ module.exports = RedisManager = {
 
   getHistoryType(doc_id, callback) {
     if (callback == null) {
-      callback = function (error, projectHistoryType) {}
+      callback = function () {}
     }
     return rclient.get(
       keys.projectHistoryType({ doc_id }),
@@ -407,7 +398,7 @@ module.exports = RedisManager = {
 
   setHistoryType(doc_id, projectHistoryType, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return rclient.set(
       keys.projectHistoryType({ doc_id }),
@@ -432,7 +423,7 @@ module.exports = RedisManager = {
       appliedOps = []
     }
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return RedisManager.getDocVersion(
       doc_id,
@@ -572,8 +563,15 @@ module.exports = RedisManager = {
               return ProjectHistoryRedisManager.queueOps(
                 project_id,
                 ...Array.from(jsonOps),
-                (error, projectUpdateCount) =>
+                (error, projectUpdateCount) => {
+                  if (error) {
+                    // The full project history can re-sync a project in case
+                    //  updates went missing.
+                    // Just record the error here and acknowledge the write-op.
+                    metrics.inc('history-queue-error')
+                  }
                   callback(null, docUpdateCount, projectUpdateCount)
+                }
               )
             } else {
               return callback(null, docUpdateCount)
@@ -586,7 +584,7 @@ module.exports = RedisManager = {
 
   renameDoc(project_id, doc_id, user_id, update, projectHistoryId, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return RedisManager.getDoc(
       project_id,
@@ -632,14 +630,14 @@ module.exports = RedisManager = {
 
   clearUnflushedTime(doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return rclient.del(keys.unflushedTime({ doc_id }), callback)
   },
 
   getDocIdsInProject(project_id, callback) {
     if (callback == null) {
-      callback = function (error, doc_ids) {}
+      callback = function () {}
     }
     return rclient.smembers(keys.docsInProject({ project_id }), callback)
   },
@@ -647,7 +645,7 @@ module.exports = RedisManager = {
   getDocTimestamps(doc_ids, callback) {
     // get lastupdatedat timestamps for an array of doc_ids
     if (callback == null) {
-      callback = function (error, result) {}
+      callback = function () {}
     }
     return async.mapSeries(
       doc_ids,
@@ -673,7 +671,7 @@ module.exports = RedisManager = {
   getNextProjectToFlushAndDelete(cutoffTime, callback) {
     // find the oldest queued flush that is before the cutoff time
     if (callback == null) {
-      callback = function (error, key, timestamp) {}
+      callback = function () {}
     }
     return rclient.zrangebyscore(
       keys.flushAndDeleteQueue(),
@@ -713,7 +711,7 @@ module.exports = RedisManager = {
 
   _serializeRanges(ranges, callback) {
     if (callback == null) {
-      callback = function (error, serializedRanges) {}
+      callback = function () {}
     }
     let jsonRanges = JSON.stringify(ranges)
     if (jsonRanges != null && jsonRanges.length > MAX_RANGES_SIZE) {

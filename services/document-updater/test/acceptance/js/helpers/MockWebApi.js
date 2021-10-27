@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -46,7 +45,7 @@ module.exports = MockWebApi = {
     callback
   ) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const doc =
       this.docs[`${project_id}:${doc_id}`] ||
@@ -62,7 +61,7 @@ module.exports = MockWebApi = {
 
   getDocument(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error, doc) {}
+      callback = function () {}
     }
     return callback(null, this.docs[`${project_id}:${doc_id}`])
   },

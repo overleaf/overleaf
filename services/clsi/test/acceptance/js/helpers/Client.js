@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -28,7 +27,7 @@ module.exports = Client = {
 
   compile(project_id, data, callback) {
     if (callback == null) {
-      callback = function (error, res, body) {}
+      callback = function () {}
     }
     if (data) {
       // Enable pdf caching unless disabled explicitly.
@@ -47,7 +46,7 @@ module.exports = Client = {
 
   clearCache(project_id, callback) {
     if (callback == null) {
-      callback = function (error, res, body) {}
+      callback = function () {}
     }
     return request.del(`${this.host}/project/${project_id}`, callback)
   },
@@ -78,7 +77,7 @@ module.exports = Client = {
 
   syncFromCodeWithImage(project_id, file, line, column, imageName, callback) {
     if (callback == null) {
-      callback = function (error, pdfPositions) {}
+      callback = function () {}
     }
     return request.get(
       {
@@ -109,7 +108,7 @@ module.exports = Client = {
 
   syncFromPdfWithImage(project_id, page, h, v, imageName, callback) {
     if (callback == null) {
-      callback = function (error, pdfPositions) {}
+      callback = function () {}
     }
     return request.get(
       {
@@ -136,7 +135,7 @@ module.exports = Client = {
 
   compileDirectory(project_id, baseDirectory, directory, serverPort, callback) {
     if (callback == null) {
-      callback = function (error, res, body) {}
+      callback = function () {}
     }
     const resources = []
     let entities = fs.readdirSync(`${baseDirectory}/${directory}`)
@@ -213,7 +212,7 @@ module.exports = Client = {
 
   wordcountWithImage(project_id, file, image, callback) {
     if (callback == null) {
-      callback = function (error, pdfPositions) {}
+      callback = function () {}
     }
     return request.get(
       {

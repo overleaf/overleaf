@@ -20,7 +20,7 @@ const _ = require('underscore')
 module.exports = FileHashManager = {
   computeHash(filePath, callback) {
     if (callback == null) {
-      callback = function (error, hashValue) {}
+      callback = function () {}
     }
     callback = _.once(callback) // avoid double callbacks
 

@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -29,7 +28,7 @@ module.exports = RangesManager = {
       updates = []
     }
     if (callback == null) {
-      callback = function (error, new_entries, ranges_were_collapsed) {}
+      callback = function () {}
     }
     const { changes, comments } = _.cloneDeep(entries)
     const rangesTracker = new RangesTracker(changes, comments)
@@ -95,7 +94,7 @@ module.exports = RangesManager = {
 
   acceptChanges(change_ids, ranges, callback) {
     if (callback == null) {
-      callback = function (error, ranges) {}
+      callback = function () {}
     }
     const { changes, comments } = ranges
     logger.debug(`accepting ${change_ids.length} changes in ranges`)
@@ -107,7 +106,7 @@ module.exports = RangesManager = {
 
   deleteComment(comment_id, ranges, callback) {
     if (callback == null) {
-      callback = function (error, ranges) {}
+      callback = function () {}
     }
     const { changes, comments } = ranges
     logger.debug({ comment_id }, 'deleting comment in ranges')

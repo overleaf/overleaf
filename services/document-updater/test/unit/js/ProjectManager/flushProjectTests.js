@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -92,7 +91,7 @@ describe('ProjectManager - flushProject', function () {
       this.DocumentManager.flushDocIfLoadedWithLock = sinon.spy(
         (project_id, doc_id, callback) => {
           if (callback == null) {
-            callback = function (error) {}
+            callback = function () {}
           }
           if (doc_id === 'doc-id-1') {
             return callback(

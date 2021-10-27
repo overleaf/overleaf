@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -15,7 +14,7 @@ const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
 
 module.exports = {
-  getUserNotifications(req, res) {
+  getUserNotifications(req, res, next) {
     logger.log(
       { user_id: req.params.user_id },
       'getting user unread notifications'
@@ -23,7 +22,10 @@ module.exports = {
     metrics.inc('getUserNotifications')
     return Notifications.getUserNotifications(
       req.params.user_id,
-      (err, notifications) => res.json(notifications)
+      (err, notifications) => {
+        if (err) return next(err)
+        res.json(notifications)
+      }
     )
   },
 
@@ -46,7 +48,7 @@ module.exports = {
     )
   },
 
-  removeNotificationId(req, res) {
+  removeNotificationId(req, res, next) {
     logger.log(
       {
         user_id: req.params.user_id,
@@ -58,11 +60,14 @@ module.exports = {
     return Notifications.removeNotificationId(
       req.params.user_id,
       req.params.notification_id,
-      (err, notifications) => res.sendStatus(200)
+      err => {
+        if (err) return next(err)
+        res.sendStatus(200)
+      }
     )
   },
 
-  removeNotificationKey(req, res) {
+  removeNotificationKey(req, res, next) {
     logger.log(
       { user_id: req.params.user_id, notification_key: req.body.key },
       'mark key notification as read'
@@ -71,18 +76,21 @@ module.exports = {
     return Notifications.removeNotificationKey(
       req.params.user_id,
       req.body.key,
-      (err, notifications) => res.sendStatus(200)
+      (err, notifications) => {
+        if (err) return next(err)
+        res.sendStatus(200)
+      }
     )
   },
 
-  removeNotificationByKeyOnly(req, res) {
+  removeNotificationByKeyOnly(req, res, next) {
     const notification_key = req.params.key
     logger.log({ notification_key }, 'mark notification as read by key only')
     metrics.inc('removeNotificationKey')
-    return Notifications.removeNotificationByKeyOnly(
-      notification_key,
-      (err, notifications) => res.sendStatus(200)
-    )
+    return Notifications.removeNotificationByKeyOnly(notification_key, err => {
+      if (err) return next(err)
+      res.sendStatus(200)
+    })
   },
 
   countNotificationsByKeyOnly(req, res) {

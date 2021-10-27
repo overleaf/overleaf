@@ -284,7 +284,7 @@ export default EditorManager = (function () {
 
     _doOpenNewDocument(doc, callback) {
       if (callback == null) {
-        callback = function (error, sharejs_doc) {}
+        callback = function () {}
       }
       sl_console.log('[_doOpenNewDocument] Opening...')
       const new_sharejs_doc = Document.getDocument(this.ide, doc.id)

@@ -250,7 +250,7 @@ export default Document = (function () {
 
     join(callback) {
       if (callback == null) {
-        callback = function (error) {}
+        callback = function () {}
       }
       this.wantToBeJoined = true
       this._cancelLeave()
@@ -266,7 +266,7 @@ export default Document = (function () {
 
     leave(callback) {
       if (callback == null) {
-        callback = function (error) {}
+        callback = function () {}
       }
       this.flush() // force an immediate flush when leaving document
       this.wantToBeJoined = false
@@ -472,7 +472,7 @@ export default Document = (function () {
 
     _joinDoc(callback) {
       if (callback == null) {
-        callback = function (error) {}
+        callback = function () {}
       }
       if (this.doc != null) {
         this.ide.pushEvent('joinDoc:existing', {
@@ -563,7 +563,7 @@ export default Document = (function () {
 
     _leaveDoc(callback) {
       if (callback == null) {
-        callback = function (error) {}
+        callback = function () {}
       }
       this.ide.pushEvent('leaveDoc', {
         doc_id: this.doc_id,

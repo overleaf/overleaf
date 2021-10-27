@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -95,6 +94,7 @@ describe('ConnectedUsersManager', function () {
         this.user,
         null,
         err => {
+          if (err) return done(err)
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -114,6 +114,7 @@ describe('ConnectedUsersManager', function () {
         this.user,
         null,
         err => {
+          if (err) return done(err)
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -133,6 +134,7 @@ describe('ConnectedUsersManager', function () {
         this.user,
         null,
         err => {
+          if (err) return done(err)
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -152,6 +154,7 @@ describe('ConnectedUsersManager', function () {
         this.user,
         null,
         err => {
+          if (err) return done(err)
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -171,6 +174,7 @@ describe('ConnectedUsersManager', function () {
         this.user,
         null,
         err => {
+          if (err) return done(err)
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -190,6 +194,7 @@ describe('ConnectedUsersManager', function () {
         this.user,
         null,
         err => {
+          if (err) return done(err)
           this.rClient.sadd
             .calledWith(`clients_in_project:${this.project_id}`, this.client_id)
             .should.equal(true)
@@ -205,6 +210,7 @@ describe('ConnectedUsersManager', function () {
         this.user,
         null,
         err => {
+          if (err) return done(err)
           this.rClient.expire
             .calledWith(
               `clients_in_project:${this.project_id}`,
@@ -223,6 +229,7 @@ describe('ConnectedUsersManager', function () {
         this.user,
         null,
         err => {
+          if (err) return done(err)
           this.rClient.expire
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -241,6 +248,7 @@ describe('ConnectedUsersManager', function () {
         this.user,
         this.cursorData,
         err => {
+          if (err) return done(err)
           this.rClient.hset
             .calledWith(
               `connected_user:${this.project_id}:${this.client_id}`,
@@ -264,6 +272,7 @@ describe('ConnectedUsersManager', function () {
         this.project_id,
         this.client_id,
         err => {
+          if (err) return done(err)
           this.rClient.srem
             .calledWith(`clients_in_project:${this.project_id}`, this.client_id)
             .should.equal(true)
@@ -277,6 +286,7 @@ describe('ConnectedUsersManager', function () {
         this.project_id,
         this.client_id,
         err => {
+          if (err) return done(err)
           this.rClient.del
             .calledWith(`connected_user:${this.project_id}:${this.client_id}`)
             .should.equal(true)
@@ -290,6 +300,7 @@ describe('ConnectedUsersManager', function () {
         this.project_id,
         this.client_id,
         err => {
+          if (err) return done(err)
           this.rClient.expire
             .calledWith(
               `clients_in_project:${this.project_id}`,
@@ -315,6 +326,7 @@ describe('ConnectedUsersManager', function () {
         this.project_id,
         this.client_id,
         (err, result) => {
+          if (err) return done(err)
           result.connected.should.equal(true)
           result.client_id.should.equal(this.client_id)
           return done()
@@ -328,6 +340,7 @@ describe('ConnectedUsersManager', function () {
         this.project_id,
         this.client_id,
         (err, result) => {
+          if (err) return done(err)
           result.connected.should.equal(false)
           result.client_id.should.equal(this.client_id)
           return done()
@@ -341,6 +354,7 @@ describe('ConnectedUsersManager', function () {
         this.project_id,
         this.client_id,
         (err, result) => {
+          if (err) return done(err)
           result.connected.should.equal(false)
           result.client_id.should.equal(this.client_id)
           return done()
@@ -388,6 +402,7 @@ describe('ConnectedUsersManager', function () {
       return this.ConnectedUsersManager.getConnectedUsers(
         this.project_id,
         (err, users) => {
+          if (err) return done(err)
           users.length.should.equal(2)
           users[0].should.deep.equal({
             client_id: this.users[0],

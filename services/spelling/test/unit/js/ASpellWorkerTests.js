@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-undef
 */
 const sinon = require('sinon')

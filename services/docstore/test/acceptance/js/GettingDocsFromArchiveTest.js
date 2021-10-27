@@ -61,6 +61,7 @@ describe('Getting A Doc from Archive', function () {
         this.doc._id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           res.statusCode.should.equal(200)
           res.headers['x-doc-status'].should.equal('archived')
           doc.lines.should.deep.equal(this.doc.lines)
@@ -77,6 +78,7 @@ describe('Getting A Doc from Archive', function () {
         this.doc._id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           res.statusCode.should.equal(200)
           res.headers['x-doc-status'].should.equal('archived')
           doc.lines.should.deep.equal(this.doc.lines)
@@ -113,6 +115,7 @@ describe('Getting A Doc from Archive', function () {
           this.doc._id,
           {},
           (error, res, doc) => {
+            if (error) return done(error)
             res.statusCode.should.equal(200)
             res.headers['x-doc-status'].should.equal('active')
             doc.lines.should.deep.equal(this.doc.lines)

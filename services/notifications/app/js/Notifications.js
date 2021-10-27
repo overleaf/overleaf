@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -19,7 +18,7 @@ const metrics = require('@overleaf/metrics')
 module.exports = Notifications = {
   getUserNotifications(user_id, callback) {
     if (callback == null) {
-      callback = function (err, notifications) {}
+      callback = function () {}
     }
     const query = {
       user_id: ObjectId(user_id),
@@ -30,7 +29,7 @@ module.exports = Notifications = {
 
   _countExistingNotifications(user_id, notification, callback) {
     if (callback == null) {
-      callback = function (err, count) {}
+      callback = function () {}
     }
     const query = {
       user_id: ObjectId(user_id),

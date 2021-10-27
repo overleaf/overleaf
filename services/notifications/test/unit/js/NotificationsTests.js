@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-dupe-keys,
     no-return-assign,
     no-unused-vars,
@@ -62,6 +61,7 @@ describe('Notifications Tests', function () {
       return this.notifications.getUserNotifications(
         user_id,
         (err, notifications) => {
+          if (err) return done(err)
           notifications.should.equal(this.stubbedNotificationArray)
           assert.deepEqual(this.findStub.args[0][0], {
             user_id: ObjectId(user_id),
@@ -228,6 +228,7 @@ describe('Notifications Tests', function () {
         user_id,
         notification_id,
         err => {
+          if (err) return done(err)
           const searchOps = {
             user_id: ObjectId(user_id),
             _id: ObjectId(notification_id),
@@ -251,6 +252,7 @@ describe('Notifications Tests', function () {
         user_id,
         notification_key,
         err => {
+          if (err) return done(err)
           const searchOps = {
             user_id: ObjectId(user_id),
             key: notification_key,
@@ -273,6 +275,7 @@ describe('Notifications Tests', function () {
       return this.notifications.removeNotificationByKeyOnly(
         notification_key,
         err => {
+          if (err) return done(err)
           const searchOps = { key: notification_key }
           const updateOperation = { $unset: { templateKey: true } }
           assert.deepEqual(this.updateOneStub.args[0][0], searchOps)
@@ -290,6 +293,7 @@ describe('Notifications Tests', function () {
       return this.notifications.deleteNotificationByKeyOnly(
         notification_key,
         err => {
+          if (err) return done(err)
           const searchOps = { key: notification_key }
           assert.deepEqual(this.deleteOneStub.args[0][0], searchOps)
           return done()

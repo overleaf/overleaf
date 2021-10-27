@@ -27,7 +27,7 @@ module.exports = V1SubscriptionManager = {
   //   - 'v1_free'
   getPlanCodeFromV1(userId, callback) {
     if (callback == null) {
-      callback = function (err, planCode, v1Id) {}
+      callback = function () {}
     }
     return V1SubscriptionManager._v1Request(
       userId,
@@ -55,7 +55,7 @@ module.exports = V1SubscriptionManager = {
 
   getSubscriptionsFromV1(userId, callback) {
     if (callback == null) {
-      callback = function (err, subscriptions, v1Id) {}
+      callback = function () {}
     }
     return V1SubscriptionManager._v1Request(
       userId,
@@ -71,7 +71,7 @@ module.exports = V1SubscriptionManager = {
 
   getSubscriptionStatusFromV1(userId, callback) {
     if (callback == null) {
-      callback = function (err, status) {}
+      callback = function () {}
     }
     return V1SubscriptionManager._v1Request(
       userId,
@@ -87,7 +87,7 @@ module.exports = V1SubscriptionManager = {
 
   cancelV1Subscription(userId, callback) {
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     return V1SubscriptionManager._v1Request(
       userId,
@@ -103,7 +103,7 @@ module.exports = V1SubscriptionManager = {
 
   v1IdForUser(userId, callback) {
     if (callback == null) {
-      callback = function (err, v1Id) {}
+      callback = function () {}
     }
     return UserGetter.getUser(
       userId,
@@ -142,7 +142,7 @@ module.exports = V1SubscriptionManager = {
 
   _v1Request(userId, options, callback) {
     if (callback == null) {
-      callback = function (err, body, v1Id) {}
+      callback = function () {}
     }
     if (!settings.apis.v1.url) {
       return callback(null, null)

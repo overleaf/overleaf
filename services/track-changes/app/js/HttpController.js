@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -27,7 +26,7 @@ const { pipeline } = require('stream')
 module.exports = HttpController = {
   flushDoc(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const { doc_id } = req.params
     const { project_id } = req.params
@@ -46,7 +45,7 @@ module.exports = HttpController = {
 
   flushProject(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const { project_id } = req.params
     logger.log({ project_id }, 'compressing project history')
@@ -64,7 +63,7 @@ module.exports = HttpController = {
   flushAll(req, res, next) {
     // limit on projects to flush or -1 for all (default)
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const limit = req.query.limit != null ? parseInt(req.query.limit, 10) : -1
     logger.log({ limit }, 'flushing all projects')
@@ -95,7 +94,7 @@ module.exports = HttpController = {
 
   checkDanglingUpdates(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     logger.log('checking dangling updates')
     return UpdatesManager.getDanglingUpdates(function (error, result) {
@@ -113,7 +112,7 @@ module.exports = HttpController = {
 
   checkDoc(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const { doc_id } = req.params
     const { project_id } = req.params
@@ -146,7 +145,7 @@ module.exports = HttpController = {
   getDiff(req, res, next) {
     let from, to
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const { doc_id } = req.params
     const { project_id } = req.params
@@ -180,7 +179,7 @@ module.exports = HttpController = {
   getUpdates(req, res, next) {
     let before, min_count
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const { project_id } = req.params
 
@@ -293,7 +292,7 @@ module.exports = HttpController = {
 
   restore(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     let { doc_id, project_id, version } = req.params
     const user_id = req.headers['x-user-id']
@@ -314,7 +313,7 @@ module.exports = HttpController = {
 
   pushDocHistory(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const { project_id } = req.params
     const { doc_id } = req.params
@@ -329,7 +328,7 @@ module.exports = HttpController = {
 
   pullDocHistory(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const { project_id } = req.params
     const { doc_id } = req.params

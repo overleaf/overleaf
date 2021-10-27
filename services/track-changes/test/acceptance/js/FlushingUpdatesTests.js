@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -64,6 +63,7 @@ describe('Flushing updates', function () {
 
     return it('should flush the op into mongo', function (done) {
       TrackChangesClient.getCompressedUpdates(this.doc_id, (error, updates) => {
+        if (error) return done(error)
         expect(updates[0].pack[0].op).to.deep.equal([
           {
             p: 3,
@@ -125,6 +125,7 @@ describe('Flushing updates', function () {
         TrackChangesClient.getCompressedUpdates(
           this.doc_id,
           (error, updates) => {
+            if (error) return done(error)
             expect(updates[0].expiresAt).to.not.exist
             return done()
           }
@@ -136,6 +137,7 @@ describe('Flushing updates', function () {
         TrackChangesClient.getProjectMetaData(
           this.project_id,
           (error, project) => {
+            if (error) return done(error)
             expect(project.preserveHistory).to.equal(true)
             return done()
           }
@@ -192,6 +194,7 @@ describe('Flushing updates', function () {
         TrackChangesClient.getCompressedUpdates(
           this.doc_id,
           (error, updates) => {
+            if (error) return done(error)
             expect(updates[0].expiresAt).to.exist
             return done()
           }
@@ -262,6 +265,7 @@ describe('Flushing updates', function () {
         TrackChangesClient.getCompressedUpdates(
           this.doc_id,
           (error, updates) => {
+            if (error) return done(error)
             expect(updates[0].expiresAt).to.not.exist
             return done()
           }

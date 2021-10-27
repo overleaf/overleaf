@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-control-regex,
     no-throw-literal,
     no-unused-vars,
@@ -26,7 +25,7 @@ module.exports = RequestParser = {
   parse(body, callback) {
     let resource
     if (callback == null) {
-      callback = function (error, data) {}
+      callback = function () {}
     }
     const response = {}
 

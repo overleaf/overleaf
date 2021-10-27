@@ -84,7 +84,7 @@ module.exports = LaunchpadController = {
 
   _atLeastOneAdminExists(callback) {
     if (callback == null) {
-      callback = function (err, exists) {}
+      callback = function () {}
     }
     return UserGetter.getUser(
       { isAdmin: true },

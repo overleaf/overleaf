@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -228,6 +227,7 @@ describe('MongoManager', function () {
         this.doc_id,
         { lines: this.lines },
         err => {
+          assert.equal(err, this.stubbedErr)
           const args = this.db.docs.updateOne.args[0]
           assert.deepEqual(args[0], { _id: ObjectId(this.doc_id) })
           assert.equal(args[1].$set.lines, this.lines)

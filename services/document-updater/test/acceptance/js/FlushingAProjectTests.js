@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -97,6 +96,7 @@ describe('Flushing a project', function () {
             return DocUpdaterClient.flushProject(
               this.project_id,
               (error, res, body) => {
+                if (error) return done(error)
                 this.statusCode = res.statusCode
                 return done()
               }
@@ -130,6 +130,7 @@ describe('Flushing a project', function () {
               this.project_id,
               doc.id,
               (error, res, returnedDoc) => {
+                if (error) return done(error)
                 returnedDoc.lines.should.deep.equal(doc.updatedLines)
                 return callback()
               }

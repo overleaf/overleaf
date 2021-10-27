@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -21,14 +20,14 @@ module.exports = MockWebApi = {
 
   getUserInfo(user_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return callback(null, this.users[user_id] || null)
   },
 
   getProjectDetails(project_id, callback) {
     if (callback == null) {
-      callback = function (error, project) {}
+      callback = function () {}
     }
     return callback(null, this.projects[project_id])
   },

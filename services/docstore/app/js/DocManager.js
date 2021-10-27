@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-dupe-keys,
     no-undef,
 */
@@ -31,7 +30,7 @@ module.exports = DocManager = {
       filter = {}
     }
     if (callback == null) {
-      callback = function (error, doc) {}
+      callback = function () {}
     }
     if (filter.inS3 !== true) {
       return callback('must include inS3 when getting doc')
@@ -102,7 +101,7 @@ module.exports = DocManager = {
 
   getFullDoc(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (err, doc) {}
+      callback = function () {}
     }
     return DocManager._getDoc(
       project_id,
@@ -190,7 +189,7 @@ module.exports = DocManager = {
 
   getDocLines(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (err, doc) {}
+      callback = function () {}
     }
     return DocManager._getDoc(
       project_id,
@@ -211,7 +210,7 @@ module.exports = DocManager = {
 
   getAllNonDeletedDocs(project_id, filter, callback) {
     if (callback == null) {
-      callback = function (error, docs) {}
+      callback = function () {}
     }
     return DocArchive.unArchiveAllDocs(project_id, function (error) {
       if (error != null) {
@@ -238,7 +237,7 @@ module.exports = DocManager = {
 
   updateDoc(project_id, doc_id, lines, version, ranges, callback) {
     if (callback == null) {
-      callback = function (error, modified, rev) {}
+      callback = function () {}
     }
     if (lines == null || version == null || ranges == null) {
       return callback(new Error('no lines, version or ranges provided'))

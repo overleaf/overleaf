@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -160,6 +159,7 @@ describe('SessionSockets', function () {
 
     return it('should return the session', function (done) {
       return this.checkSocket(this.socket, (error, s, session) => {
+        if (error) return done(error)
         expect(session).to.deep.equal({ user: { _id: '123' } })
         return done()
       })
@@ -189,6 +189,7 @@ describe('SessionSockets', function () {
 
     return it('should return the other session', function (done) {
       return this.checkSocket(this.socket, (error, s, session) => {
+        if (error) return done(error)
         expect(session).to.deep.equal({ user: { _id: 'abc' } })
         return done()
       })

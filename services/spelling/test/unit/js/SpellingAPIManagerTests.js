@@ -69,6 +69,7 @@ describe('SpellingAPIManager', function () {
           this.token,
           { words: this.allWords },
           (error, result) => {
+            if (error) return done(error)
             this.result = result
             done()
           }
@@ -122,6 +123,7 @@ describe('SpellingAPIManager', function () {
           this.token,
           { words: this.allWords },
           (error, result) => {
+            if (error) return done(error)
             this.result = result
             done()
           }
@@ -143,6 +145,7 @@ describe('SpellingAPIManager', function () {
             language: this.language,
           },
           (error, result) => {
+            if (error) return done(error)
             this.result = result
             done()
           }
@@ -164,6 +167,7 @@ describe('SpellingAPIManager', function () {
           this.token,
           { words: this.words },
           (error, result) => {
+            if (error) return done(error)
             this.result = result
             done()
           }

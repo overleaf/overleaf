@@ -402,7 +402,10 @@ module.exports = Router = {
         'clientTracking.updatePosition',
         function (cursorData, callback) {
           if (!callback) {
-            callback = function () {}
+            callback = function () {
+              // NOTE: The frontend does not pass any callback to socket.io.
+              // Any error is already logged via Router._handleError.
+            }
           }
           if (typeof callback !== 'function') {
             return Router._handleInvalidArguments(

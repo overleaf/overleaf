@@ -59,7 +59,7 @@ class SizeLimitedStream extends Transform {
 const FileWriter = {
   ensureDumpFolderExists(callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return fs.mkdir(Settings.path.dumpFolder, function (error) {
       if (error != null && error.code !== 'EEXIST') {
@@ -72,14 +72,14 @@ const FileWriter = {
 
   writeLinesToDisk(identifier, lines, callback) {
     if (callback == null) {
-      callback = function (error, fsPath) {}
+      callback = function () {}
     }
     return FileWriter.writeContentToDisk(identifier, lines.join('\n'), callback)
   },
 
   writeContentToDisk(identifier, content, callback) {
     if (callback == null) {
-      callback = function (error, fsPath) {}
+      callback = function () {}
     }
     callback = _.once(callback)
     const fsPath = `${Settings.path.dumpFolder}/${identifier}_${uuid.v4()}`
@@ -102,7 +102,7 @@ const FileWriter = {
       options = {}
     }
     if (callback == null) {
-      callback = function (error, fsPath) {}
+      callback = function () {}
     }
     options = options || {}
 
@@ -168,7 +168,7 @@ const FileWriter = {
       options = {}
     }
     if (callback == null) {
-      callback = function (error, fsPath) {}
+      callback = function () {}
     }
     options = options || {}
     callback = _.once(callback)

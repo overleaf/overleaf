@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -34,7 +33,7 @@ const Profiler = require('./Profiler')
 module.exports = UpdateManager = {
   processOutstandingUpdates(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const timer = new Metrics.Timer('updateManager.processOutstandingUpdates')
     return UpdateManager.fetchAndApplyUpdates(
@@ -52,7 +51,7 @@ module.exports = UpdateManager = {
 
   processOutstandingUpdatesWithLock(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const profile = new Profiler('processOutstandingUpdatesWithLock', {
       project_id,
@@ -97,7 +96,7 @@ module.exports = UpdateManager = {
 
   continueProcessingUpdatesWithLock(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return RealTimeRedisManager.getUpdatesLength(doc_id, (error, length) => {
       if (error != null) {
@@ -117,7 +116,7 @@ module.exports = UpdateManager = {
 
   fetchAndApplyUpdates(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const profile = new Profiler('fetchAndApplyUpdates', { project_id, doc_id })
     return RealTimeRedisManager.getPendingUpdatesForDoc(
@@ -150,7 +149,7 @@ module.exports = UpdateManager = {
 
   applyUpdate(project_id, doc_id, update, _callback) {
     if (_callback == null) {
-      _callback = function (error) {}
+      _callback = function () {}
     }
     const callback = function (error) {
       if (error != null) {
@@ -343,7 +342,19 @@ module.exports = UpdateManager = {
                   // We held the lock for a while so updates might have queued up
                   return UpdateManager.continueProcessingUpdatesWithLock(
                     project_id,
-                    doc_id
+                    doc_id,
+                    err => {
+                      if (err) {
+                        // The processing may fail for invalid user updates.
+                        // This can be very noisy, put them on level DEBUG
+                        //  and record a metric.
+                        Metrics.inc('background-processing-updates-error')
+                        logger.debug(
+                          { err, project_id, doc_id },
+                          'error processing updates in background'
+                        )
+                      }
+                    }
                   )
                 }
               )
@@ -356,7 +367,7 @@ module.exports = UpdateManager = {
 
   _handleErrorInsideLock(doc_id, lockValue, original_error, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return LockManager.releaseLock(doc_id, lockValue, lock_error =>
       callback(original_error)

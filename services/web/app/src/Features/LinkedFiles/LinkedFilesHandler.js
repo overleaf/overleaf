@@ -28,7 +28,7 @@ const {
 module.exports = LinkedFilesHandler = {
   getFileById(project_id, file_id, callback) {
     if (callback == null) {
-      callback = function (err, file) {}
+      callback = function () {}
     }
     return ProjectLocator.findElement(
       {
@@ -47,7 +47,7 @@ module.exports = LinkedFilesHandler = {
 
   getSourceProject(data, callback) {
     if (callback == null) {
-      callback = function (err, project) {}
+      callback = function () {}
     }
     const projection = { _id: 1, name: 1 }
     if (data.v1_source_doc_id != null) {
@@ -93,7 +93,7 @@ module.exports = LinkedFilesHandler = {
     callback
   ) {
     if (callback == null) {
-      callback = function (err, file) {}
+      callback = function () {}
     }
     callback = _.once(callback)
     return FileWriter.writeStreamToDisk(
@@ -132,7 +132,7 @@ module.exports = LinkedFilesHandler = {
     callback
   ) {
     if (callback == null) {
-      callback = function (err, file) {}
+      callback = function () {}
     }
     callback = _.once(callback)
     return FileWriter.writeContentToDisk(

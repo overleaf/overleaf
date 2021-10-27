@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -66,6 +65,7 @@ describe('MongoAWS', function () {
         this.doc_id,
         this.pack_id,
         (err, result) => {
+          if (err) return done(err)
           this.callback()
           return done()
         }
@@ -80,6 +80,7 @@ describe('MongoAWS', function () {
   return describe('unArchivePack', function () {
     beforeEach(function (done) {
       return zlib.gzip('{"pack":"123"}', (err, zbuf) => {
+        if (err) return done(err)
         this.awssdk.config = { update: sinon.stub() }
         this.awssdk.S3 = sinon.stub()
         this.S3S.ReadStream = () =>
@@ -94,6 +95,7 @@ describe('MongoAWS', function () {
           this.doc_id,
           this.pack_id,
           (err, result) => {
+            if (err) return done(err)
             this.callback()
             return done()
           }

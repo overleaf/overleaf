@@ -40,8 +40,8 @@ const getKeys = function (pattern, callback) {
 }
 
 const expireDocOps = callback =>
-  // eslint-disable-next-line handle-callback-err
-  getKeys(keys.docOps({ doc_id: '*' }), (error, keys) =>
+  getKeys(keys.docOps({ doc_id: '*' }), (error, keys) => {
+    if (error) return callback(error)
     async.mapSeries(
       keys,
       function (key, cb) {
@@ -50,7 +50,7 @@ const expireDocOps = callback =>
       },
       callback
     )
-  )
+  })
 
 setTimeout(
   () =>

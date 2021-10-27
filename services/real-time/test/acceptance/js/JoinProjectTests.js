@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -85,6 +84,7 @@ describe('joinProject', function () {
       return RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes(this.project_id)).to.equal(
             true
           )
@@ -97,6 +97,7 @@ describe('joinProject', function () {
       return this.client.emit(
         'clientTracking.getConnectedUsers',
         (error, users) => {
+          if (error) return done(error)
           let connected = false
           for (const user of Array.from(users)) {
             if (
@@ -165,6 +166,7 @@ describe('joinProject', function () {
       return RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes(this.project_id)).to.equal(
             false
           )
@@ -226,6 +228,7 @@ describe('joinProject', function () {
       RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes(this.project_id)).to.equal(
             false
           )
@@ -287,6 +290,7 @@ describe('joinProject', function () {
       RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
         (error, client) => {
+          if (error) return done(error)
           expect(Array.from(client.rooms).includes(this.project_id)).to.equal(
             false
           )

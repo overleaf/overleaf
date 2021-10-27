@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -59,6 +58,7 @@ describe('Getting a doc', function () {
         this.doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.lines)
           doc.version.should.equal(this.version)
           doc.ranges.should.deep.equal(this.ranges)
@@ -76,6 +76,7 @@ describe('Getting a doc', function () {
         missing_doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           res.statusCode.should.equal(404)
           return done()
         }
@@ -111,6 +112,7 @@ describe('Getting a doc', function () {
         this.deleted_doc_id,
         { include_deleted: true },
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.lines)
           doc.version.should.equal(this.version)
           doc.ranges.should.deep.equal(this.ranges)
@@ -126,6 +128,7 @@ describe('Getting a doc', function () {
         this.deleted_doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           res.statusCode.should.equal(404)
           return done()
         }

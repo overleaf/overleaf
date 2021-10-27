@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -30,7 +29,7 @@ function isImageNameAllowed(imageName) {
 module.exports = CompileController = {
   compile(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const timer = new Metrics.Timer('compile-request')
     return RequestParser.parse(req.body, function (error, request) {
@@ -152,7 +151,7 @@ module.exports = CompileController = {
 
   clearCache(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     return ProjectPersistenceManager.clearProject(
       req.params.project_id,
@@ -168,7 +167,7 @@ module.exports = CompileController = {
 
   syncFromCode(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const { file } = req.query
     const line = parseInt(req.query.line, 10)
@@ -201,7 +200,7 @@ module.exports = CompileController = {
 
   syncFromPdf(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const page = parseInt(req.query.page, 10)
     const h = parseFloat(req.query.h)
@@ -233,7 +232,7 @@ module.exports = CompileController = {
 
   wordcount(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     const file = req.query.file || 'main.tex'
     const { project_id } = req.params
@@ -262,7 +261,7 @@ module.exports = CompileController = {
 
   status(req, res, next) {
     if (next == null) {
-      next = function (error) {}
+      next = function () {}
     }
     return res.send('OK')
   },

@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -38,6 +37,7 @@ describe('receiveUpdate', function () {
               project: { name: 'Test Project' },
             },
             (error, { user_id, project_id }) => {
+              if (error) return done(error)
               this.user_id = user_id
               this.project_id = project_id
               return cb()
@@ -104,6 +104,7 @@ describe('receiveUpdate', function () {
               error,
               { user_id: user_id_second, project_id: project_id_second }
             ) => {
+              if (error) return done(error)
               this.user_id_second = user_id_second
               this.project_id_second = project_id_second
               return cb()

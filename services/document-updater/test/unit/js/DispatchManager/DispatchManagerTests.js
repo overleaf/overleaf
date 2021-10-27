@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -168,7 +167,7 @@ describe('DispatchManager', function () {
         let callCount = 0
         this.worker._waitForUpdateThenDispatchWorker = callback => {
           if (callback == null) {
-            callback = function (error) {}
+            callback = function () {}
           }
           callCount++
           if (callCount === 3) {

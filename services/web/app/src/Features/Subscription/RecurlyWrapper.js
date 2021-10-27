@@ -830,7 +830,7 @@ const RecurlyWrapper = {
 
   listAccountActiveSubscriptions(account_id, callback) {
     if (callback == null) {
-      callback = function (error, subscriptions) {}
+      callback = function () {}
     }
     return RecurlyWrapper.apiRequest(
       {

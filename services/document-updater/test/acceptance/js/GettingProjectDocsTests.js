@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -48,6 +47,7 @@ describe('Getting documents for project', function () {
             this.project_id,
             this.projectStateHash,
             (error, res, returnedDocs) => {
+              if (error) return done(error)
               this.res = res
               this.returnedDocs = returnedDocs
               return done()
@@ -85,6 +85,7 @@ describe('Getting documents for project', function () {
             this.project_id,
             this.projectStateHash,
             (error, res0, returnedDocs0) => {
+              if (error) return done(error)
               // set the hash
               this.res0 = res0
               this.returnedDocs0 = returnedDocs0
@@ -92,6 +93,7 @@ describe('Getting documents for project', function () {
                 this.project_id,
                 this.projectStateHash,
                 (error, res, returnedDocs) => {
+                  if (error) return done(error)
                   // the hash should now match
                   this.res = res
                   this.returnedDocs = returnedDocs
@@ -138,6 +140,7 @@ describe('Getting documents for project', function () {
             this.project_id,
             this.projectStateHash,
             (error, res0, returnedDocs0) => {
+              if (error) return done(error)
               // set the hash
               this.res0 = res0
               this.returnedDocs0 = returnedDocs0
@@ -145,11 +148,13 @@ describe('Getting documents for project', function () {
                 this.project_id,
                 this.doc_id,
                 (error, res, body) => {
+                  if (error) return done(error)
                   // delete the doc
                   return DocUpdaterClient.getProjectDocs(
                     this.project_id,
                     this.projectStateHash,
                     (error, res1, returnedDocs) => {
+                      if (error) return done(error)
                       // the hash would match, but the doc has been deleted
                       this.res = res1
                       this.returnedDocs = returnedDocs

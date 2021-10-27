@@ -71,7 +71,7 @@ const SubscriptionGroupHandler = {
 
   isUserPartOfGroup(user_id, subscription_id, callback) {
     if (callback == null) {
-      callback = function (err, partOfGroup) {}
+      callback = function () {}
     }
     return SubscriptionLocator.getSubscriptionByMemberIdAndId(
       user_id,
@@ -90,7 +90,7 @@ const SubscriptionGroupHandler = {
 
   getTotalConfirmedUsersInGroup(subscription_id, callback) {
     if (callback == null) {
-      callback = function (err, totalUsers) {}
+      callback = function () {}
     }
     return SubscriptionLocator.getSubscription(
       subscription_id,

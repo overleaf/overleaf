@@ -47,7 +47,7 @@ module.exports = CollaboratorsInviteController = {
 
   _checkShouldInviteEmail(email, callback) {
     if (callback == null) {
-      callback = function (err, shouldAllowInvite) {}
+      callback = function () {}
     }
     if (Settings.restrictInvitesToExistingAccounts === true) {
       logger.log({ email }, 'checking if user exists with this email')
@@ -70,7 +70,7 @@ module.exports = CollaboratorsInviteController = {
 
   _checkRateLimit(user_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return LimitationsManager.allowedNumberOfCollaboratorsForUser(
       user_id,

@@ -1,6 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -52,7 +49,7 @@ module.exports = OutputCacheManager = {
   generateBuildId(callback) {
     // generate a secure build id from Date.now() and 8 random bytes in hex
     if (callback == null) {
-      callback = function (error, buildId) {}
+      callback = function () {}
     }
     return crypto.randomBytes(8, function (err, buf) {
       if (err != null) {
@@ -72,7 +69,7 @@ module.exports = OutputCacheManager = {
     callback
   ) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return OutputCacheManager.generateBuildId(function (err, buildId) {
       if (err != null) {
@@ -122,7 +119,7 @@ module.exports = OutputCacheManager = {
     // make a compileDir/CACHE_SUBDIR/build_id directory and
     // copy all the output files into it
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const cacheRoot = Path.join(outputDir, OutputCacheManager.CACHE_SUBDIR)
     // Put the files into a new cache subdirectory
@@ -339,6 +336,7 @@ module.exports = OutputCacheManager = {
         return callback(err)
       }
       fs.readdir(contentRoot, function (err, results) {
+        if (err) return callback(err)
         const dirs = results.sort()
         const contentId = dirs.find(dir =>
           OutputCacheManager.BUILD_REGEX.test(dir)
@@ -366,7 +364,7 @@ module.exports = OutputCacheManager = {
 
   archiveLogs(outputFiles, compileDir, outputDir, buildId, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const archiveDir = Path.join(
       outputDir,
@@ -417,7 +415,7 @@ module.exports = OutputCacheManager = {
   expireOutputFiles(cacheRoot, options, callback) {
     // look in compileDir for build dirs and delete if > N or age of mod time > T
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return fs.readdir(cacheRoot, function (err, results) {
       if (err != null) {
@@ -481,7 +479,7 @@ module.exports = OutputCacheManager = {
   _checkFileIsSafe(src, callback) {
     // check if we have a valid file to copy into the cache
     if (callback == null) {
-      callback = function (error, isSafe) {}
+      callback = function () {}
     }
     return fs.stat(src, function (err, stats) {
       if ((err != null ? err.code : undefined) === 'ENOENT') {
@@ -537,7 +535,7 @@ module.exports = OutputCacheManager = {
 
   _checkIfShouldCopy(src, callback) {
     if (callback == null) {
-      callback = function (err, shouldCopy) {}
+      callback = function () {}
     }
     return callback(null, !Path.basename(src).match(/^strace/))
   },
@@ -545,7 +543,7 @@ module.exports = OutputCacheManager = {
   _checkIfShouldArchive(src, callback) {
     let needle
     if (callback == null) {
-      callback = function (err, shouldCopy) {}
+      callback = function () {}
     }
     if (Path.basename(src).match(/^strace/)) {
       return callback(null, true)

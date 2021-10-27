@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -70,6 +69,7 @@ describe('Getting all docs', function () {
         version,
         this.deleted_doc.ranges,
         err => {
+          if (err) return done(err)
           return DocstoreClient.deleteDoc(
             this.project_id,
             this.deleted_doc._id,

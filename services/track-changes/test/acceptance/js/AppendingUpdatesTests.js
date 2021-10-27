@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -100,6 +99,7 @@ describe('Appending doc ops to the history', function () {
         `DocsWithHistoryOps:${this.project_id}`,
         this.doc_id,
         (error, member) => {
+          if (error) return done(error)
           member.should.equal(0)
           return done()
         }

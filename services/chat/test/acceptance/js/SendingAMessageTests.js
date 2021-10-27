@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     max-len,
     no-return-assign,
     node/no-deprecated-api,
@@ -121,6 +120,7 @@ describe('Sending a message', function () {
           'malformed-user',
           'content',
           (error, response, body) => {
+            if (error) return done(error)
             expect(response.statusCode).to.equal(400)
             expect(body).to.equal('Invalid user_id')
             return done()
@@ -137,6 +137,7 @@ describe('Sending a message', function () {
           this.user_id,
           'content',
           (error, response, body) => {
+            if (error) return done(error)
             expect(response.statusCode).to.equal(400)
             expect(body).to.equal('Invalid project_id')
             return done()
@@ -153,6 +154,7 @@ describe('Sending a message', function () {
           this.user_id,
           'content',
           (error, response, body) => {
+            if (error) return done(error)
             expect(response.statusCode).to.equal(400)
             expect(body).to.equal('Invalid thread_id')
             return done()
@@ -169,6 +171,7 @@ describe('Sending a message', function () {
           this.user_id,
           null,
           (error, response, body) => {
+            if (error) return done(error)
             expect(response.statusCode).to.equal(400)
             expect(body).to.equal('No content provided')
             return done()
@@ -186,6 +189,7 @@ describe('Sending a message', function () {
           this.user_id,
           content,
           (error, response, body) => {
+            if (error) return done(error)
             expect(response.statusCode).to.equal(400)
             expect(body).to.equal('Content too long (> 10240 bytes)')
             return done()

@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-useless-escape,
 */
@@ -29,6 +28,7 @@ describe('SafeJsonParse', function () {
   return describe('parse', function () {
     it('should parse documents correctly', function (done) {
       return this.SafeJsonParse.parse('{"foo": "bar"}', (error, parsed) => {
+        if (error) return done(error)
         expect(parsed).to.deep.equal({ foo: 'bar' })
         return done()
       })

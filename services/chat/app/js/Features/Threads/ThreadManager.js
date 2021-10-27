@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     max-len,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -22,7 +21,7 @@ module.exports = ThreadManager = {
   findOrCreateThread(project_id, thread_id, callback) {
     let query, update
     if (callback == null) {
-      callback = function (error, thread) {}
+      callback = function () {}
     }
     project_id = ObjectId(project_id.toString())
     if (thread_id !== ThreadManager.GLOBAL_THREAD) {
@@ -63,7 +62,7 @@ module.exports = ThreadManager = {
 
   findAllThreadRooms(project_id, callback) {
     if (callback == null) {
-      callback = function (error, rooms) {}
+      callback = function () {}
     }
     db.rooms
       .find(
@@ -81,7 +80,7 @@ module.exports = ThreadManager = {
 
   resolveThread(project_id, thread_id, user_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     db.rooms.updateOne(
       {
@@ -102,7 +101,7 @@ module.exports = ThreadManager = {
 
   reopenThread(project_id, thread_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     db.rooms.updateOne(
       {
@@ -120,7 +119,7 @@ module.exports = ThreadManager = {
 
   deleteThread(project_id, thread_id, callback) {
     if (callback == null) {
-      callback = function (error, room_id) {}
+      callback = function () {}
     }
     return this.findOrCreateThread(
       project_id,

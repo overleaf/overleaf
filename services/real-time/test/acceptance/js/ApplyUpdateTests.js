@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -120,6 +119,7 @@ describe('applyOtUpdate', function () {
 
     it('should push the doc into the pending updates list', function (done) {
       getPendingUpdatesList((error, ...rest) => {
+        if (error) return done(error)
         const [doc_id] = Array.from(rest[0])
         doc_id.should.equal(`${this.project_id}:${this.doc_id}`)
         return done()
@@ -135,6 +135,7 @@ describe('applyOtUpdate', function () {
         0,
         -1,
         (error, ...rest) => {
+          if (error) return done(error)
           let [update] = Array.from(rest[0])
           update = JSON.parse(update)
           update.op.should.deep.equal(this.update.op)
@@ -265,6 +266,7 @@ describe('applyOtUpdate', function () {
           doc_id: this.doc_id,
         }),
         (error, len) => {
+          if (error) return done(error)
           len.should.equal(0)
           return done()
         }
@@ -351,6 +353,7 @@ describe('applyOtUpdate', function () {
           doc_id: this.doc_id,
         }),
         (error, len) => {
+          if (error) return done(error)
           len.should.equal(0)
           return done()
         }
@@ -422,6 +425,7 @@ describe('applyOtUpdate', function () {
 
     it('should push the doc into the pending updates list', function (done) {
       getPendingUpdatesList((error, ...rest) => {
+        if (error) return done(error)
         const [doc_id] = Array.from(rest[0])
         doc_id.should.equal(`${this.project_id}:${this.doc_id}`)
         return done()
@@ -437,6 +441,7 @@ describe('applyOtUpdate', function () {
         0,
         -1,
         (error, ...rest) => {
+          if (error) return done(error)
           let [update] = Array.from(rest[0])
           update = JSON.parse(update)
           update.op.should.deep.equal(this.comment_update.op)
@@ -551,6 +556,7 @@ describe('applyOtUpdate', function () {
           doc_id: this.doc_id,
         }),
         (error, len) => {
+          if (error) return done(error)
           len.should.equal(0)
           return done()
         }
@@ -637,6 +643,7 @@ describe('applyOtUpdate', function () {
           doc_id: this.doc_id,
         }),
         (error, len) => {
+          if (error) return done(error)
           len.should.equal(0)
           return done()
         }

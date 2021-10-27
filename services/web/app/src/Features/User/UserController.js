@@ -249,7 +249,7 @@ const UserController = {
                 OError.tag(err, 'error destroying session')
                 return next(err)
               }
-              UserSessionsManager.untrackSession(user, sessionId)
+              UserSessionsManager.untrackSession(user, sessionId, () => {})
               res.sendStatus(200)
             })
           }
@@ -418,7 +418,7 @@ const UserController = {
         return cb(err)
       }
       if (user != null) {
-        UserSessionsManager.untrackSession(user, sessionId)
+        UserSessionsManager.untrackSession(user, sessionId, () => {})
       }
       cb()
     })

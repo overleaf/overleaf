@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -89,10 +88,12 @@ describe('RequestParser', function () {
   })
 
   describe('without a compiler specified', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
       delete this.validRequest.compile.options.compiler
       return this.RequestParser.parse(this.validRequest, (error, data) => {
+        if (error) return done(error)
         this.data = data
+        done()
       })
     })
 
@@ -102,9 +103,11 @@ describe('RequestParser', function () {
   })
 
   describe('with imageName set', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
       return this.RequestParser.parse(this.validRequest, (error, data) => {
+        if (error) return done(error)
         this.data = data
+        done()
       })
     })
 
@@ -156,10 +159,12 @@ describe('RequestParser', function () {
   })
 
   describe('with flags set', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
       this.validRequest.compile.options.flags = ['-file-line-error']
       return this.RequestParser.parse(this.validRequest, (error, data) => {
+        if (error) return done(error)
         this.data = data
+        done()
       })
     })
 
@@ -169,9 +174,11 @@ describe('RequestParser', function () {
   })
 
   describe('with flags not specified', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
       return this.RequestParser.parse(this.validRequest, (error, data) => {
+        if (error) return done(error)
         this.data = data
+        done()
       })
     })
 
@@ -181,10 +188,12 @@ describe('RequestParser', function () {
   })
 
   describe('without a timeout specified', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
       delete this.validRequest.compile.options.timeout
       return this.RequestParser.parse(this.validRequest, (error, data) => {
+        if (error) return done(error)
         this.data = data
+        done()
       })
     })
 
@@ -196,11 +205,13 @@ describe('RequestParser', function () {
   })
 
   describe('with a timeout larger than the maximum', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
       this.validRequest.compile.options.timeout =
         this.RequestParser.MAX_TIMEOUT + 1
       return this.RequestParser.parse(this.validRequest, (error, data) => {
+        if (error) return done(error)
         this.data = data
+        done()
       })
     })
 
@@ -212,9 +223,11 @@ describe('RequestParser', function () {
   })
 
   describe('with a timeout', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
       return this.RequestParser.parse(this.validRequest, (error, data) => {
+        if (error) return done(error)
         this.data = data
+        done()
       })
     })
 

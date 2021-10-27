@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
     node/no-deprecated-api,
@@ -33,7 +32,7 @@ module.exports = UrlFetcher = {
 
   pipeUrlToFile(url, filePath, _callback) {
     if (_callback == null) {
-      _callback = function (error) {}
+      _callback = function () {}
     }
     const callbackOnce = function (error) {
       if (timeoutHandler != null) {

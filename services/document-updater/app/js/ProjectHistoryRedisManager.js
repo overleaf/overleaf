@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -28,10 +27,8 @@ const metrics = require('./Metrics')
 module.exports = ProjectHistoryRedisManager = {
   queueOps(project_id, ...rest) {
     // Record metric for ops pushed onto queue
-    const adjustedLength = Math.max(rest.length, 1)
-    const ops = rest.slice(0, adjustedLength - 1)
-    const val = rest[adjustedLength - 1]
-    const callback = val != null ? val : function (error, projectUpdateCount) {}
+    const callback = rest.pop()
+    const ops = rest
     for (const op of Array.from(ops)) {
       metrics.summary('redis.projectHistoryOps', op.length, { status: 'push' })
     }
@@ -96,7 +93,7 @@ module.exports = ProjectHistoryRedisManager = {
     callback
   ) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     projectUpdate = {
       pathname: projectUpdate.pathname,

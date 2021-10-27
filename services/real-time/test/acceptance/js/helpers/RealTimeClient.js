@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -41,7 +40,7 @@ module.exports = Client = {
 
   setSession(session, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const sessionId = uid(24)
     session.cookie = {}
@@ -58,7 +57,7 @@ module.exports = Client = {
 
   unsetSession(callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     Client.cookie = null
     return callback()
@@ -77,7 +76,7 @@ module.exports = Client = {
 
   getConnectedClients(callback) {
     if (callback == null) {
-      callback = function (error, clients) {}
+      callback = function () {}
     }
     return request.get(
       {
@@ -90,7 +89,7 @@ module.exports = Client = {
 
   getConnectedClient(client_id, callback) {
     if (callback == null) {
-      callback = function (error, clients) {}
+      callback = function () {}
     }
     return request.get(
       {
@@ -116,12 +115,13 @@ module.exports = Client = {
   },
 
   disconnectAllClients(callback) {
-    return Client.getConnectedClients((error, clients) =>
+    return Client.getConnectedClients((error, clients) => {
+      if (error) return callback(error)
       async.each(
         clients,
         (clientView, cb) => Client.disconnectClient(clientView.client_id, cb),
         callback
       )
-    )
+    })
   },
 }

@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -463,7 +462,7 @@ describe('UpdatesManager', function () {
           callback
         ) => {
           if (callback == null) {
-            callback = function (error, updates) {}
+            callback = function () {}
           }
           const updates = this.redisArray.slice(0, batchSize)
           this.redisArray = this.redisArray.slice(batchSize)
@@ -890,7 +889,7 @@ describe('UpdatesManager', function () {
 
         this.WebApiManager.getUserInfo = (user_id, callback) => {
           if (callback == null) {
-            callback = function (error, userInfo) {}
+            callback = function () {}
           }
           return callback(null, this.user_info[user_id])
         }
@@ -899,6 +898,7 @@ describe('UpdatesManager', function () {
         return this.UpdatesManager.fillUserInfo(
           this.updates,
           (error, results) => {
+            if (error) return done(error)
             this.results = results
             return done()
           }
@@ -963,7 +963,7 @@ describe('UpdatesManager', function () {
         ]
         this.WebApiManager.getUserInfo = (user_id, callback) => {
           if (callback == null) {
-            callback = function (error, userInfo) {}
+            callback = function () {}
           }
           return callback(null, this.user_info[user_id])
         }
@@ -972,6 +972,7 @@ describe('UpdatesManager', function () {
         return this.UpdatesManager.fillUserInfo(
           this.updates,
           (error, results) => {
+            if (error) return done(error)
             this.results = results
             return done()
           }

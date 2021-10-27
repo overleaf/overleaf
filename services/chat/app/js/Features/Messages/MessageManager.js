@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -20,7 +19,7 @@ const logger = require('logger-sharelatex')
 module.exports = MessageManager = {
   createMessage(room_id, user_id, content, timestamp, callback) {
     if (callback == null) {
-      callback = function (error, message) {}
+      callback = function () {}
     }
     let newMessageOpts = {
       content,
@@ -40,7 +39,7 @@ module.exports = MessageManager = {
 
   getMessages(room_id, limit, before, callback) {
     if (callback == null) {
-      callback = function (error, messages) {}
+      callback = function () {}
     }
     let query = { room_id }
     if (before != null) {
@@ -56,7 +55,7 @@ module.exports = MessageManager = {
 
   findAllMessagesInRooms(room_ids, callback) {
     if (callback == null) {
-      callback = function (error, messages) {}
+      callback = function () {}
     }
     db.messages
       .find({
@@ -67,7 +66,7 @@ module.exports = MessageManager = {
 
   deleteAllMessagesInRoom(room_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     db.messages.deleteMany(
       {
@@ -79,7 +78,7 @@ module.exports = MessageManager = {
 
   updateMessage(room_id, message_id, content, timestamp, callback) {
     if (callback == null) {
-      callback = function (error, message) {}
+      callback = function () {}
     }
     const query = this._ensureIdsAreObjectIds({
       _id: message_id,
@@ -99,7 +98,7 @@ module.exports = MessageManager = {
 
   deleteMessage(room_id, message_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const query = this._ensureIdsAreObjectIds({
       _id: message_id,

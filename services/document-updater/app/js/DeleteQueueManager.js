@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -99,7 +98,7 @@ module.exports = DeleteQueueManager = {
         cutoffTime,
         function (err, project_id, flushTimestamp, queueLength) {
           if (err != null) {
-            return callback(err)
+            return callback(err, count)
           }
           if (project_id == null) {
             return callback(null, count)
@@ -110,6 +109,11 @@ module.exports = DeleteQueueManager = {
             project_id,
             flushTimestamp,
             function (err, flushed) {
+              if (err) {
+                // Do not stop processing the queue in case the flush fails.
+                // Slowing down the processing can fill up redis.
+                metrics.inc('queued-delete-error')
+              }
               if (flushed) {
                 count++
               }
@@ -137,7 +141,7 @@ module.exports = DeleteQueueManager = {
           min_delete_age: 3 * 60 * 1000,
           limit: 1000, // high value, to ensure we always flush enough projects
         },
-        (err, flushed) =>
+        (_err, flushed) =>
           setTimeout(doFlush, flushed > 10 ? SHORT_DELAY : LONG_DELAY)
       )
     }

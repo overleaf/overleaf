@@ -1,6 +1,3 @@
-/* eslint-disable
-    handle-callback-err,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -55,6 +52,7 @@ Hello world
   it('should provide the pdf for download', function (done) {
     const pdf = Client.getOutputFile(this.body, 'pdf')
     return request.get(pdf.url, (error, res, body) => {
+      if (error) return done(error)
       res.statusCode.should.equal(200)
       return done()
     })
@@ -63,6 +61,7 @@ Hello world
   return it('should provide the log for download', function (done) {
     const log = Client.getOutputFile(this.body, 'pdf')
     return request.get(log.url, (error, res, body) => {
+      if (error) return done(error)
       res.statusCode.should.equal(200)
       return done()
     })

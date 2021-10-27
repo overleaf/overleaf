@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -195,7 +194,7 @@ describe('DockerRunner', function () {
           callback
         ) => {
           if (callback == null) {
-            callback = function (error, output) {}
+            callback = function () {}
           }
           if (firstTime) {
             firstTime = false
@@ -615,6 +614,7 @@ describe('DockerRunner', function () {
         return this.DockerRunner.startContainer(
           this.options,
           this.volumes,
+          () => {},
           this.callback
         )
       })
@@ -676,7 +676,7 @@ describe('DockerRunner', function () {
       beforeEach(function (done) {
         this.container.wait = function (callback) {
           if (callback == null) {
-            callback = function (error, exitCode) {}
+            callback = function () {}
           }
           return setTimeout(() => callback(null, { StatusCode: 42 }), 100)
         }
@@ -779,6 +779,7 @@ describe('DockerRunner', function () {
         this.containerId,
         false,
         err => {
+          if (err) return done(err)
           this.Docker.prototype.getContainer.callCount.should.equal(1)
           this.Docker.prototype.getContainer
             .calledWith(this.containerId)
@@ -793,6 +794,7 @@ describe('DockerRunner', function () {
         this.containerId,
         true,
         err => {
+          if (err) return done(err)
           this.fakeContainer.remove.callCount.should.equal(1)
           this.fakeContainer.remove
             .calledWith({ force: true, v: true })
@@ -807,6 +809,7 @@ describe('DockerRunner', function () {
         this.containerId,
         false,
         err => {
+          if (err) return done(err)
           this.fakeContainer.remove.callCount.should.equal(1)
           this.fakeContainer.remove
             .calledWith({ force: false, v: true })
@@ -888,6 +891,7 @@ describe('DockerRunner', function () {
 
     it('should get the container', function (done) {
       return this.DockerRunner.kill(this.containerId, err => {
+        if (err) return done(err)
         this.Docker.prototype.getContainer.callCount.should.equal(1)
         this.Docker.prototype.getContainer
           .calledWith(this.containerId)
@@ -898,6 +902,7 @@ describe('DockerRunner', function () {
 
     it('should try to force-destroy the container', function (done) {
       return this.DockerRunner.kill(this.containerId, err => {
+        if (err) return done(err)
         this.fakeContainer.kill.callCount.should.equal(1)
         return done()
       })

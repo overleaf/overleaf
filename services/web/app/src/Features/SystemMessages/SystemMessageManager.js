@@ -15,28 +15,28 @@ const { SystemMessage } = require('../../models/SystemMessage')
 module.exports = SystemMessageManager = {
   getMessages(callback) {
     if (callback == null) {
-      callback = function (error, messages) {}
+      callback = function () {}
     }
     callback(null, this._cachedMessages)
   },
 
   getMessagesFromDB(callback) {
     if (callback == null) {
-      callback = function (error, messages) {}
+      callback = function () {}
     }
     return SystemMessage.find({}, callback)
   },
 
   clearMessages(callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return SystemMessage.deleteMany({}, callback)
   },
 
   createMessage(content, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const message = new SystemMessage({ content })
     return message.save(callback)

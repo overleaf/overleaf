@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -40,7 +39,7 @@ module.exports = DispatchManager = {
       client,
       _waitForUpdateThenDispatchWorker(callback) {
         if (callback == null) {
-          callback = function (error) {}
+          callback = function () {}
         }
         const timer = new Metrics.Timer('worker.waiting')
         return worker.client.blpop(pendingListKey, 0, function (error, result) {

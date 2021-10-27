@@ -25,7 +25,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
     callback
   ) {
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     return ProjectCollabratecDetailsHandler.setCollabratecUsers(
       project_id,
@@ -36,7 +36,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
 
   isLinkedCollabratecUserProject(project_id, user_id, callback) {
     if (callback == null) {
-      callback = function (err, isLinked) {}
+      callback = function () {}
     }
     try {
       project_id = ObjectId(project_id)
@@ -68,7 +68,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
     callback
   ) {
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     try {
       project_id = ObjectId(project_id)
@@ -102,7 +102,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
   setCollabratecUsers(project_id, collabratec_users, callback) {
     let err
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     try {
       project_id = ObjectId(project_id)
@@ -127,7 +127,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
 
   unlinkCollabratecUserProject(project_id, user_id, callback) {
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     try {
       project_id = ObjectId(project_id)
@@ -149,7 +149,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
 
   updateCollabratecUserIds(old_user_id, new_user_id, callback) {
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     try {
       old_user_id = ObjectId(old_user_id)

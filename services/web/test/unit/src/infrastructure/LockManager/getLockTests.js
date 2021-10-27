@@ -83,7 +83,7 @@ describe('LockManager - getting the lock', function () {
       this.LockManager.LOCK_TEST_INTERVAL = 5
       this.LockManager._tryLock = function (key, namespace, callback) {
         if (callback == null) {
-          callback = function (error, isFree) {}
+          callback = function () {}
         }
         if (Date.now() - startTime < 20 || tries < 2) {
           tries = tries + 1
@@ -135,7 +135,7 @@ describe('LockManager - getting the lock', function () {
       this.LockManager.LOCK_TEST_INTERVAL = 1
       this.LockManager._tryLock = function (key, namespace, callback) {
         if (callback == null) {
-          callback = function (error, gotLock, lockValue) {}
+          callback = function () {}
         }
         if (locked) {
           return callback(null, false)

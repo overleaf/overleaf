@@ -23,7 +23,7 @@ const UserMembershipsHandler = {
   removeUserFromAllEntities(userId, callback) {
     // get all writable entity types
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const entityConfigs = []
     for (const key in UserMembershipEntityConfigs) {
@@ -48,7 +48,7 @@ const UserMembershipsHandler = {
 
   removeUserFromEntities(entityConfig, userId, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const removeOperation = { $pull: {} }
     removeOperation.$pull[entityConfig.fields.write] = userId
@@ -61,7 +61,7 @@ const UserMembershipsHandler = {
 
   getEntitiesByUser(entityConfig, userId, callback) {
     if (callback == null) {
-      callback = function (error, entities) {}
+      callback = function () {}
     }
     const query = Object.assign({}, entityConfig.baseQuery)
     query[entityConfig.fields.access] = userId

@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -29,6 +28,7 @@ describe('DiffCodec', function () {
         this.before,
         this.after,
         (error, ops) => {
+          if (error) return done(error)
           expect(ops).to.deep.equal([
             {
               i: 'beautiful ',
@@ -47,6 +47,7 @@ describe('DiffCodec', function () {
         this.before,
         this.after,
         (error, ops) => {
+          if (error) return done(error)
           expect(ops).to.deep.equal([
             { i: 'tall ', p: 4 },
             { i: 'red ', p: 29 },
@@ -63,6 +64,7 @@ describe('DiffCodec', function () {
         this.before,
         this.after,
         (error, ops) => {
+          if (error) return done(error)
           expect(ops).to.deep.equal([
             {
               d: 'beautiful ',
@@ -81,6 +83,7 @@ describe('DiffCodec', function () {
         this.before,
         this.after,
         (error, ops) => {
+          if (error) return done(error)
           expect(ops).to.deep.equal([
             { d: 'tall ', p: 4 },
             { d: 'red ', p: 24 },

@@ -56,7 +56,12 @@ module.exports = RateLimiter = class RateLimiter {
 
   run(task, callback) {
     if (this.ActiveWorkerCount < this.CurrentWorkerLimit) {
-      this._trackAndRun(task) // below the limit, just put the task in the background
+      // below the limit, just put the task in the background
+      this._trackAndRun(task, err => {
+        if (err) {
+          logger.error({ err }, 'error in background task')
+        }
+      })
       callback() // return immediately
       if (this.CurrentWorkerLimit > this.BaseWorkerCount) {
         return this._adjustLimitDown()

@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -25,7 +24,7 @@ module.exports = LockManager = {
 
   runWithLock(path, runner, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const lockOpts = {
       wait: this.MAX_LOCK_WAIT_TIME,

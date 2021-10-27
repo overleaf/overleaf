@@ -25,7 +25,7 @@ module.exports = UserMembershipViewModel = {
 
   buildAsync(userOrIdOrEmail, callback) {
     if (callback == null) {
-      callback = function (error, viewModel) {}
+      callback = function () {}
     }
     if (!isObjectIdInstance(userOrIdOrEmail)) {
       // userOrIdOrEmail is a user or an email and can be parsed by #build

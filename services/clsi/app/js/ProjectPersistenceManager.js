@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -94,7 +93,11 @@ module.exports = ProjectPersistenceManager = {
         () => {
           setInterval(() => {
             ProjectPersistenceManager.refreshExpiryTimeout(() => {
-              ProjectPersistenceManager.clearExpiredProjects()
+              ProjectPersistenceManager.clearExpiredProjects(err => {
+                if (err) {
+                  logger.error({ err }, 'clearing expired projects failed')
+                }
+              })
             })
           }, 10 * 60 * 1000)
         }
@@ -109,7 +112,7 @@ module.exports = ProjectPersistenceManager = {
 
   clearExpiredProjects(callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return ProjectPersistenceManager._findExpiredProjectIds(function (
       error,
@@ -139,7 +142,7 @@ module.exports = ProjectPersistenceManager = {
         }
         return CompileManager.clearExpiredProjects(
           ProjectPersistenceManager.EXPIRY_TIMEOUT,
-          error => callback()
+          error => callback(error)
         )
       })
     })
@@ -147,7 +150,7 @@ module.exports = ProjectPersistenceManager = {
 
   clearProject(project_id, user_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     logger.log({ project_id, user_id }, 'clearing project for user')
     return CompileManager.clearProject(project_id, user_id, function (error) {
@@ -168,7 +171,7 @@ module.exports = ProjectPersistenceManager = {
 
   clearProjectFromCache(project_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     logger.log({ project_id }, 'clearing project from cache')
     return UrlCache.clearProject(project_id, function (error) {

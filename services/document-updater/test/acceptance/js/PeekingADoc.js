@@ -67,6 +67,7 @@ describe('Peeking a document', function () {
             this.project_id,
             this.doc_id,
             (error, res, returnedDoc) => {
+              if (error) return done(error)
               this.res = res
               this.returnedDoc = returnedDoc
               return done()

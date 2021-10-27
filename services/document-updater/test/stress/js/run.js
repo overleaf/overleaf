@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-undef,
     no-unused-vars,
@@ -176,7 +175,7 @@ class StressTestClient {
 
   runForNUpdates(n, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     this.updateCallback = callback
     this.updateCount = n
@@ -185,7 +184,7 @@ class StressTestClient {
 
   check(callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return DocUpdaterClient.getDoc(
       this.project_id,
@@ -275,7 +274,7 @@ class StressTestClient {
 
 const checkDocument = function (project_id, doc_id, clients, callback) {
   if (callback == null) {
-    callback = function (error) {}
+    callback = function () {}
   }
   const jobs = clients.map(client => cb => client.check(cb))
   return async.parallel(jobs, callback)

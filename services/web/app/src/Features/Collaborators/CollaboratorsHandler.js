@@ -123,7 +123,7 @@ async function addUserIdToProject(
   }
 
   if (addingUserId) {
-    ContactManager.addContact(addingUserId, userId)
+    ContactManager.addContact(addingUserId, userId, () => {})
   }
 
   await Project.updateOne({ _id: projectId }, { $addToSet: level }).exec()

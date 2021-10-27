@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -78,6 +77,7 @@ describe('Archiving', function () {
           throw error
         }
         return DocstoreClient.archiveAllDoc(this.project_id, (error, res) => {
+          if (error) return done(error)
           this.res = res
           return done()
         })
@@ -94,6 +94,7 @@ describe('Archiving', function () {
         (doc => {
           return callback => {
             return db.docs.findOne({ _id: doc._id }, (error, doc) => {
+              if (error) return callback(error)
               expect(doc.lines).not.to.exist
               expect(doc.ranges).not.to.exist
               doc.inS3.should.equal(true)
@@ -113,6 +114,7 @@ describe('Archiving', function () {
               this.project_id,
               doc._id,
               (error, s3_doc) => {
+                if (error) return callback(error)
                 s3_doc.lines.should.deep.equal(doc.lines)
                 s3_doc.ranges.should.deep.equal(doc.ranges)
                 callback()
@@ -151,6 +153,7 @@ describe('Archiving', function () {
           ((doc, i) => {
             return callback => {
               return db.docs.findOne({ _id: doc._id }, (error, doc) => {
+                if (error) return callback(error)
                 doc.lines.should.deep.equal(this.docs[i].lines)
                 doc.ranges.should.deep.equal(this.docs[i].ranges)
                 expect(doc.inS3).not.to.exist

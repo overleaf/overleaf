@@ -126,13 +126,17 @@ describe('HistoryManager', function () {
 
   describe('flushProjectChanges', function () {
     describe('in the normal case', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
-        return this.HistoryManager.flushProjectChanges(this.project_id, {
-          background: true,
-        })
+        return this.HistoryManager.flushProjectChanges(
+          this.project_id,
+          {
+            background: true,
+          },
+          done
+        )
       })
 
       return it('should send a request to the project history api', function () {
@@ -146,11 +150,15 @@ describe('HistoryManager', function () {
     })
 
     return describe('with the skip_history_flush option', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.request.post = sinon.stub()
-        return this.HistoryManager.flushProjectChanges(this.project_id, {
-          skip_history_flush: true,
-        })
+        return this.HistoryManager.flushProjectChanges(
+          this.project_id,
+          {
+            skip_history_flush: true,
+          },
+          done
+        )
       })
 
       return it('should not send a request to the project history api', function () {

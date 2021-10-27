@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -22,7 +21,7 @@ const async = require('async')
 module.exports = RedisManager = {
   getOldestDocUpdates(doc_id, batchSize, callback) {
     if (callback == null) {
-      callback = function (error, jsonUpdates) {}
+      callback = function () {}
     }
     const key = Keys.uncompressedHistoryOps({ doc_id })
     return rclient.lrange(key, 0, batchSize - 1, callback)
@@ -31,7 +30,7 @@ module.exports = RedisManager = {
   expandDocUpdates(jsonUpdates, callback) {
     let rawUpdates
     if (callback == null) {
-      callback = function (error, rawUpdates) {}
+      callback = function () {}
     }
     try {
       rawUpdates = Array.from(jsonUpdates || []).map(update =>
@@ -45,7 +44,7 @@ module.exports = RedisManager = {
 
   deleteAppliedDocUpdates(project_id, doc_id, docUpdates, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const multi = rclient.multi()
     // Delete all the updates which have been applied (exact match)
@@ -73,7 +72,7 @@ module.exports = RedisManager = {
 
   getDocIdsWithHistoryOps(project_id, callback) {
     if (callback == null) {
-      callback = function (error, doc_ids) {}
+      callback = function () {}
     }
     return rclient.smembers(Keys.docsWithHistoryOps({ project_id }), callback)
   },
@@ -136,7 +135,7 @@ module.exports = RedisManager = {
 
   getProjectIdsWithHistoryOps(callback) {
     if (callback == null) {
-      callback = function (error, project_ids) {}
+      callback = function () {}
     }
     return RedisManager._getKeys(
       Keys.docsWithHistoryOps({ project_id: '*' }),
@@ -154,7 +153,7 @@ module.exports = RedisManager = {
     // return all the docids, to find dangling history entries after
     // everything is flushed.
     if (callback == null) {
-      callback = function (error, doc_ids) {}
+      callback = function () {}
     }
     return RedisManager._getKeys(
       Keys.uncompressedHistoryOps({ doc_id: '*' }),

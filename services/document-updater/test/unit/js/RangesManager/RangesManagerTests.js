@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -417,6 +416,7 @@ describe('RangesManager', function () {
           this.change_ids,
           this.ranges,
           (err, ranges) => {
+            if (err) return done(err)
             this.rangesResponse = ranges
             return done()
           }
@@ -471,6 +471,7 @@ describe('RangesManager', function () {
           this.change_ids,
           this.ranges,
           (err, ranges) => {
+            if (err) return done(err)
             this.rangesResponse = ranges
             return done()
           }

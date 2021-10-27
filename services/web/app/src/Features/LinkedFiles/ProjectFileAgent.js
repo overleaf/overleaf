@@ -73,7 +73,7 @@ module.exports = ProjectFileAgent = {
 
   _prepare(project_id, linkedFileData, user_id, callback) {
     if (callback == null) {
-      callback = function (err, linkedFileData) {}
+      callback = function () {}
     }
     return this._checkAuth(
       project_id,
@@ -174,7 +174,7 @@ module.exports = ProjectFileAgent = {
 
   _getEntity(linkedFileData, current_user_id, callback) {
     if (callback == null) {
-      callback = function (err, entity, type) {}
+      callback = function () {}
     }
     callback = _.once(callback)
     const { source_entity_path } = linkedFileData
@@ -236,7 +236,7 @@ module.exports = ProjectFileAgent = {
 
   _checkAuth(project_id, data, current_user_id, callback) {
     if (callback == null) {
-      callback = function (error, allowed) {}
+      callback = function () {}
     }
     callback = _.once(callback)
     if (!ProjectFileAgent._validate(data)) {

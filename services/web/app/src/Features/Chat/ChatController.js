@@ -87,7 +87,7 @@ module.exports = ChatController = {
     // user fields
     let message, thread, thread_id, user_id
     if (callback == null) {
-      callback = function (error, threads) {}
+      callback = function () {}
     }
     const user_ids = {}
     for (thread_id in threads) {

@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     max-len,
     no-unused-vars,
 */
@@ -55,6 +54,7 @@ describe('Getting messages', function () {
       return ChatClient.getGlobalMessages(
         this.project_id,
         (error, response, messages) => {
+          if (error) return done(error)
           expect(messages.length).to.equal(2)
           messages.reverse()
           expect(messages[0].content).to.equal(this.content1)
@@ -115,6 +115,7 @@ describe('Getting messages', function () {
       return ChatClient.getThreads(
         this.project_id,
         (error, response, threads) => {
+          if (error) return done(error)
           expect(Object.keys(threads).length).to.equal(2)
           const thread1 = threads[this.thread_id1]
           expect(thread1.messages.length).to.equal(2)

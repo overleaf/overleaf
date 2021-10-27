@@ -25,7 +25,7 @@ const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 module.exports = UpdateMerger = {
   mergeUpdate(user_id, project_id, path, updateRequest, source, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return FileWriter.writeStreamToDisk(
       project_id,
@@ -73,7 +73,7 @@ module.exports = UpdateMerger = {
 
   _determineFileType(project_id, path, fsPath, callback) {
     if (callback == null) {
-      callback = function (err, fileType) {}
+      callback = function () {}
     }
     // check if there is an existing file with the same path (we either need
     // to overwrite it or delete it)
@@ -132,7 +132,7 @@ module.exports = UpdateMerger = {
 
   _mergeUpdate(user_id, project_id, path, fsPath, source, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return UpdateMerger._determineFileType(
       project_id,

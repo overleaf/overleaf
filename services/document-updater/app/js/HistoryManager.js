@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -92,7 +91,7 @@ module.exports = HistoryManager = {
   // flush changes and callback (for when we need to know the queue is flushed)
   flushProjectChanges(project_id, options, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     if (
       !__guard__(
@@ -147,7 +146,7 @@ module.exports = HistoryManager = {
       ops = []
     }
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     if (ops.length === 0) {
       return callback()

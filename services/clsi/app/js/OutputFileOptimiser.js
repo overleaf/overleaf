@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
     no-undef,
     no-unused-vars,
@@ -26,7 +25,7 @@ module.exports = OutputFileOptimiser = {
     // check output file (src) and see if we can optimise it, storing
     // the result in the build directory (dst)
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     if (src.match(/\/output\.pdf$/)) {
       return OutputFileOptimiser.checkIfPDFIsOptimised(
@@ -68,7 +67,7 @@ module.exports = OutputFileOptimiser = {
 
   optimisePDF(src, dst, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const tmpOutput = dst + '.opt'
     const args = ['--linearize', '--newline-before-endstream', src, tmpOutput]

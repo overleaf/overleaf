@@ -33,7 +33,7 @@ const ONE_MEG = 1024 * 1024
 const ArchiveManager = {
   _isZipTooLarge(source, callback) {
     if (callback == null) {
-      callback = function (err, isTooLarge) {}
+      callback = function () {}
     }
     callback = _.once(callback)
 
@@ -79,7 +79,7 @@ const ArchiveManager = {
   _checkFilePath(entry, destination, callback) {
     // transform backslashes to forwardslashes to accommodate badly-behaved zip archives
     if (callback == null) {
-      callback = function (err, destFile) {}
+      callback = function () {}
     }
     const transformedFilename = entry.fileName.replace(/\\/g, '/')
     // check if the entry is a directory
@@ -104,7 +104,7 @@ const ArchiveManager = {
 
   _writeFileEntry(zipfile, entry, destFile, callback) {
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     callback = _.once(callback)
 
@@ -135,7 +135,7 @@ const ArchiveManager = {
 
   _extractZipFiles(source, destination, callback) {
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     callback = _.once(callback)
 
@@ -201,7 +201,7 @@ const ArchiveManager = {
 
   extractZipArchive(source, destination, _callback) {
     if (_callback == null) {
-      _callback = function (err) {}
+      _callback = function () {}
     }
     const callback = function (...args) {
       _callback(...Array.from(args || []))
@@ -242,7 +242,7 @@ const ArchiveManager = {
 
   findTopLevelDirectory(directory, callback) {
     if (callback == null) {
-      callback = function (error, topLevelDir) {}
+      callback = function () {}
     }
     return fs.readdir(directory, function (error, files) {
       if (error != null) {

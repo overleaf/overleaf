@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -335,6 +334,7 @@ describe('Ranges', function () {
           this.project_id,
           this.doc.id,
           (error, doc) => {
+            if (error) return done(error)
             const { changes } = doc.ranges
             changes[0].op.should.deep.equal({ i: '123', p: 1 })
             changes[1].op.should.deep.equal({ i: '456', p: 5 })

@@ -49,7 +49,7 @@ module.exports = HomeController = {
   externalPage(page, title) {
     return function (req, res, next) {
       if (next == null) {
-        next = function (error) {}
+        next = function () {}
       }
       const path = Path.join(__dirname, `/../../../views/external/${page}.pug`)
       return fs.exists(path, function (exists) {

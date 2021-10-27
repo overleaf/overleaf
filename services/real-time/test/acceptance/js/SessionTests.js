@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -45,6 +44,7 @@ describe('Session', function () {
 
     return it('should appear in the list of connected clients', function (done) {
       return RealTimeClient.getConnectedClients((error, clients) => {
+        if (error) return done(error)
         let included = false
         for (const client of Array.from(clients)) {
           if (client.client_id === this.client.socket.sessionid) {

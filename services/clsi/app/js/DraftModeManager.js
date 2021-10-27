@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-useless-escape,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -18,7 +17,7 @@ const logger = require('logger-sharelatex')
 module.exports = DraftModeManager = {
   injectDraftMode(filename, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return fs.readFile(filename, 'utf8', function (error, content) {
       if (error != null) {

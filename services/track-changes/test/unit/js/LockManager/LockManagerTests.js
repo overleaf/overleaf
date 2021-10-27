@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     mocha/no-nested-tests,
     no-return-assign,
     no-undef,
@@ -155,7 +154,7 @@ describe('LockManager', function () {
         this.LockManager.LOCK_TEST_INTERVAL = 5
         this.LockManager.tryLock = function (doc_id, callback) {
           if (callback == null) {
-            callback = function (error, isFree) {}
+            callback = function () {}
           }
           if (Date.now() - startTime < 100) {
             return callback(null, false)
@@ -204,7 +203,7 @@ describe('LockManager', function () {
       beforeEach(function () {
         this.runner = function (releaseLock) {
           if (releaseLock == null) {
-            releaseLock = function (error) {}
+            releaseLock = function () {}
           }
           return releaseLock()
         }
@@ -242,7 +241,7 @@ describe('LockManager', function () {
         this.error = new Error('oops')
         this.runner = releaseLock => {
           if (releaseLock == null) {
-            releaseLock = function (error) {}
+            releaseLock = function () {}
           }
           return releaseLock(this.error)
         }

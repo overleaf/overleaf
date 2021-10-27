@@ -39,7 +39,7 @@ const buildState = s =>
 module.exports = ClsiStateManager = {
   computeHash(project, options, callback) {
     if (callback == null) {
-      callback = function (err, hash) {}
+      callback = function () {}
     }
     return ProjectEntityHandler.getAllEntitiesFromProject(
       project,

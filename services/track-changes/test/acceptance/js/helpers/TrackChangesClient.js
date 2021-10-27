@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -35,7 +34,7 @@ const S3_BUCKET = Settings.trackchanges.stores.doc_history
 module.exports = TrackChangesClient = {
   flushAndGetCompressedUpdates(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error, updates) {}
+      callback = function () {}
     }
     return TrackChangesClient.flushDoc(project_id, doc_id, error => {
       if (error != null) {
@@ -47,7 +46,7 @@ module.exports = TrackChangesClient = {
 
   flushDoc(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return request.post(
       {
@@ -62,7 +61,7 @@ module.exports = TrackChangesClient = {
 
   flushProject(project_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return request.post(
       {
@@ -77,7 +76,7 @@ module.exports = TrackChangesClient = {
 
   getCompressedUpdates(doc_id, callback) {
     if (callback == null) {
-      callback = function (error, updates) {}
+      callback = function () {}
     }
     return db.docHistory
       .find({ doc_id: ObjectId(doc_id) })
@@ -87,7 +86,7 @@ module.exports = TrackChangesClient = {
 
   getProjectMetaData(project_id, callback) {
     if (callback == null) {
-      callback = function (error, updates) {}
+      callback = function () {}
     }
     return db.projectHistoryMetaData.findOne(
       {
@@ -99,7 +98,7 @@ module.exports = TrackChangesClient = {
 
   setPreserveHistoryForProject(project_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return db.projectHistoryMetaData.updateOne(
       {
@@ -117,7 +116,7 @@ module.exports = TrackChangesClient = {
 
   pushRawUpdates(project_id, doc_id, updates, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return rclient.sadd(
       Keys.docsWithHistoryOps({ project_id }),
@@ -137,13 +136,14 @@ module.exports = TrackChangesClient = {
 
   getDiff(project_id, doc_id, from, to, callback) {
     if (callback == null) {
-      callback = function (error, diff) {}
+      callback = function () {}
     }
     return request.get(
       {
         url: `http://localhost:3015/project/${project_id}/doc/${doc_id}/diff?from=${from}&to=${to}`,
       },
       (error, response, body) => {
+        if (error) return callback(error)
         response.statusCode.should.equal(200)
         return callback(null, JSON.parse(body))
       }
@@ -152,13 +152,14 @@ module.exports = TrackChangesClient = {
 
   getUpdates(project_id, options, callback) {
     if (callback == null) {
-      callback = function (error, body) {}
+      callback = function () {}
     }
     return request.get(
       {
         url: `http://localhost:3015/project/${project_id}/updates?before=${options.before}&min_count=${options.min_count}`,
       },
       (error, response, body) => {
+        if (error) return callback(error)
         response.statusCode.should.equal(200)
         return callback(null, JSON.parse(body))
       }
@@ -178,7 +179,7 @@ module.exports = TrackChangesClient = {
 
   restoreDoc(project_id, doc_id, version, user_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return request.post(
       {
@@ -188,6 +189,7 @@ module.exports = TrackChangesClient = {
         },
       },
       (error, response, body) => {
+        if (error) return callback(error)
         response.statusCode.should.equal(204)
         return callback(null)
       }
@@ -196,7 +198,7 @@ module.exports = TrackChangesClient = {
 
   pushDocHistory(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return request.post(
       {
@@ -211,7 +213,7 @@ module.exports = TrackChangesClient = {
 
   pullDocHistory(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return request.post(
       {
@@ -250,7 +252,7 @@ module.exports = TrackChangesClient = {
 
   getS3Doc(project_id, doc_id, pack_id, callback) {
     if (callback == null) {
-      callback = function (error, body) {}
+      callback = function () {}
     }
     const params = {
       Bucket: S3_BUCKET,
@@ -276,7 +278,7 @@ module.exports = TrackChangesClient = {
 
   removeS3Doc(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error, res, body) {}
+      callback = function () {}
     }
     let params = {
       Bucket: S3_BUCKET,

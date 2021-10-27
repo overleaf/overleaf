@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -73,6 +72,7 @@ describe('Applying updates to a doc', function () {
         this.version,
         this.originalRanges,
         (error, res, body) => {
+          if (error) return done(error)
           this.body = body
           return done()
         }
@@ -89,6 +89,7 @@ describe('Applying updates to a doc', function () {
         this.doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.originalLines)
           doc.version.should.equal(this.version)
           doc.ranges.should.deep.equal(this.originalRanges)
@@ -107,6 +108,7 @@ describe('Applying updates to a doc', function () {
         this.version,
         this.originalRanges,
         (error, res, body) => {
+          if (error) return done(error)
           this.body = body
           return done()
         }
@@ -127,6 +129,7 @@ describe('Applying updates to a doc', function () {
         this.doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.newLines)
           doc.version.should.equal(this.version)
           doc.ranges.should.deep.equal(this.originalRanges)
@@ -145,6 +148,7 @@ describe('Applying updates to a doc', function () {
         this.version + 1,
         this.originalRanges,
         (error, res, body) => {
+          if (error) return done(error)
           this.body = body
           return done()
         }
@@ -165,6 +169,7 @@ describe('Applying updates to a doc', function () {
         this.doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.originalLines)
           doc.version.should.equal(this.version + 1)
           doc.ranges.should.deep.equal(this.originalRanges)
@@ -183,6 +188,7 @@ describe('Applying updates to a doc', function () {
         this.version,
         this.newRanges,
         (error, res, body) => {
+          if (error) return done(error)
           this.body = body
           return done()
         }
@@ -203,6 +209,7 @@ describe('Applying updates to a doc', function () {
         this.doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.originalLines)
           doc.version.should.equal(this.version)
           doc.ranges.should.deep.equal(this.newRanges)
@@ -222,6 +229,7 @@ describe('Applying updates to a doc', function () {
         0,
         this.originalRanges,
         (error, res, body) => {
+          if (error) return done(error)
           this.res = res
           this.body = body
           return done()
@@ -239,6 +247,7 @@ describe('Applying updates to a doc', function () {
         this.missing_doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.originalLines)
           doc.version.should.equal(0)
           doc.ranges.should.deep.equal(this.originalRanges)
@@ -258,6 +267,7 @@ describe('Applying updates to a doc', function () {
           this.version,
           this.originalRanges,
           (error, res, body) => {
+            if (error) return done(error)
             this.res = res
             this.body = body
             return done()
@@ -275,6 +285,7 @@ describe('Applying updates to a doc', function () {
           this.doc_id,
           {},
           (error, res, doc) => {
+            if (error) return done(error)
             doc.lines.should.deep.equal(this.originalLines)
             return done()
           }
@@ -291,6 +302,7 @@ describe('Applying updates to a doc', function () {
           this.version,
           this.originalRanges,
           (error, res, body) => {
+            if (error) return done(error)
             this.res = res
             this.body = body
             return done()
@@ -308,6 +320,7 @@ describe('Applying updates to a doc', function () {
           this.doc_id,
           {},
           (error, res, doc) => {
+            if (error) return done(error)
             doc.lines.should.deep.equal(this.originalLines)
             return done()
           }
@@ -325,6 +338,7 @@ describe('Applying updates to a doc', function () {
         null,
         this.originalRanges,
         (error, res, body) => {
+          if (error) return done(error)
           this.res = res
           this.body = body
           return done()
@@ -342,6 +356,7 @@ describe('Applying updates to a doc', function () {
         this.doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.originalLines)
           doc.version.should.equal(this.version)
           return done()
@@ -361,6 +376,7 @@ describe('Applying updates to a doc', function () {
         this.version,
         this.originalRanges,
         (error, res, body) => {
+          if (error) return done(error)
           this.body = body
           return done()
         }
@@ -377,6 +393,7 @@ describe('Applying updates to a doc', function () {
         this.doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.largeLines)
           return done()
         }
@@ -398,6 +415,7 @@ describe('Applying updates to a doc', function () {
         this.version,
         this.originalRanges,
         (error, res, body) => {
+          if (error) return done(error)
           this.res = res
           this.body = body
           return done()
@@ -415,6 +433,7 @@ describe('Applying updates to a doc', function () {
         this.doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.largeLines)
           return done()
         }
@@ -433,6 +452,7 @@ describe('Applying updates to a doc', function () {
         this.version,
         this.originalRanges,
         (error, res, body) => {
+          if (error) return done(error)
           this.res = res
           this.body = body
           return done()
@@ -454,6 +474,7 @@ describe('Applying updates to a doc', function () {
         this.doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.originalLines)
           return done()
         }
@@ -475,6 +496,7 @@ describe('Applying updates to a doc', function () {
         this.version,
         this.originalRanges,
         (error, res, body) => {
+          if (error) return done(error)
           this.res = res
           this.body = body
           return done()
@@ -488,6 +510,7 @@ describe('Applying updates to a doc', function () {
         this.doc_id,
         {},
         (error, res, doc) => {
+          if (error) return done(error)
           doc.lines.should.deep.equal(this.originalLines)
           return done()
         }

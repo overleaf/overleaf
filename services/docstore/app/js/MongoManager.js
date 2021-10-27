@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -21,7 +20,7 @@ const { promisify } = require('util')
 module.exports = MongoManager = {
   findDoc(project_id, doc_id, filter, callback) {
     if (callback == null) {
-      callback = function (error, doc) {}
+      callback = function () {}
     }
     db.docs.findOne(
       {
@@ -141,7 +140,7 @@ module.exports = MongoManager = {
 
   getDocVersion(doc_id, callback) {
     if (callback == null) {
-      callback = function (error, version) {}
+      callback = function () {}
     }
     db.docOps.findOne(
       {
@@ -163,7 +162,7 @@ module.exports = MongoManager = {
 
   setDocVersion(doc_id, version, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     db.docOps.updateOne(
       {

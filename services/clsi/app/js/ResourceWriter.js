@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
     no-useless-escape,
@@ -30,7 +29,7 @@ const parallelFileDownloads = settings.parallelFileDownloads || 1
 module.exports = ResourceWriter = {
   syncResourcesToDisk(request, basePath, callback) {
     if (callback == null) {
-      callback = function (error, resourceList) {}
+      callback = function () {}
     }
     if (request.syncType === 'incremental') {
       logger.log(
@@ -111,7 +110,7 @@ module.exports = ResourceWriter = {
 
   saveIncrementalResourcesToDisk(project_id, resources, basePath, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return this._createDirectory(basePath, error => {
       if (error != null) {
@@ -129,7 +128,7 @@ module.exports = ResourceWriter = {
 
   saveAllResourcesToDisk(project_id, resources, basePath, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return this._createDirectory(basePath, error => {
       if (error != null) {
@@ -157,7 +156,7 @@ module.exports = ResourceWriter = {
 
   _createDirectory(basePath, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return fs.mkdir(basePath, function (err) {
       if (err != null) {
@@ -175,7 +174,7 @@ module.exports = ResourceWriter = {
 
   _removeExtraneousFiles(resources, basePath, _callback) {
     if (_callback == null) {
-      _callback = function (error, outputFiles, allFiles) {}
+      _callback = function () {}
     }
     const timer = new Metrics.Timer('unlink-output-files')
     const callback = function (error, ...result) {
@@ -267,7 +266,7 @@ module.exports = ResourceWriter = {
 
   _deleteFileIfNotDirectory(path, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return fs.stat(path, function (error, stat) {
       if (error != null && error.code === 'ENOENT') {
@@ -298,7 +297,7 @@ module.exports = ResourceWriter = {
 
   _writeResourceToDisk(project_id, resource, basePath, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return ResourceWriter.checkPath(
       basePath,

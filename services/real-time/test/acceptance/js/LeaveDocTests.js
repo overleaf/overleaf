@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -110,6 +109,7 @@ describe('leaveDoc', function () {
         return RealTimeClient.getConnectedClient(
           this.client.socket.sessionid,
           (error, client) => {
+            if (error) return done(error)
             expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(
               false
             )
@@ -156,6 +156,7 @@ describe('leaveDoc', function () {
         return RealTimeClient.getConnectedClient(
           this.client.socket.sessionid,
           (error, client) => {
+            if (error) return done(error)
             expect(Array.from(client.rooms).includes(this.doc_id)).to.equal(
               false
             )

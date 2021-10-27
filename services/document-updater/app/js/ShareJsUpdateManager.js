@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -43,7 +42,7 @@ module.exports = ShareJsUpdateManager = {
 
   applyUpdate(project_id, doc_id, update, lines, version, callback) {
     if (callback == null) {
-      callback = function (error, updatedDocLines) {}
+      callback = function () {}
     }
     logger.debug({ project_id, doc_id, update }, 'applying sharejs updates')
     const jobs = []

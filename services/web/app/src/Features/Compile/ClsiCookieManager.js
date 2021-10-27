@@ -40,7 +40,7 @@ module.exports = function (backendGroup) {
 
     _getServerId(project_id, user_id, callback) {
       if (callback == null) {
-        callback = function (err, serverId) {}
+        callback = function () {}
       }
       return rclient.get(
         this.buildKey(project_id, user_id),
@@ -63,7 +63,7 @@ module.exports = function (backendGroup) {
 
     _populateServerIdViaRequest(project_id, user_id, callback) {
       if (callback == null) {
-        callback = function (err, serverId) {}
+        callback = function () {}
       }
       const url = `${Settings.apis.clsi.url}/project/${project_id}/status`
       request.post(url, (err, res, body) => {
@@ -102,7 +102,7 @@ module.exports = function (backendGroup) {
 
     setServerId(project_id, user_id, response, previous, callback) {
       if (callback == null) {
-        callback = function (err, serverId) {}
+        callback = function () {}
       }
       if (!clsiCookiesEnabled) {
         return callback()
@@ -127,7 +127,8 @@ module.exports = function (backendGroup) {
           rclient_secondary,
           project_id,
           user_id,
-          serverId
+          serverId,
+          () => {}
         )
       }
       this._setServerIdInRedis(rclient, project_id, user_id, serverId, err =>
@@ -137,7 +138,7 @@ module.exports = function (backendGroup) {
 
     _setServerIdInRedis(rclient, project_id, user_id, serverId, callback) {
       if (callback == null) {
-        callback = function (err) {}
+        callback = function () {}
       }
       rclient.setex(
         this.buildKey(project_id, user_id),
@@ -149,7 +150,7 @@ module.exports = function (backendGroup) {
 
     clearServerId(project_id, user_id, callback) {
       if (callback == null) {
-        callback = function (err) {}
+        callback = function () {}
       }
       if (!clsiCookiesEnabled) {
         return callback()
@@ -159,7 +160,7 @@ module.exports = function (backendGroup) {
 
     getCookieJar(project_id, user_id, callback) {
       if (callback == null) {
-        callback = function (err, jar, clsiServerId) {}
+        callback = function () {}
       }
       if (!clsiCookiesEnabled) {
         return callback(null, request.jar(), undefined)

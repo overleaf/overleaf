@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -26,7 +25,7 @@ module.exports = TikzManager = {
   checkMainFile(compileDir, mainFile, resources, callback) {
     // if there's already an output.tex file, we don't want to touch it
     if (callback == null) {
-      callback = function (error, needsMainFile) {}
+      callback = function () {}
     }
     for (const resource of Array.from(resources)) {
       if (resource.path === 'output.tex') {
@@ -70,7 +69,7 @@ module.exports = TikzManager = {
 
   injectOutputFile(compileDir, mainFile, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return ResourceWriter.checkPath(
       compileDir,

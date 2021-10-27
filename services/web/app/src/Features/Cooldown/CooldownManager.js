@@ -24,7 +24,7 @@ module.exports = CooldownManager = {
 
   putProjectOnCooldown(projectId, callback) {
     if (callback == null) {
-      callback = function (err) {}
+      callback = function () {}
     }
     logger.log(
       { projectId },
@@ -41,7 +41,7 @@ module.exports = CooldownManager = {
 
   isProjectOnCooldown(projectId, callback) {
     if (callback == null) {
-      callback = function (err, isOnCooldown) {}
+      callback = function () {}
     }
     return rclient.get(
       CooldownManager._buildKey(projectId),

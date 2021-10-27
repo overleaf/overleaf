@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -32,6 +31,7 @@ describe('clientTracking', function () {
                 project: { name: 'Test Project' },
               },
               (error, { user_id, project_id }) => {
+                if (error) return done(error)
                 this.user_id = user_id
                 this.project_id = project_id
                 return cb()
@@ -127,6 +127,7 @@ describe('clientTracking', function () {
       return this.clientB.emit(
         'clientTracking.getConnectedUsers',
         (error, users) => {
+          if (error) return done(error)
           for (const user of Array.from(users)) {
             if (user.client_id === this.clientA.publicId) {
               expect(user.cursorData).to.deep.equal({
@@ -155,6 +156,7 @@ describe('clientTracking', function () {
                 publicAccess: 'readAndWrite',
               },
               (error, { user_id, project_id }) => {
+                if (error) return done(error)
                 this.user_id = user_id
                 this.project_id = project_id
                 return cb()

@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -39,7 +38,7 @@ module.exports = UpdatesManager = {
   ) {
     let i
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     const { length } = rawUpdates
     if (length === 0) {
@@ -206,7 +205,7 @@ module.exports = UpdatesManager = {
   // Check whether the updates are temporary (per-project property)
   _prepareProjectForUpdates(project_id, callback) {
     if (callback == null) {
-      callback = function (error, temporary) {}
+      callback = function () {}
     }
     return UpdateTrimmer.shouldTrimUpdates(
       project_id,
@@ -222,7 +221,7 @@ module.exports = UpdatesManager = {
   // Check for project id on document history (per-document property)
   _prepareDocForUpdates(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return MongoManager.backportProjectId(project_id, doc_id, function (error) {
       if (error != null) {
@@ -237,7 +236,7 @@ module.exports = UpdatesManager = {
   processUncompressedUpdates(project_id, doc_id, temporary, callback) {
     // get the updates as strings from redis (so we can delete them after they are applied)
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return RedisManager.getOldestDocUpdates(
       doc_id,
@@ -320,7 +319,7 @@ module.exports = UpdatesManager = {
   // Process updates for a doc when we flush it individually
   processUncompressedUpdatesWithLock(project_id, doc_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return UpdatesManager._prepareProjectForUpdates(
       project_id,
@@ -346,7 +345,7 @@ module.exports = UpdatesManager = {
     callback
   ) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return UpdatesManager._prepareDocForUpdates(
       project_id,
@@ -373,7 +372,7 @@ module.exports = UpdatesManager = {
   // Process all updates for a project, only check project-level information once
   processUncompressedUpdatesForProject(project_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return RedisManager.getDocIdsWithHistoryOps(
       project_id,
@@ -384,6 +383,7 @@ module.exports = UpdatesManager = {
         return UpdatesManager._prepareProjectForUpdates(
           project_id,
           function (error, temporary) {
+            if (error) return callback(error)
             const jobs = []
             for (const doc_id of Array.from(doc_ids)) {
               ;(doc_id =>
@@ -406,7 +406,7 @@ module.exports = UpdatesManager = {
   // flush all outstanding changes
   flushAll(limit, callback) {
     if (callback == null) {
-      callback = function (error, result) {}
+      callback = function () {}
     }
     return RedisManager.getProjectIdsWithHistoryOps(function (
       error,
@@ -470,7 +470,7 @@ module.exports = UpdatesManager = {
 
   getDanglingUpdates(callback) {
     if (callback == null) {
-      callback = function (error, doc_ids) {}
+      callback = function () {}
     }
     return RedisManager.getAllDocIdsWithHistoryOps(function (
       error,
@@ -495,6 +495,7 @@ module.exports = UpdatesManager = {
           )
         // find the dangling doc ids
         return task(function (error, project_doc_ids) {
+          if (error) return callback(error)
           const dangling_doc_ids = _.difference(all_doc_ids, project_doc_ids)
           logger.log(
             { all_doc_ids, all_project_ids, project_doc_ids, dangling_doc_ids },
@@ -511,7 +512,7 @@ module.exports = UpdatesManager = {
       options = {}
     }
     if (callback == null) {
-      callback = function (error, updates) {}
+      callback = function () {}
     }
     return UpdatesManager.processUncompressedUpdatesWithLock(
       project_id,
@@ -542,7 +543,7 @@ module.exports = UpdatesManager = {
       options = {}
     }
     if (callback == null) {
-      callback = function (error, updates) {}
+      callback = function () {}
     }
     return UpdatesManager.getDocUpdates(
       project_id,
@@ -567,7 +568,7 @@ module.exports = UpdatesManager = {
       options = {}
     }
     if (callback == null) {
-      callback = function (error, updates) {}
+      callback = function () {}
     }
     if (!options.min_count) {
       options.min_count = 25
@@ -690,7 +691,7 @@ module.exports = UpdatesManager = {
 
   fetchUserInfo(users, callback) {
     if (callback == null) {
-      callback = function (error, fetchedUserInfo) {}
+      callback = function () {}
     }
     const jobs = []
     const fetchedUserInfo = {}
@@ -718,7 +719,7 @@ module.exports = UpdatesManager = {
   fillUserInfo(updates, callback) {
     let update, user_id
     if (callback == null) {
-      callback = function (error, updates) {}
+      callback = function () {}
     }
     const users = {}
     for (update of Array.from(updates)) {
@@ -749,7 +750,7 @@ module.exports = UpdatesManager = {
   fillSummarizedUserInfo(updates, callback) {
     let update, user_id, user_ids
     if (callback == null) {
-      callback = function (error, updates) {}
+      callback = function () {}
     }
     const users = {}
     for (update of Array.from(updates)) {

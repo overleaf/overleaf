@@ -9,7 +9,7 @@ module.exports = {
   callbacks: [],
   ensureRunning(callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     if (this.running) {
       return callback()

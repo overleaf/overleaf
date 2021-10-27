@@ -567,7 +567,10 @@ const ProjectController = {
 
         // in v2 add notifications for matching university IPs
         if (Settings.overleaf != null && req.ip !== user.lastLoginIp) {
-          NotificationsBuilder.ipMatcherAffiliation(user._id).create(req.ip)
+          NotificationsBuilder.ipMatcherAffiliation(user._id).create(
+            req.ip,
+            () => {}
+          )
         }
 
         ProjectController._injectProjectUsers(projects, (error, projects) => {

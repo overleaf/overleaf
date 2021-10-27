@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -18,7 +17,7 @@ const metrics = require('@overleaf/metrics')
 module.exports = ContactManager = {
   touchContact(user_id, contact_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     try {
       user_id = ObjectId(user_id.toString())
@@ -45,7 +44,7 @@ module.exports = ContactManager = {
 
   getContacts(user_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     try {
       user_id = ObjectId(user_id.toString())

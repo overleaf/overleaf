@@ -30,7 +30,7 @@ module.exports = CompileManager = {
       options = {}
     }
     if (_callback == null) {
-      _callback = function (error) {}
+      _callback = function () {}
     }
     const timer = new Metrics.Timer('editor.compile')
     const callback = function (...args) {
@@ -127,7 +127,7 @@ module.exports = CompileManager = {
 
   stopCompile(project_id, user_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return CompileManager.getProjectCompileLimits(
       project_id,
@@ -142,7 +142,7 @@ module.exports = CompileManager = {
 
   deleteAuxFiles(project_id, user_id, clsiserverid, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return CompileManager.getProjectCompileLimits(
       project_id,
@@ -163,7 +163,7 @@ module.exports = CompileManager = {
 
   getProjectCompileLimits(project_id, callback) {
     if (callback == null) {
-      callback = function (error, limits) {}
+      callback = function () {}
     }
     return ProjectGetter.getProject(
       project_id,
@@ -201,7 +201,7 @@ module.exports = CompileManager = {
   COMPILE_DELAY: 1, // seconds
   _checkIfRecentlyCompiled(project_id, user_id, callback) {
     if (callback == null) {
-      callback = function (error, recentlyCompiled) {}
+      callback = function () {}
     }
     const key = `compile:${project_id}:${user_id}`
     return rclient.set(
@@ -225,7 +225,7 @@ module.exports = CompileManager = {
 
   _checkCompileGroupAutoCompileLimit(isAutoCompile, compileGroup, callback) {
     if (callback == null) {
-      callback = function (err, canCompile) {}
+      callback = function () {}
     }
     if (!isAutoCompile) {
       return callback(null, true)
@@ -245,7 +245,7 @@ module.exports = CompileManager = {
 
   _checkIfAutoCompileLimitHasBeenHit(isAutoCompile, compileGroup, callback) {
     if (callback == null) {
-      callback = function (err, canCompile) {}
+      callback = function () {}
     }
     if (!isAutoCompile) {
       return callback(null, true)
@@ -270,7 +270,7 @@ module.exports = CompileManager = {
 
   wordCount(project_id, user_id, file, clsiserverid, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return CompileManager.getProjectCompileLimits(
       project_id,

@@ -28,7 +28,7 @@ const _ = require('underscore')
 module.exports = ProjectRootDocManager = {
   setRootDocAutomatically(project_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return ProjectEntityHandler.getAllDocs(project_id, function (error, docs) {
       if (error != null) {
@@ -70,7 +70,7 @@ module.exports = ProjectRootDocManager = {
 
   findRootDocFileFromDirectory(directoryPath, callback) {
     if (callback == null) {
-      callback = function (error, path, content) {}
+      callback = function () {}
     }
     const filePathsPromise = globby(['**/*.{tex,Rtex}'], {
       cwd: directoryPath,
@@ -131,7 +131,7 @@ module.exports = ProjectRootDocManager = {
 
   setRootDocFromName(project_id, rootDocName, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return ProjectEntityHandler.getAllDocPathsFromProjectById(
       project_id,
@@ -180,7 +180,7 @@ module.exports = ProjectRootDocManager = {
 
   ensureRootDocumentIsSet(project_id, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     return ProjectGetter.getProject(
       project_id,
@@ -246,7 +246,7 @@ module.exports = ProjectRootDocManager = {
 
   _sortFileList(listToSort, rootDirectory, callback) {
     if (callback == null) {
-      callback = function (error, result) {}
+      callback = function () {}
     }
     return async.mapLimit(
       listToSort,

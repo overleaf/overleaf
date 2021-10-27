@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -36,7 +35,7 @@ describe('OutputFileFinder', function () {
   })
 
   describe('findOutputFiles', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
       this.resource_path = 'resource/path.tex'
       this.output_paths = ['output.pdf', 'extra/file.tex']
       this.all_paths = this.output_paths.concat([this.resource_path])
@@ -48,7 +47,9 @@ describe('OutputFileFinder', function () {
         this.resources,
         this.directory,
         (error, outputFiles) => {
+          if (error) return done(error)
           this.outputFiles = outputFiles
+          done()
         }
       )
     })

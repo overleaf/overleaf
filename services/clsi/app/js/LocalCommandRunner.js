@@ -1,6 +1,5 @@
 /* eslint-disable
     camelcase,
-    handle-callback-err,
     no-return-assign,
     no-unused-vars,
 */
@@ -32,11 +31,7 @@ module.exports = CommandRunner = {
     callback
   ) {
     let key, value
-    if (callback == null) {
-      callback = function (error) {}
-    } else {
-      callback = _.once(callback)
-    }
+    callback = _.once(callback)
     command = Array.from(command).map(arg =>
       arg.toString().replace('$COMPILE_DIR', directory)
     )
@@ -91,7 +86,7 @@ module.exports = CommandRunner = {
 
   kill(pid, callback) {
     if (callback == null) {
-      callback = function (error) {}
+      callback = function () {}
     }
     try {
       process.kill(-pid) // kill all processes in group

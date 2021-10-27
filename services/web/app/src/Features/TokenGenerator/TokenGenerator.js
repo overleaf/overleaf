@@ -61,7 +61,7 @@ const TokenGenerator = {
 
   generateUniqueReadOnlyToken(callback) {
     if (callback == null) {
-      callback = function (err, token) {}
+      callback = function () {}
     }
     return Async.retry(
       10,

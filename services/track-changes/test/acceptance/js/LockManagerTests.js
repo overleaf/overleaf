@@ -1,5 +1,4 @@
 /* eslint-disable
-    handle-callback-err,
     no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
@@ -37,22 +36,25 @@ describe('Locking document', function () {
                 releaseB => {
                   return releaseA()
                 }, // try to release lock A to see if it wipes out lock B
-                error => {}
+                () => {}
               ),
 
             // we never release lock B so nothing should happen here
             1500
           )
         }, // enough time to wait until the lock has expired
-        error =>
+        err => {
           // we get here after trying to release lock A
+          expect(err).to.exist
           done()
+        }
       )
       return null
     })
 
     return it('the new lock should not be removed by the expired locker', function (done) {
       LockManager.checkLock('doc123', (err, isFree) => {
+        if (err) return done(err)
         expect(isFree).to.equal(false)
         return done()
       })
