@@ -40,7 +40,7 @@ describe('V1SubscriptionManager', function () {
             mendeley: true,
           },
         }),
-        request: (this.request = sinon.stub()),
+        requestretry: (this.request = sinon.stub()),
       },
     })
     this.userId = 'abcd'
@@ -236,6 +236,7 @@ describe('V1SubscriptionManager', function () {
           return this.V1SubscriptionManager._v1Request(
             this.user_id,
             {
+              method: 'GET',
               url() {
                 return '/foo'
               },
@@ -248,6 +249,18 @@ describe('V1SubscriptionManager', function () {
       it('should not produce an error', function (done) {
         return this.call((err, body, v1Id) => {
           expect(err).not.to.exist
+          return done()
+        })
+      })
+
+      it('should have supplied retry options to request', function (done) {
+        return this.call((err, body, v1Id) => {
+          const requestOptions = this.request.lastCall.args[0]
+          expect(requestOptions.url).to.equal('/foo')
+          expect(requestOptions.maxAttempts).to.exist
+          expect(requestOptions.maxAttempts > 0).to.be.true
+          expect(requestOptions.retryDelay).to.exist
+          expect(requestOptions.retryDelay > 0).to.be.true
           return done()
         })
       })

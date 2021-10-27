@@ -2,7 +2,7 @@ const OError = require('@overleaf/o-error')
 const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
 const settings = require('@overleaf/settings')
-const request = require('request')
+const request = require('requestretry')
 const { promisifyAll } = require('../../util/promises')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const {
@@ -204,67 +204,66 @@ const InstitutionsAPI = {
   },
 }
 
-function makeAffiliationRequest(requestOptions, callback) {
+function makeAffiliationRequest(options, callback) {
   if (!settings.apis.v1.url) {
     return callback(null)
   } // service is not configured
-  if (!requestOptions.extraSuccessStatusCodes) {
-    requestOptions.extraSuccessStatusCodes = []
+  if (!options.extraSuccessStatusCodes) {
+    options.extraSuccessStatusCodes = []
   }
-  request(
-    {
-      method: requestOptions.method,
-      url: `${settings.apis.v1.url}${requestOptions.path}`,
-      body: requestOptions.body,
-      auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
-      json: true,
-      timeout: 20 * 1000,
-    },
-    function (error, response, body) {
-      if (error) {
-        return callback(
-          new V1ConnectionError('error getting affiliations from v1').withCause(
-            error
-          )
+  const requestOptions = {
+    method: options.method,
+    url: `${settings.apis.v1.url}${options.path}`,
+    body: options.body,
+    auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
+    json: true,
+    timeout: 20 * 1000,
+  }
+  if (options.method === 'GET') {
+    requestOptions.maxAttempts = 3
+    requestOptions.retryDelay = 500
+  } else {
+    requestOptions.maxAttempts = 0
+  }
+  request(requestOptions, function (error, response, body) {
+    if (error) {
+      return callback(
+        new V1ConnectionError('error getting affiliations from v1').withCause(
+          error
         )
-      }
-      if (response && response.statusCode >= 500) {
-        return callback(
-          new V1ConnectionError({
-            message: 'error getting affiliations from v1',
-            info: {
-              status: response.statusCode,
-              body: body,
-            },
-          })
-        )
-      }
-      let isSuccess = response.statusCode >= 200 && response.statusCode < 300
-      if (!isSuccess) {
-        isSuccess = requestOptions.extraSuccessStatusCodes.includes(
-          response.statusCode
-        )
-      }
-      if (!isSuccess) {
-        let errorMessage
-        if (body && body.errors) {
-          errorMessage = `${response.statusCode}: ${body.errors}`
-        } else {
-          errorMessage = `${requestOptions.defaultErrorMessage}: ${response.statusCode}`
-        }
-
-        logger.warn(
-          { path: requestOptions.path, body: requestOptions.body },
-          errorMessage
-        )
-        return callback(
-          new OError(errorMessage, { statusCode: response.statusCode })
-        )
-      }
-
-      callback(null, body)
+      )
     }
-  )
+    if (response && response.statusCode >= 500) {
+      return callback(
+        new V1ConnectionError({
+          message: 'error getting affiliations from v1',
+          info: {
+            status: response.statusCode,
+            body: body,
+          },
+        })
+      )
+    }
+    let isSuccess = response.statusCode >= 200 && response.statusCode < 300
+    if (!isSuccess) {
+      isSuccess = options.extraSuccessStatusCodes.includes(response.statusCode)
+    }
+    if (!isSuccess) {
+      let errorMessage
+      if (body && body.errors) {
+        errorMessage = `${response.statusCode}: ${body.errors}`
+      } else {
+        errorMessage = `${options.defaultErrorMessage}: ${response.statusCode}`
+      }
+
+      logger.warn({ path: options.path, body: options.body }, errorMessage)
+      return callback(
+        new OError(errorMessage, { statusCode: response.statusCode })
+      )
+    }
+
+    callback(null, body)
+  })
 }
 ;[
   'getInstitutionAffiliations',

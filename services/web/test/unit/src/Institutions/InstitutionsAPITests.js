@@ -21,7 +21,7 @@ describe('InstitutionsAPI', function () {
           timeAsyncMethod: sinon.stub(),
         },
         '@overleaf/settings': this.settings,
-        request: this.request,
+        requestretry: this.request,
         '../Notifications/NotificationsBuilder': {
           ipMatcherAffiliation: sinon
             .stub()
@@ -52,6 +52,9 @@ describe('InstitutionsAPI', function () {
           const expectedUrl = `v1.url/api/v2/institutions/${this.institutionId}/affiliations`
           requestOptions.url.should.equal(expectedUrl)
           requestOptions.method.should.equal('GET')
+          requestOptions.maxAttempts.should.exist
+          requestOptions.maxAttempts.should.not.equal(0)
+          requestOptions.retryDelay.should.exist
           expect(requestOptions.body).not.to.exist
           body.should.equal(responseBody)
           done()
@@ -126,6 +129,7 @@ describe('InstitutionsAPI', function () {
           const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
           requestOptions.url.should.equal(expectedUrl)
           requestOptions.method.should.equal('GET')
+          requestOptions.maxAttempts.should.equal(3)
           expect(requestOptions.body).not.to.exist
           body.should.equal(responseBody)
           done()
@@ -207,6 +211,7 @@ describe('InstitutionsAPI', function () {
           const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
           requestOptions.url.should.equal(expectedUrl)
           requestOptions.method.should.equal('POST')
+          requestOptions.maxAttempts.should.equal(0)
 
           const { body } = requestOptions
           Object.keys(body).length.should.equal(7)
