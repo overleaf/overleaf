@@ -35,6 +35,8 @@ describe('UserPagesController', function () {
       _id: (this.user_id = 'kwjewkl'),
       features: {},
       email: 'joe@example.com',
+      ip_address: '1.1.1.1',
+      session_created: 'timestamp',
       thirdPartyIdentifiers: [
         {
           providerId: 'google',
@@ -163,6 +165,17 @@ describe('UserPagesController', function () {
     it('should render user/sessions', function (done) {
       this.res.render = function (page) {
         page.should.equal('user/sessions')
+        return done()
+      }
+      return this.UserPagesController.sessionsPage(this.req, this.res)
+    })
+
+    it('should include current session data in the view', function (done) {
+      this.res.render = (page, opts) => {
+        expect(opts.currentSession).to.deep.equal({
+          ip_address: '1.1.1.1',
+          session_created: 'timestamp',
+        })
         return done()
       }
       return this.UserPagesController.sessionsPage(this.req, this.res)
