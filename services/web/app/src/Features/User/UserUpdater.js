@@ -162,7 +162,7 @@ async function setDefaultEmailAddress(
   const res = await UserUpdater.promises.updateUser(query, update)
 
   // this should not happen
-  if (res.n === 0) {
+  if (res.matchedCount !== 1) {
     throw new Error('email update error')
   }
 
@@ -226,7 +226,7 @@ async function confirmEmail(userId, email) {
 
   const res = await UserUpdater.promises.updateUser(query, update)
 
-  if (res.n === 0) {
+  if (res.matchedCount !== 1) {
     throw new Errors.NotFoundError('user id and email do no match')
   }
   await FeaturesUpdater.promises.refreshFeatures(userId, 'confirm-email')
@@ -341,7 +341,7 @@ const UserUpdater = {
           OError.tag(error, 'problem removing users email')
           return callback(error)
         }
-        if (res.n === 0) {
+        if (res.matchedCount !== 1) {
           return callback(new Error('Cannot remove email'))
         }
         FeaturesUpdater.refreshFeatures(userId, 'remove-email', callback)

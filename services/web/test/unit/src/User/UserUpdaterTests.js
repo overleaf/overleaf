@@ -103,7 +103,7 @@ describe('UserUpdater', function () {
     beforeEach(function () {
       this.UserUpdater.updateUser = sinon
         .stub()
-        .callsArgWith(2, null, { n: 1, nModified: 1, ok: 1 })
+        .yields(null, { matchedCount: 1, modifiedCount: 1 })
     })
     it('should not remove affiliationUnchecked flag if v1 returns an error', function (done) {
       this.addAffiliation.yields(true)
@@ -349,7 +349,7 @@ describe('UserUpdater', function () {
     beforeEach(function () {
       this.UserUpdater.updateUser = sinon
         .stub()
-        .callsArgWith(2, null, { nMatched: 1 })
+        .yields(null, { matchedCount: 1 })
     })
 
     it('remove email', function (done) {
@@ -412,7 +412,9 @@ describe('UserUpdater', function () {
     })
 
     it('handle missed update', function (done) {
-      this.UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, { n: 0 })
+      this.UserUpdater.updateUser = sinon
+        .stub()
+        .yields(null, { matchedCount: 0 })
 
       this.UserUpdater.removeEmailAddress(
         this.stubbedUser._id,
@@ -463,7 +465,9 @@ describe('UserUpdater', function () {
     })
 
     it('set default', function (done) {
-      this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
+      this.UserUpdater.promises.updateUser = sinon
+        .stub()
+        .resolves({ matchedCount: 1 })
 
       this.UserUpdater.setDefaultEmailAddress(
         this.stubbedUser._id,
@@ -484,7 +488,9 @@ describe('UserUpdater', function () {
     })
 
     it('set changed the email in newsletter', function (done) {
-      this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
+      this.UserUpdater.promises.updateUser = sinon
+        .stub()
+        .resolves({ matchedCount: 1 })
 
       this.UserUpdater.setDefaultEmailAddress(
         this.stubbedUser._id,
@@ -520,7 +526,9 @@ describe('UserUpdater', function () {
     })
 
     it('handle missed update', function (done) {
-      this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 0 })
+      this.UserUpdater.promises.updateUser = sinon
+        .stub()
+        .resolves({ matchedCount: 0 })
 
       this.UserUpdater.setDefaultEmailAddress(
         this.stubbedUser._id,
@@ -548,7 +556,9 @@ describe('UserUpdater', function () {
     })
 
     it('updates audit log', function (done) {
-      this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
+      this.UserUpdater.promises.updateUser = sinon
+        .stub()
+        .resolves({ matchedCount: 1 })
 
       this.UserUpdater.setDefaultEmailAddress(
         this.stubbedUser._id,
@@ -647,7 +657,9 @@ describe('UserUpdater', function () {
     describe('security alert', function () {
       it('should be sent to old and new email when sendSecurityAlert=true', function (done) {
         // this.UserGetter.promises.getUser.resolves(this.stubbedUser)
-        this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
+        this.UserUpdater.promises.updateUser = sinon
+          .stub()
+          .resolves({ matchedCount: 1 })
 
         this.UserUpdater.setDefaultEmailAddress(
           this.stubbedUser._id,
@@ -677,7 +689,7 @@ describe('UserUpdater', function () {
             this.EmailHandler.promises.sendEmail.rejects(anError)
             this.UserUpdater.promises.updateUser = sinon
               .stub()
-              .resolves({ n: 1 })
+              .resolves({ matchedCount: 1 })
           })
           it('should log but not pass back the error', function (done) {
             this.UserUpdater.setDefaultEmailAddress(
@@ -707,7 +719,9 @@ describe('UserUpdater', function () {
 
   describe('confirmEmail', function () {
     beforeEach(function () {
-      this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 1 })
+      this.UserUpdater.promises.updateUser = sinon
+        .stub()
+        .resolves({ matchedCount: 1 })
     })
 
     it('should update the email record', function (done) {
@@ -773,7 +787,9 @@ describe('UserUpdater', function () {
     })
 
     it('handle missed update', function (done) {
-      this.UserUpdater.promises.updateUser = sinon.stub().resolves({ n: 0 })
+      this.UserUpdater.promises.updateUser = sinon
+        .stub()
+        .resolves({ matchedCount: 0 })
 
       this.UserUpdater.confirmEmail(
         this.stubbedUser._id,
