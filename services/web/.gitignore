@@ -80,6 +80,3 @@ modules/**/Makefile
 # Intellij
 .idea
 .run
-
-# Test fixture zip
-!modules/admin-panel/test/unit/src/data/track-changes-project.zip

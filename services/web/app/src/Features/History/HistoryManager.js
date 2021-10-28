@@ -9,7 +9,6 @@ module.exports = {
   flushProject: callbackify(flushProject),
   resyncProject: callbackify(resyncProject),
   deleteProject: callbackify(deleteProject),
-  deleteProjectHistory: callbackify(deleteProjectHistory),
   injectUserDetails: callbackify(injectUserDetails),
   promises: {
     initializeProject,
@@ -17,7 +16,6 @@ module.exports = {
     resyncProject,
     deleteProject,
     injectUserDetails,
-    deleteProjectHistory,
   },
 }
 
@@ -57,23 +55,10 @@ async function flushProject(projectId) {
   }
 }
 
-async function deleteProjectHistory(projectId) {
-  try {
-    await request.delete({
-      url: `${settings.apis.project_history.url}/project/${projectId}`,
-    })
-  } catch (err) {
-    throw OError.tag(err, 'failed to delete project history', {
-      projectId,
-    })
-  }
-}
-
-async function resyncProject(projectId, force = false) {
+async function resyncProject(projectId) {
   try {
     await request.post({
       url: `${settings.apis.project_history.url}/project/${projectId}/resync`,
-      qs: { force }, // TODO: only send if true?
     })
   } catch (err) {
     throw OError.tag(err, 'failed to resync project history', { projectId })
