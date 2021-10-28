@@ -113,3 +113,7 @@ link(rel="icon", href="/favicon.ico")
 link(rel="icon", sizes="192x192", href="/touch-icon-192x192.png")
 link(rel="apple-touch-icon-precomposed", href="/apple-touch-icon-precomposed.png")
 link(rel="mask-icon", href="/mask-favicon.svg", color="#138A07")
+
+//- Canonical Tag for SEO
+if (metadata && metadata.canonicalURL)
+	link(rel="canonical" href=metadata.canonicalURL)

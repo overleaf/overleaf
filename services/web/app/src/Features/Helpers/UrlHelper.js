@@ -1,6 +1,19 @@
 const Settings = require('@overleaf/settings')
 const { URL } = require('url')
 
+const PROTO = new URL(Settings.siteUrl).protocol
+
+function getCanonicalURL(req, url) {
+  const origin = `${PROTO}//${req.headers.host}`
+  url = new URL(url || req.originalUrl, origin)
+  if (url.pathname.endsWith('/')) {
+    url.pathname = url.pathname.replace(/\/+$/, '')
+  }
+  url.search = ''
+  url.hash = ''
+  return url.href
+}
+
 function getSafeRedirectPath(value) {
   const baseURL = Settings.siteUrl // base URL is required to construct URL from path
   const url = new URL(value, baseURL)
@@ -12,6 +25,7 @@ function getSafeRedirectPath(value) {
 }
 
 const UrlHelper = {
+  getCanonicalURL,
   getSafeRedirectPath,
   wrapUrlWithProxy(url) {
     // TODO: Consider what to do for Community and Enterprise edition?
