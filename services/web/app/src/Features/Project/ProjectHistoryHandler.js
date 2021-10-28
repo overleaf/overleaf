@@ -70,7 +70,15 @@ const ProjectHistoryHandler = {
     )
   },
 
-  upgradeHistory(project_id, callback) {
+  unsetHistory(project_id, callback) {
+    return Project.updateOne(
+      { _id: project_id },
+      { $unset: { 'overleaf.history': true } },
+      callback
+    )
+  },
+
+  upgradeHistory(project_id, allowDowngrade, callback) {
     // project must have an overleaf.history.id before allowing display of new history
     if (callback == null) {
       callback = function () {}
@@ -80,6 +88,7 @@ const ProjectHistoryHandler = {
       {
         'overleaf.history.display': true,
         'overleaf.history.upgradedAt': new Date(),
+        'overleaf.history.allowDowngrade': allowDowngrade,
       },
       function (err, result) {
         if (err != null) {

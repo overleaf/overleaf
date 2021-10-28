@@ -99,6 +99,7 @@ const ProjectSchema = new Schema({
       id: { type: Number },
       display: { type: Boolean },
       upgradedAt: { type: Date },
+      allowDowngrade: { type: Boolean },
     },
   },
   collabratecUsers: [
