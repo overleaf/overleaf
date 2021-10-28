@@ -1,6 +1,6 @@
 {
   "name": "@overleaf/access-token-encryptor",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
   "license": "AGPL-3.0-only",
   "dependencies": {},
   "peerDependencies": {
-    "logger-sharelatex": "^2.2.0"
+    "@overleaf/logger": "^2.3.0"
   },
   "devDependencies": {
     "bunyan": "^1.8.15",
@@ -30,7 +30,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^4.2.1",
-    "logger-sharelatex": "^2.2.0",
+    "@overleaf/logger": "^2.2.0",
     "mocha": "^6.2.2",
     "nock": "0.15.2",
     "prettier": "^2.2.1",

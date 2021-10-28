@@ -38,7 +38,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-standard": "^4.1.0",
-    "logger-sharelatex": "^2.2.0",
+    "@overleaf/logger": "^2.3.0",
     "mocha": "^8.3.2",
     "prettier": "^2.2.1",
     "prettier-eslint-cli": "^5.0.1",

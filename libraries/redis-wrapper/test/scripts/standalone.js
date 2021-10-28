@@ -2,7 +2,7 @@
 // starting and stopping redis with this script running is a good test
 
 const redis = require('../../')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 const rclient = redis.createClient({ host: 'localhost', port: '6379' })
 

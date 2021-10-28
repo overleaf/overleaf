@@ -1,5 +1,5 @@
 const crypto = require('crypto')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 const ALGORITHM = 'aes-256-ctr'
 

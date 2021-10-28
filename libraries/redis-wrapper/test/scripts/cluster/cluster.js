@@ -7,7 +7,7 @@
 */
 
 const redis = require('../../../')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 const rclient = redis.createClient({
   cluster: Array.from({ length: 9 }).map((value, index) => {

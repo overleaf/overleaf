@@ -29,7 +29,7 @@ describe('AccessTokenEncryptor', function () {
         Buffer,
       },
       requires: {
-        'logger-sharelatex': {
+        '@overleaf/logger': {
           err() {},
         },
       },
