@@ -16,9 +16,7 @@ const COUNT = {
   v1WithConversion: 0,
   NoneWithoutConversion: 0,
   NoneWithConversion: 0,
-  NoneWithPreserveHistoryFalse: 0,
-  DeletedIdNeedsConversion: 0,
-  DeletedIdWithoutConversion: 0,
+  NoneWithTemporaryHistory: 0,
 }
 
 // Timestamp of when 'Enable history for SL in background' release
@@ -59,65 +57,41 @@ async function processProject(project) {
         //    THEN delete full project history and convert their SL history to full project history
         // --
         // TODO: how to verify this, can get rough start date of SL history, but not full project history
-        // TODO: check that SL history exists for project, if it doesn't then
-        //    we can just upgrade without conversion?
-        await doUpgradeForV1WithConversion(project) // CASE #4
+        const preserveHistory = await shouldPreserveHistory(project)
+        const anyDocHistory = await anyDocHistoryExists(project)
+        const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
+        if (preserveHistory) {
+          if (anyDocHistory || anyDocHistoryIndex) {
+            // if SL history exists that we need to preserve, then we must convert
+            await doUpgradeForV1WithConversion(project) // CASE #4
+          } else {
+            // otherwise just upgrade without conversion
+            await doUpgradeForV1WithoutConversion(project) // CASE #1
+          }
+        } else {
+          // if preserveHistory false, then max 7 days of SL history
+          // but v1 already record to both histories, so safe to upgrade
+          await doUpgradeForV1WithoutConversion(project) // CASE #1
+        }
       }
-    }
-  } else if (
-    project.overleaf &&
-    project.overleaf.history &&
-    project.overleaf.history.deleted_id
-  ) {
-    // TODO: has history key but deleted_id in place of id - these do exist...
-    // Is it safe to handle these like we would an Upgrade for None history state?
-    const preserveHistory = await shouldPreserveHistory(project)
-    const anyDocHistory = await anyDocHistoryExists(project)
-    const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
-    const needsConversion =
-      preserveHistory && (anyDocHistory || anyDocHistoryIndex)
-    if (needsConversion) {
-      COUNT.DeletedIdNeedsConversion += 1
-    } else {
-      COUNT.DeletedIdWithoutConversion += 1
-    }
-    if (VERBOSE_LOGGING) {
-      console.log(
-        `project ${
-          project[VERBOSE_PROJECT_NAMES ? 'name' : '_id']
-        } has deleted_id and and ${
-          needsConversion
-            ? 'requires conversion'
-            : 'does not require conversion'
-        }`
-      )
     }
   } else {
     const preserveHistory = await shouldPreserveHistory(project)
-    if (preserveHistory) {
-      const anyDocHistory = await anyDocHistoryExists(project)
-      const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
-      // TODO: also need to check docHistoryIndex???
-      if (anyDocHistory || anyDocHistoryIndex) {
-        // IF there is SL history ->
+    const anyDocHistory = await anyDocHistoryExists(project)
+    const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
+    if (anyDocHistory || anyDocHistoryIndex) {
+      // IF there is SL history ->
+      if (preserveHistory) {
+        // that needs to be preserved:
         //    THEN initialise full project history and convert SL history to full project history
         await doUpgradeForNoneWithConversion(project) // CASE #3
       } else {
-        // ELSE there is not any SL history ->
-        //    THEN initialise full project history and sync with current content
-        await doUpgradeForNoneWithoutConversion(project) // CASE #2
+        await doUpgradeForNoneWithTemporaryHistory(project) // Either #3 or #2
       }
     } else {
-      // -> FREE plan, (7 day history?)
-      // TODO: can we ignore these if we enable in background and stage rollout
-      COUNT.NoneWithPreserveHistoryFalse += 1
-      if (VERBOSE_LOGGING) {
-        console.log(
-          `project ${
-            project[VERBOSE_PROJECT_NAMES ? 'name' : '_id']
-          } is None but preserveHistory is false`
-        )
-      }
+      // ELSE there is not any SL history ->
+      //    THEN initialise full project history and sync with current content
+      await doUpgradeForNoneWithoutConversion(project) // CASE #2
     }
   }
 }
@@ -212,6 +186,20 @@ async function doUpgradeForNoneWithConversion(project) {
       `project ${
         project[VERBOSE_PROJECT_NAMES ? 'name' : '_id']
       } is None and and requires conversion`
+    )
+  }
+}
+
+async function doUpgradeForNoneWithTemporaryHistory(project) {
+  // If project doesn't have preserveHistory set
+  // but it has SL history:
+  // The history is temporary, we could convert, or do a 7 day staged rollout
+  COUNT.NoneWithTemporaryHistory += 1
+  if (VERBOSE_LOGGING) {
+    console.log(
+      `project ${
+        project[VERBOSE_PROJECT_NAMES ? 'name' : '_id']
+      } is None and and has temporary history (MAYBE requires conversion)`
     )
   }
 }
