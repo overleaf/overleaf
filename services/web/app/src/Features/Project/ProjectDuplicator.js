@@ -16,6 +16,7 @@ const ProjectLocator = require('./ProjectLocator')
 const ProjectOptionsHandler = require('./ProjectOptionsHandler')
 const SafePath = require('./SafePath')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
+const _ = require('lodash')
 
 module.exports = {
   duplicate: callbackify(duplicate),
@@ -32,6 +33,8 @@ async function duplicate(owner, originalProjectId, newProjectName) {
       compiler: true,
       rootFolder: true,
       rootDoc_id: true,
+      fromV1TemplateId: true,
+      fromV1TemplateVersionId: true,
     }
   )
   const { path: rootDocPath } = await ProjectLocator.promises.findRootDoc({
@@ -40,10 +43,18 @@ async function duplicate(owner, originalProjectId, newProjectName) {
 
   const originalEntries = _getFolderEntries(originalProject.rootFolder[0])
 
+  // Pass template ID as analytics segmentation if duplicating project from a template
+  const segmentation = _.pick(originalProject, [
+    'fromV1TemplateId',
+    'fromV1TemplateVersionId',
+  ])
+  segmentation.duplicatedFromProject = originalProjectId
+
   // Now create the new project, cleaning it up on failure if necessary
   const newProject = await ProjectCreationHandler.promises.createBlankProject(
     owner._id,
-    newProjectName
+    newProjectName,
+    { segmentation }
   )
 
   try {

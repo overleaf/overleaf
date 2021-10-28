@@ -38,6 +38,7 @@ async function createBlankProject(ownerId, projectName, attributes = {}) {
     'fromV1TemplateId',
     'fromV1TemplateVersionId',
   ])
+  Object.assign(segmentation, attributes.segmentation)
   segmentation.projectId = project._id
   if (isImport) {
     AnalyticsManager.recordEventForUser(
