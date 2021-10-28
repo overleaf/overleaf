@@ -840,6 +840,7 @@
   "restore": "Restore",
   "title": "Title",
   "last_modified": "Last Modified",
+  "last_updated": "Last Updated",
   "no_projects": "No projects",
   "welcome_to_sl": "Welcome to __appName__!",
   "new_to_latex_look_at": "New to LaTeX? Start by having a look at our",
