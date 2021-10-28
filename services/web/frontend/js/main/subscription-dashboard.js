@@ -76,15 +76,20 @@ App.factory('RecurlyPricing', function ($q, MultiCurrencyPricing) {
           .currency(currency)
           .done(function (price) {
             const totalPriceExTax = parseFloat(price.next.total)
-            let taxAmmount = totalPriceExTax * taxRate
-            if (isNaN(taxAmmount)) {
-              taxAmmount = 0
+            let taxAmount = totalPriceExTax * taxRate
+            if (isNaN(taxAmount)) {
+              taxAmount = 0
             }
-            let total = totalPriceExTax + taxAmmount
+            let total = totalPriceExTax + taxAmount
             if (total % 1 !== 0) {
               total = total.toFixed(2)
             }
-            resolve(`${currencySymbol}${total}`)
+            resolve({
+              total: `${currencySymbol}${total}`,
+              subtotal: `${currencySymbol}${totalPriceExTax.toFixed(2)}`,
+              tax: `${currencySymbol}${taxAmount.toFixed(2)}`,
+              includesTax: taxAmount !== 0,
+            })
           })
       })
     },
@@ -117,7 +122,7 @@ App.controller('ChangePlanToGroupFormController', function ($scope, $modal) {
 
 App.controller(
   'GroupPlansModalUpgradeController',
-  function ($scope, $modal, $location, $http) {
+  function ($scope, $modal, $location, $http, RecurlyPricing) {
     $scope.options = {
       plan_codes: [
         {
@@ -174,10 +179,24 @@ App.controller(
     }
 
     $scope.recalculatePrice = function () {
+      const subscription = getMeta('ol-subscription')
+      const { taxRate } = subscription.recurly
       const { usage, plan_code, currency, size } = $scope.selected
-      const price = $scope.prices[usage][plan_code][currency][size]
-      const currencySymbol = $scope.options.currencySymbols[currency]
-      $scope.displayPrice = `${currencySymbol}${price}`
+      const placeholder = { total: '...' }
+      if (taxRate === 0) {
+        const basePrice = $scope.prices[usage][plan_code][currency][size]
+        const currencySymbol = $scope.options.currencySymbols[currency]
+        placeholder.total = `${currencySymbol}${basePrice}`
+      }
+      $scope.displayPrice = placeholder // Placeholder while we talk to recurly
+      const recurlyPlanCode = `group_${plan_code}_${size}_${usage}`
+      RecurlyPricing.loadDisplayPriceWithTax(
+        recurlyPlanCode,
+        currency,
+        taxRate
+      ).then(price => {
+        $scope.displayPrice = price
+      })
     }
 
     $scope.$watch('selected', $scope.recalculatePrice, true)
@@ -234,7 +253,7 @@ App.controller(
       $scope.price = '...' // Placeholder while we talk to recurly
       RecurlyPricing.loadDisplayPriceWithTax(planCode, currency, taxRate).then(
         price => {
-          $scope.price = price
+          $scope.price = price.total
         }
       )
     })
@@ -380,7 +399,7 @@ App.controller(
     $scope.studentPrice = '...' // Placeholder while we talk to recurly
     RecurlyPricing.loadDisplayPriceWithTax('student', currency, taxRate).then(
       price => {
-        $scope.studentPrice = price
+        $scope.studentPrice = price.total
       }
     )
 

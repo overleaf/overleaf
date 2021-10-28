@@ -6,8 +6,9 @@ script(type="text/ng-template", id="groupPlanModalUpgradeTemplate")
 			.row
 				.col-md-6.text-center
 					.circle.circle-lg
-						| {{ displayPrice }}
-						span.small / year
+						| {{ displayPrice.total }}
+						br
+						span.small per year
 						br
 						span.circle-subtext For {{ selected.size }} users
 					ul.list-unstyled
@@ -46,6 +47,9 @@ script(type="text/ng-template", id="groupPlanModalUpgradeTemplate")
 								| Save an additional 40% on groups of 10 or more with our educational discount
 	.modal-footer
 		.text-center
+			p(ng-show="displayPrice.includesTax") Total:
+				strong  {{ displayPrice.total }}
+				|  ({{displayPrice.subtotal}} + {{displayPrice.tax}} tax) per year
 			p
 				strong Your new subscription will be billed immediately to your current payment method.
 			hr.thin
