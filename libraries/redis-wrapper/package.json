@@ -1,6 +1,6 @@
 {
   "name": "@overleaf/redis-wrapper",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Redis wrapper for node which will either use cluster or single instance redis",
   "main": "index.js",
   "files": [
