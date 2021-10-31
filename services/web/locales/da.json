@@ -1,5 +1,5 @@
 {
-  "generic_linked_file_compile_error": "Dette projekts udfiler er ikke tilgængelige, fordi det ikke kunne kompilere. Du kan se detaljerede kompileringsfejl, hvis du åbner projektet.",
+  "generic_linked_file_compile_error": "Dette projekts udfiler er ikke tilgængelige, fordi det ikke kunne kompilere. Du kan se detaljer om kompileringsfejl, hvis du åbner projektet.",
   "chat_error": "Kunne ikke indlæse chatbeskeder, prøv venligst igen.",
   "reconnect": "Prøv igen",
   "no_pdf_error_title": "Ingen PDF",
