@@ -1,5 +1,5 @@
 const Metrics = require('@overleaf/metrics')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 function computeValidationToken(req) {
   // this should be a deterministic function of the client-side sessionID,

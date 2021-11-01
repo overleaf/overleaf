@@ -1,7 +1,7 @@
 const { exec } = require('child_process')
 const { promisify } = require('util')
 const { expect } = require('chai')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const { filterOutput } = require('./helpers/settings')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 

@@ -16,7 +16,7 @@ let ContactsController
 const SessionManager = require('../Authentication/SessionManager')
 const ContactManager = require('./ContactManager')
 const UserGetter = require('../User/UserGetter')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Modules = require('../../infrastructure/Modules')
 
 module.exports = ContactsController = {

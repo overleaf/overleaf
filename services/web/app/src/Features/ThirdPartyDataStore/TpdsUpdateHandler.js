@@ -1,5 +1,5 @@
 const UpdateMerger = require('./UpdateMerger')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const ProjectCreationHandler = require('../Project/ProjectCreationHandler')
 const ProjectDeleter = require('../Project/ProjectDeleter')

@@ -1,6 +1,6 @@
 const OError = require('@overleaf/o-error')
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Async = require('async')
 const _ = require('underscore')
 const { promisify } = require('util')

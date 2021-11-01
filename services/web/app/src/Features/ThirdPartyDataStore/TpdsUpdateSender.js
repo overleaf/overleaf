@@ -1,7 +1,7 @@
 const { ObjectId } = require('mongodb')
 const _ = require('lodash')
 const { callbackify } = require('util')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const path = require('path')
 const request = require('request-promise-native')

@@ -7,7 +7,7 @@ const FeaturesUpdater = require('./FeaturesUpdater')
 const FeaturesHelper = require('./FeaturesHelper')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 /**
  * Change the admin of the given subscription.

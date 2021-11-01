@@ -9,7 +9,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = {
   saveTemplateDataInSession(req, res, next) {

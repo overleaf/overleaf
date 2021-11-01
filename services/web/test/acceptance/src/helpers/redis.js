@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Async = require('async')
 
 const UserSessionsRedis = require('../../../../app/src/Features/User/UserSessionsRedis')

@@ -12,7 +12,7 @@
  */
 let CaptchaMiddleware
 const request = require('request')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 
 module.exports = CaptchaMiddleware = {

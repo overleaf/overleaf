@@ -1,5 +1,5 @@
 const { callbackify } = require('util')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const crypto = require('crypto')
 const Mailchimp = require('mailchimp-api-v3')

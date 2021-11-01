@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ReferencesController
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const ReferencesHandler = require('./ReferencesHandler')
 const settings = require('@overleaf/settings')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')

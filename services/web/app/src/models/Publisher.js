@@ -2,7 +2,7 @@ const mongoose = require('../infrastructure/Mongoose')
 const { Schema } = mongoose
 const { ObjectId } = Schema
 const settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const request = require('request')
 
 const PublisherSchema = new Schema({

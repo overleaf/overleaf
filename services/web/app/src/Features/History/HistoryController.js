@@ -1,7 +1,7 @@
 let HistoryController
 const OError = require('@overleaf/o-error')
 const async = require('async')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const request = require('request')
 const settings = require('@overleaf/settings')
 const SessionManager = require('../Authentication/SessionManager')

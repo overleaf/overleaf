@@ -1,7 +1,7 @@
 const { exec } = require('child_process')
 const { promisify } = require('util')
 const { expect } = require('chai')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 const User = require('./helpers/User').promises
 

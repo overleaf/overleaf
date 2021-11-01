@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const TeamInvitesHandler = require('./TeamInvitesHandler')
 const SessionManager = require('../Authentication/SessionManager')
 const SubscriptionLocator = require('./SubscriptionLocator')

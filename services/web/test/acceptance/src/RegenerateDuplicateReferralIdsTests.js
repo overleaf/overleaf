@@ -1,7 +1,7 @@
 const { exec } = require('child_process')
 const { promisify } = require('util')
 const { expect } = require('chai')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const { filterOutput } = require('./helpers/settings')
 const { db } = require('../../../app/src/infrastructure/mongodb')
 
@@ -91,7 +91,7 @@ describe('RegenerateDuplicateReferralIds', function () {
           `BATCH_SIZE=${BATCH_SIZE}`,
           // log details on duplicate matching
           'VERBOSE_LOGGING=true',
-          // disable verbose logging from logger-sharelatex
+          // disable verbose logging
           'LOG_LEVEL=ERROR',
 
           // actual command

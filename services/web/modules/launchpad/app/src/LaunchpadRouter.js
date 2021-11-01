@@ -9,7 +9,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const LaunchpadController = require('./LaunchpadController')
 const AuthenticationController = require('../../../../app/src/Features/Authentication/AuthenticationController')
 const AuthorizationMiddleware = require('../../../../app/src/Features/Authorization/AuthorizationMiddleware')

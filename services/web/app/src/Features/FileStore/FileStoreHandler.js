@@ -1,5 +1,5 @@
 const _ = require('underscore')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const fs = require('fs')
 const request = require('request')
 const settings = require('@overleaf/settings')

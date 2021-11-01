@@ -1,5 +1,5 @@
 let TeamInvitesHandler
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const crypto = require('crypto')
 const async = require('async')
 

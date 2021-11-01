@@ -1,5 +1,5 @@
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 function ensurePlansAreSetupCorrectly() {
   Settings.plans.forEach(plan => {

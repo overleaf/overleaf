@@ -1,4 +1,4 @@
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const pug = require('pug')
 const globby = require('globby')
 const Settings = require('@overleaf/settings')

@@ -12,7 +12,7 @@
  */
 const fs = require('fs')
 const OError = require('@overleaf/o-error')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const uuid = require('uuid')
 const _ = require('underscore')
 const Settings = require('@overleaf/settings')
