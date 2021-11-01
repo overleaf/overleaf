@@ -311,6 +311,14 @@ describe('ProjectInviteTests', function () {
         cb => this.user.ensureUserExists(cb),
         cb => this.sendingUser.login(cb),
         cb => this.sendingUser.setFeatures({ collaborators: 10 }, cb),
+        cb =>
+          this.sendingUser.setFeaturesOverride(
+            {
+              note: 'ProjectInviteTests acceptance tests',
+              features: { collaborators: 10 },
+            },
+            cb
+          ),
       ],
       done
     )
