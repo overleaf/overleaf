@@ -1,5 +1,5 @@
 const _ = require('underscore')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const async = require('async')
 const ProjectGetter = require('./ProjectGetter')
 const Errors = require('../Errors/Errors')

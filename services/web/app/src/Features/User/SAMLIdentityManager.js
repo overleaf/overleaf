@@ -8,7 +8,7 @@ const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const { User } = require('../../models/User')
 
 async function _addAuditLogEntry(

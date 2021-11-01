@@ -13,7 +13,7 @@
  */
 const SubscriptionGroupHandler = require('./SubscriptionGroupHandler')
 const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const SessionManager = require('../Authentication/SessionManager')
 const _ = require('underscore')

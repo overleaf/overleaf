@@ -12,7 +12,7 @@
  */
 let CooldownMiddleware
 const CooldownManager = require('./CooldownManager')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 
 module.exports = CooldownMiddleware = {
   freezeProject(req, res, next) {

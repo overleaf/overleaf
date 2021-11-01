@@ -8,7 +8,7 @@ const SessionManager = require('../Authentication/SessionManager')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const TagsHandler = require('../Tags/TagsHandler')
 const Errors = require('../Errors/Errors')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const { expressify } = require('../../util/promises')
 
 module.exports = {

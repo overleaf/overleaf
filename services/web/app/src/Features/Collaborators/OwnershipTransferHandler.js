@@ -1,4 +1,4 @@
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const { Project } = require('../../models/Project')
 const ProjectGetter = require('../Project/ProjectGetter')
 const UserGetter = require('../User/UserGetter')

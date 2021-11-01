@@ -1,7 +1,7 @@
 const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('health_check')
 const settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const UserGetter = require('../User/UserGetter')
 const {
   SmokeTestFailure,

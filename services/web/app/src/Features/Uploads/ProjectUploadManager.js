@@ -14,7 +14,7 @@ const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const ProjectDeleter = require('../Project/ProjectDeleter')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 
 module.exports = {
   createProjectFromZipArchive: callbackify(createProjectFromZipArchive),

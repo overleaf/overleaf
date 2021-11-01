@@ -1,6 +1,6 @@
 const request = require('request')
 const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const SessionManager = require('../Authentication/SessionManager')
 
 const TEN_SECONDS = 1000 * 10

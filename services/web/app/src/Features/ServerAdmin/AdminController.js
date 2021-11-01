@@ -16,7 +16,7 @@
  */
 
 const metrics = require('@overleaf/metrics')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const _ = require('underscore')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const Settings = require('@overleaf/settings')

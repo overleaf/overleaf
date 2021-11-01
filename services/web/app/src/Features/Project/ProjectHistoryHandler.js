@@ -15,7 +15,7 @@
  */
 const { Project } = require('../../models/Project')
 const ProjectDetailsHandler = require('./ProjectDetailsHandler')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const settings = require('@overleaf/settings')
 const HistoryManager = require('../History/HistoryManager')
 const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')

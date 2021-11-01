@@ -56,7 +56,7 @@ const {
   unsupportedBrowserMiddleware,
 } = require('./infrastructure/UnsupportedBrowserMiddleware')
 
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const _ = require('underscore')
 
 module.exports = { initialize }

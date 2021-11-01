@@ -6,7 +6,7 @@ const Queues = require('../../infrastructure/Queues')
 const uuid = require('uuid')
 const _ = require('lodash')
 const { expressify } = require('../../util/promises')
-const { logger } = require('@overleaf/logger')
+const { logger } = require('logger-sharelatex')
 
 const analyticsEventsQueue = Queues.getQueue('analytics-events')
 const analyticsEditingSessionsQueue = Queues.getQueue(

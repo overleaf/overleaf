@@ -4,7 +4,7 @@ const OError = require('@overleaf/o-error')
 const metrics = require('@overleaf/metrics')
 const { promisifyAll } = require('../../util/promises')
 const { Project } = require('../../models/Project')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const LockManager = require('../../infrastructure/LockManager')
 const { DeletedProject } = require('../../models/DeletedProject')
 

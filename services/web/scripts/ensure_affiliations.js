@@ -1,7 +1,7 @@
 const { waitForDb } = require('../app/src/infrastructure/mongodb')
 const { User } = require('../app/src/models/User')
 const UserController = require('../app/src/Features/User/UserController')
-require('@overleaf/logger').logger.level('error')
+require('logger-sharelatex').logger.level('error')
 const pLimit = require('p-limit')
 const CONCURRENCY = 10
 const failure = []

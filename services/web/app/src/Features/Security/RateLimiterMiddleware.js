@@ -1,5 +1,5 @@
 const RateLimiter = require('../../infrastructure/RateLimiter')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const SessionManager = require('../Authentication/SessionManager')
 const LoginRateLimiter = require('./LoginRateLimiter')
 const settings = require('@overleaf/settings')

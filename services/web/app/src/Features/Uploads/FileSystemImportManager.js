@@ -5,7 +5,7 @@ const EditorController = require('../Editor/EditorController')
 const Errors = require('../Errors/Errors')
 const FileTypeManager = require('./FileTypeManager')
 const SafePath = require('../Project/SafePath')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 
 module.exports = {
   addEntity: callbackify(addEntity),

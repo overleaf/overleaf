@@ -13,7 +13,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
 const Metrics = require('@overleaf/metrics')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')

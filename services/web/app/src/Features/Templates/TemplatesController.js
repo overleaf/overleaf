@@ -16,7 +16,7 @@ const path = require('path')
 const SessionManager = require('../Authentication/SessionManager')
 const TemplatesManager = require('./TemplatesManager')
 const ProjectHelper = require('../Project/ProjectHelper')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 
 module.exports = TemplatesController = {
   getV1Template(req, res) {

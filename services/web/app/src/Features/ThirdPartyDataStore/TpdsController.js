@@ -3,7 +3,7 @@ let parseParams
 const TpdsUpdateHandler = require('./TpdsUpdateHandler')
 const UpdateMerger = require('./UpdateMerger')
 const Errors = require('../Errors/Errors')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const Path = require('path')
 const metrics = require('@overleaf/metrics')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')

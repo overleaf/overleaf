@@ -2,7 +2,7 @@ const App = require('../../../../app.js')
 const QueueWorkers = require('../../../../app/src/infrastructure/QueueWorkers')
 const MongoHelper = require('./MongoHelper')
 const RedisHelper = require('./RedisHelper')
-const { logger } = require('@overleaf/logger')
+const { logger } = require('logger-sharelatex')
 
 logger.level('error')
 

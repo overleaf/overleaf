@@ -15,7 +15,7 @@
 const { promisify } = require('util')
 const { Subscription } = require('../../models/Subscription')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 require('./GroupPlansData') // make sure dynamic group plans are loaded
 
 const SubscriptionLocator = {

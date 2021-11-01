@@ -1,4 +1,4 @@
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const util = require('util')
 const { AffiliationError } = require('../Errors/Errors')
 const Features = require('../../infrastructure/Features')

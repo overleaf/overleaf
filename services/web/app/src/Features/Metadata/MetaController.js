@@ -15,7 +15,7 @@ let MetaController
 const OError = require('@overleaf/o-error')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const MetaHandler = require('./MetaHandler')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 
 module.exports = MetaController = {
   getMetadata(req, res, next) {

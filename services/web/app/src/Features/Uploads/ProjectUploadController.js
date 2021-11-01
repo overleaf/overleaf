@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ProjectUploadController
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const metrics = require('@overleaf/metrics')
 const fs = require('fs')
 const Path = require('path')

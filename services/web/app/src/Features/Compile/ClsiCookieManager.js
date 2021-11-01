@@ -21,7 +21,7 @@ if (Settings.redis.clsi_cookie_secondary != null) {
   rclient_secondary = RedisWrapper.client('clsi_cookie_secondary')
 }
 const Cookie = require('cookie')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const Metrics = require('@overleaf/metrics')
 
 const clsiCookiesEnabled =

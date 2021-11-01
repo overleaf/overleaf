@@ -23,7 +23,7 @@ const EntityModels = {
 }
 const UserMembershipViewModel = require('./UserMembershipViewModel')
 const UserGetter = require('../User/UserGetter')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const UserMembershipEntityConfigs = require('./UserMembershipEntityConfigs')
 
 const UserMembershipHandler = {

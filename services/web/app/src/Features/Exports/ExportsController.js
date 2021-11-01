@@ -12,7 +12,7 @@
  */
 const ExportsHandler = require('./ExportsHandler')
 const SessionManager = require('../Authentication/SessionManager')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 
 module.exports = {
   exportProject(req, res, next) {

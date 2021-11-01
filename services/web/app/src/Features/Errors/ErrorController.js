@@ -1,6 +1,6 @@
 let ErrorController
 const Errors = require('./Errors')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const SessionManager = require('../Authentication/SessionManager')
 const SamlLogHandler = require('../SamlLog/SamlLogHandler')
 const HttpErrorHandler = require('./HttpErrorHandler')

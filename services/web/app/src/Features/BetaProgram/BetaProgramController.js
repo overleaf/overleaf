@@ -2,7 +2,7 @@ const BetaProgramHandler = require('./BetaProgramHandler')
 const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const SessionManager = require('../Authentication/SessionManager')
 
 const BetaProgramController = {

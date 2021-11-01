@@ -11,7 +11,7 @@
  */
 let UniversityController
 const settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const Settings = require('@overleaf/settings')
 
 module.exports = UniversityController = {

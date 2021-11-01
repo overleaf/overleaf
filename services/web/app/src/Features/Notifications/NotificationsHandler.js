@@ -1,6 +1,6 @@
 const settings = require('@overleaf/settings')
 const request = require('request')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const _ = require('lodash')
 
 const notificationsApi = _.get(settings, ['apis', 'notifications', 'url'])

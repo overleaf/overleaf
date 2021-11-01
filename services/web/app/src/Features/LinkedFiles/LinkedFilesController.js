@@ -17,7 +17,7 @@ const SessionManager = require('../Authentication/SessionManager')
 const EditorController = require('../Editor/EditorController')
 const ProjectLocator = require('../Project/ProjectLocator')
 const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const _ = require('underscore')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
 const {

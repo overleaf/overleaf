@@ -50,7 +50,7 @@ SandboxedModule.configure({
 
 function getSandboxedModuleRequires() {
   const requires = {
-    '@overleaf/logger': globalStubs.logger,
+    'logger-sharelatex': globalStubs.logger,
   }
 
   const internalModules = [

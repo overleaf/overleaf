@@ -15,7 +15,7 @@
  */
 let ClsiStateManager
 const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const crypto = require('crypto')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 

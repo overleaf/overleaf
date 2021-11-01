@@ -1,4 +1,4 @@
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
 const AnalyticsRegistrationSourceHelper = require('./AnalyticsRegistrationSourceHelper')
 const SessionManager = require('../../Features/Authentication/SessionManager')

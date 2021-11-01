@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ProjectDownloadsController
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const Metrics = require('@overleaf/metrics')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectZipStreamManager = require('./ProjectZipStreamManager')

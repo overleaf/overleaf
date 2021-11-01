@@ -14,7 +14,7 @@ const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
 const DocstoreManager = require('../Docstore/DocstoreManager')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const { expressify } = require('../../util/promises')
 
 module.exports = {

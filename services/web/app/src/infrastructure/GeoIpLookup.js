@@ -1,7 +1,7 @@
 const request = require('request')
 const settings = require('@overleaf/settings')
 const _ = require('underscore')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const { URL } = require('url')
 const { promisify, promisifyMultiResult } = require('../util/promises')
 

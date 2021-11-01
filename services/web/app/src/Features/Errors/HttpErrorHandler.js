@@ -1,4 +1,4 @@
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const Settings = require('@overleaf/settings')
 
 function renderJSONError(res, message, info = {}) {

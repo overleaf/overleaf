@@ -1,6 +1,6 @@
 const recurly = require('recurly')
 const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const { callbackify } = require('util')
 const UserGetter = require('../User/UserGetter')
 

@@ -1,4 +1,4 @@
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const OError = require('@overleaf/o-error')
 const { db } = require('../../infrastructure/mongodb')
 const { normalizeQuery } = require('../Helpers/Mongo')

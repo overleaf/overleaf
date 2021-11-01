@@ -12,7 +12,7 @@
 const metrics = require('@overleaf/metrics')
 metrics.initialize(process.env.METRICS_APP_NAME || 'web')
 const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const PlansLocator = require('./app/src/Features/Subscription/PlansLocator')
 logger.initialize(process.env.METRICS_APP_NAME || 'web')
 logger.logger.serializers.user = require('./app/src/infrastructure/LoggerSerializers').user

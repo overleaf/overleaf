@@ -13,7 +13,7 @@
  */
 const { ProjectInvite } = require('../../models/ProjectInvite')
 const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 const CollaboratorsEmailHandler = require('./CollaboratorsEmailHandler')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
 const UserGetter = require('../User/UserGetter')

@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const { Project } = require('../../models/Project')
-const logger = require('@overleaf/logger')
+const logger = require('logger-sharelatex')
 
 module.exports = {
   markAsUpdated(projectId, lastUpdatedAt, lastUpdatedBy, callback) {
