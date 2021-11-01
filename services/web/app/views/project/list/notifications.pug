@@ -158,7 +158,8 @@ include ../../_mixins/reconfirm_affiliation
 					)
 					.notification-body
 						p !{translate("can_link_institution_email_acct_to_institution_acct", {appName: settings.appName, email: "{{notification.email}}", institutionName: "{{notification.institutionName}}"})}
-						div !{translate("doing_this_allow_log_in_through_institution", {appName: settings.appName})}
+						div !{translate("doing_this_allow_log_in_through_institution", {appName: settings.appName})}&nbsp;
+							a(href="/learn/how-to/Institutional_Login") #{translate("learn_more")}
 					.notification-action
 						a.btn.btn-sm.btn-info(ng-href="{{samlInitPath}}?university_id={{notification.institutionId}}&auto=/project&email={{notification.email}}")
 							| #{translate('link_account')}
