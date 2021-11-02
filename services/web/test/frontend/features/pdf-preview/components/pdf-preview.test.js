@@ -289,7 +289,7 @@ describe('<PdfPreview/>', function () {
     expect(fetchMock.calls()).to.have.length(3)
   })
 
-  it('displays an error message if there was a compile error', async function () {
+  describe('displays error messages', function () {
     const compileErrorStatuses = {
       'clear-cache':
         'Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.',
@@ -313,17 +313,19 @@ describe('<PdfPreview/>', function () {
     }
 
     for (const [status, message] of Object.entries(compileErrorStatuses)) {
-      cleanup()
-      fetchMock.restore()
-      mockCompileError(status)
+      it(`displays error message for '${status}' status`, async function () {
+        cleanup()
+        fetchMock.restore()
+        mockCompileError(status)
 
-      renderWithEditorContext(<PdfPreview />, { scope })
+        renderWithEditorContext(<PdfPreview />, { scope })
 
-      // wait for "compile on load" to finish
-      await screen.findByRole('button', { name: 'Compiling…' })
-      await screen.findByRole('button', { name: 'Recompile' })
+        // wait for "compile on load" to finish
+        await screen.findByRole('button', { name: 'Compiling…' })
+        await screen.findByRole('button', { name: 'Recompile' })
 
-      screen.getByText(message)
+        screen.getByText(message)
+      })
     }
   })
 
