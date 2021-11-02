@@ -18,8 +18,6 @@ module.exports = {
         Settings.env || DEFAULT_ENV,
       ]
       execFile('npm', args, (error, stdout, stderr) => {
-        console.log(stdout)
-        console.error(stderr)
         if (error) {
           throw error
         }
