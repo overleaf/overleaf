@@ -50,7 +50,6 @@ const InstitutionsController = require('./Features/Institutions/InstitutionsCont
 const UserMembershipRouter = require('./Features/UserMembership/UserMembershipRouter')
 const SystemMessageController = require('./Features/SystemMessages/SystemMessageController')
 const AnalyticsRegistrationSourceMiddleware = require('./Features/Analytics/AnalyticsRegistrationSourceMiddleware')
-const AnalyticsUTMTrackingMiddleware = require('./Features/Analytics/AnalyticsUTMTrackingMiddleware')
 const { Joi, validate } = require('./infrastructure/Validation')
 const {
   renderUnsupportedBrowserPage,
@@ -70,7 +69,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   }
 
   webRouter.get('*', AnalyticsRegistrationSourceMiddleware.setInbound())
-  webRouter.get('*', AnalyticsUTMTrackingMiddleware.recordUTMTags())
 
   webRouter.get('/login', UserPagesController.loginPage)
   AuthenticationController.addEndpointToLoginWhitelist('/login')
