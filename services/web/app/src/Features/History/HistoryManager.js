@@ -7,15 +7,19 @@ const UserGetter = require('../User/UserGetter')
 module.exports = {
   initializeProject: callbackify(initializeProject),
   flushProject: callbackify(flushProject),
+  flushMigration: callbackify(flushMigration),
   resyncProject: callbackify(resyncProject),
   deleteProject: callbackify(deleteProject),
+  deleteProjectHistory: callbackify(deleteProjectHistory),
   injectUserDetails: callbackify(injectUserDetails),
   promises: {
     initializeProject,
     flushProject,
+    flushMigration,
     resyncProject,
     deleteProject,
     injectUserDetails,
+    deleteProjectHistory,
   },
 }
 
@@ -55,10 +59,39 @@ async function flushProject(projectId) {
   }
 }
 
-async function resyncProject(projectId) {
+async function flushMigration(projectId) {
+  try {
+    await request.post({
+      url: `${settings.apis.project_history_importer.url}/project/${projectId}/flush`,
+    })
+  } catch (err) {
+    throw OError.tag(
+      err,
+      'failed to flush project migration to project history importer',
+      {
+        projectId,
+      }
+    )
+  }
+}
+
+async function deleteProjectHistory(projectId) {
+  try {
+    await request.delete({
+      url: `${settings.apis.project_history.url}/project/${projectId}`,
+    })
+  } catch (err) {
+    throw OError.tag(err, 'failed to delete project history', {
+      projectId,
+    })
+  }
+}
+
+async function resyncProject(projectId, force = false) {
   try {
     await request.post({
       url: `${settings.apis.project_history.url}/project/${projectId}/resync`,
+      qs: { force }, // TODO: only send if true?
     })
   } catch (err) {
     throw OError.tag(err, 'failed to resync project history', { projectId })

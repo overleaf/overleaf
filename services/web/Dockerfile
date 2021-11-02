@@ -30,6 +30,7 @@ RUN mkdir -p /app/data/dumpFolder && \
   mkdir -p /app/data/pdf && \
   mkdir -p /app/data/uploads && \
   mkdir -p /app/data/zippedProjects && \
+  mkdir -p /app/data/projectHistories && \
   chmod -R 0755 /app/data/ && \
   chown -R node:node /app/data/
 
