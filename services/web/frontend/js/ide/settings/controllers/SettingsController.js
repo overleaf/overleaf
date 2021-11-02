@@ -184,6 +184,7 @@ export default App.controller(
       }
     })
 
+    let rootDocUpdateFailed = 0
     $scope.$watch('project.rootDoc_id', (rootDoc_id, oldRootDoc_id) => {
       if (this.ignoreUpdates) {
         return
@@ -200,9 +201,25 @@ export default App.controller(
       }
       // otherwise only save changes, null values are allowed
       if (rootDoc_id !== oldRootDoc_id) {
-        settings.saveProjectSettings({ rootDocId: rootDoc_id }).catch(() => {
-          $scope.project.rootDoc_id = oldRootDoc_id
-        })
+        settings
+          .saveProjectSettings({ rootDocId: rootDoc_id })
+          .then(() => {
+            rootDocUpdateFailed = 0
+          })
+          .catch(() => {
+            rootDocUpdateFailed++
+            // Let the login redirect run (if any) and reset afterwards.
+            setTimeout(() => {
+              if (rootDocUpdateFailed > 10) {
+                // We are in a loop of failing updates. Stop now.
+                this.ignoreUpdates = true
+              }
+              $scope.$apply(() => {
+                $scope.project.rootDoc_id = oldRootDoc_id
+              })
+              this.ignoreUpdates = false
+            })
+          })
       }
     })
 
