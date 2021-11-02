@@ -29,7 +29,7 @@ function setInbound() {
     }
 
     if (SessionManager.isUserLoggedIn(req.session)) {
-      return next() // don't store referrer if user is alread logged in
+      return next() // don't store referrer if user is already logged in
     }
 
     const referrer = req.header('referrer')
