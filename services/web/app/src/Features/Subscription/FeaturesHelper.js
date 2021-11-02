@@ -35,6 +35,11 @@ function mergeFeatures(featuresA, featuresB) {
       features[key] = features[key] || featuresB[key]
     }
   }
+  if (features.mendeley && features.referencesSearch && features.zotero) {
+    // Back fill legacy feature flag for isFeatureSetBetter to work properly
+    //  with professional feature overrides.
+    features.references = true
+  }
   return features
 }
 
