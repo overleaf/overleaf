@@ -158,6 +158,19 @@ form.row(
 						div(ng-class="{'alert alert-info': reconfirmationRemoveEmail === userEmail.email}")
 							+reconfirmAffiliationNotification('/user/settings')
 
+				tr(ng-if="showInstitutionalLeaversSurvey")
+					td(colspan="3")
+						div.alert.alert-info
+							button.close.pull-right(ng-click="dismissInstitutionalLeaversSurvey()")
+								span(aria-hidden="true") &times;
+								span.sr-only #{translate("close")}
+							strong #{translate('limited_offer')}:
+							|
+							| #{translate('institutional_leavers_survey_notification')}
+							|
+							a.btn-inline-link(href="https://docs.google.com/forms/d/e/1FAIpQLSfYdeeoY5p1d31r5iUx1jw0O-Gd66vcsBi_Ntu3lJRMjV2EJA/viewform")
+								strong #{translate('take_short_survey')}
+
 				tr.affiliations-table-highlighted-row(
 					ng-if="!ui.showAddEmailUI && !ui.isMakingRequest"
 				)

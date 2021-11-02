@@ -22,6 +22,24 @@ export default App.controller(
     $scope.reconfirmationRemoveEmail = getMeta('ol-reconfirmationRemoveEmail')
     $scope.reconfirmedViaSAML = getMeta('ol-reconfirmedViaSAML')
 
+    $scope.showInstitutionalLeaversSurvey = false
+    $scope.dismissInstitutionalLeaversSurvey = () => {
+      try {
+        localStorage.setItem('hideInstitutionalLeaversSurvey', true)
+      } catch (e) {}
+      $scope.showInstitutionalLeaversSurvey = false
+    }
+    function maybeShowInstitutionalLeaversSurvey() {
+      if (localStorage.getItem('hideInstitutionalLeaversSurvey')) return
+      if (
+        localStorage.getItem('showInstitutionalLeaversSurveyUntil') > Date.now()
+      ) {
+        $scope.showInstitutionalLeaversSurvey = true
+      }
+    }
+    maybeShowInstitutionalLeaversSurvey()
+
+    const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000
     const LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
     const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\ ".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA -Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
@@ -202,6 +220,28 @@ export default App.controller(
       return _monitorRequest(
         UserAffiliationsDataService.removeUserEmail(userEmail.email)
       )
+        .then(() => {
+          if (
+            userEmail.emailHasInstitutionLicence ||
+            (userEmail.affiliation && userEmail.affiliation.pastReconfirmDate)
+          ) {
+            const stillHasLicenseAccess = $scope.userEmails.some(
+              ue => ue.emailHasInstitutionLicence
+            )
+            if (!stillHasLicenseAccess) {
+              try {
+                localStorage.setItem(
+                  'showInstitutionalLeaversSurveyUntil',
+                  Date.now() + ONE_WEEK_IN_MS
+                )
+                maybeShowInstitutionalLeaversSurvey()
+              } catch (e) {}
+            }
+          }
+        })
+        .catch(() => {
+          $scope.userEmails.push(userEmail)
+        })
     }
 
     $scope.resendConfirmationEmail = function (userEmail) {
