@@ -94,7 +94,7 @@ export default class PDFJSWrapper {
         })
         .catch(error => {
           if (this.loadDocumentTask) {
-            if (error.name !== 'MissingPDFException') {
+            if (!error || error.name !== 'MissingPDFException') {
               captureMessage(`pdf preview error ${error}`)
             }
 
