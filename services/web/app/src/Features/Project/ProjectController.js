@@ -881,6 +881,10 @@ const ProjectController = {
                 'new_navigation_ui',
                 true
               ),
+              showPdfDetach: shouldDisplayFeature(
+                'pdf_detach',
+                user.alphaProgram
+              ),
               showNewPdfPreview: shouldDisplayFeature(
                 'new_pdf_preview',
                 user.alphaProgram

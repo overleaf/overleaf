@@ -64,8 +64,18 @@ export function LayoutProvider({ children }) {
     })
   }, [setPdfLayout, setView])
 
+  const changeLayout = useCallback(
+    (newLayout, newView) => {
+      setPdfLayout(newLayout)
+      setView(newLayout === 'sideBySide' ? 'editor' : newView)
+      localStorage.setItem('pdf.layout', newLayout)
+    },
+    [setPdfLayout, setView]
+  )
+
   const value = useMemo(
     () => ({
+      changeLayout,
       chatIsOpen,
       leftMenuShown,
       pdfLayout,
@@ -79,6 +89,7 @@ export function LayoutProvider({ children }) {
       view,
     }),
     [
+      changeLayout,
       chatIsOpen,
       leftMenuShown,
       pdfLayout,

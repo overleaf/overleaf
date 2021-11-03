@@ -7,7 +7,8 @@
   border-bottom: @toolbar-border-bottom;
 
   > a,
-  .toolbar-right > a {
+  .toolbar-right > a,
+  button {
     position: relative;
     .label {
       position: absolute;
@@ -16,6 +17,13 @@
       padding: 0.15em 0.6em 0.2em;
       font-size: 60%;
       pointer-events: none; // Labels were capturing button/anchor clicks.
+    }
+  }
+
+  .toolbar-right {
+    button {
+      background: transparent;
+      box-shadow: none;
     }
   }
 
@@ -148,6 +156,20 @@
 
   &.toolbar-alt {
     .toolbar-alt-mixin;
+  }
+}
+
+#layout-dropdown {
+  // override style added by required bsStyle react-bootstrap prop
+  text-decoration: none !important;
+}
+
+#layout-dropdown-list {
+  a {
+    i,
+    svg {
+      margin-right: @margin-xs;
+    }
   }
 }
 
@@ -374,4 +396,29 @@
   cursor: not-allowed;
   .opacity(0.65);
   .box-shadow(none);
+}
+
+.menu-item-with-svg {
+  svg {
+    line,
+    rect {
+      stroke: @dropdown-link-color;
+    }
+    path {
+      fill: @dropdown-link-color;
+    }
+  }
+
+  a:hover,
+  a:focus {
+    svg {
+      line,
+      rect {
+        stroke: @dropdown-link-hover-color;
+      }
+      path {
+        fill: @dropdown-link-hover-color;
+      }
+    }
+  }
 }
