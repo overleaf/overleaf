@@ -35,6 +35,19 @@ switch (process.argv.pop()) {
       console.log('popd')
     }
     break
+  case 'install-dev':
+    for (const service of services) {
+      console.log('pushd', service.name)
+      switch (service.name) {
+        case 'web':
+          console.log('npm install')
+          break
+        default:
+         console.log('npm install')
+      }
+      console.log('popd')
+    }
+    break  
   case 'compile':
     for (const service of services) {
       console.log('pushd', service.name)
