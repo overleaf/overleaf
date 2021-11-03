@@ -1557,6 +1557,92 @@ describe('ProjectController', function () {
         })
       })
     })
+
+    describe('feature flags', function () {
+      describe('showNewPdfPreview', function () {
+        it('should be false by default', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.showNewPdfPreview).to.be.false
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+        it('should be true when ?new_pdf_preview=true ', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.showNewPdfPreview).to.be.true
+            done()
+          }
+          this.req.query.new_pdf_preview = 'true'
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+        it('should be true for alpha group', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.showNewPdfPreview).to.be.true
+            done()
+          }
+          this.user.alphaProgram = true
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+        it('should be false when when ?new_pdf_preview=true and alpha group', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.showNewPdfPreview).to.be.true
+            done()
+          }
+          this.user.alphaProgram = true
+          this.req.query.new_pdf_preview = 'false'
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      })
+      describe('showPdfDetach', function () {
+        describe('showPdfDetach=false', function () {
+          it('should be false by default', function (done) {
+            this.res.render = (pageName, opts) => {
+              expect(opts.showPdfDetach).to.be.false
+              done()
+            }
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+          it('should be false by default, even when ?new_pdf_preview=true', function (done) {
+            this.res.render = (pageName, opts) => {
+              expect(opts.showPdfDetach).to.be.false
+              expect(opts.showNewPdfPreview).to.be.true
+              done()
+            }
+            this.req.query.new_pdf_preview = 'true'
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+          it('should be false when when ?pdf_detach=true and alpha group', function (done) {
+            this.res.render = (pageName, opts) => {
+              done()
+            }
+            this.user.alphaProgram = true
+            this.req.query.pdf_detach = 'false'
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+        })
+
+        describe('showPdfDetach=true', function () {
+          it('should be true when ?pdf_detach=true, and set showNewPdfPreview as true ', function (done) {
+            this.res.render = (pageName, opts) => {
+              expect(opts.showPdfDetach).to.be.true
+              expect(opts.showNewPdfPreview).to.be.true
+              done()
+            }
+            this.req.query.pdf_detach = 'true'
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+          it('should be true for alpha group, and set showNewPdfPreview as true', function (done) {
+            this.res.render = (pageName, opts) => {
+              expect(opts.showPdfDetach).to.be.true
+              expect(opts.showNewPdfPreview).to.be.true
+              done()
+            }
+            this.user.alphaProgram = true
+            this.ProjectController.loadEditor(this.req, this.res)
+          })
+        })
+      })
+    })
   })
 
   describe('userProjectsJson', function () {

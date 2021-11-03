@@ -819,6 +819,20 @@ const ProjectController = {
               return shouldDisplayFeature('enable_pdf_caching', false)
             }
 
+            let showNewPdfPreview = shouldDisplayFeature(
+              'new_pdf_preview',
+              user.alphaProgram
+            )
+
+            const showPdfDetach = shouldDisplayFeature(
+              'pdf_detach',
+              user.alphaProgram
+            )
+
+            if (showPdfDetach) {
+              showNewPdfPreview = true
+            }
+
             res.render('project/editor', {
               title: project.name,
               priority_title: true,
@@ -881,14 +895,8 @@ const ProjectController = {
                 'new_navigation_ui',
                 true
               ),
-              showPdfDetach: shouldDisplayFeature(
-                'pdf_detach',
-                user.alphaProgram
-              ),
-              showNewPdfPreview: shouldDisplayFeature(
-                'new_pdf_preview',
-                user.alphaProgram
-              ),
+              showPdfDetach,
+              showNewPdfPreview,
               showSymbolPalette: shouldDisplayFeature(
                 'symbol_palette',
                 user.alphaProgram || user.betaProgram
