@@ -1,0 +1,44 @@
+#!/bin/bash
+set -e
+
+content_type=$1
+bucket=$2
+text_extension=$3
+shift 3
+content_type_options=""
+if [[ "$content_type" != "-" ]]; then
+  content_type_options="-h Content-Type:${content_type};charset=utf-8"
+fi
+
+# DOCS for gsutil -- it does not have long command line flags!
+## global flags
+# -h NAME:VALUE   add header, can occur multiples times
+# -m              upload with multiple threads
+## rsync flags
+# -c              use checksums for determining changed files (mtime is not stable)
+# -r              traverse into directories recursively
+# -x              Python regex for excluding files from the sync
+if [[ "$text_extension" == "-" || $(find /tmp/public -type f -name "*$text_extension" | wc -l) != "0" ]]; then
+  # Potentially skip upload of non-compressed .js/.css files.
+  gsutil \
+    -h "Cache-Control:public, max-age=31536000" \
+    ${content_type_options} \
+    -m \
+    rsync \
+    -c \
+    -r \
+    "$@" \
+    "/tmp/public/" \
+    "${bucket}/public/"
+fi
+gsutil \
+  -h "Cache-Control:public, max-age=31536000" \
+  -h "Content-Encoding:gzip" \
+  ${content_type_options} \
+  -m \
+  rsync \
+  -c \
+  -r \
+  "$@" \
+  "/tmp/compressed/public/" \
+  "${bucket}/public/"

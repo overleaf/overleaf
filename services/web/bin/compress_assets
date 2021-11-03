@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e -o pipefail
+
+SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}")
+SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+
+pushd /tmp
+
+find public/ -type d | sed 's!^!compressed/!' | xargs mkdir --parents
+
+find public/ -type f -print0 \
+| xargs --null --max-args 20 --max-procs 10 "$SCRIPT_DIR/compress_batch_of_assets"
+
+popd

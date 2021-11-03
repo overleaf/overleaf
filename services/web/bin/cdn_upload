@@ -1,47 +1,22 @@
 #!/bin/bash
 set -e
 
-function upload_with_content_type() {
-  content_type=$1
-  bucket=$2
-  shift 2
-  content_type_options=""
-  if [[ "$content_type" != "-" ]]; then
-    content_type_options="-h Content-Type:${content_type};charset=utf-8"
-  fi
-
-  # DOCS for gsutil -- it does not have long command line flags!
-  ## global flags
-  # -h NAME:VALUE   add header, can occur multiples times
-  # -m              upload with multiple threads
-  ## rsync flags
-  # -r              traverse into directories recursively
-  # -x              Python regex for excluding files from the sync
-  gsutil \
-    -h "Cache-Control:public, max-age=31536000" \
-    ${content_type_options} \
-    -m \
-    rsync \
-    -r \
-    "$@" \
-    "/tmp/public/" \
-    "${bucket}/public/"
-}
 function upload_into_bucket() {
   bucket=$1
 
   # stylesheets
-  upload_with_content_type 'text/css' "$bucket" \
-    -x '.+(?<!\.css)$'
+  bin/cdn_upload_batch 'text/css' "$bucket" '.css' \
+    -x '.+(?<!\.css)$' &
 
   # javascript files
-  upload_with_content_type 'application/javascript' "$bucket" \
-    -x '.+(?<!\.js)$'
+  bin/cdn_upload_batch 'application/javascript' "$bucket" '.js' \
+    -x '.+(?<!\.js)$' &
 
   # the rest
-  upload_with_content_type '-' "$bucket" \
-    -x '.+\.(css|js)$'
+  bin/cdn_upload_batch '-' "$bucket" '-' \
+    -x '.+\.(css|js)$' &
 
+  wait
 }
 
 # Upload to staging CDN if branch is either 'master' or 'staging-master' or main variants
@@ -50,6 +25,8 @@ if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "staging-master" || "$BRAN
 
   # delete source maps
   find /tmp/public -name '*.js.map' -delete
+
+  bin/compress_assets
 
   upload_into_bucket $CDN_STAG
   # Only upload to production CDN if branch is

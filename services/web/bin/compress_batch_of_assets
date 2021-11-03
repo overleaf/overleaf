@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+for file in "$@"; do
+  file_gzipped="compressed/$file"
+
+  gzip -9 --no-name --stdout "$file" > "$file_gzipped"
+
+  before=$(stat -c%s "$file")
+  after=$(stat -c%s "$file_gzipped")
+  if [[ "$after" -ge "$before" ]]; then
+    rm "$file_gzipped"
+  else
+    rm "$file"
+  fi
+done
