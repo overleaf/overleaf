@@ -22,6 +22,7 @@ export default class DocumentCompiler {
     setData,
     setFirstRenderDone,
     setError,
+    cleanupCompileResult,
     signal,
   }) {
     this.project = project
@@ -30,6 +31,7 @@ export default class DocumentCompiler {
     this.setData = setData
     this.setFirstRenderDone = setFirstRenderDone
     this.setError = setError
+    this.cleanupCompileResult = cleanupCompileResult
     this.signal = signal
 
     this.clsiServerId = null
@@ -100,9 +102,13 @@ export default class DocumentCompiler {
       const { firstRenderDone } = trackPdfDownload(data, compileTimeClientE2E)
       this.setFirstRenderDone(() => firstRenderDone)
       data.options = options
+      if (data.clsiServerId) {
+        this.clsiServerId = data.clsiServerId
+      }
       this.setData(data)
     } catch (error) {
       console.error(error)
+      this.cleanupCompileResult()
       this.setError(error.info?.statusCode === 429 ? 'rate-limited' : 'error')
     } finally {
       this.setCompiling(false)

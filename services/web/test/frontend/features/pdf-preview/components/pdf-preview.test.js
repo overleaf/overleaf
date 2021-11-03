@@ -482,20 +482,12 @@ describe('<PdfPreview/>', function () {
         code: 'AWFUL_ERROR',
       })
 
-    const { rerender } = renderWithEditorContext(<PdfPreview />, { scope })
+    renderWithEditorContext(<PdfPreview />, { scope })
 
     await screen.findByText('Something went wrong while rendering this PDF.')
     expect(screen.queryByLabelText('Page 1')).to.not.exist
 
     expect(nock.isDone()).to.be.true
-
-    mockValidPdf()
-
-    rerender(<PdfPreview />)
-
-    await screen.findByLabelText('Page 1')
-    expect(screen.queryByText('Something went wrong while rendering this PDF.'))
-      .to.not.exist
   })
 
   it('shows an error for a corrupt PDF', async function () {
@@ -506,19 +498,11 @@ describe('<PdfPreview/>', function () {
       .get(/^\/build\/output.pdf/)
       .replyWithFile(200, corruptPDF)
 
-    const { rerender } = renderWithEditorContext(<PdfPreview />, { scope })
+    renderWithEditorContext(<PdfPreview />, { scope })
 
     await screen.findByText('Something went wrong while rendering this PDF.')
     expect(screen.queryByLabelText('Page 1')).to.not.exist
 
     expect(nock.isDone()).to.be.true
-
-    mockValidPdf()
-
-    rerender(<PdfPreview />)
-
-    await screen.findByLabelText('Page 1')
-    expect(screen.queryByText('Something went wrong while rendering this PDF.'))
-      .to.not.exist
   })
 })
