@@ -12,7 +12,7 @@ import _ from 'lodash'
  * the option of passing a function to the setter.
  *
  * @param {string} path - dot '.' path of a property in the Angular scope.
- * @param {any} defaultValue
+ * @param {any} [defaultValue]
  * @returns {[any, function]} - value and setter function tuple.
  */
 export default function useScopeValueSetterOnly(path, defaultValue) {
