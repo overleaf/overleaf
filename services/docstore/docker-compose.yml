@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
 
-version: '2.3'
+version: "2.3"
 
 services:
   test_unit:
@@ -13,7 +13,7 @@ services:
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
-      NODE_OPTIONS: '--unhandled-rejections=strict'
+      NODE_OPTIONS: "--unhandled-rejections=strict"
     command: npm run --silent test:unit
     user: node
 
@@ -38,7 +38,7 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ERROR
       NODE_ENV: test
-      NODE_OPTIONS: '--unhandled-rejections=strict'
+      NODE_OPTIONS: "--unhandled-rejections=strict"
     user: node
     depends_on:
       mongo:
@@ -56,7 +56,7 @@ services:
 
   gcs:
     image: fsouza/fake-gcs-server:v1.21.2
-    command: ['--port=9090', '--scheme=http']
+    command: ["--port=9090", "--scheme=http"]
     healthcheck:
       test: wget --quiet --output-document=/dev/null http://localhost:9090/storage/v1/b
       interval: 1s
