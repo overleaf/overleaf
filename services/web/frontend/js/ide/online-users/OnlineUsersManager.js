@@ -16,7 +16,6 @@
  */
 import ColorManager from '../colors/ColorManager'
 import 'crypto-js/md5'
-import './controllers/OnlineUsersController'
 
 let OnlineUsersManager
 

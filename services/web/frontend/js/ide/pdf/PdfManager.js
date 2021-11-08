@@ -10,7 +10,6 @@
  */
 import './controllers/PdfController'
 import './controllers/PdfSynctexController'
-import './controllers/PdfViewToggleController'
 import '../pdfng/directives/pdfJs'
 
 let PdfManager

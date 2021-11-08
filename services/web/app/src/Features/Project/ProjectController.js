@@ -891,10 +891,6 @@ const ProjectController = {
                 logsUIVariant.newLogsUI
               ),
               logsUISubvariant: logsUIVariant.subvariant,
-              showNewNavigationUI: shouldDisplayFeature(
-                'new_navigation_ui',
-                true
-              ),
               showPdfDetach,
               showNewPdfPreview,
               showSymbolPalette: shouldDisplayFeature(

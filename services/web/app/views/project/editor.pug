@@ -78,12 +78,7 @@ block content
 			ng-cloak
 		)
 			.ui-layout-center
-				if showNewNavigationUI
-					include ./editor/header-react
-				else
-					include ./editor/header
-
-				!= moduleIncludes("publish:body", locals)
+				include ./editor/header-react
 
 				include ./editor/history/toolbarV2.pug
 
@@ -115,9 +110,7 @@ block content
 
 			if !isRestrictedTokenMember
 				.ui-layout-east
-					aside.chat(
-						ng-controller="ReactChatController"
-					)
+					aside.chat
 						chat()
 
 	script(type="text/ng-template", id="genericMessageModalTemplate")
