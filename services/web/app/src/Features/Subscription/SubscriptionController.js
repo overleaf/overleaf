@@ -223,7 +223,7 @@ function successfulSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   return SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel(
     user,
-    function (error, { personalSubscription }) {
+    function (error, { personalSubscription } = {}) {
       if (error) {
         return next(error)
       }

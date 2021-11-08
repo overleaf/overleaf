@@ -13,7 +13,7 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const { expect } = require('chai')
+const { assert, expect } = require('chai')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const modulePath =
@@ -358,17 +358,53 @@ describe('SubscriptionController', function () {
   })
 
   describe('successfulSubscription', function () {
-    beforeEach(function (done) {
+    it('without a personnal subscription', function (done) {
       this.SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(
         1,
         null,
         {}
       )
-      this.res.callback = done
-      return this.SubscriptionController.successfulSubscription(
-        this.req,
-        this.res
+      this.res.callback = () => {
+        assert.equal(this.res.redirectedTo, '/user/subscription/plans')
+        done()
+      }
+      this.SubscriptionController.successfulSubscription(this.req, this.res)
+    })
+
+    it('with a personnal subscription', function (done) {
+      this.SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(
+        1,
+        null,
+        { personalSubscription: 'foo' }
       )
+      this.res.callback = () => {
+        assert.equal(
+          this.res.renderedTemplate,
+          'subscriptions/successful_subscription'
+        )
+        assert.deepEqual(this.res.renderedVariables, {
+          title: 'thank_you',
+          personalSubscription: 'foo',
+        })
+        done()
+      }
+      this.SubscriptionController.successfulSubscription(this.req, this.res)
+    })
+
+    it('with an error', function () {
+      const next = sinon.stub()
+      const error = new Error('test')
+      this.SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(
+        1,
+        error,
+        undefined
+      )
+      this.SubscriptionController.successfulSubscription(
+        this.req,
+        this.res,
+        next
+      )
+      sinon.assert.calledWith(next, error)
     })
   })
 
