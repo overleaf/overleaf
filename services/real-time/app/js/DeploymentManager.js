@@ -40,6 +40,9 @@ function checkStatusFileSync() {
   // crash on start up if file does not exist
   const content = fs.readFileSync(statusFile, { encoding: 'utf8' })
   updateDeploymentStatus(content)
+  if (settings.serviceIsClosed) {
+    serviceCloseTime = Date.now() // skip closing delay on start up
+  }
 }
 
 module.exports = {
@@ -54,6 +57,6 @@ module.exports = {
     }
   },
   deploymentIsClosed() {
-    return settings.serviceIsClosed && Date.now() > serviceCloseTime
+    return settings.serviceIsClosed && Date.now() >= serviceCloseTime
   },
 }
