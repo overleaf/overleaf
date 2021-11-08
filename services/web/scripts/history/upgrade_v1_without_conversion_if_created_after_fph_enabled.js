@@ -5,6 +5,9 @@ const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
 const DRY_RUN = process.env.DRY_RUN !== 'false'
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
+// raise mongo timeout to 1hr if otherwise unspecified
+process.env.MONGO_SOCKET_TIMEOUT =
+  parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 3600000
 
 const { ReadPreference, ObjectId } = require('mongodb')
 const { db } = require('../../app/src/infrastructure/mongodb')

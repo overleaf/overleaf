@@ -4,6 +4,9 @@ const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 5
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
+// raise mongo timeout to 1hr if otherwise unspecified
+process.env.MONGO_SOCKET_TIMEOUT =
+  parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 3600000
 
 const { ReadPreference, ObjectId } = require('mongodb')
 const { db } = require('../../app/src/infrastructure/mongodb')
@@ -209,6 +212,9 @@ async function main() {
     _id: 1,
     overleaf: 1,
   }
+  const options = {
+    hint: { _id: 1 },
+  }
   if (VERBOSE_PROJECT_NAMES) {
     projection.name = 1
   }
@@ -216,7 +222,8 @@ async function main() {
     'projects',
     { 'overleaf.history.display': { $ne: true } },
     processBatch,
-    projection
+    projection,
+    options
   )
   console.log('Final')
   console.log(COUNT)

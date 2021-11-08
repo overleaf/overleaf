@@ -1,10 +1,13 @@
-const SCRIPT_VERSION = 1
+const SCRIPT_VERSION = 2
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true'
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
 const DRY_RUN = process.env.DRY_RUN !== 'false'
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
+// raise mongo timeout to 1hr if otherwise unspecified
+process.env.MONGO_SOCKET_TIMEOUT =
+  parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 3600000
 
 const { ReadPreference } = require('mongodb')
 const { db } = require('../../app/src/infrastructure/mongodb')
@@ -24,15 +27,23 @@ async function processBatch(_, projects) {
 }
 
 async function processProject(project) {
-  const anyDocHistory = await anyDocHistoryExists(project)
-  if (anyDocHistory) {
-    return
+  const preserveHistory = await shouldPreserveHistory(project)
+  if (preserveHistory) {
+    // if we need to preserve history, then we must bail out if history exists
+    const anyDocHistory = await anyDocHistoryExists(project)
+    if (anyDocHistory) {
+      return
+    }
+    const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
+    if (anyDocHistoryIndex) {
+      return
+    }
+    return await doUpgradeForV1WithoutConversion(project)
+  } else {
+    // if preserveHistory false, then max 7 days of SL history
+    // but v1 already record to both histories, so safe to upgrade
+    return await doUpgradeForV1WithoutConversion(project)
   }
-  const anyDocHistoryIndex = await anyDocHistoryIndexExists(project)
-  if (anyDocHistoryIndex) {
-    return
-  }
-  await doUpgradeForV1WithoutConversion(project)
 }
 
 async function doUpgradeForV1WithoutConversion(project) {
@@ -52,6 +63,18 @@ async function doUpgradeForV1WithoutConversion(project) {
     console.log(`project ${project._id} converted to full project history`)
   }
   RESULT.projectsUpgraded += 1
+}
+
+async function shouldPreserveHistory(project) {
+  return await db.projectHistoryMetaData.findOne(
+    {
+      $and: [
+        { project_id: { $eq: project._id } },
+        { preserveHistory: { $eq: true } },
+      ],
+    },
+    { readPreference: ReadPreference.SECONDARY }
+  )
 }
 
 async function anyDocHistoryExists(project) {
