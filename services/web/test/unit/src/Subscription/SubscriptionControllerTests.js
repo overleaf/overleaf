@@ -185,40 +185,10 @@ describe('SubscriptionController', function () {
       })
     })
 
-    describe('splitTest', function () {
-      const cases = [
-        {
-          variant: 'default',
-          template: 'subscriptions/plans',
-        },
-        {
-          variant: 'de-ng',
-          template: 'subscriptions/plans-marketing',
-        },
-      ]
-      for (const { variant, template } of cases) {
-        describe(variant, function () {
-          beforeEach(function () {
-            const assignment = { variant }
-            this.SplitTestV2Hander.promises.getAssignmentForSession.resolves(
-              assignment
-            )
-          })
-          it(`should render template ${template}`, function (done) {
-            this.res.render = page => {
-              page.should.equal(template)
-              done()
-            }
-            this.SubscriptionController.plansPage(this.req, this.res)
-          })
-        })
-      }
-    })
-
     describe('groupPlanModal data', function () {
       it('should pass local currency if valid', function (done) {
         this.res.render = (page, opts) => {
-          page.should.equal('subscriptions/plans')
+          page.should.equal('subscriptions/plans-marketing')
           opts.groupPlanModalDefaults.currency.should.equal('GBP')
           done()
         }
@@ -230,7 +200,7 @@ describe('SubscriptionController', function () {
 
       it('should fallback to USD when valid', function (done) {
         this.res.render = (page, opts) => {
-          page.should.equal('subscriptions/plans')
+          page.should.equal('subscriptions/plans-marketing')
           opts.groupPlanModalDefaults.currency.should.equal('USD')
           done()
         }
@@ -242,7 +212,7 @@ describe('SubscriptionController', function () {
 
       it('should pass valid options for group plan modal and discard invalid', function (done) {
         this.res.render = (page, opts) => {
-          page.should.equal('subscriptions/plans')
+          page.should.equal('subscriptions/plans-marketing')
           opts.groupPlanModalDefaults.size.should.equal('42')
           opts.groupPlanModalDefaults.plan_code.should.equal('collaborator')
           opts.groupPlanModalDefaults.currency.should.equal('GBP')
