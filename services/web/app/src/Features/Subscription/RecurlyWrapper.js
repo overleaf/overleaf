@@ -439,9 +439,9 @@ const RecurlyWrapper = {
   apiRequest(options, callback) {
     options.url = RecurlyWrapper.apiUrl + '/' + options.url
     options.headers = {
-      Authorization: `Basic ${new Buffer(Settings.apis.recurly.apiKey).toString(
-        'base64'
-      )}`,
+      Authorization: `Basic ${Buffer.from(
+        Settings.apis.recurly.apiKey
+      ).toString('base64')}`,
       Accept: 'application/xml',
       'Content-Type': 'application/xml; charset=utf-8',
       'X-Api-Version': Settings.apis.recurly.apiVersion,

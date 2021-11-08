@@ -70,11 +70,16 @@ async function processBatch(_, users) {
     await rewriteDuplicates(uniqueReferalIdsInBatch)
     return
   }
-  const nMatching = await db.users.count(
-    { referal_id: { $in: uniqueReferalIdsInBatch } },
-    { readPreference: ReadPreference.SECONDARY }
-  )
-  if (nMatching !== uniqueReferalIdsInBatch.length) {
+  const matches = await db.users
+    .find(
+      { referal_id: { $in: uniqueReferalIdsInBatch } },
+      {
+        readPreference: ReadPreference.SECONDARY,
+        projection: { _id: true },
+      }
+    )
+    .toArray()
+  if (matches.length !== uniqueReferalIdsInBatch.length) {
     if (VERBOSE_LOGGING) {
       console.log('Got duplicates from running count.')
     }

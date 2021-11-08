@@ -108,10 +108,7 @@ describe('RegenerateDuplicateReferralIds', function () {
 
   it('should do the correct operations', function () {
     let { stderr: stdErr, stdout: stdOut } = result
-    stdErr = stdErr
-      .split('\n')
-      .filter(line => !line.includes('DeprecationWarning'))
-      .filter(filterOutput)
+    stdErr = stdErr.split('\n').filter(filterOutput)
     stdOut = stdOut.split('\n').filter(filterOutput)
     expect(stdErr).to.deep.equal([
       `Completed batch ending ${firstBatch[BATCH_SIZE - 1]}`,
