@@ -181,8 +181,8 @@ function PdfJsViewer({ url }) {
 
       // scroll to the first highlighted element
       elements[0]?.scrollIntoView({
-        block: 'start',
-        inline: 'nearest',
+        block: 'nearest',
+        inline: 'start',
         behavior: 'smooth',
       })
 
