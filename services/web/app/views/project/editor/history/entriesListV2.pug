@@ -177,11 +177,15 @@ script(type="text/ng-template", id="historyEntryTpl")
 							ng-style="$ctrl.getUserCSSStyle(update_user);"
 						) #{translate("anonymous")}
 					li.history-entry-metadata-user(
-						ng-if="::$ctrl.entry.meta.origin"
+						ng-if="::$ctrl.entry.meta.origin && $ctrl.entry.meta.users.length == 0"
 						ng-switch on="::$ctrl.entry.meta.origin.kind"
 					)
 						span.name(
 							ng-switch-when="history-resync"
+							ng-style="$ctrl.getUserCSSStyle()"
+						) #{translate("overleaf_history_system")}
+						span.name(
+							ng-switch-when="history-migration"
 							ng-style="$ctrl.getUserCSSStyle()"
 						) #{translate("overleaf_history_system")}
 						span.name(

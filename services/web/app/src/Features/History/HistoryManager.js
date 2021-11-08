@@ -87,11 +87,18 @@ async function deleteProjectHistory(projectId) {
   }
 }
 
-async function resyncProject(projectId, force = false) {
+async function resyncProject(projectId, options = {}) {
   try {
+    const body = {}
+    if (options.force) {
+      body.force = options.force
+    }
+    if (options.origin) {
+      body.origin = options.origin
+    }
     await request.post({
       url: `${settings.apis.project_history.url}/project/${projectId}/resync`,
-      qs: { force }, // TODO: only send if true?
+      json: body,
     })
   } catch (err) {
     throw OError.tag(err, 'failed to resync project history', { projectId })
