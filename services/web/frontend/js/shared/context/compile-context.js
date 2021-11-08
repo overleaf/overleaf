@@ -229,10 +229,12 @@ export function CompileProvider({ children }) {
           setLogEntryAnnotations(
             buildLogEntryAnnotations(result.logEntries.all, ide.fileTreeManager)
           )
+          if (data.status === 'success') {
+            setPdfDownloadUrl(result.pdfDownloadUrl)
+            setPdfUrl(result.pdfUrl)
+          }
           setLogEntries(result.logEntries)
           setFileList(result.fileList)
-          setPdfDownloadUrl(result.pdfDownloadUrl)
-          setPdfUrl(result.pdfUrl)
           setRawLog(result.log)
 
           // sample compile stats for real users
