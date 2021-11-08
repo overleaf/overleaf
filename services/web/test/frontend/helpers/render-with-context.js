@@ -13,9 +13,14 @@ import { ProjectProvider } from '../../../frontend/js/shared/context/project-con
 import { SplitTestProvider } from '../../../frontend/js/shared/context/split-test-context'
 import { CompileProvider } from '../../../frontend/js/shared/context/compile-context'
 
+// these constants can be imported in tests instead of
+// using magic strings
+export const PROJECT_ID = 'project123'
+export const PROJECT_NAME = 'project-name'
+
 export function EditorProviders({
   user = { id: '123abd', email: 'testuser@example.com' },
-  projectId = 'project123',
+  projectId = PROJECT_ID,
   socket = {
     on: sinon.stub(),
     removeListener: sinon.stub(),
@@ -24,6 +29,7 @@ export function EditorProviders({
   clsiServerId = '1234',
   scope,
   children,
+  rootFolder,
 }) {
   window.user = user || window.user
   window.gitBridgePublicBaseUrl = 'git.overleaf.test'
@@ -34,11 +40,15 @@ export function EditorProviders({
     user: window.user,
     project: {
       _id: window.project_id,
-      name: 'project-name',
+      name: PROJECT_NAME,
       owner: {
         _id: '124abd',
         email: 'owner@example.com',
       },
+      rootDoc_id: '_root_doc_id',
+    },
+    rootFolder: rootFolder || {
+      children: [],
     },
     ui: {
       chatOpen: true,
@@ -62,6 +72,7 @@ export function EditorProviders({
 
   const editorManager = {
     getCurrentDocId: () => 'foo',
+    getCurrentDocValue: () => {},
     openDoc: sinon.stub(),
   }
 
