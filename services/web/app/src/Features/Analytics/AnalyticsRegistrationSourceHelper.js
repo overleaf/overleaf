@@ -1,6 +1,5 @@
-const RefererParser = require('referer-parser')
-const { URL } = require('url')
 const AnalyticsManager = require('./AnalyticsManager')
+const RequestHelper = require('./RequestHelper')
 
 function clearSource(session) {
   if (session) {
@@ -9,57 +8,10 @@ function clearSource(session) {
   }
 }
 
-const UTM_KEYS = [
-  'utm_campaign',
-  'utm_source',
-  'utm_term',
-  'utm_medium',
-  'utm_count',
-]
-
-function parseUtm(query) {
-  const utmValues = {}
-  for (const utmKey of UTM_KEYS) {
-    if (query[utmKey]) {
-      utmValues[utmKey] = query[utmKey]
-    }
-  }
-  return Object.keys(utmValues).length > 0 ? utmValues : null
-}
-
-function parseReferrer(referrer, url) {
-  if (!referrer) {
-    return {
-      medium: 'direct',
-    }
-  }
-
-  const parsedReferrer = new RefererParser(referrer, url)
-
-  const referrerValues = {
-    medium: parsedReferrer.medium,
-    source: parsedReferrer.referer || 'other',
-  }
-
-  if (referrerValues.medium === 'unknown') {
-    try {
-      const referrerHostname = new URL(referrer).hostname
-      if (referrerHostname) {
-        referrerValues.medium = 'link'
-        referrerValues.source = referrerHostname
-      }
-    } catch (error) {
-      // ignore referrer parsing errors
-    }
-  }
-
-  return referrerValues
-}
-
 function setInbound(session, url, query, referrer) {
   const inboundSession = {
-    referrer: parseReferrer(referrer, url),
-    utm: parseUtm(query),
+    referrer: RequestHelper.parseReferrer(referrer, url),
+    utm: RequestHelper.parseUtm(query),
   }
 
   if (inboundSession.referrer || inboundSession.utm) {
@@ -123,7 +75,7 @@ function addUserProperties(userId, session) {
     }
 
     if (session.inbound.utm) {
-      for (const utmKey of UTM_KEYS) {
+      for (const utmKey of RequestHelper.UTM_KEYS) {
         if (session.inbound.utm[utmKey]) {
           AnalyticsManager.setUserPropertyForUser(
             userId,
