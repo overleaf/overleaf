@@ -893,6 +893,10 @@ const ProjectController = {
               logsUISubvariant: logsUIVariant.subvariant,
               showPdfDetach,
               showNewPdfPreview,
+              showNewSourceEditor: shouldDisplayFeature(
+                'new_source_editor',
+                false
+              ),
               showSymbolPalette: shouldDisplayFeature(
                 'symbol_palette',
                 user.alphaProgram || user.betaProgram

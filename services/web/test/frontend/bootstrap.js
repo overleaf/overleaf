@@ -78,21 +78,24 @@ moment.updateLocale('en', {
 })
 
 // workaround for missing keys in jsdom-global's keys.js
-global.AbortController = window.AbortController
-global.MutationObserver = window.MutationObserver
-global.StorageEvent = window.StorageEvent
-global.SVGElement = window.SVGElement
-global.localStorage = window.localStorage
-global.performance = window.performance
-global.requestAnimationFrame = window.requestAnimationFrame
-global.sessionStorage = window.sessionStorage
+globalThis.AbortController = global.AbortController = window.AbortController
+globalThis.MutationObserver = global.MutationObserver = window.MutationObserver
+globalThis.StorageEvent = global.StorageEvent = window.StorageEvent
+globalThis.SVGElement = global.SVGElement = window.SVGElement
+globalThis.localStorage = global.localStorage = window.localStorage
+globalThis.performance = global.performance = window.performance
+globalThis.cancelAnimationFrame = global.cancelAnimationFrame =
+  window.cancelAnimationFrame
+globalThis.requestAnimationFrame = global.requestAnimationFrame =
+  window.requestAnimationFrame
+globalThis.sessionStorage = global.sessionStorage = window.sessionStorage
 
 // add polyfill for ResizeObserver
-global.ResizeObserver = window.ResizeObserver = require('@juggle/resize-observer').ResizeObserver
+globalThis.ResizeObserver = global.ResizeObserver = window.ResizeObserver = require('@juggle/resize-observer').ResizeObserver
 
 // node-fetch doesn't accept relative URL's: https://github.com/node-fetch/node-fetch/blob/master/docs/v2-LIMITS.md#known-differences
 const fetch = require('node-fetch')
-global.fetch = window.fetch = (url, ...options) =>
+globalThis.fetch = global.fetch = window.fetch = (url, ...options) =>
   fetch(new URL(url, 'http://localhost'), ...options)
 
 // ignore CSS files

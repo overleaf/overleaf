@@ -46,7 +46,11 @@
 					.multi-selection-message
 						h4 {{ multiSelectedCount }} #{translate('files_selected')}
 
-				include ./source-editor
+				if showNewSourceEditor
+					if moduleIncludesAvailable('editor:source-editor')
+						!= moduleIncludes('editor:source-editor', locals)
+				else
+					include ./source-editor
 
 				if !isRestrictedTokenMember
 							include ./review-panel
