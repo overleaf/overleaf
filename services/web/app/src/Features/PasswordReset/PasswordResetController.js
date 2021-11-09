@@ -1,5 +1,6 @@
 const PasswordResetHandler = require('./PasswordResetHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const AuthenticationManager = require('../Authentication/AuthenticationManager')
 const SessionManager = require('../Authentication/SessionManager')
 const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
@@ -10,7 +11,7 @@ const { expressify } = require('../../util/promises')
 
 async function setNewUserPassword(req, res, next) {
   let user
-  let { passwordResetToken, password } = req.body
+  let { passwordResetToken, password, email } = req.body
   if (!passwordResetToken || !password) {
     return res.status(400).json({
       message: {
@@ -18,6 +19,14 @@ async function setNewUserPassword(req, res, next) {
       },
     })
   }
+
+  const err = AuthenticationManager.validatePassword(password, email)
+  if (err) {
+    return res.status(400).json({
+      message: { text: err.message },
+    })
+  }
+
   passwordResetToken = passwordResetToken.trim()
   delete req.session.resetToken
 
@@ -128,8 +137,10 @@ module.exports = {
     if (req.session.resetToken == null) {
       return res.redirect('/user/password/reset')
     }
+    const email = EmailsHelper.parseEmail(req.query.email)
     res.render('user/setPassword', {
       title: 'set_password',
+      email,
       passwordResetToken: req.session.resetToken,
     })
   },

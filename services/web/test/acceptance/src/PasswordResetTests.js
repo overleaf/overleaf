@@ -175,7 +175,7 @@ describe('PasswordReset', function () {
         expect(auditLog).to.deep.equal([])
       })
 
-      it('without a valid password should return 400 and log the change', async function () {
+      it('without a valid password should return 400 and not log the change', async function () {
         // send reset request
         response = await userHelper.request.post('/user/password/set', {
           form: {
@@ -185,6 +185,50 @@ describe('PasswordReset', function () {
           simple: false,
         })
         expect(response.statusCode).to.equal(400)
+        userHelper = await UserHelper.getUser({ email })
+
+        const auditLog = userHelper.getAuditLogWithoutNoise()
+        expect(auditLog).to.deep.equal([])
+      })
+
+      it('should flag email in password', async function () {
+        const localPart = email.split('@').shift()
+        // send bad password
+        response = await userHelper.request.post('/user/password/set', {
+          form: {
+            passwordResetToken: token,
+            password: localPart,
+            email,
+          },
+          json: true,
+          simple: false,
+        })
+        expect(response.statusCode).to.equal(400)
+        expect(response.body).to.deep.equal({
+          message: { text: 'password contains part of email address' },
+        })
+      })
+
+      it('should be able to retry after providing an invalid password', async function () {
+        // send bad password
+        response = await userHelper.request.post('/user/password/set', {
+          form: {
+            passwordResetToken: token,
+            password: 'short',
+          },
+          simple: false,
+        })
+        expect(response.statusCode).to.equal(400)
+
+        // send good password
+        response = await userHelper.request.post('/user/password/set', {
+          form: {
+            passwordResetToken: token,
+            password: 'SomeThingVeryStrong!11',
+          },
+          simple: false,
+        })
+        expect(response.statusCode).to.equal(200)
         userHelper = await UserHelper.getUser({ email })
 
         const auditLog = userHelper.getAuditLogWithoutNoise()

@@ -54,6 +54,9 @@ describe('PasswordResetController', function () {
       requires: {
         '@overleaf/settings': this.settings,
         './PasswordResetHandler': this.PasswordResetHandler,
+        '../Authentication/AuthenticationManager': {
+          validatePassword: sinon.stub().returns(null),
+        },
         '../Authentication/AuthenticationController': (this.AuthenticationController = {
           getLoggedInUserId: sinon.stub(),
           finishLogin: sinon.stub(),
