@@ -72,7 +72,10 @@ describe('<FileTreeitemInner />', function () {
 
     it('starts rename on menu item click', function () {
       renderWithContext(
-        <FileTreeitemInner id="123abc" name="bar.tex" isSelected />,
+        <>
+          <FileTreeitemInner id="123abc" name="bar.tex" isSelected />
+          <FileTreeContextMenu />
+        </>,
         {
           contextProps: {
             rootDocId: '123abc',

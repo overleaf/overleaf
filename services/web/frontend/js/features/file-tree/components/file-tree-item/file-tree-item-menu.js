@@ -4,26 +4,30 @@ import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import withoutPropagation from '../../../../infrastructure/without-propagation'
 
-import { Dropdown, Overlay } from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
 import Icon from '../../../../shared/components/icon'
 
-import FileTreeItemMenuItems from './file-tree-item-menu-items'
+import { useFileTreeMainContext } from '../../contexts/file-tree-main'
 
 function FileTreeItemMenu({ id }) {
   const { t } = useTranslation()
 
-  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const { contextMenuCoords, setContextMenuCoords } = useFileTreeMainContext()
   const [dropdownTarget, setDropdownTarget] = useState()
 
-  function handleToggle(wantOpen) {
-    setDropdownOpen(wantOpen)
+  function handleClick(_ev) {
+    const target = dropdownTarget.getBoundingClientRect()
+    if (!contextMenuCoords) {
+      setContextMenuCoords({
+        top: target.top + target.height / 2,
+        left: target.right,
+      })
+    } else {
+      setContextMenuCoords(null)
+    }
   }
 
-  function handleClick() {
-    handleToggle(false)
-  }
-
-  const toggleRef = component => {
+  const menuButtonRef = component => {
     if (component) {
       // eslint-disable-next-line react/no-find-dom-node
       setDropdownTarget(findDOMNode(component))
@@ -31,51 +35,21 @@ function FileTreeItemMenu({ id }) {
   }
 
   return (
-    <Dropdown
-      onClick={withoutPropagation(handleClick)}
-      pullRight
-      open={dropdownOpen}
-      id={`dropdown-${id}`}
-      onToggle={handleToggle}
-    >
-      <Dropdown.Toggle
-        noCaret
-        className="dropdown-toggle-no-background entity-menu-toggle"
-        onClick={withoutPropagation()}
-        ref={toggleRef}
+    <div className="menu-button btn-group">
+      <Button
+        className="entity-menu-toggle btn btn-default"
+        id={`menu-button-${id}`}
+        onClick={withoutPropagation(handleClick)}
+        ref={menuButtonRef}
       >
         <Icon type="ellipsis-v" accessibilityLabel={t('menu')} />
-      </Dropdown.Toggle>
-      <Overlay
-        bsRole="menu"
-        show={dropdownOpen}
-        target={dropdownTarget}
-        container={document.body}
-      >
-        <Menu dropdownId={`dropdown-${id}`} />
-      </Overlay>
-    </Dropdown>
+      </Button>
+    </div>
   )
 }
 
 FileTreeItemMenu.propTypes = {
   id: PropTypes.string.isRequired,
-}
-
-function Menu({ dropdownId, style, className }) {
-  return (
-    <div className={`dropdown open ${className}`} style={style}>
-      <ul className="dropdown-menu" role="menu" aria-labelledby={dropdownId}>
-        <FileTreeItemMenuItems />
-      </ul>
-    </div>
-  )
-}
-
-Menu.propTypes = {
-  dropdownId: PropTypes.string.isRequired,
-  style: PropTypes.object,
-  className: PropTypes.string,
 }
 
 export default FileTreeItemMenu

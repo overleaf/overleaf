@@ -42,6 +42,7 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
 
   function handleContextMenu(ev) {
     ev.preventDefault()
+
     setContextMenuCoords({
       top: ev.pageY,
       left: ev.pageX,
