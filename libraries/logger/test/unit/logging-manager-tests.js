@@ -50,7 +50,6 @@ describe('LoggingManager', function () {
     this.LoggingManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         bunyan: this.Bunyan,
-        '@google-cloud/logging-bunyan': this.GCPLogging,
         './log-level-checker': this.LogLevelChecker,
         './sentry-manager': sinon.stub().returns(this.SentryManager)
       }

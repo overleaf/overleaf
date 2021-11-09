@@ -7,7 +7,7 @@
     "url": "https://github.com/overleaf/overleaf"
   },
   "license": "AGPL-3.0-only",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "scripts": {
     "test": "mocha --grep=$MOCHA_GREP test/**/*.js",
     "format": "prettier-eslint $PWD'/**/*.js' --list-different",
@@ -17,7 +17,6 @@
     "test:ci": "npm run test"
   },
   "dependencies": {
-    "@google-cloud/logging-bunyan": "^3.1.0",
     "@overleaf/o-error": "^3.0.0",
     "@sentry/node": "^6.13.2",
     "bunyan": "^1.8.14",

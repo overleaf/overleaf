@@ -7,7 +7,7 @@ function errSerializer(err) {
   return {
     message: err.message,
     name: err.name,
-    stack: OError.getFullStack(err),
+    stack: err.stack && OError.getFullStack(err),
     info: OError.getFullInfo(err),
     code: err.code,
     signal: err.signal
@@ -19,7 +19,7 @@ function reqSerializer(req) {
     return req
   }
   const headers = req.headers || {}
-  return {
+  const entry = {
     method: req.method,
     url: req.originalUrl || req.url,
     remoteAddress: getRemoteIp(req),
@@ -29,6 +29,20 @@ function reqSerializer(req) {
       'content-length': headers['content-length']
     }
   }
+  const projectId =
+    req.params.projectId || req.params.project_id || req.params.Project_id
+  const userId = req.params.userId || req.params.user_id
+  const docId = req.params.docId || req.params.doc_id
+  if (projectId) {
+    entry.projectId = projectId
+  }
+  if (userId) {
+    entry.userId = userId
+  }
+  if (docId) {
+    entry.docId = docId
+  }
+  return entry
 }
 
 function resSerializer(res) {

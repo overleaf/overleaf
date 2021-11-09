@@ -37,12 +37,23 @@ function convertLogEntry(entry) {
     }
     if (entry.err.stack) {
       gcpEntry.message = entry.err.stack
+    } else if (entry.err.message) {
+      gcpEntry.message = entry.err.message
     }
     if (entry.name) {
       gcpEntry.serviceContext = { service: entry.name }
     }
-  } else {
-    gcpEntry.message = entry.msg
+  }
+
+  // Log message
+  if (entry.msg) {
+    if (gcpEntry.message) {
+      // A message has already been extracted from the error. Keep the extra
+      // message in the msg property.
+      gcpEntry.msg = entry.msg
+    } else {
+      gcpEntry.message = entry.msg
+    }
   }
 
   // Severity
@@ -85,9 +96,14 @@ function convertLogEntry(entry) {
   }
 
   // Labels are indexed in GCP. We copy the project, doc and user ids to labels to enable fast filtering
-  const projectId = gcpEntry.projectId || gcpEntry.project_id
-  const userId = gcpEntry.userId || gcpEntry.user_id
-  const docId = gcpEntry.docId || gcpEntry.doc_id
+  const projectId =
+    gcpEntry.projectId ||
+    gcpEntry.project_id ||
+    (entry.req && entry.req.projectId)
+  const userId =
+    gcpEntry.userId || gcpEntry.user_id || (entry.req && entry.req.userId)
+  const docId =
+    gcpEntry.docId || gcpEntry.doc_id || (entry.req && entry.req.docId)
   if (projectId || userId || docId) {
     const labels = {}
     if (projectId) {
