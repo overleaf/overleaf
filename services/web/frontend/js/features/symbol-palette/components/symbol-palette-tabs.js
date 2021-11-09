@@ -1,11 +1,15 @@
 import { TabList, Tab } from '@reach/tabs'
 import PropTypes from 'prop-types'
 
-export default function SymbolPaletteTabs({ categories }) {
+export default function SymbolPaletteTabs({ categories, disabled }) {
   return (
     <TabList aria-label="Symbol Categories" className="symbol-palette-tab-list">
       {categories.map(category => (
-        <Tab key={category.id} className="symbol-palette-tab">
+        <Tab
+          key={category.id}
+          disabled={disabled}
+          className="symbol-palette-tab"
+        >
           {category.label}
         </Tab>
       ))}
@@ -19,4 +23,5 @@ SymbolPaletteTabs.propTypes = {
       label: PropTypes.string.isRequired,
     })
   ).isRequired,
+  disabled: PropTypes.bool,
 }

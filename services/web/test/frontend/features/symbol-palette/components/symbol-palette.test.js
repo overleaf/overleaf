@@ -69,8 +69,8 @@ describe('symbol palette', function () {
       expect(symbols).to.have.length(2)
     })
 
-    // check the search hint is displayed
-    screen.getByText('Showing search results for "pi"')
+    // check the tabs are disabled
+    expect(selectedTab.disabled).to.be.true
 
     // press Tab to select the symbols
     fireEvent.keyDown(container, { key: 'Tab' })

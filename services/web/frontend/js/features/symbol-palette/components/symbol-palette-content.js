@@ -66,13 +66,10 @@ export default function SymbolPaletteContent({ handleSelect }) {
     <Tabs className="symbol-palette-container">
       <div className="symbol-palette">
         <div className="symbol-palette-header">
-          {input.length <= 0 ? (
-            <SymbolPaletteTabs categories={categories} />
-          ) : (
-            <div className="symbol-palette-search-hint">
-              {t('showing_symbol_search_results', { search: input })}
-            </div>
-          )}
+          <SymbolPaletteTabs
+            categories={categories}
+            disabled={input.length > 0}
+          />
           <div className="symbol-palette-header-group">
             <BetaBadge
               tooltip={{
