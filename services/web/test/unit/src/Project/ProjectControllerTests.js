@@ -139,6 +139,9 @@ describe('ProjectController', function () {
         getAssignment: sinon.stub().resolves({ active: false }),
         assignInLocalsContext: sinon.stub().resolves(),
       },
+      getAssignmentForSession: sinon
+        .stub()
+        .yields(null, { variant: 'variant' }),
       getAssignment: sinon.stub().yields(null, { active: false }),
       assignInLocalsContext: sinon.stub().yields(null),
     }
