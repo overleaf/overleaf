@@ -1,5 +1,5 @@
 const { callbackify } = require('util')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const moment = require('moment')
 const { User } = require('../../models/User')
 const { DeletedUser } = require('../../models/DeletedUser')

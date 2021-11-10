@@ -13,7 +13,7 @@
  */
 let FileHashManager
 const crypto = require('crypto')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const fs = require('fs')
 const _ = require('underscore')
 

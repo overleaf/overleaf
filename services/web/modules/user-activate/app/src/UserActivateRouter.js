@@ -1,4 +1,4 @@
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const UserActivateController = require('./UserActivateController')
 const AuthenticationController = require('../../../../app/src/Features/Authentication/AuthenticationController')
 

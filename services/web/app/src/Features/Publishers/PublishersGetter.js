@@ -15,7 +15,7 @@
 let PublishersGetter
 const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
 const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEntityConfigs')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const _ = require('underscore')
 
 module.exports = PublishersGetter = {

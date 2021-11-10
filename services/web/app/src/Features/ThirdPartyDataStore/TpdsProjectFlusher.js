@@ -1,5 +1,5 @@
 const { callbackify } = require('util')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')

@@ -1,7 +1,7 @@
 const { callbackify } = require('util')
 const { db } = require('../../infrastructure/mongodb')
 const metrics = require('@overleaf/metrics')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const moment = require('moment')
 const settings = require('@overleaf/settings')
 const { promisifyAll } = require('../../util/promises')

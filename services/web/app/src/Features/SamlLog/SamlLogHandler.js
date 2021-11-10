@@ -1,5 +1,5 @@
 const { SamlLog } = require('../../models/SamlLog')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 function log(providerId, sessionId, data) {
   try {

@@ -2,7 +2,7 @@ const { promisify } = require('util')
 const { promisifyMultiResult } = require('../../util/promises')
 const request = require('request').defaults({ jar: false })
 const OError = require('@overleaf/o-error')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
 const Errors = require('../Errors/Errors')
 

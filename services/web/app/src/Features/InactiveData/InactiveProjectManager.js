@@ -14,7 +14,7 @@ let InactiveProjectManager
 const OError = require('@overleaf/o-error')
 const async = require('async')
 const _ = require('underscore')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectUpdateHandler = require('../Project/ProjectUpdateHandler')

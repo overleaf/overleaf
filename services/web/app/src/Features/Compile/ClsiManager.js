@@ -3,7 +3,7 @@ const Settings = require('@overleaf/settings')
 const request = require('request')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const { URL } = require('url')
 const OError = require('@overleaf/o-error')
 

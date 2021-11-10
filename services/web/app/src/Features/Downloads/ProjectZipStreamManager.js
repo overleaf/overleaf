@@ -1,7 +1,7 @@
 let ProjectZipStreamManager
 const archiver = require('archiver')
 const async = require('async')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
 const FileStoreHandler = require('../FileStore/FileStoreHandler')

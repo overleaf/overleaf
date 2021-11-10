@@ -12,7 +12,7 @@
  */
 let ProxyManager
 const settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const request = require('request')
 const { URL, URLSearchParams } = require('url')
 

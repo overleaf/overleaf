@@ -5,7 +5,7 @@ const querystring = require('querystring')
 const { URL } = require('url')
 const Settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 function recordUTMTags() {
   return function (req, res, next) {

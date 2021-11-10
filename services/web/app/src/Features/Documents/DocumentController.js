@@ -3,7 +3,7 @@ const OError = require('@overleaf/o-error')
 const ProjectLocator = require('../Project/ProjectLocator')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const _ = require('lodash')
 
 function getDocument(req, res, next) {

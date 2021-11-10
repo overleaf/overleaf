@@ -1,5 +1,5 @@
 const OError = require('@overleaf/o-error')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const ProjectGetter = require('../Project/ProjectGetter')
 const UserGetter = require('../User/UserGetter')
 const SubscriptionLocator = require('./SubscriptionLocator')

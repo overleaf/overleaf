@@ -1,5 +1,5 @@
 const AuthorizationManager = require('./AuthorizationManager')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const { ObjectId } = require('mongodb')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')

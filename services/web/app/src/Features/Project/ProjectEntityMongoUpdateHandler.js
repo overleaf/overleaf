@@ -1,7 +1,7 @@
 const { callbackify } = require('util')
 const { callbackifyMultiResult } = require('../../util/promises')
 const _ = require('underscore')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const path = require('path')
 const { ObjectId } = require('mongodb')
 const Settings = require('@overleaf/settings')

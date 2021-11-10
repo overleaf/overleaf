@@ -1,7 +1,7 @@
 const OError = require('@overleaf/o-error')
 const { URL } = require('url')
 const settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const V1Api = require('../V1/V1Api')
 const sanitizeHtml = require('sanitize-html')
 
