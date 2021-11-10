@@ -9,11 +9,6 @@ const MODULE_PATH = require('path').join(
 describe('NewLogsUI helper', function () {
   let NewLogsUI
 
-  before(function () {
-    // We're disabling the Logs UI split test while rolling out the PDF Preview
-    this.skip()
-  })
-
   function userIdFromTime(time) {
     return ObjectId.createFromTime(time).toString()
   }

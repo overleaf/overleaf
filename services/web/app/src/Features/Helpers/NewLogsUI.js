@@ -38,7 +38,6 @@ function _getVariantForPercentile(percentile) {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
 function getNewLogsUIVariantForUser(user) {
   const { _id: userId, alphaProgram: isAlphaUser } = user
   const isSaaS = Boolean(Settings.overleaf)
@@ -57,7 +56,5 @@ function getNewLogsUIVariantForUser(user) {
 }
 
 module.exports = {
-  // We're disabling the split tests while rolling out the PDF Preview
-  // https://github.com/overleaf/internal/issues/5553
-  getNewLogsUIVariantForUser: () => EXISTING_UI,
+  getNewLogsUIVariantForUser,
 }

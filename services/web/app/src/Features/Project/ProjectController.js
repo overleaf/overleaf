@@ -733,27 +733,8 @@ const ProjectController = {
             }
           )
         },
-        newPdfPreviewAssignment(cb) {
-          SplitTestV2Handler.getAssignmentForSession(
-            req.session,
-            'new-pdf-preview',
-            (err, assignment) => {
-              cb(err, assignment)
-            }
-          )
-        },
       },
-      (
-        err,
-        {
-          project,
-          user,
-          subscription,
-          isTokenMember,
-          brandVariation,
-          newPdfPreviewAssignment,
-        }
-      ) => {
+      (err, { project, user, subscription, isTokenMember, brandVariation }) => {
         if (err != null) {
           OError.tag(err, 'error getting details for project page')
           return next(err)
