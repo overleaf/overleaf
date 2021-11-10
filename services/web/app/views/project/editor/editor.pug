@@ -12,10 +12,7 @@ div.full-size(
 	custom-toggler-msg-when-open=hasFeature('custom-togglers') ? translate("tooltip_hide_pdf") : false
 	custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? translate("tooltip_show_pdf") : false
 )
-	if showSymbolPalette
-		include ./editor-with-symbol-palette
-	else
-		include ./editor-no-symbol-palette
+	include ./editor-pane
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")

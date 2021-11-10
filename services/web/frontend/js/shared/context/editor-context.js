@@ -29,6 +29,9 @@ EditorContext.Provider.propTypes = {
     hasPremiumCompile: PropTypes.bool,
     loading: PropTypes.bool,
     renameProject: PropTypes.func.isRequired,
+    showSymbolPalette: PropTypes.bool,
+    toggleSymbolPalette: PropTypes.func,
+    insertSymbol: PropTypes.func,
     isProjectOwner: PropTypes.bool,
     isRestrictedTokenMember: PropTypes.bool,
     rootFolder: PropTypes.shape({
@@ -72,6 +75,9 @@ export function EditorProvider({ children, settings }) {
   const [projectName, setProjectName] = useScopeValue('project.name')
   const [rootFolder] = useScopeValue('rootFolder')
   const [permissionsLevel] = useScopeValue('permissionsLevel')
+  const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
+  const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
+  const [insertSymbol] = useScopeValue('editor.insertSymbol')
 
   useEffect(() => {
     if (ide?.socket) {
@@ -123,6 +129,9 @@ export function EditorProvider({ children, settings }) {
       isProjectOwner: owner?._id === window.user.id,
       isRestrictedTokenMember: window.isRestrictedTokenMember,
       rootFolder,
+      showSymbolPalette,
+      toggleSymbolPalette,
+      insertSymbol,
     }),
     [
       cobranding,
@@ -132,6 +141,9 @@ export function EditorProvider({ children, settings }) {
       permissionsLevel,
       owner?._id,
       rootFolder,
+      showSymbolPalette,
+      toggleSymbolPalette,
+      insertSymbol,
     ]
   )
 

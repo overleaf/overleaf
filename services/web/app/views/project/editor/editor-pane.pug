@@ -17,10 +17,10 @@
 			vertical-resizable-panes="symbol-palette-resizer"
 			vertical-resizable-panes-hidden-externally-on="symbol-palette-toggled"
 			vertical-resizable-panes-hidden-initially="true"
-			vertical-resizable-panes-default-size="196"
-			vertical-resizable-panes-min-size="144"
+			vertical-resizable-panes-default-size="250"
+			vertical-resizable-panes-min-size="250"
 			vertical-resizable-panes-max-size="336"
-			vertical-resizable-panes-resize-on="layout:flat-screen:toggle"
+			vertical-resizable-panes-resize-on="layout:flat-screen:toggle,symbol-palette-toggled"
 		)
 			.div(vertical-resizable-top)
 
@@ -55,5 +55,7 @@
 				if !isRestrictedTokenMember
 							include ./review-panel
 
-			.div(vertical-resizable-bottom)
-				include ./symbol-palette
+			if moduleIncludesAvailable('editor:symbol-palette')
+				.div(vertical-resizable-bottom)
+					!= moduleIncludes('editor:symbol-palette', locals)
+			

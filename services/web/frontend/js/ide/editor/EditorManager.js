@@ -19,7 +19,6 @@ import './components/spellMenu'
 import './directives/aceEditor'
 import './directives/toggleSwitch'
 import './controllers/SavingNotificationController'
-import '../../features/symbol-palette/controllers/symbol-palette-controller'
 let EditorManager
 
 export default EditorManager = (function () {

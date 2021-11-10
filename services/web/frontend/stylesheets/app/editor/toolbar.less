@@ -330,6 +330,14 @@
     color: @toolbar-btn-active-color;
     background-color: @toolbar-btn-active-bg-color;
     box-shadow: @toolbar-btn-active-shadow;
+
+    &:focus {
+      color: @toolbar-btn-active-color;
+
+      &:not(:focus-visible) {
+        outline: none;
+      }
+    }
   }
 
   &:focus {
