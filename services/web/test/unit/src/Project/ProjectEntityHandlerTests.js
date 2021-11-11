@@ -1,53 +1,26 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS206: Consider reworking classes to avoid initClass
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { assert, expect } = require('chai')
+const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Project/ProjectEntityHandler'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 describe('ProjectEntityHandler', function () {
-  const project_id = '4eecb1c1bffa66588e0000a1'
-  const doc_id = '4eecb1c1bffa66588e0000a2'
-  const folder_id = '4eecaffcbffa66588e000008'
-  const rootFolderId = '4eecaffcbffa66588e000007'
-  const userId = 1234
+  const projectId = '4eecb1c1bffa66588e0000a1'
+  const docId = '4eecb1c1bffa66588e0000a2'
 
   beforeEach(function () {
-    let Project
     this.TpdsUpdateSender = {
       addDoc: sinon.stub().callsArg(1),
       addFile: sinon.stub().callsArg(1),
     }
-    this.ProjectModel = Project = (function () {
-      Project = class Project {
-        static initClass() {
-          this.prototype.rootFolder = [this.rootFolder]
-        }
-
-        constructor(options) {
-          this._id = project_id
-          this.name = 'project_name_here'
-          this.rev = 0
-        }
+    this.ProjectModel = class Project {
+      constructor(options) {
+        this._id = projectId
+        this.name = 'project_name_here'
+        this.rev = 0
+        this.rootFolder = [this.rootFolder]
       }
-      Project.initClass()
-      return Project
-    })()
-
+    }
     this.project = new this.ProjectModel()
 
     this.ProjectLocator = { findElement: sinon.stub() }
@@ -56,7 +29,7 @@ describe('ProjectEntityHandler', function () {
     }
     this.callback = sinon.stub()
 
-    return (this.ProjectEntityHandler = SandboxedModule.require(modulePath, {
+    this.ProjectEntityHandler = SandboxedModule.require(modulePath, {
       requires: {
         '../Docstore/DocstoreManager': (this.DocstoreManager = {}),
         '../../Features/DocumentUpdater/DocumentUpdaterHandler': this
@@ -68,7 +41,7 @@ describe('ProjectEntityHandler', function () {
         './ProjectGetter': (this.ProjectGetter = {}),
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
       },
-    }))
+    })
   })
 
   describe('getting folders, docs and files', function () {
@@ -131,13 +104,11 @@ describe('ProjectEntityHandler', function () {
         this.DocstoreManager.getAllDocs = sinon
           .stub()
           .callsArgWith(1, null, this.docs)
-        this.ProjectEntityHandler.getAllDocs(project_id, this.callback)
+        this.ProjectEntityHandler.getAllDocs(projectId, this.callback)
       })
 
       it('should get the doc lines and rev from the docstore', function () {
-        this.DocstoreManager.getAllDocs
-          .calledWith(project_id)
-          .should.equal(true)
+        this.DocstoreManager.getAllDocs.calledWith(projectId).should.equal(true)
       })
 
       it('should call the callback with the docs with the lines and rev included', function () {
@@ -163,7 +134,7 @@ describe('ProjectEntityHandler', function () {
     describe('getAllFiles', function () {
       beforeEach(function () {
         this.callback = sinon.stub()
-        this.ProjectEntityHandler.getAllFiles(project_id, this.callback)
+        this.ProjectEntityHandler.getAllFiles(projectId, this.callback)
       })
 
       it('should call the callback with the files', function () {
@@ -197,7 +168,7 @@ describe('ProjectEntityHandler', function () {
         )
       })
 
-      it('should call the callback with the path for each doc_id', function () {
+      it('should call the callback with the path for each docId', function () {
         this.expected = {}
         this.expected[this.doc1._id] = `/${this.doc1.name}`
         this.expected[this.doc2._id] = `/folder1/${this.doc2.name}`
@@ -211,7 +182,7 @@ describe('ProjectEntityHandler', function () {
       })
       it('should call the callback with the path for an existing doc id at the root level', function () {
         this.ProjectEntityHandler.getDocPathByProjectIdAndDocId(
-          project_id,
+          projectId,
           this.doc1._id,
           this.callback
         )
@@ -220,7 +191,7 @@ describe('ProjectEntityHandler', function () {
 
       it('should call the callback with the path for an existing doc id nested within a folder', function () {
         this.ProjectEntityHandler.getDocPathByProjectIdAndDocId(
-          project_id,
+          projectId,
           this.doc2._id,
           this.callback
         )
@@ -231,7 +202,7 @@ describe('ProjectEntityHandler', function () {
 
       it('should call the callback with a NotFoundError for a non-existing doc', function () {
         this.ProjectEntityHandler.getDocPathByProjectIdAndDocId(
-          project_id,
+          projectId,
           'non-existing-id',
           this.callback
         )
@@ -242,7 +213,7 @@ describe('ProjectEntityHandler', function () {
 
       it('should call the callback with a NotFoundError for an existing file', function () {
         this.ProjectEntityHandler.getDocPathByProjectIdAndDocId(
-          project_id,
+          projectId,
           this.file1._id,
           this.callback
         )
@@ -255,21 +226,21 @@ describe('ProjectEntityHandler', function () {
     describe('_getAllFolders', function () {
       beforeEach(function () {
         this.callback = sinon.stub()
-        this.ProjectEntityHandler._getAllFolders(project_id, this.callback)
+        this.ProjectEntityHandler._getAllFolders(projectId, this.callback)
       })
 
       it('should get the project without the docs lines', function () {
         this.ProjectGetter.getProjectWithoutDocLines
-          .calledWith(project_id)
+          .calledWith(projectId)
           .should.equal(true)
       })
 
       it('should call the callback with the folders', function () {
         this.callback
-          .calledWith(null, {
-            '/': this.project.rootFolder[0],
-            '/folder1': this.folder1,
-          })
+          .calledWith(null, [
+            { path: '/', folder: this.project.rootFolder[0] },
+            { path: '/folder1', folder: this.folder1 },
+          ])
           .should.equal(true)
       })
     })
@@ -285,10 +256,10 @@ describe('ProjectEntityHandler', function () {
 
       it('should call the callback with the folders', function () {
         this.callback
-          .calledWith(null, {
-            '/': this.project.rootFolder[0],
-            '/folder1': this.folder1,
-          })
+          .calledWith(null, [
+            { path: '/', folder: this.project.rootFolder[0] },
+            { path: '/folder1', folder: this.folder1 },
+          ])
           .should.equal(true)
       })
     })
@@ -304,12 +275,12 @@ describe('ProjectEntityHandler', function () {
       this.DocstoreManager.getDoc = sinon
         .stub()
         .callsArgWith(3, null, this.lines, this.rev, this.version, this.ranges)
-      this.ProjectEntityHandler.getDoc(project_id, doc_id, this.callback)
+      this.ProjectEntityHandler.getDoc(projectId, docId, this.callback)
     })
 
     it('should call the docstore', function () {
       this.DocstoreManager.getDoc
-        .calledWith(project_id, doc_id)
+        .calledWith(projectId, docId)
         .should.equal(true)
     })
 
@@ -332,15 +303,12 @@ describe('ProjectEntityHandler', function () {
       this.DocstoreManager.getDoc = sinon
         .stub()
         .callsArgWith(3, null, this.lines, this.rev, this.version, this.ranges)
-      result = await this.ProjectEntityHandler.promises.getDoc(
-        project_id,
-        doc_id
-      )
+      result = await this.ProjectEntityHandler.promises.getDoc(projectId, docId)
     })
 
     it('should call the docstore', function () {
       this.DocstoreManager.getDoc
-        .calledWith(project_id, doc_id)
+        .calledWith(projectId, docId)
         .should.equal(true)
     })
 

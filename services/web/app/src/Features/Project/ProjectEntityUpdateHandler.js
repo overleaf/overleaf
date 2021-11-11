@@ -1355,31 +1355,125 @@ const ProjectEntityUpdateHandler = {
             if (error != null) {
               return callback(error)
             }
-
-            docs = _.map(docs, doc => ({
-              doc: doc.doc._id,
-              path: doc.path,
-            }))
-
-            files = _.map(files, file => ({
-              file: file.file._id,
-              path: file.path,
-              url: FileStoreHandler._buildUrl(projectId, file.file._id),
-              _hash: file.file.hash,
-            }))
-
-            DocumentUpdaterHandler.resyncProjectHistory(
+            ProjectEntityUpdateHandler._checkFiletree(
               projectId,
               projectHistoryId,
-              docs,
-              files,
-              callback
+              [...docs, ...files],
+              error => {
+                if (error) {
+                  return callback(error)
+                }
+                docs = _.map(docs, doc => ({
+                  doc: doc.doc._id,
+                  path: doc.path,
+                }))
+
+                files = _.map(files, file => ({
+                  file: file.file._id,
+                  path: file.path,
+                  url: FileStoreHandler._buildUrl(projectId, file.file._id),
+                  _hash: file.file.hash,
+                }))
+
+                DocumentUpdaterHandler.resyncProjectHistory(
+                  projectId,
+                  projectHistoryId,
+                  docs,
+                  files,
+                  callback
+                )
+              }
             )
           }
         )
       }
     )
   ),
+
+  _checkFiletree(projectId, projectHistoryId, entities, callback) {
+    const renames = []
+    const paths = new Map()
+    for (const entity of entities) {
+      // if the path is invalid (i.e. not going to be accepted in
+      // project-history due to filename rules) we could also flag it for a
+      // rename here.
+      if (paths.has(entity.path)) {
+        renames.push(entity)
+      } else {
+        paths.set(entity.path, entity)
+      }
+    }
+    if (renames.length === 0) {
+      return callback()
+    }
+    logger.warn({ projectId, renames }, 'found conflict in filetree')
+    // find new names for duplicate files
+    for (const entity of renames) {
+      const {
+        newPath,
+        newName,
+      } = ProjectEntityUpdateHandler.findNextAvailableName(paths, entity)
+      logger.debug({ projectId, newName, newPath }, 'found new name')
+      entity.newPath = newPath
+      entity.newName = newName
+    }
+    // rename the duplicate files
+    const doRename = (entity, cb) => {
+      const entityId = entity.doc ? entity.doc._id : entity.file._id
+      const entityType = entity.doc ? 'doc' : 'file'
+      ProjectEntityMongoUpdateHandler.renameEntity(
+        projectId,
+        entityId,
+        entityType,
+        entity.newName,
+        (err, project, startPath, endPath, rev, changes) => {
+          if (err) {
+            return cb(err)
+          }
+          // update the renamed entity for the resync
+          entity.path = entity.newPath
+          if (entityType === 'doc') {
+            entity.doc.name = entity.newName
+          } else {
+            entity.file.name = entity.newName
+          }
+          delete entity.newPath
+          delete entity.newname
+          DocumentUpdaterHandler.updateProjectStructure(
+            projectId,
+            projectHistoryId,
+            null,
+            changes,
+            cb
+          )
+        }
+      )
+    }
+    async.eachSeries(renames, doRename, callback)
+  },
+
+  findNextAvailableName(allPaths, entity) {
+    const incrementReplacer = (match, p1) => {
+      return ' (' + (parseInt(p1, 10) + 1) + ')'
+    }
+    let candidatePath = entity.path
+    // if the filename was invalid we should normalise it here too.  Currently
+    // this only handles renames in the same folder, so we will be out of luck
+    // if it is the folder name which in invalid.  We could handle folder
+    // renames by returning the folders list from getAllEntitiesFromProject
+    do {
+      // does the filename look like "foo (1)" if so, increment the number in parentheses
+      if (/ \(\d+\)$/.test(candidatePath)) {
+        candidatePath = candidatePath.replace(/ \((\d+)\)$/, incrementReplacer)
+      } else {
+        // otherwise, add a ' (1)' suffix to the name
+        candidatePath = candidatePath + ' (1)'
+      }
+    } while (allPaths.has(candidatePath)) // keep going until the name is unique
+    // add the new name to the set
+    allPaths.set(candidatePath, entity)
+    return { newPath: candidatePath, newName: candidatePath.split('/').pop() }
+  },
 
   isPathValidForRootDoc(docPath) {
     const docExtension = Path.extname(docPath)

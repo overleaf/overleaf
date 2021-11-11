@@ -20,15 +20,11 @@ const ProjectEntityHandler = {
       }
 
       ProjectEntityHandler._getAllFolders(projectId, (error, folders) => {
-        if (folders == null) {
-          folders = {}
-        }
         if (error != null) {
           return callback(error)
         }
         const docs = {}
-        for (const folderPath in folders) {
-          const folder = folders[folderPath]
+        for (const { path: folderPath, folder } of folders) {
           for (const doc of folder.docs || []) {
             const content = docContents[doc._id.toString()]
             if (content != null) {
@@ -49,15 +45,11 @@ const ProjectEntityHandler = {
 
   getAllFiles(projectId, callback) {
     ProjectEntityHandler._getAllFolders(projectId, (err, folders) => {
-      if (folders == null) {
-        folders = {}
-      }
       if (err != null) {
         return callback(err)
       }
       const files = {}
-      for (const folderPath in folders) {
-        const folder = folders[folderPath]
+      for (const { path: folderPath, folder } of folders) {
         for (const file of folder.fileRefs || []) {
           if (file != null) {
             files[path.join(folderPath, file.name)] = file
@@ -83,16 +75,12 @@ const ProjectEntityHandler = {
 
   getAllEntitiesFromProject(project, callback) {
     ProjectEntityHandler._getAllFoldersFromProject(project, (err, folders) => {
-      if (folders == null) {
-        folders = {}
-      }
       if (err != null) {
         return callback(err)
       }
       const docs = []
       const files = []
-      for (const folderPath in folders) {
-        const folder = folders[folderPath]
+      for (const { path: folderPath, folder } of folders) {
         for (const doc of folder.docs || []) {
           if (doc != null) {
             docs.push({ path: path.join(folderPath, doc.name), doc })
@@ -122,15 +110,11 @@ const ProjectEntityHandler = {
 
   getAllDocPathsFromProject(project, callback) {
     ProjectEntityHandler._getAllFoldersFromProject(project, (err, folders) => {
-      if (folders == null) {
-        folders = {}
-      }
       if (err != null) {
         return callback(err)
       }
       const docPath = {}
-      for (const folderPath in folders) {
-        const folder = folders[folderPath]
+      for (const { path: folderPath, folder } of folders) {
         for (const doc of folder.docs || []) {
           docPath[doc._id] = path.join(folderPath, doc.name)
         }
@@ -226,9 +210,9 @@ const ProjectEntityHandler = {
   },
 
   _getAllFoldersFromProject(project, callback) {
-    const folders = {}
+    const folders = []
     function processFolder(basePath, folder) {
-      folders[basePath] = folder
+      folders.push({ path: basePath, folder })
       for (const childFolder of folder.folders || []) {
         if (childFolder.name != null) {
           processFolder(path.join(basePath, childFolder.name), childFolder)

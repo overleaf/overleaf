@@ -78,7 +78,7 @@ describe('ProjectEntityUpdateHandler', function () {
       flushDocToMongo: sinon.stub().yields(),
       updateProjectStructure: sinon.stub().yields(),
       setDocument: sinon.stub(),
-      resyncProjectHistory: sinon.stub(),
+      resyncProjectHistory: sinon.stub().yields(),
       deleteDoc: sinon.stub().yields(),
     }
     this.fs = {
@@ -118,7 +118,7 @@ describe('ProjectEntityUpdateHandler', function () {
       replaceFileWithNew: sinon.stub(),
       mkdirp: sinon.stub(),
       moveEntity: sinon.stub(),
-      renameEntity: sinon.stub(),
+      renameEntity: sinon.stub().yields(),
       deleteEntity: sinon.stub(),
       replaceDocWithFile: sinon.stub(),
       replaceFileWithDoc: sinon.stub(),
@@ -136,6 +136,11 @@ describe('ProjectEntityUpdateHandler', function () {
       copyFile: sinon.stub(),
       uploadFileFromDisk: sinon.stub(),
       deleteFile: sinon.stub(),
+      _buildUrl: sinon
+        .stub()
+        .callsFake(
+          (projectId, fileId) => `www.filestore.test/${projectId}/${fileId}`
+        ),
     }
     this.FileWriter = {
       writeLinesToDisk: sinon.stub(),
@@ -1940,10 +1945,6 @@ describe('ProjectEntityUpdateHandler', function () {
           docs,
           files
         )
-        this.FileStoreHandler._buildUrl = (projectId, fileId) =>
-          `www.filestore.test/${projectId}/${fileId}`
-        this.DocumentUpdaterHandler.resyncProjectHistory.yields()
-
         this.ProjectEntityUpdateHandler.resyncProjectHistory(
           projectId,
           this.callback
@@ -1982,6 +1983,100 @@ describe('ProjectEntityUpdateHandler', function () {
 
       it('calls the callback', function () {
         this.callback.called.should.equal(true)
+      })
+    })
+
+    describe('a project with duplicate filenames', function () {
+      beforeEach(function (done) {
+        this.ProjectGetter.getProject.yields(null, this.project)
+        this.docs = [
+          { doc: { _id: 'doc1' }, path: 'main.tex' },
+          { doc: { _id: 'doc2' }, path: 'a/b/c/duplicate.tex' },
+          { doc: { _id: 'doc3' }, path: 'a/b/c/duplicate.tex' },
+          { doc: { _id: 'doc4' }, path: 'another dupe (22)' },
+          { doc: { _id: 'doc5' }, path: 'a/b/c/duplicate.tex' },
+        ]
+        this.files = [
+          { file: { _id: 'file1', hash: 'hash1' }, path: 'image.jpg' },
+          { file: { _id: 'file2', hash: 'hash2' }, path: 'duplicate.jpg' },
+          { file: { _id: 'file3', hash: 'hash3' }, path: 'duplicate.jpg' },
+          { file: { _id: 'file4', hash: 'hash4' }, path: 'another dupe (22)' },
+        ]
+        this.ProjectEntityHandler.getAllEntitiesFromProject.yields(
+          null,
+          this.docs,
+          this.files
+        )
+        this.ProjectEntityUpdateHandler.resyncProjectHistory(projectId, done)
+      })
+
+      it('renames the duplicate files', function () {
+        const renameEntity = this.ProjectEntityMongoUpdateHandler.renameEntity
+        expect(renameEntity).to.have.callCount(4)
+        expect(renameEntity).to.have.been.calledWith(
+          projectId,
+          'doc3',
+          'doc',
+          'duplicate.tex (1)'
+        )
+        expect(renameEntity).to.have.been.calledWith(
+          projectId,
+          'doc5',
+          'doc',
+          'duplicate.tex (2)'
+        )
+        expect(renameEntity).to.have.been.calledWith(
+          projectId,
+          'file3',
+          'file',
+          'duplicate.jpg (1)'
+        )
+        expect(renameEntity).to.have.been.calledWith(
+          projectId,
+          'file4',
+          'file',
+          'another dupe (23)'
+        )
+      })
+
+      it('tells the doc updater to resync the project', function () {
+        const docs = [
+          { doc: 'doc1', path: 'main.tex' },
+          { doc: 'doc2', path: 'a/b/c/duplicate.tex' },
+          { doc: 'doc3', path: 'a/b/c/duplicate.tex (1)' },
+          { doc: 'doc4', path: 'another dupe (22)' },
+          { doc: 'doc5', path: 'a/b/c/duplicate.tex (2)' },
+        ]
+        const urlPrefix = `www.filestore.test/${projectId}`
+        const files = [
+          {
+            file: 'file1',
+            path: 'image.jpg',
+            url: `${urlPrefix}/file1`,
+            _hash: 'hash1',
+          },
+          {
+            file: 'file2',
+            path: 'duplicate.jpg',
+            url: `${urlPrefix}/file2`,
+            _hash: 'hash2',
+          },
+          {
+            file: 'file3',
+            path: 'duplicate.jpg (1)',
+            url: `${urlPrefix}/file3`,
+            _hash: 'hash3',
+          },
+          {
+            file: 'file4',
+            path: 'another dupe (23)',
+            url: `${urlPrefix}/file4`,
+            _hash: 'hash4',
+          },
+        ]
+        expect(
+          this.DocumentUpdaterHandler.resyncProjectHistory
+        ).to.have.been.calledWith(projectId, projectHistoryId, docs, files)
       })
     })
   })
