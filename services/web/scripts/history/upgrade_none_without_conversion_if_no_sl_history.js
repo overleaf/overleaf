@@ -5,6 +5,7 @@ const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
 const DRY_RUN = process.env.DRY_RUN !== 'false'
 const MAX_UPGRADES_TO_ATTEMPT =
   parseInt(process.env.MAX_UPGRADES_TO_ATTEMPT, 10) || false
+const MAX_FAILURES = parseInt(process.env.MAX_FAILURES, 10) || 50
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
 // raise mongo timeout to 1hr if otherwise unspecified
@@ -24,6 +25,7 @@ console.log({
   WRITE_CONCURRENCY,
   BATCH_SIZE,
   MAX_UPGRADES_TO_ATTEMPT,
+  MAX_FAILURES,
 })
 
 const RESULT = {
@@ -36,6 +38,10 @@ const RESULT = {
 let INTERRUPT = false
 
 async function processBatch(_, projects) {
+  if (RESULT.failed >= MAX_FAILURES) {
+    console.log(`MAX_FAILURES limit (${MAX_FAILURES}) reached. Stopping.`)
+    process.exit(0)
+  }
   if (MAX_UPGRADES_TO_ATTEMPT && RESULT.attempted >= MAX_UPGRADES_TO_ATTEMPT) {
     console.log(
       `MAX_UPGRADES_TO_ATTEMPT limit (${MAX_UPGRADES_TO_ATTEMPT}) reached. Stopping.`
@@ -68,11 +74,13 @@ async function processProject(project) {
 }
 
 async function doUpgradeForNoneWithoutConversion(project) {
+  if (RESULT.failed >= MAX_FAILURES) {
+    return
+  }
   if (MAX_UPGRADES_TO_ATTEMPT && RESULT.attempted >= MAX_UPGRADES_TO_ATTEMPT) {
     return
-  } else {
-    RESULT.attempted += 1
   }
+  RESULT.attempted += 1
   const projectId = project._id
   if (!DRY_RUN) {
     // ensureHistoryExistsForProject resyncs project
