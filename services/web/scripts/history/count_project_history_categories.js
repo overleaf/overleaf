@@ -20,6 +20,7 @@ const COUNT = {
   NoneWithoutConversion: 0,
   NoneWithConversion: 0,
   NoneWithTemporaryHistory: 0,
+  HistoryUpgradeFailed: 0,
 }
 
 // Timestamp of when 'Enable history for SL in background' release
@@ -38,9 +39,27 @@ async function processProject(project) {
   if (
     project.overleaf &&
     project.overleaf.history &&
+    project.overleaf.history.upgradeFailed
+  ) {
+    // a failed history upgrade might look like a v1 project, but history may be broken
+    COUNT.HistoryUpgradeFailed += 1
+    return
+  }
+  if (
+    project.overleaf &&
+    project.overleaf.history &&
     project.overleaf.history.id
   ) {
-    if (project.overleaf.history.display) {
+    if (project.overleaf.history.upgradeFailed) {
+      COUNT.HistoryUpgradeFailed += 1
+      if (VERBOSE_LOGGING) {
+        console.log(
+          `project ${
+            project[VERBOSE_PROJECT_NAMES ? 'name' : '_id']
+          } has a history upgrade failure recorded`
+        )
+      }
+    } else if (project.overleaf.history.display) {
       // v2: full project history, do nothing, (query shoudln't include any, but we should stlll check?)
       COUNT.v2 += 1
       if (VERBOSE_LOGGING) {

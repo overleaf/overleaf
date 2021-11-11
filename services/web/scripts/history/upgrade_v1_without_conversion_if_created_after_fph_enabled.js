@@ -1,4 +1,4 @@
-const SCRIPT_VERSION = 1
+const SCRIPT_VERSION = 2
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true'
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
@@ -41,6 +41,14 @@ async function processBatch(_, projects) {
 
 async function processProject(project) {
   // safety check
+  if (
+    project.overleaf &&
+    project.overleaf.history &&
+    project.overleaf.history.upgradeFailed
+  ) {
+    // a failed history upgrade might look like a v1 project, but history may be broken
+    return
+  }
   if (!projectCreatedAfterFullProjectHistoryEnabled(project)) {
     return
   }
