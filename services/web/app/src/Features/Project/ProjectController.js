@@ -733,8 +733,27 @@ const ProjectController = {
             }
           )
         },
+        newPdfPreviewAssignment(cb) {
+          SplitTestV2Handler.getAssignmentForSession(
+            req.session,
+            'react-pdf-preview-rollout',
+            (err, assignment) => {
+              cb(err, assignment)
+            }
+          )
+        },
       },
-      (err, { project, user, subscription, isTokenMember, brandVariation }) => {
+      (
+        err,
+        {
+          project,
+          user,
+          subscription,
+          isTokenMember,
+          brandVariation,
+          newPdfPreviewAssignment,
+        }
+      ) => {
         if (err != null) {
           OError.tag(err, 'error getting details for project page')
           return next(err)
@@ -821,7 +840,7 @@ const ProjectController = {
 
             let showNewPdfPreview = shouldDisplayFeature(
               'new_pdf_preview',
-              user.alphaProgram
+              newPdfPreviewAssignment.variant === 'react-pdf-preview'
             )
 
             const showPdfDetach = shouldDisplayFeature(
