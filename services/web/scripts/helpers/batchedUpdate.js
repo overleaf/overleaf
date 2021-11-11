@@ -1,6 +1,7 @@
 const { ReadPreference, ObjectId } = require('mongodb')
 const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
 
+const BATCH_DESCENDING = process.env.BATCH_DESCENDING === 'true'
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 1000
 let BATCH_LAST_ID
 if (process.env.BATCH_LAST_ID) {
@@ -10,12 +11,16 @@ if (process.env.BATCH_LAST_ID) {
 async function getNextBatch(collection, query, maxId, projection, options) {
   maxId = maxId || BATCH_LAST_ID
   if (maxId) {
-    query._id = { $gt: maxId }
+    if (BATCH_DESCENDING) {
+      query._id = { $lt: maxId }
+    } else {
+      query._id = { $gt: maxId }
+    }
   }
   const entries = await collection
     .find(query, options)
     .project(projection)
-    .sort({ _id: 1 })
+    .sort({ _id: BATCH_DESCENDING ? -1 : 1 })
     .limit(BATCH_SIZE)
     .toArray()
   return entries
