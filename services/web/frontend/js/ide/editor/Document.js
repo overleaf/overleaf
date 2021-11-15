@@ -86,6 +86,7 @@ export default Document = (function () {
       this.wantToBeJoined = false
       this._checkAceConsistency = () => this._checkConsistency(this.ace)
       this._checkCMConsistency = () => this._checkConsistency(this.cm)
+      this._checkCM6Consistency = () => this._checkConsistency(this.cm6)
       this._bindToEditorEvents()
       this._bindToSocketEvents()
     }
@@ -129,6 +130,27 @@ export default Document = (function () {
       }
       if (this.cm != null) {
         this.cm.off('change', this._checkCMConsistency)
+      }
+      return this.ide.$scope.$emit('document:closed', this.doc)
+    }
+
+    attachToCM6(cm6) {
+      this.cm6 = cm6
+      if (this.doc != null) {
+        this.doc.attachToCM6(this.cm6)
+      }
+      if (this.cm6 != null) {
+        this.cm6.on('change', this._checkCM6Consistency)
+      }
+      return this.ide.$scope.$emit('document:opened', this.doc)
+    }
+
+    detachFromCM6() {
+      if (this.doc != null) {
+        this.doc.detachFromCM6()
+      }
+      if (this.cm6 != null) {
+        this.cm6.off('change', this._checkCM6Consistency)
       }
       return this.ide.$scope.$emit('document:closed', this.doc)
     }

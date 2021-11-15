@@ -381,6 +381,19 @@ export default ShareJsDoc = (function () {
         : undefined
     } // If we're waiting for the project to join, try again in 0.5 seconds
 
+    attachToCM6(cm6) {
+      this._attachToEditor('CM6', cm6, () => {
+        cm6.attachShareJs(this._doc)
+      })
+    }
+
+    detachFromCM6() {
+      this._maybeDetachEditorWatchdogManager()
+      if (this._doc.detach_cm6) {
+        this._doc.detach_cm6()
+      }
+    }
+
     _startInflightOpTimeout(update) {
       this._startFatalTimeoutTimer(update)
       const retryOp = () => {

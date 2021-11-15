@@ -178,6 +178,21 @@ export default class EditorWatchdogManager {
 
   attachToEditor(editorName, editor) {
     let onChange
+    if (editorName === 'CM6') {
+      // Code Mirror 6
+      this._log('attach to editor', editorName)
+      onChange = (_editor, changeDescription) => {
+        if (changeDescription.origin === 'remote') return
+        if (!(changeDescription.removed || changeDescription.inserted)) return
+        this.onEdit()
+      }
+      editor.on('change', onChange)
+      const detachFromEditor = () => {
+        this._log('detach from editor', editorName)
+        editor.off('change', onChange)
+      }
+      return detachFromEditor
+    }
     if (editorName === 'CM') {
       // CM is passing the CM instance as first parameter, then the change.
       onChange = (editor, change) => {
