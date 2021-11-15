@@ -288,7 +288,7 @@ describe('CompileManager', function () {
 
       it('should remove the project directory', function () {
         this.child_process.spawn
-          .calledWith('rm', ['-r', '-f', '--', this.compileDir, this.outputDir])
+          .calledWith('rm', ['-r', '-f', '--', this.compileDir])
           .should.equal(true)
       })
 
@@ -316,7 +316,7 @@ describe('CompileManager', function () {
 
       it('should remove the project directory', function () {
         this.child_process.spawn
-          .calledWith('rm', ['-r', '-f', '--', this.compileDir, this.outputDir])
+          .calledWith('rm', ['-r', '-f', '--', this.compileDir])
           .should.equal(true)
       })
 
@@ -324,7 +324,7 @@ describe('CompileManager', function () {
         this.callback.calledWithExactly(sinon.match(Error)).should.equal(true)
 
         this.callback.args[0][0].message.should.equal(
-          `rm -r ${this.compileDir} ${this.outputDir} failed: ${this.error}`
+          `rm -r ${this.compileDir} failed: ${this.error}`
         )
       })
     })

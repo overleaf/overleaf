@@ -31,6 +31,7 @@ const OutputCacheManager = require('./app/js/OutputCacheManager')
 const ContentCacheManager = require('./app/js/ContentCacheManager')
 
 ProjectPersistenceManager.init()
+OutputCacheManager.init()
 
 const express = require('express')
 const bodyParser = require('body-parser')

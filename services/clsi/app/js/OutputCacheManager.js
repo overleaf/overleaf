@@ -11,6 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let OutputCacheManager
+const { callbackify, promisify } = require('util')
 const async = require('async')
 const fs = require('fs')
 const fse = require('fs-extra')
@@ -25,6 +26,83 @@ const OutputFileOptimiser = require('./OutputFileOptimiser')
 const ContentCacheManager = require('./ContentCacheManager')
 const { QueueLimitReachedError, TimedOutError } = require('./Errors')
 
+const OLDEST_BUILD_DIR = new Map()
+const PENDING_PROJECT_ACTIONS = new Map()
+
+function init() {
+  doInit().catch(err => {
+    logger.fatal({ err }, 'low level error setting up cleanup of output dir')
+    // consider shutting down?
+  })
+}
+
+async function doInit() {
+  await fillCache()
+  const oldestTimestamp = await runBulkCleanup()
+  scheduleBulkCleanup(oldestTimestamp)
+}
+
+function scheduleBulkCleanup(oldestTimestamp) {
+  const delay =
+    Math.max(OutputCacheManager.CACHE_AGE + oldestTimestamp - Date.now(), 0) +
+    60 * 1000
+  setTimeout(async function () {
+    const oldestTimestamp = await runBulkCleanup()
+    scheduleBulkCleanup(oldestTimestamp)
+  }, delay)
+}
+
+async function fillCache() {
+  const handle = await fs.promises.opendir(Settings.path.outputDir)
+  try {
+    for await (const { name: projectIdAndUserId } of handle) {
+      OLDEST_BUILD_DIR.set(
+        Path.join(Settings.path.outputDir, projectIdAndUserId),
+        // Queue them for cleanup in the next hour.
+        Date.now() - Math.random() * OutputCacheManager.CACHE_AGE
+      )
+    }
+  } finally {
+    try {
+      await handle.close()
+    } catch (e) {}
+  }
+}
+
+async function runBulkCleanup() {
+  const cleanupThreshold = Date.now() - OutputCacheManager.CACHE_AGE
+  let oldestTimestamp = Date.now()
+  for (const [dir, timeStamp] of OLDEST_BUILD_DIR.entries()) {
+    if (timeStamp < cleanupThreshold) {
+      await cleanupDirectory(dir, { limit: OutputCacheManager.CACHE_LIMIT })
+    } else if (timeStamp < oldestTimestamp) {
+      oldestTimestamp = timeStamp
+    }
+  }
+  return oldestTimestamp
+}
+
+async function cleanupDirectory(dir, options) {
+  return queueDirOperation(dir, async () => {
+    try {
+      await OutputCacheManager.promises.expireOutputFiles(dir, options)
+    } catch (err) {
+      logger.err({ dir, err }, 'cleanup of output directory failed')
+    }
+  })
+}
+
+async function queueDirOperation(dir, fn) {
+  const pending = PENDING_PROJECT_ACTIONS.get(dir) || Promise.resolve()
+  const p = pending.then(fn, fn).finally(() => {
+    if (PENDING_PROJECT_ACTIONS.get(dir) === p) {
+      PENDING_PROJECT_ACTIONS.delete(dir)
+    }
+  })
+  PENDING_PROJECT_ACTIONS.set(dir, p)
+  return p
+}
+
 module.exports = OutputCacheManager = {
   CONTENT_SUBDIR: 'content',
   CACHE_SUBDIR: 'generated-files',
@@ -35,6 +113,9 @@ module.exports = OutputCacheManager = {
   CONTENT_REGEX: /^[0-9a-f]+(-[0-9a-f]+)?$/,
   CACHE_LIMIT: 2, // maximum number of cache directories
   CACHE_AGE: 60 * 60 * 1000, // up to one hour old
+
+  init,
+  queueDirOperation: callbackify(queueDirOperation),
 
   path(buildId, file) {
     // used by static server, given build id return '.cache/clsi/buildId'
@@ -75,11 +156,20 @@ module.exports = OutputCacheManager = {
       if (err != null) {
         return callback(err)
       }
-      return OutputCacheManager.saveOutputFilesInBuildDir(
-        outputFiles,
-        compileDir,
+      if (!OLDEST_BUILD_DIR.has(outputDir)) {
+        // Register for cleanup
+        OLDEST_BUILD_DIR.set(outputDir, Date.now())
+      }
+
+      OutputCacheManager.queueDirOperation(
         outputDir,
-        buildId,
+        () =>
+          OutputCacheManager.promises.saveOutputFilesInBuildDir(
+            outputFiles,
+            compileDir,
+            outputDir,
+            buildId
+          ),
         function (err, result) {
           if (err != null) {
             return callback(err)
@@ -121,7 +211,6 @@ module.exports = OutputCacheManager = {
     if (callback == null) {
       callback = function () {}
     }
-    const cacheRoot = Path.join(outputDir, OutputCacheManager.CACHE_SUBDIR)
     // Put the files into a new cache subdirectory
     const cacheDir = Path.join(
       outputDir,
@@ -231,10 +320,10 @@ module.exports = OutputCacheManager = {
               // pass back the list of new files in the cache
               callback(err, results)
               // let file expiry run in the background, expire all previous files if per-user
-              return OutputCacheManager.expireOutputFiles(cacheRoot, {
+              cleanupDirectory(outputDir, {
                 keep: buildId,
                 limit: perUser ? 1 : null,
-              })
+              }).catch(() => {})
             }
           }
         )
@@ -412,16 +501,29 @@ module.exports = OutputCacheManager = {
     })
   },
 
-  expireOutputFiles(cacheRoot, options, callback) {
+  expireOutputFiles(outputDir, options, callback) {
     // look in compileDir for build dirs and delete if > N or age of mod time > T
     if (callback == null) {
       callback = function () {}
     }
+    const cleanupAll = cb => {
+      fse.remove(outputDir, err => {
+        if (err) {
+          return cb(err)
+        }
+        // Drop reference after successful cleanup of the output dir.
+        OLDEST_BUILD_DIR.delete(outputDir)
+        cb(null)
+      })
+    }
+
+    const cacheRoot = Path.join(outputDir, OutputCacheManager.CACHE_SUBDIR)
     return fs.readdir(cacheRoot, function (err, results) {
       if (err != null) {
         if (err.code === 'ENOENT') {
-          return callback(null)
-        } // cache directory is empty
+          // cache directory is empty
+          return cleanupAll(callback)
+        }
         logger.error({ err, project_id: cacheRoot }, 'error clearing cache')
         return callback(err)
       }
@@ -429,8 +531,12 @@ module.exports = OutputCacheManager = {
       const dirs = results.sort().reverse()
       const currentTime = Date.now()
 
+      let oldestDirTimeToKeep = 0
+
       const isExpired = function (dir, index) {
         if ((options != null ? options.keep : undefined) === dir) {
+          // This is the directory we just created for the compile request.
+          oldestDirTimeToKeep = currentTime
           return false
         }
         // remove any directories over the requested (non-null) limit
@@ -451,10 +557,19 @@ module.exports = OutputCacheManager = {
           16
         )
         const age = currentTime - dirTime
-        return age > OutputCacheManager.CACHE_AGE
+        const expired = age > OutputCacheManager.CACHE_AGE
+        if (expired) {
+          return true
+        }
+        oldestDirTimeToKeep = dirTime
+        return false
       }
 
       const toRemove = _.filter(dirs, isExpired)
+      if (toRemove.length === dirs.length) {
+        // No builds left after cleanup.
+        return cleanupAll(callback)
+      }
 
       const removeDir = (dir, cb) =>
         fse.remove(Path.join(cacheRoot, dir), function (err, result) {
@@ -467,7 +582,16 @@ module.exports = OutputCacheManager = {
       return async.eachSeries(
         toRemove,
         (dir, cb) => removeDir(dir, cb),
-        callback
+        err => {
+          if (err) {
+            // On error: keep the timestamp in the past.
+            // The next iteration of the cleanup loop will retry the deletion.
+            return callback(err)
+          }
+          // On success: push the timestamp into the future.
+          OLDEST_BUILD_DIR.set(outputDir, oldestDirTimeToKeep)
+          callback(null)
+        }
       )
     })
   },
@@ -563,4 +687,11 @@ function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null
     ? transform(value)
     : undefined
+}
+
+OutputCacheManager.promises = {
+  expireOutputFiles: promisify(OutputCacheManager.expireOutputFiles),
+  saveOutputFilesInBuildDir: promisify(
+    OutputCacheManager.saveOutputFilesInBuildDir
+  ),
 }

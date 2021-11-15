@@ -325,7 +325,6 @@ function clearProject(projectId, userId, _callback) {
   }
 
   const compileDir = getCompileDir(projectId, userId)
-  const outputDir = getOutputDir(projectId, userId)
 
   _checkDirectory(compileDir, (err, exists) => {
     if (err) {
@@ -335,13 +334,7 @@ function clearProject(projectId, userId, _callback) {
       return callback()
     } // skip removal if no directory present
 
-    const proc = childProcess.spawn('rm', [
-      '-r',
-      '-f',
-      '--',
-      compileDir,
-      outputDir,
-    ])
+    const proc = childProcess.spawn('rm', ['-r', '-f', '--', compileDir])
 
     proc.on('error', callback)
 
@@ -352,9 +345,7 @@ function clearProject(projectId, userId, _callback) {
       if (code === 0) {
         callback(null)
       } else {
-        callback(
-          new Error(`rm -r ${compileDir} ${outputDir} failed: ${stderr}`)
-        )
+        callback(new Error(`rm -r ${compileDir} failed: ${stderr}`))
       }
     })
   })
