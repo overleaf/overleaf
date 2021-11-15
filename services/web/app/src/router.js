@@ -295,7 +295,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   webRouter.get(
-    '/Project/:Project_id',
+    '/Project/:Project_id/:detachRole(detacher|detached)?',
     RateLimiterMiddleware.rateLimit({
       endpointName: 'open-project',
       params: ['Project_id'],

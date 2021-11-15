@@ -27,7 +27,8 @@
     }
   }
 
-  > a:focus {
+  > a:focus,
+  button:focus {
     outline: none;
   }
 
@@ -426,6 +427,39 @@
       }
       path {
         fill: @dropdown-link-hover-color;
+      }
+    }
+  }
+
+  &.disabled {
+    .subdued {
+      color: @dropdown-link-disabled-color;
+    }
+
+    svg {
+      line,
+      rect {
+        stroke: @dropdown-link-disabled-color;
+      }
+      path {
+        fill: @dropdown-link-disabled-color;
+      }
+    }
+
+    a:hover,
+    a:focus {
+      .subdued {
+        color: @dropdown-link-disabled-color;
+      }
+
+      svg {
+        line,
+        rect {
+          stroke: @dropdown-link-disabled-color;
+        }
+        path {
+          fill: @dropdown-link-disabled-color;
+        }
       }
     }
   }

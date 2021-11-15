@@ -6,6 +6,7 @@ import sinon from 'sinon'
 import { UserProvider } from '../../../frontend/js/shared/context/user-context'
 import { EditorProvider } from '../../../frontend/js/shared/context/editor-context'
 import { LayoutProvider } from '../../../frontend/js/shared/context/layout-context'
+import { DetachProvider } from '../../../frontend/js/shared/context/detach-context'
 import { ChatProvider } from '../../../frontend/js/features/chat/context/chat-context'
 import { IdeProvider } from '../../../frontend/js/shared/context/ide-context'
 import { get } from 'lodash'
@@ -91,7 +92,9 @@ export function EditorProviders({
           <ProjectProvider>
             <EditorProvider settings={{}}>
               <CompileProvider>
-                <LayoutProvider>{children}</LayoutProvider>
+                <DetachProvider>
+                  <LayoutProvider>{children}</LayoutProvider>
+                </DetachProvider>
               </CompileProvider>
             </EditorProvider>
           </ProjectProvider>

@@ -1530,5 +1530,10 @@
   "editor_only_hide_pdf": "Editor only <0>(hide PDF)</0>",
   "pdf_only_hide_editor": "PDF only <0>(hide editor)</0>",
   "selected": "Selected",
-  "project_layout_sharing_submission": "Project Layout, Sharing, and Submission"
+  "project_layout_sharing_submission": "Project Layout, Sharing, and Submission",
+  "open_pdf_in_new_tab": "Open PDF in new tab",
+  "bring_pdf_back_to_tab": "Bring PDF back to this tab",
+  "tab_no_longer_connected": "This tab is no longer connected with the editor",
+  "redirect_to_editor": "Redirect to editor",
+  "layout_processing": "Layout processing"
 }

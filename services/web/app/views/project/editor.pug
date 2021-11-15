@@ -65,53 +65,14 @@ block content
 						span.sr-only #{translate("close")}
 					.system-message-content(ng-bind-html="htmlContent")
 
-		include ./editor/left-menu
-
-		#chat-wrapper.full-size(
-			layout="chat",
-			spacing-open="{{ui.chatResizerSizeOpen}}",
-			spacing-closed="{{ui.chatResizerSizeClosed}}",
-			initial-size-east="250",
-			init-closed-east="true",
-			open-east="ui.chatOpen",
-			ng-hide="state.loading",
-			ng-cloak
-		)
-			.ui-layout-center
-				include ./editor/header-react
-
-				include ./editor/history/toolbarV2.pug
-
-				main#ide-body(
-					ng-cloak,
-					role="main",
-					ng-class="{ 'ide-history-open' : (ui.view == 'history' && history.isV2) }",
-					layout="main",
-					ng-hide="state.loading",
-					resize-on="layout:chat:resize,history:toggle,layout:flat-screen:toggle,symbol-palette-toggled",
-					minimum-restore-size-west="130"
-					custom-toggler-pane=hasFeature('custom-togglers') ? "west" : false
-					custom-toggler-msg-when-open=hasFeature('custom-togglers') ? translate("tooltip_hide_filetree") : false
-					custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? translate("tooltip_show_filetree") : false
-					ng-keydown="handleKeyDown($event)"
-					tabindex="0"
-				)
-					.ui-layout-west
-						include ./editor/file-tree-react
-						include ./editor/file-tree-history
-						include ./editor/history/fileTreeV2
-
-					.ui-layout-center
-						include ./editor/editor
-
-						include ./editor/file-view
-
-						include ./editor/history
-
-			if !isRestrictedTokenMember
-				.ui-layout-east
-					aside.chat
-						chat()
+		if detachRole === 'detached'
+			div.full-size
+				if showNewPdfPreview
+					pdf-preview()
+				else
+					include ./editor/pdf
+		else
+			include ./editor/main
 
 	script(type="text/ng-template", id="genericMessageModalTemplate")
 		.modal-header
@@ -183,10 +144,13 @@ block append meta
 	meta(name="ol-logsUISubvariant" content=logsUISubvariant)
 	meta(name="ol-showSymbolPalette" data-type="boolean" content=showSymbolPalette)
 	meta(name="ol-showPdfDetach" data-type="boolean" content=showPdfDetach)
+	meta(name="ol-debugPdfDetach" data-type="boolean" content=debugPdfDetach)
+	meta(name="ol-disableAngularRouter" data-type="boolean" content=disableAngularRouter)
 	meta(name="ol-showNewPdfPreview" data-type="boolean" content=showNewPdfPreview)
 	meta(name="ol-enablePdfCaching" data-type="boolean" content=enablePdfCaching)
 	meta(name="ol-trackPdfDownload" data-type="boolean" content=trackPdfDownload)
 	meta(name="ol-resetServiceWorker" data-type="boolean" content=resetServiceWorker)
+	meta(name="ol-detachRole" data-type="string" content=detachRole)
 
 	- var fileActionI18n = ['edited', 'renamed', 'created', 'deleted'].reduce((acc, i) => {acc[i] = translate('file_action_' + i); return acc}, {})
 	meta(name="ol-fileActionI18n" data-type="json" content=fileActionI18n)

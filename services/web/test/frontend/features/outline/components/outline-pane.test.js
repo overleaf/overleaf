@@ -22,6 +22,7 @@ describe('<OutlinePane />', function () {
       value: {
         getItem: sinon.stub().returns(null),
         setItem: sinon.stub(),
+        removeItem: sinon.stub(),
       },
     })
   })

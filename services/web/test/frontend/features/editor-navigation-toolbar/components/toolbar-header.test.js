@@ -21,6 +21,8 @@ describe('<ToolbarHeader />', function () {
     handleChangeLayout: () => {},
     pdfLayout: '',
     view: '',
+    reattach: () => {},
+    detach: () => {},
   }
 
   describe('cobranding logo', function () {

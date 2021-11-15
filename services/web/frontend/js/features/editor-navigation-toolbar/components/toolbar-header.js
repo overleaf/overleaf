@@ -18,6 +18,10 @@ const [publishModalModules] = importOverleafModules('publishModal')
 const PublishButton = publishModalModules?.import.default
 
 const ToolbarHeader = React.memo(function ToolbarHeader({
+  reattach,
+  detach,
+  detachMode,
+  detachRole,
   cobranding,
   onShowLeftMenuClick,
   handleChangeLayout,
@@ -61,7 +65,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
         )}
         <BackToProjectsButton />
       </div>
-      {pdfButtonIsVisible && (
+      {!window.showPdfDetach && pdfButtonIsVisible && (
         <PdfToggleButton
           onClick={togglePdfView}
           pdfViewIsOpen={pdfViewIsOpen}
@@ -79,7 +83,11 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
 
         {window.showPdfDetach && (
           <LayoutDropdownButton
+            reattach={reattach}
+            detach={detach}
             handleChangeLayout={handleChangeLayout}
+            detachMode={detachMode}
+            detachRole={detachRole}
             pdfLayout={pdfLayout}
             view={view}
           />
@@ -115,6 +123,10 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
 })
 
 ToolbarHeader.propTypes = {
+  reattach: PropTypes.func.isRequired,
+  detach: PropTypes.func.isRequired,
+  detachMode: PropTypes.string,
+  detachRole: PropTypes.string,
   onShowLeftMenuClick: PropTypes.func.isRequired,
   handleChangeLayout: PropTypes.func.isRequired,
   cobranding: PropTypes.object,

@@ -35,6 +35,7 @@
   border-bottom: 0;
 }
 
+.toolbar-pdf-orphan,
 .toolbar-pdf-left,
 .toolbar-pdf-right {
   display: flex;
@@ -45,6 +46,14 @@
 
 .toolbar-pdf-right {
   flex: 1 0 auto;
+}
+
+.toolbar-pdf-orphan {
+  justify-content: center;
+  color: white;
+  .btn {
+    margin-left: @margin-xs;
+  }
 }
 
 .btn-toggle-logs {
@@ -58,7 +67,7 @@
 }
 
 .toolbar-pdf-hybrid {
-  .btn:not(.btn-recompile) {
+  .btn:not(.btn-recompile):not(.btn-orphan) {
     display: inline-block;
     color: @toolbar-btn-color;
     background-color: transparent;

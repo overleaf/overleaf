@@ -15,18 +15,19 @@ function ChatToggleButton({ chatIsOpen, unreadMessageCount, onClick }) {
   const hasUnreadMessages = unreadMessageCount > 0
 
   return (
-    // eslint-disable-next-line jsx-a11y/anchor-is-valid
-    <a role="button" className={classes} href="#" onClick={onClick}>
-      <Icon
-        type="fw"
-        modifier="comment"
-        classes={{ icon: hasUnreadMessages ? 'bounce' : undefined }}
-      />
-      {hasUnreadMessages ? (
-        <span className="label label-info">{unreadMessageCount}</span>
-      ) : null}
-      <p className="toolbar-label">{t('chat')}</p>
-    </a>
+    <div className="toolbar-item">
+      <button className={classes} onClick={onClick}>
+        <Icon
+          type="fw"
+          modifier="comment"
+          classes={{ icon: hasUnreadMessages ? 'bounce' : undefined }}
+        />
+        {hasUnreadMessages ? (
+          <span className="label label-info">{unreadMessageCount}</span>
+        ) : null}
+        <p className="toolbar-label">{t('chat')}</p>
+      </button>
+    </div>
   )
 }
 

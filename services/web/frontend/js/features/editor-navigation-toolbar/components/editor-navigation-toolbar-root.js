@@ -59,6 +59,10 @@ const EditorNavigationToolbarRoot = React.memo(
     } = useEditorContext(editorContextPropTypes)
 
     const {
+      reattach,
+      detach,
+      detachMode,
+      detachRole,
       changeLayout,
       chatIsOpen,
       setChatIsOpen,
@@ -123,6 +127,10 @@ const EditorNavigationToolbarRoot = React.memo(
     // `loading ? null : <ToolbarHeader/>` causes UI glitches
     return (
       <ToolbarHeader
+        reattach={reattach}
+        detach={detach}
+        detachMode={detachMode}
+        detachRole={detachRole}
         style={loading ? { display: 'none' } : {}}
         cobranding={cobranding}
         onShowLeftMenuClick={onShowLeftMenuClick}

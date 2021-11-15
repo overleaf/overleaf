@@ -11,11 +11,12 @@ function HistoryToggleButton({ historyIsOpen, onClick }) {
   })
 
   return (
-    // eslint-disable-next-line jsx-a11y/anchor-is-valid
-    <a role="button" className={classes} href="#" onClick={onClick}>
-      <Icon type="fw" modifier="history" />
-      <p className="toolbar-label">{t('history')}</p>
-    </a>
+    <div className="toolbar-item">
+      <button className={classes} onClick={onClick}>
+        <Icon type="fw" modifier="history" />
+        <p className="toolbar-label">{t('history')}</p>
+      </button>
+    </div>
   )
 }
 

@@ -10,17 +10,12 @@ function TrackChangesToggleButton({ trackChangesIsOpen, disabled, onClick }) {
   })
 
   return (
-    // eslint-disable-next-line jsx-a11y/anchor-is-valid
-    <a
-      role="button"
-      disabled={disabled}
-      className={classes}
-      href="#"
-      onClick={onClick}
-    >
-      <i className="review-icon" />
-      <p className="toolbar-label">{t('review')}</p>
-    </a>
+    <div className="toolbar-item">
+      <button disabled={disabled} className={classes} onClick={onClick}>
+        <i className="review-icon" />
+        <p className="toolbar-label">{t('review')}</p>
+      </button>
+    </div>
   )
 }
 

@@ -843,13 +843,24 @@ const ProjectController = {
               newPdfPreviewAssignment.variant === 'react-pdf-preview'
             )
 
+            let disableAngularRouter = shouldDisplayFeature(
+              'disable_angular_router',
+              user.alphaProgram
+            )
+
             const showPdfDetach = shouldDisplayFeature(
               'pdf_detach',
               user.alphaProgram
             )
 
+            const debugPdfDetach = shouldDisplayFeature('debug_pdf_detach')
+
+            let detachRole = null
+
             if (showPdfDetach) {
+              disableAngularRouter = true
               showNewPdfPreview = true
+              detachRole = req.params.detachRole
             }
 
             res.render('project/editor', {
@@ -911,7 +922,9 @@ const ProjectController = {
               ),
               logsUISubvariant: logsUIVariant.subvariant,
               showPdfDetach,
+              debugPdfDetach,
               showNewPdfPreview,
+              disableAngularRouter,
               showNewSourceEditor: shouldDisplayFeature(
                 'new_source_editor',
                 false
@@ -925,6 +938,7 @@ const ProjectController = {
               resetServiceWorker:
                 Boolean(Settings.resetServiceWorker) &&
                 !shouldDisplayFeature('enable_pdf_caching', false),
+              detachRole,
             })
             timer.done()
           }
