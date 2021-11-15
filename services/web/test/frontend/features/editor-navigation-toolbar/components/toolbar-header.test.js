@@ -18,6 +18,9 @@ describe('<ToolbarHeader />', function () {
     togglePdfView: () => {},
     hasPublishPermissions: true,
     trackChangesVisible: true,
+    handleChangeLayout: () => {},
+    pdfLayout: '',
+    view: '',
   }
 
   describe('cobranding logo', function () {

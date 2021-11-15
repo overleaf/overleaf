@@ -1,3 +1,5 @@
+import { format } from 'util'
+
 /**
  * Make tests fail when prop-types are incorrect.
  *
@@ -14,10 +16,12 @@ before(function () {
     // Ensure we still log the error
     originalConsoleError(message, ...args)
 
+    const formattedMessage = format(message, ...args)
+
     // Check if the error is from prop-types
-    if (/Failed (prop|data) type/.test(message)) {
+    if (/Failed (prop|data) type/.test(formattedMessage)) {
       // Throw an error, causing the test to fail
-      throw new Error(message)
+      throw new Error(formattedMessage)
     }
   }
 })
