@@ -1392,53 +1392,72 @@ const ProjectEntityUpdateHandler = {
 
   _checkFiletree(projectId, projectHistoryId, entities, callback) {
     const renames = []
-    const paths = new Map()
+    const paths = new Set()
     for (const entity of entities) {
-      // if the path is invalid (i.e. not going to be accepted in
-      // project-history due to filename rules) we could also flag it for a
-      // rename here.
-      if (paths.has(entity.path)) {
-        renames.push(entity)
+      const filename = entity.doc ? entity.doc.name : entity.file.name
+      const cleanFilename = SafePath.clean(filename)
+      if (cleanFilename !== filename) {
+        // File name needs to be cleaned
+        let newPath = Path.join(
+          entity.path.slice(0, -filename.length),
+          cleanFilename
+        )
+        if (paths.has(newPath)) {
+          newPath = ProjectEntityUpdateHandler.findNextAvailablePath(
+            paths,
+            newPath
+          )
+        }
+        renames.push({ entity, newName: cleanFilename, newPath })
+      } else if (paths.has(entity.path)) {
+        // Duplicate filename
+        const newPath = ProjectEntityUpdateHandler.findNextAvailablePath(
+          paths,
+          entity.path
+        )
+        const newName = newPath.split('/').pop()
+        renames.push({ entity, newName, newPath })
+        paths.add(newPath)
       } else {
-        paths.set(entity.path, entity)
+        paths.add(entity.path)
       }
     }
+
     if (renames.length === 0) {
       return callback()
     }
-    logger.warn({ projectId, renames }, 'found conflict in filetree')
-    // find new names for duplicate files
-    for (const entity of renames) {
-      const {
-        newPath,
-        newName,
-      } = ProjectEntityUpdateHandler.findNextAvailableName(paths, entity)
-      logger.debug({ projectId, newName, newPath }, 'found new name')
-      entity.newPath = newPath
-      entity.newName = newName
-    }
+    logger.warn(
+      {
+        projectId,
+        renames: renames.map(rename => ({
+          oldPath: rename.entity.path,
+          newPath: rename.newPath,
+        })),
+      },
+      'found conflicts or bad filenames in filetree'
+    )
+
     // rename the duplicate files
-    const doRename = (entity, cb) => {
+    const doRename = (rename, cb) => {
+      const entity = rename.entity
       const entityId = entity.doc ? entity.doc._id : entity.file._id
       const entityType = entity.doc ? 'doc' : 'file'
       ProjectEntityMongoUpdateHandler.renameEntity(
         projectId,
         entityId,
         entityType,
-        entity.newName,
+        rename.newName,
         (err, project, startPath, endPath, rev, changes) => {
           if (err) {
             return cb(err)
           }
           // update the renamed entity for the resync
-          entity.path = entity.newPath
+          entity.path = rename.newPath
           if (entityType === 'doc') {
-            entity.doc.name = entity.newName
+            entity.doc.name = rename.newName
           } else {
-            entity.file.name = entity.newName
+            entity.file.name = rename.newName
           }
-          delete entity.newPath
-          delete entity.newname
           DocumentUpdaterHandler.updateProjectStructure(
             projectId,
             projectHistoryId,
@@ -1452,11 +1471,10 @@ const ProjectEntityUpdateHandler = {
     async.eachSeries(renames, doRename, callback)
   },
 
-  findNextAvailableName(allPaths, entity) {
+  findNextAvailablePath(allPaths, candidatePath) {
     const incrementReplacer = (match, p1) => {
       return ' (' + (parseInt(p1, 10) + 1) + ')'
     }
-    let candidatePath = entity.path
     // if the filename was invalid we should normalise it here too.  Currently
     // this only handles renames in the same folder, so we will be out of luck
     // if it is the folder name which in invalid.  We could handle folder
@@ -1471,8 +1489,8 @@ const ProjectEntityUpdateHandler = {
       }
     } while (allPaths.has(candidatePath)) // keep going until the name is unique
     // add the new name to the set
-    allPaths.set(candidatePath, entity)
-    return { newPath: candidatePath, newName: candidatePath.split('/').pop() }
+    allPaths.add(candidatePath)
+    return candidatePath
   },
 
   isPathValidForRootDoc(docPath) {

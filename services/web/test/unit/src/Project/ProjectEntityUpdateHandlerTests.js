@@ -1924,19 +1924,11 @@ describe('ProjectEntityUpdateHandler', function () {
       beforeEach(function () {
         this.ProjectGetter.getProject.yields(null, this.project)
         const docs = [
-          {
-            doc: {
-              _id: docId,
-            },
-            path: 'main.tex',
-          },
+          { doc: { _id: docId, name: 'main.tex' }, path: 'main.tex' },
         ]
         const files = [
           {
-            file: {
-              _id: fileId,
-              hash: '123456',
-            },
+            file: { _id: fileId, name: 'universe.png', hash: '123456' },
             path: 'universe.png',
           },
         ]
@@ -1990,17 +1982,41 @@ describe('ProjectEntityUpdateHandler', function () {
       beforeEach(function (done) {
         this.ProjectGetter.getProject.yields(null, this.project)
         this.docs = [
-          { doc: { _id: 'doc1' }, path: 'main.tex' },
-          { doc: { _id: 'doc2' }, path: 'a/b/c/duplicate.tex' },
-          { doc: { _id: 'doc3' }, path: 'a/b/c/duplicate.tex' },
-          { doc: { _id: 'doc4' }, path: 'another dupe (22)' },
-          { doc: { _id: 'doc5' }, path: 'a/b/c/duplicate.tex' },
+          { doc: { _id: 'doc1', name: 'main.tex' }, path: 'main.tex' },
+          {
+            doc: { _id: 'doc2', name: 'duplicate.tex' },
+            path: 'a/b/c/duplicate.tex',
+          },
+          {
+            doc: { _id: 'doc3', name: 'duplicate.tex' },
+            path: 'a/b/c/duplicate.tex',
+          },
+          {
+            doc: { _id: 'doc4', name: 'another dupe (22)' },
+            path: 'another dupe (22)',
+          },
+          {
+            doc: { _id: 'doc5', name: 'duplicate.tex' },
+            path: 'a/b/c/duplicate.tex',
+          },
         ]
         this.files = [
-          { file: { _id: 'file1', hash: 'hash1' }, path: 'image.jpg' },
-          { file: { _id: 'file2', hash: 'hash2' }, path: 'duplicate.jpg' },
-          { file: { _id: 'file3', hash: 'hash3' }, path: 'duplicate.jpg' },
-          { file: { _id: 'file4', hash: 'hash4' }, path: 'another dupe (22)' },
+          {
+            file: { _id: 'file1', name: 'image.jpg', hash: 'hash1' },
+            path: 'image.jpg',
+          },
+          {
+            file: { _id: 'file2', name: 'duplicate.jpg', hash: 'hash2' },
+            path: 'duplicate.jpg',
+          },
+          {
+            file: { _id: 'file3', name: 'duplicate.jpg', hash: 'hash3' },
+            path: 'duplicate.jpg',
+          },
+          {
+            file: { _id: 'file4', name: 'another dupe (22)', hash: 'hash4' },
+            path: 'another dupe (22)',
+          },
         ]
         this.ProjectEntityHandler.getAllEntitiesFromProject.yields(
           null,
@@ -2072,6 +2088,63 @@ describe('ProjectEntityUpdateHandler', function () {
             path: 'another dupe (23)',
             url: `${urlPrefix}/file4`,
             _hash: 'hash4',
+          },
+        ]
+        expect(
+          this.DocumentUpdaterHandler.resyncProjectHistory
+        ).to.have.been.calledWith(projectId, projectHistoryId, docs, files)
+      })
+    })
+
+    describe('a project with bad filenames', function () {
+      beforeEach(function (done) {
+        this.ProjectGetter.getProject.yields(null, this.project)
+        this.docs = [
+          {
+            doc: { _id: 'doc1', name: '/d/e/f/test.tex' },
+            path: 'a/b/c/d/e/f/test.tex',
+          },
+        ]
+        this.files = [
+          {
+            file: { _id: 'file1', name: 'A*.png', hash: 'hash1' },
+            path: 'A*.png',
+          },
+        ]
+        this.ProjectEntityHandler.getAllEntitiesFromProject.yields(
+          null,
+          this.docs,
+          this.files
+        )
+        this.ProjectEntityUpdateHandler.resyncProjectHistory(projectId, done)
+      })
+
+      it('renames the files', function () {
+        const renameEntity = this.ProjectEntityMongoUpdateHandler.renameEntity
+        expect(renameEntity).to.have.callCount(2)
+        expect(renameEntity).to.have.been.calledWith(
+          projectId,
+          'doc1',
+          'doc',
+          '_d_e_f_test.tex'
+        )
+        expect(renameEntity).to.have.been.calledWith(
+          projectId,
+          'file1',
+          'file',
+          'A_.png'
+        )
+      })
+
+      it('tells the doc updater to resync the project', function () {
+        const docs = [{ doc: 'doc1', path: 'a/b/c/_d_e_f_test.tex' }]
+        const urlPrefix = `www.filestore.test/${projectId}`
+        const files = [
+          {
+            file: 'file1',
+            path: 'A_.png',
+            url: `${urlPrefix}/file1`,
+            _hash: 'hash1',
           },
         ]
         expect(
