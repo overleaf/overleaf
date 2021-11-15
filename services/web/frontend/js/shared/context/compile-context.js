@@ -40,6 +40,7 @@ CompileContext.Provider.propTypes = {
     hasChanges: PropTypes.bool.isRequired,
     highlights: PropTypes.arrayOf(PropTypes.object),
     logEntries: PropTypes.object,
+    logEntryAnnotations: PropTypes.object,
     pdfDownloadUrl: PropTypes.string,
     pdfUrl: PropTypes.string,
     pdfViewer: PropTypes.string,
@@ -77,7 +78,9 @@ export function CompileProvider({ children }) {
   const [logEntries, setLogEntries] = useScopeValueSetterOnly('pdf.logEntries')
 
   // annotations for display in the editor, built from the log entries
-  const [, setLogEntryAnnotations] = useScopeValue('pdf.logEntryAnnotations')
+  const [logEntryAnnotations, setLogEntryAnnotations] = useScopeValue(
+    'pdf.logEntryAnnotations'
+  )
 
   // the PDF viewer
   const [pdfViewer] = useScopeValue('settings.pdfViewer')
@@ -426,6 +429,7 @@ export function CompileProvider({ children }) {
       fileList,
       hasChanges,
       highlights,
+      logEntryAnnotations,
       logEntries,
       pdfDownloadUrl,
       pdfUrl,
@@ -463,6 +467,7 @@ export function CompileProvider({ children }) {
       hasChanges,
       highlights,
       logEntries,
+      logEntryAnnotations,
       position,
       pdfDownloadUrl,
       pdfUrl,
