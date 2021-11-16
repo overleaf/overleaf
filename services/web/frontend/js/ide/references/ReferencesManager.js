@@ -61,7 +61,13 @@ export default ReferencesManager = class ReferencesManager {
   _storeReferencesKeys(newKeys) {
     // console.log '>> storing references keys'
     const oldKeys = this.$scope.$root._references.keys
-    return (this.$scope.$root._references.keys = _.union(oldKeys, newKeys))
+    const keys = _.union(oldKeys, newKeys)
+    window.dispatchEvent(
+      new CustomEvent('project:references', {
+        detail: keys,
+      })
+    )
+    return (this.$scope.$root._references.keys = keys)
   }
 
   indexReferencesIfDocModified(doc, shouldBroadcast) {

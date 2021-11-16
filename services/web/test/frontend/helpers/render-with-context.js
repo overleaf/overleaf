@@ -77,12 +77,21 @@ export function EditorProviders({
     openDoc: sinon.stub(),
   }
 
+  const metadataManager = {
+    metadata: {
+      state: {
+        documents: {},
+      },
+    },
+  }
+
   window._ide = {
     $scope,
     socket,
     clsiServerId,
     editorManager,
     fileTreeManager,
+    metadataManager,
   }
 
   return (

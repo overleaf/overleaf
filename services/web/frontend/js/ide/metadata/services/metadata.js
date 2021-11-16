@@ -22,7 +22,10 @@ export default App.factory('metadata', function ($http, ide) {
 
   metadata.onBroadcastDocMeta = function (data) {
     if (data.docId != null && data.meta != null) {
-      return (state.documents[data.docId] = data.meta)
+      state.documents[data.docId] = data.meta
+      window.dispatchEvent(
+        new CustomEvent('project:metadata', { detail: state.documents })
+      )
     }
   }
 
@@ -74,6 +77,9 @@ export default App.factory('metadata', function ($http, ide) {
               const docMeta = data.projectMeta[docId]
               result.push((state.documents[docId] = docMeta))
             }
+            window.dispatchEvent(
+              new CustomEvent('project:metadata', { detail: state.documents })
+            )
             return result
           })()
         }
