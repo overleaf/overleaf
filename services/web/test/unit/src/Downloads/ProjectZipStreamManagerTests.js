@@ -120,6 +120,81 @@ describe('ProjectZipStreamManager', function () {
         )
       })
     })
+
+    describe('with a project not existing', function () {
+      beforeEach(function (done) {
+        this.project_ids = ['project-1', 'wrong-id']
+        this.project_names = {
+          'project-1': 'Project One Name',
+        }
+        this.zip_streams = {
+          'project-1': new EventEmitter(),
+        }
+
+        this.ProjectZipStreamManager.createZipStreamForProject = (
+          project_id,
+          callback
+        ) => {
+          callback(null, this.zip_streams[project_id])
+          setTimeout(() => {
+            this.zip_streams[project_id].emit('end')
+          })
+        }
+        sinon.spy(this.ProjectZipStreamManager, 'createZipStreamForProject')
+
+        this.ProjectGetter.getProject = (project_id, fields, callback) => {
+          const name = this.project_names[project_id]
+          callback(null, name ? { name } : undefined)
+        }
+        sinon.spy(this.ProjectGetter, 'getProject')
+
+        this.ProjectZipStreamManager.createZipStreamForMultipleProjects(
+          this.project_ids,
+          this.callback
+        )
+
+        this.archive.finalize = () => done()
+      })
+
+      it('should create a zip archive', function () {
+        this.archiver.calledWith('zip').should.equal(true)
+      })
+
+      it('should return a stream before any processing is done', function () {
+        this.callback
+          .calledWith(sinon.match.falsy, this.archive)
+          .should.equal(true)
+        this.callback
+          .calledBefore(this.ProjectZipStreamManager.createZipStreamForProject)
+          .should.equal(true)
+      })
+
+      it('should get the names of each project', function () {
+        this.project_ids.map(project_id =>
+          this.ProjectGetter.getProject
+            .calledWith(project_id, { name: true })
+            .should.equal(true)
+        )
+      })
+
+      it('should get a zip stream only for the existing project', function () {
+        this.ProjectZipStreamManager.createZipStreamForProject
+          .calledWith('project-1')
+          .should.equal(true)
+        this.ProjectZipStreamManager.createZipStreamForProject
+          .calledWith('wrong-id')
+          .should.equal(false)
+      })
+
+      it('should only add the existing project to the zip', function () {
+        sinon.assert.calledOnce(this.archive.append)
+        this.archive.append
+          .calledWith(this.zip_streams['project-1'], {
+            name: this.project_names['project-1'] + '.zip',
+          })
+          .should.equal(true)
+      })
+    })
   })
 
   describe('createZipStreamForProject', function () {

@@ -23,6 +23,13 @@ module.exports = ProjectZipStreamManager = {
         if (error) {
           return cb(error)
         }
+        if (!project) {
+          logger.log(
+            { projectId },
+            'cannot append project to zip stream: project not found'
+          )
+          return cb()
+        }
         logger.log(
           { projectId, name: project.name },
           'appending project to zip stream'
