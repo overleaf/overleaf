@@ -44,6 +44,7 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
           spacingClosed = 7
         }
 
+        const minEditorPanelsWidth = 270
         const options = {
           spacing_open: spacingOpen,
           spacing_closed: spacingClosed,
@@ -69,6 +70,8 @@ export default App.directive('layout', ($parse, $compile, ide) => ({
             size: scope.$eval(attrs.initialSizeEast),
             initClosed: scope.$eval(attrs.initClosedWest),
           },
+          center__minWidth: minEditorPanelsWidth,
+          east__minSize: minEditorPanelsWidth,
         }
 
         // Restore previously recorded state
