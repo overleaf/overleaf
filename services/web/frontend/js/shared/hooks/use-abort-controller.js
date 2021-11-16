@@ -1,4 +1,3 @@
-import 'abort-controller/polyfill'
 import { useEffect, useState } from 'react'
 
 export default function useAbortController() {
