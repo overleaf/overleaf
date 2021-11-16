@@ -38,9 +38,9 @@
     "storybook": "start-storybook -p 6006 -s ./public"
   },
   "browserslist": [
-    "last 2 years",
-    "firefox esr",
-    "not dead"
+    "last 1 year",
+    "ie 11",
+    "firefox esr"
   ],
   "dependencies": {
     "@babel/cli": "^7.14.5",
