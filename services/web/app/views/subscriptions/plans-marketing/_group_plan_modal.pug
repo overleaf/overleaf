@@ -2,8 +2,9 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 	.modal-dialog(role="document")
 		.modal-content
 			.modal-header
-				h3 Save 30% or more with a group license
-			.modal-body.plans
+				h2 Customise your group subscription
+				h3 Save 30% or more
+			.modal-body.plans.group-subscription-modal
 				.container-fluid
 					.row
 						.col-md-6.text-center
@@ -11,7 +12,7 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 								span(data-ol-group-plan-display-price) ...
 								span.small / year
 								br
-								span.circle-subtext(data-ol-group-plan-for-n-users) For ... users
+								span.circle-subtext(data-ol-group-plan-price-per-user) ...
 							ul.list-unstyled
 								li Each user will have access to:
 								li &nbsp;
@@ -31,12 +32,10 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 								.form-group
 									label(for='plan_code')
 										| Plan
-									select.form-control(id="plan_code")
-										for plan_code in groupPlanModalOptions.plan_codes
-											option(
-												value=plan_code.code
-												selected=(plan_code.code === groupPlanModalDefaults.plan_code)
-											) #{plan_code.display}
+									for plan_code in groupPlanModalOptions.plan_codes
+										label.group-plan-option
+											input(type="radio" name="plan_code" checked=(plan_code.code === "collaborator") value=plan_code.code )
+											span #{plan_code.display}
 								.form-group
 									label(for='size')
 										| Number of users
@@ -57,24 +56,19 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 											) #{currency.display}
 								.form-group
 									label(for='usage')
-										| Usage
-									select.form-control(id="usage")
-										for usage in groupPlanModalOptions.usages
-											option(
-												value=usage.code
-												selected=(usage.code === groupPlanModalDefaults.usage)
-											) #{usage.display}
-									p.small.text-center.row-spaced-small
-										span(
-											hidden=(groupPlanModalDefaults.usage !== 'educational')
-											data-ol-group-plan-usage='educational'
-										)
-											| The 40% educational discount can be used by students or faculty using Overleaf for teaching
-										span(
-											hidden=(groupPlanModalDefaults.usage !== 'enterprise')
-											data-ol-group-plan-usage='enterprise'
-										)
-											| Save an additional 40% on groups of 10 or more with our educational discount
+										| Overleaf offers a 40% educational discount for groups of 10 or more.
+								label.group-plan-option
+									input(id="usage", type="checkbox")
+									span This licence is for educational purposes (applies to students or faculty using Overleaf for teaching)
+
+					.row
+						.col-md-12.text-center
+							.educational-discount-badge
+								div(hidden=(groupPlanModalDefaults.usage !== 'educational') data-ol-group-plan-educational-discount)
+									p.applied(hidden=true data-ol-group-plan-educational-discount-applied)
+										| 40% educational discount applied!
+									p.ineligible(hidden=true data-ol-group-plan-educational-discount-ineligible)
+										| The educational discount is available for groups of 10 or more
 			.modal-footer
 				.text-center
 					button.btn.btn-primary.btn-lg(data-ol-purchase-group-plan) Purchase Now

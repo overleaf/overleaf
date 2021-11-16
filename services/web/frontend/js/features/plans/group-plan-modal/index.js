@@ -4,10 +4,13 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 
 function getFormValues() {
   const modalEl = document.querySelector('[data-ol-group-plan-modal]')
-  const planCode = modalEl.querySelector('#plan_code').value
+  const planCode = modalEl.querySelector('input[name="plan_code"]:checked')
+    .value
   const size = modalEl.querySelector('#size').value
   const currency = modalEl.querySelector('#currency').value
-  const usage = modalEl.querySelector('#usage').value
+  const usage = modalEl.querySelector('#usage').checked
+    ? 'educational'
+    : 'enterprise'
   return { planCode, size, currency, usage }
 }
 
@@ -21,6 +24,7 @@ function updateGroupPlanView() {
   const price = prices[usage][planCode][currency][size]
   const currencySymbol = currencySymbols[currency]
   const displayPrice = `${currencySymbol}${price}`
+  const perUserPrice = parseFloat((price / size).toFixed(2))
 
   modalEl.querySelectorAll('[data-ol-group-plan-plan-code]').forEach(el => {
     el.hidden = el.getAttribute('data-ol-group-plan-plan-code') !== planCode
@@ -32,8 +36,19 @@ function updateGroupPlanView() {
     '[data-ol-group-plan-display-price]'
   ).innerText = displayPrice
   modalEl.querySelector(
-    '[data-ol-group-plan-for-n-users]'
-  ).innerText = `For ${size} users`
+    '[data-ol-group-plan-price-per-user]'
+  ).innerText = `${currencySymbol}${perUserPrice} per user`
+
+  modalEl.querySelector('[data-ol-group-plan-educational-discount]').hidden =
+    usage !== 'educational'
+
+  modalEl.querySelector(
+    '[data-ol-group-plan-educational-discount-applied]'
+  ).hidden = size < 10
+
+  modalEl.querySelector(
+    '[data-ol-group-plan-educational-discount-ineligible]'
+  ).hidden = size >= 10
 }
 
 const modalEl = $('[data-ol-group-plan-modal]')
@@ -57,6 +72,9 @@ function showGroupPlanModal() {
 
 document
   .querySelectorAll('[data-ol-group-plan-form] select')
+  .forEach(el => el.addEventListener('change', updateGroupPlanView))
+document
+  .querySelectorAll('[data-ol-group-plan-form] input')
   .forEach(el => el.addEventListener('change', updateGroupPlanView))
 document.querySelectorAll('[data-ol-purchase-group-plan]').forEach(el =>
   el.addEventListener('click', e => {
