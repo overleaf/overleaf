@@ -7,6 +7,7 @@ const PACKAGE_WARNING_REGEX = /^(Package \b.+\b Warning:.*)$/
 const LINES_REGEX = /lines? ([0-9]+)/
 // This is used to parse the package name from the package warnings
 const PACKAGE_REGEX = /^Package (\b.+\b) Warning/
+const FILE_LINE_ERROR_REGEX = /^([./].*):(\d+): (.*)/
 
 const STATE = {
   NORMAL: 0,
@@ -83,7 +84,7 @@ export default class LatexParser {
   }
 
   currentLineIsFileLineError() {
-    return /^\/.*:\d+: .*/.test(this.currentLine)
+    return FILE_LINE_ERROR_REGEX.test(this.currentLine)
   }
 
   currentLineIsRunawayArgument() {
@@ -103,7 +104,7 @@ export default class LatexParser {
   }
 
   parseFileLineError() {
-    const result = this.currentLine.match(/^(\/.*):(\d+): (.*)/)
+    const result = this.currentLine.match(FILE_LINE_ERROR_REGEX)
     this.currentError = {
       line: result[2],
       file: result[1],

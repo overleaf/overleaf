@@ -77,6 +77,13 @@ describe('logParser', function (done) {
         flag: 'r',
       }
     )
+    this.secondaryFileLineErrorLog = fs.readFileSync(
+      path.resolve(__dirname, fixturePath + 'file-line-error-2.log'),
+      {
+        encoding: 'utf8',
+        flag: 'r',
+      }
+    )
   })
 
   it('should parse errors', function () {
@@ -401,10 +408,10 @@ describe('logParser', function (done) {
   })
 
   it('should perform file line error parsing', function () {
-    const latexParser = new LatexLogParser(this.fileLineErrorLog)
-    const errors = latexParser.parse().errors
+    let latexParser = new LatexLogParser(this.fileLineErrorLog)
+    let errors = latexParser.parse().errors
 
-    const expectedErrors = [
+    let expectedErrors = [
       [
         1,
         'Undefined control sequence.',
@@ -417,6 +424,25 @@ describe('logParser', function (done) {
       expect(expectedErrors[i]).to.equal(
         [errors[i].line, errors[i].message, errors[i].file] + ''
       )
+    }
+
+    // again with a more complex example
+
+    latexParser = new LatexLogParser(this.secondaryFileLineErrorLog)
+    errors = latexParser.parse().errors
+
+    expectedErrors = [
+      [1, 'Misplaced alignment tab character &.', './acks/name.tex'],
+      [14, 'Misplaced alignment tab character &.', './main.tex'],
+    ]
+
+    expect(errors.length).to.equal(expectedErrors.length)
+    for (let i = 0; i < errors.length; i++) {
+      expect(expectedErrors[i]).to.deep.equal([
+        errors[i].line,
+        errors[i].message,
+        errors[i].file,
+      ])
     }
   })
 
