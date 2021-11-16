@@ -84,11 +84,6 @@ export default function SelectCollaborators({
     itemToString: item => item && item.name,
     onStateChange: ({ inputValue, type, selectedItem }) => {
       switch (type) {
-        // set inputValue when the input changes
-        case useCombobox.stateChangeTypes.InputChange:
-          setInputValue(inputValue)
-          break
-
         // add a selected item on Enter (keypress), click or blur
         case useCombobox.stateChangeTypes.InputKeyDownEnter:
         case useCombobox.stateChangeTypes.ItemClick:
@@ -176,6 +171,9 @@ export default function SelectCollaborators({
                   if (!isOpen) {
                     addNewItem(inputValue, false)
                   }
+                },
+                onChange: e => {
+                  setInputValue(e.target.value)
                 },
                 onKeyDown: event => {
                   switch (event.key) {
