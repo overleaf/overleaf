@@ -42,7 +42,10 @@ function _pastReconfirmDate(lastDayToReconfirm) {
   return moment(lastDayToReconfirm).isBefore()
 }
 
-function _emailInReconfirmNotificationPeriod(lastDayToReconfirm) {
+function _emailInReconfirmNotificationPeriod(
+  lastDayToReconfirm,
+  cachedPastReconfirmDate
+) {
   const globalReconfirmPeriod = settings.reconfirmNotificationDays
 
   if (!globalReconfirmPeriod || !lastDayToReconfirm) return false
@@ -52,7 +55,15 @@ function _emailInReconfirmNotificationPeriod(lastDayToReconfirm) {
     'days'
   )
 
-  return moment().isAfter(notificationStarts)
+  let inNotificationPeriod = moment().isAfter(notificationStarts)
+
+  if (!inNotificationPeriod && cachedPastReconfirmDate) {
+    // show notification if cached date is past,
+    // even if non-cached date is not past
+    inNotificationPeriod = true
+  }
+
+  return inNotificationPeriod
 }
 
 async function getUserFullEmails(userId) {
@@ -224,18 +235,21 @@ const decorateFullEmails = (
         role,
         department,
         licence,
+        past_reconfirm_date: cachedPastReconfirmDate,
         portal,
       } = affiliation
       const lastDayToReconfirm = _lastDayToReconfirm(emailData, institution)
       const pastReconfirmDate = _pastReconfirmDate(lastDayToReconfirm)
       const inReconfirmNotificationPeriod = _emailInReconfirmNotificationPeriod(
-        lastDayToReconfirm
+        lastDayToReconfirm,
+        cachedPastReconfirmDate
       )
       emailData.affiliation = {
         institution,
         inferred,
         inReconfirmNotificationPeriod,
         lastDayToReconfirm,
+        cachedPastReconfirmDate,
         pastReconfirmDate,
         role,
         department,

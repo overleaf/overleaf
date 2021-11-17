@@ -181,6 +181,7 @@ describe('UserGetter', function () {
             isUniversity: true,
             confirmed: true,
           },
+          past_reconfirm_date: false,
           portal: undefined,
         },
       ]
@@ -204,6 +205,7 @@ describe('UserGetter', function () {
                 lastDayToReconfirm: undefined,
                 licence: affiliationsData[0].licence,
                 inReconfirmNotificationPeriod: false,
+                cachedPastReconfirmDate: false,
                 pastReconfirmDate: false,
                 portal: undefined,
               },
@@ -795,6 +797,42 @@ describe('UserGetter', function () {
             }
           )
         })
+      })
+
+      it('should flag to show notification if v1 shows as past reconfirmation but v2 does not', function (done) {
+        const email = 'abc123@test.com'
+        const confirmedAt = new Date()
+        const affiliationsData = [
+          {
+            email,
+            licence: 'free',
+            institution: institutionNonSSO,
+            past_reconfirm_date: true,
+          },
+        ]
+        const user = {
+          _id: '12390i',
+          email,
+          emails: [
+            {
+              email,
+              confirmedAt,
+              default: true,
+            },
+          ],
+        }
+        this.getUserAffiliations.resolves(affiliationsData)
+        this.UserGetter.promises.getUser = sinon.stub().resolves(user)
+        this.UserGetter.getUserFullEmails(
+          this.fakeUser._id,
+          (error, fullEmails) => {
+            expect(error).to.not.exist
+            expect(
+              fullEmails[0].affiliation.inReconfirmNotificationPeriod
+            ).to.equal(true)
+            done()
+          }
+        )
       })
     })
   })
