@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
 
-FROM node:12.22.7 as base
+FROM node:14.18.1 as base
 
 WORKDIR /app
 COPY install_deps.sh /app

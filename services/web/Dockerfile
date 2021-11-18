@@ -1,5 +1,5 @@
 # the base image is suitable for running web with /app bind mounted
-FROM node:12.22.7 as base
+FROM node:14.18.1 as base
 
 WORKDIR /app
 
