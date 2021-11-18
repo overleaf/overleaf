@@ -86,6 +86,7 @@ if (process.env.DOCKER_RUNNER) {
         process.env.TEXLIVE_IMAGE || 'quay.io/sharelatex/texlive-full:2017.1',
       env: {
         HOME: '/tmp',
+        CLSI: 1,
       },
       socketPath: '/var/run/docker.sock',
       user: process.env.TEXLIVE_IMAGE_USER || 'tex',
