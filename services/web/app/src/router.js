@@ -294,18 +294,25 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     ProjectController.newProject
   )
 
-  webRouter.get(
-    '/Project/:Project_id/:detachRole(detacher|detached)?',
-    RateLimiterMiddleware.rateLimit({
-      endpointName: 'open-project',
-      params: ['Project_id'],
-      maxRequests: 15,
-      timeInterval: 60,
-    }),
-    AuthenticationController.validateUserSession(),
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    ProjectController.loadEditor
-  )
+  for (const route of [
+    // Keep the old route for continuous metrics
+    '/Project/:Project_id',
+    // New route for pdf-detach
+    '/Project/:Project_id/:detachRole(detacher|detached)',
+  ]) {
+    webRouter.get(
+      route,
+      RateLimiterMiddleware.rateLimit({
+        endpointName: 'open-project',
+        params: ['Project_id'],
+        maxRequests: 15,
+        timeInterval: 60,
+      }),
+      AuthenticationController.validateUserSession(),
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      ProjectController.loadEditor
+    )
+  }
   webRouter.head(
     '/Project/:Project_id/file/:File_id',
     AuthorizationMiddleware.ensureUserCanReadProject,
