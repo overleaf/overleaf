@@ -47,15 +47,15 @@ module.exports = ThreadManager = {
       }
     }
 
-    db.rooms.updateOne(
+    db.rooms.findOneAndUpdate(
       query,
       { $set: update },
-      { upsert: true },
-      function (error) {
+      { upsert: true, returnDocument: 'after' },
+      function (error, result) {
         if (error != null) {
           return callback(error)
         }
-        db.rooms.findOne(query, callback)
+        callback(null, result.value)
       }
     )
   },
