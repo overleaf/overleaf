@@ -83,6 +83,16 @@ function getDoc(projectId, docId, options = {}, _callback) {
       if (body.pathname == null) {
         return callback(new Error('web API response had no valid doc pathname'))
       }
+      if (!body.pathname) {
+        logger.warn(
+          { projectId, docId },
+          'missing pathname in PersistenceManager getDoc'
+        )
+        Metrics.inc('pathname', 1, {
+          path: 'PersistenceManager.getDoc',
+          status: body.pathname === '' ? 'zero-length' : 'undefined',
+        })
+      }
       callback(
         null,
         body.lines,

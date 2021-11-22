@@ -98,6 +98,13 @@ module.exports = RedisManager = {
       rclient.sadd(keys.docsInProject({ project_id }), doc_id, error => {
         if (error) return callback(error)
 
+        if (!pathname) {
+          metrics.inc('pathname', 1, {
+            path: 'RedisManager.setDoc',
+            status: pathname === '' ? 'zero-length' : 'undefined',
+          })
+        }
+
         rclient.mset(
           {
             [keys.docLines({ doc_id })]: docLines,
@@ -265,6 +272,13 @@ module.exports = RedisManager = {
 
       if (projectHistoryId != null) {
         projectHistoryId = parseInt(projectHistoryId)
+      }
+
+      if (!pathname) {
+        metrics.inc('pathname', 1, {
+          path: 'RedisManager.getDoc',
+          status: pathname === '' ? 'zero-length' : 'undefined',
+        })
       }
 
       callback(
@@ -594,6 +608,16 @@ module.exports = RedisManager = {
           return callback(error)
         }
         if (lines != null && version != null) {
+          if (!update.newPathname) {
+            logger.warn(
+              { project_id, doc_id, update },
+              'missing pathname in RedisManager.renameDoc'
+            )
+            metrics.inc('pathname', 1, {
+              path: 'RedisManager.renameDoc',
+              status: update.newPathname === '' ? 'zero-length' : 'undefined',
+            })
+          }
           return rclient.set(
             keys.pathname({ doc_id }),
             update.newPathname,
