@@ -1351,14 +1351,16 @@ const ProjectEntityUpdateHandler = {
 
         ProjectEntityHandler.getAllEntitiesFromProject(
           project,
-          (error, docs, files) => {
+          (error, docs, files, folders) => {
             if (error != null) {
               return callback(error)
             }
+            // _checkFileTree() must be passed the folders before docs and
+            // files
             ProjectEntityUpdateHandler._checkFiletree(
               projectId,
               projectHistoryId,
-              [...docs, ...files],
+              [...folders, ...docs, ...files],
               error => {
                 if (error) {
                   return callback(error)
@@ -1391,36 +1393,66 @@ const ProjectEntityUpdateHandler = {
   ),
 
   _checkFiletree(projectId, projectHistoryId, entities, callback) {
+    const adjustPathsAfterFolderRename = (oldPath, newPath) => {
+      oldPath = oldPath + '/'
+      newPath = newPath + '/'
+      for (const entity of entities) {
+        if (entity.path.startsWith(oldPath)) {
+          entity.path = newPath + entity.path.slice(oldPath.length)
+        }
+      }
+    }
+
+    // Data structures for recording pending renames
     const renames = []
     const paths = new Set()
     for (const entity of entities) {
-      const filename = entity.doc ? entity.doc.name : entity.file.name
-      const cleanFilename = SafePath.clean(filename)
-      if (cleanFilename !== filename) {
-        // File name needs to be cleaned
-        let newPath = Path.join(
-          entity.path.slice(0, -filename.length),
-          cleanFilename
-        )
-        if (paths.has(newPath)) {
-          newPath = ProjectEntityUpdateHandler.findNextAvailablePath(
-            paths,
-            newPath
-          )
-        }
-        renames.push({ entity, newName: cleanFilename, newPath })
-      } else if (paths.has(entity.path)) {
-        // Duplicate filename
-        const newPath = ProjectEntityUpdateHandler.findNextAvailablePath(
-          paths,
-          entity.path
-        )
-        const newName = newPath.split('/').pop()
-        renames.push({ entity, newName, newPath })
-        paths.add(newPath)
+      const originalName = entity.folder
+        ? entity.folder.name
+        : entity.doc
+        ? entity.doc.name
+        : entity.file.name
+
+      let newPath = entity.path
+      let newName = originalName
+
+      // Clean the filename if necessary
+      if (newName === '') {
+        newName = 'untitled'
       } else {
-        paths.add(entity.path)
+        newName = SafePath.clean(newName)
       }
+      if (newName !== originalName) {
+        newPath = Path.join(
+          newPath.slice(0, newPath.length - originalName.length),
+          newName
+        )
+      }
+
+      // Check if we've seen that path already
+      if (paths.has(newPath)) {
+        newPath = ProjectEntityUpdateHandler.findNextAvailablePath(
+          paths,
+          newPath
+        )
+        newName = newPath.split('/').pop()
+      }
+
+      // If we've changed the filename, schedule a rename
+      if (newName !== originalName) {
+        renames.push({ entity, newName, newPath })
+        if (entity.folder) {
+          // Here, we rely on entities being processed in the right order.
+          // Parent folders need to be processed before their children. This is
+          // the case only because getAllEntitiesFromProject() returns folders
+          // in that order and resyncProjectHistory() calls us with the folders
+          // first.
+          adjustPathsAfterFolderRename(entity.path, newPath)
+        }
+      }
+
+      // Remember that we've seen this path
+      paths.add(newPath)
     }
 
     if (renames.length === 0) {
@@ -1440,8 +1472,12 @@ const ProjectEntityUpdateHandler = {
     // rename the duplicate files
     const doRename = (rename, cb) => {
       const entity = rename.entity
-      const entityId = entity.doc ? entity.doc._id : entity.file._id
-      const entityType = entity.doc ? 'doc' : 'file'
+      const entityId = entity.folder
+        ? entity.folder._id
+        : entity.doc
+        ? entity.doc._id
+        : entity.file._id
+      const entityType = entity.folder ? 'folder' : entity.doc ? 'doc' : 'file'
       ProjectEntityMongoUpdateHandler.renameEntity(
         projectId,
         entityId,
@@ -1453,7 +1489,9 @@ const ProjectEntityUpdateHandler = {
           }
           // update the renamed entity for the resync
           entity.path = rename.newPath
-          if (entityType === 'doc') {
+          if (entityType === 'folder') {
+            entity.folder.name = rename.newName
+          } else if (entityType === 'doc') {
             entity.doc.name = rename.newName
           } else {
             entity.file.name = rename.newName

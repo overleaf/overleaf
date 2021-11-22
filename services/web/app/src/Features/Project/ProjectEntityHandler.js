@@ -92,7 +92,7 @@ const ProjectEntityHandler = {
           }
         }
       }
-      callback(null, docs, files)
+      callback(null, docs, files, folders)
     })
   },
 
