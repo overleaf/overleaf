@@ -1097,20 +1097,6 @@ describe('RedisManager', function () {
           .calledWith(`Pathname:${this.doc_id}`, this.newPathname)
           .should.equal(true)
       })
-
-      return it('should queue an update', function () {
-        return this.ProjectHistoryRedisManager.queueRenameEntity
-          .calledWithExactly(
-            this.project_id,
-            this.projectHistoryId,
-            'doc',
-            this.doc_id,
-            this.userId,
-            this.update,
-            this.callback
-          )
-          .should.equal(true)
-      })
     })
 
     describe('the document is not cached in redis', function () {
@@ -1133,20 +1119,6 @@ describe('RedisManager', function () {
 
       it('does not update the cached pathname', function () {
         return this.rclient.set.called.should.equal(false)
-      })
-
-      return it('should queue an update', function () {
-        return this.ProjectHistoryRedisManager.queueRenameEntity
-          .calledWithExactly(
-            this.project_id,
-            this.projectHistoryId,
-            'doc',
-            this.doc_id,
-            this.userId,
-            this.update,
-            this.callback
-          )
-          .should.equal(true)
       })
     })
 

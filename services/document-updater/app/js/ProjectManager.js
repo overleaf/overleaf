@@ -238,17 +238,48 @@ function updateProjectWithLocks(
         )
         break
       case 'rename-doc':
-        DocumentManager.renameDocWithLock(
-          projectId,
-          update.id,
-          userId,
-          update,
-          projectHistoryId,
-          (error, count) => {
-            projectOpsLength = count
-            cb(error)
-          }
-        )
+        if (!update.newPathname) {
+          // an empty newPathname signifies a delete, so there is no need to
+          // update the pathname in redis
+          ProjectHistoryRedisManager.queueRenameEntity(
+            projectId,
+            projectHistoryId,
+            'doc',
+            update.id,
+            userId,
+            update,
+            (error, count) => {
+              projectOpsLength = count
+              cb(error)
+            }
+          )
+        } else {
+          // rename the doc in redis before queuing the update
+          DocumentManager.renameDocWithLock(
+            projectId,
+            update.id,
+            userId,
+            update,
+            projectHistoryId,
+            error => {
+              if (error) {
+                return cb(error)
+              }
+              ProjectHistoryRedisManager.queueRenameEntity(
+                projectId,
+                projectHistoryId,
+                'doc',
+                update.id,
+                userId,
+                update,
+                (error, count) => {
+                  projectOpsLength = count
+                  cb(error)
+                }
+              )
+            }
+          )
+        }
         break
       case 'add-file':
         ProjectHistoryRedisManager.queueAddEntity(

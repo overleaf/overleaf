@@ -69,6 +69,54 @@ describe("Applying updates to a project's structure", function () {
     })
   })
 
+  describe('deleting a file', function () {
+    before(function (done) {
+      this.project_id = DocUpdaterClient.randomId()
+      this.fileUpdate = {
+        type: 'rename-file',
+        id: DocUpdaterClient.randomId(),
+        pathname: '/file-path',
+        newPathname: '',
+      }
+      this.updates = [this.fileUpdate]
+      DocUpdaterClient.sendProjectUpdate(
+        this.project_id,
+        this.user_id,
+        this.updates,
+        this.version,
+        error => {
+          if (error) {
+            return done(error)
+          }
+          setTimeout(done, 200)
+        }
+      )
+    })
+
+    it('should push the applied file renames to the project history api', function (done) {
+      rclientProjectHistory.lrange(
+        ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+        0,
+        -1,
+        (error, updates) => {
+          if (error) {
+            return done(error)
+          }
+
+          const update = JSON.parse(updates[0])
+          update.file.should.equal(this.fileUpdate.id)
+          update.pathname.should.equal('/file-path')
+          update.new_pathname.should.equal('')
+          update.meta.user_id.should.equal(this.user_id)
+          update.meta.ts.should.be.a('string')
+          update.version.should.equal(`${this.version}.0`)
+
+          done()
+        }
+      )
+    })
+  })
+
   describe('renaming a document', function () {
     before(function () {
       this.update = {
@@ -280,6 +328,126 @@ describe("Applying updates to a project's structure", function () {
             update.meta.user_id.should.equal(this.user_id)
             update.meta.ts.should.be.a('string')
             update.version.should.equal(`${this.version}.3`)
+
+            done()
+          }
+        )
+      })
+    })
+  })
+
+  describe('deleting a document', function () {
+    before(function () {
+      this.update = {
+        type: 'rename-doc',
+        id: DocUpdaterClient.randomId(),
+        pathname: '/doc-path',
+        newPathname: '',
+      }
+      this.updates = [this.update]
+    })
+
+    describe('when the document is not loaded', function () {
+      before(function (done) {
+        this.project_id = DocUpdaterClient.randomId()
+        DocUpdaterClient.sendProjectUpdate(
+          this.project_id,
+          this.user_id,
+          this.updates,
+          this.version,
+          error => {
+            if (error) {
+              return done(error)
+            }
+            setTimeout(done, 200)
+          }
+        )
+      })
+
+      it('should push the applied doc update to the project history api', function (done) {
+        rclientProjectHistory.lrange(
+          ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+          0,
+          -1,
+          (error, updates) => {
+            if (error) {
+              return done(error)
+            }
+
+            const update = JSON.parse(updates[0])
+            update.doc.should.equal(this.update.id)
+            update.pathname.should.equal('/doc-path')
+            update.new_pathname.should.equal('')
+            update.meta.user_id.should.equal(this.user_id)
+            update.meta.ts.should.be.a('string')
+            update.version.should.equal(`${this.version}.0`)
+
+            done()
+          }
+        )
+      })
+    })
+
+    describe('when the document is loaded', function () {
+      before(function (done) {
+        this.project_id = DocUpdaterClient.randomId()
+        MockWebApi.insertDoc(this.project_id, this.update.id, {})
+        DocUpdaterClient.preloadDoc(this.project_id, this.update.id, error => {
+          if (error) {
+            return done(error)
+          }
+          sinon.spy(MockWebApi, 'getDocument')
+          DocUpdaterClient.sendProjectUpdate(
+            this.project_id,
+            this.user_id,
+            this.updates,
+            this.version,
+            error => {
+              if (error) {
+                return done(error)
+              }
+              setTimeout(done, 200)
+            }
+          )
+        })
+      })
+
+      after(function () {
+        MockWebApi.getDocument.restore()
+      })
+
+      it('should not modify the doc', function (done) {
+        DocUpdaterClient.getDoc(
+          this.project_id,
+          this.update.id,
+          (error, res, doc) => {
+            if (error) {
+              return done(error)
+            }
+
+            doc.pathname.should.equal('/a/b/c.tex') // default pathname from MockWebApi
+            done()
+          }
+        )
+      })
+
+      it('should push the applied doc update to the project history api', function (done) {
+        rclientProjectHistory.lrange(
+          ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+          0,
+          -1,
+          (error, updates) => {
+            if (error) {
+              return done(error)
+            }
+
+            const update = JSON.parse(updates[0])
+            update.doc.should.equal(this.update.id)
+            update.pathname.should.equal('/doc-path')
+            update.new_pathname.should.equal('')
+            update.meta.user_id.should.equal(this.user_id)
+            update.meta.ts.should.be.a('string')
+            update.version.should.equal(`${this.version}.0`)
 
             done()
           }

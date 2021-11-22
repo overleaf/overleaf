@@ -593,36 +593,14 @@ module.exports = RedisManager = {
         if (error != null) {
           return callback(error)
         }
-
         if (lines != null && version != null) {
           return rclient.set(
             keys.pathname({ doc_id }),
             update.newPathname,
-            function (error) {
-              if (error != null) {
-                return callback(error)
-              }
-              return ProjectHistoryRedisManager.queueRenameEntity(
-                project_id,
-                projectHistoryId,
-                'doc',
-                doc_id,
-                user_id,
-                update,
-                callback
-              )
-            }
-          )
-        } else {
-          return ProjectHistoryRedisManager.queueRenameEntity(
-            project_id,
-            projectHistoryId,
-            'doc',
-            doc_id,
-            user_id,
-            update,
             callback
           )
+        } else {
+          return callback()
         }
       }
     )
