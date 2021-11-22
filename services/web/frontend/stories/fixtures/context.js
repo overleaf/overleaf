@@ -14,6 +14,7 @@ export function setupContext() {
       project: {},
       $watch: () => {},
       $applyAsync: () => {},
+      $broadcast: () => {},
       ui: {
         chatOpen: true,
         pdfLayout: 'flat',
@@ -22,6 +23,7 @@ export function setupContext() {
         pdfViewer: 'js',
       },
       toggleHistory: () => {},
+      rootFolder: { type: 'folder', children: [] },
     }
   }
   window._ide = {
@@ -41,6 +43,13 @@ export function setupContext() {
       getCurrentDocId: () => 'foo',
       openDoc: (id, options) => {
         console.log('open doc', id, options)
+      },
+    },
+    metadataManager: {
+      metadata: {
+        state: {
+          documents: {},
+        },
       },
     },
   }
