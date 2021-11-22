@@ -34,6 +34,11 @@ const MATCHER = new RegExp(
 
 function matchOutline(content) {
   const lines = content.split('\n')
+  const flatOutline = matchOutlineFromLines(lines)
+  return flatOutline
+}
+
+function matchOutlineFromLines(lines) {
   const flatOutline = []
   lines.forEach((line, lineId) => {
     const match = line.match(MATCHER)
@@ -125,4 +130,4 @@ function nestOutline(flatOutline) {
   return nestedOutlines
 }
 
-export { matchOutline, nestOutline }
+export { matchOutline, matchOutlineFromLines, nestOutline }
