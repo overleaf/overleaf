@@ -611,6 +611,12 @@ const ProjectController = {
                 : undefined
           }
 
+          // null test targeting logged in users
+          SplitTestV2Handler.promises.getAssignmentForSession(
+            req.session,
+            'null-test-dashboard'
+          )
+
           res.render('project/list', viewModel)
           timer.done()
         })
@@ -724,12 +730,27 @@ const ProjectController = {
           TpdsProjectFlusher.flushProjectToTpdsIfNeeded(projectId, cb)
         },
         sharingModalSplitTest(cb) {
-          SplitTestV2Handler.assignInLocalsContext(
+          SplitTestV2Handler.assignInLocalsContextForSession(
             res,
-            userId,
+            req.session,
             'project-share-modal-paywall',
-            err => {
-              cb(err, null)
+            {},
+            () => {
+              // do not fail editor load if assignment fails
+              cb()
+            }
+          )
+        },
+        sharingModalNullTest(cb) {
+          // null test targeting logged in users, for front-end side
+          SplitTestV2Handler.assignInLocalsContextForSession(
+            res,
+            req.session,
+            'null-test-share-modal',
+            {},
+            () => {
+              // do not fail editor load if assignment fails
+              cb()
             }
           )
         },
@@ -737,8 +758,14 @@ const ProjectController = {
           SplitTestV2Handler.getAssignmentForSession(
             req.session,
             'react-pdf-preview-rollout',
-            (err, assignment) => {
-              cb(err, assignment)
+            {},
+            (error, assignment) => {
+              if (error) {
+                // do not fail editor load if assignment fails
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
             }
           )
         },

@@ -136,14 +136,21 @@ describe('ProjectController', function () {
     }
     this.SplitTestV2Handler = {
       promises: {
-        getAssignment: sinon.stub().resolves({ active: false }),
-        assignInLocalsContext: sinon.stub().resolves(),
+        getAssignment: sinon.stub().resolves({ variant: 'default' }),
+        getAssignmentForSession: sinon.stub().resolves({ variant: 'default' }),
+        assignInLocalsContext: sinon.stub().resolves({ variant: 'default' }),
+        assignInLocalsContextForSession: sinon
+          .stub()
+          .resolves({ variant: 'default' }),
       },
+      getAssignment: sinon.stub().yields(null, { variant: 'default' }),
       getAssignmentForSession: sinon
         .stub()
-        .yields(null, { variant: 'variant' }),
-      getAssignment: sinon.stub().yields(null, { active: false }),
-      assignInLocalsContext: sinon.stub().yields(null),
+        .yields(null, { variant: 'default' }),
+      assignInLocalsContext: sinon.stub().yields(null, { variant: 'default' }),
+      assignInLocalsContextForSession: sinon
+        .stub()
+        .yields(null, { variant: 'default' }),
     }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
