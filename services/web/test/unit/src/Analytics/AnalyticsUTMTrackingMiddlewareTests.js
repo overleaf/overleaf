@@ -63,12 +63,13 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
   describe('with all UTM tags in query', function () {
     beforeEach(function () {
       this.req.url =
-        '/project?utm_source=Organic&utm_medium=Facebook&utm_campaign=Some%20Campaign&utm_term=foo-bar'
+        '/project?utm_source=Organic&utm_medium=Facebook&utm_campaign=Some%20Campaign&utm_content=foo-bar&utm_term=overridden'
       this.req.query = {
         utm_source: 'Organic',
         utm_medium: 'Facebook',
         utm_campaign: 'Some Campaign',
-        utm_term: 'foo-bar',
+        utm_content: 'foo-bar',
+        utm_term: 'overridden',
       }
       this.middleware(this.req, this.res, this.next)
     })
@@ -92,7 +93,8 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
           utm_source: 'Organic',
           utm_medium: 'Facebook',
           utm_campaign: 'Some Campaign',
-          utm_term: 'foo-bar',
+          utm_content: 'foo-bar',
+          utm_term: 'overridden',
         }
       )
     })
@@ -109,10 +111,12 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
 
   describe('with some UTM tags in query', function () {
     beforeEach(function () {
-      this.req.url = '/project?utm_medium=Facebook&utm_campaign=Some%20Campaign'
+      this.req.url =
+        '/project?utm_medium=Facebook&utm_campaign=Some%20Campaign&utm_term=foo'
       this.req.query = {
         utm_medium: 'Facebook',
         utm_campaign: 'Some Campaign',
+        utm_term: 'foo',
       }
       this.middleware(this.req, this.res, this.next)
     })
@@ -135,6 +139,7 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
           path: '/project',
           utm_medium: 'Facebook',
           utm_campaign: 'Some Campaign',
+          utm_term: 'foo',
         }
       )
     })
@@ -144,7 +149,7 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
         this.AnalyticsManager.setUserPropertyForSession,
         this.req.session,
         'utm-tags',
-        'N/A;Facebook;Some Campaign;N/A'
+        'N/A;Facebook;Some Campaign;foo'
       )
     })
   })

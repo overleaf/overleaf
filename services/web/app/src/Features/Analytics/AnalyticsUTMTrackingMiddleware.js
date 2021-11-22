@@ -22,14 +22,11 @@ function recordUTMTags() {
           ...utmValues,
         })
 
-        const propertyValue = [
-          'utm_source',
-          'utm_medium',
-          'utm_campaign',
-          'utm_term',
-        ]
-          .map(tag => utmValues[tag] || 'N/A')
-          .join(';')
+        const propertyValue = `${utmValues.utm_source || 'N/A'};${
+          utmValues.utm_medium || 'N/A'
+        };${utmValues.utm_campaign || 'N/A'};${
+          utmValues.utm_content || utmValues.utm_term || 'N/A'
+        }`
         AnalyticsManager.setUserPropertyForSession(
           req.session,
           'utm-tags',

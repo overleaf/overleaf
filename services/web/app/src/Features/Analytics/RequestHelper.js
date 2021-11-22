@@ -5,6 +5,7 @@ const UTM_KEYS = [
   'utm_campaign',
   'utm_source',
   'utm_term',
+  'utm_content',
   'utm_medium',
   'utm_count',
 ]
