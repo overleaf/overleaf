@@ -564,8 +564,8 @@ module.exports = DocumentManager = {
     )
   },
 
-  resyncDocContents(project_id, doc_id, callback) {
-    logger.debug({ project_id, doc_id }, 'start resyncing doc contents')
+  resyncDocContents(project_id, doc_id, path, callback) {
+    logger.debug({ project_id, doc_id, path }, 'start resyncing doc contents')
     return RedisManager.getDoc(
       project_id,
       doc_id,
@@ -573,7 +573,11 @@ module.exports = DocumentManager = {
         if (error != null) {
           return callback(error)
         }
-
+        // To avoid issues where the same doc_id appears with different paths,
+        // we use the path from the resyncProjectStructure update.  If we used
+        // the path from the getDoc call to web then the two occurences of the
+        // doc_id would map to the same path, and this would be rejected by
+        // project-history as an unexpected resyncDocContent update.
         if (lines == null || version == null) {
           logger.debug(
             { project_id, doc_id },
@@ -604,7 +608,7 @@ module.exports = DocumentManager = {
                 doc_id,
                 lines,
                 version,
-                pathname,
+                path, // use the path from the resyncProjectStructure update
                 callback
               )
             }
@@ -620,7 +624,7 @@ module.exports = DocumentManager = {
             doc_id,
             lines,
             version,
-            pathname,
+            path, // use the path from the resyncProjectStructure update
             callback
           )
         }
@@ -768,7 +772,7 @@ module.exports = DocumentManager = {
     )
   },
 
-  resyncDocContentsWithLock(project_id, doc_id, callback) {
+  resyncDocContentsWithLock(project_id, doc_id, path, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -777,6 +781,7 @@ module.exports = DocumentManager = {
       DocumentManager.resyncDocContents,
       project_id,
       doc_id,
+      path,
       callback
     )
   },

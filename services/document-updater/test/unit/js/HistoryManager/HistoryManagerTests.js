@@ -416,7 +416,7 @@ describe('HistoryManager', function () {
 
     it('should queue doc content reyncs', function () {
       return this.DocumentManager.resyncDocContentsWithLock
-        .calledWith(this.project_id, this.doc_id)
+        .calledWith(this.project_id, this.docs[0].doc, this.docs[0].path)
         .should.equal(true)
     })
 

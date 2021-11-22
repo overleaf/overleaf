@@ -242,8 +242,14 @@ module.exports = HistoryManager = {
           return callback(error)
         }
         const DocumentManager = require('./DocumentManager')
-        const resyncDoc = (doc, cb) =>
-          DocumentManager.resyncDocContentsWithLock(project_id, doc.doc, cb)
+        const resyncDoc = (doc, cb) => {
+          DocumentManager.resyncDocContentsWithLock(
+            project_id,
+            doc.doc,
+            doc.path,
+            cb
+          )
+        }
         return async.eachLimit(
           docs,
           HistoryManager.MAX_PARALLEL_REQUESTS,

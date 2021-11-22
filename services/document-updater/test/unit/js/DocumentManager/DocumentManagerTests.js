@@ -975,6 +975,7 @@ describe('DocumentManager', function () {
   describe('resyncDocContents', function () {
     describe('when doc is loaded in redis', function () {
       beforeEach(function () {
+        this.pathnameFromProjectStructureUpdate = '/foo/bar.tex'
         this.RedisManager.getDoc = sinon
           .stub()
           .callsArgWith(
@@ -990,6 +991,7 @@ describe('DocumentManager', function () {
         this.DocumentManager.resyncDocContents(
           this.project_id,
           this.doc_id,
+          this.pathnameFromProjectStructureUpdate,
           this.callback
         )
       })
@@ -1008,7 +1010,7 @@ describe('DocumentManager', function () {
             this.doc_id,
             this.lines,
             this.version,
-            this.pathname,
+            this.pathnameFromProjectStructureUpdate,
             this.callback
           )
           .should.equal(true)
@@ -1017,6 +1019,7 @@ describe('DocumentManager', function () {
 
     describe('when doc is not loaded in redis', function () {
       beforeEach(function () {
+        this.pathnameFromProjectStructureUpdate = '/foo/bar.tex'
         this.RedisManager.getDoc = sinon.stub().callsArgWith(2, null)
         this.PersistenceManager.getDoc = sinon
           .stub()
@@ -1032,6 +1035,7 @@ describe('DocumentManager', function () {
         this.DocumentManager.resyncDocContents(
           this.project_id,
           this.doc_id,
+          this.pathnameFromProjectStructureUpdate,
           this.callback
         )
       })
@@ -1056,7 +1060,7 @@ describe('DocumentManager', function () {
             this.doc_id,
             this.lines,
             this.version,
-            this.pathname,
+            this.pathnameFromProjectStructureUpdate,
             this.callback
           )
           .should.equal(true)
