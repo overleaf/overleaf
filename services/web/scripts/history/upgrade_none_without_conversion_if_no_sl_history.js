@@ -33,11 +33,22 @@ const RESULT = {
   attempted: 0,
   projectsUpgraded: 0,
   failed: 0,
+  continueFrom: null,
 }
 
 let INTERRUPT = false
 
 async function processBatch(_, projects) {
+  if (projects.length && projects[0]._id) {
+    RESULT.continueFrom = projects[0]._id
+  }
+  await promiseMapWithLimit(WRITE_CONCURRENCY, projects, processProject)
+  console.log(RESULT)
+  if (INTERRUPT) {
+    // ctrl+c
+    console.log('Terminated by SIGINT')
+    process.exit(0)
+  }
   if (RESULT.failed >= MAX_FAILURES) {
     console.log(`MAX_FAILURES limit (${MAX_FAILURES}) reached. Stopping.`)
     process.exit(0)
@@ -47,14 +58,6 @@ async function processBatch(_, projects) {
       `MAX_UPGRADES_TO_ATTEMPT limit (${MAX_UPGRADES_TO_ATTEMPT}) reached. Stopping.`
     )
     process.exit(0)
-  } else {
-    await promiseMapWithLimit(WRITE_CONCURRENCY, projects, processProject)
-    console.log(RESULT)
-    if (INTERRUPT) {
-      // ctrl+c
-      console.log('Terminated by SIGINT')
-      process.exit(0)
-    }
   }
 }
 
