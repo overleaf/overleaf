@@ -73,7 +73,7 @@ export function EditorProvider({ children, settings }) {
 
   const [loading] = useScopeValue('state.loading')
   const [projectName, setProjectName] = useScopeValue('project.name')
-  const [rootFolder] = useScopeValue('rootFolder')
+  const [rootFolder] = useScopeValue('rootFolder', true)
   const [permissionsLevel] = useScopeValue('permissionsLevel')
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
