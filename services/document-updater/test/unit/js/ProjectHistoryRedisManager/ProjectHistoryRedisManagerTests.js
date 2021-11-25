@@ -24,11 +24,17 @@ describe('ProjectHistoryRedisManager', function () {
     this.callback = sinon.stub()
     this.rclient = {}
     tk.freeze(new Date())
+
+    this.Limits = {
+      docIsTooLarge: sinon.stub().returns(false),
+    }
+
     return (this.ProjectHistoryRedisManager = SandboxedModule.require(
       modulePath,
       {
         requires: {
           '@overleaf/settings': (this.settings = {
+            max_doc_length: 123,
             redis: {
               project_history: {
                 key_schema: {
@@ -46,6 +52,7 @@ describe('ProjectHistoryRedisManager', function () {
             createClient: () => this.rclient,
           },
           './Metrics': (this.metrics = { summary: sinon.stub() }),
+          './Limits': this.Limits,
         },
       }
     ))
@@ -186,8 +193,82 @@ describe('ProjectHistoryRedisManager', function () {
       return it('should queue an update', function () {})
     })
 
-    return describe('queueResyncDocContent', function () {
-      return it('should queue an update', function () {})
+    describe('queueResyncDocContent', function () {
+      beforeEach(function () {
+        this.doc_id = 1234
+        this.lines = ['one', 'two']
+        this.version = 2
+        this.pathname = '/path'
+
+        this.update = {
+          resyncDocContent: {
+            content: this.lines.join('\n'),
+            version: this.version,
+          },
+          projectHistoryId: this.projectHistoryId,
+          path: this.pathname,
+          doc: this.doc_id,
+          meta: {
+            ts: new Date(),
+          },
+        }
+
+        this.ProjectHistoryRedisManager.queueOps = sinon.stub()
+      })
+
+      describe('with a good doc', function () {
+        beforeEach(function () {
+          this.ProjectHistoryRedisManager.queueResyncDocContent(
+            this.project_id,
+            this.projectHistoryId,
+            this.doc_id,
+            this.lines,
+            this.version,
+            this.pathname,
+            this.callback
+          )
+        })
+        it('should check if the doc is too large', function () {
+          this.Limits.docIsTooLarge
+            .calledWith(
+              JSON.stringify(this.update).length,
+              this.lines,
+              this.settings.max_doc_length
+            )
+            .should.equal(true)
+        })
+
+        it('should queue an update', function () {
+          this.ProjectHistoryRedisManager.queueOps
+            .calledWithExactly(
+              this.project_id,
+              JSON.stringify(this.update),
+              this.callback
+            )
+            .should.equal(true)
+        })
+      })
+
+      describe('with a doc that is too large', function () {
+        beforeEach(function () {
+          this.Limits.docIsTooLarge.returns(true)
+          this.ProjectHistoryRedisManager.queueResyncDocContent(
+            this.project_id,
+            this.projectHistoryId,
+            this.doc_id,
+            this.lines,
+            this.version,
+            this.pathname,
+            this.callback
+          )
+        })
+        it('should not queue an update if the doc is too large', function () {
+          this.ProjectHistoryRedisManager.queueOps.called.should.equal(false)
+          this.callback
+            .calledWith(sinon.match.instanceOf(Error))
+            .should.equal(true)
+        })
+      })
     })
   })
 })

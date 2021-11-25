@@ -23,6 +23,7 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
 )
 const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
+const { docIsTooLarge } = require('./Limits')
 
 module.exports = ProjectHistoryRedisManager = {
   queueOps(project_id, ...rest) {
@@ -162,6 +163,16 @@ module.exports = ProjectHistoryRedisManager = {
       },
     }
     const jsonUpdate = JSON.stringify(projectUpdate)
+    // Do an optimised size check on the docLines using the serialised
+    // project update length as an upper bound
+    const sizeBound = jsonUpdate.length
+    if (docIsTooLarge(sizeBound, lines, Settings.max_doc_length)) {
+      const err = new Error(
+        'blocking resync doc content insert into project history queue: doc is too large'
+      )
+      logger.error({ project_id, doc_id, err, docSize: sizeBound }, err.message)
+      return callback(err)
+    }
     return ProjectHistoryRedisManager.queueOps(project_id, jsonUpdate, callback)
   },
 }
