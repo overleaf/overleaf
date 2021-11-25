@@ -67,6 +67,9 @@ export default class DocumentCompiler {
     })
 
     if (wasCompiling) {
+      if (options.isAutoCompileOnChange) {
+        this.debouncedAutoCompile()
+      }
       return
     }
 
