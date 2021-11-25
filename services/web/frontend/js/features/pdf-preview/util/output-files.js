@@ -104,9 +104,12 @@ export const handleOutputFiles = async (projectId, data) => {
 
     const log = await response.text()
 
-    const { errors, warnings } = new BibLogParser(log, {}).parse()
-
-    accumulateResults({ errors, warnings }, 'BibTeX:')
+    try {
+      const { errors, warnings } = new BibLogParser(log, {}).parse()
+      accumulateResults({ errors, warnings }, 'BibTeX:')
+    } catch (e) {
+      // BibLog parsing errors are ignored
+    }
   }
 
   result.fileList = buildFileList(outputFiles, data.clsiServerId)
