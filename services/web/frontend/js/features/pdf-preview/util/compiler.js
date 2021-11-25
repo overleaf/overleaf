@@ -6,11 +6,11 @@ import { debounce } from 'lodash'
 import { trackPdfDownload } from '../../../ide/pdf/controllers/PdfJsMetrics'
 
 const AUTO_COMPILE_MAX_WAIT = 5000
-// We add a 1 second debounce to sending user changes to server if they aren't
-// collaborating with anyone. This needs to be higher than that, and allow for
+// We add a 2 second debounce to sending user changes to server if they aren't
+// collaborating with anyone. This needs to be higher than SINGLE_USER_FLUSH_DELAY, and allow for
 // client to server latency, otherwise we compile before the op reaches the server
 // and then again on ack.
-const AUTO_COMPILE_DEBOUNCE = 2000
+const AUTO_COMPILE_DEBOUNCE = 2500
 
 const searchParams = new URLSearchParams(window.location.search)
 
