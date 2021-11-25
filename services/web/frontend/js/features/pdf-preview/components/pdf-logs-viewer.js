@@ -42,7 +42,12 @@ function PdfLogsViewer() {
             <PdfValidationIssue key={name} name={name} issue={issue} />
           ))}
 
-        {logEntries?.all && <PdfLogsEntries entries={logEntries.all} />}
+        {logEntries?.all && (
+          <PdfLogsEntries
+            entries={logEntries.all}
+            hasErrors={logEntries.errors.length > 0}
+          />
+        )}
 
         {rawLog && (
           <PdfLogEntry

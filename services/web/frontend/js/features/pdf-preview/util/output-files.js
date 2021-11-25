@@ -53,7 +53,6 @@ export const handleOutputFiles = async (projectId, data) => {
   }
 
   result.logEntries = {
-    all: [],
     errors: [],
     warnings: [],
     typesetting: [],
@@ -72,7 +71,6 @@ export const handleOutputFiles = async (projectId, data) => {
           entry.key = `${entry.file}:${entry.line}:${entry.column}:${entry.message}`
         }
         result.logEntries[key].push(...newEntries[key])
-        result.logEntries.all.push(...newEntries[key])
       }
     }
   }
@@ -113,6 +111,12 @@ export const handleOutputFiles = async (projectId, data) => {
   }
 
   result.fileList = buildFileList(outputFiles, data.clsiServerId)
+
+  result.logEntries.all = [
+    ...result.logEntries.errors,
+    ...result.logEntries.warnings,
+    ...result.logEntries.typesetting,
+  ]
 
   return result
 }

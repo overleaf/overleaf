@@ -7,7 +7,7 @@ import { useIdeContext } from '../../../shared/context/ide-context'
 
 const LOG_PREVIEW_LIMIT = 100
 
-function PdfLogsEntries({ entries }) {
+function PdfLogsEntries({ entries, hasErrors }) {
   const { t } = useTranslation()
 
   const ide = useIdeContext()
@@ -34,6 +34,7 @@ function PdfLogsEntries({ entries }) {
         <PreviewLogsPaneMaxEntries
           totalEntries={entries.length}
           entriesShown={LOG_PREVIEW_LIMIT}
+          hasErrors={hasErrors}
         />
       )}
       {logEntries.map(logEntry => (
@@ -61,6 +62,7 @@ function PdfLogsEntries({ entries }) {
 }
 PdfLogsEntries.propTypes = {
   entries: PropTypes.arrayOf(PropTypes.object),
+  hasErrors: PropTypes.bool,
 }
 
 export default memo(PdfLogsEntries)

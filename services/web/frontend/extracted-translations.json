@@ -185,6 +185,7 @@
   "log_entry_description": "",
   "log_entry_maximum_entries": "",
   "log_entry_maximum_entries_message": "",
+  "log_entry_maximum_entries_message_no_errors": "",
   "log_entry_maximum_entries_title": "",
   "log_hint_extra_info": "",
   "log_viewer_error": "",
