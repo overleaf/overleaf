@@ -49,5 +49,10 @@ function sendBeacon(key, data) {
   const blob = new Blob([JSON.stringify(data)], {
     type: 'application/json; charset=UTF-8',
   })
-  navigator.sendBeacon(`/event/${key}`, blob)
+  try {
+    navigator.sendBeacon(`/event/${key}`, blob)
+  } catch (error) {
+    // Ignored. There's a range of browser for which `navigator.sendBeacon` is available but
+    // will throw an error if it's called with an unacceptable mime-typed Blob as the data.
+  }
 }
