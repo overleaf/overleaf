@@ -139,8 +139,8 @@ async function getDoc(projectId, docId) {
     key
   )
   stream.resume()
-  const json = await _streamToString(stream)
-  const md5 = crypto.createHash('md5').update(json).digest('hex')
+  const buffer = await _streamToBuffer(stream)
+  const md5 = crypto.createHash('md5').update(buffer).digest('hex')
   if (sourceMd5 !== md5) {
     throw new Errors.Md5MismatchError('md5 mismatch when downloading doc', {
       key,
@@ -149,6 +149,7 @@ async function getDoc(projectId, docId) {
     })
   }
 
+  const json = buffer.toString()
   const doc = JSON.parse(json)
 
   const mongoDoc = {}
@@ -251,11 +252,11 @@ async function destroyArchiveWithRetry(projectId, docId) {
   throw lastError
 }
 
-async function _streamToString(stream) {
+async function _streamToBuffer(stream) {
   const chunks = []
   return new Promise((resolve, reject) => {
     stream.on('data', chunk => chunks.push(chunk))
     stream.on('error', reject)
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+    stream.on('end', () => resolve(Buffer.concat(chunks)))
   })
 }

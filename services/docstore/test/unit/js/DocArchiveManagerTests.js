@@ -265,6 +265,13 @@ describe('DocArchiveManager', function () {
           .to.eventually.be.fulfilled
       })
 
+      it('should test md5 validity with the raw buffer', async function () {
+        await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
+        expect(HashUpdate).to.have.been.calledWithMatch(
+          sinon.match.instanceOf(Buffer)
+        )
+      })
+
       it('should throw an error if the md5 does not match', async function () {
         PersistorManager.getObjectMd5Hash.resolves('badf00d')
         await expect(
