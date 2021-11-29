@@ -11,13 +11,14 @@ export default function useToolbarBreakpoint(element) {
   const [breakpoint, setBreakpoint] = useState(2)
   const [recalculate, setRecalculate] = useState(true)
 
-  const [resizeObserver] = useState(
-    () =>
-      new ResizeObserver(() => {
+  const [resizeObserver] = useState(() => {
+    if ('ResizeObserver' in window) {
+      return new ResizeObserver(() => {
         setBreakpoint(2)
         setRecalculate(true)
       })
-  )
+    }
+  })
 
   const [mutationObserver] = useState(
     () =>

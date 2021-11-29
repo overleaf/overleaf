@@ -5,7 +5,7 @@ export const useResizeObserver = handleResize => {
 
   const elementRef = useCallback(
     element => {
-      if (element) {
+      if (element && 'ResizeObserver' in window) {
         if (resizeRef.current) {
           resizeRef.current.observer.unobserve(resizeRef.current.element)
         }

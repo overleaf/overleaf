@@ -220,7 +220,7 @@ function PdfJsViewer({ url }) {
 
   // adjust the scale when the container is resized
   useEffect(() => {
-    if (pdfJsWrapper) {
+    if (pdfJsWrapper && 'ResizeObserver' in window) {
       const resizeListener = () => {
         pdfJsWrapper.updateOnResize()
       }
