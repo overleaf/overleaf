@@ -74,8 +74,6 @@ cleanUpDocs({ limit: 1000, dryRun: process.env.DRY_RUN !== 'false' })
     console.log('DONE')
   })
   .catch(function (error) {
-    if (error) {
-      throw error
-    }
-    return process.exit()
+    console.error(error)
+    process.exit(1)
   })

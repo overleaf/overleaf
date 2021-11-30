@@ -94,9 +94,7 @@ clientPromise.then(client => {
       console.log('DONE')
     })
     .catch(function (error) {
-      if (error) {
-        throw error
-      }
-      return process.exit()
+      console.error(error)
+      process.exit(1)
     })
 })
