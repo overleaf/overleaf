@@ -59,11 +59,6 @@ const EditorNavigationToolbarRoot = React.memo(
     } = useEditorContext(editorContextPropTypes)
 
     const {
-      reattach,
-      detach,
-      detachMode,
-      detachRole,
-      changeLayout,
       chatIsOpen,
       setChatIsOpen,
       reviewPanelOpen,
@@ -98,13 +93,6 @@ const EditorNavigationToolbarRoot = React.memo(
       setView(view === 'pdf' ? 'editor' : 'pdf')
     }, [view, setView])
 
-    const handleChangeLayout = useCallback(
-      (newLayout, newView) => {
-        changeLayout(newLayout, newView)
-      },
-      [changeLayout]
-    )
-
     const openShareModal = useCallback(() => {
       openShareProjectModal(isProjectOwner)
     }, [openShareProjectModal, isProjectOwner])
@@ -127,14 +115,9 @@ const EditorNavigationToolbarRoot = React.memo(
     // `loading ? null : <ToolbarHeader/>` causes UI glitches
     return (
       <ToolbarHeader
-        reattach={reattach}
-        detach={detach}
-        detachMode={detachMode}
-        detachRole={detachRole}
         style={loading ? { display: 'none' } : {}}
         cobranding={cobranding}
         onShowLeftMenuClick={onShowLeftMenuClick}
-        handleChangeLayout={handleChangeLayout}
         chatIsOpen={chatIsOpen}
         unreadMessageCount={unreadMessageCount}
         toggleChatOpen={toggleChatOpen}

@@ -4,18 +4,27 @@ import {
   useCallback,
   useMemo,
   useEffect,
+  useRef,
 } from 'react'
 import PropTypes from 'prop-types'
+import { debounce } from 'lodash'
 import useScopeValue from '../hooks/use-scope-value'
-import usePreviousValue from '../hooks/use-previous-value'
 import useDetachLayout from '../hooks/use-detach-layout'
 import { useIdeContext } from './ide-context'
 import localStorage from '../../infrastructure/local-storage'
+import getMeta from '../../utils/meta'
+
+const debugPdfDetach = getMeta('ol-debugPdfDetach')
 
 export const LayoutContext = createContext()
 
 LayoutContext.Provider.propTypes = {
   value: PropTypes.shape({
+    reattach: PropTypes.func.isRequired,
+    detach: PropTypes.func.isRequired,
+    detachIsLinked: PropTypes.bool,
+    detachRole: PropTypes.string,
+    changeLayout: PropTypes.func.isRequired,
     view: PropTypes.string,
     setView: PropTypes.func.isRequired,
     chatIsOpen: PropTypes.bool,
@@ -88,39 +97,49 @@ export function LayoutProvider({ children }) {
     [setPdfLayout, setView]
   )
 
+  // helper to avoid changing layout multiple times in rapid succession. This is
+  // especially useful for calling `changeLayout` as a side-effect. Calling
+  // `changeLayout` multiple times on page load cause layout rendering issues do
+  // to timming clash with Angular.
+  const debouncedChangeLayout = useRef(
+    debounce((newLayout, newView) => changeLayout(newLayout, newView), 1000, {
+      leading: true,
+    })
+  ).current
+
   const {
     reattach,
     detach,
-    mode: detachMode,
+    isLinking: detachIsLinking,
+    isLinked: detachIsLinked,
     role: detachRole,
   } = useDetachLayout()
-  const previousDetachMode = usePreviousValue(detachMode)
 
   useEffect(() => {
-    switch (detachMode) {
-      case 'detacher':
-        changeLayout('flat', 'editor')
-        break
-      case 'detaching':
-        changeLayout('flat', 'editor')
-        break
-      case 'detached':
-        break
-      case 'orphan':
-        break
-      case null:
-        if (previousDetachMode) {
-          changeLayout('sideBySide')
-        }
-        break
+    if (debugPdfDetach) {
+      console.log('Layout Effect', {
+        detachRole,
+        detachIsLinking,
+        detachIsLinked,
+      })
     }
-  }, [detachMode, previousDetachMode, changeLayout])
+
+    if (detachRole !== 'detacher') return // not in a PDF detacher layout
+
+    if (detachIsLinking || detachIsLinked) {
+      // the tab is linked to a detached tab (or about to be linked); show
+      // editor only
+      debouncedChangeLayout('flat', 'editor')
+    } else {
+      debouncedChangeLayout('sideBySide')
+    }
+  }, [detachRole, detachIsLinking, detachIsLinked, debouncedChangeLayout])
 
   const value = useMemo(
     () => ({
       reattach,
       detach,
-      detachMode,
+      detachIsLinked,
       detachRole,
       changeLayout,
       chatIsOpen,
@@ -138,7 +157,7 @@ export function LayoutProvider({ children }) {
     [
       reattach,
       detach,
-      detachMode,
+      detachIsLinked,
       detachRole,
       changeLayout,
       chatIsOpen,

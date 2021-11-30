@@ -8,13 +8,16 @@ import PdfHybridLogsButton from './pdf-hybrid-logs-button'
 import PdfHybridDownloadButton from './pdf-hybrid-download-button'
 import PdfHybridCodeCheckButton from './pdf-hybrid-code-check-button'
 import PdfOrphanRefreshButton from './pdf-orphan-refresh-button'
+import { DetachedSynctexControl } from './detach-synctex-control'
 
 function PdfPreviewHybridToolbar() {
-  const { detachMode } = useLayoutContext()
+  const { detachRole, detachIsLinked } = useLayoutContext()
+
+  const orphanPdfTab = !detachIsLinked && detachRole === 'detached'
 
   return (
     <ButtonToolbar className="toolbar toolbar-pdf toolbar-pdf-hybrid">
-      {detachMode === 'orphan' ? (
+      {orphanPdfTab ? (
         <PdfPreviewHybridToolbarOrphanInner />
       ) : (
         <PdfPreviewHybridToolbarInner />
@@ -34,6 +37,7 @@ function PdfPreviewHybridToolbarInner() {
       <div className="toolbar-pdf-right">
         <PdfHybridCodeCheckButton />
         {!window.showPdfDetach && <PdfExpandButton />}
+        <DetachedSynctexControl />
       </div>
     </>
   )

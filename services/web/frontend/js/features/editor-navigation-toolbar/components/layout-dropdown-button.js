@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
@@ -6,8 +7,29 @@ import IconChecked from '../../../shared/components/icon-checked'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import IconEditorOnly from './icon-editor-only'
 import IconPdfOnly from './icon-pdf-only'
+import { useLayoutContext } from '../../../shared/context/layout-context'
+import * as eventTracking from '../../../infrastructure/event-tracking'
 
-function IconCheckmark({ iconFor, pdfLayout, view }) {
+function IconPlaceholder() {
+  return <Icon type="" modifier="fw" />
+}
+
+function IconRefresh() {
+  return <Icon type="refresh" modifier="fw" spin />
+}
+
+function IconLayout() {
+  return <Icon type="columns" modifier="fw" />
+}
+
+function IconDetach() {
+  return <Icon type="window-restore" modifier="fw" />
+}
+
+function IconCheckmark({ iconFor, pdfLayout, view, detachRole }) {
+  if (detachRole === 'detacher') {
+    return <IconPlaceholder />
+  }
   if (iconFor === 'editorOnly' && pdfLayout === 'flat' && view === 'editor') {
     return <IconChecked />
   } else if (iconFor === 'pdfOnly' && pdfLayout === 'flat' && view === 'pdf') {
@@ -16,24 +38,53 @@ function IconCheckmark({ iconFor, pdfLayout, view }) {
     return <IconChecked />
   }
   // return empty icon for placeholder
-  return <Icon type="" modifier="fw" />
+  return <IconPlaceholder />
 }
 
-function LayoutDropdownButton({
-  reattach,
-  detach,
-  handleChangeLayout,
-  detachMode,
-  detachRole,
-  pdfLayout,
-  view,
-}) {
+function LayoutDropdownButton() {
   const { t } = useTranslation()
+
+  const {
+    reattach,
+    detach,
+    detachIsLinked,
+    detachRole,
+    changeLayout,
+    view,
+    pdfLayout,
+  } = useLayoutContext(layoutContextPropTypes)
+
+  const handleDetach = useCallback(() => {
+    detach()
+    eventTracking.sendMB('project-layout-detach')
+  }, [detach])
+
+  const handleReattach = useCallback(() => {
+    if (detachRole !== 'detacher') {
+      return
+    }
+    reattach()
+    eventTracking.sendMB('project-layout-reattach')
+  }, [detachRole, reattach])
+
+  const handleChangeLayout = useCallback(
+    (newLayout, newView) => {
+      handleReattach()
+      changeLayout(newLayout, newView)
+      eventTracking.sendMB('project-layout-change', {
+        layout: newLayout,
+        view: newView,
+      })
+    },
+    [changeLayout, handleReattach]
+  )
+
+  const processing = !detachIsLinked && detachRole === 'detacher'
 
   // bsStyle is required for Dropdown.Toggle, but we will override style
   return (
     <>
-      {detachMode === 'detaching' && (
+      {processing && (
         <div aria-live="assertive" className="sr-only">
           {t('layout_processing')}
         </div>
@@ -41,27 +92,19 @@ function LayoutDropdownButton({
       <ControlledDropdown
         id="layout-dropdown"
         className="toolbar-item"
-        disabled={detachMode === 'detaching'}
+        pullRight
       >
         <Dropdown.Toggle className="btn-full-height" bsStyle="link">
-          {detachMode === 'detaching' ? (
-            <Icon type="refresh" modifier="fw" spin />
-          ) : (
-            <Icon type="columns" modifier="fw" />
-          )}
+          {processing ? <IconRefresh /> : <IconLayout />}
           <span className="toolbar-label">{t('layout')}</span>
         </Dropdown.Toggle>
         <Dropdown.Menu id="layout-dropdown-list">
-          <MenuItem header>{t('layout')}</MenuItem>
-
-          <MenuItem
-            disabled={detachRole === 'detacher'}
-            onSelect={() => handleChangeLayout('sideBySide')}
-          >
+          <MenuItem onSelect={() => handleChangeLayout('sideBySide')}>
             <IconCheckmark
               iconFor="sideBySide"
               pdfLayout={pdfLayout}
               view={view}
+              detachRole={detachRole}
             />
             <Icon type="columns" />
             {t('editor_and_pdf')}
@@ -75,6 +118,7 @@ function LayoutDropdownButton({
               iconFor="editorOnly"
               pdfLayout={pdfLayout}
               view={view}
+              detachRole={detachRole}
             />
             <IconEditorOnly />
             <Trans
@@ -86,7 +130,6 @@ function LayoutDropdownButton({
           </MenuItem>
 
           <MenuItem
-            disabled={detachRole === 'detacher'}
             onSelect={() => handleChangeLayout('flat', 'pdf')}
             className="menu-item-with-svg"
           >
@@ -94,6 +137,7 @@ function LayoutDropdownButton({
               iconFor="pdfOnly"
               pdfLayout={pdfLayout}
               view={view}
+              detachRole={detachRole}
             />
             <IconPdfOnly />
             <Trans
@@ -104,17 +148,17 @@ function LayoutDropdownButton({
             />
           </MenuItem>
 
-          <MenuItem divider />
-
           {detachRole === 'detacher' ? (
-            <MenuItem onSelect={() => reattach()}>
-              <Icon type="window-restore" modifier="fw" />
-              {t('bring_pdf_back_to_tab')}
+            <MenuItem>
+              {detachIsLinked ? <IconChecked /> : <IconRefresh />}
+              <IconDetach />
+              {t('pdf_in_separate_tab')}
             </MenuItem>
           ) : (
-            <MenuItem onSelect={() => detach()}>
-              <Icon type="window-restore" modifier="fw" />
-              {t('open_pdf_in_new_tab')}
+            <MenuItem onSelect={handleDetach}>
+              <IconPlaceholder />
+              <IconDetach />
+              {t('pdf_in_separate_tab')}
             </MenuItem>
           )}
         </Dropdown.Menu>
@@ -129,13 +173,14 @@ IconCheckmark.propTypes = {
   iconFor: PropTypes.string.isRequired,
   pdfLayout: PropTypes.string.isRequired,
   view: PropTypes.string,
+  detachRole: PropTypes.string,
 }
 
-LayoutDropdownButton.propTypes = {
+const layoutContextPropTypes = {
   reattach: PropTypes.func.isRequired,
   detach: PropTypes.func.isRequired,
-  handleChangeLayout: PropTypes.func.isRequired,
-  detachMode: PropTypes.string,
+  changeLayout: PropTypes.func.isRequired,
+  detachIsLinked: PropTypes.bool,
   detachRole: PropTypes.string,
   pdfLayout: PropTypes.string.isRequired,
   view: PropTypes.string,

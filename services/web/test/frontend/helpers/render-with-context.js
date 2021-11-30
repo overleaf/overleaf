@@ -31,6 +31,7 @@ export function EditorProviders({
   scope,
   children,
   rootFolder,
+  ui = { view: null, pdfLayout: 'flat', chatOpen: true },
 }) {
   window.user = user || window.user
   window.gitBridgePublicBaseUrl = 'git.overleaf.test'
@@ -51,10 +52,7 @@ export function EditorProviders({
     rootFolder: rootFolder || {
       children: [],
     },
-    ui: {
-      chatOpen: true,
-      pdfLayout: 'flat',
-    },
+    ui,
     $watch: (path, callback) => {
       callback(get($scope, path))
       return () => null
@@ -100,11 +98,11 @@ export function EditorProviders({
         <UserProvider>
           <ProjectProvider>
             <EditorProvider settings={{}}>
-              <CompileProvider>
-                <DetachProvider>
-                  <LayoutProvider>{children}</LayoutProvider>
-                </DetachProvider>
-              </CompileProvider>
+              <DetachProvider>
+                <LayoutProvider>
+                  <CompileProvider>{children}</CompileProvider>
+                </LayoutProvider>
+              </DetachProvider>
             </EditorProvider>
           </ProjectProvider>
         </UserProvider>

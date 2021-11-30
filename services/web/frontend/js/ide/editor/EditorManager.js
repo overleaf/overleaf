@@ -19,6 +19,7 @@ import './components/spellMenu'
 import './directives/aceEditor'
 import './directives/toggleSwitch'
 import './controllers/SavingNotificationController'
+import './controllers/CompileButton'
 let EditorManager
 
 export default EditorManager = (function () {

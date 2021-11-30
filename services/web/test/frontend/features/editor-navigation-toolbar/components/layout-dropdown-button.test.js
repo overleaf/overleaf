@@ -1,20 +1,26 @@
-import { render, screen } from '@testing-library/react'
+import sinon from 'sinon'
+import { fireEvent, screen } from '@testing-library/react'
 import LayoutDropdownButton from '../../../../../frontend/js/features/editor-navigation-toolbar/components/layout-dropdown-button'
+import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 describe('<LayoutDropdownButton />', function () {
-  const defaultProps = {
-    reattach: () => {},
-    detach: () => {},
-    handleChangeLayout: () => {},
-    detachMode: undefined,
-    detachRole: undefined,
+  let openStub
+  const defaultUi = {
     pdfLayout: 'flat',
     view: 'pdf',
   }
 
+  beforeEach(function () {
+    openStub = sinon.stub(window, 'open')
+  })
+
+  afterEach(function () {
+    openStub.restore()
+  })
+
   it('should mark current layout option as selected', function () {
     // Selected is aria-label, visually we show a checkmark
-    render(<LayoutDropdownButton {...defaultProps} />)
+    renderWithEditorContext(<LayoutDropdownButton />, { ui: defaultUi })
     screen.getByRole('menuitem', {
       name: 'Editor & PDF',
     })
@@ -25,35 +31,19 @@ describe('<LayoutDropdownButton />', function () {
       name: 'Editor only (hide PDF)',
     })
     screen.getByRole('menuitem', {
-      name: 'Open PDF in new tab',
-    })
-  })
-
-  it('should select Editor Only when detached and show option to reattach', function () {
-    const detachedProps = Object.assign({}, defaultProps, {
-      detachMode: 'detacher',
-      detachRole: 'detacher',
-      view: 'editor',
-    })
-
-    render(<LayoutDropdownButton {...detachedProps} />)
-
-    screen.getByRole('menuitem', {
-      name: 'Selected Editor only (hide PDF)',
-    })
-    screen.getByRole('menuitem', {
-      name: 'Bring PDF back to this tab',
+      name: 'PDF in separate tab',
     })
   })
 
   it('should show processing when detaching', function () {
-    const detachedProps = Object.assign({}, defaultProps, {
-      detachMode: 'detaching',
-      detachRole: 'detacher',
-      view: 'editor',
+    renderWithEditorContext(<LayoutDropdownButton />, {
+      ui: { ...defaultUi, view: 'editor' },
     })
 
-    render(<LayoutDropdownButton {...detachedProps} />)
+    const menuItem = screen.getByRole('menuitem', {
+      name: 'PDF in separate tab',
+    })
+    fireEvent.click(menuItem)
 
     screen.getByText('Layout processing')
   })

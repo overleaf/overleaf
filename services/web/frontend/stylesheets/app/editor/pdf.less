@@ -50,7 +50,7 @@
 
 .toolbar-pdf-orphan {
   justify-content: center;
-  color: white;
+  color: @toolbar-btn-color;
   .btn {
     margin-left: @margin-xs;
   }
@@ -67,7 +67,7 @@
 }
 
 .toolbar-pdf-hybrid {
-  .btn:not(.btn-recompile):not(.btn-orphan) {
+  .btn:not(.btn-recompile):not(.btn-orphan):not(.detach-synctex-control) {
     display: inline-block;
     color: @toolbar-btn-color;
     background-color: transparent;
@@ -357,7 +357,7 @@
   top: 68px;
 }
 
-.synctex-control {
+.synctex-control:not(.detach-synctex-control) {
   @ol-synctex-control-size: 24px;
   align-items: center;
   display: flex;
@@ -379,7 +379,9 @@
     opacity: 1;
     background-color: fade(@btn-default-bg, 60%);
   }
+}
 
+.synctex-control {
   > .synctex-control-icon {
     display: inline-block;
     font: normal normal normal 14px/1 FontAwesome;

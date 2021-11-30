@@ -1,9 +1,14 @@
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 import { useDetachContext } from '../context/detach-context'
 import getMeta from '../../utils/meta'
 import { buildUrlWithDetachRole } from '../utils/url-helper'
+import * as eventTracking from '../../infrastructure/event-tracking'
+import usePreviousValue from './use-previous-value'
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
+
+const LINKING_TIMEOUT = 60000
+const RELINK_TIMEOUT = 10000
 
 export default function useDetachLayout() {
   const {
@@ -14,50 +19,81 @@ export default function useDetachLayout() {
     deleteEventHandler,
   } = useDetachContext()
 
-  const [mode, setMode] = useState(() => {
-    if (role === 'detacher') {
-      return 'detaching'
-    }
-    if (role === 'detached') {
-      return 'orphan'
-    }
-  })
+  // isLinking: when the tab expects to be linked soon (e.g. on detach)
+  const [isLinking, setIsLinking] = useState(false)
+
+  // isLinked: when the tab is linked to another tab (of different role)
+  const [isLinked, setIsLinked] = useState(false)
+
+  const uiTimeoutRef = useRef()
 
   useEffect(() => {
     if (debugPdfDetach) {
-      console.log('Effect', { mode })
+      console.log('Effect', { isLinked })
     }
-  }, [mode])
+    setIsLinking(false)
+  }, [isLinked, setIsLinking])
+
+  useEffect(() => {
+    if (uiTimeoutRef.current) {
+      clearTimeout(uiTimeoutRef.current)
+    }
+    if (role === 'detacher' && isLinked === false) {
+      // the detacher tab either a) disconnected from its detached tab(s), b)is
+      // loading and no detached tab(s) is connected yet or c) is detaching and
+      // waiting for the detached tab to connect.  Start a timeout to put
+      // the tab back in non-detacher role in case no detached tab are connected
+      uiTimeoutRef.current = setTimeout(
+        () => {
+          setRole(null)
+        },
+        isLinking ? LINKING_TIMEOUT : RELINK_TIMEOUT
+      )
+    }
+  }, [role, isLinking, isLinked, setRole])
+
+  useEffect(() => {
+    if (debugPdfDetach) {
+      console.log('Effect', { isLinking })
+    }
+  }, [isLinking])
+
+  const previousRole = usePreviousValue(role)
+  useEffect(() => {
+    if (previousRole && !role) {
+      eventTracking.sendMB('project-layout-reattached')
+    }
+  }, [previousRole, role])
 
   const reattach = useCallback(() => {
     broadcastEvent('reattach')
     setRole(null)
-    setMode(null)
-  }, [setRole, setMode, broadcastEvent])
+    setIsLinked(false)
+  }, [setRole, setIsLinked, broadcastEvent])
 
   const detach = useCallback(() => {
     setRole('detacher')
-    setMode('detaching')
+    setIsLinking(true)
 
     window.open(buildUrlWithDetachRole('detached'), '_blank')
-  }, [setRole, setMode])
+  }, [setRole, setIsLinking])
 
   const handleEventForDetacherFromDetached = useCallback(
     message => {
       switch (message.event) {
         case 'connected':
           broadcastEvent('up')
-          setMode('detacher')
+          setIsLinked(true)
           break
         case 'up':
-          setMode('detacher')
+          setIsLinked(true)
           break
         case 'closed':
-          setMode(null)
+          setIsLinked(false)
           break
       }
     },
-    [setMode, broadcastEvent]
+    [setIsLinked, broadcastEvent]
   )
 
   const handleEventForDetachedFromDetacher = useCallback(
@@ -65,20 +101,21 @@ export default function useDetachLayout() {
       switch (message.event) {
         case 'connected':
           broadcastEvent('up')
-          setMode('detached')
+          setIsLinked(true)
           break
         case 'up':
-          setMode('detached')
+          setIsLinked(true)
           break
         case 'closed':
-          setMode('orphan')
+          setIsLinked(false)
           break
         case 'reattach':
+          setIsLinked(false) // set as unlinked, in case closing is not allowed
           window.close()
           break
       }
     },
-    [setMode, broadcastEvent]
+    [setIsLinked, broadcastEvent]
   )
 
   const handleEventFromSelf = useCallback(
@@ -124,7 +161,8 @@ export default function useDetachLayout() {
   return {
     reattach,
     detach,
-    mode,
+    isLinked,
+    isLinking,
     role,
   }
 }

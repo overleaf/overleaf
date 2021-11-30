@@ -59,6 +59,7 @@ CompileContext.Provider.propTypes = {
     uncompiled: PropTypes.bool,
     validationIssues: PropTypes.object,
     firstRenderDone: PropTypes.func,
+    cleanupCompileResult: PropTypes.func,
   }),
 }
 
@@ -331,19 +332,6 @@ export function CompileProvider({ children }) {
     }
   }, [error])
 
-  // recompile on key press
-  useEffect(() => {
-    const listener = event => {
-      compiler.compile(event.detail)
-    }
-
-    window.addEventListener('pdf:recompile', listener)
-
-    return () => {
-      window.removeEventListener('pdf:recompile', listener)
-    }
-  }, [compiler])
-
   // whether there has been an autocompile linting error, if syntax validation is switched on
   const autoCompileLintingError = Boolean(
     autoCompile && syntaxValidation && hasLintingError
@@ -375,25 +363,13 @@ export function CompileProvider({ children }) {
     }
   }, [compiler])
 
-  // record doc changes when notified by the editor
-  useEffect(() => {
-    const listener = event => {
-      setChangedAt(Date.now())
-    }
-
-    window.addEventListener('doc:changed', listener)
-    window.addEventListener('doc:saved', listener)
-
-    return () => {
-      window.removeEventListener('doc:changed', listener)
-      window.removeEventListener('doc:saved', listener)
-    }
-  }, [])
-
   // start a compile manually
-  const startCompile = useCallback(() => {
-    compiler.compile()
-  }, [compiler])
+  const startCompile = useCallback(
+    options => {
+      compiler.compile(options)
+    },
+    [compiler]
+  )
 
   // stop a compile manually
   const stopCompile = useCallback(() => {
@@ -453,6 +429,8 @@ export function CompileProvider({ children }) {
       uncompiled,
       validationIssues,
       firstRenderDone,
+      setChangedAt,
+      cleanupCompileResult,
     }),
     [
       autoCompile,
@@ -488,6 +466,8 @@ export function CompileProvider({ children }) {
       uncompiled,
       validationIssues,
       firstRenderDone,
+      setChangedAt,
+      cleanupCompileResult,
     ]
   )
 

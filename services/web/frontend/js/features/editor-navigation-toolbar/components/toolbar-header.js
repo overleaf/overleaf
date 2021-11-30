@@ -18,13 +18,8 @@ const [publishModalModules] = importOverleafModules('publishModal')
 const PublishButton = publishModalModules?.import.default
 
 const ToolbarHeader = React.memo(function ToolbarHeader({
-  reattach,
-  detach,
-  detachMode,
-  detachRole,
   cobranding,
   onShowLeftMenuClick,
-  handleChangeLayout,
   chatIsOpen,
   toggleChatOpen,
   reviewPanelOpen,
@@ -81,18 +76,6 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
       <div className="toolbar-right">
         <OnlineUsersWidget onlineUsers={onlineUsers} goToUser={goToUser} />
 
-        {window.showPdfDetach && (
-          <LayoutDropdownButton
-            reattach={reattach}
-            detach={detach}
-            handleChangeLayout={handleChangeLayout}
-            detachMode={detachMode}
-            detachRole={detachRole}
-            pdfLayout={pdfLayout}
-            view={view}
-          />
-        )}
-
         {shouldDisplayTrackChangesButton && (
           <TrackChangesToggleButton
             onClick={toggleReviewPanelOpen}
@@ -100,22 +83,27 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
             trackChangesIsOpen={reviewPanelOpen}
           />
         )}
+
         <ShareProjectButton onClick={openShareModal} />
         {shouldDisplayPublishButton && (
           <PublishButton cobranding={cobranding} />
         )}
+
         {!isRestrictedTokenMember && (
-          <>
-            <HistoryToggleButton
-              historyIsOpen={historyIsOpen}
-              onClick={toggleHistoryOpen}
-            />
-            <ChatToggleButton
-              chatIsOpen={chatIsOpen}
-              onClick={toggleChatOpen}
-              unreadMessageCount={unreadMessageCount}
-            />
-          </>
+          <HistoryToggleButton
+            historyIsOpen={historyIsOpen}
+            onClick={toggleHistoryOpen}
+          />
+        )}
+
+        {window.showPdfDetach && <LayoutDropdownButton />}
+
+        {!isRestrictedTokenMember && (
+          <ChatToggleButton
+            chatIsOpen={chatIsOpen}
+            onClick={toggleChatOpen}
+            unreadMessageCount={unreadMessageCount}
+          />
         )}
       </div>
     </header>
@@ -123,12 +111,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
 })
 
 ToolbarHeader.propTypes = {
-  reattach: PropTypes.func.isRequired,
-  detach: PropTypes.func.isRequired,
-  detachMode: PropTypes.string,
-  detachRole: PropTypes.string,
   onShowLeftMenuClick: PropTypes.func.isRequired,
-  handleChangeLayout: PropTypes.func.isRequired,
   cobranding: PropTypes.object,
   chatIsOpen: PropTypes.bool,
   toggleChatOpen: PropTypes.func.isRequired,
