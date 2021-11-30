@@ -956,10 +956,6 @@ const ProjectController = {
                 'new_source_editor',
                 false
               ),
-              showSymbolPalette: shouldDisplayFeature(
-                'symbol_palette',
-                user.alphaProgram || user.betaProgram
-              ),
               trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
               enablePdfCaching: partOfPdfCachingRollout('enable-caching'),
               resetServiceWorker:
