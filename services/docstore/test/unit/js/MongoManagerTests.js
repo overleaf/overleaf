@@ -371,5 +371,30 @@ describe('MongoManager', function () {
         }
       )
     })
+
+    it('should return a value error if incoming rev is NaN', function (done) {
+      this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: 2 })
+      this.doc = { _id: ObjectId(), name: 'mock-doc', rev: NaN }
+      this.MongoManager.withRevCheck(
+        this.doc,
+        this.testFunction,
+        (err, result) => {
+          err.should.be.instanceof(Errors.DocRevValueError)
+          done()
+        }
+      )
+    })
+
+    it('should return a value error if checked doc rev is NaN', function (done) {
+      this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: NaN })
+      this.MongoManager.withRevCheck(
+        this.doc,
+        this.testFunction,
+        (err, result) => {
+          err.should.be.instanceof(Errors.DocRevValueError)
+          done()
+        }
+      )
+    })
   })
 })

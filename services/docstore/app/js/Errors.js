@@ -6,8 +6,11 @@ class Md5MismatchError extends OError {}
 
 class DocModifiedError extends OError {}
 
+class DocRevValueError extends OError {}
+
 module.exports = {
   Md5MismatchError,
   DocModifiedError,
+  DocRevValueError,
   ...Errors,
 }

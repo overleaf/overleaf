@@ -203,6 +203,15 @@ module.exports = MongoManager = {
       if (err) return callback(err)
       MongoManager.getDocRev(doc._id, function (err, currentRev) {
         if (err) return callback(err)
+        if (isNaN(currentRev) || isNaN(doc.rev)) {
+          return callback(
+            new Errors.DocRevValueError('doc rev is NaN', {
+              doc_id: doc._id,
+              rev: doc.rev,
+              currentRev,
+            })
+          )
+        }
         if (doc.rev !== currentRev) {
           return callback(
             new Errors.DocModifiedError('doc rev has changed', {
