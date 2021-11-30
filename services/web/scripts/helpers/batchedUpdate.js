@@ -6,16 +6,33 @@ const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 1000
 let BATCH_LAST_ID
 if (process.env.BATCH_LAST_ID) {
   BATCH_LAST_ID = ObjectId(process.env.BATCH_LAST_ID)
+} else if (process.env.BATCH_RANGE_START) {
+  BATCH_LAST_ID = ObjectId(process.env.BATCH_RANGE_START)
+}
+let BATCH_RANGE_END
+if (process.env.BATCH_RANGE_END) {
+  BATCH_RANGE_END = ObjectId(process.env.BATCH_RANGE_END)
 }
 
 async function getNextBatch(collection, query, maxId, projection, options) {
+  const queryIdField = {}
   maxId = maxId || BATCH_LAST_ID
   if (maxId) {
     if (BATCH_DESCENDING) {
-      query._id = { $lt: maxId }
+      queryIdField.$lt = maxId
     } else {
-      query._id = { $gt: maxId }
+      queryIdField.$gt = maxId
     }
+  }
+  if (BATCH_RANGE_END) {
+    if (BATCH_DESCENDING) {
+      queryIdField.$gt = BATCH_RANGE_END
+    } else {
+      queryIdField.$lt = BATCH_RANGE_END
+    }
+  }
+  if (queryIdField.$gt || queryIdField.$lt) {
+    query._id = queryIdField
   }
   const entries = await collection
     .find(query, options)
