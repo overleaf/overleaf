@@ -872,7 +872,7 @@ const ProjectController = {
 
             let disableAngularRouter = shouldDisplayFeature(
               'disable_angular_router',
-              user.alphaProgram
+              user.alphaProgram || user.betaProgram
             )
 
             const showPdfDetach = shouldDisplayFeature(
