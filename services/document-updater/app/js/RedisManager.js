@@ -248,7 +248,7 @@ module.exports = RedisManager = {
         projectHistoryId = parseInt(projectHistoryId)
       }
 
-      if (!pathname) {
+      if (docLines && version && !pathname) {
         metrics.inc('pathname', 1, {
           path: 'RedisManager.getDoc',
           status: pathname === '' ? 'zero-length' : 'undefined',
