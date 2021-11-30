@@ -28,6 +28,13 @@ LayoutContext.Provider.propTypes = {
   }).isRequired,
 }
 
+function setLayoutInLocalStorage(pdfLayout) {
+  localStorage.setItem(
+    'pdf.layout',
+    pdfLayout === 'sideBySide' ? 'split' : 'flat'
+  )
+}
+
 export function LayoutProvider({ children }) {
   const { $scope } = useIdeContext()
 
@@ -68,7 +75,7 @@ export function LayoutProvider({ children }) {
       const newLayout = layout === 'sideBySide' ? 'flat' : 'sideBySide'
       setView(newLayout === 'sideBySide' ? 'editor' : 'pdf')
       setPdfLayout(newLayout)
-      localStorage.setItem('pdf.layout', newLayout)
+      setLayoutInLocalStorage(newLayout)
     })
   }, [setPdfLayout, setView])
 
@@ -76,7 +83,7 @@ export function LayoutProvider({ children }) {
     (newLayout, newView) => {
       setPdfLayout(newLayout)
       setView(newLayout === 'sideBySide' ? 'editor' : newView)
-      localStorage.setItem('pdf.layout', newLayout)
+      setLayoutInLocalStorage(newLayout)
     },
     [setPdfLayout, setView]
   )
