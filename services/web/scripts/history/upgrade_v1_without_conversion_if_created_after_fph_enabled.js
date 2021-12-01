@@ -3,6 +3,7 @@ const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true'
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
 const DRY_RUN = process.env.DRY_RUN !== 'false'
+const USE_QUERY_HINT = process.env.USE_QUERY_HINT !== 'false'
 // persist fallback in order to keep batchedUpdate in-sync
 process.env.BATCH_SIZE = BATCH_SIZE
 // raise mongo timeout to 1hr if otherwise unspecified
@@ -14,7 +15,13 @@ const { db } = require('../../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../../app/src/util/promises')
 const { batchedUpdate } = require('../helpers/batchedUpdate')
 
-console.log({ DRY_RUN, VERBOSE_LOGGING, WRITE_CONCURRENCY, BATCH_SIZE })
+console.log({
+  DRY_RUN,
+  VERBOSE_LOGGING,
+  WRITE_CONCURRENCY,
+  BATCH_SIZE,
+  USE_QUERY_HINT,
+})
 
 const RESULT = {
   DRY_RUN,
@@ -123,8 +130,9 @@ async function main() {
     _id: 1,
     overleaf: 1,
   }
-  const options = {
-    hint: { _id: 1 },
+  const options = {}
+  if (USE_QUERY_HINT) {
+    options.hint = { _id: 1 }
   }
   await batchedUpdate(
     'projects',

@@ -1,8 +1,10 @@
-const SCRIPT_VERSION = 1
+const SCRIPT_VERSION = 2
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true'
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
 const DRY_RUN = process.env.DRY_RUN !== 'false'
+const USE_QUERY_HINT = process.env.USE_QUERY_HINT !== 'false'
+const RETRY_FAILED = process.env.RETRY_FAILED === 'true'
 const MAX_UPGRADES_TO_ATTEMPT =
   parseInt(process.env.MAX_UPGRADES_TO_ATTEMPT, 10) || false
 const MAX_FAILURES = parseInt(process.env.MAX_FAILURES, 10) || 50
@@ -25,6 +27,8 @@ console.log({
   BATCH_SIZE,
   MAX_UPGRADES_TO_ATTEMPT,
   MAX_FAILURES,
+  USE_QUERY_HINT,
+  RETRY_FAILED,
 })
 
 const RESULT = {
@@ -64,15 +68,17 @@ async function processProject(project) {
   if (INTERRUPT) {
     return
   }
-  // safety check
-  if (project.overleaf && project.overleaf.history) {
-    if (
-      project.overleaf.history.conversionFailed ||
-      project.overleaf.history.upgradeFailed
-    ) {
-      // we don't want to attempt upgrade on projects
-      // that have been previously attempted and failed
-      return
+  // skip safety check if we want to retry failed upgrades
+  if (!RETRY_FAILED) {
+    if (project.overleaf && project.overleaf.history) {
+      if (
+        project.overleaf.history.conversionFailed ||
+        project.overleaf.history.upgradeFailed
+      ) {
+        // we don't want to attempt upgrade on projects
+        // that have been previously attempted and failed
+        return
+      }
     }
   }
   const anyDocHistory = await anyDocHistoryExists(project)
@@ -122,6 +128,10 @@ async function doUpgradeForNoneWithConversion(project) {
         $set: {
           'overleaf.history.upgradeReason': `none-with-conversion/${SCRIPT_VERSION}`,
         },
+        $unset: {
+          'overleaf.history.upgradeFailed': true,
+          'overleaf.history.conversionFailed': true,
+        },
       }
     )
   }
@@ -158,8 +168,9 @@ async function main() {
     _id: 1,
     overleaf: 1,
   }
-  const options = {
-    hint: { _id: 1 },
+  const options = {}
+  if (USE_QUERY_HINT) {
+    options.hint = { _id: 1 }
   }
   await batchedUpdate(
     'projects',
