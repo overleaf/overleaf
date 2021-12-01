@@ -85,7 +85,7 @@ async function rewindDoc(projectId, docId, zipfile) {
       v = update.v
     } catch (e) {
       e.attempted_update = update // keep a record of the attempted update
-      logger.error({ projectId, docId, err: e }, 'rewind error')
+      logger.warn({ projectId, docId, err: e }, 'rewind error')
       break // stop attempting to rewind on error
     }
 

@@ -36,7 +36,7 @@ module.exports = DiffGenerator = {
           if (e instanceof ConsistencyError && (i = update.op.length - 1)) {
             // catch known case where the last op in an array has been
             // merged into a later op
-            logger.error(
+            logger.warn(
               { err: e, update, op: JSON.stringify(op) },
               'marking op as broken'
             )
