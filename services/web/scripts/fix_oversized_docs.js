@@ -5,6 +5,7 @@ const DocstoreManager = require('../app/src/Features/Docstore/DocstoreManager')
 const FileStoreHandler = require('../app/src/Features/FileStore/FileStoreHandler')
 const FileWriter = require('../app/src/infrastructure/FileWriter')
 const ProjectEntityMongoUpdateHandler = require('../app/src/Features/Project/ProjectEntityMongoUpdateHandler')
+const ProjectLocator = require('../app/src/Features/Project/ProjectLocator')
 const RedisWrapper = require('@overleaf/redis-wrapper')
 const Settings = require('@overleaf/settings')
 
@@ -55,7 +56,7 @@ async function processProject(projectId) {
 }
 
 async function processDoc(projectId, docId) {
-  const doc = await getDocFromRedis(docId)
+  const doc = await getDoc(projectId, docId)
   const size = doc.lines.reduce((sum, line) => sum + line.length + 1, 0)
   if (size > opts.maxDocSize) {
     if (
@@ -89,15 +90,19 @@ async function getDocIds(projectId) {
   return docIds
 }
 
-async function getDocFromRedis(docId) {
+async function getDoc(projectId, docId) {
   const lines = await redis.get(`doclines:{${docId}}`)
-  const path = await redis.get(`Pathname:{${docId}}`)
   const ranges = await redis.get(`Ranges:{${docId}}`)
+  const { path } = await ProjectLocator.promises.findElement({
+    project_id: projectId,
+    element_id: docId,
+    type: 'doc',
+  })
   return {
     id: docId,
     lines: JSON.parse(lines),
     ranges: ranges ? JSON.parse(ranges) : {},
-    path,
+    path: path.fileSystem,
   }
 }
 
