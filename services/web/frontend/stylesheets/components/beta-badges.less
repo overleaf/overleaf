@@ -3,9 +3,15 @@
   display: inline-block;
   width: @line-height-computed * 0.75;
   height: @line-height-computed * 0.75;
-  line-height: @line-height-computed * 0.75;
+  line-height: @font-size-small;
+  font-size: @line-height-computed * 0.75;
   text-align: center;
   color: #fff;
+
+  &::before {
+    line-height: @font-size-small;
+    font-size: @font-size-small;
+  }
 
   &:hover,
   &:focus {
