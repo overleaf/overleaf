@@ -194,7 +194,7 @@ function PdfSynctexControls() {
       setSyncToPdfInFlight(true)
 
       if (clsiServerId) {
-        params.set('clsiserverid', clsiServerId)
+        params += `&clsiserverid=${clsiServerId}`
       }
 
       getJSON(`/project/${projectId}/sync/code?${params}`, { signal })
@@ -233,7 +233,7 @@ function PdfSynctexControls() {
         file: getCurrentFilePath(),
         line: cursorPosition.row + 1,
         column: cursorPosition.column,
-      })
+      }).toString()
 
       goToPdfLocation(params)
     },
