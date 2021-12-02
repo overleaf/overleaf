@@ -4,10 +4,8 @@ import {
   useCallback,
   useMemo,
   useEffect,
-  useRef,
 } from 'react'
 import PropTypes from 'prop-types'
-import { debounce } from 'lodash'
 import useScopeValue from '../hooks/use-scope-value'
 import useDetachLayout from '../hooks/use-detach-layout'
 import { useIdeContext } from './ide-context'
@@ -97,16 +95,6 @@ export function LayoutProvider({ children }) {
     [setPdfLayout, setView]
   )
 
-  // helper to avoid changing layout multiple times in rapid succession. This is
-  // especially useful for calling `changeLayout` as a side-effect. Calling
-  // `changeLayout` multiple times on page load cause layout rendering issues do
-  // to timming clash with Angular.
-  const debouncedChangeLayout = useRef(
-    debounce((newLayout, newView) => changeLayout(newLayout, newView), 1000, {
-      leading: true,
-    })
-  ).current
-
   const {
     reattach,
     detach,
@@ -129,11 +117,9 @@ export function LayoutProvider({ children }) {
     if (detachIsLinking || detachIsLinked) {
       // the tab is linked to a detached tab (or about to be linked); show
       // editor only
-      debouncedChangeLayout('flat', 'editor')
-    } else {
-      debouncedChangeLayout('sideBySide')
+      changeLayout('flat', 'editor')
     }
-  }, [detachRole, detachIsLinking, detachIsLinked, debouncedChangeLayout])
+  }, [detachRole, detachIsLinking, detachIsLinked, changeLayout])
 
   const value = useMemo(
     () => ({
