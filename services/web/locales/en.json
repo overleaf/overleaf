@@ -1536,5 +1536,19 @@
   "redirect_to_editor": "Redirect to editor",
   "layout_processing": "Layout processing",
   "show_in_code": "Show in code",
-  "show_in_pdf": "Show in PDF"
+  "show_in_pdf": "Show in PDF",
+  "search_all": "all",
+  "search_close": "close",
+  "search_command_find": "Find",
+  "search_command_go": "Go",
+  "search_command_go_to_line": "Go to line",
+  "search_command_replace": "Replace",
+  "search_current_match": "current match",
+  "search_match_case": "match case",
+  "search_next": "next",
+  "search_on_line": "on line",
+  "search_previous": "previous",
+  "search_regexp": "regexp",
+  "search_replace": "replace",
+  "search_replace_all": "replace all"
 }
