@@ -165,6 +165,17 @@
   text-decoration: none !important;
 }
 
+.layout-dropdown {
+  .pdf-detach-survey {
+    display: flex;
+    font-size: @font-size-small;
+  }
+
+  .pdf-detach-survey-text {
+    margin-left: @margin-sm;
+    white-space: normal;
+  }
+}
 #layout-dropdown-list {
   a {
     i,
@@ -408,6 +419,11 @@
 }
 
 .menu-item-with-svg {
+  a {
+    align-items: center;
+    display: flex !important;
+  }
+
   svg {
     line,
     rect {

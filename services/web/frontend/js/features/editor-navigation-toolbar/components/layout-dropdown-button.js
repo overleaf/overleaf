@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import PropTypes from 'prop-types'
-import { Dropdown, MenuItem } from 'react-bootstrap'
+import { Dropdown, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 import IconChecked from '../../../shared/components/icon-checked'
@@ -91,12 +91,19 @@ function LayoutDropdownButton() {
       )}
       <ControlledDropdown
         id="layout-dropdown"
-        className="toolbar-item"
+        className="toolbar-item layout-dropdown"
         pullRight
       >
         <Dropdown.Toggle className="btn-full-height" bsStyle="link">
           {processing ? <IconRefresh /> : <IconLayout />}
           <span className="toolbar-label">{t('layout')}</span>
+          <OverlayTrigger
+            placement="bottom"
+            overlay={<Tooltip id="pdf-detach-badge">Beta feature</Tooltip>}
+            delayHide={100}
+          >
+            <span className="beta-badge" />
+          </OverlayTrigger>
         </Dropdown.Toggle>
         <Dropdown.Menu id="layout-dropdown-list">
           <MenuItem onSelect={() => handleChangeLayout('sideBySide')}>
@@ -121,12 +128,14 @@ function LayoutDropdownButton() {
               detachRole={detachRole}
             />
             <IconEditorOnly />
-            <Trans
-              i18nKey="editor_only_hide_pdf"
-              components={[
-                <span key="editor_only_hide_pdf" className="subdued" />,
-              ]}
-            />
+            <span>
+              <Trans
+                i18nKey="editor_only_hide_pdf"
+                components={[
+                  <span key="editor_only_hide_pdf" className="subdued" />,
+                ]}
+              />
+            </span>
           </MenuItem>
 
           <MenuItem
@@ -140,12 +149,14 @@ function LayoutDropdownButton() {
               detachRole={detachRole}
             />
             <IconPdfOnly />
-            <Trans
-              i18nKey="pdf_only_hide_editor"
-              components={[
-                <span key="pdf_only_hide_editor" className="subdued" />,
-              ]}
-            />
+            <span>
+              <Trans
+                i18nKey="pdf_only_hide_editor"
+                components={[
+                  <span key="pdf_only_hide_editor" className="subdued" />,
+                ]}
+              />
+            </span>
           </MenuItem>
 
           {detachRole === 'detacher' ? (
@@ -161,6 +172,24 @@ function LayoutDropdownButton() {
               {t('pdf_in_separate_tab')}
             </MenuItem>
           )}
+
+          <MenuItem divider />
+          <div className="pdf-detach-survey">
+            <span>
+              <span className="beta-badge" />
+            </span>
+            <span className="pdf-detach-survey-text">
+              The Layout menu and opening the PDF in a new tab are beta
+              features.{' '}
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLScuxQA8Az9NQwvYgC6FALG7FEtCCj4e8of27e_L0SXGrJFRMw/viewform"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('give_feedback')}.
+              </a>
+            </span>
+          </div>
         </Dropdown.Menu>
       </ControlledDropdown>
     </>
