@@ -51,6 +51,7 @@ const UserMembershipRouter = require('./Features/UserMembership/UserMembershipRo
 const SystemMessageController = require('./Features/SystemMessages/SystemMessageController')
 const AnalyticsRegistrationSourceMiddleware = require('./Features/Analytics/AnalyticsRegistrationSourceMiddleware')
 const AnalyticsUTMTrackingMiddleware = require('./Features/Analytics/AnalyticsUTMTrackingMiddleware')
+const SplitTestMiddleware = require('./Features/SplitTests/SplitTestMiddleware')
 const { Joi, validate } = require('./infrastructure/Validation')
 const {
   renderUnsupportedBrowserPage,
@@ -59,6 +60,7 @@ const {
 
 const logger = require('@overleaf/logger')
 const _ = require('underscore')
+const { expressify } = require('./util/promises')
 
 module.exports = { initialize }
 
@@ -71,6 +73,10 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get('*', AnalyticsRegistrationSourceMiddleware.setInbound())
   webRouter.get('*', AnalyticsUTMTrackingMiddleware.recordUTMTags())
+  webRouter.get(
+    '*',
+    expressify(SplitTestMiddleware.loadAssignmentsInLocals([]))
+  )
 
   webRouter.get('/login', UserPagesController.loginPage)
   AuthenticationController.addEndpointToLoginWhitelist('/login')

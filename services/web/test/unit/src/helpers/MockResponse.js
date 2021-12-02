@@ -27,6 +27,7 @@ class MockResponse {
     this.redirected = false
     this.returned = false
     this.headers = {}
+    this.locals = {}
   }
 
   render(template, variables) {

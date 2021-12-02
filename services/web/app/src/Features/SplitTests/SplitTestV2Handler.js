@@ -2,6 +2,7 @@ const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
+const LocalsHelper = require('./LocalsHelper')
 const crypto = require('crypto')
 const _ = require('lodash')
 const { callbackify } = require('util')
@@ -89,10 +90,11 @@ async function getAssignmentForSession(session, splitTestName, options) {
  */
 async function assignInLocalsContext(res, userId, splitTestName, options) {
   const assignment = await getAssignment(userId, splitTestName, options)
-  if (!res.locals.splitTestVariants) {
-    res.locals.splitTestVariants = {}
-  }
-  res.locals.splitTestVariants[splitTestName] = assignment.variant
+  LocalsHelper.setSplitTestVariant(
+    res.locals,
+    splitTestName,
+    assignment.variant
+  )
 }
 
 /**
@@ -115,10 +117,11 @@ async function assignInLocalsContextForSession(
     splitTestName,
     options
   )
-  if (!res.locals.splitTestVariants) {
-    res.locals.splitTestVariants = {}
-  }
-  res.locals.splitTestVariants[splitTestName] = assignment.variant
+  LocalsHelper.setSplitTestVariant(
+    res.locals,
+    splitTestName,
+    assignment.variant
+  )
 }
 
 async function _getAssignment(
