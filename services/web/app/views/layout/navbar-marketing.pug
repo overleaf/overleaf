@@ -36,7 +36,7 @@ nav.navbar.navbar-default.navbar-main
 
 
 				// loop over header_extras
-				each item in nav.header_extras
+				each item in ((splitTestVariants && (splitTestVariants['unified-navigation'] === 'show-unified-navigation')) ? nav.header_extras_unified : nav.header_extras)
 					-
 						if ((item.only_when_logged_in && getSessionUser())
 							|| (item.only_when_logged_out && (!getSessionUser()))
@@ -67,13 +67,25 @@ nav.navbar.navbar-default.navbar-main
 										else
 											li
 												if child.url
-													a(href=child.url, class=child.class) !{translate(child.text)}
+													a(
+														href=child.url, 
+														class=child.class,
+														event-tracking=child.event
+														event-tracking-mb="true"
+														event-tracking-trigger="click"
+													) !{translate(child.text)}
 												else
 													| !{translate(child.text)}
 						else
 							li(class=item.class)
 								if item.url
-									a(href=item.url, class=item.class) !{translate(item.text)}
+									a(
+										href=item.url,
+										class=item.class,
+										event-tracking=item.event
+										event-tracking-mb="true"
+										event-tracking-trigger="click"
+									) !{translate(item.text)}
 								else
 									| !{translate(item.text)}
 

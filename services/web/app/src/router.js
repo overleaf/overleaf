@@ -75,7 +75,9 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get('*', AnalyticsUTMTrackingMiddleware.recordUTMTags())
   webRouter.get(
     '*',
-    expressify(SplitTestMiddleware.loadAssignmentsInLocals([]))
+    expressify(
+      SplitTestMiddleware.loadAssignmentsInLocals(['unified-navigation'])
+    )
   )
 
   webRouter.get('/login', UserPagesController.loginPage)

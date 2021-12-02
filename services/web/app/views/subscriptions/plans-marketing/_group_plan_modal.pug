@@ -1,6 +1,10 @@
 div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 	.modal-dialog(role="document")
-		.modal-content
+		.modal-content(
+			event-tracking="form-submitted-groups-modal-open"
+			event-tracking-mb="true"
+			event-tracking-trigger="load"
+		)
 			.modal-header
 				h2 Customise your group subscription
 				h3 Save 30% or more
@@ -71,7 +75,12 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 										| The educational discount is available for groups of 10 or more
 			.modal-footer
 				.text-center
-					button.btn.btn-primary.btn-lg(data-ol-purchase-group-plan) Purchase Now
+					button.btn.btn-primary.btn-lg(
+						data-ol-purchase-group-plan
+						event-tracking="form-submitted-groups-modal-purchase-click"
+						event-tracking-mb="true"
+						event-tracking-trigger="click"
+						) Purchase Now
 					hr.thin
 					a(
 						href
