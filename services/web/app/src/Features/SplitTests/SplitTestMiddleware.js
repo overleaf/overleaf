@@ -10,9 +10,17 @@ function loadAssignmentsInLocals(splitTestNames) {
         req.session.cachedSplitTestAssignments = {}
       }
       for (const splitTestName of splitTestNames) {
-        const splitTest = await SplitTestCache.get(splitTestName)
-        if (splitTest) {
-          await _loadAssignmentInLocals(splitTest, req.session, res.locals)
+        if (req.query[splitTestName]) {
+          LocalsHelper.setSplitTestVariant(
+            res.locals,
+            splitTestName,
+            req.query[splitTestName]
+          )
+        } else {
+          const splitTest = await SplitTestCache.get(splitTestName)
+          if (splitTest) {
+            await _loadAssignmentInLocals(splitTest, req.session, res.locals)
+          }
         }
       }
     } catch (error) {

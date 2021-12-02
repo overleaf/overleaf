@@ -101,6 +101,54 @@ describe('SplitTestMiddleware', function () {
     sinon.assert.calledOnce(this.next)
   })
 
+  it('variants are overridden in locals with query parameters', async function () {
+    this.SplitTestCache.get.withArgs('active-split-test').resolves({
+      name: 'active-split-test',
+      getCurrentVersion: () => ({
+        versionNumber: 1,
+        active: true,
+      }),
+    })
+
+    this.SplitTestV2Handler.promises.getAssignmentForSession
+      .withArgs(this.req.session, 'active-split-test')
+      .resolves({
+        variant: 'default',
+      })
+
+    const middleware = this.SplitTestMiddleware.loadAssignmentsInLocals([
+      'active-split-test',
+    ])
+
+    this.req.query['active-split-test'] = 'variant'
+
+    await middleware(this.req, this.res, this.next)
+
+    assert.equal(
+      this.res.locals.splitTestVariants['active-split-test'],
+      'variant'
+    )
+    assert.deepEqual(this.req.session.cachedSplitTestAssignments, {}) // variants overriden using req.query are not cached
+    sinon.assert.calledOnce(this.next)
+  })
+
+  it('non-active split tests can be set in locals with query parameters', async function () {
+    const middleware = this.SplitTestMiddleware.loadAssignmentsInLocals([
+      'non-active-split-test',
+    ])
+
+    this.req.query['non-active-split-test'] = 'variant'
+
+    await middleware(this.req, this.res, this.next)
+
+    assert.equal(
+      this.res.locals.splitTestVariants['non-active-split-test'],
+      'variant'
+    )
+    assert.deepEqual(this.req.session.cachedSplitTestAssignments, {}) // variants overriden using req.query are not cached
+    sinon.assert.calledOnce(this.next)
+  })
+
   it('cached assignment in session is used', async function () {
     this.req.session.cachedSplitTestAssignments = {
       'ui-overhaul-1': 'cached-variant',
