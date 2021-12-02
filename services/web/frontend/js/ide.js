@@ -401,20 +401,18 @@ if (getMeta('ol-resetServiceWorker')) {
   loadServiceWorker()
 }
 
-if (getMeta('ol-disableAngularRouter')) {
-  angular.module('SharelatexApp').config(function ($provide) {
-    $provide.decorator('$browser', [
-      '$delegate',
-      function ($delegate) {
-        $delegate.onUrlChange = function () {}
-        $delegate.url = function () {
-          return ''
-        }
-        return $delegate
-      },
-    ])
-  })
-}
+angular.module('SharelatexApp').config(function ($provide) {
+  $provide.decorator('$browser', [
+    '$delegate',
+    function ($delegate) {
+      $delegate.onUrlChange = function () {}
+      $delegate.url = function () {
+        return ''
+      }
+      return $delegate
+    },
+  ])
+})
 
 export default angular.bootstrap(document.body, ['SharelatexApp'])
 

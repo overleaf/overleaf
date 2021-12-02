@@ -870,11 +870,6 @@ const ProjectController = {
               newPdfPreviewAssignment.variant === 'react-pdf-preview'
             )
 
-            let disableAngularRouter = shouldDisplayFeature(
-              'disable_angular_router',
-              user.alphaProgram || user.betaProgram
-            )
-
             const showPdfDetach = shouldDisplayFeature(
               'pdf_detach',
               user.alphaProgram
@@ -885,7 +880,6 @@ const ProjectController = {
             let detachRole = null
 
             if (showPdfDetach) {
-              disableAngularRouter = true
               showNewPdfPreview = true
               detachRole = req.params.detachRole
             }
@@ -951,7 +945,6 @@ const ProjectController = {
               showPdfDetach,
               debugPdfDetach,
               showNewPdfPreview,
-              disableAngularRouter,
               showNewSourceEditor: shouldDisplayFeature(
                 'new_source_editor',
                 false
