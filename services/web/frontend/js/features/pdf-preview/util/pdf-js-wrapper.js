@@ -175,6 +175,11 @@ export default class PDFJSWrapper {
       pageNumber: position.page + 1,
       destArray,
     })
+
+    // scroll the page down by an extra few pixels to account for the pdf.js viewer page border
+    this.viewer.container.scrollBy({
+      top: -9,
+    })
   }
 
   abortDocumentLoading() {
