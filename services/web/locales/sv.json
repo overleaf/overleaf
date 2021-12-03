@@ -26,6 +26,8 @@
   "view_error": "Visa fel",
   "view_error_plural": "Visa alla fel",
   "log_entry_maximum_entries": "Gränsen för maximalt antal loggposter har nåtts",
+  "log_entry_maximum_entries_message": "<0>Tips</0>: Försök att åtgärda det första felet och kompilera om. Ofta orsakar ett fel många senare felmeddelanden.<1>Om du vill se de fullständiga loggarna kan du fortfarande ladda ner dem eller se de obehandlade loggarna nedan.</1>",
+  "log_entry_maximum_entries_message_no_errors": "<0>Tips</0>: Om du vill se de fullständiga loggarna kan du fortfarande ladda ner dem eller se de obearbetade loggarna nedan.",
   "other_output_files": "Ladda ner andra utdatafiler",
   "refresh": "Uppdatera",
   "toggle_output_files_list": "Visa/Göm listan med utdatafiler",
