@@ -3,6 +3,7 @@ const UpdatesManager = require('./UpdatesManager')
 const DiffGenerator = require('./DiffGenerator')
 const DocumentUpdaterManager = require('./DocumentUpdaterManager')
 const DocstoreManager = require('./DocstoreManager')
+const Errors = require('./Errors')
 const PackManager = require('./PackManager')
 const yazl = require('yazl')
 const util = require('util')
@@ -47,11 +48,22 @@ async function rewindDoc(projectId, docId, zipfile) {
 
   const lastUpdateVersion = lastUpdate.v
 
-  const [latestContent, version] = await getLatestContent(
-    projectId,
-    docId,
-    lastUpdateVersion
-  )
+  let latestContent
+  let version
+  try {
+    ;[latestContent, version] = await getLatestContent(
+      projectId,
+      docId,
+      lastUpdateVersion
+    )
+  } catch (err) {
+    if (err instanceof Errors.NotFoundError) {
+      // Doc not found in docstore. We can't build its history
+      return null
+    } else {
+      throw err
+    }
+  }
 
   const id = docId.toString()
 

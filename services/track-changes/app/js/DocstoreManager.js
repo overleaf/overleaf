@@ -1,6 +1,7 @@
 const request = require('request')
 const logger = require('logger-sharelatex')
 const Settings = require('@overleaf/settings')
+const Errors = require('./Errors')
 
 function peekDocument(projectId, docId, callback) {
   const url = `${Settings.apis.docstore.url}/project/${projectId}/doc/${docId}/peek`
@@ -15,8 +16,7 @@ function peekDocument(projectId, docId, callback) {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       try {
         body = JSON.parse(body)
-      } catch (error1) {
-        error = error1
+      } catch (error) {
         return callback(error)
       }
       logger.log(
@@ -24,6 +24,10 @@ function peekDocument(projectId, docId, callback) {
         'got doc from docstore'
       )
       return callback(null, body.lines.join('\n'), body.version)
+    } else if (res.statusCode === 404) {
+      return callback(
+        new Errors.NotFoundError('doc not found', { projectId, docId })
+      )
     } else {
       return callback(
         new Error(
