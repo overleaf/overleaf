@@ -38,21 +38,9 @@ async function processBatch(_, projects) {
 }
 
 async function processProject(project) {
-  if (
-    project.overleaf &&
-    project.overleaf.history &&
-    project.overleaf.history.upgradeFailed
-  ) {
-    // a failed history upgrade might look like a v1 project, but history may be broken
-    COUNT.HistoryUpgradeFailed += 1
-    return
-  }
-  if (
-    project.overleaf &&
-    project.overleaf.history &&
-    project.overleaf.history.id
-  ) {
+  if (project.overleaf && project.overleaf.history) {
     if (project.overleaf.history.upgradeFailed) {
+      // a failed history upgrade might look like a v1 project, but history may be broken
       COUNT.HistoryUpgradeFailed += 1
       if (VERBOSE_LOGGING) {
         console.log(
@@ -61,16 +49,25 @@ async function processProject(project) {
           } has a history upgrade failure recorded`
         )
       }
+      return
     } else if (project.overleaf.history.conversionFailed) {
       COUNT.HistoryConversionFailed += 1
       if (VERBOSE_LOGGING) {
         console.log(
           `project ${
             project[VERBOSE_PROJECT_NAMES ? 'name' : '_id']
-          } has a history upgrade failure recorded`
+          } has a history conversion failure recorded`
         )
       }
-    } else if (project.overleaf.history.display) {
+      return
+    }
+  }
+  if (
+    project.overleaf &&
+    project.overleaf.history &&
+    project.overleaf.history.id
+  ) {
+    if (project.overleaf.history.display) {
       // v2: full project history, do nothing, (query shoudln't include any, but we should stlll check?)
       COUNT.v2 += 1
       if (VERBOSE_LOGGING) {
