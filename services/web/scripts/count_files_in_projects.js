@@ -17,10 +17,9 @@ async function countFiles() {
       if (!project) {
         throw new Errors.NotFoundError('project not found')
       }
-      const {
-        files,
-        docs,
-      } = await ProjectEntityHandler.promises.getAllEntitiesFromProject(project)
+      const { files, docs } = ProjectEntityHandler.getAllEntitiesFromProject(
+        project
+      )
       console.error(
         projectId,
         files.length,

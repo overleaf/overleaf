@@ -356,23 +356,18 @@ const ProjectController = {
       if (err != null) {
         return next(err)
       }
-      ProjectEntityHandler.getAllEntitiesFromProject(
-        project,
-        (err, docs, files) => {
-          if (err != null) {
-            return next(err)
-          }
-          const entities = docs
-            .concat(files)
-            // Sort by path ascending
-            .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0))
-            .map(e => ({
-              path: e.path,
-              type: e.doc != null ? 'doc' : 'file',
-            }))
-          res.json({ project_id: projectId, entities })
-        }
+      const { docs, files } = ProjectEntityHandler.getAllEntitiesFromProject(
+        project
       )
+      const entities = docs
+        .concat(files)
+        // Sort by path ascending
+        .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0))
+        .map(e => ({
+          path: e.path,
+          type: e.doc != null ? 'doc' : 'file',
+        }))
+      res.json({ project_id: projectId, entities })
     })
   },
 

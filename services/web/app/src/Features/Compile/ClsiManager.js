@@ -637,28 +637,22 @@ const ClsiManager = {
   },
 
   getContentFromDocUpdaterIfMatch(projectId, project, options, callback) {
-    ClsiStateManager.computeHash(project, options, (err, projectStateHash) => {
-      if (err != null) {
-        return callback(
-          OError.tag(err, 'Failed to compute project state hash', { projectId })
-        )
-      }
-      DocumentUpdaterHandler.getProjectDocsIfMatch(
-        projectId,
-        projectStateHash,
-        (err, docs) => {
-          if (err != null) {
-            return callback(
-              OError.tag(err, 'Failed to get project documents', {
-                projectId,
-                projectStateHash,
-              })
-            )
-          }
-          callback(null, projectStateHash, docs)
+    const projectStateHash = ClsiStateManager.computeHash(project, options)
+    DocumentUpdaterHandler.getProjectDocsIfMatch(
+      projectId,
+      projectStateHash,
+      (err, docs) => {
+        if (err != null) {
+          return callback(
+            OError.tag(err, 'Failed to get project documents', {
+              projectId,
+              projectStateHash,
+            })
+          )
         }
-      )
-    })
+        callback(null, projectStateHash, docs)
+      }
+    )
   },
 
   getOutputFileStream(projectId, userId, buildId, outputFilePath, callback) {
@@ -688,42 +682,36 @@ const ClsiManager = {
     docUpdaterDocs,
     callback
   ) {
-    ProjectEntityHandler.getAllDocPathsFromProject(project, (err, docPath) => {
-      if (err != null) {
-        return callback(
-          OError.tag(err, 'Failed to get doc paths', { projectId })
-        )
-      }
-      const docs = {}
-      for (const doc of docUpdaterDocs || []) {
-        const path = docPath[doc._id]
-        docs[path] = doc
-      }
-      // send new docs but not files as those are already on the clsi
-      options = _.clone(options)
-      options.syncType = 'incremental'
-      options.syncState = projectStateHash
-      // create stub doc entries for any possible root docs, if not
-      // present in the docupdater. This allows finaliseRequest to
-      // identify the root doc.
-      const possibleRootDocIds = [options.rootDoc_id, project.rootDoc_id]
-      for (const rootDocId of possibleRootDocIds) {
-        if (rootDocId != null && rootDocId in docPath) {
-          const path = docPath[rootDocId]
-          if (docs[path] == null) {
-            docs[path] = { _id: rootDocId, path }
-          }
+    const docPath = ProjectEntityHandler.getAllDocPathsFromProject(project)
+    const docs = {}
+    for (const doc of docUpdaterDocs || []) {
+      const path = docPath[doc._id]
+      docs[path] = doc
+    }
+    // send new docs but not files as those are already on the clsi
+    options = _.clone(options)
+    options.syncType = 'incremental'
+    options.syncState = projectStateHash
+    // create stub doc entries for any possible root docs, if not
+    // present in the docupdater. This allows finaliseRequest to
+    // identify the root doc.
+    const possibleRootDocIds = [options.rootDoc_id, project.rootDoc_id]
+    for (const rootDocId of possibleRootDocIds) {
+      if (rootDocId != null && rootDocId in docPath) {
+        const path = docPath[rootDocId]
+        if (docs[path] == null) {
+          docs[path] = { _id: rootDocId, path }
         }
       }
-      ClsiManager._finaliseRequest(
-        projectId,
-        options,
-        project,
-        docs,
-        [],
-        callback
-      )
-    })
+    }
+    ClsiManager._finaliseRequest(
+      projectId,
+      options,
+      project,
+      docs,
+      [],
+      callback
+    )
   },
 
   _buildRequestFromMongo(

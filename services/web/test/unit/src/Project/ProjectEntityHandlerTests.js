@@ -161,18 +161,19 @@ describe('ProjectEntityHandler', function () {
             rev: (this.rev2 = 2),
           },
         ]
-        this.callback = sinon.stub()
-        this.ProjectEntityHandler.getAllDocPathsFromProject(
-          this.project,
-          this.callback
-        )
       })
 
       it('should call the callback with the path for each docId', function () {
-        this.expected = {}
-        this.expected[this.doc1._id] = `/${this.doc1.name}`
-        this.expected[this.doc2._id] = `/folder1/${this.doc2.name}`
-        this.callback.calledWith(null, this.expected).should.equal(true)
+        const expected = {
+          [this.doc1._id]: `/${this.doc1.name}`,
+          [this.doc2._id]: `/folder1/${this.doc2.name}`,
+        }
+        expect(
+          this.ProjectEntityHandler.getAllDocPathsFromProject(
+            this.project,
+            this.callback
+          )
+        ).to.deep.equal(expected)
       })
     })
 
@@ -254,13 +255,13 @@ describe('ProjectEntityHandler', function () {
         )
       })
 
-      it('should call the callback with the folders', function () {
-        this.callback
-          .calledWith(null, [
-            { path: '/', folder: this.project.rootFolder[0] },
-            { path: '/folder1', folder: this.folder1 },
-          ])
-          .should.equal(true)
+      it('should return the folders', function () {
+        expect(
+          this.ProjectEntityHandler._getAllFoldersFromProject(this.project)
+        ).to.deep.equal([
+          { path: '/', folder: this.project.rootFolder[0] },
+          { path: '/folder1', folder: this.folder1 },
+        ])
       })
     })
   })

@@ -1743,7 +1743,7 @@ describe('ProjectController', function () {
         .callsArgWith(1, null, this.project)
       this.ProjectEntityHandler.getAllEntitiesFromProject = sinon
         .stub()
-        .callsArgWith(1, null, this.docs, this.files)
+        .returns({ docs: this.docs, files: this.files })
     })
 
     it('should produce a list of entities', function (done) {

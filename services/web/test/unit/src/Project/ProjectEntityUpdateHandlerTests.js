@@ -1932,12 +1932,12 @@ describe('ProjectEntityUpdateHandler', function () {
             path: 'universe.png',
           },
         ]
-        this.ProjectEntityHandler.getAllEntitiesFromProject.yields(
-          null,
+        const folders = []
+        this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
           files,
-          []
-        )
+          folders,
+        })
         this.ProjectEntityUpdateHandler.resyncProjectHistory(
           projectId,
           this.callback
@@ -2019,12 +2019,11 @@ describe('ProjectEntityUpdateHandler', function () {
             path: 'another dupe (22)',
           },
         ]
-        this.ProjectEntityHandler.getAllEntitiesFromProject.yields(
-          null,
-          this.docs,
-          this.files,
-          []
-        )
+        this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
+          docs: this.docs,
+          files: this.files,
+          folders: [],
+        })
         this.ProjectEntityUpdateHandler.resyncProjectHistory(projectId, done)
       })
 
@@ -2121,12 +2120,11 @@ describe('ProjectEntityUpdateHandler', function () {
             path: 'A_.png',
           },
         ]
-        this.ProjectEntityHandler.getAllEntitiesFromProject.yields(
-          null,
-          this.docs,
-          this.files,
-          []
-        )
+        this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
+          docs: this.docs,
+          files: this.files,
+          folders: [],
+        })
         this.ProjectEntityUpdateHandler.resyncProjectHistory(projectId, done)
       })
 
@@ -2209,12 +2207,11 @@ describe('ProjectEntityUpdateHandler', function () {
           },
         ]
         const files = []
-        this.ProjectEntityHandler.getAllEntitiesFromProject.yields(
-          null,
+        this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
           files,
-          folders
-        )
+          folders,
+        })
         this.ProjectEntityUpdateHandler.resyncProjectHistory(projectId, done)
       })
 
@@ -2261,12 +2258,11 @@ describe('ProjectEntityUpdateHandler', function () {
           },
         ]
         const files = []
-        this.ProjectEntityHandler.getAllEntitiesFromProject.yields(
-          null,
+        this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
           files,
-          folders
-        )
+          folders,
+        })
         this.ProjectEntityUpdateHandler.resyncProjectHistory(projectId, done)
       })
 

@@ -301,7 +301,7 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
   const {
     docs: oldDocs,
     files: oldFiles,
-  } = await ProjectEntityHandler.promises.getAllEntitiesFromProject(project)
+  } = ProjectEntityHandler.getAllEntitiesFromProject(project)
   // For safety, insert the entity in the destination
   // location first, and then remove the original.  If
   // there is an error the entity may appear twice. This
@@ -331,7 +331,7 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
   const {
     docs: newDocs,
     files: newFiles,
-  } = await ProjectEntityHandler.promises.getAllEntitiesFromProject(newProject)
+  } = ProjectEntityHandler.getAllEntitiesFromProject(newProject)
   const startPath = entityPath.fileSystem
   const endPath = result.path.fileSystem
   const changes = {
@@ -421,7 +421,7 @@ async function renameEntity(
   const {
     docs: oldDocs,
     files: oldFiles,
-  } = await ProjectEntityHandler.promises.getAllEntitiesFromProject(project)
+  } = ProjectEntityHandler.getAllEntitiesFromProject(project)
 
   // we need to increment the project version number for any structure change
   const newProject = await Project.findOneAndUpdate(
@@ -433,7 +433,7 @@ async function renameEntity(
   const {
     docs: newDocs,
     files: newFiles,
-  } = await ProjectEntityHandler.promises.getAllEntitiesFromProject(newProject)
+  } = ProjectEntityHandler.getAllEntitiesFromProject(newProject)
   return {
     project,
     startPath,

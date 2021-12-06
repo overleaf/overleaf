@@ -74,9 +74,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
     this.DeletedFileMock = sinon.mock(DeletedFile)
     this.ProjectMock = sinon.mock(Project)
     this.ProjectEntityHandler = {
-      promises: {
-        getAllEntitiesFromProject: sinon.stub(),
-      },
+      getAllEntitiesFromProject: sinon.stub(),
     }
     this.ProjectLocator = {
       promises: {
@@ -635,12 +633,12 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         this.newDocs = ['new-doc']
         this.newFiles = ['new-file']
 
-        this.ProjectEntityHandler.promises.getAllEntitiesFromProject
+        this.ProjectEntityHandler.getAllEntitiesFromProject
           .onFirstCall()
-          .resolves({ docs: this.oldDocs, files: this.oldFiles })
-        this.ProjectEntityHandler.promises.getAllEntitiesFromProject
+          .returns({ docs: this.oldDocs, files: this.oldFiles })
+        this.ProjectEntityHandler.getAllEntitiesFromProject
           .onSecondCall()
-          .resolves({ docs: this.newDocs, files: this.newFiles })
+          .returns({ docs: this.newDocs, files: this.newFiles })
 
         this.ProjectMock.expects('findOneAndUpdate')
           .withArgs(
@@ -751,12 +749,12 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         this.newDocs = ['new-doc']
         this.newFiles = ['new-file']
 
-        this.ProjectEntityHandler.promises.getAllEntitiesFromProject
+        this.ProjectEntityHandler.getAllEntitiesFromProject
           .onFirstCall()
-          .resolves({ docs: this.oldDocs, files: this.oldFiles })
-        this.ProjectEntityHandler.promises.getAllEntitiesFromProject
+          .returns({ docs: this.oldDocs, files: this.oldFiles })
+        this.ProjectEntityHandler.getAllEntitiesFromProject
           .onSecondCall()
-          .resolves({ docs: this.newDocs, files: this.newFiles })
+          .returns({ docs: this.newDocs, files: this.newFiles })
 
         this.ProjectMock.expects('findOneAndUpdate')
           .withArgs(

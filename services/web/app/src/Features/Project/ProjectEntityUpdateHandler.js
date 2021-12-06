@@ -1349,42 +1349,39 @@ const ProjectEntityUpdateHandler = {
           return callback(error)
         }
 
-        ProjectEntityHandler.getAllEntitiesFromProject(
-          project,
-          (error, docs, files, folders) => {
-            if (error != null) {
+        let {
+          docs,
+          files,
+          folders,
+        } = ProjectEntityHandler.getAllEntitiesFromProject(project)
+        // _checkFileTree() must be passed the folders before docs and
+        // files
+        ProjectEntityUpdateHandler._checkFiletree(
+          projectId,
+          projectHistoryId,
+          [...folders, ...docs, ...files],
+          error => {
+            if (error) {
               return callback(error)
             }
-            // _checkFileTree() must be passed the folders before docs and
-            // files
-            ProjectEntityUpdateHandler._checkFiletree(
+            docs = _.map(docs, doc => ({
+              doc: doc.doc._id,
+              path: doc.path,
+            }))
+
+            files = _.map(files, file => ({
+              file: file.file._id,
+              path: file.path,
+              url: FileStoreHandler._buildUrl(projectId, file.file._id),
+              _hash: file.file.hash,
+            }))
+
+            DocumentUpdaterHandler.resyncProjectHistory(
               projectId,
               projectHistoryId,
-              [...folders, ...docs, ...files],
-              error => {
-                if (error) {
-                  return callback(error)
-                }
-                docs = _.map(docs, doc => ({
-                  doc: doc.doc._id,
-                  path: doc.path,
-                }))
-
-                files = _.map(files, file => ({
-                  file: file.file._id,
-                  path: file.path,
-                  url: FileStoreHandler._buildUrl(projectId, file.file._id),
-                  _hash: file.file.hash,
-                }))
-
-                DocumentUpdaterHandler.resyncProjectHistory(
-                  projectId,
-                  projectHistoryId,
-                  docs,
-                  files,
-                  callback
-                )
-              }
+              docs,
+              files,
+              callback
             )
           }
         )
