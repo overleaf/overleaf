@@ -3,5 +3,4 @@ node_modules
 modules/**/scripts
 frontend/js/vendor
 modules/**/frontend/js/vendor
-public/js
-public/minjs
+/public/

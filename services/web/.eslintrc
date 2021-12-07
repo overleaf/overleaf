@@ -145,6 +145,9 @@
         "react/react-in-jsx-scope": "off",
         "react/jsx-uses-react": "off",
 
+        // Allow functions as JSX props
+        "react/jsx-no-bind": "off", // TODO: fix occurrences and re-enable this
+
         // Fix conflict between prettier & standard by overriding to prefer
         // double quotes
         "jsx-quotes": ["error", "prefer-double"],

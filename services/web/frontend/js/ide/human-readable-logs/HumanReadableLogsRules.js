@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-escape */
 import PropTypes from 'prop-types'
 
-function WikiLink({ url, children, skipPlainRendering }) {
+function WikiLink({ url, children }) {
   if (window.wikiEnabled) {
     return (
       <a href={url} target="_blank" rel="noopener">
