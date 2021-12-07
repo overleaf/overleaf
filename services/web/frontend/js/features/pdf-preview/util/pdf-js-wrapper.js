@@ -150,12 +150,13 @@ export default class PDFJSWrapper {
 
     const containerRect = this.container.getBoundingClientRect()
     const dy = containerRect.top - pageRect.top
+    const dx = containerRect.left - pageRect.left
+    const [left, top] = pageView.viewport.convertToPdfPoint(dx, dy)
     const [, , width, height] = pageView.viewport.viewBox
-    const [, top] = pageView.viewport.convertToPdfPoint(0, dy)
 
     return {
       page: pageIndex,
-      offset: { top, left: 0 },
+      offset: { top, left },
       pageSize: { height, width },
     }
   }
