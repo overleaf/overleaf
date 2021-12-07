@@ -380,10 +380,17 @@ export function CompileProvider({ children }) {
   const clearCache = useCallback(() => {
     setClearingCache(true)
 
-    return compiler.clearCache().finally(() => {
-      setClearingCache(false)
-    })
-  }, [compiler, setClearingCache])
+    return compiler
+      .clearCache()
+      .then(() => {
+        setFileList(undefined)
+        setPdfDownloadUrl(undefined)
+        setPdfUrl(undefined)
+      })
+      .finally(() => {
+        setClearingCache(false)
+      })
+  }, [compiler, setPdfDownloadUrl, setPdfUrl])
 
   // clear the cache then run a compile, triggered by a menu item
   const recompileFromScratch = useCallback(() => {
