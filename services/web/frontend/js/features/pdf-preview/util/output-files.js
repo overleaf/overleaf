@@ -2,6 +2,7 @@ import getMeta from '../../../utils/meta'
 import HumanReadableLogs from '../../../ide/human-readable-logs/HumanReadableLogs'
 import BibLogParser from '../../../ide/log-parser/bib-log-parser'
 import { buildFileList } from './file-list'
+import { v4 as uuid } from 'uuid'
 
 const searchParams = new URLSearchParams(window.location.search)
 
@@ -68,7 +69,7 @@ export const handleOutputFiles = async (projectId, data) => {
           if (entry.file) {
             entry.file = normalizeFilePath(entry.file)
           }
-          entry.key = `${entry.file}:${entry.line}:${entry.column}:${entry.message}`
+          entry.key = uuid()
         }
         result.logEntries[key].push(...newEntries[key])
       }
