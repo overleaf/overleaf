@@ -46,8 +46,6 @@ app.param('doc_id', function (req, res, next, docId) {
   }
 })
 
-Metrics.injectMetricsRoute(app)
-
 app.get('/project/:project_id/doc-deleted', HttpController.getAllDeletedDocs)
 app.get('/project/:project_id/doc', HttpController.getAllDocs)
 app.get('/project/:project_id/ranges', HttpController.getAllRanges)
@@ -106,13 +104,17 @@ if (!module.parent) {
   mongodb
     .waitForDb()
     .then(() => {
-      app.listen(port, host, function (err) {
+      const server = app.listen(port, host, function (err) {
         if (err) {
           logger.fatal({ err }, `Cannot bind to ${host}:${port}. Exiting.`)
           process.exit(1)
         }
         return logger.info(`Docstore starting up, listening on ${host}:${port}`)
       })
+      server.timeout = 120000
+      server.keepAliveTimeout = 5000
+      server.requestTimeout = 60000
+      server.headersTimeout = 60000
     })
     .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
