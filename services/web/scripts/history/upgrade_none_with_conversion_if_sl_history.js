@@ -1,4 +1,4 @@
-const SCRIPT_VERSION = 2
+const SCRIPT_VERSION = 3
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true'
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
@@ -68,13 +68,16 @@ async function processProject(project) {
   if (INTERRUPT) {
     return
   }
-  // skip safety check if we want to retry failed upgrades
-  if (!RETRY_FAILED) {
-    if (project.overleaf && project.overleaf.history) {
-      if (
-        project.overleaf.history.conversionFailed ||
-        project.overleaf.history.upgradeFailed
-      ) {
+  if (project.overleaf && project.overleaf.history) {
+    // projects we're upgrading like this should never have a history id
+    if (project.overleaf.history.id) {
+      return
+    }
+    if (
+      project.overleaf.history.conversionFailed ||
+      project.overleaf.history.upgradeFailed
+    ) {
+      if (!RETRY_FAILED) {
         // we don't want to attempt upgrade on projects
         // that have been previously attempted and failed
         return
@@ -174,7 +177,11 @@ async function main() {
   }
   await batchedUpdate(
     'projects',
-    { 'overleaf.history.id': { $exists: false } },
+    // we originally used
+    // 'overleaf.history.id': { $exists: false }
+    // but display false is indexed and contains all the above,
+    // it can be faster to skip projects with a history ID than to use a query
+    { 'overleaf.history.display': { $ne: true } },
     processBatch,
     projection,
     options
