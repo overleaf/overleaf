@@ -6,11 +6,16 @@ function MenuButton({ onClick }) {
   const { t } = useTranslation()
 
   return (
-    // eslint-disable-next-line jsx-a11y/anchor-is-valid
-    <a role="button" className="btn btn-full-height" href="#" onClick={onClick}>
-      <Icon type="fw" modifier="bars" classes={{ icon: 'editor-menu-icon' }} />
-      <p className="toolbar-label">{t('menu')}</p>
-    </a>
+    <div className="toolbar-item">
+      <button className="btn btn-full-height" onClick={onClick}>
+        <Icon
+          type="bars "
+          modifier="fw"
+          classes={{ icon: 'editor-menu-icon' }}
+        />
+        <p className="toolbar-label">{t('menu')}</p>
+      </button>
+    </div>
   )
 }
 
