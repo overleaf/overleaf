@@ -63,7 +63,6 @@ App.factory(
         x1 => x1.name
       )
       meta.client_now = new Date()
-      meta.recent_events = this.recentEvents
       const errorObj = {}
       if (typeof error === 'object') {
         for (const key of Array.from(Object.getOwnPropertyNames(error))) {
