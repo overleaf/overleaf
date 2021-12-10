@@ -32,7 +32,7 @@ module.exports = merge.smart(
               options: {
                 outputPath: 'fonts',
                 publicPath: '/fonts/',
-                name: '[name]-[hash].[ext]',
+                name: '[name]-[hash]-1.[ext]',
               },
             },
           ],
