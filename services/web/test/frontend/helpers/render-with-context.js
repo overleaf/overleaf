@@ -47,6 +47,9 @@ export function EditorProviders({
         _id: '124abd',
         email: 'owner@example.com',
       },
+      features: {
+        referencesSearch: true,
+      },
       rootDoc_id: '_root_doc_id',
     },
     rootFolder: rootFolder || {

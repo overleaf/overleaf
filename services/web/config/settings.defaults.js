@@ -738,6 +738,8 @@ module.exports = {
     tprLinkedFileRefreshError: [],
     contactUsModal: [],
     editorToolbarButtons: [],
+    sourceEditorExtensions: [],
+    sourceEditorComponents: [],
   },
 
   moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],

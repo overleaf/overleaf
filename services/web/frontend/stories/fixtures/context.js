@@ -11,7 +11,9 @@ export function setupContext() {
     $scope = {
       ...window._ide.$scope,
       user: window.user,
-      project: {},
+      project: {
+        features: {},
+      },
       $watch: () => {},
       $applyAsync: () => {},
       $broadcast: () => {},
