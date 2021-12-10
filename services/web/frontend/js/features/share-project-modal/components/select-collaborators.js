@@ -37,14 +37,20 @@ export default function SelectCollaborators({
     [options, selectedEmails]
   )
 
-  const filteredOptions = useMemo(
-    () =>
-      matchSorter(unselectedOptions, inputValue, {
-        keys: ['name', 'email'],
-        threshold: matchSorter.rankings.CONTAINS,
-      }),
-    [unselectedOptions, inputValue]
-  )
+  const filteredOptions = useMemo(() => {
+    if (inputValue === '') {
+      return unselectedOptions
+    }
+
+    return matchSorter(unselectedOptions, inputValue, {
+      keys: ['name', 'email'],
+      threshold: matchSorter.rankings.CONTAINS,
+      baseSort: (a, b) => {
+        // Prefer server-side sorting for ties in the match ranking.
+        return a.index - b.index > 0 ? 1 : -1
+      },
+    })
+  }, [unselectedOptions, inputValue])
 
   const inputRef = useRef(null)
 
