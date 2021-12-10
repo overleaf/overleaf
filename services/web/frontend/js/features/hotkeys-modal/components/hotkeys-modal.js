@@ -96,11 +96,11 @@ export default function HotkeysModal({
 
           <Col xs={4}>
             <Hotkey
-              combination={`${ctrl} + U`}
+              combination="Ctrl + U"
               description={t('hotkey_to_uppercase')}
             />
             <Hotkey
-              combination={`${ctrl} + Shift + U`}
+              combination="Ctrl + Shift + U"
               description={t('hotkey_to_lowercase')}
             />
             <Hotkey
@@ -126,7 +126,7 @@ export default function HotkeysModal({
         <Row>
           <Col xs={4}>
             <Hotkey
-              combination={`${ctrl} + Space`}
+              combination="Ctrl + Space"
               description={t('hotkey_autocomplete_menu')}
             />
           </Col>
@@ -154,7 +154,7 @@ export default function HotkeysModal({
         <Row>
           <Col xs={4}>
             <Hotkey
-              combination={`${ctrl} + Space `}
+              combination={`Ctrl + Space `}
               description={t('hotkey_search_references')}
             />
           </Col>

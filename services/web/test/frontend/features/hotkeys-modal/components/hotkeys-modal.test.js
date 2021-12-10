@@ -55,7 +55,7 @@ describe('<HotkeysModal />', function () {
   it('uses Cmd for macOS', function () {
     render(<HotkeysModal {...modalProps} isMac />)
 
-    expect(screen.getAllByText(/Cmd/)).to.have.length(16)
-    expect(screen.queryByText(/Ctrl/)).to.not.exist
+    expect(screen.getAllByText(/Cmd/)).to.have.length(12)
+    expect(screen.getAllByText(/Ctrl/)).to.have.length(4)
   })
 })
