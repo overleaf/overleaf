@@ -207,8 +207,8 @@ aside#left-menu.full-size(
 					name="pdfViewer"
 					ng-model="settings.pdfViewer"
 				)
-					option(value="pdfjs") #{translate("built_in")}
-					option(value="native") #{translate("native")}
+					option(value="pdfjs") #{settings.appName}
+					option(value="native") #{translate("browser")}
 
 	h4 #{translate("help")}
 	ul.list-unstyled.nav

@@ -962,6 +962,7 @@
   "pdf_viewer": "PDF Viewer",
   "built_in": "Built-In",
   "native": "Native",
+  "browser": "Browser",
   "show_hotkeys": "Show Hotkeys",
   "new_name": "New Name",
   "copying": "Copying",
