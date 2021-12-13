@@ -15,7 +15,12 @@ function parseArgs() {
     boolean: ['commit'],
   })
   const commit = args.commit
-  return { commit, maxDocSize: 2 * 1024 * 1024 }
+  const deleteOversized = args['delete-oversized']
+  return {
+    commit,
+    deleteOversized,
+    maxDocSize: 2 * 1024 * 1024,
+  }
 }
 
 function extractObjectId(s) {
@@ -74,12 +79,29 @@ async function processDoc(docId) {
     return
   }
   // if the doc is too big we will need to convert it to a file, skip it for now
+  // or delete the doc if the --delete-oversized option is used
   const size = doc.lines.reduce((sum, line) => sum + line.length + 1, 0)
   if (size > opts.maxDocSize) {
     logger.warn(
       { docId, projectId, size },
       'doc that exceeds max size, cannot restore'
     )
+    if (opts.deleteOversized) {
+      logger.info(
+        { docId, projectId, size, commit: opts.commit },
+        'forcing delete of large doc'
+      )
+      if (opts.commit) {
+        try {
+          await deleteDocFromRedis(projectId, docId)
+        } catch (err) {
+          logger.error(
+            { docId, projectId, deleteErr: err },
+            'error deleting doc from redis'
+          )
+        }
+      }
+    }
     return
   }
   // now we have a doc content from redis, in a project where the doc has been deleted
