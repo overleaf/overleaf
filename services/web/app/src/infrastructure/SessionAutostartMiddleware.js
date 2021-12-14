@@ -88,6 +88,9 @@ class SessionAutostartMiddleware {
           noSessionCallback: (_req, _res, next) => {
             next()
           },
+          // prevent exception for bot accesses to /project (which requires
+          // login and regenerates session)
+          regenerate: cb => cb(),
         }
       }
     }
