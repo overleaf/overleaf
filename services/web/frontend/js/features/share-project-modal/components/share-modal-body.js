@@ -11,16 +11,11 @@ import { useSplitTestContext } from '../../../shared/context/split-test-context'
 import { Row } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import RecaptchaConditions from '../../../shared/components/recaptcha-conditions'
-import * as eventTracking from '../../../infrastructure/event-tracking'
 
 export default function ShareModalBody() {
   const { isAdmin } = useShareProjectContext()
   const { splitTestVariants } = useSplitTestContext({
     splitTestVariants: PropTypes.object,
-  })
-
-  eventTracking.sendMB('share-modal-opened', {
-    splitTestVariant: splitTestVariants['null-test-share-modal'],
   })
 
   const project = useProjectContext()

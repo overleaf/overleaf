@@ -8,6 +8,8 @@ import React, {
 import PropTypes from 'prop-types'
 import ShareProjectModalContent from './share-project-modal-content'
 import { useProjectContext } from '../../../shared/context/project-context'
+import { useSplitTestContext } from '../../../shared/context/split-test-context'
+import { sendMB } from '../../../infrastructure/event-tracking'
 
 const ShareProjectContext = createContext()
 
@@ -71,6 +73,19 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   const [error, setError] = useState()
 
   const project = useProjectContext(projectShape)
+
+  const { splitTestVariants } = useSplitTestContext({
+    splitTestVariants: PropTypes.object,
+  })
+
+  // send tracking event when the modal is opened
+  useEffect(() => {
+    if (show) {
+      sendMB('share-modal-opened', {
+        splitTestVariant: splitTestVariants['null-test-share-modal'],
+      })
+    }
+  }, [splitTestVariants, show])
 
   // reset error when the modal is opened
   useEffect(() => {
