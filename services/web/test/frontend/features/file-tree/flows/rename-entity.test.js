@@ -62,6 +62,7 @@ describe('FileTree Rename Entity Flow', function () {
       />,
       { socket: new MockedSocket() }
     )
+    onSelect.reset()
   })
 
   it('renames doc', function () {
@@ -76,6 +77,10 @@ describe('FileTree Rename Entity Flow', function () {
 
     const lastFetchBody = getLastFetchBody(fetchMatcher)
     expect(lastFetchBody.name).to.equal('b.tex')
+
+    // onSelect should have been called once only: when the doc was selected for
+    // rename
+    sinon.assert.calledOnce(onSelect)
   })
 
   it('renames folder', function () {

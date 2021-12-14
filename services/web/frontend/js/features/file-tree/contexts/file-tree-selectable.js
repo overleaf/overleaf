@@ -9,11 +9,13 @@ import {
 } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
+import _ from 'lodash'
 
 import { findInTree } from '../util/find-in-tree'
 import { useFileTreeMutable } from './file-tree-mutable'
 import { useFileTreeMainContext } from './file-tree-main'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
+import usePreviousValue from '../../../shared/hooks/use-previous-value'
 
 const FileTreeSelectableContext = createContext()
 
@@ -122,12 +124,16 @@ export function FileTreeSelectableProvider({
   }, [fileTreeData, selectedEntityIds])
 
   // calls `onSelect` on entities selection
+  const previousSelectedEntityIds = usePreviousValue(selectedEntityIds)
   useEffect(() => {
+    if (_.isEqual(selectedEntityIds, previousSelectedEntityIds)) {
+      return
+    }
     const selectedEntities = Array.from(selectedEntityIds)
       .map(id => findInTree(fileTreeData, id))
       .filter(Boolean)
     onSelect(selectedEntities)
-  }, [fileTreeData, selectedEntityIds, onSelect])
+  }, [fileTreeData, selectedEntityIds, previousSelectedEntityIds, onSelect])
 
   useEffect(() => {
     // listen for `editor.openDoc` and selected that doc
