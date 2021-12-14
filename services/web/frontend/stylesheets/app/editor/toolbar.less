@@ -257,28 +257,44 @@
 }
 
 .toggle-switch {
-  position: relative;
-  height: 100%;
+  align-items: center;
+  display: flex;
+  height: 24px;
   width: 100%;
   background-color: @toggle-switch-bg;
+  border: 2px solid @toggle-switch-bg;
   border-radius: @btn-border-radius-base;
+  overflow: hidden;
 }
 
 .toggle-switch-label {
-  position: relative;
-  display: block;
+  display: inline-block;
   font-weight: normal;
-  z-index: 2;
-  float: left;
-  width: 50%;
   height: 100%;
-  line-height: 24px;
+  width: 50%;
   text-align: center;
-  margin-bottom: 0;
+  margin: 0;
   cursor: pointer;
   user-select: none;
   color: @text-color;
   transition: color 0.12s ease-out;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    line-height: 20px; // parent height minus border
+    width: 100%;
+    background: linear-gradient(
+      to right,
+      @toggle-switch-bg 50%,
+      @toggle-switch-highlight-color 50%
+    );
+
+    background-size: 200% 100%;
+    background-position: 0 0;
+    transition: background-position 0.12s ease-out;
+  }
 }
 
 .toggle-switch-input {
@@ -287,27 +303,17 @@
 }
 
 .toggle-switch-input:checked + .toggle-switch-label {
-  color: #fff;
+  span {
+    background-position: -100% 0;
+  }
+  color: @white;
   font-weight: bold;
 }
 
-.toggle-switch-selection {
-  display: block;
-  position: absolute;
-  z-index: 1;
-  top: 2px;
-  left: 2px;
-  right: 2px;
-  width: calc(~'50% - 2px');
-  height: calc(~'100% - 4px');
-  background: @toggle-switch-highlight-color;
-  border-radius: @btn-border-radius-base 0 0 @btn-border-radius-base;
-  transition: transform 0.12s ease-out, border-radius 0.12s ease-out;
-}
-
-.toggle-switch-input:checked:nth-child(4) ~ .toggle-switch-selection {
-  transform: translate(100%);
-  border-radius: 0 @btn-border-radius-base @btn-border-radius-base 0;
+.toggle-switch-input:checked:nth-child(2) + .toggle-switch-label {
+  span {
+    background-position: 100% 0;
+  }
 }
 
 /**************************************
