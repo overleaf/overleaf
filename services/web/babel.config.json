@@ -10,7 +10,8 @@
       "@babel/env",
       {
         "useBuiltIns": "usage",
-        "corejs": { "version": 3 }
+        // This version must be aligned with the `core-js` version in `package.json`
+        "corejs": { "version": 3.6 }
       }
     ]
   ],
