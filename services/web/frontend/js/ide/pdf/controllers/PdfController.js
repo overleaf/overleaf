@@ -646,7 +646,7 @@ App.controller(
       }
 
       function processBiber(log) {
-        const bibLogParser = new BibLogParser(log, {})
+        const bibLogParser = new BibLogParser(log, { maxErrors: 100 })
         const { errors, warnings } = bibLogParser.parse(log, {})
         const all = [].concat(errors, warnings)
         accumulateResults({ type: 'BibTeX:', all, errors, warnings })

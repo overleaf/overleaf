@@ -15,45 +15,49 @@ const MESSAGE_LEVELS = {
   ERROR: 'error',
 }
 
-const parserReducer = function (accumulator, parser) {
-  const consume = function (logText, regex, process) {
-    let match
-    let text = logText
-    const result = []
-    const re = regex
-    let iterationCount = 0
-    while ((match = re.exec(text))) {
-      iterationCount += 1
-      const newEntry = process(match)
+const parserReducer = function (maxErrors) {
+  return function (accumulator, parser) {
+    const consume = function (logText, regex, process) {
+      let match
+      let text = logText
+      const result = []
+      const re = regex
+      let iterationCount = 0
+      while ((match = re.exec(text))) {
+        iterationCount += 1
+        const newEntry = process(match)
 
-      // Too many log entries can cause browser crashes
-      // Construct a too many files error from the last match
-      const maxErrors = 100
-      if (iterationCount >= maxErrors) {
-        const level = newEntry.level + 's'
-        newEntry.message = [
-          'Over',
-          maxErrors,
-          level,
-          'returned. Download raw logs to see full list',
-        ].join(' ')
-        newEntry.line = undefined
-        result.unshift(newEntry)
-        return [result, '']
+        // Too many log entries can cause browser crashes
+        // Construct a too many files error from the last match
+        if (iterationCount >= maxErrors) {
+          const level = newEntry.level + 's'
+          newEntry.message = [
+            'Over',
+            maxErrors,
+            level,
+            'returned. Download raw logs to see full list',
+          ].join(' ')
+          newEntry.line = undefined
+          result.unshift(newEntry)
+          return [result, '']
+        }
+
+        result.push(newEntry)
+        text =
+          match.input.slice(0, match.index) +
+          match.input.slice(
+            match.index + match[0].length + 1,
+            match.input.length
+          )
       }
-
-      result.push(newEntry)
-      text =
-        match.input.slice(0, match.index) +
-        match.input.slice(match.index + match[0].length + 1, match.input.length)
+      return [result, text]
     }
-    return [result, text]
-  }
 
-  const [currentErrors, text] = accumulator
-  const [regex, process] = parser
-  const [errors, _remainingText] = consume(text, regex, process)
-  return [currentErrors.concat(errors), _remainingText]
+    const [currentErrors, text] = accumulator
+    const [regex, process] = parser
+    const [errors, _remainingText] = consume(text, regex, process)
+    return [currentErrors.concat(errors), _remainingText]
+  }
 }
 
 export default class BibLogParser {
@@ -174,13 +178,13 @@ export default class BibLogParser {
     }
     // reduce over the parsers, starting with the log text,
     let [allWarnings, remainingText] = this.warningParsers.reduce(
-      parserReducer,
+      parserReducer(this.options.maxErrors),
       [[], this.text]
     )
-    ;[allErrors, remainingText] = this.errorParsers.reduce(parserReducer, [
-      [],
-      remainingText,
-    ])
+    ;[allErrors, remainingText] = this.errorParsers.reduce(
+      parserReducer(this.options.maxErrors),
+      [[], remainingText]
+    )
     result.warnings = allWarnings
     result.errors = allErrors
     result.all = allWarnings.concat(allErrors)
