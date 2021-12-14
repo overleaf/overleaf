@@ -220,26 +220,34 @@ public class Oauth2Filter implements Filter {
         HttpServletResponse response = servletResponse;
         response.setContentType("text/plain");
         response.setHeader("WWW-Authenticate", "Basic realm=\"Git Bridge\"");
-        response.setStatus(401);
-
         PrintWriter w = response.getWriter();
-        w.println(
-                "Please sign in using your email address and Overleaf password."
-        );
-        w.println();
-        w.println(
-                "*Note*: if you sign in to Overleaf using another provider, "
-                        + "such "
-        );
-        w.println(
-                "as Google or Twitter, you need to set a password "
-                        + "on your Overleaf "
-        );
-        w.println(
-                "account first. "
-                        + "Please see https://www.overleaf.com/blog/195 for "
-        );
-        w.println("more information.");
+        if (statusCode == 429) {
+          // Rate limit
+          response.setStatus(429);
+          w.println(
+            "Rate limit exceeded. Please wait and try again later."
+          );
+        } else {
+          response.setStatus(401);
+          w.println(
+            "Please sign in using your email address and Overleaf password."
+          );
+          w.println();
+          w.println(
+            "*Note*: if you sign in to Overleaf using another provider, "
+              + "such "
+          );
+          w.println(
+            "as Google or Twitter, you need to set a password "
+              + "on your Overleaf "
+          );
+          w.println(
+            "account first. "
+              + "Please see https://www.overleaf.com/blog/195 for "
+          );
+          w.println("more information.");
+        }
+
         w.close();
     }
 
