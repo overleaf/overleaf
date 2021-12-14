@@ -219,6 +219,14 @@ describe('<PdfSynctexControls/>', function () {
         name: 'Go to code location in PDF',
       })
 
+      // mock editor cursor position update
+      fireEvent(
+        window,
+        new CustomEvent('cursor:editor:update', {
+          detail: { row: 100, column: 10 },
+        })
+      )
+
       sysendTestHelper.receiveMessage({
         role: 'detached',
         event: 'state-sync-to-pdf-inflight',
