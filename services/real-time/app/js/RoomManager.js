@@ -1,7 +1,7 @@
 /* eslint-disable
     camelcase,
 */
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const { EventEmitter } = require('events')
 const OError = require('@overleaf/o-error')

@@ -8,7 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const childProcess = require('child_process')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const _ = require('underscore')
 const OError = require('@overleaf/o-error')

@@ -1,6 +1,6 @@
 const app = require('../../../../app')
 const { waitForDb } = require('../../../../app/js/mongodb')
-require('logger-sharelatex').logger.level('error')
+require('@overleaf/logger').logger.level('error')
 const settings = require('@overleaf/settings')
 
 module.exports = {

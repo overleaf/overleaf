@@ -10,7 +10,7 @@
  */
 const metrics = require('@overleaf/metrics')
 metrics.initialize('chat')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 logger.initialize('chat')
 const Path = require('path')
 const express = require('express')

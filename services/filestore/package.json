@@ -21,7 +21,8 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
-    "@overleaf/metrics": "^3.5.1",
+    "@overleaf/logger": "^3.1.0",
+    "@overleaf/metrics": "^4.0.0",
     "@overleaf/o-error": "^3.0.0",
     "@overleaf/object-persistor": "^1.0.1",
     "@overleaf/settings": "^2.1.1",
@@ -31,7 +32,6 @@
     "fast-crc32c": "^2.0.0",
     "glob": "^7.1.6",
     "lodash.once": "^4.1.1",
-    "logger-sharelatex": "^2.2.0",
     "node-uuid": "~1.4.8",
     "range-parser": "^1.2.1",
     "request": "^2.88.2",

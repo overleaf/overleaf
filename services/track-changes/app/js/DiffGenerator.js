@@ -21,7 +21,7 @@ function ConsistencyError(message) {
 }
 ConsistencyError.prototype.__proto__ = Error.prototype
 
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = DiffGenerator = {
   ConsistencyError,

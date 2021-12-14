@@ -14,7 +14,7 @@
 let DocManager
 const MongoManager = require('./MongoManager')
 const Errors = require('./Errors')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const _ = require('underscore')
 const DocArchive = require('./DocArchiveManager')
 const RangeManager = require('./RangeManager')

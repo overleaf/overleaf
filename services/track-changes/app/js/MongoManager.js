@@ -16,7 +16,7 @@ const PackManager = require('./PackManager')
 const async = require('async')
 const _ = require('underscore')
 const metrics = require('@overleaf/metrics')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = MongoManager = {
   getLastCompressedUpdate(doc_id, callback) {

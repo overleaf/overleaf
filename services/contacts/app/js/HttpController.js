@@ -11,7 +11,7 @@
  */
 let HttpController
 const ContactManager = require('./ContactManager')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = HttpController = {
   addContact(req, res, next) {

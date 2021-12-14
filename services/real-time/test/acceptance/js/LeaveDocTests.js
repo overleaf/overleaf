@@ -18,7 +18,7 @@ const sinon = require('sinon')
 const RealTimeClient = require('./helpers/RealTimeClient')
 const MockDocUpdaterServer = require('./helpers/MockDocUpdaterServer')
 const FixturesManager = require('./helpers/FixturesManager')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 const async = require('async')
 

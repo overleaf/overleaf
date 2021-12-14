@@ -9,7 +9,7 @@
  */
 const ASpellWorkerPool = require('./ASpellWorkerPool')
 const LRU = require('lru-cache')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const fs = require('fs')
 const settings = require('@overleaf/settings')
 const Path = require('path')

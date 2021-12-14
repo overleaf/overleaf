@@ -4,7 +4,7 @@
 const request = require('request')
 const OError = require('@overleaf/o-error')
 const settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const {
   CodedError,
   CorruptedJoinProjectResponseError,

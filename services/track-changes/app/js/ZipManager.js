@@ -1,4 +1,4 @@
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const UpdatesManager = require('./UpdatesManager')
 const DiffGenerator = require('./DiffGenerator')
 const DocumentUpdaterManager = require('./DocumentUpdaterManager')

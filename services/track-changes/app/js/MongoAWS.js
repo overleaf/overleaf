@@ -14,7 +14,7 @@
  */
 let MongoAWS
 const settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const AWS = require('aws-sdk')
 const S3S = require('s3-streams')
 const { db, ObjectId } = require('./mongodb')

@@ -3,7 +3,7 @@
 */
 const async = require('async')
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const redis = require('@overleaf/redis-wrapper')
 const OError = require('@overleaf/o-error')
 const rclient = redis.createClient(Settings.redis.realtime)

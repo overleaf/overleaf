@@ -14,7 +14,7 @@ const request = require('request')
 const async = require('async')
 const settings = require('@overleaf/settings')
 const { port } = settings.internal.trackchanges
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const LockManager = require('./LockManager')
 
 module.exports = {

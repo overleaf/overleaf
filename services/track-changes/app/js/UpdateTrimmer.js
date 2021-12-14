@@ -14,7 +14,7 @@
 let UpdateTrimmer
 const MongoManager = require('./MongoManager')
 const WebApiManager = require('./WebApiManager')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = UpdateTrimmer = {
   shouldTrimUpdates(project_id, callback) {

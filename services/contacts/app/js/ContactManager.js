@@ -11,7 +11,7 @@
  */
 let ContactManager
 const { db, ObjectId } = require('./mongodb')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 
 module.exports = ContactManager = {

@@ -23,7 +23,8 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "@overleaf/metrics": "^3.5.1",
+    "@overleaf/logger": "^3.1.0",
+    "@overleaf/metrics": "^4.0.0",
     "@overleaf/o-error": "^3.1.0",
     "@overleaf/redis-wrapper": "^2.0.0",
     "@overleaf/settings": "^2.1.1",
@@ -36,7 +37,6 @@
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
-    "logger-sharelatex": "^2.2.0",
     "proxy-addr": "^2.0.7",
     "request": "^2.88.2",
     "socket.io": "https://github.com/overleaf/socket.io/archive/0.9.19-overleaf-5.tar.gz",

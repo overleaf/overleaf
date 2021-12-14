@@ -16,7 +16,7 @@ const async = require('async')
 const _ = require('underscore')
 const settings = require('@overleaf/settings')
 const { port } = settings.internal.notifications
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = {
   check(callback) {

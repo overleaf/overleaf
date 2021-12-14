@@ -2,7 +2,7 @@
     camelcase,
 */
 let EventLogger
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const settings = require('@overleaf/settings')
 

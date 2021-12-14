@@ -14,7 +14,7 @@
 let MessageManager
 const { db, ObjectId } = require('../../mongodb')
 const metrics = require('@overleaf/metrics')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = MessageManager = {
   createMessage(room_id, user_id, content, timestamp, callback) {

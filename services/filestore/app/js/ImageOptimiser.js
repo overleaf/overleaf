@@ -1,4 +1,4 @@
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const { callbackify } = require('util')
 const safeExec = require('./SafeExec').promises

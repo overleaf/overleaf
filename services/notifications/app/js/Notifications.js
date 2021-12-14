@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let Notifications
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const { db, ObjectId } = require('./mongodb')
 const metrics = require('@overleaf/metrics')
 

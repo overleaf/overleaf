@@ -2,7 +2,7 @@
     camelcase,
 */
 const OError = require('@overleaf/o-error')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const WebApiManager = require('./WebApiManager')
 const AuthorizationManager = require('./AuthorizationManager')

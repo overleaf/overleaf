@@ -7,7 +7,7 @@ chai.should()
 // SandboxedModule configuration
 SandboxedModule.configure({
   requires: {
-    'logger-sharelatex': {
+    '@overleaf/logger': {
       debug() {},
       log() {},
       info() {},

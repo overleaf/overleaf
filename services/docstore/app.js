@@ -7,7 +7,7 @@
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize('docstore')
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const express = require('express')
 const bodyParser = require('body-parser')
 const {

@@ -9,7 +9,7 @@
  */
 const ASpellWorker = require('./ASpellWorker')
 const _ = require('underscore')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const OError = require('@overleaf/o-error')
 

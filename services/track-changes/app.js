@@ -8,7 +8,7 @@
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize('track-changes')
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const TrackChangesLogger = logger.initialize('track-changes').logger
 
 if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {

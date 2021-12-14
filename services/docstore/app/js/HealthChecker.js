@@ -16,7 +16,7 @@ const _ = require('underscore')
 const crypto = require('crypto')
 const settings = require('@overleaf/settings')
 const { port } = settings.internal.docstore
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = {
   check(callback) {

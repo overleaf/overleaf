@@ -1,7 +1,7 @@
 /* eslint-disable
     camelcase,
 */
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
 const RedisClientManager = require('./RedisClientManager')
 const SafeJsonParse = require('./SafeJsonParse')

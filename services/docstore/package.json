@@ -20,7 +20,8 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
-    "@overleaf/metrics": "^3.5.1",
+    "@overleaf/logger": "^3.1.0",
+    "@overleaf/metrics": "^4.0.0",
     "@overleaf/o-error": "^3.0.0",
     "@overleaf/object-persistor": "^1.0.1",
     "@overleaf/settings": "^2.1.1",
@@ -29,7 +30,6 @@
     "bunyan": "^1.8.15",
     "celebrate": "^13.0.4",
     "express": "^4.17.1",
-    "logger-sharelatex": "^2.2.0",
     "mongodb": "^3.6.0",
     "p-map": "^4.0.0",
     "request": "^2.88.2",

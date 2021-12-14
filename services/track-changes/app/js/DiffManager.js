@@ -14,7 +14,7 @@ let DiffManager
 const UpdatesManager = require('./UpdatesManager')
 const DocumentUpdaterManager = require('./DocumentUpdaterManager')
 const DiffGenerator = require('./DiffGenerator')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = DiffManager = {
   getLatestDocAndUpdates(project_id, doc_id, fromVersion, callback) {

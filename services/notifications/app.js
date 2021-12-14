@@ -8,7 +8,7 @@
 const metrics = require('@overleaf/metrics')
 metrics.initialize('notifications')
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 logger.initialize('notifications-sharelatex')
 const express = require('express')
 const app = express()

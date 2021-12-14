@@ -13,7 +13,7 @@
 let RestoreManager
 const DocumentUpdaterManager = require('./DocumentUpdaterManager')
 const DiffManager = require('./DiffManager')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = RestoreManager = {
   restoreToBeforeVersion(project_id, doc_id, version, user_id, callback) {

@@ -3,7 +3,7 @@
 */
 const WebsocketLoadBalancer = require('./WebsocketLoadBalancer')
 const DrainManager = require('./DrainManager')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = {
   sendMessage(req, res) {

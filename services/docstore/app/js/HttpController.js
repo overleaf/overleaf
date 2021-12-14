@@ -13,7 +13,7 @@
  */
 let HttpController
 const DocManager = require('./DocManager')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const DocArchive = require('./DocArchiveManager')
 const HealthChecker = require('./HealthChecker')
 const Settings = require('@overleaf/settings')

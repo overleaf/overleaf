@@ -1,5 +1,5 @@
 const metrics = require('@overleaf/metrics')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 const os = require('os')
 const HOST = os.hostname()

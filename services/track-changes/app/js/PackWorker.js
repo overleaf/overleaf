@@ -23,7 +23,7 @@ const { db, ObjectId, waitForDb, closeDb } = require('./mongodb')
 const fs = require('fs')
 const Metrics = require('@overleaf/metrics')
 Metrics.initialize('track-changes')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 logger.initialize('track-changes-packworker')
 if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
