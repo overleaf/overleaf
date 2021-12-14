@@ -14,6 +14,7 @@ import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
 import useDetachState from '../../../shared/hooks/use-detach-state'
 import useDetachAction from '../../../shared/hooks/use-detach-action'
+import localStorage from '../../../infrastructure/local-storage'
 
 function GoToCodeButton({
   position,
@@ -80,7 +81,7 @@ function GoToPdfButton({
         bsStyle="default"
         bsSize="xs"
         onClick={() => syncToPdf(cursorPosition)}
-        disabled={syncToPdfInFlight}
+        disabled={syncToPdfInFlight || !cursorPosition}
         className={buttonClasses}
         aria-label={t('go_to_code_location_in_pdf')}
       >
@@ -110,7 +111,12 @@ function PdfSynctexControls() {
     setHighlights,
   } = useCompileContext()
 
-  const [cursorPosition, setCursorPosition] = useState(null)
+  const [cursorPosition, setCursorPosition] = useState(() => {
+    const position = localStorage.getItem(
+      `doc.position.${ide.editorManager.getCurrentDocId()}`
+    )
+    return position ? position.cursorPosition : null
+  })
 
   const isMounted = useIsMounted()
 
