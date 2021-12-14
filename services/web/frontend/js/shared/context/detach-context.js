@@ -40,7 +40,7 @@ export function DetachProvider({ children }) {
     if (debugPdfDetach) {
       console.log('Effect', { role })
     }
-    window.history.replaceState({}, '', buildUrlWithDetachRole(role))
+    window.history.replaceState({}, '', buildUrlWithDetachRole(role).toString())
   }, [role])
 
   useEffect(() => {
@@ -72,11 +72,14 @@ export function DetachProvider({ children }) {
           data,
         })
       }
-      sysend.broadcast(SYSEND_CHANNEL, {
+      const message = {
         role,
         event,
-        data,
-      })
+      }
+      if (data) {
+        message.data = data
+      }
+      sysend.broadcast(SYSEND_CHANNEL, message)
     },
     [role]
   )

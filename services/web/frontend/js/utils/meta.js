@@ -1,10 +1,12 @@
 import _ from 'lodash'
 
 // cache for parsed values
-const cache = new Map()
+window.metaAttributesCache = window.metaAttributesCache || new Map()
 
 export default function getMeta(name, fallback) {
-  if (cache.has(name)) return cache.get(name)
+  if (window.metaAttributesCache.has(name)) {
+    return window.metaAttributesCache.get(name)
+  }
   const element = document.head.querySelector(`meta[name="${name}"]`)
   if (!element) {
     return fallback
@@ -28,7 +30,7 @@ export default function getMeta(name, fallback) {
     default:
       value = plainTextValue
   }
-  cache.set(name, value)
+  window.metaAttributesCache.set(name, value)
   return value
 }
 

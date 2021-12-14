@@ -75,7 +75,7 @@ export default function useDetachLayout() {
     setRole('detacher')
     setIsLinking(true)
 
-    window.open(buildUrlWithDetachRole('detached'), '_blank')
+    window.open(buildUrlWithDetachRole('detached').toString(), '_blank')
   }, [setRole, setIsLinking])
 
   const handleEventForDetacherFromDetached = useCallback(

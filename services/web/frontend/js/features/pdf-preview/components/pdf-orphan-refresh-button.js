@@ -4,7 +4,7 @@ import { memo } from 'react'
 import { buildUrlWithDetachRole } from '../../../shared/utils/url-helper'
 
 const redirect = function () {
-  window.location = buildUrlWithDetachRole(null)
+  window.location = buildUrlWithDetachRole(null).toString()
 }
 
 function PdfOrphanRefreshButton() {

@@ -2,6 +2,7 @@
 /* eslint-disable react/prop-types */
 
 import { render } from '@testing-library/react'
+import { renderHook } from '@testing-library/react-hooks'
 import sinon from 'sinon'
 import { UserProvider } from '../../../frontend/js/shared/context/user-context'
 import { EditorProvider } from '../../../frontend/js/shared/context/editor-context'
@@ -120,6 +121,14 @@ export function renderWithEditorContext(component, contextProps) {
   )
 
   return render(component, { wrapper: EditorProvidersWrapper })
+}
+
+export function renderHookWithEditorContext(hook, contextProps) {
+  const EditorProvidersWrapper = ({ children }) => (
+    <EditorProviders {...contextProps}>{children}</EditorProviders>
+  )
+
+  return renderHook(hook, { wrapper: EditorProvidersWrapper })
 }
 
 export function ChatProviders({ children, ...props }) {
