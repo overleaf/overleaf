@@ -47,6 +47,12 @@ module.exports = {
       SubscriptionController.canceledSubscription
     )
 
+    webRouter.get(
+      '/user/subscription/recurly/:pageType',
+      AuthenticationController.requireLogin(),
+      SubscriptionController.redirectToHostedPage
+    )
+
     webRouter.delete(
       '/subscription/group/user',
       AuthenticationController.requireLogin(),

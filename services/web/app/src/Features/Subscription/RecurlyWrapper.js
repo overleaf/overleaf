@@ -1017,6 +1017,7 @@ const RecurlyWrapper = {
 }
 
 RecurlyWrapper.promises = {
+  getSubscription: promisify(RecurlyWrapper.getSubscription),
   updateAccountEmailAddress: promisify(updateAccountEmailAddress),
 }
 

@@ -11,23 +11,44 @@ const _ = require('underscore')
 const async = require('async')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const { promisify } = require('../../util/promises')
+const { InvalidError, NotFoundError } = require('../Errors/Errors')
 
-function buildHostedLink(recurlySubscription, type) {
+function buildHostedLink(type) {
+  return `/user/subscription/recurly/${type}`
+}
+
+async function getRedirectToHostedPage(userId, pageType) {
+  if (!['billing-details', 'account-management'].includes(pageType)) {
+    throw new InvalidError('unexpected page type')
+  }
+  const personalSubscription = await SubscriptionLocator.getUsersSubscription(
+    userId
+  )
+  const recurlySubscriptionId = personalSubscription?.recurlySubscription_id
+  if (!recurlySubscriptionId) {
+    throw new NotFoundError('not a recurly subscription')
+  }
+  const recurlySubscription = await RecurlyWrapper.promises.getSubscription(
+    recurlySubscriptionId,
+    { includeAccount: true }
+  )
+
   const recurlySubdomain = Settings.apis.recurly.subdomain
   const hostedLoginToken = recurlySubscription.account.hosted_login_token
+  if (!hostedLoginToken) {
+    throw new Error('recurly account does not have hosted login token')
+  }
   let path = ''
-  if (type === 'billingDetails') {
+  if (pageType === 'billing-details') {
     path = 'billing_info/edit?ht='
   }
-  if (hostedLoginToken && recurlySubdomain) {
-    return [
-      'https://',
-      recurlySubdomain,
-      '.recurly.com/account/',
-      path,
-      hostedLoginToken,
-    ].join('')
-  }
+  return [
+    'https://',
+    recurlySubdomain,
+    '.recurly.com/account/',
+    path,
+    hostedLoginToken,
+  ].join('')
 }
 
 function buildUsersSubscriptionViewModel(user, callback) {
@@ -178,11 +199,8 @@ function buildUsersSubscriptionViewModel(user, callback) {
           taxRate: recurlySubscription.tax_rate
             ? parseFloat(recurlySubscription.tax_rate._)
             : 0,
-          billingDetailsLink: buildHostedLink(
-            recurlySubscription,
-            'billingDetails'
-          ),
-          accountManagementLink: buildHostedLink(recurlySubscription),
+          billingDetailsLink: buildHostedLink('billing-details'),
+          accountManagementLink: buildHostedLink('account-management'),
           additionalLicenses,
           totalLicenses,
           nextPaymentDueAt: SubscriptionFormatters.formatDate(
@@ -335,5 +353,6 @@ module.exports = {
   buildPlansList,
   promises: {
     buildUsersSubscriptionViewModel: promisify(buildUsersSubscriptionViewModel),
+    getRedirectToHostedPage,
   },
 }
