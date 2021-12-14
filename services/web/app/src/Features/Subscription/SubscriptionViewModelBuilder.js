@@ -21,7 +21,7 @@ async function getRedirectToHostedPage(userId, pageType) {
   if (!['billing-details', 'account-management'].includes(pageType)) {
     throw new InvalidError('unexpected page type')
   }
-  const personalSubscription = await SubscriptionLocator.getUsersSubscription(
+  const personalSubscription = await SubscriptionLocator.promises.getUsersSubscription(
     userId
   )
   const recurlySubscriptionId = personalSubscription?.recurlySubscription_id
