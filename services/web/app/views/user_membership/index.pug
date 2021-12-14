@@ -44,7 +44,13 @@ block content
 										.col-md-4
 											span.header #{translate("name")}
 										.col-md-2
-											span.header #{translate("last_login")}
+											span.header(
+												tooltip=translate('last_active_description')
+												tooltip-placement="left"
+												tooltip-append-to-body="true"
+											)
+												| #{translate("last_active")}
+												sup (?)
 										.col-md-2
 											span.header #{translate("accepted_invite")}
 								li.container-fluid(
@@ -62,7 +68,7 @@ block content
 										.col-md-4
 											span.name {{ user.first_name }} {{ user.last_name }}
 										.col-md-2
-											span.lastLogin {{ user.last_logged_in_at | formatDate:'Do MMM YYYY' }}
+											span.lastLogin {{ user.last_active_at | formatDate:'Do MMM YYYY' }}
 										.col-md-2
 											span.registered
 												i.fa.fa-check.text-success(ng-show="!user.invite" aria-hidden="true")

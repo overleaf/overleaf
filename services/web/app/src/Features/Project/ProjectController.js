@@ -664,6 +664,12 @@ const ProjectController = {
           if (userId == null) {
             cb(null, defaultSettingsForAnonymousUser(userId))
           } else {
+            User.updateOne(
+              { _id: ObjectId(userId) },
+              { $set: { lastActive: new Date() } },
+              {},
+              () => {}
+            )
             User.findById(
               userId,
               'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace',

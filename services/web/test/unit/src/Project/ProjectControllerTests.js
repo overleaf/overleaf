@@ -58,7 +58,7 @@ describe('ProjectController', function () {
     this.LimitationsManager = { hasPaidSubscription: sinon.stub() }
     this.TagsHandler = { getAllTags: sinon.stub() }
     this.NotificationsHandler = { getUserNotifications: sinon.stub() }
-    this.UserModel = { findById: sinon.stub() }
+    this.UserModel = { findById: sinon.stub(), updateOne: sinon.stub() }
     this.AuthorizationManager = {
       getPrivilegeLevelForProject: sinon.stub(),
       isRestrictedUser: sinon.stub().returns(false),
@@ -939,7 +939,7 @@ describe('ProjectController', function () {
         brandVariationId: '12',
       }
       this.user = {
-        _id: '588f3ddae8ebc1bac07c9fa4',
+        _id: this.user._id,
         ace: {
           fontSize: 'massive',
           theme: 'sexy',
@@ -1043,6 +1043,18 @@ describe('ProjectController', function () {
         this.InactiveProjectManager.reactivateProjectIfRequired
           .calledWith(this.project_id)
           .should.equal(true)
+        done()
+      }
+      this.ProjectController.loadEditor(this.req, this.res)
+    })
+
+    it('should mark user as active', function (done) {
+      this.res.render = (pageName, opts) => {
+        expect(this.UserModel.updateOne).to.have.been.calledOnce
+        expect(this.UserModel.updateOne.args[0][0]).to.deep.equal({
+          _id: ObjectId(this.user._id),
+        })
+        expect(this.UserModel.updateOne.args[0][1].$set.lastActive).to.exist
         done()
       }
       this.ProjectController.loadEditor(this.req, this.res)

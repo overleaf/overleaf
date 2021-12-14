@@ -137,7 +137,7 @@ module.exports = {
 
   exportCsv(req, res, next) {
     const { entity, entityConfig } = req
-    const fields = ['email', 'last_logged_in_at']
+    const fields = ['email', 'last_logged_in_at', 'last_active_at']
 
     return UserMembershipHandler.getUsers(
       entity,

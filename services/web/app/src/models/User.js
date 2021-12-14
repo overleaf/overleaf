@@ -56,6 +56,7 @@ const UserSchema = new Schema({
       return new Date()
     },
   },
+  lastActive: { type: Date },
   lastLoggedIn: { type: Date },
   lastLoginIp: { type: String, default: '' },
   loginCount: { type: Number, default: 0 },

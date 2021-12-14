@@ -48,6 +48,7 @@ describe('UserMembershipViewModel', function () {
       return expect(viewModel).to.deep.equal({
         email: this.email,
         invite: true,
+        last_active_at: null,
         last_logged_in_at: null,
         first_name: null,
         last_name: null,
@@ -57,10 +58,15 @@ describe('UserMembershipViewModel', function () {
 
     it('build user', function () {
       const viewModel = this.UserMembershipViewModel.build(this.user)
-      expect(viewModel._id).to.equal(this.user._id)
-      expect(viewModel.email).to.equal(this.user.email)
-      expect(viewModel.last_logged_in_at).to.equal(this.user.lastLoggedIn)
-      return expect(viewModel.invite).to.equal(false)
+      expect(viewModel).to.deep.equal({
+        email: this.user.email,
+        invite: false,
+        last_active_at: this.user.lastLoggedIn,
+        last_logged_in_at: this.user.lastLoggedIn,
+        first_name: this.user.first_name,
+        last_name: null,
+        _id: this.user._id,
+      })
     })
   })
 
