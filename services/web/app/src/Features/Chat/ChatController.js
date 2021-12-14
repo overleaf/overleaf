@@ -24,7 +24,7 @@ const async = require('async')
 module.exports = ChatController = {
   sendMessage(req, res, next) {
     const { project_id } = req.params
-    const { content } = req.body
+    const { content, client_id } = req.body
     const user_id = SessionManager.getLoggedInUserId(req.session)
     if (user_id == null) {
       const err = new Error('no logged-in user')
@@ -45,6 +45,7 @@ module.exports = ChatController = {
               return next(err)
             }
             message.user = UserInfoController.formatPersonalInfo(user)
+            message.clientId = client_id
             EditorRealTimeController.emitToRoom(
               project_id,
               'new-chat-message',

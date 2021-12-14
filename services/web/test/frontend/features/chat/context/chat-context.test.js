@@ -405,7 +405,7 @@ describe('ChatContext', function () {
         'express:/project/:projectId/messages',
         'POST'
       )
-      expect(JSON.parse(body)).to.deep.equal({ content: 'sent message' })
+      expect(JSON.parse(body)).to.deep.include({ content: 'sent message' })
     })
 
     it("doesn't send if the content is empty", function () {

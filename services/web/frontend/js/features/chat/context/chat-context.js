@@ -18,6 +18,8 @@ import { useLayoutContext } from '../../../shared/context/layout-context'
 
 const PAGE_SIZE = 50
 
+const clientId = uuid()
+
 export function chatReducer(state, action) {
   switch (action.type) {
     case 'INITIAL_FETCH_MESSAGES':
@@ -55,14 +57,12 @@ export function chatReducer(state, action) {
           content: action.content,
           timestamp: Date.now(),
         }),
-        messageWasJustSent: true,
       }
 
     case 'RECEIVE_MESSAGE':
       return {
         ...state,
         messages: appendMessage(state.messages, action.message),
-        messageWasJustSent: false,
         unreadMessageCount: state.unreadMessageCount + 1,
       }
 
@@ -93,7 +93,6 @@ const initialState = {
   initialMessagesLoaded: false,
   lastTimestamp: null,
   atEnd: false,
-  messageWasJustSent: false,
   unreadMessageCount: 0,
   error: null,
 }
@@ -198,7 +197,7 @@ export function ChatProvider({ children }) {
 
       const url = `/project/${projectId}/messages`
       postJSON(url, {
-        body: { content },
+        body: { content, client_id: clientId },
       }).catch(error => {
         dispatch({
           type: 'ERROR',
@@ -219,11 +218,9 @@ export function ChatProvider({ children }) {
     if (!socket) return
 
     function receivedMessage(message) {
-      // If the message is from the current user and they just sent a message,
-      // then we are receiving the sent message back from the socket. Ignore it
-      // to prevent double message
-      const messageIsFromSelf = message?.user?.id === user?.id
-      if (messageIsFromSelf && state.messageWasJustSent) return
+      // If the message is from the current client id, then we are receiving the sent message back from the socket.
+      // Ignore it to prevent double message.
+      if (message.clientId === clientId) return
 
       dispatch({ type: 'RECEIVE_MESSAGE', message })
 
@@ -239,10 +236,7 @@ export function ChatProvider({ children }) {
 
       socket.removeListener('new-chat-message', receivedMessage)
     }
-    // We're adding and removing the socket listener every time we send a
-    // message (and messageWasJustSent changes). Not great, but no good way
-    // around it
-  }, [socket, state.messageWasJustSent, state.unreadMessageCount, user])
+  }, [socket])
 
   // Handle unread messages
   useEffect(() => {
