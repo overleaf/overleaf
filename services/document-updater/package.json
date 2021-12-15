@@ -29,12 +29,14 @@
     "bunyan": "^1.8.15",
     "diff-match-patch": "https://github.com/overleaf/diff-match-patch/archive/89805f9c671a77a263fc53461acd62aa7498f688.tar.gz",
     "express": "4.17.1",
+    "jumprope": "https://github.com/overleaf/jumprope/archive/b3ce482e83925a6c23278f3230a47a82bd440592.tar.gz",
     "lodash": "^4.17.21",
     "mongodb": "^3.6.6",
     "request": "^2.88.2",
     "requestretry": "^4.1.2"
   },
   "devDependencies": {
+    "benchmark": "^2.1.4",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "cluster-key-slot": "^1.0.5",

@@ -13,6 +13,7 @@
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+const { expect } = require('chai')
 const text = require('../../../../app/js/sharejs/types/text')
 const RangesTracker = require('../../../../app/js/RangesTracker')
 
@@ -268,15 +269,84 @@ describe('ShareJS text type', function () {
         .should.equal('foo123bar')
     })
 
+    it('should apply delete operations that are not in order', function () {
+      const result = text.apply('0123456789', [
+        { d: '9', p: 9 },
+        { d: '4', p: 4 },
+        { d: '7', p: 6 },
+      ])
+      expect(result).to.equal('0123568')
+    })
+
+    it('should apply a mix of inserts and deletes in any order', function () {
+      const result = text.apply('we can insert and delete in any order!', [
+        { d: 'any ', p: 28 }, // we can insert and delete in order!
+        { i: 'not', p: 6 }, // we cannot insert and delete in order!
+        { d: 'insert and ', p: 10 }, // we cannot delete in order!
+        { i: 'the same ', p: 20 },
+      ])
+      expect(result).to.equal('we cannot delete in the same order!')
+    })
+
+    it('should apply a mix of inserts and deletes in order', function () {
+      const result = text.apply('we can insert and delete in any order!', [
+        { i: 'not', p: 6 }, // we cannot insert and delete in any order!
+        { d: 'insert and ', p: 10 }, // we cannot delete in any order!
+        { d: 'any ', p: 20 }, // we cannot delete in order!
+        { i: 'the same ', p: 20 },
+      ])
+      expect(result).to.equal('we cannot delete in the same order!')
+    })
+
+    it('should be able to insert a string, then delete it along with some more text that comes before', function () {
+      const result = text.apply('I love cake and cookies', [
+        { i: ', vegetables', p: 11 }, // I love cake, vegetables and cookies
+        { d: 'cake, vege', p: 7 },
+      ])
+      expect(result).to.equal('I love tables and cookies')
+    })
+
+    it('should be able to insert a string, then delete it along with some more text that comes after', function () {
+      const result = text.apply('I love cake and cookies', [
+        { i: 'chocolate, ', p: 7 }, // I love chocolate, cake and cookies
+        { d: ', cake and', p: 16 },
+      ])
+      expect(result).to.equal('I love chocolate cookies')
+    })
+
     it('should throw an error when deleted content does not match', function () {
-      return (() => text.apply('foo123bar', [{ d: '456', p: 3 }])).should.throw(
-        Error
+      ;(() => text.apply('foo123bar', [{ d: '456', p: 3 }])).should.throw(
+        /^Delete component/
       )
     })
 
-    return it('should throw an error when comment content does not match', function () {
-      return (() => text.apply('foo123bar', [{ c: '456', p: 3 }])).should.throw(
-        Error
+    it('should throw an error when deleted content extends beyond the text', function () {
+      ;(() => text.apply('foo123bar', [{ d: '123barbaz', p: 3 }])).should.throw(
+        /^Delete component/
+      )
+    })
+
+    it('should throw an error when deleted content is out of bounds', function () {
+      ;(() => text.apply('foo123bar', [{ d: '456', p: 20 }])).should.throw(
+        /^Delete component/
+      )
+    })
+
+    it('should throw an error when comment content does not match', function () {
+      ;(() => text.apply('foo123bar', [{ c: '456', p: 3 }])).should.throw(
+        /^Comment component/
+      )
+    })
+
+    it('should throw an error when commented content extends beyond the text', function () {
+      ;(() => text.apply('foo123bar', [{ c: '123barbaz', p: 3 }])).should.throw(
+        /^Comment component/
+      )
+    })
+
+    it('should throw an error when commented content is out of bounds', function () {
+      ;(() => text.apply('foo123bar', [{ c: '456', p: 20 }])).should.throw(
+        /^Comment component/
       )
     })
   })
