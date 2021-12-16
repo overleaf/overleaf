@@ -1,1 +1,1 @@
-module.exports = require('./Settings');
+module.exports = require('./Settings')

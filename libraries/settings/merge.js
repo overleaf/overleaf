@@ -1,12 +1,12 @@
 function merge(settings, defaults) {
   for (const [key, value] of Object.entries(settings)) {
-    if ((typeof(value) === "object") && !(value instanceof Array)) {
-      defaults[key] = merge(value, defaults[key] || {});
+    if (typeof value === 'object' && !(value instanceof Array)) {
+      defaults[key] = merge(value, defaults[key] || {})
     } else {
-      defaults[key] = value;
+      defaults[key] = value
     }
   }
-  return defaults;
+  return defaults
 }
 
-module.exports = { merge };
+module.exports = { merge }
