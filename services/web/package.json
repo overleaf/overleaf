@@ -189,6 +189,7 @@
     "sanitize-html": "^1.27.1",
     "scroll-into-view-if-needed": "^2.2.25",
     "sysend": "^1.7.1",
+    "tsscmp": "^1.0.6",
     "underscore": "^1.13.1",
     "unzipper": "^0.10.11",
     "url-parse": "^1.4.7",
