@@ -26,7 +26,7 @@ class LogLevelChecker {
       } else {
         this.logger.level(this.defaultLevel)
       }
-    } catch {
+    } catch (e) {
       this.logger.level(this.defaultLevel)
     }
   }
@@ -47,8 +47,8 @@ class GCEMetadataLogLevelChecker extends LogLevelChecker {
   async getTracingEndTime() {
     const options = {
       headers: {
-        'Metadata-Flavor': 'Google'
-      }
+        'Metadata-Flavor': 'Google',
+      },
     }
     const uri = `http://metadata.google.internal/computeMetadata/v1/project/attributes/${this.logger.fields.name}-setLogLevelEndTime`
     const res = await fetch(uri, options)

@@ -12,8 +12,8 @@ describe('S3PersistorTests', function () {
   const defaultS3Credentials = {
     credentials: {
       accessKeyId: defaultS3Key,
-      secretAccessKey: defaultS3Secret
-    }
+      secretAccessKey: defaultS3Secret,
+    },
   }
   const filename = '/wombat/potato.tex'
   const bucket = 'womBucket'
@@ -23,7 +23,7 @@ describe('S3PersistorTests', function () {
   const genericError = new Error('guru meditation error')
   const files = [
     { Key: 'llama', Size: 11 },
-    { Key: 'hippo', Size: 22 }
+    { Key: 'hippo', Size: 22 },
   ]
   const filesSize = 33
   const md5 = 'ffffffff00000000ffffffff00000000'
@@ -50,7 +50,7 @@ describe('S3PersistorTests', function () {
     settings = {
       secret: defaultS3Secret,
       key: defaultS3Key,
-      partSize: 100 * 1024 * 1024
+      partSize: 100 * 1024 * 1024,
     }
 
     Transform = class {
@@ -66,29 +66,29 @@ describe('S3PersistorTests', function () {
 
     Stream = {
       pipeline: sinon.stub().yields(),
-      Transform: Transform
+      Transform: Transform,
     }
 
     EmptyPromise = {
-      promise: sinon.stub().resolves()
+      promise: sinon.stub().resolves(),
     }
 
     ReadStream = {
       pipe: sinon.stub().returns('readStream'),
       on: sinon.stub(),
-      removeListener: sinon.stub()
+      removeListener: sinon.stub(),
     }
     ReadStream.on.withArgs('end').yields()
     ReadStream.on.withArgs('pipe').yields({
       unpipe: sinon.stub(),
-      resume: sinon.stub()
+      resume: sinon.stub(),
     })
 
     FileNotFoundError = new Error('File not found')
     FileNotFoundError.code = 'ENOENT'
 
     Fs = {
-      createReadStream: sinon.stub().returns(ReadStream)
+      createReadStream: sinon.stub().returns(ReadStream),
     }
 
     S3NotFoundError = new Error('not found')
@@ -100,27 +100,27 @@ describe('S3PersistorTests', function () {
     S3ReadStream = {
       on: sinon.stub(),
       pipe: sinon.stub(),
-      removeListener: sinon.stub()
+      removeListener: sinon.stub(),
     }
     S3ReadStream.on.withArgs('end').yields()
     S3ReadStream.on.withArgs('pipe').yields({
       unpipe: sinon.stub(),
-      resume: sinon.stub()
+      resume: sinon.stub(),
     })
     S3Client = {
       getObject: sinon.stub().returns({
-        createReadStream: sinon.stub().returns(S3ReadStream)
+        createReadStream: sinon.stub().returns(S3ReadStream),
       }),
       headObject: sinon.stub().returns({
         promise: sinon.stub().resolves({
           ContentLength: objectSize,
-          ETag: md5
-        })
+          ETag: md5,
+        }),
       }),
       listObjectsV2: sinon.stub().returns({
         promise: sinon.stub().resolves({
-          Contents: files
-        })
+          Contents: files,
+        }),
       }),
       upload: sinon
         .stub()
@@ -128,21 +128,21 @@ describe('S3PersistorTests', function () {
       copyObject: sinon.stub().returns(EmptyPromise),
       deleteObject: sinon.stub().returns(EmptyPromise),
       deleteObjects: sinon.stub().returns(EmptyPromise),
-      getSignedUrlPromise: sinon.stub().resolves(redirectUrl)
+      getSignedUrlPromise: sinon.stub().resolves(redirectUrl),
     }
     S3 = sinon.stub().returns(S3Client)
 
     Hash = {
       end: sinon.stub(),
       read: sinon.stub().returns(md5),
-      setEncoding: sinon.stub()
+      setEncoding: sinon.stub(),
     }
     crypto = {
-      createHash: sinon.stub().returns(Hash)
+      createHash: sinon.stub().returns(Hash),
     }
 
     Logger = {
-      warn: sinon.stub()
+      warn: sinon.stub(),
     }
 
     S3Persistor = new (SandboxedModule.require(modulePath, {
@@ -152,9 +152,9 @@ describe('S3PersistorTests', function () {
         './Errors': Errors,
         fs: Fs,
         stream: Stream,
-        crypto
+        crypto,
       },
-      globals: { console, Buffer }
+      globals: { console, Buffer },
     }))(settings)
   })
 
@@ -177,7 +177,7 @@ describe('S3PersistorTests', function () {
       it('fetches the right key from the right bucket', function () {
         expect(S3Client.getObject).to.have.been.calledWith({
           Bucket: bucket,
-          Key: key
+          Key: key,
         })
       })
 
@@ -194,7 +194,7 @@ describe('S3PersistorTests', function () {
       beforeEach(async function () {
         stream = await S3Persistor.getObjectStream(bucket, key, {
           start: 5,
-          end: 10
+          end: 10,
         })
       })
 
@@ -206,7 +206,7 @@ describe('S3PersistorTests', function () {
         expect(S3Client.getObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
-          Range: 'bytes=5-10'
+          Range: 'bytes=5-10',
         })
       })
     })
@@ -218,15 +218,15 @@ describe('S3PersistorTests', function () {
       const alternativeS3Credentials = {
         credentials: {
           accessKeyId: alternativeKey,
-          secretAccessKey: alternativeSecret
-        }
+          secretAccessKey: alternativeSecret,
+        },
       }
 
       beforeEach(async function () {
         settings.bucketCreds = {}
         settings.bucketCreds[bucket] = {
           auth_key: alternativeKey,
-          auth_secret: alternativeSecret
+          auth_secret: alternativeSecret,
         }
 
         stream = await S3Persistor.getObjectStream(bucket, key)
@@ -243,7 +243,7 @@ describe('S3PersistorTests', function () {
       it('fetches the right key from the right bucket', function () {
         expect(S3Client.getObject).to.have.been.calledWith({
           Bucket: bucket,
-          Key: key
+          Key: key,
         })
       })
 
@@ -402,7 +402,7 @@ describe('S3PersistorTests', function () {
       it('should pass the bucket and key to S3', function () {
         expect(S3Client.headObject).to.have.been.calledWith({
           Bucket: bucket,
-          Key: key
+          Key: key,
         })
       })
     })
@@ -412,7 +412,7 @@ describe('S3PersistorTests', function () {
 
       beforeEach(async function () {
         S3Client.headObject = sinon.stub().returns({
-          promise: sinon.stub().rejects(S3NotFoundError)
+          promise: sinon.stub().rejects(S3NotFoundError),
         })
         try {
           await S3Persistor.getObjectSize(bucket, key)
@@ -435,7 +435,7 @@ describe('S3PersistorTests', function () {
 
       beforeEach(async function () {
         S3Client.headObject = sinon.stub().returns({
-          promise: sinon.stub().rejects(genericError)
+          promise: sinon.stub().rejects(genericError),
         })
         try {
           await S3Persistor.getObjectSize(bucket, key)
@@ -464,13 +464,13 @@ describe('S3PersistorTests', function () {
         expect(S3Client.upload).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
-          Body: sinon.match.instanceOf(Stream.Transform)
+          Body: sinon.match.instanceOf(Stream.Transform),
         })
       })
 
       it('should upload files in a single part', function () {
         expect(S3Client.upload).to.have.been.calledWith(sinon.match.any, {
-          partSize: 100 * 1024 * 1024
+          partSize: 100 * 1024 * 1024,
         })
       })
 
@@ -484,7 +484,7 @@ describe('S3PersistorTests', function () {
     describe('when a hash is supplied', function () {
       beforeEach(async function () {
         return S3Persistor.sendStream(bucket, key, ReadStream, {
-          sourceMd5: 'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb'
+          sourceMd5: 'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb',
         })
       })
 
@@ -493,7 +493,7 @@ describe('S3PersistorTests', function () {
           Bucket: bucket,
           Key: key,
           Body: sinon.match.instanceOf(Transform),
-          ContentMD5: 'qqqqqru7u7uqqqqqu7u7uw=='
+          ContentMD5: 'qqqqqru7u7uqqqqqu7u7uw==',
         })
       })
     })
@@ -505,7 +505,7 @@ describe('S3PersistorTests', function () {
       beforeEach(async function () {
         return S3Persistor.sendStream(bucket, key, ReadStream, {
           contentType,
-          contentEncoding
+          contentEncoding,
         })
       })
 
@@ -515,7 +515,7 @@ describe('S3PersistorTests', function () {
           Key: key,
           Body: sinon.match.instanceOf(Transform),
           ContentType: contentType,
-          ContentEncoding: contentEncoding
+          ContentEncoding: contentEncoding,
         })
       })
     })
@@ -524,7 +524,7 @@ describe('S3PersistorTests', function () {
       let error
       beforeEach(async function () {
         S3Client.upload = sinon.stub().returns({
-          promise: sinon.stub().rejects(genericError)
+          promise: sinon.stub().rejects(genericError),
         })
         try {
           await S3Persistor.sendStream(bucket, key, ReadStream)
@@ -553,7 +553,7 @@ describe('S3PersistorTests', function () {
         expect(S3Client.upload).to.have.been.calledWith({
           Bucket: bucket,
           Key: key,
-          Body: sinon.match.instanceOf(Transform)
+          Body: sinon.match.instanceOf(Transform),
         })
       })
     })
@@ -573,7 +573,7 @@ describe('S3PersistorTests', function () {
       it('should get the hash from the object metadata', function () {
         expect(S3Client.headObject).to.have.been.calledWith({
           Bucket: bucket,
-          Key: key
+          Key: key,
         })
       })
 
@@ -589,8 +589,8 @@ describe('S3PersistorTests', function () {
           promise: sinon.stub().resolves({
             ETag: 'somethingthatisntanmd5',
             Bucket: bucket,
-            Key: key
-          })
+            Key: key,
+          }),
         })
 
         hash = await S3Persistor.getObjectMd5Hash(bucket, key)
@@ -599,7 +599,7 @@ describe('S3PersistorTests', function () {
       it('should re-fetch the file to verify it', function () {
         expect(S3Client.getObject).to.have.been.calledWith({
           Bucket: bucket,
-          Key: key
+          Key: key,
         })
       })
 
@@ -629,7 +629,7 @@ describe('S3PersistorTests', function () {
         expect(S3Client.copyObject).to.have.been.calledWith({
           Bucket: bucket,
           Key: destKey,
-          CopySource: `${bucket}/${key}`
+          CopySource: `${bucket}/${key}`,
         })
       })
     })
@@ -639,7 +639,7 @@ describe('S3PersistorTests', function () {
 
       beforeEach(async function () {
         S3Client.copyObject = sinon.stub().returns({
-          promise: sinon.stub().rejects(S3NotFoundError)
+          promise: sinon.stub().rejects(S3NotFoundError),
         })
         try {
           await S3Persistor.copyObject(bucket, key, destKey)
@@ -663,7 +663,7 @@ describe('S3PersistorTests', function () {
       it('should delete the object', function () {
         expect(S3Client.deleteObject).to.have.been.calledWith({
           Bucket: bucket,
-          Key: key
+          Key: key,
         })
       })
     })
@@ -678,7 +678,7 @@ describe('S3PersistorTests', function () {
       it('should list the objects in the directory', function () {
         expect(S3Client.listObjectsV2).to.have.been.calledWith({
           Bucket: bucket,
-          Prefix: key
+          Prefix: key,
         })
       })
 
@@ -687,8 +687,8 @@ describe('S3PersistorTests', function () {
           Bucket: bucket,
           Delete: {
             Objects: [{ Key: 'llama' }, { Key: 'hippo' }],
-            Quiet: true
-          }
+            Quiet: true,
+          },
         })
       })
     })
@@ -704,7 +704,7 @@ describe('S3PersistorTests', function () {
       it('should list the objects in the directory', function () {
         expect(S3Client.listObjectsV2).to.have.been.calledWith({
           Bucket: bucket,
-          Prefix: key
+          Prefix: key,
         })
       })
 
@@ -720,8 +720,8 @@ describe('S3PersistorTests', function () {
           promise: sinon.stub().resolves({
             Contents: files,
             IsTruncated: true,
-            NextContinuationToken: continuationToken
-          })
+            NextContinuationToken: continuationToken,
+          }),
         })
 
         return S3Persistor.deleteDirectory(bucket, key)
@@ -731,12 +731,12 @@ describe('S3PersistorTests', function () {
         expect(S3Client.listObjectsV2).to.be.calledTwice
         expect(S3Client.listObjectsV2).to.be.calledWith({
           Bucket: bucket,
-          Prefix: key
+          Prefix: key,
         })
         expect(S3Client.listObjectsV2).to.be.calledWith({
           Bucket: bucket,
           Prefix: key,
-          ContinuationToken: continuationToken
+          ContinuationToken: continuationToken,
         })
       })
 
@@ -807,7 +807,7 @@ describe('S3PersistorTests', function () {
       it('should list the objects in the directory', function () {
         expect(S3Client.listObjectsV2).to.have.been.calledWith({
           Bucket: bucket,
-          Prefix: key
+          Prefix: key,
         })
       })
 
@@ -829,7 +829,7 @@ describe('S3PersistorTests', function () {
       it('should list the objects in the directory', function () {
         expect(S3Client.listObjectsV2).to.have.been.calledWith({
           Bucket: bucket,
-          Prefix: key
+          Prefix: key,
         })
       })
 
@@ -846,8 +846,8 @@ describe('S3PersistorTests', function () {
           promise: sinon.stub().resolves({
             Contents: files,
             IsTruncated: true,
-            NextContinuationToken: continuationToken
-          })
+            NextContinuationToken: continuationToken,
+          }),
         })
 
         size = await S3Persistor.directorySize(bucket, key)
@@ -857,12 +857,12 @@ describe('S3PersistorTests', function () {
         expect(S3Client.listObjectsV2).to.be.calledTwice
         expect(S3Client.listObjectsV2).to.be.calledWith({
           Bucket: bucket,
-          Prefix: key
+          Prefix: key,
         })
         expect(S3Client.listObjectsV2).to.be.calledWith({
           Bucket: bucket,
           Prefix: key,
-          ContinuationToken: continuationToken
+          ContinuationToken: continuationToken,
         })
       })
 
@@ -906,7 +906,7 @@ describe('S3PersistorTests', function () {
       it('should get the object header', function () {
         expect(S3Client.headObject).to.have.been.calledWith({
           Bucket: bucket,
-          Key: key
+          Key: key,
         })
       })
 
@@ -928,7 +928,7 @@ describe('S3PersistorTests', function () {
       it('should get the object header', function () {
         expect(S3Client.headObject).to.have.been.calledWith({
           Bucket: bucket,
-          Key: key
+          Key: key,
         })
       })
 

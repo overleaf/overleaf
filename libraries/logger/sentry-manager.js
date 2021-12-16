@@ -81,7 +81,7 @@ class SentryManager {
           url: req.originalUrl,
           query: req.query,
           headers: req.headers,
-          ip: req.ip
+          ip: req.ip,
         }
       }
 

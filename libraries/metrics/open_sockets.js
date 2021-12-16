@@ -48,5 +48,5 @@ module.exports = OpenSocketsMonitor = {
   gaugeOpenSockets() {
     collectOpenConnections(SOCKETS_HTTP, SEEN_HOSTS_HTTP, 'http')
     collectOpenConnections(SOCKETS_HTTPS, SEEN_HOSTS_HTTPS, 'https')
-  }
+  },
 }

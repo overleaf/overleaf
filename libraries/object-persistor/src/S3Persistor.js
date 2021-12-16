@@ -17,7 +17,7 @@ const {
   WriteError,
   ReadError,
   NotFoundError,
-  SettingsError
+  SettingsError,
 } = require('./Errors')
 
 module.exports = class S3Persistor extends AbstractPersistor {
@@ -36,7 +36,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
       // egress from us to S3
       const observeOptions = {
         metric: 's3.egress',
-        Metrics: this.settings.Metrics
+        Metrics: this.settings.Metrics,
       }
 
       const observer = new PersistorHelper.ObserverStream(observeOptions)
@@ -47,7 +47,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
       const uploadOptions = {
         Bucket: bucketName,
         Key: key,
-        Body: observer
+        Body: observer,
       }
 
       if (opts.contentType) {
@@ -84,7 +84,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
 
     const params = {
       Bucket: bucketName,
-      Key: key
+      Key: key,
     }
     if (opts.start != null && opts.end != null) {
       params.Range = `bytes=${opts.start}-${opts.end}`
@@ -97,7 +97,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
     // ingress from S3 to us
     const observer = new PersistorHelper.ObserverStream({
       metric: 's3.ingress',
-      Metrics: this.settings.Metrics
+      Metrics: this.settings.Metrics,
     })
 
     try {
@@ -122,7 +122,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
       ).getSignedUrlPromise('getObject', {
         Bucket: bucketName,
         Key: key,
-        Expires: expiresSeconds
+        Expires: expiresSeconds,
       })
       return url
     } catch (err) {
@@ -155,7 +155,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
       )
     }
 
-    const objects = response.Contents.map((item) => ({ Key: item.Key }))
+    const objects = response.Contents.map(item => ({ Key: item.Key }))
     if (objects.length) {
       try {
         await this._getClientForBucket(bucketName)
@@ -163,8 +163,8 @@ module.exports = class S3Persistor extends AbstractPersistor {
             Bucket: bucketName,
             Delete: {
               Objects: objects,
-              Quiet: true
-            }
+              Quiet: true,
+            },
           })
           .promise()
       } catch (err) {
@@ -248,7 +248,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
     const params = {
       Bucket: bucketName,
       Key: destKey,
-      CopySource: `${bucketName}/${sourceKey}`
+      CopySource: `${bucketName}/${sourceKey}`,
     }
     try {
       await this._getClientForBucket(bucketName).copyObject(params).promise()
@@ -283,7 +283,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
     try {
       const options = {
         Bucket: bucketName,
-        Prefix: key
+        Prefix: key,
       }
       if (continuationToken) {
         options.ContinuationToken = continuationToken
@@ -341,12 +341,12 @@ module.exports = class S3Persistor extends AbstractPersistor {
     if (bucketCredentials) {
       options.credentials = {
         accessKeyId: bucketCredentials.auth_key,
-        secretAccessKey: bucketCredentials.auth_secret
+        secretAccessKey: bucketCredentials.auth_secret,
       }
     } else {
       options.credentials = {
         accessKeyId: this.settings.key,
-        secretAccessKey: this.settings.secret
+        secretAccessKey: this.settings.secret,
       }
     }
 

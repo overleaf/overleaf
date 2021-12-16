@@ -6,10 +6,10 @@
   "scripts": {
     "test": "npm run lint && npm run format && npm run test:unit",
     "test:unit": "mocha",
-    "lint": "eslint --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix .",
-    "format": "prettier-eslint $PWD'/**/*.js' --list-different",
-    "format:fix": "prettier-eslint $PWD'/**/*.js' --write",
+    "lint": "../../node_modules/.bin/eslint --max-warnings 0 --format unix .",
+    "lint:fix": "../../node_modules/.bin/eslint --fix .",
+    "format": "../../node_modules/.bin/prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "../../node_modules/.bin/prettier --write $PWD/'**/*.js'",
     "test:ci": "npm run test:unit"
   },
   "repository": {
@@ -32,20 +32,8 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-chai-expect": "^2.2.0",
-    "eslint-plugin-chai-friendly": "^0.6.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-mocha": "^7.0.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
     "mocha": "^8.0.1",
     "mongodb": "^3.5.9",
-    "prettier-eslint": "^11.0.0",
-    "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.0.2",
     "sinon-chai": "^3.5.0"

@@ -22,7 +22,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
     // https://github.com/googleapis/nodejs-storage/issues/898
     if (this.settings.endpoint && this.settings.endpoint.apiEndpoint) {
       this.storage.interceptors.push({
-        request: (reqOpts) => {
+        request: reqOpts => {
           const url = new URL(reqOpts.uri)
           url.host = this.settings.endpoint.apiEndpoint
           if (this.settings.endpoint.apiScheme) {
@@ -30,7 +30,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
           }
           reqOpts.uri = url.toString()
           return reqOpts
-        }
+        },
       })
     }
   }
@@ -44,7 +44,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
       // egress from us to gcs
       const observeOptions = {
         metric: 'gcs.egress',
-        Metrics: this.settings.Metrics
+        Metrics: this.settings.Metrics,
       }
 
       let sourceMd5 = opts.sourceMd5
@@ -57,7 +57,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
 
       const writeOptions = {
         // disabling of resumable uploads is recommended by Google:
-        resumable: false
+        resumable: false,
       }
 
       if (sourceMd5) {
@@ -107,7 +107,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
     // ingress to us from gcs
     const observer = new PersistorHelper.ObserverStream({
       metric: 'gcs.ingress',
-      Metrics: this.settings.Metrics
+      Metrics: this.settings.Metrics,
     })
 
     try {
@@ -139,7 +139,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
         .file(key)
         .getSignedUrl({
           action: 'read',
-          expires: Date.now() + this.settings.signedUrlExpiryInMs
+          expires: Date.now() + this.settings.signedUrlExpiryInMs,
         })
       return url
     } catch (err) {
@@ -228,7 +228,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
           await asyncPool(
             this.settings.deleteConcurrency,
             files,
-            async (file) => {
+            async file => {
               await this.deleteObject(bucketName, file.name)
             }
           )

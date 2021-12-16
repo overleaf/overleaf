@@ -16,43 +16,43 @@ describe('LoggingManager', function () {
       fatal: sinon.stub(),
       info: sinon.stub(),
       level: sinon.stub(),
-      warn: sinon.stub()
+      warn: sinon.stub(),
     }
     this.Bunyan = {
       createLogger: sinon.stub().returns(this.bunyanLogger),
-      RingBuffer: bunyan.RingBuffer
+      RingBuffer: bunyan.RingBuffer,
     }
     this.stackdriverStreamConfig = { stream: 'stackdriver' }
     this.stackdriverClient = {
-      stream: sinon.stub().returns(this.stackdriverStreamConfig)
+      stream: sinon.stub().returns(this.stackdriverStreamConfig),
     }
     this.GCPLogging = {
-      LoggingBunyan: sinon.stub().returns(this.stackdriverClient)
+      LoggingBunyan: sinon.stub().returns(this.stackdriverClient),
     }
     this.FileLogLevelChecker = {
       start: sinon.stub(),
-      stop: sinon.stub()
+      stop: sinon.stub(),
     }
     this.GCEMetadataLogLevelChecker = {
       start: sinon.stub(),
-      stop: sinon.stub()
+      stop: sinon.stub(),
     }
     this.LogLevelChecker = {
       FileLogLevelChecker: sinon.stub().returns(this.FileLogLevelChecker),
       GCEMetadataLogLevelChecker: sinon
         .stub()
-        .returns(this.GCEMetadataLogLevelChecker)
+        .returns(this.GCEMetadataLogLevelChecker),
     }
     this.SentryManager = {
       captureException: sinon.stub(),
-      captureExceptionRateLimited: sinon.stub()
+      captureExceptionRateLimited: sinon.stub(),
     }
     this.LoggingManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         bunyan: this.Bunyan,
         './log-level-checker': this.LogLevelChecker,
-        './sentry-manager': sinon.stub().returns(this.SentryManager)
-      }
+        './sentry-manager': sinon.stub().returns(this.SentryManager),
+      },
     })
     this.loggerName = 'test'
     this.logger = this.LoggingManager.initialize(this.loggerName)
@@ -86,7 +86,9 @@ describe('LoggingManager', function () {
         this.logger = this.LoggingManager.initialize(this.loggerName)
       })
 
-      afterEach(() => delete process.env.NODE_ENV)
+      afterEach(function () {
+        delete process.env.NODE_ENV
+      })
 
       it('should default to log level warn', function () {
         this.Bunyan.createLogger.firstCall.args[0].streams[0].level.should.equal(
@@ -106,7 +108,9 @@ describe('LoggingManager', function () {
         this.LoggingManager.initialize()
       })
 
-      afterEach(() => delete process.env.LOG_LEVEL)
+      afterEach(function () {
+        delete process.env.LOG_LEVEL
+      })
 
       it('should use custom log level', function () {
         this.Bunyan.createLogger.firstCall.args[0].streams[0].level.should.equal(
@@ -169,7 +173,7 @@ describe('LoggingManager', function () {
       this.logBufferMock = [
         { msg: 'log 1' },
         { msg: 'log 2' },
-        { level: 50, msg: 'error' }
+        { level: 50, msg: 'error' },
       ]
     })
 
@@ -188,7 +192,7 @@ describe('LoggingManager', function () {
       it('should include buffered logs in error log and filter out error logs in buffer', function () {
         this.bunyanLogger.error.lastCall.args[0].logBuffer.should.deep.equal([
           { msg: 'log 1' },
-          { msg: 'log 2' }
+          { msg: 'log 2' },
         ])
       })
     })

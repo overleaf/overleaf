@@ -29,7 +29,7 @@ describe('MigrationPersistorTests', function () {
     fileStream = {
       name: 'fileStream',
       on: sinon.stub().withArgs('end').yields(),
-      pipe: sinon.stub()
+      pipe: sinon.stub(),
     }
 
     newPersistor = function (hasFile) {
@@ -53,32 +53,32 @@ describe('MigrationPersistorTests', function () {
           : sinon.stub().rejects(notFoundError),
         getObjectMd5Hash: hasFile
           ? sinon.stub().resolves(md5)
-          : sinon.stub().rejects(notFoundError)
+          : sinon.stub().rejects(notFoundError),
       }
     }
 
     Settings = {
       buckets: {
-        [bucket]: fallbackBucket
-      }
+        [bucket]: fallbackBucket,
+      },
     }
 
     Stream = {
       pipeline: sinon.stub().yields(),
-      PassThrough: sinon.stub()
+      PassThrough: sinon.stub(),
     }
 
     Logger = {
-      warn: sinon.stub()
+      warn: sinon.stub(),
     }
 
     MigrationPersistor = SandboxedModule.require(modulePath, {
       requires: {
         stream: Stream,
         './Errors': Errors,
-        'logger-sharelatex': Logger
+        'logger-sharelatex': Logger,
       },
-      globals: { console }
+      globals: { console },
     })
   })
 

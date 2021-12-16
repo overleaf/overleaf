@@ -17,29 +17,18 @@
   "devDependencies": {
     "bunyan": "^1.0.0",
     "chai": "^4.2.0",
-    "eslint": "^7.8.1",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-chai-expect": "^2.2.0",
-    "eslint-plugin-chai-friendly": "^0.6.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-mocha": "^8.0.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
     "mocha": "^8.0.1",
-    "prettier-eslint-cli": "^5.0.0",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.0.2"
   },
   "scripts": {
-    "lint": "eslint --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix .",
+    "lint": "../../node_modules/.bin/eslint --max-warnings 0 --format unix .",
+    "lint:fix": "../../node_modules/.bin/eslint --fix .",
     "test:unit": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/unit",
     "test:acceptance": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/acceptance",
     "test": "npm run test:unit && npm run test:acceptance",
-    "format": "prettier-eslint $PWD'/**/*.js' --list-different",
-    "format:fix": "prettier-eslint $PWD'/**/*.js' --write",
+    "format": "../../node_modules/.bin/prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "../../node_modules/.bin/prettier --write $PWD/'**/*.js'",
     "test:ci": "npm run test"
   },
   "peerDependencies": {

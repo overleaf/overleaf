@@ -15,7 +15,7 @@ const fsOpen = promisify(fs.open)
 const fsStat = promisify(fs.stat)
 const fsGlob = promisify(glob)
 
-const filterName = (key) => key.replace(/\//g, '_')
+const filterName = key => key.replace(/\//g, '_')
 
 module.exports = class FSPersistor extends AbstractPersistor {
   constructor(settings) {
@@ -59,7 +59,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
           sourceMd5,
           destMd5,
           location,
-          target
+          target,
         })
       }
     } finally {
@@ -165,7 +165,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
       await Promise.all(
         (
           await fsGlob(`${location}/${filteredName}_*`)
-        ).map((file) => fsUnlink(file))
+        ).map(file => fsUnlink(file))
       )
     } catch (err) {
       throw PersistorHelper.wrapError(

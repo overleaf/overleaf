@@ -7,7 +7,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-module.exports = function(obj, methodName, prefix, logger) {
+module.exports = function (obj, methodName, prefix, logger) {
   let modifedMethodName
   const metrics = require('./index')
 
@@ -29,7 +29,7 @@ module.exports = function(obj, methodName, prefix, logger) {
   } else {
     modifedMethodName = methodName
   }
-  return (obj[methodName] = function(...originalArgs) {
+  return (obj[methodName] = function (...originalArgs) {
     const adjustedLength = Math.max(originalArgs.length, 1)
     const firstArgs = originalArgs.slice(0, adjustedLength - 1)
     const callback = originalArgs[adjustedLength - 1]
@@ -44,41 +44,43 @@ module.exports = function(obj, methodName, prefix, logger) {
     }
 
     const timer = new metrics.Timer(startPrefix, 1, {
-      method: modifedMethodName
+      method: modifedMethodName,
     })
 
-    return realMethod.call(this, ...Array.from(firstArgs), function(
-      ...callbackArgs
-    ) {
-      const elapsedTime = timer.done()
-      const possibleError = callbackArgs[0]
-      if (possibleError != null) {
-        metrics.inc(`${startPrefix}_result`, 1, {
-          status: 'failed',
-          method: modifedMethodName
-        })
-      } else {
-        metrics.inc(`${startPrefix}_result`, 1, {
-          status: 'success',
-          method: modifedMethodName
-        })
-      }
-      if (logger != null) {
-        const loggableArgs = {}
-        try {
-          for (let idx = 0; idx < firstArgs.length; idx++) {
-            const arg = firstArgs[idx]
-            if (arg.toString().match(/^[0-9a-f]{24}$/)) {
-              loggableArgs[`${idx}`] = arg
+    return realMethod.call(
+      this,
+      ...Array.from(firstArgs),
+      function (...callbackArgs) {
+        const elapsedTime = timer.done()
+        const possibleError = callbackArgs[0]
+        if (possibleError != null) {
+          metrics.inc(`${startPrefix}_result`, 1, {
+            status: 'failed',
+            method: modifedMethodName,
+          })
+        } else {
+          metrics.inc(`${startPrefix}_result`, 1, {
+            status: 'success',
+            method: modifedMethodName,
+          })
+        }
+        if (logger != null) {
+          const loggableArgs = {}
+          try {
+            for (let idx = 0; idx < firstArgs.length; idx++) {
+              const arg = firstArgs[idx]
+              if (arg.toString().match(/^[0-9a-f]{24}$/)) {
+                loggableArgs[`${idx}`] = arg
+              }
             }
-          }
-        } catch (error) {}
-        logger.log(
-          { key, args: loggableArgs, elapsedTime },
-          '[Metrics] timed async method call'
-        )
+          } catch (error) {}
+          logger.log(
+            { key, args: loggableArgs, elapsedTime },
+            '[Metrics] timed async method call'
+          )
+        }
+        return callback.apply(this, callbackArgs)
       }
-      return callback.apply(this, callbackArgs)
-    })
+    )
   })
 }

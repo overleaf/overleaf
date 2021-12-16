@@ -11,5 +11,5 @@ module.exports = {
   WriteError,
   ReadError,
   SettingsError,
-  NotImplementedError
+  NotImplementedError,
 }

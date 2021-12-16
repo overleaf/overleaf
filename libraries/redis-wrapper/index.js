@@ -40,7 +40,7 @@ function createClient(opts) {
     client = new Redis(standardOpts)
   }
   monkeyPatchIoRedisExec(client)
-  client.healthCheck = (callback) => {
+  client.healthCheck = callback => {
     if (callback) {
       // callback based invocation
       healthCheck(client).then(callback).catch(callback)
@@ -77,7 +77,7 @@ async function runCheck(client, uniqueToken, context) {
   context.stage = 'write'
   const writeAck = await client
     .set(healthCheckKey, healthCheckValue, 'EX', 60)
-    .catch((err) => {
+    .catch(err => {
       throw new RedisHealthCheckWriteError('write errored', context, err)
     })
   if (writeAck !== 'OK') {
@@ -92,7 +92,7 @@ async function runCheck(client, uniqueToken, context) {
     .get(healthCheckKey)
     .del(healthCheckKey)
     .exec()
-    .catch((err) => {
+    .catch(err => {
       throw new RedisHealthCheckVerifyError(
         'read/delete errored',
         context,
@@ -137,7 +137,7 @@ function monkeyPatchIoRedisExec(client) {
   client.multi = function () {
     const multi = _multi.apply(client, arguments)
     const _exec = multi.exec
-    multi.exec = (callback) => {
+    multi.exec = callback => {
       if (callback) {
         // callback based invocation
         _exec.call(multi, (error, result) => {

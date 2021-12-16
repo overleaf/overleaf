@@ -19,7 +19,7 @@ module.exports = {
     }
     // monitor delay in setInterval to detect event loop blocking
     let previous = Date.now()
-    const intervalId = setInterval(function() {
+    const intervalId = setInterval(function () {
       const now = Date.now()
       const offset = now - previous - interval
       if (offset > logThreshold) {
@@ -30,5 +30,5 @@ module.exports = {
     }, interval)
 
     return Metrics.registerDestructor(() => clearInterval(intervalId))
-  }
+  },
 }

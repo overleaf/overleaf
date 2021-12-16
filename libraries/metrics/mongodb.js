@@ -22,7 +22,7 @@ module.exports = {
 
     const Metrics = require('./index')
 
-    const monitorMethod = function(base, method, type) {
+    const monitorMethod = function (base, method, type) {
       let _method
       if (base == null) {
         return
@@ -32,7 +32,7 @@ module.exports = {
       }
       const arglen = _method.length
 
-      const mongoDriverV1Wrapper = function(dbCommand, options, callback) {
+      const mongoDriverV1Wrapper = function (dbCommand, options, callback) {
         let query
         if (typeof callback === 'undefined') {
           callback = options
@@ -46,21 +46,19 @@ module.exports = {
         }
 
         if (dbCommand.query != null) {
-          query = Object.keys(dbCommand.query)
-            .sort()
-            .join('_')
+          query = Object.keys(dbCommand.query).sort().join('_')
         }
 
         const timer = new Metrics.Timer('mongo', { collection, query })
         const start = new Date()
-        return _method.call(this, dbCommand, options, function() {
+        return _method.call(this, dbCommand, options, function () {
           timer.done()
           logger.log(
             {
               query: dbCommand.query,
               query_type: type,
               collection,
-              'response-time': new Date() - start
+              'response-time': new Date() - start,
             },
             'mongo request'
           )
@@ -68,7 +66,7 @@ module.exports = {
         })
       }
 
-      const mongoDriverV2Wrapper = function(ns, ops, options, callback) {
+      const mongoDriverV2Wrapper = function (ns, ops, options, callback) {
         let query
         if (typeof callback === 'undefined') {
           callback = options
@@ -83,22 +81,20 @@ module.exports = {
         let key = `mongo-requests.${ns}.${type}`
         if (ops[0].q != null) {
           // ops[0].q
-          query = Object.keys(ops[0].q)
-            .sort()
-            .join('_')
+          query = Object.keys(ops[0].q).sort().join('_')
           key += '.' + query
         }
 
         const timer = new Metrics.Timer(key)
         const start = new Date()
-        return _method.call(this, ns, ops, options, function() {
+        return _method.call(this, ns, ops, options, function () {
           timer.done()
           logger.log(
             {
               query: ops[0].q,
               query_type: type,
               collection: ns,
-              'response-time': new Date() - start
+              'response-time': new Date() - start,
             },
             'mongo request'
           )
@@ -196,5 +192,5 @@ module.exports = {
       'update',
       'update'
     )
-  }
+  },
 }

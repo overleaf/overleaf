@@ -18,12 +18,12 @@ describe('LogLevelChecker', function () {
   beforeEach(function () {
     this.logger = {
       level: sinon.stub(),
-      fields: { name: 'myapp' }
+      fields: { name: 'myapp' },
     }
     this.fetchResponse = {
       text: sinon.stub().resolves(''),
       status: 200,
-      ok: true
+      ok: true,
     }
     this.fetch = sinon
       .stub()
@@ -35,8 +35,8 @@ describe('LogLevelChecker', function () {
 
     this.fs = {
       promises: {
-        readFile: sinon.stub()
-      }
+        readFile: sinon.stub(),
+      },
     }
 
     this.clock = sinon.useFakeTimers(NOW)
@@ -44,8 +44,8 @@ describe('LogLevelChecker', function () {
     this.module = SandboxedModule.require(MODULE_PATH, {
       requires: {
         'node-fetch': this.fetch,
-        fs: this.fs
-      }
+        fs: this.fs,
+      },
     })
   })
 

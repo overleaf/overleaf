@@ -9,7 +9,7 @@ const prom = require('prom-client')
 const registry = require('prom-client').register
 const metrics = new Map()
 
-const optsKey = function(opts) {
+const optsKey = function (opts) {
   let keys = Object.keys(opts)
   if (keys.length === 0) {
     return ''
@@ -28,7 +28,7 @@ const optsKey = function(opts) {
   return hash
 }
 
-const extendOpts = function(opts, labelNames) {
+const extendOpts = function (opts, labelNames) {
   for (const label of Array.from(labelNames)) {
     if (!opts[label]) {
       opts[label] = ''
@@ -37,7 +37,7 @@ const extendOpts = function(opts, labelNames) {
   return opts
 }
 
-const optsAsArgs = function(opts, labelNames) {
+const optsAsArgs = function (opts, labelNames) {
   const args = []
   for (const label of Array.from(labelNames)) {
     args.push(opts[label] || '')
@@ -53,7 +53,7 @@ const PromWrapper = {
     return metrics.get(name) || new MetricWrapper(type, name)
   },
 
-  collectDefaultMetrics: prom.collectDefaultMetrics
+  collectDefaultMetrics: prom.collectDefaultMetrics,
 }
 
 class MetricWrapper {
@@ -68,7 +68,7 @@ class MetricWrapper {
           return new prom.Counter({
             name,
             help: name,
-            labelNames: ['status', 'method', 'path']
+            labelNames: ['status', 'method', 'path'],
           })
         case 'summary':
           return new prom.Summary({
@@ -76,13 +76,19 @@ class MetricWrapper {
             help: name,
             maxAgeSeconds: 60,
             ageBuckets: 10,
-            labelNames: ['path', 'status_code', 'method', 'collection', 'query']
+            labelNames: [
+              'path',
+              'status_code',
+              'method',
+              'collection',
+              'query',
+            ],
           })
         case 'gauge':
           return new prom.Gauge({
             name,
             help: name,
-            labelNames: ['host', 'status']
+            labelNames: ['host', 'status'],
           })
       }
     })()
@@ -105,6 +111,7 @@ class MetricWrapper {
     this.instances.forEach((instance, key) => {
       if (thresh > instance.time) {
         if (process.env.DEBUG_METRICS) {
+          // eslint-disable-next-line no-console
           console.log(
             'Sweeping stale metric instance',
             this.name,
@@ -120,6 +127,7 @@ class MetricWrapper {
 
     if (thresh > this.lastAccess) {
       if (process.env.DEBUG_METRICS) {
+        // eslint-disable-next-line no-console
         console.log('Sweeping stale metric', this.name, thresh, this.lastAccess)
       }
       metrics.delete(this.name)
@@ -139,21 +147,24 @@ class MetricWrapper {
 }
 
 let sweepingInterval
-PromWrapper.setupSweeping = function() {
+PromWrapper.setupSweeping = function () {
   if (sweepingInterval) {
     clearInterval(sweepingInterval)
   }
   if (!PromWrapper.ttlInMinutes) {
     if (process.env.DEBUG_METRICS) {
+      // eslint-disable-next-line no-console
       console.log('Not registering sweep method -- empty ttl')
     }
     return
   }
   if (process.env.DEBUG_METRICS) {
+    // eslint-disable-next-line no-console
     console.log('Registering sweep method')
   }
-  sweepingInterval = setInterval(function() {
+  sweepingInterval = setInterval(function () {
     if (process.env.DEBUG_METRICS) {
+      // eslint-disable-next-line no-console
       console.log('Sweeping metrics')
     }
     return metrics.forEach((metric, key) => {

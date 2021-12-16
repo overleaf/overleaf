@@ -21,7 +21,7 @@ let gcInterval = 1 // how many minutes between gc (parameter is dynamically adju
 let countSinceLastGc = 0 // how many minutes since last gc
 const MemoryChunkSize = 4 // how many megabytes we need to free to consider gc worth doing
 
-const readyToGc = function() {
+const readyToGc = function () {
   // update allowed cpu time
   CpuTimeBucket = CpuTimeBucket + CpuTimeBucketRate
   CpuTimeBucket =
@@ -32,7 +32,7 @@ const readyToGc = function() {
   return countSinceLastGc > gcInterval && CpuTimeBucket > 0
 }
 
-const executeAndTime = function(fn) {
+const executeAndTime = function (fn) {
   // time the execution of fn() and subtract from cpu allowance
   const t0 = process.hrtime()
   fn()
@@ -42,7 +42,7 @@ const executeAndTime = function(fn) {
   return timeTaken
 }
 
-const inMegaBytes = function(obj) {
+const inMegaBytes = function (obj) {
   // convert process.memoryUsage hash {rss,heapTotal,heapFreed} into megabytes
   const result = {}
   for (const k in obj) {
@@ -52,7 +52,7 @@ const inMegaBytes = function(obj) {
   return result
 }
 
-const updateMemoryStats = function(oldMem, newMem) {
+const updateMemoryStats = function (oldMem, newMem) {
   countSinceLastGc = 0
   const delta = {}
   for (const k in newMem) {
@@ -100,7 +100,7 @@ module.exports = MemoryMonitor = {
           memAfterGc,
           deltaMem,
           gcInterval,
-          CpuTimeBucket
+          CpuTimeBucket,
         },
         'global.gc() forced'
       )
@@ -109,5 +109,5 @@ module.exports = MemoryMonitor = {
       Metrics.gauge('memory.gc-heaptotal-freed', -deltaMem.heapTotal)
       return Metrics.gauge('memory.gc-heapused-freed', -deltaMem.heapUsed)
     }
-  }
+  },
 }

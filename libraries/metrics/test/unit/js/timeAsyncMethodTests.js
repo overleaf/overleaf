@@ -11,28 +11,28 @@ const modulePath = path.join(__dirname, '../../../timeAsyncMethod.js')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 
-describe('timeAsyncMethod', function() {
-  beforeEach(function() {
+describe('timeAsyncMethod', function () {
+  beforeEach(function () {
     this.Timer = { done: sinon.stub() }
     this.TimerConstructor = sinon.stub().returns(this.Timer)
     this.metrics = {
       Timer: this.TimerConstructor,
-      inc: sinon.stub()
+      inc: sinon.stub(),
     }
     this.timeAsyncMethod = SandboxedModule.require(modulePath, {
       requires: {
-        './index': this.metrics
-      }
+        './index': this.metrics,
+      },
     })
 
     return (this.testObject = {
       nextNumber(n, callback) {
         return setTimeout(() => callback(null, n + 1), 100)
-      }
+      },
     })
   })
 
-  it('should have the testObject behave correctly before wrapping', function(done) {
+  it('should have the testObject behave correctly before wrapping', function (done) {
     return this.testObject.nextNumber(2, (err, result) => {
       expect(err).to.not.exist
       expect(result).to.equal(3)
@@ -40,7 +40,7 @@ describe('timeAsyncMethod', function() {
     })
   })
 
-  it('should wrap method without error', function(done) {
+  it('should wrap method without error', function (done) {
     this.timeAsyncMethod(
       this.testObject,
       'nextNumber',
@@ -49,7 +49,7 @@ describe('timeAsyncMethod', function() {
     return done()
   })
 
-  it('should transparently wrap method invocation in timer', function(done) {
+  it('should transparently wrap method invocation in timer', function (done) {
     this.timeAsyncMethod(
       this.testObject,
       'nextNumber',
@@ -64,7 +64,7 @@ describe('timeAsyncMethod', function() {
     })
   })
 
-  it('should increment success count', function(done) {
+  it('should increment success count', function (done) {
     this.metrics.inc = sinon.stub()
     this.timeAsyncMethod(
       this.testObject,
@@ -79,22 +79,22 @@ describe('timeAsyncMethod', function() {
       expect(
         this.metrics.inc.calledWith('someContext_result', 1, {
           method: 'TestObject_nextNumber',
-          status: 'success'
+          status: 'success',
         })
       ).to.equal(true)
       return done()
     })
   })
 
-  describe('when base method produces an error', function() {
-    beforeEach(function() {
+  describe('when base method produces an error', function () {
+    beforeEach(function () {
       this.metrics.inc = sinon.stub()
-      return (this.testObject.nextNumber = function(n, callback) {
+      return (this.testObject.nextNumber = function (n, callback) {
         return setTimeout(() => callback(new Error('woops')), 100)
       })
     })
 
-    it('should propagate the error transparently', function(done) {
+    it('should propagate the error transparently', function (done) {
       this.timeAsyncMethod(
         this.testObject,
         'nextNumber',
@@ -108,7 +108,7 @@ describe('timeAsyncMethod', function() {
       })
     })
 
-    return it('should increment failure count', function(done) {
+    return it('should increment failure count', function (done) {
       this.timeAsyncMethod(
         this.testObject,
         'nextNumber',
@@ -120,7 +120,7 @@ describe('timeAsyncMethod', function() {
         expect(
           this.metrics.inc.calledWith('someContext_result', 1, {
             method: 'TestObject_nextNumber',
-            status: 'failed'
+            status: 'failed',
           })
         ).to.equal(true)
         return done()
@@ -128,12 +128,12 @@ describe('timeAsyncMethod', function() {
     })
   })
 
-  describe('when a logger is supplied', function() {
-    beforeEach(function() {
+  describe('when a logger is supplied', function () {
+    beforeEach(function () {
       return (this.logger = { log: sinon.stub() })
     })
 
-    return it('should also call logger.log', function(done) {
+    return it('should also call logger.log', function (done) {
       this.timeAsyncMethod(
         this.testObject,
         'nextNumber',
@@ -151,10 +151,10 @@ describe('timeAsyncMethod', function() {
     })
   })
 
-  describe('when the wrapper cannot be applied', function() {
-    beforeEach(function() {})
+  describe('when the wrapper cannot be applied', function () {
+    beforeEach(function () {})
 
-    return it('should raise an error', function() {
+    return it('should raise an error', function () {
       const badWrap = () => {
         return this.timeAsyncMethod(
           this.testObject,
@@ -168,13 +168,13 @@ describe('timeAsyncMethod', function() {
     })
   })
 
-  return describe('when the wrapped function is not using a callback', function() {
-    beforeEach(function() {
+  return describe('when the wrapped function is not using a callback', function () {
+    beforeEach(function () {
       this.realMethod = sinon.stub().returns(42)
       return (this.testObject.nextNumber = this.realMethod)
     })
 
-    it('should not throw an error', function() {
+    it('should not throw an error', function () {
       this.timeAsyncMethod(
         this.testObject,
         'nextNumber',
@@ -186,7 +186,7 @@ describe('timeAsyncMethod', function() {
       return expect(badCall).to.not.throw(Error)
     })
 
-    return it('should call the underlying method', function() {
+    return it('should call the underlying method', function () {
       this.timeAsyncMethod(
         this.testObject,
         'nextNumber',

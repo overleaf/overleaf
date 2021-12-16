@@ -14,7 +14,7 @@ const ENTRY_FIELDS_TO_OMIT = [
   'msg',
   'err',
   'req',
-  'res'
+  'res',
 ]
 
 /**

@@ -31,8 +31,8 @@ describe('PersistorManager', function () {
       './FSPersistor': FSPersistor,
       'logger-sharelatex': {
         info() {},
-        err() {}
-      }
+        err() {},
+      },
     }
     PersistorFactory = SandboxedModule.require(modulePath, { requires })
   })

@@ -6,7 +6,7 @@ const SentryManager = require('./sentry-manager')
 const Serializers = require('./serializers')
 const {
   FileLogLevelChecker,
-  GCEMetadataLogLevelChecker
+  GCEMetadataLogLevelChecker,
 } = require('./log-level-checker')
 
 const LoggingManager = {
@@ -21,9 +21,9 @@ const LoggingManager = {
       serializers: {
         err: Serializers.err,
         req: Serializers.req,
-        res: Serializers.res
+        res: Serializers.res,
       },
-      streams: [this._getOutputStreamConfig()]
+      streams: [this._getOutputStreamConfig()],
     })
     this._setupRingBuffer()
     this._setupLogLevelChecker()
@@ -80,9 +80,10 @@ const LoggingManager = {
         objectMode: true,
         write(entry, encoding, callback) {
           const gcpEntry = GCPManager.convertLogEntry(entry)
+          // eslint-disable-next-line no-console
           console.log(JSON.stringify(gcpEntry, bunyan.safeCycles()))
           setImmediate(callback)
-        }
+        },
       })
       return { level: this.defaultLevel, type: 'raw', stream }
     } else {
@@ -97,7 +98,7 @@ const LoggingManager = {
       this.logger.addStream({
         level: 'trace',
         type: 'raw',
-        stream: this.ringBuffer
+        stream: this.ringBuffer,
       })
     } else {
       this.ringBuffer = null
@@ -125,13 +126,14 @@ const LoggingManager = {
         case 'none':
           break
         default:
+          // eslint-disable-next-line no-console
           console.log(`Unrecognised log level source: ${logLevelSource}`)
       }
       if (this.logLevelChecker) {
         this.logLevelChecker.start()
       }
     }
-  }
+  },
 }
 
 LoggingManager.initialize('default-sharelatex')

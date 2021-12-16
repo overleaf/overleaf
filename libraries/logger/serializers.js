@@ -10,7 +10,7 @@ function errSerializer(err) {
     stack: err.stack && OError.getFullStack(err),
     info: OError.getFullInfo(err),
     code: err.code,
-    signal: err.signal
+    signal: err.signal,
   }
 }
 
@@ -26,8 +26,8 @@ function reqSerializer(req) {
     headers: {
       referer: headers.referer || headers.referrer,
       'user-agent': headers['user-agent'],
-      'content-length': headers['content-length']
-    }
+      'content-length': headers['content-length'],
+    },
   }
   const projectId =
     req.params.projectId || req.params.project_id || req.params.Project_id
@@ -52,8 +52,8 @@ function resSerializer(res) {
   return {
     statusCode: res.statusCode,
     headers: {
-      'content-length': res.getHeader && res.getHeader('content-length')
-    }
+      'content-length': res.getHeader && res.getHeader('content-length'),
+    },
   }
 }
 

@@ -52,7 +52,7 @@ module.exports = {
   getReadyPipeline,
   wrapError,
   hexToBase64,
-  base64ToHex
+  base64ToHex,
 }
 
 // returns a promise which resolves with the md5 hash of the stream
@@ -84,7 +84,7 @@ async function verifyMd5(persistor, bucket, key, sourceMd5, destMd5 = null) {
       sourceMd5,
       destMd5,
       bucket,
-      key
+      key,
     })
   }
 }
@@ -133,8 +133,8 @@ function getReadyPipeline(...streams) {
     for (const stream of streams) {
       // when a stream receives a pipe, set up the drain handler to drain the
       // connection if an error occurs or the stream is closed
-      stream.on('pipe', (previousStream) => {
-        stream.on('error', (x) => {
+      stream.on('pipe', previousStream => {
+        stream.on('error', x => {
           drainPreviousStream(previousStream)
         })
         stream.on('close', () => {

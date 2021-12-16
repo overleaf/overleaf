@@ -140,7 +140,7 @@ class OError extends Error {
     let stack = oError.stack || '(no stack)'
 
     if (Array.isArray(oError._oErrorTags) && oError._oErrorTags.length) {
-      stack += `\n${oError._oErrorTags.map((tag) => tag.stack).join('\n')}`
+      stack += `\n${oError._oErrorTags.map(tag => tag.stack).join('\n')}`
     }
 
     const causeStack = oError.cause && OError.getFullStack(oError.cause)

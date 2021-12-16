@@ -15,7 +15,7 @@ function getPersistor(backend, settings) {
     case 'fs':
       return new FSPersistor({
         paths: settings.paths,
-        Metrics: settings.Metrics
+        Metrics: settings.Metrics,
       })
     case 'gcs':
       return new GcsPersistor(
@@ -30,7 +30,7 @@ module.exports = function create(settings) {
   Logger.info(
     {
       backend: settings.backend,
-      fallback: settings.fallback && settings.fallback.backend
+      fallback: settings.fallback && settings.fallback.backend,
     },
     'Loading backend'
   )

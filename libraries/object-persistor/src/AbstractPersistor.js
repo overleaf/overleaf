@@ -6,7 +6,7 @@ module.exports = class AbstractPersistor {
       method: 'sendFile',
       location,
       target,
-      source
+      source,
     })
   }
 
@@ -15,7 +15,7 @@ module.exports = class AbstractPersistor {
       method: 'sendStream',
       location,
       target,
-      opts
+      opts,
     })
   }
 
@@ -25,7 +25,7 @@ module.exports = class AbstractPersistor {
       method: 'getObjectStream',
       location,
       name,
-      opts
+      opts,
     })
   }
 
@@ -33,7 +33,7 @@ module.exports = class AbstractPersistor {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'getRedirectUrl',
       location,
-      name
+      name,
     })
   }
 
@@ -41,7 +41,7 @@ module.exports = class AbstractPersistor {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'getObjectSize',
       location,
-      name
+      name,
     })
   }
 
@@ -49,7 +49,7 @@ module.exports = class AbstractPersistor {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'getObjectMd5Hash',
       location,
-      name
+      name,
     })
   }
 
@@ -58,7 +58,7 @@ module.exports = class AbstractPersistor {
       method: 'copyObject',
       location,
       fromName,
-      toName
+      toName,
     })
   }
 
@@ -66,7 +66,7 @@ module.exports = class AbstractPersistor {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'deleteObject',
       location,
-      name
+      name,
     })
   }
 
@@ -74,7 +74,7 @@ module.exports = class AbstractPersistor {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'deleteDirectory',
       location,
-      name
+      name,
     })
   }
 
@@ -82,7 +82,7 @@ module.exports = class AbstractPersistor {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'checkIfObjectExists',
       location,
-      name
+      name,
     })
   }
 
@@ -90,7 +90,7 @@ module.exports = class AbstractPersistor {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'directorySize',
       location,
-      name
+      name,
     })
   }
 }

@@ -1,10 +1,10 @@
 const Metrics = require('./index')
 
 module.exports.monitor = logger =>
-  function(req, res, next) {
+  function (req, res, next) {
     const startTime = Date.now()
     const { end } = res
-    res.end = function(...args) {
+    res.end = function (...args) {
       end.apply(this, args)
       const responseTimeMs = Date.now() - startTime
       const requestSize = parseInt(req.headers['content-length'], 10)
@@ -15,13 +15,13 @@ module.exports.monitor = logger =>
         Metrics.timing('http_request', responseTimeMs, null, {
           method: req.method,
           status_code: res.statusCode,
-          path: routePath
+          path: routePath,
         })
         if (requestSize) {
           Metrics.summary('http_request_size_bytes', requestSize, {
             method: req.method,
             status_code: res.statusCode,
-            path: routePath
+            path: routePath,
           })
         }
       }

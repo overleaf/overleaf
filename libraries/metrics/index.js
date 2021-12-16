@@ -50,8 +50,8 @@ function initialize(appName, opts = {}) {
       allowExpressions: true,
       serviceContext: {
         service: appName,
-        version: process.env.BUILD_VERSION
-      }
+        version: process.env.BUILD_VERSION,
+      },
     })
   }
 
@@ -62,8 +62,8 @@ function initialize(appName, opts = {}) {
     profiler.start({
       serviceContext: {
         service: appName,
-        version: process.env.BUILD_VERSION
-      }
+        version: process.env.BUILD_VERSION,
+      },
     })
   }
 
@@ -78,9 +78,9 @@ function injectMetricsRoute(app) {
   app.get(
     '/metrics',
     ExpressCompression({
-      level: parseInt(process.env.METRICS_COMPRESSION_LEVEL || '1', 10)
+      level: parseInt(process.env.METRICS_COMPRESSION_LEVEL || '1', 10),
     }),
-    function(req, res) {
+    function (req, res) {
       res.set('Content-Type', promWrapper.registry.contentType)
       res.end(promWrapper.registry.metrics())
     }

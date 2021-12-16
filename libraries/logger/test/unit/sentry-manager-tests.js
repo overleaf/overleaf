@@ -10,12 +10,12 @@ describe('SentryManager', function () {
     this.clock = sinon.useFakeTimers(Date.now())
     this.Sentry = {
       init: sinon.stub(),
-      captureException: sinon.stub()
+      captureException: sinon.stub(),
     }
     this.SentryManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        '@sentry/node': this.Sentry
-      }
+        '@sentry/node': this.Sentry,
+      },
     })
     this.sentryManager = new this.SentryManager('test_dsn')
   })

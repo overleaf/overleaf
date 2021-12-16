@@ -39,31 +39,31 @@ describe('GcsPersistorTests', function () {
     Settings = {
       directoryKeyRegex: /^[0-9a-fA-F]{24}\/[0-9a-fA-F]{24}/,
       Metrics: {
-        count: sinon.stub()
-      }
+        count: sinon.stub(),
+      },
     }
 
     files = [
       {
         metadata: { size: 11, md5Hash: '/////wAAAAD/////AAAAAA==' },
-        delete: sinon.stub()
+        delete: sinon.stub(),
       },
       {
         metadata: { size: 22, md5Hash: '/////wAAAAD/////AAAAAA==' },
-        delete: sinon.stub()
-      }
+        delete: sinon.stub(),
+      },
     ]
 
     ReadStream = {
       pipe: sinon.stub().returns('readStream'),
       on: sinon.stub(),
-      removeListener: sinon.stub()
+      removeListener: sinon.stub(),
     }
     ReadStream.on.withArgs('end').yields()
     ReadStream.on.withArgs('pipe').yields({
       unpipe: sinon.stub(),
       resume: sinon.stub(),
-      on: sinon.stub()
+      on: sinon.stub(),
     })
 
     Transform = class {
@@ -79,7 +79,7 @@ describe('GcsPersistorTests', function () {
 
     Stream = {
       pipeline: sinon.stub().yields(),
-      Transform: Transform
+      Transform: Transform,
     }
 
     GcsFile = {
@@ -89,12 +89,12 @@ describe('GcsPersistorTests', function () {
       createWriteStream: sinon.stub().returns(WriteStream),
       copy: sinon.stub().resolves(),
       exists: sinon.stub().resolves([true]),
-      getSignedUrl: sinon.stub().resolves([redirectUrl])
+      getSignedUrl: sinon.stub().resolves([redirectUrl]),
     }
 
     GcsBucket = {
       file: sinon.stub().returns(GcsFile),
-      getFiles: sinon.stub().resolves([files])
+      getFiles: sinon.stub().resolves([files]),
     }
 
     Storage = class {
@@ -108,7 +108,7 @@ describe('GcsPersistorTests', function () {
     GcsNotFoundError.code = 404
 
     Fs = {
-      createReadStream: sinon.stub().returns(ReadStream)
+      createReadStream: sinon.stub().returns(ReadStream),
     }
 
     FileNotFoundError = new Error('File not found')
@@ -118,14 +118,14 @@ describe('GcsPersistorTests', function () {
       end: sinon.stub(),
       read: sinon.stub().returns(md5),
       digest: sinon.stub().returns(md5),
-      setEncoding: sinon.stub()
+      setEncoding: sinon.stub(),
     }
     crypto = {
-      createHash: sinon.stub().returns(Hash)
+      createHash: sinon.stub().returns(Hash),
     }
 
     Logger = {
-      warn: sinon.stub()
+      warn: sinon.stub(),
     }
 
     GcsPersistor = new (SandboxedModule.require(modulePath, {
@@ -136,9 +136,9 @@ describe('GcsPersistorTests', function () {
         './Errors': Errors,
         fs: Fs,
         stream: Stream,
-        crypto
+        crypto,
       },
-      globals: { console, Buffer }
+      globals: { console, Buffer },
     }))(Settings)
   })
 
@@ -162,7 +162,7 @@ describe('GcsPersistorTests', function () {
 
       it('disables automatic decompression', function () {
         expect(GcsFile.createReadStream).to.have.been.calledWith({
-          decompress: false
+          decompress: false,
         })
       })
 
@@ -179,7 +179,7 @@ describe('GcsPersistorTests', function () {
       beforeEach(async function () {
         stream = await GcsPersistor.getObjectStream(bucket, key, {
           start: 5,
-          end: 10
+          end: 10,
         })
       })
 
@@ -191,7 +191,7 @@ describe('GcsPersistorTests', function () {
         expect(GcsFile.createReadStream).to.have.been.calledWith({
           decompress: false,
           start: 5,
-          end: 10
+          end: 10,
         })
       })
     })
@@ -279,7 +279,7 @@ describe('GcsPersistorTests', function () {
         GcsPersistor.settings.unsignedUrls = true
         GcsPersistor.settings.endpoint = {
           apiScheme: 'http',
-          apiEndpoint: 'custom.endpoint'
+          apiEndpoint: 'custom.endpoint',
         }
         signedUrl = await GcsPersistor.getRedirectUrl(bucket, key)
       })
@@ -368,7 +368,7 @@ describe('GcsPersistorTests', function () {
 
       it('should not try to create a resumable upload', function () {
         expect(GcsFile.createWriteStream).to.have.been.calledWith({
-          resumable: false
+          resumable: false,
         })
       })
 
@@ -388,7 +388,7 @@ describe('GcsPersistorTests', function () {
     describe('when a hash is supplied', function () {
       beforeEach(async function () {
         return GcsPersistor.sendStream(bucket, key, ReadStream, {
-          sourceMd5: 'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb'
+          sourceMd5: 'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb',
         })
       })
 
@@ -400,9 +400,9 @@ describe('GcsPersistorTests', function () {
         expect(GcsFile.createWriteStream).to.have.been.calledWith({
           validation: 'md5',
           metadata: {
-            md5Hash: 'qqqqqru7u7uqqqqqu7u7uw=='
+            md5Hash: 'qqqqqru7u7uqqqqqu7u7uw==',
           },
-          resumable: false
+          resumable: false,
         })
       })
 
@@ -418,14 +418,14 @@ describe('GcsPersistorTests', function () {
       beforeEach(async function () {
         return GcsPersistor.sendStream(bucket, key, ReadStream, {
           contentType,
-          contentEncoding
+          contentEncoding,
         })
       })
 
       it('should send the metadata to GCS', function () {
         expect(GcsFile.createWriteStream).to.have.been.calledWith({
           metadata: { contentType, contentEncoding },
-          resumable: false
+          resumable: false,
         })
       })
     })
@@ -572,7 +572,7 @@ describe('GcsPersistorTests', function () {
         expect(Storage.prototype.bucket).to.have.been.calledWith(bucket)
         expect(GcsBucket.getFiles).to.have.been.calledWith({
           directory: directoryName,
-          autoPaginate: false
+          autoPaginate: false,
         })
         expect(GcsBucket.getFiles).to.have.been.calledWith('call-1')
         expect(GcsBucket.getFiles).to.have.been.calledWith('call-2')

@@ -81,13 +81,13 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
         // start listening on both straight away so that we don't consume bytes
         // in one place before the other
         const returnStream = new Stream.PassThrough()
-        pipeline(fallbackStream, returnStream).catch((error) => {
+        pipeline(fallbackStream, returnStream).catch(error => {
           Logger.warn({ error }, 'failed to copy object from fallback')
         })
 
         if (shouldCopy) {
           const copyStream = new Stream.PassThrough()
-          pipeline(fallbackStream, copyStream).catch((error) => {
+          pipeline(fallbackStream, copyStream).catch(error => {
             Logger.warn({ error }, 'failed to copy object from fallback')
           })
 
@@ -97,7 +97,7 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
             bucket,
             key,
             key
-          ).catch((error) => {
+          ).catch(error => {
             Logger.warn({ error }, 'failed to copy file from fallback')
           })
         }
@@ -120,13 +120,13 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
         )
 
         const copyStream = new Stream.PassThrough()
-        pipeline(fallbackStream, copyStream).catch((error) => {
+        pipeline(fallbackStream, copyStream).catch(error => {
           Logger.warn({ error }, 'failed to copy object from fallback')
         })
 
         if (this.settings.copyOnMiss) {
           const missStream = new Stream.PassThrough()
-          pipeline(fallbackStream, missStream).catch((error) => {
+          pipeline(fallbackStream, missStream).catch(error => {
             Logger.warn({ error }, 'failed to copy object from fallback')
           })
 
@@ -173,7 +173,7 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
       }
 
       await this.primaryPersistor.sendStream(destBucket, destKey, stream, {
-        sourceMd5
+        sourceMd5,
       })
     } catch (err) {
       const error = new WriteError(
@@ -182,7 +182,7 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
           sourceBucket,
           destBucket,
           sourceKey,
-          destKey
+          destKey,
         },
         err
       )
@@ -197,7 +197,7 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
           'unable to clean up destination copy artifact',
           {
             destBucket,
-            destKey
+            destKey,
           },
           err
         )
@@ -215,7 +215,7 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
 
     await Promise.all([
       this.primaryPersistor[methodName](bucket, ...moreArgs),
-      this.fallbackPersistor[methodName](fallbackBucket, ...moreArgs)
+      this.fallbackPersistor[methodName](fallbackBucket, ...moreArgs),
     ])
   }
 
@@ -239,7 +239,7 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
             bucket,
             key,
             key
-          ).catch((err) => {
+          ).catch(err => {
             Logger.warn({ err }, 'failed to copy file from fallback')
           })
         }

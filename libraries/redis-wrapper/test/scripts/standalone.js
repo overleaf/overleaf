@@ -7,7 +7,7 @@ const logger = require('@overleaf/logger')
 const rclient = redis.createClient({ host: 'localhost', port: '6379' })
 
 setInterval(() => {
-  rclient.healthCheck((err) => {
+  rclient.healthCheck(err => {
     if (err) {
       logger.error({ err }, 'HEALTH CHECK FAILED')
     } else {

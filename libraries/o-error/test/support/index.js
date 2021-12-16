@@ -53,7 +53,7 @@ exports.expectFullStackWithoutStackFramesToEqual = function (error, expected) {
   const fullStack = OError.getFullStack(error)
   const fullStackWithoutFrames = fullStack
     .split('\n')
-    .filter((line) => !/^\s+at\s/.test(line))
+    .filter(line => !/^\s+at\s/.test(line))
   expect(
     fullStackWithoutFrames,
     'full stack without frames should equal'

@@ -7,5 +7,5 @@ chai.should()
 chai.use(sinonChai)
 
 SandboxedModule.configure({
-  globals: { Buffer, JSON, console, process }
+  globals: { Buffer, JSON, console, process },
 })
