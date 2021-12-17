@@ -1,8 +1,6 @@
 /* eslint-disable
     camelcase,
-    node/handle-callback-err,
     max-len,
-    no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -21,22 +19,19 @@ require('./GroupPlansData') // make sure dynamic group plans are loaded
 const SubscriptionLocator = {
   getUsersSubscription(user_or_id, callback) {
     const user_id = SubscriptionLocator._getUserId(user_or_id)
-    return Subscription.findOne(
-      { admin_id: user_id },
-      function (err, subscription) {
-        logger.log({ user_id }, 'got users subscription')
-        return callback(err, subscription)
-      }
-    )
+    Subscription.findOne({ admin_id: user_id }, function (err, subscription) {
+      logger.log({ user_id }, 'got users subscription')
+      callback(err, subscription)
+    })
   },
 
   getUserIndividualSubscription(user_or_id, callback) {
     const user_id = SubscriptionLocator._getUserId(user_or_id)
-    return Subscription.findOne(
+    Subscription.findOne(
       { admin_id: user_id, groupPlan: false },
       function (err, subscription) {
         logger.log({ user_id }, 'got users individual subscription')
-        return callback(err, subscription)
+        callback(err, subscription)
       }
     )
   },
@@ -45,8 +40,7 @@ const SubscriptionLocator = {
     if (callback == null) {
       callback = function () {}
     }
-    const user_id = SubscriptionLocator._getUserId(user_or_id)
-    return Subscription.find({
+    Subscription.find({
       manager_ids: user_or_id,
       groupPlan: true,
     })
@@ -56,17 +50,17 @@ const SubscriptionLocator = {
 
   getMemberSubscriptions(user_or_id, callback) {
     const user_id = SubscriptionLocator._getUserId(user_or_id)
-    return Subscription.find({ member_ids: user_id })
+    Subscription.find({ member_ids: user_id })
       .populate('admin_id')
       .exec(callback)
   },
 
   getSubscription(subscription_id, callback) {
-    return Subscription.findOne({ _id: subscription_id }, callback)
+    Subscription.findOne({ _id: subscription_id }, callback)
   },
 
   getSubscriptionByMemberIdAndId(user_id, subscription_id, callback) {
-    return Subscription.findOne(
+    Subscription.findOne(
       { member_ids: user_id, _id: subscription_id },
       { _id: 1 },
       callback
@@ -74,7 +68,7 @@ const SubscriptionLocator = {
   },
 
   getGroupSubscriptionsMemberOf(user_id, callback) {
-    return Subscription.find(
+    Subscription.find(
       { member_ids: user_id },
       { _id: 1, planCode: 1 },
       callback
@@ -82,11 +76,11 @@ const SubscriptionLocator = {
   },
 
   getGroupsWithEmailInvite(email, callback) {
-    return Subscription.find({ invited_emails: email }, callback)
+    Subscription.find({ invited_emails: email }, callback)
   },
 
   getGroupWithV1Id(v1TeamId, callback) {
-    return Subscription.findOne({ 'overleaf.id': v1TeamId }, callback)
+    Subscription.findOne({ 'overleaf.id': v1TeamId }, callback)
   },
 
   getUserDeletedSubscriptions(userId, callback) {
