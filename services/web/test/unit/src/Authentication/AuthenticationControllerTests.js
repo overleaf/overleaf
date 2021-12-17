@@ -644,8 +644,8 @@ describe('AuthenticationController', function () {
         this.req.headers = {
           authorization: `Basic ${Buffer.from('user:nope').toString('base64')}`,
         }
-        this.req.end = status => {
-          expect(status).to.equal('Unauthorized')
+        this.req.sendStatus = status => {
+          expect(status).to.equal(401)
           done()
         }
         this.middleware(this.req, this.req)
@@ -657,8 +657,8 @@ describe('AuthenticationController', function () {
             'base64'
           )}`,
         }
-        this.req.end = status => {
-          expect(status).to.equal('Unauthorized')
+        this.req.sendStatus = status => {
+          expect(status).to.equal(401)
           done()
         }
         this.middleware(this.req, this.req)
@@ -670,8 +670,45 @@ describe('AuthenticationController', function () {
             'base64'
           )}`,
         }
-        this.req.end = status => {
-          expect(status).to.equal('Unauthorized')
+        this.req.sendStatus = status => {
+          expect(status).to.equal(401)
+          done()
+        }
+        this.middleware(this.req, this.req)
+      })
+
+      it('should fail with empty user and password of "undefined"', function (done) {
+        this.req.headers = {
+          authorization: `Basic ${Buffer.from(`:undefined`).toString(
+            'base64'
+          )}`,
+        }
+        this.req.sendStatus = status => {
+          expect(status).to.equal(401)
+          done()
+        }
+        this.middleware(this.req, this.req)
+      })
+
+      it('should fail with empty user and empty password', function (done) {
+        this.req.headers = {
+          authorization: `Basic ${Buffer.from(`:`).toString('base64')}`,
+        }
+        this.req.sendStatus = status => {
+          expect(status).to.equal(401)
+          done()
+        }
+        this.middleware(this.req, this.req)
+      })
+
+      it('should fail with a user that is not a valid property', function (done) {
+        this.req.headers = {
+          authorization: `Basic ${Buffer.from(
+            `constructor:[Function ]`
+          ).toString('base64')}`,
+        }
+        this.req.sendStatus = status => {
+          expect(status).to.equal(401)
           done()
         }
         this.middleware(this.req, this.req)

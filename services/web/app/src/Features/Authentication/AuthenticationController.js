@@ -7,8 +7,8 @@ const Metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const querystring = require('querystring')
 const Settings = require('@overleaf/settings')
-const basicAuth = require('basic-auth-connect')
-const crypto = require('crypto')
+const basicAuth = require('basic-auth')
+const tsscmp = require('tsscmp')
 const UserHandler = require('../User/UserHandler')
 const UserSessionsManager = require('../User/UserSessionsManager')
 const SessionStoreManager = require('../../infrastructure/SessionStoreManager')
@@ -27,6 +27,20 @@ const {
 function send401WithChallenge(res) {
   res.setHeader('WWW-Authenticate', 'OverleafLogin')
   res.sendStatus(401)
+}
+
+function checkCredentials(userDetailsMap, user, password) {
+  const expectedPassword = userDetailsMap.get(user)
+  const userExists = userDetailsMap.has(user) && expectedPassword // user exists with a non-null password
+  const isValid = userExists && tsscmp(expectedPassword, password)
+  if (!isValid) {
+    logger.err({ user }, 'invalid login details')
+  }
+  Metrics.inc('security.http-auth.check-credentials', 1, {
+    path: userExists ? 'known-user' : 'unknown-user',
+    status: isValid ? 'pass' : 'fail',
+  })
+  return isValid
 }
 
 const AuthenticationController = {
@@ -335,17 +349,20 @@ const AuthenticationController = {
   },
 
   requireBasicAuth: function (userDetails) {
-    return basicAuth(function (user, pass) {
-      const expectedPassword = userDetails[user]
-      const isValid =
-        expectedPassword &&
-        expectedPassword.length === pass.length &&
-        crypto.timingSafeEqual(Buffer.from(expectedPassword), Buffer.from(pass))
-      if (!isValid) {
-        logger.err({ user }, 'invalid login details')
+    const userDetailsMap = new Map(Object.entries(userDetails))
+    return function (req, res, next) {
+      const credentials = basicAuth(req)
+      if (
+        !credentials ||
+        !checkCredentials(userDetailsMap, credentials.name, credentials.pass)
+      ) {
+        send401WithChallenge(res)
+        Metrics.inc('security.http-auth', 1, { status: 'reject' })
+      } else {
+        Metrics.inc('security.http-auth', 1, { status: 'accept' })
+        next()
       }
-      return isValid
-    })
+    }
   },
 
   requirePrivateApiAuth() {
