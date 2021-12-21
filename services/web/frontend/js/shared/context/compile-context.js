@@ -134,7 +134,7 @@ export function CompileProvider({ children }) {
   const [position, setPosition] = usePersistedState(`pdf.position.${projectId}`)
 
   // whether autocompile is switched on
-  const [autoCompile, _setAutoCompile] = usePersistedState(
+  const [autoCompile, setAutoCompile] = usePersistedState(
     `autocompile_enabled:${projectId}`,
     false,
     true
@@ -201,15 +201,6 @@ export function CompileProvider({ children }) {
       setUncompiled(changedAt > 0)
     }
   }, [setUncompiled, changedAt])
-
-  // record changes to the autocompile setting
-  const setAutoCompile = useCallback(
-    value => {
-      _setAutoCompile(value)
-      sendMB('autocompile-setting-changed', { value })
-    },
-    [_setAutoCompile]
-  )
 
   // always compile the PDF once after opening the project, after the doc has loaded
   useEffect(() => {
@@ -293,7 +284,6 @@ export function CompileProvider({ children }) {
           if (!data.options.isAutoCompileOnLoad) {
             setError('autocompile-disabled')
             setAutoCompile(false)
-            sendMB('autocompile-rate-limited', { hasPremiumCompile })
           }
           break
 

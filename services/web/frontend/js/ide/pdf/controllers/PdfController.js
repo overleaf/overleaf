@@ -244,9 +244,6 @@ App.controller(
           autoCompileIfReady()
         }
         localStorage(`autocompile_enabled:${$scope.project_id}`, newValue)
-        eventTracking.sendMB('autocompile-setting-changed', {
-          value: newValue,
-        })
       }
     })
 
@@ -472,9 +469,6 @@ App.controller(
           $scope.pdf.view = 'errors'
           $scope.pdf.autoCompileDisabled = true
           $scope.autocompile_enabled = false // disable any further autocompiles
-          eventTracking.sendMB('autocompile-rate-limited', {
-            hasPremiumCompile: $scope.hasPremiumCompile,
-          })
         }
       } else if (response.status === 'project-too-large') {
         $scope.pdf.view = 'errors'
@@ -785,8 +779,6 @@ App.controller(
         return
       }
 
-      eventTracking.sendMBSampled('editor-recompile-sampled', options)
-
       $scope.lastStartedCompileAt = Date.now()
       $scope.pdf.compiling = true
       $scope.pdf.isAutoCompileOnLoad =
@@ -959,7 +951,6 @@ App.controller(
 
     $scope.openInEditor = function (entry) {
       let column, line
-      eventTracking.sendMBOnce('logs-jump-to-location-once')
       const entity = ide.fileTreeManager.findEntityByPath(entry.file)
       if (entity == null || entity.type !== 'doc') {
         return

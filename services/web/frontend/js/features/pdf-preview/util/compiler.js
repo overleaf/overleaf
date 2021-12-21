@@ -1,6 +1,5 @@
 import { isMainFile } from './editor-files'
 import getMeta from '../../../utils/meta'
-import { sendMBSampled } from '../../../infrastructure/event-tracking'
 import { deleteJSON, postJSON } from '../../../infrastructure/fetch-json'
 import { debounce } from 'lodash'
 import { trackPdfDownload } from '../../../ide/pdf/controllers/PdfJsMetrics'
@@ -74,9 +73,6 @@ export default class DocumentCompiler {
     }
 
     try {
-      // log a sample of the compile requests
-      sendMBSampled('editor-recompile-sampled', options)
-
       // reset values
       this.setChangedAt(0)
       this.validationIssues = undefined

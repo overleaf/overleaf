@@ -1,5 +1,4 @@
 import App from '../../../base'
-import { sendMBOnce } from '../../../infrastructure/event-tracking'
 
 App.controller('PdfSynctexController', function ($scope, synctex, ide) {
   this.cursorPosition = null
@@ -50,8 +49,6 @@ App.controller('PdfSynctexController', function ($scope, synctex, ide) {
   })
 
   window.addEventListener('synctex:sync-to-entry', event => {
-    sendMBOnce('logs-jump-to-location-once')
-
     const entry = event.detail
 
     const entity = ide.fileTreeManager.findEntityByPath(entry.file)
