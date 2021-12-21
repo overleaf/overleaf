@@ -27,6 +27,17 @@ App.controller('ProjectPageController', function (
       newValue === 'ownerName' ? ownerNameComparator : defaultComparator
   })
 
+  $scope.shouldShowSurveyLink = true
+
+  if (localStorage('dismissed-2021-future-survey') === true) {
+    $scope.shouldShowSurveyLink = false
+  }
+
+  $scope.dismissSurvey = () => {
+    localStorage('dismissed-2021-future-survey', true)
+    $scope.shouldShowSurveyLink = false
+  }
+
   $timeout(() => recalculateProjectListHeight(), 10)
 
   $scope.$watch(

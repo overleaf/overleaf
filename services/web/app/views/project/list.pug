@@ -43,6 +43,28 @@ block content
 						aside.project-list-sidebar
 							include ./list/side-bar
 
+						.project-list-sidebar-survey(
+							ng-if="shouldShowSurveyLink"
+							ng-cloak
+						)
+							| Help us shape the future of Overleaf!
+							|
+							|
+							a.project-list-sidebar-survey-link(
+								href="https://forms.gle/UmuN1w9xyemnoMK96"
+								target="_blank"
+								rel="noreferrer noopener"
+							) Take part in our annual survey
+							| .
+							button.project-list-sidebar-survey-dismiss(
+								type="button"
+								title="Dismiss Overleaf survey"
+								ng-click="dismissSurvey()"
+							)
+								span(
+									aria-hidden="true"
+								) &times;
+
 					.project-list-main.col-md-10.col-xs-9
 						include ./list/notifications
 						include ./list/project-list
