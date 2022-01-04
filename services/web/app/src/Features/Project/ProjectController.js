@@ -40,6 +40,7 @@ const Modules = require('../../infrastructure/Modules')
 const SplitTestV2Handler = require('../SplitTests/SplitTestV2Handler')
 const { getNewLogsUIVariantForUser } = require('../Helpers/NewLogsUI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
+const SpellingHandler = require('../Spelling/SpellingHandler')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
@@ -691,6 +692,12 @@ const ProjectController = {
             )
           }
         },
+        learnedWords(cb) {
+          if (!userId) {
+            return cb(null, [])
+          }
+          SpellingHandler.getUserDictionaryWithRetries(userId, cb)
+        },
         subscription(cb) {
           if (userId == null) {
             return cb()
@@ -776,6 +783,7 @@ const ProjectController = {
         {
           project,
           user,
+          learnedWords,
           subscription,
           isTokenMember,
           brandVariation,
@@ -927,6 +935,7 @@ const ProjectController = {
                 isTokenMember
               ),
               languages: Settings.languages,
+              learnedWords,
               editorThemes: THEME_LIST,
               maxDocLength: Settings.max_doc_length,
               useV2History:

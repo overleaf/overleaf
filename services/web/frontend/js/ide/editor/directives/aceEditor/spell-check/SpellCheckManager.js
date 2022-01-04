@@ -1,3 +1,5 @@
+import getMeta from '../../../../../utils/meta'
+
 // eslint-disable-next-line prefer-regex-literals
 const BLACKLISTED_COMMAND_REGEX = new RegExp(
   `\
@@ -57,6 +59,8 @@ class SpellCheckManager {
       })
 
     this.selectedHighlightContents = null
+
+    this.learnedWords = new Set(getMeta('ol-learnedWords'))
 
     $(document).on('click', e => {
       // There is a bug (?) in Safari when ctrl-clicking an element, and the
@@ -191,6 +195,7 @@ class SpellCheckManager {
     this.adapter.highlightedWordManager.removeWord(highlight.word)
     const language = this.$scope.spellCheckLanguage
     this.cache.put(`${language}:${highlight.word}`, true)
+    this.learnedWords.add(highlight.word)
   }
 
   markLinesAsUpdated(change) {
@@ -291,7 +296,7 @@ class SpellCheckManager {
     } else {
       this.inProgressRequest = this.apiRequest(
         '/check',
-        { language, words },
+        { language, words, skipLearnedWords: true },
         (error, result) => {
           delete this.inProgressRequest
           if (error != null || result == null || result.misspellings == null) {
@@ -372,8 +377,10 @@ class SpellCheckManager {
         if (word[word.length - 1] === "'") {
           word = word.slice(0, -1)
         }
-        positions.push({ row: rowIdx, column: result.index })
-        words.push(word)
+        if (!this.learnedWords.has(word)) {
+          positions.push({ row: rowIdx, column: result.index })
+          words.push(word)
+        }
       }
     }
     return { words, positions }

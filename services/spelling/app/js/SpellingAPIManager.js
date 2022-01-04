@@ -51,7 +51,7 @@ const SpellingAPIManager = {
   },
 
   getDic(token, callback) {
-    return LearnedWordsManager.getLearnedWords(token, callback)
+    return LearnedWordsManager.getLearnedWordsNoCache(token, callback)
   },
 }
 
@@ -67,7 +67,7 @@ const promises = {
 
     const misspellings = await ASpell.promises.checkWords(lang, wordSlice)
 
-    if (token) {
+    if (token && !request.skipLearnedWords) {
       const learnedWords = await LearnedWordsManager.promises.getLearnedWords(
         token
       )

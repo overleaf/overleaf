@@ -54,6 +54,14 @@ const LearnedWordsManager = {
     metrics.inc('mongoCache', 0.1, { status: 'miss' })
     logger.info({ userToken }, 'mongoCache miss')
 
+    LearnedWordsManager.getLearnedWordsNoCache(userToken, (err, words) => {
+      if (err) return callback(err)
+      mongoCache.set(userToken, words)
+      callback(null, words)
+    })
+  },
+
+  getLearnedWordsNoCache(userToken, callback) {
     db.spellingPreferences.findOne(
       { token: userToken },
       function (error, preferences) {
@@ -68,7 +76,6 @@ const LearnedWordsManager = {
             (value, index, self) => self.indexOf(value) === index
           )
         }
-        mongoCache.set(userToken, words)
         callback(null, words)
       }
     )

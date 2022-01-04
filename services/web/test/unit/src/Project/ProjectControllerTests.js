@@ -193,6 +193,9 @@ describe('ProjectController', function () {
           hooks: { fire: sinon.stub().yields(null, []) },
         },
         '../Helpers/NewLogsUI': this.NewLogsUIHelper,
+        '../Spelling/SpellingHandler': {
+          getUserDictionaryWithRetries: sinon.stub().yields(null, []),
+        },
       },
     })
 

@@ -223,6 +223,7 @@ export default describe('SpellCheckManager', function () {
         .expect('POST', '/spelling/check', {
           language: this.scope.spellCheckLanguage,
           words: ['Lorem', 'ipsum', 'dolor'],
+          skipLearnedWords: true,
           token: window.user.id,
           _csrf: window.csrfToken,
         })
@@ -244,6 +245,7 @@ export default describe('SpellCheckManager', function () {
         .expect('POST', '/spelling/check', {
           language: this.scope.spellCheckLanguage,
           words: ['Lorem', 'ipsum', 'dolor'],
+          skipLearnedWords: true,
           token: window.user.id,
           _csrf: window.csrfToken,
         })
@@ -267,6 +269,7 @@ export default describe('SpellCheckManager', function () {
         .expect('POST', '/spelling/check', {
           language: this.scope.spellCheckLanguage,
           words: ['Lorem', 'ipsum', 'dolor'],
+          skipLearnedWords: true,
           token: window.user.id,
           _csrf: window.csrfToken,
         })
@@ -287,6 +290,7 @@ export default describe('SpellCheckManager', function () {
         .expect('POST', '/spelling/check', {
           language: this.scope.spellCheckLanguage,
           words: ['sit', 'amet'],
+          skipLearnedWords: true,
           token: window.user.id,
           _csrf: window.csrfToken,
         })
