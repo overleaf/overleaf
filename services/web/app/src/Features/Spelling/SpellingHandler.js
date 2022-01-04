@@ -2,11 +2,13 @@ const request = require('request')
 const requestRetry = require('requestretry')
 const Settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
+const Metrics = require('@overleaf/metrics')
 
 const TIMEOUT = 10 * 1000
 
 module.exports = {
   getUserDictionaryWithRetries(userId, callback) {
+    const timer = new Metrics.Timer('spelling_get_dict')
     const options = {
       url: `${Settings.apis.spelling.url}/user/${userId}`,
       timeout: 3 * 1000,
@@ -30,6 +32,7 @@ module.exports = {
         )
       }
 
+      timer.done()
       callback(null, body)
     })
   },
