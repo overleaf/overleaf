@@ -196,6 +196,28 @@ const UserGetter = {
     db.users.find(query, { projection }).toArray(callback)
   },
 
+  getInstitutionUsersByHostname(hostname, callback) {
+    const projection = {
+      _id: 1,
+      email: 1,
+      emails: 1,
+      samlIdentifiers: 1,
+    }
+    UserGetter.getUsersByHostname(hostname, projection, (err, users) => {
+      if (err) return callback(err)
+
+      users.forEach(user => {
+        user.emails = decorateFullEmails(
+          user.email,
+          user.emails,
+          [],
+          user.samlIdentifiers || []
+        )
+      })
+      callback(null, users)
+    })
+  },
+
   getUsers(query, projection, callback) {
     try {
       query = normalizeMultiQuery(query)

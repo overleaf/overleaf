@@ -59,27 +59,22 @@ describe('InstitutionsController', function () {
       },
     ]
 
-    this.getUsersByHostname = sinon.stub().callsArgWith(
-      2,
-      null,
-      [this.stubbedUser1, this.stubbedUser2].map(user => {
-        return { _id: user._id }
-      })
-    )
+    this.getInstitutionUsersByHostname = sinon.stub().yields(null, [
+      {
+        _id: this.stubbedUser1._id,
+        emails: this.stubbedUser1DecoratedEmails,
+      },
+      {
+        _id: this.stubbedUser2._id,
+        emails: this.stubbedUser2DecoratedEmails,
+      },
+    ])
     this.addAffiliation = sinon.stub().callsArgWith(3, null)
     this.refreshFeatures = sinon.stub().yields(null)
-    this.getUserFullEmails = sinon.stub()
-    this.getUserFullEmails
-      .withArgs(this.stubbedUser1._id)
-      .yields(null, this.stubbedUser1DecoratedEmails)
-    this.getUserFullEmails
-      .withArgs(this.stubbedUser2._id)
-      .yields(null, this.stubbedUser2DecoratedEmails)
     this.InstitutionsController = SandboxedModule.require(modulePath, {
       requires: {
         '../User/UserGetter': {
-          getUsersByHostname: this.getUsersByHostname,
-          getUserFullEmails: this.getUserFullEmails,
+          getInstitutionUsersByHostname: this.getInstitutionUsersByHostname,
         },
         '../Institutions/InstitutionsAPI': {
           addAffiliation: this.addAffiliation,
@@ -103,7 +98,7 @@ describe('InstitutionsController', function () {
     it('should add affiliations for matching users', function (done) {
       this.res.sendStatus = code => {
         code.should.equal(200)
-        this.getUsersByHostname.calledOnce.should.equal(true)
+        this.getInstitutionUsersByHostname.calledOnce.should.equal(true)
         this.addAffiliation.calledThrice.should.equal(true)
         this.addAffiliation
           .calledWithMatch(
@@ -147,7 +142,7 @@ describe('InstitutionsController', function () {
       this.addAffiliation.onCall(2).callsArgWith(3, new Error('error'))
       this.next = error => {
         expect(error).to.exist
-        this.getUsersByHostname.calledOnce.should.equal(true)
+        this.getInstitutionUsersByHostname.calledOnce.should.equal(true)
         return done()
       }
       return this.InstitutionsController.confirmDomain(

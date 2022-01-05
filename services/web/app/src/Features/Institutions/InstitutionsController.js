@@ -19,7 +19,7 @@ module.exports = {
 
 function affiliateUsers(hostname, callback) {
   const reversedHostname = hostname.trim().split('').reverse().join('')
-  UserGetter.getUsersByHostname(hostname, { _id: 1 }, function (error, users) {
+  UserGetter.getInstitutionUsersByHostname(hostname, (error, users) => {
     if (error) {
       OError.tag(error, 'problem fetching users by hostname')
       return callback(error)
@@ -29,11 +29,7 @@ function affiliateUsers(hostname, callback) {
       users,
       ASYNC_AFFILIATIONS_LIMIT,
       (user, innerCallback) => {
-        UserGetter.getUserFullEmails(user._id, (error, emails) => {
-          if (error) return innerCallback(error)
-          user.emails = emails
-          affiliateUserByReversedHostname(user, reversedHostname, innerCallback)
-        })
+        affiliateUserByReversedHostname(user, reversedHostname, innerCallback)
       },
       callback
     )
