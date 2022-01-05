@@ -32,8 +32,6 @@
 // NOTE: The global scope here is shared with other sharejs files when built with closure.
 // Be careful what ends up in your namespace.
 
-const Rope = require('jumprope')
-
 let append, transformComponent
 const text = {}
 
@@ -70,23 +68,28 @@ const checkValidOp = function (op) {
 }
 
 text.apply = function (snapshot, op) {
-  const rope = new Rope(snapshot)
   checkValidOp(op)
   for (const component of Array.from(op)) {
     if (component.i != null) {
-      rope.insert(component.p, component.i)
+      snapshot = strInject(snapshot, component.p, component.i)
     } else if (component.d != null) {
-      const deleted = ropeSubstring(rope, component.p, component.d.length)
+      const deleted = snapshot.slice(
+        component.p,
+        component.p + component.d.length
+      )
       if (component.d !== deleted) {
         throw new Error(
           `Delete component '${component.d}' does not match deleted text '${deleted}'`
         )
       }
-      rope.del(component.p, component.d.length)
+      snapshot =
+        snapshot.slice(0, component.p) +
+        snapshot.slice(component.p + component.d.length)
     } else if (component.c != null) {
-      // The rope has strict bounds checks, so we need to make sure we don't
-      // extract text beyond the end of the rope
-      const comment = ropeSubstring(rope, component.p, component.c.length)
+      const comment = snapshot.slice(
+        component.p,
+        component.p + component.c.length
+      )
       if (component.c !== comment) {
         throw new Error(
           `Comment component '${component.c}' does not match commented text '${comment}'`
@@ -96,7 +99,7 @@ text.apply = function (snapshot, op) {
       throw new Error('Unknown op type')
     }
   }
-  return rope.toString()
+  return snapshot
 }
 
 // Exported for use by the random op generator.
@@ -384,12 +387,4 @@ if (typeof WEB !== 'undefined' && WEB !== null) {
     checkValidOp,
     append
   )
-}
-
-function ropeSubstring(rope, start, length) {
-  // The rope has strict bounds checks, so we need to make sure we don't
-  // extract text beyond the end of the rope.
-  start = Math.min(rope.length, start)
-  length = Math.min(rope.length - start, length)
-  return rope.substring(start, length)
 }
