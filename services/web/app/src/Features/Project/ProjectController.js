@@ -696,7 +696,7 @@ const ProjectController = {
           if (!userId) {
             return cb(null, [])
           }
-          SpellingHandler.getUserDictionaryWithRetries(userId, cb)
+          SpellingHandler.getUserDictionary(userId, cb)
         },
         subscription(cb) {
           if (userId == null) {

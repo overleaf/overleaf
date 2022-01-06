@@ -16,7 +16,6 @@ if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
 }
 metrics.memory.monitor(logger)
 
-const mongodb = require('./app/js/mongodb')
 const SpellingAPIController = require('./app/js/SpellingAPIController')
 const express = require('express')
 const app = express()
@@ -27,11 +26,7 @@ const HealthCheckController = require('./app/js/HealthCheckController')
 app.use(bodyParser.json({ limit: '2mb' }))
 app.use(metrics.http.monitor(logger))
 
-app.delete('/user/:user_id', SpellingAPIController.deleteDic)
-app.get('/user/:user_id', SpellingAPIController.getDic)
 app.post('/user/:user_id/check', SpellingAPIController.check)
-app.post('/user/:user_id/learn', SpellingAPIController.learn)
-app.post('/user/:user_id/unlearn', SpellingAPIController.unlearn)
 app.get('/status', (req, res) => res.send({ status: 'spelling api is up' }))
 
 app.get('/health_check', HealthCheckController.healthCheck)
@@ -45,20 +40,12 @@ const port = settings && settings.port ? settings.port : 3005
 
 if (!module.parent) {
   // application entry point, called directly
-  mongodb
-    .waitForDb()
-    .then(() => {
-      app.listen(port, host, function (error) {
-        if (error != null) {
-          throw error
-        }
-        return logger.info(`spelling starting up, listening on ${host}:${port}`)
-      })
-    })
-    .catch(err => {
-      logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
-      process.exit(1)
-    })
+  app.listen(port, host, function (error) {
+    if (error != null) {
+      throw error
+    }
+    return logger.info(`spelling starting up, listening on ${host}:${port}`)
+  })
 }
 
 module.exports = app

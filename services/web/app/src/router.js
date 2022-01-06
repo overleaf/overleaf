@@ -847,8 +847,13 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.post(
     '/spelling/learn',
+    validate({
+      body: Joi.object({
+        word: Joi.string().required(),
+      }),
+    }),
     AuthenticationController.requireLogin(),
-    SpellingController.proxyRequestToSpellingApi
+    SpellingController.learn
   )
 
   webRouter.get(

@@ -2,6 +2,7 @@ const request = require('request')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const SessionManager = require('../Authentication/SessionManager')
+const LearnedWordsManager = require('./LearnedWordsManager')
 
 const TEN_SECONDS = 1000 * 10
 
@@ -9,6 +10,15 @@ const languageCodeIsSupported = code =>
   Settings.languages.some(lang => lang.code === code)
 
 module.exports = {
+  learn(req, res, next) {
+    const { word } = req.body
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    LearnedWordsManager.learnWord(userId, word, err => {
+      if (err) return next(err)
+      res.sendStatus(204)
+    })
+  },
+
   proxyRequestToSpellingApi(req, res) {
     const { language } = req.body
 

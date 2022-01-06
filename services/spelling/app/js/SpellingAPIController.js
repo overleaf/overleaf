@@ -10,12 +10,6 @@ function extractCheckRequestData(req) {
   return { token, wordCount }
 }
 
-function extractLearnRequestData(req) {
-  const token = req.params ? req.params.user_id : undefined
-  const word = req.body ? req.body.word : undefined
-  return { token, word }
-}
-
 module.exports = {
   check(req, res) {
     metrics.inc('spelling-check', 0.1)
@@ -32,57 +26,6 @@ module.exports = {
         return res.sendStatus(500)
       }
       res.send(result)
-    })
-  },
-
-  learn(req, res, next) {
-    metrics.inc('spelling-learn', 0.1)
-    const { token, word } = extractLearnRequestData(req)
-    logger.info({ token, word }, 'learning word')
-    SpellingAPIManager.learnWord(token, req.body, function (error) {
-      if (error != null) {
-        return next(OError.tag(error))
-      }
-      res.sendStatus(204)
-    })
-  },
-
-  unlearn(req, res, next) {
-    metrics.inc('spelling-unlearn', 0.1)
-    const { token, word } = extractLearnRequestData(req)
-    logger.info({ token, word }, 'unlearning word')
-    SpellingAPIManager.unlearnWord(token, req.body, function (error) {
-      if (error != null) {
-        return next(OError.tag(error))
-      }
-      res.sendStatus(204)
-    })
-  },
-
-  deleteDic(req, res, next) {
-    const { token, word } = extractLearnRequestData(req)
-    logger.log({ token, word }, 'deleting user dictionary')
-    SpellingAPIManager.deleteDic(token, function (error) {
-      if (error != null) {
-        return next(OError.tag(error))
-      }
-      res.sendStatus(204)
-    })
-  },
-
-  getDic(req, res, next) {
-    const token = req.params ? req.params.user_id : undefined
-    logger.info(
-      {
-        token,
-      },
-      'getting user dictionary'
-    )
-    SpellingAPIManager.getDic(token, function (error, words) {
-      if (error != null) {
-        return next(OError.tag(error))
-      }
-      res.send(words)
     })
   },
 }

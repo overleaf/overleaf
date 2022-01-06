@@ -1,5 +1,4 @@
-const { db } = require('./mongodb')
-const mongoCache = require('./MongoCache')
+const { db } = require('../../infrastructure/mongodb')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const { promisify } = require('util')
@@ -7,10 +6,6 @@ const OError = require('@overleaf/o-error')
 
 const LearnedWordsManager = {
   learnWord(userToken, word, callback) {
-    if (callback == null) {
-      callback = () => {}
-    }
-    mongoCache.del(userToken)
     return db.spellingPreferences.updateOne(
       {
         token: userToken,
@@ -26,10 +21,6 @@ const LearnedWordsManager = {
   },
 
   unlearnWord(userToken, word, callback) {
-    if (callback == null) {
-      callback = () => {}
-    }
-    mongoCache.del(userToken)
     return db.spellingPreferences.updateOne(
       {
         token: userToken,
@@ -42,26 +33,6 @@ const LearnedWordsManager = {
   },
 
   getLearnedWords(userToken, callback) {
-    if (callback == null) {
-      callback = () => {}
-    }
-    const mongoCachedWords = mongoCache.get(userToken)
-    if (mongoCachedWords != null) {
-      metrics.inc('mongoCache', 0.1, { status: 'hit' })
-      return callback(null, mongoCachedWords)
-    }
-
-    metrics.inc('mongoCache', 0.1, { status: 'miss' })
-    logger.info({ userToken }, 'mongoCache miss')
-
-    LearnedWordsManager.getLearnedWordsNoCache(userToken, (err, words) => {
-      if (err) return callback(err)
-      mongoCache.set(userToken, words)
-      callback(null, words)
-    })
-  },
-
-  getLearnedWordsNoCache(userToken, callback) {
     db.spellingPreferences.findOne(
       { token: userToken },
       function (error, preferences) {
@@ -82,9 +53,6 @@ const LearnedWordsManager = {
   },
 
   deleteUsersLearnedWords(userToken, callback) {
-    if (callback == null) {
-      callback = () => {}
-    }
     db.spellingPreferences.deleteOne({ token: userToken }, callback)
   },
 }

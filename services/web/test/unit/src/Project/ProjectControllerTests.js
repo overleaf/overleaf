@@ -194,7 +194,7 @@ describe('ProjectController', function () {
         },
         '../Helpers/NewLogsUI': this.NewLogsUIHelper,
         '../Spelling/SpellingHandler': {
-          getUserDictionaryWithRetries: sinon.stub().yields(null, []),
+          getUserDictionary: sinon.stub().yields(null, []),
         },
       },
     })

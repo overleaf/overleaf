@@ -27,6 +27,7 @@ describe('SpellingController', function () {
     }
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
+        './LearnedWordsManager': {},
         request: this.request,
         '@overleaf/settings': {
           languages: [
