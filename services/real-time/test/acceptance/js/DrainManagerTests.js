@@ -16,16 +16,10 @@ const { expect } = require('chai')
 const async = require('async')
 const request = require('request')
 
-const Settings = require('@overleaf/settings')
-
 const drain = function (rate, callback) {
   request.post(
     {
       url: `http://localhost:3026/drain?rate=${rate}`,
-      auth: {
-        user: Settings.internal.realTime.user,
-        pass: Settings.internal.realTime.pass,
-      },
     },
     (error, response, data) => callback(error, data)
   )

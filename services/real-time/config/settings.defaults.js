@@ -81,8 +81,6 @@ const settings = {
     realTime: {
       port: 3026,
       host: process.env.LISTEN_ADDRESS || 'localhost',
-      user: 'sharelatex',
-      pass: 'password',
     },
   },
 

@@ -104,10 +104,6 @@ module.exports = Client = {
     request.post(
       {
         url: `http://localhost:3026/client/${client_id}/disconnect`,
-        auth: {
-          user: Settings.internal.realTime.user,
-          pass: Settings.internal.realTime.pass,
-        },
       },
       (error, response, data) => callback(error, data)
     )
