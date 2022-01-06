@@ -1,8 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    node/no-deprecated-api,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -122,7 +117,7 @@ describe('Sending a message', function () {
           (error, response, body) => {
             if (error) return done(error)
             expect(response.statusCode).to.equal(400)
-            expect(body).to.equal('Invalid user_id')
+            expect(body).to.equal('Invalid userId')
             return done()
           }
         )
@@ -139,7 +134,7 @@ describe('Sending a message', function () {
           (error, response, body) => {
             if (error) return done(error)
             expect(response.statusCode).to.equal(400)
-            expect(body).to.equal('Invalid project_id')
+            expect(body).to.equal('Invalid projectId')
             return done()
           }
         )
@@ -156,7 +151,7 @@ describe('Sending a message', function () {
           (error, response, body) => {
             if (error) return done(error)
             expect(response.statusCode).to.equal(400)
-            expect(body).to.equal('Invalid thread_id')
+            expect(body).to.equal('Invalid threadId')
             return done()
           }
         )

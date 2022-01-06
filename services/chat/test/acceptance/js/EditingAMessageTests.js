@@ -1,7 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -43,8 +39,8 @@ describe('Editing a message', function () {
             this.thread_id,
             this.message.id,
             this.new_content,
-            (error, response, new_message) => {
-              this.new_message = new_message
+            (error, response, newMessage) => {
+              this.new_message = newMessage
               expect(error).to.be.null
               expect(response.statusCode).to.equal(204)
               return done()

@@ -1,8 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-unused-vars,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -12,7 +7,6 @@
  */
 const { ObjectId } = require('../../../app/js/mongodb')
 const { expect } = require('chai')
-const crypto = require('crypto')
 
 const ChatClient = require('./helpers/ChatClient')
 const ChatApp = require('./helpers/ChatApp')
@@ -60,8 +54,8 @@ describe('Resolving a thread', function () {
           expect(threads[this.thread_id].resolved_by_user_id).to.equal(
             this.user_id
           )
-          const resolved_at = new Date(threads[this.thread_id].resolved_at)
-          expect(new Date() - resolved_at).to.be.below(1000)
+          const resolvedAt = new Date(threads[this.thread_id].resolved_at)
+          expect(new Date() - resolvedAt).to.be.below(1000)
           return done()
         }
       )

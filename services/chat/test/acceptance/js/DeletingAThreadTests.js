@@ -1,7 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-unused-vars,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -11,7 +7,6 @@
  */
 const { ObjectId } = require('../../../app/js/mongodb')
 const { expect } = require('chai')
-const crypto = require('crypto')
 
 const ChatClient = require('./helpers/ChatClient')
 const ChatApp = require('./helpers/ChatApp')

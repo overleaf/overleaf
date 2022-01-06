@@ -1,8 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-unused-vars,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -17,14 +12,14 @@ const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 
 module.exports = MessageManager = {
-  createMessage(room_id, user_id, content, timestamp, callback) {
+  createMessage(roomId, userId, content, timestamp, callback) {
     if (callback == null) {
       callback = function () {}
     }
     let newMessageOpts = {
       content,
-      room_id,
-      user_id,
+      room_id: roomId,
+      user_id: userId,
       timestamp,
     }
     newMessageOpts = this._ensureIdsAreObjectIds(newMessageOpts)
@@ -37,11 +32,11 @@ module.exports = MessageManager = {
     })
   },
 
-  getMessages(room_id, limit, before, callback) {
+  getMessages(roomId, limit, before, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    let query = { room_id }
+    let query = { room_id: roomId }
     if (before != null) {
       query.timestamp = { $lt: before }
     }
@@ -53,36 +48,36 @@ module.exports = MessageManager = {
       .toArray(callback)
   },
 
-  findAllMessagesInRooms(room_ids, callback) {
+  findAllMessagesInRooms(roomIds, callback) {
     if (callback == null) {
       callback = function () {}
     }
     db.messages
       .find({
-        room_id: { $in: room_ids },
+        room_id: { $in: roomIds },
       })
       .toArray(callback)
   },
 
-  deleteAllMessagesInRoom(room_id, callback) {
+  deleteAllMessagesInRoom(roomId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     db.messages.deleteMany(
       {
-        room_id,
+        room_id: roomId,
       },
       callback
     )
   },
 
-  updateMessage(room_id, message_id, content, timestamp, callback) {
+  updateMessage(roomId, messageId, content, timestamp, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const query = this._ensureIdsAreObjectIds({
-      _id: message_id,
-      room_id,
+      _id: messageId,
+      room_id: roomId,
     })
     db.messages.updateOne(
       query,
@@ -96,13 +91,13 @@ module.exports = MessageManager = {
     )
   },
 
-  deleteMessage(room_id, message_id, callback) {
+  deleteMessage(roomId, messageId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     const query = this._ensureIdsAreObjectIds({
-      _id: message_id,
-      room_id,
+      _id: messageId,
+      room_id: roomId,
     })
     db.messages.deleteOne(query, callback)
   },

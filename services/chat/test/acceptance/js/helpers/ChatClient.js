@@ -1,7 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -14,12 +10,12 @@ const request = require('request').defaults({
 })
 
 module.exports = {
-  sendGlobalMessage(project_id, user_id, content, callback) {
+  sendGlobalMessage(projectId, userId, content, callback) {
     return request.post(
       {
-        url: `/project/${project_id}/messages`,
+        url: `/project/${projectId}/messages`,
         json: {
-          user_id,
+          user_id: userId,
           content,
         },
       },
@@ -27,22 +23,22 @@ module.exports = {
     )
   },
 
-  getGlobalMessages(project_id, callback) {
+  getGlobalMessages(projectId, callback) {
     return request.get(
       {
-        url: `/project/${project_id}/messages`,
+        url: `/project/${projectId}/messages`,
         json: true,
       },
       callback
     )
   },
 
-  sendMessage(project_id, thread_id, user_id, content, callback) {
+  sendMessage(projectId, threadId, userId, content, callback) {
     return request.post(
       {
-        url: `/project/${project_id}/thread/${thread_id}/messages`,
+        url: `/project/${projectId}/thread/${threadId}/messages`,
         json: {
-          user_id,
+          user_id: userId,
           content,
         },
       },
@@ -50,50 +46,50 @@ module.exports = {
     )
   },
 
-  getThreads(project_id, callback) {
+  getThreads(projectId, callback) {
     return request.get(
       {
-        url: `/project/${project_id}/threads`,
+        url: `/project/${projectId}/threads`,
         json: true,
       },
       callback
     )
   },
 
-  resolveThread(project_id, thread_id, user_id, callback) {
+  resolveThread(projectId, threadId, userId, callback) {
     return request.post(
       {
-        url: `/project/${project_id}/thread/${thread_id}/resolve`,
+        url: `/project/${projectId}/thread/${threadId}/resolve`,
         json: {
-          user_id,
+          user_id: userId,
         },
       },
       callback
     )
   },
 
-  reopenThread(project_id, thread_id, callback) {
+  reopenThread(projectId, threadId, callback) {
     return request.post(
       {
-        url: `/project/${project_id}/thread/${thread_id}/reopen`,
+        url: `/project/${projectId}/thread/${threadId}/reopen`,
       },
       callback
     )
   },
 
-  deleteThread(project_id, thread_id, callback) {
+  deleteThread(projectId, threadId, callback) {
     return request.del(
       {
-        url: `/project/${project_id}/thread/${thread_id}`,
+        url: `/project/${projectId}/thread/${threadId}`,
       },
       callback
     )
   },
 
-  editMessage(project_id, thread_id, message_id, content, callback) {
+  editMessage(projectId, threadId, messageId, content, callback) {
     return request.post(
       {
-        url: `/project/${project_id}/thread/${thread_id}/messages/${message_id}/edit`,
+        url: `/project/${projectId}/thread/${threadId}/messages/${messageId}/edit`,
         json: {
           content,
         },
@@ -102,10 +98,10 @@ module.exports = {
     )
   },
 
-  deleteMessage(project_id, thread_id, message_id, callback) {
+  deleteMessage(projectId, threadId, messageId, callback) {
     return request.del(
       {
-        url: `/project/${project_id}/thread/${thread_id}/messages/${message_id}`,
+        url: `/project/${projectId}/thread/${threadId}/messages/${messageId}`,
       },
       callback
     )

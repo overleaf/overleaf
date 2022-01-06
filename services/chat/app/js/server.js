@@ -1,6 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -12,7 +9,6 @@ const metrics = require('@overleaf/metrics')
 metrics.initialize('chat')
 const logger = require('@overleaf/logger')
 logger.initialize('chat')
-const Path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()

@@ -1,7 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -18,32 +14,32 @@ const metrics = require('@overleaf/metrics')
 module.exports = ThreadManager = {
   GLOBAL_THREAD: 'GLOBAL',
 
-  findOrCreateThread(project_id, thread_id, callback) {
+  findOrCreateThread(projectId, threadId, callback) {
     let query, update
     if (callback == null) {
       callback = function () {}
     }
-    project_id = ObjectId(project_id.toString())
-    if (thread_id !== ThreadManager.GLOBAL_THREAD) {
-      thread_id = ObjectId(thread_id.toString())
+    projectId = ObjectId(projectId.toString())
+    if (threadId !== ThreadManager.GLOBAL_THREAD) {
+      threadId = ObjectId(threadId.toString())
     }
 
-    if (thread_id === ThreadManager.GLOBAL_THREAD) {
+    if (threadId === ThreadManager.GLOBAL_THREAD) {
       query = {
-        project_id,
+        project_id: projectId,
         thread_id: { $exists: false },
       }
       update = {
-        project_id,
+        project_id: projectId,
       }
     } else {
       query = {
-        project_id,
-        thread_id,
+        project_id: projectId,
+        thread_id: threadId,
       }
       update = {
-        project_id,
-        thread_id,
+        project_id: projectId,
+        thread_id: threadId,
       }
     }
 
@@ -60,14 +56,14 @@ module.exports = ThreadManager = {
     )
   },
 
-  findAllThreadRooms(project_id, callback) {
+  findAllThreadRooms(projectId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     db.rooms
       .find(
         {
-          project_id: ObjectId(project_id.toString()),
+          project_id: ObjectId(projectId.toString()),
           thread_id: { $exists: true },
         },
         {
@@ -78,19 +74,19 @@ module.exports = ThreadManager = {
       .toArray(callback)
   },
 
-  resolveThread(project_id, thread_id, user_id, callback) {
+  resolveThread(projectId, threadId, userId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     db.rooms.updateOne(
       {
-        project_id: ObjectId(project_id.toString()),
-        thread_id: ObjectId(thread_id.toString()),
+        project_id: ObjectId(projectId.toString()),
+        thread_id: ObjectId(threadId.toString()),
       },
       {
         $set: {
           resolved: {
-            user_id,
+            user_id: userId,
             ts: new Date(),
           },
         },
@@ -99,14 +95,14 @@ module.exports = ThreadManager = {
     )
   },
 
-  reopenThread(project_id, thread_id, callback) {
+  reopenThread(projectId, threadId, callback) {
     if (callback == null) {
       callback = function () {}
     }
     db.rooms.updateOne(
       {
-        project_id: ObjectId(project_id.toString()),
-        thread_id: ObjectId(thread_id.toString()),
+        project_id: ObjectId(projectId.toString()),
+        thread_id: ObjectId(threadId.toString()),
       },
       {
         $unset: {
@@ -117,30 +113,26 @@ module.exports = ThreadManager = {
     )
   },
 
-  deleteThread(project_id, thread_id, callback) {
+  deleteThread(projectId, threadId, callback) {
     if (callback == null) {
       callback = function () {}
     }
-    return this.findOrCreateThread(
-      project_id,
-      thread_id,
-      function (error, room) {
-        if (error != null) {
-          return callback(error)
-        }
-        db.rooms.deleteOne(
-          {
-            _id: room._id,
-          },
-          function (error) {
-            if (error != null) {
-              return callback(error)
-            }
-            return callback(null, room._id)
-          }
-        )
+    return this.findOrCreateThread(projectId, threadId, function (error, room) {
+      if (error != null) {
+        return callback(error)
       }
-    )
+      db.rooms.deleteOne(
+        {
+          _id: room._id,
+        },
+        function (error) {
+          if (error != null) {
+            return callback(error)
+          }
+          return callback(null, room._id)
+        }
+      )
+    })
   },
 }
 ;[

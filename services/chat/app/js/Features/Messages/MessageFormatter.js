@@ -1,7 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -38,16 +34,16 @@ module.exports = MessageFormatter = {
 
   groupMessagesByThreads(rooms, messages) {
     let room, thread
-    const rooms_by_id = {}
+    const roomsById = {}
     for (room of Array.from(rooms)) {
-      rooms_by_id[room._id.toString()] = room
+      roomsById[room._id.toString()] = room
     }
 
     const threads = {}
     const getThread = function (room) {
-      const thread_id = room.thread_id.toString()
-      if (threads[thread_id] != null) {
-        return threads[thread_id]
+      const threadId = room.thread_id.toString()
+      if (threads[threadId] != null) {
+        return threads[threadId]
       } else {
         const thread = { messages: [] }
         if (room.resolved != null) {
@@ -55,13 +51,13 @@ module.exports = MessageFormatter = {
           thread.resolved_at = room.resolved.ts
           thread.resolved_by_user_id = room.resolved.user_id
         }
-        threads[thread_id] = thread
+        threads[threadId] = thread
         return thread
       }
     }
 
     for (const message of Array.from(messages)) {
-      room = rooms_by_id[message.room_id.toString()]
+      room = roomsById[message.room_id.toString()]
       if (room != null) {
         thread = getThread(room)
         thread.messages.push(
@@ -70,8 +66,8 @@ module.exports = MessageFormatter = {
       }
     }
 
-    for (const thread_id in threads) {
-      thread = threads[thread_id]
+    for (const threadId in threads) {
+      thread = threads[threadId]
       thread.messages.sort((a, b) => a.timestamp - b.timestamp)
     }
 
