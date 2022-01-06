@@ -6,4 +6,4 @@ metrics
 --is-library=True
 --node-version=14.18.1
 --public-repo=False
---script-version=3.13.0
+--script-version=4.0.0

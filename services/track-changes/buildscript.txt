@@ -5,4 +5,4 @@ track-changes
 --env-pass-through=
 --node-version=14.18.1
 --public-repo=True
---script-version=3.13.0
+--script-version=4.0.0

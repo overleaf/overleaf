@@ -4,20 +4,17 @@
 
 FROM node:14.18.1 as base
 
-WORKDIR /app
+WORKDIR /overleaf/services/notifications
 
 FROM base as app
 
-#wildcard as some files may not be in all repos
-COPY package*.json npm-shrink*.json /app/
+COPY services/notifications/package*.json /overleaf/services/notifications/
 
 RUN npm ci --quiet
 
-COPY . /app
+COPY services/notifications /overleaf/services/notifications
 
-FROM base
-
-COPY --from=app /app /app
+FROM app
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]

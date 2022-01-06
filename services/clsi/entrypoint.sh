@@ -8,9 +8,9 @@ groupadd --non-unique --gid ${DOCKER_GROUP} dockeronhost
 usermod -aG dockeronhost node
 
 # compatibility: initial volume setup
-mkdir -p /app/cache && chown node:node /app/cache
-mkdir -p /app/compiles && chown node:node /app/compiles
-mkdir -p /app/db && chown node:node /app/db
-mkdir -p /app/output && chown node:node /app/output
+mkdir -p /overleaf/services/clsi/cache && chown node:node /overleaf/services/clsi/cache
+mkdir -p /overleaf/services/clsi/compiles && chown node:node /overleaf/services/clsi/compiles
+mkdir -p /overleaf/services/clsi/db && chown node:node /overleaf/services/clsi/db
+mkdir -p /overleaf/services/clsi/output && chown node:node /overleaf/services/clsi/output
 
 exec runuser -u node -- "$@"

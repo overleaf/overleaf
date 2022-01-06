@@ -6,13 +6,13 @@ services:
       ALLOWED_IMAGES: "quay.io/sharelatex/texlive-full:2017.1"
       TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
       TEXLIVE_IMAGE_USER: "tex"
-      SHARELATEX_CONFIG: /app/config/settings.defaults.js
+      SHARELATEX_CONFIG: /overleaf/services/clsi/config/settings.defaults.js
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./compiles:/app/compiles
-      - ./cache:/app/cache
+      - ./compiles:/overleaf/services/clsi/compiles
+      - ./cache:/overleaf/services/clsi/cache
 
 
   ci:
@@ -20,10 +20,10 @@ services:
       ALLOWED_IMAGES: ${TEXLIVE_IMAGE}
       TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
       TEXLIVE_IMAGE_USER: "tex"
-      SHARELATEX_CONFIG: /app/config/settings.defaults.js
+      SHARELATEX_CONFIG: /overleaf/services/clsi/config/settings.defaults.js
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
-      - ./compiles:/app/compiles
-      - ./cache:/app/cache
+      - ./compiles:/overleaf/services/clsi/compiles
+      - ./cache:/overleaf/services/clsi/cache

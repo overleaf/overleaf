@@ -4,20 +4,17 @@
 
 FROM node:14.18.1 as base
 
-WORKDIR /app
+WORKDIR /overleaf/services/document-updater
 
 FROM base as app
 
-#wildcard as some files may not be in all repos
-COPY package*.json npm-shrink*.json /app/
+COPY services/document-updater/package*.json /overleaf/services/document-updater/
 
 RUN npm ci --quiet
 
-COPY . /app
+COPY services/document-updater /overleaf/services/document-updater
 
-FROM base
-
-COPY --from=app /app /app
+FROM app
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]

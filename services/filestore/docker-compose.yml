@@ -7,11 +7,12 @@ version: "2.3"
 services:
   test_unit:
     build:
-      context: .
+      context: ../..
+      dockerfile: services/filestore/Dockerfile
       target: base
     volumes:
-      - .:/app
-    working_dir: /app
+      - .:/overleaf/services/filestore
+    working_dir: /overleaf/services/filestore
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
@@ -21,11 +22,12 @@ services:
 
   test_acceptance:
     build:
-      context: .
+      context: ../..
+      dockerfile: services/filestore/Dockerfile
       target: base
     volumes:
-      - .:/app
-    working_dir: /app
+      - .:/overleaf/services/filestore
+    working_dir: /overleaf/services/filestore
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis

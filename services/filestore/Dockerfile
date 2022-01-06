@@ -4,22 +4,19 @@
 
 FROM node:14.18.1 as base
 
-WORKDIR /app
-COPY install_deps.sh /app
+WORKDIR /overleaf/services/filestore
+COPY services/filestore/install_deps.sh /overleaf/services/filestore/
 RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
 
 FROM base as app
 
-#wildcard as some files may not be in all repos
-COPY package*.json npm-shrink*.json /app/
+COPY services/filestore/package*.json /overleaf/services/filestore/
 
 RUN npm ci --quiet
 
-COPY . /app
+COPY services/filestore /overleaf/services/filestore
 
-FROM base
-
-COPY --from=app /app /app
+FROM app
 RUN mkdir -p uploads user_files template_files \
 &&  chown node:node uploads user_files template_files
 USER node

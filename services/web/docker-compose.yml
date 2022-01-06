@@ -7,11 +7,12 @@ services:
 
   test_unit:
     build:
-      context: .
+      context: ../..
+      dockerfile: services/web/Dockerfile
       target: base
     volumes:
-      - .:/app
-    working_dir: /app
+      - .:/overleaf/services/web
+    working_dir: /overleaf/services/web
     environment:
       BASE_CONFIG:
       SHARELATEX_CONFIG:
@@ -23,8 +24,8 @@ services:
   test_acceptance:
     image: node:14.18.1
     volumes:
-      - .:/app
-    working_dir: /app
+      - .:/overleaf/services/web
+    working_dir: /overleaf/services/web
     env_file: docker-compose.common.env
     environment:
       BASE_CONFIG:
@@ -45,22 +46,23 @@ services:
 
   test_karma:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ../..
+      dockerfile: services/web/Dockerfile.frontend
     volumes:
-      - .:/app
+      - .:/overleaf/services/web
     environment:
       NODE_OPTIONS: "--unhandled-rejections=strict"
-    working_dir: /app
+    working_dir: /overleaf/services/web
     command: npm run --silent test:karma:single
 
   test_frontend:
     build:
-      context: .
+      context: ../..
+      dockerfile: services/web/Dockerfile
       target: base
     volumes:
-      - .:/app
-    working_dir: /app
+      - .:/overleaf/services/web
+    working_dir: /overleaf/services/web
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_OPTIONS: "--unhandled-rejections=strict"

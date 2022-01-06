@@ -18,7 +18,7 @@ services:
   test_acceptance:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
-    working_dir: /app
+    working_dir: /overleaf/services/web
     env_file: docker-compose.common.env
     environment:
       BASE_CONFIG:
@@ -41,7 +41,7 @@ services:
         PROJECT_NAME: $PROJECT_NAME
         BRANCH_NAME: $BRANCH_NAME
         BUILD_NUMBER: $BUILD_NUMBER
-    working_dir: /app
+    working_dir: /overleaf/services/web
     command: npm run test:karma:single
     user: node
     environment:

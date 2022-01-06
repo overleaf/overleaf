@@ -4,24 +4,21 @@
 
 FROM node:14.18.1 as base
 
-WORKDIR /app
-COPY install_deps.sh /app
+WORKDIR /overleaf/services/clsi
+COPY services/clsi/install_deps.sh /overleaf/services/clsi/
 RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
-ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
-COPY entrypoint.sh /app
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
+COPY services/clsi/entrypoint.sh /
 
 FROM base as app
 
-#wildcard as some files may not be in all repos
-COPY package*.json npm-shrink*.json /app/
+COPY services/clsi/package*.json /overleaf/services/clsi/
 
 RUN npm ci --quiet
 
-COPY . /app
+COPY services/clsi /overleaf/services/clsi
 
-FROM base
-
-COPY --from=app /app /app
+FROM app
 RUN mkdir -p cache compiles output \
 &&  chown node:node cache compiles output
 

@@ -94,12 +94,13 @@ build:
 		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):main-deps \
 		--target base \
 		--file Dockerfile \
-		.
+		../..
 
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
-		.
+		--file Dockerfile \
+		../..
 
 tar:
 	$(DOCKER_COMPOSE) up tar

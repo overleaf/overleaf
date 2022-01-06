@@ -4,20 +4,17 @@
 
 FROM node:14.18.1 as base
 
-WORKDIR /app
+WORKDIR /overleaf/services/contacts
 
 FROM base as app
 
-#wildcard as some files may not be in all repos
-COPY package*.json npm-shrink*.json /app/
+COPY services/contacts/package*.json /overleaf/services/contacts/
 
 RUN npm ci --quiet
 
-COPY . /app
+COPY services/contacts /overleaf/services/contacts
 
-FROM base
-
-COPY --from=app /app /app
+FROM app
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]

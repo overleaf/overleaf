@@ -61,8 +61,8 @@ Then start the Docker container:
         -e TEXLIVE_IMAGE=texlive/texlive \
         -e TEXLIVE_IMAGE_USER=root \
         -e COMPILES_HOST_DIR="$PWD/compiles" \
-        -v "$PWD/compiles:/app/compiles" \
-        -v "$PWD/cache:/app/cache" \
+        -v "$PWD/compiles:/overleaf/services/clsi/compiles" \
+        -v "$PWD/cache:/overleaf/services/clsi/cache" \
         -v /var/run/docker.sock:/var/run/docker.sock \
         --name clsi \
         overleaf/clsi

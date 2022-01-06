@@ -3,12 +3,12 @@ MODULE_NAME := $(notdir $(shell pwd))
 MODULE_DIR := modules/$(MODULE_NAME)
 PROJECT_NAME = web
 
-export SHARELATEX_CONFIG = /app/$(MODULE_DIR)/test/acceptance/config/settings.test.js
-export BASE_CONFIG ?= /app/test/acceptance/config/settings.test.saas.js
+export SHARELATEX_CONFIG = /overleaf/services/web/$(MODULE_DIR)/test/acceptance/config/settings.test.js
+export BASE_CONFIG ?= /overleaf/services/web/test/acceptance/config/settings.test.saas.js
 
-CFG_SAAS=/app/test/acceptance/config/settings.test.saas.js
-CFG_SERVER_CE=/app/test/acceptance/config/settings.test.server-ce.js
-CFG_SERVER_PRO=/app/test/acceptance/config/settings.test.server-pro.js
+CFG_SAAS=/overleaf/services/web/test/acceptance/config/settings.test.saas.js
+CFG_SERVER_CE=/overleaf/services/web/test/acceptance/config/settings.test.server-ce.js
+CFG_SERVER_PRO=/overleaf/services/web/test/acceptance/config/settings.test.server-pro.js
 
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml --log-level ERROR
 DOCKER_COMPOSE := cd ../../ && \

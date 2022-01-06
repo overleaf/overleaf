@@ -4,20 +4,17 @@
 
 FROM node:14.18.1 as base
 
-WORKDIR /app
+WORKDIR /overleaf/services/track-changes
 
 FROM base as app
 
-#wildcard as some files may not be in all repos
-COPY package*.json npm-shrink*.json /app/
+COPY services/track-changes/package*.json /overleaf/services/track-changes/
 
 RUN npm ci --quiet
 
-COPY . /app
+COPY services/track-changes /overleaf/services/track-changes
 
-FROM base
-
-COPY --from=app /app /app
+FROM app
 USER node
 
 CMD ["node", "--expose-gc", "app.js"]
