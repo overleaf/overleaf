@@ -2,10 +2,11 @@ let ThreadManager
 const { db, ObjectId } = require('../../mongodb')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
+const { callbackify } = require('util')
 
 const GLOBAL_THREAD = 'GLOBAL'
 
-function findOrCreateThread(projectId, threadId, callback) {
+async function findOrCreateThread(projectId, threadId) {
   let query, update
   projectId = ObjectId(projectId.toString())
   if (threadId !== GLOBAL_THREAD) {
@@ -31,21 +32,16 @@ function findOrCreateThread(projectId, threadId, callback) {
     }
   }
 
-  db.rooms.findOneAndUpdate(
+  const result = await db.rooms.findOneAndUpdate(
     query,
     { $set: update },
-    { upsert: true, returnDocument: 'after' },
-    function (error, result) {
-      if (error) {
-        return callback(error)
-      }
-      callback(null, result.value)
-    }
+    { upsert: true, returnDocument: 'after' }
   )
+  return result.value
 }
 
-function findAllThreadRooms(projectId, callback) {
-  db.rooms
+async function findAllThreadRooms(projectId) {
+  return db.rooms
     .find(
       {
         project_id: ObjectId(projectId.toString()),
@@ -56,11 +52,11 @@ function findAllThreadRooms(projectId, callback) {
         resolved: 1,
       }
     )
-    .toArray(callback)
+    .toArray()
 }
 
-function resolveThread(projectId, threadId, userId, callback) {
-  db.rooms.updateOne(
+async function resolveThread(projectId, threadId, userId) {
+  await db.rooms.updateOne(
     {
       project_id: ObjectId(projectId.toString()),
       thread_id: ObjectId(threadId.toString()),
@@ -72,13 +68,12 @@ function resolveThread(projectId, threadId, userId, callback) {
           ts: new Date(),
         },
       },
-    },
-    callback
+    }
   )
 }
 
-function reopenThread(projectId, threadId, callback) {
-  db.rooms.updateOne(
+async function reopenThread(projectId, threadId) {
+  await db.rooms.updateOne(
     {
       project_id: ObjectId(projectId.toString()),
       thread_id: ObjectId(threadId.toString()),
@@ -91,32 +86,21 @@ function reopenThread(projectId, threadId, callback) {
   )
 }
 
-function deleteThread(projectId, threadId, callback) {
-  findOrCreateThread(projectId, threadId, function (error, room) {
-    if (error) {
-      return callback(error)
-    }
-    db.rooms.deleteOne(
-      {
-        _id: room._id,
-      },
-      function (error) {
-        if (error) {
-          return callback(error)
-        }
-        callback(null, room._id)
-      }
-    )
+async function deleteThread(projectId, threadId) {
+  const room = await findOrCreateThread(projectId, threadId)
+  await db.rooms.deleteOne({
+    _id: room._id,
   })
+  return room._id
 }
 
 module.exports = ThreadManager = {
   GLOBAL_THREAD,
-  findOrCreateThread,
-  findAllThreadRooms,
-  resolveThread,
-  reopenThread,
-  deleteThread,
+  findOrCreateThread: callbackify(findOrCreateThread),
+  findAllThreadRooms: callbackify(findAllThreadRooms),
+  resolveThread: callbackify(resolveThread),
+  reopenThread: callbackify(reopenThread),
+  deleteThread: callbackify(deleteThread),
 }
 ;[
   'findOrCreateThread',
