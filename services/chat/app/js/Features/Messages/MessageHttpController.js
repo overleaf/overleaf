@@ -3,123 +3,74 @@ const MessageManager = require('./MessageManager')
 const MessageFormatter = require('./MessageFormatter')
 const ThreadManager = require('../Threads/ThreadManager')
 const { ObjectId } = require('../../mongodb')
+const { expressify } = require('../../util/promises')
 
 const DEFAULT_MESSAGE_LIMIT = 50
 const MAX_MESSAGE_LENGTH = 10 * 1024 // 10kb, about 1,500 words
 
-function getGlobalMessages(req, res, next) {
-  _getMessages(ThreadManager.GLOBAL_THREAD, req, res, next)
+async function getGlobalMessages(req, res) {
+  await _getMessages(ThreadManager.GLOBAL_THREAD, req, res)
 }
 
-function sendGlobalMessage(req, res, next) {
-  _sendMessage(ThreadManager.GLOBAL_THREAD, req, res, next)
+async function sendGlobalMessage(req, res) {
+  await _sendMessage(ThreadManager.GLOBAL_THREAD, req, res)
 }
 
-function sendThreadMessage(req, res, next) {
-  _sendMessage(req.params.threadId, req, res, next)
+async function sendThreadMessage(req, res) {
+  await _sendMessage(req.params.threadId, req, res)
 }
 
-function getAllThreads(req, res, next) {
+async function getAllThreads(req, res) {
   const { projectId } = req.params
   logger.log({ projectId }, 'getting all threads')
-  ThreadManager.findAllThreadRooms(projectId, function (error, rooms) {
-    if (error) {
-      return next(error)
-    }
-    const roomIds = rooms.map(r => r._id)
-    MessageManager.findAllMessagesInRooms(roomIds, function (error, messages) {
-      if (error) {
-        return next(error)
-      }
-      const threads = MessageFormatter.groupMessagesByThreads(rooms, messages)
-      res.json(threads)
-    })
-  })
+  const rooms = await ThreadManager.findAllThreadRooms(projectId)
+  const roomIds = rooms.map(r => r._id)
+  const messages = await MessageManager.findAllMessagesInRooms(roomIds)
+  const threads = MessageFormatter.groupMessagesByThreads(rooms, messages)
+  res.json(threads)
 }
 
-function resolveThread(req, res, next) {
+async function resolveThread(req, res) {
   const { projectId, threadId } = req.params
   const { user_id: userId } = req.body
   logger.log({ userId, projectId, threadId }, 'marking thread as resolved')
-  ThreadManager.resolveThread(projectId, threadId, userId, function (error) {
-    if (error) {
-      return next(error)
-    }
-    res.sendStatus(204)
-  })
+  await ThreadManager.resolveThread(projectId, threadId, userId)
+  res.sendStatus(204)
 }
 
-function reopenThread(req, res, next) {
+async function reopenThread(req, res) {
   const { projectId, threadId } = req.params
   logger.log({ projectId, threadId }, 'reopening thread')
-  ThreadManager.reopenThread(projectId, threadId, function (error) {
-    if (error) {
-      return next(error)
-    }
-    res.sendStatus(204)
-  })
+  await ThreadManager.reopenThread(projectId, threadId)
+  res.sendStatus(204)
 }
 
-function deleteThread(req, res, next) {
+async function deleteThread(req, res) {
   const { projectId, threadId } = req.params
   logger.log({ projectId, threadId }, 'deleting thread')
-  ThreadManager.deleteThread(projectId, threadId, function (error, roomId) {
-    if (error) {
-      return next(error)
-    }
-    MessageManager.deleteAllMessagesInRoom(roomId, function (error) {
-      if (error) {
-        return next(error)
-      }
-      res.sendStatus(204)
-    })
-  })
+  const roomId = await ThreadManager.deleteThread(projectId, threadId)
+  await MessageManager.deleteAllMessagesInRoom(roomId)
+  res.sendStatus(204)
 }
 
-function editMessage(req, res, next) {
+async function editMessage(req, res) {
   const { content } = req.body
   const { projectId, threadId, messageId } = req.params
   logger.log({ projectId, threadId, messageId, content }, 'editing message')
-  ThreadManager.findOrCreateThread(projectId, threadId, function (error, room) {
-    if (error) {
-      return next(error)
-    }
-    MessageManager.updateMessage(
-      room._id,
-      messageId,
-      content,
-      Date.now(),
-      function (error) {
-        if (error) {
-          return next(error)
-        }
-        res.sendStatus(204)
-      }
-    )
-  })
+  const room = await ThreadManager.findOrCreateThread(projectId, threadId)
+  await MessageManager.updateMessage(room._id, messageId, content, Date.now())
+  res.sendStatus(204)
 }
 
-function deleteMessage(req, res, next) {
+async function deleteMessage(req, res) {
   const { projectId, threadId, messageId } = req.params
   logger.log({ projectId, threadId, messageId }, 'deleting message')
-  ThreadManager.findOrCreateThread(projectId, threadId, function (error, room) {
-    if (error) {
-      return next(error)
-    }
-    MessageManager.deleteMessage(
-      room._id,
-      messageId,
-      function (error, message) {
-        if (error) {
-          return next(error)
-        }
-        res.sendStatus(204)
-      }
-    )
-  })
+  const room = await ThreadManager.findOrCreateThread(projectId, threadId)
+  await MessageManager.deleteMessage(room._id, messageId)
+  res.sendStatus(204)
 }
 
-function _sendMessage(clientThreadId, req, res, next) {
+async function _sendMessage(clientThreadId, req, res) {
   const { user_id: userId, content } = req.body
   const { projectId } = req.params
   if (!ObjectId.isValid(userId)) {
@@ -137,32 +88,22 @@ function _sendMessage(clientThreadId, req, res, next) {
     { clientThreadId, projectId, userId, content },
     'new message received'
   )
-  ThreadManager.findOrCreateThread(
+  const thread = await ThreadManager.findOrCreateThread(
     projectId,
-    clientThreadId,
-    function (error, thread) {
-      if (error) {
-        return next(error)
-      }
-      MessageManager.createMessage(
-        thread._id,
-        userId,
-        content,
-        Date.now(),
-        function (error, message) {
-          if (error) {
-            return next(error)
-          }
-          message = MessageFormatter.formatMessageForClientSide(message)
-          message.room_id = projectId
-          res.status(201).send(message)
-        }
-      )
-    }
+    clientThreadId
   )
+  let message = await MessageManager.createMessage(
+    thread._id,
+    userId,
+    content,
+    Date.now()
+  )
+  message = MessageFormatter.formatMessageForClientSide(message)
+  message.room_id = projectId
+  res.status(201).send(message)
 }
 
-function _getMessages(clientThreadId, req, res, next) {
+async function _getMessages(clientThreadId, req, res) {
   let before, limit
   const { projectId } = req.params
   if (req.query.before) {
@@ -179,43 +120,29 @@ function _getMessages(clientThreadId, req, res, next) {
     { limit, before, projectId, clientThreadId },
     'get message request received'
   )
-  ThreadManager.findOrCreateThread(
+  const thread = await ThreadManager.findOrCreateThread(
     projectId,
-    clientThreadId,
-    function (error, thread) {
-      if (error) {
-        return next(error)
-      }
-      const threadObjectId = thread._id
-      logger.log(
-        { limit, before, projectId, clientThreadId, threadObjectId },
-        'found or created thread'
-      )
-      MessageManager.getMessages(
-        threadObjectId,
-        limit,
-        before,
-        function (error, messages) {
-          if (error) {
-            return next(error)
-          }
-          messages = MessageFormatter.formatMessagesForClientSide(messages)
-          logger.log({ projectId, messages }, 'got messages')
-          res.status(200).send(messages)
-        }
-      )
-    }
+    clientThreadId
   )
+  const threadObjectId = thread._id
+  logger.log(
+    { limit, before, projectId, clientThreadId, threadObjectId },
+    'found or created thread'
+  )
+  let messages = await MessageManager.getMessages(threadObjectId, limit, before)
+  messages = MessageFormatter.formatMessagesForClientSide(messages)
+  logger.log({ projectId, messages }, 'got messages')
+  res.status(200).send(messages)
 }
 
 module.exports = {
-  getGlobalMessages,
-  sendGlobalMessage,
-  sendThreadMessage,
-  getAllThreads,
-  resolveThread,
-  reopenThread,
-  deleteThread,
-  editMessage,
-  deleteMessage,
+  getGlobalMessages: expressify(getGlobalMessages),
+  sendGlobalMessage: expressify(sendGlobalMessage),
+  sendThreadMessage: expressify(sendThreadMessage),
+  getAllThreads: expressify(getAllThreads),
+  resolveThread: expressify(resolveThread),
+  reopenThread: expressify(reopenThread),
+  deleteThread: expressify(deleteThread),
+  editMessage: expressify(editMessage),
+  deleteMessage: expressify(deleteMessage),
 }

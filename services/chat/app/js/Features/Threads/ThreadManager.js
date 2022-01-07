@@ -2,7 +2,6 @@ let ThreadManager
 const { db, ObjectId } = require('../../mongodb')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
-const { callbackify } = require('util')
 
 const GLOBAL_THREAD = 'GLOBAL'
 
@@ -96,11 +95,11 @@ async function deleteThread(projectId, threadId) {
 
 module.exports = ThreadManager = {
   GLOBAL_THREAD,
-  findOrCreateThread: callbackify(findOrCreateThread),
-  findAllThreadRooms: callbackify(findAllThreadRooms),
-  resolveThread: callbackify(resolveThread),
-  reopenThread: callbackify(reopenThread),
-  deleteThread: callbackify(deleteThread),
+  findOrCreateThread,
+  findAllThreadRooms,
+  resolveThread,
+  reopenThread,
+  deleteThread,
 }
 ;[
   'findOrCreateThread',

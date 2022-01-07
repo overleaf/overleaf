@@ -2,7 +2,6 @@ let MessageManager
 const { db, ObjectId } = require('../../mongodb')
 const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
-const { callbackify } = require('util')
 
 async function createMessage(roomId, userId, content, timestamp) {
   let newMessageOpts = {
@@ -75,12 +74,12 @@ function _ensureIdsAreObjectIds(query) {
 }
 
 module.exports = MessageManager = {
-  createMessage: callbackify(createMessage),
-  getMessages: callbackify(getMessages),
-  findAllMessagesInRooms: callbackify(findAllMessagesInRooms),
-  deleteAllMessagesInRoom: callbackify(deleteAllMessagesInRoom),
-  updateMessage: callbackify(updateMessage),
-  deleteMessage: callbackify(deleteMessage),
+  createMessage,
+  getMessages,
+  findAllMessagesInRooms,
+  deleteAllMessagesInRoom,
+  updateMessage,
+  deleteMessage,
 }
 ;[
   'createMessage',
