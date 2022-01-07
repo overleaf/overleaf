@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { debounce } from 'lodash'
 import PdfViewerControls from './pdf-viewer-controls'
 import { useProjectContext } from '../../../shared/context/project-context'
@@ -14,7 +14,7 @@ import getMeta from '../../../utils/meta'
 function PdfJsViewer({ url }) {
   const { _id: projectId } = useProjectContext()
 
-  const { setError, firstRenderDone, highlights, setPosition } =
+  const { setError, firstRenderDone, highlights, position, setPosition } =
     useCompileContext()
   const [timePDFFetched, setTimePDFFetched] = useState()
 
@@ -140,26 +140,28 @@ function PdfJsViewer({ url }) {
   }, [pdfJsWrapper])
 
   // restore the saved scale and scroll position
+  const positionRef = useRef(position)
+  useEffect(() => {
+    positionRef.current = position
+  }, [position])
+
+  const scaleRef = useRef(scale)
+  useEffect(() => {
+    scaleRef.current = scale
+  }, [scale])
+
   useEffect(() => {
     if (initialised && pdfJsWrapper) {
       if (!pdfJsWrapper.isVisible()) {
         return
       }
-
-      setScale(scale => {
-        setPosition(position => {
-          if (position) {
-            pdfJsWrapper.scrollToPosition(position, scale)
-          } else {
-            pdfJsWrapper.viewer.currentScaleValue = scale
-          }
-          return position
-        })
-
-        return scale
-      })
+      if (positionRef.current) {
+        pdfJsWrapper.scrollToPosition(positionRef.current, scaleRef.current)
+      } else {
+        pdfJsWrapper.viewer.currentScaleValue = scaleRef.current
+      }
     }
-  }, [initialised, setScale, setPosition, pdfJsWrapper])
+  }, [initialised, pdfJsWrapper, scaleRef, positionRef])
 
   // transmit scale value to the viewer when it changes
   useEffect(() => {
