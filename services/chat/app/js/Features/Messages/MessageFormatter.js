@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let MessageFormatter
 module.exports = MessageFormatter = {
   formatMessageForClientSide(message) {
@@ -25,15 +18,13 @@ module.exports = MessageFormatter = {
   },
 
   formatMessagesForClientSide(messages) {
-    return Array.from(messages).map(message =>
-      this.formatMessageForClientSide(message)
-    )
+    return messages.map(message => this.formatMessageForClientSide(message))
   },
 
   groupMessagesByThreads(rooms, messages) {
     let room, thread
     const roomsById = {}
-    for (room of Array.from(rooms)) {
+    for (room of rooms) {
       roomsById[room._id.toString()] = room
     }
 
@@ -54,7 +45,7 @@ module.exports = MessageFormatter = {
       }
     }
 
-    for (const message of Array.from(messages)) {
+    for (const message of messages) {
       room = roomsById[message.room_id.toString()]
       if (room) {
         thread = getThread(room)

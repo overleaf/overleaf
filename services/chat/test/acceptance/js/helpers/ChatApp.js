@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { waitForDb } = require('../../../../app/js/mongodb')
 const app = require('../../../../app')
 
@@ -29,7 +22,7 @@ module.exports = {
           throw error
         }
         this.running = true
-        for (callback of Array.from(this.callbacks)) {
+        for (callback of this.callbacks) {
           callback()
         }
       })
