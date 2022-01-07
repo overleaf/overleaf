@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS103: Rewrite code to no longer use __guard__
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
 
@@ -11,16 +6,8 @@ const Server = require('./app/js/server')
 
 if (!module.parent) {
   // Called directly
-  const port =
-    __guard__(
-      settings.internal != null ? settings.internal.chat : undefined,
-      x => x.port
-    ) || 3010
-  const host =
-    __guard__(
-      settings.internal != null ? settings.internal.chat : undefined,
-      x1 => x1.host
-    ) || 'localhost'
+  const port = settings.internal.chat.port
+  const host = settings.internal.chat.host
   mongodb
     .waitForDb()
     .then(() => {
@@ -39,9 +26,3 @@ if (!module.parent) {
 }
 
 module.exports = Server.server
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
