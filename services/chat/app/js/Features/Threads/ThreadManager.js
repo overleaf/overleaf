@@ -2,7 +2,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -117,7 +116,7 @@ module.exports = ThreadManager = {
     if (callback == null) {
       callback = function () {}
     }
-    return this.findOrCreateThread(projectId, threadId, function (error, room) {
+    this.findOrCreateThread(projectId, threadId, function (error, room) {
       if (error != null) {
         return callback(error)
       }
@@ -129,7 +128,7 @@ module.exports = ThreadManager = {
           if (error != null) {
             return callback(error)
           }
-          return callback(null, room._id)
+          callback(null, room._id)
         }
       )
     })

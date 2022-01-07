@@ -3,7 +3,6 @@
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
  * DS205: Consider reworking code to avoid use of IIFEs
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -27,7 +26,7 @@ module.exports = {
     this.initing = true
     this.callbacks.push(callback)
     waitForDb().then(() => {
-      return app.listen(3010, 'localhost', error => {
+      app.listen(3010, 'localhost', error => {
         if (error != null) {
           throw error
         }

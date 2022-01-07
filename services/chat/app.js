@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -31,7 +30,7 @@ if (!module.parent) {
           logger.fatal({ err }, `Cannot bind to ${host}:${port}. Exiting.`)
           process.exit(1)
         }
-        return logger.info(`Chat starting up, listening on ${host}:${port}`)
+        logger.info(`Chat starting up, listening on ${host}:${port}`)
       })
     })
     .catch(err => {

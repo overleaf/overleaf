@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { ObjectId } = require('../../../app/js/mongodb')
 const { expect } = require('chai')
 
@@ -15,14 +8,14 @@ describe('Resolving a thread', function () {
   before(function (done) {
     this.project_id = ObjectId().toString()
     this.user_id = ObjectId().toString()
-    return ChatApp.ensureRunning(done)
+    ChatApp.ensureRunning(done)
   })
 
   describe('with a resolved thread', function () {
     before(function (done) {
       this.thread_id = ObjectId().toString()
       this.content = 'resolved message'
-      return ChatClient.sendMessage(
+      ChatClient.sendMessage(
         this.project_id,
         this.thread_id,
         this.user_id,
@@ -30,35 +23,32 @@ describe('Resolving a thread', function () {
         (error, response, body) => {
           expect(error).to.be.null
           expect(response.statusCode).to.equal(201)
-          return ChatClient.resolveThread(
+          ChatClient.resolveThread(
             this.project_id,
             this.thread_id,
             this.user_id,
             (error, response, body) => {
               expect(error).to.be.null
               expect(response.statusCode).to.equal(204)
-              return done()
+              done()
             }
           )
         }
       )
     })
 
-    return it('should then list the thread as resolved', function (done) {
-      return ChatClient.getThreads(
-        this.project_id,
-        (error, response, threads) => {
-          expect(error).to.be.null
-          expect(response.statusCode).to.equal(200)
-          expect(threads[this.thread_id].resolved).to.equal(true)
-          expect(threads[this.thread_id].resolved_by_user_id).to.equal(
-            this.user_id
-          )
-          const resolvedAt = new Date(threads[this.thread_id].resolved_at)
-          expect(new Date() - resolvedAt).to.be.below(1000)
-          return done()
-        }
-      )
+    it('should then list the thread as resolved', function (done) {
+      ChatClient.getThreads(this.project_id, (error, response, threads) => {
+        expect(error).to.be.null
+        expect(response.statusCode).to.equal(200)
+        expect(threads[this.thread_id].resolved).to.equal(true)
+        expect(threads[this.thread_id].resolved_by_user_id).to.equal(
+          this.user_id
+        )
+        const resolvedAt = new Date(threads[this.thread_id].resolved_at)
+        expect(new Date() - resolvedAt).to.be.below(1000)
+        done()
+      })
     })
   })
 
@@ -66,7 +56,7 @@ describe('Resolving a thread', function () {
     before(function (done) {
       this.thread_id = ObjectId().toString()
       this.content = 'open message'
-      return ChatClient.sendMessage(
+      ChatClient.sendMessage(
         this.project_id,
         this.thread_id,
         this.user_id,
@@ -74,29 +64,26 @@ describe('Resolving a thread', function () {
         (error, response, body) => {
           expect(error).to.be.null
           expect(response.statusCode).to.equal(201)
-          return done()
+          done()
         }
       )
     })
 
-    return it('should not list the thread as resolved', function (done) {
-      return ChatClient.getThreads(
-        this.project_id,
-        (error, response, threads) => {
-          expect(error).to.be.null
-          expect(response.statusCode).to.equal(200)
-          expect(threads[this.thread_id].resolved).to.be.undefined
-          return done()
-        }
-      )
+    it('should not list the thread as resolved', function (done) {
+      ChatClient.getThreads(this.project_id, (error, response, threads) => {
+        expect(error).to.be.null
+        expect(response.statusCode).to.equal(200)
+        expect(threads[this.thread_id].resolved).to.be.undefined
+        done()
+      })
     })
   })
 
-  return describe('when a thread is resolved then reopened', function () {
+  describe('when a thread is resolved then reopened', function () {
     before(function (done) {
       this.thread_id = ObjectId().toString()
       this.content = 'resolved message'
-      return ChatClient.sendMessage(
+      ChatClient.sendMessage(
         this.project_id,
         this.thread_id,
         this.user_id,
@@ -104,20 +91,20 @@ describe('Resolving a thread', function () {
         (error, response, body) => {
           expect(error).to.be.null
           expect(response.statusCode).to.equal(201)
-          return ChatClient.resolveThread(
+          ChatClient.resolveThread(
             this.project_id,
             this.thread_id,
             this.user_id,
             (error, response, body) => {
               expect(error).to.be.null
               expect(response.statusCode).to.equal(204)
-              return ChatClient.reopenThread(
+              ChatClient.reopenThread(
                 this.project_id,
                 this.thread_id,
                 (error, response, body) => {
                   expect(error).to.be.null
                   expect(response.statusCode).to.equal(204)
-                  return done()
+                  done()
                 }
               )
             }
@@ -126,16 +113,13 @@ describe('Resolving a thread', function () {
       )
     })
 
-    return it('should not list the thread as resolved', function (done) {
-      return ChatClient.getThreads(
-        this.project_id,
-        (error, response, threads) => {
-          expect(error).to.be.null
-          expect(response.statusCode).to.equal(200)
-          expect(threads[this.thread_id].resolved).to.be.undefined
-          return done()
-        }
-      )
+    it('should not list the thread as resolved', function (done) {
+      ChatClient.getThreads(this.project_id, (error, response, threads) => {
+        expect(error).to.be.null
+        expect(response.statusCode).to.equal(200)
+        expect(threads[this.thread_id].resolved).to.be.undefined
+        done()
+      })
     })
   })
 })

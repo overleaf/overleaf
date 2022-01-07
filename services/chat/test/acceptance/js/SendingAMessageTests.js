@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { ObjectId } = require('../../../app/js/mongodb')
 const { expect } = require('chai')
 
@@ -13,7 +6,7 @@ const ChatApp = require('./helpers/ChatApp')
 
 describe('Sending a message', function () {
   before(function (done) {
-    return ChatApp.ensureRunning(done)
+    ChatApp.ensureRunning(done)
   })
 
   describe('globally', function () {
@@ -21,7 +14,7 @@ describe('Sending a message', function () {
       this.project_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
       this.content = 'global message'
-      return ChatClient.sendGlobalMessage(
+      ChatClient.sendGlobalMessage(
         this.project_id,
         this.user_id,
         this.content,
@@ -31,20 +24,20 @@ describe('Sending a message', function () {
           expect(body.content).to.equal(this.content)
           expect(body.user_id).to.equal(this.user_id)
           expect(body.room_id).to.equal(this.project_id)
-          return done()
+          done()
         }
       )
     })
 
-    return it('should then list the message in the project messages', function (done) {
-      return ChatClient.getGlobalMessages(
+    it('should then list the message in the project messages', function (done) {
+      ChatClient.getGlobalMessages(
         this.project_id,
         (error, response, messages) => {
           expect(error).to.be.null
           expect(response.statusCode).to.equal(200)
           expect(messages.length).to.equal(1)
           expect(messages[0].content).to.equal(this.content)
-          return done()
+          done()
         }
       )
     })
@@ -56,7 +49,7 @@ describe('Sending a message', function () {
       this.user_id = ObjectId().toString()
       this.thread_id = ObjectId().toString()
       this.content = 'thread message'
-      return ChatClient.sendMessage(
+      ChatClient.sendMessage(
         this.project_id,
         this.thread_id,
         this.user_id,
@@ -67,49 +60,46 @@ describe('Sending a message', function () {
           expect(body.content).to.equal(this.content)
           expect(body.user_id).to.equal(this.user_id)
           expect(body.room_id).to.equal(this.project_id)
-          return done()
+          done()
         }
       )
     })
 
     it('should then list the message in the threads', function (done) {
-      return ChatClient.getThreads(
-        this.project_id,
-        (error, response, threads) => {
-          expect(error).to.be.null
-          expect(response.statusCode).to.equal(200)
-          expect(threads[this.thread_id].messages.length).to.equal(1)
-          expect(threads[this.thread_id].messages[0].content).to.equal(
-            this.content
-          )
-          return done()
-        }
-      )
+      ChatClient.getThreads(this.project_id, (error, response, threads) => {
+        expect(error).to.be.null
+        expect(response.statusCode).to.equal(200)
+        expect(threads[this.thread_id].messages.length).to.equal(1)
+        expect(threads[this.thread_id].messages[0].content).to.equal(
+          this.content
+        )
+        done()
+      })
     })
 
-    return it('should not appear in the global messages', function (done) {
-      return ChatClient.getGlobalMessages(
+    it('should not appear in the global messages', function (done) {
+      ChatClient.getGlobalMessages(
         this.project_id,
         (error, response, messages) => {
           expect(error).to.be.null
           expect(response.statusCode).to.equal(200)
           expect(messages.length).to.equal(0)
-          return done()
+          done()
         }
       )
     })
   })
 
-  return describe('failure cases', function () {
+  describe('failure cases', function () {
     before(function () {
       this.project_id = ObjectId().toString()
       this.user_id = ObjectId().toString()
-      return (this.thread_id = ObjectId().toString())
+      this.thread_id = ObjectId().toString()
     })
 
     describe('with a malformed user_id', function () {
-      return it('should return a graceful error', function (done) {
-        return ChatClient.sendMessage(
+      it('should return a graceful error', function (done) {
+        ChatClient.sendMessage(
           this.project_id,
           this.thread_id,
           'malformed-user',
@@ -118,15 +108,15 @@ describe('Sending a message', function () {
             if (error) return done(error)
             expect(response.statusCode).to.equal(400)
             expect(body).to.equal('Invalid userId')
-            return done()
+            done()
           }
         )
       })
     })
 
     describe('with a malformed project_id', function () {
-      return it('should return a graceful error', function (done) {
-        return ChatClient.sendMessage(
+      it('should return a graceful error', function (done) {
+        ChatClient.sendMessage(
           'malformed-project',
           this.thread_id,
           this.user_id,
@@ -135,15 +125,15 @@ describe('Sending a message', function () {
             if (error) return done(error)
             expect(response.statusCode).to.equal(400)
             expect(body).to.equal('Invalid projectId')
-            return done()
+            done()
           }
         )
       })
     })
 
     describe('with a malformed thread_id', function () {
-      return it('should return a graceful error', function (done) {
-        return ChatClient.sendMessage(
+      it('should return a graceful error', function (done) {
+        ChatClient.sendMessage(
           this.project_id,
           'malformed-thread-id',
           this.user_id,
@@ -152,15 +142,15 @@ describe('Sending a message', function () {
             if (error) return done(error)
             expect(response.statusCode).to.equal(400)
             expect(body).to.equal('Invalid threadId')
-            return done()
+            done()
           }
         )
       })
     })
 
     describe('with no content', function () {
-      return it('should return a graceful error', function (done) {
-        return ChatClient.sendMessage(
+      it('should return a graceful error', function (done) {
+        ChatClient.sendMessage(
           this.project_id,
           this.thread_id,
           this.user_id,
@@ -169,16 +159,16 @@ describe('Sending a message', function () {
             if (error) return done(error)
             expect(response.statusCode).to.equal(400)
             expect(body).to.equal('No content provided')
-            return done()
+            done()
           }
         )
       })
     })
 
-    return describe('with very long content', function () {
-      return it('should return a graceful error', function (done) {
+    describe('with very long content', function () {
+      it('should return a graceful error', function (done) {
         const content = '-'.repeat(10 * 1024 + 1)
-        return ChatClient.sendMessage(
+        ChatClient.sendMessage(
           this.project_id,
           this.thread_id,
           this.user_id,
@@ -187,7 +177,7 @@ describe('Sending a message', function () {
             if (error) return done(error)
             expect(response.statusCode).to.equal(400)
             expect(body).to.equal('Content too long (> 10240 bytes)')
-            return done()
+            done()
           }
         )
       })

@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const MessageHttpController = require('./Features/Messages/MessageHttpController')
 const { ObjectId } = require('./mongodb')
 
@@ -12,17 +5,17 @@ module.exports = {
   route(app) {
     app.param('projectId', function (req, res, next, projectId) {
       if (ObjectId.isValid(projectId)) {
-        return next()
+        next()
       } else {
-        return res.status(400).send('Invalid projectId')
+        res.status(400).send('Invalid projectId')
       }
     })
 
     app.param('threadId', function (req, res, next, threadId) {
       if (ObjectId.isValid(threadId)) {
-        return next()
+        next()
       } else {
-        return res.status(400).send('Invalid threadId')
+        res.status(400).send('Invalid threadId')
       }
     })
 
@@ -73,6 +66,6 @@ module.exports = {
       MessageHttpController.deleteThread
     )
 
-    return app.get('/status', (req, res, next) => res.send('chat is alive'))
+    app.get('/status', (req, res, next) => res.send('chat is alive'))
   },
 }

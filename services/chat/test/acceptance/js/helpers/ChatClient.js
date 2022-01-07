@@ -1,17 +1,10 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const request = require('request').defaults({
   baseUrl: 'http://localhost:3010',
 })
 
 module.exports = {
   sendGlobalMessage(projectId, userId, content, callback) {
-    return request.post(
+    request.post(
       {
         url: `/project/${projectId}/messages`,
         json: {
@@ -24,7 +17,7 @@ module.exports = {
   },
 
   getGlobalMessages(projectId, callback) {
-    return request.get(
+    request.get(
       {
         url: `/project/${projectId}/messages`,
         json: true,
@@ -34,7 +27,7 @@ module.exports = {
   },
 
   sendMessage(projectId, threadId, userId, content, callback) {
-    return request.post(
+    request.post(
       {
         url: `/project/${projectId}/thread/${threadId}/messages`,
         json: {
@@ -47,7 +40,7 @@ module.exports = {
   },
 
   getThreads(projectId, callback) {
-    return request.get(
+    request.get(
       {
         url: `/project/${projectId}/threads`,
         json: true,
@@ -57,7 +50,7 @@ module.exports = {
   },
 
   resolveThread(projectId, threadId, userId, callback) {
-    return request.post(
+    request.post(
       {
         url: `/project/${projectId}/thread/${threadId}/resolve`,
         json: {
@@ -69,7 +62,7 @@ module.exports = {
   },
 
   reopenThread(projectId, threadId, callback) {
-    return request.post(
+    request.post(
       {
         url: `/project/${projectId}/thread/${threadId}/reopen`,
       },
@@ -78,7 +71,7 @@ module.exports = {
   },
 
   deleteThread(projectId, threadId, callback) {
-    return request.del(
+    request.del(
       {
         url: `/project/${projectId}/thread/${threadId}`,
       },
@@ -87,7 +80,7 @@ module.exports = {
   },
 
   editMessage(projectId, threadId, messageId, content, callback) {
-    return request.post(
+    request.post(
       {
         url: `/project/${projectId}/thread/${threadId}/messages/${messageId}/edit`,
         json: {
@@ -99,7 +92,7 @@ module.exports = {
   },
 
   deleteMessage(projectId, threadId, messageId, callback) {
-    return request.del(
+    request.del(
       {
         url: `/project/${projectId}/thread/${threadId}/messages/${messageId}`,
       },

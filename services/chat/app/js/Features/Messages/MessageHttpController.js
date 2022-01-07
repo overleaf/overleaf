@@ -2,7 +2,6 @@
 // Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -18,7 +17,7 @@ module.exports = MessageHttpController = {
   MAX_MESSAGE_LENGTH: 10 * 1024, // 10kb, about 1,500 words
 
   getGlobalMessages(req, res, next) {
-    return MessageHttpController._getMessages(
+    MessageHttpController._getMessages(
       ThreadManager.GLOBAL_THREAD,
       req,
       res,
@@ -27,7 +26,7 @@ module.exports = MessageHttpController = {
   },
 
   sendGlobalMessage(req, res, next) {
-    return MessageHttpController._sendMessage(
+    MessageHttpController._sendMessage(
       ThreadManager.GLOBAL_THREAD,
       req,
       res,
@@ -36,23 +35,18 @@ module.exports = MessageHttpController = {
   },
 
   sendThreadMessage(req, res, next) {
-    return MessageHttpController._sendMessage(
-      req.params.threadId,
-      req,
-      res,
-      next
-    )
+    MessageHttpController._sendMessage(req.params.threadId, req, res, next)
   },
 
   getAllThreads(req, res, next) {
     const { projectId } = req.params
     logger.log({ projectId }, 'getting all threads')
-    return ThreadManager.findAllThreadRooms(projectId, function (error, rooms) {
+    ThreadManager.findAllThreadRooms(projectId, function (error, rooms) {
       if (error != null) {
         return next(error)
       }
       const roomIds = rooms.map(r => r._id)
-      return MessageManager.findAllMessagesInRooms(
+      MessageManager.findAllMessagesInRooms(
         roomIds,
         function (error, messages) {
           if (error != null) {
@@ -62,7 +56,7 @@ module.exports = MessageHttpController = {
             rooms,
             messages
           )
-          return res.json(threads)
+          res.json(threads)
         }
       )
     })
@@ -72,62 +66,53 @@ module.exports = MessageHttpController = {
     const { projectId, threadId } = req.params
     const { user_id: userId } = req.body
     logger.log({ userId, projectId, threadId }, 'marking thread as resolved')
-    return ThreadManager.resolveThread(
-      projectId,
-      threadId,
-      userId,
-      function (error) {
-        if (error != null) {
-          return next(error)
-        }
-        return res.sendStatus(204)
+    ThreadManager.resolveThread(projectId, threadId, userId, function (error) {
+      if (error != null) {
+        return next(error)
       }
-    )
+      res.sendStatus(204)
+    })
   }, // No content
 
   reopenThread(req, res, next) {
     const { projectId, threadId } = req.params
     logger.log({ projectId, threadId }, 'reopening thread')
-    return ThreadManager.reopenThread(projectId, threadId, function (error) {
+    ThreadManager.reopenThread(projectId, threadId, function (error) {
       if (error != null) {
         return next(error)
       }
-      return res.sendStatus(204)
+      res.sendStatus(204)
     })
   }, // No content
 
   deleteThread(req, res, next) {
     const { projectId, threadId } = req.params
     logger.log({ projectId, threadId }, 'deleting thread')
-    return ThreadManager.deleteThread(
-      projectId,
-      threadId,
-      function (error, roomId) {
+    ThreadManager.deleteThread(projectId, threadId, function (error, roomId) {
+      if (error != null) {
+        return next(error)
+      }
+      MessageManager.deleteAllMessagesInRoom(roomId, function (error) {
         if (error != null) {
           return next(error)
         }
-        return MessageManager.deleteAllMessagesInRoom(roomId, function (error) {
-          if (error != null) {
-            return next(error)
-          }
-          return res.sendStatus(204)
-        })
-      }
-    )
+        res.sendStatus(204)
+      })
+    })
   }, // No content
 
   editMessage(req, res, next) {
     const { content } = req != null ? req.body : undefined
     const { projectId, threadId, messageId } = req.params
     logger.log({ projectId, threadId, messageId, content }, 'editing message')
-    return ThreadManager.findOrCreateThread(
+    ThreadManager.findOrCreateThread(
       projectId,
       threadId,
       function (error, room) {
         if (error != null) {
           return next(error)
         }
-        return MessageManager.updateMessage(
+        MessageManager.updateMessage(
           room._id,
           messageId,
           content,
@@ -136,7 +121,7 @@ module.exports = MessageHttpController = {
             if (error != null) {
               return next(error)
             }
-            return res.sendStatus(204)
+            res.sendStatus(204)
           }
         )
       }
@@ -146,21 +131,21 @@ module.exports = MessageHttpController = {
   deleteMessage(req, res, next) {
     const { projectId, threadId, messageId } = req.params
     logger.log({ projectId, threadId, messageId }, 'deleting message')
-    return ThreadManager.findOrCreateThread(
+    ThreadManager.findOrCreateThread(
       projectId,
       threadId,
       function (error, room) {
         if (error != null) {
           return next(error)
         }
-        return MessageManager.deleteMessage(
+        MessageManager.deleteMessage(
           room._id,
           messageId,
           function (error, message) {
             if (error != null) {
               return next(error)
             }
-            return res.sendStatus(204)
+            res.sendStatus(204)
           }
         )
       }
@@ -185,14 +170,14 @@ module.exports = MessageHttpController = {
       { clientThreadId, projectId, userId, content },
       'new message received'
     )
-    return ThreadManager.findOrCreateThread(
+    ThreadManager.findOrCreateThread(
       projectId,
       clientThreadId,
       function (error, thread) {
         if (error != null) {
           return next(error)
         }
-        return MessageManager.createMessage(
+        MessageManager.createMessage(
           thread._id,
           userId,
           content,
@@ -203,7 +188,7 @@ module.exports = MessageHttpController = {
             }
             message = MessageFormatter.formatMessageForClientSide(message)
             message.room_id = projectId
-            return res.status(201).send(message)
+            res.status(201).send(message)
           }
         )
       }
@@ -227,7 +212,7 @@ module.exports = MessageHttpController = {
       { limit, before, projectId, clientThreadId },
       'get message request received'
     )
-    return ThreadManager.findOrCreateThread(
+    ThreadManager.findOrCreateThread(
       projectId,
       clientThreadId,
       function (error, thread) {
@@ -239,7 +224,7 @@ module.exports = MessageHttpController = {
           { limit, before, projectId, clientThreadId, threadObjectId },
           'found or created thread'
         )
-        return MessageManager.getMessages(
+        MessageManager.getMessages(
           threadObjectId,
           limit,
           before,
@@ -249,7 +234,7 @@ module.exports = MessageHttpController = {
             }
             messages = MessageFormatter.formatMessagesForClientSide(messages)
             logger.log({ projectId, messages }, 'got messages')
-            return res.status(200).send(messages)
+            res.status(200).send(messages)
           }
         )
       }
