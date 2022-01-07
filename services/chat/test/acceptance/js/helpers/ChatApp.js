@@ -6,9 +6,6 @@ module.exports = {
   initing: false,
   callbacks: [],
   ensureRunning(callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     if (this.running) {
       return callback()
     } else if (this.initing) {

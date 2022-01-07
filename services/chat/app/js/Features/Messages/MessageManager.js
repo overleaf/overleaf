@@ -5,9 +5,6 @@ const logger = require('@overleaf/logger')
 
 module.exports = MessageManager = {
   createMessage(roomId, userId, content, timestamp, callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     let newMessageOpts = {
       content,
       room_id: roomId,
@@ -25,9 +22,6 @@ module.exports = MessageManager = {
   },
 
   getMessages(roomId, limit, before, callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     let query = { room_id: roomId }
     if (before) {
       query.timestamp = { $lt: before }
@@ -41,9 +35,6 @@ module.exports = MessageManager = {
   },
 
   findAllMessagesInRooms(roomIds, callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     db.messages
       .find({
         room_id: { $in: roomIds },
@@ -52,9 +43,6 @@ module.exports = MessageManager = {
   },
 
   deleteAllMessagesInRoom(roomId, callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     db.messages.deleteMany(
       {
         room_id: roomId,
@@ -64,9 +52,6 @@ module.exports = MessageManager = {
   },
 
   updateMessage(roomId, messageId, content, timestamp, callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     const query = this._ensureIdsAreObjectIds({
       _id: messageId,
       room_id: roomId,
@@ -84,9 +69,6 @@ module.exports = MessageManager = {
   },
 
   deleteMessage(roomId, messageId, callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     const query = this._ensureIdsAreObjectIds({
       _id: messageId,
       room_id: roomId,

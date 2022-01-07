@@ -8,9 +8,6 @@ module.exports = ThreadManager = {
 
   findOrCreateThread(projectId, threadId, callback) {
     let query, update
-    if (!callback) {
-      callback = function () {}
-    }
     projectId = ObjectId(projectId.toString())
     if (threadId !== ThreadManager.GLOBAL_THREAD) {
       threadId = ObjectId(threadId.toString())
@@ -49,9 +46,6 @@ module.exports = ThreadManager = {
   },
 
   findAllThreadRooms(projectId, callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     db.rooms
       .find(
         {
@@ -67,9 +61,6 @@ module.exports = ThreadManager = {
   },
 
   resolveThread(projectId, threadId, userId, callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     db.rooms.updateOne(
       {
         project_id: ObjectId(projectId.toString()),
@@ -88,9 +79,6 @@ module.exports = ThreadManager = {
   },
 
   reopenThread(projectId, threadId, callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     db.rooms.updateOne(
       {
         project_id: ObjectId(projectId.toString()),
@@ -106,9 +94,6 @@ module.exports = ThreadManager = {
   },
 
   deleteThread(projectId, threadId, callback) {
-    if (!callback) {
-      callback = function () {}
-    }
     this.findOrCreateThread(projectId, threadId, function (error, room) {
       if (error) {
         return callback(error)
