@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let MessageHttpController
 const logger = require('@overleaf/logger')
 const MessageManager = require('./MessageManager')
@@ -42,14 +35,14 @@ module.exports = MessageHttpController = {
     const { projectId } = req.params
     logger.log({ projectId }, 'getting all threads')
     ThreadManager.findAllThreadRooms(projectId, function (error, rooms) {
-      if (error != null) {
+      if (error) {
         return next(error)
       }
       const roomIds = rooms.map(r => r._id)
       MessageManager.findAllMessagesInRooms(
         roomIds,
         function (error, messages) {
-          if (error != null) {
+          if (error) {
             return next(error)
           }
           const threads = MessageFormatter.groupMessagesByThreads(
@@ -67,7 +60,7 @@ module.exports = MessageHttpController = {
     const { user_id: userId } = req.body
     logger.log({ userId, projectId, threadId }, 'marking thread as resolved')
     ThreadManager.resolveThread(projectId, threadId, userId, function (error) {
-      if (error != null) {
+      if (error) {
         return next(error)
       }
       res.sendStatus(204)
@@ -78,7 +71,7 @@ module.exports = MessageHttpController = {
     const { projectId, threadId } = req.params
     logger.log({ projectId, threadId }, 'reopening thread')
     ThreadManager.reopenThread(projectId, threadId, function (error) {
-      if (error != null) {
+      if (error) {
         return next(error)
       }
       res.sendStatus(204)
@@ -89,11 +82,11 @@ module.exports = MessageHttpController = {
     const { projectId, threadId } = req.params
     logger.log({ projectId, threadId }, 'deleting thread')
     ThreadManager.deleteThread(projectId, threadId, function (error, roomId) {
-      if (error != null) {
+      if (error) {
         return next(error)
       }
       MessageManager.deleteAllMessagesInRoom(roomId, function (error) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
         res.sendStatus(204)
@@ -102,14 +95,14 @@ module.exports = MessageHttpController = {
   }, // No content
 
   editMessage(req, res, next) {
-    const { content } = req != null ? req.body : undefined
+    const { content } = req.body
     const { projectId, threadId, messageId } = req.params
     logger.log({ projectId, threadId, messageId, content }, 'editing message')
     ThreadManager.findOrCreateThread(
       projectId,
       threadId,
       function (error, room) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
         MessageManager.updateMessage(
@@ -118,7 +111,7 @@ module.exports = MessageHttpController = {
           content,
           Date.now(),
           function (error) {
-            if (error != null) {
+            if (error) {
               return next(error)
             }
             res.sendStatus(204)
@@ -135,14 +128,14 @@ module.exports = MessageHttpController = {
       projectId,
       threadId,
       function (error, room) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
         MessageManager.deleteMessage(
           room._id,
           messageId,
           function (error, message) {
-            if (error != null) {
+            if (error) {
               return next(error)
             }
             res.sendStatus(204)
@@ -153,12 +146,12 @@ module.exports = MessageHttpController = {
   },
 
   _sendMessage(clientThreadId, req, res, next) {
-    const { user_id: userId, content } = req != null ? req.body : undefined
+    const { user_id: userId, content } = req.body
     const { projectId } = req.params
     if (!ObjectId.isValid(userId)) {
       return res.status(400).send('Invalid userId')
     }
-    if (content == null) {
+    if (!content) {
       return res.status(400).send('No content provided')
     }
     if (content.length > this.MAX_MESSAGE_LENGTH) {
@@ -174,7 +167,7 @@ module.exports = MessageHttpController = {
       projectId,
       clientThreadId,
       function (error, thread) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
         MessageManager.createMessage(
@@ -183,7 +176,7 @@ module.exports = MessageHttpController = {
           content,
           Date.now(),
           function (error, message) {
-            if (error != null) {
+            if (error) {
               return next(error)
             }
             message = MessageFormatter.formatMessageForClientSide(message)
@@ -198,12 +191,12 @@ module.exports = MessageHttpController = {
   _getMessages(clientThreadId, req, res, next) {
     let before, limit
     const { projectId } = req.params
-    if ((req.query != null ? req.query.before : undefined) != null) {
+    if (req.query.before) {
       before = parseInt(req.query.before, 10)
     } else {
       before = null
     }
-    if ((req.query != null ? req.query.limit : undefined) != null) {
+    if (req.query.limit) {
       limit = parseInt(req.query.limit, 10)
     } else {
       limit = MessageHttpController.DEFAULT_MESSAGE_LIMIT
@@ -216,7 +209,7 @@ module.exports = MessageHttpController = {
       projectId,
       clientThreadId,
       function (error, thread) {
-        if (error != null) {
+        if (error) {
           return next(error)
         }
         const threadObjectId = thread._id
@@ -229,7 +222,7 @@ module.exports = MessageHttpController = {
           limit,
           before,
           function (error, messages) {
-            if (error != null) {
+            if (error) {
               return next(error)
             }
             messages = MessageFormatter.formatMessagesForClientSide(messages)

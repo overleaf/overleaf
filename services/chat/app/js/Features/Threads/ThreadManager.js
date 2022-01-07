@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let ThreadManager
 const { db, ObjectId } = require('../../mongodb')
 const logger = require('@overleaf/logger')
@@ -15,7 +8,7 @@ module.exports = ThreadManager = {
 
   findOrCreateThread(projectId, threadId, callback) {
     let query, update
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     projectId = ObjectId(projectId.toString())
@@ -47,7 +40,7 @@ module.exports = ThreadManager = {
       { $set: update },
       { upsert: true, returnDocument: 'after' },
       function (error, result) {
-        if (error != null) {
+        if (error) {
           return callback(error)
         }
         callback(null, result.value)
@@ -56,7 +49,7 @@ module.exports = ThreadManager = {
   },
 
   findAllThreadRooms(projectId, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     db.rooms
@@ -74,7 +67,7 @@ module.exports = ThreadManager = {
   },
 
   resolveThread(projectId, threadId, userId, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     db.rooms.updateOne(
@@ -95,7 +88,7 @@ module.exports = ThreadManager = {
   },
 
   reopenThread(projectId, threadId, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     db.rooms.updateOne(
@@ -113,11 +106,11 @@ module.exports = ThreadManager = {
   },
 
   deleteThread(projectId, threadId, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     this.findOrCreateThread(projectId, threadId, function (error, room) {
-      if (error != null) {
+      if (error) {
         return callback(error)
       }
       db.rooms.deleteOne(
@@ -125,7 +118,7 @@ module.exports = ThreadManager = {
           _id: room._id,
         },
         function (error) {
-          if (error != null) {
+          if (error) {
             return callback(error)
           }
           callback(null, room._id)

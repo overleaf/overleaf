@@ -3,7 +3,6 @@
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
- * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const { waitForDb } = require('../../../../app/js/mongodb')
@@ -14,7 +13,7 @@ module.exports = {
   initing: false,
   callbacks: [],
   ensureRunning(callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     if (this.running) {
@@ -26,7 +25,7 @@ module.exports = {
     this.callbacks.push(callback)
     waitForDb().then(() => {
       app.listen(3010, 'localhost', error => {
-        if (error != null) {
+        if (error) {
           throw error
         }
         this.running = true

@@ -1,7 +1,6 @@
 /*
  * decaffeinate suggestions:
  * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const logger = require('@overleaf/logger')

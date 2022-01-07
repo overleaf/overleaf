@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let MessageManager
 const { db, ObjectId } = require('../../mongodb')
 const metrics = require('@overleaf/metrics')
@@ -12,7 +5,7 @@ const logger = require('@overleaf/logger')
 
 module.exports = MessageManager = {
   createMessage(roomId, userId, content, timestamp, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     let newMessageOpts = {
@@ -32,11 +25,11 @@ module.exports = MessageManager = {
   },
 
   getMessages(roomId, limit, before, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     let query = { room_id: roomId }
-    if (before != null) {
+    if (before) {
       query.timestamp = { $lt: before }
     }
     query = this._ensureIdsAreObjectIds(query)
@@ -48,7 +41,7 @@ module.exports = MessageManager = {
   },
 
   findAllMessagesInRooms(roomIds, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     db.messages
@@ -59,7 +52,7 @@ module.exports = MessageManager = {
   },
 
   deleteAllMessagesInRoom(roomId, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     db.messages.deleteMany(
@@ -71,7 +64,7 @@ module.exports = MessageManager = {
   },
 
   updateMessage(roomId, messageId, content, timestamp, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     const query = this._ensureIdsAreObjectIds({
@@ -91,7 +84,7 @@ module.exports = MessageManager = {
   },
 
   deleteMessage(roomId, messageId, callback) {
-    if (callback == null) {
+    if (!callback) {
       callback = function () {}
     }
     const query = this._ensureIdsAreObjectIds({
@@ -102,13 +95,13 @@ module.exports = MessageManager = {
   },
 
   _ensureIdsAreObjectIds(query) {
-    if (query.user_id != null && !(query.user_id instanceof ObjectId)) {
+    if (query.user_id && !(query.user_id instanceof ObjectId)) {
       query.user_id = ObjectId(query.user_id)
     }
-    if (query.room_id != null && !(query.room_id instanceof ObjectId)) {
+    if (query.room_id && !(query.room_id instanceof ObjectId)) {
       query.room_id = ObjectId(query.room_id)
     }
-    if (query._id != null && !(query._id instanceof ObjectId)) {
+    if (query._id && !(query._id instanceof ObjectId)) {
       query._id = ObjectId(query._id)
     }
     return query
