@@ -2,8 +2,9 @@ let MessageManager
 const { db, ObjectId } = require('../../mongodb')
 const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
+const { callbackify } = require('util')
 
-function createMessage(roomId, userId, content, timestamp, callback) {
+async function createMessage(roomId, userId, content, timestamp) {
   let newMessageOpts = {
     content,
     room_id: roomId,
@@ -11,64 +12,53 @@ function createMessage(roomId, userId, content, timestamp, callback) {
     timestamp,
   }
   newMessageOpts = _ensureIdsAreObjectIds(newMessageOpts)
-  db.messages.insertOne(newMessageOpts, function (error, confirmation) {
-    if (error) {
-      return callback(error)
-    }
-    newMessageOpts._id = confirmation.insertedId
-    callback(null, newMessageOpts)
-  })
+  const confirmation = await db.messages.insertOne(newMessageOpts)
+  newMessageOpts._id = confirmation.insertedId
+  return newMessageOpts
 }
 
-function getMessages(roomId, limit, before, callback) {
+async function getMessages(roomId, limit, before) {
   let query = { room_id: roomId }
   if (before) {
     query.timestamp = { $lt: before }
   }
   query = _ensureIdsAreObjectIds(query)
-  db.messages.find(query).sort({ timestamp: -1 }).limit(limit).toArray(callback)
+  return db.messages.find(query).sort({ timestamp: -1 }).limit(limit).toArray()
 }
 
-function findAllMessagesInRooms(roomIds, callback) {
-  db.messages
+async function findAllMessagesInRooms(roomIds) {
+  return db.messages
     .find({
       room_id: { $in: roomIds },
     })
-    .toArray(callback)
+    .toArray()
 }
 
-function deleteAllMessagesInRoom(roomId, callback) {
-  db.messages.deleteMany(
-    {
-      room_id: roomId,
-    },
-    callback
-  )
+async function deleteAllMessagesInRoom(roomId) {
+  await db.messages.deleteMany({
+    room_id: roomId,
+  })
 }
 
-function updateMessage(roomId, messageId, content, timestamp, callback) {
+async function updateMessage(roomId, messageId, content, timestamp) {
   const query = _ensureIdsAreObjectIds({
     _id: messageId,
     room_id: roomId,
   })
-  db.messages.updateOne(
-    query,
-    {
-      $set: {
-        content,
-        edited_at: timestamp,
-      },
+  await db.messages.updateOne(query, {
+    $set: {
+      content,
+      edited_at: timestamp,
     },
-    callback
-  )
+  })
 }
 
-function deleteMessage(roomId, messageId, callback) {
+async function deleteMessage(roomId, messageId) {
   const query = _ensureIdsAreObjectIds({
     _id: messageId,
     room_id: roomId,
   })
-  db.messages.deleteOne(query, callback)
+  await db.messages.deleteOne(query)
 }
 
 function _ensureIdsAreObjectIds(query) {
@@ -85,12 +75,12 @@ function _ensureIdsAreObjectIds(query) {
 }
 
 module.exports = MessageManager = {
-  createMessage,
-  getMessages,
-  findAllMessagesInRooms,
-  deleteAllMessagesInRoom,
-  updateMessage,
-  deleteMessage,
+  createMessage: callbackify(createMessage),
+  getMessages: callbackify(getMessages),
+  findAllMessagesInRooms: callbackify(findAllMessagesInRooms),
+  deleteAllMessagesInRoom: callbackify(deleteAllMessagesInRoom),
+  updateMessage: callbackify(updateMessage),
+  deleteMessage: callbackify(deleteMessage),
 }
 ;[
   'createMessage',
