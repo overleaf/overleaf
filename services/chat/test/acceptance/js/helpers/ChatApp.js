@@ -3,7 +3,6 @@
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
- * DS205: Consider reworking code to avoid use of IIFEs
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -31,13 +30,9 @@ module.exports = {
           throw error
         }
         this.running = true
-        return (() => {
-          const result = []
-          for (callback of Array.from(this.callbacks)) {
-            result.push(callback())
-          }
-          return result
-        })()
+        for (callback of Array.from(this.callbacks)) {
+          callback()
+        }
       })
     })
   },
