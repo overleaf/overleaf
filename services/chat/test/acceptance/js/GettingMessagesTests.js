@@ -16,22 +16,25 @@ describe('Getting messages', async function () {
   describe('globally', async function () {
     before(async function () {
       this.project_id = ObjectId().toString()
-      await ChatClient.sendGlobalMessage(
+      const { response } = await ChatClient.sendGlobalMessage(
         this.project_id,
         this.user_id1,
         this.content1
       )
-      await ChatClient.sendGlobalMessage(
+      expect(response.statusCode).to.equal(201)
+      const { response: response2 } = await ChatClient.sendGlobalMessage(
         this.project_id,
         this.user_id2,
         this.content2
       )
+      expect(response2.statusCode).to.equal(201)
     })
 
     it('should contain the messages and populated users when getting the messages', async function () {
-      const { body: messages } = await ChatClient.getGlobalMessages(
+      const { response, body: messages } = await ChatClient.getGlobalMessages(
         this.project_id
       )
+      expect(response.statusCode).to.equal(200)
       expect(messages.length).to.equal(2)
       messages.reverse()
       expect(messages[0].content).to.equal(this.content1)
@@ -46,34 +49,41 @@ describe('Getting messages', async function () {
       this.project_id = ObjectId().toString()
       this.thread_id1 = ObjectId().toString()
       this.thread_id2 = ObjectId().toString()
-      await ChatClient.sendMessage(
+      const { response } = await ChatClient.sendMessage(
         this.project_id,
         this.thread_id1,
         this.user_id1,
         'one'
       )
-      await ChatClient.sendMessage(
+      expect(response.statusCode).to.equal(201)
+      const { response: response2 } = await ChatClient.sendMessage(
         this.project_id,
         this.thread_id2,
         this.user_id2,
         'two'
       )
-      await ChatClient.sendMessage(
+      expect(response2.statusCode).to.equal(201)
+      const { response: response3 } = await ChatClient.sendMessage(
         this.project_id,
         this.thread_id1,
         this.user_id1,
         'three'
       )
-      await ChatClient.sendMessage(
+      expect(response3.statusCode).to.equal(201)
+      const { response: response4 } = await ChatClient.sendMessage(
         this.project_id,
         this.thread_id2,
         this.user_id2,
         'four'
       )
+      expect(response4.statusCode).to.equal(201)
     })
 
     it('should contain a dictionary of threads with messages with populated users', async function () {
-      const { body: threads } = await ChatClient.getThreads(this.project_id)
+      const { response, body: threads } = await ChatClient.getThreads(
+        this.project_id
+      )
+      expect(response.statusCode).to.equal(200)
       expect(Object.keys(threads).length).to.equal(2)
       const thread1 = threads[this.thread_id1]
       expect(thread1.messages.length).to.equal(2)
