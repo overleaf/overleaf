@@ -7,7 +7,10 @@ import React, {
 } from 'react'
 import PropTypes from 'prop-types'
 import ShareProjectModalContent from './share-project-modal-content'
-import { useProjectContext } from '../../../shared/context/project-context'
+import {
+  useProjectContext,
+  projectShape,
+} from '../../../shared/context/project-context'
 import { useSplitTestContext } from '../../../shared/context/split-test-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
 
@@ -35,32 +38,6 @@ export function useShareProjectContext() {
   }
 
   return context
-}
-
-const projectShape = {
-  _id: PropTypes.string.isRequired,
-  members: PropTypes.arrayOf(
-    PropTypes.shape({
-      _id: PropTypes.string.isRequired,
-    })
-  ),
-  invites: PropTypes.arrayOf(
-    PropTypes.shape({
-      _id: PropTypes.string.isRequired,
-    })
-  ),
-  name: PropTypes.string,
-  features: PropTypes.shape({
-    collaborators: PropTypes.number,
-  }),
-  publicAccesLevel: PropTypes.string,
-  tokens: PropTypes.shape({
-    readOnly: PropTypes.string,
-    readAndWrite: PropTypes.string,
-  }),
-  owner: PropTypes.shape({
-    email: PropTypes.string,
-  }),
 }
 
 const ShareProjectModal = React.memo(function ShareProjectModal({

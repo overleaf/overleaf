@@ -75,7 +75,7 @@ function fileTreeSelectableReadOnlyReducer(selectedEntityIds, action) {
 }
 
 export function FileTreeSelectableProvider({ onSelect, children }) {
-  const { _id: projectId, rootDoc_id: rootDocId } = useProjectContext(
+  const { _id: projectId, rootDocId } = useProjectContext(
     projectContextPropTypes
   )
   const { permissionsLevel } = useEditorContext(editorContextPropTypes)
@@ -187,7 +187,7 @@ FileTreeSelectableProvider.propTypes = {
 
 const projectContextPropTypes = {
   _id: PropTypes.string.isRequired,
-  rootDoc_id: PropTypes.string,
+  rootDocId: PropTypes.string,
 }
 
 const editorContextPropTypes = {

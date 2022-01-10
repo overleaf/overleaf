@@ -5,24 +5,21 @@ import AddCollaboratorsUpgrade from './add-collaborators-upgrade'
 import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function SendInvites() {
-  const project = useProjectContext()
+  const { members, invites, features } = useProjectContext()
 
   // whether the project has not reached the collaborator limit
   const canAddCollaborators = useMemo(() => {
-    if (!project) {
+    if (!features) {
       return false
     }
 
-    if (project.features.collaborators === -1) {
+    if (features.collaborators === -1) {
       // infinite collaborators
       return true
     }
 
-    return (
-      project.members.length + project.invites.length <
-      project.features.collaborators
-    )
-  }, [project])
+    return members.length + invites.length < features.collaborators
+  }, [members, invites, features])
 
   return (
     <Row className="invite-controls">

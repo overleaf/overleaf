@@ -45,7 +45,7 @@ export default App.controller(
 
     ide.socket.on('project:membership:changed', data => {
       if (data.members) {
-        listProjectMembers($scope.project)
+        listProjectMembers($scope.project._id)
           .then(({ members }) => {
             if (members) {
               $scope.$applyAsync(() => {
@@ -59,7 +59,7 @@ export default App.controller(
       }
 
       if (data.invites) {
-        listProjectInvites($scope.project)
+        listProjectInvites($scope.project._id)
           .then(({ invites }) => {
             if (invites) {
               $scope.$applyAsync(() => {

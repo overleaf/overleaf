@@ -4,12 +4,12 @@ import { Trans } from 'react-i18next'
 import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function SendInvitesNotice() {
-  const project = useProjectContext()
+  const { publicAccessLevel } = useProjectContext()
 
   return (
     <Row className="public-access-level public-access-level--notice">
       <Col xs={12} className="text-center">
-        <AccessLevel level={project.publicAccesLevel} />
+        <AccessLevel level={publicAccessLevel} />
       </Col>
     </Row>
   )

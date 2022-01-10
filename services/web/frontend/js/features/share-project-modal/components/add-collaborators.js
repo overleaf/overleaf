@@ -20,11 +20,11 @@ export default function AddCollaborators() {
 
   const { updateProject, setInFlight, setError } = useShareProjectContext()
 
-  const project = useProjectContext()
+  const { _id: projectId, members, invites } = useProjectContext()
 
   const currentMemberEmails = useMemo(
-    () => (project.members || []).map(member => member.email).sort(),
-    [project.members]
+    () => (members || []).map(member => member.email).sort(),
+    [members]
   )
 
   const nonMemberContacts = useMemo(() => {
@@ -73,14 +73,14 @@ export default function AddCollaborators() {
       let data
 
       try {
-        const invite = (project.invites || []).find(
+        const invite = (invites || []).find(
           invite => invite.email === normalisedEmail
         )
 
         if (invite) {
-          data = await resendInvite(project, invite)
+          data = await resendInvite(projectId, invite)
         } else {
-          data = await sendInvite(project, email, privileges)
+          data = await sendInvite(projectId, email, privileges)
         }
       } catch (error) {
         setInFlight(false)
@@ -98,15 +98,15 @@ export default function AddCollaborators() {
         setInFlight(false)
       } else if (data.invite) {
         updateProject({
-          invites: project.invites.concat(data.invite),
+          invites: invites.concat(data.invite),
         })
       } else if (data.users) {
         updateProject({
-          members: project.members.concat(data.users),
+          members: members.concat(data.users),
         })
       } else if (data.user) {
         updateProject({
-          members: project.members.concat(data.user),
+          members: members.concat(data.user),
         })
       }
 

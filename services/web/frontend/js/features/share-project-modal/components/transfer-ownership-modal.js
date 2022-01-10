@@ -12,13 +12,13 @@ export default function TransferOwnershipModal({ member, cancel }) {
   const [inflight, setInflight] = useState(false)
   const [error, setError] = useState(false)
 
-  const project = useProjectContext()
+  const { _id: projectId, name: projectName } = useProjectContext()
 
   function confirm() {
     setError(false)
     setInflight(true)
 
-    transferProjectOwnership(project, member)
+    transferProjectOwnership(projectId, member)
       .then(() => {
         reload()
       })
@@ -39,7 +39,7 @@ export default function TransferOwnershipModal({ member, cancel }) {
         <p>
           <Trans
             i18nKey="project_ownership_transfer_confirmation_1"
-            values={{ user: member.email, project: project.name }}
+            values={{ user: member.email, project: projectName }}
             components={[<strong key="strong-1" />, <strong key="strong-2" />]}
           />
         </p>

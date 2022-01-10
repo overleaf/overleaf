@@ -6,11 +6,11 @@ import {
 } from '../../../infrastructure/fetch-json'
 import { executeV2Captcha } from './captcha'
 
-export function sendInvite(project, email, privileges) {
+export function sendInvite(projectId, email, privileges) {
   return executeV2Captcha(
     window.ExposedSettings.recaptchaDisabled?.invite
   ).then(grecaptchaResponse => {
-    return postJSON(`/project/${project._id}/invite`, {
+    return postJSON(`/project/${projectId}/invite`, {
       body: {
         email, // TODO: normalisedEmail?
         privileges,
@@ -20,48 +20,42 @@ export function sendInvite(project, email, privileges) {
   })
 }
 
-export function resendInvite(project, invite) {
-  return postJSON(`/project/${project._id}/invite/${invite._id}/resend`)
+export function resendInvite(projectId, invite) {
+  return postJSON(`/project/${projectId}/invite/${invite._id}/resend`)
 }
 
-export function revokeInvite(project, invite) {
-  return deleteJSON(`/project/${project._id}/invite/${invite._id}`)
+export function revokeInvite(projectId, invite) {
+  return deleteJSON(`/project/${projectId}/invite/${invite._id}`)
 }
 
-export function updateMember(project, member, data) {
-  return putJSON(`/project/${project._id}/users/${member._id}`, {
+export function updateMember(projectId, member, data) {
+  return putJSON(`/project/${projectId}/users/${member._id}`, {
     body: data,
   })
 }
 
-export function removeMemberFromProject(project, member) {
-  return deleteJSON(`/project/${project._id}/users/${member._id}`)
+export function removeMemberFromProject(projectId, member) {
+  return deleteJSON(`/project/${projectId}/users/${member._id}`)
 }
 
-export function transferProjectOwnership(project, member) {
-  return postJSON(`/project/${project._id}/transfer-ownership`, {
+export function transferProjectOwnership(projectId, member) {
+  return postJSON(`/project/${projectId}/transfer-ownership`, {
     body: {
       user_id: member._id,
     },
   })
 }
 
-export function setProjectAccessLevel(project, publicAccessLevel) {
-  return postJSON(`/project/${project._id}/settings/admin`, {
+export function setProjectAccessLevel(projectId, publicAccessLevel) {
+  return postJSON(`/project/${projectId}/settings/admin`, {
     body: { publicAccessLevel },
   })
 }
 
-// export function updateProjectAdminSettings(project, data) {
-//   return postJSON(`/project/${project._id}/settings/admin`, {
-//     body: data
-//   })
-// }
-
-export function listProjectMembers(project) {
-  return getJSON(`/project/${project._id}/members`)
+export function listProjectMembers(projectId) {
+  return getJSON(`/project/${projectId}/members`)
 }
 
-export function listProjectInvites(project) {
-  return getJSON(`/project/${project._id}/invites`)
+export function listProjectInvites(projectId) {
+  return getJSON(`/project/${projectId}/invites`)
 }

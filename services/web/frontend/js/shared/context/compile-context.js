@@ -64,9 +64,7 @@ export function CompileProvider({ children }) {
 
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
 
-  const project = useProjectContext()
-
-  const projectId = project._id
+  const { _id: projectId, rootDocId } = useProjectContext()
 
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
@@ -169,7 +167,8 @@ export function CompileProvider({ children }) {
   // the document compiler
   const [compiler] = useState(() => {
     return new DocumentCompiler({
-      project,
+      projectId,
+      rootDocId,
       setChangedAt,
       setCompiling,
       setData,

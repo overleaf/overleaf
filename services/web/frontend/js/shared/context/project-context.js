@@ -4,39 +4,41 @@ import useScopeValue from '../hooks/use-scope-value'
 
 const ProjectContext = createContext()
 
-ProjectContext.Provider.propTypes = {
-  value: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    rootDoc_id: PropTypes.string,
-    members: PropTypes.arrayOf(
-      PropTypes.shape({
-        _id: PropTypes.string.isRequired,
-      })
-    ),
-    invites: PropTypes.arrayOf(
-      PropTypes.shape({
-        _id: PropTypes.string.isRequired,
-      })
-    ),
-    features: PropTypes.shape({
-      collaborators: PropTypes.number,
-      compileGroup: PropTypes.oneOf(['alpha', 'standard', 'priority']),
-      trackChangesVisible: PropTypes.bool,
-      references: PropTypes.bool,
-      mendeley: PropTypes.bool,
-      zotero: PropTypes.bool,
-    }),
-    publicAccesLevel: PropTypes.string,
-    tokens: PropTypes.shape({
-      readOnly: PropTypes.string,
-      readAndWrite: PropTypes.string,
-    }),
-    owner: PropTypes.shape({
+export const projectShape = {
+  _id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  rootDocId: PropTypes.string,
+  members: PropTypes.arrayOf(
+    PropTypes.shape({
       _id: PropTypes.string.isRequired,
-      email: PropTypes.string.isRequired,
-    }),
+    })
+  ),
+  invites: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+    })
+  ),
+  features: PropTypes.shape({
+    collaborators: PropTypes.number,
+    compileGroup: PropTypes.oneOf(['alpha', 'standard', 'priority']),
+    trackChangesVisible: PropTypes.bool,
+    references: PropTypes.bool,
+    mendeley: PropTypes.bool,
+    zotero: PropTypes.bool,
   }),
+  publicAccessLevel: PropTypes.string,
+  tokens: PropTypes.shape({
+    readOnly: PropTypes.string,
+    readAndWrite: PropTypes.string,
+  }),
+  owner: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+  }),
+}
+
+ProjectContext.Provider.propTypes = {
+  value: PropTypes.shape(projectShape),
 }
 
 export function useProjectContext(propTypes) {
@@ -70,12 +72,42 @@ const projectFallback = {
 export function ProjectProvider({ children }) {
   const [project] = useScopeValue('project', true)
 
+  const {
+    _id,
+    name,
+    rootDoc_id: rootDocId,
+    members,
+    invites,
+    features,
+    publicAccesLevel: publicAccessLevel,
+    tokens,
+    owner,
+  } = project || projectFallback
+
   const value = useMemo(() => {
     return {
-      ...projectFallback,
-      ...project,
+      _id,
+      name,
+      rootDocId,
+      members,
+      invites,
+      features,
+      publicAccessLevel,
+      tokens,
+      owner,
     }
-  }, [project])
+  }, [
+    _id,
+    name,
+    rootDocId,
+    members,
+    invites,
+    features,
+    publicAccessLevel,
+    tokens,
+    owner,
+  ])
+
   return (
     <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>
   )

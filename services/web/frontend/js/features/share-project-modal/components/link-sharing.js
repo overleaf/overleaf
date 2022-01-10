@@ -14,27 +14,29 @@ export default function LinkSharing() {
 
   const { monitorRequest } = useShareProjectContext()
 
-  const project = useProjectContext()
+  const { _id: projectId, publicAccessLevel } = useProjectContext()
 
   // set the access level of a project
   const setAccessLevel = useCallback(
-    publicAccesLevel => {
+    newPublicAccessLevel => {
       setInflight(true)
-      monitorRequest(() => setProjectAccessLevel(project, publicAccesLevel))
+      monitorRequest(() =>
+        setProjectAccessLevel(projectId, newPublicAccessLevel)
+      )
         .then(() => {
           // NOTE: not calling `updateProject` here as it receives data via
           // project:publicAccessLevel:changed and project:tokens:changed
           // over the websocket connection
-          // TODO: eventTracking.sendMB('project-make-token-based') when publicAccesLevel is 'tokenBased'
+          // TODO: eventTracking.sendMB('project-make-token-based') when newPublicAccessLevel is 'tokenBased'
         })
         .finally(() => {
           setInflight(false)
         })
     },
-    [monitorRequest, project]
+    [monitorRequest, projectId]
   )
 
-  switch (project.publicAccesLevel) {
+  switch (publicAccessLevel) {
     // Private (with token-access available)
     case 'private':
       return (
@@ -56,7 +58,7 @@ export default function LinkSharing() {
       return (
         <LegacySharing
           setAccessLevel={setAccessLevel}
-          accessLevel={project.publicAccesLevel}
+          accessLevel={publicAccessLevel}
           inflight={inflight}
         />
       )
@@ -96,7 +98,7 @@ PrivateSharing.propTypes = {
 }
 
 function TokenBasedSharing({ setAccessLevel, inflight }) {
-  const project = useProjectContext()
+  const { tokens } = useProjectContext()
 
   return (
     <Row className="public-access-level">
@@ -122,7 +124,7 @@ function TokenBasedSharing({ setAccessLevel, inflight }) {
             <Trans i18nKey="anyone_with_link_can_edit" />
           </strong>
           <AccessToken
-            token={project?.tokens?.readAndWrite}
+            token={tokens?.readAndWrite}
             path="/"
             tooltipId="tooltip-copy-link-rw"
           />
@@ -132,7 +134,7 @@ function TokenBasedSharing({ setAccessLevel, inflight }) {
             <Trans i18nKey="anyone_with_link_can_view" />
           </strong>
           <AccessToken
-            token={project?.tokens?.readOnly}
+            token={tokens?.readOnly}
             path="/read/"
             tooltipId="tooltip-copy-link-ro"
           />
@@ -181,7 +183,7 @@ LegacySharing.propTypes = {
 }
 
 export function ReadOnlyTokenLink() {
-  const project = useProjectContext()
+  const { tokens } = useProjectContext()
 
   return (
     <Row className="public-access-level">
@@ -191,7 +193,7 @@ export function ReadOnlyTokenLink() {
             <Trans i18nKey="anyone_with_link_can_view" />
           </strong>
           <AccessToken
-            token={project?.tokens?.readOnly}
+            token={tokens?.readOnly}
             path="/read/"
             tooltipId="tooltip-copy-link-ro"
           />

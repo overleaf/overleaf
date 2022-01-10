@@ -41,20 +41,20 @@ Invite.propTypes = {
 
 function ResendInvite({ invite }) {
   const { monitorRequest } = useShareProjectContext()
-  const project = useProjectContext()
+  const { _id: projectId } = useProjectContext()
 
   // const buttonRef = useRef(null)
   //
   const handleClick = useCallback(
     () =>
-      monitorRequest(() => resendInvite(project, invite)).finally(() => {
+      monitorRequest(() => resendInvite(projectId, invite)).finally(() => {
         // NOTE: disabled as react-bootstrap v0.33.1 isn't forwarding the ref to the `button`
         // if (buttonRef.current) {
         //   buttonRef.current.blur()
         // }
         document.activeElement.blur()
       }),
-    [invite, monitorRequest, project]
+    [invite, monitorRequest, projectId]
   )
 
   return (
@@ -75,14 +75,14 @@ ResendInvite.propTypes = {
 function RevokeInvite({ invite }) {
   const { t } = useTranslation()
   const { updateProject, monitorRequest } = useShareProjectContext()
-  const project = useProjectContext()
+  const { _id: projectId, invites } = useProjectContext()
 
   function handleClick(event) {
     event.preventDefault()
 
-    monitorRequest(() => revokeInvite(project, invite)).then(() => {
+    monitorRequest(() => revokeInvite(projectId, invite)).then(() => {
       updateProject({
-        invites: project.invites.filter(existing => existing !== invite),
+        invites: invites.filter(existing => existing !== invite),
       })
     })
   }
