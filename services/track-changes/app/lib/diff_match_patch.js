@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Diff Match and Patch
  *
