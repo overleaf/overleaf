@@ -11,5 +11,5 @@ exports.migrate = async client => {
 
 exports.rollback = async client => {
   const { db } = client
-  // Helpers.dropIndexesFromCollection(db.wombats, [{ name: 1 }])
+  // await Helpers.dropIndexesFromCollection(db.wombats, [{ name: 1 }])
 }

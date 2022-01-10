@@ -71,12 +71,7 @@ async function setupDb() {
   db.users = internalDb.collection('users')
   db.userstubs = internalDb.collection('userstubs')
 }
-async function addCollection(name) {
-  await waitForDb()
-  const internalDb = (await clientPromise).db()
 
-  db[name] = internalDb.collection(name)
-}
 async function getCollectionNames() {
   const internalDb = (await clientPromise).db()
 
@@ -84,10 +79,18 @@ async function getCollectionNames() {
   return collections.map(collection => collection.collectionName)
 }
 
+/**
+ * WARNING: Consider using a pre-populated collection from `db` to avoid typos!
+ */
+async function getCollectionInternal(name) {
+  const internalDb = (await clientPromise).db()
+  return internalDb.collection(name)
+}
+
 module.exports = {
   db,
   ObjectId,
-  addCollection,
   getCollectionNames,
+  getCollectionInternal,
   waitForDb,
 }

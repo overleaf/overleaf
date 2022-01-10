@@ -1,9 +1,5 @@
 const Path = require('path')
-const {
-  addCollection,
-  waitForDb,
-  db,
-} = require('../../app/src/infrastructure/mongodb')
+const { waitForDb, db } = require('../../app/src/infrastructure/mongodb')
 
 class Adapter {
   constructor(params) {
@@ -24,12 +20,6 @@ class Adapter {
 
   async connect() {
     await waitForDb()
-
-    await addCollection('projectImportFailures')
-    await addCollection('samllog')
-    await addCollection('user')
-    await addCollection('splittests')
-
     return { db }
   }
 

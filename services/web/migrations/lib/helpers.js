@@ -1,4 +1,9 @@
-const { getCollectionNames } = require('../../app/src/infrastructure/mongodb')
+const {
+  db,
+  getCollectionNames,
+  getCollectionInternal,
+  waitForDb,
+} = require('../../app/src/infrastructure/mongodb')
 
 async function addIndexesToCollection(collection, indexes) {
   return Promise.all(
@@ -13,10 +18,16 @@ async function dropIndexesFromCollection(collection, indexes) {
   return Promise.all(indexes.map(index => collection.dropIndex(index.name)))
 }
 
-async function dropCollection(db, collectionName) {
+async function dropCollection(collectionName) {
+  await waitForDb()
+  if (db[collectionName]) {
+    throw new Error(`blocking drop of an active collection: ${collectionName}`)
+  }
+
   const allCollections = await getCollectionNames()
   if (!allCollections.includes(collectionName)) return
-  return db[collectionName].drop()
+  const collection = await getCollectionInternal(collectionName)
+  await collection.drop()
 }
 
 module.exports = {

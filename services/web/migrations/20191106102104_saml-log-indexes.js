@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 const Helpers = require('./lib/helpers')
+const { getCollectionInternal } = require('../app/src/infrastructure/mongodb')
 
 exports.tags = ['saas']
 
@@ -27,17 +28,25 @@ const indexes = [
   },
 ]
 
-exports.migrate = async client => {
-  const { db } = client
+// Export indexes for use in the fix-up migration 20220105130000_fix_saml_indexes.js.
+exports.samlLogsIndexes = indexes
 
-  await Helpers.addIndexesToCollection(db.samllog, indexes)
+async function getCollection() {
+  // This collection was incorrectly named - it should have been `samlLogs`
+  //  instead of `samllog`. The error is corrected by the subsequent migration
+  //  20220105130000_fix_saml_indexes.js.
+  return await getCollectionInternal('samllog')
+}
+
+exports.migrate = async client => {
+  const collection = await getCollection()
+  await Helpers.addIndexesToCollection(collection, indexes)
 }
 
 exports.rollback = async client => {
-  const { db } = client
-
+  const collection = await getCollection()
   try {
-    await Helpers.dropIndexesFromCollection(db.samllog, indexes)
+    await Helpers.dropIndexesFromCollection(collection, indexes)
   } catch (err) {
     console.error('Something went wrong rolling back the migrations', err)
   }

@@ -1,4 +1,5 @@
 const Helpers = require('./lib/helpers')
+const { getCollectionInternal } = require('../app/src/infrastructure/mongodb')
 
 exports.tags = ['saas']
 
@@ -12,12 +13,17 @@ const indexes = [
   },
 ]
 
+async function getCollection() {
+  // NOTE: We do not access the splittests collection directly. Fetch it here.
+  return await getCollectionInternal('splittests')
+}
+
 exports.migrate = async client => {
-  const { db } = client
-  await Helpers.addIndexesToCollection(db.splittests, indexes)
+  const collection = await getCollection()
+  await Helpers.addIndexesToCollection(collection, indexes)
 }
 
 exports.rollback = async client => {
-  const { db } = client
-  Helpers.dropIndexesFromCollection(db.splittests, indexes)
+  const collection = await getCollection()
+  await Helpers.dropIndexesFromCollection(collection, indexes)
 }
