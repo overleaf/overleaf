@@ -178,9 +178,8 @@ class UserHelper {
 
     // hash password and delete plaintext if set
     if (attributes.password) {
-      attributes.hashedPassword = await AuthenticationManager.promises.hashPassword(
-        attributes.password
-      )
+      attributes.hashedPassword =
+        await AuthenticationManager.promises.hashPassword(attributes.password)
       delete attributes.password
     }
 

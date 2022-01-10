@@ -96,12 +96,14 @@ describe('InstitutionsManager', function () {
         './InstitutionsAPI': {
           getInstitutionAffiliations: this.getInstitutionAffiliations,
           promises: {
-            getInstitutionAffiliations: (this.getInstitutionAffiliationsPromise = sinon
-              .stub()
-              .resolves(this.affiliations)),
-            getInstitutionAffiliationsCounts: (this.getInstitutionAffiliationsCounts = sinon
-              .stub()
-              .resolves(this.v1Counts)),
+            getInstitutionAffiliations:
+              (this.getInstitutionAffiliationsPromise = sinon
+                .stub()
+                .resolves(this.affiliations)),
+            getInstitutionAffiliationsCounts:
+              (this.getInstitutionAffiliationsCounts = sinon
+                .stub()
+                .resolves(this.v1Counts)),
           },
         },
         '../Subscription/FeaturesUpdater': {
@@ -207,9 +209,10 @@ describe('InstitutionsManager', function () {
     it('returns entitled/not, sso/not, lapsed/current, and pro counts', async function () {
       if (Features.hasFeature('saas')) {
         this.isFeatureSetBetter.returns(true)
-        const usersSummary = await this.InstitutionsManager.promises.checkInstitutionUsers(
-          this.institutionId
-        )
+        const usersSummary =
+          await this.InstitutionsManager.promises.checkInstitutionUsers(
+            this.institutionId
+          )
         expect(usersSummary).to.deep.equal({
           emailUsers: {
             total: 1,
@@ -248,9 +251,10 @@ describe('InstitutionsManager', function () {
       if (Features.hasFeature('saas')) {
         this.isFeatureSetBetter.returns(true)
         this.v1Counts.with_confirmed_email = 100
-        const usersSummary = await this.InstitutionsManager.promises.checkInstitutionUsers(
-          this.institutionId
-        )
+        const usersSummary =
+          await this.InstitutionsManager.promises.checkInstitutionUsers(
+            this.institutionId
+          )
         expect(usersSummary).to.deep.equal({
           emailUsers: {
             total: 1,

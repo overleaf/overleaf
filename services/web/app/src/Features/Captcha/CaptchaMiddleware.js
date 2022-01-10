@@ -50,8 +50,7 @@ module.exports = CaptchaMiddleware = {
             return res.status(400).send({
               errorReason: 'cannot_verify_user_not_robot',
               message: {
-                text:
-                  'Sorry, we could not verify that you are not a robot. Please check that Google reCAPTCHA is not being blocked by an ad blocker or firewall.',
+                text: 'Sorry, we could not verify that you are not a robot. Please check that Google reCAPTCHA is not being blocked by an ad blocker or firewall.',
               },
             })
           } else {

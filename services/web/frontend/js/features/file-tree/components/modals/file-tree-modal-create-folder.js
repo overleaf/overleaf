@@ -18,13 +18,8 @@ function FileTreeModalCreateFolder() {
   const [name, setName] = useState('')
   const [validName, setValidName] = useState(true)
 
-  const {
-    isCreatingFolder,
-    inFlight,
-    finishCreatingFolder,
-    cancel,
-    error,
-  } = useFileTreeActionable()
+  const { isCreatingFolder, inFlight, finishCreatingFolder, cancel, error } =
+    useFileTreeActionable()
 
   if (!isCreatingFolder) return null // the modal will not be rendered; return early
 

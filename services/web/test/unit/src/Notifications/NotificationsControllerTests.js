@@ -33,8 +33,8 @@ describe('NotificationsController', function () {
     this.controller = SandboxedModule.require(modulePath, {
       requires: {
         './NotificationsHandler': this.handler,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/AuthenticationController':
+          this.AuthenticationController,
       },
     })
   })

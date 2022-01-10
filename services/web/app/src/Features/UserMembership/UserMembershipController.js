@@ -31,9 +31,8 @@ module.exports = {
           if (error != null) {
             return next(error)
           }
-          const entityPrimaryKey = entity[
-            entityConfig.fields.primaryKey
-          ].toString()
+          const entityPrimaryKey =
+            entity[entityConfig.fields.primaryKey].toString()
           if (entityConfig.fields.name) {
             entityName = entity[entityConfig.fields.name]
           }

@@ -103,13 +103,8 @@ function PdfSynctexControls() {
 
   const { detachRole } = useLayoutContext()
 
-  const {
-    clsiServerId,
-    pdfUrl,
-    pdfViewer,
-    position,
-    setHighlights,
-  } = useCompileContext()
+  const { clsiServerId, pdfUrl, pdfViewer, position, setHighlights } =
+    useCompileContext()
 
   const [cursorPosition, setCursorPosition] = useState(() => {
     const position = localStorage.getItem(

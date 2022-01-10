@@ -620,8 +620,8 @@ export default App.directive('pdfViewer', ($q, $timeout, pdfSpinner) => ({
       if (selection.rangeCount === 0) {
         return false
       }
-      const selectionAncestorNode = selection.getRangeAt(0)
-        .commonAncestorContainer
+      const selectionAncestorNode =
+        selection.getRangeAt(0).commonAncestorContainer
       return (
         element.find(selectionAncestorNode).length > 0 ||
         element.is(selectionAncestorNode)

@@ -198,10 +198,11 @@ function fetchEntityConfig(entityName) {
 // fetch the entity with id and config, and set it in the request
 function fetchEntity() {
   return expressify(async (req, res, next) => {
-    const entity = await UserMembershipHandler.promises.getEntityWithoutAuthorizationCheck(
-      req.params.id,
-      req.entityConfig
-    )
+    const entity =
+      await UserMembershipHandler.promises.getEntityWithoutAuthorizationCheck(
+        req.params.id,
+        req.entityConfig
+      )
     req.entity = entity
     next()
   })

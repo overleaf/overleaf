@@ -38,8 +38,8 @@ describe('AuthorizationMiddleware', function () {
       requires: {
         './AuthorizationManager': this.AuthorizationManager,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/AuthenticationController':
+          this.AuthenticationController,
         '../Authentication/SessionManager': this.SessionManager,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
       },

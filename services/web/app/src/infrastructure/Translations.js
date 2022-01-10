@@ -77,9 +77,8 @@ function setLangBasedOnDomainMiddleware(req, res, next) {
   // offering to switch to the appropriate library
   const detectedLanguageCode = headerLangDetector.detect(req, res)
   if (req.language !== detectedLanguageCode) {
-    res.locals.suggestedLanguageSubdomainConfig = subdomainConfigs.get(
-      detectedLanguageCode
-    )
+    res.locals.suggestedLanguageSubdomainConfig =
+      subdomainConfigs.get(detectedLanguageCode)
   }
 
   // Decorate req.i18n with translate function alias for backwards

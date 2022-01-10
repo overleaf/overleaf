@@ -99,8 +99,8 @@ describe('SubscriptionGroupHandler', function () {
         '../Email/EmailHandler': this.EmailHandler,
         '@overleaf/settings': this.settings,
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
-        '../UserMembership/UserMembershipViewModel': this
-          .UserMembershipViewModel,
+        '../UserMembership/UserMembershipViewModel':
+          this.UserMembershipViewModel,
       },
     }))
   })

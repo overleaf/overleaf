@@ -47,7 +47,8 @@ describe('EditorController', function () {
 
     return (this.EditorController = SandboxedModule.require(modulePath, {
       requires: {
-        '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
+        '../Project/ProjectEntityUpdateHandler':
+          (this.ProjectEntityUpdateHandler = {}),
         '../Project/ProjectOptionsHandler': (this.ProjectOptionsHandler = {
           setCompiler: sinon.stub().yields(),
           setImageName: sinon.stub().yields(),
@@ -59,10 +60,11 @@ describe('EditorController', function () {
           setPublicAccessLevel: sinon.stub().yields(),
         }),
         '../Project/ProjectDeleter': (this.ProjectDeleter = {}),
-        '../DocumentUpdater/DocumentUpdaterHandler': (this.DocumentUpdaterHandler = {
-          flushDocToMongo: sinon.stub().yields(),
-          setDocument: sinon.stub().yields(),
-        }),
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          (this.DocumentUpdaterHandler = {
+            flushDocToMongo: sinon.stub().yields(),
+            setDocument: sinon.stub().yields(),
+          }),
         './EditorRealTimeController': (this.EditorRealTimeController = {
           emitToRoom: sinon.stub(),
         }),

@@ -55,8 +55,8 @@ describe('ProjectGetter', function () {
         },
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../../infrastructure/LockManager': this.LockManager,
-        './ProjectEntityMongoUpdateHandler': this
-          .ProjectEntityMongoUpdateHandler,
+        './ProjectEntityMongoUpdateHandler':
+          this.ProjectEntityMongoUpdateHandler,
       },
     })
   })

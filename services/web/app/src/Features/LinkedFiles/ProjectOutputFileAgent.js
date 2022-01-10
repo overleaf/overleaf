@@ -168,10 +168,8 @@ function _checkAuth(projectId, data, currentUserId, callback) {
 
 function _getFileStream(linkedFileData, userId, callback) {
   callback = _.once(callback)
-  const {
-    source_output_file_path: sourceOutputFilePath,
-    build_id: buildId,
-  } = linkedFileData
+  const { source_output_file_path: sourceOutputFilePath, build_id: buildId } =
+    linkedFileData
   LinkedFilesHandler.getSourceProject(linkedFileData, (err, project) => {
     if (err) {
       return callback(err)

@@ -48,9 +48,10 @@ describe('UserCreator', function () {
         './UserOnboardingEmailManager': (this.UserOnboardingEmailManager = {
           scheduleOnboardingEmail: sinon.stub(),
         }),
-        './UserPostRegistrationAnalyticsManager': (this.UserPostRegistrationAnalyticsManager = {
-          schedulePostRegistrationAnalytics: sinon.stub(),
-        }),
+        './UserPostRegistrationAnalyticsManager':
+          (this.UserPostRegistrationAnalyticsManager = {
+            schedulePostRegistrationAnalytics: sinon.stub(),
+          }),
       },
     })
 

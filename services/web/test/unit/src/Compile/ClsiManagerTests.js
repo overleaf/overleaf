@@ -54,8 +54,8 @@ describe('ClsiManager', function () {
         },
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../Project/ProjectGetter': this.ProjectGetter,
-        '../DocumentUpdater/DocumentUpdaterHandler': this
-          .DocumentUpdaterHandler,
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          this.DocumentUpdaterHandler,
         './ClsiCookieManager': () => this.ClsiCookieManager,
         './ClsiStateManager': this.ClsiStateManager,
         request: this.request,

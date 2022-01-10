@@ -64,9 +64,10 @@ describe('ReferencesHandler', function () {
         '../User/UserGetter': (this.UserGetter = {
           getUser: sinon.stub(),
         }),
-        '../DocumentUpdater/DocumentUpdaterHandler': (this.DocumentUpdaterHandler = {
-          flushDocToMongo: sinon.stub().callsArgWith(2, null),
-        }),
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          (this.DocumentUpdaterHandler = {
+            flushDocToMongo: sinon.stub().callsArgWith(2, null),
+          }),
         '../../infrastructure/Features': (this.Features = {
           hasFeature: sinon.stub().returns(true),
         }),

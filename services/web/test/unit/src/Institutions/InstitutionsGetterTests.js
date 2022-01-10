@@ -17,8 +17,10 @@ describe('InstitutionsGetter', function () {
     this.InstitutionsGetter = SandboxedModule.require(modulePath, {
       requires: {
         '../User/UserGetter': this.UserGetter,
-        '../UserMembership/UserMembershipsHandler': (this.UserMembershipsHandler = {}),
-        '../UserMembership/UserMembershipEntityConfigs': (this.UserMembershipEntityConfigs = {}),
+        '../UserMembership/UserMembershipsHandler':
+          (this.UserMembershipsHandler = {}),
+        '../UserMembership/UserMembershipEntityConfigs':
+          (this.UserMembershipEntityConfigs = {}),
       },
     })
 
@@ -94,17 +96,19 @@ describe('InstitutionsGetter', function () {
   describe('getCurrentInstitutionIds', function () {
     it('filters unconfirmed affiliations, those past reconfirmation, and returns only 1 result per institution', async function () {
       this.UserGetter.promises.getUserFullEmails.resolves(this.userEmails)
-      const institutions = await this.InstitutionsGetter.promises.getCurrentInstitutionIds(
-        this.userId
-      )
+      const institutions =
+        await this.InstitutionsGetter.promises.getCurrentInstitutionIds(
+          this.userId
+        )
       expect(institutions.length).to.equal(1)
       expect(institutions[0]).to.equal(456)
     })
     it('handles empty response', async function () {
       this.UserGetter.promises.getUserFullEmails.resolves([])
-      const institutions = await this.InstitutionsGetter.promises.getCurrentInstitutionIds(
-        this.userId
-      )
+      const institutions =
+        await this.InstitutionsGetter.promises.getCurrentInstitutionIds(
+          this.userId
+        )
       expect(institutions).to.deep.equal([])
     })
     it('handles errors', async function () {
@@ -131,9 +135,10 @@ describe('InstitutionsGetter', function () {
         this.unconfirmedDomainLicensedAffiliation,
         this.unconfirmedEmailLicensedAffiliation,
       ])
-      const institutions = await this.InstitutionsGetter.promises.getCurrentInstitutionsWithLicence(
-        this.userId
-      )
+      const institutions =
+        await this.InstitutionsGetter.promises.getCurrentInstitutionsWithLicence(
+          this.userId
+        )
       expect(institutions.map(institution => institution.id)).to.deep.equal([
         this.licencedAffiliation.affiliation.institution.id,
       ])

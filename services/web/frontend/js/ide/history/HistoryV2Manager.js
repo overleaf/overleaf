@@ -323,8 +323,8 @@ export default HistoryManager = (function () {
 
     selectFile(file) {
       if (file != null && file.pathname != null) {
-        this.$scope.history.selection.pathname = this._previouslySelectedPathname =
-          file.pathname
+        this.$scope.history.selection.pathname =
+          this._previouslySelectedPathname = file.pathname
         this.$scope.history.selection.file = file
         if (this.$scope.history.viewMode === HistoryViewModes.POINT_IN_TIME) {
           this.loadFileAtPointInTime()
@@ -659,13 +659,13 @@ export default HistoryManager = (function () {
 
     _loadLabels(labels, lastUpdateToV) {
       const sortedLabels = this._sortLabelsByVersionAndDate(labels)
-      const labelsWithoutPseudoLabel = this._deletePseudoCurrentStateLabelIfExistent(
-        sortedLabels
-      )
-      const labelsWithPseudoLabelIfNeeded = this._addPseudoCurrentStateLabelIfNeeded(
-        labelsWithoutPseudoLabel,
-        lastUpdateToV
-      )
+      const labelsWithoutPseudoLabel =
+        this._deletePseudoCurrentStateLabelIfExistent(sortedLabels)
+      const labelsWithPseudoLabelIfNeeded =
+        this._addPseudoCurrentStateLabelIfNeeded(
+          labelsWithoutPseudoLabel,
+          lastUpdateToV
+        )
       return labelsWithPseudoLabelIfNeeded
     }
 
@@ -902,9 +902,8 @@ export default HistoryManager = (function () {
       if (updates == null) {
         updates = []
       }
-      let previousUpdate = this.$scope.history.updates[
-        this.$scope.history.updates.length - 1
-      ]
+      let previousUpdate =
+        this.$scope.history.updates[this.$scope.history.updates.length - 1]
       const dateTimeNow = new Date()
       const timestamp24hoursAgo = dateTimeNow.setDate(dateTimeNow.getDate() - 1)
       let cutOffIndex = null

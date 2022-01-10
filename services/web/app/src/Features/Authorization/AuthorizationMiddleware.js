@@ -29,11 +29,12 @@ async function blockRestrictedUserFromProject(req, res, next) {
   const projectId = _getProjectId(req)
   const userId = _getUserId(req)
   const token = TokenAccessHandler.getRequestToken(req, projectId)
-  const isRestrictedUser = await AuthorizationManager.promises.isRestrictedUserForProject(
-    userId,
-    projectId,
-    token
-  )
+  const isRestrictedUser =
+    await AuthorizationManager.promises.isRestrictedUserForProject(
+      userId,
+      projectId,
+      token
+    )
   if (isRestrictedUser) {
     return HttpErrorHandler.forbidden(req, res)
   }
@@ -75,11 +76,12 @@ async function ensureUserCanWriteProjectSettings(req, res, next) {
 
   const otherParams = Object.keys(req.body).filter(x => x !== 'name')
   if (otherParams.length > 0) {
-    const canWrite = await AuthorizationManager.promises.canUserWriteProjectSettings(
-      userId,
-      projectId,
-      token
-    )
+    const canWrite =
+      await AuthorizationManager.promises.canUserWriteProjectSettings(
+        userId,
+        projectId,
+        token
+      )
     if (!canWrite) {
       return HttpErrorHandler.forbidden(req, res)
     }
@@ -92,11 +94,12 @@ async function ensureUserCanWriteProjectContent(req, res, next) {
   const projectId = _getProjectId(req)
   const userId = _getUserId(req)
   const token = TokenAccessHandler.getRequestToken(req, projectId)
-  const canWrite = await AuthorizationManager.promises.canUserWriteProjectContent(
-    userId,
-    projectId,
-    token
-  )
+  const canWrite =
+    await AuthorizationManager.promises.canUserWriteProjectContent(
+      userId,
+      projectId,
+      token
+    )
   if (canWrite) {
     logger.log(
       { userId, projectId },

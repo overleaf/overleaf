@@ -87,9 +87,8 @@ export function CompileProvider({ children }) {
   const [pdfViewer] = useScopeValue('settings.pdfViewer')
 
   // the URL for downloading the PDF
-  const [pdfDownloadUrl, setPdfDownloadUrl] = useScopeValueSetterOnly(
-    'pdf.downloadUrl'
-  )
+  const [pdfDownloadUrl, setPdfDownloadUrl] =
+    useScopeValueSetterOnly('pdf.downloadUrl')
 
   // the URL for loading the PDF in the preview pane
   const [pdfUrl, setPdfUrl] = useScopeValueSetterOnly('pdf.url')

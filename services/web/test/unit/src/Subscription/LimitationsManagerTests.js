@@ -41,7 +41,8 @@ describe('LimitationsManager', function () {
         './SubscriptionLocator': this.SubscriptionLocator,
         '@overleaf/settings': (this.Settings = {}),
         '../Collaborators/CollaboratorsGetter': (this.CollaboratorsGetter = {}),
-        '../Collaborators/CollaboratorsInviteHandler': (this.CollaboratorsInviteHandler = {}),
+        '../Collaborators/CollaboratorsInviteHandler':
+          (this.CollaboratorsInviteHandler = {}),
         './V1SubscriptionManager': (this.V1SubscriptionManager = {}),
       },
     })

@@ -143,8 +143,8 @@ describe('ProjectDeleter', function () {
         '../../models/Project': { Project: Project },
         './ProjectHelper': this.ProjectHelper,
         '../../models/DeletedProject': { DeletedProject: DeletedProject },
-        '../DocumentUpdater/DocumentUpdaterHandler': this
-          .DocumentUpdaterHandler,
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          this.DocumentUpdaterHandler,
         '../Tags/TagsHandler': this.TagsHandler,
         '../FileStore/FileStoreHandler': this.FileStoreHandler,
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
@@ -267,10 +267,10 @@ describe('ProjectDeleter', function () {
         deletedProjectOwnerId: this.project.owner_ref,
         deletedProjectCollaboratorIds: this.project.collaberator_refs,
         deletedProjectReadOnlyIds: this.project.readOnly_refs,
-        deletedProjectReadWriteTokenAccessIds: this.project
-          .tokenAccessReadAndWrite_refs,
-        deletedProjectReadOnlyTokenAccessIds: this.project
-          .tokenAccessReadOnly_refs,
+        deletedProjectReadWriteTokenAccessIds:
+          this.project.tokenAccessReadAndWrite_refs,
+        deletedProjectReadOnlyTokenAccessIds:
+          this.project.tokenAccessReadOnly_refs,
         deletedProjectReadWriteToken: this.project.tokens.readAndWrite,
         deletedProjectReadOnlyToken: this.project.tokens.readOnly,
         deletedProjectOverleafId: this.project.overleaf.id,

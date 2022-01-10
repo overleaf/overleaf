@@ -48,10 +48,8 @@ async function refreshFeatures(userId, reason) {
     matchedFeatureSet
   )
 
-  const {
-    features: newFeatures,
-    featuresChanged,
-  } = await UserFeaturesUpdater.promises.updateFeatures(userId, features)
+  const { features: newFeatures, featuresChanged } =
+    await UserFeaturesUpdater.promises.updateFeatures(userId, features)
   if (oldFeatures.dropbox === true && features.dropbox === false) {
     logger.log({ userId }, '[FeaturesUpdater] must unlink dropbox')
     const Modules = require('../../infrastructure/Modules')
@@ -70,9 +68,8 @@ async function refreshFeatures(userId, reason) {
 async function computeFeatures(userId) {
   const individualFeatures = await _getIndividualFeatures(userId)
   const groupFeatureSets = await _getGroupFeatureSets(userId)
-  const institutionFeatures = await InstitutionsFeatures.promises.getInstitutionsFeatures(
-    userId
-  )
+  const institutionFeatures =
+    await InstitutionsFeatures.promises.getInstitutionsFeatures(userId)
   const v1Features = await _getV1Features(userId)
   const bonusFeatures = await ReferalFeatures.promises.getBonusFeatures(userId)
   const featuresOverrides = await _getFeaturesOverrides(userId)
@@ -144,10 +141,8 @@ async function _getFeaturesOverrides(userId) {
 async function _getV1Features(userId) {
   let planCode, v1Id
   try {
-    ;({
-      planCode,
-      v1Id,
-    } = await V1SubscriptionManager.promises.getPlanCodeFromV1(userId))
+    ;({ planCode, v1Id } =
+      await V1SubscriptionManager.promises.getPlanCodeFromV1(userId))
   } catch (err) {
     if (err.name === 'NotFoundError') {
       return {}

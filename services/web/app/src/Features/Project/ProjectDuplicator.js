@@ -66,11 +66,12 @@ async function duplicate(owner, originalProjectId, newProjectName) {
       _copyDocs(originalEntries.docEntries, originalProject, newProject),
       _copyFiles(originalEntries.fileEntries, originalProject, newProject),
     ])
-    const projectVersion = await ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure(
-      newProject._id,
-      docEntries,
-      fileEntries
-    )
+    const projectVersion =
+      await ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure(
+        newProject._id,
+        docEntries,
+        fileEntries
+      )
     // Silently ignore the rootDoc in case it's not valid per the new limits.
     if (
       rootDocPath &&

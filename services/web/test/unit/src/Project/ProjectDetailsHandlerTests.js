@@ -121,9 +121,10 @@ describe('ProjectDetailsHandler', function () {
     it('should make a call to mongo just for the description', async function () {
       this.ProjectGetter.promises.getProject.resolves()
       await this.handler.promises.getProjectDescription(this.project._id)
-      expect(
-        this.ProjectGetter.promises.getProject
-      ).to.have.been.calledWith(this.project._id, { description: true })
+      expect(this.ProjectGetter.promises.getProject).to.have.been.calledWith(
+        this.project._id,
+        { description: true }
+      )
     })
 
     it('should return what the mongo call returns', async function () {

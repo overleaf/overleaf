@@ -1,52 +1,55 @@
 import App from '../base'
-App.controller('AccountSettingsController', function (
-  $scope,
-  $http,
-  $modal,
-  // eslint-disable-next-line camelcase
-  eventTracking,
-  UserAffiliationsDataService
-) {
-  $scope.subscribed = true
+App.controller(
+  'AccountSettingsController',
+  function (
+    $scope,
+    $http,
+    $modal,
+    // eslint-disable-next-line camelcase
+    eventTracking,
+    UserAffiliationsDataService
+  ) {
+    $scope.subscribed = true
 
-  $scope.unsubscribe = function () {
-    $scope.unsubscribing = true
-    return $http({
-      method: 'DELETE',
-      url: '/user/newsletter/unsubscribe',
-      headers: {
-        'X-CSRF-Token': window.csrfToken,
-      },
-    })
-      .then(function () {
-        $scope.unsubscribing = false
-        $scope.subscribed = false
-      })
-      .catch(() => ($scope.unsubscribing = true))
-  }
-
-  $scope.deleteAccount = function () {
-    $modal.open({
-      templateUrl: 'deleteAccountModalTemplate',
-      controller: 'DeleteAccountModalController',
-      resolve: {
-        userDefaultEmail() {
-          return UserAffiliationsDataService.getUserDefaultEmail()
-            .then(
-              defaultEmailDetails =>
-                (defaultEmailDetails != null
-                  ? defaultEmailDetails.email
-                  : undefined) || null
-            )
-            .catch(() => null)
+    $scope.unsubscribe = function () {
+      $scope.unsubscribing = true
+      return $http({
+        method: 'DELETE',
+        url: '/user/newsletter/unsubscribe',
+        headers: {
+          'X-CSRF-Token': window.csrfToken,
         },
-      },
-    })
-  }
+      })
+        .then(function () {
+          $scope.unsubscribing = false
+          $scope.subscribed = false
+        })
+        .catch(() => ($scope.unsubscribing = true))
+    }
 
-  $scope.upgradeIntegration = service =>
-    eventTracking.send('subscription-funnel', 'settings-page', service)
-})
+    $scope.deleteAccount = function () {
+      $modal.open({
+        templateUrl: 'deleteAccountModalTemplate',
+        controller: 'DeleteAccountModalController',
+        resolve: {
+          userDefaultEmail() {
+            return UserAffiliationsDataService.getUserDefaultEmail()
+              .then(
+                defaultEmailDetails =>
+                  (defaultEmailDetails != null
+                    ? defaultEmailDetails.email
+                    : undefined) || null
+              )
+              .catch(() => null)
+          },
+        },
+      })
+    }
+
+    $scope.upgradeIntegration = service =>
+      eventTracking.send('subscription-funnel', 'settings-page', service)
+  }
+)
 
 App.controller(
   'DeleteAccountModalController',

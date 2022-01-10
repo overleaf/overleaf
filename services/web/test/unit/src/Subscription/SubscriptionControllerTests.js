@@ -467,7 +467,8 @@ describe('SubscriptionController', function () {
         threeDSecureActionResult: '5678',
       }
       this.req.body.recurly_token_id = this.recurlyTokenIds.billing
-      this.req.body.recurly_three_d_secure_action_result_token_id = this.recurlyTokenIds.threeDSecureActionResult
+      this.req.body.recurly_three_d_secure_action_result_token_id =
+        this.recurlyTokenIds.threeDSecureActionResult
       this.req.body.subscriptionDetails = this.subscriptionDetails
       this.LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
       return this.SubscriptionController.createSubscription(this.req, this.res)

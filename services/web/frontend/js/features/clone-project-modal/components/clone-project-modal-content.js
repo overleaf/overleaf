@@ -27,9 +27,10 @@ export default function CloneProjectModalContent({
   )
 
   // valid if the cloned project has a name
-  const valid = useMemo(() => clonedProjectName.trim().length > 0, [
-    clonedProjectName,
-  ])
+  const valid = useMemo(
+    () => clonedProjectName.trim().length > 0,
+    [clonedProjectName]
+  )
 
   // form submission: clone the project if the name is valid
   const handleSubmit = event => {

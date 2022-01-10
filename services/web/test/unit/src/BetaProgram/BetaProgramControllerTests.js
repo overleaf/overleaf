@@ -33,9 +33,10 @@ describe('BetaProgramController', function () {
         '@overleaf/settings': (this.settings = {
           languages: {},
         }),
-        '../Authentication/AuthenticationController': (this.AuthenticationController = {
-          getLoggedInUserId: sinon.stub().returns(this.user._id),
-        }),
+        '../Authentication/AuthenticationController':
+          (this.AuthenticationController = {
+            getLoggedInUserId: sinon.stub().returns(this.user._id),
+          }),
       },
     })
     this.res = {

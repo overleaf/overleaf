@@ -19,12 +19,8 @@ export function useFileTreeSocketListener() {
     dispatchCreateFile,
     fileTreeData,
   } = useFileTreeMutable()
-  const {
-    selectedEntityIds,
-    selectedEntityParentIds,
-    select,
-    unselect,
-  } = useFileTreeSelectable()
+  const { selectedEntityIds, selectedEntityParentIds, select, unselect } =
+    useFileTreeSelectable()
   const socket = window._ide && window._ide.socket
 
   const selectEntityIfCreatedByUser = useCallback(

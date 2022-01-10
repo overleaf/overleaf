@@ -21,8 +21,8 @@ describe('UserActivateController', function () {
     this.UserActivateController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../../../../app/src/Features/User/UserGetter': this.UserGetter,
-        '../../../../app/src/Features/Errors/ErrorController': this
-          .ErrorController,
+        '../../../../app/src/Features/Errors/ErrorController':
+          this.ErrorController,
       },
     })
     this.req = {

@@ -257,21 +257,18 @@ async function mkdirp(projectId, path, options = {}) {
   for (const folderName of folders) {
     builtUpPath += `/${folderName}`
     try {
-      const {
-        element: foundFolder,
-      } = await ProjectLocator.promises.findElementByPath({
-        project,
-        path: builtUpPath,
-        exactCaseMatch: options.exactCaseMatch,
-      })
+      const { element: foundFolder } =
+        await ProjectLocator.promises.findElementByPath({
+          project,
+          path: builtUpPath,
+          exactCaseMatch: options.exactCaseMatch,
+        })
       lastFolder = foundFolder
     } catch (err) {
       // Folder couldn't be found. Create it.
       const parentFolderId = lastFolder && lastFolder._id
-      const {
-        folder: newFolder,
-        parentFolderId: newParentFolderId,
-      } = await addFolder(projectId, parentFolderId, folderName)
+      const { folder: newFolder, parentFolderId: newParentFolderId } =
+        await addFolder(projectId, parentFolderId, folderName)
       newFolder.parentFolder_id = newParentFolderId
       lastFolder = newFolder
       newFolders.push(newFolder)
@@ -285,23 +282,19 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
     projectId,
     { rootFolder: true, name: true, overleaf: true }
   )
-  const {
-    element: entity,
-    path: entityPath,
-  } = await ProjectLocator.promises.findElement({
-    project,
-    element_id: entityId,
-    type: entityType,
-  })
+  const { element: entity, path: entityPath } =
+    await ProjectLocator.promises.findElement({
+      project,
+      element_id: entityId,
+      type: entityType,
+    })
   // Prevent top-level docs/files with reserved names (to match v1 behaviour)
   if (_blockedFilename(entityPath, entityType)) {
     throw new Errors.InvalidNameError('blocked element name')
   }
   await _checkValidMove(project, entityType, entity, entityPath, destFolderId)
-  const {
-    docs: oldDocs,
-    files: oldFiles,
-  } = ProjectEntityHandler.getAllEntitiesFromProject(project)
+  const { docs: oldDocs, files: oldFiles } =
+    ProjectEntityHandler.getAllEntitiesFromProject(project)
   // For safety, insert the entity in the destination
   // location first, and then remove the original.  If
   // there is an error the entity may appear twice. This
@@ -328,10 +321,8 @@ async function moveEntity(projectId, entityId, destFolderId, entityType) {
     entityPath.mongo,
     entityId
   )
-  const {
-    docs: newDocs,
-    files: newFiles,
-  } = ProjectEntityHandler.getAllEntitiesFromProject(newProject)
+  const { docs: newDocs, files: newFiles } =
+    ProjectEntityHandler.getAllEntitiesFromProject(newProject)
   const startPath = entityPath.fileSystem
   const endPath = result.path.fileSystem
   const changes = {
@@ -418,10 +409,8 @@ async function renameEntity(
   // check if the new name already exists in the current folder
   _checkValidElementName(parentFolder, newName)
 
-  const {
-    docs: oldDocs,
-    files: oldFiles,
-  } = ProjectEntityHandler.getAllEntitiesFromProject(project)
+  const { docs: oldDocs, files: oldFiles } =
+    ProjectEntityHandler.getAllEntitiesFromProject(project)
 
   // we need to increment the project version number for any structure change
   const newProject = await Project.findOneAndUpdate(
@@ -430,10 +419,8 @@ async function renameEntity(
     { new: true }
   ).exec()
 
-  const {
-    docs: newDocs,
-    files: newFiles,
-  } = ProjectEntityHandler.getAllEntitiesFromProject(newProject)
+  const { docs: newDocs, files: newFiles } =
+    ProjectEntityHandler.getAllEntitiesFromProject(newProject)
   return {
     project,
     startPath,
@@ -618,14 +605,12 @@ async function _checkValidMove(
   entityPath,
   destFolderId
 ) {
-  const {
-    element: destEntity,
-    path: destFolderPath,
-  } = await ProjectLocator.promises.findElement({
-    project,
-    element_id: destFolderId,
-    type: 'folder',
-  })
+  const { element: destEntity, path: destFolderPath } =
+    await ProjectLocator.promises.findElement({
+      project,
+      element_id: destFolderId,
+      type: 'folder',
+    })
   // check if there is already a doc/file/folder with the same name
   // in the destination folder
   _checkValidElementName(destEntity, entity.name)

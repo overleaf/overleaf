@@ -10,12 +10,8 @@ export default function useDetachAction(
   senderRole,
   targetRole
 ) {
-  const {
-    role,
-    broadcastEvent,
-    addEventHandler,
-    deleteEventHandler,
-  } = useDetachContext()
+  const { role, broadcastEvent, addEventHandler, deleteEventHandler } =
+    useDetachContext()
 
   const eventName = `action-${actionName}`
 

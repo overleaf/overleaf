@@ -16,10 +16,8 @@ import ErrorMessage from '../error-message'
 export default function FileTreeImportFromProject() {
   const { t } = useTranslation()
 
-  const {
-    hasLinkedProjectFileFeature,
-    hasLinkedProjectOutputFileFeature,
-  } = window.ExposedSettings
+  const { hasLinkedProjectFileFeature, hasLinkedProjectOutputFileFeature } =
+    window.ExposedSettings
   const canSwitchOutputFilesMode =
     hasLinkedProjectFileFeature && hasLinkedProjectOutputFileFeature
 

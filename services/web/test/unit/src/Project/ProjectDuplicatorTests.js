@@ -204,13 +204,13 @@ describe('ProjectDuplicator', function () {
         '../../models/Doc': { Doc: this.Doc },
         '../../models/File': { File: this.File },
         '../Docstore/DocstoreManager': this.DocstoreManager,
-        '../DocumentUpdater/DocumentUpdaterHandler': this
-          .DocumentUpdaterHandler,
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          this.DocumentUpdaterHandler,
         '../FileStore/FileStoreHandler': this.FileStoreHandler,
         './ProjectCreationHandler': this.ProjectCreationHandler,
         './ProjectDeleter': this.ProjectDeleter,
-        './ProjectEntityMongoUpdateHandler': this
-          .ProjectEntityMongoUpdateHandler,
+        './ProjectEntityMongoUpdateHandler':
+          this.ProjectEntityMongoUpdateHandler,
         './ProjectEntityUpdateHandler': this.ProjectEntityUpdateHandler,
         './ProjectGetter': this.ProjectGetter,
         './ProjectLocator': this.ProjectLocator,

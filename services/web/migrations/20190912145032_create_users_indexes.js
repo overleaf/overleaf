@@ -48,8 +48,7 @@ const indexes = [
       'thirdPartyIdentifiers.externalUserId': 1,
       'thirdPartyIdentifiers.providerId': 1,
     },
-    name:
-      'thirdPartyIdentifiers.externalUserId_1_thirdPartyIdentifiers.providerId_1',
+    name: 'thirdPartyIdentifiers.externalUserId_1_thirdPartyIdentifiers.providerId_1',
     sparse: true,
   },
   {

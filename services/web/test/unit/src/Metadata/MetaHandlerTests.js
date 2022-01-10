@@ -54,8 +54,8 @@ describe('MetaHandler', function () {
     return (this.MetaHandler = SandboxedModule.require(modulePath, {
       requires: {
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
-        '../DocumentUpdater/DocumentUpdaterHandler': this
-          .DocumentUpdaterHandler,
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          this.DocumentUpdaterHandler,
         './packageMapping': this.packageMapping,
       },
     }))

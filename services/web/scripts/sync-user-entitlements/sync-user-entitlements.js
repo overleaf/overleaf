@@ -3,8 +3,8 @@
 const fs = require('fs')
 const minimist = require('minimist')
 
-const InstitutionsAPI = require('../../app/src/Features/Institutions/InstitutionsAPI')
-  .promises
+const InstitutionsAPI =
+  require('../../app/src/Features/Institutions/InstitutionsAPI').promises
 
 const argv = minimist(process.argv.slice(2))
 const commit = argv.commit !== undefined
@@ -175,12 +175,8 @@ function loadCachedEntitlements(cachedEntitlementsFilename) {
 
   for (const cachedEntitlementLine of cachedEntitlementsData) {
     // this is safe because comma is not an allowed value for any column
-    const [
-      userId,
-      email,
-      hasEntitlement,
-      providerId,
-    ] = cachedEntitlementLine.split(',')
+    const [userId, email, hasEntitlement, providerId] =
+      cachedEntitlementLine.split(',')
     let hasEntitlementBoolean
     if (ignoreNulls) {
       hasEntitlementBoolean = hasEntitlement === 't'

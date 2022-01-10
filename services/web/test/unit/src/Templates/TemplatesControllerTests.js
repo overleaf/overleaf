@@ -24,9 +24,10 @@ describe('TemplatesController', function () {
     this.TemplatesController = SandboxedModule.require(modulePath, {
       requires: {
         '../Project/ProjectHelper': ProjectHelper,
-        '../Authentication/AuthenticationController': (this.AuthenticationController = {
-          getLoggedInUserId: sinon.stub().returns(this.user_id),
-        }),
+        '../Authentication/AuthenticationController':
+          (this.AuthenticationController = {
+            getLoggedInUserId: sinon.stub().returns(this.user_id),
+          }),
         './TemplatesManager': (this.TemplatesManager = {
           createProjectFromV1Template: sinon.stub(),
         }),

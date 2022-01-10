@@ -127,13 +127,11 @@ describe('FeaturesUpdater', function () {
 
   describe('refreshFeatures', function () {
     it('should return features and featuresChanged', async function () {
-      const {
-        features,
-        featuresChanged,
-      } = await this.FeaturesUpdater.promises.refreshFeatures(
-        this.user._id,
-        'test'
-      )
+      const { features, featuresChanged } =
+        await this.FeaturesUpdater.promises.refreshFeatures(
+          this.user._id,
+          'test'
+        )
       expect(features).to.exist
       expect(featuresChanged).to.exist
     })

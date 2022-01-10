@@ -25,11 +25,12 @@ async function _userAlreadyHasHigherPrivilege(
   if (!Object.values(TokenAccessHandler.TOKEN_TYPES).includes(tokenType)) {
     throw new Error('bad token type')
   }
-  const privilegeLevel = await AuthorizationManager.promises.getPrivilegeLevelForProject(
-    userId,
-    projectId,
-    token
-  )
+  const privilegeLevel =
+    await AuthorizationManager.promises.getPrivilegeLevelForProject(
+      userId,
+      projectId,
+      token
+    )
   return (
     orderedPrivilegeLevels.indexOf(privilegeLevel) >=
     orderedPrivilegeLevels.indexOf(tokenType)
@@ -84,9 +85,8 @@ async function tokenAccessPage(req, res, next) {
   }
   try {
     if (TokenAccessHandler.isReadOnlyToken(token)) {
-      const docPublishedInfo = await TokenAccessHandler.promises.getV1DocPublishedInfo(
-        token
-      )
+      const docPublishedInfo =
+        await TokenAccessHandler.promises.getV1DocPublishedInfo(token)
       if (docPublishedInfo.allow === false) {
         return res.redirect(302, docPublishedInfo.published_path)
       }
@@ -135,9 +135,8 @@ async function checkAndGetProjectOrResponseAction(
 
   const projectId = project._id
   const isAnonymousUser = !userId
-  const tokenAccessEnabled = TokenAccessHandler.tokenAccessEnabledForProject(
-    project
-  )
+  const tokenAccessEnabled =
+    TokenAccessHandler.tokenAccessEnabledForProject(project)
   if (isAnonymousUser && tokenAccessEnabled) {
     if (tokenType === TokenAccessHandler.TOKEN_TYPES.READ_AND_WRITE) {
       if (TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED) {
@@ -260,9 +259,8 @@ async function grantTokenAccessReadOnly(req, res, next) {
     return res.sendStatus(400)
   }
   const tokenType = TokenAccessHandler.TOKEN_TYPES.READ_ONLY
-  const docPublishedInfo = await TokenAccessHandler.promises.getV1DocPublishedInfo(
-    token
-  )
+  const docPublishedInfo =
+    await TokenAccessHandler.promises.getV1DocPublishedInfo(token)
   if (docPublishedInfo.allow === false) {
     return res.json({ redirect: docPublishedInfo.published_path })
   }

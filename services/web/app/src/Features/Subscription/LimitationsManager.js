@@ -197,9 +197,8 @@ const LimitationsManager = {
           return callback(new Error('no subscription found'))
         }
 
-        const limitReached = LimitationsManager.teamHasReachedMemberLimit(
-          subscription
-        )
+        const limitReached =
+          LimitationsManager.teamHasReachedMemberLimit(subscription)
         callback(err, limitReached, subscription)
       }
     )

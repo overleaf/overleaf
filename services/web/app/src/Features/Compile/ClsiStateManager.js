@@ -38,9 +38,8 @@ const buildState = s =>
 
 module.exports = ClsiStateManager = {
   computeHash(project, options) {
-    const { docs, files } = ProjectEntityHandler.getAllEntitiesFromProject(
-      project
-    )
+    const { docs, files } =
+      ProjectEntityHandler.getAllEntitiesFromProject(project)
     const fileList = Array.from(files || []).map(
       f => `${f.file._id}:${f.file.rev}:${f.file.created}:${f.path}`
     )

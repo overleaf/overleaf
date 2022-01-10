@@ -154,8 +154,8 @@ describe('ProjectEntityUpdateHandler', function () {
         fs: this.fs,
         '../../models/Doc': { Doc: this.DocModel },
         '../Docstore/DocstoreManager': this.DocstoreManager,
-        '../../Features/DocumentUpdater/DocumentUpdaterHandler': this
-          .DocumentUpdaterHandler,
+        '../../Features/DocumentUpdater/DocumentUpdaterHandler':
+          this.DocumentUpdaterHandler,
         '../../models/File': { File: this.FileModel },
         '../FileStore/FileStoreHandler': this.FileStoreHandler,
         '../../infrastructure/LockManager': this.LockManager,
@@ -164,8 +164,8 @@ describe('ProjectEntityUpdateHandler', function () {
         './ProjectLocator': this.ProjectLocator,
         './ProjectUpdateHandler': this.ProjectUpdater,
         './ProjectEntityHandler': this.ProjectEntityHandler,
-        './ProjectEntityMongoUpdateHandler': this
-          .ProjectEntityMongoUpdateHandler,
+        './ProjectEntityMongoUpdateHandler':
+          this.ProjectEntityMongoUpdateHandler,
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../../infrastructure/FileWriter': this.FileWriter,

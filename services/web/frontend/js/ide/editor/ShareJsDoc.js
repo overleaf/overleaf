@@ -335,10 +335,8 @@ export default ShareJsDoc = (function () {
       // end-to-end check for edits -> acks, for this very ShareJsdoc
       // This will catch a broken connection and missing UX-blocker for the
       //  user, allowing them to keep editing.
-      this._detachEditorWatchdogManager = this.EditorWatchdogManager.attachToEditor(
-        editorName,
-        editor
-      )
+      this._detachEditorWatchdogManager =
+        this.EditorWatchdogManager.attachToEditor(editorName, editor)
     }
 
     _attachToEditor(editorName, editor, attachToShareJs) {

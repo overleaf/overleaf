@@ -89,10 +89,8 @@ class TrackChangesAdapter {
     if (this.changeIdToMarkerIdMap[change.id] == null) {
       return
     }
-    const {
-      background_marker_id,
-      callout_marker_id,
-    } = this.changeIdToMarkerIdMap[change.id]
+    const { background_marker_id, callout_marker_id } =
+      this.changeIdToMarkerIdMap[change.id]
     delete this.changeIdToMarkerIdMap[change.id]
     const session = this.editor.getSession()
     session.removeMarker(background_marker_id)
@@ -103,10 +101,8 @@ class TrackChangesAdapter {
     if (this.changeIdToMarkerIdMap[change.id] == null) {
       return
     }
-    const {
-      background_marker_id,
-      callout_marker_id,
-    } = this.changeIdToMarkerIdMap[change.id]
+    const { background_marker_id, callout_marker_id } =
+      this.changeIdToMarkerIdMap[change.id]
     delete this.changeIdToMarkerIdMap[change.id]
 
     const session = this.editor.getSession()
@@ -166,10 +162,8 @@ class TrackChangesAdapter {
   onCommentRemoved(comment) {
     if (this.changeIdToMarkerIdMap[comment.id] != null) {
       // Resolved comments may not have marker ids
-      const {
-        background_marker_id,
-        callout_marker_id,
-      } = this.changeIdToMarkerIdMap[comment.id]
+      const { background_marker_id, callout_marker_id } =
+        this.changeIdToMarkerIdMap[comment.id]
       delete this.changeIdToMarkerIdMap[comment.id]
       const session = this.editor.getSession()
       session.removeMarker(background_marker_id)
@@ -183,10 +177,8 @@ class TrackChangesAdapter {
     }
     const session = this.editor.getSession()
     const markers = session.getMarkers()
-    const {
-      background_marker_id,
-      callout_marker_id,
-    } = this.changeIdToMarkerIdMap[change_id]
+    const { background_marker_id, callout_marker_id } =
+      this.changeIdToMarkerIdMap[change_id]
     if (background_marker_id != null && markers[background_marker_id] != null) {
       const background_marker = markers[background_marker_id]
       background_marker.range.start = start

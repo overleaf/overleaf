@@ -41,7 +41,8 @@ export default App.controller(
 
     const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000
     const LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
-    const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\ ".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA -Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    const EMAIL_REGEX =
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\ ".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA -Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
     const _matchLocalAndDomain = function (userEmailInput) {
       const match = userEmailInput
@@ -84,9 +85,10 @@ export default App.controller(
       $scope.ui.isBlacklistedEmail = false
       $scope.ui.showManualUniversitySelectionUI = false
       if (userInputLocalAndDomain.domain) {
-        $scope.ui.isBlacklistedEmail = UserAffiliationsDataService.isDomainBlacklisted(
-          userInputLocalAndDomain.domain
-        )
+        $scope.ui.isBlacklistedEmail =
+          UserAffiliationsDataService.isDomainBlacklisted(
+            userInputLocalAndDomain.domain
+          )
         return UserAffiliationsDataService.getUniversityDomainFromPartialDomainInput(
           userInputLocalAndDomain.domain
         )
@@ -100,9 +102,8 @@ export default App.controller(
             ) {
               $scope.newAffiliation.university = universityDomain.university
               $scope.newAffiliation.department = universityDomain.department
-              $scope.newAffiliation.ssoAvailable = _ssoAvailableForDomain(
-                universityDomain
-              )
+              $scope.newAffiliation.ssoAvailable =
+                _ssoAvailableForDomain(universityDomain)
             } else {
               _resetAffiliationSuggestion()
             }
@@ -175,13 +176,14 @@ export default App.controller(
         )
       } else {
         if ($scope.newAffiliation.university.isUserSuggested) {
-          addEmailPromise = UserAffiliationsDataService.addUserAffiliationWithUnknownUniversity(
-            $scope.newAffiliation.email,
-            $scope.newAffiliation.university.name,
-            $scope.newAffiliation.country.code,
-            $scope.newAffiliation.role,
-            $scope.newAffiliation.department
-          )
+          addEmailPromise =
+            UserAffiliationsDataService.addUserAffiliationWithUnknownUniversity(
+              $scope.newAffiliation.email,
+              $scope.newAffiliation.university.name,
+              $scope.newAffiliation.country.code,
+              $scope.newAffiliation.role,
+              $scope.newAffiliation.department
+            )
         } else {
           addEmailPromise = UserAffiliationsDataService.addUserAffiliation(
             $scope.newAffiliation.email,

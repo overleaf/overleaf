@@ -62,7 +62,8 @@ describe('CollaboratorsInviteHandler', function () {
         }),
         '../User/UserGetter': (this.UserGetter = { getUser: sinon.stub() }),
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
-        '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {}),
+        '../Notifications/NotificationsBuilder': (this.NotificationsBuilder =
+          {}),
         crypto: this.Crypto,
       },
     })
@@ -368,9 +369,8 @@ describe('CollaboratorsInviteHandler', function () {
 
     describe('when _trySendInviteNotification produces an error', function () {
       beforeEach(function () {
-        return (this.CollaboratorsInviteHandler._trySendInviteNotification = sinon
-          .stub()
-          .callsArgWith(3, new Error('woops')))
+        return (this.CollaboratorsInviteHandler._trySendInviteNotification =
+          sinon.stub().callsArgWith(3, new Error('woops')))
       })
 
       it('should produce an error', function (done) {

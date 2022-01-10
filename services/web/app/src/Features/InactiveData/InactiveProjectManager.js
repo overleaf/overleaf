@@ -78,16 +78,21 @@ module.exports = InactiveProjectManager = {
         if (err != null) {
           logger.err({ err }, 'could not get projects for deactivating')
         }
-        const jobs = _.map(projects, project => cb =>
-          InactiveProjectManager.deactivateProject(project._id, function (err) {
-            if (err) {
-              logger.err(
-                { project_id: project._id, err: err },
-                'unable to deactivate project'
-              )
-            }
-            cb()
-          })
+        const jobs = _.map(
+          projects,
+          project => cb =>
+            InactiveProjectManager.deactivateProject(
+              project._id,
+              function (err) {
+                if (err) {
+                  logger.err(
+                    { project_id: project._id, err: err },
+                    'unable to deactivate project'
+                  )
+                }
+                cb()
+              }
+            )
         )
         logger.log(
           { numberOfProjects: projects && projects.length },

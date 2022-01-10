@@ -63,8 +63,8 @@ describe('UserPagesController', function () {
         './UserGetter': this.UserGetter,
         './UserSessionsManager': this.UserSessionsManager,
         '../Errors/ErrorController': this.ErrorController,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/AuthenticationController':
+          this.AuthenticationController,
         '../Authentication/SessionManager': this.SessionManager,
         request: (this.request = sinon.stub()),
       },

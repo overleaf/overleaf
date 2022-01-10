@@ -120,8 +120,7 @@ describe('fetchJSON', function () {
       headers: {
         'Content-Type': 'text/html',
       },
-      body:
-        '<!doctype html><html lang="en"><body><p>lorem ipsum</p></body></html>',
+      body: '<!doctype html><html lang="en"><body><p>lorem ipsum</p></body></html>',
     })
 
     const promise = getJSON('/test')

@@ -98,23 +98,22 @@ export const mockCreateFileModalFetch = fetchMock =>
       return 204
     })
 
-export const createFileModalDecorator = (
-  contextProps = {},
-  createMode = 'doc'
+export const createFileModalDecorator =
+  (contextProps = {}, createMode = 'doc') =>
   // eslint-disable-next-line react/display-name
-) => Story => {
-  return (
-    <FileTreeContext {...defaultContextProps} {...contextProps}>
-      <FileTreeCreateNameProvider>
-        <FileTreeCreateFormProvider>
-          <OpenCreateFileModal createMode={createMode}>
-            <Story />
-          </OpenCreateFileModal>
-        </FileTreeCreateFormProvider>
-      </FileTreeCreateNameProvider>
-    </FileTreeContext>
-  )
-}
+  Story => {
+    return (
+      <FileTreeContext {...defaultContextProps} {...contextProps}>
+        <FileTreeCreateNameProvider>
+          <FileTreeCreateFormProvider>
+            <OpenCreateFileModal createMode={createMode}>
+              <Story />
+            </OpenCreateFileModal>
+          </FileTreeCreateFormProvider>
+        </FileTreeCreateNameProvider>
+      </FileTreeContext>
+    )
+  }
 
 function OpenCreateFileModal({ children, createMode }) {
   const { startCreatingFile } = useFileTreeActionable()

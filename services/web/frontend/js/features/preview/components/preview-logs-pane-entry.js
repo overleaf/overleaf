@@ -58,14 +58,10 @@ function PreviewLogEntryContent({
   formattedContent,
   extraInfoURL,
 }) {
-  const {
-    isExpanded,
-    needsExpandCollapse,
-    expandableProps,
-    toggleProps,
-  } = useExpandCollapse({
-    collapsedSize: 150,
-  })
+  const { isExpanded, needsExpandCollapse, expandableProps, toggleProps } =
+    useExpandCollapse({
+      collapsedSize: 150,
+    })
 
   const buttonContainerClasses = classNames(
     'log-entry-content-button-container',

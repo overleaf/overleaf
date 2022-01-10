@@ -426,7 +426,8 @@ Something went wrong connecting to your project. Please refresh if this continue
                 this.joinProjectRetryInterval <
                 this.JOIN_PROJECT_MAX_RETRY_INTERVAL
               ) {
-                this.joinProjectRetryInterval += this.JOIN_PROJECT_RETRY_INTERVAL
+                this.joinProjectRetryInterval +=
+                  this.JOIN_PROJECT_RETRY_INTERVAL
               }
               return
             } else {

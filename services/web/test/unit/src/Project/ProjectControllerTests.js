@@ -184,8 +184,8 @@ describe('ProjectController', function () {
         '../Subscription/FeaturesUpdater': this.FeaturesUpdater,
         '../Notifications/NotificationsBuilder': this.NotificationBuilder,
         '../User/UserGetter': this.UserGetter,
-        '../BrandVariations/BrandVariationsHandler': this
-          .BrandVariationsHandler,
+        '../BrandVariations/BrandVariationsHandler':
+          this.BrandVariationsHandler,
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../../models/Project': {},
         '../Analytics/AnalyticsManager': { recordEventForUser: () => {} },

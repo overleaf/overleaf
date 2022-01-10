@@ -32,8 +32,8 @@ describe('ProjectEntityHandler', function () {
     this.ProjectEntityHandler = SandboxedModule.require(modulePath, {
       requires: {
         '../Docstore/DocstoreManager': (this.DocstoreManager = {}),
-        '../../Features/DocumentUpdater/DocumentUpdaterHandler': this
-          .DocumentUpdaterHandler,
+        '../../Features/DocumentUpdater/DocumentUpdaterHandler':
+          this.DocumentUpdaterHandler,
         '../../models/Project': {
           Project: this.ProjectModel,
         },

@@ -6,6 +6,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import App from '../../../base'
-export default App.filter('notEmpty', () => object =>
-  !angular.equals({}, object)
+export default App.filter(
+  'notEmpty',
+  () => object => !angular.equals({}, object)
 )

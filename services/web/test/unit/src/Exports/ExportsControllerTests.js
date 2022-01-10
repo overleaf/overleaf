@@ -65,8 +65,8 @@ describe('ExportsController', function () {
     return (this.controller = SandboxedModule.require(modulePath, {
       requires: {
         './ExportsHandler': this.handler,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/AuthenticationController':
+          this.AuthenticationController,
       },
     }))
   })

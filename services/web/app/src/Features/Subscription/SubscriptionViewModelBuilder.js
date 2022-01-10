@@ -21,9 +21,8 @@ async function getRedirectToHostedPage(userId, pageType) {
   if (!['billing-details', 'account-management'].includes(pageType)) {
     throw new InvalidError('unexpected page type')
   }
-  const personalSubscription = await SubscriptionLocator.promises.getUsersSubscription(
-    userId
-  )
+  const personalSubscription =
+    await SubscriptionLocator.promises.getUsersSubscription(userId)
   const recurlySubscriptionId = personalSubscription?.recurlySubscription_id
   if (!recurlySubscriptionId) {
     throw new NotFoundError('not a recurly subscription')
@@ -253,23 +252,27 @@ function buildUsersSubscriptionViewModel(user, callback) {
           const pendingSubscriptionTax =
             personalSubscription.recurly.taxRate *
             recurlySubscription.pending_subscription.unit_amount_in_cents
-          personalSubscription.recurly.price = SubscriptionFormatters.formatPrice(
-            recurlySubscription.pending_subscription.unit_amount_in_cents +
-              pendingAddOnPrice +
-              pendingAddOnTax +
-              pendingSubscriptionTax,
-            recurlySubscription.currency
-          )
+          personalSubscription.recurly.price =
+            SubscriptionFormatters.formatPrice(
+              recurlySubscription.pending_subscription.unit_amount_in_cents +
+                pendingAddOnPrice +
+                pendingAddOnTax +
+                pendingSubscriptionTax,
+              recurlySubscription.currency
+            )
           const pendingTotalLicenses =
             (pendingPlan.membersLimit || 0) + pendingAdditionalLicenses
-          personalSubscription.recurly.pendingAdditionalLicenses = pendingAdditionalLicenses
-          personalSubscription.recurly.pendingTotalLicenses = pendingTotalLicenses
+          personalSubscription.recurly.pendingAdditionalLicenses =
+            pendingAdditionalLicenses
+          personalSubscription.recurly.pendingTotalLicenses =
+            pendingTotalLicenses
           personalSubscription.pendingPlan = pendingPlan
         } else {
-          personalSubscription.recurly.price = SubscriptionFormatters.formatPrice(
-            recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
-            recurlySubscription.currency
-          )
+          personalSubscription.recurly.price =
+            SubscriptionFormatters.formatPrice(
+              recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
+              recurlySubscription.currency
+            )
         }
       }
 

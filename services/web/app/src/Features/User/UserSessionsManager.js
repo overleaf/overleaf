@@ -217,19 +217,20 @@ const UserSessionsManager = {
         return callback(err)
       }
       Async.series(
-        sessionKeys.map(key => next =>
-          rclient.get(key, function (err, val) {
-            if (err) {
-              return next(err)
-            }
-            if (!val) {
-              rclient.srem(sessionSetKey, key, function (err, result) {
+        sessionKeys.map(
+          key => next =>
+            rclient.get(key, function (err, val) {
+              if (err) {
                 return next(err)
-              })
-            } else {
-              next()
-            }
-          })
+              }
+              if (!val) {
+                rclient.srem(sessionSetKey, key, function (err, result) {
+                  return next(err)
+                })
+              } else {
+                next()
+              }
+            })
         ),
         function (err, results) {
           callback(err)

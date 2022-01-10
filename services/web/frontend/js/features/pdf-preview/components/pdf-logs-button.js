@@ -5,13 +5,8 @@ import { sendMBOnce } from '../../../infrastructure/event-tracking'
 import { useCompileContext } from '../../../shared/context/compile-context'
 
 function PdfLogsButton() {
-  const {
-    codeCheckFailed,
-    error,
-    logEntries,
-    showLogs,
-    setShowLogs,
-  } = useCompileContext()
+  const { codeCheckFailed, error, logEntries, showLogs, setShowLogs } =
+    useCompileContext()
 
   const buttonStyle = useMemo(() => {
     if (showLogs) {

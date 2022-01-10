@@ -563,10 +563,11 @@ describe('ProjectInviteTests', function () {
                           throw err
                         }
                         this.secondInvite = invite
-                        this.secondLink = CollaboratorsEmailHandler._buildInviteUrl(
-                          this.fakeProject,
-                          invite
-                        )
+                        this.secondLink =
+                          CollaboratorsEmailHandler._buildInviteUrl(
+                            this.fakeProject,
+                            invite
+                          )
                         cb()
                       }
                     )

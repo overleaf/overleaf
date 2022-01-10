@@ -98,11 +98,12 @@ describe('AuthorizationManager', function () {
           this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel
             .withArgs(this.user._id, this.project._id)
             .resolves(PrivilegeLevels.READ_ONLY)
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            this.user._id,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              this.user._id,
+              this.project._id,
+              this.token
+            )
         })
 
         it("should return the user's privilege level", function () {
@@ -112,11 +113,12 @@ describe('AuthorizationManager', function () {
 
       describe('with a user id with no privilege level', function () {
         beforeEach(async function () {
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            this.user._id,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              this.user._id,
+              this.project._id,
+              this.token
+            )
         })
 
         it('should return false', function () {
@@ -127,11 +129,12 @@ describe('AuthorizationManager', function () {
       describe('with a user id who is an admin', function () {
         beforeEach(async function () {
           this.user.isAdmin = true
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            this.user._id,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              this.user._id,
+              this.project._id,
+              this.token
+            )
         })
 
         it('should return the user as an owner', function () {
@@ -142,11 +145,12 @@ describe('AuthorizationManager', function () {
       describe('with no user (anonymous)', function () {
         describe('when the token is not valid', function () {
           beforeEach(async function () {
-            this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              null,
-              this.project._id,
-              this.token
-            )
+            this.result =
+              await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+                null,
+                this.project._id,
+                this.token
+              )
           })
 
           it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function () {
@@ -169,15 +173,17 @@ describe('AuthorizationManager', function () {
 
         describe('when the token is valid for read-and-write', function () {
           beforeEach(async function () {
-            this.TokenAccessHandler.promises.validateTokenForAnonymousAccess = sinon
-              .stub()
-              .withArgs(this.project._id, this.token)
-              .resolves({ isValidReadAndWrite: true, isValidReadOnly: false })
-            this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              null,
-              this.project._id,
-              this.token
-            )
+            this.TokenAccessHandler.promises.validateTokenForAnonymousAccess =
+              sinon
+                .stub()
+                .withArgs(this.project._id, this.token)
+                .resolves({ isValidReadAndWrite: true, isValidReadOnly: false })
+            this.result =
+              await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+                null,
+                this.project._id,
+                this.token
+              )
           })
 
           it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function () {
@@ -200,15 +206,17 @@ describe('AuthorizationManager', function () {
 
         describe('when the token is valid for read-only', function () {
           beforeEach(async function () {
-            this.TokenAccessHandler.promises.validateTokenForAnonymousAccess = sinon
-              .stub()
-              .withArgs(this.project._id, this.token)
-              .resolves({ isValidReadAndWrite: false, isValidReadOnly: true })
-            this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              null,
-              this.project._id,
-              this.token
-            )
+            this.TokenAccessHandler.promises.validateTokenForAnonymousAccess =
+              sinon
+                .stub()
+                .withArgs(this.project._id, this.token)
+                .resolves({ isValidReadAndWrite: false, isValidReadOnly: true })
+            this.result =
+              await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+                null,
+                this.project._id,
+                this.token
+              )
           })
 
           it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function () {
@@ -241,11 +249,12 @@ describe('AuthorizationManager', function () {
           this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel
             .withArgs(this.user._id, this.project._id)
             .resolves(PrivilegeLevels.READ_ONLY)
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            this.user._id,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              this.user._id,
+              this.project._id,
+              this.token
+            )
         })
 
         it("should return the user's privilege level", function () {
@@ -255,11 +264,12 @@ describe('AuthorizationManager', function () {
 
       describe('with a user id with no privilege level', function () {
         beforeEach(async function () {
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            this.user._id,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              this.user._id,
+              this.project._id,
+              this.token
+            )
         })
 
         it('should return false', function () {
@@ -270,11 +280,12 @@ describe('AuthorizationManager', function () {
       describe('with a user id who is an admin', function () {
         beforeEach(async function () {
           this.user.isAdmin = true
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            this.user._id,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              this.user._id,
+              this.project._id,
+              this.token
+            )
         })
 
         it('should return the user as an owner', function () {
@@ -284,11 +295,12 @@ describe('AuthorizationManager', function () {
 
       describe('with no user (anonymous)', function () {
         beforeEach(async function () {
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            null,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              null,
+              this.project._id,
+              this.token
+            )
         })
 
         it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function () {
@@ -313,11 +325,12 @@ describe('AuthorizationManager', function () {
           this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel
             .withArgs(this.user._id, this.project._id)
             .resolves(PrivilegeLevels.READ_ONLY)
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            this.user._id,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              this.user._id,
+              this.project._id,
+              this.token
+            )
         })
 
         it("should return the user's privilege level", function () {
@@ -327,11 +340,12 @@ describe('AuthorizationManager', function () {
 
       describe('with a user id with no privilege level', function () {
         beforeEach(async function () {
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            this.user._id,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              this.user._id,
+              this.project._id,
+              this.token
+            )
         })
 
         it('should return the public privilege level', function () {
@@ -342,11 +356,12 @@ describe('AuthorizationManager', function () {
       describe('with a user id who is an admin', function () {
         beforeEach(async function () {
           this.user.isAdmin = true
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            this.user._id,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              this.user._id,
+              this.project._id,
+              this.token
+            )
         })
 
         it('should return the user as an owner', function () {
@@ -356,11 +371,12 @@ describe('AuthorizationManager', function () {
 
       describe('with no user (anonymous)', function () {
         beforeEach(async function () {
-          this.result = await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            null,
-            this.project._id,
-            this.token
-          )
+          this.result =
+            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              null,
+              this.project._id,
+              this.token
+            )
         })
 
         it('should not call CollaboratorsGetter.getMemberIdPrivilegeLevel', function () {
@@ -447,18 +463,20 @@ describe('AuthorizationManager', function () {
       })
 
       it('should return true', async function () {
-        const isAdmin = await this.AuthorizationManager.promises.isUserSiteAdmin(
-          this.user._id
-        )
+        const isAdmin =
+          await this.AuthorizationManager.promises.isUserSiteAdmin(
+            this.user._id
+          )
         expect(isAdmin).to.equal(true)
       })
     })
 
     describe('when user is not admin', function () {
       it('should return false', async function () {
-        const isAdmin = await this.AuthorizationManager.promises.isUserSiteAdmin(
-          this.user._id
-        )
+        const isAdmin =
+          await this.AuthorizationManager.promises.isUserSiteAdmin(
+            this.user._id
+          )
         expect(isAdmin).to.equal(false)
       })
     })
@@ -466,18 +484,16 @@ describe('AuthorizationManager', function () {
     describe('when user is not found', function () {
       it('should return false', async function () {
         const someOtherId = new ObjectId()
-        const isAdmin = await this.AuthorizationManager.promises.isUserSiteAdmin(
-          someOtherId
-        )
+        const isAdmin =
+          await this.AuthorizationManager.promises.isUserSiteAdmin(someOtherId)
         expect(isAdmin).to.equal(false)
       })
     })
 
     describe('when no user is passed', function () {
       it('should return false', async function () {
-        const isAdmin = await this.AuthorizationManager.promises.isUserSiteAdmin(
-          null
-        )
+        const isAdmin =
+          await this.AuthorizationManager.promises.isUserSiteAdmin(null)
         expect(isAdmin).to.equal(false)
       })
     })

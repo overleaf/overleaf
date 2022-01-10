@@ -7,8 +7,8 @@ const path = require('path')
 const request = require('request-promise-native')
 const settings = require('@overleaf/settings')
 
-const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
-  .promises
+const CollaboratorsGetter =
+  require('../Collaborators/CollaboratorsGetter').promises
 const UserGetter = require('../User/UserGetter.js').promises
 
 const tpdsUrl = _.get(settings, ['apis', 'thirdPartyDataStore', 'url'])
@@ -149,10 +149,8 @@ async function enqueue(group, method, job) {
 async function getProjectUsersIds(projectId) {
   // get list of all user ids with access to project. project owner
   // will always be the first entry in the list.
-  const [
-    ownerUserId,
-    ...invitedUserIds
-  ] = await CollaboratorsGetter.getInvitedMemberIds(projectId)
+  const [ownerUserId, ...invitedUserIds] =
+    await CollaboratorsGetter.getInvitedMemberIds(projectId)
   // if there are no invited users, always return the owner
   if (!invitedUserIds.length) {
     return [ownerUserId]

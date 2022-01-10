@@ -132,42 +132,37 @@ async function isUserInvitedMemberOfProject(userId, projectId) {
 
 async function getProjectsUserIsMemberOf(userId, fields) {
   const limit = pLimit(2)
-  const [
-    readAndWrite,
-    readOnly,
-    tokenReadAndWrite,
-    tokenReadOnly,
-  ] = await Promise.all([
-    limit(() => Project.find({ collaberator_refs: userId }, fields).exec()),
-    limit(() => Project.find({ readOnly_refs: userId }, fields).exec()),
-    limit(() =>
-      Project.find(
-        {
-          tokenAccessReadAndWrite_refs: userId,
-          publicAccesLevel: PublicAccessLevels.TOKEN_BASED,
-        },
-        fields
-      ).exec()
-    ),
-    limit(() =>
-      Project.find(
-        {
-          tokenAccessReadOnly_refs: userId,
-          publicAccesLevel: PublicAccessLevels.TOKEN_BASED,
-        },
-        fields
-      ).exec()
-    ),
-  ])
+  const [readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly] =
+    await Promise.all([
+      limit(() => Project.find({ collaberator_refs: userId }, fields).exec()),
+      limit(() => Project.find({ readOnly_refs: userId }, fields).exec()),
+      limit(() =>
+        Project.find(
+          {
+            tokenAccessReadAndWrite_refs: userId,
+            publicAccesLevel: PublicAccessLevels.TOKEN_BASED,
+          },
+          fields
+        ).exec()
+      ),
+      limit(() =>
+        Project.find(
+          {
+            tokenAccessReadOnly_refs: userId,
+            publicAccesLevel: PublicAccessLevels.TOKEN_BASED,
+          },
+          fields
+        ).exec()
+      ),
+    ])
   return { readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly }
 }
 
 async function getAllInvitedMembers(projectId) {
   try {
     const rawMembers = await getInvitedMembersWithPrivilegeLevels(projectId)
-    const { members } = ProjectEditorHandler.buildOwnerAndMembersViews(
-      rawMembers
-    )
+    const { members } =
+      ProjectEditorHandler.buildOwnerAndMembersViews(rawMembers)
     return members
   } catch (err) {
     throw OError.tag(err, 'error getting members for project', { projectId })

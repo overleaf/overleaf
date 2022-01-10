@@ -496,10 +496,8 @@ class TrackChangesManager {
     for (const change of Array.from(this.rangesTracker.changes)) {
       if (this.adapter.changeIdToMarkerIdMap[change.id] != null) {
         ;({ op } = change)
-        ;({
-          background_marker_id,
-          callout_marker_id,
-        } = this.adapter.changeIdToMarkerIdMap[change.id])
+        ;({ background_marker_id, callout_marker_id } =
+          this.adapter.changeIdToMarkerIdMap[change.id])
         start = this.adapter.shareJsOffsetToRowColumn(op.p)
         if (op.i != null) {
           end = this.adapter.shareJsOffsetToRowColumn(op.p + op.i.length)
@@ -521,10 +519,8 @@ class TrackChangesManager {
 
     for (const comment of Array.from(this.rangesTracker.comments)) {
       if (this.adapter.changeIdToMarkerIdMap[comment.id] != null) {
-        ;({
-          background_marker_id,
-          callout_marker_id,
-        } = this.adapter.changeIdToMarkerIdMap[comment.id])
+        ;({ background_marker_id, callout_marker_id } =
+          this.adapter.changeIdToMarkerIdMap[comment.id])
         start = this.adapter.shareJsOffsetToRowColumn(comment.op.p)
         end = this.adapter.shareJsOffsetToRowColumn(
           comment.op.p + comment.op.c.length

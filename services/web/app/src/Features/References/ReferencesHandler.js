@@ -166,8 +166,9 @@ module.exports = ReferencesHandler = {
         'flushing docs to mongo before calling references service'
       )
       return Async.series(
-        docIds.map(docId => cb =>
-          DocumentUpdaterHandler.flushDocToMongo(projectId, docId, cb)
+        docIds.map(
+          docId => cb =>
+            DocumentUpdaterHandler.flushDocToMongo(projectId, docId, cb)
         ),
         function (err) {
           // continue

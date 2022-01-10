@@ -36,8 +36,8 @@ describe('SpellingController', function () {
           ],
           apis: { spelling: { host: SPELLING_HOST, url: SPELLING_URL } },
         },
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/AuthenticationController':
+          this.AuthenticationController,
       },
     })
     this.req = {

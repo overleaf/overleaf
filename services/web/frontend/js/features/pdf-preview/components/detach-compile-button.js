@@ -16,9 +16,10 @@ export function DetachCompileButton() {
     'detached'
   )
 
-  const handleStartCompile = useCallback(() => startOrTriggerCompile(), [
-    startOrTriggerCompile,
-  ])
+  const handleStartCompile = useCallback(
+    () => startOrTriggerCompile(),
+    [startOrTriggerCompile]
+  )
 
   return (
     <div

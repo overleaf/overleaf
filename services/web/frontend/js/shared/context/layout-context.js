@@ -66,9 +66,8 @@ export function LayoutProvider({ children }) {
   const [chatIsOpen, setChatIsOpen] = useScopeValue('ui.chatOpen')
 
   // whether the review pane is open
-  const [reviewPanelOpen, setReviewPanelOpen] = useScopeValue(
-    'ui.reviewPanelOpen'
-  )
+  const [reviewPanelOpen, setReviewPanelOpen] =
+    useScopeValue('ui.reviewPanelOpen')
 
   // whether the menu pane is open
   const [leftMenuShown, setLeftMenuShown] = useScopeValue('ui.leftMenuShown')

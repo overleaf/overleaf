@@ -11,13 +11,8 @@ const LINKING_TIMEOUT = 60000
 const RELINK_TIMEOUT = 10000
 
 export default function useDetachLayout() {
-  const {
-    role,
-    setRole,
-    broadcastEvent,
-    addEventHandler,
-    deleteEventHandler,
-  } = useDetachContext()
+  const { role, setRole, broadcastEvent, addEventHandler, deleteEventHandler } =
+    useDetachContext()
 
   // isLinking: when the tab expects to be linked soon (e.g. on detach)
   const [isLinking, setIsLinking] = useState(false)

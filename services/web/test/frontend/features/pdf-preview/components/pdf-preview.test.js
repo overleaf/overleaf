@@ -308,8 +308,7 @@ describe('<PdfPreview/>', function () {
         'This project was compiled very recently, so this compile has been skipped.',
       unavailable:
         'Sorry, the compile server for your project was temporarily unavailable. Please try again in a few moments.',
-      foo:
-        'Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.',
+      foo: 'Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.',
     }
 
     for (const [status, message] of Object.entries(compileErrorStatuses)) {

@@ -12,12 +12,8 @@ export default function useDetachState(
 ) {
   const [value, setValue] = useState(defaultValue)
 
-  const {
-    role,
-    broadcastEvent,
-    addEventHandler,
-    deleteEventHandler,
-  } = useDetachContext()
+  const { role, broadcastEvent, addEventHandler, deleteEventHandler } =
+    useDetachContext()
 
   const eventName = `state-${key}`
 

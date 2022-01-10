@@ -62,12 +62,13 @@ describe('UserEmailsController', function () {
           },
         }),
         '../Helpers/EmailHelper': this.EmailHelper,
-        './UserEmailsConfirmationHandler': (this.UserEmailsConfirmationHandler = {
-          sendReconfirmationEmail: sinon.stub(),
-          promises: {
-            sendConfirmationEmail: sinon.stub().resolves(),
-          },
-        }),
+        './UserEmailsConfirmationHandler': (this.UserEmailsConfirmationHandler =
+          {
+            sendReconfirmationEmail: sinon.stub(),
+            promises: {
+              sendConfirmationEmail: sinon.stub().resolves(),
+            },
+          }),
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
       },
@@ -132,8 +133,8 @@ describe('UserEmailsController', function () {
               this.newEmail
             )
 
-            const affiliationOptions = this.UserUpdater.promises.addEmailAddress
-              .lastCall.args[2]
+            const affiliationOptions =
+              this.UserUpdater.promises.addEmailAddress.lastCall.args[2]
             Object.keys(affiliationOptions).length.should.equal(3)
             affiliationOptions.university.should.equal(this.req.body.university)
             affiliationOptions.department.should.equal(this.req.body.department)

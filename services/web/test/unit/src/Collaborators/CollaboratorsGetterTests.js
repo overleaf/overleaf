@@ -64,9 +64,10 @@ describe('CollaboratorsGetter', function () {
   describe('getMemberIdsWithPrivilegeLevels', function () {
     describe('with project', function () {
       it('should return an array of member ids with their privilege levels', async function () {
-        const result = await this.CollaboratorsGetter.promises.getMemberIdsWithPrivilegeLevels(
-          this.project._id
-        )
+        const result =
+          await this.CollaboratorsGetter.promises.getMemberIdsWithPrivilegeLevels(
+            this.project._id
+          )
         expect(result).to.have.deep.members([
           {
             id: this.ownerRef.toString(),
@@ -141,9 +142,10 @@ describe('CollaboratorsGetter', function () {
 
   describe('getInvitedMemberIds', function () {
     it('should return the invited ids', async function () {
-      const memberIds = await this.CollaboratorsGetter.promises.getInvitedMemberIds(
-        this.project._id
-      )
+      const memberIds =
+        await this.CollaboratorsGetter.promises.getInvitedMemberIds(
+          this.project._id
+        )
       expect(memberIds).to.have.members([
         this.ownerRef.toString(),
         this.readOnlyRef1.toString(),
@@ -171,9 +173,10 @@ describe('CollaboratorsGetter', function () {
     })
 
     it('should return an array of invited members with their privilege levels', async function () {
-      const result = await this.CollaboratorsGetter.promises.getInvitedMembersWithPrivilegeLevels(
-        this.project._id
-      )
+      const result =
+        await this.CollaboratorsGetter.promises.getInvitedMembersWithPrivilegeLevels(
+          this.project._id
+        )
       expect(result).to.have.deep.members([
         { user: { _id: this.readOnlyRef1 }, privilegeLevel: 'readOnly' },
         { user: { _id: this.readWriteRef2 }, privilegeLevel: 'readAndWrite' },
@@ -183,18 +186,20 @@ describe('CollaboratorsGetter', function () {
 
   describe('getMemberIdPrivilegeLevel', function () {
     it('should return the privilege level if it exists', async function () {
-      const level = await this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
-        this.readOnlyRef1,
-        this.project._id
-      )
+      const level =
+        await this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+          this.readOnlyRef1,
+          this.project._id
+        )
       expect(level).to.equal('readOnly')
     })
 
     it('should return false if the member has no privilege level', async function () {
-      const level = await this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
-        this.nonMemberRef,
-        this.project._id
-      )
+      const level =
+        await this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+          this.nonMemberRef,
+          this.project._id
+        )
       expect(level).to.equal(false)
     })
   })
@@ -202,18 +207,20 @@ describe('CollaboratorsGetter', function () {
   describe('isUserInvitedMemberOfProject', function () {
     describe('when user is a member of the project', function () {
       it('should return true and the privilegeLevel', async function () {
-        const isMember = await this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
-          this.readOnlyRef1
-        )
+        const isMember =
+          await this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
+            this.readOnlyRef1
+          )
         expect(isMember).to.equal(true)
       })
     })
 
     describe('when user is not a member of the project', function () {
       it('should return false', async function () {
-        const isMember = await this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
-          this.nonMemberRef
-        )
+        const isMember =
+          await this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
+            this.nonMemberRef
+          )
         expect(isMember).to.equal(false)
       })
     })
@@ -260,10 +267,11 @@ describe('CollaboratorsGetter', function () {
     })
 
     it('should call the callback with the projects', async function () {
-      const projects = await this.CollaboratorsGetter.promises.getProjectsUserIsMemberOf(
-        this.userId,
-        this.fields
-      )
+      const projects =
+        await this.CollaboratorsGetter.promises.getProjectsUserIsMemberOf(
+          this.userId,
+          this.fields
+        )
       expect(projects).to.deep.equal({
         readAndWrite: [
           'mock-read-write-project-1',
@@ -311,9 +319,10 @@ describe('CollaboratorsGetter', function () {
         .withArgs(this.readWriteUser._id.toString())
         .resolves(this.readWriteUser)
       this.ProjectEditorHandler.buildOwnerAndMembersViews.returns(this.views)
-      this.result = await this.CollaboratorsGetter.promises.getAllInvitedMembers(
-        this.project._id
-      )
+      this.result =
+        await this.CollaboratorsGetter.promises.getAllInvitedMembers(
+          this.project._id
+        )
     })
 
     it('should produce a list of members', function () {
@@ -332,19 +341,21 @@ describe('CollaboratorsGetter', function () {
   describe('userIsTokenMember', function () {
     it('should return true when the project is found', async function () {
       this.ProjectMock.expects('findOne').chain('exec').resolves(this.project)
-      const isMember = await this.CollaboratorsGetter.promises.userIsTokenMember(
-        this.userId,
-        this.project._id
-      )
+      const isMember =
+        await this.CollaboratorsGetter.promises.userIsTokenMember(
+          this.userId,
+          this.project._id
+        )
       expect(isMember).to.be.true
     })
 
     it('should return false when the project is not found', async function () {
       this.ProjectMock.expects('findOne').chain('exec').resolves(null)
-      const isMember = await this.CollaboratorsGetter.promises.userIsTokenMember(
-        this.userId,
-        this.project._id
-      )
+      const isMember =
+        await this.CollaboratorsGetter.promises.userIsTokenMember(
+          this.userId,
+          this.project._id
+        )
       expect(isMember).to.be.false
     })
   })

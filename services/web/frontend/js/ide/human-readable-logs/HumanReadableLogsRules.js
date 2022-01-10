@@ -500,7 +500,8 @@ const rules = [
     ruleId: 'hint_mismatched_environment2',
     types: ['environment'],
     cascadesFrom: ['environment'],
-    regexToMatch: /Error: `\\end\{([^\}]+)\}' expected but found `\\end\{([^\}]+)\}'.*/,
+    regexToMatch:
+      /Error: `\\end\{([^\}]+)\}' expected but found `\\end\{([^\}]+)\}'.*/,
     newMessage: 'Error: environments do not match: \\begin{$1} ... \\end{$2}',
     humanReadableHintComponent: (
       <>
@@ -516,7 +517,8 @@ const rules = [
     ruleId: 'hint_mismatched_environment3',
     types: ['environment'],
     cascadesFrom: ['environment'],
-    regexToMatch: /Warning: No matching \\end found for `\\begin\{([^\}]+)\}'.*/,
+    regexToMatch:
+      /Warning: No matching \\end found for `\\begin\{([^\}]+)\}'.*/,
     newMessage: 'Warning: No matching \\end found for \\begin{$1}',
     humanReadableHintComponent: (
       <>
@@ -532,7 +534,8 @@ const rules = [
     ruleId: 'hint_mismatched_environment4',
     types: ['environment'],
     cascadesFrom: ['environment'],
-    regexToMatch: /Error: Found `\\end\{([^\}]+)\}' without corresponding \\begin.*/,
+    regexToMatch:
+      /Error: Found `\\end\{([^\}]+)\}' without corresponding \\begin.*/,
     newMessage: 'Error: found \\end{$1} without a corresponding \\begin{$1}',
     humanReadableHintComponent: (
       <>

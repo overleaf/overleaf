@@ -18,10 +18,8 @@ import { useProjectContext } from '../../../shared/context/project-context'
 
 export default function EditMember({ member }) {
   const [privileges, setPrivileges] = useState(member.privileges)
-  const [
-    confirmingOwnershipTransfer,
-    setConfirmingOwnershipTransfer,
-  ] = useState(false)
+  const [confirmingOwnershipTransfer, setConfirmingOwnershipTransfer] =
+    useState(false)
 
   // update the local state if the member's privileges change externally
   useEffect(() => {

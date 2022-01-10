@@ -264,9 +264,8 @@ const decorateFullEmails = (
       )
     }
 
-    emailData.emailHasInstitutionLicence = InstitutionsHelper.emailHasLicence(
-      emailData
-    )
+    emailData.emailHasInstitutionLicence =
+      InstitutionsHelper.emailHasLicence(emailData)
   })
 
   return emailsData

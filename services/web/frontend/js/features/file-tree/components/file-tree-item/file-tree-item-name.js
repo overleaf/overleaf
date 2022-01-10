@@ -9,13 +9,8 @@ import { useFileTreeMainContext } from '../../contexts/file-tree-main'
 function FileTreeItemName({ name, isSelected, setIsDraggable }) {
   const { hasWritePermissions } = useFileTreeMainContext()
 
-  const {
-    isRenaming,
-    startRenaming,
-    finishRenaming,
-    error,
-    cancel,
-  } = useFileTreeActionable()
+  const { isRenaming, startRenaming, finishRenaming, error, cancel } =
+    useFileTreeActionable()
 
   const isRenamingEntity = isRenaming && isSelected && !error
 

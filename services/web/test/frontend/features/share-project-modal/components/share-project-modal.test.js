@@ -106,10 +106,10 @@ describe('<ShareProjectModal/>', function () {
       { scope: { project } }
     )
 
-    const [
-      headerCloseButton,
-      footerCloseButton,
-    ] = await screen.findAllByRole('button', { name: 'Close' })
+    const [headerCloseButton, footerCloseButton] = await screen.findAllByRole(
+      'button',
+      { name: 'Close' }
+    )
 
     fireEvent.click(headerCloseButton)
     fireEvent.click(footerCloseButton)

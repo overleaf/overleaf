@@ -99,12 +99,8 @@ class SAMLSessionDataMissing extends BackwardCompatibleError {
         ? arg.samlSession
         : {}
     this.tryAgain = true
-    const {
-      universityId,
-      universityName,
-      externalUserId,
-      institutionEmail,
-    } = samlSession
+    const { universityId, universityName, externalUserId, institutionEmail } =
+      samlSession
 
     if (
       !universityId &&

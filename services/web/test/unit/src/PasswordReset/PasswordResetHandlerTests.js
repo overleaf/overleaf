@@ -281,8 +281,8 @@ describe('PasswordResetHandler', function () {
               (error, result) => {
                 const { reset, userId } = result
                 expect(error).to.not.exist
-                const logCall = this.UserAuditLogHandler.promises.addEntry
-                  .lastCall
+                const logCall =
+                  this.UserAuditLogHandler.promises.addEntry.lastCall
                 expect(logCall.args[0]).to.equal(this.user_id)
                 expect(logCall.args[1]).to.equal('reset-password')
                 expect(logCall.args[2]).to.equal(undefined)
@@ -320,8 +320,8 @@ describe('PasswordResetHandler', function () {
                 (error, result) => {
                   const { reset, userId } = result
                   expect(error).to.not.exist
-                  const logCall = this.UserAuditLogHandler.promises.addEntry
-                    .lastCall
+                  const logCall =
+                    this.UserAuditLogHandler.promises.addEntry.lastCall
                   expect(logCall.args[0]).to.equal(this.user_id)
                   expect(logCall.args[1]).to.equal('reset-password')
                   expect(logCall.args[2]).to.equal(this.user_id)
@@ -337,10 +337,8 @@ describe('PasswordResetHandler', function () {
         describe('errors', function () {
           describe('via UserAuditLogHandler', function () {
             beforeEach(function () {
-              this.PasswordResetHandler.promises.getUserForPasswordResetToken = sinon
-                .stub()
-                .withArgs(this.token)
-                .resolves(this.user)
+              this.PasswordResetHandler.promises.getUserForPasswordResetToken =
+                sinon.stub().withArgs(this.token).resolves(this.user)
               this.UserAuditLogHandler.promises.addEntry.rejects(
                 new Error('oops')
               )

@@ -41,10 +41,11 @@ async function _loadAssignmentInLocals(splitTest, session, locals) {
     if (cachedVariant) {
       LocalsHelper.setSplitTestVariant(locals, splitTest.name, cachedVariant)
     } else {
-      const assignment = await SplitTestV2Handler.promises.getAssignmentForSession(
-        session,
-        splitTest.name
-      )
+      const assignment =
+        await SplitTestV2Handler.promises.getAssignmentForSession(
+          session,
+          splitTest.name
+        )
       session.cachedSplitTestAssignments[cacheKey] = assignment.variant
       LocalsHelper.setSplitTestVariant(
         locals,

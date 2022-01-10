@@ -105,8 +105,8 @@ describe('UserController', function () {
         },
         '../Newsletter/NewsletterManager': this.NewsLetterManager,
         './UserRegistrationHandler': this.UserRegistrationHandler,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/AuthenticationController':
+          this.AuthenticationController,
         '../Authentication/SessionManager': this.SessionManager,
         '../Authentication/AuthenticationManager': this.AuthenticationManager,
         '../../infrastructure/Features': (this.Features = {

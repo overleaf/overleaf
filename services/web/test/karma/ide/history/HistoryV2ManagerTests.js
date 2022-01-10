@@ -270,7 +270,8 @@ export default describe('HistoryV2Manager', function () {
 
       describe('with a previously selected file', function () {
         it('should prefer the previously selected file if it is available and has operations', function () {
-          this.historyManager._previouslySelectedPathname = this.mockedAddedFile.pathname
+          this.historyManager._previouslySelectedPathname =
+            this.mockedAddedFile.pathname
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file).to.deep.equal(
             this.mockedAddedFile
@@ -278,7 +279,8 @@ export default describe('HistoryV2Manager', function () {
         })
 
         it('should prefer a file with ops if the previously selected file is available but has no operations', function () {
-          this.historyManager._previouslySelectedPathname = this.mockedReferencesFile.pathname
+          this.historyManager._previouslySelectedPathname =
+            this.mockedReferencesFile.pathname
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file.operation).to.exist
         })
@@ -335,9 +337,8 @@ export default describe('HistoryV2Manager', function () {
             this.mockedAddedFile
           )
           this.$scope.history.selection.files.splice(indexOfAddedFile, 1)
-          const indexOfRenamedFile = this.$scope.history.selection.files.indexOf(
-            this.mockedRenamedFile
-          )
+          const indexOfRenamedFile =
+            this.$scope.history.selection.files.indexOf(this.mockedRenamedFile)
           this.$scope.history.selection.files.splice(indexOfRenamedFile, 1)
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file).to.deep.equal(
@@ -392,9 +393,8 @@ export default describe('HistoryV2Manager', function () {
             this.mockedMainTex
           )
           this.$scope.history.selection.files.splice(indexOfMainTex, 1)
-          const indexOfOtherTexFile = this.$scope.history.selection.files.indexOf(
-            this.mockedOtherTexFile
-          )
+          const indexOfOtherTexFile =
+            this.$scope.history.selection.files.indexOf(this.mockedOtherTexFile)
           this.$scope.history.selection.files.splice(indexOfOtherTexFile, 1)
           this.historyManager.autoSelectFile()
           expect(this.$scope.history.selection.file).to.deep.equal(
@@ -440,8 +440,10 @@ export default describe('HistoryV2Manager', function () {
           ],
         }
         this.sampleUpdateEditedFile = this.sampleUpdates[0].pathnames[0]
-        this.sampleUpdateAddedFile = this.sampleUpdates[0].project_ops[0].add.pathname
-        this.sampleUpdateRenamedFile = this.sampleUpdates[0].project_ops[1].rename.newPathname
+        this.sampleUpdateAddedFile =
+          this.sampleUpdates[0].project_ops[0].add.pathname
+        this.sampleUpdateRenamedFile =
+          this.sampleUpdates[0].project_ops[1].rename.newPathname
         this.$scope.history.updates = this.sampleUpdates
         this.$scope.history.selection.range = {
           fromV: this.sampleUpdates[0].toV,
@@ -625,19 +627,18 @@ export default describe('HistoryV2Manager', function () {
         ]
         const lastUpdate = 5
 
-        this.historyManager.$scope.history.labels = this.historyManager._loadLabels(
-          this.historyManager.$scope.history.labels,
-          lastUpdate
-        )
+        this.historyManager.$scope.history.labels =
+          this.historyManager._loadLabels(
+            this.historyManager.$scope.history.labels,
+            lastUpdate
+          )
 
         expect(
           this.historyManager.$scope.history.labels[0].isPseudoCurrentStateLabel
         ).to.equal(true)
 
-        this.historyManager.$scope.history.labels = this.historyManager._loadLabels(
-          [],
-          lastUpdate
-        )
+        this.historyManager.$scope.history.labels =
+          this.historyManager._loadLabels([], lastUpdate)
         expect(
           this.historyManager.$scope.history.labels[0].isPseudoCurrentStateLabel
         ).to.equal(true)

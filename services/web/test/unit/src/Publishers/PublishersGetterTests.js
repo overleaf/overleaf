@@ -30,20 +30,22 @@ describe('PublishersGetter', function () {
     this.PublishersGetter = SandboxedModule.require(modulePath, {
       requires: {
         '../User/UserGetter': this.UserGetter,
-        '../UserMembership/UserMembershipsHandler': (this.UserMembershipsHandler = {
-          getEntitiesByUser: sinon
-            .stub()
-            .callsArgWith(2, null, [this.publisher]),
-        }),
-        '../UserMembership/UserMembershipEntityConfigs': (this.UserMembershipEntityConfigs = {
-          publisher: {
-            modelName: 'Publisher',
-            canCreate: true,
-            fields: {
-              primaryKey: 'slug',
+        '../UserMembership/UserMembershipsHandler':
+          (this.UserMembershipsHandler = {
+            getEntitiesByUser: sinon
+              .stub()
+              .callsArgWith(2, null, [this.publisher]),
+          }),
+        '../UserMembership/UserMembershipEntityConfigs':
+          (this.UserMembershipEntityConfigs = {
+            publisher: {
+              modelName: 'Publisher',
+              canCreate: true,
+              fields: {
+                primaryKey: 'slug',
+              },
             },
-          },
-        }),
+          }),
       },
     })
 

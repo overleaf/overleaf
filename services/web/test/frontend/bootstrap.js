@@ -91,12 +91,17 @@ globalThis.requestAnimationFrame = global.requestAnimationFrame =
 globalThis.sessionStorage = global.sessionStorage = window.sessionStorage
 
 // add polyfill for ResizeObserver
-globalThis.ResizeObserver = global.ResizeObserver = window.ResizeObserver = require('@juggle/resize-observer').ResizeObserver
+globalThis.ResizeObserver =
+  global.ResizeObserver =
+  window.ResizeObserver =
+    require('@juggle/resize-observer').ResizeObserver
 
 // node-fetch doesn't accept relative URL's: https://github.com/node-fetch/node-fetch/blob/master/docs/v2-LIMITS.md#known-differences
 const fetch = require('node-fetch')
-globalThis.fetch = global.fetch = window.fetch = (url, ...options) =>
-  fetch(new URL(url, 'http://localhost'), ...options)
+globalThis.fetch =
+  global.fetch =
+  window.fetch =
+    (url, ...options) => fetch(new URL(url, 'http://localhost'), ...options)
 
 // ignore CSS files
 const { addHook } = require('pirates')

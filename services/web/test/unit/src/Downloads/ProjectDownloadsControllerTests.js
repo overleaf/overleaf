@@ -32,8 +32,8 @@ describe('ProjectDownloadsController', function () {
           './ProjectZipStreamManager': (this.ProjectZipStreamManager = {}),
           '../Project/ProjectGetter': (this.ProjectGetter = {}),
           '@overleaf/metrics': (this.metrics = {}),
-          '../DocumentUpdater/DocumentUpdaterHandler': this
-            .DocumentUpdaterHandler,
+          '../DocumentUpdater/DocumentUpdaterHandler':
+            this.DocumentUpdaterHandler,
         },
       }
     ))

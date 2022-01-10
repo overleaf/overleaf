@@ -357,9 +357,8 @@ const ProjectController = {
       if (err != null) {
         return next(err)
       }
-      const { docs, files } = ProjectEntityHandler.getAllEntitiesFromProject(
-        project
-      )
+      const { docs, files } =
+        ProjectEntityHandler.getAllEntitiesFromProject(project)
       const entities = docs
         .concat(files)
         // Sort by path ascending
@@ -553,9 +552,8 @@ const ProjectController = {
           delete req.session.saml
         }
 
-        const portalTemplates = ProjectController._buildPortalTemplatesList(
-          userAffiliations
-        )
+        const portalTemplates =
+          ProjectController._buildPortalTemplatesList(userAffiliations)
         const projects = ProjectController._buildProjectList(
           results.projects,
           userId
@@ -798,9 +796,8 @@ const ProjectController = {
           req,
           projectId
         )
-        const allowedImageNames = ProjectHelper.getAllowedImagesForUser(
-          sessionUser
-        )
+        const allowedImageNames =
+          ProjectHelper.getAllowedImagesForUser(sessionUser)
 
         AuthorizationManager.getPrivilegeLevelForProject(
           userId,
@@ -1028,13 +1025,8 @@ const ProjectController = {
 
   _buildProjectList(allProjects, userId) {
     let project
-    const {
-      owned,
-      readAndWrite,
-      readOnly,
-      tokenReadAndWrite,
-      tokenReadOnly,
-    } = allProjects
+    const { owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly } =
+      allProjects
     const projects = []
     for (project of owned) {
       projects.push(

@@ -58,7 +58,8 @@ describe('AuthenticationController', function () {
           identifyUser: sinon.stub(),
           getIdsFromSession: sinon.stub().returns({ userId: this.user._id }),
         }),
-        '../../infrastructure/SessionStoreManager': (this.SessionStoreManager = {}),
+        '../../infrastructure/SessionStoreManager': (this.SessionStoreManager =
+          {}),
         '@overleaf/settings': (this.Settings = {
           siteUrl: 'http://www.foo.bar',
           httpAuthUsers: this.httpAuthUsers,
@@ -78,13 +79,14 @@ describe('AuthenticationController', function () {
           ipMatcherAffiliation: sinon.stub().returns({ create: sinon.stub() }),
         }),
         '../../models/User': { User: this.UserModel },
-        '../../../../modules/oauth2-server/app/src/Oauth2Server': (this.Oauth2Server = {
-          Request: sinon.stub(),
-          Response: sinon.stub(),
-          server: {
-            authenticate: sinon.stub(),
-          },
-        }),
+        '../../../../modules/oauth2-server/app/src/Oauth2Server':
+          (this.Oauth2Server = {
+            Request: sinon.stub(),
+            Response: sinon.stub(),
+            server: {
+              authenticate: sinon.stub(),
+            },
+          }),
         '../Helpers/UrlHelper': (this.UrlHelper = {
           getSafeRedirectPath: sinon.stub(),
         }),
@@ -413,7 +415,8 @@ describe('AuthenticationController', function () {
     describe('when the user is not logged in', function () {
       beforeEach(function () {
         this.req.session = {}
-        this.AuthenticationController._redirectToLoginOrRegisterPage = sinon.stub()
+        this.AuthenticationController._redirectToLoginOrRegisterPage =
+          sinon.stub()
         this.req.query = {}
         this.SessionManager.isUserLoggedIn = sinon.stub().returns(false)
         this.middleware(this.req, this.res, this.next)
@@ -455,7 +458,8 @@ describe('AuthenticationController', function () {
           regenerate: sinon.stub().yields(),
         }
         this.req.user = this.user
-        this.AuthenticationController._redirectToLoginOrRegisterPage = sinon.stub()
+        this.AuthenticationController._redirectToLoginOrRegisterPage =
+          sinon.stub()
         this.req.query = {}
         this.SessionStoreManager.hasValidationToken = sinon
           .stub()

@@ -30,7 +30,8 @@ describe('HistoryController', function () {
         '../Authentication/SessionManager': this.SessionManager,
         './HistoryManager': (this.HistoryManager = {}),
         '../Project/ProjectDetailsHandler': (this.ProjectDetailsHandler = {}),
-        '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
+        '../Project/ProjectEntityUpdateHandler':
+          (this.ProjectEntityUpdateHandler = {}),
         '../User/UserGetter': (this.UserGetter = {}),
         './RestoreManager': (this.RestoreManager = {}),
       },

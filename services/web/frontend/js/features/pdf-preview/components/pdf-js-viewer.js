@@ -14,12 +14,8 @@ import getMeta from '../../../utils/meta'
 function PdfJsViewer({ url }) {
   const { _id: projectId } = useProjectContext()
 
-  const {
-    setError,
-    firstRenderDone,
-    highlights,
-    setPosition,
-  } = useCompileContext()
+  const { setError, firstRenderDone, highlights, setPosition } =
+    useCompileContext()
   const [timePDFFetched, setTimePDFFetched] = useState()
 
   // state values persisted in localStorage to restore on load

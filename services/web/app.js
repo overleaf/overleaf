@@ -15,10 +15,14 @@ const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const PlansLocator = require('./app/src/Features/Subscription/PlansLocator')
 logger.initialize(process.env.METRICS_APP_NAME || 'web')
-logger.logger.serializers.user = require('./app/src/infrastructure/LoggerSerializers').user
-logger.logger.serializers.docs = require('./app/src/infrastructure/LoggerSerializers').docs
-logger.logger.serializers.files = require('./app/src/infrastructure/LoggerSerializers').files
-logger.logger.serializers.project = require('./app/src/infrastructure/LoggerSerializers').project
+logger.logger.serializers.user =
+  require('./app/src/infrastructure/LoggerSerializers').user
+logger.logger.serializers.docs =
+  require('./app/src/infrastructure/LoggerSerializers').docs
+logger.logger.serializers.files =
+  require('./app/src/infrastructure/LoggerSerializers').files
+logger.logger.serializers.project =
+  require('./app/src/infrastructure/LoggerSerializers').project
 if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }

@@ -202,8 +202,8 @@ describe('SubscriptionHandler', function () {
       expect(
         this.RecurlyClient.changeSubscriptionByUuid
       ).to.have.been.calledWith(this.subscription.recurlySubscription_id)
-      const updateOptions = this.RecurlyClient.changeSubscriptionByUuid
-        .args[0][1]
+      const updateOptions =
+        this.RecurlyClient.changeSubscriptionByUuid.args[0][1]
       updateOptions.planCode.should.equal(this.plan_code)
     })
   }
@@ -252,8 +252,8 @@ describe('SubscriptionHandler', function () {
         shouldSyncSubscription()
 
         it('should update with timeframe ' + timeframe, function () {
-          const updateOptions = this.RecurlyClient.changeSubscriptionByUuid
-            .args[0][1]
+          const updateOptions =
+            this.RecurlyClient.changeSubscriptionByUuid.args[0][1]
           updateOptions.timeframe.should.equal(timeframe)
         })
       }
@@ -364,8 +364,8 @@ describe('SubscriptionHandler', function () {
         expect(this.RecurlyClient.changeSubscriptionByUuid).to.be.calledWith(
           this.subscription.recurlySubscription_id
         )
-        const updateOptions = this.RecurlyClient.changeSubscriptionByUuid
-          .args[0][1]
+        const updateOptions =
+          this.RecurlyClient.changeSubscriptionByUuid.args[0][1]
         updateOptions.planCode.should.equal(this.plan_code)
       })
     })

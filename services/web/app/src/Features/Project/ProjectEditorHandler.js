@@ -62,9 +62,8 @@ module.exports = ProjectEditorHandler = {
     result.invites.forEach(invite => {
       delete invite.token
     })
-    ;({ owner, ownerFeatures, members } = this.buildOwnerAndMembersViews(
-      members
-    ))
+    ;({ owner, ownerFeatures, members } =
+      this.buildOwnerAndMembersViews(members))
     result.owner = owner
     result.members = members
 

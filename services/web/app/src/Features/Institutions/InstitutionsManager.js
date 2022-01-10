@@ -125,11 +125,8 @@ async function checkInstitutionUsers(institutionId, emitNonProUserIds) {
   )
   result.ssoUsers.current.entitled = entitled
 
-  const {
-    allSsoUsers,
-    allSsoUsersByIds,
-    currentNotEntitledCount,
-  } = await _getSsoUsers(institutionId, lapsedUserIds)
+  const { allSsoUsers, allSsoUsersByIds, currentNotEntitledCount } =
+    await _getSsoUsers(institutionId, lapsedUserIds)
   result.ssoUsers.total = allSsoUsers.length
   result.ssoUsers.current.notEntitled = currentNotEntitledCount
 

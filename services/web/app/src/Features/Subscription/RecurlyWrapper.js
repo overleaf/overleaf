@@ -283,9 +283,8 @@ const RecurlyWrapper = {
           account_code: user._id,
         },
       }
-      const customFields = getCustomFieldsFromSubscriptionDetails(
-        subscriptionDetails
-      )
+      const customFields =
+        getCustomFieldsFromSubscriptionDetails(subscriptionDetails)
       if (customFields) {
         data.custom_fields = customFields
       }
@@ -395,9 +394,8 @@ const RecurlyWrapper = {
       data.account.billing_info.three_d_secure_action_result_token_id =
         recurlyTokenIds.threeDSecureActionResult
     }
-    const customFields = getCustomFieldsFromSubscriptionDetails(
-      subscriptionDetails
-    )
+    const customFields =
+      getCustomFieldsFromSubscriptionDetails(subscriptionDetails)
     if (customFields) {
       data.custom_fields = customFields
     }
@@ -525,9 +523,8 @@ const RecurlyWrapper = {
                 recurlySubscription.account != null &&
                 recurlySubscription.account.url != null
               ) {
-                accountId = recurlySubscription.account.url.match(
-                  /accounts\/(.*)/
-                )[1]
+                accountId =
+                  recurlySubscription.account.url.match(/accounts\/(.*)/)[1]
               } else {
                 return callback(
                   new Error("I don't understand the response from Recurly")

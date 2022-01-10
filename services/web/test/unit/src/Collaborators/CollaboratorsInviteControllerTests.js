@@ -52,8 +52,8 @@ describe('CollaboratorsInviteController', function () {
           emitToRoom: sinon.stub(),
         }),
         '../Analytics/AnalyticsManager': this.AnalyticsManger,
-        '../Authentication/AuthenticationController': this
-          .AuthenticationController,
+        '../Authentication/AuthenticationController':
+          this.AuthenticationController,
         '@overleaf/settings': (this.settings = {}),
         '../../infrastructure/RateLimiter': this.RateLimiter,
       },

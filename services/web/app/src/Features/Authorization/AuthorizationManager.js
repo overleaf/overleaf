@@ -80,10 +80,11 @@ async function getPrivilegeLevelForProjectWithUser(
   token,
   opts = {}
 ) {
-  const privilegeLevel = await CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
-    userId,
-    projectId
-  )
+  const privilegeLevel =
+    await CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+      userId,
+      projectId
+    )
   if (privilegeLevel && privilegeLevel !== PrivilegeLevels.NONE) {
     // The user has direct access
     return privilegeLevel
@@ -140,13 +141,11 @@ async function getPrivilegeLevelForProjectWithToken(projectId, token) {
   // Anonymous users can have read-only access to token-based projects,
   // while read-write access must be logged in,
   // unless the `enableAnonymousReadAndWriteSharing` setting is enabled
-  const {
-    isValidReadAndWrite,
-    isValidReadOnly,
-  } = await TokenAccessHandler.promises.validateTokenForAnonymousAccess(
-    projectId,
-    token
-  )
+  const { isValidReadAndWrite, isValidReadOnly } =
+    await TokenAccessHandler.promises.validateTokenForAnonymousAccess(
+      projectId,
+      token
+    )
   if (isValidReadOnly) {
     // Grant anonymous user read-only access
     return PrivilegeLevels.READ_ONLY

@@ -329,9 +329,8 @@ class AutoCompleteManager {
                     )
                   )
                 // Delete back to command start, as appropriate
-                const commandStartIndex = Helpers.getLastCommandFragmentIndex(
-                  lineUpToCursor
-                )
+                const commandStartIndex =
+                  Helpers.getLastCommandFragmentIndex(lineUpToCursor)
                 if (commandStartIndex !== -1) {
                   leftRange.start.column = commandStartIndex
                 } else {
@@ -351,9 +350,8 @@ class AutoCompleteManager {
                   )
 
                 if (lineBeyondCursor) {
-                  const partialCommandMatch = lineBeyondCursor.match(
-                    /^([a-zA-Z0-9]+)\{/
-                  )
+                  const partialCommandMatch =
+                    lineBeyondCursor.match(/^([a-zA-Z0-9]+)\{/)
                   if (partialCommandMatch) {
                     // We've got a partial command after the cursor
                     const commandTail = partialCommandMatch[1]

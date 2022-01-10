@@ -130,12 +130,8 @@ export default HistoryManager = (function () {
     reloadDiff() {
       let { diff } = this.$scope.history
       const { updates, doc } = this.$scope.history.selection
-      const {
-        fromV,
-        toV,
-        start_ts,
-        end_ts,
-      } = this._calculateRangeFromSelection()
+      const { fromV, toV, start_ts, end_ts } =
+        this._calculateRangeFromSelection()
 
       if (doc == null) {
         return
@@ -269,9 +265,8 @@ export default HistoryManager = (function () {
       if (updates == null) {
         updates = []
       }
-      let previousUpdate = this.$scope.history.updates[
-        this.$scope.history.updates.length - 1
-      ]
+      let previousUpdate =
+        this.$scope.history.updates[this.$scope.history.updates.length - 1]
 
       for (const update of Array.from(updates)) {
         update.pathnames = [] // Used for display

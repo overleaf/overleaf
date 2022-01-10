@@ -47,8 +47,8 @@ describe('TpdsProjectFlusher', function () {
 
     this.TpdsProjectFlusher = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        '../DocumentUpdater/DocumentUpdaterHandler': this
-          .DocumentUpdaterHandler,
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          this.DocumentUpdaterHandler,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../../models/Project': { Project },

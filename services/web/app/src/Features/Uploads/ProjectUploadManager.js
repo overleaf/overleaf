@@ -29,12 +29,10 @@ module.exports = {
 
 async function createProjectFromZipArchive(ownerId, defaultName, zipPath) {
   const contentsPath = await _extractZip(zipPath)
-  const {
-    path,
-    content,
-  } = await ProjectRootDocManager.promises.findRootDocFileFromDirectory(
-    contentsPath
-  )
+  const { path, content } =
+    await ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+      contentsPath
+    )
 
   const projectName =
     DocumentHelper.getTitleFromTexContent(content || '') || defaultName
@@ -131,11 +129,12 @@ async function _initializeProjectWithZipContents(
     project._id,
     importEntries
   )
-  const projectVersion = await ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure(
-    project._id,
-    docEntries,
-    fileEntries
-  )
+  const projectVersion =
+    await ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure(
+      project._id,
+      docEntries,
+      fileEntries
+    )
   await _notifyDocumentUpdater(project, ownerId, {
     newFiles: fileEntries,
     newDocs: docEntries,

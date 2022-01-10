@@ -100,16 +100,7 @@ export default describe('SpellCheckManager', function () {
         this.timelord.tick(500)
         this.$httpBackend.flush()
         expect(this.adapter.getLinesByRows).to.have.been.calledWith([
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
         ])
       })
     })

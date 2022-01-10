@@ -60,11 +60,8 @@ async function joinProject(req, res, next) {
     userId = null
   }
   Metrics.inc('editor.join-project')
-  const {
-    project,
-    privilegeLevel,
-    isRestrictedUser,
-  } = await _buildJoinProjectView(req, projectId, userId)
+  const { project, privilegeLevel, isRestrictedUser } =
+    await _buildJoinProjectView(req, projectId, userId)
   if (!project) {
     return res.sendStatus(403)
   }
@@ -116,15 +113,17 @@ async function _buildJoinProjectView(req, projectId, userId) {
       'soft-failure when fetching deletedDocs from docstore'
     )
   }
-  const members = await CollaboratorsGetter.promises.getInvitedMembersWithPrivilegeLevels(
-    projectId
-  )
+  const members =
+    await CollaboratorsGetter.promises.getInvitedMembersWithPrivilegeLevels(
+      projectId
+    )
   const token = TokenAccessHandler.getRequestToken(req, projectId)
-  const privilegeLevel = await AuthorizationManager.promises.getPrivilegeLevelForProject(
-    userId,
-    projectId,
-    token
-  )
+  const privilegeLevel =
+    await AuthorizationManager.promises.getPrivilegeLevelForProject(
+      userId,
+      projectId,
+      token
+    )
   if (privilegeLevel == null || privilegeLevel === PrivilegeLevels.NONE) {
     return { project: null, privilegeLevel: null, isRestrictedUser: false }
   }

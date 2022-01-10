@@ -4,8 +4,9 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 
 function getFormValues() {
   const modalEl = document.querySelector('[data-ol-group-plan-modal]')
-  const planCode = modalEl.querySelector('input[name="plan_code"]:checked')
-    .value
+  const planCode = modalEl.querySelector(
+    'input[name="plan_code"]:checked'
+  ).value
   const size = modalEl.querySelector('#size').value
   const currency = modalEl.querySelector('#currency').value
   const usage = modalEl.querySelector('#usage').checked
@@ -32,9 +33,8 @@ function updateGroupPlanView() {
   modalEl.querySelectorAll('[data-ol-group-plan-usage]').forEach(el => {
     el.hidden = el.getAttribute('data-ol-group-plan-usage') !== usage
   })
-  modalEl.querySelector(
-    '[data-ol-group-plan-display-price]'
-  ).innerText = displayPrice
+  modalEl.querySelector('[data-ol-group-plan-display-price]').innerText =
+    displayPrice
   modalEl.querySelector(
     '[data-ol-group-plan-price-per-user]'
   ).innerText = `${currencySymbol}${perUserPrice} per user`

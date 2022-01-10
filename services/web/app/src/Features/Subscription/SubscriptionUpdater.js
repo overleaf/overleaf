@@ -79,9 +79,8 @@ async function removeUserFromGroup(subscriptionId, userId) {
 }
 
 async function removeUserFromAllGroups(userId) {
-  const subscriptions = await SubscriptionLocator.promises.getMemberSubscriptions(
-    userId
-  )
+  const subscriptions =
+    await SubscriptionLocator.promises.getMemberSubscriptions(userId)
   if (subscriptions.length === 0) {
     return
   }
@@ -114,9 +113,8 @@ async function deleteSubscription(subscription, deleterData) {
 }
 
 async function restoreSubscription(subscriptionId) {
-  const deletedSubscription = await SubscriptionLocator.promises.getDeletedSubscription(
-    subscriptionId
-  )
+  const deletedSubscription =
+    await SubscriptionLocator.promises.getDeletedSubscription(subscriptionId)
   const subscription = deletedSubscription.subscription
 
   // 1. upsert subscription
@@ -249,9 +247,8 @@ async function updateSubscriptionFromRecurly(
 
 async function _sendUserGroupPlanCodeUserProperty(userId) {
   try {
-    const subscriptions = await SubscriptionLocator.promises.getMemberSubscriptions(
-      userId
-    )
+    const subscriptions =
+      await SubscriptionLocator.promises.getMemberSubscriptions(userId)
     let bestPlanCode = null
     let bestFeatures = {}
     for (const subscription of subscriptions) {

@@ -16,12 +16,14 @@ describe('ThirdPartyIdentityManager', function () {
     this.auditLog = { initiatorId: this.userId, ipAddress: '0:0:0:0' }
     this.ThirdPartyIdentityManager = SandboxedModule.require(modulePath, {
       requires: {
-        '../../../../app/src/Features/User/UserAuditLogHandler': (this.UserAuditLogHandler = {
-          addEntry: sinon.stub().yields(),
-        }),
-        '../../../../app/src/Features/Email/EmailHandler': (this.EmailHandler = {
-          sendEmail: sinon.stub().yields(),
-        }),
+        '../../../../app/src/Features/User/UserAuditLogHandler':
+          (this.UserAuditLogHandler = {
+            addEntry: sinon.stub().yields(),
+          }),
+        '../../../../app/src/Features/Email/EmailHandler': (this.EmailHandler =
+          {
+            sendEmail: sinon.stub().yields(),
+          }),
         '../../../../app/src/models/User': {
           User: (this.User = {
             findOneAndUpdate: sinon.stub().yields(undefined, this.user),

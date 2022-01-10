@@ -13,7 +13,8 @@ describe('DocumentController', function () {
         '../Project/ProjectGetter': (this.ProjectGetter = {}),
         '../Project/ProjectLocator': (this.ProjectLocator = {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
-        '../Project/ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
+        '../Project/ProjectEntityUpdateHandler':
+          (this.ProjectEntityUpdateHandler = {}),
       },
     })
     this.res = new MockResponse()

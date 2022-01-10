@@ -151,13 +151,13 @@ describe('ProjectUploadManager', function () {
         '../../models/Doc': { Doc: this.Doc },
         '../Docstore/DocstoreManager': this.DocstoreManager,
         '../Documents/DocumentHelper': this.DocumentHelper,
-        '../DocumentUpdater/DocumentUpdaterHandler': this
-          .DocumentUpdaterHandler,
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          this.DocumentUpdaterHandler,
         '../FileStore/FileStoreHandler': this.FileStoreHandler,
         './FileSystemImportManager': this.FileSystemImportManager,
         '../Project/ProjectCreationHandler': this.ProjectCreationHandler,
-        '../Project/ProjectEntityMongoUpdateHandler': this
-          .ProjectEntityMongoUpdateHandler,
+        '../Project/ProjectEntityMongoUpdateHandler':
+          this.ProjectEntityMongoUpdateHandler,
         '../Project/ProjectRootDocManager': this.ProjectRootDocManager,
         '../Project/ProjectDetailsHandler': this.ProjectDetailsHandler,
         '../Project/ProjectDeleter': this.ProjectDeleter,

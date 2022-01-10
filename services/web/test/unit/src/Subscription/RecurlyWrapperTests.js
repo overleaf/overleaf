@@ -141,16 +141,14 @@ describe('RecurlyWrapper', function () {
     }
 
     tk.freeze(Date.now()) // freeze the time for these tests
-    return (this.RecurlyWrapper = RecurlyWrapper = SandboxedModule.require(
-      modulePath,
-      {
+    return (this.RecurlyWrapper = RecurlyWrapper =
+      SandboxedModule.require(modulePath, {
         requires: {
           '@overleaf/settings': this.settings,
           request: sinon.stub(),
           './Errors': SubscriptionErrors,
         },
-      }
-    ))
+      }))
   })
 
   afterEach(function () {

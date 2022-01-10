@@ -9,8 +9,8 @@ const {
   ObjectId,
   waitForDb,
 } = require('../../app/src/infrastructure/mongodb')
-const DocstoreManager = require('../../app/src/Features/Docstore/DocstoreManager')
-  .promises
+const DocstoreManager =
+  require('../../app/src/Features/Docstore/DocstoreManager').promises
 
 const argv = minimist(process.argv.slice(2))
 const commit = argv.commit !== undefined

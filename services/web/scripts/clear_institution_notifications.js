@@ -9,10 +9,11 @@ async function main() {
 
   console.log('Deleting notifications of institution', institutionId)
 
-  const preview = await InstitutionsManager.promises.clearInstitutionNotifications(
-    institutionId,
-    true
-  )
+  const preview =
+    await InstitutionsManager.promises.clearInstitutionNotifications(
+      institutionId,
+      true
+    )
   console.log('--- Preview ---')
   console.log(JSON.stringify(preview, null, 4))
   console.log('---------------')
@@ -25,10 +26,11 @@ async function main() {
   console.log('Exit in the next 10s in case these numbers are off.')
   await sleep(10 * 1000)
 
-  const cleared = await InstitutionsManager.promises.clearInstitutionNotifications(
-    institutionId,
-    false
-  )
+  const cleared =
+    await InstitutionsManager.promises.clearInstitutionNotifications(
+      institutionId,
+      false
+    )
   console.log('--- Cleared ---')
   console.log(JSON.stringify(cleared, null, 4))
   console.log('---------------')

@@ -31,12 +31,13 @@ const _createTag = (user, name, callback) => {
 const _createTags = (user, tagNames, callback) => {
   const tags = []
   async.series(
-    tagNames.map(tagName => cb =>
-      _createTag(user, tagName, (err, response, body) => {
-        _expect200(err, response)
-        tags.push(body)
-        cb()
-      })
+    tagNames.map(
+      tagName => cb =>
+        _createTag(user, tagName, (err, response, body) => {
+          _expect200(err, response)
+          tags.push(body)
+          cb()
+        })
     ),
     err => {
       callback(err, tags)

@@ -1,10 +1,10 @@
 const { expect } = require('chai')
 const MockSubscription = require('./Subscription')
 const SubscriptionUpdater = require('../../../../app/src/Features/Subscription/SubscriptionUpdater')
-const SubscriptionModel = require('../../../../app/src/models/Subscription')
-  .Subscription
-const DeletedSubscriptionModel = require(`../../../../app/src/models/DeletedSubscription`)
-  .DeletedSubscription
+const SubscriptionModel =
+  require('../../../../app/src/models/Subscription').Subscription
+const DeletedSubscriptionModel =
+  require(`../../../../app/src/models/DeletedSubscription`).DeletedSubscription
 
 class DeletedSubscription {
   constructor(options = {}) {

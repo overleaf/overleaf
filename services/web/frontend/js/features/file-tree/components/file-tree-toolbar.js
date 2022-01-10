@@ -63,12 +63,8 @@ function FileTreeToolbarLeft() {
 
 function FileTreeToolbarRight() {
   const { t } = useTranslation()
-  const {
-    canRename,
-    canDelete,
-    startRenaming,
-    startDeleting,
-  } = useFileTreeActionable()
+  const { canRename, canDelete, startRenaming, startDeleting } =
+    useFileTreeActionable()
 
   if (!canRename && !canDelete) {
     return null

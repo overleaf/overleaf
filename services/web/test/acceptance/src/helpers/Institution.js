@@ -1,6 +1,6 @@
 const { ObjectId } = require('mongodb')
-const InstitutionModel = require('../../../../app/src/models/Institution')
-  .Institution
+const InstitutionModel =
+  require('../../../../app/src/models/Institution').Institution
 
 let count = parseInt(Math.random() * 999999)
 

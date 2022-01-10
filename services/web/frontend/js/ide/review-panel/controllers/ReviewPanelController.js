@@ -150,9 +150,8 @@ export default App.controller(
     $scope.$watch('project.members', function (members) {
       $scope.reviewPanel.formattedProjectMembers = {}
       if (($scope.project != null ? $scope.project.owner : undefined) != null) {
-        $scope.reviewPanel.formattedProjectMembers[
-          $scope.project.owner._id
-        ] = formatUser($scope.project.owner)
+        $scope.reviewPanel.formattedProjectMembers[$scope.project.owner._id] =
+          formatUser($scope.project.owner)
       }
       if (
         ($scope.project != null ? $scope.project.members : undefined) != null
@@ -170,9 +169,8 @@ export default App.controller(
                 )
               }
               result.push(
-                ($scope.reviewPanel.formattedProjectMembers[
-                  member._id
-                ] = formatUser(member))
+                ($scope.reviewPanel.formattedProjectMembers[member._id] =
+                  formatUser(member))
               )
             } else {
               result.push(undefined)
@@ -900,8 +898,8 @@ export default App.controller(
 
     $scope.toggleFullTCStateCollapse = function () {
       if ($scope.project.features.trackChanges) {
-        return ($scope.reviewPanel.fullTCStateCollapsed = !$scope.reviewPanel
-          .fullTCStateCollapsed)
+        return ($scope.reviewPanel.fullTCStateCollapsed =
+          !$scope.reviewPanel.fullTCStateCollapsed)
       } else {
         _sendAnalytics()
         return $scope.openTrackChangesUpgradeModal()

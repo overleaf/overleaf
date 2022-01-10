@@ -1349,11 +1349,8 @@ const ProjectEntityUpdateHandler = {
           return callback(error)
         }
 
-        let {
-          docs,
-          files,
-          folders,
-        } = ProjectEntityHandler.getAllEntitiesFromProject(project)
+        let { docs, files, folders } =
+          ProjectEntityHandler.getAllEntitiesFromProject(project)
         // _checkFileTree() must be passed the folders before docs and
         // files
         ProjectEntityUpdateHandler._checkFiletree(

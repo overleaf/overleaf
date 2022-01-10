@@ -29,7 +29,8 @@ describe('RestoreManager', function () {
       requires: {
         '@overleaf/settings': {},
         '../../infrastructure/FileWriter': (this.FileWriter = {}),
-        '../Uploads/FileSystemImportManager': (this.FileSystemImportManager = {}),
+        '../Uploads/FileSystemImportManager': (this.FileSystemImportManager =
+          {}),
         '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {}),
         '../Editor/EditorController': (this.EditorController = {}),
       },

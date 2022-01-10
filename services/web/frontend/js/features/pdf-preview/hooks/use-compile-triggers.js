@@ -10,12 +10,8 @@ const showPdfDetach = getMeta('ol-showPdfDetach')
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
 
 export default function useCompileTriggers() {
-  const {
-    startCompile,
-    setChangedAt,
-    cleanupCompileResult,
-    setError,
-  } = useCompileContext()
+  const { startCompile, setChangedAt, cleanupCompileResult, setError } =
+    useCompileContext()
   const { role: detachRole } = useDetachContext()
 
   // recompile on key press

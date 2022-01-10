@@ -138,13 +138,13 @@ describe('EditorHttpController', function () {
         '@overleaf/metrics': this.Metrics,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
-        '../Collaborators/CollaboratorsInviteHandler': this
-          .CollaboratorsInviteHandler,
+        '../Collaborators/CollaboratorsInviteHandler':
+          this.CollaboratorsInviteHandler,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
         '../Authentication/SessionManager': this.SessionManager,
         '../../infrastructure/FileWriter': this.FileWriter,
-        '../Project/ProjectEntityUpdateHandler': this
-          .ProjectEntityUpdateHandler,
+        '../Project/ProjectEntityUpdateHandler':
+          this.ProjectEntityUpdateHandler,
         '../Docstore/DocstoreManager': this.DocstoreManager,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
       },

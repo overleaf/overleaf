@@ -10,7 +10,8 @@ import Icon from '../../../shared/components/icon'
 // Unicode characters in these Unicode groups:
 //  "General Punctuation — Spaces"
 //  "General Punctuation — Format character" (including zero-width spaces)
-const matchAllSpaces = /[\u061C\u2000-\u200F\u202A-\u202E\u2060\u2066-\u2069\u2028\u2029\u202F]/g
+const matchAllSpaces =
+  /[\u061C\u2000-\u200F\u202A-\u202E\u2060\u2066-\u2069\u2028\u2029\u202F]/g
 
 export default function SelectCollaborators({
   loading,
@@ -28,9 +29,10 @@ export default function SelectCollaborators({
 
   const [inputValue, setInputValue] = useState('')
 
-  const selectedEmails = useMemo(() => selectedItems.map(item => item.email), [
-    selectedItems,
-  ])
+  const selectedEmails = useMemo(
+    () => selectedItems.map(item => item.email),
+    [selectedItems]
+  )
 
   const unselectedOptions = useMemo(
     () => options.filter(option => !selectedEmails.includes(option.email)),

@@ -30,11 +30,10 @@ const validGroupPlanModalOptions = {
 async function plansPage(req, res) {
   const plans = SubscriptionViewModelBuilder.buildPlansList()
 
-  const {
-    currencyCode: recommendedCurrency,
-  } = await GeoIpLookup.promises.getCurrencyCode(
-    (req.query ? req.query.ip : undefined) || req.ip
-  )
+  const { currencyCode: recommendedCurrency } =
+    await GeoIpLookup.promises.getCurrencyCode(
+      (req.query ? req.query.ip : undefined) || req.ip
+    )
 
   function getDefault(param, category, defaultValue) {
     const v = req.query && req.query[param]
@@ -77,17 +76,17 @@ async function paymentPage(req, res) {
   if (!plan) {
     return HttpErrorHandler.unprocessableEntity(req, res, 'Plan not found')
   }
-  const hasSubscription = await LimitationsManager.promises.userHasV1OrV2Subscription(
-    user
-  )
+  const hasSubscription =
+    await LimitationsManager.promises.userHasV1OrV2Subscription(user)
   if (hasSubscription) {
     res.redirect('/user/subscription?hasSubscription=true')
   } else {
     // LimitationsManager.userHasV2Subscription only checks Mongo. Double check with
     // Recurly as well at this point (we don't do this most places for speed).
-    const valid = await SubscriptionHandler.promises.validateNoSubscriptionInRecurly(
-      user._id
-    )
+    const valid =
+      await SubscriptionHandler.promises.validateNoSubscriptionInRecurly(
+        user._id
+      )
     if (!valid) {
       res.redirect('/user/subscription?hasSubscription=true')
     } else {
@@ -98,12 +97,10 @@ async function paymentPage(req, res) {
           currency = queryCurrency
         }
       }
-      const {
-        currencyCode: recommendedCurrency,
-        countryCode,
-      } = await GeoIpLookup.promises.getCurrencyCode(
-        (req.query ? req.query.ip : undefined) || req.ip
-      )
+      const { currencyCode: recommendedCurrency, countryCode } =
+        await GeoIpLookup.promises.getCurrencyCode(
+          (req.query ? req.query.ip : undefined) || req.ip
+        )
       if (recommendedCurrency && currency == null) {
         currency = recommendedCurrency
       }
@@ -127,9 +124,10 @@ async function paymentPage(req, res) {
 
 async function userSubscriptionPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-  const results = await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
-    user
-  )
+  const results =
+    await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+      user
+    )
   const {
     personalSubscription,
     memberGroupSubscriptions,
@@ -139,9 +137,8 @@ async function userSubscriptionPage(req, res) {
     managedPublishers,
     v1SubscriptionStatus,
   } = results
-  const hasSubscription = await LimitationsManager.promises.userHasV1OrV2Subscription(
-    user
-  )
+  const hasSubscription =
+    await LimitationsManager.promises.userHasV1OrV2Subscription(user)
   const fromPlansPage = req.query.hasSubscription
   const plans = SubscriptionViewModelBuilder.buildPlansList(
     personalSubscription ? personalSubscription.plan : undefined
@@ -446,9 +443,8 @@ function processUpgradeToAnnualPlan(req, res, next) {
 
 async function extendTrial(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-  const {
-    subscription,
-  } = await LimitationsManager.promises.userHasV2Subscription(user)
+  const { subscription } =
+    await LimitationsManager.promises.userHasV2Subscription(user)
 
   try {
     await SubscriptionHandler.promises.extendTrial(subscription, 14)
@@ -485,10 +481,11 @@ async function refreshUserFeatures(req, res) {
 async function redirectToHostedPage(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const { pageType } = req.params
-  const url = await SubscriptionViewModelBuilder.promises.getRedirectToHostedPage(
-    userId,
-    pageType
-  )
+  const url =
+    await SubscriptionViewModelBuilder.promises.getRedirectToHostedPage(
+      userId,
+      pageType
+    )
   logger.warn({ userId, pageType }, 'redirecting to recurly hosted page')
   res.redirect(url)
 }

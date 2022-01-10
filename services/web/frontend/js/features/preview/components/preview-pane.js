@@ -30,12 +30,10 @@ function PreviewPane({
   const [lastCompileTimestamp, setLastCompileTimestamp] = useState(
     compilerState.lastCompileTimestamp
   )
-  const [seenLogsForCurrentCompile, setSeenLogsForCurrentCompile] = useState(
-    false
-  )
-  const [dismissedFirstErrorPopUp, setDismissedFirstErrorPopUp] = useState(
-    false
-  )
+  const [seenLogsForCurrentCompile, setSeenLogsForCurrentCompile] =
+    useState(false)
+  const [dismissedFirstErrorPopUp, setDismissedFirstErrorPopUp] =
+    useState(false)
 
   if (lastCompileTimestamp < compilerState.lastCompileTimestamp) {
     setLastCompileTimestamp(compilerState.lastCompileTimestamp)

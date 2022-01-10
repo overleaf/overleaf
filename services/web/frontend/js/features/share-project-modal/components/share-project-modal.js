@@ -124,9 +124,10 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   }, [])
 
   // merge the new data with the old project data
-  const updateProject = useCallback(data => Object.assign(project, data), [
-    project,
-  ])
+  const updateProject = useCallback(
+    data => Object.assign(project, data),
+    [project]
+  )
 
   if (!project) {
     return null

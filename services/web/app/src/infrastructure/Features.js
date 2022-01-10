@@ -1,19 +1,16 @@
 const _ = require('lodash')
 const Settings = require('@overleaf/settings')
 
-const publicRegistrationModuleAvailable = Settings.moduleImportSequence.includes(
-  'public-registration'
-)
+const publicRegistrationModuleAvailable =
+  Settings.moduleImportSequence.includes('public-registration')
 
 const supportModuleAvailable = Settings.moduleImportSequence.includes('support')
 
-const historyV1ModuleAvailable = Settings.moduleImportSequence.includes(
-  'history-v1'
-)
+const historyV1ModuleAvailable =
+  Settings.moduleImportSequence.includes('history-v1')
 
-const trackChangesModuleAvailable = Settings.moduleImportSequence.includes(
-  'track-changes'
-)
+const trackChangesModuleAvailable =
+  Settings.moduleImportSequence.includes('track-changes')
 
 /**
  * @typedef {Object} Settings

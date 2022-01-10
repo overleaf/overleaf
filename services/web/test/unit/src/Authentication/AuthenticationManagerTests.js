@@ -118,9 +118,8 @@ describe('AuthenticationManager', function () {
           'testpassword',
           err => {
             expect(err).to.not.exist
-            const {
-              hashedPassword,
-            } = this.db.users.updateOne.lastCall.args[1].$set
+            const { hashedPassword } =
+              this.db.users.updateOne.lastCall.args[1].$set
             expect(hashedPassword).to.exist
             expect(hashedPassword.length).to.equal(60)
             expect(hashedPassword).to.match(/^\$2a\$04\$[a-zA-Z0-9/.]{53}$/)
@@ -283,9 +282,8 @@ describe('AuthenticationManager', function () {
   describe('validateEmail', function () {
     describe('valid', function () {
       it('should return null', function () {
-        const result = this.AuthenticationManager.validateEmail(
-          'foo@example.com'
-        )
+        const result =
+          this.AuthenticationManager.validateEmail('foo@example.com')
         expect(result).to.equal(null)
       })
     })
@@ -374,9 +372,8 @@ describe('AuthenticationManager', function () {
         })
 
         it('should reject passwords that are too short', function () {
-          const result = this.AuthenticationManager.validatePassword(
-            '012345678'
-          )
+          const result =
+            this.AuthenticationManager.validatePassword('012345678')
 
           expect(result).to.be.an.instanceOf(
             AuthenticationErrors.InvalidPasswordError
@@ -392,9 +389,8 @@ describe('AuthenticationManager', function () {
         })
 
         it('should reject passwords that are too long', function () {
-          const result = this.AuthenticationManager.validatePassword(
-            '0123456789abc'
-          )
+          const result =
+            this.AuthenticationManager.validatePassword('0123456789abc')
 
           expect(result).to.be.an.instanceOf(
             AuthenticationErrors.InvalidPasswordError

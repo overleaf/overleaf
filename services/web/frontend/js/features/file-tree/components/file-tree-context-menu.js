@@ -7,11 +7,8 @@ import { useFileTreeMainContext } from '../contexts/file-tree-main'
 import FileTreeItemMenuItems from './file-tree-item/file-tree-item-menu-items'
 
 function FileTreeContextMenu() {
-  const {
-    hasWritePermissions,
-    contextMenuCoords,
-    setContextMenuCoords,
-  } = useFileTreeMainContext()
+  const { hasWritePermissions, contextMenuCoords, setContextMenuCoords } =
+    useFileTreeMainContext()
 
   if (!hasWritePermissions || !contextMenuCoords) return null
 

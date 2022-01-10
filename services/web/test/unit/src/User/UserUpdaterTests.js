@@ -670,11 +670,11 @@ describe('UserUpdater', function () {
           error => {
             expect(error).to.not.exist
             this.EmailHandler.promises.sendEmail.callCount.should.equal(2)
-            const toOldEmailAlert = this.EmailHandler.promises.sendEmail
-              .firstCall
+            const toOldEmailAlert =
+              this.EmailHandler.promises.sendEmail.firstCall
             expect(toOldEmailAlert.args[0]).to.equal('securityAlert')
-            const toNewEmailAlert = this.EmailHandler.promises.sendEmail
-              .lastCall
+            const toNewEmailAlert =
+              this.EmailHandler.promises.sendEmail.lastCall
             expect(toOldEmailAlert.args[1].to).to.equal(this.stubbedUser.email)
             expect(toNewEmailAlert.args[0]).to.equal('securityAlert')
             expect(toNewEmailAlert.args[1].to).to.equal(this.newEmail)

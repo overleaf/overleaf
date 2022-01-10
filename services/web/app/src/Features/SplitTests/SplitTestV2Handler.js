@@ -138,12 +138,8 @@ async function _getAssignment(
   if (splitTest) {
     const currentVersion = splitTest.getCurrentVersion()
     if (currentVersion.active) {
-      const {
-        activeForUser,
-        selectedVariantName,
-        phase,
-        versionNumber,
-      } = await _getAssignmentMetadata(analyticsId, userId, splitTest)
+      const { activeForUser, selectedVariantName, phase, versionNumber } =
+        await _getAssignmentMetadata(analyticsId, userId, splitTest)
       if (activeForUser) {
         const assignmentConfig = {
           userId,
