@@ -5,46 +5,43 @@ const ChatClient = require('./helpers/ChatClient')
 const ChatApp = require('./helpers/ChatApp')
 
 describe('Deleting a message', async function () {
+  const projectId = ObjectId().toString()
+  const userId = ObjectId().toString()
+  const threadId = ObjectId().toString()
+
   before(async function () {
-    this.project_id = ObjectId().toString()
-    this.user_id = ObjectId().toString()
-    this.thread_id = ObjectId().toString()
     await ChatApp.ensureRunning()
   })
 
   describe('in a thread', async function () {
     before(async function () {
-      const { response, body: message } = await ChatClient.sendMessage(
-        this.project_id,
-        this.thread_id,
-        this.user_id,
+      const { response } = await ChatClient.sendMessage(
+        projectId,
+        threadId,
+        userId,
         'first message'
       )
-      this.message = message
       expect(response.statusCode).to.equal(201)
-      const { response: response2, body: message2 } =
+      const { response: response2, body: message } =
         await ChatClient.sendMessage(
-          this.project_id,
-          this.thread_id,
-          this.user_id,
+          projectId,
+          threadId,
+          userId,
           'deleted message'
         )
-      this.message = message2
       expect(response2.statusCode).to.equal(201)
       const { response: response3 } = await ChatClient.deleteMessage(
-        this.project_id,
-        this.thread_id,
-        this.message.id
+        projectId,
+        threadId,
+        message.id
       )
       expect(response3.statusCode).to.equal(204)
     })
 
     it('should then remove the message from the threads', async function () {
-      const { response, body: threads } = await ChatClient.getThreads(
-        this.project_id
-      )
+      const { response, body: threads } = await ChatClient.getThreads(projectId)
       expect(response.statusCode).to.equal(200)
-      expect(threads[this.thread_id].messages.length).to.equal(1)
+      expect(threads[threadId].messages.length).to.equal(1)
     })
   })
 })

@@ -10,61 +10,59 @@ describe('Sending a message', async function () {
   })
 
   describe('globally', async function () {
+    const projectId = ObjectId().toString()
+    const userId = ObjectId().toString()
+    const content = 'global message'
     before(async function () {
-      this.project_id = ObjectId().toString()
-      this.user_id = ObjectId().toString()
-      this.content = 'global message'
       const { response, body } = await ChatClient.sendGlobalMessage(
-        this.project_id,
-        this.user_id,
-        this.content
+        projectId,
+        userId,
+        content
       )
       expect(response.statusCode).to.equal(201)
-      expect(body.content).to.equal(this.content)
-      expect(body.user_id).to.equal(this.user_id)
-      expect(body.room_id).to.equal(this.project_id)
+      expect(body.content).to.equal(content)
+      expect(body.user_id).to.equal(userId)
+      expect(body.room_id).to.equal(projectId)
     })
 
     it('should then list the message in the project messages', async function () {
       const { response, body: messages } = await ChatClient.getGlobalMessages(
-        this.project_id
+        projectId
       )
       expect(response.statusCode).to.equal(200)
       expect(messages.length).to.equal(1)
-      expect(messages[0].content).to.equal(this.content)
+      expect(messages[0].content).to.equal(content)
     })
   })
 
   describe('to a thread', async function () {
+    const projectId = ObjectId().toString()
+    const userId = ObjectId().toString()
+    const threadId = ObjectId().toString()
+    const content = 'thread message'
     before(async function () {
-      this.project_id = ObjectId().toString()
-      this.user_id = ObjectId().toString()
-      this.thread_id = ObjectId().toString()
-      this.content = 'thread message'
       const { response, body } = await ChatClient.sendMessage(
-        this.project_id,
-        this.thread_id,
-        this.user_id,
-        this.content
+        projectId,
+        threadId,
+        userId,
+        content
       )
       expect(response.statusCode).to.equal(201)
-      expect(body.content).to.equal(this.content)
-      expect(body.user_id).to.equal(this.user_id)
-      expect(body.room_id).to.equal(this.project_id)
+      expect(body.content).to.equal(content)
+      expect(body.user_id).to.equal(userId)
+      expect(body.room_id).to.equal(projectId)
     })
 
     it('should then list the message in the threads', async function () {
-      const { response, body: threads } = await ChatClient.getThreads(
-        this.project_id
-      )
+      const { response, body: threads } = await ChatClient.getThreads(projectId)
       expect(response.statusCode).to.equal(200)
-      expect(threads[this.thread_id].messages.length).to.equal(1)
-      expect(threads[this.thread_id].messages[0].content).to.equal(this.content)
+      expect(threads[threadId].messages.length).to.equal(1)
+      expect(threads[threadId].messages[0].content).to.equal(content)
     })
 
     it('should not appear in the global messages', async function () {
       const { response, body: messages } = await ChatClient.getGlobalMessages(
-        this.project_id
+        projectId
       )
       expect(response.statusCode).to.equal(200)
       expect(messages.length).to.equal(0)
@@ -72,17 +70,15 @@ describe('Sending a message', async function () {
   })
 
   describe('failure cases', async function () {
-    before(async function () {
-      this.project_id = ObjectId().toString()
-      this.user_id = ObjectId().toString()
-      this.thread_id = ObjectId().toString()
-    })
+    const projectId = ObjectId().toString()
+    const userId = ObjectId().toString()
+    const threadId = ObjectId().toString()
 
-    describe('with a malformed user_id', async function () {
+    describe('with a malformed userId', async function () {
       it('should return a graceful error', async function () {
         const { response, body } = await ChatClient.sendMessage(
-          this.project_id,
-          this.thread_id,
+          projectId,
+          threadId,
           'malformed-user',
           'content'
         )
@@ -91,12 +87,12 @@ describe('Sending a message', async function () {
       })
     })
 
-    describe('with a malformed project_id', async function () {
+    describe('with a malformed projectId', async function () {
       it('should return a graceful error', async function () {
         const { response, body } = await ChatClient.sendMessage(
           'malformed-project',
-          this.thread_id,
-          this.user_id,
+          threadId,
+          userId,
           'content'
         )
         expect(response.statusCode).to.equal(400)
@@ -104,12 +100,12 @@ describe('Sending a message', async function () {
       })
     })
 
-    describe('with a malformed thread_id', async function () {
+    describe('with a malformed threadId', async function () {
       it('should return a graceful error', async function () {
         const { response, body } = await ChatClient.sendMessage(
-          this.project_id,
+          projectId,
           'malformed-thread-id',
-          this.user_id,
+          userId,
           'content'
         )
         expect(response.statusCode).to.equal(400)
@@ -120,9 +116,9 @@ describe('Sending a message', async function () {
     describe('with no content', async function () {
       it('should return a graceful error', async function () {
         const { response, body } = await ChatClient.sendMessage(
-          this.project_id,
-          this.thread_id,
-          this.user_id,
+          projectId,
+          threadId,
+          userId,
           null
         )
         expect(response.statusCode).to.equal(400)
@@ -134,9 +130,9 @@ describe('Sending a message', async function () {
       it('should return a graceful error', async function () {
         const content = '-'.repeat(10 * 1024 + 1)
         const { response, body } = await ChatClient.sendMessage(
-          this.project_id,
-          this.thread_id,
-          this.user_id,
+          projectId,
+          threadId,
+          userId,
           content
         )
         expect(response.statusCode).to.equal(400)
