@@ -100,6 +100,10 @@ export default class DocumentCompiler {
       const compileTimeClientE2E = performance.now() - t0
       const { firstRenderDone } = trackPdfDownload(data, compileTimeClientE2E)
       this.setFirstRenderDone(() => firstRenderDone)
+
+      // unset the error before it's set again later, so that components are recreated and events are tracked
+      this.setError(undefined)
+
       data.options = options
       if (data.clsiServerId) {
         this.clsiServerId = data.clsiServerId

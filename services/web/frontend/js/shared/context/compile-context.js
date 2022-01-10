@@ -12,11 +12,7 @@ import useScopeValueSetterOnly from '../hooks/use-scope-value-setter-only'
 import usePersistedState from '../hooks/use-persisted-state'
 import useAbortController from '../hooks/use-abort-controller'
 import DocumentCompiler from '../../features/pdf-preview/util/compiler'
-import {
-  send,
-  sendMB,
-  sendMBSampled,
-} from '../../infrastructure/event-tracking'
+import { send, sendMBSampled } from '../../infrastructure/event-tracking'
 import {
   buildLogEntryAnnotations,
   handleOutputFiles,
@@ -273,9 +269,6 @@ export function CompileProvider({ children }) {
               'editor-click-feature',
               'compile-timeout'
             )
-            sendMB('paywall-prompt', {
-              'paywall-type': 'compile-timeout',
-            })
           }
           break
 
