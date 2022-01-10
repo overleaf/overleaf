@@ -35,7 +35,7 @@ describe('<FileTreeFolder/>', function () {
       />,
       {
         contextProps: {
-          projectRootFolder: [
+          rootFolder: [
             {
               _id: 'root-folder-id',
               name: 'rootFolder',
@@ -66,7 +66,7 @@ describe('<FileTreeFolder/>', function () {
       />,
       {
         contextProps: {
-          projectRootFolder: [
+          rootFolder: [
             {
               _id: 'root-folder-id',
               name: 'rootFolder',
@@ -97,7 +97,7 @@ describe('<FileTreeFolder/>', function () {
       />,
       {
         contextProps: {
-          projectRootFolder: [
+          rootFolder: [
             {
               _id: 'root-folder-id',
               name: 'rootFolder',

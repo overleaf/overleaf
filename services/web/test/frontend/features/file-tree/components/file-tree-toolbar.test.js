@@ -31,7 +31,7 @@ describe('<FileTreeToolbar/>', function () {
     renderWithContext(<FileTreeToolbar />, {
       contextProps: {
         rootDocId: '456def',
-        projectRootFolder: [
+        rootFolder: [
           {
             _id: 'root-folder-id',
             name: 'rootFolder',

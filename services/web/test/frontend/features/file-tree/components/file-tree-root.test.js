@@ -47,7 +47,7 @@ describe('<FileTreeRoot/>', function () {
         isConnected
       />,
       {
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '456def',
         features: {},
@@ -86,7 +86,7 @@ describe('<FileTreeRoot/>', function () {
         isConnected
       />,
       {
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '456def',
         features: {},
@@ -128,7 +128,7 @@ describe('<FileTreeRoot/>', function () {
         setStartedFreeTrial={() => null}
       />,
       {
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '456def',
         features: {},
@@ -163,7 +163,7 @@ describe('<FileTreeRoot/>', function () {
         isConnected
       />,
       {
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '456def',
         features: {},
@@ -219,7 +219,7 @@ describe('<FileTreeRoot/>', function () {
         isConnected
       />,
       {
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '456def',
         features: {},
@@ -266,7 +266,7 @@ describe('<FileTreeRoot/>', function () {
         isConnected
       />,
       {
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '456def',
         features: {},

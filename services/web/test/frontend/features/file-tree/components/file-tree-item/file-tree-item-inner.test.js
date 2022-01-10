@@ -86,7 +86,7 @@ describe('<FileTreeitemInner />', function () {
         {
           contextProps: {
             rootDocId: '123abc',
-            projectRootFolder: [
+            rootFolder: [
               {
                 _id: 'root-folder-id',
                 name: 'rootFolder',

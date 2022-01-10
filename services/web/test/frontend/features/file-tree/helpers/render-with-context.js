@@ -5,7 +5,7 @@ export default (children, options = {}) => {
   let { contextProps = {}, ...renderOptions } = options
   contextProps = {
     projectId: '123abc',
-    projectRootFolder: [
+    rootFolder: [
       {
         _id: 'root-folder-id',
         name: 'rootFolder',

@@ -11,7 +11,7 @@ import {
 } from '../util/find-in-tree'
 
 import { useFileTreeActionable } from './file-tree-actionable'
-import { useFileTreeMutable } from './file-tree-mutable'
+import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
 import { useEditorContext } from '../../../shared/context/editor-context'
 
@@ -77,7 +77,7 @@ export function useDraggable(draggedEntityId) {
   const { t } = useTranslation()
 
   const { permissionsLevel } = useEditorContext(editorContextPropTypes)
-  const { fileTreeData } = useFileTreeMutable()
+  const { fileTreeData } = useFileTreeData()
   const { selectedEntityIds } = useFileTreeSelectable()
 
   const [isDraggable, setIsDraggable] = useState(true)

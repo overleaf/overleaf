@@ -10,6 +10,7 @@ import { DetachProvider } from './detach-context'
 import { ChatProvider } from '../../features/chat/context/chat-context'
 import { ProjectProvider } from './project-context'
 import { SplitTestProvider } from './split-test-context'
+import { FileTreeDataProvider } from './file-tree-data-context'
 
 export function ContextRoot({ children, ide, settings }) {
   return (
@@ -17,15 +18,17 @@ export function ContextRoot({ children, ide, settings }) {
       <IdeProvider ide={ide}>
         <UserProvider>
           <ProjectProvider>
-            <EditorProvider settings={settings}>
-              <DetachProvider>
-                <LayoutProvider>
-                  <CompileProvider>
-                    <ChatProvider>{children}</ChatProvider>
-                  </CompileProvider>
-                </LayoutProvider>
-              </DetachProvider>
-            </EditorProvider>
+            <FileTreeDataProvider>
+              <EditorProvider settings={settings}>
+                <DetachProvider>
+                  <LayoutProvider>
+                    <CompileProvider>
+                      <ChatProvider>{children}</ChatProvider>
+                    </CompileProvider>
+                  </LayoutProvider>
+                </DetachProvider>
+              </EditorProvider>
+            </FileTreeDataProvider>
           </ProjectProvider>
         </UserProvider>
       </IdeProvider>

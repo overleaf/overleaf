@@ -34,9 +34,6 @@ EditorContext.Provider.propTypes = {
     insertSymbol: PropTypes.func,
     isProjectOwner: PropTypes.bool,
     isRestrictedTokenMember: PropTypes.bool,
-    rootFolder: PropTypes.shape({
-      children: PropTypes.arrayOf(PropTypes.shape({ type: PropTypes.string })),
-    }),
     permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
   }),
 }
@@ -73,7 +70,6 @@ export function EditorProvider({ children, settings }) {
 
   const [loading] = useScopeValue('state.loading')
   const [projectName, setProjectName] = useScopeValue('project.name')
-  const [rootFolder] = useScopeValue('rootFolder', true)
   const [permissionsLevel] = useScopeValue('permissionsLevel')
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
@@ -135,7 +131,6 @@ export function EditorProvider({ children, settings }) {
       permissionsLevel,
       isProjectOwner: owner?._id === window.user.id,
       isRestrictedTokenMember: window.isRestrictedTokenMember,
-      rootFolder,
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,
@@ -147,7 +142,6 @@ export function EditorProvider({ children, settings }) {
       renameProject,
       permissionsLevel,
       owner?._id,
-      rootFolder,
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,

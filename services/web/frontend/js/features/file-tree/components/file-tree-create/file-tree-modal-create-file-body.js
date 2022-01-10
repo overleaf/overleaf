@@ -6,7 +6,7 @@ import FileTreeUploadDoc from './modes/file-tree-upload-doc'
 import FileTreeModalCreateFileMode from './file-tree-modal-create-file-mode'
 import FileTreeCreateNameProvider from '../../contexts/file-tree-create-name'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
-import { useFileTreeMutable } from '../../contexts/file-tree-mutable'
+import { useFileTreeData } from '../../../../shared/context/file-tree-data-context'
 
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 
@@ -16,7 +16,7 @@ export default function FileTreeModalCreateFileBody() {
   const { t } = useTranslation()
 
   const { newFileCreateMode } = useFileTreeActionable()
-  const { fileCount } = useFileTreeMutable()
+  const { fileCount } = useFileTreeData()
 
   if (!fileCount || fileCount.status === 'error') {
     return null

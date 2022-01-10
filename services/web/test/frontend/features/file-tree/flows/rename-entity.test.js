@@ -59,7 +59,7 @@ describe('FileTree Rename Entity Flow', function () {
       />,
       {
         socket: new MockedSocket(),
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
       }
     )

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { useProjectContext } from '../../../shared/context/project-context'
+import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import FileTreeContext from './file-tree-context'
 import FileTreeDraggablePreviewLayer from './file-tree-draggable-preview-layer'
 import FileTreeFolderList from './file-tree-folder-list'
@@ -13,7 +14,6 @@ import FileTreeModalError from './modals/file-tree-modal-error'
 import FileTreeContextMenu from './file-tree-context-menu'
 import FileTreeError from './file-tree-error'
 
-import { useFileTreeMutable } from '../contexts/file-tree-mutable'
 import { useDroppable } from '../contexts/file-tree-draggable'
 
 import { useFileTreeSocketListener } from '../hooks/file-tree-socket-listener'
@@ -28,10 +28,9 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
   onInit,
   isConnected,
 }) {
-  const { _id: projectId, rootFolder } = useProjectContext(
-    projectContextPropTypes
-  )
-  const isReady = projectId && rootFolder
+  const { _id: projectId } = useProjectContext(projectContextPropTypes)
+  const { fileTreeData } = useFileTreeData()
+  const isReady = projectId && fileTreeData
 
   useEffect(() => {
     if (isReady) onInit()
@@ -62,7 +61,7 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
 
 function FileTreeRootFolder() {
   useFileTreeSocketListener()
-  const { fileTreeData } = useFileTreeMutable()
+  const { fileTreeData } = useFileTreeData()
 
   const { isOver, dropRef } = useDroppable(fileTreeData._id)
 
@@ -95,7 +94,6 @@ FileTreeRoot.propTypes = {
 
 const projectContextPropTypes = {
   _id: PropTypes.string.isRequired,
-  rootFolder: PropTypes.array.isRequired,
 }
 
 export default withErrorBoundary(FileTreeRoot, FileTreeError)

@@ -1,16 +1,8 @@
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from '../hooks/use-scope-value'
 
 const ProjectContext = createContext()
-
-const fileTreeDataPropType = PropTypes.shape({
-  _id: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  docs: PropTypes.array.isRequired,
-  fileRefs: PropTypes.array.isRequired,
-  folders: PropTypes.array.isRequired,
-})
 
 ProjectContext.Provider.propTypes = {
   value: PropTypes.shape({
@@ -44,7 +36,6 @@ ProjectContext.Provider.propTypes = {
       _id: PropTypes.string.isRequired,
       email: PropTypes.string.isRequired,
     }),
-    rootFolder: PropTypes.arrayOf(fileTreeDataPropType),
   }),
 }
 
@@ -67,13 +58,24 @@ export function useProjectContext(propTypes) {
   return context
 }
 
+// when the provider is created the project is still not added to the Angular
+// scope. A few props are populated to prevent errors in existing React
+// components
+const projectFallback = {
+  _id: window.project_id,
+  name: '',
+  features: {},
+}
+
 export function ProjectProvider({ children }) {
   const [project] = useScopeValue('project', true)
 
-  // when the provider is created the project is still not added to the Angular scope.
-  // Name is also populated to prevent errors in existing React components
-  const value = project || { _id: window.project_id, name: '', features: {} }
-
+  const value = useMemo(() => {
+    return {
+      ...projectFallback,
+      ...project,
+    }
+  }, [project])
   return (
     <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>
   )

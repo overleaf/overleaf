@@ -4,18 +4,36 @@ import {
   useReducer,
   useContext,
   useEffect,
+  useMemo,
 } from 'react'
 import PropTypes from 'prop-types'
-
+import useScopeValue from '../hooks/use-scope-value'
 import {
   renameInTree,
   deleteInTree,
   moveInTree,
   createEntityInTree,
-} from '../util/mutate-in-tree'
-import { useProjectContext } from '../../../shared/context/project-context'
+} from '../../features/file-tree/util/mutate-in-tree'
+import { countFiles } from '../../features/file-tree/util/count-in-tree'
 
-const FileTreeMutableContext = createContext()
+const FileTreeDataContext = createContext()
+
+const fileTreeDataPropType = PropTypes.shape({
+  _id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  docs: PropTypes.array.isRequired,
+  fileRefs: PropTypes.array.isRequired,
+  folders: PropTypes.array.isRequired,
+})
+
+FileTreeDataContext.Provider.propTypes = {
+  value: PropTypes.shape({
+    // fileTreeData is the up-to-date representation of the files list, updated
+    // by the file tree
+    fileTreeData: fileTreeDataPropType,
+    hasFolders: PropTypes.bool,
+  }),
+}
 
 const ACTION_TYPES = {
   RENAME: 'RENAME',
@@ -88,13 +106,37 @@ function fileTreeMutableReducer({ fileTreeData }, action) {
   }
 }
 
-const initialState = rootFolder => ({
-  fileTreeData: rootFolder[0],
-  fileCount: countFiles(rootFolder[0]),
-})
+const initialState = rootFolder => {
+  const fileTreeData = rootFolder?.[0]
+  return {
+    fileTreeData,
+    fileCount: countFiles(fileTreeData),
+  }
+}
 
-export const FileTreeMutableProvider = function ({ children }) {
-  const { rootFolder } = useProjectContext(projectContextPropTypes)
+export function useFileTreeData(propTypes) {
+  const context = useContext(FileTreeDataContext)
+
+  if (!context) {
+    throw new Error(
+      'useFileTreeData is only available inside FileTreeDataProvider'
+    )
+  }
+
+  PropTypes.checkPropTypes(
+    propTypes,
+    context,
+    'data',
+    'FileTreeDataContext.Provider'
+  )
+
+  return context
+}
+
+export function FileTreeDataProvider({ children }) {
+  const [project] = useScopeValue('project', true)
+
+  const { rootFolder } = project || {}
 
   const [{ fileTreeData, fileCount }, dispatch] = useReducer(
     fileTreeMutableReducer,
@@ -105,7 +147,7 @@ export const FileTreeMutableProvider = function ({ children }) {
   useEffect(() => {
     dispatch({
       type: ACTION_TYPES.RESET,
-      fileTreeData: rootFolder[0],
+      fileTreeData: rootFolder?.[0],
     })
   }, [rootFolder])
 
@@ -152,7 +194,19 @@ export const FileTreeMutableProvider = function ({ children }) {
     dispatch({ type: ACTION_TYPES.MOVE, entityId, toFolderId })
   }, [])
 
-  const value = {
+  const value = useMemo(() => {
+    return {
+      dispatchCreateDoc,
+      dispatchCreateFile,
+      dispatchCreateFolder,
+      dispatchDelete,
+      dispatchMove,
+      dispatchRename,
+      fileCount,
+      fileTreeData,
+      hasFolders: fileTreeData?.folders.length > 0,
+    }
+  }, [
     dispatchCreateDoc,
     dispatchCreateFile,
     dispatchCreateFolder,
@@ -161,76 +215,15 @@ export const FileTreeMutableProvider = function ({ children }) {
     dispatchRename,
     fileCount,
     fileTreeData,
-  }
+  ])
 
   return (
-    <FileTreeMutableContext.Provider value={value}>
+    <FileTreeDataContext.Provider value={value}>
       {children}
-    </FileTreeMutableContext.Provider>
+    </FileTreeDataContext.Provider>
   )
 }
 
-FileTreeMutableProvider.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
-}
-
-const projectContextPropTypes = {
-  rootFolder: PropTypes.arrayOf(
-    PropTypes.shape({
-      _id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      docs: PropTypes.array.isRequired,
-      fileRefs: PropTypes.array.isRequired,
-      folders: PropTypes.array.isRequired,
-    })
-  ),
-}
-
-export function useFileTreeMutable() {
-  const context = useContext(FileTreeMutableContext)
-
-  if (!context) {
-    throw new Error(
-      'useFileTreeMutable is only available in FileTreeMutableProvider'
-    )
-  }
-
-  return context
-}
-
-function filesInFolder({ docs, folders, fileRefs }) {
-  const files = [...docs, ...fileRefs]
-
-  for (const folder of folders) {
-    files.push(...filesInFolder(folder))
-  }
-
-  return files
-}
-
-function countFiles(fileTreeData) {
-  const files = filesInFolder(fileTreeData)
-
-  // count all the non-deleted entities
-  const value = files.filter(item => !item.deleted).length
-
-  const limit = window.ExposedSettings.maxEntitiesPerProject
-  const status = fileCountStatus(value, limit, Math.ceil(limit / 20))
-
-  return { value, status, limit }
-}
-
-function fileCountStatus(value, limit, range) {
-  if (value >= limit) {
-    return 'error'
-  }
-
-  if (value >= limit - range) {
-    return 'warning'
-  }
-
-  return 'success'
+FileTreeDataProvider.propTypes = {
+  children: PropTypes.any,
 }

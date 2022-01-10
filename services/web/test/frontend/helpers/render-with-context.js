@@ -14,6 +14,7 @@ import { get } from 'lodash'
 import { ProjectProvider } from '../../../frontend/js/shared/context/project-context'
 import { SplitTestProvider } from '../../../frontend/js/shared/context/split-test-context'
 import { CompileProvider } from '../../../frontend/js/shared/context/compile-context'
+import { FileTreeDataProvider } from '../../../frontend/js/shared/context/file-tree-data-context'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -36,8 +37,7 @@ export function EditorProviders({
   },
   permissionsLevel = 'owner',
   children,
-  rootFolder,
-  projectRootFolder = [
+  rootFolder = [
     {
       _id: 'root-folder-id',
       name: 'rootFolder',
@@ -75,10 +75,7 @@ export function EditorProviders({
       },
       features,
       rootDoc_id: rootDocId,
-      rootFolder: projectRootFolder,
-    },
-    rootFolder: rootFolder || {
-      children: [],
+      rootFolder,
     },
     ui,
     $watch: (path, callback) => {
@@ -113,13 +110,15 @@ export function EditorProviders({
       <IdeProvider ide={window._ide}>
         <UserProvider>
           <ProjectProvider>
-            <EditorProvider settings={{}}>
-              <DetachProvider>
-                <LayoutProvider>
-                  <CompileProvider>{children}</CompileProvider>
-                </LayoutProvider>
-              </DetachProvider>
-            </EditorProvider>
+            <FileTreeDataProvider>
+              <EditorProvider settings={{}}>
+                <DetachProvider>
+                  <LayoutProvider>
+                    <CompileProvider>{children}</CompileProvider>
+                  </LayoutProvider>
+                </DetachProvider>
+              </EditorProvider>
+            </FileTreeDataProvider>
           </ProjectProvider>
         </UserProvider>
       </IdeProvider>

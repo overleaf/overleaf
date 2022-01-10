@@ -48,7 +48,7 @@ describe('FileTree Create Folder Flow', function () {
       />,
       {
         socket: new MockedSocket(),
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
       }
     )
@@ -110,7 +110,7 @@ describe('FileTree Create Folder Flow', function () {
       />,
       {
         socket: new MockedSocket(),
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '789ghi',
       }
@@ -182,7 +182,7 @@ describe('FileTree Create Folder Flow', function () {
       />,
       {
         socket: new MockedSocket(),
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '456def',
       }
@@ -243,7 +243,7 @@ describe('FileTree Create Folder Flow', function () {
       />,
       {
         socket: new MockedSocket(),
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '456def',
       }

@@ -19,7 +19,7 @@ describe('<FileTreeDoc/>', function () {
       <FileTreeDoc name="foo.tex" id="123abc" isLinkedFile={false} />,
       {
         contextProps: {
-          projectRootFolder: [
+          rootFolder: [
             {
               _id: 'root-folder-id',
               name: 'rootFolder',
@@ -50,7 +50,7 @@ describe('<FileTreeDoc/>', function () {
   it('selects', function () {
     renderWithContext(<FileTreeDoc name="foo.tex" id="123abc" expanded />, {
       contextProps: {
-        projectRootFolder: [
+        rootFolder: [
           {
             _id: 'root-folder-id',
             name: 'rootFolder',
@@ -71,7 +71,7 @@ describe('<FileTreeDoc/>', function () {
   it('multi-selects', function () {
     renderWithContext(<FileTreeDoc name="foo.tex" id="123abc" expanded />, {
       contextProps: {
-        projectRootFolder: [
+        rootFolder: [
           {
             _id: 'root-folder-id',
             name: 'rootFolder',

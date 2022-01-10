@@ -8,7 +8,7 @@ import PropTypes from 'prop-types'
 import renderWithContext from '../../helpers/render-with-context'
 import FileTreeModalCreateFile from '../../../../../../frontend/js/features/file-tree/components/modals/file-tree-modal-create-file'
 import { useFileTreeActionable } from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-actionable'
-import { useFileTreeMutable } from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-mutable'
+import { useFileTreeData } from '../../../../../../frontend/js/shared/context/file-tree-data-context'
 
 describe('<FileTreeModalCreateFile/>', function () {
   beforeEach(function () {
@@ -65,7 +65,7 @@ describe('<FileTreeModalCreateFile/>', function () {
     ]
 
     renderWithContext(<OpenWithMode mode="doc" />, {
-      contextProps: { projectRootFolder: rootFolder },
+      contextProps: { rootFolder },
     })
 
     screen.getByRole(
@@ -89,7 +89,7 @@ describe('<FileTreeModalCreateFile/>', function () {
     ]
 
     renderWithContext(<OpenWithMode mode="doc" />, {
-      contextProps: { projectRootFolder: rootFolder },
+      contextProps: { rootFolder },
     })
 
     screen.getByText(/This project is approaching the file limit \(\d+\/\d+\)/)
@@ -127,7 +127,7 @@ describe('<FileTreeModalCreateFile/>', function () {
     ]
 
     renderWithContext(<OpenWithMode mode="doc" />, {
-      contextProps: { projectRootFolder: rootFolder },
+      contextProps: { rootFolder },
     })
 
     screen.getByText(/This project is approaching the file limit \(\d+\/\d+\)/)
@@ -458,7 +458,7 @@ describe('<FileTreeModalCreateFile/>', function () {
 function OpenWithMode({ mode }) {
   const { newFileCreateMode, startCreatingFile } = useFileTreeActionable()
 
-  const { fileCount } = useFileTreeMutable()
+  const { fileCount } = useFileTreeData()
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => startCreatingFile(mode), [])

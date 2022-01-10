@@ -44,7 +44,7 @@ describe('FileTree Delete Entity Flow', function () {
         />,
         {
           socket: new MockedSocket(),
-          projectRootFolder: rootFolder,
+          rootFolder,
           projectId: '123abc',
         }
       )
@@ -164,7 +164,7 @@ describe('FileTree Delete Entity Flow', function () {
         />,
         {
           socket: new MockedSocket(),
-          projectRootFolder: rootFolder,
+          rootFolder,
           projectId: '123abc',
         }
       )
@@ -223,7 +223,7 @@ describe('FileTree Delete Entity Flow', function () {
         />,
         {
           socket: new MockedSocket(),
-          projectRootFolder: rootFolder,
+          rootFolder,
           projectId: '123abc',
         }
       )

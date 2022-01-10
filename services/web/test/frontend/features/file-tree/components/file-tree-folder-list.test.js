@@ -43,7 +43,7 @@ describe('<FileTreeFolderList/>', function () {
         {
           contextProps: {
             permissionsLevel: 'readOnly',
-            projectRootFolder: [
+            rootFolder: [
               {
                 _id: 'root-folder-id',
                 name: 'rootFolder',
@@ -80,7 +80,7 @@ describe('<FileTreeFolderList/>', function () {
         <FileTreeFolderList folders={[]} docs={docs} files={[]} />,
         {
           contextProps: {
-            projectRootFolder: [
+            rootFolder: [
               {
                 _id: 'root-folder-id',
                 name: 'rootFolder',

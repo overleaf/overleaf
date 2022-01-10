@@ -12,7 +12,7 @@ import classNames from 'classnames'
 import _ from 'lodash'
 
 import { findInTree } from '../util/find-in-tree'
-import { useFileTreeMutable } from './file-tree-mutable'
+import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
@@ -85,7 +85,7 @@ export function FileTreeSelectableProvider({ onSelect, children }) {
     rootDocId
   )
 
-  const { fileTreeData } = useFileTreeMutable()
+  const { fileTreeData } = useFileTreeData()
 
   const [selectedEntityIds, dispatch] = useReducer(
     permissionsLevel === 'readOnly'

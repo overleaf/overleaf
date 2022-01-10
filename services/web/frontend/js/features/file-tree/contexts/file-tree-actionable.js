@@ -22,7 +22,7 @@ import { isBlockedFilename, isCleanFilename } from '../util/safe-path'
 
 import { useProjectContext } from '../../../shared/context/project-context'
 import { useEditorContext } from '../../../shared/context/editor-context'
-import { useFileTreeMutable } from './file-tree-mutable'
+import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import { useFileTreeSelectable } from './file-tree-selectable'
 
 import {
@@ -129,7 +129,7 @@ export function FileTreeActionableProvider({ children }) {
     defaultState
   )
 
-  const { fileTreeData, dispatchRename, dispatchMove } = useFileTreeMutable()
+  const { fileTreeData, dispatchRename, dispatchMove } = useFileTreeData()
   const { selectedEntityIds } = useFileTreeSelectable()
 
   const startRenaming = useCallback(() => {

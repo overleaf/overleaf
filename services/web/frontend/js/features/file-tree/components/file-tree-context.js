@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 
 import { FileTreeMainProvider } from '../contexts/file-tree-main'
 import { FileTreeActionableProvider } from '../contexts/file-tree-actionable'
-import { FileTreeMutableProvider } from '../contexts/file-tree-mutable'
 import { FileTreeSelectableProvider } from '../contexts/file-tree-selectable'
 import { FileTreeDraggableProvider } from '../contexts/file-tree-draggable'
 
@@ -26,13 +25,11 @@ function FileTreeContext({
       setStartedFreeTrial={setStartedFreeTrial}
       reindexReferences={reindexReferences}
     >
-      <FileTreeMutableProvider>
-        <FileTreeSelectableProvider onSelect={onSelect}>
-          <FileTreeActionableProvider>
-            <FileTreeDraggableProvider>{children}</FileTreeDraggableProvider>
-          </FileTreeActionableProvider>
-        </FileTreeSelectableProvider>
-      </FileTreeMutableProvider>
+      <FileTreeSelectableProvider onSelect={onSelect}>
+        <FileTreeActionableProvider>
+          <FileTreeDraggableProvider>{children}</FileTreeDraggableProvider>
+        </FileTreeActionableProvider>
+      </FileTreeSelectableProvider>
     </FileTreeMainProvider>
   )
 }

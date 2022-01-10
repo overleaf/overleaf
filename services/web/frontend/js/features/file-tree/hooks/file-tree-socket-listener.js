@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 import { useUserContext } from '../../../shared/context/user-context'
-import { useFileTreeMutable } from '../contexts/file-tree-mutable'
+import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
 import { findInTreeOrThrow } from '../util/find-in-tree'
 
@@ -18,7 +18,7 @@ export function useFileTreeSocketListener() {
     dispatchCreateDoc,
     dispatchCreateFile,
     fileTreeData,
-  } = useFileTreeMutable()
+  } = useFileTreeData()
   const { selectedEntityIds, selectedEntityParentIds, select, unselect } =
     useFileTreeSelectable()
   const socket = window._ide && window._ide.socket

@@ -39,7 +39,7 @@ describe('FileTree Context Menu Flow', function () {
         isConnected
       />,
       {
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '456def',
       }
@@ -74,7 +74,7 @@ describe('FileTree Context Menu Flow', function () {
         isConnected
       />,
       {
-        projectRootFolder: rootFolder,
+        rootFolder,
         projectId: '123abc',
         rootDocId: '456def',
         permissionsLevel: 'readOnly',
