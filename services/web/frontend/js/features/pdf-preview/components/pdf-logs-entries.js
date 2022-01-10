@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import PreviewLogsPaneMaxEntries from '../../preview/components/preview-logs-pane-max-entries'
 import PdfLogEntry from './pdf-log-entry'
 import { useIdeContext } from '../../../shared/context/ide-context'
+import useDetachAction from '../../../shared/hooks/use-detach-action'
 
 const LOG_PREVIEW_LIMIT = 100
 
@@ -12,7 +13,7 @@ function PdfLogsEntries({ entries, hasErrors }) {
 
   const ide = useIdeContext()
 
-  const syncToEntry = useCallback(
+  const _syncToEntry = useCallback(
     entry => {
       const entity = ide.fileTreeManager.findEntityByPath(entry.file)
 
@@ -24,6 +25,13 @@ function PdfLogsEntries({ entries, hasErrors }) {
       }
     },
     [ide]
+  )
+
+  const syncToEntry = useDetachAction(
+    'sync-to-entry',
+    _syncToEntry,
+    'detached',
+    'detacher'
   )
 
   const logEntries = entries.slice(0, LOG_PREVIEW_LIMIT)

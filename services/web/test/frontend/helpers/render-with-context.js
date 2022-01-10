@@ -33,6 +33,17 @@ export function EditorProviders({
   children,
   rootFolder,
   ui = { view: null, pdfLayout: 'flat', chatOpen: true },
+  fileTreeManager = {
+    findEntityById: () => null,
+    findEntityByPath: () => null,
+    getEntityPath: () => '',
+    getRootDocDirname: () => '',
+  },
+  editorManager = {
+    getCurrentDocId: () => 'foo',
+    getCurrentDocValue: () => {},
+    openDoc: sinon.stub(),
+  },
 }) {
   window.user = user || window.user
   window.gitBridgePublicBaseUrl = 'git.overleaf.test'
@@ -64,19 +75,6 @@ export function EditorProviders({
     $applyAsync: sinon.stub(),
     toggleHistory: sinon.stub(),
     ...scope,
-  }
-
-  const fileTreeManager = {
-    findEntityById: () => null,
-    findEntityByPath: () => null,
-    getEntityPath: () => '',
-    getRootDocDirname: () => '',
-  }
-
-  const editorManager = {
-    getCurrentDocId: () => 'foo',
-    getCurrentDocValue: () => {},
-    openDoc: sinon.stub(),
   }
 
   const metadataManager = {
