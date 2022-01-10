@@ -2,101 +2,105 @@ const request = require('request').defaults({
   baseUrl: 'http://localhost:3010',
 })
 
+async function asyncRequest(options) {
+  return new Promise((resolve, reject) => {
+    request(options, (err, response, body) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve({ response, body })
+      }
+    })
+  })
+}
+
+async function sendGlobalMessage(projectId, userId, content) {
+  return asyncRequest({
+    method: 'post',
+    url: `/project/${projectId}/messages`,
+    json: {
+      user_id: userId,
+      content,
+    },
+  })
+}
+
+async function getGlobalMessages(projectId) {
+  return asyncRequest({
+    method: 'get',
+    url: `/project/${projectId}/messages`,
+    json: true,
+  })
+}
+
+async function sendMessage(projectId, threadId, userId, content) {
+  return asyncRequest({
+    method: 'post',
+    url: `/project/${projectId}/thread/${threadId}/messages`,
+    json: {
+      user_id: userId,
+      content,
+    },
+  })
+}
+
+async function getThreads(projectId) {
+  return asyncRequest({
+    method: 'get',
+    url: `/project/${projectId}/threads`,
+    json: true,
+  })
+}
+
+async function resolveThread(projectId, threadId, userId) {
+  return asyncRequest({
+    method: 'post',
+    url: `/project/${projectId}/thread/${threadId}/resolve`,
+    json: {
+      user_id: userId,
+    },
+  })
+}
+
+async function reopenThread(projectId, threadId) {
+  return asyncRequest({
+    method: 'post',
+    url: `/project/${projectId}/thread/${threadId}/reopen`,
+  })
+}
+
+async function deleteThread(projectId, threadId) {
+  return asyncRequest({
+    method: 'delete',
+    url: `/project/${projectId}/thread/${threadId}`,
+  })
+}
+
+async function editMessage(projectId, threadId, messageId, content) {
+  return asyncRequest({
+    method: 'post',
+    url: `/project/${projectId}/thread/${threadId}/messages/${messageId}/edit`,
+    json: {
+      content,
+    },
+  })
+}
+
+async function deleteMessage(projectId, threadId, messageId) {
+  return asyncRequest({
+    method: 'delete',
+    url: `/project/${projectId}/thread/${threadId}/messages/${messageId}`,
+  })
+}
+
 module.exports = {
-  sendGlobalMessage(projectId, userId, content, callback) {
-    request.post(
-      {
-        url: `/project/${projectId}/messages`,
-        json: {
-          user_id: userId,
-          content,
-        },
-      },
-      callback
-    )
-  },
-
-  getGlobalMessages(projectId, callback) {
-    request.get(
-      {
-        url: `/project/${projectId}/messages`,
-        json: true,
-      },
-      callback
-    )
-  },
-
-  sendMessage(projectId, threadId, userId, content, callback) {
-    request.post(
-      {
-        url: `/project/${projectId}/thread/${threadId}/messages`,
-        json: {
-          user_id: userId,
-          content,
-        },
-      },
-      callback
-    )
-  },
-
-  getThreads(projectId, callback) {
-    request.get(
-      {
-        url: `/project/${projectId}/threads`,
-        json: true,
-      },
-      callback
-    )
-  },
-
-  resolveThread(projectId, threadId, userId, callback) {
-    request.post(
-      {
-        url: `/project/${projectId}/thread/${threadId}/resolve`,
-        json: {
-          user_id: userId,
-        },
-      },
-      callback
-    )
-  },
-
-  reopenThread(projectId, threadId, callback) {
-    request.post(
-      {
-        url: `/project/${projectId}/thread/${threadId}/reopen`,
-      },
-      callback
-    )
-  },
-
-  deleteThread(projectId, threadId, callback) {
-    request.del(
-      {
-        url: `/project/${projectId}/thread/${threadId}`,
-      },
-      callback
-    )
-  },
-
-  editMessage(projectId, threadId, messageId, content, callback) {
-    request.post(
-      {
-        url: `/project/${projectId}/thread/${threadId}/messages/${messageId}/edit`,
-        json: {
-          content,
-        },
-      },
-      callback
-    )
-  },
-
-  deleteMessage(projectId, threadId, messageId, callback) {
-    request.del(
-      {
-        url: `/project/${projectId}/thread/${threadId}/messages/${messageId}`,
-      },
-      callback
-    )
-  },
+  sendGlobalMessage,
+  getGlobalMessages,
+  sendMessage,
+  getThreads,
+  resolveThread,
+  reopenThread,
+  deleteThread,
+  editMessage,
+  deleteMessage,
 }

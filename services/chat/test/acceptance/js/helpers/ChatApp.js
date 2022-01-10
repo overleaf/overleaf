@@ -1,28 +1,27 @@
 const { waitForDb } = require('../../../../app/js/mongodb')
 const app = require('../../../../app')
 
-module.exports = {
-  running: false,
-  initing: false,
-  callbacks: [],
-  ensureRunning(callback) {
-    if (this.running) {
-      return callback()
-    } else if (this.initing) {
-      return this.callbacks.push(callback)
-    }
-    this.initing = true
-    this.callbacks.push(callback)
-    waitForDb().then(() => {
+let serverPromise = null
+function startServer(resolve, reject) {
+  waitForDb()
+    .then(() => {
       app.listen(3010, 'localhost', error => {
         if (error) {
-          throw error
+          return reject(error)
         }
-        this.running = true
-        for (callback of this.callbacks) {
-          callback()
-        }
+        resolve()
       })
     })
-  },
+    .catch(reject)
+}
+
+async function ensureRunning() {
+  if (!serverPromise) {
+    serverPromise = new Promise(startServer)
+  }
+  return serverPromise
+}
+
+module.exports = {
+  ensureRunning,
 }
