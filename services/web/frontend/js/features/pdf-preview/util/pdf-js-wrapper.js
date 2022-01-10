@@ -183,6 +183,10 @@ export default class PDFJSWrapper {
     })
   }
 
+  isVisible() {
+    return this.viewer.container.offsetParent !== null
+  }
+
   abortDocumentLoading() {
     this.loadDocumentTask = undefined
   }

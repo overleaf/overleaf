@@ -82,13 +82,16 @@ function PdfJsViewer({ url }) {
     let storePositionTimer
 
     if (initialised && pdfJsWrapper) {
+      if (!pdfJsWrapper.isVisible()) {
+        return
+      }
+
       // store the scroll position in localStorage, for the synctex button
       const storePosition = debounce(pdfViewer => {
         // set position for "sync to code" button
         try {
           setPosition(pdfViewer.currentPosition)
         } catch (error) {
-          // TODO: investigate handling missing offsetParent in jsdom
           // console.error(error)
         }
       }, 500)
@@ -139,6 +142,10 @@ function PdfJsViewer({ url }) {
   // restore the saved scale and scroll position
   useEffect(() => {
     if (initialised && pdfJsWrapper) {
+      if (!pdfJsWrapper.isVisible()) {
+        return
+      }
+
       setScale(scale => {
         setPosition(position => {
           if (position) {
