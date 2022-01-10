@@ -10,7 +10,7 @@ import { useProjectOutputFiles } from '../../../hooks/use-project-output-files'
 import { useFileTreeActionable } from '../../../contexts/file-tree-actionable'
 import { useFileTreeCreateName } from '../../../contexts/file-tree-create-name'
 import { useFileTreeCreateForm } from '../../../contexts/file-tree-create-form'
-import { useFileTreeMainContext } from '../../../contexts/file-tree-main'
+import { useProjectContext } from '../../../../../shared/context/project-context'
 import ErrorMessage from '../error-message'
 
 export default function FileTreeImportFromProject() {
@@ -23,7 +23,6 @@ export default function FileTreeImportFromProject() {
 
   const { name, setName, validName } = useFileTreeCreateName()
   const { setValid } = useFileTreeCreateForm()
-  const { projectId } = useFileTreeMainContext()
   const { error, finishCreatingLinkedFile } = useFileTreeActionable()
 
   const [selectedProject, setSelectedProject] = useState()
@@ -112,7 +111,6 @@ export default function FileTreeImportFromProject() {
   return (
     <form className="form-controls" id="create-file" onSubmit={handleSubmit}>
       <SelectProject
-        projectId={projectId}
         selectedProject={selectedProject}
         setSelectedProject={setSelectedProject}
       />
@@ -162,8 +160,9 @@ export default function FileTreeImportFromProject() {
   )
 }
 
-function SelectProject({ projectId, selectedProject, setSelectedProject }) {
+function SelectProject({ selectedProject, setSelectedProject }) {
   const { t } = useTranslation()
+  const { _id: projectId } = useProjectContext(projectContextPropTypes)
 
   const { data, error, loading } = useUserProjects()
 
@@ -219,9 +218,12 @@ function SelectProject({ projectId, selectedProject, setSelectedProject }) {
   )
 }
 SelectProject.propTypes = {
-  projectId: PropTypes.string.isRequired,
   selectedProject: PropTypes.object,
   setSelectedProject: PropTypes.func.isRequired,
+}
+
+const projectContextPropTypes = {
+  _id: PropTypes.string.isRequired,
 }
 
 function SelectProjectOutputFile({

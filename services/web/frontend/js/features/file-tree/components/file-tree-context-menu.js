@@ -1,16 +1,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import PropTypes from 'prop-types'
 
 import { Dropdown } from 'react-bootstrap'
+import { useEditorContext } from '../../../shared/context/editor-context'
 import { useFileTreeMainContext } from '../contexts/file-tree-main'
 
 import FileTreeItemMenuItems from './file-tree-item/file-tree-item-menu-items'
 
 function FileTreeContextMenu() {
-  const { hasWritePermissions, contextMenuCoords, setContextMenuCoords } =
-    useFileTreeMainContext()
+  const { permissionsLevel } = useEditorContext(editorContextPropTypes)
+  const { contextMenuCoords, setContextMenuCoords } = useFileTreeMainContext()
 
-  if (!hasWritePermissions || !contextMenuCoords) return null
+  if (permissionsLevel === 'readOnly' || !contextMenuCoords) return null
 
   function close() {
     // reset context menu
@@ -39,6 +41,10 @@ function FileTreeContextMenu() {
     </Dropdown>,
     document.querySelector('body')
   )
+}
+
+const editorContextPropTypes = {
+  permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
 }
 
 // fake component required as Dropdowns require a Toggle, even tho we don't want

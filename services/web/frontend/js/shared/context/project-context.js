@@ -4,6 +4,14 @@ import useScopeValue from '../hooks/use-scope-value'
 
 const ProjectContext = createContext()
 
+const fileTreeDataPropType = PropTypes.shape({
+  _id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  docs: PropTypes.array.isRequired,
+  fileRefs: PropTypes.array.isRequired,
+  folders: PropTypes.array.isRequired,
+})
+
 ProjectContext.Provider.propTypes = {
   value: PropTypes.shape({
     _id: PropTypes.string.isRequired,
@@ -23,6 +31,9 @@ ProjectContext.Provider.propTypes = {
       collaborators: PropTypes.number,
       compileGroup: PropTypes.oneOf(['alpha', 'standard', 'priority']),
       trackChangesVisible: PropTypes.bool,
+      references: PropTypes.bool,
+      mendeley: PropTypes.bool,
+      zotero: PropTypes.bool,
     }),
     publicAccesLevel: PropTypes.string,
     tokens: PropTypes.shape({
@@ -33,6 +44,7 @@ ProjectContext.Provider.propTypes = {
       _id: PropTypes.string.isRequired,
       email: PropTypes.string.isRequired,
     }),
+    rootFolder: PropTypes.arrayOf(fileTreeDataPropType),
   }),
 }
 

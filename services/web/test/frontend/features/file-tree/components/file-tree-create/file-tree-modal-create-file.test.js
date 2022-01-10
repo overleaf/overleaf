@@ -1,19 +1,12 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { useEffect } from 'react'
-import {
-  screen,
-  render,
-  fireEvent,
-  cleanup,
-  waitFor,
-} from '@testing-library/react'
+import { screen, fireEvent, cleanup, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import PropTypes from 'prop-types'
 
-import { contextProps } from './context-props'
+import renderWithContext from '../../helpers/render-with-context'
 import FileTreeModalCreateFile from '../../../../../../frontend/js/features/file-tree/components/modals/file-tree-modal-create-file'
-import FileTreeContext from '../../../../../../frontend/js/features/file-tree/components/file-tree-context'
 import { useFileTreeActionable } from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-actionable'
 import { useFileTreeMutable } from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-mutable'
 
@@ -29,11 +22,7 @@ describe('<FileTreeModalCreateFile/>', function () {
   })
 
   it('handles invalid file names', async function () {
-    render(
-      <FileTreeContext {...contextProps}>
-        <OpenWithMode mode="doc" />
-      </FileTreeContext>
-    )
+    renderWithContext(<OpenWithMode mode="doc" />)
 
     const submitButton = screen.getByRole('button', { name: 'Create' })
 
@@ -65,6 +54,8 @@ describe('<FileTreeModalCreateFile/>', function () {
   it('displays an error when the file limit is reached', async function () {
     const rootFolder = [
       {
+        _id: 'root-folder-id',
+        name: 'rootFolder',
         docs: Array.from({ length: 10 }, (_, index) => ({
           _id: `entity-${index}`,
         })),
@@ -73,15 +64,9 @@ describe('<FileTreeModalCreateFile/>', function () {
       },
     ]
 
-    render(
-      <FileTreeContext
-        {...contextProps}
-        rootFolder={rootFolder}
-        initialSelectedEntityId="entity-1"
-      >
-        <OpenWithMode mode="doc" />
-      </FileTreeContext>
-    )
+    renderWithContext(<OpenWithMode mode="doc" />, {
+      contextProps: { projectRootFolder: rootFolder },
+    })
 
     screen.getByRole(
       (role, element) =>
@@ -93,6 +78,8 @@ describe('<FileTreeModalCreateFile/>', function () {
   it('displays a warning when the file limit is nearly reached', async function () {
     const rootFolder = [
       {
+        _id: 'root-folder-id',
+        name: 'rootFolder',
         docs: Array.from({ length: 9 }, (_, index) => ({
           _id: `entity-${index}`,
         })),
@@ -101,15 +88,9 @@ describe('<FileTreeModalCreateFile/>', function () {
       },
     ]
 
-    render(
-      <FileTreeContext
-        {...contextProps}
-        rootFolder={rootFolder}
-        initialSelectedEntityId="entity-1"
-      >
-        <OpenWithMode mode="doc" />
-      </FileTreeContext>
-    )
+    renderWithContext(<OpenWithMode mode="doc" />, {
+      contextProps: { projectRootFolder: rootFolder },
+    })
 
     screen.getByText(/This project is approaching the file limit \(\d+\/\d+\)/)
   })
@@ -117,6 +98,8 @@ describe('<FileTreeModalCreateFile/>', function () {
   it('counts files in nested folders', async function () {
     const rootFolder = [
       {
+        _id: 'root-folder-id',
+        name: 'rootFolder',
         docs: [{ _id: 'entity-1' }],
         fileRefs: [],
         folders: [
@@ -143,15 +126,9 @@ describe('<FileTreeModalCreateFile/>', function () {
       },
     ]
 
-    render(
-      <FileTreeContext
-        {...contextProps}
-        rootFolder={rootFolder}
-        initialSelectedEntityId="entity-1"
-      >
-        <OpenWithMode mode="doc" />
-      </FileTreeContext>
-    )
+    renderWithContext(<OpenWithMode mode="doc" />, {
+      contextProps: { projectRootFolder: rootFolder },
+    })
 
     screen.getByText(/This project is approaching the file limit \(\d+\/\d+\)/)
   })
@@ -159,11 +136,7 @@ describe('<FileTreeModalCreateFile/>', function () {
   it('creates a new file when the form is submitted', async function () {
     fetchMock.post('express:/project/:projectId/doc', () => 204)
 
-    render(
-      <FileTreeContext {...contextProps}>
-        <OpenWithMode mode="doc" />
-      </FileTreeContext>
-    )
+    renderWithContext(<OpenWithMode mode="doc" />)
 
     const input = screen.getByLabelText('File Name')
     await fireEvent.change(input, { target: { value: 'test.tex' } })
@@ -174,7 +147,10 @@ describe('<FileTreeModalCreateFile/>', function () {
 
     expect(
       fetchMock.called('express:/project/:projectId/doc', {
-        body: { name: 'test.tex' },
+        body: {
+          parent_folder_id: 'root-folder-id',
+          name: 'test.tex',
+        },
       })
     ).to.be.true
   })
@@ -222,11 +198,7 @@ describe('<FileTreeModalCreateFile/>', function () {
       })
       .post('express:/project/:projectId/linked_file', () => 204)
 
-    render(
-      <FileTreeContext {...contextProps}>
-        <OpenWithMode mode="project" />
-      </FileTreeContext>
-    )
+    renderWithContext(<OpenWithMode mode="project" />)
 
     // initial state, no project selected
     const projectInput = screen.getByLabelText('Select a Project')
@@ -286,6 +258,7 @@ describe('<FileTreeModalCreateFile/>', function () {
         body: {
           name: 'ball.jpg',
           provider: 'project_output_file',
+          parent_folder_id: 'root-folder-id',
           data: {
             source_project_id: 'project-2',
             source_output_file_path: 'ball.jpg',
@@ -323,11 +296,7 @@ describe('<FileTreeModalCreateFile/>', function () {
         ],
       })
 
-      render(
-        <FileTreeContext {...contextProps}>
-          <OpenWithMode mode="project" />
-        </FileTreeContext>
-      )
+      renderWithContext(<OpenWithMode mode="project" />)
 
       // should not show the toggle
       expect(
@@ -341,11 +310,7 @@ describe('<FileTreeModalCreateFile/>', function () {
   it('import from a URL when the form is submitted', async function () {
     fetchMock.post('express:/project/:projectId/linked_file', () => 204)
 
-    render(
-      <FileTreeContext {...contextProps}>
-        <OpenWithMode mode="url" />
-      </FileTreeContext>
-    )
+    renderWithContext(<OpenWithMode mode="url" />)
 
     const urlInput = screen.getByLabelText('URL to fetch the file from')
     const nameInput = screen.getByLabelText('File Name In This Project')
@@ -373,6 +338,7 @@ describe('<FileTreeModalCreateFile/>', function () {
         body: {
           name: 'test.tex',
           provider: 'url',
+          parent_folder_id: 'root-folder-id',
           data: { url: 'https://example.com/example.tex' },
         },
       })
@@ -386,11 +352,7 @@ describe('<FileTreeModalCreateFile/>', function () {
       requests.push(request)
     }
 
-    render(
-      <FileTreeContext {...contextProps}>
-        <OpenWithMode mode="upload" />
-      </FileTreeContext>
-    )
+    renderWithContext(<OpenWithMode mode="upload" />)
 
     // the submit button should not be present
     expect(screen.queryByRole('button', { name: 'Create' })).to.be.null
@@ -408,7 +370,9 @@ describe('<FileTreeModalCreateFile/>', function () {
     await waitFor(() => expect(requests).to.have.length(1))
 
     const [request] = requests
-    expect(request.url).to.equal('/project/test-project/upload')
+    expect(request.url).to.equal(
+      '/project/123abc/upload?folder_id=root-folder-id'
+    )
     expect(request.method).to.equal('POST')
 
     xhr.restore()
@@ -421,11 +385,7 @@ describe('<FileTreeModalCreateFile/>', function () {
       requests.push(request)
     }
 
-    render(
-      <FileTreeContext {...contextProps}>
-        <OpenWithMode mode="upload" />
-      </FileTreeContext>
-    )
+    renderWithContext(<OpenWithMode mode="upload" />)
 
     // the submit button should not be present
     expect(screen.queryByRole('button', { name: 'Create' })).to.be.null
@@ -443,7 +403,9 @@ describe('<FileTreeModalCreateFile/>', function () {
     await waitFor(() => expect(requests).to.have.length(1))
 
     const [request] = requests
-    expect(request.url).to.equal('/project/test-project/upload')
+    expect(request.url).to.equal(
+      '/project/123abc/upload?folder_id=root-folder-id'
+    )
     expect(request.method).to.equal('POST')
 
     xhr.restore()
@@ -456,11 +418,7 @@ describe('<FileTreeModalCreateFile/>', function () {
       requests.push(request)
     }
 
-    render(
-      <FileTreeContext {...contextProps}>
-        <OpenWithMode mode="upload" />
-      </FileTreeContext>
-    )
+    renderWithContext(<OpenWithMode mode="upload" />)
 
     // the submit button should not be present
     expect(screen.queryByRole('button', { name: 'Create' })).to.be.null
@@ -478,7 +436,9 @@ describe('<FileTreeModalCreateFile/>', function () {
     await waitFor(() => expect(requests).to.have.length(1))
 
     const [request] = requests
-    expect(request.url).to.equal('/project/test-project/upload')
+    expect(request.url).to.equal(
+      '/project/123abc/upload?folder_id=root-folder-id'
+    )
     expect(request.method).to.equal('POST')
 
     request.respond(

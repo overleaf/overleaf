@@ -13,6 +13,7 @@ import {
   moveInTree,
   createEntityInTree,
 } from '../util/mutate-in-tree'
+import { useProjectContext } from '../../../shared/context/project-context'
 
 const FileTreeMutableContext = createContext()
 
@@ -21,7 +22,7 @@ const ACTION_TYPES = {
   RESET: 'RESET',
   DELETE: 'DELETE',
   MOVE: 'MOVE',
-  CREATE_ENTITY: 'CREATE_ENTITY',
+  CREATE: 'CREATE',
 }
 
 function fileTreeMutableReducer({ fileTreeData }, action) {
@@ -68,7 +69,7 @@ function fileTreeMutableReducer({ fileTreeData }, action) {
       }
     }
 
-    case ACTION_TYPES.CREATE_ENTITY: {
+    case ACTION_TYPES.CREATE: {
       const newFileTreeData = createEntityInTree(
         fileTreeData,
         action.parentFolderId,
@@ -92,7 +93,9 @@ const initialState = rootFolder => ({
   fileCount: countFiles(rootFolder[0]),
 })
 
-export const FileTreeMutableProvider = function ({ rootFolder, children }) {
+export const FileTreeMutableProvider = function ({ children }) {
+  const { rootFolder } = useProjectContext(projectContextPropTypes)
+
   const [{ fileTreeData, fileCount }, dispatch] = useReducer(
     fileTreeMutableReducer,
     rootFolder,
@@ -109,7 +112,7 @@ export const FileTreeMutableProvider = function ({ rootFolder, children }) {
   const dispatchCreateFolder = useCallback((parentFolderId, entity) => {
     entity.type = 'folder'
     dispatch({
-      type: ACTION_TYPES.CREATE_ENTITY,
+      type: ACTION_TYPES.CREATE,
       parentFolderId,
       entity,
     })
@@ -118,7 +121,7 @@ export const FileTreeMutableProvider = function ({ rootFolder, children }) {
   const dispatchCreateDoc = useCallback((parentFolderId, entity) => {
     entity.type = 'doc'
     dispatch({
-      type: ACTION_TYPES.CREATE_ENTITY,
+      type: ACTION_TYPES.CREATE,
       parentFolderId,
       entity,
     })
@@ -127,7 +130,7 @@ export const FileTreeMutableProvider = function ({ rootFolder, children }) {
   const dispatchCreateFile = useCallback((parentFolderId, entity) => {
     entity.type = 'fileRef'
     dispatch({
-      type: ACTION_TYPES.CREATE_ENTITY,
+      type: ACTION_TYPES.CREATE,
       parentFolderId,
       entity,
     })
@@ -168,11 +171,22 @@ export const FileTreeMutableProvider = function ({ rootFolder, children }) {
 }
 
 FileTreeMutableProvider.propTypes = {
-  rootFolder: PropTypes.array.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
   ]).isRequired,
+}
+
+const projectContextPropTypes = {
+  rootFolder: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      docs: PropTypes.array.isRequired,
+      fileRefs: PropTypes.array.isRequired,
+      folders: PropTypes.array.isRequired,
+    })
+  ),
 }
 
 export function useFileTreeMutable() {

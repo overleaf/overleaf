@@ -30,6 +30,7 @@ describe('FileTree Rename Entity Flow', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
+        name: 'rootFolder',
         docs: [{ _id: '456def', name: 'a.tex' }],
         folders: [
           {
@@ -48,10 +49,6 @@ describe('FileTree Rename Entity Flow', function () {
     ]
     renderWithEditorContext(
       <FileTreeRoot
-        rootFolder={rootFolder}
-        projectId="123abc"
-        hasWritePermissions
-        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
@@ -60,7 +57,11 @@ describe('FileTree Rename Entity Flow', function () {
         onInit={onInit}
         isConnected
       />,
-      { socket: new MockedSocket() }
+      {
+        socket: new MockedSocket(),
+        projectRootFolder: rootFolder,
+        projectId: '123abc',
+      }
     )
     onSelect.reset()
   })

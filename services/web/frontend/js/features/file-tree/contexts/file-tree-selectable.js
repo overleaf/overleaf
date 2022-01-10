@@ -13,7 +13,8 @@ import _ from 'lodash'
 
 import { findInTree } from '../util/find-in-tree'
 import { useFileTreeMutable } from './file-tree-mutable'
-import { useFileTreeMainContext } from './file-tree-main'
+import { useProjectContext } from '../../../shared/context/project-context'
+import { useEditorContext } from '../../../shared/context/editor-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import usePreviousValue from '../../../shared/hooks/use-previous-value'
 
@@ -73,13 +74,11 @@ function fileTreeSelectableReadOnlyReducer(selectedEntityIds, action) {
   }
 }
 
-export function FileTreeSelectableProvider({
-  hasWritePermissions,
-  rootDocId,
-  onSelect,
-  children,
-}) {
-  const { projectId } = useFileTreeMainContext()
+export function FileTreeSelectableProvider({ onSelect, children }) {
+  const { _id: projectId, rootDoc_id: rootDocId } = useProjectContext(
+    projectContextPropTypes
+  )
+  const { permissionsLevel } = useEditorContext(editorContextPropTypes)
 
   const [initialSelectedEntityId] = usePersistedState(
     `doc.open_id.${projectId}`,
@@ -89,9 +88,9 @@ export function FileTreeSelectableProvider({
   const { fileTreeData } = useFileTreeMutable()
 
   const [selectedEntityIds, dispatch] = useReducer(
-    hasWritePermissions
-      ? fileTreeSelectableReadWriteReducer
-      : fileTreeSelectableReadOnlyReducer,
+    permissionsLevel === 'readOnly'
+      ? fileTreeSelectableReadOnlyReducer
+      : fileTreeSelectableReadWriteReducer,
     null,
     () => {
       if (!initialSelectedEntityId) return new Set()
@@ -179,8 +178,6 @@ export function FileTreeSelectableProvider({
 }
 
 FileTreeSelectableProvider.propTypes = {
-  hasWritePermissions: PropTypes.bool.isRequired,
-  rootDocId: PropTypes.string,
   onSelect: PropTypes.func.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
@@ -188,6 +185,14 @@ FileTreeSelectableProvider.propTypes = {
   ]).isRequired,
 }
 
+const projectContextPropTypes = {
+  _id: PropTypes.string.isRequired,
+  rootDoc_id: PropTypes.string,
+}
+
+const editorContextPropTypes = {
+  permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
+}
 export function useSelectableEntity(id) {
   const { selectedEntityIds, selectOrMultiSelectEntity } = useContext(
     FileTreeSelectableContext

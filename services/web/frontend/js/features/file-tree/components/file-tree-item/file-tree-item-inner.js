@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 
+import { useEditorContext } from '../../../../shared/context/editor-context'
 import { useFileTreeMainContext } from '../../contexts/file-tree-main'
 import { useDraggable } from '../../contexts/file-tree-draggable'
 
@@ -11,12 +12,15 @@ import FileTreeItemMenu from './file-tree-item-menu'
 import { useFileTreeSelectable } from '../../contexts/file-tree-selectable'
 
 function FileTreeItemInner({ id, name, isSelected, icons }) {
-  const { hasWritePermissions, setContextMenuCoords } = useFileTreeMainContext()
+  const { permissionsLevel } = useEditorContext(editorContextPropTypes)
+  const { setContextMenuCoords } = useFileTreeMainContext()
 
   const { selectedEntityIds } = useFileTreeSelectable()
 
   const hasMenu =
-    hasWritePermissions && isSelected && selectedEntityIds.size === 1
+    permissionsLevel !== 'readOnly' &&
+    isSelected &&
+    selectedEntityIds.size === 1
 
   const { isDragging, dragRef, setIsDraggable } = useDraggable(id)
 
@@ -80,6 +84,10 @@ FileTreeItemInner.propTypes = {
   name: PropTypes.string.isRequired,
   isSelected: PropTypes.bool.isRequired,
   icons: PropTypes.node,
+}
+
+const editorContextPropTypes = {
+  permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
 }
 
 export default FileTreeItemInner

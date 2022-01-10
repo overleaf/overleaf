@@ -1,15 +1,29 @@
 import { useEffect } from 'react'
+import { withContextRoot } from './../../utils/with-context-root'
 import FileTreeContext from '../../../js/features/file-tree/components/file-tree-context'
 import FileTreeCreateNameProvider from '../../../js/features/file-tree/contexts/file-tree-create-name'
 import FileTreeCreateFormProvider from '../../../js/features/file-tree/contexts/file-tree-create-form'
 import { useFileTreeActionable } from '../../../js/features/file-tree/contexts/file-tree-actionable'
 import PropTypes from 'prop-types'
 
-const defaultContextProps = {
-  projectId: 'project-1',
-  hasWritePermissions: true,
-  userHasFeature: () => true,
-  refProviders: {},
+export const DEFAULT_PROJECT = {
+  _id: '123abc',
+  name: 'Some Project',
+  rootDocId: '5e74f1a7ce17ae0041dfd056',
+  rootFolder: [
+    {
+      _id: 'root-folder-id',
+      name: 'rootFolder',
+      docs: [],
+      folders: [],
+      fileRefs: [],
+    },
+  ],
+  features: { mendeley: true, zotero: true },
+}
+
+const defaultFileTreeContextProps = {
+  refProviders: { mendeley: false, zotero: false },
   reindexReferences: () => {
     console.log('reindex references')
   },
@@ -19,17 +33,6 @@ const defaultContextProps = {
   setStartedFreeTrial: () => {
     console.log('started free trial')
   },
-  rootFolder: [
-    {
-      docs: [
-        {
-          _id: 'entity-1',
-        },
-      ],
-      fileRefs: [],
-      folders: [],
-    },
-  ],
   initialSelectedEntityId: 'entity-1',
   onSelect: () => {
     console.log('selected')
@@ -99,11 +102,18 @@ export const mockCreateFileModalFetch = fetchMock =>
     })
 
 export const createFileModalDecorator =
-  (contextProps = {}, createMode = 'doc') =>
-  // eslint-disable-next-line react/display-name
+  (
+    fileTreeContextProps = {},
+    projectProps = {},
+    createMode = 'doc'
+    // eslint-disable-next-line react/display-name
+  ) =>
   Story => {
-    return (
-      <FileTreeContext {...defaultContextProps} {...contextProps}>
+    return withContextRoot(
+      <FileTreeContext
+        {...defaultFileTreeContextProps}
+        {...fileTreeContextProps}
+      >
         <FileTreeCreateNameProvider>
           <FileTreeCreateFormProvider>
             <OpenCreateFileModal createMode={createMode}>
@@ -111,7 +121,11 @@ export const createFileModalDecorator =
             </OpenCreateFileModal>
           </FileTreeCreateFormProvider>
         </FileTreeCreateNameProvider>
-      </FileTreeContext>
+      </FileTreeContext>,
+      {
+        project: { ...DEFAULT_PROJECT, ...projectProps },
+        permissionsLevel: 'owner',
+      }
     )
   }
 

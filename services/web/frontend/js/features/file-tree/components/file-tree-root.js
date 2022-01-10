@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 import withErrorBoundary from '../../../infrastructure/error-boundary'
+import { useProjectContext } from '../../../shared/context/project-context'
 import FileTreeContext from './file-tree-context'
 import FileTreeDraggablePreviewLayer from './file-tree-draggable-preview-layer'
 import FileTreeFolderList from './file-tree-folder-list'
@@ -19,11 +20,6 @@ import { useFileTreeSocketListener } from '../hooks/file-tree-socket-listener'
 import FileTreeModalCreateFile from './modals/file-tree-modal-create-file'
 
 const FileTreeRoot = React.memo(function FileTreeRoot({
-  projectId,
-  rootFolder,
-  rootDocId,
-  hasWritePermissions,
-  userHasFeature,
   refProviders,
   reindexReferences,
   setRefProviderEnabled,
@@ -32,6 +28,9 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
   onInit,
   isConnected,
 }) {
+  const { _id: projectId, rootFolder } = useProjectContext(
+    projectContextPropTypes
+  )
   const isReady = projectId && rootFolder
 
   useEffect(() => {
@@ -41,15 +40,10 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
 
   return (
     <FileTreeContext
-      projectId={projectId}
-      hasWritePermissions={hasWritePermissions}
-      userHasFeature={userHasFeature}
       refProviders={refProviders}
       setRefProviderEnabled={setRefProviderEnabled}
       setStartedFreeTrial={setStartedFreeTrial}
       reindexReferences={reindexReferences}
-      rootFolder={rootFolder}
-      rootDocId={rootDocId}
       onSelect={onSelect}
     >
       {isConnected ? null : <div className="disconnected-overlay" />}
@@ -90,18 +84,18 @@ function FileTreeRootFolder() {
 }
 
 FileTreeRoot.propTypes = {
-  projectId: PropTypes.string,
-  rootFolder: PropTypes.array,
-  rootDocId: PropTypes.string,
-  hasWritePermissions: PropTypes.bool.isRequired,
   onSelect: PropTypes.func.isRequired,
   onInit: PropTypes.func.isRequired,
   isConnected: PropTypes.bool.isRequired,
   setRefProviderEnabled: PropTypes.func.isRequired,
-  userHasFeature: PropTypes.func.isRequired,
   setStartedFreeTrial: PropTypes.func.isRequired,
   reindexReferences: PropTypes.func.isRequired,
   refProviders: PropTypes.object.isRequired,
+}
+
+const projectContextPropTypes = {
+  _id: PropTypes.string.isRequired,
+  rootFolder: PropTypes.array.isRequired,
 }
 
 export default withErrorBoundary(FileTreeRoot, FileTreeError)

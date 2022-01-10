@@ -16,9 +16,6 @@ export function useFileTreeMainContext() {
 }
 
 export const FileTreeMainProvider = function ({
-  projectId,
-  hasWritePermissions,
-  userHasFeature,
   refProviders,
   reindexReferences,
   setRefProviderEnabled,
@@ -30,9 +27,6 @@ export const FileTreeMainProvider = function ({
   return (
     <FileTreeMainContext.Provider
       value={{
-        projectId,
-        hasWritePermissions,
-        userHasFeature,
         refProviders,
         reindexReferences,
         setRefProviderEnabled,
@@ -47,9 +41,6 @@ export const FileTreeMainProvider = function ({
 }
 
 FileTreeMainProvider.propTypes = {
-  projectId: PropTypes.string.isRequired,
-  hasWritePermissions: PropTypes.bool.isRequired,
-  userHasFeature: PropTypes.func.isRequired,
   reindexReferences: PropTypes.func.isRequired,
   refProviders: PropTypes.object.isRequired,
   setRefProviderEnabled: PropTypes.func.isRequired,

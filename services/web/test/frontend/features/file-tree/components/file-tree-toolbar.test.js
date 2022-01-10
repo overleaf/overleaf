@@ -21,7 +21,7 @@ describe('<FileTreeToolbar/>', function () {
 
   it('read-only', function () {
     renderWithContext(<FileTreeToolbar />, {
-      contextProps: { hasWritePermissions: false },
+      contextProps: { permissionsLevel: 'readOnly' },
     })
 
     expect(screen.queryByRole('button')).to.not.exist
@@ -31,9 +31,10 @@ describe('<FileTreeToolbar/>', function () {
     renderWithContext(<FileTreeToolbar />, {
       contextProps: {
         rootDocId: '456def',
-        rootFolder: [
+        projectRootFolder: [
           {
             _id: 'root-folder-id',
+            name: 'rootFolder',
             docs: [{ _id: '456def', name: 'main.tex' }],
             folders: [],
             fileRefs: [],

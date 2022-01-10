@@ -20,7 +20,8 @@ import { findInTree, findInTreeOrThrow } from '../util/find-in-tree'
 import { isNameUniqueInFolder } from '../util/is-name-unique-in-folder'
 import { isBlockedFilename, isCleanFilename } from '../util/safe-path'
 
-import { useFileTreeMainContext } from './file-tree-main'
+import { useProjectContext } from '../../../shared/context/project-context'
+import { useEditorContext } from '../../../shared/context/editor-context'
 import { useFileTreeMutable } from './file-tree-mutable'
 import { useFileTreeSelectable } from './file-tree-selectable'
 
@@ -117,15 +118,17 @@ function fileTreeActionableReducer(state, action) {
   }
 }
 
-export function FileTreeActionableProvider({ hasWritePermissions, children }) {
+export function FileTreeActionableProvider({ children }) {
+  const { _id: projectId } = useProjectContext(projectContextPropTypes)
+  const { permissionsLevel } = useEditorContext(editorContextPropTypes)
+
   const [state, dispatch] = useReducer(
-    hasWritePermissions
-      ? fileTreeActionableReducer
-      : fileTreeActionableReadOnlyReducer,
+    permissionsLevel === 'readOnly'
+      ? fileTreeActionableReadOnlyReducer
+      : fileTreeActionableReducer,
     defaultState
   )
 
-  const { projectId } = useFileTreeMainContext()
   const { fileTreeData, dispatchRename, dispatchMove } = useFileTreeMutable()
   const { selectedEntityIds } = useFileTreeSelectable()
 
@@ -370,11 +373,18 @@ export function FileTreeActionableProvider({ hasWritePermissions, children }) {
 }
 
 FileTreeActionableProvider.propTypes = {
-  hasWritePermissions: PropTypes.bool.isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
   ]).isRequired,
+}
+
+const projectContextPropTypes = {
+  _id: PropTypes.string.isRequired,
+}
+
+const editorContextPropTypes = {
+  permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
 }
 
 export function useFileTreeActionable() {

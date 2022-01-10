@@ -1,15 +1,16 @@
+import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 
 import Icon from '../../../shared/components/icon'
 import TooltipButton from '../../../shared/components/tooltip-button'
 
-import { useFileTreeMainContext } from '../contexts/file-tree-main'
+import { useEditorContext } from '../../../shared/context/editor-context'
 import { useFileTreeActionable } from '../contexts/file-tree-actionable'
 
 function FileTreeToolbar() {
-  const { hasWritePermissions } = useFileTreeMainContext()
+  const { permissionsLevel } = useEditorContext(editorContextPropTypes)
 
-  if (!hasWritePermissions) return null
+  if (permissionsLevel === 'readOnly') return null
 
   return (
     <div className="toolbar toolbar-filetree">
@@ -17,6 +18,10 @@ function FileTreeToolbar() {
       <FileTreeToolbarRight />
     </div>
   )
+}
+
+const editorContextPropTypes = {
+  permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
 }
 
 function FileTreeToolbarLeft() {

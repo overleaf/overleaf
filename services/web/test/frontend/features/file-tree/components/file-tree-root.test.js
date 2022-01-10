@@ -30,6 +30,7 @@ describe('<FileTreeRoot/>', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
+        name: 'rootFolder',
         docs: [{ _id: '456def', name: 'main.tex' }],
         folders: [],
         fileRefs: [],
@@ -37,19 +38,21 @@ describe('<FileTreeRoot/>', function () {
     ]
     const { container } = renderWithEditorContext(
       <FileTreeRoot
-        rootFolder={rootFolder}
-        projectId="123abc"
-        hasWritePermissions={false}
-        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
         setStartedFreeTrial={() => null}
-        rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
         isConnected
-      />
+      />,
+      {
+        projectRootFolder: rootFolder,
+        projectId: '123abc',
+        rootDocId: '456def',
+        features: {},
+        permissionsLevel: 'owner',
+      }
     )
 
     screen.queryByRole('tree')
@@ -66,6 +69,7 @@ describe('<FileTreeRoot/>', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
+        name: 'rootFolder',
         docs: [{ _id: '456def', name: 'main.tex' }],
         folders: [],
         fileRefs: [],
@@ -73,19 +77,21 @@ describe('<FileTreeRoot/>', function () {
     ]
     renderWithEditorContext(
       <FileTreeRoot
-        rootFolder={rootFolder}
-        projectId="123abc"
-        hasWritePermissions
-        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
         setStartedFreeTrial={() => null}
-        rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
         isConnected
-      />
+      />,
+      {
+        projectRootFolder: rootFolder,
+        projectId: '123abc',
+        rootDocId: '456def',
+        features: {},
+        permissionsLevel: 'owner',
+      }
     )
 
     // as a proxy to check that the invalid entity ha not been select we start
@@ -104,6 +110,7 @@ describe('<FileTreeRoot/>', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
+        name: 'rootFolder',
         docs: [{ _id: '456def', name: 'main.tex' }],
         folders: [],
         fileRefs: [],
@@ -112,19 +119,21 @@ describe('<FileTreeRoot/>', function () {
 
     const { container } = renderWithEditorContext(
       <FileTreeRoot
-        rootFolder={rootFolder}
-        projectId="123abc"
-        hasWritePermissions={false}
-        rootDocId="456def"
         onSelect={onSelect}
         onInit={onInit}
         isConnected={false}
-        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
         setStartedFreeTrial={() => null}
-      />
+      />,
+      {
+        projectRootFolder: rootFolder,
+        projectId: '123abc',
+        rootDocId: '456def',
+        features: {},
+        permissionsLevel: 'owner',
+      }
     )
 
     expect(container.querySelector('.disconnected-overlay')).to.exist
@@ -134,6 +143,7 @@ describe('<FileTreeRoot/>', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
+        name: 'rootFolder',
         docs: [
           { _id: '456def', name: 'main.tex' },
           { _id: '789ghi', name: 'other.tex' },
@@ -144,11 +154,6 @@ describe('<FileTreeRoot/>', function () {
     ]
     renderWithEditorContext(
       <FileTreeRoot
-        rootFolder={rootFolder}
-        projectId="123abc"
-        rootDocId="456def"
-        hasWritePermissions={false}
-        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
@@ -156,7 +161,14 @@ describe('<FileTreeRoot/>', function () {
         onSelect={onSelect}
         onInit={onInit}
         isConnected
-      />
+      />,
+      {
+        projectRootFolder: rootFolder,
+        projectId: '123abc',
+        rootDocId: '456def',
+        features: {},
+        permissionsLevel: 'readOnly',
+      }
     )
     sinon.assert.calledOnce(onSelect)
     sinon.assert.calledWithMatch(onSelect, [
@@ -187,6 +199,7 @@ describe('<FileTreeRoot/>', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
+        name: 'rootFolder',
         docs: [
           { _id: '456def', name: 'main.tex' },
           { _id: '789ghi', name: 'other.tex' },
@@ -197,11 +210,6 @@ describe('<FileTreeRoot/>', function () {
     ]
     renderWithEditorContext(
       <FileTreeRoot
-        rootFolder={rootFolder}
-        projectId="123abc"
-        rootDocId="456def"
-        hasWritePermissions={false}
-        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
@@ -209,7 +217,14 @@ describe('<FileTreeRoot/>', function () {
         onSelect={onSelect}
         onInit={onInit}
         isConnected
-      />
+      />,
+      {
+        projectRootFolder: rootFolder,
+        projectId: '123abc',
+        rootDocId: '456def',
+        features: {},
+        permissionsLevel: 'owner',
+      }
     )
 
     screen.getByRole('treeitem', { name: 'main.tex', selected: true })
@@ -231,6 +246,7 @@ describe('<FileTreeRoot/>', function () {
     const rootFolder = [
       {
         _id: 'root-folder-id',
+        name: 'rootFolder',
         docs: [
           { _id: '456def', name: 'main.tex' },
           { _id: '789ghi', name: 'other.tex' },
@@ -241,11 +257,6 @@ describe('<FileTreeRoot/>', function () {
     ]
     renderWithEditorContext(
       <FileTreeRoot
-        rootFolder={rootFolder}
-        projectId="123abc"
-        rootDocId="456def"
-        hasWritePermissions
-        userHasFeature={() => true}
         refProviders={{}}
         reindexReferences={() => null}
         setRefProviderEnabled={() => null}
@@ -253,7 +264,14 @@ describe('<FileTreeRoot/>', function () {
         onSelect={onSelect}
         onInit={onInit}
         isConnected
-      />
+      />,
+      {
+        projectRootFolder: rootFolder,
+        projectId: '123abc',
+        rootDocId: '456def',
+        features: {},
+        permissionsLevel: 'owner',
+      }
     )
 
     const main = screen.getByRole('treeitem', {

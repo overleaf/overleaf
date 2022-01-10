@@ -23,6 +23,7 @@ export const PROJECT_NAME = 'project-name'
 export function EditorProviders({
   user = { id: '123abd', email: 'testuser@example.com' },
   projectId = PROJECT_ID,
+  rootDocId = '_root_doc_id',
   socket = {
     on: sinon.stub(),
     removeListener: sinon.stub(),
@@ -30,8 +31,21 @@ export function EditorProviders({
   isRestrictedTokenMember = false,
   clsiServerId = '1234',
   scope,
+  features = {
+    referencesSearch: true,
+  },
+  permissionsLevel = 'owner',
   children,
   rootFolder,
+  projectRootFolder = [
+    {
+      _id: 'root-folder-id',
+      name: 'rootFolder',
+      docs: [],
+      folders: [],
+      fileRefs: [],
+    },
+  ],
   ui = { view: null, pdfLayout: 'flat', chatOpen: true },
   fileTreeManager = {
     findEntityById: () => null,
@@ -59,10 +73,9 @@ export function EditorProviders({
         _id: '124abd',
         email: 'owner@example.com',
       },
-      features: {
-        referencesSearch: true,
-      },
-      rootDoc_id: '_root_doc_id',
+      features,
+      rootDoc_id: rootDocId,
+      rootFolder: projectRootFolder,
     },
     rootFolder: rootFolder || {
       children: [],
@@ -74,6 +87,7 @@ export function EditorProviders({
     },
     $applyAsync: sinon.stub(),
     toggleHistory: sinon.stub(),
+    permissionsLevel,
     ...scope,
   }
 
@@ -113,12 +127,19 @@ export function EditorProviders({
   )
 }
 
-export function renderWithEditorContext(component, contextProps) {
+export function renderWithEditorContext(
+  component,
+  contextProps,
+  renderOptions = {}
+) {
   const EditorProvidersWrapper = ({ children }) => (
     <EditorProviders {...contextProps}>{children}</EditorProviders>
   )
 
-  return render(component, { wrapper: EditorProvidersWrapper })
+  return render(component, {
+    wrapper: EditorProvidersWrapper,
+    ...renderOptions,
+  })
 }
 
 export function renderHookWithEditorContext(hook, contextProps) {

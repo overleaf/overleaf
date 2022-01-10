@@ -6,7 +6,7 @@ import Uppy from '@uppy/core'
 import XHRUpload from '@uppy/xhr-upload'
 import { Dashboard, useUppy } from '@uppy/react'
 import { useFileTreeActionable } from '../../../contexts/file-tree-actionable'
-import { useFileTreeMainContext } from '../../../contexts/file-tree-main'
+import { useProjectContext } from '../../../../../shared/context/project-context'
 
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
@@ -15,7 +15,7 @@ import ErrorMessage from '../error-message'
 
 export default function FileTreeUploadDoc() {
   const { parentFolderId, cancel, isDuplicate } = useFileTreeActionable()
-  const { projectId } = useFileTreeMainContext()
+  const { _id: projectId } = useProjectContext(projectContextPropTypes)
 
   const [error, setError] = useState()
 
@@ -160,6 +160,10 @@ export default function FileTreeUploadDoc() {
       )}
     </>
   )
+}
+
+const projectContextPropTypes = {
+  _id: PropTypes.string.isRequired,
 }
 
 function UploadErrorMessage({ error, maxNumberOfFiles }) {

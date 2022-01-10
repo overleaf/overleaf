@@ -1,11 +1,10 @@
 import { expect } from 'chai'
-import { screen, render, waitFor, cleanup } from '@testing-library/react'
+import { screen, waitFor, cleanup } from '@testing-library/react'
 import sinon from 'sinon'
 
-import { contextProps } from './context-props'
+import renderWithContext from '../../helpers/render-with-context'
 
 import FileTreeCreateNameInput from '../../../../../../frontend/js/features/file-tree/components/file-tree-create/file-tree-create-name-input'
-import FileTreeContext from '../../../../../../frontend/js/features/file-tree/components/file-tree-context'
 import FileTreeCreateNameProvider from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-create-name'
 
 describe('<FileTreeCreateNameInput/>', function () {
@@ -21,12 +20,10 @@ describe('<FileTreeCreateNameInput/>', function () {
   })
 
   it('renders an empty input', async function () {
-    render(
-      <FileTreeContext {...contextProps}>
-        <FileTreeCreateNameProvider>
-          <FileTreeCreateNameInput />
-        </FileTreeCreateNameProvider>
-      </FileTreeContext>
+    renderWithContext(
+      <FileTreeCreateNameProvider>
+        <FileTreeCreateNameInput />
+      </FileTreeCreateNameProvider>
     )
 
     await screen.getByLabelText('File Name')
@@ -34,15 +31,13 @@ describe('<FileTreeCreateNameInput/>', function () {
   })
 
   it('renders a custom label and placeholder', async function () {
-    render(
-      <FileTreeContext {...contextProps}>
-        <FileTreeCreateNameProvider>
-          <FileTreeCreateNameInput
-            label="File name in this project"
-            placeholder="Enter a file name…"
-          />
-        </FileTreeCreateNameProvider>
-      </FileTreeContext>
+    renderWithContext(
+      <FileTreeCreateNameProvider>
+        <FileTreeCreateNameInput
+          label="File name in this project"
+          placeholder="Enter a file name…"
+        />
+      </FileTreeCreateNameProvider>
     )
 
     await screen.getByLabelText('File name in this project')
@@ -50,12 +45,10 @@ describe('<FileTreeCreateNameInput/>', function () {
   })
 
   it('uses an initial name', async function () {
-    render(
-      <FileTreeContext {...contextProps}>
-        <FileTreeCreateNameProvider initialName="test.tex">
-          <FileTreeCreateNameInput />
-        </FileTreeCreateNameProvider>
-      </FileTreeContext>
+    renderWithContext(
+      <FileTreeCreateNameProvider initialName="test.tex">
+        <FileTreeCreateNameInput />
+      </FileTreeCreateNameProvider>
     )
 
     const input = await screen.getByLabelText('File Name')
@@ -63,12 +56,10 @@ describe('<FileTreeCreateNameInput/>', function () {
   })
 
   it('focuses the name', async function () {
-    render(
-      <FileTreeContext {...contextProps}>
-        <FileTreeCreateNameProvider initialName="test.tex">
-          <FileTreeCreateNameInput focusName />
-        </FileTreeCreateNameProvider>
-      </FileTreeContext>
+    renderWithContext(
+      <FileTreeCreateNameProvider initialName="test.tex">
+        <FileTreeCreateNameInput focusName />
+      </FileTreeCreateNameProvider>
     )
 
     const input = await screen.getByLabelText('File Name')

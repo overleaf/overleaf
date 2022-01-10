@@ -1,6 +1,6 @@
 import MockedSocket from 'socket.io-mock'
 
-import { ContextRoot } from '../js/shared/context/root-context'
+import { withContextRoot } from './utils/with-context-root'
 import { rootFolderBase } from './fixtures/file-tree-base'
 import { rootFolderLimit } from './fixtures/file-tree-limit'
 import FileTreeRoot from '../js/features/file-tree/components/file-tree-root'
@@ -11,6 +11,12 @@ const MOCK_DELAY = 2000
 
 window._ide = {
   socket: new MockedSocket(),
+}
+const DEFAULT_PROJECT = {
+  _id: '123abc',
+  name: 'Some Project',
+  rootDocId: '5e74f1a7ce17ae0041dfd056',
+  rootFolder: rootFolderBase,
 }
 
 function defaultSetupMocks(fetchMock) {
@@ -80,13 +86,25 @@ function defaultSetupMocks(fetchMock) {
 export const FullTree = args => {
   useFetchMock(defaultSetupMocks)
 
-  return <FileTreeRoot {...args} />
+  return withContextRoot(<FileTreeRoot {...args} />, {
+    project: DEFAULT_PROJECT,
+    permissionsLevel: 'owner',
+  })
 }
 
-export const ReadOnly = args => <FileTreeRoot {...args} />
-ReadOnly.args = { hasWritePermissions: false }
+export const ReadOnly = args => {
+  return withContextRoot(<FileTreeRoot {...args} />, {
+    project: DEFAULT_PROJECT,
+    permissionsLevel: 'readOnly',
+  })
+}
 
-export const Disconnected = args => <FileTreeRoot {...args} />
+export const Disconnected = args => {
+  return withContextRoot(<FileTreeRoot {...args} />, {
+    project: DEFAULT_PROJECT,
+    permissionsLevel: 'owner',
+  })
+}
 Disconnected.args = { isConnected: false }
 
 export const NetworkErrors = args => {
@@ -106,24 +124,31 @@ export const NetworkErrors = args => {
       })
   })
 
-  return <FileTreeRoot {...args} />
+  return withContextRoot(<FileTreeRoot {...args} />, {
+    project: DEFAULT_PROJECT,
+    permissionsLevel: 'owner',
+  })
 }
 
-export const FallbackError = args => <FileTreeError {...args} />
+export const FallbackError = args => {
+  return withContextRoot(<FileTreeError {...args} />, {
+    project: DEFAULT_PROJECT,
+  })
+}
 
 export const FilesLimit = args => {
   useFetchMock(defaultSetupMocks)
 
-  return <FileTreeRoot {...args} />
+  return withContextRoot(<FileTreeRoot {...args} />, {
+    project: { ...DEFAULT_PROJECT, rootFolder: rootFolderLimit },
+    permissionsLevel: 'owner',
+  })
 }
-FilesLimit.args = { rootFolder: rootFolderLimit }
 
 export default {
   title: 'File Tree',
   component: FileTreeRoot,
   args: {
-    rootFolder: rootFolderBase,
-    hasWritePermissions: true,
     setStartedFreeTrial: () => {
       console.log('started free trial')
     },
@@ -131,12 +156,9 @@ export default {
     reindexReferences: () => {
       console.log('reindex references')
     },
-    userHasFeature: () => true,
     setRefProviderEnabled: provider => {
       console.log(`ref provider ${provider} enabled`)
     },
-    projectId: '123abc',
-    rootDocId: '5e74f1a7ce17ae0041dfd056',
     isConnected: true,
   },
   argTypes: {
@@ -149,9 +171,7 @@ export default {
         <style>{'html, body, .file-tree { height: 100%; width: 100%; }'}</style>
         <div className="editor-sidebar full-size">
           <div className="file-tree">
-            <ContextRoot ide={window._ide} settings={{}}>
-              <Story />
-            </ContextRoot>
+            <Story />
           </div>
         </div>
       </>

@@ -75,7 +75,7 @@ describe('<FileTreeItemName />', function () {
         setIsDraggable={setIsDraggable}
       />,
       {
-        contextProps: { hasWritePermissions: false },
+        contextProps: { permissionsLevel: 'readOnly' },
       }
     )
 

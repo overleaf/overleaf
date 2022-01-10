@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
 import { Trans } from 'react-i18next'
-import { useFileTreeMainContext } from '../../contexts/file-tree-main'
+import { useProjectContext } from '../../../../shared/context/project-context'
 
 // handle "not-logged-in" errors by redirecting to the login page
 export default function RedirectToLogin() {
-  const { projectId } = useFileTreeMainContext()
+  const { _id: projectId } = useProjectContext(projectContextPropTypes)
 
   const [secondsToRedirect, setSecondsToRedirect] = useState(10)
 
@@ -34,4 +35,8 @@ export default function RedirectToLogin() {
       values={{ seconds: secondsToRedirect }}
     />
   )
+}
+
+const projectContextPropTypes = {
+  _id: PropTypes.string.isRequired,
 }

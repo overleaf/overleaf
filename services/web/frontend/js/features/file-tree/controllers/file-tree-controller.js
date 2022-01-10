@@ -13,20 +13,10 @@ App.controller(
     ide
     // eventTracking
   ) {
-    $scope.projectId = ide.project_id
-    $scope.rootFolder = null
-    $scope.rootDocId = null
-    $scope.hasWritePermissions = false
     $scope.isConnected = true
 
     $scope.$on('project:joined', () => {
-      $scope.rootFolder = $scope.project.rootFolder
-      $scope.rootDocId = $scope.project.rootDoc_id
       $scope.$emit('file-tree:initialized')
-    })
-
-    $scope.$watch('permissions.write', hasWritePermissions => {
-      $scope.hasWritePermissions = hasWritePermissions
     })
 
     $scope.$watch('editor.open_doc_id', openDocId => {
@@ -84,12 +74,6 @@ App.controller(
         $scope.$emit('entity:no-selection')
       }
     }
-
-    $scope.userHasFeature = feature => ide.$scope.user.features[feature]
-
-    $scope.$watch('permissions.write', hasWritePermissions => {
-      $scope.hasWritePermissions = hasWritePermissions
-    })
 
     $scope.refProviders = ide.$scope.user.refProviders || {}
 
