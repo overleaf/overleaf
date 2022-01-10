@@ -77,7 +77,6 @@ export function EditorProvider({ children, settings }) {
   const [permissionsLevel] = useScopeValue('permissionsLevel')
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
-  const [insertSymbol] = useScopeValue('editor.insertSymbol')
 
   useEffect(() => {
     if (ide?.socket) {
@@ -118,6 +117,14 @@ export function EditorProvider({ children, settings }) {
       }`
     )
   }, [projectName, setTitle])
+
+  const insertSymbol = useCallback(symbol => {
+    window.dispatchEvent(
+      new CustomEvent('editor:insert-symbol', {
+        detail: symbol,
+      })
+    )
+  }, [])
 
   const value = useMemo(
     () => ({

@@ -56,6 +56,10 @@ export default EditorManager = (function () {
         },
       }
 
+      window.addEventListener('editor:insert-symbol', event => {
+        this.$scope.editor.insertSymbol(event.detail)
+      })
+
       this.$scope.$on('entity:selected', (event, entity) => {
         if (this.$scope.ui.view !== 'history' && entity.type === 'doc') {
           return this.openDoc(entity)
