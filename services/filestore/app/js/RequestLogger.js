@@ -45,25 +45,9 @@ class RequestLogger {
       const level = res.statusCode >= 500 ? 'err' : 'log'
       logger[level](
         {
-          req: {
-            url: req.originalUrl || req.url,
-            route: routePath,
-            method: req.method,
-            referrer: req.headers.referer || req.headers.referrer,
-            'remote-addr':
-              req.ip ||
-              (req.socket && req.socket.remoteAddress) ||
-              (req.socket &&
-                req.socket.socket &&
-                req.socket.socket.remoteAddress),
-            'user-agent': req.headers['user-agent'],
-            'content-length': req.headers['content-length'],
-          },
-          res: {
-            'content-length': res._headers['content-length'],
-            statusCode: res.statusCode,
-            'response-time': responseTime,
-          },
+          req,
+          res,
+          responseTimeMs: responseTime,
           info: req.requestLogger._logInfo,
         },
         req.requestLogger._logMessage
