@@ -28,6 +28,17 @@ function GoToCodeButton({
     'detach-synctex-control': !!isDetachLayout,
   })
 
+  let buttonIcon = null
+  if (syncToCodeInFlight) {
+    buttonIcon = (
+      <Icon type="refresh" spin classes={{ icon: 'synctex-spin-icon' }} />
+    )
+  } else if (!isDetachLayout) {
+    buttonIcon = (
+      <Icon type="arrow-left" classes={{ icon: 'synctex-control-icon' }} />
+    )
+  }
+
   return (
     <OverlayTrigger
       placement={tooltipPlacement}
@@ -45,11 +56,7 @@ function GoToCodeButton({
         className={buttonClasses}
         aria-label={t('go_to_pdf_location_in_code')}
       >
-        {syncToCodeInFlight ? (
-          <Icon type="refresh" spin classes={{ icon: 'synctex-spin-icon' }} />
-        ) : (
-          <Icon type="arrow-left" classes={{ icon: 'synctex-control-icon' }} />
-        )}
+        {buttonIcon}
         {isDetachLayout ? <span>&nbsp;{t('show_in_code')}</span> : ''}
       </Button>
     </OverlayTrigger>
@@ -68,6 +75,17 @@ function GoToPdfButton({
     'detach-synctex-control': !!isDetachLayout,
   })
 
+  let buttonIcon = null
+  if (syncToPdfInFlight) {
+    buttonIcon = (
+      <Icon type="refresh" spin classes={{ icon: 'synctex-spin-icon' }} />
+    )
+  } else if (!isDetachLayout) {
+    buttonIcon = (
+      <Icon type="arrow-right" classes={{ icon: 'synctex-control-icon' }} />
+    )
+  }
+
   return (
     <OverlayTrigger
       placement={tooltipPlacement}
@@ -85,11 +103,7 @@ function GoToPdfButton({
         className={buttonClasses}
         aria-label={t('go_to_code_location_in_pdf')}
       >
-        {syncToPdfInFlight ? (
-          <Icon type="refresh" spin classes={{ icon: 'synctex-spin-icon' }} />
-        ) : (
-          <Icon type="arrow-right" classes={{ icon: 'synctex-control-icon' }} />
-        )}
+        {buttonIcon}
         {isDetachLayout ? <span>&nbsp;{t('show_in_pdf')}</span> : ''}
       </Button>
     </OverlayTrigger>

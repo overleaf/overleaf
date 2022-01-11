@@ -125,7 +125,7 @@ describe('<PdfSynctexControls/>', function () {
       return null
     }
 
-    renderWithEditorContext(
+    const { container } = renderWithEditorContext(
       <>
         <Inner />
         <PdfSynctexControls />
@@ -140,6 +140,10 @@ describe('<PdfSynctexControls/>', function () {
     const syncToCodeButton = await screen.findByRole('button', {
       name: 'Go to PDF location in code',
     })
+
+    expect(container.querySelectorAll('.synctex-control-icon').length).to.equal(
+      2
+    )
 
     // mock editor cursor position update
     fireEvent(
@@ -173,14 +177,18 @@ describe('<PdfSynctexControls/>', function () {
       window.metaAttributesCache.set('ol-detachRole', 'detacher')
     })
 
-    it('does not have go to PDF location button', async function () {
-      renderWithEditorContext(<PdfSynctexControls />, { scope })
+    it('does not have go to PDF location button nor arrow icon', async function () {
+      const { container } = renderWithEditorContext(<PdfSynctexControls />, {
+        scope,
+      })
 
       expect(
         await screen.queryByRole('button', {
           name: 'Go to PDF location in code',
         })
       ).to.not.exist
+
+      expect(container.querySelector('.synctex-control-icon')).to.not.exist
     })
 
     it('send go to PDF location action', async function () {
@@ -212,7 +220,9 @@ describe('<PdfSynctexControls/>', function () {
     })
 
     it('update inflight state', async function () {
-      renderWithEditorContext(<PdfSynctexControls />, { scope })
+      const { container } = renderWithEditorContext(<PdfSynctexControls />, {
+        scope,
+      })
       sysendTestHelper.resetHistory()
 
       const syncToPdfButton = await screen.findByRole('button', {
@@ -233,6 +243,9 @@ describe('<PdfSynctexControls/>', function () {
         data: { value: true },
       })
       expect(syncToPdfButton.disabled).to.be.true
+      expect(container.querySelectorAll('.synctex-spin-icon').length).to.equal(
+        1
+      )
 
       sysendTestHelper.receiveMessage({
         role: 'detached',
@@ -240,6 +253,9 @@ describe('<PdfSynctexControls/>', function () {
         data: { value: false },
       })
       expect(syncToPdfButton.disabled).to.be.false
+      expect(container.querySelectorAll('.synctex-spin-icon').length).to.equal(
+        0
+      )
     })
   })
 
@@ -248,18 +264,24 @@ describe('<PdfSynctexControls/>', function () {
       window.metaAttributesCache.set('ol-detachRole', 'detached')
     })
 
-    it('does not have go to code location button', async function () {
-      renderWithEditorContext(<PdfSynctexControls />, { scope })
+    it('does not have go to code location button nor arrow icon', async function () {
+      const { container } = renderWithEditorContext(<PdfSynctexControls />, {
+        scope,
+      })
 
       expect(
         await screen.queryByRole('button', {
           name: 'Go to code location in PDF',
         })
       ).to.not.exist
+
+      expect(container.querySelector('.synctex-control-icon')).to.not.exist
     })
 
     it('send go to code line action and update inflight state', async function () {
-      renderWithEditorContext(<PdfSynctexControls />, { scope })
+      const { container } = renderWithEditorContext(<PdfSynctexControls />, {
+        scope,
+      })
       sysendTestHelper.resetHistory()
 
       const syncToCodeButton = await screen.findByRole('button', {
@@ -268,9 +290,17 @@ describe('<PdfSynctexControls/>', function () {
 
       sysendTestHelper.resetHistory()
 
+      expect(syncToCodeButton.disabled).to.be.false
+      expect(container.querySelectorAll('.synctex-spin-icon').length).to.equal(
+        0
+      )
+
       fireEvent.click(syncToCodeButton)
 
       expect(syncToCodeButton.disabled).to.be.true
+      expect(container.querySelectorAll('.synctex-spin-icon').length).to.equal(
+        1
+      )
 
       await waitFor(() => {
         expect(fetchMock.called('express:/project/:projectId/sync/pdf')).to.be
