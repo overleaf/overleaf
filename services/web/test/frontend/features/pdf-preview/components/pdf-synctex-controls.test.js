@@ -138,7 +138,7 @@ describe('<PdfSynctexControls/>', function () {
     })
 
     const syncToCodeButton = await screen.findByRole('button', {
-      name: 'Go to PDF location in code',
+      name: /Go to PDF location in code/,
     })
 
     expect(container.querySelectorAll('.synctex-control-icon').length).to.equal(
@@ -285,7 +285,7 @@ describe('<PdfSynctexControls/>', function () {
       sysendTestHelper.resetHistory()
 
       const syncToCodeButton = await screen.findByRole('button', {
-        name: 'Go to PDF location in code',
+        name: /Go to PDF location in code/,
       })
 
       sysendTestHelper.resetHistory()

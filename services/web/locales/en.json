@@ -1261,7 +1261,7 @@
   "project_too_large_please_reduce": "This project has too much editable text, please try and reduce it. The largest files are:",
   "project_too_much_editable_text": "This project has too much editable text, please try to reduce it.",
   "please_ask_the_project_owner_to_link_to_github": "Please ask the project owner to link this project to a GitHub repository",
-  "go_to_pdf_location_in_code": "Go to PDF location in code",
+  "go_to_pdf_location_in_code": "Go to PDF location in code (Tip: double click on the PDF for best results)",
   "ko": "Korean",
   "ja": "Japanese",
   "about_brian_gough": "is a software developer and former theoretical high energy physicist at Fermilab and Los Alamos. For many years he published free software manuals commercially using TeX and LaTeX and was also the maintainer of the GNU Scientific Library.",
