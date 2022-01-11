@@ -104,7 +104,9 @@ export const handleOutputFiles = async (projectId, data) => {
     const log = await response.text()
 
     try {
-      const { errors, warnings } = new BibLogParser(log, {}).parse()
+      const { errors, warnings } = new BibLogParser(log, {
+        maxErrors: 100,
+      }).parse()
       accumulateResults({ errors, warnings }, 'BibTeX:')
     } catch (e) {
       // BibLog parsing errors are ignored

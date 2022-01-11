@@ -18,7 +18,7 @@ const MESSAGE_LEVELS = {
   ERROR: 'error',
 }
 
-const parserReducer = function (maxErrors) {
+const parserReducer = function (maxErrors, buildMaxErrorsReachedMessage) {
   return function (accumulator, parser) {
     const consume = function (logText, regex, process) {
       let match
@@ -32,16 +32,18 @@ const parserReducer = function (maxErrors) {
 
         // Too many log entries can cause browser crashes
         // Construct a too many files error from the last match
-        if (iterationCount >= maxErrors) {
-          const level = newEntry.level + 's'
-          newEntry.message = [
-            'Over',
-            maxErrors,
-            level,
-            'returned. Download raw logs to see full list',
-          ].join(' ')
-          newEntry.line = undefined
-          result.unshift(newEntry)
+        if (maxErrors != null && iterationCount >= maxErrors) {
+          if (buildMaxErrorsReachedMessage) {
+            const level = newEntry.level + 's'
+            newEntry.message = [
+              'Over',
+              maxErrors,
+              level,
+              'returned. Download raw logs to see full list',
+            ].join(' ')
+            newEntry.line = undefined
+            result.unshift(newEntry)
+          }
           return [result, '']
         }
 
@@ -171,11 +173,17 @@ export default class BibLogParser {
     }
     // reduce over the parsers, starting with the log text,
     let [allWarnings, remainingText] = this.warningParsers.reduce(
-      parserReducer(this.options.maxErrors),
+      parserReducer(
+        this.options.maxErrors,
+        this.options.buildMaxErrorsReachedMessage
+      ),
       [[], this.text]
     )
     ;[allErrors, remainingText] = this.errorParsers.reduce(
-      parserReducer(this.options.maxErrors),
+      parserReducer(
+        this.options.maxErrors,
+        this.options.buildMaxErrorsReachedMessage
+      ),
       [[], remainingText]
     )
     result.warnings = allWarnings
