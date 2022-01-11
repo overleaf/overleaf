@@ -31,6 +31,14 @@ const ensureRecurlyIsSetup = _.once(() => {
   return true
 })
 
+function getPricePerUser(price, currencySymbol, size) {
+  let perUserPrice = price / size
+  if (perUserPrice % 1 !== 0) {
+    perUserPrice = perUserPrice.toFixed(2)
+  }
+  return `${currencySymbol}${perUserPrice}`
+}
+
 App.controller('MetricsEmailController', function ($scope, $http) {
   $scope.institutionEmailSubscription = function (institutionId) {
     const inst = _.find(window.managedInstitutions, function (institution) {
@@ -88,6 +96,7 @@ App.factory('RecurlyPricing', function ($q, MultiCurrencyPricing) {
             }
             resolve({
               total: `${currencySymbol}${total}`,
+              totalValue: total,
               subtotal: `${currencySymbol}${totalPriceExTax.toFixed(2)}`,
               tax: `${currencySymbol}${taxAmount.toFixed(2)}`,
               includesTax: taxAmount !== 0,
@@ -147,13 +156,21 @@ App.controller(
       const subscription = getMeta('ol-subscription')
       const { taxRate } = subscription.recurly
       const { usage, plan_code, currency, size } = $scope.selected
-      const placeholder = { total: '...' }
+      $scope.discountEligible = size >= 10
+      const pricePlaceholder = { total: '...' }
+      let pricePerUserPlaceholder = '...'
+      const currencySymbol = $scope.options.currencySymbols[currency]
       if (taxRate === 0) {
         const basePrice = $scope.prices[usage][plan_code][currency][size]
-        const currencySymbol = $scope.options.currencySymbols[currency]
-        placeholder.total = `${currencySymbol}${basePrice}`
+        pricePlaceholder.total = `${currencySymbol}${basePrice}`
+        pricePerUserPlaceholder = getPricePerUser(
+          basePrice,
+          currencySymbol,
+          size
+        )
       }
-      $scope.displayPrice = placeholder // Placeholder while we talk to recurly
+      $scope.displayPrice = pricePlaceholder // Placeholder while we talk to recurly
+      $scope.displayPricePerUser = pricePerUserPlaceholder // Placeholder while we talk to recurly
       const recurlyPlanCode = `group_${plan_code}_${size}_${usage}`
       RecurlyPricing.loadDisplayPriceWithTax(
         recurlyPlanCode,
@@ -161,6 +178,11 @@ App.controller(
         taxRate
       ).then(price => {
         $scope.displayPrice = price
+        $scope.displayPricePerUser = getPricePerUser(
+          price.totalValue,
+          currencySymbol,
+          size
+        )
       })
     }
 

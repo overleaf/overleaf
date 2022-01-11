@@ -1,16 +1,16 @@
 script(type="text/ng-template", id="groupPlanModalUpgradeTemplate")
 	.modal-header
-		h3 Save 30% or more with a group license
-	.modal-body.plans
+		h2 Customise your group subscription
+		h3 Save 30% or more
+	.modal-body.plans.group-subscription-modal
 		.container-fluid
 			.row
 				.col-md-6.text-center
 					.circle.circle-lg
 						| {{ displayPrice.total }}
+						span.small / year
 						br
-						span.small per year
-						br
-						span.circle-subtext For {{ selected.size }} users
+						span.circle-subtext {{displayPricePerUser}} per user
 					ul.list-unstyled
 						li Each user will have access to:
 						li &nbsp;
@@ -24,8 +24,9 @@ script(type="text/ng-template", id="groupPlanModalUpgradeTemplate")
 						.form-group
 							label(for='plan_code')
 								| Plan
-							select.form-control(id="plan_code", ng-model="selected.plan_code")
-								option(ng-repeat="plan_code in options.plan_codes", value="{{plan_code.code}}") {{ plan_code.display }}
+							label(ng-repeat="plan_code in options.plan_codes" class="group-plan-option")
+								input(type="radio" name="plan_code" ng-model="selected.plan_code" value="{{plan_code.code}}")
+								span {{plan_code.display}}
 						.form-group
 							label(for='size')
 								| Number of users
@@ -38,13 +39,18 @@ script(type="text/ng-template", id="groupPlanModalUpgradeTemplate")
 								option(ng-repeat="currency in options.currencies", value="{{currency.code}}") {{ currency.display }}
 						.form-group
 							label(for='usage')
-								| Usage
-							select.form-control(id="usage", ng-model="selected.usage")
-								option(ng-repeat="usage in options.usages", value="{{usage.code}}") {{ usage.display }}
-							p.small.text-center.row-spaced-small(ng-show="selected.usage == 'educational'")
-								| The 40% educational discount can be used by students or faculty using Overleaf for teaching
-							p.small.text-center.row-spaced-small(ng-show="selected.usage == 'enterprise'")
-								| Save an additional 40% on groups of 10 or more with our educational discount
+								| Overleaf offers a 40% educational discount for groups of 10 or more.
+						label.group-plan-option
+							input(id="usage", type="checkbox" ng-model="selected.usage" ng-true-value="'educational'" ng-false-value="'enterprise'")
+							span This license is for educational purposes (applies to students or faculty using Overleaf for teaching)
+			.row
+				.col-md-12.text-center
+					.educational-discount-badge
+						div(ng-hide="selected.usage !== 'educational'")
+							p.applied(ng-show="discountEligible")
+								| 40% educational discount applied!
+							p.ineligible(ng-hide="discountEligible")
+								| The educational discount is available for groups of 10 or more
 	.modal-footer
 		.text-center
 			p(ng-show="displayPrice.includesTax") Total:
