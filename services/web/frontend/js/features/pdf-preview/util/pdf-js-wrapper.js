@@ -11,6 +11,11 @@ if (typeof window !== 'undefined' && 'Worker' in window) {
   PDFJS.GlobalWorkerOptions.workerPort = new PDFJSWorker()
 }
 
+// forces the method (required by pdf.js) to be polyfilled by webpack, since
+// processing pdf.js by webpack/babel causes issues loading documents
+// eslint-disable-next-line no-unused-expressions
+Promise.allSettled
+
 const params = new URLSearchParams(window.location.search)
 const disableFontFace = params.get('disable-font-face') === 'true'
 const cMapUrl = getMeta('ol-pdfCMapsPath')
