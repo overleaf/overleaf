@@ -270,7 +270,7 @@
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "pirates": "^4.0.1",
     "postcss-loader": "^3.0.0",
-    "prettier": "^2.5.1",
+    "prettier": "2.5.1",
     "requirejs": "^2.3.6",
     "samlp": "^3.4.1",
     "sandboxed-module": "^2.0.4",
