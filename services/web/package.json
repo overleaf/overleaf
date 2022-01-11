@@ -205,9 +205,9 @@
   "devDependencies": {
     "@babel/register": "^7.14.5",
     "@juggle/resize-observer": "^3.3.1",
-    "@storybook/addon-a11y": "^6.2.9",
-    "@storybook/addon-essentials": "^6.2.9",
-    "@storybook/react": "^6.2.9",
+    "@storybook/addon-a11y": "^6.4.10",
+    "@storybook/addon-essentials": "^6.4.10",
+    "@storybook/react": "^6.4.10",
     "@testing-library/dom": "^7.31.2",
     "@testing-library/react": "^11.2.7",
     "@testing-library/react-hooks": "^7.0.0",
