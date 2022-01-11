@@ -3,7 +3,7 @@
 NODE_PARAMS=""
 if [ "$DEBUG_NODE" == "true" ]; then
     echo "running debug - web"
-    NODE_PARAMS="--inspect=0.0.0.0:40000"
+    NODE_PARAMS="--inspect=0.0.0.0:30000"
 fi
 
 exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /var/www/sharelatex/web/app.js >> /var/log/sharelatex/web.log 2>&1
