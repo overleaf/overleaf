@@ -12,8 +12,21 @@ import {
   cleanUpContext,
 } from '../../../helpers/render-with-context'
 import { stubMathJax, tearDownMathJaxStubs } from './stubs'
+import sinon from 'sinon'
 
 describe('<ChatPane />', function () {
+  beforeEach(function () {
+    this.clock = sinon.useFakeTimers({
+      toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
+    })
+  })
+
+  afterEach(function () {
+    this.clock.runAll()
+    this.clock.restore()
+    fetchMock.reset()
+  })
+
   const user = {
     id: 'fake_user',
     first_name: 'fake_user_first_name',
@@ -78,9 +91,15 @@ describe('<ChatPane />', function () {
   })
 
   it('a loading spinner is rendered while the messages are loading, then disappears', async function () {
-    fetchMock.get(/messages/, [])
+    fetchMock.get(/messages/, [], { delay: 1000 })
 
     renderWithChatContext(<ChatPane />, { user })
+
+    this.clock.tick(600) // wait for spinner to be displayed
+
+    await screen.findByText('Loading…')
+
+    this.clock.tick(1000) // wait for response to be received
 
     await waitForElementToBeRemoved(() => screen.getByText('Loading…'))
   })
