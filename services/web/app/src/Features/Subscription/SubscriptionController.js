@@ -160,6 +160,7 @@ async function userSubscriptionPage(req, res) {
     managedPublishers,
     v1SubscriptionStatus,
     currentInstitutionsWithLicence,
+    groupPlanModalOptions,
   }
   res.render('subscriptions/dashboard', data)
 }

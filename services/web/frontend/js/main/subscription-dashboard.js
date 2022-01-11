@@ -21,6 +21,8 @@ import App from '../base'
 import getMeta from '../utils/meta'
 const SUBSCRIPTION_URL = '/user/subscription/update'
 
+const GROUP_PLAN_MODAL_OPTIONS = getMeta('ol-groupPlanModalOptions')
+
 const ensureRecurlyIsSetup = _.once(() => {
   if (typeof recurly === 'undefined' || !recurly) {
     return false
@@ -102,7 +104,11 @@ App.controller('ChangePlanToGroupFormController', function ($scope, $modal) {
   const subscription = getMeta('ol-subscription')
   const currency = subscription.recurly.currency
 
-  if (['USD', 'GBP', 'EUR'].includes(currency)) {
+  const validCurrencies = GROUP_PLAN_MODAL_OPTIONS.currencies.map(
+    item => item.code
+  )
+
+  if (validCurrencies.includes(currency)) {
     $scope.isValidCurrencyForUpgrade = true
   }
 
@@ -123,48 +129,7 @@ App.controller('ChangePlanToGroupFormController', function ($scope, $modal) {
 App.controller(
   'GroupPlansModalUpgradeController',
   function ($scope, $modal, $location, $http, RecurlyPricing) {
-    $scope.options = {
-      plan_codes: [
-        {
-          display: 'Collaborator',
-          code: 'collaborator',
-        },
-        {
-          display: 'Professional',
-          code: 'professional',
-        },
-      ],
-      currencies: [
-        {
-          display: 'USD ($)',
-          code: 'USD',
-        },
-        {
-          display: 'GBP (£)',
-          code: 'GBP',
-        },
-        {
-          display: 'EUR (€)',
-          code: 'EUR',
-        },
-      ],
-      currencySymbols: {
-        USD: '$',
-        EUR: '€',
-        GBP: '£',
-      },
-      sizes: [2, 3, 4, 5, 10, 20, 50],
-      usages: [
-        {
-          display: 'Enterprise',
-          code: 'enterprise',
-        },
-        {
-          display: 'Educational',
-          code: 'educational',
-        },
-      ],
-    }
+    $scope.options = GROUP_PLAN_MODAL_OPTIONS
 
     $scope.prices = getMeta('ol-groupPlans')
 
