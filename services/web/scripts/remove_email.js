@@ -1,7 +1,3 @@
-// Run all the mongo queries on secondaries
-process.env.MONGO_CONNECTION_STRING =
-  process.env.READ_ONLY_MONGO_CONNECTION_STRING
-
 const { ObjectId, waitForDb } = require('../app/src/infrastructure/mongodb')
 const UserUpdater = require('../app/src/Features/User/UserUpdater')
 const UserGetter = require('../app/src/Features/User/UserGetter')
