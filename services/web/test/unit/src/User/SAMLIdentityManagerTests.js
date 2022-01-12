@@ -339,39 +339,38 @@ describe('SAMLIdentityManager', function () {
         this.UserGetter.promises.getUser.onSecondCall().resolves(this.user)
       })
 
-      it('should update the user audit log', function () {
+      it('should update the user audit log', async function () {
         const auditLog = {
-          intiatorId: '6005c75b12cbcaf771f4a105',
-          ip: '0:0:0:0',
+          initiatorId: '6005c75b12cbcaf771f4a105',
+          ipAddress: '0:0:0:0',
         }
-        this.SAMLIdentityManager.linkAccounts(
+        await this.SAMLIdentityManager.linkAccounts(
           this.user._id,
           'externalUserId',
           this.user.email,
           '1',
           'Overleaf University',
           undefined,
-          auditLog,
-          () => {
-            expect(
-              this.UserAuditLogHandler.promises.addEntry
-            ).to.have.been.calledWith(
-              this.user._id,
-              'link-institution-sso',
-              auditLog.initiatorId,
-              auditLog.ip,
-              {
-                institutionEmail: this.user.email,
-                providerId: '1',
-                providerName: 'Overleaf University',
-              }
-            )
+          auditLog
+        )
+
+        expect(
+          this.UserAuditLogHandler.promises.addEntry
+        ).to.have.been.calledWith(
+          this.user._id,
+          'link-institution-sso',
+          auditLog.initiatorId,
+          auditLog.ipAddress,
+          {
+            institutionEmail: this.user.email,
+            providerId: '1',
+            providerName: 'Overleaf University',
           }
         )
       })
 
-      it('should send an email notification', function () {
-        this.SAMLIdentityManager.linkAccounts(
+      it('should send an email notification', async function () {
+        await this.SAMLIdentityManager.linkAccounts(
           this.user._id,
           'externalUserId',
           this.user.email,
@@ -381,18 +380,17 @@ describe('SAMLIdentityManager', function () {
           {
             intiatorId: '6005c75b12cbcaf771f4a105',
             ipAddress: '0:0:0:0',
-          },
-          () => {
-            expect(this.User.updateOne).to.have.been.called
-            expect(this.EmailHandler.sendEmail).to.have.been.calledOnce
-            const emailArgs = this.EmailHandler.sendEmail.lastCall.args
-            expect(emailArgs[0]).to.equal('securityAlert')
-            expect(emailArgs[1].to).to.equal(this.user.email)
-            expect(emailArgs[1].actionDescribed).to.contain('was linked')
-            expect(emailArgs[1].message[0]).to.contain('Linked')
-            expect(emailArgs[1].message[0]).to.contain(this.user.email)
           }
         )
+
+        expect(this.User.findOneAndUpdate).to.have.been.called
+        expect(this.EmailHandler.sendEmail).to.have.been.calledOnce
+        const emailArgs = this.EmailHandler.sendEmail.lastCall.args
+        expect(emailArgs[0]).to.equal('securityAlert')
+        expect(emailArgs[1].to).to.equal(this.user.email)
+        expect(emailArgs[1].actionDescribed).to.contain('was linked')
+        expect(emailArgs[1].message[0]).to.contain('Linked')
+        expect(emailArgs[1].message[0]).to.contain(this.user.email)
       })
     })
   })
