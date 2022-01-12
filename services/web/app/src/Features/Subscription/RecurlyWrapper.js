@@ -31,7 +31,14 @@ function updateAccountEmailAddress(accountId, newEmail, callback) {
   const data = {
     email: newEmail,
   }
-  const requestBody = RecurlyWrapper._buildXml('account', data)
+  let requestBody
+  try {
+    requestBody = RecurlyWrapper._buildXml('account', data)
+  } catch (error) {
+    return callback(
+      OError.tag(error, 'error building xml', { accountId, newEmail })
+    )
+  }
 
   RecurlyWrapper.apiRequest(
     {
@@ -123,7 +130,14 @@ const RecurlyWrapper = {
         last_name: user.last_name,
         address,
       }
-      const requestBody = RecurlyWrapper._buildXml('account', data)
+      let requestBody
+      try {
+        requestBody = RecurlyWrapper._buildXml('account', data)
+      } catch (error) {
+        return next(
+          OError.tag(error, 'error building xml', { user_id: user._id })
+        )
+      }
 
       return RecurlyWrapper.apiRequest(
         {
@@ -171,7 +185,14 @@ const RecurlyWrapper = {
         return next(new Error('no account code at createBillingInfo stage'))
       }
       const data = { token_id: recurlyTokenIds.billing }
-      const requestBody = RecurlyWrapper._buildXml('billing_info', data)
+      let requestBody
+      try {
+        requestBody = RecurlyWrapper._buildXml('billing_info', data)
+      } catch (error) {
+        return next(
+          OError.tag(error, 'error building xml', { user_id: user._id })
+        )
+      }
       return RecurlyWrapper.apiRequest(
         {
           url: `accounts/${accountCode}/billing_info`,
@@ -233,10 +254,18 @@ const RecurlyWrapper = {
       } catch (error) {
         return next(error)
       }
-      const requestBody = RecurlyWrapper._buildXml(
-        'billing_info',
-        addressAndCompanyBillingInfo
-      )
+
+      let requestBody
+      try {
+        requestBody = RecurlyWrapper._buildXml(
+          'billing_info',
+          addressAndCompanyBillingInfo
+        )
+      } catch (error) {
+        return next(
+          OError.tag(error, 'error building xml', { user_id: user._id })
+        )
+      }
 
       return RecurlyWrapper.apiRequest(
         {
@@ -288,7 +317,14 @@ const RecurlyWrapper = {
       if (customFields) {
         data.custom_fields = customFields
       }
-      const requestBody = RecurlyWrapper._buildXml('subscription', data)
+      let requestBody
+      try {
+        requestBody = RecurlyWrapper._buildXml('subscription', data)
+      } catch (error) {
+        return next(
+          OError.tag(error, 'error building xml', { user_id: user._id })
+        )
+      }
 
       return RecurlyWrapper.apiRequest(
         {
@@ -399,7 +435,14 @@ const RecurlyWrapper = {
     if (customFields) {
       data.custom_fields = customFields
     }
-    const requestBody = RecurlyWrapper._buildXml('subscription', data)
+    let requestBody
+    try {
+      requestBody = RecurlyWrapper._buildXml('subscription', data)
+    } catch (error) {
+      return callback(
+        OError.tag(error, 'error building xml', { user_id: user._id })
+      )
+    }
 
     return RecurlyWrapper.apiRequest(
       {
@@ -701,7 +744,14 @@ const RecurlyWrapper = {
       plan_code: options.plan_code,
       timeframe: options.timeframe,
     }
-    const requestBody = RecurlyWrapper._buildXml('subscription', data)
+    let requestBody
+    try {
+      requestBody = RecurlyWrapper._buildXml('subscription', data)
+    } catch (error) {
+      return callback(
+        OError.tag(error, 'error building xml', { subscriptionId })
+      )
+    }
 
     return RecurlyWrapper.apiRequest(
       {
@@ -737,7 +787,14 @@ const RecurlyWrapper = {
       applies_to_all_plans: false,
     }
     data.discount_in_cents[currencyCode] = discount_in_cents
-    const requestBody = RecurlyWrapper._buildXml('coupon', data)
+    let requestBody
+    try {
+      requestBody = RecurlyWrapper._buildXml('coupon', data)
+    } catch (error) {
+      return callback(
+        OError.tag(error, 'error building xml', { coupon_code, name })
+      )
+    }
 
     logger.log({ coupon_code, requestBody }, 'creating coupon')
     return RecurlyWrapper.apiRequest(
@@ -774,7 +831,14 @@ const RecurlyWrapper = {
       account_code,
       currency: 'USD',
     }
-    const requestBody = RecurlyWrapper._buildXml('redemption', data)
+    let requestBody
+    try {
+      requestBody = RecurlyWrapper._buildXml('redemption', data)
+    } catch (error) {
+      return callback(
+        OError.tag(error, 'error building xml', { account_code, coupon_code })
+      )
+    }
 
     logger.log(
       { account_code, coupon_code, requestBody },
