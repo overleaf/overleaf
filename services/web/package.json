@@ -34,7 +34,8 @@
     "lint:fix": "eslint --fix .",
     "extract-translations": "i18next-scanner",
     "migrations": "east",
-    "storybook": "start-storybook -p 6006 -s ./public"
+    "storybook": "start-storybook -p 6006 -s ./public",
+    "routes": "bin/routes"
   },
   "browserslist": [
     "last 1 year",
@@ -226,6 +227,7 @@
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.5.2",
     "es6-promise": "^4.2.8",
+    "escodegen": "^2.0.0",
     "eslint": "^8.2.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",

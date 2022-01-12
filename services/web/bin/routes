@@ -5,7 +5,8 @@ const acornWalk = require('acorn-walk')
 const fs = require('fs')
 const _ = require('lodash')
 const glob = require('glob')
-print = console.log
+const escodegen = require('escodegen')
+const print = console.log
 
 const Methods = new Set([
   'get',
@@ -16,7 +17,7 @@ const Methods = new Set([
   'connect',
   'options',
   'trace',
-  'patch'
+  'patch',
 ])
 
 const isMethod = str => {
@@ -32,14 +33,15 @@ const routerCall = callExpression => {
     return false
   }
   const routerName = callee.object.name
-  if ( // Match known names for the Express routers: app, webRouter, whateverRouter, etc...
+  if (
+    // Match known names for the Express routers: app, webRouter, whateverRouter, etc...
     isMethod(property.name) &&
     (routerName === 'app' || routerName.match('^.*[rR]outer$'))
   ) {
     return {
       routerName: routerName,
       method: property.name,
-      args: args
+      args: args,
     }
   } else {
     return null
@@ -47,10 +49,7 @@ const routerCall = callExpression => {
 }
 
 const formatMethodCall = expression => {
-  if (!expression.object || !expression.property) {
-    return '????'
-  }
-  return `${expression.object.name}.${expression.property.name}`
+  return escodegen.generate(expression, { format: { compact: true } })
 }
 
 const parseAndPrintRoutesSync = path => {
@@ -62,12 +61,11 @@ const parseAndPrintRoutesSync = path => {
       const call = routerCall(node)
       if (call) {
         const firstArg = _.first(call.args)
-        const lastArg = _.last(call.args)
         try {
           print(
             `  ${formatRouterName(call.routerName)}\t .${call.method} \t: ${
               firstArg.value
-            } => ${formatMethodCall(lastArg)}`
+            } => ${call.args.slice(1).map(formatMethodCall).join(' => ')}`
           )
         } catch (e) {
           print('>> Error')
@@ -76,15 +74,15 @@ const parseAndPrintRoutesSync = path => {
           process.exit(1)
         }
       }
-    }
+    },
   })
 }
 
 const routerNameMapping = {
-  'privateApiRouter': 'privateApi',
-  'publicApiRouter': 'publicApi'
+  privateApiRouter: 'privateApi',
+  publicApiRouter: 'publicApi',
 }
-const formatRouterName = (name) => {
+const formatRouterName = name => {
   return routerNameMapping[name] || name
 }
 
@@ -92,7 +90,7 @@ const main = () => {
   // Take an optional filter to apply to file names
   const filter = process.argv[2] || null
 
-  if (filter && (filter === '--help' || filter == 'help')) {
+  if (filter && (filter === '--help' || filter === 'help')) {
     print('')
     print('  Usage: bin/routes [filter]')
     print('  Examples:')
@@ -104,7 +102,11 @@ const main = () => {
 
   // Find all routers
   glob('*[rR]outer.js', { matchBase: true }, (err, files) => {
-    for (file of files) {
+    if (err) {
+      console.error(err)
+      process.exit(1)
+    }
+    for (const file of files) {
       if (file.match('^node_modules.*$') || file.match('.*/public/.*')) {
         continue
       }
