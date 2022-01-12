@@ -63,14 +63,19 @@ function affiliateUserByReversedHostname(user, reversedHostname, callback) {
             )
             return innerCallback(error)
           }
-          FeaturesUpdater.refreshFeatures(
-            user._id,
-            'affiliate-user-by-reversed-hostname',
-            innerCallback
-          )
+          innerCallback()
         }
       )
     },
-    callback
+    err => {
+      if (err) {
+        return callback(err)
+      }
+      FeaturesUpdater.refreshFeatures(
+        user._id,
+        'affiliate-user-by-reversed-hostname',
+        callback
+      )
+    }
   )
 }

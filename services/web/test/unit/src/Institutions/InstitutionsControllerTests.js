@@ -132,6 +132,7 @@ describe('InstitutionsController', function () {
         this.refreshFeatures
           .calledWith(this.stubbedUser2._id)
           .should.equal(true)
+        this.refreshFeatures.should.have.been.calledTwice
         return done()
       }
       this.next.callsFake(done)
