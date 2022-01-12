@@ -6,24 +6,24 @@ const modulePath =
 const plans = {
   expensive: {
     planCode: 'expensive',
-    price: 1500,
+    price_in_cents: 1500,
   },
   cheaper: {
     planCode: 'cheaper',
-    price: 500,
+    price_in_cents: 500,
   },
   alsoCheap: {
     plancode: 'also-cheap',
-    price: 500,
+    price_in_cents: 500,
   },
   expensiveGroup: {
     plancode: 'group_expensive',
-    price: 495,
+    price_in_unit: 495,
     groupPlan: true,
   },
   cheapGroup: {
     plancode: 'group_cheap',
-    price: 10,
+    price_in_unit: 10,
     groupPlan: true,
   },
   bad: {},

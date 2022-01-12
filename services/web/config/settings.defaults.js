@@ -319,7 +319,7 @@ module.exports = {
     {
       planCode: 'personal',
       name: 'Personal',
-      price: 0,
+      price_in_cents: 0,
       features: defaultFeatures,
     },
   ],

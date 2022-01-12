@@ -16,16 +16,16 @@ function getFormValues() {
 }
 
 function updateGroupPlanView() {
-  const prices = getMeta('ol-groupPlans')
+  const groupPlans = getMeta('ol-groupPlans')
   const currencySymbols = getMeta('ol-currencySymbols')
 
   const modalEl = document.querySelector('[data-ol-group-plan-modal]')
   const { planCode, size, currency, usage } = getFormValues()
 
-  const price = prices[usage][planCode][currency][size]
+  const priceInUnit = groupPlans[usage][planCode][currency][size].price_in_unit
   const currencySymbol = currencySymbols[currency]
-  const displayPrice = `${currencySymbol}${price}`
-  const perUserPrice = parseFloat((price / size).toFixed(2))
+  const displayPrice = `${currencySymbol}${priceInUnit}`
+  const perUserPrice = parseFloat((priceInUnit / size).toFixed(2))
 
   modalEl.querySelectorAll('[data-ol-group-plan-plan-code]').forEach(el => {
     el.hidden = el.getAttribute('data-ol-group-plan-plan-code') !== planCode

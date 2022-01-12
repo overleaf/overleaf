@@ -6,21 +6,21 @@ const plans = [
   {
     planCode: 'first',
     name: '1st',
-    price: 800,
+    price_in_cents: 800,
     features: {},
     featureDescription: {},
   },
   {
     planCode: 'second',
     name: '2nd',
-    price: 1500,
+    price_in_cents: 1500,
     features: {},
     featureDescription: {},
   },
   {
     planCode: 'third',
     name: '3rd',
-    price: 3000,
+    price_in_cents: 3000,
     features: {},
     featureDescription: {},
   },
@@ -41,7 +41,7 @@ describe('PlansLocator', function () {
     it('should return the found plan', function () {
       const plan = this.PlansLocator.findLocalPlanInSettings('second')
       expect(plan).to.have.property('name', '2nd')
-      expect(plan).to.have.property('price', 1500)
+      expect(plan).to.have.property('price_in_cents', 1500)
     })
     it('should return null if no matching plan is found', function () {
       const plan = this.PlansLocator.findLocalPlanInSettings('gibberish')

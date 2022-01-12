@@ -3,8 +3,15 @@ const logger = require('@overleaf/logger')
 
 function ensurePlansAreSetupCorrectly() {
   Settings.plans.forEach(plan => {
-    if (typeof plan.price !== 'number') {
+    if (
+      typeof plan.price_in_unit !== 'number' &&
+      typeof plan.price_in_cents !== 'number'
+    ) {
       logger.fatal({ plan }, 'missing price on plan')
+      process.exit(1)
+    }
+    if (plan.price) {
+      logger.fatal({ plan }, 'unclear price attribute on plan')
       process.exit(1)
     }
   })
