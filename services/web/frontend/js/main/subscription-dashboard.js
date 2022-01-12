@@ -140,7 +140,7 @@ App.controller(
   function ($scope, $modal, $location, $http, RecurlyPricing) {
     $scope.options = GROUP_PLAN_MODAL_OPTIONS
 
-    $scope.prices = getMeta('ol-groupPlans')
+    $scope.groupPlans = getMeta('ol-groupPlans')
 
     const currency = $scope.currentPlanCurrency
 
@@ -161,7 +161,7 @@ App.controller(
       let pricePerUserPlaceholder = '...'
       const currencySymbol = $scope.options.currencySymbols[currency]
       if (taxRate === 0) {
-        const basePrice = $scope.prices[usage][plan_code][currency][size]
+        const basePrice = $scope.groupPlans[usage][plan_code][currency][size]
         pricePlaceholder.total = `${currencySymbol}${basePrice}`
         pricePerUserPlaceholder = getPricePerUser(
           basePrice,
