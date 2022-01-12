@@ -5,9 +5,9 @@ mixin printPlan(plan)
 				strong(ng-non-bindable) #{plan.name}
 			td
 				if (plan.annual)
-					| {{price}} / #{translate("year")}
+					| {{displayPrice}} / #{translate("year")}
 				else
-					| {{price}} / #{translate("month")}
+					| {{displayPrice}} / #{translate("month")}
 			td
 				if (typeof(personalSubscription.planCode) != "undefined" && plan.planCode == personalSubscription.planCode.split("_")[0])
 					if (personalSubscription.pendingPlan)

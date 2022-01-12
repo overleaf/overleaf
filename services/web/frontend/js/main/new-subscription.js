@@ -143,7 +143,9 @@ export default App.controller(
         $scope.trialLength = pricing.items.plan.trial.length
       }
 
-      $scope.price = $scope.trialLength ? pricing.price.next : pricing.price.now
+      $scope.recurlyPrice = $scope.trialLength
+        ? pricing.price.next
+        : pricing.price.now
       $scope.taxes = pricing.price.taxes
       $scope.monthlyBilling = pricing.items.plan.period.length === 1
 

@@ -45,8 +45,8 @@ block content
 										span !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
 										span(ng-if="coupon.discountMonths && coupon.discountRate") &nbsp; -  {{coupon.discountMonths}} #{translate("month")}s {{coupon.discountRate}}% Off
 
-									div(ng-if="price")
-										- var priceVars = { price: "{{ availableCurrencies[currencyCode]['symbol'] }}{{ price.total }}"};
+									div(ng-if="recurlyPrice")
+										- var priceVars = { price: "{{ availableCurrencies[currencyCode]['symbol'] }}{{ recurlyPrice.total }}"};
 										span(ng-if="!coupon.singleUse && monthlyBilling")
 											| !{translate("x_price_per_month", priceVars, ['strong'] )}
 										span(ng-if="!coupon.singleUse && !monthlyBilling")
@@ -272,7 +272,7 @@ block content
 											div.price-breakdown(
 												ng-show="taxes.length"
 											)
-												- var priceBreakdownVars = { total: "{{ availableCurrencies[currencyCode]['symbol'] }}{{ price.total }}", subtotal: "{{availableCurrencies[currencyCode]['symbol']}}{{ price.subtotal }}", tax: "{{availableCurrencies[currencyCode]['symbol']}}{{ price.tax }}" };
+												- var priceBreakdownVars = { total: "{{ availableCurrencies[currencyCode]['symbol'] }}{{ recurlyPrice.total }}", subtotal: "{{availableCurrencies[currencyCode]['symbol']}}{{ recurlyPrice.subtotal }}", tax: "{{availableCurrencies[currencyCode]['symbol']}}{{ recurlyPrice.tax }}" };
 												hr.thin
 												span
 													| Total:

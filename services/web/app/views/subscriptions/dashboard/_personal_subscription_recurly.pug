@@ -25,7 +25,7 @@ div(ng-controller="RecurlySubscriptionController")
 					p #{translate("contact_support_to_change_group_subscription")}
 				if (personalSubscription.recurly.trialEndsAtFormatted && personalSubscription.recurly.trial_ends_at > Date.now())
 					p You're on a free trial which ends on <strong ng-non-bindable>#{personalSubscription.recurly.trialEndsAtFormatted}</strong>
-				p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount: personalSubscription.recurly.price, collectionDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong', 'strong'])}
+				p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount: personalSubscription.recurly.displayPrice, collectionDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong', 'strong'])}
 				include ./../_price_exceptions
 				p.pull-right
 				p
@@ -93,7 +93,7 @@ div(ng-controller="RecurlySubscriptionController")
 
 		div(ng-show="showDowngradeToStudent")
 			div(ng-controller="ChangePlanFormController")
-				p !{translate("interested_in_cheaper_plan",{price:'{{studentPrice}}'})}
+				p !{translate("interested_in_cheaper_plan",{price:'{{studentDisplayPrice}}'})}
 				p
 					button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_move_me_to_student_plan")}
 				p

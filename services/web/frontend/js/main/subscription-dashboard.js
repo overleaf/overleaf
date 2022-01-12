@@ -157,28 +157,28 @@ App.controller(
       const { taxRate } = subscription.recurly
       const { usage, plan_code, currency, size } = $scope.selected
       $scope.discountEligible = size >= 10
-      const pricePlaceholder = { total: '...' }
-      let pricePerUserPlaceholder = '...'
+      const recurlyPricePlaceholder = { total: '...' }
+      let perUserDisplayPricePlaceholder = '...'
       const currencySymbol = $scope.options.currencySymbols[currency]
       if (taxRate === 0) {
         const basePrice = $scope.groupPlans[usage][plan_code][currency][size]
-        pricePlaceholder.total = `${currencySymbol}${basePrice}`
-        pricePerUserPlaceholder = getPricePerUser(
+        recurlyPricePlaceholder.total = `${currencySymbol}${basePrice}`
+        perUserDisplayPricePlaceholder = getPricePerUser(
           basePrice,
           currencySymbol,
           size
         )
       }
-      $scope.displayPrice = pricePlaceholder // Placeholder while we talk to recurly
-      $scope.displayPricePerUser = pricePerUserPlaceholder // Placeholder while we talk to recurly
+      $scope.recurlyPrice = recurlyPricePlaceholder // Placeholder while we talk to recurly
+      $scope.perUserDisplayPrice = perUserDisplayPricePlaceholder // Placeholder while we talk to recurly
       const recurlyPlanCode = `group_${plan_code}_${size}_${usage}`
       RecurlyPricing.loadDisplayPriceWithTax(
         recurlyPlanCode,
         currency,
         taxRate
       ).then(price => {
-        $scope.displayPrice = price
-        $scope.displayPricePerUser = getPricePerUser(
+        $scope.recurlyPrice = price
+        $scope.perUserDisplayPrice = getPricePerUser(
           price.totalValue,
           currencySymbol,
           size
@@ -237,10 +237,10 @@ App.controller(
       const planCode = plan.planCode
       const subscription = getMeta('ol-subscription')
       const { currency, taxRate } = subscription.recurly
-      $scope.price = '...' // Placeholder while we talk to recurly
+      $scope.displayPrice = '...' // Placeholder while we talk to recurly
       RecurlyPricing.loadDisplayPriceWithTax(planCode, currency, taxRate).then(
-        price => {
-          $scope.price = price.total
+        recurlyPrice => {
+          $scope.displayPrice = recurlyPrice.total
         }
       )
     })
@@ -383,10 +383,10 @@ App.controller(
     }
 
     const { currency, taxRate } = subscription.recurly
-    $scope.studentPrice = '...' // Placeholder while we talk to recurly
+    $scope.studentDisplayPrice = '...' // Placeholder while we talk to recurly
     RecurlyPricing.loadDisplayPriceWithTax('student', currency, taxRate).then(
       price => {
-        $scope.studentPrice = price.total
+        $scope.studentDisplayPrice = price.total
       }
     )
 

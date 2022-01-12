@@ -252,7 +252,7 @@ function buildUsersSubscriptionViewModel(user, callback) {
           const pendingSubscriptionTax =
             personalSubscription.recurly.taxRate *
             recurlySubscription.pending_subscription.unit_amount_in_cents
-          personalSubscription.recurly.price =
+          personalSubscription.recurly.displayPrice =
             SubscriptionFormatters.formatPrice(
               recurlySubscription.pending_subscription.unit_amount_in_cents +
                 pendingAddOnPrice +
@@ -268,7 +268,7 @@ function buildUsersSubscriptionViewModel(user, callback) {
             pendingTotalLicenses
           personalSubscription.pendingPlan = pendingPlan
         } else {
-          personalSubscription.recurly.price =
+          personalSubscription.recurly.displayPrice =
             SubscriptionFormatters.formatPrice(
               recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
               recurlySubscription.currency

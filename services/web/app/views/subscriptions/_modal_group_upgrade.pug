@@ -7,10 +7,10 @@ script(type="text/ng-template", id="groupPlanModalUpgradeTemplate")
 			.row
 				.col-md-6.text-center
 					.circle.circle-lg
-						| {{ displayPrice.total }}
+						| {{ recurlyPrice.total }}
 						span.small / year
 						br
-						span.circle-subtext {{displayPricePerUser}} per user
+						span.circle-subtext {{perUserDisplayPrice}} per user
 					ul.list-unstyled
 						li Each user will have access to:
 						li &nbsp;
@@ -53,9 +53,9 @@ script(type="text/ng-template", id="groupPlanModalUpgradeTemplate")
 								| The educational discount is available for groups of 10 or more
 	.modal-footer
 		.text-center
-			p(ng-show="displayPrice.includesTax") Total:
-				strong  {{ displayPrice.total }}
-				|  ({{displayPrice.subtotal}} + {{displayPrice.tax}} tax) per year
+			p(ng-show="recurlyPrice.includesTax") Total:
+				strong  {{ recurlyPrice.total }}
+				|  ({{recurlyPrice.subtotal}} + {{recurlyPrice.tax}} tax) per year
 			p
 				strong Your new subscription will be billed immediately to your current payment method.
 			hr.thin
