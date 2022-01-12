@@ -30,6 +30,15 @@ export default function useDetachLayout() {
   }, [isLinked, setIsLinking])
 
   useEffect(() => {
+    if (debugPdfDetach) {
+      console.log('Effect', { role, isLinked })
+    }
+    if (role === 'detached' && isLinked) {
+      eventTracking.sendMB('project-layout-detached')
+    }
+  }, [role, isLinked])
+
+  useEffect(() => {
     if (uiTimeoutRef.current) {
       clearTimeout(uiTimeoutRef.current)
     }
