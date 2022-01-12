@@ -372,6 +372,8 @@ CodeMirror
 .ui-layout-resizer {
   width: @ui-resizer-size !important;
   background-color: @editor-resizer-bg-color;
+  /* Over-ride z-index set on element by JQuery Layout */
+  z-index: 0 !important;
   &.ui-layout-resizer-closed {
     &::before,
     &::after {
@@ -410,7 +412,6 @@ CodeMirror
   height: 50px;
   margin-top: -25px;
   top: 50%;
-  z-index: 3;
   background-color: @editor-toggler-bg-color;
 
   &:hover,
@@ -460,6 +461,7 @@ CodeMirror
 
 .ui-layout-resizer-dragging {
   background-color: @editor-resizer-bg-color-dragging;
+  z-index: 1000 !important;
 }
 
 .context-menu {
