@@ -23,7 +23,9 @@ async function getRecurlyGroupPrices() {
         prices[usage] = prices[usage] || {}
         prices[usage][type] = prices[usage][type] || {}
         prices[usage][type][currency] = prices[usage][type][currency] || {}
-        prices[usage][type][currency][size] = { price_in_unit: unitAmount }
+        prices[usage][type][currency][size] = {
+          price_in_cents: unitAmount * 100,
+        }
       })
     }
   }

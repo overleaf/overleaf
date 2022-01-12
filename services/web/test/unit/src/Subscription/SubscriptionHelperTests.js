@@ -18,12 +18,12 @@ const plans = {
   },
   expensiveGroup: {
     plancode: 'group_expensive',
-    price_in_unit: 495,
+    price_in_cents: 49500,
     groupPlan: true,
   },
   cheapGroup: {
     plancode: 'group_cheap',
-    price_in_unit: 10,
+    price_in_cents: 1000,
     groupPlan: true,
   },
   bad: {},

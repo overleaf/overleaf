@@ -22,10 +22,12 @@ function updateGroupPlanView() {
   const modalEl = document.querySelector('[data-ol-group-plan-modal]')
   const { planCode, size, currency, usage } = getFormValues()
 
-  const priceInUnit = groupPlans[usage][planCode][currency][size].price_in_unit
+  const priceInCents =
+    groupPlans[usage][planCode][currency][size].price_in_cents
+  const priceInUnit = (priceInCents / 100).toFixed()
   const currencySymbol = currencySymbols[currency]
   const displayPrice = `${currencySymbol}${priceInUnit}`
-  const perUserPrice = parseFloat((priceInUnit / size).toFixed(2))
+  const perUserPrice = parseFloat((priceInCents / 100 / size).toFixed(2))
 
   modalEl.querySelectorAll('[data-ol-group-plan-plan-code]').forEach(el => {
     el.hidden = el.getAttribute('data-ol-group-plan-plan-code') !== planCode

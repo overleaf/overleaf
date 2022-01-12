@@ -161,8 +161,9 @@ App.controller(
       let perUserDisplayPricePlaceholder = '...'
       const currencySymbol = $scope.options.currencySymbols[currency]
       if (taxRate === 0) {
-        const basePriceInUnit =
-          $scope.groupPlans[usage][plan_code][currency][size].price_in_unit
+        const basePriceInCents =
+          $scope.groupPlans[usage][plan_code][currency][size].price_in_cents
+        const basePriceInUnit = (basePriceInCents / 100).toFixed()
         recurlyPricePlaceholder.total = `${currencySymbol}${basePriceInUnit}`
         perUserDisplayPricePlaceholder = getPricePerUser(
           basePriceInUnit,

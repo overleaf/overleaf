@@ -3,510 +3,510 @@
     "professional": {
       "AUD": {
         "2": {
-          "price_in_unit": 604
+          "price_in_cents": 60400
         },
         "3": {
-          "price_in_unit": 906
+          "price_in_cents": 90600
         },
         "4": {
-          "price_in_unit": 1208
+          "price_in_cents": 120800
         },
         "5": {
-          "price_in_unit": 1510
+          "price_in_cents": 151000
         },
         "10": {
-          "price_in_unit": 1685
+          "price_in_cents": 168500
         },
         "20": {
-          "price_in_unit": 3110
+          "price_in_cents": 311000
         },
         "50": {
-          "price_in_unit": 7130
+          "price_in_cents": 713000
         }
       },
       "CAD": {
         "2": {
-          "price_in_unit": 570
+          "price_in_cents": 57000
         },
         "3": {
-          "price_in_unit": 854
+          "price_in_cents": 85400
         },
         "4": {
-          "price_in_unit": 1138
+          "price_in_cents": 113800
         },
         "5": {
-          "price_in_unit": 1420
+          "price_in_cents": 142000
         },
         "10": {
-          "price_in_unit": 1590
+          "price_in_cents": 159000
         },
         "20": {
-          "price_in_unit": 2940
+          "price_in_cents": 294000
         },
         "50": {
-          "price_in_unit": 6730
+          "price_in_cents": 673000
         }
       },
       "CHF": {
         "2": {
-          "price_in_unit": 504
+          "price_in_cents": 50400
         },
         "3": {
-          "price_in_unit": 756
+          "price_in_cents": 75600
         },
         "4": {
-          "price_in_unit": 1008
+          "price_in_cents": 100800
         },
         "5": {
-          "price_in_unit": 1260
+          "price_in_cents": 126000
         },
         "10": {
-          "price_in_unit": 1405
+          "price_in_cents": 140500
         },
         "20": {
-          "price_in_unit": 2590
+          "price_in_cents": 259000
         },
         "50": {
-          "price_in_unit": 5940
+          "price_in_cents": 594000
         }
       },
       "DKK": {
         "2": {
-          "price_in_unit": 3024
+          "price_in_cents": 302400
         },
         "3": {
-          "price_in_unit": 4536
+          "price_in_cents": 453600
         },
         "4": {
-          "price_in_unit": 6048
+          "price_in_cents": 604800
         },
         "5": {
-          "price_in_unit": 7560
+          "price_in_cents": 756000
         },
         "10": {
-          "price_in_unit": 8425
+          "price_in_cents": 842500
         },
         "20": {
-          "price_in_unit": 15550
+          "price_in_cents": 1555000
         },
         "50": {
-          "price_in_unit": 35640
+          "price_in_cents": 3564000
         }
       },
       "EUR": {
         "2": {
-          "price_in_unit": 470
+          "price_in_cents": 47000
         },
         "3": {
-          "price_in_unit": 704
+          "price_in_cents": 70400
         },
         "4": {
-          "price_in_unit": 936
+          "price_in_cents": 93600
         },
         "5": {
-          "price_in_unit": 1168
+          "price_in_cents": 116800
         },
         "10": {
-          "price_in_unit": 1310
+          "price_in_cents": 131000
         },
         "20": {
-          "price_in_unit": 2420
+          "price_in_cents": 242000
         },
         "50": {
-          "price_in_unit": 5545
+          "price_in_cents": 554500
         }
       },
       "GBP": {
         "2": {
-          "price_in_unit": 396
+          "price_in_cents": 39600
         },
         "3": {
-          "price_in_unit": 592
+          "price_in_cents": 59200
         },
         "4": {
-          "price_in_unit": 788
+          "price_in_cents": 78800
         },
         "5": {
-          "price_in_unit": 984
+          "price_in_cents": 98400
         },
         "10": {
-          "price_in_unit": 1125
+          "price_in_cents": 112500
         },
         "20": {
-          "price_in_unit": 2075
+          "price_in_cents": 207500
         },
         "50": {
-          "price_in_unit": 4750
+          "price_in_cents": 475000
         }
       },
       "NOK": {
         "2": {
-          "price_in_unit": 3696
+          "price_in_cents": 369600
         },
         "3": {
-          "price_in_unit": 5544
+          "price_in_cents": 554400
         },
         "4": {
-          "price_in_unit": 7392
+          "price_in_cents": 739200
         },
         "5": {
-          "price_in_unit": 9240
+          "price_in_cents": 924000
         },
         "10": {
-          "price_in_unit": 10295
+          "price_in_cents": 1029500
         },
         "20": {
-          "price_in_unit": 19010
+          "price_in_cents": 1901000
         },
         "50": {
-          "price_in_unit": 43560
+          "price_in_cents": 4356000
         }
       },
       "NZD": {
         "2": {
-          "price_in_unit": 604
+          "price_in_cents": 60400
         },
         "3": {
-          "price_in_unit": 906
+          "price_in_cents": 90600
         },
         "4": {
-          "price_in_unit": 1208
+          "price_in_cents": 120800
         },
         "5": {
-          "price_in_unit": 1510
+          "price_in_cents": 151000
         },
         "10": {
-          "price_in_unit": 1685
+          "price_in_cents": 168500
         },
         "20": {
-          "price_in_unit": 3110
+          "price_in_cents": 311000
         },
         "50": {
-          "price_in_unit": 7130
+          "price_in_cents": 713000
         }
       },
       "SEK": {
         "2": {
-          "price_in_unit": 3696
+          "price_in_cents": 369600
         },
         "3": {
-          "price_in_unit": 5544
+          "price_in_cents": 554400
         },
         "4": {
-          "price_in_unit": 7392
+          "price_in_cents": 739200
         },
         "5": {
-          "price_in_unit": 9240
+          "price_in_cents": 924000
         },
         "10": {
-          "price_in_unit": 10295
+          "price_in_cents": 1029500
         },
         "20": {
-          "price_in_unit": 19010
+          "price_in_cents": 1901000
         },
         "50": {
-          "price_in_unit": 43560
+          "price_in_cents": 4356000
         }
       },
       "SGD": {
         "2": {
-          "price_in_unit": 672
+          "price_in_cents": 67200
         },
         "3": {
-          "price_in_unit": 1008
+          "price_in_cents": 100800
         },
         "4": {
-          "price_in_unit": 1344
+          "price_in_cents": 134400
         },
         "5": {
-          "price_in_unit": 1680
+          "price_in_cents": 168000
         },
         "10": {
-          "price_in_unit": 1870
+          "price_in_cents": 187000
         },
         "20": {
-          "price_in_unit": 3455
+          "price_in_cents": 345500
         },
         "50": {
-          "price_in_unit": 7920
+          "price_in_cents": 792000
         }
       },
       "USD": {
         "2": {
-          "price_in_unit": 504
+          "price_in_cents": 50400
         },
         "3": {
-          "price_in_unit": 752
+          "price_in_cents": 75200
         },
         "4": {
-          "price_in_unit": 990
+          "price_in_cents": 99000
         },
         "5": {
-          "price_in_unit": 1230
+          "price_in_cents": 123000
         },
         "10": {
-          "price_in_unit": 1390
+          "price_in_cents": 139000
         },
         "20": {
-          "price_in_unit": 2590
+          "price_in_cents": 259000
         },
         "50": {
-          "price_in_unit": 5940
+          "price_in_cents": 594000
         }
       }
     },
     "collaborator": {
       "AUD": {
         "2": {
-          "price_in_unit": 302
+          "price_in_cents": 30200
         },
         "3": {
-          "price_in_unit": 453
+          "price_in_cents": 45300
         },
         "4": {
-          "price_in_unit": 604
+          "price_in_cents": 60400
         },
         "5": {
-          "price_in_unit": 755
+          "price_in_cents": 75500
         },
         "10": {
-          "price_in_unit": 840
+          "price_in_cents": 84000
         },
         "20": {
-          "price_in_unit": 1555
+          "price_in_cents": 155500
         },
         "50": {
-          "price_in_unit": 3565
+          "price_in_cents": 356500
         }
       },
       "CAD": {
         "2": {
-          "price_in_unit": 285
+          "price_in_cents": 28500
         },
         "3": {
-          "price_in_unit": 427
+          "price_in_cents": 42700
         },
         "4": {
-          "price_in_unit": 569
+          "price_in_cents": 56900
         },
         "5": {
-          "price_in_unit": 710
+          "price_in_cents": 71000
         },
         "10": {
-          "price_in_unit": 795
+          "price_in_cents": 79500
         },
         "20": {
-          "price_in_unit": 1470
+          "price_in_cents": 147000
         },
         "50": {
-          "price_in_unit": 3365
+          "price_in_cents": 336500
         }
       },
       "CHF": {
         "2": {
-          "price_in_unit": 252
+          "price_in_cents": 25200
         },
         "3": {
-          "price_in_unit": 378
+          "price_in_cents": 37800
         },
         "4": {
-          "price_in_unit": 504
+          "price_in_cents": 50400
         },
         "5": {
-          "price_in_unit": 630
+          "price_in_cents": 63000
         },
         "10": {
-          "price_in_unit": 700
+          "price_in_cents": 70000
         },
         "20": {
-          "price_in_unit": 1295
+          "price_in_cents": 129500
         },
         "50": {
-          "price_in_unit": 2970
+          "price_in_cents": 297000
         }
       },
       "DKK": {
         "2": {
-          "price_in_unit": 1512
+          "price_in_cents": 151200
         },
         "3": {
-          "price_in_unit": 2268
+          "price_in_cents": 226800
         },
         "4": {
-          "price_in_unit": 3024
+          "price_in_cents": 302400
         },
         "5": {
-          "price_in_unit": 3780
+          "price_in_cents": 378000
         },
         "10": {
-          "price_in_unit": 4210
+          "price_in_cents": 421000
         },
         "20": {
-          "price_in_unit": 7775
+          "price_in_cents": 777500
         },
         "50": {
-          "price_in_unit": 17820
+          "price_in_cents": 1782000
         }
       },
       "EUR": {
         "2": {
-          "price_in_unit": 235
+          "price_in_cents": 23500
         },
         "3": {
-          "price_in_unit": 352
+          "price_in_cents": 35200
         },
         "4": {
-          "price_in_unit": 468
+          "price_in_cents": 46800
         },
         "5": {
-          "price_in_unit": 584
+          "price_in_cents": 58400
         },
         "10": {
-          "price_in_unit": 655
+          "price_in_cents": 65500
         },
         "20": {
-          "price_in_unit": 1210
+          "price_in_cents": 121000
         },
         "50": {
-          "price_in_unit": 2770
+          "price_in_cents": 277000
         }
       },
       "GBP": {
         "2": {
-          "price_in_unit": 198
+          "price_in_cents": 19800
         },
         "3": {
-          "price_in_unit": 296
+          "price_in_cents": 29600
         },
         "4": {
-          "price_in_unit": 394
+          "price_in_cents": 39400
         },
         "5": {
-          "price_in_unit": 492
+          "price_in_cents": 49200
         },
         "10": {
-          "price_in_unit": 560
+          "price_in_cents": 56000
         },
         "20": {
-          "price_in_unit": 1035
+          "price_in_cents": 103500
         },
         "50": {
-          "price_in_unit": 2375
+          "price_in_cents": 237500
         }
       },
       "NOK": {
         "2": {
-          "price_in_unit": 1848
+          "price_in_cents": 184800
         },
         "3": {
-          "price_in_unit": 2772
+          "price_in_cents": 277200
         },
         "4": {
-          "price_in_unit": 3696
+          "price_in_cents": 369600
         },
         "5": {
-          "price_in_unit": 4620
+          "price_in_cents": 462000
         },
         "10": {
-          "price_in_unit": 5150
+          "price_in_cents": 515000
         },
         "20": {
-          "price_in_unit": 9505
+          "price_in_cents": 950500
         },
         "50": {
-          "price_in_unit": 21780
+          "price_in_cents": 2178000
         }
       },
       "NZD": {
         "2": {
-          "price_in_unit": 302
+          "price_in_cents": 30200
         },
         "3": {
-          "price_in_unit": 453
+          "price_in_cents": 45300
         },
         "4": {
-          "price_in_unit": 604
+          "price_in_cents": 60400
         },
         "5": {
-          "price_in_unit": 755
+          "price_in_cents": 75500
         },
         "10": {
-          "price_in_unit": 840
+          "price_in_cents": 84000
         },
         "20": {
-          "price_in_unit": 1555
+          "price_in_cents": 155500
         },
         "50": {
-          "price_in_unit": 3565
+          "price_in_cents": 356500
         }
       },
       "SEK": {
         "2": {
-          "price_in_unit": 1848
+          "price_in_cents": 184800
         },
         "3": {
-          "price_in_unit": 2772
+          "price_in_cents": 277200
         },
         "4": {
-          "price_in_unit": 3696
+          "price_in_cents": 369600
         },
         "5": {
-          "price_in_unit": 4620
+          "price_in_cents": 462000
         },
         "10": {
-          "price_in_unit": 5150
+          "price_in_cents": 515000
         },
         "20": {
-          "price_in_unit": 9505
+          "price_in_cents": 950500
         },
         "50": {
-          "price_in_unit": 21780
+          "price_in_cents": 2178000
         }
       },
       "SGD": {
         "2": {
-          "price_in_unit": 336
+          "price_in_cents": 33600
         },
         "3": {
-          "price_in_unit": 504
+          "price_in_cents": 50400
         },
         "4": {
-          "price_in_unit": 672
+          "price_in_cents": 67200
         },
         "5": {
-          "price_in_unit": 840
+          "price_in_cents": 84000
         },
         "10": {
-          "price_in_unit": 935
+          "price_in_cents": 93500
         },
         "20": {
-          "price_in_unit": 1730
+          "price_in_cents": 173000
         },
         "50": {
-          "price_in_unit": 3960
+          "price_in_cents": 396000
         }
       },
       "USD": {
         "2": {
-          "price_in_unit": 252
+          "price_in_cents": 25200
         },
         "3": {
-          "price_in_unit": 376
+          "price_in_cents": 37600
         },
         "4": {
-          "price_in_unit": 495
+          "price_in_cents": 49500
         },
         "5": {
-          "price_in_unit": 615
+          "price_in_cents": 61500
         },
         "10": {
-          "price_in_unit": 695
+          "price_in_cents": 69500
         },
         "20": {
-          "price_in_unit": 1295
+          "price_in_cents": 129500
         },
         "50": {
-          "price_in_unit": 2970
+          "price_in_cents": 297000
         }
       }
     }
@@ -515,510 +515,510 @@
     "professional": {
       "AUD": {
         "2": {
-          "price_in_unit": 604
+          "price_in_cents": 60400
         },
         "3": {
-          "price_in_unit": 906
+          "price_in_cents": 90600
         },
         "4": {
-          "price_in_unit": 1208
+          "price_in_cents": 120800
         },
         "5": {
-          "price_in_unit": 1510
+          "price_in_cents": 151000
         },
         "10": {
-          "price_in_unit": 2810
+          "price_in_cents": 281000
         },
         "20": {
-          "price_in_unit": 5185
+          "price_in_cents": 518500
         },
         "50": {
-          "price_in_unit": 11880
+          "price_in_cents": 1188000
         }
       },
       "CAD": {
         "2": {
-          "price_in_unit": 570
+          "price_in_cents": 57000
         },
         "3": {
-          "price_in_unit": 854
+          "price_in_cents": 85400
         },
         "4": {
-          "price_in_unit": 1138
+          "price_in_cents": 113800
         },
         "5": {
-          "price_in_unit": 1420
+          "price_in_cents": 142000
         },
         "10": {
-          "price_in_unit": 2650
+          "price_in_cents": 265000
         },
         "20": {
-          "price_in_unit": 4895
+          "price_in_cents": 489500
         },
         "50": {
-          "price_in_unit": 11220
+          "price_in_cents": 1122000
         }
       },
       "CHF": {
         "2": {
-          "price_in_unit": 504
+          "price_in_cents": 50400
         },
         "3": {
-          "price_in_unit": 756
+          "price_in_cents": 75600
         },
         "4": {
-          "price_in_unit": 1008
+          "price_in_cents": 100800
         },
         "5": {
-          "price_in_unit": 1260
+          "price_in_cents": 126000
         },
         "10": {
-          "price_in_unit": 2340
+          "price_in_cents": 234000
         },
         "20": {
-          "price_in_unit": 4320
+          "price_in_cents": 432000
         },
         "50": {
-          "price_in_unit": 9900
+          "price_in_cents": 990000
         }
       },
       "DKK": {
         "2": {
-          "price_in_unit": 3024
+          "price_in_cents": 302400
         },
         "3": {
-          "price_in_unit": 4536
+          "price_in_cents": 453600
         },
         "4": {
-          "price_in_unit": 6048
+          "price_in_cents": 604800
         },
         "5": {
-          "price_in_unit": 7560
+          "price_in_cents": 756000
         },
         "10": {
-          "price_in_unit": 14040
+          "price_in_cents": 1404000
         },
         "20": {
-          "price_in_unit": 25920
+          "price_in_cents": 2592000
         },
         "50": {
-          "price_in_unit": 59400
+          "price_in_cents": 5940000
         }
       },
       "EUR": {
         "2": {
-          "price_in_unit": 470
+          "price_in_cents": 47000
         },
         "3": {
-          "price_in_unit": 704
+          "price_in_cents": 70400
         },
         "4": {
-          "price_in_unit": 936
+          "price_in_cents": 93600
         },
         "5": {
-          "price_in_unit": 1168
+          "price_in_cents": 116800
         },
         "10": {
-          "price_in_unit": 2185
+          "price_in_cents": 218500
         },
         "20": {
-          "price_in_unit": 4030
+          "price_in_cents": 403000
         },
         "50": {
-          "price_in_unit": 9240
+          "price_in_cents": 924000
         }
       },
       "GBP": {
         "2": {
-          "price_in_unit": 396
+          "price_in_cents": 39600
         },
         "3": {
-          "price_in_unit": 592
+          "price_in_cents": 59200
         },
         "4": {
-          "price_in_unit": 788
+          "price_in_cents": 78800
         },
         "5": {
-          "price_in_unit": 984
+          "price_in_cents": 98400
         },
         "10": {
-          "price_in_unit": 1870
+          "price_in_cents": 187000
         },
         "20": {
-          "price_in_unit": 3455
+          "price_in_cents": 345500
         },
         "50": {
-          "price_in_unit": 7920
+          "price_in_cents": 792000
         }
       },
       "NOK": {
         "2": {
-          "price_in_unit": 3696
+          "price_in_cents": 369600
         },
         "3": {
-          "price_in_unit": 5544
+          "price_in_cents": 554400
         },
         "4": {
-          "price_in_unit": 7392
+          "price_in_cents": 739200
         },
         "5": {
-          "price_in_unit": 9240
+          "price_in_cents": 924000
         },
         "10": {
-          "price_in_unit": 17160
+          "price_in_cents": 1716000
         },
         "20": {
-          "price_in_unit": 31680
+          "price_in_cents": 3168000
         },
         "50": {
-          "price_in_unit": 72600
+          "price_in_cents": 7260000
         }
       },
       "NZD": {
         "2": {
-          "price_in_unit": 604
+          "price_in_cents": 60400
         },
         "3": {
-          "price_in_unit": 906
+          "price_in_cents": 90600
         },
         "4": {
-          "price_in_unit": 1208
+          "price_in_cents": 120800
         },
         "5": {
-          "price_in_unit": 1510
+          "price_in_cents": 151000
         },
         "10": {
-          "price_in_unit": 2810
+          "price_in_cents": 281000
         },
         "20": {
-          "price_in_unit": 5185
+          "price_in_cents": 518500
         },
         "50": {
-          "price_in_unit": 11880
+          "price_in_cents": 1188000
         }
       },
       "SEK": {
         "2": {
-          "price_in_unit": 3696
+          "price_in_cents": 369600
         },
         "3": {
-          "price_in_unit": 5544
+          "price_in_cents": 554400
         },
         "4": {
-          "price_in_unit": 7392
+          "price_in_cents": 739200
         },
         "5": {
-          "price_in_unit": 9240
+          "price_in_cents": 924000
         },
         "10": {
-          "price_in_unit": 17160
+          "price_in_cents": 1716000
         },
         "20": {
-          "price_in_unit": 31680
+          "price_in_cents": 3168000
         },
         "50": {
-          "price_in_unit": 72600
+          "price_in_cents": 7260000
         }
       },
       "SGD": {
         "2": {
-          "price_in_unit": 672
+          "price_in_cents": 67200
         },
         "3": {
-          "price_in_unit": 1008
+          "price_in_cents": 100800
         },
         "4": {
-          "price_in_unit": 1344
+          "price_in_cents": 134400
         },
         "5": {
-          "price_in_unit": 1680
+          "price_in_cents": 168000
         },
         "10": {
-          "price_in_unit": 3120
+          "price_in_cents": 312000
         },
         "20": {
-          "price_in_unit": 5760
+          "price_in_cents": 576000
         },
         "50": {
-          "price_in_unit": 13200
+          "price_in_cents": 1320000
         }
       },
       "USD": {
         "2": {
-          "price_in_unit": 504
+          "price_in_cents": 50400
         },
         "3": {
-          "price_in_unit": 752
+          "price_in_cents": 75200
         },
         "4": {
-          "price_in_unit": 990
+          "price_in_cents": 99000
         },
         "5": {
-          "price_in_unit": 1230
+          "price_in_cents": 123000
         },
         "10": {
-          "price_in_unit": 2340
+          "price_in_cents": 234000
         },
         "20": {
-          "price_in_unit": 4320
+          "price_in_cents": 432000
         },
         "50": {
-          "price_in_unit": 9900
+          "price_in_cents": 990000
         }
       }
     },
     "collaborator": {
       "AUD": {
         "2": {
-          "price_in_unit": 302
+          "price_in_cents": 30200
         },
         "3": {
-          "price_in_unit": 453
+          "price_in_cents": 45300
         },
         "4": {
-          "price_in_unit": 604
+          "price_in_cents": 60400
         },
         "5": {
-          "price_in_unit": 755
+          "price_in_cents": 75500
         },
         "10": {
-          "price_in_unit": 1405
+          "price_in_cents": 140500
         },
         "20": {
-          "price_in_unit": 2590
+          "price_in_cents": 259000
         },
         "50": {
-          "price_in_unit": 5940
+          "price_in_cents": 594000
         }
       },
       "CAD": {
         "2": {
-          "price_in_unit": 285
+          "price_in_cents": 28500
         },
         "3": {
-          "price_in_unit": 427
+          "price_in_cents": 42700
         },
         "4": {
-          "price_in_unit": 569
+          "price_in_cents": 56900
         },
         "5": {
-          "price_in_unit": 710
+          "price_in_cents": 71000
         },
         "10": {
-          "price_in_unit": 1325
+          "price_in_cents": 132500
         },
         "20": {
-          "price_in_unit": 2450
+          "price_in_cents": 245000
         },
         "50": {
-          "price_in_unit": 5610
+          "price_in_cents": 561000
         }
       },
       "CHF": {
         "2": {
-          "price_in_unit": 252
+          "price_in_cents": 25200
         },
         "3": {
-          "price_in_unit": 378
+          "price_in_cents": 37800
         },
         "4": {
-          "price_in_unit": 504
+          "price_in_cents": 50400
         },
         "5": {
-          "price_in_unit": 630
+          "price_in_cents": 63000
         },
         "10": {
-          "price_in_unit": 1170
+          "price_in_cents": 117000
         },
         "20": {
-          "price_in_unit": 2160
+          "price_in_cents": 216000
         },
         "50": {
-          "price_in_unit": 4950
+          "price_in_cents": 495000
         }
       },
       "DKK": {
         "2": {
-          "price_in_unit": 1512
+          "price_in_cents": 151200
         },
         "3": {
-          "price_in_unit": 2268
+          "price_in_cents": 226800
         },
         "4": {
-          "price_in_unit": 3024
+          "price_in_cents": 302400
         },
         "5": {
-          "price_in_unit": 3780
+          "price_in_cents": 378000
         },
         "10": {
-          "price_in_unit": 7020
+          "price_in_cents": 702000
         },
         "20": {
-          "price_in_unit": 12960
+          "price_in_cents": 1296000
         },
         "50": {
-          "price_in_unit": 29700
+          "price_in_cents": 2970000
         }
       },
       "EUR": {
         "2": {
-          "price_in_unit": 235
+          "price_in_cents": 23500
         },
         "3": {
-          "price_in_unit": 352
+          "price_in_cents": 35200
         },
         "4": {
-          "price_in_unit": 468
+          "price_in_cents": 46800
         },
         "5": {
-          "price_in_unit": 584
+          "price_in_cents": 58400
         },
         "10": {
-          "price_in_unit": 1090
+          "price_in_cents": 109000
         },
         "20": {
-          "price_in_unit": 2015
+          "price_in_cents": 201500
         },
         "50": {
-          "price_in_unit": 4620
+          "price_in_cents": 462000
         }
       },
       "GBP": {
         "2": {
-          "price_in_unit": 198
+          "price_in_cents": 19800
         },
         "3": {
-          "price_in_unit": 296
+          "price_in_cents": 29600
         },
         "4": {
-          "price_in_unit": 394
+          "price_in_cents": 39400
         },
         "5": {
-          "price_in_unit": 492
+          "price_in_cents": 49200
         },
         "10": {
-          "price_in_unit": 935
+          "price_in_cents": 93500
         },
         "20": {
-          "price_in_unit": 1730
+          "price_in_cents": 173000
         },
         "50": {
-          "price_in_unit": 3960
+          "price_in_cents": 396000
         }
       },
       "NOK": {
         "2": {
-          "price_in_unit": 1848
+          "price_in_cents": 184800
         },
         "3": {
-          "price_in_unit": 2772
+          "price_in_cents": 277200
         },
         "4": {
-          "price_in_unit": 3696
+          "price_in_cents": 369600
         },
         "5": {
-          "price_in_unit": 4620
+          "price_in_cents": 462000
         },
         "10": {
-          "price_in_unit": 8580
+          "price_in_cents": 858000
         },
         "20": {
-          "price_in_unit": 15840
+          "price_in_cents": 1584000
         },
         "50": {
-          "price_in_unit": 36300
+          "price_in_cents": 3630000
         }
       },
       "NZD": {
         "2": {
-          "price_in_unit": 302
+          "price_in_cents": 30200
         },
         "3": {
-          "price_in_unit": 453
+          "price_in_cents": 45300
         },
         "4": {
-          "price_in_unit": 604
+          "price_in_cents": 60400
         },
         "5": {
-          "price_in_unit": 755
+          "price_in_cents": 75500
         },
         "10": {
-          "price_in_unit": 1405
+          "price_in_cents": 140500
         },
         "20": {
-          "price_in_unit": 2590
+          "price_in_cents": 259000
         },
         "50": {
-          "price_in_unit": 5940
+          "price_in_cents": 594000
         }
       },
       "SEK": {
         "2": {
-          "price_in_unit": 1848
+          "price_in_cents": 184800
         },
         "3": {
-          "price_in_unit": 2772
+          "price_in_cents": 277200
         },
         "4": {
-          "price_in_unit": 3696
+          "price_in_cents": 369600
         },
         "5": {
-          "price_in_unit": 4620
+          "price_in_cents": 462000
         },
         "10": {
-          "price_in_unit": 8580
+          "price_in_cents": 858000
         },
         "20": {
-          "price_in_unit": 15840
+          "price_in_cents": 1584000
         },
         "50": {
-          "price_in_unit": 36300
+          "price_in_cents": 3630000
         }
       },
       "SGD": {
         "2": {
-          "price_in_unit": 336
+          "price_in_cents": 33600
         },
         "3": {
-          "price_in_unit": 504
+          "price_in_cents": 50400
         },
         "4": {
-          "price_in_unit": 672
+          "price_in_cents": 67200
         },
         "5": {
-          "price_in_unit": 840
+          "price_in_cents": 84000
         },
         "10": {
-          "price_in_unit": 1560
+          "price_in_cents": 156000
         },
         "20": {
-          "price_in_unit": 2880
+          "price_in_cents": 288000
         },
         "50": {
-          "price_in_unit": 6600
+          "price_in_cents": 660000
         }
       },
       "USD": {
         "2": {
-          "price_in_unit": 252
+          "price_in_cents": 25200
         },
         "3": {
-          "price_in_unit": 376
+          "price_in_cents": 37600
         },
         "4": {
-          "price_in_unit": 495
+          "price_in_cents": 49500
         },
         "5": {
-          "price_in_unit": 615
+          "price_in_cents": 61500
         },
         "10": {
-          "price_in_unit": 1170
+          "price_in_cents": 117000
         },
         "20": {
-          "price_in_unit": 2160
+          "price_in_cents": 216000
         },
         "50": {
-          "price_in_unit": 4950
+          "price_in_cents": 495000
         }
       }
     }
