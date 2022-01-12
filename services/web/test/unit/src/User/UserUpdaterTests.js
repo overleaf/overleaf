@@ -380,9 +380,8 @@ describe('UserUpdater', function () {
           this.InstitutionsAPI.promises.removeAffiliation.calledOnce.should.equal(
             true
           )
-          const {
-            args,
-          } = this.InstitutionsAPI.promises.removeAffiliation.lastCall
+          const { args } =
+            this.InstitutionsAPI.promises.removeAffiliation.lastCall
           args[0].should.equal(this.stubbedUser._id)
           args[1].should.equal(this.newEmail)
           done()
