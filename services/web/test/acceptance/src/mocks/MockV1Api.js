@@ -91,7 +91,8 @@ class MockV1Api extends AbstractMockApi {
     )
   }
 
-  addAffiliation(userId, email) {
+  addAffiliation(userId, email, entitlement) {
+    let newAffiliation = true
     const institution = {}
     if (!email) return
     if (!this.affiliations[userId]) this.affiliations[userId] = []
@@ -101,26 +102,36 @@ class MockV1Api extends AbstractMockApi {
         return affiliationData.email === email
       })
     )
-      return
+      newAffiliation = false
 
-    const domain = email.split('@').pop()
+    if (newAffiliation) {
+      const domain = email.split('@').pop()
 
-    if (this.blocklistedDomains.indexOf(domain.replace('.com', '')) !== -1) {
-      return
-    }
+      if (this.blocklistedDomains.indexOf(domain.replace('.com', '')) !== -1) {
+        return
+      }
 
-    if (this.allInstitutionDomains.has(domain)) {
-      for (const [institutionId, domainData] of Object.entries(
-        this.institutionDomains
-      )) {
-        if (domainData[domain]) {
-          institution.id = institutionId
+      if (this.allInstitutionDomains.has(domain)) {
+        for (const [institutionId, domainData] of Object.entries(
+          this.institutionDomains
+        )) {
+          if (domainData[domain]) {
+            institution.id = institutionId
+          }
         }
+      }
+
+      if (institution.id) {
+        this.affiliations[userId].push({ email, institution })
       }
     }
 
-    if (institution.id) {
-      this.affiliations[userId].push({ email, institution })
+    if (entitlement !== undefined) {
+      this.affiliations[userId].forEach(affiliation => {
+        if (affiliation.email === email) {
+          affiliation.cached_entitlement = entitlement
+        }
+      })
     }
   }
 
@@ -231,7 +242,11 @@ class MockV1Api extends AbstractMockApi {
     })
 
     this.app.post('/api/v2/users/:userId/affiliations', (req, res) => {
-      this.addAffiliation(req.params.userId, req.body.email)
+      this.addAffiliation(
+        req.params.userId,
+        req.body.email,
+        req.body.entitlement
+      )
       res.sendStatus(201)
     })
 

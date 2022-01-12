@@ -339,12 +339,6 @@ async function updateEntitlement(
   }
   // update v2 user
   await User.updateOne(query, update).exec()
-  // update v1 affiliations record
-  if (hasEntitlement) {
-    await InstitutionsAPI.promises.addEntitlement(userId, institutionEmail)
-  } else {
-    await InstitutionsAPI.promises.removeEntitlement(userId, institutionEmail)
-  }
 }
 
 function entitlementAttributeMatches(entitlementAttribute, entitlementMatcher) {
