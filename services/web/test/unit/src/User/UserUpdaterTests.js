@@ -24,6 +24,7 @@ describe('UserUpdater', function () {
       promises: {
         ensureUniqueEmailAddress: sinon.stub(),
         getUser: sinon.stub(),
+        getUserByMainEmail: sinon.stub(),
       },
     }
     this.addAffiliation = sinon.stub().yields()
@@ -52,6 +53,7 @@ describe('UserUpdater', function () {
           removeAffiliation: this.removeAffiliation,
           promises: {
             addAffiliation: sinon.stub(),
+            removeAffiliation: sinon.stub(),
           },
         }),
         '../Email/EmailHandler': (this.EmailHandler = {
@@ -347,9 +349,9 @@ describe('UserUpdater', function () {
 
   describe('removeEmailAddress', function () {
     beforeEach(function () {
-      this.UserUpdater.updateUser = sinon
+      this.UserUpdater.promises.updateUser = sinon
         .stub()
-        .yields(null, { matchedCount: 1 })
+        .returns({ matchedCount: 1 })
     })
 
     it('remove email', function (done) {
@@ -358,7 +360,7 @@ describe('UserUpdater', function () {
         this.newEmail,
         err => {
           expect(err).not.to.exist
-          this.UserUpdater.updateUser
+          this.UserUpdater.promises.updateUser
             .calledWith(
               { _id: this.stubbedUser._id, email: { $ne: this.newEmail } },
               { $pull: { emails: { email: this.newEmail } } }
@@ -375,8 +377,12 @@ describe('UserUpdater', function () {
         this.newEmail,
         err => {
           expect(err).not.to.exist
-          this.removeAffiliation.calledOnce.should.equal(true)
-          const { args } = this.removeAffiliation.lastCall
+          this.InstitutionsAPI.promises.removeAffiliation.calledOnce.should.equal(
+            true
+          )
+          const {
+            args,
+          } = this.InstitutionsAPI.promises.removeAffiliation.lastCall
           args[0].should.equal(this.stubbedUser._id)
           args[1].should.equal(this.newEmail)
           done()
@@ -390,50 +396,87 @@ describe('UserUpdater', function () {
         this.newEmail,
         err => {
           expect(err).not.to.exist
-          sinon.assert.calledWith(this.refreshFeatures, this.stubbedUser._id)
+          sinon.assert.calledWith(
+            this.FeaturesUpdater.promises.refreshFeatures,
+            this.stubbedUser._id
+          )
           done()
         }
       )
     })
 
-    it('handle error', function (done) {
-      this.UserUpdater.updateUser = sinon
-        .stub()
-        .callsArgWith(2, new Error('nope'))
+    it('handle error from updateUser', function (done) {
+      const anError = new Error('nope')
+      this.UserUpdater.promises.updateUser.rejects(anError)
 
       this.UserUpdater.removeEmailAddress(
         this.stubbedUser._id,
         this.newEmail,
         err => {
           expect(err).to.exist
+          expect(err).to.deep.equal(anError)
+          expect(err._oErrorTags[0].message).to.equal(
+            'problem removing users email'
+          )
+          expect(
+            this.FeaturesUpdater.promises.refreshFeatures.callCount
+          ).to.equal(0)
           done()
         }
       )
     })
 
     it('handle missed update', function (done) {
-      this.UserUpdater.updateUser = sinon
+      this.UserUpdater.promises.updateUser = sinon
         .stub()
-        .yields(null, { matchedCount: 0 })
+        .returns({ matchedCount: 0 })
 
       this.UserUpdater.removeEmailAddress(
         this.stubbedUser._id,
         this.newEmail,
         err => {
           expect(err).to.exist
+          expect(err.message).to.equal('Cannot remove email')
+          expect(
+            this.FeaturesUpdater.promises.refreshFeatures.callCount
+          ).to.equal(0)
           done()
         }
       )
     })
 
     it('handle affiliation error', function (done) {
-      this.removeAffiliation.callsArgWith(2, new Error('nope'))
+      const anError = new Error('nope')
+      this.InstitutionsAPI.promises.removeAffiliation.rejects(anError)
       this.UserUpdater.removeEmailAddress(
         this.stubbedUser._id,
         this.newEmail,
         err => {
           expect(err).to.exist
-          this.UserUpdater.updateUser.called.should.equal(false)
+          expect(err).to.deep.equal(anError)
+          this.UserUpdater.promises.updateUser.called.should.equal(false)
+          expect(
+            this.FeaturesUpdater.promises.refreshFeatures.callCount
+          ).to.equal(0)
+          done()
+        }
+      )
+    })
+
+    it('returns error when removing primary email', function (done) {
+      this.UserGetter.promises.getUserByMainEmail = sinon
+        .stub()
+        .returns({ _id: '123abc' })
+      this.UserUpdater.removeEmailAddress(
+        this.stubbedUser._id,
+        this.newEmail,
+        err => {
+          expect(err).to.exist
+          expect(err.message).to.deep.equal('cannot remove primary email')
+          expect(this.UserUpdater.promises.updateUser.callCount).to.equal(0)
+          expect(
+            this.FeaturesUpdater.promises.refreshFeatures.callCount
+          ).to.equal(0)
           done()
         }
       )
@@ -442,8 +485,36 @@ describe('UserUpdater', function () {
     it('validates email', function (done) {
       this.UserUpdater.removeEmailAddress(this.stubbedUser._id, 'baz', err => {
         expect(err).to.exist
+        expect(err.message).to.equal('invalid email')
         done()
       })
+    })
+
+    it('skip email validation when skipParseEmail included', function (done) {
+      const skipParseEmail = true
+      this.UserUpdater.removeEmailAddress(
+        this.stubbedUser._id,
+        'baz',
+        skipParseEmail,
+        err => {
+          expect(err).to.not.exist
+          done()
+        }
+      )
+    })
+
+    it('returns an error when skipParseEmail included but email is not a string', function (done) {
+      const skipParseEmail = true
+      this.UserUpdater.removeEmailAddress(
+        this.stubbedUser._id,
+        1,
+        skipParseEmail,
+        err => {
+          expect(err).to.exist
+          expect(err.message).to.equal('email must be a string')
+          done()
+        }
+      )
     })
   })
 

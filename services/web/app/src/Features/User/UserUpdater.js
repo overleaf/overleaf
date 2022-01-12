@@ -8,7 +8,6 @@ const { callbackify, promisify } = require('util')
 const UserGetter = require('./UserGetter')
 const {
   addAffiliation,
-  removeAffiliation,
   promises: InstitutionsAPIPromises,
 } = require('../Institutions/InstitutionsAPI')
 const Features = require('../../infrastructure/Features')
@@ -232,6 +231,51 @@ async function confirmEmail(userId, email) {
   await FeaturesUpdater.promises.refreshFeatures(userId, 'confirm-email')
 }
 
+async function removeEmailAddress(userId, email, skipParseEmail = false) {
+  // remove one of the user's email addresses. The email cannot be the user's
+  // default email address
+  if (!skipParseEmail) {
+    email = EmailHelper.parseEmail(email)
+  } else if (skipParseEmail && typeof email !== 'string') {
+    throw new Error('email must be a string')
+  }
+
+  if (!email) {
+    throw new Error('invalid email')
+  }
+
+  const isMainEmail = await UserGetter.promises.getUserByMainEmail(email, {
+    _id: 1,
+  })
+  if (isMainEmail) {
+    throw new Error('cannot remove primary email')
+  }
+
+  try {
+    await InstitutionsAPIPromises.removeAffiliation(userId, email)
+  } catch (error) {
+    OError.tag(error, 'problem removing affiliation')
+    throw error
+  }
+
+  const query = { _id: userId, email: { $ne: email } }
+  const update = { $pull: { emails: { email } } }
+
+  let res
+  try {
+    res = await UserUpdater.promises.updateUser(query, update)
+  } catch (error) {
+    OError.tag(error, 'problem removing users email')
+    throw error
+  }
+
+  if (res.matchedCount !== 1) {
+    throw new Error('Cannot remove email')
+  }
+
+  await FeaturesUpdater.promises.refreshFeatures(userId, 'remove-email')
+}
+
 const UserUpdater = {
   addAffiliationForNewUser(userId, email, affiliationOptions, callback) {
     if (callback == null) {
@@ -321,33 +365,7 @@ const UserUpdater = {
   // or any other user
   addEmailAddress: callbackify(addEmailAddress),
 
-  // remove one of the user's email addresses. The email cannot be the user's
-  // default email address
-  removeEmailAddress(userId, email, callback) {
-    email = EmailHelper.parseEmail(email)
-    if (email == null) {
-      return callback(new Error('invalid email'))
-    }
-    removeAffiliation(userId, email, error => {
-      if (error != null) {
-        OError.tag(error, 'problem removing affiliation')
-        return callback(error)
-      }
-
-      const query = { _id: userId, email: { $ne: email } }
-      const update = { $pull: { emails: { email } } }
-      UserUpdater.updateUser(query, update, (error, res) => {
-        if (error != null) {
-          OError.tag(error, 'problem removing users email')
-          return callback(error)
-        }
-        if (res.matchedCount !== 1) {
-          return callback(new Error('Cannot remove email'))
-        }
-        FeaturesUpdater.refreshFeatures(userId, 'remove-email', callback)
-      })
-    })
-  },
+  removeEmailAddress: callbackify(removeEmailAddress),
 
   clearSAMLData: callbackify(clearSAMLData),
 
@@ -384,6 +402,7 @@ const promises = {
   confirmEmail,
   setDefaultEmailAddress,
   updateUser: promisify(UserUpdater.updateUser),
+  removeEmailAddress,
   removeReconfirmFlag: promisify(UserUpdater.removeReconfirmFlag),
 }
 
