@@ -108,14 +108,6 @@ test_unit_app_parallel_gnu_make_docker:
 		make test_unit_app_parallel_gnu_make --output-sync -j $(J)
 	$(DOCKER_COMPOSE) down -v -t 0
 
-test_unit_app_parallel: test_unit_app_parallel_gnu_parallel
-test_unit_app_parallel_gnu_parallel: export COMPOSE_PROJECT_NAME = \
-	unit_test_parallel_$(BUILD_DIR_NAME)
-test_unit_app_parallel_gnu_parallel:
-	$(DOCKER_COMPOSE) down -v -t 0
-	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:app:parallel
-	$(DOCKER_COMPOSE) down -v -t 0
-
 TEST_UNIT_MODULES = $(MODULE_DIRS:=/test_unit)
 $(TEST_UNIT_MODULES): %/test_unit: %/Makefile
 test_unit_modules: $(TEST_UNIT_MODULES)

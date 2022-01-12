@@ -7,10 +7,6 @@ WORKDIR /overleaf/services/web
 # install_deps changes app files and installs npm packages
 # as such it has to run at a later stage
 
-RUN apt-get update \
-&&  apt-get install -y parallel \
-&&  rm -rf /var/lib/apt/lists/*
-
 RUN mkdir /overleaf/services/web/node_modules \
 &&  chown node:node /overleaf/services/web/node_modules
 

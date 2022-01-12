@@ -18,7 +18,6 @@
     "test:unit:all": "npm run test:unit:run_dir -- test/unit/src modules/*/test/unit/src",
     "test:unit:all:silent": "npm run test:unit:all -- --reporter dot",
     "test:unit:app": "npm run test:unit:run_dir -- test/unit/src",
-    "test:unit:app:parallel": "parallel --plain --keep-order --halt now,fail=1 npm run test:unit:run_dir -- {} ::: test/unit/src/*",
     "test:frontend": "NODE_ENV=test TZ=GMT mocha --recursive --timeout 5000 --exit --grep=$MOCHA_GREP --require test/frontend/bootstrap.js test/frontend modules/*/test/frontend",
     "test:frontend:coverage": "c8 --all --include 'frontend/js' --include 'modules/*/frontend/js' --exclude 'frontend/js/vendor' --reporter=lcov --reporter=text-summary npm run test:frontend",
     "test:karma": "karma start",
