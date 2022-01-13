@@ -84,7 +84,9 @@ async function setNewUserPassword(req, res, next) {
       })
     }
   }
-
+  AuthenticationController.setAuditInfo(req, {
+    method: 'Password reset, set new password',
+  })
   AuthenticationController.finishLogin(user, req, res, next)
 }
 

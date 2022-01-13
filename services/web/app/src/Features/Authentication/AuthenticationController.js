@@ -81,6 +81,7 @@ const AuthenticationController = {
       }
       if (user) {
         // `user` is either a user object or false
+        AuthenticationController.setAuditInfo(req, { method: 'Password login' })
         return AuthenticationController.finishLogin(user, req, res, next)
       } else {
         if (info.redir != null) {
@@ -98,6 +99,8 @@ const AuthenticationController = {
     if (user === false) {
       return res.redirect('/login')
     } // OAuth2 'state' mismatch
+
+    const auditInfo = AuthenticationController.getAuditInfo(req)
 
     const anonymousAnalyticsId = req.session.analyticsId
     const isNewUser = req.session.justRegistered || false
@@ -128,20 +131,27 @@ const AuthenticationController = {
           AuthenticationController._getRedirectFromSession(req) || '/project'
         _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser)
         const userId = user._id
-        UserAuditLogHandler.addEntry(userId, 'login', userId, req.ip, err => {
-          if (err) {
-            return next(err)
-          }
-          _afterLoginSessionSetup(req, user, function (err) {
+        UserAuditLogHandler.addEntry(
+          userId,
+          'login',
+          userId,
+          req.ip,
+          auditInfo,
+          err => {
             if (err) {
               return next(err)
             }
-            AuthenticationController._clearRedirectFromSession(req)
-            AnalyticsRegistrationSourceHelper.clearSource(req.session)
-            AnalyticsRegistrationSourceHelper.clearInbound(req.session)
-            AsyncFormHelper.redirect(req, res, redir)
-          })
-        })
+            _afterLoginSessionSetup(req, user, function (err) {
+              if (err) {
+                return next(err)
+              }
+              AuthenticationController._clearRedirectFromSession(req)
+              AnalyticsRegistrationSourceHelper.clearSource(req.session)
+              AnalyticsRegistrationSourceHelper.clearInbound(req.session)
+              AsyncFormHelper.redirect(req, res, redir)
+            })
+          }
+        )
       }
     )
   },
@@ -367,6 +377,17 @@ const AuthenticationController = {
 
   requirePrivateApiAuth() {
     return AuthenticationController.requireBasicAuth(Settings.httpAuthUsers)
+  },
+
+  setAuditInfo(req, info) {
+    if (!req.__authAuditInfo) {
+      req.__authAuditInfo = {}
+    }
+    Object.assign(req.__authAuditInfo, info)
+  },
+
+  getAuditInfo(req) {
+    return req.__authAuditInfo || {}
   },
 
   setRedirectInSession(req, value) {

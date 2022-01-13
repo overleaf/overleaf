@@ -1188,6 +1188,25 @@ describe('AuthenticationController', function () {
         expect(this.next).to.have.been.calledWith(theError)
         expect(this.req.login).to.not.have.been.called
       })
+
+      it('should pass along auditInfo when present', function () {
+        this.AuthenticationController.setAuditInfo(this.req, {
+          method: 'Login',
+        })
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+        expect(this.UserAuditLogHandler.addEntry).to.have.been.calledWith(
+          this.user._id,
+          'login',
+          this.user._id,
+          '42.42.42.42',
+          { method: 'Login' }
+        )
+      })
     })
 
     describe('_afterLoginSessionSetup', function () {

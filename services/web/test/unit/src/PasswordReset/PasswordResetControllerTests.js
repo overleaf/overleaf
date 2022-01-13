@@ -61,6 +61,7 @@ describe('PasswordResetController', function () {
           (this.AuthenticationController = {
             getLoggedInUserId: sinon.stub(),
             finishLogin: sinon.stub(),
+            setAuditInfo: sinon.stub(),
           }),
         '../User/UserGetter': (this.UserGetter = {
           promises: {

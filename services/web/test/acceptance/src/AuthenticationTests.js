@@ -69,6 +69,7 @@ describe('Authentication', function () {
         operation: 'login',
         ipAddress: '127.0.0.1',
         initiatorId: ObjectId(user.id),
+        info: { method: 'Password login' },
       })
     })
   })
