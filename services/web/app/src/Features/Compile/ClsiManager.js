@@ -884,6 +884,7 @@ const ClsiManager = {
           file: filename,
           image: req.compile.options.imageName,
         },
+        json: true,
         method: 'GET',
       }
       ClsiManager._makeRequestWithClsiServerId(

@@ -1014,6 +1014,7 @@ describe('ClsiManager', function () {
                 file: 'rootfile.text',
                 image: undefined,
               },
+              json: true,
             },
             'node-1'
           )
@@ -1046,6 +1047,7 @@ describe('ClsiManager', function () {
               method: 'GET',
               url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
               qs: { file: 'main.tex', image: undefined },
+              json: true,
             },
             'node-2'
           )
@@ -1076,6 +1078,7 @@ describe('ClsiManager', function () {
               method: 'GET',
               url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
               qs: { file: 'main.tex', image: this.image },
+              json: true,
             },
             'node-3'
           )

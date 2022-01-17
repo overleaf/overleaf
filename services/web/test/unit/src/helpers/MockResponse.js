@@ -35,6 +35,7 @@ class MockResponse {
     sinon.spy(this, 'sendStatus')
     sinon.spy(this, 'status')
     sinon.spy(this, 'render')
+    sinon.spy(this, 'redirect')
   }
 
   header(field, val) {
