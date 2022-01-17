@@ -60,7 +60,7 @@ module.exports = ProjectUploadController = {
             })
           }
         } else {
-          return res.send({ success: true, project_id: project._id })
+          return res.json({ success: true, project_id: project._id })
         }
       }
     )
@@ -77,7 +77,7 @@ module.exports = ProjectUploadController = {
         { projectId: project_id, fileName: name },
         'bad name when trying to upload file'
       )
-      return res.status(422).send({
+      return res.status(422).json({
         success: false,
         error: 'invalid_filename',
       })
@@ -106,20 +106,20 @@ module.exports = ProjectUploadController = {
             'error uploading file'
           )
           if (error.name === 'InvalidNameError') {
-            return res.status(422).send({
+            return res.status(422).json({
               success: false,
               error: 'invalid_filename',
             })
           } else if (error.message === 'project_has_too_many_files') {
-            return res.status(422).send({
+            return res.status(422).json({
               success: false,
               error: 'project_has_too_many_files',
             })
           } else {
-            return res.status(422).send({ success: false })
+            return res.status(422).json({ success: false })
           }
         } else {
-          return res.send({
+          return res.json({
             success: true,
             entity_id: entity != null ? entity._id : undefined,
             entity_type: entity != null ? entity.type : undefined,

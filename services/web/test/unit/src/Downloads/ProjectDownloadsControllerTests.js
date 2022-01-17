@@ -46,8 +46,6 @@ describe('ProjectDownloadsController', function () {
         .stub()
         .callsArgWith(1, null, this.stream)
       this.req.params = { Project_id: this.project_id }
-      this.res.contentType = sinon.stub()
-      this.res.header = sinon.stub()
       this.project_name = 'project name with accênts'
       this.ProjectGetter.getProject = sinon
         .stub()
@@ -92,9 +90,11 @@ describe('ProjectDownloadsController', function () {
     })
 
     it('should name the downloaded file after the project', function () {
-      return this.res.setContentDisposition
-        .calledWith('attachment', { filename: `${this.project_name}.zip` })
-        .should.equal(true)
+      this.res.headers.should.deep.equal({
+        'Content-Disposition': `attachment; filename="${this.project_name}.zip"`,
+        'Content-Type': 'application/zip',
+        'X-Content-Type-Options': 'nosniff',
+      })
     })
 
     it('should record the action via Metrics', function () {
@@ -110,8 +110,6 @@ describe('ProjectDownloadsController', function () {
         .callsArgWith(1, null, this.stream)
       this.project_ids = ['project-1', 'project-2']
       this.req.query = { project_ids: this.project_ids.join(',') }
-      this.res.contentType = sinon.stub()
-      this.res.header = sinon.stub()
       this.DocumentUpdaterHandler.flushMultipleProjectsToMongo = sinon
         .stub()
         .callsArgWith(1)
@@ -146,11 +144,12 @@ describe('ProjectDownloadsController', function () {
     })
 
     it('should name the downloaded file after the project', function () {
-      return this.res.setContentDisposition
-        .calledWith('attachment', {
-          filename: 'Overleaf Projects (2 items).zip',
-        })
-        .should.equal(true)
+      this.res.headers.should.deep.equal({
+        'Content-Disposition':
+          'attachment; filename="Overleaf Projects (2 items).zip"',
+        'Content-Type': 'application/zip',
+        'X-Content-Type-Options': 'nosniff',
+      })
     })
 
     it('should record the action via Metrics', function () {

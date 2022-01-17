@@ -1,4 +1,7 @@
 const AbstractMockApi = require('./AbstractMockApi')
+const {
+  plainTextResponse,
+} = require('../../../../app/src/infrastructure/Response')
 
 class MockFilestoreApi extends AbstractMockApi {
   reset() {
@@ -24,7 +27,7 @@ class MockFilestoreApi extends AbstractMockApi {
     this.app.get('/project/:projectId/file/:fileId', (req, res) => {
       const { projectId, fileId } = req.params
       const { content } = this.files[projectId][fileId]
-      res.send(content)
+      plainTextResponse(res, content)
     })
 
     // handle file copying

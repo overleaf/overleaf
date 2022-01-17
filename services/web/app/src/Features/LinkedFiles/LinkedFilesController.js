@@ -37,6 +37,7 @@ const {
   FileCannotRefreshError,
 } = require('./LinkedFilesErrors')
 const Modules = require('../../infrastructure/Modules')
+const { plainTextResponse } = require('../../infrastructure/Response')
 
 module.exports = LinkedFilesController = {
   Agents: _.extend(
@@ -138,55 +139,70 @@ module.exports = LinkedFilesController = {
 
   handleError(error, req, res, next) {
     if (error instanceof AccessDeniedError) {
-      return res.status(403).send('You do not have access to this project')
+      res.status(403)
+      plainTextResponse(res, 'You do not have access to this project')
     } else if (error instanceof BadDataError) {
-      return res.status(400).send('The submitted data is not valid')
+      res.status(400)
+      plainTextResponse(res, 'The submitted data is not valid')
     } else if (error instanceof BadEntityTypeError) {
-      return res.status(400).send('The file is the wrong type')
+      res.status(400)
+      plainTextResponse(res, 'The file is the wrong type')
     } else if (error instanceof SourceFileNotFoundError) {
-      return res.status(404).send('Source file not found')
+      res.status(404)
+      plainTextResponse(res, 'Source file not found')
     } else if (error instanceof ProjectNotFoundError) {
-      return res.status(404).send('Project not found')
+      res.status(404)
+      plainTextResponse(res, 'Project not found')
     } else if (error instanceof V1ProjectNotFoundError) {
-      return res
-        .status(409)
-        .send(
-          'Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file'
-        )
+      res.status(409)
+      plainTextResponse(
+        res,
+        'Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file'
+      )
     } else if (error instanceof CompileFailedError) {
-      return res
-        .status(422)
-        .send(res.locals.translate('generic_linked_file_compile_error'))
+      res.status(422)
+      plainTextResponse(
+        res,
+        res.locals.translate('generic_linked_file_compile_error')
+      )
     } else if (error instanceof OutputFileFetchFailedError) {
-      return res.status(404).send('Could not get output file')
+      res.status(404)
+      plainTextResponse(res, 'Could not get output file')
     } else if (error instanceof UrlFetchFailedError) {
-      return res
-        .status(422)
-        .send(
-          `Your URL could not be reached (${error.statusCode} status code). Please check it and try again.`
-        )
+      res.status(422)
+      plainTextResponse(
+        res,
+        `Your URL could not be reached (${error.statusCode} status code). Please check it and try again.`
+      )
     } else if (error instanceof InvalidUrlError) {
-      return res
-        .status(422)
-        .send('Your URL is not valid. Please check it and try again.')
+      res.status(422)
+      plainTextResponse(
+        res,
+        'Your URL is not valid. Please check it and try again.'
+      )
     } else if (error instanceof NotOriginalImporterError) {
-      return res
-        .status(400)
-        .send('You are not the user who originally imported this file')
+      res.status(400)
+      plainTextResponse(
+        res,
+        'You are not the user who originally imported this file'
+      )
     } else if (error instanceof FeatureNotAvailableError) {
-      return res.status(400).send('This feature is not enabled on your account')
+      res.status(400)
+      plainTextResponse(res, 'This feature is not enabled on your account')
     } else if (error instanceof RemoteServiceError) {
-      return res.status(502).send('The remote service produced an error')
+      res.status(502)
+      plainTextResponse(res, 'The remote service produced an error')
     } else if (error instanceof FileCannotRefreshError) {
-      return res.status(400).send('This file cannot be refreshed')
+      res.status(400)
+      plainTextResponse(res, 'This file cannot be refreshed')
     } else if (error.message === 'project_has_too_many_files') {
-      return res.status(400).send('too many files')
+      res.status(400)
+      plainTextResponse(res, 'too many files')
     } else if (/\bECONNREFUSED\b/.test(error.message)) {
-      return res
-        .status(500)
-        .send('Importing references is not currently available')
+      res.status(500)
+      plainTextResponse(res, 'Importing references is not currently available')
     } else {
-      return next(error)
+      next(error)
     }
   },
 }

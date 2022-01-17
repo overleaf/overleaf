@@ -1,5 +1,9 @@
 const AbstractMockApi = require('./AbstractMockApi')
 const { EventEmitter } = require('events')
+const {
+  zipAttachment,
+  prepareZipAttachment,
+} = require('../../../../app/src/infrastructure/Response')
 
 class MockV1HistoryApi extends AbstractMockApi {
   reset() {
@@ -13,10 +17,10 @@ class MockV1HistoryApi extends AbstractMockApi {
     this.app.get(
       '/api/projects/:project_id/version/:version/zip',
       (req, res, next) => {
-        res.header('content-disposition', 'attachment; name=project.zip')
-        res.header('content-type', 'application/octet-stream')
-        res.send(
-          `Mock zip for ${req.params.project_id} at version ${req.params.version}`
+        zipAttachment(
+          res,
+          `Mock zip for ${req.params.project_id} at version ${req.params.version}`,
+          'project.zip'
         )
       }
     )
@@ -27,13 +31,14 @@ class MockV1HistoryApi extends AbstractMockApi {
         if (!(this.fakeZipCall++ > 0)) {
           return res.sendStatus(404)
         }
-        res.header('content-disposition', 'attachment; name=project.zip')
-        res.header('content-type', 'application/octet-stream')
         if (req.params.version === '42') {
-          return res.send(
-            `Mock zip for ${req.params.project_id} at version ${req.params.version}`
+          return zipAttachment(
+            res,
+            `Mock zip for ${req.params.project_id} at version ${req.params.version}`,
+            'project.zip'
           )
         }
+        prepareZipAttachment(res, 'project.zip')
         const writeChunk = () => {
           res.write('chunk' + this.sentChunks++)
         }

@@ -12,7 +12,6 @@ module.exports = {
   check(req, res, next) {
     if (!settings.siteIsOpen || !settings.editorIsOpen) {
       // always return successful health checks when site is closed
-      res.contentType('application/json')
       res.sendStatus(200)
     } else {
       // detach from express for cleaner stack traces
@@ -92,9 +91,6 @@ module.exports = {
   },
 }
 
-function prettyJSON(blob) {
-  return JSON.stringify(blob, null, 2) + '\n'
-}
 async function runSmokeTestsDetached(req, res) {
   function isAborted() {
     return req.aborted
@@ -120,6 +116,5 @@ async function runSmokeTestsDetached(req, res) {
     response = { stats, error: err.message }
   }
   if (isAborted()) return
-  res.contentType('application/json')
-  res.status(status).send(prettyJSON(response))
+  res.status(status).json(response)
 }

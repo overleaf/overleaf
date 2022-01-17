@@ -423,6 +423,10 @@ lint: lint_locales
 lint_locales:
 	bin/lint_locales
 
+lint: lint_flag_res_send_usage
+lint_flag_res_send_usage:
+	bin/lint_flag_res_send_usage
+
 lint_in_docker:
 	$(RUN_LINT_FORMAT) make lint -j --output-sync
 

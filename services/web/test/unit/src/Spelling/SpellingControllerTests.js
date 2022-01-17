@@ -1,5 +1,6 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
+const MockResponse = require('../helpers/MockResponse')
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Spelling/SpellingController.js'
@@ -52,11 +53,7 @@ describe('SpellingController', function () {
       headers: { Host: SPELLING_HOST },
     }
 
-    this.res = {}
-    this.res.send = sinon.stub()
-    this.res.status = sinon.stub().returns(this.res)
-    this.res.end = sinon.stub()
-    this.res.json = sinon.stub()
+    this.res = new MockResponse()
   })
 
   describe('proxyRequestToSpellingApi', function () {
@@ -104,9 +101,7 @@ describe('SpellingController', function () {
         })
 
         it('should return an empty misspellings array', function () {
-          this.res.send
-            .calledWith(JSON.stringify({ misspellings: [] }))
-            .should.equal(true)
+          this.res.json.calledWith({ misspellings: [] }).should.equal(true)
         })
 
         it('should return a 422 status', function () {
@@ -142,9 +137,7 @@ describe('SpellingController', function () {
         })
 
         it('should return an empty misspellings array', function () {
-          this.res.send
-            .calledWith(JSON.stringify({ misspellings: [] }))
-            .should.equal(true)
+          this.res.json.calledWith({ misspellings: [] }).should.equal(true)
         })
 
         it('should return a 422 status', function () {

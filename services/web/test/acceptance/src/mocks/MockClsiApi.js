@@ -1,8 +1,11 @@
 const AbstractMockApi = require('./AbstractMockApi')
+const {
+  plainTextResponse,
+} = require('../../../../app/src/infrastructure/Response')
 
 class MockClsiApi extends AbstractMockApi {
   static compile(req, res) {
-    res.status(200).send({
+    res.json({
       compile: {
         status: 'success',
         error: null,
@@ -36,9 +39,9 @@ class MockClsiApi extends AbstractMockApi {
       (req, res) => {
         const filename = req.params[0]
         if (filename === 'project.pdf') {
-          res.status(200).send('mock-pdf')
+          plainTextResponse(res, 'mock-pdf')
         } else if (filename === 'project.log') {
-          res.status(200).send('mock-log')
+          plainTextResponse(res, 'mock-log')
         } else {
           res.sendStatus(404)
         }
@@ -48,12 +51,12 @@ class MockClsiApi extends AbstractMockApi {
     this.app.get(
       '/project/:project_id/user/:user_id/build/:build_id/output/:output_path',
       (req, res) => {
-        res.status(200).send('hello')
+        plainTextResponse(res, 'hello')
       }
     )
 
     this.app.get('/project/:project_id/status', (req, res) => {
-      res.status(200).send()
+      res.sendStatus(200)
     })
   }
 }

@@ -26,7 +26,7 @@ module.exports = {
         if (err != null) {
           return res.sendStatus(500)
         } else {
-          return res.send(projectsDeactivated)
+          return res.json(projectsDeactivated)
         }
       }
     )

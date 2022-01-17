@@ -784,7 +784,7 @@ describe('CompileController', function () {
         .yields(null, { content: 'body' })
       this.req.params = { Project_id: this.project_id }
       this.req.query = { clsiserverid: 'node-42' }
-      this.res.send = sinon.stub()
+      this.res.json = sinon.stub()
       this.res.contentType = sinon.stub()
       return this.CompileController.wordCount(this.req, this.res, this.next)
     })
@@ -796,7 +796,7 @@ describe('CompileController', function () {
     })
 
     it('should return a 200 and body', function () {
-      return this.res.send.calledWith({ content: 'body' }).should.equal(true)
+      return this.res.json.calledWith({ content: 'body' }).should.equal(true)
     })
   })
 })

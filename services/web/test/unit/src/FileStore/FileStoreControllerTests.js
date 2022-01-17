@@ -2,6 +2,7 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
+const MockResponse = require('../helpers/MockResponse')
 
 const MODULE_PATH =
   '../../../../app/src/Features/FileStore/FileStoreController.js'
@@ -33,12 +34,7 @@ describe('FileStoreController', function () {
         return undefined
       },
     }
-    this.res = {
-      set: sinon.stub().returnsThis(),
-      setHeader: sinon.stub(),
-      setContentDisposition: sinon.stub(),
-      status: sinon.stub().returnsThis(),
-    }
+    this.res = new MockResponse()
     this.file = { name: 'myfile.png' }
   })
 
@@ -108,9 +104,7 @@ describe('FileStoreController', function () {
         describe('from a non-ios browser', function () {
           it('should not set Content-Type', function (done) {
             this.stream.pipe = des => {
-              this.res.setHeader
-                .calledWith('Content-Type', 'text/plain')
-                .should.equal(false)
+              this.res.headers.should.deep.equal({})
               done()
             }
             this.controller.getFile(this.req, this.res)
@@ -128,9 +122,10 @@ describe('FileStoreController', function () {
 
           it("should set Content-Type to 'text/plain'", function (done) {
             this.stream.pipe = des => {
-              this.res.setHeader
-                .calledWith('Content-Type', 'text/plain')
-                .should.equal(true)
+              this.res.headers.should.deep.equal({
+                'Content-Type': 'text/plain; charset=utf-8',
+                'X-Content-Type-Options': 'nosniff',
+              })
               done()
             }
             this.controller.getFile(this.req, this.res)
@@ -148,9 +143,10 @@ describe('FileStoreController', function () {
 
           it("should set Content-Type to 'text/plain'", function (done) {
             this.stream.pipe = des => {
-              this.res.setHeader
-                .calledWith('Content-Type', 'text/plain')
-                .should.equal(true)
+              this.res.headers.should.deep.equal({
+                'Content-Type': 'text/plain; charset=utf-8',
+                'X-Content-Type-Options': 'nosniff',
+              })
               done()
             }
             this.controller.getFile(this.req, this.res)
@@ -183,9 +179,7 @@ describe('FileStoreController', function () {
 
             it('Should not set the Content-type', function (done) {
               this.stream.pipe = des => {
-                this.res.setHeader
-                  .calledWith('Content-Type', 'text/plain')
-                  .should.equal(false)
+                this.res.headers.should.deep.equal({})
                 done()
               }
               this.controller.getFile(this.req, this.res)
@@ -208,7 +202,7 @@ describe('FileStoreController', function () {
 
       this.res.end = () => {
         expect(this.res.status.lastCall.args).to.deep.equal([200])
-        expect(this.res.set.lastCall.args).to.deep.equal([
+        expect(this.res.header.lastCall.args).to.deep.equal([
           'Content-Length',
           expectedFileSize,
         ])

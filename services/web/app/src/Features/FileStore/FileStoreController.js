@@ -3,6 +3,7 @@ const logger = require('@overleaf/logger')
 const FileStoreHandler = require('./FileStoreHandler')
 const ProjectLocator = require('../Project/ProjectLocator')
 const Errors = require('../Errors/Errors')
+const { preparePlainTextResponse } = require('../../infrastructure/Response')
 
 module.exports = {
   getFile(req, res) {
@@ -34,7 +35,7 @@ module.exports = {
             }
             // mobile safari will try to render html files, prevent this
             if (isMobileSafari(userAgent) && isHtml(file)) {
-              res.setHeader('Content-Type', 'text/plain')
+              preparePlainTextResponse(res)
             }
             res.setContentDisposition('attachment', { filename: file.name })
             stream.pipe(res)
@@ -57,7 +58,7 @@ module.exports = {
         }
         return
       }
-      res.set('Content-Length', fileSize)
+      res.setHeader('Content-Length', fileSize)
       res.status(200).end()
     })
   },

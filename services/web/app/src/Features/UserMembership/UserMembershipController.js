@@ -14,6 +14,7 @@ const SessionManager = require('../Authentication/SessionManager')
 const UserMembershipHandler = require('./UserMembershipHandler')
 const Errors = require('../Errors/Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
+const { csvAttachment } = require('../../infrastructure/Response')
 const CSVParser = require('json2csv').Parser
 
 module.exports = {
@@ -146,9 +147,7 @@ module.exports = {
           return next(error)
         }
         const csvParser = new CSVParser({ fields })
-        res.header('Content-Disposition', 'attachment; filename=Group.csv')
-        res.contentType('text/csv')
-        return res.send(csvParser.parse(users))
+        csvAttachment(res, csvParser.parse(users), 'Group.csv')
       }
     )
   },

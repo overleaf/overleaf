@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -e
+
+POTENTIAL_SEND_USAGE=$(\
+  grep \
+    --files-with-matches \
+    --recursive \
+      app.js \
+      app/ \
+      modules/*/app \
+      test/acceptance/ \
+      modules/*/test/acceptance/ \
+    --regex "\.send\b" \
+    --regex "\bsend(" \
+)
+HELPER_MODULE="app/src/infrastructure/Response.js"
+if [[ "$POTENTIAL_SEND_USAGE" == "$HELPER_MODULE" ]]; then
+  exit 0
+fi
+
+for file in ${POTENTIAL_SEND_USAGE}; do
+  if [[ "$file" == "$HELPER_MODULE" ]]; then
+    continue
+  fi
+
+  cat <<MSG >&2
+
+ERROR: $file contains a potential use of 'res.send'.
+
+---
+$(grep -n -C 3  "$file" --regex "\.send\b" --regex "\bsend(")
+---
+
+Using 'res.send' is prone to introducing XSS vulnerabilities.
+
+Consider using 'res.json' or one of the helpers in $HELPER_MODULE.
+
+If this is a false-positive, consider using a more specific name than 'send'
+ for your newly introduced function.
+
+Links:
+ - https://github.com/overleaf/internal/issues/6268
+
+MSG
+  exit 1
+done

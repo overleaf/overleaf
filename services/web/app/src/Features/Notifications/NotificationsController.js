@@ -21,7 +21,7 @@ module.exports = {
             return notification
           }
         )
-        res.send(unreadNotifications)
+        res.json(unreadNotifications)
       }
     )
   },

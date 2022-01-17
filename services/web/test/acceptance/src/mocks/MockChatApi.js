@@ -6,7 +6,7 @@ class MockChatApi extends AbstractMockApi {
   }
 
   getGlobalMessages(req, res) {
-    res.send(this.projects[req.params.project_id] || [])
+    res.json(this.projects[req.params.project_id] || [])
   }
 
   sendGlobalMessage(req, res) {
@@ -19,7 +19,7 @@ class MockChatApi extends AbstractMockApi {
     }
     this.projects[projectId] = this.projects[projectId] || []
     this.projects[projectId].push(message)
-    res.sendStatus(201).send(Object.assign({ room_id: projectId }, message))
+    res.json(Object.assign({ room_id: projectId }, message))
   }
 
   applyRoutes() {

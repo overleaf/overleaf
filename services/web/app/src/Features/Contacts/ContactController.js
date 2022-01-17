@@ -70,7 +70,7 @@ module.exports = ContactsController = {
                 contacts = contacts.concat(
                   ...Array.from(additional_contacts || [])
                 )
-                return res.send({
+                return res.json({
                   contacts,
                 })
               }

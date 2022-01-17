@@ -43,7 +43,6 @@ describe('ReferencesController', function () {
     }
     this.res = new MockResponse()
     this.res.json = sinon.stub()
-    this.res.send = sinon.stub()
     this.res.sendStatus = sinon.stub()
     return (this.fakeResponseData = {
       projectId: this.projectId,

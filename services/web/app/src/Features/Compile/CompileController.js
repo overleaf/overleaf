@@ -117,7 +117,7 @@ module.exports = CompileController = {
       if (error != null) {
         return next(error)
       }
-      return res.status(200).send()
+      return res.sendStatus(200)
     })
   },
 
@@ -159,15 +159,12 @@ module.exports = CompileController = {
         if (error != null) {
           return next(error)
         }
-        res.contentType('application/json')
-        return res.status(200).send(
-          JSON.stringify({
-            status,
-            outputFiles,
-            clsiServerId,
-            validationProblems,
-          })
-        )
+        return res.json({
+          status,
+          outputFiles,
+          clsiServerId,
+          validationProblems,
+        })
       }
     )
   },
@@ -564,8 +561,7 @@ module.exports = CompileController = {
           if (error != null) {
             return next(error)
           }
-          res.contentType('application/json')
-          return res.send(body)
+          return res.json(body)
         }
       )
     })

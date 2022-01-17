@@ -27,14 +27,14 @@ module.exports = {
     if (url === '/check') {
       if (!language) {
         logger.error('"language" field should be included for spell checking')
-        return res.status(422).send(JSON.stringify({ misspellings: [] }))
+        return res.status(422).json({ misspellings: [] })
       }
 
       if (!languageCodeIsSupported(language)) {
         // this log statement can be changed to 'error' once projects with
         // unsupported languages are removed from the DB
         logger.info({ language }, 'language not supported')
-        return res.status(422).send(JSON.stringify({ misspellings: [] }))
+        return res.status(422).json({ misspellings: [] })
       }
     }
 

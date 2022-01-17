@@ -5,6 +5,7 @@ const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
 const logger = require('@overleaf/logger')
 const _ = require('lodash')
+const { plainTextResponse } = require('../../infrastructure/Response')
 
 function getDocument(req, res, next) {
   const { Project_id: projectId, doc_id: docId } = req.params
@@ -47,8 +48,7 @@ function getDocument(req, res, next) {
                 return next(error)
               }
               if (plain) {
-                res.type('text/plain')
-                res.send(lines.join('\n'))
+                plainTextResponse(res, lines.join('\n'))
               } else {
                 const projectHistoryId = _.get(project, 'overleaf.history.id')
                 const projectHistoryDisplay = _.get(

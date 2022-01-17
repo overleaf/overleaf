@@ -17,6 +17,7 @@ const Metrics = require('@overleaf/metrics')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectZipStreamManager = require('./ProjectZipStreamManager')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
+const { prepareZipAttachment } = require('../../infrastructure/Response')
 
 module.exports = ProjectDownloadsController = {
   downloadProject(req, res, next) {
@@ -41,10 +42,7 @@ module.exports = ProjectDownloadsController = {
                 if (error != null) {
                   return next(error)
                 }
-                res.setContentDisposition('attachment', {
-                  filename: `${project.name}.zip`,
-                })
-                res.contentType('application/zip')
+                prepareZipAttachment(res, `${project.name}.zip`)
                 return stream.pipe(res)
               }
             )
@@ -69,10 +67,10 @@ module.exports = ProjectDownloadsController = {
             if (error != null) {
               return next(error)
             }
-            res.setContentDisposition('attachment', {
-              filename: `Overleaf Projects (${project_ids.length} items).zip`,
-            })
-            res.contentType('application/zip')
+            prepareZipAttachment(
+              res,
+              `Overleaf Projects (${project_ids.length} items).zip`
+            )
             return stream.pipe(res)
           }
         )

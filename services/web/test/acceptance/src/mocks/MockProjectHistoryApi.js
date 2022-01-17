@@ -1,6 +1,9 @@
 const AbstractMockApi = require('./AbstractMockApi')
 const _ = require('lodash')
 const { ObjectId } = require('mongodb')
+const {
+  plainTextResponse,
+} = require('../../../../app/src/infrastructure/Response')
 
 class MockProjectHistoryApi extends AbstractMockApi {
   reset() {
@@ -64,7 +67,7 @@ class MockProjectHistoryApi extends AbstractMockApi {
         const { projectId, version, pathname } = req.params
         const key = `${projectId}:${version}:${pathname}`
         if (this.oldFiles[key] != null) {
-          res.send(this.oldFiles[key])
+          plainTextResponse(res, this.oldFiles[key])
         } else {
           res.sendStatus(404)
         }

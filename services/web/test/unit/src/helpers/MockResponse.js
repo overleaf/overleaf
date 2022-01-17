@@ -12,14 +12,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
+const Path = require('path')
+const contentDisposition = require('content-disposition')
 
 class MockResponse {
   static initClass() {
+    // Added via ExpressLocals.
     this.prototype.setContentDisposition = sinon.stub()
-
-    this.prototype.header = sinon.stub()
-
-    this.prototype.contentType = sinon.stub()
   }
 
   constructor() {
@@ -28,6 +27,18 @@ class MockResponse {
     this.returned = false
     this.headers = {}
     this.locals = {}
+
+    sinon.spy(this, 'contentType')
+    sinon.spy(this, 'header')
+    sinon.spy(this, 'json')
+    sinon.spy(this, 'send')
+    sinon.spy(this, 'sendStatus')
+    sinon.spy(this, 'status')
+    sinon.spy(this, 'render')
+  }
+
+  header(field, val) {
+    this.headers[field] = val
   }
 
   render(template, variables) {
@@ -100,7 +111,7 @@ class MockResponse {
     }
     this.statusCode = status
     this.returned = true
-    this.type = 'application/json'
+    this.contentType('application/json')
     if (status >= 200 && status < 300) {
       this.success = true
     } else {
@@ -120,7 +131,7 @@ class MockResponse {
   }
 
   setHeader(header, value) {
-    return (this.headers[header] = value)
+    this.header(header, value)
   }
 
   setTimeout(timout) {
@@ -133,8 +144,29 @@ class MockResponse {
     }
   }
 
+  attachment(filename) {
+    switch (Path.extname(filename)) {
+      case '.csv':
+        this.contentType('text/csv; charset=utf-8')
+        break
+      case '.zip':
+        this.contentType('application/zip')
+        break
+      default:
+        throw new Error('unexpected extension')
+    }
+    this.header('Content-Disposition', contentDisposition(filename))
+    return this
+  }
+
+  contentType(type) {
+    this.header('Content-Type', type)
+    this.type = type
+    return this
+  }
+
   type(type) {
-    return (this.type = type)
+    return this.contentType(type)
   }
 }
 MockResponse.initClass()

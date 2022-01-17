@@ -280,9 +280,6 @@ describe('UserMembershipController', function () {
       this.req.entity = this.subscription
       this.req.entityConfig = EntityConfigs.groupManagers
       this.res = new MockResponse()
-      this.res.contentType = sinon.stub()
-      this.res.header = sinon.stub()
-      this.res.send = sinon.stub()
       return this.UserMembershipController.exportCsv(this.req, this.res)
     })
 
@@ -295,14 +292,14 @@ describe('UserMembershipController', function () {
     })
 
     it('should set the correct content type on the request', function () {
-      return assertCalledWith(this.res.contentType, 'text/csv')
+      return assertCalledWith(this.res.contentType, 'text/csv; charset=utf-8')
     })
 
     it('should name the exported csv file', function () {
       return assertCalledWith(
         this.res.header,
         'Content-Disposition',
-        'attachment; filename=Group.csv'
+        'attachment; filename="Group.csv"'
       )
     })
 

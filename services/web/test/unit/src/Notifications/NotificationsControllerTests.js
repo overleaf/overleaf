@@ -45,7 +45,7 @@ describe('NotificationsController', function () {
       .stub()
       .callsArgWith(1, null, allNotifications)
     this.controller.getAllUnreadNotifications(this.req, {
-      send: body => {
+      json: body => {
         body.should.deep.equal(allNotifications)
         this.handler.getUserNotifications.calledWith(userId).should.equal(true)
         done()

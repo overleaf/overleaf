@@ -7,12 +7,15 @@ const Settings = require('@overleaf/settings')
 const User = require('./helpers/User').promises
 
 const express = require('express')
+const {
+  plainTextResponse,
+} = require('../../../app/src/infrastructure/Response')
 const LinkedUrlProxy = express()
 LinkedUrlProxy.get('/', (req, res, next) => {
   if (req.query.url === 'http://example.com/foo') {
-    return res.send('foo foo foo')
+    return plainTextResponse(res, 'foo foo foo')
   } else if (req.query.url === 'http://example.com/bar') {
-    return res.send('bar bar bar')
+    return plainTextResponse(res, 'bar bar bar')
   } else {
     return res.sendStatus(404)
   }

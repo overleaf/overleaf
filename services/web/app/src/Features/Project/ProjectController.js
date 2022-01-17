@@ -249,7 +249,7 @@ const ProjectController = {
     const { projectName } = req.body
     logger.log({ projectId, projectName }, 'cloning project')
     if (!SessionManager.isUserLoggedIn(req.session)) {
-      return res.send({ redir: '/register' })
+      return res.json({ redir: '/register' })
     }
     const currentUser = SessionManager.getSessionUser(req.session)
     const { first_name: firstName, last_name: lastName, email } = currentUser
@@ -265,7 +265,7 @@ const ProjectController = {
           })
           return next(err)
         }
-        res.send({
+        res.json({
           name: project.name,
           project_id: project._id,
           owner_ref: project.owner_ref,
@@ -306,7 +306,7 @@ const ProjectController = {
         if (err != null) {
           return next(err)
         }
-        res.send({
+        res.json({
           project_id: project._id,
           owner_ref: project.owner_ref,
           owner: {

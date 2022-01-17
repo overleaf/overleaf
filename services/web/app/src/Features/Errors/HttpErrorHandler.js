@@ -1,5 +1,6 @@
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
+const { plainTextResponse } = require('../../infrastructure/Response')
 
 function renderJSONError(res, message, info = {}) {
   if (info.message) {
@@ -23,7 +24,7 @@ function handleGeneric500Error(req, res, statusCode, message) {
     case 'json':
       return renderJSONError(res, message)
     default:
-      return res.send('internal server error')
+      return plainTextResponse(res, 'internal server error')
   }
 }
 
@@ -38,7 +39,7 @@ function handleGeneric400Error(req, res, statusCode, message, info = {}) {
     case 'json':
       return renderJSONError(res, message, info)
     default:
-      return res.send('client error')
+      return plainTextResponse(res, 'client error')
   }
 }
 
@@ -90,7 +91,7 @@ module.exports = HttpErrorHandler = {
       case 'json':
         return renderJSONError(res, message, info)
       default:
-        return res.send('conflict')
+        return plainTextResponse(res, 'conflict')
     }
   },
 
@@ -102,7 +103,7 @@ module.exports = HttpErrorHandler = {
       case 'json':
         return renderJSONError(res, message, info)
       default:
-        return res.send('restricted')
+        return plainTextResponse(res, 'restricted')
     }
   },
 
@@ -114,7 +115,7 @@ module.exports = HttpErrorHandler = {
       case 'json':
         return renderJSONError(res, message, info)
       default:
-        return res.send('not found')
+        return plainTextResponse(res, 'not found')
     }
   },
 
@@ -129,7 +130,7 @@ module.exports = HttpErrorHandler = {
       case 'json':
         return renderJSONError(res, message, info)
       default:
-        return res.send('unprocessable entity')
+        return plainTextResponse(res, 'unprocessable entity')
     }
   },
 
@@ -155,7 +156,7 @@ module.exports = HttpErrorHandler = {
       case 'json':
         return renderJSONError(res, message, {})
       default:
-        return res.send(message)
+        return plainTextResponse(res, message)
     }
   },
 }

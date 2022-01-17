@@ -4,6 +4,7 @@ const logger = require('@overleaf/logger')
 const SessionManager = require('../Authentication/SessionManager')
 const SamlLogHandler = require('../SamlLog/SamlLogHandler')
 const HttpErrorHandler = require('./HttpErrorHandler')
+const { plainTextResponse } = require('../../infrastructure/Response')
 
 module.exports = ErrorController = {
   notFound(req, res) {
@@ -62,11 +63,11 @@ module.exports = ErrorController = {
     } else if (error instanceof Errors.InvalidError) {
       logger.warn({ err: error, url: req.url }, 'invalid error')
       res.status(400)
-      res.send(error.message)
+      plainTextResponse(res, error.message)
     } else if (error instanceof Errors.InvalidNameError) {
       logger.warn({ err: error, url: req.url }, 'invalid name error')
       res.status(400)
-      res.send(error.message)
+      plainTextResponse(res, error.message)
     } else if (error instanceof Errors.SAMLSessionDataMissing) {
       logger.warn(
         { err: error, url: req.url },

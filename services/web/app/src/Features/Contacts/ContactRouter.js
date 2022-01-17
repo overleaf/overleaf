@@ -11,7 +11,7 @@ function contactsAuthenticationMiddleware() {
       if (SessionManager.isUserLoggedIn(req.session)) {
         next()
       } else {
-        res.send({ contacts: [] })
+        res.json({ contacts: [] })
       }
     }
   }

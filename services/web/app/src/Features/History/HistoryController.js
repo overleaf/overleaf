@@ -12,6 +12,7 @@ const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
 const RestoreManager = require('./RestoreManager')
 const { pipeline } = require('stream')
+const { prepareZipAttachment } = require('../../infrastructure/Response')
 
 module.exports = HistoryController = {
   selectHistoryApi(req, res, next) {
@@ -414,10 +415,7 @@ module.exports = HistoryController = {
               delete response.headers['content-disposition']
               delete response.headers['content-type']
               res.status(response.statusCode)
-              res.setContentDisposition('attachment', {
-                filename: `${name}.zip`,
-              })
-              res.contentType('application/zip')
+              prepareZipAttachment(res, `${name}.zip`)
               pipeline(response, res, err => {
                 if (err) {
                   logger.warn(

@@ -1,5 +1,6 @@
 const AbstractMockApi = require('./AbstractMockApi')
 const SubscriptionController = require('../../../../app/src/Features/Subscription/SubscriptionController')
+const { xmlResponse } = require('../../../../app/src/infrastructure/Response')
 
 class MockRecurlyApi extends AbstractMockApi {
   reset() {
@@ -28,9 +29,11 @@ class MockRecurlyApi extends AbstractMockApi {
     this.app.get('/subscriptions/:id', (req, res) => {
       const subscription = this.getMockSubscriptionById(req.params.id)
       if (!subscription) {
-        res.status(404).end()
+        res.sendStatus(404)
       } else {
-        res.send(`\
+        xmlResponse(
+          res,
+          `\
 <subscription>
 	<plan><plan_code>${subscription.planCode}</plan_code></plan>
 	<currency>${subscription.currency}</currency>
@@ -42,22 +45,26 @@ class MockRecurlyApi extends AbstractMockApi {
 	<account href="accounts/${subscription.account.id}" />
 	<trial_ends_at type="datetime">${subscription.trial_ends_at}</trial_ends_at>
 </subscription>\
-`)
+`
+        )
       }
     })
 
     this.app.get('/accounts/:id', (req, res) => {
       const subscription = this.getMockSubscriptionByAccountId(req.params.id)
       if (!subscription) {
-        res.status(404).end()
+        res.sendStatus(404)
       } else {
-        res.send(`\
+        xmlResponse(
+          res,
+          `\
 <account>
 	<account_code>${req.params.id}</account_code>
 	<hosted_login_token>${subscription.account.hosted_login_token}</hosted_login_token>
 	<email>${subscription.account.email}</email>
 </account>\
-`)
+`
+        )
       }
     })
 
@@ -67,15 +74,18 @@ class MockRecurlyApi extends AbstractMockApi {
       (req, res) => {
         const subscription = this.getMockSubscriptionByAccountId(req.params.id)
         if (!subscription) {
-          res.status(404).end()
+          res.sendStatus(404)
         } else {
           Object.assign(subscription.account, req.body.account)
-          res.send(`\
+          xmlResponse(
+            res,
+            `\
 <account>
 	<account_code>${req.params.id}</account_code>
 	<email>${subscription.account.email}</email>
 </account>\
-`)
+`
+          )
         }
       }
     )
@@ -83,15 +93,18 @@ class MockRecurlyApi extends AbstractMockApi {
     this.app.get('/coupons/:code', (req, res) => {
       const coupon = this.coupons[req.params.code]
       if (!coupon) {
-        res.status(404).end()
+        res.sendStatus(404)
       } else {
-        res.send(`\
+        xmlResponse(
+          res,
+          `\
 <coupon>
 	<coupon_code>${req.params.code}</coupon_code>
 	<name>${coupon.name || ''}</name>
 	<description>${coupon.description || ''}</description>
 </coupon>\
-`)
+`
+        )
       }
     })
 
@@ -107,11 +120,14 @@ class MockRecurlyApi extends AbstractMockApi {
 `
       }
 
-      res.send(`\
+      xmlResponse(
+        res,
+        `\
 <redemptions type="array">
 	${redemptionsListXml}
 </redemptions>\
-`)
+`
+      )
     })
   }
 }
