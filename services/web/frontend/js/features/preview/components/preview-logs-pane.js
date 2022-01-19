@@ -172,7 +172,7 @@ function AutoCompileLintingErrorEntry() {
     <div className="log-entry">
       <div className="log-entry-header log-entry-header-error">
         <div className="log-entry-header-icon-container">
-          <Icon type="exclamation-triangle" modifier="fw" />
+          <Icon type="exclamation-triangle" fw />
         </div>
         <h3 className="log-entry-header-title">
           {t('code_check_failed_explanation')}

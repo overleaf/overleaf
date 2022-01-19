@@ -7,7 +7,8 @@ function Processing({ isProcessing }) {
   if (isProcessing) {
     return (
       <div aria-live="polite">
-        {t('processing')}… <Icon type="fw" modifier="refresh" spin />
+        {t('processing')}…&nbsp;
+        <Icon type="refresh" fw spin />
       </div>
     )
   } else {

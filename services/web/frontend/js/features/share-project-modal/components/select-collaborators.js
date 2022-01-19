@@ -270,7 +270,7 @@ function Option({ selected, item, getItemProps, index }) {
       className={classnames('suggestion-item', { selected })}
       {...getItemProps({ item, index })}
     >
-      <Icon type="user" modifier="fw" />
+      <Icon type="user" fw />
       &nbsp;
       {item.display}
     </li>
@@ -309,7 +309,7 @@ function SelectedItem({
       className="tag-item"
       {...getSelectedItemProps({ selectedItem, index })}
     >
-      <Icon type="user" modifier="fw" />
+      <Icon type="user" fw />
       <span>{selectedItem.display}</span>
       <button
         type="button"
@@ -317,7 +317,7 @@ function SelectedItem({
         aria-label={t('remove')}
         onClick={handleClick}
       >
-        <Icon type="close" modifier="fw" />
+        <Icon type="close" fw />
       </button>
     </span>
   )

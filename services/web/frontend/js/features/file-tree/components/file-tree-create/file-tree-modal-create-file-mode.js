@@ -19,7 +19,7 @@ export default function FileTreeModalCreateFileMode({ mode, icon, label }) {
         onClick={handleClick}
         className="modal-new-file-mode"
       >
-        <Icon modifier="fw" type={icon} />
+        <Icon type={icon} fw />
         &nbsp;
         {label}
       </Button>

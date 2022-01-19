@@ -82,7 +82,7 @@ function ProjectNameEditableLabel({
         >
           {/* eslint-disable-next-line jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus */}
           <a className="rename" role="button" onClick={startRenaming}>
-            <Icon type="pencil" modifier="fw" />
+            <Icon type="pencil" fw />
           </a>
         </OverlayTrigger>
       )}

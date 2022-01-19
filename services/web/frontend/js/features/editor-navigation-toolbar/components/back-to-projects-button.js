@@ -6,8 +6,8 @@ function BackToProjectsButton() {
   return (
     <a className="toolbar-header-back-projects" href="/project">
       <Icon
-        type="fw"
-        modifier="level-up"
+        type="level-up"
+        fw
         accessibilityLabel={t('back_to_your_projects')}
       />
     </a>

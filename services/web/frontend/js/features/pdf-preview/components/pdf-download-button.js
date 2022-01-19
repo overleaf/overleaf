@@ -26,7 +26,7 @@ function PdfDownloadButton() {
         download
         href={pdfDownloadUrl || '#'}
       >
-        <Icon type="download" modifier="fw" />
+        <Icon type="download" fw />
         <span className="toolbar-text toolbar-hide-medium toolbar-hide-small">
           {t('download_pdf')}
         </span>

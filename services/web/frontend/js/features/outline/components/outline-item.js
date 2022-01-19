@@ -80,7 +80,7 @@ function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
           >
             <Icon
               type={expanded ? 'angle-down' : 'angle-right'}
-              classes={{ icon: 'outline-caret-icon' }}
+              className="outline-caret-icon"
             />
           </button>
         ) : null}

@@ -17,14 +17,10 @@ function ChatToggleButton({ chatIsOpen, unreadMessageCount, onClick }) {
   return (
     <div className="toolbar-item">
       <button className={classes} onClick={onClick}>
-        <Icon
-          type="fw"
-          modifier="comment"
-          classes={{ icon: hasUnreadMessages ? 'bounce' : undefined }}
-        />
-        {hasUnreadMessages ? (
+        <Icon type="comment" fw className={hasUnreadMessages ? 'bounce' : ''} />
+        {hasUnreadMessages && (
           <span className="label label-info">{unreadMessageCount}</span>
-        ) : null}
+        )}
         <p className="toolbar-label">{t('chat')}</p>
       </button>
     </div>

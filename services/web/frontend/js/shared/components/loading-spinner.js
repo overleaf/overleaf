@@ -24,7 +24,7 @@ function LoadingSpinner({ delay = 500 }) {
 
   return (
     <div className="loading">
-      <Icon type="fw" modifier="refresh" spin />
+      <Icon type="refresh" fw spin />
       &nbsp;
       {t('loading')}…
     </div>

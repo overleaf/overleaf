@@ -30,13 +30,9 @@ function GoToCodeButton({
 
   let buttonIcon = null
   if (syncToCodeInFlight) {
-    buttonIcon = (
-      <Icon type="refresh" spin classes={{ icon: 'synctex-spin-icon' }} />
-    )
+    buttonIcon = <Icon type="refresh" spin className="synctex-spin-icon" />
   } else if (!isDetachLayout) {
-    buttonIcon = (
-      <Icon type="arrow-left" classes={{ icon: 'synctex-control-icon' }} />
-    )
+    buttonIcon = <Icon type="arrow-left" className="synctex-control-icon" />
   }
 
   return (
@@ -77,13 +73,9 @@ function GoToPdfButton({
 
   let buttonIcon = null
   if (syncToPdfInFlight) {
-    buttonIcon = (
-      <Icon type="refresh" spin classes={{ icon: 'synctex-spin-icon' }} />
-    )
+    buttonIcon = <Icon type="refresh" spin className="synctex-spin-icon" />
   } else if (!isDetachLayout) {
-    buttonIcon = (
-      <Icon type="arrow-right" classes={{ icon: 'synctex-control-icon' }} />
-    )
+    buttonIcon = <Icon type="arrow-right" className="synctex-control-icon" />
   }
 
   return (

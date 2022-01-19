@@ -33,7 +33,7 @@ export const FixedWidth = args => {
 }
 FixedWidth.args = {
   type: 'tasks',
-  modifier: 'fw',
+  fw: true,
 }
 
 export const AccessibilityLabel = args => {

@@ -65,7 +65,7 @@ function FileViewLoadingIndicator() {
   return (
     <div className="loading-panel loading-panel-file-view">
       <span>
-        <Icon type="refresh" modifier="spin" />
+        <Icon type="refresh" spin />
         &nbsp;&nbsp;{t('loading')}…
       </span>
     </div>

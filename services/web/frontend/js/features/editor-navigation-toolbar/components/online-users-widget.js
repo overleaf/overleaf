@@ -105,7 +105,7 @@ const DropDownToggleButton = React.forwardRef((props, ref) => {
         onClick={props.onClick} // required by Bootstrap Dropdown to trigger an opening
       >
         <strong>{props.onlineUserCount}</strong>
-        <Icon type="users" modifier="fw" />
+        <Icon type="users" fw />
       </button>
     </OverlayTrigger>
   )

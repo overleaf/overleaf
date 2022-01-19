@@ -8,11 +8,7 @@ function MenuButton({ onClick }) {
   return (
     <div className="toolbar-item">
       <button className="btn btn-full-height" onClick={onClick}>
-        <Icon
-          type="bars "
-          modifier="fw"
-          classes={{ icon: 'editor-menu-icon' }}
-        />
+        <Icon type="bars" fw className="editor-menu-icon" />
         <p className="toolbar-label">{t('menu')}</p>
       </button>
     </div>

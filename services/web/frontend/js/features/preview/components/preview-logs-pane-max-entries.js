@@ -15,7 +15,8 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
     <div className="log-entry" aria-label={t('log_entry_maximum_entries')}>
       <PreviewLogEntryHeader level="raw" headerTitle={title} />
       <div className="log-entry-content">
-        <Icon type="lightbulb-o" />{' '}
+        <Icon type="lightbulb-o" />
+        &nbsp;
         {hasErrors ? (
           <Trans
             i18nKey="log_entry_maximum_entries_message"

@@ -12,19 +12,19 @@ import { useLayoutContext } from '../../../shared/context/layout-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 
 function IconPlaceholder() {
-  return <Icon type="" modifier="fw" />
+  return <Icon type="" fw />
 }
 
 function IconRefresh() {
-  return <Icon type="refresh" modifier="fw" spin />
+  return <Icon type="refresh" fw spin />
 }
 
 function IconLayout() {
-  return <Icon type="columns" modifier="fw" />
+  return <Icon type="columns" fw />
 }
 
 function IconDetach() {
-  return <Icon type="window-restore" modifier="fw" />
+  return <Icon type="window-restore" fw />
 }
 
 function IconCheckmark({ iconFor, pdfLayout, view, detachRole }) {

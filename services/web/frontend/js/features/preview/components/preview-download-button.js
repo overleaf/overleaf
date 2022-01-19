@@ -30,7 +30,7 @@ function PreviewDownloadButton({
       href={pdfDownloadUrl || '#'}
       style={{ pointerEvents: 'auto' }}
     >
-      <Icon type="download" modifier="fw" />
+      <Icon type="download" fw />
       <span className="toolbar-text" style={textStyle}>
         {t('download_pdf')}
       </span>

@@ -1,36 +1,16 @@
 import PropTypes from 'prop-types'
-import { useTranslation } from 'react-i18next'
-
-import Icon from '../../../shared/components/icon'
-import iconTypeFromName from '../util/icon-type-from-name'
 
 import { useSelectableEntity } from '../contexts/file-tree-selectable'
 
 import FileTreeItemInner from './file-tree-item/file-tree-item-inner'
+import { useTranslation } from 'react-i18next'
+import Icon from '../../../shared/components/icon'
+import iconTypeFromName from '../util/icon-type-from-name'
+import classnames from 'classnames'
 
 function FileTreeDoc({ name, id, isLinkedFile }) {
-  const { t } = useTranslation()
-
   const { isSelected, props: selectableEntityProps } = useSelectableEntity(id)
 
-  const icons = (
-    <>
-      <Icon
-        type={iconTypeFromName(name)}
-        modifier="fw"
-        classes={{ icon: 'spaced' }}
-      >
-        {isLinkedFile ? (
-          <Icon
-            type="external-link-square"
-            modifier="rotate-180"
-            classes={{ icon: 'linked-file-highlight' }}
-            accessibilityLabel={t('linked_file')}
-          />
-        ) : null}
-      </Icon>
-    </>
-  )
   return (
     <li
       role="treeitem"
@@ -42,7 +22,7 @@ function FileTreeDoc({ name, id, isLinkedFile }) {
         id={id}
         name={name}
         isSelected={isSelected}
-        icons={icons}
+        icons={<FileTreeIcon isLinkedFile={isLinkedFile} name={name} />}
       />
     </li>
   )
@@ -51,6 +31,31 @@ function FileTreeDoc({ name, id, isLinkedFile }) {
 FileTreeDoc.propTypes = {
   name: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
+  isLinkedFile: PropTypes.bool,
+}
+
+export const FileTreeIcon = ({ isLinkedFile, name }) => {
+  const { t } = useTranslation()
+
+  const className = classnames('spaced', { 'linked-file-icon': isLinkedFile })
+
+  return (
+    <>
+      &nbsp;
+      <Icon type={iconTypeFromName(name)} fw className={className} />
+      {isLinkedFile && (
+        <Icon
+          type="external-link-square"
+          modifier="rotate-180"
+          className="linked-file-highlight"
+          accessibilityLabel={t('linked_file')}
+        />
+      )}
+    </>
+  )
+}
+FileTreeIcon.propTypes = {
+  name: PropTypes.string.isRequired,
   isLinkedFile: PropTypes.bool,
 }
 

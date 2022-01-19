@@ -40,7 +40,7 @@ function PdfHybridLogsButton() {
         style={{ position: 'relative' }}
         aria-label={showLogs ? t('view_pdf') : t('view_logs')}
       >
-        <Icon type="file-text-o" modifier="fw" />
+        <Icon type="file-text-o" fw />
 
         {!showLogs && totalCount > 0 && (
           <Label bsStyle={errorCount === 0 ? 'warning' : 'danger'}>

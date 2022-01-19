@@ -57,7 +57,7 @@ const OutlinePane = React.memo(function OutlinePane({
         >
           <Icon
             type={isOpen ? 'angle-down' : 'angle-right'}
-            classes={{ icon: 'outline-caret-icon' }}
+            className="outline-caret-icon"
           />
           <h4 className="outline-header-name">{t('file_outline')}</h4>
         </button>

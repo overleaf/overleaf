@@ -13,7 +13,7 @@ function HistoryToggleButton({ historyIsOpen, onClick }) {
   return (
     <div className="toolbar-item">
       <button className={classes} onClick={onClick}>
-        <Icon type="fw" modifier="history" />
+        <Icon type="history" fw />
         <p className="toolbar-label">{t('history')}</p>
       </button>
     </div>

@@ -42,25 +42,21 @@ function FileTreeToolbarLeft() {
         description={t('new_file')}
         onClick={startCreatingDocOrFile}
       >
-        <Icon type="file" modifier="fw" accessibilityLabel={t('new_file')} />
+        <Icon type="file" fw accessibilityLabel={t('new_file')} />
       </TooltipButton>
       <TooltipButton
         id="new_folder"
         description={t('new_folder')}
         onClick={startCreatingFolder}
       >
-        <Icon
-          type="folder"
-          modifier="fw"
-          accessibilityLabel={t('new_folder')}
-        />
+        <Icon type="folder" fw accessibilityLabel={t('new_folder')} />
       </TooltipButton>
       <TooltipButton
         id="upload"
         description={t('upload')}
         onClick={startUploadingDocOrFile}
       >
-        <Icon type="upload" modifier="fw" accessibilityLabel={t('upload')} />
+        <Icon type="upload" fw accessibilityLabel={t('upload')} />
       </TooltipButton>
     </div>
   )
@@ -83,7 +79,7 @@ function FileTreeToolbarRight() {
           description={t('rename')}
           onClick={startRenaming}
         >
-          <Icon type="pencil" modifier="fw" accessibilityLabel={t('rename')} />
+          <Icon type="pencil" fw accessibilityLabel={t('rename')} />
         </TooltipButton>
       ) : null}
       {canDelete ? (
@@ -92,7 +88,7 @@ function FileTreeToolbarRight() {
           description={t('delete')}
           onClick={startDeleting}
         >
-          <Icon type="trash-o" modifier="fw" accessibilityLabel={t('delete')} />
+          <Icon type="trash-o" fw accessibilityLabel={t('delete')} />
         </TooltipButton>
       ) : null}
     </div>

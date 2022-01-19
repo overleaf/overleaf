@@ -22,7 +22,9 @@ export default function WordCountModalContent({ handleHide }) {
       <Modal.Body>
         {loading && !error && (
           <div className="loading">
-            <Icon type="refresh" spin modifier="fw" /> &nbsp; {t('loading')}…
+            <Icon type="refresh" spin fw />
+            &nbsp;
+            {t('loading')}…
           </div>
         )}
 

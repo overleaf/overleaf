@@ -10,6 +10,7 @@ import { useProjectContext } from '../../../shared/context/project-context'
 
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
+import { LinkedFileIcon } from './file-view-icons'
 const tprLinkedFileInfo = importOverleafModules('tprLinkedFileInfo')
 const tprLinkedFileRefreshError = importOverleafModules(
   'tprLinkedFileRefreshError'
@@ -120,7 +121,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
           onClick={refreshFile}
           disabled={refreshing}
         >
-          <Icon type="refresh" spin={refreshing} modifier="fw" />
+          <Icon type="refresh" spin={refreshing} fw />
           <span>{refreshing ? t('refreshing') + '...' : t('refresh')}</span>
         </button>
       )}
@@ -129,7 +130,7 @@ export default function FileViewHeader({ file, storeReferencesKeys }) {
         href={`/project/${projectId}/file/${file.id}`}
         className="btn btn-info"
       >
-        <Icon type="download" modifier="fw" />
+        <Icon type="download" fw />
         &nbsp;
         <span>{t('download')}</span>
       </a>
@@ -162,11 +163,7 @@ FileViewHeader.propTypes = {
 function UrlProvider({ file }) {
   return (
     <p>
-      <Icon
-        type="external-link-square"
-        modifier="rotate-180"
-        classes={{ icon: 'linked-file-icon' }}
-      />
+      <LinkedFileIcon />
       &nbsp;
       <Trans
         i18nKey="imported_from_external_provider_at_date"
@@ -195,11 +192,7 @@ function ProjectFilePathProvider({ file }) {
   /* eslint-disable jsx-a11y/anchor-has-content, react/jsx-key */
   return (
     <p>
-      <Icon
-        type="external-link-square"
-        modifier="rotate-180"
-        classes={{ icon: 'linked-file-icon' }}
-      />
+      <LinkedFileIcon />
       &nbsp;
       <Trans
         i18nKey="imported_from_another_project_at_date"
@@ -235,11 +228,7 @@ ProjectFilePathProvider.propTypes = {
 function ProjectOutputFileProvider({ file }) {
   return (
     <p>
-      <Icon
-        type="external-link-square"
-        modifier="rotate-180"
-        classes={{ icon: 'linked-file-icon' }}
-      />
+      <LinkedFileIcon />
       &nbsp;
       <Trans
         i18nKey="imported_from_the_output_of_another_project_at_date"

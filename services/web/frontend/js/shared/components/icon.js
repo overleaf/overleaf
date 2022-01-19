@@ -1,32 +1,40 @@
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
+/**
+ * @param {string} type
+ * @param {boolean} [spin]
+ * @param {boolean} [fw]
+ * @param {string} [modifier]
+ * @param {string} [className]
+ * @param {string} [accessibilityLabel]
+ * @return {JSX.Element}
+ */
 function Icon({
   type,
   spin,
+  fw,
   modifier,
-  classes = {},
+  className = '',
   accessibilityLabel,
-  children,
 }) {
   const iconClassName = classNames(
     'fa',
     `fa-${type}`,
     {
       'fa-spin': spin,
+      'fa-fw': fw,
       [`fa-${modifier}`]: modifier,
     },
-    classes.icon
+    className
   )
 
   return (
     <>
-      <i className={iconClassName} aria-hidden="true">
-        {children}
-      </i>
-      {accessibilityLabel ? (
+      <i className={iconClassName} aria-hidden="true" />
+      {accessibilityLabel && (
         <span className="sr-only">{accessibilityLabel}</span>
-      ) : null}
+      )}
     </>
   )
 }
@@ -34,15 +42,10 @@ function Icon({
 Icon.propTypes = {
   type: PropTypes.string.isRequired,
   spin: PropTypes.bool,
+  fw: PropTypes.bool,
   modifier: PropTypes.string,
-  classes: PropTypes.exact({
-    icon: PropTypes.string,
-  }),
+  className: PropTypes.string,
   accessibilityLabel: PropTypes.string,
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]),
 }
 
 export default Icon

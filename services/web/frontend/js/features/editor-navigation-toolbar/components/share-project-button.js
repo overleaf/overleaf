@@ -8,7 +8,7 @@ function ShareProjectButton({ onClick }) {
   return (
     <div className="toolbar-item">
       <button className="btn btn-full-height" onClick={onClick}>
-        <Icon type="fw" modifier="group" />
+        <Icon type="group" fw />
         <p className="toolbar-label">{t('share')}</p>
       </button>
     </div>

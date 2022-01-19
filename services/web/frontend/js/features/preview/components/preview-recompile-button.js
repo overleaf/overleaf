@@ -104,33 +104,33 @@ function PreviewRecompileButton({
       <Dropdown.Menu>
         <MenuItem header>{t('auto_compile')}</MenuItem>
         <MenuItem onSelect={handleSelectAutoCompileOn}>
-          <Icon type={isAutoCompileOn ? 'check' : ''} modifier="fw" />
+          <Icon type={isAutoCompileOn ? 'check' : ''} fw />
           {t('on')}
         </MenuItem>
         <MenuItem onSelect={handleSelectAutoCompileOff}>
-          <Icon type={!isAutoCompileOn ? 'check' : ''} modifier="fw" />
+          <Icon type={!isAutoCompileOn ? 'check' : ''} fw />
           {t('off')}
         </MenuItem>
         <MenuItem header>{t('compile_mode')}</MenuItem>
         <MenuItem onSelect={handleSelectDraftModeOff}>
-          <Icon type={!isDraftModeOn ? 'check' : ''} modifier="fw" />
+          <Icon type={!isDraftModeOn ? 'check' : ''} fw />
           {t('normal')}
         </MenuItem>
         <MenuItem onSelect={handleSelectDraftModeOn}>
-          <Icon type={isDraftModeOn ? 'check' : ''} modifier="fw" />
+          <Icon type={isDraftModeOn ? 'check' : ''} fw />
           {t('fast')} <span className="subdued">[draft]</span>
         </MenuItem>
         <MenuItem header>Syntax Checks</MenuItem>
         <MenuItem onSelect={handleSelectSyntaxCheckOn}>
-          <Icon type={isSyntaxCheckOn ? 'check' : ''} modifier="fw" />
+          <Icon type={isSyntaxCheckOn ? 'check' : ''} fw />
           {t('stop_on_validation_error')}
         </MenuItem>
         <MenuItem onSelect={handleSelectSyntaxCheckOff}>
-          <Icon type={!isSyntaxCheckOn ? 'check' : ''} modifier="fw" />
+          <Icon type={!isSyntaxCheckOn ? 'check' : ''} fw />
           {t('ignore_validation_errors')}
         </MenuItem>
         <MenuItem onSelect={onRunSyntaxCheckNow}>
-          <Icon type="" modifier="fw" />
+          <Icon type="" fw />
           {t('run_syntax_check_now')}
         </MenuItem>
         <MenuItem className={!isCompiling ? 'hidden' : ''} divider />

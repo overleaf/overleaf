@@ -171,13 +171,20 @@
       i.fa {
         color: @file-tree-item-icon-color;
         font-size: 14px;
-        &.linked-file-highlight {
+      }
+
+      i.fa.linked-file-icon {
+        position: relative;
+        left: -2px;
+
+        + .linked-file-highlight {
           & {
             color: white;
           }
           position: relative;
           top: 4px;
-          left: -8px;
+          width: 0;
+          left: -2px;
           font-size: 12px;
         }
       }
@@ -227,7 +234,7 @@
             .entity-menu-toggle i.fa {
               color: #fff;
             }
-            > i.fa i.linked-file-highlight {
+            > i.linked-file-highlight {
               color: @blue;
             }
             color: #fff;
@@ -296,7 +303,7 @@
           .entity-menu-toggle i.fa {
             color: @file-tree-item-selected-color;
           }
-          > i.fa i.linked-file-highlight {
+          > i.linked-file-highlight {
             color: @blue;
           }
           background-color: @file-tree-item-selected-bg;
