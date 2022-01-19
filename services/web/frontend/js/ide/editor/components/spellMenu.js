@@ -29,8 +29,8 @@ ng-class="{open: $ctrl.open, 'spell-check-menu-from-bottom': $ctrl.layoutFromBot
 >
 <ul class="dropdown-menu">
   <li ng-repeat="suggestion in $ctrl.highlight.suggestions | limitTo:8">
-    <a
-      href
+    <button
+      class="btn-link text-left dropdown-menu-button"
       ng-click="$ctrl.replaceWord({ highlight: $ctrl.highlight, suggestion: suggestion })"
     >
       {{ suggestion }}
