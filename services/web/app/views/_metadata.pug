@@ -100,7 +100,7 @@ if (metadata && metadata.openGraphVideo)
 	meta(property="og:video", content=metadata.openGraphVideo)
 
 //- Viewport
-if metadata && metadata.viewport
+if !metadata || metadata.viewport !== false
 	meta(name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes")
 
 //- Noindex

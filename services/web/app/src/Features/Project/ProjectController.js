@@ -587,6 +587,7 @@ const ProjectController = {
             reconfirmedViaSAML,
             zipFileSizeLimit: Settings.maxUploadSize,
             isOverleaf: !!Settings.overleaf,
+            metadata: { viewport: false },
           }
 
           const paidUser =
@@ -962,6 +963,7 @@ const ProjectController = {
                 Boolean(Settings.resetServiceWorker) &&
                 !shouldDisplayFeature('enable_pdf_caching', false),
               detachRole,
+              metadata: { viewport: false },
             })
             timer.done()
           }

@@ -1,8 +1,5 @@
 extends ../../layout
 
-block vars
-	- metadata = { viewport: true }
-
 block content
 
 	script(type="template", id="overleaf-token-access-data")!= StringHelper.stringifyJsonForScript({ postUrl: postUrl, csrfToken: csrfToken})
