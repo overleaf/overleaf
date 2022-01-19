@@ -399,6 +399,7 @@ const UserUpdater = {
 const promises = {
   addAffiliationForNewUser: promisify(UserUpdater.addAffiliationForNewUser),
   addEmailAddress,
+  clearSAMLData,
   confirmEmail,
   setDefaultEmailAddress,
   updateUser: promisify(UserUpdater.updateUser),

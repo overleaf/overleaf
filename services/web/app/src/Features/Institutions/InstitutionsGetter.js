@@ -1,4 +1,4 @@
-const { callbackify } = require('util')
+const { promisify, callbackify } = require('util')
 const UserGetter = require('../User/UserGetter')
 const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
 const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEntityConfigs')
@@ -80,6 +80,7 @@ const InstitutionsGetter = {
 InstitutionsGetter.promises = {
   getCurrentInstitutionIds,
   getCurrentInstitutionsWithLicence,
+  getManagedInstitutions: promisify(InstitutionsGetter.getManagedInstitutions),
 }
 
 module.exports = InstitutionsGetter

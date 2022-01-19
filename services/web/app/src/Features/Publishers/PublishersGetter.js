@@ -15,6 +15,7 @@
 let PublishersGetter
 const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
 const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEntityConfigs')
+const { promisifyAll } = require('../../util/promises')
 const logger = require('@overleaf/logger')
 const _ = require('underscore')
 
@@ -30,3 +31,5 @@ module.exports = PublishersGetter = {
     )
   },
 }
+
+module.exports.promises = promisifyAll(PublishersGetter)
