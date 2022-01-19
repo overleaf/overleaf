@@ -114,6 +114,10 @@ export default class PDFJSWrapper {
 
   // update the current scale value if the container size changes
   updateOnResize() {
+    if (!this.isVisible()) {
+      return
+    }
+
     const currentScaleValue = this.viewer.currentScaleValue
 
     if (
