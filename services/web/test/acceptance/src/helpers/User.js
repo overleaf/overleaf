@@ -104,29 +104,37 @@ class User {
       if (error != null) {
         return callback(error)
       }
-      this.getCsrfToken(error => {
-        if (error != null) {
-          return callback(error)
-        }
-        this.request.post(
-          {
-            url: settings.enableLegacyLogin ? '/login/legacy' : '/login',
-            json: { email, password: this.password },
-          },
-          (error, response, body) => {
-            if (error != null) {
-              return callback(error)
-            }
-            // get new csrf token, then return result of login
-            this.getCsrfToken(err => {
-              if (err) {
-                return callback(err)
-              }
-              callback(null, response, body)
-            })
+      this.loginWithEmailPassword(email, this.password, callback)
+    })
+  }
+
+  loginNoUpdate(callback) {
+    this.loginWithEmailPassword(this.email, this.password, callback)
+  }
+
+  loginWithEmailPassword(email, password, callback) {
+    this.getCsrfToken(error => {
+      if (error != null) {
+        return callback(error)
+      }
+      this.request.post(
+        {
+          url: settings.enableLegacyLogin ? '/login/legacy' : '/login',
+          json: { email, password: password },
+        },
+        (error, response, body) => {
+          if (error != null) {
+            return callback(error)
           }
-        )
-      })
+          // get new csrf token, then return result of login
+          this.getCsrfToken(err => {
+            if (err) {
+              return callback(err)
+            }
+            callback(null, response, body)
+          })
+        }
+      )
     })
   }
 

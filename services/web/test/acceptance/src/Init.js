@@ -12,6 +12,7 @@ const MockProjectHistoryApi = require('./mocks/MockProjectHistoryApi')
 const MockSpellingApi = require('./mocks/MockSpellingApi')
 const MockV1Api = require('./mocks/MockV1Api')
 const MockV1HistoryApi = require('./mocks/MockV1HistoryApi')
+const MockHaveIBeenPwnedApi = require('./mocks/MockHaveIBeenPwnedApi')
 
 const mockOpts = {
   debug: ['1', 'true', 'TRUE'].includes(process.env.DEBUG_MOCKS),
@@ -24,6 +25,7 @@ MockDocUpdaterApi.initialize(3003, mockOpts)
 MockFilestoreApi.initialize(3009, mockOpts)
 MockNotificationsApi.initialize(3042, mockOpts)
 MockSpellingApi.initialize(3005, mockOpts)
+MockHaveIBeenPwnedApi.initialize(1337, mockOpts)
 
 if (Features.hasFeature('saas')) {
   MockAnalyticsApi.initialize(3050, mockOpts)

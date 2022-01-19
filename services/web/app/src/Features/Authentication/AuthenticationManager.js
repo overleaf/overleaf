@@ -8,6 +8,7 @@ const {
   InvalidPasswordError,
 } = require('./AuthenticationErrors')
 const util = require('util')
+const HaveIBeenPwned = require('./HaveIBeenPwned')
 
 const BCRYPT_ROUNDS = Settings.security.bcryptRounds || 12
 const BCRYPT_MINOR_VERSION = Settings.security.bcryptMinorVersion || 'a'
@@ -49,6 +50,7 @@ const AuthenticationManager = {
               return callback(err)
             }
             callback(null, user)
+            HaveIBeenPwned.checkPasswordForReuseInBackground(password)
           }
         )
       })
@@ -183,6 +185,7 @@ const AuthenticationManager = {
             return callback(updateError)
           }
           _checkWriteResult(result, callback)
+          HaveIBeenPwned.checkPasswordForReuseInBackground(password)
         }
       )
     })

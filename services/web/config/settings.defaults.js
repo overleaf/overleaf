@@ -216,6 +216,13 @@ module.exports = {
       url: `http://${process.env.WEBPACK_HOST || 'localhost'}:3808`,
     },
 
+    haveIBeenPwned: {
+      enabled: process.env.HAVE_I_BEEN_PWNED_ENABLED === 'true',
+      url:
+        process.env.HAVE_I_BEEN_PWNED_URL || 'https://api.pwnedpasswords.com',
+      timeout: parseInt(process.env.HAVE_I_BEEN_PWNED_TIMEOUT, 10) || 5 * 1000,
+    },
+
     // For legacy reasons, we need to populate the below objects.
     v1: {},
     recurly: {},

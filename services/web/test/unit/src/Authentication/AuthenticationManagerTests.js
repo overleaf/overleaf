@@ -23,6 +23,9 @@ describe('AuthenticationManager', function () {
         '@overleaf/settings': this.settings,
         '../User/UserGetter': (this.UserGetter = {}),
         './AuthenticationErrors': AuthenticationErrors,
+        './HaveIBeenPwned': {
+          checkPasswordForReuseInBackground: sinon.stub(),
+        },
       },
     })
     this.callback = sinon.stub()

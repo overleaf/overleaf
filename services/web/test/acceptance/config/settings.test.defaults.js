@@ -33,6 +33,11 @@ module.exports = {
       user: httpAuthUser,
       pass: httpAuthPass,
     },
+
+    haveIBeenPwned: {
+      enabled: true,
+      url: 'http://localhost:1337',
+    },
   },
 
   // for registration via SL, set enableLegacyRegistration to true
