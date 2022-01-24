@@ -63,7 +63,7 @@ async function sendSubscriptionStartedEvent(eventData) {
 
   // send the trial onboarding email
   if (isTrial) {
-    const assignment = await SplitTestHandler.promises.getAssignment(
+    const assignment = await SplitTestHandler.promises.getAssignmentForUser(
       userId,
       'trial-onboarding-email'
     )

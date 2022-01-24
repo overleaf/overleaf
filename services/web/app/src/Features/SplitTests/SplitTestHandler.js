@@ -41,7 +41,7 @@ const DEFAULT_ASSIGNMENT = {
  * @param options {Object<sync: boolean>} - for test purposes only, to force the synchronous update of the user's profile
  * @returns {Promise<{variant: string, analytics: {segmentation: {splitTest: string, variant: string, phase: string, versionNumber: number}|{}}}>}
  */
-async function getAssignment(req, splitTestName, options) {
+async function getAssignment(req, splitTestName, { sync = false } = {}) {
   const query = req.query || {}
   if (query[splitTestName]) {
     return {
@@ -54,13 +54,30 @@ async function getAssignment(req, splitTestName, options) {
   const { userId, analyticsId } = AnalyticsManager.getIdsFromSession(
     req.session
   )
-  return _getAssignment(
+  return _getAssignment(splitTestName, {
     analyticsId,
     userId,
-    req.session,
-    splitTestName,
-    options
-  )
+    session: req.session,
+    sync,
+  })
+}
+
+/**
+ * Get the assignment of a user to a split test by their user ID.
+ *
+ * Warning: this does not support query parameters override. Wherever possible, `getAssignment` should be used instead.
+ *
+ * @param userId the user ID
+ * @param splitTestName the unique name of the split test
+ * @param options {Object<sync: boolean>} - for test purposes only, to force the synchronous update of the user's profile
+ * @returns {Promise<{variant: string, analytics: {segmentation: {splitTest: string, variant: string, phase: string, versionNumber: number}|{}}}>}
+ */
+async function getAssignmentForUser(
+  userId,
+  splitTestName,
+  { sync = false } = {}
+) {
+  return _getAssignment(splitTestName, { userId, sync })
 }
 
 /**
@@ -72,8 +89,13 @@ async function getAssignment(req, splitTestName, options) {
  * @param options {Object<sync: boolean>} - for test purposes only, to force the synchronous update of the user's profile
  * @returns {Promise<void>}
  */
-async function assignInLocalsContext(req, res, splitTestName, options) {
-  const assignment = await getAssignment(req, splitTestName, options)
+async function assignInLocalsContext(
+  req,
+  res,
+  splitTestName,
+  { sync = false } = {}
+) {
+  const assignment = await getAssignment(req, splitTestName, { sync })
   LocalsHelper.setSplitTestVariant(
     res.locals,
     splitTestName,
@@ -82,48 +104,49 @@ async function assignInLocalsContext(req, res, splitTestName, options) {
 }
 
 async function _getAssignment(
-  analyticsId,
-  userId,
-  session,
   splitTestName,
-  options
+  { analyticsId, userId, session, sync }
 ) {
   if (!analyticsId && !userId) {
     return DEFAULT_ASSIGNMENT
   }
+
   const splitTest = await splitTestCache.get(splitTestName)
-  if (splitTest) {
-    const currentVersion = splitTest.getCurrentVersion()
+  const currentVersion = splitTest?.getCurrentVersion()
+  if (!splitTest || !currentVersion?.active) {
+    return DEFAULT_ASSIGNMENT
+  }
+
+  if (session) {
     const cachedVariant = _getCachedVariantFromSession(
       session,
       splitTest.name,
       currentVersion
     )
-    if (currentVersion.active) {
-      if (cachedVariant) {
-        return _makeAssignment(splitTest, cachedVariant, currentVersion)
-      }
-      const { activeForUser, selectedVariantName, phase, versionNumber } =
-        await _getAssignmentMetadata(analyticsId, userId, splitTest)
-      if (activeForUser) {
-        const assignmentConfig = {
-          userId,
-          analyticsId,
-          session,
-          splitTestName,
-          variantName: selectedVariantName,
-          phase,
-          versionNumber,
-        }
-        if (options && options.sync === true) {
-          await _updateVariantAssignment(assignmentConfig)
-        } else {
-          _updateVariantAssignment(assignmentConfig)
-        }
-        return _makeAssignment(splitTest, selectedVariantName, currentVersion)
-      }
+    if (cachedVariant) {
+      return _makeAssignment(splitTest, cachedVariant, currentVersion)
     }
   }
+  const { activeForUser, selectedVariantName, phase, versionNumber } =
+    await _getAssignmentMetadata(analyticsId, userId, splitTest)
+  if (activeForUser) {
+    const assignmentConfig = {
+      userId,
+      analyticsId,
+      session,
+      splitTestName,
+      variantName: selectedVariantName,
+      phase,
+      versionNumber,
+    }
+    if (sync === true) {
+      await _updateVariantAssignment(assignmentConfig)
+    } else {
+      _updateVariantAssignment(assignmentConfig)
+    }
+    return _makeAssignment(splitTest, selectedVariantName, currentVersion)
+  }
+
   return DEFAULT_ASSIGNMENT
 }
 
@@ -147,7 +170,11 @@ async function _getAssignmentMetadata(analyticsId, userId, splitTest) {
       }
     }
   }
-  const percentile = _getPercentile(analyticsId, splitTest.name, phase)
+  const percentile = _getPercentile(
+    analyticsId || userId,
+    splitTest.name,
+    phase
+  )
   const selectedVariantName = _getVariantFromPercentile(
     currentVersion.variants,
     percentile
@@ -210,7 +237,7 @@ async function _updateVariantAssignment({
           },
         })
         AnalyticsManager.setUserPropertyForAnalyticsId(
-          analyticsId,
+          user.analyticsId || analyticsId || userId,
           `split-test-${splitTestName}-${versionNumber}`,
           variantName
         )
@@ -276,9 +303,11 @@ async function _getUser(id) {
 
 module.exports = {
   getAssignment: callbackify(getAssignment),
+  getAssignmentForUser: callbackify(getAssignmentForUser),
   assignInLocalsContext: callbackify(assignInLocalsContext),
   promises: {
     getAssignment,
+    getAssignmentForUser,
     assignInLocalsContext,
   },
 }
