@@ -29,7 +29,7 @@ describe('RecurlyEventHandler', function () {
         './SubscriptionEmailHandler': (this.SubscriptionEmailHandler = {
           sendTrialOnboardingEmail: sinon.stub(),
         }),
-        '../SplitTests/SplitTestV2Handler': (this.SplitTestV2Handler = {
+        '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
           promises: {
             getAssignment: sinon.stub().resolves({ active: false }),
           },
@@ -76,14 +76,14 @@ describe('RecurlyEventHandler', function () {
       true
     )
     sinon.assert.calledWith(
-      this.SplitTestV2Handler.promises.getAssignment,
+      this.SplitTestHandler.promises.getAssignment,
       this.userId,
       'trial-onboarding-email'
     )
   })
 
   it('sends free trial onboarding email if user in ab group', async function () {
-    this.SplitTestV2Handler.promises.getAssignment = sinon
+    this.SplitTestHandler.promises.getAssignment = sinon
       .stub()
       .resolves({ active: true, variant: 'send-email' })
     this.userId = '123456789trial'
@@ -94,7 +94,7 @@ describe('RecurlyEventHandler', function () {
     await this.RecurlyEventHandler.sendSubscriptionStartedEvent(this.eventData)
 
     sinon.assert.calledWith(
-      this.SplitTestV2Handler.promises.getAssignment,
+      this.SplitTestHandler.promises.getAssignment,
       this.userId,
       'trial-onboarding-email'
     )

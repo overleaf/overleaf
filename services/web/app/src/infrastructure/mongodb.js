@@ -62,6 +62,7 @@ async function setupDb() {
   db.samlCache = internalDb.collection('samlCache')
   db.samlLogs = internalDb.collection('samlLogs')
   db.spellingPreferences = internalDb.collection('spellingPreferences')
+  db.splittests = internalDb.collection('splittests')
   db.subscriptions = internalDb.collection('subscriptions')
   db.systemmessages = internalDb.collection('systemmessages')
   db.tags = internalDb.collection('tags')

@@ -1,5 +1,5 @@
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const SplitTestV2Handler = require('../SplitTests/SplitTestV2Handler')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionEmailHandler = require('./SubscriptionEmailHandler')
 
 function sendRecurlyAnalyticsEvent(event, eventData) {
@@ -63,7 +63,7 @@ async function sendSubscriptionStartedEvent(eventData) {
 
   // send the trial onboarding email
   if (isTrial) {
-    const assignment = await SplitTestV2Handler.promises.getAssignment(
+    const assignment = await SplitTestHandler.promises.getAssignment(
       userId,
       'trial-onboarding-email'
     )

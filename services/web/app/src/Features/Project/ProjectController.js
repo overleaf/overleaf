@@ -37,7 +37,7 @@ const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandle
 const UserController = require('../User/UserController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Modules = require('../../infrastructure/Modules')
-const SplitTestV2Handler = require('../SplitTests/SplitTestV2Handler')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const { getNewLogsUIVariantForUser } = require('../Helpers/NewLogsUI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const SpellingHandler = require('../Spelling/SpellingHandler')
@@ -607,10 +607,7 @@ const ProjectController = {
           }
 
           // null test targeting logged in users
-          SplitTestV2Handler.promises.getAssignmentForSession(
-            req.session,
-            'null-test-dashboard'
-          )
+          SplitTestHandler.promises.getAssignment(req, 'null-test-dashboard')
 
           res.render('project/list', viewModel)
           timer.done()
@@ -737,9 +734,9 @@ const ProjectController = {
           TpdsProjectFlusher.flushProjectToTpdsIfNeeded(projectId, cb)
         },
         sharingModalSplitTest(cb) {
-          SplitTestV2Handler.assignInLocalsContextForSession(
+          SplitTestHandler.assignInLocalsContext(
+            req,
             res,
-            req.session,
             'project-share-modal-paywall',
             {},
             () => {
@@ -750,9 +747,9 @@ const ProjectController = {
         },
         sharingModalNullTest(cb) {
           // null test targeting logged in users, for front-end side
-          SplitTestV2Handler.assignInLocalsContextForSession(
+          SplitTestHandler.assignInLocalsContext(
+            req,
             res,
-            req.session,
             'null-test-share-modal',
             {},
             () => {
@@ -762,8 +759,8 @@ const ProjectController = {
           )
         },
         newPdfPreviewAssignment(cb) {
-          SplitTestV2Handler.getAssignmentForSession(
-            req.session,
+          SplitTestHandler.getAssignment(
+            req,
             'react-pdf-preview-rollout',
             {},
             (error, assignment) => {

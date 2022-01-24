@@ -133,12 +133,12 @@ describe('SubscriptionController', function () {
     }
     this.SplitTestV2Hander = {
       promises: {
-        getAssignmentForSession: sinon.stub().resolves({ variant: 'default' }),
+        getAssignment: sinon.stub().resolves({ variant: 'default' }),
       },
     }
     this.SubscriptionController = SandboxedModule.require(modulePath, {
       requires: {
-        '../SplitTests/SplitTestV2Handler': this.SplitTestV2Hander,
+        '../SplitTests/SplitTestHandler': this.SplitTestV2Hander,
         '../Authentication/SessionManager': this.SessionManager,
         './SubscriptionHandler': this.SubscriptionHandler,
         './PlansLocator': this.PlansLocator,
@@ -162,9 +162,6 @@ describe('SubscriptionController', function () {
           recordEventForUser: sinon.stub(),
           recordEventForSession: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
-        }),
-        '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
-          getTestSegmentation: () => {},
         }),
       },
     })

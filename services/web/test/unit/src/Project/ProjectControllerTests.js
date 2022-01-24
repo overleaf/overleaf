@@ -130,27 +130,11 @@ describe('ProjectController', function () {
     }
     this.SplitTestHandler = {
       promises: {
-        getTestSegmentation: sinon.stub().resolves({ enabled: false }),
-      },
-      getTestSegmentation: sinon.stub().yields(null, { enabled: false }),
-    }
-    this.SplitTestV2Handler = {
-      promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
-        getAssignmentForSession: sinon.stub().resolves({ variant: 'default' }),
         assignInLocalsContext: sinon.stub().resolves({ variant: 'default' }),
-        assignInLocalsContextForSession: sinon
-          .stub()
-          .resolves({ variant: 'default' }),
       },
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
-      getAssignmentForSession: sinon
-        .stub()
-        .yields(null, { variant: 'default' }),
       assignInLocalsContext: sinon.stub().yields(null, { variant: 'default' }),
-      assignInLocalsContextForSession: sinon
-        .stub()
-        .yields(null, { variant: 'default' }),
     }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
@@ -159,7 +143,6 @@ describe('ProjectController', function () {
         '@overleaf/settings': this.settings,
         '@overleaf/metrics': this.Metrics,
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
-        '../SplitTests/SplitTestV2Handler': this.SplitTestV2Handler,
         './ProjectDeleter': this.ProjectDeleter,
         './ProjectDuplicator': this.ProjectDuplicator,
         './ProjectCreationHandler': this.ProjectCreationHandler,
@@ -1126,21 +1109,6 @@ describe('ProjectController', function () {
     })
 
     describe('pdf caching feature flags', function () {
-      /* eslint-disable mocha/no-identical-title */
-      function showNoVariant() {
-        beforeEach(function () {
-          this.SplitTestHandler.getTestSegmentation = sinon
-            .stub()
-            .yields(null, { enabled: false })
-        })
-      }
-      function showVariant(variant) {
-        beforeEach(function () {
-          this.SplitTestHandler.getTestSegmentation = sinon
-            .stub()
-            .yields(null, { enabled: true, variant })
-        })
-      }
       function expectBandwidthTrackingEnabled() {
         it('should track pdf bandwidth', function (done) {
           this.res.render = (pageName, opts) => {
@@ -1177,158 +1145,9 @@ describe('ProjectController', function () {
           this.ProjectController.loadEditor(this.req, this.res)
         })
       }
-      function expectToCollectMetricsAndCachePDF() {
-        describe('with no query', function () {
-          expectBandwidthTrackingEnabled()
-          expectPDFCachingEnabled()
-        })
-
-        describe('with enable_pdf_caching=false', function () {
-          beforeEach(function () {
-            this.req.query.enable_pdf_caching = 'false'
-          })
-          expectBandwidthTrackingDisabled()
-          expectPDFCachingDisabled()
-        })
-
-        describe('with enable_pdf_caching=true', function () {
-          beforeEach(function () {
-            this.req.query.enable_pdf_caching = 'true'
-          })
-          expectBandwidthTrackingEnabled()
-          expectPDFCachingEnabled()
-        })
-      }
-      function expectToCollectMetricsOnly() {
-        describe('with no query', function () {
-          expectBandwidthTrackingEnabled()
-          expectPDFCachingDisabled()
-        })
-
-        describe('with enable_pdf_caching=false', function () {
-          beforeEach(function () {
-            this.req.query.enable_pdf_caching = 'false'
-          })
-          expectBandwidthTrackingDisabled()
-          expectPDFCachingDisabled()
-        })
-
-        describe('with enable_pdf_caching=true', function () {
-          beforeEach(function () {
-            this.req.query.enable_pdf_caching = 'true'
-          })
-          expectBandwidthTrackingEnabled()
-          expectPDFCachingDisabled()
-        })
-      }
-
-      function expectToCachePDFOnly() {
-        describe('with no query', function () {
-          expectBandwidthTrackingDisabled()
-          expectPDFCachingEnabled()
-        })
-
-        describe('with enable_pdf_caching=false', function () {
-          beforeEach(function () {
-            this.req.query.enable_pdf_caching = 'false'
-          })
-          expectBandwidthTrackingDisabled()
-          expectPDFCachingDisabled()
-        })
-
-        describe('with enable_pdf_caching=true', function () {
-          beforeEach(function () {
-            this.req.query.enable_pdf_caching = 'true'
-          })
-          expectBandwidthTrackingDisabled()
-          expectPDFCachingEnabled()
-        })
-      }
-
-      function expectToNotBeEnrolledAtAll() {
-        describe('with no query', function () {
-          expectBandwidthTrackingDisabled()
-          expectPDFCachingDisabled()
-        })
-
-        describe('with enable_pdf_caching=false', function () {
-          beforeEach(function () {
-            this.req.query.enable_pdf_caching = 'false'
-          })
-          expectBandwidthTrackingDisabled()
-          expectPDFCachingDisabled()
-        })
-
-        describe('with enable_pdf_caching=true', function () {
-          beforeEach(function () {
-            this.req.query.enable_pdf_caching = 'true'
-          })
-          expectBandwidthTrackingDisabled()
-          expectPDFCachingDisabled()
-        })
-      }
-
-      function tagAnonymous() {
-        beforeEach(function () {
-          this.SessionManager.isUserLoggedIn = sinon.stub().returns(false)
-        })
-      }
 
       beforeEach(function () {
         this.settings.enablePdfCaching = true
-      })
-
-      describe('during regular roll-out', function () {
-        before(function () {
-          this.skip()
-        })
-        describe('disabled', function () {
-          showNoVariant()
-
-          describe('regular user', function () {
-            expectToNotBeEnrolledAtAll()
-          })
-          describe('anonymous user', function () {
-            tagAnonymous()
-            expectToCachePDFOnly()
-          })
-        })
-
-        describe('variant=collect-metrics', function () {
-          showVariant('collect-metrics')
-
-          describe('regular user', function () {
-            expectToCollectMetricsOnly()
-          })
-          describe('anonymous user', function () {
-            tagAnonymous()
-            expectToCachePDFOnly()
-          })
-        })
-
-        describe('variant=collect-metrics-and-enable-caching', function () {
-          showVariant('collect-metrics-and-enable-caching')
-
-          describe('regular user', function () {
-            expectToCollectMetricsAndCachePDF()
-          })
-          describe('anonymous user', function () {
-            tagAnonymous()
-            expectToCachePDFOnly()
-          })
-        })
-
-        describe('variant=enable-caching-only', function () {
-          showVariant('enable-caching-only')
-
-          describe('regular user', function () {
-            expectToCachePDFOnly()
-          })
-          describe('anonymous user', function () {
-            tagAnonymous()
-            expectToCachePDFOnly()
-          })
-        })
       })
 
       describe('during opt-in only', function () {

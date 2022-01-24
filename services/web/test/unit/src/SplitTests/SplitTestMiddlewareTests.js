@@ -5,7 +5,6 @@ const modulePath = path.join(
   '../../../../app/src/Features/SplitTests/SplitTestMiddleware'
 )
 const sinon = require('sinon')
-const { assert } = require('chai')
 const MockResponse = require('../helpers/MockResponse')
 const MockRequest = require('../helpers/MockRequest')
 
@@ -13,75 +12,27 @@ describe('SplitTestMiddleware', function () {
   beforeEach(function () {
     this.SplitTestMiddleware = SandboxedModule.require(modulePath, {
       requires: {
-        './SplitTestV2Handler': (this.SplitTestV2Handler = {
+        './SplitTestHandler': (this.SplitTestHandler = {
           promises: {
-            getAssignmentForSession: sinon.stub().resolves(),
+            assignInLocalsContext: sinon.stub().resolves(),
           },
-        }),
-        './SplitTestCache': (this.SplitTestCache = {
-          get: sinon.stub().resolves(),
         }),
       },
     })
 
     this.req = new MockRequest()
-    this.req.session = {}
     this.res = new MockResponse()
     this.next = sinon.stub()
   })
 
-  it('assign split test variant in locals', async function () {
-    this.SplitTestCache.get.withArgs('ui-overhaul').resolves({
-      name: 'ui-overhaul',
-      getCurrentVersion: () => ({
-        versionNumber: 1,
-        active: true,
-      }),
-    })
-    this.SplitTestV2Handler.promises.getAssignmentForSession
-      .withArgs(this.req.session, 'ui-overhaul')
-      .resolves({
-        variant: 'new',
-      })
-
-    const middleware = this.SplitTestMiddleware.loadAssignmentsInLocals([
-      'ui-overhaul',
-    ])
-    await middleware(this.req, this.res, this.next)
-
-    assert.equal(this.res.locals.splitTestVariants['ui-overhaul'], 'new')
-    assert.deepEqual(this.req.session.cachedSplitTestAssignments, {
-      'ui-overhaul-1': 'new',
-    })
-    sinon.assert.calledOnce(this.next)
-  })
-
-  it('assign multiple split test variant in locals', async function () {
-    this.SplitTestCache.get
-      .withArgs('ui-overhaul')
-      .resolves({
-        name: 'ui-overhaul',
-        getCurrentVersion: () => ({
-          versionNumber: 1,
-          active: true,
-        }),
-      })
-      .withArgs('other-test')
-      .resolves({
-        name: 'other-test',
-        getCurrentVersion: () => ({
-          versionNumber: 1,
-          active: true,
-        }),
-      })
-
-    this.SplitTestV2Handler.promises.getAssignmentForSession
-      .withArgs(this.req.session, 'ui-overhaul')
+  it('assign multiple split test variants in locals', async function () {
+    this.SplitTestHandler.promises.assignInLocalsContext
+      .withArgs(this.req, 'ui-overhaul')
       .resolves({
         variant: 'default',
       })
-    this.SplitTestV2Handler.promises.getAssignmentForSession
-      .withArgs(this.req.session, 'other-test')
+    this.SplitTestHandler.promises.assignInLocalsContext
+      .withArgs(this.req, 'other-test')
       .resolves({
         variant: 'foobar',
       })
@@ -92,135 +43,47 @@ describe('SplitTestMiddleware', function () {
     ])
     await middleware(this.req, this.res, this.next)
 
-    assert.equal(this.res.locals.splitTestVariants['ui-overhaul'], 'default')
-    assert.equal(this.res.locals.splitTestVariants['other-test'], 'foobar')
-    assert.deepEqual(this.req.session.cachedSplitTestAssignments, {
-      'ui-overhaul-1': 'default',
-      'other-test-1': 'foobar',
-    })
-    sinon.assert.calledOnce(this.next)
-  })
-
-  it('variants are overridden in locals with query parameters', async function () {
-    this.SplitTestCache.get.withArgs('active-split-test').resolves({
-      name: 'active-split-test',
-      getCurrentVersion: () => ({
-        versionNumber: 1,
-        active: true,
-      }),
-    })
-
-    this.SplitTestV2Handler.promises.getAssignmentForSession
-      .withArgs(this.req.session, 'active-split-test')
-      .resolves({
-        variant: 'default',
-      })
-
-    const middleware = this.SplitTestMiddleware.loadAssignmentsInLocals([
-      'active-split-test',
-    ])
-
-    this.req.query['active-split-test'] = 'variant'
-
-    await middleware(this.req, this.res, this.next)
-
-    assert.equal(
-      this.res.locals.splitTestVariants['active-split-test'],
-      'variant'
+    sinon.assert.calledWith(
+      this.SplitTestHandler.promises.assignInLocalsContext,
+      this.req,
+      this.res,
+      'ui-overhaul'
     )
-    assert.deepEqual(this.req.session.cachedSplitTestAssignments, {}) // variants overriden using req.query are not cached
-    sinon.assert.calledOnce(this.next)
-  })
-
-  it('non-active split tests can be set in locals with query parameters', async function () {
-    const middleware = this.SplitTestMiddleware.loadAssignmentsInLocals([
-      'non-active-split-test',
-    ])
-
-    this.req.query['non-active-split-test'] = 'variant'
-
-    await middleware(this.req, this.res, this.next)
-
-    assert.equal(
-      this.res.locals.splitTestVariants['non-active-split-test'],
-      'variant'
+    sinon.assert.calledWith(
+      this.SplitTestHandler.promises.assignInLocalsContext,
+      this.req,
+      this.res,
+      'other-test'
     )
-    assert.deepEqual(this.req.session.cachedSplitTestAssignments, {}) // variants overriden using req.query are not cached
     sinon.assert.calledOnce(this.next)
   })
 
-  it('cached assignment in session is used', async function () {
-    this.req.session.cachedSplitTestAssignments = {
-      'ui-overhaul-1': 'cached-variant',
-    }
-    this.SplitTestCache.get.withArgs('ui-overhaul').resolves({
-      name: 'ui-overhaul',
-      getCurrentVersion: () => ({
-        versionNumber: 1,
-        active: true,
-      }),
-    })
+  it('assign no split test variant in locals', async function () {
+    const middleware = this.SplitTestMiddleware.loadAssignmentsInLocals([])
 
-    const middleware = this.SplitTestMiddleware.loadAssignmentsInLocals([
-      'ui-overhaul',
-    ])
     await middleware(this.req, this.res, this.next)
 
-    sinon.assert.notCalled(
-      this.SplitTestV2Handler.promises.getAssignmentForSession
-    )
-    assert.equal(
-      this.res.locals.splitTestVariants['ui-overhaul'],
-      'cached-variant'
-    )
-    assert.deepEqual(this.req.session.cachedSplitTestAssignments, {
-      'ui-overhaul-1': 'cached-variant',
-    })
+    sinon.assert.notCalled(this.SplitTestHandler.promises.assignInLocalsContext)
     sinon.assert.calledOnce(this.next)
   })
 
-  it('inactive split test is not assigned in locals', async function () {
-    this.SplitTestCache.get.withArgs('ui-overhaul').resolves({
-      name: 'ui-overhaul',
-      getCurrentVersion: () => ({
-        versionNumber: 1,
-        active: false,
-      }),
-    })
-
-    const middleware = this.SplitTestMiddleware.loadAssignmentsInLocals([
-      'ui-overhaul',
-    ])
-    await middleware(this.req, this.res, this.next)
-
-    assert.equal(this.res.locals.splitTestVariants, undefined)
-    assert.deepEqual(this.req.session.cachedSplitTestAssignments, {})
-    sinon.assert.calledOnce(this.next)
-  })
-
-  it('not existing split test is not assigned in locals', async function () {
-    this.SplitTestCache.get.withArgs('not-found').resolves(undefined)
-
-    const middleware = this.SplitTestMiddleware.loadAssignmentsInLocals([
-      'not-found',
-    ])
-    await middleware(this.req, this.res, this.next)
-
-    assert.equal(this.res.locals.splitTestVariants, undefined)
-    assert.deepEqual(this.req.session.cachedSplitTestAssignments, {})
-    sinon.assert.calledOnce(this.next)
-  })
-
-  it('next middleware is called even if there is an error', async function () {
-    this.SplitTestCache.get.throws('some error')
+  it('exception thrown by assignment does not fail the request', async function () {
+    this.SplitTestHandler.promises.assignInLocalsContext
+      .withArgs(this.req, this.res, 'some-test')
+      .throws(new Error('failure'))
 
     const middleware = this.SplitTestMiddleware.loadAssignmentsInLocals([
       'some-test',
     ])
+
     await middleware(this.req, this.res, this.next)
 
-    assert.equal(this.res.locals.splitTestVariants, undefined)
-    assert.deepEqual(this.req.session.cachedSplitTestAssignments, {})
+    sinon.assert.calledWith(
+      this.SplitTestHandler.promises.assignInLocalsContext,
+      this.req,
+      this.res,
+      'some-test'
+    )
     sinon.assert.calledOnce(this.next)
   })
 })

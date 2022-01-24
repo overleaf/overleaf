@@ -1,27 +1,15 @@
-const SplitTestV2Handler = require('./SplitTestV2Handler')
-const SplitTestCache = require('./SplitTestCache')
-const LocalsHelper = require('./LocalsHelper')
+const SplitTestHandler = require('./SplitTestHandler')
 const logger = require('@overleaf/logger')
 
 function loadAssignmentsInLocals(splitTestNames) {
   return async function (req, res, next) {
     try {
-      if (!req.session.cachedSplitTestAssignments) {
-        req.session.cachedSplitTestAssignments = {}
-      }
       for (const splitTestName of splitTestNames) {
-        if (req.query[splitTestName]) {
-          LocalsHelper.setSplitTestVariant(
-            res.locals,
-            splitTestName,
-            req.query[splitTestName]
-          )
-        } else {
-          const splitTest = await SplitTestCache.get(splitTestName)
-          if (splitTest) {
-            await _loadAssignmentInLocals(splitTest, req.session, res.locals)
-          }
-        }
+        await SplitTestHandler.promises.assignInLocalsContext(
+          req,
+          res,
+          splitTestName
+        )
       }
     } catch (error) {
       logger.error(
@@ -30,31 +18,6 @@ function loadAssignmentsInLocals(splitTestNames) {
       )
     }
     next()
-  }
-}
-
-async function _loadAssignmentInLocals(splitTest, session, locals) {
-  const currentVersion = splitTest.getCurrentVersion()
-  const cacheKey = `${splitTest.name}-${currentVersion.versionNumber}`
-  if (currentVersion.active) {
-    const cachedVariant = session.cachedSplitTestAssignments[cacheKey]
-    if (cachedVariant) {
-      LocalsHelper.setSplitTestVariant(locals, splitTest.name, cachedVariant)
-    } else {
-      const assignment =
-        await SplitTestV2Handler.promises.getAssignmentForSession(
-          session,
-          splitTest.name
-        )
-      session.cachedSplitTestAssignments[cacheKey] = assignment.variant
-      LocalsHelper.setSplitTestVariant(
-        locals,
-        splitTest.name,
-        assignment.variant
-      )
-    }
-  } else {
-    delete session.cachedSplitTestAssignments[cacheKey]
   }
 }
 
