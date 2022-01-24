@@ -1,9 +1,0 @@
-{
-  "presets": [
-    ["@babel/env", {
-      "targets": ["last 1 year", "ie 11", "firefox esr"],
-      "useBuiltIns": "usage",
-      "corejs": { "version": 3 }
-    }]
-  ]
-}
