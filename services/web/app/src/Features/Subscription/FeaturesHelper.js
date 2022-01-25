@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const Settings = require('@overleaf/settings')
 
 /**
  * Merge feature sets coming from different sources
@@ -96,4 +97,18 @@ function compareFeatures(currentFeatures, expectedFeatures) {
   return mismatchReasons
 }
 
-module.exports = { mergeFeatures, isFeatureSetBetter, compareFeatures }
+function getMatchedFeatureSet(features) {
+  for (const [name, featureSet] of Object.entries(Settings.features)) {
+    if (_.isEqual(features, featureSet)) {
+      return name
+    }
+  }
+  return 'mixed'
+}
+
+module.exports = {
+  mergeFeatures,
+  isFeatureSetBetter,
+  compareFeatures,
+  getMatchedFeatureSet,
+}

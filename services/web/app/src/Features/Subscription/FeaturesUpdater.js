@@ -41,7 +41,7 @@ async function refreshFeatures(userId, reason) {
   const features = await computeFeatures(userId)
   logger.log({ userId, features }, 'updating user features')
 
-  const matchedFeatureSet = _getMatchedFeatureSet(features)
+  const matchedFeatureSet = FeaturesHelper.getMatchedFeatureSet(features)
   AnalyticsManager.setUserPropertyForUser(
     userId,
     'feature-set',
@@ -187,15 +187,6 @@ async function doSyncFromV1(v1UserId) {
     '[AccountSync] updating user subscription and features'
   )
   return refreshFeatures(user._id, 'sync-v1')
-}
-
-function _getMatchedFeatureSet(features) {
-  for (const [name, featureSet] of Object.entries(Settings.features)) {
-    if (_.isEqual(features, featureSet)) {
-      return name
-    }
-  }
-  return 'mixed'
 }
 
 module.exports = {

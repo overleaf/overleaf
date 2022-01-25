@@ -105,15 +105,11 @@ describe('FeaturesUpdater', function () {
     this.Modules = {
       promises: { hooks: { fire: sinon.stub().resolves() } },
     }
-    this.FeaturesHelper = {
-      mergeFeatures: sinon.stub().callsFake((a, b) => ({ ...a, ...b })),
-    }
 
     this.FeaturesUpdater = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './UserFeaturesUpdater': this.UserFeaturesUpdater,
         './SubscriptionLocator': this.SubscriptionLocator,
-        './FeaturesHelper': this.FeaturesHelper,
         '@overleaf/settings': this.Settings,
         '../Referal/ReferalFeatures': this.ReferalFeatures,
         './V1SubscriptionManager': this.V1SubscriptionManager,

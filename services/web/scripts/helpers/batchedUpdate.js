@@ -95,8 +95,14 @@ async function batchedUpdate(
   return updated
 }
 
-function batchedUpdateWithResultHandling(collection, query, update) {
-  batchedUpdate(collection, query, update)
+function batchedUpdateWithResultHandling(
+  collection,
+  query,
+  update,
+  projection,
+  options
+) {
+  batchedUpdate(collection, query, update, projection, options)
     .then(updated => {
       console.error({ updated })
       process.exit(0)
