@@ -40,6 +40,9 @@ function formSubmitHelper(formEl) {
           text: data.message.text || data.message,
         })
       }
+
+      // Let the user re-submit the form.
+      formEl.dispatchEvent(new Event('idle'))
     } catch (error) {
       let text = error.message
       if (error instanceof FetchError) {
@@ -50,10 +53,11 @@ function formSubmitHelper(formEl) {
         key: error.data?.message?.key,
         text,
       })
+
+      // Let the user re-submit the form.
+      formEl.dispatchEvent(new Event('idle'))
     } finally {
       showMessages(formEl, messageBag)
-
-      formEl.dispatchEvent(new Event('idle'))
     }
   })
 }
