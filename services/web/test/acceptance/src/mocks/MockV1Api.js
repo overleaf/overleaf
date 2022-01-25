@@ -1,4 +1,5 @@
 const AbstractMockApi = require('./AbstractMockApi')
+const moment = require('moment')
 const sinon = require('sinon')
 
 class MockV1Api extends AbstractMockApi {
@@ -91,7 +92,7 @@ class MockV1Api extends AbstractMockApi {
     )
   }
 
-  addAffiliation(userId, email, entitlement) {
+  addAffiliation(userId, email, entitlement, confirmedAt) {
     let newAffiliation = true
     const institution = {}
     if (!email) return
@@ -130,6 +131,17 @@ class MockV1Api extends AbstractMockApi {
       this.affiliations[userId].forEach(affiliation => {
         if (affiliation.email === email) {
           affiliation.cached_entitlement = entitlement
+        }
+      })
+    }
+
+    if (confirmedAt) {
+      this.affiliations[userId].forEach(affiliation => {
+        if (affiliation.email === email) {
+          if (!affiliation.cached_confirmed_at) {
+            affiliation.cached_confirmed_at = confirmedAt
+          }
+          affiliation.cached_reconfirmed_at = confirmedAt
         }
       })
     }
@@ -235,6 +247,18 @@ class MockV1Api extends AbstractMockApi {
           ) {
             affiliation.licence = 'pro_plus'
           }
+
+          if (
+            institutionData.maxConfirmationMonths &&
+            affiliation.cached_reconfirmed_at
+          ) {
+            const lastDayToReconfirm = moment(
+              affiliation.cached_reconfirmed_at
+            ).add(institutionData.maxConfirmationMonths, 'months')
+            affiliation.last_day_to_reconfirm = lastDayToReconfirm.toDate()
+            affiliation.past_reconfirm_date = lastDayToReconfirm.isBefore()
+          }
+
           return affiliation
         }
       )
@@ -245,7 +269,8 @@ class MockV1Api extends AbstractMockApi {
       this.addAffiliation(
         req.params.userId,
         req.body.email,
-        req.body.entitlement
+        req.body.entitlement,
+        req.body.confirmedAt
       )
       res.sendStatus(201)
     })

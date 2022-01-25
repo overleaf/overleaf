@@ -29,6 +29,7 @@ describe('InstitutionsGetter', function () {
       confirmedAt: new Date(),
       affiliation: {
         institution: { id: 456, confirmed: true },
+        cachedPastReconfirmDate: false,
         pastReconfirmDate: false,
       },
     }
@@ -36,6 +37,7 @@ describe('InstitutionsGetter', function () {
       confirmedAt: new Date('2000-01-01'),
       affiliation: {
         institution: { id: 135, confirmed: true },
+        cachedPastReconfirmDate: true,
         pastReconfirmDate: true,
       },
     }
@@ -44,6 +46,7 @@ describe('InstitutionsGetter', function () {
       affiliation: {
         licence: 'pro_plus',
         institution: { id: 777, confirmed: true },
+        cachedPastReconfirmDate: false,
         pastReconfirmDate: false,
       },
     }
@@ -52,6 +55,7 @@ describe('InstitutionsGetter', function () {
       affiliation: {
         licence: 'pro_plus',
         institution: { id: 888, confirmed: true },
+        cachedPastReconfirmDate: true,
         pastReconfirmDate: true,
       },
     }
@@ -59,35 +63,64 @@ describe('InstitutionsGetter', function () {
       confirmedAt: null,
       affiliation: {
         licence: 'pro_plus',
-        institution: { id: 123, confirmed: true, pastReconfirmDate: false },
+        institution: {
+          id: 123,
+          confirmed: true,
+          cachedPastReconfirmDate: false,
+          pastReconfirmDate: false,
+        },
       },
     }
     this.unconfirmedDomainLicensedAffiliation = {
       confirmedAt: new Date(),
       affiliation: {
         licence: 'pro_plus',
-        institution: { id: 789, confirmed: false, pastReconfirmDate: false },
+        institution: {
+          id: 789,
+          confirmed: false,
+          cachedPastReconfirmDate: false,
+          pastReconfirmDate: false,
+        },
       },
     }
     this.userEmails = [
       {
         confirmedAt: null,
         affiliation: {
-          institution: { id: 123, confirmed: true, pastReconfirmDate: false },
+          institution: {
+            id: 123,
+            confirmed: true,
+            cachedPastReconfirmDate: false,
+            pastReconfirmDate: false,
+          },
         },
       },
       this.confirmedAffiliation,
       this.confirmedAffiliation,
       this.confirmedAffiliationPastReconfirmation,
-      { confirmedAt: new Date(), affiliation: null, pastReconfirmDate: false },
       {
         confirmedAt: new Date(),
-        affiliation: { institution: null, pastReconfirmDate: false },
+        affiliation: null,
+        cachedPastReconfirmDate: false,
+        pastReconfirmDate: false,
       },
       {
         confirmedAt: new Date(),
         affiliation: {
-          institution: { id: 789, confirmed: false, pastReconfirmDate: false },
+          institution: null,
+          cachedPastReconfirmDate: false,
+          pastReconfirmDate: false,
+        },
+      },
+      {
+        confirmedAt: new Date(),
+        affiliation: {
+          institution: {
+            id: 789,
+            confirmed: false,
+            cachedPastReconfirmDate: false,
+            pastReconfirmDate: false,
+          },
         },
       },
     ]

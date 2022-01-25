@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
 const Settings = require('@overleaf/settings')
+const InstitutionsAPI = require('../../../../app/src/Features/Institutions/InstitutionsAPI')
 const UserCreator = require('../../../../app/src/Features/User/UserCreator')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
@@ -335,6 +336,9 @@ class UserHelper {
       },
     }
     await UserUpdater.promises.updateUser(query, update)
+    await InstitutionsAPI.promises.addAffiliation(userId, email, {
+      confirmedAt: date,
+    })
   }
 
   async changeConfirmedToNotificationPeriod(
