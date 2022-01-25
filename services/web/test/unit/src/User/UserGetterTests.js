@@ -173,7 +173,10 @@ describe('UserGetter', function () {
         {
           email: 'email1@foo.bar',
           role: 'Prof',
+          cached_confirmed_at: '2019-07-11T18:25:01.639Z',
+          cached_reconfirmed_at: '2021-07-11T18:25:01.639Z',
           department: 'Maths',
+          entitlement: false,
           inferred: false,
           licence: 'pro_plus',
           institution: {
@@ -181,6 +184,7 @@ describe('UserGetter', function () {
             isUniversity: true,
             confirmed: true,
           },
+          last_day_to_reconfirm: undefined,
           past_reconfirm_date: false,
           portal: undefined,
         },
@@ -205,6 +209,10 @@ describe('UserGetter', function () {
                 lastDayToReconfirm: undefined,
                 licence: affiliationsData[0].licence,
                 inReconfirmNotificationPeriod: false,
+                cachedConfirmedAt: '2019-07-11T18:25:01.639Z',
+                cachedReconfirmedAt: '2021-07-11T18:25:01.639Z',
+                cachedEntitlement: false,
+                cachedLastDayToReconfirm: undefined,
                 cachedPastReconfirmDate: false,
                 pastReconfirmDate: false,
                 portal: undefined,
@@ -807,6 +815,7 @@ describe('UserGetter', function () {
             email,
             licence: 'free',
             institution: institutionNonSSO,
+            last_day_to_reconfirm: '2020-07-11T18:25:01.639Z',
             past_reconfirm_date: true,
           },
         ]
@@ -833,6 +842,67 @@ describe('UserGetter', function () {
             done()
           }
         )
+      })
+
+      describe('cachedLastDayToReconfirm', function () {
+        const email = 'abc123@test.com'
+        const confirmedAt = new Date('2019-07-11T18:25:01.639Z')
+        const lastDay = '2020-07-11T18:25:01.639Z'
+        const affiliationsData = [
+          {
+            email,
+            licence: 'professional',
+            institution: institutionSSO,
+            last_day_to_reconfirm: lastDay,
+            past_reconfirm_date: true,
+          },
+        ]
+        const user = {
+          _id: '12390i',
+          email,
+          emails: [
+            {
+              email,
+              confirmedAt,
+              default: true,
+            },
+          ],
+        }
+
+        it('should set cachedLastDayToReconfirm for SSO institutions if email is linked to SSO', async function () {
+          const userLinked = Object.assign({}, user)
+          userLinked.emails[0].samlProviderId = institutionSSO.id.toString()
+          this.getUserAffiliations.resolves(affiliationsData)
+          this.UserGetter.promises.getUser = sinon.stub().resolves(userLinked)
+          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
+            this.fakeUser._id
+          )
+          expect(fullEmails[0].affiliation.cachedLastDayToReconfirm).to.equal(
+            lastDay
+          )
+        })
+
+        it('should NOT set cachedLastDayToReconfirm for SSO institutions if email is NOT linked to SSO', async function () {
+          this.getUserAffiliations.resolves(affiliationsData)
+          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
+            this.fakeUser._id
+          )
+          expect(fullEmails[0].affiliation.cachedLastDayToReconfirm).to.equal(
+            lastDay
+          )
+        })
+
+        it('should set cachedLastDayToReconfirm for non-SSO institutions', async function () {
+          this.getUserAffiliations.resolves(affiliationsData)
+          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
+            this.fakeUser._id
+          )
+          expect(fullEmails[0].affiliation.cachedLastDayToReconfirm).to.equal(
+            lastDay
+          )
+        })
       })
     })
   })

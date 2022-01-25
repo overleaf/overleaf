@@ -257,10 +257,18 @@ const decorateFullEmails = (
         role,
         department,
         licence,
+        cached_confirmed_at: cachedConfirmedAt,
+        cached_reconfirmed_at: cachedReconfirmedAt,
         past_reconfirm_date: cachedPastReconfirmDate,
+        entitlement: cachedEntitlement,
         portal,
       } = affiliation
       const lastDayToReconfirm = _lastDayToReconfirm(emailData, institution)
+      let { last_day_to_reconfirm: cachedLastDayToReconfirm } = affiliation
+      if (institution.ssoEnabled && !emailData.samlProviderId) {
+        // only SSO linked emails are reconfirmed at SSO institutions
+        cachedLastDayToReconfirm = undefined
+      }
       const pastReconfirmDate = _pastReconfirmDate(lastDayToReconfirm)
       const inReconfirmNotificationPeriod = _emailInReconfirmNotificationPeriod(
         lastDayToReconfirm,
@@ -271,6 +279,10 @@ const decorateFullEmails = (
         inferred,
         inReconfirmNotificationPeriod,
         lastDayToReconfirm,
+        cachedConfirmedAt,
+        cachedLastDayToReconfirm,
+        cachedReconfirmedAt,
+        cachedEntitlement,
         cachedPastReconfirmDate,
         pastReconfirmDate,
         role,
