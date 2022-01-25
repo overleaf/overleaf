@@ -284,7 +284,6 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       Settings.analytics &&
       Settings.analytics.ga &&
       Settings.analytics.ga.tokenV4
-    res.locals.gaOptimizeId = _.get(Settings, ['analytics', 'gaOptimize', 'id'])
     next()
   })
 

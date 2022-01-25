@@ -116,7 +116,6 @@ describe('SubscriptionController', function () {
         },
       },
       siteUrl: 'http://de.sharelatex.dev:3000',
-      gaExperiments: {},
     }
     this.GeoIpLookup = {
       isValidCurrencyParam: sinon.stub().returns(true),

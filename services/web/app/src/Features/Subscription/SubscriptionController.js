@@ -57,8 +57,6 @@ async function plansPage(req, res) {
   res.render('subscriptions/plans-marketing', {
     title: 'plans_and_pricing',
     plans,
-    gaExperiments: Settings.gaExperiments.plansPage,
-    gaOptimize: true,
     itm_content: req.query && req.query.itm_content,
     recomendedCurrency: recommendedCurrency,
     recommendedCurrency,
@@ -116,7 +114,6 @@ async function paymentPage(req, res) {
         }),
         showCouponField: !!req.query.scf,
         showVatField: !!req.query.svf,
-        gaOptimize: true,
       })
     }
   }
