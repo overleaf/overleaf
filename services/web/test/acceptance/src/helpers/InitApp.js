@@ -3,11 +3,13 @@ const QueueWorkers = require('../../../../app/src/infrastructure/QueueWorkers')
 const MongoHelper = require('./MongoHelper')
 const RedisHelper = require('./RedisHelper')
 const { logger } = require('@overleaf/logger')
+const MockReCAPTCHAApi = require('../mocks/MockReCaptchaApi')
 
 logger.level('error')
 
 MongoHelper.initialize()
 RedisHelper.initialize()
+MockReCAPTCHAApi.initialize(2222)
 
 let server
 

@@ -1,7 +1,30 @@
+import { postJSON } from '../../infrastructure/fetch-json'
+
 const grecaptcha = window.grecaptcha
 
 let recaptchaId
 const recaptchaCallbacks = []
+
+export async function canSkipCaptcha(email) {
+  const controller = new AbortController()
+  const signal = controller.signal
+  const timer = setTimeout(() => {
+    controller.abort()
+  }, 1000)
+  let canSkip
+  try {
+    canSkip = await postJSON('/login/can-skip-captcha', {
+      signal,
+      body: { email },
+      swallowAbortError: false,
+    })
+  } catch (e) {
+    canSkip = false
+  } finally {
+    clearTimeout(timer)
+  }
+  return canSkip
+}
 
 export async function validateCaptchaV2() {
   if (

@@ -75,6 +75,7 @@ describe('Registration', function () {
             json: {
               email: user.email,
               password: 'invalid-password',
+              'g-recaptcha-response': 'valid',
             },
           })
           const message = body && body.message && body.message.text

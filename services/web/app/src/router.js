@@ -52,6 +52,7 @@ const SystemMessageController = require('./Features/SystemMessages/SystemMessage
 const AnalyticsRegistrationSourceMiddleware = require('./Features/Analytics/AnalyticsRegistrationSourceMiddleware')
 const AnalyticsUTMTrackingMiddleware = require('./Features/Analytics/AnalyticsUTMTrackingMiddleware')
 const SplitTestMiddleware = require('./Features/SplitTests/SplitTestMiddleware')
+const CaptchaMiddleware = require('./Features/Captcha/CaptchaMiddleware')
 const { Joi, validate } = require('./infrastructure/Validation')
 const {
   renderUnsupportedBrowserPage,
@@ -81,10 +82,26 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     )
   )
 
+  // Mount onto /login in order to get the deviceHistory cookie.
+  webRouter.post(
+    '/login/can-skip-captcha',
+    // Keep in sync with the overleaf-login options.
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'can-skip-captcha',
+      maxRequests: 20,
+      timeInterval: 60,
+    }),
+    CaptchaMiddleware.canSkipCaptcha
+  )
+
   webRouter.get('/login', UserPagesController.loginPage)
   AuthenticationController.addEndpointToLoginWhitelist('/login')
 
-  webRouter.post('/login', AuthenticationController.passportLogin)
+  webRouter.post(
+    '/login',
+    CaptchaMiddleware.validateCaptcha('login'),
+    AuthenticationController.passportLogin
+  )
 
   if (Settings.enableLegacyLogin) {
     AuthenticationController.addEndpointToLoginWhitelist('/login/legacy')

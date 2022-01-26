@@ -194,6 +194,16 @@ module.exports = {
     ie: '<=11',
   },
 
+  recaptcha: {
+    siteKey: 'siteKey',
+    disabled: {
+      invite: true,
+      login: false,
+      passwordReset: true,
+      register: true,
+    },
+  },
+
   // No email in tests
   email: undefined,
 

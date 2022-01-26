@@ -1,63 +1,100 @@
-/* eslint-disable
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let CaptchaMiddleware
-const request = require('request')
+const request = require('request-promise-native')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
+const Metrics = require('@overleaf/metrics')
+const DeviceHistory = require('./DeviceHistory')
+const AuthenticationController = require('../Authentication/AuthenticationController')
+const { expressify } = require('../../util/promises')
 
-module.exports = CaptchaMiddleware = {
-  validateCaptcha(action) {
-    return function (req, res, next) {
-      if (
-        (Settings.recaptcha != null ? Settings.recaptcha.siteKey : undefined) ==
-        null
-      ) {
-        return next()
-      }
-      if (Settings.recaptcha.disabled[action]) {
-        return next()
-      }
-      const response = req.body['g-recaptcha-response']
-      const options = {
-        form: {
-          secret: Settings.recaptcha.secretKey,
-          response,
-        },
-        json: true,
-      }
-      return request.post(
-        'https://www.google.com/recaptcha/api/siteverify',
-        options,
-        function (error, response, body) {
-          if (error != null) {
-            return next(error)
-          }
-          if (!(body != null ? body.success : undefined)) {
-            logger.warn(
-              { statusCode: response.statusCode, body },
-              'failed recaptcha siteverify request'
-            )
-            return res.status(400).json({
-              errorReason: 'cannot_verify_user_not_robot',
-              message: {
-                text: 'Sorry, we could not verify that you are not a robot. Please check that Google reCAPTCHA is not being blocked by an ad blocker or firewall.',
-              },
-            })
-          } else {
-            return next()
-          }
-        }
-      )
+function respondInvalidCaptcha(res) {
+  res.status(400).json({
+    errorReason: 'cannot_verify_user_not_robot',
+    message: {
+      text: 'Sorry, we could not verify that you are not a robot. Please check that Google reCAPTCHA is not being blocked by an ad blocker or firewall.',
+    },
+  })
+}
+
+async function initializeDeviceHistory(req) {
+  req.deviceHistory = new DeviceHistory()
+  try {
+    await req.deviceHistory.parse(req)
+  } catch (err) {
+    logger.err({ err }, 'cannot parse deviceHistory')
+  }
+}
+
+async function canSkipCaptcha(req, res) {
+  await initializeDeviceHistory(req)
+  const canSkip = req.deviceHistory.has(req.body?.email)
+  Metrics.inc('captcha_pre_flight', 1, {
+    status: canSkip ? 'skipped' : 'missing',
+  })
+  res.json(canSkip)
+}
+
+function validateCaptcha(action) {
+  return expressify(async function (req, res, next) {
+    if (!Settings.recaptcha?.siteKey || Settings.recaptcha.disabled[action]) {
+      Metrics.inc('captcha', 1, { path: action, status: 'disabled' })
+      return next()
     }
-  },
+    if (action === 'login') {
+      await initializeDeviceHistory(req)
+      if (req.deviceHistory.has(req.body?.email)) {
+        // The user has previously logged in from this device, which required
+        //  solving a captcha or keeping the device history alive.
+        // We can skip checking the (potentially missing) captcha response.
+        AuthenticationController.setAuditInfo(req, { captcha: 'skipped' })
+        Metrics.inc('captcha', 1, { path: action, status: 'skipped' })
+        return next()
+      }
+    }
+    const reCaptchaResponse = req.body['g-recaptcha-response']
+    if (!reCaptchaResponse) {
+      Metrics.inc('captcha', 1, { path: action, status: 'missing' })
+      return respondInvalidCaptcha(res)
+    }
+    const options = {
+      method: 'POST',
+      url: Settings.recaptcha.endpoint,
+      form: {
+        secret: Settings.recaptcha.secretKey,
+        response: reCaptchaResponse,
+      },
+      json: true,
+    }
+    let body
+    try {
+      body = await request(options)
+    } catch (err) {
+      const response = err.response
+      if (response) {
+        logger.warn(
+          { statusCode: response.statusCode, body: err.body },
+          'failed recaptcha siteverify request'
+        )
+      }
+      Metrics.inc('captcha', 1, { path: action, status: 'error' })
+      return next(err)
+    }
+    if (!body?.success) {
+      logger.warn(
+        { statusCode: 200, body },
+        'failed recaptcha siteverify request'
+      )
+      Metrics.inc('captcha', 1, { path: action, status: 'failed' })
+      return respondInvalidCaptcha(res)
+    }
+    Metrics.inc('captcha', 1, { path: action, status: 'solved' })
+    if (action === 'login') {
+      AuthenticationController.setAuditInfo(req, { captcha: 'solved' })
+    }
+    next()
+  })
+}
+
+module.exports = {
+  validateCaptcha,
+  canSkipCaptcha: expressify(canSkipCaptcha),
 }

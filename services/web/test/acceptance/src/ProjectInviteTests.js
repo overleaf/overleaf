@@ -143,6 +143,7 @@ const tryLoginUser = (user, callback) => {
         json: {
           email: user.email,
           password: user.password,
+          'g-recaptcha-response': 'valid',
         },
       },
       callback

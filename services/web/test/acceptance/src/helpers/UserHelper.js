@@ -239,7 +239,10 @@ class UserHelper {
     const loginPath = Settings.enableLegacyLogin ? '/login/legacy' : '/login'
     await userHelper.getCsrfToken()
     const response = await userHelper.request.post(loginPath, {
-      json: userData,
+      json: {
+        'g-recaptcha-response': 'valid',
+        ...userData,
+      },
     })
     if (response.statusCode !== 200 || response.body.redir !== '/project') {
       const error = new Error('login failed')

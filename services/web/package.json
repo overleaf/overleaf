@@ -129,6 +129,7 @@
     "i18next-fs-backend": "^1.0.7",
     "i18next-http-middleware": "^3.0.2",
     "isomorphic-unfetch": "^3.0.0",
+    "jose": "^4.3.8",
     "jquery": "^2.2.4",
     "json2csv": "^4.3.3",
     "jsonwebtoken": "^8.5.1",

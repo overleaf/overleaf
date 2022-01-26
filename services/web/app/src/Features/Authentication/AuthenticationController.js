@@ -530,7 +530,17 @@ function _afterLoginSessionSetup(req, user, callback) {
           return callback(err)
         }
         UserSessionsManager.trackSession(user, req.sessionID, function () {})
-        callback(null)
+        if (!req.deviceHistory) {
+          // Captcha disabled or SSO-based login.
+          return callback()
+        }
+        req.deviceHistory.add(user.email)
+        req.deviceHistory
+          .serialize(req.res)
+          .catch(err => {
+            logger.err({ err }, 'cannot serialize deviceHistory')
+          })
+          .finally(() => callback())
       })
     })
   })

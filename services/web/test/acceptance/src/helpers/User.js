@@ -120,7 +120,11 @@ class User {
       this.request.post(
         {
           url: settings.enableLegacyLogin ? '/login/legacy' : '/login',
-          json: { email, password: password },
+          json: {
+            email,
+            password,
+            'g-recaptcha-response': 'valid',
+          },
         },
         (error, response, body) => {
           if (error != null) {

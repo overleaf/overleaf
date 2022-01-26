@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 import { FetchError, postJSON } from '../../infrastructure/fetch-json'
-import { validateCaptchaV2 } from './captcha'
+import { canSkipCaptcha, validateCaptchaV2 } from './captcha'
 import inputValidator from './input-validator'
 import { disableElement, enableElement } from '../utils/disableElement'
 
@@ -22,9 +22,22 @@ function formSubmitHelper(formEl) {
     const messageBag = []
 
     try {
-      const captchaResponse = await validateCaptcha(formEl)
-
-      const data = await sendFormRequest(formEl, captchaResponse)
+      let data
+      try {
+        const captchaResponse = await validateCaptcha(formEl)
+        data = await sendFormRequest(formEl, captchaResponse)
+      } catch (e) {
+        if (
+          e instanceof FetchError &&
+          e.data?.errorReason === 'cannot_verify_user_not_robot'
+        ) {
+          // Trigger captcha unconditionally.
+          const captchaResponse = await validateCaptchaV2()
+          data = await sendFormRequest(formEl, captchaResponse)
+        } else {
+          throw e
+        }
+      }
       formEl.dispatchEvent(new Event('sent'))
 
       // Handle redirects
@@ -65,6 +78,17 @@ function formSubmitHelper(formEl) {
 async function validateCaptcha(formEl) {
   let captchaResponse
   if (formEl.hasAttribute('captcha')) {
+    if (
+      formEl.getAttribute('action') === '/login' &&
+      (await canSkipCaptcha(new FormData(formEl).get('email')))
+    ) {
+      // The email is present in the deviceHistory, and we can skip the display
+      //  of a captcha challenge.
+      // The actual login POST request will be checked against the deviceHistory
+      //  again and the server can trigger the display of a captcha if needed by
+      //  sending a 400 with errorReason set to 'cannot_verify_user_not_robot'.
+      return ''
+    }
     captchaResponse = await validateCaptchaV2()
   }
   return captchaResponse

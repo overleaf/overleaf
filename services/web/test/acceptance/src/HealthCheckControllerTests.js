@@ -5,6 +5,7 @@ const User = require('./helpers/User').promises
 describe('HealthCheckController', function () {
   describe('SmokeTests', function () {
     let user, projectId
+    const captchaDisabledBefore = Settings.recaptcha.disabled.login
 
     beforeEach(async function () {
       user = new User()
@@ -16,6 +17,11 @@ describe('HealthCheckController', function () {
       Settings.smokeTest.user = user.email
       Settings.smokeTest.password = user.password
       Settings.smokeTest.projectId = projectId
+
+      Settings.recaptcha.disabled.login = true
+    })
+    afterEach(function () {
+      Settings.recaptcha.disabled.login = captchaDisabledBefore
     })
 
     async function performSmokeTestRequest() {

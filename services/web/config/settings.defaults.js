@@ -435,6 +435,15 @@ module.exports = {
     },
   },
 
+  deviceHistory: {
+    cookieName: process.env.DEVICE_HISTORY_COOKIE_NAME || 'deviceHistory',
+    entryExpiry:
+      parseInt(process.env.DEVICE_HISTORY_ENTRY_EXPIRY_MS, 10) ||
+      30 * 24 * 60 * 60 * 1000,
+    maxEntries: parseInt(process.env.DEVICE_HISTORY_MAX_ENTRIES, 10) || 10,
+    secret: process.env.DEVICE_HISTORY_SECRET,
+  },
+
   // Email support
   // -------------
   //
@@ -595,6 +604,9 @@ module.exports = {
   //   header_extras: [{text: "Some Page", url: "http://example.com/some/page", class: "subdued"}]
 
   recaptcha: {
+    endpoint:
+      process.env.RECAPTCHA_ENDPOINT ||
+      'https://www.google.com/recaptcha/api/siteverify',
     disabled: {
       invite: true,
       login: true,
