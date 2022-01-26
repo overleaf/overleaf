@@ -117,6 +117,18 @@ module.exports = {
         ],
       },
       {
+        test: /latex-linter.worker.js$/,
+        use: [
+          {
+            loader: 'worker-loader',
+            options: {
+              name: 'js/latex-linter.worker.js',
+              publicPath: '/',
+            },
+          },
+        ],
+      },
+      {
         // Pass Less files through less-loader/css-loader/mini-css-extract-
         // plugin (note: run in reverse order)
         test: /\.less$/,
