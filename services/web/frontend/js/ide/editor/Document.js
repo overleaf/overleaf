@@ -663,7 +663,7 @@ export default Document = (function () {
           op,
         })
         this.trigger('op:timeout')
-        return this._onError(new Error('op timed out'), { op })
+        return this._onError(new Error('op timed out'))
       })
       this.doc.on('flush', (inflightOp, pendingOp, version) => {
         return this.ide.pushEvent('flush', {
