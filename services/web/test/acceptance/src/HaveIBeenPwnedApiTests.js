@@ -11,7 +11,7 @@ before(function () {
 })
 
 async function letPasswordCheckRunInBackground() {
-  await sleep(100)
+  await sleep(200)
 }
 
 async function getMetricReUsed() {
