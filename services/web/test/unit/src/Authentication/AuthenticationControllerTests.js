@@ -7,6 +7,7 @@ const tk = require('timekeeper')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const { ObjectId } = require('mongodb')
+const AuthenticationErrors = require('../../../../app/src/Features/Authentication/AuthenticationErrors')
 
 describe('AuthenticationController', function () {
   beforeEach(function () {
@@ -32,6 +33,7 @@ describe('AuthenticationController', function () {
 
     this.AuthenticationController = SandboxedModule.require(modulePath, {
       requires: {
+        './AuthenticationErrors': AuthenticationErrors,
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           addEntry: sinon.stub().yields(null),
         }),
@@ -63,6 +65,7 @@ describe('AuthenticationController', function () {
         '@overleaf/settings': (this.Settings = {
           siteUrl: 'http://www.foo.bar',
           httpAuthUsers: this.httpAuthUsers,
+          elevateAccountSecurityAfterFailedLogin: 90 * 24 * 60 * 60 * 1000,
         }),
         passport: (this.passport = {
           authenticate: sinon.stub().returns(sinon.stub()),
@@ -254,7 +257,7 @@ describe('AuthenticationController', function () {
           this.next
         )
         this.res.json.callCount.should.equal(1)
-        this.res.json.calledWith({ message: this.info }).should.equal(true)
+        this.res.json.should.have.been.calledWith({ message: this.info })
         expect(this.res.json.lastCall.args[0].redir != null).to.equal(false)
       })
     })
@@ -273,6 +276,7 @@ describe('AuthenticationController', function () {
           postLoginRedirect: '/path/to/redir/to',
         },
       }
+      this.req.__authAuditInfo = { captcha: 'disabled' }
       this.cb = sinon.stub()
     })
 
@@ -325,22 +329,103 @@ describe('AuthenticationController', function () {
           .stub()
           .callsArgWith(2, null, this.user)
         this.req.sessionID = Math.random()
-        this.AuthenticationController.doPassportLogin(
-          this.req,
-          this.req.body.email,
-          this.req.body.password,
-          this.cb
-        )
       })
 
-      it('should attempt to authorise the user', function () {
-        this.AuthenticationManager.authenticate
-          .calledWith({ email: this.email.toLowerCase() }, this.password)
-          .should.equal(true)
+      describe('happy path', function () {
+        beforeEach(function () {
+          this.AuthenticationController.doPassportLogin(
+            this.req,
+            this.req.body.email,
+            this.req.body.password,
+            this.cb
+          )
+        })
+        it('should attempt to authorise the user', function () {
+          this.AuthenticationManager.authenticate
+            .calledWith({ email: this.email.toLowerCase() }, this.password)
+            .should.equal(true)
+        })
+
+        it("should establish the user's session", function () {
+          this.cb.calledWith(null, this.user).should.equal(true)
+        })
       })
 
-      it("should establish the user's session", function () {
-        this.cb.calledWith(null, this.user).should.equal(true)
+      describe('when authenticate flags a parallel login', function () {
+        beforeEach(function () {
+          this.AuthenticationManager.authenticate = sinon
+            .stub()
+            .callsArgWith(2, new AuthenticationErrors.ParallelLoginError())
+          this.AuthenticationController.doPassportLogin(
+            this.req,
+            this.req.body.email,
+            this.req.body.password,
+            this.cb
+          )
+        })
+
+        it('should send a 429', function () {
+          this.cb.should.have.been.calledWith(null, false, { status: 429 })
+        })
+      })
+
+      describe('with a user having a recent failed login ', function () {
+        beforeEach(function () {
+          this.user.lastFailedLogin = new Date()
+        })
+
+        describe('with captcha disabled', function () {
+          beforeEach(function () {
+            this.req.__authAuditInfo.captcha = 'disabled'
+            this.AuthenticationController.doPassportLogin(
+              this.req,
+              this.req.body.email,
+              this.req.body.password,
+              this.cb
+            )
+          })
+
+          it('should let the user log in', function () {
+            this.cb.should.have.been.calledWith(null, this.user)
+          })
+        })
+
+        describe('with a solved captcha', function () {
+          beforeEach(function () {
+            this.req.__authAuditInfo.captcha = 'solved'
+            this.AuthenticationController.doPassportLogin(
+              this.req,
+              this.req.body.email,
+              this.req.body.password,
+              this.cb
+            )
+          })
+
+          it('should let the user log in', function () {
+            this.cb.should.have.been.calledWith(null, this.user)
+          })
+        })
+
+        describe('with a skipped captcha', function () {
+          beforeEach(function () {
+            this.req.__authAuditInfo.captcha = 'skipped'
+            this.AuthenticationController.doPassportLogin(
+              this.req,
+              this.req.body.email,
+              this.req.body.password,
+              this.cb
+            )
+          })
+
+          it('should request a captcha', function () {
+            this.cb.should.have.been.calledWith(null, false, {
+              text: 'cannot_verify_user_not_robot',
+              type: 'error',
+              errorReason: 'cannot_verify_user_not_robot',
+              status: 400,
+            })
+          })
+        })
       })
     })
 

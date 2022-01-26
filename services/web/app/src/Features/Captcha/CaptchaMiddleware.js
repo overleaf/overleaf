@@ -6,11 +6,11 @@ const DeviceHistory = require('./DeviceHistory')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const { expressify } = require('../../util/promises')
 
-function respondInvalidCaptcha(res) {
+function respondInvalidCaptcha(req, res) {
   res.status(400).json({
     errorReason: 'cannot_verify_user_not_robot',
     message: {
-      text: 'Sorry, we could not verify that you are not a robot. Please check that Google reCAPTCHA is not being blocked by an ad blocker or firewall.',
+      text: req.i18n.translate('cannot_verify_user_not_robot'),
     },
   })
 }
@@ -36,24 +36,27 @@ async function canSkipCaptcha(req, res) {
 function validateCaptcha(action) {
   return expressify(async function (req, res, next) {
     if (!Settings.recaptcha?.siteKey || Settings.recaptcha.disabled[action]) {
+      if (action === 'login') {
+        AuthenticationController.setAuditInfo(req, { captcha: 'disabled' })
+      }
       Metrics.inc('captcha', 1, { path: action, status: 'disabled' })
       return next()
     }
+    const reCaptchaResponse = req.body['g-recaptcha-response']
     if (action === 'login') {
       await initializeDeviceHistory(req)
-      if (req.deviceHistory.has(req.body?.email)) {
+      if (!reCaptchaResponse && req.deviceHistory.has(req.body?.email)) {
         // The user has previously logged in from this device, which required
         //  solving a captcha or keeping the device history alive.
-        // We can skip checking the (potentially missing) captcha response.
+        // We can skip checking the (missing) captcha response.
         AuthenticationController.setAuditInfo(req, { captcha: 'skipped' })
         Metrics.inc('captcha', 1, { path: action, status: 'skipped' })
         return next()
       }
     }
-    const reCaptchaResponse = req.body['g-recaptcha-response']
     if (!reCaptchaResponse) {
       Metrics.inc('captcha', 1, { path: action, status: 'missing' })
-      return respondInvalidCaptcha(res)
+      return respondInvalidCaptcha(req, res)
     }
     const options = {
       method: 'POST',
@@ -84,7 +87,7 @@ function validateCaptcha(action) {
         'failed recaptcha siteverify request'
       )
       Metrics.inc('captcha', 1, { path: action, status: 'failed' })
-      return respondInvalidCaptcha(res)
+      return respondInvalidCaptcha(req, res)
     }
     Metrics.inc('captcha', 1, { path: action, status: 'solved' })
     if (action === 'login') {
@@ -95,6 +98,7 @@ function validateCaptcha(action) {
 }
 
 module.exports = {
+  respondInvalidCaptcha,
   validateCaptcha,
   canSkipCaptcha: expressify(canSkipCaptcha),
 }

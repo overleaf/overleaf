@@ -435,6 +435,10 @@ module.exports = {
     },
   },
 
+  elevateAccountSecurityAfterFailedLogin:
+    parseInt(process.env.ELEVATED_ACCOUNT_SECURITY_AFTER_FAILED_LOGIN_MS, 10) ||
+    24 * 60 * 60 * 1000,
+
   deviceHistory: {
     cookieName: process.env.DEVICE_HISTORY_COOKIE_NAME || 'deviceHistory',
     entryExpiry:

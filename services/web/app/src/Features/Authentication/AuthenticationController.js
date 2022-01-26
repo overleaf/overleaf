@@ -23,6 +23,7 @@ const AnalyticsRegistrationSourceHelper = require('../Analytics/AnalyticsRegistr
 const {
   acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')
+const { ParallelLoginError } = require('./AuthenticationErrors')
 
 function send401WithChallenge(res) {
   res.setHeader('WWW-Authenticate', 'OverleafLogin')
@@ -89,7 +90,13 @@ const AuthenticationController = {
         } else {
           res.status(info.status || 200)
           delete info.status
-          return res.json({ message: info })
+          const body = { message: info }
+          const { errorReason } = info
+          if (errorReason) {
+            body.errorReason = errorReason
+            delete info.errorReason
+          }
+          return res.json(body)
         }
       }
     })(req, res, next)
@@ -188,9 +195,22 @@ const AuthenticationController = {
             password,
             function (error, user) {
               if (error != null) {
+                if (error instanceof ParallelLoginError) {
+                  return done(null, false, { status: 429 })
+                }
                 return done(error)
               }
-              if (user != null) {
+              if (
+                user &&
+                AuthenticationController.captchaRequiredForLogin(req, user)
+              ) {
+                done(null, false, {
+                  text: req.i18n.translate('cannot_verify_user_not_robot'),
+                  type: 'error',
+                  errorReason: 'cannot_verify_user_not_robot',
+                  status: 400,
+                })
+              } else if (user) {
                 // async actions
                 done(null, user)
               } else {
@@ -207,6 +227,30 @@ const AuthenticationController = {
         })
       }
     )
+  },
+
+  captchaRequiredForLogin(req, user) {
+    switch (AuthenticationController.getAuditInfo(req).captcha) {
+      case 'disabled':
+        return false
+      case 'solved':
+        return false
+      case 'skipped': {
+        let required = false
+        if (user.lastFailedLogin) {
+          const requireCaptchaUntil =
+            user.lastFailedLogin.getTime() +
+            Settings.elevateAccountSecurityAfterFailedLogin
+          required = requireCaptchaUntil >= Date.now()
+        }
+        Metrics.inc('force_captcha_on_login', 1, {
+          status: required ? 'yes' : 'no',
+        })
+        return required
+      }
+      default:
+        throw new Error('captcha middleware missing in handler chain')
+    }
   },
 
   ipMatchCheck(req, user) {

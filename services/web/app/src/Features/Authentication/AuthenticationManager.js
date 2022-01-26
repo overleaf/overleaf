@@ -6,6 +6,7 @@ const EmailHelper = require('../Helpers/EmailHelper')
 const {
   InvalidEmailError,
   InvalidPasswordError,
+  ParallelLoginError,
 } = require('./AuthenticationErrors')
 const util = require('util')
 const HaveIBeenPwned = require('./HaveIBeenPwned')
@@ -38,19 +39,36 @@ const AuthenticationManager = {
         if (error) {
           return callback(error)
         }
+        const update = { $inc: { loginEpoch: 1 } }
         if (!match) {
-          return callback(null, null)
+          update.$set = { lastFailedLogin: new Date() }
         }
-        AuthenticationManager.checkRounds(
-          user,
-          user.hashedPassword,
-          password,
-          function (err) {
+        User.updateOne(
+          { _id: user._id, loginEpoch: user.loginEpoch },
+          update,
+          {},
+          (err, result) => {
             if (err) {
               return callback(err)
             }
-            callback(null, user)
-            HaveIBeenPwned.checkPasswordForReuseInBackground(password)
+            if (result.nModified !== 1) {
+              return callback(new ParallelLoginError())
+            }
+            if (!match) {
+              return callback(null, null)
+            }
+            AuthenticationManager.checkRounds(
+              user,
+              user.hashedPassword,
+              password,
+              function (err) {
+                if (err) {
+                  return callback(err)
+                }
+                callback(null, user)
+                HaveIBeenPwned.checkPasswordForReuseInBackground(password)
+              }
+            )
           }
         )
       })

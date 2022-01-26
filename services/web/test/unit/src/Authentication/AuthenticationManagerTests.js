@@ -3,17 +3,21 @@ const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
 const AuthenticationErrors = require('../../../../app/src/Features/Authentication/AuthenticationErrors')
+const tk = require('timekeeper')
 
 const modulePath =
   '../../../../app/src/Features/Authentication/AuthenticationManager.js'
 
 describe('AuthenticationManager', function () {
   beforeEach(function () {
+    tk.freeze(Date.now())
     this.settings = { security: { bcryptRounds: 4 } }
     this.AuthenticationManager = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
-          User: (this.User = {}),
+          User: (this.User = {
+            updateOne: sinon.stub().callsArgWith(3, null, { nModified: 1 }),
+          }),
         },
         '../../infrastructure/mongodb': {
           db: (this.db = { users: {} }),
@@ -29,6 +33,10 @@ describe('AuthenticationManager', function () {
       },
     })
     this.callback = sinon.stub()
+  })
+
+  afterEach(function () {
+    tk.reset()
   })
 
   describe('with real bcrypt', function () {
@@ -49,13 +57,13 @@ describe('AuthenticationManager', function () {
           _id: 'user-id',
           email: (this.email = 'USER@sharelatex.com'),
         }
+        this.user.hashedPassword = this.testPassword
         this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
       })
 
       describe('when the hashed password matches', function () {
         beforeEach(function (done) {
           this.unencryptedPassword = 'testpassword'
-          this.user.hashedPassword = this.testPassword
           this.AuthenticationManager.authenticate(
             { email: this.email },
             this.unencryptedPassword,
@@ -70,22 +78,97 @@ describe('AuthenticationManager', function () {
           this.User.findOne.calledWith({ email: this.email }).should.equal(true)
         })
 
+        it('should bump epoch', function () {
+          this.User.updateOne.should.have.been.calledWith(
+            {
+              _id: this.user._id,
+              loginEpoch: this.user.loginEpoch,
+            },
+            {
+              $inc: { loginEpoch: 1 },
+            },
+            {}
+          )
+        })
+
         it('should return the user', function () {
           this.callback.calledWith(null, this.user).should.equal(true)
         })
       })
 
       describe('when the encrypted passwords do not match', function () {
-        beforeEach(function () {
+        beforeEach(function (done) {
           this.AuthenticationManager.authenticate(
             { email: this.email },
             'notthecorrectpassword',
-            this.callback
+            (...args) => {
+              this.callback(...args)
+              done()
+            }
+          )
+        })
+
+        it('should persist the login failure and bump epoch', function () {
+          this.User.updateOne.should.have.been.calledWith(
+            {
+              _id: this.user._id,
+              loginEpoch: this.user.loginEpoch,
+            },
+            {
+              $inc: { loginEpoch: 1 },
+              $set: { lastFailedLogin: new Date() },
+            }
           )
         })
 
         it('should not return the user', function () {
           this.callback.calledWith(null, null).should.equal(true)
+        })
+      })
+
+      describe('when another request runs in parallel', function () {
+        beforeEach(function () {
+          this.User.updateOne = sinon
+            .stub()
+            .callsArgWith(3, null, { nModified: 0 })
+        })
+
+        describe('correct password', function () {
+          beforeEach(function (done) {
+            this.AuthenticationManager.authenticate(
+              { email: this.email },
+              'testpassword',
+              (...args) => {
+                this.callback(...args)
+                done()
+              }
+            )
+          })
+
+          it('should return an error', function () {
+            this.callback.should.have.been.calledWith(
+              sinon.match.instanceOf(AuthenticationErrors.ParallelLoginError)
+            )
+          })
+        })
+
+        describe('bad password', function () {
+          beforeEach(function (done) {
+            this.User.updateOne = sinon.stub().yields(null, { nModified: 0 })
+            this.AuthenticationManager.authenticate(
+              { email: this.email },
+              'notthecorrectpassword',
+              (...args) => {
+                this.callback(...args)
+                done()
+              }
+            )
+          })
+          it('should return an error', function () {
+            this.callback.should.have.been.calledWith(
+              sinon.match.instanceOf(AuthenticationErrors.ParallelLoginError)
+            )
+          })
         })
       })
     })

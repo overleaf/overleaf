@@ -1,3 +1,4 @@
+const { db } = require('../../../app/src/infrastructure/mongodb')
 const { expect } = require('chai')
 const User = require('./helpers/User').promises
 
@@ -9,20 +10,24 @@ describe('Captcha', function () {
     await user.ensureUserExists()
   })
 
-  async function loginWithCaptcha(captchaResponse) {
-    return loginWithEmailAndCaptcha(user.email, captchaResponse)
-  }
-
-  async function loginWithEmailAndCaptcha(email, captchaResponse) {
+  async function login(email, password, captchaResponse) {
     await user.getCsrfToken()
     return user.doRequest('POST', {
       url: '/login',
       json: {
         email,
-        password: user.password,
+        password,
         'g-recaptcha-response': captchaResponse,
       },
     })
+  }
+
+  async function loginWithCaptcha(captchaResponse) {
+    return login(user.email, user.password, captchaResponse)
+  }
+
+  async function loginWithEmailAndCaptcha(email, captchaResponse) {
+    return login(email, user.password, captchaResponse)
   }
 
   async function canSkipCaptcha(email) {
@@ -43,6 +48,16 @@ describe('Captcha', function () {
   function expectSuccessfulLogin(response, body) {
     expect(response.statusCode).to.equal(200)
     expect(body).to.deep.equal({ redir: '/project' })
+  }
+
+  function expectBadLogin(response, body) {
+    expect(response.statusCode).to.equal(401)
+    expect(body).to.deep.equal({
+      message: {
+        text: 'Your email or password is incorrect. Please try again',
+        type: 'error',
+      },
+    })
   }
 
   it('should reject a login without captcha response', async function () {
@@ -102,6 +117,58 @@ describe('Captcha', function () {
     it('should flag missing captcha for another email', async function () {
       const { response, body } = await loginWithEmailAndCaptcha('a@bc.de', '')
       expectBadCaptchaResponse(response, body)
+    })
+
+    describe('login failure', function () {
+      beforeEach(async function () {
+        const { response, body } = await login(
+          user.email,
+          'bad password',
+          'valid'
+        )
+        expectBadLogin(response, body)
+      })
+
+      it('should be able to skip captcha per device history', async function () {
+        expect(await canSkipCaptcha(user.email)).to.equal(true)
+      })
+
+      it('should request a captcha despite device history entry', async function () {
+        const { response, body } = await loginWithCaptcha('')
+        expectBadCaptchaResponse(response, body)
+      })
+
+      it('should accept the login with captcha', async function () {
+        const { response, body } = await loginWithCaptcha('valid')
+        expectSuccessfulLogin(response, body)
+      })
+
+      describe('when the login failure happened a long time ago', function () {
+        beforeEach(async function () {
+          db.users.updateOne(
+            { email: user.email },
+            {
+              $set: {
+                lastFailedLogin: new Date(
+                  Date.now() - 90 * 24 * 60 * 60 * 1000
+                ),
+              },
+            }
+          )
+        })
+
+        it('should be able to skip captcha per device history', async function () {
+          expect(await canSkipCaptcha(user.email)).to.equal(true)
+        })
+        it('should accept the login without captcha', async function () {
+          const { response, body } = await loginWithCaptcha('')
+          expectSuccessfulLogin(response, body)
+        })
+        it('should accept the login with captcha', async function () {
+          const { response, body } = await loginWithCaptcha('valid')
+          expectSuccessfulLogin(response, body)
+        })
+      })
     })
 
     describe('cycle history', function () {
