@@ -33,6 +33,9 @@ function formSubmitHelper(formEl) {
         ) {
           // Trigger captcha unconditionally.
           const captchaResponse = await validateCaptchaV2()
+          if (!captchaResponse) {
+            throw e
+          }
           data = await sendFormRequest(formEl, captchaResponse)
         } else {
           throw e
