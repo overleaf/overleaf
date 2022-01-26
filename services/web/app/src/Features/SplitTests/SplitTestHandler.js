@@ -5,7 +5,7 @@ const LocalsHelper = require('./LocalsHelper')
 const crypto = require('crypto')
 const _ = require('lodash')
 const { callbackify } = require('util')
-const splitTestCache = require('./SplitTestCache')
+const SplitTestCache = require('./SplitTestCache')
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
@@ -103,6 +103,37 @@ async function assignInLocalsContext(
   )
 }
 
+/**
+ * Get a mapping of the active split test assignments for the given user
+ */
+async function getActiveAssignmentsForUser(userId) {
+  const user = await UserGetter.promises.getUser(userId, { splitTests: 1 })
+  if (user == null || user.splitTests == null) {
+    return {}
+  }
+  const activeAssignments = {}
+  for (const [splitTestName, assignments] of Object.entries(user.splitTests)) {
+    const splitTest = await SplitTestCache.get(splitTestName)
+    if (splitTest == null) {
+      continue
+    }
+    const currentVersion = splitTest.getCurrentVersion()
+    if (!currentVersion || !currentVersion.active) {
+      continue
+    }
+
+    let assignment
+    if (Array.isArray(assignments)) {
+      assignment = _.maxBy(assignments, 'versionNumber')
+    } else {
+      // Older format is a single string rather than an array of objects
+      assignment = { variantName: assignments }
+    }
+    activeAssignments[splitTestName] = assignment
+  }
+  return activeAssignments
+}
+
 async function _getAssignment(
   splitTestName,
   { analyticsId, userId, session, sync }
@@ -111,7 +142,7 @@ async function _getAssignment(
     return DEFAULT_ASSIGNMENT
   }
 
-  const splitTest = await splitTestCache.get(splitTestName)
+  const splitTest = await SplitTestCache.get(splitTestName)
   const currentVersion = splitTest?.getCurrentVersion()
   if (!splitTest || !currentVersion?.active) {
     return DEFAULT_ASSIGNMENT
@@ -304,10 +335,12 @@ async function _getUser(id) {
 module.exports = {
   getAssignment: callbackify(getAssignment),
   getAssignmentForUser: callbackify(getAssignmentForUser),
+  getActiveAssignmentsForUser: callbackify(getActiveAssignmentsForUser),
   assignInLocalsContext: callbackify(assignInLocalsContext),
   promises: {
     getAssignment,
     getAssignmentForUser,
+    getActiveAssignmentsForUser,
     assignInLocalsContext,
   },
 }
