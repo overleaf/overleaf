@@ -1,0 +1,26 @@
+diff --git a/node_modules/fast-crc32c/impls/rs_crc32c.js b/node_modules/fast-crc32c/impls/rs_crc32c.js
+new file mode 100644
+index 0000000..a234474
+--- /dev/null
++++ b/node_modules/fast-crc32c/impls/rs_crc32c.js
+@@ -0,0 +1,5 @@
++const {crc32c} = require('@node-rs/crc32');
++
++ module.exports = {
++   calculate: crc32c,
++ };
+diff --git a/node_modules/fast-crc32c/loader.js b/node_modules/fast-crc32c/loader.js
+index a983814..df56b5d 100644
+--- a/node_modules/fast-crc32c/loader.js
++++ b/node_modules/fast-crc32c/loader.js
+@@ -1,6 +1,9 @@
+ module.exports = (function() {
++  const os = require('os');
++  const isX86 = new Set(['ia32', 'x32', 'x64']).has(os.arch());
+   const impls = [
+-    './impls/sse4_crc32c',
++    ...(isX86 ? ['./impls/sse4_crc32c'] : []),
++    './impls/rs_crc32c',
+     './impls/js_crc32c',
+   ];
+   for (const impl of impls) {

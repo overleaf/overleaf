@@ -15,9 +15,11 @@
     "format:fix": "prettier --write $PWD/'**/*.js'",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "postinstall": "patch-package"
   },
   "dependencies": {
+    "@node-rs/crc32": "^1.1.0",
     "@overleaf/logger": "^3.1.0",
     "@overleaf/metrics": "^4.0.0",
     "@overleaf/o-error": "^3.0.0",
@@ -34,7 +36,8 @@
     "request": "^2.88.2",
     "request-promise-native": "^1.0.8",
     "stream-buffers": "~0.2.6",
-    "tiny-async-pool": "^1.1.0"
+    "tiny-async-pool": "^1.1.0",
+    "patch-package": "^6.4.7"
   },
   "devDependencies": {
     "@google-cloud/storage": "^5.1.2",
@@ -49,5 +52,8 @@
     "sinon-chai": "^3.7.0",
     "streamifier": "^0.1.1",
     "timekeeper": "^2.2.0"
+  },
+  "config": {
+    "unsafe-perm": true
   }
 }

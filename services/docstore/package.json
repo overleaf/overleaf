@@ -13,9 +13,11 @@
     "lint": "eslint --max-warnings 0 --format unix .",
     "format": "prettier --list-different $PWD/'**/*.js'",
     "format:fix": "prettier --write $PWD/'**/*.js'",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "postinstall": "patch-package"
   },
   "dependencies": {
+    "@node-rs/crc32": "^1.1.0",
     "@overleaf/logger": "^3.1.0",
     "@overleaf/metrics": "^4.0.0",
     "@overleaf/o-error": "^3.4.0",
@@ -26,11 +28,13 @@
     "bunyan": "^1.8.15",
     "celebrate": "^13.0.4",
     "express": "^4.17.1",
+    "fast-crc32c": "^2.0.0",
     "mongodb": "^3.6.0",
     "p-map": "^4.0.0",
     "request": "^2.88.2",
     "streamifier": "^0.1.1",
-    "underscore": "~1.12.1"
+    "underscore": "~1.12.1",
+    "patch-package": "^6.4.7"
   },
   "devDependencies": {
     "@google-cloud/storage": "^5.1.2",
@@ -40,5 +44,11 @@
     "sandboxed-module": "~2.0.4",
     "sinon": "~9.0.2",
     "sinon-chai": "^3.7.0"
+  },
+  "engines": {
+    "node": "~6.14.1"
+  },
+  "config": {
+    "unsafe-perm": true
   }
 }
