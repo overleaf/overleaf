@@ -62,6 +62,12 @@ COPY server-ce/settings.js /etc/sharelatex/settings.js
 ADD server-ce/bin/grunt /usr/local/bin/grunt
 RUN chmod +x /usr/local/bin/grunt
 
+# Fix error with envsubst
+ # -----------------------
+ RUN apt-get update \
+ &&  apt-get install -y \
+       gettext-base
+
 # Set Environment Variables
 # --------------------------------
 ENV SHARELATEX_CONFIG /etc/sharelatex/settings.js
