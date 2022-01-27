@@ -5,6 +5,6 @@ clsi
 --env-add=ENABLE_PDF_CACHING="true",PDF_CACHING_ENABLE_WORKER_POOL="true"
 --env-pass-through=TEXLIVE_IMAGE
 --has-custom-cloudbuild=True
---node-version=14.18.1
+--node-version=14.18.3
 --public-repo=True
 --script-version=4.0.0
