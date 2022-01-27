@@ -17,7 +17,7 @@
     "test:ci": "npm run test"
   },
   "dependencies": {
-    "@overleaf/o-error": "^3.0.0",
+    "@overleaf/o-error": "^3.4.0",
     "@sentry/node": "^6.13.2",
     "bunyan": "^1.8.14",
     "node-fetch": "^2.6.1",

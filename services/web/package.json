@@ -69,7 +69,7 @@
     "@codemirror/view": "^0.19.37",
     "@overleaf/logger": "^3.1.0",
     "@overleaf/metrics": "^4.0.0",
-    "@overleaf/o-error": "^3.3.1",
+    "@overleaf/o-error": "^3.4.0",
     "@overleaf/object-persistor": "^1.0.1",
     "@overleaf/redis-wrapper": "^2.0.0",
     "@overleaf/settings": "^2.1.1",

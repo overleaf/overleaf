@@ -19,13 +19,13 @@
     "test:ci": "npm run test"
   },
   "peerDependencies": {
-    "@overleaf/o-error": "^3.1.0"
+    "@overleaf/o-error": "^3.4.0"
   },
   "dependencies": {
     "ioredis": "~4.27.1"
   },
   "devDependencies": {
-    "@overleaf/o-error": "^3.3.1",
+    "@overleaf/o-error": "^3.4.0",
     "chai": "^4.3.4",
     "@overleaf/logger": "^2.3.0",
     "mocha": "^8.3.2",
