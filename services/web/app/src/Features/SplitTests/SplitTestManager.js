@@ -6,9 +6,16 @@ const ALPHA_PHASE = 'alpha'
 const BETA_PHASE = 'beta'
 const RELEASE_PHASE = 'release'
 
-async function getSplitTests() {
+async function getSplitTests({ name, activeOnly }) {
+  const filters = {}
+  if (name && name !== '') {
+    filters.name = { $regex: _.escapeRegExp(name) }
+  }
+  if (activeOnly) {
+    filters.$where = 'this.versions[this.versions.length - 1].active === true'
+  }
   try {
-    return await SplitTest.find().exec()
+    return await SplitTest.find(filters).limit(100).exec()
   } catch (error) {
     throw OError.tag(error, 'Failed to get split tests list')
   }
@@ -22,14 +29,13 @@ async function getSplitTestByName(name) {
   }
 }
 
-async function createSplitTest(name, configuration) {
+async function createSplitTest(name, configuration, info = {}) {
   const stripedVariants = []
   let stripeStart = 0
   _checkNewVariantsConfiguration([], configuration.variants)
   for (const variant of configuration.variants) {
     stripedVariants.push({
       name: variant.name,
-      active: variant.active,
       rolloutPercent: variant.rolloutPercent,
       rolloutStripes: [
         {
@@ -42,6 +48,11 @@ async function createSplitTest(name, configuration) {
   }
   const splitTest = new SplitTest({
     name,
+    description: info.description,
+    expectedEndDate: info.expectedEndDate,
+    ticketUrl: info.ticketUrl,
+    reportsUrls: info.reportsUrls,
+    winningVariant: info.winningVariant,
     versions: [
       {
         versionNumber: 1,
@@ -54,7 +65,7 @@ async function createSplitTest(name, configuration) {
   return _saveSplitTest(splitTest)
 }
 
-async function updateSplitTest(name, configuration) {
+async function updateSplitTestConfig(name, configuration) {
   const splitTest = await getSplitTestByName(name)
   if (splitTest) {
     const lastVersion = splitTest.getCurrentVersion().toObject()
@@ -68,12 +79,27 @@ async function updateSplitTest(name, configuration) {
       lastVersion.variants,
       configuration.variants
     )
+
     splitTest.versions.push({
       versionNumber: lastVersion.versionNumber + 1,
       phase: configuration.phase,
       active: configuration.active,
       variants: updatedVariants,
     })
+    return _saveSplitTest(splitTest)
+  } else {
+    throw new OError(`Cannot update split test '${name}': not found`)
+  }
+}
+
+async function updateSplitTestInfo(name, info) {
+  const splitTest = await getSplitTestByName(name)
+  if (splitTest) {
+    splitTest.description = info.description
+    splitTest.expectedEndDate = info.expectedEndDate
+    splitTest.ticketUrl = info.ticketUrl
+    splitTest.reportsUrls = info.reportsUrls
+    splitTest.winningVariant = info.winningVariant
     return _saveSplitTest(splitTest)
   } else {
     throw new OError(`Cannot update split test '${name}': not found`)
@@ -181,7 +207,6 @@ function _updateVariantsWithNewConfiguration(
     if (!variant) {
       variantsCopy.push({
         name: newVariantConfig.name,
-        active: newVariantConfig.active,
         rolloutPercent: newVariantConfig.rolloutPercent,
         rolloutStripes: [
           {
@@ -194,7 +219,6 @@ function _updateVariantsWithNewConfiguration(
     } else if (variant.rolloutPercent < newVariantConfig.rolloutPercent) {
       const newStripeSize =
         newVariantConfig.rolloutPercent - variant.rolloutPercent
-      variant.active = newVariantConfig.active
       variant.rolloutPercent = newVariantConfig.rolloutPercent
       variant.rolloutStripes.push({
         start: totalRolloutPercentage,
@@ -224,7 +248,8 @@ module.exports = {
   getSplitTestByName,
   getSplitTests,
   createSplitTest,
-  updateSplitTest,
+  updateSplitTestConfig,
+  updateSplitTestInfo,
   switchToNextPhase,
   revertToPreviousVersion,
 }

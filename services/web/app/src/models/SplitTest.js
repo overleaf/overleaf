@@ -30,11 +30,6 @@ const VariantSchema = new Schema(
         message: `invalid, cannot be 'default' and must match: ${NAME_REGEX}, got {VALUE}`,
       },
     },
-    active: {
-      type: Boolean,
-      default: true,
-      required: true,
-    },
     rolloutPercent: RolloutPercentType,
     rolloutStripes: [
       {
@@ -91,6 +86,27 @@ const SplitTestSchema = new Schema({
   versions: [VersionSchema],
   forbidReleasePhase: {
     type: Boolean,
+    required: false,
+  },
+  description: {
+    type: String,
+    required: false,
+  },
+  expectedEndDate: {
+    type: Date,
+    required: false,
+  },
+  ticketUrl: {
+    type: String,
+    required: false,
+  },
+  reportsUrls: {
+    type: [String],
+    required: false,
+    default: [],
+  },
+  winningVariant: {
+    type: String,
     required: false,
   },
 })

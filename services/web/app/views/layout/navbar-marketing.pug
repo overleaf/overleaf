@@ -33,6 +33,9 @@ nav.navbar.navbar-default.navbar-main
 								a(href="/admin") Manage Site
 							li
 								a(href="/admin/user") Manage Users
+							if hasFeature('saas')
+								li
+									a(href="/admin/split-test") Manage Split Tests
 
 
 				// loop over header_extras
