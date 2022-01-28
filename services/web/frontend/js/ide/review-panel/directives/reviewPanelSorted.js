@@ -169,6 +169,8 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       } else {
         overflowTop = 0
       }
+
+      // TODO: unused?
       return scope.$emit('review-panel:sizes', {
         overflowTop,
         height: previousBottom + OVERVIEW_TOGGLE_HEIGHT,
@@ -203,6 +205,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
         const old_top = parseInt(list.css('top'))
         const top = old_top - deltaY * 4
         scrollAce(-top)
+        dispatchScrollEvent(-top)
         return e.preventDefault()
       })
 
@@ -215,6 +218,7 @@ export default App.directive('reviewPanelSorted', $timeout => ({
       if (ignoreNextAceEvent) {
         return (ignoreNextAceEvent = false)
       } else {
+        // TODO: unused?
         const ignoreNextPanelEvent = true
         list.height(height)
         // console.log({height, scrollTop, top: height - scrollTop})
@@ -227,6 +231,22 @@ export default App.directive('reviewPanelSorted', $timeout => ({
 
     scope.reviewPanelEventsBridge.on('aceScroll', scrollPanel)
     scope.$on('$destroy', () => scope.reviewPanelEventsBridge.off('aceScroll'))
+
+    // receive the scroll position from the CodeMirror 6 track changes extension
+    window.addEventListener('editor:scroll', event => {
+      const { scrollTop, height } = event.detail
+
+      scrollPanel(scrollTop, height)
+    })
+
+    // send the scroll position to the CodeMirror 6 track changes extension
+    const dispatchScrollEvent = value => {
+      window.dispatchEvent(
+        new CustomEvent('review-panel:event', {
+          detail: { type: 'scroll', payload: value },
+        })
+      )
+    }
 
     return scope.reviewPanelEventsBridge.emit('refreshScrollPosition')
   },
