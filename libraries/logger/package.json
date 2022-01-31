@@ -20,7 +20,7 @@
     "@overleaf/o-error": "^3.4.0",
     "@sentry/node": "^6.13.2",
     "bunyan": "^1.8.14",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "yn": "^4.0.0"
   },
   "devDependencies": {
