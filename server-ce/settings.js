@@ -12,7 +12,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let allTexLiveDockerImageNames, allTexLiveDockerImages, redisConfig, siteUrl
+let redisConfig, siteUrl
 let e
 const Path = require('path')
 
@@ -723,28 +723,6 @@ if (process.env.SHARELATEX_PROXY_LEARN != null) {
 if (process.env.SHARELATEX_ELASTICSEARCH_URL != null) {
   settings.references.elasticsearch = {
     host: process.env.SHARELATEX_ELASTICSEARCH_URL,
-  }
-}
-
-// TeX Live Images
-// -----------
-if (process.env.ALL_TEX_LIVE_DOCKER_IMAGES != null) {
-  allTexLiveDockerImages = process.env.ALL_TEX_LIVE_DOCKER_IMAGES.split(',')
-}
-if (process.env.ALL_TEX_LIVE_DOCKER_IMAGE_NAMES != null) {
-  allTexLiveDockerImageNames =
-    process.env.ALL_TEX_LIVE_DOCKER_IMAGE_NAMES.split(',')
-}
-if (allTexLiveDockerImages != null) {
-  settings.allowedImageNames = []
-  for (let index = 0; index < allTexLiveDockerImages.length; index++) {
-    const fullImageName = allTexLiveDockerImages[index]
-    const imageName = Path.basename(fullImageName)
-    const imageDesc =
-      allTexLiveDockerImageNames != null
-        ? allTexLiveDockerImageNames[index]
-        : imageName
-    settings.allowedImageNames.push({ imageName, imageDesc })
   }
 }
 
