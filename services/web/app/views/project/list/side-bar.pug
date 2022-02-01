@@ -134,16 +134,11 @@ if (isOverleaf)
 						href="/user/settings"
 					) Add Affiliation
 
-		//- .row-spaced(ng-if="hasProjects && userHasNoSubscription && !userOnPayingUniversity", ng-cloak).text-centered
-		//- 	hr
-		//- 	p.small #{translate("on_free_sl")}
-		//- 	p
-		//- 		a(href="/user/subscription/plans" ng-click="upgradeSubscription()").btn.btn-primary #{translate("upgrade")}
-		//- 	p.small.text-centered
-		//- 		| #{translate("or_unlock_features_bonus")} 
-		//- 		a(href="/user/bonus" ng-click="share()") #{translate("sharing_sl")}.
 		.row-spaced(ng-if="hasProjects && userHasNoSubscription && !userOnPayingUniversity", ng-cloak).text-centered
 			hr
-			p.small Ending Soon: Our WFH2021 discounts are available until January 31st 2022.
+			p.small #{translate("on_free_sl")}
 			p
-				a(href="https://www.overleaf.com/events/wfh2021" event-tracking="Event-Pages" event-tracking-trigger="click" event-tracking-ga="WFH-Offer-Click" event-tracking-label="Dash-Sidebar").btn.btn-primary Upgrade
+				a(href="/user/subscription/plans" ng-click="upgradeSubscription()").btn.btn-primary #{translate("upgrade")}
+			p.small.text-centered
+				| #{translate("or_unlock_features_bonus")} 
+				a(href="/user/bonus" ng-click="share()") #{translate("sharing_sl")}.

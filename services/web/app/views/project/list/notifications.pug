@@ -251,22 +251,3 @@ include ../../_mixins/reconfirm_affiliation
 			ng-if="userEmail.samlIdentifier && userEmail.samlIdentifier.providerId === reconfirmedViaSAML"
 		)
 			+reconfirmedAffiliationNotification()
-
-	- var hasPaidAffiliation = userAffiliations.some(affiliation => affiliation.licence && affiliation.licence !== 'free')
-	if settings.enableSubscriptions && !hasSubscription && !hasPaidAffiliation
-		ul.list-unstyled(
-			ng-controller="DismissableNotificationsController",
-			ng-cloak
-		)
-			li.notification-entry(
-				ng-if="shouldShowNotification && projects.length > 0"
-			)
-				.alert.alert-info
-					.notification-body
-						span Ending Soon: Our WFH2021 discounts are available until January 31st 2022.
-					.notification-action
-						a.pull-right.btn.btn-sm.btn-info(href="https://www.overleaf.com/events/wfh2021" event-tracking="Event-Pages" event-tracking-trigger="click" event-tracking-ga="WFH-Offer-Click" event-tracking-label="Dash-Banner") Upgrade
-					.notification-close
-						button(ng-click="dismiss()").close.pull-right
-							span(aria-hidden="true") &times;
-							span.sr-only #{translate("close")}

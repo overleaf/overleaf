@@ -23,19 +23,6 @@ App.controller('NotificationsController', function ($scope, $http) {
   }
 })
 
-App.controller(
-  'DismissableNotificationsController',
-  function ($scope, localStorage) {
-    $scope.shouldShowNotification =
-      localStorage('dismissed-covid-19-notification-extended') !== true
-
-    $scope.dismiss = () => {
-      localStorage('dismissed-covid-19-notification-extended', true)
-      $scope.shouldShowNotification = false
-    }
-  }
-)
-
 App.controller('ProjectInviteNotificationController', function ($scope, $http) {
   // Shortcuts for translation keys
   $scope.projectName = $scope.notification.messageOpts.projectName
