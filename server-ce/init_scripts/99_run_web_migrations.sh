@@ -8,6 +8,6 @@ else
 fi
 
 echo "Running migrations for $environment"
-cd /var/www/sharelatex/web
+cd /overleaf/services/web
 npm run migrations -- migrate -t "$environment"
 echo "Finished migrations"

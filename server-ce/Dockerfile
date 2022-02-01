@@ -5,13 +5,13 @@
 ARG SHARELATEX_BASE_TAG=sharelatex/sharelatex-base:latest
 FROM $SHARELATEX_BASE_TAG
 
-WORKDIR /var/www/sharelatex
+WORKDIR /overleaf
 
 # Add required source files
 # -------------------------
-ADD server-ce/genScript.js /var/www/sharelatex/genScript.js
-ADD server-ce/services.js /var/www/sharelatex/services.js
-ADD services/ /var/www/sharelatex/
+ADD server-ce/genScript.js /overleaf/genScript.js
+ADD server-ce/services.js /overleaf/services.js
+ADD services/ /overleaf/services/
 
 # Store the revision
 # ------------------

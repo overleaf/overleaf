@@ -68,7 +68,7 @@ RUN mkdir /install-tl-unx \
 
 # Set up sharelatex user and home directory
 # -----------------------------------------
-RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharelatex && \
+RUN adduser --system --group --home /overleaf --no-create-home sharelatex && \
 	mkdir -p /var/lib/sharelatex && \
 	chown www-data:www-data /var/lib/sharelatex && \
 	mkdir -p /var/log/sharelatex && \

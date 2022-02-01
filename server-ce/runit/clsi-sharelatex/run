@@ -15,4 +15,4 @@ if [ -e '/var/run/docker.sock' ]; then
   usermod -aG dockeronhost www-data
 fi
 
-exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /var/www/sharelatex/clsi/app.js >> /var/log/sharelatex/clsi.log 2>&1
+exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/clsi/app.js >> /var/log/sharelatex/clsi.log 2>&1

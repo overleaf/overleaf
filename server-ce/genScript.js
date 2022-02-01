@@ -4,26 +4,9 @@ console.log('#!/bin/bash')
 console.log('set -ex')
 
 switch (process.argv.pop()) {
-  case 'checkout':
-    for (const service of services) {
-      console.log(`git clone ${service.repo} ${service.name}`)
-      console.log(`git -C ${service.name} checkout ${service.version}`)
-    }
-    break
-  case 'revisions':
-    for (const service of services) {
-      console.log(`echo -n /var/www/sharelatex/${service.name},`)
-      console.log(`git -C ${service.name} rev-parse HEAD`)
-    }
-    break
-  case 'cleanup-git':
-    for (const service of services) {
-      console.log(`rm -rf ${service.name}/.git`)
-    }
-    break
   case 'install':
     for (const service of services) {
-      console.log('pushd', service.name)
+      console.log('pushd', `services/${service.name}`)
       switch (service.name) {
         case 'web':
           console.log('npm ci')
@@ -37,7 +20,7 @@ switch (process.argv.pop()) {
     break
   case 'compile':
     for (const service of services) {
-      console.log('pushd', service.name)
+      console.log('pushd', `services/${service.name}`)
       switch (service.name) {
         case 'web':
           console.log('npm run webpack:production')

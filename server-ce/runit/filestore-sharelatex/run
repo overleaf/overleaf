@@ -1,2 +1,2 @@
 #!/bin/bash
-exec /sbin/setuser www-data /usr/bin/node /var/www/sharelatex/filestore/app.js >> /var/log/sharelatex/filestore.log 2>&1
+exec /sbin/setuser www-data /usr/bin/node /overleaf/services/filestore/app.js >> /var/log/sharelatex/filestore.log 2>&1
