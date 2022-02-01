@@ -54,6 +54,8 @@ async function plansPage(req, res) {
     usage: getDefault('usage', 'usage', 'enterprise'),
   }
 
+  AnalyticsManager.recordEventForSession(req.session, 'plans-page-view')
+
   res.render('subscriptions/plans-marketing', {
     title: 'plans_and_pricing',
     plans,

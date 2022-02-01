@@ -69,7 +69,7 @@ function showGroupPlanModal() {
     'subscription-funnel',
     'plans-page',
     'group-inquiry-potential'
-  )
+  ) // deprecated by plans-page-click
 }
 
 document
@@ -94,6 +94,12 @@ document.querySelectorAll('[data-ol-purchase-group-plan]').forEach(el =>
     if (itmContent) {
       queryParams.set('itm_content', itmContent)
     }
+    eventTracking.sendMB('groups-modal-click', {
+      plan: planCode,
+      users: size,
+      currency: currency,
+      type: usage,
+    })
     const url = new URL('/user/subscription/new', window.origin)
     url.search = queryParams.toString()
     window.location = url.toString()
@@ -101,8 +107,14 @@ document.querySelectorAll('[data-ol-purchase-group-plan]').forEach(el =>
 )
 
 document.querySelectorAll('[data-ol-open-group-plan-modal]').forEach(el => {
+  const location = el.getAttribute('data-ol-location')
   el.addEventListener('click', function (e) {
     e.preventDefault()
+    eventTracking.sendMB('plans-page-click', {
+      button: 'group',
+      location,
+      period: 'annual',
+    })
     showGroupPlanModal()
   })
 })

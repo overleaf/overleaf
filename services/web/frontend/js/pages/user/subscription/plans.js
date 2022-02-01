@@ -11,7 +11,8 @@ function setUpViewSwitching(liEl) {
   const view = liEl.getAttribute('data-ol-view-tab')
   liEl.querySelector('a').addEventListener('click', function (e) {
     e.preventDefault()
-    eventTracking.send('subscription-funnel', 'plans-page', `${view}-prices`)
+    eventTracking.send('subscription-funnel', 'plans-page', `${view}-prices`) // deprecated by plans-page-toggle
+    eventTracking.sendMB('plans-page-toggle', { button: view })
     document.querySelectorAll('[data-ol-view-tab]').forEach(el => {
       if (el.getAttribute('data-ol-view-tab') === view) {
         el.classList.add('active')
@@ -35,6 +36,7 @@ function setUpCurrencySwitching(linkEl) {
       el.hidden = el.getAttribute('data-ol-currencyCode') !== currencyCode
     })
     currentCurrencyCode = currencyCode
+    eventTracking.sendMB('plans-page-currency', { currency: currencyCode })
     updateLinkTargets()
   })
 }
@@ -43,14 +45,21 @@ function setUpSubscriptionTracking(linkEl) {
   const plan =
     linkEl.getAttribute('data-ol-tracking-plan') ||
     linkEl.getAttribute('data-ol-start-new-subscription')
+  const location = linkEl.getAttribute('data-ol-location')
+  const period = linkEl.getAttribute('data-ol-item-view') || currentView
 
   linkEl.addEventListener('click', function () {
     const customLabel = linkEl.getAttribute('data-ol-tracking-label')
     const computedLabel = currentView === 'annual' ? `${plan}_annual` : plan
     const label = customLabel || computedLabel
 
-    eventTracking.sendMB('plans-page-start-trial')
-    eventTracking.send('subscription-funnel', 'sign_up_now_button', label)
+    eventTracking.sendMB('plans-page-start-trial') // deprecated by plans-page-click
+    eventTracking.send('subscription-funnel', 'sign_up_now_button', label) // deprecated by plans-page-click
+    eventTracking.sendMB('plans-page-click', {
+      button: plan,
+      location,
+      period,
+    })
   })
 }
 
