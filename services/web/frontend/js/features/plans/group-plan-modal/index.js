@@ -53,6 +53,11 @@ function updateGroupPlanView() {
   ).hidden = size >= 10
 }
 
+function getGroupModalOpeningLocation() {
+  const modalEl = $('[data-ol-group-plan-modal]')
+  return modalEl.data('ol-modal-opening-location')
+}
+
 const modalEl = $('[data-ol-group-plan-modal]')
 modalEl
   .on('shown.bs.modal', function () {
@@ -63,8 +68,11 @@ modalEl
     history.replaceState(null, document.title, window.location.pathname)
   })
 
-function showGroupPlanModal() {
+function showGroupPlanModal(location) {
   modalEl.modal()
+  if (location) {
+    modalEl.data('ol-modal-opening-location', location)
+  }
   eventTracking.send(
     'subscription-funnel',
     'plans-page',
@@ -93,6 +101,11 @@ document.querySelectorAll('[data-ol-purchase-group-plan]').forEach(el =>
     const itmContent = getMeta('ol-itm_content')
     if (itmContent) {
       queryParams.set('itm_content', itmContent)
+    } else {
+      const openingLocation = getGroupModalOpeningLocation()
+      if (openingLocation === 'toggle') {
+        queryParams.set('itm_content', openingLocation)
+      }
     }
     eventTracking.sendMB('groups-modal-click', {
       plan: planCode,
@@ -115,7 +128,7 @@ document.querySelectorAll('[data-ol-open-group-plan-modal]').forEach(el => {
       location,
       period: 'annual',
     })
-    showGroupPlanModal()
+    showGroupPlanModal(location)
   })
 })
 

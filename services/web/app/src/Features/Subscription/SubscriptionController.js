@@ -18,6 +18,7 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const RecurlyEventHandler = require('./RecurlyEventHandler')
 const { expressify } = require('../../util/promises')
 const OError = require('@overleaf/o-error')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -56,6 +57,14 @@ async function plansPage(req, res) {
 
   AnalyticsManager.recordEventForSession(req.session, 'plans-page-view')
 
+  const assignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    'plans-page-layout'
+  )
+
+  const newPlansPageVariant =
+    assignment && assignment.variant === 'new-plans-page'
+
   res.render('subscriptions/plans-marketing', {
     title: 'plans_and_pricing',
     plans,
@@ -66,6 +75,7 @@ async function plansPage(req, res) {
     groupPlans: GroupPlansData,
     groupPlanModalOptions,
     groupPlanModalDefaults,
+    newPlansPageVariant,
   })
 }
 
