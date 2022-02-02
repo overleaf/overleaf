@@ -25,6 +25,9 @@ function sanitize(input) {
       a: ['href', 'class'],
     },
     textFilter(text) {
+      // Block Angular XSS
+      if (text === '{') return '&#123;'
+      if (text === '}') return '&#125;'
       return text
         .replace(/\{\{/, '&#123;&#123;')
         .replace(/\}\}/, '&#125;&#125;')
