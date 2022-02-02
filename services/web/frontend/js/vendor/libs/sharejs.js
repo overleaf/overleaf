@@ -1506,7 +1506,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
         return;
       }
 
-      if (maxDocLength != null && editorDoc.getValue().length > maxDocLength) {
+      if (maxDocLength != null && editorDoc.getValue().length >= maxDocLength) {
         doc.emit('error', new Error('document length is greater than maxDocLength'));
         return;
       }
@@ -1629,7 +1629,7 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
   //        a custom `origin: 'remote'` which may conflict.
   //       Perma link of the docs at the time of writing this note:
   // https://web.archive.org/web/20201029163528/https://codemirror.net/doc/manual.html#selection_origin
-  window.sharejs.extendDoc('attach_cm', function (editor, keepEditorContents) {
+  window.sharejs.extendDoc('attach_cm', function (editor, keepEditorContents, maxDocLength) {
     if (!this.provides.text) {
       throw new Error('Only text documents can be attached to CodeMirror2');
     }
@@ -1664,6 +1664,10 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
     function editorListener(ed, change) {
       if (change.origin === 'remote') {
         // this change has been injected via sharejs
+        return;
+      }
+      if (maxDocLength != null && editorDoc.getValue().length >= maxDocLength) {
+        sharedoc.emit('error', new Error('document length is greater than maxDocLength'));
         return;
       }
       var fromUndo = (change.origin === 'undo')

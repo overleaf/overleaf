@@ -368,7 +368,7 @@ export default ShareJsDoc = (function () {
 
     attachToCM(cm) {
       this._attachToEditor('CM', cm, () => {
-        this._doc.attach_cm(cm, false)
+        this._doc.attach_cm(cm, false, window.maxDocLength)
       })
     }
 
@@ -381,7 +381,7 @@ export default ShareJsDoc = (function () {
 
     attachToCM6(cm6) {
       this._attachToEditor('CM6', cm6, () => {
-        cm6.attachShareJs(this._doc)
+        cm6.attachShareJs(this._doc, false, window.maxDocLength)
       })
     }
 
