@@ -1467,9 +1467,8 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
   };
 
   // Attach an ace editor to the document. The editor's contents are replaced
-  // with the document's contents unless keepEditorContents is true. (In which case the document's
-  // contents are nuked and replaced with the editor's).
-  window.sharejs.extendDoc('attach_ace', function (editor, keepEditorContents, maxDocLength) {
+  // with the document's contents.
+  window.sharejs.extendDoc('attach_ace', function (editor, maxDocLength) {
     if (!this.provides['text']) {
       throw new Error('Only text documents can be attached to ace');
     }
@@ -1622,14 +1621,13 @@ define(['ace/ace','crypto-js/sha1'], function (_ignore, CryptoJSSHA1) {
   };
 
   // Attach a CodeMirror editor to the document. The editor's contents are replaced
-  // with the document's contents unless keepEditorContents is true. (In which case
-  // the document's contents are nuked and replaced with the editor's).
+  // with the document's contents.
   // NOTE: When upgrading CM, make sure to check for new special cases of
   //        origin prefixes as documented for `doc.setSelection`. We are using
   //        a custom `origin: 'remote'` which may conflict.
   //       Perma link of the docs at the time of writing this note:
   // https://web.archive.org/web/20201029163528/https://codemirror.net/doc/manual.html#selection_origin
-  window.sharejs.extendDoc('attach_cm', function (editor, keepEditorContents, maxDocLength) {
+  window.sharejs.extendDoc('attach_cm', function (editor, maxDocLength) {
     if (!this.provides.text) {
       throw new Error('Only text documents can be attached to CodeMirror2');
     }

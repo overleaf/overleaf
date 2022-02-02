@@ -355,7 +355,7 @@ export default ShareJsDoc = (function () {
 
     attachToAce(ace) {
       this._attachToEditor('Ace', ace, () => {
-        this._doc.attach_ace(ace, false, window.maxDocLength)
+        this._doc.attach_ace(ace, window.maxDocLength)
       })
     }
 
@@ -368,7 +368,7 @@ export default ShareJsDoc = (function () {
 
     attachToCM(cm) {
       this._attachToEditor('CM', cm, () => {
-        this._doc.attach_cm(cm, false, window.maxDocLength)
+        this._doc.attach_cm(cm, window.maxDocLength)
       })
     }
 
@@ -381,7 +381,7 @@ export default ShareJsDoc = (function () {
 
     attachToCM6(cm6) {
       this._attachToEditor('CM6', cm6, () => {
-        cm6.attachShareJs(this._doc, false, window.maxDocLength)
+        cm6.attachShareJs(this._doc, window.maxDocLength)
       })
     }
 
