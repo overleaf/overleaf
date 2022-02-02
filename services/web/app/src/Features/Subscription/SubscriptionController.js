@@ -357,7 +357,12 @@ function recurlyCallback(req, res, next) {
   const event = Object.keys(req.body)[0]
   const eventData = req.body[event]
 
-  RecurlyEventHandler.sendRecurlyAnalyticsEvent(event, eventData)
+  RecurlyEventHandler.sendRecurlyAnalyticsEvent(event, eventData).catch(error =>
+    logger.error(
+      { err: error },
+      'Failed to process analytics event on Recurly webhook'
+    )
+  )
 
   if (
     [

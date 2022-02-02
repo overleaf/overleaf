@@ -1,33 +1,39 @@
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionEmailHandler = require('./SubscriptionEmailHandler')
+const { ObjectID } = require('mongodb')
 
-function sendRecurlyAnalyticsEvent(event, eventData) {
+async function sendRecurlyAnalyticsEvent(event, eventData) {
+  const userId = _getUserId(eventData)
+  if (!ObjectID.isValid(userId)) {
+    return
+  }
+
   switch (event) {
     case 'new_subscription_notification':
-      sendSubscriptionStartedEvent(eventData)
+      await _sendSubscriptionStartedEvent(userId, eventData)
       break
     case 'updated_subscription_notification':
-      _sendSubscriptionUpdatedEvent(eventData)
+      await _sendSubscriptionUpdatedEvent(userId, eventData)
       break
     case 'canceled_subscription_notification':
-      _sendSubscriptionCancelledEvent(eventData)
+      await _sendSubscriptionCancelledEvent(userId, eventData)
       break
     case 'expired_subscription_notification':
-      _sendSubscriptionExpiredEvent(eventData)
+      await _sendSubscriptionExpiredEvent(userId, eventData)
       break
     case 'renewed_subscription_notification':
-      _sendSubscriptionRenewedEvent(eventData)
+      await _sendSubscriptionRenewedEvent(userId, eventData)
       break
     case 'reactivated_account_notification':
-      _sendSubscriptionReactivatedEvent(eventData)
+      await _sendSubscriptionReactivatedEvent(userId, eventData)
       break
     case 'paid_charge_invoice_notification':
       if (
         eventData.invoice.state === 'paid' &&
         eventData.invoice.total_in_cents > 0
       ) {
-        _sendInvoicePaidEvent(eventData)
+        await _sendInvoicePaidEvent(userId, eventData)
       }
       break
     case 'closed_invoice_notification':
@@ -35,14 +41,13 @@ function sendRecurlyAnalyticsEvent(event, eventData) {
         eventData.invoice.state === 'collected' &&
         eventData.invoice.total_in_cents > 0
       ) {
-        _sendInvoicePaidEvent(eventData)
+        await _sendInvoicePaidEvent(userId, eventData)
       }
       break
   }
 }
 
-async function sendSubscriptionStartedEvent(eventData) {
-  const userId = _getUserId(eventData)
+async function _sendSubscriptionStartedEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUser(userId, 'subscription-started', {
     plan_code: planCode,
@@ -69,13 +74,12 @@ async function sendSubscriptionStartedEvent(eventData) {
     )
 
     if (assignment.variant === 'send-email') {
-      SubscriptionEmailHandler.sendTrialOnboardingEmail(userId)
+      await SubscriptionEmailHandler.sendTrialOnboardingEmail(userId)
     }
   }
 }
 
-async function _sendSubscriptionUpdatedEvent(eventData) {
-  const userId = _getUserId(eventData)
+async function _sendSubscriptionUpdatedEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUser(userId, 'subscription-updated', {
     plan_code: planCode,
@@ -95,8 +99,7 @@ async function _sendSubscriptionUpdatedEvent(eventData) {
   )
 }
 
-async function _sendSubscriptionCancelledEvent(eventData) {
-  const userId = _getUserId(eventData)
+async function _sendSubscriptionCancelledEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUser(userId, 'subscription-cancelled', {
     plan_code: planCode,
@@ -111,8 +114,7 @@ async function _sendSubscriptionCancelledEvent(eventData) {
   )
 }
 
-async function _sendSubscriptionExpiredEvent(eventData) {
-  const userId = _getUserId(eventData)
+async function _sendSubscriptionExpiredEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUser(userId, 'subscription-expired', {
     plan_code: planCode,
@@ -132,8 +134,7 @@ async function _sendSubscriptionExpiredEvent(eventData) {
   )
 }
 
-async function _sendSubscriptionRenewedEvent(eventData) {
-  const userId = _getUserId(eventData)
+async function _sendSubscriptionRenewedEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUser(userId, 'subscription-renewed', {
     plan_code: planCode,
@@ -153,8 +154,7 @@ async function _sendSubscriptionRenewedEvent(eventData) {
   )
 }
 
-async function _sendSubscriptionReactivatedEvent(eventData) {
-  const userId = _getUserId(eventData)
+async function _sendSubscriptionReactivatedEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial } = _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUser(userId, 'subscription-reactivated', {
     plan_code: planCode,
@@ -173,8 +173,7 @@ async function _sendSubscriptionReactivatedEvent(eventData) {
   )
 }
 
-async function _sendInvoicePaidEvent(eventData) {
-  const userId = _getUserId(eventData)
+async function _sendInvoicePaidEvent(userId, eventData) {
   AnalyticsManager.recordEventForUser(userId, 'subscription-invoice-collected')
   AnalyticsManager.setUserPropertyForUser(
     userId,
@@ -211,5 +210,4 @@ function _getSubscriptionData(eventData) {
 
 module.exports = {
   sendRecurlyAnalyticsEvent,
-  sendSubscriptionStartedEvent,
 }

@@ -5,7 +5,7 @@ const modulePath =
 
 describe('RecurlyEventHandler', function () {
   beforeEach(function () {
-    this.userId = '123456789abcde'
+    this.userId = '123abc234bcd456cde567def'
     this.planCode = 'collaborator-annual'
     this.eventData = {
       account: {
@@ -86,12 +86,11 @@ describe('RecurlyEventHandler', function () {
     this.SplitTestHandler.promises.getAssignmentForUser = sinon
       .stub()
       .resolves({ variant: 'send-email' })
-    this.userId = '123456789trial'
-    this.eventData.account.account_code = this.userId
 
-    // testing directly on the send subscription started event to ensure the split handler
-    // promise is resolved before checking calls
-    await this.RecurlyEventHandler.sendSubscriptionStartedEvent(this.eventData)
+    await this.RecurlyEventHandler.sendRecurlyAnalyticsEvent(
+      'new_subscription_notification',
+      this.eventData
+    )
 
     sinon.assert.calledWith(
       this.SplitTestHandler.promises.getAssignmentForUser,
@@ -344,5 +343,19 @@ describe('RecurlyEventHandler', function () {
       }
     )
     sinon.assert.notCalled(this.AnalyticsManager.recordEventForUser)
+  })
+
+  it('nothing is called with invalid account code', function () {
+    this.eventData.account.account_code = 'foo_bar'
+
+    this.RecurlyEventHandler.sendRecurlyAnalyticsEvent(
+      'new_subscription_notification',
+      this.eventData
+    )
+    sinon.assert.notCalled(this.AnalyticsManager.recordEventForUser)
+    sinon.assert.notCalled(this.AnalyticsManager.setUserPropertyForUser)
+    sinon.assert.notCalled(this.AnalyticsManager.setUserPropertyForUser)
+    sinon.assert.notCalled(this.AnalyticsManager.setUserPropertyForUser)
+    sinon.assert.notCalled(this.SplitTestHandler.promises.getAssignmentForUser)
   })
 })
