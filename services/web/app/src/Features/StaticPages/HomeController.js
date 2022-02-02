@@ -21,6 +21,9 @@ const fs = require('fs')
 const ErrorController = require('../Errors/ErrorController')
 const SessionManager = require('../Authentication/SessionManager')
 
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const logger = require('@overleaf/logger')
+
 const homepageExists = fs.existsSync(
   Path.join(__dirname, '/../../../views/external/home/v2.pug')
 )
@@ -38,9 +41,20 @@ module.exports = HomeController = {
     }
   },
 
-  home(req, res, next) {
+  async home(req, res) {
     if (Features.hasFeature('homepage') && homepageExists) {
-      return res.render('external/home/v2')
+      try {
+        const highlightSSOAssignment =
+          await SplitTestHandler.promises.getAssignment(req, 'highlight-sso')
+        const highlightSSO = highlightSSOAssignment.variant === 'active'
+        return res.render('external/home/v2', { highlightSSO })
+      } catch (err) {
+        logger.error(
+          { err },
+          "error fetching 'highlight-sso' split test assignment"
+        )
+        return res.render('external/home/v2', { highlightSSO: false })
+      }
     } else {
       return res.redirect('/login')
     }

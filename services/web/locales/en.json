@@ -174,6 +174,7 @@
   "need_to_do_this_to_access_license": "You’ll need to do this in order to have access to the benefits from the <b>__institutionName__</b> site license.",
   "institutional_login_not_supported": "Your university doesn’t support <b>institutional login</b> yet, but you can still register with your institutional email.",
   "institutional_login_unknown": "Sorry, we don’t know which institution issued that email address. You can browse our <a href=\"__link__\">list of institutions</a> to find yours, or you can just register using your email address and password here.",
+  "institutional_login_unknown_sso_highlight_variant": "Sorry, we don’t know which institution issued that email address. You can browse our <a href=\"__link__\">list of institutions</a> to find yours, or you can use one of the other options below.",
   "link_account": "Link Account",
   "link_accounts": "Link Accounts",
   "link_accounts_and_add_email": "Link Accounts and Add Email",
