@@ -801,6 +801,21 @@ const ProjectController = {
             }
           )
         },
+        newSourceEditorAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            'source-editor',
+            {},
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null)
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (
         err,
@@ -812,6 +827,7 @@ const ProjectController = {
           isTokenMember,
           brandVariation,
           newPdfPreviewAssignment,
+          newSourceEditorAssignment,
         }
       ) => {
         if (err != null) {
@@ -916,6 +932,10 @@ const ProjectController = {
               detachRole = req.params.detachRole
             }
 
+            const showNewSourceEditor =
+              (newSourceEditorAssignment &&
+                newSourceEditorAssignment.variant === 'codemirror') ||
+              shouldDisplayFeature('new_source_editor', false) // also allow override via ?new_source_editor=true
             res.render('project/editor', {
               title: project.name,
               priority_title: true,
@@ -978,10 +998,7 @@ const ProjectController = {
               showPdfDetach,
               debugPdfDetach,
               showNewPdfPreview,
-              showNewSourceEditor: shouldDisplayFeature(
-                'new_source_editor',
-                false
-              ),
+              showNewSourceEditor,
               trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
               enablePdfCaching: partOfPdfCachingRollout('enable-caching'),
               resetServiceWorker:
