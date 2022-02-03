@@ -57,8 +57,10 @@ html(
 				window.dataLayer = window.dataLayer || [];
 				function gtag(){dataLayer.push(arguments);}
 				gtag('js', new Date());
-
 				gtag('config', '#{gaTokenV4}');
+		else
+			script(type = "text/javascript", nonce = scriptNonce).
+				window.gtag = function() { console.log("would send to GA4", arguments) };
 
 		block meta
 			meta(name="ol-csrfToken" content=csrfToken)

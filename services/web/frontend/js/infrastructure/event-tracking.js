@@ -28,6 +28,11 @@ export function sendOnce(category, action, label, value) {
 
 export function sendMB(key, segmentation = {}) {
   sendBeacon(key, segmentation)
+
+  if (typeof window.gtag !== 'function') return
+  if (['paywall-click', 'paywall-prompt', 'plans-page-click'].includes(key)) {
+    window.gtag('event', key, segmentation)
+  }
 }
 
 export function sendMBOnce(key, segmentation = {}) {
