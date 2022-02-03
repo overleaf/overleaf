@@ -257,6 +257,7 @@ If the project has been renamed please look in your project list for a new proje
     })
 
     $scope.$on('cursor:editor:update', eventTracking.editingSessionHeartbeat)
+    $scope.$on('scroll:editor:update', eventTracking.editingSessionHeartbeat)
 
     const DARK_THEMES = [
       'ambiance',

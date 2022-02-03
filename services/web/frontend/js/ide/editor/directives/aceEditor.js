@@ -818,8 +818,6 @@ App.directive(
           // deletes and then inserts document content
           session.setAnnotations(scope.annotations)
 
-          session.on('changeScrollTop', eventTracking.editingSessionHeartbeat)
-
           angular
             .element($window)
             .on('click', eventTracking.editingSessionHeartbeat)
