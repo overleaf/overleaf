@@ -309,6 +309,7 @@ export default App.controller(
       return _resetAddingEmail()
     }
     _reset()
+    $scope.ui.showAddEmailUI = window.location.hash === '#add-email'
 
     function _monitorRequest(promise) {
       $scope.ui.hasError = false

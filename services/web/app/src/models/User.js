@@ -61,6 +61,7 @@ const UserSchema = new Schema({
   lastFailedLogin: { type: Date },
   lastLoggedIn: { type: Date },
   lastLoginIp: { type: String, default: '' },
+  lastPrimaryEmailCheck: { type: Date },
   loginCount: { type: Number, default: 0 },
   holdingAccount: { type: Boolean, default: false },
   ace: {

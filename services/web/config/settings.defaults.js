@@ -533,6 +533,8 @@ module.exports = {
   // Maximum size of text documents in the real-time editing system.
   max_doc_length: 2 * 1024 * 1024, // 2mb
 
+  primary_email_check_expiration: 1000 * 60 * 60 * 24 * 90, // 90 days
+
   // Maximum JSON size in HTTP requests
   // We should be able to process twice the max doc length, to allow for
   //   - the doc content

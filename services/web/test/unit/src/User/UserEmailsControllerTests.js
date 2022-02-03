@@ -49,6 +49,9 @@ describe('UserEmailsController', function () {
       endorseAffiliation: this.endorseAffiliation,
     }
     this.HttpErrorHandler = { conflict: sinon.stub() }
+    this.AnalyticsManager = {
+      recordEventForUser: sinon.stub(),
+    }
     this.UserEmailsController = SandboxedModule.require(modulePath, {
       requires: {
         '../Authentication/SessionManager': this.SessionManager,
@@ -71,6 +74,7 @@ describe('UserEmailsController', function () {
           }),
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
+        '../Analytics/AnalyticsManager': this.AnalyticsManager,
       },
     })
   })

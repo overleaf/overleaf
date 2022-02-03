@@ -18,6 +18,7 @@ const Errors = require('../Errors/Errors')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
 const RecurlyWrapper = require('../Subscription/RecurlyWrapper')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 
 async function _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email) {
   // send email to both old and new primary email
@@ -46,6 +47,8 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
   }
 
   await UserGetter.promises.ensureUniqueEmailAddress(newEmail)
+
+  AnalyticsManager.recordEventForUser(userId, 'secondary-email-added')
 
   await UserAuditLogHandler.promises.addEntry(
     userId,
@@ -157,13 +160,15 @@ async function setDefaultEmailAddress(
   )
 
   const query = { _id: userId, 'emails.email': email }
-  const update = { $set: { email } }
+  const update = { $set: { email, lastPrimaryEmailCheck: new Date() } }
   const res = await UserUpdater.promises.updateUser(query, update)
 
   // this should not happen
   if (res.matchedCount !== 1) {
     throw new Error('email update error')
   }
+
+  AnalyticsManager.recordEventForUser(userId, 'primary-email-address-updated')
 
   if (sendSecurityAlert) {
     // no need to wait, errors are logged and not passed back

@@ -40,6 +40,9 @@ describe('UserUpdater', function () {
         updateAccountEmailAddress: sinon.stub(),
       },
     }
+    this.AnalyticsManager = {
+      recordEventForUser: sinon.stub(),
+    }
     this.UserUpdater = SandboxedModule.require(modulePath, {
       requires: {
         '../Helpers/Mongo': { normalizeQuery },
@@ -79,6 +82,7 @@ describe('UserUpdater', function () {
             addEntry: sinon.stub().resolves(),
           },
         }),
+        '../Analytics/AnalyticsManager': this.AnalyticsManager,
       },
     })
 
@@ -549,7 +553,12 @@ describe('UserUpdater', function () {
           this.UserUpdater.promises.updateUser
             .calledWith(
               { _id: this.stubbedUser._id, 'emails.email': this.newEmail },
-              { $set: { email: this.newEmail } }
+              {
+                $set: {
+                  email: this.newEmail,
+                  lastPrimaryEmailCheck: sinon.match.date,
+                },
+              }
             )
             .should.equal(true)
           done()

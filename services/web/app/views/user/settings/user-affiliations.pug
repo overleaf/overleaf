@@ -40,6 +40,7 @@ form.row(
 	.col-md-12
 		h3 #{translate("emails_and_affiliations_title")}
 		p.small #{translate("emails_and_affiliations_explanation")}
+		p.small !{translate("change_primary_email_address_instructions", {}, [{name: "strong"}, { name: "a", attrs: { href: "/learn/how-to/Keeping_your_account_secure"}}])}
 		table.table.affiliations-table
 			thead
 				tr
@@ -190,11 +191,12 @@ form.row(
 								ng-model-options="{ allowInvalid: true }"
 								get-suggestion="getEmailSuggestion(userInput)"
 								on-blur="handleEmailInputBlur()"
-								input-id="affilitations-email"
-								input-name="affilitationsEmail"
+								input-id="affiliations-email"
+								input-name="affiliationsEmail"
 								input-placeholder="e.g. johndoe@mit.edu"
 								input-type="email"
 								input-required="true"
+								focus-on-render="true"
 							)
 					td(
 						colspan="2"

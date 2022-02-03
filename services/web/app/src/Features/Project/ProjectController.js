@@ -41,6 +41,7 @@ const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const { getNewLogsUIVariantForUser } = require('../Helpers/NewLogsUI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const SpellingHandler = require('../Spelling/SpellingHandler')
+const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
@@ -404,7 +405,7 @@ const ProjectController = {
         user(cb) {
           User.findById(
             userId,
-            'emails featureSwitches overleaf awareOfV2 features lastLoginIp',
+            'email emails featureSwitches overleaf awareOfV2 features lastLoginIp lastPrimaryEmailCheck signUpDate',
             cb
           )
         },
@@ -440,13 +441,40 @@ const ProjectController = {
             )
           })
         },
+
+        primaryEmailCheckActive(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            'primary-email-check',
+            (err, assignment) => {
+              if (err) {
+                logger.warn(
+                  { err },
+                  'failed to get "primary-email-check" split test assignment'
+                )
+                cb(null, false)
+              } else {
+                cb(null, assignment.variant === 'active')
+              }
+            }
+          )
+        },
       },
       (err, results) => {
         if (err != null) {
           OError.tag(err, 'error getting data for project list page')
           return next(err)
         }
-        const { notifications, user, userEmailsData } = results
+        const { notifications, user, userEmailsData, primaryEmailCheckActive } =
+          results
+
+        if (
+          user &&
+          primaryEmailCheckActive &&
+          UserPrimaryEmailCheckHandler.requiresPrimaryEmailCheck(user)
+        ) {
+          return res.redirect('/user/emails/primary-email-check')
+        }
 
         const userEmails = userEmailsData.list || []
 

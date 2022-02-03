@@ -203,6 +203,18 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     UserEmailsController.resendConfirmation
   )
 
+  webRouter.get(
+    '/user/emails/primary-email-check',
+    AuthenticationController.requireLogin(),
+    UserEmailsController.primaryEmailCheckPage
+  )
+
+  webRouter.post(
+    '/user/emails/primary-email-check',
+    AuthenticationController.requireLogin(),
+    UserEmailsController.primaryEmailCheck
+  )
+
   if (Features.hasFeature('affiliations')) {
     webRouter.post(
       '/user/emails',

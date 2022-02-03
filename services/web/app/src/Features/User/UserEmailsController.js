@@ -10,6 +10,9 @@ const { endorseAffiliation } = require('../Institutions/InstitutionsAPI')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const { expressify } = require('../../util/promises')
+const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
 
 async function _sendSecurityAlertEmail(user, email) {
   const emailOptions = {
@@ -113,6 +116,35 @@ function sendReconfirmation(req, res, next) {
   })
 }
 
+async function primaryEmailCheckPage(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const user = await UserGetter.promises.getUser(userId, {
+    lastPrimaryEmailCheck: 1,
+    signUpDate: 1,
+    email: 1,
+    emails: 1,
+  })
+
+  if (!UserPrimaryEmailCheckHandler.requiresPrimaryEmailCheck(user)) {
+    return res.redirect('/project')
+  }
+
+  AnalyticsManager.recordEventForUser(
+    userId,
+    'primary-email-check-page-displayed'
+  )
+  res.render('user/primaryEmailCheck')
+}
+
+async function primaryEmailCheck(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  await UserUpdater.promises.updateUser(userId, {
+    $set: { lastPrimaryEmailCheck: new Date() },
+  })
+  AnalyticsManager.recordEventForUser(userId, 'primary-email-check-done')
+  AsyncFormHelper.redirect(req, res, '/project')
+}
+
 const UserEmailsController = {
   list(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
@@ -203,6 +235,10 @@ const UserEmailsController = {
   resendConfirmation,
 
   sendReconfirmation,
+
+  primaryEmailCheckPage: expressify(primaryEmailCheckPage),
+
+  primaryEmailCheck: expressify(primaryEmailCheck),
 
   showConfirm(req, res, next) {
     res.render('user/confirm_email', {

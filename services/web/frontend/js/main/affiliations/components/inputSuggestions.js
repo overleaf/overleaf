@@ -91,6 +91,7 @@ export default App.component('inputSuggestions', {
     ' ng-attr-placeholder="{{ ::$ctrl.inputPlaceholder }}"',
     ' ng-attr-type="{{ ::$ctrl.inputType }}"',
     ' ng-attr-name="{{ ::$ctrl.inputName }}"',
+    ' autofocus="::$ctrl.focusOnRender"',
     ' ng-required="::$ctrl.inputRequired">',
     '</div>',
   ].join(''),
