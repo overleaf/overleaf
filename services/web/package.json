@@ -77,6 +77,8 @@
     "@pollyjs/core": "^4.2.1",
     "@pollyjs/persister-fs": "^4.2.1",
     "@reach/tabs": "^0.15.0",
+    "@replit/codemirror-emacs": "^0.19.0",
+    "@replit/codemirror-vim": "^0.19.0",
     "@sentry/browser": "^6.3.5",
     "@uppy/core": "^1.15.0",
     "@uppy/dashboard": "^1.11.0",
