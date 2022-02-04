@@ -1550,6 +1550,8 @@
   "layout_processing": "Layout processing",
   "show_in_code": "Show in code",
   "show_in_pdf": "Show in PDF",
+  "fold_line": "Fold line",
+  "unfold_line": "Unfold line",
   "search_all": "all",
   "search_close": "close",
   "search_command_find": "Find",
