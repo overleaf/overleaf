@@ -35,6 +35,7 @@
     "extract-translations": "i18next-scanner",
     "migrations": "east",
     "storybook": "start-storybook -p 6006 -s ./public",
+    "convert-themes": "node modules/source-editor/frontend/js/themes/convert.js",
     "routes": "bin/routes"
   },
   "browserslist": [
@@ -265,6 +266,7 @@
     "less": "^3.11.1",
     "less-loader": "^6.0.0",
     "less-plugin-autoprefix": "^2.0.0",
+    "mensch": "^0.3.4",
     "mini-css-extract-plugin": "^0.8.0",
     "mkdirp": "0.5.1",
     "mocha": "^8.3.2",
