@@ -120,5 +120,9 @@ export default App.factory('metadata', function ($http, ide) {
     }, 1000))
   }
 
+  window.addEventListener('editor:metadata-outdated', () => {
+    metadata.scheduleLoadDocMetaFromServer(ide.$scope.editor.sharejs_doc.doc_id)
+  })
+
   return metadata
 })
