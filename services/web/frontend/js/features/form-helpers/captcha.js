@@ -1,3 +1,4 @@
+import 'abort-controller/polyfill'
 import { postJSON } from '../../infrastructure/fetch-json'
 
 const grecaptcha = window.grecaptcha
@@ -6,13 +7,14 @@ let recaptchaId
 const recaptchaCallbacks = []
 
 export async function canSkipCaptcha(email) {
-  const controller = new AbortController()
-  const signal = controller.signal
-  const timer = setTimeout(() => {
-    controller.abort()
-  }, 1000)
+  let timer
   let canSkip
   try {
+    const controller = new AbortController()
+    const signal = controller.signal
+    timer = setTimeout(() => {
+      controller.abort()
+    }, 1000)
     canSkip = await postJSON('/login/can-skip-captcha', {
       signal,
       body: { email },
