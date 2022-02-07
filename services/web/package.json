@@ -280,7 +280,7 @@
     "prettier": "2.5.1",
     "requirejs": "^2.3.6",
     "samlp": "^3.4.1",
-    "sandboxed-module": "^2.0.4",
+    "sandboxed-module": "https://github.com/overleaf/node-sandboxed-module/archive/cafa2d60f17ce75cc023e6f296eb8de79d92d35d.tar.gz",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.5.0",
     "sinon-mongoose": "^2.3.0",

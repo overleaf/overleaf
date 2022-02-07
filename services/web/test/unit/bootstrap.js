@@ -44,6 +44,7 @@ const globalStubs = {
 
 const SandboxedModule = require('sandboxed-module')
 SandboxedModule.configure({
+  ignoreMissing: true,
   requires: getSandboxedModuleRequires(),
   globals: { Buffer, Promise, console, process },
 })
