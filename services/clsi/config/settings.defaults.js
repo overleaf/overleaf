@@ -9,9 +9,12 @@ module.exports = {
   catchErrors: process.env.CATCH_ERRORS === 'true',
 
   path: {
-    compilesDir: Path.resolve(__dirname, '../compiles'),
-    outputDir: Path.resolve(__dirname, '../output'),
-    clsiCacheDir: Path.resolve(__dirname, '../cache'),
+    compilesDir:
+      process.env.CLSI_COMPILES_PATH || Path.resolve(__dirname, '../compiles'),
+    outputDir:
+      process.env.CLSI_OUTPUT_PATH || Path.resolve(__dirname, '../output'),
+    clsiCacheDir:
+      process.env.CLSI_CACHE_PATH || Path.resolve(__dirname, '../cache'),
     synctexBaseDir(projectId) {
       return Path.join(this.compilesDir, projectId)
     },
