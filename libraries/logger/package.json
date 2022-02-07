@@ -10,10 +10,10 @@
   "version": "3.1.0",
   "scripts": {
     "test": "mocha --grep=$MOCHA_GREP test/**/*.js",
-    "format": "../../node_modules/.bin/prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "../../node_modules/.bin/prettier --write $PWD/'**/*.js'",
-    "lint": "../../node_modules/.bin/eslint --max-warnings 0 --format unix .",
-    "lint:fix": "../../node_modules/.bin/eslint --fix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix .",
     "test:ci": "npm run test"
   },
   "dependencies": {
@@ -24,11 +24,11 @@
     "yn": "^4.0.0"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
+    "chai": "^4.3.6",
     "mocha": "^8.4.0",
     "sandboxed-module": "^2.0.4",
-    "sinon": "^9.0.2",
-    "sinon-chai": "^3.5.0"
+    "sinon": "^9.2.4",
+    "sinon-chai": "^3.7.0"
   },
   "peerDependencies": {
     "@overleaf/metrics": ">= 4.0.0"

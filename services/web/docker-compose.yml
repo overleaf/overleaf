@@ -6,12 +6,11 @@ volumes:
 services:
 
   test_unit:
-    build:
-      context: ../..
-      dockerfile: services/web/Dockerfile
-      target: base
+    image: gcr.io/overleaf-ops/node:14.18.3
     volumes:
       - .:/overleaf/services/web
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/web
     environment:
       BASE_CONFIG:
@@ -22,9 +21,11 @@ services:
     user: node
 
   test_acceptance:
-    image: node:14.18.3
+    image: gcr.io/overleaf-ops/node:14.18.3
     volumes:
       - .:/overleaf/services/web
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/web
     env_file: docker-compose.common.env
     environment:
@@ -50,6 +51,8 @@ services:
       dockerfile: services/web/Dockerfile.frontend
     volumes:
       - .:/overleaf/services/web
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
     environment:
       NODE_OPTIONS: "--unhandled-rejections=strict"
     working_dir: /overleaf/services/web
@@ -62,6 +65,8 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/web
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/web
     environment:
       MOCHA_GREP: ${MOCHA_GREP}

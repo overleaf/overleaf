@@ -4,6 +4,7 @@
     "app.js",
     "locales/*.json",
     "modules/*/app/src/",
-    "config/"
+    "config/",
+    "../../libraries/"
   ]
 }

@@ -11,7 +11,8 @@
   "watch": [
     "app/js/",
     "app.js",
-    "config/"
+    "config/",
+    "../../libraries/"
   ],
   "ext": "js"
 }

@@ -40,6 +40,20 @@ glob.sync(path.join(__dirname, 'frontend/js/pages/**/*.js')).forEach(page => {
   entryPoints[name] = './' + path.relative(__dirname, page)
 })
 
+function getModuleDirectory(moduleName) {
+  const entrypointPath = require.resolve(moduleName)
+  const suffix = `node_modules/${moduleName}`
+  const idx = entrypointPath.indexOf(suffix)
+  if (idx === -1) {
+    throw new Error(`could not find Node module: ${moduleName}`)
+  }
+  return entrypointPath.slice(0, idx + suffix.length)
+}
+
+const mathjaxDir = getModuleDirectory('mathjax')
+const aceDir = getModuleDirectory('ace-builds')
+const pdfjsDir = getModuleDirectory('pdfjs-dist')
+
 module.exports = {
   // Defines the "entry point(s)" for the application - i.e. the file which
   // bootstraps the application
@@ -263,6 +277,7 @@ module.exports = {
         `frontend/js/vendor/libs/${PackageVersions.lib('fineuploader')}`
       ),
     },
+    symlinks: false,
   },
 
   // Split out files into separate (derived) bundles if they are shared between
@@ -301,7 +316,7 @@ module.exports = {
         { from: 'fonts/HTML-CSS/TeX/woff/*', to: 'js/libs/mathjax' },
       ],
       {
-        context: 'node_modules/mathjax',
+        context: mathjaxDir,
       }
     ),
 
@@ -311,14 +326,14 @@ module.exports = {
         to: 'js/libs/sigma-master',
       },
       {
-        from: 'node_modules/ace-builds/src-min-noconflict',
+        from: `${aceDir}/src-min-noconflict`,
         to: `js/ace-${PackageVersions.version.ace}/`,
       },
       // Copy CMap files (used to provide support for non-Latin characters)
       // and static images from pdfjs-dist package to build output.
-      { from: 'node_modules/pdfjs-dist/cmaps', to: 'js/cmaps' },
+      { from: `${pdfjsDir}/cmaps`, to: 'js/cmaps' },
       {
-        from: 'node_modules/pdfjs-dist/legacy/web/images',
+        from: `${pdfjsDir}/legacy/web/images`,
         to: 'images',
       },
     ]),

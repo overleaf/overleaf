@@ -12,6 +12,8 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/spelling
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/spelling
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
@@ -27,6 +29,8 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/spelling
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/spelling
     environment:
       ELASTIC_SEARCH_DSN: es:9200

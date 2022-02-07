@@ -5,8 +5,10 @@ function clearSettingsCache() {
   delete require.cache[
     require.resolve('../../../../config/settings.defaults.js')
   ]
-  const settingsDeps = Object.keys(require.cache).filter(x =>
-    x.includes('/@overleaf/settings/')
+  const settingsDeps = Object.keys(require.cache).filter(
+    x =>
+      x.includes('/@overleaf/settings/') ||
+      x.includes('/overleaf/libraries/settings')
   )
   settingsDeps.forEach(dep => delete require.cache[dep])
 }

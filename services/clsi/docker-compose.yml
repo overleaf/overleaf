@@ -12,6 +12,8 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/clsi
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/clsi
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
@@ -26,6 +28,8 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/clsi
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/clsi
     extends:
       file: docker-compose-config.yml

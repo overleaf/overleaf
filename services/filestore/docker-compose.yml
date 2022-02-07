@@ -12,6 +12,8 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/filestore
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/filestore
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
@@ -27,6 +29,8 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/filestore
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/filestore
     environment:
       ELASTIC_SEARCH_DSN: es:9200

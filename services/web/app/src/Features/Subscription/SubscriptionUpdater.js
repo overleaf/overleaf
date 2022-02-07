@@ -118,9 +118,11 @@ async function restoreSubscription(subscriptionId) {
   const subscription = deletedSubscription.subscription
 
   // 1. upsert subscription
-  await db.subscriptions.updateOne({ _id: subscription._id }, subscription, {
-    upsert: true,
-  })
+  await db.subscriptions.updateOne(
+    { _id: subscription._id },
+    { $set: subscription },
+    { upsert: true }
+  )
 
   // 2. refresh users features. Do this before removing the
   //    subscription so the restore can be retried if this fails

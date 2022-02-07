@@ -1,11 +1,8 @@
 {
-  "name": "spelling-sharelatex",
-  "author": "ShareLaTeX <team@sharelatex.com>",
+  "name": "@overleaf/spelling",
   "description": "A JSON API wrapper around aspell",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sharelatex/spelling-sharelatex.git"
-  },
+  "private": true,
+  "main": "app.js",
   "scripts": {
     "compile:app": "([ -e app/coffee ] && coffee -m $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee -m $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
     "start": "node $NODE_APP_OPTIONS app.js",
@@ -18,17 +15,17 @@
     "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests && npm run compile:smoke_tests",
     "nodemon": "nodemon --config nodemon.json",
     "compile:smoke_tests": "[ ! -e test/smoke/coffee ] &&  echo 'No smoke tests to compile' || coffee -o test/smoke/js -c test/smoke/coffee",
-    "lint": "../../node_modules/.bin/eslint --max-warnings 0 --format unix .",
-    "format": "../../node_modules/.bin/prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "../../node_modules/.bin/prettier --write $PWD/'**/*.js'",
-    "lint:fix": "../../node_modules/.bin/eslint --fix ."
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "lint:fix": "eslint --fix ."
   },
   "version": "0.1.4",
   "dependencies": {
     "@overleaf/logger": "^3.1.0",
     "@overleaf/metrics": "^4.0.0",
     "@overleaf/o-error": "^3.4.0",
-    "@overleaf/settings": "^2.1.1",
+    "@overleaf/settings": "^3.0.0",
     "async": "^2.6.3",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
@@ -39,10 +36,10 @@
     "underscore": "1.13.1"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
+    "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^8.3.2",
+    "mocha": "^8.4.0",
     "sandboxed-module": "2.0.4",
-    "sinon": "^9.0.1"
+    "sinon": "^9.2.4"
   }
 }

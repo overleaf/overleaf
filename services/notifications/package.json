@@ -1,7 +1,7 @@
 {
-  "name": "notifications-sharelatex",
-  "version": "0.0.1",
+  "name": "@overleaf/notifications",
   "description": "An API to handle user notifications",
+  "private": true,
   "main": "app.js",
   "scripts": {
     "start": "node $NODE_APP_OPTIONS app.js",
@@ -10,17 +10,17 @@
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "nodemon": "nodemon --config nodemon.json",
-    "lint": "../../node_modules/.bin/eslint --max-warnings 0 --format unix .",
-    "format": "../../node_modules/.bin/prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "../../node_modules/.bin/prettier --write $PWD/'**/*.js'",
-    "lint:fix": "../../node_modules/.bin/eslint --fix ."
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "lint:fix": "eslint --fix ."
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@overleaf/logger": "^3.1.0",
     "@overleaf/metrics": "^4.0.0",
-    "@overleaf/settings": "^2.1.1",
+    "@overleaf/settings": "^3.0.0",
     "async": "^2.6.3",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
@@ -31,10 +31,10 @@
     "underscore": "1.13.1"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
+    "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^8.3.2",
-    "sandboxed-module": "^2.0.3",
-    "sinon": "^9.0.1"
+    "mocha": "^8.4.0",
+    "sandboxed-module": "^2.0.4",
+    "sinon": "^9.2.4"
   }
 }

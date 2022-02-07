@@ -5,18 +5,7 @@ console.log('set -ex')
 
 switch (process.argv.pop()) {
   case 'install':
-    for (const service of services) {
-      console.log('pushd', `services/${service.name}`)
-      switch (service.name) {
-        case 'web':
-          console.log('npm ci')
-          break
-        default:
-          // TODO(das7pad): revert back to npm ci --only=production (https://github.com/overleaf/issues/issues/4544)
-          console.log('npm ci')
-      }
-      console.log('popd')
-    }
+    console.log('npm ci')
     break
   case 'compile':
     for (const service of services) {

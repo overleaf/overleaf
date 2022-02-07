@@ -1,11 +1,8 @@
 {
-  "name": "node-clsi",
+  "name": "@overleaf/clsi",
   "description": "A Node.js implementation of the CLSI LaTeX web-API",
-  "version": "0.1.4",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sharelatex/clsi-sharelatex.git"
-  },
+  "private": true,
+  "main": "app.js",
   "scripts": {
     "start": "node $NODE_APP_OPTIONS app.js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
@@ -13,16 +10,15 @@
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "nodemon": "nodemon --config nodemon.json",
-    "lint": "../../node_modules/.bin/eslint --max-warnings 0 --format unix .",
-    "format": "../../node_modules/.bin/prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "../../node_modules/.bin/prettier --write $PWD/'**/*.js'",
-    "lint:fix": "../../node_modules/.bin/eslint --fix ."
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "lint:fix": "eslint --fix ."
   },
-  "author": "James Allen <james@sharelatex.com>",
   "dependencies": {
     "@overleaf/metrics": "^3.5.1",
     "@overleaf/o-error": "^3.4.0",
-    "@overleaf/settings": "^2.1.1",
+    "@overleaf/settings": "^3.0.0",
     "async": "3.2.0",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
@@ -34,17 +30,17 @@
     "lodash": "^4.17.21",
     "logger-sharelatex": "^2.2.0",
     "p-limit": "^3.1.0",
-    "pdfjs-dist": "^2.7.570",
+    "pdfjs-dist": "~2.7.570",
     "request": "^2.88.2",
     "send": "^0.17.1",
     "workerpool": "^6.1.5"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
+    "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^8.3.2",
+    "mocha": "^8.4.0",
     "nodemon": "^2.0.7",
-    "sandboxed-module": "^2.0.3",
+    "sandboxed-module": "^2.0.4",
     "sinon": "~9.0.1",
     "sinon-chai": "^3.7.0",
     "timekeeper": "2.2.0"

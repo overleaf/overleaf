@@ -30,7 +30,7 @@ HERE=$(shell pwd)
 MONOREPO=$(shell cd ../../ && pwd)
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
-RUN_LINTING = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(HERE) node:14.18.3 npm run --silent
+RUN_LINTING = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(HERE) gcr.io/overleaf-ops/node:14.18.3 npm run --silent
 
 format:
 	$(RUN_LINTING) format

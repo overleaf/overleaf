@@ -1,12 +1,8 @@
 {
-  "name": "docstore-sharelatex",
-  "version": "0.1.2",
+  "name": "@overleaf/docstore",
   "description": "A CRUD API for handling text documents in projects",
-  "author": "ShareLaTeX <team@sharelatex>",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sharelatex/docstore-sharelatex.git"
-  },
+  "private": true,
+  "main": "app.js",
   "scripts": {
     "start": "node $NODE_APP_OPTIONS app.js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
@@ -14,17 +10,17 @@
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "nodemon": "nodemon --config nodemon.json",
-    "lint": "../../node_modules/.bin/eslint --max-warnings 0 --format unix .",
-    "format": "../../node_modules/.bin/prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "../../node_modules/.bin/prettier --write $PWD/'**/*.js'",
-    "lint:fix": "../../node_modules/.bin/eslint --fix ."
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "lint:fix": "eslint --fix ."
   },
   "dependencies": {
     "@overleaf/logger": "^3.1.0",
     "@overleaf/metrics": "^4.0.0",
     "@overleaf/o-error": "^3.4.0",
     "@overleaf/object-persistor": "^1.0.1",
-    "@overleaf/settings": "^2.1.1",
+    "@overleaf/settings": "^3.0.0",
     "async": "^2.6.3",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
@@ -38,14 +34,11 @@
   },
   "devDependencies": {
     "@google-cloud/storage": "^5.1.2",
-    "chai": "^4.2.0",
+    "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^8.3.2",
+    "mocha": "^8.4.0",
     "sandboxed-module": "~2.0.4",
     "sinon": "~9.0.2",
-    "sinon-chai": "^3.5.0"
-  },
-  "engines": {
-    "node": "~6.14.1"
+    "sinon-chai": "^3.7.0"
   }
 }

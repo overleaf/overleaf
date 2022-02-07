@@ -6,17 +6,22 @@ volumes:
 services:
 
   test_unit:
-    build: .
+    build:
+      context: ../..
+      dockerfile: services/web/Dockerfile
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
     command: npm run test:unit:app
+    working_dir: /overleaf/services/web
     environment:
       BASE_CONFIG:
       SHARELATEX_CONFIG:
       NODE_OPTIONS: "--unhandled-rejections=strict"
 
   test_acceptance:
-    build: .
+    build:
+      context: ../..
+      dockerfile: services/web/Dockerfile
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     working_dir: /overleaf/services/web
     env_file: docker-compose.common.env
@@ -35,8 +40,8 @@ services:
 
   test_karma:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend.ci
+      context: ../..
+      dockerfile: services/web/Dockerfile.frontend.ci
       args:
         PROJECT_NAME: $PROJECT_NAME
         BRANCH_NAME: $BRANCH_NAME
@@ -48,9 +53,12 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
 
   test_frontend:
-    build: .
+    build:
+      context: ../..
+      dockerfile: services/web/Dockerfile
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
+    working_dir: /overleaf/services/web
     command: npm run test:frontend
     environment:
       NODE_OPTIONS: "--unhandled-rejections=strict"

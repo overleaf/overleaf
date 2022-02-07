@@ -15,7 +15,6 @@ function run(cmd) {
   // Pipe stdin from /dev/null, store stdout, pipe stderr to /dev/null.
   return execSync(cmd, {
     stdio: ['ignore', 'pipe', 'ignore'],
-    cwd: 'modules/server-ce-scripts/scripts',
   }).toString()
 }
 
@@ -26,7 +25,7 @@ async function getUser(email) {
 describe('ServerCEScripts', function () {
   describe('check-mongodb', function () {
     it('should exit with code 0 on success', function () {
-      run('node check-mongodb')
+      run('node modules/server-ce-scripts/scripts/check-mongodb')
     })
 
     it('should exit with code 1 on error', function () {
@@ -34,7 +33,7 @@ describe('ServerCEScripts', function () {
         run(
           'MONGO_SERVER_SELECTION_TIMEOUT=1' +
             'MONGO_CONNECTION_STRING=mongodb://localhost:4242 ' +
-            'node check-mongodb'
+            'node modules/server-ce-scripts/scripts/check-mongodb'
         )
       } catch (e) {
         expect(e.status).to.equal(1)
@@ -46,12 +45,14 @@ describe('ServerCEScripts', function () {
 
   describe('check-redis', function () {
     it('should exit with code 0 on success', function () {
-      run('node check-redis')
+      run('node modules/server-ce-scripts/scripts/check-redis')
     })
 
     it('should exit with code 1 on error', function () {
       try {
-        run('REDIS_HOST=localhost node check-redis')
+        run(
+          'REDIS_HOST=localhost node modules/server-ce-scripts/scripts/check-redis'
+        )
       } catch (e) {
         expect(e.status).to.equal(1)
         return
@@ -62,23 +63,29 @@ describe('ServerCEScripts', function () {
 
   describe('create-user', function () {
     it('should exit with code 0 on success', function () {
-      const out = run('node create-user --email=foo@bar.com')
+      const out = run(
+        'node modules/server-ce-scripts/scripts/create-user --email=foo@bar.com'
+      )
       expect(out).to.include('/user/activate?token=')
     })
 
     it('should create a regular user by default', async function () {
-      run('node create-user --email=foo@bar.com')
+      run(
+        'node modules/server-ce-scripts/scripts/create-user --email=foo@bar.com'
+      )
       expect(await getUser('foo@bar.com')).to.deep.equal({ isAdmin: false })
     })
 
     it('should create an admin user with --admin flag', async function () {
-      run('node create-user --admin --email=foo@bar.com')
+      run(
+        'node modules/server-ce-scripts/scripts/create-user --admin --email=foo@bar.com'
+      )
       expect(await getUser('foo@bar.com')).to.deep.equal({ isAdmin: true })
     })
 
     it('should exit with code 1 on missing email', function () {
       try {
-        run('node create-user')
+        run('node modules/server-ce-scripts/scripts/create-user')
       } catch (e) {
         expect(e.status).to.equal(1)
         return
@@ -96,25 +103,27 @@ describe('ServerCEScripts', function () {
 
     it('should log missing user', function () {
       const email = 'does-not-exist@example.com'
-      const out = run('node delete-user --email=' + email)
+      const out = run(
+        'node modules/server-ce-scripts/scripts/delete-user --email=' + email
+      )
       expect(out).to.include('not in database, potentially already deleted')
     })
 
     it('should exit with code 0 on success', function () {
       const email = user.email
-      run('node delete-user --email=' + email)
+      run('node modules/server-ce-scripts/scripts/delete-user --email=' + email)
     })
 
     it('should have deleted the user on success', async function () {
       const email = user.email
-      run('node delete-user --email=' + email)
+      run('node modules/server-ce-scripts/scripts/delete-user --email=' + email)
       const dbEntry = await user.get()
       expect(dbEntry).to.not.exist
     })
 
     it('should exit with code 1 on missing email', function () {
       try {
-        run('node delete-user')
+        run('node modules/server-ce-scripts/scripts/delete-user')
       } catch (e) {
         expect(e.status).to.equal(1)
         return

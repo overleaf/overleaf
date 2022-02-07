@@ -17,5 +17,30 @@
     "format:fix": "prettier --write $PWD/'**/*.js'",
     "lint": "eslint --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix ."
-  }
+  },
+  "workspaces": [
+    "libraries/*",
+    "services/analytics",
+    "services/chat",
+    "services/clsi",
+    "services/clsi-perf",
+    "services/contacts",
+    "services/docstore",
+    "services/document-updater",
+    "services/filestore",
+    "services/github-sync",
+    "services/k8s-debugger",
+    "services/notifications",
+    "services/project-archiver",
+    "services/project-history",
+    "services/real-time",
+    "services/references",
+    "services/spelling",
+    "services/templates",
+    "services/third-party-datastore",
+    "services/third-party-references",
+    "services/tpdsworker",
+    "services/track-changes",
+    "services/web"
+  ]
 }

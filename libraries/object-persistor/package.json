@@ -6,10 +6,10 @@
   "scripts": {
     "test": "npm run lint && npm run format && npm run test:unit",
     "test:unit": "mocha",
-    "lint": "../../node_modules/.bin/eslint --max-warnings 0 --format unix .",
-    "lint:fix": "../../node_modules/.bin/eslint --fix .",
-    "format": "../../node_modules/.bin/prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "../../node_modules/.bin/prettier --write $PWD/'**/*.js'",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
     "test:ci": "npm run test:unit"
   },
   "repository": {
@@ -19,7 +19,7 @@
   "author": "Overleaf (https://www.overleaf.com/)",
   "license": "AGPL-3.0",
   "dependencies": {
-    "@google-cloud/storage": "^5.1.2",
+    "@google-cloud/storage": "~5.1.2",
     "@overleaf/o-error": "^3.4.0",
     "aws-sdk": "^2.718.0",
     "fast-crc32c": "^2.0.0",
@@ -30,12 +30,12 @@
     "tiny-async-pool": "^1.1.0"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
+    "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^8.0.1",
+    "mocha": "^8.4.0",
     "mongodb": "^3.5.9",
     "sandboxed-module": "^2.0.4",
-    "sinon": "^9.0.2",
-    "sinon-chai": "^3.5.0"
+    "sinon": "^9.2.4",
+    "sinon-chai": "^3.7.0"
   }
 }

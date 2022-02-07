@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test/**/*.js",
-    "lint": "../../node_modules/.bin/eslint --max-warnings 0 --format unix .",
-    "lint:fix": "../../node_modules/.bin/eslint --fix .",
-    "format": "../../node_modules/.bin/prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "../../node_modules/.bin/prettier --write $PWD/'**/*.js'",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
     "test:ci": "npm run test"
   },
   "author": "",
@@ -19,11 +19,11 @@
   },
   "devDependencies": {
     "bunyan": "^1.8.15",
-    "chai": "^4.3.4",
+    "chai": "^4.3.6",
     "@overleaf/logger": "^2.2.0",
-    "mocha": "^6.2.2",
+    "mocha": "^8.4.0",
     "nock": "0.15.2",
-    "sandboxed-module": "^2.0.3",
-    "sinon": "^7.5.0"
+    "sandboxed-module": "^2.0.4",
+    "sinon": "^9.2.4"
   }
 }

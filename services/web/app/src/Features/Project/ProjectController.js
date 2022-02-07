@@ -1,7 +1,5 @@
 const _ = require('lodash')
-const Path = require('path')
 const OError = require('@overleaf/o-error')
-const fs = require('fs')
 const crypto = require('crypto')
 const async = require('async')
 const logger = require('@overleaf/logger')
@@ -1257,21 +1255,46 @@ const defaultSettingsForAnonymousUser = userId => ({
   betaProgram: false,
 })
 
-const THEME_LIST = []
-function generateThemeList() {
-  const files = fs.readdirSync(
-    Path.join(__dirname, '/../../../../node_modules/ace-builds/src-noconflict')
-  )
-  const result = []
-  for (const file of files) {
-    if (file.slice(-2) === 'js' && /^theme-/.test(file)) {
-      const cleanName = file.slice(0, -3).slice(6)
-      result.push(THEME_LIST.push(cleanName))
-    } else {
-      result.push(undefined)
-    }
-  }
-}
-generateThemeList()
+const THEME_LIST = [
+  'ambiance',
+  'chaos',
+  'chrome',
+  'clouds',
+  'clouds_midnight',
+  'cobalt',
+  'crimson_editor',
+  'dawn',
+  'dracula',
+  'dreamweaver',
+  'eclipse',
+  'github',
+  'gob',
+  'gruvbox',
+  'idle_fingers',
+  'iplastic',
+  'katzenmilch',
+  'kr_theme',
+  'kuroir',
+  'merbivore',
+  'merbivore_soft',
+  'mono_industrial',
+  'monokai',
+  'nord_dark',
+  'overleaf',
+  'pastel_on_dark',
+  'solarized_dark',
+  'solarized_light',
+  'sqlserver',
+  'terminal',
+  'textmate',
+  'tomorrow',
+  'tomorrow_night',
+  'tomorrow_night_blue',
+  'tomorrow_night_bright',
+  'tomorrow_night_eighties',
+  'twilight',
+  'vibrant_ink',
+  'xcode',
+]
 
 module.exports = ProjectController

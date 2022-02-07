@@ -16,19 +16,19 @@
   },
   "devDependencies": {
     "bunyan": "^1.0.0",
-    "chai": "^4.2.0",
-    "mocha": "^8.0.1",
+    "chai": "^4.3.6",
+    "mocha": "^8.4.0",
     "sandboxed-module": "^2.0.4",
-    "sinon": "^9.0.2"
+    "sinon": "^9.2.4"
   },
   "scripts": {
-    "lint": "../../node_modules/.bin/eslint --max-warnings 0 --format unix .",
-    "lint:fix": "../../node_modules/.bin/eslint --fix .",
+    "lint": "eslint --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix .",
     "test:unit": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/unit",
     "test:acceptance": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/acceptance",
     "test": "npm run test:unit && npm run test:acceptance",
-    "format": "../../node_modules/.bin/prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "../../node_modules/.bin/prettier --write $PWD/'**/*.js'",
+    "format": "prettier --list-different $PWD/'**/*.js'",
+    "format:fix": "prettier --write $PWD/'**/*.js'",
     "test:ci": "npm run test"
   },
   "peerDependencies": {

@@ -1,58 +1,41 @@
 /* eslint-disable no-console */
-let defaults, possibleConfigFiles, settingsExist
 const fs = require('fs')
-const path = require('path')
-const env = (process.env.NODE_ENV || 'development').toLowerCase()
+const Path = require('path')
 const { merge } = require('./merge')
 
-const defaultSettingsPath = path.join(
-  __dirname,
-  '../../../config/settings.defaults'
-)
+const CWD = process.cwd()
+const NODE_ENV = (process.env.NODE_ENV || 'development').toLowerCase()
+const SHARELATEX_CONFIG = process.env.SHARELATEX_CONFIG
 
-if (fs.existsSync(`${defaultSettingsPath}.js`)) {
-  console.log(`Using default settings from ${defaultSettingsPath}.js`)
-  defaults = require(`${defaultSettingsPath}.js`)
+let settings
+let settingsExist = false
+const defaultsPath = pathIfExists(Path.join(CWD, 'config/settings.defaults.js'))
+if (defaultsPath) {
+  console.log(`Using default settings from ${defaultsPath}`)
+  settings = require(defaultsPath)
   settingsExist = true
-} else if (fs.existsSync(`${defaultSettingsPath}.coffee`)) {
-  // TODO: remove this in the next major version
-  throw new Error(
-    `CoffeeScript settings file ${defaultSettingsPath}.coffee is no longer supported, please convert to JavaScript`
-  )
 } else {
-  defaults = {}
-  settingsExist = false
+  settings = {}
 }
 
-if (process.env.SHARELATEX_CONFIG) {
-  possibleConfigFiles = [process.env.SHARELATEX_CONFIG]
-} else {
-  possibleConfigFiles = [
-    path.join(process.cwd(), `config/settings.${env}.js`),
-    path.join(__dirname, `../../../config/settings.${env}.js`),
-    // TODO: remove these in the next major version
-    path.join(process.cwd(), `config/settings.${env}.coffee`),
-    path.join(__dirname, `../../../config/settings.${env}.coffee`),
-  ]
-}
-
-for (const file of possibleConfigFiles) {
-  if (fs.existsSync(file)) {
-    // TODO: remove this in the next major version
-    if (file.endsWith('.coffee')) {
-      throw new Error(
-        `CoffeeScript settings file ${file} is no longer supported, please convert to JavaScript`
-      )
-    }
-    console.log('Using settings from ' + file)
-    module.exports = merge(require(file), defaults)
-    settingsExist = true
-    break
-  }
+const overridesPath =
+  pathIfExists(SHARELATEX_CONFIG) ||
+  pathIfExists(Path.join(CWD, `config/settings.${NODE_ENV}.js`))
+if (overridesPath) {
+  console.log(`Using settings from ${overridesPath}`)
+  settings = merge(require(overridesPath), settings)
+  settingsExist = true
 }
 
 if (!settingsExist) {
   console.warn("No settings or defaults found. I'm flying blind.")
 }
 
-module.exports = defaults
+module.exports = settings
+
+function pathIfExists(path) {
+  if (path && fs.existsSync(path)) {
+    return path
+  }
+  return null
+}

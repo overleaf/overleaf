@@ -113,7 +113,6 @@
         "plugin:react-hooks/recommended",
         "plugin:jsx-a11y/recommended",
         "standard-jsx",
-        "standard-react",
         "prettier"
       ],
       "globals": {
@@ -129,6 +128,20 @@
         "ExposedSettings": true
       },
       "rules": {
+        // TODO: remove once https://github.com/standard/eslint-config-standard-react/issues/68 (support eslint@8) is fixed.
+        // START: inline standard-react rules
+        // "react/jsx-no-bind": ["error", {
+        //   "allowArrowFunctions": true,
+        //   "allowBind": false,
+        //   "ignoreRefs": true
+        // },],
+        "react/no-did-update-set-state": "error",
+        "react/no-unknown-property": "error",
+        "react/no-unused-prop-types": "error",
+        "react/prop-types": "error",
+        // "react/react-in-jsx-scope": "error",
+        // END: inline standard-react rules
+
         "react/jsx-no-target-blank": ["error", {
           "allowReferrer": true
         }],
