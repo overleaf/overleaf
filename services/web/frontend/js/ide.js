@@ -402,6 +402,11 @@ If the project has been renamed please look in your project list for a new proje
     // Allow service worker to be removed via the websocket
     ide.$scope.$on('service-worker:unregister', unregisterServiceWorker)
 
+    // Listen for editor:lint event from CM6 linter
+    window.addEventListener('editor:lint', event => {
+      $scope.hasLintingError = event.detail.hasLintingError
+    })
+
     return ide.socket.on('project:publicAccessLevel:changed', data => {
       if (data.newAccessLevel != null) {
         ide.$scope.project.publicAccesLevel = data.newAccessLevel
