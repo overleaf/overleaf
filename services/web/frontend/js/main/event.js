@@ -70,10 +70,12 @@ App.factory('eventTracking', function ($http, localStorage) {
     },
 
     editingSessionHeartbeat() {
+      sl_console.log('[Event] heartbeat trigger')
       if (!(nextHeartbeat <= new Date())) {
         return
       }
 
+      sl_console.log('[Event] send heartbeat request')
       _sendEditingSessionHeartbeat()
 
       heartbeatsSent++

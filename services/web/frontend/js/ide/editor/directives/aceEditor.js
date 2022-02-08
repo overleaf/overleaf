@@ -818,16 +818,6 @@ App.directive(
           // deletes and then inserts document content
           session.setAnnotations(scope.annotations)
 
-          angular
-            .element($window)
-            .on('click', eventTracking.editingSessionHeartbeat)
-
-          scope.$on('$destroy', () =>
-            angular
-              .element($window)
-              .off('click', eventTracking.editingSessionHeartbeat)
-          )
-
           if (scope.eventsBridge != null) {
             session.on('changeScrollTop', onScroll)
           }

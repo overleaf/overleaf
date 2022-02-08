@@ -80,7 +80,8 @@ App.controller(
     eventTracking,
     metadata,
     $q,
-    CobrandingDataService
+    CobrandingDataService,
+    $window
   ) {
     // Don't freak out if we're already in an apply callback
     let err, pdfLayout, userAgent
@@ -256,8 +257,22 @@ If the project has been renamed please look in your project list for a new proje
       return (_loaded = true)
     })
 
-    $scope.$on('cursor:editor:update', eventTracking.editingSessionHeartbeat)
-    $scope.$on('scroll:editor:update', eventTracking.editingSessionHeartbeat)
+    ide.editingSessionHeartbeat = () => {
+      eventTracking.editingSessionHeartbeat()
+    }
+
+    $scope.$on('cursor:editor:update', () => {
+      ide.editingSessionHeartbeat()
+    })
+    $scope.$on('scroll:editor:update', () => {
+      ide.editingSessionHeartbeat()
+    })
+
+    angular.element($window).on('click', ide.editingSessionHeartbeat)
+
+    $scope.$on('$destroy', () =>
+      angular.element($window).off('click', ide.editingSessionHeartbeat)
+    )
 
     const DARK_THEMES = [
       'ambiance',
