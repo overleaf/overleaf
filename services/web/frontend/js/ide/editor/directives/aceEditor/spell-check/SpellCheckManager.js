@@ -389,6 +389,10 @@ class SpellCheckManager {
       WORD_REGEX.lastIndex = 0 // reset global stateful regexp for this usage
       while ((result = WORD_REGEX.exec(line))) {
         let word = result[0]
+        // Skip latex commands, as they are ignored by the backend anyway
+        if (word.slice(0, 1) === '\\') {
+          continue
+        }
         if (word[0] === "'") {
           word = word.slice(1)
         }

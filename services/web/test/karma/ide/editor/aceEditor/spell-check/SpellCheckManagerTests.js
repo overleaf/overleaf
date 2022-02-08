@@ -206,7 +206,9 @@ export default describe('SpellCheckManager', function () {
       this.adapter.getLineCount.returns(1)
       this.adapter.getFirstVisibleRowNum.returns(1)
       this.adapter.getLastVisibleRowNum.returns(1)
-      this.adapter.getLinesByRows.returns(['Lorem ipsum dolor'])
+      this.adapter.getLinesByRows.returns([
+        'Lorem \\somecommand ipsum dolor \\othercommand',
+      ])
     })
 
     it('hits the backend with all words at startup', function () {
