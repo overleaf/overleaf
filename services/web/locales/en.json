@@ -1566,6 +1566,7 @@
   "search_regexp": "regexp",
   "search_replace": "replace",
   "search_replace_all": "replace all",
+  "go_to_account_settings": "Go to Account Settings",
   "keep_your_account_safe": "Keep your account safe",
   "primary_email_check_question": "Is <0>__email__</0> still your email address?",
   "yes_that_is_correct": "Yes, that’s correct",
