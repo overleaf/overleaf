@@ -33,7 +33,14 @@ div(ng-controller="RecurlySubscriptionController")
 					| &nbsp;
 					a(href=personalSubscription.recurly.accountManagementLink, target="_blank").btn.btn-info #{translate("view_your_invoices")}
 					| &nbsp;
-					a(href, ng-click="switchToCancellationView()", ng-hide="recurlyLoadError").btn.btn-danger !{translate("cancel_your_subscription")}
+					unless (cancelButtonNewCopy)
+						a(href, ng-click="switchToCancellationView()", ng-hide="recurlyLoadError", event-tracking='subscription-page-cancel-button-click', event-tracking-mb="true", event-tracking-trigger="click").btn.btn-danger !{translate("stop_your_subscription")}
+				if (cancelButtonNewCopy)
+					p
+						a(href, ng-click="switchToCancellationView()", ng-hide="recurlyLoadError", event-tracking='subscription-page-cancel-button-click', event-tracking-mb="true", event-tracking-trigger="click").btn.btn-danger !{translate("cancel_your_subscription")}
+					unless (personalSubscription.recurly.trialEndsAtFormatted && personalSubscription.recurly.trial_ends_at > Date.now())
+						p
+							i !{translate("subscription_will_remain_active_until_end_of_billing_period_x", {terminationDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong'])}
 			when "canceled"
 				p !{translate("currently_subscribed_to_plan", {planName: personalSubscription.plan.name}, ['strong'])}
 				p !{translate("subscription_canceled_and_terminate_on_x", {terminateDate: personalSubscription.recurly.nextPaymentDueAt}, ['strong'])}

@@ -155,6 +155,13 @@ async function userSubscriptionPage(req, res) {
 
   AnalyticsManager.recordEventForSession(req.session, 'subscription-page-view')
 
+  const assignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    'subscription-cancel-button'
+  )
+
+  const cancelButtonNewCopy = assignment && assignment.variant === 'new-copy'
+
   const data = {
     title: 'your_subscription',
     plans,
@@ -170,6 +177,7 @@ async function userSubscriptionPage(req, res) {
     v1SubscriptionStatus,
     currentInstitutionsWithLicence,
     groupPlanModalOptions,
+    cancelButtonNewCopy,
   }
   res.render('subscriptions/dashboard', data)
 }
