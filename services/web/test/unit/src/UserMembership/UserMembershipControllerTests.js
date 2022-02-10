@@ -21,6 +21,9 @@ const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const EntityConfigs = require('../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
+const {
+  UserIsManagerError,
+} = require('../../../../app/src/Features/UserMembership/UserMembershipErrors')
 
 describe('UserMembershipController', function () {
   beforeEach(function () {
@@ -71,6 +74,7 @@ describe('UserMembershipController', function () {
       modulePath,
       {
         requires: {
+          './UserMembershipErrors': { UserIsManagerError },
           '../Authentication/SessionManager': this.SessionManager,
           './UserMembershipHandler': this.UserMembershipHandler,
         },
@@ -263,7 +267,7 @@ describe('UserMembershipController', function () {
     })
 
     it('prevent admin removal', function (done) {
-      this.UserMembershipHandler.removeUser.yields({ isAdmin: true })
+      this.UserMembershipHandler.removeUser.yields(new UserIsManagerError())
       return this.UserMembershipController.remove(this.req, {
         status: () => ({
           json: payload => {

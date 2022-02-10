@@ -21,6 +21,9 @@ const modulePath =
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const EntityConfigs = require('../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs')
+const {
+  UserIsManagerError,
+} = require('../../../../app/src/Features/UserMembership/UserMembershipErrors')
 
 describe('UserMembershipHandler', function () {
   beforeEach(function () {
@@ -68,6 +71,7 @@ describe('UserMembershipHandler', function () {
     return (this.UserMembershipHandler = SandboxedModule.require(modulePath, {
       requires: {
         mongodb: { ObjectId },
+        './UserMembershipErrors': { UserIsManagerError },
         './UserMembershipViewModel': this.UserMembershipViewModel,
         '../User/UserGetter': this.UserGetter,
         '../../models/Institution': {
@@ -265,7 +269,7 @@ describe('UserMembershipHandler', function () {
           this.newUser._id,
           (error, user) => {
             expect(error).to.exist
-            expect(error.isAdmin).to.equal(true)
+            expect(error).to.be.instanceof(UserIsManagerError)
             return done()
           }
         )

@@ -15,6 +15,7 @@ const UserMembershipHandler = require('./UserMembershipHandler')
 const Errors = require('../Errors/Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
 const { csvAttachment } = require('../../infrastructure/Response')
+const { UserIsManagerError } = require('./UserMembershipErrors')
 const CSVParser = require('json2csv').Parser
 
 module.exports = {
@@ -119,7 +120,7 @@ module.exports = {
       entityConfig,
       userId,
       function (error, user) {
-        if (error != null ? error.isAdmin : undefined) {
+        if (error && error instanceof UserIsManagerError) {
           return res.status(400).json({
             error: {
               code: 'managers_cannot_remove_admin',

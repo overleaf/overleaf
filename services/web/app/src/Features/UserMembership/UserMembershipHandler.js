@@ -25,6 +25,7 @@ const UserMembershipViewModel = require('./UserMembershipViewModel')
 const UserGetter = require('../User/UserGetter')
 const logger = require('@overleaf/logger')
 const UserMembershipEntityConfigs = require('./UserMembershipEntityConfigs')
+const { UserIsManagerError } = require('./UserMembershipErrors')
 
 const UserMembershipHandler = {
   getEntityWithoutAuthorizationCheck(entityId, entityConfig, callback) {
@@ -81,8 +82,7 @@ const UserMembershipHandler = {
     }
     const attribute = entityConfig.fields.write
     if (entity.admin_id != null ? entity.admin_id.equals(userId) : undefined) {
-      const error = { isAdmin: true }
-      return callback(error)
+      return callback(new UserIsManagerError())
     }
     return removeUserFromEntity(entity, attribute, userId, callback)
   },
