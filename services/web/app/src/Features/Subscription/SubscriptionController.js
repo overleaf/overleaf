@@ -114,7 +114,15 @@ async function paymentPage(req, res) {
       if (recommendedCurrency && currency == null) {
         currency = recommendedCurrency
       }
-      res.render('subscriptions/new', {
+      const assignment = await SplitTestHandler.promises.getAssignment(
+        req,
+        'payment-page'
+      )
+      const template =
+        assignment && assignment.variant === 'updated-payment-page'
+          ? 'subscriptions/new-updated'
+          : 'subscriptions/new'
+      res.render(template, {
         title: 'subscribe',
         currency,
         countryCode,

@@ -167,6 +167,8 @@ export default App.controller(
         $scope.coupon = {
           singleUse: pricing.items.coupon.single_use,
           normalPrice: basePrice,
+          name: pricing.items.coupon.name,
+          normalPriceWithoutTax: basePrice,
         }
         if (
           pricing.items.coupon.applies_for_months > 0 &&
