@@ -520,21 +520,21 @@ export default App.controller(
       }
 
       if (changed) {
-        return $scope.$broadcast('entries:changed')
+        // TODO: unused?
+        $scope.$broadcast('entries:changed')
       }
+
+      return entries
     }
 
     $scope.$on('editor:track-changes:changed', function () {
       const doc_id = $scope.editor.open_doc_id
-      updateEntries(doc_id)
+      const entries = updateEntries(doc_id)
 
       // For now, not worrying about entry panels for rich text
       if (!$scope.editor.showRichText) {
         $scope.$broadcast('review-panel:recalculate-screen-positions')
-        dispatchReviewPanelEvent(
-          'recalculate-screen-positions',
-          getDocEntries($scope.editor.open_doc_id)
-        )
+        dispatchReviewPanelEvent('recalculate-screen-positions', entries)
 
         return $scope.$broadcast('review-panel:layout')
       }
