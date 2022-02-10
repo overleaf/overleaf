@@ -423,6 +423,8 @@ module.exports = {
     'zh-CN': '简体中文',
   },
 
+  maxDictionarySize: 1024 * 1024, // 1 MB
+
   // Password Settings
   // -----------
   // These restrict the passwords users can use when registering

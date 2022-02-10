@@ -5,6 +5,7 @@ const modulePath = require('path').join(
   __dirname,
   '/../../../../app/src/Features/Spelling/LearnedWordsManager'
 )
+const { InvalidError } = require('../../../../app/src/Features/Errors/Errors')
 
 describe('LearnedWordsManager', function () {
   beforeEach(function () {
@@ -13,6 +14,7 @@ describe('LearnedWordsManager', function () {
     this.db = {
       spellingPreferences: {
         updateOne: sinon.stub().yields(),
+        findOne: sinon.stub().yields(null, ['pear']),
       },
     }
     this.LearnedWordsManager = SandboxedModule.require(modulePath, {
@@ -22,34 +24,56 @@ describe('LearnedWordsManager', function () {
           timeAsyncMethod: sinon.stub(),
           inc: sinon.stub(),
         },
+        '@overleaf/settings': {
+          maxDictionarySize: 20,
+        },
       },
     })
   })
 
   describe('learnWord', function () {
-    beforeEach(function () {
-      this.word = 'instanton'
-      this.LearnedWordsManager.learnWord(this.token, this.word, this.callback)
+    describe('under size limit', function () {
+      beforeEach(function () {
+        this.word = 'instanton'
+        this.LearnedWordsManager.learnWord(this.token, this.word, this.callback)
+      })
+
+      it('should insert the word in the word list in the database', function () {
+        expect(
+          this.db.spellingPreferences.updateOne.calledWith(
+            {
+              token: this.token,
+            },
+            {
+              $addToSet: { learnedWords: this.word },
+            },
+            {
+              upsert: true,
+            }
+          )
+        ).to.equal(true)
+      })
+
+      it('should call the callback without error', function () {
+        sinon.assert.called(this.callback)
+        expect(this.callback.lastCall.args.length).to.equal(0)
+      })
     })
 
-    it('should insert the word in the word list in the database', function () {
-      expect(
-        this.db.spellingPreferences.updateOne.calledWith(
-          {
-            token: this.token,
-          },
-          {
-            $addToSet: { learnedWords: this.word },
-          },
-          {
-            upsert: true,
-          }
-        )
-      ).to.equal(true)
-    })
+    describe('over size limit', function () {
+      beforeEach(function () {
+        this.word = 'superlongwordthatwillgobeyondthelimit'
+        this.LearnedWordsManager.learnWord(this.token, this.word, this.callback)
+      })
 
-    it('should call the callback', function () {
-      expect(this.callback.called).to.equal(true)
+      it('should not insert the word in the word list in the database', function () {
+        expect(this.db.spellingPreferences.updateOne.notCalled).to.equal(true)
+      })
+
+      it('should call the callback with error', function () {
+        sinon.assert.called(this.callback)
+        expect(this.callback.lastCall.args[0]).to.be.instanceof(InvalidError)
+      })
     })
   })
 
@@ -97,6 +121,18 @@ describe('LearnedWordsManager', function () {
 
     it('should return the word list in the callback without duplicates', function () {
       expect(this.callback.calledWith(null, this.wordList)).to.equal(true)
+    })
+  })
+
+  describe('getLearnedWordsSize', function () {
+    it('should return the word list size in the callback', function () {
+      this.db.spellingPreferences.findOne = (conditions, callback) => {
+        callback(null, {
+          learnedWords: ['apples', 'bananas', 'pears', 'bananas'],
+        })
+      }
+      this.LearnedWordsManager.getLearnedWordsSize(this.token, this.callback)
+      sinon.assert.calledWith(this.callback, null, 38)
     })
   })
 
