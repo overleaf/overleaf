@@ -42,11 +42,13 @@ Installation
 
 The CLSI can be installed and set up as part of the entire [Overleaf stack](https://github.com/overleaf/overleaf) (complete with front end editor and document storage), or it can be run as a standalone service. To run is as a standalone service, first checkout this repository:
 
-    $ git clone git@github.com:overleaf/clsi.git
+    $ git clone git@github.com:overleaf/overleaf.git
+
+Change the directory to the root of the cloned repository. 
 
 Then build the Docker image:
 
-    $ docker build . -t overleaf/clsi
+    $ docker build . -t overleaf/clsi -f services/clsi/Dockerfile
 
 Then pull the TeX Live image:
 
