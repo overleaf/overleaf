@@ -5,7 +5,7 @@ const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const { Joi, validate } = require('../../infrastructure/Validation')
 
 module.exports = {
-  apply(webRouter, apiRouter) {
+  apply(webRouter) {
     const rateLimit = RateLimiterMiddleware.rateLimit({
       endpointName: 'password_reset_rate_limit',
       ipOnly: true,

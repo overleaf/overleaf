@@ -9,7 +9,7 @@ const AnalyticsRegistrationSourceMiddleware = require('../Analytics/AnalyticsReg
 const { Joi, validate } = require('../../infrastructure/Validation')
 
 module.exports = {
-  apply(webRouter, apiRouter) {
+  apply(webRouter) {
     webRouter.post(
       '/project/:Project_id/leave',
       AuthenticationController.requireLogin(),

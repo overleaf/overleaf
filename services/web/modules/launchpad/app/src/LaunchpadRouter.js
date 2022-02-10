@@ -15,7 +15,7 @@ const AuthenticationController = require('../../../../app/src/Features/Authentic
 const AuthorizationMiddleware = require('../../../../app/src/Features/Authorization/AuthorizationMiddleware')
 
 module.exports = {
-  apply(webRouter, apiRouter) {
+  apply(webRouter) {
     logger.log({}, 'Init launchpad router')
 
     webRouter.get('/launchpad', LaunchpadController.launchpadPage)

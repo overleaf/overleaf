@@ -12,7 +12,7 @@ const HomeController = require('./HomeController')
 const UniversityController = require('./UniversityController')
 
 module.exports = {
-  apply(webRouter, apiRouter) {
+  apply(webRouter) {
     webRouter.get('/', HomeController.index)
     webRouter.get('/home', HomeController.home)
 

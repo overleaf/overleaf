@@ -5,7 +5,7 @@ const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const Settings = require('@overleaf/settings')
 
 module.exports = {
-  apply(webRouter, apiRouter) {
+  apply(webRouter) {
     webRouter.post(
       '/project/new/upload',
       AuthenticationController.requireLogin(),
