@@ -93,7 +93,22 @@ const rules = [
       'You need to enclose all mathematical expressions and symbols with special markers. These special markers create a ‘math mode’. Use $...$ for inline math mode, and \\[...\\] or one of the mathematical environments (e.g. equation) for display math mode.  This applies to symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ) and modifiers (\\vec{x}, \\tilde{x} ).',
   },
   {
-    regexToMatch: /(undefined )?[rR]eference(s)?.+(undefined)?/,
+    regexToMatch: /Reference.+undefined/,
+    extraInfoURL:
+      'https://www.overleaf.com/learn/Errors/There_were_undefined_references',
+    humanReadableHintComponent: (
+      <>
+        You have referenced something which has not yet been labelled. If you
+        have labelled it already, make sure that what is written inside \ref
+        {'{...}'} is the same as what is written inside \label
+        {'{...}'}.
+      </>
+    ),
+    humanReadableHint:
+      'You have referenced something which has not yet been labelled. If you have labelled it already, make sure that what is written inside \\ref{...} is the same as what is written inside \\label{...}.',
+  },
+  {
+    regexToMatch: /There were undefined references/,
     extraInfoURL:
       'https://www.overleaf.com/learn/Errors/There_were_undefined_references',
     humanReadableHintComponent: (

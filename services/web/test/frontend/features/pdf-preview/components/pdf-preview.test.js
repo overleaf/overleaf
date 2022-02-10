@@ -504,4 +504,85 @@ describe('<PdfPreview/>', function () {
 
     expect(nock.isDone()).to.be.true
   })
+
+  describe('human readable logs', function () {
+    it('shows human readable hint for undefined reference errors', async function () {
+      mockCompile()
+      mockBuildFile({
+        ...defaultFileResponses,
+        '/build/output.log': `
+log This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.9.10)  8 FEB 2022 16:27
+entering extended mode
+ \\write18 enabled.
+ %&-line parsing enabled.
+**main.tex
+(./main.tex
+LaTeX2e <2020-02-02> patch level 5
+
+LaTeX Warning: Reference \`intorduction' on page 1 undefined on input line 11.
+
+
+LaTeX Warning: Reference \`section1' on page 1 undefined on input line 13.
+
+[1
+
+{/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (/compi
+le/output.aux)
+
+LaTeX Warning: There were undefined references.
+
+ )
+`,
+      })
+      mockValidPdf()
+
+      screen.debug()
+      renderWithEditorContext(<PdfPreview />, { scope })
+
+      await screen.findByText(
+        "Reference `intorduction' on page 1 undefined on input line 11."
+      )
+      await screen.findByText(
+        "Reference `section1' on page 1 undefined on input line 13."
+      )
+      await screen.findByText('There were undefined references.')
+      const hints = await screen.findAllByText(
+        /You have referenced something which has not yet been labelled/
+      )
+      console.log('hints', hints)
+      expect(hints.length).to.equal(3)
+    })
+
+    it('idoes not show human readable hint for undefined reference errors', async function () {
+      mockCompile()
+      mockBuildFile({
+        ...defaultFileResponses,
+        '/build/output.log': `
+Package rerunfilecheck Info: File \`output.out' has not changed.
+(rerunfilecheck)             Checksum: 339DB29951BB30436898BC39909EA4FA;11265.
+
+Package rerunfilecheck Warning: File \`output.brf' has changed.
+(rerunfilecheck)                Rerun to get bibliographical references right.
+
+Package rerunfilecheck Info: Checksums for \`output.brf':
+(rerunfilecheck)             Before: D41D8CD98F00B204E9800998ECF8427E;0
+(rerunfilecheck)             After:  DF3260FAD3828D54C5E4E9337E97F7AF;4841.
+ )
+`,
+      })
+      mockValidPdf()
+
+      screen.debug()
+      renderWithEditorContext(<PdfPreview />, { scope })
+
+      await screen.findByText(
+        /Package rerunfilecheck Warning: File `output.brf' has changed. Rerun to get bibliographical references right./
+      )
+      expect(
+        screen.queryByText(
+          /You have referenced something which has not yet been labelled/
+        )
+      ).to.not.exist
+    })
+  })
 })
