@@ -6,7 +6,7 @@ const MIN_NAME_LENGTH = 3
 const MAX_NAME_LENGTH = 200
 const MIN_VARIANT_NAME_LENGTH = 3
 const MAX_VARIANT_NAME_LENGTH = 255
-const NAME_REGEX = /^[a-zA-Z0-9\-_]+$/
+const NAME_REGEX = /^[a-z0-9-]+$/
 
 const RolloutPercentType = {
   type: Number,

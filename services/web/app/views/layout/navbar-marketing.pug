@@ -15,9 +15,11 @@ nav.navbar.navbar-default.navbar-main
 			else
 				a(href='/', aria-label=settings.appName).navbar-brand
 
-		.navbar-collapse.collapse(data-ol-navbar-main-collapse)
+		- var canDisplayAdminMenu = getSessionUser() && getSessionUser().isAdmin
+		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
+		.navbar-collapse.collapse(collapse="navCollapsed")
 			ul.nav.navbar-nav.navbar-right
-				if (getSessionUser() && getSessionUser().isAdmin)
+				if (canDisplayAdminMenu || canDisplaySplitTestMenu)
 					li.dropdown.subdued
 						a.dropdown-toggle(
 							href="#",
@@ -29,14 +31,14 @@ nav.navbar.navbar-default.navbar-main
 							| Admin
 							span.caret
 						ul.dropdown-menu
-							li
-								a(href="/admin") Manage Site
-							li
-								a(href="/admin/user") Manage Users
-							if hasFeature('saas')
+							if canDisplayAdminMenu
+								li
+									a(href="/admin") Manage Site
+								li
+									a(href="/admin/user") Manage Users
+							if canDisplaySplitTestMenu
 								li
 									a(href="/admin/split-test") Manage Split Tests
-
 
 				// loop over header_extras
 				each item in ((splitTestVariants && (splitTestVariants['unified-navigation'] === 'show-unified-navigation')) ? nav.header_extras_unified : nav.header_extras)

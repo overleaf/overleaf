@@ -155,6 +155,21 @@ const UserMembershipMiddleware = {
     fetchEntityConfig('institution'),
   ],
 
+  requireSplitTestMetricsAccess: [
+    AuthenticationController.requireLogin(),
+    allowAccessIfAny([
+      UserMembershipAuthorization.hasStaffAccess('splitTestMetrics'),
+      UserMembershipAuthorization.hasStaffAccess('splitTestManagement'),
+    ]),
+  ],
+
+  requireSplitTestManagementAccess: [
+    AuthenticationController.requireLogin(),
+    allowAccessIfAny([
+      UserMembershipAuthorization.hasStaffAccess('splitTestManagement'),
+    ]),
+  ],
+
   // graphs access is an edge-case:
   // - the entity id is in `req.query.resource_id`. It must be set as
   // `req.params.id`

@@ -35,7 +35,7 @@ async function createSplitTest(name, configuration, info = {}) {
   _checkNewVariantsConfiguration([], configuration.variants)
   for (const variant of configuration.variants) {
     stripedVariants.push({
-      name: variant.name,
+      name: (variant.name || '').trim(),
       rolloutPercent: variant.rolloutPercent,
       rolloutStripes: [
         {
@@ -47,7 +47,7 @@ async function createSplitTest(name, configuration, info = {}) {
     stripeStart += variant.rolloutPercent
   }
   const splitTest = new SplitTest({
-    name,
+    name: (name || '').trim(),
     description: info.description,
     expectedEndDate: info.expectedEndDate,
     ticketUrl: info.ticketUrl,
@@ -71,7 +71,7 @@ async function updateSplitTestConfig(name, configuration) {
     const lastVersion = splitTest.getCurrentVersion().toObject()
     if (configuration.phase !== lastVersion.phase) {
       throw new OError(
-        `Cannot update with different phase - use switchToNextPhase endpoint instead`
+        `Cannot update with different phase - use /switch-to-next-phase endpoint instead`
       )
     }
     _checkNewVariantsConfiguration(lastVersion.variants, configuration.variants)

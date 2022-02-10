@@ -49,6 +49,8 @@ const UserSchema = new Schema({
     groupMetrics: { type: Boolean, default: false },
     groupManagement: { type: Boolean, default: false },
     adminMetrics: { type: Boolean, default: false },
+    splitTestMetrics: { type: Boolean, default: false },
+    splitTestManagement: { type: Boolean, default: false },
   },
   signUpDate: {
     type: Date,

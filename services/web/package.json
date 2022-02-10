@@ -117,6 +117,7 @@
     "express-bearer-token": "^2.4.0",
     "express-http-proxy": "^1.6.0",
     "express-session": "^1.17.1",
+    "formik": "^2.2.9",
     "fs-extra": "^4.0.2",
     "fuse.js": "^3.0.0",
     "globby": "^5.0.0",
@@ -199,7 +200,8 @@
     "xml-crypto": "^2.1.2",
     "xml2js": "^0.4.22",
     "xregexp": "^4.3.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@babel/register": "^7.14.5",
