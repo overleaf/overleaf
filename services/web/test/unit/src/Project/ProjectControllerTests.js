@@ -123,11 +123,6 @@ describe('ProjectController', function () {
       },
       inc: sinon.stub(),
     }
-    this.NewLogsUIHelper = {
-      getNewLogsUIVariantForUser: sinon
-        .stub()
-        .returns({ newLogsUI: false, subvariant: null }),
-    }
     this.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
@@ -175,7 +170,6 @@ describe('ProjectController', function () {
         '../../infrastructure/Modules': {
           hooks: { fire: sinon.stub().yields(null, []) },
         },
-        '../Helpers/NewLogsUI': this.NewLogsUIHelper,
         '../Spelling/SpellingHandler': {
           getUserDictionary: sinon.stub().yields(null, []),
         },
@@ -1411,6 +1405,7 @@ describe('ProjectController', function () {
           }
           this.ProjectController.loadEditor(this.req, this.res)
         })
+
         it('should be true when ?new_pdf_preview=true ', function (done) {
           this.res.render = (pageName, opts) => {
             expect(opts.showNewPdfPreview).to.be.true
@@ -1419,24 +1414,31 @@ describe('ProjectController', function () {
           this.req.query.new_pdf_preview = 'true'
           this.ProjectController.loadEditor(this.req, this.res)
         })
-        it('should be true for alpha group', function (done) {
+
+        it('should be true when the react-pdf-preview-rollout split test is enabled', function (done) {
           this.res.render = (pageName, opts) => {
             expect(opts.showNewPdfPreview).to.be.true
             done()
           }
-          this.user.alphaProgram = true
+          this.SplitTestHandler.getAssignment
+            .withArgs(this.req, 'react-pdf-preview-rollout')
+            .yields(null, { variant: 'react-pdf-preview' })
           this.ProjectController.loadEditor(this.req, this.res)
         })
-        it('should be false when when ?new_pdf_preview=true and alpha group', function (done) {
+
+        it('should be false when when ?new_pdf_preview=false and the split test is enabled', function (done) {
           this.res.render = (pageName, opts) => {
-            expect(opts.showNewPdfPreview).to.be.true
+            expect(opts.showNewPdfPreview).to.be.false
             done()
           }
-          this.user.alphaProgram = true
+          this.SplitTestHandler.getAssignment
+            .withArgs(this.req, 'react-pdf-preview-rollout')
+            .yields(null, { variant: 'react-pdf-preview' })
           this.req.query.new_pdf_preview = 'false'
           this.ProjectController.loadEditor(this.req, this.res)
         })
       })
+
       describe('showPdfDetach', function () {
         describe('showPdfDetach=false', function () {
           it('should be false by default', function (done) {
@@ -1446,6 +1448,7 @@ describe('ProjectController', function () {
             }
             this.ProjectController.loadEditor(this.req, this.res)
           })
+
           it('should be false by default, even when ?new_pdf_preview=true', function (done) {
             this.res.render = (pageName, opts) => {
               expect(opts.showPdfDetach).to.be.false
@@ -1455,11 +1458,15 @@ describe('ProjectController', function () {
             this.req.query.new_pdf_preview = 'true'
             this.ProjectController.loadEditor(this.req, this.res)
           })
-          it('should be false when when ?pdf_detach=true and alpha group', function (done) {
+
+          it('should be false when the split test is enabled and ?pdf_detach=false', function (done) {
             this.res.render = (pageName, opts) => {
+              expect(opts.showPdfDetach).to.be.false
               done()
             }
-            this.user.alphaProgram = true
+            this.SplitTestHandler.getAssignment
+              .withArgs(this.req, 'pdf-detach')
+              .yields(null, { variant: 'enabled' })
             this.req.query.pdf_detach = 'false'
             this.ProjectController.loadEditor(this.req, this.res)
           })
@@ -1475,13 +1482,16 @@ describe('ProjectController', function () {
             this.req.query.pdf_detach = 'true'
             this.ProjectController.loadEditor(this.req, this.res)
           })
+
           it('should be true for alpha group, and set showNewPdfPreview as true', function (done) {
             this.res.render = (pageName, opts) => {
               expect(opts.showPdfDetach).to.be.true
               expect(opts.showNewPdfPreview).to.be.true
               done()
             }
-            this.user.alphaProgram = true
+            this.SplitTestHandler.getAssignment
+              .withArgs(this.req, 'pdf-detach')
+              .yields(null, { variant: 'enabled' })
             this.ProjectController.loadEditor(this.req, this.res)
           })
         })

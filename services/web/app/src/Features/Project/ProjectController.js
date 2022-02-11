@@ -36,7 +36,6 @@ const UserController = require('../User/UserController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Modules = require('../../infrastructure/Modules')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const { getNewLogsUIVariantForUser } = require('../Helpers/NewLogsUI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const SpellingHandler = require('../Spelling/SpellingHandler')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
@@ -814,6 +813,36 @@ const ProjectController = {
             }
           )
         },
+        pdfDetachAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            'pdf-detach',
+            {},
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null)
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
+        logsUIAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            'logs-ui',
+            {},
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (
         err,
@@ -826,6 +855,8 @@ const ProjectController = {
           brandVariation,
           newPdfPreviewAssignment,
           newSourceEditorAssignment,
+          pdfDetachAssignment,
+          logsUIAssignment,
         }
       ) => {
         if (err != null) {
@@ -890,8 +921,6 @@ const ProjectController = {
               })
             }
 
-            const logsUIVariant = getNewLogsUIVariantForUser(user)
-
             function shouldDisplayFeature(name, variantFlag) {
               if (req.query && req.query[name]) {
                 return req.query[name] === 'true'
@@ -918,7 +947,7 @@ const ProjectController = {
 
             const showPdfDetach = shouldDisplayFeature(
               'pdf_detach',
-              user.alphaProgram
+              pdfDetachAssignment.variant === 'enabled'
             )
 
             const debugPdfDetach = shouldDisplayFeature('debug_pdf_detach')
@@ -988,11 +1017,7 @@ const ProjectController = {
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support'),
-              showNewLogsUI: shouldDisplayFeature(
-                'new_logs_ui',
-                logsUIVariant.newLogsUI
-              ),
-              logsUISubvariant: logsUIVariant.subvariant,
+              logsUIVariant: logsUIAssignment.variant,
               showPdfDetach,
               debugPdfDetach,
               showNewPdfPreview,

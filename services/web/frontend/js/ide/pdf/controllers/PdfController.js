@@ -36,7 +36,7 @@ App.controller(
     $scope.pdf.clearingCache = false
     $scope.shouldShowLogs = false
 
-    $scope.logsUISubvariant = window.logsUISubvariant
+    $scope.logsUIVariant = window.logsUIVariant
 
     // view logic to check whether the files dropdown should "drop up" or "drop down"
     $scope.shouldDropUp = false
@@ -538,7 +538,7 @@ App.controller(
     // In the existing compile UI, errors and validation problems are shown in the PDF pane, whereas in the new
     // one they're shown in the logs pane. This `$watch`er makes sure we change the view in the new logs UI.
     // This should be removed once we stop supporting the two different log UIs.
-    if (window.showNewLogsUI) {
+    if (window.logsUIVariant !== 'default') {
       $scope.$watch(
         () =>
           $scope.pdf.view === 'errors' ||
@@ -732,8 +732,7 @@ App.controller(
           errors: $scope.pdf.logEntries.errors.length,
           warnings: $scope.pdf.logEntries.warnings.length,
           typesetting: $scope.pdf.logEntries.typesetting.length,
-          newLogsUI: window.showNewLogsUI,
-          subvariant: window.showNewLogsUI ? window.logsUISubvariant : null,
+          logsUIVariant: window.logsUIVariant,
         }
         eventTracking.sendMBSampled('compile-result', metadata, 0.01)
       }
