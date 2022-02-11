@@ -276,7 +276,7 @@ const CollaboratorsInviteHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ projectId, tokenString }, 'fetching invite by token')
+    logger.log({ projectId }, 'fetching invite by token')
     return ProjectInvite.findOne(
       { projectId, token: tokenString },
       function (err, invite) {
@@ -287,7 +287,7 @@ const CollaboratorsInviteHandler = {
           return callback(err)
         }
         if (invite == null) {
-          logger.err({ err, projectId, token: tokenString }, 'no invite found')
+          logger.err({ err, projectId }, 'no invite found')
           return callback(null, null)
         }
         return callback(null, invite)
@@ -299,7 +299,7 @@ const CollaboratorsInviteHandler = {
     if (callback == null) {
       callback = function () {}
     }
-    logger.log({ projectId, userId: user._id, tokenString }, 'accepting invite')
+    logger.log({ projectId, userId: user._id }, 'accepting invite')
     return CollaboratorsInviteHandler.getInviteByToken(
       projectId,
       tokenString,
@@ -313,10 +313,7 @@ const CollaboratorsInviteHandler = {
         }
         if (!invite) {
           err = new Errors.NotFoundError('no matching invite found')
-          logger.log(
-            { err, projectId, tokenString },
-            'no matching invite found'
-          )
+          logger.log({ err, projectId }, 'no matching invite found')
           return callback(err)
         }
         const inviteId = invite._id

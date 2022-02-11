@@ -135,7 +135,7 @@ const TokenAccessHandler = {
             )
           ) {
             logger.err(
-              { token },
+              { projectId: project._id },
               'read-and-write token match on numeric section, but not on full token'
             )
             return callback(null, null)
@@ -144,7 +144,10 @@ const TokenAccessHandler = {
           }
         } catch (error) {
           err = error
-          logger.err({ token, cryptoErr: err }, 'error comparing tokens')
+          logger.err(
+            { projectId: project._id, cryptoErr: err },
+            'error comparing tokens'
+          )
           return callback(null, null)
         }
       }

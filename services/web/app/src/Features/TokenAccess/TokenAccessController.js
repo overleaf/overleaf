@@ -153,7 +153,7 @@ async function checkAndGetProjectOrResponseAction(
         ]
       } else {
         logger.warn(
-          { token, projectId },
+          { projectId },
           '[TokenAccess] deny anonymous read-and-write token access'
         )
         AuthenticationController.setRedirectInSession(

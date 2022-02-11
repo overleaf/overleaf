@@ -263,10 +263,7 @@ module.exports = CollaboratorsInviteController = {
     const projectId = req.params.Project_id
     const { token } = req.params
     const _renderInvalidPage = function () {
-      logger.log(
-        { projectId, token },
-        'invite not valid, rendering not-valid page'
-      )
+      logger.log({ projectId }, 'invite not valid, rendering not-valid page')
       return res.render('project/invite/not-valid', { title: 'Invalid Invite' })
     }
     // check if the user is already a member of the project
@@ -296,13 +293,12 @@ module.exports = CollaboratorsInviteController = {
             if (err != null) {
               OError.tag(err, 'error getting invite by token', {
                 projectId,
-                token,
               })
               return next(err)
             }
             // check if invite is gone, or otherwise non-existent
             if (invite == null) {
-              logger.log({ projectId, token }, 'no invite found for this token')
+              logger.log({ projectId }, 'no invite found for this token')
               return _renderInvalidPage()
             }
             // check the user who sent the invite exists
@@ -357,7 +353,7 @@ module.exports = CollaboratorsInviteController = {
     const { token } = req.params
     const currentUser = SessionManager.getSessionUser(req.session)
     logger.log(
-      { projectId, userId: currentUser._id, token },
+      { projectId, userId: currentUser._id },
       'got request to accept invite'
     )
     return CollaboratorsInviteHandler.acceptInvite(
