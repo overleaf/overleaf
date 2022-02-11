@@ -29,11 +29,6 @@ describe('RecurlyEventHandler', function () {
         './SubscriptionEmailHandler': (this.SubscriptionEmailHandler = {
           sendTrialOnboardingEmail: sinon.stub(),
         }),
-        '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
-          promises: {
-            getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
-          },
-        }),
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
           recordEventForUser: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
@@ -75,28 +70,14 @@ describe('RecurlyEventHandler', function () {
       'subscription-is-trial',
       true
     )
-    sinon.assert.calledWith(
-      this.SplitTestHandler.promises.getAssignmentForUser,
-      this.userId,
-      'trial-onboarding-email'
-    )
   })
 
-  it('sends free trial onboarding email if user in ab group', async function () {
-    this.SplitTestHandler.promises.getAssignmentForUser = sinon
-      .stub()
-      .resolves({ variant: 'send-email' })
-
+  it('sends free trial onboarding email if user starting a trial', async function () {
     await this.RecurlyEventHandler.sendRecurlyAnalyticsEvent(
       'new_subscription_notification',
       this.eventData
     )
 
-    sinon.assert.calledWith(
-      this.SplitTestHandler.promises.getAssignmentForUser,
-      this.userId,
-      'trial-onboarding-email'
-    )
     sinon.assert.called(this.SubscriptionEmailHandler.sendTrialOnboardingEmail)
   })
 
@@ -356,6 +337,5 @@ describe('RecurlyEventHandler', function () {
     sinon.assert.notCalled(this.AnalyticsManager.setUserPropertyForUser)
     sinon.assert.notCalled(this.AnalyticsManager.setUserPropertyForUser)
     sinon.assert.notCalled(this.AnalyticsManager.setUserPropertyForUser)
-    sinon.assert.notCalled(this.SplitTestHandler.promises.getAssignmentForUser)
   })
 })

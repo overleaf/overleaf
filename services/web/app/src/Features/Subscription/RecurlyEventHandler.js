@@ -1,5 +1,4 @@
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionEmailHandler = require('./SubscriptionEmailHandler')
 const { ObjectID } = require('mongodb')
 
@@ -66,16 +65,8 @@ async function _sendSubscriptionStartedEvent(userId, eventData) {
     isTrial
   )
 
-  // send the trial onboarding email
   if (isTrial) {
-    const assignment = await SplitTestHandler.promises.getAssignmentForUser(
-      userId,
-      'trial-onboarding-email'
-    )
-
-    if (assignment.variant === 'send-email') {
-      await SubscriptionEmailHandler.sendTrialOnboardingEmail(userId)
-    }
+    await SubscriptionEmailHandler.sendTrialOnboardingEmail(userId)
   }
 }
 
