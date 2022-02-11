@@ -123,6 +123,11 @@ describe('ProjectController', function () {
       },
       inc: sinon.stub(),
     }
+    this.NewLogsUIHelper = {
+      getNewLogsUIVariantForUser: sinon
+        .stub()
+        .returns({ newLogsUI: false, subvariant: null }),
+    }
     this.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
@@ -170,6 +175,7 @@ describe('ProjectController', function () {
         '../../infrastructure/Modules': {
           hooks: { fire: sinon.stub().yields(null, []) },
         },
+        '../Helpers/NewLogsUI': this.NewLogsUIHelper,
         '../Spelling/SpellingHandler': {
           getUserDictionary: sinon.stub().yields(null, []),
         },

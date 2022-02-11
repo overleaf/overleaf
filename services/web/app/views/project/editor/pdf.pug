@@ -1,5 +1,5 @@
 div.full-size.pdf(ng-controller="PdfController")
-	if logsUIVariant !== 'default'
+	if showNewLogsUI
 		preview-pane(
 			compiler-state=`{
 				autoCompileHasChanges: changesToAutoCompile,
@@ -43,7 +43,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			on-set-split-layout="setPdfSplitLayout"
 			on-set-full-layout="setPdfFullLayout"
 			on-stop-compilation="stop"
-			variant-with-first-error-popup="logsUIVariant === 'new-logs-ui-with-popup'"
+			variant-with-first-error-popup="logsUISubvariant === 'new-logs-ui-with-popup'"
 			show-logs="shouldShowLogs"
 			on-log-entry-location-click="openInEditor"
 		)
@@ -303,7 +303,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				ng-if="settings.pdfViewer == 'native'"
 			)
 
-		if logsUIVariant === 'default'
+		if !showNewLogsUI
 			.pdf-validation-problems(ng-switch-when="validation-problems")
 
 				.alert.alert-danger(ng-show="pdf.validation.sizeCheck")
