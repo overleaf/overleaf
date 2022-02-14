@@ -252,14 +252,15 @@
 ***************************************/
 
 .toggle-wrapper {
-  min-width: 200px;
+  white-space: nowrap;
   height: 24px;
 }
 
 .toggle-switch {
+  display: inline-flex;
   align-items: center;
   height: 24px;
-  width: 100%;
+  margin-right: 5px;
   background-color: @toggle-switch-bg;
   border: 2px solid @toggle-switch-bg;
   border-radius: @btn-border-radius-base;
@@ -271,7 +272,6 @@
   float: left;
   font-weight: normal;
   height: 100%;
-  width: 50%;
   text-align: center;
   margin: 0;
   cursor: pointer;
@@ -285,6 +285,7 @@
     height: 100%;
     line-height: 20px; // parent height minus border
     width: 100%;
+    padding: 0 15px;
     background: linear-gradient(
       to right,
       @toggle-switch-bg 50%,

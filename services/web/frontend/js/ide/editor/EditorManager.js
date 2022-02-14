@@ -41,6 +41,7 @@ export default EditorManager = (function () {
         trackChanges: false,
         wantTrackChanges: false,
         showRichText: this.showRichText(),
+        newSourceEditor: this.newSourceEditor(),
         showSymbolPalette: false,
         toggleSymbolPalette: () => {
           const newValue = !this.$scope.editor.showSymbolPalette
@@ -133,6 +134,13 @@ export default EditorManager = (function () {
       return (
         this.localStorage(`editor.mode.${this.$scope.project_id}`) ===
         'rich-text'
+      )
+    }
+
+    newSourceEditor() {
+      return (
+        this.localStorage(`editor.source_editor.${this.$scope.project_id}`) ===
+        'cm6'
       )
     }
 

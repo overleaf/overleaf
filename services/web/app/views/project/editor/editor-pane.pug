@@ -46,10 +46,10 @@
 					.multi-selection-message
 						h4 {{ multiSelectedCount }} #{translate('files_selected')}
 
-				if showNewSourceEditor
+				div(ng-if="editor.newSourceEditor")
 					if moduleIncludesAvailable('editor:source-editor')
 						!= moduleIncludes('editor:source-editor', locals)
-				else
+				div(ng-if="!editor.newSourceEditor")
 					include ./source-editor
 
 				if !isRestrictedTokenMember

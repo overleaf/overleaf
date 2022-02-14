@@ -946,7 +946,7 @@ const ProjectController = {
               detachRole = req.params.detachRole
             }
 
-            const showNewSourceEditor =
+            const showNewSourceEditorOption =
               (newSourceEditorAssignment &&
                 newSourceEditorAssignment.variant === 'codemirror') ||
               shouldDisplayFeature('new_source_editor', false) // also allow override via ?new_source_editor=true
@@ -1012,7 +1012,7 @@ const ProjectController = {
               showPdfDetach,
               debugPdfDetach,
               showNewPdfPreview,
-              showNewSourceEditor,
+              showNewSourceEditorOption,
               trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
               enablePdfCaching: partOfPdfCachingRollout('enable-caching'),
               resetServiceWorker:

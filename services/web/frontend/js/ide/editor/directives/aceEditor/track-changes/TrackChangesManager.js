@@ -574,6 +574,9 @@ class TrackChangesManager {
   }
 
   recalculateReviewEntriesScreenPositions() {
+    if (!this.editor) {
+      return
+    }
     const session = this.editor.getSession()
     const { renderer } = this.editor
     const entries = this._getCurrentDocEntries()
