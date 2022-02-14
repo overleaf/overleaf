@@ -778,6 +778,7 @@
   "search_references": "Search the .bib files in this project",
   "no_search_results": "No Search Results",
   "email_already_registered": "This email is already registered",
+  "email_already_registered_sso": "This email is already registered. Please log in to your account another way and link your account to the new provider via your account settings.",
   "compile_mode": "Compile Mode",
   "normal": "Normal",
   "fast": "Fast",
