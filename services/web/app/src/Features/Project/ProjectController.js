@@ -36,7 +36,6 @@ const UserController = require('../User/UserController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Modules = require('../../infrastructure/Modules')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const { getNewLogsUIVariantForUser } = require('../Helpers/NewLogsUI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const SpellingHandler = require('../Spelling/SpellingHandler')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
@@ -829,6 +828,21 @@ const ProjectController = {
             }
           )
         },
+        logsUIAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            'logs-ui',
+            {},
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (
         err,
@@ -842,6 +856,7 @@ const ProjectController = {
           newPdfPreviewAssignment,
           newSourceEditorAssignment,
           pdfDetachAssignment,
+          logsUIAssignment,
         }
       ) => {
         if (err != null) {
@@ -905,8 +920,6 @@ const ProjectController = {
                 projectId: project._id,
               })
             }
-
-            const logsUIVariant = getNewLogsUIVariantForUser(user)
 
             function shouldDisplayFeature(name, variantFlag) {
               if (req.query && req.query[name]) {
@@ -1004,11 +1017,7 @@ const ProjectController = {
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support'),
-              showNewLogsUI: shouldDisplayFeature(
-                'new_logs_ui',
-                logsUIVariant.newLogsUI
-              ),
-              logsUISubvariant: logsUIVariant.subvariant,
+              logsUIVariant: logsUIAssignment.variant,
               showPdfDetach,
               debugPdfDetach,
               showNewPdfPreview,
