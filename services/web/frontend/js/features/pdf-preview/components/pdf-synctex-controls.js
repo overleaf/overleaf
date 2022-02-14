@@ -312,6 +312,10 @@ function PdfSynctexControls() {
     }
   }, [syncToCode])
 
+  if (!position) {
+    return null
+  }
+
   if (!pdfExists || pdfViewer === 'native') {
     return null
   }
