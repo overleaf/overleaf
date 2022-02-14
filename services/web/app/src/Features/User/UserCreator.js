@@ -7,6 +7,7 @@ const UserDeleter = require('./UserDeleter')
 const UserGetter = require('./UserGetter')
 const UserUpdater = require('./UserUpdater')
 const Analytics = require('../Analytics/AnalyticsManager')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const UserOnboardingEmailManager = require('./UserOnboardingEmailManager')
 const UserPostRegistrationAnalyticsManager = require('./UserPostRegistrationAnalyticsManager')
 const OError = require('@overleaf/o-error')
@@ -33,6 +34,30 @@ async function _addAffiliation(user, affiliationOptions) {
     )
   }
   return user
+}
+
+async function recordRegistrationEvent(user) {
+  SplitTestHandler.promises
+    .getAssignmentForUser(user._id, 'highlight-sso')
+    .then(assignment => {
+      const segmentation = {
+        highlightSSO: assignment.variant === 'active',
+      }
+      if (user.thirdPartyIdentifiers && user.thirdPartyIdentifiers.length > 0) {
+        segmentation.provider = user.thirdPartyIdentifiers[0].providerId
+      }
+      return Analytics.recordEventForUser(
+        user._id,
+        'user-registered',
+        segmentation
+      )
+    })
+    .catch(err =>
+      logger.warn(
+        { err },
+        'there was an error recording `user-registered` event'
+      )
+    )
 }
 
 async function createNewUser(attributes, options = {}) {
@@ -84,7 +109,7 @@ async function createNewUser(attributes, options = {}) {
     }
   }
 
-  await Analytics.recordEventForUser(user._id, 'user-registered')
+  await recordRegistrationEvent(user)
   await Analytics.setUserPropertyForUser(user._id, 'created-at', new Date())
   await Analytics.setUserPropertyForUser(user._id, 'user-id', user._id)
   if (attributes.analyticsId) {

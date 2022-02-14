@@ -45,6 +45,11 @@ describe('UserCreator', function () {
           recordEventForUser: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
         }),
+        '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
+          promises: {
+            getAssignmentForUser: sinon.stub().resolves({ variant: 'active' }),
+          },
+        }),
         './UserOnboardingEmailManager': (this.UserOnboardingEmailManager = {
           scheduleOnboardingEmail: sinon.stub(),
         }),
