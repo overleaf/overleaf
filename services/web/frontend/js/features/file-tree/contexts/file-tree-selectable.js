@@ -15,7 +15,6 @@ import { findInTree } from '../util/find-in-tree'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { useEditorContext } from '../../../shared/context/editor-context'
-import { useLayoutContext } from '../../../shared/context/layout-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import usePreviousValue from '../../../shared/hooks/use-previous-value'
 
@@ -194,9 +193,7 @@ const projectContextPropTypes = {
 const editorContextPropTypes = {
   permissionsLevel: PropTypes.oneOf(['readOnly', 'readAndWrite', 'owner']),
 }
-
 export function useSelectableEntity(id) {
-  const { view, setView } = useLayoutContext(layoutContextPropTypes)
   const { selectedEntityIds, selectOrMultiSelectEntity } = useContext(
     FileTreeSelectableContext
   )
@@ -206,9 +203,8 @@ export function useSelectableEntity(id) {
   const handleEvent = useCallback(
     ev => {
       selectOrMultiSelectEntity(id, ev.ctrlKey || ev.metaKey)
-      setView('editor')
     },
-    [id, selectOrMultiSelectEntity, setView]
+    [id, selectOrMultiSelectEntity]
   )
 
   const handleClick = useCallback(
@@ -237,24 +233,18 @@ export function useSelectableEntity(id) {
     [id, handleEvent, selectedEntityIds]
   )
 
-  const isVisuallySelected = isSelected && view !== 'pdf'
   const props = useMemo(
     () => ({
-      className: classNames({ selected: isVisuallySelected }),
-      'aria-selected': isVisuallySelected,
+      className: classNames({ selected: isSelected }),
+      'aria-selected': isSelected,
       onClick: handleClick,
       onContextMenu: handleContextMenu,
       onKeyPress: handleKeyPress,
     }),
-    [handleClick, handleContextMenu, handleKeyPress, isVisuallySelected]
+    [handleClick, handleContextMenu, handleKeyPress, isSelected]
   )
 
   return { isSelected, props }
-}
-
-const layoutContextPropTypes = {
-  view: PropTypes.string,
-  setView: PropTypes.func.isRequired,
 }
 
 export function useFileTreeSelectable() {
