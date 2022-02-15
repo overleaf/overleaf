@@ -17,7 +17,7 @@ nav.navbar.navbar-default.navbar-main
 
 		- var canDisplayAdminMenu = getSessionUser() && getSessionUser().isAdmin
 		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
-		.navbar-collapse.collapse(collapse="navCollapsed")
+		.navbar-collapse.collapse(data-ol-navbar-main-collapse)
 			ul.nav.navbar-nav.navbar-right
 				if (canDisplayAdminMenu || canDisplaySplitTestMenu)
 					li.dropdown.subdued
