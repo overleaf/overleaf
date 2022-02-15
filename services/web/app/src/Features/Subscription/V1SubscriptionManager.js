@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let V1SubscriptionManager
+const logger = require('@overleaf/logger')
 const UserGetter = require('../User/UserGetter')
 const request = require('requestretry')
 const settings = require('@overleaf/settings')
@@ -47,6 +48,12 @@ module.exports = V1SubscriptionManager = {
         } else {
           // Throw away 'anonymous', etc as being equivalent to null
           planName = null
+        }
+        if (planName != null && planName !== 'v1_free') {
+          logger.warn(
+            { v1Id, planName },
+            'got non expired personal subscription'
+          )
         }
         return callback(null, planName, v1Id)
       }
