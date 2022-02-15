@@ -3,7 +3,6 @@ import {
   useCallback,
   useReducer,
   useContext,
-  useEffect,
   useMemo,
 } from 'react'
 import PropTypes from 'prop-types'
@@ -15,6 +14,7 @@ import {
   createEntityInTree,
 } from '../../features/file-tree/util/mutate-in-tree'
 import { countFiles } from '../../features/file-tree/util/count-in-tree'
+import useDeepCompareEffect from '../../shared/hooks/use-deep-compare-effect'
 
 const FileTreeDataContext = createContext()
 
@@ -144,7 +144,7 @@ export function FileTreeDataProvider({ children }) {
     initialState
   )
 
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     dispatch({
       type: ACTION_TYPES.RESET,
       fileTreeData: rootFolder?.[0],
