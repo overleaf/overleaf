@@ -40,6 +40,7 @@ export default EditorManager = (function () {
         opening: true,
         trackChanges: false,
         wantTrackChanges: false,
+        docTooLongErrorShown: false,
         showRichText: this.showRichText(),
         newSourceEditor: this.newSourceEditor(),
         showSymbolPalette: false,
@@ -334,16 +335,21 @@ export default EditorManager = (function () {
           message = ''
         }
         if (/maxDocLength/.test(message)) {
-          this.ide.showGenericMessageModal(
+          this.$scope.docTooLongErrorShown = true
+          this.openDoc(doc, { forceReopen: true })
+          const genericMessageModal = this.ide.showGenericMessageModal(
             'Document Too Long',
             'Sorry, this file is too long to be edited manually. Please upload it directly.'
           )
+          genericMessageModal.result.finally(() => {
+            this.$scope.docTooLongErrorShown = false
+          })
         } else if (/too many comments or tracked changes/.test(message)) {
           this.ide.showGenericMessageModal(
             'Too many comments or tracked changes',
             'Sorry, this file has too many comments or tracked changes. Please try accepting or rejecting some existing changes, or resolving and deleting some comments.'
           )
-        } else {
+        } else if (!this.$scope.docTooLongErrorShown) {
           // Do not allow this doc to open another error modal.
           sharejs_doc.off('error')
 
