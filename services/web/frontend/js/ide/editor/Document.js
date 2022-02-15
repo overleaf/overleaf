@@ -110,6 +110,8 @@ export default Document = (function () {
       if (editorDoc != null) {
         editorDoc.off('change', this._checkAceConsistency)
       }
+      delete this.ace
+      this.clearChaosMonkey()
       return this.ide.$scope.$emit('document:closed', this.doc)
     }
 
@@ -131,6 +133,8 @@ export default Document = (function () {
       if (this.cm != null) {
         this.cm.off('change', this._checkCMConsistency)
       }
+      delete this.cm
+      this.clearChaosMonkey()
       return this.ide.$scope.$emit('document:closed', this.doc)
     }
 
@@ -152,6 +156,8 @@ export default Document = (function () {
       if (this.cm6 != null) {
         this.cm6.off('change', this._checkCM6Consistency)
       }
+      delete this.cm6
+      this.clearChaosMonkey()
       return this.ide.$scope.$emit('document:closed', this.doc)
     }
 
@@ -335,7 +341,16 @@ export default Document = (function () {
         }
         char = copy[0]
         copy = copy.slice(1)
-        this.ace.session.insert({ row: line, column: pos }, char)
+        if (this.ace) {
+          this.ace.session.insert({ row: line, column: pos }, char)
+        } else if (this.cm6) {
+          this.cm6.view.dispatch({
+            changes: {
+              from: Math.min(pos, this.cm6.view.state.doc.length),
+              insert: char,
+            },
+          })
+        }
         pos += 1
         return (this._cm = setTimeout(
           timer,
@@ -346,7 +361,11 @@ export default Document = (function () {
     }
 
     clearChaosMonkey() {
-      return clearTimeout(this._cm) // pending ops bigger than this are always considered unsaved
+      const timer = this._cm
+      if (timer) {
+        delete this._cm
+        return clearTimeout(timer)
+      }
     }
 
     pollSavedStatus() {
