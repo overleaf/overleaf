@@ -1,3 +1,7 @@
+## v3.1.1
+
+* Handle malformed requests in the req serializer
+
 ## v3.0.0
 
 * Improve logging in Google Cloud Platform. Set environment variable `GCP_LOGGING=true` to enable.

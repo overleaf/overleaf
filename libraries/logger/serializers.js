@@ -29,18 +29,20 @@ function reqSerializer(req) {
       'content-length': headers['content-length'],
     },
   }
-  const projectId =
-    req.params.projectId || req.params.project_id || req.params.Project_id
-  const userId = req.params.userId || req.params.user_id
-  const docId = req.params.docId || req.params.doc_id
-  if (projectId) {
-    entry.projectId = projectId
-  }
-  if (userId) {
-    entry.userId = userId
-  }
-  if (docId) {
-    entry.docId = docId
+  if (req.params) {
+    const projectId =
+      req.params.projectId || req.params.project_id || req.params.Project_id
+    const userId = req.params.userId || req.params.user_id
+    const docId = req.params.docId || req.params.doc_id
+    if (projectId) {
+      entry.projectId = projectId
+    }
+    if (userId) {
+      entry.userId = userId
+    }
+    if (docId) {
+      entry.docId = docId
+    }
   }
   return entry
 }
