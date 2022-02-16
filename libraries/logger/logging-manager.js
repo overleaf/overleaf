@@ -118,10 +118,16 @@ const LoggingManager = {
     if (this.isProduction) {
       switch (logLevelSource) {
         case 'file':
-          this.logLevelChecker = new FileLogLevelChecker(this.logger)
+          this.logLevelChecker = new FileLogLevelChecker(
+            this.logger,
+            this.defaultLevel
+          )
           break
         case 'gce_metadata':
-          this.logLevelChecker = new GCEMetadataLogLevelChecker(this.logger)
+          this.logLevelChecker = new GCEMetadataLogLevelChecker(
+            this.logger,
+            this.defaultLevel
+          )
           break
         case 'none':
           break
