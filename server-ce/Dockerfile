@@ -78,7 +78,4 @@ ENV LOG_LEVEL "info"
 
 EXPOSE 80
 
-WORKDIR /
-
 ENTRYPOINT ["/sbin/my_init"]
-
