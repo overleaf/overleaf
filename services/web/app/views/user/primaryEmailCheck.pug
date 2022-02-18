@@ -2,8 +2,8 @@ extends ../layout-marketing
 
 block content
 	main.content.content-alt#main-content
-		.login-register-container.text-center.primary-email-check-container
-			.card.login-register-card.primary-email-check-card
+		.login-register-container.primary-email-check-container
+			.card.login-register-card
 				.login-register-header
 					h1.login-register-header-heading #{translate("keep_your_account_safe")}
 				.login-register-form(data-ol-multi-submit)
@@ -17,24 +17,22 @@ block content
 						input(name='_csrf', type='hidden', value=csrfToken)
 						+formMessages()
 
-						.primary-email-check-button-container
-							button.btn-primary.btn.btn-block.btn-primary-email-check-button(
-								type='submit'
-								data-ol-disabled-inflight
-							)
-								span(data-ol-inflight="idle") #{translate("yes_that_is_correct")}
-								span(hidden data-ol-inflight="pending") #{translate("confirming")}…
-
-					.primary-email-check-button-container
-						a.btn-default.btn.btn-block.btn-primary-email-check-button(
-							href="/user/settings#add-email"
-							data-ol-slow-link
-							event-tracking="primary-email-check-change-email"
-							event-tracking-mb="true"
-							event-tracking-trigger="click"
+						button.btn-primary.btn.btn-block.btn-primary-email-check-button(
+							type='submit'
+							data-ol-disabled-inflight
 						)
-							span(data-ol-inflight="idle") #{translate("no_update_email")}
-							span(hidden data-ol-inflight="pending") #{translate("redirecting")}…	
+							span(data-ol-inflight="idle") #{translate("yes_that_is_correct")}
+							span(hidden data-ol-inflight="pending") #{translate("confirming")}…
+
+					a.btn-default.btn.btn-block.btn-primary-email-check-button(
+						href="/user/settings#add-email"
+						data-ol-slow-link
+						event-tracking="primary-email-check-change-email"
+						event-tracking-mb="true"
+						event-tracking-trigger="click"
+					)
+						span(data-ol-inflight="idle") #{translate("no_update_email")}
+						span(hidden data-ol-inflight="pending") #{translate("redirecting")}…	
 					p
 						|  #{translate("keep_your_email_updated")}
 					p
