@@ -5,7 +5,11 @@ export default function BetaBadge({ tooltip, url = '/beta/participate' }) {
   return (
     <OverlayTrigger
       placement={tooltip.placement || 'bottom'}
-      overlay={<Tooltip id={tooltip.id}>{tooltip.text}</Tooltip>}
+      overlay={
+        <Tooltip id={tooltip.id} className={tooltip.className}>
+          {tooltip.text}
+        </Tooltip>
+      }
       delayHide={100}
     >
       <a
@@ -23,8 +27,9 @@ export default function BetaBadge({ tooltip, url = '/beta/participate' }) {
 BetaBadge.propTypes = {
   tooltip: PropTypes.exact({
     id: PropTypes.string.isRequired,
-    text: PropTypes.string.isRequired,
+    text: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
     placement: PropTypes.string,
+    className: PropTypes.string,
   }),
   url: PropTypes.string,
 }

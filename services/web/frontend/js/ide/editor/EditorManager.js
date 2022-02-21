@@ -20,6 +20,7 @@ import './directives/aceEditor'
 import './directives/toggleSwitch'
 import './controllers/SavingNotificationController'
 import './controllers/CompileButton'
+import getMeta from '../../utils/meta'
 let EditorManager
 
 export default EditorManager = (function () {
@@ -139,6 +140,11 @@ export default EditorManager = (function () {
     }
 
     newSourceEditor() {
+      // only use the new source editor if the option to switch is available
+      if (!getMeta('ol-showNewSourceEditorOption')) {
+        return false
+      }
+
       return (
         this.localStorage(`editor.source_editor.${this.$scope.project_id}`) ===
         'cm6'

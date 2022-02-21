@@ -317,6 +317,36 @@
   }
 }
 
+.editor-toggle-switch {
+  display: flex;
+  align-items: center;
+
+  .toggle-switch {
+    margin-left: 5px;
+    border: 1px solid #cdd0d6;
+  }
+
+  .toggle-switch-label span {
+    padding: 1px 6px;
+    background: none;
+    transition: background 0.12s ease-out;
+    border-right: 1px solid #cdd0d6;
+  }
+
+  .toggle-switch-label:first-of-type span {
+    padding-left: 8px;
+  }
+
+  .toggle-switch-label:last-of-type span {
+    padding-right: 8px;
+    border-right: none;
+  }
+
+  .toggle-switch-input:checked + .toggle-switch-label {
+    background: @toggle-switch-highlight-color;
+  }
+}
+
 /**************************************
 	Formatting buttons
 ***************************************/
