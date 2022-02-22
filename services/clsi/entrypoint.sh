@@ -1,7 +1,5 @@
 #!/bin/sh
 
-docker --version >&2
-
 # add the node user to the docker group on the host
 DOCKER_GROUP=$(stat -c '%g' /var/run/docker.sock)
 groupadd --non-unique --gid ${DOCKER_GROUP} dockeronhost
