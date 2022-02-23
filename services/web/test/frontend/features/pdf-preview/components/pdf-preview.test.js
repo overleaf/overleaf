@@ -536,7 +536,6 @@ LaTeX Warning: There were undefined references.
       })
       mockValidPdf()
 
-      screen.debug()
       renderWithEditorContext(<PdfPreview />, { scope })
 
       await screen.findByText(
@@ -549,7 +548,6 @@ LaTeX Warning: There were undefined references.
       const hints = await screen.findAllByText(
         /You have referenced something which has not yet been labelled/
       )
-      console.log('hints', hints)
       expect(hints.length).to.equal(3)
     })
 
@@ -572,7 +570,6 @@ Package rerunfilecheck Info: Checksums for \`output.brf':
       })
       mockValidPdf()
 
-      screen.debug()
       renderWithEditorContext(<PdfPreview />, { scope })
 
       await screen.findByText(
