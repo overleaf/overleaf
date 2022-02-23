@@ -29,7 +29,7 @@
     "lint:fix": "eslint --fix .",
     "extract-translations": "i18next-scanner",
     "migrations": "east",
-    "storybook": "start-storybook -p 6006 -s ./public",
+    "storybook": "start-storybook -p 6006",
     "convert-themes": "node modules/source-editor/frontend/js/themes/convert.js",
     "routes": "bin/routes"
   },
@@ -206,9 +206,9 @@
   "devDependencies": {
     "@babel/register": "^7.14.5",
     "@juggle/resize-observer": "^3.3.1",
-    "@storybook/addon-a11y": "^6.4.10",
-    "@storybook/addon-essentials": "^6.4.10",
-    "@storybook/react": "^6.4.10",
+    "@storybook/addon-a11y": "^6.4.19",
+    "@storybook/addon-essentials": "^6.4.19",
+    "@storybook/react": "^6.4.19",
     "@testing-library/dom": "^7.31.2",
     "@testing-library/react": "^11.2.7",
     "@testing-library/react-hooks": "^7.0.0",

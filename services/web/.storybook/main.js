@@ -10,33 +10,20 @@ process.env.SHARELATEX_CONFIG = path.resolve(
 const customConfig = require('../webpack.config.dev')
 
 module.exports = {
+  staticDirs: ['../public'],
   stories: [
     '../frontend/stories/**/*.stories.js',
     '../modules/**/stories/**/*.stories.js',
   ],
   addons: ['@storybook/addon-essentials', '@storybook/addon-a11y'],
   webpackFinal: storybookConfig => {
-    // Combine Storybook's webpack loaders with our webpack loaders
     const rules = [
-      // Filter out the Storybook font file loader, which overrides our font
-      // file loader causing the font to fail to load
-      ...storybookConfig.module.rules.filter(
-        rule => !rule.test.toString().includes('woff')
-      ),
-      // Replace the LESS rule, and the CSS rule which conflicts with the built-in CSS loader
-      ...customConfig.module.rules.filter(
-        rule =>
-          !rule.test.toString().includes('less') &&
-          !rule.test.toString().includes('css')
-      ),
+      ...storybookConfig.module.rules,
       {
-        test: /\.less$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader'],
+        test: /\.worker\.js$/,
+        use: 'worker-loader',
       },
     ]
-
-    // Combine Storybook's webpack plugins with our webpack plugins
-    const plugins = [...storybookConfig.plugins, ...customConfig.plugins]
 
     return {
       ...storybookConfig,
@@ -44,7 +31,6 @@ module.exports = {
         ...storybookConfig.module,
         rules,
       },
-      plugins,
     }
   },
 }
