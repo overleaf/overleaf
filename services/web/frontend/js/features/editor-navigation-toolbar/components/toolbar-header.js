@@ -35,12 +35,10 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   renameProject,
   hasRenamePermissions,
   openShareModal,
-  pdfLayout,
   pdfViewIsOpen,
   pdfButtonIsVisible,
   togglePdfView,
   trackChangesVisible,
-  view,
 }) {
   const { t } = useTranslation()
   const shouldDisplayPublishButton = hasPublishPermissions && PublishButton
@@ -128,12 +126,10 @@ ToolbarHeader.propTypes = {
   renameProject: PropTypes.func.isRequired,
   hasRenamePermissions: PropTypes.bool,
   openShareModal: PropTypes.func.isRequired,
-  pdfLayout: PropTypes.string.isRequired,
   pdfViewIsOpen: PropTypes.bool,
   pdfButtonIsVisible: PropTypes.bool,
   togglePdfView: PropTypes.func.isRequired,
   trackChangesVisible: PropTypes.bool,
-  view: PropTypes.string,
 }
 
 export default ToolbarHeader

@@ -138,8 +138,6 @@ const EditorNavigationToolbarRoot = React.memo(
         pdfButtonIsVisible={pdfLayout === 'flat'}
         togglePdfView={togglePdfView}
         trackChangesVisible={trackChangesVisible}
-        pdfLayout={pdfLayout}
-        view={view}
       />
     )
   }
