@@ -35,7 +35,7 @@ module.exports = {
     },
 
     haveIBeenPwned: {
-      enabled: true,
+      enabled: false,
       url: 'http://localhost:1337',
     },
   },

@@ -1,3 +1,4 @@
+const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
 const User = require('./helpers/User').promises
 const MockHaveIBeenPwnedApiClass = require('./mocks/MockHaveIBeenPwnedApi')
@@ -60,6 +61,13 @@ async function resetPassword(password) {
 }
 
 describe('HaveIBeenPwnedApi', function () {
+  before(function () {
+    Settings.apis.haveIBeenPwned.enabled = true
+  })
+  after(function () {
+    Settings.apis.haveIBeenPwned.enabled = false
+  })
+
   describe('login with weak password', function () {
     beforeEach(function () {
       user = new User()
