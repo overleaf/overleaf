@@ -23,7 +23,7 @@ const DEFAULT_V1_PARAMS = {
     pass: settings.apis.v1.pass,
   },
   json: true,
-  timeout: 30 * 1000,
+  timeout: 2 * 1000,
 }
 
 const v1Request = request.defaults(DEFAULT_V1_PARAMS)
