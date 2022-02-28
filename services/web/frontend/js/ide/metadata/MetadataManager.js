@@ -20,7 +20,6 @@ export default MetadataManager = class MetadataManager {
       return this.metadata.onBroadcastDocMeta(data)
     })
     this.$scope.$on('entity:deleted', this.metadata.onEntityDeleted)
-    this.$scope.$on('file:upload:complete', this.metadata.fileUploadComplete)
   }
 
   loadProjectMetaFromServer() {

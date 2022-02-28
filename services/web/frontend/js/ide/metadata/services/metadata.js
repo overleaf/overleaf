@@ -35,12 +35,6 @@ export default App.factory('metadata', function ($http, ide) {
     }
   }
 
-  metadata.onFileUploadComplete = function (e, upload) {
-    if (upload.entity_type === 'doc') {
-      return metadata.loadDocMetaFromServer(upload.entity_id)
-    }
-  }
-
   metadata.getAllLabels = () =>
     _.flattenDeep(
       (() => {
