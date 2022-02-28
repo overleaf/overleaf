@@ -81,6 +81,14 @@ function loadViewIncludes(app) {
   }
 }
 
+function registerAppMiddleware(app) {
+  for (const module of _modules) {
+    if (module.appMiddleware) {
+      module.appMiddleware(app)
+    }
+  }
+}
+
 function moduleIncludes(view, locals) {
   const compiledPartials = _viewIncludes[view] || []
   let html = ''
@@ -144,6 +152,7 @@ module.exports = {
   loadViewIncludes,
   moduleIncludes,
   moduleIncludesAvailable,
+  registerAppMiddleware,
   hooks: {
     attach: attachHook,
     fire: fireHook,
