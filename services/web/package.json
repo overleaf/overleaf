@@ -21,6 +21,7 @@
     "nodemon": "nodemon $NODE_APP_OPTIONS --config nodemon.json",
     "webpack": "webpack-dev-server --config webpack.config.dev.js",
     "webpack:production": "webpack --config webpack.config.prod.js",
+    "webpack:profile": "webpack --config webpack.config.prod.js --profile --json > stats.json",
     "format": "prettier --list-different $PWD/'**/*.js'",
     "format:fix": "prettier --write $PWD/'**/*.js'",
     "format:styles": "prettier --list-different $PWD/'**/*.less'",
