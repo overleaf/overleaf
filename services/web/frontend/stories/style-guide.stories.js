@@ -490,14 +490,14 @@ export const Forms = () => {
               <form className="ng-pristine ng-valid">
                 <div className="checkbox">
                   <label>
-                    <input type="checkbox" value="" />
+                    <input type="checkbox" defaultValue="" />
                     Option one is this and that—be sure to include why it's
                     great
                   </label>
                 </div>
                 <div className="checkbox disabled">
                   <label>
-                    <input type="checkbox" value="" disabled="" />
+                    <input type="checkbox" defaultValue="" disabled="" />
                     Option two is disabled
                   </label>
                 </div>
@@ -516,8 +516,8 @@ export const Forms = () => {
                       id="optionsRadios1"
                       type="radio"
                       name="optionsRadios"
-                      value="option1"
-                      checked
+                      defaultValue="option1"
+                      defaultChecked="checked"
                     />
                     Option one is this and that—be sure to include why it's
                     great
@@ -529,7 +529,7 @@ export const Forms = () => {
                       id="optionsRadios2"
                       type="radio"
                       name="optionsRadios"
-                      value="option2"
+                      defaultValue="option2"
                     />
                     Option two can be something else and selecting it will
                     deselect option one
@@ -541,7 +541,7 @@ export const Forms = () => {
                       id="optionsRadios3"
                       type="radio"
                       name="optionsRadios"
-                      value="option3"
+                      defaultValue="option3"
                       disabled=""
                     />
                     Option three is disabled
@@ -582,7 +582,7 @@ export const Forms = () => {
                     id="inlineRadio1"
                     type="radio"
                     name="inlineRadioOptions"
-                    value="option1"
+                    defaultValue="option1"
                   />
                   1
                 </label>
@@ -591,7 +591,7 @@ export const Forms = () => {
                     id="inlineRadio2"
                     type="radio"
                     name="inlineRadioOptions"
-                    value="option2"
+                    defaultValue="option2"
                   />
                   2
                 </label>
@@ -600,7 +600,7 @@ export const Forms = () => {
                     id="inlineRadio3"
                     type="radio"
                     name="inlineRadioOptions"
-                    value="option3"
+                    defaultValue="option3"
                   />
                   3
                 </label>
@@ -678,7 +678,7 @@ export const Forms = () => {
                   className="form-control"
                   id="focusedInput"
                   type="text"
-                  value="Demonstrative focus state"
+                  defaultValue="Demonstrative focus state"
                 />
               </form>
             </div>
@@ -784,7 +784,7 @@ export const Forms = () => {
                       <input
                         id="checkboxSuccess"
                         type="checkbox"
-                        value="option1"
+                        defaultValue="option1"
                       />
                       Checkbox with success
                     </label>
@@ -796,7 +796,7 @@ export const Forms = () => {
                       <input
                         id="checkboxWarning"
                         type="checkbox"
-                        value="option1"
+                        defaultValue="option1"
                       />
                       Checkbox with warning
                     </label>
@@ -808,7 +808,7 @@ export const Forms = () => {
                       <input
                         id="checkboxError"
                         type="checkbox"
-                        value="option1"
+                        defaultValue="option1"
                       />
                       Checkbox with error
                     </label>
