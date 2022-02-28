@@ -6,6 +6,7 @@ const crypto = require('crypto')
 const _ = require('lodash')
 const { callbackify } = require('util')
 const SplitTestCache = require('./SplitTestCache')
+const { SplitTest } = require('../../models/SplitTest')
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
@@ -107,31 +108,37 @@ async function assignInLocalsContext(
  * Get a mapping of the active split test assignments for the given user
  */
 async function getActiveAssignmentsForUser(userId) {
-  const user = await UserGetter.promises.getUser(userId, { splitTests: 1 })
-  if (user == null || user.splitTests == null) {
+  const user = await _getUser(userId)
+  if (user == null) {
     return {}
   }
-  const activeAssignments = {}
-  for (const [splitTestName, assignments] of Object.entries(user.splitTests)) {
-    const splitTest = await SplitTestCache.get(splitTestName)
-    if (splitTest == null) {
-      continue
-    }
-    const currentVersion = splitTest.getCurrentVersion()
-    if (!currentVersion || !currentVersion.active) {
-      continue
-    }
 
-    let assignment
-    if (Array.isArray(assignments)) {
-      assignment = _.maxBy(assignments, 'versionNumber')
-    } else {
-      // Older format is a single string rather than an array of objects
-      assignment = { variantName: assignments }
+  const splitTests = await SplitTest.find({
+    $where: 'this.versions[this.versions.length - 1].active',
+  }).exec()
+  const assignments = {}
+  for (const splitTest of splitTests) {
+    const { activeForUser, selectedVariantName, phase, versionNumber } =
+      await _getAssignmentMetadata(user.analyticsId, user, splitTest)
+    if (activeForUser) {
+      const assignment = {
+        variantName: selectedVariantName,
+        versionNumber,
+        phase,
+      }
+      const userAssignments = user.splitTests?.[splitTest.name]
+      if (Array.isArray(userAssignments)) {
+        const userAssignment = userAssignments.find(
+          x => x.versionNumber === versionNumber
+        )
+        if (userAssignment) {
+          assignment.assignedAt = userAssignment.assignedAt
+        }
+      }
+      assignments[splitTest.name] = assignment
     }
-    activeAssignments[splitTestName] = assignment
   }
-  return activeAssignments
+  return assignments
 }
 
 async function _getAssignment(
@@ -158,8 +165,9 @@ async function _getAssignment(
       return _makeAssignment(splitTest, cachedVariant, currentVersion)
     }
   }
+  const user = userId && (await _getUser(userId))
   const { activeForUser, selectedVariantName, phase, versionNumber } =
-    await _getAssignmentMetadata(analyticsId, userId, splitTest)
+    await _getAssignmentMetadata(analyticsId, user, splitTest)
   if (activeForUser) {
     const assignmentConfig = {
       userId,
@@ -181,26 +189,19 @@ async function _getAssignment(
   return DEFAULT_ASSIGNMENT
 }
 
-async function _getAssignmentMetadata(analyticsId, userId, splitTest) {
+async function _getAssignmentMetadata(analyticsId, user, splitTest) {
   const currentVersion = splitTest.getCurrentVersion()
   const phase = currentVersion.phase
-  if ([ALPHA_PHASE, BETA_PHASE].includes(phase)) {
-    if (userId) {
-      const user = await _getUser(userId)
-      if (
-        (phase === ALPHA_PHASE && !(user && user.alphaProgram)) ||
-        (phase === BETA_PHASE && !(user && user.betaProgram))
-      ) {
-        return {
-          activeForUser: false,
-        }
-      }
-    } else {
-      return {
-        activeForUser: false,
-      }
+  if (
+    !user ||
+    (phase === ALPHA_PHASE && !user.alphaProgram) ||
+    (phase === BETA_PHASE && !user.betaProgram)
+  ) {
+    return {
+      activeForUser: false,
     }
   }
+  const userId = user?._id.toString()
   const percentile = _getPercentile(
     analyticsId || userId,
     splitTest.name,

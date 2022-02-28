@@ -60,6 +60,11 @@ const VersionSchema = new Schema(
       default: true,
       required: true,
     },
+    analyticsEnabled: {
+      type: Boolean,
+      default: true,
+      required: true,
+    },
     variants: [VariantSchema],
     createdAt: {
       type: Date,

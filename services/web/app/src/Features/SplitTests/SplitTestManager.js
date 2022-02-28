@@ -58,6 +58,8 @@ async function createSplitTest(name, configuration, info = {}) {
         versionNumber: 1,
         phase: configuration.phase,
         active: configuration.active,
+        analyticsEnabled:
+          configuration.active && configuration.analyticsEnabled,
         variants: stripedVariants,
       },
     ],
@@ -84,6 +86,7 @@ async function updateSplitTestConfig(name, configuration) {
       versionNumber: lastVersion.versionNumber + 1,
       phase: configuration.phase,
       active: configuration.active,
+      analyticsEnabled: configuration.active && configuration.analyticsEnabled,
       variants: updatedVariants,
     })
     return _saveSplitTest(splitTest)

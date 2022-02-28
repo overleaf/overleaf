@@ -1,10 +1,5 @@
 const sinon = require('sinon')
-const sinonChai = require('sinon-chai')
-const chai = require('chai')
-const chaiAsPromised = require('chai-as-promised')
-chai.use(sinonChai)
-chai.use(chaiAsPromised)
-const { expect } = chai
+const { expect } = require('chai')
 const recurly = require('recurly')
 const modulePath = '../../../../app/src/Features/Subscription/RecurlyClient'
 const SandboxedModule = require('sandboxed-module')

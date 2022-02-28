@@ -11,12 +11,15 @@ const MODULE_PATH = Path.join(
 
 describe('SplitTestHandler', function () {
   beforeEach(function () {
-    this.splitTest = {
-      getCurrentVersion: sinon.stub().returns({ active: true }),
-    }
-    this.inactiveSplitTest = {
-      getCurrentVersion: sinon.stub().returns({ active: false }),
-    }
+    this.splitTests = [
+      makeSplitTest('active-test'),
+      makeSplitTest('legacy-test'),
+      makeSplitTest('no-analytics-test-1', { analyticsEnabled: false }),
+      makeSplitTest('no-analytics-test-2', {
+        analyticsEnabled: false,
+        versionNumber: 2,
+      }),
+    ]
 
     this.UserGetter = {
       promises: {
@@ -24,19 +27,24 @@ describe('SplitTestHandler', function () {
       },
     }
 
+    this.SplitTest = {
+      find: sinon.stub().returns({
+        exec: sinon.stub().resolves(this.splitTests),
+      }),
+    }
+
     this.SplitTestCache = {
       get: sinon.stub().resolves(null),
     }
-    this.SplitTestCache.get.withArgs('legacy-test').resolves(this.splitTest)
-    this.SplitTestCache.get.withArgs('other-test').resolves(this.splitTest)
-    this.SplitTestCache.get
-      .withArgs('inactive-test')
-      .resolves(this.inactiveSplitTest)
+    for (const splitTest of this.splitTests) {
+      this.SplitTestCache.get.withArgs(splitTest.name).resolves(splitTest)
+    }
 
     this.SplitTestHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../User/UserGetter': this.UserGetter,
         './SplitTestCache': this.SplitTestCache,
+        '../../models/SplitTest': { SplitTest: this.SplitTest },
         '../User/UserUpdater': {},
         '../Analytics/AnalyticsManager': {},
         './LocalsHelper': {},
@@ -49,14 +57,23 @@ describe('SplitTestHandler', function () {
       this.user = {
         _id: ObjectId(),
         splitTests: {
-          'legacy-test': 'legacy-variant',
-          'other-test': [
-            { variantName: 'default', versionNumber: 1 },
-            { variantName: 'latest', versionNumber: 3 },
-            { variantName: 'experiment', versionNumber: 2 },
+          'active-test': [
+            {
+              variantName: 'default',
+              versionNumber: 1,
+              assignedAt: 'active-test-assigned-at',
+            },
           ],
+          'legacy-test': 'legacy-variant',
           'inactive-test': [{ variantName: 'trythis' }],
           'unknown-test': [{ variantName: 'trythis' }],
+          'no-analytics-test-2': [
+            {
+              variantName: 'some-variant',
+              versionNumber: 1,
+              assignedAt: 'no-analytics-assigned-at',
+            },
+          ],
         },
       }
       this.UserGetter.promises.getUser
@@ -69,19 +86,36 @@ describe('SplitTestHandler', function () {
     })
 
     it('handles the legacy assignment format', function () {
-      expect(this.assignments).to.have.property('legacy-test')
-      expect(this.assignments['legacy-test'].variantName).to.equal(
-        'legacy-variant'
-      )
+      expect(this.assignments['legacy-test']).to.deep.equal({
+        variantName: 'variant-1',
+        phase: 'release',
+        versionNumber: 1,
+      })
     })
 
-    it('returns the last assignment for each active test', function () {
-      expect(this.assignments).to.have.property('other-test')
-      expect(this.assignments['other-test'].variantName).to.equal('latest')
+    it('returns the current assignment for each active test', function () {
+      expect(this.assignments['active-test']).to.deep.equal({
+        variantName: 'variant-1',
+        phase: 'release',
+        versionNumber: 1,
+        assignedAt: 'active-test-assigned-at',
+      })
     })
 
-    it('does not return assignments for inactive tests', function () {
-      expect(this.assignments).not.to.have.property('inactive-test')
+    it('returns the current assignment for tests with analytics disabled', function () {
+      expect(this.assignments['no-analytics-test-1']).to.deep.equal({
+        variantName: 'variant-1',
+        phase: 'release',
+        versionNumber: 1,
+      })
+    })
+
+    it('returns the current assignment for tests with analytics disabled that had previous assignments', function () {
+      expect(this.assignments['no-analytics-test-2']).to.deep.equal({
+        variantName: 'variant-1',
+        phase: 'release',
+        versionNumber: 2,
+      })
     })
 
     it('does not return assignments for unknown tests', function () {
@@ -89,7 +123,7 @@ describe('SplitTestHandler', function () {
     })
   })
 
-  describe('with an inexistent user', function () {
+  describe('with an non-existent user', function () {
     beforeEach(async function () {
       const unknownUserId = ObjectId()
       this.assignments =
@@ -115,8 +149,55 @@ describe('SplitTestHandler', function () {
         )
     })
 
-    it('returns empty assignments', function () {
-      expect(this.assignments).to.deep.equal({})
+    it('returns current assignments', function () {
+      expect(this.assignments).to.deep.equal({
+        'active-test': {
+          phase: 'release',
+          variantName: 'variant-1',
+          versionNumber: 1,
+        },
+        'legacy-test': {
+          phase: 'release',
+          variantName: 'variant-1',
+          versionNumber: 1,
+        },
+        'no-analytics-test-1': {
+          phase: 'release',
+          variantName: 'variant-1',
+          versionNumber: 1,
+        },
+        'no-analytics-test-2': {
+          phase: 'release',
+          variantName: 'variant-1',
+          versionNumber: 2,
+        },
+      })
     })
   })
 })
+
+function makeSplitTest(name, opts = {}) {
+  const {
+    active = true,
+    analyticsEnabled = active,
+    phase = 'release',
+    versionNumber = 1,
+  } = opts
+
+  return {
+    name,
+    getCurrentVersion: sinon.stub().returns({
+      active,
+      analyticsEnabled,
+      phase,
+      versionNumber,
+      variants: [
+        {
+          name: 'variant-1',
+          rolloutPercent: 100,
+          rolloutStripes: [{ start: 0, end: 100 }],
+        },
+      ],
+    }),
+  }
+}
