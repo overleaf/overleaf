@@ -15,7 +15,7 @@
 let LatexRunner
 const Path = require('path')
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
 const CommandRunner = require('./CommandRunner')
 const fs = require('fs')

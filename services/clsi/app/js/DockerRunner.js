@@ -1,5 +1,5 @@
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Docker = require('dockerode')
 const dockerode = new Docker()
 const crypto = require('crypto')

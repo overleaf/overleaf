@@ -2,7 +2,7 @@ let OutputFileFinder
 const Path = require('path')
 const _ = require('lodash')
 const { spawn } = require('child_process')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = OutputFileFinder = {
   findOutputFiles(resources, directory, callback) {

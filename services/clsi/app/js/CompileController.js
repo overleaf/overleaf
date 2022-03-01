@@ -17,7 +17,7 @@ const CompileManager = require('./CompileManager')
 const Settings = require('@overleaf/settings')
 const Metrics = require('./Metrics')
 const ProjectPersistenceManager = require('./ProjectPersistenceManager')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Errors = require('./Errors')
 
 function isImageNameAllowed(imageName) {

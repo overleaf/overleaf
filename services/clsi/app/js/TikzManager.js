@@ -15,7 +15,7 @@ const fs = require('fs')
 const Path = require('path')
 const ResourceWriter = require('./ResourceWriter')
 const SafeReader = require('./SafeReader')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 // for \tikzexternalize or pstool to work the main file needs to match the
 // jobname.  Since we set the -jobname to output, we have to create a

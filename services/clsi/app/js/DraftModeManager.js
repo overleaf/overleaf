@@ -12,7 +12,7 @@
  */
 let DraftModeManager
 const fs = require('fs')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = DraftModeManager = {
   injectDraftMode(filename, callback) {

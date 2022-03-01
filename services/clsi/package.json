@@ -16,7 +16,8 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
-    "@overleaf/metrics": "^3.5.1",
+    "@overleaf/logger": "^3.1.0",
+    "@overleaf/metrics": "^4.0.0",
     "@overleaf/o-error": "^3.4.0",
     "@overleaf/settings": "^3.0.0",
     "async": "3.2.0",
@@ -28,7 +29,6 @@
     "fs-extra": "^10.0.0",
     "lockfile": "^1.0.4",
     "lodash": "^4.17.21",
-    "logger-sharelatex": "^2.2.0",
     "p-limit": "^3.1.0",
     "pdfjs-dist": "~2.7.570",
     "request": "^2.88.2",

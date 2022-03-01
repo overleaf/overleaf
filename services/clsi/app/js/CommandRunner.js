@@ -7,7 +7,7 @@
  */
 let commandRunnerPath
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 if ((Settings.clsi != null ? Settings.clsi.dockerRunner : undefined) === true) {
   commandRunnerPath = './DockerRunner'

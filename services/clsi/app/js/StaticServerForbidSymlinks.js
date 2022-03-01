@@ -18,7 +18,7 @@ let ForbidSymlinks
 const Path = require('path')
 const fs = require('fs')
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = ForbidSymlinks = function (staticFn, root, options) {
   const expressStatic = staticFn(root, options)

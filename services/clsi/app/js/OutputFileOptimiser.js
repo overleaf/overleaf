@@ -16,7 +16,7 @@ let OutputFileOptimiser
 const fs = require('fs')
 const Path = require('path')
 const { spawn } = require('child_process')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
 const _ = require('lodash')
 

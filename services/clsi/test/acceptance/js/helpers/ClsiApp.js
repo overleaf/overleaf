@@ -10,8 +10,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const app = require('../../../../app')
-require('logger-sharelatex').logger.level('info')
-const logger = require('logger-sharelatex')
+require('@overleaf/logger').logger.level('info')
+const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 
 module.exports = {

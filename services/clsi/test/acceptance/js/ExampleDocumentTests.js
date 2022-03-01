@@ -19,7 +19,7 @@ const fs = require('fs')
 const fsExtra = require('fs-extra')
 const ChildProcess = require('child_process')
 const ClsiApp = require('./helpers/ClsiApp')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Path = require('path')
 const fixturePath = path => {
   if (path.slice(0, 3) === 'tmp') {

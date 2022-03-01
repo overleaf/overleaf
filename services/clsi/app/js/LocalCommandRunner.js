@@ -15,7 +15,7 @@
 let CommandRunner
 const { spawn } = require('child_process')
 const _ = require('lodash')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 logger.info('using standard command runner')
 

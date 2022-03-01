@@ -12,7 +12,7 @@
  */
 let LockManager
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Lockfile = require('lockfile') // from https://github.com/npm/lockfile
 const Errors = require('./Errors')
 const fs = require('fs')

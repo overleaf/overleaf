@@ -1,6 +1,6 @@
 const Path = require('path')
 const fs = require('fs')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Errors = require('./Errors')
 const SafeReader = require('./SafeReader')
 

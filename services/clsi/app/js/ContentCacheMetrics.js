@@ -1,4 +1,4 @@
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
 const os = require('os')
 

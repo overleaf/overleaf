@@ -8,7 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let LockManager
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 const LockState = {} // locks for docker container operations, by container name
 

@@ -7,7 +7,7 @@
  */
 const async = require('async')
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const queue = async.queue(
   (task, cb) => task(cb),
   Settings.parallelSqlQueryLimit

@@ -14,7 +14,7 @@ let ProjectPersistenceManager
 const UrlCache = require('./UrlCache')
 const CompileManager = require('./CompileManager')
 const async = require('async')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const oneDay = 24 * 60 * 60 * 1000
 const Settings = require('@overleaf/settings')
 const diskusage = require('diskusage')

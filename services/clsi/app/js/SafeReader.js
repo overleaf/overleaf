@@ -13,7 +13,7 @@
  */
 let SafeReader
 const fs = require('fs')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 
 module.exports = SafeReader = {
   // safely read up to size bytes from a file and return result as a

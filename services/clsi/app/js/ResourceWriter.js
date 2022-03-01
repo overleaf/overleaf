@@ -21,7 +21,7 @@ const async = require('async')
 const OutputFileFinder = require('./OutputFileFinder')
 const ResourceStateManager = require('./ResourceStateManager')
 const Metrics = require('./Metrics')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
 
 const parallelFileDownloads = settings.parallelFileDownloads || 1

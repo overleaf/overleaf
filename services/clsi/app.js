@@ -11,7 +11,7 @@ Metrics.initialize('clsi')
 const CompileController = require('./app/js/CompileController')
 const ContentController = require('./app/js/ContentController')
 const Settings = require('@overleaf/settings')
-const logger = require('logger-sharelatex')
+const logger = require('@overleaf/logger')
 logger.initialize('clsi')
 if ((Settings.sentry != null ? Settings.sentry.dsn : undefined) != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
