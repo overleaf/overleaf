@@ -7,6 +7,7 @@ const _ = require('lodash')
 const { callbackify } = require('util')
 const SplitTestCache = require('./SplitTestCache')
 const { SplitTest } = require('../../models/SplitTest')
+const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
@@ -78,7 +79,8 @@ async function getAssignmentForUser(
   splitTestName,
   { sync = false } = {}
 ) {
-  return _getAssignment(splitTestName, { userId, sync })
+  const analyticsId = await UserAnalyticsIdCache.get(userId)
+  return _getAssignment(splitTestName, { analyticsId, userId, sync })
 }
 
 /**
