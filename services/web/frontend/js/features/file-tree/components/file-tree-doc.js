@@ -8,8 +8,11 @@ import Icon from '../../../shared/components/icon'
 import iconTypeFromName from '../util/icon-type-from-name'
 import classnames from 'classnames'
 
-function FileTreeDoc({ name, id, isLinkedFile }) {
-  const { isSelected, props: selectableEntityProps } = useSelectableEntity(id)
+function FileTreeDoc({ name, id, isFile, isLinkedFile }) {
+  const { isSelected, props: selectableEntityProps } = useSelectableEntity(
+    id,
+    isFile
+  )
 
   return (
     <li
@@ -31,6 +34,7 @@ function FileTreeDoc({ name, id, isLinkedFile }) {
 FileTreeDoc.propTypes = {
   name: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
+  isFile: PropTypes.bool,
   isLinkedFile: PropTypes.bool,
 }
 

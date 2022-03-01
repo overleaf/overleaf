@@ -40,6 +40,7 @@ function FileTreeFolderList({
             key={doc._id}
             name={doc.name}
             id={doc._id}
+            isFile={doc.linkedFileData !== undefined}
             isLinkedFile={doc.linkedFileData && !!doc.linkedFileData.provider}
           />
         )
