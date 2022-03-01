@@ -17,27 +17,7 @@ footer.site-footer
 							strong.text-muted |
 
 				if showLanguagePicker
-					li.dropdown.dropup.subdued
-						a.dropdown-toggle(
-							href="#",
-							data-toggle="dropdown",
-							aria-haspopup="true",
-							aria-expanded="false",
-							aria-label="Select " + translate('language'),
-							data-ol-lang-selector-tooltip,
-							title=translate('language')
-						)
-							i.fa.fa-fw.fa-language
-							|
-							| #{settings.translatedLanguages[currentLngCode]}
-
-						ul.dropdown-menu(role="menu")
-							li.dropdown-header #{translate("language")}
-							each subdomainDetails, subdomain in settings.i18n.subdomainLang
-								if !subdomainDetails.hide
-									li.lngOption
-										a.menu-indent(href=subdomainDetails.url+currentUrlWithQueryParams)
-											| #{settings.translatedLanguages[subdomainDetails.lngCode]}
+					include language-picker
 
 				if showLanguagePicker && hasCustomLeftNav
 					li
@@ -51,7 +31,6 @@ footer.site-footer
 							| !{item.text}
 
 			ul.col-md-3.text-right
-
 				each item in nav.right_footer
 					li(ng-non-bindable)
 						if item.url

@@ -1,0 +1,79 @@
+footer.fat-footer.hidden-print
+	.fat-footer-container
+		.fat-footer-sections(class=hideFatFooter ? 'hidden' : undefined)
+			.footer-section#footer-brand
+				a(href='/', aria-label=settings.appName).footer-brand
+					
+			.footer-section
+				.footer-section-heading #{translate('About')}
+					
+				ul.list-unstyled
+					li
+						a(href="/about") #{translate('footer_about_us')}
+					li
+						a(href="/about/values") #{translate('our_values')}
+					li
+						a(href="https://apply.workable.com/overleaf/") #{translate('careers')}
+					li
+						a(href="/for/press") #{translate('press_and_awards')}
+					li
+						a(href="/blog") #{translate('blog')}
+						
+			.footer-section
+				.footer-section-heading #{translate('learn')}
+		
+				ul.list-unstyled
+					li
+						a(href="/learn/latex/Learn_LaTeX_in_30_minutes") #{translate('latex_in_thirty_minutes')}
+					li
+						a(href="/latex/templates") #{translate('templates')}
+					li
+						a(href="/events/webinars") #{translate('webinars')}
+					li
+						a(href="/learn/latex/Tutorials") #{translate('tutorials')}
+					li
+						a(href="/learn/latex/Inserting_Images") #{translate('how_to_insert_images')}
+					li
+						a(href="/learn/latex/Tables") #{translate('how_to_create_tables')}
+						
+			.footer-section
+				.footer-section-heading #{translate('footer_plans_and_pricing')}
+		
+				ul.list-unstyled
+					li
+						a(href="/learn/how-to/Overleaf_premium_features") #{translate('premium_features')}
+					li
+						a(href="/user/subscription/plans") #{translate('for_individuals_and_groups')}
+					li
+						a(href="/for/enterprises") #{translate('for_enterprise')}
+					li
+						a(href="/for/universities") #{translate('for_universities')}
+					li
+						a(href="/user/subscription/plans#view=student") #{translate('for_students')}
+						
+			.footer-section
+				.footer-section-heading #{translate('get_involved')}
+		
+				ul.list-unstyled
+					li
+						a(href="/for/community/advisors") #{translate('become_an_advisor')}
+					li
+						a(href="https://calendly.com/overleaf/user-research") #{translate('participate_in_user_research')}
+					if user
+						li
+							a(href="/beta/participate") #{translate('join_beta_program')}
+						li
+							a(href="/user/bonus") #{translate('refer_a_friend')}
+		
+			.footer-section
+				.footer-section-heading #{translate('help')}
+		
+				ul.list-unstyled
+					li
+						a(href="/learn") #{translate('Documentation')} 
+					li
+						a(href="/contact") #{translate('footer_contact_us')}  
+					li
+						a(href="https://status.overleaf.com/") #{translate('website_status')}
+					
+		include fat-footer-base

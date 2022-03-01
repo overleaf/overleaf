@@ -6,10 +6,9 @@ footer.site-footer
 	.site-footer-content.hidden-print
 		.row
 			ul.col-md-9
-				if hasFeature('saas')
-					li © #{new Date().getFullYear()} Overleaf
-				else if !settings.nav.hide_powered_by
+				if !settings.nav.hide_powered_by
 					li
+						//- year of Server Pro release, static
 						| © 2021
 						|
 						a(href='https://www.overleaf.com/for/enterprises') Powered by Overleaf
@@ -19,27 +18,7 @@ footer.site-footer
 							strong.text-muted |
 
 				if showLanguagePicker
-					li.dropdown.dropup.subdued(dropdown)
-						a.dropdown-toggle(
-							href="#",
-							dropdown-toggle,
-							data-toggle="dropdown",
-							aria-haspopup="true",
-							aria-expanded="false",
-							aria-label="Select " + translate('language')
-							tooltip=translate('language')
-						)
-							i.fa.fa-fw.fa-language
-							|
-							| #{settings.translatedLanguages[currentLngCode]}
-
-						ul.dropdown-menu
-							li.dropdown-header #{translate("language")}
-							each subdomainDetails, subdomain in settings.i18n.subdomainLang
-								if !subdomainDetails.hide
-									li.lngOption
-										a.menu-indent(href=subdomainDetails.url+currentUrlWithQueryParams)
-											| #{settings.translatedLanguages[subdomainDetails.lngCode]}
+					include language-picker
 
 				if showLanguagePicker && hasCustomLeftNav
 					li

@@ -99,7 +99,7 @@ html(
 		block head-scripts
 
 
-	body
+	body(class=(showThinFooter ? 'thin-footer' : undefined))
 		if(settings.recaptcha && settings.recaptcha.siteKeyV3)
 			script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
 
@@ -112,7 +112,10 @@ html(
 		block content
 
 		if (typeof(suppressFooter) == "undefined")
-			include layout/footer-marketing
+			if showThinFooter
+				include layout/footer-marketing
+			else
+				include layout/fat-footer
 
 		!= moduleIncludes("contactModal-marketing", locals)
 

@@ -31,10 +31,13 @@ body {
   background-color: @body-bg;
   min-height: 100%;
   position: relative;
-  padding-bottom: @footer-height;
   & > .content {
     min-height: calc(~'100vh -' @footer-height);
     padding-top: @header-height + @content-margin-vertical;
+  }
+
+  .thin-footer {
+    padding-bottom: @footer-height;
   }
 }
 

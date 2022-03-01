@@ -1,0 +1,18 @@
+.fat-footer-base
+	.fat-footer-base-section.fat-footer-base-meta
+		.fat-footer-base-item 
+			.fat-footer-base-copyright © #{new Date().getFullYear()} Overleaf
+			a(href="/legal") #{translate('privacy_and_terms')}
+		ul.fat-footer-base-item.list-unstyled.fat-footer-base-language
+			include language-picker
+	.fat-footer-base-section.fat-footer-base-social
+		.fat-footer-base-item
+			a.fat-footer-social(href="https://twitter.com/overleaf")
+				i.fa.fa-twitter-square(aria-hidden="true")
+					.sr-only Overleaf on Twitter
+			a.fat-footer-social(href="https://www.facebook.com/overleaf.editor")
+				i.fa.fa-facebook-square(aria-hidden="true")
+					.sr-only Overleaf on Facebook
+			a.fat-footer-social(href="https://www.linkedin.com/company/writelatex-limited")
+				i.fa.fa-linkedin-square(aria-hidden="true")
+					.sr-only Overleaf on LinkedIn

@@ -356,6 +356,11 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
+    res.locals.showThinFooter = !Features.hasFeature('saas')
+    next()
+  })
+
+  webRouter.use(function (req, res, next) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
       appName: Settings.appName,

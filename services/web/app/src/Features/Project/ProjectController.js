@@ -613,6 +613,7 @@ const ProjectController = {
             zipFileSizeLimit: Settings.maxUploadSize,
             isOverleaf: !!Settings.overleaf,
             metadata: { viewport: false },
+            showThinFooter: true, // don't show the fat footer on the projects dashboard, as there's a fixed space available
           }
 
           const paidUser =
