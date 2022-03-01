@@ -50,7 +50,7 @@ public class GetSavedVersResult extends Result {
 
     @Override
     public void fromJSON(JsonElement json) {
-        Log.info("GetSavedVersResult({})", json);
+        Log.debug("GetSavedVersResult({})", json);
         savedVers = new ArrayList<>();
         for (JsonElement elem : json.getAsJsonArray()) {
             savedVers.add(

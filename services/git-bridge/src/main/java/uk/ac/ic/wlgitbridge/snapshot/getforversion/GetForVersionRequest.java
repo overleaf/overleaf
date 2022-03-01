@@ -24,7 +24,7 @@ public class GetForVersionRequest
     ) {
         super(projectName, API_CALL + "/" + versionID, oauth2);
         this.versionID = versionID;
-        Log.info(
+        Log.debug(
                 "GetForVersionRequest({}, {}, {})",
                 "oauth2: <oauth2>",
                 "projectName: " + projectName,

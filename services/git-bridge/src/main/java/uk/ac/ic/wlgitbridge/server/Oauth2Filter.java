@@ -97,14 +97,14 @@ public class Oauth2Filter implements Filter {
             ));
             return;
         }
-        Log.info("[{}] Checking if auth needed", project);
+        Log.debug("[{}] Checking if auth needed", project);
         GetDocRequest doc = new GetDocRequest(project);
         doc.request();
         try {
             SnapshotApi.getResult(
                     snapshotApi.getDoc(Optional.empty(), project));
         } catch (ForbiddenException e) {
-            Log.info("[{}] Auth needed", project);
+            Log.debug("[{}] Auth needed", project);
             getAndInjectCredentials(
                     project,
                     servletRequest,
@@ -115,7 +115,7 @@ public class Oauth2Filter implements Filter {
         } catch (MissingRepositoryException e) {
             handleMissingRepository(project, e, (HttpServletResponse) servletResponse);
         }
-        Log.info("[{}] Auth not needed", project);
+        Log.debug("[{}] Auth not needed", project);
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
@@ -137,7 +137,7 @@ public class Oauth2Filter implements Filter {
             if (clientIp == null) {
               clientIp = request.getRemoteAddr();
             }
-            Log.info("[{}] Authorization header present", clientIp);
+            Log.debug("[{}] Authorization header present", clientIp);
             StringTokenizer st = new StringTokenizer(authHeader);
             if (st.hasMoreTokens()) {
                 String basic = st.nextToken();

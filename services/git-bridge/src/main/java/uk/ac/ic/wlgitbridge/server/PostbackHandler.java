@@ -32,7 +32,7 @@ public class PostbackHandler extends AbstractHandler {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException, ServletException {
-        Log.info(
+        Log.debug(
                 "PostbackHandler: " + baseRequest.getMethod()
                         + " <- "
                         + baseRequest.getHttpURI()

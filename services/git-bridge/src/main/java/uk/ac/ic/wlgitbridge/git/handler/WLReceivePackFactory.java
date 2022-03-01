@@ -60,7 +60,7 @@ public class WLReceivePackFactory
             HttpServletRequest httpServletRequest,
             Repository repository
     ) {
-        Log.info(
+        Log.debug(
                 "[{}] Creating receive-pack",
                 repository.getWorkTree().getName()
         );

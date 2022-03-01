@@ -112,11 +112,11 @@ public class SwapJobImpl implements SwapJob {
     private void doSwap_() {
         ArrayList<String> exceptionProjectNames = new ArrayList<String>();
 
-        Log.info("Running swap number {}", swaps.get() + 1);
+        Log.debug("Running swap number {}", swaps.get() + 1);
         long totalSize = repoStore.totalSize();
-        Log.info("Size is {}/{} (high)", totalSize, highWatermarkBytes);
+        Log.debug("Size is {}/{} (high)", totalSize, highWatermarkBytes);
         if (totalSize < highWatermarkBytes) {
-            Log.info("No need to swap.");
+            Log.debug("No need to swap.");
             swaps.incrementAndGet();
             return;
         }
@@ -162,7 +162,7 @@ public class SwapJobImpl implements SwapJob {
                     "Finished swapping, but total size is still too high."
             );
         }
-        Log.info(
+        Log.debug(
                 "Size: {}/{} (low), " +
                         "{} (high), " +
                         "projects on disk: {}/{}, " +

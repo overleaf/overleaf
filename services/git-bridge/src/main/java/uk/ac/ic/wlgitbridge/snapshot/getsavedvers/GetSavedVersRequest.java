@@ -17,7 +17,7 @@ public class GetSavedVersRequest
 
     public GetSavedVersRequest(Credential oauth2, String projectName) {
         super(projectName, API_CALL, oauth2);
-        Log.info(
+        Log.debug(
                 "GetSavedVersRequest({}, {})",
                 "oauth2: <oauth2>",
                 "projectName: " + projectName

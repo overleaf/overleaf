@@ -270,7 +270,7 @@ public class Bridge {
          if (!rootDirectory.exists()) {
            throw new Exception("bad filesystem state, root directory does not exist");
          }
-         Log.info("[HealthCheck] passed");
+         Log.debug("[HealthCheck] passed");
          return true;
        } catch (Exception e)  {
          Log.error("[HealthCheck] FAILED!", e);
@@ -332,7 +332,7 @@ public class Bridge {
                 throw new RepositoryNotFoundException(projectName);
             }
             GetDocResult doc = maybeDoc.get();
-            Log.info("[{}] Updating repository", projectName);
+            Log.debug("[{}] Updating repository", projectName);
             return getUpdatedRepoCritical(oauth2, projectName, doc);
         }
     }
@@ -539,13 +539,13 @@ public class Bridge {
         if (maxFileNum.isPresent()) {
           long maxFileNum_ = maxFileNum.get();
           if (directoryContents.getFileTable().size() > maxFileNum_) {
-            Log.debug("[{}] Too many files: {}/{}", projectName, directoryContents.getFileTable().size(), maxFileNum_);
+            Log.warn("[{}] Too many files: {}/{}", projectName, directoryContents.getFileTable().size(), maxFileNum_);
             throw new FileLimitExceededException(directoryContents.getFileTable().size(), maxFileNum_);
           }
         }
-        Log.info("[{}] Pushing files ({} new, {} old)", projectName, directoryContents.getFileTable().size(), oldDirectoryContents.getFileTable().size());
+        Log.debug("[{}] Pushing files ({} new, {} old)", projectName, directoryContents.getFileTable().size(), oldDirectoryContents.getFileTable().size());
         String postbackKey = postbackManager.makeKeyForProject(projectName);
-        Log.info(
+        Log.debug(
                 "[{}] Created postback key: {}",
                 projectName,
                 postbackKey
@@ -557,7 +557,7 @@ public class Bridge {
                                 oldDirectoryContents
                 );
         ) {
-            Log.info(
+            Log.debug(
                     "[{}] Candidate snapshot created: {}",
                     projectName,
                     candidate
@@ -565,20 +565,20 @@ public class Bridge {
             PushResult result
                     = snapshotAPI.push(oauth2, candidate, postbackKey);
             if (result.wasSuccessful()) {
-                Log.info(
+                Log.debug(
                         "[{}] Push to Overleaf successful",
                         projectName
                 );
-                Log.info("[{}] Waiting for postback...", projectName);
+                Log.debug("[{}] Waiting for postback...", projectName);
                 int versionID =
                         postbackManager.waitForVersionIdOrThrow(projectName);
-                Log.info(
+                Log.debug(
                         "[{}] Got version ID for push: {}",
                         projectName,
                         versionID
                 );
                 approveSnapshot(versionID, candidate);
-                Log.info(
+                Log.debug(
                         "[{}] Approved version ID: {}",
                         projectName,
                         versionID
@@ -636,7 +636,7 @@ public class Bridge {
             String postbackKey,
             int versionID
     ) throws UnexpectedPostbackException {
-        Log.info(
+        Log.debug(
                 "[{}]" +
                         " Postback received by postback thread, version: {}",
                 projectName,
@@ -762,7 +762,7 @@ public class Bridge {
                         )
                 );
             }
-            Log.info(
+            Log.debug(
                     "[{}] Committing version ID: {}",
                     name,
                     snapshot.getVersionID()

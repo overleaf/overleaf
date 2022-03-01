@@ -30,7 +30,7 @@ public abstract class RawFile {
         OutputStream out = new FileOutputStream(file);
         out.write(getContents());
         out.close();
-        Log.info("Wrote file: {}", file.getAbsolutePath());
+        Log.debug("Wrote file: {}", file.getAbsolutePath());
     }
 
     @Override

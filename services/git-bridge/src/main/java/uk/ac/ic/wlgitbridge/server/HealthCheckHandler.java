@@ -34,7 +34,7 @@ public class HealthCheckHandler extends AbstractHandler {
         && target != null
         && target.matches("^/health_check/?$")
     ) {
-      Log.info(method + " <- /health_check");
+      Log.debug(method + " <- /health_check");
       baseRequest.setHandled(true);
       response.setContentType("text/plain");
       if (bridge.healthCheck()) {

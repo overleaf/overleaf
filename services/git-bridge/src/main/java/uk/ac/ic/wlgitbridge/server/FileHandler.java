@@ -38,7 +38,7 @@ public class FileHandler extends ResourceHandler {
             HttpServletResponse response
     ) throws IOException, ServletException {
         if (!"GET".equals(baseRequest.getMethod())) return;
-        LOG.info("GET <- {}", baseRequest.getRequestURI());
+        LOG.debug("GET <- {}", baseRequest.getRequestURI());
 
         Matcher docKeyMatcher = DOC_KEY_PATTERN.matcher(target);
         if (!docKeyMatcher.matches()) return;

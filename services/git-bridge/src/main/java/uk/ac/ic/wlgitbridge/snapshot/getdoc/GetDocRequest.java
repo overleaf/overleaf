@@ -19,7 +19,7 @@ public class GetDocRequest extends SnapshotAPIRequest<GetDocResult> {
 
     public GetDocRequest(Credential oauth2, String projectName) {
         super(projectName, API_CALL, oauth2);
-        Log.info(
+        Log.debug(
                 "GetDocRequest({}, {})",
                 "oauth2: <oauth2>",
                 "projectName: "  + projectName

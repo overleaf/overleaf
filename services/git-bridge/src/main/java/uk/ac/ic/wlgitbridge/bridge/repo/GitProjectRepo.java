@@ -116,14 +116,14 @@ public class GitProjectRepo implements ProjectRepo {
         );
         File dir = getProjectDir();
         Preconditions.checkState(dir.isDirectory());
-        Log.info("[{}] Running git gc", projectName);
+        Log.debug("[{}] Running git gc", projectName);
         Process proc = new ProcessBuilder(
                 "git", "gc"
         ).directory(dir).start();
         int exitCode;
         try {
             exitCode = proc.waitFor();
-            Log.info("Exit: {}", exitCode);
+            Log.debug("Exit: {}", exitCode);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -139,12 +139,12 @@ public class GitProjectRepo implements ProjectRepo {
             ));
             throw new IOException("git gc error");
         }
-        Log.info("[{}] git gc successful", projectName);
+        Log.debug("[{}] git gc successful", projectName);
     }
 
     @Override
     public void deleteIncomingPacks() throws IOException {
-        Log.info(
+        Log.debug(
                 "[{}] Checking for garbage `incoming` files",
                 projectName
         );
@@ -165,7 +165,7 @@ public class GitProjectRepo implements ProjectRepo {
                 File file_ = file.toFile();
                 String name = file_.getName();
                 if (name.startsWith("incoming_") && name.endsWith(".pack")) {
-                    Log.info("Deleting garbage `incoming` file: {}", file_);
+                    Log.debug("Deleting garbage `incoming` file: {}", file_);
                     Preconditions.checkState(file_.delete());
                 }
                 return FileVisitResult.CONTINUE;
@@ -242,21 +242,21 @@ public class GitProjectRepo implements ProjectRepo {
         Repository repo = getJGitRepository();
         resetHard();
         String name = getProjectName();
-        Log.info("[{}] Writing commit", name);
+        Log.debug("[{}] Writing commit", name);
         contents.write();
         Git git = new Git(getJGitRepository());
-        Log.info("[{}] Getting missing files", name);
+        Log.debug("[{}] Getting missing files", name);
         Set<String> missingFiles = git.status().call().getMissing();
         for (String missing : missingFiles) {
-            Log.info("[{}] Git rm {}", name, missing);
+            Log.debug("[{}] Git rm {}", name, missing);
             git.rm().setCached(true).addFilepattern(missing).call();
         }
-        Log.info("[{}] Calling Git add", name);
+        Log.debug("[{}] Calling Git add", name);
         git.add(
         ).setWorkingTreeIterator(
                 new NoGitignoreIterator(repo)
         ).addFilepattern(".").call();
-        Log.info("[{}] Calling Git commit", name);
+        Log.debug("[{}] Calling Git commit", name);
         git.commit(
         ).setAuthor(
                 new PersonIdent(
@@ -268,7 +268,7 @@ public class GitProjectRepo implements ProjectRepo {
         ).setMessage(
                 contents.getCommitMessage()
         ).call();
-        Log.info(
+        Log.debug(
                 "[{}] Deleting files in directory: {}",
                 name,
                 contents.getDirectory().getAbsolutePath()

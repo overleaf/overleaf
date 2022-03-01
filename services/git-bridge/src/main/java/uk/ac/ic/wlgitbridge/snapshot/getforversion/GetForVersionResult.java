@@ -28,7 +28,7 @@ public class GetForVersionResult extends Result {
     @Override
     public void fromJSON(JsonElement json) {
         snapshotData = new SnapshotData(json);
-        Log.info("GetForVersionResult({})", snapshotData);
+        Log.debug("GetForVersionResult({})", snapshotData);
     }
 
     public SnapshotData getSnapshotData() {

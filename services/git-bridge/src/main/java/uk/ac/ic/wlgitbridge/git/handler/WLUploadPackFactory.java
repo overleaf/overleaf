@@ -34,7 +34,7 @@ public class WLUploadPackFactory
             HttpServletRequest __,
             Repository repository
     ) {
-        Log.info(
+        Log.debug(
                 "[{}] Creating upload-pack",
                 repository.getWorkTree().getName()
         );

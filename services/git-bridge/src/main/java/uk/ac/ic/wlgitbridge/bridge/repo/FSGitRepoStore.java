@@ -82,7 +82,7 @@ public class FSGitRepoStore implements RepoStore {
          String repoRoot = getRepoStorePath();
          String sourcePath = repoRoot + "/" + fromProject;
          String destinationPath = repoRoot + "/" + project;
-         Log.info("[{}] Init repo by copying data from: {}, to: {}",
+         Log.debug("[{}] Init repo by copying data from: {}, to: {}",
              project,
              sourcePath,
              destinationPath
@@ -136,7 +136,7 @@ public class FSGitRepoStore implements RepoStore {
             long[] sizePtr
     ) throws IOException {
         Project.checkValidProjectName(projectName);
-        Log.info("[{}] bzip2 project", projectName);
+        Log.debug("[{}] bzip2 project", projectName);
         return Tar.bz2.zip(getDotGitForProject(projectName), sizePtr);
     }
 
@@ -146,7 +146,7 @@ public class FSGitRepoStore implements RepoStore {
         long[] sizePtr
     ) throws IOException {
         Project.checkValidProjectName(projectName);
-        Log.info("[{}] gzip project", projectName);
+        Log.debug("[{}] gzip project", projectName);
         return Tar.gzip.zip(getDotGitForProject(projectName), sizePtr);
     }
 
@@ -179,7 +179,7 @@ public class FSGitRepoStore implements RepoStore {
                         "evicted project already exist",
                 projectName
         );
-        Log.info("[{}] un-bzip2 project", projectName);
+        Log.debug("[{}] un-bzip2 project", projectName);
         Tar.bz2.unzip(dataStream, getDirForProject(projectName));
     }
 
@@ -199,7 +199,7 @@ public class FSGitRepoStore implements RepoStore {
             "evicted project already exist",
             projectName
         );
-        Log.info("[{}] un-gzip project", projectName);
+        Log.debug("[{}] un-gzip project", projectName);
         Tar.gzip.unzip(dataStream, getDirForProject(projectName));
     }
 

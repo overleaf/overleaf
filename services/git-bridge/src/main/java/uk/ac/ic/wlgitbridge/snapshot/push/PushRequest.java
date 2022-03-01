@@ -26,7 +26,7 @@ public class PushRequest extends SnapshotAPIRequest<PushResult> {
         super(candidateSnapshot.getProjectName(), API_CALL, oauth2);
         this.candidateSnapshot = candidateSnapshot;
         this.postbackKey = postbackKey;
-        Log.info(
+        Log.debug(
                 "PushRequest({}, {}, {})",
                 "oauth2: <oauth2>",
                 "candidateSnapshot: " + candidateSnapshot,

@@ -80,7 +80,7 @@ public class GetDocResult extends Result {
 
     @Override
     public void fromJSON(JsonElement json) {
-        Log.info("GetDocResult: " + json);
+        Log.debug("GetDocResult: " + json);
         JsonObject jsonObject = json.getAsJsonObject();
         if (jsonObject.has("status")) {
             switch (jsonObject.get("status").getAsInt()) {

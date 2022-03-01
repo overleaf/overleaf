@@ -33,7 +33,7 @@ public class PushResult extends Result {
 
     @Override
     public void fromJSON(JsonElement json) {
-        Log.info("PushResult({})", json);
+        Log.debug("PushResult({})", json);
         JsonObject responseObject = json.getAsJsonObject();
         String code = Util.getCodeFromResponse(responseObject);
 

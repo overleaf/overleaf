@@ -56,7 +56,7 @@ public abstract class Request<T extends Result> {
     private T getResult() throws MissingRepositoryException, FailedConnectionException, ForbiddenException {
         try {
             HttpResponse response = future.get();
-            Log.info(
+            Log.debug(
                     "{} {} ({}B) -> " + url,
                     response.getStatusCode(),
                     response.getStatusMessage(),
@@ -140,7 +140,7 @@ public abstract class Request<T extends Result> {
                 throw new FailedConnectionException(cause);
             }
         } catch (IOException e) {
-            Log.error("Failed to parse JSON.", e);
+            Log.warn("Failed to parse JSON.", e);
             throw new FailedConnectionException();
         }
     }
@@ -159,7 +159,7 @@ public abstract class Request<T extends Result> {
     }
 
     private void performGetRequest() {
-        Log.info("GET -> " + url);
+        Log.debug("GET -> " + url);
         try {
             HttpRequest request = Instance.httpRequestFactory.buildGetRequest(
                     new GenericUrl(url)
@@ -173,7 +173,7 @@ public abstract class Request<T extends Result> {
     }
 
     private void performPostRequest() {
-        Log.info("POST -> " + url);
+        Log.debug("POST -> " + url);
         try {
             HttpRequest request = Instance.httpRequestFactory.buildPostRequest(
                     new GenericUrl(url),

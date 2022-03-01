@@ -35,7 +35,7 @@ public class GitLfsHandler extends AbstractHandler {
         && target != null
         && target.matches("^/[0-9a-z]+\\.git/info/lfs/objects/batch/?$")
     ) {
-      Log.info(method + " <- /<project>.git/info/lfs/objects/batch");
+      Log.debug(method + " <- /<project>.git/info/lfs/objects/batch");
       response.setContentType("application/vnd.git-lfs+json");
       response.setStatus(422);
       response.getWriter().println("{\"message\": \"ERROR: Git LFS is not supported on Overleaf\"}");

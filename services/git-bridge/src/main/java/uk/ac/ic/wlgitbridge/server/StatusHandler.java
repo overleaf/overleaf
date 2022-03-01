@@ -35,7 +35,7 @@ public class StatusHandler extends AbstractHandler {
         && target != null
         && target.matches("^/status/?$")
     ) {
-      Log.info(method + " <- /status");
+      Log.debug(method + " <- /status");
       baseRequest.setHandled(true);
       response.setContentType("text/plain");
       response.setStatus(200);

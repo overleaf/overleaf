@@ -117,14 +117,14 @@ public class GcJobImpl implements GcJob {
                 it.remove(), ++numGcs
         ) {
             String proj = it.next();
-            Log.info("[{}] Running GC job on project", proj);
+            Log.debug("[{}] Running GC job on project", proj);
             try (LockGuard __ = locks.lockGuard(proj)) {
                 try {
                     ProjectRepo repo = repoStore.getExistingRepo(proj);
                     repo.runGC();
                     repo.deleteIncomingPacks();
                 } catch (IOException e) {
-                    Log.info("[{}] Failed to GC project", proj);
+                    Log.warn("[{}] Failed to GC project", proj);
                 }
             }
         }

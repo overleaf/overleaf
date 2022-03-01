@@ -37,7 +37,7 @@ public class DiagnosticsHandler extends AbstractHandler {
     ) {
       baseRequest.setHandled(true);
 
-      Log.info(method + " <- /diags");
+      Log.debug(method + " <- /diags");
 
       String detail;
       String summary;
@@ -50,7 +50,7 @@ public class DiagnosticsHandler extends AbstractHandler {
         response.setStatus(500);
         return;
       }
-      
+
       response.setContentType("text/plain");
       response.setStatus(200);
 

@@ -60,7 +60,7 @@ public class NingHttpClient implements NingHttpClientFacade {
                     }
                     byte[] ret = bytes.toByteArray();
                     bytes.close();
-                    log.info(
+                    log.debug(
                             statusCode
                                     + " "
                                     + response.getStatusText()

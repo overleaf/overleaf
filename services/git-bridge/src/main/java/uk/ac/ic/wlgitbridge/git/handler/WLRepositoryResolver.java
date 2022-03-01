@@ -82,7 +82,7 @@ public class WLRepositoryResolver
     ) throws RepositoryNotFoundException,
              ServiceNotAuthorizedException,
              ServiceMayNotContinueException {
-        Log.info("[{}] Request to open git repo", name);
+        Log.debug("[{}] Request to open git repo", name);
         Optional<Credential> oauth2 = Optional.ofNullable(
                 (Credential) httpServletRequest.getAttribute(
                         Oauth2Filter.ATTRIBUTE_KEY));
@@ -90,7 +90,7 @@ public class WLRepositoryResolver
         try {
             return bridge.getUpdatedRepo(oauth2, projName).getJGitRepository();
         } catch (RepositoryNotFoundException e) {
-            Log.info("Repository not found: " + name);
+            Log.warn("Repository not found: " + name);
             throw e;
             /*
         } catch (ServiceNotAuthorizedException e) {

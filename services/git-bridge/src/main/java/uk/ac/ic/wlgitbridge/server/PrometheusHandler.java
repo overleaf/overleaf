@@ -43,7 +43,7 @@ public class PrometheusHandler extends AbstractHandler {
         && target != null
         && target.matches("^/metrics/?$")
     ) {
-      Log.info(method + " <- /metrics");
+      Log.debug(method + " <- /metrics");
       this.printMetrics(request, response);
       baseRequest.setHandled(true);
     }

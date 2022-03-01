@@ -50,8 +50,8 @@ public class UrlResourceCache implements ResourceCache {
             contents = fetch(projectName, url, path, maxFileSize);
             fetchedUrls.put(url, contents);
         } else {
-            Log.info("Found (" + projectName + "): " + url);
-            Log.info("At (" + projectName + "): " + path);
+            Log.debug("Found (" + projectName + "): " + url);
+            Log.debug("At (" + projectName + "): " + path);
             contents = fetchedUrls.get(url);
             if (contents == null) {
                 RawFile rawFile = fileTable.get(path);
@@ -79,7 +79,7 @@ public class UrlResourceCache implements ResourceCache {
             Optional<Long> maxFileSize
     ) throws FailedConnectionException, SizeLimitExceededException {
         byte[] contents;
-        Log.info("GET -> " + url);
+        Log.debug("GET -> " + url);
         try {
             contents = http.get(url, hs -> {
                 List<String> contentLengths = hs.getAll("Content-Length");
