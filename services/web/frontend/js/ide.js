@@ -259,7 +259,10 @@ If the project has been renamed please look in your project list for a new proje
     })
 
     ide.editingSessionHeartbeat = () => {
-      eventTracking.editingSessionHeartbeat()
+      const segmentation = {
+        editorType: ide.editorManager.getEditorType(),
+      }
+      eventTracking.editingSessionHeartbeat(segmentation)
     }
 
     $scope.$on('cursor:editor:update', () => {

@@ -91,6 +91,18 @@ export default Document = (function () {
       this._bindToSocketEvents()
     }
 
+    editorType() {
+      if (this.ace) {
+        return 'ace'
+      } else if (this.cm6) {
+        return 'cm6'
+      } else if (this.cm) {
+        return 'cm-rich-text'
+      } else {
+        return null
+      }
+    }
+
     attachToAce(ace) {
       this.ace = ace
       if (this.doc != null) {

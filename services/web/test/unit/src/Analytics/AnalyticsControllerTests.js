@@ -43,6 +43,11 @@ describe('AnalyticsController', function () {
           projectId: 'a project id',
         },
         session: {},
+        body: {
+          segmentation: {
+            editorType: 'abc',
+          },
+        },
       }
       this.GeoIpLookup.getDetails = sinon
         .stub()
@@ -54,7 +59,7 @@ describe('AnalyticsController', function () {
       this.controller.updateEditingSession(this.req, this.res)
 
       this.AnalyticsManager.updateEditingSession
-        .calledWith('1234', 'a project id', 'XY')
+        .calledWith('1234', 'a project id', 'XY', { editorType: 'abc' })
         .should.equal(true)
       done()
     })

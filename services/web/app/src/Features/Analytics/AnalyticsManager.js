@@ -123,7 +123,7 @@ async function setUserPropertyForSession(session, propertyName, propertyValue) {
   }
 }
 
-function updateEditingSession(userId, projectId, countryCode) {
+function updateEditingSession(userId, projectId, countryCode, segmentation) {
   if (!userId) {
     return
   }
@@ -139,6 +139,7 @@ function updateEditingSession(userId, projectId, countryCode) {
       userId,
       projectId,
       countryCode,
+      segmentation,
       createdAt: new Date(),
     })
     .then(() => {

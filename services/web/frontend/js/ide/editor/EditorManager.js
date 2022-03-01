@@ -132,6 +132,13 @@ export default EditorManager = (function () {
       })
     }
 
+    getEditorType() {
+      if (!this.$scope.editor.sharejs_doc) {
+        return null
+      }
+      return this.$scope.editor.sharejs_doc.editorType()
+    }
+
     showRichText() {
       return (
         this.localStorage(`editor.mode.${this.$scope.project_id}`) ===

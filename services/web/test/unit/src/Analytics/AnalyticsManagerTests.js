@@ -146,10 +146,12 @@ describe('AnalyticsManager', function () {
     it('updateEditingSession', function () {
       const projectId = '789ghi'
       const countryCode = 'fr'
+      const segmentation = { editorType: 'abc' }
       this.AnalyticsManager.updateEditingSession(
         this.fakeUserId,
         projectId,
-        countryCode
+        countryCode,
+        segmentation
       )
       sinon.assert.calledWithMatch(
         this.analyticsEditingSessionQueue.add,
@@ -158,6 +160,7 @@ describe('AnalyticsManager', function () {
           userId: this.fakeUserId,
           projectId,
           countryCode,
+          segmentation,
         }
       )
     })
