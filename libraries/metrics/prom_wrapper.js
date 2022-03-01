@@ -29,6 +29,8 @@ const optsKey = function (opts) {
 }
 
 const extendOpts = function (opts, labelNames) {
+  // Make a clone in order to be able to re-use opts for other kinds of metrics.
+  opts = Object.assign({}, opts)
   for (const label of Array.from(labelNames)) {
     if (!opts[label]) {
       opts[label] = ''
@@ -49,15 +51,15 @@ const PromWrapper = {
   ttlInMinutes: 0,
   registry,
 
-  metric(type, name) {
-    return metrics.get(name) || new MetricWrapper(type, name)
+  metric(type, name, buckets) {
+    return metrics.get(name) || new MetricWrapper(type, name, buckets)
   },
 
   collectDefaultMetrics: prom.collectDefaultMetrics,
 }
 
 class MetricWrapper {
-  constructor(type, name) {
+  constructor(type, name, buckets) {
     metrics.set(name, this)
     this.name = name
     this.instances = new Map()
@@ -69,6 +71,19 @@ class MetricWrapper {
             name,
             help: name,
             labelNames: ['status', 'method', 'path'],
+          })
+        case 'histogram':
+          return new prom.Histogram({
+            name,
+            help: name,
+            labelNames: [
+              'path',
+              'status_code',
+              'method',
+              'collection',
+              'query',
+            ],
+            buckets,
           })
         case 'summary':
           return new prom.Summary({

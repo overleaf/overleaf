@@ -44,6 +44,7 @@ module.exports = ResourceWriter = {
             return callback(error)
           }
           return ResourceWriter._removeExtraneousFiles(
+            request,
             resourceList,
             basePath,
             function (error, outputFiles, allFiles) {
@@ -84,27 +85,22 @@ module.exports = ResourceWriter = {
       if (error != null) {
         return callback(error)
       }
-      this.saveAllResourcesToDisk(
-        request.project_id,
-        request.resources,
-        basePath,
-        function (error) {
-          if (error != null) {
-            return callback(error)
-          }
-          return ResourceStateManager.saveProjectState(
-            request.syncState,
-            request.resources,
-            basePath,
-            function (error) {
-              if (error != null) {
-                return callback(error)
-              }
-              return callback(null, request.resources)
-            }
-          )
+      this.saveAllResourcesToDisk(request, basePath, function (error) {
+        if (error != null) {
+          return callback(error)
         }
-      )
+        return ResourceStateManager.saveProjectState(
+          request.syncState,
+          request.resources,
+          basePath,
+          function (error) {
+            if (error != null) {
+              return callback(error)
+            }
+            return callback(null, request.resources)
+          }
+        )
+      })
     })
   },
 
@@ -126,7 +122,7 @@ module.exports = ResourceWriter = {
     })
   },
 
-  saveAllResourcesToDisk(project_id, resources, basePath, callback) {
+  saveAllResourcesToDisk(request, basePath, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -134,7 +130,8 @@ module.exports = ResourceWriter = {
       if (error != null) {
         return callback(error)
       }
-      return this._removeExtraneousFiles(resources, basePath, error => {
+      const { project_id, resources } = request
+      this._removeExtraneousFiles(request, resources, basePath, error => {
         if (error != null) {
           return callback(error)
         }
@@ -172,11 +169,15 @@ module.exports = ResourceWriter = {
     })
   },
 
-  _removeExtraneousFiles(resources, basePath, _callback) {
+  _removeExtraneousFiles(request, resources, basePath, _callback) {
     if (_callback == null) {
       _callback = function () {}
     }
-    const timer = new Metrics.Timer('unlink-output-files')
+    const timer = new Metrics.Timer(
+      'unlink-output-files',
+      1,
+      request.metricsOpts
+    )
     const callback = function (error, ...result) {
       timer.done()
       return _callback(error, ...Array.from(result))

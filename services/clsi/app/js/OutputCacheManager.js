@@ -186,7 +186,7 @@ module.exports = OutputCacheManager = {
               }
 
               OutputCacheManager.saveStreamsInContentDir(
-                { stats, timings },
+                { request, stats, timings },
                 result,
                 compileDir,
                 outputDir,
@@ -348,7 +348,7 @@ module.exports = OutputCacheManager = {
   },
 
   saveStreamsInContentDir(
-    { stats, timings },
+    { request, stats, timings },
     outputFiles,
     compileDir,
     outputDir,
@@ -367,7 +367,11 @@ module.exports = OutputCacheManager = {
           OutputCacheManager.path(outputFile.build, outputFile.path)
         )
         const pdfSize = outputFile.size
-        const timer = new Metrics.Timer('compute-pdf-ranges')
+        const timer = new Metrics.Timer(
+          'compute-pdf-ranges',
+          1,
+          request.metricsOpts
+        )
         ContentCacheManager.update(
           contentDir,
           outputFilePath,

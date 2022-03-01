@@ -56,15 +56,16 @@ describe('ResourceWriter', function () {
   describe('syncResourcesToDisk on a full request', function () {
     beforeEach(function () {
       this.resources = ['resource-1-mock', 'resource-2-mock', 'resource-3-mock']
+      this.request = {
+        project_id: this.project_id,
+        syncState: (this.syncState = '0123456789abcdef'),
+        resources: this.resources,
+      }
       this.ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
-      this.ResourceWriter._removeExtraneousFiles = sinon.stub().callsArg(2)
+      this.ResourceWriter._removeExtraneousFiles = sinon.stub().yields(null)
       this.ResourceStateManager.saveProjectState = sinon.stub().callsArg(3)
       return this.ResourceWriter.syncResourcesToDisk(
-        {
-          project_id: this.project_id,
-          syncState: (this.syncState = '0123456789abcdef'),
-          resources: this.resources,
-        },
+        this.request,
         this.basePath,
         this.callback
       )
@@ -72,7 +73,7 @@ describe('ResourceWriter', function () {
 
     it('should remove old files', function () {
       return this.ResourceWriter._removeExtraneousFiles
-        .calledWith(this.resources, this.basePath)
+        .calledWith(this.request, this.resources, this.basePath)
         .should.equal(true)
     })
 
@@ -98,22 +99,24 @@ describe('ResourceWriter', function () {
   describe('syncResourcesToDisk on an incremental update', function () {
     beforeEach(function () {
       this.resources = ['resource-1-mock']
+      this.request = {
+        project_id: this.project_id,
+        syncType: 'incremental',
+        syncState: (this.syncState = '1234567890abcdef'),
+        resources: this.resources,
+      }
+      this.fullResources = this.resources.concat(['file-1'])
       this.ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
       this.ResourceWriter._removeExtraneousFiles = sinon
         .stub()
-        .callsArgWith(2, null, (this.outputFiles = []), (this.allFiles = []))
+        .yields(null, (this.outputFiles = []), (this.allFiles = []))
       this.ResourceStateManager.checkProjectStateMatches = sinon
         .stub()
-        .callsArgWith(2, null, this.resources)
+        .callsArgWith(2, null, this.fullResources)
       this.ResourceStateManager.saveProjectState = sinon.stub().callsArg(3)
       this.ResourceStateManager.checkResourceFiles = sinon.stub().callsArg(3)
       return this.ResourceWriter.syncResourcesToDisk(
-        {
-          project_id: this.project_id,
-          syncType: 'incremental',
-          syncState: (this.syncState = '1234567890abcdef'),
-          resources: this.resources,
-        },
+        this.request,
         this.basePath,
         this.callback
       )
@@ -127,13 +130,13 @@ describe('ResourceWriter', function () {
 
     it('should remove old files', function () {
       return this.ResourceWriter._removeExtraneousFiles
-        .calledWith(this.resources, this.basePath)
+        .calledWith(this.request, this.fullResources, this.basePath)
         .should.equal(true)
     })
 
     it('should check each resource exists', function () {
       return this.ResourceStateManager.checkResourceFiles
-        .calledWith(this.resources, this.allFiles, this.basePath)
+        .calledWith(this.fullResources, this.allFiles, this.basePath)
         .should.equal(true)
     })
 
@@ -153,16 +156,17 @@ describe('ResourceWriter', function () {
   describe('syncResourcesToDisk on an incremental update when the state does not match', function () {
     beforeEach(function () {
       this.resources = ['resource-1-mock']
+      this.request = {
+        project_id: this.project_id,
+        syncType: 'incremental',
+        syncState: (this.syncState = '1234567890abcdef'),
+        resources: this.resources,
+      }
       this.ResourceStateManager.checkProjectStateMatches = sinon
         .stub()
         .callsArgWith(2, (this.error = new Error()))
       return this.ResourceWriter.syncResourcesToDisk(
-        {
-          project_id: this.project_id,
-          syncType: 'incremental',
-          syncState: (this.syncState = '1234567890abcdef'),
-          resources: this.resources,
-        },
+        this.request,
         this.basePath,
         this.callback
       )
@@ -237,11 +241,18 @@ describe('ResourceWriter', function () {
         },
       ]
       this.resources = 'mock-resources'
+      this.request = {
+        project_id: this.project_id,
+        syncType: 'incremental',
+        syncState: (this.syncState = '1234567890abcdef'),
+        resources: this.resources,
+      }
       this.OutputFileFinder.findOutputFiles = sinon
         .stub()
         .callsArgWith(2, null, this.output_files)
       this.ResourceWriter._deleteFileIfNotDirectory = sinon.stub().callsArg(1)
       return this.ResourceWriter._removeExtraneousFiles(
+        this.request,
         this.resources,
         this.basePath,
         this.callback

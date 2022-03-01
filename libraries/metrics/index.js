@@ -131,18 +131,31 @@ function timing(key, timeSpan, sampleRate = 1, opts = {}) {
   }
 }
 
+function histogram(key, value, buckets, opts = {}) {
+  key = buildPromKey('histogram_' + key)
+  promWrapper.metric('histogram', key, buckets).observe(opts, value)
+  if (process.env.DEBUG_METRICS) {
+    console.log('doing histogram', key, buckets, opts)
+  }
+}
+
 class Timer {
-  constructor(key, sampleRate = 1, opts = {}) {
+  constructor(key, sampleRate = 1, opts = {}, buckets) {
     this.start = new Date()
     key = buildPromKey(key)
     this.key = key
     this.sampleRate = sampleRate
     this.opts = opts
+    this.buckets = buckets
   }
 
   done() {
     const timeSpan = new Date() - this.start
-    timing(this.key, timeSpan, this.sampleRate, this.opts)
+    if (this.buckets) {
+      histogram(this.key, timeSpan, this.buckets, this.opts)
+    } else {
+      timing(this.key, timeSpan, this.sampleRate, this.opts)
+    }
     return timeSpan
   }
 }
@@ -181,6 +194,7 @@ module.exports.inc = inc
 module.exports.count = count
 module.exports.summary = summary
 module.exports.timing = timing
+module.exports.histogram = histogram
 module.exports.Timer = Timer
 module.exports.gauge = gauge
 module.exports.globalGauge = globalGauge

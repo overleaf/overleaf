@@ -854,6 +854,7 @@ const ClsiManager = {
           enablePdfCaching:
             (Settings.enablePdfCaching && options.enablePdfCaching) || false,
           flags: flags,
+          metricsMethod: options.compileGroup,
         },
         rootResourcePath,
         resources,

@@ -1,3 +1,4 @@
+const { promisify } = require('util')
 const os = require('os')
 const http = require('http')
 const { expect } = require('chai')
@@ -5,6 +6,7 @@ const Metrics = require('../..')
 
 const HOSTNAME = os.hostname()
 const APP_NAME = 'test-app'
+const sleep = promisify(setTimeout)
 
 describe('Metrics module', function () {
   before(function () {
@@ -64,6 +66,60 @@ describe('Metrics module', function () {
       Metrics.timing('sprint_100m', 30)
       const sum = await getSummarySum('timer_sprint_100m')
       expect(sum).to.equal(60)
+    })
+  })
+
+  describe('histogram()', function () {
+    it('collects in buckets', async function () {
+      const buckets = [10, 100, 1000]
+      Metrics.histogram('distance', 10, buckets)
+      Metrics.histogram('distance', 20, buckets)
+      Metrics.histogram('distance', 100, buckets)
+      Metrics.histogram('distance', 200, buckets)
+      Metrics.histogram('distance', 1000, buckets)
+      Metrics.histogram('distance', 2000, buckets)
+      const sum = await getSummarySum('histogram_distance')
+      expect(sum).to.equal(3330)
+      await checkHistogramValues('histogram_distance', {
+        10: 1,
+        100: 3,
+        1000: 5,
+        '+Inf': 6,
+      })
+    })
+  })
+
+  describe('Timer', function () {
+    beforeEach('collect timings', async function () {
+      const buckets = [10, 100, 1000]
+      for (const duration of [1, 1, 1, 15, 15, 15, 105, 105, 105]) {
+        const withBuckets = new Metrics.Timer('height', 1, {}, buckets)
+        const withOutBuckets = new Metrics.Timer('depth', 1, {})
+        await sleep(duration)
+        withBuckets.done()
+        withOutBuckets.done()
+      }
+    })
+
+    it('with buckets', async function () {
+      await checkHistogramValues('histogram_height', {
+        10: 3,
+        100: 6,
+        1000: 9,
+        '+Inf': 9,
+      })
+    })
+
+    it('without buckets', async function () {
+      await checkSummaryValues('timer_depth', {
+        0.01: 1,
+        0.05: 1,
+        0.5: 15,
+        0.9: 105,
+        0.95: 105,
+        0.99: 105,
+        0.999: 105,
+      })
     })
   })
 
@@ -221,6 +277,38 @@ async function getSummarySum(key) {
     if (value.metricName === `${key}_sum`) {
       return value.value
     }
+  }
+  return null
+}
+
+async function checkHistogramValues(key, values) {
+  const metric = getMetric(key)
+  const item = await metric.get()
+  const found = {}
+  for (const value of item.values) {
+    const bucket = value.labels.le
+    if (!bucket) continue
+    found[bucket] = value.value
+  }
+  expect(found).to.deep.equal(values)
+  return null
+}
+
+async function checkSummaryValues(key, values) {
+  const metric = getMetric(key)
+  const item = await metric.get()
+  const found = {}
+  for (const value of item.values) {
+    const quantile = value.labels.quantile
+    if (!quantile) continue
+    found[quantile] = value.value
+  }
+  for (const quantile of Object.keys(values)) {
+    expect(found[quantile]).to.be.within(
+      values[quantile] - 5,
+      values[quantile] + 5,
+      `quantile: ${quantile}`
+    )
   }
   return null
 }

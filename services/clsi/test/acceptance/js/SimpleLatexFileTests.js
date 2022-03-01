@@ -8,6 +8,7 @@
 const Client = require('./helpers/Client')
 const request = require('request')
 const ClsiApp = require('./helpers/ClsiApp')
+const Settings = require('@overleaf/settings')
 
 describe('Simple LaTeX file', function () {
   before(function (done) {
@@ -24,6 +25,10 @@ Hello world
 `,
         },
       ],
+      options: {
+        metricsPath: 'clsi-perf',
+        metricsMethod: 'priority',
+      },
     }
     return ClsiApp.ensureRunning(() => {
       return Client.compile(
@@ -58,12 +63,29 @@ Hello world
     })
   })
 
-  return it('should provide the log for download', function (done) {
+  it('should provide the log for download', function (done) {
     const log = Client.getOutputFile(this.body, 'pdf')
     return request.get(log.url, (error, res, body) => {
       if (error) return done(error)
       res.statusCode.should.equal(200)
       return done()
+    })
+  })
+
+  it('should gather personalized metrics', function (done) {
+    request.get(`${Settings.apis.clsi.url}/metrics`, (err, res, body) => {
+      if (err) return done(err)
+      body
+        .split('\n')
+        .some(line => {
+          return (
+            line.startsWith('compile') &&
+            line.includes('path="clsi-perf"') &&
+            line.includes('method="priority"')
+          )
+        })
+        .should.equal(true)
+      done()
     })
   })
 })

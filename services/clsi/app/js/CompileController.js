@@ -36,6 +36,7 @@ module.exports = CompileController = {
       if (error != null) {
         return next(error)
       }
+      timer.opts = request.metricsOpts
       request.project_id = req.params.project_id
       if (req.params.user_id != null) {
         request.user_id = req.params.user_id

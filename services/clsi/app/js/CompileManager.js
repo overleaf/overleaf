@@ -19,6 +19,12 @@ const CommandRunner = require('./CommandRunner')
 const { emitPdfStats } = require('./ContentCacheMetrics')
 const SynctexOutputParser = require('./SynctexOutputParser')
 
+const COMPILE_TIME_BUCKETS = [
+  // NOTE: These buckets are locked in per metric name.
+  //       If you want to change them, you will need to rename metrics.
+  1, 2, 3, 4, 6, 8, 11, 15, 22, 31, 43, 61, 86, 121, 170, 240,
+].map(seconds => seconds * 1000)
+
 function getCompileName(projectId, userId) {
   if (userId != null) {
     return `${projectId}-${userId}`
@@ -56,8 +62,13 @@ function doCompile(request, callback) {
   const compileDir = getCompileDir(request.project_id, request.user_id)
   const outputDir = getOutputDir(request.project_id, request.user_id)
 
-  const timerE2E = new Metrics.Timer('compile-e2e')
-  const timer = new Metrics.Timer('write-to-disk')
+  const timerE2E = new Metrics.Timer(
+    'compile-e2e',
+    1,
+    request.metricsOpts,
+    COMPILE_TIME_BUCKETS
+  )
+  const timer = new Metrics.Timer('write-to-disk', 1, request.metricsOpts)
   logger.log(
     { projectId: request.project_id, userId: request.user_id },
     'syncing resources to disk'
@@ -158,7 +169,7 @@ function doCompile(request, callback) {
           if (error) {
             return callback(error)
           }
-          const timer = new Metrics.Timer('run-compile')
+          const timer = new Metrics.Timer('run-compile', 1, request.metricsOpts)
           // find the image tag to log it as a metric, e.g. 2015.1 (convert . to - for graphite)
           let tag = 'default'
           if (request.imageName != null) {
@@ -170,8 +181,8 @@ function doCompile(request, callback) {
           if (!request.project_id.match(/^[0-9a-f]{24}$/)) {
             tag = 'other'
           } // exclude smoke test
-          Metrics.inc('compiles')
-          Metrics.inc(`compiles-with-image.${tag}`)
+          Metrics.inc('compiles', 1, request.metricsOpts)
+          Metrics.inc(`compiles-with-image.${tag}`, 1, request.metricsOpts)
           const compileName = getCompileName(
             request.project_id,
             request.user_id
@@ -204,6 +215,10 @@ function doCompile(request, callback) {
                 error = new Error('compilation')
                 error.validate = 'fail'
               }
+              // record timeout errors as a separate counter, success is recorded later
+              if (error && error.timedout) {
+                Metrics.inc('compiles-timeout', 1, request.metricsOpts)
+              }
               // compile was killed by user, was a validation, or a compile which failed validation
               if (
                 error &&
@@ -225,16 +240,16 @@ function doCompile(request, callback) {
               if (error) {
                 return callback(error)
               }
-              Metrics.inc('compiles-succeeded')
+              Metrics.inc('compiles-succeeded', 1, request.metricsOpts)
               stats = stats || {}
               for (const metricKey in stats) {
                 const metricValue = stats[metricKey]
-                Metrics.count(metricKey, metricValue)
+                Metrics.count(metricKey, metricValue, 1, request.metricsOpts)
               }
               timings = timings || {}
               for (const metricKey in timings) {
                 const metricValue = timings[metricKey]
-                Metrics.timing(metricKey, metricValue)
+                Metrics.timing(metricKey, metricValue, 1, request.metricsOpts)
               }
               const loadavg =
                 typeof os.loadavg === 'function' ? os.loadavg() : undefined
@@ -254,18 +269,29 @@ function doCompile(request, callback) {
                 'done compile'
               )
               if (stats['latex-runs'] > 0) {
-                Metrics.timing('run-compile-per-pass', ts / stats['latex-runs'])
+                Metrics.histogram(
+                  'avg-compile-per-pass',
+                  ts / stats['latex-runs'],
+                  COMPILE_TIME_BUCKETS,
+                  request.metricsOpts
+                )
               }
               if (stats['latex-runs'] > 0 && timings['cpu-time'] > 0) {
                 Metrics.timing(
                   'run-compile-cpu-time-per-pass',
-                  timings['cpu-time'] / stats['latex-runs']
+                  timings['cpu-time'] / stats['latex-runs'],
+                  1,
+                  request.metricsOpts
                 )
               }
               // Emit compile time.
               timings.compile = ts
 
-              const outputStageTimer = new Metrics.Timer('process-output-files')
+              const outputStageTimer = new Metrics.Timer(
+                'process-output-files',
+                1,
+                request.metricsOpts
+              )
 
               OutputFileFinder.findOutputFiles(
                 resourceList,
@@ -297,7 +323,7 @@ function doCompile(request, callback) {
                       timings.compileE2E = timerE2E.done()
 
                       if (stats['pdf-size']) {
-                        emitPdfStats(stats, timings)
+                        emitPdfStats(stats, timings, request)
                       }
 
                       callback(null, newOutputFiles, stats, timings)

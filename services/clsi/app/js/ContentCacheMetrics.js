@@ -18,26 +18,31 @@ function getSystemLoad() {
 
 const ONE_MB = 1024 * 1024
 
-function emitPdfStats(stats, timings) {
+function emitPdfStats(stats, timings, request) {
   if (stats['pdf-caching-timed-out']) {
-    Metrics.inc('pdf-caching-timed-out')
+    Metrics.inc('pdf-caching-timed-out', 1, request.metricsOpts)
   }
   if (stats['pdf-caching-queue-limit-reached']) {
-    Metrics.inc('pdf-caching-queue-limit-reached')
+    Metrics.inc('pdf-caching-queue-limit-reached', 1, request.metricsOpts)
   }
   if (timings['compute-pdf-caching']) {
-    emitPdfCachingStats(stats, timings)
+    emitPdfCachingStats(stats, timings, request)
   } else {
     // How much bandwidth will the pdf incur when downloaded in full?
-    Metrics.summary('pdf-bandwidth', stats['pdf-size'])
+    Metrics.summary('pdf-bandwidth', stats['pdf-size'], 1, request.metricsOpts)
   }
 }
 
-function emitPdfCachingStats(stats, timings) {
+function emitPdfCachingStats(stats, timings, request) {
   if (!stats['pdf-size']) return // double check
 
   // How much extra time did we spent in PDF.js?
-  Metrics.timing('compute-pdf-caching', timings['compute-pdf-caching'])
+  Metrics.timing(
+    'compute-pdf-caching',
+    timings['compute-pdf-caching'],
+    1,
+    request.metricsOpts
+  )
 
   // How large is the overhead of hashing up-front?
   const fraction =
@@ -55,37 +60,52 @@ function emitPdfCachingStats(stats, timings) {
       'slow pdf caching'
     )
   }
-  Metrics.summary('overhead-compute-pdf-ranges', fraction * 100 - 100)
+  Metrics.summary(
+    'overhead-compute-pdf-ranges',
+    fraction * 100 - 100,
+    1,
+    request.metricsOpts
+  )
 
   // How does the hashing scale to pdf size in MB?
   Metrics.timing(
     'compute-pdf-caching-relative-to-pdf-size',
-    timings['compute-pdf-caching'] / (stats['pdf-size'] / ONE_MB)
+    timings['compute-pdf-caching'] / (stats['pdf-size'] / ONE_MB),
+    1,
+    request.metricsOpts
   )
   if (stats['pdf-caching-total-ranges-size']) {
     // How does the hashing scale to total ranges size in MB?
     Metrics.timing(
       'compute-pdf-caching-relative-to-total-ranges-size',
       timings['compute-pdf-caching'] /
-        (stats['pdf-caching-total-ranges-size'] / ONE_MB)
+        (stats['pdf-caching-total-ranges-size'] / ONE_MB),
+      1,
+      request.metricsOpts
     )
     // How fast is the hashing per range on average?
     Metrics.timing(
       'compute-pdf-caching-relative-to-ranges-count',
-      timings['compute-pdf-caching'] / stats['pdf-caching-n-ranges']
+      timings['compute-pdf-caching'] / stats['pdf-caching-n-ranges'],
+      1,
+      request.metricsOpts
     )
 
     // How many ranges are new?
     Metrics.summary(
       'new-pdf-ranges-relative-to-total-ranges',
-      (stats['pdf-caching-n-new-ranges'] / stats['pdf-caching-n-ranges']) * 100
+      (stats['pdf-caching-n-new-ranges'] / stats['pdf-caching-n-ranges']) * 100,
+      1,
+      request.metricsOpts
     )
   }
 
   // How much content is cacheable?
   Metrics.summary(
     'cacheable-ranges-to-pdf-size',
-    (stats['pdf-caching-total-ranges-size'] / stats['pdf-size']) * 100
+    (stats['pdf-caching-total-ranges-size'] / stats['pdf-size']) * 100,
+    1,
+    request.metricsOpts
   )
 
   const sizeWhenDownloadedInFull =
@@ -99,17 +119,26 @@ function emitPdfCachingStats(stats, timings) {
   // How much bandwidth can we save when downloading the pdf in full?
   Metrics.summary(
     'pdf-bandwidth-savings',
-    100 - (sizeWhenDownloadedInFull / stats['pdf-size']) * 100
+    100 - (sizeWhenDownloadedInFull / stats['pdf-size']) * 100,
+    1,
+    request.metricsOpts
   )
 
   // How much bandwidth will the pdf incur when downloaded in full?
-  Metrics.summary('pdf-bandwidth', sizeWhenDownloadedInFull)
+  Metrics.summary(
+    'pdf-bandwidth',
+    sizeWhenDownloadedInFull,
+    1,
+    request.metricsOpts
+  )
 
   // How much space do the ranges use?
   // This will accumulate the ranges size over time, skipping already written ranges.
   Metrics.summary(
     'pdf-ranges-disk-size',
-    stats['pdf-caching-new-ranges-size'] - stats['pdf-caching-reclaimed-space']
+    stats['pdf-caching-new-ranges-size'] - stats['pdf-caching-reclaimed-space'],
+    1,
+    request.metricsOpts
   )
 }
 

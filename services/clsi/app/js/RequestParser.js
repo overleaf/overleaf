@@ -41,6 +41,20 @@ module.exports = RequestParser = {
     }
 
     try {
+      response.metricsOpts = {
+        path: this._parseAttribute('metricsPath', compile.options.metricsPath, {
+          default: '',
+          type: 'string',
+        }),
+        method: this._parseAttribute(
+          'metricsMethod',
+          compile.options.metricsMethod,
+          {
+            default: '',
+            type: 'string',
+          }
+        ),
+      }
       response.compiler = this._parseAttribute(
         'compiler',
         compile.options.compiler,
