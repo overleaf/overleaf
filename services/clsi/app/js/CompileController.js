@@ -27,6 +27,8 @@ function isImageNameAllowed(imageName) {
 }
 
 module.exports = CompileController = {
+  lastSuccessfulCompile: 0,
+
   compile(req, res, next) {
     if (next == null) {
       next = function () {}
@@ -87,6 +89,7 @@ module.exports = CompileController = {
                 for (file of Array.from(outputFiles)) {
                   if (file.path === 'output.pdf' && file.size > 0) {
                     status = 'success'
+                    CompileController.lastSuccessfulCompile = Date.now()
                   }
                 }
 

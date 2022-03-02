@@ -19,6 +19,9 @@ module.exports = {
       cb(error)
     })
   },
+  lastRunSuccessful() {
+    return this._lastError == null
+  },
 
   _lastError: new Error('SmokeTestsPending'),
   _sendResponse(res, error) {
@@ -39,6 +42,9 @@ module.exports = {
         url,
         json: {
           compile: {
+            options: {
+              metricsPath: 'health-check',
+            },
             resources: [
               {
                 path: 'main.tex',
