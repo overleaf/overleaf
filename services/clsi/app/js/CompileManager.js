@@ -22,7 +22,7 @@ const SynctexOutputParser = require('./SynctexOutputParser')
 const COMPILE_TIME_BUCKETS = [
   // NOTE: These buckets are locked in per metric name.
   //       If you want to change them, you will need to rename metrics.
-  1, 2, 3, 4, 6, 8, 11, 15, 22, 31, 43, 61, 86, 121, 170, 240,
+  0, 1, 2, 3, 4, 6, 8, 11, 15, 22, 31, 43, 61, 86, 121, 170, 240,
 ].map(seconds => seconds * 1000)
 
 function getCompileName(projectId, userId) {
@@ -63,7 +63,7 @@ function doCompile(request, callback) {
   const outputDir = getOutputDir(request.project_id, request.user_id)
 
   const timerE2E = new Metrics.Timer(
-    'compile-e2e',
+    'compile-e2e-v2',
     1,
     request.metricsOpts,
     COMPILE_TIME_BUCKETS
@@ -270,9 +270,15 @@ function doCompile(request, callback) {
               )
               if (stats['latex-runs'] > 0) {
                 Metrics.histogram(
-                  'avg-compile-per-pass',
+                  'avg-compile-per-pass-v2',
                   ts / stats['latex-runs'],
                   COMPILE_TIME_BUCKETS,
+                  request.metricsOpts
+                )
+                Metrics.timing(
+                  'avg-compile-per-pass-v2',
+                  ts / stats['latex-runs'],
+                  1,
                   request.metricsOpts
                 )
               }
@@ -321,6 +327,12 @@ function doCompile(request, callback) {
 
                       // Emit e2e compile time.
                       timings.compileE2E = timerE2E.done()
+                      Metrics.timing(
+                        'compile-e2e-v2',
+                        timings.compileE2E,
+                        1,
+                        request.metricsOpts
+                      )
 
                       if (stats['pdf-size']) {
                         emitPdfStats(stats, timings, request)
