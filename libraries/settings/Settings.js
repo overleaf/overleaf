@@ -4,12 +4,15 @@ const Path = require('path')
 const { merge } = require('./merge')
 
 const CWD = process.cwd()
+const ENTRY_POINT_DIR = Path.dirname(process.argv[1])
 const NODE_ENV = (process.env.NODE_ENV || 'development').toLowerCase()
 const SHARELATEX_CONFIG = process.env.SHARELATEX_CONFIG
 
 let settings
 let settingsExist = false
-const defaultsPath = pathIfExists(Path.join(CWD, 'config/settings.defaults.js'))
+const defaultsPath =
+  pathIfExists(Path.join(CWD, 'config/settings.defaults.js')) ||
+  pathIfExists(Path.join(ENTRY_POINT_DIR, 'config/settings.defaults.js'))
 if (defaultsPath) {
   console.log(`Using default settings from ${defaultsPath}`)
   settings = require(defaultsPath)
