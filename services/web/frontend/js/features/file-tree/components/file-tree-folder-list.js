@@ -13,6 +13,7 @@ function FileTreeFolderList({
   dropRef = null,
   children,
 }) {
+  files = files.map(file => ({ ...file, isFile: true }))
   const docsAndFiles = [...docs, ...files]
 
   return (
@@ -40,7 +41,7 @@ function FileTreeFolderList({
             key={doc._id}
             name={doc.name}
             id={doc._id}
-            isFile={doc.linkedFileData !== undefined}
+            isFile={doc.isFile}
             isLinkedFile={doc.linkedFileData && !!doc.linkedFileData.provider}
           />
         )
