@@ -51,16 +51,28 @@ const outputFiles = [
   },
 ]
 
-const mockCompile = () =>
-  fetchMock.post('express:/project/:projectId/compile', {
-    body: {
-      status: 'success',
-      clsiServerId: 'foo',
-      compileGroup: 'priority',
-      pdfDownloadDomain: 'https://clsi.test-overleaf.com',
-      outputFiles: cloneDeep(outputFiles),
-    },
+const mockCompile = (delayPromise = Promise.resolve()) =>
+  fetchMock.post(
+    'express:/project/:projectId/compile',
+    delayPromise.then(() => ({
+      body: {
+        status: 'success',
+        clsiServerId: 'foo',
+        compileGroup: 'priority',
+        pdfDownloadDomain: 'https://clsi.test-overleaf.com',
+        outputFiles: cloneDeep(outputFiles),
+      },
+    }))
+  )
+
+const mockDelayed = fn => {
+  let _resolve = null
+  const delayPromise = new Promise((resolve, reject) => {
+    _resolve = resolve
   })
+  fn(delayPromise)
+  return _resolve
+}
 
 const mockCompileError = status =>
   fetchMock.post('express:/project/:projectId/compile', {
@@ -209,6 +221,53 @@ describe('<PdfPreview/>', function () {
     await screen.findByRole('button', { name: 'Recompile' })
 
     expect(fetchMock.calls()).to.have.length(6)
+  })
+
+  it('runs a compile on `pdf:recompile` event', async function () {
+    mockCompile()
+    mockBuildFile()
+    mockValidPdf()
+
+    renderWithEditorContext(<PdfPreview />, { scope })
+
+    // wait for "compile on load" to finish
+    await screen.findByRole('button', { name: 'Compiling…' })
+    await screen.findByRole('button', { name: 'Recompile' })
+
+    mockValidPdf()
+
+    fireEvent(window, new CustomEvent('pdf:recompile'))
+
+    await screen.findByRole('button', { name: 'Compiling…' })
+    await screen.findByRole('button', { name: 'Recompile' })
+
+    expect(fetchMock.calls()).to.have.length(6)
+  })
+
+  it('does not compile while compiling', async function () {
+    mockDelayed(mockCompile)
+
+    renderWithEditorContext(<PdfPreview />, { scope })
+
+    // trigger compiles while "compile on load" is running
+    await screen.findByRole('button', { name: 'Compiling…' })
+    fireEvent(window, new CustomEvent('pdf:recompile'))
+
+    expect(fetchMock.calls()).to.have.length(1)
+  })
+
+  it('disables compile button while compile is running', async function () {
+    mockCompile()
+    mockBuildFile()
+    mockValidPdf()
+
+    renderWithEditorContext(<PdfPreview />, { scope })
+
+    let button = screen.getByRole('button', { name: 'Compiling…' })
+    expect(button.hasAttribute('disabled')).to.be.true
+
+    button = await screen.findByRole('button', { name: 'Recompile' })
+    expect(button.hasAttribute('disabled')).to.be.false
   })
 
   it('runs a compile on doc change if autocompile is enabled', async function () {

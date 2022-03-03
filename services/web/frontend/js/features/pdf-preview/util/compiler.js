@@ -15,6 +15,7 @@ const searchParams = new URLSearchParams(window.location.search)
 
 export default class DocumentCompiler {
   constructor({
+    compilingRef,
     projectId,
     rootDocId,
     setChangedAt,
@@ -25,6 +26,7 @@ export default class DocumentCompiler {
     cleanupCompileResult,
     signal,
   }) {
+    this.compilingRef = compilingRef
     this.projectId = projectId
     this.rootDocId = rootDocId
     this.setChangedAt = setChangedAt
@@ -54,18 +56,17 @@ export default class DocumentCompiler {
   // The main "compile" function.
   // Call this directly to run a compile now, otherwise call debouncedAutoCompile.
   async compile(options = {}) {
+    if (!options) {
+      options = {}
+    }
     // only compile if the feature flag is enabled
     if (!window.showNewPdfPreview) {
       return
     }
 
     // set "compiling" to true (in the React component's state), and return if it was already true
-    let wasCompiling
-
-    this.setCompiling(oldValue => {
-      wasCompiling = oldValue
-      return true
-    })
+    const wasCompiling = this.compilingRef.current
+    this.setCompiling(true)
 
     if (wasCompiling) {
       if (options.isAutoCompileOnChange) {

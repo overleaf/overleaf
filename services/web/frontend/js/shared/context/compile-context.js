@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import PropTypes from 'prop-types'
@@ -164,6 +165,12 @@ export function CompileProvider({ children }) {
     setLogEntryAnnotations({})
   }, [setPdfUrl, setPdfDownloadUrl, setLogEntries, setLogEntryAnnotations])
 
+  const compilingRef = useRef(false)
+
+  useEffect(() => {
+    compilingRef.current = compiling
+  }, [compiling])
+
   // the document compiler
   const [compiler] = useState(() => {
     return new DocumentCompiler({
@@ -175,6 +182,7 @@ export function CompileProvider({ children }) {
       setFirstRenderDone,
       setError,
       cleanupCompileResult,
+      compilingRef,
       signal,
     })
   })

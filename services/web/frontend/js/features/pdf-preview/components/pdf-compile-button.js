@@ -32,6 +32,7 @@ function PdfCompileButton() {
         'btn-recompile-group-has-changes': hasChanges,
       })}
       id="pdf-recompile-dropdown"
+      disabled={compiling}
     >
       <PdfCompileButtonInner
         startCompile={startCompile}
