@@ -1,133 +1,20 @@
+extends ./layout-base
+
 include ./_mixins/formMessages
 
-doctype html
-html(
-	lang=(currentLngCode || 'en')
-)
-	- metadata = metadata || {}
+block entrypointVar
 	- entrypoint = 'marketing'
 
-	//- hook for overriding metadata/page
-	block vars
+block body
+	if (typeof(suppressNavbar) == "undefined")
+		include layout/navbar-marketing
 
-	head
-		include ./_metadata.pug
+	block content
 
-		//- Stylesheet
-		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation)), id="main-stylesheet")
-		block css
-			each file in entrypointStyles(entrypoint)
-				link(rel='stylesheet', href=file)
-
-		block _headLinks
-
-		if settings.i18n.subdomainLang
-			each subdomainDetails in settings.i18n.subdomainLang
-				if !subdomainDetails.hide
-					link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
-
-		//- Scripts
-
-		//- Google Analytics
-		if (typeof(gaToken) != "undefined")
-			script(type="text/javascript", nonce=scriptNonce).
-				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-			script(type="text/javascript", nonce=scriptNonce).
-				ga('create', '#{gaToken}', '#{settings.cookieDomain.replace(/^\./, "")}');
-				ga('set', 'anonymizeIp', true);
-				ga('send', 'pageview');
-
-				try {
-					ga.isBlocked = localStorage.getItem('gaBlocked') === 'true'
-					if (!ga.isBlocked) {
-						window.addEventListener('load', function () {
-							setTimeout(function () {
-								if (!ga.loaded) localStorage.setItem('gaBlocked', 'true')
-							}, 4000)
-						})
-					}
-				} catch (e) {}
+	if (typeof(suppressFooter) == "undefined")
+		if showThinFooter
+			include layout/footer-marketing
 		else
-			script(type="text/javascript", nonce=scriptNonce).
-				window.ga = function() { console.log("would send to GA", arguments) };
+			include layout/fat-footer
 
-		if (typeof(gaTokenV4) != "undefined")
-			script(async, nonce=scriptNonce, src='https://www.googletagmanager.com/gtag/js?id=' + gaTokenV4)
-			script(type="text/javascript", nonce=scriptNonce).
-				window.dataLayer = window.dataLayer || [];
-				function gtag(){dataLayer.push(arguments);}
-				gtag('js', new Date());
-				gtag('config', '#{gaTokenV4}');
-
-		block meta
-			meta(name="ol-csrfToken" content=csrfToken)
-			//- Configure dynamically loaded assets (via webpack) to be downloaded from CDN
-			//- See: https://webpack.js.org/guides/public-path/#on-the-fly
-			meta(name="ol-baseAssetPath" content=buildBaseAssetPath())
-
-			meta(name="ol-usersEmail" content=getUserEmail())
-			meta(name="ol-sharelatex" data-type="json" content={
-				siteUrl: settings.siteUrl,
-				wsUrl,
-			})
-			meta(name="ol-ab" data-type="json" content={})
-			meta(name="ol-user_id" content=getLoggedInUserId())
-			//- Internationalisation settings
-			meta(name="ol-i18n" data-type="json" content={
-				currentLangCode: currentLngCode
-			})
-			//- Expose some settings globally to the frontend
-			meta(name="ol-ExposedSettings" data-type="json" content=ExposedSettings)
-
-			if (typeof(settings.algolia) != "undefined")
-				meta(name="ol-algolia" data-type="json" content={
-					appId: settings.algolia.app_id,
-					apiKey: settings.algolia.read_only_api_key,
-					indexes: settings.algolia.indexes
-				})
-
-			if (typeof(settings.templates) != "undefined")
-				meta(name="ol-sharelatex.templates" data-type="json" content={
-					user_id : settings.templates.user_id,
-					cdnDomain : settings.templates.cdnDomain,
-					indexName : settings.templates.indexName
-				})
-
-		block head-scripts
-
-
-	body(class=(showThinFooter ? 'thin-footer' : undefined))
-		if(settings.recaptcha && settings.recaptcha.siteKeyV3)
-			script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
-
-		if (typeof(suppressSkipToContent) == "undefined")
-			a(class="skip-to-content" href="#main-content") #{translate('skip_to_content')}
-
-		if (typeof(suppressNavbar) == "undefined")
-			include layout/navbar-marketing
-
-		block content
-
-		if (typeof(suppressFooter) == "undefined")
-			if showThinFooter
-				include layout/footer-marketing
-			else
-				include layout/fat-footer
-
-		!= moduleIncludes("contactModal-marketing", locals)
-
-		block foot-scripts
-			each file in entrypointScripts(entrypoint)
-				script(type="text/javascript", nonce=scriptNonce, src=file)
-			script(type="text/javascript", nonce=scriptNonce).
-				//- Look for bundle
-				var cdnBlocked = typeof Frontend === 'undefined'
-				//- Prevent loops
-				var noCdnAlreadyInUrl = window.location.href.indexOf("nocdn=true") != -1
-				if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
-					//- Set query param, server will not set CDN url
-					window.location.search += "&nocdn=true";
-				}
+	!= moduleIncludes("contactModal-marketing", locals)

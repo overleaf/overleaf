@@ -119,43 +119,7 @@ block content
 		.modal-body(ng-bind-html="message")
 
 block append meta
-	meta(name="ol-useV2History" data-type="boolean" content=useV2History)
-	meta(name="ol-project_id" content=project_id)
-	meta(name="ol-userSettings" data-type="json" content=userSettings)
-	meta(name="ol-user" data-type="json" content=user)
-	meta(name="ol-learnedWords" data-type="json" content=learnedWords)
-	meta(name="ol-anonymous" data-type="boolean" content=anonymous)
-	meta(name="ol-brandVariation" data-type="json" content=brandVariation)
-	meta(name="ol-anonymousAccessToken" content=anonymousAccessToken)
-	meta(name="ol-isTokenMember" data-type="boolean" content=isTokenMember)
-	meta(name="ol-isRestrictedTokenMember" data-type="boolean" content=isRestrictedTokenMember)
-	meta(name="ol-maxDocLength" data-type="json" content=maxDocLength)
-	meta(name="ol-wikiEnabled" data-type="boolean" content=!!(settings.apis.wiki && settings.apis.wiki.url))
-	meta(name="ol-gitBridgePublicBaseUrl" content=gitBridgePublicBaseUrl)
-	//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
-	meta(name="ol-aceBasePath" content="/js/" + lib('ace'))
-	//- Set path for PDFjs CMaps and images
-	meta(name="ol-pdfCMapsPath" content="/js/cmaps/")
-	meta(name="ol-pdfImageResourcesPath" content="/images/")
-	//- enable doc hash checking for all projects
-	//- used in public/js/libs/sharejs.js
-	meta(name="ol-useShareJsHash" data-type="boolean" content=true)
-	meta(name="ol-wsRetryHandshake" data-type="json" content=settings.wsRetryHandshake)
-	meta(name="ol-logsUIVariant" content=logsUIVariant)
-	meta(name="ol-showPdfDetach" data-type="boolean" content=showPdfDetach)
-	meta(name="ol-debugPdfDetach" data-type="boolean" content=debugPdfDetach)
-	meta(name="ol-showNewPdfPreview" data-type="boolean" content=showNewPdfPreview)
-	meta(name="ol-showNewSourceEditorOption" data-type="boolean" content=showNewSourceEditorOption)
-	meta(name="ol-enablePdfCaching" data-type="boolean" content=enablePdfCaching)
-	meta(name="ol-trackPdfDownload" data-type="boolean" content=trackPdfDownload)
-	meta(name="ol-resetServiceWorker" data-type="boolean" content=resetServiceWorker)
-	meta(name="ol-detachRole" data-type="string" content=detachRole)
-
-	- var fileActionI18n = ['edited', 'renamed', 'created', 'deleted'].reduce((acc, i) => {acc[i] = translate('file_action_' + i); return acc}, {})
-	meta(name="ol-fileActionI18n" data-type="json" content=fileActionI18n)
-
-	if (settings.overleaf != null)
-		meta(name="ol-overallThemes" data-type="json" content=overallThemes)
+	include ./editor/meta
 
 block foot-scripts
 	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
