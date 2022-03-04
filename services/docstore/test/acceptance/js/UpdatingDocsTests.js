@@ -486,9 +486,9 @@ describe('Applying updates to a doc', function () {
     beforeEach(function (done) {
       const line = new Array(1025).join('x') // 1kb
       this.largeLines = Array.apply(null, Array(1024)).map(() => line) // 1kb
-      this.originalRanges.padding = Array.apply(null, Array(4096)).map(
+      this.originalRanges.padding = Array.apply(null, Array(6144)).map(
         () => line
-      ) // 4mb
+      ) // 6mb
       return DocstoreClient.updateDoc(
         this.project_id,
         this.doc_id,

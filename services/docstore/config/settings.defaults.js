@@ -37,6 +37,9 @@ const Settings = {
 
   max_doc_length: parseInt(process.env.MAX_DOC_LENGTH) || 2 * 1024 * 1024, // 2mb
 
+  maxJsonRequestSize:
+    parseInt(process.env.MAX_JSON_REQUEST_SIZE) || 6 * 1024 * 1024, // 6 MB
+
   archiveBatchSize: parseInt(process.env.ARCHIVE_BATCH_SIZE, 10) || 50,
   unArchiveBatchSize: parseInt(process.env.UN_ARCHIVE_BATCH_SIZE, 10) || 50,
   destroyBatchSize: parseInt(process.env.DESTROY_BATCH_SIZE, 10) || 2000,
