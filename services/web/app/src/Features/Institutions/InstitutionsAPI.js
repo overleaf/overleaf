@@ -217,7 +217,7 @@ function makeAffiliationRequest(options, callback) {
     body: options.body,
     auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
     json: true,
-    timeout: 20 * 1000,
+    timeout: settings.apis.v1.timeout,
   }
   if (options.method === 'GET') {
     requestOptions.maxAttempts = 3

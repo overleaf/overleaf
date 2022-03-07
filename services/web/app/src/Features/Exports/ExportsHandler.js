@@ -178,6 +178,7 @@ module.exports = ExportsHandler = {
         url: `${settings.apis.v1.url}/api/v1/sharelatex/exports`,
         auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
         json: export_data,
+        timeout: settings.apis.v1.timeout,
       },
       function (err, res, body) {
         if (err != null) {
@@ -236,6 +237,7 @@ module.exports = ExportsHandler = {
       {
         url: `${settings.apis.v1.url}/api/v1/sharelatex/exports/${export_id}`,
         auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
+        timeout: settings.apis.v1.timeout,
       },
       function (err, res, body) {
         if (err != null) {
@@ -264,6 +266,7 @@ module.exports = ExportsHandler = {
       {
         url: `${settings.apis.v1.url}/api/v1/sharelatex/exports/${export_id}/${type}_url`,
         auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
+        timeout: settings.apis.v1.timeout,
       },
       function (err, res, body) {
         if (err != null) {

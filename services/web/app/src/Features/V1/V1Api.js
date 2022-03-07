@@ -23,7 +23,7 @@ const DEFAULT_V1_PARAMS = {
     pass: settings.apis.v1.pass,
   },
   json: true,
-  timeout: 30 * 1000,
+  timeout: settings.apis.v1.timeout,
 }
 
 const v1Request = request.defaults(DEFAULT_V1_PARAMS)
@@ -31,7 +31,7 @@ const v1Request = request.defaults(DEFAULT_V1_PARAMS)
 const DEFAULT_V1_OAUTH_PARAMS = {
   baseUrl: settings.apis.v1.url,
   json: true,
-  timeout: 30 * 1000,
+  timeout: settings.apis.v1.timeout,
 }
 
 const v1OauthRequest = request.defaults(DEFAULT_V1_OAUTH_PARAMS)

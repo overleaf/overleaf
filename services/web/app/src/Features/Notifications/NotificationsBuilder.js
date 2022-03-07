@@ -151,7 +151,7 @@ function ipMatcherAffiliation(userId) {
           auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
           body: { ip },
           json: true,
-          timeout: 20 * 1000,
+          timeout: settings.apis.v1.timeout,
         },
         function (error, response, body) {
           if (error != null) {

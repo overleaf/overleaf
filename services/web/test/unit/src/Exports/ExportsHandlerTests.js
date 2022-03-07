@@ -507,6 +507,7 @@ describe('ExportsHandler', function () {
           url: 'http://localhost:5000',
           user: 'overleaf',
           pass: 'pass',
+          timeout: 15000,
         },
       }
       this.export_data = { iAmAnExport: true }
@@ -537,6 +538,7 @@ describe('ExportsHandler', function () {
             pass: this.settings.apis.v1.pass,
           },
           json: this.export_data,
+          timeout: 15000,
         })
       })
 
@@ -598,6 +600,7 @@ describe('ExportsHandler', function () {
           url: 'http://localhost:5000',
           user: 'overleaf',
           pass: 'pass',
+          timeout: 15000,
         },
       }
       this.export_id = 897
@@ -630,6 +633,7 @@ describe('ExportsHandler', function () {
             user: this.settings.apis.v1.user,
             pass: this.settings.apis.v1.pass,
           },
+          timeout: 15000,
         })
       })
 
@@ -648,6 +652,7 @@ describe('ExportsHandler', function () {
           url: 'http://localhost:5000',
           user: 'overleaf',
           pass: 'pass',
+          timeout: 15000,
         },
       }
       this.export_id = 897
@@ -683,6 +688,7 @@ describe('ExportsHandler', function () {
             user: this.settings.apis.v1.user,
             pass: this.settings.apis.v1.pass,
           },
+          timeout: 15000,
         })
       })
 

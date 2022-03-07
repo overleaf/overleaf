@@ -22,6 +22,7 @@ PublisherSchema.method('fetchV1Data', function (callback) {
         pass: settings.apis.v1.pass,
         sendImmediately: true,
       },
+      timeout: settings.apis.v1.timeout,
     },
     (error, response, body) => {
       let parsedBody

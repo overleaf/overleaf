@@ -173,7 +173,7 @@ module.exports = V1SubscriptionManager = {
           sendImmediately: true,
         },
         json: true,
-        timeout: 15 * 1000,
+        timeout: settings.apis.v1.timeout,
       }
       if (options.method === 'GET') {
         requestOptions.maxAttempts = 3
