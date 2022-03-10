@@ -26,7 +26,6 @@
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "express": "^4.17.1",
-    "fast-crc32c": "^2.0.0",
     "glob": "^7.1.6",
     "lodash.once": "^4.1.1",
     "node-uuid": "~1.4.8",
