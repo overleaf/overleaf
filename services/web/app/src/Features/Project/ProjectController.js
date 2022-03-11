@@ -964,6 +964,11 @@ const ProjectController = {
               (newSourceEditorAssignment &&
                 newSourceEditorAssignment.variant === 'codemirror') ||
               shouldDisplayFeature('new_source_editor', false) // also allow override via ?new_source_editor=true
+
+            const showSymbolPalette =
+              !Features.hasFeature('saas') ||
+              (user.features && user.features.symbolPalette)
+
             res.render('project/editor', {
               title: project.name,
               priority_title: true,
@@ -1023,6 +1028,7 @@ const ProjectController = {
               debugPdfDetach,
               showNewPdfPreview,
               showNewSourceEditorOption,
+              showSymbolPalette,
               trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
               enablePdfCaching: partOfPdfCachingRollout('enable-caching'),
               resetServiceWorker:
