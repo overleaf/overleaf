@@ -31,6 +31,16 @@ App.directive('addCommentEntry', () => ({
       scope.onCancel()
     }
 
+    const ignoreKeysInTextAreas = ['PageDown', 'PageUp']
+
+    scope.handleCommentKeyDown = function (ev) {
+      if (ignoreKeysInTextAreas.includes(ev.key)) {
+        if (ev.target.closest('textarea')) {
+          ev.preventDefault()
+        }
+      }
+    }
+
     scope.handleCommentKeyPress = function (ev) {
       if (ev.keyCode === 13 && !ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
         ev.preventDefault()
