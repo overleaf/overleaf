@@ -13,7 +13,10 @@
 		}"
 	)
 
+		include ./file-view
+
 		.editor-container.full-size(
+			ng-show="ui.view == 'editor'"
 			vertical-resizable-panes="symbol-palette-resizer"
 			vertical-resizable-panes-hidden-externally-on="symbol-palette-toggled"
 			vertical-resizable-panes-hidden-initially="true"

@@ -44,6 +44,47 @@ describe('<LayoutDropdownButton />', function () {
     })
   })
 
+  it('should not select any option in history view', function () {
+    // Selected is aria-label, visually we show a checkmark
+    renderWithEditorContext(<LayoutDropdownButton />, {
+      ui: { ...defaultUi, view: 'history' },
+    })
+    screen.getByRole('menuitem', {
+      name: 'Editor & PDF',
+    })
+    screen.getByRole('menuitem', {
+      name: 'PDF only (hide editor)',
+    })
+    screen.getByRole('menuitem', {
+      name: 'Editor only (hide PDF)',
+    })
+    screen.getByRole('menuitem', {
+      name: 'PDF in separate tab',
+    })
+  })
+
+  it('should treat file and editor views the same way', function () {
+    // Selected is aria-label, visually we show a checkmark
+    renderWithEditorContext(<LayoutDropdownButton />, {
+      ui: {
+        pdfLayout: 'flat',
+        view: 'file',
+      },
+    })
+    screen.getByRole('menuitem', {
+      name: 'Editor & PDF',
+    })
+    screen.getByRole('menuitem', {
+      name: 'PDF only (hide editor)',
+    })
+    screen.getByRole('menuitem', {
+      name: 'Selected Editor only (hide PDF)',
+    })
+    screen.getByRole('menuitem', {
+      name: 'PDF in separate tab',
+    })
+  })
+
   describe('on detach', function () {
     beforeEach(function () {
       renderWithEditorContext(<LayoutDropdownButton />, {

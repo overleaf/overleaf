@@ -28,10 +28,14 @@ function IconDetach() {
 }
 
 function IconCheckmark({ iconFor, pdfLayout, view, detachRole }) {
-  if (detachRole === 'detacher') {
+  if (detachRole === 'detacher' || view === 'history') {
     return <IconPlaceholder />
   }
-  if (iconFor === 'editorOnly' && pdfLayout === 'flat' && view === 'editor') {
+  if (
+    iconFor === 'editorOnly' &&
+    pdfLayout === 'flat' &&
+    (view === 'editor' || view === 'file')
+  ) {
     return <IconChecked />
   } else if (iconFor === 'pdfOnly' && pdfLayout === 'flat' && view === 'pdf') {
     return <IconChecked />

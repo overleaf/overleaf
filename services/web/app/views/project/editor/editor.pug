@@ -1,5 +1,5 @@
 div.full-size(
-	ng-show="ui.view == 'editor'"
+	ng-show="ui.view == 'editor' || ui.view === 'file'"
 	layout="pdf"
 	layout-disabled="ui.pdfLayout != 'sideBySide'"
 	mask-iframes-on-resize="true"
