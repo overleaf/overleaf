@@ -45,7 +45,7 @@
     },
     {
       // Test specific rules
-      "files": ["**/test/**/*.js"],
+      "files": ["**/test/**/*.*"],
       "plugins": [
         "mocha",
         "chai-expect",
