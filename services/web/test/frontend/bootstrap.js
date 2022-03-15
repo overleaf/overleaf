@@ -1,5 +1,7 @@
 // Run babel on tests to allow support for import/export statements in Node
-require('@babel/register')
+require('@babel/register')({
+  extensions: ['.ts', '.tsx', '.js', '.jsx'],
+})
 
 // Load JSDOM to mock the DOM in Node
 // Set pretendToBeVisual to enable requestAnimationFrame

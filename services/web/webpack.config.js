@@ -81,8 +81,8 @@ module.exports = {
   module: {
     rules: [
       {
-        // Pass application JS files through babel-loader, compiling to ES5
-        test: /\.js$/,
+        // Pass application JS/TS files through babel-loader, compiling to ES5
+        test: /\.[j|t]sx?$/,
         // Only compile application files (npm and vendored dependencies are in
         // ES5 already)
         exclude: [
@@ -278,6 +278,7 @@ module.exports = {
       ),
     },
     symlinks: false,
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
   },
 
   // Split out files into separate (derived) bundles if they are shared between

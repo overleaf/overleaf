@@ -1,5 +1,6 @@
 {
   "presets": [
+    "@babel/typescript",
     [
       "@babel/react",
       {
@@ -21,6 +22,7 @@
   "env": {
     "test": {
       "presets": [
+        "@babel/typescript",
         [
           "@babel/react",
           {

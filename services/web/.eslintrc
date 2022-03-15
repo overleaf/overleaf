@@ -1,7 +1,9 @@
 {
   "root": true,
+  "parser": "@typescript-eslint/parser",
   "extends": [
     "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
     "standard",
     "prettier"
   ],
@@ -16,7 +18,14 @@
   },
   "rules": {
     // do not allow importing of implicit dependencies.
-    "import/no-extraneous-dependencies": "error"
+    "import/no-extraneous-dependencies": "error",
+
+    // disable some TypeScript rules
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-this-alias": "off"
   },
   "overrides": [
     // NOTE: changing paths may require updating them in the Makefile too.
@@ -178,6 +187,21 @@
             }
           }
         ]
+      }
+    },
+    // React + TypeScript-specific rules
+    {
+      "files": ["**/*.tsx"],
+      "rules": {
+        "react/prop-types": "off",
+        "no-undef": "off"
+      }
+    },
+    // TypeScript-specific rules
+    {
+      "files": ["**/*.ts"],
+      "rules": {
+        "no-undef": "off"
       }
     },
     {
