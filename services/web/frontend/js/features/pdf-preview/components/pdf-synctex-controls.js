@@ -109,8 +109,14 @@ function PdfSynctexControls() {
 
   const { detachRole } = useLayoutContext()
 
-  const { clsiServerId, pdfUrl, pdfViewer, position, setHighlights } =
-    useCompileContext()
+  const {
+    clsiServerId,
+    pdfUrl,
+    pdfViewer,
+    position,
+    setShowLogs,
+    setHighlights,
+  } = useCompileContext()
 
   const [cursorPosition, setCursorPosition] = useState(() => {
     const position = localStorage.getItem(
@@ -206,6 +212,7 @@ function PdfSynctexControls() {
 
       getJSON(`/project/${projectId}/sync/code?${params}`, { signal })
         .then(data => {
+          setShowLogs(false)
           setHighlights(data.pdf)
         })
         .catch(error => {
@@ -221,6 +228,7 @@ function PdfSynctexControls() {
       clsiServerId,
       isMounted,
       projectId,
+      setShowLogs,
       setHighlights,
       setSyncToPdfInFlight,
       signal,
