@@ -67,10 +67,7 @@ block content
 
 		if detachRole === 'detached'
 			div.full-size
-				if showNewPdfPreview
-					pdf-preview()
-				else
-					include ./editor/pdf
+				pdf-preview()
 		else
 			include ./editor/main
 

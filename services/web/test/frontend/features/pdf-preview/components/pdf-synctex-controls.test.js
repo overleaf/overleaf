@@ -95,7 +95,6 @@ const mockSynctex = () =>
 
 describe('<PdfSynctexControls/>', function () {
   beforeEach(function () {
-    window.showNewPdfPreview = true
     window.metaAttributesCache = new Map()
     fetchMock.restore()
     mockCompile()
@@ -104,7 +103,6 @@ describe('<PdfSynctexControls/>', function () {
   })
 
   afterEach(function () {
-    window.showNewPdfPreview = undefined
     window.metaAttributesCache = new Map()
     fetchMock.restore()
   })

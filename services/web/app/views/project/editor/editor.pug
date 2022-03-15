@@ -16,48 +16,18 @@ div.full-size(
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")
-			if showNewPdfPreview
-				pdf-preview()
-			else
-				include ./pdf
+			pdf-preview()
 
-	if showNewPdfPreview
-		.ui-layout-resizer-controls.synctex-controls(
-			ng-show="settings.pdfViewer !== 'native'"
-		)
-			pdf-synctex-controls()
-	else
-		.ui-layout-resizer-controls.synctex-controls(
-			ng-show="!!pdf.url && settings.pdfViewer !== 'native'"
-			ng-controller="PdfSynctexController"
-		)
-			a.btn.btn-default.btn-xs.synctex-control.synctex-control-goto-pdf(
-				tooltip=translate('go_to_code_location_in_pdf')
-				tooltip-placement="right"
-				tooltip-append-to-body="true"
-				ng-click="syncToPdf()"
-				ng-disabled="syncToPdfInFlight"
-			)
-				i.synctex-control-icon(ng-show="!syncToPdfInFlight")
-				i.synctex-spin-icon.fa.fa-refresh.fa-spin(ng-show="syncToPdfInFlight")
-			a.btn.btn-default.btn-xs.synctex-control.synctex-control-goto-code(
-				tooltip=translate('go_to_pdf_location_in_code')
-				tooltip-placement="right"
-				tooltip-append-to-body="true"
-				ng-click="syncToCode()"
-				ng-disabled="syncToCodeInFlight"
-			)
-				i.synctex-control-icon(ng-show="!syncToCodeInFlight")
-				i.synctex-spin-icon.fa.fa-refresh.fa-spin(ng-show="syncToCodeInFlight")
+	.ui-layout-resizer-controls.synctex-controls(
+		ng-show="settings.pdfViewer !== 'native'"
+	)
+		pdf-synctex-controls()
 
 div.full-size(
 	ng-if="ui.pdfLayout == 'flat'"
 	ng-show="ui.view == 'pdf'"
 )
-	if showNewPdfPreview
-		pdf-preview()
-	else
-		include ./pdf
+	pdf-preview()
 
 // fallback, shown when no file/view is selected
 div.full-size.no-file-selection(

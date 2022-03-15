@@ -199,9 +199,7 @@ export function CompileProvider({ children }) {
 
   // pass the "uncompiled" value up into the scope for use outside this context provider
   useEffect(() => {
-    if (window.showNewPdfPreview) {
-      setUncompiled(changedAt > 0)
-    }
+    setUncompiled(changedAt > 0)
   }, [setUncompiled, changedAt])
 
   // always compile the PDF once after opening the project, after the doc has loaded

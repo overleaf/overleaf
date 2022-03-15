@@ -2,7 +2,7 @@ import { isMainFile } from './editor-files'
 import getMeta from '../../../utils/meta'
 import { deleteJSON, postJSON } from '../../../infrastructure/fetch-json'
 import { debounce } from 'lodash'
-import { trackPdfDownload } from '../../../ide/pdf/controllers/PdfJsMetrics'
+import { trackPdfDownload } from './metrics'
 
 const AUTO_COMPILE_MAX_WAIT = 5000
 // We add a 2 second debounce to sending user changes to server if they aren't
@@ -58,10 +58,6 @@ export default class DocumentCompiler {
   async compile(options = {}) {
     if (!options) {
       options = {}
-    }
-    // only compile if the feature flag is enabled
-    if (!window.showNewPdfPreview) {
-      return
     }
 
     // set "compiling" to true (in the React component's state), and return if it was already true

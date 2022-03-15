@@ -25,17 +25,16 @@ import OnlineUsersManager from './ide/online-users/OnlineUsersManager'
 import HistoryManager from './ide/history/HistoryManager'
 import HistoryV2Manager from './ide/history/HistoryV2Manager'
 import PermissionsManager from './ide/permissions/PermissionsManager'
-import PdfManager from './ide/pdf/PdfManager'
 import BinaryFilesManager from './ide/binary-files/BinaryFilesManager'
 import ReferencesManager from './ide/references/ReferencesManager'
 import MetadataManager from './ide/metadata/MetadataManager'
-import ReviewPanelManager from './ide/review-panel/ReviewPanelManager'
+import './ide/review-panel/ReviewPanelManager'
 import OutlineManager from './features/outline/outline-manager'
 import SafariScrollPatcher from './ide/SafariScrollPatcher'
 import {
   loadServiceWorker,
   unregisterServiceWorker,
-} from './ide/pdfng/directives/serviceWorkerManager'
+} from './features/pdf-preview/util/service-worker'
 import './ide/cobranding/CobrandingDataService'
 import './ide/settings/index'
 import './ide/chat/index'
@@ -210,7 +209,6 @@ App.controller(
     } else {
       ide.historyManager = new HistoryManager(ide, $scope)
     }
-    ide.pdfManager = new PdfManager(ide, $scope)
     ide.permissionsManager = new PermissionsManager(ide, $scope)
     ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
     ide.metadataManager = new MetadataManager(ide, $scope, metadata)

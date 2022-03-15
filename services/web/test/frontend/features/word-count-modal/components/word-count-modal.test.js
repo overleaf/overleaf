@@ -16,6 +16,10 @@ describe('<WordCountModal />', function () {
   }
 
   it('renders the translated modal title', async function () {
+    fetchMock.get('express:/project/:projectId/wordcount', () => {
+      return { status: 200, body: { texcount: { messages: 'This is a test' } } }
+    })
+
     const handleHide = sinon.stub()
 
     renderWithEditorContext(

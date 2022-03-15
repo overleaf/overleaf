@@ -784,21 +784,6 @@ const ProjectController = {
             }
           )
         },
-        newPdfPreviewAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            'react-pdf-preview-rollout',
-            {},
-            (error, assignment) => {
-              if (error) {
-                // do not fail editor load if assignment fails
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
         newSourceEditorAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -829,21 +814,6 @@ const ProjectController = {
             }
           )
         },
-        logsUIAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            'logs-ui',
-            {},
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
       },
       (
         err,
@@ -854,10 +824,8 @@ const ProjectController = {
           subscription,
           isTokenMember,
           brandVariation,
-          newPdfPreviewAssignment,
           newSourceEditorAssignment,
           pdfDetachAssignment,
-          logsUIAssignment,
         }
       ) => {
         if (err != null) {
@@ -941,11 +909,6 @@ const ProjectController = {
               return shouldDisplayFeature('enable_pdf_caching', false)
             }
 
-            let showNewPdfPreview = shouldDisplayFeature(
-              'new_pdf_preview',
-              newPdfPreviewAssignment.variant === 'react-pdf-preview'
-            )
-
             const showPdfDetach = shouldDisplayFeature(
               'pdf_detach',
               pdfDetachAssignment.variant === 'enabled'
@@ -956,7 +919,6 @@ const ProjectController = {
             let detachRole = null
 
             if (showPdfDetach) {
-              showNewPdfPreview = true
               detachRole = req.params.detachRole
             }
 
@@ -1023,10 +985,8 @@ const ProjectController = {
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support'),
-              logsUIVariant: logsUIAssignment.variant,
               showPdfDetach,
               debugPdfDetach,
-              showNewPdfPreview,
               showNewSourceEditorOption,
               showSymbolPalette,
               trackPdfDownload: partOfPdfCachingRollout('collect-metrics'),
