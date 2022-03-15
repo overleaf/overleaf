@@ -29,6 +29,7 @@
     "services/document-updater",
     "services/filestore",
     "services/github-sync",
+    "services/history-v1",
     "services/k8s-debugger",
     "services/notifications",
     "services/project-archiver",
