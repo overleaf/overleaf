@@ -1,4 +1,4 @@
-const { waitForDb } = require('../../../../app/js/mongodb')
+const { db, waitForDb } = require('../../../../app/js/mongodb')
 const app = require('../../../../app')
 
 let serverPromise = null
@@ -23,5 +23,6 @@ async function ensureRunning() {
 }
 
 module.exports = {
+  db,
   ensureRunning,
 }

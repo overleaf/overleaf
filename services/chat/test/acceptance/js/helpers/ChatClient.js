@@ -93,6 +93,13 @@ async function deleteMessage(projectId, threadId, messageId) {
   })
 }
 
+async function destroyProject(projectId) {
+  return asyncRequest({
+    method: 'delete',
+    url: `/project/${projectId}`,
+  })
+}
+
 module.exports = {
   sendGlobalMessage,
   getGlobalMessages,
@@ -103,4 +110,5 @@ module.exports = {
   deleteThread,
   editMessage,
   deleteMessage,
+  destroyProject,
 }

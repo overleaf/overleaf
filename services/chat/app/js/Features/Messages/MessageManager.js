@@ -39,6 +39,12 @@ async function deleteAllMessagesInRoom(roomId) {
   })
 }
 
+async function deleteAllMessagesInRooms(roomIds) {
+  await db.messages.deleteMany({
+    room_id: { $in: roomIds },
+  })
+}
+
 async function updateMessage(roomId, messageId, content, timestamp) {
   const query = _ensureIdsAreObjectIds({
     _id: messageId,
@@ -78,6 +84,7 @@ module.exports = MessageManager = {
   getMessages,
   findAllMessagesInRooms,
   deleteAllMessagesInRoom,
+  deleteAllMessagesInRooms,
   updateMessage,
   deleteMessage,
 }

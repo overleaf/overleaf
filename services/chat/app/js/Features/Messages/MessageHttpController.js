@@ -70,6 +70,18 @@ async function deleteMessage(req, res) {
   res.sendStatus(204)
 }
 
+async function destroyProject(req, res) {
+  const { projectId } = req.params
+  logger.log({ projectId }, 'destroying project')
+  const rooms = await ThreadManager.findAllThreadRoomsAndGlobalThread(projectId)
+  const roomIds = rooms.map(r => r._id)
+  logger.log({ projectId, roomIds }, 'deleting all messages in rooms')
+  await MessageManager.deleteAllMessagesInRooms(roomIds)
+  logger.log({ projectId }, 'deleting all threads in project')
+  await ThreadManager.deleteAllThreadsInProject(projectId)
+  res.sendStatus(204)
+}
+
 async function _sendMessage(clientThreadId, req, res) {
   const { user_id: userId, content } = req.body
   const { projectId } = req.params
@@ -145,4 +157,5 @@ module.exports = {
   deleteThread: expressify(deleteThread),
   editMessage: expressify(editMessage),
   deleteMessage: expressify(deleteMessage),
+  destroyProject: expressify(destroyProject),
 }

@@ -54,6 +54,20 @@ async function findAllThreadRooms(projectId) {
     .toArray()
 }
 
+async function findAllThreadRoomsAndGlobalThread(projectId) {
+  return db.rooms
+    .find(
+      {
+        project_id: ObjectId(projectId.toString()),
+      },
+      {
+        thread_id: 1,
+        resolved: 1,
+      }
+    )
+    .toArray()
+}
+
 async function resolveThread(projectId, threadId, userId) {
   await db.rooms.updateOne(
     {
@@ -93,13 +107,21 @@ async function deleteThread(projectId, threadId) {
   return room._id
 }
 
+async function deleteAllThreadsInProject(projectId) {
+  await db.rooms.deleteMany({
+    project_id: ObjectId(projectId.toString()),
+  })
+}
+
 module.exports = ThreadManager = {
   GLOBAL_THREAD,
   findOrCreateThread,
   findAllThreadRooms,
+  findAllThreadRoomsAndGlobalThread,
   resolveThread,
   reopenThread,
   deleteThread,
+  deleteAllThreadsInProject,
 }
 ;[
   'findOrCreateThread',

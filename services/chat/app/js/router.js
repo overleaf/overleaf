@@ -66,6 +66,8 @@ module.exports = {
       MessageHttpController.deleteThread
     )
 
+    app.delete('/project/:projectId', MessageHttpController.destroyProject)
+
     app.get('/status', (req, res, next) => res.send('chat is alive'))
   },
 }
