@@ -134,6 +134,15 @@ const setup = () => {
   ASYNC_LIMIT = argv.async ? argv.async : 10
   MONGO_SKIP = argv.skip ? argv.skip : 0
   COMMIT = argv.commit !== undefined
+  const FORCE = argv.force !== undefined
+  if (!FORCE) {
+    console.log(
+      'NOTE: features can be automatically refreshed on login (using `featuresEpoch`)\n' +
+        'Consider incrementing settings.featuresEpoch instead of running this script.\n' +
+        'If you really need to run this script, use refresh_features.js --force.'
+    )
+    process.exit(1)
+  }
   if (!COMMIT) {
     console.warn('Doing dry run without --commit')
   }
