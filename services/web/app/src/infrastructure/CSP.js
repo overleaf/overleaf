@@ -93,4 +93,10 @@ function relativeViewPath(view) {
     : path.join('app', 'views', view)
 }
 
+function removeCSPHeaders(res) {
+  res.removeHeader('Content-Security-Policy')
+  res.removeHeader('Content-Security-Policy-Report-Only')
+}
+
 module.exports.buildDefaultPolicy = buildDefaultPolicy
+module.exports.removeCSPHeaders = removeCSPHeaders
