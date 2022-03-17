@@ -772,7 +772,6 @@ module.exports = {
   moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],
 
   csp: {
-    percentage: parseFloat(process.env.CSP_PERCENTAGE) || 0,
     enabled: process.env.CSP_ENABLED === 'true',
     reportOnly: process.env.CSP_REPORT_ONLY === 'true',
     reportPercentage: parseFloat(process.env.CSP_REPORT_PERCENTAGE) || 0,

@@ -3,6 +3,7 @@ const merge = require('webpack-merge')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const base = require('./webpack.config')
+const { buildDefaultPolicy } = require('./app/src/infrastructure/CSP')
 
 module.exports = merge(base, {
   mode: 'development',
@@ -29,6 +30,10 @@ module.exports = merge(base, {
     host: '0.0.0.0',
     port: 3808,
     public: 'www.dev-overleaf.com:443',
+
+    headers: {
+      'Content-Security-Policy': buildDefaultPolicy(),
+    },
 
     // Customise output to the (node) console
     stats: {

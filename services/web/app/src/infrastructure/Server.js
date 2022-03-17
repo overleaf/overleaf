@@ -271,7 +271,7 @@ webRouter.use(
 // add CSP header to HTML-rendering routes, if enabled
 if (Settings.csp && Settings.csp.enabled) {
   logger.info('adding CSP header to rendered routes', Settings.csp)
-  webRouter.use(csp(Settings.csp))
+  app.use(csp(Settings.csp))
 }
 
 logger.info('creating HTTP server'.yellow)
