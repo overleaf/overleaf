@@ -35,13 +35,20 @@ for (const [usage, planData] of Object.entries(groups)) {
       }
     }
 
+    const planName =
+      planCode === 'collaborator'
+        ? 'Standard (Collaborator)'
+        : capitalize(planCode)
+
     // Generate plans in settings
     for (const size of sizes) {
       Settings.plans.push({
         planCode: `group_${planCode}_${size}_${usage}`,
-        name: `${Settings.appName} ${capitalize(
-          planCode
-        )} - Group Account (${size} licenses) - ${capitalize(usage)}`,
+        name: `${
+          Settings.appName
+        } ${planName} - Group Account (${size} licenses) - ${capitalize(
+          usage
+        )}`,
         hideFromUsers: true,
         price_in_cents: groups[usage][planCode].USD[size].price_in_cents,
         annual: true,
