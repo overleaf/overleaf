@@ -65,6 +65,13 @@ async function plansPage(req, res) {
   const newPlansPageVariant =
     assignment && assignment.variant === 'new-plans-page'
 
+  const standardPlanNameAssignment =
+    await SplitTestHandler.promises.getAssignment(req, 'standard-plan-name')
+
+  const useNewPlanName =
+    standardPlanNameAssignment &&
+    standardPlanNameAssignment.variant === 'new-plan-name'
+
   res.render('subscriptions/plans-marketing', {
     title: 'plans_and_pricing',
     plans,
@@ -76,6 +83,7 @@ async function plansPage(req, res) {
     groupPlanModalOptions,
     groupPlanModalDefaults,
     newPlansPageVariant,
+    useNewPlanName,
   })
 }
 

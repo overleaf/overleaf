@@ -5,7 +5,11 @@ mixin table_premium
 			th
 			th #{translate("free")}
 			th #{translate("personal")}
-			th #{translate("collaborator")}
+			th
+				if (useNewPlanName)
+					| #{translate("standard")}
+				else
+					| #{translate("collaborator")}
 				.outer.outer-top
 					.outer-content
 						.best-value

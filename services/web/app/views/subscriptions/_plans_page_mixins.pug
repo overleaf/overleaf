@@ -207,7 +207,10 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 							.best-value
 								strong #{translate('best_value')}
 							.card-header
-								h2 #{translate("collaborator")}
+								if (useNewPlanName)
+									h2 #{translate("standard")}
+								else
+									h2 #{translate("collaborator")}
 							h5.tagline #{translate("tagline_collaborator")}
 							.circle
 								+price_collaborator

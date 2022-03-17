@@ -39,7 +39,10 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 									for plan_code in groupPlanModalOptions.plan_codes
 										label.group-plan-option
 											input(type="radio" name="plan_code" checked=(plan_code.code === "collaborator") value=plan_code.code )
-											span #{plan_code.display}
+											if (useNewPlanName && plan_code.code === 'collaborator')
+												span Standard
+											else
+												span #{plan_code.display}
 								.form-group
 									label(for='size')
 										| Number of users

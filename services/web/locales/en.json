@@ -926,6 +926,7 @@
   "group_plans": "Group plans",
   "one_collaborator": "Only one collaborator",
   "collaborator": "Collaborator",
+  "standard": "Standard",
   "collabs_per_proj": "__collabcount__ collaborators per project",
   "full_doc_history": "Full document history",
   "sync_to_dropbox": "Sync to Dropbox",
