@@ -101,15 +101,15 @@ module.exports = {
         ],
       },
       {
-        // Wrap PDF.js worker in a Web Worker
-        test: /pdf\.worker\.js$/,
+        // Wrap worker scripts in a Web Worker
+        test: /\.worker\.js$/,
         use: [
           {
             loader: 'worker-loader',
             options: {
               // Write into js directory (note: customising this is not possible
               // with pdfjs-dist/webpack auto loader)
-              name: 'js/pdfjs-worker.[hash].js',
+              name: 'js/[name].[contenthash].js',
               // Override dynamically-set publicPath to explicitly use root.
               // This prevents a security problem where the Worker - normally
               // loaded from a CDN - has cross-origin issues, by forcing it to not
@@ -126,18 +126,6 @@ module.exports = {
             loader: 'worker-loader',
             options: {
               name: 'serviceWorker.js',
-            },
-          },
-        ],
-      },
-      {
-        test: /latex-linter.worker.js$/,
-        use: [
-          {
-            loader: 'worker-loader',
-            options: {
-              name: 'js/latex-linter.worker.js',
-              publicPath: '/',
             },
           },
         ],
