@@ -1,5 +1,7 @@
 // NOTE: using "legacy" build as main build requires webpack v5
 // import PDFJS from 'pdfjs-dist/webpack'
+
+import 'core-js/features/promise/all-settled' // polyfill for Promise.allSettled (used by pdf.js)
 import * as PDFJS from 'pdfjs-dist/legacy/build/pdf'
 import * as PDFJSViewer from 'pdfjs-dist/legacy/web/pdf_viewer'
 import PDFJSWorker from 'pdfjs-dist/legacy/build/pdf.worker'
@@ -10,11 +12,6 @@ import { captureMessage } from '../../../infrastructure/error-reporter'
 if (typeof window !== 'undefined' && 'Worker' in window) {
   PDFJS.GlobalWorkerOptions.workerPort = new PDFJSWorker()
 }
-
-// forces the method (required by pdf.js) to be polyfilled by webpack, since
-// processing pdf.js by webpack/babel causes issues loading documents
-// eslint-disable-next-line no-unused-expressions
-Promise.allSettled
 
 const params = new URLSearchParams(window.location.search)
 const disableFontFace = params.get('disable-font-face') === 'true'
