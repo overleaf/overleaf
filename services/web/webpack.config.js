@@ -326,10 +326,10 @@ module.exports = {
         // and static images from pdfjs-dist package to build output.
 
         return [
-          { from: `${dir}/cmaps`, to: `js/${dir}/cmaps` },
+          { from: `${dir}/cmaps`, to: `js/${version}/cmaps` },
           {
             from: `${dir}/legacy/web/images`,
-            to: `images/${dir}`,
+            to: `images/${version}`,
           },
         ]
       }),
