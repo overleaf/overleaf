@@ -52,7 +52,8 @@ function getModuleDirectory(moduleName) {
 
 const mathjaxDir = getModuleDirectory('mathjax')
 const aceDir = getModuleDirectory('ace-builds')
-const pdfjsDir = getModuleDirectory('pdfjs-dist')
+
+const pdfjsVersions = ['pdfjs-dist210', 'pdfjs-dist213']
 
 module.exports = {
   // Defines the "entry point(s)" for the application - i.e. the file which
@@ -318,13 +319,20 @@ module.exports = {
         from: `${aceDir}/src-min-noconflict`,
         to: `js/ace-${PackageVersions.version.ace}/`,
       },
-      // Copy CMap files (used to provide support for non-Latin characters)
-      // and static images from pdfjs-dist package to build output.
-      { from: `${pdfjsDir}/cmaps`, to: 'js/cmaps' },
-      {
-        from: `${pdfjsDir}/legacy/web/images`,
-        to: 'images',
-      },
+      ...pdfjsVersions.flatMap(version => {
+        const dir = getModuleDirectory(version)
+
+        // Copy CMap files (used to provide support for non-Latin characters)
+        // and static images from pdfjs-dist package to build output.
+
+        return [
+          { from: `${dir}/cmaps`, to: `js/${dir}/cmaps` },
+          {
+            from: `${dir}/legacy/web/images`,
+            to: `images/${dir}`,
+          },
+        ]
+      }),
     ]),
   ],
 }

@@ -31,9 +31,15 @@ function PdfJsViewer({ url }) {
   // create the viewer when the container is mounted
   const handleContainer = useCallback(parent => {
     if (parent) {
-      const viewer = new PDFJSWrapper(parent.firstChild)
-      setPdfJsWrapper(viewer)
-      return () => viewer.destroy()
+      const wrapper = new PDFJSWrapper(parent.firstChild)
+      wrapper.init().then(() => {
+        setPdfJsWrapper(wrapper)
+      })
+
+      return () => {
+        setPdfJsWrapper(null)
+        wrapper.destroy()
+      }
     }
   }, [])
 
@@ -177,7 +183,7 @@ function PdfJsViewer({ url }) {
 
       for (const highlight of highlights) {
         try {
-          const element = buildHighlightElement(highlight, pdfJsWrapper.viewer)
+          const element = buildHighlightElement(highlight, pdfJsWrapper)
           elements.push(element)
         } catch (error) {
           // ignore invalid highlights

@@ -814,6 +814,21 @@ const ProjectController = {
             }
           )
         },
+        pdfjsAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            'pdfjs',
+            {},
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (
         err,
@@ -826,6 +841,7 @@ const ProjectController = {
           brandVariation,
           newSourceEditorAssignment,
           pdfDetachAssignment,
+          pdfjsAssignment,
         }
       ) => {
         if (err != null) {
@@ -985,6 +1001,7 @@ const ProjectController = {
               gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
               wsUrl,
               showSupport: Features.hasFeature('support'),
+              pdfjsVariant: pdfjsAssignment.variant,
               showPdfDetach,
               debugPdfDetach,
               showNewSourceEditorOption,

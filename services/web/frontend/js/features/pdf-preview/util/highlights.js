@@ -1,7 +1,5 @@
-import * as PDFJS from 'pdfjs-dist/legacy/build/pdf'
-
-export function buildHighlightElement(highlight, viewer) {
-  const pageView = viewer.getPageView(highlight.page - 1)
+export function buildHighlightElement(highlight, wrapper) {
+  const pageView = wrapper.viewer.getPageView(highlight.page - 1)
 
   const viewport = pageView.viewport
 
@@ -14,7 +12,7 @@ export function buildHighlightElement(highlight, viewer) {
     height - highlight.v + 10, // yMax
   ])
 
-  const [left, top, right, bottom] = PDFJS.Util.normalizeRect(rect)
+  const [left, top, right, bottom] = wrapper.PDFJS.Util.normalizeRect(rect)
 
   const element = document.createElement('div')
   element.style.left = Math.floor(left) + 'px'
