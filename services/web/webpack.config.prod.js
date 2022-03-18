@@ -45,8 +45,8 @@ module.exports = merge.smart(
       minimizer: [
         new TerserPlugin({
           terserOptions: {
-            keep_classnames: /Error$/,
-            keep_fnames: /Error$/,
+            keep_classnames: /(Error|Exception)$/,
+            keep_fnames: /(Error|Exception)$/,
           },
         }),
         new OptimizeCssAssetsPlugin(),
