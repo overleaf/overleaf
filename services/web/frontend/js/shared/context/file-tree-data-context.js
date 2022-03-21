@@ -4,6 +4,7 @@ import {
   useReducer,
   useContext,
   useMemo,
+  useState,
 } from 'react'
 import PropTypes from 'prop-types'
 import useScopeValue from '../hooks/use-scope-value'
@@ -144,6 +145,8 @@ export function FileTreeDataProvider({ children }) {
     initialState
   )
 
+  const [selectedEntities, setSelectedEntities] = useState([])
+
   useDeepCompareEffect(() => {
     dispatch({
       type: ACTION_TYPES.RESET,
@@ -205,6 +208,8 @@ export function FileTreeDataProvider({ children }) {
       fileCount,
       fileTreeData,
       hasFolders: fileTreeData?.folders.length > 0,
+      selectedEntities,
+      setSelectedEntities,
     }
   }, [
     dispatchCreateDoc,
@@ -215,6 +220,8 @@ export function FileTreeDataProvider({ children }) {
     dispatchRename,
     fileCount,
     fileTreeData,
+    selectedEntities,
+    setSelectedEntities,
   ])
 
   return (

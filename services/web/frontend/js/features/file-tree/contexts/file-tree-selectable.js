@@ -86,7 +86,7 @@ export function FileTreeSelectableProvider({ onSelect, children }) {
     rootDocId
   )
 
-  const { fileTreeData } = useFileTreeData()
+  const { fileTreeData, setSelectedEntities } = useFileTreeData()
 
   const [selectedEntityIds, dispatch] = useReducer(
     permissionsLevel === 'readOnly'
@@ -129,11 +129,18 @@ export function FileTreeSelectableProvider({ onSelect, children }) {
     if (_.isEqual(selectedEntityIds, previousSelectedEntityIds)) {
       return
     }
-    const selectedEntities = Array.from(selectedEntityIds)
+    const _selectedEntities = Array.from(selectedEntityIds)
       .map(id => findInTree(fileTreeData, id))
       .filter(Boolean)
-    onSelect(selectedEntities)
-  }, [fileTreeData, selectedEntityIds, previousSelectedEntityIds, onSelect])
+    onSelect(_selectedEntities)
+    setSelectedEntities(_selectedEntities)
+  }, [
+    fileTreeData,
+    selectedEntityIds,
+    previousSelectedEntityIds,
+    onSelect,
+    setSelectedEntities,
+  ])
 
   useEffect(() => {
     // listen for `editor.openDoc` and selected that doc

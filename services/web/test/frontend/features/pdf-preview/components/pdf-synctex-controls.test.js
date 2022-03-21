@@ -8,6 +8,7 @@ import fs from 'fs'
 import path from 'path'
 import { expect } from 'chai'
 import { useCompileContext } from '../../../../../frontend/js/shared/context/compile-context'
+import { useFileTreeData } from '../../../../../frontend/js/shared/context/file-tree-data-context'
 import { useEffect } from 'react'
 
 const examplePDF = path.join(__dirname, '../fixtures/test-example.pdf')
@@ -84,6 +85,14 @@ const mockHighlights = [
   },
 ]
 
+const mockPosition = {
+  page: 1,
+  offset: { top: 10, left: 10 },
+  pageSize: { height: 500, width: 500 },
+}
+
+const mockSelectedEntities = [{ type: 'doc' }]
+
 const mockSynctex = () =>
   fetchMock
     .get('express:/project/:projectId/sync/code', () => {
@@ -92,6 +101,27 @@ const mockSynctex = () =>
     .get('express:/project/:projectId/sync/pdf', () => {
       return { code: [{ file: 'main.tex', line: 100 }] }
     })
+
+const WithPosition = ({ mockPosition }) => {
+  const { setPosition } = useCompileContext()
+
+  // mock PDF scroll position update
+  useEffect(() => {
+    setPosition(mockPosition)
+  }, [mockPosition, setPosition])
+
+  return null
+}
+
+const WithSelectedEntities = ({ mockSelectedEntities = [] }) => {
+  const { setSelectedEntities } = useFileTreeData()
+
+  useEffect(() => {
+    setSelectedEntities(mockSelectedEntities)
+  }, [mockSelectedEntities, setSelectedEntities])
+
+  return null
+}
 
 describe('<PdfSynctexControls/>', function () {
   beforeEach(function () {
@@ -108,24 +138,10 @@ describe('<PdfSynctexControls/>', function () {
   })
 
   it('handles clicks on sync buttons', async function () {
-    const Inner = () => {
-      const { setPosition } = useCompileContext()
-
-      // mock PDF scroll position update
-      useEffect(() => {
-        setPosition({
-          page: 1,
-          offset: { top: 10, left: 10 },
-          pageSize: { height: 500, width: 500 },
-        })
-      }, [setPosition])
-
-      return null
-    }
-
     const { container } = renderWithEditorContext(
       <>
-        <Inner />
+        <WithPosition mockPosition={mockPosition} />
+        <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
         <PdfSynctexControls />
       </>,
       { scope }
@@ -170,6 +186,50 @@ describe('<PdfSynctexControls/>', function () {
     })
   })
 
+  it('disables button when multiple entities are selected', async function () {
+    renderWithEditorContext(
+      <>
+        <WithPosition mockPosition={mockPosition} />
+        <WithSelectedEntities
+          mockSelectedEntities={[{ type: 'doc' }, { type: 'doc' }]}
+        />
+        <PdfSynctexControls />
+      </>,
+      { scope }
+    )
+
+    const syncToPdfButton = await screen.findByRole('button', {
+      name: 'Go to code location in PDF',
+    })
+    expect(syncToPdfButton.disabled).to.be.true
+
+    const syncToCodeButton = await screen.findByRole('button', {
+      name: /Go to PDF location in code/,
+    })
+    expect(syncToCodeButton.disabled).to.be.true
+  })
+
+  it('disables button when a file is selected', async function () {
+    renderWithEditorContext(
+      <>
+        <WithPosition mockPosition={mockPosition} />
+        <WithSelectedEntities mockSelectedEntities={[{ type: 'file' }]} />
+        <PdfSynctexControls />
+      </>,
+      { scope }
+    )
+
+    const syncToPdfButton = await screen.findByRole('button', {
+      name: 'Go to code location in PDF',
+    })
+    expect(syncToPdfButton.disabled).to.be.true
+
+    const syncToCodeButton = await screen.findByRole('button', {
+      name: /Go to PDF location in code/,
+    })
+    expect(syncToCodeButton.disabled).to.be.true
+  })
+
   describe('with detacher role', async function () {
     beforeEach(function () {
       window.metaAttributesCache.set('ol-detachRole', 'detacher')
@@ -190,7 +250,15 @@ describe('<PdfSynctexControls/>', function () {
     })
 
     it('send go to PDF location action', async function () {
-      renderWithEditorContext(<PdfSynctexControls />, { scope })
+      renderWithEditorContext(
+        <>
+          <WithPosition mockPosition={mockPosition} />
+          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
+          <PdfSynctexControls />
+        </>,
+        { scope }
+      )
+
       sysendTestHelper.resetHistory()
 
       const syncToPdfButton = await screen.findByRole('button', {
@@ -218,9 +286,14 @@ describe('<PdfSynctexControls/>', function () {
     })
 
     it('update inflight state', async function () {
-      const { container } = renderWithEditorContext(<PdfSynctexControls />, {
-        scope,
-      })
+      const { container } = renderWithEditorContext(
+        <>
+          <WithPosition mockPosition={mockPosition} />
+          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
+          <PdfSynctexControls />
+        </>,
+        { scope }
+      )
       sysendTestHelper.resetHistory()
 
       const syncToPdfButton = await screen.findByRole('button', {
@@ -277,9 +350,14 @@ describe('<PdfSynctexControls/>', function () {
     })
 
     it('send go to code line action and update inflight state', async function () {
-      const { container } = renderWithEditorContext(<PdfSynctexControls />, {
-        scope,
-      })
+      const { container } = renderWithEditorContext(
+        <>
+          <WithPosition mockPosition={mockPosition} />
+          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
+          <PdfSynctexControls />
+        </>,
+        { scope }
+      )
       sysendTestHelper.resetHistory()
 
       const syncToCodeButton = await screen.findByRole('button', {
@@ -313,7 +391,14 @@ describe('<PdfSynctexControls/>', function () {
     })
 
     it('sends PDF exists state', async function () {
-      renderWithEditorContext(<PdfSynctexControls />, { scope })
+      renderWithEditorContext(
+        <>
+          <WithPosition mockPosition={mockPosition} />
+          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
+          <PdfSynctexControls />
+        </>,
+        { scope }
+      )
       sysendTestHelper.resetHistory()
 
       await waitFor(() => {
@@ -328,7 +413,14 @@ describe('<PdfSynctexControls/>', function () {
     })
 
     it('reacts to go to PDF location action', async function () {
-      renderWithEditorContext(<PdfSynctexControls />, { scope })
+      renderWithEditorContext(
+        <>
+          <WithPosition mockPosition={mockPosition} />
+          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
+          <PdfSynctexControls />
+        </>,
+        { scope }
+      )
       sysendTestHelper.resetHistory()
 
       await waitFor(() => {

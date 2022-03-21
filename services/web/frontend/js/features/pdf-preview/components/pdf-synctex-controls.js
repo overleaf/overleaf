@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { useIdeContext } from '../../../shared/context/ide-context'
 import { useProjectContext } from '../../../shared/context/project-context'
@@ -15,12 +15,14 @@ import useAbortController from '../../../shared/hooks/use-abort-controller'
 import useDetachState from '../../../shared/hooks/use-detach-state'
 import useDetachAction from '../../../shared/hooks/use-detach-action'
 import localStorage from '../../../infrastructure/local-storage'
+import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 
 function GoToCodeButton({
   position,
   syncToCode,
   syncToCodeInFlight,
   isDetachLayout,
+  hasSingleSelectedDoc,
 }) {
   const { t } = useTranslation()
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
@@ -48,7 +50,7 @@ function GoToCodeButton({
         bsStyle="default"
         bsSize="xs"
         onClick={() => syncToCode(position, 72)}
-        disabled={syncToCodeInFlight}
+        disabled={syncToCodeInFlight || !hasSingleSelectedDoc}
         className={buttonClasses}
         aria-label={t('go_to_pdf_location_in_code')}
       >
@@ -64,6 +66,7 @@ function GoToPdfButton({
   syncToPdf,
   syncToPdfInFlight,
   isDetachLayout,
+  hasSingleSelectedDoc,
 }) {
   const { t } = useTranslation()
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
@@ -91,7 +94,7 @@ function GoToPdfButton({
         bsStyle="default"
         bsSize="xs"
         onClick={() => syncToPdf(cursorPosition)}
-        disabled={syncToPdfInFlight || !cursorPosition}
+        disabled={syncToPdfInFlight || !cursorPosition || !hasSingleSelectedDoc}
         className={buttonClasses}
         aria-label={t('go_to_code_location_in_pdf')}
       >
@@ -117,6 +120,8 @@ function PdfSynctexControls() {
     setShowLogs,
     setHighlights,
   } = useCompileContext()
+
+  const { selectedEntities } = useFileTreeData()
 
   const [cursorPosition, setCursorPosition] = useState(() => {
     const position = localStorage.getItem(
@@ -320,6 +325,17 @@ function PdfSynctexControls() {
     }
   }, [syncToCode])
 
+  const hasSingleSelectedDoc = useMemo(() => {
+    if (selectedEntities.length !== 1) {
+      return false
+    }
+
+    if (selectedEntities[0].type !== 'doc') {
+      return false
+    }
+    return true
+  }, [selectedEntities])
+
   if (!position) {
     return null
   }
@@ -336,6 +352,7 @@ function PdfSynctexControls() {
           syncToPdf={syncToPdf}
           syncToPdfInFlight={syncToPdfInFlight}
           isDetachLayout
+          hasSingleSelectedDoc={hasSingleSelectedDoc}
         />
       </>
     )
@@ -347,6 +364,7 @@ function PdfSynctexControls() {
           syncToCode={syncToCode}
           syncToCodeInFlight={syncToCodeInFlight}
           isDetachLayout
+          hasSingleSelectedDoc={hasSingleSelectedDoc}
         />
       </>
     )
@@ -357,12 +375,14 @@ function PdfSynctexControls() {
           cursorPosition={cursorPosition}
           syncToPdf={syncToPdf}
           syncToPdfInFlight={syncToPdfInFlight}
+          hasSingleSelectedDoc={hasSingleSelectedDoc}
         />
 
         <GoToCodeButton
           position={position}
           syncToCode={syncToCode}
           syncToCodeInFlight={syncToCodeInFlight}
+          hasSingleSelectedDoc={hasSingleSelectedDoc}
         />
       </>
     )
@@ -376,6 +396,7 @@ GoToCodeButton.propTypes = {
   position: PropTypes.object.isRequired,
   syncToCode: PropTypes.func.isRequired,
   syncToCodeInFlight: PropTypes.bool.isRequired,
+  hasSingleSelectedDoc: PropTypes.bool.isRequired,
 }
 
 GoToPdfButton.propTypes = {
@@ -383,4 +404,5 @@ GoToPdfButton.propTypes = {
   isDetachLayout: PropTypes.bool,
   syncToPdf: PropTypes.func.isRequired,
   syncToPdfInFlight: PropTypes.bool.isRequired,
+  hasSingleSelectedDoc: PropTypes.bool.isRequired,
 }
