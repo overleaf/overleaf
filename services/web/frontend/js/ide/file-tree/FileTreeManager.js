@@ -38,6 +38,7 @@ export default FileTreeManager = class FileTreeManager {
     this.$scope.$on('entities:multiSelected', (_event, data) => {
       this.$scope.$apply(() => {
         this.$scope.multiSelectedCount = data.count
+        this.$scope.editor.multiSelectedCount = data.count
       })
     })
 
@@ -144,7 +145,8 @@ export default FileTreeManager = class FileTreeManager {
 
   toggleMultiSelectEntity(entity) {
     entity.multiSelected = !entity.multiSelected
-    return (this.$scope.multiSelectedCount = this.multiSelectedCount())
+    this.$scope.multiSelectedCount = this.multiSelectedCount()
+    this.$scope.editor.multiSelectedCount = this.$scope.multiSelectedCount
   }
 
   multiSelectedCount() {

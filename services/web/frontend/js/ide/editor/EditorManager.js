@@ -57,6 +57,7 @@ export default EditorManager = (function () {
           ide.$scope.$emit('editor:replace-selection', symbol.command)
           eventTracking.sendMB('symbol-palette-insert')
         },
+        multiSelectedCount: 0,
       }
 
       window.addEventListener('editor:insert-symbol', event => {

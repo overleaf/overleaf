@@ -13,10 +13,16 @@
 		}"
 	)
 
+		.multi-selection-ongoing(
+			ng-show="editor.multiSelectedCount > 0"
+		)
+			.multi-selection-message
+				h4 {{ editor.multiSelectedCount }} #{translate('files_selected')}
+
 		include ./file-view
 
 		.editor-container.full-size(
-			ng-show="ui.view == 'editor'"
+			ng-show="ui.view == 'editor' && editor.multiSelectedCount === 0"
 			vertical-resizable-panes="symbol-palette-resizer"
 			vertical-resizable-panes-hidden-externally-on="symbol-palette-toggled"
 			vertical-resizable-panes-hidden-initially="true"
@@ -42,12 +48,6 @@
 					!= moduleIncludes('editor:main', locals)
 				else
 					.toolbar.toolbar-editor
-
-				.multi-selection-ongoing(
-					ng-show="multiSelectedCount > 0"
-				)
-					.multi-selection-message
-						h4 {{ multiSelectedCount }} #{translate('files_selected')}
 
 				div(ng-if="editor.newSourceEditor")
 					if moduleIncludesAvailable('editor:source-editor')
