@@ -58,6 +58,11 @@ EmailBuilder.templates.trialOnboarding = EmailBuilder.NoCTAEmailTemplate({
       `${settings.siteUrl}/learn/how-to/Using_Git_and_GitHub?utm_source=Overleaf&utm_medium=email&utm_campaign=TrialEmail&utm_content=gitgithublink`,
       isPlainText
     )
+    const symbolPalette = EmailMessageHelper.displayLink(
+      'Read More',
+      `${settings.siteUrl}/learn/how-to/Using_the_Symbol_Palette_in_Overleaf#:~:text=To%20open%20the%20Symbol%20Palette,the%20handle%20up%20and%20down.`,
+      isPlainText
+    )
     const latexTutorials = EmailMessageHelper.displayLink(
       'Read More',
       `${settings.siteUrl}/learn/latex/Learn_LaTeX_in_30_minutes?utm_source=Overleaf&utm_medium=email&utm_campaign=TrialEmail&utm_content=latextutorialslink`,
@@ -126,7 +131,10 @@ EmailBuilder.templates.trialOnboarding = EmailBuilder.NoCTAEmailTemplate({
       `8. <b>Git and GitHub integration</b>: You can configure your Overleaf project to sync directly with a repository on GitHub, or you can use raw git access. This allows you to work offline and sync your files whenever you come back online. You can also use our Overleaf Git Bridge integration, which lets you git clone, push and pull changes between the online Overleaf editor, and your local offline git repository.`,
       `<ul><li> Git, GitHub and Git Bridge: ${gitSync}</li></ul>`,
 
-      `9. <b>Online tutorials and knowledge base</b>: We have an extensive online knowledge base providing a wide range of platform guidance, LaTeX tutorials, technical articles, and webinars.`,
+      `9. <b>Symbol Palette</b>: A quick and convenient tool to insert math symbols into your document.`,
+      `<ul><li> Symbol Palette: ${symbolPalette}</li></ul>`,
+
+      `10. <b>Online tutorials and knowledge base</b>: We have an extensive online knowledge base providing a wide range of platform guidance, LaTeX tutorials, technical articles, and webinars.`,
       `<ul><li>LaTeX tutorials: ${latexTutorials}</li>
       <li>Knowledge base: ${knowledgeBase}</li>
       <li>Technical articles: ${technicalArticles}</li>
