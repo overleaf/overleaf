@@ -3,6 +3,7 @@ const DocstoreManager = require('../Docstore/DocstoreManager')
 const Errors = require('../Errors/Errors')
 const ProjectGetter = require('./ProjectGetter')
 const { promisifyAll } = require('../../util/promises')
+const OError = require('@overleaf/o-error')
 
 const ProjectEntityHandler = {
   getAllDocs(projectId, callback) {
@@ -206,17 +207,23 @@ const ProjectEntityHandler = {
 
   _getAllFoldersFromProject(project) {
     const folders = []
-    function processFolder(basePath, folder) {
-      folders.push({ path: basePath, folder })
-      for (const childFolder of folder.folders || []) {
-        if (childFolder.name != null) {
-          processFolder(path.join(basePath, childFolder.name), childFolder)
+    try {
+      const processFolder = (basePath, folder) => {
+        folders.push({ path: basePath, folder })
+        if (folder.folders) {
+          for (const childFolder of folder.folders) {
+            if (childFolder.name != null) {
+              const childPath = path.join(basePath, childFolder.name)
+              processFolder(childPath, childFolder)
+            }
+          }
         }
       }
+      processFolder('/', project.rootFolder[0])
+      return folders
+    } catch (err) {
+      throw OError.tag(err, 'Error getting folders', { projectId: project._id })
     }
-
-    processFolder('/', project.rootFolder[0])
-    return folders
   },
 }
 
