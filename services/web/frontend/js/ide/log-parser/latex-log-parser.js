@@ -15,9 +15,8 @@ const STATE = {
 }
 
 export default class LatexParser {
-  constructor(text, options) {
+  constructor(text, options = {}) {
     this.state = STATE.NORMAL
-    options = options || {}
     this.fileBaseNames = options.fileBaseNames || [/compiles/, /\/usr\/local/]
     this.ignoreDuplicates = options.ignoreDuplicates
     this.data = []
@@ -159,10 +158,10 @@ export default class LatexParser {
   parseMultipleWarningLine() {
     // Some package warnings are multiple lines, let's parse the first line
     let warningMatch = this.currentLine.match(PACKAGE_WARNING_REGEX)
+    // Something strange happened, return early
     if (!warningMatch) {
       return
     }
-    // Something strange happened, return early
     const warningLines = [warningMatch[1]]
     let lineMatch = this.currentLine.match(LINES_REGEX)
     let line = lineMatch ? parseInt(lineMatch[1], 10) : null
@@ -285,62 +284,60 @@ export default class LatexParser {
 
   postProcess(data) {
     const all = []
-    const errors = []
-    const warnings = []
-    const typesetting = []
-    const hashes = []
+    const errorsByLevel = {
+      error: [],
+      warning: [],
+      typesetting: [],
+    }
+    const hashes = new Set()
 
     const hashEntry = entry => entry.raw
 
-    let i = 0
-    while (i < data.length) {
-      if (this.ignoreDuplicates && hashes.indexOf(hashEntry(data[i])) > -1) {
-        i++
-        continue
+    data.forEach(item => {
+      const hash = hashEntry(item)
+
+      if (this.ignoreDuplicates && hashes.has(hash)) {
+        return
       }
-      if (data[i].level === 'error') {
-        errors.push(data[i])
-      } else if (data[i].level === 'typesetting') {
-        typesetting.push(data[i])
-      } else if (data[i].level === 'warning') {
-        warnings.push(data[i])
-      }
-      all.push(data[i])
-      hashes.push(hashEntry(data[i]))
-      i++
-    }
+
+      errorsByLevel[item.level]?.push(item)
+
+      all.push(item)
+      hashes.add(hash)
+    })
+
     return {
-      errors,
-      warnings,
-      typesetting,
+      errors: errorsByLevel.error,
+      warnings: errorsByLevel.warning,
+      typesetting: errorsByLevel.typesetting,
       all,
       files: this.rootFileList,
     }
   }
 }
 
-const LogText = class LogText {
+class LogText {
   constructor(text) {
     this.text = text.replace(/(\r\n)|\r/g, '\n')
     // Join any lines which look like they have wrapped.
     const wrappedLines = this.text.split('\n')
     this.lines = [wrappedLines[0]]
-    let i = 1
-    while (i < wrappedLines.length) {
+
+    for (let i = 1; i < wrappedLines.length; i++) {
       // If the previous line is as long as the wrap limit then
       // append this line to it.
       // Some lines end with ... when LaTeX knows it's hit the limit
       // These shouldn't be wrapped.
-      if (
-        wrappedLines[i - 1].length === LOG_WRAP_LIMIT &&
-        wrappedLines[i - 1].slice(-3) !== '...'
-      ) {
-        this.lines[this.lines.length - 1] += wrappedLines[i]
+      const prevLine = wrappedLines[i - 1]
+      const currentLine = wrappedLines[i]
+
+      if (prevLine.length === LOG_WRAP_LIMIT && prevLine.slice(-3) !== '...') {
+        this.lines[this.lines.length - 1] += currentLine
       } else {
-        this.lines.push(wrappedLines[i])
+        this.lines.push(currentLine)
       }
-      i++
     }
+
     this.row = 0
   }
 
@@ -363,16 +360,21 @@ const LogText = class LogText {
 
   linesUpToNextMatchingLine(match) {
     const lines = []
-    let nextLine = this.nextLine()
-    if (nextLine !== false) {
+
+    while (true) {
+      const nextLine = this.nextLine()
+
+      if (nextLine === false) {
+        break
+      }
+
       lines.push(nextLine)
-    }
-    while (nextLine !== false && !nextLine.match(match) && nextLine !== false) {
-      nextLine = this.nextLine()
-      if (nextLine !== false) {
-        lines.push(nextLine)
+
+      if (nextLine.match(match)) {
+        break
       }
     }
+
     return lines
   }
 }
