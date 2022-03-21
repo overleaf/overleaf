@@ -104,7 +104,7 @@
     },
     {
       // Frontend specific rules
-      "files": ["**/frontend/js/**/*.js", "**/frontend/stories/**/*.js", "**/*.stories.js", "**/test/frontend/**/*.js"],
+      "files": ["**/frontend/js/**/*.{js,ts,tsx}", "**/frontend/stories/**/*.{js,ts,tsx}", "**/*.stories.{js,ts,tsx}", "**/test/frontend/**/*.{js,ts,tsx}"],
       "env": {
         "browser": true
       },
