@@ -12,8 +12,8 @@ const customConfig = require('../webpack.config.dev')
 module.exports = {
   staticDirs: ['../public'],
   stories: [
-    '../frontend/stories/**/*.stories.js',
-    '../modules/**/stories/**/*.stories.js',
+    '../frontend/stories/**/*.stories.{js,ts,tsx}',
+    '../modules/**/stories/**/*.stories.{js,ts,tsx}',
   ],
   addons: ['@storybook/addon-essentials', '@storybook/addon-a11y'],
   webpackFinal: storybookConfig => {
