@@ -155,7 +155,7 @@ describe('ThirdPartyIdentityManager', function () {
                   err: anError,
                   userId: this.userId,
                 },
-                'could not send security alert email when Google account linked'
+                'could not send security alert email when new account linked'
               )
               done()
             }
@@ -226,7 +226,7 @@ describe('ThirdPartyIdentityManager', function () {
                   err: anError,
                   userId: this.userId,
                 },
-                'could not send security alert email when Google account no longer linked'
+                'could not send security alert email when account no longer linked'
               )
               done()
             }

@@ -201,7 +201,7 @@ function _sendSecurityAlert(accountLinked, providerId, user, userId) {
     if (error) {
       logger.error(
         { err: error, userId },
-        `could not send security alert email when ${emailOptions.action}`
+        `could not send security alert email when ${emailOptions.action.toLowerCase()}`
       )
     }
   })
