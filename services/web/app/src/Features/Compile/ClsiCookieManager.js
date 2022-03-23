@@ -100,6 +100,29 @@ module.exports = function (backendGroup) {
       return cookies != null ? cookies[Settings.clsiCookie.key] : undefined
     },
 
+    checkIsLoadSheddingEvent(clsiserverid) {
+      request.get(
+        {
+          url: `${Settings.apis.clsi.url}/instance-state`,
+          qs: { clsiserverid },
+        },
+        (err, res, body) => {
+          if (err) {
+            Metrics.inc('clsi-lb-switch-backend', 1, {
+              status: 'error',
+            })
+            logger.warn({ err, clsiserverid }, 'cannot probe clsi VM')
+            return
+          }
+          const isStillRunning =
+            res.statusCode === 200 && body === `${clsiserverid},UP\n`
+          Metrics.inc('clsi-lb-switch-backend', 1, {
+            status: isStillRunning ? 'load-shedding' : 'cycle',
+          })
+        }
+      )
+    },
+
     setServerId(project_id, user_id, response, previous, callback) {
       if (callback == null) {
         callback = function () {}
@@ -120,7 +143,7 @@ module.exports = function (backendGroup) {
         // Initial assignment of a user+project or after clearing cache.
         Metrics.inc('clsi-lb-assign-initial-backend')
       } else {
-        Metrics.inc('clsi-lb-switch-backend')
+        this.checkIsLoadSheddingEvent(previous)
       }
       if (rclient_secondary != null) {
         this._setServerIdInRedis(
