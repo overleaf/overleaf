@@ -10,6 +10,7 @@ export const handleOutputFiles = async (projectId, data) => {
   const result = {}
 
   const outputFiles = new Map()
+  const pdfDownloadDomain = data.pdfDownloadDomain ?? ''
 
   for (const outputFile of data.outputFiles) {
     outputFiles.set(outputFile.path, outputFile)
@@ -37,7 +38,7 @@ export const handleOutputFiles = async (projectId, data) => {
       params.set('enable_pdf_caching', 'true')
     }
 
-    result.pdfUrl = `${data.pdfDownloadDomain}${outputFile.url}?${params}`
+    result.pdfUrl = `${pdfDownloadDomain}${outputFile.url}?${params}`
 
     // build the URL for downloading the PDF
     params.set('popupDownload', 'true') // save PDF download as file
@@ -79,9 +80,7 @@ export const handleOutputFiles = async (projectId, data) => {
   const logFile = outputFiles.get('output.log')
 
   if (logFile) {
-    const response = await fetch(
-      `${data.pdfDownloadDomain}${logFile.url}?${params}`
-    )
+    const response = await fetch(`${pdfDownloadDomain}${logFile.url}?${params}`)
 
     const log = await response.text()
 
@@ -97,9 +96,7 @@ export const handleOutputFiles = async (projectId, data) => {
   const blgFile = outputFiles.get('output.blg')
 
   if (blgFile) {
-    const response = await fetch(
-      `${data.pdfDownloadDomain}${blgFile.url}?${params}`
-    )
+    const response = await fetch(`${pdfDownloadDomain}${blgFile.url}?${params}`)
 
     const log = await response.text()
 
