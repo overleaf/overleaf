@@ -4,7 +4,9 @@ const Path = require('path')
 const { merge } = require('./merge')
 
 const CWD = process.cwd()
-const ENTRY_POINT_DIR = Path.dirname(process.argv[1])
+const ENTRY_POINT_DIR = process.argv[1]
+  ? Path.dirname(process.argv[1])
+  : undefined
 const NODE_ENV = (process.env.NODE_ENV || 'development').toLowerCase()
 const SHARELATEX_CONFIG = process.env.SHARELATEX_CONFIG
 
