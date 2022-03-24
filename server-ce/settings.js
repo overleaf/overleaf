@@ -574,6 +574,7 @@ if (process.env.SHARELATEX_SAML_ENTRYPOINT) {
       issuer: process.env.SHARELATEX_SAML_ISSUER,
       decryptionPvk: process.env.SHARELATEX_SAML_DECRYPTION_PVK,
       decryptionCert: process.env.SHARELATEX_SAML_DECRYPTION_CERT,
+      signingCert: process.env.SHARELATEX_SAML_SIGNING_CERT,
       signatureAlgorithm: process.env.SHARELATEX_SAML_SIGNATURE_ALGORITHM,
       identifierFormat: process.env.SHARELATEX_SAML_IDENTIFIER_FORMAT,
       attributeConsumingServiceIndex:
