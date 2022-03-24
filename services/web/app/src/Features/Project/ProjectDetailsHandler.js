@@ -97,6 +97,7 @@ async function setProjectDescription(projectId, description) {
   }
 }
 async function renameProject(projectId, newName) {
+  newName = newName.trim()
   await validateProjectName(newName)
   logger.log({ projectId, newName }, 'renaming project')
   let project

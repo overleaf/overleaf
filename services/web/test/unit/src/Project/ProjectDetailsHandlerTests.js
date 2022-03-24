@@ -186,6 +186,17 @@ describe('ProjectDetailsHandler', function () {
       expect(this.TpdsUpdateSender.promises.moveEntity).not.to.have.been.called
       expect(this.ProjectModel.updateOne).not.to.have.been.called
     })
+
+    it('should trim whitespace around name', async function () {
+      await this.handler.promises.renameProject(
+        this.project._id,
+        `   ${this.newName}   `
+      )
+      expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+        { _id: this.project._id },
+        { name: this.newName }
+      )
+    })
   })
 
   describe('validateProjectName', function () {
