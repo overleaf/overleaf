@@ -670,11 +670,22 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get(
     '/Project/:Project_id/download/zip',
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'zip-download',
+      params: ['Project_id'],
+      maxRequests: 10,
+      timeInterval: 60,
+    }),
     AuthorizationMiddleware.ensureUserCanReadProject,
     ProjectDownloadsController.downloadProject
   )
   webRouter.get(
     '/project/download/zip',
+    RateLimiterMiddleware.rateLimit({
+      endpointName: 'multiple-projects-zip-download',
+      maxRequests: 10,
+      timeInterval: 60,
+    }),
     AuthorizationMiddleware.ensureUserCanReadMultipleProjects,
     ProjectDownloadsController.downloadMultipleProjects
   )
