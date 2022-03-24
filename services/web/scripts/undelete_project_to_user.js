@@ -1,4 +1,5 @@
 const minimist = require('minimist')
+const { waitForDb } = require('../app/src/infrastructure/mongodb')
 const ProjectDeleter = require('../app/src/Features/Project/ProjectDeleter')
 
 async function main() {
@@ -10,6 +11,7 @@ async function main() {
     throw new Error('set --project-id and --user-id')
   }
   console.log(`Restoring project ${projectId} to user ${userId}`)
+  await waitForDb()
   await ProjectDeleter.promises.undeleteProject(projectId, { userId })
 }
 
