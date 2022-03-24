@@ -54,62 +54,6 @@ describe('V1SubscriptionManager', function () {
     })
   })
 
-  describe('getPlanCodeFromV1', function () {
-    beforeEach(function () {
-      this.responseBody = {
-        id: 32,
-        plan_name: 'pro',
-      }
-      this.V1SubscriptionManager._v1Request = sinon
-        .stub()
-        .yields(null, this.responseBody)
-      return (this.call = cb => {
-        return this.V1SubscriptionManager.getPlanCodeFromV1(this.userId, cb)
-      })
-    })
-
-    describe('when all goes well', function () {
-      it('should call _v1Request', function (done) {
-        return this.call((err, planCode) => {
-          expect(this.V1SubscriptionManager._v1Request.callCount).to.equal(1)
-          expect(
-            this.V1SubscriptionManager._v1Request.calledWith(this.userId)
-          ).to.equal(true)
-          return done()
-        })
-      })
-
-      it('should return the v1 user id', function (done) {
-        return this.call(function (err, planCode, v1Id) {
-          expect(v1Id).to.equal(this.v1UserId)
-          return done()
-        })
-      })
-
-      it('should produce a plan-code without error', function (done) {
-        return this.call((err, planCode) => {
-          expect(err).to.not.exist
-          expect(planCode).to.equal('v1_pro')
-          return done()
-        })
-      })
-
-      describe('when the plan_name from v1 is null', function () {
-        beforeEach(function () {
-          return (this.responseBody.plan_name = null)
-        })
-
-        it('should produce a null plan-code without error', function (done) {
-          return this.call((err, planCode) => {
-            expect(err).to.not.exist
-            expect(planCode).to.equal(null)
-            return done()
-          })
-        })
-      })
-    })
-  })
-
   describe('getGrandfatheredFeaturesForV1User', function () {
     describe('when the user ID is greater than the cutoff', function () {
       it('should return an empty feature set', function (done) {

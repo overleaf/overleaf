@@ -7,11 +7,12 @@ const MODULE_PATH = '../../../../app/src/Features/Subscription/FeaturesUpdater'
 
 describe('FeaturesUpdater', function () {
   beforeEach(function () {
+    this.v1UserId = 12345
     this.user = {
       _id: new ObjectId(),
       features: {},
+      overleaf: { id: this.v1UserId },
     }
-    this.v1UserId = 12345
     this.subscriptions = {
       individual: { planCode: 'individual-plan' },
       group1: { planCode: 'group-plan-1' },
@@ -46,7 +47,6 @@ describe('FeaturesUpdater', function () {
         { planCode: 'individual-plan', features: { individual: 'features' } },
         { planCode: 'group-plan-1', features: { group1: 'features' } },
         { planCode: 'group-plan-2', features: { group2: 'features' } },
-        { planCode: 'v1-plan', features: { v1: 'features' } },
         { planCode: 'no-dropbox', features: { dropbox: false } },
       ],
       features: {
@@ -56,7 +56,6 @@ describe('FeaturesUpdater', function () {
           group1: 'features',
           group2: 'features',
           institutions: 'features',
-          v1: 'features',
           grandfathered: 'features',
           bonus: 'features',
         },
@@ -70,13 +69,7 @@ describe('FeaturesUpdater', function () {
     }
     this.V1SubscriptionManager = {
       getGrandfatheredFeaturesForV1User: sinon.stub(),
-      promises: {
-        getPlanCodeFromV1: sinon.stub(),
-      },
     }
-    this.V1SubscriptionManager.promises.getPlanCodeFromV1
-      .withArgs(this.user._id)
-      .resolves({ planCode: 'v1-plan', v1Id: this.v1UserId })
     this.V1SubscriptionManager.getGrandfatheredFeaturesForV1User
       .withArgs(this.v1UserId)
       .returns({ grandfathered: 'features' })
