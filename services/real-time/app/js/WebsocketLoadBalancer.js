@@ -20,6 +20,7 @@ const RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
   'reciveNewFile',
   'reciveNewFolder',
   'removeEntity',
+  'accept-changes',
 ]
 
 let WebsocketLoadBalancer
