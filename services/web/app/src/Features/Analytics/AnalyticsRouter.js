@@ -2,6 +2,7 @@ const AuthenticationController = require('./../Authentication/AuthenticationCont
 const AnalyticsController = require('./AnalyticsController')
 const AnalyticsProxy = require('./AnalyticsProxy')
 const RateLimiterMiddleware = require('./../Security/RateLimiterMiddleware')
+const { expressify } = require('../../util/promises')
 
 module.exports = {
   apply(webRouter, privateApiRouter, publicApiRouter) {
@@ -23,7 +24,7 @@ module.exports = {
         maxRequests: 20,
         timeInterval: 60,
       }),
-      AnalyticsController.updateEditingSession
+      expressify(AnalyticsController.updateEditingSession)
     )
 
     publicApiRouter.use(

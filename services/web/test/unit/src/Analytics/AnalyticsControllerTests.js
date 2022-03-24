@@ -25,7 +25,9 @@ describe('AnalyticsController', function () {
         '../Authentication/SessionManager': this.SessionManager,
         '../../infrastructure/Features': this.Features,
         '../../infrastructure/GeoIpLookup': (this.GeoIpLookup = {
-          getDetails: sinon.stub(),
+          promises: {
+            getDetails: sinon.stub().resolves(),
+          },
         }),
       },
     })
@@ -49,19 +51,21 @@ describe('AnalyticsController', function () {
           },
         },
       }
-      this.GeoIpLookup.getDetails = sinon
+      this.GeoIpLookup.promises.getDetails = sinon
         .stub()
-        .callsArgWith(1, null, { country_code: 'XY' })
+        .resolves({ country_code: 'XY' })
     })
 
-    it('delegates to the AnalyticsManager', function (done) {
+    it('delegates to the AnalyticsManager', async function () {
       this.SessionManager.getLoggedInUserId.returns('1234')
-      this.controller.updateEditingSession(this.req, this.res)
-
-      this.AnalyticsManager.updateEditingSession
-        .calledWith('1234', 'a project id', 'XY', { editorType: 'abc' })
-        .should.equal(true)
-      done()
+      await this.controller.updateEditingSession(this.req, this.res)
+      sinon.assert.calledWith(
+        this.AnalyticsManager.updateEditingSession,
+        '1234',
+        'a project id',
+        'XY',
+        { editorType: 'abc' }
+      )
     })
   })
 
@@ -86,17 +90,23 @@ describe('AnalyticsController', function () {
 
     it('should use the session', function (done) {
       this.controller.recordEvent(this.req, this.res)
-      this.AnalyticsManager.recordEventForSession
-        .calledWith(this.req.session, this.req.params.event, this.expectedData)
-        .should.equal(true)
+      sinon.assert.calledWith(
+        this.AnalyticsManager.recordEventForSession,
+        this.req.session,
+        this.req.params.event,
+        this.expectedData
+      )
       done()
     })
 
     it('should remove the CSRF token before sending to the manager', function (done) {
       this.controller.recordEvent(this.req, this.res)
-      this.AnalyticsManager.recordEventForSession
-        .calledWith(this.req.session, this.req.params.event, this.expectedData)
-        .should.equal(true)
+      sinon.assert.calledWith(
+        this.AnalyticsManager.recordEventForSession,
+        this.req.session,
+        this.req.params.event,
+        this.expectedData
+      )
       done()
     })
   })
