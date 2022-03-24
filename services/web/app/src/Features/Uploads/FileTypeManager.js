@@ -44,7 +44,22 @@ const FileTypeManager = {
 
   // returns charset as understood by fs.readFile,
   getType(name, fsPath, callback) {
-    if (!_isTextFilename(name)) {
+    if (!name) {
+      return callback(
+        new Error(
+          '[FileTypeManager] getType requires a non-null "name" parameter'
+        )
+      )
+    }
+    if (!fsPath) {
+      return callback(
+        new Error(
+          '[FileTypeManager] getType requires a non-null "fsPath" parameter'
+        )
+      )
+    }
+    const basename = Path.basename(name)
+    if (!_isTextFilename(basename)) {
       return callback(null, { binary: true })
     }
 
@@ -77,7 +92,8 @@ const FileTypeManager = {
   },
 
   getStrictTypeFromContent(name, contents) {
-    const isText = _isTextFilename(name)
+    const basename = Path.basename(name)
+    const isText = _isTextFilename(basename)
 
     if (!isText) {
       return false
@@ -98,16 +114,16 @@ const FileTypeManager = {
   },
 
   shouldIgnore(path, callback) {
-    const name = Path.basename(path)
-    const extension = Path.extname(name).toLowerCase()
+    const basename = Path.basename(path)
+    const extension = Path.extname(basename).toLowerCase()
     let ignore = false
-    if (name.startsWith('.') && name !== '.latexmkrc') {
+    if (basename.startsWith('.') && basename !== '.latexmkrc') {
       ignore = true
     }
     if (FileTypeManager.IGNORE_EXTENSIONS.includes(extension)) {
       ignore = true
     }
-    if (FileTypeManager.IGNORE_FILENAMES.includes(name)) {
+    if (FileTypeManager.IGNORE_FILENAMES.includes(basename)) {
       ignore = true
     }
     callback(null, ignore)
@@ -118,7 +134,7 @@ function _isTextFilename(filename) {
   const extension = Path.extname(filename).toLowerCase()
   return (
     FileTypeManager.TEXT_EXTENSIONS.includes(extension) ||
-    filename === 'latexmkrc'
+    filename.match(/^(\.)?latexmkrc$/)
   )
 }
 

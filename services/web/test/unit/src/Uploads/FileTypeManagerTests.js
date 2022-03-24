@@ -76,23 +76,25 @@ describe('FileTypeManager', function () {
   describe('getType', function () {
     describe('when the file extension is text', function () {
       const TEXT_FILENAMES = [
-        'file.tex',
-        'file.bib',
-        'file.bibtex',
-        'file.cls',
-        'file.bst',
-        '.latexmkrc',
-        'latexmkrc',
-        'file.lbx',
-        'file.bbx',
-        'file.cbx',
-        'file.m',
-        'file.TEX',
+        '/file.tex',
+        '/file.bib',
+        '/file.bibtex',
+        '/file.cls',
+        '/file.bst',
+        '/.latexmkrc',
+        '/latexmkrc',
+        '/file.lbx',
+        '/other/file.lbx',
+        '/file.bbx',
+        '/file.cbx',
+        '/file.m',
+        '/something/file.m',
+        '/file.TEX',
       ]
       TEXT_FILENAMES.forEach(filename => {
         it(`should classify ${filename} as text`, function (done) {
           this.FileTypeManager.getType(
-            'file.tex',
+            filename,
             'utf8.tex',
             (err, { binary }) => {
               if (err) {
@@ -108,7 +110,7 @@ describe('FileTypeManager', function () {
       it('should classify large text files as binary', function (done) {
         this.stats.size = 2 * 1024 * 1024 // 2Mb
         this.FileTypeManager.getType(
-          'file.tex',
+          '/file.tex',
           'utf8.tex',
           (err, { binary }) => {
             if (err) {
@@ -122,7 +124,7 @@ describe('FileTypeManager', function () {
 
       it('should not try to determine the encoding of large files', function (done) {
         this.stats.size = 2 * 1024 * 1024 // 2Mb
-        this.FileTypeManager.getType('file.tex', 'utf8.tex', err => {
+        this.FileTypeManager.getType('/file.tex', 'utf8.tex', err => {
           if (err) {
             return done(err)
           }
@@ -133,7 +135,7 @@ describe('FileTypeManager', function () {
 
       it('should detect the encoding of a utf8 file', function (done) {
         this.FileTypeManager.getType(
-          'file.tex',
+          '/file.tex',
           'utf8.tex',
           (err, { binary, encoding }) => {
             if (err) {
@@ -149,7 +151,7 @@ describe('FileTypeManager', function () {
 
       it("should return 'latin1' for non-unicode encodings", function (done) {
         this.FileTypeManager.getType(
-          'file.tex',
+          '/file.tex',
           'latin1.tex',
           (err, { binary, encoding }) => {
             if (err) {
@@ -165,7 +167,7 @@ describe('FileTypeManager', function () {
 
       it('should classify utf16 with BOM as utf-16', function (done) {
         this.FileTypeManager.getType(
-          'file.tex',
+          '/file.tex',
           'utf16.tex',
           (err, { binary, encoding }) => {
             if (err) {
@@ -181,7 +183,7 @@ describe('FileTypeManager', function () {
 
       it('should classify latin1 files with a null char as binary', function (done) {
         this.FileTypeManager.getType(
-          'file.tex',
+          '/file.tex',
           'latin1-null.tex',
           (err, { binary }) => {
             if (err) {
@@ -195,7 +197,7 @@ describe('FileTypeManager', function () {
 
       it('should classify utf8 files with a null char as binary', function (done) {
         this.FileTypeManager.getType(
-          'file.tex',
+          '/file.tex',
           'utf8-null.tex',
           (err, { binary }) => {
             if (err) {
@@ -209,7 +211,7 @@ describe('FileTypeManager', function () {
 
       it('should classify utf8 files with non-BMP chars as binary', function (done) {
         this.FileTypeManager.getType(
-          'file.tex',
+          '/file.tex',
           'utf8-non-bmp.tex',
           (err, { binary }) => {
             if (err) {
@@ -223,7 +225,7 @@ describe('FileTypeManager', function () {
 
       it('should classify utf8 files with ascii control chars as utf-8', function (done) {
         this.FileTypeManager.getType(
-          'file.tex',
+          '/file.tex',
           'utf8-control-chars.tex',
           (err, { binary, encoding }) => {
             if (err) {
@@ -238,11 +240,17 @@ describe('FileTypeManager', function () {
     })
 
     describe('when the file extension is non-text', function () {
-      const BINARY_FILENAMES = ['file.eps', 'file.dvi', 'file.png', 'tex']
+      const BINARY_FILENAMES = [
+        '/file.eps',
+        '/file.dvi',
+        '/file.png',
+        '/images/file.png',
+        '/tex',
+      ]
       BINARY_FILENAMES.forEach(filename => {
         it(`should classify ${filename} as binary`, function (done) {
           this.FileTypeManager.getType(
-            'file.tex',
+            '/file.tex',
             'utf8.tex',
             (err, { binary }) => {
               if (err) {
@@ -256,7 +264,7 @@ describe('FileTypeManager', function () {
       })
 
       it('should not try to get the character encoding', function (done) {
-        this.FileTypeManager.getType('file.png', 'utf8.tex', err => {
+        this.FileTypeManager.getType('/file.png', 'utf8.tex', err => {
           if (err) {
             return done(err)
           }
