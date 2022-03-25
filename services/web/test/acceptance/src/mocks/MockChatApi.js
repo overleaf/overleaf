@@ -22,12 +22,21 @@ class MockChatApi extends AbstractMockApi {
     res.json(Object.assign({ room_id: projectId }, message))
   }
 
+  destroyProject(req, res) {
+    const projectId = req.params.project_id
+    delete this.projects[projectId]
+    res.sendStatus(204)
+  }
+
   applyRoutes() {
     this.app.get('/project/:project_id/messages', (req, res) =>
       this.getGlobalMessages(req, res)
     )
     this.app.post('/project/:project_id/messages', (req, res) =>
       this.sendGlobalMessage(req, res)
+    )
+    this.app.delete('/project/:project_id', (req, res) =>
+      this.destroyProject(req, res)
     )
   }
 }

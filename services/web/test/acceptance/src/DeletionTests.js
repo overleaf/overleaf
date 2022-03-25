@@ -6,12 +6,14 @@ const settings = require('@overleaf/settings')
 const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 const MockDocstoreApiClass = require('./mocks/MockDocstoreApi')
 const MockFilestoreApiClass = require('./mocks/MockFilestoreApi')
+const MockChatApiClass = require('./mocks/MockChatApi')
 
-let MockDocstoreApi, MockFilestoreApi
+let MockDocstoreApi, MockFilestoreApi, MockChatApi
 
 before(function () {
   MockDocstoreApi = MockDocstoreApiClass.instance()
   MockFilestoreApi = MockFilestoreApiClass.instance()
+  MockChatApi = MockChatApiClass.instance()
 })
 
 describe('Deleting a user', function () {
@@ -310,6 +312,7 @@ describe('Deleting a project', function () {
         MockFilestoreApi.files[this.projectId.toString()] = {
           dummyFile: 'wombat',
         }
+        MockChatApi.projects[this.projectId.toString()] = ['message']
       })
     })
 
@@ -365,6 +368,28 @@ describe('Deleting a project', function () {
 
             expect(MockFilestoreApi.files[this.projectId.toString()]).not.to
               .exist
+            done()
+          }
+        )
+      })
+
+      it('Should destroy the chat', function (done) {
+        expect(MockChatApi.projects[this.projectId.toString()]).to.exist
+
+        request.post(
+          `/internal/project/${this.projectId}/expire-deleted-project`,
+          {
+            auth: {
+              user: settings.apis.web.user,
+              pass: settings.apis.web.pass,
+              sendImmediately: true,
+            },
+          },
+          (error, res) => {
+            expect(error).not.to.exist
+            expect(res.statusCode).to.equal(200)
+
+            expect(MockChatApi.projects[this.projectId.toString()]).not.to.exist
             done()
           }
         )

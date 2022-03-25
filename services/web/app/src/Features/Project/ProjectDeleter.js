@@ -17,6 +17,7 @@ const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const HistoryManager = require('../History/HistoryManager')
 const FilestoreHandler = require('../FileStore/FileStoreHandler')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
+const ChatApiHandler = require('../Chat/ChatApiHandler')
 const moment = require('moment')
 const { promiseMapWithLimit } = require('../../util/promises')
 
@@ -386,6 +387,7 @@ async function expireDeletedProject(projectId) {
       TpdsUpdateSender.promises.deleteProject({
         project_id: deletedProject.project._id,
       }),
+      ChatApiHandler.promises.destroyProject(deletedProject.project._id),
       hardDeleteDeletedFiles(deletedProject.project._id),
     ])
 

@@ -15,6 +15,20 @@ let ChatApiHandler
 const OError = require('@overleaf/o-error')
 const request = require('request')
 const settings = require('@overleaf/settings')
+const { promisify } = require('util')
+
+function destroyProject(project_id, callback) {
+  if (callback == null) {
+    callback = function () {}
+  }
+  return ChatApiHandler._apiRequest(
+    {
+      url: `${settings.apis.chat.internal_url}/project/${project_id}`,
+      method: 'DELETE',
+    },
+    callback
+  )
+}
 
 module.exports = ChatApiHandler = {
   _apiRequest(opts, callback) {
@@ -164,5 +178,11 @@ module.exports = ChatApiHandler = {
       },
       callback
     )
+  },
+
+  destroyProject,
+
+  promises: {
+    destroyProject: promisify(destroyProject),
   },
 }
