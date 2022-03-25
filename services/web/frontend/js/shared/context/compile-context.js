@@ -16,11 +16,13 @@ import DocumentCompiler from '../../features/pdf-preview/util/compiler'
 import { send, sendMBSampled } from '../../infrastructure/event-tracking'
 import {
   buildLogEntryAnnotations,
+  handleLogFiles,
   handleOutputFiles,
 } from '../../features/pdf-preview/util/output-files'
 import { useIdeContext } from './ide-context'
 import { useProjectContext } from './project-context'
 import { useEditorContext } from './editor-context'
+import { buildFileList } from '../../features/pdf-preview/util/file-list'
 
 export const CompileContext = createContext()
 
@@ -214,37 +216,61 @@ export function CompileProvider({ children }) {
   // note: this should _only_ run when `data` changes,
   // the other dependencies must all be static
   useEffect(() => {
+    const abortController = new AbortController()
+
     if (data) {
       if (data.clsiServerId) {
         setClsiServerId(data.clsiServerId) // set in scope, for PdfSynctexController
       }
 
       if (data.outputFiles) {
-        handleOutputFiles(projectId, data).then(result => {
-          setLogEntryAnnotations(
-            buildLogEntryAnnotations(result.logEntries.all, ide.fileTreeManager)
-          )
+        const outputFiles = new Map()
+
+        for (const outputFile of data.outputFiles) {
+          outputFiles.set(outputFile.path, outputFile)
+        }
+
+        // set the PDF URLs
+        handleOutputFiles(outputFiles, projectId, data).then(result => {
           if (data.status === 'success') {
             setPdfDownloadUrl(result.pdfDownloadUrl)
             setPdfUrl(result.pdfUrl)
           }
-          setLogEntries(result.logEntries)
-          setFileList(result.fileList)
-          setRawLog(result.log)
 
-          // sample compile stats for real users
-          if (!window.user.alphaProgram && data.status === 'success') {
-            sendMBSampled(
-              'compile-result',
-              {
-                errors: result.logEntries.errors.length,
-                warnings: result.logEntries.warnings.length,
-                typesetting: result.logEntries.typesetting.length,
-                newPdfPreview: true, // TODO: is this useful?
-              },
-              0.01
-            )
-          }
+          setFileList(buildFileList(outputFiles, data.clsiServerId))
+
+          // handle log files
+          // asynchronous (TODO: cancel on new compile?)
+          setLogEntryAnnotations(null)
+          setLogEntries(null)
+          setRawLog(null)
+
+          handleLogFiles(outputFiles, data, abortController.signal).then(
+            result => {
+              setRawLog(result.log)
+              setLogEntries(result.logEntries)
+              setLogEntryAnnotations(
+                buildLogEntryAnnotations(
+                  result.logEntries.all,
+                  ide.fileTreeManager
+                )
+              )
+
+              // sample compile stats for real users
+              if (!window.user.alphaProgram && data.status === 'success') {
+                sendMBSampled(
+                  'compile-result',
+                  {
+                    errors: result.logEntries.errors.length,
+                    warnings: result.logEntries.warnings.length,
+                    typesetting: result.logEntries.typesetting.length,
+                    newPdfPreview: true, // TODO: is this useful?
+                  },
+                  0.01
+                )
+              }
+            }
+          )
         })
       }
 
@@ -297,6 +323,10 @@ export function CompileProvider({ children }) {
           setError('error')
           break
       }
+    }
+
+    return () => {
+      abortController.abort()
     }
   }, [
     data,

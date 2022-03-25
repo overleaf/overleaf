@@ -1,20 +1,14 @@
 import getMeta from '../../../utils/meta'
 import HumanReadableLogs from '../../../ide/human-readable-logs/HumanReadableLogs'
 import BibLogParser from '../../../ide/log-parser/bib-log-parser'
-import { buildFileList } from './file-list'
 import { v4 as uuid } from 'uuid'
 
 const searchParams = new URLSearchParams(window.location.search)
 
-export const handleOutputFiles = async (projectId, data) => {
+export const handleOutputFiles = async (outputFiles, projectId, data) => {
   const result = {}
 
-  const outputFiles = new Map()
   const pdfDownloadDomain = data.pdfDownloadDomain ?? ''
-
-  for (const outputFile of data.outputFiles) {
-    outputFiles.set(outputFile.path, outputFile)
-  }
 
   const outputFile = outputFiles.get('output.pdf')
 
@@ -46,18 +40,19 @@ export const handleOutputFiles = async (projectId, data) => {
     result.pdfDownloadUrl = `/download/project/${projectId}/build/${outputFile.build}/output/output.pdf?${params}`
   }
 
-  const params = new URLSearchParams({
-    compileGroup: data.compileGroup,
-  })
+  return result
+}
 
-  if (data.clsiServerId) {
-    params.set('clsiserverid', data.clsiServerId)
-  }
+export const handleLogFiles = async (outputFiles, data, signal) => {
+  const pdfDownloadDomain = data.pdfDownloadDomain ?? ''
 
-  result.logEntries = {
-    errors: [],
-    warnings: [],
-    typesetting: [],
+  const result = {
+    log: null,
+    logEntries: {
+      errors: [],
+      warnings: [],
+      typesetting: [],
+    },
   }
 
   function accumulateResults(newEntries, type) {
@@ -80,37 +75,48 @@ export const handleOutputFiles = async (projectId, data) => {
   const logFile = outputFiles.get('output.log')
 
   if (logFile) {
-    const response = await fetch(`${pdfDownloadDomain}${logFile.url}?${params}`)
+    try {
+      const response = await fetch(`${pdfDownloadDomain}${logFile.url}`, {
+        signal,
+      })
 
-    const log = await response.text()
+      result.log = await response.text()
 
-    result.log = log
+      const { errors, warnings, typesetting } = HumanReadableLogs.parse(
+        result.log,
+        {
+          ignoreDuplicates: true,
+        }
+      )
 
-    const { errors, warnings, typesetting } = HumanReadableLogs.parse(log, {
-      ignoreDuplicates: true,
-    })
-
-    accumulateResults({ errors, warnings, typesetting })
+      accumulateResults({ errors, warnings, typesetting })
+    } catch (e) {
+      console.warn(e) // ignore failure to fetch/parse the log file, but log a warning
+    }
   }
 
   const blgFile = outputFiles.get('output.blg')
 
   if (blgFile) {
-    const response = await fetch(`${pdfDownloadDomain}${blgFile.url}?${params}`)
-
-    const log = await response.text()
-
     try {
-      const { errors, warnings } = new BibLogParser(log, {
-        maxErrors: 100,
-      }).parse()
-      accumulateResults({ errors, warnings }, 'BibTeX:')
+      const response = await fetch(`${pdfDownloadDomain}${blgFile.url}`, {
+        signal,
+      })
+
+      const log = await response.text()
+
+      try {
+        const { errors, warnings } = new BibLogParser(log, {
+          maxErrors: 100,
+        }).parse()
+        accumulateResults({ errors, warnings }, 'BibTeX:')
+      } catch (e) {
+        // BibLog parsing errors are ignored
+      }
     } catch (e) {
-      // BibLog parsing errors are ignored
+      console.warn(e) // ignore failure to fetch/parse the log file, but log a warning
     }
   }
-
-  result.fileList = buildFileList(outputFiles, data.clsiServerId)
 
   result.logEntries.all = [
     ...result.logEntries.errors,

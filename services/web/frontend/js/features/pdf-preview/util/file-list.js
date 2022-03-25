@@ -11,13 +11,18 @@ export const buildFileList = (outputFiles, clsiServerId) => {
       params.set('clsiserverid', clsiServerId)
     }
 
+    const queryString = params.toString()
+
     const allFiles = []
 
     // filter out ignored files and set some properties
     for (const file of outputFiles.values()) {
       if (!ignoreFiles.includes(file.path)) {
         file.main = file.path.startsWith('output.')
-        file.url += `?${params}`
+
+        if (queryString.length) {
+          file.url += `?${queryString}`
+        }
 
         allFiles.push(file)
       }
