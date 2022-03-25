@@ -427,6 +427,10 @@ lint: lint_flag_res_send_usage
 lint_flag_res_send_usage:
 	bin/lint_flag_res_send_usage
 
+lint: typecheck_frontend
+typecheck_frontend:
+	npx tsc --noEmit
+
 lint_in_docker:
 	$(RUN_LINT_FORMAT) make lint -j --output-sync
 

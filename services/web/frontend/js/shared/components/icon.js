@@ -1,15 +1,6 @@
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 
-/**
- * @param {string} type
- * @param {boolean} [spin]
- * @param {boolean} [fw]
- * @param {string} [modifier]
- * @param {string} [className]
- * @param {string} [accessibilityLabel]
- * @return {JSX.Element}
- */
 function Icon({
   type,
   spin,

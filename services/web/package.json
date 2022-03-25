@@ -28,6 +28,7 @@
     "format:styles:fix": "prettier --write $PWD/'**/*.less'",
     "lint": "eslint --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix .",
+    "type-check": "tsc --noEmit",
     "extract-translations": "i18next-scanner",
     "migrations": "east",
     "storybook": "start-storybook -p 6006",
