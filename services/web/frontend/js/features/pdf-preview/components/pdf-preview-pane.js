@@ -4,12 +4,7 @@ import PdfLogsViewer from './pdf-logs-viewer'
 import PdfViewer from './pdf-viewer'
 import LoadingSpinner from '../../../shared/components/loading-spinner'
 import PdfHybridPreviewToolbar from './pdf-preview-hybrid-toolbar'
-import PdfPreviewToolbar from './pdf-preview-toolbar'
 import { useCompileContext } from '../../../shared/context/compile-context'
-
-const newPreviewToolbar = new URLSearchParams(window.location.search).has(
-  'new_preview_toolbar'
-)
 
 function PdfPreviewPane() {
   const { pdfUrl } = useCompileContext()
@@ -18,7 +13,7 @@ function PdfPreviewPane() {
   })
   return (
     <div className={classes}>
-      {newPreviewToolbar ? <PdfPreviewToolbar /> : <PdfHybridPreviewToolbar />}
+      <PdfHybridPreviewToolbar />
       <Suspense fallback={<LoadingPreview />}>
         <div className="pdf-viewer">
           <PdfViewer />
