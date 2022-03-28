@@ -530,21 +530,25 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.post(
     '/Project/:Project_id/archive',
+    AuthenticationController.requireLogin(),
     AuthorizationMiddleware.ensureUserCanReadProject,
     ProjectController.archiveProject
   )
   webRouter.delete(
     '/Project/:Project_id/archive',
+    AuthenticationController.requireLogin(),
     AuthorizationMiddleware.ensureUserCanReadProject,
     ProjectController.unarchiveProject
   )
   webRouter.post(
     '/project/:project_id/trash',
+    AuthenticationController.requireLogin(),
     AuthorizationMiddleware.ensureUserCanReadProject,
     ProjectController.trashProject
   )
   webRouter.delete(
     '/project/:project_id/trash',
+    AuthenticationController.requireLogin(),
     AuthorizationMiddleware.ensureUserCanReadProject,
     ProjectController.untrashProject
   )
