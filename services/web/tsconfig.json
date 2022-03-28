@@ -16,6 +16,7 @@
     "frontend/js/**/*.*",
     "modules/**/frontend/js/**/*.*",
     "test/frontend/**/*.*",
-    "modules/**/test/frontend/**/*.*"
+    "modules/**/test/frontend/**/*.*",
+    "types"
   ]
 }
