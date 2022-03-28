@@ -580,24 +580,28 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.get(
     '/project/:Project_id/updates',
+    AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.selectHistoryApi,
     HistoryController.proxyToHistoryApiAndInjectUserDetails
   )
   webRouter.get(
     '/project/:Project_id/doc/:doc_id/diff',
+    AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.selectHistoryApi,
     HistoryController.proxyToHistoryApi
   )
   webRouter.get(
     '/project/:Project_id/diff',
+    AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.selectHistoryApi,
     HistoryController.proxyToHistoryApiAndInjectUserDetails
   )
   webRouter.get(
     '/project/:Project_id/filetree/diff',
+    AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.selectHistoryApi,
     HistoryController.proxyToHistoryApi
@@ -625,6 +629,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       maxRequests: 30,
       timeInterval: 60 * 60,
     }),
+    AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.downloadZipOfVersion
   )
@@ -636,6 +641,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get(
     '/project/:Project_id/labels',
+    AuthorizationMiddleware.blockRestrictedUserFromProject,
     AuthorizationMiddleware.ensureUserCanReadProject,
     HistoryController.selectHistoryApi,
     HistoryController.ensureProjectHistoryEnabled,
