@@ -2,7 +2,6 @@ const EditorHttpController = require('./EditorHttpController')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
-const { Joi, validate } = require('../../infrastructure/Validation')
 
 module.exports = {
   apply(webRouter, privateApiRouter) {
@@ -54,16 +53,6 @@ module.exports = {
       '/project/:Project_id/folder/:entity_id',
       AuthorizationMiddleware.ensureUserCanWriteProjectContent,
       EditorHttpController.deleteFolder
-    )
-    privateApiRouter.post(
-      '/project/:Project_id/doc/:entity_id/convert-to-file',
-      AuthenticationController.requirePrivateApiAuth(),
-      validate({
-        body: Joi.object({
-          userId: Joi.objectId().required(),
-        }),
-      }),
-      EditorHttpController.convertDocToFile
     )
 
     // Called by the real-time API to load up the current project state.
