@@ -23,6 +23,7 @@ block content
 							p #{translate("need_anything_contact_us_at")} 
 								a(href=`mailto:${settings.adminEmail}`, ng-non-bindable) #{settings.adminEmail}
 								| .
+							p !{translate("help_improve_overleaf_fill_out_this_survey", {}, [{name: 'a', attrs: {href: 'https://forms.gle/CdLNX9m6NLxkv1yr5', target:'_blank', rel:'noopener noreferrer'}}])}
 							p #{translate("regards")},
 								br(ng-non-bindable)
 								| The #{settings.appName} Team
