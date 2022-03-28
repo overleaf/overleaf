@@ -12,5 +12,10 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
   },
-  "include": ["frontend/js/**/*.*", "modules/**/frontend/js/**/*.*"]
+  "include": [
+    "frontend/js/**/*.*",
+    "modules/**/frontend/js/**/*.*",
+    "test/frontend/**/*.*",
+    "modules/**/test/frontend/**/*.*"
+  ]
 }
