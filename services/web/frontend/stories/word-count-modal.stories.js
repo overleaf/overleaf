@@ -56,7 +56,7 @@ export const ErrorResponse = args => {
 }
 
 export default {
-  title: 'Modals / Word Count',
+  title: 'Editor / Modals / Word Count',
   component: WordCountModal,
   args: {
     show: true,

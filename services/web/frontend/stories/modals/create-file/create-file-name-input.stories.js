@@ -58,7 +58,7 @@ BlockedError.args = {
 }
 
 export default {
-  title: 'Modals / Create File / File Name Input',
+  title: 'Editor / Modals / Create File / File Name Input',
   component: FileTreeCreateNameInput,
   decorators: [ModalBodyDecorator, ModalContentDecorator],
 }

@@ -26,7 +26,7 @@ import { cloneDeep } from 'lodash'
 setupContext()
 
 export default {
-  title: 'PDF Preview',
+  title: 'Editor / PDF Preview',
   component: PdfPreview,
   subcomponents: {
     PdfPreviewHybridToolbar,

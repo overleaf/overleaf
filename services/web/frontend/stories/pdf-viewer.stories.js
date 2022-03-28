@@ -14,7 +14,7 @@ import { useEffect } from 'react'
 setupContext()
 
 export default {
-  title: 'PDF Viewer',
+  title: 'Editor / PDF Viewer',
   component: PdfViewer,
 }
 

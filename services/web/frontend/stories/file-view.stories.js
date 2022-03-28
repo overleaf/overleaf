@@ -247,7 +247,7 @@ UploadedFile.args = {
 }
 
 export default {
-  title: 'FileView',
+  title: 'Editor / FileView',
   component: FileView,
   argTypes: {
     storeReferencesKeys: { action: 'store references keys' },

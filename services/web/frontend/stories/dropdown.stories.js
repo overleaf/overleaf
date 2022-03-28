@@ -32,7 +32,7 @@ Customized.args = {
 }
 
 export default {
-  title: 'Dropdown',
+  title: 'Shared / Components / Dropdown',
   component: ControlledDropdown,
   args: {
     bsStyle: 'default',

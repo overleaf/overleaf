@@ -146,7 +146,7 @@ export const FilesLimit = args => {
 }
 
 export default {
-  title: 'File Tree',
+  title: 'Editor / File Tree',
   component: FileTreeRoot,
   args: {
     setStartedFreeTrial: () => {

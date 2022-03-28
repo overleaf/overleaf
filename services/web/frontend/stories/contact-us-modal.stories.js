@@ -23,7 +23,7 @@ export const RequestError = args => {
 }
 
 export default {
-  title: 'Modals / Contact Us',
+  title: 'Shared / Modals / Contact Us',
   component: ContactUsModal,
   args: {
     show: true,

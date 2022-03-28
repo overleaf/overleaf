@@ -103,6 +103,6 @@ export const SpecificClassErrors = () => {
 }
 
 export default {
-  title: 'Modals / Create File / Error Message',
+  title: 'Editor / Modals / Create File / Error Message',
   component: ErrorMessage,
 }

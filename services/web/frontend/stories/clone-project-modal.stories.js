@@ -41,7 +41,7 @@ export const SpecificErrorResponse = args => {
 }
 
 export default {
-  title: 'Modals / Clone Project',
+  title: 'Editor / Modals / Clone Project',
   component: CloneProjectModal,
   args: {
     show: true,

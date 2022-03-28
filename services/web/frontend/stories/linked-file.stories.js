@@ -13,7 +13,7 @@ MendeleyLinkedFile.args = {
 }
 
 export default {
-  title: 'LinkedFileInfo',
+  title: 'Editor / LinkedFileInfo',
   component: LinkedFileInfo,
   args: {
     file: {

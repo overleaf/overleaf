@@ -25,7 +25,7 @@ ManyConnectedUsers.args = {
 }
 
 export default {
-  title: 'EditorNavigationToolbar',
+  title: 'Editor / Toolbar',
   component: ToolbarHeader,
   argTypes: {
     goToUser: { action: 'goToUser' },

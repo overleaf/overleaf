@@ -131,5 +131,5 @@ const horizontalContents = (
 )
 
 export default {
-  title: 'useExpandCollapse',
+  title: 'Shared / Hooks / useExpandCollapse',
 }

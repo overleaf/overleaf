@@ -13,7 +13,7 @@ export const MacModifier = args => {
 }
 
 export default {
-  title: 'Modals / Hotkeys',
+  title: 'Editor / Modals / Hotkeys',
   component: HotkeysModal,
   args: {
     animation: false,

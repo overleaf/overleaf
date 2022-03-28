@@ -45,6 +45,6 @@ AccessibilityLabel.args = {
 }
 
 export default {
-  title: 'Icon',
+  title: 'Shared / Components / Icon',
   component: Icon,
 }

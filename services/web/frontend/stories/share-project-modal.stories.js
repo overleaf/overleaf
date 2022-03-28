@@ -163,7 +163,7 @@ const project = {
 }
 
 export default {
-  title: 'Modals / Share Project',
+  title: 'Editor / Modals / Share Project',
   component: ShareProjectModal,
   args: {
     show: true,

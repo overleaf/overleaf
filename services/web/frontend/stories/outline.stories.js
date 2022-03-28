@@ -43,7 +43,7 @@ NonTexFile.args = {
 }
 
 export default {
-  title: 'Outline',
+  title: 'Editor / Outline',
   component: OutlinePane,
   argTypes: {
     jumpToLine: { action: 'jumpToLine' },

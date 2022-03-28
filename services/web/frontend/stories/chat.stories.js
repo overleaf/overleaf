@@ -69,7 +69,7 @@ export const Loading = args => {
 }
 
 export default {
-  title: 'Chat',
+  title: 'Editor / Chat',
   component: ChatPane,
   argTypes: {
     resetUnreadMessages: { action: 'resetUnreadMessages' },

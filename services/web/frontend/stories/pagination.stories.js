@@ -5,7 +5,7 @@ export const Interactive = args => {
 }
 
 export default {
-  title: 'Pagination',
+  title: 'Shared / Components / Pagination',
   component: Pagination,
   args: {
     currentPage: 1,

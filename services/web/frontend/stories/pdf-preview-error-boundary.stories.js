@@ -3,7 +3,7 @@ import { setupContext } from './fixtures/context'
 import { withContextRoot } from './utils/with-context-root'
 
 export default {
-  title: 'PDF Preview / Error Boundary',
+  title: 'Editor / PDF Preview / Error Boundary',
   component: ErrorBoundaryFallback,
 }
 

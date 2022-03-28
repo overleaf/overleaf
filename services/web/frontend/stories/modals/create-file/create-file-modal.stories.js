@@ -97,6 +97,6 @@ FileLimitReached.decorators = [
 ]
 
 export default {
-  title: 'Modals / Create File',
+  title: 'Editor / Modals / Create File',
   component: FileTreeModalCreateFile,
 }

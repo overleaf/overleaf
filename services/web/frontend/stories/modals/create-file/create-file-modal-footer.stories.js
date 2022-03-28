@@ -43,7 +43,7 @@ FileLimitError.args = {
 }
 
 export default {
-  title: 'Modals / Create File / Footer',
+  title: 'Editor / Modals / Create File / Footer',
   component: FileTreeModalCreateFileFooterContent,
   args: {
     fileCount: {

@@ -31,7 +31,7 @@ TeaserModal.args = {
 }
 
 export default {
-  title: 'Modals / Git Bridge',
+  title: 'Editor / Modals / Git Bridge',
   component: GitBridgeModal,
   args: {
     show: true,
