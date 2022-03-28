@@ -141,12 +141,5 @@ module.exports = {
       AuthenticationController.requireLogin(),
       SubscriptionController.updateAccountEmailAddress
     )
-
-    // Currently used in acceptance tests only, as a way to trigger the syncing logic
-    return publicApiRouter.post(
-      '/user/:user_id/features/sync',
-      AuthenticationController.requirePrivateApiAuth(),
-      SubscriptionController.refreshUserFeatures
-    )
   },
 }
