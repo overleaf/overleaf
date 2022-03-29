@@ -278,16 +278,6 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
-    res.locals.gaToken =
-      Settings.analytics && Settings.analytics.ga && Settings.analytics.ga.token
-    res.locals.gaTokenV4 =
-      Settings.analytics &&
-      Settings.analytics.ga &&
-      Settings.analytics.ga.tokenV4
-    next()
-  })
-
-  webRouter.use(function (req, res, next) {
     res.locals.getReqQueryParam = field =>
       req.query != null ? req.query[field] : undefined
     next()
@@ -387,6 +377,15 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       sentryEnvironment: Settings.sentry.environment,
       sentryRelease: Settings.sentry.release,
       enableSubscriptions: Settings.enableSubscriptions,
+      gaToken:
+        Settings.analytics &&
+        Settings.analytics.ga &&
+        Settings.analytics.ga.token,
+      gaTokenV4:
+        Settings.analytics &&
+        Settings.analytics.ga &&
+        Settings.analytics.ga.tokenV4,
+      cookieDomain: Settings.cookieDomain,
     }
     next()
   })

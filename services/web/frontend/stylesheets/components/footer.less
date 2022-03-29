@@ -262,3 +262,37 @@ footer.site-footer {
     }
   }
 }
+
+.cookie-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  line-height: 1;
+  position: fixed;
+  bottom: 0px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  color: @text-color;
+  background: @ol-blue-gray-0;
+  box-shadow: 0 -2px 1px 0px #2c36455c;
+
+  a {
+    color: @footer-link-color;
+    &:hover,
+    &:focus {
+      color: @footer-link-hover-color;
+    }
+  }
+}
+
+.cookie-banner-content {
+  flex: 1;
+}
+
+.cookie-banner-actions {
+  flex-shrink: 0;
+  white-space: nowrap;
+}

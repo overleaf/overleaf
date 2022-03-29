@@ -51,6 +51,7 @@ import './services/queued-http'
 import './services/validateCaptcha'
 import './services/validateCaptchaV3'
 import './filters/formatDate'
+import './features/cookie-banner'
 import '../../modules/modules-main.js'
 import './cdn-load-test'
 angular.module('SharelatexApp').config(function ($locationProvider) {
