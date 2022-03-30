@@ -55,6 +55,8 @@ const aceDir = getModuleDirectory('ace-builds')
 
 const pdfjsVersions = ['pdfjs-dist210', 'pdfjs-dist213']
 
+const vendorDir = path.join(__dirname, 'frontend/js/vendor')
+
 module.exports = {
   // Defines the "entry point(s)" for the application - i.e. the file which
   // bootstraps the application
@@ -64,7 +66,7 @@ module.exports = {
   // Note: webpack-dev-server does not write the bundle to disk, instead it is
   // kept in memory for speed
   output: {
-    path: path.join(__dirname, '/public'),
+    path: path.join(__dirname, 'public'),
 
     publicPath: '/',
 
@@ -86,10 +88,7 @@ module.exports = {
         test: /\.[j|t]sx?$/,
         // Only compile application files (npm and vendored dependencies are in
         // ES5 already)
-        exclude: [
-          /node_modules\/(?!react-dnd\/)/,
-          path.resolve(__dirname, 'frontend/js/vendor'),
-        ],
+        exclude: [/node_modules\/(?!react-dnd\/)/, vendorDir],
         use: [
           {
             loader: 'babel-loader',
@@ -97,6 +96,7 @@ module.exports = {
               // Configure babel-loader to cache compiled output so that
               // subsequent compile runs are much faster
               cacheDirectory: true,
+              configFile: path.join(__dirname, './babel.config.json'),
             },
           },
         ],
@@ -205,7 +205,7 @@ module.exports = {
         test: /locales\/(\w{2}(-\w{2})?)\.json$/,
         use: [
           {
-            loader: path.resolve('frontend/translations-loader.js'),
+            loader: path.join(__dirname, 'frontend/translations-loader.js'),
           },
         ],
       },
@@ -310,15 +310,31 @@ module.exports = {
       }
     ),
 
+    new CopyPlugin(
+      [
+        {
+          from: 'libs/sigma-master',
+          to: 'js/libs/sigma-master',
+        },
+      ],
+      {
+        context: vendorDir,
+      }
+    ),
+
+    new CopyPlugin(
+      [
+        {
+          from: 'src-min-noconflict',
+          to: `js/ace-${PackageVersions.version.ace}/`,
+        },
+      ],
+      {
+        context: aceDir,
+      }
+    ),
+
     new CopyPlugin([
-      {
-        from: 'frontend/js/vendor/libs/sigma-master',
-        to: 'js/libs/sigma-master',
-      },
-      {
-        from: `${aceDir}/src-min-noconflict`,
-        to: `js/ace-${PackageVersions.version.ace}/`,
-      },
       ...pdfjsVersions.flatMap(version => {
         const dir = getModuleDirectory(version)
 

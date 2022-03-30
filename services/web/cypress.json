@@ -1,0 +1,12 @@
+{
+  "component": {
+    "componentFolder": ".",
+    "testFiles": "./{test,modules/**/test}/frontend/components/**/*.spec.js",
+    "supportFile": "cypress/support/ct/index.js"
+  },
+  "experimentalFetchPolyfill": true,
+  "fixturesFolder": false,
+  "video": false,
+  "viewportHeight": 800,
+  "viewportWidth": 800
+}

@@ -81,6 +81,11 @@ modules/**/Makefile
 .idea
 .run
 
+# Cypress
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+
 # Test fixture zip
 !modules/admin-panel/test/unit/src/data/track-changes-project.zip
 

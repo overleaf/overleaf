@@ -18,6 +18,8 @@ COPY package.json package-lock.json /overleaf/
 COPY services/web/package.json /overleaf/services/web/
 COPY libraries/ /overleaf/libraries/
 
+ENV CYPRESS_INSTALL_BINARY=0
+
 RUN cd /overleaf && npm ci --quiet
 
 

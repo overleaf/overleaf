@@ -60,7 +60,7 @@ clean_ci:
 # Tests
 #
 
-test: test_unit test_karma test_acceptance test_frontend
+test: test_unit test_karma test_acceptance test_frontend test_frontend_ct
 
 test_module: test_unit_module test_acceptance_module
 
@@ -136,6 +136,15 @@ test_frontend:
 	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend
 	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+
+#
+# Frontend component tests in Cypress
+#
+
+test_frontend_ct:
+	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_ct
+	COMPOSE_PROJECT_NAME=frontend_test_ct_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 #
 # Acceptance tests

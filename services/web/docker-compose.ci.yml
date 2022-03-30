@@ -63,6 +63,21 @@ services:
     environment:
       NODE_OPTIONS: "--unhandled-rejections=strict"
 
+  test_frontend_ct:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.frontend_ct
+      args:
+        PROJECT_NAME: $PROJECT_NAME
+        BRANCH_NAME: $BRANCH_NAME
+        BUILD_NUMBER: $BUILD_NUMBER
+        CYPRESS_IMAGE: $CYPRESS_IMAGE
+    working_dir: /overleaf/services/web
+    entrypoint: npm
+    command:
+      - "run"
+      - "cypress:run-ct"
+
   tar:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER-webpack
     volumes:

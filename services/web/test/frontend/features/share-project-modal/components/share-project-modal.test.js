@@ -13,9 +13,9 @@ import ShareProjectModal from '../../../../../frontend/js/features/share-project
 import {
   renderWithEditorContext,
   cleanUpContext,
-  EditorProviders,
 } from '../../../helpers/render-with-context'
 import * as locationModule from '../../../../../frontend/js/features/share-project-modal/utils/location'
+import { EditorProviders } from '../../../helpers/editor-providers'
 
 describe('<ShareProjectModal/>', function () {
   const project = {

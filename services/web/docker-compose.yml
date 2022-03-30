@@ -74,6 +74,16 @@ services:
     command: npm run --silent test:frontend
     user: node
 
+  test_frontend_ct:
+    image: cypress/included:9.5.2
+    volumes:
+      - ../../:/overleaf
+    working_dir: /overleaf/services/web
+    entrypoint: npm
+    command:
+      - "run"
+      - "cypress:run-ct"
+
   redis:
     image: redis
 

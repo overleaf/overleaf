@@ -103,8 +103,15 @@
       }
     },
     {
+      // Cypress specific rules
+      "files": ["cypress/**/*.js", "**/test/frontend/**/*.spec.js"],
+      "extends": [
+        "plugin:cypress/recommended"
+      ]
+    },
+    {
       // Frontend specific rules
-      "files": ["**/frontend/js/**/*.{js,ts,tsx}", "**/frontend/stories/**/*.{js,ts,tsx}", "**/*.stories.{js,ts,tsx}", "**/test/frontend/**/*.{js,ts,tsx}"],
+      "files": ["**/frontend/js/**/*.{js,ts,tsx}", "**/frontend/stories/**/*.{js,ts,tsx}", "**/*.stories.{js,ts,tsx}", "**/test/frontend/**/*.{js,ts,tsx}", "**/test/frontend/components/**/*.spec.{js,ts,tsx}"],
       "env": {
         "browser": true
       },
