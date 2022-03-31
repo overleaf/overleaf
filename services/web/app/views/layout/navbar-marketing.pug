@@ -16,10 +16,11 @@ nav.navbar.navbar-default.navbar-main
 				a(href='/', aria-label=settings.appName).navbar-brand
 
 		- var canDisplayAdminMenu = hasAdminAccess()
+		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
 		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
 		.navbar-collapse.collapse(data-ol-navbar-main-collapse)
 			ul.nav.navbar-nav.navbar-right
-				if (canDisplayAdminMenu || canDisplaySplitTestMenu)
+				if (canDisplayAdminMenu || canDisplayAdminRedirect || canDisplaySplitTestMenu)
 					li.dropdown.subdued
 						a.dropdown-toggle(
 							href="#",
@@ -38,6 +39,9 @@ nav.navbar.navbar-default.navbar-main
 									a(href="/admin/user") Manage Users
 								li
 									a(href="/admin/project") Project URL Lookup
+							if canDisplayAdminRedirect
+								li
+									a(href=settings.adminUrl) Switch to Admin
 							if canDisplaySplitTestMenu
 								li
 									a(href="/admin/split-test") Manage Split Tests

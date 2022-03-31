@@ -8,12 +8,12 @@ const SessionManager = require('../Authentication/SessionManager')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const { expressify } = require('../../util/promises')
 const {
-  shouldRedirectToAdminDomain,
+  canRedirectToAdminDomain,
 } = require('../Helpers/AdminAuthorizationHelper')
 const { getSafeAdminDomainRedirect } = require('../Helpers/UrlHelper')
 
 function handleAdminDomainRedirect(req, res) {
-  if (shouldRedirectToAdminDomain(SessionManager.getSessionUser(req.session))) {
+  if (canRedirectToAdminDomain(SessionManager.getSessionUser(req.session))) {
     logger.warn({ req }, 'redirecting admin user to admin domain')
     res.redirect(getSafeAdminDomainRedirect(req.originalUrl))
     return true

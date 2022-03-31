@@ -13,6 +13,7 @@ const PackageVersions = require('./PackageVersions')
 const Modules = require('./Modules')
 const SafeHTMLSubstitute = require('../Features/Helpers/SafeHTMLSubstitution')
 const {
+  canRedirectToAdminDomain,
   hasAdminAccess,
 } = require('../Features/Helpers/AdminAuthorizationHelper')
 
@@ -302,6 +303,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     res.locals.getLoggedInUserId = () =>
       SessionManager.getLoggedInUserId(req.session)
     res.locals.getSessionUser = () => SessionManager.getSessionUser(req.session)
+    res.locals.canRedirectToAdminDomain = () =>
+      canRedirectToAdminDomain(SessionManager.getSessionUser(req.session))
     res.locals.hasAdminAccess = () =>
       hasAdminAccess(SessionManager.getSessionUser(req.session))
     next()

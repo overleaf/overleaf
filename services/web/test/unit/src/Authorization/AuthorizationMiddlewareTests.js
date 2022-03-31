@@ -44,7 +44,7 @@ describe('AuthorizationMiddleware', function () {
         '../Authentication/SessionManager': this.SessionManager,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
         '../Helpers/AdminAuthorizationHelper': {
-          shouldRedirectToAdminDomain: sinon.stub().returns(false),
+          canRedirectToAdminDomain: sinon.stub().returns(false),
         },
       },
     })
