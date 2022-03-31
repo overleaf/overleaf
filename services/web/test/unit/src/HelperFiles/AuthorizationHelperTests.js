@@ -43,7 +43,7 @@ describe('AuthorizationHelper', function () {
     it('with admin user', function () {
       const user = { isAdmin: true }
       this.AdminAuthorizationHelper.hasAdminAccess.returns(true)
-      expect(this.AuthorizationHelper.hasAnyStaffAccess(user)).to.be.true
+      expect(this.AuthorizationHelper.hasAnyStaffAccess(user)).to.be.false
     })
 
     it('with staff user', function () {
