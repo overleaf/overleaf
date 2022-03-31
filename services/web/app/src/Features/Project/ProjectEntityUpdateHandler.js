@@ -386,7 +386,7 @@ const ProjectEntityUpdateHandler = {
               if (error != null) {
                 return callback(error)
               }
-              callback(null, doc, folderId)
+              callback(null, doc, folderId || project.rootFolder[0]._id)
             }
           )
         }

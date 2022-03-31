@@ -1,7 +1,7 @@
 const { callbackify } = require('util')
 const Path = require('path')
 const ProjectEntityHandler = require('./ProjectEntityHandler')
-const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
+const EditorController = require('../Editor/EditorController')
 
 // generate a new name based on the original, with an optional label.
 // e.g. origname-20210101-122345.tex          (default)
@@ -24,12 +24,14 @@ async function restoreDeletedDoc(projectId, docId, docName, userId) {
     { include_deleted: true }
   )
   const deletedDocName = generateRestoredName(docName)
-  return await ProjectEntityUpdateHandler.promises.addDocWithRanges(
+  // Create the doc and emit a websocket message.
+  return await EditorController.promises.addDocWithRanges(
     projectId,
     null,
     `${deletedDocName}`,
     deletedDoc.lines,
     deletedDoc.ranges,
+    null,
     userId
   )
 }

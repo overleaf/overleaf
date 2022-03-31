@@ -33,7 +33,7 @@ describe('ProjectEntityRestoreHandler', function () {
       },
     }
 
-    this.ProjectEntityUpdateHandler = {
+    this.EditorController = {
       promises: {
         addDocWithRanges: sinon.stub(),
       },
@@ -42,7 +42,7 @@ describe('ProjectEntityRestoreHandler', function () {
     this.ProjectEntityRestoreHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './ProjectEntityHandler': this.ProjectEntityHandler,
-        './ProjectEntityUpdateHandler': this.ProjectEntityUpdateHandler,
+        '../Editor/EditorController': this.EditorController,
       },
     })
   })
@@ -68,9 +68,9 @@ describe('ProjectEntityRestoreHandler', function () {
       ranges: this.ranges,
     })
 
-    this.ProjectEntityUpdateHandler.addDocWithRanges = sinon
+    this.EditorController.promises.addDocWithRanges = sinon
       .stub()
-      .yields(null, this.newDoc)
+      .resolves(this.newDoc)
 
     await this.ProjectEntityRestoreHandler.promises.restoreDeletedDoc(
       this.project._id,
@@ -82,13 +82,14 @@ describe('ProjectEntityRestoreHandler', function () {
     const docNameMatcher = new RegExp(docName + '-\\d{4}-\\d{2}-\\d{2}-\\d+')
 
     expect(
-      this.ProjectEntityUpdateHandler.promises.addDocWithRanges
+      this.EditorController.promises.addDocWithRanges
     ).to.have.been.calledWith(
       this.project._id,
       null,
       sinon.match(docNameMatcher),
       this.docLines,
       this.ranges,
+      null,
       this.user._id
     )
   })
