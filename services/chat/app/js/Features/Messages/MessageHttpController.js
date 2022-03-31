@@ -54,11 +54,17 @@ async function deleteThread(req, res) {
 }
 
 async function editMessage(req, res) {
-  const { content } = req.body
+  const { content, userId } = req.body
   const { projectId, threadId, messageId } = req.params
   logger.log({ projectId, threadId, messageId, content }, 'editing message')
   const room = await ThreadManager.findOrCreateThread(projectId, threadId)
-  await MessageManager.updateMessage(room._id, messageId, content, Date.now())
+  await MessageManager.updateMessage(
+    room._id,
+    messageId,
+    userId,
+    content,
+    Date.now()
+  )
   res.sendStatus(204)
 }
 

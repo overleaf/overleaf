@@ -151,7 +151,7 @@ module.exports = ChatApiHandler = {
     )
   },
 
-  editMessage(project_id, thread_id, message_id, content, callback) {
+  editMessage(project_id, thread_id, message_id, userId, content, callback) {
     if (callback == null) {
       callback = function () {}
     }
@@ -161,6 +161,7 @@ module.exports = ChatApiHandler = {
         method: 'POST',
         json: {
           content,
+          userId,
         },
       },
       callback

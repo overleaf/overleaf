@@ -86,6 +86,23 @@ async function editMessage(projectId, threadId, messageId, content) {
   })
 }
 
+async function editMessageWithUser(
+  projectId,
+  threadId,
+  messageId,
+  userId,
+  content
+) {
+  return asyncRequest({
+    method: 'post',
+    url: `/project/${projectId}/thread/${threadId}/messages/${messageId}/edit`,
+    json: {
+      content,
+      userId,
+    },
+  })
+}
+
 async function deleteMessage(projectId, threadId, messageId) {
   return asyncRequest({
     method: 'delete',
@@ -109,6 +126,7 @@ module.exports = {
   reopenThread,
   deleteThread,
   editMessage,
+  editMessageWithUser,
   deleteMessage,
   destroyProject,
 }

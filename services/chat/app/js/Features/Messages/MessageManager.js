@@ -45,11 +45,14 @@ async function deleteAllMessagesInRooms(roomIds) {
   })
 }
 
-async function updateMessage(roomId, messageId, content, timestamp) {
+async function updateMessage(roomId, messageId, userId, content, timestamp) {
   const query = _ensureIdsAreObjectIds({
     _id: messageId,
     room_id: roomId,
   })
+  if (userId) {
+    query.user_id = ObjectId(userId)
+  }
   await db.messages.updateOne(query, {
     $set: {
       content,
