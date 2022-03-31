@@ -8,6 +8,8 @@ const PrivilegeLevels = require('./PrivilegeLevels')
 const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 const PublicAccessLevels = require('./PublicAccessLevels')
 const Errors = require('../Errors/Errors')
+const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
+const Settings = require('@overleaf/settings')
 
 function isRestrictedUser(userId, privilegeLevel, isTokenMember) {
   if (privilegeLevel === PrivilegeLevels.NONE) {
@@ -91,8 +93,7 @@ async function getPrivilegeLevelForProjectWithUser(
   }
 
   if (!opts.ignoreSiteAdmin) {
-    const isAdmin = await isUserSiteAdmin(userId)
-    if (isAdmin) {
+    if (await isUserSiteAdmin(userId)) {
       return PrivilegeLevels.OWNER
     }
   }
@@ -216,8 +217,9 @@ async function isUserSiteAdmin(userId) {
   if (!userId) {
     return false
   }
+  if (!Settings.adminPrivilegeAvailable) return false
   const user = await User.findOne({ _id: userId }, { isAdmin: 1 }).exec()
-  return user != null && user.isAdmin === true
+  return hasAdminAccess(user)
 }
 
 module.exports = {

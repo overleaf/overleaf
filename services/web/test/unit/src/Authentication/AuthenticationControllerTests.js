@@ -33,6 +33,10 @@ describe('AuthenticationController', function () {
 
     this.AuthenticationController = SandboxedModule.require(modulePath, {
       requires: {
+        '../Helpers/AdminAuthorizationHelper': (this.AdminAuthorizationHelper =
+          {
+            hasAdminAccess: sinon.stub().returns(false),
+          }),
         './AuthenticationErrors': AuthenticationErrors,
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           addEntry: sinon.stub().yields(null),
@@ -158,6 +162,7 @@ describe('AuthenticationController', function () {
       this.SessionManager.getSessionUser = sinon
         .stub()
         .returns({ isAdmin: true })
+      this.AdminAuthorizationHelper.hasAdminAccess.returns(true)
       this.AuthenticationController.validateAdmin(this.req, this.res, err => {
         this.SessionManager.getSessionUser.called.should.equal(true)
         expect(err).to.exist
@@ -167,6 +172,7 @@ describe('AuthenticationController', function () {
 
     it('should block an admin with a bad domain', function (done) {
       this.SessionManager.getSessionUser = sinon.stub().returns(this.badAdmin)
+      this.AdminAuthorizationHelper.hasAdminAccess.returns(true)
       this.AuthenticationController.validateAdmin(this.req, this.res, err => {
         this.SessionManager.getSessionUser.called.should.equal(true)
         expect(err).to.exist

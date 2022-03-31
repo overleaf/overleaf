@@ -1,11 +1,12 @@
 const { UserSchema } = require('../../models/User')
+const { hasAdminAccess } = require('./AdminAuthorizationHelper')
 
 module.exports = {
   hasAnyStaffAccess,
 }
 
 function hasAnyStaffAccess(user) {
-  if (user.isAdmin) {
+  if (hasAdminAccess(user)) {
     return true
   }
   if (!user.staffAccess) {

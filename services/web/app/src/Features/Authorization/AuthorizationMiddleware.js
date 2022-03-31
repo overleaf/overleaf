@@ -133,8 +133,7 @@ async function ensureUserCanAdminProject(req, res, next) {
 
 async function ensureUserIsSiteAdmin(req, res, next) {
   const userId = _getUserId(req)
-  const isAdmin = await AuthorizationManager.promises.isUserSiteAdmin(userId)
-  if (isAdmin) {
+  if (await AuthorizationManager.promises.isUserSiteAdmin(userId)) {
     logger.log({ userId }, 'allowing user admin access to site')
     return next()
   }

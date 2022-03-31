@@ -15,7 +15,7 @@ nav.navbar.navbar-default.navbar-main
 			else
 				a(href='/', aria-label=settings.appName).navbar-brand
 
-		- var canDisplayAdminMenu = getSessionUser() && getSessionUser().isAdmin
+		- var canDisplayAdminMenu = hasAdminAccess()
 		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
 		.navbar-collapse.collapse(data-ol-navbar-main-collapse)
 			ul.nav.navbar-nav.navbar-right

@@ -40,6 +40,9 @@ const HttpErrorHandler = require('../Features/Errors/HttpErrorHandler')
 const UserSessionsManager = require('../Features/User/UserSessionsManager')
 const AuthenticationController = require('../Features/Authentication/AuthenticationController')
 const SessionManager = require('../Features/Authentication/SessionManager')
+const {
+  hasAdminAccess,
+} = require('../Features/Helpers/AdminAuthorizationHelper')
 
 const STATIC_CACHE_AGE = Settings.cacheStaticAssets
   ? oneDayInMilliseconds * 365
@@ -141,6 +144,11 @@ app.use(methodOverride())
 app.use(bearerToken())
 
 app.use(metrics.http.monitor(logger))
+
+if (Settings.blockCrossOriginRequests) {
+  app.use(Csrf.blockCrossOriginRequests())
+}
+
 RedirectManager.apply(webRouter)
 ProxyManager.apply(publicApiRouter)
 
@@ -228,10 +236,7 @@ webRouter.use(SessionAutostartMiddleware.invokeCallbackMiddleware)
 webRouter.use(function (req, res, next) {
   if (Settings.siteIsOpen) {
     next()
-  } else if (
-    SessionManager.getSessionUser(req.session) &&
-    SessionManager.getSessionUser(req.session).isAdmin
-  ) {
+  } else if (hasAdminAccess(SessionManager.getSessionUser(req.session))) {
     next()
   } else {
     HttpErrorHandler.maintenance(req, res)

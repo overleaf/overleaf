@@ -283,6 +283,12 @@ module.exports = {
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS, 10) || 12,
   }, // number of rounds used to hash user passwords (raised to power 2)
 
+  adminUrl: process.env.ADMIN_URL,
+  adminOnlyLogin: process.env.ADMIN_ONLY_LOGIN === 'true',
+  adminPrivilegeAvailable: process.env.ADMIN_PRIVILEGE_AVAILABLE === 'true',
+  blockCrossOriginRequests: process.env.BLOCK_CROSS_ORIGIN_REQUESTS === 'true',
+  allowedOrigins: (process.env.ALLOWED_ORIGINS || siteUrl).split(','),
+
   httpAuthUsers,
 
   // Default features

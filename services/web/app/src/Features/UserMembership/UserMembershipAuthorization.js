@@ -1,10 +1,11 @@
+const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const UserMembershipAuthorization = {
   hasStaffAccess(requiredStaffAccess) {
     return req => {
       if (!req.user) {
         return false
       }
-      if (req.user.isAdmin) {
+      if (hasAdminAccess(req.user)) {
         return true
       }
       return (

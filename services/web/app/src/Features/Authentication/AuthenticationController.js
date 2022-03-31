@@ -24,6 +24,7 @@ const {
   acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')
 const { ParallelLoginError } = require('./AuthenticationErrors')
+const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 
 function send401WithChallenge(res) {
   res.setHeader('WWW-Authenticate', 'OverleafLogin')
@@ -106,6 +107,12 @@ const AuthenticationController = {
     if (user === false) {
       return res.redirect('/login')
     } // OAuth2 'state' mismatch
+
+    if (Settings.adminOnlyLogin && !hasAdminAccess(user)) {
+      return res.status(403).json({
+        message: { type: 'error', text: 'Admin only panel' },
+      })
+    }
 
     const auditInfo = AuthenticationController.getAuditInfo(req)
 
@@ -380,7 +387,7 @@ const AuthenticationController = {
       return next()
     }
     const user = SessionManager.getSessionUser(req.session)
-    if (!(user && user.isAdmin)) {
+    if (!hasAdminAccess(user)) {
       return next()
     }
     const email = user.email

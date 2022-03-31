@@ -15,6 +15,8 @@
 const csurf = require('csurf')
 const csrf = csurf()
 const { promisify } = require('util')
+const Settings = require('@overleaf/settings')
+const logger = require('@overleaf/logger')
 
 // Wrapper for `csurf` middleware that provides a list of routes that can be excluded from csrf checks.
 //
@@ -33,6 +35,18 @@ class Csrf {
   constructor() {
     this.middleware = this.middleware.bind(this)
     this.excluded_routes = {}
+  }
+
+  static blockCrossOriginRequests() {
+    return function (req, res, next) {
+      const { origin } = req.headers
+      // NOTE: Only cross-origin requests must have an origin header set.
+      if (origin && !Settings.allowedOrigins.includes(origin)) {
+        logger.warn({ req }, 'blocking cross-origin request')
+        return res.sendStatus(403)
+      }
+      next()
+    }
   }
 
   disableDefaultCsrfProtection(route, method) {

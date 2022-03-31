@@ -54,7 +54,10 @@ describe('AuthorizationManager', function () {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../../models/User': { User: this.User },
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
-        '@overleaf/settings': { passwordStrengthOptions: {} },
+        '@overleaf/settings': {
+          passwordStrengthOptions: {},
+          adminPrivilegeAvailable: true,
+        },
       },
     })
   })

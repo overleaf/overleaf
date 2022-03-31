@@ -1,4 +1,5 @@
 const SandboxedModule = require('sandboxed-module')
+const sinon = require('sinon')
 const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Helpers/AuthorizationHelper'
 
@@ -6,6 +7,9 @@ describe('AuthorizationHelper', function () {
   beforeEach(function () {
     this.AuthorizationHelper = SandboxedModule.require(modulePath, {
       requires: {
+        './AdminAuthorizationHelper': (this.AdminAuthorizationHelper = {
+          hasAdminAccess: sinon.stub().returns(false),
+        }),
         '../../models/User': {
           UserSchema: {
             obj: {
@@ -38,11 +42,13 @@ describe('AuthorizationHelper', function () {
 
     it('with admin user', function () {
       const user = { isAdmin: true }
+      this.AdminAuthorizationHelper.hasAdminAccess.returns(true)
       expect(this.AuthorizationHelper.hasAnyStaffAccess(user)).to.be.true
     })
 
     it('with staff user', function () {
       const user = { staffAccess: { adminMetrics: true, somethingElse: false } }
+      this.AdminAuthorizationHelper.hasAdminAccess.returns(true)
       expect(this.AuthorizationHelper.hasAnyStaffAccess(user)).to.be.true
     })
 

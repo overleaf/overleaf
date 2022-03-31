@@ -12,6 +12,9 @@ const SessionManager = require('../Features/Authentication/SessionManager')
 const PackageVersions = require('./PackageVersions')
 const Modules = require('./Modules')
 const SafeHTMLSubstitute = require('../Features/Helpers/SafeHTMLSubstitution')
+const {
+  hasAdminAccess,
+} = require('../Features/Helpers/AdminAuthorizationHelper')
 
 let webpackManifest
 switch (process.env.NODE_ENV) {
@@ -299,6 +302,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     res.locals.getLoggedInUserId = () =>
       SessionManager.getLoggedInUserId(req.session)
     res.locals.getSessionUser = () => SessionManager.getSessionUser(req.session)
+    res.locals.hasAdminAccess = () =>
+      hasAdminAccess(SessionManager.getSessionUser(req.session))
     next()
   })
 

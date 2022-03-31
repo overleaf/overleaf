@@ -10,6 +10,7 @@ const TagsHandler = require('../Tags/TagsHandler')
 const Errors = require('../Errors/Errors')
 const logger = require('@overleaf/logger')
 const { expressify } = require('../../util/promises')
+const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 
 module.exports = {
   removeUserFromProject: expressify(removeUserFromProject),
@@ -82,7 +83,7 @@ async function transferOwnership(req, res, next) {
       projectId,
       toUserId,
       {
-        allowTransferToNonCollaborators: sessionUser.isAdmin,
+        allowTransferToNonCollaborators: hasAdminAccess(sessionUser),
         sessionUserId: ObjectId(sessionUser._id),
       }
     )

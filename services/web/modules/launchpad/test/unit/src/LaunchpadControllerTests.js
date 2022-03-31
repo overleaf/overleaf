@@ -31,7 +31,9 @@ describe('LaunchpadController', function () {
     this.User = {}
     this.LaunchpadController = SandboxedModule.require(modulePath, {
       requires: {
-        '@overleaf/settings': (this.Settings = {}),
+        '@overleaf/settings': (this.Settings = {
+          adminPrivilegeAvailable: true,
+        }),
         '@overleaf/metrics': (this.Metrics = {}),
         '../../../../app/src/Features/User/UserRegistrationHandler':
           (this.UserRegistrationHandler = {}),

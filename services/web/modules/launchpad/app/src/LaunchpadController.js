@@ -25,6 +25,9 @@ const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const { User } = require('../../../../app/src/models/User')
 const AuthenticationController = require('../../../../app/src/Features/Authentication/AuthenticationController')
 const SessionManager = require('../../../../app/src/Features/Authentication/SessionManager')
+const {
+  hasAdminAccess,
+} = require('../../../../app/src/Features/Helpers/AdminAuthorizationHelper')
 
 module.exports = LaunchpadController = {
   _getAuthMethod() {
@@ -67,7 +70,7 @@ module.exports = LaunchpadController = {
             if (err != null) {
               return next(err)
             }
-            if (user && user.isAdmin) {
+            if (hasAdminAccess(user)) {
               return res.render(Path.resolve(__dirname, '../views/launchpad'), {
                 wsUrl: Settings.wsUrl,
                 adminUserExists,

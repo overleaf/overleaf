@@ -39,6 +39,7 @@ const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const SpellingHandler = require('../Spelling/SpellingHandler')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
+const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
@@ -965,7 +966,7 @@ const ProjectController = {
                 refProviders: _.mapValues(user.refProviders, Boolean),
                 alphaProgram: user.alphaProgram,
                 betaProgram: user.betaProgram,
-                isAdmin: user.isAdmin,
+                isAdmin: hasAdminAccess(user),
               },
               userSettings: {
                 mode: user.ace.mode,

@@ -22,6 +22,7 @@ describe('ProjectHelper', function () {
     }
 
     this.Settings = {
+      adminPrivilegeAvailable: true,
       allowedImageNames: [
         { imageName: 'texlive-full:2018.1', imageDesc: 'TeX Live 2018' },
         { imageName: 'texlive-full:2019.1', imageDesc: 'TeX Live 2019' },
