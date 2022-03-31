@@ -65,11 +65,7 @@ block content
 						span.sr-only #{translate("close")}
 					.system-message-content(ng-bind-html="htmlContent")
 
-		if detachRole === 'detached'
-			div.full-size
-				pdf-preview()
-		else
-			include ./editor/main
+		include ./editor/main
 
 	script(type="text/ng-template", id="genericMessageModalTemplate")
 		.modal-header

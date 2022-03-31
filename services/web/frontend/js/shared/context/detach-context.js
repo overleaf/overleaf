@@ -29,6 +29,7 @@ const debugPdfDetach = getMeta('ol-debugPdfDetach')
 const SYSEND_CHANNEL = `detach-${getMeta('ol-project_id')}`
 
 export function DetachProvider({ children }) {
+  const [lastDetachedConnectedAt, setLastDetachedConnectedAt] = useState()
   const [role, setRole] = useState(() => getMeta('ol-detachRole') || null)
   const {
     addHandler: addEventHandler,
@@ -94,15 +95,33 @@ export function DetachProvider({ children }) {
     return () => window.removeEventListener('beforeunload', onBeforeUnload)
   }, [broadcastEvent])
 
+  useEffect(() => {
+    const updateLastDetachedConnectedAt = message => {
+      if (message.role === 'detached' && message.event === 'connected') {
+        setLastDetachedConnectedAt(new Date())
+      }
+    }
+    addEventHandler(updateLastDetachedConnectedAt)
+    return () => deleteEventHandler(updateLastDetachedConnectedAt)
+  }, [addEventHandler, deleteEventHandler])
+
   const value = useMemo(
     () => ({
       role,
       setRole,
       broadcastEvent,
+      lastDetachedConnectedAt,
       addEventHandler,
       deleteEventHandler,
     }),
-    [role, setRole, broadcastEvent, addEventHandler, deleteEventHandler]
+    [
+      role,
+      setRole,
+      broadcastEvent,
+      lastDetachedConnectedAt,
+      addEventHandler,
+      deleteEventHandler,
+    ]
   )
 
   return (

@@ -83,11 +83,14 @@ describe('<ShareProjectModal/>', function () {
 
   beforeEach(function () {
     fetchMock.get('/user/contacts', { contacts })
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-user', { allowedFreeTrial: true })
   })
 
   afterEach(function () {
     fetchMock.restore()
     cleanUpContext()
+    window.metaAttributesCache = new Map()
   })
 
   it('renders the modal', async function () {
@@ -179,7 +182,7 @@ describe('<ShareProjectModal/>', function () {
     ]
 
     // render as admin: actions should be present
-    const { rerender } = render(
+    render(
       <EditorProviders
         scope={{
           project: {
@@ -197,7 +200,7 @@ describe('<ShareProjectModal/>', function () {
     await screen.findByRole('button', { name: 'Resend' })
 
     // render as non-admin (non-owner), link sharing on: actions should be missing and message should be present
-    rerender(
+    render(
       <EditorProviders
         scope={{
           project: {
@@ -222,7 +225,7 @@ describe('<ShareProjectModal/>', function () {
     expect(screen.queryByRole('button', { name: 'Resend' })).to.be.null
 
     // render as non-admin (non-owner), link sharing off: actions should be missing and message should be present
-    rerender(
+    render(
       <EditorProviders
         scope={{
           project: {
@@ -619,10 +622,6 @@ describe('<ShareProjectModal/>', function () {
     )
 
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      user: {
-        id: '123abd',
-        allowedFreeTrial: true,
-      },
       scope: {
         project: {
           ...project,

@@ -82,8 +82,15 @@ export const mockValidationProblems = validationProblems =>
     },
   })
 
-export const mockClearCache = () =>
-  fetchMock.delete('express:/project/:projectId/output', 204)
+export const mockClearCache = (delayPromise = Promise.resolve()) =>
+  fetchMock.delete(
+    'express:/project/:projectId/output',
+    delayPromise.then(() => ({
+      body: {
+        status: 204,
+      },
+    }))
+  )
 
 export const mockValidPdf = () => {
   nock('https://clsi.test-overleaf.com')

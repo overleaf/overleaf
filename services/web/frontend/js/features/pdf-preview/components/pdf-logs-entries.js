@@ -48,11 +48,10 @@ function PdfLogsEntries({ entries, hasErrors }) {
       {logEntries.map(logEntry => (
         <PdfLogEntry
           key={logEntry.key}
+          ruleId={logEntry.ruleId}
           headerTitle={logEntry.message}
           rawContent={logEntry.content}
           logType={logEntry.type}
-          formattedContent={logEntry.humanReadableHintComponent}
-          extraInfoURL={logEntry.extraInfoURL}
           level={logEntry.level}
           entryAriaLabel={t('log_entry_description', {
             level: logEntry.level,

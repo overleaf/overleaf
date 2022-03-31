@@ -15,6 +15,8 @@ describe('<FileTreeRoot/>', function () {
 
   beforeEach(function () {
     global.requestAnimationFrame = sinon.stub()
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-user', { id: 'user1' })
   })
 
   afterEach(function () {
@@ -24,6 +26,7 @@ describe('<FileTreeRoot/>', function () {
     onInit.reset()
     cleanUpContext()
     global.localStorage.clear()
+    window.metaAttributesCache = new Map()
   })
 
   it('renders', function () {

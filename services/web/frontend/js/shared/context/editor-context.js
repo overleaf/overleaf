@@ -155,7 +155,7 @@ export function EditorProvider({ children, settings }) {
 
 EditorProvider.propTypes = {
   children: PropTypes.any,
-  settings: PropTypes.any.isRequired,
+  settings: PropTypes.object,
 }
 
 export function useEditorContext(propTypes) {

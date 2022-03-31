@@ -13,7 +13,11 @@ import useScopeValueSetterOnly from '../hooks/use-scope-value-setter-only'
 import usePersistedState from '../hooks/use-persisted-state'
 import useAbortController from '../hooks/use-abort-controller'
 import DocumentCompiler from '../../features/pdf-preview/util/compiler'
-import { send, sendMBSampled } from '../../infrastructure/event-tracking'
+import {
+  send,
+  sendMBOnce,
+  sendMBSampled,
+} from '../../infrastructure/event-tracking'
 import {
   buildLogEntryAnnotations,
   handleLogFiles,
@@ -24,9 +28,9 @@ import { useProjectContext } from './project-context'
 import { useEditorContext } from './editor-context'
 import { buildFileList } from '../../features/pdf-preview/util/file-list'
 
-export const CompileContext = createContext()
+export const LocalCompileContext = createContext()
 
-CompileContext.Provider.propTypes = {
+export const CompileContextPropTypes = {
   value: PropTypes.shape({
     autoCompile: PropTypes.bool.isRequired,
     clearingCache: PropTypes.bool.isRequired,
@@ -52,6 +56,7 @@ CompileContext.Provider.propTypes = {
     setHighlights: PropTypes.func.isRequired,
     setPosition: PropTypes.func.isRequired,
     setShowLogs: PropTypes.func.isRequired,
+    toggleLogs: PropTypes.func.isRequired,
     setStopOnValidationError: PropTypes.func.isRequired,
     showLogs: PropTypes.bool.isRequired,
     stopOnValidationError: PropTypes.bool.isRequired,
@@ -62,7 +67,9 @@ CompileContext.Provider.propTypes = {
   }),
 }
 
-export function CompileProvider({ children }) {
+LocalCompileContext.Provider.propTypes = CompileContextPropTypes
+
+export function LocalCompileProvider({ children }) {
   const ide = useIdeContext()
 
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
@@ -110,6 +117,15 @@ export function CompileProvider({ children }) {
 
   // whether the logs should be visible
   const [showLogs, setShowLogs] = useState(false)
+
+  const toggleLogs = useCallback(() => {
+    setShowLogs(prev => {
+      if (!prev) {
+        sendMBOnce('ide-open-logs-once')
+      }
+      return !prev
+    })
+  }, [setShowLogs])
 
   // an error that occurred
   const [error, setError] = useState()
@@ -445,6 +461,7 @@ export function CompileProvider({ children }) {
       setHighlights,
       setPosition,
       setShowLogs,
+      toggleLogs,
       setStopOnValidationError,
       showLogs,
       startCompile,
@@ -492,20 +509,29 @@ export function CompileProvider({ children }) {
       firstRenderDone,
       setChangedAt,
       cleanupCompileResult,
+      setShowLogs,
+      toggleLogs,
     ]
   )
 
   return (
-    <CompileContext.Provider value={value}>{children}</CompileContext.Provider>
+    <LocalCompileContext.Provider value={value}>
+      {children}
+    </LocalCompileContext.Provider>
   )
 }
 
-CompileProvider.propTypes = {
+LocalCompileProvider.propTypes = {
   children: PropTypes.any,
 }
 
-export function useCompileContext(propTypes) {
-  const data = useContext(CompileContext)
-  PropTypes.checkPropTypes(propTypes, data, 'data', 'CompileContext.Provider')
+export function useLocalCompileContext(propTypes) {
+  const data = useContext(LocalCompileContext)
+  PropTypes.checkPropTypes(
+    propTypes,
+    data,
+    'data',
+    'LocalCompileContext.Provider'
+  )
   return data
 }

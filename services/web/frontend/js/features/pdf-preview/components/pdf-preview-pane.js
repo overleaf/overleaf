@@ -4,7 +4,7 @@ import PdfLogsViewer from './pdf-logs-viewer'
 import PdfViewer from './pdf-viewer'
 import LoadingSpinner from '../../../shared/components/loading-spinner'
 import PdfHybridPreviewToolbar from './pdf-preview-hybrid-toolbar'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 function PdfPreviewPane() {
   const { pdfUrl } = useCompileContext()

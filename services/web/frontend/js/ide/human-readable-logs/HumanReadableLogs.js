@@ -28,11 +28,6 @@ export default {
         let type
         if (ruleDetails.ruleId != null) {
           entry.ruleId = ruleDetails.ruleId
-        } else if (ruleDetails.regexToMatch != null) {
-          entry.ruleId = `hint_${ruleDetails.regexToMatch
-            .toString()
-            .replace(/\s/g, '_')
-            .slice(1, -1)}`
         }
         if (ruleDetails.newMessage != null) {
           entry.message = entry.message.replace(
@@ -53,19 +48,6 @@ export default {
           for (type of ruleDetails.types) {
             seenErrorTypes[type] = true
           }
-        }
-
-        if (ruleDetails.humanReadableHint != null) {
-          entry.humanReadableHint = ruleDetails.humanReadableHint
-        }
-
-        if (ruleDetails.humanReadableHintComponent != null) {
-          entry.humanReadableHintComponent =
-            ruleDetails.humanReadableHintComponent
-        }
-
-        if (ruleDetails.extraInfoURL != null) {
-          entry.extraInfoURL = ruleDetails.extraInfoURL
         }
       }
     }

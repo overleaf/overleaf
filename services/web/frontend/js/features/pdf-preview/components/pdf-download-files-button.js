@@ -3,7 +3,7 @@ import PdfFileList from './pdf-file-list'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 function PdfDownloadFilesButton() {
   const { compiling, fileList } = useCompileContext()

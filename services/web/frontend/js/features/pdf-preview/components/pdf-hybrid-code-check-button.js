@@ -1,24 +1,17 @@
 import { memo, useCallback } from 'react'
-import { sendMBOnce } from '../../../infrastructure/event-tracking'
 import { Button } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 function PdfHybridCodeCheckButton() {
-  const { codeCheckFailed, error, setShowLogs } = useCompileContext()
+  const { codeCheckFailed, error, toggleLogs } = useCompileContext()
 
   const { t } = useTranslation()
 
   const handleClick = useCallback(() => {
-    setShowLogs(value => {
-      if (!value) {
-        sendMBOnce('ide-open-logs-once')
-      }
-
-      return !value
-    })
-  }, [setShowLogs])
+    toggleLogs()
+  }, [toggleLogs])
 
   if (!codeCheckFailed) {
     return null

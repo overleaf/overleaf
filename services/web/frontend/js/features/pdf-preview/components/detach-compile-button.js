@@ -1,25 +1,12 @@
-import { memo, useCallback } from 'react'
+import { memo } from 'react'
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
 import { useLayoutContext } from '../../../shared/context/layout-context'
-import { useCompileContext } from '../../../shared/context/compile-context'
-import useDetachAction from '../../../shared/hooks/use-detach-action'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import PdfCompileButtonInner from './pdf-compile-button-inner'
 
 export function DetachCompileButton() {
   const { compiling, hasChanges, startCompile } = useCompileContext()
-
-  const startOrTriggerCompile = useDetachAction(
-    'start-compile',
-    startCompile,
-    'detacher',
-    'detached'
-  )
-
-  const handleStartCompile = useCallback(
-    () => startOrTriggerCompile(),
-    [startOrTriggerCompile]
-  )
 
   return (
     <div
@@ -29,7 +16,7 @@ export function DetachCompileButton() {
       })}
     >
       <PdfCompileButtonInner
-        startCompile={handleStartCompile}
+        startCompile={startCompile}
         compiling={compiling}
       />
     </div>

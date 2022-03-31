@@ -4,7 +4,7 @@ import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
 import classnames from 'classnames'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import PdfCompileButtonInner from './pdf-compile-button-inner'
 
 function PdfCompileButton() {
@@ -84,7 +84,7 @@ function PdfCompileButton() {
         <MenuItem divider />
 
         <MenuItem
-          onSelect={stopCompile}
+          onSelect={() => stopCompile()}
           disabled={!compiling}
           aria-disabled={!compiling}
         >
@@ -92,7 +92,7 @@ function PdfCompileButton() {
         </MenuItem>
 
         <MenuItem
-          onSelect={recompileFromScratch}
+          onSelect={() => recompileFromScratch()}
           disabled={compiling}
           aria-disabled={compiling}
         >

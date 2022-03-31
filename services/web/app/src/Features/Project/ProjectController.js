@@ -948,11 +948,16 @@ const ProjectController = {
               !Features.hasFeature('saas') ||
               (user.features && user.features.symbolPalette)
 
-            res.render('project/editor', {
+            const template =
+              detachRole === 'detached'
+                ? 'project/editor_detached'
+                : 'project/editor'
+            res.render(template, {
               title: project.name,
               priority_title: true,
               bodyClasses: ['editor'],
               project_id: project._id,
+              projectName: project.name,
               user: {
                 id: userId,
                 email: user.email,

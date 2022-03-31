@@ -11,7 +11,7 @@ import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
 import PdfCodeCheckFailedNotice from './pdf-code-check-failed-notice'
 import PdfLogsPaneInfoNotice from './pdf-logs-pane-info-notice'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import PdfLogEntry from './pdf-log-entry'
 
 function PdfLogsViewer() {

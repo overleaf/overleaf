@@ -1,33 +1,21 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef } from 'react'
 
 export default function useCallbackHandlers() {
-  const [handlers, setHandlers] = useState(new Set())
+  const handlersRef = useRef(new Set())
 
-  const addHandler = useCallback(
-    handler => {
-      setHandlers(prev => new Set(prev.add(handler)))
-    },
-    [setHandlers]
-  )
+  const addHandler = useCallback(handler => {
+    handlersRef.current.add(handler)
+  }, [])
 
-  const deleteHandler = useCallback(
-    handler => {
-      setHandlers(prev => {
-        prev.delete(handler)
-        return new Set(prev)
-      })
-    },
-    [setHandlers]
-  )
+  const deleteHandler = useCallback(handler => {
+    handlersRef.current.delete(handler)
+  }, [])
 
-  const callHandlers = useCallback(
-    (...args) => {
-      for (const handler of handlers) {
-        handler(...args)
-      }
-    },
-    [handlers]
-  )
+  const callHandlers = useCallback((...args) => {
+    for (const handler of handlersRef.current) {
+      handler(...args)
+    }
+  }, [])
 
   return { addHandler, deleteHandler, callHandlers }
 }

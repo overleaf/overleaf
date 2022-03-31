@@ -10,7 +10,7 @@ import { buildFileList } from '../js/features/pdf-preview/util/file-list'
 import PdfLogsViewer from '../js/features/pdf-preview/components/pdf-logs-viewer'
 import PdfPreviewError from '../js/features/pdf-preview/components/pdf-preview-error'
 import PdfPreviewHybridToolbar from '../js/features/pdf-preview/components/pdf-preview-hybrid-toolbar'
-import { useCompileContext } from '../js/shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../js/shared/context/detach-compile-context'
 import {
   dispatchDocChanged,
   mockBuildFile,

@@ -1,5 +1,5 @@
 import { lazy, memo } from 'react'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 const PdfJsViewer = lazy(() =>
   import(/* webpackChunkName: "pdf-js-viewer" */ './pdf-js-viewer')

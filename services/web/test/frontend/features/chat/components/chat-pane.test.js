@@ -15,23 +15,26 @@ import { stubMathJax, tearDownMathJaxStubs } from './stubs'
 import sinon from 'sinon'
 
 describe('<ChatPane />', function () {
+  const user = {
+    id: 'fake_user',
+    first_name: 'fake_user_first_name',
+    email: 'fake@example.com',
+  }
+
   beforeEach(function () {
     this.clock = sinon.useFakeTimers({
       toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
     })
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-user', user)
   })
 
   afterEach(function () {
     this.clock.runAll()
     this.clock.restore()
     fetchMock.reset()
+    window.metaAttributesCache = new Map()
   })
-
-  const user = {
-    id: 'fake_user',
-    first_name: 'fake_user_first_name',
-    email: 'fake@example.com',
-  }
 
   const testMessages = [
     {

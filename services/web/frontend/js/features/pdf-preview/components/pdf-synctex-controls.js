@@ -1,10 +1,10 @@
 import classNames from 'classnames'
-import { memo, useCallback, useEffect, useState, useMemo } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useIdeContext } from '../../../shared/context/ide-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { getJSON } from '../../../infrastructure/fetch-json'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -134,32 +134,19 @@ function PdfSynctexControls() {
 
   const { signal } = useAbortController()
 
-  // for detacher editor tab, which cannot access pdfUrl in a scope value in
-  // detached state
-  const [pdfExists, setPdfExists] = useDetachState(
-    'pdf-exists',
-    !!pdfUrl,
-    'detached',
-    'detacher'
-  )
-
-  useEffect(() => {
-    setPdfExists(!!pdfUrl)
-  }, [pdfUrl, setPdfExists])
-
   useEffect(() => {
     const listener = event => setCursorPosition(event.detail)
     window.addEventListener('cursor:editor:update', listener)
     return () => window.removeEventListener('cursor:editor:update', listener)
   }, [ide])
 
-  const [syncToPdfInFlight, setSyncToPdfInFlight] = useDetachState(
-    'sync-to-pdf-inflight',
+  const [syncToPdfInFlight, setSyncToPdfInFlight] = useState(false)
+  const [syncToCodeInFlight, setSyncToCodeInFlight] = useDetachState(
+    'sync-to-code-inflight',
     false,
-    'detached',
-    'detacher'
+    'detacher',
+    'detached'
   )
-  const [syncToCodeInFlight, setSyncToCodeInFlight] = useState(false)
 
   const [, setSynctexError] = useScopeValue('sync_tex_error')
 
@@ -179,7 +166,7 @@ function PdfSynctexControls() {
     return path
   }, [ide])
 
-  const _goToCodeLine = useCallback(
+  const goToCodeLine = useCallback(
     (file, line) => {
       if (file) {
         const doc = ide.fileTreeManager.findEntityByPath(file)
@@ -200,14 +187,7 @@ function PdfSynctexControls() {
     [ide, isMounted, setSynctexError]
   )
 
-  const goToCodeLine = useDetachAction(
-    'go-to-code-line',
-    _goToCodeLine,
-    'detached',
-    'detacher'
-  )
-
-  const _goToPdfLocation = useCallback(
+  const goToPdfLocation = useCallback(
     params => {
       setSyncToPdfInFlight(true)
 
@@ -240,13 +220,6 @@ function PdfSynctexControls() {
     ]
   )
 
-  const goToPdfLocation = useDetachAction(
-    'go-to-pdf-location',
-    _goToPdfLocation,
-    'detacher',
-    'detached'
-  )
-
   const syncToPdf = useCallback(
     cursorPosition => {
       const params = new URLSearchParams({
@@ -260,7 +233,7 @@ function PdfSynctexControls() {
     [getCurrentFilePath, goToPdfLocation]
   )
 
-  const syncToCode = useCallback(
+  const _syncToCode = useCallback(
     (position, visualOffset = 0) => {
       setSyncToCodeInFlight(true)
       // FIXME: this actually works better if it's halfway across the
@@ -317,6 +290,13 @@ function PdfSynctexControls() {
     ]
   )
 
+  const syncToCode = useDetachAction(
+    'sync-to-code',
+    _syncToCode,
+    'detached',
+    'detacher'
+  )
+
   useEffect(() => {
     const listener = event => syncToCode(event.detail)
     window.addEventListener('synctex:sync-to-position', listener)
@@ -325,22 +305,32 @@ function PdfSynctexControls() {
     }
   }, [syncToCode])
 
-  const hasSingleSelectedDoc = useMemo(() => {
+  const [hasSingleSelectedDoc, setHasSingleSelectedDoc] = useDetachState(
+    'has-single-selected-doc',
+    false,
+    'detacher',
+    'detached'
+  )
+
+  useEffect(() => {
     if (selectedEntities.length !== 1) {
-      return false
+      setHasSingleSelectedDoc(false)
+      return
     }
 
     if (selectedEntities[0].type !== 'doc') {
-      return false
+      setHasSingleSelectedDoc(false)
+      return
     }
-    return true
-  }, [selectedEntities])
+
+    setHasSingleSelectedDoc(true)
+  }, [selectedEntities, setHasSingleSelectedDoc])
 
   if (!position) {
     return null
   }
 
-  if (!pdfExists || pdfViewer === 'native') {
+  if (!pdfUrl || pdfViewer === 'native') {
     return null
   }
 

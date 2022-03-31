@@ -18,7 +18,6 @@ describe('<LayoutDropdownButton />', function () {
   beforeEach(function () {
     openStub = sinon.stub(window, 'open')
     window.metaAttributesCache = new Map()
-    fetchMock.post('express:/project/:projectId/compile/stop', () => 204)
   })
 
   afterEach(function () {
@@ -99,11 +98,6 @@ describe('<LayoutDropdownButton />', function () {
 
     it('should show processing', function () {
       screen.getByText('Layout processing')
-    })
-
-    it('should stop compile when detaching', function () {
-      expect(fetchMock.called('express:/project/:projectId/compile/stop')).to.be
-        .true
     })
 
     it('should record event', function () {

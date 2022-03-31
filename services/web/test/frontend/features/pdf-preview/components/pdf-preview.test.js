@@ -350,7 +350,10 @@ describe('<PdfPreview/>', function () {
 
     // click the button
     clearCacheButton.click()
-    expect(clearCacheButton.hasAttribute('disabled')).to.be.true
+    await waitFor(() => {
+      expect(clearCacheButton.hasAttribute('disabled')).to.be.true
+    })
+
     await waitFor(() => {
       expect(clearCacheButton.hasAttribute('disabled')).to.be.false
     })
@@ -382,7 +385,7 @@ describe('<PdfPreview/>', function () {
     expect(clearCacheButton.hasAttribute('disabled')).to.be.false
 
     mockValidPdf()
-    mockClearCache()
+    const finishClearCache = mockDelayed(mockClearCache)
 
     const recompileFromScratch = screen.getByRole('menuitem', {
       name: 'Recompile from scratch',
@@ -390,7 +393,11 @@ describe('<PdfPreview/>', function () {
     })
     recompileFromScratch.click()
 
-    expect(clearCacheButton.hasAttribute('disabled')).to.be.true
+    await waitFor(() => {
+      expect(clearCacheButton.hasAttribute('disabled')).to.be.true
+    })
+
+    finishClearCache()
 
     // wait for compile to finish
     await screen.findByRole('button', { name: 'Compiling…' })

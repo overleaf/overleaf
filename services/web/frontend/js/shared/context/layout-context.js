@@ -108,11 +108,13 @@ export function LayoutProvider({ children }) {
     isLinking: detachIsLinking,
     isLinked: detachIsLinked,
     role: detachRole,
+    isRedundant: detachIsRedundant,
   } = useDetachLayout()
 
   useEffect(() => {
     if (debugPdfDetach) {
       console.log('Layout Effect', {
+        detachIsRedundant,
         detachRole,
         detachIsLinking,
         detachIsLinked,
@@ -121,12 +123,23 @@ export function LayoutProvider({ children }) {
 
     if (detachRole !== 'detacher') return // not in a PDF detacher layout
 
+    if (detachIsRedundant) {
+      changeLayout('sideBySide')
+      return
+    }
+
     if (detachIsLinking || detachIsLinked) {
       // the tab is linked to a detached tab (or about to be linked); show
       // editor only
       changeLayout('flat', 'editor')
     }
-  }, [detachRole, detachIsLinking, detachIsLinked, changeLayout])
+  }, [
+    detachIsRedundant,
+    detachRole,
+    detachIsLinking,
+    detachIsLinked,
+    changeLayout,
+  ])
 
   const value = useMemo(
     () => ({

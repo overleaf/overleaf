@@ -37,7 +37,7 @@ function usePersistedState(key, defaultValue, listen = false) {
         if (event.key === key) {
           // note: this value is read via getItem rather than from event.newValue
           // because getItem handles deserializing the JSON that's stored in localStorage.
-          setValue(localStorage.getItem(key))
+          setValue(localStorage.getItem(key) ?? defaultValue)
         }
       }
 
@@ -47,7 +47,7 @@ function usePersistedState(key, defaultValue, listen = false) {
         window.removeEventListener('storage', listener)
       }
     }
-  }, [key, listen])
+  }, [key, listen, defaultValue])
 
   return [value, updateFunction]
 }

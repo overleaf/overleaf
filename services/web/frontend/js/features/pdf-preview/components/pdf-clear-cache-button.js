@@ -2,7 +2,7 @@ import Icon from '../../../shared/components/icon'
 import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 function PdfClearCacheButton() {
   const { compiling, clearCache, clearingCache } = useCompileContext()
@@ -14,7 +14,7 @@ function PdfClearCacheButton() {
       bsSize="small"
       bsStyle="danger"
       className="logs-pane-actions-clear-cache"
-      onClick={clearCache}
+      onClick={() => clearCache()}
       disabled={clearingCache || compiling}
     >
       {clearingCache ? <Icon type="refresh" spin /> : <Icon type="trash-o" />}

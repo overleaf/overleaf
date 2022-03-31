@@ -16,6 +16,8 @@ describe('FileTree Create Folder Flow', function () {
 
   beforeEach(function () {
     global.requestAnimationFrame = sinon.stub()
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-user', { id: 'user1' })
   })
 
   afterEach(function () {
@@ -24,6 +26,7 @@ describe('FileTree Create Folder Flow', function () {
     onSelect.reset()
     onInit.reset()
     cleanUpContext()
+    window.metaAttributesCache = new Map()
   })
 
   it('add to root when no files are selected', async function () {

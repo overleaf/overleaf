@@ -10,7 +10,8 @@ import { FileTreeDataProvider } from '../../../frontend/js/shared/context/file-t
 import { EditorProvider } from '../../../frontend/js/shared/context/editor-context'
 import { DetachProvider } from '../../../frontend/js/shared/context/detach-context'
 import { LayoutProvider } from '../../../frontend/js/shared/context/layout-context'
-import { CompileProvider } from '../../../frontend/js/shared/context/compile-context'
+import { LocalCompileProvider } from '../../../frontend/js/shared/context/local-compile-context'
+import { DetachCompileProvider } from '../../../frontend/js/shared/context/detach-compile-context'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -110,7 +111,9 @@ export function EditorProviders({
               <EditorProvider settings={{}}>
                 <DetachProvider>
                   <LayoutProvider>
-                    <CompileProvider>{children}</CompileProvider>
+                    <LocalCompileProvider>
+                      <DetachCompileProvider>{children}</DetachCompileProvider>
+                    </LocalCompileProvider>
                   </LayoutProvider>
                 </DetachProvider>
               </EditorProvider>

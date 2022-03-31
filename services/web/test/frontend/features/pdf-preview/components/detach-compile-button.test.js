@@ -1,6 +1,6 @@
 import DetachCompileButton from '../../../../../frontend/js/features/pdf-preview/components/detach-compile-button'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
-import { screen, fireEvent } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import sysendTestHelper from '../../../helpers/sysend'
 import { expect } from 'chai'
 
@@ -47,24 +47,5 @@ describe('<DetachCompileButton/>', function () {
         name: 'Recompile',
       })
     ).to.not.exist
-  })
-
-  it('send compile clicks via detached action', async function () {
-    window.metaAttributesCache.set('ol-detachRole', 'detacher')
-    renderWithEditorContext(<DetachCompileButton />)
-    sysendTestHelper.receiveMessage({
-      role: 'detached',
-      event: 'connected',
-    })
-
-    const compileButton = await screen.getByRole('button', {
-      name: 'Recompile',
-    })
-    fireEvent.click(compileButton)
-    expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
-      role: 'detacher',
-      event: 'action-start-compile',
-      data: { args: [] },
-    })
   })
 })

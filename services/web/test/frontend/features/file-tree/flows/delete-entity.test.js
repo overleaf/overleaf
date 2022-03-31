@@ -14,11 +14,17 @@ describe('FileTree Delete Entity Flow', function () {
   const onSelect = sinon.stub()
   const onInit = sinon.stub()
 
+  beforeEach(function () {
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-user', { id: 'user1' })
+  })
+
   afterEach(function () {
     fetchMock.restore()
     onSelect.reset()
     onInit.reset()
     cleanUpContext()
+    window.metaAttributesCache = new Map()
   })
 
   describe('single entity', function () {

@@ -7,7 +7,6 @@ import IconChecked from '../../../shared/components/icon-checked'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import IconEditorOnly from './icon-editor-only'
 import IconPdfOnly from './icon-pdf-only'
-import { useCompileContext } from '../../../shared/context/compile-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 
@@ -59,13 +58,10 @@ function LayoutDropdownButton() {
     pdfLayout,
   } = useLayoutContext(layoutContextPropTypes)
 
-  const { stopCompile } = useCompileContext()
-
   const handleDetach = useCallback(() => {
     detach()
-    stopCompile()
     eventTracking.sendMB('project-layout-detach')
-  }, [detach, stopCompile])
+  }, [detach])
 
   const handleReattach = useCallback(() => {
     if (detachRole !== 'detacher') {

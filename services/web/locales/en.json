@@ -1580,6 +1580,7 @@
   "project_layout_sharing_submission": "Project Layout, Sharing, and Submission",
   "pdf_in_separate_tab": "PDF in separate tab",
   "tab_no_longer_connected": "This tab is no longer connected with the editor",
+  "tab_connecting": "Connecting with the editor",
   "redirect_to_editor": "Redirect to editor",
   "layout_processing": "Layout processing",
   "show_in_code": "Show in code",

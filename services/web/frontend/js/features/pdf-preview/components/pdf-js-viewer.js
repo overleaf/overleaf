@@ -8,7 +8,7 @@ import { buildHighlightElement } from '../util/highlights'
 import PDFJSWrapper from '../util/pdf-js-wrapper'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import ErrorBoundaryFallback from './error-boundary-fallback'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import getMeta from '../../../utils/meta'
 
 function PdfJsViewer({ url }) {

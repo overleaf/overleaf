@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
 import { memo } from 'react'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 function PdfHybridDownloadButton() {
   const { pdfDownloadUrl } = useCompileContext()

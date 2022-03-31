@@ -7,7 +7,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import fs from 'fs'
 import path from 'path'
 import { expect } from 'chai'
-import { useCompileContext } from '../../../../../frontend/js/shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../../../frontend/js/shared/context/detach-compile-context'
 import { useFileTreeData } from '../../../../../frontend/js/shared/context/file-tree-data-context'
 import { useEffect } from 'react'
 
@@ -122,7 +122,6 @@ const WithSelectedEntities = ({ mockSelectedEntities = [] }) => {
 
   return null
 }
-
 describe('<PdfSynctexControls/>', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
@@ -185,7 +184,6 @@ describe('<PdfSynctexControls/>', function () {
         .true
     })
   })
-
   it('disables button when multiple entities are selected', async function () {
     renderWithEditorContext(
       <>
@@ -236,9 +234,14 @@ describe('<PdfSynctexControls/>', function () {
     })
 
     it('does not have go to PDF location button nor arrow icon', async function () {
-      const { container } = renderWithEditorContext(<PdfSynctexControls />, {
-        scope,
-      })
+      const { container } = renderWithEditorContext(
+        <>
+          <WithPosition mockPosition={mockPosition} />
+          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
+          <PdfSynctexControls />
+        </>,
+        { scope }
+      )
 
       expect(
         await screen.queryByRole('button', {
@@ -249,7 +252,50 @@ describe('<PdfSynctexControls/>', function () {
       expect(container.querySelector('.synctex-control-icon')).to.not.exist
     })
 
-    it('send go to PDF location action', async function () {
+    it('send set highlights action', async function () {
+      renderWithEditorContext(
+        <>
+          <WithPosition mockPosition={mockPosition} />
+          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
+          <PdfSynctexControls />
+        </>,
+        { scope }
+      )
+      sysendTestHelper.resetHistory()
+
+      const syncToPdfButton = await screen.findByRole('button', {
+        name: 'Go to code location in PDF',
+      })
+
+      // mock editor cursor position update
+      fireEvent(
+        window,
+        new CustomEvent('cursor:editor:update', {
+          detail: { row: 100, column: 10 },
+        })
+      )
+
+      expect(syncToPdfButton.disabled).to.be.false
+
+      fireEvent.click(syncToPdfButton)
+
+      expect(syncToPdfButton.disabled).to.be.true
+
+      await waitFor(() => {
+        expect(fetchMock.called('express:/project/:projectId/sync/code')).to.be
+          .true
+      })
+
+      // synctex is called locally and the result are broadcast for the detached
+      // tab
+      expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
+        role: 'detacher',
+        event: 'action-setHighlights',
+        data: { args: [mockHighlights] },
+      })
+    })
+
+    it('reacts to sync to code action', async function () {
       renderWithEditorContext(
         <>
           <WithPosition mockPosition={mockPosition} />
@@ -259,74 +305,23 @@ describe('<PdfSynctexControls/>', function () {
         { scope }
       )
 
-      sysendTestHelper.resetHistory()
-
-      const syncToPdfButton = await screen.findByRole('button', {
-        name: 'Go to code location in PDF',
+      await waitFor(() => {
+        expect(fetchMock.called('express:/project/:projectId/compile')).to.be
+          .true
       })
-
-      // mock editor cursor position update
-      fireEvent(
-        window,
-        new CustomEvent('cursor:editor:update', {
-          detail: { row: 100, column: 10 },
-        })
-      )
-
-      fireEvent.click(syncToPdfButton)
-
-      // the button is only disabled when the state is updated via sysend
-      expect(syncToPdfButton.disabled).to.be.false
-
-      expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
-        role: 'detacher',
-        event: 'action-go-to-pdf-location',
-        data: { args: ['file=&line=101&column=10'] },
-      })
-    })
-
-    it('update inflight state', async function () {
-      const { container } = renderWithEditorContext(
-        <>
-          <WithPosition mockPosition={mockPosition} />
-          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
-          <PdfSynctexControls />
-        </>,
-        { scope }
-      )
-      sysendTestHelper.resetHistory()
-
-      const syncToPdfButton = await screen.findByRole('button', {
-        name: 'Go to code location in PDF',
-      })
-
-      // mock editor cursor position update
-      fireEvent(
-        window,
-        new CustomEvent('cursor:editor:update', {
-          detail: { row: 100, column: 10 },
-        })
-      )
 
       sysendTestHelper.receiveMessage({
         role: 'detached',
-        event: 'state-sync-to-pdf-inflight',
-        data: { value: true },
+        event: 'action-sync-to-code',
+        data: {
+          args: [mockPosition],
+        },
       })
-      expect(syncToPdfButton.disabled).to.be.true
-      expect(container.querySelectorAll('.synctex-spin-icon').length).to.equal(
-        1
-      )
 
-      sysendTestHelper.receiveMessage({
-        role: 'detached',
-        event: 'state-sync-to-pdf-inflight',
-        data: { value: false },
+      await waitFor(() => {
+        expect(fetchMock.called('express:/project/:projectId/sync/pdf')).to.be
+          .true
       })
-      expect(syncToPdfButton.disabled).to.be.false
-      expect(container.querySelectorAll('.synctex-spin-icon').length).to.equal(
-        0
-      )
     })
   })
 
@@ -336,9 +331,13 @@ describe('<PdfSynctexControls/>', function () {
     })
 
     it('does not have go to code location button nor arrow icon', async function () {
-      const { container } = renderWithEditorContext(<PdfSynctexControls />, {
-        scope,
-      })
+      const { container } = renderWithEditorContext(
+        <>
+          <WithPosition mockPosition={mockPosition} />
+          <PdfSynctexControls />
+        </>,
+        { scope }
+      )
 
       expect(
         await screen.queryByRole('button', {
@@ -349,102 +348,90 @@ describe('<PdfSynctexControls/>', function () {
       expect(container.querySelector('.synctex-control-icon')).to.not.exist
     })
 
-    it('send go to code line action and update inflight state', async function () {
+    it('send go to code line action', async function () {
       const { container } = renderWithEditorContext(
         <>
           <WithPosition mockPosition={mockPosition} />
-          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
           <PdfSynctexControls />
         </>,
         { scope }
       )
-      sysendTestHelper.resetHistory()
 
       const syncToCodeButton = await screen.findByRole('button', {
         name: /Go to PDF location in code/,
       })
+      expect(syncToCodeButton.disabled).to.be.true
+
+      sysendTestHelper.receiveMessage({
+        role: 'detached',
+        event: 'state-has-single-selected-doc',
+        data: { value: true },
+      })
+      expect(syncToCodeButton.disabled).to.be.false
 
       sysendTestHelper.resetHistory()
+
+      fireEvent.click(syncToCodeButton)
+
+      // the button is only disabled when the state is updated via sysend
+      expect(syncToCodeButton.disabled).to.be.false
+      expect(container.querySelectorAll('.synctex-spin-icon').length).to.equal(
+        0
+      )
+
+      expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
+        role: 'detached',
+        event: 'action-sync-to-code',
+        data: {
+          args: [mockPosition, 72],
+        },
+      })
+    })
+
+    it('update inflight state', async function () {
+      const { container } = renderWithEditorContext(
+        <>
+          <WithPosition mockPosition={mockPosition} />
+          <PdfSynctexControls />
+        </>,
+        { scope }
+      )
+      sysendTestHelper.receiveMessage({
+        role: 'detached',
+        event: 'state-has-single-selected-doc',
+        data: { value: true },
+      })
+
+      const syncToCodeButton = await screen.findByRole('button', {
+        name: /Go to PDF location in code/,
+      })
 
       expect(syncToCodeButton.disabled).to.be.false
       expect(container.querySelectorAll('.synctex-spin-icon').length).to.equal(
         0
       )
 
-      fireEvent.click(syncToCodeButton)
+      sysendTestHelper.receiveMessage({
+        role: 'detacher',
+        event: 'state-sync-to-code-inflight',
+        data: { value: true },
+      })
 
       expect(syncToCodeButton.disabled).to.be.true
       expect(container.querySelectorAll('.synctex-spin-icon').length).to.equal(
         1
       )
 
-      await waitFor(() => {
-        expect(fetchMock.called('express:/project/:projectId/sync/pdf')).to.be
-          .true
-      })
-
-      expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
-        role: 'detached',
-        event: 'action-go-to-code-line',
-        data: { args: ['main.tex', 100] },
-      })
-    })
-
-    it('sends PDF exists state', async function () {
-      renderWithEditorContext(
-        <>
-          <WithPosition mockPosition={mockPosition} />
-          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
-          <PdfSynctexControls />
-        </>,
-        { scope }
-      )
-      sysendTestHelper.resetHistory()
-
-      await waitFor(() => {
-        expect(fetchMock.called('express:/project/:projectId/compile')).to.be
-          .true
-      })
-      expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
-        role: 'detached',
-        event: 'state-pdf-exists',
-        data: { value: true },
-      })
-    })
-
-    it('reacts to go to PDF location action', async function () {
-      renderWithEditorContext(
-        <>
-          <WithPosition mockPosition={mockPosition} />
-          <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
-          <PdfSynctexControls />
-        </>,
-        { scope }
-      )
-      sysendTestHelper.resetHistory()
-
-      await waitFor(() => {
-        expect(fetchMock.called('express:/project/:projectId/compile')).to.be
-          .true
-      })
-      sysendTestHelper.spy.broadcast.resetHistory()
-
       sysendTestHelper.receiveMessage({
         role: 'detacher',
-        event: 'action-go-to-pdf-location',
-        data: { args: ['file=&line=101&column=10'] },
-      })
-
-      await waitFor(() => {
-        expect(fetchMock.called('express:/project/:projectId/sync/code')).to.be
-          .true
-      })
-
-      expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
-        role: 'detached',
-        event: 'state-sync-to-pdf-inflight',
+        event: 'state-sync-to-code-inflight',
         data: { value: false },
       })
+
+      expect(syncToCodeButton.disabled).to.be.false
+      expect(container.querySelectorAll('.synctex-spin-icon').length).to.equal(
+        0
+      )
     })
   })
 })

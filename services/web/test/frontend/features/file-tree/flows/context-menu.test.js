@@ -12,10 +12,16 @@ describe('FileTree Context Menu Flow', function () {
   const onSelect = sinon.stub()
   const onInit = sinon.stub()
 
+  beforeEach(function () {
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-user', { id: 'user1' })
+  })
+
   afterEach(function () {
     onSelect.reset()
     onInit.reset()
     cleanUpContext()
+    window.metaAttributesCache = new Map()
   })
 
   it('opens on contextMenu event', async function () {

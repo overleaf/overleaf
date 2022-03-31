@@ -1,24 +1,17 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Label, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { sendMBOnce } from '../../../infrastructure/event-tracking'
 import Icon from '../../../shared/components/icon'
-import { useCompileContext } from '../../../shared/context/compile-context'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 function PdfHybridLogsButton() {
-  const { error, logEntries, setShowLogs, showLogs } = useCompileContext()
+  const { error, logEntries, toggleLogs, showLogs } = useCompileContext()
 
   const { t } = useTranslation()
 
   const handleClick = useCallback(() => {
-    setShowLogs(value => {
-      if (!value) {
-        sendMBOnce('ide-open-logs-once')
-      }
-
-      return !value
-    })
-  }, [setShowLogs])
+    toggleLogs()
+  }, [toggleLogs])
 
   const errorCount = Number(logEntries?.errors?.length)
   const warningCount = Number(logEntries?.warnings?.length)

@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import PropTypes from 'prop-types'
-import useScopeValue from '../hooks/use-scope-value'
+import getMeta from '../../utils/meta'
 
 export const UserContext = createContext()
 
@@ -18,7 +18,7 @@ UserContext.Provider.propTypes = {
 }
 
 export function UserProvider({ children }) {
-  const [user] = useScopeValue('user', true)
+  const user = getMeta('ol-user')
 
   return <UserContext.Provider value={user}>{children}</UserContext.Provider>
 }

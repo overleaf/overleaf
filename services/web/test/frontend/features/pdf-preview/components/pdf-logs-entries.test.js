@@ -17,9 +17,7 @@ describe('<PdfLogsEntries/>', function () {
       message: 'LaTeX Error',
       content: 'See the LaTeX manual',
       raw: '',
-      ruleId: 'latex_error',
-      humanReadableHint: '',
-      humanReadableHintComponent: <></>,
+      ruleId: 'hint_misplaced_alignment_tab_character',
       key: '',
     },
   ]
@@ -34,6 +32,14 @@ describe('<PdfLogsEntries/>', function () {
     window.metaAttributesCache = new Map()
     sysendTestHelper.resetHistory()
     fileTreeManager.findEntityByPath.resetHistory()
+  })
+
+  it('displays human readable hint', async function () {
+    renderWithEditorContext(<PdfLogsEntries entries={logEntries} />, {
+      fileTreeManager,
+      editorManager,
+    })
+    screen.getByText(/You have placed an alignment tab character/)
   })
 
   it('opens doc on click', async function () {

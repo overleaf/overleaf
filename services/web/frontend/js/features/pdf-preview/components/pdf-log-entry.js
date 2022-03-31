@@ -3,8 +3,10 @@ import classNames from 'classnames'
 import { memo, useCallback } from 'react'
 import PreviewLogEntryHeader from '../../preview/components/preview-log-entry-header'
 import PdfLogEntryContent from './pdf-log-entry-content'
+import HumanReadableLogsHints from '../../../ide/human-readable-logs/HumanReadableLogsHints'
 
 function PdfLogEntry({
+  ruleId,
   headerTitle,
   headerIcon,
   rawContent,
@@ -20,6 +22,12 @@ function PdfLogEntry({
   onSourceLocationClick,
   onClose,
 }) {
+  if (ruleId && HumanReadableLogsHints[ruleId]) {
+    const hint = HumanReadableLogsHints[ruleId]
+    formattedContent = hint.formattedContent
+    extraInfoURL = hint.extraInfoURL
+  }
+
   const handleLogEntryLinkClick = useCallback(
     event => {
       event.preventDefault()
@@ -56,6 +64,7 @@ function PdfLogEntry({
 }
 
 PdfLogEntry.propTypes = {
+  ruleId: PropTypes.string,
   sourceLocation: PreviewLogEntryHeader.propTypes.sourceLocation,
   headerTitle: PropTypes.string,
   headerIcon: PropTypes.element,

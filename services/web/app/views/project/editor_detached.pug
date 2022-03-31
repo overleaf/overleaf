@@ -1,0 +1,16 @@
+extends ../layout
+
+block entrypointVar
+	- entrypoint = 'ide-detached'
+
+block vars
+	- var suppressNavbar = true
+	- var suppressFooter = true
+	- var suppressSkipToContent = true
+	- metadata.robotsNoindexNofollow = true
+
+block content
+	#pdf-preview-detached-root()
+
+block append meta
+	include ./editor/meta

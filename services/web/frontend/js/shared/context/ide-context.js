@@ -1,5 +1,6 @@
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useState } from 'react'
 import PropTypes from 'prop-types'
+import { getMockIde } from './mock/mock-ide'
 
 const IdeContext = createContext()
 
@@ -20,11 +21,13 @@ export function useIdeContext() {
 }
 
 export function IdeProvider({ ide, children }) {
-  return <IdeContext.Provider value={ide}>{children}</IdeContext.Provider>
+  const [value] = useState(() => ide || getMockIde())
+
+  return <IdeContext.Provider value={value}>{children}</IdeContext.Provider>
 }
 IdeProvider.propTypes = {
   children: PropTypes.any.isRequired,
   ide: PropTypes.shape({
     $scope: PropTypes.object.isRequired,
-  }).isRequired,
+  }),
 }

@@ -25,10 +25,15 @@ describe('ChatContext', function () {
     cleanUpContext()
 
     stubMathJax()
+
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-user', user)
   })
 
   afterEach(function () {
     tearDownMathJaxStubs()
+
+    window.metaAttributesCache = new Map()
   })
 
   describe('socket connection', function () {
@@ -42,7 +47,7 @@ describe('ChatContext', function () {
 
     it('subscribes when mounted', function () {
       const socket = new EventEmitter()
-      renderChatContextHook({ user, socket })
+      renderChatContextHook({ socket })
 
       // Assert that there is 1 listener
       expect(socket.rawListeners('new-chat-message').length).to.equal(1)
@@ -50,7 +55,7 @@ describe('ChatContext', function () {
 
     it('unsubscribes when unmounted', function () {
       const socket = new EventEmitter()
-      const { unmount } = renderChatContextHook({ user, socket })
+      const { unmount } = renderChatContextHook({ socket })
 
       unmount()
 
@@ -62,7 +67,6 @@ describe('ChatContext', function () {
       // Mock socket: we only need to emit events, not mock actual connections
       const socket = new EventEmitter()
       const { result, waitForNextUpdate } = renderChatContextHook({
-        user,
         socket,
       })
 
@@ -93,7 +97,6 @@ describe('ChatContext', function () {
     it("doesn't add received messages from the current user if a message was just sent", async function () {
       const socket = new EventEmitter()
       const { result, waitForNextUpdate } = renderChatContextHook({
-        user,
         socket,
       })
 
@@ -123,7 +126,6 @@ describe('ChatContext', function () {
     it('adds the new message from the current user if another message was received after sending', async function () {
       const socket = new EventEmitter()
       const { result, waitForNextUpdate } = renderChatContextHook({
-        user,
         socket,
       })
 
@@ -187,7 +189,7 @@ describe('ChatContext', function () {
     })
 
     it('adds messages to the list', async function () {
-      const { result, waitForNextUpdate } = renderChatContextHook({ user })
+      const { result, waitForNextUpdate } = renderChatContextHook({})
 
       result.current.loadInitialMessages()
       await waitForNextUpdate()
@@ -196,7 +198,7 @@ describe('ChatContext', function () {
     })
 
     it("won't load messages a second time", async function () {
-      const { result, waitForNextUpdate } = renderChatContextHook({ user })
+      const { result, waitForNextUpdate } = renderChatContextHook({})
 
       result.current.loadInitialMessages()
       await waitForNextUpdate()
@@ -211,7 +213,7 @@ describe('ChatContext', function () {
     it('provides an error on failure', async function () {
       fetchMock.reset()
       fetchMock.get('express:/project/:projectId/messages', 500)
-      const { result, waitForNextUpdate } = renderChatContextHook({ user })
+      const { result, waitForNextUpdate } = renderChatContextHook({})
 
       result.current.loadInitialMessages()
       await waitForNextUpdate()
@@ -233,7 +235,7 @@ describe('ChatContext', function () {
         },
       ])
 
-      const { result, waitForNextUpdate } = renderChatContextHook({ user })
+      const { result, waitForNextUpdate } = renderChatContextHook({})
 
       result.current.loadMoreMessages()
       await waitForNextUpdate()
@@ -267,7 +269,7 @@ describe('ChatContext', function () {
           { overwriteRoutes: false }
         )
 
-      const { result, waitForNextUpdate } = renderChatContextHook({ user })
+      const { result, waitForNextUpdate } = renderChatContextHook({})
 
       result.current.loadMoreMessages()
       await waitForNextUpdate()
@@ -297,7 +299,7 @@ describe('ChatContext', function () {
         createMessages(49, user)
       )
 
-      const { result, waitForNextUpdate } = renderChatContextHook({ user })
+      const { result, waitForNextUpdate } = renderChatContextHook({})
 
       result.current.loadMoreMessages()
       await waitForNextUpdate()
@@ -322,7 +324,6 @@ describe('ChatContext', function () {
 
       const socket = new EventEmitter()
       const { result, waitForNextUpdate } = renderChatContextHook({
-        user,
         socket,
       })
 
@@ -367,7 +368,7 @@ describe('ChatContext', function () {
     it('provides an error on failures', async function () {
       fetchMock.reset()
       fetchMock.get('express:/project/:projectId/messages', 500)
-      const { result, waitForNextUpdate } = renderChatContextHook({ user })
+      const { result, waitForNextUpdate } = renderChatContextHook({})
 
       result.current.loadMoreMessages()
       await waitForNextUpdate()
@@ -387,7 +388,7 @@ describe('ChatContext', function () {
     })
 
     it('optimistically adds the message to the list', function () {
-      const { result } = renderChatContextHook({ user })
+      const { result } = renderChatContextHook({})
 
       result.current.sendMessage('sent message')
 
@@ -397,7 +398,7 @@ describe('ChatContext', function () {
     })
 
     it('POSTs the message to the backend', function () {
-      const { result } = renderChatContextHook({ user })
+      const { result } = renderChatContextHook({})
 
       result.current.sendMessage('sent message')
 
@@ -409,7 +410,7 @@ describe('ChatContext', function () {
     })
 
     it("doesn't send if the content is empty", function () {
-      const { result } = renderChatContextHook({ user })
+      const { result } = renderChatContextHook({})
 
       result.current.sendMessage('')
 
@@ -426,7 +427,7 @@ describe('ChatContext', function () {
       fetchMock
         .get('express:/project/:projectId/messages', [])
         .postOnce('express:/project/:projectId/messages', 500)
-      const { result, waitForNextUpdate } = renderChatContextHook({ user })
+      const { result, waitForNextUpdate } = renderChatContextHook({})
 
       result.current.sendMessage('sent message')
       await waitForNextUpdate()
@@ -444,7 +445,7 @@ describe('ChatContext', function () {
 
     it('increments unreadMessageCount when a new message is received', function () {
       const socket = new EventEmitter()
-      const { result } = renderChatContextHook({ user, socket })
+      const { result } = renderChatContextHook({ socket })
 
       // Receive a new message from the socket
       socket.emit('new-chat-message', {
@@ -459,7 +460,7 @@ describe('ChatContext', function () {
 
     it('resets unreadMessageCount when markMessagesAsRead is called', function () {
       const socket = new EventEmitter()
-      const { result } = renderChatContextHook({ user, socket })
+      const { result } = renderChatContextHook({ socket })
 
       // Receive a new message from the socket, incrementing unreadMessageCount
       // by 1
