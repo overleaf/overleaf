@@ -21,15 +21,25 @@ const QUEUES_JOB_OPTIONS = {
   },
 }
 
+const ANALYTICS_QUEUES = [
+  'analytics-events',
+  'analytics-editing-sessions',
+  'analytics-user-properties',
+  'post-registration-analytics',
+]
+
 const queues = {}
 
 function getQueue(queueName) {
   if (!queues[queueName]) {
+    const redisOptions = ANALYTICS_QUEUES.includes(queueName)
+      ? Settings.redis.analyticsQueues
+      : Settings.redis.queues
     const jobOptions = QUEUES_JOB_OPTIONS[queueName] || {}
     queues[queueName] = new Queue(queueName, {
       // this configuration is duplicated in /services/analytics/app/js/Queues.js
       // and needs to be manually kept in sync whenever modified
-      redis: Settings.redis.queues,
+      redis: redisOptions,
       defaultJobOptions: {
         removeOnComplete: MAX_COMPLETED_JOBS_RETAINED,
         removeOnFail: MAX_FAILED_JOBS_RETAINED,
