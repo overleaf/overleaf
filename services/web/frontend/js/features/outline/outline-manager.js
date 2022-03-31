@@ -31,12 +31,6 @@ class OutlineManager {
       this.broadcastChangeEvent()
     })
 
-    scope.$watch('openFile.name', openFileName => {
-      this.isTexFile = isValidTeXFile(openFileName)
-      this.updateOutline()
-      this.broadcastChangeEvent()
-    })
-
     scope.$on('doc:changed', () => {
       this.updateOutline()
       this.broadcastChangeEvent()
