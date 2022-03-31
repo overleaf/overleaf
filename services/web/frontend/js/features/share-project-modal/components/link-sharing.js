@@ -8,6 +8,7 @@ import { setProjectAccessLevel } from '../utils/api'
 import CopyLink from '../../../shared/components/copy-link'
 import { useProjectContext } from '../../../shared/context/project-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
+import { useUserContext } from '../../../shared/context/user-context'
 
 export default function LinkSharing() {
   const [inflight, setInflight] = useState(false)
@@ -204,6 +205,8 @@ export function ReadOnlyTokenLink() {
 }
 
 function AccessToken({ token, path, tooltipId }) {
+  const { isAdmin } = useUserContext()
+
   if (!token) {
     return (
       <pre className="access-token">
@@ -214,7 +217,11 @@ function AccessToken({ token, path, tooltipId }) {
     )
   }
 
-  const link = `${window.location.origin}${path}${token}`
+  let origin = window.location.origin
+  if (isAdmin) {
+    origin = window.ExposedSettings.siteUrl
+  }
+  const link = `${origin}${path}${token}`
 
   return (
     <pre className="access-token">
