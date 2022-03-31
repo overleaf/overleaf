@@ -107,6 +107,10 @@ const UserPagesController = {
       if (err != null) {
         return next(err)
       }
+      if (!user) {
+        // The user has just deleted their account.
+        return res.redirect('/logout')
+      }
       res.render('user/settings', {
         title: 'account_settings',
         user,
