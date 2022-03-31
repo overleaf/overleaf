@@ -8,6 +8,9 @@ const OError = require('@overleaf/o-error')
 const { expressify } = require('../../util/promises')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
+const {
+  shouldRedirectToAdminPanel,
+} = require('../Helpers/AdminAuthorizationHelper')
 
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
@@ -82,6 +85,12 @@ async function tokenAccessPage(req, res, next) {
   const { token } = req.params
   if (!TokenAccessHandler.isValidToken(token)) {
     return next(new Errors.NotFoundError())
+  }
+  if (shouldRedirectToAdminPanel(SessionManager.getSessionUser(req.session))) {
+    const path = TokenAccessHandler.isReadOnlyToken(token)
+      ? `/read/${token}`
+      : `/${token}`
+    return res.redirect(settings.adminUrl + path)
   }
   try {
     if (TokenAccessHandler.isReadOnlyToken(token)) {
