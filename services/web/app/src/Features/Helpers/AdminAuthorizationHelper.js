@@ -2,7 +2,7 @@ const Settings = require('@overleaf/settings')
 
 module.exports = {
   hasAdminAccess,
-  shouldRedirectToAdminPanel,
+  shouldRedirectToAdminDomain,
 }
 
 function hasAdminAccess(user) {
@@ -11,8 +11,9 @@ function hasAdminAccess(user) {
   return Boolean(user.isAdmin)
 }
 
-function shouldRedirectToAdminPanel(user) {
+function shouldRedirectToAdminDomain(user) {
   if (Settings.adminPrivilegeAvailable) return false
+  if (!Settings.adminUrl) return false
   if (!user) return false
   return Boolean(user.isAdmin)
 }

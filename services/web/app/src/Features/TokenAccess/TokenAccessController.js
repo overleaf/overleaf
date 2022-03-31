@@ -9,8 +9,8 @@ const { expressify } = require('../../util/promises')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const {
-  shouldRedirectToAdminPanel,
-} = require('../Helpers/AdminAuthorizationHelper')
+  handleAdminDomainRedirect,
+} = require('../Authorization/AuthorizationMiddleware')
 
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
@@ -86,11 +86,9 @@ async function tokenAccessPage(req, res, next) {
   if (!TokenAccessHandler.isValidToken(token)) {
     return next(new Errors.NotFoundError())
   }
-  if (shouldRedirectToAdminPanel(SessionManager.getSessionUser(req.session))) {
-    const path = TokenAccessHandler.isReadOnlyToken(token)
-      ? `/read/${token}`
-      : `/${token}`
-    return res.redirect(settings.adminUrl + path)
+  if (handleAdminDomainRedirect(req, res)) {
+    // Admin users do not join the project, but view it on the admin domain.
+    return
   }
   try {
     if (TokenAccessHandler.isReadOnlyToken(token)) {

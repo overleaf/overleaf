@@ -24,9 +24,14 @@ function getSafeRedirectPath(value) {
   return safePath
 }
 
-const UrlHelper = {
+function getSafeAdminDomainRedirect(path) {
+  return Settings.adminUrl + (getSafeRedirectPath(path) || '/')
+}
+
+module.exports = {
   getCanonicalURL,
   getSafeRedirectPath,
+  getSafeAdminDomainRedirect,
   wrapUrlWithProxy(url) {
     // TODO: Consider what to do for Community and Enterprise edition?
     if (!Settings.apis.linkedUrlProxy.url) {
@@ -42,5 +47,3 @@ const UrlHelper = {
     return url
   },
 }
-
-module.exports = UrlHelper

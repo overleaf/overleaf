@@ -3,6 +3,7 @@ const async = require('async')
 const User = require('./helpers/User')
 const request = require('./helpers/request')
 const settings = require('@overleaf/settings')
+const Features = require('../../../app/src/infrastructure/Features')
 
 const expectErrorResponse = require('./helpers/expectErrorResponse')
 
@@ -75,7 +76,7 @@ function trySettingsWriteAccess(user, projectId, test, callback) {
   )
 }
 
-function tryAdminAccess(user, projectId, test, callback) {
+function tryProjectAdminAccess(user, projectId, test, callback) {
   async.series(
     [
       cb =>
@@ -115,6 +116,44 @@ function tryAdminAccess(user, projectId, test, callback) {
   )
 }
 
+function tryAdminAccess(user, test, callback) {
+  async.series(
+    [
+      cb =>
+        user.request.get(
+          {
+            uri: '/admin',
+          },
+          (error, response, body) => {
+            if (error != null) {
+              return cb(error)
+            }
+            test(response, body)
+            cb()
+          }
+        ),
+      cb => {
+        if (!Features.hasFeature('saas')) {
+          return cb()
+        }
+        user.request.get(
+          {
+            uri: `/admin/user/${user._id}`,
+          },
+          (error, response, body) => {
+            if (error != null) {
+              return cb(error)
+            }
+            test(response, body)
+            cb()
+          }
+        )
+      },
+    ],
+    callback
+  )
+}
+
 function tryContentAccess(user, projectId, test, callback) {
   // The real-time service calls this end point to determine the user's
   // permissions.
@@ -143,6 +182,27 @@ function tryContentAccess(user, projectId, test, callback) {
       test(response, body)
       callback()
     }
+  )
+}
+
+function expectAdminAccess(user, callback) {
+  tryAdminAccess(
+    user,
+    response => expect(response.statusCode).to.be.oneOf([200, 204]),
+    callback
+  )
+}
+
+function expectRedirectedAdminAccess(user, callback) {
+  tryAdminAccess(
+    user,
+    response => {
+      expect(response.statusCode).to.equal(302)
+      expect(response.headers.location).to.equal(
+        settings.adminUrl + response.request.uri.pathname
+      )
+    },
+    callback
   )
 }
 
@@ -204,8 +264,8 @@ function expectSettingsWriteAccess(user, projectId, callback) {
   )
 }
 
-function expectAdminAccess(user, projectId, callback) {
-  tryAdminAccess(
+function expectProjectAdminAccess(user, projectId, callback) {
+  tryProjectAdminAccess(
     user,
     projectId,
     (response, body) => expect(response.statusCode).to.be.oneOf([200, 204]),
@@ -261,8 +321,8 @@ function expectNoRenameProjectAccess(user, projectId, callback) {
   )
 }
 
-function expectNoAdminAccess(user, projectId, callback) {
-  tryAdminAccess(
+function expectNoProjectAdminAccess(user, projectId, callback) {
+  tryProjectAdminAccess(
     user,
     projectId,
     (response, body) => {
@@ -272,8 +332,8 @@ function expectNoAdminAccess(user, projectId, callback) {
   )
 }
 
-function expectNoAnonymousAdminAccess(user, projectId, callback) {
-  tryAdminAccess(
+function expectNoAnonymousProjectAdminAccess(user, projectId, callback) {
+  tryProjectAdminAccess(
     user,
     projectId,
     expectErrorResponse.requireLogin.json,
@@ -328,11 +388,14 @@ describe('Authorization', function () {
         cb => this.other2.login(cb),
         cb => this.anon.getCsrfToken(cb),
         cb => {
-          this.site_admin.login(err => {
-            if (err != null) {
-              return cb(err)
-            }
-            return this.site_admin.ensureAdmin(cb)
+          this.site_admin.ensureUserExists(err => {
+            if (err) return cb(err)
+            this.site_admin.ensureAdmin(err => {
+              if (err != null) {
+                return cb(err)
+              }
+              return this.site_admin.login(cb)
+            })
           })
         },
       ],
@@ -367,8 +430,8 @@ describe('Authorization', function () {
       expectRenameProjectAccess(this.owner, this.projectId, done)
     })
 
-    it('should allow the owner admin access to it', function (done) {
-      expectAdminAccess(this.owner, this.projectId, done)
+    it('should allow the owner project admin access to it', function (done) {
+      expectProjectAdminAccess(this.owner, this.projectId, done)
     })
 
     it('should allow the owner user chat messages access', function (done) {
@@ -391,8 +454,8 @@ describe('Authorization', function () {
       expectNoRenameProjectAccess(this.other1, this.projectId, done)
     })
 
-    it('should not allow another user admin access to it', function (done) {
-      expectNoAdminAccess(this.other1, this.projectId, done)
+    it('should not allow another user project admin access to it', function (done) {
+      expectNoProjectAdminAccess(this.other1, this.projectId, done)
     })
 
     it('should not allow another user chat messages access', function (done) {
@@ -415,32 +478,75 @@ describe('Authorization', function () {
       expectNoRenameProjectAccess(this.anon, this.projectId, done)
     })
 
-    it('should not allow anonymous user admin access to it', function (done) {
-      expectNoAnonymousAdminAccess(this.anon, this.projectId, done)
+    it('should not allow anonymous user project admin access to it', function (done) {
+      expectNoAnonymousProjectAdminAccess(this.anon, this.projectId, done)
     })
 
     it('should not allow anonymous user chat messages access', function (done) {
       expectNoChatAccess(this.anon, this.projectId, done)
     })
 
-    it('should allow site admin users read access to it', function (done) {
-      expectReadAccess(this.site_admin, this.projectId, done)
+    describe('with admin privilege available', function () {
+      beforeEach(function () {
+        settings.adminPrivilegeAvailable = true
+      })
+
+      it('should allow site admin users read access to it', function (done) {
+        expectReadAccess(this.site_admin, this.projectId, done)
+      })
+
+      it('should allow site admin users write access to its content', function (done) {
+        expectContentWriteAccess(this.site_admin, this.projectId, done)
+      })
+
+      it('should allow site admin users write access to its settings', function (done) {
+        expectSettingsWriteAccess(this.site_admin, this.projectId, done)
+      })
+
+      it('should allow site admin users to rename the project', function (done) {
+        expectRenameProjectAccess(this.site_admin, this.projectId, done)
+      })
+
+      it('should allow site admin users project admin access to it', function (done) {
+        expectProjectAdminAccess(this.site_admin, this.projectId, done)
+      })
+
+      it('should allow site admin users site admin access to site admin endpoints', function (done) {
+        expectAdminAccess(this.site_admin, done)
+      })
     })
 
-    it('should allow site admin users write access to its content', function (done) {
-      expectContentWriteAccess(this.site_admin, this.projectId, done)
-    })
+    describe('with admin privilege unavailable', function () {
+      beforeEach(function () {
+        settings.adminPrivilegeAvailable = false
+      })
+      afterEach(function () {
+        settings.adminPrivilegeAvailable = true
+      })
 
-    it('should allow site admin users write access to its settings', function (done) {
-      expectSettingsWriteAccess(this.site_admin, this.projectId, done)
-    })
+      it('should not allow site admin users read access to it', function (done) {
+        expectNoReadAccess(this.site_admin, this.projectId, done)
+      })
 
-    it('should allow site admin users to rename the project', function (done) {
-      expectRenameProjectAccess(this.site_admin, this.projectId, done)
-    })
+      it('should not allow site admin users write access to its content', function (done) {
+        expectNoContentWriteAccess(this.site_admin, this.projectId, done)
+      })
 
-    it('should allow site admin users admin access to it', function (done) {
-      expectAdminAccess(this.site_admin, this.projectId, done)
+      it('should not allow site admin users write access to its settings', function (done) {
+        expectNoSettingsWriteAccess(this.site_admin, this.projectId, done)
+      })
+
+      it('should not allow site admin users to rename the project', function (done) {
+        expectNoRenameProjectAccess(this.site_admin, this.projectId, done)
+      })
+
+      it('should not allow site admin users project admin access to it', function (done) {
+        expectNoProjectAdminAccess(this.site_admin, this.projectId, done)
+      })
+
+      it('should redirect site admin users when accessing site admin endpoints', function (done) {
+        expectRedirectedAdminAccess(this.site_admin, done)
+      })
     })
   })
 
@@ -497,8 +603,8 @@ describe('Authorization', function () {
       expectNoRenameProjectAccess(this.ro_user, this.projectId, done)
     })
 
-    it('should not allow the read-only user admin access to it', function (done) {
-      expectNoAdminAccess(this.ro_user, this.projectId, done)
+    it('should not allow the read-only user project admin access to it', function (done) {
+      expectNoProjectAdminAccess(this.ro_user, this.projectId, done)
     })
 
     it('should allow the read-write user read access to it', function (done) {
@@ -517,8 +623,8 @@ describe('Authorization', function () {
       expectNoRenameProjectAccess(this.rw_user, this.projectId, done)
     })
 
-    it('should not allow the read-write user admin access to it', function (done) {
-      expectNoAdminAccess(this.rw_user, this.projectId, done)
+    it('should not allow the read-write user project admin access to it', function (done) {
+      expectNoProjectAdminAccess(this.rw_user, this.projectId, done)
     })
 
     it('should allow the read-write user chat messages access', function (done) {
@@ -557,8 +663,8 @@ describe('Authorization', function () {
       expectNoRenameProjectAccess(this.other1, this.projectId, done)
     })
 
-    it('should not allow a user admin access to it', function (done) {
-      expectNoAdminAccess(this.other1, this.projectId, done)
+    it('should not allow a user project admin access to it', function (done) {
+      expectNoProjectAdminAccess(this.other1, this.projectId, done)
     })
 
     it('should allow an anonymous user read access to it', function (done) {
@@ -581,8 +687,8 @@ describe('Authorization', function () {
       expectNoRenameProjectAccess(this.anon, this.projectId, done)
     })
 
-    it('should not allow an anonymous user admin access to it', function (done) {
-      expectNoAnonymousAdminAccess(this.anon, this.projectId, done)
+    it('should not allow an anonymous user project admin access to it', function (done) {
+      expectNoAnonymousProjectAdminAccess(this.anon, this.projectId, done)
     })
   })
 
@@ -613,8 +719,8 @@ describe('Authorization', function () {
       expectNoRenameProjectAccess(this.other1, this.projectId, done)
     })
 
-    it('should not allow a user admin access to it', function (done) {
-      expectNoAdminAccess(this.other1, this.projectId, done)
+    it('should not allow a user project admin access to it', function (done) {
+      expectNoProjectAdminAccess(this.other1, this.projectId, done)
     })
 
     // NOTE: legacy readOnly access does not count as 'restricted' in the new model
@@ -638,8 +744,8 @@ describe('Authorization', function () {
       expectNoRenameProjectAccess(this.anon, this.projectId, done)
     })
 
-    it('should not allow an anonymous user admin access to it', function (done) {
-      expectNoAnonymousAdminAccess(this.anon, this.projectId, done)
+    it('should not allow an anonymous user project admin access to it', function (done) {
+      expectNoAnonymousProjectAdminAccess(this.anon, this.projectId, done)
     })
 
     it('should not allow an anonymous user chat messages access', function (done) {
