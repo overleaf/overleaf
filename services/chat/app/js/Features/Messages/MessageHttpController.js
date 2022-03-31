@@ -58,13 +58,16 @@ async function editMessage(req, res) {
   const { projectId, threadId, messageId } = req.params
   logger.log({ projectId, threadId, messageId, content }, 'editing message')
   const room = await ThreadManager.findOrCreateThread(projectId, threadId)
-  await MessageManager.updateMessage(
+  const found = await MessageManager.updateMessage(
     room._id,
     messageId,
     userId,
     content,
     Date.now()
   )
+  if (!found) {
+    return res.sendStatus(404)
+  }
   res.sendStatus(204)
 }
 

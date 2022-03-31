@@ -53,12 +53,13 @@ async function updateMessage(roomId, messageId, userId, content, timestamp) {
   if (userId) {
     query.user_id = ObjectId(userId)
   }
-  await db.messages.updateOne(query, {
+  const res = await db.messages.updateOne(query, {
     $set: {
       content,
       edited_at: timestamp,
     },
   })
+  return res.modifiedCount === 1
 }
 
 async function deleteMessage(roomId, messageId) {

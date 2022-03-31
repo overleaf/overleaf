@@ -83,7 +83,7 @@ describe('Editing a message', async function () {
           ObjectId(),
           newContent
         )
-        expect(response.statusCode).to.equal(204)
+        expect(response.statusCode).to.equal(404)
       })
 
       it('should then list the old message in the threads', async function () {
