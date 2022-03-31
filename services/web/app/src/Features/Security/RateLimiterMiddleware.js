@@ -16,8 +16,10 @@ const settings = require('@overleaf/settings')
   Unique clients are identified by user_id if logged in, and IP address if not.
 */
 function rateLimit(opts) {
+  const getUserId =
+    opts.getUserId || (req => SessionManager.getLoggedInUserId(req.session))
   return function (req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session) || req.ip
+    const userId = getUserId(req) || req.ip
     if (
       settings.smokeTest &&
       settings.smokeTest.userId &&
