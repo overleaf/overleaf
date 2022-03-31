@@ -691,6 +691,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.get(
     '/project/download/zip',
+    AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit({
       endpointName: 'multiple-projects-zip-download',
       maxRequests: 10,
