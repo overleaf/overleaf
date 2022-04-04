@@ -28,7 +28,7 @@ function test(hashType, filePath, callback) {
       ContentCacheManager.update(dir, filePath, x => {
         const t2 = process.hrtime.bigint()
         const warm = Number(t2 - t1) / 1e6
-        fs.rm(dir, { recursive: true, force: true }, err => {
+        fs.rmdir(dir, { recursive: true }, err => {
           if (err) {
             return callback(err)
           }
