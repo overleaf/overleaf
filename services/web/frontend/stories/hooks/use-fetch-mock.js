@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import fetchMock from 'fetch-mock'
+fetchMock.config.fallbackToNetwork = true
 
 /**
  * Run callback to mock fetch routes, call restore() when unmounted
