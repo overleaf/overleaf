@@ -100,7 +100,7 @@ Object.defineProperty(app.request, 'ip', {
   },
 })
 app.use(function (req, res, next) {
-  if (req.aborted) {
+  if (req.destroyed) {
     // Request has been aborted already.
     return
   }

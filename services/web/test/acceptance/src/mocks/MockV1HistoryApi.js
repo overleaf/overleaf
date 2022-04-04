@@ -43,12 +43,12 @@ class MockV1HistoryApi extends AbstractMockApi {
           res.write('chunk' + this.sentChunks++)
         }
         const writeEvery = interval => {
-          if (req.aborted) return
+          if (req.destroyed) return
 
           // setInterval delays the first run
           writeChunk()
           const periodicWrite = setInterval(writeChunk, interval)
-          req.on('aborted', () => clearInterval(periodicWrite))
+          req.on('close', () => clearInterval(periodicWrite))
 
           const deadLine = setTimeout(() => {
             clearInterval(periodicWrite)

@@ -3,7 +3,6 @@ contacts
 --docker-repos=gcr.io/overleaf-ops
 --env-add=
 --env-pass-through=
---node-image=gcr.io/overleaf-ops/node
---node-version=14.18.3
+--node-version=16.14.2
 --public-repo=False
 --script-version=4.1.0

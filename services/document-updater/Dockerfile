@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
 
-FROM gcr.io/overleaf-ops/node:14.18.3 as base
+FROM node:16.14.2 as base
 
 WORKDIR /overleaf/services/document-updater
 

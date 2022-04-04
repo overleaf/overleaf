@@ -93,7 +93,7 @@ module.exports = {
 
 async function runSmokeTestsDetached(req, res) {
   function isAborted() {
-    return req.aborted
+    return req.destroyed
   }
   const stats = { start: new Date(), steps: [] }
   let status, response

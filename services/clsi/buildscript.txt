@@ -5,7 +5,6 @@ clsi
 --env-add=ENABLE_PDF_CACHING="true",PDF_CACHING_ENABLE_WORKER_POOL="true"
 --env-pass-through=TEXLIVE_IMAGE
 --has-custom-cloudbuild=True
---node-image=gcr.io/overleaf-ops/node
---node-version=14.18.3
+--node-version=16.14.2
 --public-repo=True
 --script-version=4.1.0

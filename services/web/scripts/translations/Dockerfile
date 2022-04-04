@@ -1,4 +1,4 @@
-FROM gcr.io/overleaf-ops/node:14.18.3
+FROM node:16.14.2
 
 WORKDIR /app/scripts/translations
 

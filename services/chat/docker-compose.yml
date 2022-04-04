@@ -6,7 +6,7 @@ version: "2.3"
 
 services:
   test_unit:
-    image: gcr.io/overleaf-ops/node:14.18.3
+    image: node:16.14.2
     volumes:
       - .:/overleaf/services/chat
       - ../../node_modules:/overleaf/node_modules
@@ -20,7 +20,7 @@ services:
     user: node
 
   test_acceptance:
-    image: gcr.io/overleaf-ops/node:14.18.3
+    image: node:16.14.2
     volumes:
       - .:/overleaf/services/chat
       - ../../node_modules:/overleaf/node_modules
