@@ -664,12 +664,13 @@ App.directive(
         }
 
         const initTrackChanges = function () {
+          if (!trackChangesManager) return
+
           trackChangesManager.rangesTracker = scope.sharejsDoc.ranges
 
           // Force onChangeSession in order to set up highlights etc.
           trackChangesManager.onChangeSession()
 
-          if (!trackChangesManager) return
           editor.on('changeSelection', trackChangesManager.onChangeSelection)
 
           // Selection also moves with updates elsewhere in the document

@@ -247,7 +247,9 @@ export default RangesTracker = class RangesTracker {
       this.applyDeleteToChanges(op, metadata)
       return this.applyDeleteToComments(op)
     } else if (op.c != null) {
-      return this.addComment(op, metadata)
+      if (!window.isRestrictedTokenMember) {
+        return this.addComment(op, metadata)
+      }
     } else {
       throw new Error('unknown op type')
     }

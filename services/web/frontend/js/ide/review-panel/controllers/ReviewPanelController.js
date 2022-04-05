@@ -475,12 +475,16 @@ export default App.controller(
         }
 
         if ($scope.users[change.metadata.user_id] == null) {
-          refreshChangeUsers(change.metadata.user_id)
+          if (!window.isRestrictedTokenMember) {
+            refreshChangeUsers(change.metadata.user_id)
+          }
         }
       }
 
       if (rangesTracker.comments.length > 0) {
-        ensureThreadsAreLoaded()
+        if (!window.isRestrictedTokenMember) {
+          ensureThreadsAreLoaded()
+        }
       }
 
       for (const comment of Array.from(rangesTracker.comments)) {
