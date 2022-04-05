@@ -44,7 +44,10 @@ if (typeof(ExposedSettings.gaTokenV4) != "undefined" || typeof(ExposedSettings.g
                 loadGA();
             }
         }
-else 
-    script(type="text/javascript", nonce=scriptNonce).
-        window.ga = function() { console.log("would send to GA", arguments) };
-        window.gtag = function() { console.log("would send to GA4", arguments) };
+
+if typeof(ExposedSettings.gaTokenV4) === "undefined"
+  script(type="text/javascript", nonce=scriptNonce).
+    window.gtag = function() { console.log("would send to GA4", arguments) };
+if typeof(ExposedSettings.gaToken) === "undefined"
+  script(type="text/javascript", nonce=scriptNonce).
+    window.ga = function() { console.log("would send to GA", arguments) };
