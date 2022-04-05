@@ -8,7 +8,11 @@ block append meta
 	meta(name="ol-thirdPartyIds", data-type="json", content=thirdPartyIds)
 
 block content
-	main.content.content-alt#main-content
+	main.content.content-alt#main-content(
+		event-tracking-mb="true"
+		event-tracking="settings-view"
+		event-tracking-trigger="load"
+	)
 		.container
 			.row
 				.col-md-12.col-lg-10.col-lg-offset-1
