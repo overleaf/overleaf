@@ -17,6 +17,9 @@ const queue = async.queue(function (sessKey, callback) {
       } else {
         redis.del(sessKey, () => {
           totalDeletedSessions++
+          if (totalDeletedSessions % 1000 === 0) {
+            console.log(`Keys deleted so far: ${totalDeletedSessions}`)
+          }
           cb()
         })
       }
@@ -25,18 +28,17 @@ const queue = async.queue(function (sessKey, callback) {
       cb()
     }
   })
-}, 10)
+}, 20)
 
 function scanAndPurge(cb) {
   const stream = redis.scanStream({
     match: 'sess:*',
-    count: 100,
+    count: 1000,
   })
   console.log('starting scan')
 
   stream.on('data', resultKeys => {
     console.log(`Keys found, count:${resultKeys.length}`)
-    console.log(`Keys deleted so far: ${totalDeletedSessions}`)
     queue.push(resultKeys)
   })
 
