@@ -126,22 +126,51 @@ describe('InstitutionsManager', function () {
     beforeEach(function () {
       this.user1Id = '123abc123abc123abc123abc'
       this.user2Id = '456def456def456def456def'
-      this.affiliations = [{ user_id: this.user1Id }, { user_id: this.user2Id }]
+      this.user3Id = 'trial123abc'
+      this.user4Id = 'group123abc'
+      this.affiliations = [
+        { user_id: this.user1Id },
+        { user_id: this.user2Id },
+        { user_id: this.user3Id },
+        { user_id: this.user4Id },
+      ]
       this.user1 = { _id: this.user1Id }
       this.user2 = { _id: this.user2Id }
-      this.subscription = {
-        planCode: 'pro',
-        groupPlan: false,
-      }
+      this.user3 = { _id: this.user3Id }
+      this.user4 = { _id: this.user4Id }
+
       this.UserGetter.getUser
         .withArgs(this.user1Id)
         .callsArgWith(1, null, this.user1)
       this.UserGetter.getUser
         .withArgs(this.user2Id)
         .callsArgWith(1, null, this.user2)
+      this.UserGetter.getUser
+        .withArgs(this.user3Id)
+        .callsArgWith(1, null, this.user3)
+      this.UserGetter.getUser
+        .withArgs(this.user4Id)
+        .callsArgWith(1, null, this.user4)
+
       this.SubscriptionLocator.getUsersSubscription
         .withArgs(this.user2)
-        .callsArgWith(1, null, this.subscription)
+        .callsArgWith(1, null, {
+          planCode: 'pro',
+          groupPlan: false,
+        })
+      this.SubscriptionLocator.getUsersSubscription
+        .withArgs(this.user3)
+        .callsArgWith(1, null, {
+          planCode: 'collaborator_free_trial_7_days',
+          groupPlan: false,
+        })
+      this.SubscriptionLocator.getUsersSubscription
+        .withArgs(this.user4)
+        .callsArgWith(1, null, {
+          planCode: 'collaborator-annual',
+          groupPlan: true,
+        })
+
       this.refreshFeatures.withArgs(this.user1Id).yields(null, {}, true)
       this.getInstitutionAffiliations.yields(null, this.affiliations)
     })
@@ -152,8 +181,7 @@ describe('InstitutionsManager', function () {
         false,
         error => {
           expect(error).not.to.exist
-          sinon.assert.calledTwice(this.refreshFeatures)
-
+          sinon.assert.callCount(this.refreshFeatures, 4)
           // expect no notifications
           sinon.assert.notCalled(
             this.NotificationsBuilder.featuresUpgradedByAffiliation
@@ -185,19 +213,24 @@ describe('InstitutionsManager', function () {
       )
     })
 
-    it('notifies users if they have a subscription that should be cancelled', function (done) {
+    it('notifies users if they have a subscription, or a trial subscription, that should be cancelled', function (done) {
       this.InstitutionsManager.refreshInstitutionUsers(
         this.institutionId,
         true,
         error => {
           expect(error).not.to.exist
-          sinon.assert.calledOnce(
+          sinon.assert.calledTwice(
             this.NotificationsBuilder.redundantPersonalSubscription
           )
           sinon.assert.calledWith(
             this.NotificationsBuilder.redundantPersonalSubscription,
             this.affiliations[1],
             this.user2
+          )
+          sinon.assert.calledWith(
+            this.NotificationsBuilder.redundantPersonalSubscription,
+            this.affiliations[2],
+            this.user3
           )
           done()
         }

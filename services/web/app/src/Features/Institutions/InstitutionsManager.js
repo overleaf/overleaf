@@ -326,11 +326,7 @@ const notifyUser = (
         }
       },
       function (cb) {
-        if (
-          subscription &&
-          !subscription.planCode.match(/(free|trial)/) &&
-          !subscription.groupPlan
-        ) {
+        if (subscription && !subscription.groupPlan) {
           NotificationsBuilder.redundantPersonalSubscription(
             affiliation,
             user
