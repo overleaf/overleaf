@@ -1,4 +1,4 @@
-DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml --log-level ERROR
+DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
