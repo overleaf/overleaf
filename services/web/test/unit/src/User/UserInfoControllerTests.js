@@ -1,20 +1,7 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
-const { assert, expect } = require('chai')
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/User/UserInfoController.js'
 const SandboxedModule = require('sandboxed-module')
-const events = require('events')
 const MockResponse = require('../helpers/MockResponse')
 const MockRequest = require('../helpers/MockRequest')
 const { ObjectId } = require('mongodb')
@@ -39,31 +26,7 @@ describe('UserInfoController', function () {
 
     this.req = new MockRequest()
     this.res = new MockResponse()
-    return (this.next = sinon.stub())
-  })
-
-  describe('getLoggedInUsersPersonalInfo', function () {
-    beforeEach(function () {
-      this.user = { _id: ObjectId() }
-      this.req.user = this.user
-      this.req.session.user = this.user
-      this.UserInfoController.sendFormattedPersonalInfo = sinon.stub()
-      this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)
-      this.SessionManager.getLoggedInUserId = sinon
-        .stub()
-        .returns(this.user._id)
-      return this.UserInfoController.getLoggedInUsersPersonalInfo(
-        this.req,
-        this.res,
-        this.next
-      )
-    })
-
-    it('should call sendFormattedPersonalInfo', function () {
-      return this.UserInfoController.sendFormattedPersonalInfo
-        .calledWith(this.user, this.res, this.next)
-        .should.equal(true)
-    })
+    this.next = sinon.stub()
   })
 
   describe('getPersonalInfo', function () {
@@ -74,25 +37,15 @@ describe('UserInfoController', function () {
         this.req.params = { user_id: this.user_id }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)
         this.UserInfoController.sendFormattedPersonalInfo = sinon.stub()
-        return this.UserInfoController.getPersonalInfo(
-          this.req,
-          this.res,
-          this.next
-        )
+        this.UserInfoController.getPersonalInfo(this.req, this.res, this.next)
       })
 
       it('should look up the user in the database', function () {
-        return this.UserGetter.getUser
+        this.UserGetter.getUser
           .calledWith(
             { _id: ObjectId(this.user_id) },
             { _id: true, first_name: true, last_name: true, email: true }
           )
-          .should.equal(true)
-      })
-
-      it('should send the formatted details back to the client', function () {
-        return this.UserInfoController.sendFormattedPersonalInfo
-          .calledWith(this.user, this.res, this.next)
           .should.equal(true)
       })
     })
@@ -108,26 +61,15 @@ describe('UserInfoController', function () {
         }
         this.req.params = { user_id: this.user_id.toString() }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)
-        this.UserInfoController.sendFormattedPersonalInfo = sinon.stub()
-        return this.UserInfoController.getPersonalInfo(
-          this.req,
-          this.res,
-          this.next
-        )
+        this.UserInfoController.getPersonalInfo(this.req, this.res, this.next)
       })
 
       it('should look up the user in the database', function () {
-        return this.UserGetter.getUser
+        this.UserGetter.getUser
           .calledWith(
             { 'overleaf.id': this.user_id },
             { _id: true, first_name: true, last_name: true, email: true }
           )
-          .should.equal(true)
-      })
-
-      it('should send the formatted details back to the client', function () {
-        return this.UserInfoController.sendFormattedPersonalInfo
-          .calledWith(this.user, this.res, this.next)
           .should.equal(true)
       })
     })
@@ -137,15 +79,11 @@ describe('UserInfoController', function () {
         this.user_id = ObjectId().toString()
         this.req.params = { user_id: this.user_id }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
-        return this.UserInfoController.getPersonalInfo(
-          this.req,
-          this.res,
-          this.next
-        )
+        this.UserInfoController.getPersonalInfo(this.req, this.res, this.next)
       })
 
       it('should return 404 to the client', function () {
-        return this.res.statusCode.should.equal(404)
+        this.res.statusCode.should.equal(404)
       })
     })
 
@@ -154,15 +92,11 @@ describe('UserInfoController', function () {
         this.user_id = 'invalid'
         this.req.params = { user_id: this.user_id }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
-        return this.UserInfoController.getPersonalInfo(
-          this.req,
-          this.res,
-          this.next
-        )
+        this.UserInfoController.getPersonalInfo(this.req, this.res, this.next)
       })
 
       it('should return 400 to the client', function () {
-        return this.res.statusCode.should.equal(400)
+        this.res.statusCode.should.equal(400)
       })
     })
   })
@@ -181,23 +115,11 @@ describe('UserInfoController', function () {
         last_name: this.user.last_name,
         email: this.user.email,
       }
-      this.UserInfoController.formatPersonalInfo = sinon
-        .stub()
-        .returns(this.formattedInfo)
-      return this.UserInfoController.sendFormattedPersonalInfo(
-        this.user,
-        this.res
-      )
-    })
-
-    it('should format the user details for the response', function () {
-      return this.UserInfoController.formatPersonalInfo
-        .calledWith(this.user)
-        .should.equal(true)
+      this.UserInfoController.sendFormattedPersonalInfo(this.user, this.res)
     })
 
     it('should send the formatted details back to the client', function () {
-      return this.res.body.should.equal(JSON.stringify(this.formattedInfo))
+      this.res.body.should.equal(JSON.stringify(this.formattedInfo))
     })
   })
 
@@ -213,7 +135,7 @@ describe('UserInfoController', function () {
         role: 'student',
         institution: 'sheffield',
       }
-      return expect(
+      expect(
         this.UserInfoController.formatPersonalInfo(this.user)
       ).to.deep.equal({
         id: this.user._id.toString(),

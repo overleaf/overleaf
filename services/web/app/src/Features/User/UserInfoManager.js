@@ -1,13 +1,18 @@
 const UserGetter = require('./UserGetter')
+const { callbackify } = require('../../util/promises')
 
-const UserInfoManager = {
-  getPersonalInfo(userId, callback) {
-    UserGetter.getUser(
-      userId,
-      { _id: true, first_name: true, last_name: true, email: true },
-      callback
-    )
-  },
+async function getPersonalInfo(userId) {
+  return UserGetter.promises.getUser(userId, {
+    _id: true,
+    first_name: true,
+    last_name: true,
+    email: true,
+  })
 }
 
-module.exports = UserInfoManager
+module.exports = {
+  getPersonalInfo: callbackify(getPersonalInfo),
+  promises: {
+    getPersonalInfo,
+  },
+}
