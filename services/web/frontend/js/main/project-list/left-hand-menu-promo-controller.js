@@ -8,6 +8,9 @@ export default App.controller(
 
     $scope.upgradeSubscription = function () {
       eventTracking.send('subscription-funnel', 'project-page', 'upgrade')
+      eventTracking.sendMB('upgrade-button-click', {
+        source: 'dashboard',
+      })
     }
 
     $scope.share = function () {
