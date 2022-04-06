@@ -44,6 +44,7 @@ describe('ReferencesController', function () {
     this.res = new MockResponse()
     this.res.json = sinon.stub()
     this.res.sendStatus = sinon.stub()
+    this.next = sinon.stub()
     return (this.fakeResponseData = {
       projectId: this.projectId,
       keys: ['one', 'two', 'three'],
@@ -59,7 +60,7 @@ describe('ReferencesController', function () {
         this.fakeResponseData
       )
       return (this.call = callback => {
-        this.controller.indexAll(this.req, this.res)
+        this.controller.indexAll(this.req, this.res, this.next)
         return callback()
       })
     })
@@ -166,7 +167,7 @@ describe('ReferencesController', function () {
     beforeEach(function () {
       this.ReferencesHandler.indexAll.callsArgWith(1)
       return (this.call = callback => {
-        this.controller.indexAll(this.req, this.res)
+        this.controller.indexAll(this.req, this.res, this.next)
         return callback()
       })
     })
@@ -201,7 +202,7 @@ describe('ReferencesController', function () {
   describe('index', function () {
     beforeEach(function () {
       return (this.call = callback => {
-        this.controller.index(this.req, this.res)
+        this.controller.index(this.req, this.res, this.next)
         return callback()
       })
     })
@@ -260,8 +261,10 @@ describe('ReferencesController', function () {
 
         it('should produce an error response', function (done) {
           return this.call(() => {
-            this.res.sendStatus.callCount.should.equal(1)
-            this.res.sendStatus.calledWith(500).should.equal(true)
+            this.next.callCount.should.equal(1)
+            this.next
+              .calledWith(sinon.match.instanceOf(Error))
+              .should.equal(true)
             return done()
           })
         })

@@ -23,6 +23,7 @@ const UserGetter = require('../User/UserGetter')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const _ = require('underscore')
 const Async = require('async')
+const Errors = require('../Errors/Errors')
 
 const oneMinInMs = 60 * 1000
 const fiveMinsInMs = oneMinInMs * 5
@@ -111,6 +112,11 @@ module.exports = ReferencesHandler = {
           })
           return callback(err)
         }
+        if (!project) {
+          return callback(
+            new Errors.NotFoundError(`project does not exist: ${projectId}`)
+          )
+        }
         logger.log({ projectId }, 'indexing all bib files in project')
         const docIds = ReferencesHandler._findBibDocIds(project)
         const fileIds = ReferencesHandler._findBibFileIds(project)
@@ -138,6 +144,11 @@ module.exports = ReferencesHandler = {
             projectId,
           })
           return callback(err)
+        }
+        if (!project) {
+          return callback(
+            new Errors.NotFoundError(`project does not exist: ${projectId}`)
+          )
         }
         return ReferencesHandler._doIndexOperation(
           projectId,

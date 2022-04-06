@@ -15,9 +15,10 @@ const logger = require('@overleaf/logger')
 const ReferencesHandler = require('./ReferencesHandler')
 const settings = require('@overleaf/settings')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
+const { OError } = require('../Errors/Errors')
 
 module.exports = ReferencesController = {
-  index(req, res) {
+  index(req, res, next) {
     const projectId = req.params.Project_id
     const { shouldBroadcast } = req.body
     const { docIds } = req.body
@@ -28,10 +29,10 @@ module.exports = ReferencesController = {
       )
       return res.sendStatus(400)
     }
-    return ReferencesHandler.index(projectId, docIds, function (err, data) {
-      if (err != null) {
-        logger.err({ err, projectId }, 'error indexing all references')
-        return res.sendStatus(500)
+    return ReferencesHandler.index(projectId, docIds, function (error, data) {
+      if (error) {
+        OError.tag(error, 'failed to index references', { projectId })
+        return next(error)
       }
       return ReferencesController._handleIndexResponse(
         req,
@@ -43,13 +44,13 @@ module.exports = ReferencesController = {
     })
   },
 
-  indexAll(req, res) {
+  indexAll(req, res, next) {
     const projectId = req.params.Project_id
     const { shouldBroadcast } = req.body
-    return ReferencesHandler.indexAll(projectId, function (err, data) {
-      if (err != null) {
-        logger.err({ err, projectId }, 'error indexing all references')
-        return res.sendStatus(500)
+    return ReferencesHandler.indexAll(projectId, function (error, data) {
+      if (error) {
+        OError.tag(error, 'failed to index references', { projectId })
+        return next(error)
       }
       return ReferencesController._handleIndexResponse(
         req,
