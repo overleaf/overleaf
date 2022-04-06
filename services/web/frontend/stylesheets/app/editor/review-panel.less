@@ -947,7 +947,8 @@
 
 .review-icon {
   display: inline-block;
-  background: url('/img/ol-icons/review-icon-dark-theme.svg') top/30px no-repeat;
+  background: url('../../../../public/img/ol-icons/review-icon-dark-theme.svg')
+    top/30px no-repeat;
   width: 30px;
 
   &::before {
@@ -957,15 +958,15 @@
 
 button when (@is-overleaf-light = true) {
   .review-icon {
-    background: url('/img/ol-icons/review-icon-light-theme.svg') top/30px
-      no-repeat;
+    background: url('../../../../public/img/ol-icons/review-icon-light-theme.svg')
+      top/30px no-repeat;
   }
 
   &.active,
   &:active {
     .review-icon {
-      background: url('/img/ol-icons/review-icon-dark-theme.svg') top/30px
-        no-repeat;
+      background: url('../../../../public/img/ol-icons/review-icon-dark-theme.svg')
+        top/30px no-repeat;
     }
   }
 }

@@ -1,5 +1,5 @@
 const webpack = require('webpack')
-const merge = require('webpack-merge')
+const { merge } = require('webpack-merge')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const base = require('./webpack.config')
@@ -28,19 +28,26 @@ module.exports = merge(base, {
     // Expose dev server at www.dev-overleaf.com
     host: '0.0.0.0',
     port: 3808,
-    public: 'www.dev-overleaf.com:443',
-
-    // Customise output to the (node) console
-    stats: {
-      colors: true, // Enable some coloured highlighting
-      // Hide some overly verbose output
-      performance: false, // Disable as code is uncompressed in dev mode
-      hash: false,
-      version: false,
-      chunks: false,
-      modules: false,
-      // Hide copied assets from output
-      excludeAssets: [/^js\/ace/, /^js\/libs/, /^js\/cmaps/],
+    client: {
+      webSocketURL: 'auto://0.0.0.0:0/ws',
     },
+    allowedHosts: '.dev-overleaf.com',
+    setupMiddlewares(middlewares, devServer) {
+      devServer.app.get('/status', (req, res) => res.send('webpack is up'))
+      return middlewares
+    },
+  },
+
+  // Customise output to the (node) console
+  stats: {
+    colors: true, // Enable some coloured highlighting
+    // Hide some overly verbose output
+    performance: false, // Disable as code is uncompressed in dev mode
+    hash: false,
+    version: false,
+    chunks: false,
+    modules: false,
+    // Hide copied assets from output
+    excludeAssets: [/^js\/ace/, /^js\/libs/, /^js\/cmaps/],
   },
 })

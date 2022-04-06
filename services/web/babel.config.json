@@ -32,7 +32,7 @@
         [
           "@babel/env",
           {
-            "targets": { "node": "12.21" },
+            "targets": { "node": "14.18" },
             "useBuiltIns": "usage",
             // This version must be aligned with the `core-js` version in `package.json`
             "corejs": { "version": 3.6 }

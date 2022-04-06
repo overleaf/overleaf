@@ -31,7 +31,8 @@ const SearchBox = ace.require('ace/ext/searchbox')
 // Set the base path that ace will fetch modes/snippets/workers from
 if (window.aceBasePath !== '') {
   syntaxValidationEnabled = true
-  ace.config.set('basePath', `${window.aceBasePath}`)
+  ace.config.set('basePath', window.aceBasePath)
+  ace.config.set('workerPath', window.aceBasePath)
 } else {
   syntaxValidationEnabled = false
 }

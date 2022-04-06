@@ -12,12 +12,14 @@ export default class PDFJSWrapper {
   }
 
   async init() {
-    const { PDFJS, PDFJSViewer, PDFJSWorker, cMapUrl, imageResourcesPath } =
-      await import('./pdf-js-versions').then(m => m.default)
+    const { PDFJS, PDFJSViewer, cMapUrl, imageResourcesPath } = await import(
+      './pdf-js-versions'
+    ).then(m => {
+      return m.default
+    })
 
     this.PDFJS = PDFJS
     this.PDFJSViewer = PDFJSViewer
-    this.PDFJSWorker = PDFJSWorker
     this.cMapUrl = cMapUrl
     this.imageResourcesPath = imageResourcesPath
 

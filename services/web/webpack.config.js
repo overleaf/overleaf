@@ -9,7 +9,6 @@ const PackageVersions = require('./app/src/infrastructure/PackageVersions')
 
 // Generate a hash of entry points, including modules
 const entryPoints = {
-  serviceWorker: './frontend/js/serviceWorker.js',
   main: './frontend/js/main.js',
   ide: './frontend/js/ide.js',
   'ide-detached': './frontend/js/ide-detached.js',
@@ -17,6 +16,13 @@ const entryPoints = {
   style: './frontend/stylesheets/style.less',
   'ieee-style': './frontend/stylesheets/ieee-style.less',
   'light-style': './frontend/stylesheets/light-style.less',
+}
+
+// ServiceWorker at /serviceWorker.js
+entryPoints.serviceWorker = {
+  import: './frontend/js/serviceWorker.js',
+  publicPath: '/',
+  filename: 'serviceWorker.js',
 }
 
 // Add entrypoints for each "page"
@@ -72,7 +78,7 @@ module.exports = {
     publicPath: '/',
 
     // By default write into js directory
-    filename: 'js/[name].js',
+    filename: 'js/[name]-[contenthash].js',
 
     // Output as UMD bundle (allows main JS to import with CJS, AMD or global
     // style code bundles
@@ -101,36 +107,7 @@ module.exports = {
             },
           },
         ],
-      },
-      {
-        // Wrap worker scripts in a Web Worker
-        test: /\.worker\.js$/,
-        use: [
-          {
-            loader: 'worker-loader',
-            options: {
-              // Write into js directory (note: customising this is not possible
-              // with pdfjs-dist/webpack auto loader)
-              name: 'js/[name].[contenthash].js',
-              // Override dynamically-set publicPath to explicitly use root.
-              // This prevents a security problem where the Worker - normally
-              // loaded from a CDN - has cross-origin issues, by forcing it to not
-              // be loaded from the CDN
-              publicPath: '/',
-            },
-          },
-        ],
-      },
-      {
-        test: /serviceWorker.js$/,
-        use: [
-          {
-            loader: 'worker-loader',
-            options: {
-              name: 'serviceWorker.js',
-            },
-          },
-        ],
+        type: 'javascript/auto',
       },
       {
         // Pass Less files through less-loader/css-loader/mini-css-extract-
@@ -145,9 +122,9 @@ module.exports = {
             // Runs autoprefixer on CSS via postcss
             loader: 'postcss-loader',
             options: {
-              // Uniquely identifies the postcss plugin (required by webpack)
-              ident: 'postcss',
-              plugins: [require('autoprefixer')],
+              postcssOptions: {
+                plugins: ['autoprefixer'],
+              },
             },
           },
           // Compiles the Less syntax to CSS
@@ -162,32 +139,18 @@ module.exports = {
       {
         // Load fonts
         test: /\.(woff|woff2)$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              // Output to public/font
-              outputPath: 'fonts',
-              publicPath: '/fonts/',
-              name: '[name].[ext]',
-            },
-          },
-        ],
+        type: 'asset/resource',
+        generator: {
+          filename: 'fonts/[name]-[contenthash][ext]',
+        },
       },
       {
         // Load images (static files)
         test: /\.(svg|gif|png|jpg|pdf)$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              // Output to public/images
-              outputPath: 'images',
-              publicPath: '/images/',
-              name: '[name].[ext]',
-            },
-          },
-        ],
+        type: 'asset/resource',
+        generator: {
+          filename: 'images/[name]-[contenthash][ext]',
+        },
       },
       {
         // These options are necessary for handlebars to have access to helper
@@ -234,21 +197,9 @@ module.exports = {
         use: [
           {
             loader: 'expose-loader',
-            options: 'jQuery',
-          },
-          {
-            loader: 'expose-loader',
-            options: '$',
-          },
-        ],
-      },
-      {
-        // Expose angular global variable
-        test: require.resolve('angular'),
-        use: [
-          {
-            loader: 'expose-loader',
-            options: 'angular',
+            options: {
+              exposes: ['$', 'jQuery'],
+            },
           },
         ],
       },
@@ -269,13 +220,8 @@ module.exports = {
     },
     symlinks: false,
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-  },
-
-  // Split out files into separate (derived) bundles if they are shared between
-  // multiple (explicit) bundles, according to some webpack heuristics
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
+    fallback: {
+      events: require.resolve('events'),
     },
   },
 
@@ -285,6 +231,13 @@ module.exports = {
     new WebpackAssetsManifest({
       entrypoints: true,
       publicPath: true,
+      output: 'manifest.json',
+    }),
+
+    // Ensure that process.env.RESET_APP_DATA_TIMER is defined, to avoid an error.
+    // https://github.com/algolia/algoliasearch-client-javascript/issues/756
+    new webpack.EnvironmentPlugin({
+      RESET_APP_DATA_TIMER: '120000',
     }),
 
     // Prevent moment from loading (very large) locale files that aren't used
@@ -294,62 +247,71 @@ module.exports = {
     }),
 
     // Copy the required files for loading MathJax from MathJax NPM package
-    new CopyPlugin(
-      [
-        { from: 'MathJax.js', to: 'js/libs/mathjax' },
-        { from: 'config/**/*', to: 'js/libs/mathjax' },
-        { from: 'extensions/**/*', to: 'js/libs/mathjax' },
-        { from: 'localization/en/**/*', to: 'js/libs/mathjax' },
-        { from: 'jax/output/HTML-CSS/fonts/TeX/**/*', to: 'js/libs/mathjax' },
-        { from: 'jax/output/HTML-CSS/**/*.js', to: 'js/libs/mathjax' },
-        { from: 'jax/element/**/*', to: 'js/libs/mathjax' },
-        { from: 'jax/input/**/*', to: 'js/libs/mathjax' },
-        { from: 'fonts/HTML-CSS/TeX/woff/*', to: 'js/libs/mathjax' },
-      ],
-      {
-        context: mathjaxDir,
-      }
-    ),
-
-    new CopyPlugin(
-      [
+    new CopyPlugin({
+      patterns: [
+        { from: 'MathJax.js', to: 'js/libs/mathjax', context: mathjaxDir },
+        { from: 'config/**/*', to: 'js/libs/mathjax', context: mathjaxDir },
+        {
+          from: 'extensions/**/*',
+          globOptions: {
+            // https://github.com/mathjax/MathJax/issues/2403
+            ignore: ['**/mathmaps/*.js'],
+          },
+          to: 'js/libs/mathjax',
+          context: mathjaxDir,
+        },
+        {
+          from: 'localization/en/**/*',
+          to: 'js/libs/mathjax',
+          context: mathjaxDir,
+        },
+        {
+          from: 'jax/output/HTML-CSS/fonts/TeX/**/*',
+          to: 'js/libs/mathjax',
+          context: mathjaxDir,
+        },
+        {
+          from: 'jax/output/HTML-CSS/**/*.js',
+          to: 'js/libs/mathjax',
+          context: mathjaxDir,
+        },
+        {
+          from: 'jax/element/**/*',
+          to: 'js/libs/mathjax',
+          context: mathjaxDir,
+        },
+        { from: 'jax/input/**/*', to: 'js/libs/mathjax', context: mathjaxDir },
+        {
+          from: 'fonts/HTML-CSS/TeX/woff/*',
+          to: 'js/libs/mathjax',
+          context: mathjaxDir,
+        },
         {
           from: 'libs/sigma-master',
           to: 'js/libs/sigma-master',
+          context: vendorDir,
         },
-      ],
-      {
-        context: vendorDir,
-      }
-    ),
-
-    new CopyPlugin(
-      [
         {
           from: 'src-min-noconflict',
           to: `js/ace-${PackageVersions.version.ace}/`,
+          context: aceDir,
         },
+        ...pdfjsVersions.flatMap(version => {
+          const dir = getModuleDirectory(version)
+
+          // Copy CMap files (used to provide support for non-Latin characters)
+          // and static images from pdfjs-dist package to build output.
+
+          return [
+            { from: `cmaps`, to: `js/${version}/cmaps`, context: dir },
+            {
+              from: `legacy/web/images`,
+              to: `images/${version}`,
+              context: dir,
+            },
+          ]
+        }),
       ],
-      {
-        context: aceDir,
-      }
-    ),
-
-    new CopyPlugin([
-      ...pdfjsVersions.flatMap(version => {
-        const dir = getModuleDirectory(version)
-
-        // Copy CMap files (used to provide support for non-Latin characters)
-        // and static images from pdfjs-dist package to build output.
-
-        return [
-          { from: `${dir}/cmaps`, to: `js/${version}/cmaps` },
-          {
-            from: `${dir}/legacy/web/images`,
-            to: `images/${version}`,
-          },
-        ]
-      }),
-    ]),
+    }),
   ],
 }
