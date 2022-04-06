@@ -160,7 +160,7 @@ async function replaceFileWithNew(projectId, fileId, newFileRef) {
   })
   await _insertDeletedFileReference(projectId, fileRef)
   const newProject = await Project.findOneAndUpdate(
-    { _id: project._id },
+    { _id: project._id, [path.mongo]: { $exists: true } },
     {
       $set: {
         [`${path.mongo}._id`]: newFileRef._id,
@@ -173,14 +173,20 @@ async function replaceFileWithNew(projectId, fileId, newFileRef) {
         [`${path.mongo}.rev`]: 1,
       },
     },
+    // Note: Mongoose uses new:true to return the modified document
+    // https://mongoosejs.com/docs/api.html#model_Model.findOneAndUpdate
+    // but Mongo uses returnNewDocument:true instead
+    // https://docs.mongodb.com/manual/reference/method/db.collection.findOneAndUpdate/
+    // We are using Mongoose here, but if we ever switch to a direct mongo call
+    // the next line will need to be updated.
     { new: true }
   ).exec()
-  // Note: Mongoose uses new:true to return the modified document
-  // https://mongoosejs.com/docs/api.html#model_Model.findOneAndUpdate
-  // but Mongo uses returnNewDocument:true instead
-  // https://docs.mongodb.com/manual/reference/method/db.collection.findOneAndUpdate/
-  // We are using Mongoose here, but if we ever switch to a direct mongo call
-  // the next line will need to be updated.
+  if (newProject == null) {
+    throw new OError('Project not found or path not found in filetree', {
+      projectId,
+      path,
+    })
+  }
   return { oldFileRef: fileRef, project, path, newProject }
 }
 
@@ -196,7 +202,7 @@ async function replaceDocWithFile(projectId, docId, fileRef) {
   })
   const folderMongoPath = _getParentMongoPath(path.mongo)
   const newProject = await Project.findOneAndUpdate(
-    { _id: project._id },
+    { _id: project._id, [folderMongoPath]: { $exists: true } },
     {
       $pull: {
         [`${folderMongoPath}.docs`]: { _id: docId },
@@ -208,6 +214,12 @@ async function replaceDocWithFile(projectId, docId, fileRef) {
     },
     { new: true }
   ).exec()
+  if (newProject == null) {
+    throw new OError('Project not found or path not found in filetree', {
+      projectId,
+      path,
+    })
+  }
   return newProject
 }
 
@@ -223,7 +235,7 @@ async function replaceFileWithDoc(projectId, fileId, newDoc) {
   })
   const folderMongoPath = _getParentMongoPath(path.mongo)
   const newProject = await Project.findOneAndUpdate(
-    { _id: project._id },
+    { _id: project._id, [folderMongoPath]: { $exists: true } },
     {
       $pull: {
         [`${folderMongoPath}.fileRefs`]: { _id: fileId },
@@ -235,6 +247,12 @@ async function replaceFileWithDoc(projectId, fileId, newDoc) {
     },
     { new: true }
   ).exec()
+  if (newProject == null) {
+    throw new OError('Project not found or path not found in filetree', {
+      projectId,
+      path,
+    })
+  }
   return newProject
 }
 
@@ -414,10 +432,16 @@ async function renameEntity(
 
   // we need to increment the project version number for any structure change
   const newProject = await Project.findOneAndUpdate(
-    { _id: projectId },
+    { _id: projectId, [entPath.mongo]: { $exists: true } },
     { $set: { [`${entPath.mongo}.name`]: newName }, $inc: { version: 1 } },
     { new: true }
   ).exec()
+  if (newProject == null) {
+    throw new OError('Project not found or path not found in filetree', {
+      projectId,
+      path: entPath,
+    })
+  }
 
   const { docs: newDocs, files: newFiles } =
     ProjectEntityHandler.getAllEntitiesFromProject(newProject)
@@ -541,10 +565,16 @@ async function _putElement(project, folderId, element, type) {
   element._id = ObjectId(element._id.toString())
   const mongoPath = `${path.mongo}.${pathSegment}`
   const newProject = await Project.findOneAndUpdate(
-    { _id: project._id },
+    { _id: project._id, [path.mongo]: { $exists: true } },
     { $push: { [mongoPath]: element }, $inc: { version: 1 } },
     { new: true }
   ).exec()
+  if (newProject == null) {
+    throw new OError('Project not found or path not found in filetree', {
+      projectId: project._id,
+      path,
+    })
+  }
   return { result: { path: newPath }, project: newProject }
 }
 
