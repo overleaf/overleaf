@@ -1,0 +1,19 @@
+The LaTeX compiler output
+  * With a lot of details
+
+Wrapped in an HTML <pre> element with
+      preformatted text which is to be presented exactly
+            as written in the HTML file
+
+                                              (whitespace included™)
+
+The text is typically rendered using a non-proportional ("monospace") font.
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 18.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 18.
+! Undefined control sequence.
+<recently read> \Zlpha
+
+ main.tex, line 23

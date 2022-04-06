@@ -234,10 +234,12 @@ module.exports = {
       output: 'manifest.json',
     }),
 
-    // Ensure that process.env.RESET_APP_DATA_TIMER is defined, to avoid an error.
-    // https://github.com/algolia/algoliasearch-client-javascript/issues/756
     new webpack.EnvironmentPlugin({
+      // Ensure that process.env.RESET_APP_DATA_TIMER is defined, to avoid an error.
+      // https://github.com/algolia/algoliasearch-client-javascript/issues/756
       RESET_APP_DATA_TIMER: '120000',
+      // Ensure that process.env.CYPRESS is defined (see utils/worker.js)
+      CYPRESS: false,
     }),
 
     // Prevent moment from loading (very large) locale files that aren't used

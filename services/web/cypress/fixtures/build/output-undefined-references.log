@@ -1,0 +1,10 @@
+Package rerunfilecheck Info: File `output.out' has not changed.
+(rerunfilecheck)             Checksum: 339DB29951BB30436898BC39909EA4FA;11265.
+
+Package rerunfilecheck Warning: File `output.brf' has changed.
+(rerunfilecheck)                Rerun to get bibliographical references right.
+
+Package rerunfilecheck Info: Checksums for `output.brf':
+(rerunfilecheck)             Before: D41D8CD98F00B204E9800998ECF8427E;0
+(rerunfilecheck)             After:  DF3260FAD3828D54C5E4E9337E97F7AF;4841.
+)

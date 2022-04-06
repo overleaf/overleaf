@@ -25,7 +25,7 @@ export default function BetaBadge({ tooltip, url = '/beta/participate' }) {
 }
 
 BetaBadge.propTypes = {
-  tooltip: PropTypes.exact({
+  tooltip: PropTypes.shape({
     id: PropTypes.string.isRequired,
     text: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
     placement: PropTypes.string,

@@ -104,7 +104,7 @@
     },
     {
       // Cypress specific rules
-      "files": ["cypress/**/*.js", "**/test/frontend/**/*.spec.js"],
+      "files": ["cypress/**/*.{js,ts,tsx}", "**/test/frontend/**/*.spec.{js,ts,tsx}"],
       "extends": [
         "plugin:cypress/recommended"
       ]

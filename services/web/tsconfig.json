@@ -10,13 +10,15 @@
     "moduleResolution": "node" /* Specify module resolution strategy */,
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     "skipLibCheck": true /* Skip type checking of declaration files. */,
-    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
+    "types": ["cypress", "@testing-library/cypress"]
   },
   "include": [
     "frontend/js/**/*.*",
     "modules/**/frontend/js/**/*.*",
     "test/frontend/**/*.*",
     "modules/**/test/frontend/**/*.*",
+    "cypress",
     "types"
   ]
 }

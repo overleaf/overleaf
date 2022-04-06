@@ -1,11 +1,10 @@
 {
   "component": {
     "componentFolder": ".",
-    "testFiles": "./{test,modules/**/test}/frontend/components/**/*.spec.js",
-    "supportFile": "cypress/support/ct/index.js"
+    "testFiles": "./{test,modules/**/test}/frontend/components/**/*.spec.{js,ts,tsx}",
+    "supportFile": "cypress/support/ct/index.ts"
   },
-  "experimentalFetchPolyfill": true,
-  "fixturesFolder": false,
+  "fixturesFolder": "cypress/fixtures",
   "video": false,
   "viewportHeight": 800,
   "viewportWidth": 800

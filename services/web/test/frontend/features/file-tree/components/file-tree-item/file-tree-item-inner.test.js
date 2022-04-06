@@ -9,13 +9,8 @@ import FileTreeContextMenu from '../../../../../../frontend/js/features/file-tre
 describe('<FileTreeitemInner />', function () {
   const setContextMenuCoords = sinon.stub()
 
-  beforeEach(function () {
-    global.requestAnimationFrame = sinon.stub()
-  })
-
   afterEach(function () {
     setContextMenuCoords.reset()
-    delete global.requestAnimationFrame
   })
 
   describe('menu', function () {

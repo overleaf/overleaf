@@ -15,13 +15,11 @@ describe('FileTree Create Folder Flow', function () {
   const onInit = sinon.stub()
 
   beforeEach(function () {
-    global.requestAnimationFrame = sinon.stub()
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-user', { id: 'user1' })
   })
 
   afterEach(function () {
-    delete global.requestAnimationFrame
     fetchMock.restore()
     onSelect.reset()
     onInit.reset()

@@ -91,3 +91,5 @@ cypress/downloads/
 
 # Ace themes for conversion
 modules/source-editor/frontend/js/themes/ace/
+
+!**/fixtures/**/*.log

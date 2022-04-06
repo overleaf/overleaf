@@ -28,7 +28,7 @@ export function EditorProviders({
   },
   isRestrictedTokenMember = false,
   clsiServerId = '1234',
-  scope,
+  scope = {},
   features = {
     referencesSearch: true,
   },

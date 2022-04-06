@@ -1,0 +1,21 @@
+log This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.9.10)  8 FEB 2022 16:27
+entering extended mode
+ \write18 enabled.
+ %&-line parsing enabled.
+**main.tex
+(./main.tex
+LaTeX2e <2020-02-02> patch level 5
+
+LaTeX Warning: Reference `intorduction' on page 1 undefined on input line 11.
+
+
+LaTeX Warning: Reference `section1' on page 1 undefined on input line 13.
+
+[1
+
+{/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (/compi
+le/output.aux)
+
+LaTeX Warning: There were undefined references.
+
+ )
