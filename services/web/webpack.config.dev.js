@@ -10,6 +10,31 @@ module.exports = merge(base, {
   // Enable accurate source maps for dev
   devtool: 'source-map',
 
+  // Load entrypoints without contenthash in filename
+  output: {
+    filename: 'js/[name].js',
+  },
+
+  // Load assets without contenthash in filename
+  module: {
+    rules: [
+      {
+        test: /\.(woff|woff2)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'fonts/[name][ext]',
+        },
+      },
+      {
+        test: /\.(svg|gif|png|jpg|pdf)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'images/[name][ext]',
+        },
+      },
+    ],
+  },
+
   plugins: [
     // Extract CSS to a separate file (rather than inlining to a <style> tag)
     new MiniCssExtractPlugin({
