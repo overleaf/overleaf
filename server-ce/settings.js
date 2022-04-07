@@ -717,6 +717,12 @@ if (process.env.SHARELATEX_TEMPLATES_USER_ID) {
 // -------
 if (process.env.SHARELATEX_PROXY_LEARN != null) {
   settings.proxyLearn = parse(process.env.SHARELATEX_PROXY_LEARN)
+  if (settings.proxyLearn) {
+    settings.nav.header_extras = [{
+      url: '/learn',
+      text: 'documentation',
+    }].concat(settings.nav.header_extras || [])
+  }
 }
 
 // /References
