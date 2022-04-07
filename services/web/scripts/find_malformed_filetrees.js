@@ -18,6 +18,14 @@ async function main() {
 }
 
 function processProject(project) {
+  if (!project.rootFolder || !Array.isArray(project.rootFolder)) {
+    console.log('BAD PATH:', project._id, 'rootFolder')
+    return
+  }
+  if (!project.rootFolder[0]) {
+    console.log('BAD PATH:', project._id, 'rootFolder.0')
+    return
+  }
   const badPaths = findBadPaths(project.rootFolder[0])
   for (const path of badPaths) {
     console.log('BAD PATH:', project._id, `rootFolder.0.${path}`)
