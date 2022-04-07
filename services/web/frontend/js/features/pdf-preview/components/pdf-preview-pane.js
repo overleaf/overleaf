@@ -27,7 +27,7 @@ function PdfPreviewPane() {
 function LoadingPreview() {
   return (
     <div className="pdf-loading-spinner-container">
-      <LoadingSpinner />
+      <LoadingSpinner delay={500} />
     </div>
   )
 }

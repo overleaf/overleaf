@@ -71,7 +71,7 @@ const ChatPane = React.memo(function ChatPane() {
       >
         <div>
           <h2 className="sr-only">{t('chat')}</h2>
-          {status === 'pending' && <LoadingSpinner />}
+          {status === 'pending' && <LoadingSpinner delay={500} />}
           {shouldDisplayPlaceholder && <Placeholder />}
           <MessageList
             messages={messages}

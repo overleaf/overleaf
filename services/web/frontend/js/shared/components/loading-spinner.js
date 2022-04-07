@@ -3,7 +3,7 @@ import Icon from './icon'
 import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
-function LoadingSpinner({ delay = 500 }) {
+function LoadingSpinner({ delay = 0 }) {
   const { t } = useTranslation()
 
   const [show, setShow] = useState(false)
