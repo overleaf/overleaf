@@ -362,7 +362,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
       appName: Settings.appName,
-      dropboxAppName: Settings.apis.thirdPartyDataStore?.dropboxAppName || '',
+      dropboxAppName:
+        Settings.apis.thirdPartyDataStore?.dropboxAppName || 'Overleaf',
       hasSamlBeta: req.session.samlBeta,
       hasSamlFeature: Features.hasFeature('saml'),
       samlInitPath: _.get(Settings, ['saml', 'ukamf', 'initPath']),
