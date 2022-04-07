@@ -57,14 +57,6 @@ async function plansPage(req, res) {
 
   AnalyticsManager.recordEventForSession(req.session, 'plans-page-view')
 
-  const assignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    'plans-page-layout'
-  )
-
-  const newPlansPageVariant =
-    assignment && assignment.variant === 'new-plans-page'
-
   const standardPlanNameAssignment =
     await SplitTestHandler.promises.getAssignment(req, 'standard-plan-name')
 
@@ -82,7 +74,6 @@ async function plansPage(req, res) {
     groupPlans: GroupPlansData,
     groupPlanModalOptions,
     groupPlanModalDefaults,
-    newPlansPageVariant,
     useNewPlanName,
   })
 }

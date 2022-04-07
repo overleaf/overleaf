@@ -65,24 +65,6 @@ mixin card_student_monthly(location)
 		span
 			+price_student_monthly
 	+features_student(location, 'monthly')
-mixin card_student_annual_variant(location)
-	.best-value
-		strong #{translate('best_value')}
-	.card-header
-		h2 #{translate("student")} (#{translate("annual")})
-	h5.tagline #{translate('tagline_student_annual')}
-	.circle
-		span
-			+price_student_annual
-	+btn_buy_student(location, 'annual')
-mixin card_student_monthly_variant(location)
-	.card-header
-		h2 #{translate("student")}
-	h5.tagline #{translate('tagline_student_monthly')}
-	.circle
-		span
-			+price_student_monthly
-	+btn_buy_student(location, 'monthly')
 
 //- Features Lists, used within cards
 mixin features_collaborator(location)
@@ -210,27 +192,6 @@ mixin plan_switch(location)
 				href="#"
 			) #{translate("special_price_student")}
 
-mixin plan_switch_variant()
-	ul.nav.nav-pills
-		li.active(data-ol-view-tab='monthly')
-			a.btn.btn-default-outline(
-				href="#"
-			) #{translate("monthly")}
-		li(data-ol-view-tab='annual')
-			a.btn.btn-default-outline(
-				href="#"
-			) #{translate("annual")}
-		li(data-ol-view-tab='student')
-			a.btn.btn-default-outline(
-				href="#"
-			) #{translate("special_price_student")}
-		li()
-			a.btn.btn-default-outline(
-				href="#groups"
-				data-ol-open-group-plan-modal
-				data-ol-location='toggle'
-			) #{translate("group_plans")}
-
 mixin allCardsAndControls(controlsRowSpaced, listLocation)
 	- var location = listLocation ? 'card_' + listLocation : 'card'
 	.row.top-switch(class=(controlsRowSpaced ? "row-spaced" : ""))
@@ -290,73 +251,3 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 					.col-md-4
 						.card.card-last
 							+card_student_monthly(location)
-
-mixin allCardsAndControlsForVariant()
-	- var location = listLocation ? 'card_' + listLocation : 'card'
-	.row.top-switch(class=(controlsRowSpaced ? "row-spaced" : ""))
-		.col-lg-6.col-lg-offset-3.col-md-8.col-md-offset-1
-			+plan_switch_variant('card')
-		.col-md-2.text-right
-			+currency_dropdown
-
-	.row
-		.col-md-10.col-md-offset-1
-			.row
-				for view in ['monthly', 'annual']
-					.card-group.text-centered(data-ol-view=view hidden=(view==='annual'))
-						.col-md-4
-							.card.card-first
-								.card-header
-									h2 #{translate("personal")}
-								h5.tagline #{translate("tagline_personal")}
-								.circle
-									+price_personal
-								ul.list-unstyled
-									li #{translate("one_collaborator")}
-								+btn_buy_personal(location)
-						.col-md-4
-							.card.card-highlighted
-								.best-value
-									strong #{translate('best_value')}
-								.card-header
-									if (useNewPlanName)
-										h2 #{translate("standard")}
-									else
-										h2 #{translate("collaborator")}
-								h5.tagline #{translate("tagline_collaborator")}
-								.circle
-									+price_collaborator
-								ul.list-unstyled
-									li
-										strong #{translate("collabs_per_proj", {collabcount:10})}
-								+btn_buy_collaborator(location)
-						.col-md-4
-							.card.card-last
-								.card-header
-									h2 #{translate("professional")}
-								h5.tagline #{translate("tagline_professional")}
-								.circle
-									+price_professional
-								ul.list-unstyled
-									li
-										strong #{translate("unlimited_collabs")}
-								+btn_buy_professional(location)
-
-				.card-group.text-centered(hidden data-ol-view='student')
-					.col-md-4
-						.card.card-first
-							.card-header
-								h2 #{translate("free")}
-							h5.tagline #{translate("tagline_free")}
-							.circle #{translate("free")}
-							ul.list-unstyled
-								li #{translate("one_collaborator")}
-							+btn_buy_free(location)
-
-					.col-md-4
-						.card.card-highlighted
-							+card_student_annual_variant(location)
-
-					.col-md-4
-						.card.card-last
-							+card_student_monthly_variant(location)

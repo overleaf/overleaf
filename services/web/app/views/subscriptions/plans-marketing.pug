@@ -25,94 +25,53 @@ block content
 						.col-md-8.col-md-offset-2
 							p.text-centered #{translate("sl_benefits_plans")}
 
-					if (newPlansPageVariant)
-						+allCardsAndControlsForVariant
-					else
-						+allCardsAndControls()
+					+allCardsAndControls()
 
-					if (newPlansPageVariant)
-						.row.features-table(event-tracking="features-table-viewed" event-tracking-ga="subscription-funnel" event-tracking-trigger="scroll" event-tracking-send-once="true" event-tracking-label="exp-")
-							.col-sm-12(data-ol-view='monthly')
-								+table_premium
-							.col-sm-12(hidden data-ol-view='annual')
-								+table_premium
-							.col-sm-12(hidden data-ol-view='student')
-								+table_student
+					.row.row-spaced-large.text-centered
+						.col-xs-12
+							p.text-centered !{translate('also_provides_free_plan', {}, [{ name: 'a', attrs: { href: '/register' }}])}
+							i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Mastercard accepted
+							i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Visa accepted
+							i.fa.fa-cc-amex.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Amex accepted
+							i.fa.fa-cc-paypal.fa-2x(aria-hidden="true") &nbsp;
+							span.sr-only Paypal accepted
+							div.text-centered #{translate('change_plans_any_time')}<br/> #{translate('billed_after_x_days', {len:'7'})}
+							br
+							div.text-centered #{translate('subject_to_additional_vat')}<br/> #{translate('select_country_vat')}
 
-						.row.row-spaced-large
-							.col-md-8.col-md-offset-2
-								.card.text-centered
-									.card-header
-										h2 #{translate('looking_multiple_licenses')}
-									span #{translate('reduce_costs_group_licenses')}
-									br
-									br
-									a.btn.btn-default(
-										href="#groups"
-										data-ol-open-group-plan-modal
-										data-ol-location='callout'
-									) #{translate('find_out_more')}
-
-						.row.row-spaced-large.text-centered
-							.col-xs-12
-								p.text-centered !{translate('also_provides_free_plan', {}, [{ name: 'a', attrs: { href: '/register' }}])}
-								i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
-								span.sr-only Mastercard accepted
-								i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;
-								span.sr-only Visa accepted
-								i.fa.fa-cc-amex.fa-2x(aria-hidden="true") &nbsp;
-								span.sr-only Amex accepted
-								i.fa.fa-cc-paypal.fa-2x(aria-hidden="true") &nbsp;
-								span.sr-only Paypal accepted
-								div.text-centered #{translate('change_plans_any_time')}<br/> #{translate('billed_after_x_days', {len:'7'})}
+					.row.row-spaced-large
+						.col-md-8.col-md-offset-2
+							.card.text-centered
+								.card-header
+									h2 #{translate('looking_multiple_licenses')}
+								span #{translate('reduce_costs_group_licenses')}
 								br
-								div.text-centered #{translate('subject_to_additional_vat')}<br/> #{translate('select_country_vat')}
-					else
-						.row.row-spaced-large.text-centered
-							.col-xs-12
-								p.text-centered !{translate('also_provides_free_plan', {}, [{ name: 'a', attrs: { href: '/register' }}])}
-								i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
-								span.sr-only Mastercard accepted
-								i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;
-								span.sr-only Visa accepted
-								i.fa.fa-cc-amex.fa-2x(aria-hidden="true") &nbsp;
-								span.sr-only Amex accepted
-								i.fa.fa-cc-paypal.fa-2x(aria-hidden="true") &nbsp;
-								span.sr-only Paypal accepted
-								div.text-centered #{translate('change_plans_any_time')}<br/> #{translate('billed_after_x_days', {len:'7'})}
 								br
-								div.text-centered #{translate('subject_to_additional_vat')}<br/> #{translate('select_country_vat')}
+								a.btn.btn-default(
+									href="#groups"
+									data-ol-open-group-plan-modal
+									data-ol-location='callout'
+								) #{translate('find_out_more')}
 
-						.row.row-spaced-large
-							.col-md-8.col-md-offset-2
-								.card.text-centered
-									.card-header
-										h2 #{translate('looking_multiple_licenses')}
-									span #{translate('reduce_costs_group_licenses')}
-									br
-									br
-									a.btn.btn-default(
-										href="#groups"
-										data-ol-open-group-plan-modal
-										data-ol-location='callout'
-									) #{translate('find_out_more')}
-
-						.row.row-spaced-large
-							.col-sm-12
-								.page-header.plans-header.plans-subheader.text-centered
-									h2 #{translate('compare_plan_features')}
-						.row
-							.col-md-6.col-md-offset-3
-								+plan_switch('table')
-							.col-md-3.text-right
-								+currency_dropdown
-						.row(event-tracking="features-table-viewed" event-tracking-ga="subscription-funnel" event-tracking-trigger="scroll" event-tracking-send-once="true" event-tracking-label="exp-")
-							.col-sm-12(data-ol-view='monthly')
-								+table_premium
-							.col-sm-12(hidden data-ol-view='annual')
-								+table_premium
-							.col-sm-12(hidden data-ol-view='student')
-								+table_student
+					.row.row-spaced-large
+						.col-sm-12
+							.page-header.plans-header.plans-subheader.text-centered
+								h2 #{translate('compare_plan_features')}
+					.row
+						.col-md-6.col-md-offset-3
+							+plan_switch('table')
+						.col-md-3.text-right
+							+currency_dropdown
+					.row(event-tracking="features-table-viewed" event-tracking-ga="subscription-funnel" event-tracking-trigger="scroll" event-tracking-send-once="true" event-tracking-label="exp-")
+						.col-sm-12(data-ol-view='monthly')
+							+table_premium
+						.col-sm-12(hidden data-ol-view='annual')
+							+table_premium
+						.col-sm-12(hidden data-ol-view='student')
+							+table_student
 
 					include ./plans-marketing/_quotes
 
