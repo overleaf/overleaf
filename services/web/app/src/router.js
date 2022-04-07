@@ -1010,27 +1010,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     }
   })
 
-  // Admin Stuff
   webRouter.get(
     '/admin',
     AuthorizationMiddleware.ensureUserIsSiteAdmin,
     AdminController.index
   )
-  webRouter.get(
-    '/admin/user',
-    AuthorizationMiddleware.ensureUserIsSiteAdmin,
-    (req, res) => res.redirect('/admin/register')
-  ) // this gets removed by admin-panel addon
-  webRouter.get(
-    '/admin/register',
-    AuthorizationMiddleware.ensureUserIsSiteAdmin,
-    AdminController.registerNewUser
-  )
-  webRouter.post(
-    '/admin/register',
-    AuthorizationMiddleware.ensureUserIsSiteAdmin,
-    UserController.register
-  )
+
   if (!Features.hasFeature('saas')) {
     webRouter.post(
       '/admin/openEditor',

@@ -43,7 +43,6 @@ describe('UserController', function () {
     }
     this.User = { findById: sinon.stub().callsArgWith(1, null, this.user) }
     this.NewsLetterManager = { unsubscribe: sinon.stub().callsArgWith(1) }
-    this.UserRegistrationHandler = { registerNewUser: sinon.stub() }
     this.AuthenticationController = {
       establishUserSession: sinon.stub().callsArg(2),
     }
@@ -104,7 +103,6 @@ describe('UserController', function () {
           User: this.User,
         },
         '../Newsletter/NewsletterManager': this.NewsLetterManager,
-        './UserRegistrationHandler': this.UserRegistrationHandler,
         '../Authentication/AuthenticationController':
           this.AuthenticationController,
         '../Authentication/SessionManager': this.SessionManager,
@@ -555,32 +553,6 @@ describe('UserController', function () {
         done()
       }
       this.UserController.logout(this.req, this.res)
-    })
-  })
-
-  describe('register', function () {
-    beforeEach(function () {
-      this.UserRegistrationHandler.registerNewUserAndSendActivationEmail = sinon
-        .stub()
-        .callsArgWith(1, null, this.user, (this.url = 'mock/url'))
-      this.req.body.email = this.user.email = this.email = 'email@example.com'
-      this.UserController.register(this.req, this.res)
-    })
-
-    it('should register the user and send them an email', function () {
-      sinon.assert.calledWith(
-        this.UserRegistrationHandler.registerNewUserAndSendActivationEmail,
-        this.email
-      )
-    })
-
-    it('should return the user and activation url', function () {
-      this.res.json
-        .calledWith({
-          email: this.email,
-          setNewPasswordUrl: this.url,
-        })
-        .should.equal(true)
     })
   })
 

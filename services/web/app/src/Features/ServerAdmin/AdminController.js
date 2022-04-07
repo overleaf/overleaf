@@ -101,10 +101,6 @@ const AdminController = {
     })
   },
 
-  registerNewUser(req, res, next) {
-    return res.render('admin/register')
-  },
-
   disconnectAllUsers: (req, res) => {
     logger.warn('disconecting everyone')
     const delay = (req.query && req.query.delay) > 0 ? req.query.delay : 10

@@ -3,7 +3,6 @@ const UserDeleter = require('./UserDeleter')
 const UserGetter = require('./UserGetter')
 const { User } = require('../../models/User')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
-const UserRegistrationHandler = require('./UserRegistrationHandler')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const AuthenticationManager = require('../Authentication/AuthenticationManager')
@@ -461,25 +460,6 @@ const UserController = {
 
       res.sendStatus(204)
     })
-  },
-
-  register(req, res, next) {
-    const { email } = req.body
-    if (email == null || email === '') {
-      return res.sendStatus(422) // Unprocessable Entity
-    }
-    UserRegistrationHandler.registerNewUserAndSendActivationEmail(
-      email,
-      (error, user, setNewPasswordUrl) => {
-        if (error != null) {
-          return next(error)
-        }
-        res.json({
-          email: user.email,
-          setNewPasswordUrl,
-        })
-      }
-    )
   },
 
   changePassword: expressify(changePassword),

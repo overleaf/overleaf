@@ -1,8 +1,32 @@
 const Path = require('path')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
+const UserRegistrationHandler = require('../../../../app/src/Features/User/UserRegistrationHandler')
 const ErrorController = require('../../../../app/src/Features/Errors/ErrorController')
 
 module.exports = {
+  registerNewUser(req, res, next) {
+    res.render(Path.resolve(__dirname, '../views/user/register'))
+  },
+
+  register(req, res, next) {
+    const { email } = req.body
+    if (email == null || email === '') {
+      return res.sendStatus(422) // Unprocessable Entity
+    }
+    UserRegistrationHandler.registerNewUserAndSendActivationEmail(
+      email,
+      (error, user, setNewPasswordUrl) => {
+        if (error != null) {
+          return next(error)
+        }
+        res.json({
+          email: user.email,
+          setNewPasswordUrl,
+        })
+      }
+    )
+  },
+
   activateAccountPage(req, res, next) {
     // An 'activation' is actually just a password reset on an account that
     // was set with a random password originally.

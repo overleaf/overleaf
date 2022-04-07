@@ -17,21 +17,27 @@ describe('UserActivateController', function () {
     }
 
     this.UserGetter = { getUser: sinon.stub() }
+    this.UserRegistrationHandler = {}
     this.ErrorController = { notFound: sinon.stub() }
     this.UserActivateController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../../../../app/src/Features/User/UserGetter': this.UserGetter,
+        '../../../../app/src/Features/User/UserRegistrationHandler':
+          this.UserRegistrationHandler,
         '../../../../app/src/Features/Errors/ErrorController':
           this.ErrorController,
       },
     })
     this.req = {
+      body: {},
       query: {},
       session: {
         user: this.user,
       },
     }
-    this.res = {}
+    this.res = {
+      json: sinon.stub(),
+    }
   })
 
   describe('activateAccountPage', function () {
@@ -84,6 +90,32 @@ describe('UserActivateController', function () {
         return done()
       }
       this.UserActivateController.activateAccountPage(this.req, this.res)
+    })
+  })
+
+  describe('register', function () {
+    beforeEach(function () {
+      this.UserRegistrationHandler.registerNewUserAndSendActivationEmail = sinon
+        .stub()
+        .callsArgWith(1, null, this.user, (this.url = 'mock/url'))
+      this.req.body.email = this.user.email = this.email = 'email@example.com'
+      this.UserActivateController.register(this.req, this.res)
+    })
+
+    it('should register the user and send them an email', function () {
+      sinon.assert.calledWith(
+        this.UserRegistrationHandler.registerNewUserAndSendActivationEmail,
+        this.email
+      )
+    })
+
+    it('should return the user and activation url', function () {
+      this.res.json
+        .calledWith({
+          email: this.email,
+          setNewPasswordUrl: this.url,
+        })
+        .should.equal(true)
     })
   })
 })
