@@ -30,7 +30,7 @@ mixin table_premium
 			tr
 				td(event-tracking="features-table" event-tracking-trigger="hover" event-tracking-ga="subscription-funnel" event-tracking-label=`${feature.feature}`)
 					if feature.info
-						span(tooltip=translate(feature.info)) #{translate(feature.feature)}
+						span(data-toggle="tooltip" title=translate(feature.info)) #{translate(feature.feature)}
 					else
 						| #{translate(feature.feature)}
 				for plan in feature.plans
@@ -91,7 +91,7 @@ mixin table_student
 			tr
 				td(event-tracking="plans-page-table" event-tracking-trigger="hover" event-tracking-ga="subscription-funnel" event-tracking-label=`${feature.feature}`)
 					if feature.info
-						span(tooltip=translate(feature.info)) #{translate(feature.feature)}
+						span(data-toggle="tooltip" title=translate(feature.info)) #{translate(feature.feature)}
 					else
 						| #{translate(feature.feature)}
 				td(ng-non-bindable)
