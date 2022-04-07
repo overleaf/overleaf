@@ -18,7 +18,9 @@ const SandboxedModule = require('sandboxed-module')
 
 describe('RangesManager', function () {
   beforeEach(function () {
-    this.RangesManager = SandboxedModule.require(modulePath)
+    this.RangesManager = SandboxedModule.require(modulePath, {
+      requires: { './Metrics': (this.Metrics = { histogram: sinon.stub() }) },
+    })
 
     this.doc_id = 'doc-id-123'
     this.project_id = 'project-id-123'
@@ -302,7 +304,7 @@ describe('RangesManager', function () {
       })
     })
 
-    return describe('with an update that collapses a range', function () {
+    describe('with an update that collapses a range', function () {
       beforeEach(function () {
         this.updates = [
           {
@@ -341,6 +343,70 @@ describe('RangesManager', function () {
           this.newDocLines,
           this.callback
         )
+      })
+
+      return it('should return ranges_were_collapsed == true', function () {
+        this.callback.called.should.equal(true)
+        const [error, entries, ranges_were_collapsed] = Array.from(
+          this.callback.args[0]
+        )
+        return expect(ranges_were_collapsed).to.equal(true)
+      })
+    })
+
+    describe('with an update that deletes ranges', function () {
+      beforeEach(function () {
+        this.updates = [
+          {
+            meta: {
+              user_id: this.user_id,
+            },
+            op: [
+              {
+                d: 'one two three four five',
+                p: 0,
+              },
+            ],
+          },
+        ]
+        this.entries = {
+          comments: [
+            {
+              op: {
+                c: 'n',
+                p: 1,
+                t: 'thread-id-2',
+              },
+              metadata: {
+                user_id: this.user_id,
+              },
+            },
+          ],
+          changes: [
+            {
+              op: {
+                i: 'hello',
+                p: 1,
+                t: 'thread-id-2',
+              },
+              metadata: {
+                user_id: this.user_id,
+              },
+            },
+          ],
+        }
+        return this.RangesManager.applyUpdate(
+          this.project_id,
+          this.doc_id,
+          this.entries,
+          this.updates,
+          this.newDocLines,
+          this.callback
+        )
+      })
+
+      it('should increment the range-delta histogram', function () {
+        this.Metrics.histogram.called.should.equal(true)
       })
 
       return it('should return ranges_were_collapsed == true', function () {

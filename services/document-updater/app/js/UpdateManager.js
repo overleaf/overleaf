@@ -239,6 +239,7 @@ module.exports = UpdateManager = {
                           return callback(error)
                         }
                         if (ranges_were_collapsed) {
+                          Metrics.inc('doc-snapshot')
                           logger.debug(
                             {
                               project_id,

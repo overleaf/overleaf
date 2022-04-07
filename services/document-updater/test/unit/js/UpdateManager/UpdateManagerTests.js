@@ -30,6 +30,7 @@ describe('UpdateManager', function () {
         './ShareJsUpdateManager': (this.ShareJsUpdateManager = {}),
         './HistoryManager': (this.HistoryManager = {}),
         './Metrics': (this.Metrics = {
+          inc: sinon.stub(),
           Timer: (Timer = (function () {
             Timer = class Timer {
               static initClass() {
@@ -487,6 +488,10 @@ describe('UpdateManager', function () {
           this.update,
           this.callback
         )
+      })
+
+      it('should increment the doc-snapshot metric', function () {
+        this.Metrics.inc.calledWith('doc-snapshot').should.equal(true)
       })
 
       return it('should call SnapshotManager.recordSnapshot', function () {

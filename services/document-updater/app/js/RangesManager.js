@@ -13,7 +13,10 @@
 let RangesManager
 const RangesTracker = require('./RangesTracker')
 const logger = require('@overleaf/logger')
+const Metrics = require('./Metrics')
 const _ = require('lodash')
+
+const RANGE_DELTA_BUCKETS = [0, 1, 2, 3, 4, 5, 10, 20, 50]
 
 module.exports = RangesManager = {
   MAX_COMMENTS: 500,
@@ -32,7 +35,8 @@ module.exports = RangesManager = {
     }
     const { changes, comments } = _.cloneDeep(entries)
     const rangesTracker = new RangesTracker(changes, comments)
-    const emptyRangeCountBefore = RangesManager._emptyRangesCount(rangesTracker)
+    const [emptyRangeCountBefore, totalRangeCountBefore] =
+      RangesManager._emptyRangesCount(rangesTracker)
     for (const update of Array.from(updates)) {
       rangesTracker.track_changes = !!update.meta.tc
       if (update.meta.tc) {
@@ -74,8 +78,18 @@ module.exports = RangesManager = {
       return callback(error)
     }
 
-    const emptyRangeCountAfter = RangesManager._emptyRangesCount(rangesTracker)
+    const [emptyRangeCountAfter, totalRangeCountAfter] =
+      RangesManager._emptyRangesCount(rangesTracker)
     const rangesWereCollapsed = emptyRangeCountAfter > emptyRangeCountBefore
+    // monitor the change in range count, we may want to snapshot before large decreases
+    if (totalRangeCountAfter < totalRangeCountBefore) {
+      Metrics.histogram(
+        'range-delta',
+        totalRangeCountBefore - totalRangeCountAfter,
+        RANGE_DELTA_BUCKETS,
+        { status_code: rangesWereCollapsed ? 'saved' : 'unsaved' }
+      )
+    }
     const response = RangesManager._getRanges(rangesTracker)
     logger.debug(
       {
@@ -144,19 +158,22 @@ module.exports = RangesManager = {
   },
 
   _emptyRangesCount(ranges) {
-    let count = 0
+    let emptyCount = 0
+    let totalCount = 0
     for (const comment of Array.from(ranges.comments || [])) {
+      totalCount++
       if (comment.op.c === '') {
-        count++
+        emptyCount++
       }
     }
     for (const change of Array.from(ranges.changes || [])) {
+      totalCount++
       if (change.op.i != null) {
         if (change.op.i === '') {
-          count++
+          emptyCount++
         }
       }
     }
-    return count
+    return [emptyCount, totalCount]
   },
 }
