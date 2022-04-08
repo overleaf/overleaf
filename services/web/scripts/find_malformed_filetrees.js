@@ -43,6 +43,7 @@ function findBadPaths(folder) {
     for (const [i, subfolder] of folder.folders.entries()) {
       if (!subfolder) {
         result.push(`folders.${i}`)
+        continue
       }
       for (const badPath of findBadPaths(subfolder)) {
         result.push(`folders.${i}.${badPath}`)
