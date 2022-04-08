@@ -1,6 +1,7 @@
 const Settings = require('settings-sharelatex')
 const mongojs = require('mongojs')
 const db = mongojs(Settings.mongo.url, ['tokens'])
+// eslint-disable-next-line import/no-extraneous-dependencies
 const async = require('async')
 
 exports.migrate = (client, done) => {
