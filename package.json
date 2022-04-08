@@ -1,4 +1,6 @@
 {
+  "name": "overleaf",
+  "private": true,
   "devDependencies": {
     "eslint": "^7.21.0",
     "eslint-config-prettier": "^8.1.0",
