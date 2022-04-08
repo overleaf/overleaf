@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { screen, render, fireEvent } from '@testing-library/react'
+import { screen, render, fireEvent, waitFor } from '@testing-library/react'
 
 import OutlineItem from '../../../../../frontend/js/features/outline/components/outline-item'
 
@@ -82,7 +82,7 @@ describe('<OutlineItem />', function () {
     screen.getByRole('treeitem', { name: 'Parent', current: true })
   })
 
-  it('click and double-click jump to location', function () {
+  it('click and double-click jump to location', async function () {
     const outlineItem = {
       title: 'Parent',
       line: 1,
@@ -91,13 +91,17 @@ describe('<OutlineItem />', function () {
 
     const titleButton = screen.getByRole('button', { name: outlineItem.title })
 
-    fireEvent.click(titleButton)
-    expect(jumpToLine).to.be.calledOnce
-    expect(jumpToLine).to.be.calledWith(1, false)
+    fireEvent.click(titleButton, { detail: 1 })
+    await waitFor(() => {
+      expect(jumpToLine).to.be.calledOnce
+      expect(jumpToLine).to.be.calledWith(1, false)
+    })
 
     jumpToLine.reset()
-    fireEvent.doubleClick(titleButton)
-    expect(jumpToLine).to.be.calledOnce
-    expect(jumpToLine).to.be.calledWith(1, true)
+    fireEvent.click(titleButton, { detail: 2 })
+    await waitFor(() => {
+      expect(jumpToLine).to.be.calledOnce
+      expect(jumpToLine).to.be.calledWith(1, true)
+    })
   })
 })

@@ -40,12 +40,9 @@ function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
     setExpanded(!expanded)
   }
 
-  function handleOutlineItemLinkClick() {
-    jumpToLine(outlineItem.line, false)
-  }
-
-  function handleOutlineItemLinkDoubleClick() {
-    jumpToLine(outlineItem.line, true)
+  function handleOutlineItemLinkClick(event) {
+    const syncToPdf = event.detail === 2 // double-click = sync to PDF
+    jumpToLine(outlineItem.line, syncToPdf)
   }
 
   useEffect(() => {
@@ -87,7 +84,6 @@ function OutlineItem({ outlineItem, jumpToLine, highlightedLine }) {
         <button
           className={itemLinkClasses}
           onClick={handleOutlineItemLinkClick}
-          onDoubleClick={handleOutlineItemLinkDoubleClick}
           ref={titleElementRef}
         >
           {outlineItem.title}

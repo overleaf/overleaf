@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { useIdeContext } from '../../../shared/context/ide-context'
 import { useProjectContext } from '../../../shared/context/project-context'
@@ -16,6 +16,7 @@ import useDetachState from '../../../shared/hooks/use-detach-state'
 import useDetachAction from '../../../shared/hooks/use-detach-action'
 import localStorage from '../../../infrastructure/local-storage'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
+import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
 
 function GoToCodeButton({
   position,
@@ -232,6 +233,18 @@ function PdfSynctexControls() {
     },
     [getCurrentFilePath, goToPdfLocation]
   )
+
+  const cursorPositionRef = useRef(cursorPosition)
+
+  useEffect(() => {
+    cursorPositionRef.current = cursorPosition
+  }, [cursorPosition])
+
+  const handleSyncToPdf = useCallback(() => {
+    syncToPdf(cursorPositionRef.current)
+  }, [syncToPdf])
+
+  useScopeEventListener('cursor:editor:syncToPdf', handleSyncToPdf)
 
   const _syncToCode = useCallback(
     (position, visualOffset = 0) => {

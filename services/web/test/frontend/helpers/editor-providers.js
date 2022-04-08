@@ -79,6 +79,7 @@ export function EditorProviders({
       callback(get($scope, path))
       return () => null
     },
+    $on: sinon.stub(),
     $applyAsync: sinon.stub(),
     toggleHistory: sinon.stub(),
     permissionsLevel,
