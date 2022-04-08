@@ -98,6 +98,17 @@ button.dropdown-toggle.dropdown-toggle-no-background {
   }
 }
 
+// This removes positioning, display and z-index, which is used just to style the menu in situations where something
+// else is managing that stuff (e.g. the spelling context menu in CodeMirror 6).
+.dropdown-menu.dropdown-menu-unpositioned {
+  position: unset;
+  top: unset;
+  left: unset;
+  z-index: unset;
+  display: block;
+  float: unset;
+}
+
 // Hover/Focus state
 .dropdown-menu > li > a,
 .dropdown-menu .dropdown-menu-button {
