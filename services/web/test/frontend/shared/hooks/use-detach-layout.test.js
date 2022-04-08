@@ -1,3 +1,4 @@
+import { waitFor } from '@testing-library/react'
 import { act } from '@testing-library/react-hooks'
 import { expect } from 'chai'
 import sinon from 'sinon'
@@ -75,10 +76,11 @@ describe('useDetachLayout', function () {
 
     // check that all message were re-broadcast for the new tab
     await nextTick() // necessary to ensure all event handler have run
-    const reBroadcastMessagesCount =
-      sysendTestHelper.getAllBroacastMessages().length
-    expect(reBroadcastMessagesCount).to.equal(broadcastMessagesCount)
-
+    await waitFor(() => {
+      const reBroadcastMessagesCount =
+        sysendTestHelper.getAllBroacastMessages().length
+      expect(reBroadcastMessagesCount).to.equal(broadcastMessagesCount)
+    })
     // 3. simulate closed detached tab
     sysendTestHelper.spy.broadcast.resetHistory()
     sysendTestHelper.receiveMessage({
