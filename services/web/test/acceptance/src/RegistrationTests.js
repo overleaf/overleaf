@@ -97,7 +97,9 @@ describe('Registration', function () {
       it('should produce the correct responses so far', function () {
         expect(results.length).to.equal(9)
         expect(results).to.deep.equal(
-          Array(9).fill('Your email or password is incorrect. Please try again')
+          Array(9).fill(
+            'Your email or password is incorrect. Please try again.'
+          )
         )
       })
 
@@ -115,7 +117,7 @@ describe('Registration', function () {
           expect(results.length).to.equal(15)
           expect(results).to.deep.equal(
             Array(10)
-              .fill('Your email or password is incorrect. Please try again')
+              .fill('Your email or password is incorrect. Please try again.')
               .concat(
                 Array(5).fill(
                   'This account has had too many login requests. Please wait 2 minutes before trying to log in again'
@@ -145,7 +147,7 @@ describe('Registration', function () {
 
           it('should not rate limit their request', function () {
             expect(messages).to.deep.equal([
-              'Your email or password is incorrect. Please try again',
+              'Your email or password is incorrect. Please try again.',
             ])
           })
 
@@ -194,7 +196,7 @@ describe('Registration', function () {
             expect(results.length).to.equal(9)
             expect(results).to.deep.equal(
               Array(9).fill(
-                'Your email or password is incorrect. Please try again'
+                'Your email or password is incorrect. Please try again.'
               )
             )
           })

@@ -221,7 +221,7 @@ block content
 		.modal-header
 			h3 #{translate("delete_account")}
 		div.modal-body#delete-account-modal
-			p !{translate("delete_account_warning_message_3")}
+			p !{translate("delete_account_warning_message_3", {}, ['strong'])}
 			if settings.createV1AccountOnLogin && settings.overleaf
 				p
 					strong
