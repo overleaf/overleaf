@@ -1,5 +1,13 @@
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
+
+type IconProps = {
+  type: string
+  spin?: boolean
+  fw?: boolean
+  modifier?: string
+  className?: string
+  accessibilityLabel?: string
+}
 
 function Icon({
   type,
@@ -8,7 +16,7 @@ function Icon({
   modifier,
   className = '',
   accessibilityLabel,
-}) {
+}: IconProps) {
   const iconClassName = classNames(
     'fa',
     `fa-${type}`,
@@ -28,15 +36,6 @@ function Icon({
       )}
     </>
   )
-}
-
-Icon.propTypes = {
-  type: PropTypes.string.isRequired,
-  spin: PropTypes.bool,
-  fw: PropTypes.bool,
-  modifier: PropTypes.string,
-  className: PropTypes.string,
-  accessibilityLabel: PropTypes.string,
 }
 
 export default Icon
