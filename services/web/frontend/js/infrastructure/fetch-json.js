@@ -8,8 +8,9 @@ import OError from '@overleaf/o-error'
 /**
  * @typedef {Object} FetchOptions
  * @extends RequestInit
- * @property {Object} body
- * @property {Boolean} swallowAbortError Set to false for throwing AbortErrors.
+ * @property {Object} [body]
+ * @property {Boolean} [swallowAbortError] Set to false for throwing AbortErrors.
+ * @property {AbortSignal} [signal] Allows aborting a request via AbortController
  */
 
 /**
