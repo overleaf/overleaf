@@ -5,7 +5,7 @@ import { postJSON, FetchError } from '../../../../infrastructure/fetch-json'
 import getMeta from '../../../../utils/meta'
 import LeaveModalFormError from './modal-form-error'
 
-type LeaveModalFormProps = {
+export type LeaveModalFormProps = {
   setInFlight: Dispatch<SetStateAction<boolean>>
   isFormValid: boolean
   setIsFormValid: Dispatch<SetStateAction<boolean>>

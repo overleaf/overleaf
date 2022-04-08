@@ -11,9 +11,15 @@ function defaultSetupMocks(fetchMock) {
   })
 }
 
-export const Section = args => {
+function setDefaultMeta() {
   window.metaAttributesCache.set('ol-userDefaultEmail', 'user@primary.com')
+  window.metaAttributesCache.set('ol-isSaas', true)
+  window.metaAttributesCache.set('ol-hasPassword', true)
+}
+
+export const Section = args => {
   useFetchMock(defaultSetupMocks)
+  setDefaultMeta()
 
   return <LeaveSection {...args} />
 }
@@ -21,14 +27,22 @@ Section.component = LeaveSection
 Section.parameters = { controls: { include: [], hideNoControlsWarning: true } }
 
 export const ModalSuccess = args => {
-  window.metaAttributesCache.set('ol-userDefaultEmail', 'user@primary.com')
+  setDefaultMeta()
+  useFetchMock(defaultSetupMocks)
+
+  return <LeaveModal {...args} />
+}
+
+export const ModalWithoutPassword = args => {
+  setDefaultMeta()
+  window.metaAttributesCache.set('ol-hasPassword', false)
   useFetchMock(defaultSetupMocks)
 
   return <LeaveModal {...args} />
 }
 
 export const ModalAuthError = args => {
-  window.metaAttributesCache.set('ol-userDefaultEmail', 'user@primary.com')
+  setDefaultMeta()
   useFetchMock(fetchMock => {
     fetchMock.post(/\/user\/delete/, 403)
   })
@@ -37,7 +51,7 @@ export const ModalAuthError = args => {
 }
 
 export const ModalServerError = args => {
-  window.metaAttributesCache.set('ol-userDefaultEmail', 'user@primary.com')
+  setDefaultMeta()
   useFetchMock(fetchMock => {
     fetchMock.post(/\/user\/delete/, 500)
   })
@@ -46,7 +60,7 @@ export const ModalServerError = args => {
 }
 
 export const ModalSubscriptionError = args => {
-  window.metaAttributesCache.set('ol-userDefaultEmail', 'user@primary.com')
+  setDefaultMeta()
   useFetchMock(fetchMock => {
     fetchMock.post(/\/user\/delete/, {
       status: 422,

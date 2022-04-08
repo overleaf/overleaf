@@ -1,12 +1,41 @@
 import { useState, Dispatch, SetStateAction } from 'react'
 import { Modal, Button } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
-import LeaveModalForm from './modal-form'
+import getMeta from '../../../../utils/meta'
+import LeaveModalForm, { LeaveModalFormProps } from './modal-form'
 
 type LeaveModalContentProps = {
   handleHide: () => void
   inFlight: boolean
   setInFlight: Dispatch<SetStateAction<boolean>>
+}
+
+function LeaveModalContentBlock({
+  setInFlight,
+  isFormValid,
+  setIsFormValid,
+}: LeaveModalFormProps) {
+  const { t } = useTranslation()
+  const isSaas = getMeta('ol-isSaas') as boolean
+  const hasPassword = getMeta('ol-hasPassword') as boolean
+
+  if (isSaas && !hasPassword) {
+    return (
+      <p>
+        <b>
+          <a href="/user/password/reset">{t('delete_acct_no_existing_pw')}</a>
+        </b>
+      </p>
+    )
+  }
+
+  return (
+    <LeaveModalForm
+      setInFlight={setInFlight}
+      isFormValid={isFormValid}
+      setIsFormValid={setIsFormValid}
+    />
+  )
 }
 
 function LeaveModalContent({
@@ -30,7 +59,7 @@ function LeaveModalContent({
             components={[<strong />]} // eslint-disable-line react/jsx-key
           />
         </p>
-        <LeaveModalForm
+        <LeaveModalContentBlock
           setInFlight={setInFlight}
           isFormValid={isFormValid}
           setIsFormValid={setIsFormValid}
