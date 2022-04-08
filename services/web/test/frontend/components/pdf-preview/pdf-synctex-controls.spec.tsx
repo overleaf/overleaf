@@ -215,7 +215,7 @@ describe('<PdfSynctexControls/>', function () {
         name: 'Go to code location in PDF',
       }).should('be.disabled')
 
-      cy.wait('@sync-code').then(() => {
+      cy.wait('@sync-code').should(() => {
         // synctex is called locally and the result are broadcast for the detached tab
         expect(sysendTestHelper.getLastBroacastMessage()).to.deep.equal({
           role: 'detacher',
