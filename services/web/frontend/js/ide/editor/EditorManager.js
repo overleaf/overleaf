@@ -225,6 +225,7 @@ export default EditorManager = (function () {
       if (doc.id === this.$scope.editor.open_doc_id && !options.forceReopen) {
         // automatically update the file tree whenever the file is opened
         this.ide.fileTreeManager.selectEntity(doc)
+        this.$scope.$broadcast('file-tree.reselectDoc', doc.id)
         this.$scope.$apply(() => {
           return done(false)
         })

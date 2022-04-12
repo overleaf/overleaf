@@ -25,6 +25,10 @@ App.controller(
       )
     })
 
+    $scope.$on('file-tree.reselectDoc', (ev, docId) => {
+      window.dispatchEvent(new CustomEvent('editor.openDoc', { detail: docId }))
+    })
+
     // Set isConnected to true if:
     // - connection state is 'ready', OR
     // - connection state is 'waitingCountdown' and reconnection_countdown is null

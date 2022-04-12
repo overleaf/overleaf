@@ -132,10 +132,6 @@ describe('<PdfSynctexControls/>', function () {
     cy.get('body')
       .findByRole('button', { name: 'Go to code location in PDF' })
       .should('be.disabled')
-
-    cy.get('body')
-      .findByRole('button', { name: /^Go to PDF location in code/ })
-      .should('be.disabled')
   })
 
   it('disables button when a file is selected', function () {
@@ -151,10 +147,6 @@ describe('<PdfSynctexControls/>', function () {
 
     cy.get('body')
       .findByRole('button', { name: 'Go to code location in PDF' })
-      .should('be.disabled')
-
-    cy.get('body')
-      .findByRole('button', { name: /^Go to PDF location in code/ })
       .should('be.disabled')
   })
 
@@ -285,16 +277,9 @@ describe('<PdfSynctexControls/>', function () {
 
       cy.wait('@compile')
 
-      cy.get('body')
-        .findByRole('button', { name: /^Go to PDF location in code/ })
-        .should('be.disabled')
-        .then(() => {
-          sysendTestHelper.receiveMessage({
-            role: 'detached',
-            event: 'state-has-single-selected-doc',
-            data: { value: true },
-          })
-        })
+      cy.get('body').findByRole('button', {
+        name: /^Go to PDF location in code/,
+      })
 
       cy.get('body')
         .findByRole('button', { name: /^Go to PDF location in code/ })

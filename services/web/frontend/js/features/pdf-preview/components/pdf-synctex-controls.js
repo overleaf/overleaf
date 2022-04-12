@@ -23,7 +23,6 @@ function GoToCodeButton({
   syncToCode,
   syncToCodeInFlight,
   isDetachLayout,
-  hasSingleSelectedDoc,
 }) {
   const { t } = useTranslation()
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
@@ -51,7 +50,7 @@ function GoToCodeButton({
         bsStyle="default"
         bsSize="xs"
         onClick={() => syncToCode(position, 72)}
-        disabled={syncToCodeInFlight || !hasSingleSelectedDoc}
+        disabled={syncToCodeInFlight}
         className={buttonClasses}
         aria-label={t('go_to_pdf_location_in_code')}
       >
@@ -367,7 +366,6 @@ function PdfSynctexControls() {
           syncToCode={syncToCode}
           syncToCodeInFlight={syncToCodeInFlight}
           isDetachLayout
-          hasSingleSelectedDoc={hasSingleSelectedDoc}
         />
       </>
     )
@@ -385,7 +383,6 @@ function PdfSynctexControls() {
           position={position}
           syncToCode={syncToCode}
           syncToCodeInFlight={syncToCodeInFlight}
-          hasSingleSelectedDoc={hasSingleSelectedDoc}
         />
       </>
     )
@@ -399,7 +396,6 @@ GoToCodeButton.propTypes = {
   position: PropTypes.object.isRequired,
   syncToCode: PropTypes.func.isRequired,
   syncToCodeInFlight: PropTypes.bool.isRequired,
-  hasSingleSelectedDoc: PropTypes.bool.isRequired,
 }
 
 GoToPdfButton.propTypes = {
