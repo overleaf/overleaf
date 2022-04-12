@@ -195,9 +195,9 @@ async function _getAssignmentMetadata(analyticsId, user, splitTest) {
   const currentVersion = splitTest.getCurrentVersion()
   const phase = currentVersion.phase
   if (
-    !user ||
-    (phase === ALPHA_PHASE && !user.alphaProgram) ||
-    (phase === BETA_PHASE && !user.betaProgram)
+    user &&
+    ((phase === ALPHA_PHASE && !user.alphaProgram) ||
+      (phase === BETA_PHASE && !user.betaProgram))
   ) {
     return {
       activeForUser: false,
