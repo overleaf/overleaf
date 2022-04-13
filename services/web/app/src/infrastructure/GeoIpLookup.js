@@ -15,6 +15,7 @@ const currencyMappings = {
   NO: 'NOK',
   CA: 'CAD',
   SE: 'SEK',
+  SG: 'SGD',
 }
 
 const validCurrencyParams = Object.values(currencyMappings).concat(['EUR'])

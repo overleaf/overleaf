@@ -47,6 +47,7 @@ describe('GeoIpLookup', function () {
       expect(this.GeoIpLookup.isValidCurrencyParam('USD')).to.equal(true)
       expect(this.GeoIpLookup.isValidCurrencyParam('AUD')).to.equal(true)
       expect(this.GeoIpLookup.isValidCurrencyParam('EUR')).to.equal(true)
+      expect(this.GeoIpLookup.isValidCurrencyParam('SGD')).to.equal(true)
       expect(this.GeoIpLookup.isValidCurrencyParam('WAT')).to.equal(false)
       expect(this.GeoIpLookup.isValidCurrencyParam('NON')).to.equal(false)
       expect(this.GeoIpLookup.isValidCurrencyParam('LOL')).to.equal(false)
