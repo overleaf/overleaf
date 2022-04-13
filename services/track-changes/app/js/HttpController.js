@@ -238,7 +238,7 @@ module.exports = HttpController = {
     UpdatesManager.exportProject(
       project_id,
       function (err, { updates, userIds }, confirmWrite) {
-        const abortStreaming = req.aborted || res.finished || res.destroyed
+        const abortStreaming = req.destroyed || res.finished || res.destroyed
         if (abortStreaming) {
           // Tell the producer to stop emitting data
           if (confirmWrite) confirmWrite(new Error('stop'))
