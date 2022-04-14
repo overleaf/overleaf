@@ -25,6 +25,7 @@ describe('UserUpdater', function () {
         ensureUniqueEmailAddress: sinon.stub(),
         getUser: sinon.stub(),
         getUserByMainEmail: sinon.stub(),
+        getUserFullEmails: sinon.stub(),
       },
     }
     this.addAffiliation = sinon.stub().yields()
@@ -522,17 +523,24 @@ describe('UserUpdater', function () {
   })
 
   describe('setDefaultEmailAddress', function () {
+    function setStubbedUserEmails(test, emails) {
+      test.stubbedUser.emails = emails
+      test.UserGetter.promises.getUserFullEmails.resolves(
+        test.stubbedUser.emails
+      )
+    }
+
     beforeEach(function () {
       this.auditLog = {
         initiatorId: this.stubbedUser,
         ipAddress: '0:0:0:0',
       }
-      this.stubbedUser.emails = [
+      setStubbedUserEmails(this, [
         {
           email: this.newEmail,
           confirmedAt: new Date(),
         },
-      ]
+      ])
       this.UserGetter.promises.getUser.resolves(this.stubbedUser)
       this.NewsletterManager.promises.changeEmail.callsArgWith(2, null)
       this.RecurlyWrapper.promises.updateAccountEmailAddress.resolves()
@@ -681,12 +689,12 @@ describe('UserUpdater', function () {
 
     describe('when email not confirmed', function () {
       beforeEach(function () {
-        this.stubbedUser.emails = [
+        setStubbedUserEmails(this, [
           {
             email: this.newEmail,
             confirmedAt: null,
           },
-        ]
+        ])
         this.UserUpdater.promises.updateUser = sinon.stub()
       })
 
@@ -708,9 +716,142 @@ describe('UserUpdater', function () {
       })
     })
 
+    describe('securityAlertPrimaryEmailChangedExtraRecipients', function () {
+      it('should be empty for unaffiliated user with single email', function () {
+        const recipients =
+          this.UserUpdater.securityAlertPrimaryEmailChangedExtraRecipients(
+            this.stubbedUser.emails,
+            this.stubbedUser.email,
+            this.newEmail
+          )
+        expect(recipients).to.have.same.members([])
+      })
+
+      it('should be most recently (re-)confirmed emails grouped by institution and by domain for unaffiliated emails as recipients', function () {
+        setStubbedUserEmails(this, [
+          {
+            email: '1@a1.uni',
+            confirmedAt: new Date(2020, 0, 1),
+            reConfirmedAt: new Date(2021, 2, 11),
+            lastConfirmedAt: new Date(2021, 2, 11),
+            default: false,
+            affiliation: {
+              institution: {
+                id: 123,
+                name: 'A1 University',
+              },
+              cachedConfirmedAt: '2020-01-01T18:25:01.639Z',
+              cachedReconfirmedAt: '2021-03-11T18:25:01.639Z',
+            },
+          },
+          {
+            email: '2@a1.uni',
+            confirmedAt: new Date(2019, 0, 1),
+            reConfirmedAt: new Date(2022, 2, 11),
+            lastConfirmedAt: new Date(2022, 2, 11),
+            default: false,
+            affiliation: {
+              institution: {
+                id: 123,
+                name: 'A1 University',
+              },
+              cachedConfirmedAt: '2019-01-01T18:25:01.639Z',
+              cachedReconfirmedAt: '2022-03-11T18:25:01.639Z',
+            },
+          },
+          {
+            email: '2020@foo.bar',
+            confirmedAt: new Date(2020, 6, 1),
+            lastConfirmedAt: new Date(2020, 6, 1),
+          },
+          {
+            email: '2021@foo.bar',
+            confirmedAt: new Date(2021, 6, 1),
+            lastConfirmedAt: new Date(2021, 6, 1),
+          },
+          {
+            email: this.stubbedUser.email,
+            confirmedAt: new Date(2021, 6, 1),
+            lastConfirmedAt: new Date(2021, 6, 1),
+          },
+        ])
+
+        const recipients =
+          this.UserUpdater.securityAlertPrimaryEmailChangedExtraRecipients(
+            this.stubbedUser.emails,
+            this.stubbedUser.email,
+            this.newEmail
+          )
+        expect(recipients).to.have.same.members(['2@a1.uni', '2021@foo.bar'])
+      })
+
+      it('should be most recently (re-)confirmed emails grouped by institution and by domain for unaffiliated emails as recipients (multiple institutions and unaffiliated email domains)', function () {
+        setStubbedUserEmails(this, [
+          {
+            email: '1@a1.uni',
+            confirmedAt: new Date(2020, 0, 1),
+            reConfirmedAt: new Date(2021, 2, 11),
+            lastConfirmedAt: new Date(2021, 2, 11),
+            default: false,
+            affiliation: {
+              institution: {
+                id: 123,
+                name: 'A1 University',
+              },
+              cachedConfirmedAt: '2020-01-01T18:25:01.639Z',
+              cachedReconfirmedAt: '2021-03-11T18:25:01.639Z',
+            },
+          },
+          {
+            email: '1@b2.uni',
+            confirmedAt: new Date(2019, 0, 1),
+            reConfirmedAt: new Date(2022, 2, 11),
+            lastConfirmedAt: new Date(2022, 2, 11),
+            default: false,
+            affiliation: {
+              institution: {
+                id: 234,
+                name: 'B2 University',
+              },
+              cachedConfirmedAt: '2019-01-01T18:25:01.639Z',
+              cachedReconfirmedAt: '2022-03-11T18:25:01.639Z',
+            },
+          },
+          {
+            email: '2020@foo.bar',
+            confirmedAt: new Date(2020, 6, 1),
+            lastConfirmedAt: new Date(2020, 6, 1),
+          },
+          {
+            email: '2021@bar.foo',
+            confirmedAt: new Date(2021, 6, 1),
+            lastConfirmedAt: new Date(2021, 6, 1),
+          },
+          {
+            email: this.stubbedUser.email,
+            confirmedAt: new Date(2021, 6, 1),
+            lastConfirmedAt: new Date(2021, 6, 1),
+          },
+        ])
+
+        const recipients =
+          this.UserUpdater.securityAlertPrimaryEmailChangedExtraRecipients(
+            this.stubbedUser.emails,
+            this.stubbedUser.email,
+            this.newEmail
+          )
+        expect(recipients).to.have.same.members([
+          '1@a1.uni',
+          '1@b2.uni',
+          '2020@foo.bar',
+          '2021@bar.foo',
+        ])
+      })
+    })
+
     describe('when email does not belong to user', function () {
       beforeEach(function () {
-        this.stubbedUser.emails = []
+        setStubbedUserEmails(this, [])
         this.UserGetter.promises.getUser.resolves(this.stubbedUser)
         this.UserUpdater.promises.updateUser = sinon.stub()
       })

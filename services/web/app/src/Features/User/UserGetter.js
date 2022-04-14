@@ -288,6 +288,11 @@ const decorateFullEmails = (
 
     emailData.emailHasInstitutionLicence =
       InstitutionsHelper.emailHasLicence(emailData)
+
+    const lastConfirmedAtStr = emailData.reconfirmedAt || emailData.confirmedAt
+    emailData.lastConfirmedAt = lastConfirmedAtStr
+      ? moment(lastConfirmedAtStr).toDate()
+      : null
   })
 
   return emailsData

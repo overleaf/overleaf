@@ -19,25 +19,51 @@ const NewsletterManager = require('../Newsletter/NewsletterManager')
 const RecurlyWrapper = require('../Subscription/RecurlyWrapper')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
+const _ = require('lodash')
 
 async function _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email) {
-  // send email to both old and new primary email
+  // Send email to the following:
+  // - the old primary
+  // - the new primary
+  // - for all other current (confirmed or recently-enough reconfirmed) email addresses, group by institution if we
+  //   have it, or domain if we don’t, and for each group send to the most recently reconfirmed (or confirmed if never
+  //   reconfirmed) address in that group.
+  // See #6101.
   const emailOptions = {
     actionDescribed: `the primary email address on your account was changed to ${email}`,
     action: 'change of primary email address',
   }
-  const toOld = Object.assign({}, emailOptions, { to: oldEmail })
-  const toNew = Object.assign({}, emailOptions, { to: email })
 
-  try {
-    await EmailHandler.promises.sendEmail('securityAlert', toOld)
-    await EmailHandler.promises.sendEmail('securityAlert', toNew)
-  } catch (error) {
-    logger.error(
-      { error, userId },
-      'could not send security alert email when primary email changed'
-    )
+  async function sendToRecipients(recipients) {
+    // On failure, log the error and carry on so that one email failing does not prevent other emails sending
+    for await (const recipient of recipients) {
+      try {
+        const opts = Object.assign({}, emailOptions, { to: recipient })
+        await EmailHandler.promises.sendEmail('securityAlert', opts)
+      } catch (error) {
+        logger.error(
+          { error, userId },
+          'could not send security alert email when primary email changed'
+        )
+      }
+    }
   }
+
+  // First, send notification to the old and new primary emails before getting other emails from v1 to ensure that these
+  // are still sent in the event of not being able to reach v1
+  const oldAndNewPrimaryEmails = [oldEmail, email]
+  await sendToRecipients(oldAndNewPrimaryEmails)
+
+  // Next, get extra recipients with affiliation data
+  const emailsData = await UserGetter.promises.getUserFullEmails(userId)
+  const extraRecipients =
+    UserUpdater.securityAlertPrimaryEmailChangedExtraRecipients(
+      emailsData,
+      oldEmail,
+      email
+    )
+
+  await sendToRecipients(extraRecipients)
 }
 
 async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
@@ -388,6 +414,46 @@ const UserUpdater = {
       },
       error => callback(error)
     )
+  },
+
+  securityAlertPrimaryEmailChangedExtraRecipients(emailsData, oldEmail, email) {
+    // Group by institution if we have it, or domain if we don’t, and for each group send to the most recently
+    // reconfirmed (or confirmed if never reconfirmed) address in that group. We also remove the original and new
+    // primary email addresses because they are emailed separately
+    // See #6101.
+    function sortEmailsByConfirmation(emails) {
+      return emails.sort((e1, e2) => e2.lastConfirmedAt - e1.lastConfirmedAt)
+    }
+
+    const recipients = new Set()
+    const emailsToIgnore = new Set([oldEmail, email])
+
+    // Remove non-confirmed emails
+    const confirmedEmails = emailsData.filter(email => !!email.lastConfirmedAt)
+
+    // Group other emails by institution, separating out those with no institution and grouping them instead by domain.
+    // The keys for each group are not used for anything other than the grouping, so can have a slightly paranoid format
+    // to avoid any potential clash
+    const groupedEmails = _.groupBy(confirmedEmails, emailData => {
+      if (!emailData.affiliation || !emailData.affiliation.institution) {
+        return `domain:${EmailHelper.getDomain(emailData.email)}`
+      }
+      return `institution_id:${emailData.affiliation.institution.id}`
+    })
+
+    // For each group of emails, order the emails by (re-)confirmation date and pick the first
+    for (const emails of Object.values(groupedEmails)) {
+      // Sort by confirmation and pick the first
+      sortEmailsByConfirmation(emails)
+
+      // Ignore original and new primary email addresses
+      const recipient = emails[0].email
+      if (!emailsToIgnore.has(recipient)) {
+        recipients.add(emails[0].email)
+      }
+    }
+
+    return Array.from(recipients)
   },
 }
 ;[

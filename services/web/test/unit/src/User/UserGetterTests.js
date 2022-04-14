@@ -17,6 +17,7 @@ const {
 
 describe('UserGetter', function () {
   beforeEach(function () {
+    const confirmedAt = new Date()
     this.fakeUser = {
       _id: '12390i',
       email: 'email2@foo.bar',
@@ -24,7 +25,8 @@ describe('UserGetter', function () {
         {
           email: 'email1@foo.bar',
           reversedHostname: 'rab.oof',
-          confirmedAt: new Date(),
+          confirmedAt: confirmedAt,
+          lastConfirmedAt: confirmedAt,
         },
         { email: 'email2@foo.bar', reversedHostname: 'rab.oof' },
       ],
@@ -152,6 +154,7 @@ describe('UserGetter', function () {
               email: 'email1@foo.bar',
               reversedHostname: 'rab.oof',
               confirmedAt: this.fakeUser.emails[0].confirmedAt,
+              lastConfirmedAt: this.fakeUser.emails[0].lastConfirmedAt,
               emailHasInstitutionLicence: false,
               default: false,
             },
@@ -160,6 +163,7 @@ describe('UserGetter', function () {
               reversedHostname: 'rab.oof',
               emailHasInstitutionLicence: false,
               default: true,
+              lastConfirmedAt: null,
             },
           ])
           done()
@@ -199,6 +203,7 @@ describe('UserGetter', function () {
               email: 'email1@foo.bar',
               reversedHostname: 'rab.oof',
               confirmedAt: this.fakeUser.emails[0].confirmedAt,
+              lastConfirmedAt: this.fakeUser.emails[0].lastConfirmedAt,
               default: false,
               emailHasInstitutionLicence: true,
               affiliation: {
@@ -223,6 +228,7 @@ describe('UserGetter', function () {
               reversedHostname: 'rab.oof',
               emailHasInstitutionLicence: false,
               default: true,
+              lastConfirmedAt: null,
             },
           ])
           done()
@@ -248,6 +254,7 @@ describe('UserGetter', function () {
               email: 'email1@foo.bar',
               reversedHostname: 'rab.oof',
               confirmedAt: this.fakeUser.emails[0].confirmedAt,
+              lastConfirmedAt: this.fakeUser.emails[0].lastConfirmedAt,
               default: false,
               emailHasInstitutionLicence: false,
               samlProviderId: 'saml_id',
@@ -258,6 +265,7 @@ describe('UserGetter', function () {
               reversedHostname: 'rab.oof',
               emailHasInstitutionLicence: false,
               default: true,
+              lastConfirmedAt: null,
             },
           ])
           done()
