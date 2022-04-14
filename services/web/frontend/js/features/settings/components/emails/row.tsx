@@ -1,6 +1,7 @@
 import { UserEmailData } from '../../../../../../types/user-email'
 import { Row, Col } from 'react-bootstrap'
 import Email from './email'
+import InstitutionAndRole from './institution-and-role'
 import EmailCell from './cell'
 
 type EmailsRowProps = {
@@ -16,7 +17,11 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
         </EmailCell>
       </Col>
       <Col sm={5}>
-        <EmailCell>todo</EmailCell>
+        {userEmailData.affiliation?.institution && (
+          <EmailCell>
+            <InstitutionAndRole userEmailData={userEmailData} />
+          </EmailCell>
+        )}
       </Col>
       <Col sm={2}>
         <EmailCell>todo</EmailCell>

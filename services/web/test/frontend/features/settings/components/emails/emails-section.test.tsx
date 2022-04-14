@@ -8,24 +8,40 @@ import {
 import EmailsSection from '../../../../../../frontend/js/features/settings/components/emails-section'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
+import { UserEmailData } from '../../../../../../types/user-email'
 
-const confirmedUserData = {
+const confirmedUserData: UserEmailData = {
   confirmedAt: '2022-03-10T10:59:44.139Z',
   email: 'bar@overleaf.com',
   default: false,
 }
 
-const unconfirmedUserData = {
+const unconfirmedUserData: UserEmailData = {
   email: 'baz@overleaf.com',
   default: false,
 }
 
-const professionalUserData = {
+const professionalUserData: UserEmailData = {
   affiliation: {
+    cachedConfirmedAt: null,
+    cachedPastReconfirmDate: false,
+    cachedReconfirmedAt: null,
+    department: 'Art History',
     institution: {
+      commonsAccount: false,
       confirmed: true,
+      id: 1,
+      isUniversity: false,
+      name: 'Overleaf',
+      ssoEnabled: false,
+      ssoBeta: false,
     },
+    inReconfirmNotificationPeriod: false,
+    inferred: false,
     licence: 'pro_plus',
+    pastReconfirmDate: false,
+    portal: { slug: '', templates_count: 1 },
+    role: 'Reader',
   },
   confirmedAt: '2022-03-09T10:59:44.139Z',
   email: 'foo@overleaf.com',
@@ -69,12 +85,10 @@ describe('<EmailsSection />', function () {
   })
 
   it('renders primary status', function () {
-    window.metaAttributesCache.set('ol-userEmails', fakeUsersData)
+    window.metaAttributesCache.set('ol-userEmails', [professionalUserData])
     render(<EmailsSection />)
 
-    const primary = fakeUsersData.find(userData => userData.default)
-
-    screen.getByText(`${primary.email} (primary)`)
+    screen.getByText(`${professionalUserData.email} (primary)`)
   })
 
   it('shows confirmation status for unconfirmed users', function () {

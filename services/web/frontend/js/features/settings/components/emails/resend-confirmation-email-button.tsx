@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
+import { Button } from 'react-bootstrap'
 import useAsync from '../../../../shared/hooks/use-async'
 import { postJSON } from '../../../../infrastructure/fetch-json'
 import { UserEmailData } from '../../../../../../types/user-email'
@@ -42,12 +43,12 @@ function ResendConfirmationEmailButton({
 
   return (
     <>
-      <button
-        className="btn btn-inline-link"
+      <Button
+        className="btn-inline-link"
         onClick={handleResendConfirmationEmail}
       >
         {t('resend_confirmation_email')}
-      </button>
+      </Button>
       <br />
       {isError && (
         <span className="text-danger">

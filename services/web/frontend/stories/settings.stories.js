@@ -21,6 +21,7 @@ const fakeUsersData = [
     affiliation: {
       institution: {
         confirmed: true,
+        name: 'Overleaf',
       },
       licence: 'pro_plus',
     },
@@ -34,6 +35,15 @@ const fakeUsersData = [
     default: false,
   },
   {
+    affiliation: {
+      institution: {
+        confirmed: true,
+        name: 'Overleaf',
+      },
+      licence: 'pro_plus',
+      department: 'Art & Art History',
+      role: 'Reader',
+    },
     email: 'baz@overleaf.com',
     default: false,
   },

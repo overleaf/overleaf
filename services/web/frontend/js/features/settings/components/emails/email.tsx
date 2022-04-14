@@ -29,7 +29,7 @@ function Email({ userEmailData }: EmailProps) {
       )}
       {userEmailData.confirmedAt &&
         userEmailData.affiliation?.institution.confirmed &&
-        userEmailData.affiliation?.licence !== 'free' && (
+        userEmailData.affiliation.licence !== 'free' && (
           <div className="small">
             <span className="label label-primary">{t('professional')}</span>
           </div>
