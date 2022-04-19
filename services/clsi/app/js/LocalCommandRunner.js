@@ -50,7 +50,11 @@ module.exports = CommandRunner = {
     }
 
     // run command as detached process so it has its own process group (which can be killed if needed)
-    const proc = spawn(command[0], command.slice(1), { cwd: directory, env, stdio: ['pipe', 'pipe', 'ignore'] })
+    const proc = spawn(command[0], command.slice(1), {
+      cwd: directory,
+      env,
+      stdio: ['pipe', 'pipe', 'ignore'],
+    })
 
     let stdout = ''
     proc.stdout.setEncoding('utf8').on('data', data => (stdout += data))
