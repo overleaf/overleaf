@@ -1,14 +1,3 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { assert, expect } = require('chai')
@@ -40,46 +29,46 @@ describe('HttpController', function () {
     this.res.status = sinon.stub().returns(this.res)
     this.req = { query: {} }
     this.next = sinon.stub()
-    this.project_id = 'mock-project-id'
-    this.doc_id = 'mock-doc-id'
+    this.projectId = 'mock-project-id'
+    this.docId = 'mock-doc-id'
     this.doc = {
-      _id: this.doc_id,
+      _id: this.docId,
       lines: ['mock', 'lines', ' here', '', '', ' spaces '],
       version: 42,
       rev: 5,
     }
-    return (this.deletedDoc = {
+    this.deletedDoc = {
       deleted: true,
-      _id: this.doc_id,
+      _id: this.docId,
       lines: ['mock', 'lines', ' here', '', '', ' spaces '],
       version: 42,
       rev: 5,
-    })
+    }
   })
 
   describe('getDoc', function () {
     describe('without deleted docs', function () {
       beforeEach(function () {
         this.req.params = {
-          project_id: this.project_id,
-          doc_id: this.doc_id,
+          project_id: this.projectId,
+          doc_id: this.docId,
         }
         this.DocManager.getFullDoc = sinon
           .stub()
           .callsArgWith(2, null, this.doc)
-        return this.HttpController.getDoc(this.req, this.res, this.next)
+        this.HttpController.getDoc(this.req, this.res, this.next)
       })
 
       it('should get the document with the version (including deleted)', function () {
-        return this.DocManager.getFullDoc
-          .calledWith(this.project_id, this.doc_id)
+        this.DocManager.getFullDoc
+          .calledWith(this.projectId, this.docId)
           .should.equal(true)
       })
 
-      return it('should return the doc as JSON', function () {
-        return this.res.json
+      it('should return the doc as JSON', function () {
+        this.res.json
           .calledWith({
-            _id: this.doc_id,
+            _id: this.docId,
             lines: this.doc.lines,
             rev: this.doc.rev,
             version: this.doc.version,
@@ -88,35 +77,35 @@ describe('HttpController', function () {
       })
     })
 
-    return describe('which is deleted', function () {
+    describe('which is deleted', function () {
       beforeEach(function () {
         this.req.params = {
-          project_id: this.project_id,
-          doc_id: this.doc_id,
+          project_id: this.projectId,
+          doc_id: this.docId,
         }
-        return (this.DocManager.getFullDoc = sinon
+        this.DocManager.getFullDoc = sinon
           .stub()
-          .callsArgWith(2, null, this.deletedDoc))
+          .callsArgWith(2, null, this.deletedDoc)
       })
 
       it('should get the doc from the doc manager', function () {
         this.HttpController.getDoc(this.req, this.res, this.next)
-        return this.DocManager.getFullDoc
-          .calledWith(this.project_id, this.doc_id)
+        this.DocManager.getFullDoc
+          .calledWith(this.projectId, this.docId)
           .should.equal(true)
       })
 
       it('should return 404 if the query string delete is not set ', function () {
         this.HttpController.getDoc(this.req, this.res, this.next)
-        return this.res.sendStatus.calledWith(404).should.equal(true)
+        this.res.sendStatus.calledWith(404).should.equal(true)
       })
 
-      return it('should return the doc as JSON if include_deleted is set to true', function () {
+      it('should return the doc as JSON if include_deleted is set to true', function () {
         this.req.query.include_deleted = 'true'
         this.HttpController.getDoc(this.req, this.res, this.next)
-        return this.res.json
+        this.res.json
           .calledWith({
-            _id: this.doc_id,
+            _id: this.docId,
             lines: this.doc.lines,
             rev: this.doc.rev,
             deleted: true,
@@ -130,27 +119,27 @@ describe('HttpController', function () {
   describe('getRawDoc', function () {
     beforeEach(function () {
       this.req.params = {
-        project_id: this.project_id,
-        doc_id: this.doc_id,
+        project_id: this.projectId,
+        doc_id: this.docId,
       }
       this.DocManager.getDocLines = sinon.stub().callsArgWith(2, null, this.doc)
-      return this.HttpController.getRawDoc(this.req, this.res, this.next)
+      this.HttpController.getRawDoc(this.req, this.res, this.next)
     })
 
     it('should get the document without the version', function () {
-      return this.DocManager.getDocLines
-        .calledWith(this.project_id, this.doc_id)
+      this.DocManager.getDocLines
+        .calledWith(this.projectId, this.docId)
         .should.equal(true)
     })
 
     it('should set the content type header', function () {
-      return this.res.setHeader
+      this.res.setHeader
         .calledWith('content-type', 'text/plain')
         .should.equal(true)
     })
 
-    return it('should send the raw version of the doc', function () {
-      return assert.deepEqual(
+    it('should send the raw version of the doc', function () {
+      assert.deepEqual(
         this.res.send.args[0][0],
         `${this.doc.lines[0]}\n${this.doc.lines[1]}\n${this.doc.lines[2]}\n${this.doc.lines[3]}\n${this.doc.lines[4]}\n${this.doc.lines[5]}`
       )
@@ -160,7 +149,7 @@ describe('HttpController', function () {
   describe('getAllDocs', function () {
     describe('normally', function () {
       beforeEach(function () {
-        this.req.params = { project_id: this.project_id }
+        this.req.params = { project_id: this.projectId }
         this.docs = [
           {
             _id: ObjectId(),
@@ -176,17 +165,17 @@ describe('HttpController', function () {
         this.DocManager.getAllNonDeletedDocs = sinon
           .stub()
           .callsArgWith(2, null, this.docs)
-        return this.HttpController.getAllDocs(this.req, this.res, this.next)
+        this.HttpController.getAllDocs(this.req, this.res, this.next)
       })
 
       it('should get all the (non-deleted) docs', function () {
-        return this.DocManager.getAllNonDeletedDocs
-          .calledWith(this.project_id, { lines: true, rev: true })
+        this.DocManager.getAllNonDeletedDocs
+          .calledWith(this.projectId, { lines: true, rev: true })
           .should.equal(true)
       })
 
-      return it('should return the doc as JSON', function () {
-        return this.res.json
+      it('should return the doc as JSON', function () {
+        this.res.json
           .calledWith([
             {
               _id: this.docs[0]._id.toString(),
@@ -203,9 +192,9 @@ describe('HttpController', function () {
       })
     })
 
-    return describe('with a null doc', function () {
+    describe('with a null doc', function () {
       beforeEach(function () {
-        this.req.params = { project_id: this.project_id }
+        this.req.params = { project_id: this.projectId }
         this.docs = [
           {
             _id: ObjectId(),
@@ -222,11 +211,11 @@ describe('HttpController', function () {
         this.DocManager.getAllNonDeletedDocs = sinon
           .stub()
           .callsArgWith(2, null, this.docs)
-        return this.HttpController.getAllDocs(this.req, this.res, this.next)
+        this.HttpController.getAllDocs(this.req, this.res, this.next)
       })
 
       it('should return the non null docs as JSON', function () {
-        return this.res.json
+        this.res.json
           .calledWith([
             {
               _id: this.docs[0]._id.toString(),
@@ -242,12 +231,12 @@ describe('HttpController', function () {
           .should.equal(true)
       })
 
-      return it('should log out an error', function () {
-        return this.logger.error
+      it('should log out an error', function () {
+        this.logger.error
           .calledWith(
             {
               err: sinon.match.has('message', 'null doc'),
-              project_id: this.project_id,
+              projectId: this.projectId,
             },
             'encountered null doc'
           )
@@ -257,9 +246,9 @@ describe('HttpController', function () {
   })
 
   describe('getAllRanges', function () {
-    return describe('normally', function () {
+    describe('normally', function () {
       beforeEach(function () {
-        this.req.params = { project_id: this.project_id }
+        this.req.params = { project_id: this.projectId }
         this.docs = [
           {
             _id: ObjectId(),
@@ -273,17 +262,17 @@ describe('HttpController', function () {
         this.DocManager.getAllNonDeletedDocs = sinon
           .stub()
           .callsArgWith(2, null, this.docs)
-        return this.HttpController.getAllRanges(this.req, this.res, this.next)
+        this.HttpController.getAllRanges(this.req, this.res, this.next)
       })
 
       it('should get all the (non-deleted) doc ranges', function () {
-        return this.DocManager.getAllNonDeletedDocs
-          .calledWith(this.project_id, { ranges: true })
+        this.DocManager.getAllNonDeletedDocs
+          .calledWith(this.projectId, { ranges: true })
           .should.equal(true)
       })
 
-      return it('should return the doc as JSON', function () {
-        return this.res.json
+      it('should return the doc as JSON', function () {
+        this.res.json
           .calledWith([
             {
               _id: this.docs[0]._id.toString(),
@@ -301,10 +290,10 @@ describe('HttpController', function () {
 
   describe('updateDoc', function () {
     beforeEach(function () {
-      return (this.req.params = {
-        project_id: this.project_id,
-        doc_id: this.doc_id,
-      })
+      this.req.params = {
+        project_id: this.projectId,
+        doc_id: this.docId,
+      }
     })
 
     describe('when the doc lines exist and were updated', function () {
@@ -317,14 +306,14 @@ describe('HttpController', function () {
         this.DocManager.updateDoc = sinon
           .stub()
           .yields(null, true, (this.rev = 5))
-        return this.HttpController.updateDoc(this.req, this.res, this.next)
+        this.HttpController.updateDoc(this.req, this.res, this.next)
       })
 
       it('should update the document', function () {
-        return this.DocManager.updateDoc
+        this.DocManager.updateDoc
           .calledWith(
-            this.project_id,
-            this.doc_id,
+            this.projectId,
+            this.docId,
             this.lines,
             this.version,
             this.ranges
@@ -332,8 +321,8 @@ describe('HttpController', function () {
           .should.equal(true)
       })
 
-      return it('should return a modified status', function () {
-        return this.res.json
+      it('should return a modified status', function () {
+        this.res.json
           .calledWith({ modified: true, rev: this.rev })
           .should.equal(true)
       })
@@ -349,11 +338,11 @@ describe('HttpController', function () {
         this.DocManager.updateDoc = sinon
           .stub()
           .yields(null, false, (this.rev = 5))
-        return this.HttpController.updateDoc(this.req, this.res, this.next)
+        this.HttpController.updateDoc(this.req, this.res, this.next)
       })
 
-      return it('should return a modified status', function () {
-        return this.res.json
+      it('should return a modified status', function () {
+        this.res.json
           .calledWith({ modified: false, rev: this.rev })
           .should.equal(true)
       })
@@ -363,15 +352,15 @@ describe('HttpController', function () {
       beforeEach(function () {
         this.req.body = { version: 42, ranges: {} }
         this.DocManager.updateDoc = sinon.stub().yields(null, false)
-        return this.HttpController.updateDoc(this.req, this.res, this.next)
+        this.HttpController.updateDoc(this.req, this.res, this.next)
       })
 
       it('should not update the document', function () {
-        return this.DocManager.updateDoc.called.should.equal(false)
+        this.DocManager.updateDoc.called.should.equal(false)
       })
 
-      return it('should return a 400 (bad request) response', function () {
-        return this.res.sendStatus.calledWith(400).should.equal(true)
+      it('should return a 400 (bad request) response', function () {
+        this.res.sendStatus.calledWith(400).should.equal(true)
       })
     })
 
@@ -379,15 +368,15 @@ describe('HttpController', function () {
       beforeEach(function () {
         this.req.body = { version: 42, lines: ['hello world'] }
         this.DocManager.updateDoc = sinon.stub().yields(null, false)
-        return this.HttpController.updateDoc(this.req, this.res, this.next)
+        this.HttpController.updateDoc(this.req, this.res, this.next)
       })
 
       it('should not update the document', function () {
-        return this.DocManager.updateDoc.called.should.equal(false)
+        this.DocManager.updateDoc.called.should.equal(false)
       })
 
-      return it('should return a 400 (bad request) response', function () {
-        return this.res.sendStatus.calledWith(400).should.equal(true)
+      it('should return a 400 (bad request) response', function () {
+        this.res.sendStatus.calledWith(400).should.equal(true)
       })
     })
 
@@ -395,34 +384,34 @@ describe('HttpController', function () {
       beforeEach(function () {
         this.req.body = { lines: ['foo'], version: 42 }
         this.DocManager.updateDoc = sinon.stub().yields(null, false)
-        return this.HttpController.updateDoc(this.req, this.res, this.next)
+        this.HttpController.updateDoc(this.req, this.res, this.next)
       })
 
       it('should not update the document', function () {
-        return this.DocManager.updateDoc.called.should.equal(false)
+        this.DocManager.updateDoc.called.should.equal(false)
       })
 
-      return it('should return a 400 (bad request) response', function () {
-        return this.res.sendStatus.calledWith(400).should.equal(true)
+      it('should return a 400 (bad request) response', function () {
+        this.res.sendStatus.calledWith(400).should.equal(true)
       })
     })
 
-    return describe('when the doc body is too large', function () {
+    describe('when the doc body is too large', function () {
       beforeEach(function () {
         this.req.body = {
           lines: (this.lines = Array(2049).fill('a'.repeat(1024))),
           version: (this.version = 42),
           ranges: (this.ranges = { changes: 'mock' }),
         }
-        return this.HttpController.updateDoc(this.req, this.res, this.next)
+        this.HttpController.updateDoc(this.req, this.res, this.next)
       })
 
       it('should return a 413 (too large) response', function () {
-        return sinon.assert.calledWith(this.res.status, 413)
+        sinon.assert.calledWith(this.res.status, 413)
       })
 
-      return it('should report that the document body is too large', function () {
-        return sinon.assert.calledWith(this.res.send, 'document body too large')
+      it('should report that the document body is too large', function () {
+        sinon.assert.calledWith(this.res.send, 'document body too large')
       })
     })
   })
@@ -430,8 +419,8 @@ describe('HttpController', function () {
   describe('patchDoc', function () {
     beforeEach(function () {
       this.req.params = {
-        project_id: this.project_id,
-        doc_id: this.doc_id,
+        project_id: this.projectId,
+        doc_id: this.docId,
       }
       this.req.body = { name: 'foo.tex' }
       this.DocManager.patchDoc = sinon.stub().yields(null)
@@ -440,8 +429,8 @@ describe('HttpController', function () {
 
     it('should delete the document', function () {
       expect(this.DocManager.patchDoc).to.have.been.calledWith(
-        this.project_id,
-        this.doc_id
+        this.projectId,
+        this.docId
       )
     })
 
@@ -466,8 +455,8 @@ describe('HttpController', function () {
 
       it('should not pass the invalid field along', function () {
         expect(this.DocManager.patchDoc).to.have.been.calledWith(
-          this.project_id,
-          this.doc_id,
+          this.projectId,
+          this.docId,
           {}
         )
       })
@@ -476,38 +465,38 @@ describe('HttpController', function () {
 
   describe('archiveAllDocs', function () {
     beforeEach(function () {
-      this.req.params = { project_id: this.project_id }
+      this.req.params = { project_id: this.projectId }
       this.DocArchiveManager.archiveAllDocs = sinon.stub().callsArg(1)
-      return this.HttpController.archiveAllDocs(this.req, this.res, this.next)
+      this.HttpController.archiveAllDocs(this.req, this.res, this.next)
     })
 
     it('should archive the project', function () {
-      return this.DocArchiveManager.archiveAllDocs
-        .calledWith(this.project_id)
+      this.DocArchiveManager.archiveAllDocs
+        .calledWith(this.projectId)
         .should.equal(true)
     })
 
-    return it('should return a 204 (No Content)', function () {
-      return this.res.sendStatus.calledWith(204).should.equal(true)
+    it('should return a 204 (No Content)', function () {
+      this.res.sendStatus.calledWith(204).should.equal(true)
     })
   })
 
-  return describe('destroyAllDocs', function () {
+  describe('destroyAllDocs', function () {
     beforeEach(function () {
-      this.req.params = { project_id: this.project_id }
+      this.req.params = { project_id: this.projectId }
       this.DocArchiveManager.destroyAllDocs = sinon.stub().callsArg(1)
-      return this.HttpController.destroyAllDocs(this.req, this.res, this.next)
+      this.HttpController.destroyAllDocs(this.req, this.res, this.next)
     })
 
     it('should destroy the docs', function () {
-      return sinon.assert.calledWith(
+      sinon.assert.calledWith(
         this.DocArchiveManager.destroyAllDocs,
-        this.project_id
+        this.projectId
       )
     })
 
-    return it('should return 204', function () {
-      return sinon.assert.calledWith(this.res.sendStatus, 204)
+    it('should return 204', function () {
+      sinon.assert.calledWith(this.res.sendStatus, 204)
     })
   })
 })

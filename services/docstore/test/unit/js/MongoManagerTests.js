@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const modulePath = require('path').join(
@@ -34,7 +24,7 @@ describe('MongoManager', function () {
     this.project_id = ObjectId().toString()
     this.doc_id = ObjectId().toString()
     this.callback = sinon.stub()
-    return (this.stubbedErr = new Error('hello world'))
+    this.stubbedErr = new Error('hello world')
   })
 
   describe('findDoc', function () {
@@ -42,7 +32,7 @@ describe('MongoManager', function () {
       this.doc = { name: 'mock-doc' }
       this.db.docs.findOne = sinon.stub().callsArgWith(2, null, this.doc)
       this.filter = { lines: true }
-      return this.MongoManager.findDoc(
+      this.MongoManager.findDoc(
         this.project_id,
         this.doc_id,
         this.filter,
@@ -64,8 +54,8 @@ describe('MongoManager', function () {
         .should.equal(true)
     })
 
-    return it('should call the callback with the doc', function () {
-      return this.callback.calledWith(null, this.doc).should.equal(true)
+    it('should call the callback with the doc', function () {
+      this.callback.calledWith(null, this.doc).should.equal(true)
     })
   })
 
@@ -112,7 +102,7 @@ describe('MongoManager', function () {
 
     describe('with included_deleted = false', function () {
       beforeEach(function () {
-        return this.MongoManager.getProjectsDocs(
+        this.MongoManager.getProjectsDocs(
           this.project_id,
           { include_deleted: false },
           this.filter,
@@ -121,7 +111,7 @@ describe('MongoManager', function () {
       })
 
       it('should find the non-deleted docs via the project_id', function () {
-        return this.db.docs.find
+        this.db.docs.find
           .calledWith(
             {
               project_id: ObjectId(this.project_id),
@@ -134,16 +124,16 @@ describe('MongoManager', function () {
           .should.equal(true)
       })
 
-      return it('should call the callback with the docs', function () {
-        return this.callback
+      it('should call the callback with the docs', function () {
+        this.callback
           .calledWith(null, [this.doc, this.doc3, this.doc4])
           .should.equal(true)
       })
     })
 
-    return describe('with included_deleted = true', function () {
+    describe('with included_deleted = true', function () {
       beforeEach(function () {
-        return this.MongoManager.getProjectsDocs(
+        this.MongoManager.getProjectsDocs(
           this.project_id,
           { include_deleted: true },
           this.filter,
@@ -152,7 +142,7 @@ describe('MongoManager', function () {
       })
 
       it('should find all via the project_id', function () {
-        return this.db.docs.find
+        this.db.docs.find
           .calledWith(
             {
               project_id: ObjectId(this.project_id),
@@ -164,8 +154,8 @@ describe('MongoManager', function () {
           .should.equal(true)
       })
 
-      return it('should call the callback with the docs', function () {
-        return this.callback
+      it('should call the callback with the docs', function () {
+        this.callback
           .calledWith(null, [this.doc, this.doc3, this.doc4])
           .should.equal(true)
       })
@@ -218,11 +208,11 @@ describe('MongoManager', function () {
   describe('upsertIntoDocCollection', function () {
     beforeEach(function () {
       this.db.docs.updateOne = sinon.stub().callsArgWith(3, this.stubbedErr)
-      return (this.oldRev = 77)
+      this.oldRev = 77
     })
 
     it('should upsert the document', function (done) {
-      return this.MongoManager.upsertIntoDocCollection(
+      this.MongoManager.upsertIntoDocCollection(
         this.project_id,
         this.doc_id,
         { lines: this.lines },
@@ -233,19 +223,19 @@ describe('MongoManager', function () {
           assert.equal(args[1].$set.lines, this.lines)
           assert.equal(args[1].$inc.rev, 1)
           assert.deepEqual(args[1].$set.project_id, ObjectId(this.project_id))
-          return done()
+          done()
         }
       )
     })
 
-    return it('should return the error', function (done) {
-      return this.MongoManager.upsertIntoDocCollection(
+    it('should return the error', function (done) {
+      this.MongoManager.upsertIntoDocCollection(
         this.project_id,
         this.doc_id,
         { lines: this.lines },
         err => {
           err.should.equal(this.stubbedErr)
-          return done()
+          done()
         }
       )
     })
@@ -255,17 +245,17 @@ describe('MongoManager', function () {
     beforeEach(function (done) {
       this.db.docs.deleteOne = sinon.stub().yields()
       this.db.docOps.deleteOne = sinon.stub().yields()
-      return this.MongoManager.destroyDoc('123456789012', done)
+      this.MongoManager.destroyDoc('123456789012', done)
     })
 
     it('should destroy the doc', function () {
-      return sinon.assert.calledWith(this.db.docs.deleteOne, {
+      sinon.assert.calledWith(this.db.docs.deleteOne, {
         _id: ObjectId('123456789012'),
       })
     })
 
-    return it('should destroy the docOps', function () {
-      return sinon.assert.calledWith(this.db.docOps.deleteOne, {
+    it('should destroy the docOps', function () {
+      sinon.assert.calledWith(this.db.docOps.deleteOne, {
         doc_id: ObjectId('123456789012'),
       })
     })
@@ -276,11 +266,11 @@ describe('MongoManager', function () {
       beforeEach(function () {
         this.doc = { version: (this.version = 42) }
         this.db.docOps.findOne = sinon.stub().callsArgWith(2, null, this.doc)
-        return this.MongoManager.getDocVersion(this.doc_id, this.callback)
+        this.MongoManager.getDocVersion(this.doc_id, this.callback)
       })
 
       it('should look for the doc in the database', function () {
-        return this.db.docOps.findOne
+        this.db.docOps.findOne
           .calledWith(
             { doc_id: ObjectId(this.doc_id) },
             {
@@ -290,19 +280,19 @@ describe('MongoManager', function () {
           .should.equal(true)
       })
 
-      return it('should call the callback with the version', function () {
-        return this.callback.calledWith(null, this.version).should.equal(true)
+      it('should call the callback with the version', function () {
+        this.callback.calledWith(null, this.version).should.equal(true)
       })
     })
 
-    return describe("when the doc doesn't exist", function () {
+    describe("when the doc doesn't exist", function () {
       beforeEach(function () {
         this.db.docOps.findOne = sinon.stub().callsArgWith(2, null, null)
-        return this.MongoManager.getDocVersion(this.doc_id, this.callback)
+        this.MongoManager.getDocVersion(this.doc_id, this.callback)
       })
 
-      return it('should call the callback with 0', function () {
-        return this.callback.calledWith(null, 0).should.equal(true)
+      it('should call the callback with 0', function () {
+        this.callback.calledWith(null, 0).should.equal(true)
       })
     })
   })
@@ -311,15 +301,11 @@ describe('MongoManager', function () {
     beforeEach(function () {
       this.version = 42
       this.db.docOps.updateOne = sinon.stub().callsArg(3)
-      return this.MongoManager.setDocVersion(
-        this.doc_id,
-        this.version,
-        this.callback
-      )
+      this.MongoManager.setDocVersion(this.doc_id, this.version, this.callback)
     })
 
     it('should update the doc version', function () {
-      return this.db.docOps.updateOne
+      this.db.docOps.updateOne
         .calledWith(
           {
             doc_id: ObjectId(this.doc_id),
@@ -336,8 +322,8 @@ describe('MongoManager', function () {
         .should.equal(true)
     })
 
-    return it('should call the callback', function () {
-      return this.callback.called.should.equal(true)
+    it('should call the callback', function () {
+      this.callback.called.should.equal(true)
     })
   })
 
