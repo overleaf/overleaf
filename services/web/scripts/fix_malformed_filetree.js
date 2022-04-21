@@ -12,7 +12,7 @@ async function main() {
     modifiedCount = await fixRootFolder(projectId)
   } else if (endsWithNumber(mongoPath)) {
     modifiedCount = await removeNullFolders(projectId, parentPath(mongoPath))
-  } else if (['docs', 'folders', 'fileTrees'].includes(lastPathSegment)) {
+  } else if (['docs', 'folders', 'fileRefs'].includes(lastPathSegment)) {
     modifiedCount = await ensureElementIsArray(projectId, mongoPath)
   } else {
     console.error(`Unexpected mongo path: ${mongoPath}`)
