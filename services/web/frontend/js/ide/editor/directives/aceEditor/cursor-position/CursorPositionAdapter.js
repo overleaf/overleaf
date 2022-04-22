@@ -50,4 +50,8 @@ export default CursorPositionAdapter = class CursorPositionAdapter {
     const position = EditorShareJsCodec.shareJsOffsetToRowColumn(offset, lines)
     return this.gotoLine(position.row + 1, position.column)
   }
+
+  focus() {
+    this.editor.focus()
+  }
 }

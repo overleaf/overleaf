@@ -113,6 +113,7 @@ export default CursorPositionManager = class CursorPositionManager {
     }
     const pos = this.localStorage(`doc.position.${this.doc_id}`) || {}
     this.adapter.setCursor(pos)
-    return this.adapter.setEditorScrollPosition(pos)
+    this.adapter.setEditorScrollPosition(pos)
+    this.adapter.focus()
   }
 }
