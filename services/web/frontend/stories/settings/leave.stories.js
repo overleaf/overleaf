@@ -1,21 +1,7 @@
 import useFetchMock from '../hooks/use-fetch-mock'
 import LeaveModal from '../../js/features/settings/components/leave/modal'
 import LeaveSection from '../../js/features/settings/components/leave-section'
-
-const MOCK_DELAY = 1000
-window.metaAttributesCache = window.metaAttributesCache || new Map()
-
-function defaultSetupMocks(fetchMock) {
-  fetchMock.post(/\/user\/delete/, 200, {
-    delay: MOCK_DELAY,
-  })
-}
-
-function setDefaultMeta() {
-  window.metaAttributesCache.set('ol-userDefaultEmail', 'user@primary.com')
-  window.metaAttributesCache.set('ol-isSaas', true)
-  window.metaAttributesCache.set('ol-hasPassword', true)
-}
+import { setDefaultMeta, defaultSetupMocks } from './helpers/leave'
 
 export const Section = args => {
   useFetchMock(defaultSetupMocks)

@@ -9,12 +9,17 @@ import {
 import { postJSON } from '../../../infrastructure/fetch-json'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { set, cloneDeep } from 'lodash'
+import getMeta from '../../../utils/meta'
+import type {
+  OAuthProviders,
+  OAuthProvider,
+} from '../../../../../types/oauth-providers'
+import type { ThirdPartyIds } from '../../../../../types/third-party-ids'
 
-type SSOSubscription = {
-  name: string
-  descriptionKey: string
-  linked?: boolean
-  linkPath: string
+export type SSOSubscription = {
+  providerId: string
+  provider: OAuthProvider
+  linked: boolean
 }
 
 type SSOContextValue = {
@@ -30,15 +35,21 @@ type SSOProviderProps = {
 
 export function SSOProvider({ children }: SSOProviderProps) {
   const isMountedRef = useIsMounted()
+  const oauthProviders = getMeta('ol-oauthProviders') as OAuthProviders
+  const thirdPartyIds = getMeta('ol-thirdPartyIds') as ThirdPartyIds
 
-  const [subscriptions, setSubscriptions] = useState(() => {
+  const [subscriptions, setSubscriptions] = useState<
+    Record<string, SSOSubscription>
+  >(() => {
     const initialSubscriptions: Record<string, SSOSubscription> = {}
-    for (const [id, provider] of Object.entries(window.oauthProviders)) {
-      initialSubscriptions[id] = {
-        descriptionKey: provider.descriptionKey,
-        name: provider.name,
-        linkPath: provider.linkPath,
-        linked: !!window.thirdPartyIds[id],
+    for (const [id, provider] of Object.entries(oauthProviders)) {
+      const linked = !!thirdPartyIds[id]
+      if (!provider.hideWhenNotLinked || linked) {
+        initialSubscriptions[id] = {
+          providerId: id,
+          provider,
+          linked,
+        }
       }
     }
     return initialSubscriptions

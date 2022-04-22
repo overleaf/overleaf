@@ -129,3 +129,56 @@ tbody > tr.affiliations-table-warning-row > td {
     }
   }
 }
+
+.settings-widgets-container {
+  border: 1px solid @gray-lighter;
+
+  hr {
+    margin: 15px 10px;
+  }
+}
+
+.settings-widget-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    padding-right: 20px;
+
+    &:last-child {
+      padding-right: 0px;
+    }
+  }
+
+  img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .description-container {
+    flex-grow: 1;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+
+    > h4 {
+      margin: 0;
+      margin-right: 10px;
+    }
+  }
+
+  p {
+    margin-bottom: 10px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

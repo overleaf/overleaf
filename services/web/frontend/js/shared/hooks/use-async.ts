@@ -10,13 +10,15 @@ type State = {
 type Action = Partial<State>
 
 const defaultInitialState: State = { status: 'idle', data: null, error: null }
-const initializer = (initialState: State) => ({ ...initialState })
 
 function useAsync(initialState?: Partial<State>) {
+  const initialStateRef = React.useRef({
+    ...defaultInitialState,
+    ...initialState,
+  })
   const [{ status, data, error }, setState] = React.useReducer(
     (state: State, action: Action) => ({ ...state, ...action }),
-    { ...defaultInitialState, ...initialState },
-    initializer
+    initialStateRef.current
   )
 
   const safeSetState = useSafeDispatch(setState)
@@ -31,11 +33,25 @@ function useAsync(initialState?: Partial<State>) {
     [safeSetState]
   )
 
+  const reset = React.useCallback(
+    () => safeSetState(initialStateRef.current),
+    [safeSetState]
+  )
+
   const runAsync = React.useCallback(
-    (promise: Promise<Record<string, unknown>>) => {
+    <T>(promise: Promise<T>) => {
       safeSetState({ status: 'pending' })
 
-      return promise.then(setData, setError)
+      return promise.then(
+        data => {
+          setData(data)
+          return data
+        },
+        error => {
+          setError(error)
+          return Promise.reject(error)
+        }
+      )
     },
     [safeSetState, setData, setError]
   )
@@ -51,6 +67,7 @@ function useAsync(initialState?: Partial<State>) {
     status,
     data,
     runAsync,
+    reset,
   }
 }
 

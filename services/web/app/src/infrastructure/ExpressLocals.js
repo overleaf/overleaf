@@ -365,6 +365,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       dropboxAppName:
         Settings.apis.thirdPartyDataStore?.dropboxAppName || 'Overleaf',
       hasSamlBeta: req.session.samlBeta,
+      hasAffiliationsFeature: Features.hasFeature('affiliations'),
       hasSamlFeature: Features.hasFeature('saml'),
       samlInitPath: _.get(Settings, ['saml', 'ukamf', 'initPath']),
       hasLinkUrlFeature: Features.hasFeature('link-url'),

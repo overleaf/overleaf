@@ -1,8 +1,5 @@
-export type OAuthProvider = {
-  name: string
-  descriptionKey: string
-  linkPath: string
-}
+import { ExposedSettings } from './exposed-settings'
+import { OAuthProviders } from './oauth-providers'
 
 declare global {
   // eslint-disable-next-line no-unused-vars
@@ -11,12 +8,12 @@ declare global {
     user: {
       id: string
     }
-    oauthProviders: Record<string, OAuthProvider>
+    oauthProviders: OAuthProviders
     thirdPartyIds: Record<string, string>
-    metaAttributesCache: Map<string, unknown>
+    metaAttributesCache: Map<string, any>
     i18n: {
       currentLangCode: string
     }
-    ExposedSettings: Record<string, unknown>
+    ExposedSettings: ExposedSettings
   }
 }

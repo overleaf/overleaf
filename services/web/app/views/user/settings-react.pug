@@ -1,0 +1,29 @@
+extends ../layout
+
+block entrypointVar
+	- entrypoint = 'pages/user/settings'
+
+block append meta
+	meta(name="ol-hasPassword" data-type="boolean" content=hasPassword)
+	meta(name="ol-shouldAllowEditingDetails" data-type="boolean" content=shouldAllowEditingDetails)
+	meta(name="ol-oauthProviders", data-type="json", content=oauthProviders)
+	meta(name="ol-institutionLinked", data-type="json", content=institutionLinked)
+	meta(name="ol-samlError", data-type="json", content=samlError)
+	meta(name="ol-institutionEmailNonCanonical", content=institutionEmailNonCanonical)
+
+	meta(name="ol-reconfirmedViaSAML", content=reconfirmedViaSAML)
+	meta(name="ol-reconfirmationRemoveEmail", content=reconfirmationRemoveEmail)
+	meta(name="ol-samlBeta", content=samlBeta)
+	meta(name="ol-ssoError", content=ssoError)
+	meta(name="ol-thirdPartyIds", data-type="json", content=thirdPartyIds || {})
+	meta(name="ol-passwordStrengthOptions", data-type="json", content=settings.passwordStrengthOptions || {})
+	meta(name="ol-isExternalAuthenticationSystemUsed" data-type="boolean" content=externalAuthenticationSystemUsed())
+	meta(name="ol-firstName" content=firstName)
+	meta(name="ol-lastName" content=lastName)
+	meta(name="ol-user" data-type="json" content=user)
+	meta(name="ol-dropbox" data-type="json" content=dropbox)
+	meta(name="ol-github" data-type="json" content=github)
+
+
+block content
+	main.content.content-alt#settings-page-root

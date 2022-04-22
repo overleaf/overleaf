@@ -1,16 +1,23 @@
 import { Fragment } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
+import getMeta from '../../../utils/meta'
 import {
   UserEmailsProvider,
   useUserEmailsContext,
 } from '../context/user-email-context'
 import EmailsHeader from './emails/header'
 import EmailsRow from './emails/row'
+import Icon from '../../../shared/components/icon'
+import { Alert } from 'react-bootstrap'
+import { ExposedSettings } from '../../../../../types/exposed-settings'
 
 function EmailsSectionContent() {
   const { t } = useTranslation()
   const {
     state: { data: userEmailsData },
+    isInitializing,
+    isInitializingSuccess,
+    isInitializingError,
   } = useUserEmailsContext()
   const userEmails = Object.values(userEmailsData.byId)
 
@@ -25,20 +32,42 @@ function EmailsSectionContent() {
           <a href="/learn/how-to/Keeping_your_account_secure" />
         </Trans>
       </p>
-      <EmailsHeader />
-      {userEmails?.map((userEmail, i) => (
-        <Fragment key={userEmail.email}>
-          <EmailsRow userEmailData={userEmail} />
-          {i + 1 !== userEmails.length && (
-            <div className="horizontal-divider" />
-          )}
-        </Fragment>
-      ))}
+      {isInitializing && (
+        <div className="text-center">
+          <Icon type="refresh" fw spin /> {t('loading')}...
+        </div>
+      )}
+      {isInitializingSuccess && (
+        <>
+          <EmailsHeader />
+          {userEmails?.map((userEmail, i) => (
+            <Fragment key={userEmail.email}>
+              <EmailsRow userEmailData={userEmail} />
+              {i + 1 !== userEmails.length && (
+                <div className="horizontal-divider" />
+              )}
+            </Fragment>
+          ))}
+        </>
+      )}
+      {isInitializingError && (
+        <Alert bsStyle="danger" className="text-center">
+          <Icon type="exclamation-triangle" fw />{' '}
+          {t('error_performing_request')}
+        </Alert>
+      )}
     </>
   )
 }
 
 function EmailsSection() {
+  const { hasAffiliationsFeature } = getMeta(
+    'ol-ExposedSettings'
+  ) as ExposedSettings
+  if (!hasAffiliationsFeature) {
+    return null
+  }
+
   return (
     <UserEmailsProvider>
       <EmailsSectionContent />

@@ -3,6 +3,7 @@ import { Row, Col } from 'react-bootstrap'
 import Email from './email'
 import InstitutionAndRole from './institution-and-role'
 import EmailCell from './cell'
+import Actions from './actions'
 
 type EmailsRowProps = {
   userEmailData: UserEmailData
@@ -11,20 +12,22 @@ type EmailsRowProps = {
 function EmailsRow({ userEmailData }: EmailsRowProps) {
   return (
     <Row>
-      <Col sm={5}>
+      <Col md={4}>
         <EmailCell>
           <Email userEmailData={userEmailData} />
         </EmailCell>
       </Col>
-      <Col sm={5}>
+      <Col sm={4}>
         {userEmailData.affiliation?.institution && (
           <EmailCell>
             <InstitutionAndRole userEmailData={userEmailData} />
           </EmailCell>
         )}
       </Col>
-      <Col sm={2}>
-        <EmailCell>todo</EmailCell>
+      <Col md={4}>
+        <EmailCell className="text-md-right">
+          <Actions userEmailData={userEmailData} />
+        </EmailCell>
       </Col>
     </Row>
   )

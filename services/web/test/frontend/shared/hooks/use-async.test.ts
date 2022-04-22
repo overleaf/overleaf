@@ -91,6 +91,12 @@ describe('useAsync', function () {
       ...resolvedState,
       data: resolvedValue,
     })
+
+    act(() => {
+      result.current.reset()
+    })
+
+    expect(result.current).to.include(defaultState)
   })
 
   it('calling `runAsync` with a promise which rejects', async function () {
@@ -101,7 +107,7 @@ describe('useAsync', function () {
 
     let p: Promise<unknown>
     act(() => {
-      p = result.current.runAsync(promise)
+      p = result.current.runAsync(promise).catch(() => {})
     })
 
     expect(result.current).to.include(pendingState)

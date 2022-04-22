@@ -1,7 +1,15 @@
-import { render, screen } from '@testing-library/react'
+import {
+  render,
+  screen,
+  fireEvent,
+  waitForElementToBeRemoved,
+} from '@testing-library/react'
 import { expect } from 'chai'
 import { UserEmailData } from '../../../../../../types/user-email'
+import fetchMock from 'fetch-mock'
 import InstitutionAndRole from '../../../../../../frontend/js/features/settings/components/emails/institution-and-role'
+import { UserEmailsProvider } from '../../../../../../frontend/js/features/settings/context/user-email-context'
+import EmailsSection from '../../../../../../frontend/js/features/settings/components/emails-section'
 
 const userData1: UserEmailData = {
   affiliation: {
@@ -57,9 +65,26 @@ const userData2: UserEmailData = {
 }
 
 describe('user role and institution', function () {
+  beforeEach(function () {
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-ExposedSettings', {
+      hasAffiliationsFeature: true,
+    })
+    fetchMock.reset()
+  })
+
+  afterEach(function () {
+    window.metaAttributesCache = new Map()
+    fetchMock.reset()
+  })
+
   it('renders affiliation name with add role/department button', function () {
     const userEmailData = userData1
-    render(<InstitutionAndRole userEmailData={userEmailData} />)
+    render(
+      <UserEmailsProvider>
+        <InstitutionAndRole userEmailData={userEmailData} />
+      </UserEmailsProvider>
+    )
 
     screen.getByText(userEmailData.affiliation.institution.name, {
       exact: false,
@@ -70,7 +95,11 @@ describe('user role and institution', function () {
 
   it('renders affiliation name, role and department with change button', function () {
     const userEmailData = userData2
-    render(<InstitutionAndRole userEmailData={userEmailData} />)
+    render(
+      <UserEmailsProvider>
+        <InstitutionAndRole userEmailData={userEmailData} />
+      </UserEmailsProvider>
+    )
 
     screen.getByText(userEmailData.affiliation.institution.name, {
       exact: false,
@@ -80,5 +109,50 @@ describe('user role and institution', function () {
     screen.getByRole('button', { name: /change/i })
     expect(screen.queryByRole('button', { name: /add role and department/i }))
       .to.not.exist
+  })
+
+  it('adds new role and department', async function () {
+    fetchMock
+      .get('/user/emails?ensureAffiliation=true', [userData1])
+      .post('/user/emails/endorse', 200)
+    render(<EmailsSection />)
+
+    const addBtn = await screen.findByRole('button', {
+      name: /add role and department/i,
+    })
+    fireEvent.click(addBtn)
+
+    const submitBtn = screen.getByRole('button', {
+      name: /save/i,
+    }) as HTMLButtonElement
+    expect(submitBtn.disabled).to.be.true
+
+    const roleValue = 'Dummy role'
+    const departmentValue = 'Dummy department'
+
+    const roleInput = screen.getByPlaceholderText(/role/i)
+    fireEvent.change(roleInput, {
+      target: { value: roleValue },
+    })
+
+    expect(submitBtn.disabled).to.be.true
+
+    const departmentInput = screen.getByPlaceholderText(/department/i)
+    fireEvent.change(departmentInput, {
+      target: { value: departmentValue },
+    })
+
+    expect(submitBtn.disabled).to.be.false
+
+    fireEvent.click(submitBtn)
+
+    expect(submitBtn.disabled).to.be.true
+
+    await waitForElementToBeRemoved(() =>
+      screen.getByRole('button', { name: /saving/i })
+    )
+
+    screen.getByText(roleValue, { exact: false })
+    screen.getByText(departmentValue, { exact: false })
   })
 })

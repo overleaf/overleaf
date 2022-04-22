@@ -3,6 +3,7 @@ import { Modal, Button } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import LeaveModalForm, { LeaveModalFormProps } from './modal-form'
+import { ExposedSettings } from '../../../../../../types/exposed-settings'
 
 type LeaveModalContentProps = {
   handleHide: () => void
@@ -16,10 +17,10 @@ function LeaveModalContentBlock({
   setIsFormValid,
 }: LeaveModalFormProps) {
   const { t } = useTranslation()
-  const isSaas = getMeta('ol-isSaas') as boolean
+  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
   const hasPassword = getMeta('ol-hasPassword') as boolean
 
-  if (isSaas && !hasPassword) {
+  if (isOverleaf && !hasPassword) {
     return (
       <p>
         <b>

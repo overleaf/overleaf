@@ -3,8 +3,31 @@ import { renderHook } from '@testing-library/react-hooks'
 import {
   SSOProvider,
   useSSOContext,
-} from '../../../../../frontend/js/features/user-settings/context/sso-context'
+} from '../../../../../frontend/js/features/settings/context/sso-context'
 import fetchMock from 'fetch-mock'
+
+const mockOauthProviders = {
+  google: {
+    descriptionKey: 'login_with_service',
+    descriptionOptions: { service: 'Google' },
+    name: 'Google',
+    linkPath: '/auth/google',
+  },
+  orcid: {
+    descriptionKey: 'oauth_orcid_description',
+    descriptionOptions: {
+      link: '/blog/434',
+      appName: 'Overleaf',
+    },
+    name: 'Orcid',
+    linkPath: '/auth/orcid',
+  },
+  twitter: {
+    hideWhenNotLinked: true,
+    name: 'Twitter',
+    linkPath: '/auth/twitter',
+  },
+}
 
 describe('SSOContext', function () {
   const renderSSOContext = () =>
@@ -13,21 +36,11 @@ describe('SSOContext', function () {
     })
 
   beforeEach(function () {
-    window.oauthProviders = {
-      google: {
-        descriptionKey: 'login_google',
-        name: 'Google',
-        linkPath: '/auth/google',
-      },
-      orcid: {
-        descriptionKey: 'login_orcid',
-        name: 'Google',
-        linkPath: '/auth/google',
-      },
-    }
-    window.thirdPartyIds = {
-      google: 'googleId',
-    }
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-thirdPartyIds', {
+      google: 'google-id',
+    })
+    window.metaAttributesCache.set('ol-oauthProviders', mockOauthProviders)
     fetchMock.reset()
   })
 
@@ -35,16 +48,14 @@ describe('SSOContext', function () {
     const { result } = renderSSOContext()
     expect(result.current.subscriptions).to.deep.equal({
       google: {
-        descriptionKey: 'login_google',
-        linkPath: '/auth/google',
+        providerId: 'google',
+        provider: mockOauthProviders.google,
         linked: true,
-        name: 'Google',
       },
       orcid: {
-        descriptionKey: 'login_orcid',
-        linkPath: '/auth/google',
+        providerId: 'orcid',
+        provider: mockOauthProviders.orcid,
         linked: false,
-        name: 'Google',
       },
     })
   })

@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
 import { Button } from 'react-bootstrap'
-import useAsync from '../../../../shared/hooks/use-async'
 import { postJSON } from '../../../../infrastructure/fetch-json'
+import useAsync from '../../../../shared/hooks/use-async'
 import { UserEmailData } from '../../../../../../types/user-email'
 import { useUserEmailsContext } from '../../context/user-email-context'
 
@@ -16,12 +16,13 @@ function ResendConfirmationEmailButton({
 }: ResendConfirmationEmailButtonProps) {
   const { t } = useTranslation()
   const { isLoading, isError, runAsync } = useAsync()
-  const { setLoading } = useUserEmailsContext()
+  const { state, setLoading: setUserEmailsContextLoading } =
+    useUserEmailsContext()
 
   // Update global isLoading prop
   useEffect(() => {
-    setLoading(isLoading)
-  }, [setLoading, isLoading])
+    setUserEmailsContextLoading(isLoading)
+  }, [setUserEmailsContextLoading, isLoading])
 
   const handleResendConfirmationEmail = () => {
     runAsync(
@@ -30,7 +31,7 @@ function ResendConfirmationEmailButton({
           email,
         },
       })
-    )
+    ).catch(() => {})
   }
 
   if (isLoading) {
@@ -45,6 +46,7 @@ function ResendConfirmationEmailButton({
     <>
       <Button
         className="btn-inline-link"
+        disabled={state.isLoading}
         onClick={handleResendConfirmationEmail}
       >
         {t('resend_confirmation_email')}

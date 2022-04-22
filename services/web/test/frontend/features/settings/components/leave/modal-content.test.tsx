@@ -7,7 +7,7 @@ import LeaveModalContent from '../../../../../../frontend/js/features/settings/c
 describe('<LeaveModalContent />', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
-    window.metaAttributesCache.set('ol-isSaas', false)
+    window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
     window.metaAttributesCache.set('ol-hasPassword', true)
   })
 

@@ -1,29 +1,37 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Modal } from 'react-bootstrap'
-import AccessibleModal from '../../../shared/components/accessible-modal'
+import AccessibleModal from '../../../../shared/components/accessible-modal'
+import IEEELogo from '../../../../shared/svgs/ieee-logo'
+import GoogleLogo from '../../../../shared/svgs/google-logo'
+import OrcidLogo from '../../../../shared/svgs/orcid-logo'
+
+const providerLogos = {
+  collabratec: <IEEELogo />,
+  google: <GoogleLogo />,
+  orcid: <OrcidLogo />,
+}
 
 type SSOLinkingWidgetProps = {
-  logoSrc: string
+  providerId: string
   title: string
   description: string
+  helpPath?: string
   linked?: boolean
   linkPath: string
   onUnlink: () => Promise<void>
-  unlinkConfirmationTitle: string
-  unlinkConfirmationText: string
 }
 
 export function SSOLinkingWidget({
-  logoSrc,
+  providerId,
   title,
   description,
+  helpPath,
   linked,
   linkPath,
   onUnlink,
-  unlinkConfirmationTitle,
-  unlinkConfirmationText,
 }: SSOLinkingWidgetProps) {
+  const { t } = useTranslation()
   const [showModal, setShowModal] = useState(false)
   const [unlinkRequestInflight, setUnlinkRequestInflight] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -49,16 +57,23 @@ export function SSOLinkingWidget({
   }, [])
 
   return (
-    <div className="row">
-      <div className="col-xs-2 col-sm-2 col-md-2">
-        <img alt={title} src={logoSrc} />
-      </div>
-      <div className="col-xs-10 col-sm-6 col-md-8">
-        <h4>{title}</h4>
-        <p>{description}</p>
+    <div className="settings-widget-container">
+      <div>{providerLogos[providerId]}</div>
+      <div className="description-container">
+        <div className="title-row">
+          <h4>{title}</h4>
+        </div>
+        <p>
+          {description?.replace(/<[^>]+>/g, '')}{' '}
+          {helpPath ? (
+            <a href={helpPath} target="_blank" rel="noreferrer">
+              {t('learn_more')}
+            </a>
+          ) : null}
+        </p>
         {errorMessage && <div>{errorMessage} </div>}
       </div>
-      <div className="col-xs-2 col-sm-4 col-md-2 text-right">
+      <div>
         <ActionButton
           unlinkRequestInflight={unlinkRequestInflight}
           accountIsLinked={linked}
@@ -67,9 +82,8 @@ export function SSOLinkingWidget({
         />
       </div>
       <UnlinkConfirmModal
+        title={title}
         show={showModal}
-        title={unlinkConfirmationTitle}
-        content={unlinkConfirmationText}
         handleConfirmation={handleUnlinkConfirmationClick}
         handleHide={handleModalHide}
       />
@@ -92,15 +106,15 @@ function ActionButton({
   const { t } = useTranslation()
   if (unlinkRequestInflight) {
     return (
-      <button disabled className="btn default">
+      <Button bsStyle="danger" disabled>
         {t('unlinking')}
-      </button>
+      </Button>
     )
   } else if (accountIsLinked) {
     return (
-      <button className="btn default" onClick={onUnlinkClick}>
+      <Button bsStyle="danger" onClick={onUnlinkClick}>
         {t('unlink')}
-      </button>
+      </Button>
     )
   } else {
     return (
@@ -112,17 +126,15 @@ function ActionButton({
 }
 
 type UnlinkConfirmModalProps = {
-  show: boolean
   title: string
-  content: string
+  show: boolean
   handleConfirmation: () => void
   handleHide: () => void
 }
 
 function UnlinkConfirmModal({
-  show,
   title,
-  content,
+  show,
   handleConfirmation,
   handleHide,
 }: UnlinkConfirmModalProps) {
@@ -131,11 +143,13 @@ function UnlinkConfirmModal({
   return (
     <AccessibleModal show={show} onHide={handleHide}>
       <Modal.Header closeButton>
-        <Modal.Title>{title}</Modal.Title>
+        <Modal.Title>
+          {t('unlink_provider_account_title', { provider: title })}
+        </Modal.Title>
       </Modal.Header>
 
       <Modal.Body className="modal-body-share">
-        <p>{content}</p>
+        <p>{t('unlink_provider_account_warning', { provider: title })}</p>
       </Modal.Body>
 
       <Modal.Footer>

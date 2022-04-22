@@ -1,55 +1,88 @@
-import { createContext, useContext, useReducer, useCallback } from 'react'
-import getMeta from '../../../utils/meta'
+import {
+  createContext,
+  useEffect,
+  useContext,
+  useReducer,
+  useCallback,
+} from 'react'
 import useSafeDispatch from '../../../shared/hooks/use-safe-dispatch'
+import * as ActionCreators from '../utils/action-creators'
 import { UserEmailData } from '../../../../../types/user-email'
+import { Nullable } from '../../../../../types/utils'
+import { Affiliation } from '../../../../../types/affiliation'
 import { normalize, NormalizedObject } from '../../../utils/normalize'
+import { getJSON } from '../../../infrastructure/fetch-json'
+import useAsync from '../../../shared/hooks/use-async'
 
 // eslint-disable-next-line no-unused-vars
-enum Actions {
+export enum Actions {
+  SET_DATA = 'SET_DATA', // eslint-disable-line no-unused-vars
   SET_LOADING_STATE = 'SET_LOADING_STATE', // eslint-disable-line no-unused-vars
+  MAKE_PRIMARY = 'MAKE_PRIMARY', // eslint-disable-line no-unused-vars
+  DELETE_EMAIL = 'DELETE_EMAIL', // eslint-disable-line no-unused-vars
+  SET_EMAIL_AFFILIATION_BEING_EDITED = 'SET_EMAIL_AFFILIATION_BEING_EDITED', // eslint-disable-line no-unused-vars
+  UPDATE_AFFILIATION = 'UPDATE_AFFILIATION', // eslint-disable-line no-unused-vars
 }
 
-type ActionSetLoading = {
+export type ActionSetData = {
+  type: Actions.SET_DATA
+  payload: UserEmailData[]
+}
+
+export type ActionSetLoading = {
   type: Actions.SET_LOADING_STATE
   payload: boolean
 }
 
-type State = {
+export type ActionMakePrimary = {
+  type: Actions.MAKE_PRIMARY
+  payload: UserEmailData['email']
+}
+
+export type ActionDeleteEmail = {
+  type: Actions.DELETE_EMAIL
+  payload: UserEmailData['email']
+}
+
+export type ActionSetEmailAffiliationBeingEdited = {
+  type: Actions.SET_EMAIL_AFFILIATION_BEING_EDITED
+  payload: Nullable<UserEmailData['email']>
+}
+
+export type ActionUpdateAffiliation = {
+  type: Actions.UPDATE_AFFILIATION
+  payload: {
+    email: UserEmailData['email']
+    role: Affiliation['role']
+    department: Affiliation['department']
+  }
+}
+
+export type State = {
   isLoading: boolean
   data: {
     byId: NormalizedObject<UserEmailData>
+    linkedInstitutionIds: NonNullable<UserEmailData['samlProviderId']>[]
+    emailAffiliationBeingEdited: Nullable<UserEmailData['email']>
   }
 }
 
-type Action = ActionSetLoading
+type Action =
+  | ActionSetData
+  | ActionSetLoading
+  | ActionMakePrimary
+  | ActionDeleteEmail
+  | ActionSetEmailAffiliationBeingEdited
+  | ActionUpdateAffiliation
 
-const setLoadingAction = (state: State, action: ActionSetLoading) => ({
-  ...state,
-  isLoading: action.payload,
-})
-
-const initialState: State = {
-  isLoading: false,
-  data: {
-    byId: {},
-  },
-}
-
-const reducer = (state: State, action: Action) => {
-  switch (action.type) {
-    case Actions.SET_LOADING_STATE:
-      return setLoadingAction(state, action)
-  }
-}
-
-const initializer = (initialState: State) => {
-  const normalized = normalize<UserEmailData>(getMeta('ol-userEmails'), {
+const setData = (state: State, action: ActionSetData) => {
+  const normalized = normalize<UserEmailData>(action.payload, {
     idAttribute: 'email',
   })
   const byId = normalized || {}
 
   return {
-    ...initialState,
+    ...state,
     data: {
       ...initialState.data,
       byId,
@@ -57,23 +90,154 @@ const initializer = (initialState: State) => {
   }
 }
 
-function useUserEmails() {
-  const [state, dispatch] = useReducer(reducer, initialState, initializer)
-  const safeDispatch = useSafeDispatch(dispatch)
+const setLoadingAction = (state: State, action: ActionSetLoading) => ({
+  ...state,
+  isLoading: action.payload,
+})
 
-  const setLoading = useCallback(
-    (flag: boolean) => {
-      safeDispatch({
-        type: Actions.SET_LOADING_STATE,
-        payload: flag,
-      })
+const makePrimaryAction = (state: State, action: ActionMakePrimary) => {
+  const byId: State['data']['byId'] = {}
+  for (const id of Object.keys(state.data.byId)) {
+    byId[id] = {
+      ...state.data.byId[id],
+      default: state.data.byId[id].email === action.payload,
+    }
+  }
+
+  return {
+    ...state,
+    data: {
+      ...state.data,
+      byId,
     },
-    [safeDispatch]
-  )
+  }
+}
+
+const deleteEmailAction = (state: State, action: ActionDeleteEmail) => {
+  const { [action.payload]: _, ...byId } = state.data.byId
+
+  return {
+    ...state,
+    data: {
+      ...state.data,
+      byId,
+    },
+  }
+}
+
+const setEmailAffiliationBeingEditedAction = (
+  state: State,
+  action: ActionSetEmailAffiliationBeingEdited
+) => ({
+  ...state,
+  data: {
+    ...state.data,
+    emailAffiliationBeingEdited: action.payload,
+  },
+})
+
+const updateAffiliationAction = (
+  state: State,
+  action: ActionUpdateAffiliation
+) => {
+  const { email, role, department } = action.payload
+  const affiliation = state.data.byId[email].affiliation
+
+  return {
+    ...state,
+    data: {
+      ...state.data,
+      byId: {
+        ...state.data.byId,
+        [email]: {
+          ...state.data.byId[email],
+          ...(affiliation && {
+            affiliation: {
+              ...affiliation,
+              role,
+              department,
+            },
+          }),
+        },
+      },
+      emailAffiliationBeingEdited: null,
+    },
+  }
+}
+
+const initialState: State = {
+  isLoading: false,
+  data: {
+    byId: {},
+    linkedInstitutionIds: [],
+    emailAffiliationBeingEdited: null,
+  },
+}
+
+const reducer = (state: State, action: Action) => {
+  switch (action.type) {
+    case Actions.SET_DATA:
+      return setData(state, action)
+    case Actions.SET_LOADING_STATE:
+      return setLoadingAction(state, action)
+    case Actions.MAKE_PRIMARY:
+      return makePrimaryAction(state, action)
+    case Actions.DELETE_EMAIL:
+      return deleteEmailAction(state, action)
+    case Actions.SET_EMAIL_AFFILIATION_BEING_EDITED:
+      return setEmailAffiliationBeingEditedAction(state, action)
+    case Actions.UPDATE_AFFILIATION:
+      return updateAffiliationAction(state, action)
+    default:
+      return state
+  }
+}
+
+function useUserEmails() {
+  const [state, unsafeDispatch] = useReducer(reducer, initialState)
+  const dispatch = useSafeDispatch(unsafeDispatch)
+  const { isLoading, isSuccess, isError, runAsync } = useAsync()
+
+  useEffect(() => {
+    runAsync<UserEmailData[]>(getJSON('/user/emails?ensureAffiliation=true'))
+      .then(data => {
+        dispatch(ActionCreators.setData(data))
+      })
+      .catch(() => {})
+  }, [runAsync, dispatch])
 
   return {
     state,
-    setLoading,
+    isInitializing: isLoading,
+    isInitializingSuccess: isSuccess,
+    isInitializingError: isError,
+    setLoading: useCallback(
+      (flag: boolean) => dispatch(ActionCreators.setLoading(flag)),
+      [dispatch]
+    ),
+    makePrimary: useCallback(
+      (email: UserEmailData['email']) =>
+        dispatch(ActionCreators.makePrimary(email)),
+      [dispatch]
+    ),
+    deleteEmail: useCallback(
+      (email: UserEmailData['email']) =>
+        dispatch(ActionCreators.deleteEmail(email)),
+      [dispatch]
+    ),
+    setEmailAffiliationBeingEdited: useCallback(
+      (email: Nullable<UserEmailData['email']>) =>
+        dispatch(ActionCreators.setEmailAffiliationBeingEdited(email)),
+      [dispatch]
+    ),
+    updateAffiliation: useCallback(
+      (
+        email: UserEmailData['email'],
+        role: Affiliation['role'],
+        department: Affiliation['department']
+      ) => dispatch(ActionCreators.updateAffiliation(email, role, department)),
+      [dispatch]
+    ),
   }
 }
 

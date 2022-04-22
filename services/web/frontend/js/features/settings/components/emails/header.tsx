@@ -8,19 +8,14 @@ function Header() {
   return (
     <>
       <Row>
-        <Col sm={5} className="hidden-xs">
+        <Col md={4} className="hidden-xs">
           <EmailCell>
             <strong>{t('email')}</strong>
           </EmailCell>
         </Col>
-        <Col sm={5} className="hidden-xs">
+        <Col md={8} className="hidden-xs">
           <EmailCell>
             <strong>{t('institution_and_role')}</strong>
-          </EmailCell>
-        </Col>
-        <Col sm={2} className="hidden-xs">
-          <EmailCell>
-            <strong>todo</strong>
           </EmailCell>
         </Col>
       </Row>

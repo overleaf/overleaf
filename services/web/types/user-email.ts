@@ -5,5 +5,6 @@ export type UserEmailData = {
   confirmedAt?: string
   email: string
   default: boolean
+  samlProviderId?: string
   ssoAvailable?: boolean
 }

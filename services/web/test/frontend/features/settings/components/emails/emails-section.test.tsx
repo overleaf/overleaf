@@ -3,6 +3,7 @@ import {
   screen,
   within,
   fireEvent,
+  waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react'
 import EmailsSection from '../../../../../../frontend/js/features/settings/components/emails-section'
@@ -55,77 +56,104 @@ const fakeUsersData = [
 ]
 
 describe('<EmailsSection />', function () {
+  beforeEach(function () {
+    window.metaAttributesCache.set('ol-ExposedSettings', {
+      hasAffiliationsFeature: true,
+    })
+    fetchMock.reset()
+  })
+
   afterEach(function () {
     window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 
   it('renders translated heading', function () {
-    window.metaAttributesCache.set('ol-userEmails', fakeUsersData)
     render(<EmailsSection />)
 
     screen.getByRole('heading', { name: /emails and affiliations/i })
   })
 
   it('renders translated description', function () {
-    window.metaAttributesCache.set('ol-userEmails', fakeUsersData)
     render(<EmailsSection />)
 
     screen.getByText(/add additional email addresses/i)
     screen.getByText(/to change your primary email/i)
   })
 
-  it('renders user emails', function () {
-    window.metaAttributesCache.set('ol-userEmails', fakeUsersData)
+  it('renders a loading message when loading', async function () {
     render(<EmailsSection />)
 
-    fakeUsersData.forEach(userData => {
-      screen.getByText(new RegExp(userData.email, 'i'))
+    await screen.findByText(/loading/i)
+  })
+
+  it('renders an error message and hides loading message on error', async function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', 500)
+    render(<EmailsSection />)
+
+    await screen.findByText(
+      /an error has occurred while performing your request/i
+    )
+    expect(screen.queryByText(/loading/i)).to.be.null
+  })
+
+  it('renders user emails', async function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', fakeUsersData)
+    render(<EmailsSection />)
+
+    await waitFor(() => {
+      fakeUsersData.forEach(userData => {
+        screen.getByText(new RegExp(userData.email, 'i'))
+      })
     })
   })
 
-  it('renders primary status', function () {
-    window.metaAttributesCache.set('ol-userEmails', [professionalUserData])
+  it('renders primary status', async function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', [professionalUserData])
     render(<EmailsSection />)
 
-    screen.getByText(`${professionalUserData.email} (primary)`)
+    await screen.findByText(`${professionalUserData.email} (primary)`)
   })
 
-  it('shows confirmation status for unconfirmed users', function () {
-    window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
+  it('shows confirmation status for unconfirmed users', async function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', [unconfirmedUserData])
     render(<EmailsSection />)
 
-    screen.getByText(/please check your inbox/i)
+    await screen.findByText(/please check your inbox/i)
   })
 
-  it('hides confirmation status for confirmed users', function () {
-    window.metaAttributesCache.set('ol-userEmails', [confirmedUserData])
+  it('hides confirmation status for confirmed users', async function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', [confirmedUserData])
     render(<EmailsSection />)
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
 
     expect(screen.queryByText(/please check your inbox/i)).to.be.null
   })
 
-  it('renders resend link', function () {
-    window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
+  it('renders resend link', async function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', [unconfirmedUserData])
     render(<EmailsSection />)
 
-    screen.getByRole('button', { name: /resend confirmation email/i })
+    await screen.findByRole('button', { name: /resend confirmation email/i })
   })
 
-  it('renders professional label', function () {
-    window.metaAttributesCache.set('ol-userEmails', [professionalUserData])
+  it('renders professional label', async function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', [professionalUserData])
     render(<EmailsSection />)
 
-    const node = screen.getByText(professionalUserData.email, {
+    const node = await screen.findByText(professionalUserData.email, {
       exact: false,
     })
     expect(within(node).getByText(/professional/i)).to.exist
   })
 
   it('shows loader when resending email', async function () {
-    fetchMock.post('/user/emails/resend_confirmation', 200)
-    window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
+    fetchMock.get('/user/emails?ensureAffiliation=true', [unconfirmedUserData])
+
     render(<EmailsSection />)
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
+
+    fetchMock.post('/user/emails/resend_confirmation', 200)
 
     const button = screen.getByRole('button', {
       name: /resend confirmation email/i,
@@ -150,9 +178,12 @@ describe('<EmailsSection />', function () {
   })
 
   it('shows error when resending email fails', async function () {
-    fetchMock.post('/user/emails/resend_confirmation', 503)
-    window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
+    fetchMock.get('/user/emails?ensureAffiliation=true', [unconfirmedUserData])
+
     render(<EmailsSection />)
+    await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
+
+    fetchMock.post('/user/emails/resend_confirmation', 503)
 
     const button = screen.getByRole('button', {
       name: /resend confirmation email/i,

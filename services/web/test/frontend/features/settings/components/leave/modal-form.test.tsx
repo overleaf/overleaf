@@ -8,7 +8,8 @@ import LeaveModalForm from '../../../../../../frontend/js/features/settings/comp
 describe('<LeaveModalForm />', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
-    window.metaAttributesCache.set('ol-userDefaultEmail', 'foo@bar.com')
+    window.metaAttributesCache.set('ol-usersEmail', 'foo@bar.com')
+    window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
   })
 
   afterEach(function () {
@@ -63,6 +64,7 @@ describe('<LeaveModalForm />', function () {
           assign: locationStub,
         },
       })
+      window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
     })
 
     afterEach(function () {
@@ -110,7 +112,8 @@ describe('<LeaveModalForm />', function () {
     })
   })
 
-  it('handles credentials error with Saas tip', async function () {
+  it('handles credentials error without Saas tip', async function () {
+    window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: false })
     fetchMock.post('/user/delete', 403)
     render(
       <LeaveModalForm
@@ -129,9 +132,8 @@ describe('<LeaveModalForm />', function () {
       .exist
   })
 
-  it('handles credentials error without Saas tip', async function () {
+  it('handles credentials error with Saas tip', async function () {
     fetchMock.post('/user/delete', 403)
-    window.metaAttributesCache.set('ol-isSaas', true)
     render(
       <LeaveModalForm
         setInFlight={() => {}}

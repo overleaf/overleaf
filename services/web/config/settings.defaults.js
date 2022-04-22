@@ -773,6 +773,7 @@ module.exports = {
     editorToolbarButtons: [],
     sourceEditorExtensions: [],
     sourceEditorComponents: [],
+    integrationLinkingWidgets: [],
   },
 
   moduleImportSequence: ['launchpad', 'server-ce-scripts', 'user-activate'],

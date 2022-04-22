@@ -43,9 +43,16 @@ describe('UserPagesController', function () {
           externalUserId: 'testId',
         },
       ],
+      refProviders: {
+        mendeley: true,
+        zotero: true,
+      },
     }
 
-    this.UserGetter = { getUser: sinon.stub() }
+    this.UserGetter = {
+      getUser: sinon.stub(),
+      promises: { getUser: sinon.stub() },
+    }
     this.UserSessionsManager = { getAllUserSessions: sinon.stub() }
     this.dropboxStatus = {}
     this.ErrorController = { notFound: sinon.stub() }
@@ -57,6 +64,11 @@ describe('UserPagesController', function () {
       _getRedirectFromSession: sinon.stub(),
       setRedirectInSession: sinon.stub(),
     }
+    this.SplitTestHandler = {
+      promises: {
+        getAssignment: sinon.stub().resolves({ variant: 'default' }),
+      },
+    }
     this.UserPagesController = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.settings,
@@ -67,6 +79,7 @@ describe('UserPagesController', function () {
           this.AuthenticationController,
         '../Authentication/SessionManager': this.SessionManager,
         request: (this.request = sinon.stub()),
+        '../SplitTests/SplitTestHandler': this.SplitTestHandler,
       },
     })
     this.req = {
@@ -217,14 +230,23 @@ describe('UserPagesController', function () {
       this.request.get = sinon
         .stub()
         .callsArgWith(1, null, { statusCode: 200 }, { has_password: true })
-      return (this.UserGetter.getUser = sinon
-        .stub()
-        .callsArgWith(1, null, this.user))
+      this.UserGetter.promises.getUser = sinon.stub().resolves(this.user)
     })
 
     it('should render user/settings', function (done) {
       this.res.render = function (page) {
         page.should.equal('user/settings')
+        return done()
+      }
+      return this.UserPagesController.settingsPage(this.req, this.res)
+    })
+
+    it('should render user/settings-react', function (done) {
+      this.SplitTestHandler.promises.getAssignment = sinon
+        .stub()
+        .resolves({ variant: 'react' })
+      this.res.render = function (page) {
+        page.should.equal('user/settings-react')
         return done()
       }
       return this.UserPagesController.settingsPage(this.req, this.res)

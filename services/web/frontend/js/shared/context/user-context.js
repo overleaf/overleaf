@@ -13,6 +13,17 @@ UserContext.Provider.propTypes = {
       allowedFreeTrial: PropTypes.boolean,
       first_name: PropTypes.string,
       last_name: PropTypes.string,
+      features: PropTypes.shape({
+        dropbox: PropTypes.boolean,
+        github: PropTypes.boolean,
+        mendeley: PropTypes.boolean,
+        zotero: PropTypes.boolean,
+        references: PropTypes.boolean,
+      }),
+      refProviders: PropTypes.shape({
+        mendeley: PropTypes.any,
+        zotero: PropTypes.any,
+      }),
     }),
   }),
 }
@@ -29,6 +40,12 @@ UserProvider.propTypes = {
 
 export function useUserContext(propTypes) {
   const data = useContext(UserContext)
+  if (!data) {
+    throw new Error(
+      'useUserContext is only available inside UserContext, or `ol-user` meta is not defined'
+    )
+  }
+
   PropTypes.checkPropTypes(propTypes, data, 'data', 'UserContext.Provider')
   return data
 }

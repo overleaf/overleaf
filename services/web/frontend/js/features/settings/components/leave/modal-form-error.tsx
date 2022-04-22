@@ -2,6 +2,7 @@ import { Alert } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import { FetchError } from '../../../../infrastructure/fetch-json'
+import { ExposedSettings } from '../../../../../../types/exposed-settings'
 
 type LeaveModalFormErrorProps = {
   error: FetchError
@@ -9,13 +10,13 @@ type LeaveModalFormErrorProps = {
 
 function LeaveModalFormError({ error }: LeaveModalFormErrorProps) {
   const { t } = useTranslation()
-  const isSaas = getMeta('ol-isSaas') as boolean
+  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
 
   let errorMessage
   let errorTip = null
   if (error.response?.status === 403) {
     errorMessage = t('email_or_password_wrong_try_again')
-    if (isSaas) {
+    if (isOverleaf) {
       errorTip = (
         <Trans
           i18nKey="user_deletion_password_reset_tip"

@@ -1,16 +1,15 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
-import { SSOLinkingWidget } from '../../../../../frontend/js/features/user-settings/components/sso-linking-widget'
+import { SSOLinkingWidget } from '../../../../../../frontend/js/features/settings/components/sso-linking/widget'
 
 describe('<SSOLinkingWidget />', function () {
   const defaultProps = {
-    logoSrc: 'logo.png',
+    providerId: 'integration_id',
     title: 'integration',
     description: 'integration description',
+    helpPath: '/help/integration',
     linkPath: 'integration/link',
-    unlinkConfirmationTitle: 'confirm unlink',
-    unlinkConfirmationText: 'you will be unlinked',
     onUnlink: () => Promise.resolve(),
   }
 
@@ -18,13 +17,16 @@ describe('<SSOLinkingWidget />', function () {
     render(<SSOLinkingWidget {...defaultProps} />)
     screen.getByText('integration')
     screen.getByText('integration description')
+    expect(
+      screen.getByRole('link', { name: 'Learn more' }).getAttribute('href')
+    ).to.equal('/help/integration')
   })
 
   describe('when unlinked', function () {
     it('should render a link to `linkPath`', function () {
       render(<SSOLinkingWidget {...defaultProps} linked={false} />)
       expect(
-        screen.getByRole('link', { name: 'link' }).getAttribute('href')
+        screen.getByRole('link', { name: 'Link' }).getAttribute('href')
       ).to.equal('integration/link')
     })
   })
@@ -45,13 +47,14 @@ describe('<SSOLinkingWidget />', function () {
 
     it('should open a modal to confirm integration unlinking', function () {
       fireEvent.click(screen.getByRole('button', { name: 'Unlink' }))
-      screen.getByText('confirm unlink')
-      screen.getByText('you will be unlinked')
+      screen.getByText('Unlink integration Account')
+      screen.getByText(
+        'Warning: When you unlink your account from integration you will not be able to sign in using integration anymore.'
+      )
     })
 
     it('should cancel unlinking when clicking cancel in the confirmation modal', async function () {
       fireEvent.click(screen.getByRole('button', { name: 'Unlink' }))
-      screen.getByText('confirm unlink')
       const cancelBtn = screen.getByRole('button', {
         name: 'Cancel',
         hidden: false,
@@ -117,9 +120,7 @@ describe('<SSOLinkingWidget />', function () {
     })
 
     it('should display the unlink button ', async function () {
-      await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Unlink' }))
-      )
+      await waitFor(() => screen.getByRole('button', { name: 'Unlink' }))
     })
   })
 })

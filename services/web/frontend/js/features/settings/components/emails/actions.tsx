@@ -1,0 +1,62 @@
+import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import MakePrimary from './actions/make-primary'
+import Remove from './actions/remove'
+import Icon from '../../../../shared/components/icon'
+import useAsync from '../../../../shared/hooks/use-async'
+import { useUserEmailsContext } from '../../context/user-email-context'
+import { UserEmailData } from '../../../../../../types/user-email'
+
+type ActionsProps = {
+  userEmailData: UserEmailData
+}
+
+function Actions({ userEmailData }: ActionsProps) {
+  const { t } = useTranslation()
+  const { setLoading: setUserEmailsContextLoading } = useUserEmailsContext()
+  const makePrimaryAsync = useAsync()
+  const deleteEmailAsync = useAsync()
+
+  useEffect(() => {
+    setUserEmailsContextLoading(
+      makePrimaryAsync.isLoading || deleteEmailAsync.isLoading
+    )
+  }, [
+    setUserEmailsContextLoading,
+    makePrimaryAsync.isLoading,
+    deleteEmailAsync.isLoading,
+  ])
+
+  useEffect(() => {
+    if (makePrimaryAsync.isLoading && !deleteEmailAsync.isIdle) {
+      deleteEmailAsync.reset()
+    }
+  }, [makePrimaryAsync.isLoading, deleteEmailAsync])
+
+  useEffect(() => {
+    if (deleteEmailAsync.isLoading && !makePrimaryAsync.isIdle) {
+      makePrimaryAsync.reset()
+    }
+  }, [deleteEmailAsync.isLoading, makePrimaryAsync])
+
+  return (
+    <>
+      <MakePrimary
+        userEmailData={userEmailData}
+        makePrimaryAsync={makePrimaryAsync}
+      />{' '}
+      <Remove
+        userEmailData={userEmailData}
+        deleteEmailAsync={deleteEmailAsync}
+      />
+      {(makePrimaryAsync.isError || deleteEmailAsync.isError) && (
+        <div className="text-danger small">
+          <Icon type="exclamation-triangle" fw />{' '}
+          {t('error_performing_request')}
+        </div>
+      )}
+    </>
+  )
+}
+
+export default Actions

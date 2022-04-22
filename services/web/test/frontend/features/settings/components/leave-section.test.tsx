@@ -8,6 +8,17 @@ import {
 import LeaveSection from '../../../../../frontend/js/features/settings/components/leave-section'
 
 describe('<LeaveSection />', function () {
+  beforeEach(function () {
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-usersEmail', 'foo@bar.com')
+    window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
+    window.metaAttributesCache.set('ol-hasPassword', true)
+  })
+
+  afterEach(function () {
+    window.metaAttributesCache = new Map()
+  })
+
   it('opens modal', async function () {
     render(<LeaveSection />)
 
