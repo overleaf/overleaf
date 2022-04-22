@@ -106,7 +106,7 @@ export default function FileTreeUploadDoc() {
 
             default:
               console.error(error)
-              setError(response.body?.error || 'generic_something_went_wrong')
+              setError(response?.body?.error || 'generic_something_went_wrong')
               break
           }
         })
