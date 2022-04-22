@@ -184,7 +184,6 @@ export default App.directive('reviewPanelSorted', $timeout => ({
         overflowTop = 0
       }
 
-      // TODO: unused?
       return scope.$emit('review-panel:sizes', {
         overflowTop,
         height: previousBottom + OVERVIEW_TOGGLE_HEIGHT,

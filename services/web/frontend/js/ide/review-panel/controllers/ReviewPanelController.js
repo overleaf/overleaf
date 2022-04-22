@@ -134,7 +134,6 @@ export default App.controller(
       $timeout(() => $scope.$broadcast('review-panel:layout'))
     )
 
-    // TODO: unused?
     $scope.$on('review-panel:sizes', (e, sizes) =>
       $scope.$broadcast('editor:set-scroll-size', sizes)
     )
