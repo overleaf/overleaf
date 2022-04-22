@@ -7,6 +7,7 @@ import AccountInfoSection from './account-info-section'
 import PasswordSection from './password-section'
 import IntegrationLinkingSection from './integration-linking-section'
 import SSOLinkingSection from './sso-linking-section'
+import MiscSection from './misc-section'
 import LeaveSection from './leave-section'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { UserProvider } from '../../../shared/context/user-context'
@@ -47,6 +48,8 @@ function SettingsPageRoot() {
                 <IntegrationLinkingSection />
                 <hr />
                 <SSOLinkingSection />
+                <hr />
+                <MiscSection />
                 <hr />
                 <LeaveSection />
               </div>

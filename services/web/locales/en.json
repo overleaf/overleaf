@@ -915,6 +915,8 @@
   "account_is_linked": "Account is linked",
   "unlink_dropbox": "Unlink Dropbox",
   "link_to_dropbox": "Link to Dropbox",
+  "newsletter": "Newsletter",
+  "manage_newsletter": "Manage Your Newsletter Preferences",
   "newsletter_info_and_unsubscribe": "Every few months we send a newsletter out summarizing the new features available. If you would prefer not to receive this email then you can unsubscribe at any time:",
   "unsubscribed": "Unsubscribed",
   "unsubscribing": "Unsubscribing",
