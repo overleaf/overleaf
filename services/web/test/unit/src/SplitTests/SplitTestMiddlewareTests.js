@@ -14,7 +14,7 @@ describe('SplitTestMiddleware', function () {
       requires: {
         './SplitTestHandler': (this.SplitTestHandler = {
           promises: {
-            assignInLocalsContext: sinon.stub().resolves(),
+            getAssignment: sinon.stub().resolves(),
           },
         }),
       },
@@ -26,12 +26,12 @@ describe('SplitTestMiddleware', function () {
   })
 
   it('assign multiple split test variants in locals', async function () {
-    this.SplitTestHandler.promises.assignInLocalsContext
+    this.SplitTestHandler.promises.getAssignment
       .withArgs(this.req, 'ui-overhaul')
       .resolves({
         variant: 'default',
       })
-    this.SplitTestHandler.promises.assignInLocalsContext
+    this.SplitTestHandler.promises.getAssignment
       .withArgs(this.req, 'other-test')
       .resolves({
         variant: 'foobar',
@@ -44,13 +44,13 @@ describe('SplitTestMiddleware', function () {
     await middleware(this.req, this.res, this.next)
 
     sinon.assert.calledWith(
-      this.SplitTestHandler.promises.assignInLocalsContext,
+      this.SplitTestHandler.promises.getAssignment,
       this.req,
       this.res,
       'ui-overhaul'
     )
     sinon.assert.calledWith(
-      this.SplitTestHandler.promises.assignInLocalsContext,
+      this.SplitTestHandler.promises.getAssignment,
       this.req,
       this.res,
       'other-test'
@@ -63,12 +63,12 @@ describe('SplitTestMiddleware', function () {
 
     await middleware(this.req, this.res, this.next)
 
-    sinon.assert.notCalled(this.SplitTestHandler.promises.assignInLocalsContext)
+    sinon.assert.notCalled(this.SplitTestHandler.promises.getAssignment)
     sinon.assert.calledOnce(this.next)
   })
 
   it('exception thrown by assignment does not fail the request', async function () {
-    this.SplitTestHandler.promises.assignInLocalsContext
+    this.SplitTestHandler.promises.getAssignment
       .withArgs(this.req, this.res, 'some-test')
       .throws(new Error('failure'))
 
@@ -79,7 +79,7 @@ describe('SplitTestMiddleware', function () {
     await middleware(this.req, this.res, this.next)
 
     sinon.assert.calledWith(
-      this.SplitTestHandler.promises.assignInLocalsContext,
+      this.SplitTestHandler.promises.getAssignment,
       this.req,
       this.res,
       'some-test'

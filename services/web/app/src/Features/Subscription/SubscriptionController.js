@@ -58,7 +58,11 @@ async function plansPage(req, res) {
   AnalyticsManager.recordEventForSession(req.session, 'plans-page-view')
 
   const standardPlanNameAssignment =
-    await SplitTestHandler.promises.getAssignment(req, 'standard-plan-name')
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'standard-plan-name'
+    )
 
   const useNewPlanName =
     standardPlanNameAssignment &&
@@ -115,6 +119,7 @@ async function paymentPage(req, res) {
       }
       const assignment = await SplitTestHandler.promises.getAssignment(
         req,
+        res,
         'payment-page'
       )
       const template =
@@ -164,6 +169,7 @@ async function userSubscriptionPage(req, res) {
 
   const assignment = await SplitTestHandler.promises.getAssignment(
     req,
+    res,
     'subscription-cancel-button'
   )
 

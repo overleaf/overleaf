@@ -126,10 +126,8 @@ describe('ProjectController', function () {
     this.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
-        assignInLocalsContext: sinon.stub().resolves({ variant: 'default' }),
       },
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
-      assignInLocalsContext: sinon.stub().yields(null, { variant: 'default' }),
     }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
@@ -1413,7 +1411,7 @@ describe('ProjectController', function () {
               done()
             }
             this.SplitTestHandler.getAssignment
-              .withArgs(this.req, 'pdf-detach')
+              .withArgs(this.req, this.res, 'pdf-detach')
               .yields(null, { variant: 'enabled' })
             this.req.query.pdf_detach = 'false'
             this.ProjectController.loadEditor(this.req, this.res)
@@ -1436,7 +1434,7 @@ describe('ProjectController', function () {
               done()
             }
             this.SplitTestHandler.getAssignment
-              .withArgs(this.req, 'pdf-detach')
+              .withArgs(this.req, this.res, 'pdf-detach')
               .yields(null, { variant: 'enabled' })
             this.ProjectController.loadEditor(this.req, this.res)
           })

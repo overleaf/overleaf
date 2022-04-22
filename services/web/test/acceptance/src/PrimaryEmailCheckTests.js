@@ -1,12 +1,29 @@
 const UserHelper = require('./helpers/UserHelper')
 const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
+const SplitTestManager = require('../../../app/src/Features/SplitTests/SplitTestManager')
 
 // While the split test is in progress this must be appended to URLs during tests
 const SPLIT_TEST_QUERY = '?primary-email-check=active'
 
 describe('PrimaryEmailCheck', function () {
   let userHelper
+
+  // Create the primary-email-check split test because this is now required for the query string override to work. See
+  // https://github.com/overleaf/internal/pull/7545#discussion_r848575736
+  before(async function () {
+    await SplitTestManager.createSplitTest('primary-email-check', {
+      active: true,
+      analyticsEnabled: true,
+      phase: 'release',
+      variants: [
+        {
+          name: 'active',
+          rolloutPercent: 0,
+        },
+      ],
+    })
+  })
 
   beforeEach(async function () {
     userHelper = await UserHelper.createUser()

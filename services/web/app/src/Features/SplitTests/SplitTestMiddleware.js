@@ -5,11 +5,7 @@ function loadAssignmentsInLocals(splitTestNames) {
   return async function (req, res, next) {
     try {
       for (const splitTestName of splitTestNames) {
-        await SplitTestHandler.promises.assignInLocalsContext(
-          req,
-          res,
-          splitTestName
-        )
+        await SplitTestHandler.promises.getAssignment(req, res, splitTestName)
       }
     } catch (error) {
       logger.error(

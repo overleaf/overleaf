@@ -45,7 +45,11 @@ module.exports = HomeController = {
     if (Features.hasFeature('homepage') && homepageExists) {
       try {
         const highlightSSOAssignment =
-          await SplitTestHandler.promises.getAssignment(req, 'highlight-sso')
+          await SplitTestHandler.promises.getAssignment(
+            req,
+            res,
+            'highlight-sso'
+          )
         const highlightSSO = highlightSSOAssignment.variant === 'active'
         return res.render('external/home/v2', { highlightSSO })
       } catch (err) {

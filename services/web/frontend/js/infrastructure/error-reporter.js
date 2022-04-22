@@ -1,4 +1,6 @@
 // Conditionally enable Sentry based on whether the DSN token is set
+import getMeta from '../utils/meta'
+
 const reporterPromise = window.ExposedSettings.sentryDsn
   ? sentryReporter()
   : nullReporter()
@@ -51,6 +53,13 @@ function sentryReporter() {
         })
 
         Sentry.setUser({ id: window.user_id })
+
+        const splitTestAssignments = getMeta('ol-splitTestVariants')
+        if (splitTestAssignments) {
+          for (const [name, value] of Object.entries(splitTestAssignments)) {
+            Sentry.setTag(`ol.splitTest.${name}`, value.toString())
+          }
+        }
 
         return Sentry
       })

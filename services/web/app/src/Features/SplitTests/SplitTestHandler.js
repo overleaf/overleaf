@@ -20,12 +20,12 @@ const DEFAULT_ASSIGNMENT = {
 }
 
 /**
- * Get the assignment of a user to a split test by their session.
+ * Get the assignment of a user to a split test and store it in the response locals context
  *
  * @example
  * // Assign user and record an event
  *
- * const assignment = await SplitTestHandler.getAssignment(req.session, 'example-project')
+ * const assignment = await SplitTestHandler.getAssignment(req, res, 'example-project')
  * if (assignment.variant === 'awesome-new-version') {
  *   // execute my awesome change
  * }
@@ -39,29 +39,47 @@ const DEFAULT_ASSIGNMENT = {
  * })
  *
  * @param req the request
+ * @param res the Express response object
  * @param splitTestName the unique name of the split test
  * @param options {Object<sync: boolean>} - for test purposes only, to force the synchronous update of the user's profile
  * @returns {Promise<{variant: string, analytics: {segmentation: {splitTest: string, variant: string, phase: string, versionNumber: number}|{}}}>}
  */
-async function getAssignment(req, splitTestName, { sync = false } = {}) {
+async function getAssignment(req, res, splitTestName, { sync = false } = {}) {
   const query = req.query || {}
-  if (query[splitTestName]) {
-    return {
-      variant: query[splitTestName],
-      analytics: {
-        segmentation: {},
-      },
+  let assignment
+
+  // Check the query string for an override, ignoring an invalid value
+  const queryVariant = query[splitTestName]
+  if (queryVariant) {
+    const variants = await _getVariantNames(splitTestName)
+    if (variants.includes(queryVariant)) {
+      assignment = {
+        variant: queryVariant,
+        analytics: {
+          segmentation: {},
+        },
+      }
     }
   }
-  const { userId, analyticsId } = AnalyticsManager.getIdsFromSession(
-    req.session
+
+  if (!assignment) {
+    const { userId, analyticsId } = AnalyticsManager.getIdsFromSession(
+      req.session
+    )
+    assignment = await _getAssignment(splitTestName, {
+      analyticsId,
+      userId,
+      session: req.session,
+      sync,
+    })
+  }
+
+  LocalsHelper.setSplitTestVariant(
+    res.locals,
+    splitTestName,
+    assignment.variant
   )
-  return _getAssignment(splitTestName, {
-    analyticsId,
-    userId,
-    session: req.session,
-    sync,
-  })
+  return assignment
 }
 
 /**
@@ -81,29 +99,6 @@ async function getAssignmentForUser(
 ) {
   const analyticsId = await UserAnalyticsIdCache.get(userId)
   return _getAssignment(splitTestName, { analyticsId, userId, sync })
-}
-
-/**
- * Get the assignment of a user to a split test by their session and stores it in the locals context.
- *
- * @param req the request
- * @param res the Express response object
- * @param splitTestName the unique name of the split test
- * @param options {Object<sync: boolean>} - for test purposes only, to force the synchronous update of the user's profile
- * @returns {Promise<void>}
- */
-async function assignInLocalsContext(
-  req,
-  res,
-  splitTestName,
-  { sync = false } = {}
-) {
-  const assignment = await getAssignment(req, splitTestName, { sync })
-  LocalsHelper.setSplitTestVariant(
-    res.locals,
-    splitTestName,
-    assignment.variant
-  )
 }
 
 /**
@@ -143,6 +138,23 @@ async function getActiveAssignmentsForUser(userId) {
   return assignments
 }
 
+/**
+ * Returns an array of valid variant names for the given split test, including default
+ *
+ * @param splitTestName
+ * @returns {Promise<string[]>}
+ * @private
+ */
+async function _getVariantNames(splitTestName) {
+  const splitTest = await SplitTestCache.get(splitTestName)
+  const currentVersion = splitTest?.getCurrentVersion()
+  if (currentVersion?.active) {
+    return currentVersion.variants.map(v => v.name).concat([DEFAULT_VARIANT])
+  } else {
+    return [DEFAULT_VARIANT]
+  }
+}
+
 async function _getAssignment(
   splitTestName,
   { analyticsId, userId, session, sync }
@@ -153,7 +165,7 @@ async function _getAssignment(
 
   const splitTest = await SplitTestCache.get(splitTestName)
   const currentVersion = splitTest?.getCurrentVersion()
-  if (!splitTest || !currentVersion?.active) {
+  if (!currentVersion?.active) {
     return DEFAULT_ASSIGNMENT
   }
 
@@ -339,11 +351,9 @@ module.exports = {
   getAssignment: callbackify(getAssignment),
   getAssignmentForUser: callbackify(getAssignmentForUser),
   getActiveAssignmentsForUser: callbackify(getActiveAssignmentsForUser),
-  assignInLocalsContext: callbackify(assignInLocalsContext),
   promises: {
     getAssignment,
     getAssignmentForUser,
     getActiveAssignmentsForUser,
-    assignInLocalsContext,
   },
 }

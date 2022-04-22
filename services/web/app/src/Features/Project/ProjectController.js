@@ -443,6 +443,7 @@ const ProjectController = {
         primaryEmailCheckActive(cb) {
           SplitTestHandler.getAssignment(
             req,
+            res,
             'primary-email-check',
             (err, assignment) => {
               if (err) {
@@ -634,7 +635,11 @@ const ProjectController = {
           }
 
           // null test targeting logged in users
-          SplitTestHandler.promises.getAssignment(req, 'null-test-dashboard')
+          SplitTestHandler.promises.getAssignment(
+            req,
+            res,
+            'null-test-dashboard'
+          )
 
           res.render('project/list', viewModel)
           timer.done()
@@ -761,7 +766,7 @@ const ProjectController = {
           TpdsProjectFlusher.flushProjectToTpdsIfNeeded(projectId, cb)
         },
         sharingModalSplitTest(cb) {
-          SplitTestHandler.assignInLocalsContext(
+          SplitTestHandler.getAssignment(
             req,
             res,
             'project-share-modal-paywall',
@@ -774,7 +779,7 @@ const ProjectController = {
         },
         sharingModalNullTest(cb) {
           // null test targeting logged in users, for front-end side
-          SplitTestHandler.assignInLocalsContext(
+          SplitTestHandler.getAssignment(
             req,
             res,
             'null-test-share-modal',
@@ -788,6 +793,7 @@ const ProjectController = {
         newSourceEditorAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
+            res,
             'source-editor',
             {},
             (error, assignment) => {
@@ -803,6 +809,7 @@ const ProjectController = {
         pdfDetachAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
+            res,
             'pdf-detach',
             {},
             (error, assignment) => {
@@ -818,6 +825,7 @@ const ProjectController = {
         pdfjsAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
+            res,
             'pdfjs',
             {},
             (error, assignment) => {
