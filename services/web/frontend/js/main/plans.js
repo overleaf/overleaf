@@ -18,8 +18,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '$80',
         },
         personal: {
-          monthly: '$13',
-          annual: '$120',
+          monthly: '$5',
+          annual: '$49',
         },
         collaborator: {
           monthly: '$19',
@@ -38,8 +38,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '€70',
         },
         personal: {
-          monthly: '€12',
-          annual: '€108',
+          monthly: '€5',
+          annual: '€44',
         },
         collaborator: {
           monthly: '€18',
@@ -58,8 +58,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '£60',
         },
         personal: {
-          monthly: '£10',
-          annual: '£96',
+          monthly: '£4',
+          annual: '£39',
         },
         collaborator: {
           monthly: '£15',
@@ -78,8 +78,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '600 kr',
         },
         personal: {
-          monthly: '92 kr',
-          annual: '876 kr',
+          monthly: '35 kr',
+          annual: '359 kr',
         },
         collaborator: {
           monthly: '138 kr',
@@ -97,8 +97,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '$90',
         },
         personal: {
-          monthly: '$14',
-          annual: '$132',
+          monthly: '$5',
+          annual: '$55',
         },
         collaborator: {
           monthly: '$22',
@@ -117,8 +117,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '600 kr',
         },
         personal: {
-          monthly: '92 kr',
-          annual: '876 kr',
+          monthly: '35 kr',
+          annual: '359 kr',
         },
         collaborator: {
           monthly: '138 kr',
@@ -137,8 +137,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '500 kr',
         },
         personal: {
-          monthly: '75 kr',
-          annual: '720 kr',
+          monthly: '29 kr',
+          annual: '295 kr',
         },
         collaborator: {
           monthly: '113 kr',
@@ -157,8 +157,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '$100',
         },
         personal: {
-          monthly: '$15',
-          annual: '$144',
+          monthly: '$6',
+          annual: '$59',
         },
         collaborator: {
           monthly: '$23',
@@ -177,8 +177,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '$100',
         },
         personal: {
-          monthly: '$15',
-          annual: '$144',
+          monthly: '$6',
+          annual: '$59',
         },
         collaborator: {
           monthly: '$23',
@@ -197,8 +197,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: 'Fr 80',
         },
         personal: {
-          monthly: 'Fr 13',
-          annual: 'Fr 120',
+          monthly: 'Fr 5',
+          annual: 'Fr 49',
         },
         collaborator: {
           monthly: 'Fr 19',
@@ -217,8 +217,8 @@ App.factory('MultiCurrencyPricing', function () {
           annual: '$120',
         },
         personal: {
-          monthly: '$17',
-          annual: '$156',
+          monthly: '$7',
+          annual: '$64',
         },
         collaborator: {
           monthly: '$25',
