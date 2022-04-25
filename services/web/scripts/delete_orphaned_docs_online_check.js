@@ -3,6 +3,7 @@ const { promisify } = require('util')
 const { ObjectId, ReadPreference } = require('mongodb')
 const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('../app/src/util/promises')
+const { getHardDeletedProjectIds } = require('./delete_orphaned_data_helper')
 const sleep = promisify(setTimeout)
 
 const NOW_IN_S = Date.now() / 1000
@@ -90,28 +91,6 @@ async function main() {
   }
 }
 
-async function getDeletedProject(projectId, readPreference) {
-  return await db.deletedProjects.findOne(
-    { 'deleterData.deletedProjectId': projectId },
-    {
-      // There is no index on .project. Pull down something small.
-      projection: { 'project._id': 1 },
-      readPreference,
-    }
-  )
-}
-
-async function getProject(projectId, readPreference) {
-  return await db.projects.findOne(
-    { _id: projectId },
-    {
-      // Pulling down an empty object is fine for differentiating with null.
-      projection: { _id: 0 },
-      readPreference,
-    }
-  )
-}
-
 async function getProjectDocs(projectId) {
   return await db.docs
     .find(
@@ -124,69 +103,15 @@ async function getProjectDocs(projectId) {
     .toArray()
 }
 
-async function checkProjectExistsWithReadPreference(projectId, readPreference) {
-  // NOTE: Possible race conditions!
-  // There are two processes which are racing with our queries:
-  //  1. project deletion
-  //  2. project restoring
-  // For 1. we check the projects collection before deletedProjects.
-  // If a project were to be delete in this very moment, we should see the
-  //  soft-deleted entry which is created before deleting the projects entry.
-  // For 2. we check the projects collection after deletedProjects again.
-  // If a project were to be restored in this very moment, it is very likely
-  //  to see the projects entry again.
-  // Unlikely edge case: Restore+Deletion in rapid succession.
-  // We could add locking to the ProjectDeleter for ruling ^ out.
-  if (await getProject(projectId, readPreference)) {
-    // The project is live.
-    return true
-  }
-  const deletedProject = await getDeletedProject(projectId, readPreference)
-  if (deletedProject && deletedProject.project) {
-    // The project is registered for hard-deletion.
-    return true
-  }
-  if (await getProject(projectId, readPreference)) {
-    // The project was just restored.
-    return true
-  }
-  // The project does not exist.
-  return false
-}
-
-async function checkProjectExistsOnPrimary(projectId) {
-  return await checkProjectExistsWithReadPreference(
-    projectId,
-    ReadPreference.PRIMARY
-  )
-}
-
-async function checkProjectExistsOnSecondary(projectId) {
-  return await checkProjectExistsWithReadPreference(
-    projectId,
-    ReadPreference.SECONDARY
-  )
-}
-
 async function processBatch(projectIds) {
-  const doubleCheckProjectIdsOnPrimary = []
-  let nDeletedDocs = 0
-  async function checkProjectOnSecondary(projectId) {
-    if (await checkProjectExistsOnSecondary(projectId)) {
-      // Finding a project with secondary confidence is sufficient.
-      return
-    }
-    // At this point, the secondaries deem this project as having orphaned docs.
-    doubleCheckProjectIdsOnPrimary.push(projectId)
-  }
+  const projectsWithOrphanedDocs = await getHardDeletedProjectIds({
+    projectIds,
+    READ_CONCURRENCY_PRIMARY,
+    READ_CONCURRENCY_SECONDARY,
+  })
 
-  const projectsWithOrphanedDocs = []
-  async function checkProjectOnPrimary(projectId) {
-    if (await checkProjectExistsOnPrimary(projectId)) {
-      // The project is actually live.
-      return
-    }
-    projectsWithOrphanedDocs.push(projectId)
+  let nDeletedDocs = 0
+  async function countOrphanedDocs(projectId) {
     const docs = await getProjectDocs(projectId)
     nDeletedDocs += docs.length
     console.log(
@@ -196,16 +121,10 @@ async function processBatch(projectIds) {
       JSON.stringify(docs.map(doc => doc._id))
     )
   }
-
-  await promiseMapWithLimit(
-    READ_CONCURRENCY_SECONDARY,
-    projectIds,
-    checkProjectOnSecondary
-  )
   await promiseMapWithLimit(
     READ_CONCURRENCY_PRIMARY,
-    doubleCheckProjectIdsOnPrimary,
-    checkProjectOnPrimary
+    projectsWithOrphanedDocs,
+    countOrphanedDocs
   )
   if (!DRY_RUN) {
     await promiseMapWithLimit(
