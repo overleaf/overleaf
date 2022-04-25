@@ -7,6 +7,7 @@ import {
 } from '../context/user-email-context'
 import EmailsHeader from './emails/header'
 import EmailsRow from './emails/row'
+import AddEmail from './emails/add-email'
 import Icon from '../../../shared/components/icon'
 import { Alert } from 'react-bootstrap'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
@@ -16,7 +17,6 @@ function EmailsSectionContent() {
   const {
     state: { data: userEmailsData },
     isInitializing,
-    isInitializingSuccess,
     isInitializingError,
   } = useUserEmailsContext()
   const userEmails = Object.values(userEmailsData.byId)
@@ -32,30 +32,30 @@ function EmailsSectionContent() {
           <a href="/learn/how-to/Keeping_your_account_secure" />
         </Trans>
       </p>
-      {isInitializing && (
-        <div className="text-center">
-          <Icon type="refresh" fw spin /> {t('loading')}...
-        </div>
-      )}
-      {isInitializingSuccess && (
-        <>
-          <EmailsHeader />
-          {userEmails?.map((userEmail, i) => (
-            <Fragment key={userEmail.email}>
-              <EmailsRow userEmailData={userEmail} />
-              {i + 1 !== userEmails.length && (
+      <div className="table">
+        <EmailsHeader />
+        {isInitializing ? (
+          <div className="text-center">
+            <Icon type="refresh" fw spin /> {t('loading')}...
+          </div>
+        ) : (
+          <>
+            {userEmails?.map(userEmail => (
+              <Fragment key={userEmail.email}>
+                <EmailsRow userEmailData={userEmail} />
                 <div className="horizontal-divider" />
-              )}
-            </Fragment>
-          ))}
-        </>
-      )}
-      {isInitializingError && (
-        <Alert bsStyle="danger" className="text-center">
-          <Icon type="exclamation-triangle" fw />{' '}
-          {t('error_performing_request')}
-        </Alert>
-      )}
+              </Fragment>
+            ))}
+          </>
+        )}
+        <AddEmail />
+        {isInitializingError && (
+          <Alert bsStyle="danger" className="text-center">
+            <Icon type="exclamation-triangle" fw />{' '}
+            {t('error_performing_request')}
+          </Alert>
+        )}
+      </div>
     </>
   )
 }

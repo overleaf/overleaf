@@ -99,7 +99,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
               setValue={setDepartment}
             />
             <Button
-              bsSize="sm"
+              bsSize="small"
               bsStyle="success"
               type="submit"
               disabled={!role || !department || isLoading || state.isLoading}

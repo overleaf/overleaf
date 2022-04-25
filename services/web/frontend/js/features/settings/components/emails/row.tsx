@@ -17,7 +17,7 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
           <Email userEmailData={userEmailData} />
         </EmailCell>
       </Col>
-      <Col sm={4}>
+      <Col md={4}>
         {userEmailData.affiliation?.institution && (
           <EmailCell>
             <InstitutionAndRole userEmailData={userEmailData} />
