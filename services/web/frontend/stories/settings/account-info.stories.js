@@ -1,12 +1,17 @@
 import useFetchMock from '../hooks/use-fetch-mock'
 import AccountInfoSection from '../../js/features/settings/components/account-info-section'
 import { setDefaultMeta, defaultSetupMocks } from './helpers/account-info'
+import { UserProvider } from '../../js/shared/context/user-context'
 
 export const Success = args => {
   setDefaultMeta()
   useFetchMock(defaultSetupMocks)
 
-  return <AccountInfoSection {...args} />
+  return (
+    <UserProvider>
+      <AccountInfoSection {...args} />
+    </UserProvider>
+  )
 }
 
 export const ReadOnly = args => {
@@ -14,7 +19,11 @@ export const ReadOnly = args => {
   window.metaAttributesCache.set('ol-isExternalAuthenticationSystemUsed', true)
   window.metaAttributesCache.set('ol-shouldAllowEditingDetails', false)
 
-  return <AccountInfoSection {...args} />
+  return (
+    <UserProvider>
+      <AccountInfoSection {...args} />
+    </UserProvider>
+  )
 }
 
 export const NoEmailInput = args => {
@@ -24,14 +33,22 @@ export const NoEmailInput = args => {
   })
   useFetchMock(defaultSetupMocks)
 
-  return <AccountInfoSection {...args} />
+  return (
+    <UserProvider>
+      <AccountInfoSection {...args} />
+    </UserProvider>
+  )
 }
 
 export const Error = args => {
   setDefaultMeta()
   useFetchMock(fetchMock => fetchMock.post(/\/user\/settings/, 500))
 
-  return <AccountInfoSection {...args} />
+  return (
+    <UserProvider>
+      <AccountInfoSection {...args} />
+    </UserProvider>
+  )
 }
 
 export default {

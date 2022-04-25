@@ -73,7 +73,11 @@ async function changePassword(req, res, next) {
     req.body.currentPassword
   )
   if (!user) {
-    return HttpErrorHandler.badRequest(req, res, 'Your old password is wrong')
+    return HttpErrorHandler.badRequest(
+      req,
+      res,
+      req.i18n.translate('password_change_old_password_wrong')
+    )
   }
 
   if (req.body.newPassword1 !== req.body.newPassword2) {

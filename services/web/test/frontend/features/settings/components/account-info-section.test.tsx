@@ -2,13 +2,22 @@ import { expect } from 'chai'
 import { fireEvent, screen, render } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import AccountInfoSection from '../../../../../frontend/js/features/settings/components/account-info-section'
+import { UserProvider } from '../../../../../frontend/js/shared/context/user-context'
+
+function renderSectionWithUserProvider() {
+  render(<AccountInfoSection />, {
+    wrapper: ({ children }) => <UserProvider>{children}</UserProvider>,
+  })
+}
 
 describe('<AccountInfoSection />', function () {
   beforeEach(function () {
     window.metaAttributesCache = window.metaAttributesCache || new Map()
-    window.metaAttributesCache.set('ol-usersEmail', 'sherlock@holmes.co.uk')
-    window.metaAttributesCache.set('ol-firstName', 'Sherlock')
-    window.metaAttributesCache.set('ol-lastName', 'Holmes')
+    window.metaAttributesCache.set('ol-user', {
+      email: 'sherlock@holmes.co.uk',
+      first_name: 'Sherlock',
+      last_name: 'Holmes',
+    })
     window.metaAttributesCache.set('ol-ExposedSettings', {
       hasAffiliationsFeature: false,
     })
@@ -26,7 +35,7 @@ describe('<AccountInfoSection />', function () {
 
   it('submits all inputs', async function () {
     const updateMock = fetchMock.post('/user/settings', 200)
-    render(<AccountInfoSection />)
+    renderSectionWithUserProvider()
 
     fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: 'john@watson.co.uk' },
@@ -45,14 +54,14 @@ describe('<AccountInfoSection />', function () {
     expect(updateMock.called()).to.be.true
     expect(JSON.parse(updateMock.lastCall()[1].body)).to.deep.equal({
       email: 'john@watson.co.uk',
-      firstName: 'John',
-      lastName: 'Watson',
+      first_name: 'John',
+      last_name: 'Watson',
     })
   })
 
   it('disables button on invalid email', async function () {
     const updateMock = fetchMock.post('/user/settings', 200)
-    render(<AccountInfoSection />)
+    renderSectionWithUserProvider()
 
     fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: 'john' },
@@ -73,7 +82,7 @@ describe('<AccountInfoSection />', function () {
       '/user/settings',
       new Promise(resolve => (finishUpdateCall = resolve))
     )
-    render(<AccountInfoSection />)
+    renderSectionWithUserProvider()
 
     fireEvent.click(
       screen.getByRole('button', {
@@ -91,7 +100,7 @@ describe('<AccountInfoSection />', function () {
 
   it('shows server error', async function () {
     fetchMock.post('/user/settings', 500)
-    render(<AccountInfoSection />)
+    renderSectionWithUserProvider()
 
     fireEvent.click(
       screen.getByRole('button', {
@@ -105,7 +114,7 @@ describe('<AccountInfoSection />', function () {
 
   it('shows invalid error', async function () {
     fetchMock.post('/user/settings', 400)
-    render(<AccountInfoSection />)
+    renderSectionWithUserProvider()
 
     fireEvent.click(
       screen.getByRole('button', {
@@ -124,7 +133,7 @@ describe('<AccountInfoSection />', function () {
         message: 'This email is already registered',
       },
     })
-    render(<AccountInfoSection />)
+    renderSectionWithUserProvider()
 
     fireEvent.click(
       screen.getByRole('button', {
@@ -140,7 +149,7 @@ describe('<AccountInfoSection />', function () {
     })
     const updateMock = fetchMock.post('/user/settings', 200)
 
-    render(<AccountInfoSection />)
+    renderSectionWithUserProvider()
     expect(screen.queryByLabelText('Email')).to.not.exist
 
     fireEvent.click(
@@ -149,8 +158,8 @@ describe('<AccountInfoSection />', function () {
       })
     )
     expect(JSON.parse(updateMock.lastCall()[1].body)).to.deep.equal({
-      firstName: 'Sherlock',
-      lastName: 'Holmes',
+      first_name: 'Sherlock',
+      last_name: 'Holmes',
     })
   })
 
@@ -161,7 +170,7 @@ describe('<AccountInfoSection />', function () {
     )
     const updateMock = fetchMock.post('/user/settings', 200)
 
-    render(<AccountInfoSection />)
+    renderSectionWithUserProvider()
     expect(screen.getByLabelText('Email').readOnly).to.be.true
     expect(screen.getByLabelText('First Name').readOnly).to.be.false
     expect(screen.getByLabelText('Last Name').readOnly).to.be.false
@@ -172,8 +181,8 @@ describe('<AccountInfoSection />', function () {
       })
     )
     expect(JSON.parse(updateMock.lastCall()[1].body)).to.deep.equal({
-      firstName: 'Sherlock',
-      lastName: 'Holmes',
+      first_name: 'Sherlock',
+      last_name: 'Holmes',
     })
   })
 
@@ -181,7 +190,7 @@ describe('<AccountInfoSection />', function () {
     window.metaAttributesCache.set('ol-shouldAllowEditingDetails', false)
     const updateMock = fetchMock.post('/user/settings', 200)
 
-    render(<AccountInfoSection />)
+    renderSectionWithUserProvider()
     expect(screen.getByLabelText('Email').readOnly).to.be.false
     expect(screen.getByLabelText('First Name').readOnly).to.be.true
     expect(screen.getByLabelText('Last Name').readOnly).to.be.true

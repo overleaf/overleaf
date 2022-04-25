@@ -1,4 +1,4 @@
-extends ../layout
+extends ../layout-marketing
 
 block entrypointVar
 	- entrypoint = 'pages/user/settings'
@@ -18,8 +18,6 @@ block append meta
 	meta(name="ol-thirdPartyIds", data-type="json", content=thirdPartyIds || {})
 	meta(name="ol-passwordStrengthOptions", data-type="json", content=settings.passwordStrengthOptions || {})
 	meta(name="ol-isExternalAuthenticationSystemUsed" data-type="boolean" content=externalAuthenticationSystemUsed())
-	meta(name="ol-firstName" content=firstName)
-	meta(name="ol-lastName" content=lastName)
 	meta(name="ol-user" data-type="json" content=user)
 	meta(name="ol-dropbox" data-type="json" content=dropbox)
 	meta(name="ol-github" data-type="json" content=github)

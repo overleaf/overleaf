@@ -8,9 +8,11 @@ export function defaultSetupMocks(fetchMock) {
 
 export function setDefaultMeta() {
   window.metaAttributesCache = window.metaAttributesCache || new Map()
-  window.metaAttributesCache.set('ol-usersEmail', 'sherlock@holmes.co.uk')
-  window.metaAttributesCache.set('ol-firstName', 'Sherlock')
-  window.metaAttributesCache.set('ol-lastName', 'Holmes')
+  window.metaAttributesCache.set('ol-user', {
+    email: 'sherlock@holmes.co.uk',
+    first_name: 'Sherlock',
+    last_name: 'Holmes',
+  })
   window.metaAttributesCache.set('ol-ExposedSettings', {
     hasAffiliationsFeature: false,
   })

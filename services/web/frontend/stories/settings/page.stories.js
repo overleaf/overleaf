@@ -28,11 +28,13 @@ export const Root = args => {
   setDefaultPasswordMeta()
   setDefaultEmailsMeta()
   setDefaultLinkingMeta()
-  useFetchMock(defaultSetupLeaveMocks)
-  useFetchMock(defaultSetupAccountInfoMocks)
-  useFetchMock(defaultSetupPasswordMocks)
-  useFetchMock(defaultSetupEmailsMocks)
-  useFetchMock(defaultSetupLinkingMocks)
+  useFetchMock(fetchMock => {
+    defaultSetupLeaveMocks(fetchMock)
+    defaultSetupAccountInfoMocks(fetchMock)
+    defaultSetupPasswordMocks(fetchMock)
+    defaultSetupEmailsMocks(fetchMock)
+    defaultSetupLinkingMocks(fetchMock)
+  })
 
   return (
     <UserProvider>

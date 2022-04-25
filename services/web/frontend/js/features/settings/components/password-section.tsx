@@ -58,7 +58,7 @@ function PasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword1, setNewPassword1] = useState('')
   const [newPassword2, setNewPassword2] = useState('')
-  const { isLoading, error, isSuccess, data, runAsync } = useAsync()
+  const { isLoading, isSuccess, isError, data, error, runAsync } = useAsync()
   const [isNewPasswordValid, setIsNewPasswordValid] = useState(false)
   const [isFormValid, setIsFormValid] = useState(false)
 
@@ -126,7 +126,7 @@ function PasswordForm() {
           <Alert bsStyle="success">{data.message.text}</Alert>
         </FormGroup>
       ) : null}
-      {error ? (
+      {isError ? (
         <FormGroup>
           <Alert bsStyle="danger">{error.getUserFacingMessage()}</Alert>
         </FormGroup>

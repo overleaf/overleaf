@@ -1,7 +1,8 @@
 import { useCallback, useState, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
-import { Modal } from 'react-bootstrap'
+import { Button, Modal } from 'react-bootstrap'
+import getMeta from '../../../../utils/meta'
 
 type IntegrationLinkingWidgetProps = {
   logo: ReactNode
@@ -135,6 +136,10 @@ function UnlinkConfirmationModal({
 }: UnlinkConfirmModalProps) {
   const { t } = useTranslation()
 
+  const handleCancel = event => {
+    event.preventDefault()
+    handleHide()
+  }
   return (
     <AccessibleModal show={show} onHide={handleHide}>
       <Modal.Header closeButton>
@@ -146,12 +151,13 @@ function UnlinkConfirmationModal({
       </Modal.Body>
 
       <Modal.Footer>
-        <button className="btn btn-default" onClick={handleHide}>
-          {t('cancel')}
-        </button>
-        <a href={unlinkPath} className="btn btn-danger text-capitalize">
-          {t('unlink')}
-        </a>
+        <form action={unlinkPath} method="POST" className="form-inline">
+          <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />
+          <Button onClick={handleCancel}>{t('cancel')}</Button>
+          <Button type="submit" bsStyle="danger">
+            {t('unlink')}
+          </Button>
+        </form>
       </Modal.Footer>
     </AccessibleModal>
   )

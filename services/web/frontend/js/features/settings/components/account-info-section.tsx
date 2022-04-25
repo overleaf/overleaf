@@ -11,6 +11,7 @@ import { postJSON } from '../../../infrastructure/fetch-json'
 import getMeta from '../../../utils/meta'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import useAsync from '../../../shared/hooks/use-async'
+import { useUserContext } from '../../../shared/context/user-context'
 
 function AccountInfoSection() {
   const { t } = useTranslation()
@@ -23,15 +24,16 @@ function AccountInfoSection() {
   const shouldAllowEditingDetails = getMeta(
     'ol-shouldAllowEditingDetails'
   ) as boolean
+  const {
+    first_name: initialFirstName,
+    last_name: initialLastName,
+    email: initialEmail,
+  } = useUserContext()
 
-  const [email, setEmail] = useState(() => getMeta('ol-usersEmail') as string)
-  const [firstName, setFirstName] = useState(
-    () => getMeta('ol-firstName') as string
-  )
-  const [lastName, setLastName] = useState(
-    () => getMeta('ol-lastName') as string
-  )
-  const { isLoading, error, isSuccess, runAsync } = useAsync()
+  const [email, setEmail] = useState(initialEmail)
+  const [firstName, setFirstName] = useState(initialFirstName)
+  const [lastName, setLastName] = useState(initialLastName)
+  const { isLoading, isSuccess, isError, error, runAsync } = useAsync()
   const [isFormValid, setIsFormValid] = useState(true)
 
   const handleEmailChange = event => {
@@ -60,8 +62,8 @@ function AccountInfoSection() {
       postJSON('/user/settings', {
         body: {
           email: canUpdateEmail ? email : undefined,
-          firstName: canUpdateNames ? firstName : undefined,
-          lastName: canUpdateNames ? lastName : undefined,
+          first_name: canUpdateNames ? firstName : undefined,
+          last_name: canUpdateNames ? lastName : undefined,
         },
       })
     ).catch(() => {})
@@ -105,7 +107,7 @@ function AccountInfoSection() {
             <Alert bsStyle="success">{t('thanks_settings_updated')}</Alert>
           </FormGroup>
         ) : null}
-        {error ? (
+        {isError ? (
           <FormGroup>
             <Alert bsStyle="danger">{error.getUserFacingMessage()}</Alert>
           </FormGroup>

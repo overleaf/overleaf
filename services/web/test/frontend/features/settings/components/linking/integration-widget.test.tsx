@@ -79,9 +79,8 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
       fireEvent.click(screen.getByRole('button', { name: 'Unlink' }))
       screen.getByText('confirm unlink')
       screen.getByText('you will be unlinked')
-      expect(
-        screen.getByRole('link', { name: 'Unlink' }).getAttribute('href')
-      ).to.equal('/unlink')
+      screen.getByRole('button', { name: 'Cancel' })
+      screen.getByRole('button', { name: 'Unlink' })
     })
 
     it('should cancel unlinking when clicking "cancel" in the confirmation modal', async function () {

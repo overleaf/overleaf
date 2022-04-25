@@ -714,7 +714,7 @@ describe('UserController', function () {
           expect(this.HttpErrorHandler.badRequest).to.have.been.calledWith(
             this.req,
             this.res,
-            'Your old password is wrong'
+            'password_change_old_password_wrong'
           )
           this.AuthenticationManager.promises.authenticate.should.have.been.calledWith(
             { _id: this.user._id },

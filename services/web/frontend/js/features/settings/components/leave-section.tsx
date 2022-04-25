@@ -18,7 +18,7 @@ function LeaveSection() {
   return (
     <>
       {t('need_to_leave')}{' '}
-      <button className="btn btn-inline-link" onClick={handleOpen}>
+      <button className="btn btn-inline-link btn-danger" onClick={handleOpen}>
         {t('delete_your_account')}
       </button>
       <LeaveModal isOpen={isModalOpen} handleClose={handleClose} />

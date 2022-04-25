@@ -82,8 +82,6 @@ async function settingsPage(req, res) {
         },
       },
       hasPassword: !!user.hashedPassword,
-      firstName: user.first_name,
-      lastName: user.last_name,
       shouldAllowEditingDetails,
       oauthProviders: UserPagesController._translateProviderDescriptions(
         oauthProviders,
