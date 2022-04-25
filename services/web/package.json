@@ -166,7 +166,7 @@
     "passport-local": "^1.0.0",
     "passport-oauth2": "^1.5.0",
     "passport-orcid": "0.0.4",
-    "passport-saml": "https://github.com/overleaf/passport-saml/releases/download/v3.0.0-overleaf/passport-saml-3.0.0-overleaf.tar.gz",
+    "passport-saml": "https://github.com/overleaf/passport-saml/releases/download/v3.2.1-overleaf/passport-saml-3.2.1-overleaf.tar.gz",
     "passport-twitter": "^1.0.4",
     "pdfjs-dist210": "npm:pdfjs-dist@2.10.377",
     "pdfjs-dist213": "npm:pdfjs-dist@2.13.216",
