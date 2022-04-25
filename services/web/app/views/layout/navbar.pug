@@ -88,11 +88,25 @@ nav.navbar.navbar-default.navbar-main
 					// register link
 					if hasFeature('registration-page')
 						li
-							a(href="/register") #{translate('register')}
+							a(
+								href="/register"
+								event-tracking="menu-clicked-register"
+								event-tracking-action="clicked"
+								event-tracking-trigger="click"
+								event-tracking-mb="true"
+								event-segmentation={ page: currentUrl }
+							) #{translate('register')}
 
 					// login link
 					li
-						a(href="/login") #{translate('log_in')}
+						a(
+							href="/login"
+							event-tracking="menu-clicked-login"
+							event-tracking-action="clicked"
+							event-tracking-trigger="click"
+							event-tracking-mb="true"
+							event-segmentation={ page: currentUrl }
+						) #{translate('log_in')}
 
 				// projects link and account menu
 				if getSessionUser()
