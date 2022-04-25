@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
-import { IntegrationLinkingWidget } from '../../../../../../frontend/js/features/settings/components/integration-linking/widget'
+import { IntegrationLinkingWidget } from '../../../../../../frontend/js/features/settings/components/linking/integration-widget'
 
 describe('<IntegrationLinkingWidgetTest/>', function () {
   const defaultProps = {

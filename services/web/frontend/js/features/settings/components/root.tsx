@@ -5,12 +5,12 @@ import getMeta from '../../../utils/meta'
 import EmailsSection from './emails-section'
 import AccountInfoSection from './account-info-section'
 import PasswordSection from './password-section'
-import IntegrationLinkingSection from './integration-linking-section'
-import SSOLinkingSection from './sso-linking-section'
+import LinkingSection from './linking-section'
 import MiscSection from './misc-section'
 import LeaveSection from './leave-section'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { UserProvider } from '../../../shared/context/user-context'
+import { SSOProvider } from '../context/sso-context'
 
 function SettingsPageRoot() {
   const { t } = useTranslation()
@@ -34,7 +34,7 @@ function SettingsPageRoot() {
               <div className="page-header">
                 <h1>{t('account_settings')}</h1>
               </div>
-              <div className="account-settings">
+              <div>
                 <EmailsSection />
                 <div className="row">
                   <div className="col-md-5">
@@ -45,10 +45,9 @@ function SettingsPageRoot() {
                   </div>
                 </div>
                 <hr />
-                <IntegrationLinkingSection />
-                <hr />
-                <SSOLinkingSection />
-                <hr />
+                <SSOProvider>
+                  <LinkingSection />
+                </SSOProvider>
                 <MiscSection />
                 <hr />
                 <LeaveSection />

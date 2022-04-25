@@ -69,9 +69,12 @@ function EmailsSection() {
   }
 
   return (
-    <UserEmailsProvider>
-      <EmailsSectionContent />
-    </UserEmailsProvider>
+    <>
+      <UserEmailsProvider>
+        <EmailsSectionContent />
+      </UserEmailsProvider>
+      <hr />
+    </>
   )
 }
 

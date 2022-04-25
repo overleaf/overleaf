@@ -17,13 +17,9 @@ import {
   defaultSetupMocks as defaultSetupEmailsMocks,
 } from './helpers/emails'
 import {
-  setDefaultMeta as setDefaultIntegrationLinkingMeta,
-  defaultSetupMocks as defaultSetupIntegrationLinkingMocks,
-} from './helpers/integration-linking'
-import {
-  setDefaultMeta as setDefaultSSOMeta,
-  defaultSetupMocks as defaultSetupSSOMocks,
-} from './helpers/sso-linking'
+  setDefaultMeta as setDefaultLinkingMeta,
+  defaultSetupMocks as defaultSetupLinkingMocks,
+} from './helpers/linking'
 import { UserProvider } from '../../js/shared/context/user-context'
 
 export const Root = args => {
@@ -31,14 +27,12 @@ export const Root = args => {
   setDefaultAccountInfoMeta()
   setDefaultPasswordMeta()
   setDefaultEmailsMeta()
-  setDefaultIntegrationLinkingMeta()
-  setDefaultSSOMeta()
+  setDefaultLinkingMeta()
   useFetchMock(defaultSetupLeaveMocks)
   useFetchMock(defaultSetupAccountInfoMocks)
   useFetchMock(defaultSetupPasswordMocks)
   useFetchMock(defaultSetupEmailsMocks)
-  useFetchMock(defaultSetupIntegrationLinkingMocks)
-  useFetchMock(defaultSetupSSOMocks)
+  useFetchMock(defaultSetupLinkingMocks)
 
   return (
     <UserProvider>

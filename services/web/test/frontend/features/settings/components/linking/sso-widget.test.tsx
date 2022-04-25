@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
-import { SSOLinkingWidget } from '../../../../../../frontend/js/features/settings/components/sso-linking/widget'
+import { SSOLinkingWidget } from '../../../../../../frontend/js/features/settings/components/linking/sso-widget'
 
 describe('<SSOLinkingWidget />', function () {
   const defaultProps = {
