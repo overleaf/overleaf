@@ -66,7 +66,7 @@ async function _sendSubscriptionStartedEvent(userId, eventData) {
   )
 
   if (isTrial) {
-    await SubscriptionEmailHandler.sendTrialOnboardingEmail(userId)
+    await SubscriptionEmailHandler.sendTrialOnboardingEmail(userId, planCode)
   }
 }
 

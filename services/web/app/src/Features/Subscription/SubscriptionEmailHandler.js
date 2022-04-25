@@ -1,16 +1,23 @@
 const EmailHandler = require('../Email/EmailHandler')
 const UserGetter = require('../User/UserGetter')
 require('./SubscriptionEmailBuilder')
+const PlansLocator = require('./PlansLocator')
 
 const SubscriptionEmailHandler = {
-  async sendTrialOnboardingEmail(userId) {
+  async sendTrialOnboardingEmail(userId, planCode) {
     const user = await UserGetter.promises.getUser(userId, {
       email: 1,
     })
 
+    const plan = PlansLocator.findLocalPlanInSettings(planCode)
+    if (!plan) {
+      throw new Error('unknown paid plan: ' + planCode)
+    }
     const emailOptions = {
       to: user.email,
       sendingUser_id: userId,
+      planName: plan.name,
+      features: plan.features,
     }
     await EmailHandler.promises.sendEmail('trialOnboarding', emailOptions)
   },

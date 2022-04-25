@@ -23,17 +23,32 @@ describe('SubscriptionEmailHandler', function () {
               .resolves({ _id: this.userId, email: 'test@test.com' }),
           },
         }),
+        './PlansLocator': (this.PlansLocator = {
+          findLocalPlanInSettings: sinon.stub().returns({
+            name: 'foo',
+            features: { collaborators: 42 },
+          }),
+        }),
       },
     })
   })
 
   it('sends trail onboarding email', async function () {
-    await this.SubscriptionEmailHandler.sendTrialOnboardingEmail(this.userId)
+    await this.SubscriptionEmailHandler.sendTrialOnboardingEmail(
+      this.userId,
+      'foo-plan-code'
+    )
+
+    expect(this.PlansLocator.findLocalPlanInSettings).to.have.been.calledWith(
+      'foo-plan-code'
+    )
     expect(this.EmailHandler.promises.sendEmail.lastCall.args).to.deep.equal([
       'trialOnboarding',
       {
         to: this.email,
         sendingUser_id: this.userId,
+        planName: 'foo',
+        features: { collaborators: 42 },
       },
     ])
   })
