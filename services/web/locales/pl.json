@@ -1,10 +1,10 @@
 {
   "error": "Błąd",
+  "projects": "Projekty",
   "upload_project": "Wyślij projekt",
   "all_projects": "Wszystkie projekty",
   "your_projects": "Twoje projekty",
   "shared_with_you": "Udostępnione dla Ciebie",
-  "projects": "Projekty",
   "deleted_projects": "Usunięte projekty",
   "templates": "Szablony",
   "new_folder": "Nowy folder",

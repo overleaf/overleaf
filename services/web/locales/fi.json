@@ -1,9 +1,9 @@
 {
+  "projects": "Projektit",
   "upload_project": "Siirrä projekti palvelimelle",
   "all_projects": "Kaikki projektit",
   "your_projects": "Sinun projektisi",
   "shared_with_you": "Jaettu kanssasi",
-  "projects": "Projektit",
   "deleted_projects": "Poistetut projektit",
   "templates": "Mallit",
   "new_folder": "Uusi kansio",
