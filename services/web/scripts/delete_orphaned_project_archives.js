@@ -74,10 +74,10 @@ async function hardDeleteProjectArchiverData(projectId) {
   console.log(`Destroying hard deleted project archive for ${projectId}`)
   if (DRY_RUN) return
 
-  const res = await TpdsUpdateSender.promises.deleteProject({
+  const ok = await TpdsUpdateSender.promises.deleteProject({
     project_id: projectId,
   })
-  if (!res) {
+  if (!ok) {
     throw new Error(`deletion failed for ${projectId}, check logs`)
   }
 }

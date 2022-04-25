@@ -113,16 +113,17 @@ async function deleteProject(options) {
   metrics.inc('tpds.delete-project')
   // send the request directly to project archiver, bypassing third-party-datastore
   try {
-    const response = await request({
+    await request({
       uri: `${settings.apis.project_archiver.url}/project/${options.project_id}`,
       method: 'delete',
     })
-    return response
+    return true
   } catch (err) {
     logger.error(
       { err, project_id: options.project_id },
       'error deleting project in third party datastore (project_archiver)'
     )
+    return false
   }
 }
 
