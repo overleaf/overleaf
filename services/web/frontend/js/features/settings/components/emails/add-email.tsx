@@ -6,6 +6,7 @@ import useAsync from '../../../../shared/hooks/use-async'
 import { useUserEmailsContext } from '../../context/user-email-context'
 import { postJSON } from '../../../../infrastructure/fetch-json'
 import Icon from '../../../../shared/components/icon'
+import { AddEmailInput } from './add-email-input'
 
 const isValidEmail = (email: string) => {
   return Boolean(email)
@@ -38,8 +39,8 @@ function AddEmail() {
     setIsInstitutionFieldsVisible(true)
   }
 
-  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewEmail(event.target.value)
+  const handleEmailChange = (value: string) => {
+    setNewEmail(value)
   }
 
   const handleAddNewEmail = () => {
@@ -81,13 +82,7 @@ function AddEmail() {
                 <label htmlFor="affiliations-email" className="sr-only">
                   {t('email')}
                 </label>
-                <input
-                  id="affiliations-email"
-                  className="form-control"
-                  type="email"
-                  onChange={handleEmailChange}
-                  placeholder="e.g. johndoe@mit.edu"
-                />
+                <AddEmailInput onChange={handleEmailChange} />
               </Cell>
             </Col>
             <Col md={4}>
