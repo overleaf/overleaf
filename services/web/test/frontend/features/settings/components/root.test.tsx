@@ -1,5 +1,5 @@
 import sinon from 'sinon'
-import { screen, render } from '@testing-library/react'
+import { screen, render, waitFor } from '@testing-library/react'
 import * as eventTracking from '../../../../../frontend/js/infrastructure/event-tracking'
 import SettingsPageRoot from '../../../../../frontend/js/features/settings/components/root'
 
@@ -33,6 +33,10 @@ describe('<SettingsPageRoot />', function () {
 
   it('displays page', async function () {
     render(<SettingsPageRoot />)
+
+    await waitFor(() => {
+      screen.getByText('Account Settings')
+    })
 
     screen.getByRole('button', {
       name: 'Delete your account',

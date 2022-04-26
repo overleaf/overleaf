@@ -11,49 +11,58 @@ import LeaveSection from './leave-section'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { UserProvider } from '../../../shared/context/user-context'
 import { SSOProvider } from '../context/sso-context'
+import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 
 function SettingsPageRoot() {
-  const { t } = useTranslation()
-  const ssoError = getMeta('ol-ssoError') as string
+  const { isReady } = useWaitForI18n()
 
   useEffect(() => {
     eventTracking.sendMB('settings-view')
   }, [])
 
   return (
+    <div className="container">
+      <div className="row">
+        <div className="col-md-12 col-lg-10 col-lg-offset-1">
+          {isReady ? <SettingsPageContent /> : null}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SettingsPageContent() {
+  const { t } = useTranslation()
+  const ssoError = getMeta('ol-ssoError') as string
+
+  return (
     <UserProvider>
-      <div className="container">
-        <div className="row">
-          <div className="col-md-12 col-lg-10 col-lg-offset-1">
-            {ssoError ? (
-              <Alert bsStyle="danger">
-                {t('sso_link_error')}: {t(ssoError)}
-              </Alert>
-            ) : null}
-            <div className="card">
-              <div className="page-header">
-                <h1>{t('account_settings')}</h1>
-              </div>
-              <div>
-                <EmailsSection />
-                <div className="row">
-                  <div className="col-md-5">
-                    <AccountInfoSection />
-                  </div>
-                  <div className="col-md-5 col-md-offset-1">
-                    <PasswordSection />
-                  </div>
-                </div>
-                <hr />
-                <SSOProvider>
-                  <LinkingSection />
-                </SSOProvider>
-                <MiscSection />
-                <hr />
-                <LeaveSection />
-              </div>
+      {ssoError ? (
+        <Alert bsStyle="danger">
+          {t('sso_link_error')}: {t(ssoError)}
+        </Alert>
+      ) : null}
+      <div className="card">
+        <div className="page-header">
+          <h1>{t('account_settings')}</h1>
+        </div>
+        <div>
+          <EmailsSection />
+          <div className="row">
+            <div className="col-md-5">
+              <AccountInfoSection />
+            </div>
+            <div className="col-md-5 col-md-offset-1">
+              <PasswordSection />
             </div>
           </div>
+          <hr />
+          <SSOProvider>
+            <LinkingSection />
+          </SSOProvider>
+          <MiscSection />
+          <hr />
+          <LeaveSection />
         </div>
       </div>
     </UserProvider>
