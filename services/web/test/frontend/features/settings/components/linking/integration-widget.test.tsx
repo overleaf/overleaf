@@ -25,7 +25,7 @@ describe('<IntegrationLinkingWidgetTest/>', function () {
     it('should render a link to upgrade the account', function () {
       expect(
         screen.getByRole('link', { name: 'Upgrade' }).getAttribute('href')
-      ).to.equal('user/subscription/plans')
+      ).to.equal('/user/subscription/plans')
     })
   })
 

@@ -9,7 +9,7 @@ describe('<SSOLinkingWidget />', function () {
     title: 'integration',
     description: 'integration description',
     helpPath: '/help/integration',
-    linkPath: 'integration/link',
+    linkPath: '/integration/link',
     onUnlink: () => Promise.resolve(),
   }
 
@@ -27,7 +27,7 @@ describe('<SSOLinkingWidget />', function () {
       render(<SSOLinkingWidget {...defaultProps} linked={false} />)
       expect(
         screen.getByRole('link', { name: 'Link' }).getAttribute('href')
-      ).to.equal('integration/link')
+      ).to.equal('/integration/link?intent=link')
     })
   })
 

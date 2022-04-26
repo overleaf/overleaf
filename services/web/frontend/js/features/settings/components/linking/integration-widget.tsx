@@ -53,7 +53,7 @@ export function IntegrationLinkingWidget({
             <span className="label label-info">{t('premium_feature')}</span>
           )}
         </div>
-        <p>
+        <p className="small">
           {description}{' '}
           <a href={helpPath} target="_blank" rel="noreferrer">
             {t('learn_more')}
@@ -64,7 +64,7 @@ export function IntegrationLinkingWidget({
       <div>
         <ActionButton
           hasFeature={hasFeature}
-          upgradePath="user/subscription/plans"
+          upgradePath="/user/subscription/plans"
           linked={linked}
           handleUnlinkClick={handleUnlinkClick}
           linkPath={linkPath}

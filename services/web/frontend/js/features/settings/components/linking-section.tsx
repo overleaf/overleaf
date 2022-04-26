@@ -27,10 +27,12 @@ function LinkingSection() {
   return (
     <>
       <h3>{t('integrations')}</h3>
-      <p>{t('linked_accounts_explained')}</p>
+      <p className="small">{t('linked_accounts_explained')}</p>
       {hasIntegrationLinkingSection ? (
         <>
-          <h3 className="text-capitalize">{t('sync_dropbox_github')}</h3>
+          <h3 id="project-sync" className="text-capitalize">
+            {t('sync_dropbox_github')}
+          </h3>
           <div className="settings-widgets-container">
             {integrationLinkingWidgets.map(
               ({ import: importObject, path }, widgetIndex) => (
@@ -46,7 +48,9 @@ function LinkingSection() {
       ) : null}
       {hasReferencesLinkingSection ? (
         <>
-          <h3 className="text-capitalize">{t('reference_sync')}</h3>
+          <h3 id="references" className="text-capitalize">
+            {t('reference_sync')}
+          </h3>
           <div className="settings-widgets-container">
             {referenceLinkingWidgets.map(
               ({ import: importObject, path }, widgetIndex) => (
@@ -62,7 +66,9 @@ function LinkingSection() {
       ) : null}
       {hasSSOLinkingSection ? (
         <>
-          <h3 className="text-capitalize">{t('linked_accounts')}</h3>
+          <h3 id="linked-accounts" className="text-capitalize">
+            {t('linked_accounts')}
+          </h3>
           <div className="settings-widgets-container">
             {Object.values(subscriptions).map(
               (subscription, subscriptionIndex) => (
@@ -113,15 +119,28 @@ function SSOLinkingWidgetContainer({
   const { t } = useTranslation()
   const { unlink } = useSSOContext()
 
+  let description = null
+  switch (subscription.providerId) {
+    case 'collabratec':
+      description = t('linked_collabratec_description')
+      break
+    case 'google':
+    case 'twitter':
+      description = t('login_with_service', {
+        service: subscription.provider.name,
+      })
+      break
+    case 'orcid':
+      description = t('oauth_orcid_description')
+      break
+  }
+
   return (
     <>
       <SSOLinkingWidget
         providerId={subscription.providerId}
         title={subscription.provider.name}
-        description={t(
-          subscription.provider.descriptionKey,
-          subscription.provider.descriptionOptions
-        )}
+        description={description}
         helpPath={subscription.provider.descriptionOptions?.link}
         linked={subscription.linked}
         linkPath={subscription.provider.linkPath}

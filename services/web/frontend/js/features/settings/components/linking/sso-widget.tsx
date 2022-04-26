@@ -63,7 +63,7 @@ export function SSOLinkingWidget({
         <div className="title-row">
           <h4>{title}</h4>
         </div>
-        <p>
+        <p className="small">
           {description?.replace(/<[^>]+>/g, '')}{' '}
           {helpPath ? (
             <a href={helpPath} target="_blank" rel="noreferrer">
@@ -77,7 +77,7 @@ export function SSOLinkingWidget({
         <ActionButton
           unlinkRequestInflight={unlinkRequestInflight}
           accountIsLinked={linked}
-          linkPath={linkPath}
+          linkPath={`${linkPath}?intent=link`}
           onUnlinkClick={handleUnlinkClick}
         />
       </div>
