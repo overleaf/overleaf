@@ -6,12 +6,15 @@ import EmailsSection from './emails-section'
 import AccountInfoSection from './account-info-section'
 import PasswordSection from './password-section'
 import LinkingSection from './linking-section'
-import MiscSection from './misc-section'
+import BetaProgramSection from './beta-program-section'
+import SessionsSection from './sessions-section'
+import NewsletterSection from './newsletter-section'
 import LeaveSection from './leave-section'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { UserProvider } from '../../../shared/context/user-context'
 import { SSOProvider } from '../context/sso-context'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
+import { ExposedSettings } from '../../../../../types/exposed-settings'
 
 function SettingsPageRoot() {
   const { isReady } = useWaitForI18n()
@@ -34,6 +37,7 @@ function SettingsPageRoot() {
 function SettingsPageContent() {
   const { t } = useTranslation()
   const ssoError = getMeta('ol-ssoError') as string
+  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
 
   return (
     <UserProvider>
@@ -60,9 +64,17 @@ function SettingsPageContent() {
           <SSOProvider>
             <LinkingSection />
           </SSOProvider>
-          <MiscSection />
+          {isOverleaf ? <BetaProgramSection /> : null}
           <hr />
-          <LeaveSection />
+          <SessionsSection />
+          <hr />
+          {isOverleaf ? (
+            <>
+              <NewsletterSection />
+              <hr />
+              <LeaveSection />
+            </>
+          ) : null}
         </div>
       </div>
     </UserProvider>

@@ -1,3 +1,4 @@
+import { expect } from 'chai'
 import sinon from 'sinon'
 import { screen, render, waitFor } from '@testing-library/react'
 import * as eventTracking from '../../../../../frontend/js/infrastructure/event-tracking'
@@ -11,7 +12,8 @@ describe('<SettingsPageRoot />', function () {
     window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
     window.metaAttributesCache.set('ol-hasPassword', true)
     window.metaAttributesCache.set('ol-ExposedSettings', {
-      hasAffiliationsFeature: false,
+      hasAffiliationsFeature: true,
+      isOverleaf: true,
     })
     window.metaAttributesCache.set('ol-user', {
       features: { github: true, dropbox: true, mendeley: true, zotero: true },
@@ -31,16 +33,46 @@ describe('<SettingsPageRoot />', function () {
     sendMBSpy.restore()
   })
 
-  it('displays page', async function () {
+  it('displays page for Overleaf', async function () {
     render(<SettingsPageRoot />)
 
     await waitFor(() => {
       screen.getByText('Account Settings')
     })
-
+    screen.getByText('Emails and Affiliations')
+    screen.getByText('Update Account Info')
+    screen.getByText('Change Password')
+    screen.getByText('Integrations')
+    screen.getByText('Overleaf Beta Program')
+    screen.getByText('Sessions')
+    screen.getByText('Newsletter')
     screen.getByRole('button', {
       name: 'Delete your account',
     })
+  })
+
+  it('displays page for non-Overleaf', async function () {
+    window.metaAttributesCache.set('ol-ExposedSettings', {
+      hasAffiliationsFeature: false,
+      isOverleaf: false,
+    })
+    render(<SettingsPageRoot />)
+
+    await waitFor(() => {
+      screen.getByText('Account Settings')
+    })
+    expect(screen.queryByText('Emails and Affiliations')).to.not.exist
+    screen.getByText('Update Account Info')
+    screen.getByText('Change Password')
+    screen.getByText('Integrations')
+    expect(screen.queryByText('Overleaf Beta Program')).to.not.exist
+    screen.getByText('Sessions')
+    expect(screen.queryByText('Newsletter')).to.not.exist
+    expect(
+      screen.queryByRole('button', {
+        name: 'Delete your account',
+      })
+    ).to.not.exist
   })
 
   it('sends tracking event on load', async function () {
