@@ -78,7 +78,7 @@ app.delete('/project/:project_id/doc/:doc_id', (req, res) => {
 app.post('/project/:project_id/archive', HttpController.archiveAllDocs)
 app.post('/project/:project_id/doc/:doc_id/archive', HttpController.archiveDoc)
 app.post('/project/:project_id/unarchive', HttpController.unArchiveAllDocs)
-app.post('/project/:project_id/destroy', HttpController.destroyAllDocs)
+app.post('/project/:project_id/destroy', HttpController.destroyProject)
 
 app.get('/health_check', HttpController.healthCheck)
 

@@ -1,15 +1,3 @@
-/* eslint-disable
-    camelcase,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { db, ObjectId } = require('../../../app/js/mongodb')
 const { expect } = require('chai')
 const DocstoreApp = require('./helpers/DocstoreApp')
@@ -25,18 +13,18 @@ function deleteTestSuite(deleteDoc) {
     this.lines = ['original', 'lines']
     this.version = 42
     this.ranges = []
-    return DocstoreApp.ensureRunning(() => {
-      return DocstoreClient.createDoc(
+    DocstoreApp.ensureRunning(() => {
+      DocstoreClient.createDoc(
         this.project_id,
         this.doc_id,
         this.lines,
         this.version,
         this.ranges,
         error => {
-          if (error != null) {
+          if (error) {
             throw error
           }
-          return done()
+          done()
         }
       )
     })
@@ -60,12 +48,12 @@ function deleteTestSuite(deleteDoc) {
       deleteDoc(this.project_id, this.doc_id, (error, res, doc) => {
         if (error) return done(error)
         this.res = res
-        return done()
+        done()
       })
     })
 
     afterEach(function (done) {
-      return db.docs.remove({ _id: this.doc_id }, done)
+      db.docs.remove({ _id: this.doc_id }, done)
     })
 
     it('should mark the doc as deleted on /deleted', function (done) {
@@ -82,12 +70,12 @@ function deleteTestSuite(deleteDoc) {
     })
 
     it('should insert a deleted doc into the docs collection', function (done) {
-      return db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
+      db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
         if (error) return done(error)
         docs[0]._id.should.deep.equal(this.doc_id)
         docs[0].lines.should.deep.equal(this.lines)
         docs[0].deleted.should.equal(true)
-        return done()
+        done()
       })
     })
 
@@ -150,12 +138,12 @@ function deleteTestSuite(deleteDoc) {
     })
 
     it('should set the doc in s3 correctly', function (done) {
-      DocstoreClient.getS3Doc(this.project_id, this.doc_id, (error, s3_doc) => {
+      DocstoreClient.getS3Doc(this.project_id, this.doc_id, (error, s3doc) => {
         if (error) {
           return done(error)
         }
-        expect(s3_doc.lines).to.deep.equal(this.lines)
-        expect(s3_doc.ranges).to.deep.equal(this.ranges)
+        expect(s3doc.lines).to.deep.equal(this.lines)
+        expect(s3doc.ranges).to.deep.equal(this.ranges)
         done()
       })
     })
@@ -181,12 +169,12 @@ function deleteTestSuite(deleteDoc) {
     })
   })
 
-  return describe('when the doc does not exist', function () {
+  describe('when the doc does not exist', function () {
     it('should show as not existing on /deleted', function (done) {
-      const missing_doc_id = ObjectId()
+      const missingDocId = ObjectId()
       DocstoreClient.isDocDeleted(
         this.project_id,
-        missing_doc_id,
+        missingDocId,
         (error, res) => {
           if (error) return done(error)
           expect(res.statusCode).to.equal(404)
@@ -195,12 +183,12 @@ function deleteTestSuite(deleteDoc) {
       )
     })
 
-    return it('should return a 404', function (done) {
-      const missing_doc_id = ObjectId()
-      deleteDoc(this.project_id, missing_doc_id, (error, res, doc) => {
+    it('should return a 404', function (done) {
+      const missingDocId = ObjectId()
+      deleteDoc(this.project_id, missingDocId, (error, res, doc) => {
         if (error) return done(error)
         res.statusCode.should.equal(404)
-        return done()
+        done()
       })
     })
   })
@@ -441,64 +429,84 @@ describe('Delete via PATCH', function () {
 })
 
 describe("Destroying a project's documents", function () {
-  describe('when the doc exists', function () {
-    beforeEach(function (done) {
-      return db.docOps.insert(
-        { doc_id: ObjectId(this.doc_id), version: 1 },
-        function (err) {
-          if (err != null) {
-            return done(err)
+  beforeEach(function (done) {
+    this.project_id = ObjectId()
+    this.doc_id = ObjectId()
+    this.lines = ['original', 'lines']
+    this.version = 42
+    this.ranges = []
+    DocstoreApp.ensureRunning(() => {
+      DocstoreClient.createDoc(
+        this.project_id,
+        this.doc_id,
+        this.lines,
+        this.version,
+        this.ranges,
+        error => {
+          if (error) {
+            throw error
           }
-          return DocstoreClient.destroyAllDoc(this.project_id, done)
+          done()
         }
       )
     })
-
-    it('should remove the doc from the docs collection', function (done) {
-      return db.docs.find({ _id: this.doc_id }).toArray((err, docs) => {
-        expect(err).not.to.exist
-        expect(docs).to.deep.equal([])
-        return done()
-      })
-    })
-
-    return it('should remove the docOps from the docOps collection', function (done) {
-      return db.docOps.find({ doc_id: this.doc_id }).toArray((err, docOps) => {
-        expect(err).not.to.exist
-        expect(docOps).to.deep.equal([])
-        return done()
-      })
-    })
   })
 
-  return describe('when the doc is archived', function () {
+  describe('when the doc exists', function () {
     beforeEach(function (done) {
-      return DocstoreClient.archiveAllDoc(this.project_id, err => {
-        if (err != null) {
+      db.docOps.insert({ doc_id: ObjectId(this.doc_id), version: 1 }, err => {
+        if (err) {
           return done(err)
         }
-        return DocstoreClient.destroyAllDoc(this.project_id, done)
+        DocstoreClient.destroyAllDoc(this.project_id, done)
       })
     })
 
     it('should remove the doc from the docs collection', function (done) {
-      return db.docs.find({ _id: this.doc_id }).toArray((err, docs) => {
+      db.docs.find({ _id: this.doc_id }).toArray((err, docs) => {
         expect(err).not.to.exist
         expect(docs).to.deep.equal([])
-        return done()
+        done()
       })
     })
 
     it('should remove the docOps from the docOps collection', function (done) {
-      return db.docOps.find({ doc_id: this.doc_id }).toArray((err, docOps) => {
+      db.docOps.find({ doc_id: this.doc_id }).toArray((err, docOps) => {
         expect(err).not.to.exist
         expect(docOps).to.deep.equal([])
-        return done()
+        done()
+      })
+    })
+  })
+
+  describe('when the doc is archived', function () {
+    beforeEach(function (done) {
+      DocstoreClient.archiveAllDoc(this.project_id, err => {
+        if (err) {
+          return done(err)
+        }
+        DocstoreClient.destroyAllDoc(this.project_id, done)
       })
     })
 
-    return it('should remove the doc contents from s3', function (done) {
-      return DocstoreClient.getS3Doc(this.project_id, this.doc_id, error => {
+    it('should remove the doc from the docs collection', function (done) {
+      db.docs.find({ _id: this.doc_id }).toArray((err, docs) => {
+        expect(err).not.to.exist
+        expect(docs).to.deep.equal([])
+        done()
+      })
+    })
+
+    it('should remove the docOps from the docOps collection', function (done) {
+      db.docOps.find({ doc_id: this.doc_id }).toArray((err, docOps) => {
+        expect(err).not.to.exist
+        expect(docOps).to.deep.equal([])
+        done()
+      })
+    })
+
+    it('should remove the doc contents from s3', function (done) {
+      DocstoreClient.getS3Doc(this.project_id, this.doc_id, error => {
         expect(error).to.be.instanceOf(Errors.NotFoundError)
         done()
       })

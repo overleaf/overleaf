@@ -17,7 +17,8 @@ describe('DocArchiveManager', function () {
     HashUpdate,
     archivedDocs,
     mongoDocs,
-    docJson,
+    archivedDoc,
+    archivedDocJson,
     md5Sum,
     projectId,
     readStream,
@@ -31,11 +32,10 @@ describe('DocArchiveManager', function () {
     }
     Settings = {
       docstore: {
+        backend: 'gcs',
         bucket: 'wombat',
       },
       parallelArchiveJobs: 3,
-      destroyBatchSize: 10,
-      destroyRetryCount: 3,
     }
     HashDigest = sinon.stub().returns(md5Sum)
     HashUpdate = sinon.stub().returns({ digest: HashDigest })
@@ -92,17 +92,18 @@ describe('DocArchiveManager', function () {
       },
     ]
 
-    docJson = JSON.stringify({
+    archivedDoc = {
       lines: mongoDocs[0].lines,
-      ranges: mongoDocs[0].ranges,
-      schema_v: 1,
-    })
+      rev: mongoDocs[0].rev,
+    }
+
+    archivedDocJson = JSON.stringify({ ...archivedDoc, schema_v: 1 })
 
     stream = {
       on: sinon.stub(),
       resume: sinon.stub(),
     }
-    stream.on.withArgs('data').yields(Buffer.from(docJson, 'utf8'))
+    stream.on.withArgs('data').yields(Buffer.from(archivedDocJson, 'utf8'))
     stream.on.withArgs('end').yields()
 
     readStream = {
@@ -114,6 +115,7 @@ describe('DocArchiveManager', function () {
       sendStream: sinon.stub().resolves(),
       getObjectMd5Hash: sinon.stub().resolves(md5Sum),
       deleteObject: sinon.stub().resolves(),
+      deleteDirectory: sinon.stub().resolves(),
     }
 
     const getNonArchivedProjectDocs = sinon.stub()
@@ -129,13 +131,14 @@ describe('DocArchiveManager', function () {
     MongoManager = {
       promises: {
         markDocAsArchived: sinon.stub().resolves(),
+        restoreArchivedDoc: sinon.stub().resolves(),
         upsertIntoDocCollection: sinon.stub().resolves(),
         getProjectsDocs: sinon.stub().resolves(mongoDocs),
         getNonDeletedArchivedProjectDocs: getArchivedProjectDocs,
         getNonArchivedProjectDocs,
         getArchivedProjectDocs,
         findDoc: sinon.stub().rejects(new Errors.NotFoundError()),
-        destroyDoc: sinon.stub().resolves(),
+        destroyProject: sinon.stub().resolves(),
       },
     }
     for (const mongoDoc of mongoDocs.concat(archivedDocs)) {
@@ -181,16 +184,9 @@ describe('DocArchiveManager', function () {
     })
 
     it('should calculate the hex md5 sum of the content', async function () {
-      const json = JSON.stringify({
-        lines: mongoDocs[0].lines,
-        ranges: mongoDocs[0].ranges,
-        schema_v: 1,
-      })
-
       await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
-
       expect(Crypto.createHash).to.have.been.calledWith('md5')
-      expect(HashUpdate).to.have.been.calledWith(json)
+      expect(HashUpdate).to.have.been.calledWith(archivedDocJson)
       expect(HashDigest).to.have.been.calledWith('hex')
     })
 
@@ -216,7 +212,9 @@ describe('DocArchiveManager', function () {
 
     it('should create a stream from the encoded json and send it', async function () {
       await DocArchiveManager.promises.archiveDoc(projectId, mongoDocs[0])
-      expect(Streamifier.createReadStream).to.have.been.calledWith(docJson)
+      expect(Streamifier.createReadStream).to.have.been.calledWith(
+        archivedDocJson
+      )
       expect(PersistorManager.sendStream).to.have.been.calledWith(
         sinon.match.any,
         sinon.match.any,
@@ -252,12 +250,16 @@ describe('DocArchiveManager', function () {
   })
 
   describe('unarchiveDoc', function () {
-    let docId
+    let docId, lines, rev
 
     describe('when the doc is in S3', function () {
       beforeEach(function () {
-        MongoManager.promises.findDoc = sinon.stub().resolves({ inS3: true })
+        MongoManager.promises.findDoc = sinon
+          .stub()
+          .resolves({ inS3: true, rev })
         docId = mongoDocs[0]._id
+        lines = ['doc', 'lines']
+        rev = 123
       })
 
       it('should resolve when passed a valid document', async function () {
@@ -267,7 +269,7 @@ describe('DocArchiveManager', function () {
 
       it('should test md5 validity with the raw buffer', async function () {
         await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
-        expect(HashUpdate).to.have.been.calledWithMatch(
+        expect(HashUpdate).to.have.been.calledWith(
           sinon.match.instanceOf(Buffer)
         )
       })
@@ -279,96 +281,100 @@ describe('DocArchiveManager', function () {
         ).to.eventually.be.rejected.and.be.instanceof(Errors.Md5MismatchError)
       })
 
-      it('should update the doc lines in mongo', async function () {
+      it('should restore the doc in Mongo', async function () {
         await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
         expect(
-          MongoManager.promises.upsertIntoDocCollection
-        ).to.have.been.calledWith(projectId, docId, {
-          lines: mongoDocs[0].lines,
-        })
-      })
-
-      it('should delete the doc in s3', async function () {
-        await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
-        expect(PersistorManager.deleteObject).to.have.been.calledWith(
-          Settings.docstore.bucket,
-          `${projectId}/${docId}`
-        )
+          MongoManager.promises.restoreArchivedDoc
+        ).to.have.been.calledWith(projectId, docId, archivedDoc)
       })
 
       describe('doc contents', function () {
-        let mongoDoc, s3Doc
+        let archivedDoc
 
         describe('when the doc has the old schema', function () {
           beforeEach(function () {
-            mongoDoc = {
-              lines: ['doc', 'lines'],
-            }
-            s3Doc = ['doc', 'lines']
-            docJson = JSON.stringify(s3Doc)
-            stream.on.withArgs('data').yields(Buffer.from(docJson, 'utf8'))
+            archivedDoc = lines
+            archivedDocJson = JSON.stringify(archivedDoc)
+            stream.on
+              .withArgs('data')
+              .yields(Buffer.from(archivedDocJson, 'utf8'))
           })
 
           it('should return the docs lines', async function () {
             await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
             expect(
-              MongoManager.promises.upsertIntoDocCollection
-            ).to.have.been.calledWith(projectId, docId, mongoDoc)
+              MongoManager.promises.restoreArchivedDoc
+            ).to.have.been.calledWith(projectId, docId, { lines, rev })
           })
         })
 
         describe('with the new schema and ranges', function () {
           beforeEach(function () {
-            s3Doc = {
-              lines: ['doc', 'lines'],
+            archivedDoc = {
+              lines,
               ranges: { json: 'ranges' },
+              rev: 456,
               schema_v: 1,
             }
-            mongoDoc = {
-              lines: ['doc', 'lines'],
-              ranges: { mongo: 'ranges' },
-            }
-            docJson = JSON.stringify(s3Doc)
-            stream.on.withArgs('data').yields(Buffer.from(docJson, 'utf8'))
+            archivedDocJson = JSON.stringify(archivedDoc)
+            stream.on
+              .withArgs('data')
+              .yields(Buffer.from(archivedDocJson, 'utf8'))
           })
 
           it('should return the doc lines and ranges', async function () {
             await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
             expect(
-              MongoManager.promises.upsertIntoDocCollection
-            ).to.have.been.calledWith(projectId, docId, mongoDoc)
+              MongoManager.promises.restoreArchivedDoc
+            ).to.have.been.calledWith(projectId, docId, {
+              lines,
+              ranges: { mongo: 'ranges' },
+              rev: 456,
+            })
           })
         })
 
         describe('with the new schema and no ranges', function () {
           beforeEach(function () {
-            s3Doc = {
-              lines: ['doc', 'lines'],
-              schema_v: 1,
-            }
-            mongoDoc = {
-              lines: ['doc', 'lines'],
-            }
-            docJson = JSON.stringify(s3Doc)
-            stream.on.withArgs('data').yields(Buffer.from(docJson, 'utf8'))
+            archivedDoc = { lines, rev: 456, schema_v: 1 }
+            archivedDocJson = JSON.stringify(archivedDoc)
+            stream.on
+              .withArgs('data')
+              .yields(Buffer.from(archivedDocJson, 'utf8'))
           })
 
           it('should return only the doc lines', async function () {
             await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
             expect(
-              MongoManager.promises.upsertIntoDocCollection
-            ).to.have.been.calledWith(projectId, docId, mongoDoc)
+              MongoManager.promises.restoreArchivedDoc
+            ).to.have.been.calledWith(projectId, docId, { lines, rev: 456 })
+          })
+        })
+
+        describe('with the new schema and no rev', function () {
+          beforeEach(function () {
+            archivedDoc = { lines, schema_v: 1 }
+            archivedDocJson = JSON.stringify(archivedDoc)
+            stream.on
+              .withArgs('data')
+              .yields(Buffer.from(archivedDocJson, 'utf8'))
+          })
+
+          it('should use the rev obtained from Mongo', async function () {
+            await DocArchiveManager.promises.unarchiveDoc(projectId, docId)
+            expect(
+              MongoManager.promises.restoreArchivedDoc
+            ).to.have.been.calledWith(projectId, docId, { lines, rev })
           })
         })
 
         describe('with an unrecognised schema', function () {
           beforeEach(function () {
-            s3Doc = {
-              lines: ['doc', 'lines'],
-              schema_v: 2,
-            }
-            docJson = JSON.stringify(s3Doc)
-            stream.on.withArgs('data').yields(Buffer.from(docJson, 'utf8'))
+            archivedDoc = { lines, schema_v: 2 }
+            archivedDocJson = JSON.stringify(archivedDoc)
+            stream.on
+              .withArgs('data')
+              .yields(Buffer.from(archivedDocJson, 'utf8'))
           })
 
           it('should throw an error', async function () {
@@ -388,33 +394,7 @@ describe('DocArchiveManager', function () {
       expect(PersistorManager.getObjectStream).not.to.have.been.called
     })
 
-    describe('when the file is removed while we are processing it', function () {
-      beforeEach(function () {
-        MongoManager.promises.findDoc = sinon.stub().resolves({ inS3: true })
-        MongoManager.promises.findDoc.onSecondCall().resolves({ inS3: false })
-      })
-
-      it('should not throw an error if the file is unarchived before we get for its hash', async function () {
-        PersistorManager.getObjectMd5Hash = sinon
-          .stub()
-          .rejects(new Errors.NotFoundError())
-        await expect(DocArchiveManager.promises.unarchiveDoc(projectId, docId))
-          .to.eventually.be.fulfilled
-        expect(PersistorManager.getObjectStream).not.to.have.been.called
-      })
-
-      it('should not throw an error if the file is unarchived before we download it', async function () {
-        PersistorManager.getObjectStream = sinon
-          .stub()
-          .rejects(new Errors.NotFoundError())
-        await expect(DocArchiveManager.promises.unarchiveDoc(projectId, docId))
-          .to.eventually.be.fulfilled
-        expect(MongoManager.promises.upsertIntoDocCollection).not.to.have.been
-          .called
-      })
-    })
-
-    it('should throw an error if the file is not found but is still listed as archived', async function () {
+    it('should throw an error if the file is not found', async function () {
       PersistorManager.getObjectStream = sinon
         .stub()
         .rejects(new Errors.NotFoundError())
@@ -424,89 +404,40 @@ describe('DocArchiveManager', function () {
     })
   })
 
-  describe('destroyDoc', function () {
-    let docId
-
-    beforeEach(function () {
-      docId = mongoDocs[0]._id
-    })
-
-    it('should resolve when passed a valid document', async function () {
-      await expect(DocArchiveManager.promises.destroyDoc(projectId, docId)).to
-        .eventually.be.fulfilled
-    })
-
-    it('should throw a not found error when there is no document', async function () {
-      await expect(
-        DocArchiveManager.promises.destroyDoc(projectId, 'wombat')
-      ).to.eventually.be.rejected.and.be.instanceof(Errors.NotFoundError)
-    })
-
-    describe('when the doc is in s3', function () {
-      beforeEach(function () {
-        mongoDocs[0].inS3 = true
+  describe('destroyProject', function () {
+    describe('when archiving is enabled', function () {
+      beforeEach(async function () {
+        await DocArchiveManager.promises.destroyProject(projectId)
       })
 
-      it('should delete the document from s3, if it is in s3', async function () {
-        await DocArchiveManager.promises.destroyDoc(projectId, docId)
-        expect(PersistorManager.deleteObject).to.have.been.calledWith(
-          Settings.docstore.bucket,
-          `${projectId}/${docId}`
+      it('should delete the project in Mongo', function () {
+        expect(MongoManager.promises.destroyProject).to.have.been.calledWith(
+          projectId
         )
       })
 
-      it('should delete the doc in mongo', async function () {
-        await DocArchiveManager.promises.destroyDoc(projectId, docId)
-      })
-
-      describe('when the destroy request errors', function () {
-        beforeEach(function () {
-          mongoDocs[0].inS3 = true
-          PersistorManager.deleteObject.onFirstCall().rejects(new Error('1'))
-          PersistorManager.deleteObject.onSecondCall().rejects(new Error('2'))
-          PersistorManager.deleteObject.onThirdCall().resolves()
-        })
-
-        it('should retry', async function () {
-          await DocArchiveManager.promises.destroyDoc(projectId, docId)
-          expect(PersistorManager.deleteObject).to.have.been.calledWith(
-            Settings.docstore.bucket,
-            `${projectId}/${docId}`
-          )
-          expect(PersistorManager.deleteObject.callCount).to.equal(3)
-        })
-      })
-
-      describe('when the destroy request errors permanent', function () {
-        beforeEach(function () {
-          mongoDocs[0].inS3 = true
-          PersistorManager.deleteObject.rejects(new Error('permanent'))
-        })
-
-        it('should retry and fail eventually', async function () {
-          await expect(DocArchiveManager.promises.destroyDoc(projectId, docId))
-            .to.eventually.be.rejected
-          expect(PersistorManager.deleteObject).to.have.been.calledWith(
-            Settings.docstore.bucket,
-            `${projectId}/${docId}`
-          )
-          expect(PersistorManager.deleteObject.callCount).to.equal(4)
-        })
+      it('should delete the project in the persistor', function () {
+        expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
+          Settings.docstore.bucket,
+          projectId
+        )
       })
     })
 
-    describe('when the doc is not in s3', function () {
-      beforeEach(function () {
-        mongoDocs[0].inS3 = false
+    describe('when archiving is disabled', function () {
+      beforeEach(async function () {
+        Settings.docstore.backend = ''
+        await DocArchiveManager.promises.destroyProject(projectId)
       })
 
-      it('should not delete the document from s3, if it is not in s3', async function () {
-        await DocArchiveManager.promises.destroyDoc(projectId, docId)
-        expect(PersistorManager.deleteObject).not.to.have.been.called
+      it('should delete the project in Mongo', function () {
+        expect(MongoManager.promises.destroyProject).to.have.been.calledWith(
+          projectId
+        )
       })
 
-      it('should delete the doc in mongo', async function () {
-        await DocArchiveManager.promises.destroyDoc(projectId, docId)
+      it('should not delete the project in the persistor', function () {
+        expect(PersistorManager.deleteDirectory).not.to.have.been.called
       })
     })
   })
@@ -553,48 +484,6 @@ describe('DocArchiveManager', function () {
         expect(PersistorManager.getObjectStream).to.have.been.calledWith(
           Settings.docstore.bucket,
           `${projectId}/${doc._id}`
-        )
-      }
-    })
-  })
-
-  describe('destroyAllDocs', function () {
-    beforeEach(function () {
-      MongoManager.promises.getProjectsDocs.onCall(0).resolves(mongoDocs)
-      MongoManager.promises.getProjectsDocs.onCall(1).resolves([])
-    })
-
-    it('should resolve with valid arguments', async function () {
-      await expect(DocArchiveManager.promises.destroyAllDocs(projectId)).to
-        .eventually.be.fulfilled
-    })
-
-    it('should delete all docs that are in s3 from s3', async function () {
-      await DocArchiveManager.promises.destroyAllDocs(projectId)
-
-      // not inS3
-      for (const index of [0, 1, 4]) {
-        expect(PersistorManager.deleteObject).not.to.have.been.calledWith(
-          Settings.docstore.bucket,
-          `${projectId}/${mongoDocs[index]._id}`
-        )
-      }
-
-      // inS3
-      for (const index of [2, 3]) {
-        expect(PersistorManager.deleteObject).to.have.been.calledWith(
-          Settings.docstore.bucket,
-          `${projectId}/${mongoDocs[index]._id}`
-        )
-      }
-    })
-
-    it('should destroy all docs in mongo', async function () {
-      await DocArchiveManager.promises.destroyAllDocs(projectId)
-
-      for (const mongoDoc of mongoDocs) {
-        expect(MongoManager.promises.destroyDoc).to.have.been.calledWith(
-          mongoDoc._id
         )
       }
     })

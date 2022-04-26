@@ -2,6 +2,7 @@ const { db, ObjectId } = require('./mongodb')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
+const OError = require('@overleaf/o-error')
 const Errors = require('./Errors')
 const { promisify } = require('util')
 
@@ -122,6 +123,48 @@ function markDocAsArchived(docId, rev, callback) {
   db.docs.updateOne(query, update, callback)
 }
 
+/**
+ * Restore an archived doc
+ *
+ * This checks that inS3 is true and that the archived doc's rev matches. The
+ * rev was not always stored with docs, so this check is optional.
+ */
+function restoreArchivedDoc(projectId, docId, archivedDoc, callback) {
+  const query = {
+    _id: ObjectId(docId),
+    project_id: ObjectId(projectId),
+    inS3: true,
+    rev: archivedDoc.rev,
+  }
+  const update = {
+    $set: {
+      lines: archivedDoc.lines,
+      ranges: archivedDoc.ranges || {},
+    },
+    $unset: {
+      inS3: true,
+    },
+  }
+  db.docs.updateOne(query, update, (err, result) => {
+    if (err) {
+      OError.tag(err, 'failed to unarchive doc', {
+        docId,
+        rev: archivedDoc.rev,
+      })
+      return callback(err)
+    }
+    if (result.modifiedCount === 0) {
+      return callback(
+        new Errors.DocRevValueError('failed to unarchive doc', {
+          docId,
+          rev: archivedDoc.rev,
+        })
+      )
+    }
+    callback()
+  })
+}
+
 function getDocVersion(docId, callback) {
   db.docOps.findOne(
     {
@@ -204,23 +247,21 @@ function withRevCheck(doc, method, callback) {
   })
 }
 
-function destroyDoc(docId, callback) {
-  db.docs.deleteOne(
-    {
-      _id: ObjectId(docId),
-    },
-    function (err) {
+function destroyProject(projectId, callback) {
+  db.docs
+    .find({ project_id: ObjectId(projectId) }, { projection: { _id: 1 } })
+    .toArray((err, records) => {
+      const docIds = records.map(r => r._id)
       if (err) {
         return callback(err)
       }
-      db.docOps.deleteOne(
-        {
-          doc_id: ObjectId(docId),
-        },
-        callback
-      )
-    }
-  )
+      db.docOps.deleteMany({ doc_id: { $in: docIds } }, err => {
+        if (err) {
+          return callback(err)
+        }
+        db.docs.deleteMany({ project_id: ObjectId(projectId) }, callback)
+      })
+    })
 }
 
 module.exports = {
@@ -231,12 +272,13 @@ module.exports = {
   getNonArchivedProjectDocs,
   getNonDeletedArchivedProjectDocs,
   upsertIntoDocCollection,
+  restoreArchivedDoc,
   patchDoc,
   markDocAsArchived,
   getDocVersion,
   setDocVersion,
   withRevCheck,
-  destroyDoc,
+  destroyProject,
 }
 
 const methods = Object.getOwnPropertyNames(module.exports)

@@ -2,6 +2,7 @@ const DocManager = require('./DocManager')
 const logger = require('@overleaf/logger')
 const DocArchive = require('./DocArchiveManager')
 const HealthChecker = require('./HealthChecker')
+const Errors = require('./Errors')
 const Settings = require('@overleaf/settings')
 
 function getDoc(req, res, next) {
@@ -250,16 +251,19 @@ function unArchiveAllDocs(req, res, next) {
   logger.log({ projectId }, 'unarchiving all docs')
   DocArchive.unArchiveAllDocs(projectId, function (error) {
     if (error) {
+      if (error instanceof Errors.DocRevValueError) {
+        return res.sendStatus(409)
+      }
       return next(error)
     }
     res.sendStatus(200)
   })
 }
 
-function destroyAllDocs(req, res, next) {
+function destroyProject(req, res, next) {
   const { project_id: projectId } = req.params
   logger.log({ projectId }, 'destroying all docs')
-  DocArchive.destroyAllDocs(projectId, function (error) {
+  DocArchive.destroyProject(projectId, function (error) {
     if (error) {
       return next(error)
     }
@@ -291,6 +295,6 @@ module.exports = {
   archiveAllDocs,
   archiveDoc,
   unArchiveAllDocs,
-  destroyAllDocs,
+  destroyProject,
   healthCheck,
 }

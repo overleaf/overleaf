@@ -6,18 +6,24 @@ const modulePath = require('path').join(
   '../../../app/js/HttpController'
 )
 const { ObjectId } = require('mongodb')
+const Errors = require('../../../app/js/Errors')
 
 describe('HttpController', function () {
   beforeEach(function () {
     const settings = {
       max_doc_length: 2 * 1024 * 1024,
     }
+    this.DocArchiveManager = {
+      unArchiveAllDocs: sinon.stub().yields(),
+    }
+    this.DocManager = {}
     this.HttpController = SandboxedModule.require(modulePath, {
       requires: {
-        './DocManager': (this.DocManager = {}),
-        './DocArchiveManager': (this.DocArchiveManager = {}),
+        './DocManager': this.DocManager,
+        './DocArchiveManager': this.DocArchiveManager,
         '@overleaf/settings': settings,
         './HealthChecker': {},
+        './Errors': Errors,
       },
     })
     this.res = {
@@ -481,16 +487,47 @@ describe('HttpController', function () {
     })
   })
 
-  describe('destroyAllDocs', function () {
+  describe('unArchiveAllDocs', function () {
     beforeEach(function () {
       this.req.params = { project_id: this.projectId }
-      this.DocArchiveManager.destroyAllDocs = sinon.stub().callsArg(1)
-      this.HttpController.destroyAllDocs(this.req, this.res, this.next)
+    })
+
+    describe('on success', function () {
+      beforeEach(function (done) {
+        this.res.sendStatus.callsFake(() => done())
+        this.HttpController.unArchiveAllDocs(this.req, this.res, this.next)
+      })
+
+      it('returns a 200', function () {
+        expect(this.res.sendStatus).to.have.been.calledWith(200)
+      })
+    })
+
+    describe("when the archived rev doesn't match", function () {
+      beforeEach(function (done) {
+        this.res.sendStatus.callsFake(() => done())
+        this.DocArchiveManager.unArchiveAllDocs.yields(
+          new Errors.DocRevValueError('bad rev')
+        )
+        this.HttpController.unArchiveAllDocs(this.req, this.res, this.next)
+      })
+
+      it('returns a 409', function () {
+        expect(this.res.sendStatus).to.have.been.calledWith(409)
+      })
+    })
+  })
+
+  describe('destroyProject', function () {
+    beforeEach(function () {
+      this.req.params = { project_id: this.projectId }
+      this.DocArchiveManager.destroyProject = sinon.stub().callsArg(1)
+      this.HttpController.destroyProject(this.req, this.res, this.next)
     })
 
     it('should destroy the docs', function () {
       sinon.assert.calledWith(
-        this.DocArchiveManager.destroyAllDocs,
+        this.DocArchiveManager.destroyProject,
         this.projectId
       )
     })
