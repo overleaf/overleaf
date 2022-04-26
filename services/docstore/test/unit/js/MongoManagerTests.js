@@ -12,7 +12,7 @@ describe('MongoManager', function () {
   beforeEach(function () {
     this.db = {
       docs: {
-        updateOne: sinon.stub().yields(null, { modifedCount: 1 }),
+        updateOne: sinon.stub().yields(null, { matchedCount: 1 }),
       },
       docOps: {},
     }
@@ -426,7 +426,6 @@ describe('MongoManager', function () {
           {
             _id: ObjectId(this.docId),
             project_id: ObjectId(this.projectId),
-            inS3: true,
             rev: this.archivedDoc.rev,
           },
           {
@@ -458,7 +457,6 @@ describe('MongoManager', function () {
           {
             _id: ObjectId(this.docId),
             project_id: ObjectId(this.projectId),
-            inS3: true,
             rev: this.archivedDoc.rev,
           },
           {
@@ -476,7 +474,7 @@ describe('MongoManager', function () {
 
     describe("when the update doesn't succeed", function () {
       it('throws a DocRevValueError', function (done) {
-        this.db.docs.updateOne.yields(null, { modifiedCount: 0 })
+        this.db.docs.updateOne.yields(null, { matchedCount: 0 })
         this.MongoManager.restoreArchivedDoc(
           this.projectId,
           this.docId,

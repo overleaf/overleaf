@@ -126,14 +126,12 @@ function markDocAsArchived(docId, rev, callback) {
 /**
  * Restore an archived doc
  *
- * This checks that inS3 is true and that the archived doc's rev matches. The
- * rev was not always stored with docs, so this check is optional.
+ * This checks that the archived doc's rev matches.
  */
 function restoreArchivedDoc(projectId, docId, archivedDoc, callback) {
   const query = {
     _id: ObjectId(docId),
     project_id: ObjectId(projectId),
-    inS3: true,
     rev: archivedDoc.rev,
   }
   const update = {
@@ -153,7 +151,7 @@ function restoreArchivedDoc(projectId, docId, archivedDoc, callback) {
       })
       return callback(err)
     }
-    if (result.modifiedCount === 0) {
+    if (result.matchedCount === 0) {
       return callback(
         new Errors.DocRevValueError('failed to unarchive doc', {
           docId,

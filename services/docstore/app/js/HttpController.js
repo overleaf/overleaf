@@ -249,12 +249,13 @@ function archiveDoc(req, res, next) {
 function unArchiveAllDocs(req, res, next) {
   const { project_id: projectId } = req.params
   logger.log({ projectId }, 'unarchiving all docs')
-  DocArchive.unArchiveAllDocs(projectId, function (error) {
-    if (error) {
-      if (error instanceof Errors.DocRevValueError) {
+  DocArchive.unArchiveAllDocs(projectId, function (err) {
+    if (err) {
+      if (err instanceof Errors.DocRevValueError) {
+        logger.warn({ err }, 'Failed to unarchive doc')
         return res.sendStatus(409)
       }
-      return next(error)
+      return next(err)
     }
     res.sendStatus(200)
   })
