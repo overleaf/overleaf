@@ -1,15 +1,18 @@
-import { useState, useCallback, useEffect } from 'react'
+import {
+  useState,
+  useCallback,
+  useEffect,
+  SetStateAction,
+  Dispatch,
+} from 'react'
 import localStorage from '../../infrastructure/local-storage'
 
-/**
- * @param {string} key
- * @param {any} [defaultValue]
- * @param {boolean} [listen]
- *
- * @returns {[any, function]}
- */
-function usePersistedState(key, defaultValue, listen = false) {
-  const [value, setValue] = useState(() => {
+function usePersistedState<T>(
+  key: string,
+  defaultValue?: T,
+  listen = false
+): [T, Dispatch<SetStateAction<T>>] {
+  const [value, setValue] = useState<T>(() => {
     return localStorage.getItem(key) ?? defaultValue
   })
 
