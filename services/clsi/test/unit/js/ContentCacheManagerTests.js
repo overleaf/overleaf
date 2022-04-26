@@ -40,7 +40,7 @@ describe('ContentCacheManager', function () {
   })
 
   before(async function () {
-    await fs.promises.rmdir(contentDir, { recursive: true })
+    await fs.promises.rm(contentDir, { recursive: true, force: true })
     await fs.promises.mkdir(contentDir, { recursive: true })
     await fs.promises.mkdir(Path.dirname(pdfPath), { recursive: true })
   })
