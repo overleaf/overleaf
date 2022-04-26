@@ -30,7 +30,7 @@ async function main() {
   let pageToken = ''
   let startOffset = START_OFFSET
   while (pageToken !== undefined) {
-    const { nextPageToken, projectIds } = await request({
+    const { nextPageToken, entries } = await request({
       url: `${Settings.apis.project_archiver.url}/project/list`,
       json: true,
       qs: {
@@ -41,8 +41,8 @@ async function main() {
     pageToken = nextPageToken
     startOffset = undefined
 
-    hardDeleted += await processBatch(projectIds.map(id => ObjectId(id)))
-    processed += projectIds.length
+    hardDeleted += await processBatch(entries)
+    processed += entries.length
     console.log(
       'processed:',
       processed.toString().padStart(10, '0'),
@@ -51,11 +51,20 @@ async function main() {
       'nextPageToken:',
       nextPageToken,
       'START_OFFSET:',
-      projectIds.pop()
+      entries.pop()?.prefix
     )
   }
 }
-async function processBatch(projectIds) {
+async function processBatch(entries) {
+  const projectIdToPrefix = new Map()
+  for (const { prefix, projectId } of entries) {
+    const prefixes = projectIdToPrefix.get(projectId) || []
+    prefixes.push(prefix)
+    projectIdToPrefix.set(projectId, prefixes)
+  }
+  const projectIds = Array.from(projectIdToPrefix.keys()).map(id =>
+    ObjectId(id)
+  )
   const projectsWithOrphanedArchive = await getHardDeletedProjectIds({
     projectIds,
     READ_CONCURRENCY_PRIMARY,
@@ -64,21 +73,23 @@ async function processBatch(projectIds) {
 
   await promiseMapWithLimit(
     WRITE_CONCURRENCY,
-    projectsWithOrphanedArchive,
+    projectsWithOrphanedArchive.flatMap(id =>
+      projectIdToPrefix.get(id.toString())
+    ),
     hardDeleteProjectArchiverData
   )
   return projectsWithOrphanedArchive.length
 }
 
-async function hardDeleteProjectArchiverData(projectId) {
-  console.log(`Destroying hard deleted project archive for ${projectId}`)
+async function hardDeleteProjectArchiverData(prefix) {
+  console.log(`Destroying hard deleted project archive at '${prefix}/'`)
   if (DRY_RUN) return
 
   const ok = await TpdsUpdateSender.promises.deleteProject({
-    project_id: projectId,
+    project_id: encodeURIComponent(prefix),
   })
   if (!ok) {
-    throw new Error(`deletion failed for ${projectId}, check logs`)
+    throw new Error(`deletion failed for '${prefix}/', check logs`)
   }
 }
 
