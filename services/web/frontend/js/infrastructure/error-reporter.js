@@ -57,7 +57,8 @@ function sentryReporter() {
         const splitTestAssignments = getMeta('ol-splitTestVariants')
         if (splitTestAssignments) {
           for (const [name, value] of Object.entries(splitTestAssignments)) {
-            Sentry.setTag(`ol.splitTest.${name}`, value.toString())
+            // Ensure Sentry tag name is within the 32-character limit
+            Sentry.setTag(`ol.${name}`.slice(0, 32), value.toString())
           }
         }
 
