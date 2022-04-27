@@ -42,7 +42,10 @@ describe('UserController', function () {
       promises: { getUser: sinon.stub().resolves(this.user) },
     }
     this.User = { findById: sinon.stub().callsArgWith(1, null, this.user) }
-    this.NewsLetterManager = { unsubscribe: sinon.stub().callsArgWith(1) }
+    this.NewsLetterManager = {
+      subscribe: sinon.stub().yields(),
+      unsubscribe: sinon.stub().yields(),
+    }
     this.AuthenticationController = {
       establishUserSession: sinon.stub().callsArg(2),
     }
@@ -288,9 +291,23 @@ describe('UserController', function () {
     })
   })
 
+  describe('subscribe', function () {
+    it('should send the user to subscribe', function (done) {
+      this.res.json = data => {
+        expect(data.message).to.equal('thanks_settings_updated')
+        this.NewsLetterManager.subscribe
+          .calledWith(this.user)
+          .should.equal(true)
+        done()
+      }
+      this.UserController.subscribe(this.req, this.res)
+    })
+  })
+
   describe('unsubscribe', function () {
     it('should send the user to unsubscribe', function (done) {
-      this.res.sendStatus = () => {
+      this.res.json = data => {
+        expect(data.message).to.equal('thanks_settings_updated')
         this.NewsLetterManager.unsubscribe
           .calledWith(this.user)
           .should.equal(true)

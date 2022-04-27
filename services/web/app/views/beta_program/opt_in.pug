@@ -6,7 +6,7 @@ block content
 			.row
 				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
 					.card
-						.page-header.text-centered
+						.page-header
 							h1 
 								| #{translate("sharelatex_beta_program")}
 						.beta-opt-in
@@ -49,8 +49,6 @@ block content
 													)
 														span(data-ol-inflight="idle") #{translate("beta_program_opt_out_action")}
 														span(hidden data-ol-inflight="pending") #{translate("processing")}…
-												.form-group
-													a(href="/project").btn.btn-link.btn-sm #{translate("back_to_your_projects")}
 										else
 											form(
 												data-ol-regular-form
@@ -65,5 +63,7 @@ block content
 													)
 														span(data-ol-inflight="idle") #{translate("beta_program_opt_in_action")}
 														span(hidden data-ol-inflight="pending") #{translate("joining")}…
-												.form-group
-													a(href="/project").btn.btn-link.btn-sm #{translate("back_to_your_projects")}
+							.page-separator
+							a.btn.btn-default.text-capitalize(href='/user/settings') #{translate('back_to_account_settings')}
+							| 
+							a.btn.btn-default.text-capitalize(href='/project') #{translate('back_to_your_projects')}

@@ -60,6 +60,9 @@ describe('UserPagesController', function () {
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       getSessionUser: sinon.stub().returns(this.user),
     }
+    this.NewsletterManager = {
+      subscribed: sinon.stub().yields(),
+    }
     this.AuthenticationController = {
       _getRedirectFromSession: sinon.stub(),
       setRedirectInSession: sinon.stub(),
@@ -74,6 +77,7 @@ describe('UserPagesController', function () {
         '@overleaf/settings': this.settings,
         './UserGetter': this.UserGetter,
         './UserSessionsManager': this.UserSessionsManager,
+        '../Newsletter/NewsletterManager': this.NewsletterManager,
         '../Errors/ErrorController': this.ErrorController,
         '../Authentication/AuthenticationController':
           this.AuthenticationController,
@@ -222,6 +226,34 @@ describe('UserPagesController', function () {
           this.next
         )
       })
+    })
+  })
+
+  describe('emailPreferencesPage', function () {
+    beforeEach(function () {
+      this.UserGetter.getUser = sinon.stub().yields(null, this.user)
+    })
+
+    it('render page with subscribed status', function (done) {
+      this.NewsletterManager.subscribed.yields(null, true)
+      this.res.render = function (page, data) {
+        page.should.equal('user/email-preferences')
+        data.title.should.equal('newsletter_info_title')
+        data.subscribed.should.equal(true)
+        return done()
+      }
+      return this.UserPagesController.emailPreferencesPage(this.req, this.res)
+    })
+
+    it('render page with unsubscribed status', function (done) {
+      this.NewsletterManager.subscribed.yields(null, false)
+      this.res.render = function (page, data) {
+        page.should.equal('user/email-preferences')
+        data.title.should.equal('newsletter_info_title')
+        data.subscribed.should.equal(false)
+        return done()
+      }
+      return this.UserPagesController.emailPreferencesPage(this.req, this.res)
     })
   })
 

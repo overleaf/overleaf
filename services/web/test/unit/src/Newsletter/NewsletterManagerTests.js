@@ -13,6 +13,7 @@ describe('NewsletterManager', function () {
       },
     }
     this.mailchimp = {
+      get: sinon.stub(),
       put: sinon.stub(),
       patch: sinon.stub(),
       delete: sinon.stub(),
@@ -40,6 +41,30 @@ describe('NewsletterManager', function () {
     }
     // MD5 sum of the user email
     this.emailHash = 'c02f60ed0ef51818186274e406c9a48f'
+  })
+
+  describe('subscribed', function () {
+    it('calls Mailchimp to get the user status', async function () {
+      await this.NewsletterManager.subscribed(this.user)
+      expect(this.mailchimp.get).to.have.been.calledWith(
+        `/lists/list_id/members/${this.emailHash}`
+      )
+    })
+
+    it('returns true when subscribed', async function () {
+      this.mailchimp.get.resolves({ status: 'subscribed' })
+
+      const subscribed = await this.NewsletterManager.subscribed(this.user)
+      expect(subscribed).to.be.true
+    })
+
+    it('returns false on 404', async function () {
+      const err = new Error()
+      err.status = 404
+      this.mailchimp.get.rejects(err)
+      const subscribed = await this.NewsletterManager.subscribed(this.user)
+      expect(subscribed).to.be.false
+    })
   })
 
   describe('subscribe', function () {

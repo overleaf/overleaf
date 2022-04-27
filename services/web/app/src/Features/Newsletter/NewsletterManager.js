@@ -8,6 +8,7 @@ const OError = require('@overleaf/o-error')
 const provider = getProvider()
 
 module.exports = {
+  subscribed: callbackify(provider.subscribed),
   subscribe: callbackify(provider.subscribe),
   unsubscribe: callbackify(provider.unsubscribe),
   changeEmail: callbackify(provider.changeEmail),
@@ -39,9 +40,25 @@ function makeMailchimpProvider() {
   const MAILCHIMP_LIST_ID = Settings.mailchimp.list_id
 
   return {
+    subscribed,
     subscribe,
     unsubscribe,
     changeEmail,
+  }
+
+  async function subscribed(user) {
+    try {
+      const path = getSubscriberPath(user.email)
+      const result = await mailchimp.get(path)
+      return result?.status === 'subscribed'
+    } catch (err) {
+      if (err.status === 404) {
+        return false
+      }
+      throw OError.tag(err, 'error getting newsletter subscriptions status', {
+        userId: user._id,
+      })
+    }
   }
 
   async function subscribe(user) {
@@ -194,9 +211,18 @@ function makeMailchimpProvider() {
 
 function makeNullProvider() {
   return {
+    subscribed,
     subscribe,
     unsubscribe,
     changeEmail,
+  }
+
+  async function subscribed(user) {
+    logger.info(
+      { user },
+      'Not checking user because no newsletter provider is configured'
+    )
+    return false
   }
 
   async function subscribe(user) {

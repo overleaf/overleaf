@@ -264,11 +264,31 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     UserController.clearSessions
   )
 
+  // deprecated
   webRouter.delete(
     '/user/newsletter/unsubscribe',
     AuthenticationController.requireLogin(),
     UserController.unsubscribe
   )
+
+  webRouter.post(
+    '/user/newsletter/unsubscribe',
+    AuthenticationController.requireLogin(),
+    UserController.unsubscribe
+  )
+
+  webRouter.post(
+    '/user/newsletter/subscribe',
+    AuthenticationController.requireLogin(),
+    UserController.subscribe
+  )
+
+  webRouter.get(
+    '/user/email-preferences',
+    AuthenticationController.requireLogin(),
+    UserPagesController.emailPreferencesPage
+  )
+
   webRouter.post(
     '/user/delete',
     RateLimiterMiddleware.rateLimit({

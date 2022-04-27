@@ -476,7 +476,7 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
     )
     const userSettingsLink = EmailMessageHelper.displayLink(
       'here',
-      `${settings.siteUrl}/user/settings`,
+      `${settings.siteUrl}/user/email-preferences`,
       isPlainText
     )
     const onboardingSurveyLink = EmailMessageHelper.displayLink(

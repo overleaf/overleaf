@@ -57,6 +57,12 @@ function formSubmitHelper(formEl) {
         })
       }
 
+      // Handle reloads
+      if (formEl.hasAttribute('data-ol-reload-on-success')) {
+        window.setTimeout(window.location.reload.bind(window.location), 1000)
+        return
+      }
+
       // Let the user re-submit the form.
       formEl.dispatchEvent(new Event('idle'))
     } catch (error) {

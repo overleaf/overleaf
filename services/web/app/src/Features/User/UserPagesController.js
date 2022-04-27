@@ -5,6 +5,7 @@ const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const AuthenticationController = require('../Authentication/AuthenticationController')
 const SessionManager = require('../Authentication/SessionManager')
+const NewsletterManager = require('../Newsletter/NewsletterManager')
 const _ = require('lodash')
 const { expressify } = require('../../util/promises')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
@@ -209,6 +210,25 @@ const UserPagesController = {
         })
       }
     )
+  },
+
+  emailPreferencesPage(req, res, next) {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    UserGetter.getUser(userId, (err, user) => {
+      if (err != null) {
+        return next(err)
+      }
+      NewsletterManager.subscribed(user, (err, subscribed) => {
+        if (err != null) {
+          OError.tag(err, 'error getting newsletter subscription status')
+          return next(err)
+        }
+        res.render('user/email-preferences', {
+          title: 'newsletter_info_title',
+          subscribed,
+        })
+      })
+    })
   },
 
   _restructureThirdPartyIds(user) {

@@ -261,6 +261,24 @@ const UserController = {
     )
   },
 
+  subscribe(req, res, next) {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    UserGetter.getUser(userId, (err, user) => {
+      if (err != null) {
+        return next(err)
+      }
+      NewsletterManager.subscribe(user, err => {
+        if (err != null) {
+          OError.tag(err, 'error subscribing to newsletter')
+          return next(err)
+        }
+        return res.json({
+          message: req.i18n.translate('thanks_settings_updated'),
+        })
+      })
+    })
+  },
+
   unsubscribe(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
     UserGetter.getUser(userId, (err, user) => {
@@ -269,12 +287,12 @@ const UserController = {
       }
       NewsletterManager.unsubscribe(user, err => {
         if (err != null) {
-          logger.warn(
-            { err, user },
-            'Failed to unsubscribe user from newsletter'
-          )
+          OError.tag(err, 'error unsubscribing to newsletter')
+          return next(err)
         }
-        res.sendStatus(200)
+        return res.json({
+          message: req.i18n.translate('thanks_settings_updated'),
+        })
       })
     })
   },

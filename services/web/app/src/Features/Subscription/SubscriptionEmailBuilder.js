@@ -98,7 +98,7 @@ EmailBuilder.templates.trialOnboarding = EmailBuilder.NoCTAEmailTemplate({
 
     const unsubscribe = EmailMessageHelper.displayLink(
       'here',
-      `${settings.siteUrl}/user/settings`,
+      `${settings.siteUrl}/user/email-preferences`,
       isPlainText
     )
 
