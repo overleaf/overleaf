@@ -64,6 +64,9 @@
   .card-header {
     margin-bottom: 15px;
   }
+  .card-byline {
+    min-height: 58px;
+  }
   .circle {
     font-size: 1.5rem;
     font-weight: 700;
@@ -77,9 +80,13 @@
     color: white;
     white-space: nowrap;
     line-height: 1;
-    span.small {
+    .small {
       color: rgba(255, 255, 255, 0.85);
       font-size: @font-size-base * 0.8;
+    }
+    .undiscounted-price {
+      text-decoration: line-through;
+      margin-top: -48px;
     }
   }
   .circle-lg {
@@ -119,7 +126,11 @@
     margin-bottom: @line-height-computed;
   }
   .tagline {
-    margin-bottom: 20px;
+    margin-bottom: 0px;
+  }
+  .special-offer {
+    margin-top: 6px;
+    color: @ol-dark-green;
   }
   ul.nav-pills {
     text-align: center;

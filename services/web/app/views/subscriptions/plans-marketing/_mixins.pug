@@ -132,6 +132,13 @@ mixin gen_localized_price_for_plan_view(plan, view)
 			data-ol-currencyCode=currencyCode
 		) #{settings.localizedPlanPricing[currencyCode][plan][view]}
 
+mixin gen_localized_undiscounted_price_for_plan_view(plan, view)
+	for currencyCode in Object.keys(settings.localizedPlanPricing)
+		span(
+			hidden=(currencyCode !== recommendedCurrency)
+			data-ol-currencyCode=currencyCode
+		) #{settings.localizedPlanPricing[currencyCode][plan]['withoutDiscount'][view]}
+
 mixin gen_localized_price_for_plan(plan)
 	div(data-ol-view='monthly')
 		+gen_localized_price_for_plan_view(plan, 'monthly')
@@ -140,9 +147,25 @@ mixin gen_localized_price_for_plan(plan)
 		+gen_localized_price_for_plan_view(plan, 'annual')
 		span.small /yr
 
+mixin gen_localized_price_for_personal_plan_special_offer
+	div(data-ol-view='monthly')
+		+gen_localized_price_for_plan_view('personal', 'monthly')
+		span.small /mo
+		.undiscounted-price.small
+			span.sr-only Price reduced from
+			+gen_localized_undiscounted_price_for_plan_view('personal', 'monthly')
+			| /mo
+	div(hidden data-ol-view='annual')
+		+gen_localized_price_for_plan_view('personal', 'annual')
+		span.small /yr
+		.undiscounted-price.small
+			span.sr-only Price reduced from
+			+gen_localized_undiscounted_price_for_plan_view('personal', 'annual')
+			| /yr
+
 //- Prices
 mixin price_personal
-	+gen_localized_price_for_plan('personal')
+	+gen_localized_price_for_personal_plan_special_offer
 mixin price_collaborator
 	+gen_localized_price_for_plan('collaborator')
 mixin price_professional
@@ -209,7 +232,9 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 							.card.card-first
 								.card-header
 									h2 #{translate("personal")}
-								h5.tagline #{translate("tagline_personal")}
+								.card-byline
+									h5.tagline #{translate("tagline_personal")}
+									h5.special-offer #{translate("limited_time_discount")}
 								.circle
 									+price_personal
 								+features_personal(location)
@@ -222,7 +247,8 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 										h2 #{translate("standard")}
 									else
 										h2 #{translate("collaborator")}
-								h5.tagline #{translate("tagline_collaborator")}
+								.card-byline
+									h5.tagline #{translate("tagline_collaborator")}
 								.circle
 									+price_collaborator
 								+features_collaborator(location)
@@ -230,7 +256,8 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 							.card.card-last
 								.card-header
 									h2 #{translate("professional")}
-								h5.tagline #{translate("tagline_professional")}
+								.card-byline
+									h5.tagline #{translate("tagline_professional")}
 								.circle
 									+price_professional
 								+features_professional(location)
