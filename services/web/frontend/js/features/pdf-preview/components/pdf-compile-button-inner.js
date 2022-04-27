@@ -8,11 +8,16 @@ import { useLayoutContext } from '../../../shared/context/layout-context'
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
 function PdfCompileButtonInner({ startCompile, compiling }) {
-  const { detachRole } = useLayoutContext()
+  const { detachRole, view, pdfLayout } = useLayoutContext()
 
   const { t } = useTranslation()
 
   const compileButtonLabel = compiling ? t('compiling') + '…' : t('recompile')
+
+  // show the compile shortcut when the editor is visible
+  const showCompileShortcut =
+    detachRole !== 'detached' &&
+    (view === 'editor' || pdfLayout === 'sideBySide')
 
   return (
     <OverlayTrigger
@@ -21,7 +26,7 @@ function PdfCompileButtonInner({ startCompile, compiling }) {
       overlay={
         <Tooltip id="tooltip-logs-toggle" className="keyboard-tooltip">
           {t('recompile_pdf')}{' '}
-          {detachRole !== 'detached' && (
+          {showCompileShortcut && (
             <span className="keyboard-shortcut">({modifierKey} + Enter)</span>
           )}
         </Tooltip>
