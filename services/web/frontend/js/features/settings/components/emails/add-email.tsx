@@ -2,11 +2,17 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Row, Col } from 'react-bootstrap'
 import Cell from './cell'
+import Icon from '../../../../shared/components/icon'
+import DownshiftInput from './downshift-input'
+import CountryInput from './country-input'
+import { AddEmailInput } from './add-email-input'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useUserEmailsContext } from '../../context/user-email-context'
-import { postJSON } from '../../../../infrastructure/fetch-json'
-import Icon from '../../../../shared/components/icon'
-import { AddEmailInput } from './add-email-input'
+import { getJSON, postJSON } from '../../../../infrastructure/fetch-json'
+import { defaults as roles } from '../../roles'
+import { defaults as departments } from '../../departments'
+import { University } from '../../../../../../types/university'
+import { CountryCode } from '../../../../../../types/country'
 
 const isValidEmail = (email: string) => {
   return Boolean(email)
@@ -18,9 +24,18 @@ function AddEmail() {
     () => window.location.hash === '#add-email'
   )
   const [newEmail, setNewEmail] = useState('')
+  const [countryCode, setCountryCode] = useState<CountryCode | null>(null)
+  const [universities, setUniversities] = useState<
+    Partial<Record<CountryCode, University[]>>
+  >({})
+  const [university, setUniversity] = useState('')
+  const [role, setRole] = useState('')
+  const [department, setDepartment] = useState('')
   const [isInstitutionFieldsVisible, setIsInstitutionFieldsVisible] =
     useState(false)
+  const [isUniversityDirty, setIsUniversityDirty] = useState(false)
   const { isLoading, isError, runAsync } = useAsync()
+  const { runAsync: institutionRunAsync } = useAsync()
   const {
     state,
     setLoading: setUserEmailsContextLoading,
@@ -30,6 +45,29 @@ function AddEmail() {
   useEffect(() => {
     setUserEmailsContextLoading(isLoading)
   }, [setUserEmailsContextLoading, isLoading])
+
+  useEffect(() => {
+    if (university) {
+      setIsUniversityDirty(true)
+    }
+  }, [setIsUniversityDirty, university])
+
+  // Fetch country institution
+  useEffect(() => {
+    // Skip if country not selected or universities for
+    // that country are already fetched
+    if (!countryCode || universities[countryCode]) {
+      return
+    }
+
+    institutionRunAsync<University[]>(
+      getJSON(`/institutions/list?country_code=${countryCode}`)
+    )
+      .then(data => {
+        setUniversities(state => ({ ...state, [countryCode]: data }))
+      })
+      .catch(() => {})
+  }, [countryCode, universities, setUniversities, institutionRunAsync])
 
   const handleShowAddEmailForm = () => {
     setIsFormVisible(true)
@@ -44,10 +82,35 @@ function AddEmail() {
   }
 
   const handleAddNewEmail = () => {
+    const selectedKnownUniversity = countryCode
+      ? universities[countryCode]?.find(({ name }) => name === university)
+      : undefined
+
+    const knownUniversityData = university &&
+      selectedKnownUniversity && {
+        university: {
+          id: selectedKnownUniversity.id,
+        },
+        role,
+        department,
+      }
+
+    const unknownUniversityData = university &&
+      !selectedKnownUniversity && {
+        university: {
+          name: university,
+          country_code: countryCode,
+        },
+        role,
+        department,
+      }
+
     runAsync(
       postJSON('/user/emails', {
         body: {
           email: newEmail,
+          ...knownUniversityData,
+          ...unknownUniversityData,
         },
       })
     )
@@ -55,10 +118,22 @@ function AddEmail() {
         getEmails()
         setIsFormVisible(false)
         setNewEmail('')
+        setCountryCode(null)
+        setIsUniversityDirty(false)
+        setUniversity('')
+        setRole('')
+        setDepartment('')
+        setIsInstitutionFieldsVisible(false)
       })
-      .catch(error => {
-        console.error(error)
-      })
+      .catch(() => {})
+  }
+
+  const getUniversityItems = () => {
+    if (!countryCode) {
+      return []
+    }
+
+    return universities[countryCode]?.map(({ name }) => name) ?? []
   }
 
   return (
@@ -90,11 +165,43 @@ function AddEmail() {
                 {isInstitutionFieldsVisible ? (
                   <>
                     <div className="form-group mb-2">
-                      <input className="form-control" />
+                      <CountryInput
+                        id="new-email-country-input"
+                        setValue={setCountryCode}
+                      />
                     </div>
-                    <div className="form-group mb-0">
-                      <input className="form-control" />
+                    <div className="form-group mb-2">
+                      <DownshiftInput
+                        items={getUniversityItems()}
+                        inputValue={university}
+                        placeholder={t('university')}
+                        label={t('university')}
+                        setValue={setUniversity}
+                        disabled={!countryCode}
+                      />
                     </div>
+                    {isUniversityDirty && (
+                      <>
+                        <div className="form-group mb-2">
+                          <DownshiftInput
+                            items={roles}
+                            inputValue={role}
+                            placeholder={t('role')}
+                            label={t('role')}
+                            setValue={setRole}
+                          />
+                        </div>
+                        <div className="form-group mb-0">
+                          <DownshiftInput
+                            items={departments}
+                            inputValue={department}
+                            placeholder={t('department')}
+                            label={t('department')}
+                            setValue={setDepartment}
+                          />
+                        </div>
+                      </>
+                    )}
                   </>
                 ) : (
                   <div className="mt-1">

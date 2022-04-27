@@ -90,12 +90,14 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
               items={roles}
               inputValue={role}
               placeholder={t('role')}
+              label={t('role')}
               setValue={setRole}
             />
             <DownshiftInput
               items={departments}
               inputValue={department}
               placeholder={t('department')}
+              label={t('department')}
               setValue={setDepartment}
             />
             <Button

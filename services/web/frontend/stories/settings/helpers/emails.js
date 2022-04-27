@@ -37,9 +37,14 @@ const fakeUsersData = [
   },
 ]
 
+const fakeInstitutions = [
+  { id: 9326, name: 'Unknown', country_code: 'al', departments: [] },
+]
+
 export function defaultSetupMocks(fetchMock) {
   fetchMock
     .get(/\/user\/emails/, fakeUsersData, { delay: MOCK_DELAY })
+    .get(/\/institutions\/list/, fakeInstitutions, { delay: MOCK_DELAY })
     .post(/\/user\/emails\/*/, 200, {
       delay: MOCK_DELAY,
     })

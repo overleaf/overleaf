@@ -1,32 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
+import { defaults as countries } from '../../countries-list'
+import { CountryCode } from '../../../../../../types/country'
 
-type DownshiftInputProps = {
-  items: string[]
-  inputValue: string
-  label: string
-  setValue: React.Dispatch<React.SetStateAction<string>>
+type CountryInputProps = {
+  setValue: React.Dispatch<React.SetStateAction<CountryCode | null>>
 } & React.InputHTMLAttributes<HTMLInputElement>
 
-const filterItemsByInputValue = (
-  items: DownshiftInputProps['items'],
-  inputValue: DownshiftInputProps['inputValue']
-) => items.filter(item => item.toLowerCase().includes(inputValue.toLowerCase()))
+const itemToString = (item: typeof countries[number] | null) => item?.name ?? ''
 
-function DownshiftInput({
-  items,
-  inputValue,
-  placeholder,
-  label,
-  setValue,
-  disabled,
-}: DownshiftInputProps) {
-  const [inputItems, setInputItems] = useState(items)
-
-  useEffect(() => {
-    setInputItems(items)
-  }, [items])
+function CountryInput({ setValue }: CountryInputProps) {
+  const { t } = useTranslation()
+  const [inputItems, setInputItems] = useState(() => countries)
+  const [inputValue, setInputValue] = useState('')
 
   const {
     isOpen,
@@ -40,17 +28,17 @@ function DownshiftInput({
   } = useCombobox({
     inputValue,
     items: inputItems,
-    initialSelectedItem: inputValue,
+    itemToString,
     onSelectedItemChange: ({ selectedItem }) => {
-      setValue(selectedItem ?? '')
+      setValue(selectedItem?.code ?? null)
+      setInputValue(selectedItem?.name ?? '')
     },
     onInputValueChange: ({ inputValue = '' }) => {
-      setInputItems(filterItemsByInputValue(items, inputValue))
-    },
-    onStateChange: ({ type }) => {
-      if (type === useCombobox.stateChangeTypes.FunctionOpenMenu) {
-        setInputItems(filterItemsByInputValue(items, inputValue))
-      }
+      setInputItems(
+        countries.filter(country =>
+          itemToString(country).toLowerCase().includes(inputValue.toLowerCase())
+        )
+      )
     },
   })
 
@@ -63,15 +51,15 @@ function DownshiftInput({
         }
       )}
     >
-      <div {...getComboboxProps()} className="form-group mb-2">
+      <div {...getComboboxProps()} className="form-group mb-2 ui-select-toggle">
         {/* eslint-disable-next-line jsx-a11y/label-has-for */}
         <label {...getLabelProps()} className="sr-only">
-          {label}
+          {t('country')}
         </label>
         <input
           {...getInputProps({
             onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-              setValue(event.target.value)
+              setInputValue(event.target.value)
             },
             onFocus: () => {
               if (!isOpen) {
@@ -81,9 +69,9 @@ function DownshiftInput({
           })}
           className="form-control"
           type="text"
-          placeholder={placeholder}
-          disabled={disabled}
+          placeholder={t('country')}
         />
+        <i className="caret" />
       </div>
       <ul
         {...getMenuProps()}
@@ -92,16 +80,16 @@ function DownshiftInput({
         {inputItems.map((item, index) => (
           <li
             className="ui-select-choices-group"
-            key={`${item}${index}`}
+            key={`${item.name}-${index}`}
             {...getItemProps({ item, index })}
           >
             <div
               className={classnames('ui-select-choices-row', {
-                active: selectedItem === item,
+                active: selectedItem?.name === item.name,
               })}
             >
               <span className="ui-select-choices-row-inner">
-                <span>{item}</span>
+                <span>{item.name}</span>
               </span>
             </div>
           </li>
@@ -111,4 +99,4 @@ function DownshiftInput({
   )
 }
 
-export default DownshiftInput
+export default CountryInput
