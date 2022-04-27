@@ -267,9 +267,13 @@ const AuthenticationController = {
         () => {}
       )
     }
-    return UserUpdater.updateUser(user._id.toString(), {
-      $set: { lastLoginIp: req.ip },
-    })
+    return UserUpdater.updateUser(
+      user._id.toString(),
+      {
+        $set: { lastLoginIp: req.ip },
+      },
+      () => {}
+    )
   },
 
   requireLogin() {

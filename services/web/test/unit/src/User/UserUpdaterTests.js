@@ -1,712 +1,635 @@
+const { setTimeout } = require('timers/promises')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
-const modulePath = path.join(
-  __dirname,
-  '../../../../app/src/Features/User/UserUpdater'
-)
+const { ObjectId } = require('mongodb')
 const tk = require('timekeeper')
 const { expect } = require('chai')
 const { normalizeQuery } = require('../../../../app/src/Features/Helpers/Mongo')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
+
+const MODULE_PATH = path.join(
+  __dirname,
+  '../../../../app/src/Features/User/UserUpdater'
+)
 
 describe('UserUpdater', function () {
   beforeEach(function () {
     tk.freeze(Date.now())
+
+    this.user = {
+      _id: ObjectId(),
+      name: 'bob',
+      email: 'hello@world.com',
+      emails: [{ email: 'hello@world.com' }],
+    }
+
+    this.db = {
+      users: {
+        updateOne: sinon.stub().resolves({ matchedCount: 1, modifiedCount: 1 }),
+      },
+    }
     this.mongodb = {
-      db: {},
+      db: this.db,
       ObjectId(id) {
         return id
       },
     }
+
     this.UserGetter = {
-      getUserEmail: sinon.stub(),
-      getUserByAnyEmail: sinon.stub(),
       promises: {
-        ensureUniqueEmailAddress: sinon.stub(),
+        ensureUniqueEmailAddress: sinon.stub().resolves(),
         getUser: sinon.stub(),
         getUserByMainEmail: sinon.stub(),
         getUserFullEmails: sinon.stub(),
+        getUserEmail: sinon.stub(),
       },
     }
-    this.addAffiliation = sinon.stub().yields()
-    this.removeAffiliation = sinon.stub().callsArgWith(2, null)
-    this.refreshFeatures = sinon.stub().yields()
+    this.UserGetter.promises.getUser.withArgs(this.user._id).resolves(this.user)
+    this.UserGetter.promises.getUserByMainEmail
+      .withArgs(this.user.email)
+      .resolves(this.user)
+    this.UserGetter.promises.getUserFullEmails
+      .withArgs(this.user._id)
+      .resolves(this.user.emails)
+    this.UserGetter.promises.getUserEmail
+      .withArgs(this.user._id)
+      .resolves(this.user.email)
+
     this.NewsletterManager = {
       promises: {
-        changeEmail: sinon.stub(),
+        changeEmail: sinon.stub().resolves(),
       },
     }
     this.RecurlyWrapper = {
       promises: {
-        updateAccountEmailAddress: sinon.stub(),
+        updateAccountEmailAddress: sinon.stub().resolves(),
       },
     }
     this.AnalyticsManager = {
       recordEventForUser: sinon.stub(),
     }
-    this.UserUpdater = SandboxedModule.require(modulePath, {
+    this.InstitutionsAPI = {
+      promises: {
+        addAffiliation: sinon.stub().resolves(),
+        removeAffiliation: sinon.stub().resolves(),
+      },
+    }
+    this.EmailHandler = {
+      promises: {
+        sendEmail: sinon.stub().resolves(),
+      },
+    }
+    this.Features = {
+      hasFeature: sinon.stub().returns(false),
+    }
+    this.FeaturesUpdater = {
+      promises: {
+        refreshFeatures: sinon.stub().resolves(),
+      },
+    }
+    this.UserAuditLogHandler = {
+      promises: {
+        addEntry: sinon.stub().resolves(),
+      },
+    }
+
+    this.UserUpdater = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../Helpers/Mongo': { normalizeQuery },
         '../../infrastructure/mongodb': this.mongodb,
-        '@overleaf/metrics': {
-          timeAsyncMethod: sinon.stub(),
-        },
         './UserGetter': this.UserGetter,
-        '../Institutions/InstitutionsAPI': (this.InstitutionsAPI = {
-          addAffiliation: this.addAffiliation,
-          removeAffiliation: this.removeAffiliation,
-          promises: {
-            addAffiliation: sinon.stub(),
-            removeAffiliation: sinon.stub(),
-          },
-        }),
-        '../Email/EmailHandler': (this.EmailHandler = {
-          promises: {
-            sendEmail: sinon.stub(),
-          },
-        }),
-        '../../infrastructure/Features': (this.Features = {
-          hasFeature: sinon.stub().returns(false),
-        }),
-        '../Subscription/FeaturesUpdater': (this.FeaturesUpdater = {
-          refreshFeatures: this.refreshFeatures,
-          promises: {
-            refreshFeatures: sinon.stub().resolves(),
-          },
-        }),
+        '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
+        '../Email/EmailHandler': this.EmailHandler,
+        '../../infrastructure/Features': this.Features,
+        '../Subscription/FeaturesUpdater': this.FeaturesUpdater,
         '@overleaf/settings': (this.settings = {}),
-        request: (this.request = {}),
         '../Newsletter/NewsletterManager': this.NewsletterManager,
         '../Subscription/RecurlyWrapper': this.RecurlyWrapper,
-        './UserAuditLogHandler': (this.UserAuditLogHandler = {
-          promises: {
-            addEntry: sinon.stub().resolves(),
-          },
-        }),
+        './UserAuditLogHandler': this.UserAuditLogHandler,
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
+        '../../Errors/Errors': Errors,
       },
     })
 
-    this.stubbedUserEmail = 'hello@world.com'
-    this.stubbedUser = {
-      _id: '3131231',
-      name: 'bob',
-      email: this.stubbedUserEmail,
-      emails: [
-        {
-          email: this.stubbedUserEmail,
-        },
-      ],
-    }
     this.newEmail = 'bob@bob.com'
-    this.callback = sinon.stub()
   })
 
   afterEach(function () {
     return tk.reset()
   })
 
-  describe('addAffiliationForNewUser', function (done) {
-    beforeEach(function () {
-      this.UserUpdater.updateUser = sinon
-        .stub()
-        .yields(null, { matchedCount: 1, modifiedCount: 1 })
+  describe('addAffiliationForNewUser', function () {
+    it('should not remove affiliationUnchecked flag if v1 returns an error', async function () {
+      this.InstitutionsAPI.promises.addAffiliation.rejects()
+      await expect(
+        this.UserUpdater.promises.addAffiliationForNewUser(
+          this.user._id,
+          this.newEmail
+        )
+      ).to.be.rejected
+      sinon.assert.notCalled(this.db.users.updateOne)
     })
-    it('should not remove affiliationUnchecked flag if v1 returns an error', function (done) {
-      this.addAffiliation.yields(true)
-      this.UserUpdater.addAffiliationForNewUser(
-        this.stubbedUser._id,
-        this.newEmail,
-        (error, updated) => {
-          expect(error).to.exist
-          expect(updated).to.be.undefined
-          sinon.assert.notCalled(this.UserUpdater.updateUser)
-          done()
-        }
+
+    it('should remove affiliationUnchecked flag if v1 does not return an error', async function () {
+      await this.UserUpdater.promises.addAffiliationForNewUser(
+        this.user._id,
+        this.newEmail
       )
-    })
-    it('should remove affiliationUnchecked flag if v1 does not return an error', function (done) {
-      this.addAffiliation.yields()
-      this.UserUpdater.addAffiliationForNewUser(
-        this.stubbedUser._id,
-        this.newEmail,
-        error => {
-          expect(error).not.to.exist
-          sinon.assert.calledOnce(this.UserUpdater.updateUser)
-          sinon.assert.calledWithMatch(
-            this.UserUpdater.updateUser,
-            { _id: this.stubbedUser._id, 'emails.email': this.newEmail },
-            { $unset: { 'emails.$.affiliationUnchecked': 1 } }
-          )
-          done()
-        }
+      sinon.assert.calledOnce(this.db.users.updateOne)
+      sinon.assert.calledWithMatch(
+        this.db.users.updateOne,
+        { _id: this.user._id, 'emails.email': this.newEmail },
+        { $unset: { 'emails.$.affiliationUnchecked': 1 } }
       )
     })
   })
 
   describe('changeEmailAddress', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.auditLog = {
         initiatorId: 'abc123',
         ipAddress: '0:0:0:0',
       }
-      this.UserGetter.getUserEmail.callsArgWith(1, null, this.stubbedUser.email)
-      this.UserUpdater.addEmailAddress = sinon.stub().callsArgWith(4)
-      this.UserUpdater.setDefaultEmailAddress = sinon.stub().yields()
-      this.UserUpdater.removeEmailAddress = sinon.stub().callsArgWith(2)
-    })
-
-    it('change email', function (done) {
-      this.UserUpdater.changeEmailAddress(
-        this.stubbedUser._id,
+      // After the email changed, make sure that UserGetter.getUser() returns a
+      // user with the new email.
+      this.UserGetter.promises.getUser
+        .withArgs(this.user._id)
+        .onCall(1)
+        .resolves({
+          ...this.user,
+          emails: [...this.user.emails, { email: this.newEmail }],
+        })
+      // The main email changes as a result of the email change
+      this.UserGetter.promises.getUserByMainEmail
+        .withArgs(this.user.email)
+        .resolves(null)
+      this.user.emails.push({ email: this.newEmail })
+      await this.UserUpdater.promises.changeEmailAddress(
+        this.user._id,
         this.newEmail,
-        this.auditLog,
-        err => {
-          expect(err).not.to.exist
-          this.UserUpdater.addEmailAddress
-            .calledWith(this.stubbedUser._id, this.newEmail, {}, this.auditLog)
-            .should.equal(true)
-          this.UserUpdater.setDefaultEmailAddress
-            .calledWith(
-              this.stubbedUser._id,
-              this.newEmail,
-              true,
-              this.auditLog,
-              true
-            )
-            .should.equal(true)
-          this.UserUpdater.removeEmailAddress
-            .calledWith(this.stubbedUser._id, this.stubbedUser.email)
-            .should.equal(true)
-          done()
+        this.auditLog
+      )
+    })
+
+    it('adds the new email', function () {
+      expect(this.db.users.updateOne).to.have.been.calledWith(
+        { _id: this.user._id },
+        {
+          $push: {
+            emails: sinon.match({ email: this.newEmail }),
+          },
         }
       )
     })
 
-    it('validates email', function (done) {
-      this.UserUpdater.changeEmailAddress(
-        this.stubbedUser._id,
-        'foo',
-        this.auditLog,
-        err => {
-          expect(err).to.exist
-          done()
+    it('adds the new affiliation', function () {
+      this.InstitutionsAPI.promises.addAffiliation.should.have.been.calledWith(
+        this.user._id,
+        this.newEmail
+      )
+    })
+
+    it('removes the old email', function () {
+      expect(this.db.users.updateOne).to.have.been.calledWith(
+        { _id: this.user._id, email: { $ne: this.user.email } },
+        { $pull: { emails: { email: this.user.email } } }
+      )
+    })
+
+    it('removes the affiliation', function () {
+      expect(
+        this.InstitutionsAPI.promises.removeAffiliation
+      ).to.have.been.calledWith(this.user._id, this.user.email)
+    })
+
+    it('refreshes features', function () {
+      sinon.assert.calledWith(
+        this.FeaturesUpdater.promises.refreshFeatures,
+        this.user._id
+      )
+    })
+
+    it('sets the default email', function () {
+      expect(this.db.users.updateOne).to.have.been.calledWith(
+        { _id: this.user._id, 'emails.email': this.newEmail },
+        {
+          $set: sinon.match({
+            email: this.newEmail,
+          }),
         }
       )
     })
 
-    it('handle error', function (done) {
-      this.UserUpdater.removeEmailAddress.callsArgWith(2, new Error('nope'))
-      this.UserUpdater.changeEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        this.auditLog,
-        err => {
-          expect(err).to.exist
-          done()
-        }
-      )
+    it('sets the new email in the newsletter', function () {
+      expect(
+        this.NewsletterManager.promises.changeEmail
+      ).to.have.been.calledWith(this.user, this.newEmail)
+      expect(
+        this.RecurlyWrapper.promises.updateAccountEmailAddress
+      ).to.have.been.calledWith(this.user._id, this.newEmail)
+    })
+
+    it('validates email', async function () {
+      await expect(
+        this.UserUpdater.promises.changeEmailAddress(
+          this.user._id,
+          'foo',
+          this.auditLog
+        )
+      ).to.be.rejected
     })
   })
 
   describe('addEmailAddress', function () {
-    beforeEach(function () {
-      this.UserGetter.promises.ensureUniqueEmailAddress = sinon
-        .stub()
-        .resolves()
-      this.UserUpdater.promises.updateUser = sinon.stub().resolves()
-    })
-
-    it('add email', function (done) {
-      this.UserUpdater.addEmailAddress(
-        this.stubbedUser._id,
+    it('adds the email', async function () {
+      await this.UserUpdater.promises.addEmailAddress(
+        this.user._id,
         this.newEmail,
         {},
-        { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
-        err => {
-          this.UserGetter.promises.ensureUniqueEmailAddress.called.should.equal(
-            true
-          )
-          expect(err).to.not.exist
-          const reversedHostname = this.newEmail
-            .split('@')[1]
-            .split('')
-            .reverse()
-            .join('')
-          this.UserUpdater.promises.updateUser
-            .calledWith(this.stubbedUser._id, {
-              $push: {
-                emails: {
-                  email: this.newEmail,
-                  createdAt: sinon.match.date,
-                  reversedHostname,
-                },
-              },
-            })
-            .should.equal(true)
-          done()
+        { initiatorId: this.user._id, ipAddress: '127:0:0:0' }
+      )
+      this.UserGetter.promises.ensureUniqueEmailAddress.should.have.been.called
+      const reversedHostname = this.newEmail
+        .split('@')[1]
+        .split('')
+        .reverse()
+        .join('')
+      this.db.users.updateOne.should.have.been.calledWith(
+        { _id: this.user._id },
+        {
+          $push: {
+            emails: {
+              email: this.newEmail,
+              createdAt: sinon.match.date,
+              reversedHostname,
+            },
+          },
         }
       )
     })
 
-    it('add affiliation', function (done) {
+    it('adds the affiliation', async function () {
       const affiliationOptions = {
         university: { id: 1 },
         role: 'Prof',
         department: 'Math',
       }
-      this.UserUpdater.addEmailAddress(
-        this.stubbedUser._id,
+      await this.UserUpdater.promises.addEmailAddress(
+        this.user._id,
         this.newEmail,
         affiliationOptions,
-        { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
-        err => {
-          expect(err).not.to.exist
-          this.InstitutionsAPI.promises.addAffiliation.calledOnce.should.equal(
-            true
-          )
-          const { args } = this.InstitutionsAPI.promises.addAffiliation.lastCall
-          args[0].should.equal(this.stubbedUser._id)
-          args[1].should.equal(this.newEmail)
-          args[2].should.equal(affiliationOptions)
-          done()
-        }
+        { initiatorId: this.user._id, ipAddress: '127:0:0:0' }
+      )
+      this.InstitutionsAPI.promises.addAffiliation.should.have.been.calledWith(
+        this.user._id,
+        this.newEmail,
+        affiliationOptions
       )
     })
 
-    it('handle affiliation error', function (done) {
+    it('handles affiliation errors', async function () {
       this.InstitutionsAPI.promises.addAffiliation.rejects(new Error('nope'))
-      this.UserUpdater.addEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        {},
-        { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
-        err => {
-          expect(err).to.exist
-          this.UserUpdater.promises.updateUser.called.should.equal(false)
-          done()
-        }
-      )
+      await expect(
+        this.UserUpdater.promises.addEmailAddress(
+          this.user._id,
+          this.newEmail,
+          {},
+          { initiatorId: this.user._id, ipAddress: '127:0:0:0' }
+        )
+      ).to.be.rejected
+      this.db.users.updateOne.should.not.have.been.called
     })
 
-    it('validates email', function (done) {
-      this.UserUpdater.addEmailAddress(
-        this.stubbedUser._id,
-        'bar',
-        {},
-        { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
-        err => {
-          expect(err).to.exist
-          done()
-        }
-      )
+    it('validates the email', async function () {
+      expect(
+        this.UserUpdater.promises.addEmailAddress(
+          this.user._id,
+          'bar',
+          {},
+          { initiatorId: this.user._id, ipAddress: '127:0:0:0' }
+        )
+      ).to.be.rejected
     })
 
-    it('updates the audit log', function (done) {
+    it('updates the audit log', async function () {
       this.ip = '127:0:0:0'
-      this.UserUpdater.addEmailAddress(
-        this.stubbedUser._id,
+      await this.UserUpdater.promises.addEmailAddress(
+        this.user._id,
         this.newEmail,
         {},
-        { initiatorId: this.stubbedUser._id, ipAddress: this.ip },
-        error => {
-          expect(error).to.not.exist
-          this.InstitutionsAPI.promises.addAffiliation.calledOnce.should.equal(
-            true
-          )
-          const { args } = this.UserAuditLogHandler.promises.addEntry.lastCall
-          expect(args[0]).to.equal(this.stubbedUser._id)
-          expect(args[1]).to.equal('add-email')
-          expect(args[2]).to.equal(this.stubbedUser._id)
-          expect(args[3]).to.equal(this.ip)
-          expect(args[4]).to.deep.equal({
-            newSecondaryEmail: this.newEmail,
-          })
-          done()
-        }
+        { initiatorId: this.user._id, ipAddress: this.ip }
       )
+      this.InstitutionsAPI.promises.addAffiliation.calledOnce.should.equal(true)
+      const { args } = this.UserAuditLogHandler.promises.addEntry.lastCall
+      expect(args[0]).to.equal(this.user._id)
+      expect(args[1]).to.equal('add-email')
+      expect(args[2]).to.equal(this.user._id)
+      expect(args[3]).to.equal(this.ip)
+      expect(args[4]).to.deep.equal({ newSecondaryEmail: this.newEmail })
     })
 
     describe('errors', function () {
       describe('via UserAuditLogHandler', function () {
         const anError = new Error('oops')
         beforeEach(function () {
-          this.UserAuditLogHandler.promises.addEntry.throws(anError)
+          this.UserAuditLogHandler.promises.addEntry.rejects(anError)
         })
-        it('should not add email and should return error', function (done) {
-          this.UserUpdater.addEmailAddress(
-            this.stubbedUser._id,
-            this.newEmail,
-            {},
-            { initiatorId: this.stubbedUser._id, ipAddress: '127:0:0:0' },
-            error => {
-              expect(error).to.exist
-              expect(error).to.equal(anError)
-              expect(this.UserUpdater.promises.updateUser).to.not.have.been
-                .called
-              done()
-            }
-          )
+        it('should not add email and should return error', async function () {
+          await expect(
+            this.UserUpdater.promises.addEmailAddress(
+              this.user._id,
+              this.newEmail,
+              {},
+              { initiatorId: this.user._id, ipAddress: '127:0:0:0' }
+            )
+          ).to.be.rejectedWith(anError)
+          expect(this.db.users.updateOne).to.not.have.been.called
         })
       })
     })
   })
 
   describe('removeEmailAddress', function () {
-    beforeEach(function () {
-      this.UserUpdater.promises.updateUser = sinon
-        .stub()
-        .returns({ matchedCount: 1 })
-    })
-
-    it('remove email', function (done) {
-      this.UserUpdater.removeEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).not.to.exist
-          this.UserUpdater.promises.updateUser
-            .calledWith(
-              { _id: this.stubbedUser._id, email: { $ne: this.newEmail } },
-              { $pull: { emails: { email: this.newEmail } } }
-            )
-            .should.equal(true)
-          done()
-        }
+    it('removes the email', async function () {
+      await this.UserUpdater.promises.removeEmailAddress(
+        this.user._id,
+        this.newEmail
+      )
+      expect(this.db.users.updateOne).to.have.been.calledWith(
+        { _id: this.user._id, email: { $ne: this.newEmail } },
+        { $pull: { emails: { email: this.newEmail } } }
       )
     })
 
-    it('remove affiliation', function (done) {
-      this.UserUpdater.removeEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).not.to.exist
-          this.InstitutionsAPI.promises.removeAffiliation.calledOnce.should.equal(
-            true
-          )
-          const { args } =
-            this.InstitutionsAPI.promises.removeAffiliation.lastCall
-          args[0].should.equal(this.stubbedUser._id)
-          args[1].should.equal(this.newEmail)
-          done()
-        }
+    it('removes the affiliation', async function () {
+      await this.UserUpdater.promises.removeEmailAddress(
+        this.user._id,
+        this.newEmail
+      )
+      expect(this.InstitutionsAPI.promises.removeAffiliation).to.have.been
+        .calledOnce
+      const { args } = this.InstitutionsAPI.promises.removeAffiliation.lastCall
+      args[0].should.equal(this.user._id)
+      args[1].should.equal(this.newEmail)
+    })
+
+    it('refreshes features', async function () {
+      await this.UserUpdater.promises.removeEmailAddress(
+        this.user._id,
+        this.newEmail
+      )
+      sinon.assert.calledWith(
+        this.FeaturesUpdater.promises.refreshFeatures,
+        this.user._id
       )
     })
 
-    it('refresh features', function (done) {
-      this.UserUpdater.removeEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).not.to.exist
-          sinon.assert.calledWith(
-            this.FeaturesUpdater.promises.refreshFeatures,
-            this.stubbedUser._id
-          )
-          done()
-        }
-      )
-    })
-
-    it('handle error from updateUser', function (done) {
+    it('handles Mongo errors', async function () {
       const anError = new Error('nope')
-      this.UserUpdater.promises.updateUser.rejects(anError)
+      this.db.users.updateOne.rejects(anError)
 
-      this.UserUpdater.removeEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).to.exist
-          expect(err).to.deep.equal(anError)
-          expect(err._oErrorTags[0].message).to.equal(
-            'problem removing users email'
-          )
-          expect(
-            this.FeaturesUpdater.promises.refreshFeatures.callCount
-          ).to.equal(0)
-          done()
-        }
-      )
+      await expect(
+        this.UserUpdater.promises.removeEmailAddress(
+          this.user._id,
+          this.newEmail
+        )
+      ).to.be.rejected
+      expect(this.FeaturesUpdater.promises.refreshFeatures).not.to.have.been
+        .called
     })
 
-    it('handle missed update', function (done) {
-      this.UserUpdater.promises.updateUser = sinon
-        .stub()
-        .returns({ matchedCount: 0 })
+    it('handles missed update', async function () {
+      this.db.users.updateOne.resolves({ matchedCount: 0 })
 
-      this.UserUpdater.removeEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).to.exist
-          expect(err.message).to.equal('Cannot remove email')
-          expect(
-            this.FeaturesUpdater.promises.refreshFeatures.callCount
-          ).to.equal(0)
-          done()
-        }
-      )
+      await expect(
+        this.UserUpdater.promises.removeEmailAddress(
+          this.user._id,
+          this.newEmail
+        )
+      ).to.be.rejectedWith('Cannot remove email')
+      expect(this.FeaturesUpdater.promises.refreshFeatures).not.to.have.been
+        .called
     })
 
-    it('handle affiliation error', function (done) {
+    it('handles an affiliation error', async function () {
       const anError = new Error('nope')
       this.InstitutionsAPI.promises.removeAffiliation.rejects(anError)
-      this.UserUpdater.removeEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).to.exist
-          expect(err).to.deep.equal(anError)
-          this.UserUpdater.promises.updateUser.called.should.equal(false)
-          expect(
-            this.FeaturesUpdater.promises.refreshFeatures.callCount
-          ).to.equal(0)
-          done()
-        }
-      )
+      await expect(
+        this.UserUpdater.promises.removeEmailAddress(
+          this.user._id,
+          this.newEmail
+        )
+      ).to.be.rejected
+      expect(this.db.users.updateOne).not.to.have.been.called
+      expect(this.FeaturesUpdater.promises.refreshFeatures).not.to.have.been
+        .called
     })
 
-    it('returns error when removing primary email', function (done) {
-      this.UserGetter.promises.getUserByMainEmail = sinon
-        .stub()
-        .returns({ _id: '123abc' })
-      this.UserUpdater.removeEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).to.exist
-          expect(err.message).to.deep.equal('cannot remove primary email')
-          expect(this.UserUpdater.promises.updateUser.callCount).to.equal(0)
-          expect(
-            this.FeaturesUpdater.promises.refreshFeatures.callCount
-          ).to.equal(0)
-          done()
-        }
-      )
+    it('throws an error when removing the primary email', async function () {
+      await expect(
+        this.UserUpdater.promises.removeEmailAddress(
+          this.user._id,
+          this.user.email
+        )
+      ).to.be.rejectedWith('cannot remove primary email')
+      expect(this.db.users.updateOne).not.to.have.been.called
+      expect(this.FeaturesUpdater.promises.refreshFeatures).not.to.have.been
+        .called
     })
 
-    it('validates email', function (done) {
-      this.UserUpdater.removeEmailAddress(this.stubbedUser._id, 'baz', err => {
-        expect(err).to.exist
-        expect(err.message).to.equal('invalid email')
-        done()
-      })
+    it('validates the email', function () {
+      expect(
+        this.UserUpdater.promises.removeEmailAddress(this.user._id, 'baz')
+      ).to.be.rejectedWith('invalid email')
     })
 
-    it('skip email validation when skipParseEmail included', function (done) {
+    it('skips email validation when skipParseEmail included', async function () {
       const skipParseEmail = true
-      this.UserUpdater.removeEmailAddress(
-        this.stubbedUser._id,
+      await this.UserUpdater.promises.removeEmailAddress(
+        this.user._id,
         'baz',
-        skipParseEmail,
-        err => {
-          expect(err).to.not.exist
-          done()
-        }
+        skipParseEmail
       )
     })
 
-    it('returns an error when skipParseEmail included but email is not a string', function (done) {
+    it('throws an error when skipParseEmail included but email is not a string', async function () {
       const skipParseEmail = true
-      this.UserUpdater.removeEmailAddress(
-        this.stubbedUser._id,
-        1,
-        skipParseEmail,
-        err => {
-          expect(err).to.exist
-          expect(err.message).to.equal('email must be a string')
-          done()
-        }
-      )
+      await expect(
+        this.UserUpdater.promises.removeEmailAddress(
+          this.user._id,
+          1,
+          skipParseEmail
+        )
+      ).to.be.rejectedWith('email must be a string')
     })
   })
 
   describe('setDefaultEmailAddress', function () {
-    function setStubbedUserEmails(test, emails) {
-      test.stubbedUser.emails = emails
-      test.UserGetter.promises.getUserFullEmails.resolves(
-        test.stubbedUser.emails
-      )
+    function setUserEmails(test, emails) {
+      test.user.emails = emails
+      test.UserGetter.promises.getUserFullEmails
+        .withArgs(test.user._id)
+        .resolves(emails)
     }
 
     beforeEach(function () {
       this.auditLog = {
-        initiatorId: this.stubbedUser,
+        initiatorId: this.user,
         ipAddress: '0:0:0:0',
       }
-      setStubbedUserEmails(this, [
+      setUserEmails(this, [
         {
           email: this.newEmail,
           confirmedAt: new Date(),
         },
       ])
-      this.UserGetter.promises.getUser.resolves(this.stubbedUser)
-      this.NewsletterManager.promises.changeEmail.callsArgWith(2, null)
-      this.RecurlyWrapper.promises.updateAccountEmailAddress.resolves()
     })
 
-    it('set default', function (done) {
-      this.UserUpdater.promises.updateUser = sinon
-        .stub()
-        .resolves({ matchedCount: 1 })
-
-      this.UserUpdater.setDefaultEmailAddress(
-        this.stubbedUser._id,
+    it('set default', async function () {
+      await this.UserUpdater.promises.setDefaultEmailAddress(
+        this.user._id,
         this.newEmail,
         false,
-        this.auditLog,
-        err => {
-          expect(err).not.to.exist
-          this.UserUpdater.promises.updateUser
-            .calledWith(
-              { _id: this.stubbedUser._id, 'emails.email': this.newEmail },
-              {
-                $set: {
-                  email: this.newEmail,
-                  lastPrimaryEmailCheck: sinon.match.date,
-                },
-              }
-            )
-            .should.equal(true)
-          done()
+        this.auditLog
+      )
+      expect(this.db.users.updateOne).to.have.been.calledWith(
+        { _id: this.user._id, 'emails.email': this.newEmail },
+        {
+          $set: {
+            email: this.newEmail,
+            lastPrimaryEmailCheck: sinon.match.date,
+          },
         }
       )
     })
 
-    it('set changed the email in newsletter', function (done) {
-      this.UserUpdater.promises.updateUser = sinon
-        .stub()
-        .resolves({ matchedCount: 1 })
-
-      this.UserUpdater.setDefaultEmailAddress(
-        this.stubbedUser._id,
+    it('sets the changed email in the newsletter', async function () {
+      await this.UserUpdater.promises.setDefaultEmailAddress(
+        this.user._id,
         this.newEmail,
         false,
-        this.auditLog,
-        err => {
-          expect(err).not.to.exist
-          this.NewsletterManager.promises.changeEmail
-            .calledWith(this.stubbedUser, this.newEmail)
-            .should.equal(true)
-          this.RecurlyWrapper.promises.updateAccountEmailAddress
-            .calledWith(this.stubbedUser._id, this.newEmail)
-            .should.equal(true)
-          done()
-        }
+        this.auditLog
       )
+      expect(
+        this.NewsletterManager.promises.changeEmail
+      ).to.have.been.calledWith(this.user, this.newEmail)
+      expect(
+        this.RecurlyWrapper.promises.updateAccountEmailAddress
+      ).to.have.been.calledWith(this.user._id, this.newEmail)
     })
 
-    it('handle error', function (done) {
-      this.UserUpdater.promises.updateUser = sinon.stub().rejects(Error('nope'))
+    it('handles Mongo errors', async function () {
+      this.db.users.updateOne = sinon.stub().rejects(Error('nope'))
 
-      this.UserUpdater.setDefaultEmailAddress(
-        this.stubbedUser._id,
+      await expect(
+        this.UserUpdater.promises.setDefaultEmailAddress(
+          this.user._id,
+          this.newEmail,
+          false,
+          this.auditLog
+        )
+      ).to.be.rejected
+    })
+
+    it('handles missed updates', async function () {
+      this.db.users.updateOne.resolves({ matchedCount: 0 })
+
+      await expect(
+        this.UserUpdater.promises.setDefaultEmailAddress(
+          this.user._id,
+          this.newEmail,
+          false,
+          this.auditLog
+        )
+      ).to.be.rejected
+    })
+
+    it('validates the email', async function () {
+      await expect(
+        this.UserUpdater.promises.setDefaultEmailAddress(
+          this.user._id,
+          '.edu',
+          false,
+          this.auditLog
+        )
+      ).to.be.rejected
+    })
+
+    it('updates the audit log', async function () {
+      await this.UserUpdater.promises.setDefaultEmailAddress(
+        this.user._id,
         this.newEmail,
         false,
-        this.auditLog,
-        err => {
-          expect(err).to.exist
-          done()
+        this.auditLog
+      )
+      expect(
+        this.UserAuditLogHandler.promises.addEntry
+      ).to.have.been.calledWith(
+        this.user._id,
+        'change-primary-email',
+        this.auditLog.initiatorId,
+        this.auditLog.ipAddress,
+        {
+          newPrimaryEmail: this.newEmail,
+          oldPrimaryEmail: this.user.email,
         }
       )
     })
 
-    it('handle missed update', function (done) {
-      this.UserUpdater.promises.updateUser = sinon
-        .stub()
-        .resolves({ matchedCount: 0 })
-
-      this.UserUpdater.setDefaultEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        false,
-        this.auditLog,
-        err => {
-          expect(err).to.exist
-          done()
-        }
-      )
-    })
-
-    it('validates email', function (done) {
-      this.UserUpdater.setDefaultEmailAddress(
-        this.stubbedUser._id,
-        '.edu',
-        false,
-        this.auditLog,
-        err => {
-          expect(err).to.exist
-          done()
-        }
-      )
-    })
-
-    it('updates audit log', function (done) {
-      this.UserUpdater.promises.updateUser = sinon
-        .stub()
-        .resolves({ matchedCount: 1 })
-
-      this.UserUpdater.setDefaultEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        false,
-        this.auditLog,
-        error => {
-          expect(error).to.not.exist
-          expect(
-            this.UserAuditLogHandler.promises.addEntry
-          ).to.have.been.calledWith(
-            this.stubbedUser._id,
-            'change-primary-email',
-            this.auditLog.initiatorId,
-            this.auditLog.ipAddress,
-            {
-              newPrimaryEmail: this.newEmail,
-              oldPrimaryEmail: this.stubbedUser.email,
-            }
-          )
-          done()
-        }
-      )
-    })
-
-    it('blocks email update if audit log returns an error', function (done) {
-      this.UserUpdater.promises.updateUser = sinon.stub()
+    it('blocks email update if audit log returns an error', async function () {
       this.UserAuditLogHandler.promises.addEntry.rejects(new Error('oops'))
-      this.UserUpdater.setDefaultEmailAddress(
-        this.stubbedUser._id,
-        this.newEmail,
-        false,
-        this.auditLog,
-        error => {
-          expect(error).to.exist
-          expect(this.UserUpdater.promises.updateUser).to.not.have.been.called
-          done()
-        }
-      )
+      await expect(
+        this.UserUpdater.promises.setDefaultEmailAddress(
+          this.user._id,
+          this.newEmail,
+          false,
+          this.auditLog
+        )
+      ).to.be.rejected
+      expect(this.db.users.updateOne).to.not.have.been.called
     })
 
     describe('when email not confirmed', function () {
       beforeEach(function () {
-        setStubbedUserEmails(this, [
+        setUserEmails(this, [
           {
             email: this.newEmail,
             confirmedAt: null,
           },
         ])
+      })
+
+      it('should throw an error', async function () {
+        await expect(
+          this.UserUpdater.promises.setDefaultEmailAddress(
+            this.user._id,
+            this.newEmail,
+            false,
+            this.auditLog
+          )
+        ).to.be.rejectedWith(Errors.UnconfirmedEmailError)
+        expect(this.db.users.updateOne).to.not.have.been.called
+        expect(this.NewsletterManager.promises.changeEmail).to.not.have.been
+          .called
+      })
+    })
+
+    describe('when email does not belong to user', function () {
+      beforeEach(function () {
+        setUserEmails(this, [])
         this.UserUpdater.promises.updateUser = sinon.stub()
       })
 
       it('should callback with error', function () {
         this.UserUpdater.setDefaultEmailAddress(
-          this.stubbedUser._id,
+          this.user._id,
           this.newEmail,
           false,
           this.auditLog,
           error => {
             expect(error).to.exist
-            expect(error.name).to.equal('UnconfirmedEmailError')
+            expect(error.name).to.equal('Error')
             this.UserUpdater.promises.updateUser.callCount.should.equal(0)
             this.NewsletterManager.promises.changeEmail.callCount.should.equal(
               0
@@ -716,19 +639,28 @@ describe('UserUpdater', function () {
       })
     })
 
-    describe('securityAlertPrimaryEmailChangedExtraRecipients', function () {
-      it('should be empty for unaffiliated user with single email', function () {
-        const recipients =
-          this.UserUpdater.securityAlertPrimaryEmailChangedExtraRecipients(
-            this.stubbedUser.emails,
-            this.stubbedUser.email,
-            this.newEmail
+    describe('security alert', function () {
+      it('should be sent to old and new email when sendSecurityAlert=true', async function () {
+        await this.UserUpdater.promises.setDefaultEmailAddress(
+          this.user._id,
+          this.newEmail,
+          false,
+          this.auditLog,
+          true
+        )
+        // Emails are sent asynchronously. Wait a bit.
+        await setTimeout(100)
+        this.EmailHandler.promises.sendEmail.callCount.should.equal(2)
+        for (const recipient of [this.user.email, this.newEmail]) {
+          expect(this.EmailHandler.promises.sendEmail).to.have.been.calledWith(
+            'securityAlert',
+            sinon.match({ to: recipient })
           )
-        expect(recipients).to.have.same.members([])
+        }
       })
 
-      it('should be most recently (re-)confirmed emails grouped by institution and by domain for unaffiliated emails as recipients', function () {
-        setStubbedUserEmails(this, [
+      it('should send to the most recently (re-)confirmed emails grouped by institution and by domain for unaffiliated emails', async function () {
+        setUserEmails(this, [
           {
             email: '1@a1.uni',
             confirmedAt: new Date(2020, 0, 1),
@@ -770,23 +702,41 @@ describe('UserUpdater', function () {
             lastConfirmedAt: new Date(2021, 6, 1),
           },
           {
-            email: this.stubbedUser.email,
+            email: this.user.email,
+            confirmedAt: new Date(2021, 6, 1),
+            lastConfirmedAt: new Date(2021, 6, 1),
+          },
+          {
+            email: this.newEmail,
             confirmedAt: new Date(2021, 6, 1),
             lastConfirmedAt: new Date(2021, 6, 1),
           },
         ])
-
-        const recipients =
-          this.UserUpdater.securityAlertPrimaryEmailChangedExtraRecipients(
-            this.stubbedUser.emails,
-            this.stubbedUser.email,
-            this.newEmail
+        await this.UserUpdater.promises.setDefaultEmailAddress(
+          this.user._id,
+          this.newEmail,
+          false,
+          this.auditLog,
+          true
+        )
+        // Emails are sent asynchronously. Wait a bit.
+        await setTimeout(100)
+        this.EmailHandler.promises.sendEmail.callCount.should.equal(4)
+        for (const recipient of [
+          this.user.email,
+          this.newEmail,
+          '2@a1.uni',
+          '2021@foo.bar',
+        ]) {
+          expect(this.EmailHandler.promises.sendEmail).to.have.been.calledWith(
+            'securityAlert',
+            sinon.match({ to: recipient })
           )
-        expect(recipients).to.have.same.members(['2@a1.uni', '2021@foo.bar'])
+        }
       })
 
-      it('should be most recently (re-)confirmed emails grouped by institution and by domain for unaffiliated emails as recipients (multiple institutions and unaffiliated email domains)', function () {
-        setStubbedUserEmails(this, [
+      it('should send to the most recently (re-)confirmed emails grouped by institution and by domain for unaffiliated emails (multiple institutions and unaffiliated email domains)', async function () {
+        setUserEmails(this, [
           {
             email: '1@a1.uni',
             confirmedAt: new Date(2020, 0, 1),
@@ -828,108 +778,62 @@ describe('UserUpdater', function () {
             lastConfirmedAt: new Date(2021, 6, 1),
           },
           {
-            email: this.stubbedUser.email,
+            email: this.user.email,
+            confirmedAt: new Date(2021, 6, 1),
+            lastConfirmedAt: new Date(2021, 6, 1),
+          },
+          {
+            email: this.newEmail,
             confirmedAt: new Date(2021, 6, 1),
             lastConfirmedAt: new Date(2021, 6, 1),
           },
         ])
-
-        const recipients =
-          this.UserUpdater.securityAlertPrimaryEmailChangedExtraRecipients(
-            this.stubbedUser.emails,
-            this.stubbedUser.email,
-            this.newEmail
-          )
-        expect(recipients).to.have.same.members([
+        await this.UserUpdater.promises.setDefaultEmailAddress(
+          this.user._id,
+          this.newEmail,
+          false,
+          this.auditLog,
+          true
+        )
+        // Emails are sent asynchronously. Wait a bit.
+        await setTimeout(100)
+        this.EmailHandler.promises.sendEmail.callCount.should.equal(6)
+        for (const recipient of [
+          this.user.email,
+          this.newEmail,
           '1@a1.uni',
           '1@b2.uni',
           '2020@foo.bar',
           '2021@bar.foo',
-        ])
-      })
-    })
-
-    describe('when email does not belong to user', function () {
-      beforeEach(function () {
-        setStubbedUserEmails(this, [])
-        this.UserGetter.promises.getUser.resolves(this.stubbedUser)
-        this.UserUpdater.promises.updateUser = sinon.stub()
+        ]) {
+          expect(this.EmailHandler.promises.sendEmail).to.have.been.calledWith(
+            'securityAlert',
+            sinon.match({ to: recipient })
+          )
+        }
       })
 
-      it('should callback with error', function () {
-        this.UserUpdater.setDefaultEmailAddress(
-          this.stubbedUser._id,
-          this.newEmail,
-          false,
-          this.auditLog,
-          error => {
-            expect(error).to.exist
-            expect(error.name).to.equal('Error')
-            this.UserUpdater.promises.updateUser.callCount.should.equal(0)
-            this.NewsletterManager.promises.changeEmail.callCount.should.equal(
-              0
-            )
-          }
-        )
-      })
-    })
-
-    describe('security alert', function () {
-      it('should be sent to old and new email when sendSecurityAlert=true', function (done) {
-        // this.UserGetter.promises.getUser.resolves(this.stubbedUser)
-        this.UserUpdater.promises.updateUser = sinon
-          .stub()
-          .resolves({ matchedCount: 1 })
-
-        this.UserUpdater.setDefaultEmailAddress(
-          this.stubbedUser._id,
-          this.newEmail,
-          false,
-          this.auditLog,
-          true,
-          error => {
-            expect(error).to.not.exist
-            this.EmailHandler.promises.sendEmail.callCount.should.equal(2)
-            const toOldEmailAlert =
-              this.EmailHandler.promises.sendEmail.firstCall
-            expect(toOldEmailAlert.args[0]).to.equal('securityAlert')
-            const toNewEmailAlert =
-              this.EmailHandler.promises.sendEmail.lastCall
-            expect(toOldEmailAlert.args[1].to).to.equal(this.stubbedUser.email)
-            expect(toNewEmailAlert.args[0]).to.equal('securityAlert')
-            expect(toNewEmailAlert.args[1].to).to.equal(this.newEmail)
-            done()
-          }
-        )
-      })
       describe('errors', function () {
         const anError = new Error('oops')
         describe('EmailHandler', function () {
           beforeEach(function () {
             this.EmailHandler.promises.sendEmail.rejects(anError)
-            this.UserUpdater.promises.updateUser = sinon
-              .stub()
-              .resolves({ matchedCount: 1 })
           })
-          it('should log but not pass back the error', function (done) {
-            this.UserUpdater.setDefaultEmailAddress(
-              this.stubbedUser._id,
+          it('should log but not pass back the error', async function () {
+            await this.UserUpdater.promises.setDefaultEmailAddress(
+              this.user._id,
               this.newEmail,
               false,
               this.auditLog,
-              true,
-              error => {
-                expect(error).to.not.exist
-                const loggerCall = this.logger.error.firstCall
-                expect(loggerCall.args[0]).to.deep.equal({
-                  error: anError,
-                  userId: this.stubbedUser._id,
-                })
-                expect(loggerCall.args[1]).to.contain(
-                  'could not send security alert email when primary email changed'
-                )
-                done()
-              }
+              true
+            )
+            const loggerCall = this.logger.error.firstCall
+            expect(loggerCall.args[0]).to.deep.equal({
+              error: anError,
+              userId: this.user._id,
+            })
+            expect(loggerCall.args[1]).to.contain(
+              'could not send security alert email when primary email changed'
             )
           })
         })
@@ -938,121 +842,72 @@ describe('UserUpdater', function () {
   })
 
   describe('confirmEmail', function () {
-    beforeEach(function () {
-      this.UserUpdater.promises.updateUser = sinon
-        .stub()
-        .resolves({ matchedCount: 1 })
-    })
-
-    it('should update the email record', function (done) {
-      this.UserUpdater.confirmEmail(
-        this.stubbedUser._id,
-        this.stubbedUserEmail,
-        err => {
-          expect(err).not.to.exist
-          this.UserUpdater.promises.updateUser
-            .calledWith(
-              {
-                _id: this.stubbedUser._id,
-                'emails.email': this.stubbedUserEmail,
-              },
-              {
-                $set: {
-                  'emails.$.reconfirmedAt': new Date(),
-                },
-                $min: {
-                  'emails.$.confirmedAt': new Date(),
-                },
-              }
-            )
-            .should.equal(true)
-          done()
+    it('should update the email record', async function () {
+      await this.UserUpdater.promises.confirmEmail(
+        this.user._id,
+        this.user.email
+      )
+      expect(this.db.users.updateOne).to.have.been.calledWith(
+        {
+          _id: this.user._id,
+          'emails.email': this.user.email,
+        },
+        {
+          $set: {
+            'emails.$.reconfirmedAt': new Date(),
+          },
+          $min: {
+            'emails.$.confirmedAt': new Date(),
+          },
         }
       )
     })
 
-    it('add affiliation', function (done) {
-      this.UserUpdater.confirmEmail(
-        this.stubbedUser._id,
+    it('adds affiliation', async function () {
+      await this.UserUpdater.promises.confirmEmail(this.user._id, this.newEmail)
+      this.InstitutionsAPI.promises.addAffiliation.calledOnce.should.equal(true)
+      sinon.assert.calledWith(
+        this.InstitutionsAPI.promises.addAffiliation,
+        this.user._id,
         this.newEmail,
-        err => {
-          expect(err).not.to.exist
-          this.InstitutionsAPI.promises.addAffiliation.calledOnce.should.equal(
-            true
-          )
-          sinon.assert.calledWith(
-            this.InstitutionsAPI.promises.addAffiliation,
-            this.stubbedUser._id,
-            this.newEmail,
-            { confirmedAt: new Date() }
-          )
-          done()
-        }
+        { confirmedAt: new Date() }
       )
     })
 
-    it('handle error', function (done) {
-      this.UserUpdater.promises.updateUser = sinon
-        .stub()
-        .throws(new Error('nope'))
+    it('handles errors', async function () {
+      this.db.users.updateOne.rejects(new Error('nope'))
 
-      this.UserUpdater.confirmEmail(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).to.exist
-          done()
-        }
-      )
+      await expect(
+        this.UserUpdater.promises.confirmEmail(this.user._id, this.newEmail)
+      ).to.be.rejected
     })
 
-    it('handle missed update', function (done) {
-      this.UserUpdater.promises.updateUser = sinon
-        .stub()
-        .resolves({ matchedCount: 0 })
+    it('handle missed update', async function () {
+      this.db.users.updateOne.resolves({ matchedCount: 0 })
 
-      this.UserUpdater.confirmEmail(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).to.exist
-          done()
-        }
-      )
+      await expect(
+        this.UserUpdater.promises.confirmEmail(this.user._id, this.newEmail)
+      ).to.be.rejected
     })
 
-    it('validates email', function (done) {
-      this.UserUpdater.confirmEmail(this.stubbedUser._id, '@', err => {
-        expect(err).to.exist
-        done()
-      })
+    it('validates email', async function () {
+      expect(this.UserUpdater.promises.confirmEmail(this.user._id, '@')).to.be
+        .rejected
     })
 
-    it('handle affiliation error', function (done) {
-      this.InstitutionsAPI.promises.addAffiliation.throws(Error('nope'))
-      this.UserUpdater.confirmEmail(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).to.exist
-          this.UserUpdater.promises.updateUser.called.should.equal(false)
-          done()
-        }
-      )
+    it('handles affiliation errors', async function () {
+      this.InstitutionsAPI.promises.addAffiliation.rejects(new Error('nope'))
+      await expect(
+        this.UserUpdater.promises.confirmEmail(this.user._id, this.newEmail)
+      ).to.be.rejected
+      expect(this.db.users.updateOne).to.not.have.been.called
     })
 
-    it('refresh features', function (done) {
-      this.UserUpdater.confirmEmail(
-        this.stubbedUser._id,
-        this.newEmail,
-        err => {
-          expect(err).not.to.exist
-          sinon.assert.calledWith(
-            this.FeaturesUpdater.promises.refreshFeatures,
-            this.stubbedUser._id
-          )
-          done()
-        }
+    it('refreshes features', async function () {
+      await this.UserUpdater.promises.confirmEmail(this.user._id, this.newEmail)
+      sinon.assert.calledWith(
+        this.FeaturesUpdater.promises.refreshFeatures,
+        this.user._id
       )
     })
   })
