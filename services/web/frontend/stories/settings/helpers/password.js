@@ -22,6 +22,7 @@ export function defaultSetupMocks(fetchMock) {
 export function setDefaultMeta() {
   window.metaAttributesCache = window.metaAttributesCache || new Map()
   window.metaAttributesCache.set('ol-ExposedSettings', {
+    ...window.metaAttributesCache.get('ol-ExposedSettings'),
     isOverleaf: true,
   })
   window.metaAttributesCache.set('ol-isExternalAuthenticationSystemUsed', false)

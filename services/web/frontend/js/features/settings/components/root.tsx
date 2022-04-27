@@ -64,12 +64,16 @@ function SettingsPageContent() {
           <SSOProvider>
             <LinkingSection />
           </SSOProvider>
-          {isOverleaf ? <BetaProgramSection /> : null}
-          <hr />
-          <SessionsSection />
-          <hr />
           {isOverleaf ? (
             <>
+              <BetaProgramSection />
+              <hr />
+            </>
+          ) : null}
+          <SessionsSection />
+          {isOverleaf ? (
+            <>
+              <hr />
               <NewsletterSection />
               <hr />
               <LeaveSection />

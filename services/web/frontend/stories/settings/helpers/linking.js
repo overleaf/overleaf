@@ -12,6 +12,7 @@ export function defaultSetupMocks(fetchMock) {
 
 export function setDefaultMeta() {
   window.metaAttributesCache.set('ol-user', {
+    ...window.metaAttributesCache.get('ol-user'),
     features: { github: true, dropbox: true, mendeley: false, zotero: false },
     refProviders: {
       mendeley: true,
@@ -55,4 +56,6 @@ export function setDefaultMeta() {
       linkPath: '/auth/twitter',
     },
   })
+  window.metaAttributesCache.delete('integrationLinkingWidgets')
+  window.metaAttributesCache.delete('referenceLinkingWidgets')
 }

@@ -22,7 +22,7 @@ import {
 } from './helpers/linking'
 import { UserProvider } from '../../js/shared/context/user-context'
 
-export const Root = args => {
+export const Overleaf = args => {
   setDefaultLeaveMeta()
   setDefaultAccountInfoMeta()
   setDefaultPasswordMeta()
@@ -35,6 +35,30 @@ export const Root = args => {
     defaultSetupEmailsMocks(fetchMock)
     defaultSetupLinkingMocks(fetchMock)
   })
+
+  return (
+    <UserProvider>
+      <SettingsPageRoot {...args} />
+    </UserProvider>
+  )
+}
+
+export const ServerPro = args => {
+  setDefaultAccountInfoMeta()
+  setDefaultPasswordMeta()
+  useFetchMock(fetchMock => {
+    defaultSetupAccountInfoMocks(fetchMock)
+    defaultSetupPasswordMocks(fetchMock)
+  })
+
+  window.metaAttributesCache.set('ol-ExposedSettings', {
+    ...window.metaAttributesCache.get('ol-ExposedSettings'),
+    hasAffiliationsFeature: false,
+    isOverleaf: false,
+  })
+  window.metaAttributesCache.set('integrationLinkingWidgets', [])
+  window.metaAttributesCache.set('referenceLinkingWidgets', [])
+  window.metaAttributesCache.delete('ol-oauthProviders')
 
   return (
     <UserProvider>

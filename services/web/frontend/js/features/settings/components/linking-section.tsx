@@ -1,16 +1,24 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { useSSOContext, SSOSubscription } from '../context/sso-context'
 import { SSOLinkingWidget } from './linking/sso-widget'
-
-const integrationLinkingWidgets = importOverleafModules(
-  'integrationLinkingWidgets'
-)
-const referenceLinkingWidgets = importOverleafModules('referenceLinkingWidgets')
+import getMeta from '../../../utils/meta'
 
 function LinkingSection() {
   const { t } = useTranslation()
   const { subscriptions } = useSSOContext()
+
+  const [integrationLinkingWidgets] = useState(
+    () =>
+      getMeta('integrationLinkingWidgets') ||
+      importOverleafModules('integrationLinkingWidgets')
+  )
+  const [referenceLinkingWidgets] = useState(
+    () =>
+      getMeta('referenceLinkingWidgets') ||
+      importOverleafModules('referenceLinkingWidgets')
+  )
 
   const hasIntegrationLinkingSection = integrationLinkingWidgets.length
   const hasReferencesLinkingSection = referenceLinkingWidgets.length

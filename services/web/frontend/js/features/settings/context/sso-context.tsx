@@ -35,7 +35,7 @@ type SSOProviderProps = {
 
 export function SSOProvider({ children }: SSOProviderProps) {
   const isMountedRef = useIsMounted()
-  const oauthProviders = getMeta('ol-oauthProviders') as OAuthProviders
+  const oauthProviders = getMeta('ol-oauthProviders', {}) as OAuthProviders
   const thirdPartyIds = getMeta('ol-thirdPartyIds') as ThirdPartyIds
 
   const [subscriptions, setSubscriptions] = useState<
