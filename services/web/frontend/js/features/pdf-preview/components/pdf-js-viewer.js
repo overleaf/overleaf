@@ -178,29 +178,64 @@ function PdfJsViewer({ url }) {
 
   // when highlights are created, build the highlight elements
   useEffect(() => {
+    const timers = []
+    let intersectionObserver
+
     if (pdfJsWrapper && highlights?.length) {
+      // watch for the highlight elements to scroll into view
+      intersectionObserver = new IntersectionObserver(
+        entries => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              intersectionObserver.unobserve(entry.target)
+
+              // fade the element in and out
+              entry.target.style.opacity = '0.5'
+
+              timers.push(
+                window.setTimeout(() => {
+                  entry.target.style.opacity = '0'
+                }, 1000)
+              )
+            }
+          }
+        },
+        {
+          threshold: 1.0, // the whole element must be visible
+        }
+      )
+
       const elements = []
 
       for (const highlight of highlights) {
         try {
           const element = buildHighlightElement(highlight, pdfJsWrapper)
           elements.push(element)
+          intersectionObserver.observe(element)
         } catch (error) {
           // ignore invalid highlights
         }
       }
 
-      // scroll to the first highlighted element
-      elements[0]?.scrollIntoView({
-        block: 'nearest',
-        inline: 'start',
-        behavior: 'smooth',
-      })
+      const [firstElement] = elements
+
+      if (firstElement) {
+        // scroll to the first highlighted element
+        firstElement.scrollIntoView({
+          block: 'center',
+          inline: 'start',
+          behavior: 'smooth',
+        })
+      }
 
       return () => {
+        for (const timer of timers) {
+          window.clearTimeout(timer)
+        }
         for (const element of elements) {
           element.remove()
         }
+        intersectionObserver?.disconnect()
       }
     }
   }, [highlights, pdfJsWrapper])
