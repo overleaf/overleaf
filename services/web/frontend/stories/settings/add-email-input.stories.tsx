@@ -4,7 +4,10 @@ import { AddEmailInput } from '../../js/features/settings/components/emails/add-
 export const EmailInput = args => {
   useFetchMock(fetchMock =>
     fetchMock.get(/\/institutions\/domains/, [
-      { hostname: 'autocomplete.edu', id: 123 },
+      {
+        hostname: 'autocomplete.edu',
+        university: { id: 123, name: 'Auto Complete University' },
+      },
     ])
   )
   return (

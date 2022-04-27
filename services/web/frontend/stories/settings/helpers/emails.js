@@ -41,10 +41,23 @@ const fakeInstitutions = [
   { id: 9326, name: 'Unknown', country_code: 'al', departments: [] },
 ]
 
+const fakeInstitutionDomain = [
+  {
+    university: {
+      id: 1234,
+      ssoEnabled: true,
+      name: 'Auto Complete University',
+    },
+    hostname: 'autocomplete.edu',
+    confirmed: true,
+  },
+]
+
 export function defaultSetupMocks(fetchMock) {
   fetchMock
     .get(/\/user\/emails/, fakeUsersData, { delay: MOCK_DELAY })
     .get(/\/institutions\/list/, fakeInstitutions, { delay: MOCK_DELAY })
+    .get(/\/institutions\/domains/, fakeInstitutionDomain)
     .post(/\/user\/emails\/*/, 200, {
       delay: MOCK_DELAY,
     })
@@ -60,5 +73,7 @@ export function setDefaultMeta() {
   window.metaAttributesCache = window.metaAttributesCache || new Map()
   window.metaAttributesCache.set('ol-ExposedSettings', {
     hasAffiliationsFeature: true,
+    hasSamlFeature: true,
+    samlInitPath: 'saml/init',
   })
 }

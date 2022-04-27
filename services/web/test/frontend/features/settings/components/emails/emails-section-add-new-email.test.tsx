@@ -36,17 +36,35 @@ const userEmailData: UserEmailData = {
   default: false,
 }
 
+const institutionDomainData = [
+  {
+    university: {
+      id: 1234,
+      ssoEnabled: true,
+      name: 'Auto Complete University',
+    },
+    hostname: 'autocomplete.edu',
+    confirmed: true,
+  },
+]
+
+function resetFetchMock() {
+  fetchMock.reset()
+  fetchMock.get('express:/institutions/domains', [])
+}
+
 describe('<EmailsSection />', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-ExposedSettings', {
       hasAffiliationsFeature: true,
+      hasSamlFeature: true,
+      samlInitPath: 'saml/init',
     })
-    fetchMock.reset()
   })
 
   afterEach(function () {
     window.metaAttributesCache = new Map()
-    fetchMock.reset()
+    resetFetchMock()
   })
 
   it('renders "add another email" button', function () {
@@ -85,7 +103,7 @@ describe('<EmailsSection />', function () {
     render(<EmailsSection />)
 
     await fetchMock.flush(true)
-    fetchMock.reset()
+    resetFetchMock()
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [userEmailData])
       .post('/user/emails', 200)
@@ -125,7 +143,7 @@ describe('<EmailsSection />', function () {
     render(<EmailsSection />)
 
     await fetchMock.flush(true)
-    fetchMock.reset()
+    resetFetchMock()
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [])
       .post('/user/emails', 500)
@@ -158,13 +176,33 @@ describe('<EmailsSection />', function () {
     expect(submitBtn.disabled).to.be.false
   })
 
+  it('can link email address to an existing SSO institution', async function () {
+    fetchMock.reset()
+    fetchMock.get('/user/emails?ensureAffiliation=true', [])
+    fetchMock.get('express:/institutions/domains', institutionDomainData)
+    render(<EmailsSection />)
+
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: /add another email/i,
+      })
+    )
+
+    const input = screen.getByLabelText(/email/i)
+    fireEvent.change(input, {
+      target: { value: 'user@autocomplete.edu' },
+    })
+
+    await screen.findByRole('link', { name: 'Link Accounts and Add Email' })
+  })
+
   it('adds new email address with existing institution', async function () {
     const country = 'Germany'
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
     await fetchMock.flush(true)
-    fetchMock.reset()
+    resetFetchMock()
 
     await userEvent.click(
       screen.getByRole('button', {
@@ -203,7 +241,7 @@ describe('<EmailsSection />', function () {
     expect(universityInput.disabled).to.be.false
 
     await fetchMock.flush(true)
-    fetchMock.reset()
+    resetFetchMock()
 
     // Select the university from dropdown
     await userEvent.click(universityInput)
@@ -251,7 +289,7 @@ describe('<EmailsSection />', function () {
     render(<EmailsSection />)
 
     await fetchMock.flush(true)
-    fetchMock.reset()
+    resetFetchMock()
 
     await userEvent.click(
       screen.getByRole('button', {
@@ -290,7 +328,7 @@ describe('<EmailsSection />', function () {
     expect(universityInput.disabled).to.be.false
 
     await fetchMock.flush(true)
-    fetchMock.reset()
+    resetFetchMock()
 
     // Enter the university manually
     await userEvent.type(universityInput, newUniversity)

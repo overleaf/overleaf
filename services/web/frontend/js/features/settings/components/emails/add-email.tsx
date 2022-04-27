@@ -5,7 +5,7 @@ import Cell from './cell'
 import Icon from '../../../../shared/components/icon'
 import DownshiftInput from './downshift-input'
 import CountryInput from './country-input'
-import { AddEmailInput } from './add-email-input'
+import { AddEmailInput, InstitutionInfo } from './add-email-input'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useUserEmailsContext } from '../../context/user-email-context'
 import { getJSON, postJSON } from '../../../../infrastructure/fetch-json'
@@ -13,9 +13,25 @@ import { defaults as roles } from '../../roles'
 import { defaults as departments } from '../../departments'
 import { University } from '../../../../../../types/university'
 import { CountryCode } from '../../../../../../types/country'
+import { ExposedSettings } from '../../../../../../types/exposed-settings'
+import getMeta from '../../../../utils/meta'
+import { AddEmailSSOLinkingInfo } from './add-email-sso-linking-info'
 
 const isValidEmail = (email: string) => {
   return Boolean(email)
+}
+
+const ssoAvailableForDomain = (domain: InstitutionInfo | null) => {
+  const { hasSamlBeta, hasSamlFeature } = getMeta(
+    'ol-ExposedSettings'
+  ) as ExposedSettings
+  if (!hasSamlFeature || !domain || !domain.confirmed || !domain.university) {
+    return false
+  }
+  if (domain.university.ssoEnabled) {
+    return true
+  }
+  return hasSamlBeta && domain.university.ssoBeta
 }
 
 function AddEmail() {
@@ -24,6 +40,8 @@ function AddEmail() {
     () => window.location.hash === '#add-email'
   )
   const [newEmail, setNewEmail] = useState('')
+  const [newEmailMatchedInstitution, setNewEmailMatchedInstitution] =
+    useState<InstitutionInfo | null>(null)
   const [countryCode, setCountryCode] = useState<CountryCode | null>(null)
   const [universities, setUniversities] = useState<
     Partial<Record<CountryCode, University[]>>
@@ -77,8 +95,9 @@ function AddEmail() {
     setIsInstitutionFieldsVisible(true)
   }
 
-  const handleEmailChange = (value: string) => {
+  const handleEmailChange = (value: string, institution?: InstitutionInfo) => {
     setNewEmail(value)
+    setNewEmailMatchedInstitution(institution || null)
   }
 
   const handleAddNewEmail = () => {
@@ -118,6 +137,7 @@ function AddEmail() {
         getEmails()
         setIsFormVisible(false)
         setNewEmail('')
+        setNewEmailMatchedInstitution(null)
         setCountryCode(null)
         setIsUniversityDirty(false)
         setUniversity('')
@@ -135,6 +155,10 @@ function AddEmail() {
 
     return universities[countryCode]?.map(({ name }) => name) ?? []
   }
+
+  const ssoAvailable =
+    newEmailMatchedInstitution &&
+    ssoAvailableForDomain(newEmailMatchedInstitution)
 
   return (
     <div className="affiliations-table-row--highlighted">
@@ -160,83 +184,100 @@ function AddEmail() {
                 <AddEmailInput onChange={handleEmailChange} />
               </Cell>
             </Col>
-            <Col md={4}>
-              <Cell>
-                {isInstitutionFieldsVisible ? (
-                  <>
-                    <div className="form-group mb-2">
-                      <CountryInput
-                        id="new-email-country-input"
-                        setValue={setCountryCode}
-                      />
-                    </div>
-                    <div className="form-group mb-2">
-                      <DownshiftInput
-                        items={getUniversityItems()}
-                        inputValue={university}
-                        placeholder={t('university')}
-                        label={t('university')}
-                        setValue={setUniversity}
-                        disabled={!countryCode}
-                      />
-                    </div>
-                    {isUniversityDirty && (
+
+            {ssoAvailable && (
+              <Col md={8}>
+                <Cell>
+                  <AddEmailSSOLinkingInfo
+                    email={newEmail}
+                    institutionInfo={newEmailMatchedInstitution}
+                  />
+                </Cell>
+              </Col>
+            )}
+
+            {!ssoAvailable && (
+              <>
+                <Col md={4}>
+                  <Cell>
+                    {isInstitutionFieldsVisible ? (
                       <>
                         <div className="form-group mb-2">
-                          <DownshiftInput
-                            items={roles}
-                            inputValue={role}
-                            placeholder={t('role')}
-                            label={t('role')}
-                            setValue={setRole}
+                          <CountryInput
+                            id="new-email-country-input"
+                            setValue={setCountryCode}
                           />
                         </div>
-                        <div className="form-group mb-0">
+                        <div className="form-group mb-2">
                           <DownshiftInput
-                            items={departments}
-                            inputValue={department}
-                            placeholder={t('department')}
-                            label={t('department')}
-                            setValue={setDepartment}
+                            items={getUniversityItems()}
+                            inputValue={university}
+                            placeholder={t('university')}
+                            label={t('university')}
+                            setValue={setUniversity}
+                            disabled={!countryCode}
                           />
                         </div>
+                        {isUniversityDirty && (
+                          <>
+                            <div className="form-group mb-2">
+                              <DownshiftInput
+                                items={roles}
+                                inputValue={role}
+                                placeholder={t('role')}
+                                label={t('role')}
+                                setValue={setRole}
+                              />
+                            </div>
+                            <div className="form-group mb-0">
+                              <DownshiftInput
+                                items={departments}
+                                inputValue={department}
+                                placeholder={t('department')}
+                                label={t('department')}
+                                setValue={setDepartment}
+                              />
+                            </div>
+                          </>
+                        )}
                       </>
+                    ) : (
+                      <div className="mt-1">
+                        {t('is_email_affiliated')}
+                        <br />
+                        <Button
+                          className="btn-inline-link"
+                          onClick={handleShowInstitutionFields}
+                        >
+                          {t('let_us_know')}
+                        </Button>
+                      </div>
                     )}
-                  </>
-                ) : (
-                  <div className="mt-1">
-                    {t('is_email_affiliated')}
-                    <br />
+                  </Cell>
+                </Col>
+
+                <Col md={4}>
+                  <Cell className="text-md-right">
                     <Button
-                      className="btn-inline-link"
-                      onClick={handleShowInstitutionFields}
+                      bsSize="small"
+                      bsStyle="success"
+                      disabled={
+                        !isValidEmail(newEmail) || isLoading || state.isLoading
+                      }
+                      onClick={handleAddNewEmail}
                     >
-                      {t('let_us_know')}
+                      {t('add_new_email')}
                     </Button>
-                  </div>
-                )}
-              </Cell>
-            </Col>
-            <Col md={4}>
-              <Cell className="text-md-right">
-                <Button
-                  bsSize="small"
-                  bsStyle="success"
-                  disabled={
-                    !isValidEmail(newEmail) || isLoading || state.isLoading
-                  }
-                  onClick={handleAddNewEmail}
-                >
-                  {t('add_new_email')}
-                </Button>
-                {isError && (
-                  <div className="text-danger small">
-                    <Icon type="exclamation-triangle" fw />{' '}
-                    {t('error_performing_request')}
-                  </div>
-                )}
-              </Cell>
-            </Col>
+                    {isError && (
+                      <div className="text-danger small">
+                        <Icon type="exclamation-triangle" fw />{' '}
+                        {t('error_performing_request')}
+                      </div>
+                    )}
+                  </Cell>
+                </Col>
+              </>
+            )}
           </form>
         )}
       </Row>

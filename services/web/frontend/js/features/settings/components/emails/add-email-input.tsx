@@ -19,7 +19,16 @@ function matchLocalAndDomain(emailHint: string) {
   }
 }
 
-type InstitutionInfo = { hostname: string; university: { id: number } }
+export type InstitutionInfo = {
+  hostname: string
+  confirmed?: boolean
+  university: {
+    id: number
+    name: string
+    ssoEnabled?: boolean
+    ssoBeta?: boolean
+  }
+}
 
 let domainCache = new Map<string, InstitutionInfo>()
 
