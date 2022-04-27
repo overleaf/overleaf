@@ -56,10 +56,18 @@ export function unregisterServiceWorker() {
         type: 'disable',
       })
     }
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      registrations.forEach(worker => {
-        worker.unregister()
+
+    navigator.serviceWorker
+      .getRegistrations()
+      .catch(error => {
+        // fail silently if permission not given (e.g. SecurityError)
+        console.error('error listing service worker registrations', error)
+        return []
       })
-    })
+      .then(registrations => {
+        registrations.forEach(worker => {
+          worker.unregister()
+        })
+      })
   }
 }
