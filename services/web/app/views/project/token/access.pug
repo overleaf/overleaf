@@ -1,5 +1,9 @@
 extends ../../layout
 
+block vars
+	- var suppressFooter = true
+	- var suppressSkipToContent = true
+
 block content
 
 	script(type="template", id="overleaf-token-access-data")!= StringHelper.stringifyJsonForScript({ postUrl: postUrl, csrfToken: csrfToken})
