@@ -23,7 +23,21 @@
 					ng-show="searchText.value.length > 0"
 				) #{translate('clear_search')}
 
+
 		.project-tools(ng-cloak)
+			if (showToolbarUpgradePrompt)
+				.project-list-upgrade-prompt(ng-cloak ng-hide="selectedProjects.length > 0")
+					span You're on the free plan &nbsp;
+					a.btn.btn-primary(
+						href="/user/subscription/plans"
+						event-tracking="upgrade-button-click"
+						event-tracking-mb="true"
+						event-tracking-ga="subscription-funnel"
+						event-tracking-action="dashboard-top"
+						event-tracking-label="upgrade"
+						event-tracking-trigger="click"
+						event-segmentation='{"source": "dashboard-top"}'
+					) Upgrade
 			.btn-toolbar
 				.btn-group(ng-hide="selectedProjects.length < 1")
 					a.btn.btn-default(

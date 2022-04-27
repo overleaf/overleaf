@@ -129,6 +129,9 @@ describe('ProjectController', function () {
       },
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
     }
+    this.InstitutionsFeatures = {
+      hasLicence: sinon.stub().callsArgWith(1, null, false),
+    }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -171,6 +174,7 @@ describe('ProjectController', function () {
         '../Spelling/SpellingHandler': {
           getUserDictionary: sinon.stub().yields(null, []),
         },
+        '../Institutions/InstitutionsFeatures': this.InstitutionsFeatures,
       },
     })
 
@@ -543,6 +547,57 @@ describe('ProjectController', function () {
           done()
         }
         this.ProjectController.projectListPage(this.req, this.res)
+      })
+    })
+
+    describe('persistent upgrade prompt', function () {
+      describe('if the user has the default variant', function (done) {
+        it('should not show', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.showToolbarUpgradePrompt).to.equal(false)
+            done()
+          }
+          this.ProjectController.projectListPage(this.req, this.res)
+        })
+      })
+
+      describe('if the user has the persistent-upgrade variant', function (done) {
+        beforeEach(function () {
+          this.SplitTestHandler.getAssignment
+            .withArgs(this.req, this.res, 'persistent-upgrade-prompt')
+            .yields(null, { variant: 'persistent-upgrade' })
+        })
+        it('should show for a user without a subscription or only non-paid affiliations', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.showToolbarUpgradePrompt).to.equal(true)
+            done()
+          }
+          this.ProjectController.projectListPage(this.req, this.res)
+        })
+        it('should not show for a user with a subscription', function (done) {
+          this.LimitationsManager.hasPaidSubscription = sinon
+            .stub()
+            .callsArgWith(1, null, true)
+          this.res.render = (pageName, opts) => {
+            expect(opts.showToolbarUpgradePrompt).to.equal(false)
+            done()
+          }
+          this.ProjectController.projectListPage(this.req, this.res)
+        })
+        it('should not show for a user with an affiliated paid university', function (done) {
+          const emailWithProAffiliation = {
+            email: 'pro@example.com',
+            emailHasInstitutionLicence: true,
+          }
+          this.UserGetter.getUserFullEmails = sinon
+            .stub()
+            .yields(null, [emailWithProAffiliation])
+          this.res.render = (pageName, opts) => {
+            expect(opts.showToolbarUpgradePrompt).to.equal(false)
+            done()
+          }
+          this.ProjectController.projectListPage(this.req, this.res)
+        })
       })
     })
 
@@ -1438,6 +1493,59 @@ describe('ProjectController', function () {
               .yields(null, { variant: 'enabled' })
             this.ProjectController.loadEditor(this.req, this.res)
           })
+        })
+      })
+    })
+
+    describe('persistent upgrade prompt', function () {
+      beforeEach(function () {
+        // default to without a subscription
+        this.SubscriptionLocator.getUsersSubscription = sinon
+          .stub()
+          .callsArgWith(1, null, null)
+      })
+      describe('if the user has the default variant', function (done) {
+        it('should not show', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.showHeaderUpgradePrompt).to.equal(false)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      })
+
+      describe('if the user has the persistent-upgrade variant', function (done) {
+        beforeEach(function () {
+          this.SplitTestHandler.getAssignment
+            .withArgs(this.req, this.res, 'persistent-upgrade-prompt')
+            .yields(null, { variant: 'persistent-upgrade' })
+        })
+        it('should show for a user without a subscription or only non-paid affiliations', function (done) {
+          this.res.render = (pageName, opts) => {
+            expect(opts.showHeaderUpgradePrompt).to.equal(true)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+        it('should not show for a user with a subscription', function (done) {
+          this.SubscriptionLocator.getUsersSubscription = sinon
+            .stub()
+            .callsArgWith(1, null, {})
+          this.res.render = (pageName, opts) => {
+            expect(opts.showHeaderUpgradePrompt).to.equal(false)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+        it('should not show for a user with an affiliated paid university', function (done) {
+          this.InstitutionsFeatures.hasLicence = sinon
+            .stub()
+            .callsArgWith(1, null, true)
+          this.res.render = (pageName, opts) => {
+            expect(opts.showHeaderUpgradePrompt).to.equal(false)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
         })
       })
     })

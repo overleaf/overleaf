@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import MenuButton from './menu-button'
 import CobrandingLogo from './cobranding-logo'
 import BackToProjectsButton from './back-to-projects-button'
+import UpgradePrompt from './upgrade-prompt'
 import ChatToggleButton from './chat-toggle-button'
 import LayoutDropdownButton from './layout-dropdown-button'
 import OnlineUsersWidget from './online-users-widget'
@@ -63,6 +64,9 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
           onClick={togglePdfView}
           pdfViewIsOpen={pdfViewIsOpen}
         />
+      )}
+      {window.showHeaderUpgradePrompt && !pdfButtonIsVisible && (
+        <UpgradePrompt />
       )}
       <ProjectNameEditableLabel
         className="toolbar-center"

@@ -40,6 +40,7 @@ const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const SpellingHandler = require('../Spelling/SpellingHandler')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
+const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false
@@ -458,14 +459,38 @@ const ProjectController = {
             }
           )
         },
+
+        persistentUpgradePromptsAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'persistent-upgrade-prompt',
+            (err, assignment) => {
+              if (err) {
+                logger.warn(
+                  { err },
+                  'failed to get "persistent-upgrade-prompt" split test assignment'
+                )
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (err, results) => {
         if (err != null) {
           OError.tag(err, 'error getting data for project list page')
           return next(err)
         }
-        const { notifications, user, userEmailsData, primaryEmailCheckActive } =
-          results
+        const {
+          notifications,
+          user,
+          userEmailsData,
+          primaryEmailCheckActive,
+          persistentUpgradePromptsAssignment,
+        } = results
 
         if (
           user &&
@@ -594,6 +619,12 @@ const ProjectController = {
           )
         }
 
+        // Persistent upgrade prompts
+        const showToolbarUpgradePrompt =
+          persistentUpgradePromptsAssignment.variant === 'persistent-upgrade' &&
+          !results.hasSubscription &&
+          !userEmails.some(e => e.emailHasInstitutionLicence)
+
         ProjectController._injectProjectUsers(projects, (error, projects) => {
           if (error != null) {
             return next(error)
@@ -616,6 +647,7 @@ const ProjectController = {
             isOverleaf: !!Settings.overleaf,
             metadata: { viewport: false },
             showThinFooter: true, // don't show the fat footer on the projects dashboard, as there's a fixed space available
+            showToolbarUpgradePrompt,
           }
 
           const paidUser =
@@ -719,6 +751,18 @@ const ProjectController = {
               }
             )
           }
+        },
+        userHasInstitutionLicence(cb) {
+          if (!userId) {
+            return cb(null, false)
+          }
+          InstitutionsFeatures.hasLicence(userId, (error, hasLicence) => {
+            if (error) {
+              // Don't fail if we can't get affiliation licences
+              return cb(null, false)
+            }
+            cb(null, hasLicence)
+          })
         },
         learnedWords(cb) {
           if (!userId) {
@@ -838,12 +882,28 @@ const ProjectController = {
             }
           )
         },
+        persistentUpgradePromptsAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'persistent-upgrade-prompt',
+            (error, assignment) => {
+              // do not fail editor load if assignment fails
+              if (error) {
+                cb(null, { variant: 'default' })
+              } else {
+                cb(null, assignment)
+              }
+            }
+          )
+        },
       },
       (
         err,
         {
           project,
           user,
+          userHasInstitutionLicence,
           learnedWords,
           subscription,
           isTokenMember,
@@ -851,6 +911,7 @@ const ProjectController = {
           newSourceEditorAssignment,
           pdfDetachAssignment,
           pdfjsAssignment,
+          persistentUpgradePromptsAssignment,
         }
       ) => {
         if (err != null) {
@@ -956,6 +1017,14 @@ const ProjectController = {
               !Features.hasFeature('saas') ||
               (user.features && user.features.symbolPalette)
 
+            // Persistent upgrade prompts
+            const showHeaderUpgradePrompt =
+              persistentUpgradePromptsAssignment.variant ===
+                'persistent-upgrade' &&
+              userId &&
+              !subscription &&
+              !userHasInstitutionLicence
+
             const template =
               detachRole === 'detached'
                 ? 'project/editor_detached'
@@ -1027,6 +1096,7 @@ const ProjectController = {
                 !shouldDisplayFeature('enable_pdf_caching', false),
               detachRole,
               metadata: { viewport: false },
+              showHeaderUpgradePrompt,
             })
             timer.done()
           }
