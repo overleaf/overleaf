@@ -776,6 +776,17 @@ const ProjectController = {
           }
           SubscriptionLocator.getUsersSubscription(userId, cb)
         },
+        userIsMemberOfGroupSubscription(cb) {
+          if (sessionUser == null) {
+            return cb(null, false)
+          }
+          LimitationsManager.userIsMemberOfGroupSubscription(
+            sessionUser,
+            (error, isMember) => {
+              cb(error, isMember)
+            }
+          )
+        },
         activate(cb) {
           InactiveProjectManager.reactivateProjectIfRequired(projectId, cb)
         },
@@ -906,6 +917,7 @@ const ProjectController = {
           userHasInstitutionLicence,
           learnedWords,
           subscription,
+          userIsMemberOfGroupSubscription,
           isTokenMember,
           brandVariation,
           newSourceEditorAssignment,
@@ -1023,6 +1035,7 @@ const ProjectController = {
                 'persistent-upgrade' &&
               userId &&
               !subscription &&
+              !userIsMemberOfGroupSubscription &&
               !userHasInstitutionLicence
 
             const template =

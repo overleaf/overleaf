@@ -55,7 +55,12 @@ describe('ProjectController', function () {
         .callsArgWith(2, null, { _id: this.project_id }),
     }
     this.SubscriptionLocator = { getUsersSubscription: sinon.stub() }
-    this.LimitationsManager = { hasPaidSubscription: sinon.stub() }
+    this.LimitationsManager = {
+      hasPaidSubscription: sinon.stub(),
+      userIsMemberOfGroupSubscription: sinon
+        .stub()
+        .callsArgWith(1, null, false),
+    }
     this.TagsHandler = { getAllTags: sinon.stub() }
     this.NotificationsHandler = { getUserNotifications: sinon.stub() }
     this.UserModel = { findById: sinon.stub(), updateOne: sinon.stub() }
@@ -1527,10 +1532,20 @@ describe('ProjectController', function () {
           }
           this.ProjectController.loadEditor(this.req, this.res)
         })
-        it('should not show for a user with a subscription', function (done) {
+        it('should not show for a user with a personal subscription', function (done) {
           this.SubscriptionLocator.getUsersSubscription = sinon
             .stub()
             .callsArgWith(1, null, {})
+          this.res.render = (pageName, opts) => {
+            expect(opts.showHeaderUpgradePrompt).to.equal(false)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+        it('should not show for a user who is a member of a group subscription', function (done) {
+          this.LimitationsManager.userIsMemberOfGroupSubscription = sinon
+            .stub()
+            .callsArgWith(1, null, true)
           this.res.render = (pageName, opts) => {
             expect(opts.showHeaderUpgradePrompt).to.equal(false)
             done()
