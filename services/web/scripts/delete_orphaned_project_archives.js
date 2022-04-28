@@ -85,12 +85,20 @@ async function hardDeleteProjectArchiverData(prefix) {
   console.log(`Destroying hard deleted project archive at '${prefix}/'`)
   if (DRY_RUN) return
 
-  const ok = await TpdsUpdateSender.promises.deleteProject({
-    project_id: encodeURIComponent(prefix),
-  })
-  if (!ok) {
-    throw new Error(`deletion failed for '${prefix}/', check logs`)
+  for (let i = 0; i < 10; i++) {
+    await sleep(1000 * i)
+    try {
+      const ok = await TpdsUpdateSender.promises.deleteProject({
+        project_id: encodeURIComponent(prefix),
+      })
+      if (ok) {
+        return
+      }
+    } catch (e) {
+      console.error(`deletion failed for '${prefix}/'`, e)
+    }
   }
+  throw new Error(`deletion failed for '${prefix}/', check logs`)
 }
 
 async function letUserDoubleCheckInputs() {
