@@ -131,10 +131,9 @@ const UserRegistrationHandler = {
                 if (error) {
                   logger.warn({ err: error }, 'failed to send activation email')
                 }
+                callback(null, user, setNewPasswordUrl)
               }
             )
-
-            callback(null, user, setNewPasswordUrl)
           }
         )
       }
