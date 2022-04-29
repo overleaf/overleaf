@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef } from 'react'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 
@@ -7,6 +7,7 @@ type DownshiftInputProps = {
   inputValue: string
   label: string
   setValue: React.Dispatch<React.SetStateAction<string>>
+  inputRef?: React.ForwardedRef<HTMLInputElement>
 } & React.InputHTMLAttributes<HTMLInputElement>
 
 const filterItemsByInputValue = (
@@ -14,13 +15,14 @@ const filterItemsByInputValue = (
   inputValue: DownshiftInputProps['inputValue']
 ) => items.filter(item => item.toLowerCase().includes(inputValue.toLowerCase()))
 
-function DownshiftInput({
+function Downshift({
   items,
   inputValue,
   placeholder,
   label,
   setValue,
   disabled,
+  inputRef,
 }: DownshiftInputProps) {
   const [inputItems, setInputItems] = useState(items)
 
@@ -35,6 +37,7 @@ function DownshiftInput({
     getInputProps,
     getComboboxProps,
     getItemProps,
+    highlightedIndex,
     openMenu,
     selectedItem,
   } = useCombobox({
@@ -78,6 +81,7 @@ function DownshiftInput({
                 openMenu()
               }
             },
+            ref: inputRef,
           })}
           className="form-control"
           type="text"
@@ -98,6 +102,8 @@ function DownshiftInput({
             <div
               className={classnames('ui-select-choices-row', {
                 active: selectedItem === item,
+                'ui-select-choices-row--highlighted':
+                  highlightedIndex === index,
               })}
             >
               <span className="ui-select-choices-row-inner">
@@ -110,5 +116,12 @@ function DownshiftInput({
     </div>
   )
 }
+
+const DownshiftInput = forwardRef<
+  HTMLInputElement,
+  Omit<DownshiftInputProps, 'inputRef'>
+>((props, ref) => <Downshift {...props} inputRef={ref} />)
+
+DownshiftInput.displayName = 'DownshiftInput'
 
 export default DownshiftInput

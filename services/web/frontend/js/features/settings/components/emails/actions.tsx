@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import MakePrimary from './actions/make-primary'
 import Remove from './actions/remove'
-import Icon from '../../../../shared/components/icon'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useUserEmailsContext } from '../../context/user-email-context'
 import { UserEmailData } from '../../../../../../types/user-email'
@@ -51,8 +50,7 @@ function Actions({ userEmailData }: ActionsProps) {
       />
       {(makePrimaryAsync.isError || deleteEmailAsync.isError) && (
         <div className="text-danger small">
-          <Icon type="exclamation-triangle" fw />{' '}
-          {t('error_performing_request')}
+          {t('generic_something_went_wrong')}
         </div>
       )}
     </>

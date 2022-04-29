@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { UserEmailData } from '../../../../../../types/user-email'
 import { Button } from 'react-bootstrap'
 import { isChangingAffiliation } from '../../utils/selectors'
 import { useUserEmailsContext } from '../../context/user-email-context'
 import DownshiftInput from './downshift-input'
-import Icon from '../../../../shared/components/icon'
 import useAsync from '../../../../shared/hooks/use-async'
 import { getJSON, postJSON } from '../../../../infrastructure/fetch-json'
 import { defaults as defaultRoles } from '../../roles'
@@ -30,10 +29,21 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
   const [role, setRole] = useState(affiliation?.role || '')
   const [department, setDepartment] = useState(affiliation?.department || '')
   const [departments, setDepartments] = useState(defaultDepartments)
+  const roleRef = useRef<HTMLInputElement | null>(null)
+  const isChangingAffiliationInProgress = isChangingAffiliation(
+    state,
+    userEmailData.email
+  )
 
   useEffect(() => {
     setUserEmailsContextLoading(isLoading)
   }, [setUserEmailsContextLoading, isLoading])
+
+  useEffect(() => {
+    if (isChangingAffiliationInProgress && roleRef.current) {
+      roleRef.current?.focus()
+    }
+  }, [roleRef, isChangingAffiliationInProgress])
 
   const handleChangeAffiliation = () => {
     setEmailAffiliationBeingEdited(userEmailData.email)
@@ -87,7 +97,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
   return (
     <>
       <div>{affiliation.institution.name}</div>
-      {!isChangingAffiliation(state, userEmailData.email) ? (
+      {!isChangingAffiliationInProgress ? (
         <div className="small">
           {(affiliation.role || affiliation.department) && (
             <>
@@ -112,6 +122,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
               placeholder={t('role')}
               label={t('role')}
               setValue={setRole}
+              ref={roleRef}
             />
             <DownshiftInput
               items={departments}
@@ -130,7 +141,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
             </Button>
             {!isLoading && (
               <>
-                <span className="mx-2">{t('save_or_cancel-or')}</span>
+                <span className="mx-1">{t('save_or_cancel-or')}</span>
                 <Button
                   className="btn-inline-link"
                   onClick={handleCancelAffiliationChange}
@@ -143,10 +154,9 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
         </div>
       )}
       {isError && (
-        <span className="text-danger small">
-          <Icon type="exclamation-triangle" fw />{' '}
-          {t('error_performing_request')}
-        </span>
+        <div className="text-danger small">
+          {t('generic_something_went_wrong')}
+        </div>
       )}
     </>
   )

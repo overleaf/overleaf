@@ -18,6 +18,7 @@ function EmailsSectionContent() {
     state: { data: userEmailsData },
     isInitializing,
     isInitializingError,
+    isInitializingSuccess,
   } = useUserEmailsContext()
   const userEmails = Object.values(userEmailsData.byId)
 
@@ -32,11 +33,13 @@ function EmailsSectionContent() {
           <a href="/learn/how-to/Keeping_your_account_secure" />
         </Trans>
       </p>
-      <div className="table">
+      <>
         <EmailsHeader />
         {isInitializing ? (
-          <div className="text-center">
-            <Icon type="refresh" fw spin /> {t('loading')}...
+          <div className="affiliations-table-row--highlighted">
+            <div className="affiliations-table-cell text-center">
+              <Icon type="refresh" fw spin /> {t('loading')}...
+            </div>
           </div>
         ) : (
           <>
@@ -48,14 +51,14 @@ function EmailsSectionContent() {
             ))}
           </>
         )}
-        <AddEmail />
+        {isInitializingSuccess && <AddEmail />}
         {isInitializingError && (
           <Alert bsStyle="danger" className="text-center">
             <Icon type="exclamation-triangle" fw />{' '}
             {t('error_performing_request')}
           </Alert>
         )}
-      </div>
+      </>
     </>
   )
 }
@@ -73,7 +76,6 @@ function EmailsSection() {
       <UserEmailsProvider>
         <EmailsSectionContent />
       </UserEmailsProvider>
-      <hr />
     </>
   )
 }

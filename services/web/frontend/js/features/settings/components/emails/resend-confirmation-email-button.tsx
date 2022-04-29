@@ -53,10 +53,7 @@ function ResendConfirmationEmailButton({
       </Button>
       <br />
       {isError && (
-        <span className="text-danger">
-          <Icon type="exclamation-triangle" fw />{' '}
-          {t('error_performing_request')}
-        </span>
+        <div className="text-danger">{t('generic_something_went_wrong')}</div>
       )}
     </>
   )

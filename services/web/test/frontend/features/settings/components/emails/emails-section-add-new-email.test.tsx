@@ -60,6 +60,7 @@ describe('<EmailsSection />', function () {
       hasSamlFeature: true,
       samlInitPath: 'saml/init',
     })
+    fetchMock.reset()
   })
 
   afterEach(function () {
@@ -67,9 +68,11 @@ describe('<EmailsSection />', function () {
     resetFetchMock()
   })
 
-  it('renders "add another email" button', function () {
+  it('renders "add another email" button', async function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
+
+    await fetchMock.flush(true)
 
     screen.getByRole('button', { name: /add another email/i })
   })
@@ -146,7 +149,7 @@ describe('<EmailsSection />', function () {
     resetFetchMock()
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [])
-      .post('/user/emails', 500)
+      .post('/user/emails', 400)
 
     const addAnotherEmailBtn = screen.getByRole('button', {
       name: /add another email/i,
@@ -170,17 +173,19 @@ describe('<EmailsSection />', function () {
     expect(submitBtn.disabled).to.be.true
 
     await screen.findByText(
-      /an error has occurred while performing your request/i
+      /Invalid Request. Please correct the data and try again./i
     )
     expect(submitBtn).to.not.be.null
     expect(submitBtn.disabled).to.be.false
   })
 
   it('can link email address to an existing SSO institution', async function () {
-    fetchMock.reset()
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
-    fetchMock.get('express:/institutions/domains', institutionDomainData)
     render(<EmailsSection />)
+
+    await fetchMock.flush(true)
+    fetchMock.reset()
+    fetchMock.get('express:/institutions/domains', institutionDomainData)
 
     await userEvent.click(
       screen.getByRole('button', {

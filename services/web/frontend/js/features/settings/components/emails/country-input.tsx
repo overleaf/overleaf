@@ -1,5 +1,5 @@
+import { useState, forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 import { defaults as countries } from '../../countries-list'
@@ -7,11 +7,12 @@ import { CountryCode } from '../../../../../../types/country'
 
 type CountryInputProps = {
   setValue: React.Dispatch<React.SetStateAction<CountryCode | null>>
+  inputRef?: React.ForwardedRef<HTMLInputElement>
 } & React.InputHTMLAttributes<HTMLInputElement>
 
 const itemToString = (item: typeof countries[number] | null) => item?.name ?? ''
 
-function CountryInput({ setValue }: CountryInputProps) {
+function Downshift({ setValue, inputRef }: CountryInputProps) {
   const { t } = useTranslation()
   const [inputItems, setInputItems] = useState(() => countries)
   const [inputValue, setInputValue] = useState('')
@@ -23,6 +24,7 @@ function CountryInput({ setValue }: CountryInputProps) {
     getInputProps,
     getComboboxProps,
     getItemProps,
+    highlightedIndex,
     openMenu,
     selectedItem,
   } = useCombobox({
@@ -66,6 +68,7 @@ function CountryInput({ setValue }: CountryInputProps) {
                 openMenu()
               }
             },
+            ref: inputRef,
           })}
           className="form-control"
           type="text"
@@ -86,6 +89,8 @@ function CountryInput({ setValue }: CountryInputProps) {
             <div
               className={classnames('ui-select-choices-row', {
                 active: selectedItem?.name === item.name,
+                'ui-select-choices-row--highlighted':
+                  highlightedIndex === index,
               })}
             >
               <span className="ui-select-choices-row-inner">
@@ -98,5 +103,12 @@ function CountryInput({ setValue }: CountryInputProps) {
     </div>
   )
 }
+
+const CountryInput = forwardRef<
+  HTMLInputElement,
+  Omit<CountryInputProps, 'inputRef'>
+>((props, ref) => <Downshift {...props} inputRef={ref} />)
+
+CountryInput.displayName = 'CountryInput'
 
 export default CountryInput

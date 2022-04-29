@@ -65,7 +65,7 @@ describe('email actions - make primary', function () {
       screen.getByRole('button', { name: /sending/i })
     )
 
-    screen.getByText(/an error has occurred while performing your request/i)
+    screen.getByText(/sorry, something went wrong/i)
     screen.getByRole('button', { name: /make primary/i })
   })
 })
@@ -114,7 +114,7 @@ describe('email actions - delete', function () {
       screen.getByRole('button', { name: /deleting/i })
     )
 
-    screen.getByText(/an error has occurred while performing your request/i)
+    screen.getByText(/sorry, something went wrong/i)
     screen.getByRole('button', { name: /remove/i })
   })
 })

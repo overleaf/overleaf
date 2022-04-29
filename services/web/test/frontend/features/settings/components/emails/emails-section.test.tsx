@@ -198,7 +198,7 @@ describe('<EmailsSection />', function () {
 
     await waitForElementToBeRemoved(() => screen.getByText(/sending/i))
 
-    screen.getByText(/an error has occurred while performing your request/i)
+    screen.getByText(/sorry, something went wrong/i)
     screen.getByRole('button', { name: /resend confirmation email/i })
   })
 })

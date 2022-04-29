@@ -17,14 +17,14 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
           <Email userEmailData={userEmailData} />
         </EmailCell>
       </Col>
-      <Col md={4}>
+      <Col md={5}>
         {userEmailData.affiliation?.institution && (
           <EmailCell>
             <InstitutionAndRole userEmailData={userEmailData} />
           </EmailCell>
         )}
       </Col>
-      <Col md={4}>
+      <Col md={3}>
         <EmailCell className="text-md-right">
           <Actions userEmailData={userEmailData} />
         </EmailCell>

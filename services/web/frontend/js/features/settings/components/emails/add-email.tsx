@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Row, Col } from 'react-bootstrap'
+import { Button, Row, Col, Alert } from 'react-bootstrap'
 import Cell from './cell'
 import Icon from '../../../../shared/components/icon'
 import DownshiftInput from './downshift-input'
@@ -39,6 +39,8 @@ function AddEmail() {
   const [isFormVisible, setIsFormVisible] = useState(
     () => window.location.hash === '#add-email'
   )
+  const emailRef = useRef<HTMLInputElement | null>(null)
+  const countryRef = useRef<HTMLInputElement | null>(null)
   const [newEmail, setNewEmail] = useState('')
   const [newEmailMatchedInstitution, setNewEmailMatchedInstitution] =
     useState<InstitutionInfo | null>(null)
@@ -53,7 +55,7 @@ function AddEmail() {
   const [isInstitutionFieldsVisible, setIsInstitutionFieldsVisible] =
     useState(false)
   const [isUniversityDirty, setIsUniversityDirty] = useState(false)
-  const { isLoading, isError, runAsync } = useAsync()
+  const { isLoading, isError, error, runAsync } = useAsync()
   const { runAsync: institutionRunAsync } = useAsync()
   const {
     state,
@@ -64,6 +66,18 @@ function AddEmail() {
   useEffect(() => {
     setUserEmailsContextLoading(isLoading)
   }, [setUserEmailsContextLoading, isLoading])
+
+  useEffect(() => {
+    if (isFormVisible && emailRef.current) {
+      emailRef.current?.focus()
+    }
+  }, [emailRef, isFormVisible])
+
+  useEffect(() => {
+    if (isInstitutionFieldsVisible && countryRef.current) {
+      countryRef.current?.focus()
+    }
+  }, [countryRef, isInstitutionFieldsVisible])
 
   useEffect(() => {
     if (university) {
@@ -194,7 +208,7 @@ function AddEmail() {
                 <label htmlFor="affiliations-email" className="sr-only">
                   {t('email')}
                 </label>
-                <AddEmailInput onChange={handleEmailChange} />
+                <AddEmailInput onChange={handleEmailChange} ref={emailRef} />
               </Cell>
             </Col>
 
@@ -211,7 +225,7 @@ function AddEmail() {
 
             {!ssoAvailable && (
               <>
-                <Col md={4}>
+                <Col md={5}>
                   <Cell>
                     {isInstitutionFieldsVisible ? (
                       <>
@@ -219,6 +233,7 @@ function AddEmail() {
                           <CountryInput
                             id="new-email-country-input"
                             setValue={setCountryCode}
+                            ref={countryRef}
                           />
                         </div>
                         <div className="form-group mb-2">
@@ -269,7 +284,7 @@ function AddEmail() {
                   </Cell>
                 </Col>
 
-                <Col md={4}>
+                <Col md={3}>
                   <Cell className="text-md-right">
                     <Button
                       bsSize="small"
@@ -281,12 +296,6 @@ function AddEmail() {
                     >
                       {t('add_new_email')}
                     </Button>
-                    {isError && (
-                      <div className="text-danger small">
-                        <Icon type="exclamation-triangle" fw />{' '}
-                        {t('error_performing_request')}
-                      </div>
-                    )}
                   </Cell>
                 </Col>
               </>
@@ -294,6 +303,11 @@ function AddEmail() {
           </form>
         )}
       </Row>
+      {isError && (
+        <Alert bsStyle="danger" className="text-center">
+          <Icon type="exclamation-triangle" fw /> {error.getUserFacingMessage()}
+        </Alert>
+      )}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useState,
+  forwardRef,
 } from 'react'
 import { getJSON } from '../../../../infrastructure/fetch-json'
 import useAbortController from '../../../../shared/hooks/use-abort-controller'
@@ -38,13 +39,14 @@ export function clearDomainCache() {
 
 type AddEmailInputProps = {
   onChange: (value: string, institution?: InstitutionInfo) => void
+  inputRef?: React.ForwardedRef<HTMLInputElement>
 }
 
-export function AddEmailInput({ onChange }: AddEmailInputProps) {
+function AddEmailInputBase({ onChange, inputRef }: AddEmailInputProps) {
   const { signal } = useAbortController()
 
-  const [suggestion, setSuggestion] = useState<string>(null)
-  const [inputValue, setInputValue] = useState<string>(null)
+  const [suggestion, setSuggestion] = useState<string | null>(null)
+  const [inputValue, setInputValue] = useState<string | null>(null)
   const [matchedInstitution, setMatchedInstitution] =
     useState<InstitutionInfo>(null)
 
@@ -52,7 +54,10 @@ export function AddEmailInput({ onChange }: AddEmailInputProps) {
     if (inputValue == null) {
       return
     }
-    if (matchedInstitution && suggestion === inputValue) {
+    if (
+      matchedInstitution &&
+      inputValue.endsWith(matchedInstitution.hostname)
+    ) {
       onChange(inputValue, matchedInstitution)
     } else {
       onChange(inputValue)
@@ -103,11 +108,22 @@ export function AddEmailInput({ onChange }: AddEmailInputProps) {
 
   const handleKeyDownEvent = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === 'Tab' || event.key === 'Enter') {
+      const setInputValueAndResetSuggestion = () => {
+        setInputValue(suggestion)
+        setSuggestion(null)
+      }
+
+      if (event.key === 'Enter') {
         event.preventDefault()
+
         if (suggestion) {
-          setInputValue(suggestion)
+          setInputValueAndResetSuggestion()
         }
+      }
+
+      if (event.key === 'Tab' && suggestion) {
+        event.preventDefault()
+        setInputValueAndResetSuggestion()
       }
     },
     [suggestion]
@@ -129,7 +145,17 @@ export function AddEmailInput({ onChange }: AddEmailInputProps) {
         onKeyDown={handleKeyDownEvent}
         value={inputValue || ''}
         placeholder="e.g. johndoe@mit.edu"
+        ref={inputRef}
       />
     </div>
   )
 }
+
+const AddEmailInput = forwardRef<
+  HTMLInputElement,
+  Omit<AddEmailInputProps, 'inputRef'>
+>((props, ref) => <AddEmailInputBase {...props} inputRef={ref} />)
+
+AddEmailInput.displayName = 'AddEmailInput'
+
+export { AddEmailInput }

@@ -196,7 +196,7 @@ const reducer = (state: State, action: Action) => {
 function useUserEmails() {
   const [state, unsafeDispatch] = useReducer(reducer, initialState)
   const dispatch = useSafeDispatch(unsafeDispatch)
-  const { data, isLoading, isError, runAsync } = useAsync()
+  const { data, isLoading, isError, isSuccess, runAsync } = useAsync()
 
   const getEmails = useCallback(() => {
     runAsync<UserEmailData[]>(getJSON('/user/emails?ensureAffiliation=true'))
@@ -214,6 +214,7 @@ function useUserEmails() {
   return {
     state,
     isInitializing: isLoading && !data,
+    isInitializingSuccess: isSuccess,
     isInitializingError: isError,
     getEmails,
     setLoading: useCallback(
