@@ -147,25 +147,23 @@ mixin gen_localized_price_for_plan(plan)
 		+gen_localized_price_for_plan_view(plan, 'annual')
 		span.small /yr
 
-mixin gen_localized_price_for_personal_plan_special_offer
+mixin gen_localized_undiscounted_price_for_plan(plan)
 	div(data-ol-view='monthly')
-		+gen_localized_price_for_plan_view('personal', 'monthly')
-		span.small /mo
 		.undiscounted-price.small
 			span.sr-only Price reduced from
-			+gen_localized_undiscounted_price_for_plan_view('personal', 'monthly')
+			+gen_localized_undiscounted_price_for_plan_view(plan, 'monthly')
 			| /mo
 	div(hidden data-ol-view='annual')
-		+gen_localized_price_for_plan_view('personal', 'annual')
-		span.small /yr
 		.undiscounted-price.small
 			span.sr-only Price reduced from
-			+gen_localized_undiscounted_price_for_plan_view('personal', 'annual')
+			+gen_localized_undiscounted_price_for_plan_view(plan, 'annual')
 			| /yr
 
 //- Prices
 mixin price_personal
-	+gen_localized_price_for_personal_plan_special_offer
+	+gen_localized_price_for_plan('personal')
+mixin price_personal_undiscounted
+	+gen_localized_undiscounted_price_for_plan('personal')
 mixin price_collaborator
 	+gen_localized_price_for_plan('collaborator')
 mixin price_professional
@@ -237,6 +235,7 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 									h5.special-offer #{translate("limited_time_discount")}
 								.circle
 									+price_personal
+									+price_personal_undiscounted
 								+features_personal(location)
 						.col-md-4
 							.card.card-highlighted
