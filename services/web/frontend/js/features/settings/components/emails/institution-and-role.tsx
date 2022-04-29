@@ -7,9 +7,10 @@ import { useUserEmailsContext } from '../../context/user-email-context'
 import DownshiftInput from './downshift-input'
 import Icon from '../../../../shared/components/icon'
 import useAsync from '../../../../shared/hooks/use-async'
-import { postJSON } from '../../../../infrastructure/fetch-json'
-import { defaults as roles } from '../../roles'
-import { defaults as departments } from '../../departments'
+import { getJSON, postJSON } from '../../../../infrastructure/fetch-json'
+import { defaults as defaultRoles } from '../../roles'
+import { defaults as defaultDepartments } from '../../departments'
+import { University } from '../../../../../../types/university'
 
 type InstitutionAndRoleProps = {
   userEmailData: UserEmailData
@@ -18,6 +19,7 @@ type InstitutionAndRoleProps = {
 function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
   const { t } = useTranslation()
   const { isLoading, isError, runAsync } = useAsync()
+  const changeAffiliationAsync = useAsync()
   const { affiliation } = userEmailData
   const {
     state,
@@ -27,6 +29,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
   } = useUserEmailsContext()
   const [role, setRole] = useState(affiliation?.role || '')
   const [department, setDepartment] = useState(affiliation?.department || '')
+  const [departments, setDepartments] = useState(defaultDepartments)
 
   useEffect(() => {
     setUserEmailsContextLoading(isLoading)
@@ -34,6 +37,23 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
 
   const handleChangeAffiliation = () => {
     setEmailAffiliationBeingEdited(userEmailData.email)
+
+    if (!affiliation?.institution.id) {
+      return
+    }
+
+    changeAffiliationAsync
+      .runAsync<University>(
+        getJSON(`/institutions/list/${affiliation.institution.id}`)
+      )
+      .then(data => {
+        if (data.departments.length) {
+          setDepartments(data.departments)
+        }
+      })
+      .catch(() => {
+        setDepartments(defaultDepartments)
+      })
   }
 
   const handleCancelAffiliationChange = () => {
@@ -87,7 +107,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
         <div className="affiliation-change-container small">
           <form onSubmit={handleSubmit}>
             <DownshiftInput
-              items={roles}
+              items={defaultRoles}
               inputValue={role}
               placeholder={t('role')}
               label={t('role')}

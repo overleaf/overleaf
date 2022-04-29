@@ -5,6 +5,7 @@ const fakeUsersData = [
     affiliation: {
       institution: {
         confirmed: true,
+        id: 1,
         name: 'Overleaf',
       },
       licence: 'pro_plus',
@@ -22,6 +23,7 @@ const fakeUsersData = [
     affiliation: {
       institution: {
         confirmed: true,
+        id: 2,
         name: 'Overleaf',
       },
       licence: 'pro_plus',
@@ -38,8 +40,27 @@ const fakeUsersData = [
 ]
 
 const fakeInstitutions = [
-  { id: 9326, name: 'Unknown', country_code: 'al', departments: [] },
+  {
+    id: 9326,
+    name: 'Unknown',
+    country_code: 'al',
+    departments: ['New department'],
+  },
 ]
+const fakeInstitution = {
+  id: 123,
+  name: 'test',
+  country_code: 'de',
+  departments: [],
+  team_id: null,
+}
+const bazFakeInstitution = {
+  id: 2,
+  name: 'Baz',
+  country_code: 'de',
+  departments: ['Custom department 1', 'Custom department 2'],
+  team_id: null,
+}
 
 const fakeInstitutionDomain = [
   {
@@ -56,7 +77,11 @@ const fakeInstitutionDomain = [
 export function defaultSetupMocks(fetchMock) {
   fetchMock
     .get(/\/user\/emails/, fakeUsersData, { delay: MOCK_DELAY })
-    .get(/\/institutions\/list/, fakeInstitutions, { delay: MOCK_DELAY })
+    .get(/\/institutions\/list\/2/, bazFakeInstitution, { delay: MOCK_DELAY })
+    .get(/\/institutions\/list\/\d+/, fakeInstitution, { delay: MOCK_DELAY })
+    .get(/\/institutions\/list\?country_code=.*/, fakeInstitutions, {
+      delay: MOCK_DELAY,
+    })
     .get(/\/institutions\/domains/, fakeInstitutionDomain)
     .post(/\/user\/emails\/*/, 200, {
       delay: MOCK_DELAY,

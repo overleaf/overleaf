@@ -9,8 +9,8 @@ import { AddEmailInput, InstitutionInfo } from './add-email-input'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useUserEmailsContext } from '../../context/user-email-context'
 import { getJSON, postJSON } from '../../../../infrastructure/fetch-json'
-import { defaults as roles } from '../../roles'
-import { defaults as departments } from '../../departments'
+import { defaults as defaultRoles } from '../../roles'
+import { defaults as defaultDepartments } from '../../departments'
 import { University } from '../../../../../../types/university'
 import { CountryCode } from '../../../../../../types/country'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
@@ -49,6 +49,7 @@ function AddEmail() {
   const [university, setUniversity] = useState('')
   const [role, setRole] = useState('')
   const [department, setDepartment] = useState('')
+  const [departments, setDepartments] = useState(defaultDepartments)
   const [isInstitutionFieldsVisible, setIsInstitutionFieldsVisible] =
     useState(false)
   const [isUniversityDirty, setIsUniversityDirty] = useState(false)
@@ -69,6 +70,18 @@ function AddEmail() {
       setIsUniversityDirty(true)
     }
   }, [setIsUniversityDirty, university])
+
+  useEffect(() => {
+    const selectedKnownUniversity = countryCode
+      ? universities[countryCode]?.find(({ name }) => name === university)
+      : undefined
+
+    if (selectedKnownUniversity && selectedKnownUniversity.departments.length) {
+      setDepartments(selectedKnownUniversity.departments)
+    } else {
+      setDepartments(defaultDepartments)
+    }
+  }, [countryCode, universities, university])
 
   // Fetch country institution
   useEffect(() => {
@@ -222,7 +235,7 @@ function AddEmail() {
                           <>
                             <div className="form-group mb-2">
                               <DownshiftInput
-                                items={roles}
+                                items={defaultRoles}
                                 inputValue={role}
                                 placeholder={t('role')}
                                 label={t('role')}

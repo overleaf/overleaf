@@ -196,8 +196,9 @@ describe('<EmailsSection />', function () {
     await screen.findByRole('link', { name: 'Link Accounts and Add Email' })
   })
 
-  it('adds new email address with existing institution', async function () {
+  it('adds new email address with existing institution and custom departments', async function () {
     const country = 'Germany'
+    const customDepartment = 'Custom department'
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     render(<EmailsSection />)
 
@@ -225,7 +226,7 @@ describe('<EmailsSection />', function () {
         id: userEmailData.affiliation.institution.id,
         name: userEmailData.affiliation.institution.name,
         country_code: 'de',
-        departments: [],
+        departments: [customDepartment],
       },
     ])
 
@@ -252,10 +253,19 @@ describe('<EmailsSection />', function () {
     const roleInput = screen.getByRole('textbox', { name: /role/i })
     await userEvent.type(roleInput, userEmailData.affiliation.role)
     const departmentInput = screen.getByRole('textbox', { name: /department/i })
-    await userEvent.type(departmentInput, userEmailData.affiliation.department)
+    await userEvent.click(departmentInput)
+    await userEvent.click(screen.getByText(customDepartment))
+
+    const userEmailDataCopy = {
+      ...userEmailData,
+      affiliation: {
+        ...userEmailData.affiliation,
+        department: customDepartment,
+      },
+    }
 
     fetchMock
-      .get('/user/emails?ensureAffiliation=true', [userEmailData])
+      .get('/user/emails?ensureAffiliation=true', [userEmailDataCopy])
       .post(/\/user\/emails/, 200)
 
     await userEvent.click(
@@ -272,13 +282,13 @@ describe('<EmailsSection />', function () {
         id: userEmailData.affiliation?.institution.id,
       },
       role: userEmailData.affiliation?.role,
-      department: userEmailData.affiliation?.department,
+      department: customDepartment,
     })
 
     screen.getByText(userEmailData.email)
     screen.getByText(userEmailData.affiliation.institution.name)
     screen.getByText(userEmailData.affiliation.role, { exact: false })
-    screen.getByText(userEmailData.affiliation.department, { exact: false })
+    screen.getByText(customDepartment, { exact: false })
   })
 
   it('adds new email address without existing institution', async function () {

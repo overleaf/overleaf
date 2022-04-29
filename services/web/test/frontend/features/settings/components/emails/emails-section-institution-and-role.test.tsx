@@ -111,9 +111,39 @@ describe('user role and institution', function () {
       .to.not.exist
   })
 
+  it('fetches institution data and replaces departments dropdown on add/change', async function () {
+    const userEmailData = userData1
+    fetchMock.get('/user/emails?ensureAffiliation=true', [userEmailData])
+    render(<EmailsSection />)
+
+    await fetchMock.flush(true)
+    fetchMock.reset()
+
+    const fakeDepartment = 'Fake department'
+    const institution = userEmailData.affiliation.institution
+    fetchMock.get(`/institutions/list/${institution.id}`, {
+      id: institution.id,
+      name: institution.name,
+      country_code: 'de',
+      departments: [fakeDepartment],
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /add role and department/i })
+    )
+
+    await fetchMock.flush(true)
+    fetchMock.reset()
+
+    fireEvent.click(screen.getByRole('textbox', { name: /department/i }))
+
+    screen.getByText(fakeDepartment)
+  })
+
   it('adds new role and department', async function () {
     fetchMock
       .get('/user/emails?ensureAffiliation=true', [userData1])
+      .get(/\/institutions\/list/, { departments: [] })
       .post('/user/emails/endorse', 200)
     render(<EmailsSection />)
 
