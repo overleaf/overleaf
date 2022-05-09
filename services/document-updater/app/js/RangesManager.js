@@ -80,7 +80,9 @@ module.exports = RangesManager = {
 
     const [emptyRangeCountAfter, totalRangeCountAfter] =
       RangesManager._emptyRangesCount(rangesTracker)
-    const rangesWereCollapsed = emptyRangeCountAfter > emptyRangeCountBefore
+    const rangesWereCollapsed =
+      emptyRangeCountAfter > emptyRangeCountBefore ||
+      totalRangeCountAfter + 1 < totalRangeCountBefore // also include the case where multiple ranges were removed
     // monitor the change in range count, we may want to snapshot before large decreases
     if (totalRangeCountAfter < totalRangeCountBefore) {
       Metrics.histogram(
