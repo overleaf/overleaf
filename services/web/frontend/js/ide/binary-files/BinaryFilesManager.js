@@ -26,7 +26,9 @@ export default BinaryFilesManager = class BinaryFilesManager {
 
   openFile(file) {
     this.ide.fileTreeManager.selectEntity(file)
-    this.$scope.ui.view = 'file'
+    if (this.$scope.ui.view !== 'history') {
+      this.$scope.ui.view = 'file'
+    }
     this.$scope.openFile = null
     this.$scope.$apply()
     return window.setTimeout(
@@ -46,7 +48,9 @@ export default BinaryFilesManager = class BinaryFilesManager {
     return window.setTimeout(
       () => {
         this.$scope.openFile = null
-        this.$scope.ui.view = 'editor'
+        if (this.$scope.ui.view !== 'history') {
+          this.$scope.ui.view = 'editor'
+        }
         this.$scope.$apply()
       },
       0,

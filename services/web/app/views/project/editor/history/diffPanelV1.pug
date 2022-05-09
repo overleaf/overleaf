@@ -1,6 +1,15 @@
 .diff-panel.full-size(ng-if="!history.isV2", ng-controller="HistoryDiffController")
+	div(
+		ng-controller="FileViewController"
+		ng-if="ui.view == 'history' && openFile"
+	)
+		file-view(
+			file="file"
+			store-references-keys="storeReferencesKeys"
+		)
+
 	.diff(
-		ng-if="!!history.diff && !history.diff.loading && !history.diff.deleted && !history.diff.error && !history.diff.binary"
+		ng-if="!!history.diff && !history.diff.loading && !history.diff.deleted && !history.diff.error && !openFile"
 	)
 		.toolbar.toolbar-alt
 			span.name
