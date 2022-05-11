@@ -1,4 +1,4 @@
-import { useEffect, createRef } from 'react'
+import { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
@@ -24,7 +24,7 @@ function FileTreeItemInner({ id, name, isSelected, icons }) {
 
   const { isDragging, dragRef, setIsDraggable } = useDraggable(id)
 
-  const itemRef = createRef()
+  const itemRef = useRef()
 
   useEffect(() => {
     const item = itemRef.current
