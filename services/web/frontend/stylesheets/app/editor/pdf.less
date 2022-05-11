@@ -230,6 +230,10 @@
       height: 100%;
       -webkit-font-smoothing: initial;
       -moz-osx-font-smoothing: initial;
+      /* fix review-panel overflow issue, see: https://github.com/overleaf/internal/issues/6781#issuecomment-1112708638 */
+      .pdfViewer {
+        min-height: 100%;
+      }
     }
     &:focus-within {
       outline: none;
