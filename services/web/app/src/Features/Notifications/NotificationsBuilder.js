@@ -242,6 +242,9 @@ NotificationsBuilder.promises = {
   redundantPersonalSubscription: function (affiliation, user) {
     return promisifyAll(redundantPersonalSubscription(affiliation, user))
   },
+  dropboxDuplicateProjectNames(userId) {
+    return promisifyAll(dropboxDuplicateProjectNames(userId))
+  },
 }
 
 module.exports = NotificationsBuilder
