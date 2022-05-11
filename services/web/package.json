@@ -51,7 +51,7 @@
     "@codemirror/commands": "^0.20.0",
     "@codemirror/lang-markdown": "^0.20.0",
     "@codemirror/language": "^0.20.0",
-    "@codemirror/lint": "^0.20.1",
+    "@codemirror/lint": "^0.20.2",
     "@codemirror/search": "^0.20.1",
     "@codemirror/state": "^0.20.0",
     "@codemirror/view": "^0.20.2",
