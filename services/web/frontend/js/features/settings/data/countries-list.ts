@@ -1,6 +1,4 @@
-import { CountryCode } from '../../../../types/country'
-
-export const defaults: { code: CountryCode; name: string }[] = [
+const countries = <const>[
   { code: 'af', name: 'Afghanistan' },
   { code: 'ax', name: 'Åland Islands' },
   { code: 'al', name: 'Albania' },
@@ -253,3 +251,6 @@ export const defaults: { code: CountryCode; name: string }[] = [
   { code: 'zm', name: 'Zambia' },
   { code: 'zw', name: 'Zimbabwe' },
 ]
+
+export default countries
+export type CountryCode = typeof countries[number]['code']

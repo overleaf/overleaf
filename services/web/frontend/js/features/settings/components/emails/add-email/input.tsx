@@ -4,10 +4,10 @@ import {
   useCallback,
   useEffect,
   useState,
-  forwardRef,
+  useRef,
 } from 'react'
-import { getJSON } from '../../../../infrastructure/fetch-json'
-import useAbortController from '../../../../shared/hooks/use-abort-controller'
+import { getJSON } from '../../../../../infrastructure/fetch-json'
+import useAbortController from '../../../../../shared/hooks/use-abort-controller'
 
 const LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
 
@@ -37,18 +37,22 @@ export function clearDomainCache() {
   domainCache = new Map<string, InstitutionInfo>()
 }
 
-type AddEmailInputProps = {
+type InputProps = {
   onChange: (value: string, institution?: InstitutionInfo) => void
-  inputRef?: React.ForwardedRef<HTMLInputElement>
 }
 
-function AddEmailInputBase({ onChange, inputRef }: AddEmailInputProps) {
+function Input({ onChange }: InputProps) {
   const { signal } = useAbortController()
 
+  const inputRef = useRef<HTMLInputElement | null>(null)
   const [suggestion, setSuggestion] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState<string | null>(null)
   const [matchedInstitution, setMatchedInstitution] =
-    useState<InstitutionInfo>(null)
+    useState<InstitutionInfo | null>(null)
+
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [inputRef])
 
   useEffect(() => {
     if (inputValue == null) {
@@ -151,11 +155,4 @@ function AddEmailInputBase({ onChange, inputRef }: AddEmailInputProps) {
   )
 }
 
-const AddEmailInput = forwardRef<
-  HTMLInputElement,
-  Omit<AddEmailInputProps, 'inputRef'>
->((props, ref) => <AddEmailInputBase {...props} inputRef={ref} />)
-
-AddEmailInput.displayName = 'AddEmailInput'
-
-export { AddEmailInput }
+export default Input

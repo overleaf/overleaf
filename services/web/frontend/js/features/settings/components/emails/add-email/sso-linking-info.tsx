@@ -1,17 +1,14 @@
 import { Trans, useTranslation } from 'react-i18next'
-import { InstitutionInfo } from './add-email-input'
-import { ExposedSettings } from '../../../../../../types/exposed-settings'
-import getMeta from '../../../../utils/meta'
+import { InstitutionInfo } from './input'
+import { ExposedSettings } from '../../../../../../../types/exposed-settings'
+import getMeta from '../../../../../utils/meta'
 
-type AddEmailSSOLinkingInfoProps = {
+type SSOLinkingInfoProps = {
   institutionInfo: InstitutionInfo
   email: string
 }
 
-export function AddEmailSSOLinkingInfo({
-  institutionInfo,
-  email,
-}: AddEmailSSOLinkingInfoProps) {
+function SsoLinkingInfo({ institutionInfo, email }: SSOLinkingInfoProps) {
   const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
   const { t } = useTranslation()
 
@@ -50,3 +47,5 @@ export function AddEmailSSOLinkingInfo({
     </>
   )
 }
+
+export default SsoLinkingInfo

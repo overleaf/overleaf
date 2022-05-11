@@ -1,4 +1,4 @@
-import { CountryCode } from './country'
+import { CountryCode } from '../frontend/js/features/settings/data/countries-list'
 
 export type University = {
   id: number

@@ -7,8 +7,8 @@ import { useUserEmailsContext } from '../../context/user-email-context'
 import DownshiftInput from './downshift-input'
 import useAsync from '../../../../shared/hooks/use-async'
 import { getJSON, postJSON } from '../../../../infrastructure/fetch-json'
-import { defaults as defaultRoles } from '../../roles'
-import { defaults as defaultDepartments } from '../../departments'
+import defaultRoles from '../../data/roles'
+import defaultDepartments from '../../data/departments'
 import { University } from '../../../../../../types/university'
 
 type InstitutionAndRoleProps = {
@@ -28,7 +28,9 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
   } = useUserEmailsContext()
   const [role, setRole] = useState(affiliation?.role || '')
   const [department, setDepartment] = useState(affiliation?.department || '')
-  const [departments, setDepartments] = useState(defaultDepartments)
+  const [departments, setDepartments] = useState<string[]>(() => [
+    ...defaultDepartments,
+  ])
   const roleRef = useRef<HTMLInputElement | null>(null)
   const isChangingAffiliationInProgress = isChangingAffiliation(
     state,
@@ -62,7 +64,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
         }
       })
       .catch(() => {
-        setDepartments(defaultDepartments)
+        setDepartments([...defaultDepartments])
       })
   }
 
@@ -117,7 +119,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
         <div className="affiliation-change-container small">
           <form onSubmit={handleSubmit}>
             <DownshiftInput
-              items={defaultRoles}
+              items={[...defaultRoles]}
               inputValue={role}
               placeholder={t('role')}
               label={t('role')}

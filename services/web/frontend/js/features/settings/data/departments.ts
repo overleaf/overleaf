@@ -1,4 +1,4 @@
-export const defaults = [
+const departments = <const>[
   'Aeronautics & Astronautics',
   'Anesthesia',
   'Anthropology',
@@ -74,3 +74,5 @@ export const defaults = [
   'Theater and Performance Studies',
   'Urology',
 ]
+
+export default departments

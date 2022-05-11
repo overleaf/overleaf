@@ -7,10 +7,9 @@ import {
 import { expect } from 'chai'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
-import {
-  AddEmailInput,
+import Input, {
   clearDomainCache,
-} from '../../../../../../frontend/js/features/settings/components/emails/add-email-input'
+} from '../../../../../../frontend/js/features/settings/components/emails/add-email/input'
 
 const testInstitutionData = [
   { university: { id: 124 }, hostname: 'domain.edu' },
@@ -28,13 +27,13 @@ describe('<AddEmailInput/>', function () {
 
   describe('on initial render', function () {
     it('should render an input with a placeholder', function () {
-      render(<AddEmailInput {...defaultProps} />)
+      render(<Input {...defaultProps} />)
       screen.getByPlaceholderText('e.g. johndoe@mit.edu')
     })
 
     it('should not dispatch any `change` event', function () {
       const onChangeStub = sinon.stub()
-      render(<AddEmailInput {...defaultProps} onChange={onChangeStub} />)
+      render(<Input {...defaultProps} onChange={onChangeStub} />)
       expect(onChangeStub.called).to.equal(false)
     })
   })
@@ -45,7 +44,7 @@ describe('<AddEmailInput/>', function () {
     beforeEach(function () {
       fetchMock.get('express:/institutions/domains', 200)
       onChangeStub = sinon.stub()
-      render(<AddEmailInput {...defaultProps} onChange={onChangeStub} />)
+      render(<Input {...defaultProps} onChange={onChangeStub} />)
       fireEvent.change(screen.getByRole('textbox'), {
         target: { value: 'user' },
       })
@@ -74,7 +73,7 @@ describe('<AddEmailInput/>', function () {
 
     beforeEach(function () {
       onChangeStub = sinon.stub()
-      render(<AddEmailInput onChange={onChangeStub} />)
+      render(<Input onChange={onChangeStub} />)
     })
 
     describe('when there are no matches', function () {
@@ -228,7 +227,7 @@ describe('<AddEmailInput/>', function () {
       // initial request populates the suggestion
       fetchMock.get('express:/institutions/domains', testInstitutionData)
       onChangeStub = sinon.stub()
-      render(<AddEmailInput {...defaultProps} onChange={onChangeStub} />)
+      render(<Input {...defaultProps} onChange={onChangeStub} />)
       fireEvent.change(screen.getByRole('textbox'), {
         target: { value: 'user@d' },
       })

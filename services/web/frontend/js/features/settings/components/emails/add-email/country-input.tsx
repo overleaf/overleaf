@@ -2,8 +2,7 @@ import { useState, forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
-import { defaults as countries } from '../../countries-list'
-import { CountryCode } from '../../../../../../types/country'
+import countries, { CountryCode } from '../../../data/countries-list'
 
 type CountryInputProps = {
   setValue: React.Dispatch<React.SetStateAction<CountryCode | null>>
@@ -14,7 +13,7 @@ const itemToString = (item: typeof countries[number] | null) => item?.name ?? ''
 
 function Downshift({ setValue, inputRef }: CountryInputProps) {
   const { t } = useTranslation()
-  const [inputItems, setInputItems] = useState(() => countries)
+  const [inputItems, setInputItems] = useState(() => [...countries])
   const [inputValue, setInputValue] = useState('')
 
   const {

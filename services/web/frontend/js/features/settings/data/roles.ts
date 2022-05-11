@@ -1,4 +1,4 @@
-export const defaults = [
+const roles = <const>[
   'Undergraduate Student',
   'Masters Student (MSc, MA, ...)',
   'Doctoral Student (PhD, EngD, ...)',
@@ -11,3 +11,5 @@ export const defaults = [
   'Professor',
   'Emeritus Professor',
 ]
+
+export default roles

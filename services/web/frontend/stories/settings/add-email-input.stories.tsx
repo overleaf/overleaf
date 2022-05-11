@@ -1,5 +1,5 @@
 import useFetchMock from './../hooks/use-fetch-mock'
-import { AddEmailInput } from '../../js/features/settings/components/emails/add-email-input'
+import Input from '../../js/features/settings/components/emails/add-email/input'
 
 export const EmailInput = args => {
   useFetchMock(fetchMock =>
@@ -12,7 +12,7 @@ export const EmailInput = args => {
   )
   return (
     <>
-      <AddEmailInput {...args} />
+      <Input {...args} />
       <br />
       <div>
         Use <code>autocomplete.edu</code> as domain to trigger an autocomplete
@@ -23,7 +23,7 @@ export const EmailInput = args => {
 
 export default {
   title: 'Account Settings / Emails and Affiliations',
-  component: AddEmailInput,
+  component: Input,
   argTypes: {
     onChange: { action: 'change' },
   },
