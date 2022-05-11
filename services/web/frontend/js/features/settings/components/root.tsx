@@ -14,10 +14,12 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 import { UserProvider } from '../../../shared/context/user-context'
 import { SSOProvider } from '../context/sso-context'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
+import useScrollToIdOnLoad from '../../../shared/hooks/use-scroll-to-id-on-load'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 
 function SettingsPageRoot() {
   const { isReady } = useWaitForI18n()
+  useScrollToIdOnLoad()
 
   useEffect(() => {
     eventTracking.sendMB('settings-view')
