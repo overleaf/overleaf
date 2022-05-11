@@ -37,7 +37,8 @@ function FileTreeItemMenu({ id }) {
   return (
     <div className="menu-button btn-group">
       <Button
-        className="entity-menu-toggle btn btn-default"
+        className="entity-menu-toggle"
+        bsSize="sm"
         id={`menu-button-${id}`}
         onClick={withoutPropagation(handleClick)}
         ref={menuButtonRef}

@@ -45,9 +45,17 @@ function FileTreeFolder({ name, id, folders, docs, files }) {
         onClick={handleExpandCollapseClick}
         aria-label={expanded ? t('collapse') : t('expand')}
       >
-        <Icon type={expanded ? 'angle-down' : 'angle-right'} fw />
+        <Icon
+          type={expanded ? 'angle-down' : 'angle-right'}
+          fw
+          className="file-tree-expand-icon"
+        />
       </button>
-      <Icon type={expanded ? 'folder-open' : 'folder'} fw />
+      <Icon
+        type={expanded ? 'folder-open' : 'folder'}
+        fw
+        className="file-tree-folder-icon"
+      />
     </>
   )
 

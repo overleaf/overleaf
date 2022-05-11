@@ -41,7 +41,9 @@ FileTreeDoc.propTypes = {
 export const FileTreeIcon = ({ isLinkedFile, name }) => {
   const { t } = useTranslation()
 
-  const className = classnames('spaced', { 'linked-file-icon': isLinkedFile })
+  const className = classnames('spaced', 'file-tree-icon', {
+    'linked-file-icon': isLinkedFile,
+  })
 
   return (
     <>

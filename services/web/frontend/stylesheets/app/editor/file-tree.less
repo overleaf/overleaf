@@ -93,7 +93,7 @@
 
     .entity > ul,
     ul[role='tree'] {
-      margin-left: (@line-height-computed / 2);
+      margin-left: 22px;
     }
 
     li.bottom-buffer {
@@ -171,21 +171,34 @@
       i.fa {
         color: @file-tree-item-icon-color;
         font-size: 14px;
-      }
 
-      i.fa.linked-file-icon {
-        position: relative;
-        left: -2px;
+        &.file-tree-icon {
+          margin-right: 4px;
+          margin-left: 8px;
 
-        + .linked-file-highlight {
-          & {
-            color: white;
+          &.linked-file-icon {
+            position: relative;
+            left: -2px;
+
+            + .linked-file-highlight {
+              & {
+                color: white;
+              }
+              position: relative;
+              top: 4px;
+              width: 0;
+              left: -5px;
+              font-size: 12px;
+            }
           }
-          position: relative;
-          top: 4px;
-          width: 0;
-          left: -2px;
-          font-size: 12px;
+        }
+
+        &.file-tree-folder-icon {
+          margin-right: 4px;
+        }
+
+        &.file-tree-expand-icon {
+          margin-left: 8px;
         }
       }
 
@@ -193,10 +206,6 @@
       i.fa-folder {
         color: @file-tree-item-folder-color;
         font-size: 14px;
-      }
-
-      i.spaced {
-        margin-left: 18px;
       }
 
       i.toggle {
@@ -252,13 +261,14 @@
       .menu-button {
         position: absolute;
         right: 0;
+        top: 3px;
       }
 
       .rename-input {
         display: block;
         position: absolute;
         top: 1px;
-        left: 44px;
+        left: 32px;
         right: 32px;
         color: @file-tree-item-input-color;
         input {
