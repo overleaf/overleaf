@@ -190,8 +190,12 @@ module.exports = LinkedFilesController = {
       res.status(400)
       plainTextResponse(res, 'This feature is not enabled on your account')
     } else if (error instanceof RemoteServiceError) {
-      res.status(502)
-      plainTextResponse(res, 'The remote service produced an error')
+      if (error.info?.statusCode === 403) {
+        res.status(400).json({ relink: true })
+      } else {
+        res.status(502)
+        plainTextResponse(res, 'The remote service produced an error')
+      }
     } else if (error instanceof FileCannotRefreshError) {
       res.status(400)
       plainTextResponse(res, 'This file cannot be refreshed')

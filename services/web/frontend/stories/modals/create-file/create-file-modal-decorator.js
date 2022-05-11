@@ -65,6 +65,18 @@ export const mockCreateFileModalFetch = fetchMock =>
         },
       ],
     })
+    .get('path:/zotero/groups', {
+      groups: [
+        {
+          id: 'group-1',
+          name: 'Group One',
+        },
+        {
+          id: 'group-2',
+          name: 'Group Two',
+        },
+      ],
+    })
     .get('express:/project/:projectId/entities', {
       entities: [
         {
