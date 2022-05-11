@@ -790,6 +790,7 @@
   "notification_group_invite": "You have been invited to join the __groupName__, <a href=\"/user/subscription/__subscription_id__/group/invited\">Join Here</a>.",
   "search_references": "Search the .bib files in this project",
   "no_search_results": "No Search Results",
+  "too_many_search_results": "There are more than 100 results. Please refine your search.",
   "email_already_registered": "This email is already registered",
   "email_already_registered_sso": "This email is already registered. Please log in to your account another way and link your account to the new provider via your account settings.",
   "compile_mode": "Compile Mode",
