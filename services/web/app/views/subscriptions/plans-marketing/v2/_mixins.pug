@@ -1,0 +1,512 @@
+mixin table_individual(period)
+	table.card.plans-v2-table.plans-v2-table-individual
+		tr
+			th
+			th
+				div.plans-v2-table-th-content
+					p.plans-v2-table-th-content-title #{translate("free")}
+					+table_head_price('free', period)
+					.plans-v2-table-btn-buy-container-mobile
+						+btn_buy_individual_free()
+					ul.plans-v2-table-th-content-benefit
+						li #{translate("only_one_collaborator")}
+					.plans-v2-table-btn-buy-container-desktop
+						+btn_buy_individual_free()
+			th.plans-v2-table-cell-before-highlighted-column
+				div.plans-v2-table-th-content
+					p.plans-v2-table-th-content-title #{translate("personal")}
+					+table_head_price('personal', period)
+					.plans-v2-table-btn-buy-container-mobile
+						+btn_buy_individual_personal(period)
+					ul.plans-v2-table-th-content-benefit
+						li #{translate("only_one_collaborator")}
+						li #{translate("most_premium_features")}
+					.plans-v2-table-btn-buy-container-desktop
+						+btn_buy_individual_personal(period)
+			th.plans-v2-table-green-highlighted
+				div.plans-v2-table-th-content
+					p.plans-v2-table-green-highlighted-text MOST POPULAR
+					p.plans-v2-table-th-content-title #{translate("standard")}
+					+table_head_price('collaborator', period)
+					.plans-v2-table-btn-buy-container-mobile
+						+btn_buy_individual_collaborator(period)
+					ul.plans-v2-table-th-content-benefit
+						li #{translate("only_one_collaborator")}
+						li #{translate("all_premium_features")}
+					.plans-v2-table-btn-buy-container-desktop
+						+btn_buy_individual_collaborator(period)
+
+			th
+				div.plans-v2-table-th-content
+					p.plans-v2-table-th-content-title #{translate("professional")}
+					+table_head_price('professional', period)
+					.plans-v2-table-btn-buy-container-mobile
+						+btn_buy_individual_professional()
+					ul.plans-v2-table-th-content-benefit
+						li !{translate("x_collaborators_per_project", {collaboratorsCount: '10'})}
+						li #{translate("all_premium_features")}
+					.plans-v2-table-btn-buy-container-desktop
+						+btn_buy_individual_professional(period)
+
+		for planFeaturesPerSection in planFeatures.individual
+			if planFeaturesPerSection.divider
+				tr.plans-v2-table-divider
+					td(colspan="5")
+						div
+							span.plans-v2-table-divider-label #{translate(planFeaturesPerSection.dividerLabel)}
+							//- will only appear on screen width >= 768px (using CSS)
+							i.fa.fa-question-circle.plans-v2-table-divider-question-icon(
+										data-toggle="tooltip"
+										title=translate(planFeaturesPerSection.dividerInfo),
+										data-placement="top"
+									)
+							//- will only appear on screen width < 768px (using CSS)
+							span.plans-v2-table-divider-learn-more-container
+								span (
+								span.plans-v2-table-divider-learn-more-text(
+									data-toggle="tooltip"
+									title=translate(planFeaturesPerSection.dividerInfo),
+									data-placement="top"
+								) #{translate("learn_more_lowercase")}
+								span )
+			for feature, featureIndex in planFeaturesPerSection.items
+				tr(
+					class=(featureIndex === (planFeaturesPerSection.items.length - 1) ? 'plans-v2-table-row-last-row-per-section' : '')
+				)
+					td(event-tracking="plans-page-table" event-tracking-trigger="hover" event-tracking-ga="subscription-funnel" event-tracking-label=`${feature.feature}`)
+						.plans-v2-table-feature-name
+							if feature.info
+								span #{translate(feature.feature)}
+								//- will only appear on screen width >= 768px (using CSS)
+								i.fa.fa-question-circle.plans-v2-table-feature-name-question-icon(
+									data-toggle="tooltip"
+									title=translate(feature.info),
+									data-placement="right"
+								)
+								//- will only appear on screen width < 768px (using CSS)
+								span.plans-v2-table-feature-name-learn-more-container
+									span (
+									span.plans-v2-table-feature-name-learn-more-text(
+										data-toggle="tooltip"
+										title=translate(feature.info),
+										data-placement="top"
+									) #{translate("learn_more_lowercase")}
+									span )
+							else
+								| #{translate(feature.feature)}
+					td(ng-non-bindable)
+						+table_cell(feature, 'free')
+					td.plans-v2-table-cell-before-highlighted-column(ng-non-bindable)
+						+table_cell(feature, 'personal')
+					td.plans-v2-table-green-highlighted(ng-non-bindable)
+						+table_cell(feature, 'collaborator')
+					td(ng-non-bindable)
+						+table_cell(feature, 'professional')
+
+mixin table_group
+	table.card.plans-v2-table.plans-v2-table-group
+		tr
+			th
+			th.plans-v2-table-cell-before-highlighted-column
+				div.plans-v2-table-th-content
+					p.plans-v2-table-th-content-title #{translate("group_standard")}
+					div.plans-v2-table-price-container
+						strike.plans-v2-table-annual-price-before-discount(data-ol-plans-v2-table-annual-price-before-discount)
+							+gen_localized_price_for_plan_view('collaborator', 'annual')
+						p.plans-v2-table-price
+							span(data-ol-group-price-per-user='collaborator') $0
+						p.plans-v2-table-price-period-label
+							| per user / year
+					.plans-v2-table-btn-buy-container-mobile
+						+btn_buy_group_collaborator()
+						small.plans-v2-table-th-content-additional-link !{translate("or_contact_us", {}, [{name: 'a', attrs: {href: '/for/enterprises/sales-contact', target: '_blank'}}])}
+					ul.plans-v2-table-th-content-benefit
+						li #{translate("up_to")} !{translate("x_collaborators_per_project", {collaboratorsCount: '10'})}
+						li
+							span.plans-v2-group-total-price(data-ol-plans-v2-group-total-price='collaborator') $0
+							span &nbsp;#{translate("total_per_year_lowercase")}
+					.plans-v2-table-btn-buy-container-desktop
+						+btn_buy_group_collaborator()
+						small.plans-v2-table-th-content-additional-link !{translate("or_contact_us", {}, [{name: 'a', attrs: {href: '/for/enterprises/sales-contact', target: '_blank'}}])}
+
+			th.plans-v2-table-green-highlighted
+				div.plans-v2-table-th-content
+					p.plans-v2-table-green-highlighted-text RECOMMENDED
+					p.plans-v2-table-th-content-title #{translate("group_professional")}
+					div.plans-v2-table-price-container
+						strike.plans-v2-table-annual-price-before-discount(data-ol-plans-v2-table-annual-price-before-discount)
+							+gen_localized_price_for_plan_view('professional', 'annual')
+						p.plans-v2-table-price
+							span(data-ol-group-price-per-user='professional') $0
+						p.plans-v2-table-price-period-label
+							| per user / year
+					.plans-v2-table-btn-buy-container-mobile
+						+btn_buy_group_professional()
+						small.plans-v2-table-th-content-additional-link !{translate("or_contact_us", {}, [{name: 'a', attrs: {href: '/for/enterprises/sales-contact', target: '_blank'}}])}
+					ul.plans-v2-table-th-content-benefit
+						li #{translate("unlimited_collaborators_in_each_project")}
+						li
+							span.plans-v2-group-total-price(data-ol-plans-v2-group-total-price='professional') $0
+							span &nbsp;#{translate("total_per_year_lowercase")}
+					.plans-v2-table-btn-buy-container-desktop
+						+btn_buy_group_professional()
+						small.plans-v2-table-th-content-additional-link !{translate("or_contact_us", {}, [{name: 'a', attrs: {href: '/for/enterprises/sales-contact', target: '_blank'}}])}
+						
+			th
+				div.plans-v2-table-th-content
+					p.plans-v2-table-th-content-title #{translate("organization")}
+					div.plans-v2-table-comments-icon
+						i.fa.fa-comments-o
+					.plans-v2-table-btn-buy-container-mobile
+						+btn_buy_group_organization()
+						small.plans-v2-table-th-content-additional-link.invisible(aria-hidden="true")
+					ul.plans-v2-table-th-content-benefit
+						li #{translate("best_choices_companies_universities_non_profits")}
+						li #{translate("for_groups_or_site_wide")}
+						li
+							a(href="/for/enterprises/sales-contact") #{translate("also_available_as_on_premises")}
+					.plans-v2-table-btn-buy-container-desktop
+						+btn_buy_group_organization()
+						small.plans-v2-table-th-content-additional-link.invisible(aria-hidden="true")
+			th
+
+		for planFeaturesPerSection in planFeatures.group
+			if planFeaturesPerSection.divider
+				tr.plans-v2-table-divider
+					td(colspan="4")
+						div
+							span.plans-v2-table-divider-label #{translate(planFeaturesPerSection.dividerLabel)}
+							//- will only appear on screen width >= 768px (using CSS)
+							i.fa.fa-question-circle.plans-v2-table-divider-question-icon(
+										data-toggle="tooltip"
+										title=translate(planFeaturesPerSection.dividerInfo),
+										data-placement="top"
+									)
+							//- will only appear on screen width < 768px (using CSS)
+							span.plans-v2-table-divider-learn-more-container
+								span (
+								span.plans-v2-table-divider-learn-more-text(
+									data-toggle="tooltip"
+									title=translate(planFeaturesPerSection.dividerInfo),
+									data-placement="top"
+								) #{translate("learn_more_lowercase")}
+								span )
+					td
+			for feature, featureIndex in planFeaturesPerSection.items
+				tr(
+					class=(featureIndex === (planFeaturesPerSection.items.length - 1) ? 'plans-v2-table-row-last-row-per-section' : '')
+				)
+					td(event-tracking="plans-page-table" event-tracking-trigger="hover" event-tracking-ga="subscription-funnel" event-tracking-label=`${feature.feature}`)
+						.plans-v2-table-feature-name
+							if feature.info
+								span #{translate(feature.feature)}
+								//- will only appear on screen width >= 768px (using CSS)
+								i.fa.fa-question-circle.plans-v2-table-feature-name-question-icon(
+									data-toggle="tooltip"
+									title=translate(feature.info),
+									data-placement="right"
+								)
+								//- will only appear on screen width < 768px (using CSS)
+								span.plans-v2-table-feature-name-learn-more-container
+									span (
+									span.plans-v2-table-feature-name-learn-more-text(
+										data-toggle="tooltip"
+										title=translate(feature.info),
+										data-placement="top"
+									) #{translate("learn_more_lowercase")}
+									span )
+							else
+								| #{translate(feature.feature)}
+					td.plans-v2-table-cell-before-highlighted-column(ng-non-bindable)
+						+table_cell(feature, 'group_standard')
+					td.plans-v2-table-green-highlighted(ng-non-bindable)
+						+table_cell(feature, 'group_professional')
+					td(ng-non-bindable)
+						+table_cell(feature, 'organization')
+					td
+
+mixin table_student(period)
+	table.card.plans-v2-table.plans-v2-table-student
+		tr
+			th
+			th.plans-v2-table-cell-before-highlighted-column
+				div.plans-v2-table-th-content
+					p.plans-v2-table-th-content-title #{translate("free")}
+					+table_head_price('free', period)
+					.plans-v2-table-btn-buy-container-mobile
+						+btn_buy_student_free()
+					ul.plans-v2-table-th-content-benefit
+						li #{translate("only_one_collaborator")}
+						li #{translate("most_premium_features")}
+					.plans-v2-table-btn-buy-container-desktop
+						+btn_buy_student_free()
+			th.plans-v2-table-green-highlighted
+				div.plans-v2-table-th-content
+					p.plans-v2-table-green-highlighted-text
+						if (period === 'monthly')
+							| SAVE 20% ON ANNUAL PLAN
+						else 
+							| SAVING 20%
+					p.plans-v2-table-th-content-title #{translate("student")}
+					+table_head_price('student', period)
+					.plans-v2-table-btn-buy-container-mobile
+						+btn_buy_student_student(period)
+					ul.plans-v2-table-th-content-benefit
+						li #{translate("only_one_collaborator")}
+						li #{translate("all_premium_features")}
+					.plans-v2-table-btn-buy-container-desktop
+						+btn_buy_student_student(period)
+			th
+				div.plans-v2-table-th-content
+					p.plans-v2-table-th-content-title #{translate("university")}
+					div.plans-v2-table-comments-icon
+						i.fa.fa-comments-o
+					.plans-v2-table-btn-buy-container-mobile
+						+btn_buy_student_university
+					p.plans-v2-table-th-content-benefit !{translate("all_our_group_plans_offer_educational_discount", {}, [{name: 'b'}, {name: 'b'}])}
+					.plans-v2-table-btn-buy-container-desktop
+						+btn_buy_student_university
+			th
+
+		for planFeaturesPerSection in planFeatures.student
+			if (planFeaturesPerSection.divider)
+				tr.plans-v2-table-divider
+					td(colspan="4")
+						div
+							span.plans-v2-table-divider-label #{translate(planFeaturesPerSection.dividerLabel)}
+							//- will only appear on screen width >= 768px (using CSS)
+							i.fa.fa-question-circle.plans-v2-table-divider-question-icon(
+										data-toggle="tooltip"
+										title=translate(planFeaturesPerSection.dividerInfo),
+										data-placement="top"
+									)
+							//- will only appear on screen width < 768px (using CSS)
+							span.plans-v2-table-divider-learn-more-container
+								span (
+								span.plans-v2-table-divider-learn-more-text(
+									data-toggle="tooltip"
+									title=translate(planFeaturesPerSection.dividerInfo),
+									data-placement="top"
+								) #{translate("learn_more_lowercase")}
+								span )
+					td
+			for feature, featureIndex in planFeaturesPerSection.items
+				tr(
+					class=(featureIndex === (planFeaturesPerSection.items.length - 1) ? 'plans-v2-table-row-last-row-per-section' : '')
+				)
+					td(event-tracking="plans-page-table" event-tracking-trigger="hover" event-tracking-ga="subscription-funnel" event-tracking-label=`${feature.feature}`)
+						.plans-v2-table-feature-name
+							if (feature.info)
+								span #{translate(feature.feature)}
+								//- will only appear on screen width >= 768px (using CSS)
+								i.fa.fa-question-circle.plans-v2-table-feature-name-question-icon(
+									data-toggle="tooltip"
+									title=translate(feature.info),
+									data-placement="right"
+								)
+								//- will only appear on screen width < 768px (using CSS)
+								span.plans-v2-table-feature-name-learn-more-container
+									span (
+									span.plans-v2-table-feature-name-learn-more-text(
+										data-toggle="tooltip"
+										title=translate(feature.info),
+										data-placement="top"
+									) #{translate("learn_more_lowercase")}
+									span )
+							else
+								| #{translate(feature.feature)}
+					td.plans-v2-table-cell-before-highlighted-column(ng-non-bindable)
+						+table_cell(feature, 'free')
+					td.plans-v2-table-green-highlighted(ng-non-bindable)
+						+table_cell(feature, 'student')
+					td(ng-non-bindable)
+						+table_cell(feature, 'university')
+					td
+
+mixin table_head_price(plan, period)
+	div.plans-v2-table-price-container
+		if plan !== 'free'
+			strike.plans-v2-table-annual-price-before-discount.hidden(data-ol-plans-v2-table-annual-price-before-discount)
+				+gen_localized_price_for_plan_view(plan, 'monthlyTimesTwelve')
+		p.plans-v2-table-price
+			+gen_localized_price_for_plan_view(plan, period)
+		p.plans-v2-table-price-period-label
+			if period == 'annual'
+				| per year
+			else
+				| per month
+
+mixin table_cell(feature, plan)
+	.plans-v2-table-cell-inner-content
+		if (feature.value === 'str')
+			| #{feature.plans[plan]}
+		else if (feature.plans[plan])
+			i.fa.fa-check(aria-hidden="true")
+			span.sr-only #{translate("feature_included")}
+		else
+			span(aria-hidden="true") -
+			span.sr-only #{translate("feature_not_included")}
+
+mixin group_plans_license_picker()
+	form.plans-v2-license-picker-form(data-ol-plans-v2-license-picker-form)
+		.plans-v2-license-picker-select-container
+			span #{translate("how_many_licenses_are_you_looking_for")}
+			select.plans-v2-license-picker-select(
+				name="plans-v2-license-picker-select"
+				id="plans-v2-license-picker-select"
+				autocomplete="off"
+				data-ol-plans-v2-license-picker-select
+			)
+				option(value="2") 2
+				option(value="3") 3
+				option(value="4") 4
+				option(value="5") 5
+				option(value="10") 10
+				option(value="20") 20
+				option(value="50") 50
+		.plans-v2-license-picker-educational-discount
+			label.plans-v2-license-picker-educational-discount-label(data-ol-plans-v2-license-picker-educational-discount-label)
+				input.plans-v2-license-picker-educational-discount-checkbox(
+					type="checkbox"
+					id="license-picker-educational-discount"
+					autocomplete="off"
+					data-ol-plans-v2-license-picker-educational-discount-input
+				)
+				span #{translate("include_educational_discount")}
+			//- will only appear on screen width >= 768px (using CSS)
+			i.fa.fa-question-circle.plans-v2-license-picker-educational-discount-question-icon(
+				data-toggle="tooltip"
+				title=translate("include_educational_discount_info"),
+				data-placement="bottom"
+			)
+			//- will only appear on screen width < 768px (using CSS)
+			span.plans-v2-license-picker-educational-discount-learn-more-container
+				span (
+				span.plans-v2-license-picker-educational-discount-learn-more-text(
+					data-toggle="tooltip"
+					title=translate("include_educational_discount_info"),
+					data-placement="bottom"
+				) #{translate("learn_more_lowercase")}
+				span )
+
+mixin btn_buy_individual(subscriptionPlan, period, highlighted) 
+	if (highlighted)
+		a.btn.btn-primary.plans-v2-table-btn-buy(
+			data-ol-start-new-subscription=subscriptionPlan
+			data-ol-item-view=period
+		)
+			if (period === 'monthly')
+				span #{translate("try_for_free")}
+			else 
+				span #{translate("buy_now")}
+	else
+		a.btn.btn-default.plans-v2-table-btn-buy(
+			data-ol-start-new-subscription=subscriptionPlan
+			data-ol-item-view=period
+		)
+			if (period === 'monthly')
+				span #{translate("try_for_free")}
+			else 
+				span #{translate("buy_now")}
+
+mixin btn_buy_individual_free()
+	if (!getSessionUser())
+		a.btn.btn-default.plans-v2-table-btn-buy(href="/register")
+			span #{translate("try_for_free")}
+	else
+		a.btn.btn-default.plans-v2-table-btn-buy.invisible(aria-hidden="true")
+
+mixin btn_buy_individual_personal(period)
+	+btn_buy_individual('paid-personal', period, false)
+	if (period === 'monthly')
+		small.plans-v2-table-th-content-additional-link !{translate("or_buy_now", {}, [{name: 'a', attrs: {href: '/user/subscription/new?planCode=paid-personal&currency=' + recommendedCurrency + '&itm_campaign=plans&itm_content=card'}}])}
+
+mixin btn_buy_individual_collaborator(period)
+	+btn_buy_individual('collaborator', period, true)
+	if (period === 'monthly')
+		small.plans-v2-table-th-content-additional-link !{translate("or_buy_now", {}, [{name: 'a', attrs: {href: '/user/subscription/new?planCode=collaborator&currency=' + recommendedCurrency + '&itm_campaign=plans&itm_content=card'}}])}
+
+mixin btn_buy_individual_professional(period)
+	+btn_buy_individual('professional', period, false)
+	if (period === 'monthly')
+		small.plans-v2-table-th-content-additional-link !{translate("or_buy_now", {}, [{name: 'a', attrs: {href: '/user/subscription/new?planCode=professional&currency=' + recommendedCurrency + '&itm_campaign=plans&itm_content=card'}}])}
+
+mixin btn_buy_group_collaborator() 
+	a.btn.btn-default.plans-v2-table-btn-buy(
+		data-ol-start-new-subscription='group_collaborator'
+		data-ol-item-view='annual'
+		data-ol-has-custom-href
+	)
+		span #{translate("customize")} 
+		span.hidden-mobile #{translate("your_plan_lowercase")}
+
+mixin btn_buy_group_professional() 
+	a.btn.btn-primary.plans-v2-table-btn-buy(
+		data-ol-start-new-subscription='group_professional'
+		data-ol-item-view='annual'
+		data-ol-has-custom-href
+	)
+		span #{translate("customize")} 
+		span.hidden-mobile #{translate("your_plan_lowercase")}
+
+mixin btn_buy_group_organization() 
+	a.btn.btn-default.plans-v2-table-btn-buy(
+		data-ol-start-new-subscription='group_organization'
+		data-ol-item-view='annual'
+		data-ol-has-custom-href
+		href='/for/enterprises/sales-contact'
+		target='_blank'
+	)
+		span #{translate("contact_us_lowercase")}
+
+mixin btn_buy_student_free()
+	if (!getSessionUser())
+		a.btn.btn-default.plans-v2-table-btn-buy(href="/register")
+			span #{translate("try_for_free")}
+
+mixin btn_buy_student_student(period)
+	a.btn.btn-primary.plans-v2-table-btn-buy(
+		data-ol-start-new-subscription='student'
+		data-ol-item-view=period
+		data-ol-location='card'
+	)
+		if (period === 'monthly')
+			span #{translate("try_for_free")}
+		else 
+			span #{translate("buy_now")}
+	if (period === 'monthly')
+		small.plans-v2-table-th-content-additional-link !{translate("or_buy_now", {}, [{name: 'a', attrs: {href: '/user/subscription/new?planCode=student&currency=' + recommendedCurrency + '&itm_campaign=plans&itm_content=card'}}])}
+
+mixin btn_buy_student_university()
+	a.btn.btn-default.plans-v2-table-btn-buy(
+		href="/for/enterprises/sales-contact"
+		target="_blank"
+	)
+		span #{translate("contact_us_lowercase")}
+
+mixin table_sticky_header
+	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-individual.sticky(data-ol-plans-v2-table-sticky-header='individual')
+		.plans-v2-table-sticky-header-item
+			span #{translate("free")}
+		.plans-v2-table-sticky-header-item
+			span #{translate("personal")}
+		.plans-v2-table-sticky-header-item.plans-v2-table-sticky-header-item-highlighted
+			span #{translate("standard")}
+		.plans-v2-table-sticky-header-item
+			span #{translate("professional")}
+
+	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-group.sticky(hidden data-ol-plans-v2-table-sticky-header='group')
+		.plans-v2-table-sticky-header-item
+			span #{translate("group_standard")}
+		.plans-v2-table-sticky-header-item.plans-v2-table-sticky-header-item-highlighted
+			span #{translate("group_professional")}
+		.plans-v2-table-sticky-header-item
+			span #{translate("organization")}
+
+	.row.plans-v2-table-sticky-header.plans-v2-table-sticky-header-student.sticky(hidden data-ol-plans-v2-table-sticky-header='student')
+		.plans-v2-table-sticky-header-item
+			span #{translate("free")}
+		.plans-v2-table-sticky-header-item.plans-v2-table-sticky-header-item-highlighted
+			span #{translate("student")}
+		.plans-v2-table-sticky-header-item
+			span #{translate("university")}

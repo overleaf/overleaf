@@ -1,0 +1,64 @@
+include ./_mixins
+
+.row.plans-v2-top-switch
+	.col-xs-12
+		ul.nav.plans-v2-nav
+			li.active.plans-v2-top-switch-individual(data-ol-plans-v2-view-tab='individual')
+				a.btn.btn-default-outline(
+					href="#"
+				) #{translate("indvidual_plans")}
+			li.plans-v2-top-switch-group(data-ol-plans-v2-view-tab='group')
+				a.btn.btn-default-outline(
+					href="#"
+				)
+					span #{translate("group_plans")} 
+					span (save 30% or more)
+			li.plans-v2-top-switch-student(data-ol-plans-v2-view-tab='student')
+				a.btn.btn-default-outline(
+					href="#"
+				) #{translate("student_plans")}
+
+.row
+	.col-md-4.col-md-offset-4.text-centered.plans-v2-m-a-switch-container(data-ol-plans-v2-m-a-switch-container)
+		span.underline(data-ol-plans-v2-m-a-switch-monthly-text) #{translate("monthly")}
+		label.plans-v2-m-a-switch(data-ol-plans-v2-m-a-switch)
+			input(
+				type="checkbox"
+				role="switch"
+				autocomplete="off"
+			)
+			span
+		div.plans-v2-m-a-switch-annual-text-container
+			span(data-ol-plans-v2-m-a-switch-annual-text) #{translate("annual")}
+			div.plans-v2-m-a-tooltip.plans-v2-m-a-tooltip-monthly(data-ol-plans-v2-m-a-tooltip)
+				div.plans-v2-m-a-tooltip-arrow
+				span(data-ol-tooltip-period='monthly') #{translate("save_20_percent_by_paying_annually")}
+				span(hidden data-ol-tooltip-period='annual') #{translate("saving_20_percent")}
+
+.row(hidden data-ol-plans-v2-license-picker-container)
+	.col-sm-12
+		+group_plans_license_picker()
+
++table_sticky_header
+
+.row.plans-v2-table-container(data-ol-plans-v2-table-container='monthly')
+	.col-sm-12(data-ol-plans-v2-view='individual')
+		.row
+			+table_individual('monthly')
+	.col-sm-12(hidden data-ol-plans-v2-view='student')
+		.row
+			+table_student('monthly')
+
+.row.plans-v2-table-container(hidden data-ol-plans-v2-table-container='annual')
+	.col-sm-12(data-ol-plans-v2-view='individual')
+		.row
+			+table_individual('annual')
+	.col-sm-12(hidden data-ol-plans-v2-view='group')
+		.row
+			+table_group('annual')
+	.col-sm-12(hidden data-ol-plans-v2-view='student')
+		.row
+			+table_student('annual')
+
+//- sticky header on mobile will be "hidden" (by removing its sticky position) if it reaches this div
+.invisible(aria-hidden="true" data-ol-plans-v2-table-sticky-header-stop)

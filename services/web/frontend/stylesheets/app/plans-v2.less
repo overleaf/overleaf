@@ -1,0 +1,1137 @@
+// m-a stands for: monthly annual
+
+@plans-v2-top-switch-item-height: 34px;
+@plans-v2-top-switch-item-border-radius: @plans-v2-top-switch-item-height / 2;
+@plans-v2-m-a-switch-height: 34px;
+@plans-v2-highlighted-text-height-desktop: 30px;
+@plans-v2-highlighted-text-height-mobile: 41px;
+@plans-v2-learn-more-link-color: hsl(206, 100%, 52%);
+@plans-v2-top-switch-group-width-mobile: 46%;
+@plans-v2-m-a-tooltip-arrow-z-index: 10;
+@plans-v2-m-a-tooltip-z-index: 20;
+@plans-v2-table-sticky-header-z-index: 100;
+@plans-v2-table-border-radius: 20px;
+
+.plans-v2-top-switch ul.plans-v2-nav {
+  display: flex;
+  justify-content: center;
+
+  li {
+    border: solid 1px @ol-blue-gray-3;
+    height: @plans-v2-top-switch-item-height;
+
+    &.plans-v2-top-switch-individual {
+      border-top-left-radius: @plans-v2-top-switch-item-border-radius;
+      border-bottom-left-radius: @plans-v2-top-switch-item-border-radius;
+    }
+
+    &.plans-v2-top-switch-student {
+      border-top-right-radius: @plans-v2-top-switch-item-border-radius;
+      border-bottom-right-radius: @plans-v2-top-switch-item-border-radius;
+    }
+
+    a {
+      padding: 4px 16px;
+      height: 100%;
+
+      // remove bootstrap default
+      &.btn:active {
+        box-shadow: none;
+      }
+
+      // on Firefox, there will be a visible dotted border on the li element
+      // when it's `active` / `focus`
+      // `outline: none` rule intends to eliminate that border
+      &:active,
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &.active {
+      background-color: @ol-blue-gray-4;
+
+      a {
+        color: @white;
+      }
+    }
+
+    &:not(.active) {
+      background-color: @white;
+    }
+  }
+
+  @media (max-width: @screen-xs-max) {
+    margin: 0 13px;
+
+    li {
+      height: unset;
+
+      &.plans-v2-top-switch-individual,
+      &.plans-v2-top-switch-student {
+        width: (100% - @plans-v2-top-switch-group-width-mobile) / 2;
+      }
+
+      &.plans-v2-top-switch-group {
+        width: @plans-v2-top-switch-group-width-mobile;
+
+        // force newline for the second span
+        span:first-child::after {
+          content: '';
+          display: block;
+        }
+
+        span:last-child {
+          font-weight: 400;
+        }
+      }
+
+      &.plans-v2-top-switch-individual,
+      &.plans-v2-top-switch-student {
+        a {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+        }
+      }
+
+      a {
+        white-space: unset;
+        padding: 4px 8px;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.plans-v2-btn-header {
+  font-family: @font-family-sans-serif;
+  margin-top: @margin-sm;
+  text-shadow: 0 0 0;
+  background-color: @ol-blue;
+  color: @white;
+}
+
+.plans-v2-m-a-switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-top: @margin-xl;
+
+  .underline {
+    text-decoration: underline;
+  }
+
+  &.disabled {
+    span {
+      color: @ol-blue-gray-2;
+    }
+
+    .plans-v2-m-a-switch {
+      input + span {
+        background-color: @ol-blue-gray-2;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  @media (max-width: @screen-xs-max) {
+    margin-top: 25px;
+  }
+}
+
+.plans-v2-m-a-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: @plans-v2-m-a-switch-height;
+  margin: 0 @margin-lg;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  input + span {
+    background-color: @ol-blue-gray-4;
+  }
+
+  input:checked + span::before {
+    transform: translateX(26px);
+  }
+
+  span {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: @ol-blue-gray-1;
+    transition: 0.4s;
+    border-radius: @plans-v2-m-a-switch-height;
+
+    &::before {
+      position: absolute;
+      content: '';
+      height: 32px;
+      width: 32px;
+      left: 1px;
+      bottom: 1px;
+      background-color: @white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+  }
+}
+
+.plans-v2-m-a-switch-annual-text-container {
+  position: relative;
+}
+
+.plans-v2-m-a-tooltip {
+  position: absolute;
+  color: @white;
+  width: auto;
+  height: 35px;
+  padding: @padding-xs @padding-sm;
+  border-radius: 4px;
+  left: 59px;
+  top: -5px;
+  z-index: @plans-v2-m-a-tooltip-z-index;
+
+  span {
+    white-space: nowrap;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    top: 36px;
+
+    span {
+      font-size: @font-size-extra-small;
+      position: relative;
+    }
+  }
+}
+
+.plans-v2-m-a-tooltip-monthly {
+  background-color: rgba(0, 0, 0, 0.9);
+
+  .plans-v2-m-a-tooltip-arrow {
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+
+  @media (max-width: @screen-xs-max) {
+    left: -86px;
+
+    .plans-v2-m-a-tooltip-arrow {
+      left: 102px;
+    }
+  }
+}
+
+.plans-v2-m-a-tooltip-annual {
+  background-color: @ol-green;
+
+  .plans-v2-m-a-tooltip-arrow {
+    background-color: @ol-green;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    left: -27px;
+
+    .plans-v2-m-a-tooltip-arrow {
+      left: 43px;
+    }
+  }
+}
+
+.plans-v2-m-a-tooltip-arrow {
+  background-color: rgba(0, 0, 0, 0.9);
+  position: absolute;
+  left: -4px;
+  top: 14px;
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  // hide the arrow behind the tooltip text
+  z-index: @plans-v2-m-a-tooltip-arrow-z-index;
+
+  @media (max-width: @screen-xs-max) {
+    width: 18px;
+    height: 18px;
+    top: -9px;
+  }
+}
+
+.page-header.top-page-header {
+  // remove page-header border & margin on mobile
+  @media (max-width: @screen-xs-max) {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+
+    h1 {
+      margin-top: 0;
+    }
+  }
+}
+
+.plans-v2-table-comments-icon {
+  height: 65px;
+
+  i {
+    font-size: 50px;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    height: 58px;
+  }
+}
+
+.plans-v2-table-container {
+  position: relative;
+}
+
+.plans-v2-license-picker-form {
+  margin-top: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+
+  @media (max-width: @screen-xs-max) {
+    font-size: @font-size-small;
+    margin-top: 15px;
+    flex-direction: column;
+  }
+}
+
+.plans-v2-license-picker-select {
+  background-color: @white;
+  border: 1px solid #cccccc;
+  width: 64px;
+  height: 30px;
+  margin: 0 @margin-sm;
+  padding-left: @padding-sm;
+
+  @media (max-width: @screen-xs-max) {
+    margin: 0 15px;
+  }
+}
+
+.plans-v2-license-picker-educational-discount {
+  display: flex;
+  align-items: center;
+
+  @media (max-width: @screen-xs-max) {
+    margin-top: 15px;
+  }
+}
+
+.plans-v2-license-picker-educational-discount-label {
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+
+  &.disabled span {
+    color: @ol-blue-gray-2;
+  }
+}
+
+input[type='checkbox'].plans-v2-license-picker-educational-discount-checkbox {
+  margin-top: 0;
+  margin-right: @margin-sm;
+
+  @media (max-width: @screen-xs-max) {
+    margin-right: 25px;
+    // scale the checkbox to around 30px width and height
+    transform: scale(2.307);
+  }
+}
+
+i.plans-v2-license-picker-educational-discount-question-icon {
+  margin-left: @margin-xs;
+
+  @media (max-width: @screen-xs-max) {
+    display: none;
+  }
+}
+
+span.plans-v2-license-picker-educational-discount-learn-more-container {
+  display: none;
+
+  @media (max-width: @screen-xs-max) {
+    margin-left: 5px;
+    display: inline;
+    // this white-space is important to ensure the "learn more" text won't get separated by a newline
+    white-space: nowrap;
+
+    span.plans-v2-license-picker-educational-discount-learn-more-text {
+      color: @plans-v2-learn-more-link-color;
+    }
+
+    .tooltip {
+      // force white-space to have initial value since the `white-space: nowrap` rule
+      // on .plans-v2-license-picker-educational-discount-learn-more-container selector (the current code block) above
+      // will also affect every child inside of it, including the generated tooltip
+      white-space: initial;
+    }
+  }
+}
+
+.plans-v2-table-individual,
+.plans-v2-table-student {
+  margin-top: 40px + @plans-v2-highlighted-text-height-desktop;
+
+  @media (max-width: @screen-xs-max) {
+    margin-top: 60px + @plans-v2-highlighted-text-height-desktop;
+
+    th .plans-v2-table-th-content {
+      min-height: 280px;
+    }
+  }
+}
+
+.plans-v2-table-group,
+.plans-v2-table-student {
+  tr {
+    // "hide" the last column on desktop by making the background-color as the default background color
+    th:last-of-type,
+    td:last-of-type {
+      background-color: @ol-blue-gray-0;
+    }
+
+    &:last-child {
+      td:first-child {
+        background-color: @ol-blue-gray-0;
+
+        .plans-v2-table-feature-name {
+          border-bottom-left-radius: @plans-v2-table-border-radius;
+        }
+      }
+
+      td:nth-last-child(2) {
+        background-color: @ol-blue-gray-0;
+
+        .plans-v2-table-cell-inner-content {
+          border-bottom-right-radius: @plans-v2-table-border-radius;
+        }
+      }
+    }
+
+    &:not(.plans-v2-table-divider) {
+      background-color: @white;
+    }
+  }
+
+  th {
+    &:nth-last-child(2) .plans-v2-table-th-content {
+      border-top-right-radius: @plans-v2-table-border-radius;
+    }
+
+    &:nth-child(2) .plans-v2-table-th-content {
+      border-top-left-radius: @plans-v2-table-border-radius;
+    }
+  }
+
+  @media (max-width: @screen-md-max) {
+    tr {
+      th:last-of-type,
+      td:last-of-type {
+        // Last column is only a UI placeholder for desktop view.
+        // We need to hide it for mobile to have the full table fully visible on mobile
+        // without any empty horizontal space.
+        display: none;
+      }
+    }
+  }
+
+  @media (max-width: @screen-xs-max) {
+    tr {
+      &:last-child {
+        td:first-child {
+          background-color: @ol-blue-gray-0;
+
+          .plans-v2-table-feature-name {
+            border-bottom-left-radius: @plans-v2-table-border-radius;
+          }
+        }
+
+        td:nth-last-child(2) {
+          background-color: @ol-blue-gray-0;
+
+          .plans-v2-table-cell-inner-content {
+            border-bottom-right-radius: @plans-v2-table-border-radius;
+          }
+        }
+      }
+
+      &:not(.plans-v2-table-divider) {
+        td:not(:first-of-type),
+        th:not(:first-of-type) {
+          // 33.33% is because table-group & table-student have 3 real column on mobile.
+          // It actually has 5 table column, but on mobile version,
+          // the first column become row and the last column is hidden since it is just a UI placeholder.
+          // We need to force 33.33% width to make each of 3 columns have an equal width of 1/3 screen width.
+          width: 33.33%;
+        }
+      }
+    }
+
+    th {
+      &:nth-last-child(2) .plans-v2-table-th-content {
+        border-top-right-radius: 0;
+      }
+
+      &:nth-child(2) .plans-v2-table-th-content {
+        border-top-left-radius: 0;
+      }
+    }
+  }
+}
+
+// This is a workaround.
+// Table student have "Dedicated account manager" as its last feature.
+// That name is long and it overflows to the next line,
+// making the `td` is bigger than the inner `plans-v2-table-cell-inner-content` (inner `div` class of most of the `td`).
+// Since we can't make all `td` have fixed height
+// (due to different text length that makes the
+// `td` has variable height depending whether the text overflows),
+// we need to force the last element of table student to have fixed height
+// so the `border-bottom-right-radius` will work properly
+// on the bottom right of the `plans-v2-table-student` (desktop only).
+// To remove this workaround
+// I think we need to change the whole table structure
+// so it can support direct border-radius without inner div hack
+// probably adding `border-collapse: separate` on the main table will do it, but need more research
+// (we have `border-collapse: collapse` as the default from our normalize.less)
+// example reference: https://stackoverflow.com/questions/4094126/how-to-add-border-radius-on-table-row
+.plans-v2-table-student {
+  @media (min-width: @screen-md-min) {
+    tr:last-child td:nth-last-child(2) .plans-v2-table-cell-inner-content {
+      height: 62px;
+    }
+  }
+
+  @media (min-width: @screen-sm-min) {
+    tr:last-child td:nth-last-child(2) .plans-v2-table-cell-inner-content {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
+.plans-v2-table-individual {
+  tr {
+    &:last-child {
+      td:first-child {
+        background-color: @ol-blue-gray-0;
+
+        .plans-v2-table-feature-name {
+          border-bottom-left-radius: @plans-v2-table-border-radius;
+        }
+      }
+
+      td:last-child {
+        background-color: @ol-blue-gray-0;
+
+        .plans-v2-table-cell-inner-content {
+          border-bottom-right-radius: @plans-v2-table-border-radius;
+        }
+      }
+    }
+
+    &:not(.plans-v2-table-divider) td {
+      background-color: @white;
+    }
+  }
+
+  th {
+    &:last-child .plans-v2-table-th-content {
+      border-top-right-radius: @plans-v2-table-border-radius;
+    }
+
+    &:nth-child(2) .plans-v2-table-th-content {
+      border-top-left-radius: @plans-v2-table-border-radius;
+    }
+  }
+
+  @media (max-width: @screen-xs-max) {
+    tr:not(.plans-v2-table-divider) {
+      td:not(:first-of-type),
+      th:not(:first-of-type) {
+        // 25% is because table-individual have 4 real columns on mobile
+        // it actually has 5 table columns, but on mobile version, the first column become row
+        // we need to force 25% width to make each of 4 columns have an equal width of 1/4 screen width
+        width: 25%;
+      }
+    }
+
+    tr {
+      &:last-child {
+        td:first-child .plans-v2-table-feature-name {
+          border-bottom-left-radius: 0;
+        }
+
+        td:last-child .plans-v2-table-cell-inner-content {
+          border-bottom-right-radius: 0;
+        }
+      }
+    }
+
+    th {
+      &:last-child .plans-v2-table-th-content {
+        border-top-right-radius: 0;
+      }
+
+      &:nth-child(2) .plans-v2-table-th-content {
+        border-top-left-radius: 0;
+      }
+    }
+  }
+}
+
+.plans-v2-table-group {
+  margin-top: 26px + @plans-v2-highlighted-text-height-desktop;
+}
+
+.plans-v2-table {
+  background-color: @ol-blue-gray-0;
+  margin-bottom: 15px;
+  table-layout: fixed;
+  width: 100%;
+
+  th,
+  td {
+    background-clip: padding-box; /* needed for firefox when there is bg color */
+    text-align: center;
+
+    &:not(.plans-v2-table-cell-before-highlighted-column):not(.plans-v2-table-green-highlighted) {
+      border-right: 1px solid @ol-blue-gray-0;
+
+      @media (max-width: @screen-xs-max) {
+        border-right: none;
+      }
+    }
+  }
+
+  th {
+    border-top: 0;
+    font-family: @headings-font-family;
+    font-size: @font-size-h2;
+    font-weight: @headings-font-weight;
+    line-height: @headings-line-height;
+    vertical-align: top;
+    padding: 0;
+    position: relative;
+    background-color: @ol-blue-gray-0;
+
+    &:first-child {
+      border-left: 0;
+    }
+
+    &:last-child {
+      border-right: 0;
+    }
+  }
+
+  td {
+    vertical-align: middle;
+
+    &:first-child {
+      border-left: 0;
+      text-align: left;
+    }
+
+    &:last-child {
+      border-right: 0;
+    }
+  }
+
+  tr {
+    &:first-child th {
+      // keep the position here, otherwise messes up border on safari
+      position: relative;
+    }
+
+    // css hack for table border-radius on the first feature name
+    &:nth-child(2) {
+      td:first-child {
+        background-color: @ol-blue-gray-0;
+
+        .plans-v2-table-feature-name {
+          border-top-left-radius: @plans-v2-table-border-radius;
+        }
+      }
+    }
+
+    &:not(.plans-v2-table-row-last-row-per-section):not(.plans-v2-table-divider):not(:last-of-type) {
+      border-bottom: 1px solid @ol-blue-gray-0;
+    }
+
+    &:last-child td.plans-v2-table-green-highlighted {
+      border-bottom: 2px solid @ol-green;
+
+      @media (max-width: @screen-xs-max) {
+        border-bottom: unset;
+      }
+    }
+  }
+
+  .fa-check {
+    color: @green;
+  }
+
+  @media (min-width: @screen-sm-min) {
+    // highlight rows on hover
+    tr:not(.plans-v2-table-divider):hover td {
+      background-color: @table-hover-bg;
+
+      .plans-v2-table-feature-name,
+      .plans-v2-table-cell-inner-content {
+        background-color: @table-hover-bg;
+      }
+    }
+  }
+
+  @media (max-width: @screen-sm-max) {
+    font-size: @font-size-small;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    tr {
+      display: flex;
+      // for mobile, we need to show the feature name (the first column) as its own row
+      // the flex-flow will make the whole tr overflow to a next row if
+      // total td width combined is bigger than viewport width
+      // so, one tr can have multiple "visible" row depending on the total width.
+      flex-flow: row wrap;
+      justify-content: space-around;
+    }
+
+    th {
+      font-size: 12px;
+    }
+
+    // hide the first column header
+    tr:first-child th:first-child {
+      display: none;
+    }
+
+    // for mobile, we need to show the feature name (the first td) as its own row
+    // the width: 100vw rule will enhance the flex-flow on the tr by ensuring the feature name (first column of each feature row)
+    // will have the full width of viewport,
+    // and making the first td appear like the it is in its own row (although it's technically still on the same tr as the other tds)
+    td:first-child {
+      background: @gray-lightest;
+      width: 100vw;
+
+      span.plans-v2-table-feature-name {
+        width: 100%;
+
+        span {
+          text-align: left;
+        }
+      }
+    }
+  }
+}
+
+// plans-v2-table-cell-inner-content class only appears for the inner `div` of a `td`
+// that doesn't contain divider or feature name
+// (i.e it contains either check mark icon or a dash)
+.plans-v2-table-cell-inner-content {
+  background-color: @white;
+  padding: 6px;
+}
+
+.plans-v2-table-th-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 321px;
+  height: 100%;
+  background-color: @white;
+  padding: 10px 13px;
+
+  @media (max-width: @screen-md-max) {
+    min-height: 330px;
+  }
+
+  @media (max-width: @screen-sm-max) {
+    padding-left: @padding-xs;
+    padding-right: @padding-xs;
+  }
+}
+
+.plans-v2-table-btn-buy-container-desktop {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 60px;
+
+  @media (max-width: @screen-xs-max) {
+    display: none;
+  }
+}
+
+.plans-v2-table-btn-buy-container-mobile {
+  display: none;
+
+  @media (max-width: @screen-xs-max) {
+    display: flex;
+    flex-direction: column;
+    min-height: 50px;
+    margin-top: @padding-sm;
+  }
+}
+
+.plans-v2-table-btn-buy {
+  font-family: @font-family-sans-serif;
+  padding: 4px 15px 5px;
+
+  @media (max-width: @screen-sm-max) {
+    font-size: @font-size-small;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    padding-left: 9px;
+    padding-right: 9px;
+    // truncating group plans long button text for mobile
+    .hidden-mobile {
+      display: none;
+    }
+  }
+}
+
+p.plans-v2-table-th-content-title {
+  font-size: @font-size-large;
+  padding-bottom: @padding-sm;
+  border-bottom: 1px solid @gray-lighter;
+  margin-bottom: @margin-lg;
+
+  @media (max-width: @screen-md-max) {
+    font-size: @font-size-base;
+  }
+
+  // `plans-v2-table-th-content-title` is visually invisible on screen size less than @screen-xs-max
+  // because there is a sticky header (`plans-v2-table-sticky-header` class) that "replace" the content visually
+  // (see the `@plans-v2-table-sticky-header-z-index` variable that make the sticky header element is "above" the whole table)
+  // however, we still need to properly styling the `plans-v2-table-th-content-title` for small screen size to
+  // fit this element to the size of the sticky header
+  // this trick is used because th element can not have a `position: sticky` rule, at least for our use case
+  @media (max-width: @screen-xs-max) {
+    min-height: 40px;
+    margin-bottom: @margin-md;
+    font-size: @font-size-small;
+    padding-bottom: 0;
+  }
+}
+
+p.plans-v2-table-th-content-benefit,
+ul.plans-v2-table-th-content-benefit {
+  padding-top: 15px;
+  font-size: @font-size-small;
+  font-family: @font-family-sans-serif;
+  line-height: 23px;
+}
+
+ul.plans-v2-table-th-content-benefit {
+  padding-left: 15px;
+  text-align: left;
+  margin-bottom: 0;
+
+  li a {
+    color: @ol-blue-gray-3;
+    text-decoration: underline;
+  }
+}
+
+// this class should only appear on the group table
+.plans-v2-group-total-price {
+  font-weight: 700;
+}
+
+.plans-v2-table-price-container {
+  position: relative;
+}
+
+p.plans-v2-table-price-period-label {
+  margin: 0;
+  font-size: @font-size-small;
+  line-height: 23px;
+  color: @ol-blue-gray-3;
+  font-family: @font-family-sans-serif;
+}
+
+p.plans-v2-table-price {
+  margin: 0;
+
+  span {
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 42px;
+
+    @media (max-width: @screen-xs-max) {
+      line-height: 35px;
+      font-size: @font-size-large;
+    }
+  }
+}
+
+strike.plans-v2-table-annual-price-before-discount {
+  position: absolute;
+  top: -27px;
+  font-weight: 700;
+  font-size: @font-size-small;
+  line-height: 42px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  color: @ol-blue-gray-2;
+
+  @media (max-width: @screen-xs-max) {
+    font-size: @font-size-extra-small;
+  }
+}
+
+small.plans-v2-table-th-content-additional-link {
+  margin-top: @margin-xs;
+  font-size: @font-size-extra-small;
+  height: 16px;
+  font-family: @font-family-sans-serif;
+
+  a {
+    color: @ol-blue-gray-5;
+    text-decoration: underline;
+  }
+}
+
+.plans-v2-table-feature-name {
+  background-color: @white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 6px 6px 18px;
+
+  i.plans-v2-table-feature-name-question-icon {
+    margin-left: 10px;
+  }
+
+  span.plans-v2-table-feature-name-learn-more-container {
+    display: none;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    display: inline-block;
+    text-align: left;
+    padding: 6px;
+    width: 100%;
+    background-color: @ol-blue-gray-0;
+
+    i.plans-v2-table-feature-name-question-icon {
+      display: none;
+    }
+
+    span.plans-v2-table-feature-name-learn-more-container {
+      margin-left: 5px;
+      display: inline;
+      // this white-space is important to ensure the "learn more" text won't get separated by a newline
+      white-space: nowrap;
+
+      span.plans-v2-table-feature-name-learn-more-text {
+        color: @plans-v2-learn-more-link-color;
+      }
+
+      .tooltip {
+        // force white-space to have initial value since the `white-space: nowrap` rule
+        // on .plans-v2-table-feature-name-learn-more-container selector (the current code block) above
+        // will also affect every child inside of it, including the generated tooltip
+        white-space: initial;
+      }
+    }
+  }
+}
+
+tr.plans-v2-table-divider {
+  background-color: @ol-blue-gray-1;
+
+  // direct child selector to NOT affect the generated tooltip
+  td > div {
+    text-align: center;
+    padding: 6px;
+
+    .plans-v2-table-divider-label {
+      margin-bottom: 0;
+      margin-right: 5px;
+    }
+
+    .plans-v2-table-divider-learn-more-container {
+      display: none;
+    }
+  }
+
+  @media (max-width: @screen-xs-max) {
+    // need the colspan attribute selector to increase specificity to override more specific css rule on another selector
+    td[colspan] {
+      padding-top: 0;
+      padding-right: 0;
+      padding-left: 0;
+
+      // direct child selector to NOT affect the generated tooltip
+      > div {
+        background-color: @ol-blue-gray-1;
+        padding: 15px 5px;
+
+        i.plans-v2-table-divider-question-icon {
+          display: none;
+        }
+
+        .plans-v2-table-divider-learn-more-container {
+          display: inline;
+          // this white-space is important to ensure the "learn more" text won't get separated by a newline
+          white-space: nowrap;
+
+          span.plans-v2-table-divider-learn-more-text {
+            color: @plans-v2-learn-more-link-color;
+          }
+
+          // force white-space to have initial value since the `white-space: nowrap` rule
+          // on .plans-v2-table-divider-learn-more-container selector (the current code block) above
+          // will also affect every child inside of it, including the generated tooltip
+          .tooltip {
+            white-space: initial;
+          }
+        }
+      }
+    }
+  }
+}
+
+.plans-v2-table-green-highlighted {
+  border-left: 2px solid @ol-green;
+  border-right: 2px solid @ol-green;
+
+  @media (max-width: @screen-xs-max) {
+    border-left: unset;
+    border-right: unset;
+  }
+}
+
+p.plans-v2-table-green-highlighted-text {
+  border: 2px solid @ol-green;
+  position: absolute;
+  top: -1 * @plans-v2-highlighted-text-height-desktop;
+  left: -2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // 4px because border width is 2px each side (left and right)
+  width: calc(100% + 4px);
+  font-family: @font-family-sans-serif;
+  font-size: @font-size-small;
+  line-height: 19px;
+  font-weight: 700;
+  background-color: @ol-green;
+  border-radius: @plans-v2-table-border-radius @plans-v2-table-border-radius 0 0;
+  color: @white;
+  height: @plans-v2-highlighted-text-height-desktop;
+  margin: 0;
+
+  @media (max-width: @screen-sm-max) {
+    top: -1 * @plans-v2-highlighted-text-height-mobile;
+    height: @plans-v2-highlighted-text-height-mobile;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: @font-size-extra-small;
+    line-height: 15px;
+  }
+}
+
+.plans-v2-table-sticky-header-group,
+.plans-v2-table-sticky-header-student {
+  .plans-v2-table-sticky-header-item {
+    // has 3 visible column on the table for mobile view
+    width: 33.33%;
+  }
+}
+
+.plans-v2-table-sticky-header-individual {
+  .plans-v2-table-sticky-header-item {
+    // has 4 visible column on the table for mobile view
+    width: 25%;
+  }
+}
+
+.plans-v2-table-sticky-header-group {
+  margin-bottom: -107px;
+  margin-top: 67px;
+}
+
+.plans-v2-table-sticky-header-individual,
+.plans-v2-table-sticky-header-student {
+  margin-bottom: -140px;
+  margin-top: 100px;
+
+  @media (max-width: @screen-xs-max) {
+    margin-top: 118px;
+  }
+}
+
+.plans-v2-table-sticky-header {
+  display: none;
+
+  @media (max-width: @screen-xs-max) {
+    display: flex;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    z-index: @plans-v2-table-sticky-header-z-index;
+    height: 40px;
+
+    // separate sticky class because we want to remove the class (to visually remove the sticky header)
+    // with javascript whenever the table is not visible anymore
+    &.sticky {
+      position: sticky;
+    }
+  }
+}
+
+.plans-v2-table-sticky-header-item {
+  background-color: @white;
+
+  span {
+    margin: 0px @margin-xs;
+    border-bottom: 1px solid #cccccc;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: @font-family-serif;
+
+    @media (max-width: @screen-xs-max) {
+      font-size: @font-size-small;
+      text-align: center;
+      line-height: 19px;
+    }
+  }
+}
+
+.plans-v2-table-sticky-header-item-highlighted span {
+  color: @ol-green;
+}
+
+.plans-v2-faq {
+  // need for specificity to override default a color
+  p > a {
+    color: @ol-blue;
+  }
+}

@@ -39,10 +39,10 @@ mixin table_premium
 							| #{plan}
 						else if plan
 							i.fa.fa-check(aria-hidden="true")
-							span.sr-only Feature included
+							span.sr-only #{translate("feature_included")}
 						else
 							i.fa.fa-times(aria-hidden="true")
-							span.sr-only Feature not included
+							span.sr-only #{translate("feature_not_included")}
 
 		tr
 			td
@@ -62,10 +62,10 @@ mixin table_cell_student(feature)
 		| #{feature.student}
 	else if feature.student
 		i.fa.fa-check(aria-hidden="true")
-		span.sr-only Feature included
+		span.sr-only #{translate("feature_included")}
 	else
 		i.fa.fa-times(aria-hidden="true")
-		span.sr-only Feature not included
+		span.sr-only #{translate("feature_not_included")}
 
 mixin table_student
 	table.card.plans-table.plans-table-student
@@ -99,10 +99,10 @@ mixin table_student
 						| #{feature.plans.free}
 					else if feature.plans.free
 						i.fa.fa-check(aria-hidden="true")
-						span.sr-only Feature included
+						span.sr-only #{translate("feature_included")}
 					else
 						i.fa.fa-times(aria-hidden="true")
-						span.sr-only Feature included
+						span.sr-only #{translate("feature_not_included")}
 				td(ng-non-bindable)
 					+table_cell_student(feature)
 				td(ng-non-bindable)

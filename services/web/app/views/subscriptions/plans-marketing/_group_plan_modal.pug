@@ -38,7 +38,13 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 										| Plan
 									for plan_code in groupPlanModalOptions.plan_codes
 										label.group-plan-option
-											input(type="radio" name="plan_code" checked=(plan_code.code === "collaborator") value=plan_code.code )
+											input(
+												type="radio"
+												name="plan_code"
+												checked=(plan_code.code === "collaborator")
+												value=plan_code.code
+												data-ol-group-plan-code=plan_code.code
+											)
 											if (useNewPlanName && plan_code.code === 'collaborator')
 												span Standard
 											else
@@ -52,7 +58,7 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 												value=size
 												selected=(size === groupPlanModalDefaults.size)
 											) #{size}
-								.form-group
+								.form-group(data-ol-group-plan-form-currency)
 									label(for='currency')
 										| Currency
 									select.form-control(id="currency")
@@ -65,7 +71,11 @@ div.modal.fade(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 									label(for='usage')
 										| Overleaf offers a 40% educational discount for groups of 10 or more.
 								label.group-plan-option
-									input(id="usage", type="checkbox")
+									input(
+										id="usage"
+										type="checkbox"
+										autocomplete="off"
+									)
 									span This license is for educational purposes (applies to students or faculty using Overleaf for teaching)
 
 					.row

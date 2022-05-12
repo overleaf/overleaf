@@ -9,6 +9,7 @@ const logger = require('@overleaf/logger')
 const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 const FeaturesUpdater = require('./FeaturesUpdater')
 const planFeatures = require('./planFeatures')
+const planFeaturesV2 = require('./planFeaturesV2')
 const GroupPlansData = require('./GroupPlansData')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const Errors = require('../Errors/Errors')
@@ -57,6 +58,17 @@ async function plansPage(req, res) {
 
   AnalyticsManager.recordEventForSession(req.session, 'plans-page-view')
 
+  const newPlansPageAssignmentV2 =
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'plans-page-layout-v2'
+    )
+
+  const newPlansPageVariantV2 =
+    newPlansPageAssignmentV2 &&
+    newPlansPageAssignmentV2.variant === 'new-plans-page'
+
   const standardPlanNameAssignment =
     await SplitTestHandler.promises.getAssignment(
       req,
@@ -68,13 +80,17 @@ async function plansPage(req, res) {
     standardPlanNameAssignment &&
     standardPlanNameAssignment.variant === 'new-plan-name'
 
-  res.render('subscriptions/plans-marketing', {
+  const template = newPlansPageVariantV2
+    ? 'subscriptions/plans-marketing-v2'
+    : 'subscriptions/plans-marketing'
+
+  res.render(template, {
     title: 'plans_and_pricing',
     plans,
     itm_content: req.query && req.query.itm_content,
     recomendedCurrency: recommendedCurrency,
     recommendedCurrency,
-    planFeatures,
+    planFeatures: newPlansPageVariantV2 ? planFeaturesV2 : planFeatures,
     groupPlans: GroupPlansData,
     groupPlanModalOptions,
     groupPlanModalDefaults,

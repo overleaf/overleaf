@@ -67,7 +67,7 @@ function setUpSubscriptionTracking(linkEl) {
   })
 }
 
-function updateLinkTargets() {
+export function updateLinkTargets() {
   document.querySelectorAll('[data-ol-start-new-subscription]').forEach(el => {
     if (el.hasAttribute('data-ol-has-custom-href')) return
 
