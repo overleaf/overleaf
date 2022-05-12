@@ -64,6 +64,11 @@ async function addUserToGroup(subscriptionId, userId) {
   ).exec()
   await FeaturesUpdater.promises.refreshFeatures(userId, 'add-to-group')
   await _sendUserGroupPlanCodeUserProperty(userId)
+  await _sendSubscriptionEvent(
+    userId,
+    subscriptionId,
+    'group-subscription-joined'
+  )
 }
 
 async function removeUserFromGroup(subscriptionId, userId) {
@@ -76,6 +81,11 @@ async function removeUserFromGroup(subscriptionId, userId) {
     'remove-user-from-group'
   )
   await _sendUserGroupPlanCodeUserProperty(userId)
+  await _sendSubscriptionEvent(
+    userId,
+    subscriptionId,
+    'group-subscription-left'
+  )
 }
 
 async function removeUserFromAllGroups(userId) {
@@ -94,6 +104,13 @@ async function removeUserFromAllGroups(userId) {
     userId,
     'remove-user-from-groups'
   )
+  for (const subscriptionId of subscriptionIds) {
+    await _sendSubscriptionEvent(
+      userId,
+      subscriptionId,
+      'group-subscription-left'
+    )
+  }
   await _sendUserGroupPlanCodeUserProperty(userId)
 }
 
@@ -105,10 +122,16 @@ async function deleteSubscription(subscription, deleterData) {
   // 1. create deletedSubscription
   await createDeletedSubscription(subscription, deleterData)
 
-  // 2. remove subscription
+  // 2. notify analytics that members left the subscription
+  await _sendSubscriptionEventForAllMembers(
+    subscription._id,
+    'group-subscription-left'
+  )
+
+  // 3. remove subscription
   await Subscription.deleteOne({ _id: subscription._id }).exec()
 
-  // 3. refresh users features
+  // 4. refresh users features
   await _scheduleRefreshFeatures(subscription)
 }
 
@@ -132,6 +155,12 @@ async function restoreSubscription(subscriptionId) {
   await DeletedSubscription.deleteOne({
     'subscription._id': subscription._id,
   }).exec()
+
+  // 4. notify analytics that members rejoined the subscription
+  await _sendSubscriptionEventForAllMembers(
+    subscriptionId,
+    'group-subscription-left'
+  )
 }
 
 async function refreshUsersFeatures(subscription) {
@@ -273,6 +302,43 @@ async function _sendUserGroupPlanCodeUserProperty(userId) {
       { err: error },
       `Failed to update group-subscription-plan-code property for user ${userId}`
     )
+  }
+}
+
+async function _sendSubscriptionEvent(userId, subscriptionId, event) {
+  const subscription = await Subscription.findOne(
+    { _id: subscriptionId },
+    { recurlySubscription_id: 1, groupPlan: 1 }
+  )
+  if (!subscription || !subscription.groupPlan) {
+    return
+  }
+  AnalyticsManager.recordEventForUser(userId, event, {
+    groupId: subscription._id.toString(),
+    subscriptionId: subscription.recurlySubscription_id,
+  })
+}
+
+async function _sendSubscriptionEventForAllMembers(subscriptionId, event) {
+  const subscription = await Subscription.findOne(
+    { _id: subscriptionId },
+    {
+      recurlySubscription_id: 1,
+      member_ids: 1,
+      groupPlan: 1,
+    }
+  )
+  if (!subscription) {
+    return
+  }
+  const userIds = (subscription.member_ids || []).filter(Boolean)
+  for (const userId of userIds) {
+    if (userId) {
+      AnalyticsManager.recordEventForUser(userId, event, {
+        groupId: subscription._id.toString(),
+        subscriptionId: subscription.recurlySubscription_id,
+      })
+    }
   }
 }
 

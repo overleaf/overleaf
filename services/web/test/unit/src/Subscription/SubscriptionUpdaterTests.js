@@ -25,6 +25,7 @@ describe('SubscriptionUpdater', function () {
       member_ids: [],
       save: sinon.stub().resolves(),
       planCode: 'student_or_something',
+      recurlySubscription_id: 'abc123def456fab789',
     }
     this.user_id = this.adminuser_id
 
@@ -36,6 +37,7 @@ describe('SubscriptionUpdater', function () {
       save: sinon.stub().resolves(),
       groupPlan: true,
       planCode: 'group_subscription',
+      recurlySubscription_id: '456fab789abc123def',
     }
     this.betterGroupSubscription = {
       _id: '999999999999999999999999',
@@ -45,6 +47,7 @@ describe('SubscriptionUpdater', function () {
       save: sinon.stub().resolves(),
       groupPlan: true,
       planCode: 'better_group_subscription',
+      recurlySubscription_id: '123def456fab789abc',
     }
 
     const subscription = this.subscription
@@ -66,6 +69,7 @@ describe('SubscriptionUpdater', function () {
     this.SubscriptionModel.updateOne = sinon
       .stub()
       .returns({ exec: sinon.stub().resolves() })
+    this.SubscriptionModel.findOne = sinon.stub().resolves()
     this.SubscriptionModel.updateMany = sinon
       .stub()
       .returns({ exec: sinon.stub().resolves() })
@@ -135,6 +139,7 @@ describe('SubscriptionUpdater', function () {
     }
 
     this.AnalyticsManager = {
+      recordEventForUser: sinon.stub().resolves(),
       setUserPropertyForUser: sinon.stub(),
     }
 
@@ -378,17 +383,30 @@ describe('SubscriptionUpdater', function () {
 
   describe('addUserToGroup', function () {
     it('should add the user ids to the group as a set', async function () {
+      this.SubscriptionModel.findOne = sinon
+        .stub()
+        .resolves(this.groupSubscription)
+
       await this.SubscriptionUpdater.promises.addUserToGroup(
-        this.subscription._id,
+        this.groupSubscription._id,
         this.otherUserId
       )
-      const searchOps = { _id: this.subscription._id }
+      const searchOps = { _id: this.groupSubscription._id }
       const insertOperation = {
         $addToSet: { member_ids: this.otherUserId },
       }
       this.SubscriptionModel.updateOne
         .calledWith(searchOps, insertOperation)
         .should.equal(true)
+      sinon.assert.calledWith(
+        this.AnalyticsManager.recordEventForUser,
+        this.otherUserId,
+        'group-subscription-joined',
+        {
+          groupId: this.groupSubscription._id,
+          subscriptionId: this.groupSubscription.recurlySubscription_id,
+        }
+      )
     })
 
     it('should update the users features', async function () {
@@ -450,9 +468,17 @@ describe('SubscriptionUpdater', function () {
     })
   })
 
-  describe('removeUserFromGroups', function () {
+  describe('removeUserFromGroup', function () {
     beforeEach(function () {
-      this.fakeSubscriptions = [{ _id: 'fake-id-1' }, { _id: 'fake-id-2' }]
+      this.fakeSubscriptions = [
+        {
+          _id: 'fake-id-1',
+        },
+        {
+          _id: 'fake-id-2',
+        },
+      ]
+      this.SubscriptionModel.findOne.resolves(this.groupSubscription)
       this.SubscriptionLocator.promises.getMemberSubscriptions.resolves(
         this.fakeSubscriptions
       )
@@ -469,6 +495,22 @@ describe('SubscriptionUpdater', function () {
         .should.equal(true)
     })
 
+    it('should send a group-subscription-left event', async function () {
+      await this.SubscriptionUpdater.promises.removeUserFromGroup(
+        this.groupSubscription._id,
+        this.otherUserId
+      )
+      sinon.assert.calledWith(
+        this.AnalyticsManager.recordEventForUser,
+        this.otherUserId,
+        'group-subscription-left',
+        {
+          groupId: this.groupSubscription._id,
+          subscriptionId: this.groupSubscription.recurlySubscription_id,
+        }
+      )
+    })
+
     it('should set the group plan code user property when removing user from group', async function () {
       await this.SubscriptionUpdater.promises.removeUserFromGroup(
         this.subscription._id,
@@ -480,6 +522,29 @@ describe('SubscriptionUpdater', function () {
         'group-subscription-plan-code',
         null
       )
+    })
+
+    it('should update the users features', async function () {
+      await this.SubscriptionUpdater.promises.removeUserFromGroup(
+        this.subscription._id,
+        this.otherUserId
+      )
+      this.FeaturesUpdater.promises.refreshFeatures
+        .calledWith(this.otherUserId)
+        .should.equal(true)
+    })
+  })
+
+  describe('removeUserFromAllGroups', function () {
+    beforeEach(function () {
+      this.SubscriptionLocator.promises.getMemberSubscriptions.resolves([
+        {
+          _id: 'fake-id-1',
+        },
+        {
+          _id: 'fake-id-2',
+        },
+      ])
     })
 
     it('should set the group plan code user property when removing user from all groups', async function () {
@@ -507,14 +572,50 @@ describe('SubscriptionUpdater', function () {
       )
     })
 
-    it('should update the users features', async function () {
-      await this.SubscriptionUpdater.promises.removeUserFromGroup(
-        this.subscription._id,
+    it('should send a group-subscription-left event for each group', async function () {
+      this.fakeSub1 = {
+        _id: 'fake-id-1',
+        groupPlan: true,
+        recurlySubscription_id: 'fake-sub-1',
+      }
+      this.fakeSub2 = {
+        _id: 'fake-id-2',
+        groupPlan: true,
+        recurlySubscription_id: 'fake-sub-2',
+      }
+      this.SubscriptionModel.findOne
+        .withArgs(
+          { _id: 'fake-id-1' },
+          { recurlySubscription_id: 1, groupPlan: 1 }
+        )
+        .resolves(this.fakeSub1)
+        .withArgs(
+          { _id: 'fake-id-2' },
+          { recurlySubscription_id: 1, groupPlan: 1 }
+        )
+        .resolves(this.fakeSub2)
+
+      await this.SubscriptionUpdater.promises.removeUserFromAllGroups(
         this.otherUserId
       )
-      this.FeaturesUpdater.promises.refreshFeatures
-        .calledWith(this.otherUserId)
-        .should.equal(true)
+      sinon.assert.calledWith(
+        this.AnalyticsManager.recordEventForUser,
+        this.otherUserId,
+        'group-subscription-left',
+        {
+          groupId: 'fake-id-1',
+          subscriptionId: 'fake-sub-1',
+        }
+      )
+      sinon.assert.calledWith(
+        this.AnalyticsManager.recordEventForUser,
+        this.otherUserId,
+        'group-subscription-left',
+        {
+          groupId: 'fake-id-2',
+          subscriptionId: 'fake-sub-2',
+        }
+      )
     })
   })
 
