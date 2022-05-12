@@ -14,9 +14,15 @@ function BackToProjectsButton() {
         </Tooltip>
       }
     >
-      <a className="toolbar-header-back-projects" href="/project">
-        <Icon type="home" fw accessibilityLabel={t('back_to_your_projects')} />
-      </a>
+      <div className="toolbar-item">
+        <a className="btn btn-full-height" href="/project">
+          <Icon
+            type="home"
+            fw
+            accessibilityLabel={t('back_to_your_projects')}
+          />
+        </a>
+      </div>
     </OverlayTrigger>
   )
 }
