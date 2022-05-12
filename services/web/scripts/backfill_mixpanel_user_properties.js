@@ -18,8 +18,12 @@ async function processUser(user) {
   await _sendPropertyToQueue(analyticsId, 'user-id', user._id)
   await _sendPropertyToQueue(analyticsId, 'analytics-id', analyticsId)
   await _sendPropertyToQueue(analyticsId, 'created-at', user.signUpDate)
-  await _sendPropertyToQueue(analyticsId, 'alpha-program', user.alphaProgram)
-  await _sendPropertyToQueue(analyticsId, 'beta-program', user.betaProgram)
+  if (user.alphaProgram !== undefined) {
+    await _sendPropertyToQueue(analyticsId, 'alpha-program', user.alphaProgram)
+  }
+  if (user.betaProgram !== undefined) {
+    await _sendPropertyToQueue(analyticsId, 'beta-program', user.betaProgram)
+  }
 
   const groupSubscriptionPlanCode = await _getGroupSubscriptionPlanCode(
     user._id
@@ -77,6 +81,9 @@ async function _sendPropertyToQueue(
   propertyValue,
   createdAt = new Date()
 ) {
+  if (propertyValue == null) {
+    return
+  }
   await mixpanelSinkQueue.add('user-property', {
     analyticsId,
     propertyName,
