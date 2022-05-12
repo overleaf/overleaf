@@ -1,6 +1,5 @@
 import '../../../marketing'
 import '../../../features/plans/group-plan-modal'
-
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import getMeta from '../../../utils/meta'
 
@@ -18,6 +17,7 @@ function selectView(view) {
   document.querySelectorAll('[data-ol-view]').forEach(el => {
     el.hidden = el.getAttribute('data-ol-view') !== view
   })
+  updateAnnualSavingBanner(view)
   currentView = view
   updateLinkTargets()
 }
@@ -79,6 +79,16 @@ function updateLinkTargets() {
     const location = el.getAttribute('data-ol-location')
     el.href = `/user/subscription/new?planCode=${planCode}&currency=${currentCurrencyCode}&itm_campaign=plans&itm_content=${location}`
   })
+}
+
+function updateAnnualSavingBanner(view) {
+  const tooltipEl = document.querySelector('[data-ol-annual-saving-tooltip]')
+
+  if (view === 'annual') {
+    tooltipEl.classList.add('annual-selected')
+  } else {
+    tooltipEl.classList.remove('annual-selected')
+  }
 }
 
 function selectViewFromHash() {

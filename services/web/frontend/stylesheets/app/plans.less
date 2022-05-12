@@ -85,7 +85,7 @@
       font-size: @font-size-base * 0.8;
     }
     .undiscounted-price {
-      text-decoration: line-through;
+      display: block;
       margin-top: -48px;
     }
   }
@@ -135,13 +135,41 @@
   ul.nav-pills {
     text-align: center;
     margin-bottom: @line-height-computed;
+    display: flex;
+    justify-content: center;
     li {
       float: none;
       display: inline-block;
+      position: relative;
+      .annual-saving-tooltip {
+        white-space: nowrap;
+        left: 50%;
+        width: 200px;
+        margin-left: -100px;
+        &.bottom {
+          margin-top: 0px;
+        }
+        &.annual-selected {
+          width: 94px;
+          margin-left: -47px;
+          .tooltip-inner {
+            background-color: @ol-green;
+          }
+          .tooltip-arrow {
+            border-bottom-color: @ol-green;
+          }
+        }
+        .tooltip-inner {
+          max-width: none;
+        }
+      }
     }
     > li + li {
       margin-left: @line-height-computed / 2;
     }
+  }
+  ul.nav-pills.above-cards {
+    margin-bottom: @line-height-computed * 2;
   }
 }
 
@@ -207,6 +235,19 @@
       li {
         margin-bottom: @margin-sm;
       }
+    }
+  }
+}
+@media (max-width: @screen-xs-max) {
+  .plans ul.nav-pills {
+    li {
+      a {
+        font-size: @font-size-small;
+        padding: 8px 10px;
+      }
+    }
+    > li + li {
+      margin-left: @margin-sm;
     }
   }
 }

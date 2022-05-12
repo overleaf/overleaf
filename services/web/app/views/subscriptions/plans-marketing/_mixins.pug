@@ -132,12 +132,20 @@ mixin gen_localized_price_for_plan_view(plan, view)
 			data-ol-currencyCode=currencyCode
 		) #{settings.localizedPlanPricing[currencyCode][plan][view]}
 
-mixin gen_localized_undiscounted_price_for_plan_view(plan, view)
+mixin gen_localized_undiscounted_price_for_plan_view_personal(view)
 	for currencyCode in Object.keys(settings.localizedPlanPricing)
 		span(
 			hidden=(currencyCode !== recommendedCurrency)
 			data-ol-currencyCode=currencyCode
-		) #{settings.localizedPlanPricing[currencyCode][plan]['withoutDiscount'][view]}
+		) #{settings.localizedPlanPricing[currencyCode]['personal']['withoutDiscount'][view]}
+
+mixin gen_localized_undiscounted_price_for_plan_view(plan)
+	for currencyCode in Object.keys(settings.localizedPlanPricing)
+		span(
+			hidden=(currencyCode !== recommendedCurrency)
+			data-ol-currencyCode=currencyCode
+		) #{settings.localizedPlanPricing[currencyCode][plan]['monthlyTimesTwelve']}
+
 
 mixin gen_localized_price_for_plan(plan)
 	div(data-ol-view='monthly')
@@ -147,27 +155,38 @@ mixin gen_localized_price_for_plan(plan)
 		+gen_localized_price_for_plan_view(plan, 'annual')
 		span.small /yr
 
-mixin gen_localized_undiscounted_price_for_plan(plan)
+mixin gen_localized_undiscounted_price_for_plan_personal()
 	div(data-ol-view='monthly')
-		.undiscounted-price.small
+		strike.undiscounted-price.small
 			span.sr-only Price reduced from
-			+gen_localized_undiscounted_price_for_plan_view(plan, 'monthly')
+			+gen_localized_undiscounted_price_for_plan_view_personal('monthly')
 			| /mo
 	div(hidden data-ol-view='annual')
-		.undiscounted-price.small
+		strike.undiscounted-price.small
 			span.sr-only Price reduced from
-			+gen_localized_undiscounted_price_for_plan_view(plan, 'annual')
+			+gen_localized_undiscounted_price_for_plan_view_personal('annual')
+			| /yr
+
+mixin gen_localized_undiscounted_price_for_plan(plan)
+	div(hidden data-ol-view='annual')
+		strike.undiscounted-price.small
+			span.sr-only Price reduced from
+			+gen_localized_undiscounted_price_for_plan_view(plan)
 			| /yr
 
 //- Prices
 mixin price_personal
 	+gen_localized_price_for_plan('personal')
 mixin price_personal_undiscounted
-	+gen_localized_undiscounted_price_for_plan('personal')
+	+gen_localized_undiscounted_price_for_plan_personal()
 mixin price_collaborator
 	+gen_localized_price_for_plan('collaborator')
+mixin price_collaborator_undiscounted
+	+gen_localized_undiscounted_price_for_plan('collaborator')
 mixin price_professional
 	+gen_localized_price_for_plan('professional')
+mixin price_professional_undiscounted
+	+gen_localized_undiscounted_price_for_plan('professional')
 mixin price_student_annual
 	+gen_localized_price_for_plan_view('student', 'annual')
 	span.small /yr
@@ -199,15 +218,25 @@ mixin currency_dropdown
 					) #{currencyCode} #{settings.localizedPlanPricing[currencyCode]['symbol']}
 
 mixin plan_switch(location)
-	ul.nav.nav-pills
+	ul.nav.nav-pills(class=(location === 'card' ? "above-cards" : ""))
 		li.active(data-ol-view-tab='monthly')
 			a.btn.btn-default-outline(
 				href="#"
 			) #{translate("monthly")}
-		li(data-ol-view-tab='annual')
+		li(data-ol-view-tab='annual' class=(location === 'card' ? "annual-saving-tooltip-container" : ""))
 			a.btn.btn-default-outline(
 				href="#"
 			) #{translate("annual")}
+			if (location === 'card')
+				.tooltip.in.bottom.annual-saving-tooltip(
+					role="tooltip"
+					data-ol-annual-saving-tooltip
+				)
+					.tooltip-arrow
+					.tooltip-inner
+						span(data-ol-view="monthly") #{translate("save_20_percent_by_paying_annually")}
+						span(hidden data-ol-view="annual") #{translate("saving_20_percent")}
+						span(hidden data-ol-view="student") #{translate("save_20_percent_by_paying_annually")}
 		li(data-ol-view-tab='student')
 			a.btn.btn-default-outline(
 				href="#"
@@ -217,7 +246,7 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 	- var location = listLocation ? 'card_' + listLocation : 'card'
 	.row.top-switch(class=(controlsRowSpaced ? "row-spaced" : ""))
 		.col-md-6.col-md-offset-3
-			+plan_switch('card')
+			+plan_switch(location)
 		.col-md-2.text-right
 			+currency_dropdown
 
@@ -250,6 +279,7 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 									h5.tagline #{translate("tagline_collaborator")}
 								.circle
 									+price_collaborator
+									+price_collaborator_undiscounted
 								+features_collaborator(location)
 						.col-md-4
 							.card.card-last
@@ -259,6 +289,7 @@ mixin allCardsAndControls(controlsRowSpaced, listLocation)
 									h5.tagline #{translate("tagline_professional")}
 								.circle
 									+price_professional
+									+price_professional_undiscounted
 								+features_professional(location)
 
 				.card-group.text-centered(hidden data-ol-view='student')

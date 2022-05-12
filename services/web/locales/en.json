@@ -1640,5 +1640,7 @@
   "change_primary_email_address_instructions": "To change your primary email, please add your new primary email address first (by clicking <0>Add another email</0>) and confirm it. Then click the <0>Make Primary</0> button. <1>Learn more</1> about managing your __appName__ emails.",
   "help_improve_overleaf_fill_out_this_survey": "If you would like to help us improve Overleaf, please take a moment to fill out <0>this survey</0>.",
   "unlink_dropbox_folder": "Unlink Dropbox Account",
-  "unlink_dropbox_warning": "Any projects that you have synced with Dropbox will be disconnected and no longer kept in sync with Dropbox. Are you sure you want to unlink your Dropbox account?"
+  "unlink_dropbox_warning": "Any projects that you have synced with Dropbox will be disconnected and no longer kept in sync with Dropbox. Are you sure you want to unlink your Dropbox account?",
+  "save_20_percent_by_paying_annually": "Save 20% by paying annually",
+  "saving_20_percent": "Saving 20%!"
 }
