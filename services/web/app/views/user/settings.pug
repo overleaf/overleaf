@@ -166,17 +166,18 @@ block content
 							| !{moduleIncludes("userSettings", locals)}
 							hr
 
-							h3
-								| #{translate("sharelatex_beta_program")}
-
-							if (user.betaProgram)
-								p.small
-									| #{translate("beta_program_already_participating")}
-
-							div
-								a(id="beta-program-participate-link" href="/beta/participate") #{translate("manage_beta_program_membership")}
-
-							hr
+							if hasFeature('saas')
+								h3
+									| #{translate("sharelatex_beta_program")}
+	
+								if (user.betaProgram)
+									p.small
+										| #{translate("beta_program_already_participating")}
+	
+								div
+									a(id="beta-program-participate-link" href="/beta/participate") #{translate("manage_beta_program_membership")}
+	
+								hr
 
 							h3
 								| #{translate("sessions")}
