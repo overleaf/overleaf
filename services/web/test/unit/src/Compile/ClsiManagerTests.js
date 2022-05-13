@@ -8,7 +8,7 @@ describe('ClsiManager', function () {
     this.jar = { cookie: 'stuff' }
     this.ClsiCookieManager = {
       clearServerId: sinon.stub().yields(),
-      getCookieJar: sinon.stub().callsArgWith(2, null, this.jar),
+      getCookieJar: sinon.stub().yields(null, this.jar),
       setServerId: sinon.stub().yields(null),
       _getServerId: sinon.stub(),
     }
@@ -491,9 +491,10 @@ describe('ClsiManager', function () {
           .calledWith(
             this.project_id,
             this.user_id,
+            'standard',
             {
               method: 'DELETE',
-              url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}`,
+              url: `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}?compileGroup=standard`,
             },
             'node-1'
           )
@@ -922,12 +923,7 @@ describe('ClsiManager', function () {
       beforeEach(function () {
         this.ClsiManager._makeRequest = sinon
           .stub()
-          .callsArgWith(
-            3,
-            null,
-            { statusCode: 204 },
-            (this.body = { mock: 'foo' })
-          )
+          .yields(null, { statusCode: 204 }, (this.body = { mock: 'foo' }))
         this.ClsiManager._postToClsi(
           this.project_id,
           this.user_id,
@@ -938,9 +934,9 @@ describe('ClsiManager', function () {
       })
 
       it('should send the request to the CLSI', function () {
-        const url = `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/compile`
+        const url = `${this.settings.apis.clsi.url}/project/${this.project_id}/user/${this.user_id}/compile?compileGroup=standard`
         this.ClsiManager._makeRequest
-          .calledWith(this.project_id, this.user_id, {
+          .calledWith(this.project_id, this.user_id, 'standard', {
             method: 'POST',
             url,
             json: this.req,
@@ -957,12 +953,7 @@ describe('ClsiManager', function () {
       beforeEach(function () {
         this.ClsiManager._makeRequest = sinon
           .stub()
-          .callsArgWith(
-            3,
-            null,
-            { statusCode: 500 },
-            (this.body = { mock: 'foo' })
-          )
+          .yields(null, { statusCode: 500 }, (this.body = { mock: 'foo' }))
         this.ClsiManager._postToClsi(
           this.project_id,
           this.user_id,
@@ -983,8 +974,7 @@ describe('ClsiManager', function () {
       this.ClsiManager._makeRequestWithClsiServerId = sinon
         .stub()
         .yields(null, { statusCode: 200 }, (this.body = { mock: 'foo' }))
-      this.ClsiManager._buildRequest = sinon.stub().callsArgWith(
-        2,
+      this.ClsiManager._buildRequest = sinon.stub().yields(
         null,
         (this.req = {
           compile: { rootResourcePath: 'rootfile.text', options: {} },
@@ -998,7 +988,7 @@ describe('ClsiManager', function () {
           this.project_id,
           this.user_id,
           false,
-          {},
+          { compileGroup: 'standard' },
           'node-1',
           this.callback
         )
@@ -1009,9 +999,10 @@ describe('ClsiManager', function () {
           .calledWith(
             this.project_id,
             this.user_id,
+            'standard',
             {
               method: 'GET',
-              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
+              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount?compileGroup=standard`,
               qs: {
                 file: 'rootfile.text',
                 image: undefined,
@@ -1034,7 +1025,7 @@ describe('ClsiManager', function () {
           this.project_id,
           this.user_id,
           'main.tex',
-          {},
+          { compileGroup: 'standard' },
           'node-2',
           this.callback
         )
@@ -1045,9 +1036,10 @@ describe('ClsiManager', function () {
           .calledWith(
             this.project_id,
             this.user_id,
+            'standard',
             {
               method: 'GET',
-              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
+              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount?compileGroup=standard`,
               qs: { file: 'main.tex', image: undefined },
               json: true,
             },
@@ -1065,7 +1057,7 @@ describe('ClsiManager', function () {
           this.project_id,
           this.user_id,
           'main.tex',
-          {},
+          { compileGroup: 'standard' },
           'node-3',
           this.callback
         )
@@ -1076,9 +1068,10 @@ describe('ClsiManager', function () {
           .calledWith(
             this.project_id,
             this.user_id,
+            'standard',
             {
               method: 'GET',
-              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount`,
+              url: `http://clsi.example.com/project/${this.project_id}/user/${this.user_id}/wordcount?compileGroup=standard`,
               qs: { file: 'main.tex', image: this.image },
               json: true,
             },
@@ -1103,6 +1096,7 @@ describe('ClsiManager', function () {
       this.ClsiManager._makeRequest(
         this.project_id,
         this.user_id,
+        'standard',
         this.opts,
         () => {
           const args = this.request.args[0]
@@ -1118,10 +1112,16 @@ describe('ClsiManager', function () {
       this.ClsiManager._makeRequest(
         this.project_id,
         this.user_id,
+        'standard',
         this.opts,
         () => {
           this.ClsiCookieManager.setServerId
-            .calledWith(this.project_id, this.user_id, this.response)
+            .calledWith(
+              this.project_id,
+              this.user_id,
+              'standard',
+              this.response
+            )
             .should.equal(true)
           done()
         }
@@ -1144,6 +1144,7 @@ describe('ClsiManager', function () {
         this.ClsiManager._makeRequestWithClsiServerId(
           this.project_id,
           this.user_id,
+          'standard',
           this.opts,
           undefined,
           err => {
@@ -1162,12 +1163,18 @@ describe('ClsiManager', function () {
         this.ClsiManager._makeRequestWithClsiServerId(
           this.project_id,
           this.user_id,
+          'standard',
           this.opts,
           undefined,
           err => {
             if (err) return done(err)
             this.ClsiCookieManager.setServerId
-              .calledWith(this.project_id, this.user_id, this.response)
+              .calledWith(
+                this.project_id,
+                this.user_id,
+                'standard',
+                this.response
+              )
               .should.equal(true)
             done()
           }
@@ -1180,6 +1187,7 @@ describe('ClsiManager', function () {
         this.ClsiManager._makeRequestWithClsiServerId(
           this.project_id,
           this.user_id,
+          'standard',
           this.opts,
           'node-1',
           err => {
@@ -1188,7 +1196,10 @@ describe('ClsiManager', function () {
             expect(requestOpts.method).to.equal(this.opts.method)
             expect(requestOpts.url).to.equal(this.opts.url)
             expect(requestOpts.jar).to.not.exist
-            expect(requestOpts.qs).to.deep.equal({ clsiserverid: 'node-1' })
+            expect(requestOpts.qs).to.deep.equal({
+              clsiserverid: 'node-1',
+              compileGroup: 'standard',
+            })
             done()
           }
         )
@@ -1198,6 +1209,7 @@ describe('ClsiManager', function () {
         this.ClsiManager._makeRequestWithClsiServerId(
           this.project_id,
           this.user_id,
+          'standard',
           this.opts,
           'node-1',
           err => {
@@ -1216,7 +1228,7 @@ describe('ClsiManager', function () {
       this.response = { there: 'something' }
       this.request.callsArgWith(1, null, this.response)
       this.opts = {
-        url: this.ClsiManager._getCompilerUrl(null, this.project_id),
+        url: this.ClsiManager._getCompilerUrl('standard', this.project_id),
       }
     })
 
@@ -1224,11 +1236,12 @@ describe('ClsiManager', function () {
       this.ClsiManager._makeNewBackendRequest(
         this.project_id,
         this.user_id,
+        'standard',
         this.opts,
         () => {
           const args = this.request.args[0]
           args[0].url.should.equal(
-            `https://compiles.somewhere.test/project/${this.project_id}`
+            `https://compiles.somewhere.test/project/${this.project_id}?compileGroup=standard`
           )
           done()
         }
@@ -1240,6 +1253,7 @@ describe('ClsiManager', function () {
       this.ClsiManager._makeNewBackendRequest(
         this.project_id,
         this.user_id,
+        'standard',
         this.opts,
         err => {
           expect(err).to.equal(undefined)

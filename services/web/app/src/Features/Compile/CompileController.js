@@ -336,6 +336,7 @@ module.exports = CompileController = {
     const limits = {
       compileGroup:
         (req.body != null ? req.body.compileGroup : undefined) ||
+        req.query?.compileGroup ||
         Settings.defaultFeatures.compileGroup,
     }
     return CompileController.proxyToClsiWithLimits(
@@ -489,59 +490,64 @@ module.exports = CompileController = {
     if (next == null) {
       next = function () {}
     }
-    _getPersistenceOptions(req, project_id, (err, persistenceOptions) => {
-      let qs
-      if (err != null) {
-        OError.tag(err, 'error getting cookie jar for clsi request')
-        return next(err)
-      }
-      // expand any url parameter passed in as {url:..., qs:...}
-      if (typeof url === 'object') {
-        ;({ url, qs } = url)
-      }
-      const compilerUrl = Settings.apis.clsi.url
-      url = `${compilerUrl}${url}`
-      const oneMinute = 60 * 1000
-      // the base request
-      const options = {
-        url,
-        method: req.method,
-        timeout: oneMinute,
-        ...persistenceOptions,
-      }
-      // add any provided query string
-      if (qs != null) {
-        options.qs = Object.assign(options.qs || {}, qs)
-      }
-      // if we have a build parameter, pass it through to the clsi
-      if (
-        (req.query != null ? req.query.pdfng : undefined) &&
-        (req.query != null ? req.query.build : undefined) != null
-      ) {
-        // only for new pdf viewer
-        if (options.qs == null) {
-          options.qs = {}
+    _getPersistenceOptions(
+      req,
+      project_id,
+      limits.compileGroup,
+      (err, persistenceOptions) => {
+        let qs
+        if (err != null) {
+          OError.tag(err, 'error getting cookie jar for clsi request')
+          return next(err)
         }
-        options.qs.build = req.query.build
-      }
-      // if we are byte serving pdfs, pass through If-* and Range headers
-      // do not send any others, there's a proxying loop if Host: is passed!
-      if (req.query != null ? req.query.pdfng : undefined) {
-        const newHeaders = {}
-        for (const h in req.headers) {
-          const v = req.headers[h]
-          if (/^(If-|Range)/i.test(h)) {
-            newHeaders[h] = req.headers[h]
+        // expand any url parameter passed in as {url:..., qs:...}
+        if (typeof url === 'object') {
+          ;({ url, qs } = url)
+        }
+        const compilerUrl = Settings.apis.clsi.url
+        url = `${compilerUrl}${url}`
+        const oneMinute = 60 * 1000
+        // the base request
+        const options = {
+          url,
+          method: req.method,
+          timeout: oneMinute,
+          ...persistenceOptions,
+        }
+        // add any provided query string
+        if (qs != null) {
+          options.qs = Object.assign(options.qs || {}, qs)
+        }
+        // if we have a build parameter, pass it through to the clsi
+        if (
+          (req.query != null ? req.query.pdfng : undefined) &&
+          (req.query != null ? req.query.build : undefined) != null
+        ) {
+          // only for new pdf viewer
+          if (options.qs == null) {
+            options.qs = {}
           }
+          options.qs.build = req.query.build
         }
-        options.headers = newHeaders
+        // if we are byte serving pdfs, pass through If-* and Range headers
+        // do not send any others, there's a proxying loop if Host: is passed!
+        if (req.query != null ? req.query.pdfng : undefined) {
+          const newHeaders = {}
+          for (const h in req.headers) {
+            const v = req.headers[h]
+            if (/^(If-|Range)/i.test(h)) {
+              newHeaders[h] = req.headers[h]
+            }
+          }
+          options.headers = newHeaders
+        }
+        const proxy = request(options)
+        proxy.pipe(res)
+        return proxy.on('error', error =>
+          logger.warn({ err: error, url }, 'CLSI proxy error')
+        )
       }
-      const proxy = request(options)
-      proxy.pipe(res)
-      return proxy.on('error', error =>
-        logger.warn({ err: error, url }, 'CLSI proxy error')
-      )
-    })
+    )
   },
 
   wordCount(req, res, next) {
@@ -568,14 +574,19 @@ module.exports = CompileController = {
   },
 }
 
-function _getPersistenceOptions(req, projectId, callback) {
+function _getPersistenceOptions(req, projectId, compileGroup, callback) {
   const { clsiserverid } = req.query
   const user_id = SessionManager.getLoggedInUserId(req)
   if (clsiserverid && typeof clsiserverid === 'string') {
-    callback(null, { qs: { clsiserverid } })
+    callback(null, { qs: { clsiserverid, compileGroup } })
   } else {
-    ClsiCookieManager.getCookieJar(projectId, user_id, (err, jar) => {
-      callback(err, { jar })
-    })
+    ClsiCookieManager.getCookieJar(
+      projectId,
+      user_id,
+      compileGroup,
+      (err, jar) => {
+        callback(err, { jar })
+      }
+    )
   }
 }

@@ -253,7 +253,9 @@ export function LocalCompileProvider({ children }) {
             setPdfUrl(result.pdfUrl)
           }
 
-          setFileList(buildFileList(outputFiles, data.clsiServerId))
+          setFileList(
+            buildFileList(outputFiles, data.clsiServerId, data.compileGroup)
+          )
 
           // handle log files
           // asynchronous (TODO: cancel on new compile?)

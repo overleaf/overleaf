@@ -58,6 +58,7 @@ describe('CompileManager', function () {
     this.callback = sinon.stub()
     return (this.limits = {
       timeout: 42,
+      compileGroup: 'standard',
     })
   })
 
@@ -120,6 +121,7 @@ describe('CompileManager', function () {
         return this.ClsiManager.sendRequest
           .calledWith(this.project_id, this.user_id, {
             timeout: this.limits.timeout,
+            compileGroup: 'standard',
           })
           .should.equal(true)
       })

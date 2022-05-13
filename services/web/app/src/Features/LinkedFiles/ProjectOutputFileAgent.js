@@ -131,6 +131,8 @@ function _sanitizeData(data) {
     source_project_id: data.source_project_id,
     source_output_file_path: data.source_output_file_path,
     build_id: data.build_id,
+    clsiServerId: data.clsiServerId,
+    compileGroup: data.compileGroup,
   }
 }
 
@@ -168,8 +170,12 @@ function _checkAuth(projectId, data, currentUserId, callback) {
 
 function _getFileStream(linkedFileData, userId, callback) {
   callback = _.once(callback)
-  const { source_output_file_path: sourceOutputFilePath, build_id: buildId } =
-    linkedFileData
+  const {
+    source_output_file_path: sourceOutputFilePath,
+    build_id: buildId,
+    clsiServerId,
+    compileGroup,
+  } = linkedFileData
   LinkedFilesHandler.getSourceProject(linkedFileData, (err, project) => {
     if (err) {
       return callback(err)
@@ -178,6 +184,8 @@ function _getFileStream(linkedFileData, userId, callback) {
     ClsiManager.getOutputFileStream(
       sourceProjectId,
       userId,
+      compileGroup,
+      clsiServerId,
       buildId,
       sourceOutputFilePath,
       (err, readStream) => {
@@ -203,7 +211,7 @@ function _compileAndGetFileStream(linkedFileData, userId, callback) {
       sourceProjectId,
       userId,
       {},
-      (err, status, outputFiles) => {
+      (err, status, outputFiles, clsiServerId, limits) => {
         if (err) {
           return callback(err)
         }
@@ -221,6 +229,8 @@ function _compileAndGetFileStream(linkedFileData, userId, callback) {
         ClsiManager.getOutputFileStream(
           sourceProjectId,
           userId,
+          limits.compileGroup,
+          clsiServerId,
           buildId,
           sourceOutputFilePath,
           (err, readStream) => {

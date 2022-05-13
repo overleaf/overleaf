@@ -1,7 +1,7 @@
 const topFileTypes = ['bbl', 'gls', 'ind']
 const ignoreFiles = ['output.fls', 'output.fdb_latexmk']
 
-export const buildFileList = (outputFiles, clsiServerId) => {
+export const buildFileList = (outputFiles, clsiServerId, compileGroup) => {
   const files = { top: [], other: [] }
 
   if (outputFiles) {
@@ -9,6 +9,9 @@ export const buildFileList = (outputFiles, clsiServerId) => {
 
     if (clsiServerId) {
       params.set('clsiserverid', clsiServerId)
+    }
+    if (compileGroup) {
+      params.set('compileGroup', compileGroup)
     }
 
     const queryString = params.toString()

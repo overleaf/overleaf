@@ -31,7 +31,10 @@ export function useProjectOutputFiles(projectId) {
             const filteredFiles = data.outputFiles.filter(file =>
               file.path.match(/.*\.(pdf|png|jpeg|jpg|gif)/)
             )
-
+            data.outputFiles.forEach(file => {
+              file.clsiServerId = data.clsiServerId
+              file.compileGroup = data.compileGroup
+            })
             setData(filteredFiles.sort(alphabetical))
           } else {
             setError('linked-project-compile-error')

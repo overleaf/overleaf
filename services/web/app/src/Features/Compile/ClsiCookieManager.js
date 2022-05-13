@@ -12,6 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let rclient_secondary
+const { URL, URLSearchParams } = require('url')
 const OError = require('@overleaf/o-error')
 const Settings = require('@overleaf/settings')
 const request = require('request').defaults({ timeout: 30 * 1000 })
@@ -38,7 +39,7 @@ module.exports = function (backendGroup) {
       }
     },
 
-    _getServerId(project_id, user_id, callback) {
+    _getServerId(project_id, user_id, compileGroup, callback) {
       if (callback == null) {
         callback = function () {}
       }
@@ -52,6 +53,7 @@ module.exports = function (backendGroup) {
             return this._populateServerIdViaRequest(
               project_id,
               user_id,
+              compileGroup,
               callback
             )
           } else {
@@ -61,12 +63,15 @@ module.exports = function (backendGroup) {
       )
     },
 
-    _populateServerIdViaRequest(project_id, user_id, callback) {
+    _populateServerIdViaRequest(project_id, user_id, compileGroup, callback) {
       if (callback == null) {
         callback = function () {}
       }
-      const url = `${Settings.apis.clsi.url}/project/${project_id}/status`
-      request.post(url, (err, res, body) => {
+      const u = new URL(
+        `${Settings.apis.clsi.url}/project/${project_id}/status`
+      )
+      u.search = new URLSearchParams({ compileGroup }).toString()
+      request.post(u.href, (err, res, body) => {
         if (err != null) {
           OError.tag(err, 'error getting initial server id for project', {
             project_id,
@@ -76,6 +81,7 @@ module.exports = function (backendGroup) {
         this.setServerId(
           project_id,
           user_id,
+          compileGroup,
           res,
           null,
           function (err, serverId) {
@@ -100,11 +106,11 @@ module.exports = function (backendGroup) {
       return cookies != null ? cookies[Settings.clsiCookie.key] : undefined
     },
 
-    checkIsLoadSheddingEvent(clsiserverid) {
+    checkIsLoadSheddingEvent(clsiserverid, compileGroup) {
       request.get(
         {
           url: `${Settings.apis.clsi.url}/instance-state`,
-          qs: { clsiserverid },
+          qs: { clsiserverid, compileGroup },
         },
         (err, res, body) => {
           if (err) {
@@ -123,7 +129,14 @@ module.exports = function (backendGroup) {
       )
     },
 
-    setServerId(project_id, user_id, response, previous, callback) {
+    setServerId(
+      project_id,
+      user_id,
+      compileGroup,
+      response,
+      previous,
+      callback
+    ) {
       if (callback == null) {
         callback = function () {}
       }
@@ -143,7 +156,7 @@ module.exports = function (backendGroup) {
         // Initial assignment of a user+project or after clearing cache.
         Metrics.inc('clsi-lb-assign-initial-backend')
       } else {
-        this.checkIsLoadSheddingEvent(previous)
+        this.checkIsLoadSheddingEvent(previous, compileGroup)
       }
       if (rclient_secondary != null) {
         this._setServerIdInRedis(
@@ -181,27 +194,32 @@ module.exports = function (backendGroup) {
       return rclient.del(this.buildKey(project_id, user_id), callback)
     },
 
-    getCookieJar(project_id, user_id, callback) {
+    getCookieJar(project_id, user_id, compileGroup, callback) {
       if (callback == null) {
         callback = function () {}
       }
       if (!clsiCookiesEnabled) {
         return callback(null, request.jar(), undefined)
       }
-      return this._getServerId(project_id, user_id, (err, serverId) => {
-        if (err != null) {
-          OError.tag(err, 'error getting server id', {
-            project_id,
-          })
-          return callback(err)
+      return this._getServerId(
+        project_id,
+        user_id,
+        compileGroup,
+        (err, serverId) => {
+          if (err != null) {
+            OError.tag(err, 'error getting server id', {
+              project_id,
+            })
+            return callback(err)
+          }
+          const serverCookie = request.cookie(
+            `${Settings.clsiCookie.key}=${serverId}`
+          )
+          const jar = request.jar()
+          jar.setCookie(serverCookie, Settings.apis.clsi.url)
+          return callback(null, jar, serverId)
         }
-        const serverCookie = request.cookie(
-          `${Settings.clsiCookie.key}=${serverId}`
-        )
-        const jar = request.jar()
-        jar.setCookie(serverCookie, Settings.apis.clsi.url)
-        return callback(null, jar, serverId)
-      })
+      )
     },
   }
 }

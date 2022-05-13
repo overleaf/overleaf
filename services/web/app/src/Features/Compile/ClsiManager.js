@@ -4,7 +4,7 @@ const request = require('request')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 const logger = require('@overleaf/logger')
-const { URL } = require('url')
+const { URL, URLSearchParams } = require('url')
 const OError = require('@overleaf/o-error')
 
 const ClsiCookieManager = require('./ClsiCookieManager')(
@@ -122,8 +122,9 @@ const ClsiManager = {
     if (options == null) {
       options = {}
     }
+    const { compileGroup } = options
     const compilerUrl = this._getCompilerUrl(
-      options.compileGroup,
+      compileGroup,
       projectId,
       userId,
       'compile/stop'
@@ -132,18 +133,15 @@ const ClsiManager = {
       url: compilerUrl,
       method: 'POST',
     }
-    ClsiManager._makeRequest(projectId, userId, opts, callback)
+    ClsiManager._makeRequest(projectId, userId, compileGroup, opts, callback)
   },
 
   deleteAuxFiles(projectId, userId, options, clsiserverid, callback) {
     if (options == null) {
       options = {}
     }
-    const compilerUrl = this._getCompilerUrl(
-      options.compileGroup,
-      projectId,
-      userId
-    )
+    const { compileGroup } = options
+    const compilerUrl = this._getCompilerUrl(compileGroup, projectId, userId)
     const opts = {
       url: compilerUrl,
       method: 'DELETE',
@@ -151,6 +149,7 @@ const ClsiManager = {
     ClsiManager._makeRequestWithClsiServerId(
       projectId,
       userId,
+      compileGroup,
       opts,
       clsiserverid,
       clsiErr => {
@@ -274,13 +273,14 @@ const ClsiManager = {
   _makeRequestWithClsiServerId(
     projectId,
     userId,
+    compileGroup,
     opts,
     clsiserverid,
     callback
   ) {
     if (clsiserverid) {
       // ignore cookies and newBackend, go straight to the clsi node
-      opts.qs = Object.assign({ clsiserverid }, opts.qs)
+      opts.qs = Object.assign({ compileGroup, clsiserverid }, opts.qs)
       request(opts, (err, response, body) => {
         if (err) {
           return callback(
@@ -290,11 +290,11 @@ const ClsiManager = {
         callback(null, response, body)
       })
     } else {
-      ClsiManager._makeRequest(projectId, userId, opts, callback)
+      ClsiManager._makeRequest(projectId, userId, compileGroup, opts, callback)
     }
   },
 
-  _makeRequest(projectId, userId, opts, callback) {
+  _makeRequest(projectId, userId, compileGroup, opts, callback) {
     async.series(
       {
         currentBackend(cb) {
@@ -302,6 +302,7 @@ const ClsiManager = {
           ClsiCookieManager.getCookieJar(
             projectId,
             userId,
+            compileGroup,
             (err, jar, clsiServerId) => {
               if (err != null) {
                 return callback(
@@ -327,6 +328,7 @@ const ClsiManager = {
                 ClsiCookieManager.setServerId(
                   projectId,
                   userId,
+                  compileGroup,
                   response,
                   clsiServerId,
                   (err, newClsiServerId) => {
@@ -361,6 +363,7 @@ const ClsiManager = {
           ClsiManager._makeNewBackendRequest(
             projectId,
             userId,
+            compileGroup,
             opts,
             (err, response, body) => {
               if (err != null) {
@@ -407,7 +410,7 @@ const ClsiManager = {
     )
   },
 
-  _makeNewBackendRequest(projectId, userId, baseOpts, callback) {
+  _makeNewBackendRequest(projectId, userId, compileGroup, baseOpts, callback) {
     if (Settings.apis.clsi_new == null || Settings.apis.clsi_new.url == null) {
       return callback()
     }
@@ -421,6 +424,7 @@ const ClsiManager = {
     NewBackendCloudClsiCookieManager.getCookieJar(
       projectId,
       userId,
+      compileGroup,
       (err, jar, clsiServerId) => {
         if (err != null) {
           return callback(
@@ -444,6 +448,7 @@ const ClsiManager = {
           NewBackendCloudClsiCookieManager.setServerId(
             projectId,
             userId,
+            compileGroup,
             response,
             clsiServerId,
             err => {
@@ -463,15 +468,15 @@ const ClsiManager = {
   },
 
   _getCompilerUrl(compileGroup, projectId, userId, action) {
-    const host = Settings.apis.clsi.url
-    let path = `/project/${projectId}`
+    const u = new URL(`/project/${projectId}`, Settings.apis.clsi.url)
     if (userId != null) {
-      path += `/user/${userId}`
+      u.pathname += `/user/${userId}`
     }
     if (action != null) {
-      path += `/${action}`
+      u.pathname += `/${action}`
     }
-    return `${host}${path}`
+    u.search = new URLSearchParams({ compileGroup }).toString()
+    return u.href
   },
 
   _postToClsi(projectId, userId, req, compileGroup, callback) {
@@ -489,16 +494,21 @@ const ClsiManager = {
     ClsiManager._makeRequest(
       projectId,
       userId,
+      compileGroup,
       opts,
       (err, response, body, clsiServerId) => {
         if (err != null) {
           return callback(
-            new OError('failed to make request to CLSI', {
-              projectId,
-              userId,
-              compileOptions: req.compile.options,
-              rootResourcePath: req.compile.rootResourcePath,
-            })
+            new OError(
+              'failed to make request to CLSI',
+              {
+                projectId,
+                userId,
+                compileOptions: req.compile.options,
+                rootResourcePath: req.compile.rootResourcePath,
+              },
+              err
+            )
           )
         }
         if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -655,9 +665,18 @@ const ClsiManager = {
     )
   },
 
-  getOutputFileStream(projectId, userId, buildId, outputFilePath, callback) {
+  getOutputFileStream(
+    projectId,
+    userId,
+    compileGroup,
+    clsiServerId,
+    buildId,
+    outputFilePath,
+    callback
+  ) {
     const url = `${Settings.apis.clsi.url}/project/${projectId}/user/${userId}/build/${buildId}/output/${outputFilePath}`
-    ClsiCookieManager.getCookieJar(projectId, userId, (err, jar) => {
+    // TODO(das7pad): remove one week after landing frontend changes.
+    ClsiCookieManager.getCookieJar(projectId, userId, '', (err, jar) => {
       if (err != null) {
         return callback(
           OError.tag(err, 'Failed to get cookie jar', {
@@ -669,6 +688,10 @@ const ClsiManager = {
         )
       }
       const options = { url, method: 'GET', timeout: 60 * 1000, jar }
+      if (clsiServerId) {
+        options.qs = { compileGroup, clsiserverid: clsiServerId }
+        delete options.jar
+      }
       const readStream = request(options)
       callback(null, readStream)
     })
@@ -863,6 +886,7 @@ const ClsiManager = {
   },
 
   wordCount(projectId, userId, file, options, clsiserverid, callback) {
+    const { compileGroup } = options
     ClsiManager._buildRequest(projectId, options, (err, req) => {
       if (err != null) {
         return callback(
@@ -874,7 +898,7 @@ const ClsiManager = {
       }
       const filename = file || req.compile.rootResourcePath
       const wordCountUrl = ClsiManager._getCompilerUrl(
-        options.compileGroup,
+        compileGroup,
         projectId,
         userId,
         'wordcount'
@@ -891,6 +915,7 @@ const ClsiManager = {
       ClsiManager._makeRequestWithClsiServerId(
         projectId,
         userId,
+        compileGroup,
         opts,
         clsiserverid,
         (err, response, body) => {

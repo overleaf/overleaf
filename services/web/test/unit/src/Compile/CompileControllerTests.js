@@ -49,7 +49,7 @@ describe('CompileController', function () {
     }
     this.jar = { cookie: 'stuff' }
     this.ClsiCookieManager = {
-      getCookieJar: sinon.stub().callsArgWith(2, null, this.jar),
+      getCookieJar: sinon.stub().yields(null, this.jar),
     }
     this.SessionManager = {
       getLoggedInUser: sinon.stub().callsArgWith(1, null, this.user),
