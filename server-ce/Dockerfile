@@ -5,6 +5,8 @@
 ARG SHARELATEX_BASE_TAG=sharelatex/sharelatex-base:latest
 FROM $SHARELATEX_BASE_TAG
 
+ARG TARGETARCH
+
 WORKDIR /overleaf
 
 # Add required source files
@@ -61,6 +63,13 @@ COPY server-ce/settings.js /etc/sharelatex/settings.js
 # -----------------------
 ADD server-ce/bin/grunt /usr/local/bin/grunt
 RUN chmod +x /usr/local/bin/grunt
+
+# Fix error with envsubst on arm64
+ # -----------------------
+ RUN if [ "$TARGETARCH" != "amd64" ]; then \
+  apt-get update && \
+  apt-get install -y gettext-base; \
+  fi
 
 # Set Environment Variables
 # --------------------------------

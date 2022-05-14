@@ -43,6 +43,7 @@ RUN chmod +x /usr/bin/envsubst
 ARG TEXLIVE_MIRROR=http://mirror.ctan.org/systems/texlive/tlnet
 
 ENV PATH "${PATH}:/usr/local/texlive/2022/bin/x86_64-linux"
+ENV PATH "${PATH}:/usr/local/texlive/2022/bin/aarch64-linux"
 
 RUN mkdir /install-tl-unx \
 &&  curl -sSL \
