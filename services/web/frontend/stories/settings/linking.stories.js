@@ -4,6 +4,8 @@ import { setDefaultMeta, defaultSetupMocks } from './helpers/linking'
 import { UserProvider } from '../../js/shared/context/user-context'
 import { SSOProvider } from '../../js/features/settings/context/sso-context'
 
+const MOCK_DELAY = 1000
+
 export const Section = args => {
   useFetchMock(defaultSetupMocks)
   setDefaultMeta()
@@ -30,6 +32,27 @@ export const SectionAllUnlinked = args => {
   })
   window.metaAttributesCache.set('ol-github', { enabled: false })
   window.metaAttributesCache.set('ol-dropbox', { registered: false })
+
+  return (
+    <UserProvider>
+      <SSOProvider>
+        <LinkingSection {...args} />
+      </SSOProvider>
+    </UserProvider>
+  )
+}
+
+export const SectionSSOErrors = args => {
+  useFetchMock(fetchMock =>
+    fetchMock.post('/user/oauth-unlink', 500, { delay: MOCK_DELAY })
+  )
+  setDefaultMeta()
+  window.metaAttributesCache.set('integrationLinkingWidgets', [])
+  window.metaAttributesCache.set('referenceLinkingWidgets', [])
+  window.metaAttributesCache.set(
+    'ol-ssoErrorMessage',
+    'Account already linked to another Overleaf user'
+  )
 
   return (
     <UserProvider>

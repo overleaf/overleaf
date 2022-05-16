@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { useSSOContext, SSOSubscription } from '../context/sso-context'
@@ -8,7 +9,7 @@ import getMeta from '../../../utils/meta'
 function LinkingSection() {
   const { t } = useTranslation()
   const { subscriptions } = useSSOContext()
-
+  const ssoErrorMessage = getMeta('ol-ssoErrorMessage') as string
   const [integrationLinkingWidgets] = useState(
     () =>
       getMeta('integrationLinkingWidgets') ||
@@ -77,6 +78,11 @@ function LinkingSection() {
           <h3 id="linked-accounts" className="text-capitalize">
             {t('linked_accounts')}
           </h3>
+          {ssoErrorMessage ? (
+            <Alert bsStyle="danger">
+              {t('sso_link_error')}: {ssoErrorMessage}
+            </Alert>
+          ) : null}
           <div className="settings-widgets-container">
             {Object.values(subscriptions).map(
               (subscription, subscriptionIndex) => (

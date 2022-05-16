@@ -89,6 +89,12 @@ describe('<LinkingSection />', function () {
     expect(screen.queryByText('Twitter')).to.not.exist
   })
 
+  it('shows SSO error message', async function () {
+    window.metaAttributesCache.set('ol-ssoErrorMessage', 'You no SSO')
+    renderSectionWithProviders()
+    screen.getByText('Error linking SSO account: You no SSO')
+  })
+
   it('does not show providers section when empty', async function () {
     window.metaAttributesCache.delete('ol-oauthProviders')
     renderSectionWithProviders()

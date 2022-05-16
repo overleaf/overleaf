@@ -1,10 +1,12 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Modal } from 'react-bootstrap'
+import { FetchError } from '../../../../infrastructure/fetch-json'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import IEEELogo from '../../../../shared/svgs/ieee-logo'
 import GoogleLogo from '../../../../shared/svgs/google-logo'
 import OrcidLogo from '../../../../shared/svgs/orcid-logo'
+import LinkingStatus from './status'
 
 const providerLogos = {
   collabratec: <IEEELogo />,
@@ -38,14 +40,15 @@ export function SSOLinkingWidget({
 
   const handleUnlinkClick = useCallback(() => {
     setShowModal(true)
+    setErrorMessage('')
   }, [])
 
   const handleUnlinkConfirmationClick = useCallback(() => {
     setShowModal(false)
     setUnlinkRequestInflight(true)
     onUnlink()
-      .catch((error: Error) => {
-        setErrorMessage(error.message)
+      .catch((error: FetchError) => {
+        setErrorMessage(error.getUserFacingMessage())
       })
       .finally(() => {
         setUnlinkRequestInflight(false)
@@ -71,7 +74,9 @@ export function SSOLinkingWidget({
             </a>
           ) : null}
         </p>
-        {errorMessage && <div>{errorMessage} </div>}
+        {errorMessage ? (
+          <LinkingStatus status="error" description={errorMessage} />
+        ) : null}
       </div>
       <div>
         <ActionButton

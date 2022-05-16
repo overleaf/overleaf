@@ -126,7 +126,7 @@ include ../../_mixins/reconfirm_affiliation
 					.notification-body
 						if user.features.dropbox
 							| !{translate("dropbox_unlinked_premium_feature", {}, ['strong'])}
-							| !{translate("can_now_relink_dropbox", {}, [{name: 'a', attrs: {href: '/user/settings#dropboxSettings' }}])}
+							| !{translate("can_now_relink_dropbox", {}, [{name: 'a', attrs: {href: '/user/settings#project-sync' }}])}
 						else
 							| !{translate("dropbox_unlinked_premium_feature", {}, ['strong'])}
 							| !{translate("confirm_affiliation_to_relink_dropbox")}

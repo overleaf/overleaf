@@ -16,6 +16,7 @@ type IntegrationLinkingWidgetProps = {
   unlinkPath: string
   unlinkConfirmationTitle: string
   unlinkConfirmationText: string
+  disabled?: boolean
 }
 
 export function IntegrationLinkingWidget({
@@ -30,6 +31,7 @@ export function IntegrationLinkingWidget({
   unlinkPath,
   unlinkConfirmationTitle,
   unlinkConfirmationText,
+  disabled,
 }: IntegrationLinkingWidgetProps) {
   const { t } = useTranslation()
 
@@ -59,7 +61,7 @@ export function IntegrationLinkingWidget({
             {t('learn_more')}
           </a>
         </p>
-        {linked && statusIndicator}
+        {hasFeature && statusIndicator}
       </div>
       <div>
         <ActionButton
@@ -68,6 +70,7 @@ export function IntegrationLinkingWidget({
           linked={linked}
           handleUnlinkClick={handleUnlinkClick}
           linkPath={linkPath}
+          disabled={disabled}
         />
       </div>
       <UnlinkConfirmationModal
@@ -87,6 +90,7 @@ type ActionButtonProps = {
   linked?: boolean
   handleUnlinkClick: () => void
   linkPath: string
+  disabled?: boolean
 }
 
 function ActionButton({
@@ -95,6 +99,7 @@ function ActionButton({
   linked,
   handleUnlinkClick,
   linkPath,
+  disabled,
 }: ActionButtonProps) {
   const { t } = useTranslation()
 
@@ -106,13 +111,21 @@ function ActionButton({
     )
   } else if (linked) {
     return (
-      <button className="btn btn-danger" onClick={handleUnlinkClick}>
+      <button
+        className="btn btn-danger"
+        onClick={handleUnlinkClick}
+        disabled={disabled}
+      >
         {t('unlink')}
       </button>
     )
   } else {
     return (
-      <a href={linkPath} className="btn btn-primary text-capitalize">
+      <a
+        href={linkPath}
+        className="btn btn-primary text-capitalize"
+        disabled={disabled}
+      >
         {t('link')}
       </a>
     )

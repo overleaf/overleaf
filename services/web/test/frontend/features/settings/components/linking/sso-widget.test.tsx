@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
+import { FetchError } from '../../../../../../frontend/js/infrastructure/fetch-json'
 import { SSOLinkingWidget } from '../../../../../../frontend/js/features/settings/components/linking/sso-widget'
 
 describe('<SSOLinkingWidget />', function () {
@@ -103,7 +104,9 @@ describe('<SSOLinkingWidget />', function () {
 
   describe('when unlinking fails', function () {
     beforeEach(function () {
-      const unlinkFunction = sinon.stub().rejects(new Error('unlinking failed'))
+      const unlinkFunction = sinon
+        .stub()
+        .rejects(new FetchError('unlinking failed', ''))
       render(
         <SSOLinkingWidget {...defaultProps} linked onUnlink={unlinkFunction} />
       )
@@ -116,7 +119,11 @@ describe('<SSOLinkingWidget />', function () {
     })
 
     it('should display an error message ', async function () {
-      await waitFor(() => screen.getByText('unlinking failed'))
+      await waitFor(() =>
+        screen.getByText(
+          'Something went wrong talking to the server :(. Please try again.'
+        )
+      )
     })
 
     it('should display the unlink button ', async function () {

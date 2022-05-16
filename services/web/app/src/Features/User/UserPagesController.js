@@ -18,6 +18,10 @@ async function settingsPage(req, res) {
   if (ssoError) {
     delete req.session.ssoError
   }
+  const ssoErrorMessage = req.session.ssoErrorMessage
+  if (ssoErrorMessage) {
+    delete req.session.ssoErrorMessage
+  }
   // Institution SSO
   let institutionLinked = _.get(req.session, ['saml', 'linked'])
   if (institutionLinked) {
@@ -97,7 +101,7 @@ async function settingsPage(req, res) {
       reconfirmedViaSAML,
       reconfirmationRemoveEmail,
       samlBeta: req.session.samlBeta,
-      ssoError: ssoError,
+      ssoErrorMessage,
       thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
     })
   } else {

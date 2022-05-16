@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import getMeta from '../../../utils/meta'
 import EmailsSection from './emails-section'
@@ -38,16 +37,10 @@ function SettingsPageRoot() {
 
 function SettingsPageContent() {
   const { t } = useTranslation()
-  const ssoError = getMeta('ol-ssoError') as string
   const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
 
   return (
     <UserProvider>
-      {ssoError ? (
-        <Alert bsStyle="danger">
-          {t('sso_link_error')}: {t(ssoError)}
-        </Alert>
-      ) : null}
       <div className="card">
         <div className="page-header">
           <h1>{t('account_settings')}</h1>

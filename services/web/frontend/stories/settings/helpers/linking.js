@@ -58,4 +58,5 @@ export function setDefaultMeta() {
   })
   window.metaAttributesCache.delete('integrationLinkingWidgets')
   window.metaAttributesCache.delete('referenceLinkingWidgets')
+  window.metaAttributesCache.delete('ol-ssoErrorMessage')
 }

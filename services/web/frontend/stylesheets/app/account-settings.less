@@ -107,17 +107,21 @@ tbody > tr.affiliations-table-warning-row > td {
   margin-bottom: (@line-height-computed / 2) - @table-cell-padding;
 }
 
+.settings-widget-status-icon,
 .dropbox-sync-icon {
   position: relative;
   font-size: 1.3em;
   line-height: 1.3em;
   vertical-align: top;
+  &.status-error,
   &.dropbox-sync-icon-error {
     color: @alert-danger-bg;
   }
+  &.status-success,
   &.dropbox-sync-icon-success {
     color: @alert-success-bg;
   }
+  &.status-pending,
   &.dropbox-sync-icon-updating {
     color: @alert-info-bg;
     &::after {
