@@ -36,11 +36,15 @@ App.controller(
     // connection state goes into 'waitingCountdown' before being hidden and we
     // don't want to show a disconnect UI.
     function updateIsConnected() {
-      const isReady = $scope.connection.state === 'ready'
-      const willStartCountdown =
-        $scope.connection.state === 'waitingCountdown' &&
-        $scope.connection.reconnection_countdown === null
-      $scope.isConnected = isReady || willStartCountdown
+      if ($scope.connection) {
+        const isReady = $scope.connection.state === 'ready'
+        const willStartCountdown =
+          $scope.connection.state === 'waitingCountdown' &&
+          $scope.connection.reconnection_countdown === null
+        $scope.isConnected = isReady || willStartCountdown
+      } else {
+        $scope.isConnected = false
+      }
     }
 
     $scope.$watch('connection.state', updateIsConnected)
