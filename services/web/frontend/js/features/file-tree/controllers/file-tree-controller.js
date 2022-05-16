@@ -89,9 +89,9 @@ App.controller(
       true
     )
 
-    $scope.setRefProviderEnabled = provider => {
+    $scope.setRefProviderEnabled = (provider, value = true) => {
       ide.$scope.$applyAsync(() => {
-        ide.$scope.user.refProviders[provider] = true
+        ide.$scope.user.refProviders[provider] = value
       })
     }
 
