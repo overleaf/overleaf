@@ -11,6 +11,7 @@ import AddEmail from './emails/add-email'
 import Icon from '../../../shared/components/icon'
 import { Alert } from 'react-bootstrap'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
+import { LeaversSurveyAlert } from './leavers-survey-alert'
 
 function EmailsSectionContent() {
   const { t } = useTranslation()
@@ -51,6 +52,7 @@ function EmailsSectionContent() {
             ))}
           </>
         )}
+        {isInitializingSuccess && <LeaversSurveyAlert />}
         {isInitializingSuccess && <AddEmail />}
         {isInitializingError && (
           <Alert bsStyle="danger" className="text-center">

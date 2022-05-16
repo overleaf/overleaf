@@ -27,7 +27,8 @@ type RemoveProps = {
 
 function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
   const { t } = useTranslation()
-  const { state, deleteEmail } = useUserEmailsContext()
+  const { state, deleteEmail, resetLeaversSurveyExpiration } =
+    useUserEmailsContext()
 
   const handleRemoveUserEmail = () => {
     deleteEmailAsync
@@ -40,6 +41,7 @@ function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
       )
       .then(() => {
         deleteEmail(userEmailData.email)
+        resetLeaversSurveyExpiration(userEmailData)
       })
       .catch(() => {})
   }

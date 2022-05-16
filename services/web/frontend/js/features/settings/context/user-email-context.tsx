@@ -13,6 +13,9 @@ import { Affiliation } from '../../../../../types/affiliation'
 import { normalize, NormalizedObject } from '../../../utils/normalize'
 import { getJSON } from '../../../infrastructure/fetch-json'
 import useAsync from '../../../shared/hooks/use-async'
+import usePersistedState from '../../../shared/hooks/use-persisted-state'
+
+const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000
 
 // eslint-disable-next-line no-unused-vars
 export enum Actions {
@@ -194,6 +197,10 @@ const reducer = (state: State, action: Action) => {
 }
 
 function useUserEmails() {
+  const [, setExpirationDate] = usePersistedState(
+    'showInstitutionalLeaversSurveyUntil',
+    0
+  )
   const [state, unsafeDispatch] = useReducer(reducer, initialState)
   const dispatch = useSafeDispatch(unsafeDispatch)
   const { data, isLoading, isError, isSuccess, runAsync } = useAsync()
@@ -211,12 +218,34 @@ function useUserEmails() {
     getEmails()
   }, [getEmails])
 
+  const resetLeaversSurveyExpiration = useCallback(
+    (deletedEmail: UserEmailData) => {
+      if (!data) {
+        return
+      }
+      const emailData = data as UserEmailData[]
+      if (
+        deletedEmail.emailHasInstitutionLicence ||
+        deletedEmail.affiliation?.pastReconfirmDate
+      ) {
+        const stillHasLicenseAccess = emailData.some(
+          userEmail => userEmail.emailHasInstitutionLicence
+        )
+        if (stillHasLicenseAccess) {
+          setExpirationDate(Date.now() + ONE_WEEK_IN_MS)
+        }
+      }
+    },
+    [data, setExpirationDate]
+  )
+
   return {
     state,
     isInitializing: isLoading && !data,
     isInitializingSuccess: isSuccess,
     isInitializingError: isError,
     getEmails,
+    resetLeaversSurveyExpiration,
     setLoading: useCallback(
       (flag: boolean) => dispatch(ActionCreators.setLoading(flag)),
       [dispatch]
