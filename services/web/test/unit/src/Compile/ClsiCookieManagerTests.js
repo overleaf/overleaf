@@ -45,7 +45,8 @@ describe('ClsiCookieManager', function () {
         },
       },
       clsiCookie: {
-        ttl: Math.random(),
+        ttlInSeconds: Math.random().toString(),
+        ttlInSecondsRegular: Math.random().toString(),
         key: 'coooookie',
       },
     }
@@ -172,11 +173,32 @@ describe('ClsiCookieManager', function () {
           this.redis.setex
             .calledWith(
               `clsiserver:${this.project_id}:${this.user_id}`,
-              this.settings.clsiCookie.ttl,
+              this.settings.clsiCookie.ttlInSeconds,
               'clsi-8'
             )
             .should.equal(true)
           return done()
+        }
+      )
+    })
+
+    it('should set the server id with the regular ttl for reg instance', function (done) {
+      this.ClsiCookieManager._parseServerIdFromResponse = sinon
+        .stub()
+        .returns('clsi-reg-8')
+      this.ClsiCookieManager.setServerId(
+        this.project_id,
+        this.user_id,
+        'standard',
+        this.response,
+        null,
+        err => {
+          expect(this.redis.setex).to.have.been.calledWith(
+            `clsiserver:${this.project_id}:${this.user_id}`,
+            this.settings.clsiCookie.ttlInSecondsRegular,
+            'clsi-reg-8'
+          )
+          done()
         }
       )
     })
@@ -260,7 +282,7 @@ describe('ClsiCookieManager', function () {
           this.redis_secondary.setex
             .calledWith(
               `clsiserver:${this.project_id}:${this.user_id}`,
-              this.settings.clsiCookie.ttl,
+              this.settings.clsiCookie.ttlInSeconds,
               'clsi-8'
             )
             .should.equal(true)

@@ -129,6 +129,12 @@ module.exports = function (backendGroup) {
       )
     },
 
+    _getTTLInSeconds(clsiServerId) {
+      return (clsiServerId || '').includes('-reg-')
+        ? Settings.clsiCookie.ttlInSecondsRegular
+        : Settings.clsiCookie.ttlInSeconds
+    },
+
     setServerId(
       project_id,
       user_id,
@@ -148,7 +154,7 @@ module.exports = function (backendGroup) {
         // We don't get a cookie back if it hasn't changed
         return rclient.expire(
           this.buildKey(project_id, user_id),
-          Settings.clsiCookie.ttl,
+          this._getTTLInSeconds(previous),
           err => callback(err, undefined)
         )
       }
@@ -178,7 +184,7 @@ module.exports = function (backendGroup) {
       }
       rclient.setex(
         this.buildKey(project_id, user_id),
-        Settings.clsiCookie.ttl,
+        this._getTTLInSeconds(serverId),
         serverId,
         callback
       )
