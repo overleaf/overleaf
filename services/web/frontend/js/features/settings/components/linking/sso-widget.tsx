@@ -123,7 +123,7 @@ function ActionButton({
     )
   } else {
     return (
-      <a href={linkPath} className="btn btn-primary text-capitalize">
+      <a href={linkPath} className="btn btn-info text-capitalize">
         {t('link')}
       </a>
     )

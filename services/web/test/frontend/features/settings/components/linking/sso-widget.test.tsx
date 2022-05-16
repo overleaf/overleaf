@@ -120,9 +120,7 @@ describe('<SSOLinkingWidget />', function () {
 
     it('should display an error message ', async function () {
       await waitFor(() =>
-        screen.getByText(
-          'Something went wrong talking to the server :(. Please try again.'
-        )
+        screen.getByText('Something went wrong. Please try again.')
       )
     })
 

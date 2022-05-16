@@ -107,9 +107,7 @@ describe('<AccountInfoSection />', function () {
         name: 'Update',
       })
     )
-    await screen.findByText(
-      'Something went wrong talking to the server :(. Please try again.'
-    )
+    await screen.findByText('Something went wrong. Please try again.')
   })
 
   it('shows invalid error', async function () {

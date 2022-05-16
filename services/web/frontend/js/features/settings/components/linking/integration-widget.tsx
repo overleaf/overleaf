@@ -123,7 +123,7 @@ function ActionButton({
     return (
       <a
         href={linkPath}
-        className="btn btn-primary text-capitalize"
+        className="btn btn-info text-capitalize"
         disabled={disabled}
       >
         {t('link')}

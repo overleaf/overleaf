@@ -43,7 +43,7 @@ function LinkingSection() {
       {hasIntegrationLinkingSection ? (
         <>
           <h3 id="project-sync" className="text-capitalize">
-            {t('sync_dropbox_github')}
+            {t('project_synchronisation')}
           </h3>
           {projectSyncSuccessMessage ? (
             <Alert bsStyle="success">{projectSyncSuccessMessage}</Alert>

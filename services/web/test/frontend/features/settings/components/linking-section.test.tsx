@@ -92,7 +92,7 @@ describe('<LinkingSection />', function () {
   it('shows SSO error message', async function () {
     window.metaAttributesCache.set('ol-ssoErrorMessage', 'You no SSO')
     renderSectionWithProviders()
-    screen.getByText('Error linking SSO account: You no SSO')
+    screen.getByText('Error linking account: You no SSO')
   })
 
   it('does not show providers section when empty', async function () {

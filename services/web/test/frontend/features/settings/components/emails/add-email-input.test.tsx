@@ -253,4 +253,16 @@ describe('<AddEmailInput/>', function () {
       expect(fetchMock.called()).to.be.true // ensures `domainCache` hasn't been hit
     })
   })
+
+  describe('when the request to fetch institution is not matching input', function () {
+    it('should clear suggestion', async function () {
+      fetchMock.get('express:/institutions/domains', testInstitutionData)
+      render(<Input {...defaultProps} onChange={sinon.stub()} />)
+      fireEvent.change(screen.getByRole('textbox'), {
+        target: { value: 'user@other' },
+      })
+      await fetchMock.flush(true)
+      expect(screen.queryByText('user@domain.edu')).to.not.exist
+    })
+  })
 })

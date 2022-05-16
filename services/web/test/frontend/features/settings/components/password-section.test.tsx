@@ -160,9 +160,7 @@ describe('<PasswordSection />', function () {
     fetchMock.post('/user/password/update', 500)
     render(<PasswordSection />)
     submitValidForm()
-    await screen.findByText(
-      'Something went wrong talking to the server :(. Please try again.'
-    )
+    await screen.findByText('Something went wrong. Please try again.')
   })
 
   it('shows server error message', async function () {

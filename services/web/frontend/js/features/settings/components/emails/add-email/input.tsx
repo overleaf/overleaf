@@ -133,6 +133,12 @@ function Input({ onChange }: InputProps) {
     [suggestion]
   )
 
+  useEffect(() => {
+    if (suggestion && !suggestion.startsWith(inputValue)) {
+      setSuggestion(null)
+    }
+  }, [suggestion, inputValue])
+
   return (
     <div className="input-suggestions">
       <div className="form-control input-suggestions-shadow">

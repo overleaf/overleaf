@@ -112,7 +112,7 @@ export class FetchError extends OError {
       case 429:
         return 'Too many attempts. Please wait for a while and try again.'
       default:
-        return 'Something went wrong talking to the server :(. Please try again.'
+        return 'Something went wrong. Please try again.'
     }
   }
 }
