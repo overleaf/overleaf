@@ -1,4 +1,3 @@
-import { withContextRoot } from './utils/with-context-root'
 import { useCallback, useMemo, useState } from 'react'
 import useFetchMock from './hooks/use-fetch-mock'
 import { Button } from 'react-bootstrap'
@@ -21,6 +20,7 @@ import {
   outputFiles,
 } from './fixtures/compile'
 import { cloneDeep } from 'lodash'
+import { ScopeDecorator } from './decorators/scope'
 
 export default {
   title: 'Editor / PDF Preview',
@@ -30,34 +30,7 @@ export default {
     PdfFileList,
     PdfPreviewError,
   },
-}
-
-const project = {
-  _id: 'a-project',
-  name: 'A Project',
-  features: {},
-  tokens: {},
-  owner: {
-    _id: 'a-user',
-    email: 'stories@overleaf.com',
-  },
-  members: [],
-  invites: [],
-}
-
-const scope = {
-  project,
-  settings: {
-    syntaxValidation: true,
-  },
-  hasLintingError: false,
-  $applyAsync: () => {},
-  editor: {
-    sharejs_doc: {
-      doc_id: 'test-doc',
-      getSnapshot: () => 'some doc content',
-    },
-  },
+  decorators: [ScopeDecorator],
 }
 
 export const Interactive = () => {
@@ -205,12 +178,11 @@ export const Interactive = () => {
     )
   }
 
-  return withContextRoot(
+  return (
     <div className="pdf-viewer">
       <PdfPreviewPane />
       <Inner />
-    </div>,
-    scope
+    </div>
   )
 }
 
@@ -276,12 +248,11 @@ export const CompileError = () => {
     )
   }
 
-  return withContextRoot(
+  return (
     <>
       <PdfPreviewPane />
       <Inner />
-    </>,
-    scope
+    </>
   )
 }
 
@@ -309,7 +280,7 @@ export const DisplayError = () => {
     mockCompile(fetchMock)
   })
 
-  return withContextRoot(
+  return (
     <>
       {compileErrors.map(error => (
         <div
@@ -320,8 +291,7 @@ export const DisplayError = () => {
           <PdfPreviewError error={error} />
         </div>
       ))}
-    </>,
-    scope
+    </>
   )
 }
 
@@ -332,11 +302,10 @@ export const HybridToolbar = () => {
     mockEventTracking(fetchMock)
   })
 
-  return withContextRoot(
+  return (
     <div className="pdf">
       <PdfPreviewHybridToolbar />
-    </div>,
-    scope
+    </div>
   )
 }
 
@@ -361,11 +330,10 @@ export const Logs = () => {
     mockClearCache(fetchMock)
   })
 
-  return withContextRoot(
+  return (
     <div className="pdf">
       <PdfLogsViewer />
-    </div>,
-    scope
+    </div>
   )
 }
 
@@ -393,5 +361,5 @@ export const ValidationIssues = () => {
     mockBuildFile(fetchMock)
   })
 
-  return withContextRoot(<PdfPreviewPane />, scope)
+  return <PdfPreviewPane />
 }

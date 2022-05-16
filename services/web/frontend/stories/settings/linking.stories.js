@@ -3,6 +3,9 @@ import LinkingSection from '../../js/features/settings/components/linking-sectio
 import { setDefaultMeta, defaultSetupMocks } from './helpers/linking'
 import { UserProvider } from '../../js/shared/context/user-context'
 import { SSOProvider } from '../../js/features/settings/context/sso-context'
+import { ScopeDecorator } from '../decorators/scope'
+import { useEffect } from 'react'
+import { useMeta } from '../hooks/use-meta'
 
 const MOCK_DELAY = 1000
 
@@ -21,17 +24,23 @@ export const Section = args => {
 
 export const SectionAllUnlinked = args => {
   useFetchMock(defaultSetupMocks)
-  setDefaultMeta()
-  window.metaAttributesCache.set('ol-thirdPartyIds', {})
-  window.metaAttributesCache.set('ol-user', {
-    features: { github: true, dropbox: true, mendeley: true, zotero: true },
-    refProviders: {
-      mendeley: false,
-      zotero: false,
+
+  useMeta({
+    'ol-thirdPartyIds': {},
+    'ol-user': {
+      features: { github: true, dropbox: true, mendeley: true, zotero: true },
+      refProviders: {
+        mendeley: false,
+        zotero: false,
+      },
     },
+    'ol-github': { enabled: false },
+    'ol-dropbox': { registered: false },
   })
-  window.metaAttributesCache.set('ol-github', { enabled: false })
-  window.metaAttributesCache.set('ol-dropbox', { registered: false })
+
+  useEffect(() => {
+    setDefaultMeta()
+  }, [])
 
   return (
     <UserProvider>
@@ -84,4 +93,5 @@ export const SectionProjetSyncSuccess = args => {
 export default {
   title: 'Account Settings / Linking',
   component: LinkingSection,
+  decorators: [ScopeDecorator],
 }

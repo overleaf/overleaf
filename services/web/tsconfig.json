@@ -18,6 +18,8 @@
     "modules/**/frontend/js/**/*.*",
     "test/frontend/**/*.*",
     "modules/**/test/frontend/**/*.*",
+    "frontend/stories/**/*.*",
+    "modules/**/stories/**/*.*",
     "cypress",
     "types"
   ]

@@ -9,13 +9,13 @@ import Icon from '../../../shared/components/icon'
 
 const imageExtensions = ['png', 'jpg', 'jpeg', 'gif']
 
-const textExtensions = window.ExposedSettings.textExtensions
-
 export default function FileView({ file, storeReferencesKeys }) {
   const [contentLoading, setContentLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
   const { t } = useTranslation()
+
+  const { textExtensions } = window.ExposedSettings
 
   const extension = file.name.split('.').pop().toLowerCase()
   const isUnpreviewableFile =

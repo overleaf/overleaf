@@ -58,7 +58,7 @@ export const mockCompile = (fetchMock, delay = 1000) =>
         outputFiles: cloneDeep(outputFiles),
       },
     },
-    { delay }
+    { delay, overwriteRoutes: true }
   )
 
 export const mockCompileError = (fetchMock, status = 'success', delay = 1000) =>
@@ -97,6 +97,7 @@ export const mockCompileValidationIssues = (
 export const mockClearCache = fetchMock =>
   fetchMock.delete('express:/project/:projectId/output', 204, {
     delay: 1000,
+    overwriteRoutes: true,
   })
 
 export const mockBuildFile = fetchMock =>
@@ -156,7 +157,7 @@ LaTeX Font Info:    External font \`cmex10' loaded for size
           return 404
       }
     },
-    { sendAsJson: false }
+    { sendAsJson: false, overwriteRoutes: true }
   )
 
 const mockHighlights = [
@@ -215,7 +216,7 @@ export const mockValidPdf = fetchMock =>
         xhr.send()
       })
     },
-    { sendAsJson: false }
+    { sendAsJson: false, overwriteRoutes: true }
   )
 
 export const mockSynctex = fetchMock =>

@@ -5,6 +5,8 @@ import {
 } from './create-file-modal-decorator'
 import FileTreeModalCreateFile from '../../../js/features/file-tree/components/modals/file-tree-modal-create-file'
 import useFetchMock from '../../hooks/use-fetch-mock'
+import { ScopeDecorator } from '../../decorators/scope'
+import { useScope } from '../../hooks/use-scope'
 
 export const MinimalFeatures = args => {
   useFetchMock(mockCreateFileModalFetch)
@@ -75,28 +77,26 @@ ErrorImportingFileFromReferenceProvider.decorators = [
 export const FileLimitReached = args => {
   useFetchMock(mockCreateFileModalFetch)
 
+  useScope({
+    project: {
+      rootFolder: {
+        _id: 'root-folder-id',
+        name: 'rootFolder',
+        docs: Array.from({ length: 10 }, (_, index) => ({
+          _id: `entity-${index}`,
+        })),
+        fileRefs: [],
+        folders: [],
+      },
+    },
+  })
+
   return <FileTreeModalCreateFile {...args} />
 }
-FileLimitReached.decorators = [
-  createFileModalDecorator(
-    {},
-    {
-      rootFolder: [
-        {
-          _id: 'root-folder-id',
-          name: 'rootFolder',
-          docs: Array.from({ length: 10 }, (_, index) => ({
-            _id: `entity-${index}`,
-          })),
-          fileRefs: [],
-          folders: [],
-        },
-      ],
-    }
-  ),
-]
+FileLimitReached.decorators = [createFileModalDecorator()]
 
 export default {
   title: 'Editor / Modals / Create File',
   component: FileTreeModalCreateFile,
+  decorators: [ScopeDecorator],
 }

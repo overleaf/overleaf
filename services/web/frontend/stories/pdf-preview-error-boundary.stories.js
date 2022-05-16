@@ -1,19 +1,20 @@
 import ErrorBoundaryFallback from '../js/features/pdf-preview/components/error-boundary-fallback'
-import { withContextRoot } from './utils/with-context-root'
+import { ScopeDecorator } from './decorators/scope'
 
 export default {
   title: 'Editor / PDF Preview / Error Boundary',
   component: ErrorBoundaryFallback,
+  decorators: [ScopeDecorator],
 }
 
 export const PreviewErrorBoundary = () => {
-  return withContextRoot(<ErrorBoundaryFallback type="preview" />)
+  return <ErrorBoundaryFallback type="preview" />
 }
 
 export const PdfErrorBoundary = () => {
-  return withContextRoot(<ErrorBoundaryFallback type="pdf" />)
+  return <ErrorBoundaryFallback type="pdf" />
 }
 
 export const LogsErrorBoundary = () => {
-  return withContextRoot(<ErrorBoundaryFallback type="logs" />)
+  return <ErrorBoundaryFallback type="logs" />
 }

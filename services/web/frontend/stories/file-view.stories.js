@@ -1,6 +1,6 @@
-import { ContextRoot } from '../js/shared/context/root-context'
 import FileView from '../js/features/file-view/components/file-view'
 import useFetchMock from './hooks/use-fetch-mock'
+import { ScopeDecorator } from './decorators/scope'
 
 const bodies = {
   latex: `\\documentclass{article}
@@ -252,11 +252,5 @@ export default {
   argTypes: {
     storeReferencesKeys: { action: 'store references keys' },
   },
-  decorators: [
-    Story => (
-      <ContextRoot ide={window._ide} settings={{}}>
-        <Story />
-      </ContextRoot>
-    ),
-  ],
+  decorators: [ScopeDecorator],
 }

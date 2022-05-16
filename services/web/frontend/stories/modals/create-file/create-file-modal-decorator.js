@@ -1,26 +1,9 @@
 import { useEffect } from 'react'
-import { withContextRoot } from './../../utils/with-context-root'
 import FileTreeContext from '../../../js/features/file-tree/components/file-tree-context'
 import FileTreeCreateNameProvider from '../../../js/features/file-tree/contexts/file-tree-create-name'
 import FileTreeCreateFormProvider from '../../../js/features/file-tree/contexts/file-tree-create-form'
 import { useFileTreeActionable } from '../../../js/features/file-tree/contexts/file-tree-actionable'
 import PropTypes from 'prop-types'
-
-export const DEFAULT_PROJECT = {
-  _id: '123abc',
-  name: 'Some Project',
-  rootDocId: '5e74f1a7ce17ae0041dfd056',
-  rootFolder: [
-    {
-      _id: 'root-folder-id',
-      name: 'rootFolder',
-      docs: [],
-      folders: [],
-      fileRefs: [],
-    },
-  ],
-  features: { mendeley: true, zotero: true },
-}
 
 const defaultFileTreeContextProps = {
   refProviders: { mendeley: false, zotero: false },
@@ -87,19 +70,6 @@ export const mockCreateFileModalFetch = fetchMock =>
         },
       ],
     })
-    .post('express:/project/:projectId/compile', {
-      status: 'success',
-      outputFiles: [
-        {
-          build: 'foo',
-          path: 'baz.jpg',
-        },
-        {
-          build: 'foo',
-          path: 'ball.jpg',
-        },
-      ],
-    })
     .post('express:/project/:projectId/doc', (path, req) => {
       console.log({ path, req })
       return 204
@@ -114,14 +84,10 @@ export const mockCreateFileModalFetch = fetchMock =>
     })
 
 export const createFileModalDecorator =
-  (
-    fileTreeContextProps = {},
-    projectProps = {},
-    createMode = 'doc'
-    // eslint-disable-next-line react/display-name
-  ) =>
+  (fileTreeContextProps = {}, createMode = 'doc') =>
+  // eslint-disable-next-line react/display-name
   Story => {
-    return withContextRoot(
+    return (
       <FileTreeContext
         {...defaultFileTreeContextProps}
         {...fileTreeContextProps}
@@ -133,11 +99,7 @@ export const createFileModalDecorator =
             </OpenCreateFileModal>
           </FileTreeCreateFormProvider>
         </FileTreeCreateNameProvider>
-      </FileTreeContext>,
-      {
-        project: { ...DEFAULT_PROJECT, ...projectProps },
-        permissionsLevel: 'owner',
-      }
+      </FileTreeContext>
     )
   }
 

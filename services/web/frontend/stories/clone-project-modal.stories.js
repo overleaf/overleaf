@@ -1,8 +1,6 @@
 import useFetchMock from './hooks/use-fetch-mock'
-import { withContextRoot } from './utils/with-context-root'
 import CloneProjectModal from '../js/features/clone-project-modal/components/clone-project-modal'
-
-const project = { _id: 'original-project', name: 'Project Title' }
+import { ScopeDecorator } from './decorators/scope'
 
 export const Success = args => {
   useFetchMock(fetchMock => {
@@ -13,7 +11,7 @@ export const Success = args => {
     )
   })
 
-  return withContextRoot(<CloneProjectModal {...args} />, { project })
+  return <CloneProjectModal {...args} />
 }
 
 export const GenericErrorResponse = args => {
@@ -25,7 +23,7 @@ export const GenericErrorResponse = args => {
     )
   })
 
-  return withContextRoot(<CloneProjectModal {...args} />, { project })
+  return <CloneProjectModal {...args} />
 }
 
 export const SpecificErrorResponse = args => {
@@ -37,7 +35,7 @@ export const SpecificErrorResponse = args => {
     )
   })
 
-  return withContextRoot(<CloneProjectModal {...args} />, { project })
+  return <CloneProjectModal {...args} />
 }
 
 export default {
@@ -50,4 +48,5 @@ export default {
     handleHide: { action: 'close modal' },
     openProject: { action: 'open project' },
   },
+  decorators: [ScopeDecorator],
 }

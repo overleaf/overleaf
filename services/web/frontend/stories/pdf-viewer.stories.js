@@ -1,6 +1,4 @@
-import { useEffect, Suspense } from 'react'
 import useFetchMock from './hooks/use-fetch-mock'
-import { withContextRoot } from './utils/with-context-root'
 import PdfSynctexControls from '../js/features/pdf-preview/components/pdf-synctex-controls'
 import PdfViewer from '../js/features/pdf-preview/components/pdf-viewer'
 import {
@@ -9,24 +7,13 @@ import {
   mockSynctex,
   mockValidPdf,
 } from './fixtures/compile'
+import { useEffect, Suspense } from 'react'
+import { ScopeDecorator } from './decorators/scope'
 
 export default {
   title: 'Editor / PDF Viewer',
   component: PdfViewer,
-}
-
-const project = {
-  _id: 'story-project',
-}
-
-const scope = {
-  project,
-  editor: {
-    sharejs_doc: {
-      doc_id: 'test-doc',
-      getSnapshot: () => 'some doc content',
-    },
-  },
+  decorators: [ScopeDecorator],
 }
 
 export const Interactive = () => {
@@ -45,17 +32,16 @@ export const Interactive = () => {
     )
   }, [])
 
-  return withContextRoot(
-    <Suspense fallback="Loading">
-      <div>
-        <div className="pdf-viewer">
+  return (
+    <div>
+      <div className="pdf-viewer">
+        <Suspense fallback={null}>
           <PdfViewer />
-        </div>
-        <div style={{ position: 'absolute', top: 150, left: 50 }}>
-          <PdfSynctexControls />
-        </div>
+        </Suspense>
       </div>
-    </Suspense>,
-    scope
+      <div style={{ position: 'absolute', top: 150, left: 50 }}>
+        <PdfSynctexControls />
+      </div>
+    </div>
   )
 }

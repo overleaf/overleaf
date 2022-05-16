@@ -1,11 +1,12 @@
 import MockedSocket from 'socket.io-mock'
 
-import { withContextRoot } from './utils/with-context-root'
 import { rootFolderBase } from './fixtures/file-tree-base'
 import { rootFolderLimit } from './fixtures/file-tree-limit'
 import FileTreeRoot from '../js/features/file-tree/components/file-tree-root'
 import FileTreeError from '../js/features/file-tree/components/file-tree-error'
 import useFetchMock from './hooks/use-fetch-mock'
+import { ScopeDecorator } from './decorators/scope'
+import { useScope } from './hooks/use-scope'
 
 const MOCK_DELAY = 2000
 
@@ -87,24 +88,30 @@ function defaultSetupMocks(fetchMock) {
 export const FullTree = args => {
   useFetchMock(defaultSetupMocks)
 
-  return withContextRoot(<FileTreeRoot {...args} />, {
+  useScope({
     project: DEFAULT_PROJECT,
     permissionsLevel: 'owner',
   })
+
+  return <FileTreeRoot {...args} />
 }
 
 export const ReadOnly = args => {
-  return withContextRoot(<FileTreeRoot {...args} />, {
+  useScope({
     project: DEFAULT_PROJECT,
     permissionsLevel: 'readOnly',
   })
+
+  return <FileTreeRoot {...args} />
 }
 
 export const Disconnected = args => {
-  return withContextRoot(<FileTreeRoot {...args} />, {
+  useScope({
     project: DEFAULT_PROJECT,
     permissionsLevel: 'owner',
   })
+
+  return <FileTreeRoot {...args} />
 }
 Disconnected.args = { isConnected: false }
 
@@ -125,25 +132,34 @@ export const NetworkErrors = args => {
       })
   })
 
-  return withContextRoot(<FileTreeRoot {...args} />, {
+  useScope({
     project: DEFAULT_PROJECT,
     permissionsLevel: 'owner',
   })
+
+  return <FileTreeRoot {...args} />
 }
 
 export const FallbackError = args => {
-  return withContextRoot(<FileTreeError {...args} />, {
+  useScope({
     project: DEFAULT_PROJECT,
   })
+
+  return <FileTreeError {...args} />
 }
 
 export const FilesLimit = args => {
   useFetchMock(defaultSetupMocks)
 
-  return withContextRoot(<FileTreeRoot {...args} />, {
-    project: { ...DEFAULT_PROJECT, rootFolder: rootFolderLimit },
+  useScope({
+    project: {
+      ...DEFAULT_PROJECT,
+      rootFolder: rootFolderLimit,
+    },
     permissionsLevel: 'owner',
   })
+
+  return <FileTreeRoot {...args} />
 }
 
 export default {
@@ -167,6 +183,7 @@ export default {
     onSelect: { action: 'onSelect' },
   },
   decorators: [
+    ScopeDecorator,
     Story => (
       <>
         <style>{'html, body, .file-tree { height: 100%; width: 100%; }'}</style>

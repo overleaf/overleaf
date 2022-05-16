@@ -1,6 +1,6 @@
 import useFetchMock from './hooks/use-fetch-mock'
-import { withContextRoot } from './utils/with-context-root'
 import WordCountModal from '../js/features/word-count-modal/components/word-count-modal'
+import { ScopeDecorator } from './decorators/scope'
 
 const counts = {
   headers: 4,
@@ -14,11 +14,6 @@ const messages = [
   'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
 ].join('\n')
 
-const project = {
-  _id: 'project-id',
-  name: 'A Project',
-}
-
 export const WordCount = args => {
   useFetchMock(fetchMock => {
     fetchMock.get(
@@ -28,7 +23,7 @@ export const WordCount = args => {
     )
   })
 
-  return withContextRoot(<WordCountModal {...args} />, { project })
+  return <WordCountModal {...args} />
 }
 
 export const WordCountWithMessages = args => {
@@ -40,7 +35,7 @@ export const WordCountWithMessages = args => {
     )
   })
 
-  return withContextRoot(<WordCountModal {...args} />, { project })
+  return <WordCountModal {...args} />
 }
 
 export const ErrorResponse = args => {
@@ -52,7 +47,7 @@ export const ErrorResponse = args => {
     )
   })
 
-  return withContextRoot(<WordCountModal {...args} />, { project })
+  return <WordCountModal {...args} />
 }
 
 export default {
@@ -61,4 +56,8 @@ export default {
   args: {
     show: true,
   },
+  argTypes: {
+    handleHide: { action: 'close modal' },
+  },
+  decorators: [ScopeDecorator],
 }

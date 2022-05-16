@@ -1,5 +1,5 @@
 import OutlinePane from '../js/features/outline/components/outline-pane'
-import { ContextRoot } from '../js/shared/context/root-context'
+import { ScopeDecorator } from './decorators/scope'
 
 export const Basic = args => <OutlinePane {...args} />
 Basic.args = {
@@ -52,11 +52,5 @@ export default {
     jumpToLine: () => {},
     onToggle: () => {},
   },
-  decorators: [
-    Story => (
-      <ContextRoot ide={window._ide} settings={{}}>
-        <Story />
-      </ContextRoot>
-    ),
-  ],
+  decorators: [ScopeDecorator],
 }

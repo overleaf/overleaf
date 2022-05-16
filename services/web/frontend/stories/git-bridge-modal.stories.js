@@ -1,6 +1,5 @@
-import { ContextRoot } from '../js/shared/context/root-context'
 import importOverleafModules from '../macros/import-overleaf-module.macro'
-import useFetchMock from './hooks/use-fetch-mock'
+import { ScopeDecorator } from './decorators/scope'
 
 const [
   {
@@ -19,7 +18,10 @@ CollaboratorModal.args = {
 }
 
 export const TeaserModal = args => {
-  useFetchMock(fetchMock => fetchMock.post('express:/event/:key', 202))
+  // TODO: mock navigator.sendBeacon?
+  // useFetchMock(fetchMock => {
+  //   fetchMock.post('express:/event/:key', 202)
+  // })
 
   return <GitBridgeModal {...args} />
 }
@@ -36,13 +38,5 @@ export default {
   argTypes: {
     handleHide: { action: 'handleHide' },
   },
-  decorators: [
-    Story => (
-      <>
-        <ContextRoot ide={window._ide} settings={{}}>
-          <Story />
-        </ContextRoot>
-      </>
-    ),
-  ],
+  decorators: [ScopeDecorator],
 }

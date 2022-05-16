@@ -1,5 +1,4 @@
 import ErrorMessage from '../../../js/features/file-tree/components/file-tree-create/error-message'
-import { createFileModalDecorator } from './create-file-modal-decorator'
 import { FetchError } from '../../../js/infrastructure/fetch-json'
 import {
   BlockedFilenameError,
@@ -19,7 +18,6 @@ export const KeyedErrors = () => {
     </>
   )
 }
-KeyedErrors.decorators = [createFileModalDecorator()]
 
 export const FetchStatusErrors = () => {
   return (

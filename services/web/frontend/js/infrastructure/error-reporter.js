@@ -1,7 +1,7 @@
 // Conditionally enable Sentry based on whether the DSN token is set
 import getMeta from '../utils/meta'
 
-const reporterPromise = window.ExposedSettings.sentryDsn
+const reporterPromise = window.ExposedSettings?.sentryDsn
   ? sentryReporter()
   : nullReporter()
 
