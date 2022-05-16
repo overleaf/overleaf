@@ -189,6 +189,23 @@ describe('<AddEmailInput/>', function () {
       })
     })
 
+    describe('when there is a match for a blocklisted domain', function () {
+      beforeEach(function () {
+        const blockedInstitution = [
+          { university: { id: 1 }, hostname: 'overleaf.com' },
+        ]
+        fetchMock.get('express:/institutions/domains', blockedInstitution)
+        fireEvent.change(screen.getByRole('textbox'), {
+          target: { value: 'user@o' },
+        })
+      })
+
+      it('should not render the suggestion', async function () {
+        await fetchMock.flush(true)
+        expect(screen.queryByText('user@overleaf.com')).to.be.null
+      })
+    })
+
     describe('while waiting for a response', function () {
       beforeEach(async function () {
         // type an initial suggestion

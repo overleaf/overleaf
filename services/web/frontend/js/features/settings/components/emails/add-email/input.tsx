@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { getJSON } from '../../../../../infrastructure/fetch-json'
 import useAbortController from '../../../../../shared/hooks/use-abort-controller'
+import domainBlocklist from '../../../domain-blocklist'
 
 const LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
 
@@ -89,6 +90,9 @@ function Input({ onChange }: InputProps) {
       getJSON(`/institutions/domains${query}`, { signal })
         .then(data => {
           if (!(data && data[0])) {
+            return
+          }
+          if (domainBlocklist.has(data[0].hostname)) {
             return
           }
           const hostname = data[0]?.hostname
